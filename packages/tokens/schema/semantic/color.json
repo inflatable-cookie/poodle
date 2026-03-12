@@ -1,0 +1,97 @@
+{
+  "color": {
+    "background": {
+      "canvas": {
+        "$type": "color",
+        "$value": "{primitives.color.neutral.50}",
+        "$description": "Primary app canvas."
+      },
+      "surface": {
+        "$type": "color",
+        "$value": "{primitives.color.neutral.100}",
+        "$description": "Secondary raised surface."
+      },
+      "panel": {
+        "$type": "color",
+        "$value": "{primitives.color.neutral.25}",
+        "$description": "Panel and card surface."
+      },
+      "elevated": {
+        "$type": "color",
+        "$value": "{primitives.color.neutral.0}",
+        "$description": "Floating surface."
+      },
+      "overlay": {
+        "$type": "color",
+        "$value": "rgba(11, 15, 20, 0.64)",
+        "$description": "Backdrop scrim."
+      }
+    },
+    "text": {
+      "primary": {
+        "$type": "color",
+        "$value": "{primitives.color.neutral.900}"
+      },
+      "secondary": {
+        "$type": "color",
+        "$value": "{primitives.color.neutral.700}"
+      },
+      "inverse": {
+        "$type": "color",
+        "$value": "{primitives.color.neutral.0}"
+      }
+    },
+    "border": {
+      "subtle": {
+        "$type": "color",
+        "$value": "{primitives.color.neutral.200}"
+      },
+      "default": {
+        "$type": "color",
+        "$value": "{primitives.color.neutral.400}"
+      },
+      "strong": {
+        "$type": "color",
+        "$value": "{primitives.color.neutral.700}"
+      }
+    },
+    "accent": {
+      "base": {
+        "$type": "color",
+        "$value": "{primitives.color.blue.500}"
+      },
+      "hover": {
+        "$type": "color",
+        "$value": "{primitives.color.blue.400}"
+      },
+      "focusRing": {
+        "$type": "color",
+        "$value": "{primitives.color.blue.400}"
+      }
+    },
+    "status": {
+      "success": {
+        "$type": "color",
+        "$value": "{primitives.color.green.500}"
+      },
+      "warning": {
+        "$type": "color",
+        "$value": "{primitives.color.amber.500}"
+      },
+      "danger": {
+        "$type": "color",
+        "$value": "{primitives.color.red.500}"
+      }
+    },
+    "icon": {
+      "primary": {
+        "$type": "color",
+        "$value": "{semantic.color.text.primary}"
+      },
+      "muted": {
+        "$type": "color",
+        "$value": "{semantic.color.text.secondary}"
+      }
+    }
+  }
+}

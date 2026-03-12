@@ -1,0 +1,16 @@
+{
+  "radius": {
+    "control": {
+      "$type": "dimension",
+      "$value": "{primitives.radius.md}"
+    },
+    "surface": {
+      "$type": "dimension",
+      "$value": "{primitives.radius.lg}"
+    },
+    "pill": {
+      "$type": "dimension",
+      "$value": "{primitives.radius.pill}"
+    }
+  }
+}

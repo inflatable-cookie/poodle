@@ -1,0 +1,40 @@
+{
+  "themes": {
+    "light": {
+      "selector": "[data-theme=\"light\"]",
+      "description": "Default neutral application theme."
+    },
+    "dark": {
+      "selector": "[data-theme=\"dark\"]",
+      "description": "Dark neutral application theme."
+    },
+    "loophole-studio": {
+      "selector": "[data-theme=\"loophole-studio\"]",
+      "description": "Downstream workstation-oriented theme tuned for Aura and Spark shell surfaces."
+    }
+  },
+  "density": {
+    "compact": {
+      "selector": "[data-density=\"compact\"]",
+      "description": "Tighter spacing for dense workstation layouts."
+    },
+    "comfortable": {
+      "selector": "[data-density=\"comfortable\"]",
+      "description": "Relaxed spacing for content-heavy product layouts."
+    }
+  },
+  "controlSize": {
+    "sm": {
+      "selector": "[data-control-size=\"sm\"]",
+      "description": "Small control size overlay."
+    },
+    "md": {
+      "selector": "[data-control-size=\"md\"]",
+      "description": "Default control size overlay."
+    },
+    "lg": {
+      "selector": "[data-control-size=\"lg\"]",
+      "description": "Large control size overlay."
+    }
+  }
+}

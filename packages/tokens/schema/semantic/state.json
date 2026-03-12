@@ -1,0 +1,14 @@
+{
+  "state": {
+    "opacity": {
+      "disabled": {
+        "$type": "number",
+        "$value": "{primitives.state.opacity.disabled}"
+      },
+      "muted": {
+        "$type": "number",
+        "$value": "{primitives.state.opacity.muted}"
+      }
+    }
+  }
+}

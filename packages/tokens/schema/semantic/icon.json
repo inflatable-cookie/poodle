@@ -1,0 +1,16 @@
+{
+  "icon": {
+    "size": {
+      "default": {
+        "$type": "dimension",
+        "$value": "{semantic.size.icon.md}"
+      }
+    },
+    "stroke": {
+      "default": {
+        "$type": "dimension",
+        "$value": "{primitives.icon.stroke.default}"
+      }
+    }
+  }
+}

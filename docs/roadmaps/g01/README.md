@@ -1,6 +1,6 @@
 # g01 Foundation, Tokens, Contracts, And First Shared Surface
 
-Status: active
+Status: completed
 Updated: 2026-03-11
 
 ## Context
@@ -33,20 +33,20 @@ workstation-shell layer, and proves the first Underlay bridge.
 
 | ID | Milestone | Depends On | Class | Status |
 |----|-----------|------------|-------|--------|
-| 001 | Northstar bootstrap and scope freeze | - | Foundation | Planned |
-| 002 | Canonical token schema and naming system | 001 | Foundation | Planned |
-| 003 | Token artifact emission, themes, and density modes | 002 | Foundation | Planned |
-| 004 | Component contract template and documentation IA | 001, 002 | Foundation | Planned |
-| 005 | Svelte substrate and Bits integration policy | 002, 004 | Foundation | Planned |
-| 006 | GPUI substrate and Rust token binding baseline | 002, 004 | Foundation | Planned |
-| 007 | Layout, surface, and scrolling primitives | 003-006 | Core build | Planned |
-| 008 | Action and text-entry primitives | 003-006 | Core build | Planned |
-| 009 | Selection, value, and feedback primitives | 003-006 | Core build | Planned |
-| 010 | Overlay, navigation, and interaction primitives | 003-006 | Core build | Planned |
-| 011 | Product composites and information architecture baseline | 007-010 | Depth | Planned |
-| 012 | Workstation-shell composites and panel system baseline | 007-010 | Depth | Planned |
-| 013 | Underlay bridge and token-ingestion baseline | 003, 011, 012 | Adoption | Planned |
-| 014 | Parity evidence, downstream extension contract, and `g02` cutover | 005-013 | Closure | Planned |
+| 001 | Northstar bootstrap and scope freeze | - | Foundation | Completed |
+| 002 | Canonical token schema and naming system | 001 | Foundation | Completed |
+| 003 | Token artifact emission, themes, and density modes | 002 | Foundation | Completed |
+| 004 | Component contract template and documentation IA | 001, 002 | Foundation | Completed |
+| 005 | Svelte substrate and Bits integration policy | 002, 004 | Foundation | Completed |
+| 006 | GPUI substrate and Rust token binding baseline | 002, 004 | Foundation | Completed |
+| 007 | Layout, surface, and scrolling primitives | 003-006 | Core build | Completed |
+| 008 | Action and text-entry primitives | 003-006 | Core build | Completed |
+| 009 | Selection, value, and feedback primitives | 003-006 | Core build | Completed |
+| 010 | Overlay, navigation, and interaction primitives | 003-006 | Core build | Completed |
+| 011 | Product composites and information architecture baseline | 007-010 | Depth | Completed |
+| 012 | Workstation-shell composites and panel system baseline | 007-010 | Depth | Completed |
+| 013 | Underlay bridge and token-ingestion baseline | 003, 011, 012 | Adoption | Completed |
+| 014 | Parity evidence, downstream extension contract, and `g02` cutover | 005-013 | Closure | Completed |
 
 ## Dependency Shape
 
@@ -87,5 +87,5 @@ workstation-shell layer, and proves the first Underlay bridge.
 
 ## Next Task
 
-Start with `g01.001`, then move immediately into `g01.002` and `g01.003`
-because the token model is the real foundation for the rest of the generation.
+`g01` is complete. Start `g02.001` next so the now-stable baseline can expand
+into forms and validation system depth without reopening foundation questions.

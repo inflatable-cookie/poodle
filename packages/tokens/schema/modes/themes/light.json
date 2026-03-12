@@ -1,0 +1,52 @@
+{
+  "color": {
+    "background": {
+      "canvas": {
+        "$type": "color",
+        "$value": "{primitives.color.neutral.50}"
+      },
+      "surface": {
+        "$type": "color",
+        "$value": "{primitives.color.neutral.100}"
+      },
+      "panel": {
+        "$type": "color",
+        "$value": "{primitives.color.neutral.25}"
+      },
+      "elevated": {
+        "$type": "color",
+        "$value": "{primitives.color.neutral.0}"
+      }
+    },
+    "text": {
+      "primary": {
+        "$type": "color",
+        "$value": "{primitives.color.neutral.900}"
+      },
+      "secondary": {
+        "$type": "color",
+        "$value": "{primitives.color.neutral.700}"
+      }
+    },
+    "border": {
+      "subtle": {
+        "$type": "color",
+        "$value": "{primitives.color.neutral.200}"
+      },
+      "default": {
+        "$type": "color",
+        "$value": "{primitives.color.neutral.400}"
+      }
+    },
+    "icon": {
+      "primary": {
+        "$type": "color",
+        "$value": "{primitives.color.neutral.900}"
+      },
+      "muted": {
+        "$type": "color",
+        "$value": "{primitives.color.neutral.700}"
+      }
+    }
+  }
+}

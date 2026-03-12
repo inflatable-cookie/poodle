@@ -19,7 +19,7 @@ Start here:
 1. `docs/vision/001-pug-vision.md`
 2. `docs/architecture/001-pug-system-shape.md`
 3. `docs/roadmaps/README.md`
-4. `docs/roadmaps/g01/README.md`
+4. `docs/roadmaps/g03/README.md`
 
 ## Current Direction
 
@@ -33,7 +33,28 @@ Pug is planned as:
 - one explicit extension boundary for app-specific systems such as Loophole's
   DAW widgets
 
+## Local Preview
+
+The repo now includes a browser inspection surface at
+`packages/svelte/preview`.
+
+Run:
+
+```sh
+bun install
+bun run tokens:build
+bun run docs:dev
+```
+
+Then open `http://localhost:4173`.
+
+The docs surface now includes theme inspection, form and composite baselines,
+command discovery, workstation shell depth, dock regions, split views, surface
+tabs, token provenance, family navigation, and a host-owned layout snapshot
+readout.
+
 ## Next Task
 
-Open `docs/roadmaps/g01/002-token-system-and-artifact-emission.md` and freeze
-the canonical token model before starting code packages.
+Open `docs/roadmaps/g03/001-token-evolution-migration-and-compatibility-policy.md`
+and freeze token evolution, migration, and compatibility policy before
+downstream adoption begins.

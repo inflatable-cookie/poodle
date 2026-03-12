@@ -1,6 +1,6 @@
 # g02.005 Picker, Relation, And Selection Workflow Suite
 
-Status: planned
+Status: completed
 Owner: Pug Core
 Updated: 2026-03-11
 Depends on: g02.001, g02.003, g02.004
@@ -8,26 +8,26 @@ Primary repos: `pug`
 
 ## Goals
 
-- [ ] define picker workflows
-- [ ] define relation-selector and multi-selection workflows
-- [ ] define modal, popover, and inline-selection variants where needed
+- [x] define picker workflows
+- [x] define relation-selector and multi-selection workflows
+- [x] define modal, popover, and inline-selection variants where needed
 
 ## Execution Checklist
 
-- [ ] define picker entry, browse, search, and confirm flows
-- [ ] define relation-selector variants and multi-selection rules
-- [ ] define which patterns are modal, popover, inline, or hybrid
-- [ ] define how these workflows compose from the primitive and form layers
+- [x] define picker entry, browse, search, and confirm flows
+- [x] define relation-selector variants and multi-selection rules
+- [x] define which patterns are modal, popover, inline, or hybrid
+- [x] define how these workflows compose from the primitive and form layers
 
 ## Acceptance Criteria
 
-- [ ] picker workflows are explicit
-- [ ] relation and multi-selection workflows are explicit
+- [x] picker workflows are explicit
+- [x] relation and multi-selection workflows are explicit
 
 ## Deliverables
 
-- [ ] picker workflow baseline
-- [ ] relation-selector baseline
+- [x] picker workflow baseline
+- [x] relation-selector baseline
 
 ## Next Task
 

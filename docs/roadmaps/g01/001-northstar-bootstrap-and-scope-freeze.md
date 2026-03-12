@@ -1,6 +1,6 @@
 # g01.001 Northstar Bootstrap And Scope Freeze
 
-Status: planned
+Status: completed
 Owner: Pug Core
 Updated: 2026-03-11
 Primary repos: `pug`

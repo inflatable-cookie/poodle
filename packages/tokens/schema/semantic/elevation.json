@@ -1,0 +1,16 @@
+{
+  "elevation": {
+    "surface": {
+      "$type": "shadow",
+      "$value": "{primitives.elevation.shadow.sm}"
+    },
+    "overlay": {
+      "$type": "shadow",
+      "$value": "{primitives.elevation.shadow.md}"
+    },
+    "dialog": {
+      "$type": "shadow",
+      "$value": "{primitives.elevation.shadow.lg}"
+    }
+  }
+}

@@ -1,0 +1,96 @@
+{
+  "color": {
+    "neutral": {
+      "0": {
+        "$type": "color",
+        "$value": "#fcfdff",
+        "$description": "Neutral white for light surfaces."
+      },
+      "25": {
+        "$type": "color",
+        "$value": "#f7fafd",
+        "$description": "Lifted light panel background."
+      },
+      "50": {
+        "$type": "color",
+        "$value": "#e7eef5",
+        "$description": "Primary light app canvas."
+      },
+      "100": {
+        "$type": "color",
+        "$value": "#dbe5ef",
+        "$description": "Recessed light control surface."
+      },
+      "200": {
+        "$type": "color",
+        "$value": "#c9d4e0",
+        "$description": "Low-contrast border neutral."
+      },
+      "400": {
+        "$type": "color",
+        "$value": "#75869b",
+        "$description": "Muted neutral text."
+      },
+      "700": {
+        "$type": "color",
+        "$value": "#314255",
+        "$description": "Strong neutral text on light surfaces."
+      },
+      "900": {
+        "$type": "color",
+        "$value": "#131a22",
+        "$description": "Dark workstation chrome text."
+      }
+    },
+    "slate": {
+      "850": {
+        "$type": "color",
+        "$value": "#1a212c",
+        "$description": "Dark panel surface."
+      },
+      "900": {
+        "$type": "color",
+        "$value": "#11161d",
+        "$description": "Dark workspace surface."
+      },
+      "950": {
+        "$type": "color",
+        "$value": "#0b0f14",
+        "$description": "Darkest shell background."
+      }
+    },
+    "blue": {
+      "400": {
+        "$type": "color",
+        "$value": "#57a7ff",
+        "$description": "Readable accent on dark surfaces."
+      },
+      "500": {
+        "$type": "color",
+        "$value": "#2d86f3",
+        "$description": "Primary accent color."
+      }
+    },
+    "green": {
+      "500": {
+        "$type": "color",
+        "$value": "#1fb67b",
+        "$description": "Positive status color."
+      }
+    },
+    "amber": {
+      "500": {
+        "$type": "color",
+        "$value": "#f0b24d",
+        "$description": "Warning status color."
+      }
+    },
+    "red": {
+      "500": {
+        "$type": "color",
+        "$value": "#e06a5f",
+        "$description": "Danger status color."
+      }
+    }
+  }
+}

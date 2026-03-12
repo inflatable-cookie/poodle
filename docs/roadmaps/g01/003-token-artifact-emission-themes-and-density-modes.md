@@ -1,6 +1,6 @@
 # g01.003 Token Artifact Emission, Themes, And Density Modes
 
-Status: planned
+Status: completed
 Owner: Pug Core
 Updated: 2026-03-11
 Depends on: g01.002

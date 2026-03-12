@@ -1,0 +1,48 @@
+{
+  "space": {
+    "panel": {
+      "x": {
+        "$type": "dimension",
+        "$value": "{primitives.space.3}"
+      },
+      "y": {
+        "$type": "dimension",
+        "$value": "{primitives.space.2}"
+      }
+    },
+    "control": {
+      "x": {
+        "$type": "dimension",
+        "$value": "{primitives.space.2}"
+      },
+      "y": {
+        "$type": "dimension",
+        "$value": "{primitives.space.1}"
+      }
+    },
+    "stack": {
+      "md": {
+        "$type": "dimension",
+        "$value": "{primitives.space.2}"
+      },
+      "lg": {
+        "$type": "dimension",
+        "$value": "{primitives.space.4}"
+      }
+    }
+  },
+  "size": {
+    "control": {
+      "height": {
+        "$type": "dimension",
+        "$value": "{primitives.size.control.sm}"
+      }
+    },
+    "panel": {
+      "header": {
+        "$type": "dimension",
+        "$value": "36px"
+      }
+    }
+  }
+}

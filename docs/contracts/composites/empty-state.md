@@ -1,0 +1,166 @@
+# EmptyState
+
+Status: seed contract
+Updated: 2026-03-11
+
+## 1. Purpose
+
+- Component name: `EmptyState`
+- Layer: `composites`
+- Summary: a standardized empty-result or no-content message with optional
+  supporting actions
+- In scope: title, descriptive copy, optional illustration/icon, action group,
+  browse vs first-run posture
+- Out of scope: async loading progress, blocking errors, app-specific onboarding
+  flows
+
+## 2. Anatomy
+
+```text
+[Root State]
+  ├── [Visual] (optional)
+  ├── [Title]
+  ├── [Message] (optional)
+  └── [Actions] (optional)
+```
+
+| Part | Required | Description | Token Targets |
+|------|----------|-------------|---------------|
+| Root State | yes | empty-state container | spacing, alignment |
+| Visual | no | decorative or meaningful icon/illustration | icon, size |
+| Title | yes | primary empty-state message | typography, text color |
+| Message | no | supporting explanation | typography, text-muted |
+| Actions | no | remediation or creation actions | action spacing |
+
+## 3. Props And Inputs
+
+### Public Props
+
+| Prop | Type | Default | Required | Notes |
+|------|------|---------|----------|-------|
+| `title` | `string` | none | yes | primary message |
+| `message` | `string \| null` | `null` | no | supporting explanation |
+| `variant` | `"neutral" \| "search" \| "firstRun"` | `"neutral"` | no | semantic posture |
+| `ariaLabel` | `string \| null` | `null` | no | optional label when the state is independently addressable |
+
+### Controlled And Uncontrolled
+
+- declarative state composite
+- action behavior remains host-owned
+
+## 4. States
+
+### Visual States
+
+| State | Trigger | Expected Result |
+|-------|---------|-----------------|
+| neutral | base variant | generic no-content posture |
+| search | `variant="search"` | empty-result posture for filtered/browsed content |
+| firstRun | `variant="firstRun"` | more invitational creation posture |
+| actionable | actions present | remediation/creation controls visible |
+
+### Component States
+
+State table is sufficient.
+
+## 5. Events
+
+No component-owned events beyond child action behavior.
+
+## 6. Accessibility
+
+### Semantics
+
+- Role: usually grouped informational content, status region, or neutral section
+  depending on context
+- Required attributes: meaningful textual message
+- Optional attributes: region label when independently navigable
+- Labeling rules: decorative visual elements must stay out of the accessibility
+  tree unless they communicate unique meaning not present in text
+
+### Keyboard
+
+| Key | Behavior |
+|-----|----------|
+| `Tab` | reaches any visible actions in logical order |
+
+### Focus And Announcement
+
+- focus entry: the empty-state container is not focusable by default
+- focus exit: actions and surrounding shell controls should remain in a
+  sensible order after empty content appears
+- live-region behavior: empty-state appearance may be announced by the host when
+  it results from a user-triggered search or filter change
+- GPUI-native accessibility mapping notes: GPUI must preserve the text message
+  and action labeling explicitly and avoid relying on visual illustration alone
+
+## 7. Layout
+
+### Sizing
+
+- empty states center or align within available parent space according to host
+  context
+- content remains readable in narrow and wide containers
+
+### Composition
+
+- parent expectations: `ListShell`, `GridShell`, `DetailShell`, settings scopes
+- child expectations: text, icon/illustration, and action primitives
+- resizing rules: actions may stack below the message on narrow widths
+
+## 8. Token Usage
+
+| Part | Token | Purpose |
+|------|-------|---------|
+| Root State | spacing and alignment roles | state layout |
+| Visual | icon/color roles | optional cue |
+| Title | heading/text roles | primary message |
+| Message | subdued text roles | explanation |
+| Actions | action spacing roles | remediation controls |
+
+## 9. Svelte Notes
+
+- expected substrate: `Stack`, `Inline`, icon primitives, and button family
+- wrapper strategy: visuals should be optional and removable without changing
+  the textual core of the state
+
+## 10. GPUI Notes
+
+- expected crate/module surface: `pug_gpui::composites::empty_state`
+- implementation-only details: GPUI may use native layout and icon rendering,
+  but the textual message and accessible action names remain the semantic core
+
+## 11. Parity Checklist
+
+### Tier 1: Strict Parity
+
+- [ ] title/message semantics match
+- [ ] decorative-vs-meaningful visual behavior matches
+- [ ] action ordering and naming match when present
+
+### Tier 2: Visual Parity
+
+- [ ] spacing, hierarchy, and optional visual emphasis use comparable token roles
+
+### Tier 3: Implementation Freedom
+
+- [ ] illustration style and alignment details stay internal
+
+## 12. Known Deltas
+
+| Delta | Why Allowed | Approval Status | Follow-Up |
+|-------|-------------|-----------------|-----------|
+| illustration style may differ | runtime rendering tools differ | allowed | keep textual semantics strict |
+
+## 13. Approval And Adoption Notes
+
+- contract status: `seed contract`
+- approvers: pending
+- downstream adopters: browsers, settings scopes, detail shells, onboarding-lite
+  surfaces
+- future follow-up: connect deeper empty/error/loading workflow suites in `g02`
+
+## Next Task
+
+Use `EmptyState` for no-content messaging and keep onboarding flows, tutorials,
+and app-specific remediation logic outside the generic composite contract.

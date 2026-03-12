@@ -1,0 +1,14 @@
+{
+  "border": {
+    "width": {
+      "default": {
+        "$type": "dimension",
+        "$value": "{primitives.border.width.subtle}"
+      },
+      "focus": {
+        "$type": "dimension",
+        "$value": "{primitives.stroke.focus}"
+      }
+    }
+  }
+}

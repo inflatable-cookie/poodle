@@ -1,0 +1,22 @@
+{
+  "overlay": {
+    "z": {
+      "menu": {
+        "$type": "number",
+        "$value": "{primitives.overlay.z.menu}"
+      },
+      "dialog": {
+        "$type": "number",
+        "$value": "{primitives.overlay.z.dialog}"
+      },
+      "toast": {
+        "$type": "number",
+        "$value": "{primitives.overlay.z.toast}"
+      }
+    },
+    "scrimOpacity": {
+      "$type": "number",
+      "$value": "{primitives.overlay.scrim.opacity}"
+    }
+  }
+}

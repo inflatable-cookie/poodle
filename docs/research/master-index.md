@@ -23,7 +23,7 @@ Source hubs document external systems that Pug builds upon or integrates with. E
 |-----|---------|--------------|--------|
 | [hub-gpui](./source-hubs/hub-gpui.md) | GPUI component model, styling capabilities, element tree patterns | g01.006, g01.007-012, parity rules | 🟢 **complete** |
 | [hub-bits](./source-hubs/hub-bits.md) | Bits Svelte primitives, extension limits, composition patterns | g01.005, Svelte substrate policy | 🟢 **complete** |
-| [hub-underlay](./source-hubs/hub-underlay.md) | Underlay token/runtime integration, wrapper patterns | g01.013, g02.013, g03.007 | 🟡 planned |
+| [hub-underlay](./source-hubs/hub-underlay.md) | Underlay token/runtime integration, wrapper patterns | g01.013, g03.007 | 🟡 planned |
 
 ---
 
@@ -54,7 +54,7 @@ Value tracks research domain precedents and patterns. They answer "what are the 
 | Track | Purpose | Critical For | Status |
 |-------|---------|--------------|--------|
 | [tk-data-table-patterns](./value-tracks/tk-data-table-patterns.md) | Tables, virtualization, bulk actions | g02.002, g02.003 | 🟡 planned |
-| [tk-command-palette-patterns](./value-tracks/tk-command-palette-patterns.md) | Action discovery, fuzzy search | g02.008, g01.012 | 🟡 planned |
+| [tk-command-palette-patterns](./value-tracks/tk-command-palette-patterns.md) | Action discovery, fuzzy search | g02.008, g01.012 | ✅ landed |
 | [tk-parity-testing](./value-tracks/tk-parity-testing.md) | Cross-platform testing strategies | g03.002, g03.012 | 🟡 planned |
 | [tk-docs-site-tooling](./value-tracks/tk-docs-site-tooling.md) | Component documentation platforms | g02.012, g03.003 | 🟡 planned |
 
@@ -115,7 +115,7 @@ Phase 2 value tracks now **COMPLETE**:
 
 11. **hub-underlay** - Integration patterns for g01.013
 12. **tk-data-table-patterns** - Virtualization for g02.002
-13. **tk-command-palette-patterns** - Command palette for g02.008
+13. **tk-command-palette-patterns** - Command palette baseline landed in g02.008
 14. **tk-parity-testing** - Testing strategies for g03.002
 15. **tk-docs-site-tooling** - Docs platforms for g02.012
 

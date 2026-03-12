@@ -34,11 +34,13 @@ pug/
   packages/
     tokens/
       schema/           # DTCG format source files
-      scripts/          # Style Dictionary 4.0 build scripts
+      scripts/          # Bun + TypeScript token build scripts
       artifacts/        # Generated outputs (CSS, TS, Rust)
     svelte/
       tokens/           # Imports from packages/tokens/artifacts/
       primitives/
+      composites/
+      workstation/
     gpui/
       tokens/           # Imports from packages/tokens/artifacts/rust/
       primitives/
@@ -131,7 +133,8 @@ The important split is:
 
 ### `packages/tokens/scripts/`
 
-Owns token compilation and emission using **Style Dictionary 4.0**.
+Owns token compilation and emission on the JavaScript side using **Bun and
+TypeScript**, with Style Dictionary-compatible planning retained where useful.
 
 Planned files:
 
@@ -139,23 +142,24 @@ Planned files:
 packages/tokens/scripts/
   build-tokens.ts           # Main build entrypoint
   validate-tokens.ts        # Schema validation
-  sd.config.js              # Style Dictionary configuration
+  sd.config.ts              # Style Dictionary configuration
   transforms/               # Custom transforms
-    name-transforms.js      # Path to naming conventions
-    rust-transform.js       # Rust-specific value transforms
+    name-transforms.ts      # Path to naming conventions
+    rust-transform.ts       # Rust-specific value transforms
   formats/                  # Custom formats
-    rust-format.js          # Rust struct/constant generation
+    rust-format.ts          # Rust struct/constant generation
   actions/                  # Post-build actions
-    copy-to-gpui.js         # Copy Rust artifacts to GPUI package
+    copy-to-gpui.ts         # Copy Rust artifacts to GPUI package
 ```
 
-The likely first implementation path is a single build entrypoint that drives
-Style Dictionary for CSS and TypeScript output plus a Rust-specific format for
-GPUI-facing emission.
+The likely first implementation path is a single Bun-executed TypeScript
+entrypoint that drives CSS and TypeScript output plus a Rust-facing emission
+path for GPUI consumers. If Style Dictionary remains the chosen library, it
+should still be configured from TypeScript rather than plain JavaScript.
 
 **Style Dictionary Configuration:**
-```javascript
-// sd.config.js
+```ts
+// sd.config.ts
 export default {
   source: ['schema/**/*.json'],
   platforms: {

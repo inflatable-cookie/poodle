@@ -1,0 +1,14 @@
+{
+  "state": {
+    "opacity": {
+      "disabled": {
+        "$type": "number",
+        "$value": 0.48
+      },
+      "muted": {
+        "$type": "number",
+        "$value": 0.72
+      }
+    }
+  }
+}

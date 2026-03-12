@@ -16,17 +16,16 @@ Roadmaps hold executable milestone work for Pug.
 
 ## Current Generation
 
-- Active generation: `g01`
-- Next generation: `g02`
+- Active generation: `g03`
+- Next generation: not yet planned
 
 ## Generation Map
 
 - `g01` foundation, token system, contracts, primitive suite, workstation
   shells, and first Underlay bridge baseline
-- `g02` advanced composites, adoption tranches, docs/catalog depth, and release
-  baseline
-- `g03` hardening, migration policy, parity automation, downstream validation,
-  and mature extension support
+- `g02` advanced composites, docs/catalog depth, cleanup, and release baseline
+- `g03` hardening, migration policy, parity automation, first downstream
+  adoption tranches, validation, and mature extension support
 
 ## Planning Standard
 
@@ -54,5 +53,5 @@ express a real program rather than three or four umbrella headings.
 
 ## Next Task
 
-Execute `g01` in order, starting with token and contract foundations before the
-component catalogue expands.
+Execute `g03` in order, beginning with token evolution, migration, and
+compatibility policy before downstream adoption begins.

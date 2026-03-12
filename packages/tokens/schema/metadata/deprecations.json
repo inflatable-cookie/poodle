@@ -1,0 +1,10 @@
+{
+  "deprecations": [
+    {
+      "path": "semantic.color.border.default",
+      "status": "active",
+      "replacement": null,
+      "note": "Bootstrap file proves lifecycle metadata wiring."
+    }
+  ]
+}

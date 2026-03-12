@@ -1,6 +1,6 @@
 # g02.007 Loading, Empty, Error, Notification, And Remediation Depth
 
-Status: planned
+Status: completed
 Owner: Pug Core
 Updated: 2026-03-11
 Depends on: g02.001, g02.002, g02.003, g02.004, g02.005, g02.006
@@ -8,26 +8,26 @@ Primary repos: `pug`
 
 ## Goals
 
-- [ ] define the async and empty-state layer more deeply
-- [ ] define remediation and retry affordances
-- [ ] define transient and persistent notification patterns
+- [x] define the async and empty-state layer more deeply
+- [x] define remediation and retry affordances
+- [x] define transient and persistent notification patterns
 
 ## Execution Checklist
 
-- [ ] define loading and skeleton usage across the composite catalogue
-- [ ] define empty, no-results, and error-state patterns
-- [ ] define remediation and retry affordances
-- [ ] define transient versus persistent notifications and banners
+- [x] define loading and skeleton usage across the composite catalogue
+- [x] define empty, no-results, and error-state patterns
+- [x] define remediation and retry affordances
+- [x] define transient versus persistent notifications and banners
 
 ## Acceptance Criteria
 
-- [ ] async and empty-state layer is explicit
-- [ ] remediation and notification patterns are explicit
+- [x] async and empty-state layer is explicit
+- [x] remediation and notification patterns are explicit
 
 ## Deliverables
 
-- [ ] loading/empty/error baseline
-- [ ] notification/remediation baseline
+- [x] loading/empty/error baseline
+- [x] notification/remediation baseline
 
 ## Next Task
 

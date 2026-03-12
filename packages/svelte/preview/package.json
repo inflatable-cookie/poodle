@@ -1,0 +1,27 @@
+{
+  "name": "@pug/svelte-preview",
+  "private": true,
+  "type": "module",
+  "description": "Internal preview and docs harness for Pug.",
+  "pugRelease": {
+    "publicIntent": false,
+    "channel": "internal",
+    "stability": "internal-only"
+  },
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build"
+  },
+  "dependencies": {
+    "@pug/svelte-composites": "workspace:*",
+    "@pug/svelte-primitives": "workspace:*",
+    "@pug/svelte-tokens": "workspace:*",
+    "@pug/svelte-workstation": "workspace:*",
+    "svelte": "^5.38.6"
+  },
+  "devDependencies": {
+    "@sveltejs/vite-plugin-svelte": "^6.2.1",
+    "typescript": "^5.9.2",
+    "vite": "^7.1.5"
+  }
+}

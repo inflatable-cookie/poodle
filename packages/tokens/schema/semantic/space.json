@@ -1,0 +1,52 @@
+{
+  "space": {
+    "stack": {
+      "sm": {
+        "$type": "dimension",
+        "$value": "{primitives.space.2}"
+      },
+      "md": {
+        "$type": "dimension",
+        "$value": "{primitives.space.3}"
+      },
+      "lg": {
+        "$type": "dimension",
+        "$value": "{primitives.space.5}"
+      }
+    },
+    "inline": {
+      "sm": {
+        "$type": "dimension",
+        "$value": "{primitives.space.2}"
+      },
+      "md": {
+        "$type": "dimension",
+        "$value": "{primitives.space.3}"
+      },
+      "lg": {
+        "$type": "dimension",
+        "$value": "{primitives.space.4}"
+      }
+    },
+    "panel": {
+      "x": {
+        "$type": "dimension",
+        "$value": "{primitives.space.4}"
+      },
+      "y": {
+        "$type": "dimension",
+        "$value": "{primitives.space.3}"
+      }
+    },
+    "control": {
+      "x": {
+        "$type": "dimension",
+        "$value": "{primitives.space.3}"
+      },
+      "y": {
+        "$type": "dimension",
+        "$value": "{primitives.space.2}"
+      }
+    }
+  }
+}

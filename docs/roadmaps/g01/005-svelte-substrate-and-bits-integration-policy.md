@@ -1,6 +1,6 @@
 # g01.005 Svelte Substrate And Bits Integration Policy
 
-Status: planned
+Status: completed
 Owner: Pug Core
 Updated: 2026-03-11
 Depends on: g01.002, g01.004

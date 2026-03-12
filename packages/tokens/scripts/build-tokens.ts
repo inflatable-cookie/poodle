@@ -1,0 +1,571 @@
+import fs from "node:fs";
+import path from "node:path";
+import { fileURLToPath } from "node:url";
+
+type JsonPrimitive = string | number | boolean | null;
+type JsonValue = JsonPrimitive | JsonObject | JsonValue[];
+type JsonObject = { [key: string]: JsonValue };
+
+type TokenValue = string | number | boolean;
+
+interface TokenLeaf {
+  $type?: string;
+  $value: TokenValue;
+  $description?: string;
+}
+
+interface TokenEntry {
+  path: string;
+  type: string;
+  value: TokenValue;
+  description: string;
+}
+
+interface ResolvedTokenEntry extends TokenEntry {
+  rawValue: TokenValue;
+  resolvedValue: TokenValue;
+}
+
+interface NamedModeDefinition {
+  name: string;
+  selector: string;
+  description: string;
+  entries: ResolvedTokenEntry[];
+}
+
+interface ThemeMetadata {
+  selector: string;
+  description: string;
+}
+
+interface AliasMetadata {
+  from: string;
+  to: string;
+  note?: string;
+}
+
+interface DeprecationMetadata {
+  path: string;
+  status: string;
+  replacement?: string | null;
+  note?: string;
+}
+
+interface Manifest {
+  name: string;
+  version: string;
+  canonicalFormat: string;
+  artifactBaseline: string;
+}
+
+function isJsonObject(value: JsonValue | undefined): value is JsonObject {
+  return Boolean(value) && typeof value === "object" && !Array.isArray(value);
+}
+
+function isTokenLeaf(value: JsonValue | undefined): value is TokenLeaf {
+  return isJsonObject(value) && "$value" in value;
+}
+
+const scriptDir = path.dirname(fileURLToPath(import.meta.url));
+const tokensDir = path.resolve(scriptDir, "..");
+const schemaDir = path.join(tokensDir, "schema");
+const artifactDir = path.join(tokensDir, "artifacts");
+
+function readJson<T>(filePath: string): T {
+  return JSON.parse(fs.readFileSync(filePath, "utf8")) as T;
+}
+
+function listJsonFiles(dirPath: string): string[] {
+  return fs
+    .readdirSync(dirPath, { withFileTypes: true })
+    .filter((entry) => entry.isFile() && entry.name.endsWith(".json"))
+    .map((entry) => path.join(dirPath, entry.name))
+    .sort();
+}
+
+function deepMerge(target: JsonObject, source: JsonObject): JsonObject {
+  const output: JsonObject = { ...target };
+
+  for (const [key, value] of Object.entries(source)) {
+    if (isJsonObject(value) && !("$value" in value)) {
+      output[key] = deepMerge((output[key] as JsonObject | undefined) ?? {}, value);
+    } else {
+      output[key] = value;
+    }
+  }
+
+  return output;
+}
+
+function loadDirectoryObject(relativeDir: string): JsonObject {
+  const dirPath = path.join(schemaDir, relativeDir);
+  return listJsonFiles(dirPath).reduce<JsonObject>(
+    (accumulator, filePath) => deepMerge(accumulator, readJson<JsonObject>(filePath)),
+    {},
+  );
+}
+
+function loadNamedDirectory(relativeDir: string): Record<string, JsonObject> {
+  const dirPath = path.join(schemaDir, relativeDir);
+  return listJsonFiles(dirPath).reduce<Record<string, JsonObject>>((accumulator, filePath) => {
+    const name = path.basename(filePath, ".json");
+    accumulator[name] = readJson<JsonObject>(filePath);
+    return accumulator;
+  }, {});
+}
+
+function collectTokenEntries(
+  node: JsonObject,
+  prefix: string[] = [],
+  entries: TokenEntry[] = [],
+): TokenEntry[] {
+  for (const [key, value] of Object.entries(node)) {
+    if (key.startsWith("$")) {
+      continue;
+    }
+
+    if (isTokenLeaf(value)) {
+      entries.push({
+        path: [...prefix, key].join("."),
+        type: value.$type ?? "unknown",
+        value: value.$value,
+        description: value.$description ?? "",
+      });
+      continue;
+    }
+
+    if (isJsonObject(value)) {
+      collectTokenEntries(value, [...prefix, key], entries);
+    }
+  }
+
+  return entries;
+}
+
+function isReference(value: TokenValue): value is string {
+  return typeof value === "string" && /^\{.+\}$/.test(value);
+}
+
+function resolveEntries(entries: TokenEntry[]): ResolvedTokenEntry[] {
+  const sourceByPath = new Map(entries.map((entry) => [entry.path, entry]));
+  const cache = new Map<string, ResolvedTokenEntry>();
+
+  function resolvePath(tokenPath: string, trail: string[] = []): ResolvedTokenEntry {
+    const cached = cache.get(tokenPath);
+    if (cached) {
+      return cached;
+    }
+
+    if (trail.includes(tokenPath)) {
+      throw new Error(`Circular token reference: ${[...trail, tokenPath].join(" -> ")}`);
+    }
+
+    const entry = sourceByPath.get(tokenPath);
+    if (!entry) {
+      throw new Error(`Unknown token reference: ${tokenPath}`);
+    }
+
+    let resolvedValue: TokenValue = entry.value;
+    if (isReference(entry.value)) {
+      const referencedPath = entry.value.slice(1, -1);
+      resolvedValue = resolvePath(referencedPath, [...trail, tokenPath]).resolvedValue;
+    }
+
+    const resolvedEntry: ResolvedTokenEntry = {
+      ...entry,
+      rawValue: entry.value,
+      resolvedValue,
+    };
+    cache.set(tokenPath, resolvedEntry);
+    return resolvedEntry;
+  }
+
+  return entries.map((entry) => resolvePath(entry.path));
+}
+
+function setNested(target: JsonObject, pathParts: string[], value: TokenValue): void {
+  let cursor = target;
+  for (const part of pathParts.slice(0, -1)) {
+    const next = cursor[part];
+    if (!isJsonObject(next)) {
+      cursor[part] = {};
+    }
+    cursor = cursor[part] as JsonObject;
+  }
+  cursor[pathParts.at(-1) ?? ""] = value;
+}
+
+function entriesToObject(entries: ResolvedTokenEntry[], stripPrefix: string): JsonObject {
+  return entries.reduce<JsonObject>((accumulator, entry) => {
+    const pathParts = entry.path.replace(`${stripPrefix}.`, "").split(".");
+    setNested(accumulator, pathParts, entry.resolvedValue);
+    return accumulator;
+  }, {});
+}
+
+function cssVarName(tokenPath: string): string {
+  const normalized = tokenPath.replace(/^(primitives|semantic)\./, "");
+  return `--pug-${normalized.replace(/\./g, "-")}`;
+}
+
+function rustConstName(tokenPath: string, stripPrefix: string): string {
+  return tokenPath
+    .replace(`${stripPrefix}.`, "")
+    .replace(/[^a-zA-Z0-9]+/g, "_")
+    .replace(/([a-z])([A-Z])/g, "$1_$2")
+    .toUpperCase();
+}
+
+function jsString(value: string): string {
+  return JSON.stringify(value);
+}
+
+function writeFile(relativePath: string, contents: string): void {
+  const filePath = path.join(artifactDir, relativePath);
+  fs.mkdirSync(path.dirname(filePath), { recursive: true });
+  fs.writeFileSync(filePath, contents);
+}
+
+function buildCssBlock(selector: string, entries: ResolvedTokenEntry[]): string {
+  const lines = entries.map(
+    (entry) => `  ${cssVarName(entry.path)}: ${String(entry.resolvedValue)};`,
+  );
+  return `${selector} {\n${lines.join("\n")}\n}\n`;
+}
+
+function formatHeader(commentPrefix: string): string {
+  return `${commentPrefix} Generated by packages/tokens/scripts/build-tokens.ts. Do not edit manually.\n`;
+}
+
+const metadata = loadDirectoryObject("metadata");
+const themesMetadata = metadata.themes as Record<string, ThemeMetadata>;
+const densityMetadata = metadata.density as Record<string, ThemeMetadata>;
+const controlSizeMetadata = metadata.controlSize as Record<string, ThemeMetadata>;
+const aliasesMetadata = metadata.aliases as AliasMetadata[];
+const deprecationsMetadata = metadata.deprecations as DeprecationMetadata[];
+
+const schema = {
+  primitives: loadDirectoryObject("primitives"),
+  semantic: loadDirectoryObject("semantic"),
+  modes: {
+    themes: loadNamedDirectory("modes/themes"),
+    density: loadNamedDirectory("modes/density"),
+    controlSize: loadNamedDirectory("modes/control-size"),
+  },
+  metadata,
+  manifest: readJson<Manifest>(path.join(schemaDir, "manifest.json")),
+};
+
+const baseEntries = collectTokenEntries(schema.primitives, ["primitives"]).concat(
+  collectTokenEntries(schema.semantic, ["semantic"]),
+);
+const resolvedBaseEntries = resolveEntries(baseEntries);
+const primitiveEntries = resolvedBaseEntries.filter((entry) =>
+  entry.path.startsWith("primitives."),
+);
+const semanticEntries = resolvedBaseEntries.filter((entry) =>
+  entry.path.startsWith("semantic."),
+);
+
+function resolveModeEntries(modeEntries: TokenEntry[]): ResolvedTokenEntry[] {
+  const resolvedEntries = resolveEntries([...resolvedBaseEntries, ...modeEntries]);
+  return resolvedEntries.slice(-modeEntries.length);
+}
+
+const themeDefinitions = Object.entries(schema.modes.themes).map<NamedModeDefinition>(
+  ([name, value]) => {
+    const modeEntries = collectTokenEntries(value).map((entry) => ({
+      ...entry,
+      path: `semantic.${entry.path}`,
+    }));
+
+    return {
+      name,
+      selector: themesMetadata[name].selector,
+      description: themesMetadata[name].description,
+      entries: resolveModeEntries(modeEntries),
+    };
+  },
+);
+
+const densityDefinitions = Object.entries(schema.modes.density).map<NamedModeDefinition>(
+  ([name, value]) => {
+    const modeEntries = collectTokenEntries(value).map((entry) => ({
+      ...entry,
+      path: `semantic.${entry.path}`,
+    }));
+    return {
+      name,
+      selector: densityMetadata[name].selector,
+      description: densityMetadata[name].description,
+      entries: resolveModeEntries(modeEntries),
+    };
+  },
+);
+
+const controlSizeDefinitions = Object.entries(schema.modes.controlSize).map<NamedModeDefinition>(
+  ([name, value]) => {
+    const modeEntries = collectTokenEntries(value).map((entry) => ({
+      ...entry,
+      path: `semantic.${entry.path}`,
+    }));
+    return {
+      name,
+      selector: controlSizeMetadata[name].selector,
+      description: controlSizeMetadata[name].description,
+      entries: resolveModeEntries(modeEntries),
+    };
+  },
+);
+
+const cssHeader =
+  "/* Generated by packages/tokens/scripts/build-tokens.ts. Do not edit manually. */\n";
+writeFile(
+  "css/pug-tokens.css",
+  `${cssHeader}${buildCssBlock(":root", [...primitiveEntries, ...semanticEntries])}`,
+);
+
+for (const theme of themeDefinitions) {
+  writeFile(
+    `css/pug-theme-${theme.name}.css`,
+    `${cssHeader}${buildCssBlock(theme.selector, theme.entries)}`,
+  );
+}
+
+for (const density of densityDefinitions) {
+  writeFile(
+    `css/pug-density-${density.name}.css`,
+    `${cssHeader}${buildCssBlock(density.selector, density.entries)}`,
+  );
+}
+
+for (const controlSize of controlSizeDefinitions) {
+  writeFile(
+    `css/pug-control-size-${controlSize.name}.css`,
+    `${cssHeader}${buildCssBlock(controlSize.selector, controlSize.entries)}`,
+  );
+}
+
+const tokenPaths = resolvedBaseEntries.map((entry) => entry.path);
+const cssVars = Object.fromEntries(
+  semanticEntries.map((entry) => [entry.path, cssVarName(entry.path)]),
+);
+
+writeFile(
+  "ts/index.ts",
+  `${formatHeader("//")}
+export const tokens = ${JSON.stringify(
+    {
+      primitives: entriesToObject(primitiveEntries, "primitives"),
+      semantic: entriesToObject(semanticEntries, "semantic"),
+    },
+    null,
+    2,
+  )} as const;
+
+export const tokenPaths = ${JSON.stringify(tokenPaths, null, 2)} as const;
+
+export const cssVars = ${JSON.stringify(cssVars, null, 2)} as const;
+
+export type TokenPath = (typeof tokenPaths)[number];
+export type Tokens = typeof tokens;
+`,
+);
+
+writeFile(
+  "ts/themes.ts",
+  `${formatHeader("//")}
+export const themes = ${JSON.stringify(
+    Object.fromEntries(
+      themeDefinitions.map((theme) => [
+        theme.name,
+        {
+          selector: theme.selector,
+          description: theme.description,
+          overrides: Object.fromEntries(
+            theme.entries.map((entry) => [entry.path, entry.resolvedValue]),
+          ),
+        },
+      ]),
+    ),
+    null,
+    2,
+  )} as const;
+
+export const densityModes = ${JSON.stringify(
+    Object.fromEntries(
+      densityDefinitions.map((density) => [
+        density.name,
+        {
+          selector: density.selector,
+          description: density.description,
+          overrides: Object.fromEntries(
+            density.entries.map((entry) => [entry.path, entry.resolvedValue]),
+          ),
+        },
+      ]),
+    ),
+    null,
+    2,
+  )} as const;
+
+export const controlSizes = ${JSON.stringify(
+    Object.fromEntries(
+      controlSizeDefinitions.map((mode) => [
+        mode.name,
+        {
+          selector: mode.selector,
+          description: mode.description,
+          overrides: Object.fromEntries(
+            mode.entries.map((entry) => [entry.path, entry.resolvedValue]),
+          ),
+        },
+      ]),
+    ),
+    null,
+    2,
+  )} as const;
+`,
+);
+
+writeFile(
+  "ts/metadata.ts",
+  `${formatHeader("//")}
+export const manifest = ${JSON.stringify(schema.manifest, null, 2)} as const;
+
+export const aliases = ${JSON.stringify(aliasesMetadata, null, 2)} as const;
+
+export const deprecations = ${JSON.stringify(deprecationsMetadata, null, 2)} as const;
+`,
+);
+
+function buildRustConstants(entries: ResolvedTokenEntry[], stripPrefix: string): string {
+  return entries
+    .map(
+      (entry) =>
+        `pub const ${rustConstName(entry.path, stripPrefix)}: &str = ${jsString(String(entry.resolvedValue))};`,
+    )
+    .join("\n");
+}
+
+function buildRustDefinitionArray(entries: ResolvedTokenEntry[]): string {
+  return entries
+    .map(
+      (entry) => `    (${jsString(entry.path)}, ${jsString(String(entry.resolvedValue))}),`,
+    )
+    .join("\n");
+}
+
+writeFile(
+  "rust/mod.rs",
+  `${formatHeader("//")}
+pub mod density;
+pub mod metadata;
+pub mod primitives;
+pub mod semantic;
+pub mod themes;
+`,
+);
+
+writeFile(
+  "rust/primitives.rs",
+  `${formatHeader("//")}
+${buildRustConstants(primitiveEntries, "primitives")}
+`,
+);
+
+writeFile(
+  "rust/semantic.rs",
+  `${formatHeader("//")}
+${buildRustConstants(semanticEntries, "semantic")}
+`,
+);
+
+writeFile(
+  "rust/themes.rs",
+  `${formatHeader("//")}
+#[derive(Debug, Clone, Copy)]
+pub struct ThemeDefinition {
+    pub name: &'static str,
+    pub selector: &'static str,
+    pub overrides: &'static [(&'static str, &'static str)],
+}
+
+${themeDefinitions
+    .map(
+      (theme) => `pub const ${theme.name.replace(/[^a-zA-Z0-9]+/g, "_").toUpperCase()}: ThemeDefinition = ThemeDefinition {
+    name: ${jsString(theme.name)},
+    selector: ${jsString(theme.selector)},
+    overrides: &[
+${buildRustDefinitionArray(theme.entries)}
+    ],
+};`,
+    )
+    .join("\n\n")}
+`,
+);
+
+writeFile(
+  "rust/density.rs",
+  `${formatHeader("//")}
+#[derive(Debug, Clone, Copy)]
+pub struct DensityDefinition {
+    pub name: &'static str,
+    pub selector: &'static str,
+    pub overrides: &'static [(&'static str, &'static str)],
+}
+
+#[derive(Debug, Clone, Copy)]
+pub struct ControlSizeDefinition {
+    pub name: &'static str,
+    pub selector: &'static str,
+    pub overrides: &'static [(&'static str, &'static str)],
+}
+
+${densityDefinitions
+    .map(
+      (density) => `pub const ${density.name.replace(/[^a-zA-Z0-9]+/g, "_").toUpperCase()}: DensityDefinition = DensityDefinition {
+    name: ${jsString(density.name)},
+    selector: ${jsString(density.selector)},
+    overrides: &[
+${buildRustDefinitionArray(density.entries)}
+    ],
+};`,
+    )
+    .join("\n\n")}
+
+${controlSizeDefinitions
+    .map(
+      (mode) => `pub const CONTROL_SIZE_${mode.name.replace(/[^a-zA-Z0-9]+/g, "_").toUpperCase()}: ControlSizeDefinition = ControlSizeDefinition {
+    name: ${jsString(mode.name)},
+    selector: ${jsString(mode.selector)},
+    overrides: &[
+${buildRustDefinitionArray(mode.entries)}
+    ],
+};`,
+    )
+    .join("\n\n")}
+`,
+);
+
+writeFile(
+  "rust/metadata.rs",
+  `${formatHeader("//")}
+pub const MANIFEST_NAME: &str = ${jsString(schema.manifest.name)};
+pub const MANIFEST_VERSION: &str = ${jsString(schema.manifest.version)};
+pub const CANONICAL_FORMAT: &str = ${jsString(schema.manifest.canonicalFormat)};
+pub const ARTIFACT_BASELINE: &str = ${jsString(schema.manifest.artifactBaseline)};
+
+pub const ALIASES: &[(&str, &str)] = &[
+${aliasesMetadata
+    .map((alias) => `    (${jsString(alias.from)}, ${jsString(alias.to)}),`)
+    .join("\n")}
+];
+
+pub const DEPRECATIONS: &[(&str, &str)] = &[
+${deprecationsMetadata
+    .map((item) => `    (${jsString(item.path)}, ${jsString(item.status)}),`)
+    .join("\n")}
+];
+`,
+);

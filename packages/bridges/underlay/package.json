@@ -1,0 +1,17 @@
+{
+  "name": "@pug/bridge-underlay",
+  "private": true,
+  "type": "module",
+  "description": "Internal Underlay bridge layer for token and wrapper mapping.",
+  "pugRelease": {
+    "publicIntent": false,
+    "channel": "internal",
+    "stability": "internal-bridge"
+  },
+  "exports": {
+    "./token-map": "./ts/token-map.ts",
+    "./theme-map": "./ts/theme-map.ts",
+    "./component-wrappers": "./ts/component-wrappers.ts",
+    ".": "./ts/index.ts"
+  }
+}

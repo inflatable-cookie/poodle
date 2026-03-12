@@ -65,7 +65,7 @@ Document Underlay's token/runtime system and integration constraints to inform:
 ## Related
 
 - Milestone: [g01.013](../../roadmaps/g01/013-underlay-bridge-and-token-ingestion-baseline.md)
-- Milestone: [g02.013](../../roadmaps/g02/013-underlay-adoption-tranche-and-wrapper-preservation.md)
+- Milestone: `g02.013` now covers preview/docs usability hardening instead of adoption sequencing
 - Milestone: [g03.007](../../roadmaps/g03/007-underlay-bridge-hardening-and-zero-leak-adoption-proof.md)
 
 ---

@@ -1,6 +1,6 @@
 # g01.004 Component Contract Template And Documentation IA
 
-Status: planned
+Status: completed
 Owner: Pug Core
 Updated: 2026-03-11
 Depends on: g01.001, g01.002

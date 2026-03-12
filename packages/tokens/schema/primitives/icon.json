@@ -1,0 +1,24 @@
+{
+  "icon": {
+    "size": {
+      "sm": {
+        "$type": "dimension",
+        "$value": "{primitives.size.icon.sm}"
+      },
+      "md": {
+        "$type": "dimension",
+        "$value": "{primitives.size.icon.md}"
+      },
+      "lg": {
+        "$type": "dimension",
+        "$value": "{primitives.size.icon.lg}"
+      }
+    },
+    "stroke": {
+      "default": {
+        "$type": "dimension",
+        "$value": "1.5px"
+      }
+    }
+  }
+}

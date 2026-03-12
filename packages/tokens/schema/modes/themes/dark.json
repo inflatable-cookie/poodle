@@ -1,0 +1,78 @@
+{
+  "color": {
+    "background": {
+      "canvas": {
+        "$type": "color",
+        "$value": "{primitives.color.slate.950}"
+      },
+      "surface": {
+        "$type": "color",
+        "$value": "{primitives.color.slate.900}"
+      },
+      "panel": {
+        "$type": "color",
+        "$value": "{primitives.color.slate.850}"
+      },
+      "elevated": {
+        "$type": "color",
+        "$value": "{primitives.color.slate.850}"
+      },
+      "overlay": {
+        "$type": "color",
+        "$value": "rgba(11, 15, 20, 0.76)"
+      }
+    },
+    "text": {
+      "primary": {
+        "$type": "color",
+        "$value": "{primitives.color.neutral.50}"
+      },
+      "secondary": {
+        "$type": "color",
+        "$value": "{primitives.color.neutral.400}"
+      },
+      "inverse": {
+        "$type": "color",
+        "$value": "{primitives.color.neutral.900}"
+      }
+    },
+    "border": {
+      "subtle": {
+        "$type": "color",
+        "$value": "rgba(215, 221, 230, 0.12)"
+      },
+      "default": {
+        "$type": "color",
+        "$value": "rgba(215, 221, 230, 0.24)"
+      },
+      "strong": {
+        "$type": "color",
+        "$value": "rgba(215, 221, 230, 0.48)"
+      }
+    },
+    "accent": {
+      "base": {
+        "$type": "color",
+        "$value": "{primitives.color.blue.400}"
+      },
+      "hover": {
+        "$type": "color",
+        "$value": "{primitives.color.blue.500}"
+      },
+      "focusRing": {
+        "$type": "color",
+        "$value": "{primitives.color.blue.400}"
+      }
+    },
+    "icon": {
+      "primary": {
+        "$type": "color",
+        "$value": "{primitives.color.neutral.50}"
+      },
+      "muted": {
+        "$type": "color",
+        "$value": "{primitives.color.neutral.400}"
+      }
+    }
+  }
+}

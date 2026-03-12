@@ -1,0 +1,15 @@
+{
+  "name": "@pug/tokens",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Canonical token source and generated artifact builder for Pug.",
+  "pugRelease": {
+    "publicIntent": false,
+    "channel": "internal",
+    "stability": "source-of-truth"
+  },
+  "scripts": {
+    "build": "bun scripts/build-tokens.ts"
+  }
+}

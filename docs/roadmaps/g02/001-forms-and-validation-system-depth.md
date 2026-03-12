@@ -1,6 +1,6 @@
 # g02.001 Forms And Validation System Depth
 
-Status: planned
+Status: completed
 Owner: Pug Core
 Updated: 2026-03-11
 Depends on: g01.014
@@ -13,27 +13,27 @@ isolated inputs.
 
 ## Goals
 
-- [ ] define field wrappers, labels, help text, error text, validation states,
+- [x] define field wrappers, labels, help text, error text, validation states,
   and action rows
-- [ ] define consistent form composition rules across Svelte and GPUI
-- [ ] define async and pending validation posture where relevant
+- [x] define consistent form composition rules across Svelte and GPUI
+- [x] define async and pending validation posture where relevant
 
 ## Execution Checklist
 
-- [ ] define the first form-shell components in scope
-- [ ] define validation-state and error-presentation rules
-- [ ] define form composition and action-row patterns
-- [ ] define async or pending validation behavior where needed
+- [x] define the first form-shell components in scope
+- [x] define validation-state and error-presentation rules
+- [x] define form composition and action-row patterns
+- [x] define async or pending validation behavior where needed
 
 ## Acceptance Criteria
 
-- [ ] form system surface is explicit
-- [ ] validation semantics are explicit
+- [x] form system surface is explicit
+- [x] validation semantics are explicit
 
 ## Deliverables
 
-- [ ] form-system baseline
-- [ ] validation contract notes
+- [x] form-system baseline
+- [x] validation contract notes
 
 ## Next Task
 

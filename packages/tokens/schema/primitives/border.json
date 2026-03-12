@@ -1,0 +1,14 @@
+{
+  "border": {
+    "width": {
+      "subtle": {
+        "$type": "dimension",
+        "$value": "1px"
+      },
+      "strong": {
+        "$type": "dimension",
+        "$value": "2px"
+      }
+    }
+  }
+}

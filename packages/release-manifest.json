@@ -1,0 +1,74 @@
+{
+  "versionPolicy": {
+    "baseline": "0.x until first downstream adoption proofs land",
+    "publicIntentChannel": "preview",
+    "internalChannel": "internal",
+    "breakingChangePolicy": "breaking changes may ship in minor releases while all packages remain pre-1.0, but must still be documented in roadmap, specs, and release notes"
+  },
+  "packages": [
+    {
+      "name": "@pug/tokens",
+      "path": "packages/tokens",
+      "kind": "source-of-truth",
+      "language": "typescript",
+      "publicIntent": false,
+      "channel": "internal"
+    },
+    {
+      "name": "@pug/svelte-tokens",
+      "path": "packages/svelte/tokens",
+      "kind": "runtime-package",
+      "language": "typescript",
+      "publicIntent": true,
+      "channel": "preview"
+    },
+    {
+      "name": "@pug/svelte-primitives",
+      "path": "packages/svelte/primitives",
+      "kind": "runtime-package",
+      "language": "typescript",
+      "publicIntent": true,
+      "channel": "preview"
+    },
+    {
+      "name": "@pug/svelte-composites",
+      "path": "packages/svelte/composites",
+      "kind": "runtime-package",
+      "language": "typescript",
+      "publicIntent": true,
+      "channel": "preview"
+    },
+    {
+      "name": "@pug/svelte-workstation",
+      "path": "packages/svelte/workstation",
+      "kind": "runtime-package",
+      "language": "typescript",
+      "publicIntent": true,
+      "channel": "preview"
+    },
+    {
+      "name": "pug-gpui-tokens",
+      "path": "packages/gpui/tokens",
+      "kind": "runtime-package",
+      "language": "rust",
+      "publicIntent": true,
+      "channel": "preview"
+    },
+    {
+      "name": "@pug/bridge-underlay",
+      "path": "packages/bridges/underlay",
+      "kind": "bridge",
+      "language": "typescript",
+      "publicIntent": false,
+      "channel": "internal"
+    },
+    {
+      "name": "@pug/svelte-preview",
+      "path": "packages/svelte/preview",
+      "kind": "tooling",
+      "language": "typescript",
+      "publicIntent": false,
+      "channel": "internal"
+    }
+  ]
+}

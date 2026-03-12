@@ -1,6 +1,6 @@
 # g01.002 Canonical Token Schema And Naming System
 
-Status: planned
+Status: completed
 Owner: Pug Core
 Updated: 2026-03-11
 Depends on: g01.001

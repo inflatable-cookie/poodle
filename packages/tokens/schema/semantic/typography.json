@@ -1,0 +1,76 @@
+{
+  "typography": {
+    "body": {
+      "family": {
+        "$type": "fontFamily",
+        "$value": "{primitives.typography.font.family.sans}"
+      },
+      "size": {
+        "$type": "dimension",
+        "$value": "{primitives.typography.font.size.md}"
+      },
+      "lineHeight": {
+        "$type": "dimension",
+        "$value": "{primitives.typography.font.lineHeight.md}"
+      },
+      "weight": {
+        "$type": "fontWeight",
+        "$value": "{primitives.typography.font.weight.regular}"
+      }
+    },
+    "label": {
+      "family": {
+        "$type": "fontFamily",
+        "$value": "{primitives.typography.font.family.sans}"
+      },
+      "size": {
+        "$type": "dimension",
+        "$value": "{primitives.typography.font.size.sm}"
+      },
+      "lineHeight": {
+        "$type": "dimension",
+        "$value": "{primitives.typography.font.lineHeight.sm}"
+      },
+      "weight": {
+        "$type": "fontWeight",
+        "$value": "{primitives.typography.font.weight.medium}"
+      }
+    },
+    "heading": {
+      "family": {
+        "$type": "fontFamily",
+        "$value": "{primitives.typography.font.family.sans}"
+      },
+      "size": {
+        "$type": "dimension",
+        "$value": "{primitives.typography.font.size.lg}"
+      },
+      "lineHeight": {
+        "$type": "dimension",
+        "$value": "{primitives.typography.font.lineHeight.lg}"
+      },
+      "weight": {
+        "$type": "fontWeight",
+        "$value": "{primitives.typography.font.weight.semibold}"
+      }
+    },
+    "code": {
+      "family": {
+        "$type": "fontFamily",
+        "$value": "{primitives.typography.font.family.mono}"
+      },
+      "size": {
+        "$type": "dimension",
+        "$value": "{primitives.typography.font.size.sm}"
+      },
+      "lineHeight": {
+        "$type": "dimension",
+        "$value": "{primitives.typography.font.lineHeight.sm}"
+      },
+      "weight": {
+        "$type": "fontWeight",
+        "$value": "{primitives.typography.font.weight.regular}"
+      }
+    }
+  }
+}

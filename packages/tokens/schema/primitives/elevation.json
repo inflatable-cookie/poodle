@@ -1,0 +1,18 @@
+{
+  "elevation": {
+    "shadow": {
+      "sm": {
+        "$type": "shadow",
+        "$value": "0 4px 12px rgba(17, 22, 29, 0.08)"
+      },
+      "md": {
+        "$type": "shadow",
+        "$value": "0 12px 32px rgba(17, 22, 29, 0.16)"
+      },
+      "lg": {
+        "$type": "shadow",
+        "$value": "0 24px 60px rgba(11, 15, 20, 0.32)"
+      }
+    }
+  }
+}

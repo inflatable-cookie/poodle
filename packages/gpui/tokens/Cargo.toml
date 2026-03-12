@@ -1,0 +1,13 @@
+[package]
+name = "pug-gpui-tokens"
+version = "0.0.0"
+edition = "2021"
+description = "Generated Pug token bindings for GPUI consumers."
+
+[lib]
+path = "src/lib.rs"
+
+[package.metadata.pug]
+public-intent = true
+channel = "preview"
+stability = "pre-release"

@@ -1,0 +1,21 @@
+{
+  "name": "pug",
+  "private": true,
+  "type": "module",
+  "workspaces": [
+    "packages/tokens",
+    "packages/svelte/tokens",
+    "packages/svelte/primitives",
+    "packages/svelte/composites",
+    "packages/svelte/workstation",
+    "packages/bridges/underlay",
+    "packages/svelte/preview"
+  ],
+  "scripts": {
+    "tokens:build": "bun packages/tokens/scripts/build-tokens.ts",
+    "docs:dev": "bun run preview:dev",
+    "docs:build": "bun run preview:build",
+    "preview:dev": "bun run --cwd packages/svelte/preview dev",
+    "preview:build": "bun run --cwd packages/svelte/preview build"
+  }
+}

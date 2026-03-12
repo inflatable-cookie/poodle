@@ -1,19 +1,20 @@
 # g03 Hardening, Migration, And Mature Ecosystem Support
 
-Status: planned
+Status: active
 Updated: 2026-03-11
 
 ## Context
 
-`g03` is the hardening generation. By this point Pug should already have a
-credible token system, component catalogue, workstation-shell layer, docs
-surface, and first downstream adoption tranches. The work here is to make the
-system stable enough to carry real long-term consumers.
+`g03` is the hardening and first-adoption generation. By this point Pug should
+already have a credible token system, component catalogue, workstation-shell
+layer, docs surface, packaging baseline, and a much cleaner review surface than
+the rougher `g02` build-out phase. The work here is to start real downstream
+adoption without reopening the core shape every few days.
 
 ## Starting State
 
 - `g02` has expanded the reusable component suite
-- Underlay and at least one GPUI downstream adoption path are real
+- downstream adoption is ready to begin deliberately, not by optimism
 - packaging and versioning baselines exist
 - docs and examples are already present
 
@@ -22,7 +23,7 @@ system stable enough to carry real long-term consumers.
 - migration and compatibility policy are explicit
 - parity automation and regression evidence exist
 - docs publishing and contract linting are reliable
-- Underlay and Loophole-facing extension contracts are hardened
+- first Underlay and Loophole-facing adoption tranches are real and hardened
 - the system can support broader ecosystem adoption without reopening its core
   shape
 
@@ -47,5 +48,5 @@ system stable enough to carry real long-term consumers.
 
 ## Next Task
 
-Keep `g03` as a hardening and maturity generation; do not defer the first
-version of foundational component work into it.
+Open `g03.001` and freeze token evolution, migration, and compatibility policy
+before downstream adoption begins.

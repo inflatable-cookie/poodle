@@ -1,0 +1,34 @@
+{
+  "size": {
+    "control": {
+      "height": {
+        "$type": "dimension",
+        "$value": "{primitives.size.control.md}"
+      },
+      "minWidth": {
+        "$type": "dimension",
+        "$value": "96px"
+      }
+    },
+    "icon": {
+      "sm": {
+        "$type": "dimension",
+        "$value": "{primitives.size.icon.sm}"
+      },
+      "md": {
+        "$type": "dimension",
+        "$value": "{primitives.size.icon.md}"
+      },
+      "lg": {
+        "$type": "dimension",
+        "$value": "{primitives.size.icon.lg}"
+      }
+    },
+    "panel": {
+      "header": {
+        "$type": "dimension",
+        "$value": "{primitives.size.panel.header}"
+      }
+    }
+  }
+}

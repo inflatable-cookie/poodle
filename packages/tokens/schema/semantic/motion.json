@@ -1,0 +1,24 @@
+{
+  "motion": {
+    "duration": {
+      "interaction": {
+        "$type": "duration",
+        "$value": "{primitives.motion.duration.standard}"
+      },
+      "overlay": {
+        "$type": "duration",
+        "$value": "{primitives.motion.duration.fast}"
+      }
+    },
+    "easing": {
+      "standard": {
+        "$type": "cubicBezier",
+        "$value": "{primitives.motion.easing.standard}"
+      },
+      "emphasized": {
+        "$type": "cubicBezier",
+        "$value": "{primitives.motion.easing.emphasized}"
+      }
+    }
+  }
+}

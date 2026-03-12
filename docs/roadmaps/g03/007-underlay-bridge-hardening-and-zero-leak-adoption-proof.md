@@ -1,4 +1,4 @@
-# g03.007 Underlay Bridge Hardening And Zero-Leak Adoption Proof
+# g03.007 Underlay Adoption Tranche, Bridge Hardening, And Zero-Leak Proof
 
 Status: planned
 Owner: Pug Core
@@ -8,14 +8,14 @@ Primary repos: `pug`, `underlay`
 
 ## Goals
 
-- [ ] validate that Underlay can adopt Pug internally without exposing Pug
+- [ ] validate the first real Underlay adoption tranche without exposing Pug
   publicly
 - [ ] harden bridge boundaries and migration posture
 - [ ] record remaining adoption friction clearly
 
 ## Execution Checklist
 
-- [ ] validate Underlay internal adoption with no public Pug leakage
+- [ ] validate the first Underlay-owned adoption surfaces with no public Pug leakage
 - [ ] harden bridge boundaries and migration posture
 - [ ] record remaining adoption friction clearly
 

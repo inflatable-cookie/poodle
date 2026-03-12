@@ -1,0 +1,56 @@
+{
+  "$schema": "https://www.designtokens.org/TR/2025.10/format/",
+  "name": "@pug/tokens",
+  "version": "0.0.0",
+  "canonicalFormat": "W3C DTCG 2025.10",
+  "artifactBaseline": "Style Dictionary 4.x target shapes with bootstrap local emission script",
+  "families": [
+    "color",
+    "typography",
+    "spacing",
+    "sizing",
+    "radius",
+    "border",
+    "elevation",
+    "motion",
+    "density",
+    "icon",
+    "overlay",
+    "state"
+  ],
+  "requiredThemes": [
+    "light",
+    "dark",
+    "loophole-studio"
+  ],
+  "requiredDensityModes": [
+    "compact",
+    "comfortable"
+  ],
+  "requiredControlSizes": [
+    "sm",
+    "md",
+    "lg"
+  ],
+  "artifactTargets": {
+    "css": [
+      "packages/tokens/artifacts/css/pug-tokens.css",
+      "packages/tokens/artifacts/css/pug-theme-light.css",
+      "packages/tokens/artifacts/css/pug-theme-dark.css",
+      "packages/tokens/artifacts/css/pug-theme-loophole-studio.css",
+      "packages/tokens/artifacts/css/pug-density-compact.css",
+      "packages/tokens/artifacts/css/pug-density-comfortable.css"
+    ],
+    "ts": [
+      "packages/tokens/artifacts/ts/index.ts",
+      "packages/tokens/artifacts/ts/themes.ts",
+      "packages/tokens/artifacts/ts/metadata.ts"
+    ],
+    "rust": [
+      "packages/tokens/artifacts/rust/mod.rs",
+      "packages/tokens/artifacts/rust/themes.rs",
+      "packages/tokens/artifacts/rust/density.rs",
+      "packages/tokens/artifacts/rust/metadata.rs"
+    ]
+  }
+}
