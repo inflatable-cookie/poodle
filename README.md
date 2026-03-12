@@ -55,6 +55,7 @@ readout.
 
 ## Next Task
 
-Open `docs/roadmaps/g03/001-token-evolution-migration-and-compatibility-policy.md`
-and freeze token evolution, migration, and compatibility policy before
-downstream adoption begins.
+`g03` is complete. If a future generation is opened, start from the explicit
+closeout in `docs/roadmaps/g03/014-generation-closeout-and-next-program-cutover.md`
+instead of reopening parity, accessibility, release, acceptance, or adoption
+baselines by implication.

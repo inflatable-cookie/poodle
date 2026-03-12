@@ -1,7 +1,7 @@
 # Roadmaps
 
 Status: active
-Updated: 2026-03-11
+Updated: 2026-03-12
 
 Roadmaps hold executable milestone work for Pug.
 
@@ -16,7 +16,8 @@ Roadmaps hold executable milestone work for Pug.
 
 ## Current Generation
 
-- Active generation: `g03`
+- Active generation: none
+- Most recently completed generation: `g03`
 - Next generation: not yet planned
 
 ## Generation Map
@@ -53,5 +54,6 @@ express a real program rather than three or four umbrella headings.
 
 ## Next Task
 
-Execute `g03` in order, beginning with token evolution, migration, and
-compatibility policy before downstream adoption begins.
+`g03` is complete. Do not open a new generation until it has a narrower,
+artifact-backed cutover plan instead of a generic continuation of hardening or
+adoption work.

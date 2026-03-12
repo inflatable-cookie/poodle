@@ -1,7 +1,7 @@
 # 022 Packaging Versioning And Release Channel Rules
 
 Status: active
-Updated: 2026-03-11
+Updated: 2026-03-12
 Depends on: `021-public-package-api-stability-and-parity-debt-baseline.md`
 
 ## Purpose
@@ -20,6 +20,7 @@ Every package must fall into one of these release classes:
 - `tooling`: internal docs, preview, or validation tooling
 
 The canonical classification record is `packages/release-manifest.json`.
+Operational change-control rules now live in `packages/release-operations.json`.
 
 ## Channel Rule
 
@@ -98,6 +99,7 @@ Each release-capable tranche should document:
 ## Seed Evidence
 
 - `packages/release-manifest.json`
+- `packages/release-operations.json`
 - `packages/svelte/tokens/package.json`
 - `packages/svelte/primitives/package.json`
 - `packages/svelte/composites/package.json`
@@ -108,5 +110,6 @@ Each release-capable tranche should document:
 
 ## Next Task
 
-Use this baseline while executing `g02.016`, summarizing which preview-channel
-packages are mature enough to carry into the next generation.
+Carry this baseline into `g03.011` and later operations work so preview,
+internal, and future stable channel language remain explicit instead of
+drifting into implied release promises.

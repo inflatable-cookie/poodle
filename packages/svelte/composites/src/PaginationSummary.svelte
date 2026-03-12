@@ -68,7 +68,7 @@
   .pagination-summary__actions button {
     min-height: var(--pug-size-control-height);
     padding: 0 var(--pug-space-control-x);
-    border: 1px solid var(--pug-color-border-default);
+    border: 0.0625rem solid var(--pug-color-border-default);
     border-radius: var(--pug-radius-control);
     background: var(--pug-color-background-surface);
     color: var(--pug-color-text-primary);
@@ -82,6 +82,6 @@
 
   .pagination-summary__actions button:focus-visible {
     outline: var(--pug-border-width-focus) solid var(--pug-color-accent-focusRing);
-    outline-offset: 2px;
+    outline-offset: 0.125rem;
   }
 </style>

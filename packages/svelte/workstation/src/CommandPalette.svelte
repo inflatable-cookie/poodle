@@ -25,6 +25,8 @@
   let previousFocusedElement: HTMLElement | null = null;
   let activeId: string | null = null;
   let wasOpen = false;
+  let previousHtmlOverflow = "";
+  let previousBodyOverflow = "";
   const queryInputId = "command-palette-query";
   const statusId = "command-palette-status";
   let itemButtons: Array<HTMLButtonElement | null> = [];
@@ -39,6 +41,10 @@
   $: groupEntries = Object.entries(groupedItems);
   $: if (open && !wasOpen) {
     previousFocusedElement = document.activeElement instanceof HTMLElement ? document.activeElement : null;
+    previousHtmlOverflow = document.documentElement.style.overflow;
+    previousBodyOverflow = document.body.style.overflow;
+    document.documentElement.style.overflow = "hidden";
+    document.body.style.overflow = "hidden";
     wasOpen = true;
     queueMicrotask(async () => {
       await tick();
@@ -53,6 +59,8 @@
   $: if (!open && wasOpen) {
     wasOpen = false;
     activeId = null;
+    document.documentElement.style.overflow = previousHtmlOverflow;
+    document.body.style.overflow = previousBodyOverflow;
     previousFocusedElement?.focus();
   }
   $: if (open && enabledItems.length > 0 && (!activeId || !enabledItems.some((item) => item.id === activeId))) {
@@ -185,6 +193,8 @@
   }
 
   onDestroy(() => {
+    document.documentElement.style.overflow = previousHtmlOverflow;
+    document.body.style.overflow = previousBodyOverflow;
     previousFocusedElement = null;
   });
 </script>
@@ -330,7 +340,7 @@
     position: fixed;
     inset: 0;
     background: color-mix(in srgb, black 44%, transparent);
-    backdrop-filter: blur(8px);
+    backdrop-filter: blur(0.5rem);
     z-index: 40;
   }
 
@@ -339,14 +349,18 @@
     top: 50%;
     left: 50%;
     display: grid;
+    grid-template-rows: auto auto auto minmax(0, 1fr);
     gap: var(--pug-space-stack-md);
-    width: min(720px, calc(100vw - 32px));
-    max-height: min(78vh, 840px);
+    width: min(45rem, calc(100vw - 2rem));
+    max-height: min(78vh, 52.5rem);
+    min-height: 0;
     padding: var(--pug-space-panel-y) var(--pug-space-panel-x);
-    border: 1px solid color-mix(in srgb, var(--pug-color-border-default) 42%, transparent);
-    border-radius: calc(var(--pug-radius-surface) + 2px);
+    border: 0.0625rem solid color-mix(in srgb, var(--pug-color-border-default) 42%, transparent);
+    border-radius: calc(var(--pug-radius-surface) + 0.125rem);
     background: color-mix(in srgb, var(--pug-color-background-elevated) 98%, transparent);
     box-shadow: var(--pug-elevation-dialog);
+    overflow: hidden;
+    overscroll-behavior: contain;
     transform: translate(-50%, -50%);
     z-index: 41;
   }
@@ -364,13 +378,13 @@
   }
 
   .command-palette__header h3 {
-    font-size: 22px;
+    font-size: 1.375rem;
     line-height: 1.2;
   }
 
   .command-palette__header p {
     color: var(--pug-color-text-secondary);
-    font-size: 13px;
+    font-size: 0.8125rem;
     line-height: 1.5;
   }
 
@@ -386,12 +400,12 @@
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    min-height: 24px;
-    padding: 0 8px;
+    min-height: 1.5rem;
+    padding: 0 0.5rem;
     border-radius: var(--pug-radius-control);
     background: color-mix(in srgb, var(--pug-color-background-surface) 76%, transparent);
     color: var(--pug-color-text-secondary);
-    font-size: 12px;
+    font-size: 0.75rem;
   }
 
   .command-palette__hint,
@@ -400,11 +414,11 @@
   }
 
   .command-palette__close {
-    width: 28px;
-    height: 28px;
+    width: 1.75rem;
+    height: 1.75rem;
     padding: 0;
     border: 0;
-    border-radius: calc(var(--pug-radius-control) - 1px);
+    border-radius: calc(var(--pug-radius-control) - 0.0625rem);
     background: color-mix(in srgb, var(--pug-color-background-surface) 62%, transparent);
     color: var(--pug-color-text-secondary);
     cursor: pointer;
@@ -417,16 +431,17 @@
   }
 
   .command-palette__results {
-    overflow: auto;
     display: grid;
     gap: var(--pug-space-stack-md);
-    min-height: 280px;
+    min-height: 0;
+    overflow: auto;
+    overscroll-behavior: contain;
   }
 
   .command-palette__status {
     margin: 0;
     color: var(--pug-color-text-secondary);
-    font-size: 13px;
+    font-size: 0.8125rem;
     line-height: 1.5;
   }
 
@@ -439,6 +454,12 @@
     gap: var(--pug-space-stack-sm);
   }
 
+  .command-palette__group-list {
+    min-height: 0;
+    align-content: start;
+    gap: 0.75rem;
+  }
+
   .command-palette__group h4,
   .command-palette__copy strong,
   .command-palette__copy small {
@@ -447,7 +468,7 @@
 
   .command-palette__group h4 {
     color: var(--pug-color-text-secondary);
-    font-size: 12px;
+    font-size: 0.75rem;
     font-weight: 600;
     letter-spacing: 0.08em;
     text-transform: uppercase;
@@ -455,7 +476,7 @@
 
   .command-palette__group ul {
     display: grid;
-    gap: 8px;
+    gap: 0.375rem;
     margin: 0;
     padding: 0;
     list-style: none;
@@ -467,9 +488,9 @@
     gap: var(--pug-space-inline-md);
     align-items: center;
     width: 100%;
-    padding: 14px;
-    border: 1px solid transparent;
-    border-radius: calc(var(--pug-radius-surface) - 2px);
+    padding: 0.6875rem 0.75rem;
+    border: 0.0625rem solid transparent;
+    border-radius: calc(var(--pug-radius-surface) - 0.125rem);
     background: color-mix(in srgb, var(--pug-color-background-panel) 92%, transparent);
     color: var(--pug-color-text-primary);
     text-align: left;
@@ -477,15 +498,24 @@
     font: inherit;
   }
 
+  .command-palette__copy {
+    gap: 0.1875rem;
+  }
+
+  .command-palette__copy strong {
+    font-size: 0.875rem;
+    line-height: 1.25;
+  }
+
   .command-palette__item--active {
     border-color: transparent;
     background: color-mix(in srgb, var(--pug-color-accent-base) 18%, var(--pug-color-background-elevated));
-    box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--pug-color-accent-base) 22%, transparent);
+    box-shadow: inset 0 0 0 0.0625rem color-mix(in srgb, var(--pug-color-accent-base) 22%, transparent);
   }
 
   .command-palette__item:focus-visible {
     outline: var(--pug-border-width-focus) solid var(--pug-color-accent-focusRing);
-    outline-offset: 2px;
+    outline-offset: 0.125rem;
   }
 
   .command-palette__item:disabled {
@@ -495,14 +525,14 @@
 
   .command-palette__copy small {
     color: var(--pug-color-text-secondary);
-    font-size: 13px;
-    line-height: 1.5;
+    font-size: 0.6875rem;
+    line-height: 1.35;
   }
 
   .command-palette__trailing {
     display: flex;
     flex-wrap: wrap;
-    gap: var(--pug-space-inline-sm);
+    gap: 0.375rem;
     align-items: center;
     justify-content: flex-end;
   }
@@ -511,30 +541,30 @@
     display: grid;
     grid-template-columns: minmax(0, 1fr) auto;
     gap: var(--pug-space-inline-md);
-    padding: 14px;
-    border: 1px solid transparent;
-    border-radius: calc(var(--pug-radius-surface) - 2px);
+    padding: 0.875rem;
+    border: 0.0625rem solid transparent;
+    border-radius: calc(var(--pug-radius-surface) - 0.125rem);
     background: color-mix(in srgb, var(--pug-color-background-surface) 72%, transparent);
   }
 
   :global([data-theme="light"]) .command-palette {
     border-color: color-mix(in srgb, var(--pug-color-border-default) 24%, transparent);
     box-shadow:
-      0 18px 44px rgba(49, 66, 85, 0.1),
-      inset 0 1px 0 rgba(255, 255, 255, 0.72);
+      0 1.125rem 2.75rem rgba(49, 66, 85, 0.1),
+      inset 0 0.0625rem 0 rgba(255, 255, 255, 0.72);
   }
 
   :global([data-theme="light"]) .command-palette__item,
   :global([data-theme="light"]) .command-palette__skeleton-row {
     background: color-mix(in srgb, var(--pug-color-background-elevated) 96%, var(--pug-color-background-panel));
-    box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--pug-color-border-subtle) 36%, transparent);
+    box-shadow: inset 0 0 0 0.0625rem color-mix(in srgb, var(--pug-color-border-subtle) 36%, transparent);
   }
 
-  @media (max-width: 720px) {
+  @media (max-width: 45rem) {
     .command-palette {
-      width: min(100vw - 20px, 720px);
-      max-height: calc(100vh - 20px);
-      padding: 16px;
+      width: min(100vw - 1.25rem, 45rem);
+      max-height: calc(100vh - 1.25rem);
+      padding: 1rem;
     }
 
     .command-palette__header,

@@ -17,7 +17,7 @@
     "stroke": {
       "default": {
         "$type": "dimension",
-        "$value": "1.5px"
+        "$value": "0.0938rem"
       }
     }
   }

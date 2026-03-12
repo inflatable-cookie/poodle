@@ -34,10 +34,24 @@
 
 <style>
   .page-header {
+    --pug-recipe-page-header-padding-block-start: 0;
+    --pug-recipe-page-header-padding-inline: 0;
+    --pug-recipe-page-header-padding-block-end: calc(var(--pug-space-stack-md) + 0.125rem);
+    --pug-recipe-page-header-fill: transparent;
+    --pug-recipe-page-header-border: transparent;
+    --pug-recipe-page-header-shadow: none;
+    --pug-recipe-page-header-radius: var(--pug-radius-surface);
     display: grid;
     gap: var(--pug-space-stack-md);
     align-items: end;
-    padding-bottom: calc(var(--pug-space-stack-md) + 2px);
+    padding:
+      var(--pug-recipe-page-header-padding-block-start)
+      var(--pug-recipe-page-header-padding-inline)
+      var(--pug-recipe-page-header-padding-block-end);
+    border: 0.0625rem solid var(--pug-recipe-page-header-border);
+    border-radius: var(--pug-recipe-page-header-radius);
+    background: var(--pug-recipe-page-header-fill);
+    box-shadow: var(--pug-recipe-page-header-shadow);
   }
 
   .page-header[data-align="between"] {
@@ -51,7 +65,7 @@
 
   .page-header__title-block {
     display: grid;
-    gap: 6px;
+    gap: 0.375rem;
   }
 
   .page-header__title,
@@ -62,14 +76,14 @@
 
   .page-header__title {
     font-family: var(--pug-typography-heading-family);
-    font-size: 28px;
+    font-size: 1.75rem;
     line-height: 1.1;
     font-weight: 700;
   }
 
   .page-header__eyebrow {
     color: var(--pug-color-text-secondary);
-    font-size: 11px;
+    font-size: 0.6875rem;
     font-weight: 600;
     letter-spacing: 0.12em;
     text-transform: uppercase;
@@ -89,7 +103,7 @@
     align-items: start;
   }
 
-  @media (max-width: 720px) {
+  @media (max-width: 45rem) {
     .page-header[data-align="between"] {
       grid-template-columns: 1fr;
     }

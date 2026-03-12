@@ -17,3 +17,11 @@ export {
   underlayZeroLeakRules,
   type UnderlayWrapperPolicy,
 } from "./component-wrappers";
+export {
+  underlayAdoptionSurfaceProof,
+  underlayRemainingAdoptionFriction,
+  underlayZeroLeakProof,
+  validateUnderlayZeroLeakProof,
+  type UnderlayAdoptionSurfaceProof,
+  type UnderlayZeroLeakProof,
+} from "./zero-leak-proof";

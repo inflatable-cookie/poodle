@@ -38,8 +38,8 @@
     justify-items: start;
     gap: var(--pug-space-stack-md);
     padding: calc(var(--pug-space-panel-y) * 1.5) var(--pug-space-panel-x);
-    border: 1px dashed var(--pug-color-border-default);
-    border-radius: calc(var(--pug-radius-surface) - 2px);
+    border: 0.0625rem dashed var(--pug-color-border-default);
+    border-radius: calc(var(--pug-radius-surface) - 0.125rem);
     background: color-mix(in srgb, var(--pug-color-background-surface) 76%, transparent);
   }
 
@@ -55,18 +55,18 @@
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    width: 36px;
-    height: 36px;
-    border-radius: 999px;
+    width: 2.25rem;
+    height: 2.25rem;
+    border-radius: 999rem;
     background: color-mix(in srgb, var(--pug-color-background-panel) 90%, transparent);
     color: var(--pug-color-text-secondary);
-    font-size: 18px;
+    font-size: 1.125rem;
     font-weight: 600;
   }
 
   .empty-state__copy {
     display: grid;
-    gap: 6px;
+    gap: 0.375rem;
   }
 
   .empty-state__copy h3,
@@ -75,13 +75,13 @@
   }
 
   .empty-state__copy h3 {
-    font-size: 18px;
+    font-size: 1.125rem;
     line-height: 1.2;
   }
 
   .empty-state__copy p {
     color: var(--pug-color-text-secondary);
-    font-size: 13px;
+    font-size: 0.8125rem;
     line-height: 1.5;
   }
 

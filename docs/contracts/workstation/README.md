@@ -38,8 +38,16 @@ They may not own:
 - project-specific workspace orchestration logic
 - storage backends for persistence
 
+## Current Downstream Proof
+
+The current Loophole-facing foundation proof lives in:
+
+- `packages/svelte/workstation/loophole-foundation-proof.json`
+
+Use that artifact when deciding whether a workstation pattern is still generic
+shell foundation or has drifted into app-specific DAW ownership.
+
 ## Next Task
 
-Use this workstation baseline while executing `g02.011` and later workstation
-or hardening tranches, without reopening the shell boundary already frozen in
-`g01`.
+Use this workstation baseline while executing the later downstream-adoption
+tranches, without reopening the shell boundary already frozen in `g01`.

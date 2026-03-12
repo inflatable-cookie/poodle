@@ -162,20 +162,41 @@
   .panel-tabs {
     display: flex;
     flex-wrap: wrap;
-    gap: 4px;
+    gap: 0.25rem;
     align-items: center;
   }
 
   .panel-tabs__tab {
+    --pug-panel-tab-radius: var(--pug-treatment-interactive-radius, var(--pug-radius-control));
+    --pug-panel-tab-fill: var(
+      --pug-treatment-interactive-fill,
+      color-mix(in srgb, var(--pug-color-background-surface) 68%, transparent)
+    );
+    --pug-panel-tab-fill-active: var(
+      --pug-treatment-interactive-fill-active,
+      color-mix(in srgb, var(--pug-color-accent-base) 20%, var(--pug-color-background-elevated))
+    );
+    --pug-panel-tab-border: var(
+      --pug-treatment-interactive-border,
+      var(--pug-color-border-subtle)
+    );
+    --pug-panel-tab-border-active: var(
+      --pug-treatment-interactive-border-active,
+      color-mix(in srgb, var(--pug-color-accent-base) 24%, var(--pug-color-border-subtle))
+    );
+    --pug-panel-tab-shadow-active: var(
+      --pug-treatment-interactive-shadow-active,
+      inset 0 0.0625rem 0 color-mix(in srgb, var(--pug-color-text-inverse) 10%, transparent)
+    );
     display: grid;
     grid-template-columns: minmax(0, 1fr) auto;
-    gap: 10px;
+    gap: 0.625rem;
     align-items: center;
-    min-height: 32px;
-    padding: 0 10px 0 12px;
-    border: 1px solid var(--pug-color-border-subtle);
-    border-radius: var(--pug-radius-control);
-    background: color-mix(in srgb, var(--pug-color-background-surface) 68%, transparent);
+    min-height: 2rem;
+    padding: 0 0.625rem 0 0.75rem;
+    border: 0.0625rem solid var(--pug-panel-tab-border);
+    border-radius: var(--pug-panel-tab-radius);
+    background: var(--pug-panel-tab-fill);
     color: var(--pug-color-text-primary);
     cursor: pointer;
     font: inherit;
@@ -183,31 +204,31 @@
   }
 
   .panel-tabs__tab--active {
-    border-color: color-mix(in srgb, var(--pug-color-accent-base) 24%, var(--pug-color-border-subtle));
-    background: color-mix(in srgb, var(--pug-color-accent-base) 20%, var(--pug-color-background-elevated));
-    box-shadow: inset 0 1px 0 color-mix(in srgb, var(--pug-color-text-inverse) 10%, transparent);
+    border-color: var(--pug-panel-tab-border-active);
+    background: var(--pug-panel-tab-fill-active);
+    box-shadow: var(--pug-panel-tab-shadow-active);
   }
 
   .panel-tabs__tab:focus-visible,
   .panel-tabs__icon-button:focus-visible {
     outline: var(--pug-border-width-focus) solid var(--pug-color-accent-focusRing);
-    outline-offset: 2px;
+    outline-offset: 0.125rem;
   }
 
   .panel-tabs__copy,
   .panel-tabs__actions {
     display: flex;
     align-items: center;
-    gap: 8px;
+    gap: 0.5rem;
     min-width: 0;
   }
 
   .panel-tabs__icon-button {
-    width: 22px;
-    height: 22px;
+    width: 1.375rem;
+    height: 1.375rem;
     padding: 0;
     border: 0;
-    border-radius: calc(var(--pug-radius-control) - 1px);
+    border-radius: calc(var(--pug-panel-tab-radius) - 0.0625rem);
     background: transparent;
     color: var(--pug-color-text-secondary);
     cursor: pointer;
@@ -215,7 +236,10 @@
   }
 
   .panel-tabs__icon-button:hover {
-    background: color-mix(in srgb, var(--pug-color-background-surface) 84%, transparent);
+    background: var(
+      --pug-treatment-interactive-subtle-fill-hover,
+      color-mix(in srgb, var(--pug-color-background-surface) 84%, transparent)
+    );
     color: var(--pug-color-text-primary);
   }
 </style>

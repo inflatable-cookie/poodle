@@ -32,11 +32,11 @@
 <style>
   .detail-row {
     display: grid;
-    grid-template-columns: minmax(0, 180px) minmax(0, 1fr) auto;
+    grid-template-columns: 11.25rem minmax(0, 1fr) auto;
     gap: var(--pug-space-inline-md);
-    align-items: start;
-    padding: 12px 14px;
-    border-radius: calc(var(--pug-radius-surface) - 1px);
+    align-items: center;
+    padding: 0.75rem 0.875rem;
+    border-radius: calc(var(--pug-radius-surface) - 0.0625rem);
     background: color-mix(in srgb, var(--pug-color-background-surface) 52%, transparent);
   }
 
@@ -48,7 +48,8 @@
 
   .detail-row__label-block {
     display: grid;
-    gap: 4px;
+    gap: 0.25rem;
+    min-width: 0;
   }
 
   .detail-row__label {
@@ -60,7 +61,7 @@
 
   .detail-row__description {
     color: var(--pug-color-text-secondary);
-    font-size: 13px;
+    font-size: 0.8125rem;
     line-height: 1.5;
   }
 
@@ -69,6 +70,7 @@
     font-family: var(--pug-typography-body-family);
     font-size: var(--pug-typography-body-size);
     line-height: var(--pug-typography-body-lineHeight);
+    min-width: 0;
   }
 
   .detail-row__value.truncate {
@@ -77,7 +79,7 @@
     white-space: nowrap;
   }
 
-  @media (max-width: 720px) {
+  @media (max-width: 45rem) {
     .detail-row {
       grid-template-columns: 1fr;
     }

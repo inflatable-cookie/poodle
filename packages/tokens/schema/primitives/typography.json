@@ -28,37 +28,37 @@
       "size": {
         "xs": {
           "$type": "dimension",
-          "$value": "11px"
+          "$value": "0.6875rem"
         },
         "sm": {
           "$type": "dimension",
-          "$value": "13px"
+          "$value": "0.8125rem"
         },
         "md": {
           "$type": "dimension",
-          "$value": "14px"
+          "$value": "0.875rem"
         },
         "lg": {
           "$type": "dimension",
-          "$value": "16px"
+          "$value": "1rem"
         },
         "xl": {
           "$type": "dimension",
-          "$value": "20px"
+          "$value": "1.25rem"
         }
       },
       "lineHeight": {
         "sm": {
           "$type": "dimension",
-          "$value": "16px"
+          "$value": "1rem"
         },
         "md": {
           "$type": "dimension",
-          "$value": "20px"
+          "$value": "1.25rem"
         },
         "lg": {
           "$type": "dimension",
-          "$value": "24px"
+          "$value": "1.5rem"
         }
       }
     }

@@ -52,7 +52,7 @@
 
   .detail-shell__state {
     padding: calc(var(--pug-space-panel-y) * 2) calc(var(--pug-space-panel-x) * 1.5);
-    border: 1px solid transparent;
+    border: 0.0625rem solid transparent;
     border-radius: var(--pug-radius-surface);
     background: color-mix(in srgb, var(--pug-color-background-panel) 96%, var(--pug-color-background-elevated));
   }

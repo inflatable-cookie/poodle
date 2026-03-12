@@ -1,0 +1,135 @@
+{
+  "changeClasses": [
+    {
+      "id": "docs-only",
+      "description": "Documentation, preview-copy, or audit-surface changes that do not alter a public runtime contract.",
+      "mayChangePublicApi": false,
+      "requiresContractUpdate": false,
+      "requiresReleaseNotes": true
+    },
+    {
+      "id": "additive",
+      "description": "New public exports, new contract-backed states, or new generated artifacts that preserve existing consumer behavior.",
+      "mayChangePublicApi": true,
+      "requiresContractUpdate": true,
+      "requiresReleaseNotes": true
+    },
+    {
+      "id": "behavioral",
+      "description": "Changes that keep the same public API shape but alter semantics, interaction behavior, accessibility posture, or emitted artifact meaning.",
+      "mayChangePublicApi": true,
+      "requiresContractUpdate": true,
+      "requiresReleaseNotes": true
+    },
+    {
+      "id": "breaking",
+      "description": "Changes that remove, rename, repurpose, or narrow a public surface in a way that downstream consumers must react to explicitly.",
+      "mayChangePublicApi": true,
+      "requiresContractUpdate": true,
+      "requiresReleaseNotes": true
+    }
+  ],
+  "channelRules": {
+    "internal": {
+      "enabled": true,
+      "publicIntent": false,
+      "consumerExpectation": "Internal packages must not be treated as downstream dependencies.",
+      "deprecationRecord": "docs-or-proof-only"
+    },
+    "preview": {
+      "enabled": true,
+      "publicIntent": true,
+      "consumerExpectation": "Preview packages may be evaluated downstream but remain pre-release and change-controlled.",
+      "deprecationRecord": "contract-or-metadata-plus-release-notes"
+    },
+    "stable": {
+      "enabled": false,
+      "publicIntent": true,
+      "consumerExpectation": "Stable release channel is not available during g03.",
+      "deprecationRecord": "reserved-for-later-generation"
+    }
+  },
+  "deprecationWorkflow": {
+    "stages": ["proposed", "documented", "deprecated", "removal-ready", "removed"],
+    "minimumRemovalGenerationDelay": 1,
+    "minimumRequirements": [
+      "public-intent packages must document deprecations in contracts, specs, metadata, or package README surfaces plus release notes",
+      "breaking removals must name a successor, migration path, or explicit non-replacement decision",
+      "removal may not happen in the same documented generation tranche that first announced deprecation unless the surface never had public intent"
+    ]
+  },
+  "packages": [
+    {
+      "name": "@pug/tokens",
+      "channel": "internal",
+      "publicIntent": false,
+      "changeControl": "artifact-backed",
+      "requiresReleaseNotes": false,
+      "requiresDeprecationRecord": false,
+      "removalGate": "owner-directed-with-doc-update"
+    },
+    {
+      "name": "@pug/svelte-tokens",
+      "channel": "preview",
+      "publicIntent": true,
+      "changeControl": "artifact-backed",
+      "requiresReleaseNotes": true,
+      "requiresDeprecationRecord": true,
+      "removalGate": "successor-and-generation-delay"
+    },
+    {
+      "name": "@pug/svelte-primitives",
+      "channel": "preview",
+      "publicIntent": true,
+      "changeControl": "contract-backed",
+      "requiresReleaseNotes": true,
+      "requiresDeprecationRecord": true,
+      "removalGate": "successor-and-generation-delay"
+    },
+    {
+      "name": "@pug/svelte-composites",
+      "channel": "preview",
+      "publicIntent": true,
+      "changeControl": "contract-backed",
+      "requiresReleaseNotes": true,
+      "requiresDeprecationRecord": true,
+      "removalGate": "successor-and-generation-delay"
+    },
+    {
+      "name": "@pug/svelte-workstation",
+      "channel": "preview",
+      "publicIntent": true,
+      "changeControl": "contract-backed",
+      "requiresReleaseNotes": true,
+      "requiresDeprecationRecord": true,
+      "removalGate": "successor-and-generation-delay"
+    },
+    {
+      "name": "pug-gpui-tokens",
+      "channel": "preview",
+      "publicIntent": true,
+      "changeControl": "artifact-backed",
+      "requiresReleaseNotes": true,
+      "requiresDeprecationRecord": true,
+      "removalGate": "successor-and-generation-delay"
+    },
+    {
+      "name": "@pug/bridge-underlay",
+      "channel": "internal",
+      "publicIntent": false,
+      "changeControl": "proof-backed",
+      "requiresReleaseNotes": false,
+      "requiresDeprecationRecord": false,
+      "removalGate": "bridge-proof-preserving"
+    },
+    {
+      "name": "@pug/svelte-preview",
+      "channel": "internal",
+      "publicIntent": false,
+      "changeControl": "tooling-owned",
+      "requiresReleaseNotes": false,
+      "requiresDeprecationRecord": false,
+      "removalGate": "owner-directed-with-doc-update"
+    }
+  ]
+}

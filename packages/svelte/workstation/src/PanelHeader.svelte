@@ -40,8 +40,8 @@
     grid-template-columns: auto minmax(0, 1fr) auto;
     gap: var(--pug-space-inline-md);
     align-items: center;
-    padding: 10px 12px;
-    border-bottom: 1px solid var(--pug-color-border-subtle);
+    padding: 0.625rem 0.75rem;
+    border-bottom: 0.0625rem solid var(--pug-color-border-subtle);
     background: color-mix(in srgb, var(--pug-color-background-panel) 94%, transparent);
   }
 
@@ -59,7 +59,7 @@
   }
 
   .panel-header__identity strong {
-    font-size: 14px;
+    font-size: 0.875rem;
     line-height: 1.2;
   }
 
@@ -67,7 +67,7 @@
     justify-content: flex-end;
   }
 
-  @media (max-width: 720px) {
+  @media (max-width: 45rem) {
     .panel-header {
       grid-template-columns: 1fr;
     }

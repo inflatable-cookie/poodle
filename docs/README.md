@@ -50,5 +50,7 @@ metadata, and serialized layout inspection.
 
 ## Next Task
 
-Open `docs/roadmaps/g03/001-token-evolution-migration-and-compatibility-policy.md`
-and begin `g03` with explicit migration and compatibility policy.
+`g03` is complete. If a future generation is opened, begin from
+`docs/roadmaps/g03/014-generation-closeout-and-next-program-cutover.md` and
+the `g03` closeout artifacts rather than reopening the now-explicit baselines
+by implication.

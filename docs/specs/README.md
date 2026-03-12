@@ -1,7 +1,7 @@
 # Specs
 
 Status: active
-Updated: 2026-03-11
+Updated: 2026-03-12
 
 Specs will hold normative definitions once Pug starts freezing token schemas,
 component contracts, parity rules, and emitted artifact shapes.
@@ -39,9 +39,33 @@ component contracts, parity rules, and emitted artifact shapes.
 - `021-public-package-api-stability-and-parity-debt-baseline.md`
 - `022-packaging-versioning-and-release-channel-rules.md`
 - `023-svelte-visual-hierarchy-and-contrast-baseline.md`
+- `024-token-evolution-migration-and-compatibility-policy.md`
+- `025-parity-automation-and-harness-boundary.md`
+- `026-appearance-recipes-and-downstream-override-strategy.md`
+- `027-docs-completeness-contract-linting-and-publish-pipeline.md`
+- `028-primitive-baseline-and-bits-aligned-surface.md`
+- `029-advanced-primitive-promotion-and-substrate-mapping.md`
+- `030-date-selection-and-calendar-foundation-baseline.md`
+- `031-time-aware-date-foundation-boundary.md`
+- `032-hover-card-rating-and-navigation-menu-ownership.md`
+- `033-navigation-menu-and-menubar-foundation-baseline.md`
+- `034-range-plus-time-foundation-boundary.md`
+- `035-timezone-aware-date-foundation-boundary.md`
+- `036-command-and-data-foundation-boundary.md`
+- `037-disclosure-foundation-boundary.md`
+- `038-performance-render-cost-and-memory-hardening-baseline.md`
+- `039-extension-sdk-composition-guidance-and-starter-package-baseline.md`
+- `040-underlay-bridge-zero-leak-adoption-proof-baseline.md`
+- `041-loophole-foundation-adoption-and-daw-extension-boundary.md`
+- `042-gpui-multi-app-validation-target-matrix.md`
+- `043-accessibility-audit-and-cross-runtime-delta-handling-baseline.md`
+- `044-deprecation-change-control-and-release-channel-operations.md`
+- `045-ecosystem-acceptance-and-long-tail-regression-baseline.md`
+- `046-reference-apps-onboarding-and-public-example-baseline.md`
+- `047-generation-closeout-and-next-program-posture.md`
 
 ## Next Task
 
-Use the full spec set while executing `g03.001`, especially while migration,
-compatibility policy, and the stabilized Svelte visual target are being frozen
-before downstream adoption.
+`g03` is complete. Use the full spec set as the cutover frame for any future
+generation instead of reopening release, accessibility, acceptance, or
+adoption-baseline work implicitly.

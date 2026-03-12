@@ -41,7 +41,7 @@
     "panel": {
       "header": {
         "$type": "dimension",
-        "$value": "44px"
+        "$value": "2.75rem"
       }
     }
   }

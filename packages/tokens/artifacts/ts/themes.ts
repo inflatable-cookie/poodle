@@ -5,22 +5,22 @@ export const themes = {
     "selector": "[data-theme=\"dark\"]",
     "description": "Dark neutral application theme.",
     "overrides": {
-      "semantic.color.background.canvas": "#0b0f14",
-      "semantic.color.background.surface": "#11161d",
-      "semantic.color.background.panel": "#1a212c",
-      "semantic.color.background.elevated": "#1a212c",
-      "semantic.color.background.overlay": "rgba(11, 15, 20, 0.76)",
-      "semantic.color.text.primary": "#e7eef5",
-      "semantic.color.text.secondary": "#75869b",
-      "semantic.color.text.inverse": "#131a22",
-      "semantic.color.border.subtle": "rgba(215, 221, 230, 0.12)",
-      "semantic.color.border.default": "rgba(215, 221, 230, 0.24)",
-      "semantic.color.border.strong": "rgba(215, 221, 230, 0.48)",
-      "semantic.color.accent.base": "#57a7ff",
-      "semantic.color.accent.hover": "#2d86f3",
-      "semantic.color.accent.focusRing": "#57a7ff",
-      "semantic.color.icon.primary": "#e7eef5",
-      "semantic.color.icon.muted": "#75869b"
+      "semantic.color.background.canvas": "#0e1012",
+      "semantic.color.background.surface": "#15181b",
+      "semantic.color.background.panel": "#1b1f23",
+      "semantic.color.background.elevated": "#20252a",
+      "semantic.color.background.overlay": "rgba(8, 10, 13, 0.78)",
+      "semantic.color.text.primary": "#eef2f6",
+      "semantic.color.text.secondary": "#99a4b0",
+      "semantic.color.text.inverse": "#161a1f",
+      "semantic.color.border.subtle": "rgba(227, 232, 238, 0.12)",
+      "semantic.color.border.default": "rgba(227, 232, 238, 0.22)",
+      "semantic.color.border.strong": "rgba(227, 232, 238, 0.42)",
+      "semantic.color.accent.base": "#f0b24d",
+      "semantic.color.accent.hover": "#ffca73",
+      "semantic.color.accent.focusRing": "#ffca73",
+      "semantic.color.icon.primary": "#eef2f6",
+      "semantic.color.icon.muted": "#99a4b0"
     }
   },
   "light": {
@@ -43,25 +43,25 @@ export const themes = {
     "selector": "[data-theme=\"loophole-studio\"]",
     "description": "Downstream workstation-oriented theme tuned for Aura and Spark shell surfaces.",
     "overrides": {
-      "semantic.color.background.canvas": "#090d12",
-      "semantic.color.background.surface": "#101720",
-      "semantic.color.background.panel": "#151d28",
-      "semantic.color.background.elevated": "#1a2330",
-      "semantic.color.background.overlay": "rgba(4, 6, 10, 0.82)",
-      "semantic.color.text.primary": "#edf3fb",
-      "semantic.color.text.secondary": "#9fb0c4",
-      "semantic.color.text.inverse": "#11161d",
-      "semantic.color.border.subtle": "rgba(159, 176, 196, 0.14)",
-      "semantic.color.border.default": "rgba(159, 176, 196, 0.24)",
-      "semantic.color.border.strong": "rgba(159, 176, 196, 0.44)",
-      "semantic.color.accent.base": "#57a7ff",
-      "semantic.color.accent.hover": "#7dc4ff",
-      "semantic.color.accent.focusRing": "#7dc4ff",
-      "semantic.color.status.success": "#37c78f",
+      "semantic.color.background.canvas": "#111111",
+      "semantic.color.background.surface": "#181818",
+      "semantic.color.background.panel": "#202020",
+      "semantic.color.background.elevated": "#292929",
+      "semantic.color.background.overlay": "rgba(8, 8, 8, 0.82)",
+      "semantic.color.text.primary": "#efefef",
+      "semantic.color.text.secondary": "#a6a6a6",
+      "semantic.color.text.inverse": "#151515",
+      "semantic.color.border.subtle": "rgba(198, 198, 198, 0.14)",
+      "semantic.color.border.default": "rgba(198, 198, 198, 0.24)",
+      "semantic.color.border.strong": "rgba(198, 198, 198, 0.42)",
+      "semantic.color.accent.base": "#97d14d",
+      "semantic.color.accent.hover": "#b5e36f",
+      "semantic.color.accent.focusRing": "#b5e36f",
+      "semantic.color.status.success": "#97d14d",
       "semantic.color.status.warning": "#f0ba55",
       "semantic.color.status.danger": "#ef7c72",
-      "semantic.color.icon.primary": "#edf3fb",
-      "semantic.color.icon.muted": "#9fb0c4"
+      "semantic.color.icon.primary": "#efefef",
+      "semantic.color.icon.muted": "#a6a6a6"
     }
   }
 } as const;
@@ -71,28 +71,28 @@ export const densityModes = {
     "selector": "[data-density=\"comfortable\"]",
     "description": "Relaxed spacing for content-heavy product layouts.",
     "overrides": {
-      "semantic.space.panel.x": "20px",
-      "semantic.space.panel.y": "16px",
-      "semantic.space.control.x": "16px",
-      "semantic.space.control.y": "12px",
-      "semantic.space.stack.md": "16px",
-      "semantic.space.stack.lg": "24px",
-      "semantic.size.control.height": "44px",
-      "semantic.size.panel.header": "44px"
+      "semantic.space.panel.x": "1.25rem",
+      "semantic.space.panel.y": "1rem",
+      "semantic.space.control.x": "1rem",
+      "semantic.space.control.y": "0.75rem",
+      "semantic.space.stack.md": "1rem",
+      "semantic.space.stack.lg": "1.5rem",
+      "semantic.size.control.height": "2.75rem",
+      "semantic.size.panel.header": "2.75rem"
     }
   },
   "compact": {
     "selector": "[data-density=\"compact\"]",
     "description": "Tighter spacing for dense workstation layouts.",
     "overrides": {
-      "semantic.space.panel.x": "12px",
-      "semantic.space.panel.y": "8px",
-      "semantic.space.control.x": "8px",
-      "semantic.space.control.y": "4px",
-      "semantic.space.stack.md": "8px",
-      "semantic.space.stack.lg": "16px",
-      "semantic.size.control.height": "28px",
-      "semantic.size.panel.header": "36px"
+      "semantic.space.panel.x": "0.75rem",
+      "semantic.space.panel.y": "0.5rem",
+      "semantic.space.control.x": "0.5rem",
+      "semantic.space.control.y": "0.25rem",
+      "semantic.space.stack.md": "0.5rem",
+      "semantic.space.stack.lg": "1rem",
+      "semantic.size.control.height": "1.75rem",
+      "semantic.size.panel.header": "2.25rem"
     }
   }
 } as const;
@@ -102,27 +102,27 @@ export const controlSizes = {
     "selector": "[data-control-size=\"lg\"]",
     "description": "Large control size overlay.",
     "overrides": {
-      "semantic.size.control.height": "44px",
-      "semantic.size.control.minWidth": "112px",
-      "semantic.size.icon.default": "20px"
+      "semantic.size.control.height": "2.75rem",
+      "semantic.size.control.minWidth": "7rem",
+      "semantic.size.icon.default": "1.25rem"
     }
   },
   "md": {
     "selector": "[data-control-size=\"md\"]",
     "description": "Default control size overlay.",
     "overrides": {
-      "semantic.size.control.height": "36px",
-      "semantic.size.control.minWidth": "96px",
-      "semantic.size.icon.default": "16px"
+      "semantic.size.control.height": "2.25rem",
+      "semantic.size.control.minWidth": "6rem",
+      "semantic.size.icon.default": "1rem"
     }
   },
   "sm": {
     "selector": "[data-control-size=\"sm\"]",
     "description": "Small control size overlay.",
     "overrides": {
-      "semantic.size.control.height": "28px",
-      "semantic.size.control.minWidth": "84px",
-      "semantic.size.icon.default": "12px"
+      "semantic.size.control.height": "1.75rem",
+      "semantic.size.control.minWidth": "5.25rem",
+      "semantic.size.icon.default": "0.75rem"
     }
   }
 } as const;

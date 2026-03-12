@@ -39,6 +39,6 @@ and data components.
 
 ## Next Task
 
-Use this package surface while executing `g02.016`, confirming which composite
-entry points are stable enough to carry into the first downstream-adoption
-generation.
+Use this package surface while following the direct-consumer and workstation
+onboarding lanes, keeping workflow orchestration host-owned and treating these
+composites as reusable shells rather than app templates.

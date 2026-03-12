@@ -10,7 +10,10 @@
   },
   "scripts": {
     "dev": "vite",
-    "build": "vite build"
+    "build": "vite build",
+    "docs:lint": "bun scripts/lint-docs.ts",
+    "parity:report": "bun scripts/build-parity-report.ts",
+    "accessibility:report": "bun scripts/build-accessibility-report.ts"
   },
   "dependencies": {
     "@pug/svelte-composites": "workspace:*",

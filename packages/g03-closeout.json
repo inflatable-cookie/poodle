@@ -1,0 +1,107 @@
+{
+  "generation": "g03",
+  "status": "completed",
+  "completedMilestones": [
+    "g03.001",
+    "g03.002",
+    "g03.003",
+    "g03.004",
+    "g03.005",
+    "g03.006",
+    "g03.007",
+    "g03.008",
+    "g03.009",
+    "g03.010",
+    "g03.011",
+    "g03.012",
+    "g03.013",
+    "g03.014"
+  ],
+  "stableSurfaces": [
+    {
+      "id": "tokens-and-artifacts",
+      "label": "Canonical tokens and generated artifacts",
+      "evidencePaths": [
+        "packages/tokens/schema/",
+        "packages/tokens/artifacts/",
+        "packages/svelte/tokens/",
+        "packages/gpui/tokens/"
+      ]
+    },
+    {
+      "id": "contract-backed-svelte-surface",
+      "label": "Contract-backed Svelte package family",
+      "evidencePaths": [
+        "packages/svelte/primitives/",
+        "packages/svelte/composites/",
+        "packages/svelte/workstation/",
+        "docs/contracts/"
+      ]
+    },
+    {
+      "id": "docs-and-preview-evidence",
+      "label": "Docs, preview, parity, accessibility, and publish evidence",
+      "evidencePaths": [
+        "packages/svelte/preview/",
+        "packages/svelte/preview/artifacts/parity-report.json",
+        "packages/svelte/preview/artifacts/accessibility-report.json",
+        "docs/specs/025-parity-automation-and-harness-boundary.md",
+        "docs/specs/027-docs-completeness-contract-linting-and-publish-pipeline.md"
+      ]
+    },
+    {
+      "id": "adoption-boundaries",
+      "label": "Underlay, Loophole, and extension-boundary proofs",
+      "evidencePaths": [
+        "packages/bridges/underlay/ts/zero-leak-proof.ts",
+        "packages/svelte/workstation/loophole-foundation-proof.json",
+        "docs/specs/039-extension-sdk-composition-guidance-and-starter-package-baseline.md",
+        "docs/specs/040-underlay-bridge-zero-leak-adoption-proof-baseline.md",
+        "docs/specs/041-loophole-foundation-adoption-and-daw-extension-boundary.md"
+      ]
+    },
+    {
+      "id": "operations-and-adoption-guidance",
+      "label": "Release operations, ecosystem acceptance, and onboarding guidance",
+      "evidencePaths": [
+        "packages/release-manifest.json",
+        "packages/release-operations.json",
+        "packages/ecosystem-acceptance.json",
+        "packages/reference-apps.json",
+        "docs/specs/044-deprecation-change-control-and-release-channel-operations.md",
+        "docs/specs/045-ecosystem-acceptance-and-long-tail-regression-baseline.md",
+        "docs/specs/046-reference-apps-onboarding-and-public-example-baseline.md"
+      ]
+    }
+  ],
+  "carryForwardGaps": [
+    {
+      "id": "gpui-component-parity",
+      "summary": "GPUI remains mostly token-level and matrix-level evidence rather than shipped component packages and runnable parity.",
+      "nextProgramReason": "Cross-runtime component evidence belongs in a follow-on program, not implied by g03 docs and matrices."
+    },
+    {
+      "id": "published-docs-platform",
+      "summary": "The preview is a strong internal docs and review surface, but it is not yet a versioned public docs platform with external release notes or hosted documentation.",
+      "nextProgramReason": "Publishing and public-facing docs product work should be planned deliberately instead of inferred from the internal preview."
+    },
+    {
+      "id": "downstream-runnable-reference-apps",
+      "summary": "Reference shapes and onboarding lanes are explicit, but the repo does not yet ship multiple polished runnable starter or reference app repositories.",
+      "nextProgramReason": "A future program should decide which reference apps are worth building as maintained assets."
+    },
+    {
+      "id": "deeper-automation",
+      "summary": "Route-based review, linting, and artifact generation are strong, but screenshot regression, native accessibility proof, and broader acceptance automation are still absent.",
+      "nextProgramReason": "Additional automation should follow explicit evidence needs rather than speculative tooling."
+    }
+  ],
+  "nextProgramPosture": {
+    "status": "not-yet-opened",
+    "guidance": [
+      "Do not reopen g03 hardening baselines as vague debt.",
+      "Open the next generation only once its goals are narrower than 'do more hardening' and can name concrete runtime or publishing outcomes.",
+      "Treat the g03 artifacts and specs as the cutover frame for any next-program planning."
+    ]
+  }
+}

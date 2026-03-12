@@ -10,7 +10,8 @@
     "./runtime": "./src/runtime.ts",
     "./css": "./src/css.ts",
     "./themes": "./src/themes.ts",
-    "./metadata": "./src/metadata.ts"
+    "./metadata": "./src/metadata.ts",
+    "./units": "./src/units.ts"
   },
   "files": [
     "src",

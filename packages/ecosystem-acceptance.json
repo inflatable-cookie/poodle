@@ -1,0 +1,213 @@
+{
+  "suites": [
+    {
+      "id": "preview-docs-harness",
+      "label": "Svelte preview docs harness",
+      "consumerShape": "browser review surface for direct Pug evaluation",
+      "runtime": "browser",
+      "adoptionModel": "internal acceptance harness",
+      "status": "baseline",
+      "coveredPackages": [
+        "@pug/svelte-tokens",
+        "@pug/svelte-primitives",
+        "@pug/svelte-composites",
+        "@pug/svelte-workstation",
+        "@pug/svelte-preview"
+      ],
+      "evidenceArtifacts": [
+        "packages/svelte/preview/artifacts/parity-report.json",
+        "packages/svelte/preview/artifacts/accessibility-report.json",
+        "packages/svelte/preview/README.md"
+      ],
+      "regressionClasses": [
+        "tokens-and-themes",
+        "package-surface-and-contracts",
+        "preview-routes-and-docs-build",
+        "accessibility-and-keyboard",
+        "release-metadata-and-change-control"
+      ],
+      "requiredChecks": [
+        "bun run docs:lint",
+        "bun run parity:report",
+        "bun run accessibility:report",
+        "bun run docs:build"
+      ],
+      "blockers": [
+        "This harness is route-based review evidence, not screenshot-regression or GPUI runtime proof.",
+        "It does not prove downstream host integration beyond the preview shell."
+      ]
+    },
+    {
+      "id": "underlay-bridge-adoption",
+      "label": "Underlay bridge-mediated adoption",
+      "consumerShape": "bridge-owned wrapper adoption inside an existing downstream app stack",
+      "runtime": "web",
+      "adoptionModel": "bridge-mediated",
+      "status": "proof-backed",
+      "coveredPackages": [
+        "@pug/bridge-underlay",
+        "@pug/svelte-tokens",
+        "@pug/svelte-primitives",
+        "@pug/svelte-composites"
+      ],
+      "evidenceArtifacts": [
+        "packages/bridges/underlay/ts/zero-leak-proof.ts",
+        "packages/bridges/underlay/README.md",
+        "docs/specs/040-underlay-bridge-zero-leak-adoption-proof-baseline.md"
+      ],
+      "regressionClasses": [
+        "downstream-boundaries-and-ownership",
+        "tokens-and-themes",
+        "accessibility-and-keyboard",
+        "release-metadata-and-change-control"
+      ],
+      "requiredChecks": [
+        "bun run docs:lint",
+        "bun run docs:build"
+      ],
+      "blockers": [
+        "Real downstream wrapper translation and assistive-technology evidence still belong to Underlay rollout work."
+      ]
+    },
+    {
+      "id": "loophole-foundation-adoption",
+      "label": "Loophole foundation adoption",
+      "consumerShape": "direct downstream Svelte adoption on top of generic workstation foundations",
+      "runtime": "web or desktop shell",
+      "adoptionModel": "direct package consumption",
+      "status": "proof-backed",
+      "coveredPackages": [
+        "@pug/svelte-tokens",
+        "@pug/svelte-primitives",
+        "@pug/svelte-composites",
+        "@pug/svelte-workstation"
+      ],
+      "evidenceArtifacts": [
+        "packages/svelte/workstation/loophole-foundation-proof.json",
+        "packages/svelte/workstation/README.md",
+        "docs/specs/041-loophole-foundation-adoption-and-daw-extension-boundary.md"
+      ],
+      "regressionClasses": [
+        "downstream-boundaries-and-ownership",
+        "package-surface-and-contracts",
+        "accessibility-and-keyboard",
+        "release-metadata-and-change-control"
+      ],
+      "requiredChecks": [
+        "bun run docs:lint",
+        "bun run docs:build"
+      ],
+      "blockers": [
+        "DAW-specific widgets and runtime behavior remain downstream-owned and therefore outside Pug acceptance proof."
+      ]
+    },
+    {
+      "id": "gpui-target-matrix",
+      "label": "GPUI multi-app validation target matrix",
+      "consumerShape": "native app validation targets rather than runnable downstream adoption",
+      "runtime": "gpui-native",
+      "adoptionModel": "matrix-only",
+      "status": "matrix-only",
+      "coveredPackages": [
+        "pug-gpui-tokens"
+      ],
+      "evidenceArtifacts": [
+        "packages/gpui/tokens/multi-app-validation.json",
+        "packages/gpui/tokens/README.md",
+        "docs/specs/042-gpui-multi-app-validation-target-matrix.md"
+      ],
+      "regressionClasses": [
+        "runtime-specific-gpui-assumptions",
+        "tokens-and-themes",
+        "accessibility-and-keyboard",
+        "downstream-boundaries-and-ownership"
+      ],
+      "requiredChecks": [
+        "bun run docs:lint",
+        "bun run docs:build"
+      ],
+      "blockers": [
+        "The repo still lacks runnable GPUI component packages and native acceptance suites beyond generated token bindings.",
+        "This matrix is explicit validation pressure, not runnable production readiness proof."
+      ]
+    }
+  ],
+  "regressionClasses": [
+    {
+      "id": "tokens-and-themes",
+      "label": "Tokens and theme emission",
+      "scope": "schema, generated artifacts, theme posture, and compatibility metadata",
+      "primaryEvidence": [
+        "packages/tokens/schema/",
+        "packages/tokens/artifacts/",
+        "packages/svelte/tokens/"
+      ]
+    },
+    {
+      "id": "package-surface-and-contracts",
+      "label": "Package surface and contract integrity",
+      "scope": "public package exports, contract inventories, and README alignment",
+      "primaryEvidence": [
+        "docs/contracts/",
+        "packages/svelte/primitives/",
+        "packages/svelte/composites/",
+        "packages/svelte/workstation/"
+      ]
+    },
+    {
+      "id": "preview-routes-and-docs-build",
+      "label": "Preview routes and docs build",
+      "scope": "route-based review coverage, generated reports, and preview build posture",
+      "primaryEvidence": [
+        "packages/svelte/preview/src/parity.ts",
+        "packages/svelte/preview/src/accessibility.ts",
+        "packages/svelte/preview/artifacts/"
+      ]
+    },
+    {
+      "id": "accessibility-and-keyboard",
+      "label": "Accessibility and keyboard posture",
+      "scope": "focus, keyboard, announcement, and cross-runtime accessibility deltas",
+      "primaryEvidence": [
+        "docs/specs/003-accessibility-and-assistive-technology-baseline.md",
+        "docs/specs/043-accessibility-audit-and-cross-runtime-delta-handling-baseline.md",
+        "packages/svelte/preview/artifacts/accessibility-report.json"
+      ]
+    },
+    {
+      "id": "downstream-boundaries-and-ownership",
+      "label": "Downstream boundaries and ownership",
+      "scope": "bridge boundaries, extension ownership, and app-specific surface isolation",
+      "primaryEvidence": [
+        "packages/bridges/underlay/ts/zero-leak-proof.ts",
+        "packages/svelte/workstation/loophole-foundation-proof.json",
+        "docs/specs/039-extension-sdk-composition-guidance-and-starter-package-baseline.md"
+      ]
+    },
+    {
+      "id": "release-metadata-and-change-control",
+      "label": "Release metadata and change control",
+      "scope": "release classification, change classes, deprecation workflow, and per-package metadata",
+      "primaryEvidence": [
+        "packages/release-manifest.json",
+        "packages/release-operations.json",
+        "docs/specs/044-deprecation-change-control-and-release-channel-operations.md"
+      ]
+    },
+    {
+      "id": "runtime-specific-gpui-assumptions",
+      "label": "Runtime-specific GPUI assumptions",
+      "scope": "native app validation pressure, GPUI-specific blockers, and non-browser evidence gaps",
+      "primaryEvidence": [
+        "packages/gpui/tokens/multi-app-validation.json",
+        "docs/specs/042-gpui-multi-app-validation-target-matrix.md"
+      ]
+    }
+  ],
+  "ecosystemReadinessGate": [
+    "Preview docs harness remains buildable and machine-checked.",
+    "Underlay bridge and Loophole adoption proofs remain explicit and internally coherent.",
+    "GPUI validation remains honest about matrix-only versus runnable evidence.",
+    "Accessibility, release operations, and package-surface checks stay aligned with the acceptance suites they support."
+  ]
+}

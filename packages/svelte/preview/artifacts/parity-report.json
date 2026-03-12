@@ -1,0 +1,1777 @@
+{
+  "generatedAt": "2026-03-12T20:50:33.726Z",
+  "artifact": "packages/svelte/preview/artifacts/parity-report.json",
+  "previewBasePath": "/",
+  "automatedBoundary": [
+    "catalog registration and section-to-family coverage",
+    "stable preview route generation for repeat review",
+    "package and contract provenance attachment",
+    "token overlay mode coverage at the route-manifest level"
+  ],
+  "manualBoundary": [
+    "final visual acceptance and hierarchy judgment",
+    "assistive technology narration quality",
+    "GPUI runtime parity review until a runnable GPUI harness exists",
+    "interaction nuance such as drag feel, resize feel, and motion quality"
+  ],
+  "summary": {
+    "sectionCount": 12,
+    "familyCount": 4,
+    "contractCoverage": {
+      "automated": 12
+    },
+    "visualCoverage": {
+      "hybrid": 12
+    },
+    "interactionCoverage": {
+      "manual": 5,
+      "hybrid": 6,
+      "not-applicable": 1
+    }
+  },
+  "packageSurfaceCoverage": {
+    "summary": [
+      {
+        "packageName": "@pug/svelte-primitives",
+        "exportCount": 63,
+        "componentCount": 63,
+        "helperCount": 0,
+        "previewedCount": 14,
+        "contractOnlyCount": 49
+      },
+      {
+        "packageName": "@pug/svelte-composites",
+        "exportCount": 20,
+        "componentCount": 20,
+        "helperCount": 0,
+        "previewedCount": 18,
+        "contractOnlyCount": 2
+      },
+      {
+        "packageName": "@pug/svelte-workstation",
+        "exportCount": 14,
+        "componentCount": 12,
+        "helperCount": 2,
+        "previewedCount": 12,
+        "contractOnlyCount": 2
+      }
+    ],
+    "exports": [
+      {
+        "packageName": "@pug/svelte-composites",
+        "exportName": "Breadcrumbs",
+        "kind": "component",
+        "status": "previewed",
+        "note": "Detail suite exercises readonly hierarchy, navigation, and card summaries.",
+        "sectionIds": [
+          "detail-suite"
+        ],
+        "sectionTitles": [
+          "Detail display, cards, headers, and navigation"
+        ]
+      },
+      {
+        "packageName": "@pug/svelte-composites",
+        "exportName": "BulkActionBar",
+        "kind": "component",
+        "status": "previewed",
+        "note": "Table suite exercises structured data, selection, and pagination posture.",
+        "sectionIds": [
+          "table-suite"
+        ],
+        "sectionTitles": [
+          "Selection, sorting, and bulk actions"
+        ]
+      },
+      {
+        "packageName": "@pug/svelte-composites",
+        "exportName": "Card",
+        "kind": "component",
+        "status": "previewed",
+        "note": "Detail suite exercises readonly hierarchy, navigation, and card summaries.",
+        "sectionIds": [
+          "detail-suite"
+        ],
+        "sectionTitles": [
+          "Detail display, cards, headers, and navigation"
+        ]
+      },
+      {
+        "packageName": "@pug/svelte-composites",
+        "exportName": "DataTable",
+        "kind": "component",
+        "status": "previewed",
+        "note": "Table suite exercises structured data, selection, and pagination posture.",
+        "sectionIds": [
+          "table-suite"
+        ],
+        "sectionTitles": [
+          "Selection, sorting, and bulk actions"
+        ]
+      },
+      {
+        "packageName": "@pug/svelte-composites",
+        "exportName": "DetailRow",
+        "kind": "component",
+        "status": "previewed",
+        "note": "Detail suite exercises readonly hierarchy, navigation, and card summaries.",
+        "sectionIds": [
+          "detail-suite"
+        ],
+        "sectionTitles": [
+          "Detail display, cards, headers, and navigation"
+        ]
+      },
+      {
+        "packageName": "@pug/svelte-composites",
+        "exportName": "DetailSection",
+        "kind": "component",
+        "status": "previewed",
+        "note": "Detail suite exercises readonly hierarchy, navigation, and card summaries.",
+        "sectionIds": [
+          "detail-suite"
+        ],
+        "sectionTitles": [
+          "Detail display, cards, headers, and navigation"
+        ]
+      },
+      {
+        "packageName": "@pug/svelte-composites",
+        "exportName": "DetailShell",
+        "kind": "component",
+        "status": "previewed",
+        "note": "Detail suite exercises readonly hierarchy, navigation, and card summaries.",
+        "sectionIds": [
+          "detail-suite"
+        ],
+        "sectionTitles": [
+          "Detail display, cards, headers, and navigation"
+        ]
+      },
+      {
+        "packageName": "@pug/svelte-composites",
+        "exportName": "EmbedShell",
+        "kind": "component",
+        "status": "previewed",
+        "note": "Media suite exercises thumbnail framing, preview fallback, and embed posture.",
+        "sectionIds": [
+          "media-suite"
+        ],
+        "sectionTitles": [
+          "Preview framing, embeds, and fallback posture"
+        ]
+      },
+      {
+        "packageName": "@pug/svelte-composites",
+        "exportName": "EmptyState",
+        "kind": "component",
+        "status": "previewed",
+        "note": "Browse suite exercises list, grid, and empty-state surface posture.",
+        "sectionIds": [
+          "browse-suite"
+        ],
+        "sectionTitles": [
+          "Lists, grids, filters, and search depth"
+        ]
+      },
+      {
+        "packageName": "@pug/svelte-composites",
+        "exportName": "FilterToolbar",
+        "kind": "component",
+        "status": "previewed",
+        "note": "Table suite exercises structured data, selection, and pagination posture.",
+        "sectionIds": [
+          "table-suite"
+        ],
+        "sectionTitles": [
+          "Selection, sorting, and bulk actions"
+        ]
+      },
+      {
+        "packageName": "@pug/svelte-composites",
+        "exportName": "GridShell",
+        "kind": "component",
+        "status": "previewed",
+        "note": "Browse suite exercises list, grid, and empty-state surface posture.",
+        "sectionIds": [
+          "browse-suite"
+        ],
+        "sectionTitles": [
+          "Lists, grids, filters, and search depth"
+        ]
+      },
+      {
+        "packageName": "@pug/svelte-composites",
+        "exportName": "ListShell",
+        "kind": "component",
+        "status": "previewed",
+        "note": "Browse suite exercises list, grid, and empty-state surface posture.",
+        "sectionIds": [
+          "browse-suite"
+        ],
+        "sectionTitles": [
+          "Lists, grids, filters, and search depth"
+        ]
+      },
+      {
+        "packageName": "@pug/svelte-composites",
+        "exportName": "MediaPreview",
+        "kind": "component",
+        "status": "previewed",
+        "note": "Media suite exercises thumbnail framing, preview fallback, and embed posture.",
+        "sectionIds": [
+          "media-suite"
+        ],
+        "sectionTitles": [
+          "Preview framing, embeds, and fallback posture"
+        ]
+      },
+      {
+        "packageName": "@pug/svelte-composites",
+        "exportName": "MediaThumbnail",
+        "kind": "component",
+        "status": "previewed",
+        "note": "Media suite exercises thumbnail framing, preview fallback, and embed posture.",
+        "sectionIds": [
+          "media-suite"
+        ],
+        "sectionTitles": [
+          "Preview framing, embeds, and fallback posture"
+        ]
+      },
+      {
+        "packageName": "@pug/svelte-composites",
+        "exportName": "PageHeader",
+        "kind": "component",
+        "status": "previewed",
+        "note": "Detail suite exercises readonly hierarchy, navigation, and card summaries.",
+        "sectionIds": [
+          "detail-suite"
+        ],
+        "sectionTitles": [
+          "Detail display, cards, headers, and navigation"
+        ]
+      },
+      {
+        "packageName": "@pug/svelte-composites",
+        "exportName": "PaginationSummary",
+        "kind": "component",
+        "status": "previewed",
+        "note": "Table suite exercises structured data, selection, and pagination posture.",
+        "sectionIds": [
+          "table-suite"
+        ],
+        "sectionTitles": [
+          "Selection, sorting, and bulk actions"
+        ]
+      },
+      {
+        "packageName": "@pug/svelte-composites",
+        "exportName": "PickerShell",
+        "kind": "component",
+        "status": "contract-only",
+        "note": "The composite is public and contract-backed, but the preview currently covers the workflow through adjacent exported shells instead of a direct specimen.",
+        "sectionIds": [],
+        "sectionTitles": []
+      },
+      {
+        "packageName": "@pug/svelte-composites",
+        "exportName": "RelationPicker",
+        "kind": "component",
+        "status": "previewed",
+        "note": "Picker suite exercises relation selection and attach-or-choose flow posture.",
+        "sectionIds": [
+          "picker-suite"
+        ],
+        "sectionTitles": [
+          "Picker, relation, and selection workflows"
+        ]
+      },
+      {
+        "packageName": "@pug/svelte-composites",
+        "exportName": "SelectionSummary",
+        "kind": "component",
+        "status": "contract-only",
+        "note": "The composite is public and contract-backed, but the preview currently covers the workflow through adjacent exported shells instead of a direct specimen.",
+        "sectionIds": [],
+        "sectionTitles": []
+      },
+      {
+        "packageName": "@pug/svelte-composites",
+        "exportName": "ToastStack",
+        "kind": "component",
+        "status": "previewed",
+        "note": "Notification suite exercises transient toast stack posture alongside banner remediation.",
+        "sectionIds": [
+          "notification-suite"
+        ],
+        "sectionTitles": [
+          "Banners, toasts, skeletons, and remediation"
+        ]
+      },
+      {
+        "packageName": "@pug/svelte-primitives",
+        "exportName": "Accordion",
+        "kind": "component",
+        "status": "previewed",
+        "note": "The preview shell and catalog hub now exercise foundational disclosure, control, and chip primitives directly instead of custom shell-only controls.",
+        "sectionIds": [
+          "catalog-hub"
+        ],
+        "sectionTitles": [
+          "Catalog hub"
+        ]
+      },
+      {
+        "packageName": "@pug/svelte-primitives",
+        "exportName": "Badge",
+        "kind": "component",
+        "status": "contract-only",
+        "note": "The primitive is exported and contract-backed, but the preview does not yet isolate a dedicated review specimen for it.",
+        "sectionIds": [],
+        "sectionTitles": []
+      },
+      {
+        "packageName": "@pug/svelte-primitives",
+        "exportName": "Banner",
+        "kind": "component",
+        "status": "previewed",
+        "note": "Notification suite exercises persistent and loading state posture.",
+        "sectionIds": [
+          "notification-suite"
+        ],
+        "sectionTitles": [
+          "Banners, toasts, skeletons, and remediation"
+        ]
+      },
+      {
+        "packageName": "@pug/svelte-primitives",
+        "exportName": "Box",
+        "kind": "component",
+        "status": "contract-only",
+        "note": "The primitive is exported and contract-backed, but the preview does not yet isolate a dedicated review specimen for it.",
+        "sectionIds": [],
+        "sectionTitles": []
+      },
+      {
+        "packageName": "@pug/svelte-primitives",
+        "exportName": "Button",
+        "kind": "component",
+        "status": "previewed",
+        "note": "The preview shell and catalog hub now exercise foundational disclosure, control, and chip primitives directly instead of custom shell-only controls.",
+        "sectionIds": [
+          "catalog-hub"
+        ],
+        "sectionTitles": [
+          "Catalog hub"
+        ]
+      },
+      {
+        "packageName": "@pug/svelte-primitives",
+        "exportName": "Calendar",
+        "kind": "component",
+        "status": "contract-only",
+        "note": "The primitive is exported and contract-backed, but the preview does not yet isolate a dedicated review specimen for it.",
+        "sectionIds": [],
+        "sectionTitles": []
+      },
+      {
+        "packageName": "@pug/svelte-primitives",
+        "exportName": "Callout",
+        "kind": "component",
+        "status": "contract-only",
+        "note": "The primitive is exported and contract-backed, but the preview does not yet isolate a dedicated review specimen for it.",
+        "sectionIds": [],
+        "sectionTitles": []
+      },
+      {
+        "packageName": "@pug/svelte-primitives",
+        "exportName": "Checkbox",
+        "kind": "component",
+        "status": "previewed",
+        "note": "The preview shell and catalog hub now exercise foundational disclosure, control, and chip primitives directly instead of custom shell-only controls.",
+        "sectionIds": [
+          "catalog-hub"
+        ],
+        "sectionTitles": [
+          "Catalog hub"
+        ]
+      },
+      {
+        "packageName": "@pug/svelte-primitives",
+        "exportName": "Collapsible",
+        "kind": "component",
+        "status": "previewed",
+        "note": "The preview shell and catalog hub now exercise foundational disclosure, control, and chip primitives directly instead of custom shell-only controls.",
+        "sectionIds": [
+          "catalog-hub"
+        ],
+        "sectionTitles": [
+          "Catalog hub"
+        ]
+      },
+      {
+        "packageName": "@pug/svelte-primitives",
+        "exportName": "Combobox",
+        "kind": "component",
+        "status": "contract-only",
+        "note": "The primitive is exported and contract-backed, but the preview does not yet isolate a dedicated review specimen for it.",
+        "sectionIds": [],
+        "sectionTitles": []
+      },
+      {
+        "packageName": "@pug/svelte-primitives",
+        "exportName": "ContextMenu",
+        "kind": "component",
+        "status": "contract-only",
+        "note": "The primitive is exported and contract-backed, but the preview does not yet isolate a dedicated review specimen for it.",
+        "sectionIds": [],
+        "sectionTitles": []
+      },
+      {
+        "packageName": "@pug/svelte-primitives",
+        "exportName": "DatePicker",
+        "kind": "component",
+        "status": "contract-only",
+        "note": "The primitive is exported and contract-backed, but the preview does not yet isolate a dedicated review specimen for it.",
+        "sectionIds": [],
+        "sectionTitles": []
+      },
+      {
+        "packageName": "@pug/svelte-primitives",
+        "exportName": "DateRangePicker",
+        "kind": "component",
+        "status": "contract-only",
+        "note": "The primitive is exported and contract-backed, but the preview does not yet isolate a dedicated review specimen for it.",
+        "sectionIds": [],
+        "sectionTitles": []
+      },
+      {
+        "packageName": "@pug/svelte-primitives",
+        "exportName": "DateTimePicker",
+        "kind": "component",
+        "status": "contract-only",
+        "note": "The primitive is exported and contract-backed, but the preview does not yet isolate a dedicated review specimen for it.",
+        "sectionIds": [],
+        "sectionTitles": []
+      },
+      {
+        "packageName": "@pug/svelte-primitives",
+        "exportName": "DateTimeRangePicker",
+        "kind": "component",
+        "status": "contract-only",
+        "note": "The primitive is exported and contract-backed, but the preview does not yet isolate a dedicated review specimen for it.",
+        "sectionIds": [],
+        "sectionTitles": []
+      },
+      {
+        "packageName": "@pug/svelte-primitives",
+        "exportName": "Dialog",
+        "kind": "component",
+        "status": "contract-only",
+        "note": "The primitive is exported and contract-backed, but the preview does not yet isolate a dedicated review specimen for it.",
+        "sectionIds": [],
+        "sectionTitles": []
+      },
+      {
+        "packageName": "@pug/svelte-primitives",
+        "exportName": "Drawer",
+        "kind": "component",
+        "status": "contract-only",
+        "note": "The primitive is exported and contract-backed, but the preview does not yet isolate a dedicated review specimen for it.",
+        "sectionIds": [],
+        "sectionTitles": []
+      },
+      {
+        "packageName": "@pug/svelte-primitives",
+        "exportName": "EditableLabel",
+        "kind": "component",
+        "status": "contract-only",
+        "note": "The primitive is exported and contract-backed, but the preview does not yet isolate a dedicated review specimen for it.",
+        "sectionIds": [],
+        "sectionTitles": []
+      },
+      {
+        "packageName": "@pug/svelte-primitives",
+        "exportName": "Field",
+        "kind": "component",
+        "status": "previewed",
+        "note": "Form suite exercises the current field, validation, and text-entry baseline.",
+        "sectionIds": [
+          "form-suite"
+        ],
+        "sectionTitles": [
+          "Form baseline and validation posture"
+        ]
+      },
+      {
+        "packageName": "@pug/svelte-primitives",
+        "exportName": "FormActions",
+        "kind": "component",
+        "status": "previewed",
+        "note": "Form suite exercises the current field, validation, and text-entry baseline.",
+        "sectionIds": [
+          "form-suite"
+        ],
+        "sectionTitles": [
+          "Form baseline and validation posture"
+        ]
+      },
+      {
+        "packageName": "@pug/svelte-primitives",
+        "exportName": "Grid",
+        "kind": "component",
+        "status": "contract-only",
+        "note": "The primitive is exported and contract-backed, but the preview does not yet isolate a dedicated review specimen for it.",
+        "sectionIds": [],
+        "sectionTitles": []
+      },
+      {
+        "packageName": "@pug/svelte-primitives",
+        "exportName": "HoverCard",
+        "kind": "component",
+        "status": "contract-only",
+        "note": "The primitive is exported and contract-backed, but the preview does not yet isolate a dedicated review specimen for it.",
+        "sectionIds": [],
+        "sectionTitles": []
+      },
+      {
+        "packageName": "@pug/svelte-primitives",
+        "exportName": "IconButton",
+        "kind": "component",
+        "status": "contract-only",
+        "note": "The primitive is exported and contract-backed, but the preview does not yet isolate a dedicated review specimen for it.",
+        "sectionIds": [],
+        "sectionTitles": []
+      },
+      {
+        "packageName": "@pug/svelte-primitives",
+        "exportName": "Inline",
+        "kind": "component",
+        "status": "contract-only",
+        "note": "The primitive is exported and contract-backed, but the preview does not yet isolate a dedicated review specimen for it.",
+        "sectionIds": [],
+        "sectionTitles": []
+      },
+      {
+        "packageName": "@pug/svelte-primitives",
+        "exportName": "Menu",
+        "kind": "component",
+        "status": "contract-only",
+        "note": "The primitive is exported and contract-backed, but the preview does not yet isolate a dedicated review specimen for it.",
+        "sectionIds": [],
+        "sectionTitles": []
+      },
+      {
+        "packageName": "@pug/svelte-primitives",
+        "exportName": "Menubar",
+        "kind": "component",
+        "status": "contract-only",
+        "note": "The primitive is exported and contract-backed, but the preview does not yet isolate a dedicated review specimen for it.",
+        "sectionIds": [],
+        "sectionTitles": []
+      },
+      {
+        "packageName": "@pug/svelte-primitives",
+        "exportName": "Meter",
+        "kind": "component",
+        "status": "contract-only",
+        "note": "The primitive is exported and contract-backed, but the preview does not yet isolate a dedicated review specimen for it.",
+        "sectionIds": [],
+        "sectionTitles": []
+      },
+      {
+        "packageName": "@pug/svelte-primitives",
+        "exportName": "NavigationMenu",
+        "kind": "component",
+        "status": "contract-only",
+        "note": "The primitive is exported and contract-backed, but the preview does not yet isolate a dedicated review specimen for it.",
+        "sectionIds": [],
+        "sectionTitles": []
+      },
+      {
+        "packageName": "@pug/svelte-primitives",
+        "exportName": "NumberEntry",
+        "kind": "component",
+        "status": "contract-only",
+        "note": "The primitive is exported and contract-backed, but the preview does not yet isolate a dedicated review specimen for it.",
+        "sectionIds": [],
+        "sectionTitles": []
+      },
+      {
+        "packageName": "@pug/svelte-primitives",
+        "exportName": "Pagination",
+        "kind": "component",
+        "status": "contract-only",
+        "note": "The primitive is exported and contract-backed, but the preview does not yet isolate a dedicated review specimen for it.",
+        "sectionIds": [],
+        "sectionTitles": []
+      },
+      {
+        "packageName": "@pug/svelte-primitives",
+        "exportName": "Pill",
+        "kind": "component",
+        "status": "previewed",
+        "note": "The preview shell and catalog hub now exercise foundational disclosure, control, and chip primitives directly instead of custom shell-only controls.",
+        "sectionIds": [
+          "catalog-hub"
+        ],
+        "sectionTitles": [
+          "Catalog hub"
+        ]
+      },
+      {
+        "packageName": "@pug/svelte-primitives",
+        "exportName": "PinInput",
+        "kind": "component",
+        "status": "contract-only",
+        "note": "The primitive is exported and contract-backed, but the preview does not yet isolate a dedicated review specimen for it.",
+        "sectionIds": [],
+        "sectionTitles": []
+      },
+      {
+        "packageName": "@pug/svelte-primitives",
+        "exportName": "Popover",
+        "kind": "component",
+        "status": "contract-only",
+        "note": "The primitive is exported and contract-backed, but the preview does not yet isolate a dedicated review specimen for it.",
+        "sectionIds": [],
+        "sectionTitles": []
+      },
+      {
+        "packageName": "@pug/svelte-primitives",
+        "exportName": "Progress",
+        "kind": "component",
+        "status": "contract-only",
+        "note": "The primitive is exported and contract-backed, but the preview does not yet isolate a dedicated review specimen for it.",
+        "sectionIds": [],
+        "sectionTitles": []
+      },
+      {
+        "packageName": "@pug/svelte-primitives",
+        "exportName": "RadioGroup",
+        "kind": "component",
+        "status": "contract-only",
+        "note": "The primitive is exported and contract-backed, but the preview does not yet isolate a dedicated review specimen for it.",
+        "sectionIds": [],
+        "sectionTitles": []
+      },
+      {
+        "packageName": "@pug/svelte-primitives",
+        "exportName": "RangeCalendar",
+        "kind": "component",
+        "status": "contract-only",
+        "note": "The primitive is exported and contract-backed, but the preview does not yet isolate a dedicated review specimen for it.",
+        "sectionIds": [],
+        "sectionTitles": []
+      },
+      {
+        "packageName": "@pug/svelte-primitives",
+        "exportName": "RangeSlider",
+        "kind": "component",
+        "status": "contract-only",
+        "note": "The primitive is exported and contract-backed, but the preview does not yet isolate a dedicated review specimen for it.",
+        "sectionIds": [],
+        "sectionTitles": []
+      },
+      {
+        "packageName": "@pug/svelte-primitives",
+        "exportName": "Rating",
+        "kind": "component",
+        "status": "contract-only",
+        "note": "The primitive is exported and contract-backed, but the preview does not yet isolate a dedicated review specimen for it.",
+        "sectionIds": [],
+        "sectionTitles": []
+      },
+      {
+        "packageName": "@pug/svelte-primitives",
+        "exportName": "ScrollShell",
+        "kind": "component",
+        "status": "contract-only",
+        "note": "The primitive is exported and contract-backed, but the preview does not yet isolate a dedicated review specimen for it.",
+        "sectionIds": [],
+        "sectionTitles": []
+      },
+      {
+        "packageName": "@pug/svelte-primitives",
+        "exportName": "SearchField",
+        "kind": "component",
+        "status": "previewed",
+        "note": "Form suite exercises the current field, validation, and text-entry baseline.",
+        "sectionIds": [
+          "form-suite"
+        ],
+        "sectionTitles": [
+          "Form baseline and validation posture"
+        ]
+      },
+      {
+        "packageName": "@pug/svelte-primitives",
+        "exportName": "SegmentedControl",
+        "kind": "component",
+        "status": "contract-only",
+        "note": "The primitive is exported and contract-backed, but the preview does not yet isolate a dedicated review specimen for it.",
+        "sectionIds": [],
+        "sectionTitles": []
+      },
+      {
+        "packageName": "@pug/svelte-primitives",
+        "exportName": "Select",
+        "kind": "component",
+        "status": "previewed",
+        "note": "The preview shell and catalog hub now exercise foundational disclosure, control, and chip primitives directly instead of custom shell-only controls.",
+        "sectionIds": [
+          "catalog-hub"
+        ],
+        "sectionTitles": [
+          "Catalog hub"
+        ]
+      },
+      {
+        "packageName": "@pug/svelte-primitives",
+        "exportName": "Separator",
+        "kind": "component",
+        "status": "contract-only",
+        "note": "The primitive is exported and contract-backed, but the preview does not yet isolate a dedicated review specimen for it.",
+        "sectionIds": [],
+        "sectionTitles": []
+      },
+      {
+        "packageName": "@pug/svelte-primitives",
+        "exportName": "Skeleton",
+        "kind": "component",
+        "status": "previewed",
+        "note": "Notification suite exercises persistent and loading state posture.",
+        "sectionIds": [
+          "notification-suite"
+        ],
+        "sectionTitles": [
+          "Banners, toasts, skeletons, and remediation"
+        ]
+      },
+      {
+        "packageName": "@pug/svelte-primitives",
+        "exportName": "Slider",
+        "kind": "component",
+        "status": "contract-only",
+        "note": "The primitive is exported and contract-backed, but the preview does not yet isolate a dedicated review specimen for it.",
+        "sectionIds": [],
+        "sectionTitles": []
+      },
+      {
+        "packageName": "@pug/svelte-primitives",
+        "exportName": "Spacer",
+        "kind": "component",
+        "status": "contract-only",
+        "note": "The primitive is exported and contract-backed, but the preview does not yet isolate a dedicated review specimen for it.",
+        "sectionIds": [],
+        "sectionTitles": []
+      },
+      {
+        "packageName": "@pug/svelte-primitives",
+        "exportName": "Stack",
+        "kind": "component",
+        "status": "contract-only",
+        "note": "The primitive is exported and contract-backed, but the preview does not yet isolate a dedicated review specimen for it.",
+        "sectionIds": [],
+        "sectionTitles": []
+      },
+      {
+        "packageName": "@pug/svelte-primitives",
+        "exportName": "StatusIndicator",
+        "kind": "component",
+        "status": "contract-only",
+        "note": "The primitive is exported and contract-backed, but the preview does not yet isolate a dedicated review specimen for it.",
+        "sectionIds": [],
+        "sectionTitles": []
+      },
+      {
+        "packageName": "@pug/svelte-primitives",
+        "exportName": "Surface",
+        "kind": "component",
+        "status": "contract-only",
+        "note": "The primitive is exported and contract-backed, but the preview does not yet isolate a dedicated review specimen for it.",
+        "sectionIds": [],
+        "sectionTitles": []
+      },
+      {
+        "packageName": "@pug/svelte-primitives",
+        "exportName": "Switch",
+        "kind": "component",
+        "status": "contract-only",
+        "note": "The primitive is exported and contract-backed, but the preview does not yet isolate a dedicated review specimen for it.",
+        "sectionIds": [],
+        "sectionTitles": []
+      },
+      {
+        "packageName": "@pug/svelte-primitives",
+        "exportName": "Table",
+        "kind": "component",
+        "status": "contract-only",
+        "note": "The primitive is exported and contract-backed, but the preview does not yet isolate a dedicated review specimen for it.",
+        "sectionIds": [],
+        "sectionTitles": []
+      },
+      {
+        "packageName": "@pug/svelte-primitives",
+        "exportName": "Tabs",
+        "kind": "component",
+        "status": "contract-only",
+        "note": "The primitive is exported and contract-backed, but the preview does not yet isolate a dedicated review specimen for it.",
+        "sectionIds": [],
+        "sectionTitles": []
+      },
+      {
+        "packageName": "@pug/svelte-primitives",
+        "exportName": "TabStrip",
+        "kind": "component",
+        "status": "contract-only",
+        "note": "The primitive is exported and contract-backed, but the preview does not yet isolate a dedicated review specimen for it.",
+        "sectionIds": [],
+        "sectionTitles": []
+      },
+      {
+        "packageName": "@pug/svelte-primitives",
+        "exportName": "TextArea",
+        "kind": "component",
+        "status": "contract-only",
+        "note": "The primitive is exported and contract-backed, but the preview does not yet isolate a dedicated review specimen for it.",
+        "sectionIds": [],
+        "sectionTitles": []
+      },
+      {
+        "packageName": "@pug/svelte-primitives",
+        "exportName": "TextInput",
+        "kind": "component",
+        "status": "previewed",
+        "note": "Form suite exercises the current field, validation, and text-entry baseline.",
+        "sectionIds": [
+          "form-suite"
+        ],
+        "sectionTitles": [
+          "Form baseline and validation posture"
+        ]
+      },
+      {
+        "packageName": "@pug/svelte-primitives",
+        "exportName": "TimeField",
+        "kind": "component",
+        "status": "contract-only",
+        "note": "The primitive is exported and contract-backed, but the preview does not yet isolate a dedicated review specimen for it.",
+        "sectionIds": [],
+        "sectionTitles": []
+      },
+      {
+        "packageName": "@pug/svelte-primitives",
+        "exportName": "TimeZoneSelect",
+        "kind": "component",
+        "status": "contract-only",
+        "note": "The primitive is exported and contract-backed, but the preview does not yet isolate a dedicated review specimen for it.",
+        "sectionIds": [],
+        "sectionTitles": []
+      },
+      {
+        "packageName": "@pug/svelte-primitives",
+        "exportName": "Toggle",
+        "kind": "component",
+        "status": "previewed",
+        "note": "The preview shell and catalog hub now exercise foundational disclosure, control, and chip primitives directly instead of custom shell-only controls.",
+        "sectionIds": [
+          "catalog-hub"
+        ],
+        "sectionTitles": [
+          "Catalog hub"
+        ]
+      },
+      {
+        "packageName": "@pug/svelte-primitives",
+        "exportName": "ToggleGroup",
+        "kind": "component",
+        "status": "previewed",
+        "note": "The preview shell and catalog hub now exercise foundational disclosure, control, and chip primitives directly instead of custom shell-only controls.",
+        "sectionIds": [
+          "catalog-hub"
+        ],
+        "sectionTitles": [
+          "Catalog hub"
+        ]
+      },
+      {
+        "packageName": "@pug/svelte-primitives",
+        "exportName": "Toolbar",
+        "kind": "component",
+        "status": "contract-only",
+        "note": "The primitive is exported and contract-backed, but the preview does not yet isolate a dedicated review specimen for it.",
+        "sectionIds": [],
+        "sectionTitles": []
+      },
+      {
+        "packageName": "@pug/svelte-primitives",
+        "exportName": "Tooltip",
+        "kind": "component",
+        "status": "contract-only",
+        "note": "The primitive is exported and contract-backed, but the preview does not yet isolate a dedicated review specimen for it.",
+        "sectionIds": [],
+        "sectionTitles": []
+      },
+      {
+        "packageName": "@pug/svelte-primitives",
+        "exportName": "TriStateSwitch",
+        "kind": "component",
+        "status": "contract-only",
+        "note": "The primitive is exported and contract-backed, but the preview does not yet isolate a dedicated review specimen for it.",
+        "sectionIds": [],
+        "sectionTitles": []
+      },
+      {
+        "packageName": "@pug/svelte-primitives",
+        "exportName": "ZonedDateTimePicker",
+        "kind": "component",
+        "status": "contract-only",
+        "note": "The primitive is exported and contract-backed, but the preview does not yet isolate a dedicated review specimen for it.",
+        "sectionIds": [],
+        "sectionTitles": []
+      },
+      {
+        "packageName": "@pug/svelte-workstation",
+        "exportName": "ActionDiscoveryPanel",
+        "kind": "component",
+        "status": "previewed",
+        "note": "Command suite exercises modal and inline action-discovery posture.",
+        "sectionIds": [
+          "command-suite"
+        ],
+        "sectionTitles": [
+          "Palette search, grouped actions, and inline rediscovery"
+        ]
+      },
+      {
+        "packageName": "@pug/svelte-workstation",
+        "exportName": "AppHeader",
+        "kind": "component",
+        "status": "previewed",
+        "note": "Workspace suite exercises shell hierarchy, docking, and panel-surface posture.",
+        "sectionIds": [
+          "workspace-suite"
+        ],
+        "sectionTitles": [
+          "Headers, dock orchestration, and workspace shell posture"
+        ]
+      },
+      {
+        "packageName": "@pug/svelte-workstation",
+        "exportName": "CommandPalette",
+        "kind": "component",
+        "status": "previewed",
+        "note": "Command suite exercises modal and inline action-discovery posture.",
+        "sectionIds": [
+          "command-suite"
+        ],
+        "sectionTitles": [
+          "Palette search, grouped actions, and inline rediscovery"
+        ]
+      },
+      {
+        "packageName": "@pug/svelte-workstation",
+        "exportName": "DockRegion",
+        "kind": "component",
+        "status": "previewed",
+        "note": "Workspace suite exercises shell hierarchy, docking, and panel-surface posture.",
+        "sectionIds": [
+          "workspace-suite"
+        ],
+        "sectionTitles": [
+          "Headers, dock orchestration, and workspace shell posture"
+        ]
+      },
+      {
+        "packageName": "@pug/svelte-workstation",
+        "exportName": "PanelHeader",
+        "kind": "component",
+        "status": "contract-only",
+        "note": "The workstation export is public and contract-backed, but the preview currently exercises the higher-level shell flow rather than a direct specimen.",
+        "sectionIds": [],
+        "sectionTitles": []
+      },
+      {
+        "packageName": "@pug/svelte-workstation",
+        "exportName": "PanelSurface",
+        "kind": "component",
+        "status": "previewed",
+        "note": "Workspace suite exercises shell hierarchy, docking, and panel-surface posture.",
+        "sectionIds": [
+          "workspace-suite"
+        ],
+        "sectionTitles": [
+          "Headers, dock orchestration, and workspace shell posture"
+        ]
+      },
+      {
+        "packageName": "@pug/svelte-workstation",
+        "exportName": "PanelTabs",
+        "kind": "component",
+        "status": "contract-only",
+        "note": "The workstation export is public and contract-backed, but the preview currently exercises the higher-level shell flow rather than a direct specimen.",
+        "sectionIds": [],
+        "sectionTitles": []
+      },
+      {
+        "packageName": "@pug/svelte-workstation",
+        "exportName": "parseWorkspaceLayoutSnapshot",
+        "kind": "helper",
+        "status": "previewed",
+        "note": "Workspace suite exercises public layout snapshot round-tripping through the shell state review surface.",
+        "sectionIds": [
+          "workspace-suite"
+        ],
+        "sectionTitles": [
+          "Headers, dock orchestration, and workspace shell posture"
+        ]
+      },
+      {
+        "packageName": "@pug/svelte-workstation",
+        "exportName": "ProjectHeader",
+        "kind": "component",
+        "status": "previewed",
+        "note": "Workspace suite exercises shell hierarchy, docking, and panel-surface posture.",
+        "sectionIds": [
+          "workspace-suite"
+        ],
+        "sectionTitles": [
+          "Headers, dock orchestration, and workspace shell posture"
+        ]
+      },
+      {
+        "packageName": "@pug/svelte-workstation",
+        "exportName": "serializeWorkspaceLayoutSnapshot",
+        "kind": "helper",
+        "status": "previewed",
+        "note": "Workspace suite exercises public layout snapshot round-tripping through the shell state review surface.",
+        "sectionIds": [
+          "workspace-suite"
+        ],
+        "sectionTitles": [
+          "Headers, dock orchestration, and workspace shell posture"
+        ]
+      },
+      {
+        "packageName": "@pug/svelte-workstation",
+        "exportName": "ShellStatusBar",
+        "kind": "component",
+        "status": "previewed",
+        "note": "Workspace suite exercises shell hierarchy, docking, and panel-surface posture.",
+        "sectionIds": [
+          "workspace-suite"
+        ],
+        "sectionTitles": [
+          "Headers, dock orchestration, and workspace shell posture"
+        ]
+      },
+      {
+        "packageName": "@pug/svelte-workstation",
+        "exportName": "SplitView",
+        "kind": "component",
+        "status": "previewed",
+        "note": "Workspace suite exercises shell hierarchy, docking, and panel-surface posture.",
+        "sectionIds": [
+          "workspace-suite"
+        ],
+        "sectionTitles": [
+          "Headers, dock orchestration, and workspace shell posture"
+        ]
+      },
+      {
+        "packageName": "@pug/svelte-workstation",
+        "exportName": "SurfaceTabs",
+        "kind": "component",
+        "status": "previewed",
+        "note": "Workspace suite exercises shell hierarchy, docking, and panel-surface posture.",
+        "sectionIds": [
+          "workspace-suite"
+        ],
+        "sectionTitles": [
+          "Headers, dock orchestration, and workspace shell posture"
+        ]
+      },
+      {
+        "packageName": "@pug/svelte-workstation",
+        "exportName": "WorkspaceShell",
+        "kind": "component",
+        "status": "previewed",
+        "note": "Workspace suite exercises shell hierarchy, docking, and panel-surface posture.",
+        "sectionIds": [
+          "workspace-suite"
+        ],
+        "sectionTitles": [
+          "Headers, dock orchestration, and workspace shell posture"
+        ]
+      }
+    ]
+  },
+  "families": [
+    {
+      "id": "tokens",
+      "title": "Tokens and artifacts",
+      "sectionCount": 2,
+      "sectionIds": [
+        "token-summary-section",
+        "token-inspector"
+      ]
+    },
+    {
+      "id": "primitives",
+      "title": "Foundation primitives",
+      "sectionCount": 2,
+      "sectionIds": [
+        "form-suite",
+        "notification-suite"
+      ]
+    },
+    {
+      "id": "composites",
+      "title": "Product composites",
+      "sectionCount": 6,
+      "sectionIds": [
+        "table-suite",
+        "browse-suite",
+        "detail-suite",
+        "picker-suite",
+        "media-suite",
+        "notification-suite"
+      ]
+    },
+    {
+      "id": "workstation",
+      "title": "Workstation shells",
+      "sectionCount": 2,
+      "sectionIds": [
+        "command-suite",
+        "workspace-suite"
+      ]
+    }
+  ],
+  "targets": [
+    {
+      "sectionId": "catalog-hub",
+      "title": "Catalog hub",
+      "layer": "tokens",
+      "packageName": "docs + packages/svelte/*",
+      "contractRoot": "packages/svelte/preview/",
+      "summary": "Entry point for package ownership, family coverage, example scope, and adoption expectations.",
+      "harnessCoverage": {
+        "contract": "automated",
+        "visual": "hybrid",
+        "interaction": "manual"
+      },
+      "automatedChecks": [
+        "catalog registration is complete",
+        "family-to-section coverage is resolvable",
+        "review routes are generated from stable preview state"
+      ],
+      "manualChecks": [
+        "landing-page hierarchy and adoption messaging still read clearly",
+        "section browser remains usable across themes and densities"
+      ],
+      "reviewRoutes": [
+        {
+          "id": "catalog-hub-baseline",
+          "label": "baseline",
+          "note": "Primary docs landing review.",
+          "state": {
+            "sectionId": "catalog-hub",
+            "theme": "loophole-studio",
+            "density": "compact",
+            "controlSize": "md"
+          },
+          "url": "/?theme=loophole-studio&density=compact&controlSize=md#catalog-hub"
+        },
+        {
+          "id": "catalog-hub-light",
+          "label": "light",
+          "note": "Light-theme docs shell review.",
+          "state": {
+            "sectionId": "catalog-hub",
+            "theme": "light",
+            "density": "comfortable",
+            "controlSize": "md"
+          },
+          "url": "/?theme=light&density=comfortable&controlSize=md#catalog-hub"
+        }
+      ]
+    },
+    {
+      "sectionId": "form-suite",
+      "title": "Form baseline and validation posture",
+      "layer": "foundation",
+      "packageName": "@pug/svelte-primitives",
+      "contractRoot": "docs/contracts/foundation/",
+      "summary": "Field wrappers, inputs, search, and action rows with validation and announcement posture.",
+      "harnessCoverage": {
+        "contract": "automated",
+        "visual": "hybrid",
+        "interaction": "hybrid"
+      },
+      "automatedChecks": [
+        "section remains catalog-registered",
+        "stateful route matrix exists for invalid, pending, and sizing review",
+        "token overlay switching remains deep-linkable"
+      ],
+      "manualChecks": [
+        "caret, selection, and IME behavior",
+        "screen-reader announcement quality for validation and help text"
+      ],
+      "reviewRoutes": [
+        {
+          "id": "form-suite-baseline",
+          "label": "baseline",
+          "note": "Default workstation-oriented form review.",
+          "state": {
+            "sectionId": "form-suite",
+            "theme": "loophole-studio",
+            "density": "compact",
+            "controlSize": "md"
+          },
+          "url": "/?theme=loophole-studio&density=compact&controlSize=md#form-suite"
+        },
+        {
+          "id": "form-suite-light",
+          "label": "light",
+          "note": "Light-theme form contrast review.",
+          "state": {
+            "sectionId": "form-suite",
+            "theme": "light",
+            "density": "comfortable",
+            "controlSize": "md"
+          },
+          "url": "/?theme=light&density=comfortable&controlSize=md#form-suite"
+        },
+        {
+          "id": "form-suite-small",
+          "label": "small",
+          "note": "Minimum control sizing review.",
+          "state": {
+            "sectionId": "form-suite",
+            "theme": "loophole-studio",
+            "density": "compact",
+            "controlSize": "sm"
+          },
+          "url": "/?theme=loophole-studio&density=compact&controlSize=sm#form-suite"
+        },
+        {
+          "id": "form-suite-large",
+          "label": "large",
+          "note": "Large control sizing review.",
+          "state": {
+            "sectionId": "form-suite",
+            "theme": "loophole-studio",
+            "density": "compact",
+            "controlSize": "lg"
+          },
+          "url": "/?theme=loophole-studio&density=compact&controlSize=lg#form-suite"
+        }
+      ]
+    },
+    {
+      "sectionId": "table-suite",
+      "title": "Selection, sorting, and bulk actions",
+      "layer": "composites",
+      "packageName": "@pug/svelte-composites",
+      "contractRoot": "docs/contracts/composites/",
+      "summary": "Structured rows with visible-scope selection, sort semantics, row actions, and pagination context.",
+      "harnessCoverage": {
+        "contract": "automated",
+        "visual": "hybrid",
+        "interaction": "hybrid"
+      },
+      "automatedChecks": [
+        "section remains catalog-registered",
+        "sorting and selection review routes are generated",
+        "preview URL is stable for repeat review"
+      ],
+      "manualChecks": [
+        "header affordance clarity and density fit",
+        "row action naming and keyboard flow"
+      ],
+      "reviewRoutes": [
+        {
+          "id": "table-suite-baseline",
+          "label": "baseline",
+          "note": "Default table review.",
+          "state": {
+            "sectionId": "table-suite",
+            "theme": "loophole-studio",
+            "density": "compact",
+            "controlSize": "md"
+          },
+          "url": "/?theme=loophole-studio&density=compact&controlSize=md#table-suite"
+        },
+        {
+          "id": "table-suite-light",
+          "label": "light",
+          "note": "Light-theme table review.",
+          "state": {
+            "sectionId": "table-suite",
+            "theme": "light",
+            "density": "comfortable",
+            "controlSize": "md"
+          },
+          "url": "/?theme=light&density=comfortable&controlSize=md#table-suite"
+        }
+      ]
+    },
+    {
+      "sectionId": "browse-suite",
+      "title": "Lists, grids, filters, and search depth",
+      "layer": "composites",
+      "packageName": "@pug/svelte-composites",
+      "contractRoot": "docs/contracts/composites/",
+      "summary": "Browse shells that separate ready, loading, empty, and no-results posture across list and grid views.",
+      "harnessCoverage": {
+        "contract": "automated",
+        "visual": "hybrid",
+        "interaction": "manual"
+      },
+      "automatedChecks": [
+        "section remains catalog-registered",
+        "browse-state review routes are generated",
+        "contract and package ownership remain linked"
+      ],
+      "manualChecks": [
+        "empty versus no-results posture clarity",
+        "progressive-loading rhythm and content hierarchy"
+      ],
+      "reviewRoutes": [
+        {
+          "id": "browse-suite-baseline",
+          "label": "baseline",
+          "note": "Default browse-shell review.",
+          "state": {
+            "sectionId": "browse-suite",
+            "theme": "loophole-studio",
+            "density": "compact",
+            "controlSize": "md"
+          },
+          "url": "/?theme=loophole-studio&density=compact&controlSize=md#browse-suite"
+        },
+        {
+          "id": "browse-suite-light",
+          "label": "light",
+          "note": "Light-theme browse review.",
+          "state": {
+            "sectionId": "browse-suite",
+            "theme": "light",
+            "density": "comfortable",
+            "controlSize": "md"
+          },
+          "url": "/?theme=light&density=comfortable&controlSize=md#browse-suite"
+        }
+      ]
+    },
+    {
+      "sectionId": "detail-suite",
+      "title": "Detail display, cards, headers, and navigation",
+      "layer": "composites",
+      "packageName": "@pug/svelte-composites",
+      "contractRoot": "docs/contracts/composites/",
+      "summary": "Readonly detail surfaces with breadcrumb context, page headers, cards, and section hierarchy.",
+      "harnessCoverage": {
+        "contract": "automated",
+        "visual": "hybrid",
+        "interaction": "manual"
+      },
+      "automatedChecks": [
+        "section remains catalog-registered",
+        "detail review routes are generated",
+        "package and contract provenance remain exposed"
+      ],
+      "manualChecks": [
+        "visual hierarchy, spacing, and summary-card contrast",
+        "header action emphasis and reading order"
+      ],
+      "reviewRoutes": [
+        {
+          "id": "detail-suite-baseline",
+          "label": "baseline",
+          "note": "Primary detail-surface review.",
+          "state": {
+            "sectionId": "detail-suite",
+            "theme": "loophole-studio",
+            "density": "compact",
+            "controlSize": "md"
+          },
+          "url": "/?theme=loophole-studio&density=compact&controlSize=md#detail-suite"
+        },
+        {
+          "id": "detail-suite-light",
+          "label": "light",
+          "note": "Light-theme detail review.",
+          "state": {
+            "sectionId": "detail-suite",
+            "theme": "light",
+            "density": "comfortable",
+            "controlSize": "md"
+          },
+          "url": "/?theme=light&density=comfortable&controlSize=md#detail-suite"
+        }
+      ]
+    },
+    {
+      "sectionId": "picker-suite",
+      "title": "Picker, relation, and selection workflows",
+      "layer": "composites",
+      "packageName": "@pug/svelte-composites",
+      "contractRoot": "docs/contracts/composites/",
+      "summary": "Searchable attach-or-choose flows with selection summaries, commit/cancel rhythm, and keyboard traversal.",
+      "harnessCoverage": {
+        "contract": "automated",
+        "visual": "hybrid",
+        "interaction": "hybrid"
+      },
+      "automatedChecks": [
+        "section remains catalog-registered",
+        "picker workflow routes are generated",
+        "stateful review surface stays deep-linkable"
+      ],
+      "manualChecks": [
+        "multi-select traversal and confirmation rhythm",
+        "announcement quality for search and selection summary updates"
+      ],
+      "reviewRoutes": [
+        {
+          "id": "picker-suite-baseline",
+          "label": "baseline",
+          "note": "Default picker workflow review.",
+          "state": {
+            "sectionId": "picker-suite",
+            "theme": "loophole-studio",
+            "density": "compact",
+            "controlSize": "md"
+          },
+          "url": "/?theme=loophole-studio&density=compact&controlSize=md#picker-suite"
+        },
+        {
+          "id": "picker-suite-light",
+          "label": "light",
+          "note": "Light-theme picker review.",
+          "state": {
+            "sectionId": "picker-suite",
+            "theme": "light",
+            "density": "comfortable",
+            "controlSize": "md"
+          },
+          "url": "/?theme=light&density=comfortable&controlSize=md#picker-suite"
+        }
+      ]
+    },
+    {
+      "sectionId": "media-suite",
+      "title": "Preview framing, embeds, and fallback posture",
+      "layer": "composites",
+      "packageName": "@pug/svelte-composites",
+      "contractRoot": "docs/contracts/composites/",
+      "summary": "Media surfaces that keep framing, metadata, and fallback meaning explicit without owning playback engines.",
+      "harnessCoverage": {
+        "contract": "automated",
+        "visual": "hybrid",
+        "interaction": "manual"
+      },
+      "automatedChecks": [
+        "section remains catalog-registered",
+        "media preview routes are generated",
+        "theme/density review surface stays stable"
+      ],
+      "manualChecks": [
+        "thumbnail framing and metadata hierarchy",
+        "renderer-failure and fallback posture clarity"
+      ],
+      "reviewRoutes": [
+        {
+          "id": "media-suite-baseline",
+          "label": "baseline",
+          "note": "Default media review.",
+          "state": {
+            "sectionId": "media-suite",
+            "theme": "loophole-studio",
+            "density": "compact",
+            "controlSize": "md"
+          },
+          "url": "/?theme=loophole-studio&density=compact&controlSize=md#media-suite"
+        },
+        {
+          "id": "media-suite-light",
+          "label": "light",
+          "note": "Light-theme media review.",
+          "state": {
+            "sectionId": "media-suite",
+            "theme": "light",
+            "density": "comfortable",
+            "controlSize": "md"
+          },
+          "url": "/?theme=light&density=comfortable&controlSize=md#media-suite"
+        }
+      ]
+    },
+    {
+      "sectionId": "notification-suite",
+      "title": "Banners, toasts, skeletons, and remediation",
+      "layer": "composites",
+      "packageName": "@pug/svelte-primitives + @pug/svelte-composites",
+      "contractRoot": "docs/contracts/foundation/ + docs/contracts/composites/",
+      "summary": "Persistent and transient state surfaces with loading, remediation, and announcement posture.",
+      "harnessCoverage": {
+        "contract": "automated",
+        "visual": "hybrid",
+        "interaction": "hybrid"
+      },
+      "automatedChecks": [
+        "section remains catalog-registered",
+        "notification routes are generated",
+        "stateful remediation surface remains deep-linkable"
+      ],
+      "manualChecks": [
+        "toast timing appropriateness and message hierarchy",
+        "banner tone fit and remediation action emphasis"
+      ],
+      "reviewRoutes": [
+        {
+          "id": "notification-suite-baseline",
+          "label": "baseline",
+          "note": "Default state-surface review.",
+          "state": {
+            "sectionId": "notification-suite",
+            "theme": "loophole-studio",
+            "density": "compact",
+            "controlSize": "md"
+          },
+          "url": "/?theme=loophole-studio&density=compact&controlSize=md#notification-suite"
+        },
+        {
+          "id": "notification-suite-light",
+          "label": "light",
+          "note": "Light-theme state-surface review.",
+          "state": {
+            "sectionId": "notification-suite",
+            "theme": "light",
+            "density": "comfortable",
+            "controlSize": "md"
+          },
+          "url": "/?theme=light&density=comfortable&controlSize=md#notification-suite"
+        }
+      ]
+    },
+    {
+      "sectionId": "command-suite",
+      "title": "Palette search, grouped actions, and inline rediscovery",
+      "layer": "workstation",
+      "packageName": "@pug/svelte-workstation",
+      "contractRoot": "docs/contracts/workstation/",
+      "summary": "Modal and inline command discovery with grouped results, focus containment, and keyboard movement.",
+      "harnessCoverage": {
+        "contract": "automated",
+        "visual": "hybrid",
+        "interaction": "hybrid"
+      },
+      "automatedChecks": [
+        "section remains catalog-registered",
+        "command discovery routes are generated",
+        "modal and inline discovery surface stay addressable"
+      ],
+      "manualChecks": [
+        "focus containment and restoration quality",
+        "result ranking readability and command grouping clarity"
+      ],
+      "reviewRoutes": [
+        {
+          "id": "command-suite-baseline",
+          "label": "baseline",
+          "note": "Default command-discovery review.",
+          "state": {
+            "sectionId": "command-suite",
+            "theme": "loophole-studio",
+            "density": "compact",
+            "controlSize": "md"
+          },
+          "url": "/?theme=loophole-studio&density=compact&controlSize=md#command-suite"
+        },
+        {
+          "id": "command-suite-dark",
+          "label": "dark",
+          "note": "Dark neutral command review.",
+          "state": {
+            "sectionId": "command-suite",
+            "theme": "dark",
+            "density": "comfortable",
+            "controlSize": "md"
+          },
+          "url": "/?theme=dark&density=comfortable&controlSize=md#command-suite"
+        }
+      ]
+    },
+    {
+      "sectionId": "workspace-suite",
+      "title": "Headers, dock orchestration, and workspace shell posture",
+      "layer": "workstation",
+      "packageName": "@pug/svelte-workstation",
+      "contractRoot": "docs/contracts/workstation/",
+      "summary": "App and project headers, docks, tabs, split views, and host-owned layout snapshots.",
+      "harnessCoverage": {
+        "contract": "automated",
+        "visual": "hybrid",
+        "interaction": "hybrid"
+      },
+      "automatedChecks": [
+        "section remains catalog-registered",
+        "workspace shell routes are generated",
+        "layout review surface stays deep-linkable"
+      ],
+      "manualChecks": [
+        "dock, split, and shell hierarchy legibility",
+        "resize affordance feel and focus order through shell regions"
+      ],
+      "reviewRoutes": [
+        {
+          "id": "workspace-suite-baseline",
+          "label": "baseline",
+          "note": "Primary workstation-shell review.",
+          "state": {
+            "sectionId": "workspace-suite",
+            "theme": "loophole-studio",
+            "density": "compact",
+            "controlSize": "md"
+          },
+          "url": "/?theme=loophole-studio&density=compact&controlSize=md#workspace-suite"
+        },
+        {
+          "id": "workspace-suite-dark",
+          "label": "dark",
+          "note": "Dark neutral workstation-shell review.",
+          "state": {
+            "sectionId": "workspace-suite",
+            "theme": "dark",
+            "density": "comfortable",
+            "controlSize": "md"
+          },
+          "url": "/?theme=dark&density=comfortable&controlSize=md#workspace-suite"
+        }
+      ]
+    },
+    {
+      "sectionId": "token-summary-section",
+      "title": "Runtime-critical values",
+      "layer": "tokens",
+      "packageName": "@pug/svelte-tokens",
+      "contractRoot": "packages/tokens/",
+      "summary": "Live values pulled from the active emitted theme, density, and control-size overlays.",
+      "harnessCoverage": {
+        "contract": "automated",
+        "visual": "hybrid",
+        "interaction": "not-applicable"
+      },
+      "automatedChecks": [
+        "theme, density, and control-size routes are generated",
+        "runtime token readout remains addressable",
+        "artifact provenance remains linked"
+      ],
+      "manualChecks": [
+        "live readout remains legible in light and dark themes"
+      ],
+      "reviewRoutes": [
+        {
+          "id": "token-summary-section-loophole",
+          "label": "loophole",
+          "note": "Workstation token overlay review.",
+          "state": {
+            "sectionId": "token-summary-section",
+            "theme": "loophole-studio",
+            "density": "compact",
+            "controlSize": "md"
+          },
+          "url": "/?theme=loophole-studio&density=compact&controlSize=md#token-summary-section"
+        },
+        {
+          "id": "token-summary-section-dark",
+          "label": "dark",
+          "note": "Dark token overlay review.",
+          "state": {
+            "sectionId": "token-summary-section",
+            "theme": "dark",
+            "density": "comfortable",
+            "controlSize": "md"
+          },
+          "url": "/?theme=dark&density=comfortable&controlSize=md#token-summary-section"
+        },
+        {
+          "id": "token-summary-section-light",
+          "label": "light",
+          "note": "Light token overlay review.",
+          "state": {
+            "sectionId": "token-summary-section",
+            "theme": "light",
+            "density": "comfortable",
+            "controlSize": "md"
+          },
+          "url": "/?theme=light&density=comfortable&controlSize=md#token-summary-section"
+        }
+      ]
+    },
+    {
+      "sectionId": "token-inspector",
+      "title": "Search the emitted token tree",
+      "layer": "tokens",
+      "packageName": "@pug/svelte-tokens",
+      "contractRoot": "packages/tokens/artifacts/",
+      "summary": "Searchable inspection of the emitted semantic token paths and their active computed values.",
+      "harnessCoverage": {
+        "contract": "automated",
+        "visual": "hybrid",
+        "interaction": "manual"
+      },
+      "automatedChecks": [
+        "token inspector routes are generated",
+        "artifact provenance remains addressable",
+        "section remains catalog-registered"
+      ],
+      "manualChecks": [
+        "search usability and token-path readability"
+      ],
+      "reviewRoutes": [
+        {
+          "id": "token-inspector-loophole",
+          "label": "loophole",
+          "note": "Workstation token-inspector review.",
+          "state": {
+            "sectionId": "token-inspector",
+            "theme": "loophole-studio",
+            "density": "compact",
+            "controlSize": "md"
+          },
+          "url": "/?theme=loophole-studio&density=compact&controlSize=md#token-inspector"
+        },
+        {
+          "id": "token-inspector-dark",
+          "label": "dark",
+          "note": "Dark token-inspector review.",
+          "state": {
+            "sectionId": "token-inspector",
+            "theme": "dark",
+            "density": "comfortable",
+            "controlSize": "md"
+          },
+          "url": "/?theme=dark&density=comfortable&controlSize=md#token-inspector"
+        },
+        {
+          "id": "token-inspector-light",
+          "label": "light",
+          "note": "Light token-inspector review.",
+          "state": {
+            "sectionId": "token-inspector",
+            "theme": "light",
+            "density": "comfortable",
+            "controlSize": "md"
+          },
+          "url": "/?theme=light&density=comfortable&controlSize=md#token-inspector"
+        }
+      ]
+    }
+  ]
+}

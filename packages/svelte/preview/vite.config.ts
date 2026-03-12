@@ -1,8 +1,17 @@
 import { svelte } from "@sveltejs/vite-plugin-svelte";
+import { fileURLToPath } from "node:url";
 import { defineConfig } from "vite";
 
 export default defineConfig({
   plugins: [svelte()],
+  resolve: {
+    alias: {
+      "@pug/svelte-tokens": fileURLToPath(new URL("../tokens/src/index.ts", import.meta.url)),
+      "@pug/svelte-primitives": fileURLToPath(new URL("../primitives/src/index.ts", import.meta.url)),
+      "@pug/svelte-composites": fileURLToPath(new URL("../composites/src/index.ts", import.meta.url)),
+      "@pug/svelte-workstation": fileURLToPath(new URL("../workstation/src/index.ts", import.meta.url)),
+    },
+  },
   server: {
     host: "0.0.0.0",
     port: 4173,

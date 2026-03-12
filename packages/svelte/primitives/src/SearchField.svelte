@@ -90,11 +90,21 @@
     background: transparent;
     color: var(--pug-color-icon-muted);
     cursor: pointer;
+    border-radius: calc(
+      var(--pug-treatment-interactive-subtle-radius, var(--pug-radius-control)) - 0.0625rem
+    );
+  }
+
+  .search-field__clear:hover {
+    background: var(
+      --pug-treatment-interactive-subtle-fill-hover,
+      color-mix(in srgb, var(--pug-color-background-surface) 84%, transparent)
+    );
+    color: var(--pug-color-text-primary);
   }
 
   .search-field__clear:focus-visible {
     outline: var(--pug-border-width-focus) solid var(--pug-color-accent-focusRing);
-    outline-offset: 2px;
-    border-radius: calc(var(--pug-radius-control) - 1px);
+    outline-offset: 0.125rem;
   }
 </style>

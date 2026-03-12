@@ -1,0 +1,190 @@
+{
+  "referenceShapes": [
+    {
+      "id": "direct-svelte-consumer",
+      "label": "Direct Svelte consumer reference app",
+      "format": "reference-app-shape",
+      "status": "docs-backed",
+      "audience": "teams importing Pug packages directly",
+      "packageEntryPoints": [
+        "@pug/svelte-tokens",
+        "@pug/svelte-primitives",
+        "@pug/svelte-composites",
+        "@pug/svelte-workstation"
+      ],
+      "exampleSectionIds": [
+        "catalog-hub",
+        "form-suite",
+        "detail-suite",
+        "workspace-suite"
+      ],
+      "onboardingSteps": [
+        "Read the package and extension-SDK baselines before wiring imports.",
+        "Start from tokens, then primitives, then composites, then workstation shell only where needed.",
+        "Keep app-specific workflows, persistence, and orchestration outside the shared packages."
+      ],
+      "evidencePaths": [
+        "docs/specs/039-extension-sdk-composition-guidance-and-starter-package-baseline.md",
+        "packages/svelte/primitives/README.md",
+        "packages/svelte/composites/README.md",
+        "packages/svelte/workstation/README.md"
+      ],
+      "blockers": [
+        "This is a composition baseline, not a generated app template or proof of GPUI parity."
+      ]
+    },
+    {
+      "id": "underlay-bridge-consumer",
+      "label": "Underlay bridge-mediated reference app",
+      "format": "reference-app-shape",
+      "status": "proof-backed",
+      "audience": "teams preserving an existing app-local API while adopting Pug internally",
+      "packageEntryPoints": [
+        "@pug/bridge-underlay"
+      ],
+      "exampleSectionIds": [
+        "catalog-hub",
+        "browse-suite",
+        "notification-suite"
+      ],
+      "onboardingSteps": [
+        "Adopt Pug only behind bridge-owned aliases and wrappers.",
+        "Keep app imports Pug-agnostic and route all compatibility translation through the bridge.",
+        "Treat wrapper translation, host integration, and rollout pacing as downstream-owned concerns."
+      ],
+      "evidencePaths": [
+        "packages/bridges/underlay/README.md",
+        "packages/bridges/underlay/ts/zero-leak-proof.ts",
+        "docs/specs/040-underlay-bridge-zero-leak-adoption-proof-baseline.md"
+      ],
+      "blockers": [
+        "Reference guidance exists, but real downstream wrapper and accessibility rollout evidence remains outside this repo."
+      ]
+    },
+    {
+      "id": "workstation-foundation-consumer",
+      "label": "Workstation-oriented reference app",
+      "format": "reference-app-shape",
+      "status": "proof-backed",
+      "audience": "teams adopting generic shell and dock surfaces while keeping domain widgets downstream-owned",
+      "packageEntryPoints": [
+        "@pug/svelte-tokens",
+        "@pug/svelte-primitives",
+        "@pug/svelte-composites",
+        "@pug/svelte-workstation"
+      ],
+      "exampleSectionIds": [
+        "command-suite",
+        "workspace-suite",
+        "detail-suite"
+      ],
+      "onboardingSteps": [
+        "Use workstation shells as shared foundation rather than as a domain-specific widget kit.",
+        "Keep command registries, layout policy, and domain widgets app-owned.",
+        "Treat GPUI workstation parity as an explicit adoption blocker, not an implied capability."
+      ],
+      "evidencePaths": [
+        "packages/svelte/workstation/loophole-foundation-proof.json",
+        "packages/svelte/workstation/README.md",
+        "docs/specs/041-loophole-foundation-adoption-and-daw-extension-boundary.md"
+      ],
+      "blockers": [
+        "This shape proves generic workstation foundation, not DAW-specific surface ownership or native parity."
+      ]
+    },
+    {
+      "id": "public-example-surface",
+      "label": "Public-facing example surface",
+      "format": "public-example-family",
+      "status": "preview-backed",
+      "audience": "evaluators and adopters learning the system before direct integration",
+      "packageEntryPoints": [
+        "@pug/svelte-preview"
+      ],
+      "exampleSectionIds": [
+        "catalog-hub",
+        "token-summary-section",
+        "token-inspector",
+        "form-suite",
+        "browse-suite",
+        "workspace-suite"
+      ],
+      "onboardingSteps": [
+        "Use the preview surface to inspect package ownership, contract ownership, and stateful examples.",
+        "Follow preview sections back to the owning contracts and package READMEs rather than copying shell-specific demo code.",
+        "Treat preview examples as discoverability and inspection aids, not as hidden public API templates."
+      ],
+      "evidencePaths": [
+        "packages/svelte/preview/README.md",
+        "docs/specs/020-docs-site-example-and-component-discoverability-rules.md",
+        "packages/svelte/preview/artifacts/parity-report.json",
+        "packages/svelte/preview/artifacts/accessibility-report.json"
+      ],
+      "blockers": [
+        "The preview is still an internal docs harness, not a published versioned docs site or app starter."
+      ]
+    }
+  ],
+  "onboardingLanes": [
+    {
+      "id": "evaluate",
+      "label": "Evaluate the system",
+      "startPaths": [
+        "README.md",
+        "docs/README.md",
+        "packages/svelte/preview/README.md"
+      ],
+      "primaryReferenceShapeId": "public-example-surface",
+      "nonGoals": [
+        "Do not treat preview glue or section-specific example code as hidden package API.",
+        "Do not infer GPUI component readiness from browser examples alone."
+      ]
+    },
+    {
+      "id": "direct-adoption",
+      "label": "Direct Svelte adoption",
+      "startPaths": [
+        "docs/specs/039-extension-sdk-composition-guidance-and-starter-package-baseline.md",
+        "packages/svelte/primitives/README.md",
+        "packages/svelte/composites/README.md",
+        "packages/svelte/workstation/README.md"
+      ],
+      "primaryReferenceShapeId": "direct-svelte-consumer",
+      "nonGoals": [
+        "Do not bypass contracts with deep imports or ad hoc wrappers that redefine canonical meaning.",
+        "Do not import workstation shells unless the app actually needs them."
+      ]
+    },
+    {
+      "id": "bridge-adoption",
+      "label": "Bridge-mediated adoption",
+      "startPaths": [
+        "packages/bridges/underlay/README.md",
+        "docs/specs/040-underlay-bridge-zero-leak-adoption-proof-baseline.md"
+      ],
+      "primaryReferenceShapeId": "underlay-bridge-consumer",
+      "nonGoals": [
+        "Do not expose Pug package names directly in downstream app imports.",
+        "Do not widen bridge aliases without concrete downstream pressure."
+      ]
+    },
+    {
+      "id": "workstation-adoption",
+      "label": "Workstation foundation adoption",
+      "startPaths": [
+        "packages/svelte/workstation/README.md",
+        "docs/specs/041-loophole-foundation-adoption-and-daw-extension-boundary.md"
+      ],
+      "primaryReferenceShapeId": "workstation-foundation-consumer",
+      "nonGoals": [
+        "Do not mistake workstation foundation for a DAW or domain widget kit.",
+        "Do not claim native-runtime parity from Svelte workstation examples alone."
+      ]
+    }
+  ],
+  "publicExampleExpectations": [
+    "Examples must point back to owning packages and contracts.",
+    "Examples must show meaningful state or shell posture instead of only default specimens.",
+    "Examples may support evaluation and onboarding, but they must not silently become product templates."
+  ]
+}

@@ -16,13 +16,41 @@ bun run docs:dev
 
 Then open `http://localhost:4173`.
 
+To validate the docs baseline before a publish candidate:
+
+```sh
+bun run docs:lint
+bun run docs:check
+```
+
 ## Scope
 
 - inspect live token artifact output rather than hand-copied demo values
 - exercise theme, density, and control-size overlays
+- exercise scoped appearance-treatment overrides without redefining token meaning
 - provide the first catalog-style docs and examples surface while the larger
   docs-site program remains early
 - make package and contract ownership visible alongside the live examples
+- keep preview state URL-addressable by section, theme, density, and control
+  size so review notes can point at stable surfaces
+- act as the source for the generated parity route/report baseline
+
+## Parity Report
+
+Regenerate the current parity evidence artifact from the repository root:
+
+```sh
+bun run parity:report
+```
+
+This writes:
+
+- `packages/svelte/preview/artifacts/parity-report.json`
+
+The parity artifact now also records which public exports from
+`@pug/svelte-primitives`, `@pug/svelte-composites`, and
+`@pug/svelte-workstation` are directly covered by preview sections versus still
+being contract-only.
 
 ## Remaining Harness Debt
 
@@ -32,12 +60,16 @@ Then open `http://localhost:4173`.
   search, permalinks, or generated contract pages
 - GPUI implementation parity is still documented more strongly than it is
   demonstrated in a runnable harness
-- packaging, versioning, and release policy still need to be defined before
-  downstream repos should depend on the current package surfaces
-- downstream adoption remains intentionally deferred until the release baseline
-  tranche lands
+- the current parity report stabilizes review routes and boundaries, but it is
+  not yet a screenshot-regression or GPUI interaction harness
+- many public exports are now classified explicitly as contract-only because
+  the preview still reviews them through broader suite sections rather than one
+  direct specimen per export
+- the current publish candidate is an internal static preview build, not yet a
+  public docs-site deployment with versioned hosting or external release notes
 
 ## Next Task
 
-Use this docs/preview surface to support `g03.001`, validating any migration or
-compatibility policy against the real internal review surface.
+Use this docs/preview surface while following the reference-app and onboarding
+baseline, keeping preview examples tied back to owning contracts and packages
+instead of treating section-specific demo glue as public starter code.

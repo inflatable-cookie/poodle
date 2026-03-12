@@ -1,21 +1,28 @@
 # Foundation Contracts
 
 Status: active
-Updated: 2026-03-11
+Updated: 2026-03-12
 
 Foundation contracts define the lowest reusable surface in Pug.
 
 ## Current Contracts
 
+- `accordion.md`
 - `box.md`
 - `stack.md`
 - `inline.md`
 - `grid.md`
+- `table.md`
 - `spacer.md`
 - `surface.md`
 - `separator.md`
 - `scroll-shell.md`
+- `calendar.md`
+- `range-calendar.md`
 - `button.md`
+- `toggle.md`
+- `toggle-group.md`
+- `toolbar.md`
 - `icon-button.md`
 - `checkbox.md`
 - `radio-group.md`
@@ -27,12 +34,24 @@ Foundation contracts define the lowest reusable surface in Pug.
 - `range-slider.md`
 - `tabs.md`
 - `tab-strip.md`
+- `navigation-menu.md`
+- `menubar.md`
 - `menu.md`
 - `context-menu.md`
+- `hover-card.md`
 - `tooltip.md`
 - `popover.md`
 - `dialog.md`
 - `drawer.md`
+- `combobox.md`
+- `collapsible.md`
+- `date-picker.md`
+- `date-range-picker.md`
+- `time-field.md`
+- `time-zone-select.md`
+- `date-time-picker.md`
+- `date-time-range-picker.md`
+- `zoned-date-time-picker.md`
 - `text-input.md`
 - `field.md`
 - `form-actions.md`
@@ -40,7 +59,11 @@ Foundation contracts define the lowest reusable surface in Pug.
 - `search-field.md`
 - `editable-label.md`
 - `number-entry.md`
+- `pin-input.md`
+- `pagination.md`
 - `progress.md`
+- `meter.md`
+- `rating.md`
 - `skeleton.md`
 - `badge.md`
 - `pill.md`
@@ -62,5 +85,6 @@ they are mostly structural. In particular:
 
 ## Next Task
 
-Use this foundation surface while executing `g02.002`, especially as tables,
-filters, and bulk actions start composing on top of the new form baseline.
+Use this expanded foundation surface while deciding which wider substrate
+families still deserve promotion into first-class contracts, with disclosure
+now explicit and deeper integration ownership still open.

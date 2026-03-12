@@ -1,0 +1,177 @@
+<script context="module" lang="ts">
+  let nextPopoverId = 0;
+</script>
+
+<script lang="ts">
+  import { createEventDispatcher, onMount, tick } from "svelte";
+
+  import { getFocusableElements } from "./internal";
+
+  import type { OverlayPlacement, PopoverInitialFocus } from "./types";
+
+  export let open: boolean | null = null;
+  export let defaultOpen = false;
+  export let placement: OverlayPlacement = "bottom-start";
+  export let offset = 8;
+  export let dismissOnOutsideInteract = true;
+  export let initialFocus: PopoverInitialFocus = "first-focusable";
+  export let ariaLabel: string | null = null;
+
+  const dispatch = createEventDispatcher<{
+    openChange: { open: boolean };
+  }>();
+
+  const popoverId = `pug-popover-${++nextPopoverId}`;
+  let rootElement: HTMLDivElement | null = null;
+  let triggerElement: HTMLDivElement | null = null;
+  let surfaceElement: HTMLDivElement | null = null;
+  let uncontrolledOpen = defaultOpen;
+  let previousOpen = false;
+
+  $: isControlled = open !== null;
+  $: isOpen = isControlled ? open === true : uncontrolledOpen;
+  $: if (isOpen && !previousOpen) {
+    tick().then(() => {
+      if (!surfaceElement) {
+        return;
+      }
+
+      if (initialFocus === "content") {
+        surfaceElement.focus();
+        return;
+      }
+
+      if (initialFocus === "first-focusable") {
+        getFocusableElements(surfaceElement)[0]?.focus();
+      }
+    });
+  }
+  $: previousOpen = isOpen;
+
+  function setOpen(nextOpen: boolean): void {
+    if (!isControlled) {
+      uncontrolledOpen = nextOpen;
+    }
+
+    dispatch("openChange", { open: nextOpen });
+
+    if (!nextOpen) {
+      triggerElement?.focus();
+    }
+  }
+
+  onMount(() => {
+    function handlePointerDown(event: MouseEvent): void {
+      if (!dismissOnOutsideInteract || !isOpen || !rootElement) {
+        return;
+      }
+
+      if (!rootElement.contains(event.target as Node)) {
+        setOpen(false);
+      }
+    }
+
+    function handleKeydown(event: KeyboardEvent): void {
+      if (event.key === "Escape" && isOpen) {
+        event.preventDefault();
+        setOpen(false);
+      }
+    }
+
+    document.addEventListener("mousedown", handlePointerDown);
+    document.addEventListener("keydown", handleKeydown);
+
+    return () => {
+      document.removeEventListener("mousedown", handlePointerDown);
+      document.removeEventListener("keydown", handleKeydown);
+    };
+  });
+</script>
+
+<div class="popover" bind:this={rootElement}>
+  <div
+    bind:this={triggerElement}
+    class="popover__trigger"
+    role="button"
+    tabindex="0"
+    aria-expanded={isOpen ? "true" : "false"}
+    aria-controls={isOpen ? popoverId : undefined}
+    on:click={() => setOpen(!isOpen)}
+    on:keydown={(event) => {
+      if (event.key === "Enter" || event.key === " ") {
+        event.preventDefault();
+        setOpen(!isOpen);
+      }
+    }}
+  >
+    <slot name="trigger" />
+  </div>
+
+  {#if isOpen}
+    <div
+      bind:this={surfaceElement}
+      id={popoverId}
+      class="popover__surface"
+      data-placement={placement}
+      style={`--pug-popover-offset: ${offset}px;`}
+      tabindex={initialFocus === "content" ? 0 : -1}
+      role="dialog"
+      aria-label={ariaLabel ?? undefined}
+    >
+      <slot />
+    </div>
+  {/if}
+</div>
+
+<style>
+  .popover {
+    position: relative;
+    display: inline-flex;
+  }
+
+  .popover__trigger {
+    display: inline-flex;
+  }
+
+  .popover__trigger:focus-visible {
+    outline: var(--pug-border-width-focus) solid var(--pug-color-accent-focusRing);
+    outline-offset: 0.125rem;
+  }
+
+  .popover__surface {
+    position: absolute;
+    z-index: var(--pug-overlay-z-menu);
+    min-width: 14rem;
+    max-width: min(24rem, 90vw);
+    padding: var(--pug-space-panel-y) var(--pug-space-panel-x);
+    border: 0.0625rem solid color-mix(in srgb, var(--pug-color-border-default) 72%, transparent);
+    border-radius: var(--pug-radius-surface);
+    background: color-mix(in srgb, var(--pug-color-background-elevated) 98%, var(--pug-color-background-panel));
+    box-shadow: var(--pug-elevation-overlay);
+  }
+
+  .popover__surface[data-placement^="bottom"] {
+    top: calc(100% + var(--pug-popover-offset));
+    left: 0;
+  }
+
+  .popover__surface[data-placement^="top"] {
+    bottom: calc(100% + var(--pug-popover-offset));
+    left: 0;
+  }
+
+  .popover__surface[data-placement^="right"] {
+    top: 0;
+    left: calc(100% + var(--pug-popover-offset));
+  }
+
+  .popover__surface[data-placement^="left"] {
+    top: 0;
+    right: calc(100% + var(--pug-popover-offset));
+  }
+
+  .popover__surface[data-placement$="end"] {
+    left: auto;
+    right: 0;
+  }
+</style>

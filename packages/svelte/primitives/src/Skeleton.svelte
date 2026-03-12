@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { pxToRem } from "@pug/svelte-tokens";
   import type { SkeletonShape } from "./types";
 
   export let shape: SkeletonShape = "line";
@@ -7,9 +8,9 @@
   export let isAnimated = true;
 
   $: resolvedWidth =
-    width ?? (shape === "circle" ? "40px" : shape === "block" ? "100%" : "100%");
+    width ?? (shape === "circle" ? pxToRem(40) : shape === "block" ? "100%" : "100%");
   $: resolvedHeight =
-    height ?? (shape === "circle" ? "40px" : shape === "block" ? "96px" : "14px");
+    height ?? (shape === "circle" ? pxToRem(40) : shape === "block" ? pxToRem(96) : pxToRem(14));
 </script>
 
 <span
@@ -37,11 +38,11 @@
   }
 
   .skeleton[data-shape="circle"] {
-    border-radius: 999px;
+    border-radius: 999rem;
   }
 
   .skeleton[data-shape="block"] {
-    border-radius: calc(var(--pug-radius-surface) - 4px);
+    border-radius: calc(var(--pug-radius-surface) - 0.25rem);
   }
 
   .skeleton[data-animated="true"] {

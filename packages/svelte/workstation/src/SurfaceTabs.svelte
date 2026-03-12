@@ -175,29 +175,50 @@
     grid-template-columns: minmax(0, 1fr) auto;
     gap: var(--pug-space-inline-sm);
     align-items: center;
-    padding: 8px var(--pug-space-panel-x);
-    border-bottom: 1px solid var(--pug-color-border-subtle);
+    padding: 0.5rem var(--pug-space-panel-x);
+    border-bottom: 0.0625rem solid var(--pug-color-border-subtle);
     background: color-mix(in srgb, var(--pug-color-background-panel) 92%, transparent);
   }
 
   .surface-tabs__items {
     display: flex;
     flex-wrap: wrap;
-    gap: 4px;
+    gap: 0.25rem;
     align-items: center;
     min-width: 0;
   }
 
   .surface-tabs__tab {
+    --pug-surface-tab-radius: var(--pug-treatment-interactive-radius, var(--pug-radius-control));
+    --pug-surface-tab-fill: var(
+      --pug-treatment-interactive-fill,
+      color-mix(in srgb, var(--pug-color-background-surface) 68%, transparent)
+    );
+    --pug-surface-tab-fill-active: var(
+      --pug-treatment-interactive-fill-active,
+      color-mix(in srgb, var(--pug-color-accent-base) 20%, var(--pug-color-background-elevated))
+    );
+    --pug-surface-tab-border: var(
+      --pug-treatment-interactive-border,
+      var(--pug-color-border-subtle)
+    );
+    --pug-surface-tab-border-active: var(
+      --pug-treatment-interactive-border-active,
+      color-mix(in srgb, var(--pug-color-accent-base) 24%, var(--pug-color-border-subtle))
+    );
+    --pug-surface-tab-shadow-active: var(
+      --pug-treatment-interactive-shadow-active,
+      inset 0 0.0625rem 0 color-mix(in srgb, var(--pug-color-text-inverse) 10%, transparent)
+    );
     display: grid;
     grid-template-columns: minmax(0, 1fr) auto;
-    gap: 10px;
+    gap: 0.625rem;
     align-items: center;
-    min-height: 32px;
-    padding: 0 10px 0 12px;
-    border: 1px solid var(--pug-color-border-subtle);
-    border-radius: var(--pug-radius-control);
-    background: color-mix(in srgb, var(--pug-color-background-surface) 68%, transparent);
+    min-height: 2rem;
+    padding: 0 0.625rem 0 0.75rem;
+    border: 0.0625rem solid var(--pug-surface-tab-border);
+    border-radius: var(--pug-surface-tab-radius);
+    background: var(--pug-surface-tab-fill);
     color: var(--pug-color-text-primary);
     cursor: pointer;
     font: inherit;
@@ -205,24 +226,24 @@
   }
 
   .surface-tabs__tab--active {
-    border-color: color-mix(in srgb, var(--pug-color-accent-base) 24%, var(--pug-color-border-subtle));
-    background: color-mix(in srgb, var(--pug-color-accent-base) 20%, var(--pug-color-background-elevated));
-    box-shadow: inset 0 1px 0 color-mix(in srgb, var(--pug-color-text-inverse) 10%, transparent);
+    border-color: var(--pug-surface-tab-border-active);
+    background: var(--pug-surface-tab-fill-active);
+    box-shadow: var(--pug-surface-tab-shadow-active);
   }
 
   .surface-tabs__actions {
     display: flex;
     align-items: center;
-    gap: 6px;
+    gap: 0.375rem;
   }
 
   .surface-tabs__icon-button,
   .surface-tabs__add {
-    min-height: 28px;
-    min-width: 28px;
+    min-height: 1.75rem;
+    min-width: 1.75rem;
     padding: 0;
     border: 0;
-    border-radius: calc(var(--pug-radius-control) - 1px);
+    border-radius: calc(var(--pug-surface-tab-radius) - 0.0625rem);
     background: transparent;
     color: var(--pug-color-text-secondary);
     cursor: pointer;
@@ -230,13 +251,16 @@
   }
 
   .surface-tabs__add {
-    border: 1px solid var(--pug-color-border-subtle);
-    background: color-mix(in srgb, var(--pug-color-background-surface) 68%, transparent);
+    border: 0.0625rem solid var(--pug-surface-tab-border);
+    background: var(--pug-surface-tab-fill);
   }
 
   .surface-tabs__icon-button:hover,
   .surface-tabs__add:hover {
-    background: color-mix(in srgb, var(--pug-color-background-surface) 84%, transparent);
+    background: var(
+      --pug-treatment-interactive-subtle-fill-hover,
+      color-mix(in srgb, var(--pug-color-background-surface) 84%, transparent)
+    );
     color: var(--pug-color-text-primary);
   }
 
@@ -244,6 +268,6 @@
   .surface-tabs__icon-button:focus-visible,
   .surface-tabs__add:focus-visible {
     outline: var(--pug-border-width-focus) solid var(--pug-color-accent-focusRing);
-    outline-offset: 2px;
+    outline-offset: 0.125rem;
   }
 </style>

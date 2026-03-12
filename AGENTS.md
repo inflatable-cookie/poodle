@@ -22,3 +22,18 @@ Scope: whole `pug/` repository.
 - `docs/vision/001-pug-vision.md`
 - `docs/architecture/001-pug-system-shape.md`
 - `docs/roadmaps/README.md`
+
+## Task Runner
+
+Pug uses [Effigy](https://github.com/inflatable-cookie/effigy) as its task runner.
+
+Common commands:
+- `effigy tasks` — list all available tasks
+- `effigy tokens:build` — build design tokens
+- `effigy docs:dev` — start documentation dev server
+- `effigy docs:check` — run all documentation checks
+- `effigy health` — full health check
+- `effigy doctor` — environment and configuration health
+- `effigy scan attention-markers` — scan for TODO/FIXME markers
+
+Legacy npm scripts in `package.json` are deprecated; use `effigy <task>` instead.

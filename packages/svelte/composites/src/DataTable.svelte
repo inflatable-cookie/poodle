@@ -133,7 +133,7 @@
 <style>
   .data-table {
     overflow: auto;
-    border: 1px solid var(--pug-color-border-subtle);
+    border: 0.0625rem solid var(--pug-color-border-subtle);
     border-radius: var(--pug-radius-surface);
     background: var(--pug-color-background-panel);
   }
@@ -145,10 +145,10 @@
 
   .data-table__caption {
     position: absolute;
-    width: 1px;
-    height: 1px;
+    width: 0.0625rem;
+    height: 0.0625rem;
     padding: 0;
-    margin: -1px;
+    margin: -0.0625rem;
     overflow: hidden;
     clip: rect(0, 0, 0, 0);
     white-space: nowrap;
@@ -158,7 +158,7 @@
   th,
   td {
     padding: var(--pug-space-panel-y) var(--pug-space-panel-x);
-    border-bottom: 1px solid var(--pug-color-border-subtle);
+    border-bottom: 0.0625rem solid var(--pug-color-border-subtle);
     text-align: left;
     vertical-align: middle;
   }
@@ -181,7 +181,7 @@
   }
 
   .data-table__selection {
-    width: 52px;
+    width: 3.25rem;
   }
 
   .data-table__sort,
@@ -201,13 +201,13 @@
   .data-table__sort:focus-visible,
   .data-table__actions button:focus-visible {
     outline: var(--pug-border-width-focus) solid var(--pug-color-accent-focusRing);
-    outline-offset: 2px;
+    outline-offset: 0.125rem;
     border-radius: var(--pug-radius-control);
   }
 
   .data-table__cell {
     display: grid;
-    gap: 4px;
+    gap: 0.25rem;
   }
 
   .data-table__cell small {
@@ -223,7 +223,7 @@
 
   .data-table__actions-header,
   .data-table__actions {
-    width: 120px;
+    width: 7.5rem;
     text-align: right;
   }
 

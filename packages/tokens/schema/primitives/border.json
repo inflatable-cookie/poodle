@@ -3,11 +3,11 @@
     "width": {
       "subtle": {
         "$type": "dimension",
-        "$value": "1px"
+        "$value": "0.0625rem"
       },
       "strong": {
         "$type": "dimension",
-        "$value": "2px"
+        "$value": "0.125rem"
       }
     }
   }

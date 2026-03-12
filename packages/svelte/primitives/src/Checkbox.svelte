@@ -85,10 +85,10 @@
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    width: 18px;
-    height: 18px;
-    border: 1px solid var(--pug-color-border-default);
-    border-radius: 5px;
+    width: 1.125rem;
+    height: 1.125rem;
+    border: 0.0625rem solid var(--pug-color-border-default);
+    border-radius: 0.3125rem;
     background: var(--pug-color-background-surface);
     color: var(--pug-color-text-inverse);
   }
@@ -101,12 +101,12 @@
 
   .checkbox__control:focus-visible + .checkbox__indicator {
     outline: var(--pug-border-width-focus) solid var(--pug-color-accent-focusRing);
-    outline-offset: 2px;
+    outline-offset: 0.125rem;
   }
 
   .checkbox__mark {
     font-family: var(--pug-typography-code-family);
-    font-size: 12px;
+    font-size: 0.75rem;
     line-height: 1;
   }
 

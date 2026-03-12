@@ -46,7 +46,7 @@
     justify-content: space-between;
     gap: var(--pug-space-inline-md);
     padding: var(--pug-space-panel-y) var(--pug-space-panel-x);
-    border: 1px solid var(--pug-color-border-subtle);
+    border: 0.0625rem solid var(--pug-color-border-subtle);
     border-radius: var(--pug-radius-surface);
     background: color-mix(in srgb, var(--pug-color-accent-base) 10%, var(--pug-color-background-panel));
   }
@@ -75,7 +75,7 @@
   .bulk-action-bar__button {
     min-height: var(--pug-size-control-height);
     padding: 0 var(--pug-space-control-x);
-    border: 1px solid var(--pug-color-border-default);
+    border: 0.0625rem solid var(--pug-color-border-default);
     border-radius: var(--pug-radius-control);
     background: var(--pug-color-background-surface);
     color: var(--pug-color-text-primary);
@@ -89,6 +89,6 @@
 
   .bulk-action-bar__button:focus-visible {
     outline: var(--pug-border-width-focus) solid var(--pug-color-accent-focusRing);
-    outline-offset: 2px;
+    outline-offset: 0.125rem;
   }
 </style>

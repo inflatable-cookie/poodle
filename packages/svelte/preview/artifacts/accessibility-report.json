@@ -1,0 +1,730 @@
+{
+  "generatedAt": "2026-03-12T20:50:33.761Z",
+  "artifact": "packages/svelte/preview/artifacts/accessibility-report.json",
+  "previewBasePath": "/",
+  "automatedBoundary": [
+    "Every docs section must have a machine-readable accessibility audit target.",
+    "Each target must list audit-area status, automated checks, manual checks, and stable review routes.",
+    "GPUI-blocked targets must name the blocker instead of implying native proof from Svelte behavior."
+  ],
+  "manualBoundary": [
+    "Screen-reader announcement quality, keyboard rhythm, and focus recovery still require human review.",
+    "Cross-runtime deltas between browser semantics and GPUI native accessibility must be documented explicitly.",
+    "Preview coverage can seed accessibility review, but it cannot claim native assistive-technology conformance without runtime evidence."
+  ],
+  "summary": {
+    "targetCount": 12,
+    "blockedGpuiTargets": 9,
+    "semanticsCoverage": {
+      "explicit": 7,
+      "hybrid": 5
+    },
+    "focusCoverage": {
+      "hybrid": 10,
+      "explicit": 2
+    },
+    "keyboardCoverage": {
+      "hybrid": 8,
+      "manual": 1,
+      "explicit": 3
+    },
+    "announcementCoverage": {
+      "not-applicable": 2,
+      "hybrid": 4,
+      "manual": 6
+    },
+    "gpuiCoverage": {
+      "not-applicable": 3,
+      "blocked": 9
+    }
+  },
+  "targets": [
+    {
+      "sectionId": "catalog-hub",
+      "title": "Catalog hub",
+      "layer": "tokens",
+      "packageName": "docs + packages/svelte/*",
+      "contractRoot": "packages/svelte/preview/",
+      "summary": "Entry point for package ownership, family coverage, example scope, and adoption expectations.",
+      "auditAreas": {
+        "semantics": "explicit",
+        "focus": "hybrid",
+        "keyboard": "hybrid",
+        "announcements": "not-applicable",
+        "gpui": "not-applicable"
+      },
+      "automatedChecks": [
+        "catalog-hub review routes stay deep-linkable",
+        "section navigation remains present in the generated docs surface"
+      ],
+      "manualChecks": [
+        "section browser stays usable with keyboard-only navigation",
+        "landing copy still exposes package ownership and adoption guidance clearly"
+      ],
+      "gpuiDeltaNotes": [
+        "This section is a browser review index rather than a candidate shared GPUI component surface."
+      ],
+      "blockerNotes": [],
+      "reviewRoutes": [
+        {
+          "id": "catalog-hub-baseline",
+          "label": "baseline",
+          "note": "Primary catalog landing review.",
+          "state": {
+            "sectionId": "catalog-hub",
+            "theme": "loophole-studio",
+            "density": "compact",
+            "controlSize": "md"
+          },
+          "url": "/?theme=loophole-studio&density=compact&controlSize=md#catalog-hub"
+        },
+        {
+          "id": "catalog-hub-light",
+          "label": "light",
+          "note": "Light-theme catalog and navigation review.",
+          "state": {
+            "sectionId": "catalog-hub",
+            "theme": "light",
+            "density": "comfortable",
+            "controlSize": "md"
+          },
+          "url": "/?theme=light&density=comfortable&controlSize=md#catalog-hub"
+        }
+      ]
+    },
+    {
+      "sectionId": "form-suite",
+      "title": "Form baseline and validation posture",
+      "layer": "foundation",
+      "packageName": "@pug/svelte-primitives",
+      "contractRoot": "docs/contracts/foundation/",
+      "summary": "Field wrappers, inputs, search, and action rows with validation and announcement posture.",
+      "auditAreas": {
+        "semantics": "explicit",
+        "focus": "explicit",
+        "keyboard": "hybrid",
+        "announcements": "hybrid",
+        "gpui": "blocked"
+      },
+      "automatedChecks": [
+        "invalid, pending, and disabled form review routes are stable",
+        "control-size and theme state remain deep-linkable for repeat audits"
+      ],
+      "manualChecks": [
+        "screen-reader announcement quality for help, error, and pending copy",
+        "caret, selection, and IME behavior remain intact across text entry surfaces"
+      ],
+      "gpuiDeltaNotes": [
+        "Browser form semantics come from native inputs, while GPUI will need explicit accessible tree nodes plus announcement wiring.",
+        "Validation messaging parity must be proven separately for native focus movement and error exposure."
+      ],
+      "blockerNotes": [
+        "GPUI runtime evidence is not shipped for this section yet, so Svelte behavior cannot be promoted to native assistive-technology proof."
+      ],
+      "reviewRoutes": [
+        {
+          "id": "form-suite-baseline",
+          "label": "baseline",
+          "note": "Default form suite audit.",
+          "state": {
+            "sectionId": "form-suite",
+            "theme": "loophole-studio",
+            "density": "compact",
+            "controlSize": "md"
+          },
+          "url": "/?theme=loophole-studio&density=compact&controlSize=md#form-suite"
+        },
+        {
+          "id": "form-suite-light",
+          "label": "light",
+          "note": "Light-theme contrast and field grouping audit.",
+          "state": {
+            "sectionId": "form-suite",
+            "theme": "light",
+            "density": "comfortable",
+            "controlSize": "md"
+          },
+          "url": "/?theme=light&density=comfortable&controlSize=md#form-suite"
+        },
+        {
+          "id": "form-suite-small",
+          "label": "small",
+          "note": "Minimum-size input and label audit.",
+          "state": {
+            "sectionId": "form-suite",
+            "theme": "loophole-studio",
+            "density": "compact",
+            "controlSize": "sm"
+          },
+          "url": "/?theme=loophole-studio&density=compact&controlSize=sm#form-suite"
+        }
+      ]
+    },
+    {
+      "sectionId": "table-suite",
+      "title": "Selection, sorting, and bulk actions",
+      "layer": "composites",
+      "packageName": "@pug/svelte-composites",
+      "contractRoot": "docs/contracts/composites/",
+      "summary": "Structured rows with visible-scope selection, sort semantics, row actions, and pagination context.",
+      "auditAreas": {
+        "semantics": "explicit",
+        "focus": "hybrid",
+        "keyboard": "hybrid",
+        "announcements": "manual",
+        "gpui": "blocked"
+      },
+      "automatedChecks": [
+        "table review routes stay stable for default and light-theme audits",
+        "selection and sorting examples remain attached to the table section"
+      ],
+      "manualChecks": [
+        "header and row action keyboard flow stays understandable",
+        "sort or selection state changes are announced clearly enough for assistive technology"
+      ],
+      "gpuiDeltaNotes": [
+        "HTML table semantics do not translate directly to GPUI; native structured data surfaces will require explicit accessible relationships.",
+        "Row focus and selection narration cannot be claimed cross-runtime yet."
+      ],
+      "blockerNotes": [
+        "GPUI runtime evidence is not shipped for this section yet, so Svelte behavior cannot be promoted to native assistive-technology proof."
+      ],
+      "reviewRoutes": [
+        {
+          "id": "table-suite-baseline",
+          "label": "baseline",
+          "note": "Primary table interaction audit.",
+          "state": {
+            "sectionId": "table-suite",
+            "theme": "loophole-studio",
+            "density": "compact",
+            "controlSize": "md"
+          },
+          "url": "/?theme=loophole-studio&density=compact&controlSize=md#table-suite"
+        },
+        {
+          "id": "table-suite-light",
+          "label": "light",
+          "note": "Light-theme table review.",
+          "state": {
+            "sectionId": "table-suite",
+            "theme": "light",
+            "density": "comfortable",
+            "controlSize": "md"
+          },
+          "url": "/?theme=light&density=comfortable&controlSize=md#table-suite"
+        }
+      ]
+    },
+    {
+      "sectionId": "browse-suite",
+      "title": "Lists, grids, filters, and search depth",
+      "layer": "composites",
+      "packageName": "@pug/svelte-composites",
+      "contractRoot": "docs/contracts/composites/",
+      "summary": "Browse shells that separate ready, loading, empty, and no-results posture across list and grid views.",
+      "auditAreas": {
+        "semantics": "hybrid",
+        "focus": "hybrid",
+        "keyboard": "hybrid",
+        "announcements": "manual",
+        "gpui": "blocked"
+      },
+      "automatedChecks": [
+        "browse routes remain stable for ready and empty-state review",
+        "catalog registration still maps browse ownership to the correct contracts"
+      ],
+      "manualChecks": [
+        "empty, loading, and no-results transitions stay understandable without relying on layout alone",
+        "filter and search affordances maintain predictable focus order"
+      ],
+      "gpuiDeltaNotes": [
+        "DOM list semantics and browser search fields currently do part of the accessibility work automatically.",
+        "Native browse-shell parity will need explicit narration for result-count and progressive-loading state."
+      ],
+      "blockerNotes": [
+        "GPUI runtime evidence is not shipped for this section yet, so Svelte behavior cannot be promoted to native assistive-technology proof."
+      ],
+      "reviewRoutes": [
+        {
+          "id": "browse-suite-baseline",
+          "label": "baseline",
+          "note": "Default browse audit.",
+          "state": {
+            "sectionId": "browse-suite",
+            "theme": "loophole-studio",
+            "density": "compact",
+            "controlSize": "md"
+          },
+          "url": "/?theme=loophole-studio&density=compact&controlSize=md#browse-suite"
+        },
+        {
+          "id": "browse-suite-light",
+          "label": "light",
+          "note": "Light-theme browse-shell review.",
+          "state": {
+            "sectionId": "browse-suite",
+            "theme": "light",
+            "density": "comfortable",
+            "controlSize": "md"
+          },
+          "url": "/?theme=light&density=comfortable&controlSize=md#browse-suite"
+        }
+      ]
+    },
+    {
+      "sectionId": "detail-suite",
+      "title": "Detail display, cards, headers, and navigation",
+      "layer": "composites",
+      "packageName": "@pug/svelte-composites",
+      "contractRoot": "docs/contracts/composites/",
+      "summary": "Readonly detail surfaces with breadcrumb context, page headers, cards, and section hierarchy.",
+      "auditAreas": {
+        "semantics": "explicit",
+        "focus": "hybrid",
+        "keyboard": "hybrid",
+        "announcements": "manual",
+        "gpui": "blocked"
+      },
+      "automatedChecks": [
+        "detail routes remain stable for metadata and action review",
+        "theme and density changes keep the same detail audit entry points"
+      ],
+      "manualChecks": [
+        "metadata rows remain understandable when scanned by assistive technology",
+        "header actions and companion panes keep a predictable focus order"
+      ],
+      "gpuiDeltaNotes": [
+        "Structured metadata is explicit in Svelte through DOM text order, but GPUI will need deliberate accessible grouping.",
+        "Cross-pane navigation expectations remain unproven natively."
+      ],
+      "blockerNotes": [
+        "GPUI runtime evidence is not shipped for this section yet, so Svelte behavior cannot be promoted to native assistive-technology proof."
+      ],
+      "reviewRoutes": [
+        {
+          "id": "detail-suite-baseline",
+          "label": "baseline",
+          "note": "Primary detail layout audit.",
+          "state": {
+            "sectionId": "detail-suite",
+            "theme": "loophole-studio",
+            "density": "compact",
+            "controlSize": "md"
+          },
+          "url": "/?theme=loophole-studio&density=compact&controlSize=md#detail-suite"
+        },
+        {
+          "id": "detail-suite-light",
+          "label": "light",
+          "note": "Light-theme detail contrast audit.",
+          "state": {
+            "sectionId": "detail-suite",
+            "theme": "light",
+            "density": "comfortable",
+            "controlSize": "md"
+          },
+          "url": "/?theme=light&density=comfortable&controlSize=md#detail-suite"
+        }
+      ]
+    },
+    {
+      "sectionId": "picker-suite",
+      "title": "Picker, relation, and selection workflows",
+      "layer": "composites",
+      "packageName": "@pug/svelte-composites",
+      "contractRoot": "docs/contracts/composites/",
+      "summary": "Searchable attach-or-choose flows with selection summaries, commit/cancel rhythm, and keyboard traversal.",
+      "auditAreas": {
+        "semantics": "hybrid",
+        "focus": "hybrid",
+        "keyboard": "hybrid",
+        "announcements": "hybrid",
+        "gpui": "blocked"
+      },
+      "automatedChecks": [
+        "picker routes remain stable for single, multiple, and modal review",
+        "preview-state switches remain deep-linkable for repeat audits"
+      ],
+      "manualChecks": [
+        "selection change feedback remains understandable for keyboard-only and screen-reader users",
+        "popover or modal picker variants keep focus contained and recover correctly on close"
+      ],
+      "gpuiDeltaNotes": [
+        "Browser overlays rely on DOM focus scope patterns that do not automatically map to GPUI.",
+        "Selection announcement and active-descendant style behavior still need native proof."
+      ],
+      "blockerNotes": [
+        "GPUI runtime evidence is not shipped for this section yet, so Svelte behavior cannot be promoted to native assistive-technology proof."
+      ],
+      "reviewRoutes": [
+        {
+          "id": "picker-suite-baseline",
+          "label": "baseline",
+          "note": "Primary picker audit.",
+          "state": {
+            "sectionId": "picker-suite",
+            "theme": "loophole-studio",
+            "density": "compact",
+            "controlSize": "md"
+          },
+          "url": "/?theme=loophole-studio&density=compact&controlSize=md#picker-suite"
+        },
+        {
+          "id": "picker-suite-light",
+          "label": "light",
+          "note": "Light-theme picker review.",
+          "state": {
+            "sectionId": "picker-suite",
+            "theme": "light",
+            "density": "comfortable",
+            "controlSize": "md"
+          },
+          "url": "/?theme=light&density=comfortable&controlSize=md#picker-suite"
+        },
+        {
+          "id": "picker-suite-small",
+          "label": "small",
+          "note": "Small control-size picker audit.",
+          "state": {
+            "sectionId": "picker-suite",
+            "theme": "loophole-studio",
+            "density": "compact",
+            "controlSize": "sm"
+          },
+          "url": "/?theme=loophole-studio&density=compact&controlSize=sm#picker-suite"
+        }
+      ]
+    },
+    {
+      "sectionId": "media-suite",
+      "title": "Preview framing, embeds, and fallback posture",
+      "layer": "composites",
+      "packageName": "@pug/svelte-composites",
+      "contractRoot": "docs/contracts/composites/",
+      "summary": "Media surfaces that keep framing, metadata, and fallback meaning explicit without owning playback engines.",
+      "auditAreas": {
+        "semantics": "hybrid",
+        "focus": "hybrid",
+        "keyboard": "manual",
+        "announcements": "manual",
+        "gpui": "blocked"
+      },
+      "automatedChecks": [
+        "media preview routes remain stable for ready and empty-state review",
+        "embed and media preview examples stay attached to the media section"
+      ],
+      "manualChecks": [
+        "thumbnail strips and large preview surfaces remain keyboard-discoverable",
+        "fallback or unavailable preview states remain understandable without relying on art direction alone"
+      ],
+      "gpuiDeltaNotes": [
+        "Media previews depend on browser-native image and document affordances that are not equivalent to GPUI surfaces.",
+        "Playback, focus, and preview fallback narration remain native-runtime debt."
+      ],
+      "blockerNotes": [
+        "GPUI runtime evidence is not shipped for this section yet, so Svelte behavior cannot be promoted to native assistive-technology proof."
+      ],
+      "reviewRoutes": [
+        {
+          "id": "media-suite-baseline",
+          "label": "baseline",
+          "note": "Primary media review.",
+          "state": {
+            "sectionId": "media-suite",
+            "theme": "loophole-studio",
+            "density": "compact",
+            "controlSize": "md"
+          },
+          "url": "/?theme=loophole-studio&density=compact&controlSize=md#media-suite"
+        },
+        {
+          "id": "media-suite-light",
+          "label": "light",
+          "note": "Light-theme media audit.",
+          "state": {
+            "sectionId": "media-suite",
+            "theme": "light",
+            "density": "comfortable",
+            "controlSize": "md"
+          },
+          "url": "/?theme=light&density=comfortable&controlSize=md#media-suite"
+        }
+      ]
+    },
+    {
+      "sectionId": "notification-suite",
+      "title": "Banners, toasts, skeletons, and remediation",
+      "layer": "composites",
+      "packageName": "@pug/svelte-primitives + @pug/svelte-composites",
+      "contractRoot": "docs/contracts/foundation/ + docs/contracts/composites/",
+      "summary": "Persistent and transient state surfaces with loading, remediation, and announcement posture.",
+      "auditAreas": {
+        "semantics": "explicit",
+        "focus": "hybrid",
+        "keyboard": "explicit",
+        "announcements": "hybrid",
+        "gpui": "blocked"
+      },
+      "automatedChecks": [
+        "notification routes remain stable for banner and toast review",
+        "tone-switching review state stays deep-linkable"
+      ],
+      "manualChecks": [
+        "banner, toast, and remediation actions expose the right urgency without over-announcing",
+        "dismiss and follow-up actions stay reachable without focus traps"
+      ],
+      "gpuiDeltaNotes": [
+        "DOM live-region behavior and toast timing do not imply equivalent native announcement behavior.",
+        "Notification queue narration will need runtime-specific proof in GPUI."
+      ],
+      "blockerNotes": [
+        "GPUI runtime evidence is not shipped for this section yet, so Svelte behavior cannot be promoted to native assistive-technology proof."
+      ],
+      "reviewRoutes": [
+        {
+          "id": "notification-suite-baseline",
+          "label": "baseline",
+          "note": "Primary notification audit.",
+          "state": {
+            "sectionId": "notification-suite",
+            "theme": "loophole-studio",
+            "density": "compact",
+            "controlSize": "md"
+          },
+          "url": "/?theme=loophole-studio&density=compact&controlSize=md#notification-suite"
+        },
+        {
+          "id": "notification-suite-light",
+          "label": "light",
+          "note": "Light-theme notification tone audit.",
+          "state": {
+            "sectionId": "notification-suite",
+            "theme": "light",
+            "density": "comfortable",
+            "controlSize": "md"
+          },
+          "url": "/?theme=light&density=comfortable&controlSize=md#notification-suite"
+        }
+      ]
+    },
+    {
+      "sectionId": "command-suite",
+      "title": "Palette search, grouped actions, and inline rediscovery",
+      "layer": "workstation",
+      "packageName": "@pug/svelte-workstation",
+      "contractRoot": "docs/contracts/workstation/",
+      "summary": "Modal and inline command discovery with grouped results, focus containment, and keyboard movement.",
+      "auditAreas": {
+        "semantics": "hybrid",
+        "focus": "hybrid",
+        "keyboard": "explicit",
+        "announcements": "hybrid",
+        "gpui": "blocked"
+      },
+      "automatedChecks": [
+        "command review routes remain stable for modal and inline discovery",
+        "review URLs continue to target the command section directly"
+      ],
+      "manualChecks": [
+        "modal launcher, list navigation, and close recovery remain fully keyboard-usable",
+        "result count, active item, and execution feedback remain understandable to assistive technology"
+      ],
+      "gpuiDeltaNotes": [
+        "Browser dialog, list, and focus-lock patterns do not establish native command palette accessibility automatically.",
+        "Keyboard discovery and announcement behavior need standalone GPUI proof."
+      ],
+      "blockerNotes": [
+        "GPUI runtime evidence is not shipped for this section yet, so Svelte behavior cannot be promoted to native assistive-technology proof."
+      ],
+      "reviewRoutes": [
+        {
+          "id": "command-suite-baseline",
+          "label": "baseline",
+          "note": "Primary command discovery audit.",
+          "state": {
+            "sectionId": "command-suite",
+            "theme": "loophole-studio",
+            "density": "compact",
+            "controlSize": "md"
+          },
+          "url": "/?theme=loophole-studio&density=compact&controlSize=md#command-suite"
+        },
+        {
+          "id": "command-suite-light",
+          "label": "light",
+          "note": "Light-theme command review.",
+          "state": {
+            "sectionId": "command-suite",
+            "theme": "light",
+            "density": "comfortable",
+            "controlSize": "md"
+          },
+          "url": "/?theme=light&density=comfortable&controlSize=md#command-suite"
+        }
+      ]
+    },
+    {
+      "sectionId": "workspace-suite",
+      "title": "Headers, dock orchestration, and workspace shell posture",
+      "layer": "workstation",
+      "packageName": "@pug/svelte-workstation",
+      "contractRoot": "docs/contracts/workstation/",
+      "summary": "App and project headers, docks, tabs, split views, and host-owned layout snapshots.",
+      "auditAreas": {
+        "semantics": "hybrid",
+        "focus": "hybrid",
+        "keyboard": "hybrid",
+        "announcements": "manual",
+        "gpui": "blocked"
+      },
+      "automatedChecks": [
+        "workspace routes remain stable for dock and persistence review",
+        "serialized layout review stays attached to the workspace section"
+      ],
+      "manualChecks": [
+        "panel traversal, dock controls, and persistence readout remain understandable without pointer-only assumptions",
+        "large multi-panel examples do not hide the currently active region or action target"
+      ],
+      "gpuiDeltaNotes": [
+        "Complex shell focus scopes and docking semantics are likely to diverge most between DOM and GPUI.",
+        "Native accessible region naming and movement remain unproven for this section."
+      ],
+      "blockerNotes": [
+        "GPUI runtime evidence is not shipped for this section yet, so Svelte behavior cannot be promoted to native assistive-technology proof."
+      ],
+      "reviewRoutes": [
+        {
+          "id": "workspace-suite-baseline",
+          "label": "baseline",
+          "note": "Primary workspace shell audit.",
+          "state": {
+            "sectionId": "workspace-suite",
+            "theme": "loophole-studio",
+            "density": "compact",
+            "controlSize": "md"
+          },
+          "url": "/?theme=loophole-studio&density=compact&controlSize=md#workspace-suite"
+        },
+        {
+          "id": "workspace-suite-light",
+          "label": "light",
+          "note": "Light-theme workspace review.",
+          "state": {
+            "sectionId": "workspace-suite",
+            "theme": "light",
+            "density": "comfortable",
+            "controlSize": "md"
+          },
+          "url": "/?theme=light&density=comfortable&controlSize=md#workspace-suite"
+        }
+      ]
+    },
+    {
+      "sectionId": "token-summary-section",
+      "title": "Runtime-critical values",
+      "layer": "tokens",
+      "packageName": "@pug/svelte-tokens",
+      "contractRoot": "packages/tokens/",
+      "summary": "Live values pulled from the active emitted theme, density, and control-size overlays.",
+      "auditAreas": {
+        "semantics": "explicit",
+        "focus": "explicit",
+        "keyboard": "explicit",
+        "announcements": "not-applicable",
+        "gpui": "not-applicable"
+      },
+      "automatedChecks": [
+        "token summary review routes remain stable across theme and density changes",
+        "token family registration remains catalog-linked"
+      ],
+      "manualChecks": [
+        "token summary cards stay readable at all theme and density combinations",
+        "chip and metadata ordering still exposes hierarchy clearly for quick inspection"
+      ],
+      "gpuiDeltaNotes": [
+        "This section is a docs inspection surface rather than a shared runtime component contract."
+      ],
+      "blockerNotes": [],
+      "reviewRoutes": [
+        {
+          "id": "token-summary-section-baseline",
+          "label": "baseline",
+          "note": "Primary token summary audit.",
+          "state": {
+            "sectionId": "token-summary-section",
+            "theme": "loophole-studio",
+            "density": "compact",
+            "controlSize": "md"
+          },
+          "url": "/?theme=loophole-studio&density=compact&controlSize=md#token-summary-section"
+        },
+        {
+          "id": "token-summary-section-light",
+          "label": "light",
+          "note": "Light-theme token summary review.",
+          "state": {
+            "sectionId": "token-summary-section",
+            "theme": "light",
+            "density": "comfortable",
+            "controlSize": "md"
+          },
+          "url": "/?theme=light&density=comfortable&controlSize=md#token-summary-section"
+        }
+      ]
+    },
+    {
+      "sectionId": "token-inspector",
+      "title": "Search the emitted token tree",
+      "layer": "tokens",
+      "packageName": "@pug/svelte-tokens",
+      "contractRoot": "packages/tokens/artifacts/",
+      "summary": "Searchable inspection of the emitted semantic token paths and their active computed values.",
+      "auditAreas": {
+        "semantics": "explicit",
+        "focus": "hybrid",
+        "keyboard": "hybrid",
+        "announcements": "manual",
+        "gpui": "not-applicable"
+      },
+      "automatedChecks": [
+        "token inspector route remains stable for search-led audits",
+        "inspector continues to expose token provenance and computed values"
+      ],
+      "manualChecks": [
+        "search, focus movement, and result scanning remain usable without pointer dependence",
+        "value and provenance copy remain understandable when the search surface filters aggressively"
+      ],
+      "gpuiDeltaNotes": [
+        "The inspector is a preview-only documentation utility and is not a target shared GPUI surface."
+      ],
+      "blockerNotes": [],
+      "reviewRoutes": [
+        {
+          "id": "token-inspector-baseline",
+          "label": "baseline",
+          "note": "Primary token inspector audit.",
+          "state": {
+            "sectionId": "token-inspector",
+            "theme": "loophole-studio",
+            "density": "compact",
+            "controlSize": "md"
+          },
+          "url": "/?theme=loophole-studio&density=compact&controlSize=md#token-inspector"
+        },
+        {
+          "id": "token-inspector-light",
+          "label": "light",
+          "note": "Light-theme inspector review.",
+          "state": {
+            "sectionId": "token-inspector",
+            "theme": "light",
+            "density": "comfortable",
+            "controlSize": "md"
+          },
+          "url": "/?theme=light&density=comfortable&controlSize=md#token-inspector"
+        }
+      ]
+    }
+  ]
+}

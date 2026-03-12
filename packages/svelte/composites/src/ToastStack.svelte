@@ -48,35 +48,52 @@
   }
 
   .toast {
+    --pug-toast-tone: var(--pug-color-accent-base);
     display: grid;
     grid-template-columns: minmax(0, 1fr) auto;
     gap: var(--pug-space-inline-md);
     padding: var(--pug-space-panel-y) var(--pug-space-panel-x);
-    border: 1px solid var(--pug-color-border-subtle);
-    border-radius: calc(var(--pug-radius-surface) - 2px);
-    background: color-mix(in srgb, var(--pug-color-background-elevated) 94%, transparent);
+    border: 0.0625rem solid color-mix(in srgb, var(--pug-toast-tone) 34%, var(--pug-color-border-default));
+    border-radius: calc(var(--pug-radius-surface) - 0.125rem);
+    background:
+      linear-gradient(
+        90deg,
+        color-mix(in srgb, var(--pug-toast-tone) 12%, transparent),
+        color-mix(in srgb, var(--pug-color-background-elevated) 98%, transparent) 18%
+      ),
+      color-mix(in srgb, var(--pug-color-background-elevated) 96%, transparent);
     box-shadow: var(--pug-elevation-overlay);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .toast::before {
+    content: "";
+    position: absolute;
+    inset: 0 auto 0 0;
+    width: 0.1875rem;
+    background: color-mix(in srgb, var(--pug-toast-tone) 82%, white 6%);
   }
 
   .toast[data-tone="info"] {
-    border-color: color-mix(in srgb, var(--pug-color-accent-base) 28%, var(--pug-color-border-default));
+    --pug-toast-tone: var(--pug-color-accent-base);
   }
 
   .toast[data-tone="success"] {
-    border-color: color-mix(in srgb, var(--pug-color-status-success) 28%, var(--pug-color-border-default));
+    --pug-toast-tone: var(--pug-color-status-success);
   }
 
   .toast[data-tone="warning"] {
-    border-color: color-mix(in srgb, var(--pug-color-status-warning) 28%, var(--pug-color-border-default));
+    --pug-toast-tone: var(--pug-color-status-warning);
   }
 
   .toast[data-tone="danger"] {
-    border-color: color-mix(in srgb, var(--pug-color-status-danger) 28%, var(--pug-color-border-default));
+    --pug-toast-tone: var(--pug-color-status-danger);
   }
 
   .toast__copy {
     display: grid;
-    gap: 4px;
+    gap: 0.25rem;
   }
 
   .toast__copy strong,
@@ -86,7 +103,7 @@
 
   .toast__copy p {
     color: var(--pug-color-text-secondary);
-    font-size: 13px;
+    font-size: 0.8125rem;
     line-height: 1.5;
   }
 
@@ -98,9 +115,9 @@
 
   .toast__action,
   .toast__dismiss {
-    min-height: 28px;
-    padding: 0 10px;
-    border: 1px solid var(--pug-color-border-default);
+    min-height: 1.75rem;
+    padding: 0 0.625rem;
+    border: 0.0625rem solid var(--pug-color-border-default);
     border-radius: var(--pug-radius-pill);
     background: color-mix(in srgb, var(--pug-color-background-surface) 82%, transparent);
     color: var(--pug-color-text-primary);
@@ -109,7 +126,17 @@
   }
 
   .toast__dismiss {
-    width: 28px;
+    width: 1.75rem;
     padding: 0;
+  }
+
+  .toast__action {
+    border-color: color-mix(in srgb, var(--pug-toast-tone) 30%, var(--pug-color-border-default));
+    background: color-mix(in srgb, var(--pug-toast-tone) 10%, var(--pug-color-background-surface));
+  }
+
+  .toast__dismiss {
+    border-color: color-mix(in srgb, var(--pug-toast-tone) 24%, var(--pug-color-border-default));
+    background: color-mix(in srgb, var(--pug-color-background-surface) 88%, transparent);
   }
 </style>

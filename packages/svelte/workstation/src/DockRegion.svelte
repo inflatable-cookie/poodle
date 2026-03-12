@@ -110,19 +110,19 @@
     display: flex;
     align-items: center;
     justify-content: flex-start;
-    min-height: 160px;
-    padding: 16px 14px;
+    min-height: 10rem;
+    padding: 1rem 0.875rem;
     color: var(--pug-color-text-secondary);
-    font-size: 13px;
+    font-size: 0.8125rem;
     line-height: 1.5;
   }
 
   .dock-region__collapse {
-    min-height: 28px;
-    min-width: 28px;
+    min-height: 1.75rem;
+    min-width: 1.75rem;
     padding: 0;
     border: 0;
-    border-radius: calc(var(--pug-radius-control) - 1px);
+    border-radius: calc(var(--pug-radius-control) - 0.0625rem);
     background: color-mix(in srgb, var(--pug-color-background-surface) 62%, transparent);
     color: var(--pug-color-text-secondary);
     cursor: pointer;
@@ -136,6 +136,6 @@
 
   .dock-region__collapse:focus-visible {
     outline: var(--pug-border-width-focus) solid var(--pug-color-accent-focusRing);
-    outline-offset: 2px;
+    outline-offset: 0.125rem;
   }
 </style>

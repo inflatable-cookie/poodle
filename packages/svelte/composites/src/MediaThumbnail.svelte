@@ -10,6 +10,7 @@
   export let ariaLabel: string | null = null;
   export let stateTitle: string | null = null;
   export let stateMessage: string | null = null;
+  export let presentation: "default" | "compact" = "default";
 
   $: resolvedStateTitle =
     stateTitle ??
@@ -27,6 +28,7 @@
   data-kind={kind}
   data-state={state}
   data-aspect-ratio={aspectRatio}
+  data-presentation={presentation}
   aria-label={ariaLabel ?? title ?? undefined}
   aria-busy={state === "loading"}
 >
@@ -48,7 +50,7 @@
     {:else}
       <div class="media-thumbnail__state">
         <strong>{resolvedStateTitle}</strong>
-        {#if stateMessage}
+        {#if stateMessage && presentation !== "compact"}
           <p>{stateMessage}</p>
         {/if}
       </div>
@@ -59,7 +61,7 @@
     {/if}
   </div>
 
-  {#if title || meta}
+  {#if presentation !== "compact" && (title || meta)}
     <figcaption class="media-thumbnail__caption">
       {#if title}
         <strong>{title}</strong>
@@ -78,11 +80,15 @@
     margin: 0;
   }
 
+  .media-thumbnail[data-presentation="compact"] {
+    gap: 0;
+  }
+
   .media-thumbnail__frame {
     position: relative;
     overflow: hidden;
-    border: 1px solid var(--pug-color-border-subtle);
-    border-radius: calc(var(--pug-radius-surface) - 2px);
+    border: 0.0625rem solid var(--pug-color-border-subtle);
+    border-radius: calc(var(--pug-radius-surface) - 0.125rem);
     background:
       radial-gradient(circle at top left, color-mix(in srgb, var(--pug-color-accent-base) 18%, transparent), transparent 38%),
       color-mix(in srgb, var(--pug-color-background-panel) 94%, transparent);
@@ -119,7 +125,7 @@
   }
 
   .media-thumbnail__placeholder span {
-    font-size: 28px;
+    font-size: 1.75rem;
     color: var(--pug-color-text-secondary);
   }
 
@@ -139,20 +145,30 @@
     margin: 0;
   }
 
+  .media-thumbnail[data-presentation="compact"] .media-thumbnail__state {
+    align-content: center;
+    padding: 0.875rem;
+  }
+
+  .media-thumbnail[data-presentation="compact"] .media-thumbnail__state strong {
+    font-size: 0.875rem;
+    line-height: 1.35;
+  }
+
   .media-thumbnail__state p,
   .media-thumbnail__caption span {
     color: var(--pug-color-text-secondary);
-    font-size: 13px;
+    font-size: 0.8125rem;
     line-height: 1.5;
   }
 
   .media-thumbnail__caption {
     display: grid;
-    gap: 2px;
+    gap: 0.125rem;
   }
 
   .media-thumbnail__caption strong {
-    font-size: 14px;
+    font-size: 0.875rem;
     line-height: 1.35;
   }
 
@@ -163,29 +179,34 @@
     align-items: center;
     justify-content: center;
     border-radius: var(--pug-radius-control);
-    backdrop-filter: blur(16px);
+    backdrop-filter: blur(1rem);
   }
 
   .media-thumbnail__badge {
-    top: 10px;
-    right: 10px;
-    min-height: 24px;
-    padding: 0 10px;
+    top: 0.625rem;
+    right: 0.625rem;
+    min-height: 1.5rem;
+    padding: 0 0.625rem;
     background: color-mix(in srgb, var(--pug-color-background-surface) 74%, transparent);
     color: var(--pug-color-text-primary);
-    font-size: 11px;
+    font-size: 0.6875rem;
     font-weight: 600;
     letter-spacing: 0.04em;
     text-transform: uppercase;
   }
 
+  .media-thumbnail[data-presentation="compact"] .media-thumbnail__badge {
+    top: 0.5rem;
+    right: 0.5rem;
+  }
+
   .media-thumbnail__play {
-    left: 10px;
-    bottom: 10px;
-    width: 32px;
-    height: 32px;
+    left: 0.625rem;
+    bottom: 0.625rem;
+    width: 2rem;
+    height: 2rem;
     background: color-mix(in srgb, var(--pug-color-background-elevated) 78%, transparent);
     color: var(--pug-color-text-primary);
-    font-size: 15px;
+    font-size: 0.9375rem;
   }
 </style>

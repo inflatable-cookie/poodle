@@ -36,6 +36,14 @@ Use borders only when they add real semantic clarity, such as:
 Most cards, panels, and action rows should separate primarily through tonal
 contrast, spacing, and occasional shadow or inset edge treatment.
 
+Default component and panel treatments should not rely on gradients for their
+basic fill. Gradients are reserved for shell atmosphere or opt-in branded
+appearance overrides.
+
+Neutral informational chips, catalog tags, and mode readouts should default to
+surface-toned fills rather than accent-tinted fills. Accent tinting belongs to
+selection, emphasis, or branded extension contexts.
+
 ## Radius Rule
 
 Use radius by role, not by habit:
@@ -83,6 +91,20 @@ Required light-theme posture:
 Component-level light-theme overrides are acceptable when the shared token
 hierarchy is not sufficient on its own.
 
+## Dark Theme Neutrality Rule
+
+The default `dark` theme should remain predominantly monochrome in its shell and
+surface toning.
+
+Required dark-theme posture:
+
+- canvas, panel, and elevated backgrounds should read as neutral charcoal rather
+  than accent-tinted chrome
+- accent color should stay concentrated in primary actions, focus, selected
+  states, and explicit highlights
+- broader atmospheric tinting belongs in opt-in themes such as
+  `loophole-studio`, not the default dark baseline
+
 ## Spacing Rule
 
 Section identity, metadata, and actions must not crowd each other.
@@ -94,6 +116,29 @@ At minimum:
 - detail sections should rely on spacing before reintroducing dividers
 - readonly rows should not appear as undifferentiated table stripes when a
   grouped card treatment communicates structure better
+- control-group labels, helper copy, and option sets should keep enough
+  vertical separation that headings do not visually collide with surrounding
+  body text or option tiles
+
+Interactive affordances must also remain legible at rest:
+
+- inactive selectable tiles should show a visible hover delta before click
+- active tiles may keep their selected fill, but hover should not be the only
+  clearly legible state change in a control group
+
+## Relative Unit Rule
+
+Svelte sizing should prefer relative units for type and layout rhythm.
+
+Use:
+
+- `rem` for tokenized spacing, sizing, radius, breakpoints, and component
+  layout values that should scale with the root type baseline
+- `em` only where a component needs sizing to follow its local text context
+
+Avoid introducing raw `px` values for ordinary spacing, typography, control
+size, radius, or breakpoint work unless a browser primitive or external
+integration makes that unavoidable.
 
 ## Workstation Chrome Rule
 

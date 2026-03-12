@@ -84,7 +84,7 @@
     align-items: start;
     gap: var(--pug-space-inline-md);
     padding: var(--pug-space-panel-y) var(--pug-space-panel-x);
-    border: 1px solid var(--pug-color-border-subtle);
+    border: 0.0625rem solid var(--pug-color-border-subtle);
     border-radius: var(--pug-radius-surface);
     background: color-mix(in srgb, var(--pug-color-background-panel) 92%, transparent);
   }
@@ -120,18 +120,18 @@
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    width: 24px;
-    height: 24px;
-    border-radius: calc(var(--pug-radius-control) - 1px);
+    width: 1.5rem;
+    height: 1.5rem;
+    border-radius: calc(var(--pug-radius-control) - 0.0625rem);
     background: color-mix(in srgb, var(--pug-color-background-surface) 78%, transparent);
     color: var(--pug-color-text-primary);
     font-weight: 700;
-    font-size: 13px;
+    font-size: 0.8125rem;
   }
 
   .banner__copy {
     display: grid;
-    gap: 4px;
+    gap: 0.25rem;
     min-width: 0;
   }
 
@@ -142,7 +142,7 @@
 
   .banner__copy p {
     color: var(--pug-color-text-secondary);
-    font-size: 13px;
+    font-size: 0.8125rem;
     line-height: 1.5;
   }
 
@@ -155,11 +155,11 @@
   }
 
   .banner__dismiss {
-    width: 28px;
-    height: 28px;
+    width: 1.75rem;
+    height: 1.75rem;
     padding: 0;
     border: 0;
-    border-radius: calc(var(--pug-radius-control) - 1px);
+    border-radius: calc(var(--pug-radius-control) - 0.0625rem);
     background: transparent;
     color: var(--pug-color-text-secondary);
     cursor: pointer;
@@ -168,10 +168,10 @@
 
   .banner__dismiss:focus-visible {
     outline: var(--pug-border-width-focus) solid var(--pug-color-accent-focusRing);
-    outline-offset: 2px;
+    outline-offset: 0.125rem;
   }
 
-  @media (max-width: 720px) {
+  @media (max-width: 45rem) {
     .banner {
       grid-template-columns: 1fr;
     }

@@ -88,16 +88,40 @@
 
 <style>
   .text-input {
+    --pug-text-input-radius: var(--pug-treatment-interactive-subtle-radius, var(--pug-radius-control));
+    --pug-text-input-fill: var(
+      --pug-treatment-interactive-subtle-fill,
+      var(--pug-color-background-surface)
+    );
+    --pug-text-input-fill-focus: var(
+      --pug-treatment-interactive-subtle-fill-focus,
+      var(--pug-text-input-fill)
+    );
+    --pug-text-input-border: var(
+      --pug-treatment-interactive-subtle-border,
+      var(--pug-color-border-default)
+    );
+    --pug-text-input-border-focus: var(
+      --pug-treatment-interactive-subtle-border-focus,
+      var(--pug-color-accent-focusRing)
+    );
+    --pug-text-input-shadow: var(--pug-treatment-interactive-subtle-shadow, none);
+    --pug-text-input-shadow-focus: var(
+      --pug-treatment-interactive-subtle-shadow-focus,
+      0 0 0 var(--pug-border-width-focus)
+        color-mix(in srgb, var(--pug-color-accent-focusRing) 28%, transparent)
+    );
     display: grid;
     grid-template-columns: auto minmax(0, 1fr) auto;
     align-items: center;
     gap: var(--pug-space-inline-sm);
     min-height: var(--pug-size-control-height);
     padding: 0 var(--pug-space-control-x);
-    border: 1px solid var(--pug-color-border-default);
-    border-radius: var(--pug-radius-control);
-    background: var(--pug-color-background-surface);
+    border: 0.0625rem solid var(--pug-text-input-border);
+    border-radius: var(--pug-text-input-radius);
+    background: var(--pug-text-input-fill);
     color: var(--pug-color-text-primary);
+    box-shadow: var(--pug-text-input-shadow);
     transition:
       border-color var(--pug-motion-duration-interaction) var(--pug-motion-easing-standard),
       box-shadow var(--pug-motion-duration-interaction) var(--pug-motion-easing-standard),
@@ -105,8 +129,9 @@
   }
 
   .text-input:focus-within {
-    border-color: var(--pug-color-accent-focusRing);
-    box-shadow: 0 0 0 var(--pug-border-width-focus) color-mix(in srgb, var(--pug-color-accent-focusRing) 28%, transparent);
+    border-color: var(--pug-text-input-border-focus);
+    background: var(--pug-text-input-fill-focus);
+    box-shadow: var(--pug-text-input-shadow-focus);
   }
 
   .text-input[data-validation-state="invalid"] {

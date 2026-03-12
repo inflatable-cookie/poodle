@@ -1,9 +1,10 @@
 {
   "versionPolicy": {
-    "baseline": "0.x until first downstream adoption proofs land",
+    "baseline": "0.x until a later generation explicitly introduces a stable channel",
     "publicIntentChannel": "preview",
     "internalChannel": "internal",
-    "breakingChangePolicy": "breaking changes may ship in minor releases while all packages remain pre-1.0, but must still be documented in roadmap, specs, and release notes"
+    "breakingChangePolicy": "breaking changes may ship in minor releases while all packages remain pre-1.0, but must still be documented in roadmap, specs, and release notes",
+    "operationsPolicyArtifact": "packages/release-operations.json"
   },
   "packages": [
     {

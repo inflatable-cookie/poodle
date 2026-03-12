@@ -26,11 +26,11 @@
     align-items: center;
     justify-content: space-between;
     gap: var(--pug-space-inline-md);
-    padding: 10px var(--pug-space-panel-x);
-    border-top: 1px solid var(--pug-color-border-subtle);
+    padding: 0.625rem var(--pug-space-panel-x);
+    border-top: 0.0625rem solid var(--pug-color-border-subtle);
     background: color-mix(in srgb, var(--pug-color-background-panel) 94%, transparent);
     color: var(--pug-color-text-secondary);
-    font-size: 13px;
+    font-size: 0.8125rem;
     line-height: 1.5;
   }
 

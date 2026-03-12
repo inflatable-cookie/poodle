@@ -6,6 +6,7 @@
     controlSizes,
     densityModes,
     manifest,
+    pxToRem,
     themes,
   } from "@pug/svelte-tokens";
   import {
@@ -42,13 +43,24 @@
     ToastStack,
   } from "@pug/svelte-composites";
   import {
+    Accordion,
     Banner,
+    Button,
+    Checkbox,
+    Collapsible,
     Field,
     FormActions,
+    Pill,
     SearchField,
+    Select,
     Skeleton,
     TextInput,
+    Toggle,
+    ToggleGroup,
+    type AccordionItem,
     type BannerTone,
+    type SelectOption,
+    type ToggleGroupOption,
     type ValidationState,
   } from "@pug/svelte-primitives";
   import {
@@ -72,12 +84,18 @@
     type WorkspaceLayoutSnapshot,
     type WorkspaceShellState,
   } from "@pug/svelte-workstation";
-  import { onMount, tick } from "svelte";
+  import { onMount } from "svelte";
   import { docsAdoptionChecklist, docsFamilies, docsSections } from "./catalog";
+  import {
+    buildPreviewUrl,
+    docsNavigationSections,
+    parsePreviewLocation,
+    type ControlSizeName,
+    type DensityName,
+    type DocsSectionId,
+    type ThemeName,
+  } from "./parity";
 
-  type ThemeName = keyof typeof themes;
-  type DensityName = keyof typeof densityModes;
-  type ControlSizeName = keyof typeof controlSizes;
   type SemanticTokenPath = keyof typeof cssVars;
   type DemoMediaAsset = {
     id: string;
@@ -103,19 +121,19 @@
     summary: string;
     items: string[];
   };
-  type DocsSectionId = "catalog-hub" | (typeof docsSections)[number]["id"];
-
-  const catalogHubEntry = {
-    id: "catalog-hub" as const,
-    title: "Catalog hub",
-    eyebrow: "Docs baseline",
-    layer: "tokens" as const,
-    packageName: "docs + packages/svelte/*",
-    contractRoot: "packages/svelte/preview/",
-    summary: "Entry point for package ownership, family coverage, example scope, and adoption expectations.",
-    exampleTypes: ["directory", "adoption bar", "section map"],
+  type AppearanceTreatmentName = "system" | "brand-raised";
+  type SearchIndexEntry<T> = {
+    item: T;
+    haystack: string;
   };
-  const docsNavigationSections = [catalogHubEntry, ...docsSections];
+
+  function optionsFromValues(values: readonly string[]): ToggleGroupOption[] {
+    return values.map((value) => ({ value, label: value }));
+  }
+
+  function normalizeSearchText(value: string): string {
+    return value.trim().toLowerCase();
+  }
 
   const tableColumns: TableColumn[] = [
     { id: "name", label: "Name", isSortable: true },
@@ -168,6 +186,29 @@
     { id: "health", title: "Health", value: "Ready for review", meta: "No blockers across the active checklist." },
     { id: "owners", title: "Owners", value: "Clay + Aura", meta: "Shared handoff between mix and QA." },
     { id: "deliverables", title: "Deliverables", value: "6 stems", meta: "Broadcast, music, dialogue, FX, M&E, full mix." },
+  ];
+  const brandProofCards = [
+    {
+      id: "proof-surface",
+      eyebrow: "Surface recipe",
+      title: "Tonal panels become branded",
+      summary: "Cards and framed sections can pick up gradients, gloss, and softer depth without redefining canonical background tokens.",
+      variant: "elevated" as const,
+    },
+    {
+      id: "proof-interactive",
+      eyebrow: "Interactive recipe",
+      title: "Buttons and tabs stay coordinated",
+      summary: "A single scoped treatment keeps CTA chrome, input shells, and segmented controls moving together.",
+      variant: "outlined" as const,
+    },
+    {
+      id: "proof-wrapper",
+      eyebrow: "App-owned wrapper",
+      title: "Website composition stays local",
+      summary: "The branded hero structure belongs to the consuming app while the primitives underneath stay shared and documented.",
+      variant: "outlined" as const,
+    },
   ];
   const relationItems: PickerItem[] = [
     { id: "rel-001", label: "Dialogue cleanup chain", description: "Noise reduction and de-click toolset", meta: "Preset" },
@@ -374,10 +415,94 @@
       keywords: ["brief", "document", "review"],
     },
   ];
+  const commandGroupOrder = ["Navigation", "Workspace", "Assets", "Recent"] as const;
+  const commandSectionDescriptions: Record<(typeof commandGroupOrder)[number], string> = {
+    Navigation: "Route between major surfaces quickly.",
+    Workspace: "High-frequency shell and panel actions.",
+    Assets: "Asset-centric commands tied to preview and relation flows.",
+    Recent: "Previously used actions kept close for rediscovery.",
+  };
+  const tableRowSearchIndex: SearchIndexEntry<TableRow>[] = allRows.map((row) => ({
+    item: row,
+    haystack: normalizeSearchText(`${Object.values(row.cells).join(" ")} ${row.summary ?? ""}`),
+  }));
+  const browseRowSearchIndex: SearchIndexEntry<(typeof browseRows)[number]>[] = browseRows.map((row) => ({
+    item: row,
+    haystack: normalizeSearchText([row.title, row.kind, row.status, row.owner].join(" ")),
+  }));
+  const browseCardSearchIndex: SearchIndexEntry<(typeof browseCards)[number]>[] = browseCards.map((card) => ({
+    item: card,
+    haystack: normalizeSearchText([card.title, card.category, card.meta].join(" ")),
+  }));
+  const relationItemSearchIndex: SearchIndexEntry<PickerItem>[] = relationItems.map((item) => ({
+    item,
+    haystack: normalizeSearchText([item.label, item.description ?? "", item.meta ?? ""].join(" ")),
+  }));
+  const commandActionSearchIndex = commandActions.map((action) => ({
+    action,
+    haystack: normalizeSearchText([action.title, action.description ?? "", ...(action.keywords ?? [])].join(" ")),
+    title: action.title.toLowerCase(),
+  }));
+  const catalogEntries = docsSections;
+  const catalogEntryMap = Object.fromEntries(catalogEntries.map((entry) => [entry.id, entry]));
+  const sectionEntries = docsNavigationSections;
+  const sectionNavigationOptions: SelectOption[] = sectionEntries.map((entry) => ({
+    value: entry.id,
+    label: entry.title,
+  }));
 
   const themeEntries = Object.entries(themes) as [ThemeName, (typeof themes)[ThemeName]][];
   const densityEntries = Object.entries(densityModes) as [DensityName, (typeof densityModes)[DensityName]][];
   const controlSizeEntries = Object.entries(controlSizes) as [ControlSizeName, (typeof controlSizes)[ControlSizeName]][];
+  const appearanceTreatmentEntries: Array<{
+    name: AppearanceTreatmentName;
+    description: string;
+  }> = [
+    {
+      name: "system",
+      description: "Canonical application treatment roles derived from semantic tokens.",
+    },
+    {
+      name: "brand-raised",
+      description:
+        "Scoped raised/gradient override proving recipe-level extension without changing token meaning.",
+    },
+  ];
+  const railSectionItems: AccordionItem[] = [
+    {
+      value: "display-controls",
+      label: "Display controls",
+      description: "Theme, density, control sizing, and appearance treatment for the active review surface.",
+    },
+    {
+      value: "state-probes",
+      label: "State probes",
+      description: "Accessibility-oriented interaction checks for the current examples.",
+    },
+    {
+      value: "reference",
+      label: "Reference",
+      description: "Artifact counts, command entry points, and ownership anchors for the current build.",
+    },
+  ];
+  const themeOptions: ToggleGroupOption[] = themeEntries.map(([name]) => ({ value: name, label: name }));
+  const densityOptions: ToggleGroupOption[] = densityEntries.map(([name]) => ({ value: name, label: name }));
+  const controlSizeOptions: ToggleGroupOption[] = controlSizeEntries.map(([name]) => ({ value: name, label: name }));
+  const appearanceTreatmentOptions: ToggleGroupOption[] = appearanceTreatmentEntries.map((entry) => ({
+    value: entry.name,
+    label: entry.name,
+  }));
+  const browseStatusOptions = optionsFromValues(browseStatuses);
+  const browseStateOptions = optionsFromValues(["auto", "loading", "error", "empty"] as const);
+  const detailStateOptions = optionsFromValues(["ready", "loading", "error", "empty"] as const);
+  const pickerVariantOptions = optionsFromValues(pickerVariants);
+  const selectionModeOptions = optionsFromValues(selectionModes);
+  const pickerStateOptions = optionsFromValues(["auto", "loading", "error", "empty"] as const);
+  const mediaStateOptions = optionsFromValues(mediaStates);
+  const notificationToneOptions = optionsFromValues(notificationTones);
+  const commandScopeOptions = optionsFromValues(["all", "workspace", "navigation", "assets", "recent"] as const);
+  const commandStateOptions = optionsFromValues(["auto", "loading", "error", "empty"] as const);
+  const workspaceStateOptions = optionsFromValues(workspaceStates);
   const semanticPaths = Object.keys(cssVars) as SemanticTokenPath[];
   const keySemanticPaths: SemanticTokenPath[] = [
     "semantic.color.background.canvas",
@@ -398,6 +523,7 @@
   let theme: ThemeName = "loophole-studio";
   let density: DensityName = "compact";
   let controlSize: ControlSizeName = "md";
+  let appearanceTreatment: AppearanceTreatmentName = "system";
   let activeSectionId: DocsSectionId = "catalog-hub";
   let disabled = false;
   let invalid = true;
@@ -412,6 +538,8 @@
   let keySemanticTokens: { path: SemanticTokenPath; value: string }[] = [];
   let matchingTokenCount = 0;
   let previewModeKey = "";
+  let appliedPreviewModeKey = "";
+  let hasMounted = false;
   let selectedRowIds: string[] = [];
   let sortColumnId: string | null = "updated";
   let sortDirection: TableSortDirection = "desc";
@@ -483,13 +611,13 @@
       : invalid
         ? "Validation is failing. Error text is attached through the field wrapper rather than placeholder copy."
         : "Field wrapper, help text, and action-row semantics are currently aligned for the Svelte baseline.";
-  $: normalizedQuery = assetSearch.trim().toLowerCase();
-  $: filteredRows = allRows.filter((row) =>
+  $: normalizedQuery = normalizeSearchText(assetSearch);
+  $: filteredRows =
     normalizedQuery.length === 0
-      ? true
-      : Object.values(row.cells).some((value) => value.toLowerCase().includes(normalizedQuery)) ||
-        (row.summary ?? "").toLowerCase().includes(normalizedQuery),
-  );
+      ? allRows
+      : tableRowSearchIndex
+          .filter((entry) => entry.haystack.includes(normalizedQuery))
+          .map((entry) => entry.item);
   $: sortedRows = [...filteredRows].sort((left, right) => {
     if (!sortColumnId) {
       return 0;
@@ -507,23 +635,22 @@
   }
   $: visibleRows = sortedRows.slice((currentPage - 1) * pageSize, currentPage * pageSize);
   $: visibleRowIds = visibleRows.map((row) => row.id);
-  $: selectedRowIds = selectedRowIds.filter((rowId) => sortedRows.some((row) => row.id === rowId));
-  $: browseNormalizedQuery = browseQuery.trim().toLowerCase();
-  $: filteredBrowseRows = browseRows.filter((row) =>
-    (browseStatus === "all" || row.status === browseStatus) &&
-    (browseNormalizedQuery.length === 0
-      ? true
-      : [row.title, row.kind, row.status, row.owner].some((value) =>
-          value.toLowerCase().includes(browseNormalizedQuery),
-        )),
-  );
-  $: filteredBrowseCards = browseCards.filter((card) =>
+  $: sortedRowIdSet = new Set(sortedRows.map((row) => row.id));
+  $: selectedRowIds = selectedRowIds.filter((rowId) => sortedRowIdSet.has(rowId));
+  $: browseNormalizedQuery = normalizeSearchText(browseQuery);
+  $: filteredBrowseRows = browseRowSearchIndex
+    .filter(
+      (entry) =>
+        (browseStatus === "all" || entry.item.status === browseStatus) &&
+        (browseNormalizedQuery.length === 0 || entry.haystack.includes(browseNormalizedQuery)),
+    )
+    .map((entry) => entry.item);
+  $: filteredBrowseCards =
     browseNormalizedQuery.length === 0
-      ? true
-      : [card.title, card.category, card.meta].some((value) =>
-          value.toLowerCase().includes(browseNormalizedQuery),
-        ),
-  );
+      ? browseCards
+      : browseCardSearchIndex
+          .filter((entry) => entry.haystack.includes(browseNormalizedQuery))
+          .map((entry) => entry.item);
   $: listShellState =
     browseStateOverride !== "auto"
       ? browseStateOverride
@@ -552,13 +679,13 @@
       : browseStateOverride === "error"
         ? "Browse results unavailable."
         : `${filteredBrowseRows.length} list results, ${filteredBrowseCards.length} grid results, ${browseStatus === "all" ? "all statuses" : browseStatus}.`;
-  $: filteredRelationItems = relationItems.filter((item) =>
-    pickerQuery.trim().length === 0
-      ? true
-      : [item.label, item.description ?? "", item.meta ?? ""].some((value) =>
-          value.toLowerCase().includes(pickerQuery.trim().toLowerCase()),
-        ),
-  );
+  $: pickerNormalizedQuery = normalizeSearchText(pickerQuery);
+  $: filteredRelationItems =
+    pickerNormalizedQuery.length === 0
+      ? relationItems
+      : relationItemSearchIndex
+          .filter((entry) => entry.haystack.includes(pickerNormalizedQuery))
+          .map((entry) => entry.item);
   $: pickerState =
     pickerStateOverride !== "auto"
       ? pickerStateOverride
@@ -567,7 +694,8 @@
         : filteredRelationItems.length === 0
           ? "no-results"
           : "ready";
-  $: selectedRelationIds = selectedRelationIds.filter((id) => relationItems.some((item) => item.id === id));
+  $: relationItemIdSet = new Set(relationItems.map((item) => item.id));
+  $: selectedRelationIds = selectedRelationIds.filter((id) => relationItemIdSet.has(id));
   $: activeMedia = mediaAssets.find((asset) => asset.id === activeMediaId) ?? mediaAssets[0];
   $: secondaryMediaAssets = mediaAssets.filter((asset) => asset.id !== activeMedia.id).slice(0, 2);
   $: mediaStatus =
@@ -587,7 +715,7 @@
           ? "Embed rendering failed. Fallback posture must still preserve title, context, and recovery actions."
           : "No embedded surface is available. Users still need an explicit fallback path.";
   $: notificationSummary = `${toastItems.length} transient notification(s) queued. Persistent banner is ${showPersistentBanner ? "visible" : "dismissed"}.`;
-  $: scopedCommandActions = commandActions.filter((action) => {
+  $: scopedCommandActionEntries = commandActionSearchIndex.filter(({ action }) => {
     if (commandScope === "all") {
       return true;
     }
@@ -606,26 +734,24 @@
 
     return action.group === "Assets";
   });
-  $: normalizedCommandQuery = commandQuery.trim().toLowerCase();
-  $: filteredCommandActions = scopedCommandActions
-    .map((action) => {
+  $: scopedCommandActions = scopedCommandActionEntries.map((entry) => entry.action);
+  $: normalizedCommandQuery = normalizeSearchText(commandQuery);
+  $: filteredCommandEntries = scopedCommandActionEntries
+    .map((entry) => {
       if (normalizedCommandQuery.length === 0) {
-        return { action, score: 0 };
+        return { action: entry.action, score: 0 };
       }
 
-      const haystack = [action.title, action.description ?? "", ...(action.keywords ?? [])];
-      const text = haystack.join(" ").toLowerCase();
-      if (!text.includes(normalizedCommandQuery)) {
+      if (!entry.haystack.includes(normalizedCommandQuery)) {
         return null;
       }
 
-      const title = action.title.toLowerCase();
-      const score = title.startsWith(normalizedCommandQuery) ? 3 : title.includes(normalizedCommandQuery) ? 2 : 1;
-      return { action, score };
+      const score = entry.title.startsWith(normalizedCommandQuery) ? 3 : entry.title.includes(normalizedCommandQuery) ? 2 : 1;
+      return { action: entry.action, score };
     })
     .filter((entry): entry is { action: CommandActionItem; score: number } => entry !== null)
     .sort((left, right) => right.score - left.score || left.action.title.localeCompare(right.action.title))
-    .map((entry) => entry.action);
+  $: filteredCommandActions = filteredCommandEntries.map((entry) => entry.action);
   $: commandPaletteState =
     commandStateOverride !== "auto"
       ? commandStateOverride
@@ -634,25 +760,35 @@
         : filteredCommandActions.length === 0
           ? "no-results"
           : "ready";
-  $: commandSections = ["Navigation", "Workspace", "Assets", "Recent"].reduce<ActionDiscoverySection[]>((accumulator, group) => {
-    const actions = filteredCommandActions.filter((action) => action.group === group).slice(0, group === "Recent" ? 2 : 3);
-    if (actions.length > 0) {
-      accumulator.push({
-        id: group.toLowerCase(),
-        title: group,
-        description:
-          group === "Navigation"
-            ? "Route between major surfaces quickly."
-            : group === "Workspace"
-              ? "High-frequency shell and panel actions."
-              : group === "Assets"
-                ? "Asset-centric commands tied to preview and relation flows."
-                : "Previously used actions kept close for rediscovery.",
-        actions,
-      });
+  $: commandSections = (() => {
+    const groupedActions: Record<(typeof commandGroupOrder)[number], CommandActionItem[]> = {
+      Navigation: [],
+      Workspace: [],
+      Assets: [],
+      Recent: [],
+    };
+
+    for (const action of filteredCommandActions) {
+      const group = action.group as (typeof commandGroupOrder)[number];
+      const limit = group === "Recent" ? 2 : 3;
+      if (groupedActions[group].length < limit) {
+        groupedActions[group].push(action);
+      }
     }
-    return accumulator;
-  }, []);
+
+    return commandGroupOrder.reduce<ActionDiscoverySection[]>((accumulator, group) => {
+      const actions = groupedActions[group];
+      if (actions.length > 0) {
+        accumulator.push({
+          id: group.toLowerCase(),
+          title: group,
+          description: commandSectionDescriptions[group],
+          actions,
+        });
+      }
+      return accumulator;
+    }, []);
+  })();
   $: commandStatus =
     commandPaletteState === "ready"
       ? `${filteredCommandActions.length} commands available in the ${commandScope} scope. Host ordering remains explicit and inspectable.`
@@ -708,9 +844,6 @@
     parsedWorkspaceLayout.secondarySplitRatio === workspaceLayoutSnapshot.secondarySplitRatio
       ? "Round-trip serialization preserves the current shell layout snapshot."
       : "Layout serialization drift detected.";
-  $: catalogEntries = docsSections;
-  $: catalogEntryMap = Object.fromEntries(catalogEntries.map((entry) => [entry.id, entry]));
-  $: sectionEntries = docsNavigationSections;
   $: activeSectionIndex = Math.max(
     0,
     sectionEntries.findIndex((entry) => entry.id === activeSectionId),
@@ -728,14 +861,14 @@
     }, {});
   }
 
-  async function refreshPreviewSurface(): Promise<void> {
+  function refreshPreviewSurface(): void {
     if (!appShell) {
       return;
     }
 
     applyThemeAttributes(appShell, { theme, density, controlSize });
-    await tick();
     liveTokenValues = readSemanticTokenValues(appShell);
+    appliedPreviewModeKey = previewModeKey;
   }
 
   $: filteredTokens = semanticPaths
@@ -756,37 +889,77 @@
 
   $: previewModeKey = `${theme}:${density}:${controlSize}`;
 
-  $: if (appShell && previewModeKey) {
-    void refreshPreviewSurface();
+  $: if (appShell && previewModeKey && previewModeKey !== appliedPreviewModeKey) {
+    refreshPreviewSurface();
   }
 
-  function syncCurrentHash(): void {
+  function syncCurrentLocation(): void {
     if (typeof window === "undefined") {
       return;
     }
 
-    const hash = window.location.hash.replace(/^#/, "");
-    const matchingSection = docsNavigationSections.find((entry) => entry.id === hash);
-    activeSectionId = matchingSection?.id ?? "catalog-hub";
+    const nextState = parsePreviewLocation(
+      new URLSearchParams(window.location.search),
+      window.location.hash,
+    );
+    theme = nextState.theme;
+    density = nextState.density;
+    controlSize = nextState.controlSize;
+    activeSectionId = nextState.sectionId;
   }
 
   onMount(() => {
-    syncCurrentHash();
-    void refreshPreviewSurface();
+    syncCurrentLocation();
+    hasMounted = true;
+    refreshPreviewSurface();
   });
+
+  $: if (hasMounted && typeof window !== "undefined") {
+    const nextUrl = buildPreviewUrl(
+      {
+        sectionId: activeSectionId,
+        theme,
+        density,
+        controlSize,
+      },
+      window.location.pathname,
+    );
+    const currentUrl = `${window.location.pathname}${window.location.search}${window.location.hash}`;
+    if (nextUrl !== currentUrl) {
+      window.history.replaceState(null, "", nextUrl);
+    }
+  }
 
   function selectSection(sectionId: DocsSectionId): void {
     activeSectionId = sectionId;
 
     if (typeof window !== "undefined") {
-      const nextUrl = `${window.location.pathname}${window.location.search}#${sectionId}`;
-      window.history.replaceState(null, "", nextUrl);
       window.scrollTo({ top: 0, behavior: "smooth" });
     }
   }
 
+  function handleSectionNavigationChange(event: CustomEvent<{ value: string }>): void {
+    selectSection(event.detail.value as DocsSectionId);
+  }
+
+  function handleDisabledChange(event: CustomEvent<{ checked: boolean }>): void {
+    disabled = event.detail.checked;
+  }
+
+  function handleInvalidChange(event: CustomEvent<{ checked: boolean }>): void {
+    invalid = event.detail.checked;
+  }
+
+  function handleBusyChange(event: CustomEvent<{ checked: boolean }>): void {
+    busy = event.detail.checked;
+  }
+
   function handleTitleChange(event: CustomEvent<{ value: string }>): void {
     projectTitle = event.detail.value;
+  }
+
+  function remHeight(px: number): string {
+    return pxToRem(px);
   }
 
   function handleSearchChange(event: CustomEvent<{ value: string }>): void {
@@ -866,6 +1039,18 @@
     browseStateOverride = nextState;
   }
 
+  function handleBrowseStatusChange(event: CustomEvent<{ value: string | string[] }>): void {
+    if (typeof event.detail.value === "string") {
+      setBrowseStatus(event.detail.value as (typeof browseStatuses)[number]);
+    }
+  }
+
+  function handleBrowseStateChange(event: CustomEvent<{ value: string | string[] }>): void {
+    if (typeof event.detail.value === "string") {
+      setBrowseState(event.detail.value as "auto" | BrowseState);
+    }
+  }
+
   function loadMoreBrowseRows(): void {
     browseVisibleCount = Math.min(filteredBrowseRows.length, browseVisibleCount + 3);
   }
@@ -893,6 +1078,32 @@
 
   function handlePickerCancel(): void {
     pickerStatus = "Picker workflow cancelled. Selection remains host-owned.";
+  }
+
+  function handleDetailStateChange(event: CustomEvent<{ value: string | string[] }>): void {
+    if (typeof event.detail.value === "string") {
+      detailState = event.detail.value as typeof detailState;
+    }
+  }
+
+  function handlePickerVariantChange(event: CustomEvent<{ value: string | string[] }>): void {
+    if (typeof event.detail.value === "string") {
+      pickerVariant = event.detail.value as PickerVariant;
+    }
+  }
+
+  function handlePickerModeChange(event: CustomEvent<{ value: string | string[] }>): void {
+    if (typeof event.detail.value === "string") {
+      pickerMode = event.detail.value as SelectionMode;
+      selectedRelationIds =
+        pickerMode === "single" ? selectedRelationIds.slice(0, 1) : selectedRelationIds;
+    }
+  }
+
+  function handlePickerStateChange(event: CustomEvent<{ value: string | string[] }>): void {
+    if (typeof event.detail.value === "string") {
+      pickerStateOverride = event.detail.value as "auto" | BrowseState;
+    }
   }
 
   function getMediaStateTitle(state: MediaState, kind: MediaKind): string {
@@ -966,6 +1177,24 @@
     pickerQuery = "";
   }
 
+  function handleMediaStateChange(event: CustomEvent<{ value: string | string[] }>): void {
+    if (typeof event.detail.value === "string") {
+      mediaState = event.detail.value as MediaState;
+    }
+  }
+
+  function handleEmbedStateChange(event: CustomEvent<{ value: string | string[] }>): void {
+    if (typeof event.detail.value === "string") {
+      embedState = event.detail.value as MediaState;
+    }
+  }
+
+  function handleBannerToneChange(event: CustomEvent<{ value: string | string[] }>): void {
+    if (typeof event.detail.value === "string") {
+      bannerTone = event.detail.value as BannerTone;
+    }
+  }
+
   function enqueueToast(tone: ToastTone): void {
     toastSequence += 1;
     toastItems = [
@@ -1014,6 +1243,18 @@
     commandQuery = "";
     commandScope = "all";
     commandStateOverride = "auto";
+  }
+
+  function handleCommandScopeChange(event: CustomEvent<{ value: string | string[] }>): void {
+    if (typeof event.detail.value === "string") {
+      commandScope = event.detail.value as CommandResultScope;
+    }
+  }
+
+  function handleCommandStateChange(event: CustomEvent<{ value: string | string[] }>): void {
+    if (typeof event.detail.value === "string") {
+      commandStateOverride = event.detail.value as "auto" | DiscoveryState;
+    }
   }
 
   function reorderByValue<T extends { value: string }>(items: T[], orderedValues: string[]): T[] {
@@ -1155,6 +1396,20 @@
     commandQuery = event.detail.value;
   }
 
+  function handleWorkspaceStateChange(event: CustomEvent<{ value: string | string[] }>): void {
+    if (typeof event.detail.value === "string") {
+      workspaceState = event.detail.value as WorkspaceShellState;
+    }
+  }
+
+  function handleInspectorQueryChange(event: CustomEvent<{ value: string }>): void {
+    inspectorQuery = event.detail.value;
+  }
+
+  function handleInspectorQueryClear(): void {
+    inspectorQuery = "";
+  }
+
   function handlePreviewKeydown(event: KeyboardEvent): void {
     if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === "k") {
       event.preventDefault();
@@ -1167,9 +1422,13 @@
   <title>Pug Docs Preview</title>
 </svelte:head>
 
-<svelte:window on:keydown={handlePreviewKeydown} on:hashchange={syncCurrentHash} />
+<svelte:window
+  on:keydown={handlePreviewKeydown}
+  on:hashchange={syncCurrentLocation}
+  on:popstate={syncCurrentLocation}
+/>
 
-<div class="app-shell" bind:this={appShell}>
+<div class="app-shell" data-appearance-treatment={appearanceTreatment} bind:this={appShell}>
   <aside class="control-rail">
     <div class="rail-header">
       <p class="eyebrow">Pug Docs Preview</p>
@@ -1185,163 +1444,156 @@
         <p>Move section by section instead of scrolling one long catalog column.</p>
       </div>
       <div class="rail-nav">
-        <label class="sr-only" for="section-navigation-select">Select a docs section</label>
-        <select
+        <Select
           id="section-navigation-select"
-          class="rail-select"
-          bind:value={activeSectionId}
-          aria-label="Catalog sections"
-          on:change={() => selectSection(activeSectionId)}
-        >
-          {#each sectionEntries as entry}
-            <option value={entry.id}>{entry.title}</option>
-          {/each}
-        </select>
+          value={activeSectionId}
+          options={sectionNavigationOptions}
+          ariaLabel="Catalog sections"
+          on:valueChange={handleSectionNavigationChange}
+        />
         <div class="nav-button-row">
-          <button
-            type="button"
-            class="secondary-action"
-            disabled={!previousSection}
+          <Button
+            variant="secondary"
+            isDisabled={!previousSection}
             on:click={() => previousSection && selectSection(previousSection.id)}
           >
             Previous
-          </button>
-          <button
-            type="button"
-            class="secondary-action"
-            disabled={!nextSection}
+          </Button>
+          <Button
+            variant="secondary"
+            isDisabled={!nextSection}
             on:click={() => nextSection && selectSection(nextSection.id)}
           >
             Next
-          </button>
+          </Button>
         </div>
       </div>
     </section>
 
-    <details class="rail-details" open>
-      <summary>Display controls</summary>
-      <p class="rail-details__copy">Theme, density, and control sizing for the active review surface.</p>
-      <div class="rail-details__body">
-        <section class="control-group" aria-labelledby="theme-group">
-          <div class="group-head">
-            <h2 id="theme-group">Theme</h2>
-            <p>Rendered from emitted theme overlays.</p>
-          </div>
-          <div class="segmented">
-            {#each themeEntries as [name, config]}
-              <button
-                type="button"
-                class:active={theme === name}
-                aria-pressed={theme === name}
-                on:click={() => (theme = name)}
-              >
-                <span>{name}</span>
-                <small>{config.description}</small>
-              </button>
-            {/each}
-          </div>
-        </section>
-
-        <section class="control-group" aria-labelledby="density-group">
-          <div class="group-head">
-            <h2 id="density-group">Density</h2>
-            <p>Shows layout compression against the same token baseline.</p>
-          </div>
-          <div class="pill-row">
-            {#each densityEntries as [name, config]}
-              <button
-                type="button"
-                class:active={density === name}
-                aria-pressed={density === name}
-                on:click={() => (density = name)}
-              >
-                {name}
-                <small>{config.description}</small>
-              </button>
-            {/each}
-          </div>
-        </section>
-
-        <section class="control-group" aria-labelledby="size-group">
-          <div class="group-head">
-            <h2 id="size-group">Control size</h2>
-            <p>Exercises minimum control hit area across themes.</p>
-          </div>
-          <div class="pill-row compact">
-            {#each controlSizeEntries as [name, config]}
-              <button
-                type="button"
-                class:active={controlSize === name}
-                aria-pressed={controlSize === name}
-                on:click={() => (controlSize = name)}
-              >
-                {name}
-                <small>{config.description}</small>
-              </button>
-            {/each}
-          </div>
-        </section>
-      </div>
-    </details>
-
-    <details class="rail-details">
-      <summary>State probes</summary>
-      <p class="rail-details__copy">Accessibility-oriented interaction checks for the current examples.</p>
-      <div class="rail-details__body">
-        <label class="toggle-row">
-          <input bind:checked={disabled} type="checkbox" />
-          <span>Disabled surfaces</span>
-        </label>
-        <label class="toggle-row">
-          <input bind:checked={invalid} type="checkbox" />
-          <span>Invalid form state</span>
-        </label>
-        <label class="toggle-row">
-          <input bind:checked={busy} type="checkbox" />
-          <span>Busy action state</span>
-        </label>
-      </div>
-    </details>
-
-    <details class="rail-details">
-      <summary>Reference</summary>
-      <p class="rail-details__copy">Artifact counts, command entry points, and ownership anchors for the current build.</p>
-      <div class="rail-details__body">
-        <section class="control-group" aria-labelledby="meta-group">
-          <div class="group-head">
-            <h2 id="meta-group">Artifact baseline</h2>
-            <p>{manifest.canonicalFormat}</p>
-          </div>
-          <ul class="meta-list">
-            <li>{manifest.requiredThemes.length} required themes</li>
-            <li>{manifest.requiredDensityModes.length} density modes</li>
-            <li>{manifest.requiredControlSizes.length} control sizes</li>
-            <li>{aliases.length} bridge alias hooks</li>
-          </ul>
-        </section>
-
-        <section class="control-group" aria-labelledby="entry-group">
-          <div class="group-head">
-            <h2 id="entry-group">Docs entry points</h2>
-            <p>The preview now doubles as the first docs-site baseline.</p>
-          </div>
-          <div class="meta-stack">
-            <div class="state-tile">
-              <span class="token-path">bun run docs:dev</span>
-              <strong>local docs surface</strong>
+    <Accordion
+      items={railSectionItems}
+      selectionMode="multiple"
+      defaultValue={["display-controls"]}
+      ariaLabel="Preview rail controls"
+      let:item
+    >
+      {#if item.value === "display-controls"}
+        <div class="rail-panel-body">
+          <section class="control-group" aria-labelledby="theme-group">
+            <div class="group-head">
+              <h2 id="theme-group">Theme</h2>
+              <p>Rendered from emitted theme overlays.</p>
             </div>
-            <div class="state-tile">
-              <span class="token-path">docs/contracts/</span>
-              <strong>contract source of truth</strong>
+            <ToggleGroup
+              value={theme}
+              options={themeOptions}
+              ariaLabel="Theme"
+              on:valueChange={(event) => (theme = event.detail.value as ThemeName)}
+            />
+            <p class="control-caption">{themes[theme].description}</p>
+          </section>
+
+          <section class="control-group" aria-labelledby="density-group">
+            <div class="group-head">
+              <h2 id="density-group">Density</h2>
+              <p>Shows layout compression against the same token baseline.</p>
             </div>
-            <div class="state-tile">
-              <span class="token-path">packages/svelte/*</span>
-              <strong>implementation packages</strong>
+            <ToggleGroup
+              value={density}
+              options={densityOptions}
+              ariaLabel="Density"
+              on:valueChange={(event) => (density = event.detail.value as DensityName)}
+            />
+            <p class="control-caption">{densityModes[density].description}</p>
+          </section>
+
+          <section class="control-group" aria-labelledby="size-group">
+            <div class="group-head">
+              <h2 id="size-group">Control size</h2>
+              <p>Exercises minimum control hit area across themes.</p>
             </div>
-          </div>
-        </section>
-      </div>
-    </details>
+            <ToggleGroup
+              value={controlSize}
+              options={controlSizeOptions}
+              ariaLabel="Control size"
+              on:valueChange={(event) => (controlSize = event.detail.value as ControlSizeName)}
+            />
+            <p class="control-caption">{controlSizes[controlSize].description}</p>
+          </section>
+
+          <section class="control-group" aria-labelledby="treatment-group">
+            <div class="group-head">
+              <h2 id="treatment-group">Appearance treatment</h2>
+              <p>Scoped recipe-level override across controls, cards, panels, and header framing.</p>
+            </div>
+            <ToggleGroup
+              value={appearanceTreatment}
+              options={appearanceTreatmentOptions}
+              ariaLabel="Appearance treatment"
+              on:valueChange={(event) =>
+                (appearanceTreatment = event.detail.value as AppearanceTreatmentName)}
+            />
+            <p class="control-caption">
+              {appearanceTreatmentEntries.find((entry) => entry.name === appearanceTreatment)?.description}
+            </p>
+          </section>
+        </div>
+      {:else if item.value === "state-probes"}
+        <div class="rail-panel-body rail-panel-body--compact">
+          <Checkbox
+            isChecked={disabled}
+            label="Disabled surfaces"
+            on:checkedChange={handleDisabledChange}
+          />
+          <Checkbox
+            isChecked={invalid}
+            label="Invalid form state"
+            on:checkedChange={handleInvalidChange}
+          />
+          <Checkbox
+            isChecked={busy}
+            label="Busy action state"
+            on:checkedChange={handleBusyChange}
+          />
+        </div>
+      {:else if item.value === "reference"}
+        <div class="rail-panel-body">
+          <section class="control-group" aria-labelledby="meta-group">
+            <div class="group-head">
+              <h2 id="meta-group">Artifact baseline</h2>
+              <p>{manifest.canonicalFormat}</p>
+            </div>
+            <ul class="meta-list">
+              <li>{manifest.requiredThemes.length} required themes</li>
+              <li>{manifest.requiredDensityModes.length} density modes</li>
+              <li>{manifest.requiredControlSizes.length} control sizes</li>
+              <li>{aliases.length} bridge alias hooks</li>
+            </ul>
+          </section>
+
+          <section class="control-group" aria-labelledby="entry-group">
+            <div class="group-head">
+              <h2 id="entry-group">Docs entry points</h2>
+              <p>The preview now doubles as the first docs-site baseline.</p>
+            </div>
+            <div class="meta-stack">
+              <div class="state-tile">
+                <span class="token-path">bun run docs:dev</span>
+                <strong>local docs surface</strong>
+              </div>
+              <div class="state-tile">
+                <span class="token-path">docs/contracts/</span>
+                <strong>contract source of truth</strong>
+              </div>
+              <div class="state-tile">
+                <span class="token-path">packages/svelte/*</span>
+                <strong>implementation packages</strong>
+              </div>
+            </div>
+          </section>
+        </div>
+      {/if}
+    </Accordion>
   </aside>
 
   <main class="preview-root" bind:this={previewRoot}>
@@ -1368,9 +1620,10 @@
         </div>
       </div>
       <div class="hero-chips" aria-label="current modes">
-        <span>{theme}</span>
-        <span>{density}</span>
-        <span>{controlSize}</span>
+        <Pill>{theme}</Pill>
+        <Pill>{density}</Pill>
+        <Pill>{controlSize}</Pill>
+        <Pill>{appearanceTreatment}</Pill>
       </div>
     </section>
 
@@ -1407,9 +1660,14 @@
                   <div class="docs-link-row">
                     {#each family.sectionIds as sectionId}
                       {#if catalogEntryMap[sectionId]}
-                        <button type="button" on:click={() => selectSection(catalogEntryMap[sectionId].id)}>
+                        <Button
+                          className="docs-link-chip"
+                          variant="ghost"
+                          size="sm"
+                          on:click={() => selectSection(catalogEntryMap[sectionId].id)}
+                        >
                           {catalogEntryMap[sectionId].title}
-                        </button>
+                        </Button>
                       {/if}
                     {/each}
                   </div>
@@ -1418,11 +1676,11 @@
             </div>
           </article>
 
-          <article class="demo-card docs-overview-card docs-overview-card--narrow">
-            <div class="card-header">
-              <h3>Adoption-ready minimum</h3>
-              <p>`g02.012` freezes what must be visible before wider rollout, not just what exists somewhere in the repo.</p>
-            </div>
+        <article class="demo-card docs-overview-card docs-overview-card--narrow">
+          <div class="card-header">
+            <h3>Adoption-ready minimum</h3>
+            <p>`g02.012` freezes what must be visible before wider rollout, not just what exists somewhere in the repo.</p>
+          </div>
             <div class="behavior-list">
               {#each docsAdoptionChecklist as item}
                 <div class="behavior-item">
@@ -1430,6 +1688,40 @@
                   <p>{item}</p>
                 </div>
               {/each}
+            </div>
+          </article>
+
+          <article class="demo-card docs-overview-card docs-overview-card--narrow">
+            <div class="card-header">
+              <h3>Disclosure primitives</h3>
+              <p>The preview shell now uses real disclosure primitives instead of ad hoc details styling.</p>
+            </div>
+            <div class="demo-stack">
+              <Accordion
+                items={[
+                  { value: "accordion-foundation", label: "Accordion", description: "Grouped disclosure for repeated docs or settings sections." },
+                  { value: "accordion-boundary", label: "Boundary", description: "Use grouped disclosure only when repeated sections are the real semantic pattern." },
+                ]}
+                defaultValue="accordion-foundation"
+                ariaLabel="Disclosure primitive example"
+                let:item
+              >
+                <p class="detail-card-meta">
+                  {item.value === "accordion-foundation"
+                    ? "Foundation-safe grouped disclosure now exists for more web-oriented products and docs surfaces."
+                    : "Single-block reveal belongs to Collapsible; grouped disclosure belongs to Accordion."}
+                </p>
+              </Accordion>
+
+              <Collapsible
+                title="Collapsible"
+                description="Single revealable content block for compact notes, diagnostics, or settings groups."
+                defaultOpen={true}
+              >
+                <p class="detail-card-meta">
+                  This surface owns one trigger and one revealable region without pretending to be grouped navigation.
+                </p>
+              </Collapsible>
             </div>
           </article>
         </div>
@@ -1441,7 +1733,14 @@
           </div>
           <div class="docs-section-list">
             {#each catalogEntries as entry}
-              <button type="button" class="docs-section-card" on:click={() => selectSection(entry.id)}>
+              <Toggle
+                className="docs-section-card"
+                isPressed={activeSectionId === entry.id}
+                layout="stack"
+                variant="ghost"
+                ariaLabel={`Open ${entry.title}`}
+                on:pressedChange={() => selectSection(entry.id)}
+              >
                 <div>
                   <p class="eyebrow">{entry.eyebrow}</p>
                   <strong>{entry.title}</strong>
@@ -1453,11 +1752,42 @@
                 </div>
                 <div class="docs-tag-row">
                   {#each entry.exampleTypes as exampleType}
-                    <span>{exampleType}</span>
+                    <Pill appearance="subtle">{exampleType}</Pill>
                   {/each}
                 </div>
-              </button>
+              </Toggle>
             {/each}
+          </div>
+        </article>
+
+        <article class="demo-card docs-overview-card">
+          <div class="card-header">
+            <h3>Scoped brand proof</h3>
+            <p>The same Pug components can sit inside a more expressive website wrapper through scoped recipe variables instead of token redefinition.</p>
+          </div>
+          <div class="brand-proof-scope">
+            <PageHeader
+              title="Make room for brand styling without rebuilding the system"
+              eyebrow="Website-style wrapper"
+              subtitle="This proof uses app-owned composition plus scoped appearance recipes so cards, header framing, and CTA chrome can shift together."
+            >
+              <div slot="actions" class="action-cluster brand-proof-actions">
+                <Button variant="secondary">Read pattern notes</Button>
+                <Button variant="primary">Launch branded preview</Button>
+              </div>
+            </PageHeader>
+
+            <div class="brand-proof-grid">
+              {#each brandProofCards as card}
+                <Card variant={card.variant}>
+                  <div slot="header">
+                    <p class="eyebrow">{card.eyebrow}</p>
+                  </div>
+                  <strong class="detail-card-value">{card.title}</strong>
+                  <p class="detail-card-meta">{card.summary}</p>
+                </Card>
+              {/each}
+            </div>
           </div>
         </article>
       </div>
@@ -1533,12 +1863,12 @@
           <FormActions align="between">
             <p class="demo-status">{validationLog}</p>
             <div class="action-cluster">
-              <button class="secondary-action" disabled={disabled} type="button">
+              <Button variant="secondary" isDisabled={disabled}>
                 Cancel
-              </button>
-              <button class="primary-action" disabled={disabled} aria-busy={busy} type="submit">
+              </Button>
+              <Button variant="primary" type="submit" isDisabled={disabled} isLoading={busy}>
                 {busy ? "Validating..." : "Save changes"}
-              </button>
+              </Button>
             </div>
           </FormActions>
         </form>
@@ -1682,29 +2012,19 @@
               on:clear={handleBrowseSearchClear}
             />
           </div>
-          {#each browseStatuses as status}
-            <button
-              type="button"
-              class:active-pill={browseStatus === status}
-              class="pill-button"
-              on:click={() => setBrowseStatus(status)}
-            >
-              {status}
-            </button>
-          {/each}
+          <ToggleGroup
+            value={browseStatus}
+            options={browseStatusOptions}
+            ariaLabel="Browse status"
+            on:valueChange={handleBrowseStatusChange}
+          />
           <svelte:fragment slot="secondary">
-            <button type="button" class:active-pill={browseStateOverride === "auto"} class="pill-button" on:click={() => setBrowseState("auto")}>
-              Auto
-            </button>
-            <button type="button" class:active-pill={browseStateOverride === "loading"} class="pill-button" on:click={() => setBrowseState("loading")}>
-              Loading
-            </button>
-            <button type="button" class:active-pill={browseStateOverride === "error"} class="pill-button" on:click={() => setBrowseState("error")}>
-              Error
-            </button>
-            <button type="button" class:active-pill={browseStateOverride === "empty"} class="pill-button" on:click={() => setBrowseState("empty")}>
-              Empty
-            </button>
+            <ToggleGroup
+              value={browseStateOverride}
+              options={browseStateOptions}
+              ariaLabel="Browse state override"
+              on:valueChange={handleBrowseStateChange}
+            />
           </svelte:fragment>
         </FilterToolbar>
       </div>
@@ -1731,7 +2051,7 @@
                 <div class="state-skeleton-list" aria-hidden="true">
                   {#each Array.from({ length: 4 }) as _}
                     <div class="state-skeleton-row">
-                      <Skeleton shape="circle" width="18px" height="18px" />
+                      <Skeleton shape="circle" width="1.125rem" height="1.125rem" />
                       <div class="state-skeleton-copy">
                         <Skeleton width="58%" />
                         <Skeleton width="34%" />
@@ -1746,7 +2066,7 @@
                   message="Persistent errors need remediation action, not just a textual state string."
                 >
                   <div slot="actions" class="action-cluster">
-                    <button class="secondary-action" type="button" on:click={retryBrowseState}>Retry</button>
+                    <Button variant="secondary" on:click={retryBrowseState}>Retry</Button>
                   </div>
                 </Banner>
                 <EmptyState
@@ -1760,7 +2080,7 @@
                   variant="search"
                 >
                   <div slot="actions" class="action-cluster">
-                    <button class="secondary-action" type="button" on:click={resetBrowseFilters}>Clear filters</button>
+                    <Button variant="secondary" on:click={resetBrowseFilters}>Clear filters</Button>
                   </div>
                 </EmptyState>
               {:else}
@@ -1781,9 +2101,9 @@
             {/each}
             <svelte:fragment slot="footer">
               {#if listShellState === "ready" && visibleBrowseRows.length < filteredBrowseRows.length}
-                <button type="button" class="secondary-action" on:click={loadMoreBrowseRows}>
+                <Button variant="secondary" on:click={loadMoreBrowseRows}>
                   Load more results
-                </button>
+                </Button>
               {/if}
             </svelte:fragment>
           </ListShell>
@@ -1811,7 +2131,7 @@
                 <div class="state-skeleton-grid" aria-hidden="true">
                   {#each Array.from({ length: 4 }) as _}
                     <div class="state-skeleton-card">
-                      <Skeleton shape="block" height="120px" />
+                      <Skeleton shape="block" height="7.5rem" />
                       <Skeleton width="62%" />
                       <Skeleton width="40%" />
                     </div>
@@ -1824,7 +2144,7 @@
                   message="Retry and support actions should stay adjacent to the failed surface."
                 >
                   <div slot="actions" class="action-cluster">
-                    <button class="secondary-action" type="button" on:click={retryBrowseState}>Retry</button>
+                    <Button variant="secondary" on:click={retryBrowseState}>Retry</Button>
                   </div>
                 </Banner>
                 <EmptyState
@@ -1838,7 +2158,7 @@
                   variant="search"
                 >
                   <div slot="actions" class="action-cluster">
-                    <button class="secondary-action" type="button" on:click={resetBrowseFilters}>Clear filters</button>
+                    <Button variant="secondary" on:click={resetBrowseFilters}>Clear filters</Button>
                   </div>
                 </EmptyState>
               {:else}
@@ -1887,18 +2207,12 @@
         <span class="token-path">docs/contracts/composites/breadcrumbs.md</span>
       </div>
       <div class="detail-controls">
-        <button type="button" class:active-pill={detailState === "ready"} class="pill-button" on:click={() => (detailState = "ready")}>
-          Ready
-        </button>
-        <button type="button" class:active-pill={detailState === "loading"} class="pill-button" on:click={() => (detailState = "loading")}>
-          Loading
-        </button>
-        <button type="button" class:active-pill={detailState === "error"} class="pill-button" on:click={() => (detailState = "error")}>
-          Error
-        </button>
-        <button type="button" class:active-pill={detailState === "empty"} class="pill-button" on:click={() => (detailState = "empty")}>
-          Empty
-        </button>
+        <ToggleGroup
+          value={detailState}
+          options={detailStateOptions}
+          ariaLabel="Detail state"
+          on:valueChange={handleDetailStateChange}
+        />
       </div>
       <DetailShell
         ariaLabel="Mix review detail"
@@ -1918,8 +2232,8 @@
             on:navigate={handleBreadcrumbNavigate}
           />
           <div slot="actions" class="action-cluster">
-            <button class="secondary-action" type="button">Share</button>
-            <button class="primary-action" type="button">Approve</button>
+            <Button variant="secondary">Share</Button>
+            <Button variant="primary">Approve</Button>
           </div>
         </PageHeader>
         <div slot="state" class="state-stack">
@@ -1930,9 +2244,9 @@
               message="Header identity and action placement should remain stable while body sections resolve."
             />
             <div class="detail-loading-grid" aria-hidden="true">
-              <Skeleton shape="block" height="84px" />
-              <Skeleton shape="block" height="84px" />
-              <Skeleton shape="block" height="84px" />
+              <Skeleton shape="block" height="5.25rem" />
+              <Skeleton shape="block" height="5.25rem" />
+              <Skeleton shape="block" height="5.25rem" />
             </div>
           {:else if detailState === "error"}
             <Banner
@@ -1941,7 +2255,7 @@
               message="Persistent failures need explicit retry or fallback actions near the affected surface."
             >
               <div slot="actions" class="action-cluster">
-                <button class="secondary-action" type="button" on:click={() => (detailState = "ready")}>Retry</button>
+                <Button variant="secondary" on:click={() => (detailState = "ready")}>Retry</Button>
               </div>
             </Banner>
             <EmptyState
@@ -1980,7 +2294,7 @@
               value="/clients/aura/review/v4/final-deliverables"
               truncateValue={true}
             >
-              <button slot="action" class="secondary-action" type="button">Reveal</button>
+              <Button slot="action" variant="secondary">Reveal</Button>
             </DetailRow>
           </dl>
         </DetailSection>
@@ -2026,48 +2340,30 @@
       <div class="picker-controls">
         <div class="picker-control-group">
           <span class="token-path">Variant</span>
-          <div class="picker-pill-row">
-            {#each pickerVariants as variant}
-              <button type="button" class:active-pill={pickerVariant === variant} class="pill-button" on:click={() => (pickerVariant = variant)}>
-                {variant}
-              </button>
-            {/each}
-          </div>
+          <ToggleGroup
+            value={pickerVariant}
+            options={pickerVariantOptions}
+            ariaLabel="Picker variant"
+            on:valueChange={handlePickerVariantChange}
+          />
         </div>
         <div class="picker-control-group">
           <span class="token-path">Selection mode</span>
-          <div class="picker-pill-row">
-            {#each selectionModes as mode}
-              <button
-                type="button"
-                class:active-pill={pickerMode === mode}
-                class="pill-button"
-                on:click={() => {
-                  pickerMode = mode;
-                  selectedRelationIds = mode === "single" ? selectedRelationIds.slice(0, 1) : selectedRelationIds;
-                }}
-              >
-                {mode}
-              </button>
-            {/each}
-          </div>
+          <ToggleGroup
+            value={pickerMode}
+            options={selectionModeOptions}
+            ariaLabel="Picker selection mode"
+            on:valueChange={handlePickerModeChange}
+          />
         </div>
         <div class="picker-control-group">
           <span class="token-path">State</span>
-          <div class="picker-pill-row">
-            <button type="button" class:active-pill={pickerStateOverride === "auto"} class="pill-button" on:click={() => (pickerStateOverride = "auto")}>
-              auto
-            </button>
-            <button type="button" class:active-pill={pickerStateOverride === "loading"} class="pill-button" on:click={() => (pickerStateOverride = "loading")}>
-              loading
-            </button>
-            <button type="button" class:active-pill={pickerStateOverride === "error"} class="pill-button" on:click={() => (pickerStateOverride = "error")}>
-              error
-            </button>
-            <button type="button" class:active-pill={pickerStateOverride === "empty"} class="pill-button" on:click={() => (pickerStateOverride = "empty")}>
-              empty
-            </button>
-          </div>
+          <ToggleGroup
+            value={pickerStateOverride}
+            options={pickerStateOptions}
+            ariaLabel="Picker state"
+            on:valueChange={handlePickerStateChange}
+          />
         </div>
       </div>
       <div class="picker-demo-grid">
@@ -2096,7 +2392,7 @@
                 <div class="state-skeleton-list" aria-hidden="true">
                   {#each Array.from({ length: 3 }) as _}
                     <div class="state-skeleton-row">
-                      <Skeleton shape="circle" width="18px" height="18px" />
+                      <Skeleton shape="circle" width="1.125rem" height="1.125rem" />
                       <div class="state-skeleton-copy">
                         <Skeleton width="56%" />
                         <Skeleton width="28%" />
@@ -2111,7 +2407,7 @@
                   message="Error handling remains host-owned, but retry and escape routes need to stay visible."
                 >
                   <div slot="actions" class="action-cluster">
-                    <button class="secondary-action" type="button" on:click={resetPickerState}>Reset</button>
+                    <Button variant="secondary" on:click={resetPickerState}>Reset</Button>
                   </div>
                 </Banner>
                 <EmptyState
@@ -2125,7 +2421,7 @@
                   variant="search"
                 >
                   <div slot="actions" class="action-cluster">
-                    <button class="secondary-action" type="button" on:click={resetPickerState}>Clear search</button>
+                    <Button variant="secondary" on:click={resetPickerState}>Clear search</Button>
                   </div>
                 </EmptyState>
               {:else}
@@ -2179,40 +2475,40 @@
       <div class="media-controls">
         <div class="picker-control-group">
           <span class="token-path">Preview state</span>
-          <div class="picker-pill-row">
-            {#each mediaStates as state}
-              <button type="button" class:active-pill={mediaState === state} class="pill-button" on:click={() => (mediaState = state)}>
-                {state}
-              </button>
-            {/each}
-          </div>
+          <ToggleGroup
+            value={mediaState}
+            options={mediaStateOptions}
+            ariaLabel="Media preview state"
+            on:valueChange={handleMediaStateChange}
+          />
         </div>
         <div class="picker-control-group">
           <span class="token-path">Embed state</span>
-          <div class="picker-pill-row">
-            {#each mediaStates as state}
-              <button type="button" class:active-pill={embedState === state} class="pill-button" on:click={() => (embedState = state)}>
-                {state}
-              </button>
-            {/each}
-          </div>
+          <ToggleGroup
+            value={embedState}
+            options={mediaStateOptions}
+            ariaLabel="Embed state"
+            on:valueChange={handleEmbedStateChange}
+          />
         </div>
       </div>
       <div class="media-demo-grid">
         <div class="media-main-column">
           <div class="media-strip" role="tablist" aria-label="Asset previews">
             {#each mediaAssets as asset}
-              <button
-                type="button"
-                class="media-strip__item"
-                class:media-strip__item--active={activeMediaId === asset.id}
-                aria-pressed={activeMediaId === asset.id}
-                on:click={() => (activeMediaId = asset.id)}
+              <Toggle
+                className="media-strip__item"
+                isPressed={activeMediaId === asset.id}
+                layout="stack"
+                variant="ghost"
+                ariaLabel={`Show ${asset.title}`}
+                on:pressedChange={() => (activeMediaId = asset.id)}
               >
                 <MediaThumbnail
                   kind={asset.kind}
                   state={mediaState}
                   aspectRatio={asset.aspectRatio}
+                  presentation="compact"
                   title={asset.title}
                   badge={asset.badge}
                   meta={asset.thumbnailMeta}
@@ -2228,7 +2524,7 @@
                     <div class="mock-media mock-media--audio" aria-hidden="true">
                       <div class="mock-waveform">
                         {#each Array.from({ length: 16 }) as _, index}
-                          <span style={`height: ${18 + ((index % 5) * 10)}px;`}></span>
+                          <span style={`height: ${remHeight(18 + ((index % 5) * 10))};`}></span>
                         {/each}
                       </div>
                     </div>
@@ -2247,7 +2543,7 @@
                     </div>
                   {/if}
                 </MediaThumbnail>
-              </button>
+              </Toggle>
             {/each}
           </div>
 
@@ -2276,7 +2572,7 @@
                 <div class="mock-media mock-media--audio" aria-hidden="true">
                   <div class="mock-waveform">
                     {#each Array.from({ length: 24 }) as _, index}
-                      <span style={`height: ${18 + ((index % 7) * 10)}px;`}></span>
+                      <span style={`height: ${remHeight(18 + ((index % 7) * 10))};`}></span>
                     {/each}
                   </div>
                 </div>
@@ -2309,8 +2605,8 @@
             <div slot="footer" class="media-preview-footer">
               <span class="token-path">{activeMedia.assetId}</span>
               <div class="action-cluster">
-                <button class="secondary-action" type="button" disabled={disabled}>Open source</button>
-                <button class="primary-action" type="button" disabled={disabled}>Attach asset</button>
+                <Button variant="secondary" isDisabled={disabled}>Open source</Button>
+                <Button variant="primary" isDisabled={disabled}>Attach asset</Button>
               </div>
             </div>
           </MediaPreview>
@@ -2337,7 +2633,7 @@
                     <div class="mock-media mock-media--audio" aria-hidden="true">
                       <div class="mock-waveform">
                         {#each Array.from({ length: 18 }) as _, index}
-                          <span style={`height: ${18 + ((index % 6) * 8)}px;`}></span>
+                          <span style={`height: ${remHeight(18 + ((index % 6) * 8))};`}></span>
                         {/each}
                       </div>
                     </div>
@@ -2382,7 +2678,7 @@
                   title="Loading review embed"
                   message="The framed embed region stays stable while host-native or external content initializes."
                 />
-                <Skeleton shape="block" height="260px" />
+                <Skeleton shape="block" height="16.25rem" />
               {:else if embedState === "error"}
                 <Banner
                   tone="danger"
@@ -2390,7 +2686,7 @@
                   message="A failed embed still needs visible fallback actions and preserved context."
                 >
                   <div slot="actions" class="action-cluster">
-                    <button class="secondary-action" type="button" on:click={() => (embedState = "ready")}>Retry</button>
+                    <Button variant="secondary" on:click={() => (embedState = "ready")}>Retry</Button>
                   </div>
                 </Banner>
                 <EmptyState
@@ -2398,7 +2694,7 @@
                   message="Inline embedding is optional; recovery posture is not."
                 >
                   <div slot="actions" class="action-cluster">
-                    <button class="secondary-action" type="button">Open external</button>
+                    <Button variant="secondary">Open external</Button>
                   </div>
                 </EmptyState>
               {:else}
@@ -2422,10 +2718,10 @@
             <div slot="footer" class="media-preview-footer">
               <span class="token-path">embed.review.pass-4</span>
               <div class="action-cluster">
-                <button class="secondary-action" type="button" disabled={disabled}>Open external</button>
-                <button class="primary-action" type="button" disabled={disabled || embedState !== "ready"}>
+                <Button variant="secondary" isDisabled={disabled}>Open external</Button>
+                <Button variant="primary" isDisabled={disabled || embedState !== "ready"}>
                   Focus embed
-                </button>
+                </Button>
               </div>
             </div>
           </EmbedShell>
@@ -2472,21 +2768,20 @@
       <div class="notification-controls">
         <div class="picker-control-group">
           <span class="token-path">Banner tone</span>
-          <div class="picker-pill-row">
-            {#each notificationTones as tone}
-              <button type="button" class:active-pill={bannerTone === tone} class="pill-button" on:click={() => (bannerTone = tone)}>
-                {tone}
-              </button>
-            {/each}
-          </div>
+          <ToggleGroup
+            value={bannerTone}
+            options={notificationToneOptions}
+            ariaLabel="Banner tone"
+            on:valueChange={handleBannerToneChange}
+          />
         </div>
         <div class="picker-control-group">
           <span class="token-path">Transient notifications</span>
-          <div class="picker-pill-row">
+          <div class="toast-action-row">
             {#each notificationTones as tone}
-              <button type="button" class="pill-button" on:click={() => enqueueToast(tone)}>
+              <Button variant="secondary" on:click={() => enqueueToast(tone)}>
                 push {tone}
-              </button>
+              </Button>
             {/each}
           </div>
         </div>
@@ -2502,8 +2797,8 @@
               on:dismiss={() => (showPersistentBanner = false)}
             >
               <div slot="actions" class="action-cluster">
-                <button class="secondary-action" type="button" on:click={() => enqueueToast("info")}>Inspect</button>
-                <button class="primary-action" type="button" on:click={() => enqueueToast("success")}>Resolve</button>
+                <Button variant="secondary" on:click={() => enqueueToast("info")}>Inspect</Button>
+                <Button variant="primary" on:click={() => enqueueToast("success")}>Resolve</Button>
               </div>
             </Banner>
           {:else}
@@ -2513,7 +2808,7 @@
               variant="neutral"
             >
               <div slot="actions" class="action-cluster">
-                <button class="secondary-action" type="button" on:click={() => (showPersistentBanner = true)}>Restore banner</button>
+                <Button variant="secondary" on:click={() => (showPersistentBanner = true)}>Restore banner</Button>
               </div>
             </EmptyState>
           {/if}
@@ -2523,7 +2818,7 @@
               <p class="eyebrow">Loading scaffolds</p>
             </div>
             <div class="state-skeleton-card" aria-hidden="true">
-              <Skeleton shape="block" height="132px" />
+              <Skeleton shape="block" height="8.25rem" />
               <Skeleton width="64%" />
               <Skeleton width="44%" />
             </div>
@@ -2561,40 +2856,21 @@
       <div class="command-controls">
         <div class="picker-control-group">
           <span class="token-path">Scope</span>
-          <div class="picker-pill-row">
-            <button type="button" class:active-pill={commandScope === "all"} class="pill-button" on:click={() => (commandScope = "all")}>
-              all
-            </button>
-            <button type="button" class:active-pill={commandScope === "workspace"} class="pill-button" on:click={() => (commandScope = "workspace")}>
-              workspace
-            </button>
-            <button type="button" class:active-pill={commandScope === "navigation"} class="pill-button" on:click={() => (commandScope = "navigation")}>
-              navigation
-            </button>
-            <button type="button" class:active-pill={commandScope === "assets"} class="pill-button" on:click={() => (commandScope = "assets")}>
-              assets
-            </button>
-            <button type="button" class:active-pill={commandScope === "recent"} class="pill-button" on:click={() => (commandScope = "recent")}>
-              recent
-            </button>
-          </div>
+          <ToggleGroup
+            value={commandScope}
+            options={commandScopeOptions}
+            ariaLabel="Command scope"
+            on:valueChange={handleCommandScopeChange}
+          />
         </div>
         <div class="picker-control-group">
           <span class="token-path">Palette state</span>
-          <div class="picker-pill-row">
-            <button type="button" class:active-pill={commandStateOverride === "auto"} class="pill-button" on:click={() => (commandStateOverride = "auto")}>
-              auto
-            </button>
-            <button type="button" class:active-pill={commandStateOverride === "loading"} class="pill-button" on:click={() => (commandStateOverride = "loading")}>
-              loading
-            </button>
-            <button type="button" class:active-pill={commandStateOverride === "error"} class="pill-button" on:click={() => (commandStateOverride = "error")}>
-              error
-            </button>
-            <button type="button" class:active-pill={commandStateOverride === "empty"} class="pill-button" on:click={() => (commandStateOverride = "empty")}>
-              empty
-            </button>
-          </div>
+          <ToggleGroup
+            value={commandStateOverride}
+            options={commandStateOptions}
+            ariaLabel="Command palette state"
+            on:valueChange={handleCommandStateChange}
+          />
         </div>
       </div>
       <div class="command-grid">
@@ -2611,8 +2887,8 @@
               The launcher is modal, grouped, keyboard-navigable, and still host-owned for ranking and execution.
             </p>
             <div class="action-cluster">
-              <button class="primary-action" type="button" on:click={openCommandPalette}>Open palette</button>
-              <button class="secondary-action" type="button" on:click={clearCommandDiscovery}>Reset filters</button>
+              <Button variant="primary" on:click={openCommandPalette}>Open palette</Button>
+              <Button variant="secondary" on:click={clearCommandDiscovery}>Reset filters</Button>
             </div>
             <div class="picker-state-stack">
               <div class="state-tile">
@@ -2662,13 +2938,12 @@
       <div class="command-controls">
         <div class="picker-control-group">
           <span class="token-path">Workspace state</span>
-          <div class="picker-pill-row">
-            {#each workspaceStates as state}
-              <button type="button" class:active-pill={workspaceState === state} class="pill-button" on:click={() => (workspaceState = state)}>
-                {state}
-              </button>
-            {/each}
-          </div>
+          <ToggleGroup
+            value={workspaceState}
+            options={workspaceStateOptions}
+            ariaLabel="Workspace state"
+            on:valueChange={handleWorkspaceStateChange}
+          />
         </div>
       </div>
       <WorkspaceShell
@@ -2697,8 +2972,8 @@
             <strong>Pug Workstation</strong>
           </div>
           <div slot="actions" class="action-cluster">
-            <button class="secondary-action" type="button">Settings</button>
-            <button class="primary-action" type="button" on:click={openCommandPalette}>Commands</button>
+            <Button variant="secondary">Settings</Button>
+            <Button variant="primary" on:click={openCommandPalette}>Commands</Button>
           </div>
           <div slot="utility" class="workspace-status-pill-row">
             <span class="command-shortcut-hint">{workspaceState === "offline" ? "offline" : workspaceState === "disconnected" ? "disconnected" : "connected"}</span>
@@ -2713,8 +2988,8 @@
           isDirty={workspaceState !== "ready"}
         >
           <div slot="actions" class="action-cluster">
-            <button class="secondary-action" type="button">Share</button>
-            <button class="secondary-action" type="button">Layout</button>
+            <Button variant="secondary">Share</Button>
+            <Button variant="secondary">Layout</Button>
           </div>
           <div slot="status" class="workspace-status-pill-row">
             <span class="command-shortcut-hint">{commandScope}</span>
@@ -2730,9 +3005,9 @@
               message="App and project headers should stay stable while the main shell content resolves."
             />
             <div class="workspace-loading-grid" aria-hidden="true">
-              <Skeleton shape="block" height="240px" />
-              <Skeleton shape="block" height="240px" />
-              <Skeleton shape="block" height="240px" />
+              <Skeleton shape="block" height="15rem" />
+              <Skeleton shape="block" height="15rem" />
+              <Skeleton shape="block" height="15rem" />
             </div>
           {:else if workspaceState === "offline"}
             <Banner
@@ -2741,7 +3016,7 @@
               message="Offline work is deliberate and should keep local actions available while remote sync remains paused."
             >
               <div slot="actions" class="action-cluster">
-                <button class="secondary-action" type="button" on:click={() => (workspaceState = "ready")}>Resume sync</button>
+                <Button variant="secondary" on:click={() => (workspaceState = "ready")}>Resume sync</Button>
               </div>
             </Banner>
             <EmptyState
@@ -2755,7 +3030,7 @@
               message="Unexpected disconnection needs adjacent retry and recovery actions."
             >
               <div slot="actions" class="action-cluster">
-                <button class="secondary-action" type="button" on:click={() => (workspaceState = "ready")}>Reconnect</button>
+                <Button variant="secondary" on:click={() => (workspaceState = "ready")}>Reconnect</Button>
               </div>
             </Banner>
             <EmptyState
@@ -2873,16 +3148,27 @@
                           <p class="detail-card-meta">{workspacePersistenceSummary}</p>
                         </Card>
                       </div>
-                      <div class="workspace-persistence-panel">
-                        <div class="workspace-persistence-header">
-                          <div>
-                            <p class="eyebrow">Serialized layout</p>
-                            <h4 class="workspace-persistence-title">Host-owned persistence payload</h4>
+                      <Collapsible
+                        title="Host-owned persistence payload"
+                        description="Serialized layout state stays explicit and reversible without becoming shell chrome."
+                        defaultOpen={true}
+                      >
+                        <svelte:fragment slot="trigger" let:isOpen>
+                          <div class="workspace-persistence-trigger">
+                            <div>
+                              <p class="eyebrow">Serialized layout</p>
+                              <h4 class="workspace-persistence-title">Host-owned persistence payload</h4>
+                            </div>
+                            <div class="workspace-persistence-trigger__meta">
+                              <span class="command-shortcut-hint">v{workspaceLayoutSnapshot.version}</span>
+                              <Pill appearance="subtle">{isOpen ? "open" : "closed"}</Pill>
+                            </div>
                           </div>
-                          <span class="command-shortcut-hint">v{workspaceLayoutSnapshot.version}</span>
+                        </svelte:fragment>
+                        <div class="workspace-persistence-panel">
+                          <pre>{serializedWorkspaceLayout}</pre>
                         </div>
-                        <pre>{serializedWorkspaceLayout}</pre>
-                      </div>
+                      </Collapsible>
                     </div>
                   </PanelSurface>
                 </div>
@@ -2993,10 +3279,16 @@
           <p class="eyebrow">Semantic token inspector</p>
           <h2 id="inspector-heading">Search the emitted token tree</h2>
         </div>
-        <label class="filter-field">
-          <span class="sr-only">Filter semantic tokens</span>
-          <input bind:value={inspectorQuery} type="search" placeholder="Filter tokens by path" />
-        </label>
+        <div class="filter-field">
+          <SearchField
+            id="token-inspector-query"
+            value={inspectorQuery}
+            placeholder="Filter tokens by path"
+            ariaLabel="Filter semantic tokens"
+            on:valueChange={handleInspectorQueryChange}
+            on:clear={handleInspectorQueryClear}
+          />
+        </div>
       </div>
       <p class="inspector-count">{matchingTokenCount} semantic tokens shown</p>
       <div class="token-table-wrap">

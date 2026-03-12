@@ -68,8 +68,8 @@
     position: relative;
     display: grid;
     gap: 0;
-    min-height: 560px;
-    border: 1px solid var(--pug-color-border-subtle);
+    min-height: 35rem;
+    border: 0.0625rem solid var(--pug-color-border-subtle);
     border-radius: var(--pug-radius-surface);
     overflow: clip;
     background:
@@ -83,7 +83,7 @@
 
   .workspace-shell__body,
   .workspace-shell__state {
-    min-height: 360px;
+    min-height: 22.5rem;
   }
 
   .workspace-shell__body {
@@ -104,7 +104,7 @@
 
   .workspace-shell__state p {
     color: var(--pug-color-text-secondary);
-    font-size: 13px;
+    font-size: 0.8125rem;
     line-height: 1.5;
   }
 

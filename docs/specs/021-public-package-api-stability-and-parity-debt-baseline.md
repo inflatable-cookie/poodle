@@ -1,7 +1,7 @@
 # 021 Public Package API Stability And Parity Debt Baseline
 
 Status: active
-Updated: 2026-03-11
+Updated: 2026-03-12
 Depends on: `002-component-contract-template-and-parity-rules.md`, `008-parity-evidence-documented-delta-and-downstream-extension-rules.md`, `020-docs-site-example-and-component-discoverability-rules.md`
 
 ## Purpose
@@ -39,6 +39,7 @@ Public consumers may rely on:
 - documented root exports
 - documented `./types` or equivalent type-only subpaths
 - generated token or metadata entry points that are named in package exports
+- package-surface inventories that remain contract-backed and linted
 
 Public consumers may not rely on:
 
@@ -93,7 +94,21 @@ The current adoption-blocking parity debt is explicit:
 
 - component package entry points were implicit rather than intentionally bounded before this tranche
 - downstream consumers still need stronger guidance on what is stable, internal, or preview-only
-- package documentation was too sparse to gate adoption cleanly
+- package documentation and contract mapping were too sparse to gate adoption cleanly
+
+## Package Surface Integrity Rule
+
+Public Svelte package surfaces must stay machine-checkable against their
+documented contracts and README inventories.
+
+At minimum, the current baseline should prove:
+
+- exported public components map to real contracts in the owning layer
+- public README surface inventories match the actual export surface
+- root and type-only entry points named to downstream adopters remain present
+
+This keeps package ergonomics, contracts, and public docs from drifting apart
+as the surface grows.
 
 ### Downstream Readiness Debt
 
@@ -125,5 +140,6 @@ Downstream adoption should remain blocked until all of the following are true:
 
 ## Next Task
 
-Use this baseline while executing `g02.015`, turning the newly explicit package
-surface into a concrete packaging, versioning, and release posture.
+Carry this baseline into `g03.011` and later operations work so package-surface
+integrity, parity debt, and release posture stay coupled as the public-intent
+surface evolves.

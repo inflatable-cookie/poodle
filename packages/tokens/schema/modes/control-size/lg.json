@@ -7,7 +7,7 @@
       },
       "minWidth": {
         "$type": "dimension",
-        "$value": "112px"
+        "$value": "7rem"
       }
     },
     "icon": {

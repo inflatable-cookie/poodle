@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { pxToRem } from "@pug/svelte-tokens";
   import type { BrowseState, MinColumnWidth } from "./types";
 
   export let state: BrowseState = "ready";
@@ -11,10 +12,10 @@
 
   $: columnWidth =
     minColumnWidth === "sm"
-      ? "180px"
+      ? pxToRem(180)
       : minColumnWidth === "lg"
-        ? "280px"
-        : "220px";
+        ? pxToRem(280)
+        : pxToRem(220);
 </script>
 
 <section class="grid-shell" data-scroll-mode={scrollMode} aria-label={ariaLabel ?? undefined}>
@@ -70,7 +71,7 @@
 
   .grid-shell__viewport,
   .grid-shell__state {
-    border: 1px solid var(--pug-color-border-subtle);
+    border: 0.0625rem solid var(--pug-color-border-subtle);
     border-radius: var(--pug-radius-surface);
     background: color-mix(in srgb, var(--pug-color-background-panel) 92%, transparent);
   }

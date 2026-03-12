@@ -15,8 +15,21 @@ Generated Rust token surface for GPUI consumers.
 - downstream adoption should treat this crate as a token baseline, not as proof
   that wider GPUI package ergonomics are already settled
 
+## Current Multi-App Validation Baseline
+
+The current GPUI multi-app validation matrix lives in:
+
+- `packages/gpui/tokens/multi-app-validation.json`
+
+It does not claim shipped GPUI component crates. It records:
+
+- the current GPUI target app shapes
+- the shared-layer assumptions those targets should expose
+- the required follow-up work
+- the blockers still preventing stronger GPUI adoption claims
+
 ## Next Task
 
-Use this crate surface while executing `g02.016`, confirming how token-level
-Rust artifacts should be represented in the first downstream-adoption
-generation without overstating wider GPUI readiness.
+Use this crate surface while executing the later GPUI validation and adoption
+tranches, without overstating token-only readiness as wider GPUI package
+completeness.

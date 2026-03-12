@@ -17,6 +17,8 @@ command-discovery components.
 - `DockRegion`
 - `CommandPalette`
 - `ActionDiscoveryPanel`
+- `parseWorkspaceLayoutSnapshot`
+- `serializeWorkspaceLayoutSnapshot`
 - root import: `@pug/svelte-workstation`
 - type-only import: `@pug/svelte-workstation/types`
 
@@ -30,8 +32,36 @@ command-discovery components.
 - GPUI workstation parity is still an explicit adoption blocker rather than an
   implied capability
 
+## Current Downstream Adoption Proof
+
+The current Loophole-facing foundation proof lives in:
+
+- `packages/svelte/workstation/loophole-foundation-proof.json`
+
+That proof records:
+
+- which Pug packages Loophole may consume directly
+- which workstation exports are approved as shared shell foundation
+- which DAW surfaces remain downstream-owned
+- which adoption frictions remain explicit
+
+## Explicit Non-Goals
+
+This package does not become a DAW widget kit.
+
+It does not own:
+
+- transport bars
+- timelines
+- mixer strips
+- automation lanes
+- plugin racks
+- clip editors
+- session rulers
+- meter bridges
+
 ## Next Task
 
-Use this package surface while executing `g02.016`, confirming which
-workstation entry points are stable enough to carry into the first
-downstream-adoption generation.
+Use this package surface while following the workstation-oriented reference-app
+lane, keeping generic shell foundation separate from downstream-owned DAW or
+domain widgets and from unproven native-runtime parity claims.

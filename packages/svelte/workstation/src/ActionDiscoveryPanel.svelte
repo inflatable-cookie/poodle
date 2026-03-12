@@ -95,7 +95,7 @@
 
   .action-discovery-panel {
     padding: var(--pug-space-panel-y) var(--pug-space-panel-x);
-    border: 1px solid transparent;
+    border: 0.0625rem solid transparent;
     border-radius: var(--pug-radius-surface);
     background: color-mix(in srgb, var(--pug-color-background-panel) 96%, transparent);
   }
@@ -116,7 +116,7 @@
   }
 
   .action-discovery-panel__header h3 {
-    font-size: 20px;
+    font-size: 1.25rem;
     line-height: 1.2;
   }
 
@@ -124,17 +124,17 @@
   .action-discovery-panel__section-header p,
   .action-discovery-panel__copy small {
     color: var(--pug-color-text-secondary);
-    font-size: 13px;
+    font-size: 0.8125rem;
     line-height: 1.5;
   }
 
   .action-discovery-panel__hint {
-    padding: 6px 10px;
+    padding: 0.375rem 0.625rem;
     border-radius: var(--pug-radius-control);
     background: color-mix(in srgb, var(--pug-color-background-surface) 74%, transparent);
     color: var(--pug-color-text-secondary);
     font-family: var(--pug-typography-code-family);
-    font-size: 12px;
+    font-size: 0.75rem;
   }
 
   .action-discovery-panel__list {
@@ -151,9 +151,9 @@
     align-items: center;
     gap: var(--pug-space-inline-md);
     width: 100%;
-    padding: 14px;
-    border: 1px solid transparent;
-    border-radius: calc(var(--pug-radius-surface) - 2px);
+    padding: 0.875rem;
+    border: 0.0625rem solid transparent;
+    border-radius: calc(var(--pug-radius-surface) - 0.125rem);
     background: color-mix(in srgb, var(--pug-color-background-surface) 74%, transparent);
     color: var(--pug-color-text-primary);
     text-align: left;
@@ -163,12 +163,12 @@
 
   .action-discovery-panel__item:focus-visible {
     outline: var(--pug-border-width-focus) solid var(--pug-color-accent-focusRing);
-    outline-offset: 2px;
+    outline-offset: 0.125rem;
   }
 
   .action-discovery-panel__item:hover {
     background: color-mix(in srgb, var(--pug-color-background-elevated) 92%, transparent);
-    box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--pug-color-border-subtle) 32%, transparent);
+    box-shadow: inset 0 0 0 0.0625rem color-mix(in srgb, var(--pug-color-border-subtle) 32%, transparent);
   }
 
   .action-discovery-panel__item:disabled {
@@ -189,12 +189,12 @@
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    min-height: 24px;
-    padding: 0 8px;
+    min-height: 1.5rem;
+    padding: 0 0.5rem;
     border-radius: var(--pug-radius-control);
     background: color-mix(in srgb, var(--pug-color-background-elevated) 82%, transparent);
     color: var(--pug-color-text-secondary);
-    font-size: 12px;
+    font-size: 0.75rem;
   }
 
   .action-discovery-panel__meta kbd {
@@ -204,16 +204,16 @@
   :global([data-theme="light"]) .action-discovery-panel {
     border-color: color-mix(in srgb, var(--pug-color-border-default) 16%, transparent);
     box-shadow:
-      inset 0 0 0 1px color-mix(in srgb, var(--pug-color-border-subtle) 36%, transparent),
-      0 8px 20px rgba(49, 66, 85, 0.04);
+      inset 0 0 0 0.0625rem color-mix(in srgb, var(--pug-color-border-subtle) 36%, transparent),
+      0 0.5rem 1.25rem rgba(49, 66, 85, 0.04);
   }
 
   :global([data-theme="light"]) .action-discovery-panel__item {
     background: color-mix(in srgb, var(--pug-color-background-elevated) 96%, var(--pug-color-background-panel));
-    box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--pug-color-border-subtle) 30%, transparent);
+    box-shadow: inset 0 0 0 0.0625rem color-mix(in srgb, var(--pug-color-border-subtle) 30%, transparent);
   }
 
-  @media (max-width: 720px) {
+  @media (max-width: 45rem) {
     .action-discovery-panel__header,
     .action-discovery-panel__item {
       grid-template-columns: 1fr;

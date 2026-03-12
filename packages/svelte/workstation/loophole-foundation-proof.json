@@ -1,0 +1,63 @@
+{
+  "artifact": "packages/svelte/workstation/loophole-foundation-proof.json",
+  "proofVersion": 1,
+  "consumer": "Loophole",
+  "adoptionMode": "direct-foundation-consumer",
+  "directPugImportsAllowed": true,
+  "bridgeRequired": false,
+  "allowedPugPackages": [
+    {
+      "packageName": "@pug/svelte-tokens",
+      "scope": "semantic tokens, emitted themes, density overlays, and control-size overlays"
+    },
+    {
+      "packageName": "@pug/svelte-primitives",
+      "scope": "foundation controls, layout primitives, overlays, and feedback surfaces"
+    },
+    {
+      "packageName": "@pug/svelte-composites",
+      "scope": "generic product shells such as cards, detail, browse, picker, media, and notification surfaces"
+    },
+    {
+      "packageName": "@pug/svelte-workstation",
+      "scope": "generic workstation shell, panel, dock, split, tab, command, and status surfaces"
+    }
+  ],
+  "approvedWorkstationExports": [
+    "ActionDiscoveryPanel",
+    "AppHeader",
+    "CommandPalette",
+    "DockRegion",
+    "PanelHeader",
+    "PanelSurface",
+    "PanelTabs",
+    "ProjectHeader",
+    "ShellStatusBar",
+    "SplitView",
+    "SurfaceTabs",
+    "WorkspaceShell",
+    "parseWorkspaceLayoutSnapshot",
+    "serializeWorkspaceLayoutSnapshot"
+  ],
+  "downstreamOwnedDawSurfaces": [
+    "TransportBar",
+    "Timeline",
+    "MixerStrip",
+    "AutomationLane",
+    "PluginRack",
+    "ClipEditor",
+    "SessionRuler",
+    "MeterBridge"
+  ],
+  "boundaryRules": [
+    "Loophole may import Pug packages directly as a downstream foundation consumer.",
+    "Loophole-specific DAW widgets remain downstream-owned and do not become Pug workstation exports.",
+    "Pug workstation shells may supply generic panel, dock, split, tab, command, and shell posture underneath Loophole-specific workflows.",
+    "Branding, workflow semantics, command registries, persistence backends, and DAW orchestration stay Loophole-owned above the canonical Pug layers."
+  ],
+  "remainingFriction": [
+    "GPUI parity for workstation surfaces is still an adoption blocker for any claim of full cross-runtime Loophole rollout.",
+    "Real Loophole wrapper evidence still needs to confirm where generic workstation chrome ends and DAW-specific widgetry begins.",
+    "Downstream theme and appearance treatments still need to prove they do not redefine canonical token meaning while expressing Loophole-specific shell character."
+  ]
+}

@@ -38,22 +38,71 @@
 
 <style>
   .card {
+    --pug-recipe-card-radius: var(--pug-treatment-surface-radius, var(--pug-radius-surface));
+    --pug-recipe-card-fill: color-mix(
+      in srgb,
+      var(--pug-color-background-panel) 98%,
+      var(--pug-color-background-elevated)
+    );
+    --pug-recipe-card-border: color-mix(
+      in srgb,
+      var(--pug-color-border-subtle) 18%,
+      transparent
+    );
+    --pug-recipe-card-shadow:
+      inset 0 0 0 0.0625rem color-mix(in srgb, var(--pug-color-border-subtle) 18%, transparent);
+    --pug-recipe-card-divider: color-mix(
+      in srgb,
+      var(--pug-color-border-subtle) 52%,
+      transparent
+    );
+    --pug-recipe-card-hover-fill: var(
+      --pug-treatment-surface-hover-fill,
+      color-mix(in srgb, var(--pug-color-background-elevated) 94%, var(--pug-color-background-panel))
+    );
+    --pug-recipe-card-hover-border: var(
+      --pug-treatment-surface-hover-border,
+      color-mix(in srgb, var(--pug-color-accent-base) 28%, var(--pug-color-border-subtle))
+    );
+    --pug-recipe-card-hover-shadow: var(--pug-treatment-surface-hover-shadow, var(--pug-recipe-card-shadow));
     display: grid;
+    align-content: start;
     gap: var(--pug-space-stack-md);
     padding: var(--pug-space-panel-y) var(--pug-space-panel-x);
-    border: 1px solid transparent;
-    border-radius: var(--pug-radius-surface);
-    background: color-mix(in srgb, var(--pug-color-background-panel) 98%, var(--pug-color-background-elevated));
-    box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--pug-color-border-subtle) 18%, transparent);
+    border: 0.0625rem solid var(--pug-recipe-card-border);
+    border-radius: var(--pug-recipe-card-radius);
+    background: var(--pug-treatment-surface-fill, var(--pug-recipe-card-fill));
+    box-shadow: var(--pug-treatment-surface-shadow, var(--pug-recipe-card-shadow));
   }
 
   .card[data-variant="outlined"] {
-    border-color: var(--pug-color-border-default);
+    border-color: color-mix(in srgb, var(--pug-color-border-default) 76%, transparent);
   }
 
   .card[data-variant="elevated"] {
-    box-shadow: var(--pug-elevation-surface);
-    background: color-mix(in srgb, var(--pug-color-background-elevated) 94%, transparent);
+    border-radius: var(--pug-treatment-surface-elevated-radius, var(--pug-recipe-card-radius));
+    border-color: color-mix(
+      in srgb,
+      var(--pug-treatment-surface-elevated-border, var(--pug-color-border-default)) 82%,
+      var(--pug-color-border-default)
+    );
+    background: var(
+      --pug-treatment-surface-elevated-fill,
+      color-mix(in srgb, var(--pug-color-background-elevated) 98%, var(--pug-color-background-panel))
+    );
+    box-shadow:
+      0 1.125rem 2.5rem color-mix(in srgb, black 38%, transparent),
+      0 0.375rem 0.875rem color-mix(in srgb, black 24%, transparent),
+      inset 0 0.0625rem 0 color-mix(in srgb, var(--pug-color-text-inverse) 10%, transparent),
+      0 0 0 0.0625rem color-mix(in srgb, var(--pug-color-border-default) 12%, transparent);
+  }
+
+  :global([data-theme="light"]) .card[data-variant="elevated"] {
+    box-shadow:
+      0 0.875rem 1.75rem rgba(49, 66, 85, 0.1),
+      0 0.25rem 0.625rem rgba(49, 66, 85, 0.06),
+      inset 0 0.0625rem 0 rgba(255, 255, 255, 0.72),
+      0 0 0 0.0625rem color-mix(in srgb, var(--pug-color-border-default) 10%, transparent);
   }
 
   .card[data-interactive="true"] {
@@ -61,35 +110,18 @@
   }
 
   .card[data-interactive="true"]:hover {
-    border-color: color-mix(in srgb, var(--pug-color-accent-base) 28%, var(--pug-color-border-subtle));
-    background: color-mix(in srgb, var(--pug-color-background-elevated) 94%, transparent);
+    border-color: var(--pug-recipe-card-hover-border);
+    background: var(--pug-recipe-card-hover-fill);
+    box-shadow: var(--pug-recipe-card-hover-shadow);
   }
 
   .card__media {
     overflow: hidden;
-    border-radius: calc(var(--pug-radius-surface) - 3px);
+    border-radius: calc(var(--pug-recipe-card-radius) - 0.1875rem);
   }
 
   .card__footer {
     padding-top: var(--pug-space-stack-sm);
-    border-top: 1px solid var(--pug-color-border-subtle);
-  }
-
-  :global([data-theme="light"]) .card {
-    border-color: color-mix(in srgb, var(--pug-color-border-default) 16%, transparent);
-    background: color-mix(in srgb, var(--pug-color-background-elevated) 96%, var(--pug-color-background-panel));
-    box-shadow:
-      inset 0 0 0 1px color-mix(in srgb, var(--pug-color-border-subtle) 42%, transparent),
-      0 8px 20px rgba(49, 66, 85, 0.04);
-  }
-
-  :global([data-theme="light"]) .card[data-variant="outlined"] {
-    border-color: color-mix(in srgb, var(--pug-color-border-default) 24%, transparent);
-  }
-
-  :global([data-theme="light"]) .card[data-variant="elevated"] {
-    box-shadow:
-      0 12px 28px rgba(49, 66, 85, 0.06),
-      inset 0 1px 0 rgba(255, 255, 255, 0.74);
+    border-top: 0.0625rem solid var(--pug-treatment-surface-divider, var(--pug-recipe-card-divider));
   }
 </style>

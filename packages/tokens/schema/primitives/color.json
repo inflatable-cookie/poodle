@@ -72,13 +72,23 @@
       }
     },
     "green": {
+      "400": {
+        "$type": "color",
+        "$value": "#9fe870",
+        "$description": "Readable lime accent on dark surfaces."
+      },
       "500": {
         "$type": "color",
-        "$value": "#1fb67b",
+        "$value": "#7fd24d",
         "$description": "Positive status color."
       }
     },
     "amber": {
+      "400": {
+        "$type": "color",
+        "$value": "#ffca73",
+        "$description": "Readable warm accent on dark surfaces."
+      },
       "500": {
         "$type": "color",
         "$value": "#f0b24d",

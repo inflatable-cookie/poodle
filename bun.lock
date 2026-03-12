@@ -13,6 +13,7 @@
       "version": "0.0.0",
       "dependencies": {
         "@pug/svelte-primitives": "workspace:*",
+        "@pug/svelte-tokens": "workspace:*",
         "svelte": "^5.38.6",
       },
     },
@@ -49,6 +50,7 @@
       "dependencies": {
         "@pug/svelte-composites": "workspace:*",
         "@pug/svelte-primitives": "workspace:*",
+        "@pug/svelte-tokens": "workspace:*",
         "svelte": "^5.38.6",
       },
     },

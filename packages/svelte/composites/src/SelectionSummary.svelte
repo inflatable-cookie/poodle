@@ -53,7 +53,7 @@
     display: grid;
     gap: var(--pug-space-stack-sm);
     padding: var(--pug-space-panel-y) var(--pug-space-panel-x);
-    border: 1px solid transparent;
+    border: 0.0625rem solid transparent;
     border-radius: var(--pug-radius-surface);
     background: color-mix(in srgb, var(--pug-color-background-panel) 94%, transparent);
   }
@@ -67,7 +67,7 @@
 
   .selection-summary__header button,
   .selection-summary__chip {
-    border: 1px solid transparent;
+    border: 0.0625rem solid transparent;
     border-radius: var(--pug-radius-control);
     background: color-mix(in srgb, var(--pug-color-background-surface) 76%, transparent);
     color: var(--pug-color-text-primary);
@@ -88,17 +88,17 @@
 
   .selection-summary__chip {
     display: inline-flex;
-    gap: 8px;
+    gap: 0.5rem;
     align-items: center;
-    min-height: 32px;
-    padding: 0 12px;
+    min-height: 2rem;
+    padding: 0 0.75rem;
   }
 
   .selection-summary__overflow {
     color: var(--pug-color-text-secondary);
-    font-size: 13px;
-    line-height: 32px;
-    padding: 0 10px;
+    font-size: 0.8125rem;
+    line-height: 2rem;
+    padding: 0 0.625rem;
     border-radius: var(--pug-radius-control);
     background: color-mix(in srgb, var(--pug-color-background-surface) 58%, transparent);
   }
@@ -106,7 +106,7 @@
   :global([data-theme="light"]) .selection-summary {
     border-color: color-mix(in srgb, var(--pug-color-border-default) 14%, transparent);
     box-shadow:
-      inset 0 0 0 1px color-mix(in srgb, var(--pug-color-border-subtle) 32%, transparent),
-      0 6px 16px rgba(49, 66, 85, 0.03);
+      inset 0 0 0 0.0625rem color-mix(in srgb, var(--pug-color-border-subtle) 32%, transparent),
+      0 0.375rem 1rem rgba(49, 66, 85, 0.03);
   }
 </style>

@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { pxToRem } from "@pug/svelte-tokens";
   import { createEventDispatcher } from "svelte";
   import { onDestroy } from "svelte";
 
@@ -25,6 +26,8 @@
   $: currentRatio = Math.min(0.9, Math.max(0.1, ratio ?? uncontrolledRatio));
   $: primarySize = `${Math.round(currentRatio * 1000) / 10}%`;
   $: secondarySize = `${Math.round((1 - currentRatio) * 1000) / 10}%`;
+  $: primaryMinSize = pxToRem(minPrimarySize ?? 0);
+  $: secondaryMinSize = pxToRem(minSecondarySize ?? 0);
 
   function setRatio(nextRatio: number): void {
     const clamped = Math.min(0.9, Math.max(0.1, nextRatio));
@@ -117,7 +120,7 @@
   data-secondary-collapsed={isSecondaryCollapsed}
   aria-label={ariaLabel ?? "Split view"}
   bind:this={container}
-  style={`--pug-split-primary-size: ${primarySize}; --pug-split-secondary-size: ${secondarySize}; --pug-split-primary-min: ${minPrimarySize ?? 0}px; --pug-split-secondary-min: ${minSecondarySize ?? 0}px;`}
+  style={`--pug-split-primary-size: ${primarySize}; --pug-split-secondary-size: ${secondarySize}; --pug-split-primary-min: ${primaryMinSize}; --pug-split-secondary-min: ${secondaryMinSize};`}
 >
   <div class="split-view__pane split-view__pane--primary">
     <slot name="primary" />
@@ -175,33 +178,33 @@
   }
 
   .split-view[data-orientation="horizontal"] .split-view__divider {
-    width: 10px;
+    width: 0.625rem;
   }
 
   .split-view[data-orientation="vertical"] .split-view__divider {
-    height: 10px;
+    height: 0.625rem;
   }
 
   .split-view__divider span {
     position: absolute;
     inset: 0;
     margin: auto;
-    border-radius: 999px;
+    border-radius: 999rem;
     background: color-mix(in srgb, var(--pug-color-border-default) 82%, transparent);
   }
 
   .split-view[data-orientation="horizontal"] .split-view__divider span {
-    width: 2px;
+    width: 0.125rem;
     height: 100%;
   }
 
   .split-view[data-orientation="vertical"] .split-view__divider span {
     width: 100%;
-    height: 2px;
+    height: 0.125rem;
   }
 
   .split-view__divider:focus-visible {
     outline: var(--pug-border-width-focus) solid var(--pug-color-accent-focusRing);
-    outline-offset: 2px;
+    outline-offset: 0.125rem;
   }
 </style>

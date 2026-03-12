@@ -4,6 +4,24 @@ Underlay bridge scaffolding for token aliases, theme translation, and
 wrapper-preservation rules that ingest Pug artifacts without exposing Pug
 directly to Underlay app code.
 
+## Current Purpose
+
+In `g03`, this package is the zero-leak adapter layer between Pug and
+Underlay-owned public APIs.
+
+It exists to let Underlay adopt Pug internally while keeping:
+
+- Underlay-owned import paths
+- Underlay-owned component names
+- Underlay-owned prop naming
+- Underlay-owned rollout and deprecation posture
+
+It is not:
+
+- a public app-facing UI kit
+- a second canonical token source
+- a place where Pug naming becomes the public Underlay contract
+
 ## Package Shape
 
 ```text
@@ -17,6 +35,7 @@ packages/bridges/underlay/
     token-map.ts
     theme-map.ts
     component-wrappers.ts
+    zero-leak-proof.ts
 ```
 
 ## Ownership Rule
@@ -34,7 +53,55 @@ Underlay apps should not need:
 - Pug component names
 - Pug-specific prop names
 
+## Current Public Bridge Surface
+
+The bridge currently exports:
+
+- `token-map`
+- `theme-map`
+- `component-wrappers`
+- `zero-leak-proof`
+
+These exports are bridge-owned adoption artifacts. They describe how Underlay
+may consume Pug, but they do not redefine Pug canonically.
+
+## Current Zero-Leak Proof
+
+The current proof artifact lives in:
+
+- `ts/zero-leak-proof.ts`
+
+It makes the bridge posture concrete by recording:
+
+- the zero-leak rules
+- the current wrapper-backed adoption surfaces
+- the canonical dependency shape (`bridge-owned`)
+- and the remaining adoption friction that later milestones must resolve
+
+The current proof surfaces are:
+
+- `@underlay/ui/Button`
+- `@underlay/ui/SearchField`
+- `@underlay/ui/Panel`
+
+Each of these surfaces assumes:
+
+- app-facing imports stay Underlay-owned
+- Pug internals may sit underneath wrappers
+- bridge-local token aliases and theme maps remain internal implementation detail
+
+## Remaining Adoption Friction
+
+The bridge baseline still leaves these items explicit:
+
+- Underlay theme IDs are placeholders until real Underlay canonical names are supplied
+- wrapper prop translation is policy-first until a downstream Underlay wrapper package consumes the bridge
+- accessibility parity still needs real downstream wrapper evidence
+- the alias map should widen only when concrete Underlay adoption requires it
+
 ## Next Task
 
-Use this bridge package as the baseline while `g01.014` defines parity
-evidence and the downstream extension contract.
+Use this bridge package while executing
+`docs/roadmaps/g03/007-underlay-bridge-hardening-and-zero-leak-adoption-proof.md`
+so the first real Underlay adoption proof inherits an explicit zero-leak
+artifact instead of relying on README prose alone.

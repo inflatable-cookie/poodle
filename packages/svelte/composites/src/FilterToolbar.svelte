@@ -30,7 +30,7 @@
     display: grid;
     gap: var(--pug-space-stack-sm);
     padding: var(--pug-space-panel-y) var(--pug-space-panel-x);
-    border: 1px solid var(--pug-color-border-subtle);
+    border: 0.0625rem solid var(--pug-color-border-subtle);
     border-radius: var(--pug-radius-surface);
     background: color-mix(in srgb, var(--pug-color-background-elevated) 92%, transparent);
   }

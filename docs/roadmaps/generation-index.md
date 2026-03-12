@@ -23,14 +23,19 @@
     baseline are now in place
 
 - `g03`
-  - Status: active
+  - Status: completed
   - Range: `001` to `014`
   - Notes: migration policy, parity automation, docs publishing, first real
     downstream adoption tranches, ecosystem validation, change control, and
-    mature extension support
+    mature extension support are now explicit; `g03.001` freezes token
+    evolution and compatibility policy, `g03.002` adds the parity registry and
+    generated evidence artifact, `g03.003` and `g03.004` harden docs/publish
+    and performance posture, `g03.005` freezes recipe-based downstream styling
+    overrides, `g03.006` through `g03.009` make extension, adoption, and GPUI
+    validation boundaries explicit, and `g03.010` through `g03.014` complete
+    the accessibility, release, acceptance, onboarding, and closeout baselines
 
 ## Next Task
 
-Advance into `g03.001` from the now-established `g02` foundation, catalogue,
-docs surface, package API cleanup, and release baseline, then begin hardening
-and downstream-adoption readiness deliberately.
+No active generation is open. If the next program is created later, start from
+the explicit `g03` closeout artifact and carry-forward gaps.

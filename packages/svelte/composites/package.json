@@ -19,6 +19,7 @@
     "stability": "pre-release"
   },
   "dependencies": {
+    "@pug/svelte-tokens": "workspace:*",
     "@pug/svelte-primitives": "workspace:*",
     "svelte": "^5.38.6"
   }

@@ -48,7 +48,7 @@ Primary repos: `pug`
 ## `g03` Unblocked Milestones
 
 - [x] `g03.001` token evolution, migration, and compatibility policy
-- [x] `g03.002` parity automation and screenshot or interaction harnesses
+- [x] `g03.002` parity automation and visual or interaction harnesses
 - [x] `g03.003` contract linting, docs completeness, and publish pipeline
 - [x] `g03.004` performance, render-cost, and memory profile hardening
 

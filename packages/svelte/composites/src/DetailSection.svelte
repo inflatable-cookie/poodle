@@ -31,8 +31,8 @@
 <style>
   .detail-section {
     display: grid;
-    gap: calc(var(--pug-space-stack-md) + 2px);
-    padding-top: calc(var(--pug-space-stack-md) + 2px);
+    gap: calc(var(--pug-space-stack-md) + 0.125rem);
+    padding-top: calc(var(--pug-space-stack-md) + 0.125rem);
   }
 
   .detail-section[data-separated="true"] {
@@ -49,7 +49,7 @@
 
   .detail-section__title-block {
     display: grid;
-    gap: 6px;
+    gap: 0.375rem;
   }
 
   .detail-section__title,
@@ -59,7 +59,7 @@
 
   .detail-section__title {
     font-family: var(--pug-typography-heading-family);
-    font-size: 18px;
+    font-size: 1.125rem;
     line-height: 1.2;
   }
 

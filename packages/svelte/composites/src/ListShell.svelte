@@ -62,7 +62,7 @@
 
   .list-shell__viewport,
   .list-shell__state {
-    border: 1px solid var(--pug-color-border-subtle);
+    border: 0.0625rem solid var(--pug-color-border-subtle);
     border-radius: var(--pug-radius-surface);
     background: color-mix(in srgb, var(--pug-color-background-panel) 92%, transparent);
   }

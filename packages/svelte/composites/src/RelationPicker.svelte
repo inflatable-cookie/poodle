@@ -228,7 +228,7 @@
     align-items: center;
     gap: var(--pug-space-inline-md);
     padding: var(--pug-space-panel-y) var(--pug-space-panel-x);
-    border: 1px solid var(--pug-color-border-subtle);
+    border: 0.0625rem solid var(--pug-color-border-subtle);
     border-radius: var(--pug-radius-surface);
     background: color-mix(in srgb, var(--pug-color-background-surface) 86%, transparent);
     color: var(--pug-color-text-primary);
@@ -242,7 +242,7 @@
   .relation-picker__item-button {
     display: grid;
     grid-template-columns: minmax(0, 1fr);
-    gap: 4px;
+    gap: 0.25rem;
     min-width: 0;
     padding: 0;
     border: 0;
@@ -255,7 +255,7 @@
 
   .relation-picker__item-copy {
     display: grid;
-    gap: 4px;
+    gap: 0.25rem;
   }
 
   .relation-picker__item-copy strong,
@@ -267,13 +267,13 @@
   .relation-picker__item-copy small,
   .relation-picker__footer-note {
     color: var(--pug-color-text-secondary);
-    font-size: 13px;
+    font-size: 0.8125rem;
     line-height: 1.5;
   }
 
   .relation-picker__item-button:focus-visible {
     outline: var(--pug-border-width-focus) solid var(--pug-color-accent-focusRing);
-    outline-offset: 2px;
+    outline-offset: 0.125rem;
     border-radius: var(--pug-radius-control);
   }
 

@@ -1,0 +1,185 @@
+<script context="module" lang="ts">
+  let nextAccordionId = 0;
+</script>
+
+<script lang="ts">
+  import { createEventDispatcher } from "svelte";
+
+  import type { AccordionItem } from "./types";
+
+  export let items: AccordionItem[] = [];
+  export let value: string | string[] | null = null;
+  export let defaultValue: string | string[] | null = null;
+  export let selectionMode: "single" | "multiple" = "single";
+  export let isCollapsible = true;
+  export let ariaLabel: string | null = null;
+
+  const dispatch = createEventDispatcher<{
+    valueChange: { value: string | string[] | null };
+  }>();
+
+  const accordionId = ++nextAccordionId;
+  let uncontrolledValue = defaultValue ?? (selectionMode === "multiple" ? [] : null);
+
+  $: isControlled = value !== null;
+  $: currentValue = isControlled ? value : uncontrolledValue;
+  $: openValues = Array.isArray(currentValue)
+    ? currentValue
+    : currentValue
+      ? [currentValue]
+      : [];
+
+  function isOpen(itemValue: string): boolean {
+    return openValues.includes(itemValue);
+  }
+
+  function toggle(itemValue: string): void {
+    const currentlyOpen = isOpen(itemValue);
+    let nextValue: string | string[] | null;
+
+    if (selectionMode === "multiple") {
+      nextValue = currentlyOpen
+        ? openValues.filter((valueItem) => valueItem !== itemValue)
+        : [...openValues, itemValue];
+    } else if (currentlyOpen) {
+      nextValue = isCollapsible ? null : itemValue;
+    } else {
+      nextValue = itemValue;
+    }
+
+    if (!isControlled) {
+      uncontrolledValue = nextValue;
+    }
+
+    dispatch("valueChange", { value: nextValue });
+  }
+</script>
+
+<div
+  class="accordion"
+  role={selectionMode === "multiple" ? "group" : undefined}
+  aria-label={ariaLabel ?? undefined}
+>
+  {#each items as item (item.value)}
+    <section class="accordion__item" data-open={isOpen(item.value)}>
+      <h3 class="accordion__heading">
+        <button
+          type="button"
+          class="accordion__trigger"
+          id={`pug-accordion-trigger-${accordionId}-${item.value}`}
+          disabled={item.isDisabled === true}
+          aria-expanded={isOpen(item.value) ? "true" : "false"}
+          aria-controls={`pug-accordion-panel-${accordionId}-${item.value}`}
+          on:click={() => toggle(item.value)}
+        >
+          <span class="accordion__summary">
+            <span class="accordion__title">{item.label}</span>
+            {#if item.description}
+              <span class="accordion__description">{item.description}</span>
+            {/if}
+          </span>
+          <span class="accordion__indicator" aria-hidden="true">▾</span>
+        </button>
+      </h3>
+
+      {#if isOpen(item.value)}
+        <div
+          class="accordion__panel"
+          id={`pug-accordion-panel-${accordionId}-${item.value}`}
+          role="region"
+          aria-labelledby={`pug-accordion-trigger-${accordionId}-${item.value}`}
+        >
+          <slot item={item} isOpen={true} />
+        </div>
+      {/if}
+    </section>
+  {/each}
+</div>
+
+<style>
+  .accordion {
+    display: grid;
+    gap: 0.75rem;
+    min-width: 0;
+  }
+
+  .accordion__item {
+    display: grid;
+    gap: 0.75rem;
+    min-width: 0;
+    padding: 0.875rem 1rem;
+    border: 0.0625rem solid color-mix(in srgb, var(--pug-color-border-subtle) 36%, transparent);
+    border-radius: var(--pug-radius-surface);
+    background: color-mix(
+      in srgb,
+      var(--pug-color-background-elevated) 84%,
+      var(--pug-color-background-surface)
+    );
+    box-shadow: inset 0 0.0625rem 0 color-mix(in srgb, var(--pug-color-text-inverse) 8%, transparent);
+  }
+
+  .accordion__heading {
+    margin: 0;
+  }
+
+  .accordion__trigger {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 0.75rem;
+    width: 100%;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    color: var(--pug-color-text-primary);
+    cursor: pointer;
+    text-align: left;
+    font: inherit;
+  }
+
+  .accordion__trigger:disabled {
+    cursor: not-allowed;
+    opacity: var(--pug-state-opacity-disabled);
+  }
+
+  .accordion__trigger:focus-visible {
+    outline: var(--pug-border-width-focus) solid var(--pug-color-accent-focusRing);
+    outline-offset: 0.125rem;
+    border-radius: calc(var(--pug-radius-control) - 0.125rem);
+  }
+
+  .accordion__summary {
+    display: grid;
+    gap: 0.3125rem;
+    min-width: 0;
+  }
+
+  .accordion__title {
+    font-family: var(--pug-typography-heading-family);
+    font-size: 1rem;
+    font-weight: 700;
+    line-height: 1.2;
+  }
+
+  .accordion__description {
+    color: var(--pug-color-text-secondary);
+    font-size: 0.8125rem;
+    line-height: 1.45;
+  }
+
+  .accordion__indicator {
+    color: var(--pug-color-text-secondary);
+    font-family: var(--pug-typography-code-family);
+    font-size: 0.75rem;
+    line-height: 1;
+    transition: transform var(--pug-motion-duration-interaction) var(--pug-motion-easing-standard);
+  }
+
+  .accordion__item[data-open="true"] .accordion__indicator {
+    transform: rotate(180deg);
+  }
+
+  .accordion__panel {
+    min-width: 0;
+  }
+</style>

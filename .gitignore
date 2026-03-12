@@ -65,3 +65,6 @@ Cargo.lock
 # Temporary files
 *.tmp
 *.temp
+
+# Effigy
+.effigy/

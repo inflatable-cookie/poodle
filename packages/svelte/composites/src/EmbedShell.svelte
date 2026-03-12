@@ -67,7 +67,7 @@
     display: grid;
     gap: var(--pug-space-stack-md);
     padding: var(--pug-space-panel-y) var(--pug-space-panel-x);
-    border: 1px solid var(--pug-color-border-subtle);
+    border: 0.0625rem solid var(--pug-color-border-subtle);
     border-radius: var(--pug-radius-surface);
     background: color-mix(in srgb, var(--pug-color-background-panel) 96%, transparent);
   }
@@ -87,25 +87,25 @@
   .embed-shell__header p,
   .embed-shell__state p {
     color: var(--pug-color-text-secondary);
-    font-size: 13px;
+    font-size: 0.8125rem;
     line-height: 1.5;
   }
 
   .embed-shell__provider {
     align-self: start;
-    padding: 6px 10px;
+    padding: 0.375rem 0.625rem;
     border-radius: var(--pug-radius-control);
     background: color-mix(in srgb, var(--pug-color-background-surface) 72%, transparent);
     color: var(--pug-color-text-secondary);
-    font-size: 12px;
+    font-size: 0.75rem;
     font-weight: 600;
   }
 
   .embed-shell__viewport,
   .embed-shell__state {
     overflow: hidden;
-    border: 1px solid var(--pug-color-border-subtle);
-    border-radius: calc(var(--pug-radius-surface) - 2px);
+    border: 0.0625rem solid var(--pug-color-border-subtle);
+    border-radius: calc(var(--pug-radius-surface) - 0.125rem);
     background: color-mix(in srgb, var(--pug-color-background-surface) 78%, transparent);
   }
 

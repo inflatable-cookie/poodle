@@ -86,7 +86,7 @@
 
   .media-preview__eyebrow {
     color: var(--pug-color-text-secondary);
-    font-size: 11px;
+    font-size: 0.6875rem;
     font-weight: 600;
     letter-spacing: 0.12em;
     text-transform: uppercase;
@@ -94,7 +94,7 @@
 
   .media-preview__header h3 {
     margin: 0;
-    font-size: 20px;
+    font-size: 1.25rem;
     line-height: 1.2;
   }
 
@@ -106,7 +106,7 @@
   .media-preview__caption,
   .media-preview__meta {
     color: var(--pug-color-text-secondary);
-    font-size: 13px;
+    font-size: 0.8125rem;
     line-height: 1.5;
   }
 
@@ -120,12 +120,12 @@
   }
 
   .media-preview__meta li {
-    padding: 6px 10px;
+    padding: 0.375rem 0.625rem;
     border-radius: var(--pug-radius-control);
     background: color-mix(in srgb, var(--pug-color-background-surface) 70%, transparent);
   }
 
   :global([data-theme="light"]) .media-preview__meta li {
-    box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--pug-color-border-subtle) 32%, transparent);
+    box-shadow: inset 0 0 0 0.0625rem color-mix(in srgb, var(--pug-color-border-subtle) 32%, transparent);
   }
 </style>

@@ -4,8 +4,8 @@ export const tokens = {
   "primitives": {
     "border": {
       "width": {
-        "subtle": "1px",
-        "strong": "2px"
+        "subtle": "0.0625rem",
+        "strong": "0.125rem"
       }
     },
     "color": {
@@ -29,9 +29,11 @@ export const tokens = {
         "500": "#2d86f3"
       },
       "green": {
-        "500": "#1fb67b"
+        "400": "#9fe870",
+        "500": "#7fd24d"
       },
       "amber": {
+        "400": "#ffca73",
         "500": "#f0b24d"
       },
       "red": {
@@ -39,51 +41,51 @@ export const tokens = {
       }
     },
     "space": {
-      "0": "0px",
-      "1": "4px",
-      "2": "8px",
-      "3": "12px",
-      "4": "16px",
-      "5": "20px",
-      "6": "24px",
-      "8": "32px",
-      "10": "40px",
-      "12": "48px"
+      "0": "0rem",
+      "1": "0.25rem",
+      "2": "0.5rem",
+      "3": "0.75rem",
+      "4": "1rem",
+      "5": "1.25rem",
+      "6": "1.5rem",
+      "8": "2rem",
+      "10": "2.5rem",
+      "12": "3rem"
     },
     "size": {
       "control": {
-        "sm": "28px",
-        "md": "36px",
-        "lg": "44px"
+        "sm": "1.75rem",
+        "md": "2.25rem",
+        "lg": "2.75rem"
       },
       "icon": {
-        "sm": "12px",
-        "md": "16px",
-        "lg": "20px"
+        "sm": "0.75rem",
+        "md": "1rem",
+        "lg": "1.25rem"
       },
       "panel": {
-        "header": "40px"
+        "header": "2.5rem"
       }
     },
     "stroke": {
-      "hairline": "1px",
-      "focus": "2px"
+      "hairline": "0.0625rem",
+      "focus": "0.125rem"
     },
     "elevation": {
       "shadow": {
-        "sm": "0 4px 12px rgba(17, 22, 29, 0.08)",
-        "md": "0 12px 32px rgba(17, 22, 29, 0.16)",
-        "lg": "0 24px 60px rgba(11, 15, 20, 0.32)"
+        "sm": "0 0.25rem 0.75rem rgba(17, 22, 29, 0.08)",
+        "md": "0 0.75rem 2rem rgba(17, 22, 29, 0.16)",
+        "lg": "0 1.5rem 3.75rem rgba(11, 15, 20, 0.32)"
       }
     },
     "icon": {
       "size": {
-        "sm": "12px",
-        "md": "16px",
-        "lg": "20px"
+        "sm": "0.75rem",
+        "md": "1rem",
+        "lg": "1.25rem"
       },
       "stroke": {
-        "default": "1.5px"
+        "default": "0.0938rem"
       }
     },
     "motion": {
@@ -109,11 +111,11 @@ export const tokens = {
       }
     },
     "radius": {
-      "none": "0px",
-      "sm": "3px",
-      "md": "6px",
-      "lg": "10px",
-      "pill": "999px"
+      "none": "0rem",
+      "sm": "0.1875rem",
+      "md": "0.375rem",
+      "lg": "0.625rem",
+      "pill": "999rem"
     },
     "state": {
       "opacity": {
@@ -133,16 +135,16 @@ export const tokens = {
           "semibold": "600"
         },
         "size": {
-          "xs": "11px",
-          "sm": "13px",
-          "md": "14px",
-          "lg": "16px",
-          "xl": "20px"
+          "xs": "0.6875rem",
+          "sm": "0.8125rem",
+          "md": "0.875rem",
+          "lg": "1rem",
+          "xl": "1.25rem"
         },
         "lineHeight": {
-          "sm": "16px",
-          "md": "20px",
-          "lg": "24px"
+          "sm": "1rem",
+          "md": "1.25rem",
+          "lg": "1.5rem"
         }
       }
     }
@@ -150,8 +152,8 @@ export const tokens = {
   "semantic": {
     "border": {
       "width": {
-        "default": "1px",
-        "focus": "2px"
+        "default": "0.0625rem",
+        "focus": "0.125rem"
       }
     },
     "color": {
@@ -178,7 +180,7 @@ export const tokens = {
         "focusRing": "#57a7ff"
       },
       "status": {
-        "success": "#1fb67b",
+        "success": "#7fd24d",
         "warning": "#f0b24d",
         "danger": "#e06a5f"
       },
@@ -188,16 +190,16 @@ export const tokens = {
       }
     },
     "elevation": {
-      "surface": "0 4px 12px rgba(17, 22, 29, 0.08)",
-      "overlay": "0 12px 32px rgba(17, 22, 29, 0.16)",
-      "dialog": "0 24px 60px rgba(11, 15, 20, 0.32)"
+      "surface": "0 0.25rem 0.75rem rgba(17, 22, 29, 0.08)",
+      "overlay": "0 0.75rem 2rem rgba(17, 22, 29, 0.16)",
+      "dialog": "0 1.5rem 3.75rem rgba(11, 15, 20, 0.32)"
     },
     "icon": {
       "size": {
-        "default": "16px"
+        "default": "1rem"
       },
       "stroke": {
-        "default": "1.5px"
+        "default": "0.0938rem"
       }
     },
     "motion": {
@@ -219,42 +221,42 @@ export const tokens = {
       "scrimOpacity": 0.64
     },
     "radius": {
-      "control": "6px",
-      "surface": "10px",
-      "pill": "999px"
+      "control": "0.375rem",
+      "surface": "0.625rem",
+      "pill": "999rem"
     },
     "size": {
       "control": {
-        "height": "36px",
-        "minWidth": "96px"
+        "height": "2.25rem",
+        "minWidth": "6rem"
       },
       "icon": {
-        "sm": "12px",
-        "md": "16px",
-        "lg": "20px"
+        "sm": "0.75rem",
+        "md": "1rem",
+        "lg": "1.25rem"
       },
       "panel": {
-        "header": "40px"
+        "header": "2.5rem"
       }
     },
     "space": {
       "stack": {
-        "sm": "8px",
-        "md": "12px",
-        "lg": "20px"
+        "sm": "0.5rem",
+        "md": "0.75rem",
+        "lg": "1.25rem"
       },
       "inline": {
-        "sm": "8px",
-        "md": "12px",
-        "lg": "16px"
+        "sm": "0.5rem",
+        "md": "0.75rem",
+        "lg": "1rem"
       },
       "panel": {
-        "x": "16px",
-        "y": "12px"
+        "x": "1rem",
+        "y": "0.75rem"
       },
       "control": {
-        "x": "12px",
-        "y": "8px"
+        "x": "0.75rem",
+        "y": "0.5rem"
       }
     },
     "state": {
@@ -266,26 +268,26 @@ export const tokens = {
     "typography": {
       "body": {
         "family": "\"Inter\", \"SF Pro Display\", system-ui, sans-serif",
-        "size": "14px",
-        "lineHeight": "20px",
+        "size": "0.875rem",
+        "lineHeight": "1.25rem",
         "weight": "400"
       },
       "label": {
         "family": "\"Inter\", \"SF Pro Display\", system-ui, sans-serif",
-        "size": "13px",
-        "lineHeight": "16px",
+        "size": "0.8125rem",
+        "lineHeight": "1rem",
         "weight": "500"
       },
       "heading": {
         "family": "\"Inter\", \"SF Pro Display\", system-ui, sans-serif",
-        "size": "16px",
-        "lineHeight": "24px",
+        "size": "1rem",
+        "lineHeight": "1.5rem",
         "weight": "600"
       },
       "code": {
         "family": "\"IBM Plex Mono\", \"SFMono-Regular\", monospace",
-        "size": "13px",
-        "lineHeight": "16px",
+        "size": "0.8125rem",
+        "lineHeight": "1rem",
         "weight": "400"
       }
     }
@@ -308,7 +310,9 @@ export const tokenPaths = [
   "primitives.color.slate.950",
   "primitives.color.blue.400",
   "primitives.color.blue.500",
+  "primitives.color.green.400",
   "primitives.color.green.500",
+  "primitives.color.amber.400",
   "primitives.color.amber.500",
   "primitives.color.red.500",
   "primitives.space.0",

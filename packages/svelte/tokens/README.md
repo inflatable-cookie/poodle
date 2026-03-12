@@ -9,6 +9,7 @@ Public Svelte-facing token surface for emitted Pug token artifacts.
 - CSS helper exports: `@pug/svelte-tokens/css`
 - generated themes: `@pug/svelte-tokens/themes`
 - generated metadata: `@pug/svelte-tokens/metadata`
+- relative-unit helpers: `@pug/svelte-tokens/units`
 
 ## Stability Notes
 
