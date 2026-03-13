@@ -1,0 +1,16 @@
+[package]
+name = "pug-gpui-primitives"
+version = "0.0.0"
+edition = "2021"
+description = "Contract-backed GPUI structural primitive baseline for Pug."
+
+[lib]
+path = "src/lib.rs"
+
+[dependencies]
+pug-gpui-tokens = { path = "../tokens" }
+
+[package.metadata.pug]
+public-intent = true
+channel = "preview"
+stability = "pre-release"

@@ -1,0 +1,352 @@
+{
+  "generation": "g04.010",
+  "comparisonSource": "packages/svelte/preview/src/accessibility.ts",
+  "sectionIds": [
+    "form-suite",
+    "table-suite",
+    "browse-suite",
+    "detail-suite",
+    "picker-suite",
+    "media-suite",
+    "notification-suite",
+    "command-suite",
+    "workspace-suite"
+  ],
+  "layerProof": [
+    {
+      "id": "primitives",
+      "crateName": "pug-gpui-primitives",
+      "cratePath": "packages/gpui/primitives",
+      "contractIds": [
+        "accordion",
+        "badge",
+        "box",
+        "button",
+        "calendar",
+        "checkbox",
+        "collapsible",
+        "context-menu",
+        "date-picker",
+        "date-range-picker",
+        "date-time-picker",
+        "date-time-range-picker",
+        "dialog",
+        "drawer",
+        "field",
+        "form-actions",
+        "grid",
+        "icon-button",
+        "menu",
+        "menubar",
+        "navigation-menu",
+        "popover",
+        "progress",
+        "radio-group",
+        "range-calendar",
+        "scroll-shell",
+        "search-field",
+        "segmented-control",
+        "select",
+        "separator",
+        "slider",
+        "stack",
+        "status-indicator",
+        "surface",
+        "switch",
+        "tab-strip",
+        "tabs",
+        "text-area",
+        "text-input",
+        "time-field",
+        "tooltip"
+      ],
+      "exportNames": [
+        "AccordionSpec",
+        "BadgeSpec",
+        "BoxSpec",
+        "ButtonSpec",
+        "CalendarSpec",
+        "CheckboxSpec",
+        "CollapsibleSpec",
+        "ContextMenuSpec",
+        "DatePickerSpec",
+        "DateRangePickerSpec",
+        "DateTimePickerSpec",
+        "DateTimeRangePickerSpec",
+        "DialogSpec",
+        "DrawerSpec",
+        "FieldRelationships",
+        "FieldSpec",
+        "FormActionsSpec",
+        "GridSpec",
+        "IconButtonSpec",
+        "MenuSpec",
+        "MenubarSpec",
+        "NavigationMenuSpec",
+        "PopoverSpec",
+        "ProgressSpec",
+        "RadioGroupSpec",
+        "RangeCalendarSpec",
+        "ScrollShellSpec",
+        "SearchFieldSpec",
+        "SegmentedControlSpec",
+        "SelectSpec",
+        "SeparatorSpec",
+        "SliderSpec",
+        "StackSpec",
+        "StatusIndicatorSpec",
+        "SurfaceSpec",
+        "SwitchSpec",
+        "TabStripSpec",
+        "TabsSpec",
+        "TextAreaSpec",
+        "TextInputSpec",
+        "TimeFieldSpec",
+        "TooltipSpec"
+      ],
+      "focusEntryStatus": "explicit",
+      "focusRecoveryStatus": "hybrid",
+      "keyboardTraversalStatus": "hybrid",
+      "stateExposureStatus": "explicit",
+      "announcementsStatus": "hybrid",
+      "assistiveTechnologyStatus": "manual",
+      "evidence": [
+        "Accessible naming, validation-state exposure, check state, overlay dismissal posture, initial-focus posture, and focus-ring token resolution are explicit in the public primitive API.",
+        "The crate test surface already covers validation exposure, checked state exposure, dismiss-on-backdrop rules, popover initial focus, and focus ring tokens rather than leaving those semantics implicit."
+      ],
+      "remainingBlockers": [
+        "Mounted native focus-scope ownership and focus restoration still need runnable GPUI review coverage.",
+        "Assistive-technology traces for dialog, menu, tabs, and selection widgets still require native runtime evidence rather than spec-only proof."
+      ]
+    },
+    {
+      "id": "composites",
+      "crateName": "pug-gpui-composites",
+      "cratePath": "packages/gpui/composites",
+      "contractIds": [
+        "banner",
+        "callout",
+        "data-table",
+        "detail-shell",
+        "empty-state",
+        "field",
+        "filter-toolbar",
+        "form-actions",
+        "grid-shell",
+        "list-shell",
+        "media-preview",
+        "media-thumbnail",
+        "pagination-summary",
+        "picker-shell",
+        "relation-picker",
+        "selection-summary"
+      ],
+      "exportNames": [
+        "DataTableSpec",
+        "DetailShellSpec",
+        "EmptyStateSpec",
+        "FilterToolbarSpec",
+        "FormShellSpec",
+        "GridShellSpec",
+        "InlineRemediationSpec",
+        "ListShellSpec",
+        "MediaPreviewSpec",
+        "MediaThumbnailSpec",
+        "PaginationSummarySpec",
+        "PickerShellSpec",
+        "RelationPickerSpec",
+        "RemediationBannerSpec",
+        "SelectionSummarySpec",
+        "ValidationSummarySpec"
+      ],
+      "focusEntryStatus": "hybrid",
+      "focusRecoveryStatus": "hybrid",
+      "keyboardTraversalStatus": "hybrid",
+      "stateExposureStatus": "explicit",
+      "announcementsStatus": "hybrid",
+      "assistiveTechnologyStatus": "manual",
+      "evidence": [
+        "Validation summary and remediation composites expose announcement urgency explicitly through shared announcement modes instead of hiding that behavior in browser-only live regions.",
+        "Browse, detail, picker, selection-summary, and media composite specs keep labels, variant posture, empty or error states, and visible selection semantics explicit for later mounted GPUI review."
+      ],
+      "remainingBlockers": [
+        "Structured table narration, picker active-item narration, and media fallback narration still need mounted native proof.",
+        "Composite shells do not yet ship a runnable GPUI review app section for every browse, detail, picker, and media route, so assistive-technology evidence remains manual."
+      ]
+    },
+    {
+      "id": "workstation",
+      "crateName": "pug-gpui-workstation",
+      "cratePath": "packages/gpui/workstation",
+      "contractIds": [
+        "action-discovery-panel",
+        "app-header",
+        "command-palette",
+        "command-palette-shell",
+        "dock-region",
+        "panel-header",
+        "panel-surface",
+        "panel-tabs",
+        "project-header",
+        "shell-status-bar",
+        "split-view",
+        "surface-tabs",
+        "workspace-shell"
+      ],
+      "exportNames": [
+        "ActionDiscoveryPanelSpec",
+        "AppHeaderSpec",
+        "CommandPaletteShellSpec",
+        "CommandPaletteSpec",
+        "DockRegionSpec",
+        "PanelHeaderSpec",
+        "PanelSurfaceSpec",
+        "PanelTabsSpec",
+        "ProjectHeaderSpec",
+        "ShellStatusBarSpec",
+        "SplitViewSpec",
+        "SurfaceTabsSpec",
+        "WorkspaceShellSpec"
+      ],
+      "focusEntryStatus": "hybrid",
+      "focusRecoveryStatus": "hybrid",
+      "keyboardTraversalStatus": "explicit",
+      "stateExposureStatus": "explicit",
+      "announcementsStatus": "manual",
+      "assistiveTechnologyStatus": "manual",
+      "evidence": [
+        "Command and workstation shells already expose accessible labels, active-surface identity, command shortcut posture, grouped action meaning, and keyboard-resize capability explicitly in the public API.",
+        "The workstation crate test surface covers command discovery grouping, workspace identity, split keyboard-resize posture, and snapshot stability so shell meaning does not depend on undocumented runtime behavior."
+      ],
+      "remainingBlockers": [
+        "Native dock focus scopes, focus recovery after command execution or overlay close, and named-region traversal still require mounted GPUI evidence.",
+        "Menu-bar ownership, multi-window movement, and downstream shell assistive-technology traces remain later runtime proof work."
+      ]
+    }
+  ],
+  "sectionProof": [
+    {
+      "sectionId": "form-suite",
+      "gpuiStatus": "manual",
+      "focusStatus": "explicit",
+      "keyboardStatus": "hybrid",
+      "announcementsStatus": "hybrid",
+      "owningLayer": "primitives-plus-composites",
+      "sideBySideReview": true,
+      "remainingBlockers": [
+        "Mounted field, text-entry, and validation-summary review surfaces are still required before native assistive-technology conformance can be promoted beyond manual proof."
+      ]
+    },
+    {
+      "sectionId": "table-suite",
+      "gpuiStatus": "manual",
+      "focusStatus": "hybrid",
+      "keyboardStatus": "hybrid",
+      "announcementsStatus": "manual",
+      "owningLayer": "composites",
+      "sideBySideReview": true,
+      "remainingBlockers": [
+        "Native table narration, row selection narration, and sort-state exposure still need mounted GPUI evidence."
+      ]
+    },
+    {
+      "sectionId": "browse-suite",
+      "gpuiStatus": "manual",
+      "focusStatus": "hybrid",
+      "keyboardStatus": "hybrid",
+      "announcementsStatus": "manual",
+      "owningLayer": "composites",
+      "sideBySideReview": true,
+      "remainingBlockers": [
+        "Browse-shell focus order, filter recovery, and loading or result-count announcement posture remain native runtime review work."
+      ]
+    },
+    {
+      "sectionId": "detail-suite",
+      "gpuiStatus": "manual",
+      "focusStatus": "hybrid",
+      "keyboardStatus": "hybrid",
+      "announcementsStatus": "manual",
+      "owningLayer": "composites",
+      "sideBySideReview": true,
+      "remainingBlockers": [
+        "Metadata narration, action ordering, and companion-pane traversal still need mounted native verification."
+      ]
+    },
+    {
+      "sectionId": "picker-suite",
+      "gpuiStatus": "manual",
+      "focusStatus": "hybrid",
+      "keyboardStatus": "hybrid",
+      "announcementsStatus": "hybrid",
+      "owningLayer": "composites",
+      "sideBySideReview": true,
+      "remainingBlockers": [
+        "Modal or popover focus containment, active-item narration, and close recovery still require mounted GPUI proof."
+      ]
+    },
+    {
+      "sectionId": "media-suite",
+      "gpuiStatus": "manual",
+      "focusStatus": "hybrid",
+      "keyboardStatus": "manual",
+      "announcementsStatus": "manual",
+      "owningLayer": "composites",
+      "sideBySideReview": false,
+      "remainingBlockers": [
+        "Media playback, document preview, and unavailable-preview fallback narration remain the most runtime-specific accessibility debt in the current GPUI surface."
+      ]
+    },
+    {
+      "sectionId": "notification-suite",
+      "gpuiStatus": "manual",
+      "focusStatus": "hybrid",
+      "keyboardStatus": "explicit",
+      "announcementsStatus": "hybrid",
+      "owningLayer": "primitives-plus-composites",
+      "sideBySideReview": true,
+      "remainingBlockers": [
+        "Native toast timing, queue narration, and escalation between polite and assertive announcement posture still need mounted evidence."
+      ]
+    },
+    {
+      "sectionId": "command-suite",
+      "gpuiStatus": "manual",
+      "focusStatus": "hybrid",
+      "keyboardStatus": "explicit",
+      "announcementsStatus": "hybrid",
+      "owningLayer": "workstation",
+      "sideBySideReview": true,
+      "remainingBlockers": [
+        "Modal command focus recovery, active-result narration, and execution feedback traces remain native review work."
+      ]
+    },
+    {
+      "sectionId": "workspace-suite",
+      "gpuiStatus": "manual",
+      "focusStatus": "hybrid",
+      "keyboardStatus": "hybrid",
+      "announcementsStatus": "manual",
+      "owningLayer": "workstation",
+      "sideBySideReview": true,
+      "remainingBlockers": [
+        "Dock-region naming, multi-panel traversal, and layout-change narration still require mounted GPUI shell evidence."
+      ]
+    }
+  ],
+  "manualReviewExpectations": [
+    "Mounted GPUI review surfaces must still be exercised for focus entry, focus recovery, keyboard traversal, and announcement quality before any section can be promoted from manual proof to explicit assistive-technology conformance.",
+    "Side-by-side review against the Svelte preview remains mandatory for the sections marked as side-by-side review targets in the parity matrix.",
+    "Native assistive-technology traces should capture real focus movement, announcement timing, and shell-region naming rather than relying on browser inference."
+  ],
+  "deltaRegister": [
+    "Browser live-region and semantic HTML behavior still does work automatically in Svelte that GPUI must reproduce with native accessible-tree and announcement plumbing.",
+    "Overlay, menu, command palette, and picker focus containment remain the highest-risk cross-runtime delta because browser focus-scope behavior does not transfer automatically to GPUI.",
+    "Structured table, media preview, and workstation shell narration remain more runtime-specific than direct-parity visual comparison alone can prove."
+  ],
+  "nonGoals": [
+    "Do not treat this proof artifact as full native conformance certification for every GPUI surface.",
+    "Do not claim mounted assistive-technology proof for sections that still only have spec-level or crate-test evidence.",
+    "Do not reopen Loophole-specific DAW widget ownership under the banner of GPUI accessibility work."
+  ]
+}

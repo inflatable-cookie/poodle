@@ -1,0 +1,302 @@
+{
+  "generation": "g04.013",
+  "appId": "shared-demo-app",
+  "dependsOnAudit": "packages/shared-demo-app-audit.json",
+  "reviewDimensions": [
+    "theme",
+    "density",
+    "controlSize"
+  ],
+  "docsShellBoundary": {
+    "docsOnlySectionIds": [
+      "catalog-hub",
+      "token-summary-section",
+      "token-inspector"
+    ],
+    "rules": [
+      "Docs navigation, family metadata, token inspection, and catalog browsing remain docs-shell concerns and must not be required inside the shared demo target.",
+      "The shared demo app may be launched or inspected from the docs shell, but its core screens must stand on their own without docs-only chrome.",
+      "The demo contract owns screen structure, state posture, and component usage; the docs shell owns catalog navigation, package metadata, and token-inspector utilities."
+    ]
+  },
+  "shellRegions": [
+    {
+      "id": "app-header",
+      "purpose": "Top-level identity, navigation entry points, and global actions."
+    },
+    {
+      "id": "screen-tabs",
+      "purpose": "Primary screen switching inside the demo app without using docs navigation."
+    },
+    {
+      "id": "context-toolbar",
+      "purpose": "Screen-local filters, segmented controls, and state toggles."
+    },
+    {
+      "id": "primary-content",
+      "purpose": "Main task surface for the current demo screen."
+    },
+    {
+      "id": "companion-panel",
+      "purpose": "Secondary detail, review, or supporting state surface."
+    },
+    {
+      "id": "status-bar",
+      "purpose": "Persistent shell status, summary, and mode visibility."
+    },
+    {
+      "id": "modal-layer",
+      "purpose": "Command, picker, dialog, drawer, and other transient overlay surfaces."
+    }
+  ],
+  "screenContracts": [
+    {
+      "id": "overview-shell",
+      "title": "Overview shell",
+      "sourceSectionIds": [
+        "notification-suite",
+        "workspace-suite"
+      ],
+      "regionIds": [
+        "app-header",
+        "screen-tabs",
+        "primary-content",
+        "companion-panel",
+        "status-bar"
+      ],
+      "componentExpectations": [
+        "AppHeader",
+        "ProjectHeader",
+        "WorkspaceShell",
+        "ShellStatusBar",
+        "Banner",
+        "StatusIndicator",
+        "Pill"
+      ],
+      "stateMatrix": [
+        "default",
+        "status-active",
+        "review-blocked"
+      ],
+      "interactionCheckpoints": [
+        "shell hierarchy remains readable without docs metadata chrome",
+        "global actions and shell status remain reachable with keyboard-only traversal",
+        "status and remediation posture remain visible without collapsing into toast-only feedback",
+        "the primitive coverage deck keeps every public primitive directly reviewable without leaving the shared demo shell"
+      ],
+      "comparisonMode": "direct-parity"
+    },
+    {
+      "id": "form-and-validation",
+      "title": "Form and validation",
+      "sourceSectionIds": [
+        "form-suite",
+        "notification-suite"
+      ],
+      "regionIds": [
+        "context-toolbar",
+        "primary-content",
+        "companion-panel",
+        "modal-layer"
+      ],
+      "componentExpectations": [
+        "Field",
+        "TextInput",
+        "TextArea",
+        "SearchField",
+        "Select",
+        "RadioGroup",
+        "Switch",
+        "FormActions",
+        "Banner",
+        "Callout",
+        "Dialog"
+      ],
+      "stateMatrix": [
+        "default",
+        "invalid",
+        "pending",
+        "disabled"
+      ],
+      "interactionCheckpoints": [
+        "field labels, help text, and validation posture remain attached to the same screen story",
+        "focus entry, error recovery, and action enablement remain explicit",
+        "notification or remediation surfaces remain part of the workflow instead of separate docs examples"
+      ],
+      "comparisonMode": "direct-parity"
+    },
+    {
+      "id": "browse-and-table",
+      "title": "Browse and table",
+      "sourceSectionIds": [
+        "browse-suite",
+        "table-suite"
+      ],
+      "regionIds": [
+        "context-toolbar",
+        "primary-content",
+        "companion-panel"
+      ],
+      "componentExpectations": [
+        "FilterToolbar",
+        "DataTable",
+        "BulkActionBar",
+        "PaginationSummary",
+        "ListShell",
+        "GridShell",
+        "EmptyState",
+        "Table",
+        "SegmentedControl"
+      ],
+      "stateMatrix": [
+        "ready",
+        "selection-active",
+        "empty",
+        "no-results",
+        "loading"
+      ],
+      "interactionCheckpoints": [
+        "filters, search, table selection, and no-results posture read as one coherent browse workflow",
+        "bulk actions and pagination stay attached to visible selection semantics",
+        "list or table mode switching remains part of the screen model rather than separate section demos"
+      ],
+      "comparisonMode": "native-adaptation"
+    },
+    {
+      "id": "detail-and-related-data",
+      "title": "Detail and related data",
+      "sourceSectionIds": [
+        "detail-suite"
+      ],
+      "regionIds": [
+        "primary-content",
+        "companion-panel",
+        "context-toolbar"
+      ],
+      "componentExpectations": [
+        "PageHeader",
+        "Breadcrumbs",
+        "DetailShell",
+        "DetailSection",
+        "DetailRow",
+        "Card",
+        "SelectionSummary",
+        "Tabs"
+      ],
+      "stateMatrix": [
+        "default",
+        "metadata-dense",
+        "action-emphasis"
+      ],
+      "interactionCheckpoints": [
+        "headers, metadata, cards, and supporting content remain part of one believable detail workflow",
+        "value alignment and card hierarchy stay strong across themes and densities",
+        "detail navigation and supporting summaries are visible without docs-catalog framing"
+      ],
+      "comparisonMode": "direct-parity"
+    },
+    {
+      "id": "picker-and-media",
+      "title": "Picker and media",
+      "sourceSectionIds": [
+        "picker-suite",
+        "media-suite"
+      ],
+      "regionIds": [
+        "context-toolbar",
+        "primary-content",
+        "companion-panel",
+        "modal-layer"
+      ],
+      "componentExpectations": [
+        "PickerShell",
+        "RelationPicker",
+        "SelectionSummary",
+        "MediaThumbnail",
+        "MediaPreview",
+        "EmbedShell",
+        "Popover",
+        "Drawer"
+      ],
+      "stateMatrix": [
+        "inline-ready",
+        "modal-open",
+        "media-ready",
+        "media-empty",
+        "media-error"
+      ],
+      "interactionCheckpoints": [
+        "selection workflow, preview framing, and fallback posture remain one story instead of separate section samples",
+        "inline and overlay picker modes preserve the same visible workflow semantics",
+        "media fallback and unavailable-preview posture stay intentional rather than renderer-specific noise"
+      ],
+      "comparisonMode": "native-adaptation"
+    },
+    {
+      "id": "command-and-workspace",
+      "title": "Command and workspace",
+      "sourceSectionIds": [
+        "command-suite",
+        "workspace-suite"
+      ],
+      "regionIds": [
+        "app-header",
+        "screen-tabs",
+        "primary-content",
+        "companion-panel",
+        "status-bar",
+        "modal-layer"
+      ],
+      "componentExpectations": [
+        "CommandPalette",
+        "ActionDiscoveryPanel",
+        "PanelSurface",
+        "PanelHeader",
+        "PanelTabs",
+        "DockRegion",
+        "SplitView",
+        "SurfaceTabs",
+        "WorkspaceShell",
+        "Toolbar",
+        "Menu"
+      ],
+      "stateMatrix": [
+        "shell-ready",
+        "command-open",
+        "docking-visible",
+        "persistence-visible"
+      ],
+      "interactionCheckpoints": [
+        "command discovery and workstation hierarchy remain part of the same shell target",
+        "modal command posture, panel tabs, and dock regions stay readable under side-by-side review",
+        "workspace status, persistence cues, and companion-panel state remain visible without docs-shell interference"
+      ],
+      "comparisonMode": "direct-parity"
+    }
+  ],
+  "parityChecklist": [
+    "Each demo screen must preserve the same screen purpose and shell hierarchy in Svelte and GPUI.",
+    "Public component usage should be visible enough that the screen reads as built from the shared packages rather than from ad-hoc demo glue.",
+    "Every public primitive export must be directly reviewable somewhere inside the shared demo shell, even when multiple specimens are grouped on one coverage deck.",
+    "Theme, density, and control size remain first-class review dimensions for the same demo screens in both runtimes.",
+    "Focus entry, focus recovery, keyboard traversal, and state exposure must be reviewed at the screen level rather than only at isolated component level.",
+    "Any runtime-specific differences must be recorded through the intentional delta register instead of becoming implicit demo drift."
+  ],
+  "runtimeBindings": {
+    "svelte": {
+      "status": "rebuilt",
+      "milestone": "g04.014",
+      "implementationRoot": "packages/svelte/preview/src/"
+    },
+    "gpui": {
+      "status": "implementation-required",
+      "milestone": "g04.015",
+      "implementationRoot": "packages/gpui/"
+    }
+  },
+  "nonGoals": [
+    "Do not treat the docs shell as the demo app contract.",
+    "Do not make Bits-specific or GPUI-specific mechanics part of the demo contract.",
+    "Do not require every exported component to become its own detached screen or specimen if that breaks the coherence of the target app."
+  ]
+}

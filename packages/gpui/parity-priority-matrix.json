@@ -1,0 +1,191 @@
+{
+  "generation": "g04.001",
+  "implementationWaves": [
+    {
+      "id": "wave-0-theme-and-preview",
+      "label": "Theme runtime and native preview foundation",
+      "goal": "Make GPUI emitted tokens, theme switching, and review-shell navigation visible enough to support side-by-side inspection.",
+      "sectionIds": [
+        "catalog-hub",
+        "token-summary-section",
+        "token-inspector"
+      ],
+      "packageFocus": [
+        "pug-gpui-tokens",
+        "gpui-preview-app"
+      ]
+    },
+    {
+      "id": "wave-1-foundation-primitives",
+      "label": "Structural, action, field, selection, and overlay primitives",
+      "goal": "Build the GPUI primitive foundation needed to stop later composites from inventing one-off native UI semantics.",
+      "sectionIds": [
+        "form-suite",
+        "notification-suite"
+      ],
+      "packageFocus": [
+        "pug-gpui-primitives"
+      ]
+    },
+    {
+      "id": "wave-2-product-composites",
+      "label": "Browse, detail, picker, table, and media composites",
+      "goal": "Bring the major application composites into GPUI once the primitive base is stable enough to carry them honestly.",
+      "sectionIds": [
+        "table-suite",
+        "browse-suite",
+        "detail-suite",
+        "picker-suite",
+        "media-suite"
+      ],
+      "packageFocus": [
+        "gpui-composites"
+      ]
+    },
+    {
+      "id": "wave-3-workstation-shell",
+      "label": "Command and workstation-shell parity",
+      "goal": "Implement the generic workstation layer that Loophole-style shared shells actually depend on.",
+      "sectionIds": [
+        "command-suite",
+        "workspace-suite"
+      ],
+      "packageFocus": [
+        "gpui-workstation"
+      ]
+    }
+  ],
+  "sectionTargets": [
+    {
+      "sectionId": "catalog-hub",
+      "priority": "high",
+      "parityMode": "native-adaptation",
+      "gpuiLayer": "preview-app",
+      "sideBySideReview": true,
+      "reasons": [
+        "The GPUI preview app needs section navigation and ownership context if side-by-side review is going to be credible.",
+        "This is a review shell, not a shared runtime component family."
+      ]
+    },
+    {
+      "sectionId": "form-suite",
+      "priority": "highest",
+      "parityMode": "direct-parity",
+      "gpuiLayer": "primitives-plus-composites",
+      "sideBySideReview": true,
+      "reasons": [
+        "Form semantics and validation posture are one of the strongest contract-owned surfaces.",
+        "Loophole-facing shared UI will expose form differences immediately."
+      ]
+    },
+    {
+      "sectionId": "table-suite",
+      "priority": "medium",
+      "parityMode": "native-adaptation",
+      "gpuiLayer": "composites",
+      "sideBySideReview": true,
+      "reasons": [
+        "Structured data parity matters, but table semantics and virtualization will likely need more native adaptation than forms or detail views."
+      ]
+    },
+    {
+      "sectionId": "browse-suite",
+      "priority": "medium",
+      "parityMode": "native-adaptation",
+      "gpuiLayer": "composites",
+      "sideBySideReview": true,
+      "reasons": [
+        "Browse, filtering, and shell posture are important, but host and runtime-specific list behavior may require explicit deltas."
+      ]
+    },
+    {
+      "sectionId": "detail-suite",
+      "priority": "highest",
+      "parityMode": "direct-parity",
+      "gpuiLayer": "composites",
+      "sideBySideReview": true,
+      "reasons": [
+        "Detail surfaces are a strong contract-owned UI target and should stay close across runtimes.",
+        "This section is visually stable enough to make side-by-side parity defects obvious."
+      ]
+    },
+    {
+      "sectionId": "picker-suite",
+      "priority": "medium",
+      "parityMode": "native-adaptation",
+      "gpuiLayer": "composites",
+      "sideBySideReview": true,
+      "reasons": [
+        "Picker and relation workflows are important, but focus scope and active-item behavior need explicit native handling."
+      ]
+    },
+    {
+      "sectionId": "media-suite",
+      "priority": "medium",
+      "parityMode": "native-adaptation",
+      "gpuiLayer": "composites",
+      "sideBySideReview": false,
+      "reasons": [
+        "Media shells matter for parity, but browser embed behavior and native preview capabilities are not expected to match one-to-one."
+      ]
+    },
+    {
+      "sectionId": "notification-suite",
+      "priority": "high",
+      "parityMode": "direct-parity",
+      "gpuiLayer": "primitives-plus-composites",
+      "sideBySideReview": true,
+      "reasons": [
+        "Banner, toast, skeleton, and remediation posture are shared-state surfaces that should feel materially the same across runtimes."
+      ]
+    },
+    {
+      "sectionId": "command-suite",
+      "priority": "highest",
+      "parityMode": "direct-parity",
+      "gpuiLayer": "workstation",
+      "sideBySideReview": true,
+      "reasons": [
+        "Command discovery is one of the clearest Loophole-facing shared workstation surfaces.",
+        "A side-by-side GPUI review surface will make ranking, grouping, and focus issues much easier to detect."
+      ]
+    },
+    {
+      "sectionId": "workspace-suite",
+      "priority": "highest",
+      "parityMode": "direct-parity",
+      "gpuiLayer": "workstation",
+      "sideBySideReview": true,
+      "reasons": [
+        "The workstation shell is the most important shared Loophole-facing UI target above primitives and composites.",
+        "This is the strongest place to prove Pug can build the same UI in Svelte and GPUI."
+      ]
+    },
+    {
+      "sectionId": "token-summary-section",
+      "priority": "highest",
+      "parityMode": "direct-parity",
+      "gpuiLayer": "tokens-plus-preview-app",
+      "sideBySideReview": true,
+      "reasons": [
+        "Token and theme parity is the floor for everything else.",
+        "This section should exist in both review surfaces before broader GPUI UI work begins."
+      ]
+    },
+    {
+      "sectionId": "token-inspector",
+      "priority": "high",
+      "parityMode": "native-adaptation",
+      "gpuiLayer": "preview-app",
+      "sideBySideReview": true,
+      "reasons": [
+        "A searchable token inspector will make parity debugging much faster even if the native presentation differs from the browser."
+      ]
+    }
+  ],
+  "nonGoals": [
+    "Do not treat DOM-specific implementation details as mandatory when the contract can be satisfied more honestly by a GPUI-native approach.",
+    "Do not reopen Loophole-specific DAW widget ownership under the banner of GPUI parity.",
+    "Do not claim GPUI parity from token emission or preview-app scaffolding alone."
+  ]
+}

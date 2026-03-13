@@ -50,7 +50,12 @@ This writes:
 The parity artifact now also records which public exports from
 `@pug/svelte-primitives`, `@pug/svelte-composites`, and
 `@pug/svelte-workstation` are directly covered by preview sections versus still
-being contract-only.
+being contract-only, and it now includes a cross-runtime summary sourced from:
+
+- `packages/gpui/cross-runtime-parity-report.json`
+
+That GPUI artifact carries the current side-by-side section set, intentional
+delta register, and GPUI acceptance-harness alignment.
 
 ## Remaining Harness Debt
 
@@ -58,10 +63,11 @@ being contract-only.
   grouping inside the larger composite and workstation pages
 - the surface is still a single-app preview, not a published docs system with
   search, permalinks, or generated contract pages
-- GPUI implementation parity is still documented more strongly than it is
-  demonstrated in a runnable harness
-- the current parity report stabilizes review routes and boundaries, but it is
-  not yet a screenshot-regression or GPUI interaction harness
+- mounted GPUI implementation parity is still documented more strongly than it
+  is demonstrated in a runnable harness
+- the current parity report now joins Svelte and GPUI evidence more honestly,
+  but it is still not a screenshot-regression or mounted GPUI interaction
+  harness
 - many public exports are now classified explicitly as contract-only because
   the preview still reviews them through broader suite sections rather than one
   direct specimen per export
@@ -70,6 +76,7 @@ being contract-only.
 
 ## Next Task
 
-Use this docs/preview surface while following the reference-app and onboarding
-baseline, keeping preview examples tied back to owning contracts and packages
-instead of treating section-specific demo glue as public starter code.
+Use this docs/preview surface while following the next `g04` adoption tranche,
+keeping preview examples and parity artifacts tied back to owning contracts,
+packages, and explicit GPUI deltas instead of treating section-specific demo
+glue as public starter code.

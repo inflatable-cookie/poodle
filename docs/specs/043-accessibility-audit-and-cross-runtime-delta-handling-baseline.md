@@ -12,7 +12,7 @@ assistive-technology conformance.
 
 The goal of this milestone is to make accessibility review explicit, section
 based, and honest about where Svelte evidence stops and GPUI or native evidence
-has not yet been earned.
+is still blocked or remains only manual proof rather than explicit conformance.
 
 ## Core Rule
 
@@ -22,7 +22,7 @@ about cross-runtime deltas.
 Pug should not treat accessibility as an implied outcome of contract docs,
 preview examples, or visual parity. The audit surface must state which areas
 are explicit, which still require manual review, and which GPUI claims remain
-blocked.
+blocked or manual-only.
 
 ## Required Baseline
 
@@ -33,7 +33,8 @@ records:
 - automated checks that can be validated mechanically
 - manual checks that still require human review
 - stable preview review routes for repeat inspection
-- GPUI delta notes and blockers where native proof does not yet exist
+- GPUI delta notes and blockers where native proof does not yet exist or still
+  remains manual-only
 
 ## Current Audit Artifacts
 
@@ -42,6 +43,7 @@ The current accessibility audit baseline lives in:
 - `packages/svelte/preview/src/accessibility.ts`
 - `packages/svelte/preview/scripts/build-accessibility-report.ts`
 - `packages/svelte/preview/artifacts/accessibility-report.json`
+- `packages/gpui/native-accessibility-proof.json`
 
 ## Cross-Runtime Delta Rule
 
@@ -65,6 +67,7 @@ Pug may say:
 - the current accessibility audit surface is explicit
 - a section has stable review routes and named manual checks
 - a GPUI accessibility claim is blocked until native evidence exists
+- a GPUI accessibility claim remains manual until mounted runtime proof exists
 
 Pug may not say:
 
@@ -81,6 +84,7 @@ The current seed baseline is:
 - `packages/svelte/preview/src/accessibility.ts`
 - `packages/svelte/preview/scripts/build-accessibility-report.ts`
 - `packages/svelte/preview/artifacts/accessibility-report.json`
+- `packages/gpui/native-accessibility-proof.json`
 - `docs/roadmaps/g03/010-accessibility-audit-and-assistive-technology-conformance.md`
 
 ## Next Task

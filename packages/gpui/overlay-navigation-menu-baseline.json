@@ -1,0 +1,44 @@
+{
+  "generation": "g04.006",
+  "crateName": "pug-gpui-primitives",
+  "cratePath": "packages/gpui/primitives",
+  "tokenSource": "pug-gpui-tokens",
+  "contractIds": [
+    "accordion",
+    "collapsible",
+    "context-menu",
+    "dialog",
+    "drawer",
+    "menu",
+    "menubar",
+    "navigation-menu",
+    "popover",
+    "tab-strip",
+    "tabs",
+    "tooltip"
+  ],
+  "exportNames": [
+    "AccordionSpec",
+    "CollapsibleSpec",
+    "ContextMenuSpec",
+    "DialogSpec",
+    "DrawerSpec",
+    "MenuSpec",
+    "MenubarSpec",
+    "NavigationMenuSpec",
+    "PopoverSpec",
+    "TabStripSpec",
+    "TabsSpec",
+    "TooltipSpec"
+  ],
+  "knownDeltas": [
+    "This tranche freezes overlay, disclosure, navigation, and menu semantics as token-backed GPUI specs before the repo ships mounted native focus-scope, layering, or submenu runtime for every family.",
+    "Browser-origin concepts like hover opening, outside interaction dismissal, alert-dialog backdrop rules, and menubar navigation are preserved as explicit public posture, but their eventual GPUI event plumbing remains later runtime work.",
+    "Selection, open-state, and menu-entry models now stay crate-owned and reusable so later GPUI composites and workstation shells do not invent runtime-local overlay semantics."
+  ],
+  "nonGoals": [
+    "Do not treat this tranche as proof that mounted GPUI overlay rendering, focus traps, submenu choreography, or keyboard navigation are finished.",
+    "Do not collapse native-runtime deltas into browser-specific assumptions simply because the Svelte implementation uses DOM primitives.",
+    "Do not treat the presence of these specs as proof that workstation-shell parity or native accessibility proof is already complete."
+  ]
+}

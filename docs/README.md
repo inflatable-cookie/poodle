@@ -20,7 +20,7 @@ Pug uses a Northstar-shaped documentation system inside `docs/`.
 1. Read `vision/001-pug-vision.md`.
 2. Read `architecture/001-pug-system-shape.md`.
 3. Read `roadmaps/README.md`.
-4. Read the current generation under `roadmaps/g03/`.
+4. Read the current generation under `roadmaps/g04/`.
 
 ## Local Inspection Surface
 
@@ -50,7 +50,6 @@ metadata, and serialized layout inspection.
 
 ## Next Task
 
-`g03` is complete. If a future generation is opened, begin from
-`docs/roadmaps/g03/014-generation-closeout-and-next-program-cutover.md` and
-the `g03` closeout artifacts rather than reopening the now-explicit baselines
-by implication.
+Open `docs/roadmaps/g04/015-gpui-demo-app-parity-implementation-and-side-by-side-review.md`
+and implement the GPUI shared demo app against the rebuilt Svelte target so
+cross-runtime review moves onto one explicit shell and screen model.

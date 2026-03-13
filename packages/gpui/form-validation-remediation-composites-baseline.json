@@ -1,0 +1,28 @@
+{
+  "generation": "g04.007",
+  "crateName": "pug-gpui-composites",
+  "cratePath": "packages/gpui/composites",
+  "tokenSource": "pug-gpui-tokens",
+  "contractIds": [
+    "field",
+    "form-actions",
+    "callout",
+    "banner"
+  ],
+  "exportNames": [
+    "FormShellSpec",
+    "ValidationSummarySpec",
+    "RemediationBannerSpec",
+    "InlineRemediationSpec"
+  ],
+  "knownDeltas": [
+    "This tranche freezes form-shell, validation-summary, and remediation-banner semantics as token-backed GPUI composites before the repo ships mounted native composite widgets for every form surface.",
+    "Browser-origin announcement and relationship patterns are kept explicit through announcement mode, blocking counts, and field-reference models, but native accessibility event wiring remains later GPUI runtime work.",
+    "The composite layer now depends on the widened GPUI primitive surface rather than inventing one-off validation or remediation posture in downstream apps."
+  ],
+  "nonGoals": [
+    "Do not treat this tranche as proof that broader GPUI browse, detail, picker, media, or workstation composites are complete.",
+    "Do not claim final native accessibility proof from composite-level validation and remediation specs alone.",
+    "Do not fold app-specific workflow logic or domain validation engines into this generic GPUI composite baseline."
+  ]
+}

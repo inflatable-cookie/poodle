@@ -1,0 +1,46 @@
+{
+  "generation": "g04.009",
+  "crateName": "pug-gpui-workstation",
+  "cratePath": "packages/gpui/workstation",
+  "tokenSource": "pug-gpui-tokens",
+  "contractIds": [
+    "action-discovery-panel",
+    "app-header",
+    "command-palette-shell",
+    "command-palette",
+    "dock-region",
+    "panel-header",
+    "panel-surface",
+    "panel-tabs",
+    "project-header",
+    "shell-status-bar",
+    "split-view",
+    "surface-tabs",
+    "workspace-shell"
+  ],
+  "exportNames": [
+    "ActionDiscoveryPanelSpec",
+    "AppHeaderSpec",
+    "CommandPaletteShellSpec",
+    "CommandPaletteSpec",
+    "DockRegionSpec",
+    "PanelHeaderSpec",
+    "PanelSurfaceSpec",
+    "PanelTabsSpec",
+    "ProjectHeaderSpec",
+    "ShellStatusBarSpec",
+    "SplitViewSpec",
+    "SurfaceTabsSpec",
+    "WorkspaceShellSpec"
+  ],
+  "knownDeltas": [
+    "This tranche freezes workstation shell, command-discovery, and layout-orchestration semantics as token-backed GPUI specs before the repo ships mounted native dock, split, or command-shell implementations for every surface.",
+    "Browser-origin shell details like focus traps, drag regions, menu ownership, dock transfer, and modal layering are preserved as explicit public posture, but their final GPUI event plumbing and native window integration remain later runtime work.",
+    "The workstation layer now carries generic shell headers, panel chrome, dock snapshots, and command-discovery models directly so downstream GPUI apps do not invent incompatible workstation foundations."
+  ],
+  "nonGoals": [
+    "Do not treat this tranche as proof that native workstation accessibility, multi-window orchestration, or downstream GPUI adoption is complete.",
+    "Do not claim final dock transfer, drag-region, or menu-bar integration proof from spec-level workstation shells alone.",
+    "Do not fold DAW-specific transport, timeline, mixer, or editor widgets into this generic GPUI workstation baseline."
+  ]
+}

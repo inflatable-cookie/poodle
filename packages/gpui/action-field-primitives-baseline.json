@@ -1,0 +1,27 @@
+{
+  "generation": "g04.004",
+  "crateName": "pug-gpui-primitives",
+  "cratePath": "packages/gpui/primitives",
+  "tokenSource": "pug-gpui-tokens",
+  "contractIds": ["button", "field", "form-actions", "icon-button", "search-field", "text-area", "text-input"],
+  "exportNames": [
+    "ButtonSpec",
+    "FieldRelationships",
+    "FieldSpec",
+    "FormActionsSpec",
+    "IconButtonSpec",
+    "SearchFieldSpec",
+    "TextAreaSpec",
+    "TextInputSpec"
+  ],
+  "knownDeltas": [
+    "The crate currently freezes action, field, and text-entry semantics as token-backed GPUI specs before mounted native widgets exist for every control.",
+    "Controlled and uncontrolled value meaning, validation relationships, and disabled or loading suppression are explicit in the API even where actual event plumbing remains later runtime work.",
+    "Search-field and field-wrapper composition is frozen here so later GPUI composites reuse one contract posture instead of restating input semantics ad hoc."
+  ],
+  "nonGoals": [
+    "Do not treat this tranche as proof that GPUI selection, feedback, date-time, overlay, or workstation primitives are complete.",
+    "Do not bypass field relationships or validation-state semantics with runtime-local widget shortcuts.",
+    "Do not claim full native accessibility proof from spec-level naming and relationship models alone."
+  ]
+}

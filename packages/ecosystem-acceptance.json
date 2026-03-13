@@ -103,16 +103,23 @@
     },
     {
       "id": "gpui-target-matrix",
-      "label": "GPUI multi-app validation target matrix",
-      "consumerShape": "native app validation targets rather than runnable downstream adoption",
+      "label": "GPUI multi-app validation and cross-runtime parity evidence",
+      "consumerShape": "native app validation targets plus artifact-backed cross-runtime parity evidence rather than runnable downstream adoption",
       "runtime": "gpui-native",
       "adoptionModel": "matrix-only",
       "status": "matrix-only",
       "coveredPackages": [
-        "pug-gpui-tokens"
+        "pug-gpui-tokens",
+        "pug-gpui-primitives",
+        "pug-gpui-composites",
+        "pug-gpui-workstation"
       ],
       "evidenceArtifacts": [
         "packages/gpui/tokens/multi-app-validation.json",
+        "packages/gpui/cross-runtime-parity-report.json",
+        "packages/gpui/native-accessibility-proof.json",
+        "packages/svelte/preview/artifacts/parity-report.json",
+        "packages/svelte/preview/artifacts/accessibility-report.json",
         "packages/gpui/tokens/README.md",
         "docs/specs/042-gpui-multi-app-validation-target-matrix.md"
       ],
@@ -120,15 +127,20 @@
         "runtime-specific-gpui-assumptions",
         "tokens-and-themes",
         "accessibility-and-keyboard",
-        "downstream-boundaries-and-ownership"
+        "downstream-boundaries-and-ownership",
+        "package-surface-and-contracts",
+        "preview-routes-and-docs-build"
       ],
       "requiredChecks": [
+        "bun run parity:report",
+        "bun run accessibility:report",
         "bun run docs:lint",
         "bun run docs:build"
       ],
       "blockers": [
-        "The repo still lacks runnable GPUI component packages and native acceptance suites beyond generated token bindings.",
-        "This matrix is explicit validation pressure, not runnable production readiness proof."
+        "The repo still lacks a mounted GPUI preview app and native acceptance routes comparable to the Svelte preview surface.",
+        "This suite now carries real GPUI package and parity evidence, but it is still artifact-backed rather than runnable downstream production proof.",
+        "Downstream GPUI adoption remains future work, so this suite should still be read as validation pressure rather than deployment readiness."
       ]
     }
   ],
@@ -200,6 +212,8 @@
       "scope": "native app validation pressure, GPUI-specific blockers, and non-browser evidence gaps",
       "primaryEvidence": [
         "packages/gpui/tokens/multi-app-validation.json",
+        "packages/gpui/cross-runtime-parity-report.json",
+        "packages/gpui/native-accessibility-proof.json",
         "docs/specs/042-gpui-multi-app-validation-target-matrix.md"
       ]
     }

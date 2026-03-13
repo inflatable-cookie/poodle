@@ -85,6 +85,9 @@
     type WorkspaceShellState,
   } from "@pug/svelte-workstation";
   import { onMount } from "svelte";
+  import DocsCatalogHub from "./components/DocsCatalogHub.svelte";
+  import SharedDemoApp from "./components/SharedDemoApp.svelte";
+  import TokenToolsPanel from "./components/TokenToolsPanel.svelte";
   import { docsAdoptionChecklist, docsFamilies, docsSections } from "./catalog";
   import {
     buildPreviewUrl,
@@ -125,6 +128,23 @@
   type SearchIndexEntry<T> = {
     item: T;
     haystack: string;
+  };
+  type SharedDemoScreenId =
+    | "overview-shell"
+    | "form-and-validation"
+    | "browse-and-table"
+    | "detail-and-related-data"
+    | "picker-and-media"
+    | "command-and-workspace";
+  type PreviewNavigationEntry = {
+    id: DocsSectionId;
+    title: string;
+    eyebrow: string;
+    packageName: string;
+    contractRoot: string;
+    summary: string;
+    exampleTypes: string[];
+    demoScreenId?: SharedDemoScreenId;
   };
 
   function optionsFromValues(values: readonly string[]): ToggleGroupOption[] {
@@ -446,9 +466,137 @@
   const catalogEntries = docsSections;
   const catalogEntryMap = Object.fromEntries(catalogEntries.map((entry) => [entry.id, entry]));
   const sectionEntries = docsNavigationSections;
-  const sectionNavigationOptions: SelectOption[] = sectionEntries.map((entry) => ({
+  const sectionEntryMap = Object.fromEntries(sectionEntries.map((entry) => [entry.id, entry]));
+  const sharedDemoScreens: Array<{
+    id: SharedDemoScreenId;
+    representativeSectionId: DocsSectionId;
+    title: string;
+    eyebrow: string;
+    packageName: string;
+    contractRoot: string;
+    summary: string;
+    exampleTypes: string[];
+    sourceSectionIds: DocsSectionId[];
+  }> = [
+    {
+      id: "overview-shell",
+      representativeSectionId: "notification-suite",
+      title: "Overview shell",
+      eyebrow: "Shared demo",
+      packageName: "@pug/svelte-primitives + @pug/svelte-composites + @pug/svelte-workstation",
+      contractRoot: "packages/shared-demo-app-contract.json",
+      summary: "Top-level shell posture, visible remediation, and shared runtime status without docs-only chrome.",
+      exampleTypes: ["shell", "status", "remediation"],
+      sourceSectionIds: ["notification-suite"],
+    },
+    {
+      id: "form-and-validation",
+      representativeSectionId: "form-suite",
+      title: "Form and validation",
+      eyebrow: "Shared demo",
+      packageName: "@pug/svelte-primitives",
+      contractRoot: "packages/shared-demo-app-contract.json",
+      summary: "Real form workflow using field, text-entry, selection, dialog, and remediation primitives together.",
+      exampleTypes: ["default", "invalid", "pending", "disabled"],
+      sourceSectionIds: ["form-suite"],
+    },
+    {
+      id: "browse-and-table",
+      representativeSectionId: "browse-suite",
+      title: "Browse and table",
+      eyebrow: "Shared demo",
+      packageName: "@pug/svelte-composites + @pug/svelte-primitives",
+      contractRoot: "packages/shared-demo-app-contract.json",
+      summary: "Search, filter, selection, list/grid switching, and structured data in one browse workflow.",
+      exampleTypes: ["ready", "selection", "empty", "loading"],
+      sourceSectionIds: ["browse-suite", "table-suite"],
+    },
+    {
+      id: "detail-and-related-data",
+      representativeSectionId: "detail-suite",
+      title: "Detail and related data",
+      eyebrow: "Shared demo",
+      packageName: "@pug/svelte-composites",
+      contractRoot: "packages/shared-demo-app-contract.json",
+      summary: "Headers, metadata, summaries, and related-data posture as one detail screen.",
+      exampleTypes: ["summary", "metadata", "related data"],
+      sourceSectionIds: ["detail-suite"],
+    },
+    {
+      id: "picker-and-media",
+      representativeSectionId: "picker-suite",
+      title: "Picker and media",
+      eyebrow: "Shared demo",
+      packageName: "@pug/svelte-composites + @pug/svelte-primitives",
+      contractRoot: "packages/shared-demo-app-contract.json",
+      summary: "Picker workflow, selection summary, preview framing, and embed fallback on one screen.",
+      exampleTypes: ["inline", "overlay", "ready", "fallback"],
+      sourceSectionIds: ["picker-suite", "media-suite"],
+    },
+    {
+      id: "command-and-workspace",
+      representativeSectionId: "command-suite",
+      title: "Command and workspace",
+      eyebrow: "Shared demo",
+      packageName: "@pug/svelte-workstation",
+      contractRoot: "packages/shared-demo-app-contract.json",
+      summary: "Command discovery, docks, tabs, split views, and persistence inside one workstation scene.",
+      exampleTypes: ["command", "workspace", "layout", "persistence"],
+      sourceSectionIds: ["command-suite", "workspace-suite"],
+    },
+  ];
+  const sharedDemoScreenMap = Object.fromEntries(sharedDemoScreens.map((screen) => [screen.id, screen]));
+  const sharedDemoScreenBySection = Object.fromEntries(
+    sharedDemoScreens.flatMap((screen) =>
+      screen.sourceSectionIds.map((sectionId) => [sectionId, screen.id]),
+    ),
+  ) as Partial<Record<DocsSectionId, SharedDemoScreenId>>;
+  const previewNavigationEntries: PreviewNavigationEntry[] = [
+    {
+      id: "catalog-hub",
+      title: sectionEntryMap["catalog-hub"].title,
+      eyebrow: sectionEntryMap["catalog-hub"].eyebrow,
+      packageName: sectionEntryMap["catalog-hub"].packageName,
+      contractRoot: sectionEntryMap["catalog-hub"].contractRoot,
+      summary: sectionEntryMap["catalog-hub"].summary,
+      exampleTypes: sectionEntryMap["catalog-hub"].exampleTypes,
+    },
+    ...sharedDemoScreens.map((screen) => ({
+      id: screen.representativeSectionId,
+      title: screen.title,
+      eyebrow: screen.eyebrow,
+      packageName: screen.packageName,
+      contractRoot: screen.contractRoot,
+      summary: screen.summary,
+      exampleTypes: screen.exampleTypes,
+      demoScreenId: screen.id,
+    })),
+    {
+      id: "token-summary-section",
+      title: sectionEntryMap["token-summary-section"].title,
+      eyebrow: sectionEntryMap["token-summary-section"].eyebrow,
+      packageName: sectionEntryMap["token-summary-section"].packageName,
+      contractRoot: sectionEntryMap["token-summary-section"].contractRoot,
+      summary: sectionEntryMap["token-summary-section"].summary,
+      exampleTypes: sectionEntryMap["token-summary-section"].exampleTypes,
+    },
+    {
+      id: "token-inspector",
+      title: sectionEntryMap["token-inspector"].title,
+      eyebrow: sectionEntryMap["token-inspector"].eyebrow,
+      packageName: sectionEntryMap["token-inspector"].packageName,
+      contractRoot: sectionEntryMap["token-inspector"].contractRoot,
+      summary: sectionEntryMap["token-inspector"].summary,
+      exampleTypes: sectionEntryMap["token-inspector"].exampleTypes,
+    },
+  ];
+  const sectionNavigationOptions: SelectOption[] = previewNavigationEntries.map((entry) => ({
     value: entry.id,
     label: entry.title,
+  }));
+  const sharedDemoScreenOptions: ToggleGroupOption[] = sharedDemoScreens.map((screen) => ({
+    value: screen.id,
+    label: screen.title.replace(" and ", " + "),
   }));
 
   const themeEntries = Object.entries(themes) as [ThemeName, (typeof themes)[ThemeName]][];
@@ -844,13 +992,31 @@
     parsedWorkspaceLayout.secondarySplitRatio === workspaceLayoutSnapshot.secondarySplitRatio
       ? "Round-trip serialization preserves the current shell layout snapshot."
       : "Layout serialization drift detected.";
-  $: activeSectionIndex = Math.max(
+  $: currentDemoScreenId = sharedDemoScreenBySection[activeSectionId] ?? null;
+  $: currentDemoScreen = currentDemoScreenId ? sharedDemoScreenMap[currentDemoScreenId] : null;
+  $: activeNavigationId = currentDemoScreen?.representativeSectionId ?? activeSectionId;
+  $: activeNavigationIndex = Math.max(
     0,
-    sectionEntries.findIndex((entry) => entry.id === activeSectionId),
+    previewNavigationEntries.findIndex((entry) => entry.id === activeNavigationId),
   );
-  $: activeSection = sectionEntries.find((entry) => entry.id === activeSectionId) ?? sectionEntries[0];
-  $: previousSection = activeSectionIndex > 0 ? sectionEntries[activeSectionIndex - 1] : null;
-  $: nextSection = activeSectionIndex < sectionEntries.length - 1 ? sectionEntries[activeSectionIndex + 1] : null;
+  $: activeNavigationEntry =
+    previewNavigationEntries.find((entry) => entry.id === activeNavigationId) ?? previewNavigationEntries[0];
+  $: previousSection = activeNavigationIndex > 0 ? previewNavigationEntries[activeNavigationIndex - 1] : null;
+  $: nextSection =
+    activeNavigationIndex < previewNavigationEntries.length - 1
+      ? previewNavigationEntries[activeNavigationIndex + 1]
+      : null;
+  $: heroEyebrow = currentDemoScreen ? "Shared demo target" : "Docs shell";
+  $: heroTitle = currentDemoScreen
+    ? "Cross-runtime demo target for Svelte and GPUI"
+    : activeSectionId === "catalog-hub"
+      ? "Catalog, contracts, and inspection surface"
+      : "Token runtime inspection and artifact provenance";
+  $: heroCopy = currentDemoScreen
+    ? "The demo app now groups shared screens by believable workflows so GPUI can target the same UI rather than a loose pile of docs examples."
+    : activeSectionId === "catalog-hub"
+      ? "The docs shell remains the authority for catalog navigation, package ownership, contract provenance, and adoption framing."
+      : "Token tools stay outside the shared demo target so live values and emitted artifacts remain inspectable without polluting the app shell.";
 
   function readSemanticTokenValues(element: HTMLElement): Partial<Record<SemanticTokenPath, string>> {
     const styles = getComputedStyle(element);
@@ -940,6 +1106,13 @@
 
   function handleSectionNavigationChange(event: CustomEvent<{ value: string }>): void {
     selectSection(event.detail.value as DocsSectionId);
+  }
+
+  function handleDemoScreenChange(screenId: string): void {
+    const nextScreen = sharedDemoScreenMap[screenId as SharedDemoScreenId];
+    if (nextScreen) {
+      selectSection(nextScreen.representativeSectionId);
+    }
   }
 
   function handleDisabledChange(event: CustomEvent<{ checked: boolean }>): void {
@@ -1181,6 +1354,10 @@
     if (typeof event.detail.value === "string") {
       mediaState = event.detail.value as MediaState;
     }
+  }
+
+  function handleActiveMediaChange(mediaId: string): void {
+    activeMediaId = mediaId;
   }
 
   function handleEmbedStateChange(event: CustomEvent<{ value: string | string[] }>): void {
@@ -1440,15 +1617,15 @@
 
     <section class="control-group" aria-labelledby="navigation-group">
       <div class="group-head">
-        <h2 id="navigation-group">Section navigation</h2>
-        <p>Move section by section instead of scrolling one long catalog column.</p>
+        <h2 id="navigation-group">Preview navigation</h2>
+        <p>Jump between the docs shell, shared demo screens, and token tools without one long scrolling catalog.</p>
       </div>
       <div class="rail-nav">
         <Select
           id="section-navigation-select"
-          value={activeSectionId}
+          value={activeNavigationId}
           options={sectionNavigationOptions}
-          ariaLabel="Catalog sections"
+          ariaLabel="Preview destinations"
           on:valueChange={handleSectionNavigationChange}
         />
         <div class="nav-button-row">
@@ -1599,21 +1776,19 @@
   <main class="preview-root" bind:this={previewRoot}>
     <section class="hero panel">
       <div class="hero-main">
-        <p class="eyebrow">Docs-site baseline</p>
-        <h2>First serious catalog surface for Pug</h2>
-        <p class="hero-copy">
-          This browser surface now groups tokens, contracts, Svelte packages, and stateful examples so adopters can inspect the shared system without hopping blind between markdown and code.
-        </p>
+        <p class="eyebrow">{heroEyebrow}</p>
+        <h2>{heroTitle}</h2>
+        <p class="hero-copy">{heroCopy}</p>
         <div class="hero-section-context" aria-label="active section context">
           <div class="hero-section-context__header">
-            <span class="command-shortcut-hint">{activeSection.eyebrow}</span>
-            <strong>{activeSection.title}</strong>
+            <span class="command-shortcut-hint">{activeNavigationEntry.eyebrow}</span>
+            <strong>{activeNavigationEntry.title}</strong>
           </div>
-          <p class="hero-section-context__summary">{activeSection.summary}</p>
+          <p class="hero-section-context__summary">{activeNavigationEntry.summary}</p>
           <div class="hero-section-context__meta">
-            <span class="token-path">{activeSection.contractRoot}</span>
-            <span class="command-shortcut-hint">{activeSection.packageName}</span>
-            {#each activeSection.exampleTypes as exampleType}
+            <span class="token-path">{activeNavigationEntry.contractRoot}</span>
+            <span class="command-shortcut-hint">{activeNavigationEntry.packageName}</span>
+            {#each activeNavigationEntry.exampleTypes as exampleType}
               <span>{exampleType}</span>
             {/each}
           </div>
@@ -1628,1691 +1803,184 @@
     </section>
 
     {#if activeSectionId === "catalog-hub"}
-    <section id="catalog-hub" class="panel token-summary" aria-labelledby="catalog-heading">
-      <div class="section-header">
-        <div>
-          <p class="eyebrow">Catalog hub</p>
-          <h2 id="catalog-heading">Information architecture, coverage, and adoption bar</h2>
-        </div>
-      </div>
-      <div class="docs-overview-stack">
-        <div class="docs-overview-top">
-          <article class="demo-card docs-overview-card">
-            <div class="card-header">
-              <h3>Family directory</h3>
-              <p>The first docs-site baseline groups examples by the same package and contract layers adopters will actually consume.</p>
-            </div>
-            <div class="docs-family-grid">
-              {#each docsFamilies as family}
-                <article class="docs-family-card">
-                  <div class="docs-family-card__header">
-                    <div>
-                      <p class="eyebrow">{family.eyebrow}</p>
-                      <h4>{family.title}</h4>
-                    </div>
-                    <span class="command-shortcut-hint">{family.packageName}</span>
-                  </div>
-                  <p class="detail-card-meta">{family.summary}</p>
-                  <div class="docs-family-meta">
-                    <span class="token-path">{family.contractRoot}</span>
-                    <strong>{family.adoptionBar}</strong>
-                  </div>
-                  <div class="docs-link-row">
-                    {#each family.sectionIds as sectionId}
-                      {#if catalogEntryMap[sectionId]}
-                        <Button
-                          className="docs-link-chip"
-                          variant="ghost"
-                          size="sm"
-                          on:click={() => selectSection(catalogEntryMap[sectionId].id)}
-                        >
-                          {catalogEntryMap[sectionId].title}
-                        </Button>
-                      {/if}
-                    {/each}
-                  </div>
-                </article>
-              {/each}
-            </div>
-          </article>
-
-        <article class="demo-card docs-overview-card docs-overview-card--narrow">
-          <div class="card-header">
-            <h3>Adoption-ready minimum</h3>
-            <p>`g02.012` freezes what must be visible before wider rollout, not just what exists somewhere in the repo.</p>
-          </div>
-            <div class="behavior-list">
-              {#each docsAdoptionChecklist as item}
-                <div class="behavior-item">
-                  <strong>Required</strong>
-                  <p>{item}</p>
-                </div>
-              {/each}
-            </div>
-          </article>
-
-          <article class="demo-card docs-overview-card docs-overview-card--narrow">
-            <div class="card-header">
-              <h3>Disclosure primitives</h3>
-              <p>The preview shell now uses real disclosure primitives instead of ad hoc details styling.</p>
-            </div>
-            <div class="demo-stack">
-              <Accordion
-                items={[
-                  { value: "accordion-foundation", label: "Accordion", description: "Grouped disclosure for repeated docs or settings sections." },
-                  { value: "accordion-boundary", label: "Boundary", description: "Use grouped disclosure only when repeated sections are the real semantic pattern." },
-                ]}
-                defaultValue="accordion-foundation"
-                ariaLabel="Disclosure primitive example"
-                let:item
-              >
-                <p class="detail-card-meta">
-                  {item.value === "accordion-foundation"
-                    ? "Foundation-safe grouped disclosure now exists for more web-oriented products and docs surfaces."
-                    : "Single-block reveal belongs to Collapsible; grouped disclosure belongs to Accordion."}
-                </p>
-              </Accordion>
-
-              <Collapsible
-                title="Collapsible"
-                description="Single revealable content block for compact notes, diagnostics, or settings groups."
-                defaultOpen={true}
-              >
-                <p class="detail-card-meta">
-                  This surface owns one trigger and one revealable region without pretending to be grouped navigation.
-                </p>
-              </Collapsible>
-            </div>
-          </article>
-        </div>
-
-        <article class="demo-card docs-overview-card">
-          <div class="card-header">
-            <h3>Example directory</h3>
-            <p>Every section below states which contract layer it belongs to, which package owns the implementation, and what example types it covers.</p>
-          </div>
-          <div class="docs-section-list">
-            {#each catalogEntries as entry}
-              <Toggle
-                className="docs-section-card"
-                isPressed={activeSectionId === entry.id}
-                layout="stack"
-                variant="ghost"
-                ariaLabel={`Open ${entry.title}`}
-                on:pressedChange={() => selectSection(entry.id)}
-              >
-                <div>
-                  <p class="eyebrow">{entry.eyebrow}</p>
-                  <strong>{entry.title}</strong>
-                </div>
-                <p>{entry.summary}</p>
-                <div class="docs-section-meta">
-                  <span class="token-path">{entry.contractRoot}</span>
-                  <span class="command-shortcut-hint">{entry.packageName}</span>
-                </div>
-                <div class="docs-tag-row">
-                  {#each entry.exampleTypes as exampleType}
-                    <Pill appearance="subtle">{exampleType}</Pill>
-                  {/each}
-                </div>
-              </Toggle>
-            {/each}
-          </div>
-        </article>
-
-        <article class="demo-card docs-overview-card">
-          <div class="card-header">
-            <h3>Scoped brand proof</h3>
-            <p>The same Pug components can sit inside a more expressive website wrapper through scoped recipe variables instead of token redefinition.</p>
-          </div>
-          <div class="brand-proof-scope">
-            <PageHeader
-              title="Make room for brand styling without rebuilding the system"
-              eyebrow="Website-style wrapper"
-              subtitle="This proof uses app-owned composition plus scoped appearance recipes so cards, header framing, and CTA chrome can shift together."
-            >
-              <div slot="actions" class="action-cluster brand-proof-actions">
-                <Button variant="secondary">Read pattern notes</Button>
-                <Button variant="primary">Launch branded preview</Button>
-              </div>
-            </PageHeader>
-
-            <div class="brand-proof-grid">
-              {#each brandProofCards as card}
-                <Card variant={card.variant}>
-                  <div slot="header">
-                    <p class="eyebrow">{card.eyebrow}</p>
-                  </div>
-                  <strong class="detail-card-value">{card.title}</strong>
-                  <p class="detail-card-meta">{card.summary}</p>
-                </Card>
-              {/each}
-            </div>
-          </div>
-        </article>
-      </div>
-    </section>
-    {/if}
-
-    {#if activeSectionId === "form-suite"}
-    <section id="form-suite" class="panel token-summary" aria-labelledby="form-suite-heading">
-      <div class="section-header">
-        <div>
-          <p class="eyebrow">Foundation examples</p>
-          <h2 id="form-suite-heading">Form baseline and validation posture</h2>
-        </div>
-      </div>
-      <div class="section-meta-bar">
-        <span class="command-shortcut-hint">@pug/svelte-primitives</span>
-        <span class="token-path">docs/contracts/foundation/field.md</span>
-        <span class="token-path">docs/contracts/foundation/text-input.md</span>
-        <span class="token-path">docs/contracts/foundation/search-field.md</span>
-      </div>
-      <div class="demo-grid" aria-label="form system baseline preview">
-      <article class="demo-card">
-        <div class="card-header">
-          <h3>Form system baseline</h3>
-          <p>First contract-backed Svelte field wrapper, text input, search field, and action row.</p>
-        </div>
-        <form class="demo-form" on:submit={handleSubmit}>
-          <Field
-            id="project-title"
-            label="Project title"
-            description="Used for handoff labels, activity logs, and downstream validation review."
-            error={titleError}
-            pendingMessage={titlePendingMessage}
-            validationState={titleValidationState as ValidationState}
-            isRequired={true}
-            let:describedBy
-            let:validationState
-          >
-            <TextInput
-              id="project-title"
-              value={projectTitle}
-              placeholder="Enter project title"
-              isDisabled={disabled}
-              validationState={validationState}
-              describedBy={describedBy}
-              on:valueChange={handleTitleChange}
-            >
-              <span slot="leading" aria-hidden="true">Aa</span>
-              <span slot="trailing" class="field-shortcut" aria-hidden="true">⌘K</span>
-            </TextInput>
-          </Field>
-
-          <Field
-            id="asset-search"
-            label="Asset search"
-            description="Search stays native on the Svelte side while clear and pending semantics remain explicit."
-            pendingMessage={busy ? "Refreshing indexed asset results..." : null}
-            validationState={searchValidationState as ValidationState}
-            let:describedBy
-            let:validationState
-          >
-            <SearchField
-              id="asset-search"
-              value={assetSearch}
-              isDisabled={disabled}
-              validationState={validationState}
-              describedBy={describedBy}
-              on:valueChange={handleSearchChange}
-              on:clear={handleSearchClear}
-            />
-          </Field>
-
-          <FormActions align="between">
-            <p class="demo-status">{validationLog}</p>
-            <div class="action-cluster">
-              <Button variant="secondary" isDisabled={disabled}>
-                Cancel
-              </Button>
-              <Button variant="primary" type="submit" isDisabled={disabled} isLoading={busy}>
-                {busy ? "Validating..." : "Save changes"}
-              </Button>
-            </div>
-          </FormActions>
-        </form>
-      </article>
-
-      <article class="demo-card">
-        <div class="card-header">
-          <h3>Behavior probe</h3>
-          <p>The preview state toggles drive visible form semantics instead of purely cosmetic examples.</p>
-        </div>
-        <div class="demo-stack behavior-list">
-          <div class="behavior-item">
-            <strong>Invalid</strong>
-            <p>Error copy is attached by field wrapper IDs rather than buried in placeholder text.</p>
-          </div>
-          <div class="behavior-item">
-            <strong>Pending</strong>
-            <p>Pending state stays visible in field messaging and action-row status so announcement rules are testable.</p>
-          </div>
-          <div class="behavior-item">
-            <strong>Disabled</strong>
-            <p>Input reachability, clear behavior, and action buttons all collapse together when the disabled toggle is active.</p>
-          </div>
-        </div>
-      </article>
-
-      <article class="demo-card">
-        <div class="card-header">
-          <h3>Current form state</h3>
-          <p>Live values and validation posture from the implemented Svelte primitives.</p>
-        </div>
-        <div class="demo-stack">
-          <div class="state-tile">
-            <span class="token-path">projectTitle</span>
-            <strong>{projectTitle || "∅"}</strong>
-          </div>
-          <div class="state-tile">
-            <span class="token-path">assetSearch</span>
-            <strong>{assetSearch || "∅"}</strong>
-          </div>
-          <div class="state-tile">
-            <span class="token-path">titleValidationState</span>
-            <strong>{titleValidationState}</strong>
-          </div>
-          <div class="state-tile">
-            <span class="token-path">searchValidationState</span>
-            <strong>{searchValidationState}</strong>
-          </div>
-        </div>
-      </article>
-      </div>
-    </section>
-    {/if}
-
-    {#if activeSectionId === "table-suite"}
-    <section id="table-suite" class="panel token-summary" aria-labelledby="table-suite-heading">
-      <div class="section-header">
-        <div>
-          <p class="eyebrow">Data table suite</p>
-          <h2 id="table-suite-heading">Selection, sorting, and bulk actions</h2>
-        </div>
-      </div>
-      <div class="section-meta-bar">
-        <span class="command-shortcut-hint">@pug/svelte-composites</span>
-        <span class="token-path">docs/contracts/composites/data-table.md</span>
-        <span class="token-path">docs/contracts/composites/bulk-action-bar.md</span>
-      </div>
-      <div class="table-toolbar">
-        <div class="table-toolbar__search">
-          <SearchField
-            id="table-search"
-            value={assetSearch}
-            ariaLabel="Filter visible rows"
-            on:valueChange={handleSearchChange}
-            on:clear={handleSearchClear}
-          />
-        </div>
-        <p class="table-toolbar__summary">
-          {filteredRows.length} matching rows, {selectedRowIds.length} selected, virtualization remains a documented future concern.
-        </p>
-      </div>
-      {#if selectedRowIds.length > 0}
-        <BulkActionBar
-          selectionCount={selectedRowIds.length}
-          totalCount={visibleRows.length}
-          actions={bulkActions}
-          on:action={handleBulkAction}
-          on:clear={clearTableSelection}
-        />
-      {/if}
-      <div class="table-stack">
-        <DataTable
-          ariaLabel="Mix tasks"
-          columns={tableColumns}
-          rows={visibleRows}
-          {selectedRowIds}
-          {sortColumnId}
-          {sortDirection}
-          on:sortChange={handleSortChange}
-          on:rowToggle={handleRowToggle}
-          on:toggleAll={handleToggleAll}
-          on:rowAction={handleRowAction}
-        />
-        <PaginationSummary
-          {currentPage}
-          {totalPages}
-          totalItems={sortedRows.length}
-          {pageSize}
-          on:pageChange={handlePageChange}
-        />
-        <p class="demo-status">{tableStatus}</p>
-      </div>
-    </section>
-    {/if}
-
-    {#if activeSectionId === "browse-suite"}
-    <section id="browse-suite" class="panel token-summary" aria-labelledby="browse-suite-heading">
-      <div class="section-header">
-        <div>
-          <p class="eyebrow">Browse shells</p>
-          <h2 id="browse-suite-heading">Lists, grids, filters, and search depth</h2>
-        </div>
-      </div>
-      <div class="section-meta-bar">
-        <span class="command-shortcut-hint">@pug/svelte-composites</span>
-        <span class="token-path">docs/contracts/composites/list-shell.md</span>
-        <span class="token-path">docs/contracts/composites/grid-shell.md</span>
-        <span class="token-path">docs/contracts/composites/filter-toolbar.md</span>
-      </div>
-      <div class="browse-controls">
-        <FilterToolbar
-          ariaLabel="Browse controls"
-          summaryText={browseSummary}
-        >
-          <div class="browse-search">
-            <SearchField
-              id="browse-search"
-              value={browseQuery}
-              ariaLabel="Search browse results"
-              on:valueChange={handleBrowseSearchChange}
-              on:clear={handleBrowseSearchClear}
-            />
-          </div>
-          <ToggleGroup
-            value={browseStatus}
-            options={browseStatusOptions}
-            ariaLabel="Browse status"
-            on:valueChange={handleBrowseStatusChange}
-          />
-          <svelte:fragment slot="secondary">
-            <ToggleGroup
-              value={browseStateOverride}
-              options={browseStateOptions}
-              ariaLabel="Browse state override"
-              on:valueChange={handleBrowseStateChange}
-            />
-          </svelte:fragment>
-        </FilterToolbar>
-      </div>
-      <div class="browse-shell-grid">
-        <div class="browse-column">
-          <h3 class="browse-column__title">List shell with progressive loading</h3>
-          <ListShell
-            ariaLabel="Browse list"
-            state={listShellState}
-            itemCount={filteredBrowseRows.length}
-            stateTitle={listShellState === "no-results" ? "No matching list results" : listShellState === "loading" ? "Loading list results" : listShellState === "error" ? "List unavailable" : "No list content"}
-            stateMessage={listShellState === "no-results" ? "Try clearing the search query or widening the status filter." : listShellState === "loading" ? "The host owns the async fetch policy; the shell only owns posture." : listShellState === "error" ? "Error remediation remains host-owned, but the shell makes the state legible." : "Empty collections stay distinct from no-results states."}
-          >
-            <div slot="header" class="browse-header-note">
-              Progressive loading can append more rows without switching the shell to pagination.
-            </div>
-            <div slot="state" class="state-stack">
-              {#if listShellState === "loading"}
-                <Banner
-                  tone="info"
-                  title="Loading list results"
-                  message="Loading posture stays explicit while result fetching remains host-owned."
-                />
-                <div class="state-skeleton-list" aria-hidden="true">
-                  {#each Array.from({ length: 4 }) as _}
-                    <div class="state-skeleton-row">
-                      <Skeleton shape="circle" width="1.125rem" height="1.125rem" />
-                      <div class="state-skeleton-copy">
-                        <Skeleton width="58%" />
-                        <Skeleton width="34%" />
-                      </div>
-                    </div>
-                  {/each}
-                </div>
-              {:else if listShellState === "error"}
-                <Banner
-                  tone="danger"
-                  title="List unavailable"
-                  message="Persistent errors need remediation action, not just a textual state string."
-                >
-                  <div slot="actions" class="action-cluster">
-                    <Button variant="secondary" on:click={retryBrowseState}>Retry</Button>
-                  </div>
-                </Banner>
-                <EmptyState
-                  title="Browse results could not be loaded"
-                  message="The shell keeps structure and action placement stable while the host decides how to recover."
-                />
-              {:else if listShellState === "no-results"}
-                <EmptyState
-                  title="No list results match the current filters"
-                  message="No-results stays distinct from a genuinely empty collection."
-                  variant="search"
-                >
-                  <div slot="actions" class="action-cluster">
-                    <Button variant="secondary" on:click={resetBrowseFilters}>Clear filters</Button>
-                  </div>
-                </EmptyState>
-              {:else}
-                <EmptyState
-                  title="No list content available yet"
-                  message="First-run and truly empty collections should not masquerade as search failures."
-                />
-              {/if}
-            </div>
-            {#each visibleBrowseRows as row}
-              <li class="browse-row">
-                <div>
-                  <strong>{row.title}</strong>
-                  <p>{row.kind} owned by {row.owner}</p>
-                </div>
-                <span class={`status-chip status-chip--${row.status.toLowerCase()}`}>{row.status}</span>
-              </li>
-            {/each}
-            <svelte:fragment slot="footer">
-              {#if listShellState === "ready" && visibleBrowseRows.length < filteredBrowseRows.length}
-                <Button variant="secondary" on:click={loadMoreBrowseRows}>
-                  Load more results
-                </Button>
-              {/if}
-            </svelte:fragment>
-          </ListShell>
-        </div>
-        <div class="browse-column">
-          <h3 class="browse-column__title">Grid shell with pagination</h3>
-          <GridShell
-            ariaLabel="Browse grid"
-            state={gridShellState}
-            itemCount={filteredBrowseCards.length}
-            minColumnWidth="sm"
-            stateTitle={gridShellState === "no-results" ? "No matching grid results" : gridShellState === "loading" ? "Loading grid results" : gridShellState === "error" ? "Grid unavailable" : "No grid content"}
-            stateMessage={gridShellState === "no-results" ? "Search and filter composition is host-owned, but the shell keeps the no-results posture explicit." : gridShellState === "loading" ? "Pagination and progressive loading remain separate postures in this baseline." : gridShellState === "error" ? "Retry or remediation actions belong to the host screen." : "Empty collections remain distinct from query-driven no-results."}
-          >
-            <div slot="header" class="browse-header-note">
-              Pagination works well for stable result sets where range summary matters more than incremental append.
-            </div>
-            <div slot="state" class="state-stack">
-              {#if gridShellState === "loading"}
-                <Banner
-                  tone="info"
-                  title="Loading grid results"
-                  message="Decorative skeletons can reserve layout without claiming to be real content."
-                />
-                <div class="state-skeleton-grid" aria-hidden="true">
-                  {#each Array.from({ length: 4 }) as _}
-                    <div class="state-skeleton-card">
-                      <Skeleton shape="block" height="7.5rem" />
-                      <Skeleton width="62%" />
-                      <Skeleton width="40%" />
-                    </div>
-                  {/each}
-                </div>
-              {:else if gridShellState === "error"}
-                <Banner
-                  tone="danger"
-                  title="Grid results unavailable"
-                  message="Retry and support actions should stay adjacent to the failed surface."
-                >
-                  <div slot="actions" class="action-cluster">
-                    <Button variant="secondary" on:click={retryBrowseState}>Retry</Button>
-                  </div>
-                </Banner>
-                <EmptyState
-                  title="Card gallery could not be loaded"
-                  message="Error states need clear recovery affordances and should remain visually distinct from empty states."
-                />
-              {:else if gridShellState === "no-results"}
-                <EmptyState
-                  title="No cards match the current query"
-                  message="Clear filters or widen the search scope to restore results."
-                  variant="search"
-                >
-                  <div slot="actions" class="action-cluster">
-                    <Button variant="secondary" on:click={resetBrowseFilters}>Clear filters</Button>
-                  </div>
-                </EmptyState>
-              {:else}
-                <EmptyState
-                  title="No cards available yet"
-                  message="A genuinely empty destination should present the next step, not read like a failed fetch."
-                />
-              {/if}
-            </div>
-            {#each visibleBrowseCards as card}
-              <article class="browse-card">
-                <p class="eyebrow">{card.category}</p>
-                <h4>{card.title}</h4>
-                <p>{card.meta}</p>
-              </article>
-            {/each}
-            <svelte:fragment slot="footer">
-              {#if gridShellState === "ready"}
-                <PaginationSummary
-                  currentPage={gridPage}
-                  totalPages={gridTotalPages}
-                  totalItems={filteredBrowseCards.length}
-                  pageSize={gridPageSize}
-                  on:pageChange={handleGridPageChange}
-                />
-              {/if}
-            </svelte:fragment>
-          </GridShell>
-        </div>
-      </div>
-    </section>
-    {/if}
-
-    {#if activeSectionId === "detail-suite"}
-    <section id="detail-suite" class="panel token-summary" aria-labelledby="detail-heading">
-      <div class="section-header">
-        <div>
-          <p class="eyebrow">Detail display suite</p>
-          <h2 id="detail-heading">Cards, headers, breadcrumbs, and summary/detail composition</h2>
-        </div>
-      </div>
-      <div class="section-meta-bar">
-        <span class="command-shortcut-hint">@pug/svelte-composites</span>
-        <span class="token-path">docs/contracts/composites/detail-shell.md</span>
-        <span class="token-path">docs/contracts/composites/page-header.md</span>
-        <span class="token-path">docs/contracts/composites/breadcrumbs.md</span>
-      </div>
-      <div class="detail-controls">
-        <ToggleGroup
-          value={detailState}
-          options={detailStateOptions}
-          ariaLabel="Detail state"
-          on:valueChange={handleDetailStateChange}
-        />
-      </div>
-      <DetailShell
-        ariaLabel="Mix review detail"
-        state={detailState}
-        stateTitle={detailState === "loading" ? "Loading detail surface" : detailState === "error" ? "Detail unavailable" : "No detail content"}
-        stateMessage={detailState === "loading" ? "Detail shells keep header identity distinct while body content loads." : detailState === "error" ? "Error remediation remains host-owned while the shell preserves region structure." : "Empty detail destinations remain distinct from browse no-results states."}
-      >
-        <PageHeader
-          slot="header"
-          title="Aura review delivery"
-          eyebrow="Detail surface"
-          subtitle="Local identity, breadcrumb context, and summary actions composed above readonly detail sections."
-        >
-          <Breadcrumbs
-            slot="breadcrumbs"
-            items={detailBreadcrumbs}
-            on:navigate={handleBreadcrumbNavigate}
-          />
-          <div slot="actions" class="action-cluster">
-            <Button variant="secondary">Share</Button>
-            <Button variant="primary">Approve</Button>
-          </div>
-        </PageHeader>
-        <div slot="state" class="state-stack">
-          {#if detailState === "loading"}
-            <Banner
-              tone="info"
-              title="Loading detail surface"
-              message="Header identity and action placement should remain stable while body sections resolve."
-            />
-            <div class="detail-loading-grid" aria-hidden="true">
-              <Skeleton shape="block" height="5.25rem" />
-              <Skeleton shape="block" height="5.25rem" />
-              <Skeleton shape="block" height="5.25rem" />
-            </div>
-          {:else if detailState === "error"}
-            <Banner
-              tone="danger"
-              title="Detail surface unavailable"
-              message="Persistent failures need explicit retry or fallback actions near the affected surface."
-            >
-              <div slot="actions" class="action-cluster">
-                <Button variant="secondary" on:click={() => (detailState = "ready")}>Retry</Button>
-              </div>
-            </Banner>
-            <EmptyState
-              title="This detail record could not be displayed"
-              message="The shell still preserves hierarchy and remediation placement even when data retrieval fails."
-            />
-          {:else}
-            <EmptyState
-              title="No detail record selected"
-              message="Empty detail destinations should offer a calm, explanatory posture instead of looking broken."
-            />
-          {/if}
-        </div>
-
-        <div class="detail-card-grid">
-          {#each detailCards as card}
-            <Card variant={card.id === "health" ? "elevated" : "outlined"}>
-              <div slot="header">
-                <p class="eyebrow">{card.title}</p>
-              </div>
-              <strong class="detail-card-value">{card.value}</strong>
-              <p class="detail-card-meta">{card.meta}</p>
-            </Card>
-          {/each}
-        </div>
-
-        <DetailSection
-          title="Delivery metadata"
-          description="Readonly rows emphasize label/value semantics instead of form editing posture."
-        >
-          <dl class="detail-list">
-            <DetailRow label="Sample rate" value="48 kHz" />
-            <DetailRow label="Loudness target" value="-16 LUFS integrated" />
-            <DetailRow
-              label="Destination"
-              value="/clients/aura/review/v4/final-deliverables"
-              truncateValue={true}
-            >
-              <Button slot="action" variant="secondary">Reveal</Button>
-            </DetailRow>
-          </dl>
-        </DetailSection>
-
-        <DetailSection
-          title="Checklist"
-          description="Cards and detail rows can mix inside the same detail shell without collapsing hierarchy."
-          isSeparated={true}
-        >
-          <div class="detail-inline-cards">
-            <Card variant="outlined">
-              <div slot="header">
-                <h4 class="mini-card-title">Mix notes</h4>
-              </div>
-              <p class="detail-card-meta">Lead vocal automation cleaned, sibilance pass approved, limiter margin preserved.</p>
-            </Card>
-            <Card variant="outlined">
-              <div slot="header">
-                <h4 class="mini-card-title">Review notes</h4>
-              </div>
-              <p class="detail-card-meta">Broadcast compliance still needs one final offline bounce confirmation.</p>
-            </Card>
-          </div>
-        </DetailSection>
-      </DetailShell>
-    </section>
-    {/if}
-
-    {#if activeSectionId === "picker-suite"}
-    <section id="picker-suite" class="panel token-summary" aria-labelledby="picker-heading">
-      <div class="section-header">
-        <div>
-          <p class="eyebrow">Picker workflows</p>
-          <h2 id="picker-heading">Relation and selection flows</h2>
-        </div>
-      </div>
-      <div class="section-meta-bar">
-        <span class="command-shortcut-hint">@pug/svelte-composites</span>
-        <span class="token-path">docs/contracts/composites/picker-shell.md</span>
-        <span class="token-path">docs/contracts/composites/relation-picker.md</span>
-        <span class="token-path">docs/contracts/composites/selection-summary.md</span>
-      </div>
-      <div class="picker-controls">
-        <div class="picker-control-group">
-          <span class="token-path">Variant</span>
-          <ToggleGroup
-            value={pickerVariant}
-            options={pickerVariantOptions}
-            ariaLabel="Picker variant"
-            on:valueChange={handlePickerVariantChange}
-          />
-        </div>
-        <div class="picker-control-group">
-          <span class="token-path">Selection mode</span>
-          <ToggleGroup
-            value={pickerMode}
-            options={selectionModeOptions}
-            ariaLabel="Picker selection mode"
-            on:valueChange={handlePickerModeChange}
-          />
-        </div>
-        <div class="picker-control-group">
-          <span class="token-path">State</span>
-          <ToggleGroup
-            value={pickerStateOverride}
-            options={pickerStateOptions}
-            ariaLabel="Picker state"
-            on:valueChange={handlePickerStateChange}
-          />
-        </div>
-      </div>
-      <div class="picker-demo-grid">
-        <div class="picker-demo-column">
-          <RelationPicker
-            title="Attach related assets"
-            description="One shared picker shell supports inline, popover-style, and modal-style relation workflows."
-            items={relationItems}
-            selectedIds={selectedRelationIds}
-            query={pickerQuery}
-            selectionMode={pickerMode}
-            variant={pickerVariant}
-            state={pickerState}
-            on:queryChange={handlePickerQueryChange}
-            on:selectionChange={handleRelationSelectionChange}
-            on:confirm={handlePickerConfirm}
-            on:cancel={handlePickerCancel}
-          >
-            <div slot="state" class="state-stack">
-              {#if pickerState === "loading"}
-                <Banner
-                  tone="info"
-                  title="Loading picker candidates"
-                  message="Selection summary and confirm posture remain stable while candidates load."
-                />
-                <div class="state-skeleton-list" aria-hidden="true">
-                  {#each Array.from({ length: 3 }) as _}
-                    <div class="state-skeleton-row">
-                      <Skeleton shape="circle" width="1.125rem" height="1.125rem" />
-                      <div class="state-skeleton-copy">
-                        <Skeleton width="56%" />
-                        <Skeleton width="28%" />
-                      </div>
-                    </div>
-                  {/each}
-                </div>
-              {:else if pickerState === "error"}
-                <Banner
-                  tone="danger"
-                  title="Picker unavailable"
-                  message="Error handling remains host-owned, but retry and escape routes need to stay visible."
-                >
-                  <div slot="actions" class="action-cluster">
-                    <Button variant="secondary" on:click={resetPickerState}>Reset</Button>
-                  </div>
-                </Banner>
-                <EmptyState
-                  title="Candidates could not be loaded"
-                  message="Keep selection context and remediation reachability visible instead of collapsing the picker."
-                />
-              {:else if pickerState === "no-results"}
-                <EmptyState
-                  title="No candidates match the current query"
-                  message="No-results should offer a fast way back to the full candidate set."
-                  variant="search"
-                >
-                  <div slot="actions" class="action-cluster">
-                    <Button variant="secondary" on:click={resetPickerState}>Clear search</Button>
-                  </div>
-                </EmptyState>
-              {:else}
-                <EmptyState
-                  title="No candidates available"
-                  message="Empty relation states remain distinct from failed fetches and filtered no-results."
-                />
-              {/if}
-            </div>
-          </RelationPicker>
-        </div>
-        <div class="picker-demo-column">
-          <Card variant="outlined">
-            <div slot="header">
-              <p class="eyebrow">Workflow notes</p>
-            </div>
-            <div class="picker-state-stack">
-              <div class="state-tile">
-                <span class="token-path">pickerState</span>
-                <strong>{pickerState}</strong>
-              </div>
-              <div class="state-tile">
-                <span class="token-path">selectedRelationIds</span>
-                <strong>{selectedRelationIds.length === 0 ? "∅" : selectedRelationIds.join(", ")}</strong>
-              </div>
-              <div class="state-tile">
-                <span class="token-path">filteredRelationItems</span>
-                <strong>{filteredRelationItems.length}</strong>
-              </div>
-            </div>
-            <p class="detail-card-meta">{pickerStatus}</p>
-          </Card>
-        </div>
-      </div>
-    </section>
-    {/if}
-
-    {#if activeSectionId === "media-suite"}
-    <section id="media-suite" class="panel token-summary" aria-labelledby="media-heading">
-      <div class="section-header">
-        <div>
-          <p class="eyebrow">Media and asset suite</p>
-          <h2 id="media-heading">Preview framing, embeds, and fallback posture</h2>
-        </div>
-      </div>
-      <div class="section-meta-bar">
-        <span class="command-shortcut-hint">@pug/svelte-composites</span>
-        <span class="token-path">docs/contracts/composites/media-preview.md</span>
-        <span class="token-path">docs/contracts/composites/embed-shell.md</span>
-      </div>
-      <div class="media-controls">
-        <div class="picker-control-group">
-          <span class="token-path">Preview state</span>
-          <ToggleGroup
-            value={mediaState}
-            options={mediaStateOptions}
-            ariaLabel="Media preview state"
-            on:valueChange={handleMediaStateChange}
-          />
-        </div>
-        <div class="picker-control-group">
-          <span class="token-path">Embed state</span>
-          <ToggleGroup
-            value={embedState}
-            options={mediaStateOptions}
-            ariaLabel="Embed state"
-            on:valueChange={handleEmbedStateChange}
-          />
-        </div>
-      </div>
-      <div class="media-demo-grid">
-        <div class="media-main-column">
-          <div class="media-strip" role="tablist" aria-label="Asset previews">
-            {#each mediaAssets as asset}
-              <Toggle
-                className="media-strip__item"
-                isPressed={activeMediaId === asset.id}
-                layout="stack"
-                variant="ghost"
-                ariaLabel={`Show ${asset.title}`}
-                on:pressedChange={() => (activeMediaId = asset.id)}
-              >
-                <MediaThumbnail
-                  kind={asset.kind}
-                  state={mediaState}
-                  aspectRatio={asset.aspectRatio}
-                  presentation="compact"
-                  title={asset.title}
-                  badge={asset.badge}
-                  meta={asset.thumbnailMeta}
-                  stateTitle={getMediaStateTitle(mediaState, asset.kind)}
-                  stateMessage={getMediaStateMessage(mediaState, asset.kind)}
-                >
-                  {#if asset.kind === "image"}
-                    <div class="mock-media mock-media--image" aria-hidden="true">
-                      <div class="mock-media__panel"></div>
-                      <div class="mock-media__panel"></div>
-                    </div>
-                  {:else if asset.kind === "audio"}
-                    <div class="mock-media mock-media--audio" aria-hidden="true">
-                      <div class="mock-waveform">
-                        {#each Array.from({ length: 16 }) as _, index}
-                          <span style={`height: ${remHeight(18 + ((index % 5) * 10))};`}></span>
-                        {/each}
-                      </div>
-                    </div>
-                  {:else if asset.kind === "video"}
-                    <div class="mock-media mock-media--video" aria-hidden="true">
-                      <div class="mock-video__screen"></div>
-                      <div class="mock-video__timeline"></div>
-                    </div>
-                  {:else if asset.kind === "document"}
-                    <div class="mock-media mock-media--document" aria-hidden="true">
-                      <div class="mock-document">
-                        <span></span>
-                        <span></span>
-                        <span></span>
-                      </div>
-                    </div>
-                  {/if}
-                </MediaThumbnail>
-              </Toggle>
-            {/each}
-          </div>
-
-          <MediaPreview
-            title={activeMedia.title}
-            description={activeMedia.description}
-            eyebrow={activeMedia.eyebrow}
-            caption={activeMedia.caption}
-            meta={activeMedia.meta}
-            badge={activeMedia.badge}
-            thumbnailMeta={activeMedia.thumbnailMeta}
-            kind={activeMedia.kind}
-            state={mediaState}
-            aspectRatio={activeMedia.aspectRatio}
-            stateTitle={getMediaStateTitle(mediaState, activeMedia.kind)}
-            stateMessage={getMediaStateMessage(mediaState, activeMedia.kind)}
-            variant="elevated"
-          >
-            <svelte:fragment slot="media">
-              {#if activeMedia.kind === "image"}
-                <div class="mock-media mock-media--image" aria-hidden="true">
-                  <div class="mock-media__panel"></div>
-                  <div class="mock-media__panel"></div>
-                </div>
-              {:else if activeMedia.kind === "audio"}
-                <div class="mock-media mock-media--audio" aria-hidden="true">
-                  <div class="mock-waveform">
-                    {#each Array.from({ length: 24 }) as _, index}
-                      <span style={`height: ${remHeight(18 + ((index % 7) * 10))};`}></span>
-                    {/each}
-                  </div>
-                </div>
-              {:else if activeMedia.kind === "video"}
-                <div class="mock-media mock-media--video" aria-hidden="true">
-                  <div class="mock-video__screen"></div>
-                  <div class="mock-video__timeline"></div>
-                </div>
-              {:else if activeMedia.kind === "document"}
-                <div class="mock-media mock-media--document" aria-hidden="true">
-                  <div class="mock-document mock-document--large">
-                    <span></span>
-                    <span></span>
-                    <span></span>
-                    <span></span>
-                  </div>
-                </div>
-              {/if}
-            </svelte:fragment>
-            <div class="media-preview__notes">
-              <div class="state-tile">
-                <span class="token-path">assetId</span>
-                <strong>{activeMedia.assetId}</strong>
-              </div>
-              <div class="state-tile">
-                <span class="token-path">kind</span>
-                <strong>{activeMedia.kind}</strong>
-              </div>
-            </div>
-            <div slot="footer" class="media-preview-footer">
-              <span class="token-path">{activeMedia.assetId}</span>
-              <div class="action-cluster">
-                <Button variant="secondary" isDisabled={disabled}>Open source</Button>
-                <Button variant="primary" isDisabled={disabled}>Attach asset</Button>
-              </div>
-            </div>
-          </MediaPreview>
-
-          <div class="media-secondary-grid">
-            {#each secondaryMediaAssets as asset}
-              <MediaPreview
-                title={asset.title}
-                description={asset.description}
-                eyebrow={asset.eyebrow}
-                caption={asset.caption}
-                meta={asset.meta}
-                badge={asset.badge}
-                thumbnailMeta={asset.thumbnailMeta}
-                kind={asset.kind}
-                state={mediaState}
-                aspectRatio={asset.aspectRatio}
-                stateTitle={getMediaStateTitle(mediaState, asset.kind)}
-                stateMessage={getMediaStateMessage(mediaState, asset.kind)}
-                variant="outlined"
-              >
-                <svelte:fragment slot="media">
-                  {#if asset.kind === "audio"}
-                    <div class="mock-media mock-media--audio" aria-hidden="true">
-                      <div class="mock-waveform">
-                        {#each Array.from({ length: 18 }) as _, index}
-                          <span style={`height: ${remHeight(18 + ((index % 6) * 8))};`}></span>
-                        {/each}
-                      </div>
-                    </div>
-                  {:else if asset.kind === "video"}
-                    <div class="mock-media mock-media--video" aria-hidden="true">
-                      <div class="mock-video__screen"></div>
-                      <div class="mock-video__timeline"></div>
-                    </div>
-                  {:else if asset.kind === "document"}
-                    <div class="mock-media mock-media--document" aria-hidden="true">
-                      <div class="mock-document">
-                        <span></span>
-                        <span></span>
-                        <span></span>
-                      </div>
-                    </div>
-                  {:else}
-                    <div class="mock-media mock-media--image" aria-hidden="true">
-                      <div class="mock-media__panel"></div>
-                      <div class="mock-media__panel"></div>
-                    </div>
-                  {/if}
-                </svelte:fragment>
-              </MediaPreview>
-            {/each}
-          </div>
-        </div>
-
-        <div class="media-sidebar">
-          <EmbedShell
-            title="External review embed"
-            description="Embed shells frame host-native or external surfaces while preserving fallback copy and recovery actions."
-            provider="Bridge viewer"
-            state={embedState}
-            stateTitle={embedState === "loading" ? "Loading review embed" : embedState === "error" ? "Review embed unavailable" : "No embed target"}
-            stateMessage={getEmbedStateMessage(embedState)}
-          >
-            <div slot="state" class="state-stack">
-              {#if embedState === "loading"}
-                <Banner
-                  tone="info"
-                  title="Loading review embed"
-                  message="The framed embed region stays stable while host-native or external content initializes."
-                />
-                <Skeleton shape="block" height="16.25rem" />
-              {:else if embedState === "error"}
-                <Banner
-                  tone="danger"
-                  title="Review embed unavailable"
-                  message="A failed embed still needs visible fallback actions and preserved context."
-                >
-                  <div slot="actions" class="action-cluster">
-                    <Button variant="secondary" on:click={() => (embedState = "ready")}>Retry</Button>
-                  </div>
-                </Banner>
-                <EmptyState
-                  title="Open this review in the host instead"
-                  message="Inline embedding is optional; recovery posture is not."
-                >
-                  <div slot="actions" class="action-cluster">
-                    <Button variant="secondary">Open external</Button>
-                  </div>
-                </EmptyState>
-              {:else}
-                <EmptyState
-                  title="No embedded destination configured"
-                  message="Some workflows intentionally prefer a host-owned open action over inline rendering."
-                />
-              {/if}
-            </div>
-            <div class="mock-embed" aria-hidden="true">
-              <div class="mock-embed__header">
-                <span></span>
-                <span></span>
-                <span></span>
-              </div>
-              <div class="mock-embed__body">
-                <div class="mock-embed__sidebar"></div>
-                <div class="mock-embed__canvas"></div>
-              </div>
-            </div>
-            <div slot="footer" class="media-preview-footer">
-              <span class="token-path">embed.review.pass-4</span>
-              <div class="action-cluster">
-                <Button variant="secondary" isDisabled={disabled}>Open external</Button>
-                <Button variant="primary" isDisabled={disabled || embedState !== "ready"}>
-                  Focus embed
-                </Button>
-              </div>
-            </div>
-          </EmbedShell>
-
-          <Card variant="outlined">
-            <div slot="header">
-              <p class="eyebrow">Current media posture</p>
-            </div>
-            <div class="picker-state-stack">
-              <div class="state-tile">
-                <span class="token-path">mediaState</span>
-                <strong>{mediaState}</strong>
-              </div>
-              <div class="state-tile">
-                <span class="token-path">embedState</span>
-                <strong>{embedState}</strong>
-              </div>
-              <div class="state-tile">
-                <span class="token-path">activeMedia</span>
-                <strong>{activeMedia.title}</strong>
-              </div>
-            </div>
-            <p class="detail-card-meta">{mediaStatus}</p>
-            <p class="detail-card-meta">{embedStatus}</p>
-          </Card>
-        </div>
-      </div>
-    </section>
-    {/if}
-
-    {#if activeSectionId === "notification-suite"}
-    <section id="notification-suite" class="panel token-summary" aria-labelledby="notification-heading">
-      <div class="section-header">
-        <div>
-          <p class="eyebrow">State hardening</p>
-          <h2 id="notification-heading">Banners, toasts, skeletons, and remediation</h2>
-        </div>
-      </div>
-      <div class="section-meta-bar">
-        <span class="command-shortcut-hint">@pug/svelte-primitives + @pug/svelte-composites</span>
-        <span class="token-path">docs/contracts/foundation/banner.md</span>
-        <span class="token-path">docs/contracts/composites/toast-stack.md</span>
-      </div>
-      <div class="notification-controls">
-        <div class="picker-control-group">
-          <span class="token-path">Banner tone</span>
-          <ToggleGroup
-            value={bannerTone}
-            options={notificationToneOptions}
-            ariaLabel="Banner tone"
-            on:valueChange={handleBannerToneChange}
-          />
-        </div>
-        <div class="picker-control-group">
-          <span class="token-path">Transient notifications</span>
-          <div class="toast-action-row">
-            {#each notificationTones as tone}
-              <Button variant="secondary" on:click={() => enqueueToast(tone)}>
-                push {tone}
-              </Button>
-            {/each}
-          </div>
-        </div>
-      </div>
-      <div class="notification-grid">
-        <div class="notification-column">
-          {#if showPersistentBanner}
-            <Banner
-              tone={bannerTone}
-              title="Persistent inline remediation"
-              message="Use banners when the condition should stay attached to the current surface until the user resolves or dismisses it."
-              isDismissible={true}
-              on:dismiss={() => (showPersistentBanner = false)}
-            >
-              <div slot="actions" class="action-cluster">
-                <Button variant="secondary" on:click={() => enqueueToast("info")}>Inspect</Button>
-                <Button variant="primary" on:click={() => enqueueToast("success")}>Resolve</Button>
-              </div>
-            </Banner>
-          {:else}
-            <EmptyState
-              title="Persistent banner dismissed"
-              message="Dismissal should be explicit and reversible when the condition may return."
-              variant="neutral"
-            >
-              <div slot="actions" class="action-cluster">
-                <Button variant="secondary" on:click={() => (showPersistentBanner = true)}>Restore banner</Button>
-              </div>
-            </EmptyState>
-          {/if}
-
-          <Card variant="outlined">
-            <div slot="header">
-              <p class="eyebrow">Loading scaffolds</p>
-            </div>
-            <div class="state-skeleton-card" aria-hidden="true">
-              <Skeleton shape="block" height="8.25rem" />
-              <Skeleton width="64%" />
-              <Skeleton width="44%" />
-            </div>
-            <p class="detail-card-meta">
-              Skeletons are decorative only. They reserve layout while the real loading announcement comes from the surrounding state surface.
-            </p>
-          </Card>
-        </div>
-        <div class="notification-column">
-          <Card variant="outlined">
-            <div slot="header">
-              <p class="eyebrow">Transient notification stack</p>
-            </div>
-            <ToastStack items={toastItems} on:dismiss={dismissToast} on:action={handleToastAction} />
-            <p class="detail-card-meta">{notificationSummary}</p>
-          </Card>
-        </div>
-      </div>
-    </section>
-    {/if}
-
-    {#if activeSectionId === "command-suite"}
-    <section id="command-suite" class="panel token-summary" aria-labelledby="command-heading">
-      <div class="section-header">
-        <div>
-          <p class="eyebrow">Workstation command discovery</p>
-          <h2 id="command-heading">Palette search, grouped actions, and inline rediscovery</h2>
-        </div>
-      </div>
-      <div class="section-meta-bar">
-        <span class="command-shortcut-hint">@pug/svelte-workstation</span>
-        <span class="token-path">docs/contracts/workstation/command-palette.md</span>
-        <span class="token-path">docs/contracts/workstation/action-discovery-panel.md</span>
-      </div>
-      <div class="command-controls">
-        <div class="picker-control-group">
-          <span class="token-path">Scope</span>
-          <ToggleGroup
-            value={commandScope}
-            options={commandScopeOptions}
-            ariaLabel="Command scope"
-            on:valueChange={handleCommandScopeChange}
-          />
-        </div>
-        <div class="picker-control-group">
-          <span class="token-path">Palette state</span>
-          <ToggleGroup
-            value={commandStateOverride}
-            options={commandStateOptions}
-            ariaLabel="Command palette state"
-            on:valueChange={handleCommandStateChange}
-          />
-        </div>
-      </div>
-      <div class="command-grid">
-        <div class="command-column">
-          <Card variant="elevated">
-            <div slot="header" class="command-launcher-header">
-              <div>
-                <p class="eyebrow">Launcher entry</p>
-                <h3 class="command-card-title">Global command palette</h3>
-              </div>
-              <span class="command-shortcut-hint">⌘K</span>
-            </div>
-            <p class="detail-card-meta">
-              The launcher is modal, grouped, keyboard-navigable, and still host-owned for ranking and execution.
-            </p>
-            <div class="action-cluster">
-              <Button variant="primary" on:click={openCommandPalette}>Open palette</Button>
-              <Button variant="secondary" on:click={clearCommandDiscovery}>Reset filters</Button>
-            </div>
-            <div class="picker-state-stack">
-              <div class="state-tile">
-                <span class="token-path">commandPaletteState</span>
-                <strong>{commandPaletteState}</strong>
-              </div>
-              <div class="state-tile">
-                <span class="token-path">lastCommandId</span>
-                <strong>{lastCommandId ?? "∅"}</strong>
-              </div>
-              <div class="state-tile">
-                <span class="token-path">query</span>
-                <strong>{commandQuery || "∅"}</strong>
-              </div>
-            </div>
-            <p class="detail-card-meta">{commandStatus}</p>
-            <p class="detail-card-meta">{commandEventLog}</p>
-          </Card>
-        </div>
-        <div class="command-column">
-          <ActionDiscoveryPanel
-            title="Inline action discovery"
-            description="Suggested and recent actions stay visible outside the modal launcher so command discovery is not palette-only."
-            sections={commandSections}
-            invocationHint="Open palette with ⌘K"
-            on:actionSelect={handleActionDiscoverySelect}
-          />
-        </div>
-      </div>
-    </section>
-    {/if}
-
-    {#if activeSectionId === "workspace-suite"}
-    <section id="workspace-suite" class="panel token-summary" aria-labelledby="workspace-heading">
-      <div class="section-header">
-        <div>
-          <p class="eyebrow">Workspace shell depth</p>
-          <h2 id="workspace-heading">Headers, utility regions, and shell-state posture</h2>
-        </div>
-      </div>
-      <div class="section-meta-bar">
-        <span class="command-shortcut-hint">@pug/svelte-workstation</span>
-        <span class="token-path">docs/contracts/workstation/workspace-shell.md</span>
-        <span class="token-path">docs/contracts/workstation/dock-region.md</span>
-        <span class="token-path">docs/contracts/workstation/split-view.md</span>
-      </div>
-      <div class="command-controls">
-        <div class="picker-control-group">
-          <span class="token-path">Workspace state</span>
-          <ToggleGroup
-            value={workspaceState}
-            options={workspaceStateOptions}
-            ariaLabel="Workspace state"
-            on:valueChange={handleWorkspaceStateChange}
-          />
-        </div>
-      </div>
-      <WorkspaceShell
-        ariaLabel="Workstation shell preview"
-        state={workspaceState}
-        activeSurfaceLabel="Mix review workspace"
-        stateTitle={workspaceState === "loading" ? "Loading workspace shell" : workspaceState === "offline" ? "Offline workspace shell" : workspaceState === "disconnected" ? "Workspace disconnected" : "No workspace content"}
-        stateMessage={workspaceState === "loading" ? "Headers and status rails remain stable while shell content resolves." : workspaceState === "offline" ? "Offline posture should stay explicit without collapsing local tools." : workspaceState === "disconnected" ? "Disconnection needs recovery posture distinct from deliberate offline mode." : "Workspace shells should explain the missing surface instead of appearing broken."}
-      >
-        <SurfaceTabs
-          slot="surfaceTabs"
-          items={workspaceSurfaceItems}
-          value={workspaceSurfaceValue}
-          ariaLabel="Workspace surfaces"
-          on:valueChange={handleSurfaceTabChange}
-          on:reorder={handleSurfaceReorder}
-          on:requestRename={handleSurfaceRename}
-          on:requestMove={handleSurfaceMove}
-          on:requestClose={handleSurfaceClose}
-          on:requestAdd={handleSurfaceAdd}
-        />
-
-        <AppHeader slot="appHeader" title="Pug Workstation" ariaLabel="Application header">
-          <div slot="identity" class="workspace-identity">
-            <span class="workspace-identity__mark" aria-hidden="true">P</span>
-            <strong>Pug Workstation</strong>
-          </div>
-          <div slot="actions" class="action-cluster">
-            <Button variant="secondary">Settings</Button>
-            <Button variant="primary" on:click={openCommandPalette}>Commands</Button>
-          </div>
-          <div slot="utility" class="workspace-status-pill-row">
-            <span class="command-shortcut-hint">{workspaceState === "offline" ? "offline" : workspaceState === "disconnected" ? "disconnected" : "connected"}</span>
-            <span class="command-shortcut-hint">surface: mix review</span>
-          </div>
-        </AppHeader>
-
-        <ProjectHeader
-          slot="projectHeader"
-          title="Aura review delivery"
-          subtitle="Project-scoped context, shell actions, and utility state stay beneath the global app header."
-          isDirty={workspaceState !== "ready"}
-        >
-          <div slot="actions" class="action-cluster">
-            <Button variant="secondary">Share</Button>
-            <Button variant="secondary">Layout</Button>
-          </div>
-          <div slot="status" class="workspace-status-pill-row">
-            <span class="command-shortcut-hint">{commandScope}</span>
-            <span class="command-shortcut-hint">{lastCommandId ?? "no command yet"}</span>
-          </div>
-        </ProjectHeader>
-
-        <div slot="state" class="state-stack">
-          {#if workspaceState === "loading"}
-            <Banner
-              tone="info"
-              title="Loading workspace shell"
-              message="App and project headers should stay stable while the main shell content resolves."
-            />
-            <div class="workspace-loading-grid" aria-hidden="true">
-              <Skeleton shape="block" height="15rem" />
-              <Skeleton shape="block" height="15rem" />
-              <Skeleton shape="block" height="15rem" />
-            </div>
-          {:else if workspaceState === "offline"}
-            <Banner
-              tone="warning"
-              title="Offline mode active"
-              message="Offline work is deliberate and should keep local actions available while remote sync remains paused."
-            >
-              <div slot="actions" class="action-cluster">
-                <Button variant="secondary" on:click={() => (workspaceState = "ready")}>Resume sync</Button>
-              </div>
-            </Banner>
-            <EmptyState
-              title="Remote collaboration is paused"
-              message="Workspace shell context remains visible so users can keep working locally."
-            />
-          {:else if workspaceState === "disconnected"}
-            <Banner
-              tone="danger"
-              title="Workspace connection lost"
-              message="Unexpected disconnection needs adjacent retry and recovery actions."
-            >
-              <div slot="actions" class="action-cluster">
-                <Button variant="secondary" on:click={() => (workspaceState = "ready")}>Reconnect</Button>
-              </div>
-            </Banner>
-            <EmptyState
-              title="Shell utilities are waiting for reconnection"
-              message="Keep action-discovery and shell identity visible while the host negotiates recovery."
-            />
-          {:else}
-            <EmptyState
-              title="No workspace surface configured"
-              message="Empty workspace shells should still preserve identity, context, and next steps."
-            />
-          {/if}
-        </div>
-
-        <div class="workspace-orchestration-shell">
-          <SplitView
-            orientation="horizontal"
-            ratio={primarySplitRatio}
-            minPrimarySize={leftDockCollapsed ? 72 : 240}
-            minSecondarySize={480}
-            ariaLabel="Primary workspace split"
-            on:ratioChange={handlePrimarySplitChange}
-          >
-            <div slot="primary" class="workspace-pane">
-              <DockRegion
-                edge="left"
-                items={leftDockItems}
-                value={leftDockValue}
-                isCollapsed={leftDockCollapsed}
-                ariaLabel="Left dock"
-                on:valueChange={(event) => handleDockValueChange("left", event)}
-                on:collapsedChange={(event) => handleDockCollapsedChange("left", event)}
-                on:reorder={(event) => handleDockReorder("left", event)}
-                on:requestClose={(event) => handleDockClose("left", event)}
-                on:requestContextMenu={(event) => handleDockContextMenu("left", event)}
-                let:activeItem
-              >
-                <div class="workspace-dock-content">
-                  <p class="eyebrow">{activeLeftDockMeta?.title ?? activeItem?.label ?? "Left dock"}</p>
-                  <p class="detail-card-meta">{activeLeftDockMeta?.summary ?? "Dock content remains host-defined."}</p>
-                  <ul class="workspace-list">
-                    {#each activeLeftDockMeta?.items ?? [] as item}
-                      <li>{item}</li>
-                    {/each}
-                  </ul>
-                </div>
-              </DockRegion>
-            </div>
-
-            <div slot="secondary" class="workspace-pane">
-              <SplitView
-                orientation="horizontal"
-                ratio={secondarySplitRatio}
-                minPrimarySize={420}
-                minSecondarySize={rightDockCollapsed ? 72 : 240}
-                ariaLabel="Secondary workspace split"
-                on:ratioChange={handleSecondarySplitChange}
-              >
-                <div slot="primary" class="workspace-pane">
-                  <PanelSurface
-                    title={activeWorkspaceSurface?.label ?? "Workspace surface"}
-                    isActive={true}
-                    isElevated={true}
-                    bodyPadding="md"
-                    ariaLabel="Active workspace surface"
-                  >
-                    <div class="workspace-surface-stack">
-                      <div class="workspace-surface-copy">
-                        <p class="eyebrow">{activeWorkspaceSurfaceMeta.eyebrow}</p>
-                        <h3 class="workspace-surface-title">{activeWorkspaceSurface?.label ?? "Workspace surface"}</h3>
-                        <p class="detail-card-meta">{activeWorkspaceSurfaceMeta.description}</p>
-                      </div>
-                      <div class="workspace-signal-grid">
-                        {#each activeWorkspaceSurfaceMeta.highlights as highlight}
-                          <div class="state-tile">
-                            <span class="token-path">surface signal</span>
-                            <strong>{highlight}</strong>
-                          </div>
-                        {/each}
-                      </div>
-                      <div class="workspace-demo-grid">
-                        <Card variant="outlined">
-                          <div slot="header">
-                            <p class="eyebrow">Utility rail</p>
-                          </div>
-                          <div class="workspace-rail-stack">
-                            <div class="state-tile">
-                              <span class="token-path">activeSurface</span>
-                              <strong>{activeWorkspaceSurface?.value ?? "none"}</strong>
-                            </div>
-                            <div class="state-tile">
-                              <span class="token-path">sync</span>
-                              <strong>{workspaceState === "offline" ? "paused" : workspaceState === "disconnected" ? "retrying" : "live"}</strong>
-                            </div>
-                          </div>
-                          <p class="detail-card-meta">
-                            Utility rails should stay stable under shell-state changes and preserve visible recovery posture.
-                          </p>
-                        </Card>
-
-                        <Card variant="outlined">
-                          <div slot="header">
-                            <p class="eyebrow">Persistence snapshot</p>
-                          </div>
-                          <div class="workspace-rail-stack">
-                            <div class="state-tile">
-                              <span class="token-path">primarySplitRatio</span>
-                              <strong>{Math.round(primarySplitRatio * 100)}%</strong>
-                            </div>
-                            <div class="state-tile">
-                              <span class="token-path">secondarySplitRatio</span>
-                              <strong>{Math.round(secondarySplitRatio * 100)}%</strong>
-                            </div>
-                          </div>
-                          <p class="detail-card-meta">{workspacePersistenceSummary}</p>
-                        </Card>
-                      </div>
-                      <Collapsible
-                        title="Host-owned persistence payload"
-                        description="Serialized layout state stays explicit and reversible without becoming shell chrome."
-                        defaultOpen={true}
-                      >
-                        <svelte:fragment slot="trigger" let:isOpen>
-                          <div class="workspace-persistence-trigger">
-                            <div>
-                              <p class="eyebrow">Serialized layout</p>
-                              <h4 class="workspace-persistence-title">Host-owned persistence payload</h4>
-                            </div>
-                            <div class="workspace-persistence-trigger__meta">
-                              <span class="command-shortcut-hint">v{workspaceLayoutSnapshot.version}</span>
-                              <Pill appearance="subtle">{isOpen ? "open" : "closed"}</Pill>
-                            </div>
-                          </div>
-                        </svelte:fragment>
-                        <div class="workspace-persistence-panel">
-                          <pre>{serializedWorkspaceLayout}</pre>
-                        </div>
-                      </Collapsible>
-                    </div>
-                  </PanelSurface>
-                </div>
-
-                <div slot="secondary" class="workspace-pane">
-                  <DockRegion
-                    edge="right"
-                    items={rightDockItems}
-                    value={rightDockValue}
-                    isCollapsed={rightDockCollapsed}
-                    ariaLabel="Right dock"
-                    on:valueChange={(event) => handleDockValueChange("right", event)}
-                    on:collapsedChange={(event) => handleDockCollapsedChange("right", event)}
-                    on:reorder={(event) => handleDockReorder("right", event)}
-                    on:requestClose={(event) => handleDockClose("right", event)}
-                    on:requestContextMenu={(event) => handleDockContextMenu("right", event)}
-                    let:activeItem
-                  >
-                    <div class="workspace-dock-stack">
-                      <div class="workspace-dock-content">
-                        <p class="eyebrow">{activeRightDockMeta?.title ?? activeItem?.label ?? "Right dock"}</p>
-                        <p class="detail-card-meta">{activeRightDockMeta?.summary ?? "Dock content remains host-defined."}</p>
-                        <ul class="workspace-list">
-                          {#each activeRightDockMeta?.items ?? [] as item}
-                            <li>{item}</li>
-                          {/each}
-                        </ul>
-                      </div>
-                      <ActionDiscoveryPanel
-                        title="Workspace actions"
-                        description="Inline action discovery remains visible inside docked shell regions for rediscovery without forcing the modal launcher."
-                        sections={commandSections}
-                        invocationHint="Open global commands with ⌘K"
-                        on:actionSelect={handleActionDiscoverySelect}
-                      />
-                      <Card variant="outlined">
-                        <div slot="header">
-                          <p class="eyebrow">Orchestration event</p>
-                        </div>
-                        <div class="workspace-rail-stack">
-                          <div class="state-tile">
-                            <span class="token-path">workspaceState</span>
-                            <strong>{workspaceState}</strong>
-                          </div>
-                          <div class="state-tile">
-                            <span class="token-path">commandPaletteState</span>
-                            <strong>{commandPaletteState}</strong>
-                          </div>
-                        </div>
-                        <p class="detail-card-meta">{workspaceEventLog}</p>
-                      </Card>
-                    </div>
-                  </DockRegion>
-                </div>
-              </SplitView>
-            </div>
-          </SplitView>
-        </div>
-
-        <ShellStatusBar slot="statusBar" summary="Shell utilities and recovery status">
-          <div slot="leading" class="workspace-status-pill-row">
-            <span class="command-shortcut-hint">surface: {activeWorkspaceSurface?.label ?? "none"}</span>
-            <span class="command-shortcut-hint">commands: {filteredCommandActions.length}</span>
-            <span class="command-shortcut-hint">layout: {Math.round(primarySplitRatio * 100)} / {Math.round(secondarySplitRatio * 100)}</span>
-          </div>
-          <div slot="trailing" class="workspace-status-pill-row">
-            <span class="command-shortcut-hint">{workspaceState}</span>
-            <span class="command-shortcut-hint">{activeRightDockItem?.label ?? "no dock panel"}</span>
-            <span class="command-shortcut-hint">{lastCommandId ?? "no recent command"}</span>
-          </div>
-        </ShellStatusBar>
-
-        <div slot="overlay" class="workspace-overlay-note" aria-hidden="true">
-          <span>utility overlays host</span>
-        </div>
-      </WorkspaceShell>
-    </section>
-    {/if}
-
-    {#if activeSectionId === "token-summary-section"}
-    <section id="token-summary-section" class="panel token-summary" aria-labelledby="token-summary-heading">
-      <div class="section-header">
-        <div>
-          <p class="eyebrow">Key semantic tokens</p>
-          <h2 id="token-summary-heading">Runtime-critical values</h2>
-        </div>
-      </div>
-      <div class="section-meta-bar">
-        <span class="command-shortcut-hint">@pug/svelte-tokens</span>
-        <span class="token-path">packages/tokens/artifacts/css/</span>
-        <span class="token-path">packages/tokens/artifacts/ts/</span>
-      </div>
-      <div class="summary-grid">
-        {#each keySemanticTokens as token}
-          <article class="summary-tile">
-            <span class="token-path">{token.path}</span>
-            <strong>{token.value}</strong>
-          </article>
-        {/each}
-      </div>
-    </section>
-    {/if}
-
-    {#if activeSectionId === "token-inspector"}
-    <section id="token-inspector" class="panel token-inspector" aria-labelledby="inspector-heading">
-      <div class="section-header inspector-header">
-        <div>
-          <p class="eyebrow">Semantic token inspector</p>
-          <h2 id="inspector-heading">Search the emitted token tree</h2>
-        </div>
-        <div class="filter-field">
-          <SearchField
-            id="token-inspector-query"
-            value={inspectorQuery}
-            placeholder="Filter tokens by path"
-            ariaLabel="Filter semantic tokens"
-            on:valueChange={handleInspectorQueryChange}
-            on:clear={handleInspectorQueryClear}
-          />
-        </div>
-      </div>
-      <p class="inspector-count">{matchingTokenCount} semantic tokens shown</p>
-      <div class="token-table-wrap">
-        <table>
-          <thead>
-            <tr>
-              <th scope="col">Path</th>
-              <th scope="col">Value</th>
-            </tr>
-          </thead>
-          <tbody>
-            {#each filteredTokens as token}
-              <tr>
-                <td class="token-path">{token.path}</td>
-                <td>{token.value}</td>
-              </tr>
-            {/each}
-          </tbody>
-        </table>
-      </div>
-    </section>
+      <DocsCatalogHub
+        {docsFamilies}
+        {docsAdoptionChecklist}
+        {catalogEntries}
+        {brandProofCards}
+        onSelectSection={selectSection}
+      />
+    {:else if activeSectionId === "token-summary-section" || activeSectionId === "token-inspector"}
+      <TokenToolsPanel
+        activePanelId={activeSectionId}
+        {keySemanticTokens}
+        {filteredTokens}
+        {matchingTokenCount}
+        {inspectorQuery}
+        onSelectPanel={(panelId) => selectSection(panelId as DocsSectionId)}
+        onQueryChange={handleInspectorQueryChange}
+        onQueryClear={handleInspectorQueryClear}
+      />
+    {:else if currentDemoScreen}
+      <SharedDemoApp
+        screenId={currentDemoScreen.id}
+        screenTabs={sharedDemoScreenOptions}
+        screenMeta={currentDemoScreen}
+        {theme}
+        {density}
+        {controlSize}
+        onScreenChange={handleDemoScreenChange}
+        demo={{
+          invalid,
+          busy,
+          disabled,
+          projectTitle,
+          assetSearch,
+          titleError,
+          titlePendingMessage,
+          titleValidationState,
+          searchValidationState,
+          validationLog,
+          handleTitleChange,
+          handleSearchChange,
+          handleSearchClear,
+          handleSubmit,
+          tableColumns,
+          visibleRows,
+          selectedRowIds,
+          sortColumnId,
+          sortDirection,
+          handleSortChange,
+          handleRowToggle,
+          handleToggleAll,
+          handleRowAction,
+          tableStatus,
+          currentPage,
+          totalPages,
+          sortedRows,
+          pageSize,
+          handlePageChange,
+          bulkActions,
+          handleBulkAction,
+          clearTableSelection,
+          browseQuery,
+          browseStatus,
+          browseStatusOptions,
+          browseStateOptions,
+          handleBrowseSearchChange,
+          handleBrowseSearchClear,
+          handleBrowseStatusChange,
+          handleBrowseStateChange,
+          listShellState,
+          gridShellState,
+          filteredBrowseRows,
+          visibleBrowseRows,
+          filteredBrowseCards,
+          visibleBrowseCards,
+          browseSummary,
+          loadMoreBrowseRows,
+          gridPage,
+          gridTotalPages,
+          resetBrowseFilters,
+          retryBrowseState,
+          detailBreadcrumbs,
+          detailCards,
+          detailState,
+          handleDetailStateChange,
+          handleBreadcrumbNavigate,
+          relationItems,
+          pickerQuery,
+          handlePickerQueryChange,
+          pickerVariant,
+          pickerVariantOptions,
+          handlePickerVariantChange,
+          pickerMode,
+          pickerModeOptions: selectionModeOptions,
+          handlePickerModeChange,
+          pickerState,
+          pickerStateOptions,
+          handlePickerStateChange,
+          filteredRelationItems,
+          selectedRelationIds,
+          handleRelationSelectionChange,
+          handlePickerConfirm,
+          handlePickerCancel,
+          pickerStatus,
+          resetPickerState,
+          mediaState,
+          embedState,
+          mediaStateOptions,
+          handleMediaStateChange,
+          handleEmbedStateChange,
+          activeMedia,
+          activeMediaId,
+          secondaryMediaAssets,
+          handleActiveMediaChange,
+          getMediaStateTitle,
+          getMediaStateMessage,
+          getEmbedStateMessage,
+          mediaStatus,
+          embedStatus,
+          bannerTone,
+          bannerToneOptions: notificationToneOptions,
+          handleBannerToneChange,
+          showPersistentBanner,
+          enqueueToast,
+          toastItems,
+          dismissToast,
+          handleToastAction,
+          notificationSummary,
+          openCommandPalette,
+          commandScope,
+          commandScopeOptions,
+          handleCommandScopeChange,
+          commandStateOverride,
+          commandStateOptions,
+          handleCommandStateChange,
+          clearCommandDiscovery,
+          lastCommandId,
+          filteredCommandActions,
+          commandSections,
+          commandStatus,
+          commandEventLog,
+          handleActionDiscoverySelect,
+          workspaceState,
+          workspaceStateOptions,
+          handleWorkspaceStateChange,
+          workspaceSurfaceItems,
+          workspaceSurfaceValue,
+          handleSurfaceTabChange,
+          handleSurfaceReorder,
+          handleSurfaceRename,
+          handleSurfaceMove,
+          handleSurfaceClose,
+          handleSurfaceAdd,
+          leftDockItems,
+          leftDockValue,
+          leftDockCollapsed,
+          rightDockItems,
+          rightDockValue,
+          rightDockCollapsed,
+          handleDockValueChange,
+          handleDockCollapsedChange,
+          handleDockReorder,
+          handleDockClose,
+          handleDockContextMenu,
+          primarySplitRatio,
+          secondarySplitRatio,
+          handlePrimarySplitChange,
+          handleSecondarySplitChange,
+          activeWorkspaceSurface,
+          activeWorkspaceSurfaceMeta,
+          activeLeftDockMeta,
+          activeRightDockMeta,
+          workspacePersistenceSummary,
+          serializedWorkspaceLayout,
+          workspaceEventLog,
+        }}
+      />
     {/if}
   </main>
-
   <CommandPalette
     open={commandPaletteOpen}
     title="Workspace commands"

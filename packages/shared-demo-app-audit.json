@@ -1,0 +1,156 @@
+{
+  "generation": "g04.012",
+  "sourceSurface": {
+    "entryPath": "packages/svelte/preview/src/App.svelte",
+    "stylePath": "packages/svelte/preview/src/app.css",
+    "entryLineCount": 3328,
+    "styleLineCount": 2085,
+    "docsOnlySectionIds": [
+      "catalog-hub",
+      "token-summary-section",
+      "token-inspector"
+    ],
+    "sharedTargetSectionIds": [
+      "form-suite",
+      "table-suite",
+      "browse-suite",
+      "detail-suite",
+      "picker-suite",
+      "media-suite",
+      "notification-suite",
+      "command-suite",
+      "workspace-suite"
+    ]
+  },
+  "packageCoverage": {
+    "artifactsSource": "packages/svelte/preview/artifacts/parity-report.json",
+    "packages": [
+      {
+        "packageName": "@pug/svelte-primitives",
+        "exportCount": 63,
+        "previewedCount": 63,
+        "contractOnlyCount": 0,
+        "priorityMissingExports": []
+      },
+      {
+        "packageName": "@pug/svelte-composites",
+        "exportCount": 20,
+        "previewedCount": 20,
+        "contractOnlyCount": 0,
+        "priorityMissingExports": []
+      },
+      {
+        "packageName": "@pug/svelte-workstation",
+        "exportCount": 14,
+        "previewedCount": 14,
+        "contractOnlyCount": 0,
+        "priorityMissingExports": []
+      }
+    ]
+  },
+  "auditFindings": [
+    {
+      "id": "docs-shell-and-demo-target-are-mixed",
+      "severity": "high",
+      "summary": "The current Svelte surface mixes docs navigation, token inspection, package metadata, and target-app UI into one monolithic screen.",
+      "evidence": [
+        "packages/svelte/preview/src/App.svelte",
+        "packages/svelte/preview/src/catalog.ts",
+        "packages/svelte/preview/src/parity.ts"
+      ],
+      "impact": "GPUI would end up reproducing docs-shell noise instead of a clean shared target app."
+    },
+    {
+      "id": "monolithic-preview-entrypoint",
+      "severity": "high",
+      "summary": "The main preview app entry is a 3328-line single Svelte component backed by a 2085-line global stylesheet.",
+      "evidence": [
+        "packages/svelte/preview/src/App.svelte",
+        "packages/svelte/preview/src/app.css"
+      ],
+      "impact": "The current surface is difficult to reason about, hard to contract, and too coupled for efficient cross-runtime parity work."
+    },
+    {
+      "id": "coverage-is-broad-but-shallow",
+      "severity": "high",
+      "summary": "The old preview was broad but shallow, so the rebuilt shared demo must close primitive coverage gaps instead of leaving long-tail exports as contract-only surfaces.",
+      "evidence": [
+        "packages/svelte/preview/artifacts/parity-report.json",
+        "packages/svelte/preview/src/parity.ts"
+      ],
+      "impact": "Without direct primitive coverage inside the shared demo shell, GPUI parity would still be forced to guess at long-tail exported controls."
+    },
+    {
+      "id": "docs-only-sections-pollute-target-parity",
+      "severity": "medium",
+      "summary": "Catalog, token summary, and token inspector are useful docs utilities but should not sit inside the target app GPUI is trying to match.",
+      "evidence": [
+        "packages/svelte/preview/src/App.svelte",
+        "packages/gpui/parity-priority-matrix.json"
+      ],
+      "impact": "Side-by-side review gets diluted by sections that are not the main shared Loophole-facing UI target."
+    },
+    {
+      "id": "stateful-demo-sections-lack-one-app-story",
+      "severity": "medium",
+      "summary": "The current review surface is organized as section demos rather than a coherent app with screens, flows, and stable region ownership.",
+      "evidence": [
+        "packages/svelte/preview/src/App.svelte",
+        "docs/specs/049-gpui-theme-runtime-and-native-preview-app-baseline.md"
+      ],
+      "impact": "The current surface demonstrates parts, but not one believable app that both Svelte and GPUI can implement as the same UI."
+    },
+    {
+      "id": "ad-hoc-preview-glue-still-owns-too-much",
+      "severity": "medium",
+      "summary": "The demo still relies heavily on preview-specific shell glue, state controls, and inspection layout rather than treating the shared components as the main screen-building blocks.",
+      "evidence": [
+        "packages/svelte/preview/src/App.svelte",
+        "packages/svelte/preview/src/app.css"
+      ],
+      "impact": "Component adoption is harder to read and parity work risks targeting scaffolding instead of the shared public surface."
+    }
+  ],
+  "targetShapeFreeze": {
+    "appId": "shared-demo-app",
+    "description": "A coherent contract-owned demo app that demonstrates the same UI in Svelte and GPUI without docs-shell noise.",
+    "requiredScreens": [
+      {
+        "id": "overview-shell",
+        "goal": "Establish shell hierarchy, global controls, and identity without mixing docs navigation and token-inspector utilities."
+      },
+      {
+        "id": "form-and-validation",
+        "goal": "Demonstrate fields, actions, validation, banners, and status posture through one realistic screen."
+      },
+      {
+        "id": "browse-and-table",
+        "goal": "Demonstrate list, grid, table, filtering, bulk action, and empty-state posture through one coherent browse surface."
+      },
+      {
+        "id": "detail-and-related-data",
+        "goal": "Demonstrate headers, metadata rows, cards, breadcrumbs, and related companion content as one detail workflow."
+      },
+      {
+        "id": "picker-and-media",
+        "goal": "Demonstrate selection flows, media thumbnails, preview fallback, and embed posture through one media-adjacent workflow."
+      },
+      {
+        "id": "command-and-workspace",
+        "goal": "Demonstrate command discovery, dock or split hierarchy, panel surfaces, tabs, and shell status in one workstation screen."
+      }
+    ],
+    "requiredRules": [
+      "The shared demo app must be separable from docs-shell and token-inspector utilities.",
+      "The demo must prefer real public primitives, composites, and workstation components over ad-hoc HTML or preview-specific shells.",
+      "The rebuilt Svelte demo must directly preview every public primitive export somewhere inside the shared demo shell.",
+      "Each screen must have an explicit state matrix and parity checklist instead of section-local demo glue alone.",
+      "The Svelte demo must become the clean parity target before GPUI demo implementation begins."
+    ],
+    "nonGoals": [
+      "Do not turn the shared demo app into a full published docs site.",
+      "Do not treat docs-shell utilities as required demo parity targets.",
+      "Do not force every export into its own detached screen if that hurts coherence."
+    ]
+  }
+}

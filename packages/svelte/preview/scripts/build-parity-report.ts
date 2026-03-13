@@ -15,6 +15,8 @@ type HarnessCoverage = (typeof parityTargets)[number]["harnessCoverage"];
 const scriptDir = path.dirname(fileURLToPath(import.meta.url));
 const previewDir = path.resolve(scriptDir, "..");
 const artifactPath = path.join(previewDir, "artifacts", "parity-report.json");
+const repoRoot = path.resolve(previewDir, "../../..");
+const gpuiCrossRuntimeParityPath = path.join(repoRoot, "packages", "gpui", "cross-runtime-parity-report.json");
 
 function countCoverageKind(
   harnessName: keyof HarnessCoverage,
@@ -122,6 +124,36 @@ function validateParityState(): void {
 
 validateParityState();
 
+const gpuiCrossRuntimeParity = JSON.parse(fs.readFileSync(gpuiCrossRuntimeParityPath, "utf8")) as {
+  generation: string;
+  summary: {
+    sectionCount: number;
+    directParityCount: number;
+    nativeAdaptationCount: number;
+    deferredCount: number;
+    sideBySideSectionCount: number;
+    manualGpuiProofCount: number;
+    blockedGpuiProofCount: number;
+  };
+  sectionReports: Array<{
+    sectionId: string;
+    sideBySideReview: boolean;
+    parityMode: string;
+    intentionalDeltaIds: string[];
+  }>;
+  deltaRegister: Array<{
+    id: string;
+    status: string;
+    sectionIds: string[];
+  }>;
+  acceptanceHarness: {
+    suiteId: string;
+    status: string;
+    coveredPackages: string[];
+    evidenceArtifacts: string[];
+  };
+};
+
 const report = {
   generatedAt: new Date().toISOString(),
   artifact: "packages/svelte/preview/artifacts/parity-report.json",
@@ -134,6 +166,23 @@ const report = {
     contractCoverage: countCoverageKind("contract"),
     visualCoverage: countCoverageKind("visual"),
     interactionCoverage: countCoverageKind("interaction"),
+  },
+  crossRuntime: {
+    generation: gpuiCrossRuntimeParity.generation,
+    summary: gpuiCrossRuntimeParity.summary,
+    sideBySideSections: gpuiCrossRuntimeParity.sectionReports
+      .filter((entry) => entry.sideBySideReview)
+      .map((entry) => ({
+        sectionId: entry.sectionId,
+        parityMode: entry.parityMode,
+        deltaIds: entry.intentionalDeltaIds,
+      })),
+    deltaRegister: gpuiCrossRuntimeParity.deltaRegister.map((entry) => ({
+      id: entry.id,
+      status: entry.status,
+      sectionIds: entry.sectionIds,
+    })),
+    acceptanceHarness: gpuiCrossRuntimeParity.acceptanceHarness,
   },
   packageSurfaceCoverage: {
     summary: ["@pug/svelte-primitives", "@pug/svelte-composites", "@pug/svelte-workstation"].map((packageName) => {

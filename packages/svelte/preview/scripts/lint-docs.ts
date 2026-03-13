@@ -19,6 +19,44 @@ const releaseOperationsPath = path.join(repoRoot, "packages", "release-operation
 const ecosystemAcceptancePath = path.join(repoRoot, "packages", "ecosystem-acceptance.json");
 const referenceAppsPath = path.join(repoRoot, "packages", "reference-apps.json");
 const g03CloseoutPath = path.join(repoRoot, "packages", "g03-closeout.json");
+const gpuiParityPriorityPath = path.join(repoRoot, "packages", "gpui", "parity-priority-matrix.json");
+const gpuiPreviewBaselinePath = path.join(repoRoot, "packages", "gpui", "preview-app-baseline.json");
+const gpuiStructuralBaselinePath = path.join(repoRoot, "packages", "gpui", "structural-primitives-baseline.json");
+const gpuiActionFieldBaselinePath = path.join(repoRoot, "packages", "gpui", "action-field-primitives-baseline.json");
+const gpuiSelectionFeedbackDateBaselinePath = path.join(repoRoot, "packages", "gpui", "selection-feedback-date-baseline.json");
+const gpuiOverlayNavigationMenuBaselinePath = path.join(repoRoot, "packages", "gpui", "overlay-navigation-menu-baseline.json");
+const gpuiFormValidationRemediationBaselinePath = path.join(
+  repoRoot,
+  "packages",
+  "gpui",
+  "form-validation-remediation-composites-baseline.json",
+);
+const gpuiDataBrowseDetailPickerMediaBaselinePath = path.join(
+  repoRoot,
+  "packages",
+  "gpui",
+  "data-browse-detail-picker-media-baseline.json",
+);
+const gpuiWorkstationBaselinePath = path.join(
+  repoRoot,
+  "packages",
+  "gpui",
+  "workstation-shell-command-layout-baseline.json",
+);
+const gpuiNativeAccessibilityProofPath = path.join(
+  repoRoot,
+  "packages",
+  "gpui",
+  "native-accessibility-proof.json",
+);
+const gpuiCrossRuntimeParityReportPath = path.join(
+  repoRoot,
+  "packages",
+  "gpui",
+  "cross-runtime-parity-report.json",
+);
+const sharedDemoAppAuditPath = path.join(repoRoot, "packages", "shared-demo-app-audit.json");
+const sharedDemoAppContractPath = path.join(repoRoot, "packages", "shared-demo-app-contract.json");
 
 function collectMarkdownFiles(directory: string): string[] {
   return fs
@@ -526,6 +564,19 @@ function validateAccessibilityAudit(errors: string[]): void {
       expect(
         target.blockerNotes.length > 0,
         `Accessibility audit target "${target.sectionId}" blocks GPUI without naming blockers.`,
+        errors,
+      );
+    }
+
+    if (target.auditAreas.gpui === "manual" || target.auditAreas.gpui === "hybrid") {
+      expect(
+        target.gpuiDeltaNotes.length > 0,
+        `Accessibility audit target "${target.sectionId}" marks GPUI as ${target.auditAreas.gpui} without naming GPUI deltas.`,
+        errors,
+      );
+      expect(
+        target.blockerNotes.length > 0,
+        `Accessibility audit target "${target.sectionId}" marks GPUI as ${target.auditAreas.gpui} without naming remaining blockers.`,
         errors,
       );
     }
@@ -1177,6 +1228,1928 @@ function validateG03Closeout(errors: string[]): { stableSurfaceCount: number; ca
   };
 }
 
+function validateGpuiPriorityMatrix(errors: string[]): { waveCount: number; targetCount: number } {
+  const matrix = JSON.parse(fs.readFileSync(gpuiParityPriorityPath, "utf8")) as {
+    generation: string;
+    implementationWaves: Array<{
+      id: string;
+      label: string;
+      goal: string;
+      sectionIds: string[];
+      packageFocus: string[];
+    }>;
+    sectionTargets: Array<{
+      sectionId: string;
+      priority: string;
+      parityMode: string;
+      gpuiLayer: string;
+      sideBySideReview: boolean;
+      reasons: string[];
+    }>;
+    nonGoals: string[];
+  };
+  const expectedWaveIds = [
+    "wave-0-theme-and-preview",
+    "wave-1-foundation-primitives",
+    "wave-2-product-composites",
+    "wave-3-workstation-shell",
+  ];
+  const expectedSectionIds = ["catalog-hub", ...docsSections.map((entry) => entry.id)];
+  const docsSectionIds = new Set(expectedSectionIds);
+  const waveIds = matrix.implementationWaves.map((entry) => entry.id);
+  const targetSectionIds = matrix.sectionTargets.map((entry) => entry.sectionId);
+  const waveIdSet = new Set<string>();
+  const targetIdSet = new Set<string>();
+
+  expect(matrix.generation === "g04.001", "packages/gpui/parity-priority-matrix.json must target g04.001.", errors);
+  compareLists(
+    "packages/gpui/parity-priority-matrix.json waves",
+    [...waveIds].sort(),
+    [...expectedWaveIds].sort(),
+    errors,
+  );
+  compareLists(
+    "packages/gpui/parity-priority-matrix.json section targets",
+    [...targetSectionIds].sort(),
+    [...expectedSectionIds].sort(),
+    errors,
+  );
+
+  for (const wave of matrix.implementationWaves) {
+    expect(!waveIdSet.has(wave.id), `GPUI priority matrix duplicates wave "${wave.id}".`, errors);
+    waveIdSet.add(wave.id);
+    expect(wave.label.trim().length > 0, `GPUI priority wave "${wave.id}" is missing a label.`, errors);
+    expect(wave.goal.trim().length > 0, `GPUI priority wave "${wave.id}" is missing goal text.`, errors);
+    expect(wave.sectionIds.length > 0, `GPUI priority wave "${wave.id}" is missing section coverage.`, errors);
+    expect(wave.packageFocus.length > 0, `GPUI priority wave "${wave.id}" is missing package focus.`, errors);
+
+    for (const sectionId of wave.sectionIds) {
+      expect(
+        docsSectionIds.has(sectionId),
+        `GPUI priority wave "${wave.id}" references unknown section "${sectionId}".`,
+        errors,
+      );
+    }
+  }
+
+  for (const target of matrix.sectionTargets) {
+    expect(!targetIdSet.has(target.sectionId), `GPUI priority matrix duplicates target "${target.sectionId}".`, errors);
+    targetIdSet.add(target.sectionId);
+    expect(
+      docsSectionIds.has(target.sectionId),
+      `GPUI priority matrix references unknown section "${target.sectionId}".`,
+      errors,
+    );
+    expect(
+      ["highest", "high", "medium", "low"].includes(target.priority),
+      `GPUI priority target "${target.sectionId}" has unsupported priority "${target.priority}".`,
+      errors,
+    );
+    expect(
+      ["direct-parity", "native-adaptation", "deferred"].includes(target.parityMode),
+      `GPUI priority target "${target.sectionId}" has unsupported parity mode "${target.parityMode}".`,
+      errors,
+    );
+    expect(
+      target.gpuiLayer.trim().length > 0,
+      `GPUI priority target "${target.sectionId}" is missing a GPUI layer.`,
+      errors,
+    );
+    expect(
+      target.reasons.length > 0,
+      `GPUI priority target "${target.sectionId}" is missing rationale.`,
+      errors,
+    );
+  }
+
+  expect(matrix.nonGoals.length >= 3, "GPUI priority matrix must record explicit non-goals.", errors);
+
+  return {
+    waveCount: matrix.implementationWaves.length,
+    targetCount: matrix.sectionTargets.length,
+  };
+}
+
+function validateGpuiPreviewBaseline(errors: string[]): { previewSectionCount: number } {
+  const matrix = JSON.parse(fs.readFileSync(gpuiParityPriorityPath, "utf8")) as {
+    implementationWaves: Array<{ id: string; sectionIds: string[] }>;
+  };
+  const previewBaseline = JSON.parse(fs.readFileSync(gpuiPreviewBaselinePath, "utf8")) as {
+    generation: string;
+    themeRuntime: {
+      tokenSource: string;
+      themeIds: string[];
+      densityModes: string[];
+      controlSizes: string[];
+      applicationRules: string[];
+    };
+    previewApp: {
+      sectionIds: string[];
+      requiredControls: string[];
+      shellAreas: string[];
+      comparisonSource: string;
+      evidenceCapture: string[];
+      sideBySideExpectations: string[];
+    };
+    nonGoals: string[];
+  };
+  const wave0SectionIds =
+    matrix.implementationWaves.find((entry) => entry.id === "wave-0-theme-and-preview")?.sectionIds ?? [];
+
+  expect(previewBaseline.generation === "g04.002", "packages/gpui/preview-app-baseline.json must target g04.002.", errors);
+  expect(
+    previewBaseline.themeRuntime.tokenSource === "pug-gpui-tokens",
+    "packages/gpui/preview-app-baseline.json must use pug-gpui-tokens as token source.",
+    errors,
+  );
+  compareLists(
+    "packages/gpui/preview-app-baseline.json theme ids",
+    [...previewBaseline.themeRuntime.themeIds].sort(),
+    ["dark", "light", "loophole-studio"],
+    errors,
+  );
+  compareLists(
+    "packages/gpui/preview-app-baseline.json density modes",
+    [...previewBaseline.themeRuntime.densityModes].sort(),
+    ["comfortable", "compact"],
+    errors,
+  );
+  compareLists(
+    "packages/gpui/preview-app-baseline.json control sizes",
+    [...previewBaseline.themeRuntime.controlSizes].sort(),
+    ["lg", "md", "sm"],
+    errors,
+  );
+  compareLists(
+    "packages/gpui/preview-app-baseline.json preview sections",
+    [...previewBaseline.previewApp.sectionIds].sort(),
+    [...wave0SectionIds].sort(),
+    errors,
+  );
+  compareLists(
+    "packages/gpui/preview-app-baseline.json required controls",
+    [...previewBaseline.previewApp.requiredControls].sort(),
+    ["controlSize", "density", "section", "theme"],
+    errors,
+  );
+
+  expect(
+    fs.existsSync(path.join(repoRoot, previewBaseline.previewApp.comparisonSource)),
+    `packages/gpui/preview-app-baseline.json references missing comparison source "${previewBaseline.previewApp.comparisonSource}".`,
+    errors,
+  );
+  expect(
+    previewBaseline.themeRuntime.applicationRules.length > 0,
+    "packages/gpui/preview-app-baseline.json must record theme application rules.",
+    errors,
+  );
+  expect(
+    previewBaseline.previewApp.shellAreas.length >= 3,
+    "packages/gpui/preview-app-baseline.json must record shell areas.",
+    errors,
+  );
+  expect(
+    previewBaseline.previewApp.evidenceCapture.length > 0,
+    "packages/gpui/preview-app-baseline.json must record evidence capture expectations.",
+    errors,
+  );
+  expect(
+    previewBaseline.previewApp.sideBySideExpectations.length === previewBaseline.previewApp.sectionIds.length,
+    "packages/gpui/preview-app-baseline.json must record one side-by-side expectation per preview section.",
+    errors,
+  );
+  expect(
+    previewBaseline.nonGoals.length >= 3,
+    "packages/gpui/preview-app-baseline.json must record explicit non-goals.",
+    errors,
+  );
+
+  return {
+    previewSectionCount: previewBaseline.previewApp.sectionIds.length,
+  };
+}
+
+function validateGpuiStructuralBaseline(errors: string[]): { structuralExportCount: number } {
+  const structuralBaseline = JSON.parse(fs.readFileSync(gpuiStructuralBaselinePath, "utf8")) as {
+    generation: string;
+    crateName: string;
+    cratePath: string;
+    tokenSource: string;
+    contractIds: string[];
+    exportNames: string[];
+    knownDeltas: string[];
+    nonGoals: string[];
+  };
+  const expectedContractIds = ["box", "grid", "scroll-shell", "separator", "stack", "surface"];
+  const expectedExportNames = [
+    "BoxSpec",
+    "GridSpec",
+    "ScrollShellSpec",
+    "SeparatorSpec",
+    "StackSpec",
+    "SurfaceSpec",
+  ];
+  const crateRoot = path.join(repoRoot, structuralBaseline.cratePath);
+
+  expect(
+    structuralBaseline.generation === "g04.003",
+    "packages/gpui/structural-primitives-baseline.json must target g04.003.",
+    errors,
+  );
+  expect(
+    structuralBaseline.crateName === "pug-gpui-primitives",
+    "packages/gpui/structural-primitives-baseline.json must target the pug-gpui-primitives crate.",
+    errors,
+  );
+  expect(
+    structuralBaseline.tokenSource === "pug-gpui-tokens",
+    "packages/gpui/structural-primitives-baseline.json must use pug-gpui-tokens as token source.",
+    errors,
+  );
+  compareLists(
+    "packages/gpui/structural-primitives-baseline.json contract coverage",
+    [...structuralBaseline.contractIds].sort(),
+    [...expectedContractIds].sort(),
+    errors,
+  );
+  compareLists(
+    "packages/gpui/structural-primitives-baseline.json export names",
+    [...structuralBaseline.exportNames].sort(),
+    [...expectedExportNames].sort(),
+    errors,
+  );
+  expect(
+    fs.existsSync(path.join(crateRoot, "Cargo.toml")),
+    `packages/gpui/structural-primitives-baseline.json references missing crate manifest "${structuralBaseline.cratePath}/Cargo.toml".`,
+    errors,
+  );
+  expect(
+    fs.existsSync(path.join(crateRoot, "README.md")),
+    `packages/gpui/structural-primitives-baseline.json references missing crate README "${structuralBaseline.cratePath}/README.md".`,
+    errors,
+  );
+  expect(
+    fs.existsSync(path.join(crateRoot, "src", "lib.rs")),
+    `packages/gpui/structural-primitives-baseline.json references missing crate source "${structuralBaseline.cratePath}/src/lib.rs".`,
+    errors,
+  );
+  expect(
+    structuralBaseline.knownDeltas.length >= 2,
+    "packages/gpui/structural-primitives-baseline.json must record explicit known deltas.",
+    errors,
+  );
+  expect(
+    structuralBaseline.nonGoals.length >= 3,
+    "packages/gpui/structural-primitives-baseline.json must record explicit non-goals.",
+    errors,
+  );
+
+  return {
+    structuralExportCount: structuralBaseline.exportNames.length,
+  };
+}
+
+function validateGpuiActionFieldBaseline(errors: string[]): { actionFieldExportCount: number } {
+  const actionFieldBaseline = JSON.parse(fs.readFileSync(gpuiActionFieldBaselinePath, "utf8")) as {
+    generation: string;
+    crateName: string;
+    cratePath: string;
+    tokenSource: string;
+    contractIds: string[];
+    exportNames: string[];
+    knownDeltas: string[];
+    nonGoals: string[];
+  };
+  const expectedContractIds = [
+    "button",
+    "field",
+    "form-actions",
+    "icon-button",
+    "search-field",
+    "text-area",
+    "text-input",
+  ];
+  const expectedExportNames = [
+    "ButtonSpec",
+    "FieldRelationships",
+    "FieldSpec",
+    "FormActionsSpec",
+    "IconButtonSpec",
+    "SearchFieldSpec",
+    "TextAreaSpec",
+    "TextInputSpec",
+  ];
+  const crateRoot = path.join(repoRoot, actionFieldBaseline.cratePath);
+  const libSource = fs.readFileSync(path.join(crateRoot, "src", "lib.rs"), "utf8");
+
+  expect(
+    actionFieldBaseline.generation === "g04.004",
+    "packages/gpui/action-field-primitives-baseline.json must target g04.004.",
+    errors,
+  );
+  expect(
+    actionFieldBaseline.crateName === "pug-gpui-primitives",
+    "packages/gpui/action-field-primitives-baseline.json must target the pug-gpui-primitives crate.",
+    errors,
+  );
+  expect(
+    actionFieldBaseline.tokenSource === "pug-gpui-tokens",
+    "packages/gpui/action-field-primitives-baseline.json must use pug-gpui-tokens as token source.",
+    errors,
+  );
+  compareLists(
+    "packages/gpui/action-field-primitives-baseline.json contract coverage",
+    [...actionFieldBaseline.contractIds].sort(),
+    [...expectedContractIds].sort(),
+    errors,
+  );
+  compareLists(
+    "packages/gpui/action-field-primitives-baseline.json export names",
+    [...actionFieldBaseline.exportNames].sort(),
+    [...expectedExportNames].sort(),
+    errors,
+  );
+  expect(
+    fs.existsSync(path.join(crateRoot, "README.md")),
+    `packages/gpui/action-field-primitives-baseline.json references missing crate README "${actionFieldBaseline.cratePath}/README.md".`,
+    errors,
+  );
+  expect(
+    actionFieldBaseline.knownDeltas.length >= 2,
+    "packages/gpui/action-field-primitives-baseline.json must record explicit known deltas.",
+    errors,
+  );
+  expect(
+    actionFieldBaseline.nonGoals.length >= 3,
+    "packages/gpui/action-field-primitives-baseline.json must record explicit non-goals.",
+    errors,
+  );
+
+  for (const exportName of actionFieldBaseline.exportNames) {
+    expect(
+      libSource.includes(exportName),
+      `packages/gpui/primitives/src/lib.rs must expose GPUI action/field export "${exportName}".`,
+      errors,
+    );
+  }
+
+  return {
+    actionFieldExportCount: actionFieldBaseline.exportNames.length,
+  };
+}
+
+function validateGpuiSelectionFeedbackDateBaseline(errors: string[]): { selectionFeedbackDateExportCount: number } {
+  const baseline = JSON.parse(fs.readFileSync(gpuiSelectionFeedbackDateBaselinePath, "utf8")) as {
+    generation: string;
+    crateName: string;
+    cratePath: string;
+    tokenSource: string;
+    contractIds: string[];
+    exportNames: string[];
+    knownDeltas: string[];
+    nonGoals: string[];
+  };
+  const expectedContractIds = [
+    "badge",
+    "calendar",
+    "checkbox",
+    "date-picker",
+    "date-range-picker",
+    "date-time-picker",
+    "date-time-range-picker",
+    "progress",
+    "radio-group",
+    "range-calendar",
+    "segmented-control",
+    "select",
+    "slider",
+    "status-indicator",
+    "switch",
+    "time-field",
+  ];
+  const expectedExportNames = [
+    "BadgeSpec",
+    "CalendarSpec",
+    "CheckboxSpec",
+    "DatePickerSpec",
+    "DateRangePickerSpec",
+    "DateTimePickerSpec",
+    "DateTimeRangePickerSpec",
+    "ProgressSpec",
+    "RadioGroupSpec",
+    "RangeCalendarSpec",
+    "SegmentedControlSpec",
+    "SelectSpec",
+    "SliderSpec",
+    "StatusIndicatorSpec",
+    "SwitchSpec",
+    "TimeFieldSpec",
+  ];
+  const crateRoot = path.join(repoRoot, baseline.cratePath);
+  const libSource = fs.readFileSync(path.join(crateRoot, "src", "lib.rs"), "utf8");
+
+  expect(
+    baseline.generation === "g04.005",
+    "packages/gpui/selection-feedback-date-baseline.json must target g04.005.",
+    errors,
+  );
+  expect(
+    baseline.crateName === "pug-gpui-primitives",
+    "packages/gpui/selection-feedback-date-baseline.json must target the pug-gpui-primitives crate.",
+    errors,
+  );
+  expect(
+    baseline.tokenSource === "pug-gpui-tokens",
+    "packages/gpui/selection-feedback-date-baseline.json must use pug-gpui-tokens as token source.",
+    errors,
+  );
+  compareLists(
+    "packages/gpui/selection-feedback-date-baseline.json contract coverage",
+    [...baseline.contractIds].sort(),
+    [...expectedContractIds].sort(),
+    errors,
+  );
+  compareLists(
+    "packages/gpui/selection-feedback-date-baseline.json export names",
+    [...baseline.exportNames].sort(),
+    [...expectedExportNames].sort(),
+    errors,
+  );
+  expect(
+    baseline.knownDeltas.length >= 2,
+    "packages/gpui/selection-feedback-date-baseline.json must record explicit known deltas.",
+    errors,
+  );
+  expect(
+    baseline.nonGoals.length >= 3,
+    "packages/gpui/selection-feedback-date-baseline.json must record explicit non-goals.",
+    errors,
+  );
+
+  for (const exportName of baseline.exportNames) {
+    expect(
+      libSource.includes(exportName),
+      `packages/gpui/primitives/src/lib.rs must expose GPUI selection/feedback/date export "${exportName}".`,
+      errors,
+    );
+  }
+
+  return {
+    selectionFeedbackDateExportCount: baseline.exportNames.length,
+  };
+}
+
+function validateGpuiOverlayNavigationMenuBaseline(errors: string[]): { overlayNavigationMenuExportCount: number } {
+  const baseline = JSON.parse(fs.readFileSync(gpuiOverlayNavigationMenuBaselinePath, "utf8")) as {
+    generation: string;
+    crateName: string;
+    cratePath: string;
+    tokenSource: string;
+    contractIds: string[];
+    exportNames: string[];
+    knownDeltas: string[];
+    nonGoals: string[];
+  };
+  const expectedContractIds = [
+    "accordion",
+    "collapsible",
+    "context-menu",
+    "dialog",
+    "drawer",
+    "menu",
+    "menubar",
+    "navigation-menu",
+    "popover",
+    "tab-strip",
+    "tabs",
+    "tooltip",
+  ];
+  const expectedExportNames = [
+    "AccordionSpec",
+    "CollapsibleSpec",
+    "ContextMenuSpec",
+    "DialogSpec",
+    "DrawerSpec",
+    "MenuSpec",
+    "MenubarSpec",
+    "NavigationMenuSpec",
+    "PopoverSpec",
+    "TabStripSpec",
+    "TabsSpec",
+    "TooltipSpec",
+  ];
+  const crateRoot = path.join(repoRoot, baseline.cratePath);
+  const libSource = fs.readFileSync(path.join(crateRoot, "src", "lib.rs"), "utf8");
+
+  expect(
+    baseline.generation === "g04.006",
+    "packages/gpui/overlay-navigation-menu-baseline.json must target g04.006.",
+    errors,
+  );
+  expect(
+    baseline.crateName === "pug-gpui-primitives",
+    "packages/gpui/overlay-navigation-menu-baseline.json must target the pug-gpui-primitives crate.",
+    errors,
+  );
+  expect(
+    baseline.tokenSource === "pug-gpui-tokens",
+    "packages/gpui/overlay-navigation-menu-baseline.json must use pug-gpui-tokens as token source.",
+    errors,
+  );
+  compareLists(
+    "packages/gpui/overlay-navigation-menu-baseline.json contract coverage",
+    [...baseline.contractIds].sort(),
+    [...expectedContractIds].sort(),
+    errors,
+  );
+  compareLists(
+    "packages/gpui/overlay-navigation-menu-baseline.json export names",
+    [...baseline.exportNames].sort(),
+    [...expectedExportNames].sort(),
+    errors,
+  );
+  expect(
+    baseline.knownDeltas.length >= 2,
+    "packages/gpui/overlay-navigation-menu-baseline.json must record explicit known deltas.",
+    errors,
+  );
+  expect(
+    baseline.nonGoals.length >= 3,
+    "packages/gpui/overlay-navigation-menu-baseline.json must record explicit non-goals.",
+    errors,
+  );
+
+  for (const exportName of baseline.exportNames) {
+    expect(
+      libSource.includes(exportName),
+      `packages/gpui/primitives/src/lib.rs must expose GPUI overlay/navigation export "${exportName}".`,
+      errors,
+    );
+  }
+
+  return {
+    overlayNavigationMenuExportCount: baseline.exportNames.length,
+  };
+}
+
+function validateGpuiFormValidationRemediationBaseline(errors: string[]): { gpuiCompositeExportCount: number } {
+  const baseline = JSON.parse(fs.readFileSync(gpuiFormValidationRemediationBaselinePath, "utf8")) as {
+    generation: string;
+    crateName: string;
+    cratePath: string;
+    tokenSource: string;
+    contractIds: string[];
+    exportNames: string[];
+    knownDeltas: string[];
+    nonGoals: string[];
+  };
+  const expectedContractIds = ["banner", "callout", "field", "form-actions"];
+  const expectedExportNames = [
+    "FormShellSpec",
+    "InlineRemediationSpec",
+    "RemediationBannerSpec",
+    "ValidationSummarySpec",
+  ];
+  const crateRoot = path.join(repoRoot, baseline.cratePath);
+  const libSource = fs.readFileSync(path.join(crateRoot, "src", "lib.rs"), "utf8");
+
+  expect(
+    baseline.generation === "g04.007",
+    "packages/gpui/form-validation-remediation-composites-baseline.json must target g04.007.",
+    errors,
+  );
+  expect(
+    baseline.crateName === "pug-gpui-composites",
+    "packages/gpui/form-validation-remediation-composites-baseline.json must target the pug-gpui-composites crate.",
+    errors,
+  );
+  expect(
+    baseline.tokenSource === "pug-gpui-tokens",
+    "packages/gpui/form-validation-remediation-composites-baseline.json must use pug-gpui-tokens as token source.",
+    errors,
+  );
+  compareLists(
+    "packages/gpui/form-validation-remediation-composites-baseline.json contract coverage",
+    [...baseline.contractIds].sort(),
+    [...expectedContractIds].sort(),
+    errors,
+  );
+  compareLists(
+    "packages/gpui/form-validation-remediation-composites-baseline.json export names",
+    [...baseline.exportNames].sort(),
+    [...expectedExportNames].sort(),
+    errors,
+  );
+  expect(
+    fs.existsSync(path.join(crateRoot, "README.md")),
+    `packages/gpui/form-validation-remediation-composites-baseline.json references missing crate README "${baseline.cratePath}/README.md".`,
+    errors,
+  );
+  expect(
+    baseline.knownDeltas.length >= 2,
+    "packages/gpui/form-validation-remediation-composites-baseline.json must record explicit known deltas.",
+    errors,
+  );
+  expect(
+    baseline.nonGoals.length >= 3,
+    "packages/gpui/form-validation-remediation-composites-baseline.json must record explicit non-goals.",
+    errors,
+  );
+
+  for (const exportName of baseline.exportNames) {
+    expect(
+      libSource.includes(exportName),
+      `packages/gpui/composites/src/lib.rs must expose GPUI composite export "${exportName}".`,
+      errors,
+    );
+  }
+
+  return {
+    gpuiCompositeExportCount: baseline.exportNames.length,
+  };
+}
+
+function validateGpuiDataBrowseDetailPickerMediaBaseline(errors: string[]): { gpuiDataCompositeExportCount: number } {
+  const baseline = JSON.parse(fs.readFileSync(gpuiDataBrowseDetailPickerMediaBaselinePath, "utf8")) as {
+    generation: string;
+    crateName: string;
+    cratePath: string;
+    tokenSource: string;
+    contractIds: string[];
+    exportNames: string[];
+    knownDeltas: string[];
+    nonGoals: string[];
+  };
+  const expectedContractIds = [
+    "data-table",
+    "detail-shell",
+    "empty-state",
+    "filter-toolbar",
+    "grid-shell",
+    "list-shell",
+    "media-preview",
+    "media-thumbnail",
+    "pagination-summary",
+    "picker-shell",
+    "relation-picker",
+    "selection-summary",
+  ];
+  const expectedExportNames = [
+    "DataTableSpec",
+    "DetailShellSpec",
+    "EmptyStateSpec",
+    "FilterToolbarSpec",
+    "GridShellSpec",
+    "ListShellSpec",
+    "MediaPreviewSpec",
+    "MediaThumbnailSpec",
+    "PaginationSummarySpec",
+    "PickerShellSpec",
+    "RelationPickerSpec",
+    "SelectionSummarySpec",
+  ];
+  const crateRoot = path.join(repoRoot, baseline.cratePath);
+  const libSource = fs.readFileSync(path.join(crateRoot, "src", "lib.rs"), "utf8");
+
+  expect(
+    baseline.generation === "g04.008",
+    "packages/gpui/data-browse-detail-picker-media-baseline.json must target g04.008.",
+    errors,
+  );
+  expect(
+    baseline.crateName === "pug-gpui-composites",
+    "packages/gpui/data-browse-detail-picker-media-baseline.json must target the pug-gpui-composites crate.",
+    errors,
+  );
+  expect(
+    baseline.tokenSource === "pug-gpui-tokens",
+    "packages/gpui/data-browse-detail-picker-media-baseline.json must use pug-gpui-tokens as token source.",
+    errors,
+  );
+  compareLists(
+    "packages/gpui/data-browse-detail-picker-media-baseline.json contract coverage",
+    [...baseline.contractIds].sort(),
+    [...expectedContractIds].sort(),
+    errors,
+  );
+  compareLists(
+    "packages/gpui/data-browse-detail-picker-media-baseline.json export names",
+    [...baseline.exportNames].sort(),
+    [...expectedExportNames].sort(),
+    errors,
+  );
+  expect(
+    fs.existsSync(path.join(crateRoot, "README.md")),
+    `packages/gpui/data-browse-detail-picker-media-baseline.json references missing crate README "${baseline.cratePath}/README.md".`,
+    errors,
+  );
+  expect(
+    baseline.knownDeltas.length >= 2,
+    "packages/gpui/data-browse-detail-picker-media-baseline.json must record explicit known deltas.",
+    errors,
+  );
+  expect(
+    baseline.nonGoals.length >= 3,
+    "packages/gpui/data-browse-detail-picker-media-baseline.json must record explicit non-goals.",
+    errors,
+  );
+
+  for (const exportName of baseline.exportNames) {
+    expect(
+      libSource.includes(exportName),
+      `packages/gpui/composites/src/lib.rs must expose GPUI data/browse composite export "${exportName}".`,
+      errors,
+    );
+  }
+
+  return {
+    gpuiDataCompositeExportCount: baseline.exportNames.length,
+  };
+}
+
+function validateGpuiWorkstationBaseline(errors: string[]): { gpuiWorkstationExportCount: number } {
+  const baseline = JSON.parse(fs.readFileSync(gpuiWorkstationBaselinePath, "utf8")) as {
+    generation: string;
+    crateName: string;
+    cratePath: string;
+    tokenSource: string;
+    contractIds: string[];
+    exportNames: string[];
+    knownDeltas: string[];
+    nonGoals: string[];
+  };
+  const expectedContractIds = [
+    "action-discovery-panel",
+    "app-header",
+    "command-palette",
+    "command-palette-shell",
+    "dock-region",
+    "panel-header",
+    "panel-surface",
+    "panel-tabs",
+    "project-header",
+    "shell-status-bar",
+    "split-view",
+    "surface-tabs",
+    "workspace-shell",
+  ];
+  const expectedExportNames = [
+    "ActionDiscoveryPanelSpec",
+    "AppHeaderSpec",
+    "CommandPaletteShellSpec",
+    "CommandPaletteSpec",
+    "DockRegionSpec",
+    "PanelHeaderSpec",
+    "PanelSurfaceSpec",
+    "PanelTabsSpec",
+    "ProjectHeaderSpec",
+    "ShellStatusBarSpec",
+    "SplitViewSpec",
+    "SurfaceTabsSpec",
+    "WorkspaceShellSpec",
+  ];
+  const crateRoot = path.join(repoRoot, baseline.cratePath);
+  const libSource = fs.readFileSync(path.join(crateRoot, "src", "lib.rs"), "utf8");
+
+  expect(
+    baseline.generation === "g04.009",
+    "packages/gpui/workstation-shell-command-layout-baseline.json must target g04.009.",
+    errors,
+  );
+  expect(
+    baseline.crateName === "pug-gpui-workstation",
+    "packages/gpui/workstation-shell-command-layout-baseline.json must target the pug-gpui-workstation crate.",
+    errors,
+  );
+  expect(
+    baseline.tokenSource === "pug-gpui-tokens",
+    "packages/gpui/workstation-shell-command-layout-baseline.json must use pug-gpui-tokens as token source.",
+    errors,
+  );
+  compareLists(
+    "packages/gpui/workstation-shell-command-layout-baseline.json contract coverage",
+    [...baseline.contractIds].sort(),
+    [...expectedContractIds].sort(),
+    errors,
+  );
+  compareLists(
+    "packages/gpui/workstation-shell-command-layout-baseline.json export names",
+    [...baseline.exportNames].sort(),
+    [...expectedExportNames].sort(),
+    errors,
+  );
+  expect(
+    fs.existsSync(path.join(crateRoot, "README.md")),
+    `packages/gpui/workstation-shell-command-layout-baseline.json references missing crate README "${baseline.cratePath}/README.md".`,
+    errors,
+  );
+  expect(
+    baseline.knownDeltas.length >= 2,
+    "packages/gpui/workstation-shell-command-layout-baseline.json must record explicit known deltas.",
+    errors,
+  );
+  expect(
+    baseline.nonGoals.length >= 3,
+    "packages/gpui/workstation-shell-command-layout-baseline.json must record explicit non-goals.",
+    errors,
+  );
+
+  for (const exportName of baseline.exportNames) {
+    expect(
+      libSource.includes(exportName),
+      `packages/gpui/workstation/src/lib.rs must expose GPUI workstation export "${exportName}".`,
+      errors,
+    );
+  }
+
+  return {
+    gpuiWorkstationExportCount: baseline.exportNames.length,
+  };
+}
+
+function validateGpuiNativeAccessibilityProof(errors: string[]): {
+  gpuiAccessibilityLayerCount: number;
+  gpuiAccessibilitySectionCount: number;
+} {
+  const proof = JSON.parse(fs.readFileSync(gpuiNativeAccessibilityProofPath, "utf8")) as {
+    generation: string;
+    comparisonSource: string;
+    sectionIds: string[];
+    layerProof: Array<{
+      id: string;
+      crateName: string;
+      cratePath: string;
+      contractIds: string[];
+      exportNames: string[];
+      focusEntryStatus: string;
+      focusRecoveryStatus: string;
+      keyboardTraversalStatus: string;
+      stateExposureStatus: string;
+      announcementsStatus: string;
+      assistiveTechnologyStatus: string;
+      evidence: string[];
+      remainingBlockers: string[];
+    }>;
+    sectionProof: Array<{
+      sectionId: string;
+      gpuiStatus: string;
+      focusStatus: string;
+      keyboardStatus: string;
+      announcementsStatus: string;
+      owningLayer: string;
+      sideBySideReview: boolean;
+      remainingBlockers: string[];
+    }>;
+    manualReviewExpectations: string[];
+    deltaRegister: string[];
+    nonGoals: string[];
+  };
+  const expectedSectionIds = [
+    "browse-suite",
+    "command-suite",
+    "detail-suite",
+    "form-suite",
+    "media-suite",
+    "notification-suite",
+    "picker-suite",
+    "table-suite",
+    "workspace-suite",
+  ];
+  const expectedLayerIds = ["composites", "primitives", "workstation"];
+  const allowedStatuses = new Set(["explicit", "hybrid", "manual"]);
+  const primitiveExportNames = [
+    ...JSON.parse(fs.readFileSync(gpuiStructuralBaselinePath, "utf8")).exportNames,
+    ...JSON.parse(fs.readFileSync(gpuiActionFieldBaselinePath, "utf8")).exportNames,
+    ...JSON.parse(fs.readFileSync(gpuiSelectionFeedbackDateBaselinePath, "utf8")).exportNames,
+    ...JSON.parse(fs.readFileSync(gpuiOverlayNavigationMenuBaselinePath, "utf8")).exportNames,
+  ].sort();
+  const primitiveContractIds = [
+    ...JSON.parse(fs.readFileSync(gpuiStructuralBaselinePath, "utf8")).contractIds,
+    ...JSON.parse(fs.readFileSync(gpuiActionFieldBaselinePath, "utf8")).contractIds,
+    ...JSON.parse(fs.readFileSync(gpuiSelectionFeedbackDateBaselinePath, "utf8")).contractIds,
+    ...JSON.parse(fs.readFileSync(gpuiOverlayNavigationMenuBaselinePath, "utf8")).contractIds,
+  ].sort();
+  const compositeExportNames = [
+    ...JSON.parse(fs.readFileSync(gpuiFormValidationRemediationBaselinePath, "utf8")).exportNames,
+    ...JSON.parse(fs.readFileSync(gpuiDataBrowseDetailPickerMediaBaselinePath, "utf8")).exportNames,
+  ].sort();
+  const compositeContractIds = [
+    ...JSON.parse(fs.readFileSync(gpuiFormValidationRemediationBaselinePath, "utf8")).contractIds,
+    ...JSON.parse(fs.readFileSync(gpuiDataBrowseDetailPickerMediaBaselinePath, "utf8")).contractIds,
+  ].sort();
+  const workstationBaseline = JSON.parse(fs.readFileSync(gpuiWorkstationBaselinePath, "utf8")) as {
+    exportNames: string[];
+    contractIds: string[];
+  };
+  const sectionTargets = new Map(
+    accessibilityAuditTargets
+      .filter((target) => target.auditAreas.gpui !== "not-applicable")
+      .map((target) => [target.sectionId, target]),
+  );
+  const gpuiPriorityMatrix = JSON.parse(fs.readFileSync(gpuiParityPriorityPath, "utf8")) as {
+    sectionTargets: Array<{
+      sectionId: string;
+      sideBySideReview: boolean;
+    }>;
+  };
+  const paritySections = new Map(
+    gpuiPriorityMatrix.sectionTargets
+      .filter((target) => expectedSectionIds.includes(target.sectionId))
+      .map((target) => [target.sectionId, target]),
+  );
+
+  expect(
+    proof.generation === "g04.010",
+    "packages/gpui/native-accessibility-proof.json must target g04.010.",
+    errors,
+  );
+  expect(
+    proof.comparisonSource === "packages/svelte/preview/src/accessibility.ts",
+    "packages/gpui/native-accessibility-proof.json must compare against packages/svelte/preview/src/accessibility.ts.",
+    errors,
+  );
+  compareLists(
+    "packages/gpui/native-accessibility-proof.json section ids",
+    [...proof.sectionIds].sort(),
+    [...expectedSectionIds].sort(),
+    errors,
+  );
+  compareLists(
+    "packages/gpui/native-accessibility-proof.json layer ids",
+    proof.layerProof.map((layer) => layer.id).sort(),
+    [...expectedLayerIds].sort(),
+    errors,
+  );
+  expect(
+    proof.manualReviewExpectations.length >= 2,
+    "packages/gpui/native-accessibility-proof.json must record manual review expectations.",
+    errors,
+  );
+  expect(
+    proof.deltaRegister.length >= 2,
+    "packages/gpui/native-accessibility-proof.json must record explicit accessibility deltas.",
+    errors,
+  );
+  expect(
+    proof.nonGoals.length >= 2,
+    "packages/gpui/native-accessibility-proof.json must record explicit non-goals.",
+    errors,
+  );
+
+  const expectedLayerData = new Map([
+    [
+      "primitives",
+      {
+        crateName: "pug-gpui-primitives",
+        cratePath: "packages/gpui/primitives",
+        exportNames: primitiveExportNames,
+        contractIds: primitiveContractIds,
+      },
+    ],
+    [
+      "composites",
+      {
+        crateName: "pug-gpui-composites",
+        cratePath: "packages/gpui/composites",
+        exportNames: compositeExportNames,
+        contractIds: compositeContractIds,
+      },
+    ],
+    [
+      "workstation",
+      {
+        crateName: "pug-gpui-workstation",
+        cratePath: "packages/gpui/workstation",
+        exportNames: [...workstationBaseline.exportNames].sort(),
+        contractIds: [...workstationBaseline.contractIds].sort(),
+      },
+    ],
+  ]);
+
+  for (const layer of proof.layerProof) {
+    const expected = expectedLayerData.get(layer.id);
+
+    expect(
+      Boolean(expected),
+      `packages/gpui/native-accessibility-proof.json includes unknown layer "${layer.id}".`,
+      errors,
+    );
+    if (!expected) {
+      continue;
+    }
+
+    expect(
+      layer.crateName === expected.crateName,
+      `packages/gpui/native-accessibility-proof.json layer "${layer.id}" must target ${expected.crateName}.`,
+      errors,
+    );
+    expect(
+      layer.cratePath === expected.cratePath,
+      `packages/gpui/native-accessibility-proof.json layer "${layer.id}" must target ${expected.cratePath}.`,
+      errors,
+    );
+    compareLists(
+      `packages/gpui/native-accessibility-proof.json ${layer.id} export names`,
+      [...layer.exportNames].sort(),
+      expected.exportNames,
+      errors,
+    );
+    compareLists(
+      `packages/gpui/native-accessibility-proof.json ${layer.id} contract ids`,
+      [...layer.contractIds].sort(),
+      expected.contractIds,
+      errors,
+    );
+
+    for (const status of [
+      layer.focusEntryStatus,
+      layer.focusRecoveryStatus,
+      layer.keyboardTraversalStatus,
+      layer.stateExposureStatus,
+      layer.announcementsStatus,
+      layer.assistiveTechnologyStatus,
+    ]) {
+      expect(
+        allowedStatuses.has(status),
+        `packages/gpui/native-accessibility-proof.json layer "${layer.id}" uses unsupported status "${status}".`,
+        errors,
+      );
+    }
+
+    expect(
+      layer.evidence.length > 0,
+      `packages/gpui/native-accessibility-proof.json layer "${layer.id}" must record evidence.`,
+      errors,
+    );
+    expect(
+      layer.remainingBlockers.length > 0,
+      `packages/gpui/native-accessibility-proof.json layer "${layer.id}" must record remaining blockers.`,
+      errors,
+    );
+    expect(
+      fs.existsSync(path.join(repoRoot, layer.cratePath, "README.md")),
+      `packages/gpui/native-accessibility-proof.json references missing crate README "${layer.cratePath}/README.md".`,
+      errors,
+    );
+  }
+
+  compareLists(
+    "packages/gpui/native-accessibility-proof.json section proof entries",
+    proof.sectionProof.map((entry) => entry.sectionId).sort(),
+    [...expectedSectionIds].sort(),
+    errors,
+  );
+
+  for (const section of proof.sectionProof) {
+    const accessibilityTarget = sectionTargets.get(section.sectionId);
+    const parityTarget = paritySections.get(section.sectionId);
+
+    expect(
+      Boolean(accessibilityTarget),
+      `packages/gpui/native-accessibility-proof.json references unknown section "${section.sectionId}".`,
+      errors,
+    );
+    if (!accessibilityTarget) {
+      continue;
+    }
+
+    expect(
+      section.gpuiStatus === accessibilityTarget.auditAreas.gpui,
+      `packages/gpui/native-accessibility-proof.json section "${section.sectionId}" GPUI status must match packages/svelte/preview/src/accessibility.ts.`,
+      errors,
+    );
+    expect(
+      section.focusStatus === accessibilityTarget.auditAreas.focus,
+      `packages/gpui/native-accessibility-proof.json section "${section.sectionId}" focus status must match packages/svelte/preview/src/accessibility.ts.`,
+      errors,
+    );
+    expect(
+      section.keyboardStatus === accessibilityTarget.auditAreas.keyboard,
+      `packages/gpui/native-accessibility-proof.json section "${section.sectionId}" keyboard status must match packages/svelte/preview/src/accessibility.ts.`,
+      errors,
+    );
+    expect(
+      section.announcementsStatus === accessibilityTarget.auditAreas.announcements,
+      `packages/gpui/native-accessibility-proof.json section "${section.sectionId}" announcement status must match packages/svelte/preview/src/accessibility.ts.`,
+      errors,
+    );
+    expect(
+      section.remainingBlockers.length > 0,
+      `packages/gpui/native-accessibility-proof.json section "${section.sectionId}" must record remaining blockers.`,
+      errors,
+    );
+
+    if (parityTarget) {
+      expect(
+        section.sideBySideReview === parityTarget.sideBySideReview,
+        `packages/gpui/native-accessibility-proof.json section "${section.sectionId}" side-by-side flag must match the parity registry.`,
+        errors,
+      );
+    }
+  }
+
+  return {
+    gpuiAccessibilityLayerCount: proof.layerProof.length,
+    gpuiAccessibilitySectionCount: proof.sectionProof.length,
+  };
+}
+
+function validateGpuiCrossRuntimeParityReport(errors: string[]): {
+  gpuiCrossRuntimeSectionCount: number;
+  gpuiCrossRuntimeDeltaCount: number;
+} {
+  const report = JSON.parse(fs.readFileSync(gpuiCrossRuntimeParityReportPath, "utf8")) as {
+    generation: string;
+    comparisonArtifacts: string[];
+    acceptanceHarness: {
+      suiteId: string;
+      status: string;
+      coveredPackages: string[];
+      evidenceArtifacts: string[];
+      requiredChecks: string[];
+      blockers: string[];
+    };
+    summary: {
+      sectionCount: number;
+      directParityCount: number;
+      nativeAdaptationCount: number;
+      deferredCount: number;
+      sideBySideSectionCount: number;
+      manualGpuiProofCount: number;
+      blockedGpuiProofCount: number;
+    };
+    sectionReports: Array<{
+      sectionId: string;
+      parityMode: string;
+      owningLayer: string;
+      sideBySideReview: boolean;
+      svelteRouteIds: string[];
+      gpuiEvidenceArtifacts: string[];
+      gpuiStatuses: {
+        gpui: string;
+        focus: string;
+        keyboard: string;
+        announcements: string;
+      };
+      comparisonPosture: string;
+      intentionalDeltaIds: string[];
+    }>;
+    deltaRegister: Array<{
+      id: string;
+      title: string;
+      status: string;
+      sectionIds: string[];
+      runtimeReason: string;
+      followUp: string;
+      evidenceArtifacts: string[];
+    }>;
+    automatedBoundary: string[];
+    manualBoundary: string[];
+    nonGoals: string[];
+  };
+  const accessibilityProof = JSON.parse(fs.readFileSync(gpuiNativeAccessibilityProofPath, "utf8")) as {
+    sectionProof: Array<{
+      sectionId: string;
+      gpuiStatus: string;
+      focusStatus: string;
+      keyboardStatus: string;
+      announcementsStatus: string;
+      sideBySideReview: boolean;
+    }>;
+  };
+  const gpuiPriorityMatrix = JSON.parse(fs.readFileSync(gpuiParityPriorityPath, "utf8")) as {
+    sectionTargets: Array<{
+      sectionId: string;
+      parityMode: string;
+      gpuiLayer: string;
+      sideBySideReview: boolean;
+    }>;
+  };
+  const ecosystemAcceptance = JSON.parse(fs.readFileSync(ecosystemAcceptancePath, "utf8")) as {
+    suites: Array<{
+      id: string;
+      status: string;
+      coveredPackages: string[];
+      evidenceArtifacts: string[];
+      requiredChecks: string[];
+      blockers: string[];
+    }>;
+  };
+  const parityTargetRoutes = new Map(
+    parityTargets.map((target) => [target.sectionId, new Set(target.reviewRoutes.map((route) => route.id))]),
+  );
+  const accessibilitySections = new Map(
+    accessibilityProof.sectionProof.map((entry) => [entry.sectionId, entry]),
+  );
+  const prioritySections = new Map(
+    gpuiPriorityMatrix.sectionTargets.map((entry) => [entry.sectionId, entry]),
+  );
+  const gpuiAcceptanceSuite = ecosystemAcceptance.suites.find((entry) => entry.id === report.acceptanceHarness.suiteId);
+  const allowedDeltaStatuses = new Set(["pending", "allowed", "revisit", "rejected"]);
+  const reportSectionIds = report.sectionReports.map((entry) => entry.sectionId).sort();
+  const deltaIds = new Set(report.deltaRegister.map((entry) => entry.id));
+
+  expect(
+    report.generation === "g04.011",
+    "packages/gpui/cross-runtime-parity-report.json must target g04.011.",
+    errors,
+  );
+  expect(
+    report.comparisonArtifacts.length >= 3,
+    "packages/gpui/cross-runtime-parity-report.json must record comparison artifacts.",
+    errors,
+  );
+  compareLists(
+    "packages/gpui/cross-runtime-parity-report.json section ids",
+    reportSectionIds,
+    Array.from(accessibilitySections.keys()).sort(),
+    errors,
+  );
+  expect(
+    report.summary.sectionCount === report.sectionReports.length,
+    "packages/gpui/cross-runtime-parity-report.json summary.sectionCount must match sectionReports length.",
+    errors,
+  );
+  expect(
+    report.summary.directParityCount + report.summary.nativeAdaptationCount + report.summary.deferredCount ===
+      report.summary.sectionCount,
+    "packages/gpui/cross-runtime-parity-report.json parity summary counts must add up to the section count.",
+    errors,
+  );
+  expect(
+    report.summary.sideBySideSectionCount === report.sectionReports.filter((entry) => entry.sideBySideReview).length,
+    "packages/gpui/cross-runtime-parity-report.json sideBySideSectionCount must match the side-by-side section set.",
+    errors,
+  );
+  expect(
+    report.summary.manualGpuiProofCount ===
+      report.sectionReports.filter((entry) => entry.gpuiStatuses.gpui === "manual").length,
+    "packages/gpui/cross-runtime-parity-report.json manualGpuiProofCount must match section proof status.",
+    errors,
+  );
+  expect(
+    report.summary.blockedGpuiProofCount ===
+      report.sectionReports.filter((entry) => entry.gpuiStatuses.gpui === "blocked").length,
+    "packages/gpui/cross-runtime-parity-report.json blockedGpuiProofCount must match section proof status.",
+    errors,
+  );
+  expect(
+    report.automatedBoundary.length > 0,
+    "packages/gpui/cross-runtime-parity-report.json must record automated boundaries.",
+    errors,
+  );
+  expect(
+    report.manualBoundary.length > 0,
+    "packages/gpui/cross-runtime-parity-report.json must record manual boundaries.",
+    errors,
+  );
+  expect(
+    report.nonGoals.length >= 2,
+    "packages/gpui/cross-runtime-parity-report.json must record explicit non-goals.",
+    errors,
+  );
+
+  for (const artifactPath of report.comparisonArtifacts) {
+    expect(
+      fs.existsSync(path.join(repoRoot, artifactPath)),
+      `packages/gpui/cross-runtime-parity-report.json references missing comparison artifact "${artifactPath}".`,
+      errors,
+    );
+  }
+
+  for (const section of report.sectionReports) {
+    const accessibilitySection = accessibilitySections.get(section.sectionId);
+    const prioritySection = prioritySections.get(section.sectionId);
+    const routeIds = parityTargetRoutes.get(section.sectionId);
+
+    expect(
+      Boolean(accessibilitySection),
+      `packages/gpui/cross-runtime-parity-report.json references unknown section "${section.sectionId}".`,
+      errors,
+    );
+    expect(
+      Boolean(prioritySection),
+      `packages/gpui/cross-runtime-parity-report.json section "${section.sectionId}" is missing from the GPUI priority matrix.`,
+      errors,
+    );
+    expect(
+      section.comparisonPosture.trim().length > 0,
+      `packages/gpui/cross-runtime-parity-report.json section "${section.sectionId}" must record comparison posture.`,
+      errors,
+    );
+    expect(
+      section.svelteRouteIds.length > 0,
+      `packages/gpui/cross-runtime-parity-report.json section "${section.sectionId}" must record Svelte route ids.`,
+      errors,
+    );
+    expect(
+      section.gpuiEvidenceArtifacts.length > 0,
+      `packages/gpui/cross-runtime-parity-report.json section "${section.sectionId}" must record GPUI evidence artifacts.`,
+      errors,
+    );
+
+    if (accessibilitySection) {
+      expect(
+        section.gpuiStatuses.gpui === accessibilitySection.gpuiStatus,
+        `packages/gpui/cross-runtime-parity-report.json section "${section.sectionId}" GPUI status must match the accessibility proof.`,
+        errors,
+      );
+      expect(
+        section.gpuiStatuses.focus === accessibilitySection.focusStatus,
+        `packages/gpui/cross-runtime-parity-report.json section "${section.sectionId}" focus status must match the accessibility proof.`,
+        errors,
+      );
+      expect(
+        section.gpuiStatuses.keyboard === accessibilitySection.keyboardStatus,
+        `packages/gpui/cross-runtime-parity-report.json section "${section.sectionId}" keyboard status must match the accessibility proof.`,
+        errors,
+      );
+      expect(
+        section.gpuiStatuses.announcements === accessibilitySection.announcementsStatus,
+        `packages/gpui/cross-runtime-parity-report.json section "${section.sectionId}" announcement status must match the accessibility proof.`,
+        errors,
+      );
+    }
+
+    if (prioritySection) {
+      expect(
+        section.parityMode === prioritySection.parityMode,
+        `packages/gpui/cross-runtime-parity-report.json section "${section.sectionId}" parity mode must match the GPUI priority matrix.`,
+        errors,
+      );
+      expect(
+        section.sideBySideReview === prioritySection.sideBySideReview,
+        `packages/gpui/cross-runtime-parity-report.json section "${section.sectionId}" side-by-side flag must match the GPUI priority matrix.`,
+        errors,
+      );
+      expect(
+        section.owningLayer === prioritySection.gpuiLayer,
+        `packages/gpui/cross-runtime-parity-report.json section "${section.sectionId}" owning layer must match the GPUI priority matrix.`,
+        errors,
+      );
+    }
+
+    for (const routeId of section.svelteRouteIds) {
+      expect(
+        routeIds?.has(routeId) ?? false,
+        `packages/gpui/cross-runtime-parity-report.json section "${section.sectionId}" references unknown Svelte route "${routeId}".`,
+        errors,
+      );
+    }
+
+    for (const artifactPath of section.gpuiEvidenceArtifacts) {
+      expect(
+        fs.existsSync(path.join(repoRoot, artifactPath)),
+        `packages/gpui/cross-runtime-parity-report.json section "${section.sectionId}" references missing GPUI evidence artifact "${artifactPath}".`,
+        errors,
+      );
+    }
+
+    for (const deltaId of section.intentionalDeltaIds) {
+      expect(
+        deltaIds.has(deltaId),
+        `packages/gpui/cross-runtime-parity-report.json section "${section.sectionId}" references unknown delta "${deltaId}".`,
+        errors,
+      );
+    }
+  }
+
+  for (const delta of report.deltaRegister) {
+    expect(delta.title.trim().length > 0, `Cross-runtime delta "${delta.id}" is missing a title.`, errors);
+    expect(
+      allowedDeltaStatuses.has(delta.status),
+      `Cross-runtime delta "${delta.id}" uses unsupported status "${delta.status}".`,
+      errors,
+    );
+    expect(delta.sectionIds.length > 0, `Cross-runtime delta "${delta.id}" is missing section coverage.`, errors);
+    expect(
+      delta.runtimeReason.trim().length > 0,
+      `Cross-runtime delta "${delta.id}" is missing a runtime reason.`,
+      errors,
+    );
+    expect(
+      delta.followUp.trim().length > 0,
+      `Cross-runtime delta "${delta.id}" is missing follow-up guidance.`,
+      errors,
+    );
+    expect(
+      delta.evidenceArtifacts.length > 0,
+      `Cross-runtime delta "${delta.id}" is missing evidence artifacts.`,
+      errors,
+    );
+
+    for (const sectionId of delta.sectionIds) {
+      expect(
+        reportSectionIds.includes(sectionId),
+        `Cross-runtime delta "${delta.id}" references unknown section "${sectionId}".`,
+        errors,
+      );
+    }
+
+    for (const artifactPath of delta.evidenceArtifacts) {
+      expect(
+        fs.existsSync(path.join(repoRoot, artifactPath)),
+        `Cross-runtime delta "${delta.id}" references missing evidence artifact "${artifactPath}".`,
+        errors,
+      );
+    }
+  }
+
+  expect(
+    Boolean(gpuiAcceptanceSuite),
+    `packages/gpui/cross-runtime-parity-report.json references missing acceptance suite "${report.acceptanceHarness.suiteId}".`,
+    errors,
+  );
+
+  if (gpuiAcceptanceSuite) {
+    expect(
+      report.acceptanceHarness.status === gpuiAcceptanceSuite.status,
+      "packages/gpui/cross-runtime-parity-report.json acceptance harness status must match packages/ecosystem-acceptance.json.",
+      errors,
+    );
+    compareLists(
+      "packages/gpui/cross-runtime-parity-report.json acceptance harness covered packages",
+      [...report.acceptanceHarness.coveredPackages].sort(),
+      [...gpuiAcceptanceSuite.coveredPackages].sort(),
+      errors,
+    );
+    compareLists(
+      "packages/gpui/cross-runtime-parity-report.json acceptance harness evidence artifacts",
+      [...report.acceptanceHarness.evidenceArtifacts].sort(),
+      [...gpuiAcceptanceSuite.evidenceArtifacts].sort(),
+      errors,
+    );
+    compareLists(
+      "packages/gpui/cross-runtime-parity-report.json acceptance harness required checks",
+      [...report.acceptanceHarness.requiredChecks].sort(),
+      [...gpuiAcceptanceSuite.requiredChecks].sort(),
+      errors,
+    );
+    compareLists(
+      "packages/gpui/cross-runtime-parity-report.json acceptance harness blockers",
+      [...report.acceptanceHarness.blockers].sort(),
+      [...gpuiAcceptanceSuite.blockers].sort(),
+      errors,
+    );
+  }
+
+  return {
+    gpuiCrossRuntimeSectionCount: report.sectionReports.length,
+    gpuiCrossRuntimeDeltaCount: report.deltaRegister.length,
+  };
+}
+
+function validateSharedDemoAppAudit(errors: string[]): {
+  demoAuditFindingCount: number;
+  demoAuditScreenCount: number;
+} {
+  const audit = JSON.parse(fs.readFileSync(sharedDemoAppAuditPath, "utf8")) as {
+    generation: string;
+    sourceSurface: {
+      entryPath: string;
+      stylePath: string;
+      entryLineCount: number;
+      styleLineCount: number;
+      docsOnlySectionIds: string[];
+      sharedTargetSectionIds: string[];
+    };
+    packageCoverage: {
+      artifactsSource: string;
+      packages: Array<{
+        packageName: string;
+        exportCount: number;
+        previewedCount: number;
+        contractOnlyCount: number;
+        priorityMissingExports: string[];
+      }>;
+    };
+    auditFindings: Array<{
+      id: string;
+      severity: string;
+      summary: string;
+      evidence: string[];
+      impact: string;
+    }>;
+    targetShapeFreeze: {
+      appId: string;
+      description: string;
+      requiredScreens: Array<{
+        id: string;
+        goal: string;
+      }>;
+      requiredRules: string[];
+      nonGoals: string[];
+    };
+  };
+  const parityReport = JSON.parse(
+    fs.readFileSync(path.join(repoRoot, "packages", "svelte", "preview", "artifacts", "parity-report.json"), "utf8"),
+  ) as {
+    packageSurfaceCoverage: {
+      summary: Array<{
+        packageName: string;
+        exportCount: number;
+        previewedCount: number;
+        contractOnlyCount: number;
+      }>;
+    };
+  };
+  const docsSectionIds = new Set(docsNavigationSections.map((entry) => entry.id));
+  const docsOnlySet = new Set(audit.sourceSurface.docsOnlySectionIds);
+  const targetSectionSet = new Set(audit.sourceSurface.sharedTargetSectionIds);
+
+  expect(
+    audit.generation === "g04.012",
+    "packages/shared-demo-app-audit.json must target g04.012.",
+    errors,
+  );
+  expect(
+    audit.sourceSurface.entryPath === "packages/svelte/preview/src/App.svelte",
+    "packages/shared-demo-app-audit.json must target packages/svelte/preview/src/App.svelte as the source entry.",
+    errors,
+  );
+  expect(
+    audit.sourceSurface.stylePath === "packages/svelte/preview/src/app.css",
+    "packages/shared-demo-app-audit.json must target packages/svelte/preview/src/app.css as the source stylesheet.",
+    errors,
+  );
+  expect(
+    fs.existsSync(path.join(repoRoot, audit.sourceSurface.entryPath)),
+    `packages/shared-demo-app-audit.json references missing source entry "${audit.sourceSurface.entryPath}".`,
+    errors,
+  );
+  expect(
+    fs.existsSync(path.join(repoRoot, audit.sourceSurface.stylePath)),
+    `packages/shared-demo-app-audit.json references missing source stylesheet "${audit.sourceSurface.stylePath}".`,
+    errors,
+  );
+  expect(
+    audit.sourceSurface.entryLineCount >= 2000,
+    "packages/shared-demo-app-audit.json must record the current monolithic App.svelte posture honestly.",
+    errors,
+  );
+  expect(
+    audit.sourceSurface.styleLineCount >= 1500,
+    "packages/shared-demo-app-audit.json must record the current global app.css posture honestly.",
+    errors,
+  );
+  expect(
+    audit.packageCoverage.artifactsSource === "packages/svelte/preview/artifacts/parity-report.json",
+    "packages/shared-demo-app-audit.json must use packages/svelte/preview/artifacts/parity-report.json as its coverage source.",
+    errors,
+  );
+  expect(
+    audit.auditFindings.length >= 5,
+    "packages/shared-demo-app-audit.json must record multiple audit findings.",
+    errors,
+  );
+  expect(
+    audit.targetShapeFreeze.appId === "shared-demo-app",
+    "packages/shared-demo-app-audit.json must freeze the shared-demo-app target.",
+    errors,
+  );
+  expect(
+    audit.targetShapeFreeze.requiredScreens.length >= 5,
+    "packages/shared-demo-app-audit.json must record the rebuilt demo screen set.",
+    errors,
+  );
+  expect(
+    audit.targetShapeFreeze.requiredRules.length >= 3,
+    "packages/shared-demo-app-audit.json must record required target-shape rules.",
+    errors,
+  );
+  expect(
+    audit.targetShapeFreeze.nonGoals.length >= 2,
+    "packages/shared-demo-app-audit.json must record explicit non-goals.",
+    errors,
+  );
+
+  for (const sectionId of audit.sourceSurface.docsOnlySectionIds) {
+    expect(
+      docsSectionIds.has(sectionId),
+      `packages/shared-demo-app-audit.json docs-only section "${sectionId}" is not a known docs section.`,
+      errors,
+    );
+  }
+  for (const sectionId of audit.sourceSurface.sharedTargetSectionIds) {
+    expect(
+      docsSectionIds.has(sectionId),
+      `packages/shared-demo-app-audit.json target section "${sectionId}" is not a known docs section.`,
+      errors,
+    );
+  }
+  for (const sectionId of audit.sourceSurface.docsOnlySectionIds) {
+    expect(
+      !targetSectionSet.has(sectionId),
+      `packages/shared-demo-app-audit.json section "${sectionId}" cannot be both docs-only and a shared target section.`,
+      errors,
+    );
+  }
+  expect(
+    docsOnlySet.has("catalog-hub") && docsOnlySet.has("token-summary-section") && docsOnlySet.has("token-inspector"),
+    "packages/shared-demo-app-audit.json must keep catalog-hub, token-summary-section, and token-inspector as docs-only sections.",
+    errors,
+  );
+
+  const parityCoverage = new Map(
+    parityReport.packageSurfaceCoverage.summary.map((entry) => [entry.packageName, entry]),
+  );
+
+  for (const packageEntry of audit.packageCoverage.packages) {
+    const parityEntry = parityCoverage.get(packageEntry.packageName);
+    expect(
+      Boolean(parityEntry),
+      `packages/shared-demo-app-audit.json references unknown package coverage "${packageEntry.packageName}".`,
+      errors,
+    );
+    if (!parityEntry) {
+      continue;
+    }
+    expect(
+      packageEntry.exportCount === parityEntry.exportCount,
+      `packages/shared-demo-app-audit.json package "${packageEntry.packageName}" exportCount must match the parity report.`,
+      errors,
+    );
+    expect(
+      packageEntry.previewedCount === parityEntry.previewedCount,
+      `packages/shared-demo-app-audit.json package "${packageEntry.packageName}" previewedCount must match the parity report.`,
+      errors,
+    );
+    expect(
+      packageEntry.contractOnlyCount === parityEntry.contractOnlyCount,
+      `packages/shared-demo-app-audit.json package "${packageEntry.packageName}" contractOnlyCount must match the parity report.`,
+      errors,
+    );
+    expect(
+      packageEntry.contractOnlyCount === 0 || packageEntry.priorityMissingExports.length > 0,
+      `packages/shared-demo-app-audit.json package "${packageEntry.packageName}" must record priority missing exports when contract-only exports remain.`,
+      errors,
+    );
+  }
+
+  for (const finding of audit.auditFindings) {
+    expect(finding.id.trim().length > 0, "Shared demo-app audit findings must have ids.", errors);
+    expect(
+      ["high", "medium", "low"].includes(finding.severity),
+      `Shared demo-app audit finding "${finding.id}" has unsupported severity "${finding.severity}".`,
+      errors,
+    );
+    expect(
+      finding.summary.trim().length > 0,
+      `Shared demo-app audit finding "${finding.id}" must record a summary.`,
+      errors,
+    );
+    expect(
+      finding.evidence.length > 0,
+      `Shared demo-app audit finding "${finding.id}" must record evidence paths.`,
+      errors,
+    );
+    expect(
+      finding.impact.trim().length > 0,
+      `Shared demo-app audit finding "${finding.id}" must record impact.`,
+      errors,
+    );
+    for (const evidencePath of finding.evidence) {
+      expect(
+        fs.existsSync(path.join(repoRoot, evidencePath)),
+        `Shared demo-app audit finding "${finding.id}" references missing evidence path "${evidencePath}".`,
+        errors,
+      );
+    }
+  }
+
+  const requiredScreenIds = new Set<string>();
+  for (const screen of audit.targetShapeFreeze.requiredScreens) {
+    expect(screen.id.trim().length > 0, "Shared demo-app target screens must have ids.", errors);
+    expect(screen.goal.trim().length > 0, `Shared demo-app target screen "${screen.id}" must record a goal.`, errors);
+    expect(
+      !requiredScreenIds.has(screen.id),
+      `packages/shared-demo-app-audit.json repeats target screen "${screen.id}".`,
+      errors,
+    );
+    requiredScreenIds.add(screen.id);
+  }
+
+  return {
+    demoAuditFindingCount: audit.auditFindings.length,
+    demoAuditScreenCount: audit.targetShapeFreeze.requiredScreens.length,
+  };
+}
+
+function validateSharedDemoAppContract(errors: string[]): {
+  demoContractScreenCount: number;
+  demoContractRegionCount: number;
+} {
+  const audit = JSON.parse(fs.readFileSync(sharedDemoAppAuditPath, "utf8")) as {
+    targetShapeFreeze: {
+      appId: string;
+      requiredScreens: Array<{ id: string }>;
+    };
+    sourceSurface: {
+      docsOnlySectionIds: string[];
+      sharedTargetSectionIds: string[];
+    };
+  };
+  const contract = JSON.parse(fs.readFileSync(sharedDemoAppContractPath, "utf8")) as {
+    generation: string;
+    appId: string;
+    dependsOnAudit: string;
+    reviewDimensions: string[];
+    docsShellBoundary: {
+      docsOnlySectionIds: string[];
+      rules: string[];
+    };
+    shellRegions: Array<{
+      id: string;
+      purpose: string;
+    }>;
+    screenContracts: Array<{
+      id: string;
+      title: string;
+      sourceSectionIds: string[];
+      regionIds: string[];
+      componentExpectations: string[];
+      stateMatrix: string[];
+      interactionCheckpoints: string[];
+      comparisonMode: string;
+    }>;
+    parityChecklist: string[];
+    runtimeBindings: {
+      svelte: {
+        status: string;
+        milestone: string;
+        implementationRoot: string;
+      };
+      gpui: {
+        status: string;
+        milestone: string;
+        implementationRoot: string;
+      };
+    };
+    nonGoals: string[];
+  };
+  const knownDocsSections = new Set(docsNavigationSections.map((entry) => entry.id));
+  const auditScreenIds = audit.targetShapeFreeze.requiredScreens.map((screen) => screen.id).sort();
+  const auditDocsOnlyIds = [...audit.sourceSurface.docsOnlySectionIds].sort();
+  const auditTargetIds = new Set(audit.sourceSurface.sharedTargetSectionIds);
+  const contractScreenIds = contract.screenContracts.map((screen) => screen.id).sort();
+  const regionIds = new Set<string>();
+
+  expect(
+    contract.generation === "g04.013",
+    "packages/shared-demo-app-contract.json must target g04.013.",
+    errors,
+  );
+  expect(
+    contract.appId === audit.targetShapeFreeze.appId,
+    "packages/shared-demo-app-contract.json appId must match the shared demo-app audit.",
+    errors,
+  );
+  expect(
+    contract.dependsOnAudit === "packages/shared-demo-app-audit.json",
+    "packages/shared-demo-app-contract.json must depend on packages/shared-demo-app-audit.json.",
+    errors,
+  );
+  compareLists(
+    "packages/shared-demo-app-contract.json review dimensions",
+    [...contract.reviewDimensions].sort(),
+    ["controlSize", "density", "theme"],
+    errors,
+  );
+  compareLists(
+    "packages/shared-demo-app-contract.json docs-only section ids",
+    [...contract.docsShellBoundary.docsOnlySectionIds].sort(),
+    auditDocsOnlyIds,
+    errors,
+  );
+  compareLists(
+    "packages/shared-demo-app-contract.json screen ids",
+    contractScreenIds,
+    auditScreenIds,
+    errors,
+  );
+  expect(
+    contract.docsShellBoundary.rules.length >= 2,
+    "packages/shared-demo-app-contract.json must record docs-shell boundary rules.",
+    errors,
+  );
+  expect(
+    contract.shellRegions.length >= 5,
+    "packages/shared-demo-app-contract.json must record shell regions.",
+    errors,
+  );
+  expect(
+    contract.parityChecklist.length >= 4,
+    "packages/shared-demo-app-contract.json must record the parity checklist.",
+    errors,
+  );
+  expect(
+    contract.nonGoals.length >= 2,
+    "packages/shared-demo-app-contract.json must record explicit non-goals.",
+    errors,
+  );
+
+  for (const region of contract.shellRegions) {
+    expect(region.id.trim().length > 0, "Shared demo-app contract regions must have ids.", errors);
+    expect(region.purpose.trim().length > 0, `Shared demo-app contract region "${region.id}" must record a purpose.`, errors);
+    expect(
+      !regionIds.has(region.id),
+      `packages/shared-demo-app-contract.json repeats shell region "${region.id}".`,
+      errors,
+    );
+    regionIds.add(region.id);
+  }
+
+  for (const screen of contract.screenContracts) {
+    expect(screen.title.trim().length > 0, `Shared demo-app contract screen "${screen.id}" must record a title.`, errors);
+    expect(
+      screen.sourceSectionIds.length > 0,
+      `Shared demo-app contract screen "${screen.id}" must record source sections.`,
+      errors,
+    );
+    expect(
+      screen.regionIds.length > 0,
+      `Shared demo-app contract screen "${screen.id}" must record shell regions.`,
+      errors,
+    );
+    expect(
+      screen.componentExpectations.length > 0,
+      `Shared demo-app contract screen "${screen.id}" must record component expectations.`,
+      errors,
+    );
+    expect(
+      screen.stateMatrix.length >= 2,
+      `Shared demo-app contract screen "${screen.id}" must record a state matrix.`,
+      errors,
+    );
+    expect(
+      screen.interactionCheckpoints.length > 0,
+      `Shared demo-app contract screen "${screen.id}" must record interaction checkpoints.`,
+      errors,
+    );
+    expect(
+      ["direct-parity", "native-adaptation"].includes(screen.comparisonMode),
+      `Shared demo-app contract screen "${screen.id}" has unsupported comparison mode "${screen.comparisonMode}".`,
+      errors,
+    );
+
+    for (const sectionId of screen.sourceSectionIds) {
+      expect(
+        knownDocsSections.has(sectionId),
+        `Shared demo-app contract screen "${screen.id}" references unknown section "${sectionId}".`,
+        errors,
+      );
+      expect(
+        auditTargetIds.has(sectionId),
+        `Shared demo-app contract screen "${screen.id}" references non-target section "${sectionId}".`,
+        errors,
+      );
+    }
+    for (const regionId of screen.regionIds) {
+      expect(
+        regionIds.has(regionId),
+        `Shared demo-app contract screen "${screen.id}" references unknown region "${regionId}".`,
+        errors,
+      );
+    }
+  }
+
+  expect(
+    contract.runtimeBindings.svelte.status === "rebuilt",
+    "packages/shared-demo-app-contract.json must mark the Svelte demo as rebuilt.",
+    errors,
+  );
+  expect(
+    contract.runtimeBindings.svelte.milestone === "g04.014",
+    "packages/shared-demo-app-contract.json must attach the Svelte demo to g04.014.",
+    errors,
+  );
+  expect(
+    contract.runtimeBindings.svelte.implementationRoot === "packages/svelte/preview/src/",
+    "packages/shared-demo-app-contract.json must attach the Svelte demo implementation root to packages/svelte/preview/src/.",
+    errors,
+  );
+  expect(
+    contract.runtimeBindings.gpui.status === "implementation-required",
+    "packages/shared-demo-app-contract.json must mark the GPUI demo as implementation-required.",
+    errors,
+  );
+  expect(
+    contract.runtimeBindings.gpui.milestone === "g04.015",
+    "packages/shared-demo-app-contract.json must attach the GPUI demo to g04.015.",
+    errors,
+  );
+  expect(
+    contract.runtimeBindings.gpui.implementationRoot === "packages/gpui/",
+    "packages/shared-demo-app-contract.json must attach the GPUI demo implementation root to packages/gpui/.",
+    errors,
+  );
+
+  return {
+    demoContractScreenCount: contract.screenContracts.length,
+    demoContractRegionCount: contract.shellRegions.length,
+  };
+}
+
 const errors: string[] = [];
 const componentContractCount = validateComponentContracts(errors);
 validateContractIndexes(errors);
@@ -1193,11 +3166,24 @@ validateReleaseOperations(errors);
 const ecosystemAcceptanceCounts = validateEcosystemAcceptance(errors);
 const referenceAppsCounts = validateReferenceApps(errors);
 const g03CloseoutCounts = validateG03Closeout(errors);
+const gpuiPriorityCounts = validateGpuiPriorityMatrix(errors);
+const gpuiPreviewCounts = validateGpuiPreviewBaseline(errors);
+const gpuiStructuralCounts = validateGpuiStructuralBaseline(errors);
+const gpuiActionFieldCounts = validateGpuiActionFieldBaseline(errors);
+const gpuiSelectionFeedbackDateCounts = validateGpuiSelectionFeedbackDateBaseline(errors);
+const gpuiOverlayNavigationMenuCounts = validateGpuiOverlayNavigationMenuBaseline(errors);
+const gpuiFormValidationRemediationCounts = validateGpuiFormValidationRemediationBaseline(errors);
+const gpuiDataBrowseDetailPickerMediaCounts = validateGpuiDataBrowseDetailPickerMediaBaseline(errors);
+const gpuiWorkstationCounts = validateGpuiWorkstationBaseline(errors);
+const gpuiNativeAccessibilityCounts = validateGpuiNativeAccessibilityProof(errors);
+const gpuiCrossRuntimeParityCounts = validateGpuiCrossRuntimeParityReport(errors);
+const sharedDemoAppAuditCounts = validateSharedDemoAppAudit(errors);
+const sharedDemoAppContractCounts = validateSharedDemoAppContract(errors);
 
 if (errors.length > 0) {
   throw new Error(errors.join("\n"));
 }
 
 console.log(
-  `Validated ${componentContractCount} component contracts, ${docsSections.length} docs sections, ${docsFamilies.length} docs families, ${parityTargets.length} parity targets, ${accessibilityAuditTargets.length} accessibility audit targets, ${ecosystemAcceptanceCounts.suiteCount} ecosystem acceptance suites, ${ecosystemAcceptanceCounts.regressionClassCount} regression classes, ${referenceAppsCounts.shapeCount} reference shapes, ${referenceAppsCounts.laneCount} onboarding lanes, ${g03CloseoutCounts.stableSurfaceCount} closeout surfaces, and ${g03CloseoutCounts.carryForwardCount} carry-forward gaps.`,
+  `Validated ${componentContractCount} component contracts, ${docsSections.length} docs sections, ${docsFamilies.length} docs families, ${parityTargets.length} parity targets, ${accessibilityAuditTargets.length} accessibility audit targets, ${ecosystemAcceptanceCounts.suiteCount} ecosystem acceptance suites, ${ecosystemAcceptanceCounts.regressionClassCount} regression classes, ${referenceAppsCounts.shapeCount} reference shapes, ${referenceAppsCounts.laneCount} onboarding lanes, ${g03CloseoutCounts.stableSurfaceCount} closeout surfaces, ${g03CloseoutCounts.carryForwardCount} carry-forward gaps, ${gpuiPriorityCounts.waveCount} GPUI implementation waves, ${gpuiPriorityCounts.targetCount} GPUI section targets, ${gpuiPreviewCounts.previewSectionCount} GPUI preview baseline sections, ${gpuiStructuralCounts.structuralExportCount} GPUI structural exports, ${gpuiActionFieldCounts.actionFieldExportCount} GPUI action or field exports, ${gpuiSelectionFeedbackDateCounts.selectionFeedbackDateExportCount} GPUI selection/feedback/date exports, ${gpuiOverlayNavigationMenuCounts.overlayNavigationMenuExportCount} GPUI overlay/disclosure/navigation/menu exports, ${gpuiFormValidationRemediationCounts.gpuiCompositeExportCount} GPUI form/validation/remediation composite exports, ${gpuiDataBrowseDetailPickerMediaCounts.gpuiDataCompositeExportCount} GPUI data/browse/detail/picker/media composite exports, ${gpuiWorkstationCounts.gpuiWorkstationExportCount} GPUI workstation exports, ${gpuiNativeAccessibilityCounts.gpuiAccessibilityLayerCount} GPUI accessibility-proof layers, ${gpuiNativeAccessibilityCounts.gpuiAccessibilitySectionCount} GPUI accessibility-proof sections, ${gpuiCrossRuntimeParityCounts.gpuiCrossRuntimeSectionCount} GPUI cross-runtime parity sections, ${gpuiCrossRuntimeParityCounts.gpuiCrossRuntimeDeltaCount} GPUI intentional deltas, ${sharedDemoAppAuditCounts.demoAuditFindingCount} shared demo-app audit findings, ${sharedDemoAppAuditCounts.demoAuditScreenCount} shared demo target screens, ${sharedDemoAppContractCounts.demoContractScreenCount} shared demo contract screens, and ${sharedDemoAppContractCounts.demoContractRegionCount} shared demo shell regions.`,
 );

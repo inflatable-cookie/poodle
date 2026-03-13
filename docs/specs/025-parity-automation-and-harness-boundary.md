@@ -140,6 +140,10 @@ The current baseline artifact is:
 
 - `packages/svelte/preview/artifacts/parity-report.json`
 
+Later generations may widen that artifact with explicit GPUI evidence and
+linked delta-register summaries, but the core honesty rule still holds: the
+report may not imply mounted native proof the repo has not actually earned.
+
 ## Preview Route Rule
 
 The Svelte preview must support stable, URL-addressable review state so parity

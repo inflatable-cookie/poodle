@@ -1,0 +1,44 @@
+{
+  "generation": "g04.008",
+  "crateName": "pug-gpui-composites",
+  "cratePath": "packages/gpui/composites",
+  "tokenSource": "pug-gpui-tokens",
+  "contractIds": [
+    "data-table",
+    "list-shell",
+    "grid-shell",
+    "detail-shell",
+    "filter-toolbar",
+    "pagination-summary",
+    "empty-state",
+    "picker-shell",
+    "relation-picker",
+    "selection-summary",
+    "media-thumbnail",
+    "media-preview"
+  ],
+  "exportNames": [
+    "DataTableSpec",
+    "ListShellSpec",
+    "GridShellSpec",
+    "DetailShellSpec",
+    "FilterToolbarSpec",
+    "PaginationSummarySpec",
+    "EmptyStateSpec",
+    "PickerShellSpec",
+    "RelationPickerSpec",
+    "SelectionSummarySpec",
+    "MediaThumbnailSpec",
+    "MediaPreviewSpec"
+  ],
+  "knownDeltas": [
+    "This tranche freezes data, browse, detail, picker, and media composite posture as token-backed GPUI specs before the repo ships mounted native list, table, picker, or media widgets for every surface.",
+    "Browser-origin details like virtualization strategy, list or grid reflow, table semantics plumbing, and media renderer behavior are preserved as explicit public posture, but their final GPUI event and accessibility wiring remain later runtime work.",
+    "The composite layer now carries empty, no-results, fallback media, and visible-scope selection semantics directly so downstream GPUI apps do not invent incompatible browse shells."
+  ],
+  "nonGoals": [
+    "Do not treat this tranche as proof that workstation-shell, command, docking, or orchestration parity is complete.",
+    "Do not claim final native accessibility or virtualization proof from spec-level data and media composites alone.",
+    "Do not fold domain-specific row renderers, transport controls, persistence logic, or product workflows into this generic GPUI composite baseline."
+  ]
+}

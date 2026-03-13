@@ -1,7 +1,7 @@
 # Roadmaps
 
 Status: active
-Updated: 2026-03-12
+Updated: 2026-03-13
 
 Roadmaps hold executable milestone work for Pug.
 
@@ -16,7 +16,7 @@ Roadmaps hold executable milestone work for Pug.
 
 ## Current Generation
 
-- Active generation: none
+- Active generation: `g04`
 - Most recently completed generation: `g03`
 - Next generation: not yet planned
 
@@ -27,6 +27,8 @@ Roadmaps hold executable milestone work for Pug.
 - `g02` advanced composites, docs/catalog depth, cleanup, and release baseline
 - `g03` hardening, migration policy, parity automation, first downstream
   adoption tranches, validation, and mature extension support
+- `g04` GPUI-native component parity, runtime proof, downstream GPUI adoption,
+  and docs promotion beyond the internal preview baseline
 
 ## Planning Standard
 
@@ -54,6 +56,6 @@ express a real program rather than three or four umbrella headings.
 
 ## Next Task
 
-`g03` is complete. Do not open a new generation until it has a narrower,
-artifact-backed cutover plan instead of a generic continuation of hardening or
-adoption work.
+Execute `g04` in order, continuing with GPUI demo-app parity implementation so
+the rebuilt Svelte target becomes a real side-by-side reference before
+downstream GPUI proof resumes.

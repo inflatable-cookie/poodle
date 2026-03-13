@@ -56,8 +56,8 @@ function route(
   };
 }
 
-const noShippedGpuiProof = [
-  "GPUI runtime evidence is not shipped for this section yet, so Svelte behavior cannot be promoted to native assistive-technology proof.",
+const gpuiManualProofRequired = [
+  "GPUI proof posture is explicit for this section now, but mounted native review and assistive-technology traces are still required before it can be promoted beyond manual evidence.",
 ];
 
 const accessibilityAuditConfig: Record<DocsSectionId, AccessibilityAuditConfig> = {
@@ -95,7 +95,7 @@ const accessibilityAuditConfig: Record<DocsSectionId, AccessibilityAuditConfig> 
       focus: "explicit",
       keyboard: "hybrid",
       announcements: "hybrid",
-      gpui: "blocked",
+      gpui: "manual",
     },
     automatedChecks: [
       "invalid, pending, and disabled form review routes are stable",
@@ -109,7 +109,10 @@ const accessibilityAuditConfig: Record<DocsSectionId, AccessibilityAuditConfig> 
       "Browser form semantics come from native inputs, while GPUI will need explicit accessible tree nodes plus announcement wiring.",
       "Validation messaging parity must be proven separately for native focus movement and error exposure.",
     ],
-    blockerNotes: noShippedGpuiProof,
+    blockerNotes: [
+      ...gpuiManualProofRequired,
+      "Field widgets, validation summaries, and remediation flows still need mounted GPUI focus and announcement traces.",
+    ],
     reviewRoutes: [
       route("form-suite", "baseline", "Default form suite audit."),
       route("form-suite", "light", "Light-theme contrast and field grouping audit.", {
@@ -127,7 +130,7 @@ const accessibilityAuditConfig: Record<DocsSectionId, AccessibilityAuditConfig> 
       focus: "hybrid",
       keyboard: "hybrid",
       announcements: "manual",
-      gpui: "blocked",
+      gpui: "manual",
     },
     automatedChecks: [
       "table review routes stay stable for default and light-theme audits",
@@ -141,7 +144,10 @@ const accessibilityAuditConfig: Record<DocsSectionId, AccessibilityAuditConfig> 
       "HTML table semantics do not translate directly to GPUI; native structured data surfaces will require explicit accessible relationships.",
       "Row focus and selection narration cannot be claimed cross-runtime yet.",
     ],
-    blockerNotes: noShippedGpuiProof,
+    blockerNotes: [
+      ...gpuiManualProofRequired,
+      "Row narration, sort-state exposure, and selection feedback still need mounted GPUI table evidence.",
+    ],
     reviewRoutes: [
       route("table-suite", "baseline", "Primary table interaction audit."),
       route("table-suite", "light", "Light-theme table review.", {
@@ -156,7 +162,7 @@ const accessibilityAuditConfig: Record<DocsSectionId, AccessibilityAuditConfig> 
       focus: "hybrid",
       keyboard: "hybrid",
       announcements: "manual",
-      gpui: "blocked",
+      gpui: "manual",
     },
     automatedChecks: [
       "browse routes remain stable for ready and empty-state review",
@@ -170,7 +176,10 @@ const accessibilityAuditConfig: Record<DocsSectionId, AccessibilityAuditConfig> 
       "DOM list semantics and browser search fields currently do part of the accessibility work automatically.",
       "Native browse-shell parity will need explicit narration for result-count and progressive-loading state.",
     ],
-    blockerNotes: noShippedGpuiProof,
+    blockerNotes: [
+      ...gpuiManualProofRequired,
+      "Result-count changes, loading posture, and filter-focus recovery remain native browse-shell review work.",
+    ],
     reviewRoutes: [
       route("browse-suite", "baseline", "Default browse audit."),
       route("browse-suite", "light", "Light-theme browse-shell review.", {
@@ -185,7 +194,7 @@ const accessibilityAuditConfig: Record<DocsSectionId, AccessibilityAuditConfig> 
       focus: "hybrid",
       keyboard: "hybrid",
       announcements: "manual",
-      gpui: "blocked",
+      gpui: "manual",
     },
     automatedChecks: [
       "detail routes remain stable for metadata and action review",
@@ -199,7 +208,10 @@ const accessibilityAuditConfig: Record<DocsSectionId, AccessibilityAuditConfig> 
       "Structured metadata is explicit in Svelte through DOM text order, but GPUI will need deliberate accessible grouping.",
       "Cross-pane navigation expectations remain unproven natively.",
     ],
-    blockerNotes: noShippedGpuiProof,
+    blockerNotes: [
+      ...gpuiManualProofRequired,
+      "Metadata narration and cross-pane focus order still need mounted GPUI detail-shell verification.",
+    ],
     reviewRoutes: [
       route("detail-suite", "baseline", "Primary detail layout audit."),
       route("detail-suite", "light", "Light-theme detail contrast audit.", {
@@ -214,7 +226,7 @@ const accessibilityAuditConfig: Record<DocsSectionId, AccessibilityAuditConfig> 
       focus: "hybrid",
       keyboard: "hybrid",
       announcements: "hybrid",
-      gpui: "blocked",
+      gpui: "manual",
     },
     automatedChecks: [
       "picker routes remain stable for single, multiple, and modal review",
@@ -228,7 +240,10 @@ const accessibilityAuditConfig: Record<DocsSectionId, AccessibilityAuditConfig> 
       "Browser overlays rely on DOM focus scope patterns that do not automatically map to GPUI.",
       "Selection announcement and active-descendant style behavior still need native proof.",
     ],
-    blockerNotes: noShippedGpuiProof,
+    blockerNotes: [
+      ...gpuiManualProofRequired,
+      "Popover or modal focus containment, active-item narration, and close recovery still require mounted GPUI picker evidence.",
+    ],
     reviewRoutes: [
       route("picker-suite", "baseline", "Primary picker audit."),
       route("picker-suite", "light", "Light-theme picker review.", {
@@ -246,7 +261,7 @@ const accessibilityAuditConfig: Record<DocsSectionId, AccessibilityAuditConfig> 
       focus: "hybrid",
       keyboard: "manual",
       announcements: "manual",
-      gpui: "blocked",
+      gpui: "manual",
     },
     automatedChecks: [
       "media preview routes remain stable for ready and empty-state review",
@@ -260,7 +275,10 @@ const accessibilityAuditConfig: Record<DocsSectionId, AccessibilityAuditConfig> 
       "Media previews depend on browser-native image and document affordances that are not equivalent to GPUI surfaces.",
       "Playback, focus, and preview fallback narration remain native-runtime debt.",
     ],
-    blockerNotes: noShippedGpuiProof,
+    blockerNotes: [
+      ...gpuiManualProofRequired,
+      "Media playback, document preview, and unavailable-preview fallback narration remain runtime-specific GPUI debt.",
+    ],
     reviewRoutes: [
       route("media-suite", "baseline", "Primary media review."),
       route("media-suite", "light", "Light-theme media audit.", {
@@ -275,7 +293,7 @@ const accessibilityAuditConfig: Record<DocsSectionId, AccessibilityAuditConfig> 
       focus: "hybrid",
       keyboard: "explicit",
       announcements: "hybrid",
-      gpui: "blocked",
+      gpui: "manual",
     },
     automatedChecks: [
       "notification routes remain stable for banner and toast review",
@@ -289,7 +307,10 @@ const accessibilityAuditConfig: Record<DocsSectionId, AccessibilityAuditConfig> 
       "DOM live-region behavior and toast timing do not imply equivalent native announcement behavior.",
       "Notification queue narration will need runtime-specific proof in GPUI.",
     ],
-    blockerNotes: noShippedGpuiProof,
+    blockerNotes: [
+      ...gpuiManualProofRequired,
+      "Native toast timing, queue narration, and escalation between polite and assertive announcements still need mounted GPUI review.",
+    ],
     reviewRoutes: [
       route("notification-suite", "baseline", "Primary notification audit."),
       route("notification-suite", "light", "Light-theme notification tone audit.", {
@@ -304,7 +325,7 @@ const accessibilityAuditConfig: Record<DocsSectionId, AccessibilityAuditConfig> 
       focus: "hybrid",
       keyboard: "explicit",
       announcements: "hybrid",
-      gpui: "blocked",
+      gpui: "manual",
     },
     automatedChecks: [
       "command review routes remain stable for modal and inline discovery",
@@ -318,7 +339,10 @@ const accessibilityAuditConfig: Record<DocsSectionId, AccessibilityAuditConfig> 
       "Browser dialog, list, and focus-lock patterns do not establish native command palette accessibility automatically.",
       "Keyboard discovery and announcement behavior need standalone GPUI proof.",
     ],
-    blockerNotes: noShippedGpuiProof,
+    blockerNotes: [
+      ...gpuiManualProofRequired,
+      "Modal focus recovery, active-result narration, and execution feedback remain command-palette-specific GPUI review work.",
+    ],
     reviewRoutes: [
       route("command-suite", "baseline", "Primary command discovery audit."),
       route("command-suite", "light", "Light-theme command review.", {
@@ -333,7 +357,7 @@ const accessibilityAuditConfig: Record<DocsSectionId, AccessibilityAuditConfig> 
       focus: "hybrid",
       keyboard: "hybrid",
       announcements: "manual",
-      gpui: "blocked",
+      gpui: "manual",
     },
     automatedChecks: [
       "workspace routes remain stable for dock and persistence review",
@@ -347,7 +371,10 @@ const accessibilityAuditConfig: Record<DocsSectionId, AccessibilityAuditConfig> 
       "Complex shell focus scopes and docking semantics are likely to diverge most between DOM and GPUI.",
       "Native accessible region naming and movement remain unproven for this section.",
     ],
-    blockerNotes: noShippedGpuiProof,
+    blockerNotes: [
+      ...gpuiManualProofRequired,
+      "Dock-region naming, multi-panel traversal, and layout-change narration still require mounted GPUI shell evidence.",
+    ],
     reviewRoutes: [
       route("workspace-suite", "baseline", "Primary workspace shell audit."),
       route("workspace-suite", "light", "Light-theme workspace review.", {
@@ -418,12 +445,12 @@ export const accessibilityAuditBoundary = {
   automated: [
     "Every docs section must have a machine-readable accessibility audit target.",
     "Each target must list audit-area status, automated checks, manual checks, and stable review routes.",
-    "GPUI-blocked targets must name the blocker instead of implying native proof from Svelte behavior.",
+    "GPUI manual or blocked targets must name the remaining blockers instead of implying native proof from Svelte behavior.",
   ],
   manual: [
     "Screen-reader announcement quality, keyboard rhythm, and focus recovery still require human review.",
     "Cross-runtime deltas between browser semantics and GPUI native accessibility must be documented explicitly.",
-    "Preview coverage can seed accessibility review, but it cannot claim native assistive-technology conformance without runtime evidence.",
+    "Preview coverage and crate tests can seed accessibility review, but they cannot claim native assistive-technology conformance without runtime evidence.",
   ],
 } as const;
 

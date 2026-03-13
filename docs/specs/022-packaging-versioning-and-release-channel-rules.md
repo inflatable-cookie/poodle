@@ -70,6 +70,9 @@ The current release posture is:
 - `@pug/svelte-composites`
 - `@pug/svelte-workstation`
 - `pug-gpui-tokens`
+- `pug-gpui-primitives`
+- `pug-gpui-composites`
+- `pug-gpui-workstation`
 
 ### Internal Packages
 
@@ -107,6 +110,9 @@ Each release-capable tranche should document:
 - `packages/svelte/preview/package.json`
 - `packages/bridges/underlay/package.json`
 - `packages/gpui/tokens/Cargo.toml`
+- `packages/gpui/primitives/Cargo.toml`
+- `packages/gpui/composites/Cargo.toml`
+- `packages/gpui/workstation/Cargo.toml`
 
 ## Next Task
 

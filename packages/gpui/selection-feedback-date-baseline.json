@@ -1,0 +1,52 @@
+{
+  "generation": "g04.005",
+  "crateName": "pug-gpui-primitives",
+  "cratePath": "packages/gpui/primitives",
+  "tokenSource": "pug-gpui-tokens",
+  "contractIds": [
+    "badge",
+    "calendar",
+    "checkbox",
+    "date-picker",
+    "date-range-picker",
+    "date-time-picker",
+    "date-time-range-picker",
+    "progress",
+    "radio-group",
+    "range-calendar",
+    "segmented-control",
+    "select",
+    "slider",
+    "status-indicator",
+    "switch",
+    "time-field"
+  ],
+  "exportNames": [
+    "BadgeSpec",
+    "CalendarSpec",
+    "CheckboxSpec",
+    "DatePickerSpec",
+    "DateRangePickerSpec",
+    "DateTimePickerSpec",
+    "DateTimeRangePickerSpec",
+    "ProgressSpec",
+    "RadioGroupSpec",
+    "RangeCalendarSpec",
+    "SegmentedControlSpec",
+    "SelectSpec",
+    "SliderSpec",
+    "StatusIndicatorSpec",
+    "SwitchSpec",
+    "TimeFieldSpec"
+  ],
+  "knownDeltas": [
+    "The crate now freezes selection, compact feedback, and date-time value semantics as token-backed GPUI specs before mounted native widgets exist for every control family.",
+    "Roving-focus, open-state, range, and popup ownership semantics are explicit in the API even where actual focus and overlay plumbing remain later runtime work.",
+    "Date and time values remain contract-owned local strings or objects rather than platform-native date objects or timestamps."
+  ],
+  "nonGoals": [
+    "Do not treat this tranche as proof that GPUI overlay, disclosure, navigation, menu, or workstation primitives are complete.",
+    "Do not replace contract-owned value objects with runtime-native date or time objects in the public API.",
+    "Do not claim final native accessibility proof from spec-level selection and popup models alone."
+  ]
+}

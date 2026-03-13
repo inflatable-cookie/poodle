@@ -1,7 +1,7 @@
 # Specs
 
 Status: active
-Updated: 2026-03-12
+Updated: 2026-03-13
 
 Specs will hold normative definitions once Pug starts freezing token schemas,
 component contracts, parity rules, and emitted artifact shapes.
@@ -63,9 +63,22 @@ component contracts, parity rules, and emitted artifact shapes.
 - `045-ecosystem-acceptance-and-long-tail-regression-baseline.md`
 - `046-reference-apps-onboarding-and-public-example-baseline.md`
 - `047-generation-closeout-and-next-program-posture.md`
+- `048-gpui-contract-audit-priority-and-side-by-side-review-baseline.md`
+- `049-gpui-theme-runtime-and-native-preview-app-baseline.md`
+- `050-gpui-structural-primitives-baseline.md`
+- `051-gpui-action-text-entry-and-field-primitives-baseline.md`
+- `052-gpui-selection-feedback-and-date-time-primitives-baseline.md`
+- `053-gpui-overlay-disclosure-navigation-and-menu-primitives-baseline.md`
+- `054-gpui-form-validation-and-remediation-composite-baseline.md`
+- `055-gpui-data-browse-detail-picker-and-media-composite-baseline.md`
+- `056-gpui-workstation-shell-command-and-layout-baseline.md`
+- `057-gpui-native-accessibility-focus-keyboard-and-assistive-technology-proof-baseline.md`
+- `058-cross-runtime-parity-report-delta-register-and-acceptance-harness-expansion.md`
+- `059-shared-demo-app-audit-and-target-freeze-baseline.md`
+- `060-shared-demo-app-contract-section-model-and-parity-checklist.md`
+- `061-svelte-demo-app-rebuild-and-coverage-upgrade-baseline.md`
 
 ## Next Task
 
-`g03` is complete. Use the full spec set as the cutover frame for any future
-generation instead of reopening release, accessibility, acceptance, or
-adoption-baseline work implicitly.
+Use the full spec set while executing `g04`, continuing with the GPUI demo-app
+parity implementation now that the Svelte target is rebuilt and explicit.

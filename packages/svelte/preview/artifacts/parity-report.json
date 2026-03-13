@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-03-12T20:50:33.726Z",
+  "generatedAt": "2026-03-13T21:06:13.673Z",
   "artifact": "packages/svelte/preview/artifacts/parity-report.json",
   "previewBasePath": "/",
   "automatedBoundary": [
@@ -11,7 +11,7 @@
   "manualBoundary": [
     "final visual acceptance and hierarchy judgment",
     "assistive technology narration quality",
-    "GPUI runtime parity review until a runnable GPUI harness exists",
+    "mounted GPUI runtime parity review until the native preview and acceptance harness move beyond artifact-backed evidence",
     "interaction nuance such as drag feel, resize feel, and motion quality"
   ],
   "summary": {
@@ -29,6 +29,145 @@
       "not-applicable": 1
     }
   },
+  "crossRuntime": {
+    "generation": "g04.011",
+    "summary": {
+      "sectionCount": 9,
+      "directParityCount": 5,
+      "nativeAdaptationCount": 4,
+      "deferredCount": 0,
+      "sideBySideSectionCount": 8,
+      "manualGpuiProofCount": 9,
+      "blockedGpuiProofCount": 0
+    },
+    "sideBySideSections": [
+      {
+        "sectionId": "form-suite",
+        "parityMode": "direct-parity",
+        "deltaIds": []
+      },
+      {
+        "sectionId": "table-suite",
+        "parityMode": "native-adaptation",
+        "deltaIds": [
+          "native-table-and-list-structured-narration"
+        ]
+      },
+      {
+        "sectionId": "browse-suite",
+        "parityMode": "native-adaptation",
+        "deltaIds": [
+          "native-table-and-list-structured-narration"
+        ]
+      },
+      {
+        "sectionId": "detail-suite",
+        "parityMode": "direct-parity",
+        "deltaIds": []
+      },
+      {
+        "sectionId": "picker-suite",
+        "parityMode": "native-adaptation",
+        "deltaIds": [
+          "native-overlay-focus-scope-and-dismissal"
+        ]
+      },
+      {
+        "sectionId": "notification-suite",
+        "parityMode": "direct-parity",
+        "deltaIds": [
+          "notification-and-command-announcement-timing"
+        ]
+      },
+      {
+        "sectionId": "command-suite",
+        "parityMode": "direct-parity",
+        "deltaIds": [
+          "native-overlay-focus-scope-and-dismissal",
+          "notification-and-command-announcement-timing"
+        ]
+      },
+      {
+        "sectionId": "workspace-suite",
+        "parityMode": "direct-parity",
+        "deltaIds": [
+          "native-overlay-focus-scope-and-dismissal",
+          "workstation-dock-region-and-multi-window-shell-behavior"
+        ]
+      }
+    ],
+    "deltaRegister": [
+      {
+        "id": "native-table-and-list-structured-narration",
+        "status": "revisit",
+        "sectionIds": [
+          "table-suite",
+          "browse-suite"
+        ]
+      },
+      {
+        "id": "native-overlay-focus-scope-and-dismissal",
+        "status": "revisit",
+        "sectionIds": [
+          "picker-suite",
+          "command-suite",
+          "workspace-suite"
+        ]
+      },
+      {
+        "id": "native-media-renderer-and-fallback-behavior",
+        "status": "allowed",
+        "sectionIds": [
+          "media-suite"
+        ]
+      },
+      {
+        "id": "notification-and-command-announcement-timing",
+        "status": "revisit",
+        "sectionIds": [
+          "notification-suite",
+          "command-suite"
+        ]
+      },
+      {
+        "id": "workstation-dock-region-and-multi-window-shell-behavior",
+        "status": "revisit",
+        "sectionIds": [
+          "workspace-suite"
+        ]
+      }
+    ],
+    "acceptanceHarness": {
+      "suiteId": "gpui-target-matrix",
+      "status": "matrix-only",
+      "coveredPackages": [
+        "pug-gpui-tokens",
+        "pug-gpui-primitives",
+        "pug-gpui-composites",
+        "pug-gpui-workstation"
+      ],
+      "evidenceArtifacts": [
+        "packages/gpui/tokens/multi-app-validation.json",
+        "packages/gpui/cross-runtime-parity-report.json",
+        "packages/gpui/native-accessibility-proof.json",
+        "packages/svelte/preview/artifacts/parity-report.json",
+        "packages/svelte/preview/artifacts/accessibility-report.json",
+        "packages/gpui/tokens/README.md",
+        "docs/specs/042-gpui-multi-app-validation-target-matrix.md"
+      ],
+      "requiredChecks": [
+        "bun run parity:report",
+        "bun run accessibility:report",
+        "bun run docs:lint",
+        "bun run docs:build"
+      ],
+      "blockers": [
+        "The repo still lacks a mounted GPUI preview app and native acceptance routes comparable to the Svelte preview surface.",
+        "This suite now carries real GPUI package and parity evidence, but it is still artifact-backed rather than runnable downstream production proof.",
+        "Downstream GPUI adoption remains future work, so this suite should still be read as validation pressure rather than deployment readiness."
+      ]
+    }
+  },
   "packageSurfaceCoverage": {
     "summary": [
       {
@@ -36,24 +175,24 @@
         "exportCount": 63,
         "componentCount": 63,
         "helperCount": 0,
-        "previewedCount": 14,
-        "contractOnlyCount": 49
+        "previewedCount": 63,
+        "contractOnlyCount": 0
       },
       {
         "packageName": "@pug/svelte-composites",
         "exportCount": 20,
         "componentCount": 20,
         "helperCount": 0,
-        "previewedCount": 18,
-        "contractOnlyCount": 2
+        "previewedCount": 20,
+        "contractOnlyCount": 0
       },
       {
         "packageName": "@pug/svelte-workstation",
         "exportCount": 14,
         "componentCount": 12,
         "helperCount": 2,
-        "previewedCount": 12,
-        "contractOnlyCount": 2
+        "previewedCount": 14,
+        "contractOnlyCount": 0
       }
     ],
     "exports": [
@@ -269,32 +408,46 @@
         "packageName": "@pug/svelte-composites",
         "exportName": "PickerShell",
         "kind": "component",
-        "status": "contract-only",
-        "note": "The composite is public and contract-backed, but the preview currently covers the workflow through adjacent exported shells instead of a direct specimen.",
-        "sectionIds": [],
-        "sectionTitles": []
+        "status": "previewed",
+        "note": "Picker and detail screens now exercise direct selection summary and picker-shell posture in addition to relation selection.",
+        "sectionIds": [
+          "picker-suite",
+          "detail-suite"
+        ],
+        "sectionTitles": [
+          "Picker, relation, and selection workflows",
+          "Detail display, cards, headers, and navigation"
+        ]
       },
       {
         "packageName": "@pug/svelte-composites",
         "exportName": "RelationPicker",
         "kind": "component",
         "status": "previewed",
-        "note": "Picker suite exercises relation selection and attach-or-choose flow posture.",
+        "note": "Picker and detail screens now exercise direct selection summary and picker-shell posture in addition to relation selection.",
         "sectionIds": [
-          "picker-suite"
+          "picker-suite",
+          "detail-suite"
         ],
         "sectionTitles": [
-          "Picker, relation, and selection workflows"
+          "Picker, relation, and selection workflows",
+          "Detail display, cards, headers, and navigation"
         ]
       },
       {
         "packageName": "@pug/svelte-composites",
         "exportName": "SelectionSummary",
         "kind": "component",
-        "status": "contract-only",
-        "note": "The composite is public and contract-backed, but the preview currently covers the workflow through adjacent exported shells instead of a direct specimen.",
-        "sectionIds": [],
-        "sectionTitles": []
+        "status": "previewed",
+        "note": "Picker and detail screens now exercise direct selection summary and picker-shell posture in addition to relation selection.",
+        "sectionIds": [
+          "picker-suite",
+          "detail-suite"
+        ],
+        "sectionTitles": [
+          "Picker, relation, and selection workflows",
+          "Detail display, cards, headers, and navigation"
+        ]
       },
       {
         "packageName": "@pug/svelte-composites",
@@ -314,7 +467,7 @@
         "exportName": "Accordion",
         "kind": "component",
         "status": "previewed",
-        "note": "The preview shell and catalog hub now exercise foundational disclosure, control, and chip primitives directly instead of custom shell-only controls.",
+        "note": "The docs shell and shared demo navigation exercise foundational disclosure, control, and chip primitives directly instead of custom shell-only controls.",
         "sectionIds": [
           "catalog-hub"
         ],
@@ -326,17 +479,21 @@
         "packageName": "@pug/svelte-primitives",
         "exportName": "Badge",
         "kind": "component",
-        "status": "contract-only",
-        "note": "The primitive is exported and contract-backed, but the preview does not yet isolate a dedicated review specimen for it.",
-        "sectionIds": [],
-        "sectionTitles": []
+        "status": "previewed",
+        "note": "The rebuilt shared demo now includes a dedicated primitive coverage deck so every public primitive export is directly reviewable from the parity target shell.",
+        "sectionIds": [
+          "catalog-hub"
+        ],
+        "sectionTitles": [
+          "Catalog hub"
+        ]
       },
       {
         "packageName": "@pug/svelte-primitives",
         "exportName": "Banner",
         "kind": "component",
         "status": "previewed",
-        "note": "Notification suite exercises persistent and loading state posture.",
+        "note": "The rebuilt shell now exercises shared feedback, menu, and toolbar primitives through the notification-facing shared demo route.",
         "sectionIds": [
           "notification-suite"
         ],
@@ -348,17 +505,21 @@
         "packageName": "@pug/svelte-primitives",
         "exportName": "Box",
         "kind": "component",
-        "status": "contract-only",
-        "note": "The primitive is exported and contract-backed, but the preview does not yet isolate a dedicated review specimen for it.",
-        "sectionIds": [],
-        "sectionTitles": []
+        "status": "previewed",
+        "note": "The rebuilt shared demo now includes a dedicated primitive coverage deck so every public primitive export is directly reviewable from the parity target shell.",
+        "sectionIds": [
+          "catalog-hub"
+        ],
+        "sectionTitles": [
+          "Catalog hub"
+        ]
       },
       {
         "packageName": "@pug/svelte-primitives",
         "exportName": "Button",
         "kind": "component",
         "status": "previewed",
-        "note": "The preview shell and catalog hub now exercise foundational disclosure, control, and chip primitives directly instead of custom shell-only controls.",
+        "note": "The docs shell and shared demo navigation exercise foundational disclosure, control, and chip primitives directly instead of custom shell-only controls.",
         "sectionIds": [
           "catalog-hub"
         ],
@@ -370,26 +531,34 @@
         "packageName": "@pug/svelte-primitives",
         "exportName": "Calendar",
         "kind": "component",
-        "status": "contract-only",
-        "note": "The primitive is exported and contract-backed, but the preview does not yet isolate a dedicated review specimen for it.",
-        "sectionIds": [],
-        "sectionTitles": []
+        "status": "previewed",
+        "note": "The rebuilt shared demo now includes a dedicated primitive coverage deck so every public primitive export is directly reviewable from the parity target shell.",
+        "sectionIds": [
+          "catalog-hub"
+        ],
+        "sectionTitles": [
+          "Catalog hub"
+        ]
       },
       {
         "packageName": "@pug/svelte-primitives",
         "exportName": "Callout",
         "kind": "component",
-        "status": "contract-only",
-        "note": "The primitive is exported and contract-backed, but the preview does not yet isolate a dedicated review specimen for it.",
-        "sectionIds": [],
-        "sectionTitles": []
+        "status": "previewed",
+        "note": "Form and validation screen now exercises the broader field, text-entry, selection, and remediation primitive set directly.",
+        "sectionIds": [
+          "form-suite"
+        ],
+        "sectionTitles": [
+          "Form baseline and validation posture"
+        ]
       },
       {
         "packageName": "@pug/svelte-primitives",
         "exportName": "Checkbox",
         "kind": "component",
         "status": "previewed",
-        "note": "The preview shell and catalog hub now exercise foundational disclosure, control, and chip primitives directly instead of custom shell-only controls.",
+        "note": "The docs shell and shared demo navigation exercise foundational disclosure, control, and chip primitives directly instead of custom shell-only controls.",
         "sectionIds": [
           "catalog-hub"
         ],
@@ -402,7 +571,7 @@
         "exportName": "Collapsible",
         "kind": "component",
         "status": "previewed",
-        "note": "The preview shell and catalog hub now exercise foundational disclosure, control, and chip primitives directly instead of custom shell-only controls.",
+        "note": "The docs shell and shared demo navigation exercise foundational disclosure, control, and chip primitives directly instead of custom shell-only controls.",
         "sectionIds": [
           "catalog-hub"
         ],
@@ -414,89 +583,125 @@
         "packageName": "@pug/svelte-primitives",
         "exportName": "Combobox",
         "kind": "component",
-        "status": "contract-only",
-        "note": "The primitive is exported and contract-backed, but the preview does not yet isolate a dedicated review specimen for it.",
-        "sectionIds": [],
-        "sectionTitles": []
+        "status": "previewed",
+        "note": "The rebuilt shared demo now includes a dedicated primitive coverage deck so every public primitive export is directly reviewable from the parity target shell.",
+        "sectionIds": [
+          "catalog-hub"
+        ],
+        "sectionTitles": [
+          "Catalog hub"
+        ]
       },
       {
         "packageName": "@pug/svelte-primitives",
         "exportName": "ContextMenu",
         "kind": "component",
-        "status": "contract-only",
-        "note": "The primitive is exported and contract-backed, but the preview does not yet isolate a dedicated review specimen for it.",
-        "sectionIds": [],
-        "sectionTitles": []
+        "status": "previewed",
+        "note": "The rebuilt shared demo now includes a dedicated primitive coverage deck so every public primitive export is directly reviewable from the parity target shell.",
+        "sectionIds": [
+          "catalog-hub"
+        ],
+        "sectionTitles": [
+          "Catalog hub"
+        ]
       },
       {
         "packageName": "@pug/svelte-primitives",
         "exportName": "DatePicker",
         "kind": "component",
-        "status": "contract-only",
-        "note": "The primitive is exported and contract-backed, but the preview does not yet isolate a dedicated review specimen for it.",
-        "sectionIds": [],
-        "sectionTitles": []
+        "status": "previewed",
+        "note": "Form and validation screen now exercises the broader field, text-entry, selection, and remediation primitive set directly.",
+        "sectionIds": [
+          "form-suite"
+        ],
+        "sectionTitles": [
+          "Form baseline and validation posture"
+        ]
       },
       {
         "packageName": "@pug/svelte-primitives",
         "exportName": "DateRangePicker",
         "kind": "component",
-        "status": "contract-only",
-        "note": "The primitive is exported and contract-backed, but the preview does not yet isolate a dedicated review specimen for it.",
-        "sectionIds": [],
-        "sectionTitles": []
+        "status": "previewed",
+        "note": "The rebuilt shared demo now includes a dedicated primitive coverage deck so every public primitive export is directly reviewable from the parity target shell.",
+        "sectionIds": [
+          "catalog-hub"
+        ],
+        "sectionTitles": [
+          "Catalog hub"
+        ]
       },
       {
         "packageName": "@pug/svelte-primitives",
         "exportName": "DateTimePicker",
         "kind": "component",
-        "status": "contract-only",
-        "note": "The primitive is exported and contract-backed, but the preview does not yet isolate a dedicated review specimen for it.",
-        "sectionIds": [],
-        "sectionTitles": []
+        "status": "previewed",
+        "note": "The rebuilt shared demo now includes a dedicated primitive coverage deck so every public primitive export is directly reviewable from the parity target shell.",
+        "sectionIds": [
+          "catalog-hub"
+        ],
+        "sectionTitles": [
+          "Catalog hub"
+        ]
       },
       {
         "packageName": "@pug/svelte-primitives",
         "exportName": "DateTimeRangePicker",
         "kind": "component",
-        "status": "contract-only",
-        "note": "The primitive is exported and contract-backed, but the preview does not yet isolate a dedicated review specimen for it.",
-        "sectionIds": [],
-        "sectionTitles": []
+        "status": "previewed",
+        "note": "The rebuilt shared demo now includes a dedicated primitive coverage deck so every public primitive export is directly reviewable from the parity target shell.",
+        "sectionIds": [
+          "catalog-hub"
+        ],
+        "sectionTitles": [
+          "Catalog hub"
+        ]
       },
       {
         "packageName": "@pug/svelte-primitives",
         "exportName": "Dialog",
         "kind": "component",
-        "status": "contract-only",
-        "note": "The primitive is exported and contract-backed, but the preview does not yet isolate a dedicated review specimen for it.",
-        "sectionIds": [],
-        "sectionTitles": []
+        "status": "previewed",
+        "note": "Form and validation screen now exercises the broader field, text-entry, selection, and remediation primitive set directly.",
+        "sectionIds": [
+          "form-suite"
+        ],
+        "sectionTitles": [
+          "Form baseline and validation posture"
+        ]
       },
       {
         "packageName": "@pug/svelte-primitives",
         "exportName": "Drawer",
         "kind": "component",
-        "status": "contract-only",
-        "note": "The primitive is exported and contract-backed, but the preview does not yet isolate a dedicated review specimen for it.",
-        "sectionIds": [],
-        "sectionTitles": []
+        "status": "previewed",
+        "note": "The shared demo target now visibly adopts additional workflow and overlay primitives even when no single legacy docs section owns them cleanly.",
+        "sectionIds": [
+          "catalog-hub"
+        ],
+        "sectionTitles": [
+          "Catalog hub"
+        ]
       },
       {
         "packageName": "@pug/svelte-primitives",
         "exportName": "EditableLabel",
         "kind": "component",
-        "status": "contract-only",
-        "note": "The primitive is exported and contract-backed, but the preview does not yet isolate a dedicated review specimen for it.",
-        "sectionIds": [],
-        "sectionTitles": []
+        "status": "previewed",
+        "note": "The rebuilt shared demo now includes a dedicated primitive coverage deck so every public primitive export is directly reviewable from the parity target shell.",
+        "sectionIds": [
+          "catalog-hub"
+        ],
+        "sectionTitles": [
+          "Catalog hub"
+        ]
       },
       {
         "packageName": "@pug/svelte-primitives",
         "exportName": "Field",
         "kind": "component",
         "status": "previewed",
-        "note": "Form suite exercises the current field, validation, and text-entry baseline.",
+        "note": "Form and validation screen now exercises the broader field, text-entry, selection, and remediation primitive set directly.",
         "sectionIds": [
           "form-suite"
         ],
@@ -509,7 +714,7 @@
         "exportName": "FormActions",
         "kind": "component",
         "status": "previewed",
-        "note": "Form suite exercises the current field, validation, and text-entry baseline.",
+        "note": "Form and validation screen now exercises the broader field, text-entry, selection, and remediation primitive set directly.",
         "sectionIds": [
           "form-suite"
         ],
@@ -521,98 +726,138 @@
         "packageName": "@pug/svelte-primitives",
         "exportName": "Grid",
         "kind": "component",
-        "status": "contract-only",
-        "note": "The primitive is exported and contract-backed, but the preview does not yet isolate a dedicated review specimen for it.",
-        "sectionIds": [],
-        "sectionTitles": []
+        "status": "previewed",
+        "note": "The rebuilt shared demo now includes a dedicated primitive coverage deck so every public primitive export is directly reviewable from the parity target shell.",
+        "sectionIds": [
+          "catalog-hub"
+        ],
+        "sectionTitles": [
+          "Catalog hub"
+        ]
       },
       {
         "packageName": "@pug/svelte-primitives",
         "exportName": "HoverCard",
         "kind": "component",
-        "status": "contract-only",
-        "note": "The primitive is exported and contract-backed, but the preview does not yet isolate a dedicated review specimen for it.",
-        "sectionIds": [],
-        "sectionTitles": []
+        "status": "previewed",
+        "note": "The rebuilt shared demo now includes a dedicated primitive coverage deck so every public primitive export is directly reviewable from the parity target shell.",
+        "sectionIds": [
+          "catalog-hub"
+        ],
+        "sectionTitles": [
+          "Catalog hub"
+        ]
       },
       {
         "packageName": "@pug/svelte-primitives",
         "exportName": "IconButton",
         "kind": "component",
-        "status": "contract-only",
-        "note": "The primitive is exported and contract-backed, but the preview does not yet isolate a dedicated review specimen for it.",
-        "sectionIds": [],
-        "sectionTitles": []
+        "status": "previewed",
+        "note": "The rebuilt shared demo now includes a dedicated primitive coverage deck so every public primitive export is directly reviewable from the parity target shell.",
+        "sectionIds": [
+          "catalog-hub"
+        ],
+        "sectionTitles": [
+          "Catalog hub"
+        ]
       },
       {
         "packageName": "@pug/svelte-primitives",
         "exportName": "Inline",
         "kind": "component",
-        "status": "contract-only",
-        "note": "The primitive is exported and contract-backed, but the preview does not yet isolate a dedicated review specimen for it.",
-        "sectionIds": [],
-        "sectionTitles": []
+        "status": "previewed",
+        "note": "The rebuilt shared demo now includes a dedicated primitive coverage deck so every public primitive export is directly reviewable from the parity target shell.",
+        "sectionIds": [
+          "catalog-hub"
+        ],
+        "sectionTitles": [
+          "Catalog hub"
+        ]
       },
       {
         "packageName": "@pug/svelte-primitives",
         "exportName": "Menu",
         "kind": "component",
-        "status": "contract-only",
-        "note": "The primitive is exported and contract-backed, but the preview does not yet isolate a dedicated review specimen for it.",
-        "sectionIds": [],
-        "sectionTitles": []
+        "status": "previewed",
+        "note": "The rebuilt shell now exercises shared feedback, menu, and toolbar primitives through the notification-facing shared demo route.",
+        "sectionIds": [
+          "notification-suite"
+        ],
+        "sectionTitles": [
+          "Banners, toasts, skeletons, and remediation"
+        ]
       },
       {
         "packageName": "@pug/svelte-primitives",
         "exportName": "Menubar",
         "kind": "component",
-        "status": "contract-only",
-        "note": "The primitive is exported and contract-backed, but the preview does not yet isolate a dedicated review specimen for it.",
-        "sectionIds": [],
-        "sectionTitles": []
+        "status": "previewed",
+        "note": "The rebuilt shared demo now includes a dedicated primitive coverage deck so every public primitive export is directly reviewable from the parity target shell.",
+        "sectionIds": [
+          "catalog-hub"
+        ],
+        "sectionTitles": [
+          "Catalog hub"
+        ]
       },
       {
         "packageName": "@pug/svelte-primitives",
         "exportName": "Meter",
         "kind": "component",
-        "status": "contract-only",
-        "note": "The primitive is exported and contract-backed, but the preview does not yet isolate a dedicated review specimen for it.",
-        "sectionIds": [],
-        "sectionTitles": []
+        "status": "previewed",
+        "note": "The rebuilt shared demo now includes a dedicated primitive coverage deck so every public primitive export is directly reviewable from the parity target shell.",
+        "sectionIds": [
+          "catalog-hub"
+        ],
+        "sectionTitles": [
+          "Catalog hub"
+        ]
       },
       {
         "packageName": "@pug/svelte-primitives",
         "exportName": "NavigationMenu",
         "kind": "component",
-        "status": "contract-only",
-        "note": "The primitive is exported and contract-backed, but the preview does not yet isolate a dedicated review specimen for it.",
-        "sectionIds": [],
-        "sectionTitles": []
+        "status": "previewed",
+        "note": "The rebuilt shared demo now includes a dedicated primitive coverage deck so every public primitive export is directly reviewable from the parity target shell.",
+        "sectionIds": [
+          "catalog-hub"
+        ],
+        "sectionTitles": [
+          "Catalog hub"
+        ]
       },
       {
         "packageName": "@pug/svelte-primitives",
         "exportName": "NumberEntry",
         "kind": "component",
-        "status": "contract-only",
-        "note": "The primitive is exported and contract-backed, but the preview does not yet isolate a dedicated review specimen for it.",
-        "sectionIds": [],
-        "sectionTitles": []
+        "status": "previewed",
+        "note": "The rebuilt shared demo now includes a dedicated primitive coverage deck so every public primitive export is directly reviewable from the parity target shell.",
+        "sectionIds": [
+          "catalog-hub"
+        ],
+        "sectionTitles": [
+          "Catalog hub"
+        ]
       },
       {
         "packageName": "@pug/svelte-primitives",
         "exportName": "Pagination",
         "kind": "component",
-        "status": "contract-only",
-        "note": "The primitive is exported and contract-backed, but the preview does not yet isolate a dedicated review specimen for it.",
-        "sectionIds": [],
-        "sectionTitles": []
+        "status": "previewed",
+        "note": "The rebuilt shared demo now includes a dedicated primitive coverage deck so every public primitive export is directly reviewable from the parity target shell.",
+        "sectionIds": [
+          "catalog-hub"
+        ],
+        "sectionTitles": [
+          "Catalog hub"
+        ]
       },
       {
         "packageName": "@pug/svelte-primitives",
         "exportName": "Pill",
         "kind": "component",
         "status": "previewed",
-        "note": "The preview shell and catalog hub now exercise foundational disclosure, control, and chip primitives directly instead of custom shell-only controls.",
+        "note": "The docs shell and shared demo navigation exercise foundational disclosure, control, and chip primitives directly instead of custom shell-only controls.",
         "sectionIds": [
           "catalog-hub"
         ],
@@ -624,80 +869,112 @@
         "packageName": "@pug/svelte-primitives",
         "exportName": "PinInput",
         "kind": "component",
-        "status": "contract-only",
-        "note": "The primitive is exported and contract-backed, but the preview does not yet isolate a dedicated review specimen for it.",
-        "sectionIds": [],
-        "sectionTitles": []
+        "status": "previewed",
+        "note": "The rebuilt shared demo now includes a dedicated primitive coverage deck so every public primitive export is directly reviewable from the parity target shell.",
+        "sectionIds": [
+          "catalog-hub"
+        ],
+        "sectionTitles": [
+          "Catalog hub"
+        ]
       },
       {
         "packageName": "@pug/svelte-primitives",
         "exportName": "Popover",
         "kind": "component",
-        "status": "contract-only",
-        "note": "The primitive is exported and contract-backed, but the preview does not yet isolate a dedicated review specimen for it.",
-        "sectionIds": [],
-        "sectionTitles": []
+        "status": "previewed",
+        "note": "The shared demo target now visibly adopts additional workflow and overlay primitives even when no single legacy docs section owns them cleanly.",
+        "sectionIds": [
+          "catalog-hub"
+        ],
+        "sectionTitles": [
+          "Catalog hub"
+        ]
       },
       {
         "packageName": "@pug/svelte-primitives",
         "exportName": "Progress",
         "kind": "component",
-        "status": "contract-only",
-        "note": "The primitive is exported and contract-backed, but the preview does not yet isolate a dedicated review specimen for it.",
-        "sectionIds": [],
-        "sectionTitles": []
+        "status": "previewed",
+        "note": "The rebuilt shared demo now includes a dedicated primitive coverage deck so every public primitive export is directly reviewable from the parity target shell.",
+        "sectionIds": [
+          "catalog-hub"
+        ],
+        "sectionTitles": [
+          "Catalog hub"
+        ]
       },
       {
         "packageName": "@pug/svelte-primitives",
         "exportName": "RadioGroup",
         "kind": "component",
-        "status": "contract-only",
-        "note": "The primitive is exported and contract-backed, but the preview does not yet isolate a dedicated review specimen for it.",
-        "sectionIds": [],
-        "sectionTitles": []
+        "status": "previewed",
+        "note": "Form and validation screen now exercises the broader field, text-entry, selection, and remediation primitive set directly.",
+        "sectionIds": [
+          "form-suite"
+        ],
+        "sectionTitles": [
+          "Form baseline and validation posture"
+        ]
       },
       {
         "packageName": "@pug/svelte-primitives",
         "exportName": "RangeCalendar",
         "kind": "component",
-        "status": "contract-only",
-        "note": "The primitive is exported and contract-backed, but the preview does not yet isolate a dedicated review specimen for it.",
-        "sectionIds": [],
-        "sectionTitles": []
+        "status": "previewed",
+        "note": "The rebuilt shared demo now includes a dedicated primitive coverage deck so every public primitive export is directly reviewable from the parity target shell.",
+        "sectionIds": [
+          "catalog-hub"
+        ],
+        "sectionTitles": [
+          "Catalog hub"
+        ]
       },
       {
         "packageName": "@pug/svelte-primitives",
         "exportName": "RangeSlider",
         "kind": "component",
-        "status": "contract-only",
-        "note": "The primitive is exported and contract-backed, but the preview does not yet isolate a dedicated review specimen for it.",
-        "sectionIds": [],
-        "sectionTitles": []
+        "status": "previewed",
+        "note": "The rebuilt shared demo now includes a dedicated primitive coverage deck so every public primitive export is directly reviewable from the parity target shell.",
+        "sectionIds": [
+          "catalog-hub"
+        ],
+        "sectionTitles": [
+          "Catalog hub"
+        ]
       },
       {
         "packageName": "@pug/svelte-primitives",
         "exportName": "Rating",
         "kind": "component",
-        "status": "contract-only",
-        "note": "The primitive is exported and contract-backed, but the preview does not yet isolate a dedicated review specimen for it.",
-        "sectionIds": [],
-        "sectionTitles": []
+        "status": "previewed",
+        "note": "The rebuilt shared demo now includes a dedicated primitive coverage deck so every public primitive export is directly reviewable from the parity target shell.",
+        "sectionIds": [
+          "catalog-hub"
+        ],
+        "sectionTitles": [
+          "Catalog hub"
+        ]
       },
       {
         "packageName": "@pug/svelte-primitives",
         "exportName": "ScrollShell",
         "kind": "component",
-        "status": "contract-only",
-        "note": "The primitive is exported and contract-backed, but the preview does not yet isolate a dedicated review specimen for it.",
-        "sectionIds": [],
-        "sectionTitles": []
+        "status": "previewed",
+        "note": "The rebuilt shared demo now includes a dedicated primitive coverage deck so every public primitive export is directly reviewable from the parity target shell.",
+        "sectionIds": [
+          "catalog-hub"
+        ],
+        "sectionTitles": [
+          "Catalog hub"
+        ]
       },
       {
         "packageName": "@pug/svelte-primitives",
         "exportName": "SearchField",
         "kind": "component",
         "status": "previewed",
-        "note": "Form suite exercises the current field, validation, and text-entry baseline.",
+        "note": "Form and validation screen now exercises the broader field, text-entry, selection, and remediation primitive set directly.",
         "sectionIds": [
           "form-suite"
         ],
@@ -709,17 +986,21 @@
         "packageName": "@pug/svelte-primitives",
         "exportName": "SegmentedControl",
         "kind": "component",
-        "status": "contract-only",
-        "note": "The primitive is exported and contract-backed, but the preview does not yet isolate a dedicated review specimen for it.",
-        "sectionIds": [],
-        "sectionTitles": []
+        "status": "previewed",
+        "note": "The shared demo target now visibly adopts additional workflow and overlay primitives even when no single legacy docs section owns them cleanly.",
+        "sectionIds": [
+          "catalog-hub"
+        ],
+        "sectionTitles": [
+          "Catalog hub"
+        ]
       },
       {
         "packageName": "@pug/svelte-primitives",
         "exportName": "Select",
         "kind": "component",
         "status": "previewed",
-        "note": "The preview shell and catalog hub now exercise foundational disclosure, control, and chip primitives directly instead of custom shell-only controls.",
+        "note": "The docs shell and shared demo navigation exercise foundational disclosure, control, and chip primitives directly instead of custom shell-only controls.",
         "sectionIds": [
           "catalog-hub"
         ],
@@ -731,17 +1012,21 @@
         "packageName": "@pug/svelte-primitives",
         "exportName": "Separator",
         "kind": "component",
-        "status": "contract-only",
-        "note": "The primitive is exported and contract-backed, but the preview does not yet isolate a dedicated review specimen for it.",
-        "sectionIds": [],
-        "sectionTitles": []
+        "status": "previewed",
+        "note": "The rebuilt shared demo now includes a dedicated primitive coverage deck so every public primitive export is directly reviewable from the parity target shell.",
+        "sectionIds": [
+          "catalog-hub"
+        ],
+        "sectionTitles": [
+          "Catalog hub"
+        ]
       },
       {
         "packageName": "@pug/svelte-primitives",
         "exportName": "Skeleton",
         "kind": "component",
         "status": "previewed",
-        "note": "Notification suite exercises persistent and loading state posture.",
+        "note": "The rebuilt shell now exercises shared feedback, menu, and toolbar primitives through the notification-facing shared demo route.",
         "sectionIds": [
           "notification-suite"
         ],
@@ -753,98 +1038,138 @@
         "packageName": "@pug/svelte-primitives",
         "exportName": "Slider",
         "kind": "component",
-        "status": "contract-only",
-        "note": "The primitive is exported and contract-backed, but the preview does not yet isolate a dedicated review specimen for it.",
-        "sectionIds": [],
-        "sectionTitles": []
+        "status": "previewed",
+        "note": "The rebuilt shared demo now includes a dedicated primitive coverage deck so every public primitive export is directly reviewable from the parity target shell.",
+        "sectionIds": [
+          "catalog-hub"
+        ],
+        "sectionTitles": [
+          "Catalog hub"
+        ]
       },
       {
         "packageName": "@pug/svelte-primitives",
         "exportName": "Spacer",
         "kind": "component",
-        "status": "contract-only",
-        "note": "The primitive is exported and contract-backed, but the preview does not yet isolate a dedicated review specimen for it.",
-        "sectionIds": [],
-        "sectionTitles": []
+        "status": "previewed",
+        "note": "The rebuilt shared demo now includes a dedicated primitive coverage deck so every public primitive export is directly reviewable from the parity target shell.",
+        "sectionIds": [
+          "catalog-hub"
+        ],
+        "sectionTitles": [
+          "Catalog hub"
+        ]
       },
       {
         "packageName": "@pug/svelte-primitives",
         "exportName": "Stack",
         "kind": "component",
-        "status": "contract-only",
-        "note": "The primitive is exported and contract-backed, but the preview does not yet isolate a dedicated review specimen for it.",
-        "sectionIds": [],
-        "sectionTitles": []
+        "status": "previewed",
+        "note": "The rebuilt shared demo now includes a dedicated primitive coverage deck so every public primitive export is directly reviewable from the parity target shell.",
+        "sectionIds": [
+          "catalog-hub"
+        ],
+        "sectionTitles": [
+          "Catalog hub"
+        ]
       },
       {
         "packageName": "@pug/svelte-primitives",
         "exportName": "StatusIndicator",
         "kind": "component",
-        "status": "contract-only",
-        "note": "The primitive is exported and contract-backed, but the preview does not yet isolate a dedicated review specimen for it.",
-        "sectionIds": [],
-        "sectionTitles": []
+        "status": "previewed",
+        "note": "The rebuilt shell now exercises shared feedback, menu, and toolbar primitives through the notification-facing shared demo route.",
+        "sectionIds": [
+          "notification-suite"
+        ],
+        "sectionTitles": [
+          "Banners, toasts, skeletons, and remediation"
+        ]
       },
       {
         "packageName": "@pug/svelte-primitives",
         "exportName": "Surface",
         "kind": "component",
-        "status": "contract-only",
-        "note": "The primitive is exported and contract-backed, but the preview does not yet isolate a dedicated review specimen for it.",
-        "sectionIds": [],
-        "sectionTitles": []
+        "status": "previewed",
+        "note": "The rebuilt shared demo now includes a dedicated primitive coverage deck so every public primitive export is directly reviewable from the parity target shell.",
+        "sectionIds": [
+          "catalog-hub"
+        ],
+        "sectionTitles": [
+          "Catalog hub"
+        ]
       },
       {
         "packageName": "@pug/svelte-primitives",
         "exportName": "Switch",
         "kind": "component",
-        "status": "contract-only",
-        "note": "The primitive is exported and contract-backed, but the preview does not yet isolate a dedicated review specimen for it.",
-        "sectionIds": [],
-        "sectionTitles": []
+        "status": "previewed",
+        "note": "Form and validation screen now exercises the broader field, text-entry, selection, and remediation primitive set directly.",
+        "sectionIds": [
+          "form-suite"
+        ],
+        "sectionTitles": [
+          "Form baseline and validation posture"
+        ]
       },
       {
         "packageName": "@pug/svelte-primitives",
         "exportName": "Table",
         "kind": "component",
-        "status": "contract-only",
-        "note": "The primitive is exported and contract-backed, but the preview does not yet isolate a dedicated review specimen for it.",
-        "sectionIds": [],
-        "sectionTitles": []
+        "status": "previewed",
+        "note": "The shared demo target now visibly adopts additional workflow and overlay primitives even when no single legacy docs section owns them cleanly.",
+        "sectionIds": [
+          "catalog-hub"
+        ],
+        "sectionTitles": [
+          "Catalog hub"
+        ]
       },
       {
         "packageName": "@pug/svelte-primitives",
         "exportName": "Tabs",
         "kind": "component",
-        "status": "contract-only",
-        "note": "The primitive is exported and contract-backed, but the preview does not yet isolate a dedicated review specimen for it.",
-        "sectionIds": [],
-        "sectionTitles": []
+        "status": "previewed",
+        "note": "The rebuilt shell now exercises shared feedback, menu, and toolbar primitives through the notification-facing shared demo route.",
+        "sectionIds": [
+          "notification-suite"
+        ],
+        "sectionTitles": [
+          "Banners, toasts, skeletons, and remediation"
+        ]
       },
       {
         "packageName": "@pug/svelte-primitives",
         "exportName": "TabStrip",
         "kind": "component",
-        "status": "contract-only",
-        "note": "The primitive is exported and contract-backed, but the preview does not yet isolate a dedicated review specimen for it.",
-        "sectionIds": [],
-        "sectionTitles": []
+        "status": "previewed",
+        "note": "The rebuilt shared demo now includes a dedicated primitive coverage deck so every public primitive export is directly reviewable from the parity target shell.",
+        "sectionIds": [
+          "catalog-hub"
+        ],
+        "sectionTitles": [
+          "Catalog hub"
+        ]
       },
       {
         "packageName": "@pug/svelte-primitives",
         "exportName": "TextArea",
         "kind": "component",
-        "status": "contract-only",
-        "note": "The primitive is exported and contract-backed, but the preview does not yet isolate a dedicated review specimen for it.",
-        "sectionIds": [],
-        "sectionTitles": []
+        "status": "previewed",
+        "note": "Form and validation screen now exercises the broader field, text-entry, selection, and remediation primitive set directly.",
+        "sectionIds": [
+          "form-suite"
+        ],
+        "sectionTitles": [
+          "Form baseline and validation posture"
+        ]
       },
       {
         "packageName": "@pug/svelte-primitives",
         "exportName": "TextInput",
         "kind": "component",
         "status": "previewed",
-        "note": "Form suite exercises the current field, validation, and text-entry baseline.",
+        "note": "Form and validation screen now exercises the broader field, text-entry, selection, and remediation primitive set directly.",
         "sectionIds": [
           "form-suite"
         ],
@@ -856,26 +1181,34 @@
         "packageName": "@pug/svelte-primitives",
         "exportName": "TimeField",
         "kind": "component",
-        "status": "contract-only",
-        "note": "The primitive is exported and contract-backed, but the preview does not yet isolate a dedicated review specimen for it.",
-        "sectionIds": [],
-        "sectionTitles": []
+        "status": "previewed",
+        "note": "The rebuilt shared demo now includes a dedicated primitive coverage deck so every public primitive export is directly reviewable from the parity target shell.",
+        "sectionIds": [
+          "catalog-hub"
+        ],
+        "sectionTitles": [
+          "Catalog hub"
+        ]
       },
       {
         "packageName": "@pug/svelte-primitives",
         "exportName": "TimeZoneSelect",
         "kind": "component",
-        "status": "contract-only",
-        "note": "The primitive is exported and contract-backed, but the preview does not yet isolate a dedicated review specimen for it.",
-        "sectionIds": [],
-        "sectionTitles": []
+        "status": "previewed",
+        "note": "The rebuilt shared demo now includes a dedicated primitive coverage deck so every public primitive export is directly reviewable from the parity target shell.",
+        "sectionIds": [
+          "catalog-hub"
+        ],
+        "sectionTitles": [
+          "Catalog hub"
+        ]
       },
       {
         "packageName": "@pug/svelte-primitives",
         "exportName": "Toggle",
         "kind": "component",
         "status": "previewed",
-        "note": "The preview shell and catalog hub now exercise foundational disclosure, control, and chip primitives directly instead of custom shell-only controls.",
+        "note": "The docs shell and shared demo navigation exercise foundational disclosure, control, and chip primitives directly instead of custom shell-only controls.",
         "sectionIds": [
           "catalog-hub"
         ],
@@ -888,7 +1221,7 @@
         "exportName": "ToggleGroup",
         "kind": "component",
         "status": "previewed",
-        "note": "The preview shell and catalog hub now exercise foundational disclosure, control, and chip primitives directly instead of custom shell-only controls.",
+        "note": "The docs shell and shared demo navigation exercise foundational disclosure, control, and chip primitives directly instead of custom shell-only controls.",
         "sectionIds": [
           "catalog-hub"
         ],
@@ -900,44 +1233,60 @@
         "packageName": "@pug/svelte-primitives",
         "exportName": "Toolbar",
         "kind": "component",
-        "status": "contract-only",
-        "note": "The primitive is exported and contract-backed, but the preview does not yet isolate a dedicated review specimen for it.",
-        "sectionIds": [],
-        "sectionTitles": []
+        "status": "previewed",
+        "note": "The rebuilt shell now exercises shared feedback, menu, and toolbar primitives through the notification-facing shared demo route.",
+        "sectionIds": [
+          "notification-suite"
+        ],
+        "sectionTitles": [
+          "Banners, toasts, skeletons, and remediation"
+        ]
       },
       {
         "packageName": "@pug/svelte-primitives",
         "exportName": "Tooltip",
         "kind": "component",
-        "status": "contract-only",
-        "note": "The primitive is exported and contract-backed, but the preview does not yet isolate a dedicated review specimen for it.",
-        "sectionIds": [],
-        "sectionTitles": []
+        "status": "previewed",
+        "note": "The rebuilt shared demo now includes a dedicated primitive coverage deck so every public primitive export is directly reviewable from the parity target shell.",
+        "sectionIds": [
+          "catalog-hub"
+        ],
+        "sectionTitles": [
+          "Catalog hub"
+        ]
       },
       {
         "packageName": "@pug/svelte-primitives",
         "exportName": "TriStateSwitch",
         "kind": "component",
-        "status": "contract-only",
-        "note": "The primitive is exported and contract-backed, but the preview does not yet isolate a dedicated review specimen for it.",
-        "sectionIds": [],
-        "sectionTitles": []
+        "status": "previewed",
+        "note": "The rebuilt shared demo now includes a dedicated primitive coverage deck so every public primitive export is directly reviewable from the parity target shell.",
+        "sectionIds": [
+          "catalog-hub"
+        ],
+        "sectionTitles": [
+          "Catalog hub"
+        ]
       },
       {
         "packageName": "@pug/svelte-primitives",
         "exportName": "ZonedDateTimePicker",
         "kind": "component",
-        "status": "contract-only",
-        "note": "The primitive is exported and contract-backed, but the preview does not yet isolate a dedicated review specimen for it.",
-        "sectionIds": [],
-        "sectionTitles": []
+        "status": "previewed",
+        "note": "The rebuilt shared demo now includes a dedicated primitive coverage deck so every public primitive export is directly reviewable from the parity target shell.",
+        "sectionIds": [
+          "catalog-hub"
+        ],
+        "sectionTitles": [
+          "Catalog hub"
+        ]
       },
       {
         "packageName": "@pug/svelte-workstation",
         "exportName": "ActionDiscoveryPanel",
         "kind": "component",
         "status": "previewed",
-        "note": "Command suite exercises modal and inline action-discovery posture.",
+        "note": "Command and workspace screen exercises modal launch, inline discovery, and panel-level workstation chrome.",
         "sectionIds": [
           "command-suite"
         ],
@@ -963,7 +1312,7 @@
         "exportName": "CommandPalette",
         "kind": "component",
         "status": "previewed",
-        "note": "Command suite exercises modal and inline action-discovery posture.",
+        "note": "Command and workspace screen exercises modal launch, inline discovery, and panel-level workstation chrome.",
         "sectionIds": [
           "command-suite"
         ],
@@ -988,10 +1337,14 @@
         "packageName": "@pug/svelte-workstation",
         "exportName": "PanelHeader",
         "kind": "component",
-        "status": "contract-only",
-        "note": "The workstation export is public and contract-backed, but the preview currently exercises the higher-level shell flow rather than a direct specimen.",
-        "sectionIds": [],
-        "sectionTitles": []
+        "status": "previewed",
+        "note": "Command and workspace screen exercises modal launch, inline discovery, and panel-level workstation chrome.",
+        "sectionIds": [
+          "command-suite"
+        ],
+        "sectionTitles": [
+          "Palette search, grouped actions, and inline rediscovery"
+        ]
       },
       {
         "packageName": "@pug/svelte-workstation",
@@ -1010,10 +1363,14 @@
         "packageName": "@pug/svelte-workstation",
         "exportName": "PanelTabs",
         "kind": "component",
-        "status": "contract-only",
-        "note": "The workstation export is public and contract-backed, but the preview currently exercises the higher-level shell flow rather than a direct specimen.",
-        "sectionIds": [],
-        "sectionTitles": []
+        "status": "previewed",
+        "note": "Command and workspace screen exercises modal launch, inline discovery, and panel-level workstation chrome.",
+        "sectionIds": [
+          "command-suite"
+        ],
+        "sectionTitles": [
+          "Palette search, grouped actions, and inline rediscovery"
+        ]
       },
       {
         "packageName": "@pug/svelte-workstation",

@@ -31,6 +31,8 @@ const report = {
   summary: {
     targetCount: accessibilityAuditTargets.length,
     blockedGpuiTargets: accessibilityAuditTargets.filter((target) => target.auditAreas.gpui === "blocked").length,
+    manualGpuiTargets: accessibilityAuditTargets.filter((target) => target.auditAreas.gpui === "manual").length,
+    explicitGpuiTargets: accessibilityAuditTargets.filter((target) => target.auditAreas.gpui === "explicit").length,
     semanticsCoverage: countAreaStatus("semantics"),
     focusCoverage: countAreaStatus("focus"),
     keyboardCoverage: countAreaStatus("keyboard"),

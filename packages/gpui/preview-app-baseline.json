@@ -1,0 +1,40 @@
+{
+  "generation": "g04.002",
+  "themeRuntime": {
+    "tokenSource": "pug-gpui-tokens",
+    "themeIds": ["light", "dark", "loophole-studio"],
+    "densityModes": ["compact", "comfortable"],
+    "controlSizes": ["sm", "md", "lg"],
+    "applicationRules": [
+      "Apply the active semantic theme before rendering the current review section.",
+      "Treat density and control size as first-class review dimensions, not browser-only options.",
+      "Keep the GPUI preview app wired to emitted tokens rather than preview-local constants."
+    ]
+  },
+  "previewApp": {
+    "sectionIds": ["catalog-hub", "token-summary-section", "token-inspector"],
+    "requiredControls": ["section", "theme", "density", "controlSize"],
+    "shellAreas": [
+      "section navigation",
+      "review metadata bar",
+      "main review surface",
+      "token or state inspection panel"
+    ],
+    "comparisonSource": "packages/svelte/preview",
+    "evidenceCapture": [
+      "native screenshots for stable theme and section states",
+      "recorded inspection notes for token application and layout issues",
+      "theme plus section snapshots that can be compared against Svelte review routes"
+    ],
+    "sideBySideExpectations": [
+      "catalog-hub should mirror section ownership and review entry points closely enough to compare navigation and metadata posture.",
+      "token-summary-section should expose live values for the same semantic token families across the same theme and density states.",
+      "token-inspector should allow searchable token inspection even if the native presentation differs from the browser inspector."
+    ]
+  },
+  "nonGoals": [
+    "Do not build the full GPUI component catalogue before the review shell and theme runtime exist.",
+    "Do not require pixel-identical shell chrome when native presentation can still satisfy the same review job honestly.",
+    "Do not infer broader GPUI component parity from the preview app baseline alone."
+  ]
+}

@@ -1,0 +1,20 @@
+[package]
+name = "pug-gpui-workstation"
+version = "0.0.0"
+edition = "2021"
+description = "Contract-backed GPUI workstation baseline for Pug."
+
+[lib]
+path = "src/lib.rs"
+
+[dependencies]
+pug-gpui-composites = { path = "../composites" }
+pug-gpui-primitives = { path = "../primitives" }
+pug-gpui-tokens = { path = "../tokens" }
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+
+[package.metadata.pug]
+public-intent = true
+channel = "preview"
+stability = "pre-release"

@@ -114,6 +114,33 @@
       "removalGate": "successor-and-generation-delay"
     },
     {
+      "name": "pug-gpui-primitives",
+      "channel": "preview",
+      "publicIntent": true,
+      "changeControl": "contract-backed",
+      "requiresReleaseNotes": true,
+      "requiresDeprecationRecord": true,
+      "removalGate": "successor-and-generation-delay"
+    },
+    {
+      "name": "pug-gpui-composites",
+      "channel": "preview",
+      "publicIntent": true,
+      "changeControl": "contract-backed",
+      "requiresReleaseNotes": true,
+      "requiresDeprecationRecord": true,
+      "removalGate": "successor-and-generation-delay"
+    },
+    {
+      "name": "pug-gpui-workstation",
+      "channel": "preview",
+      "publicIntent": true,
+      "changeControl": "contract-backed",
+      "requiresReleaseNotes": true,
+      "requiresDeprecationRecord": true,
+      "removalGate": "successor-and-generation-delay"
+    },
+    {
       "name": "@pug/bridge-underlay",
       "channel": "internal",
       "publicIntent": false,

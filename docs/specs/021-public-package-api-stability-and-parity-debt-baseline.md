@@ -28,6 +28,9 @@ baseline:
 - `@pug/svelte-workstation`
 - `@pug/svelte-workstation/types`
 - `pug-gpui-tokens`
+- `pug-gpui-primitives`
+- `pug-gpui-composites`
+- `pug-gpui-workstation`
 
 Everything else in `packages/` should be treated as internal until a later
 milestone explicitly promotes it.
@@ -76,8 +79,8 @@ The current package surfaces fall into three buckets:
 
 ### Not Yet Adoption-Ready
 
-- any GPUI package surface beyond generated tokens
-- any claim of Svelte/GPUI parity beyond documented contract intent and the token layer
+- any GPUI package surface beyond generated tokens, the current widened primitive baseline, the widened GPUI composite baseline, and the first GPUI workstation baseline
+- any claim of Svelte/GPUI parity beyond documented contract intent, the token layer, and the current GPUI primitive contract substrate
 - any assumption that Underlay adoption can begin before package and parity cleanup is complete
 
 ## Parity Debt Register
@@ -132,11 +135,17 @@ Downstream adoption should remain blocked until all of the following are true:
 - `packages/svelte/composites/package.json`
 - `packages/svelte/workstation/package.json`
 - `packages/gpui/tokens/Cargo.toml`
+- `packages/gpui/primitives/Cargo.toml`
+- `packages/gpui/composites/Cargo.toml`
+- `packages/gpui/workstation/Cargo.toml`
 - `packages/svelte/tokens/README.md`
 - `packages/svelte/primitives/README.md`
 - `packages/svelte/composites/README.md`
 - `packages/svelte/workstation/README.md`
 - `packages/gpui/tokens/README.md`
+- `packages/gpui/primitives/README.md`
+- `packages/gpui/composites/README.md`
+- `packages/gpui/workstation/README.md`
 
 ## Next Task
 

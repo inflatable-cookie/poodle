@@ -19,7 +19,7 @@ Start here:
 1. `docs/vision/001-pug-vision.md`
 2. `docs/architecture/001-pug-system-shape.md`
 3. `docs/roadmaps/README.md`
-4. `docs/roadmaps/g03/README.md`
+4. `docs/roadmaps/g04/README.md`
 
 ## Current Direction
 
@@ -55,7 +55,6 @@ readout.
 
 ## Next Task
 
-`g03` is complete. If a future generation is opened, start from the explicit
-closeout in `docs/roadmaps/g03/014-generation-closeout-and-next-program-cutover.md`
-instead of reopening parity, accessibility, release, acceptance, or adoption
-baselines by implication.
+Open `docs/roadmaps/g04/015-gpui-demo-app-parity-implementation-and-side-by-side-review.md`
+and implement the same shared demo app in GPUI against the rebuilt Svelte
+target, with side-by-side review as the primary parity check.

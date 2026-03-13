@@ -56,6 +56,30 @@
       "channel": "preview"
     },
     {
+      "name": "pug-gpui-primitives",
+      "path": "packages/gpui/primitives",
+      "kind": "runtime-package",
+      "language": "rust",
+      "publicIntent": true,
+      "channel": "preview"
+    },
+    {
+      "name": "pug-gpui-composites",
+      "path": "packages/gpui/composites",
+      "kind": "runtime-package",
+      "language": "rust",
+      "publicIntent": true,
+      "channel": "preview"
+    },
+    {
+      "name": "pug-gpui-workstation",
+      "path": "packages/gpui/workstation",
+      "kind": "runtime-package",
+      "language": "rust",
+      "publicIntent": true,
+      "channel": "preview"
+    },
+    {
       "name": "@pug/bridge-underlay",
       "path": "packages/bridges/underlay",
       "kind": "bridge",

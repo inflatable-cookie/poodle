@@ -35,7 +35,30 @@
     validation boundaries explicit, and `g03.010` through `g03.014` complete
     the accessibility, release, acceptance, onboarding, and closeout baselines
 
+- `g04`
+  - Status: active
+  - Range: `001` to `018`
+  - Notes: GPUI-native component implementation, runtime proof, stronger
+    cross-runtime parity evidence, downstream GPUI adoption proof, and docs
+    promotion beyond the internal preview harness; `g04.001` sets the GPUI
+    priority matrix and implementation order, `g04.002` establishes the native
+    theme runtime and preview app baseline, `g04.003` lands the first real GPUI
+    structural primitive crate, `g04.004` adds the GPUI action, text-entry,
+    and field primitive tranche, `g04.005` adds the GPUI selection, compact
+    feedback, and date-time tranche, `g04.006` adds the GPUI overlay,
+    disclosure, navigation, and menu primitive tranche, `g04.007` adds the
+    first GPUI form, validation, and remediation composite tranche, `g04.008`
+    widens the GPUI data, browse, detail, picker, and media composite layer,
+    `g04.009` adds the first GPUI workstation layer, `g04.010` freezes the
+    first honest GPUI native accessibility-proof posture, `g04.011` hardens
+    cross-runtime parity evidence and the delta register, `g04.012` audits and
+    freezes the shared demo target, `g04.013` writes the explicit demo
+    contract, `g04.014` and `g04.015` realign the implementation surface
+    before GPUI proof resumes, and
+    `g04.016` through `g04.018` cover downstream GPUI proof, public docs
+    promotion, and generation closeout
+
 ## Next Task
 
-No active generation is open. If the next program is created later, start from
-the explicit `g03` closeout artifact and carry-forward gaps.
+Open `g04.015` and implement the GPUI shared demo app against the rebuilt
+Svelte target before downstream GPUI proof resumes.
