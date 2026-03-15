@@ -13,11 +13,13 @@ mod token_view;
 
 use gpui::*;
 use pug_adapter::ThemeProvider;
+use pug_gpui_primitives::{TabDefinition, TabsSpec, TabVariant};
 
 use app_state::{
     AppState, AppearanceTreatment, ControlSize, DemoScreen, Density, Section, ThemePreset,
 };
 use component_registry::{COMPOSITES, PRIMITIVES, SHELLS};
+use pug_gpui_components::PugTabs;
 use style_bridge::color_to_hsla;
 
 /// Root view for the preview application.
@@ -103,58 +105,25 @@ impl Render for PreviewRoot {
 }
 
 impl PreviewRoot {
-    /// Pill-style nav tabs matching Svelte's <Tabs variant="pill">.
-    /// The tablist is a rounded container with a subtle border; each tab
-    /// is a pill inside it. The active tab has a tinted accent background.
+    /// Pill-style nav tabs using PugTabs with the Pill variant.
     fn render_nav_tabs(
         &self,
-        text_secondary: pug_tokens::typed::ColorValue,
-        accent: pug_tokens::typed::ColorValue,
-        cx: &mut Context<Self>,
-    ) -> Div {
-        let text_primary = self.state.theme.resolve_color("semantic.color.text.primary");
-        let border = self.state.theme.resolve_color("semantic.color.border.default");
+        _text_secondary: pug_tokens::typed::ColorValue,
+        _accent: pug_tokens::typed::ColorValue,
+        _cx: &mut Context<Self>,
+    ) -> impl IntoElement {
+        let active_value = self.state.section.label();
+        let tab_defs: Vec<TabDefinition> = Section::ALL
+            .iter()
+            .map(|s| TabDefinition::new(s.label(), s.label()))
+            .collect();
 
-        // Outer pill container — matches Svelte: border-radius 999px, 2px border, 3px padding, 2px gap
-        // Svelte computed: 2px solid srgb(0.776, 0.776, 0.776 / 0.096)
-        let mut tabs = div()
-            .flex()
-            .items_center()
-            .gap(px(2.0))
-            .rounded(px(999.0))
-            .border_2()
-            .border_color(color_to_hsla(border))
-            .p(px(3.0));
+        let spec = TabsSpec::new(tab_defs)
+            .with_variant(TabVariant::Pill)
+            .with_value(active_value);
 
-        for &section in Section::ALL {
-            let is_active = self.state.section == section;
-            let label = section.label();
-
-            let mut tab = div()
-                .id(SharedString::new_static(label))
-                .px(px(10.0))
-                .py(px(3.0))
-                .rounded(px(999.0))
-                .text_size(px(12.0))
-                .font_weight(FontWeight::SEMIBOLD)
-                .cursor_pointer()
-                .child(label);
-
-            tab = if is_active {
-                tab.bg(color_to_hsla(accent).opacity(0.18))
-                    .text_color(color_to_hsla(text_primary))
-            } else {
-                tab.text_color(color_to_hsla(text_secondary))
-            };
-
-            tab = tab.on_click(cx.listener(move |this, _event: &ClickEvent, _window, cx| {
-                this.state.section = section;
-                cx.notify();
-            }));
-
-            tabs = tabs.child(tab);
-        }
-        tabs
+        PugTabs::new(spec, &self.state.theme)
+            .with_id("nav-tabs")
     }
 
     /// Right-aligned pills showing current theme, density, and size.

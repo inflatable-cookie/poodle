@@ -35,17 +35,21 @@ func findWindow(ownerContains: String) -> WindowInfo? {
         let title = d["kCGWindowName"] as? String ?? ""
         let layer = d["kCGWindowLayer"] as? Int ?? -1
         let needle = ownerContains.lowercased()
-        if layer == 0 && (name.lowercased().contains(needle) || title.lowercased().contains(needle)) {
+        let ownerMatch = name.lowercased().contains(needle)
+        let titleMatch = title.lowercased() == needle  // exact title match to avoid "Pug" matching "Pug Docs Preview"
+        if layer == 0 && (ownerMatch || titleMatch) {
             if let bounds = d["kCGWindowBounds"] as? NSDictionary {
                 let x = bounds["X"] as? Int ?? 0
                 let y = bounds["Y"] as? Int ?? 0
                 let w = bounds["Width"] as? Int ?? 0
                 let h = bounds["Height"] as? Int ?? 0
                 let area = w * h
-                if w > 100 && h > 100 && area > bestArea {
+                // Prefer exact title matches over owner-substring matches
+                let score = titleMatch ? area + 10_000_000 : area
+                if w > 100 && h > 100 && score > bestArea {
                     let wid = d["kCGWindowNumber"] as? Int ?? 0
                     best = WindowInfo(id: wid, owner: name, x: x, y: y, width: w, height: h)
-                    bestArea = area
+                    bestArea = score
                 }
             }
         }

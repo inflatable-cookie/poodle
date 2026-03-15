@@ -461,6 +461,13 @@ pub enum DrawerEdge {
 }
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub enum TabVariant {
+    Underline,
+    Card,
+    Pill,
+}
+
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub enum TabActivationMode {
     Automatic,
     Manual,

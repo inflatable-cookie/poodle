@@ -132,7 +132,8 @@ pub use types::{
     DateTimeValue, DialogKind, Dimension, Direction, DrawerEdge, FormActionAlign, Inset, MenuEntry,
     MenuItemKind, MenubarEntry, NavigationMenuEntry, Orientation, Overflow, OverlayPlacement,
     PaddingScale, PopoverInitialFocus, RuleTone, SeparatorOrientation, StatusTone, SurfaceBorder,
-    SurfaceRole, SurfaceTone, TabActivationMode, TabDefinition, TabStripItem, ValidationState,
+    SurfaceRole, SurfaceTone, TabActivationMode, TabDefinition, TabStripItem, TabVariant,
+    ValidationState,
 };
 
 pub const CURRENT_GENERATION: &str = "g04.006";
