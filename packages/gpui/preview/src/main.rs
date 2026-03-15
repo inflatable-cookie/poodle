@@ -17,7 +17,7 @@ use pug_adapter::ThemeProvider;
 use app_state::{
     AppState, AppearanceTreatment, ControlSize, DemoScreen, Density, Section, ThemePreset,
 };
-use component_registry::{COMPOSITES, PRIMITIVES};
+use component_registry::{COMPOSITES, PRIMITIVES, SHELLS};
 use style_bridge::color_to_hsla;
 
 /// Root view for the preview application.
@@ -410,8 +410,9 @@ impl PreviewRoot {
     fn render_section_content(&self, available_h: Pixels, cx: &mut Context<Self>) -> Div {
         let theme = &self.state.theme;
         match self.state.section {
-            Section::Primitives => self.render_catalogue_section(PRIMITIVES, true, available_h, cx),
-            Section::Composites => self.render_catalogue_section(COMPOSITES, false, available_h, cx),
+            Section::Primitives => self.render_catalogue_section(PRIMITIVES, Section::Primitives, available_h, cx),
+            Section::Composites => self.render_catalogue_section(COMPOSITES, Section::Composites, available_h, cx),
+            Section::Shells => self.render_catalogue_section(SHELLS, Section::Shells, available_h, cx),
             Section::Demo => self.render_demo_section(available_h, cx),
             Section::Tokens => {
                 div().w_full().h(available_h).child(
@@ -431,7 +432,7 @@ impl PreviewRoot {
     fn render_catalogue_section(
         &self,
         components: &'static [component_registry::ComponentEntry],
-        is_primitives: bool,
+        which: Section,
         available_h: Pixels,
         cx: &mut Context<Self>,
     ) -> Div {
@@ -442,10 +443,11 @@ impl PreviewRoot {
         let accent = theme.resolve_color("semantic.color.accent.base");
         let elevated_bg = theme.resolve_color("semantic.color.background.elevated");
 
-        let active_idx = if is_primitives {
-            self.state.active_primitive
-        } else {
-            self.state.active_composite
+        let active_idx = match which {
+            Section::Primitives => self.state.active_primitive,
+            Section::Composites => self.state.active_composite,
+            Section::Shells => self.state.active_shell,
+            _ => None,
         };
 
         // Sidebar — explicit height so overflow_y_scroll has definite bounds.
@@ -485,10 +487,11 @@ impl PreviewRoot {
 
             link = link.on_click(
                 cx.listener(move |this, _event: &ClickEvent, _window, cx| {
-                    if is_primitives {
-                        this.state.active_primitive = Some(i);
-                    } else {
-                        this.state.active_composite = Some(i);
+                    match which {
+                        Section::Primitives => this.state.active_primitive = Some(i),
+                        Section::Composites => this.state.active_composite = Some(i),
+                        Section::Shells => this.state.active_shell = Some(i),
+                        _ => {}
                     }
                     cx.notify();
                 }),
@@ -709,6 +712,7 @@ fn parse_cli_args() -> CliArgs {
                     section = match val.as_str() {
                         "primitives" => Some(Section::Primitives),
                         "composites" => Some(Section::Composites),
+                        "shells" => Some(Section::Shells),
                         "demo" => Some(Section::Demo),
                         "tokens" => Some(Section::Tokens),
                         _ => None,
@@ -814,6 +818,9 @@ fn main() {
                         } else if let Some(idx) = COMPOSITES.iter().position(|c| c.slug == slug.as_str()) {
                             root.state.section = Section::Composites;
                             root.state.active_composite = Some(idx);
+                        } else if let Some(idx) = SHELLS.iter().position(|c| c.slug == slug.as_str()) {
+                            root.state.section = Section::Shells;
+                            root.state.active_shell = Some(idx);
                         }
                     }
 

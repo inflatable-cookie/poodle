@@ -11,6 +11,7 @@ use pug_gpui::GpuiThemeProvider;
 pub enum Section {
     Primitives,
     Composites,
+    Shells,
     Demo,
     Tokens,
 }
@@ -19,6 +20,7 @@ impl Section {
     pub const ALL: &[Section] = &[
         Section::Primitives,
         Section::Composites,
+        Section::Shells,
         Section::Demo,
         Section::Tokens,
     ];
@@ -27,6 +29,7 @@ impl Section {
         match self {
             Section::Primitives => "Primitives",
             Section::Composites => "Composites",
+            Section::Shells => "Shells",
             Section::Demo => "Demo",
             Section::Tokens => "Tokens",
         }
@@ -229,6 +232,7 @@ pub struct AppState {
     pub busy: bool,
     pub active_primitive: Option<usize>,
     pub active_composite: Option<usize>,
+    pub active_shell: Option<usize>,
     pub active_demo_screen: DemoScreen,
     pub debug_clicks: u32,
     pub specimens: SpecimenState,
@@ -236,7 +240,7 @@ pub struct AppState {
 
 impl AppState {
     pub fn new() -> Self {
-        let preset = ThemePreset::LoopholeStudio;
+        let preset = ThemePreset::Dark;
         Self {
             section: Section::Primitives,
             theme: preset.build_theme(),
@@ -249,6 +253,7 @@ impl AppState {
             busy: false,
             active_primitive: None,
             active_composite: None,
+            active_shell: None,
             active_demo_screen: DemoScreen::OverviewShell,
             debug_clicks: 0,
             specimens: SpecimenState::new(),

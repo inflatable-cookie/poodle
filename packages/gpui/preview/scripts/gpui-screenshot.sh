@@ -36,7 +36,7 @@ cd "$PREVIEW_DIR"
 cargo build --quiet 2>/dev/null
 
 # Launch the app with the specified component and any extra args
-cargo run --quiet -- --component "$SLUG" "${EXTRA_ARGS[@]}" &
+cargo run --quiet -- --component "$SLUG" ${EXTRA_ARGS[@]+"${EXTRA_ARGS[@]}"} &
 APP_PID=$!
 
 # Wait for window to appear (poll up to 5 seconds)

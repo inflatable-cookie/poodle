@@ -32,8 +32,10 @@ func findWindow(ownerContains: String) -> WindowInfo? {
     for w in windowList {
         let d = w as! NSDictionary
         let name = d["kCGWindowOwnerName"] as? String ?? ""
+        let title = d["kCGWindowName"] as? String ?? ""
         let layer = d["kCGWindowLayer"] as? Int ?? -1
-        if layer == 0 && name.lowercased().contains(ownerContains.lowercased()) {
+        let needle = ownerContains.lowercased()
+        if layer == 0 && (name.lowercased().contains(needle) || title.lowercased().contains(needle)) {
             if let bounds = d["kCGWindowBounds"] as? NSDictionary {
                 let x = bounds["X"] as? Int ?? 0
                 let y = bounds["Y"] as? Int ?? 0

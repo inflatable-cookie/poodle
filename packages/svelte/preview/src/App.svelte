@@ -16,6 +16,7 @@
   import DisplayControls from "./components/DisplayControls.svelte";
   import PrimitivesSection from "./sections/PrimitivesSection.svelte";
   import CompositesSection from "./sections/CompositesSection.svelte";
+  import ShellsSection from "./sections/ShellsSection.svelte";
   import DemoSection from "./sections/DemoSection.svelte";
   import TokensSection from "./sections/TokensSection.svelte";
   import { parseRoute, type Route, type SectionId } from "./router";
@@ -29,6 +30,7 @@
   const topTabs: TabItem[] = [
     { value: "primitives", label: "Primitives" },
     { value: "composites", label: "Composites" },
+    { value: "shells", label: "Shells" },
     { value: "demo", label: "Demo" },
     { value: "tokens", label: "Tokens" },
   ];
@@ -38,7 +40,7 @@
   // ── State ───────────────────────────────────────────────────────────
 
   let appShell: HTMLElement | null = null;
-  let theme: ThemeName = "loophole-studio";
+  let theme: ThemeName = "dark";
   let density: DensityName = "compact";
   let controlSize: ControlSizeName = "md";
   let appearanceTreatment: AppearanceTreatmentName = "system";
@@ -172,6 +174,8 @@
       <PrimitivesSection activeComponent={route.component} />
     {:else if activeSection === "composites"}
       <CompositesSection activeComponent={route.component} />
+    {:else if activeSection === "shells"}
+      <ShellsSection activeComponent={route.component} />
     {:else if activeSection === "demo"}
       <DemoSection
         {theme}
