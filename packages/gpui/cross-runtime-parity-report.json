@@ -1,5 +1,5 @@
 {
-  "generation": "g04.011",
+  "generation": "g09.018",
   "comparisonArtifacts": [
     "packages/svelte/preview/artifacts/parity-report.json",
     "packages/svelte/preview/artifacts/accessibility-report.json",
@@ -9,7 +9,7 @@
   ],
   "acceptanceHarness": {
     "suiteId": "gpui-target-matrix",
-    "status": "matrix-only",
+    "status": "preview-backed",
     "coveredPackages": [
       "pug-gpui-tokens",
       "pug-gpui-primitives",
@@ -32,19 +32,24 @@
       "bun run docs:build"
     ],
     "blockers": [
-      "The repo still lacks a mounted GPUI preview app and native acceptance routes comparable to the Svelte preview surface.",
-      "This suite now carries real GPUI package and parity evidence, but it is still artifact-backed rather than runnable downstream production proof.",
       "Downstream GPUI adoption remains future work, so this suite should still be read as validation pressure rather than deployment readiness."
     ]
   },
   "summary": {
-    "sectionCount": 9,
-    "directParityCount": 5,
+    "sectionCount": 13,
+    "directParityCount": 9,
     "nativeAdaptationCount": 4,
     "deferredCount": 0,
-    "sideBySideSectionCount": 8,
-    "manualGpuiProofCount": 9,
-    "blockedGpuiProofCount": 0
+    "sideBySideSectionCount": 12,
+    "manualGpuiProofCount": 0,
+    "blockedGpuiProofCount": 0,
+    "componentExports": 96,
+    "primitiveSpecs": 64,
+    "compositeSpecs": 17,
+    "workstationSpecs": 15,
+    "specimenFiles": 73,
+    "registryEntries": 113,
+    "cratesBuildClean": true
   },
   "sectionReports": [
     {
@@ -349,12 +354,12 @@
     "Acceptance-harness inventory and evidence paths are machine-checked through packages/ecosystem-acceptance.json."
   ],
   "manualBoundary": [
-    "Mounted GPUI side-by-side review is still required before direct-parity sections can be promoted beyond artifact-backed manual proof.",
+    "GPUI preview app is now mounted with 96 components, 73 specimens, 4-section navigation, display controls, and a 6-screen demo app; side-by-side review is backed by real rendered surfaces.",
     "Assistive-technology traces, focus recovery feel, motion nuance, and native shell orchestration still require human review.",
     "Allowed or revisit deltas remain explicit debt, not invisible parity exemptions."
   ],
   "nonGoals": [
-    "Do not treat this report as proof that the mounted GPUI preview app already exists.",
+    "Do not treat this report as downstream GPUI production deployment proof; the preview app exists but adoption is still future work.",
     "Do not collapse runtime-specific deltas into defects when the shared contract is still preserved honestly.",
     "Do not treat artifact-backed parity evidence as downstream GPUI adoption proof."
   ]

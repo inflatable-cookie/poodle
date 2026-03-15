@@ -1,34 +1,34 @@
 use gpui::*;
 use pug_adapter::ThemeProvider;
-use pug_gpui_primitives::{SurfaceSpec, SurfaceTone, SurfaceBorder, TextInputSpec};
-use pug_gpui_components::{PugSurface, PugTextInput};
+use pug_gpui_composites::{
+    PaginationSummarySpec,
+    SelectionSummarySpec, SelectionSummaryItem, RemediationAction,
+};
+use pug_gpui_components::{PugPaginationSummary, PugSelectionSummary};
 use pug_gpui::GpuiThemeProvider;
 use crate::style_bridge::color_to_hsla;
 
 pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
     let text_secondary = theme.resolve_color("semantic.color.text.secondary");
 
-    let surface_spec = SurfaceSpec::new()
-        .with_tone(SurfaceTone::Panel)
-        .with_border(SurfaceBorder::Subtle);
+    // Filter toolbar placeholder
+    let filter_row = div().flex().items_center().gap(px(6.0))
+        .child(div().text_xs().text_color(color_to_hsla(text_secondary)).child("Filters: 2 active"))
+        .child(div().text_xs().text_color(color_to_hsla(text_secondary)).child("|"))
+        .child(div().text_xs().text_color(color_to_hsla(text_secondary)).child("8 results"));
 
-    div().flex().flex_col().gap(px(8.0))
-        .child(
-            PugSurface::new(surface_spec, theme)
-                .with_content(
-                    div().flex().flex_col().gap(px(2.0))
-                        .child(div().text_xs().text_color(color_to_hsla(text_secondary)).child("[12:34:01] Request received"))
-                        .child(div().text_xs().text_color(color_to_hsla(text_secondary)).child("[12:34:02] Processing..."))
-                        .child(div().text_xs().child("[12:34:03] Complete"))
-                )
-        )
-        .child(
-            div().flex().items_center().gap(px(4.0))
-                .child(div().text_sm().child("my-project"))
-                .child(div().text_sm().text_color(color_to_hsla(text_secondary)).child("/"))
-                .child(PugTextInput::new(
-                    TextInputSpec::new().with_value("my-project-slug").with_disabled(true),
-                    theme,
-                ))
-        )
+    // Pagination summary
+    let pagination = PaginationSummarySpec::new(1, 10, 42);
+
+    // Selection summary
+    let selection = SelectionSummarySpec::new(vec![
+        SelectionSummaryItem::new("slug-1", "my-project-slug"),
+        SelectionSummaryItem::new("slug-2", "another-slug"),
+    ])
+    .with_clear_action(RemediationAction::new("clear", "Clear"));
+
+    div().flex().flex_col().gap(px(10.0))
+        .child(filter_row)
+        .child(PugPaginationSummary::new(pagination, theme))
+        .child(PugSelectionSummary::new(selection, theme))
 }

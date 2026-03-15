@@ -1,0 +1,108 @@
+//! PugAppHeader — real GPUI component backed by AppHeaderSpec.
+
+use gpui::prelude::FluentBuilder;
+use gpui::*;
+use pug_gpui::GpuiThemeProvider;
+use pug_gpui_workstation::AppHeaderSpec;
+
+use crate::theme_ext::resolve_color;
+
+/// A real GPUI app header bar backed by `AppHeaderSpec`.
+///
+/// Renders a horizontal header with optional title, primary actions slot,
+/// and utility items slot. Supports drag-region for window dragging.
+pub struct PugAppHeader {
+    spec: AppHeaderSpec,
+    theme: GpuiThemeProvider,
+    /// Slot for primary action elements (e.g., buttons).
+    primary_actions: Option<AnyElement>,
+    /// Slot for utility items (e.g., user avatar, notifications).
+    utility_items: Option<AnyElement>,
+    /// Slot for navigation/leading content.
+    leading: Option<AnyElement>,
+}
+
+impl PugAppHeader {
+    pub fn new(spec: AppHeaderSpec, theme: &GpuiThemeProvider) -> Self {
+        Self {
+            spec,
+            theme: theme.clone(),
+            primary_actions: None,
+            utility_items: None,
+            leading: None,
+        }
+    }
+
+    pub fn with_primary_actions(mut self, actions: impl IntoElement) -> Self {
+        self.primary_actions = Some(actions.into_any_element());
+        self
+    }
+
+    pub fn with_utility_items(mut self, items: impl IntoElement) -> Self {
+        self.utility_items = Some(items.into_any_element());
+        self
+    }
+
+    pub fn with_leading(mut self, leading: impl IntoElement) -> Self {
+        self.leading = Some(leading.into_any_element());
+        self
+    }
+}
+
+impl IntoElement for PugAppHeader {
+    type Element = AnyElement;
+
+    fn into_element(self) -> Self::Element {
+        let theme = &self.theme;
+        let spec = &self.spec;
+
+        let bg = resolve_color(theme, spec.background_token());
+        let border = resolve_color(theme, "semantic.color.border.default");
+        let text_primary = resolve_color(theme, "semantic.color.text.primary");
+
+        let mut header = div()
+            .flex()
+            .items_center()
+            .justify_between()
+            .w_full()
+            .h(px(44.0))
+            .px(px(12.0))
+            .bg(bg)
+            .border_b_1()
+            .border_color(border);
+
+        // Left section: leading + title
+        let mut left = div().flex().items_center().gap(px(8.0)).flex_shrink_0();
+
+        if let Some(leading) = self.leading {
+            left = left.child(leading);
+        }
+
+        if let Some(ref title) = spec.title {
+            left = left.child(
+                div()
+                    .text_sm()
+                    .font_weight(FontWeight::SEMIBOLD)
+                    .text_color(text_primary)
+                    .child(title.clone()),
+            );
+        }
+
+        header = header.child(left);
+
+        // Right section: actions + utility
+        let mut right = div().flex().items_center().gap(px(8.0)).flex_shrink_0();
+
+        if let Some(primary_actions) = self.primary_actions {
+            right = right.child(primary_actions);
+        }
+
+        if let Some(utility_items) = self.utility_items {
+            right = right.child(utility_items);
+        }
+
+        header = header.child(right);
+
+        header.into_any_element()
+    }
+}

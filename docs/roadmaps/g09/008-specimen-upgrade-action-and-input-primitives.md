@@ -1,6 +1,6 @@
 # g09.008 — Specimen Upgrade: Action and Input Primitives
 
-Status: planned
+Status: complete
 Owner: Pug Core
 Updated: 2026-03-15
 Depends on: g09.003

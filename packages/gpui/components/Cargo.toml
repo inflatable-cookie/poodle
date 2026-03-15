@@ -10,6 +10,8 @@ path = "src/lib.rs"
 [dependencies]
 gpui = "0.2.2"
 pug-gpui-primitives = { path = "../primitives" }
+pug-gpui-composites = { path = "../composites" }
+pug-gpui-workstation = { path = "../workstation" }
 pug-gpui = { path = "../adapter" }
 pug-adapter = { path = "../../contracts/adapter" }
 

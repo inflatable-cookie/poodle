@@ -1,6 +1,6 @@
 # g09.009 — Specimen Upgrade: Selection and Feedback Primitives
 
-Status: planned
+Status: complete
 Owner: Pug Core
 Updated: 2026-03-15
 Depends on: g09.003

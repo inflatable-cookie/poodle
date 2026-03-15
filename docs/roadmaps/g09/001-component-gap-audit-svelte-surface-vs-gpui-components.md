@@ -1,6 +1,6 @@
 # g09.001 — Component Gap Audit: Svelte Surface vs GPUI Components
 
-Status: planned
+Status: complete
 Owner: Pug Core
 Updated: 2026-03-15
 Depends on: g08.014

@@ -110,7 +110,7 @@
     closes the generation; 142 tests passing
 
 - `g09`
-  - Status: planned
+  - Status: completed
   - Range: `001` to `018`
   - Notes: GPUI first-class component build-out, preview parity, and visual
     fidelity; `g09.001` component gap audit (Svelte surface vs GPUI
@@ -145,5 +145,5 @@
 
 ## Next Task
 
-Open `g09.001` and begin the GPUI component gap audit. `g10` can proceed in
-parallel after `g08` is complete.
+Open `g10.001` and begin the Jetstream preview app scaffold and navigation
+shell. `g10` can proceed now that both `g08` and `g09` are complete.

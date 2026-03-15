@@ -1,6 +1,6 @@
 # g09.016 — Visual Parity Audit: Systematic Svelte vs GPUI Comparison
 
-Status: planned
+Status: complete
 Owner: Pug Core
 Updated: 2026-03-15
 Depends on: g09.015

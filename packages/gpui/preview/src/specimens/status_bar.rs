@@ -1,42 +1,38 @@
 use gpui::*;
 use pug_adapter::ThemeProvider;
-use pug_gpui_primitives::{TabStripSpec, TabStripItem, SurfaceSpec, SurfaceTone, SurfaceBorder, StatusIndicatorSpec, StatusTone};
-use pug_gpui_components::{PugTabStrip, PugSurface, PugStatusIndicator};
+use pug_gpui_workstation::{ShellStatusBarSpec, SurfaceTabsSpec, SurfaceTabItem};
+use pug_gpui_components::{PugShellStatusBar, PugSurfaceTabs};
+use pug_gpui_primitives::{StatusIndicatorSpec, StatusTone};
+use pug_gpui_components::PugStatusIndicator;
 use crate::app_state::AppState;
 use crate::style_bridge::color_to_hsla;
 use crate::PreviewRoot;
 
-pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
+pub(crate) fn render(state: &AppState, _cx: &mut Context<PreviewRoot>) -> Div {
     let theme = &state.theme;
     let text_secondary = theme.resolve_color("semantic.color.text.secondary");
     let selected = state.specimens.selected("surface-tab");
 
-    let tabs = vec![
-        TabStripItem::new("main", "main.rs").with_closable(true),
-        TabStripItem::new("lib", "lib.rs").with_closable(true),
-        TabStripItem::new("mod", "mod.rs").with_closable(true),
-    ];
-    let values = ["main", "lib", "mod"];
-
-    let tab_spec = TabStripSpec::new(tabs)
-        .with_value(values[selected]);
+    let surface_tabs_spec = SurfaceTabsSpec::new(vec![
+        SurfaceTabItem::new("main", "main.rs").with_closable(true),
+        SurfaceTabItem::new("lib", "lib.rs").with_closable(true),
+        SurfaceTabItem::new("mod", "mod.rs").with_closable(true),
+    ])
+    .with_value(["main", "lib", "mod"][selected]);
 
     let mut ready = StatusIndicatorSpec::new().with_status(StatusTone::Success);
     ready.label = Some("Ready".to_string());
 
-    let surface_spec = SurfaceSpec::new()
-        .with_tone(SurfaceTone::Panel)
-        .with_border(SurfaceBorder::Subtle);
+    let status_spec = ShellStatusBarSpec::new()
+        .with_summary("Ln 42, Col 18");
 
     div().flex().flex_col().gap(px(6.0))
-        .child(PugTabStrip::new(tab_spec, theme).with_id("stab"))
+        .child(PugSurfaceTabs::new(surface_tabs_spec, theme).with_id("stab"))
         .child(
-            PugSurface::new(surface_spec, theme)
-                .with_content(
-                    div().flex().items_center().gap(px(12.0))
-                        .child(PugStatusIndicator::new(ready, theme))
-                        .child(div().text_xs().text_color(color_to_hsla(text_secondary)).child("Ln 42, Col 18"))
-                        .child(div().text_xs().text_color(color_to_hsla(text_secondary)).child("UTF-8"))
+            PugShellStatusBar::new(status_spec, theme)
+                .with_leading_items(PugStatusIndicator::new(ready, theme))
+                .with_trailing_items(
+                    div().text_xs().text_color(color_to_hsla(text_secondary)).child("UTF-8")
                 )
         )
 }

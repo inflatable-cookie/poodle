@@ -1,6 +1,6 @@
 # g09.011 — Specimen Upgrade: Composites Batch 1 (Form, Data, Detail)
 
-Status: planned
+Status: complete
 Owner: Pug Core
 Updated: 2026-03-15
 Depends on: g09.004

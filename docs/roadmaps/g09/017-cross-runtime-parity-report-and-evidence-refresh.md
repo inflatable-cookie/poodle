@@ -1,6 +1,6 @@
 # g09.017 — Cross-Runtime Parity Report Update and Evidence Refresh
 
-Status: planned
+Status: complete
 Owner: Pug Core
 Updated: 2026-03-15
 Depends on: g09.016

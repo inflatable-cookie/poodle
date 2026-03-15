@@ -1,6 +1,6 @@
 # g09.006 — Missing Workstation Components
 
-Status: planned
+Status: complete
 Owner: Pug Core
 Updated: 2026-03-15
 Depends on: g09.005

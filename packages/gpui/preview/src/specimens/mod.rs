@@ -12,6 +12,8 @@ mod separator;
 mod scroll_shell;
 mod banner;
 mod callout;
+mod inline;
+mod spacer;
 
 // ── Action ────────────────────────────────────────────────
 mod button;
@@ -24,6 +26,7 @@ mod field;
 mod number_entry;
 mod pin_input;
 mod toolbar;
+mod editable_label;
 
 // ── Selection ─────────────────────────────────────────────
 mod checkbox;
@@ -62,6 +65,7 @@ mod collapsible;
 mod dialog;
 mod drawer;
 mod popover;
+mod hover_card;
 mod tooltip;
 mod menu;
 mod tabs;
@@ -164,7 +168,8 @@ pub fn render_single_specimen(
         "scroll-shell" => specimen_card("ScrollShell", theme, scroll_shell::render(theme)),
         "banner" => specimen_card("Banner", theme, banner::render(theme)),
         "callout" => specimen_card("Callout", theme, callout::render(theme)),
-        "inline" | "spacer" => specimen_card(slug, theme, simple_specimen(&format!("{} — layout primitive", slug), theme)),
+        "inline" => specimen_card("Inline", theme, inline::render(theme)),
+        "spacer" => specimen_card("Spacer", theme, spacer::render(theme)),
 
         // ── Action ──────────────────────────────────────────────
         "button" => specimen_card("Button", theme, button::render(state, cx)),
@@ -178,7 +183,7 @@ pub fn render_single_specimen(
         "pin-input" => specimen_card("PinInput", theme, pin_input::render(theme)),
         "toolbar" => specimen_card("Toolbar", theme, toolbar::render(state, cx)),
         "time-field" => specimen_card("TimeField", theme, time_field::render(theme)),
-        "editable-label" => specimen_card(slug, theme, simple_specimen(&format!("{} — input control", slug), theme)),
+        "editable-label" => specimen_card("EditableLabel", theme, editable_label::render(theme)),
 
         // ── Selection ───────────────────────────────────────────
         "checkbox" => specimen_card("Checkbox", theme, checkbox::render(state, cx)),
@@ -215,7 +220,8 @@ pub fn render_single_specimen(
         "collapsible" => specimen_card("Collapsible", theme, collapsible::render(state, cx)),
         "dialog" | "alert-dialog" => specimen_card("Dialog", theme, dialog::render(state, cx)),
         "drawer" => specimen_card("Drawer", theme, drawer::render(state, cx)),
-        "popover" | "hover-card" => specimen_card("Popover", theme, popover::render(state, cx)),
+        "popover" => specimen_card("Popover", theme, popover::render(state, cx)),
+        "hover-card" => specimen_card("HoverCard", theme, hover_card::render(theme)),
         "tooltip" => specimen_card("Tooltip", theme, tooltip::render(theme)),
         "menu" | "context-menu" => specimen_card("Menu", theme, menu::render(state, cx)),
         "tabs" => specimen_card("Tabs", theme, tabs::render(state, cx)),

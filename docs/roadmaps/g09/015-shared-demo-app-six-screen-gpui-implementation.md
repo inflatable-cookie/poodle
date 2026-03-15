@@ -1,6 +1,6 @@
 # g09.015 — Shared Demo App: 6-Screen GPUI Implementation
 
-Status: planned
+Status: complete
 Owner: Pug Core
 Updated: 2026-03-15
 Depends on: g09.014

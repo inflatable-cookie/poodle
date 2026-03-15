@@ -1,6 +1,6 @@
 # g09.013 — Preview App Shell: Section Tabs, Sidebar, Per-Component Pages
 
-Status: planned
+Status: complete
 Owner: Pug Core
 Updated: 2026-03-15
 Depends on: g09.007, g09.008, g09.009, g09.010, g09.011, g09.012

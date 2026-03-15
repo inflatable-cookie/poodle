@@ -1,6 +1,6 @@
 # g09.005 — Missing Composite Components: Editing, Media, and Operational
 
-Status: planned
+Status: complete
 Owner: Pug Core
 Updated: 2026-03-15
 Depends on: g09.004

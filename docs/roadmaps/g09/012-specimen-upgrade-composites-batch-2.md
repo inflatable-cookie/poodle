@@ -1,6 +1,6 @@
 # g09.012 — Specimen Upgrade: Composites Batch 2 (Editing, Media, Workstation)
 
-Status: planned
+Status: complete
 Owner: Pug Core
 Updated: 2026-03-15
 Depends on: g09.005, g09.006
