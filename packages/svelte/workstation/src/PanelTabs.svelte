@@ -1,6 +1,8 @@
 <script lang="ts">
   import { createEventDispatcher } from "svelte";
 
+  import { Icon } from "@pug/svelte-primitives";
+
   import type { PanelTabItem } from "./types";
 
   export let items: PanelTabItem[] = [];
@@ -141,7 +143,7 @@
           aria-label={`Open panel actions for ${item.label}`}
           on:click|stopPropagation={() => dispatch("requestContextMenu", { value: item.value })}
         >
-          ⋯
+          <Icon name="more-horizontal" size="sm" />
         </button>
         {#if item.isClosable}
           <button
@@ -150,7 +152,7 @@
             aria-label={`Close ${item.label}`}
             on:click|stopPropagation={() => dispatch("requestClose", { value: item.value })}
           >
-            ×
+            <Icon name="x" size="sm" />
           </button>
         {/if}
       </span>

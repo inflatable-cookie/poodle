@@ -1,6 +1,8 @@
 <script lang="ts">
   import { createEventDispatcher } from "svelte";
 
+  import Icon from "./Icon.svelte";
+
   export let value: number | null = null;
   export let defaultValue: number | null = null;
   export let max = 5;
@@ -88,7 +90,7 @@
         }
       }}
     >
-      <span class="rating__glyph" aria-hidden="true">★</span>
+      <span class="rating__glyph" aria-hidden="true"><Icon name="star" size="sm" /></span>
     </button>
   {/each}
 </div>

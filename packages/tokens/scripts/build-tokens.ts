@@ -439,6 +439,183 @@ export const deprecations = ${JSON.stringify(deprecationsMetadata, null, 2)} as 
 `,
 );
 
+// --- Typed token parsing for multi-renderer consumers ---
+
+const REM_BASE = 16; // 1rem = 16px
+
+interface ParsedColor {
+  r: number;
+  g: number;
+  b: number;
+  a: number;
+}
+
+function parseHexColor(hex: string): ParsedColor | null {
+  const match = hex.match(/^#([0-9a-fA-F]{6})$/);
+  if (!match) return null;
+  const r = parseInt(match[1].slice(0, 2), 16) / 255;
+  const g = parseInt(match[1].slice(2, 4), 16) / 255;
+  const b = parseInt(match[1].slice(4, 6), 16) / 255;
+  return { r, g, b, a: 1.0 };
+}
+
+function parseRgbaColor(value: string): ParsedColor | null {
+  const match = value.match(/^rgba\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)\s*,\s*([\d.]+)\s*\)$/);
+  if (!match) return null;
+  return {
+    r: parseInt(match[1]) / 255,
+    g: parseInt(match[2]) / 255,
+    b: parseInt(match[3]) / 255,
+    a: parseFloat(match[4]),
+  };
+}
+
+function parseColor(value: string): ParsedColor | null {
+  return parseHexColor(value) ?? parseRgbaColor(value);
+}
+
+function parseRemValue(value: string): number | null {
+  const match = value.match(/^([\d.]+)rem$/);
+  if (!match) return null;
+  return parseFloat(match[1]) * REM_BASE;
+}
+
+function parseMsValue(value: string): number | null {
+  const match = value.match(/^(\d+)ms$/);
+  if (!match) return null;
+  return parseFloat(match[1]);
+}
+
+function parseNumericValue(value: string): number | null {
+  const num = parseFloat(value);
+  return isFinite(num) ? num : null;
+}
+
+interface ParsedShadow {
+  offset_x: number;
+  offset_y: number;
+  blur: number;
+  color: ParsedColor;
+}
+
+function parseShadowDimension(token: string): number | null {
+  if (token === "0") return 0;
+  const rem = parseRemValue(token);
+  if (rem !== null) return rem;
+  const pxMatch = token.match(/^([\d.]+)px$/);
+  if (pxMatch) return parseFloat(pxMatch[1]);
+  return null;
+}
+
+function parseShadow(value: string): ParsedShadow | null {
+  const match = value.match(
+    /^([\d.]+(?:rem|px)?)\s+([\d.]+(?:rem|px)?)\s+([\d.]+(?:rem|px)?)\s+(rgba?\([^)]+\)|#[0-9a-fA-F]{6})$/,
+  );
+  if (!match) return null;
+  const color = parseColor(match[4]);
+  if (!color) return null;
+  const ox = parseShadowDimension(match[1]);
+  const oy = parseShadowDimension(match[2]);
+  const bl = parseShadowDimension(match[3]);
+  if (ox === null || oy === null || bl === null) return null;
+  return {
+    offset_x: ox,
+    offset_y: oy,
+    blur: bl,
+    color,
+  };
+}
+
+type TypedValue =
+  | { kind: "color"; value: ParsedColor }
+  | { kind: "px"; value: number }
+  | { kind: "ms"; value: number }
+  | { kind: "number"; value: number }
+  | { kind: "shadow"; value: ParsedShadow }
+  | { kind: "string"; value: string };
+
+function classifyTokenValue(path: string, value: string): TypedValue {
+  const color = parseColor(value);
+  if (color) return { kind: "color", value: color };
+
+  const shadow = parseShadow(value);
+  if (shadow) return { kind: "shadow", value: shadow };
+
+  const rem = parseRemValue(value);
+  if (rem !== null) return { kind: "px", value: rem };
+
+  const ms = parseMsValue(value);
+  if (ms !== null) return { kind: "ms", value: ms };
+
+  const num = parseNumericValue(value);
+  if (num !== null) return { kind: "number", value: num };
+
+  return { kind: "string", value };
+}
+
+function formatF32(n: number): string {
+  const s = n.toString();
+  return s.includes(".") ? s : `${s}.0`;
+}
+
+function formatColorConst(name: string, c: ParsedColor): string {
+  return `pub const ${name}: ColorValue = ColorValue(${formatF32(c.r)}, ${formatF32(c.g)}, ${formatF32(c.b)}, ${formatF32(c.a)});`;
+}
+
+function formatPxConst(name: string, px: number): string {
+  return `pub const ${name}: SpaceValue = SpaceValue(${formatF32(px)});`;
+}
+
+function formatMsConst(name: string, ms: number): string {
+  return `pub const ${name}: DurationValue = DurationValue(${formatF32(ms)});`;
+}
+
+function formatNumberConst(name: string, n: number): string {
+  return `pub const ${name}: f32 = ${formatF32(n)};`;
+}
+
+function formatShadowConst(name: string, s: ParsedShadow): string {
+  return `pub const ${name}: ShadowValue = ShadowValue { offset_x: ${formatF32(s.offset_x)}, offset_y: ${formatF32(s.offset_y)}, blur: ${formatF32(s.blur)}, color: ColorValue(${formatF32(s.color.r)}, ${formatF32(s.color.g)}, ${formatF32(s.color.b)}, ${formatF32(s.color.a)}) };`;
+}
+
+function buildTypedRustConstants(entries: ResolvedTokenEntry[], stripPrefix: string): string {
+  const lines: string[] = [];
+
+  for (const entry of entries) {
+    const name = rustConstName(entry.path, stripPrefix);
+    const strValue = String(entry.resolvedValue);
+    const typed = classifyTokenValue(entry.path, strValue);
+
+    switch (typed.kind) {
+      case "color":
+        lines.push(formatColorConst(name, typed.value));
+        break;
+      case "px":
+        lines.push(formatPxConst(name, typed.value));
+        break;
+      case "ms":
+        lines.push(formatMsConst(name, typed.value));
+        break;
+      case "number":
+        lines.push(formatNumberConst(name, typed.value));
+        break;
+      case "shadow":
+        lines.push(formatShadowConst(name, typed.value));
+        break;
+      case "string":
+        // String-only tokens (font families, easings) stay as &str in the typed module
+        lines.push(
+          `pub const ${name}: &str = ${jsString(typed.value)};`,
+        );
+        break;
+    }
+  }
+
+  return lines.join("\n");
+}
+
+// --- End typed token parsing ---
+
 function buildRustConstants(entries: ResolvedTokenEntry[], stripPrefix: string): string {
   return entries
     .map(
@@ -464,6 +641,7 @@ pub mod metadata;
 pub mod primitives;
 pub mod semantic;
 pub mod themes;
+pub mod typed;
 `,
 );
 
@@ -567,5 +745,98 @@ ${deprecationsMetadata
     .map((item) => `    (${jsString(item.path)}, ${jsString(item.status)}),`)
     .join("\n")}
 ];
+`,
+);
+
+// --- Typed token artifacts ---
+
+writeFile(
+  "rust/typed/mod.rs",
+  `${formatHeader("//")}
+mod types;
+pub mod primitives;
+pub mod semantic;
+
+pub use types::{ColorValue, DurationValue, ShadowValue, SpaceValue};
+`,
+);
+
+writeFile(
+  "rust/typed/types.rs",
+  `${formatHeader("//")}
+/// RGBA color as four f32 values in 0.0\u20131.0 range.
+/// Compatible with Jetstream \`Vec4\` and GPUI color types.
+#[derive(Debug, Clone, Copy, PartialEq)]
+pub struct ColorValue(pub f32, pub f32, pub f32, pub f32);
+
+impl ColorValue {
+    pub const fn rgba(r: f32, g: f32, b: f32, a: f32) -> Self {
+        Self(r, g, b, a)
+    }
+
+    pub const fn as_array(&self) -> [f32; 4] {
+        [self.0, self.1, self.2, self.3]
+    }
+}
+
+/// Dimension in pixels as f32, resolved from rem/px token values.
+/// Base size: 16px per rem.
+#[derive(Debug, Clone, Copy, PartialEq)]
+pub struct SpaceValue(pub f32);
+
+impl SpaceValue {
+    pub const fn px(value: f32) -> Self {
+        Self(value)
+    }
+
+    pub const fn as_f32(&self) -> f32 {
+        self.0
+    }
+}
+
+/// Duration in milliseconds as f32.
+#[derive(Debug, Clone, Copy, PartialEq)]
+pub struct DurationValue(pub f32);
+
+impl DurationValue {
+    pub const fn ms(value: f32) -> Self {
+        Self(value)
+    }
+
+    pub const fn as_f32(&self) -> f32 {
+        self.0
+    }
+
+    pub const fn as_secs(&self) -> f32 {
+        self.0 / 1000.0
+    }
+}
+
+/// Box shadow with offset, blur radius, and color.
+#[derive(Debug, Clone, Copy, PartialEq)]
+pub struct ShadowValue {
+    pub offset_x: f32,
+    pub offset_y: f32,
+    pub blur: f32,
+    pub color: ColorValue,
+}
+`,
+);
+
+writeFile(
+  "rust/typed/primitives.rs",
+  `${formatHeader("//")}
+use super::types::{ColorValue, DurationValue, ShadowValue, SpaceValue};
+
+${buildTypedRustConstants(primitiveEntries, "primitives")}
+`,
+);
+
+writeFile(
+  "rust/typed/semantic.rs",
+  `${formatHeader("//")}
+use super::types::{ColorValue, DurationValue, ShadowValue, SpaceValue};
+
+${buildTypedRustConstants(semanticEntries, "semantic")}
 `,
 );

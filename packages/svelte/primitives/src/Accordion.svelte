@@ -5,6 +5,7 @@
 <script lang="ts">
   import { createEventDispatcher } from "svelte";
 
+  import Icon from "./Icon.svelte";
   import type { AccordionItem } from "./types";
 
   export let items: AccordionItem[] = [];
@@ -29,12 +30,8 @@
       ? [currentValue]
       : [];
 
-  function isOpen(itemValue: string): boolean {
-    return openValues.includes(itemValue);
-  }
-
   function toggle(itemValue: string): void {
-    const currentlyOpen = isOpen(itemValue);
+    const currentlyOpen = openValues.includes(itemValue);
     let nextValue: string | string[] | null;
 
     if (selectionMode === "multiple") {
@@ -61,14 +58,14 @@
   aria-label={ariaLabel ?? undefined}
 >
   {#each items as item (item.value)}
-    <section class="accordion__item" data-open={isOpen(item.value)}>
+    <section class="accordion__item" data-open={openValues.includes(item.value)}>
       <h3 class="accordion__heading">
         <button
           type="button"
           class="accordion__trigger"
           id={`pug-accordion-trigger-${accordionId}-${item.value}`}
           disabled={item.isDisabled === true}
-          aria-expanded={isOpen(item.value) ? "true" : "false"}
+          aria-expanded={openValues.includes(item.value) ? "true" : "false"}
           aria-controls={`pug-accordion-panel-${accordionId}-${item.value}`}
           on:click={() => toggle(item.value)}
         >
@@ -78,11 +75,11 @@
               <span class="accordion__description">{item.description}</span>
             {/if}
           </span>
-          <span class="accordion__indicator" aria-hidden="true">▾</span>
+          <span class="accordion__indicator" aria-hidden="true"><Icon name="chevron-down" size="sm" /></span>
         </button>
       </h3>
 
-      {#if isOpen(item.value)}
+      {#if openValues.includes(item.value)}
         <div
           class="accordion__panel"
           id={`pug-accordion-panel-${accordionId}-${item.value}`}

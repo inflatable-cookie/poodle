@@ -1,0 +1,16 @@
+[package]
+name = "pug-layout"
+version = "0.0.0"
+edition = "2021"
+description = "Renderer-agnostic layout intent types for Pug multi-renderer targets."
+
+[lib]
+path = "src/lib.rs"
+
+[dependencies]
+pug-tokens = { path = "../tokens" }
+
+[package.metadata.pug]
+public-intent = true
+channel = "preview"
+stability = "pre-release"

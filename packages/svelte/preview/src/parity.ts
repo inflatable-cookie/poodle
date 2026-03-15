@@ -501,7 +501,6 @@ const packageSurfaceCoverageGroups: PackageSurfaceCoverageGroup[] = [
       "Spacer",
       "Stack",
       "Surface",
-      "TabStrip",
       "TimeField",
       "TimeZoneSelect",
       "Tooltip",

@@ -101,9 +101,9 @@
   }
 
   .action-discovery-panel__header {
-    grid-template-columns: minmax(0, 1fr) auto;
+    grid-template-columns: 1fr;
     align-items: start;
-    gap: var(--pug-space-inline-md);
+    gap: var(--pug-space-inline-sm);
   }
 
   .action-discovery-panel__header h3,

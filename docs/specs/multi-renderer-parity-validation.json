@@ -1,0 +1,84 @@
+{
+  "version": 1,
+  "generation": "g06.014",
+  "updated": "2026-03-14",
+  "description": "Multi-renderer parity validation report — maps Svelte components to Rust specs and adapter readiness",
+  "contract_crates": {
+    "pug-tokens": {
+      "path": "packages/contracts/tokens",
+      "modules": ["semantic", "primitives", "themes", "density", "metadata", "typed"],
+      "typed_module": true
+    },
+    "pug-primitives": {
+      "path": "packages/contracts/primitives",
+      "spec_count": 64
+    },
+    "pug-composites": {
+      "path": "packages/contracts/composites",
+      "spec_count": 41
+    },
+    "pug-workstation": {
+      "path": "packages/contracts/workstation",
+      "spec_count": 13
+    },
+    "pug-layout": {
+      "path": "packages/contracts/layout",
+      "types": ["LayoutDirection", "LayoutSizing", "LayoutEdges", "LayoutSpacing", "MainAxisAlignment", "CrossAxisAlignment", "LayoutAlignment", "LayoutOverflow", "LayoutIntent"]
+    },
+    "pug-events": {
+      "path": "packages/contracts/events",
+      "types": ["SemanticEvent", "EventValue", "DragPhase", "EventModifiers", "NavigateDirection", "ComponentEventProfile"]
+    },
+    "pug-style": {
+      "path": "packages/contracts/style",
+      "types": ["StyleDescriptor", "FontFamily", "TypographyDescriptor", "BorderDescriptor", "CornerRadii", "CursorHint"]
+    },
+    "pug-adapter": {
+      "path": "packages/contracts/adapter",
+      "traits": ["ThemeProvider", "EventSink", "RenderTarget", "RenderComponent", "AdapterManifest"]
+    }
+  },
+  "adapter_targets": {
+    "gpui": {
+      "generation": "g07",
+      "status": "planned",
+      "crate_name": "pug-gpui"
+    },
+    "jetstream": {
+      "generation": "g08",
+      "status": "planned",
+      "crate_name": "pug-jetstream",
+      "constraint_document": "docs/roadmaps/g06/013-jetstream-rendering-constraint-document.md"
+    }
+  },
+  "spec_coverage": {
+    "total_svelte_components": 124,
+    "total_rust_specs": 118,
+    "coverage_notes": "6 Svelte components map to existing specs via configuration (AlertDialog → DialogSpec with DialogKind::AlertDialog, FormDialog → FormShellSpec + DialogSpec, etc.)",
+    "primitive_specs": 64,
+    "composite_specs": 41,
+    "workstation_specs": 13
+  },
+  "validation_checks": {
+    "typed_token_coverage": {
+      "status": "pass",
+      "description": "All token categories have typed equivalents (ColorValue, SpaceValue, DurationValue, ShadowValue)",
+      "string_only_tokens": ["font-family", "easing", "z-index (emitted as f32)"]
+    },
+    "layout_intent_coverage": {
+      "status": "pass",
+      "description": "All layout properties map losslessly to both GPUI and Jetstream",
+      "known_deltas": ["overflow_x: Scroll maps to Hidden in Jetstream (vertical-only scroll)"]
+    },
+    "event_model_coverage": {
+      "status": "pass",
+      "description": "All semantic events map to both GPUI events and Jetstream UiEvent",
+      "known_deltas": ["Hovered not emitted by Jetstream (gamepad primary)", "Navigate added for Jetstream gamepad"]
+    },
+    "adapter_trait_readiness": {
+      "status": "pass",
+      "description": "All trait definitions published, ready for g07/g08 implementation",
+      "deferred": "Actual adapter implementations land in g07 (GPUI) and g08 (Jetstream)"
+    }
+  }
+}

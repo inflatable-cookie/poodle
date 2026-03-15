@@ -5,6 +5,8 @@
 <script lang="ts">
   import { createEventDispatcher } from "svelte";
 
+  import Icon from "./Icon.svelte";
+
   export let open: boolean | null = null;
   export let defaultOpen = false;
   export let title: string | null = null;
@@ -55,7 +57,7 @@
         {/if}
       {/if}
     </span>
-    <span class="collapsible__indicator" aria-hidden="true">▾</span>
+    <span class="collapsible__indicator" aria-hidden="true"><Icon name="chevron-down" size="sm" /></span>
   </button>
 
   {#if isOpen}

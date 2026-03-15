@@ -1,6 +1,7 @@
 <script lang="ts">
   import { createEventDispatcher } from "svelte";
 
+  import Icon from "./Icon.svelte";
   import type { ButtonVariant, ControlSize } from "./types";
 
   export let variant: ButtonVariant = "ghost";
@@ -42,7 +43,7 @@
     <span class="icon-button__spinner" aria-hidden="true"></span>
   {:else}
     <span class="icon-button__glyph" aria-hidden="true">
-      <slot>{icon}</slot>
+      <slot><Icon name={icon} size="sm" /></slot>
     </span>
   {/if}
 </button>
@@ -140,10 +141,10 @@
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    width: 0.875rem;
-    height: 0.875rem;
+    width: var(--pug-size-icon-md);
+    height: var(--pug-size-icon-md);
     font-family: var(--pug-typography-code-family);
-    font-size: 0.8125rem;
+    font-size: 0.875rem;
     line-height: 1;
   }
 

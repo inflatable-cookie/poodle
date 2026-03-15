@@ -1,0 +1,65 @@
+<script lang="ts">
+  import { NavCard, NavCardGrid } from "@pug/svelte-composites";
+  import { Eyebrow, Icon } from "@pug/svelte-primitives";
+
+  let lastClick = "";
+</script>
+
+<div class="specimen">
+  <div class="specimen__group">
+    <Eyebrow>Navigation card grid (2 columns)</Eyebrow>
+    <NavCardGrid columns={2}>
+      <NavCard
+        title="Getting Started"
+        description="Learn the basics of the component library."
+        on:click={() => (lastClick = "Getting Started")}
+      >
+        <svelte:fragment slot="icon"><Icon name="home" /></svelte:fragment>
+      </NavCard>
+      <NavCard
+        title="Components"
+        description="Browse all available components."
+        badge="New"
+        on:click={() => (lastClick = "Components")}
+      >
+        <svelte:fragment slot="icon"><Icon name="layers" /></svelte:fragment>
+      </NavCard>
+      <NavCard
+        title="Tokens"
+        description="Design tokens and theming system."
+        on:click={() => (lastClick = "Tokens")}
+      >
+        <svelte:fragment slot="icon"><Icon name="sliders-horizontal" /></svelte:fragment>
+      </NavCard>
+      <NavCard
+        title="API Reference"
+        description="Complete component API documentation."
+        isDisabled
+      >
+        <svelte:fragment slot="icon"><Icon name="file-text" /></svelte:fragment>
+      </NavCard>
+    </NavCardGrid>
+  </div>
+
+  <div class="specimen__group">
+    <Eyebrow>Single card (as link)</Eyebrow>
+    <NavCard
+      title="View Documentation"
+      description="Open the full documentation site."
+      href="#"
+    />
+  </div>
+
+  {#if lastClick}
+    <div class="specimen__group">
+      <Eyebrow>Last click</Eyebrow>
+      <p>{lastClick}</p>
+    </div>
+  {/if}
+</div>
+
+<style>
+  .specimen { display: flex; flex-direction: column; gap: 1.5rem; }
+  .specimen__group { display: flex; flex-direction: column; gap: 0.5rem; }
+  p { margin: 0; }
+</style>

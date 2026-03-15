@@ -1,6 +1,7 @@
 <script lang="ts">
   import { createEventDispatcher } from "svelte";
 
+  import Icon from "./Icon.svelte";
   import TextInput from "./TextInput.svelte";
   import type { ValidationState } from "./types";
 
@@ -63,7 +64,7 @@
   on:submit={(event) => dispatch("submit", event.detail)}
   on:cancel={() => dispatch("cancel")}
 >
-  <span slot="leading" aria-hidden="true">⌕</span>
+  <span slot="leading" aria-hidden="true"><Icon name="search" size="sm" /></span>
   <svelte:fragment slot="trailing">
     {#if canClear}
       <button
@@ -72,7 +73,7 @@
         aria-label="Clear search query"
         on:click={handleClear}
       >
-        ✕
+        <Icon name="x" size="sm" />
       </button>
     {/if}
   </svelte:fragment>

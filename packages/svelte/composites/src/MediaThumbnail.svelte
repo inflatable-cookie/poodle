@@ -1,4 +1,6 @@
 <script lang="ts">
+  import { Icon } from "@pug/svelte-primitives";
+
   import type { AspectRatio, MediaKind, MediaState } from "./types";
 
   export let kind: MediaKind = "image";
@@ -19,8 +21,8 @@
       : state === "error"
         ? "Preview unavailable"
         : "No preview");
-  $: fallbackGlyph =
-    kind === "audio" ? "♫" : kind === "video" ? "▶" : kind === "document" ? "▣" : kind === "embed" ? "⇱" : "▥";
+  $: fallbackIcon =
+    kind === "audio" ? "music" : kind === "video" ? "play" : kind === "document" ? "file-text" : kind === "embed" ? "external-link" : "image";
 </script>
 
 <figure
@@ -38,13 +40,13 @@
         <slot />
       {:else}
         <div class="media-thumbnail__placeholder" aria-hidden="true">
-          <span>{fallbackGlyph}</span>
+          <Icon name={fallbackIcon} size="lg" />
         </div>
       {/if}
 
       {#if kind === "audio" || kind === "video"}
         <span class="media-thumbnail__play" aria-hidden="true">
-          {kind === "audio" ? "♫" : "▶"}
+          <Icon name={kind === "audio" ? "music" : "play"} size="sm" />
         </span>
       {/if}
     {:else}

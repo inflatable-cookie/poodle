@@ -1,13 +1,14 @@
 <script lang="ts">
   import { createEventDispatcher } from "svelte";
 
-  import type { SelectOption } from "./types";
+  import Icon from "./Icon.svelte";
+  import type { SelectOption, SelectOptionGroup, SelectItems } from "./types";
 
   export let id: string | undefined = undefined;
   export let value: string | null = null;
   export let defaultValue: string | null = null;
   export let placeholder: string | null = null;
-  export let options: SelectOption[] = [];
+  export let options: SelectItems = [];
   export let isDisabled = false;
   export let ariaLabel: string | null = null;
   export let describedBy: string | null = null;
@@ -22,6 +23,7 @@
   $: isControlled = value !== null;
   $: currentValue = (isControlled ? value : uncontrolledValue) ?? "";
   $: hasSelection = currentValue !== "";
+  $: isGrouped = options.length > 0 && "options" in options[0];
 
   function handleChange(event: Event): void {
     const nextValue = (event.currentTarget as HTMLSelectElement).value;
@@ -49,14 +51,26 @@
       <option value="" disabled>{placeholder}</option>
     {/if}
 
-    {#each options as option (option.value)}
-      <option value={option.value} disabled={option.isDisabled === true}>
-        {option.label}
-      </option>
-    {/each}
+    {#if isGrouped}
+      {#each options as group}
+        <optgroup label={(group as SelectOptionGroup).label}>
+          {#each (group as SelectOptionGroup).options as option (option.value)}
+            <option value={option.value} disabled={option.isDisabled === true}>
+              {option.label}
+            </option>
+          {/each}
+        </optgroup>
+      {/each}
+    {:else}
+      {#each options as option}
+        <option value={(option as SelectOption).value} disabled={(option as SelectOption).isDisabled === true}>
+          {(option as SelectOption).label}
+        </option>
+      {/each}
+    {/if}
   </select>
 
-  <span class="select__indicator" aria-hidden="true">▾</span>
+  <span class="select__indicator" aria-hidden="true"><Icon name="chevron-down" size="sm" /></span>
 </div>
 
 <style>
@@ -119,5 +133,15 @@
     font-size: 0.75rem;
     line-height: 1;
     pointer-events: none;
+  }
+
+  .select__control optgroup {
+    font-weight: 600;
+    color: var(--pug-color-text-secondary);
+  }
+
+  .select__control option {
+    font-weight: normal;
+    color: var(--pug-color-text-primary);
   }
 </style>

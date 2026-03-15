@@ -2,31 +2,38 @@
 
 Status: planned
 Owner: Pug Core
-Updated: 2026-03-13
-Depends on: g04.016, g04.017
+Updated: 2026-03-14
+Depends on: g04.017
 Primary repos: `pug`
 
 ## Goals
 
-- [ ] summarize what is now explicit after the GPUI parity, demo-app, and
-  docs-promotion generation
-- [ ] record remaining GPUI, publishing, and ecosystem gaps explicitly
-- [ ] define the next planning posture after `g04`
+- [ ] verify all g04 milestones are complete or explicitly deferred
+- [ ] update generation status and documentation
+- [ ] confirm g05 scope accounts for expanded component surface
 
 ## Execution Checklist
 
-- [ ] summarize the explicit `g04` stable surface
-- [ ] record remaining gaps and deferred work explicitly
-- [ ] define which next-program milestones are unblocked and which are still
-  speculative
-- [ ] avoid carrying ambiguous runtime or publishing scope forward implicitly
+- [ ] audit all g04 milestones for completion status
+- [ ] record any deferred items with justification and g05 target
+- [ ] update g04 README.md with final milestone status table
+- [ ] update generation-index.md to mark g04 as completed
+- [ ] confirm g05 GPUI parity scope covers:
+  - GPUI counterparts for all new g04 components
+  - block editor full implementation (if deferred from g04.015)
+  - downstream migration support and tooling
+  - any remaining Underlay parity gaps
+- [ ] update roadmaps README.md to reflect g05 as active generation
 
 ## Acceptance Criteria
 
-- [ ] `g04` closeout is explicit
-- [ ] `g05` cutover posture is explicit
+- [ ] all g04 milestones are marked completed or explicitly deferred
+- [ ] g04 README.md reflects final status
+- [ ] generation-index.md is updated
+- [ ] g05 scope is confirmed with enough detail to begin execution
+- [ ] no orphaned work items remain untracked
 
 ## Next Task
 
-If a new generation is needed, open it only after the rebuilt demo target,
-GPUI runtime evidence, and published-docs posture from `g04` are explicit.
+Begin `g05` execution based on the confirmed scope, starting with GPUI parity
+for g04-added components.

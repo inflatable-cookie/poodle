@@ -1,6 +1,6 @@
 <script lang="ts">
   import { Card, PageHeader } from "@pug/svelte-composites";
-  import { Accordion, Button, Collapsible, Pill, Toggle } from "@pug/svelte-primitives";
+  import { Accordion, Button, Collapsible, Eyebrow, Inline, Pill, Toggle } from "@pug/svelte-primitives";
 
   import type { DocsFamilyEntry, DocsSectionEntry } from "../catalog";
 
@@ -22,7 +22,7 @@
 <section id="catalog-hub" class="panel token-summary" aria-labelledby="catalog-heading">
   <div class="section-header">
     <div>
-      <p class="eyebrow">Catalog hub</p>
+      <Eyebrow>Catalog hub</Eyebrow>
       <h2 id="catalog-heading">Information architecture, coverage, and adoption bar</h2>
     </div>
   </div>
@@ -41,7 +41,7 @@
             <article class="docs-family-card">
               <div class="docs-family-card__header">
                 <div>
-                  <p class="eyebrow">{family.eyebrow}</p>
+                  <Eyebrow>{family.eyebrow}</Eyebrow>
                   <h4>{family.title}</h4>
                 </div>
                 <span class="command-shortcut-hint">{family.packageName}</span>
@@ -154,7 +154,7 @@
             on:pressedChange={() => onSelectSection(entry.id)}
           >
             <div>
-              <p class="eyebrow">{entry.eyebrow}</p>
+              <Eyebrow>{entry.eyebrow}</Eyebrow>
               <strong>{entry.title}</strong>
             </div>
             <p>{entry.summary}</p>
@@ -186,17 +186,17 @@
           eyebrow="Website-style wrapper"
           subtitle="This proof uses app-owned composition plus scoped appearance recipes so cards, header framing, and CTA chrome can shift together."
         >
-          <div slot="actions" class="action-cluster brand-proof-actions">
+          <Inline slot="actions" justify="end" wrap gap="md">
             <Button variant="secondary">Read pattern notes</Button>
             <Button variant="primary">Launch branded preview</Button>
-          </div>
+          </Inline>
         </PageHeader>
 
         <div class="brand-proof-grid">
           {#each brandProofCards as card}
             <Card variant={card.variant}>
               <div slot="header">
-                <p class="eyebrow">{card.eyebrow}</p>
+                <Eyebrow>{card.eyebrow}</Eyebrow>
               </div>
               <strong class="detail-card-value">{card.title}</strong>
               <p class="detail-card-meta">{card.summary}</p>

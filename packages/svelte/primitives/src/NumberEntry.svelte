@@ -1,6 +1,7 @@
 <script lang="ts">
   import { createEventDispatcher } from "svelte";
 
+  import Icon from "./Icon.svelte";
   import { clamp, formatNumber, snapToStep } from "./internal";
 
   import type { ValidationState } from "./types";
@@ -143,10 +144,10 @@
   {#if showSteppers}
     <div class="number-entry__steppers">
       <button type="button" disabled={isDisabled || isReadOnly} on:click={() => adjust(step, "increment")}>
-        +
+        <Icon name="plus" size="sm" />
       </button>
       <button type="button" disabled={isDisabled || isReadOnly} on:click={() => adjust(-step, "decrement")}>
-        −
+        <Icon name="minus" size="sm" />
       </button>
     </div>
   {/if}

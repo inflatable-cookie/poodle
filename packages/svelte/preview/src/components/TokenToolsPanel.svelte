@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { SearchField, Tabs, type TabDefinition } from "@pug/svelte-primitives";
+  import { Eyebrow, SearchField, Table, Tabs, type TabItem, type TableColumn, type TableRow } from "@pug/svelte-primitives";
 
   export let activePanelId: "token-summary-section" | "token-inspector" = "token-summary-section";
   export let keySemanticTokens: Array<{ path: string; value: string }> = [];
@@ -10,16 +10,26 @@
   export let onQueryChange: (event: CustomEvent<{ value: string }>) => void = () => {};
   export let onQueryClear: () => void = () => {};
 
-  const tabs: TabDefinition[] = [
+  const tabItems: TabItem[] = [
     { value: "token-summary-section", label: "Runtime values" },
     { value: "token-inspector", label: "Inspector" },
   ];
+
+  const inspectorColumns: TableColumn[] = [
+    { id: "path", label: "Path", isRowHeader: true },
+    { id: "value", label: "Value" },
+  ];
+
+  $: inspectorRows = filteredTokens.map((token, i): TableRow => ({
+    id: `token-${i}`,
+    cells: { path: token.path, value: token.value },
+  }));
 </script>
 
 <section class="panel token-tools-shell" aria-labelledby="token-tools-heading">
   <div class="section-header">
     <div>
-      <p class="eyebrow">Token tools</p>
+      <Eyebrow>Token tools</Eyebrow>
       <h2 id="token-tools-heading">Runtime values and emitted-token inspection</h2>
     </div>
   </div>
@@ -31,7 +41,7 @@
 
   <Tabs
     value={activePanelId}
-    {tabs}
+    items={tabItems}
     ariaLabel="Token tools"
     on:valueChange={(event) =>
       onSelectPanel(event.detail.value as "token-summary-section" | "token-inspector")}
@@ -59,24 +69,12 @@
           />
         </div>
         <p class="inspector-count">{matchingTokenCount} semantic tokens shown</p>
-        <div class="token-table-wrap">
-          <table>
-            <thead>
-              <tr>
-                <th scope="col">Path</th>
-                <th scope="col">Value</th>
-              </tr>
-            </thead>
-            <tbody>
-              {#each filteredTokens as token}
-                <tr>
-                  <td class="token-path">{token.path}</td>
-                  <td>{token.value}</td>
-                </tr>
-              {/each}
-            </tbody>
-          </table>
-        </div>
+        <Table
+          columns={inspectorColumns}
+          rows={inspectorRows}
+          ariaLabel="Semantic token inspector"
+          emptyMessage="No tokens match the current filter."
+        />
       </div>
     {/if}
   </Tabs>

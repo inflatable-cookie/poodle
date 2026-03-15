@@ -1,129 +1,117 @@
-# g04 GPUI Native Parity, Runtime Proof, And Public Docs Promotion
+# g04 Underlay Parity, Component Depth, And Workflow Coverage
 
-Status: active
-Updated: 2026-03-13
+Status: completed
+Updated: 2026-03-14
 
 ## Context
 
-`g04` begins after `g03` made the hardening, adoption-boundary, accessibility,
-release, acceptance, and onboarding baselines explicit. The next bottleneck is
-no longer whether Pug has a credible Svelte surface and adoption posture. It is
-whether GPUI becomes a real implementation surface rather than mostly token
-bindings and matrix-only validation, and whether the shared demo target itself
-is coherent enough that side-by-side parity actually means something.
+`g04` begins after `g03` completed hardening, migration policy, parity
+automation, first downstream adoption tranches, validation, and mature extension
+support. The next priority is whether the Svelte component surface covers enough
+real-world UI patterns to replace Underlay as the primary component library for
+downstream applications. GPUI native parity work follows in `g05` once the
+expanded Svelte component suite is established.
 
-This generation should treat the Svelte implementation as the strongest current
-reference, but not as a DOM-specific template to copy mechanically. GPUI work
-should imitate Svelte semantics, state models, token usage, and contract
-meaning as closely as possible while documenting native-runtime deltas
-explicitly where one-to-one imitation would be wrong.
-
-For Loophole-facing shared surfaces, the target is not merely "similar enough"
-cross-runtime components. The target is the same UI implemented in Svelte and
-GPUI against one contract, with explicit deltas only where the runtime makes a
-real difference unavoidable. That requires the Svelte demo surface to become a
-deliberate contract-owned target app, not just a dense preview page with broad
-section coverage.
+An exhaustive audit of the Underlay component library identified approximately
+39 missing components, patterns, and feature gaps that Pug must address before
+downstream projects can migrate away from Underlay without regressions. This
+generation organizes that work into sequenced milestones covering new component
+families, depth extensions to existing components, and specialized editing and
+media surfaces.
 
 ## Starting State
 
-- `g03` is complete and explicit
-- Svelte tokens, primitives, composites, and workstation shells exist as the
-  strongest implementation surface
-- GPUI currently has generated token bindings and a multi-app validation matrix
-  but not comparable component packages
-- Underlay and Loophole adoption boundaries are explicit
-- release operations, ecosystem acceptance, and onboarding baselines are
-  explicit
-- the preview is strong internal docs evidence but not yet a published public
-  docs platform
+- `g03` hardening, adoption, accessibility, release, and onboarding baselines
+  are complete
+- Svelte primitives cover 64 components with full specimen coverage
+- Svelte composites cover 21 components with full specimen coverage
+- Underlay parity audit has identified ~39 gaps across dialog patterns, file
+  handling, input depth, list interactions, media, editing, and operational
+  display
+- the preview app is restructured into a three-section catalogue with
+  per-component pages
 
 ## Exit State
 
-- GPUI implementation order and native-delta posture are explicit
-- a GPUI preview or review app exists that mirrors the Svelte preview's review
-  coverage closely enough for side-by-side comparison
-- GPUI primitives, composites, and workstation-shell foundations exist against
-  the same contracts where they are worth sharing
-- cross-runtime parity evidence is stronger and less aspirational
-- native accessibility, focus, and keyboard posture are documented with real
-  GPUI evidence rather than browser inference
-- the Svelte demo app is coherent, contract-owned, and broad enough to serve as
-  the same target UI GPUI should implement
-- at least one meaningful GPUI downstream or reference-app proof exists beyond
-  token-only evidence
-- docs and onboarding surfaces are strong enough to support external evaluator
-  review rather than only internal preview usage
+- all Underlay-parity components are implemented and documented
+- existing component feature gaps are resolved
+- downstream projects can adopt Pug as a full Underlay replacement for UI
+  components
+- new component specimens are integrated into the preview catalogue
+- the block editor baseline is evaluated and scoped for follow-on work
+- GPUI counterparts for new components are scoped but not required in this
+  generation
 
 ## Milestone Status
 
 | ID | Milestone | Depends On | Class | Status |
 |----|-----------|------------|-------|--------|
-| 001 | GPUI contract audit, parity priority matrix, and implementation order | g03.014 | Foundation | Completed |
-| 002 | GPUI theme runtime, token application, and native preview app baseline | 001 | Foundation | Completed |
-| 003 | GPUI layout, surface, scrolling, and structural primitives | 001, 002 | Core build | Completed |
-| 004 | GPUI action, text-entry, and field primitives | 001-003 | Core build | Completed |
-| 005 | GPUI selection, value, feedback, and date or time primitives | 001-004 | Core build | Completed |
-| 006 | GPUI overlay, disclosure, navigation, and menu primitives | 001-005 | Core build | Completed |
-| 007 | GPUI form, validation, and remediation composite parity | 004-006 | Depth | Completed |
-| 008 | GPUI data, browse, detail, picker, and media composite parity | 003-007 | Depth | Completed |
-| 009 | GPUI workstation shell, command discovery, and layout orchestration parity | 003, 006, 008 | Workstation | Completed |
-| 010 | GPUI native accessibility, focus, keyboard, and assistive-technology proof | 003-009 | Hardening | Completed |
-| 011 | Cross-runtime parity report, intentional delta register, and acceptance-harness expansion | 007-010 | Hardening | Completed |
-| 012 | Shared demo-app audit, gap register, and target-shape freeze | 009-011 | Alignment | Completed |
-| 013 | Cross-runtime demo-app contract, section model, and parity checklist | 012 | Alignment | Completed |
-| 014 | Svelte demo-app rebuild, component adoption, and coverage upgrade | 012, 013 | Alignment | Completed |
-| 015 | GPUI demo-app parity implementation and side-by-side review | 013, 014 | Alignment | Planned |
-| 016 | GPUI downstream reference app and multi-app implementation proof | 015 | Adoption | Planned |
-| 017 | Published docs platform, evaluator onboarding, and external release evidence | 015, 016 | Adoption | Planned |
-| 018 | Generation closeout and `g05` cutover plan | 016, 017 | Closure | Planned |
+| 001 | Underlay parity audit, gap register, and implementation priority | g03.014 | Foundation | Completed |
+| 002 | Dialog and confirmation patterns | 001 | Core build | Completed |
+| 003 | File upload, media input, and embed patterns | 001 | Core build | Completed |
+| 004 | Button and card pattern extensions | 001 | Core build | Completed |
+| 005 | Input depth, text field, and specialized entry patterns | 001 | Core build | Completed |
+| 006 | Temporal display and duration input | 001 | Core build | Completed |
+| 007 | List interaction, reordering, and sort controls | 001 | Core build | Completed |
+| 008 | Code display and color selection | 001 | Core build | Completed |
+| 009 | Navigation cards and list card patterns | 001 | Core build | Completed |
+| 010 | Loading, skeleton presets, and progress patterns | 001 | Depth | Completed |
+| 011 | DataTable and Select depth | 002-010 | Depth | Completed |
+| 012 | Operational display and monitoring patterns | 002-010 | Depth | Completed |
+| 013 | Rich text and markdown editing | 001 | Specialist | Completed |
+| 014 | Media playback components | 001 | Specialist | Completed |
+| 015 | Block editor exploration and Nightfire-informed baseline | 013 | Specialist | Completed |
+| 016 | Existing component feature gap hardening | 002-012 | Hardening | Completed |
+| 017 | Preview specimen coverage and documentation | 002-016 | Docs | Completed |
+| 018 | Generation closeout and `g05` cutover plan | 017 | Closure | Completed |
 
 ## Dependency Shape
 
 ```text
-001 GPUI Contract Audit / Priority Matrix
-  -> 002 Theme Runtime / Native Preview App
-      -> 003 Structural GPUI Primitives
-          -> 004 Action / Text-Entry / Field Primitives
-              -> 005 Selection / Value / Feedback / Date-Time Primitives
-                  -> 006 Overlay / Disclosure / Navigation / Menu Primitives
-                      -> 007 Form / Validation / Remediation Composites
-                          -> 008 Data / Browse / Detail / Picker / Media Composites
-                              -> 009 Workstation Shell / Command / Layout Orchestration
-                                  -> 010 Native Accessibility / Focus / Keyboard Proof
-                                      -> 011 Cross-Runtime Parity Report / Delta Register
-                                          -> 012 Demo App Audit / Gap Register
-                                              -> 013 Demo App Contract / Parity Checklist
-                                                  -> 014 Svelte Demo Rebuild / Coverage Upgrade
-                                                      -> 015 GPUI Demo Parity / Side-By-Side Review
-                                                          -> 016 Downstream GPUI Reference App Proof
-                                                              -> 017 Published Docs / External Onboarding
-                                                                  -> 018 Closeout / g05 Cutover
+001 Underlay Parity Audit / Gap Register
+  -> 002 Dialog / Confirmation Patterns
+  -> 003 File Upload / Media Input / Embed
+  -> 004 Button / Card Pattern Extensions
+  -> 005 Input Depth / Text Field / Specialized Entry
+  -> 006 Temporal Display / Duration Input
+  -> 007 List Interaction / Reordering / Sort
+  -> 008 Code Display / Color Selection
+  -> 009 Navigation Cards / List Cards
+      -> 010 Loading / Skeleton / Progress
+      -> 011 DataTable / Select Depth
+      -> 012 Operational Display / Monitoring
+          -> 016 Feature Gap Hardening
+              -> 017 Specimen Coverage / Docs
+                  -> 018 Closeout / g05 Cutover
+  -> 013 Rich Text / Markdown Editing
+      -> 015 Block Editor Exploration
+  -> 014 Media Playback
 ```
 
 ## Execution Lanes
 
-### Lane A: GPUI Foundation And Harness
+### Lane A: Foundation
 
-`001 -> 002 -> 003`
+`001`
 
-### Lane B: GPUI Shared Component Surface
+### Lane B: Core New Components
 
-`004 -> 005 -> 006 -> 007 -> 008`
+`002 -> 003 -> 004 -> 005 -> 006 -> 007 -> 008 -> 009`
 
-### Lane C: GPUI Runtime Proof
+### Lane C: Component Depth
 
-`009 -> 010 -> 011`
+`010 -> 011 -> 012`
 
-### Lane D: Demo Surface Alignment
+### Lane D: Specialist Surfaces
 
-`012 -> 013 -> 014 -> 015`
+`013 -> 015` and `014` (independent)
 
-### Lane E: Adoption And External-Facing Promotion
+### Lane E: Hardening And Closeout
 
 `016 -> 017 -> 018`
 
 ## Next Task
 
-Open `g04.015` and implement the same shared demo app in GPUI, using the
-rebuilt Svelte target for side-by-side review and explicit delta handling.
+Open `g04.001` and formalize the Underlay parity gap register with explicit
+implementation priority, contract requirements, and layer assignment for each
+identified component.

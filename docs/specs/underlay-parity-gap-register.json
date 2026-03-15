@@ -1,0 +1,476 @@
+{
+  "$schema": "underlay-parity-gap-register",
+  "version": "1.0.0",
+  "updated": "2026-03-14",
+  "description": "Machine-readable register of Underlay component parity gaps identified for Pug g04 implementation.",
+  "gaps": [
+    {
+      "id": "gap-001",
+      "component": "AlertDialog",
+      "class": "new-component",
+      "priority": "high",
+      "layer": "@pug/svelte-primitives",
+      "contract": "new",
+      "milestone": "g04.002",
+      "sourcePattern": "Underlay AlertDialog (bits-ui based)",
+      "description": "Focused modal for destructive-action confirmation with tone-colored confirm button, title, description, and keyboard dismiss."
+    },
+    {
+      "id": "gap-002",
+      "component": "FormDialog",
+      "class": "new-component",
+      "priority": "high",
+      "layer": "@pug/svelte-composites",
+      "contract": "new",
+      "milestone": "g04.002",
+      "sourcePattern": "Underlay FormDialog combining Dialog + form layout",
+      "description": "Modal dialog with embedded form fields, inline validation, submit/cancel actions, and loading state."
+    },
+    {
+      "id": "gap-003",
+      "component": "ConfirmAction",
+      "class": "new-component",
+      "priority": "high",
+      "layer": "@pug/svelte-composites",
+      "contract": "new",
+      "milestone": "g04.002",
+      "sourcePattern": "Underlay ConfirmAction with confirmation flow",
+      "description": "Wraps any trigger element with a confirmation prompt (popover or inline) before executing a dangerous action."
+    },
+    {
+      "id": "gap-004",
+      "component": "FileUpload",
+      "class": "new-component",
+      "priority": "high",
+      "layer": "@pug/svelte-primitives",
+      "contract": "new",
+      "milestone": "g04.003",
+      "sourcePattern": "Underlay FileUpload with drag-drop and preview",
+      "description": "File input with drag-and-drop zone, file type filtering, size limits, upload progress, and thumbnail previews."
+    },
+    {
+      "id": "gap-005",
+      "component": "MediaPicker",
+      "class": "new-component",
+      "priority": "lower",
+      "layer": "@pug/svelte-composites",
+      "contract": "new",
+      "milestone": "g04.003",
+      "sourcePattern": "Underlay MediaPicker asset selection",
+      "description": "Gallery-based asset browser with search, filtering, selection mode, and upload integration."
+    },
+    {
+      "id": "gap-006",
+      "component": "EmbedInput",
+      "class": "new-component",
+      "priority": "lower",
+      "layer": "@pug/svelte-composites",
+      "contract": "new",
+      "milestone": "g04.003",
+      "sourcePattern": "Underlay EmbedInput URL-to-embed conversion",
+      "description": "URL input with paste detection, provider resolution, and preview generation for embedded content."
+    },
+    {
+      "id": "gap-007",
+      "component": "EmbedPreview",
+      "class": "new-component",
+      "priority": "lower",
+      "layer": "@pug/svelte-composites",
+      "contract": "new",
+      "milestone": "g04.003",
+      "sourcePattern": "Underlay EmbedPreview rich embed display",
+      "description": "Rich card rendering for embedded content with provider icon, title, description, thumbnail, and link."
+    },
+    {
+      "id": "gap-008",
+      "component": "SplitButton",
+      "class": "new-component",
+      "priority": "high",
+      "layer": "@pug/svelte-primitives",
+      "contract": "new",
+      "milestone": "g04.004",
+      "sourcePattern": "Underlay SplitButton with dropdown actions",
+      "description": "Primary action button with chevron-triggered dropdown menu of secondary actions."
+    },
+    {
+      "id": "gap-009",
+      "component": "CardRadioGroup",
+      "class": "new-component",
+      "priority": "high",
+      "layer": "@pug/svelte-composites",
+      "contract": "new",
+      "milestone": "g04.004",
+      "sourcePattern": "Underlay CardRadioGroup rich option cards",
+      "description": "Radio-selection group rendered as rich cards with title, description, icon, and visual selection indicator."
+    },
+    {
+      "id": "gap-010",
+      "component": "Button",
+      "class": "feature-extension",
+      "priority": "medium",
+      "layer": "@pug/svelte-primitives",
+      "contract": "amendment",
+      "milestone": "g04.004",
+      "sourcePattern": "Underlay SplitButton split variant",
+      "description": "Add split variant prop to Button for use alongside SplitButton component."
+    },
+    {
+      "id": "gap-011",
+      "component": "Card",
+      "class": "feature-extension",
+      "priority": "medium",
+      "layer": "@pug/svelte-composites",
+      "contract": "amendment",
+      "milestone": "g04.004",
+      "sourcePattern": "Underlay card radio-selection and specialized variants",
+      "description": "Add selected/selectable props for radio contexts and specialized card layout variants (media-top, horizontal, compact)."
+    },
+    {
+      "id": "gap-012",
+      "component": "TextInput",
+      "class": "feature-extension",
+      "priority": "high",
+      "layer": "@pug/svelte-primitives",
+      "contract": "amendment",
+      "milestone": "g04.005",
+      "sourcePattern": "Underlay TextInput async validation, prefix/suffix",
+      "description": "Add prefix/suffix slots, async validation with debounce and loading indicator, and character count display."
+    },
+    {
+      "id": "gap-013",
+      "component": "InlineEditableField",
+      "class": "new-component",
+      "priority": "medium",
+      "layer": "@pug/svelte-composites",
+      "contract": "new",
+      "milestone": "g04.005",
+      "sourcePattern": "Underlay InlineEditableField click-to-edit",
+      "description": "Inline text that toggles between display and edit modes on click, with save on Enter/blur and cancel on Escape."
+    },
+    {
+      "id": "gap-014",
+      "component": "SlugField",
+      "class": "new-component",
+      "priority": "medium",
+      "layer": "@pug/svelte-composites",
+      "contract": "new",
+      "milestone": "g04.005",
+      "sourcePattern": "Underlay SlugField auto-generated URL slug",
+      "description": "Auto-generates URL-safe slug from bound source text with manual override and validation."
+    },
+    {
+      "id": "gap-015",
+      "component": "Field",
+      "class": "feature-extension",
+      "priority": "medium",
+      "layer": "@pug/svelte-primitives",
+      "contract": "amendment",
+      "milestone": "g04.005",
+      "sourcePattern": "Underlay Field grid-spanning layout modes",
+      "description": "Add span and gridArea props for CSS grid column spanning in multi-column form layouts."
+    },
+    {
+      "id": "gap-016",
+      "component": "TimeAgo",
+      "class": "new-component",
+      "priority": "high",
+      "layer": "@pug/svelte-primitives",
+      "contract": "new",
+      "milestone": "g04.006",
+      "sourcePattern": "Underlay TimeAgo relative timestamp display",
+      "description": "Displays relative timestamps that auto-update on a configurable interval with absolute-time tooltip."
+    },
+    {
+      "id": "gap-017",
+      "component": "DurationInput",
+      "class": "new-component",
+      "priority": "medium",
+      "layer": "@pug/svelte-primitives",
+      "contract": "new",
+      "milestone": "g04.006",
+      "sourcePattern": "Underlay DurationInput hours/minutes/seconds",
+      "description": "Segmented input for hours/minutes/seconds with keyboard increment/decrement and min/max constraints."
+    },
+    {
+      "id": "gap-018",
+      "component": "ReorderableList",
+      "class": "new-component",
+      "priority": "high",
+      "layer": "@pug/svelte-composites",
+      "contract": "new",
+      "milestone": "g04.007",
+      "sourcePattern": "Underlay ReorderableList with drag handles",
+      "description": "List with drag-handle reordering, drop indicators, keyboard reorder support, and onReorder callback."
+    },
+    {
+      "id": "gap-019",
+      "component": "AutonomousList",
+      "class": "new-component",
+      "priority": "lower",
+      "layer": "@pug/svelte-composites",
+      "contract": "new",
+      "milestone": "g04.007",
+      "sourcePattern": "Underlay AutonomousList self-managing list",
+      "description": "Self-managing list with inline add/remove/reorder and inline text editing per item."
+    },
+    {
+      "id": "gap-020",
+      "component": "OrderBy",
+      "class": "new-component",
+      "priority": "medium",
+      "layer": "@pug/svelte-composites",
+      "contract": "new",
+      "milestone": "g04.007",
+      "sourcePattern": "Underlay OrderBy sort control toolbar",
+      "description": "Sort-control toolbar with field buttons, direction indicators, single/multi-sort, and reset."
+    },
+    {
+      "id": "gap-021",
+      "component": "Code",
+      "class": "new-component",
+      "priority": "medium",
+      "layer": "@pug/svelte-primitives",
+      "contract": "new",
+      "milestone": "g04.008",
+      "sourcePattern": "Underlay Code syntax-highlighted display",
+      "description": "Syntax-highlighted code display with line numbers, line highlighting, copy button, and overflow handling."
+    },
+    {
+      "id": "gap-022",
+      "component": "ColorPicker",
+      "class": "new-component",
+      "priority": "medium",
+      "layer": "@pug/svelte-primitives",
+      "contract": "new",
+      "milestone": "g04.008",
+      "sourcePattern": "Underlay ColorPicker with swatches and input",
+      "description": "Color selection with color area, hue slider, text input, swatch palette, and hex/rgb/hsl format support."
+    },
+    {
+      "id": "gap-023",
+      "component": "NavCard",
+      "class": "new-component",
+      "priority": "medium",
+      "layer": "@pug/svelte-composites",
+      "contract": "new",
+      "milestone": "g04.009",
+      "sourcePattern": "Underlay NavCard navigation-oriented card",
+      "description": "Clickable card for navigation with title, description, icon, badge, and hover/focus styling."
+    },
+    {
+      "id": "gap-024",
+      "component": "NavCardGrid",
+      "class": "new-component",
+      "priority": "medium",
+      "layer": "@pug/svelte-composites",
+      "contract": "new",
+      "milestone": "g04.009",
+      "sourcePattern": "Underlay NavCardGrid grid of navigation cards",
+      "description": "Responsive grid layout container for NavCard items with column config and breakpoints."
+    },
+    {
+      "id": "gap-025",
+      "component": "ListCard",
+      "class": "new-component",
+      "priority": "medium",
+      "layer": "@pug/svelte-composites",
+      "contract": "new",
+      "milestone": "g04.009",
+      "sourcePattern": "Underlay ListCard structured list item",
+      "description": "Structured list item card with leading icon/avatar, title, subtitle, metadata slots, and trailing action."
+    },
+    {
+      "id": "gap-026",
+      "component": "Skeleton",
+      "class": "feature-extension",
+      "priority": "high",
+      "layer": "@pug/svelte-primitives",
+      "contract": "amendment",
+      "milestone": "g04.010",
+      "sourcePattern": "Underlay DataSkeleton presets",
+      "description": "Add data-shape presets (table-row, card, list-item, detail-section, avatar-line) for common loading layouts."
+    },
+    {
+      "id": "gap-027",
+      "component": "PageLoading",
+      "class": "new-component",
+      "priority": "medium",
+      "layer": "@pug/svelte-composites",
+      "contract": "new",
+      "milestone": "g04.010",
+      "sourcePattern": "Underlay PageLoading full-page loading state",
+      "description": "Full-viewport loading overlay with spinner or progress bar, status message, and optional cancel."
+    },
+    {
+      "id": "gap-028",
+      "component": "DataTable",
+      "class": "feature-extension",
+      "priority": "medium",
+      "layer": "@pug/svelte-composites",
+      "contract": "amendment",
+      "milestone": "g04.011",
+      "sourcePattern": "Underlay DataTable CSV export and column visibility",
+      "description": "Add CSV export action, column visibility toggle menu, and multi-column sort indicators."
+    },
+    {
+      "id": "gap-029",
+      "component": "Select",
+      "class": "feature-extension",
+      "priority": "medium",
+      "layer": "@pug/svelte-primitives",
+      "contract": "amendment",
+      "milestone": "g04.011",
+      "sourcePattern": "Underlay Select grouped options",
+      "description": "Add option group support with non-selectable heading labels and ARIA role=group semantics."
+    },
+    {
+      "id": "gap-030",
+      "component": "LogList",
+      "class": "new-component",
+      "priority": "medium",
+      "layer": "@pug/svelte-composites",
+      "contract": "new",
+      "milestone": "g04.012",
+      "sourcePattern": "Underlay LogList timestamped event display",
+      "description": "Timestamped event/log list with level-based color coding, filtering, auto-scroll, and search."
+    },
+    {
+      "id": "gap-031",
+      "component": "StateTile",
+      "class": "feature-extension",
+      "priority": "medium",
+      "layer": "@pug/svelte-composites",
+      "contract": "amendment",
+      "milestone": "g04.012",
+      "sourcePattern": "Underlay StateTile trend indicators and sparklines",
+      "description": "Add trend prop (up/down/flat) with directional arrow, trendLabel, and optional sparkline data array."
+    },
+    {
+      "id": "gap-032",
+      "component": "MarkdownEditor",
+      "class": "new-component",
+      "priority": "lower",
+      "layer": "@pug/svelte-composites",
+      "contract": "new",
+      "milestone": "g04.013",
+      "sourcePattern": "Underlay MarkdownEditor (EasyMDE based)",
+      "description": "Markdown authoring with formatting toolbar, preview toggle, split-view mode, and image upload integration."
+    },
+    {
+      "id": "gap-033",
+      "component": "AudioPlayer",
+      "class": "new-component",
+      "priority": "lower",
+      "layer": "@pug/svelte-composites",
+      "contract": "new",
+      "milestone": "g04.014",
+      "sourcePattern": "Underlay AudioPlayer audio playback",
+      "description": "Audio playback with transport controls, seek bar, volume, duration display, and playback speed."
+    },
+    {
+      "id": "gap-034",
+      "component": "VideoPlayer",
+      "class": "new-component",
+      "priority": "lower",
+      "layer": "@pug/svelte-composites",
+      "contract": "new",
+      "milestone": "g04.014",
+      "sourcePattern": "Underlay VideoPlayer video playback",
+      "description": "Video playback with overlay controls, seek, volume, fullscreen, poster image, and captions."
+    },
+    {
+      "id": "gap-035",
+      "component": "RelationSelector",
+      "class": "new-component",
+      "priority": "lower",
+      "layer": "@pug/svelte-composites",
+      "contract": "new",
+      "milestone": "g04.007",
+      "sourcePattern": "Underlay RelationSelector enhanced picker",
+      "description": "Enhanced relation picker with richer selection UI and multi-relation support."
+    },
+    {
+      "id": "gap-036",
+      "component": "BlockEditor",
+      "class": "new-component",
+      "priority": "exploration",
+      "layer": "@pug/svelte-composites",
+      "contract": "new",
+      "milestone": "g04.015",
+      "sourcePattern": "Nightfire block editor system",
+      "description": "Block-based content editor with paragraph, heading, image, code, quote, list, and divider blocks. Feasibility TBD."
+    }
+  ],
+  "nonGoals": [
+    {
+      "id": "non-001",
+      "component": "Auth flows",
+      "reason": "App-specific authentication patterns tied to Underlay's backend. Not portable as generic UI components."
+    },
+    {
+      "id": "non-002",
+      "component": "Nightfire deep internals",
+      "reason": "Block editor plugin system, block-type registry, and serialization engine are Underlay-specific. Only the user-facing editor surface is in scope (g04.015)."
+    },
+    {
+      "id": "non-003",
+      "component": "Underlay data patterns",
+      "reason": "Data fetching hooks, API client wrappers, and Underlay-specific store patterns are app-level concerns, not UI components."
+    },
+    {
+      "id": "non-004",
+      "component": "Svelte 5 runes migration",
+      "reason": "Underlay uses Svelte 5.x runes syntax. Pug targets Svelte 4.x. Runes migration is a separate concern from component parity."
+    },
+    {
+      "id": "non-005",
+      "component": "Layout primitives already covered",
+      "reason": "Underlay layout components (HStack, VStack, Grid, etc.) already have Pug equivalents (Inline, Stack, Grid, Box)."
+    }
+  ],
+  "sharedPatterns": [
+    {
+      "id": "pattern-001",
+      "name": "drag-and-drop",
+      "usedBy": ["ReorderableList", "AutonomousList", "FileUpload", "BlockEditor"],
+      "description": "Shared drag-and-drop interaction pattern needed by multiple components. Consider a shared utility or action."
+    },
+    {
+      "id": "pattern-002",
+      "name": "rich-text-rendering",
+      "usedBy": ["MarkdownEditor", "BlockEditor"],
+      "description": "Markdown-to-HTML rendering and sanitization shared by editing components."
+    },
+    {
+      "id": "pattern-003",
+      "name": "inline-edit-toggle",
+      "usedBy": ["InlineEditableField", "EditableLabel"],
+      "description": "Display-to-edit mode toggle pattern with save/cancel keyboard shortcuts."
+    },
+    {
+      "id": "pattern-004",
+      "name": "media-playback",
+      "usedBy": ["AudioPlayer", "VideoPlayer"],
+      "description": "Shared transport controls, seek bar, and volume management for media playback."
+    }
+  ],
+  "summary": {
+    "totalGaps": 36,
+    "newComponents": 27,
+    "featureExtensions": 9,
+    "byPriority": {
+      "high": 10,
+      "medium": 17,
+      "lower": 8,
+      "exploration": 1
+    },
+    "byLayer": {
+      "primitives": 13,
+      "composites": 23
+    },
+    "byContract": {
+      "new": 27,
+      "amendment": 9
+    }
+  }
+}

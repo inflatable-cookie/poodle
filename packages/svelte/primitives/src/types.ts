@@ -40,6 +40,7 @@ export type OverlayPlacement =
   | "left-end";
 export type PopoverInitialFocus = "first-focusable" | "content" | "none";
 export type DialogKind = "dialog" | "alertdialog";
+export type AlertDialogTone = "danger" | "warning";
 export type DrawerEdge = "left" | "right" | "top" | "bottom";
 export type TriStateValue = "excluded" | "default" | "included";
 export type EditableLabelActivationMode =
@@ -50,6 +51,12 @@ export type FormActionAlign = "start" | "end" | "between";
 export type BannerTone = "info" | "success" | "warning" | "danger";
 export type BannerAnnounceMode = "none" | "polite" | "assertive";
 export type SkeletonShape = "line" | "block" | "circle";
+export type SkeletonPreset =
+  | "table-row"
+  | "card"
+  | "list-item"
+  | "detail-section"
+  | "avatar-line";
 
 export interface AccordionItem {
   value: string;
@@ -72,18 +79,20 @@ export interface ToggleGroupOption {
   isDisabled?: boolean;
 }
 
-export interface TabDefinition {
+export interface TabItem {
   value: string;
   label: string;
-  isDisabled?: boolean;
-}
-
-export interface TabStripItem {
-  value: string;
-  label: string;
+  icon?: string;
   isDisabled?: boolean;
   isClosable?: boolean;
 }
+
+export type TabVariant = "underline" | "card" | "pill";
+
+/** @deprecated Use TabItem instead */
+export type TabDefinition = TabItem;
+/** @deprecated Use TabItem instead */
+export type TabStripItem = TabItem;
 
 export interface RadioGroupOption {
   value: string;
@@ -95,7 +104,15 @@ export interface SelectOption {
   value: string;
   label: string;
   isDisabled?: boolean;
+  group?: string;
 }
+
+export interface SelectOptionGroup {
+  label: string;
+  options: SelectOption[];
+}
+
+export type SelectItems = SelectOption[] | SelectOptionGroup[];
 
 export interface MenuItem {
   value: string;
@@ -159,6 +176,15 @@ export interface DateTimeValue {
 export interface DateTimeRangeValue {
   start: DateTimeValue;
   end: DateTimeValue;
+}
+
+export interface FileUploadItem {
+  file: File;
+  id: string;
+  progress: number;
+  status: "pending" | "uploading" | "complete" | "error";
+  error?: string;
+  previewUrl?: string | null;
 }
 
 export interface ZonedDateTimeValue {

@@ -99,7 +99,6 @@
     );
     display: grid;
     min-height: 0;
-    padding: var(--pug-space-control-y) var(--pug-space-control-x);
     border: 0.0625rem solid var(--pug-text-area-border);
     border-radius: var(--pug-text-area-radius);
     background: var(--pug-text-area-fill);
@@ -137,7 +136,7 @@
     min-width: 0;
     width: 100%;
     min-height: calc(1lh * 4);
-    padding: 0;
+    padding: var(--pug-space-control-y) var(--pug-space-control-x);
     border: 0;
     resize: vertical;
     background: transparent;

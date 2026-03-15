@@ -1,0 +1,31 @@
+[package]
+name = "pug-gpui-preview"
+version = "0.0.0"
+edition = "2021"
+description = "Native macOS preview application for the Pug design system, rendered via GPUI."
+
+[[bin]]
+name = "pug-preview"
+path = "src/main.rs"
+
+[dependencies]
+# GPUI framework — Zed's GPU-accelerated UI framework (macOS/Metal)
+# Using crates.io release. If build fails due to core-foundation/font-kit
+# conflicts, switch to git: gpui = { git = "https://github.com/zed-industries/zed" }
+gpui = "0.2.2"
+
+# Pug adapter + contracts + real components
+pug-gpui = { path = "../adapter" }
+pug-gpui-components = { path = "../components" }
+pug-gpui-primitives = { path = "../primitives" }
+pug-adapter = { path = "../../contracts/adapter" }
+pug-primitives = { path = "../../contracts/primitives" }
+pug-composites = { path = "../../contracts/composites" }
+pug-workstation = { path = "../../contracts/workstation" }
+pug-style = { path = "../../contracts/style" }
+pug-tokens = { path = "../../contracts/tokens" }
+
+[package.metadata.pug]
+public-intent = true
+channel = "preview"
+stability = "pre-release"

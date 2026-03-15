@@ -1,25 +1,27 @@
 <script lang="ts">
+  import Icon from "./Icon.svelte";
   import type { StatusTone } from "./types";
 
   export let tone: StatusTone | "neutral" = "neutral";
   export let title: string | null = null;
   export let ariaLabel: string | null = null;
+
+  const toneIcon: Record<string, string> = {
+    success: "check",
+    warning: "alert-triangle",
+    danger: "x-circle",
+    pending: "loader",
+    info: "info",
+    neutral: "info",
+  };
 </script>
 
 <section class="callout" data-tone={tone} aria-label={ariaLabel ?? undefined}>
   <span class="callout__icon" aria-hidden="true">
     {#if $$slots.icon}
       <slot name="icon" />
-    {:else if tone === "success"}
-      ✓
-    {:else if tone === "warning"}
-      !
-    {:else if tone === "danger"}
-      ×
-    {:else if tone === "pending"}
-      …
     {:else}
-      i
+      <Icon name={toneIcon[tone] ?? "info"} size="sm" />
     {/if}
   </span>
 

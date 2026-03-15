@@ -1,0 +1,658 @@
+//! Pug GPUI Preview — native macOS preview application for the Pug design system.
+//!
+//! Matches the Svelte preview app layout: top bar with pill tabs,
+//! display controls bar, and section-specific content areas.
+
+mod app_state;
+mod component_registry;
+mod demo_view;
+mod specimens;
+#[allow(dead_code)]
+mod style_bridge;
+mod token_view;
+
+use gpui::*;
+use pug_adapter::ThemeProvider;
+
+use app_state::{
+    AppState, AppearanceTreatment, ControlSize, DemoScreen, Density, Section, ThemePreset,
+};
+use component_registry::{COMPOSITES, PRIMITIVES};
+use style_bridge::color_to_hsla;
+
+/// Root view for the preview application.
+struct PreviewRoot {
+    state: AppState,
+}
+
+impl PreviewRoot {
+    fn new() -> Self {
+        Self {
+            state: AppState::new(),
+        }
+    }
+}
+
+impl Render for PreviewRoot {
+    fn render(&mut self, window: &mut Window, cx: &mut Context<Self>) -> impl IntoElement {
+        let theme = &self.state.theme;
+
+        let canvas_bg = theme.resolve_color("semantic.color.background.canvas");
+        let elevated_bg = theme.resolve_color("semantic.color.background.elevated");
+        let panel_bg = theme.resolve_color("semantic.color.background.panel");
+        let text_primary = theme.resolve_color("semantic.color.text.primary");
+        let text_secondary = theme.resolve_color("semantic.color.text.secondary");
+        let accent = theme.resolve_color("semantic.color.accent.base");
+        let border_subtle = theme.resolve_color("semantic.color.border.subtle");
+        let border = theme.resolve_color("semantic.color.border.default");
+
+        // Compute remaining height for the content area so scroll containers
+        // get a definite pixel height (required for gpui content-mask hit testing).
+        let window_h = window.viewport_size().height;
+        let top_bar_h = px(40.0);
+        let controls_h = px(100.0); // approximate; wraps at narrow widths
+        let content_h = window_h - top_bar_h - controls_h;
+
+        div()
+            .size_full()
+            .flex()
+            .flex_col()
+            .bg(color_to_hsla(canvas_bg))
+            .text_color(color_to_hsla(text_primary))
+            // ── Top bar ──────────────────────────────────────────────
+            .child(
+                div()
+                    .w_full()
+                    .h(top_bar_h)
+                    .flex()
+                    .items_center()
+                    .gap(px(16.0))
+                    .px(px(16.0))
+                    .flex_shrink_0()
+                    .bg(color_to_hsla(elevated_bg))
+                    .border_b_1()
+                    .border_color(color_to_hsla(border_subtle))
+                    // Title
+                    .child(div().child("Pug"))
+                    // Nav tabs (pill style)
+                    .child(self.render_nav_tabs(text_secondary, accent, cx))
+                    // Spacer
+                    .child(div().flex_1())
+                    // Right pills showing current settings
+                    .child(self.render_status_pills(text_secondary, border)),
+            )
+            // ── Display controls bar ─────────────────────────────────
+            .child(
+                self.render_display_controls(
+                    text_secondary,
+                    accent,
+                    border,
+                    border_subtle,
+                    panel_bg,
+                    controls_h,
+                    cx,
+                ),
+            )
+            // ── Main content area ────────────────────────────────────
+            // Section content is a direct child of root — no intermediate wrapper.
+            // Each section is given an explicit pixel height so overflow_y_scroll
+            // containers get a definite content-mask for hit testing.
+            .child(self.render_section_content(content_h, cx))
+    }
+}
+
+impl PreviewRoot {
+    /// Pill-style nav tabs matching Svelte's <Tabs variant="pill">.
+    fn render_nav_tabs(
+        &self,
+        text_secondary: pug_tokens::typed::ColorValue,
+        accent: pug_tokens::typed::ColorValue,
+        cx: &mut Context<Self>,
+    ) -> Div {
+        let mut tabs = div().flex().gap(px(4.0));
+        for &section in Section::ALL {
+            let is_active = self.state.section == section;
+            let label = section.label();
+
+            let mut tab = div()
+                .id(SharedString::new_static(label))
+                .px(px(12.0))
+                .py(px(4.0))
+                .rounded(px(6.0))
+                .text_sm()
+                .cursor_pointer()
+                .child(label);
+
+            tab = if is_active {
+                tab.bg(color_to_hsla(accent).opacity(0.15))
+                    .text_color(color_to_hsla(accent))
+            } else {
+                tab.text_color(color_to_hsla(text_secondary))
+            };
+
+            tab = tab.on_click(cx.listener(move |this, _event: &ClickEvent, _window, cx| {
+                this.state.section = section;
+                cx.notify();
+            }));
+
+            tabs = tabs.child(tab);
+        }
+        tabs
+    }
+
+    /// Right-aligned pills showing current theme, density, and size.
+    fn render_status_pills(
+        &self,
+        text_secondary: pug_tokens::typed::ColorValue,
+        border: pug_tokens::typed::ColorValue,
+    ) -> Div {
+        let pill = |text: &str| {
+            div()
+                .px(px(8.0))
+                .py(px(2.0))
+                .rounded(px(10.0))
+                .border_1()
+                .border_color(color_to_hsla(border))
+                .text_xs()
+                .text_color(color_to_hsla(text_secondary))
+                .child(text.to_string())
+        };
+
+        div()
+            .flex()
+            .gap(px(6.0))
+            .child(pill(self.state.theme_preset.label()))
+            .child(pill(self.state.density.label()))
+            .child(pill(self.state.control_size.label()))
+    }
+
+    /// Display controls bar — theme, density, size, treatment toggle groups + state probes.
+    fn render_display_controls(
+        &self,
+        text_secondary: pug_tokens::typed::ColorValue,
+        accent: pug_tokens::typed::ColorValue,
+        border: pug_tokens::typed::ColorValue,
+        border_subtle: pug_tokens::typed::ColorValue,
+        panel_bg: pug_tokens::typed::ColorValue,
+        h: Pixels,
+        cx: &mut Context<Self>,
+    ) -> Div {
+        div()
+            .w_full()
+            .h(h)
+            .flex()
+            .flex_wrap()
+            .items_start()
+            .gap_x(px(32.0))
+            .gap_y(px(12.0))
+            .px(px(16.0))
+            .py(px(12.0))
+            .bg(color_to_hsla(panel_bg))
+            .border_b_1()
+            .border_color(color_to_hsla(border_subtle))
+            .flex_shrink_0()
+            .overflow_hidden()
+            // Theme group
+            .child({
+                let opts: Vec<(&str, bool)> = ThemePreset::ALL
+                    .iter()
+                    .map(|p| (p.label(), self.state.theme_preset == *p))
+                    .collect();
+                self.render_toggle_group("Theme", text_secondary, &opts, accent, border, "theme", cx)
+            })
+            // Density group
+            .child({
+                let opts: Vec<(&str, bool)> = Density::ALL
+                    .iter()
+                    .map(|d| (d.label(), self.state.density == *d))
+                    .collect();
+                self.render_toggle_group("Density", text_secondary, &opts, accent, border, "density", cx)
+            })
+            // Size group
+            .child({
+                let opts: Vec<(&str, bool)> = ControlSize::ALL
+                    .iter()
+                    .map(|s| (s.label(), self.state.control_size == *s))
+                    .collect();
+                self.render_toggle_group("Size", text_secondary, &opts, accent, border, "size", cx)
+            })
+            // Treatment group
+            .child({
+                let opts: Vec<(&str, bool)> = AppearanceTreatment::ALL
+                    .iter()
+                    .map(|t| (t.label(), self.state.appearance_treatment == *t))
+                    .collect();
+                self.render_toggle_group("Treatment", text_secondary, &opts, accent, border, "treatment", cx)
+            })
+            // State probes
+            .child(self.render_state_probes(text_secondary, accent, border, cx))
+    }
+
+    /// A labelled toggle group (eyebrow + row of toggle buttons).
+    fn render_toggle_group(
+        &self,
+        label: &'static str,
+        text_secondary: pug_tokens::typed::ColorValue,
+        options: &[(&str, bool)],
+        accent: pug_tokens::typed::ColorValue,
+        border: pug_tokens::typed::ColorValue,
+        group_id: &'static str,
+        cx: &mut Context<Self>,
+    ) -> Div {
+        let mut toggle_row = div().flex().border_1().border_color(color_to_hsla(border)).rounded(px(6.0));
+
+        for (i, &(opt_label, is_active)) in options.iter().enumerate() {
+            let mut btn = div()
+                .id(SharedString::from(format!("{}-{}", group_id, opt_label)))
+                .px(px(8.0))
+                .py(px(4.0))
+                .text_xs()
+                .cursor_pointer()
+                .child(opt_label.to_string());
+
+            btn = if is_active {
+                btn.bg(color_to_hsla(accent).opacity(0.15))
+                    .text_color(color_to_hsla(accent))
+            } else {
+                btn.text_color(color_to_hsla(text_secondary))
+            };
+
+            btn = btn.on_click(cx.listener(move |this, _event: &ClickEvent, _window, cx| {
+                match group_id {
+                    "theme" => {
+                        this.state.set_theme(ThemePreset::ALL[i]);
+                    }
+                    "density" => {
+                        this.state.density = Density::ALL[i];
+                    }
+                    "size" => {
+                        this.state.control_size = ControlSize::ALL[i];
+                    }
+                    "treatment" => {
+                        this.state.appearance_treatment = AppearanceTreatment::ALL[i];
+                    }
+                    _ => {}
+                }
+                cx.notify();
+            }));
+
+            toggle_row = toggle_row.child(btn);
+        }
+
+        div()
+            .flex()
+            .flex_col()
+            .gap(px(6.0))
+            .child(
+                div()
+                    .text_xs()
+                    .text_color(color_to_hsla(text_secondary))
+                    .child(label),
+            )
+            .child(toggle_row)
+    }
+
+    /// State probe checkboxes (disabled, invalid, busy).
+    fn render_state_probes(
+        &self,
+        text_secondary: pug_tokens::typed::ColorValue,
+        accent: pug_tokens::typed::ColorValue,
+        border: pug_tokens::typed::ColorValue,
+        cx: &mut Context<Self>,
+    ) -> Div {
+        let check = |label: &'static str, checked: bool, on_toggle: fn(&mut AppState)| {
+            let box_el = div()
+                .w(px(14.0))
+                .h(px(14.0))
+                .rounded(px(3.0))
+                .border_1()
+                .flex()
+                .items_center()
+                .justify_center();
+
+            let box_el = if checked {
+                box_el
+                    .bg(color_to_hsla(accent))
+                    .border_color(color_to_hsla(accent))
+                    .text_color(gpui::white())
+                    .text_xs()
+                    .child("✓")
+            } else {
+                box_el.border_color(color_to_hsla(border))
+            };
+
+            div()
+                .id(SharedString::from(format!("probe-{}", label)))
+                .flex()
+                .items_center()
+                .gap(px(4.0))
+                .cursor_pointer()
+                .child(box_el)
+                .child(
+                    div()
+                        .text_xs()
+                        .text_color(color_to_hsla(text_secondary))
+                        .child(label),
+                )
+                .on_click(cx.listener(move |this, _event: &ClickEvent, _window, cx| {
+                    on_toggle(&mut this.state);
+                    cx.notify();
+                }))
+        };
+
+        div()
+            .flex()
+            .flex_col()
+            .gap(px(6.0))
+            .child(
+                div()
+                    .text_xs()
+                    .text_color(color_to_hsla(text_secondary))
+                    .child("State probes"),
+            )
+            .child(
+                div()
+                    .flex()
+                    .items_center()
+                    .gap(px(16.0))
+                    .child(check("Disabled", self.state.disabled, |s| {
+                        s.disabled = !s.disabled
+                    }))
+                    .child(check("Invalid", self.state.invalid, |s| {
+                        s.invalid = !s.invalid
+                    }))
+                    .child(check("Busy", self.state.busy, |s| s.busy = !s.busy)),
+            )
+    }
+
+    /// Section content router.
+    /// `available_h` is the pixel height remaining after top bar + controls.
+    fn render_section_content(&self, available_h: Pixels, cx: &mut Context<Self>) -> Div {
+        let theme = &self.state.theme;
+        match self.state.section {
+            Section::Primitives => self.render_catalogue_section(PRIMITIVES, true, available_h, cx),
+            Section::Composites => self.render_catalogue_section(COMPOSITES, false, available_h, cx),
+            Section::Demo => self.render_demo_section(available_h, cx),
+            Section::Tokens => {
+                div().w_full().h(available_h).child(
+                    div()
+                        .id("tokens-section")
+                        .size_full()
+                        .overflow_y_scroll()
+                        .child(token_view::render_token_inspector(theme)),
+                )
+            }
+        }
+    }
+
+    /// Two-column layout: sidebar listing components + content area.
+    /// Both sidebar and content get explicit pixel heights so their
+    /// overflow_y_scroll content-masks have definite bounds for hit testing.
+    fn render_catalogue_section(
+        &self,
+        components: &'static [component_registry::ComponentEntry],
+        is_primitives: bool,
+        available_h: Pixels,
+        cx: &mut Context<Self>,
+    ) -> Div {
+        let theme = &self.state.theme;
+        let border_subtle = theme.resolve_color("semantic.color.border.subtle");
+        let text_primary = theme.resolve_color("semantic.color.text.primary");
+        let text_secondary = theme.resolve_color("semantic.color.text.secondary");
+        let accent = theme.resolve_color("semantic.color.accent.base");
+        let elevated_bg = theme.resolve_color("semantic.color.background.elevated");
+
+        let active_idx = if is_primitives {
+            self.state.active_primitive
+        } else {
+            self.state.active_composite
+        };
+
+        // Sidebar — explicit height so overflow_y_scroll has definite bounds.
+        let mut sidebar = div()
+            .id("catalogue-sidebar")
+            .w(px(224.0))
+            .h(available_h)
+            .flex_shrink_0()
+            .flex()
+            .flex_col()
+            .py(px(12.0))
+            .overflow_y_scroll()
+            .border_r_1()
+            .border_color(color_to_hsla(border_subtle).opacity(0.6));
+
+        for (i, comp) in components.iter().enumerate() {
+            let is_active = active_idx == Some(i);
+
+            let mut link = div()
+                .id(SharedString::from(format!("comp-{}", comp.slug)))
+                .px(px(16.0))
+                .py(px(6.0))
+                .text_sm()
+                .cursor_pointer()
+                .border_l_2();
+
+            link = if is_active {
+                link.text_color(color_to_hsla(text_primary))
+                    .border_color(color_to_hsla(accent))
+                    .bg(color_to_hsla(accent).opacity(0.08))
+            } else {
+                link.text_color(color_to_hsla(text_secondary))
+                    .border_color(hsla(0.0, 0.0, 0.0, 0.0))
+            };
+
+            link = link.child(comp.display_name);
+
+            link = link.on_click(
+                cx.listener(move |this, _event: &ClickEvent, _window, cx| {
+                    if is_primitives {
+                        this.state.active_primitive = Some(i);
+                    } else {
+                        this.state.active_composite = Some(i);
+                    }
+                    cx.notify();
+                }),
+            );
+
+            sidebar = sidebar.child(link);
+        }
+
+        // Outer layout: horizontal flex row with explicit height.
+        let mut layout = div()
+            .w_full()
+            .h(available_h)
+            .flex()
+            .child(sidebar);
+
+        if let Some(idx) = active_idx {
+            let comp = &components[idx];
+            layout = layout.child(
+                div()
+                    .id("specimen-content")
+                    .flex_1()
+                    .h(available_h)
+                    .flex()
+                    .flex_col()
+                    .gap(px(16.0))
+                    .p(px(24.0))
+                    .overflow_y_scroll()
+                    .child(
+                        div()
+                            .flex()
+                            .flex_col()
+                            .gap(px(4.0))
+                            .child(div().text_xl().child(comp.display_name))
+                            .child(
+                                div()
+                                    .text_sm()
+                                    .text_color(color_to_hsla(text_secondary))
+                                    .child(comp.description),
+                            ),
+                    )
+                    .child(
+                        div()
+                            .h(px(1.0))
+                            .w_full()
+                            .bg(color_to_hsla(border_subtle)),
+                    )
+                    .child(
+                        div()
+                            .text_xs()
+                            .text_color(color_to_hsla(text_secondary))
+                            .child("Specimen preview — rendered through pug-gpui adapter"),
+                    )
+                    .child(self.render_component_specimen(comp.slug, cx)),
+            );
+        } else {
+            layout = layout.child(
+                self.render_catalogue_landing(components, theme, available_h, text_secondary, border_subtle, elevated_bg),
+            );
+        }
+
+        layout
+    }
+
+    /// Landing page grid showing all components as cards.
+    fn render_catalogue_landing(
+        &self,
+        components: &[component_registry::ComponentEntry],
+        _theme: &pug_gpui::GpuiThemeProvider,
+        available_h: Pixels,
+        text_secondary: pug_tokens::typed::ColorValue,
+        border: pug_tokens::typed::ColorValue,
+        elevated_bg: pug_tokens::typed::ColorValue,
+    ) -> Div {
+        let mut grid = div().flex().flex_wrap().gap(px(12.0));
+
+        for comp in components {
+            grid = grid.child(
+                div()
+                    .w(px(200.0))
+                    .p(px(12.0))
+                    .rounded(px(8.0))
+                    .bg(color_to_hsla(elevated_bg))
+                    .border_1()
+                    .border_color(color_to_hsla(border))
+                    .flex()
+                    .flex_col()
+                    .gap(px(4.0))
+                    .child(div().text_sm().child(comp.display_name))
+                    .child(
+                        div()
+                            .text_xs()
+                            .text_color(color_to_hsla(text_secondary))
+                            .child(comp.description),
+                    ),
+            );
+        }
+
+        div()
+            .flex_1()
+            .h(available_h)
+            .child(
+                div()
+                    .id("catalogue-landing")
+                    .size_full()
+                    .overflow_y_scroll()
+                    .child(
+                        div()
+                            .flex()
+                            .flex_col()
+                            .gap(px(16.0))
+                            .p(px(24.0))
+                            .child(
+                                div()
+                                    .text_sm()
+                                    .text_color(color_to_hsla(text_secondary))
+                                    .child(format!("{} components", components.len())),
+                            )
+                            .child(grid),
+                    ),
+            )
+    }
+
+    /// Render a single specimen for a specific component by slug.
+    fn render_component_specimen(
+        &self,
+        slug: &str,
+        cx: &mut Context<Self>,
+    ) -> Div {
+        specimens::render_single_specimen(slug, &self.state, cx)
+    }
+
+    /// Demo section with segmented control for screen switching.
+    fn render_demo_section(&self, available_h: Pixels, cx: &mut Context<Self>) -> Div {
+        let theme = &self.state.theme;
+        let text_secondary = theme.resolve_color("semantic.color.text.secondary");
+        let accent = theme.resolve_color("semantic.color.accent.base");
+        let border = theme.resolve_color("semantic.color.border.default");
+
+        // Segmented control for demo screens
+        let mut seg = div()
+            .flex()
+            .border_1()
+            .border_color(color_to_hsla(border))
+            .rounded(px(8.0))
+            .overflow_hidden();
+
+        for &screen in DemoScreen::ALL {
+            let is_active = self.state.active_demo_screen == screen;
+            let label = screen.label();
+
+            let mut btn = div()
+                .id(SharedString::from(format!("demo-{}", label)))
+                .px(px(14.0))
+                .py(px(6.0))
+                .text_sm()
+                .cursor_pointer()
+                .child(label);
+
+            btn = if is_active {
+                btn.bg(color_to_hsla(accent).opacity(0.15))
+                    .text_color(color_to_hsla(accent))
+            } else {
+                btn.text_color(color_to_hsla(text_secondary))
+            };
+
+            btn = btn.on_click(cx.listener(move |this, _event: &ClickEvent, _window, cx| {
+                this.state.active_demo_screen = screen;
+                cx.notify();
+            }));
+
+            seg = seg.child(btn);
+        }
+
+        let screen_content = demo_view::render_single_screen(theme, self.state.active_demo_screen);
+
+        div().w_full().h(available_h).child(
+            div()
+                .id("demo-section")
+                .size_full()
+                .overflow_y_scroll()
+                .child(
+                    div()
+                        .flex()
+                        .flex_col()
+                        .gap(px(16.0))
+                        .p(px(24.0))
+                        .child(seg)
+                        .child(screen_content),
+                ),
+        )
+    }
+}
+
+fn main() {
+    Application::new().run(|cx: &mut App| {
+        let bounds = Bounds::centered(None, size(px(1280.0), px(800.0)), cx);
+        cx.open_window(
+            WindowOptions {
+                window_bounds: Some(WindowBounds::Windowed(bounds)),
+                ..Default::default()
+            },
+            |_window, cx| cx.new(|_| PreviewRoot::new()),
+        )
+        .unwrap();
+        cx.activate(true);
+    });
+}

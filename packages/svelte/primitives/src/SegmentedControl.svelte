@@ -53,7 +53,7 @@
 
 <style>
   .segmented-control {
-    display: inline-grid;
+    display: grid;
     grid-auto-flow: column;
     grid-auto-columns: minmax(0, 1fr);
     gap: 0.125rem;
@@ -65,7 +65,7 @@
 
   .segmented-control__segment {
     position: relative;
-    display: inline-flex;
+    display: grid;
     min-width: 0;
     cursor: pointer;
   }
@@ -77,9 +77,7 @@
   }
 
   .segmented-control__label {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
+    display: block;
     min-width: 0;
     min-height: calc(var(--pug-size-control-height) - 0.25rem);
     padding: 0 0.75rem;
@@ -88,7 +86,10 @@
     font-family: var(--pug-typography-label-family);
     font-size: 0.75rem;
     font-weight: 600;
-    line-height: 1;
+    line-height: calc(var(--pug-size-control-height) - 0.25rem);
+    text-align: center;
+    overflow: hidden;
+    text-overflow: ellipsis;
     white-space: nowrap;
     transition:
       background var(--pug-motion-duration-interaction) var(--pug-motion-easing-standard),

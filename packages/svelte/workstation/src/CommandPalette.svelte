@@ -1,7 +1,7 @@
 <script lang="ts">
   import { createEventDispatcher, onDestroy, tick } from "svelte";
 
-  import { Banner, SearchField, Skeleton } from "@pug/svelte-primitives";
+  import { Banner, Icon, SearchField, Skeleton } from "@pug/svelte-primitives";
   import { EmptyState } from "@pug/svelte-composites";
 
   import type { CommandActionItem, DiscoveryState } from "./types";
@@ -222,7 +222,7 @@
           <span class="command-palette__hint">{invocationHint}</span>
         {/if}
         <button type="button" class="command-palette__close" aria-label="Close command palette" on:click={requestClose}>
-          ×
+          <Icon name="x" size="sm" />
         </button>
       </div>
     </div>

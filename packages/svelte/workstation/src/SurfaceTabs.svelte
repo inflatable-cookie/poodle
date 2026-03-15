@@ -1,6 +1,8 @@
 <script lang="ts">
   import { createEventDispatcher } from "svelte";
 
+  import { Icon } from "@pug/svelte-primitives";
+
   import type { SurfaceTabItem } from "./types";
 
   export let items: SurfaceTabItem[] = [];
@@ -134,7 +136,7 @@
             aria-label={`Rename ${item.label}`}
             on:click|stopPropagation={() => dispatch("requestRename", { value: item.value })}
           >
-            ✎
+            <Icon name="edit" size="sm" />
           </button>
           <button
             type="button"
@@ -142,7 +144,7 @@
             aria-label={`Move ${item.label}`}
             on:click|stopPropagation={() => dispatch("requestMove", { value: item.value })}
           >
-            ⇱
+            <Icon name="move" size="sm" />
           </button>
           {#if item.isClosable}
             <button
@@ -151,7 +153,7 @@
               aria-label={`Close ${item.label}`}
               on:click|stopPropagation={() => dispatch("requestClose", { value: item.value })}
             >
-              ×
+              <Icon name="x" size="sm" />
             </button>
           {/if}
         </span>
@@ -165,7 +167,7 @@
     aria-label="Add surface"
     on:click={() => dispatch("requestAdd")}
   >
-    +
+    <Icon name="plus" size="sm" />
   </button>
 </div>
 

@@ -1,7 +1,7 @@
 <script lang="ts">
   import { createEventDispatcher } from "svelte";
 
-  import { Checkbox } from "@pug/svelte-primitives";
+  import { Checkbox, Icon } from "@pug/svelte-primitives";
 
   import type { TableColumn, TableRow, TableSortDirection } from "./types";
 
@@ -14,14 +14,24 @@
   export let rowActionLabel = "Open";
   export let showRowActions = true;
   export let emptyMessage = "No rows match the current view.";
+  export let hiddenColumnIds: string[] = [];
+  export let showColumnVisibility = false;
+  export let showExport = false;
+  export let exportFilename = "export.csv";
 
   const dispatch = createEventDispatcher<{
     sortChange: { columnId: string; direction: TableSortDirection };
     rowToggle: { rowId: string; selected: boolean };
     toggleAll: { selected: boolean };
     rowAction: { rowId: string };
+    columnVisibilityChange: { columnId: string; visible: boolean };
+    exportCsv: { filename: string };
   }>();
 
+  let columnMenuOpen = false;
+
+  $: visibleColumns = columns.filter((c) => !hiddenColumnIds.includes(c.id));
+  $: hideableColumns = columns.filter((c) => c.isHideable !== false);
   $: selectableRowCount = rows.length;
   $: selectionCount = rows.filter((row) => selectedRowIds.includes(row.id)).length;
   $: allRowsSelected = selectableRowCount > 0 && selectionCount === selectableRowCount;
@@ -39,9 +49,85 @@
 
     dispatch("sortChange", { columnId: column.id, direction });
   }
+
+  function toggleColumnVisibility(columnId: string): void {
+    const isHidden = hiddenColumnIds.includes(columnId);
+    dispatch("columnVisibilityChange", { columnId, visible: isHidden });
+  }
+
+  function handleExport(): void {
+    const header = visibleColumns.map((c) => c.label).join(",");
+    const body = rows
+      .map((row) =>
+        visibleColumns
+          .map((col) => {
+            const val = row.cells[col.id] ?? "";
+            return val.includes(",") || val.includes('"')
+              ? `"${val.replace(/"/g, '""')}"`
+              : val;
+          })
+          .join(","),
+      )
+      .join("\n");
+    const csv = `${header}\n${body}`;
+    const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = exportFilename;
+    link.click();
+    URL.revokeObjectURL(url);
+    dispatch("exportCsv", { filename: exportFilename });
+  }
 </script>
 
 <div class="data-table">
+  {#if showColumnVisibility || showExport}
+    <div class="data-table__toolbar">
+      {#if showExport}
+        <button
+          type="button"
+          class="data-table__toolbar-btn"
+          on:click={handleExport}
+          aria-label="Export as CSV"
+        >
+          <Icon name="download" size="sm" />
+          Export
+        </button>
+      {/if}
+
+      {#if showColumnVisibility && hideableColumns.length > 0}
+        <div class="data-table__col-menu-wrapper">
+          <button
+            type="button"
+            class="data-table__toolbar-btn"
+            aria-haspopup="true"
+            aria-expanded={columnMenuOpen}
+            on:click={() => (columnMenuOpen = !columnMenuOpen)}
+          >
+            <Icon name="columns-3" size="sm" />
+            Columns
+          </button>
+
+          {#if columnMenuOpen}
+            <div class="data-table__col-menu" role="menu">
+              {#each hideableColumns as col}
+                <label class="data-table__col-menu-item">
+                  <Checkbox
+                    ariaLabel={col.label}
+                    isChecked={!hiddenColumnIds.includes(col.id)}
+                    on:checkedChange={() => toggleColumnVisibility(col.id)}
+                  />
+                  <span>{col.label}</span>
+                </label>
+              {/each}
+            </div>
+          {/if}
+        </div>
+      {/if}
+    </div>
+  {/if}
+
   <table aria-label={ariaLabel}>
     <caption class="data-table__caption">
       {ariaLabel}. {selectionCount} selected row{selectionCount === 1 ? "" : "s"} out of {selectableRowCount}.
@@ -56,7 +142,7 @@
             on:checkedChange={(event) => dispatch("toggleAll", { selected: event.detail.checked })}
           />
         </th>
-        {#each columns as column}
+        {#each visibleColumns as column}
           <th
             scope="col"
             class:end-align={column.align === "end"}
@@ -71,7 +157,7 @@
               >
                 <span>{column.label}</span>
                 {#if sortColumnId === column.id}
-                  <span aria-hidden="true">{sortDirection === "asc" ? "↑" : "↓"}</span>
+                  <span aria-hidden="true"><Icon name={sortDirection === "asc" ? "arrow-up" : "arrow-down"} size="sm" /></span>
                 {/if}
               </button>
             {:else}
@@ -87,7 +173,7 @@
     <tbody>
       {#if rows.length === 0}
         <tr>
-          <td colspan={columns.length + (showRowActions ? 2 : 1)} class="data-table__empty">
+          <td colspan={visibleColumns.length + (showRowActions ? 2 : 1)} class="data-table__empty">
             {emptyMessage}
           </td>
         </tr>
@@ -96,17 +182,17 @@
           <tr class:selected={selectedRowIds.includes(row.id)} aria-selected={selectedRowIds.includes(row.id)}>
             <td class="data-table__selection">
               <Checkbox
-                ariaLabel={`Select row ${row.cells[columns[0]?.id ?? "id"] ?? row.id}`}
+                ariaLabel={`Select row ${row.cells[visibleColumns[0]?.id ?? "id"] ?? row.id}`}
                 isChecked={selectedRowIds.includes(row.id)}
                 on:checkedChange={(event) =>
                   dispatch("rowToggle", { rowId: row.id, selected: event.detail.checked })}
               />
             </td>
-            {#each columns as column, index}
+            {#each visibleColumns as column, index}
               <svelte:element this={index === 0 ? "th" : "td"} scope={index === 0 ? "row" : undefined} class:end-align={column.align === "end"}>
                 <div class="data-table__cell">
                   <span>{row.cells[column.id] ?? "—"}</span>
-                  {#if column.id === columns[0]?.id && row.summary}
+                  {#if column.id === visibleColumns[0]?.id && row.summary}
                     <small>{row.summary}</small>
                   {/if}
                 </div>
@@ -116,7 +202,7 @@
               <td class="data-table__actions">
                 <button
                   type="button"
-                  aria-label={`${rowActionLabel} ${row.cells[columns[0]?.id ?? "id"] ?? row.id}`}
+                  aria-label={`${rowActionLabel} ${row.cells[visibleColumns[0]?.id ?? "id"] ?? row.id}`}
                   on:click={() => dispatch("rowAction", { rowId: row.id })}
                 >
                   {rowActionLabel}
@@ -136,6 +222,78 @@
     border: 0.0625rem solid var(--pug-color-border-subtle);
     border-radius: var(--pug-radius-surface);
     background: var(--pug-color-background-panel);
+  }
+
+  .data-table__toolbar {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 0.5rem;
+    padding: 0.5rem 0.75rem;
+    border-bottom: 0.0625rem solid var(--pug-color-border-subtle);
+    background: color-mix(in srgb, var(--pug-color-background-elevated) 92%, transparent);
+  }
+
+  .data-table__toolbar-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.375rem;
+    padding: 0.25rem 0.625rem;
+    border: 0.0625rem solid var(--pug-color-border-default);
+    border-radius: var(--pug-radius-control);
+    background: var(--pug-color-background-surface);
+    color: var(--pug-color-text-secondary);
+    cursor: pointer;
+    font: inherit;
+    font-size: var(--pug-typography-label-size);
+    line-height: 1;
+    transition: background var(--pug-motion-duration-interaction) var(--pug-motion-easing-standard);
+  }
+
+  .data-table__toolbar-btn:hover {
+    background: color-mix(in srgb, var(--pug-color-background-elevated) 72%, transparent);
+  }
+
+  .data-table__toolbar-btn:focus-visible {
+    outline: var(--pug-border-width-focus) solid var(--pug-color-accent-focusRing);
+    outline-offset: 0.125rem;
+  }
+
+  .data-table__toolbar-btn :global(.pug-icon) {
+    width: 0.875rem;
+    height: 0.875rem;
+  }
+
+  .data-table__col-menu-wrapper {
+    position: relative;
+  }
+
+  .data-table__col-menu {
+    position: absolute;
+    top: calc(100% + 0.375rem);
+    right: 0;
+    z-index: var(--pug-overlay-z-menu, 100);
+    min-width: 10rem;
+    padding: 0.375rem;
+    border: 0.0625rem solid color-mix(in srgb, var(--pug-color-border-default) 72%, transparent);
+    border-radius: var(--pug-radius-surface);
+    background: color-mix(in srgb, var(--pug-color-background-elevated) 98%, var(--pug-color-background-panel));
+    box-shadow: var(--pug-elevation-overlay);
+  }
+
+  .data-table__col-menu-item {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.375rem 0.5rem;
+    border-radius: calc(var(--pug-radius-control) - 0.125rem);
+    cursor: pointer;
+    font-size: var(--pug-typography-label-size);
+    color: var(--pug-color-text-primary);
+  }
+
+  .data-table__col-menu-item:hover {
+    background: color-mix(in srgb, var(--pug-color-accent-base) 12%, transparent);
   }
 
   table {

@@ -2,7 +2,9 @@
   import type { CardVariant } from "./types";
 
   export let variant: CardVariant = "default";
+  export let layout: "vertical" | "horizontal" | "compact" = "vertical";
   export let isInteractive = false;
+  export let isSelected = false;
   export let hasMedia = false;
   export let ariaLabel: string | null = null;
 </script>
@@ -10,7 +12,9 @@
 <article
   class="card"
   data-variant={variant}
+  data-layout={layout}
   data-interactive={isInteractive}
+  data-selected={isSelected}
   aria-label={ariaLabel ?? undefined}
 >
   {#if $$slots.media}
@@ -105,6 +109,13 @@
       0 0 0 0.0625rem color-mix(in srgb, var(--pug-color-border-default) 10%, transparent);
   }
 
+  .card[data-selected="true"] {
+    border-color: var(--pug-color-accent-base);
+    box-shadow:
+      0 0 0 0.0625rem var(--pug-color-accent-base),
+      inset 0 0 0 0.0625rem color-mix(in srgb, var(--pug-color-accent-base) 12%, transparent);
+  }
+
   .card[data-interactive="true"] {
     cursor: pointer;
   }
@@ -113,6 +124,28 @@
     border-color: var(--pug-recipe-card-hover-border);
     background: var(--pug-recipe-card-hover-fill);
     box-shadow: var(--pug-recipe-card-hover-shadow);
+  }
+
+  .card[data-interactive="true"][data-selected="true"]:hover {
+    border-color: var(--pug-color-accent-base);
+    box-shadow:
+      0 0 0 0.0625rem var(--pug-color-accent-base),
+      inset 0 0 0 0.0625rem color-mix(in srgb, var(--pug-color-accent-base) 12%, transparent);
+  }
+
+  .card[data-layout="horizontal"] {
+    grid-template-columns: auto 1fr;
+    grid-template-rows: auto;
+  }
+
+  .card[data-layout="horizontal"] .card__media {
+    grid-row: 1 / -1;
+    width: 8rem;
+  }
+
+  .card[data-layout="compact"] {
+    padding: var(--pug-space-panel-y-sm, 0.5rem) var(--pug-space-panel-x-sm, 0.625rem);
+    gap: var(--pug-space-stack-sm);
   }
 
   .card__media {

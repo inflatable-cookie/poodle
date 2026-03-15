@@ -1,0 +1,19 @@
+[package]
+name = "pug-gpui-components"
+version = "0.0.0"
+edition = "2021"
+description = "Real GPUI renderable components for Pug — contract-backed, token-resolved, interactive."
+
+[lib]
+path = "src/lib.rs"
+
+[dependencies]
+gpui = "0.2.2"
+pug-gpui-primitives = { path = "../primitives" }
+pug-gpui = { path = "../adapter" }
+pug-adapter = { path = "../../contracts/adapter" }
+
+[package.metadata.pug]
+public-intent = true
+channel = "preview"
+stability = "pre-release"

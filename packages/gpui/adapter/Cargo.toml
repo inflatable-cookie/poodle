@@ -1,0 +1,23 @@
+[package]
+name = "pug-gpui"
+version = "0.0.0"
+edition = "2021"
+description = "GPUI rendering adapter for Pug — maps shared contract specs and resolved styles to GPUI native elements."
+
+[lib]
+path = "src/lib.rs"
+
+[dependencies]
+pug-adapter = { path = "../../contracts/adapter" }
+pug-events = { path = "../../contracts/events" }
+pug-layout = { path = "../../contracts/layout" }
+pug-primitives = { path = "../../contracts/primitives" }
+pug-composites = { path = "../../contracts/composites" }
+pug-workstation = { path = "../../contracts/workstation" }
+pug-style = { path = "../../contracts/style" }
+pug-tokens = { path = "../../contracts/tokens" }
+
+[package.metadata.pug]
+public-intent = true
+channel = "preview"
+stability = "pre-release"

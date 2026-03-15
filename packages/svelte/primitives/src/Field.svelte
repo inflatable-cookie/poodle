@@ -9,6 +9,8 @@
   export let validationState: ValidationState = "none";
   export let isRequired = false;
   export let optionalLabel: string | null = "Optional";
+  export let span: number | "full" | null = null;
+  export let gridArea: string | null = null;
 
   $: descriptionId = description ? `${id}-description` : null;
   $: errorId = error ? `${id}-error` : null;
@@ -22,7 +24,14 @@
   $: describedBy = [descriptionId, messageId].filter(Boolean).join(" ") || null;
 </script>
 
-<div class="field" data-validation-state={validationState}>
+<div
+  class="field"
+  data-validation-state={validationState}
+  style={[
+    span ? `grid-column: span ${span === "full" ? "-1" : span}` : "",
+    gridArea ? `grid-area: ${gridArea}` : "",
+  ].filter(Boolean).join("; ") || undefined}
+>
   <div class="field__header">
     <label class="field__label" for={id}>
       {label}

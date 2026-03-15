@@ -108,7 +108,7 @@
     color: var(--pug-color-text-primary);
     font-size: 0.6875rem;
     line-height: 1.35;
-    white-space: normal;
+    white-space: nowrap;
   }
 
   .tooltip__bubble[data-placement^="top"] {

@@ -36,7 +36,7 @@
     display: grid;
     grid-template-columns: minmax(0, 1fr) auto auto;
     gap: var(--pug-space-inline-md);
-    align-items: center;
+    align-items: start;
     padding: 0.875rem var(--pug-space-panel-x);
     border-bottom: 0.0625rem solid color-mix(in srgb, var(--pug-color-border-subtle) 72%, transparent);
     background: color-mix(in srgb, var(--pug-color-background-surface) 74%, var(--pug-color-background-panel));
@@ -70,6 +70,10 @@
     color: var(--pug-color-text-secondary);
     font-size: 0.8125rem;
     line-height: 1.5;
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
   }
 
   .project-header__dirty {

@@ -1,6 +1,8 @@
 <script lang="ts">
   import { createEventDispatcher } from "svelte";
 
+  import { Icon } from "@pug/svelte-primitives";
+
   export let items: Array<{ id: string; label: string }> = [];
   export let selectionMode: "single" | "multiple" = "multiple";
   export let maxVisibleItems = 4;
@@ -38,7 +40,7 @@
           aria-label={`Remove ${item.label}`}
         >
           {item.label}
-          <span aria-hidden="true">×</span>
+          <span aria-hidden="true"><Icon name="x" size="sm" /></span>
         </button>
       {/each}
       {#if overflowCount > 0}

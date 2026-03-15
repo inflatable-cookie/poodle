@@ -9,12 +9,36 @@ export type MediaKind = "image" | "audio" | "video" | "document" | "embed";
 export type AspectRatio = "square" | "landscape" | "portrait" | "video";
 export type EmptyStateVariant = "neutral" | "search" | "firstRun";
 export type ToastTone = "info" | "success" | "warning" | "danger";
+export type LogLevel = "info" | "warn" | "error";
+
+export type LogEntry = {
+  id?: string;
+  timestamp: Date | string | number;
+  level: LogLevel;
+  message: string;
+};
+
+export type BlockType =
+  | "paragraph"
+  | "heading"
+  | "code"
+  | "quote"
+  | "list"
+  | "image"
+  | "divider";
+
+export type EditorBlock = {
+  id: string;
+  type: BlockType;
+  content: string;
+};
 
 export type TableColumn = {
   id: string;
   label: string;
   align?: "start" | "end";
   isSortable?: boolean;
+  isHideable?: boolean;
 };
 
 export type TableRow = {
@@ -41,6 +65,46 @@ export type PickerItem = {
   label: string;
   description?: string | null;
   meta?: string | null;
+};
+
+export type MediaPickerItem = {
+  id: string;
+  label: string;
+  thumbnailUrl?: string | null;
+  mimeType?: string | null;
+  kind?: MediaKind;
+};
+
+export type ParsedEmbed = {
+  provider: string;
+  id: string;
+  originalUrl?: string;
+  originalEmbed?: string;
+  width?: number;
+  height?: number;
+};
+
+export type CardRadioItem = {
+  value: string;
+  label: string;
+  description?: string | null;
+  isDisabled?: boolean;
+};
+
+export type ReorderableItem = {
+  id: string;
+  label: string;
+};
+
+export type SortField = {
+  value: string;
+  label: string;
+  isDisabled?: boolean;
+};
+
+export type ActiveSort = {
+  field: string;
+  direction: "asc" | "desc";
 };
 
 export type ToastItem = {

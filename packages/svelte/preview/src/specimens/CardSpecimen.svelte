@@ -1,0 +1,97 @@
+<script lang="ts">
+  import { Card } from "@pug/svelte-composites";
+  import { Eyebrow } from "@pug/svelte-primitives";
+</script>
+
+<div class="specimen">
+  <div class="specimen__group">
+    <Eyebrow>Default variant</Eyebrow>
+    <div class="specimen__cards">
+      <Card ariaLabel="Project card">
+        <svelte:fragment slot="header">
+          <h3 class="card-title">Project Alpha</h3>
+        </svelte:fragment>
+        <p class="card-body">A design system component library for building consistent interfaces.</p>
+        <svelte:fragment slot="footer">
+          <span class="card-meta">Updated 2 days ago</span>
+        </svelte:fragment>
+      </Card>
+
+      <Card ariaLabel="Stats card">
+        <svelte:fragment slot="header">
+          <h3 class="card-title">Monthly report</h3>
+        </svelte:fragment>
+        <p class="card-body">48 components shipped across 3 packages this month.</p>
+      </Card>
+    </div>
+  </div>
+
+  <div class="specimen__group">
+    <Eyebrow>Outlined variant</Eyebrow>
+    <Card variant="outlined" ariaLabel="Outlined card">
+      <svelte:fragment slot="header">
+        <h3 class="card-title">Outlined card</h3>
+      </svelte:fragment>
+      <p class="card-body">This card uses a subtle border instead of elevation.</p>
+    </Card>
+  </div>
+
+  <div class="specimen__group">
+    <Eyebrow>Elevated variant</Eyebrow>
+    <Card variant="elevated" ariaLabel="Elevated card">
+      <svelte:fragment slot="header">
+        <h3 class="card-title">Elevated card</h3>
+      </svelte:fragment>
+      <p class="card-body">This card uses a drop shadow for visual prominence.</p>
+    </Card>
+  </div>
+
+  <div class="specimen__group">
+    <Eyebrow>Interactive</Eyebrow>
+    <Card isInteractive ariaLabel="Clickable card">
+      <svelte:fragment slot="header">
+        <h3 class="card-title">Interactive card</h3>
+      </svelte:fragment>
+      <p class="card-body">Hover to see the interactive state. Cursor changes to pointer.</p>
+    </Card>
+  </div>
+</div>
+
+<style>
+  .specimen {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+  }
+
+  .specimen__group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .specimen__cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr));
+    gap: 1rem;
+  }
+
+  .card-title {
+    font-size: 1rem;
+    font-weight: 600;
+    margin: 0;
+    color: var(--pug-color-text-primary);
+  }
+
+  .card-body {
+    font-size: 0.875rem;
+    margin: 0;
+    color: var(--pug-color-text-secondary);
+    line-height: 1.5;
+  }
+
+  .card-meta {
+    font-size: 0.75rem;
+    color: var(--pug-color-text-secondary);
+  }
+</style>

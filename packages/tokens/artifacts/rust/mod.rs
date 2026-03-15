@@ -5,3 +5,4 @@ pub mod metadata;
 pub mod primitives;
 pub mod semantic;
 pub mod themes;
+pub mod typed;

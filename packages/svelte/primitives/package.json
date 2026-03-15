@@ -20,6 +20,7 @@
   },
   "dependencies": {
     "@pug/svelte-tokens": "workspace:*",
+    "lucide-static": "^0.577.0",
     "svelte": "^5.38.6"
   }
 }

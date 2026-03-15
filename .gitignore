@@ -52,7 +52,7 @@ coverage/
 *.pid.lock
 
 # Rust/GPUI specific
-/target/
+**/target/
 Cargo.lock
 **/*.rs.bk
 *.pdb

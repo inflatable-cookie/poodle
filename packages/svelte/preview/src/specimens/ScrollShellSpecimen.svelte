@@ -1,0 +1,65 @@
+<script lang="ts">
+  import { ScrollShell, Surface, Eyebrow } from "@pug/svelte-primitives";
+</script>
+
+<div class="specimen">
+  <div class="specimen__group">
+    <Eyebrow>Vertical scroll</Eyebrow>
+    <div class="scroll-container">
+      <ScrollShell direction="vertical" label="Scrollable content">
+        {#each Array(12) as _, i}
+          <Surface padding="sm" border="subtle">
+            <p>Item {i + 1} — Scroll to see more content below</p>
+          </Surface>
+        {/each}
+      </ScrollShell>
+    </div>
+  </div>
+
+  <div class="specimen__group">
+    <Eyebrow>Horizontal scroll</Eyebrow>
+    <ScrollShell direction="horizontal" label="Horizontal items">
+      <div class="h-row">
+        {#each Array(10) as _, i}
+          <Surface padding="sm" border="subtle">
+            <p class="h-item">Column {i + 1}</p>
+          </Surface>
+        {/each}
+      </div>
+    </ScrollShell>
+  </div>
+</div>
+
+<style>
+  .specimen {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+  }
+
+  .specimen__group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .scroll-container {
+    height: 10rem;
+    border: 1px solid var(--pug-color-border-default);
+    border-radius: 4px;
+  }
+
+  .h-row {
+    display: flex;
+    gap: 0.5rem;
+  }
+
+  .h-item {
+    white-space: nowrap;
+  }
+
+  p {
+    margin: 0;
+    font-size: 0.875rem;
+  }
+</style>

@@ -71,7 +71,9 @@
         "ShellStatusBar",
         "Banner",
         "StatusIndicator",
-        "Pill"
+        "Pill",
+        "Eyebrow",
+        "StateTile"
       ],
       "stateMatrix": [
         "default",
@@ -258,7 +260,9 @@
         "SurfaceTabs",
         "WorkspaceShell",
         "Toolbar",
-        "Menu"
+        "Menu",
+        "Eyebrow",
+        "StateTile"
       ],
       "stateMatrix": [
         "shell-ready",

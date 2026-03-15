@@ -9,6 +9,7 @@
     DateTimePicker,
     DateTimeRangePicker,
     EditableLabel,
+    Eyebrow,
     Grid,
     HoverCard,
     IconButton,
@@ -29,7 +30,7 @@
     Spacer,
     Stack,
     Surface,
-    TabStrip,
+    Tabs,
     TimeField,
     TimeZoneSelect,
     Tooltip,
@@ -42,7 +43,7 @@
     type MenubarItem,
     type MenuItem,
     type NavigationMenuItem,
-    type TabStripItem,
+    type TabItem,
     type TimeZoneOption,
     type TriStateValue,
     type ZonedDateTimeValue,
@@ -82,7 +83,7 @@
       ],
     },
   ];
-  const tabStripSeedItems: TabStripItem[] = [
+  const tabStripSeedItems: TabItem[] = [
     { value: "review", label: "Review", isClosable: true },
     { value: "mix", label: "Mix", isClosable: true },
     { value: "exports", label: "Exports", isClosable: true },
@@ -130,11 +131,11 @@
 
     tabStripItems = itemOrder
       .map((value) => itemMap.get(value))
-      .filter((item): item is TabStripItem => item !== undefined);
+      .filter((item): item is TabItem => item !== undefined);
     primitiveActionLog = `Tab strip reordered to ${itemOrder.join(" -> ")}.`;
   }
 
-  function closeTabStripItem(event: CustomEvent<{ value: string }>): void {
+  function closeTabItem(event: CustomEvent<{ value: string }>): void {
     const nextItems = tabStripItems.filter((item) => item.value !== event.detail.value);
 
     tabStripItems = nextItems;
@@ -156,7 +157,7 @@
   <Stack gap="md">
     <div class="primitive-deck__header">
       <div>
-        <p class="eyebrow">Full primitive coverage</p>
+        <Eyebrow>Full primitive coverage</Eyebrow>
         <h3>Every public primitive is directly reviewable in the shared demo</h3>
       </div>
       <Inline gap="sm" wrap={true} align="center">
@@ -174,7 +175,7 @@
       <Surface tone="elevated" border="subtle" padding="md" asRole="group" label="Layout primitives">
         <Stack gap="sm">
           <div>
-            <p class="eyebrow">Layout and surfaces</p>
+            <Eyebrow>Layout and surfaces</Eyebrow>
             <h4>Structural primitives</h4>
           </div>
           <Box padding="sm" minHeight="3.25rem">
@@ -217,7 +218,7 @@
       <Surface tone="elevated" border="subtle" padding="md" asRole="group" label="Navigation primitives">
         <Stack gap="sm">
           <div>
-            <p class="eyebrow">Navigation and overlay</p>
+            <Eyebrow>Navigation and overlay</Eyebrow>
             <h4>Menu-driven primitives</h4>
           </div>
           <NavigationMenu
@@ -233,14 +234,15 @@
             on:valueChange={(event) => (activeMenubar = event.detail.value)}
             on:action={(event) => (primitiveActionLog = `Menubar action "${event.detail.value}" requested.`)}
           />
-          <TabStrip
+          <Tabs
             value={tabStripValue}
             items={tabStripItems}
+            variant="card"
             isReorderable={true}
             ariaLabel="Primitive coverage tab strip"
             on:valueChange={(event) => (tabStripValue = event.detail.value)}
             on:reorder={reorderTabStrip}
-            on:close={closeTabStripItem}
+            on:close={closeTabItem}
           />
           <Inline gap="sm" wrap={true}>
             <Tooltip content="Tooltip coverage lives in the demo too." placement="top">
@@ -269,7 +271,7 @@
       <Surface tone="elevated" border="subtle" padding="md" asRole="group" label="Input primitives">
         <Stack gap="sm">
           <div>
-            <p class="eyebrow">Inputs and values</p>
+            <Eyebrow>Inputs and values</Eyebrow>
             <h4>Long-tail form primitives</h4>
           </div>
           <Combobox
@@ -338,7 +340,7 @@
               ariaLabel="Review access code"
               on:valueChange={(event) => (pinValue = event.detail.value)}
             />
-            <IconButton icon="+" ariaLabel="Add marker" />
+            <IconButton icon="plus" ariaLabel="Add marker" />
           </Inline>
           <TimeZoneSelect
             id="primitive-time-zone"
@@ -353,7 +355,7 @@
       <Surface tone="elevated" border="subtle" padding="md" asRole="group" label="Feedback primitives">
         <Stack gap="sm">
           <div>
-            <p class="eyebrow">Progress and feedback</p>
+            <Eyebrow>Progress and feedback</Eyebrow>
             <h4>Status primitives</h4>
           </div>
           <Progress value={72} max={100} ariaLabel="Publish progress" valueText="72%" />
@@ -375,7 +377,7 @@
     <Surface tone="elevated" border="subtle" padding="md" asRole="group" label="Date and scheduling primitives">
       <Stack gap="md">
         <div>
-          <p class="eyebrow">Date and scheduling</p>
+          <Eyebrow>Date and scheduling</Eyebrow>
           <h4>Calendar and time primitives</h4>
         </div>
 

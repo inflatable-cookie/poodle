@@ -1,7 +1,7 @@
 # Roadmaps
 
 Status: active
-Updated: 2026-03-13
+Updated: 2026-03-15
 
 Roadmaps hold executable milestone work for Pug.
 
@@ -16,9 +16,9 @@ Roadmaps hold executable milestone work for Pug.
 
 ## Current Generation
 
-- Active generation: `g04`
-- Most recently completed generation: `g03`
-- Next generation: not yet planned
+- Active generation: none (between generations)
+- Most recently completed generation: `g05`
+- Next generation: `g06` (planned)
 
 ## Generation Map
 
@@ -27,8 +27,18 @@ Roadmaps hold executable milestone work for Pug.
 - `g02` advanced composites, docs/catalog depth, cleanup, and release baseline
 - `g03` hardening, migration policy, parity automation, first downstream
   adoption tranches, validation, and mature extension support
-- `g04` GPUI-native component parity, runtime proof, downstream GPUI adoption,
-  and docs promotion beyond the internal preview baseline
+- `g04` Underlay component parity, new component families (dialog patterns,
+  file/media input, list interactions, code/color, navigation cards, editing),
+  feature depth for existing components, and specialist media/editing surfaces
+- `g05` GPUI foundation, spec crates, cross-runtime parity baseline, demo-app
+  alignment, and Svelte demo rebuild
+- `g06` shared multi-renderer contract layer — crate restructuring, typed
+  token resolution, layout/event/style abstractions, adapter traits, and spec
+  expansion to full 124-component surface (planned)
+- `g07` GPUI rendering build-out — adapter crate, primitive and composite
+  rendering, demo-app parity, downstream proof, published docs (planned)
+- `g08` Jetstream rendering build-out — adapter crate, token bridge, component
+  rendering in game engine context, integration demo scene (planned)
 
 ## Planning Standard
 
@@ -52,10 +62,16 @@ express a real program rather than three or four umbrella headings.
 - `g01/README.md`
 - `g02/README.md`
 - `g03/README.md`
+- `g04/README.md`
+- `g05/README.md`
+- `g06/README.md`
+- `g07/README.md`
+- `g08/README.md`
 - `backlog/README.md`
 
 ## Next Task
 
-Execute `g04` in order, continuing with GPUI demo-app parity implementation so
-the rebuilt Svelte target becomes a real side-by-side reference before
-downstream GPUI proof resumes.
+Execute `g06` in order, beginning with `g06.001` multi-renderer architecture
+audit. `g07` (GPUI build-out) and `g08` (Jetstream build-out) follow after
+`g06` closeout and can run in parallel. Jetstream g04.016 (UI Rendering
+Infrastructure) should be completed before `g08` begins.

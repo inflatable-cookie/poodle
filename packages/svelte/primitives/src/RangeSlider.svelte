@@ -142,7 +142,10 @@
 
   .range-slider__control {
     position: absolute;
-    inset: 0;
+    top: 50%;
+    left: 0;
+    right: 0;
+    transform: translateY(-50%);
     width: 100%;
     margin: 0;
     background: transparent;

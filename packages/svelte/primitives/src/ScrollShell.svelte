@@ -15,6 +15,8 @@
     scroll: Event;
   }>();
 
+  $: needsHorizontal = direction === "horizontal" || direction === "both";
+
   $: viewportStyle = joinStyles([
     overflowForDirection(direction),
     `padding: ${scaleToSpace(padding)}`,
@@ -34,7 +36,9 @@
     style={viewportStyle}
     on:scroll={(event) => dispatch("scroll", event)}
   >
-    <slot />
+    <div class="scroll-shell__content" class:scroll-shell__content--h={needsHorizontal}>
+      <slot />
+    </div>
   </div>
 </div>
 
@@ -42,6 +46,9 @@
   .scroll-shell {
     min-width: 0;
     min-height: 0;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
     border-radius: var(--pug-radius-surface);
   }
 
@@ -50,6 +57,10 @@
     height: 100%;
     overscroll-behavior: contain;
     border-radius: inherit;
+  }
+
+  .scroll-shell__content--h {
+    min-width: max-content;
   }
 
   .scroll-shell__viewport:focus-visible {

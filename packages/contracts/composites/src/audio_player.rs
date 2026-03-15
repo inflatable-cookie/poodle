@@ -1,0 +1,72 @@
+use pug_tokens::semantic;
+
+#[derive(Clone, Debug, PartialEq)]
+pub struct AudioPlayerSpec {
+    pub src: String,
+    pub is_playing: bool,
+    pub current_time: f64,
+    pub duration: f64,
+    pub volume: f64,
+    pub is_muted: bool,
+    pub show_speed_control: bool,
+}
+
+impl AudioPlayerSpec {
+    pub fn new(src: impl Into<String>) -> Self {
+        Self {
+            src: src.into(),
+            is_playing: false,
+            current_time: 0.0,
+            duration: 0.0,
+            volume: 1.0,
+            is_muted: false,
+            show_speed_control: false,
+        }
+    }
+
+    pub fn with_playing(mut self, is_playing: bool) -> Self {
+        self.is_playing = is_playing;
+        self
+    }
+
+    pub fn with_current_time(mut self, current_time: f64) -> Self {
+        self.current_time = current_time;
+        self
+    }
+
+    pub fn with_duration(mut self, duration: f64) -> Self {
+        self.duration = duration;
+        self
+    }
+
+    pub fn with_volume(mut self, volume: f64) -> Self {
+        self.volume = volume;
+        self
+    }
+
+    pub fn with_muted(mut self, is_muted: bool) -> Self {
+        self.is_muted = is_muted;
+        self
+    }
+
+    pub fn with_show_speed_control(mut self, show_speed_control: bool) -> Self {
+        self.show_speed_control = show_speed_control;
+        self
+    }
+
+    pub fn progress(&self) -> f64 {
+        if self.duration <= 0.0 {
+            0.0
+        } else {
+            self.current_time / self.duration
+        }
+    }
+
+    pub fn fill_token(&self) -> &'static str {
+        semantic::COLOR_BACKGROUND_SURFACE
+    }
+
+    pub fn control_color_token(&self) -> &'static str {
+        semantic::COLOR_TEXT_PRIMARY
+    }
+}

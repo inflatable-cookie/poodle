@@ -1,6 +1,7 @@
 <script lang="ts">
   import { createEventDispatcher } from "svelte";
 
+  import Icon from "./Icon.svelte";
   import type { ButtonVariant, ControlSize } from "./types";
 
   export let variant: ButtonVariant = "secondary";
@@ -21,6 +22,7 @@
   }>();
 
   $: isUnavailable = isDisabled || isLoading;
+  $: iconOnly = !$$slots.default;
 </script>
 
 <button
@@ -28,6 +30,7 @@
   class={`button ${className}`.trim()}
   data-variant={variant}
   data-size={size}
+  data-icon-only={iconOnly || undefined}
   data-loading={isLoading}
   disabled={isUnavailable}
   aria-label={ariaLabel ?? undefined}
@@ -45,8 +48,8 @@
     <span class="button__icon" aria-hidden="true">
       {#if $$slots.leading}
         <slot name="leading" />
-      {:else}
-        {leadingIcon}
+      {:else if leadingIcon}
+        <Icon name={leadingIcon} size="sm" />
       {/if}
     </span>
   {/if}
@@ -61,8 +64,8 @@
     <span class="button__icon" aria-hidden="true">
       {#if $$slots.trailing}
         <slot name="trailing" />
-      {:else}
-        {trailingIcon}
+      {:else if trailingIcon}
+        <Icon name={trailingIcon} size="sm" />
       {/if}
     </span>
   {/if}
@@ -125,6 +128,21 @@
     font-size: 0.875rem;
   }
 
+  /* Icon-only: square, no min-width */
+  .button[data-icon-only] {
+    min-width: 0;
+    padding: 0;
+    width: var(--pug-size-control-height);
+  }
+
+  .button[data-icon-only][data-size="sm"] {
+    width: calc(var(--pug-size-control-height) - 0.375rem);
+  }
+
+  .button[data-icon-only][data-size="lg"] {
+    width: calc(var(--pug-size-control-height) + 0.375rem);
+  }
+
   .button[data-variant="primary"] {
     --pug-button-fill: var(--pug-color-accent-base);
     --pug-button-border: color-mix(in srgb, var(--pug-color-accent-base) 84%, black);
@@ -135,8 +153,8 @@
   }
 
   .button[data-variant="ghost"] {
-    --pug-button-fill: color-mix(in srgb, var(--pug-color-background-surface) 42%, transparent);
-    --pug-button-border: color-mix(in srgb, var(--pug-color-border-subtle) 72%, transparent);
+    --pug-button-fill: transparent;
+    --pug-button-border: transparent;
     --pug-button-shadow: none;
   }
 
@@ -175,8 +193,10 @@
     display: inline-flex;
     align-items: center;
     justify-content: center;
+    width: var(--pug-size-icon-md);
+    height: var(--pug-size-icon-md);
     font-family: var(--pug-typography-code-family);
-    font-size: 0.8125rem;
+    font-size: 0.875rem;
     line-height: 1;
   }
 

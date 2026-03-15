@@ -36,29 +36,114 @@
     the accessibility, release, acceptance, onboarding, and closeout baselines
 
 - `g04`
-  - Status: active
+  - Status: completed
   - Range: `001` to `018`
-  - Notes: GPUI-native component implementation, runtime proof, stronger
-    cross-runtime parity evidence, downstream GPUI adoption proof, and docs
-    promotion beyond the internal preview harness; `g04.001` sets the GPUI
-    priority matrix and implementation order, `g04.002` establishes the native
-    theme runtime and preview app baseline, `g04.003` lands the first real GPUI
-    structural primitive crate, `g04.004` adds the GPUI action, text-entry,
-    and field primitive tranche, `g04.005` adds the GPUI selection, compact
-    feedback, and date-time tranche, `g04.006` adds the GPUI overlay,
-    disclosure, navigation, and menu primitive tranche, `g04.007` adds the
-    first GPUI form, validation, and remediation composite tranche, `g04.008`
-    widens the GPUI data, browse, detail, picker, and media composite layer,
-    `g04.009` adds the first GPUI workstation layer, `g04.010` freezes the
-    first honest GPUI native accessibility-proof posture, `g04.011` hardens
-    cross-runtime parity evidence and the delta register, `g04.012` audits and
-    freezes the shared demo target, `g04.013` writes the explicit demo
-    contract, `g04.014` and `g04.015` realign the implementation surface
-    before GPUI proof resumes, and
-    `g04.016` through `g04.018` cover downstream GPUI proof, public docs
-    promotion, and generation closeout
+  - Notes: Underlay component parity, new component families, feature depth
+    for existing components, and specialist editing/media surfaces; `g04.001`
+    formalizes the Underlay parity gap register and implementation priority,
+    `g04.002` adds AlertDialog, FormDialog, and ConfirmAction dialog patterns,
+    `g04.003` adds FileUpload, MediaPicker, EmbedInput, and EmbedPreview,
+    `g04.004` adds SplitButton and CardRadioGroup with Card selection
+    extensions, `g04.005` deepens TextInput, Field, InlineEditableField, and
+    SlugField, `g04.006` adds TimeAgo and DurationInput, `g04.007` adds
+    ReorderableList, AutonomousList, and OrderBy, `g04.008` adds Code display
+    and ColorPicker, `g04.009` adds NavCard, NavCardGrid, and ListCard,
+    `g04.010` adds Skeleton presets and PageLoading, `g04.011` deepens
+    DataTable and Select, `g04.012` adds LogList and StateTile trends,
+    `g04.013` adds MarkdownEditor, `g04.014` adds AudioPlayer and
+    VideoPlayer, `g04.015` explores block editor feasibility, `g04.016`
+    hardens remaining feature gaps, `g04.017` ensures specimen and docs
+    coverage, and `g04.018` closes the generation
+
+- `g05`
+  - Status: completed
+  - Range: `001` to `014`
+  - Notes: GPUI foundation, spec crates, cross-runtime parity baseline, and
+    demo alignment; `g05.001` contract audit and parity priority matrix,
+    `g05.002` theme runtime and token application, `g05.003` through `g05.006`
+    primitive spec crates (structural, action, selection, overlay), `g05.007`
+    and `g05.008` composite spec crates (form, data, browse, workstation),
+    `g05.009` workstation shell specs, `g05.010` accessibility proof,
+    `g05.011` parity report and delta register, `g05.012` through `g05.014`
+    demo-app audit, contract, and Svelte rebuild; deferred GPUI g04-surface
+    parity, expanded component coverage, downstream adoption proof, and docs
+    promotion to `g06` to enable shared multi-renderer contract redesign
+
+- `g06`
+  - Status: completed
+  - Range: `001` to `015`
+  - Notes: shared multi-renderer contract layer; `g06.001` architecture audit
+    and extraction plan, `g06.002` crate restructuring and rename
+    (`pug-gpui-*` → `pug-*`), `g06.003` typed token resolution system
+    (`[f32; 4]` colors, `f32` pixel values), `g06.004` layout intent
+    abstraction, `g06.005` event model and interaction abstraction, `g06.006`
+    style descriptor intermediate representation, `g06.007` renderer adapter
+    trait definition, `g06.008` through `g06.012` spec expansion to full
+    124-component Svelte surface (53 new specs), `g06.013` Jetstream rendering
+    constraint document, `g06.014` multi-renderer parity validation tooling,
+    and `g06.015` closes the generation
+
+- `g07`
+  - Status: completed
+  - Range: `001` to `015`
+  - Notes: GPUI rendering build-out; `g07.001` adapter crate setup and theme
+    integration, `g07.002` through `g07.006` primitive rendering batches
+    (structural, action, selection, overlay, informational), `g07.007` through
+    `g07.009` composite rendering batches (form, data, editing/navigation),
+    `g07.010` workstation shell updates, `g07.011` cross-runtime parity report,
+    `g07.012` GPUI demo-app parity, `g07.013` downstream reference-app proof,
+    `g07.014` published docs and evaluator onboarding, and `g07.015` closes
+    the generation; can run in parallel with `g08` after `g06` completes
+
+- `g08`
+  - Status: completed
+  - Range: `001` to `014`
+  - Notes: Jetstream rendering build-out; `g08.001` adapter crate setup and
+    token bridge, `g08.002` theme construction from Pug tokens with 19 semantic
+    color constants, `g08.003` through `g08.008` component rendering batches
+    (8 structural, 4 action, 8 input, 8 selection, 22 feedback/informational,
+    13 overlay), `g08.009` and `g08.010` composite rendering (5 form, 36
+    data/editing/operational), workstation rendering (13 shell specs),
+    `g08.011` component subset review (full parity — 0 unsupported),
+    `g08.012` integration demo scene with 4 game screens (32 nodes),
+    `g08.013` cross-runtime parity report for Jetstream target, and `g08.014`
+    closes the generation; 142 tests passing
+
+- `g09`
+  - Status: planned
+  - Range: `001` to `018`
+  - Notes: GPUI first-class component build-out, preview parity, and visual
+    fidelity; `g09.001` component gap audit (Svelte surface vs GPUI
+    components), `g09.002` and `g09.003` missing primitive components
+    (structural, informational, input, temporal), `g09.004` and `g09.005`
+    missing composite components (form, data, editing, media, operational),
+    `g09.006` missing workstation components, `g09.007` through `g09.012`
+    specimen upgrades replacing all hand-built mockups with real Pug component
+    instances, `g09.013` preview app shell (section tabs, sidebar, per-component
+    pages), `g09.014` display controls (theme, density, control size, route
+    state), `g09.015` shared 6-screen demo app, `g09.016` systematic visual
+    parity audit (Svelte vs GPUI), `g09.017` cross-runtime parity report
+    update, and `g09.018` generation closeout; goal is GPUI preview app
+    that looks and works identically to the Svelte version
+
+- `g10`
+  - Status: planned
+  - Range: `001` to `016`
+  - Notes: Jetstream first-class component build-out, preview app, and visual
+    fidelity; `g10.001` preview app scaffold and navigation shell, `g10.002`
+    component registry and specimen framework, `g10.003` through `g10.009`
+    per-component specimen build-out (structural, action, input, selection,
+    feedback, overlay, date/time, composites, workstation), `g10.010` display
+    controls (theme, density, control size), `g10.011` demo scene expansion
+    to 6-screen parity, `g10.012` visual parity audit (Svelte/GPUI vs
+    Jetstream), `g10.013` delta register update and native adaptation
+    documentation, `g10.014` cross-runtime parity report refresh, `g10.015`
+    accessibility and input model verification (keyboard + gamepad), and
+    `g10.016` generation closeout; goal is Jetstream preview app with full
+    component coverage and visual fidelity matching Svelte and GPUI; can run
+    in parallel with `g09` after `g08` completes
 
 ## Next Task
 
-Open `g04.015` and implement the GPUI shared demo app against the rebuilt
-Svelte target before downstream GPUI proof resumes.
+Open `g09.001` and begin the GPUI component gap audit. `g10` can proceed in
+parallel after `g08` is complete.

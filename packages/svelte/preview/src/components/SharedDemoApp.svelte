@@ -17,6 +17,7 @@
     PickerShell,
     RelationPicker,
     SelectionSummary,
+    StateTile,
     ToastStack,
   } from "@pug/svelte-composites";
   import {
@@ -26,8 +27,10 @@
     DatePicker,
     Dialog,
     Drawer,
+    Eyebrow,
     Field,
     FormActions,
+    Inline,
     Menu,
     Pill,
     Popover,
@@ -168,7 +171,7 @@
 <section class="panel shared-demo-shell-panel" aria-labelledby="shared-demo-heading">
   <div class="section-header">
     <div>
-      <p class="eyebrow">Shared demo target</p>
+      <Eyebrow>Shared demo target</Eyebrow>
       <h2 id="shared-demo-heading">Svelte parity target for the GPUI demo app</h2>
     </div>
   </div>
@@ -184,14 +187,14 @@
         <span class="workspace-identity__mark" aria-hidden="true">P</span>
         <strong>Shared demo target</strong>
       </div>
-      <div slot="actions" class="action-cluster">
+      <Inline slot="actions" justify="end" wrap gap="md">
         <Menu items={shellMenuItems} ariaLabel="Shared demo shell actions" on:action={handleShellMenuAction}>
           <div slot="trigger">
             <Button variant="secondary">Shell menu</Button>
           </div>
         </Menu>
         <Button variant="primary" on:click={demo.openCommandPalette}>Open commands</Button>
-      </div>
+      </Inline>
       <div slot="utility" class="workspace-status-pill-row">
         <StatusIndicator status={selectedTone} label={demo.workspaceState} />
         <Pill appearance="subtle">{theme}</Pill>
@@ -206,13 +209,12 @@
       subtitle={screenMeta.summary}
       isDirty={demo.invalid || demo.busy}
     >
-      <div slot="actions" class="action-cluster">
+      <Inline slot="actions" justify="end" wrap gap="md">
         <Button variant="secondary">Share state</Button>
         <Button variant="secondary" on:click={() => demo.enqueueToast("info")}>Push toast</Button>
-      </div>
+      </Inline>
       <div slot="status" class="workspace-status-pill-row">
         <span class="command-shortcut-hint">{screenMeta.eyebrow}</span>
-        <span class="command-shortcut-hint">{shellMenuLog}</span>
       </div>
     </ProjectHeader>
 
@@ -316,10 +318,10 @@
                   title="Shared shell posture is visible"
                   message="The rebuilt target keeps remediation and shell status attached to the same story instead of splitting them across unrelated docs sections."
                 >
-                  <div slot="actions" class="action-cluster">
+                  <Inline slot="actions" justify="end" wrap gap="md">
                     <Button variant="secondary">Inspect</Button>
                     <Button variant="primary" on:click={() => demo.enqueueToast("success")}>Resolve</Button>
-                  </div>
+                  </Inline>
                 </Banner>
               {/if}
 
@@ -327,7 +329,7 @@
                 {#each demo.detailCards as card}
                   <Card variant="elevated">
                     <div slot="header">
-                      <p class="eyebrow">{card.title}</p>
+                      <Eyebrow>{card.title}</Eyebrow>
                     </div>
                     <strong class="detail-card-value">{card.value}</strong>
                     <p class="detail-card-meta">{card.meta}</p>
@@ -452,12 +454,12 @@
 
                 <FormActions align="between">
                   <p class="demo-status">{demo.validationLog}</p>
-                  <div class="action-cluster">
+                  <Inline justify="end" wrap gap="md">
                     <Button variant="secondary" type="button" on:click={() => (formDialogOpen = true)}>Review issue</Button>
                     <Button variant="primary" type="submit" isDisabled={demo.disabled} isLoading={demo.busy}>
                       {demo.busy ? "Validating..." : "Save changes"}
                     </Button>
-                  </div>
+                  </Inline>
                 </FormActions>
               </form>
             </div>
@@ -485,10 +487,10 @@
                   ariaLabel="Browse presentation"
                   on:valueChange={(event) => (browsePresentation = event.detail.value)}
                 />
-                <div slot="secondary" class="action-cluster">
+                <Inline slot="secondary" justify="end" wrap gap="md">
                   <Button variant="secondary" on:click={demo.resetBrowseFilters}>Reset</Button>
                   <Button variant="secondary" on:click={demo.retryBrowseState}>Retry</Button>
-                </div>
+                </Inline>
               </FilterToolbar>
 
               {#if browsePresentation === "table"}
@@ -531,7 +533,7 @@
                       </li>
                     {/each}
                   {/if}
-                  <div slot="footer" class="action-cluster">
+                  <Inline slot="footer" justify="end" wrap gap="md">
                     <Button
                       variant="secondary"
                       isDisabled={demo.visibleBrowseRows.length >= demo.filteredBrowseRows.length}
@@ -539,7 +541,7 @@
                     >
                       Load more
                     </Button>
-                  </div>
+                  </Inline>
                 </ListShell>
               {:else}
                 <GridShell
@@ -553,7 +555,7 @@
                     {#each demo.visibleBrowseCards as card}
                       <Card variant="outlined">
                         <div slot="header">
-                          <p class="eyebrow">{card.category}</p>
+                          <Eyebrow>{card.category}</Eyebrow>
                         </div>
                         <strong class="detail-card-value">{card.title}</strong>
                         <p class="detail-card-meta">{card.meta}</p>
@@ -575,17 +577,17 @@
                 <div slot="breadcrumbs">
                   <Breadcrumbs items={demo.detailBreadcrumbs} on:navigate={demo.handleBreadcrumbNavigate} />
                 </div>
-                <div slot="actions" class="action-cluster">
+                <Inline slot="actions" justify="end" wrap gap="md">
                   <Button variant="secondary">Reveal export</Button>
                   <Button variant="primary">Approve handoff</Button>
-                </div>
+                </Inline>
               </PageHeader>
 
               <div class="shared-demo-summary-grid">
                 {#each demo.detailCards as card}
                   <Card variant="elevated">
                     <div slot="header">
-                      <p class="eyebrow">{card.title}</p>
+                      <Eyebrow>{card.title}</Eyebrow>
                     </div>
                     <strong class="detail-card-value">{card.value}</strong>
                     <p class="detail-card-meta">{card.meta}</p>
@@ -669,12 +671,12 @@
                   on:cancel={demo.handlePickerCancel}
                 />
 
-                <div slot="footer" class="action-cluster">
+                <Inline slot="footer" justify="end" wrap gap="md">
                   <Button variant="secondary" on:click={() => (pickerDrawerOpen = true)}>Open drawer mode</Button>
                   <Button variant="primary" on:click={() => demo.handlePickerConfirm(new CustomEvent("confirm", { detail: { selectedIds: demo.selectedRelationIds } }))}>
                     Confirm selection
                   </Button>
-                </div>
+                </Inline>
               </PickerShell>
 
               <PanelSurface title="Active media preview" isElevated={true} bodyPadding="md">
@@ -704,139 +706,115 @@
             </div>
           {:else}
             <div class="shared-demo-screen-stack">
-              <div class="shared-demo-command-grid">
-                <PanelSurface isActive={true} isElevated={true} bodyPadding="none" ariaLabel="Command and workspace shell">
-                  <div slot="header">
-                    <PanelHeader title="Command and workspace shell" isActive={true}>
-                      <div slot="tabs">
-                        <PanelTabs
-                          items={workspacePanelItems}
-                          value={activeWorkspacePanel}
-                          isReorderable={false}
-                          ariaLabel="Command and workspace views"
-                          on:valueChange={(event) => (activeWorkspacePanel = event.detail.value)}
-                        />
-                      </div>
-                    </PanelHeader>
-                  </div>
-
-                  {#if activeWorkspacePanel === "overview"}
-                    <div class="workspace-surface-stack">
-                      <Callout tone="info" title="Launcher and inline discovery belong together">
-                        <p>
-                          The shared demo now keeps command launch, grouped discovery,
-                          and shell state in one believable workstation scene.
-                        </p>
-                      </Callout>
-                      <div class="action-cluster">
-                        <Button variant="primary" on:click={demo.openCommandPalette}>Open command palette</Button>
-                        <Button variant="secondary" on:click={demo.clearCommandDiscovery}>Reset command filters</Button>
-                      </div>
-                      <div class="workspace-signal-grid">
-                        <div class="state-tile">
-                          <span class="token-path">commandScope</span>
-                          <strong>{demo.commandScope}</strong>
-                        </div>
-                        <div class="state-tile">
-                          <span class="token-path">workspaceState</span>
-                          <strong>{demo.workspaceState}</strong>
-                        </div>
-                        <div class="state-tile">
-                          <span class="token-path">lastCommandId</span>
-                          <strong>{demo.lastCommandId ?? "∅"}</strong>
-                        </div>
-                      </div>
+              <PanelSurface isActive={true} isElevated={true} bodyPadding="none" ariaLabel="Command and workspace shell">
+                <div slot="header">
+                  <PanelHeader title="Command and workspace shell" isActive={true}>
+                    <div slot="tabs">
+                      <PanelTabs
+                        items={workspacePanelItems}
+                        value={activeWorkspacePanel}
+                        isReorderable={false}
+                        ariaLabel="Command and workspace views"
+                        on:valueChange={(event) => (activeWorkspacePanel = event.detail.value)}
+                      />
                     </div>
-                  {:else if activeWorkspacePanel === "workspace"}
-                    <SplitView
-                      orientation="horizontal"
-                      ratio={demo.primarySplitRatio}
-                      minPrimarySize={260}
-                      minSecondarySize={480}
-                      ariaLabel="Shared demo workspace split"
-                      on:ratioChange={demo.handlePrimarySplitChange}
-                    >
-                      <div slot="primary" class="workspace-pane">
-                        <DockRegion
-                          edge="left"
-                          items={demo.leftDockItems}
-                          value={demo.leftDockValue}
-                          isCollapsed={demo.leftDockCollapsed}
-                          ariaLabel="Left dock"
-                          on:valueChange={(event) => demo.handleDockValueChange("left", event)}
-                          on:collapsedChange={(event) => demo.handleDockCollapsedChange("left", event)}
-                          on:reorder={(event) => demo.handleDockReorder("left", event)}
-                          on:requestClose={(event) => demo.handleDockClose("left", event)}
-                          on:requestContextMenu={(event) => demo.handleDockContextMenu("left", event)}
-                          let:activeItem
-                        >
-                          <div class="workspace-dock-content">
-                            <p class="eyebrow">{demo.activeLeftDockMeta?.title ?? activeItem?.label ?? "Left dock"}</p>
-                            <p class="detail-card-meta">{demo.activeLeftDockMeta?.summary}</p>
-                            <ul class="workspace-list">
-                              {#each demo.activeLeftDockMeta?.items ?? [] as item}
-                                <li>{item}</li>
-                              {/each}
-                            </ul>
-                          </div>
-                        </DockRegion>
-                      </div>
-
-                      <div slot="secondary" class="workspace-pane">
-                        <PanelSurface title={demo.activeWorkspaceSurface?.label ?? "Workspace surface"} isActive={true} isElevated={true} bodyPadding="md">
-                          <div slot="header">
-                            <PanelHeader title={demo.activeWorkspaceSurface?.label ?? "Workspace surface"} isActive={true}>
-                              <div slot="tabs">
-                                <SurfaceTabs
-                                  items={demo.workspaceSurfaceItems}
-                                  value={demo.workspaceSurfaceValue}
-                                  ariaLabel="Workspace surfaces"
-                                  on:valueChange={demo.handleSurfaceTabChange}
-                                  on:reorder={demo.handleSurfaceReorder}
-                                  on:requestRename={demo.handleSurfaceRename}
-                                  on:requestMove={demo.handleSurfaceMove}
-                                  on:requestClose={demo.handleSurfaceClose}
-                                  on:requestAdd={demo.handleSurfaceAdd}
-                                />
-                              </div>
-                            </PanelHeader>
-                          </div>
-
-                          <div class="workspace-surface-stack">
-                            <div class="workspace-surface-copy">
-                              <p class="eyebrow">{demo.activeWorkspaceSurfaceMeta.eyebrow}</p>
-                              <h3 class="workspace-surface-title">{demo.activeWorkspaceSurface?.label ?? "Workspace surface"}</h3>
-                              <p class="detail-card-meta">{demo.activeWorkspaceSurfaceMeta.description}</p>
-                            </div>
-                            <div class="workspace-signal-grid">
-                              {#each demo.activeWorkspaceSurfaceMeta.highlights as highlight}
-                                <div class="state-tile">
-                                  <span class="token-path">surface signal</span>
-                                  <strong>{highlight}</strong>
-                                </div>
-                              {/each}
-                            </div>
-                          </div>
-                        </PanelSurface>
-                      </div>
-                    </SplitView>
-                  {:else}
-                    <div class="workspace-persistence-panel">
-                      <pre>{demo.serializedWorkspaceLayout}</pre>
-                    </div>
-                  {/if}
-                </PanelSurface>
-
-                <div class="shared-demo-command-companion">
-                  <ActionDiscoveryPanel
-                    title="Inline action discovery"
-                    description="Grouped action rediscovery now sits beside workspace context, not on a separate docs page."
-                    sections={demo.commandSections}
-                    invocationHint="Open the full launcher with ⌘K"
-                    on:actionSelect={demo.handleActionDiscoverySelect}
-                  />
+                  </PanelHeader>
                 </div>
-              </div>
+
+                {#if activeWorkspacePanel === "overview"}
+                  <div class="workspace-surface-stack">
+                    <Callout tone="info" title="Launcher and inline discovery belong together">
+                      <p>
+                        The shared demo now keeps command launch, grouped discovery,
+                        and shell state in one believable workstation scene.
+                      </p>
+                    </Callout>
+                    <Inline justify="end" wrap gap="md">
+                      <Button variant="primary" on:click={demo.openCommandPalette}>Open command palette</Button>
+                      <Button variant="secondary" on:click={demo.clearCommandDiscovery}>Reset command filters</Button>
+                    </Inline>
+                    <div class="workspace-signal-grid">
+                      <StateTile label="commandScope" value={demo.commandScope} />
+                      <StateTile label="workspaceState" value={demo.workspaceState} />
+                      <StateTile label="lastCommandId" value={demo.lastCommandId ?? "∅"} />
+                    </div>
+                  </div>
+                {:else if activeWorkspacePanel === "workspace"}
+                  <SplitView
+                    orientation="horizontal"
+                    ratio={demo.primarySplitRatio}
+                    minPrimarySize={260}
+                    minSecondarySize={480}
+                    ariaLabel="Shared demo workspace split"
+                    on:ratioChange={demo.handlePrimarySplitChange}
+                  >
+                    <div slot="primary" class="workspace-pane">
+                      <DockRegion
+                        edge="left"
+                        items={demo.leftDockItems}
+                        value={demo.leftDockValue}
+                        isCollapsed={demo.leftDockCollapsed}
+                        ariaLabel="Left dock"
+                        on:valueChange={(event) => demo.handleDockValueChange("left", event)}
+                        on:collapsedChange={(event) => demo.handleDockCollapsedChange("left", event)}
+                        on:reorder={(event) => demo.handleDockReorder("left", event)}
+                        on:requestClose={(event) => demo.handleDockClose("left", event)}
+                        on:requestContextMenu={(event) => demo.handleDockContextMenu("left", event)}
+                        let:activeItem
+                      >
+                        <div class="workspace-dock-content">
+                          <Eyebrow>{demo.activeLeftDockMeta?.title ?? activeItem?.label ?? "Left dock"}</Eyebrow>
+                          <p class="detail-card-meta">{demo.activeLeftDockMeta?.summary}</p>
+                          <ul class="workspace-list">
+                            {#each demo.activeLeftDockMeta?.items ?? [] as item}
+                              <li>{item}</li>
+                            {/each}
+                          </ul>
+                        </div>
+                      </DockRegion>
+                    </div>
+
+                    <div slot="secondary" class="workspace-pane">
+                      <PanelSurface title={demo.activeWorkspaceSurface?.label ?? "Workspace surface"} isActive={true} isElevated={true} bodyPadding="md">
+                        <div slot="header">
+                          <PanelHeader title={demo.activeWorkspaceSurface?.label ?? "Workspace surface"} isActive={true}>
+                            <div slot="tabs">
+                              <SurfaceTabs
+                                items={demo.workspaceSurfaceItems}
+                                value={demo.workspaceSurfaceValue}
+                                ariaLabel="Workspace surfaces"
+                                on:valueChange={demo.handleSurfaceTabChange}
+                                on:reorder={demo.handleSurfaceReorder}
+                                on:requestRename={demo.handleSurfaceRename}
+                                on:requestMove={demo.handleSurfaceMove}
+                                on:requestClose={demo.handleSurfaceClose}
+                                on:requestAdd={demo.handleSurfaceAdd}
+                              />
+                            </div>
+                          </PanelHeader>
+                        </div>
+
+                        <div class="workspace-surface-stack">
+                          <div class="workspace-surface-copy">
+                            <Eyebrow>{demo.activeWorkspaceSurfaceMeta.eyebrow}</Eyebrow>
+                            <h3 class="workspace-surface-title">{demo.activeWorkspaceSurface?.label ?? "Workspace surface"}</h3>
+                            <p class="detail-card-meta">{demo.activeWorkspaceSurfaceMeta.description}</p>
+                          </div>
+                          <div class="workspace-signal-grid">
+                            {#each demo.activeWorkspaceSurfaceMeta.highlights as highlight}
+                              <StateTile label="surface signal" value={highlight} />
+                            {/each}
+                          </div>
+                        </div>
+                      </PanelSurface>
+                    </div>
+                  </SplitView>
+                {:else}
+                  <div class="workspace-persistence-panel">
+                    <pre>{demo.serializedWorkspaceLayout}</pre>
+                  </div>
+                {/if}
+              </PanelSurface>
             </div>
           {/if}
         </div>
@@ -861,18 +839,9 @@
                 <p>{demo.validationLog}</p>
               </Callout>
               <div class="demo-stack">
-                <div class="state-tile">
-                  <span class="token-path">deliveryMode</span>
-                  <strong>{deliveryMode}</strong>
-                </div>
-                <div class="state-tile">
-                  <span class="token-path">handoffTarget</span>
-                  <strong>{handoffTarget}</strong>
-                </div>
-                <div class="state-tile">
-                  <span class="token-path">publishOn</span>
-                  <strong>{publishOn}</strong>
-                </div>
+                <StateTile label="deliveryMode" value={deliveryMode} />
+                <StateTile label="handoffTarget" value={handoffTarget} />
+                <StateTile label="publishOn" value={publishOn} />
               </div>
             </div>
           {:else if screenId === "browse-and-table"}
@@ -905,14 +874,8 @@
                 />
               {:else}
                 <div class="demo-stack">
-                  <div class="state-tile">
-                    <span class="token-path">lastCommandId</span>
-                    <strong>{demo.lastCommandId ?? "∅"}</strong>
-                  </div>
-                  <div class="state-tile">
-                    <span class="token-path">workspaceEventLog</span>
-                    <strong>{demo.workspaceEventLog}</strong>
-                  </div>
+                  <StateTile label="lastCommandId" value={demo.lastCommandId ?? "∅"} />
+                  <StateTile label="workspaceEventLog" value={demo.workspaceEventLog} />
                 </div>
               {/if}
             </Tabs>
@@ -941,24 +904,25 @@
                 stateTitle={demo.embedState === "ready" ? "External review embed" : "Embed shell fallback"}
                 stateMessage={demo.getEmbedStateMessage(demo.embedState)}
               >
-                <div slot="actions" class="action-cluster">
+                <Inline slot="actions" justify="end" wrap gap="md">
                   <Button variant="secondary">Open external</Button>
                   <Button variant="primary">Focus embed</Button>
-                </div>
+                </Inline>
               </EmbedShell>
             </div>
           {:else}
             <div class="shared-demo-screen-stack">
+              <ActionDiscoveryPanel
+                title="Inline action discovery"
+                description="Grouped action rediscovery now sits beside workspace context, not on a separate docs page."
+                sections={demo.commandSections}
+                invocationHint="Open the full launcher with ⌘K"
+                on:actionSelect={demo.handleActionDiscoverySelect}
+              />
               <PanelSurface title="Workstation notes" bodyPadding="md">
                 <div class="demo-stack">
-                  <div class="state-tile">
-                    <span class="token-path">commandStatus</span>
-                    <strong>{demo.commandStatus}</strong>
-                  </div>
-                  <div class="state-tile">
-                    <span class="token-path">workspacePersistence</span>
-                    <strong>{demo.workspacePersistenceSummary}</strong>
-                  </div>
+                  <StateTile label="commandStatus" value={demo.commandStatus} />
+                  <StateTile label="workspacePersistence" value={demo.workspacePersistenceSummary} />
                 </div>
               </PanelSurface>
               <Callout tone="warning" title="Native runtime deltas still need proof">
@@ -998,10 +962,10 @@
   <Callout tone="danger" title="Blocking issue">
     <p>{demo.titleError ?? "No blocking issue is active."}</p>
   </Callout>
-  <div slot="actions" class="action-cluster">
+  <Inline slot="actions" justify="end" wrap gap="md">
     <Button variant="secondary" on:click={() => (formDialogOpen = false)}>Dismiss</Button>
     <Button variant="primary" on:click={() => (formDialogOpen = false)}>Acknowledge</Button>
-  </div>
+  </Inline>
 </Dialog>
 
 <Drawer
@@ -1017,8 +981,8 @@
     on:remove={removeSelectedRelation}
     on:clear={clearSelectedRelations}
   />
-  <div slot="actions" class="action-cluster">
+  <Inline slot="actions" justify="end" wrap gap="md">
     <Button variant="secondary" on:click={() => (pickerDrawerOpen = false)}>Cancel</Button>
     <Button variant="primary" on:click={() => (pickerDrawerOpen = false)}>Apply selection</Button>
-  </div>
+  </Inline>
 </Drawer>

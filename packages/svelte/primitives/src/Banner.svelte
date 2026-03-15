@@ -1,7 +1,15 @@
 <script lang="ts">
   import { createEventDispatcher } from "svelte";
 
+  import Icon from "./Icon.svelte";
   import type { BannerAnnounceMode, BannerTone } from "./types";
+
+  const toneIcon: Record<string, string> = {
+    success: "check",
+    warning: "alert-triangle",
+    danger: "x-circle",
+    info: "info",
+  };
 
   export let tone: BannerTone = "info";
   export let title: string | null = null;
@@ -38,15 +46,7 @@
 >
   <div class="banner__content">
     <span class="banner__icon" aria-hidden="true">
-      {#if tone === "success"}
-        ✓
-      {:else if tone === "warning"}
-        !
-      {:else if tone === "danger"}
-        ×
-      {:else}
-        i
-      {/if}
+      <Icon name={toneIcon[tone] ?? "info"} size="sm" />
     </span>
     <div class="banner__copy">
       {#if title}
@@ -72,7 +72,7 @@
       aria-label={dismissLabel}
       on:click={() => dispatch("dismiss")}
     >
-      ×
+      <Icon name="x" size="sm" />
     </button>
   {/if}
 </section>

@@ -15,6 +15,10 @@
   export let describedBy: string | null = null;
   export let inputMode: HTMLInputElement["inputMode"] | undefined = undefined;
   export let type: HTMLInputElement["type"] = "text";
+  export let prefix: string | null = null;
+  export let suffix: string | null = null;
+  export let maxLength: number | null = null;
+  export let showCharCount = false;
 
   const dispatch = createEventDispatcher<{
     valueChange: { value: string };
@@ -30,6 +34,9 @@
   $: currentValue = isControlled ? value ?? "" : uncontrolledValue;
   $: ariaInvalid = validationState === "invalid" ? "true" : undefined;
   $: ariaBusy = validationState === "pending" ? "true" : undefined;
+  $: charCount = currentValue.length;
+  $: charCountText = maxLength ? `${charCount}/${maxLength}` : `${charCount}`;
+  $: isOverLimit = maxLength !== null && charCount > maxLength;
 
   function handleInput(event: Event): void {
     const nextValue = (event.currentTarget as HTMLInputElement).value;
@@ -53,6 +60,10 @@
 </script>
 
 <div class="text-input" data-validation-state={validationState}>
+  {#if prefix}
+    <span class="text-input__affix text-input__affix--prefix">{prefix}</span>
+  {/if}
+
   {#if $$slots.leading}
     <span class="text-input__affordance text-input__affordance--leading">
       <slot name="leading" />
@@ -67,6 +78,7 @@
     class="text-input__control"
     value={currentValue}
     {placeholder}
+    maxlength={maxLength ?? undefined}
     disabled={isDisabled}
     readonly={isReadOnly}
     aria-label={ariaLabel ?? undefined}
@@ -82,6 +94,16 @@
   {#if $$slots.trailing}
     <span class="text-input__affordance text-input__affordance--trailing">
       <slot name="trailing" />
+    </span>
+  {/if}
+
+  {#if suffix}
+    <span class="text-input__affix text-input__affix--suffix">{suffix}</span>
+  {/if}
+
+  {#if showCharCount}
+    <span class="text-input__char-count" class:text-input__char-count--over={isOverLimit} aria-live="polite">
+      {charCountText}
     </span>
   {/if}
 </div>
@@ -111,8 +133,7 @@
       0 0 0 var(--pug-border-width-focus)
         color-mix(in srgb, var(--pug-color-accent-focusRing) 28%, transparent)
     );
-    display: grid;
-    grid-template-columns: auto minmax(0, 1fr) auto;
+    display: flex;
     align-items: center;
     gap: var(--pug-space-inline-sm);
     min-height: var(--pug-size-control-height);
@@ -151,6 +172,7 @@
   }
 
   .text-input__control {
+    flex: 1;
     min-width: 0;
     width: 100%;
     height: calc(var(--pug-size-control-height) - (var(--pug-border-width-default) * 2));
@@ -175,5 +197,40 @@
     color: var(--pug-color-icon-muted);
     font-family: var(--pug-typography-code-family);
     font-size: var(--pug-icon-size-default);
+  }
+
+  .text-input__affix {
+    display: inline-flex;
+    align-items: center;
+    color: var(--pug-color-text-secondary);
+    font-family: var(--pug-typography-body-family);
+    font-size: var(--pug-typography-body-size);
+    white-space: nowrap;
+    user-select: none;
+  }
+
+  .text-input__affix--prefix {
+    padding-right: var(--pug-space-inline-sm);
+    border-right: 0.0625rem solid color-mix(in srgb, var(--pug-color-border-subtle) 52%, transparent);
+    margin-right: var(--pug-space-inline-sm);
+  }
+
+  .text-input__affix--suffix {
+    padding-left: var(--pug-space-inline-sm);
+    border-left: 0.0625rem solid color-mix(in srgb, var(--pug-color-border-subtle) 52%, transparent);
+    margin-left: var(--pug-space-inline-sm);
+  }
+
+  .text-input__char-count {
+    display: inline-flex;
+    align-items: center;
+    color: var(--pug-color-text-secondary);
+    font-family: var(--pug-typography-code-family);
+    font-size: 0.6875rem;
+    white-space: nowrap;
+  }
+
+  .text-input__char-count--over {
+    color: var(--pug-color-status-danger);
   }
 </style>

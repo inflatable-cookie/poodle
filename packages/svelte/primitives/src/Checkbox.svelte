@@ -1,6 +1,8 @@
 <script lang="ts">
   import { createEventDispatcher } from "svelte";
 
+  import Icon from "./Icon.svelte";
+
   export let id: string | undefined = undefined;
   export let isChecked = false;
   export let defaultChecked = false;
@@ -51,9 +53,9 @@
   />
   <span class="checkbox__indicator" aria-hidden="true">
     {#if isMixed}
-      <span class="checkbox__mark">−</span>
+      <span class="checkbox__mark"><Icon name="minus" size="sm" /></span>
     {:else if currentChecked}
-      <span class="checkbox__mark">✓</span>
+      <span class="checkbox__mark"><Icon name="check" size="sm" /></span>
     {/if}
   </span>
   {#if label}
@@ -105,8 +107,11 @@
   }
 
   .checkbox__mark {
-    font-family: var(--pug-typography-code-family);
-    font-size: 0.75rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 0.875rem;
+    height: 0.875rem;
     line-height: 1;
   }
 

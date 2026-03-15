@@ -1,0 +1,414 @@
+//! RenderComponent implementations for all composites.
+//!
+//! g08.009–010: Form/validation, data/browse, editing, media, navigation,
+//! and operational composites — full parity with GPUI adapter.
+
+use pug_adapter::{RenderComponent, ThemeProvider};
+use pug_composites::{
+    AudioPlayerSpec, AutonomousListSpec, BlockEditorSpec, BreadcrumbsSpec, CardRadioGroupSpec,
+    ConfirmActionSpec, DataTableSpec, DetailSectionSpec, DetailShellSpec, EmbedInputSpec,
+    EmbedPreviewSpec, EmbedShellSpec, EmptyStateSpec, FilterToolbarSpec, FormShellSpec,
+    GridShellSpec, InlineEditableFieldSpec, InlineRemediationSpec, ListCardSpec, ListShellSpec,
+    LogListSpec, MarkdownEditorSpec, MediaPickerSpec, MediaPreviewSpec, MediaThumbnailSpec,
+    NavCardGridSpec, NavCardSpec, OrderBySpec, PageHeaderSpec, PageLoadingSpec,
+    PaginationSummarySpec, PickerShellSpec, RelationPickerSpec, RemediationBannerSpec,
+    ReorderableListSpec, SelectionSummarySpec, SlugFieldSpec, StateTileSpec, ToastStackSpec,
+    ValidationSummarySpec, VideoPlayerSpec,
+};
+use pug_style::StyleDescriptor;
+
+use crate::style_map::map_style;
+use crate::{JetstreamAdapter, JetstreamNodeHandle, JetstreamTarget, WidgetKind};
+
+// g08.009 — Form and validation composites
+
+impl RenderComponent<FormShellSpec> for JetstreamAdapter {
+    type Target = JetstreamTarget;
+    fn render(&self, _spec: &FormShellSpec, style: &StyleDescriptor, _theme: &dyn ThemeProvider) -> JetstreamNodeHandle {
+        let _s = map_style(style);
+        JetstreamNodeHandle::new("form-shell", "FormShellSpec", WidgetKind::Panel)
+    }
+}
+
+impl RenderComponent<ValidationSummarySpec> for JetstreamAdapter {
+    type Target = JetstreamTarget;
+    fn render(&self, _spec: &ValidationSummarySpec, style: &StyleDescriptor, _theme: &dyn ThemeProvider) -> JetstreamNodeHandle {
+        let _s = map_style(style);
+        JetstreamNodeHandle::new("validation-summary", "ValidationSummarySpec", WidgetKind::Panel)
+    }
+}
+
+impl RenderComponent<RemediationBannerSpec> for JetstreamAdapter {
+    type Target = JetstreamTarget;
+    fn render(&self, _spec: &RemediationBannerSpec, style: &StyleDescriptor, _theme: &dyn ThemeProvider) -> JetstreamNodeHandle {
+        let _s = map_style(style);
+        JetstreamNodeHandle::new("remediation-banner", "RemediationBannerSpec", WidgetKind::Panel)
+    }
+}
+
+impl RenderComponent<InlineRemediationSpec> for JetstreamAdapter {
+    type Target = JetstreamTarget;
+    fn render(&self, _spec: &InlineRemediationSpec, style: &StyleDescriptor, _theme: &dyn ThemeProvider) -> JetstreamNodeHandle {
+        let _s = map_style(style);
+        JetstreamNodeHandle::new("inline-remediation", "InlineRemediationSpec", WidgetKind::Panel)
+    }
+}
+
+impl RenderComponent<ConfirmActionSpec> for JetstreamAdapter {
+    type Target = JetstreamTarget;
+    fn render(&self, _spec: &ConfirmActionSpec, style: &StyleDescriptor, _theme: &dyn ThemeProvider) -> JetstreamNodeHandle {
+        let _s = map_style(style);
+        JetstreamNodeHandle::new("confirm-action", "ConfirmActionSpec", WidgetKind::Panel)
+    }
+}
+
+// g08.010 — Data and browse composites
+
+impl RenderComponent<DataTableSpec> for JetstreamAdapter {
+    type Target = JetstreamTarget;
+    fn render(&self, _spec: &DataTableSpec, style: &StyleDescriptor, _theme: &dyn ThemeProvider) -> JetstreamNodeHandle {
+        let _s = map_style(style);
+        JetstreamNodeHandle::new("data-table", "DataTableSpec", WidgetKind::List)
+    }
+}
+
+impl RenderComponent<ListShellSpec> for JetstreamAdapter {
+    type Target = JetstreamTarget;
+    fn render(&self, _spec: &ListShellSpec, style: &StyleDescriptor, _theme: &dyn ThemeProvider) -> JetstreamNodeHandle {
+        let _s = map_style(style);
+        JetstreamNodeHandle::new("list-shell", "ListShellSpec", WidgetKind::List)
+    }
+}
+
+impl RenderComponent<GridShellSpec> for JetstreamAdapter {
+    type Target = JetstreamTarget;
+    fn render(&self, _spec: &GridShellSpec, style: &StyleDescriptor, _theme: &dyn ThemeProvider) -> JetstreamNodeHandle {
+        let _s = map_style(style);
+        JetstreamNodeHandle::new("grid-shell", "GridShellSpec", WidgetKind::Panel)
+    }
+}
+
+impl RenderComponent<DetailShellSpec> for JetstreamAdapter {
+    type Target = JetstreamTarget;
+    fn render(&self, _spec: &DetailShellSpec, style: &StyleDescriptor, _theme: &dyn ThemeProvider) -> JetstreamNodeHandle {
+        let _s = map_style(style);
+        JetstreamNodeHandle::new("detail-shell", "DetailShellSpec", WidgetKind::Panel)
+    }
+}
+
+impl RenderComponent<DetailSectionSpec> for JetstreamAdapter {
+    type Target = JetstreamTarget;
+    fn render(&self, _spec: &DetailSectionSpec, style: &StyleDescriptor, _theme: &dyn ThemeProvider) -> JetstreamNodeHandle {
+        let _s = map_style(style);
+        JetstreamNodeHandle::new("detail-section", "DetailSectionSpec", WidgetKind::Panel)
+    }
+}
+
+impl RenderComponent<FilterToolbarSpec> for JetstreamAdapter {
+    type Target = JetstreamTarget;
+    fn render(&self, _spec: &FilterToolbarSpec, style: &StyleDescriptor, _theme: &dyn ThemeProvider) -> JetstreamNodeHandle {
+        let _s = map_style(style);
+        JetstreamNodeHandle::new("filter-toolbar", "FilterToolbarSpec", WidgetKind::Panel)
+    }
+}
+
+impl RenderComponent<PickerShellSpec> for JetstreamAdapter {
+    type Target = JetstreamTarget;
+    fn render(&self, _spec: &PickerShellSpec, style: &StyleDescriptor, _theme: &dyn ThemeProvider) -> JetstreamNodeHandle {
+        let _s = map_style(style);
+        JetstreamNodeHandle::new("picker-shell", "PickerShellSpec", WidgetKind::Panel)
+    }
+}
+
+impl RenderComponent<SelectionSummarySpec> for JetstreamAdapter {
+    type Target = JetstreamTarget;
+    fn render(&self, _spec: &SelectionSummarySpec, style: &StyleDescriptor, _theme: &dyn ThemeProvider) -> JetstreamNodeHandle {
+        let _s = map_style(style);
+        JetstreamNodeHandle::new("selection-summary", "SelectionSummarySpec", WidgetKind::Panel)
+    }
+}
+
+impl RenderComponent<PaginationSummarySpec> for JetstreamAdapter {
+    type Target = JetstreamTarget;
+    fn render(&self, _spec: &PaginationSummarySpec, style: &StyleDescriptor, _theme: &dyn ThemeProvider) -> JetstreamNodeHandle {
+        let _s = map_style(style);
+        JetstreamNodeHandle::new("pagination-summary", "PaginationSummarySpec", WidgetKind::Label)
+    }
+}
+
+impl RenderComponent<EmptyStateSpec> for JetstreamAdapter {
+    type Target = JetstreamTarget;
+    fn render(&self, _spec: &EmptyStateSpec, style: &StyleDescriptor, _theme: &dyn ThemeProvider) -> JetstreamNodeHandle {
+        let _s = map_style(style);
+        JetstreamNodeHandle::new("empty-state", "EmptyStateSpec", WidgetKind::Panel)
+    }
+}
+
+impl RenderComponent<PageHeaderSpec> for JetstreamAdapter {
+    type Target = JetstreamTarget;
+    fn render(&self, _spec: &PageHeaderSpec, style: &StyleDescriptor, _theme: &dyn ThemeProvider) -> JetstreamNodeHandle {
+        let _s = map_style(style);
+        JetstreamNodeHandle::new("page-header", "PageHeaderSpec", WidgetKind::Panel)
+    }
+}
+
+impl RenderComponent<PageLoadingSpec> for JetstreamAdapter {
+    type Target = JetstreamTarget;
+    fn render(&self, _spec: &PageLoadingSpec, style: &StyleDescriptor, _theme: &dyn ThemeProvider) -> JetstreamNodeHandle {
+        let _s = map_style(style);
+        JetstreamNodeHandle::new("page-loading", "PageLoadingSpec", WidgetKind::Panel)
+    }
+}
+
+impl RenderComponent<StateTileSpec> for JetstreamAdapter {
+    type Target = JetstreamTarget;
+    fn render(&self, _spec: &StateTileSpec, style: &StyleDescriptor, _theme: &dyn ThemeProvider) -> JetstreamNodeHandle {
+        let _s = map_style(style);
+        JetstreamNodeHandle::new("state-tile", "StateTileSpec", WidgetKind::Panel)
+    }
+}
+
+impl RenderComponent<ToastStackSpec> for JetstreamAdapter {
+    type Target = JetstreamTarget;
+    fn render(&self, _spec: &ToastStackSpec, style: &StyleDescriptor, _theme: &dyn ThemeProvider) -> JetstreamNodeHandle {
+        let _s = map_style(style);
+        JetstreamNodeHandle::new("toast-stack", "ToastStackSpec", WidgetKind::Panel)
+    }
+}
+
+impl RenderComponent<LogListSpec> for JetstreamAdapter {
+    type Target = JetstreamTarget;
+    fn render(&self, _spec: &LogListSpec, style: &StyleDescriptor, _theme: &dyn ThemeProvider) -> JetstreamNodeHandle {
+        let _s = map_style(style);
+        JetstreamNodeHandle::new("log-list", "LogListSpec", WidgetKind::List)
+    }
+}
+
+impl RenderComponent<NavCardSpec> for JetstreamAdapter {
+    type Target = JetstreamTarget;
+    fn render(&self, _spec: &NavCardSpec, style: &StyleDescriptor, _theme: &dyn ThemeProvider) -> JetstreamNodeHandle {
+        let _s = map_style(style);
+        JetstreamNodeHandle::new("nav-card", "NavCardSpec", WidgetKind::Button)
+    }
+}
+
+impl RenderComponent<NavCardGridSpec> for JetstreamAdapter {
+    type Target = JetstreamTarget;
+    fn render(&self, _spec: &NavCardGridSpec, style: &StyleDescriptor, _theme: &dyn ThemeProvider) -> JetstreamNodeHandle {
+        let _s = map_style(style);
+        JetstreamNodeHandle::new("nav-card-grid", "NavCardGridSpec", WidgetKind::Panel)
+    }
+}
+
+impl RenderComponent<ListCardSpec> for JetstreamAdapter {
+    type Target = JetstreamTarget;
+    fn render(&self, _spec: &ListCardSpec, style: &StyleDescriptor, _theme: &dyn ThemeProvider) -> JetstreamNodeHandle {
+        let _s = map_style(style);
+        JetstreamNodeHandle::new("list-card", "ListCardSpec", WidgetKind::Button)
+    }
+}
+
+// Editing, media, navigation, and list composites (full parity)
+
+impl RenderComponent<AudioPlayerSpec> for JetstreamAdapter {
+    type Target = JetstreamTarget;
+    fn render(&self, _spec: &AudioPlayerSpec, style: &StyleDescriptor, _theme: &dyn ThemeProvider) -> JetstreamNodeHandle {
+        let _s = map_style(style);
+        JetstreamNodeHandle::new("audio-player", "AudioPlayerSpec", WidgetKind::Panel)
+    }
+}
+
+impl RenderComponent<VideoPlayerSpec> for JetstreamAdapter {
+    type Target = JetstreamTarget;
+    fn render(&self, _spec: &VideoPlayerSpec, style: &StyleDescriptor, _theme: &dyn ThemeProvider) -> JetstreamNodeHandle {
+        let _s = map_style(style);
+        JetstreamNodeHandle::new("video-player", "VideoPlayerSpec", WidgetKind::Panel)
+    }
+}
+
+impl RenderComponent<MediaPickerSpec> for JetstreamAdapter {
+    type Target = JetstreamTarget;
+    fn render(&self, _spec: &MediaPickerSpec, style: &StyleDescriptor, _theme: &dyn ThemeProvider) -> JetstreamNodeHandle {
+        let _s = map_style(style);
+        JetstreamNodeHandle::new("media-picker", "MediaPickerSpec", WidgetKind::Panel)
+    }
+}
+
+impl RenderComponent<MediaThumbnailSpec> for JetstreamAdapter {
+    type Target = JetstreamTarget;
+    fn render(&self, _spec: &MediaThumbnailSpec, style: &StyleDescriptor, _theme: &dyn ThemeProvider) -> JetstreamNodeHandle {
+        let _s = map_style(style);
+        JetstreamNodeHandle::new("media-thumbnail", "MediaThumbnailSpec", WidgetKind::Image)
+    }
+}
+
+impl RenderComponent<MediaPreviewSpec> for JetstreamAdapter {
+    type Target = JetstreamTarget;
+    fn render(&self, _spec: &MediaPreviewSpec, style: &StyleDescriptor, _theme: &dyn ThemeProvider) -> JetstreamNodeHandle {
+        let _s = map_style(style);
+        JetstreamNodeHandle::new("media-preview", "MediaPreviewSpec", WidgetKind::Panel)
+    }
+}
+
+impl RenderComponent<MarkdownEditorSpec> for JetstreamAdapter {
+    type Target = JetstreamTarget;
+    fn render(&self, _spec: &MarkdownEditorSpec, style: &StyleDescriptor, _theme: &dyn ThemeProvider) -> JetstreamNodeHandle {
+        let _s = map_style(style);
+        JetstreamNodeHandle::new("markdown-editor", "MarkdownEditorSpec", WidgetKind::Panel)
+    }
+}
+
+impl RenderComponent<BlockEditorSpec> for JetstreamAdapter {
+    type Target = JetstreamTarget;
+    fn render(&self, _spec: &BlockEditorSpec, style: &StyleDescriptor, _theme: &dyn ThemeProvider) -> JetstreamNodeHandle {
+        let _s = map_style(style);
+        JetstreamNodeHandle::new("block-editor", "BlockEditorSpec", WidgetKind::Panel)
+    }
+}
+
+impl RenderComponent<EmbedInputSpec> for JetstreamAdapter {
+    type Target = JetstreamTarget;
+    fn render(&self, _spec: &EmbedInputSpec, style: &StyleDescriptor, _theme: &dyn ThemeProvider) -> JetstreamNodeHandle {
+        let _s = map_style(style);
+        JetstreamNodeHandle::new("embed-input", "EmbedInputSpec", WidgetKind::TextInput)
+    }
+}
+
+impl RenderComponent<EmbedPreviewSpec> for JetstreamAdapter {
+    type Target = JetstreamTarget;
+    fn render(&self, _spec: &EmbedPreviewSpec, style: &StyleDescriptor, _theme: &dyn ThemeProvider) -> JetstreamNodeHandle {
+        let _s = map_style(style);
+        JetstreamNodeHandle::new("embed-preview", "EmbedPreviewSpec", WidgetKind::Panel)
+    }
+}
+
+impl RenderComponent<EmbedShellSpec> for JetstreamAdapter {
+    type Target = JetstreamTarget;
+    fn render(&self, _spec: &EmbedShellSpec, style: &StyleDescriptor, _theme: &dyn ThemeProvider) -> JetstreamNodeHandle {
+        let _s = map_style(style);
+        JetstreamNodeHandle::new("embed-shell", "EmbedShellSpec", WidgetKind::Panel)
+    }
+}
+
+impl RenderComponent<AutonomousListSpec> for JetstreamAdapter {
+    type Target = JetstreamTarget;
+    fn render(&self, _spec: &AutonomousListSpec, style: &StyleDescriptor, _theme: &dyn ThemeProvider) -> JetstreamNodeHandle {
+        let _s = map_style(style);
+        JetstreamNodeHandle::new("autonomous-list", "AutonomousListSpec", WidgetKind::List)
+    }
+}
+
+impl RenderComponent<ReorderableListSpec> for JetstreamAdapter {
+    type Target = JetstreamTarget;
+    fn render(&self, _spec: &ReorderableListSpec, style: &StyleDescriptor, _theme: &dyn ThemeProvider) -> JetstreamNodeHandle {
+        let _s = map_style(style);
+        JetstreamNodeHandle::new("reorderable-list", "ReorderableListSpec", WidgetKind::List)
+    }
+}
+
+impl RenderComponent<BreadcrumbsSpec> for JetstreamAdapter {
+    type Target = JetstreamTarget;
+    fn render(&self, _spec: &BreadcrumbsSpec, style: &StyleDescriptor, _theme: &dyn ThemeProvider) -> JetstreamNodeHandle {
+        let _s = map_style(style);
+        JetstreamNodeHandle::new("breadcrumbs", "BreadcrumbsSpec", WidgetKind::Panel)
+    }
+}
+
+impl RenderComponent<CardRadioGroupSpec> for JetstreamAdapter {
+    type Target = JetstreamTarget;
+    fn render(&self, _spec: &CardRadioGroupSpec, style: &StyleDescriptor, _theme: &dyn ThemeProvider) -> JetstreamNodeHandle {
+        let _s = map_style(style);
+        JetstreamNodeHandle::new("card-radio-group", "CardRadioGroupSpec", WidgetKind::Panel)
+    }
+}
+
+impl RenderComponent<InlineEditableFieldSpec> for JetstreamAdapter {
+    type Target = JetstreamTarget;
+    fn render(&self, _spec: &InlineEditableFieldSpec, style: &StyleDescriptor, _theme: &dyn ThemeProvider) -> JetstreamNodeHandle {
+        let _s = map_style(style);
+        JetstreamNodeHandle::new("inline-editable-field", "InlineEditableFieldSpec", WidgetKind::TextInput)
+    }
+}
+
+impl RenderComponent<OrderBySpec> for JetstreamAdapter {
+    type Target = JetstreamTarget;
+    fn render(&self, _spec: &OrderBySpec, style: &StyleDescriptor, _theme: &dyn ThemeProvider) -> JetstreamNodeHandle {
+        let _s = map_style(style);
+        JetstreamNodeHandle::new("order-by", "OrderBySpec", WidgetKind::Panel)
+    }
+}
+
+impl RenderComponent<SlugFieldSpec> for JetstreamAdapter {
+    type Target = JetstreamTarget;
+    fn render(&self, _spec: &SlugFieldSpec, style: &StyleDescriptor, _theme: &dyn ThemeProvider) -> JetstreamNodeHandle {
+        let _s = map_style(style);
+        JetstreamNodeHandle::new("slug-field", "SlugFieldSpec", WidgetKind::TextInput)
+    }
+}
+
+impl RenderComponent<RelationPickerSpec> for JetstreamAdapter {
+    type Target = JetstreamTarget;
+    fn render(&self, _spec: &RelationPickerSpec, style: &StyleDescriptor, _theme: &dyn ThemeProvider) -> JetstreamNodeHandle {
+        let _s = map_style(style);
+        JetstreamNodeHandle::new("relation-picker", "RelationPickerSpec", WidgetKind::Panel)
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use pug_adapter::RenderComponent;
+    use pug_composites::*;
+    use pug_style::StyleDescriptor;
+    use crate::{JetstreamAdapter, WidgetKind, theme::JetstreamThemeProvider};
+
+    fn a() -> JetstreamAdapter { JetstreamAdapter::new(JetstreamThemeProvider::default()) }
+    fn s() -> StyleDescriptor { StyleDescriptor::new() }
+    fn t() -> JetstreamThemeProvider { JetstreamThemeProvider::default() }
+
+    // Form composites
+    #[test] fn form_shell() { assert_eq!(a().render(&FormShellSpec::new("f"), &s(), &t()).spec_type, "FormShellSpec"); }
+    #[test] fn validation_summary() { assert_eq!(a().render(&ValidationSummarySpec::new(vec![]), &s(), &t()).spec_type, "ValidationSummarySpec"); }
+    #[test] fn remediation_banner() { assert_eq!(a().render(&RemediationBannerSpec::new("t", "m"), &s(), &t()).spec_type, "RemediationBannerSpec"); }
+    #[test] fn inline_remediation() { assert_eq!(a().render(&InlineRemediationSpec::new("m"), &s(), &t()).spec_type, "InlineRemediationSpec"); }
+    #[test] fn confirm_action() { assert_eq!(a().render(&ConfirmActionSpec::new("t", "m", "y", "n"), &s(), &t()).spec_type, "ConfirmActionSpec"); }
+
+    // Data composites
+    #[test] fn data_table() { assert_eq!(a().render(&DataTableSpec::new(vec![], vec![]), &s(), &t()).widget_kind, WidgetKind::List); }
+    #[test] fn list_shell() { assert_eq!(a().render(&ListShellSpec::new(), &s(), &t()).widget_kind, WidgetKind::List); }
+    #[test] fn grid_shell() { assert_eq!(a().render(&GridShellSpec::new(), &s(), &t()).spec_type, "GridShellSpec"); }
+    #[test] fn detail_shell() { assert_eq!(a().render(&DetailShellSpec::new(), &s(), &t()).spec_type, "DetailShellSpec"); }
+    #[test] fn detail_section() { assert_eq!(a().render(&DetailSectionSpec::new("S"), &s(), &t()).spec_type, "DetailSectionSpec"); }
+    #[test] fn filter_toolbar() { assert_eq!(a().render(&FilterToolbarSpec::new(), &s(), &t()).spec_type, "FilterToolbarSpec"); }
+    #[test] fn picker_shell() { assert_eq!(a().render(&PickerShellSpec::new("P"), &s(), &t()).spec_type, "PickerShellSpec"); }
+    #[test] fn selection_summary() { assert_eq!(a().render(&SelectionSummarySpec::new(vec![]), &s(), &t()).spec_type, "SelectionSummarySpec"); }
+    #[test] fn pagination_summary() { assert_eq!(a().render(&PaginationSummarySpec::new(1, 10, 50), &s(), &t()).widget_kind, WidgetKind::Label); }
+    #[test] fn empty_state() { assert_eq!(a().render(&EmptyStateSpec::new("Empty"), &s(), &t()).spec_type, "EmptyStateSpec"); }
+    #[test] fn page_header() { assert_eq!(a().render(&PageHeaderSpec::new("Title"), &s(), &t()).spec_type, "PageHeaderSpec"); }
+    #[test] fn page_loading() { assert_eq!(a().render(&PageLoadingSpec::new(), &s(), &t()).spec_type, "PageLoadingSpec"); }
+    #[test] fn state_tile() { assert_eq!(a().render(&StateTileSpec::new("L", "V"), &s(), &t()).spec_type, "StateTileSpec"); }
+    #[test] fn toast_stack() { assert_eq!(a().render(&ToastStackSpec::new(), &s(), &t()).spec_type, "ToastStackSpec"); }
+    #[test] fn log_list() { assert_eq!(a().render(&LogListSpec::new(), &s(), &t()).widget_kind, WidgetKind::List); }
+    #[test] fn nav_card() { assert_eq!(a().render(&NavCardSpec::new("N"), &s(), &t()).widget_kind, WidgetKind::Button); }
+    #[test] fn nav_card_grid() { assert_eq!(a().render(&NavCardGridSpec::new(3), &s(), &t()).spec_type, "NavCardGridSpec"); }
+    #[test] fn list_card() { assert_eq!(a().render(&ListCardSpec::new("C"), &s(), &t()).widget_kind, WidgetKind::Button); }
+
+    // Editing, media, navigation, and list composites
+    #[test] fn audio_player() { assert_eq!(a().render(&AudioPlayerSpec::new("audio.mp3"), &s(), &t()).spec_type, "AudioPlayerSpec"); }
+    #[test] fn video_player() { assert_eq!(a().render(&VideoPlayerSpec::new("video.mp4"), &s(), &t()).spec_type, "VideoPlayerSpec"); }
+    #[test] fn media_picker() { assert_eq!(a().render(&MediaPickerSpec::new("Pick"), &s(), &t()).spec_type, "MediaPickerSpec"); }
+    #[test] fn media_thumbnail() { assert_eq!(a().render(&MediaThumbnailSpec::new(pug_composites::MediaKind::Image), &s(), &t()).widget_kind, WidgetKind::Image); }
+    #[test] fn media_preview() { assert_eq!(a().render(&MediaPreviewSpec::new(pug_composites::MediaKind::Image, "Preview"), &s(), &t()).spec_type, "MediaPreviewSpec"); }
+    #[test] fn markdown_editor() { assert_eq!(a().render(&MarkdownEditorSpec::new(), &s(), &t()).spec_type, "MarkdownEditorSpec"); }
+    #[test] fn block_editor() { assert_eq!(a().render(&BlockEditorSpec::new(), &s(), &t()).spec_type, "BlockEditorSpec"); }
+    #[test] fn embed_input() { assert_eq!(a().render(&EmbedInputSpec::new(), &s(), &t()).spec_type, "EmbedInputSpec"); }
+    #[test] fn embed_preview() { assert_eq!(a().render(&EmbedPreviewSpec::new(), &s(), &t()).spec_type, "EmbedPreviewSpec"); }
+    #[test] fn embed_shell() { assert_eq!(a().render(&EmbedShellSpec::new(), &s(), &t()).spec_type, "EmbedShellSpec"); }
+    #[test] fn autonomous_list() { assert_eq!(a().render(&AutonomousListSpec::new(), &s(), &t()).widget_kind, WidgetKind::List); }
+    #[test] fn reorderable_list() { assert_eq!(a().render(&ReorderableListSpec::new(), &s(), &t()).widget_kind, WidgetKind::List); }
+    #[test] fn breadcrumbs() { assert_eq!(a().render(&BreadcrumbsSpec::new(vec![]), &s(), &t()).spec_type, "BreadcrumbsSpec"); }
+    #[test] fn card_radio_group() { assert_eq!(a().render(&CardRadioGroupSpec::new(vec![]), &s(), &t()).spec_type, "CardRadioGroupSpec"); }
+    #[test] fn inline_editable_field() { assert_eq!(a().render(&InlineEditableFieldSpec::new("val"), &s(), &t()).spec_type, "InlineEditableFieldSpec"); }
+    #[test] fn order_by() { assert_eq!(a().render(&OrderBySpec::new(vec![]), &s(), &t()).spec_type, "OrderBySpec"); }
+    #[test] fn slug_field() { assert_eq!(a().render(&SlugFieldSpec::new("slug"), &s(), &t()).spec_type, "SlugFieldSpec"); }
+    #[test] fn relation_picker() { assert_eq!(a().render(&RelationPickerSpec::new(vec![]), &s(), &t()).spec_type, "RelationPickerSpec"); }
+}

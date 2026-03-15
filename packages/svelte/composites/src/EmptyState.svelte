@@ -1,4 +1,6 @@
 <script lang="ts">
+  import { Icon } from "@pug/svelte-primitives";
+
   import type { EmptyStateVariant } from "./types";
 
   export let title: string;
@@ -10,11 +12,11 @@
 <section class="empty-state" data-variant={variant} aria-label={ariaLabel ?? title}>
   <div class="empty-state__visual" aria-hidden="true">
     {#if variant === "search"}
-      ⌕
+      <Icon name="search" />
     {:else if variant === "firstRun"}
-      +
+      <Icon name="plus" />
     {:else}
-      ○
+      <Icon name="inbox" />
     {/if}
   </div>
 

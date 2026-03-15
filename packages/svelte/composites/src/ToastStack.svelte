@@ -1,6 +1,8 @@
 <script lang="ts">
   import { createEventDispatcher } from "svelte";
 
+  import { Icon } from "@pug/svelte-primitives";
+
   import type { ToastItem } from "./types";
 
   export let items: ToastItem[] = [];
@@ -34,7 +36,7 @@
           </button>
         {/if}
         <button type="button" class="toast__dismiss" aria-label={`Dismiss ${item.title}`} on:click={() => dispatch("dismiss", { id: item.id })}>
-          ×
+          <Icon name="x" size="sm" />
         </button>
       </div>
     </article>
