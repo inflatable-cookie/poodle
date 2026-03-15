@@ -72,7 +72,7 @@ impl Render for PreviewRoot {
                     .flex_shrink_0()
                     .bg(color_to_hsla(elevated_bg))
                     .border_b_1()
-                    .border_color(color_to_hsla(border_subtle).opacity(0.14))
+                    .border_color(color_to_hsla(border_subtle))
                     // Title — bold, 16px
                     .child(div().text_size(px(16.0)).font_weight(FontWeight::BOLD).child("Pug"))
                     // Nav tabs (pill style)
@@ -113,16 +113,17 @@ impl PreviewRoot {
         cx: &mut Context<Self>,
     ) -> Div {
         let text_primary = self.state.theme.resolve_color("semantic.color.text.primary");
-        let border_subtle = self.state.theme.resolve_color("semantic.color.border.subtle");
+        let border = self.state.theme.resolve_color("semantic.color.border.default");
 
         // Outer pill container — matches Svelte: border-radius 999px, 2px border, 3px padding, 2px gap
+        // Svelte computed: 2px solid srgb(0.776, 0.776, 0.776 / 0.096)
         let mut tabs = div()
             .flex()
             .items_center()
             .gap(px(2.0))
             .rounded(px(999.0))
             .border_2()
-            .border_color(color_to_hsla(border_subtle).opacity(0.10))
+            .border_color(color_to_hsla(border))
             .p(px(3.0));
 
         for &section in Section::ALL {
@@ -161,10 +162,10 @@ impl PreviewRoot {
     fn render_status_pills(
         &self,
         text_secondary: pug_tokens::typed::ColorValue,
-        _border: pug_tokens::typed::ColorValue,
+        border: pug_tokens::typed::ColorValue,
     ) -> Div {
-        let border_subtle = self.state.theme.resolve_color("semantic.color.border.subtle");
-        let elevated_bg = self.state.theme.resolve_color("semantic.color.background.elevated");
+        // Svelte computed: bg srgb(0.094, 0.094, 0.094 / 0.9), border srgb(0.776, 0.776, 0.776 / 0.116)
+        let canvas_bg = self.state.theme.resolve_color("semantic.color.background.canvas");
 
         let pill = |text: &str| {
             div()
@@ -172,8 +173,8 @@ impl PreviewRoot {
                 .py(px(3.0))
                 .rounded(px(999.0))
                 .border_1()
-                .border_color(color_to_hsla(border_subtle).opacity(0.12))
-                .bg(color_to_hsla(elevated_bg).opacity(0.9))
+                .border_color(color_to_hsla(border))
+                .bg(color_to_hsla(canvas_bg).opacity(0.9))
                 .text_size(px(11.0))
                 .text_color(color_to_hsla(text_secondary))
                 .child(text.to_string())
@@ -212,7 +213,7 @@ impl PreviewRoot {
             .py(px(12.0))
             .bg(color_to_hsla(panel_bg))
             .border_b_1()
-            .border_color(color_to_hsla(border_subtle).opacity(0.14))
+            .border_color(color_to_hsla(border_subtle))
             .flex_shrink_0()
             .overflow_hidden()
             // Theme group
@@ -264,7 +265,7 @@ impl PreviewRoot {
         cx: &mut Context<Self>,
     ) -> Div {
         let text_primary = self.state.theme.resolve_color("semantic.color.text.primary");
-        let border_subtle = self.state.theme.resolve_color("semantic.color.border.subtle");
+        let border_default = self.state.theme.resolve_color("semantic.color.border.default");
         let canvas_bg = self.state.theme.resolve_color("semantic.color.background.canvas");
 
         let mut toggle_row = div().flex().gap(px(4.0));
@@ -289,7 +290,7 @@ impl PreviewRoot {
                     .text_color(color_to_hsla(text_primary))
             } else {
                 btn.bg(color_to_hsla(canvas_bg).opacity(0.88))
-                    .border_color(color_to_hsla(border_subtle).opacity(0.12))
+                    .border_color(color_to_hsla(border_default))
                     .text_color(color_to_hsla(text_primary))
             };
 
