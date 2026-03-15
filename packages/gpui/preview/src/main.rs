@@ -49,8 +49,8 @@ impl Render for PreviewRoot {
         // Compute remaining height for the content area so scroll containers
         // get a definite pixel height (required for gpui content-mask hit testing).
         let window_h = window.viewport_size().height;
-        let top_bar_h = px(40.0);
-        let controls_h = px(100.0); // approximate; wraps at narrow widths
+        let top_bar_h = px(55.0);
+        let controls_h = px(80.0);
         let content_h = window_h - top_bar_h - controls_h;
 
         div()
@@ -68,12 +68,13 @@ impl Render for PreviewRoot {
                     .items_center()
                     .gap(px(16.0))
                     .px(px(16.0))
+                    .py(px(8.0))
                     .flex_shrink_0()
                     .bg(color_to_hsla(elevated_bg))
                     .border_b_1()
-                    .border_color(color_to_hsla(border_subtle))
-                    // Title
-                    .child(div().child("Pug"))
+                    .border_color(color_to_hsla(border_subtle).opacity(0.14))
+                    // Title — bold, 16px
+                    .child(div().text_size(px(16.0)).font_weight(FontWeight::BOLD).child("Pug"))
                     // Nav tabs (pill style)
                     .child(self.render_nav_tabs(text_secondary, accent, cx))
                     // Spacer
@@ -103,29 +104,44 @@ impl Render for PreviewRoot {
 
 impl PreviewRoot {
     /// Pill-style nav tabs matching Svelte's <Tabs variant="pill">.
+    /// The tablist is a rounded container with a subtle border; each tab
+    /// is a pill inside it. The active tab has a tinted accent background.
     fn render_nav_tabs(
         &self,
         text_secondary: pug_tokens::typed::ColorValue,
         accent: pug_tokens::typed::ColorValue,
         cx: &mut Context<Self>,
     ) -> Div {
-        let mut tabs = div().flex().gap(px(4.0));
+        let text_primary = self.state.theme.resolve_color("semantic.color.text.primary");
+        let border_subtle = self.state.theme.resolve_color("semantic.color.border.subtle");
+
+        // Outer pill container — matches Svelte: border-radius 999px, 2px border, 3px padding, 2px gap
+        let mut tabs = div()
+            .flex()
+            .items_center()
+            .gap(px(2.0))
+            .rounded(px(999.0))
+            .border_2()
+            .border_color(color_to_hsla(border_subtle).opacity(0.10))
+            .p(px(3.0));
+
         for &section in Section::ALL {
             let is_active = self.state.section == section;
             let label = section.label();
 
             let mut tab = div()
                 .id(SharedString::new_static(label))
-                .px(px(12.0))
-                .py(px(4.0))
-                .rounded(px(6.0))
-                .text_sm()
+                .px(px(10.0))
+                .py(px(3.0))
+                .rounded(px(999.0))
+                .text_size(px(12.0))
+                .font_weight(FontWeight::SEMIBOLD)
                 .cursor_pointer()
                 .child(label);
 
             tab = if is_active {
-                tab.bg(color_to_hsla(accent).opacity(0.15))
-                    .text_color(color_to_hsla(accent))
+                tab.bg(color_to_hsla(accent).opacity(0.18))
+                    .text_color(color_to_hsla(text_primary))
             } else {
                 tab.text_color(color_to_hsla(text_secondary))
             };
@@ -141,25 +157,31 @@ impl PreviewRoot {
     }
 
     /// Right-aligned pills showing current theme, density, and size.
+    /// Matches Svelte: 11px text, 999px radius, 1px subtle border, 3px 8px padding.
     fn render_status_pills(
         &self,
         text_secondary: pug_tokens::typed::ColorValue,
-        border: pug_tokens::typed::ColorValue,
+        _border: pug_tokens::typed::ColorValue,
     ) -> Div {
+        let border_subtle = self.state.theme.resolve_color("semantic.color.border.subtle");
+        let elevated_bg = self.state.theme.resolve_color("semantic.color.background.elevated");
+
         let pill = |text: &str| {
             div()
                 .px(px(8.0))
-                .py(px(2.0))
-                .rounded(px(10.0))
+                .py(px(3.0))
+                .rounded(px(999.0))
                 .border_1()
-                .border_color(color_to_hsla(border))
-                .text_xs()
+                .border_color(color_to_hsla(border_subtle).opacity(0.12))
+                .bg(color_to_hsla(elevated_bg).opacity(0.9))
+                .text_size(px(11.0))
                 .text_color(color_to_hsla(text_secondary))
                 .child(text.to_string())
         };
 
         div()
             .flex()
+            .items_center()
             .gap(px(6.0))
             .child(pill(self.state.theme_preset.label()))
             .child(pill(self.state.density.label()))
@@ -167,6 +189,7 @@ impl PreviewRoot {
     }
 
     /// Display controls bar — theme, density, size, treatment toggle groups + state probes.
+    /// Matches Svelte: 80px height, panel bg, 12px 16px padding, 20px/32px gap.
     fn render_display_controls(
         &self,
         text_secondary: pug_tokens::typed::ColorValue,
@@ -184,12 +207,12 @@ impl PreviewRoot {
             .flex_wrap()
             .items_start()
             .gap_x(px(32.0))
-            .gap_y(px(12.0))
+            .gap_y(px(20.0))
             .px(px(16.0))
             .py(px(12.0))
             .bg(color_to_hsla(panel_bg))
             .border_b_1()
-            .border_color(color_to_hsla(border_subtle))
+            .border_color(color_to_hsla(border_subtle).opacity(0.14))
             .flex_shrink_0()
             .overflow_hidden()
             // Theme group
@@ -228,33 +251,46 @@ impl PreviewRoot {
             .child(self.render_state_probes(text_secondary, accent, border, cx))
     }
 
-    /// A labelled toggle group (eyebrow + row of toggle buttons).
+    /// A labelled toggle group (uppercase eyebrow + row of individual toggle buttons).
+    /// Matches Svelte: each button is a separate pill with its own border.
     fn render_toggle_group(
         &self,
         label: &'static str,
         text_secondary: pug_tokens::typed::ColorValue,
         options: &[(&str, bool)],
         accent: pug_tokens::typed::ColorValue,
-        border: pug_tokens::typed::ColorValue,
+        _border: pug_tokens::typed::ColorValue,
         group_id: &'static str,
         cx: &mut Context<Self>,
     ) -> Div {
-        let mut toggle_row = div().flex().border_1().border_color(color_to_hsla(border)).rounded(px(6.0));
+        let text_primary = self.state.theme.resolve_color("semantic.color.text.primary");
+        let border_subtle = self.state.theme.resolve_color("semantic.color.border.subtle");
+        let canvas_bg = self.state.theme.resolve_color("semantic.color.background.canvas");
+
+        let mut toggle_row = div().flex().gap(px(4.0));
 
         for (i, &(opt_label, is_active)) in options.iter().enumerate() {
             let mut btn = div()
                 .id(SharedString::from(format!("{}-{}", group_id, opt_label)))
-                .px(px(8.0))
-                .py(px(4.0))
-                .text_xs()
+                .h(px(32.0))
+                .px(px(12.0))
+                .flex()
+                .items_center()
+                .rounded(px(6.0))
+                .border_1()
+                .text_size(px(12.0))
+                .font_weight(FontWeight::SEMIBOLD)
                 .cursor_pointer()
                 .child(opt_label.to_string());
 
             btn = if is_active {
-                btn.bg(color_to_hsla(accent).opacity(0.15))
-                    .text_color(color_to_hsla(accent))
+                btn.bg(color_to_hsla(accent).opacity(0.22))
+                    .border_color(color_to_hsla(accent).opacity(0.56))
+                    .text_color(color_to_hsla(text_primary))
             } else {
-                btn.text_color(color_to_hsla(text_secondary))
+                btn.bg(color_to_hsla(canvas_bg).opacity(0.88))
+                    .border_color(color_to_hsla(border_subtle).opacity(0.12))
+                    .text_color(color_to_hsla(text_primary))
             };
 
             btn = btn.on_click(cx.listener(move |this, _event: &ClickEvent, _window, cx| {
@@ -279,15 +315,17 @@ impl PreviewRoot {
             toggle_row = toggle_row.child(btn);
         }
 
+        // Eyebrow label: uppercase, 11px, semibold, 1.32px letter-spacing
         div()
             .flex()
             .flex_col()
             .gap(px(6.0))
             .child(
                 div()
-                    .text_xs()
+                    .text_size(px(11.0))
+                    .font_weight(FontWeight::SEMIBOLD)
                     .text_color(color_to_hsla(text_secondary))
-                    .child(label),
+                    .child(label.to_uppercase()),
             )
             .child(toggle_row)
     }
@@ -346,9 +384,10 @@ impl PreviewRoot {
             .gap(px(6.0))
             .child(
                 div()
-                    .text_xs()
+                    .text_size(px(11.0))
+                    .font_weight(FontWeight::SEMIBOLD)
                     .text_color(color_to_hsla(text_secondary))
-                    .child("State probes"),
+                    .child("STATE PROBES"),
             )
             .child(
                 div()
@@ -642,15 +681,144 @@ impl PreviewRoot {
     }
 }
 
+/// Parsed CLI arguments.
+struct CliArgs {
+    section: Option<Section>,
+    component: Option<String>,
+    theme: Option<ThemePreset>,
+    density: Option<Density>,
+    control_size: Option<ControlSize>,
+    treatment: Option<AppearanceTreatment>,
+}
+
+fn parse_cli_args() -> CliArgs {
+    let args: Vec<String> = std::env::args().collect();
+    let mut section = None;
+    let mut component = None;
+    let mut theme = None;
+    let mut density = None;
+    let mut control_size = None;
+    let mut treatment = None;
+
+    let mut i = 1;
+    while i < args.len() {
+        match args[i].as_str() {
+            "--section" => {
+                if let Some(val) = args.get(i + 1) {
+                    section = match val.as_str() {
+                        "primitives" => Some(Section::Primitives),
+                        "composites" => Some(Section::Composites),
+                        "demo" => Some(Section::Demo),
+                        "tokens" => Some(Section::Tokens),
+                        _ => None,
+                    };
+                    i += 1;
+                }
+            }
+            "--component" => {
+                if let Some(val) = args.get(i + 1) {
+                    component = Some(val.clone());
+                    i += 1;
+                }
+            }
+            "--theme" => {
+                if let Some(val) = args.get(i + 1) {
+                    theme = match val.as_str() {
+                        "loophole-studio" => Some(ThemePreset::LoopholeStudio),
+                        "dark" => Some(ThemePreset::Dark),
+                        "light" => Some(ThemePreset::Light),
+                        "default" => Some(ThemePreset::Default),
+                        _ => None,
+                    };
+                    i += 1;
+                }
+            }
+            "--density" => {
+                if let Some(val) = args.get(i + 1) {
+                    density = match val.as_str() {
+                        "comfortable" => Some(Density::Comfortable),
+                        "compact" => Some(Density::Compact),
+                        _ => None,
+                    };
+                    i += 1;
+                }
+            }
+            "--size" => {
+                if let Some(val) = args.get(i + 1) {
+                    control_size = match val.as_str() {
+                        "sm" => Some(ControlSize::Sm),
+                        "md" => Some(ControlSize::Md),
+                        "lg" => Some(ControlSize::Lg),
+                        _ => None,
+                    };
+                    i += 1;
+                }
+            }
+            "--treatment" => {
+                if let Some(val) = args.get(i + 1) {
+                    treatment = match val.as_str() {
+                        "system" => Some(AppearanceTreatment::System),
+                        "brand-raised" => Some(AppearanceTreatment::BrandRaised),
+                        _ => None,
+                    };
+                    i += 1;
+                }
+            }
+            _ => {}
+        }
+        i += 1;
+    }
+
+    CliArgs { section, component, theme, density, control_size, treatment }
+}
+
 fn main() {
-    Application::new().run(|cx: &mut App| {
+    let cli = parse_cli_args();
+
+    Application::new().run(move |cx: &mut App| {
         let bounds = Bounds::centered(None, size(px(1280.0), px(800.0)), cx);
         cx.open_window(
             WindowOptions {
                 window_bounds: Some(WindowBounds::Windowed(bounds)),
                 ..Default::default()
             },
-            |_window, cx| cx.new(|_| PreviewRoot::new()),
+            move |_window, cx| {
+                cx.new(move |_| {
+                    let mut root = PreviewRoot::new();
+
+                    // Apply CLI overrides — display controls
+                    if let Some(preset) = cli.theme {
+                        root.state.set_theme(preset);
+                    }
+                    if let Some(d) = cli.density {
+                        root.state.density = d;
+                    }
+                    if let Some(s) = cli.control_size {
+                        root.state.control_size = s;
+                    }
+                    if let Some(t) = cli.treatment {
+                        root.state.appearance_treatment = t;
+                    }
+
+                    // Apply CLI overrides — navigation
+                    if let Some(section) = cli.section {
+                        root.state.section = section;
+                    }
+
+                    if let Some(ref slug) = cli.component {
+                        // Auto-detect section and select the component
+                        if let Some(idx) = PRIMITIVES.iter().position(|c| c.slug == slug.as_str()) {
+                            root.state.section = Section::Primitives;
+                            root.state.active_primitive = Some(idx);
+                        } else if let Some(idx) = COMPOSITES.iter().position(|c| c.slug == slug.as_str()) {
+                            root.state.section = Section::Composites;
+                            root.state.active_composite = Some(idx);
+                        }
+                    }
+
+                    root
+                })
+            },
         )
         .unwrap();
         cx.activate(true);

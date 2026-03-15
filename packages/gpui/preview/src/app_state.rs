@@ -43,11 +43,11 @@ pub enum ThemePreset {
 }
 
 impl ThemePreset {
+    /// Order matches Svelte preview: dark, light, loophole-studio.
     pub const ALL: &[ThemePreset] = &[
-        ThemePreset::LoopholeStudio,
         ThemePreset::Dark,
         ThemePreset::Light,
-        ThemePreset::Default,
+        ThemePreset::LoopholeStudio,
     ];
 
     pub fn label(self) -> &'static str {
@@ -102,7 +102,8 @@ pub enum ControlSize {
 }
 
 impl ControlSize {
-    pub const ALL: &[ControlSize] = &[ControlSize::Sm, ControlSize::Md, ControlSize::Lg];
+    /// Order matches Svelte preview: lg, md, sm.
+    pub const ALL: &[ControlSize] = &[ControlSize::Lg, ControlSize::Md, ControlSize::Sm];
 
     pub fn label(self) -> &'static str {
         match self {
