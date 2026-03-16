@@ -51,7 +51,9 @@ mod style_map;
 mod theme;
 
 pub use style_map::{
-    map_layout, map_style, JetstreamColor, JetstreamEdges, JetstreamStyle,
+    map_layout, map_style, JetstreamAlign, JetstreamBoxShadow, JetstreamColor,
+    JetstreamDirection, JetstreamEdges, JetstreamJustify, JetstreamOverflow,
+    JetstreamPosition, JetstreamSizing, JetstreamStyle,
 };
 pub use theme::JetstreamThemeProvider;
 

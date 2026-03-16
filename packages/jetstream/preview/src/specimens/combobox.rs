@@ -1,0 +1,110 @@
+//! Combobox specimen — text input with filterable dropdown.
+
+use jetstream_runtime::game_ui::*;
+use pug_adapter::ThemeProvider;
+
+use crate::theme_bridge;
+
+pub fn render(tree: &mut UiTree, theme: &dyn ThemeProvider) -> UiNodeId {
+    let text_primary = theme_bridge::text_primary(theme);
+    let text_secondary = theme_bridge::text_secondary(theme);
+    let bg_canvas = theme_bridge::canvas_background(theme);
+    let bg_elevated = theme_bridge::elevated_background(theme);
+    let border = theme_bridge::border_default(theme);
+    let border_subtle = theme_bridge::border_subtle(theme);
+    let accent = theme_bridge::accent_base(theme);
+
+    let root = tree.create(Widget::Panel, UiStyle {
+        direction: Direction::Column,
+        width: Sizing::Grow(1.0),
+        gap: 16.0,
+        ..UiStyle::default()
+    });
+
+    // ── Closed with value ──
+    section_label(tree, root, "With Value", text_secondary);
+    combo_input(tree, root, "United States", bg_canvas, border, text_primary, 1.0);
+
+    // ── Placeholder ──
+    section_label(tree, root, "Placeholder", text_secondary);
+    combo_input(tree, root, "Search countries...", bg_canvas, border, text_secondary, 1.0);
+
+    // ── Open with filtered results ──
+    section_label(tree, root, "Open with Filter", text_secondary);
+    {
+        let col = tree.create(Widget::Panel, UiStyle {
+            direction: Direction::Column, gap: 4.0, ..UiStyle::default()
+        });
+        tree.add_child(root, col);
+
+        combo_input(tree, col, "Uni", bg_canvas, accent, text_primary, 1.0);
+
+        let dropdown = tree.create(Widget::Panel, UiStyle {
+            direction: Direction::Column,
+            width: Sizing::Fixed(240.0),
+            padding: Edges::all(4.0), gap: 1.0,
+            background: Some(bg_elevated),
+            border_color: Some(border_subtle), border_width: 1.0,
+            corner_radius: 8.0, ..UiStyle::default()
+        });
+        tree.add_child(col, dropdown);
+
+        for &(item, highlighted) in &[
+            ("United States", true),
+            ("United Kingdom", false),
+            ("United Arab Emirates", false),
+        ] {
+            let bg = if highlighted { Some(theme_bridge::tint(accent, 0.12)) } else { None };
+            let color = if highlighted { accent } else { text_primary };
+
+            let row = tree.create(Widget::Panel, UiStyle {
+                width: Sizing::Grow(1.0), height: Sizing::Fixed(28.0),
+                padding: Edges { top: 0.0, right: 10.0, bottom: 0.0, left: 10.0 },
+                corner_radius: 4.0, background: bg, align: Align::Center,
+                ..UiStyle::default()
+            });
+            tree.add_child(dropdown, row);
+
+            let lbl = tree.create(Widget::Label { text: item.to_string() }, UiStyle {
+                text_color: Some(color), text_size: Some(12.0), ..UiStyle::default()
+            });
+            tree.add_child(row, lbl);
+        }
+    }
+
+    // ── Disabled ──
+    section_label(tree, root, "Disabled", text_secondary);
+    combo_input(tree, root, "United States", bg_canvas, border, text_primary, 0.5);
+
+    root
+}
+
+fn section_label(tree: &mut UiTree, parent: UiNodeId, text: &str, color: glam::Vec4) {
+    let lbl = tree.create(Widget::Label { text: text.to_string() }, UiStyle {
+        text_color: Some(color), text_size: Some(11.0), ..UiStyle::default()
+    });
+    tree.add_child(parent, lbl);
+}
+
+fn combo_input(tree: &mut UiTree, parent: UiNodeId, text: &str, bg: glam::Vec4, border: glam::Vec4, fg: glam::Vec4, opacity: f32) {
+    let input = tree.create(Widget::Panel, UiStyle {
+        direction: Direction::Row,
+        width: Sizing::Fixed(240.0), height: Sizing::Fixed(32.0),
+        padding: Edges { top: 0.0, right: 10.0, bottom: 0.0, left: 10.0 },
+        background: Some(bg), border_color: Some(border),
+        border_width: 1.0, corner_radius: 6.0,
+        align: Align::Center, justify: Justify::SpaceBetween,
+        opacity, ..UiStyle::default()
+    });
+    tree.add_child(parent, input);
+
+    let val = tree.create(Widget::Label { text: text.to_string() }, UiStyle {
+        text_color: Some(fg), text_size: Some(12.0), ..UiStyle::default()
+    });
+    tree.add_child(input, val);
+
+    let chevron = tree.create(Widget::Label { text: "▾".to_string() }, UiStyle {
+        text_color: Some(fg), text_size: Some(12.0), ..UiStyle::default()
+    });
+    tree.add_child(input, chevron);
+}

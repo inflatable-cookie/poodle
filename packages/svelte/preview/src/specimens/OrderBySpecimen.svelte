@@ -1,7 +1,5 @@
 <script lang="ts">
-  import { OrderBy } from "@pug/svelte-composites";
-  import { Eyebrow } from "@pug/svelte-primitives";
-  import type { SortField, ActiveSort } from "@pug/svelte-composites";
+  import { Eyebrow, OrderBy, type ActiveSort, type SortField } from "@pug/svelte-primitives";
 
   let activeSort: ActiveSort | null = null;
 

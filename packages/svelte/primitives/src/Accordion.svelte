@@ -4,6 +4,7 @@
 
 <script lang="ts">
   import { createEventDispatcher } from "svelte";
+  import { slide } from "svelte/transition";
 
   import Icon from "./Icon.svelte";
   import type { AccordionItem } from "./types";
@@ -85,6 +86,7 @@
           id={`pug-accordion-panel-${accordionId}-${item.value}`}
           role="region"
           aria-labelledby={`pug-accordion-trigger-${accordionId}-${item.value}`}
+          transition:slide={{ duration: 180 }}
         >
           <slot item={item} isOpen={true} />
         </div>
@@ -107,11 +109,7 @@
     padding: 0.875rem 1rem;
     border: 0.0625rem solid color-mix(in srgb, var(--pug-color-border-subtle) 36%, transparent);
     border-radius: var(--pug-radius-surface);
-    background: color-mix(
-      in srgb,
-      var(--pug-color-background-elevated) 84%,
-      var(--pug-color-background-surface)
-    );
+    background: color-mix(in srgb, var(--pug-surface) 93%, var(--pug-color-text-primary));
     box-shadow: inset 0 0.0625rem 0 color-mix(in srgb, var(--pug-color-text-inverse) 8%, transparent);
   }
 

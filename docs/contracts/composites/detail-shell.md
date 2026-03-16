@@ -28,7 +28,7 @@ Updated: 2026-03-11
 |------|----------|-------------|---------------|
 | Root Shell | yes | overall detail container | spacing, background |
 | Header Region | no | page identity and top actions | spacing, separator |
-| State Region | no | empty, loading, or callout/banner state | spacing |
+| State Region | no | empty, loading, or callout state | spacing |
 | Body Scroll Region | yes | main content viewport | scroll, spacing, surface |
 
 ## 3. Props And Inputs
@@ -56,7 +56,7 @@ Updated: 2026-03-11
 | ready | `state="ready"` | content visible |
 | empty | `state="empty"` | empty-state region replaces content |
 | loading | `state="loading"` | skeleton/progress region visible |
-| error | `state="error"` | callout/banner region visible |
+| error | `state="error"` | callout region visible |
 
 ### Component States
 
@@ -93,7 +93,7 @@ State table is sufficient.
 - focus exit: state transitions should preserve or restore a sensible focus
   target when content changes materially
 - live-region behavior: loading and error transitions should surface through
-  child `Progress`, `Skeleton`, `Callout`, or `Banner` semantics rather than
+  child `Progress`, `Skeleton`, or `Callout` semantics rather than
   ad hoc shell announcements
 - GPUI-native accessibility mapping notes: GPUI must preserve named-region
   semantics, scroll ownership, and sensible focus continuity when loading, error,

@@ -15,7 +15,33 @@
       <Button variant="primary" on:click={() => log("Primary")}>Primary</Button>
       <Button variant="secondary" on:click={() => log("Secondary")}>Secondary</Button>
       <Button variant="ghost" on:click={() => log("Ghost")}>Ghost</Button>
-      <Button variant="danger" on:click={() => log("Danger")}>Danger</Button>
+    </div>
+  </div>
+
+  <div class="specimen__group">
+    <Eyebrow>Danger tone</Eyebrow>
+    <div class="specimen__row">
+      <Button variant="primary" tone="danger" on:click={() => log("Danger primary")}>Danger primary</Button>
+      <Button variant="secondary" tone="danger" on:click={() => log("Danger secondary")}>Danger secondary</Button>
+      <Button variant="ghost" tone="danger" on:click={() => log("Danger ghost")}>Danger ghost</Button>
+    </div>
+  </div>
+
+  <div class="specimen__group">
+    <Eyebrow>With icons</Eyebrow>
+    <div class="specimen__row">
+      <Button leadingIcon="plus" on:click={() => log("Leading icon")}>Create</Button>
+      <Button trailingIcon="external-link" on:click={() => log("Trailing icon")}>Open</Button>
+      <Button leadingIcon="save" trailingIcon="check" on:click={() => log("Both icons")}>Save</Button>
+    </div>
+  </div>
+
+  <div class="specimen__group">
+    <Eyebrow>With chevron</Eyebrow>
+    <div class="specimen__row">
+      <Button chevron on:click={() => log("Chevron")}>Options</Button>
+      <Button variant="primary" chevron on:click={() => log("Primary chevron")}>Actions</Button>
+      <Button leadingIcon="filter" chevron on:click={() => log("Icon + chevron")}>Filter</Button>
     </div>
   </div>
 

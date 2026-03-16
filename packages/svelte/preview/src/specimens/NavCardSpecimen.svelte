@@ -1,6 +1,5 @@
 <script lang="ts">
-  import { NavCard, NavCardGrid } from "@pug/svelte-composites";
-  import { Eyebrow, Icon } from "@pug/svelte-primitives";
+  import { Eyebrow, Icon, NavCard, NavCardGrid } from "@pug/svelte-primitives";
 
   let lastClick = "";
 </script>

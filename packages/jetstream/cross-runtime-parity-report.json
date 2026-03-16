@@ -1,0 +1,65 @@
+{
+  "generation": "g10.014",
+  "runtime": "jetstream",
+  "updated": "2026-03-16",
+  "summary": {
+    "componentExports": 117,
+    "primitiveSpecs": 63,
+    "compositeSpecs": 41,
+    "workstationSpecs": 13,
+    "specimenFiles": 125,
+    "demoScreens": 6,
+    "tokenInspector": true,
+    "displayControls": ["theme", "density", "controlSize", "disabled", "invalid", "busy"],
+    "adapterTests": 165,
+    "parityTiers": {
+      "full": 109,
+      "partial": 8,
+      "skip": 0
+    }
+  },
+  "previewApp": {
+    "crate": "pug-jetstream-preview",
+    "sections": ["Primitives", "Composites", "Demo", "Tokens"],
+    "primitiveCount": 80,
+    "compositeCount": 46,
+    "demoScreens": [
+      "OverviewShell",
+      "FormAndValidation",
+      "BrowseAndTable",
+      "DetailAndRelatedData",
+      "PickerAndMedia",
+      "CommandAndWorkspace"
+    ],
+    "tokenInspector": {
+      "colorSections": 6,
+      "valueSections": 4,
+      "typographySection": true
+    }
+  },
+  "parityWithGpui": {
+    "primitiveSlugs": "identical (79 entries)",
+    "compositeSlugs": "superset (+19 entries: 13 workstation surfaces + 6 additional composites)",
+    "demoScreens": "identical (6 screens)",
+    "tokenInspector": "equivalent (same semantic tokens displayed)",
+    "displayControls": "equivalent minus AppearanceTreatment toggle"
+  },
+  "parityWithSvelte": {
+    "componentCoverage": "100% — all 117 renderable components supported",
+    "tokenResolution": "full — all semantic tokens resolved via JetstreamThemeProvider",
+    "visualFidelity": "retained-mode rendering; see delta-register.md for adaptations"
+  },
+  "deltaRegister": "docs/roadmaps/g10/delta-register.md",
+  "comparisonArtifacts": [
+    "packages/svelte/preview/artifacts/parity-report.json",
+    "packages/gpui/cross-runtime-parity-report.json",
+    "packages/jetstream/cross-runtime-parity-report.json",
+    "docs/roadmaps/g10/delta-register.md"
+  ],
+  "verification": {
+    "cargoCheck": "pass (7 pre-existing warnings)",
+    "cargoTest": "165 tests passing",
+    "componentCoverage": "117/117 (100%)",
+    "specimenCoverage": "125 files + 6 demos + token inspector"
+  }
+}

@@ -23,6 +23,21 @@
   </div>
 
   <div class="specimen__group">
+    <Eyebrow>Message prop</Eyebrow>
+    <Callout tone="info" title="Information" message="This is an informational callout using the message prop instead of slot content." />
+  </div>
+
+  <div class="specimen__group">
+    <Eyebrow>Dismissible</Eyebrow>
+    <Callout
+      tone="info"
+      title="Dismissible callout"
+      message="This callout can be dismissed by the user."
+      isDismissible
+    />
+  </div>
+
+  <div class="specimen__group">
     <Eyebrow>Without title</Eyebrow>
     <Callout tone="info">
       A simple inline callout without a title for brief contextual notes.

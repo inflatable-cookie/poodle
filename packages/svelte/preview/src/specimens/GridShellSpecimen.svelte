@@ -1,6 +1,6 @@
 <script lang="ts">
-  import { GridShell, Card } from "@pug/svelte-composites";
-  import { Eyebrow } from "@pug/svelte-primitives";
+  import { GridShell } from "@pug/svelte-composites";
+  import { Card, Eyebrow } from "@pug/svelte-primitives";
 
   const items = [
     { id: "1", title: "Dashboard", desc: "Overview and metrics" },

@@ -2,15 +2,17 @@
   import { createEventDispatcher } from "svelte";
 
   import Icon from "./Icon.svelte";
-  import type { ButtonVariant, ControlSize } from "./types";
+  import type { ButtonTone, ButtonVariant, ControlSize } from "./types";
 
   export let variant: ButtonVariant = "secondary";
+  export let tone: ButtonTone = "default";
   export let size: ControlSize = "md";
   export let type: HTMLButtonElement["type"] = "button";
   export let isDisabled = false;
   export let isLoading = false;
   export let leadingIcon: string | null = null;
   export let trailingIcon: string | null = null;
+  export let chevron = false;
   export let ariaLabel: string | null = null;
   export let describedBy: string | null = null;
   export let className = "";
@@ -29,6 +31,7 @@
   {type}
   class={`button ${className}`.trim()}
   data-variant={variant}
+  data-tone={tone !== "default" ? tone : undefined}
   data-size={size}
   data-icon-only={iconOnly || undefined}
   data-loading={isLoading}
@@ -67,6 +70,12 @@
       {:else if trailingIcon}
         <Icon name={trailingIcon} size="sm" />
       {/if}
+    </span>
+  {/if}
+
+  {#if chevron}
+    <span class="button__chevron" aria-hidden="true">
+      <Icon name="chevron-down" size="sm" />
     </span>
   {/if}
 </button>
@@ -158,10 +167,26 @@
     --pug-button-shadow: none;
   }
 
-  .button[data-variant="danger"] {
+  .button[data-tone="danger"] {
     --pug-button-fill: color-mix(in srgb, var(--pug-color-status-danger) 16%, var(--pug-color-background-surface));
     --pug-button-border: color-mix(in srgb, var(--pug-color-status-danger) 46%, var(--pug-color-border-default));
     --pug-button-text: var(--pug-color-text-primary);
+  }
+
+  .button[data-variant="primary"][data-tone="danger"] {
+    --pug-button-fill: var(--pug-color-status-danger);
+    --pug-button-border: color-mix(in srgb, var(--pug-color-status-danger) 84%, black);
+    --pug-button-text: var(--pug-color-text-inverse);
+    --pug-button-shadow:
+      inset 0 0.0625rem 0 color-mix(in srgb, white 14%, transparent),
+      0 0.375rem 1.125rem color-mix(in srgb, black 18%, transparent);
+  }
+
+  .button[data-variant="ghost"][data-tone="danger"] {
+    --pug-button-fill: transparent;
+    --pug-button-border: transparent;
+    --pug-button-text: var(--pug-color-status-danger);
+    --pug-button-shadow: none;
   }
 
   .button:hover:not(:disabled) {
@@ -198,6 +223,14 @@
     font-family: var(--pug-typography-code-family);
     font-size: 0.875rem;
     line-height: 1;
+  }
+
+  .button__chevron {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0.5;
+    margin-left: calc(var(--pug-space-inline-sm) * -0.25);
   }
 
   .button__spinner {

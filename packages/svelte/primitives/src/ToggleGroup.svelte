@@ -82,7 +82,7 @@
     padding: 0 0.75rem;
     border: 0.0625rem solid color-mix(in srgb, var(--pug-color-border-subtle) 82%, transparent);
     border-radius: var(--pug-radius-control);
-    background: color-mix(in srgb, var(--pug-color-background-surface) 88%, transparent);
+    background: color-mix(in srgb, var(--pug-surface) 93%, var(--pug-color-text-primary));
     color: var(--pug-color-text-primary);
     cursor: pointer;
     font-family: var(--pug-typography-label-family);

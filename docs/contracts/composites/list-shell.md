@@ -58,7 +58,7 @@ Updated: 2026-03-11
 | empty | `state="empty"` | empty-state region visible |
 | no-results | `state="no-results"` | query/filter-specific empty posture visible |
 | loading | `state="loading"` | progress or skeleton state visible |
-| error | `state="error"` | callout/banner state visible |
+| error | `state="error"` | callout state visible |
 
 ### Component States
 

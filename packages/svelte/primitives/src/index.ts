@@ -1,10 +1,11 @@
 export { default as Accordion } from "./Accordion.svelte";
 export { default as AlertDialog } from "./AlertDialog.svelte";
-export { default as Banner } from "./Banner.svelte";
 export { default as Badge } from "./Badge.svelte";
 export { default as Box } from "./Box.svelte";
+export { default as BulkActionBar } from "./BulkActionBar.svelte";
 export { default as Button } from "./Button.svelte";
 export { default as Callout } from "./Callout.svelte";
+export { default as Card } from "./Card.svelte";
 export { default as Code } from "./Code.svelte";
 export { default as ColorPicker } from "./ColorPicker.svelte";
 export { default as Checkbox } from "./Checkbox.svelte";
@@ -12,6 +13,7 @@ export { default as Calendar } from "./Calendar.svelte";
 export { default as Combobox } from "./Combobox.svelte";
 export { default as ContextMenu } from "./ContextMenu.svelte";
 export { default as Collapsible } from "./Collapsible.svelte";
+export { default as DetailRow } from "./DetailRow.svelte";
 export { default as DatePicker } from "./DatePicker.svelte";
 export { default as DateRangePicker } from "./DateRangePicker.svelte";
 export { default as DateTimePicker } from "./DateTimePicker.svelte";
@@ -31,13 +33,19 @@ export { default as IconButton } from "./IconButton.svelte";
 export { default as IconProvider } from "./IconProvider.svelte";
 export { default as Inline } from "./Inline.svelte";
 export { default as Meter } from "./Meter.svelte";
+export { default as ListCard } from "./ListCard.svelte";
+export { default as ListCardCounter } from "./ListCardCounter.svelte";
 export { default as Menu } from "./Menu.svelte";
 export { default as NumberEntry } from "./NumberEntry.svelte";
+export { default as OrderBy } from "./OrderBy.svelte";
+export { default as NavCard } from "./NavCard.svelte";
+export { default as NavCardGrid } from "./NavCardGrid.svelte";
 export { default as NavigationMenu } from "./NavigationMenu.svelte";
 export { default as Pill } from "./Pill.svelte";
 export { default as PinInput } from "./PinInput.svelte";
 export { default as Popover } from "./Popover.svelte";
 export { default as Pagination } from "./Pagination.svelte";
+export { default as PaginationSummary } from "./PaginationSummary.svelte";
 export { default as Progress } from "./Progress.svelte";
 export { default as RadioGroup } from "./RadioGroup.svelte";
 export { default as Rating } from "./Rating.svelte";
@@ -73,8 +81,9 @@ export { default as ZonedDateTimePicker } from "./ZonedDateTimePicker.svelte";
 export type {
   AccordionItem,
   AlertDialogTone,
-  BannerAnnounceMode,
-  BannerTone,
+  CalloutAnnounceMode,
+  ColorInputMode,
+  ButtonTone,
   ButtonVariant,
   CalendarWeekStart,
   ComboboxOption,
@@ -125,6 +134,10 @@ export type {
   ToggleVariant,
   TriStateValue,
   ValidationState,
+  ActiveSort,
+  BulkAction,
+  CardVariant,
+  SortField,
   ZonedDateTimeValue,
 } from "./types";
 export type { IconRegistry, IconNodeElement } from "./icon-registry";

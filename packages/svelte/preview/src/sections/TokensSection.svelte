@@ -1,5 +1,6 @@
 <script lang="ts">
   import { cssVars } from "@pug/svelte-tokens";
+  import { Surface } from "@pug/svelte-primitives";
   import TokenToolsPanel from "../components/TokenToolsPanel.svelte";
 
   export let liveTokenValues: Partial<Record<string, string>> = {};
@@ -48,13 +49,25 @@
   }
 </script>
 
-<TokenToolsPanel
-  {activePanelId}
-  {keySemanticTokens}
-  {filteredTokens}
-  {matchingTokenCount}
-  {inspectorQuery}
-  onSelectPanel={handleSelectPanel}
-  onQueryChange={handleQueryChange}
-  onQueryClear={handleQueryClear}
-/>
+<article class="tokens-page">
+  <Surface tone="panel" border="subtle" padding="lg">
+    <TokenToolsPanel
+      {activePanelId}
+      {keySemanticTokens}
+      {filteredTokens}
+      {matchingTokenCount}
+      {inspectorQuery}
+      onSelectPanel={handleSelectPanel}
+      onQueryChange={handleQueryChange}
+      onQueryClear={handleQueryClear}
+    />
+  </Surface>
+</article>
+
+<style>
+  .tokens-page {
+    padding: 1.5rem 2rem;
+    max-width: 64rem;
+    overflow-y: auto;
+  }
+</style>

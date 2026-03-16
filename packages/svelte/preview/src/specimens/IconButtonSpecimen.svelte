@@ -6,10 +6,18 @@
   <div class="specimen__group">
     <Eyebrow>Variants</Eyebrow>
     <div class="button-row">
-      <IconButton icon="x" ariaLabel="Close" variant="ghost" />
       <IconButton icon="plus" ariaLabel="Add" variant="primary" />
       <IconButton icon="settings" ariaLabel="Settings" variant="secondary" />
-      <IconButton icon="trash-2" ariaLabel="Delete" variant="danger" />
+      <IconButton icon="x" ariaLabel="Close" variant="ghost" />
+    </div>
+  </div>
+
+  <div class="specimen__group">
+    <Eyebrow>Danger tone</Eyebrow>
+    <div class="button-row">
+      <IconButton icon="trash-2" ariaLabel="Delete" variant="primary" tone="danger" />
+      <IconButton icon="trash-2" ariaLabel="Delete" variant="secondary" tone="danger" />
+      <IconButton icon="trash-2" ariaLabel="Delete" variant="ghost" tone="danger" />
     </div>
   </div>
 

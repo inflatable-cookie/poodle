@@ -1,27 +1,30 @@
 # Box
 
-Status: seed contract
-Updated: 2026-03-11
+Status: detailed contract
+Updated: 2026-03-15
 
 ## 1. Purpose
 
 - Component name: `Box`
 - Layer: `foundation`
-- Summary: the neutral layout wrapper for spacing, sizing, positioning, and
-  semantic opt-in without imposing directional layout behavior
-- In scope: sizing, padding, overflow, semantic role opt-in
-- Out of scope: directional layout rules, scrolling ownership, interactive
-  behavior
+- Summary: a neutral layout container for spacing, sizing, and overflow control
+  without imposing directional layout behavior
+- In scope: padding, width/height constraints, overflow control, semantic role
+  opt-in
+- Out of scope: directional layout (use Stack/Inline/Grid), scrolling ownership,
+  interactive behavior, background/border styling
 
 ## 2. Anatomy
 
 ```text
-[Root]
+[Root .box]  <div>
+  └── [Content] (slot)
 ```
 
 | Part | Required | Description | Token Targets |
 |------|----------|-------------|---------------|
-| Root | yes | neutral layout container | spacing, size, radius only when explicitly requested |
+| Root | yes | neutral layout container | padding, sizing, overflow |
+| Content | yes | arbitrary slotted children | none (caller-owned) |
 
 ## 3. Props And Inputs
 
@@ -29,22 +32,23 @@ Updated: 2026-03-11
 
 | Prop | Type | Default | Required | Notes |
 |------|------|---------|----------|-------|
-| `padding` | `"none" \| "sm" \| "md" \| "lg"` | `"none"` | no | semantic interior spacing |
-| `width` | `string \| null` | `null` | no | layout-only size value |
-| `height` | `string \| null` | `null` | no | layout-only size value |
-| `minWidth` | `string \| null` | `null` | no | optional constraint |
-| `minHeight` | `string \| null` | `null` | no | optional constraint |
-| `overflow` | `"visible" \| "hidden" \| "clip"` | `"visible"` | no | no scrolling semantics |
+| `padding` | `SpaceScale` | `"none"` | no | interior spacing via scale tokens |
+| `width` | `string \| null` | `null` | no | explicit width (any CSS value) |
+| `height` | `string \| null` | `null` | no | explicit height (any CSS value) |
+| `minWidth` | `string \| null` | `null` | no | minimum width constraint |
+| `minHeight` | `string \| null` | `null` | no | minimum height constraint |
+| `overflow` | `OverflowMode` | `"visible"` | no | overflow behavior |
 | `asRole` | `string \| null` | `null` | no | explicit semantic role opt-in |
+| `ariaLabel` | `string \| null` | `null` | no | accessible name when role is set |
 
-### Naming Rules
+### Shared Types
 
-- `Box` remains neutral and does not expose direction-specific props
-- semantic opt-in is explicit rather than inferred from styling
+- `SpaceScale`: `"none" \| "sm" \| "md" \| "lg"`
+- `OverflowMode`: `"visible" \| "hidden" \| "auto" \| "scroll"`
 
 ### Controlled And Uncontrolled
 
-- no controlled value model
+- display primitive only, no state
 
 ## 4. States
 
@@ -52,7 +56,7 @@ Updated: 2026-03-11
 
 | State | Trigger | Expected Result |
 |-------|---------|-----------------|
-| default | resting | neutral container |
+| default | resting | neutral container with no visual styling |
 
 ### Component States
 
@@ -68,89 +72,113 @@ No internal state.
 
 ### Semantics
 
-- Role: none by default
-- Required attributes: none by default
-- Optional attributes: role and labeling attributes only when the caller opts
-  into semantic usage
-- Labeling rules: if `asRole` creates an addressable region, the caller must
-  provide the required label relationship
+- Role: none by default (`<div>`)
+- `role`: from `asRole` prop when set
+- `aria-label`: from prop, used when `asRole` creates an addressable region
 
 ### Keyboard
 
 | Key | Behavior |
 |-----|----------|
-| none | no keyboard behavior owned by `Box` |
+| none | non-interactive, not focusable |
 
 ### Focus And Announcement
 
-- focus entry: `Box` is not focusable by default
-- focus exit: n/a
-- live-region behavior: none
+- Not focusable by default
+- No live-region behavior
 
 ## 7. Layout
 
 ### Sizing
 
-- min/max and fixed sizes are caller-owned
-- `Box` should not introduce implicit flex or grid behavior
+- No display override (block-level `<div>`)
+- Base `min-width: 0` and `min-height: 0` prevent flex/grid overflow
+- Explicit `width`, `height`, `minWidth`, `minHeight` applied as inline styles when set
 
 ### Composition
 
-- parent expectations: any layout context
+- parent expectations: any layout context (flex, grid, block flow)
 - child expectations: arbitrary content
-- resizing rules: follows parent and explicit constraints only
+- resizing rules: follows parent constraints and explicit size props
 
-## 8. Token Usage
+## 8. Token Usage — Exact Values
 
-| Part | Token | Purpose |
-|------|-------|---------|
-| Root | `semantic.space.*` | optional padding |
-| Root | `semantic.radius.*` | optional rounding when intentionally used as a surface-like shell |
+### Root
+
+| Property | Value |
+|----------|-------|
+| `min-width` | `0` |
+| `min-height` | `0` |
+
+### Inline Styles (conditional)
+
+| Property | Condition | Value |
+|----------|-----------|-------|
+| `padding` | `padding="none"` | `0` |
+| `padding` | `padding="sm"` | `var(--pug-space-inline-sm)` |
+| `padding` | `padding="md"` | `var(--pug-space-panel-y)` |
+| `padding` | `padding="lg"` | `var(--pug-space-panel-x)` |
+| `overflow` | always | direct prop value (`visible`, `hidden`, `auto`, `scroll`) |
+| `width` | when set | direct prop value |
+| `height` | when set | direct prop value |
+| `min-width` | when set | direct prop value (overrides base 0) |
+| `min-height` | when set | direct prop value (overrides base 0) |
+
+### SpaceScale Token Map
+
+| Scale | Resolved Value |
+|-------|---------------|
+| `"none"` | `0` |
+| `"sm"` | `var(--pug-space-inline-sm)` |
+| `"md"` | `var(--pug-space-panel-y)` |
+| `"lg"` | `var(--pug-space-panel-x)` |
 
 ## 9. Svelte Notes
 
-- implemented as a thin wrapper over a semantic HTML element such as `div`
-- semantic HTML should be used first when the box is more than neutral layout
-- browser accessibility stays HTML-first rather than ARIA-first
+- Rendered as a `<div>` with class `box`
+- All layout properties applied as inline styles via `scaleToSpace` helper
+- Slot-based content model
+- `role` and `aria-label` attributes set conditionally from props
+- No events, no state, no lifecycle hooks
 
 ## 10. GPUI Notes
 
-- implemented as a neutral GPUI container element
-- when semantic role opt-in is requested, the GPUI side must map it into the
-  native accessibility tree rather than silently dropping it
-- `Box` must not become focusable unless a higher-order contract requires it
+- Expected crate/module surface: `pug_gpui::components::box_container`
+- Implemented as a neutral GPUI container element
+- SpaceScale mapping must use the same design token values
+- When `asRole` is set, GPUI must map it into the native accessibility tree
+- Must not become focusable unless a higher-order contract requires it
 
 ## 11. Parity Checklist
 
 ### Tier 1: Strict Parity
 
-- [ ] role opt-in meaning matches
+- [ ] neutral non-interactive semantics match
+- [ ] `asRole` opt-in meaning matches
+- [ ] `ariaLabel` applied when role is set
 - [ ] focus neutrality matches
-- [ ] overflow-without-scroll semantics match
 
 ### Tier 2: Visual Parity
 
-- [ ] padding semantics match
-- [ ] explicit size constraints match
+- [ ] padding scale tokens resolve to same values
+- [ ] overflow behavior matches across all modes
+- [ ] width/height/minWidth/minHeight constraints match
+- [ ] base min-width: 0 and min-height: 0 match
 
 ### Tier 3: Implementation Freedom
 
-- [ ] HTML element choice or GPUI container choice stays internal
+- [ ] rendering internals (div vs GPUI container) stay platform-owned
 
 ## 12. Known Deltas
 
 | Delta | Why Allowed | Approval Status | Follow-Up |
 |-------|-------------|-----------------|-----------|
-| none yet | n/a | pending | review during first implementation |
+| none | n/a | n/a | n/a |
 
 ## 13. Approval And Adoption Notes
 
-- contract status: `seed contract`
+- contract status: `detailed contract`
 - approvers: pending
-- downstream adopters: all foundation and composite layers
+- downstream adopters: all foundation and composite layers, used as neutral
+  wrapper throughout the system
 - future follow-up: clarify polymorphic element support only if needed
-
-## Next Task
-
-Use `Box` as the neutral base when implementing directional layout primitives
-such as `Stack`, `Inline`, and `Grid`.

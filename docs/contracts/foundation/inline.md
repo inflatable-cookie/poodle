@@ -1,27 +1,30 @@
 # Inline
 
-Status: seed contract
-Updated: 2026-03-11
+Status: detailed contract
+Updated: 2026-03-15
 
 ## 1. Purpose
 
 - Component name: `Inline`
 - Layer: `foundation`
-- Summary: horizontal layout primitive for arranging items in a row with
-  semantic spacing and optional wrap behavior
-- In scope: row direction, gaps, alignment, wrapping
-- Out of scope: toolbar semantics, roving focus, menu/tab behavior
+- Summary: a horizontal flex layout primitive for arranging children in a row
+  with spacing, alignment, justification, and optional wrapping
+- In scope: horizontal flow, gap spacing, cross-axis alignment, main-axis
+  justification, wrap control, interior padding
+- Out of scope: vertical layout (use Stack), toolbar semantics, roving focus,
+  menu/tab behavior
 
 ## 2. Anatomy
 
 ```text
-[Root]
-  └── [Children...]
+[Root .inline]  <div>
+  └── [Content] (slot)
 ```
 
 | Part | Required | Description | Token Targets |
 |------|----------|-------------|---------------|
-| Root | yes | horizontal flow container | inline gap, optional padding |
+| Root | yes | horizontal flex container | gap, padding, alignment, justification |
+| Content | yes | inline peer children | none (caller-owned) |
 
 ## 3. Props And Inputs
 
@@ -29,16 +32,23 @@ Updated: 2026-03-11
 
 | Prop | Type | Default | Required | Notes |
 |------|------|---------|----------|-------|
-| `gap` | `"sm" \| "md" \| "lg"` | `"md"` | no | semantic horizontal spacing |
-| `align` | `"start" \| "center" \| "end" \| "stretch"` | `"center"` | no | cross-axis alignment |
-| `justify` | `"start" \| "center" \| "end" \| "between"` | `"start"` | no | main-axis distribution |
-| `wrap` | `boolean` | `false` | no | allows multi-row flow when true |
-| `padding` | `"none" \| "sm" \| "md" \| "lg"` | `"none"` | no | interior spacing |
-| `asRole` | `string \| null` | `null` | no | optional semantic grouping |
+| `gap` | `SpaceScale` | `"md"` | no | horizontal spacing between children |
+| `align` | `LayoutAlign` | `"center"` | no | cross-axis (vertical) alignment |
+| `justify` | `LayoutJustify` | `"start"` | no | main-axis distribution |
+| `wrap` | `boolean` | `false` | no | enables multi-row flow when true |
+| `padding` | `SpaceScale` | `"none"` | no | interior spacing |
+| `asRole` | `string \| null` | `null` | no | explicit semantic role opt-in |
+| `ariaLabel` | `string \| null` | `null` | no | accessible name when role is set |
+
+### Shared Types
+
+- `SpaceScale`: `"none" \| "sm" \| "md" \| "lg"`
+- `LayoutAlign`: `"start" \| "end" \| "center" \| "stretch"`
+- `LayoutJustify`: `"start" \| "center" \| "end" \| "between"`
 
 ### Controlled And Uncontrolled
 
-- no controlled value model
+- display primitive only, no state
 
 ## 4. States
 
@@ -46,8 +56,8 @@ Updated: 2026-03-11
 
 | State | Trigger | Expected Result |
 |-------|---------|-----------------|
-| default | resting | horizontal flow container |
-| wrapped | `wrap=true` and children overflow | multi-row flow |
+| default | resting | single-row horizontal flow |
+| wrapped | `wrap={true}` and children overflow | multi-row horizontal flow |
 
 ### Component States
 
@@ -63,84 +73,152 @@ No internal state.
 
 ### Semantics
 
-- Role: neutral grouping by default
-- Required attributes: none by default
-- Optional attributes: grouping semantics when the container is more than
-  visual alignment
+- Role: none by default (`<div>`)
+- `role`: from `asRole` prop when set
+- `aria-label`: from prop, used when `asRole` creates an addressable region
 
 ### Keyboard
 
 | Key | Behavior |
 |-----|----------|
-| none | keyboard semantics belong to children or higher-order containers |
+| none | non-interactive, not focusable |
 
 ### Focus And Announcement
 
-- focus entry: root is not focusable by default
-- live-region behavior: none
+- Not focusable by default
+- No live-region behavior
 
 ## 7. Layout
 
 ### Sizing
 
-- inline size follows parent constraints
-- block size grows with child size and wrap behavior
+- `display: flex` with default row direction
+- Base `min-width: 0` and `min-height: 0` prevent flex/grid overflow
+- Inline size follows parent constraints
+- Block size grows with child size and wrap behavior
 
 ### Composition
 
 - parent expectations: any layout or shell container
-- child expectations: inline peers
-- resizing rules: gap remains stable; wrapping is explicit
+- child expectations: inline peer elements (buttons, badges, icons, text)
+- resizing rules: gap remains stable; wrapping is explicit via `wrap` prop
 
-## 8. Token Usage
+## 8. Token Usage — Exact Values
 
-| Part | Token | Purpose |
-|------|-------|---------|
-| Root | `semantic.space.inline.*` | horizontal spacing |
-| Root | semantic padding roles | optional interior spacing |
+### Root (static CSS)
+
+| Property | Value |
+|----------|-------|
+| `display` | `flex` |
+| `min-width` | `0` |
+| `min-height` | `0` |
+
+### Inline Styles (conditional)
+
+| Property | Condition | Value |
+|----------|-----------|-------|
+| `gap` | `gap="none"` | `0` |
+| `gap` | `gap="sm"` | `var(--pug-space-inline-sm)` |
+| `gap` | `gap="md"` | `var(--pug-space-panel-y)` |
+| `gap` | `gap="lg"` | `var(--pug-space-panel-x)` |
+| `padding` | `padding="none"` | `0` |
+| `padding` | `padding="sm"` | `var(--pug-space-inline-sm)` |
+| `padding` | `padding="md"` | `var(--pug-space-panel-y)` |
+| `padding` | `padding="lg"` | `var(--pug-space-panel-x)` |
+| `align-items` | `align="start"` | `flex-start` |
+| `align-items` | `align="end"` | `flex-end` |
+| `align-items` | `align="center"` | `center` |
+| `align-items` | `align="stretch"` | `stretch` |
+| `justify-content` | `justify="start"` | `flex-start` |
+| `justify-content` | `justify="center"` | `center` |
+| `justify-content` | `justify="end"` | `flex-end` |
+| `justify-content` | `justify="between"` | `space-between` |
+| `flex-wrap` | `wrap={false}` | `nowrap` |
+| `flex-wrap` | `wrap={true}` | `wrap` |
+
+### SpaceScale Token Map
+
+| Scale | Resolved Value |
+|-------|---------------|
+| `"none"` | `0` |
+| `"sm"` | `var(--pug-space-inline-sm)` |
+| `"md"` | `var(--pug-space-panel-y)` |
+| `"lg"` | `var(--pug-space-panel-x)` |
+
+### LayoutAlign Value Map
+
+| Align | CSS Value |
+|-------|-----------|
+| `"start"` | `flex-start` |
+| `"end"` | `flex-end` |
+| `"center"` | `center` |
+| `"stretch"` | `stretch` |
+
+### LayoutJustify Value Map
+
+| Justify | CSS Value |
+|---------|-----------|
+| `"start"` | `flex-start` |
+| `"center"` | `center` |
+| `"end"` | `flex-end` |
+| `"between"` | `space-between` |
 
 ## 9. Svelte Notes
 
-- implemented with flex row or equivalent
-- if used as a toolbar or tablist, the higher-order contract must define the
-  accessibility semantics rather than relying on `Inline`
+- Rendered as a `<div>` with class `inline`
+- All layout properties applied as inline styles
+- Gap and padding resolved via `scaleToSpace` helper
+- Alignment resolved via `alignItemsValue` helper
+- Justification resolved via `justifyContentValue` helper
+- Wrap resolved to CSS `flex-wrap` value
+- Slot-based content model
+- `role` and `aria-label` attributes set conditionally from props
+- No events, no state, no lifecycle hooks
 
 ## 10. GPUI Notes
 
-- implemented with GPUI-native horizontal layout APIs
-- native accessibility grouping must be added only when requested by the
-  higher-order contract
+- Expected crate/module surface: `pug_gpui::components::inline`
+- Implemented with GPUI-native horizontal flex layout
+- SpaceScale mapping must use the same design token values
+- LayoutAlign mapping must produce equivalent cross-axis alignment
+- LayoutJustify mapping must produce equivalent main-axis distribution
+- Wrap behavior must be supported for multi-row flow
+- When `asRole` is set, GPUI must expose equivalent native accessibility grouping
+- Must not become focusable unless a higher-order contract requires it
 
 ## 11. Parity Checklist
 
 ### Tier 1: Strict Parity
 
-- [ ] gap, alignment, and wrap meaning match
-- [ ] semantic neutrality matches
+- [ ] horizontal flex-row layout direction matches
+- [ ] non-interactive semantics match
+- [ ] `asRole` opt-in meaning matches
+- [ ] `ariaLabel` applied when role is set
 - [ ] focus neutrality matches
 
 ### Tier 2: Visual Parity
 
-- [ ] inline spacing and wrapping behavior stay proportionally aligned
+- [ ] gap scale tokens resolve to same values
+- [ ] padding scale tokens resolve to same values
+- [ ] align-items mapping matches (start, end, center, stretch)
+- [ ] justify-content mapping matches (start, center, end, between)
+- [ ] flex-wrap toggling matches (nowrap vs wrap)
+- [ ] base min-width: 0 and min-height: 0 match
 
 ### Tier 3: Implementation Freedom
 
-- [ ] CSS row layout vs GPUI row layout stays internal
+- [ ] CSS flex vs GPUI layout internals stay platform-owned
 
 ## 12. Known Deltas
 
 | Delta | Why Allowed | Approval Status | Follow-Up |
 |-------|-------------|-----------------|-----------|
-| none yet | n/a | pending | review during first implementation |
+| none | n/a | n/a | n/a |
 
 ## 13. Approval And Adoption Notes
 
-- contract status: `seed contract`
+- contract status: `detailed contract`
 - approvers: pending
-- downstream adopters: button groups, header rows, shell utility strips
+- downstream adopters: button groups, header rows, action bars, shell utility
+  strips, breadcrumbs
 - future follow-up: add bidirectional/layout-direction guidance if required
-
-## Next Task
-
-Use `Inline` for future shell rows, action groups, and header utilities, but
-attach explicit semantics when those groups become navigable composites.

@@ -226,6 +226,7 @@
     color: var(--pug-color-text-primary);
     cursor: pointer;
     font: inherit;
+    font-size: 0.875rem;
     text-align: left;
   }
 

@@ -166,10 +166,10 @@
 <style>
   .duration-input {
     display: inline-flex;
-    align-items: center;
+    align-items: flex-end;
     gap: 0.125rem;
-    padding: 0 var(--pug-space-control-x);
-    height: var(--pug-size-control-height);
+    width: fit-content;
+    padding: 0.25rem var(--pug-space-control-x);
     border: 0.0625rem solid var(--pug-color-border-default);
     border-radius: var(--pug-radius-control);
     background: var(--pug-color-background-surface);
@@ -196,7 +196,13 @@
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 0;
+    gap: 0.125rem;
+    padding: 0.125rem;
+    border-radius: 0.1875rem;
+  }
+
+  .duration-input__segment:has(.duration-input__field:focus) {
+    background: color-mix(in srgb, var(--pug-color-accent-base) 12%, transparent);
   }
 
   .duration-input__label {
@@ -209,7 +215,8 @@
   }
 
   .duration-input__field {
-    width: 2rem;
+    width: 1.75rem;
+    min-height: 0;
     padding: 0;
     border: 0;
     background: transparent;
@@ -222,17 +229,11 @@
     outline: none;
   }
 
-  .duration-input__field:focus {
-    background: color-mix(in srgb, var(--pug-color-accent-base) 12%, transparent);
-    border-radius: 0.125rem;
-  }
-
   .duration-input__separator {
     color: var(--pug-color-text-secondary);
     font-size: var(--pug-typography-body-size);
     font-weight: 600;
     line-height: 1;
-    padding-top: 0.5rem;
     user-select: none;
   }
 </style>

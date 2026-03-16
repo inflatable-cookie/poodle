@@ -1,0 +1,38 @@
+[package]
+name = "pug-jetstream-preview"
+version = "0.0.0"
+edition = "2024"
+description = "Jetstream preview application for the Pug design system — showcases all Pug components rendered via the Jetstream game engine."
+
+[[bin]]
+name = "pug-jetstream-preview"
+path = "src/main.rs"
+
+[dependencies]
+# Pug adapter + contracts
+pug-jetstream = { path = "../adapter" }
+pug-adapter = { path = "../../contracts/adapter" }
+pug-primitives = { path = "../../contracts/primitives" }
+pug-composites = { path = "../../contracts/composites" }
+pug-workstation = { path = "../../contracts/workstation" }
+pug-style = { path = "../../contracts/style" }
+pug-tokens = { path = "../../contracts/tokens" }
+
+# Jetstream runtime (cross-repo path)
+jetstream-runtime = { path = "../../../../jetstream/crates/jetstream-runtime" }
+jetstream-renderer = { path = "../../../../jetstream/crates/jetstream-renderer" }
+jetstream-platform = { path = "../../../../jetstream/crates/jetstream-platform" }
+jetstream-input = { path = "../../../../jetstream/crates/jetstream-input" }
+jetstream-text = { path = "../../../../jetstream/crates/jetstream-text" }
+
+glam = "0.29"
+wgpu = "24"
+bytemuck = "1"
+image = { version = "0.25", default-features = false, features = ["png"] }
+env_logger = "0.11"
+log = "0.4"
+
+[package.metadata.pug]
+public-intent = true
+channel = "preview"
+stability = "pre-release"

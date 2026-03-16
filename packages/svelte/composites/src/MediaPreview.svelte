@@ -1,5 +1,5 @@
 <script lang="ts">
-  import Card from "./Card.svelte";
+  import { Card } from "@pug/svelte-primitives";
   import MediaThumbnail from "./MediaThumbnail.svelte";
 
   import type { AspectRatio, CardVariant, MediaKind, MediaState } from "./types";

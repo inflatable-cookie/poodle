@@ -3,7 +3,8 @@ export type ValidationState = "none" | "invalid" | "valid" | "pending";
 export type CalendarWeekStart = "sunday" | "monday";
 export type SpaceScale = "none" | "sm" | "md" | "lg";
 export type ControlSize = "sm" | "md" | "lg";
-export type ButtonVariant = "primary" | "secondary" | "ghost" | "danger";
+export type ButtonVariant = "primary" | "secondary" | "ghost";
+export type ButtonTone = "default" | "danger";
 export type LayoutAlign = "start" | "center" | "end" | "stretch";
 export type LayoutJustify = "start" | "center" | "end" | "between";
 export type OverflowMode = "visible" | "hidden" | "clip";
@@ -48,8 +49,8 @@ export type EditableLabelActivationMode =
   | "enterOrSpace"
   | "programmatic";
 export type FormActionAlign = "start" | "end" | "between";
-export type BannerTone = "info" | "success" | "warning" | "danger";
-export type BannerAnnounceMode = "none" | "polite" | "assertive";
+export type CalloutAnnounceMode = "none" | "polite" | "assertive";
+export type ColorInputMode = "hex" | "rgb" | "hsl";
 export type SkeletonShape = "line" | "block" | "circle";
 export type SkeletonPreset =
   | "table-row"
@@ -192,3 +193,23 @@ export interface ZonedDateTimeValue {
   time: string | null;
   timeZone: string | null;
 }
+
+export type CardVariant = "default" | "outlined" | "elevated";
+
+export type BulkAction = {
+  id: string;
+  label: string;
+  icon?: string;
+  tone?: "default" | "danger";
+};
+
+export type SortField = {
+  value: string;
+  label: string;
+  isDisabled?: boolean;
+};
+
+export type ActiveSort = {
+  field: string;
+  direction: "asc" | "desc";
+};

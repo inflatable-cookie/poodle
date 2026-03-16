@@ -1,98 +1,178 @@
 # Form Actions
 
-Status: seed contract
-Updated: 2026-03-11
+Status: detailed contract
+Updated: 2026-03-15
 
 ## 1. Purpose
 
 - Component name: `FormActions`
 - Layer: `foundation`
 - Summary: an action-row wrapper for submit, cancel, and secondary form actions
-- In scope: action alignment, grouping, status text adjacency, wrapping under
-  narrow widths
+  with configurable alignment
+- In scope: action alignment (start, end, between), grouping, wrapping under
+  narrow widths, separation from field stack
 - Out of scope: button semantics themselves, validation logic, sticky footer
-  shells
+  shells, status text (parent responsibility)
 
 ## 2. Anatomy
 
 ```text
-[Root]
-  ├── [Status / Secondary Content] (optional)
-  └── [Action Cluster]
+[Root .form-actions]  <div>
+  └── [Default Slot] (buttons and actions)
 ```
 
 | Part | Required | Description | Token Targets |
 |------|----------|-------------|---------------|
-| Root | yes | action-row layout wrapper | stack and inline spacing |
-| Status / Secondary Content | no | validation or save-state summary | body typography, secondary text |
-| Action Cluster | yes | submit/cancel/secondary actions | inline spacing |
+| Root | yes | action-row layout wrapper | spacing, alignment |
 
 ## 3. Props And Inputs
 
+### Public Props
+
 | Prop | Type | Default | Required | Notes |
 |------|------|---------|----------|-------|
-| `align` | `"start" \| "end" \| "between"` | `"end"` | no | alignment rule for the row |
+| `align` | `"start" \| "end" \| "between"` | `"end"` | no | alignment rule for the action row |
+
+### Slots
+
+| Slot | Purpose |
+|------|---------|
+| default | buttons, links, or other action elements |
+
+### Controlled And Uncontrolled
+
+- layout-only component, no value model
 
 ## 4. States
 
-State table is sufficient for the base layout primitive.
+### Visual States
 
-## 5. Accessibility
+| State | Trigger | Expected Result |
+|-------|---------|-----------------|
+| default | resting | actions aligned per `align` prop |
+| wrapped | narrow container | actions wrap to multiple lines maintaining gap |
+
+### Component States
+
+State table is sufficient for this layout primitive. No interactive state transitions.
+
+## 5. Events
+
+| Event | When It Fires | Payload | Notes |
+|-------|---------------|---------|-------|
+| none | — | — | events belong to slotted child actions |
+
+## 6. Accessibility
 
 ### Semantics
 
-- Role: neutral structural container by default
-- required behavior: action order must remain logical for keyboard and screen
-  reader users
-- labeling rule: status text must stay textual, not icon-only
+- Role: neutral structural container (`<div>`), no implicit ARIA role
+- Required behavior: action order must remain logical for keyboard and screen reader users
+- Labeling rules: no accessible name needed on the container itself; child buttons own their labels
 
 ### Keyboard
 
-- `FormActions` itself is not focusable
-- keyboard order follows DOM order of slotted actions
+| Key | Behavior |
+|-----|----------|
+| `Tab` | moves focus between slotted action buttons in DOM order |
 
 ### Focus And Announcement
 
-- submit, cancel, and status-announcement semantics belong to child actions and
-  parent form logic
-- GPUI-native accessibility mapping notes: GPUI must preserve action order and
-  any adjacent status text relationships even though there is no implicit HTML
-  form footer pattern
+- focus entry: FormActions itself is not focusable; focus goes to first slotted button
+- focus exit: standard tab order continues past the last slotted button
+- live-region behavior: none; status announcements belong to parent form logic
+- GPUI-native accessibility mapping notes: GPUI must preserve action order and logical focus sequence even without HTML form-footer patterns
 
-## 6. Composition
+## 7. Layout
+
+### Sizing
+
+- Root stretches to parent width
+- `flex-wrap: wrap` allows actions to wrap on narrow viewports
+- `padding-top` separates the action row from the field stack above
+
+### Composition
 
 - parent expectations: forms, dialog forms, drawers, inline edit groups
-- child expectations: buttons or linked actions, plus optional status text
-- layout rule: on narrow widths the row may wrap, but primary action order must
-  remain stable
+- child expectations: buttons or linked actions
+- resizing rules: on narrow widths the row wraps, but primary action order must remain stable
 
-## 7. Token Usage
+## 8. Token Usage — Exact Values
 
-| Part | Token | Purpose |
-|------|-------|---------|
-| Root | `semantic.space.inline.*` | action spacing |
-| Root | `semantic.space.stack.*` | separation from field stack |
-| Status text | `semantic.typography.body.*` and `semantic.color.text.secondary` | supporting status copy |
+### Root `.form-actions`
 
-## 8. Svelte Notes
+| Property | Value |
+|----------|-------|
+| `display` | `flex` |
+| `flex-wrap` | `wrap` |
+| `gap` | `var(--pug-space-inline-md)` |
+| `align-items` | `center` |
+| `padding-top` | `var(--pug-space-stack-sm)` |
 
-- action rows should remain simple flex layout wrappers
-- native form submit buttons can live inside the slot without `FormActions`
-  taking over event semantics
+### Root — `align="start"`
 
-## 9. GPUI Notes
+| Property | Value |
+|----------|-------|
+| `justify-content` | `flex-start` |
+
+### Root — `align="end"` (default)
+
+| Property | Value |
+|----------|-------|
+| `justify-content` | `flex-end` |
+
+### Root — `align="between"`
+
+| Property | Value |
+|----------|-------|
+| `justify-content` | `space-between` |
+
+## 9. Svelte Notes
+
+- Simple flex layout wrapper with `data-align` attribute for CSS targeting
+- No event handling; all interaction belongs to slotted children
+- Default slot accepts any content but intended for Button components
+- `align` prop maps directly to `justify-content` value
+
+## 10. GPUI Notes
 
 - expected crate/module surface: `pug_gpui::primitives::form_actions`
-- GPUI implementation must preserve action order, wrapping behavior intent, and
-  nearby status text visibility without relying on HTML form-footer defaults
+- Spec struct: `FormActionsSpec` in primitives crate
+- GPUI must preserve action order, wrapping behavior intent, and logical focus sequence
+- The three alignment modes map to equivalent flex layout behaviors in GPUI
+- No HTML form-footer defaults to rely on; explicit layout rules suffice
 
-## 10. Parity Checklist
+## 11. Parity Checklist
 
-- [ ] action order and grouping match
-- [ ] alignment behavior matches
+### Tier 1: Strict Parity
+
+- [ ] align prop values ("start", "end", "between") mean the same thing
+- [ ] action order remains logical for keyboard and screen readers
 - [ ] wrapped layouts preserve logical action ordering
 
-## Next Task
+### Tier 2: Visual Parity
 
-Use `FormActions` in `g02.001` and later composite forms so action-row
-structure stops being redefined ad hoc per screen.
+- [ ] gap uses space-inline-md token
+- [ ] padding-top uses space-stack-sm token
+- [ ] flex-wrap behavior matches
+- [ ] justify-content values match for each alignment mode
+
+### Tier 3: Implementation Freedom
+
+- [ ] container element type is implementation-owned
+- [ ] wrapping breakpoint behavior is platform-owned
+
+## 12. Known Deltas
+
+| Delta | Why Allowed | Approval Status | Follow-Up |
+|-------|-------------|-----------------|-----------|
+| wrapping behavior may differ slightly | flex-wrap vs GPUI layout wrapping | allowed | keep action order and alignment meaning strict |
+
+## 13. Approval And Adoption Notes
+
+- contract status: `detailed contract`
+- approvers: pending
+- downstream adopters: forms, dialog forms, drawers, inline edit groups,
+  settings panels
+- future follow-up: consider whether status text adjacency needs formal contract
+  support or stays as parent composition

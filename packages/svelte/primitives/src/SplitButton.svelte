@@ -3,9 +3,10 @@
 
   import { menuNavigableItems } from "./internal";
 
-  import type { ButtonVariant, ControlSize, MenuItem } from "./types";
+  import type { ButtonTone, ButtonVariant, ControlSize, MenuItem } from "./types";
 
   export let variant: ButtonVariant = "secondary";
+  export let tone: ButtonTone = "default";
   export let size: ControlSize = "md";
   export let items: MenuItem[] = [];
   export let isDisabled = false;
@@ -86,7 +87,7 @@
   });
 </script>
 
-<div class="split-button" data-variant={variant} data-size={size} bind:this={rootElement}>
+<div class="split-button" data-variant={variant} data-tone={tone !== "default" ? tone : undefined} data-size={size} bind:this={rootElement}>
   <button
     type="button"
     class="split-button__primary"
@@ -207,10 +208,22 @@
     --pug-split-border: color-mix(in srgb, var(--pug-color-border-subtle) 72%, transparent);
   }
 
-  .split-button[data-variant="danger"] {
+  .split-button[data-tone="danger"] {
     --pug-split-fill: color-mix(in srgb, var(--pug-color-status-danger) 16%, var(--pug-color-background-surface));
     --pug-split-border: color-mix(in srgb, var(--pug-color-status-danger) 46%, var(--pug-color-border-default));
     --pug-split-text: var(--pug-color-text-primary);
+  }
+
+  .split-button[data-variant="primary"][data-tone="danger"] {
+    --pug-split-fill: var(--pug-color-status-danger);
+    --pug-split-border: color-mix(in srgb, var(--pug-color-status-danger) 84%, black);
+    --pug-split-text: var(--pug-color-text-inverse);
+  }
+
+  .split-button[data-variant="ghost"][data-tone="danger"] {
+    --pug-split-fill: transparent;
+    --pug-split-border: transparent;
+    --pug-split-text: var(--pug-color-status-danger);
   }
 
   .split-button__primary,

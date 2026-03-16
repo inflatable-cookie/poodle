@@ -68,7 +68,7 @@
       <pre class="code__pre"><code class="code__source">{#each lines as line, i}<span
           class="code__line"
           class:code__line--highlighted={highlightSet.has(i + 1)}
-        >{#if showLineNumbers}<span class="code__line-number" aria-hidden="true">{i + 1}</span>{/if}<span class="code__line-content">{line}</span></span>{#if i < lines.length - 1}{"\n"}{/if}{/each}</code></pre>
+        >{#if showLineNumbers}<span class="code__line-number" aria-hidden="true">{i + 1}</span>{/if}<span class="code__line-content">{line}</span></span>{/each}</code></pre>
     </div>
   </div>
 {/if}
@@ -157,7 +157,7 @@
     display: block;
     font-family: var(--pug-typography-code-family);
     font-size: 0.8125rem;
-    line-height: 1.625;
+    line-height: 1.4;
     color: var(--pug-color-text-primary);
     tab-size: 2;
     white-space: pre;

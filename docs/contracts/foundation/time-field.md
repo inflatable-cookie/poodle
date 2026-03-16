@@ -1,88 +1,197 @@
 # Time Field
 
-Status: seed contract
-Updated: 2026-03-12
+Status: detailed contract
+Updated: 2026-03-15
 
 ## 1. Purpose
 
 - Component name: `TimeField`
 - Layer: `foundation`
-- Summary: a time-only value control for local wall-clock entry
-- In scope: time value entry, min/max constraints, step sizing, disabled state
+- Summary: a time-only value control for local wall-clock entry using a native
+  time input with Pug field chrome
+- In scope: time value entry, min/max constraints, step sizing, disabled state,
+  controlled and uncontrolled value models
 - Out of scope: timezone conversion, date ownership, recurrence, schedule
-  workflows
+  workflows, custom time picker overlays
 
 ## 2. Anatomy
 
 ```text
-[Input]
+[Input .time-field]  <input type="time">
 ```
+
+| Part | Required | Description | Token Targets |
+|------|----------|-------------|---------------|
+| Input | yes | native time input element | background, border, radius, color, typography, focus ring |
 
 ## 3. Props And Inputs
 
-- `value`: `string | null`
-- `defaultValue`: `string | null`
-- `min`: `string | null`
-- `max`: `string | null`
-- `step`: `number`
-- `isDisabled`: `boolean`
-- `ariaLabel`: `string | null`
-- `describedBy`: `string | null`
+### Public Props
+
+| Prop | Type | Default | Required | Notes |
+|------|------|---------|----------|-------|
+| `id` | `string \| null` | `null` | no | HTML id for label association |
+| `value` | `string \| null` | `null` | no | controlled value in HH:MM or HH:MM:SS format |
+| `defaultValue` | `string \| null` | `null` | no | uncontrolled initial value |
+| `min` | `string \| null` | `null` | no | earliest allowed time |
+| `max` | `string \| null` | `null` | no | latest allowed time |
+| `step` | `number` | `60` | no | step increment in seconds |
+| `isDisabled` | `boolean` | `false` | no | disables editing and interaction |
+| `ariaLabel` | `string \| null` | `null` | no | required when no external label exists |
+| `describedBy` | `string \| null` | `null` | no | aria-describedby target |
+
+### Controlled And Uncontrolled
+
+- controlled: `value` (non-null) plus `valueChange` event
+- uncontrolled: `defaultValue` sets the initial value; component owns its own state
+- do not mix controlled and uncontrolled modes simultaneously
 
 ## 4. States
 
-- empty
-- populated
-- disabled
+### Visual States
+
+| State | Trigger | Expected Result |
+|-------|---------|-----------------|
+| empty | no value set | input shows platform placeholder |
+| populated | value is set | time value displayed |
+| focus | input receives focus | focus ring via outline |
+| disabled | `isDisabled=true` | reduced opacity, non-interactive |
+
+### Component States
+
+| State | Trigger | Expected Result |
+|-------|---------|-----------------|
+| empty -> populated | user enters time or value prop set | valueChange fires |
+| populated -> empty | value cleared | valueChange fires with null |
 
 ## 5. Events
 
-- `onValueChange`
+| Event | When It Fires | Payload | Notes |
+|-------|---------------|---------|-------|
+| `valueChange` | user changes the time value | `{ value: string \| null }` | fires on native change/input event |
 
 ## 6. Accessibility
 
-- role: time entry field using native input semantics
-- required semantics: accessible name, disabled state, descriptive relation when
-  supplied
-- keyboard: standard text and native time-input editing
+### Semantics
+
+- Role: native `<input type="time">` provides built-in accessibility
+- Required attributes: accessible name from external label or `ariaLabel`
+- Optional attributes: `aria-describedby` from `describedBy`
+- `disabled` attribute set when `isDisabled`
+- `min`, `max`, `step` attributes set on native input when provided
+
+### Keyboard
+
+| Key | Behavior |
+|-----|----------|
+| `Arrow Up` / `Arrow Down` | increment/decrement time segment (platform-native) |
+| `Tab` | moves between time segments or exits control (platform-native) |
+| number keys | direct entry of time digits |
+
+### Focus And Announcement
+
+- focus entry: input receives visible focus ring
+- focus exit: focus ring clears
+- live-region behavior: none; native time input handles value announcement
+- GPUI-native accessibility mapping notes: GPUI must expose time-input semantics with min/max/step constraints through native accessibility tree
 
 ## 7. Layout
 
-- follows shared control sizing and field chrome
-- parent owns any surrounding label, helper, or validation composition
+### Sizing
 
-## 8. Token Usage
+- minimum height follows `size-control-height` token
+- width determined by parent container
+- overflow behavior: text truncates within input
 
-- control background, border, text, and focus roles
+### Composition
+
+- parent expectations: forms, settings rows, datetime pickers, Field wrapper
+- child expectations: none (self-contained)
+- resizing rules: input stretches to parent width
+
+## 8. Token Usage — Exact Values
+
+### Input `.time-field`
+
+| Property | Value |
+|----------|-------|
+| `min-height` | `var(--pug-size-control-height)` |
+| `padding` | `0 var(--pug-space-control-x)` |
+| `border` | `0.0625rem solid var(--pug-color-border-default)` |
+| `border-radius` | `var(--pug-radius-control)` |
+| `background` | `var(--pug-color-background-surface)` |
+| `color` | `var(--pug-color-text-primary)` |
+| `font-family` | `var(--pug-typography-body-family)` |
+| `font-size` | `var(--pug-typography-body-size)` |
+| `line-height` | `var(--pug-typography-body-lineHeight)` |
+
+### Input — focus
+
+| Property | Value |
+|----------|-------|
+| `outline` | `var(--pug-border-width-focus) solid var(--pug-color-accent-focusRing)` |
+| `outline-offset` | `0.125rem` |
+
+### Input — disabled
+
+| Property | Value |
+|----------|-------|
+| `cursor` | `not-allowed` |
+| `opacity` | `var(--pug-state-opacity-disabled)` |
 
 ## 9. Svelte Notes
 
-- public value uses local time strings in `HH:MM` form
-- implementation may use browser-native `input[type="time"]` behavior as long
-  as the public value contract stays Pug-owned
+- Uses native `<input type="time">` for platform accessibility and time-entry UX
+- `appearance: none` may be needed for consistent cross-browser styling
+- Public value uses local time strings in HH:MM or HH:MM:SS form
+- Browser-native time picker UI is allowed; Pug does not override it
+- Treatment tokens may be added for themed styling with fallbacks
 
 ## 10. GPUI Notes
 
 - expected crate/module surface: `pug_gpui::primitives::time_field`
+- Spec struct: `TimeFieldSpec` in primitives crate
+- GPUI must provide its own time-entry editing UI since there is no native input[type="time"]
+- Must expose time value, min/max constraints, and step through accessibility tree
+- Focus ring treatment must match outline spec
 
 ## 11. Parity Checklist
 
-- [ ] time value semantics match
-- [ ] disabled and descriptive semantics match
-- [ ] min/max/step posture stays equivalent
+### Tier 1: Strict Parity
+
+- [ ] value and valueChange semantics match
+- [ ] min, max, step constraints match
+- [ ] disabled state matches
+- [ ] accessible name from label or ariaLabel matches
+- [ ] describedBy relationship matches
+
+### Tier 2: Visual Parity
+
+- [ ] control height uses control-height token
+- [ ] padding uses space-control-x token
+- [ ] border and border-radius match
+- [ ] background uses background-surface token
+- [ ] typography (body-family, body-size, body-lineHeight) matches
+- [ ] focus ring (border-width-focus, accent-focusRing, 0.125rem offset) matches
+- [ ] disabled opacity matches
+
+### Tier 3: Implementation Freedom
+
+- [ ] native time-entry UI vs GPUI custom time editing stays internal
+- [ ] transition timing is platform-owned
 
 ## 12. Known Deltas
 
 | Delta | Why Allowed | Approval Status | Follow-Up |
 |-------|-------------|-----------------|-----------|
 | native editing affordances may differ | platform time-entry controls differ | allowed | keep public value meaning strict |
+| GPUI provides custom time editing UI | no native input[type="time"] in GPUI | allowed | must preserve value format and constraints |
 
 ## 13. Approval And Adoption Notes
 
-- contract status: `seed contract`
-- downstream adopters: settings rows, booking fields, datetime pickers
-
-## Next Task
-
-Use `TimeField` as the standalone time-value primitive, and let composed
-datetime controls build on it rather than redefining time entry semantics.
+- contract status: `detailed contract`
+- approvers: pending
+- downstream adopters: settings rows, booking fields, datetime pickers,
+  DateTimePicker composite
+- future follow-up: consider custom time picker overlay for consistency if
+  browser-native pickers prove too inconsistent

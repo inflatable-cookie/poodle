@@ -68,7 +68,6 @@ Foundation contracts define the lowest reusable surface in Pug.
 - `badge.md`
 - `pill.md`
 - `callout.md`
-- `banner.md`
 - `status-indicator.md`
 
 ## Accessibility Rule

@@ -100,7 +100,7 @@
     font-weight: 600;
     letter-spacing: 0.04em;
     text-transform: uppercase;
-    background: color-mix(in srgb, var(--pug-color-background-elevated) 74%, transparent);
+    background: color-mix(in srgb, var(--pug-surface) 91%, var(--pug-color-text-primary));
   }
 
   .table__cell--row-header {

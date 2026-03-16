@@ -15,6 +15,12 @@ alias = "pug"
 "gpui:test" = "cargo test -p pug-gpui --manifest-path packages/gpui/adapter/Cargo.toml"
 "gpui:preview" = [{ task = "gpui:run" }]
 
+# Jetstream native preview (game engine)
+"jetstream:build" = "cargo build -p pug-jetstream-preview --manifest-path packages/jetstream/preview/Cargo.toml"
+"jetstream:run" = "cargo run -p pug-jetstream-preview --manifest-path packages/jetstream/preview/Cargo.toml"
+"jetstream:test" = "cd packages/jetstream/adapter && cargo test"
+"jetstream:preview" = [{ task = "jetstream:run" }]
+
 # Reports
 "report:parity" = [
   { task = "tokens:build" },

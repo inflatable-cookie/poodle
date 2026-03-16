@@ -1,6 +1,5 @@
 <script lang="ts">
-  import { DetailRow } from "@pug/svelte-composites";
-  import { Eyebrow, Button } from "@pug/svelte-primitives";
+  import { DetailRow, Eyebrow, Button } from "@pug/svelte-primitives";
 </script>
 
 <div class="specimen">

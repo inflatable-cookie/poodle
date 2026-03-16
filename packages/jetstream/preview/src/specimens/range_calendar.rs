@@ -1,0 +1,141 @@
+//! RangeCalendar specimen — calendar grid with range selection highlighting.
+
+use jetstream_runtime::game_ui::*;
+use pug_adapter::ThemeProvider;
+
+use crate::theme_bridge;
+
+pub fn render(tree: &mut UiTree, theme: &dyn ThemeProvider) -> UiNodeId {
+    let text_primary = theme_bridge::text_primary(theme);
+    let text_secondary = theme_bridge::text_secondary(theme);
+    let text_inverse = theme_bridge::text_inverse(theme);
+    let accent = theme_bridge::accent_base(theme);
+    let bg_elevated = theme_bridge::elevated_background(theme);
+    let border = theme_bridge::border_subtle(theme);
+
+    let root = tree.create(Widget::Panel, UiStyle {
+        direction: Direction::Column,
+        width: Sizing::Grow(1.0),
+        gap: 20.0,
+        ..UiStyle::default()
+    });
+
+    // ── Range selected (10–20) ──
+    section_label(tree, root, "Range Selected (10th – 20th)", text_secondary);
+    {
+        let cal = tree.create(Widget::Panel, UiStyle {
+            direction: Direction::Column,
+            width: Sizing::Fixed(232.0),
+            background: Some(bg_elevated),
+            border_color: Some(border),
+            border_width: 1.0,
+            corner_radius: 8.0,
+            padding: Edges { top: 0.0, right: 0.0, bottom: 8.0, left: 0.0 },
+            ..UiStyle::default()
+        });
+        tree.add_child(root, cal);
+
+        // Header
+        let nav = tree.create(Widget::Panel, UiStyle {
+            direction: Direction::Row,
+            width: Sizing::Grow(1.0),
+            padding: Edges { top: 12.0, right: 12.0, bottom: 8.0, left: 12.0 },
+            align: Align::Center, justify: Justify::Center,
+            ..UiStyle::default()
+        });
+        tree.add_child(cal, nav);
+
+        let month = tree.create(Widget::Label { text: "March 2026".to_string() }, UiStyle {
+            text_color: Some(text_primary), text_size: Some(13.0), ..UiStyle::default()
+        });
+        tree.add_child(nav, month);
+
+        // DOW headers
+        let dow_row = grid_row(tree, cal);
+        for day in &["Su", "Mo", "Tu", "We", "Th", "Fr", "Sa"] {
+            day_header(tree, dow_row, day, text_secondary);
+        }
+
+        // Weeks — show range 10-20 highlighted
+        let range = 10..=20_u8;
+        let weeks: &[&[u8]] = &[
+            &[1, 2, 3, 4, 5, 6, 7],
+            &[8, 9, 10, 11, 12, 13, 14],
+            &[15, 16, 17, 18, 19, 20, 21],
+            &[22, 23, 24, 25, 26, 27, 28],
+        ];
+
+        let range_bg = theme_bridge::tint(accent, 0.15);
+
+        for week in weeks {
+            let row = grid_row(tree, cal);
+            for &d in *week {
+                let is_start = d == 10;
+                let is_end = d == 20;
+                let in_range = range.contains(&d);
+
+                let bg = if is_start || is_end {
+                    Some(accent)
+                } else if in_range {
+                    Some(range_bg)
+                } else {
+                    None
+                };
+
+                let fg = if is_start || is_end {
+                    text_inverse
+                } else {
+                    text_primary
+                };
+
+                let cell = tree.create(Widget::Panel, UiStyle {
+                    width: Sizing::Fixed(28.0), height: Sizing::Fixed(28.0),
+                    corner_radius: if is_start || is_end { 14.0 } else { 4.0 },
+                    background: bg, align: Align::Center,
+                    justify: Justify::Center, ..UiStyle::default()
+                });
+                tree.add_child(row, cell);
+
+                let lbl = tree.create(Widget::Label { text: d.to_string() }, UiStyle {
+                    text_color: Some(fg), text_size: Some(11.0), ..UiStyle::default()
+                });
+                tree.add_child(cell, lbl);
+            }
+        }
+    }
+
+    root
+}
+
+fn section_label(tree: &mut UiTree, parent: UiNodeId, text: &str, color: glam::Vec4) {
+    let lbl = tree.create(Widget::Label { text: text.to_string() }, UiStyle {
+        text_color: Some(color), text_size: Some(11.0), ..UiStyle::default()
+    });
+    tree.add_child(parent, lbl);
+}
+
+fn grid_row(tree: &mut UiTree, parent: UiNodeId) -> UiNodeId {
+    let row = tree.create(Widget::Panel, UiStyle {
+        direction: Direction::Row,
+        width: Sizing::Grow(1.0),
+        padding: Edges { top: 0.0, right: 8.0, bottom: 0.0, left: 8.0 },
+        gap: 2.0, justify: Justify::Center,
+        ..UiStyle::default()
+    });
+    tree.add_child(parent, row);
+    row
+}
+
+fn day_header(tree: &mut UiTree, parent: UiNodeId, text: &str, color: glam::Vec4) {
+    let cell = tree.create(Widget::Panel, UiStyle {
+        width: Sizing::Fixed(28.0), height: Sizing::Fixed(24.0),
+        align: Align::Center, justify: Justify::Center,
+        ..UiStyle::default()
+    });
+    tree.add_child(parent, cell);
+
+    let lbl = tree.create(Widget::Label { text: text.to_string() }, UiStyle {
+        text_color: Some(color), text_size: Some(10.0), ..UiStyle::default()
+    });
+    tree.add_child(cell, lbl);
+}

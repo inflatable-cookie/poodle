@@ -101,13 +101,23 @@
     color: var(--pug-color-status-danger);
   }
 
-  .field__optional,
+  .field__optional {
+    color: var(--pug-color-text-secondary);
+    font-family: var(--pug-typography-body-family);
+    font-size: 0.75rem;
+    line-height: var(--pug-typography-body-lineHeight);
+  }
+
+  .field__description,
+  .field__message {
+    font-family: var(--pug-typography-body-family);
+    font-size: 0.75rem;
+    line-height: var(--pug-typography-body-lineHeight);
+  }
+
   .field__description,
   .field__message--pending {
     color: var(--pug-color-text-secondary);
-    font-family: var(--pug-typography-body-family);
-    font-size: var(--pug-typography-body-size);
-    line-height: var(--pug-typography-body-lineHeight);
   }
 
   .field__message--error {

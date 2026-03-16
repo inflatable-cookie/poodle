@@ -1,31 +1,34 @@
 # Number Entry
 
-Status: seed contract
-Updated: 2026-03-11
+Status: detailed contract
+Updated: 2026-03-15
 
 ## 1. Purpose
 
 - Component name: `NumberEntry`
 - Layer: `foundation`
 - Summary: a numeric text-entry control with optional increment/decrement
-  affordances and constrained numeric semantics
-- In scope: numeric value entry, validation bounds, step behavior, optional
-  steppers
-- Out of scope: slider interaction, knob/fader semantics, scientific editors
+  stepper affordances and constrained numeric semantics
+- In scope: numeric value entry, validation bounds (min/max), step behavior,
+  precision formatting, optional stepper buttons, blur-commit clamping
+- Out of scope: slider interaction, knob/fader semantics, scientific notation
+  editors, currency formatting
 
 ## 2. Anatomy
 
 ```text
-[Root]
-  ├── [Input Control]
-  └── [Stepper Controls] (optional)
+[Root .number-entry]  <div>
+  ├── [Input Control .number-entry__control]  <input type="text" inputmode="decimal">
+  └── [Steppers .number-entry__steppers] (conditional, when showSteppers)
+        ├── [Decrement Button]  <button>
+        └── [Increment Button]  <button>
 ```
 
 | Part | Required | Description | Token Targets |
 |------|----------|-------------|---------------|
-| Root | yes | numeric field chrome | background, border, radius, focus ring |
-| Input Control | yes | editable numeric text surface | typography, text color |
-| Stepper Controls | no | increment/decrement affordances | icon/action tokens |
+| Root | yes | numeric field chrome container | background, border, radius, focus ring |
+| Input Control | yes | editable numeric text surface | typography, text color, padding |
+| Steppers | no | increment/decrement button pair | background, border-radius, color |
 
 ## 3. Props And Inputs
 
@@ -33,25 +36,27 @@ Updated: 2026-03-11
 
 | Prop | Type | Default | Required | Notes |
 |------|------|---------|----------|-------|
+| `id` | `string` | — | yes | HTML id for the input element |
 | `value` | `number \| null` | `null` | no | controlled numeric value |
 | `defaultValue` | `number \| null` | `null` | no | uncontrolled initial value |
-| `placeholder` | `string \| null` | `null` | no | optional hint |
-| `min` | `number \| null` | `null` | no | lower bound |
-| `max` | `number \| null` | `null` | no | upper bound |
+| `placeholder` | `string \| null` | `null` | no | hint text when empty |
+| `min` | `number \| null` | `null` | no | lower bound; null means unbounded |
+| `max` | `number \| null` | `null` | no | upper bound; null means unbounded |
 | `step` | `number` | `1` | no | increment/decrement size |
-| `precision` | `number \| null` | `null` | no | optional decimal formatting hint |
-| `isDisabled` | `boolean` | `false` | no | disables editing |
+| `precision` | `number \| null` | `null` | no | decimal places for formatting; null means auto |
+| `name` | `string \| undefined` | `undefined` | no | form field name |
+| `isDisabled` | `boolean` | `false` | no | disables editing and steppers |
 | `isReadOnly` | `boolean` | `false` | no | allows selection without editing |
-| `validationState` | `"none" \| "invalid" \| "valid" \| "pending"` | `"none"` | no | state treatment |
-| `showSteppers` | `boolean` | `false` | no | shows increment/decrement controls |
+| `validationState` | `"none" \| "invalid" \| "valid" \| "pending"` | `"none"` | no | visual and assistive validation state |
+| `showSteppers` | `boolean` | `false` | no | shows increment/decrement stepper buttons |
 | `ariaLabel` | `string \| null` | `null` | no | required when no external label exists |
-| `onValueChange` | `(value: number \| null) => void` | none | no | value change callback |
-| `onSubmit` | `(value: number \| null) => void` | none | no | commit callback |
+| `describedBy` | `string \| null` | `null` | no | aria-describedby target |
 
 ### Controlled And Uncontrolled
 
-- controlled: `value` plus `onValueChange`
+- controlled: `value` plus `valueChange` event
 - uncontrolled: `defaultValue`
+- do not mix controlled and uncontrolled modes simultaneously
 
 ## 4. States
 
@@ -59,131 +64,193 @@ Updated: 2026-03-11
 
 | State | Trigger | Expected Result |
 |-------|---------|-----------------|
-| default | resting | neutral numeric field |
-| focus | focused | visible active treatment |
-| invalid | `validationState="invalid"` or parse/bounds failure | error emphasis |
-| disabled | `isDisabled=true` | muted field |
-| readOnly | `isReadOnly=true` | selectable without editing |
+| default | resting | neutral numeric field chrome |
+| focus | keyboard or pointer focus | focus ring via `box-shadow` on root |
+| invalid | `validationState="invalid"` | border-color changes to `status-danger` |
+| valid | `validationState="valid"` | border-color changes to `status-success` |
+| pending | `validationState="pending"` | border-color changes to `accent-base` |
+| disabled | `isDisabled=true` | non-interactive, stepper buttons show `cursor: not-allowed`, `opacity: state-opacity-disabled` |
+| readOnly | `isReadOnly=true` | selectable but not editable |
 
 ### Component States
 
 | State | Trigger | Expected Result |
 |-------|---------|-----------------|
-| valid numeric text | user enters parseable value | numeric value available |
-| transient text | user enters partial numeric text | edit preserved until commit/blur policy resolves it |
-| bounds-adjusted | stepper or commit exceeds min/max | clamped or rejected per contract policy |
+| valid numeric text | user enters parseable value | numeric value emitted via valueChange |
+| transient text | user enters partial numeric text | edit preserved until blur resolves it |
+| bounds-adjusted | blur or stepper exceeds min/max | value clamped to bounds |
+| step-snapped | blur with step constraint | value snapped to nearest step increment |
 
 ## 5. Events
 
 | Event | When It Fires | Payload | Notes |
 |-------|---------------|---------|-------|
-| `onValueChange` | numeric value meaningfully changes | `number \| null` | partial invalid text should not emit misleading numeric values |
-| `onSubmit` | enter or explicit commit confirms current value | `number \| null` | optional |
-| `onIncrement` | stepper or keyboard increment action occurs | `number \| null` | optional higher-level passthrough |
-| `onDecrement` | stepper or keyboard decrement action occurs | `number \| null` | optional higher-level passthrough |
+| `valueChange` | numeric value changes (commit) | `{ value: number \| null }` | fires on blur-commit, stepper action, or keyboard step |
+| `submit` | Enter key pressed | none | signals explicit commit |
+| `increment` | value stepped up | none | via stepper button or ArrowUp |
+| `decrement` | value stepped down | none | via stepper button or ArrowDown |
+| `focus` | control receives focus | native event | passthrough |
+| `blur` | control loses focus | native event | triggers clamp-and-snap logic |
 
 ## 6. Accessibility
 
 ### Semantics
 
-- Role: native numeric input or equivalent spinbutton semantics
-- Required attributes: accessible name from label or `ariaLabel`
-- Optional attributes: value, min, max, invalid state, readonly state
-- Labeling rules: the control must expose numeric value and bounds semantics to
-  assistive technology
+- Role: uses `<input type="text" inputmode="decimal">` (not `type="number"` to avoid browser-native spinner conflicts)
+- Required attributes: accessible name from external label or `ariaLabel`
+- Optional attributes: `aria-describedby` from `describedBy`, `aria-invalid` when validationState is `"invalid"`, `aria-readonly` when `isReadOnly`
+- Labeling rules: placeholder text never counts as the accessible name
 
 ### Keyboard
 
 | Key | Behavior |
 |-----|----------|
-| numeric text input | edits the textual numeric representation |
-| `Arrow Up` | increments by `step` when stepping is enabled |
-| `Arrow Down` | decrements by `step` when stepping is enabled |
-| `Home` | moves to min when that interaction is explicitly supported |
-| `End` | moves to max when that interaction is explicitly supported |
-| `Enter` | optional commit |
-| `Tab` | exits control |
+| numeric/decimal text input | edits the textual numeric representation |
+| `Arrow Up` | increments value by `step` |
+| `Arrow Down` | decrements value by `step` |
+| `Enter` | fires submit event, commits current value |
+| `Tab` | exits control; blur triggers clamp-and-snap |
 
 ### Focus And Announcement
 
-- focus entry: visible active treatment and editable value context
-- focus exit: invalid or out-of-range state should remain programmatically
-  exposed
+- focus entry: root receives visible focus ring, input is editable
+- focus exit: blur triggers value clamping to min/max and snapping to step; validation state remains programmatically exposed
 - live-region behavior: none by default; validation errors are parent-owned
-- GPUI-native accessibility mapping notes: GPUI must expose spinbutton-like
-  value/min/max semantics when the number control presents stepping behavior,
-  and must suppress conflicting global shortcuts while focused
+- GPUI-native accessibility mapping notes: GPUI must expose spinbutton-like value/min/max semantics when stepping is enabled, and must suppress conflicting global shortcuts while focused
 
 ## 7. Layout
 
 ### Sizing
 
-- control height follows shared control-size tokens
-- optional stepper controls remain aligned and reachable without collapsing the
-  editable numeric area
+- Root min-height follows `size-control-height` token
+- Steppers display as a side-by-side pair within a grid column
+- Input control fills remaining horizontal space via `minmax(0, 1fr)`
 
 ### Composition
 
-- parent expectations: forms, inspectors, parameter sheets
+- parent expectations: forms, inspectors, parameter sheets, settings rows
 - child expectations: optional stepper controls only
-- resizing rules: text entry remains primary; stepper controls are auxiliary
+- resizing rules: text entry remains primary; stepper controls are auxiliary and do not collapse the editable area
 
-## 8. Token Usage
+## 8. Token Usage — Exact Values
 
-| Part | Token | Purpose |
-|------|-------|---------|
-| Root | text-input field tokens | base numeric field chrome |
-| Input Control | `semantic.typography.body.*` and text roles | numeric text |
-| Stepper Controls | button/icon token roles | increment/decrement affordances |
-| Focus treatment | `semantic.color.accent.focusRing` and `semantic.border.width.focus` | focus |
-| Validation | `semantic.color.status.*` | invalid/pending/valid emphasis |
+### Root `.number-entry`
+
+| Property | Value |
+|----------|-------|
+| `display` | `grid` |
+| `grid-template-columns` | `minmax(0, 1fr) auto` |
+| `align-items` | `stretch` |
+| `min-height` | `var(--pug-size-control-height)` |
+| `border` | `0.0625rem solid var(--pug-color-border-default)` |
+| `border-radius` | `var(--pug-radius-control)` |
+| `background` | `var(--pug-color-background-surface)` |
+
+### Root — validation states
+
+| State | Property | Value |
+|-------|----------|-------|
+| `invalid` | `border-color` | `var(--pug-color-status-danger)` |
+| `valid` | `border-color` | `var(--pug-color-status-success)` |
+| `pending` | `border-color` | `var(--pug-color-accent-base)` |
+
+### Root — focus-within
+
+| Property | Value |
+|----------|-------|
+| `box-shadow` | `0 0 0 var(--pug-border-width-focus) color-mix(in srgb, var(--pug-color-accent-focusRing) 28%, transparent)` |
+
+### Input Control `.number-entry__control`
+
+| Property | Value |
+|----------|-------|
+| `min-width` | `0` |
+| `padding` | `0 var(--pug-space-control-x)` |
+| `border` | `0` |
+| `background` | `transparent` |
+| `color` | `var(--pug-color-text-primary)` |
+| `font-family` | `var(--pug-typography-body-family)` |
+| `font-size` | `var(--pug-typography-body-size)` |
+| `line-height` | `var(--pug-typography-body-lineHeight)` |
+| `outline` | `0` |
+
+### Steppers Container `.number-entry__steppers`
+
+| Property | Value |
+|----------|-------|
+| `display` | `grid` |
+| `grid-template-columns` | `repeat(2, minmax(0, 1fr))` |
+| `gap` | `0.0625rem` |
+| `padding` | `0.0625rem` |
+
+### Stepper Button `.number-entry__steppers button`
+
+| Property | Value |
+|----------|-------|
+| `min-width` | `1.75rem` |
+| `border` | `0` |
+| `border-radius` | `calc(var(--pug-radius-control) - 0.125rem)` |
+| `background` | `color-mix(in srgb, var(--pug-color-background-elevated) 88%, transparent)` |
+| `color` | `var(--pug-color-text-primary)` |
+| `cursor` | `pointer` |
+| `font` | `inherit` |
+
+### Stepper Button — disabled
+
+| Property | Value |
+|----------|-------|
+| `cursor` | `not-allowed` |
+| `opacity` | `var(--pug-state-opacity-disabled)` |
 
 ## 9. Svelte Notes
 
-- may use native numeric input semantics or text-input composition with numeric
-  parsing rules, but public behavior must stay consistent
-- browser-specific spinner visuals should not define the contract
+- Uses `<input type="text" inputmode="decimal">` instead of `type="number"` to avoid browser-native spinner conflicts and gain full control over step/clamp behavior
+- Browser-native number spinners are not rendered; custom steppers replace them when `showSteppers` is enabled
+- Blur handler performs clamp-to-bounds and snap-to-step logic before emitting final value
+- Precision prop controls decimal formatting on blur commit
 
 ## 10. GPUI Notes
 
 - expected crate/module surface: `pug_gpui::primitives::number_entry`
-- GPUI implementation must intentionally expose numeric value, bounds, step
-  semantics, and focused-text shortcut suppression
-- partial numeric editing states should preserve user input without emitting
-  misleading committed values
+- GPUI implementation must intentionally expose numeric value, bounds, step semantics, and focused-text shortcut suppression
+- Partial numeric editing states should preserve user input without emitting misleading committed values
+- Stepper buttons must remain reachable via pointer; keyboard ArrowUp/ArrowDown handle stepping without requiring steppers to be visible
 
 ## 11. Parity Checklist
 
 ### Tier 1: Strict Parity
 
-- [ ] value/min/max/step semantics match
+- [ ] value/min/max/step/precision semantics match
 - [ ] accessible numeric role/value exposure matches
 - [ ] partial-entry and invalid-entry behavior matches
-- [ ] keyboard increment/decrement behavior matches when enabled
+- [ ] keyboard increment/decrement behavior matches
+- [ ] blur clamp-and-snap behavior matches
+- [ ] submit (Enter) behavior matches
 
 ### Tier 2: Visual Parity
 
-- [ ] field sizing and stepper placement remain proportionally aligned
-- [ ] validation emphasis uses the same semantic roles
+- [ ] field sizing uses the same control-height token
+- [ ] stepper button sizing and border-radius match
+- [ ] stepper background color-mix formula matches
+- [ ] validation border-color states match
+- [ ] focus ring box-shadow formula matches (28% mix)
+- [ ] disabled opacity matches
 
 ### Tier 3: Implementation Freedom
 
-- [ ] native numeric-input internals vs GPUI numeric parsing internals stay internal
+- [ ] native text input internals vs GPUI numeric parsing internals stay internal
+- [ ] step-snap rounding strategy is implementation-owned
 
 ## 12. Known Deltas
 
 | Delta | Why Allowed | Approval Status | Follow-Up |
 |-------|-------------|-----------------|-----------|
-| browser-native spinner visuals may differ or be suppressed | platform visuals are not the contract | allowed | keep numeric semantics and accessibility strict |
+| browser-native spinner visuals suppressed in Svelte | `type="text"` eliminates native spinners; GPUI has none | allowed | keep numeric semantics strict |
+| stepper visual details may differ slightly in GPUI | rendering model differs | allowed | keep stepping behavior and bounds strict |
 
 ## 13. Approval And Adoption Notes
 
-- contract status: `seed contract`
+- contract status: `detailed contract`
 - approvers: pending
-- downstream adopters: inspectors, parameter sheets, settings forms
-- future follow-up: coordinate with slider/range primitives in `g01.009`
-
-## Next Task
-
-Keep numeric text entry distinct from slider or knob controls when the value
-primitive family lands in `g01.009`.
+- downstream adopters: inspectors, parameter sheets, settings forms, property editors
+- future follow-up: coordinate with slider/range primitives; share clamp/snap utility logic

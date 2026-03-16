@@ -27,7 +27,7 @@
   }
 
   .badge[data-variant="muted"] {
-    background: color-mix(in srgb, var(--pug-color-background-surface) 88%, transparent);
+    background: color-mix(in srgb, var(--pug-surface) 96%, var(--pug-color-text-primary));
     color: var(--pug-color-text-secondary);
   }
 </style>

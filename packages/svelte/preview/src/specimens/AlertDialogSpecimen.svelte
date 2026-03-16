@@ -16,7 +16,7 @@
 <div class="specimen">
   <div class="specimen__group">
     <Eyebrow>Danger tone (default)</Eyebrow>
-    <Button variant="danger" on:click={() => (dangerOpen = true)}>Delete item</Button>
+    <Button tone="danger" on:click={() => (dangerOpen = true)}>Delete item</Button>
     <AlertDialog
       open={dangerOpen}
       title="Delete this item?"
@@ -53,7 +53,7 @@
 
   <div class="specimen__group">
     <Eyebrow>With body content</Eyebrow>
-    <Button variant="danger" on:click={() => (asyncOpen = true)}>Remove user</Button>
+    <Button tone="danger" on:click={() => (asyncOpen = true)}>Remove user</Button>
     <AlertDialog
       open={asyncOpen}
       title="Remove this user?"

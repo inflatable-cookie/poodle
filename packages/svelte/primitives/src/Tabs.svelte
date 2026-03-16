@@ -387,8 +387,7 @@
 
   /* Card variant: transparent tab inside card */
   .pug-tabs[data-variant="card"] .pug-tabs__tab {
-    min-height: calc(var(--pug-size-control-height) - 0.75rem);
-    padding: 0 0.625rem;
+    padding: 0 0.5rem;
     color: var(--pug-color-text-primary);
   }
 
@@ -439,6 +438,7 @@
     justify-content: center;
     width: 1.25rem;
     height: 1.25rem;
+    min-height: 0;
     padding: 0;
     border: 0;
     border-radius: calc(var(--pug-radius-control) - 0.125rem);

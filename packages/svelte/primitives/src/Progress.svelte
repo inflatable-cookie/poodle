@@ -35,7 +35,7 @@
     width: 100%;
     min-height: 0.5rem;
     border-radius: 999px;
-    background: color-mix(in srgb, var(--pug-color-background-surface) 92%, transparent);
+    background: color-mix(in srgb, var(--pug-surface) 96%, var(--pug-color-text-primary));
   }
 
   .progress__indicator {

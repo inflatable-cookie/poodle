@@ -1,6 +1,6 @@
 <script lang="ts">
-  import { DetailSection, DetailRow } from "@pug/svelte-composites";
-  import { Button, Eyebrow } from "@pug/svelte-primitives";
+  import { DetailSection } from "@pug/svelte-composites";
+  import { Button, DetailRow, Eyebrow } from "@pug/svelte-primitives";
 </script>
 
 <div class="specimen">

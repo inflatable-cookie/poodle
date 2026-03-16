@@ -17,17 +17,42 @@
   }>();
 
   let rootElement: HTMLDivElement | null = null;
+  let overlayElement: HTMLDivElement | null = null;
   let itemElements: Array<HTMLButtonElement | null> = [];
   let uncontrolledOpen = defaultOpen;
   let uncontrolledAnchorPoint = anchorPoint;
   let highlightIndex = 0;
+
+  let adjustedPosition: { left: string; top: string } | null = null;
 
   $: isControlled = open !== null;
   $: isOpen = isControlled ? open === true : uncontrolledOpen;
   $: currentAnchorPoint = anchorPoint ?? uncontrolledAnchorPoint;
   $: actionableItems = menuNavigableItems(items);
   $: if (isOpen) {
-    tick().then(() => itemElements[highlightIndex]?.focus());
+    adjustedPosition = null;
+    tick().then(() => {
+      if (overlayElement && currentAnchorPoint) {
+        const rect = overlayElement.getBoundingClientRect();
+        const vw = window.innerWidth;
+        const vh = window.innerHeight;
+        const pad = 8;
+        let x = currentAnchorPoint.x;
+        let y = currentAnchorPoint.y;
+
+        if (x + rect.width > vw - pad) {
+          x = Math.max(pad, x - rect.width);
+        }
+
+        if (y + rect.height > vh - pad) {
+          y = Math.max(pad, vh - rect.height - pad);
+        }
+
+        adjustedPosition = { left: `${x}px`, top: `${y}px` };
+      }
+
+      itemElements[highlightIndex]?.focus();
+    });
   }
 
   function setOpen(nextOpen: boolean): void {
@@ -77,7 +102,7 @@
         return;
       }
 
-      if (!rootElement.contains(event.target as Node)) {
+      if (!overlayElement || !overlayElement.contains(event.target as Node)) {
         setOpen(false);
       }
     }
@@ -124,10 +149,13 @@
 
   {#if isOpen && currentAnchorPoint}
     <div
+      bind:this={overlayElement}
       class="context-menu__overlay"
       role="menu"
       aria-label={ariaLabel ?? undefined}
-      style={`left: ${currentAnchorPoint.x}px; top: ${currentAnchorPoint.y}px;`}
+      style={adjustedPosition
+        ? `left: ${adjustedPosition.left}; top: ${adjustedPosition.top};`
+        : `left: ${currentAnchorPoint.x}px; top: ${currentAnchorPoint.y}px; visibility: hidden;`}
     >
       {#each items as item (item.value)}
         {#if item.kind === "separator"}
@@ -214,6 +242,7 @@
     color: var(--pug-color-text-primary);
     cursor: pointer;
     font: inherit;
+    font-size: 0.875rem;
     text-align: left;
   }
 

@@ -183,6 +183,7 @@
     border: 0.0625rem solid color-mix(in srgb, var(--pug-color-border-default) 78%, transparent);
     border-radius: var(--pug-radius-surface);
     background: color-mix(in srgb, var(--pug-color-background-elevated) 98%, var(--pug-color-background-panel));
+    --pug-surface: color-mix(in srgb, var(--pug-color-background-elevated) 98%, var(--pug-color-background-panel));
     box-shadow: var(--pug-elevation-dialog);
   }
 

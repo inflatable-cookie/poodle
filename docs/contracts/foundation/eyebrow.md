@@ -1,7 +1,7 @@
 # Eyebrow
 
-Status: seed contract
-Updated: 2026-03-13
+Status: detailed contract
+Updated: 2026-03-15
 
 ## 1. Purpose
 
@@ -15,14 +15,14 @@ Updated: 2026-03-13
 ## 2. Anatomy
 
 ```text
-[Root]
-  └── [Text content]
+[Root .eyebrow]
+  └── [Text content (default slot)]
 ```
 
-| Part | Required | Description | Token Targets |
-|------|----------|-------------|---------------|
-| Root | yes | `<p>` element with uppercase label styling | typography, text color |
-| Text content | yes | short label text via default slot | none (inherits) |
+| Part | Element | Required | Description |
+|------|---------|----------|-------------|
+| Root | `<p>` | yes | paragraph element with uppercase label styling |
+| Text content | slot | yes | short label text via default slot |
 
 ## 3. Props And Inputs
 
@@ -34,7 +34,7 @@ Updated: 2026-03-13
 
 ### Controlled And Uncontrolled
 
-- display primitive only
+- Display primitive only; no internal state.
 
 ## 4. States
 
@@ -79,8 +79,8 @@ No internal state.
 
 ### Sizing
 
-- sizes to content width
-- single-line by default, no wrapping expected
+- Sizes to content width
+- Single-line by default, no wrapping expected
 
 ### Composition
 
@@ -89,30 +89,47 @@ No internal state.
 
 ## 8. Token Usage
 
-| Part | Token | Purpose |
-|------|-------|---------|
-| Root | `--pug-color-text-secondary` | label color |
-| Root | `--pug-typography-label-family` | font family |
+### Root `.eyebrow`
+
+| Property | Value |
+|----------|-------|
+| `margin` | `0` |
+| `color` | `var(--pug-color-text-secondary)` |
+| `font-family` | `var(--pug-typography-label-family)` |
+| `font-size` | `0.6875rem` |
+| `font-weight` | `600` |
+| `letter-spacing` | `0.12em` |
+| `line-height` | `1.5` |
+| `text-transform` | `uppercase` |
 
 ## 9. Svelte Notes
 
-- simple styled `<p>` with slot
-- no wrapper overhead
+- Renders as a simple styled `<p>` element with a default slot
+- No wrapper overhead; the root element is the `<p>` itself
+- `margin: 0` resets browser default paragraph margins
 
 ## 10. GPUI Notes
 
 - expected crate/module surface: `pug_gpui::primitives::eyebrow`
 - render as styled text with uppercase transform and letter-spacing
+- GPUI text rendering should apply the equivalent of `text-transform: uppercase`
+  either by transforming the string or via a text style flag
 
 ## 11. Parity Checklist
 
 ### Tier 1: Strict Parity
 
 - [ ] non-interactive text semantics match
+- [ ] renders as paragraph-level element
 
 ### Tier 2: Visual Parity
 
-- [ ] typography treatment matches (size, weight, spacing, transform)
+- [ ] font-size matches 0.6875rem
+- [ ] font-weight matches 600
+- [ ] letter-spacing matches 0.12em
+- [ ] text-transform uppercase applied
+- [ ] line-height matches 1.5
+- [ ] color matches `--pug-color-text-secondary`
 
 ### Tier 3: Implementation Freedom
 
@@ -126,7 +143,7 @@ No internal state.
 
 ## 13. Approval And Adoption Notes
 
-- contract status: `seed contract`
+- contract status: `detailed contract`
 - approvers: pending
 - downstream adopters: section headers, card intros, metadata labels, page
   headers

@@ -3,7 +3,7 @@
 </script>
 
 <script lang="ts">
-  import { createEventDispatcher } from "svelte";
+  import { createEventDispatcher, onMount } from "svelte";
 
   import { findNextEnabledIndex, firstEnabledIndex } from "./internal";
 
@@ -19,6 +19,7 @@
   }>();
 
   const menuId = ++nextNavigationMenuId;
+  let rootElement: HTMLDivElement | null = null;
   let triggerElements: Array<HTMLButtonElement | null> = [];
   let uncontrolledValue = defaultValue;
   let focusIndex = 0;
@@ -84,9 +85,36 @@
       setValue(null);
     }
   }
+
+  onMount(() => {
+    function handlePointerDown(event: MouseEvent): void {
+      if (!currentValue || !rootElement) {
+        return;
+      }
+
+      if (!rootElement.contains(event.target as Node)) {
+        setValue(null);
+      }
+    }
+
+    function handleKeydown(event: KeyboardEvent): void {
+      if (event.key === "Escape" && currentValue) {
+        event.preventDefault();
+        setValue(null);
+      }
+    }
+
+    document.addEventListener("mousedown", handlePointerDown);
+    document.addEventListener("keydown", handleKeydown);
+
+    return () => {
+      document.removeEventListener("mousedown", handlePointerDown);
+      document.removeEventListener("keydown", handleKeydown);
+    };
+  });
 </script>
 
-<div class="navigation-menu">
+<div class="navigation-menu" bind:this={rootElement}>
   <nav
     class="navigation-menu__list"
     aria-label={ariaLabel ?? undefined}

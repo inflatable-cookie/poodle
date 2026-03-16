@@ -1,13 +1,20 @@
+<script context="module" lang="ts">
+  let nextTooltipId = 0;
+</script>
+
 <script lang="ts">
-  import { createEventDispatcher } from "svelte";
+  import { createEventDispatcher, onDestroy } from "svelte";
 
   import Icon from "./Icon.svelte";
-  import type { ButtonVariant, ControlSize } from "./types";
+  import type { ButtonTone, ButtonVariant, ControlSize, OverlayPlacement } from "./types";
 
   export let variant: ButtonVariant = "ghost";
+  export let tone: ButtonTone = "default";
   export let size: ControlSize = "md";
   export let icon: string;
   export let ariaLabel: string;
+  export let tooltip: string | null = null;
+  export let tooltipPlacement: OverlayPlacement = "top";
   export let isDisabled = false;
   export let isLoading = false;
   export let isPressed: boolean | null = null;
@@ -20,37 +27,84 @@
     blur: FocusEvent;
   }>();
 
+  const tooltipId = `pug-icon-tooltip-${++nextTooltipId}`;
+  let tooltipOpen = false;
+  let timer: ReturnType<typeof setTimeout> | null = null;
+
   $: isUnavailable = isDisabled || isLoading;
+  $: tooltipText = tooltip ?? ariaLabel;
+
+  function scheduleOpen(): void {
+    clearTimer();
+    timer = setTimeout(() => (tooltipOpen = true), 300);
+  }
+
+  function dismiss(): void {
+    clearTimer();
+    tooltipOpen = false;
+  }
+
+  function clearTimer(): void {
+    if (timer) {
+      clearTimeout(timer);
+      timer = null;
+    }
+  }
+
+  onDestroy(() => clearTimer());
 </script>
 
-<button
-  {type}
-  class="icon-button"
-  data-variant={variant}
-  data-size={size}
-  data-loading={isLoading}
-  data-pressed={isPressed === true}
-  disabled={isUnavailable}
-  aria-label={ariaLabel}
-  aria-describedby={describedBy ?? undefined}
-  aria-busy={isLoading ? "true" : undefined}
-  aria-pressed={isPressed === null ? undefined : isPressed ? "true" : "false"}
-  on:click={(event) => dispatch("click", event)}
-  on:focus={(event) => dispatch("focus", event)}
-  on:blur={(event) => dispatch("blur", event)}
+<span
+  class="icon-button-wrap"
+  on:mouseenter={scheduleOpen}
+  on:mouseleave={dismiss}
 >
-  {#if isLoading}
-    <span class="icon-button__spinner" aria-hidden="true"></span>
-  {:else}
-    <span class="icon-button__glyph" aria-hidden="true">
-      <slot><Icon name={icon} size="sm" /></slot>
+  <button
+    {type}
+    class="icon-button"
+    data-variant={variant}
+    data-tone={tone !== "default" ? tone : undefined}
+    data-size={size}
+    data-loading={isLoading}
+    data-pressed={isPressed === true}
+    disabled={isUnavailable}
+    aria-label={ariaLabel}
+    aria-describedby={tooltipOpen ? tooltipId : describedBy ?? undefined}
+    aria-busy={isLoading ? "true" : undefined}
+    aria-pressed={isPressed === null ? undefined : isPressed ? "true" : "false"}
+    on:click={(event) => dispatch("click", event)}
+    on:focus={scheduleOpen}
+    on:blur={dismiss}
+    on:focus={(event) => dispatch("focus", event)}
+    on:blur={(event) => dispatch("blur", event)}
+    on:keydown={(event) => {
+      if (event.key === "Escape") dismiss();
+    }}
+  >
+    {#if isLoading}
+      <span class="icon-button__spinner" aria-hidden="true"></span>
+    {:else}
+      <span class="icon-button__glyph" aria-hidden="true">
+        <slot><Icon name={icon} size="md" /></slot>
+      </span>
+    {/if}
+  </button>
+
+  {#if tooltipOpen && tooltipText}
+    <span id={tooltipId} class="icon-button__tooltip" data-placement={tooltipPlacement} role="tooltip">
+      {tooltipText}
     </span>
   {/if}
-</button>
+</span>
 
 <style>
+  .icon-button-wrap {
+    position: relative;
+    display: inline-flex;
+  }
+
   .icon-button {
-    --pug-icon-button-fill: color-mix(in srgb, var(--pug-color-background-surface) 58%, transparent);
+    --pug-icon-button-fill: transparent;
     --pug-icon-button-fill-hover: color-mix(
       in srgb,
       var(--pug-icon-button-fill) 76%,
@@ -61,7 +115,7 @@
       var(--pug-icon-button-fill) 64%,
       var(--pug-color-background-elevated)
     );
-    --pug-icon-button-border: color-mix(in srgb, var(--pug-color-border-subtle) 76%, transparent);
+    --pug-icon-button-border: transparent;
     --pug-icon-button-text: var(--pug-color-text-primary);
     display: inline-flex;
     align-items: center;
@@ -72,7 +126,7 @@
     border: 0.0625rem solid var(--pug-icon-button-border);
     border-radius: var(--pug-treatment-interactive-solid-radius, var(--pug-radius-control));
     background: var(--pug-icon-button-fill);
-    box-shadow: inset 0 0.0625rem 0 color-mix(in srgb, white 8%, transparent);
+    box-shadow: none;
     color: var(--pug-icon-button-text);
     cursor: pointer;
     transition:
@@ -96,16 +150,35 @@
     --pug-icon-button-fill: var(--pug-color-accent-base);
     --pug-icon-button-border: color-mix(in srgb, var(--pug-color-accent-base) 84%, black);
     --pug-icon-button-text: var(--pug-color-text-inverse);
+    box-shadow: inset 0 0.0625rem 0 color-mix(in srgb, white 8%, transparent);
   }
 
   .icon-button[data-variant="secondary"] {
     --pug-icon-button-fill: var(--pug-color-background-surface);
     --pug-icon-button-border: var(--pug-color-border-default);
+    box-shadow: inset 0 0.0625rem 0 color-mix(in srgb, white 8%, transparent);
   }
 
-  .icon-button[data-variant="danger"] {
+  .icon-button[data-tone="danger"] {
     --pug-icon-button-fill: color-mix(in srgb, var(--pug-color-status-danger) 16%, var(--pug-color-background-surface));
     --pug-icon-button-border: color-mix(in srgb, var(--pug-color-status-danger) 46%, var(--pug-color-border-default));
+  }
+
+  .icon-button[data-variant="primary"][data-tone="danger"] {
+    --pug-icon-button-fill: var(--pug-color-status-danger);
+    --pug-icon-button-border: color-mix(in srgb, var(--pug-color-status-danger) 84%, black);
+    --pug-icon-button-text: var(--pug-color-text-inverse);
+  }
+
+  .icon-button[data-variant="ghost"][data-tone="danger"] {
+    --pug-icon-button-fill: transparent;
+    --pug-icon-button-border: transparent;
+    --pug-icon-button-text: var(--pug-color-status-danger);
+  }
+
+  .icon-button[data-variant="ghost"][data-tone="danger"]:hover:not(:disabled) {
+    --pug-icon-button-border: color-mix(in srgb, var(--pug-color-status-danger) 46%, var(--pug-color-border-default));
+    background: color-mix(in srgb, var(--pug-color-status-danger) 10%, transparent);
   }
 
   .icon-button[data-pressed="true"] {
@@ -141,11 +214,16 @@
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    width: var(--pug-size-icon-md);
-    height: var(--pug-size-icon-md);
+    width: 45%;
+    height: 45%;
     font-family: var(--pug-typography-code-family);
     font-size: 0.875rem;
     line-height: 1;
+  }
+
+  .icon-button__glyph :global(svg) {
+    width: 100%;
+    height: 100%;
   }
 
   .icon-button__spinner {
@@ -159,5 +237,47 @@
     to {
       transform: rotate(360deg);
     }
+  }
+
+  /* ── Tooltip ── */
+
+  .icon-button__tooltip {
+    position: absolute;
+    z-index: var(--pug-overlay-z-menu);
+    max-width: 16rem;
+    padding: 0.375rem 0.5rem;
+    border: 0.0625rem solid color-mix(in srgb, var(--pug-color-border-default) 72%, transparent);
+    border-radius: calc(var(--pug-radius-control) - 0.125rem);
+    background: color-mix(in srgb, var(--pug-color-background-elevated) 98%, var(--pug-color-background-panel));
+    box-shadow: var(--pug-elevation-overlay);
+    color: var(--pug-color-text-primary);
+    font-size: 0.6875rem;
+    line-height: 1.35;
+    white-space: nowrap;
+    pointer-events: none;
+  }
+
+  .icon-button__tooltip[data-placement^="top"] {
+    bottom: calc(100% + 0.375rem);
+    left: 50%;
+    transform: translateX(-50%);
+  }
+
+  .icon-button__tooltip[data-placement^="bottom"] {
+    top: calc(100% + 0.375rem);
+    left: 50%;
+    transform: translateX(-50%);
+  }
+
+  .icon-button__tooltip[data-placement^="left"] {
+    top: 50%;
+    right: calc(100% + 0.375rem);
+    transform: translateY(-50%);
+  }
+
+  .icon-button__tooltip[data-placement^="right"] {
+    top: 50%;
+    left: calc(100% + 0.375rem);
+    transform: translateY(-50%);
   }
 </style>

@@ -1,7 +1,7 @@
 <script lang="ts">
   import { createEventDispatcher, onDestroy, tick } from "svelte";
 
-  import { Banner, Icon, SearchField, Skeleton } from "@pug/svelte-primitives";
+  import { Callout, Icon, SearchField, Skeleton } from "@pug/svelte-primitives";
   import { EmptyState } from "@pug/svelte-composites";
 
   import type { CommandActionItem, DiscoveryState } from "./types";
@@ -252,7 +252,7 @@
     <div class="command-palette__results">
       {#if state === "loading"}
         <div class="command-palette__state">
-          <Banner
+          <Callout
             tone="info"
             title="Loading commands"
             message="Keep the query visible while grouped actions and recent commands resolve."
@@ -268,7 +268,7 @@
         </div>
       {:else if state === "error"}
         <div class="command-palette__state">
-          <Banner
+          <Callout
             tone="danger"
             title="Command palette unavailable"
             message="Retry or fallback actions should remain visible when command discovery fails."

@@ -1,4 +1,4 @@
-export type ComponentTier = "primitive" | "composite";
+export type ComponentTier = "primitive" | "composite" | "shell";
 
 export type ComponentEntry = {
   slug: string;
@@ -39,11 +39,12 @@ export const primitiveComponents: ComponentEntry[] = [
   entry("Accordion", "primitive", P, "Expandable disclosure panels with single or multiple selection.", true),
   entry("AlertDialog", "primitive", P, "Focused confirmation modal for destructive or dangerous actions.", true),
   entry("Badge", "primitive", P, "Small status label for counts, tags, or indicators.", true),
-  entry("Banner", "primitive", P, "Persistent message bar with tone-based severity and optional actions.", true),
   entry("Box", "primitive", P, "Generic layout container with configurable padding and alignment.", true),
+  entry("BulkActionBar", "primitive", P, "Action bar for batch operations on selected items.", true),
   entry("Button", "primitive", P, "Primary interactive control for triggering actions.", true),
   entry("Calendar", "primitive", P, "Date grid for picking a single date.", true),
-  entry("Callout", "primitive", P, "Highlighted informational block with icon and message.", true),
+  entry("Callout", "primitive", P, "Informational block with tone, optional dismissal, actions, and ARIA announcements.", true),
+  entry("Card", "primitive", P, "Contained surface for grouped content with optional header and actions.", true),
   entry("Checkbox", "primitive", P, "Boolean toggle with label, supporting indeterminate state.", true),
   entry("Code", "primitive", P, "Syntax-highlighted code display with copy button and line numbers.", true),
   entry("ColorPicker", "primitive", P, "Color selection with native picker, hex input, and swatches.", true),
@@ -51,6 +52,7 @@ export const primitiveComponents: ComponentEntry[] = [
   entry("Combobox", "primitive", P, "Text input with filtered dropdown suggestions.", true),
   entry("ContextMenu", "primitive", P, "Right-click triggered menu overlay.", true),
   entry("DatePicker", "primitive", P, "Date selection with calendar popup.", true),
+  entry("DetailRow", "primitive", P, "Label-value pair for metadata display.", true),
   entry("DateRangePicker", "primitive", P, "Start and end date selection with dual calendar.", true),
   entry("DateTimePicker", "primitive", P, "Combined date and time selection.", true),
   entry("DateTimeRangePicker", "primitive", P, "Start/end date-time range selection.", true),
@@ -67,12 +69,17 @@ export const primitiveComponents: ComponentEntry[] = [
   entry("Icon", "primitive", P, "SVG icon from a swappable registry. Lucide default set.", true),
   entry("IconButton", "primitive", P, "Button variant displaying only an icon.", true),
   entry("Inline", "primitive", P, "Horizontal flex layout container.", true),
+  entry("ListCard", "primitive", P, "Structured list item card with leading/trailing slots.", true),
   entry("Menu", "primitive", P, "Dropdown menu with items, separators, and keyboard navigation.", true),
   entry("Menubar", "primitive", P, "Horizontal menu bar with dropdown sub-menus.", true),
   entry("Meter", "primitive", P, "Visual gauge for scalar values within a known range.", true),
+  entry("NavCard", "primitive", P, "Navigation-oriented card link with icon, badge, and arrow.", true),
+  entry("NavCardGrid", "primitive", P, "Responsive grid layout for NavCard navigation panels.", true),
   entry("NavigationMenu", "primitive", P, "Horizontal navigation with dropdown sub-menus.", true),
   entry("NumberEntry", "primitive", P, "Numeric input with increment/decrement controls.", true),
+  entry("OrderBy", "primitive", P, "Sort-control toolbar for data views with direction toggle.", true),
   entry("Pagination", "primitive", P, "Page navigation controls for paged data sets.", true),
+  entry("PaginationSummary", "primitive", P, "Textual summary of pagination state.", true),
   entry("Pill", "primitive", P, "Small inline label chip with tone and size variants.", true),
   entry("PinInput", "primitive", P, "Multi-digit code entry with separate character fields.", true),
   entry("Popover", "primitive", P, "Anchored overlay for contextual content.", true),
@@ -114,36 +121,22 @@ export const compositeComponents: ComponentEntry[] = [
   entry("AutonomousList", "composite", C, "Self-managing list with add, remove, and optional reorder.", true),
   entry("BlockEditor", "composite", C, "Block-based content editor with paragraph, heading, code, quote, list, image, and divider blocks.", true),
   entry("Breadcrumbs", "composite", C, "Hierarchical navigation trail showing current location.", true),
-  entry("BulkActionBar", "composite", C, "Action bar for batch operations on selected items.", true),
-  entry("Card", "composite", C, "Contained surface for grouped content with optional header and actions.", true),
   entry("CardRadioGroup", "composite", C, "Radio selection across rich card options with keyboard navigation.", true),
   entry("ConfirmAction", "composite", C, "Trigger element with confirmation prompt before executing dangerous actions.", true),
   entry("DataTable", "composite", C, "Feature-rich table with sorting, selection, and pagination.", true),
-  entry("DetailRow", "composite", C, "Label-value pair for metadata display.", true),
-  entry("DetailSection", "composite", C, "Titled section for grouping detail content.", true),
-  entry("DetailShell", "composite", C, "Full detail page layout with header, sections, and sidebar.", true),
   entry("EmbedInput", "composite", C, "URL or embed code input with provider detection and parsing.", true),
   entry("EmbedPreview", "composite", C, "Rich preview card for embedded content with aspect ratio and loading states.", true),
-  entry("EmbedShell", "composite", C, "Container for embedded external content with fallback.", true),
   entry("EmptyState", "composite", C, "Placeholder for empty data views with messaging and actions.", true),
   entry("FilterToolbar", "composite", C, "Toolbar with filter controls for data views.", true),
   entry("FormDialog", "composite", C, "Modal dialog with embedded form, validation, and submit/cancel actions.", true),
-  entry("GridShell", "composite", C, "Grid layout browse view with state management.", true),
   entry("InlineEditableField", "composite", C, "Click-to-edit inline text field with save and cancel.", true),
-  entry("ListCard", "composite", C, "Structured list item card with leading/trailing slots.", true),
-  entry("ListShell", "composite", C, "List layout browse view with state management.", true),
   entry("LogList", "composite", C, "Timestamped log viewer with level filtering and auto-scroll.", true),
   entry("MarkdownEditor", "composite", C, "Markdown authoring with formatting toolbar and live preview.", true),
-  entry("OrderBy", "composite", C, "Sort-control toolbar for data views with direction toggle.", true),
   entry("PageLoading", "composite", C, "Full-viewport loading overlay with spinner, progress, and cancel.", true),
-  entry("NavCard", "composite", C, "Navigation-oriented card link with icon, badge, and arrow.", true),
-  entry("NavCardGrid", "composite", C, "Responsive grid layout for NavCard navigation panels.", true),
   entry("MediaPicker", "composite", C, "Dialog for browsing and selecting media assets with upload.", true),
   entry("MediaPreview", "composite", C, "Media asset preview with metadata and fallback.", true),
   entry("MediaThumbnail", "composite", C, "Compact media thumbnail with overlay metadata.", true),
   entry("PageHeader", "composite", C, "Page-level header with title, actions, and breadcrumbs.", true),
-  entry("PaginationSummary", "composite", C, "Textual summary of pagination state.", true),
-  entry("PickerShell", "composite", C, "Container for search-and-select picker workflows.", true),
   entry("RelationPicker", "composite", C, "Searchable picker for selecting related items.", true),
   entry("ReorderableList", "composite", C, "Drag-and-drop reorderable list with keyboard support.", true),
   entry("SelectionSummary", "composite", C, "Summary display of current selection state.", true),
@@ -153,9 +146,19 @@ export const compositeComponents: ComponentEntry[] = [
   entry("VideoPlayer", "composite", C, "Video playback with overlay controls, fullscreen, and captions.", true),
 ].sort((a, b) => a.displayName.localeCompare(b.displayName));
 
+export const shellComponents: ComponentEntry[] = [
+  entry("DetailSection", "shell", C, "Titled section for grouping detail content.", true),
+  entry("DetailShell", "shell", C, "Full detail page layout with header, sections, and sidebar.", true),
+  entry("EmbedShell", "shell", C, "Container for embedded external content with fallback.", true),
+  entry("GridShell", "shell", C, "Grid layout browse view with state management.", true),
+  entry("ListShell", "shell", C, "List layout browse view with state management.", true),
+  entry("PickerShell", "shell", C, "Container for search-and-select picker workflows.", true),
+].sort((a, b) => a.displayName.localeCompare(b.displayName));
+
 export const allComponents: ComponentEntry[] = [
   ...primitiveComponents,
   ...compositeComponents,
+  ...shellComponents,
 ];
 
 export function findComponent(
@@ -166,6 +169,8 @@ export function findComponent(
     ? primitiveComponents
     : tier === "composite"
       ? compositeComponents
-      : allComponents;
+      : tier === "shell"
+        ? shellComponents
+        : allComponents;
   return list.find((c) => c.slug === slug);
 }

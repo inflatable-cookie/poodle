@@ -1,12 +1,11 @@
-export type SectionId = "primitives" | "composites" | "demo" | "tokens";
+export type SectionId = "primitives" | "composites" | "shells" | "tokens";
 
 export type Route = {
   section: SectionId;
   component?: string;
-  subscreen?: string;
 };
 
-const validSections: SectionId[] = ["primitives", "composites", "demo", "tokens"];
+const validSections: SectionId[] = ["primitives", "composites", "shells", "tokens"];
 
 export function parseRoute(hash: string): Route {
   const raw = hash.replace(/^#/, "").trim();
@@ -23,10 +22,6 @@ export function parseRoute(hash: string): Route {
   }
 
   if (segments.length >= 2) {
-    if (section === "demo") {
-      return { section, subscreen: segments[1] };
-    }
-
     return { section, component: segments[1] };
   }
 
@@ -36,10 +31,6 @@ export function parseRoute(hash: string): Route {
 export function buildHash(route: Route): string {
   if (route.component) {
     return `#${route.section}/${route.component}`;
-  }
-
-  if (route.subscreen) {
-    return `#${route.section}/${route.subscreen}`;
   }
 
   return `#${route.section}`;

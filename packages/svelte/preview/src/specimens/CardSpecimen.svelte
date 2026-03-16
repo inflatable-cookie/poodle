@@ -1,6 +1,5 @@
 <script lang="ts">
-  import { Card } from "@pug/svelte-composites";
-  import { Eyebrow } from "@pug/svelte-primitives";
+  import { Card, Eyebrow } from "@pug/svelte-primitives";
 </script>
 
 <div class="specimen">

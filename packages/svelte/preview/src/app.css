@@ -54,6 +54,7 @@ input:focus-visible {
 }
 
 .app-shell {
+  --pug-surface: var(--pug-color-background-canvas);
   --pug-treatment-interactive-radius: var(--pug-radius-control);
   --pug-treatment-interactive-fill: color-mix(in srgb, var(--pug-color-background-surface) 80%, transparent);
   --pug-treatment-interactive-fill-active: color-mix(
@@ -428,7 +429,6 @@ input:focus-visible {
 
 .app-shell[data-theme="light"] .docs-family-card,
 .app-shell[data-theme="light"] .docs-section-card,
-.app-shell[data-theme="light"] .demo-card,
 .app-shell[data-theme="light"] .summary-tile,
 .app-shell[data-theme="light"] .behavior-item,
 .app-shell[data-theme="light"] .workspace-persistence-panel {
@@ -734,7 +734,6 @@ input:focus-visible {
   gap: 0.625rem;
 }
 
-.demo-card,
 .summary-tile {
   display: grid;
   gap: 1.125rem;
@@ -743,11 +742,6 @@ input:focus-visible {
   border-radius: var(--pug-radius-surface);
   background: var(--pug-treatment-surface-fill);
   box-shadow: var(--pug-treatment-surface-shadow);
-}
-
-.demo-stack {
-  display: grid;
-  gap: 0.75rem;
 }
 
 .behavior-list {
@@ -967,71 +961,6 @@ input:focus-visible {
   max-width: 26rem;
 }
 
-.shared-demo-shell-panel {
-  display: grid;
-  gap: var(--pug-space-stack-lg);
-}
-
-.shared-demo-screen-tabs {
-  padding: 0.75rem 1rem;
-  border-top: 0.0625rem solid color-mix(in srgb, var(--pug-color-border-subtle) 42%, transparent);
-  border-bottom: 0.0625rem solid color-mix(in srgb, var(--pug-color-border-subtle) 42%, transparent);
-  background: color-mix(in srgb, var(--pug-color-background-elevated) 54%, transparent);
-}
-
-.shared-demo-stage {
-  display: grid;
-  gap: var(--pug-space-stack-lg);
-  padding: var(--pug-space-panel-y) var(--pug-space-panel-x);
-}
-
-.shared-demo-toolbar {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--pug-space-inline-sm);
-}
-
-.shared-demo-grid {
-  display: grid;
-  grid-template-columns: minmax(0, 1.6fr) minmax(18rem, 0.9fr);
-  gap: var(--pug-space-inline-lg);
-  align-items: start;
-}
-
-.shared-demo-primary,
-.shared-demo-companion,
-.shared-demo-screen-stack,
-.shared-demo-overview-stack {
-  display: grid;
-  gap: var(--pug-space-stack-md);
-  min-width: 0;
-}
-
-.shared-demo-summary-grid {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: var(--pug-space-inline-md);
-}
-
-.shared-demo-form-grid {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: var(--pug-space-inline-md);
-}
-
-.shared-demo-inline-controls {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: var(--pug-space-inline-lg);
-}
-
-.shared-demo-inline-stack,
-.shared-demo-picker-toolbar {
-  display: grid;
-  gap: var(--pug-space-stack-sm);
-}
-
 .browse-list-item {
   display: flex;
   justify-content: space-between;
@@ -1052,17 +981,11 @@ input:focus-visible {
 
 @media (max-width: 68.75rem) {
   .brand-proof-grid,
-  .docs-overview-top,
-  .shared-demo-summary-grid {
+  .docs-overview-top {
     grid-template-columns: 1fr;
   }
 
   .workspace-signal-grid {
-    grid-template-columns: 1fr;
-  }
-
-  .shared-demo-grid,
-  .shared-demo-form-grid {
     grid-template-columns: 1fr;
   }
 

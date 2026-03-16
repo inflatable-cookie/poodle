@@ -1,11 +1,10 @@
 <script lang="ts">
-  import { BulkActionBar, type BulkAction } from "@pug/svelte-composites";
-  import { Eyebrow } from "@pug/svelte-primitives";
+  import { BulkActionBar, Eyebrow, type BulkAction } from "@pug/svelte-primitives";
 
   const actions: BulkAction[] = [
-    { id: "export", label: "Export" },
-    { id: "archive", label: "Archive" },
-    { id: "delete", label: "Delete", tone: "danger" },
+    { id: "export", label: "Export", icon: "download" },
+    { id: "archive", label: "Archive", icon: "inbox" },
+    { id: "delete", label: "Delete", icon: "trash-2", tone: "danger" },
   ];
 
   let lastAction = "";

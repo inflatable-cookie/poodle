@@ -1,7 +1,7 @@
 # Popover
 
-Status: seed contract
-Updated: 2026-03-11
+Status: detailed contract
+Updated: 2026-03-15
 
 ## 1. Purpose
 
@@ -10,25 +10,25 @@ Updated: 2026-03-11
 - Summary: an anchored non-modal overlay for contextual interactive or rich
   informational content
 - In scope: trigger/content relationship, anchored placement, outside dismissal,
-  optional initial focus, collision handling
+  optional initial focus, placement via CSS custom property
 - Out of scope: modal flows, menu-specific item semantics, long-lived pinned
   panels
 
 ## 2. Anatomy
 
 ```text
-[Root]
-  ├── [Trigger]
-  └── [Popover Surface]
-        └── [Content]
+[Root .popover]  <div>
+  ├── [Trigger .popover__trigger]  <div>
+  └── [Surface .popover__surface]  <div> (conditional)
+        └── [Content] (slot)
 ```
 
 | Part | Required | Description | Token Targets |
 |------|----------|-------------|---------------|
-| Root | yes | state owner | overlay state |
-| Trigger | yes | invokes the popover | button or field roles, focus |
-| Popover Surface | conditional | anchored floating shell | surface, border, radius, elevation |
-| Content | yes | informational or interactive content | spacing, typography |
+| Root | yes | relative positioning host and state owner | position context |
+| Trigger | yes | invokes the popover | focus ring |
+| Surface | conditional | anchored floating shell | surface background, border, radius, elevation |
+| Content | yes | informational or interactive content | caller-owned |
 
 ## 3. Props And Inputs
 
@@ -36,18 +36,34 @@ Updated: 2026-03-11
 
 | Prop | Type | Default | Required | Notes |
 |------|------|---------|----------|-------|
-| `open` | `boolean` | `false` | no | controlled open state |
+| `open` | `boolean \| null` | `null` | no | controlled open state |
 | `defaultOpen` | `boolean` | `false` | no | uncontrolled initial state |
-| `placement` | `string` | `"bottom-start"` | no | placement hint |
-| `offset` | `number` | `8` | no | trigger gap |
+| `placement` | `OverlayPlacement` | `"bottom-start"` | no | placement hint |
+| `offset` | `number` | `8` | no | trigger gap in pixels, set as CSS custom property |
 | `dismissOnOutsideInteract` | `boolean` | `true` | no | outside dismissal |
-| `initialFocus` | `"first-focusable" \| "content" \| "none"` | `"first-focusable"` | no | initial focus strategy |
+| `initialFocus` | `"first-focusable" \| "content"` | `"first-focusable"` | no | initial focus strategy |
 | `ariaLabel` | `string \| null` | `null` | no | optional label when no internal heading exists |
-| `onOpenChange` | `(open: boolean) => void` | none | no | open-state callback |
+
+### Type Definitions
+
+```
+OverlayPlacement:
+  "top" | "top-start" | "top-end" |
+  "bottom" | "bottom-start" | "bottom-end" |
+  "left" | "left-start" | "left-end" |
+  "right" | "right-start" | "right-end"
+```
+
+### Slots
+
+| Slot | Purpose |
+|------|---------|
+| trigger | trigger element |
+| default | popover body content |
 
 ### Controlled And Uncontrolled
 
-- controlled: `open` plus `onOpenChange`
+- controlled: `open` plus `openChange` event
 - uncontrolled: `defaultOpen`
 - popover content state remains external to the primitive
 
@@ -69,7 +85,7 @@ Open/closed state and placement state are required.
 
 | Event | When It Fires | Payload | Notes |
 |-------|---------------|---------|-------|
-| `onOpenChange` | popover opens or closes | boolean | trigger, outside interact, or escape driven |
+| `openChange` | popover opens or closes | `{ open: boolean }` | trigger, outside interact, or escape driven |
 
 ## 6. Accessibility
 
@@ -107,7 +123,8 @@ Open/closed state and placement state are required.
 
 ### Sizing
 
-- content sizes to intrinsic needs within viewport limits
+- surface min-width: 14rem, max-width: min(24rem, 90vw)
+- content sizes to intrinsic needs within these constraints
 - anchored width may optionally match the trigger when the use case requires it
 
 ### Composition
@@ -116,13 +133,69 @@ Open/closed state and placement state are required.
 - child expectations: informational or interactive content blocks
 - resizing rules: placement collision handling should preserve reachability
 
-## 8. Token Usage
+## 8. Token Usage — Exact Values
 
-| Part | Token | Purpose |
-|------|-------|---------|
-| Popover Surface | surface, border, radius, elevation, and overlay roles | floating shell |
-| Content | spacing and typography roles | internal layout |
-| Motion | motion roles | open and close transitions when used |
+### CSS Custom Properties
+
+| Var | Purpose |
+|-----|---------|
+| `--pug-popover-offset` | set from `offset` prop (default produces `0.5rem` equivalent at 8px) |
+
+### Root (.popover) — base styles
+
+| Property | Value |
+|----------|-------|
+| `position` | `relative` |
+| `display` | `inline-flex` |
+
+### Trigger (.popover__trigger)
+
+| Property | Value |
+|----------|-------|
+| `display` | `inline-flex` |
+
+### Trigger focus-visible — .popover__trigger:focus-visible
+
+| Property | Value |
+|----------|-------|
+| `outline` | `var(--pug-border-width-focus) solid var(--pug-color-accent-focusRing)` |
+| `outline-offset` | `0.125rem` |
+
+### Surface (.popover__surface)
+
+| Property | Value |
+|----------|-------|
+| `position` | `absolute` |
+| `z-index` | `var(--pug-overlay-z-menu)` |
+| `min-width` | `14rem` |
+| `max-width` | `min(24rem, 90vw)` |
+| `padding` | `var(--pug-space-panel-y) var(--pug-space-panel-x)` |
+| `border` | `0.0625rem solid color-mix(in srgb, var(--pug-color-border-default) 72%, transparent)` |
+| `border-radius` | `var(--pug-radius-surface)` |
+| `background` | `color-mix(in srgb, var(--pug-color-background-elevated) 98%, var(--pug-color-background-panel))` |
+| `--pug-surface` | `color-mix(in srgb, var(--pug-color-background-elevated) 98%, var(--pug-color-background-panel))` |
+| `box-shadow` | `var(--pug-elevation-overlay)` |
+
+### Placement rules — position offsets by placement value
+
+| Placement prefix | Properties |
+|------------------|------------|
+| `bottom-*` | `top: calc(100% + var(--pug-popover-offset))`, `left: 0` |
+| `top-*` | `bottom: calc(100% + var(--pug-popover-offset))`, `left: 0` |
+| `right-*` | `top: 0`, `left: calc(100% + var(--pug-popover-offset))` |
+| `left-*` | `top: 0`, `right: calc(100% + var(--pug-popover-offset))` |
+
+### Placement alignment — end modifier
+
+| Modifier | Properties |
+|----------|------------|
+| `*-end` | `left: auto`, `right: 0` |
+
+### Data Attributes
+
+| Attribute | Source |
+|-----------|--------|
+| `data-placement` | resolved placement value |
 
 ## 9. Svelte Notes
 
@@ -130,6 +203,9 @@ Open/closed state and placement state are required.
   focus-restoration semantics
 - if the content traps focus, the component should likely be `Dialog` or
   `Drawer` instead
+- `--pug-popover-offset` CSS custom property is set from the `offset` prop,
+  enabling placement rules to reference it in `calc()` expressions
+- surface uses `position: absolute` relative to the root's `position: relative`
 
 ## 10. GPUI Notes
 
@@ -137,6 +213,9 @@ Open/closed state and placement state are required.
 - GPUI implementation must intentionally model anchored overlay behavior,
   outside-dismiss rules, and non-modal focus flow through native window or view
   constructs
+- surface sizing constraints must match: min-width 14rem, max-width
+  min(24rem, 90vw)
+- border uses 72% opacity color-mix for border-default
 
 ## 11. Parity Checklist
 
@@ -145,31 +224,38 @@ Open/closed state and placement state are required.
 - [ ] trigger/content relationship and labeling match
 - [ ] open, close, outside-dismiss, and escape behavior match
 - [ ] focus handoff and restoration match
+- [ ] initialFocus strategy (first-focusable vs content) matches
 
 ### Tier 2: Visual Parity
 
-- [ ] surface hierarchy, spacing, and elevation use comparable token roles
+- [ ] surface min-width 14rem, max-width min(24rem, 90vw)
+- [ ] border: 0.0625rem solid with 72% opacity border color
+- [ ] background: 98% elevated mixed with panel
+- [ ] border-radius: radius-surface token
+- [ ] box-shadow: elevation-overlay
+- [ ] padding: panel-y / panel-x
+- [ ] trigger focus ring matches (focus width, focusRing color, 0.125rem offset)
+- [ ] placement offset uses --pug-popover-offset custom property
 
 ### Tier 3: Implementation Freedom
 
 - [ ] exact collision engine and rendering strategy stay internal
+- [ ] CSS custom property vs GPUI prop access stays internal
 
 ## 12. Known Deltas
 
 | Delta | Why Allowed | Approval Status | Follow-Up |
 |-------|-------------|-----------------|-----------|
 | exact placement fallback order may differ | overlay engine internals vary | allowed | keep trigger relation, dismissal, and focus rules strict |
+| color-mix transparency blending | GPUI may use direct alpha blending instead of CSS color-mix | allowed | same visual result required |
 
 ## 13. Approval And Adoption Notes
 
-- contract status: `seed contract`
+- contract status: `detailed contract`
 - approvers: pending
 - downstream adopters: anchored helpers, compact inspector surfaces, shell
   affordances
 - future follow-up: connect richer picker and command-surface composites in
   later milestones
 
-## Next Task
-
-Use `Popover` for anchored rich content that stays non-modal; use `Dialog` or
-`Drawer` when the workflow needs blocking modality or focus trapping.
+> **Surface elevation**: Popover is a surface creator — see [surface-elevation.md](./surface-elevation.md).

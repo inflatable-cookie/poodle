@@ -40,9 +40,9 @@
   </div>
 
   <div class="specimen__group">
-    <Eyebrow>Danger variant</Eyebrow>
+    <Eyebrow>Danger tone</Eyebrow>
     <SplitButton
-      variant="danger"
+      tone="danger"
       items={[
         { value: "delete-selected", label: "Delete selected" },
         { value: "delete-all", label: "Delete all" },

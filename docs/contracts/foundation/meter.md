@@ -1,86 +1,215 @@
 # Meter
 
-Status: seed contract
-Updated: 2026-03-12
+> **Surface elevation**: Meter is a surface consumer (80% subtle contrast) — see [surface-elevation.md](./surface-elevation.md).
+
+Status: detailed contract
+Updated: 2026-03-15
 
 ## 1. Purpose
 
 - Component name: `Meter`
 - Layer: `foundation`
 - Summary: a bounded measurement display for current level within a known range
-- In scope: value, range, low/high/optimum hints
+- In scope: value, range, low/high/optimum hints, native meter semantics
 - Out of scope: progress-task completion semantics and animated loading
 
 ## 2. Anatomy
 
 ```text
-[Root]
-  ├── [Track]
-  └── [Value Fill]
+[Root .meter]
+  ├── [Native <meter> .meter__native] (hidden, provides semantics)
+  ├── [Track .meter__track]
+  │     └── [Fill .meter__fill]
 ```
+
+| Part | Element | Required | Description |
+|------|---------|----------|-------------|
+| Root | `div` | yes | grid container for meter layout |
+| Native | `<meter>` | yes | hidden native element providing browser meter semantics |
+| Track | `span` | yes | visible track shell with rounded background |
+| Fill | `span` | yes | visible fill bar representing current value |
 
 ## 3. Props And Inputs
 
-- `value`: `number`
-- `min`: `number`
-- `max`: `number`
-- `low`: `number | null`
-- `high`: `number | null`
-- `optimum`: `number | null`
-- `ariaLabel`: `string | null`
+### Public Props
+
+| Prop | Type | Default | Required | Notes |
+|------|------|---------|----------|-------|
+| `value` | `number` | `0` | no | current measurement value |
+| `min` | `number` | `0` | no | minimum range bound |
+| `max` | `number` | `100` | no | maximum range bound |
+| `low` | `number \| null` | `null` | no | low threshold hint (passed to native meter) |
+| `high` | `number \| null` | `null` | no | high threshold hint (passed to native meter) |
+| `optimum` | `number \| null` | `null` | no | optimum value hint (passed to native meter) |
+| `ariaLabel` | `string \| null` | `null` | no | accessible name for the meter |
+
+### Controlled And Uncontrolled
+
+- Controlled-only display primitive. All values are parent-owned.
+
+### Computed Values
+
+| Name | Formula |
+|------|---------|
+| `safeMax` | `max <= min ? min + 1 : max` |
+| `safeValue` | `clamp(value, min, safeMax)` |
+| `percentage` | `((safeValue - min) / (safeMax - min)) * 100` |
 
 ## 4. States
 
-- in-range
-- low
-- high
-- optimum
+### Visual States
+
+| State | Trigger | Expected Result |
+|-------|---------|-----------------|
+| empty | `value = min` | fill width is 0% |
+| partial | `min < value < max` | fill width reflects percentage |
+| full | `value >= max` | fill width is 100% |
+
+### Component States
+
+No internal state. The `low`, `high`, and `optimum` props are passed to the
+native `<meter>` element for browser semantics but do not change the visual
+fill color in the current implementation.
 
 ## 5. Events
 
-- none
+| Event | When It Fires | Payload | Notes |
+|-------|---------------|---------|-------|
+| none | n/a | n/a | display primitive only |
 
 ## 6. Accessibility
 
-- role: meter semantics or native equivalent
-- required semantics: current value and range
-- keyboard: none
+### Semantics
+
+- Role: native `<meter>` element provides meter semantics (hidden visually)
+- The root `div` carries `aria-label` when provided
+- The native `<meter>` receives `value`, `min`, `max`, and optional `low`,
+  `high`, `optimum` attributes
+- Labeling rules: `ariaLabel` should be provided when the meter's purpose is
+  not clear from surrounding context
+
+### Keyboard
+
+| Key | Behavior |
+|-----|----------|
+| none | not interactive |
+
+### Focus And Announcement
+
+- Focus entry: not focusable by default
+- Live-region behavior: parent-owned
+- GPUI-native accessibility mapping notes: GPUI must expose bounded-value
+  meter semantics distinct from progress semantics
 
 ## 7. Layout
 
-- width is parent-owned
-- remains compact and inline-friendly
+### Sizing
+
+- Width is parent-owned (`width: 100%`)
+- Track minimum height is `0.5rem`
+- Root uses grid layout with `gap: 0`
+
+### Composition
+
+- Parent expectations: health bars, storage usage, bounded scoring displays
+- Child expectations: none (fill is internal)
+- Resizing rules: fill width scales as a percentage of the track
 
 ## 8. Token Usage
 
-- background, status, and bounded-value display roles
+### Root `.meter`
+
+| Property | Value |
+|----------|-------|
+| `display` | `grid` |
+| `gap` | `0` |
+| `width` | `100%` |
+
+### Native Meter `.meter__native`
+
+| Property | Value |
+|----------|-------|
+| `position` | `absolute` |
+| `opacity` | `0` |
+| `pointer-events` | `none` |
+
+### Track `.meter__track`
+
+| Property | Value |
+|----------|-------|
+| `position` | `relative` |
+| `display` | `block` |
+| `overflow` | `hidden` |
+| `min-height` | `0.5rem` |
+| `border-radius` | `999px` |
+| `background` | `color-mix(in srgb, var(--pug-surface) 80%, var(--pug-color-background-elevated))` |
+
+### Fill `.meter__fill`
+
+| Property | Value |
+|----------|-------|
+| `display` | `block` |
+| `height` | `100%` |
+| `border-radius` | `inherit` |
+| `background` | `linear-gradient(90deg, color-mix(in srgb, var(--pug-color-status-success) 82%, white), var(--pug-color-status-success))` |
+
+### Fill — Inline Style
+
+| Property | Value |
+|----------|-------|
+| `width` | `{percentage}%` where percentage = ((safeValue - min) / (safeMax - min)) * 100 |
+
+### Token Reference
+
+| Token | Role |
+|-------|------|
+| `--pug-color-background-surface` | track background (mixed at 88% opacity) |
+| `--pug-color-status-success` | fill gradient endpoint and base |
 
 ## 9. Svelte Notes
 
-- native `<meter>` semantics are preferred when practical
+- Uses a hidden native `<meter>` element for browser semantics while rendering
+  a fully styled custom track and fill
+- Fill uses percentage-based `width` (not `scaleX` transform as Progress does)
+- The `low`, `high`, and `optimum` props are passed through to the native
+  `<meter>` but do not affect custom visual styling
 
 ## 10. GPUI Notes
 
-- expected crate/module surface: `pug_gpui::primitives::meter`
+- Expected crate/module surface: `pug_gpui::primitives::meter`
+- GPUI must expose bounded-value meter semantics distinct from progress
+  semantics through native accessibility APIs
 
 ## 11. Parity Checklist
 
-- [ ] bounded-value semantics match
-- [ ] range and optimum hints match
+### Tier 1: Strict Parity
+
+- [ ] bounded-value semantics match (value, min, max)
+- [ ] low/high/optimum hints are exposed to accessibility layer
 - [ ] progress-vs-meter meaning stays distinct
+
+### Tier 2: Visual Parity
+
+- [ ] track background uses `--pug-color-background-surface` at 88% mix
+- [ ] fill gradient uses `--pug-color-status-success` at 82% mix with white
+- [ ] border-radius 999px pill shape matches
+- [ ] min-height of 0.5rem matches
+
+### Tier 3: Implementation Freedom
+
+- [ ] hidden native meter approach is Svelte-specific; GPUI uses native APIs
+- [ ] fill rendering method (width vs other) is implementation choice
 
 ## 12. Known Deltas
 
 | Delta | Why Allowed | Approval Status | Follow-Up |
 |-------|-------------|-----------------|-----------|
 | native meter styling may vary | platform visuals are not the contract | allowed | keep measurement semantics strict |
+| hidden native meter is Svelte-specific | GPUI uses native accessibility APIs directly | allowed | ensure semantic parity |
 
 ## 13. Approval And Adoption Notes
 
-- contract status: `seed contract`
-- downstream adopters: health bars, storage usage, bounded scoring
-
-## Next Task
-
-Keep `Meter` distinct from `Progress` so measurement displays do not inherit
-task-completion semantics.
+- Contract status: `detailed contract`
+- Approvers: pending
+- Downstream adopters: health bars, storage usage, bounded scoring
+- Future follow-up: consider adding color shifts for low/high/optimum zones

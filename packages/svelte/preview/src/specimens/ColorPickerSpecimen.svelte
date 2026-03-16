@@ -2,6 +2,7 @@
   import { ColorPicker, Eyebrow } from "@pug/svelte-primitives";
 
   let color = "#6366f1";
+  let alphaColor = "#3b82f6";
 
   const brandSwatches = [
     "#ef4444", "#f97316", "#eab308", "#22c55e",
@@ -22,6 +23,17 @@
       bind:value={color}
       swatches={brandSwatches}
     />
+  </div>
+
+  <div class="specimen__group">
+    <Eyebrow>With alpha</Eyebrow>
+    <ColorPicker bind:value={alphaColor} showAlpha />
+    <p>Selected: <strong>{alphaColor}</strong></p>
+  </div>
+
+  <div class="specimen__group">
+    <Eyebrow>Default open, RGB mode</Eyebrow>
+    <ColorPicker value="#22c55e" defaultOpen defaultMode="rgb" />
   </div>
 
   <div class="specimen__group">

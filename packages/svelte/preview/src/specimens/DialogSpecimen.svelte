@@ -26,7 +26,7 @@
 
   <div class="specimen__group">
     <Eyebrow>Alert dialog</Eyebrow>
-    <Button variant="danger" on:click={() => (alertOpen = true)}>Delete item</Button>
+    <Button tone="danger" on:click={() => (alertOpen = true)}>Delete item</Button>
     <Dialog
       open={alertOpen}
       title="Delete item?"
@@ -36,7 +36,7 @@
     >
       <svelte:fragment slot="actions">
         <Button variant="ghost" on:click={() => (alertOpen = false)}>Cancel</Button>
-        <Button variant="danger" on:click={() => (alertOpen = false)}>Delete</Button>
+        <Button variant="primary" tone="danger" on:click={() => (alertOpen = false)}>Delete</Button>
       </svelte:fragment>
     </Dialog>
   </div>

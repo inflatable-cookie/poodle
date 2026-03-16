@@ -46,7 +46,7 @@
     overflow: hidden;
     min-height: 0.5rem;
     border-radius: 999px;
-    background: color-mix(in srgb, var(--pug-color-background-surface) 88%, transparent);
+    background: color-mix(in srgb, var(--pug-surface) 96%, var(--pug-color-text-primary));
   }
 
   .meter__fill {

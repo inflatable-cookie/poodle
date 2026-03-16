@@ -1,7 +1,7 @@
 # g10 Jetstream First-Class Component Build-Out, Preview App, And Visual Fidelity
 
-Status: planned
-Updated: 2026-03-15
+Status: complete
+Updated: 2026-03-16
 
 ## Context
 
@@ -55,22 +55,22 @@ documented in the delta register from `g08.011` and updated here.
 
 | ID | Milestone | Depends On | Class | Status |
 |----|-----------|------------|-------|--------|
-| 001 | Jetstream preview app scaffold and navigation shell | g08.014 | Foundation | Planned |
-| 002 | Component registry and specimen framework | 001 | Foundation | Planned |
-| 003 | Structural and layout primitive specimens | 002 | Specimens | Planned |
-| 004 | Action and input primitive specimens | 003 | Specimens | Planned |
-| 005 | Selection and feedback primitive specimens | 004 | Specimens | Planned |
-| 006 | Overlay and date/time primitive specimens | 005 | Specimens | Planned |
-| 007 | Form, data, and browse composite specimens | 006 | Specimens | Planned |
-| 008 | Editing, media, and operational composite specimens | 007 | Specimens | Planned |
-| 009 | Workstation surface specimens | 008 | Specimens | Planned |
-| 010 | Display controls — theme, density, control size | 009 | App shell | Planned |
-| 011 | Demo scene expansion — 6-screen parity | 010 | Alignment | Planned |
-| 012 | Visual parity audit — Svelte/GPUI vs Jetstream comparison | 011 | Hardening | Planned |
-| 013 | Delta register update and native adaptation documentation | 012 | Hardening | Planned |
-| 014 | Cross-runtime parity report — Jetstream evidence refresh | 013 | Hardening | Planned |
-| 015 | Accessibility and input model verification | 014 | Hardening | Planned |
-| 016 | Generation closeout | 015 | Closure | Planned |
+| 001 | Jetstream preview app scaffold and navigation shell | g08.014 | Foundation | Complete |
+| 002 | Component registry and specimen framework | 001 | Foundation | Complete |
+| 003 | Structural and layout primitive specimens | 002 | Specimens | Complete |
+| 004 | Action and input primitive specimens | 003 | Specimens | Complete |
+| 005 | Selection and feedback primitive specimens | 004 | Specimens | Complete |
+| 006 | Overlay and date/time primitive specimens | 005 | Specimens | Complete |
+| 007 | Form, data, and browse composite specimens | 006 | Specimens | Complete |
+| 008 | Editing, media, and operational composite specimens | 007 | Specimens | Complete |
+| 009 | Workstation surface specimens | 008 | Specimens | Complete |
+| 010 | Display controls — theme, density, control size | 009 | App shell | Complete |
+| 011 | Demo scene expansion — 6-screen parity | 010 | Alignment | Complete |
+| 012 | Visual parity audit — Svelte/GPUI vs Jetstream comparison | 011 | Hardening | Complete |
+| 013 | Delta register update and native adaptation documentation | 012 | Hardening | Complete |
+| 014 | Cross-runtime parity report — Jetstream evidence refresh | 013 | Hardening | Complete |
+| 015 | Accessibility and input model verification | 014 | Hardening | Complete |
+| 016 | Generation closeout | 015 | Closure | Complete |
 
 ## Dependency Shape
 
@@ -265,6 +265,15 @@ From the Jetstream rendering constraint document (g06.013) and g08:
 - **Scrolling**: vertical scroll with clipping — no momentum or snap
 - **Input**: keyboard + mouse + gamepad — no touch/multi-touch, no IME
 
-## Next Task
+## Completion Summary
 
-Open `g10.001` and begin the preview app scaffold.
+g10 is complete. The Jetstream preview app is a first-class deliverable with:
+- 125 specimen files covering all 117 renderable components
+- 4 section tabs (Primitives, Composites, Demo, Tokens)
+- Sidebar navigation with component catalogue
+- Display controls (theme, density, size, state probes)
+- 6-screen demo matching Svelte and GPUI
+- Token inspector with all semantic token categories
+- Delta register documenting 8 partial-parity adaptations
+- Cross-runtime parity report covering all three runtimes
+- 165 adapter tests passing, zero build errors

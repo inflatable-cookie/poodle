@@ -446,15 +446,15 @@ const packageSurfaceCoverageGroups: PackageSurfaceCoverageGroup[] = [
     kind: "component",
     status: "previewed",
     sectionIds: ["notification-suite"],
-    note: "The rebuilt shell now exercises shared feedback, menu, and toolbar primitives through the notification-facing shared demo route.",
-    exportNames: ["Banner", "Menu", "Skeleton", "StatusIndicator", "Tabs", "Toolbar"],
+    note: "Feedback, menu, and toolbar primitives exercised through notification-facing specimens.",
+    exportNames: ["Callout", "Menu", "Skeleton", "StatusIndicator", "Tabs", "Toolbar"],
   },
   {
     packageName: "@pug/svelte-primitives",
     kind: "component",
     status: "previewed",
     sectionIds: ["catalog-hub"],
-    note: "The docs shell and shared demo navigation exercise foundational disclosure, control, and chip primitives directly instead of custom shell-only controls.",
+    note: "Foundational disclosure, control, and chip primitives exercised directly in catalogue specimens.",
     exportNames: ["Accordion", "Button", "Checkbox", "Collapsible", "Pill", "Select", "Toggle", "ToggleGroup"],
   },
   {
@@ -462,7 +462,7 @@ const packageSurfaceCoverageGroups: PackageSurfaceCoverageGroup[] = [
     kind: "component",
     status: "previewed",
     sectionIds: ["catalog-hub"],
-    note: "The shared demo target now visibly adopts additional workflow and overlay primitives even when no single legacy docs section owns them cleanly.",
+    note: "Additional workflow and overlay primitives previewed in catalogue specimens.",
     exportNames: ["Drawer", "Popover", "SegmentedControl", "Table"],
   },
   {
@@ -470,7 +470,7 @@ const packageSurfaceCoverageGroups: PackageSurfaceCoverageGroup[] = [
     kind: "component",
     status: "previewed",
     sectionIds: ["catalog-hub"],
-    note: "The rebuilt shared demo now includes a dedicated primitive coverage deck so every public primitive export is directly reviewable from the parity target shell.",
+    note: "Every public primitive export is directly reviewable from the catalogue.",
     exportNames: [
       "Badge",
       "Box",

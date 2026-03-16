@@ -6,7 +6,6 @@ import AutonomousListSpecimen from "./AutonomousListSpecimen.svelte";
 import AlertDialogSpecimen from "./AlertDialogSpecimen.svelte";
 import BadgeSpecimen from "./BadgeSpecimen.svelte";
 import BlockEditorSpecimen from "./BlockEditorSpecimen.svelte";
-import BannerSpecimen from "./BannerSpecimen.svelte";
 import BoxSpecimen from "./BoxSpecimen.svelte";
 import BreadcrumbsSpecimen from "./BreadcrumbsSpecimen.svelte";
 import BulkActionBarSpecimen from "./BulkActionBarSpecimen.svelte";
@@ -123,7 +122,6 @@ export const specimenMap: Record<string, typeof SvelteComponent<any>> = {
   "alert-dialog": AlertDialogSpecimen,
   badge: BadgeSpecimen,
   "block-editor": BlockEditorSpecimen,
-  banner: BannerSpecimen,
   box: BoxSpecimen,
   breadcrumbs: BreadcrumbsSpecimen,
   "bulk-action-bar": BulkActionBarSpecimen,

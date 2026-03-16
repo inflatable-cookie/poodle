@@ -1,0 +1,196 @@
+# AlertDialog
+
+Status: detailed contract
+Updated: 2026-03-15
+
+## 1. Purpose
+
+- Component name: `AlertDialog`
+- Layer: `foundation`
+- Summary: a focused confirmation overlay for destructive or irreversible actions
+  that composes Dialog with alertdialog semantics
+- In scope: danger and warning tones, confirm/cancel action pair, working state
+  that prevents premature dismiss, alertdialog ARIA role
+- Out of scope: multi-step wizards, informational dialogs, inline confirmations,
+  non-modal alerts
+
+## 2. Anatomy
+
+```text
+[Root]  <Dialog kind="alertdialog">
+  ├── [Title]  via Dialog title prop
+  ├── [Description]  via Dialog description prop
+  └── [Actions slot]
+      ├── [Cancel Button]  <Button variant="ghost">
+      └── [Confirm Button]  <Button variant="primary"|"danger">
+```
+
+| Part | Required | Description | Token Targets |
+|------|----------|-------------|---------------|
+| Root (Dialog) | yes | composed Dialog with kind="alertdialog" | delegates to Dialog |
+| Cancel Button | yes | ghost Button for cancel action | delegates to Button |
+| Confirm Button | yes | primary or danger Button for confirm action | delegates to Button |
+
+## 3. Props And Inputs
+
+### Public Props
+
+| Prop | Type | Default | Required | Notes |
+|------|------|---------|----------|-------|
+| `open` | `boolean \| null` | `null` | no | controlled open state; `null` = uncontrolled |
+| `title` | `string` | — | yes | visible title text passed to Dialog |
+| `description` | `string \| null` | `null` | no | description text passed to Dialog |
+| `tone` | `"danger" \| "warning"` | `"danger"` | no | controls confirm button variant |
+| `confirmLabel` | `string` | `"Confirm"` | no | label for confirm button |
+| `cancelLabel` | `string` | `"Cancel"` | no | label for cancel button |
+| `ariaLabel` | `string \| null` | `null` | no | optional explicit accessible name |
+
+### Slots
+
+| Slot | Purpose |
+|------|---------|
+| default | optional body content between description and actions |
+
+### Controlled And Uncontrolled
+
+- `open` prop follows same controlled/uncontrolled pattern as Dialog
+- Internal `working` state is always internally managed
+
+## 4. States
+
+### Visual States
+
+| State | Trigger | Expected Result |
+|-------|---------|-----------------|
+| closed | `open=false` or default | dialog not rendered |
+| open | `open=true` or triggered | dialog visible with cancel and confirm buttons |
+| working | confirm activated | dismiss on escape and backdrop disabled, buttons remain visible |
+| danger tone | `tone="danger"` (default) | confirm button uses variant="danger" |
+| warning tone | `tone="warning"` | confirm button uses variant="primary" |
+
+## 5. Events
+
+| Event | When It Fires | Payload | Notes |
+|-------|---------------|---------|-------|
+| `confirm` | confirm button clicked | `void` | fires after working state resolves |
+| `cancel` | cancel button clicked or dialog dismissed | `void` | suppressed while working |
+| `openChange` | dialog open state changes | `{open: boolean}` | passthrough from Dialog |
+
+## 6. Accessibility
+
+### Semantics
+
+- Role: `alertdialog` via Dialog `kind` prop
+- `aria-modal`: `"true"` (via Dialog)
+- `aria-label`: from ariaLabel prop when provided
+- `aria-labelledby`: auto-linked to title (via Dialog)
+- `aria-describedby`: auto-linked to description (via Dialog)
+- Focus trap: managed by Dialog
+
+### Keyboard
+
+| Key | Behavior |
+|-----|----------|
+| `Enter` | activates focused button |
+| `Space` | activates focused button |
+| `Tab` | cycles focus within dialog (focus trap) |
+| `Shift+Tab` | cycles focus backward within dialog |
+| `Escape` | dismisses dialog (disabled while working) |
+
+### Focus And Announcement
+
+- focus entry: confirm button receives initial focus
+- focus exit: focus restores to previously focused element (via Dialog)
+- working state: escape and backdrop dismiss suppressed
+
+## 7. Layout
+
+### Sizing
+
+- Delegates entirely to Dialog sizing
+- Actions row: flex layout with gap, cancel left, confirm right
+
+### Composition
+
+- parent expectations: triggered by user action in any view context
+- child expectations: optional body content via default slot
+- resizing: inherits Dialog responsive behavior
+
+## 8. Token Usage — Exact Values
+
+AlertDialog has no unique CSS of its own. All visual presentation is delegated
+to the composed Dialog and Button components.
+
+### Confirm Button variant mapping
+
+| Tone | Button variant |
+|------|---------------|
+| `"danger"` | `"danger"` |
+| `"warning"` | `"primary"` |
+
+### Cancel Button
+
+| Property | Value |
+|----------|-------|
+| variant | `"ghost"` |
+
+### Dialog props passed through
+
+| Dialog Prop | Value |
+|-------------|-------|
+| `kind` | `"alertdialog"` |
+| `open` | from AlertDialog `open` prop |
+| `title` | from AlertDialog `title` prop |
+| `description` | from AlertDialog `description` prop |
+| `dismissOnEscape` | `false` while working, `true` otherwise |
+| `dismissOnBackdrop` | `false` while working, `true` otherwise |
+
+## 9. Svelte Notes
+
+- Composes `Dialog` component directly; does not replicate Dialog internals
+- `working` state is a reactive `$state(false)` boolean
+- Confirm handler sets `working = true`, dispatches `confirm`, caller resolves
+- `data-tone` attribute on root for testing hooks
+- Cancel button calls Dialog close and dispatches `cancel`
+
+## 10. GPUI Notes
+
+- expected crate/module surface: `pug_gpui::components::alert_dialog`
+- Composes `PugDialog` with `DialogKind::AlertDialog`
+- Working state modeled as internal `bool` field
+- Confirm and cancel are callback props
+- Tone enum maps to button variant selection
+
+## 11. Parity Checklist
+
+### Tier 1: Strict Parity
+
+- [ ] tone prop maps to correct confirm button variant
+- [ ] working state suppresses escape and backdrop dismiss
+- [ ] confirm and cancel events fire correctly
+- [ ] alertdialog role is set
+- [ ] focus trap is active
+
+### Tier 2: Visual Parity
+
+- [ ] cancel button is ghost variant
+- [ ] confirm button matches tone-to-variant mapping
+- [ ] Dialog visual presentation matches
+
+### Tier 3: Implementation Freedom
+
+- [ ] working state implementation details are platform-owned
+- [ ] focus target on open (confirm button) is recommended but platform-owned
+
+## 12. Known Deltas
+
+| Delta | Why Allowed | Approval Status | Follow-Up |
+|-------|-------------|-----------------|-----------|
+| No unique CSS deltas | delegates entirely to Dialog and Button | n/a | n/a |
+
+## 13. Approval And Adoption Notes
+
+- contract status: `detailed contract`
+- approvers: pending
+- downstream adopters: destructive action confirmations, settings changes, data deletion flows
+- future follow-up: async confirm pattern (Promise-based working resolution)

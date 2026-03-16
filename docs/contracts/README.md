@@ -98,7 +98,6 @@ above it in downstream repos such as Loophole.
 - `foundation/badge.md`
 - `foundation/pill.md`
 - `foundation/callout.md`
-- `foundation/banner.md`
 - `foundation/status-indicator.md`
 - `composites/README.md`
 - `composites/card.md`

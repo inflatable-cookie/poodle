@@ -1,6 +1,5 @@
 <script lang="ts">
-  import { PaginationSummary } from "@pug/svelte-composites";
-  import { Eyebrow } from "@pug/svelte-primitives";
+  import { Eyebrow, PaginationSummary } from "@pug/svelte-primitives";
 
   let page = 1;
 </script>

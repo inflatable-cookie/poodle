@@ -1,6 +1,5 @@
 <script lang="ts">
-  import { ListCard } from "@pug/svelte-composites";
-  import { Eyebrow, Icon } from "@pug/svelte-primitives";
+  import { ContextMenu, Eyebrow, Icon, ListCard, ListCardCounter, Pill, Badge } from "@pug/svelte-primitives";
 
   let lastClick = "";
 </script>
@@ -35,6 +34,124 @@
       >
         <svelte:fragment slot="leading"><Icon name="layers" /></svelte:fragment>
       </ListCard>
+    </div>
+  </div>
+
+  <div class="specimen__group">
+    <Eyebrow>Rounded-square leading (thumbnails)</Eyebrow>
+    <div class="specimen__stack">
+      <ListCard
+        title="hero-banner.png"
+        subtitle="Uploaded by Jamie · 4h ago"
+        meta="3.1 MB"
+        leadingShape="rounded-square"
+        isInteractive
+        on:click={() => (lastClick = "hero-banner.png")}
+      >
+        <svelte:fragment slot="leading"><Icon name="image" /></svelte:fragment>
+      </ListCard>
+      <ListCard
+        title="onboarding-flow.mp4"
+        subtitle="Screen recording · Today"
+        meta="128 MB"
+        leadingShape="rounded-square"
+        isInteractive
+        on:click={() => (lastClick = "onboarding-flow.mp4")}
+      >
+        <svelte:fragment slot="leading"><Icon name="play" /></svelte:fragment>
+      </ListCard>
+    </div>
+  </div>
+
+  <div class="specimen__group">
+    <Eyebrow>With badges</Eyebrow>
+    <div class="specimen__stack">
+      <ListCard
+        title="API integration guide"
+        subtitle="Updated yesterday"
+        meta="Draft"
+        isInteractive
+        on:click={() => (lastClick = "API integration guide")}
+      >
+        <svelte:fragment slot="leading"><Icon name="file-text" /></svelte:fragment>
+        <svelte:fragment slot="badges">
+          <Pill tone="accent" size="xs">New</Pill>
+        </svelte:fragment>
+      </ListCard>
+      <ListCard
+        title="Q4 planning deck"
+        subtitle="Shared with leadership"
+        isInteractive
+        on:click={() => (lastClick = "Q4 planning deck")}
+      >
+        <svelte:fragment slot="leading"><Icon name="layers" /></svelte:fragment>
+        <svelte:fragment slot="badges">
+          <Badge variant="muted">3</Badge>
+          <Pill tone="caution" size="xs">Review</Pill>
+        </svelte:fragment>
+      </ListCard>
+    </div>
+  </div>
+
+  <div class="specimen__group">
+    <Eyebrow>With footer counters</Eyebrow>
+    <div class="specimen__stack">
+      <ListCard
+        title="Design system"
+        subtitle="12 contributors"
+        leadingShape="rounded-square"
+        isInteractive
+        on:click={() => (lastClick = "Design system")}
+      >
+        <svelte:fragment slot="leading"><Icon name="folder" /></svelte:fragment>
+        <svelte:fragment slot="badges">
+          <Pill tone="positive" size="xs">Active</Pill>
+        </svelte:fragment>
+        <svelte:fragment slot="footer">
+          <ListCardCounter icon="file-text" count={24} tooltip="24 documents" />
+          <ListCardCounter icon="image" count={8} tooltip="8 images" />
+          <ListCardCounter icon="layers" count={3} tooltip="3 sub-folders" href="#sub-folders" />
+        </svelte:fragment>
+      </ListCard>
+      <ListCard
+        title="Brand guidelines"
+        subtitle="Last updated 2 weeks ago"
+        leadingShape="rounded-square"
+        isInteractive
+        on:click={() => (lastClick = "Brand guidelines")}
+      >
+        <svelte:fragment slot="leading"><Icon name="folder" /></svelte:fragment>
+        <svelte:fragment slot="footer">
+          <ListCardCounter icon="file-text" count={6} tooltip="6 documents" />
+          <ListCardCounter icon="image" count={42} tooltip="42 images" />
+        </svelte:fragment>
+      </ListCard>
+    </div>
+  </div>
+
+  <div class="specimen__group">
+    <Eyebrow>With context menu</Eyebrow>
+    <div class="specimen__stack">
+      <ContextMenu
+        items={[
+          { label: "Open", value: "open" },
+          { label: "Rename", value: "rename" },
+          { label: "Duplicate", value: "duplicate" },
+          { kind: "separator", label: "", value: "sep-1" },
+          { label: "Delete", value: "delete" },
+        ]}
+        on:action={(e) => (lastClick = `Action: ${e.detail.value}`)}
+      >
+        <ListCard
+          title="Right-click for actions"
+          subtitle="Context menu on the whole card"
+          meta="12 KB"
+          isInteractive
+          on:click={() => (lastClick = "Card clicked")}
+        >
+          <svelte:fragment slot="leading"><Icon name="file-text" /></svelte:fragment>
+        </ListCard>
+      </ContextMenu>
     </div>
   </div>
 

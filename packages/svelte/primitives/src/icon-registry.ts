@@ -45,13 +45,13 @@ const curatedNames: string[] = [
 
   // Status / feedback
   "alert-circle",
-  "alert-triangle",
+  "triangle-alert",
   "ban",
   "check-circle",
   "circle-help",
   "info",
   "loader",
-  "x-circle",
+  "circle-x",
 
   // Objects / UI chrome
   "bell",

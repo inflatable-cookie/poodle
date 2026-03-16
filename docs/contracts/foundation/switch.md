@@ -1,30 +1,36 @@
 # Switch
 
-Status: seed contract
-Updated: 2026-03-11
+Status: detailed contract
+Updated: 2026-03-15
 
 ## 1. Purpose
 
 - Component name: `Switch`
 - Layer: `foundation`
-- Summary: a binary on/off control with switch semantics
-- In scope: checked state, optional label, disabled/readonly states
-- Out of scope: mixed-state semantics, tri-state membership logic
+- Summary: a binary on/off control with switch semantics built on a hidden
+  native checkbox input with `role="switch"`; features a sliding thumb within a
+  track with label association
+- In scope: checked (on/off) state, optional label, disabled and readonly
+  semantics, controlled and uncontrolled value models
+- Out of scope: mixed-state semantics (see Checkbox), tri-state membership
+  logic (see TriStateSwitch)
 
 ## 2. Anatomy
 
 ```text
-[Root]
-  ├── [Track]
-  │     └── [Thumb]
-  └── [Label] (optional)
+[Root .switch]  <label>
+  ├── [Control .switch__control]  <input type="checkbox" role="switch"> (visually hidden)
+  ├── [Track .switch__track]  <span>
+  │     └── [Thumb .switch__thumb]  <span>
+  └── [Label .switch__label]  <span> (optional)
 ```
 
 | Part | Required | Description | Token Targets |
 |------|----------|-------------|---------------|
-| Root | yes | switch host | spacing, focus ring |
-| Track | yes | visible on/off track | background, border |
-| Thumb | yes | sliding control indicator | background |
+| Root | yes | label element wrapping the entire control | spacing, cursor |
+| Control | yes | hidden native checkbox with role="switch" for a11y | visually hidden |
+| Track | yes | visible on/off track housing the thumb | background, border, shadow, transition |
+| Thumb | yes | sliding indicator circle | background, shadow, transform, transition |
 | Label | no | visible text label | typography, text color |
 
 ## 3. Props And Inputs
@@ -33,18 +39,21 @@ Updated: 2026-03-11
 
 | Prop | Type | Default | Required | Notes |
 |------|------|---------|----------|-------|
-| `isChecked` | `boolean` | `false` | no | controlled on/off state |
+| `id` | `string \| undefined` | `undefined` | no | element id for external label association |
+| `isChecked` | `boolean \| null` | `null` | no | controlled on/off state; when non-null, component is controlled |
 | `defaultChecked` | `boolean` | `false` | no | uncontrolled initial state |
-| `isDisabled` | `boolean` | `false` | no | disables interaction |
-| `isReadOnly` | `boolean` | `false` | no | exposes state without allowing mutation |
-| `label` | `string \| null` | `null` | no | visible label |
-| `ariaLabel` | `string \| null` | `null` | no | required when no visible label exists |
-| `onCheckedChange` | `(checked: boolean) => void` | none | no | state-change callback |
+| `isDisabled` | `boolean` | `false` | no | disables interaction, applies disabled opacity |
+| `isReadOnly` | `boolean` | `false` | no | allows focus and reading but reverts any change attempt |
+| `label` | `string \| null` | `null` | no | visible label text |
+| `ariaLabel` | `string \| null` | `null` | no | accessible name; required when no visible label exists |
+| `describedBy` | `string \| null` | `null` | no | aria-describedby target id |
+| `name` | `string \| undefined` | `undefined` | no | form submission name |
 
 ### Controlled And Uncontrolled
 
-- controlled: `isChecked` plus `onCheckedChange`
-- uncontrolled: `defaultChecked`
+- controlled: `isChecked` (non-null) plus `checkedChange` event handler
+- uncontrolled: `defaultChecked` sets the initial state; component owns its own
+  state thereafter
 
 ## 4. States
 
@@ -52,112 +61,233 @@ Updated: 2026-03-11
 
 | State | Trigger | Expected Result |
 |-------|---------|-----------------|
-| off | default | thumb at off position |
-| on | `isChecked=true` | thumb at on position |
-| focus | focus enters | visible focus ring |
-| disabled | `isDisabled=true` | muted non-interactive state |
-| readOnly | `isReadOnly=true` | visible state without mutation |
+| off | default | thumb at left position, track has default border and muted background |
+| on | `isChecked=true` or user toggle | thumb slides right with accent color, track border and background shift to accent tints |
+| focus | native input receives focus-visible | focus ring outline on track |
+| disabled | `isDisabled=true` | reduced opacity, cursor not-allowed |
+| readOnly | `isReadOnly=true` | default cursor, change reverted on toggle attempt |
 
 ### Component States
 
-State table is sufficient.
+- internal checked state (uncontrolled mode)
 
 ## 5. Events
 
 | Event | When It Fires | Payload | Notes |
 |-------|---------------|---------|-------|
-| `onCheckedChange` | user toggles the switch | next boolean state | suppressed while disabled/readonly |
+| `checkedChange` | user toggles the switch | `{ checked: boolean }` | suppressed when disabled; when readOnly, the native change is reverted so no event fires |
 
 ## 6. Accessibility
 
 ### Semantics
 
-- Role: switch
-- Required attributes: accessible name from label or `ariaLabel`, checked state
-- Optional attributes: readonly state, description relation
-- Labeling rules: visible label or programmatic label required
+- Role: `role="switch"` on the hidden checkbox input
+- `id`: from prop, used for external `<label for>` association
+- `aria-label`: from ariaLabel prop; required when no visible label exists
+- `aria-describedby`: from describedBy prop
+- `aria-checked`: reflects current on/off state
+- `aria-readonly`: set when isReadOnly
+- `disabled`: native disabled attribute when isDisabled
+- Labeling rules: visible label or programmatic ariaLabel required; the root
+  `<label>` element wraps the control
 
 ### Keyboard
 
 | Key | Behavior |
 |-----|----------|
 | `Space` | toggles switch when interactive |
-| `Enter` | optional activation parity if platform uses button-like semantics |
+| `Enter` | toggles switch when interactive (parity with button-like switch semantics) |
 | `Tab` | moves focus into or past the switch |
 
 ### Focus And Announcement
 
-- focus entry: visible ring on the switch host
+- focus entry: visible focus ring on the track via `:focus-visible` on the
+  native input + adjacent sibling selector
 - focus exit: ring clears while on/off state remains visible
-- live-region behavior: none; checked state is announced through switch
+- live-region behavior: none; checked state is announced through switch role
   semantics
 - GPUI-native accessibility mapping notes: GPUI must expose switch role,
-  checked state, label, and readonly/disabled state explicitly
+  checked state, label, and readonly/disabled state explicitly through the
+  native accessibility tree
 
 ## 7. Layout
 
 ### Sizing
 
-- switch track and thumb proportions follow control-size tokens
+- track is fixed at 2.125rem wide by 1.25rem tall
+- thumb is fixed at 0.875rem diameter
+- thumb travels 0.875rem horizontally between off and on positions
 - label spacing remains stable regardless of state
 
 ### Composition
 
-- parent expectations: settings rows, filter bars, shell toggles
-- child expectations: optional visible label
-- resizing rules: track/thumb remain fixed proportionally while label can flex
+- parent expectations: settings rows, filter bars, shell toggles, Field wrappers
+- child expectations: optional visible label text
+- resizing rules: track/thumb remain fixed proportionally; label can flex with
+  parent
 
-## 8. Token Usage
+## 8. Token Usage — Exact Values
 
-| Part | Token | Purpose |
-|------|-------|---------|
-| Track | background and border roles | on/off shell |
-| Thumb | background roles | indicator |
-| Label | typography and text roles | label styling |
-| Focus ring | accent focus roles | focus |
-| Disabled | state opacity roles | disabled treatment |
+### Root `.switch`
+
+| Property | Value |
+|----------|-------|
+| `display` | `inline-flex` |
+| `align-items` | `center` |
+| `gap` | `var(--pug-space-inline-sm)` |
+| `color` | `var(--pug-color-text-primary)` |
+| `cursor` | `pointer` |
+
+### Root disabled `[data-disabled="true"]`
+
+| Property | Value |
+|----------|-------|
+| `cursor` | `not-allowed` |
+| `opacity` | `var(--pug-state-opacity-disabled)` |
+
+### Root readOnly `[data-read-only="true"]`
+
+| Property | Value |
+|----------|-------|
+| `cursor` | `default` |
+
+### Control `.switch__control`
+
+| Property | Value |
+|----------|-------|
+| `position` | `absolute` |
+| `opacity` | `0` |
+| `pointer-events` | `none` |
+
+### Track `.switch__track`
+
+| Property | Value |
+|----------|-------|
+| `display` | `inline-flex` |
+| `align-items` | `center` |
+| `width` | `2.125rem` |
+| `height` | `1.25rem` |
+| `padding` | `0.125rem` |
+| `border` | `0.0625rem solid var(--pug-color-border-default)` |
+| `border-radius` | `999px` |
+| `background` | `color-mix(in srgb, var(--pug-color-background-surface) 86%, transparent)` |
+| `box-shadow` | `inset 0 0.0625rem 0 color-mix(in srgb, white 8%, transparent)` |
+| `transition` | `background, border-color, box-shadow` at `var(--pug-motion-duration-interaction)` with `var(--pug-motion-easing-standard)` |
+
+### Track checked `:checked + .switch__track`
+
+| Property | Value |
+|----------|-------|
+| `border-color` | `color-mix(in srgb, var(--pug-color-accent-base) 58%, var(--pug-color-border-default))` |
+| `background` | `color-mix(in srgb, var(--pug-color-accent-base) 24%, var(--pug-color-background-surface))` |
+
+### Track focus `:focus-visible + .switch__track`
+
+| Property | Value |
+|----------|-------|
+| `outline` | `var(--pug-border-width-focus) solid var(--pug-color-accent-focusRing)` |
+| `outline-offset` | `0.125rem` |
+
+### Thumb `.switch__thumb`
+
+| Property | Value |
+|----------|-------|
+| `width` | `0.875rem` |
+| `height` | `0.875rem` |
+| `border-radius` | `999px` |
+| `background` | `var(--pug-color-text-primary)` |
+| `box-shadow` | `0 0.125rem 0.5rem color-mix(in srgb, black 18%, transparent)` |
+| `transform` | `translateX(0)` |
+| `transition` | `transform, background` at `var(--pug-motion-duration-interaction)` with `var(--pug-motion-easing-standard)` |
+
+### Thumb checked `:checked + .switch__track .switch__thumb`
+
+| Property | Value |
+|----------|-------|
+| `background` | `var(--pug-color-accent-base)` |
+| `transform` | `translateX(0.875rem)` |
+
+### Label `.switch__label`
+
+| Property | Value |
+|----------|-------|
+| `font-family` | `var(--pug-typography-label-family)` |
+| `font-size` | `var(--pug-typography-label-size)` |
+| `font-weight` | `var(--pug-typography-label-weight)` |
+| `line-height` | `var(--pug-typography-label-lineHeight)` |
 
 ## 9. Svelte Notes
 
-- should prefer native checkbox/switch semantics or headless switch primitives
-  that preserve accessible state
+- Uses a hidden native `<input type="checkbox" role="switch">` for accessibility
+  and form semantics, with a custom track/thumb sibling for visual rendering
+- The root element is a `<label>` to associate the click target with the hidden
+  input
+- ReadOnly behavior: listen for the `change` event on the native input and
+  immediately revert the checked state back to the controlled value, preventing
+  the toggle from taking effect
+- Adjacent sibling CSS selectors (`:checked +`, `:focus-visible +`) connect the
+  hidden input state to the visible track and thumb
+- `data-disabled` and `data-read-only` attributes on root drive state styling
+- `color-mix` formulas create the semi-transparent track background and accent
+  tints for the checked state
+- Thumb `translateX(0.875rem)` slides the thumb from the off to on position
 
 ## 10. GPUI Notes
 
 - expected crate/module surface: `pug_gpui::primitives::switch`
-- GPUI implementation must preserve keyboard toggle parity and native switch
-  semantics instead of exposing the control as a generic button
+- GPUI implementation must expose switch role (not generic button or checkbox)
+  with checked state through the native accessibility tree
+- keyboard toggle via Space and Enter must be explicitly handled
+- readonly behavior: reject toggle attempts while maintaining focusability
+- thumb animation between off/on positions should use platform-appropriate
+  motion matching `motion-duration-interaction`
+- color-mix formulas for track background and border must achieve the same
+  visual result by any means available in the rendering engine
 
 ## 11. Parity Checklist
 
 ### Tier 1: Strict Parity
 
-- [ ] switch role and checked semantics match
-- [ ] keyboard toggle behavior matches
-- [ ] readonly and disabled behavior matches
+- [ ] switch role and checked semantics match across platforms
+- [ ] keyboard toggle behavior (Space, Enter) matches
+- [ ] readonly behavior (revert on change) matches
+- [ ] disabled behavior (opacity, cursor, suppressed interaction) matches
+- [ ] accessible name exposure matches
 
 ### Tier 2: Visual Parity
 
-- [ ] track/thumb proportions and focus treatment use the same token roles
+- [ ] track sizing (2.125rem x 1.25rem) matches
+- [ ] thumb sizing (0.875rem diameter) matches
+- [ ] thumb travel distance (0.875rem translateX) matches
+- [ ] unchecked track uses border-default and semi-transparent background
+- [ ] checked track uses accent-base tinted border and background
+- [ ] thumb color transitions from text-primary to accent-base on check
+- [ ] focus ring uses accent-focusRing with correct offset (0.125rem)
+- [ ] thumb box-shadow matches (0.125rem 0.5rem black 18%)
+- [ ] label typography uses label token family
+- [ ] disabled opacity uses state-opacity-disabled
+- [ ] gap between track and label uses space-inline-sm
 
 ### Tier 3: Implementation Freedom
 
-- [ ] animation and thumb movement internals stay internal
+- [ ] native checkbox with role="switch" vs GPUI switch control internals
+- [ ] CSS adjacent sibling selectors are Svelte-specific
+- [ ] color-mix formulas may be achieved differently in GPUI
+- [ ] transition/animation timing is platform-owned
 
 ## 12. Known Deltas
 
 | Delta | Why Allowed | Approval Status | Follow-Up |
 |-------|-------------|-----------------|-----------|
 | thumb animation details may differ | motion internals are runtime-specific | allowed | keep on/off semantics strict |
+| color-mix formulas for track tints | GPUI must achieve same visual result by any means | allowed | verify visual parity |
+| CSS adjacent sibling selectors | Svelte-specific DOM pattern | allowed | GPUI uses state-driven rendering |
 
 ## 13. Approval And Adoption Notes
 
-- contract status: `seed contract`
+- contract status: `detailed contract`
 - approvers: pending
-- downstream adopters: settings panels, shell toggles
-- future follow-up: coordinate with `TriStateSwitch` for ternary semantics
-
-## Next Task
-
-Use `Switch` for binary on/off semantics and reserve ternary membership or
-policy semantics for `TriStateSwitch`.
+- downstream adopters: settings panels, shell toggles, filter bars,
+  Field-wrapped form inputs
+- future follow-up: coordinate with `TriStateSwitch` for ternary membership
+  semantics when that contract is detailed

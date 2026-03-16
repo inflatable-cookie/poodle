@@ -61,7 +61,7 @@
         <Icon name="zap" /> Accent
       </span>
       <span class="color-demo" style="color: var(--pug-color-status-danger)">
-        <Icon name="alert-triangle" /> Danger
+        <Icon name="triangle-alert" /> Danger
       </span>
     </div>
   </div>

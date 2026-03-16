@@ -4,6 +4,7 @@
 
 <script lang="ts">
   import { createEventDispatcher } from "svelte";
+  import { slide } from "svelte/transition";
 
   import Icon from "./Icon.svelte";
 
@@ -66,6 +67,7 @@
       id={`pug-collapsible-content-${collapsibleId}`}
       role="region"
       aria-labelledby={`pug-collapsible-trigger-${collapsibleId}`}
+      transition:slide={{ duration: 180 }}
     >
       <slot />
     </div>
@@ -80,11 +82,7 @@
     padding: 0.875rem 1rem;
     border: 0.0625rem solid color-mix(in srgb, var(--pug-color-border-subtle) 42%, transparent);
     border-radius: var(--pug-radius-surface);
-    background: color-mix(
-      in srgb,
-      var(--pug-color-background-elevated) 88%,
-      var(--pug-color-background-surface)
-    );
+    background: color-mix(in srgb, var(--pug-surface) 88%, var(--pug-color-text-primary));
     box-shadow: inset 0 0.0625rem 0 color-mix(in srgb, var(--pug-color-text-inverse) 8%, transparent);
   }
 

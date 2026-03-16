@@ -68,3 +68,6 @@ Cargo.lock
 
 # Effigy
 .effigy/
+
+# Screenshots (Jetstream preview debug captures)
+docs/screenshots/

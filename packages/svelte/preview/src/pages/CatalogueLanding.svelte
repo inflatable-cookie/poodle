@@ -5,10 +5,27 @@
   export let tier: ComponentTier;
   export let components: ComponentEntry[] = [];
 
-  $: tierLabel = tier === "primitive" ? "Primitives" : "Composites";
-  $: tierDescription = tier === "primitive"
-    ? "Foundation-level building blocks. Each primitive handles one concern with full accessibility, keyboard, and theming support."
-    : "Higher-order components composed from primitives. Each composite handles a complete workflow pattern.";
+  const tierConfig: Record<ComponentTier, { label: string; description: string; section: string }> = {
+    primitive: {
+      label: "Primitives",
+      description: "Foundation-level building blocks. Each primitive handles one concern with full accessibility, keyboard, and theming support.",
+      section: "primitives",
+    },
+    composite: {
+      label: "Composites",
+      description: "Higher-order components composed from primitives. Each composite handles a complete workflow pattern.",
+      section: "composites",
+    },
+    shell: {
+      label: "Shells",
+      description: "Structural layout containers that orchestrate page regions, state management, and slot composition.",
+      section: "shells",
+    },
+  };
+
+  $: tierLabel = tierConfig[tier].label;
+  $: tierDescription = tierConfig[tier].description;
+  $: tierSection = tierConfig[tier].section;
 </script>
 
 <div class="catalogue-landing">
@@ -23,7 +40,7 @@
     {#each components as component (component.slug)}
       <a
         class="component-card"
-        href="#{tier === 'primitive' ? 'primitives' : 'composites'}/{component.slug}"
+        href="#{tierSection}/{component.slug}"
       >
         <div class="component-card__header">
           <strong class="component-card__name">{component.displayName}</strong>

@@ -1,31 +1,43 @@
 # Callout
 
-Status: seed contract
-Updated: 2026-03-11
+Status: detailed contract
+Updated: 2026-03-16
 
 ## 1. Purpose
 
 - Component name: `Callout`
 - Layer: `foundation`
-- Summary: a low-to-medium emphasis informational block for inline contextual
-  messaging
-- In scope: neutral and danger/informational tones, non-modal contextual
-  content
-- Out of scope: dismissible banners, toast notifications, alert dialogs
+- Summary: contextual messaging block with tone-specific coloring, optional
+  dismissal, action slots, and ARIA announcement support. Consolidates the
+  former Banner and Callout components into a single primitive.
+- In scope: neutral, info, success, warning, danger, and pending tones;
+  inline contextual content; dismissible messaging; action slots; optional
+  icon override; ARIA live-region announcements; title, message prop, and
+  body slot
+- Out of scope: toast notifications, alert dialogs, full-width page banners
 
 ## 2. Anatomy
 
 ```text
-[Root]
-  ├── [Icon] (optional)
-  └── [Content]
+[Root .callout]  <section>
+  ├── [Body .callout__body]
+  │     ├── [Icon .callout__icon]  (slot or default based on tone)
+  │     └── [Content .callout__content]
+  │           ├── <strong>  (title, optional)
+  │           ├── <p>  (message prop, optional)
+  │           └── <slot>  (body, default slot)
+  ├── [Actions .callout__actions]  (named slot, optional)
+  └── [Dismiss .callout__dismiss]  (button, optional)
 ```
 
 | Part | Required | Description | Token Targets |
 |------|----------|-------------|---------------|
-| Root | yes | contextual message shell | background, border, radius |
-| Icon | no | message affordance | icon color |
-| Content | yes | callout text and inline content | typography, text color |
+| Root | yes | contextual message shell with 3-column grid | background, border, radius, padding, color |
+| Body | yes | icon + content container | grid layout, gap |
+| Icon | no | tone-specific glyph in a circular badge | background, radius, font, color |
+| Content | yes | title, message, and body container | typography, text color, gap |
+| Actions | no | action buttons area | flex layout, gap |
+| Dismiss | no | close button | size, border-radius, color |
 
 ## 3. Props And Inputs
 
@@ -33,12 +45,37 @@ Updated: 2026-03-11
 
 | Prop | Type | Default | Required | Notes |
 |------|------|---------|----------|-------|
-| `tone` | `"neutral" \| "info" \| "success" \| "warning" \| "danger"` | `"neutral"` | no | semantic tone |
-| `ariaLabel` | `string \| null` | `null` | no | optional accessible label when surrounding context is insufficient |
+| `tone` | `StatusTone \| "neutral"` | `"neutral"` | no | semantic tone and coloring |
+| `title` | `string \| null` | `null` | no | bold heading text rendered as `<strong>` |
+| `message` | `string \| null` | `null` | no | body text rendered as `<p>` |
+| `ariaLabel` | `string \| null` | `null` | no | optional accessible label for the callout region |
+| `announceMode` | `CalloutAnnounceMode` | `"none"` | no | ARIA live-region behavior |
+| `isDismissible` | `boolean` | `false` | no | shows dismiss button |
+| `dismissLabel` | `string` | `"Dismiss message"` | no | accessible label for dismiss button |
+
+### CalloutAnnounceMode
+
+```
+type CalloutAnnounceMode = "none" | "polite" | "assertive"
+```
+
+### StatusTone (with neutral extension)
+
+```
+type CalloutTone = "neutral" | "info" | "success" | "warning" | "danger" | "pending"
+```
+
+### Slots
+
+| Slot | Purpose |
+|------|---------|
+| default | body content rendered inside `.callout__content` |
+| icon | named slot to override the default tone-based icon |
+| actions | named slot for action buttons (e.g. Resolve, Inspect) |
 
 ### Controlled And Uncontrolled
 
-- display primitive only
+- Dismiss state is uncontrolled; parent handles via `on:dismiss` event
 
 ## 4. States
 
@@ -46,103 +83,279 @@ Updated: 2026-03-11
 
 | State | Trigger | Expected Result |
 |-------|---------|-----------------|
-| neutral | default | low-emphasis message shell |
-| tonal | tone changed | matching border/background/text emphasis |
+| neutral | `tone="neutral"` (default) | subtle panel background and border |
+| info | `tone="info"` | info-status-tinted fill and border (dedicated blue `--pug-color-status-info` token) |
+| success | `tone="success"` | success-tinted fill and border |
+| warning | `tone="warning"` | warning-tinted fill and border |
+| danger | `tone="danger"` | danger-tinted fill and border |
+| pending | `tone="pending"` | lighter accent-tinted fill and border |
 
 ### Component States
 
-No internal state.
+- dismissible: shows close button when `isDismissible` is true
 
 ## 5. Events
 
 | Event | When It Fires | Payload | Notes |
 |-------|---------------|---------|-------|
-| none | n/a | n/a | non-interactive by default |
+| `dismiss` | dismiss button clicked | `void` | only available when `isDismissible` is true |
 
 ## 6. Accessibility
 
 ### Semantics
 
-- Role: usually static group/region content, not alert by default
-- Required attributes: none by default
-- Optional attributes: accessible label when the message needs an explicit
-  programmatic summary
-- Labeling rules: message text itself is normally sufficient if present
+- Root element: `<section>`
+- `aria-label` from prop when provided
+- ARIA role derived from `announceMode`:
+  - `"assertive"` → `role="alert"`, `aria-live="assertive"`
+  - `"polite"` → `role="status"`, `aria-live="polite"`
+  - `"none"` → no role or aria-live (default)
+
+### Icon Mapping
+
+| Tone | Icon Name |
+|------|-----------|
+| `neutral` | `info` |
+| `info` | `info` |
+| `success` | `check` |
+| `warning` | `triangle-alert` |
+| `danger` | `circle-x` |
+| `pending` | `loader` |
 
 ### Keyboard
 
 | Key | Behavior |
 |-----|----------|
-| none | non-interactive by default |
+| Tab | focuses dismiss button (when dismissible) |
+| Enter/Space | activates dismiss button |
 
 ### Focus And Announcement
 
-- focus entry: not focusable by default
-- live-region behavior: none by default; use `Banner` or higher-order alerting
-  surfaces when announcement behavior is required
-- GPUI-native accessibility mapping notes: GPUI should expose callouts as
-  grouped informational content, not as automatically announced alerts unless a
-  higher-level contract demands it
+- focus entry: dismiss button is focusable when present
+- live-region behavior: controlled by `announceMode` prop
+- GPUI-native accessibility mapping: GPUI should expose callouts as
+  grouped informational content; when announceMode is assertive, expose
+  as an alert
 
 ## 7. Layout
 
 ### Sizing
 
-- width follows parent
-- height grows with content
+- Width follows parent container
+- Height grows with content
+
+### Responsive
+
+- At `max-width: 45rem`, grid collapses to single column; actions align start
 
 ### Composition
 
-- parent expectations: forms, inspectors, cards, settings sections
-- child expectations: informative text and optional inline content
+- parent expectations: forms, inspectors, cards, settings sections, dialogs
+- child expectations: informative text, action buttons, optional inline content
+- resizing rules: content wraps naturally; icon column remains fixed-width
 
-## 8. Token Usage
+## 8. Token Usage — Exact Values
 
-| Part | Token | Purpose |
-|------|-------|---------|
-| Root | surface/background/border roles | shell |
-| Icon | icon roles | message affordance |
-| Content | typography and text roles | message text |
-| Tone | status semantic roles | tonal emphasis |
+### Root `.callout`
+
+| Property | Value |
+|----------|-------|
+| `--pug-callout-fill` | `color-mix(in srgb, var(--pug-color-background-panel) 94%, transparent)` |
+| `--pug-callout-border` | `color-mix(in srgb, var(--pug-color-border-subtle) 88%, transparent)` |
+| `display` | `grid` |
+| `grid-template-columns` | `minmax(0, 1fr) auto auto` |
+| `align-items` | `start` |
+| `gap` | `var(--pug-space-inline-md)` |
+| `padding` | `var(--pug-space-panel-y) var(--pug-space-panel-x)` |
+| `border` | `0.0625rem solid var(--pug-callout-border)` |
+| `border-radius` | `var(--pug-radius-surface)` |
+| `background` | `var(--pug-callout-fill)` |
+| `--pug-surface` | `var(--pug-callout-fill)` |
+| `color` | `var(--pug-color-text-primary)` |
+
+### Root — tone: info
+
+| Property | Value |
+|----------|-------|
+| `--pug-callout-fill` | `color-mix(in srgb, var(--pug-color-status-info) 10%, var(--pug-color-background-panel))` |
+| `--pug-callout-border` | `color-mix(in srgb, var(--pug-color-status-info) 34%, var(--pug-color-border-default))` |
+
+### Root — tone: success
+
+| Property | Value |
+|----------|-------|
+| `--pug-callout-fill` | `color-mix(in srgb, var(--pug-color-status-success) 10%, var(--pug-color-background-panel))` |
+| `--pug-callout-border` | `color-mix(in srgb, var(--pug-color-status-success) 34%, var(--pug-color-border-default))` |
+
+### Root — tone: warning
+
+| Property | Value |
+|----------|-------|
+| `--pug-callout-fill` | `color-mix(in srgb, var(--pug-color-status-warning) 10%, var(--pug-color-background-panel))` |
+| `--pug-callout-border` | `color-mix(in srgb, var(--pug-color-status-warning) 34%, var(--pug-color-border-default))` |
+
+### Root — tone: danger
+
+| Property | Value |
+|----------|-------|
+| `--pug-callout-fill` | `color-mix(in srgb, var(--pug-color-status-danger) 10%, var(--pug-color-background-panel))` |
+| `--pug-callout-border` | `color-mix(in srgb, var(--pug-color-status-danger) 34%, var(--pug-color-border-default))` |
+
+### Root — tone: pending
+
+| Property | Value |
+|----------|-------|
+| `--pug-callout-fill` | `color-mix(in srgb, var(--pug-color-accent-base) 8%, var(--pug-color-background-panel))` |
+| `--pug-callout-border` | `color-mix(in srgb, var(--pug-color-accent-base) 26%, var(--pug-color-border-default))` |
+
+### Body `.callout__body`
+
+| Property | Value |
+|----------|-------|
+| `display` | `grid` |
+| `grid-template-columns` | `auto minmax(0, 1fr)` |
+| `gap` | `var(--pug-space-inline-md)` |
+| `min-width` | `0` |
+
+### Icon `.callout__icon`
+
+| Property | Value |
+|----------|-------|
+| `display` | `inline-flex` |
+| `align-items` | `center` |
+| `justify-content` | `center` |
+| `width` | `1.375rem` |
+| `height` | `1.375rem` |
+| `border-radius` | `999px` |
+| `background` | `color-mix(in srgb, var(--pug-color-background-surface) 78%, transparent)` |
+| `font-family` | `var(--pug-typography-code-family)` |
+| `font-size` | `0.75rem` |
+| `font-weight` | `700` |
+| `line-height` | `1` |
+
+### Content `.callout__content`
+
+| Property | Value |
+|----------|-------|
+| `display` | `grid` |
+| `gap` | `0.25rem` |
+| `min-width` | `0` |
+
+### Content — `p` (global within content)
+
+| Property | Value |
+|----------|-------|
+| `margin` | `0` |
+| `color` | `var(--pug-color-text-secondary)` |
+| `font-size` | `0.8125rem` |
+| `line-height` | `1.5` |
+
+### Content — `strong`
+
+| Property | Value |
+|----------|-------|
+| `font-family` | `var(--pug-typography-label-family)` |
+| `font-size` | `var(--pug-typography-label-size)` |
+| `line-height` | `var(--pug-typography-label-lineHeight)` |
+
+### Actions `.callout__actions`
+
+| Property | Value |
+|----------|-------|
+| `display` | `flex` |
+| `flex-wrap` | `wrap` |
+| `gap` | `var(--pug-space-inline-sm)` |
+| `align-items` | `center` |
+| `justify-content` | `flex-end` |
+
+### Dismiss `.callout__dismiss`
+
+| Property | Value |
+|----------|-------|
+| `width` | `1.75rem` |
+| `height` | `1.75rem` |
+| `min-height` | `0` |
+| `padding` | `0` |
+| `border` | `0` |
+| `border-radius` | `calc(var(--pug-radius-control) - 0.0625rem)` |
+| `background` | `transparent` |
+| `color` | `var(--pug-color-text-secondary)` |
+| `cursor` | `pointer` |
 
 ## 9. Svelte Notes
 
-- can remain a styled container with no default live-region behavior
+- Root element is a `<section>` with optional `aria-label`, `role`, and `aria-live`
+- Icon slot allows overriding the default tone-based icon
+- Default icon is rendered based on tone mapping when no icon slot content
+  is provided
+- `data-tone` attribute on root for CSS tone targeting
+- Custom properties `--pug-callout-fill` and `--pug-callout-border` are set
+  per tone variant
+- Content slot projects into `.callout__content` after the optional title
+- Actions slot and dismiss button conditionally rendered
+- Consolidates former Banner component — all Banner consumers should migrate
+  to Callout
 
 ## 10. GPUI Notes
 
 - expected crate/module surface: `pug_gpui::primitives::callout`
-- keep callout informational and non-announcing unless wrapped by a more
-  urgent messaging contract
+- When announceMode is assertive, expose as an alert; otherwise keep
+  informational and non-announcing
+- Icon badge uses circular border-radius (999px)
+- Custom property pattern for fill/border can be flattened in GPUI to
+  direct color assignments per tone variant
+- color-mix values must be replicated using GPUI's color blending or
+  equivalent
+- GPUI still has separate BannerSpec and CallOutSpec — consolidation
+  can follow in a future pass
 
 ## 11. Parity Checklist
 
 ### Tier 1: Strict Parity
 
-- [ ] informational/non-alert semantics match
+- [ ] all six tone values produce distinct visual treatments
+- [ ] announceMode controls ARIA live-region behavior
+- [ ] dismissible state shows/hides close button
+- [ ] dismiss event fires on close button click
+- [ ] aria-label passthrough matches
+- [ ] icon mapping per tone matches
+- [ ] icon slot override behavior matches
+- [ ] actions slot renders action buttons
 
 ### Tier 2: Visual Parity
 
-- [ ] tonal shell treatment uses comparable token roles
+- [ ] root 3-column grid layout matches (1fr auto auto)
+- [ ] neutral tone uses custom property defaults (94% panel, 88% border)
+- [ ] info/success/warning/danger tones use 10%/34% color-mix pattern
+- [ ] pending tone uses 8%/26% color-mix pattern (distinct from others)
+- [ ] icon badge size (1.375rem), circular radius (999px), and background match
+- [ ] icon typography matches (code-family, 0.75rem, weight 700)
+- [ ] content gap (0.25rem) matches
+- [ ] title typography uses label token family/size/lineHeight
+- [ ] paragraph color uses text-secondary
+- [ ] responsive collapse at 45rem breakpoint
 
 ### Tier 3: Implementation Freedom
 
-- [ ] icon presence and layout internals stay internal
+- [ ] icon rendering mechanism is platform-owned
+- [ ] slot projection mechanism is platform-owned
+- [ ] custom property vs direct color assignment is platform-owned
 
 ## 12. Known Deltas
 
 | Delta | Why Allowed | Approval Status | Follow-Up |
 |-------|-------------|-----------------|-----------|
-| none yet | n/a | pending | review during first implementation |
+| Color-mix blending | GPUI may approximate color-mix differently | allowed | visual result must be comparable |
+| Custom property pattern | GPUI may use direct values instead of CSS custom properties | allowed | final computed colors must match |
+| GPUI still has separate Banner/CallOut | consolidation deferred | allowed | align in future GPUI pass |
 
 ## 13. Approval And Adoption Notes
 
-- contract status: `seed contract`
+- contract status: `detailed contract`
 - approvers: pending
-- downstream adopters: contextual messaging in forms and shells
-- future follow-up: route urgent messaging to `Banner`
+- downstream adopters: contextual messaging in forms, inspectors, cards,
+  settings sections, dialogs, command palettes
+- migration note: former Banner consumers should use Callout with
+  `announceMode`, `isDismissible`, and `actions` slot as needed
 
-## Next Task
-
-Use `Callout` for contextual information and reserve announced or dismissible
-messaging for `Banner`.
+> **Surface elevation**: Callout is a surface creator — see [surface-elevation.md](./surface-elevation.md).

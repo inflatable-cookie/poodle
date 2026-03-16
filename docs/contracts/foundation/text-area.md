@@ -1,28 +1,31 @@
 # Text Area
 
-Status: seed contract
-Updated: 2026-03-11
+Status: detailed contract
+Updated: 2026-03-15
 
 ## 1. Purpose
 
 - Component name: `TextArea`
 - Layer: `foundation`
-- Summary: a multiline text entry control for longer text content
-- In scope: multiline editing, line breaks, scroll behavior, validation state,
-  submit/cancel semantics when intentionally enabled
-- Out of scope: rich text formatting, markdown semantics, code editor features
+- Summary: a multiline text entry control for longer text content with explicit
+  value, validation, and chord-based submission semantics
+- In scope: multiline editing, line breaks, vertical resize, scroll behavior,
+  validation state, Cmd/Ctrl+Enter submit, Escape cancel, controlled and
+  uncontrolled value models
+- Out of scope: rich text formatting, markdown rendering, code editor features
+  (syntax highlighting, line numbers), auto-grow behavior
 
 ## 2. Anatomy
 
 ```text
-[Root]
-  └── [Text Area Control]
+[Root .text-area]  <div>
+  └── [Text Area Control .text-area__control]  <textarea>
 ```
 
 | Part | Required | Description | Token Targets |
 |------|----------|-------------|---------------|
-| Root | yes | field chrome container | background, border, radius, focus ring |
-| Text Area Control | yes | multiline editing surface | typography, text color, spacing |
+| Root | yes | field chrome container with grid layout | background, border, radius, shadow, focus ring |
+| Text Area Control | yes | native multiline editing surface | typography, text color, padding, resize |
 
 ## 3. Props And Inputs
 
@@ -30,24 +33,23 @@ Updated: 2026-03-11
 
 | Prop | Type | Default | Required | Notes |
 |------|------|---------|----------|-------|
-| `value` | `string \| null` | `null` | no | controlled value |
+| `id` | `string` | none | yes | element id for label association |
+| `value` | `string \| null` | `null` | no | controlled value; when non-null, component is controlled |
 | `defaultValue` | `string` | `""` | no | uncontrolled initial value |
-| `placeholder` | `string \| null` | `null` | no | hint text |
-| `rows` | `number` | `4` | no | initial visible rows |
-| `isDisabled` | `boolean` | `false` | no | disables editing |
+| `placeholder` | `string \| null` | `null` | no | hint text when empty |
+| `rows` | `number` | `4` | no | initial visible line count |
+| `name` | `string \| undefined` | `undefined` | no | form submission name |
+| `isDisabled` | `boolean` | `false` | no | disables editing and interaction |
 | `isReadOnly` | `boolean` | `false` | no | allows selection without editing |
-| `validationState` | `"none" \| "invalid" \| "valid" \| "pending"` | `"none"` | no | visual and assistive state |
+| `validationState` | `"none" \| "invalid" \| "valid" \| "pending"` | `"none"` | no | visual and assistive validation state |
 | `ariaLabel` | `string \| null` | `null` | no | required when no external label exists |
-| `descriptionId` | `string \| null` | `null` | no | descriptive relationship |
-| `errorMessageId` | `string \| null` | `null` | no | validation relationship |
-| `onValueChange` | `(value: string) => void` | none | no | change callback |
-| `onSubmit` | `(value: string) => void` | none | no | optional explicit submit behavior |
-| `onCancel` | `() => void` | none | no | optional cancel behavior |
+| `describedBy` | `string \| null` | `null` | no | aria-describedby target |
 
 ### Controlled And Uncontrolled
 
-- controlled: `value` plus `onValueChange`
-- uncontrolled: `defaultValue`
+- controlled: `value` (non-null) plus `valueChange` event
+- uncontrolled: `defaultValue` sets the initial value; component owns its own state
+- do not mix controlled and uncontrolled modes simultaneously
 
 ## 4. States
 
@@ -55,86 +57,166 @@ Updated: 2026-03-11
 
 | State | Trigger | Expected Result |
 |-------|---------|-----------------|
-| default | resting | neutral multiline field |
-| focus | focus enters | visible active treatment |
-| disabled | `isDisabled=true` | muted non-interactive field |
+| default | resting | neutral multiline field chrome |
+| focus | focus-within on root | border-color switches to focus border, background to focus fill, box-shadow to focus shadow |
+| disabled | `isDisabled=true` | opacity reduced via `state-opacity-disabled`, interaction suppressed |
 | readOnly | `isReadOnly=true` | selectable but not editable |
-| invalid | `validationState="invalid"` | error emphasis |
-| pending | `validationState="pending"` | progress treatment |
-
-### Component States
-
-State table is sufficient.
+| invalid | `validationState="invalid"` | border-color switches to `status-danger` |
+| valid | `validationState="valid"` | border-color switches to `status-success` |
+| pending | `validationState="pending"` | border-color switches to `accent-base` |
 
 ## 5. Events
 
 | Event | When It Fires | Payload | Notes |
 |-------|---------------|---------|-------|
-| `onValueChange` | content edits | current string | multiline-safe |
-| `onSubmit` | explicit submit action | current string | typically chord-based rather than bare enter |
-| `onCancel` | escape or explicit cancel action | none | optional |
+| `valueChange` | user edits content | `{ value: string }` | fires on each input change; multiline-safe |
+| `submit` | Cmd/Ctrl+Enter pressed | `{ value: string }` | chord-based, NOT plain Enter (Enter inserts newline) |
+| `cancel` | Escape pressed | `void` | fires with no payload |
+| `focus` | textarea receives focus | `FocusEvent` | native focus event passthrough |
+| `blur` | textarea loses focus | `FocusEvent` | native blur event passthrough |
 
 ## 6. Accessibility
 
 ### Semantics
 
-- Role: native multiline text input
-- Required attributes: accessible name from label or `ariaLabel`
-- Optional attributes: description and error relationships, invalid and readonly
-  state
-- Labeling rules: placeholder is not the accessible name
+- Role: native `<textarea>` element
+- `id`: from prop, used for external `<label for>` association
+- `aria-label`: from ariaLabel prop; required when no external label exists
+- `aria-describedby`: from describedBy prop
+- `aria-invalid`: `"true"` when validationState is `"invalid"`
+- `aria-readonly`: set when isReadOnly
+- `disabled`: native disabled attribute when isDisabled
+- `rows`: from rows prop, sets initial visible height
+- Labeling rules: placeholder text never counts as the accessible name
 
 ### Keyboard
 
 | Key | Behavior |
 |-----|----------|
 | character input | inserts text |
-| `Enter` | inserts line break by default |
+| `Enter` | inserts line break (default multiline behavior) |
+| `Arrow keys` | moves caret within text |
 | `Shift+Arrow` | extends selection |
-| platform clipboard shortcuts | operate on multiline selection |
-| `Tab` | leaves control unless explicit indentation mode is a higher-order contract |
-| explicit submit chord | optional, app- or contract-owned |
-| `Escape` | optional cancel behavior |
+| platform copy/cut/paste/select-all shortcuts | operate on multiline selection |
+| `Cmd/Ctrl+Enter` | fires `submit` event with current value |
+| `Escape` | fires `cancel` event |
+| `Tab` | moves focus out of the control |
 
 ### Focus And Announcement
 
-- focus entry: visible focus treatment with insertion point
-- focus exit: field remains scrollable/selected but no longer active
-- live-region behavior: validation announcement is parent-owned, but invalid
-  state relationships must be exposed
+- focus entry: root receives visible focus treatment (border, background, and
+  shadow transition); insertion point appears in textarea
+- focus exit: focus treatment clears; validation can be surfaced by parent
+  Field wrapper on blur
+- live-region behavior: validation announcement is parent-owned (Field), but the
+  textarea must expose invalid state via `aria-invalid`
 - GPUI-native accessibility mapping notes: multiline role, value exposure,
-  caret/selection movement, and embedded scrollability must be surfaced through
-  native accessibility APIs
+  caret/selection movement, vertical scrolling, and IME composition must be
+  surfaced through native accessibility APIs
 
 ## 7. Layout
 
 ### Sizing
 
-- min height based on `rows`
-- internal vertical scrolling occurs when content exceeds visible height
+- minimum height: determined by `rows` prop (default 4 lines via `min-height: calc(1lh * rows)`)
+- no explicit min-height from control-height token (unlike TextInput)
+- width: stretches with parent
+- vertical resize: `resize: vertical` allows user resizing
 
 ### Composition
 
-- parent expectations: forms, notes panels, comments, descriptions
-- child expectations: none
-- resizing rules: may be fixed-height or resizable by higher-level wrappers
+- parent expectations: Field wrappers, forms, notes panels, comments,
+  descriptions, dialog content
+- child expectations: none (no slots or child elements)
+- resizing rules: may be fixed-height or user-resizable; internal vertical
+  scrolling occurs when content exceeds visible height
 
-## 8. Token Usage
+## 8. Token Usage — Exact Values
 
-| Part | Token | Purpose |
-|------|-------|---------|
-| Root | `semantic.color.background.panel` and border roles | field chrome |
-| Root | `semantic.radius.control` | shape |
-| Root | `semantic.space.control.*` | interior spacing |
-| Text Area Control | `semantic.typography.body.*` | text styling |
-| Text Area Control | `semantic.color.text.primary/secondary` | content and placeholder text |
-| Focus treatment | `semantic.color.accent.focusRing` and `semantic.border.width.focus` | focus |
-| Validation | `semantic.color.status.*` | state emphasis |
+### CSS Custom Properties (treatment system)
+
+| Var | Default Value | Focus Value |
+|-----|---------------|-------------|
+| `--pug-text-area-radius` | `var(--pug-treatment-interactive-subtle-radius, var(--pug-radius-control))` | — |
+| `--pug-text-area-fill` | `var(--pug-treatment-interactive-subtle-fill, var(--pug-color-background-surface))` | `var(--pug-text-area-fill-focus)` |
+| `--pug-text-area-border` | `var(--pug-treatment-interactive-subtle-border, var(--pug-color-border-default))` | `var(--pug-text-area-border-focus)` |
+| `--pug-text-area-shadow` | (none by default) | `var(--pug-text-area-shadow-focus)` fallback `0 0 0 var(--pug-border-width-focus) color-mix(in srgb, var(--pug-color-accent-focusRing) 28%, transparent)` |
+
+### Root `.text-area`
+
+| Property | Value |
+|----------|-------|
+| `display` | `grid` |
+| `min-height` | `0` |
+| `border` | `0.0625rem solid var(--pug-text-area-border)` |
+| `border-radius` | `var(--pug-text-area-radius)` |
+| `background` | `var(--pug-text-area-fill)` |
+| `color` | `var(--pug-color-text-primary)` |
+| `box-shadow` | `var(--pug-text-area-shadow)` |
+| `transition` | `border-color, box-shadow, background` all at `var(--pug-motion-duration-interaction) var(--pug-motion-easing-standard)` |
+
+### Root focus-within
+
+| Property | Value |
+|----------|-------|
+| `border-color` | `var(--pug-text-area-border-focus)` |
+| `background` | `var(--pug-text-area-fill-focus)` |
+| `box-shadow` | `var(--pug-text-area-shadow-focus)` fallback `0 0 0 var(--pug-border-width-focus) color-mix(in srgb, var(--pug-color-accent-focusRing) 28%, transparent)` |
+
+### Root validation states
+
+| State | `border-color` |
+|-------|----------------|
+| `invalid` | `var(--pug-color-status-danger)` |
+| `valid` | `var(--pug-color-status-success)` |
+| `pending` | `var(--pug-color-accent-base)` |
+
+### Root disabled (`:has(:disabled)`)
+
+| Property | Value |
+|----------|-------|
+| `opacity` | `var(--pug-state-opacity-disabled)` |
+
+### Text Area Control `.text-area__control`
+
+| Property | Value |
+|----------|-------|
+| `min-width` | `0` |
+| `width` | `100%` |
+| `min-height` | `calc(1lh * 4)` (based on rows prop, default 4) |
+| `padding` | `var(--pug-space-control-y) var(--pug-space-control-x)` |
+| `border` | `0` |
+| `resize` | `vertical` |
+| `background` | `transparent` |
+| `color` | `inherit` |
+| `font-family` | `var(--pug-typography-body-family)` |
+| `font-size` | `var(--pug-typography-body-size)` |
+| `line-height` | `var(--pug-typography-body-lineHeight)` |
+| `outline` | `0` |
+
+### Text Area Control `::placeholder`
+
+| Property | Value |
+|----------|-------|
+| `color` | `var(--pug-color-text-secondary)` |
 
 ## 9. Svelte Notes
 
-- should prefer native `<textarea>`
-- browser line wrapping, selection, and IME behavior should remain native
+- Uses native `<textarea>` element inside a styled `<div>` wrapper with grid
+  layout
+- CSS custom properties (`--pug-text-area-*`) enable treatment-level theming;
+  same treatment token chain as TextInput but with `text-area` prefix
+- `data-validation` data attribute drives validation border-color via CSS
+  attribute selectors
+- Controlled mode: when `value` prop is non-null, the textarea value is bound
+  to it; `valueChange` must be handled to update
+- Uncontrolled mode: internal state initialized from `defaultValue`
+- Browser line wrapping, selection, IME, and undo behavior remain native
+- Submit is chord-based (`Cmd/Ctrl+Enter`), not plain Enter — this is the key
+  behavioral difference from TextInput
+- `rows` prop sets the initial `min-height` via `calc(1lh * rows)`
+- Root uses `display: grid` instead of flex (unlike TextInput) because the
+  textarea is the sole child and grid enables clean sizing
 
 ## 10. GPUI Notes
 
@@ -142,38 +224,56 @@ State table is sufficient.
 - GPUI implementation must intentionally support multiline caret movement,
   selection, vertical scrolling, IME composition, and text-focused shortcut
   suppression
+- Enter must insert a newline; submit requires Cmd/Ctrl+Enter chord
+- while focused, application-global shortcuts should defer to the text control
+  unless the contract explicitly defines an exception (Cmd/Ctrl+Enter for
+  submit, Escape for cancel)
+- treatment radius fallback: use treatment token if set, else radius-control
+- `1lh` unit for min-height: GPUI must compute equivalent based on line-height
+  and row count
 
 ## 11. Parity Checklist
 
 ### Tier 1: Strict Parity
 
-- [ ] multiline editing semantics match
-- [ ] accessible naming and invalid/readonly exposure match
-- [ ] enter-as-line-break behavior matches by default
+- [ ] multiline editing semantics match (Enter inserts newline)
+- [ ] Cmd/Ctrl+Enter fires submit (not plain Enter)
+- [ ] Escape fires cancel
+- [ ] value/change semantics match (controlled and uncontrolled)
+- [ ] accessible naming and invalid/readonly/disabled state exposure match
 - [ ] text-focused shortcut suppression matches
 
 ### Tier 2: Visual Parity
 
-- [ ] spacing, typography, and validation emphasis use the same token roles
+- [ ] control sizing (min-height from rows, padding) uses the same token roles
+- [ ] validation emphasis uses the same semantic color roles (danger, success, accent)
+- [ ] focus treatment matches (border, background, box-shadow transitions)
+- [ ] disabled opacity matches (state-opacity-disabled)
+- [ ] typography matches (body family, size, line-height)
+- [ ] resize: vertical behavior present in both runtimes
 
 ### Tier 3: Implementation Freedom
 
-- [ ] browser `<textarea>` internals vs GPUI multiline editor internals stay internal
+- [ ] native browser textarea internals vs GPUI multiline editor internals stay internal
+- [ ] transition timing is platform-owned
+- [ ] native scrollbar visuals may differ
+- [ ] treatment token fallback chain (CSS var fallback vs Rust conditional)
 
 ## 12. Known Deltas
 
 | Delta | Why Allowed | Approval Status | Follow-Up |
 |-------|-------------|-----------------|-----------|
 | native scrollbar visuals may differ | platform-native scrolling visuals are acceptable | allowed | keep editing and accessibility semantics strict |
+| CSS transition timing | GPUI may not support CSS-style transitions | allowed | match where possible |
+| treatment radius fallback chain | CSS var fallback vs Rust conditional | allowed | same visual result required |
+| `1lh` unit support | GPUI must compute equivalent from line-height and rows | allowed | verify visual height parity |
+| resize handle appearance | platform-native resize affordance is acceptable | allowed | ensure resize: vertical behavior exists |
 
 ## 13. Approval And Adoption Notes
 
-- contract status: `seed contract`
+- contract status: `detailed contract`
 - approvers: pending
-- downstream adopters: notes fields, descriptions, long-form content editors
-- future follow-up: split code/editor primitives into a separate family later
-
-## Next Task
-
-Keep multiline text entry distinct from code or rich text editors when later
-composite editing surfaces arrive.
+- downstream adopters: Field-wrapped form textareas, notes fields, descriptions,
+  comments, long-form content editors
+- future follow-up: code editor and rich text editor primitives are separate
+  families and should not extend this contract

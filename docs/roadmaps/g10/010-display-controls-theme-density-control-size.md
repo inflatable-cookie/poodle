@@ -1,8 +1,8 @@
 # g10.010 — Display Controls: Theme, Density, Control Size
 
-Status: planned
+Status: complete
 Owner: Pug Core
-Updated: 2026-03-15
+Updated: 2026-03-16
 Depends on: g10.009
 Primary repos: `pug`
 

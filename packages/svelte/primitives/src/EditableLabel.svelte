@@ -133,7 +133,7 @@
   .editable-label__display:hover:not(:disabled),
   .editable-label__display:focus-visible {
     border-color: color-mix(in srgb, var(--pug-color-border-default) 72%, transparent);
-    background: color-mix(in srgb, var(--pug-color-background-surface) 84%, transparent);
+    background: color-mix(in srgb, var(--pug-surface) 93%, var(--pug-color-text-primary));
     outline: none;
   }
 

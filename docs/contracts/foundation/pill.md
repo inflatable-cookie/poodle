@@ -1,7 +1,7 @@
 # Pill
 
-Status: seed contract
-Updated: 2026-03-11
+Status: detailed contract
+Updated: 2026-03-15
 
 ## 1. Purpose
 
@@ -14,14 +14,14 @@ Updated: 2026-03-11
 ## 2. Anatomy
 
 ```text
-[Root]
-  └── [Content]
+[Root .pill]
+  └── [Content (default slot)]
 ```
 
-| Part | Required | Description | Token Targets |
-|------|----------|-------------|---------------|
-| Root | yes | rounded metadata shell | border, background, radius |
-| Content | yes | short label content | typography, text color |
+| Part | Element | Required | Description |
+|------|---------|----------|-------------|
+| Root | `<span>` | yes | rounded metadata shell with inline-flex layout |
+| Content | slot | yes | short label text |
 
 ## 3. Props And Inputs
 
@@ -29,16 +29,16 @@ Updated: 2026-03-11
 
 | Prop | Type | Default | Required | Notes |
 |------|------|---------|----------|-------|
-| `tone` | `"neutral" \| "success" \| "danger"` | `"neutral"` | no | semantic tone |
-| `appearance` | `"solid" \| "subtle"` | `"solid"` | no | fill style |
+| `tone` | `"neutral" \| "success" \| "danger"` | `"neutral"` | no | semantic tone controlling fill/border/text color |
+| `appearance` | `"solid" \| "subtle"` | `"solid"` | no | fill opacity variant |
 | `size` | `"xxs" \| "xs" \| "sm"` | `"xs"` | no | compact scale |
 | `font` | `"normal" \| "mono"` | `"normal"` | no | content font variant |
-| `isMuted` | `boolean` | `false` | no | visual de-emphasis |
-| `ariaLabel` | `string \| null` | `null` | no | optional explicit label |
+| `isMuted` | `boolean` | `false` | no | visual de-emphasis via reduced opacity |
+| `ariaLabel` | `string \| null` | `null` | no | optional explicit accessible name |
 
 ### Controlled And Uncontrolled
 
-- display primitive only
+- Display primitive only; no internal state.
 
 ## 4. States
 
@@ -46,10 +46,11 @@ Updated: 2026-03-11
 
 | State | Trigger | Expected Result |
 |-------|---------|-----------------|
-| neutral | default | neutral pill shell |
-| success | `tone="success"` | positive styling |
-| danger | `tone="danger"` | warning/danger styling |
-| muted | `isMuted=true` | lower-emphasis pill |
+| neutral | default | neutral fill, subtle border, secondary text |
+| success | `tone="success"` | green-tinted fill and border, primary text |
+| danger | `tone="danger"` | red-tinted fill and border, primary text |
+| subtle | `appearance="subtle"` | 50% transparent fill overlay |
+| muted | `isMuted=true` | reduced opacity (0.72) |
 
 ### Component States
 
@@ -59,16 +60,15 @@ No internal state.
 
 | Event | When It Fires | Payload | Notes |
 |-------|---------------|---------|-------|
-| none | n/a | n/a | non-interactive by default |
+| none | n/a | n/a | non-interactive display primitive |
 
 ## 6. Accessibility
 
 ### Semantics
 
-- Role: inline text by default
+- Role: inline text by default (no ARIA role)
 - Required attributes: none
-- Optional attributes: accessible label when visible text is abbreviated or
-  symbolic
+- Optional attributes: `aria-label` when visible text is abbreviated or symbolic
 - Labeling rules: pills stay non-interactive unless a higher-order contract
   wraps them
 
@@ -82,15 +82,16 @@ No internal state.
 
 - focus entry: not focusable by default
 - live-region behavior: none
-- GPUI-native accessibility mapping notes: GPUI should expose pill content as
-  text-like metadata, not as a control
+- GPUI-native accessibility mapping notes: expose pill content as text-like
+  metadata, not as a control
 
 ## 7. Layout
 
 ### Sizing
 
-- pill sizes to content with compact padding
-- content may truncate according to parent layout rules
+- Pill sizes to content with compact padding
+- Content may truncate according to parent layout rules
+- Uses `white-space: nowrap` to prevent wrapping
 
 ### Composition
 
@@ -99,49 +100,128 @@ No internal state.
 
 ## 8. Token Usage
 
-| Part | Token | Purpose |
-|------|-------|---------|
-| Root | border/background/radius roles | shell |
-| Content | text/typography roles | label styling |
-| Tone | status or neutral semantic roles | tone treatment |
+### Root `.pill` (default / neutral / xs)
+
+| Property | Value |
+|----------|-------|
+| `display` | `inline-flex` |
+| `align-items` | `center` |
+| `justify-content` | `center` |
+| `min-height` | `1.25rem` |
+| `padding` | `0.1875rem 0.5rem` |
+| `border` | `0.0625rem solid var(--pug-pill-border)` |
+| `border-radius` | `999px` |
+| `background` | `var(--pug-pill-fill)` |
+| `color` | `var(--pug-pill-text)` |
+| `font-family` | `var(--pug-typography-label-family)` |
+| `font-size` | `0.6875rem` |
+| `font-weight` | `600` |
+| `line-height` | `1` |
+| `white-space` | `nowrap` |
+
+### Component custom properties (neutral default)
+
+| Custom Property | Value |
+|-----------------|-------|
+| `--pug-pill-fill` | `color-mix(in srgb, var(--pug-color-background-surface) 90%, transparent)` |
+| `--pug-pill-border` | `color-mix(in srgb, var(--pug-color-border-subtle) 82%, transparent)` |
+| `--pug-pill-text` | `var(--pug-color-text-secondary)` |
+
+### Tone: success `.pill[data-tone="success"]`
+
+| Custom Property | Value |
+|-----------------|-------|
+| `--pug-pill-fill` | `color-mix(in srgb, var(--pug-color-status-success) 14%, var(--pug-color-background-surface))` |
+| `--pug-pill-border` | `color-mix(in srgb, var(--pug-color-status-success) 38%, var(--pug-color-border-subtle))` |
+| `--pug-pill-text` | `var(--pug-color-text-primary)` |
+
+### Tone: danger `.pill[data-tone="danger"]`
+
+| Custom Property | Value |
+|-----------------|-------|
+| `--pug-pill-fill` | `color-mix(in srgb, var(--pug-color-status-danger) 14%, var(--pug-color-background-surface))` |
+| `--pug-pill-border` | `color-mix(in srgb, var(--pug-color-status-danger) 38%, var(--pug-color-border-subtle))` |
+| `--pug-pill-text` | `var(--pug-color-text-primary)` |
+
+### Appearance: subtle `.pill[data-appearance="subtle"]`
+
+| Custom Property | Value |
+|-----------------|-------|
+| `--pug-pill-fill` | `color-mix(in srgb, var(--pug-pill-fill) 50%, transparent)` |
+
+### Size: xxs `.pill[data-size="xxs"]`
+
+| Property | Value |
+|----------|-------|
+| `min-height` | `1rem` |
+| `padding` | `0.125rem 0.375rem` |
+| `font-size` | `0.625rem` |
+
+### Size: sm `.pill[data-size="sm"]`
+
+| Property | Value |
+|----------|-------|
+| `min-height` | `1.375rem` |
+| `padding` | `0.25rem 0.625rem` |
+| `font-size` | `0.75rem` |
+
+### Font: mono `.pill[data-font="mono"]`
+
+| Property | Value |
+|----------|-------|
+| `font-family` | `var(--pug-typography-code-family)` |
+| `letter-spacing` | `0.02em` |
+
+### Muted `.pill[data-muted="true"]`
+
+| Property | Value |
+|----------|-------|
+| `opacity` | `0.72` |
 
 ## 9. Svelte Notes
 
-- can remain a styled inline element
+- Renders as a styled inline `<span>` with a default slot
+- Tone, appearance, size, font, and muted state are driven via `data-*`
+  attributes for CSS selector targeting
+- Component custom properties (`--pug-pill-fill`, `--pug-pill-border`,
+  `--pug-pill-text`) are set on the root element and consumed by the same
+  element's CSS, enabling tone overrides without class proliferation
 
 ## 10. GPUI Notes
 
 - expected crate/module surface: `pug_gpui::primitives::pill`
 - keep semantics non-interactive unless wrapped by a control-specific contract
+- `color-mix` blending should be replicated using equivalent alpha-blended color
+  calculations in GPUI's color system
 
 ## 11. Parity Checklist
 
 ### Tier 1: Strict Parity
 
 - [ ] non-interactive metadata semantics match
+- [ ] tone custom property overrides produce equivalent colors
 
 ### Tier 2: Visual Parity
 
-- [ ] tone, appearance, and typography roles match
+- [ ] all three sizes produce correct min-height, padding, and font-size
+- [ ] mono font variant uses code family with correct letter-spacing
+- [ ] subtle appearance halves fill opacity
+- [ ] muted state applies 0.72 opacity
 
 ### Tier 3: Implementation Freedom
 
 - [ ] truncation and rendering internals stay internal
+- [ ] `color-mix` may be replaced by pre-computed equivalents
 
 ## 12. Known Deltas
 
 | Delta | Why Allowed | Approval Status | Follow-Up |
 |-------|-------------|-----------------|-----------|
-| none yet | n/a | pending | review during first implementation |
+| `color-mix` implementation | GPUI may pre-compute blended colors rather than using CSS `color-mix` | allowed | ensure visual equivalence across themes |
 
 ## 13. Approval And Adoption Notes
 
-- contract status: `seed contract`
+- contract status: `detailed contract`
 - approvers: pending
-- downstream adopters: metadata displays, labels, status tags
+- downstream adopters: metadata displays, labels, status tags, card headers
 - future follow-up: add dismissible-chip semantics separately if needed
-
-## Next Task
-
-Keep `Pill` static and metadata-oriented until a true chip/tag-input contract is
-needed.

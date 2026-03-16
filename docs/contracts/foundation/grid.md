@@ -1,26 +1,29 @@
 # Grid
 
-Status: seed contract
-Updated: 2026-03-11
+Status: detailed contract
+Updated: 2026-03-15
 
 ## 1. Purpose
 
 - Component name: `Grid`
 - Layer: `foundation`
-- Summary: a structural placement primitive for two-dimensional layout
-- In scope: columns, rows, gaps, item placement
-- Out of scope: data-grid semantics, keyboard navigation, cell selection
+- Summary: a two-dimensional CSS grid layout primitive for placing children into
+  column and row tracks with consistent spacing
+- In scope: column/row track definitions, gap spacing, interior padding
+- Out of scope: data-grid semantics, keyboard navigation, cell selection,
+  responsive breakpoint logic
 
 ## 2. Anatomy
 
 ```text
-[Root]
-  └── [Children...]
+[Root .grid]  <div>
+  └── [Content] (slot)
 ```
 
 | Part | Required | Description | Token Targets |
 |------|----------|-------------|---------------|
-| Root | yes | two-dimensional layout container | spacing and optional padding |
+| Root | yes | CSS grid container | columns, rows, gap, padding |
+| Content | yes | grid-placed children | none (caller-owned) |
 
 ## 3. Props And Inputs
 
@@ -28,15 +31,20 @@ Updated: 2026-03-11
 
 | Prop | Type | Default | Required | Notes |
 |------|------|---------|----------|-------|
-| `columns` | `string` | `"1fr"` | no | layout track definition |
-| `rows` | `string \| null` | `null` | no | optional row definition |
-| `gap` | `"sm" \| "md" \| "lg"` | `"md"` | no | semantic grid gap |
-| `padding` | `"none" \| "sm" \| "md" \| "lg"` | `"none"` | no | interior spacing |
-| `asRole` | `string \| null` | `null` | no | optional semantic role |
+| `columns` | `string` | `"1fr"` | no | CSS grid-template-columns value |
+| `rows` | `string \| null` | `null` | no | CSS grid-template-rows value (omitted when null) |
+| `gap` | `SpaceScale` | `"md"` | no | spacing between grid cells |
+| `padding` | `SpaceScale` | `"none"` | no | interior spacing |
+| `asRole` | `string \| null` | `null` | no | explicit semantic role opt-in |
+| `ariaLabel` | `string \| null` | `null` | no | accessible name when role is set |
+
+### Shared Types
+
+- `SpaceScale`: `"none" \| "sm" \| "md" \| "lg"`
 
 ### Controlled And Uncontrolled
 
-- no controlled value model
+- display primitive only, no state
 
 ## 4. States
 
@@ -60,85 +68,124 @@ No internal state.
 
 ### Semantics
 
-- Role: neutral layout by default
-- Required attributes: none by default
-- Optional attributes: semantic grouping only when requested
-- Labeling rules: do not assume `grid` role for visual grid layout
+- Role: none by default (`<div>`)
+- `role`: from `asRole` prop when set
+- `aria-label`: from prop, used when `asRole` creates an addressable region
+- Important: do not assume ARIA `grid` role for visual grid layout
 
 ### Keyboard
 
 | Key | Behavior |
 |-----|----------|
-| none | no intrinsic keyboard model |
+| none | non-interactive, not focusable |
 
 ### Focus And Announcement
 
-- focus entry: root is not focusable by default
-- live-region behavior: none
+- Not focusable by default
+- No live-region behavior
 
 ## 7. Layout
 
 ### Sizing
 
-- track sizing is caller-defined through `columns` and `rows`
-- gap remains semantic and token-backed
+- `display: grid`
+- Base `min-width: 0` and `min-height: 0` prevent overflow
+- Track sizing is caller-defined through `columns` and `rows` props
+- Accepts any valid CSS grid-template value (e.g., `"1fr 1fr"`, `"repeat(3, 1fr)"`, `"200px auto 1fr"`)
 
 ### Composition
 
 - parent expectations: any sizing context
-- child expectations: direct placed items
-- resizing rules: placement follows track definitions, not content-specific
-  semantics
+- child expectations: direct grid-placed items
+- resizing rules: placement follows track definitions; gap remains constant
 
-## 8. Token Usage
+## 8. Token Usage — Exact Values
 
-| Part | Token | Purpose |
-|------|-------|---------|
-| Root | `semantic.space.inline.*` and `semantic.space.stack.*` | grid gap mapping |
-| Root | semantic padding roles | interior spacing |
+### Root (static CSS)
+
+| Property | Value |
+|----------|-------|
+| `display` | `grid` |
+| `min-width` | `0` |
+| `min-height` | `0` |
+
+### Inline Styles (conditional)
+
+| Property | Condition | Value |
+|----------|-----------|-------|
+| `grid-template-columns` | always | direct `columns` prop value |
+| `grid-template-rows` | when `rows` is set | direct `rows` prop value |
+| `gap` | `gap="none"` | `0` |
+| `gap` | `gap="sm"` | `var(--pug-space-inline-sm)` |
+| `gap` | `gap="md"` | `var(--pug-space-panel-y)` |
+| `gap` | `gap="lg"` | `var(--pug-space-panel-x)` |
+| `padding` | `padding="none"` | `0` |
+| `padding` | `padding="sm"` | `var(--pug-space-inline-sm)` |
+| `padding` | `padding="md"` | `var(--pug-space-panel-y)` |
+| `padding` | `padding="lg"` | `var(--pug-space-panel-x)` |
+
+### SpaceScale Token Map
+
+| Scale | Resolved Value |
+|-------|---------------|
+| `"none"` | `0` |
+| `"sm"` | `var(--pug-space-inline-sm)` |
+| `"md"` | `var(--pug-space-panel-y)` |
+| `"lg"` | `var(--pug-space-panel-x)` |
 
 ## 9. Svelte Notes
 
-- implemented with CSS grid or equivalent
-- data-table or spreadsheet semantics must be separate higher-order contracts
+- Rendered as a `<div>` with class `grid`
+- All layout properties applied as inline styles
+- Gap and padding resolved via `scaleToSpace` helper
+- `grid-template-columns` always set from `columns` prop
+- `grid-template-rows` only set when `rows` prop is non-null
+- Slot-based content model
+- `role` and `aria-label` attributes set conditionally from props
+- No events, no state, no lifecycle hooks
 
 ## 10. GPUI Notes
 
-- implemented with GPUI-native layout constraints or custom placement helpers
-- native accessibility semantics remain neutral unless a higher-order contract
-  explicitly opts into table/grid semantics
+- Expected crate/module surface: `pug_gpui::components::grid`
+- GPUI may need custom placement helpers to emulate CSS grid track definitions
+- `columns` and `rows` string props must be parsed into equivalent track sizes
+- SpaceScale mapping must use the same design token values
+- When `asRole` is set, GPUI must expose equivalent native accessibility grouping
+- Must not impose ARIA `grid` role for visual-only grid layout
+- Must not become focusable unless a higher-order contract requires it
 
 ## 11. Parity Checklist
 
 ### Tier 1: Strict Parity
 
-- [ ] visual-layout-only semantics match
-- [ ] no accidental `grid` accessibility role is implied
-- [ ] token-backed gap meaning matches
+- [ ] grid layout semantics match (visual-only, no ARIA grid role)
+- [ ] non-interactive semantics match
+- [ ] `asRole` opt-in meaning matches
+- [ ] `ariaLabel` applied when role is set
+- [ ] focus neutrality matches
 
 ### Tier 2: Visual Parity
 
-- [ ] track placement and gap proportions match
+- [ ] gap scale tokens resolve to same values
+- [ ] padding scale tokens resolve to same values
+- [ ] column track definitions produce equivalent layout
+- [ ] row track definitions produce equivalent layout when set
+- [ ] base min-width: 0 and min-height: 0 match
 
 ### Tier 3: Implementation Freedom
 
-- [ ] CSS grid vs GPUI placement internals stay internal
+- [ ] CSS grid vs GPUI placement internals stay platform-owned
 
 ## 12. Known Deltas
 
 | Delta | Why Allowed | Approval Status | Follow-Up |
 |-------|-------------|-----------------|-----------|
-| none yet | n/a | pending | review during first implementation |
+| none | n/a | n/a | n/a |
 
 ## 13. Approval And Adoption Notes
 
-- contract status: `seed contract`
+- contract status: `detailed contract`
 - approvers: pending
-- downstream adopters: card grids, stat grids, shell content areas
+- downstream adopters: card grids, stat grids, shell content areas, NavCardGrid
 - future follow-up: separate `DataGrid` contract if interactive grid semantics
   become required
-
-## Next Task
-
-Keep `Grid` structural and reserve interactive grid semantics for higher-order
- contracts in later milestones.

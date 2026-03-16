@@ -1,8 +1,8 @@
 # g10.011 — Demo Scene Expansion: 6-Screen Parity
 
-Status: planned
+Status: complete
 Owner: Pug Core
-Updated: 2026-03-15
+Updated: 2026-03-16
 Depends on: g10.010
 Primary repos: `pug`
 

@@ -110,10 +110,19 @@
       }
     }
 
+    function handleKeydown(event: KeyboardEvent): void {
+      if (event.key === "Escape" && currentValue) {
+        event.preventDefault();
+        setValue(null);
+      }
+    }
+
     document.addEventListener("mousedown", handlePointerDown);
+    document.addEventListener("keydown", handleKeydown);
 
     return () => {
       document.removeEventListener("mousedown", handlePointerDown);
+      document.removeEventListener("keydown", handleKeydown);
     };
   });
 </script>
@@ -321,6 +330,7 @@
     color: var(--pug-color-text-primary);
     cursor: pointer;
     font: inherit;
+    font-size: 0.875rem;
     text-align: left;
   }
 

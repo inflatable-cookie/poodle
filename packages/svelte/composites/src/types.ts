@@ -1,7 +1,7 @@
 export type TableSortDirection = "asc" | "desc";
 export type BrowseState = "ready" | "empty" | "loading" | "error" | "no-results";
 export type MinColumnWidth = "sm" | "md" | "lg";
-export type CardVariant = "default" | "outlined" | "elevated";
+export type { CardVariant } from "@pug/svelte-primitives";
 export type PickerVariant = "inline" | "popover" | "modal";
 export type SelectionMode = "single" | "multiple";
 export type MediaState = "ready" | "loading" | "error" | "empty";
@@ -47,11 +47,7 @@ export type TableRow = {
   summary?: string | null;
 };
 
-export type BulkAction = {
-  id: string;
-  label: string;
-  tone?: "default" | "danger";
-};
+export type { BulkAction } from "@pug/svelte-primitives";
 
 export type BreadcrumbItem = {
   value: string;
@@ -96,16 +92,7 @@ export type ReorderableItem = {
   label: string;
 };
 
-export type SortField = {
-  value: string;
-  label: string;
-  isDisabled?: boolean;
-};
-
-export type ActiveSort = {
-  field: string;
-  direction: "asc" | "desc";
-};
+export type { SortField, ActiveSort } from "@pug/svelte-primitives";
 
 export type ToastItem = {
   id: string;

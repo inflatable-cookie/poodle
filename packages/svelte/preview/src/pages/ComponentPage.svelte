@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { Eyebrow, Pill, Separator } from "@pug/svelte-primitives";
+  import { Eyebrow, Pill, Separator, Surface } from "@pug/svelte-primitives";
   import type { ComponentEntry } from "../component-registry";
 
   export let entry: ComponentEntry;
@@ -9,7 +9,7 @@
 <article class="component-page">
   <header class="component-page__hero">
     <div class="component-page__hero-top">
-      <Eyebrow>{entry.tier === "primitive" ? "Primitive" : "Composite"}</Eyebrow>
+      <Eyebrow>{entry.tier === "primitive" ? "Primitive" : entry.tier === "shell" ? "Shell" : "Composite"}</Eyebrow>
       <Pill size="sm">{entry.packageName}</Pill>
     </div>
     <h1 class="component-page__title">{entry.displayName}</h1>
@@ -21,9 +21,9 @@
   {#if specimenComponent}
     <section class="component-page__section">
       <h2 class="component-page__section-title">Live demo</h2>
-      <div class="component-page__specimen">
+      <Surface tone="panel" border="subtle" padding="md">
         <svelte:component this={specimenComponent} />
-      </div>
+      </Surface>
     </section>
     <Separator />
   {:else}
@@ -83,13 +83,6 @@
     font-weight: 600;
     color: var(--pug-color-text-primary);
     margin: 0 0 1rem;
-  }
-
-  .component-page__specimen {
-    padding: 1.5rem;
-    border: 0.0625rem solid color-mix(in srgb, var(--pug-color-border-subtle) 60%, transparent);
-    border-radius: var(--pug-radius-surface);
-    background: color-mix(in srgb, var(--pug-color-background-panel) 90%, transparent);
   }
 
   .component-page__placeholder {

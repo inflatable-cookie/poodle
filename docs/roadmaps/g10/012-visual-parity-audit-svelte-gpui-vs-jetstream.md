@@ -1,8 +1,8 @@
 # g10.012 — Visual Parity Audit: Svelte/GPUI vs Jetstream Comparison
 
-Status: planned
+Status: complete
 Owner: Pug Core
-Updated: 2026-03-15
+Updated: 2026-03-16
 Depends on: g10.011
 Primary repos: `pug`
 

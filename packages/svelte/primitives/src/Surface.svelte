@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { joinStyles, scaleToSpace } from "./internal";
+  import { joinStyles } from "./internal";
 
   import type { SpaceScale, SurfaceBorder, SurfaceTone } from "./types";
 
@@ -10,7 +10,16 @@
   export let asRole: "region" | "group" | null = null;
   export let label: string | null = null;
 
-  $: style = joinStyles([`padding: ${scaleToSpace(padding)}`]);
+  function surfacePadding(scale: SpaceScale): string {
+    switch (scale) {
+      case "sm": return "var(--pug-space-panel-y)";
+      case "md": return "1rem";
+      case "lg": return "1.5rem";
+      default: return "0";
+    }
+  }
+
+  $: style = joinStyles([`padding: ${surfacePadding(padding)}`]);
 </script>
 
 <div
@@ -27,7 +36,8 @@
 
 <style>
   .surface {
-    --pug-surface-fill: color-mix(in srgb, var(--pug-color-background-panel) 96%, transparent);
+    --pug-surface-fill: color-mix(in srgb, var(--pug-color-background-surface) 96%, transparent);
+    --pug-surface: var(--pug-surface-fill);
     --pug-surface-border: color-mix(in srgb, var(--pug-color-border-subtle) 74%, transparent);
     --pug-surface-shadow: none;
     min-width: 0;

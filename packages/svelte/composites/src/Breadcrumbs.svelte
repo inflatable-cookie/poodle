@@ -1,6 +1,8 @@
 <script lang="ts">
   import { createEventDispatcher } from "svelte";
 
+  import { Icon } from "@pug/svelte-primitives";
+
   import type { BreadcrumbItem } from "./types";
 
   export let items: BreadcrumbItem[] = [];
@@ -39,7 +41,7 @@
           <button type="button" on:click={() => handleNavigate(item)}>{item.label}</button>
         {/if}
         {#if index < visibleItems.length - 1}
-          <span class="breadcrumbs__separator" aria-hidden="true">/</span>
+          <span class="breadcrumbs__separator" aria-hidden="true"><Icon name="chevron-right" size="sm" /></span>
         {/if}
       </li>
     {/each}
@@ -74,6 +76,11 @@
     cursor: pointer;
     font: inherit;
     text-decoration: none;
+  }
+
+  .breadcrumbs__separator {
+    display: inline-flex;
+    opacity: 0.4;
   }
 
   .breadcrumbs [aria-current="page"] {

@@ -1,27 +1,31 @@
 # Surface
 
-Status: seed contract
-Updated: 2026-03-11
+Status: detailed contract
+Updated: 2026-03-15
 
 ## 1. Purpose
 
 - Component name: `Surface`
 - Layer: `foundation`
-- Summary: a semantic visual container for backgrounds, borders, elevation, and
-  optional region semantics
-- In scope: background tiers, border presence, elevation, optional labeling
-- Out of scope: panel-header chrome, dock behavior, scroll ownership
+- Summary: a semantic visual container providing background tiers, border
+  treatments, elevation, and optional region semantics
+- In scope: background tones (panel, canvas, elevated), border presence and
+  emphasis, elevation shadow, interior padding, optional ARIA region/group
+  semantics
+- Out of scope: panel-header chrome, dock behavior, scroll ownership, toolbar
+  layout
 
 ## 2. Anatomy
 
 ```text
-[Root Surface]
-  └── [Children...]
+[Root .surface]  <div>
+  └── [Children...] (slot)
 ```
 
 | Part | Required | Description | Token Targets |
 |------|----------|-------------|---------------|
-| Root Surface | yes | background and boundary container | background, border, radius, elevation |
+| Root | yes | background and boundary container | background fill, border, radius, elevation shadow |
+| Children | no | arbitrary slotted content | caller-owned |
 
 ## 3. Props And Inputs
 
@@ -29,12 +33,18 @@ Updated: 2026-03-11
 
 | Prop | Type | Default | Required | Notes |
 |------|------|---------|----------|-------|
-| `tone` | `"canvas" \| "panel" \| "elevated"` | `"panel"` | no | semantic surface tier |
-| `border` | `"none" \| "subtle" \| "default"` | `"subtle"` | no | shell boundary level |
-| `padding` | `"none" \| "sm" \| "md" \| "lg"` | `"md"` | no | interior spacing |
-| `isElevated` | `boolean` | `false` | no | stronger elevation treatment |
-| `asRole` | `"region" \| "group" \| null` | `null` | no | semantic opt-in only |
-| `label` | `string \| null` | `null` | no | required when the surface is an addressable region without visible title |
+| `tone` | `SurfaceTone: "panel" \| "canvas" \| "elevated"` | `"panel"` | no | semantic surface background tier |
+| `border` | `SurfaceBorder: "subtle" \| "default" \| "none"` | `"subtle"` | no | shell boundary emphasis level |
+| `padding` | `SpaceScale: "none" \| "sm" \| "md" \| "lg"` | `"md"` | no | interior spacing via scaleToSpace utility |
+| `isElevated` | `boolean` | `false` | no | applies elevated fill and shadow regardless of tone |
+| `asRole` | `"region" \| "group" \| null` | `null` | no | semantic role opt-in |
+| `label` | `string \| null` | `null` | no | accessible label; required when asRole="region" and no visible heading |
+
+### Slots
+
+| Slot | Purpose |
+|------|---------|
+| default | arbitrary child content |
 
 ### Controlled And Uncontrolled
 
@@ -46,9 +56,12 @@ Updated: 2026-03-11
 
 | State | Trigger | Expected Result |
 |-------|---------|-----------------|
-| default | resting | panel-tier shell |
-| canvas | `tone="canvas"` | background matches canvas |
-| elevated | `tone="elevated"` or `isElevated=true` | stronger elevation and contrast |
+| panel (default) | `tone="panel"` | panel-tier background with subtle border |
+| canvas | `tone="canvas"` | canvas-tier background |
+| elevated | `tone="elevated"` or `isElevated=true` | elevated background, elevation shadow |
+| border-none | `border="none"` | border becomes transparent |
+| border-default | `border="default"` | stronger border using default border color |
+| border-subtle | `border="subtle"` (default) | low-emphasis mixed border |
 
 ### Component States
 
@@ -64,12 +77,13 @@ No internal state.
 
 ### Semantics
 
-- Role: none by default; `group` or `region` only by explicit opt-in
-- Required attributes: accessible label when `asRole="region"` and no visible
-  heading is associated externally
-- Optional attributes: `aria-labelledby`, `aria-describedby` or native
+- Role: none by default; `group` or `region` only by explicit `asRole` opt-in
+- Required attributes: `aria-label` (from `label` prop) when `asRole="region"`
+  and no visible heading is associated externally
+- Optional attributes: `aria-labelledby`, `aria-describedby` via native
   equivalents
-- Labeling rules: decorative surfaces must stay accessibility-neutral
+- Labeling rules: decorative surfaces (no asRole) must stay
+  accessibility-neutral and not appear as landmarks
 
 ### Keyboard
 
@@ -79,7 +93,8 @@ No internal state.
 
 ### Focus And Announcement
 
-- focus entry: surface itself is not focusable by default
+- focus entry: surface itself is not focusable
+- focus exit: n/a
 - live-region behavior: none
 
 ## 7. Layout
@@ -87,69 +102,153 @@ No internal state.
 ### Sizing
 
 - follows parent constraints and child content
-- does not own scroll behavior unless paired with `ScrollShell`
+- `min-width: 0` and `min-height: 0` prevent flex overflow
+- does not own scroll behavior (pair with ScrollShell for scrolling)
 
 ### Composition
 
-- parent expectations: any layout primitive or shell region
-- child expectations: arbitrary content or nested primitives
-- resizing rules: visual chrome scales with size but does not change semantics
+- parent expectations: any layout primitive, shell region, or page container
+- child expectations: arbitrary content, nested primitives, composite
+  components
+- resizing rules: visual chrome (border, radius, shadow) scales with size but
+  does not change semantics
 
-## 8. Token Usage
+## 8. Token Usage — Exact Values
 
-| Part | Token | Purpose |
-|------|-------|---------|
-| Root Surface | `semantic.color.background.canvas/panel/elevated` | fill tier |
-| Root Surface | `semantic.color.border.*` | shell boundary |
-| Root Surface | `semantic.radius.surface` | rounding |
-| Root Surface | `semantic.elevation.surface` and `semantic.elevation.overlay` | elevation |
-| Root Surface | `semantic.space.panel.*` | interior spacing |
+### CSS Custom Properties (on .surface)
+
+| Var | Default Value |
+|-----|---------------|
+| `--pug-surface-fill` | `color-mix(in srgb, var(--pug-color-background-surface) 96%, transparent)` |
+| `--pug-surface` | `var(--pug-surface-fill)` — propagates surface context to descendants (see [surface-elevation](./surface-elevation.md)) |
+| `--pug-surface-border` | `color-mix(in srgb, var(--pug-color-border-subtle) 74%, transparent)` |
+| `--pug-surface-shadow` | `none` |
+
+### Root (.surface) — base styles
+
+| Property | Value |
+|----------|-------|
+| `min-width` | `0` |
+| `min-height` | `0` |
+| `border` | `0.0625rem solid var(--pug-surface-border)` |
+| `border-radius` | `var(--pug-treatment-surface-radius, var(--pug-radius-surface))` |
+| `background` | `var(--pug-surface-fill)` |
+| `box-shadow` | `var(--pug-surface-shadow)` |
+
+### Tone: canvas — .surface[data-tone="canvas"]
+
+| Var | Value |
+|-----|-------|
+| `--pug-surface-fill` | `color-mix(in srgb, var(--pug-color-background-canvas) 98%, transparent)` |
+
+### Tone: elevated — .surface[data-tone="elevated"]
+
+| Var | Value |
+|-----|-------|
+| `--pug-surface-fill` | `color-mix(in srgb, var(--pug-color-background-elevated) 96%, var(--pug-color-background-panel))` |
+| `--pug-surface-shadow` | `var(--pug-elevation-surface)` |
+
+### isElevated override — .surface[data-elevated="true"]
+
+| Var | Value |
+|-----|-------|
+| `--pug-surface-fill` | `color-mix(in srgb, var(--pug-color-background-elevated) 96%, var(--pug-color-background-panel))` |
+| `--pug-surface-shadow` | `var(--pug-elevation-surface)` |
+
+### Border: none — .surface[data-border="none"]
+
+| Property | Value |
+|----------|-------|
+| `border-color` | `transparent` |
+
+### Border: default — .surface[data-border="default"]
+
+| Var | Value |
+|-----|-------|
+| `--pug-surface-border` | `var(--pug-color-border-default)` |
+
+### Padding (Surface-specific mapping, applied as inline style)
+
+Surface uses its own padding scale rather than the shared `scaleToSpace`
+utility, providing roomier defaults suited to container-level spacing.
+
+| Scale | Value |
+|-------|-------|
+| `none` | `0` |
+| `sm` | `var(--pug-space-panel-y)` (0.5rem) |
+| `md` | `1rem` |
+| `lg` | `1.5rem` |
+
+### Data Attributes
+
+| Attribute | Source |
+|-----------|--------|
+| `data-tone` | `tone` prop |
+| `data-border` | `border` prop |
+| `data-elevated` | `isElevated` prop (string "true"/"false") |
 
 ## 9. Svelte Notes
 
-- implemented as semantic HTML container plus token styling
-- if the surface is a true region or section, prefer matching HTML semantics
-  first and use ARIA only when needed
+- rendered as a `<div>` with data attributes driving CSS selector overrides
+- padding applied as inline style via shared `scaleToSpace` utility
+- when `asRole` is set, the `role` attribute is applied to the root element
+- when `label` is set, `aria-label` is applied to the root element
+- treatment token `--pug-treatment-surface-radius` allows theme-level radius
+  overrides with fallback to `--pug-radius-surface`
+- CSS custom properties (`--pug-surface-fill`, `--pug-surface-border`,
+  `--pug-surface-shadow`) are set on the root and overridden by data-attribute
+  selectors for tone, border, and elevation variants
+- `color-mix` blending creates semi-transparent fills that layer naturally
+  when surfaces are nested
 
 ## 10. GPUI Notes
 
-- implemented as a styled GPUI container plus native accessibility-node mapping
-  when semantic opt-in is requested
-- region/group semantics must map into platform accessibility APIs rather than
-  being lost because GPUI lacks HTML semantics
+- expected crate/module surface: `pug_gpui::components::surface`
+- Spec struct: `SurfaceSpec` in primitives crate
+- tone and border variants must produce matching fill colors using equivalent
+  color-mix logic
+- elevation shadow (`--pug-elevation-surface`) maps to GPUI shadow drawing
+- treatment radius fallback: use treatment token if set, else radius-surface
+- region/group semantics must map into platform accessibility APIs when
+  `asRole` is provided
+- decorative surfaces (no asRole) must not surface as named accessibility nodes
 
 ## 11. Parity Checklist
 
 ### Tier 1: Strict Parity
 
-- [ ] tone and border semantics match
+- [ ] tone semantics (panel, canvas, elevated) produce matching backgrounds
+- [ ] border semantics (subtle, default, none) match
+- [ ] isElevated override applies elevated fill and shadow
 - [ ] region/group opt-in meaning matches
 - [ ] decorative surfaces remain accessibility-neutral
 
 ### Tier 2: Visual Parity
 
-- [ ] background tiers and elevation hierarchy match
-- [ ] spacing and boundary weight match
+- [ ] background fill color-mix values match across runtimes
+- [ ] border color and width match (0.0625rem solid)
+- [ ] border-radius matches (treatment fallback chain)
+- [ ] elevation shadow matches
+- [ ] padding scale values match
 
 ### Tier 3: Implementation Freedom
 
-- [ ] CSS shadows vs GPUI drawing details stay internal
+- [ ] CSS custom properties vs GPUI theme access stays internal
+- [ ] CSS data-attribute selectors vs Rust match stays internal
+- [ ] color-mix implementation may differ in internal API
 
 ## 12. Known Deltas
 
 | Delta | Why Allowed | Approval Status | Follow-Up |
 |-------|-------------|-----------------|-----------|
-| none yet | n/a | pending | review during first implementation |
+| color-mix transparency blending | GPUI may use direct alpha blending instead of CSS color-mix | allowed | same visual result required |
+| Treatment radius fallback chain | CSS var fallback vs Rust conditional | allowed | same visual result |
 
 ## 13. Approval And Adoption Notes
 
-- contract status: `seed contract`
+- contract status: `detailed contract`
 - approvers: pending
-- downstream adopters: cards, panels, dialogs, shell sections
+- downstream adopters: cards, panels, dialogs, shell sections, detail views,
+  PanelSurface
 - future follow-up: add high-contrast appearance guidance during accessibility
   hardening
-
-## Next Task
-
-Build `PanelSurface` and future card-like composites on top of `Surface`
-instead of re-documenting basic container semantics.

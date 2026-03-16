@@ -1,7 +1,7 @@
 <script lang="ts">
   import { createEventDispatcher } from "svelte";
 
-  import Card from "./Card.svelte";
+  import { Card } from "@pug/svelte-primitives";
 
   import type { CardRadioItem } from "./types";
 

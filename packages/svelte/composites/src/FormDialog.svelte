@@ -1,7 +1,7 @@
 <script lang="ts">
   import { createEventDispatcher } from "svelte";
 
-  import { Dialog, Button, Banner } from "@pug/svelte-primitives";
+  import { Dialog, Button, Callout } from "@pug/svelte-primitives";
 
   export let open: boolean | null = null;
   export let title: string;
@@ -54,7 +54,7 @@
 >
   {#if error}
     <div class="form-dialog__error">
-      <Banner tone="danger" message={error} />
+      <Callout tone="danger" message={error} />
     </div>
   {/if}
 

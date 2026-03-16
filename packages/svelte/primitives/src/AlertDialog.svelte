@@ -52,7 +52,7 @@
     }
   }
 
-  $: confirmVariant = tone === "danger" ? "danger" as const : "primary" as const;
+  $: confirmTone = tone === "danger" ? "danger" as const : "default" as const;
 </script>
 
 <Dialog
@@ -76,7 +76,8 @@
       {cancelLabel}
     </Button>
     <Button
-      variant={confirmVariant}
+      variant="primary"
+      tone={confirmTone}
       on:click={handleConfirm}
       disabled={working}
     >

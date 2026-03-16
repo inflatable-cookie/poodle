@@ -19,7 +19,7 @@
 
   let open: boolean = false;
 
-  $: triggerVariant = tone === "danger" ? "danger" as const : "secondary" as const;
+  $: triggerTone = tone === "danger" ? "danger" as const : "default" as const;
 
   function handleTrigger(): void {
     open = true;
@@ -55,7 +55,7 @@
     <slot name="trigger" />
   </span>
 {:else}
-  <Button variant={triggerVariant} on:click={handleTrigger}>
+  <Button variant="secondary" tone={triggerTone} on:click={handleTrigger}>
     {triggerLabel}
   </Button>
 {/if}
