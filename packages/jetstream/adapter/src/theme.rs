@@ -5,26 +5,52 @@
 //! theme model. Uses the same resolution strategy as GPUI (parse string values
 //! directly, match against typed constants, fall back to safe defaults).
 
+use std::collections::HashMap;
+
 use pug_adapter::ThemeProvider;
 use pug_tokens::typed::{self, ColorValue};
+use pug_tokens::themes::ThemeDefinition;
 
 /// Theme provider for the Jetstream rendering adapter.
 ///
-/// Resolves Pug semantic token strings to typed values. In a real Jetstream
-/// integration, this would also bridge to Jetstream's `Theme` struct for
-/// runtime theme switching.
+/// Resolves Pug semantic token strings to typed values. Supports runtime
+/// theme switching by applying color overrides from a `ThemeDefinition`.
 #[derive(Debug, Clone)]
 pub struct JetstreamThemeProvider {
     scale_factor: f32,
+    /// Color overrides from the active theme definition. Keys are semantic
+    /// token paths (e.g. "semantic.color.background.canvas"), values are
+    /// pre-parsed RGBA colors.
+    color_overrides: HashMap<String, ColorValue>,
 }
 
 impl Default for JetstreamThemeProvider {
     fn default() -> Self {
-        Self { scale_factor: 1.0 }
+        Self::from_theme(&pug_tokens::themes::LIGHT)
     }
 }
 
 impl JetstreamThemeProvider {
+    /// Create a provider from a theme definition, pre-parsing all color
+    /// overrides so that resolve_color is fast at runtime.
+    pub fn from_theme(theme: &ThemeDefinition) -> Self {
+        let mut color_overrides = HashMap::new();
+        for &(key, value) in theme.overrides {
+            // Only cache color overrides.
+            if key.contains("color.") {
+                if let Some(hex) = value.strip_prefix('#') {
+                    color_overrides.insert(key.to_string(), parse_hex_color(hex));
+                } else if let Some(inner) = value.strip_prefix("rgba(").and_then(|s| s.strip_suffix(')')) {
+                    color_overrides.insert(key.to_string(), parse_rgba(inner));
+                }
+            }
+        }
+        Self {
+            scale_factor: 1.0,
+            color_overrides,
+        }
+    }
+
     pub fn with_scale_factor(mut self, factor: f32) -> Self {
         self.scale_factor = factor;
         self
@@ -32,6 +58,24 @@ impl JetstreamThemeProvider {
 
     pub fn scale_factor(&self) -> f32 {
         self.scale_factor
+    }
+
+    /// Look up a semantic token in the theme's color overrides.
+    /// Tokens use short names like "background.canvas"; override keys use
+    /// full paths like "semantic.color.background.canvas".
+    fn match_override(&self, token: &str) -> Option<ColorValue> {
+        // Try to find the token in our pre-parsed override map.
+        // The override keys are "semantic.color.<segment>" and the tokens
+        // passed in contain the segment (e.g. "background.canvas").
+        for (key, color) in &self.color_overrides {
+            // Strip "semantic.color." prefix to get the segment.
+            if let Some(segment) = key.strip_prefix("semantic.color.") {
+                if token.contains(segment) {
+                    return Some(*color);
+                }
+            }
+        }
+        None
     }
 }
 
@@ -47,7 +91,12 @@ impl ThemeProvider for JetstreamThemeProvider {
             return parse_rgba(inner);
         }
 
-        // Strategy 3: Match against known typed semantic constants
+        // Strategy 3: Check theme overrides (dark/light/loophole-studio)
+        if let Some(color) = self.match_override(token) {
+            return color;
+        }
+
+        // Strategy 4: Match against known typed semantic constants (light defaults)
         if let Some(color) = match_semantic_color(token) {
             return color;
         }

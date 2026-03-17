@@ -228,6 +228,15 @@ impl PreviewState {
     }
 
     fn rebuild_shell(&mut self) {
+        // Update the theme provider to match the selected preset.
+        let theme_def = match self.app.theme_preset {
+            ThemePreset::Dark => &pug_tokens::themes::DARK,
+            ThemePreset::Light => &pug_tokens::themes::LIGHT,
+            ThemePreset::LoopholeStudio => &pug_tokens::themes::LOOPHOLE_STUDIO,
+        };
+        self.theme = pug_jetstream::JetstreamThemeProvider::from_theme(theme_def)
+            .with_scale_factor(self.theme.scale_factor());
+
         // Save current scroll offsets before tearing down the tree.
         let saved_sidebar_scroll = if !self.app.reset_sidebar_scroll {
             self.shell.as_ref().and_then(|s| {
