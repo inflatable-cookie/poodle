@@ -22,7 +22,7 @@ pub fn render(tree: &mut UiTree, theme: &dyn ThemeProvider) -> UiNodeId {
             direction: Direction::Column,
             width: Sizing::Fixed(400.0),
             background: Some(glam::Vec4::new(0.05, 0.05, 0.05, 1.0)),
-            corner_radius: 8.0,
+            corner_radii: [8.0; 4],
             ..UiStyle::default()
         });
         tree.add_child(root, player);
@@ -37,7 +37,7 @@ pub fn render(tree: &mut UiTree, theme: &dyn ThemeProvider) -> UiNodeId {
 
         let play = tree.create(Widget::Panel, UiStyle {
             width: Sizing::Fixed(48.0), height: Sizing::Fixed(48.0),
-            corner_radius: 24.0,
+            corner_radii: [24.0; 4],
             background: Some(glam::Vec4::new(0.0, 0.0, 0.0, 0.5)),
             align: Align::Center, justify: Justify::Center,
             ..UiStyle::default()
@@ -72,7 +72,7 @@ pub fn render(tree: &mut UiTree, theme: &dyn ThemeProvider) -> UiNodeId {
         let track = tree.create(Widget::Panel, UiStyle {
             width: Sizing::Grow(1.0), height: Sizing::Fixed(3.0),
             background: Some(glam::Vec4::new(0.3, 0.3, 0.3, 1.0)),
-            corner_radius: 1.5, ..UiStyle::default()
+            corner_radii: [1.5; 4], ..UiStyle::default()
         });
         tree.add_child(controls, track);
 
@@ -91,7 +91,7 @@ pub fn render(tree: &mut UiTree, theme: &dyn ThemeProvider) -> UiNodeId {
     let note = tree.create(Widget::Panel, UiStyle {
         padding: Edges::all(10.0),
         background: Some(theme_bridge::tint(accent, 0.08)),
-        corner_radius: 6.0,
+        corner_radii: [6.0; 4],
         ..UiStyle::default()
     });
     tree.add_child(root, note);

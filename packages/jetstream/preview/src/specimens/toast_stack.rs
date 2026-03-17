@@ -43,7 +43,7 @@ fn toast(tree: &mut UiTree, parent: UiNodeId, icon: &str, message: &str, action:
         direction: Direction::Row, gap: 8.0,
         padding: Edges { top: 10.0, right: 12.0, bottom: 10.0, left: 12.0 },
         background: Some(bg), border_color: Some(border), border_width: 1.0,
-        corner_radius: 8.0, align: Align::Center,
+        corner_radii: [8.0; 4], align: Align::Center,
         ..UiStyle::default()
     });
     tree.add_child(parent, card);
@@ -51,7 +51,7 @@ fn toast(tree: &mut UiTree, parent: UiNodeId, icon: &str, message: &str, action:
     // Tone bar
     let bar = tree.create(Widget::Panel, UiStyle {
         width: Sizing::Fixed(3.0), height: Sizing::Fixed(24.0),
-        background: Some(tone), corner_radius: 1.5,
+        background: Some(tone), corner_radii: [1.5; 4],
         ..UiStyle::default()
     });
     tree.add_child(card, bar);
@@ -73,7 +73,7 @@ fn toast(tree: &mut UiTree, parent: UiNodeId, icon: &str, message: &str, action:
         }, UiStyle {
             height: Sizing::Fixed(24.0),
             padding: Edges { top: 0.0, right: 8.0, bottom: 0.0, left: 8.0 },
-            corner_radius: 4.0, background: Some(tone),
+            corner_radii: [4.0; 4], background: Some(tone),
             text_color: Some(action_fg), text_size: Some(10.0),
             align: Align::Center, justify: Justify::Center,
             focusable: true, ..UiStyle::default()

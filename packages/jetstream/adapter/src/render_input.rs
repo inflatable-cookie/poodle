@@ -27,7 +27,8 @@ impl RenderComponent<TextInputSpec> for JetstreamAdapter {
         js_style.border_color = Some(JetstreamColor::from(border_color));
 
         // Resolve corner radius
-        js_style.corner_radius = theme.resolve_radius(spec.radius_token());
+        let r = theme.resolve_radius(spec.radius_token());
+        js_style.corner_radii = [r; 4];
 
         // Resolve text color
         let text_color = theme.resolve_color(spec.text_color_token());
@@ -68,7 +69,8 @@ impl RenderComponent<TextAreaSpec> for JetstreamAdapter {
         js_style.border_color = Some(JetstreamColor::from(border_color));
 
         // Resolve corner radius
-        js_style.corner_radius = theme.resolve_radius(spec.radius_token());
+        let r = theme.resolve_radius(spec.radius_token());
+        js_style.corner_radii = [r; 4];
 
         JetstreamNodeHandle::new("text-area", "TextAreaSpec", WidgetKind::TextInput)
     }

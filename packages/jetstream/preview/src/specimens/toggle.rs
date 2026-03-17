@@ -69,7 +69,7 @@ fn toggle_btn(tree: &mut UiTree, parent: UiNodeId, label: &str, bg: glam::Vec4, 
         label: label.to_string(), pressed, hovered: false,
     }, UiStyle {
         width: Sizing::Fixed(36.0), height: Sizing::Fixed(32.0),
-        corner_radius: 6.0, background: Some(bg),
+        corner_radii: [6.0; 4], background: Some(bg),
         border_color: Some(border), border_width: if pressed { 0.0 } else { 1.0 },
         text_color: Some(fg), text_size: Some(12.0),
         align: Align::Center, justify: Justify::Center,

@@ -30,7 +30,7 @@ fn audio_card(tree: &mut UiTree, parent: UiNodeId, state_icon: &str, title: &str
         direction: Direction::Column, width: Sizing::Fixed(360.0),
         padding: Edges::all(12.0), gap: 8.0,
         background: Some(bg), border_color: Some(border), border_width: 1.0,
-        corner_radius: 8.0,
+        corner_radii: [8.0; 4],
         ..UiStyle::default()
     });
     tree.add_child(parent, card);
@@ -45,7 +45,7 @@ fn audio_card(tree: &mut UiTree, parent: UiNodeId, state_icon: &str, title: &str
         label: state_icon.to_string(), pressed: false, hovered: false,
     }, UiStyle {
         width: Sizing::Fixed(36.0), height: Sizing::Fixed(36.0),
-        corner_radius: 18.0, background: Some(accent),
+        corner_radii: [18.0; 4], background: Some(accent),
         text_color: Some(glam::Vec4::ONE), text_size: Some(14.0),
         align: Align::Center, justify: Justify::Center,
         focusable: true, ..UiStyle::default()
@@ -71,7 +71,7 @@ fn audio_card(tree: &mut UiTree, parent: UiNodeId, state_icon: &str, title: &str
     let track = tree.create(Widget::Panel, UiStyle {
         width: Sizing::Grow(1.0), height: Sizing::Fixed(4.0),
         background: Some(theme_bridge::tint(border, 0.5)),
-        corner_radius: 2.0, ..UiStyle::default()
+        corner_radii: [2.0; 4], ..UiStyle::default()
     });
     tree.add_child(card, track);
 
@@ -79,7 +79,7 @@ fn audio_card(tree: &mut UiTree, parent: UiNodeId, state_icon: &str, title: &str
         let fill_width = 336.0 * progress; // approximate
         let fill = tree.create(Widget::Panel, UiStyle {
             width: Sizing::Fixed(fill_width), height: Sizing::Fixed(4.0),
-            background: Some(accent), corner_radius: 2.0, ..UiStyle::default()
+            background: Some(accent), corner_radii: [2.0; 4], ..UiStyle::default()
         });
         tree.add_child(track, fill);
     }

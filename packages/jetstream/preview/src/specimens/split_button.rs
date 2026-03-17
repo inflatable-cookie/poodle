@@ -53,7 +53,7 @@ pub fn render(tree: &mut UiTree, theme: &dyn ThemeProvider) -> UiNodeId {
         }, UiStyle {
             height: Sizing::Fixed(h),
             padding: Edges { top: 0.0, right: 12.0, bottom: 0.0, left: 12.0 },
-            corner_radius: 0.0,
+            corner_radii: [0.0; 4],
             background: Some(accent),
             text_color: Some(text_inverse),
             text_size: Some(ts),
@@ -81,7 +81,7 @@ pub fn render(tree: &mut UiTree, theme: &dyn ThemeProvider) -> UiNodeId {
         }, UiStyle {
             width: Sizing::Fixed(h),
             height: Sizing::Fixed(h),
-            corner_radius: 0.0,
+            corner_radii: [0.0; 4],
             background: Some(accent),
             text_color: Some(text_inverse),
             text_size: Some(ts),
@@ -128,7 +128,7 @@ fn split_button_group(
     }, UiStyle {
         height: Sizing::Fixed(32.0),
         padding: Edges { top: 0.0, right: 14.0, bottom: 0.0, left: 14.0 },
-        corner_radius: 0.0,
+        corner_radii: [0.0; 4],
         background: Some(bg),
         text_color: Some(text),
         text_size: Some(12.0),
@@ -156,7 +156,7 @@ fn split_button_group(
     }, UiStyle {
         width: Sizing::Fixed(32.0),
         height: Sizing::Fixed(32.0),
-        corner_radius: 0.0,
+        corner_radii: [0.0; 4],
         background: Some(bg),
         text_color: Some(text),
         text_size: Some(12.0),

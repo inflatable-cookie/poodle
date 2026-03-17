@@ -46,7 +46,7 @@ pub fn render(tree: &mut UiTree, theme: &dyn ThemeProvider) -> UiNodeId {
             background: Some(theme_bridge::tint(tone_color, 0.10)),
             border_color: Some(theme_bridge::tint(tone_color, 0.40)),
             border_width: 1.0,
-            corner_radius: 6.0,
+            corner_radii: [6.0; 4],
             ..UiStyle::default()
         });
         tree.add_child(root, banner);
@@ -77,7 +77,7 @@ pub fn render(tree: &mut UiTree, theme: &dyn ThemeProvider) -> UiNodeId {
             text_size: Some(10.0),
             padding: Edges { top: 1.0, right: 6.0, bottom: 1.0, left: 6.0 },
             background: Some(theme_bridge::tint(tone_color, 0.15)),
-            corner_radius: 3.0,
+            corner_radii: [3.0; 4],
             ..UiStyle::default()
         });
         tree.add_child(title_row, tone_badge);
@@ -115,7 +115,7 @@ pub fn render(tree: &mut UiTree, theme: &dyn ThemeProvider) -> UiNodeId {
         background: Some(theme_bridge::tint(accent, 0.10)),
         border_color: Some(theme_bridge::tint(accent, 0.40)),
         border_width: 1.0,
-        corner_radius: 6.0,
+        corner_radii: [6.0; 4],
         ..UiStyle::default()
     });
     tree.add_child(root, dismissible);
@@ -136,7 +136,7 @@ pub fn render(tree: &mut UiTree, theme: &dyn ThemeProvider) -> UiNodeId {
     }, UiStyle {
         height: Sizing::Fixed(24.0),
         padding: Edges { top: 0.0, right: 10.0, bottom: 0.0, left: 10.0 },
-        corner_radius: 4.0,
+        corner_radii: [4.0; 4],
         background: Some(theme_bridge::tint(accent, 0.20)),
         text_color: Some(text_primary),
         text_size: Some(10.0),

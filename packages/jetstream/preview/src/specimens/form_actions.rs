@@ -101,7 +101,7 @@ fn btn_primary(tree: &mut UiTree, parent: UiNodeId, text: &str, bg: glam::Vec4, 
     }, UiStyle {
         height: Sizing::Fixed(32.0),
         padding: Edges { top: 0.0, right: 16.0, bottom: 0.0, left: 16.0 },
-        corner_radius: 6.0,
+        corner_radii: [6.0; 4],
         background: Some(bg),
         text_color: Some(fg),
         text_size: Some(12.0),
@@ -121,7 +121,7 @@ fn btn_secondary(tree: &mut UiTree, parent: UiNodeId, text: &str, bg: glam::Vec4
     }, UiStyle {
         height: Sizing::Fixed(32.0),
         padding: Edges { top: 0.0, right: 16.0, bottom: 0.0, left: 16.0 },
-        corner_radius: 6.0,
+        corner_radii: [6.0; 4],
         background: Some(bg),
         border_color: Some(border),
         border_width: 1.0,

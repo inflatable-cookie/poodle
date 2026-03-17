@@ -53,7 +53,7 @@ pub fn render(tree: &mut UiTree, theme: &dyn ThemeProvider) -> UiNodeId {
             background: Some(bg_surface),
             border_color: Some(border),
             border_width: 1.0,
-            corner_radius: 6.0,
+            corner_radii: [6.0; 4],
             ..UiStyle::default()
         });
         tree.add_child(row, card);
@@ -62,7 +62,7 @@ pub fn render(tree: &mut UiTree, theme: &dyn ThemeProvider) -> UiNodeId {
             width: Sizing::Fixed(60.0),
             height: Sizing::Fixed(32.0),
             background: Some(theme_bridge::tint(accent, 0.20)),
-            corner_radius: 4.0,
+            corner_radii: [4.0; 4],
             align: Align::Center,
             justify: Justify::Center,
             ..UiStyle::default()
@@ -97,7 +97,7 @@ pub fn render(tree: &mut UiTree, theme: &dyn ThemeProvider) -> UiNodeId {
         background: Some(bg_surface),
         border_color: Some(border),
         border_width: 1.0,
-        corner_radius: 6.0,
+        corner_radii: [6.0; 4],
         padding: Edges::all(8.0),
         ..UiStyle::default()
     });
@@ -108,7 +108,7 @@ pub fn render(tree: &mut UiTree, theme: &dyn ThemeProvider) -> UiNodeId {
         width: Sizing::Fixed(400.0),
         height: Sizing::Fixed(40.0),
         background: Some(theme_bridge::tint(accent, 0.15)),
-        corner_radius: 4.0,
+        corner_radii: [4.0; 4],
         align: Align::Center,
         justify: Justify::Center,
         ..UiStyle::default()

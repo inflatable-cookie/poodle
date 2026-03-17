@@ -68,7 +68,7 @@ fn slug_pair(tree: &mut UiTree, parent: UiNodeId, title_label: &str, title_value
         height: Sizing::Fixed(32.0),
         padding: Edges { top: 0.0, right: 10.0, bottom: 0.0, left: 10.0 },
         background: Some(bg), border_color: Some(border), border_width: 1.0,
-        corner_radius: 6.0, align: Align::Center,
+        corner_radii: [6.0; 4], align: Align::Center,
         ..UiStyle::default()
     });
     tree.add_child(slug_row, input);
@@ -94,7 +94,7 @@ fn field(tree: &mut UiTree, parent: UiNodeId, label: &str, value: &str, has_valu
         height: Sizing::Fixed(32.0),
         padding: Edges { top: 0.0, right: 10.0, bottom: 0.0, left: 10.0 },
         background: Some(bg), border_color: Some(border), border_width: 1.0,
-        corner_radius: 6.0, align: Align::Center,
+        corner_radii: [6.0; 4], align: Align::Center,
         ..UiStyle::default()
     });
     tree.add_child(wrapper, input);

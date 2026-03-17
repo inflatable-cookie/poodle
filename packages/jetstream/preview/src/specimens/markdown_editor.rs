@@ -26,7 +26,7 @@ pub fn render(tree: &mut UiTree, theme: &dyn ThemeProvider) -> UiNodeId {
             width: Sizing::Fixed(420.0),
             background: Some(bg_elevated),
             border_color: Some(border), border_width: 1.0,
-            corner_radius: 8.0,
+            corner_radii: [8.0; 4],
             ..UiStyle::default()
         });
         tree.add_child(root, editor);
@@ -46,7 +46,7 @@ pub fn render(tree: &mut UiTree, theme: &dyn ThemeProvider) -> UiNodeId {
                 label: btn_label.to_string(), pressed: false, hovered: false,
             }, UiStyle {
                 width: Sizing::Fixed(28.0), height: Sizing::Fixed(28.0),
-                corner_radius: 4.0,
+                corner_radii: [4.0; 4],
                 text_color: Some(text_primary), text_size: Some(11.0),
                 align: Align::Center, justify: Justify::Center,
                 focusable: true, ..UiStyle::default()

@@ -46,7 +46,7 @@ pub fn render(tree: &mut UiTree, theme: &dyn ThemeProvider) -> UiNodeId {
         let checkbox = tree.create(Widget::Panel, UiStyle {
             width: Sizing::Fixed(18.0),
             height: Sizing::Fixed(18.0),
-            corner_radius: 3.0,
+            corner_radii: [3.0; 4],
             background: box_bg,
             border_color: Some(box_border),
             border_width: if checked { 0.0 } else { 1.5 },
@@ -89,7 +89,7 @@ pub fn render(tree: &mut UiTree, theme: &dyn ThemeProvider) -> UiNodeId {
         let cb = tree.create(Widget::Panel, UiStyle {
             width: Sizing::Fixed(18.0),
             height: Sizing::Fixed(18.0),
-            corner_radius: 3.0,
+            corner_radii: [3.0; 4],
             background: if is_checked { Some(accent) } else { None },
             border_color: Some(if is_checked { accent } else { border }),
             border_width: if is_checked { 0.0 } else { 1.5 },

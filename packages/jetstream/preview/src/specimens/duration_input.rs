@@ -82,7 +82,7 @@ fn duration_row(
             background: Some(bg),
             border_color: Some(border),
             border_width: 1.0,
-            corner_radius: 6.0,
+            corner_radii: [6.0; 4],
             align: Align::Center,
             justify: Justify::Center,
             ..UiStyle::default()

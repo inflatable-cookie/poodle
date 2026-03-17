@@ -76,7 +76,7 @@ pub fn render(tree: &mut UiTree, theme: &dyn ThemeProvider) -> UiNodeId {
             background: Some(bg_canvas),
             border_color: Some(border),
             border_width: 1.0,
-            corner_radius: 6.0,
+            corner_radii: [6.0; 4],
             align: Align::Center,
             ..UiStyle::default()
         });
@@ -143,7 +143,7 @@ fn swatch(tree: &mut UiTree, parent: UiNodeId, color: glam::Vec4, size: f32, bor
     let s = tree.create(Widget::Panel, UiStyle {
         width: Sizing::Fixed(size),
         height: Sizing::Fixed(size),
-        corner_radius: 4.0,
+        corner_radii: [4.0; 4],
         background: Some(color),
         border_color: Some(border),
         border_width: if selected { 2.0 } else { 1.0 },

@@ -52,7 +52,7 @@ pub fn render(tree: &mut UiTree, theme: &dyn ThemeProvider) -> UiNodeId {
                     background: Some(bg_surface),
                     border_color: Some(border),
                     border_width: 1.0,
-                    corner_radius: 4.0,
+                    corner_radii: [4.0; 4],
                     align: Align::Center,
                     justify: Justify::Center,
                     ..UiStyle::default()
@@ -96,7 +96,7 @@ pub fn render(tree: &mut UiTree, theme: &dyn ThemeProvider) -> UiNodeId {
             background: Some(theme_bridge::tint(accent, 0.15)),
             border_color: Some(border),
             border_width: 1.0,
-            corner_radius: 4.0,
+            corner_radii: [4.0; 4],
             align: Align::Center,
             justify: Justify::Center,
             ..UiStyle::default()

@@ -36,7 +36,7 @@ pub fn render(tree: &mut UiTree, theme: &dyn ThemeProvider) -> UiNodeId {
     make_button(tree, variants_row, "Primary", UiStyle {
         height: Sizing::Fixed(32.0),
         padding: Edges { top: 0.0, right: 16.0, bottom: 0.0, left: 16.0 },
-        corner_radius: 6.0,
+        corner_radii: [6.0; 4],
         background: Some(accent),
         text_color: Some(text_inverse),
         text_size: Some(12.0),
@@ -50,7 +50,7 @@ pub fn render(tree: &mut UiTree, theme: &dyn ThemeProvider) -> UiNodeId {
     make_button(tree, variants_row, "Secondary", UiStyle {
         height: Sizing::Fixed(32.0),
         padding: Edges { top: 0.0, right: 16.0, bottom: 0.0, left: 16.0 },
-        corner_radius: 6.0,
+        corner_radii: [6.0; 4],
         background: Some(bg_surface),
         border_color: Some(border),
         border_width: 1.0,
@@ -66,7 +66,7 @@ pub fn render(tree: &mut UiTree, theme: &dyn ThemeProvider) -> UiNodeId {
     make_button(tree, variants_row, "Ghost", UiStyle {
         height: Sizing::Fixed(32.0),
         padding: Edges { top: 0.0, right: 16.0, bottom: 0.0, left: 16.0 },
-        corner_radius: 6.0,
+        corner_radii: [6.0; 4],
         text_color: Some(accent),
         text_size: Some(12.0),
         align: Align::Center,
@@ -79,7 +79,7 @@ pub fn render(tree: &mut UiTree, theme: &dyn ThemeProvider) -> UiNodeId {
     make_button(tree, variants_row, "Danger", UiStyle {
         height: Sizing::Fixed(32.0),
         padding: Edges { top: 0.0, right: 16.0, bottom: 0.0, left: 16.0 },
-        corner_radius: 6.0,
+        corner_radii: [6.0; 4],
         background: Some(danger),
         text_color: Some(text_inverse),
         text_size: Some(12.0),
@@ -108,7 +108,7 @@ pub fn render(tree: &mut UiTree, theme: &dyn ThemeProvider) -> UiNodeId {
         make_button(tree, sizes_row, label, UiStyle {
             height: Sizing::Fixed(height),
             padding: Edges { top: 0.0, right: pad_h, bottom: 0.0, left: pad_h },
-            corner_radius: 6.0,
+            corner_radii: [6.0; 4],
             background: Some(accent),
             text_color: Some(text_inverse),
             text_size: Some(text_size),
@@ -133,7 +133,7 @@ pub fn render(tree: &mut UiTree, theme: &dyn ThemeProvider) -> UiNodeId {
     make_button(tree, disabled_row, "Enabled", UiStyle {
         height: Sizing::Fixed(32.0),
         padding: Edges { top: 0.0, right: 16.0, bottom: 0.0, left: 16.0 },
-        corner_radius: 6.0,
+        corner_radii: [6.0; 4],
         background: Some(accent),
         text_color: Some(text_inverse),
         text_size: Some(12.0),
@@ -146,7 +146,7 @@ pub fn render(tree: &mut UiTree, theme: &dyn ThemeProvider) -> UiNodeId {
     make_button(tree, disabled_row, "Disabled", UiStyle {
         height: Sizing::Fixed(32.0),
         padding: Edges { top: 0.0, right: 16.0, bottom: 0.0, left: 16.0 },
-        corner_radius: 6.0,
+        corner_radii: [6.0; 4],
         background: Some(theme_bridge::tint(accent, 0.4)),
         text_color: Some(theme_bridge::tint(text_inverse, 0.5)),
         text_size: Some(12.0),

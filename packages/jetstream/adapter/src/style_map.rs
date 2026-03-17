@@ -144,7 +144,7 @@ pub struct JetstreamStyle {
     pub text_size: Option<f32>,
     pub border_color: Option<JetstreamColor>,
     pub border_width: f32,
-    pub corner_radius: f32,
+    pub corner_radii: [f32; 4],
     pub opacity: f32,
     pub visible: bool,
     pub disabled: bool,
@@ -191,7 +191,7 @@ impl Default for JetstreamStyle {
             text_size: None,
             border_color: None,
             border_width: 0.0,
-            corner_radius: 0.0,
+            corner_radii: [0.0; 4],
             opacity: 1.0,
             visible: true,
             disabled: false,
@@ -287,7 +287,7 @@ pub fn map_style(desc: &StyleDescriptor) -> JetstreamStyle {
         style.border_color = Some(JetstreamColor::from(border.color));
         style.border_width = border.width;
     }
-    style.corner_radius = desc.corner_radii.top_left;
+    style.corner_radii = [desc.corner_radii.top_left, desc.corner_radii.top_right, desc.corner_radii.bottom_right, desc.corner_radii.bottom_left];
 
     // Shadow
     if let Some(ref shadow) = desc.shadow {
@@ -371,7 +371,7 @@ mod tests {
         let style = map_style(&desc);
         assert_eq!(style.background, Some(JetstreamColor(0.1, 0.2, 0.3, 1.0)));
         assert_eq!(style.border_width, 2.0);
-        assert_eq!(style.corner_radius, 4.0);
+        assert_eq!(style.corner_radii, [4.0; 4]);
         assert!((style.opacity - 0.8).abs() < 0.001);
     }
 

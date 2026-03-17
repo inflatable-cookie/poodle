@@ -23,7 +23,7 @@ pub fn render(tree: &mut UiTree, theme: &dyn ThemeProvider) -> UiNodeId {
         let split = tree.create(Widget::Panel, UiStyle {
             direction: Direction::Row,
             width: Sizing::Fixed(440.0), height: Sizing::Fixed(180.0),
-            border_color: Some(border), border_width: 1.0, corner_radius: 8.0,
+            border_color: Some(border), border_width: 1.0, corner_radii: [8.0; 4],
             ..UiStyle::default()
         });
         tree.add_child(root, split);
@@ -88,7 +88,7 @@ pub fn render(tree: &mut UiTree, theme: &dyn ThemeProvider) -> UiNodeId {
         let split = tree.create(Widget::Panel, UiStyle {
             direction: Direction::Column,
             width: Sizing::Fixed(440.0), height: Sizing::Fixed(200.0),
-            border_color: Some(border), border_width: 1.0, corner_radius: 8.0,
+            border_color: Some(border), border_width: 1.0, corner_radii: [8.0; 4],
             ..UiStyle::default()
         });
         tree.add_child(root, split);

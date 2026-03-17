@@ -40,7 +40,7 @@ pub fn render(tree: &mut UiTree, theme: &dyn ThemeProvider) -> UiNodeId {
         background: Some(bg_surface),
         border_color: Some(border),
         border_width: 1.0,
-        corner_radius: 8.0,
+        corner_radii: [8.0; 4],
         ..UiStyle::default()
     });
     tree.add_child(root, scroll);
@@ -58,7 +58,7 @@ pub fn render(tree: &mut UiTree, theme: &dyn ThemeProvider) -> UiNodeId {
             } else {
                 None
             },
-            corner_radius: 4.0,
+            corner_radii: [4.0; 4],
             ..UiStyle::default()
         });
         tree.add_child(scroll, item);

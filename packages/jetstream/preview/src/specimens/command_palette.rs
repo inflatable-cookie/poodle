@@ -23,7 +23,7 @@ pub fn render(tree: &mut UiTree, theme: &dyn ThemeProvider) -> UiNodeId {
             direction: Direction::Column,
             width: Sizing::Fixed(400.0),
             background: Some(bg_elevated), border_color: Some(border), border_width: 1.0,
-            corner_radius: 10.0,
+            corner_radii: [10.0; 4],
             ..UiStyle::default()
         });
         tree.add_child(root, palette);
@@ -115,7 +115,7 @@ fn command_item(tree: &mut UiTree, parent: UiNodeId, label: &str, shortcut: &str
         direction: Direction::Row,
         height: Sizing::Fixed(28.0),
         padding: Edges { top: 0.0, right: 8.0, bottom: 0.0, left: 8.0 },
-        background: bg, corner_radius: 4.0,
+        background: bg, corner_radii: [4.0; 4],
         justify: Justify::SpaceBetween, align: Align::Center,
         ..UiStyle::default()
     });
@@ -130,7 +130,7 @@ fn command_item(tree: &mut UiTree, parent: UiNodeId, label: &str, shortcut: &str
     let kbd = tree.create(Widget::Panel, UiStyle {
         height: Sizing::Fixed(18.0),
         padding: Edges { top: 0.0, right: 6.0, bottom: 0.0, left: 6.0 },
-        background: Some(bg_surface), corner_radius: 3.0,
+        background: Some(bg_surface), corner_radii: [3.0; 4],
         align: Align::Center,
         ..UiStyle::default()
     });

@@ -41,7 +41,7 @@ pub fn render(tree: &mut UiTree, theme: &dyn ThemeProvider) -> UiNodeId {
         let track = tree.create(Widget::Panel, UiStyle {
             width: Sizing::Fixed(44.0),
             height: Sizing::Fixed(20.0),
-            corner_radius: 10.0,
+            corner_radii: [10.0; 4],
             background: Some(track_color),
             border_color: Some(if position == 0.0 { border } else { track_color }),
             border_width: 1.0,
@@ -65,7 +65,7 @@ pub fn render(tree: &mut UiTree, theme: &dyn ThemeProvider) -> UiNodeId {
         let thumb = tree.create(Widget::Panel, UiStyle {
             width: Sizing::Fixed(16.0),
             height: Sizing::Fixed(16.0),
-            corner_radius: 8.0,
+            corner_radii: [8.0; 4],
             background: Some(glam::Vec4::ONE),
             ..UiStyle::default()
         });

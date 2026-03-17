@@ -111,7 +111,7 @@ pub fn render(tree: &mut UiTree, theme: &dyn ThemeProvider) -> UiNodeId {
                 // Today — outlined, not filled
                 let cell = tree.create(Widget::Panel, UiStyle {
                     width: Sizing::Fixed(28.0), height: Sizing::Fixed(28.0),
-                    corner_radius: 14.0, border_color: Some(accent),
+                    corner_radii: [14.0; 4], border_color: Some(accent),
                     border_width: 1.0, align: Align::Center,
                     justify: Justify::Center, ..UiStyle::default()
                 });
@@ -155,7 +155,7 @@ fn calendar_card(tree: &mut UiTree, bg: glam::Vec4, border: glam::Vec4) -> UiNod
         background: Some(bg),
         border_color: Some(border),
         border_width: 1.0,
-        corner_radius: 8.0,
+        corner_radii: [8.0; 4],
         padding: Edges { top: 0.0, right: 0.0, bottom: 8.0, left: 0.0 },
         ..UiStyle::default()
     })
@@ -191,7 +191,7 @@ fn day_header(tree: &mut UiTree, parent: UiNodeId, text: &str, color: glam::Vec4
 fn day_cell(tree: &mut UiTree, parent: UiNodeId, text: &str, color: glam::Vec4, bg: Option<glam::Vec4>, _selected: bool) {
     let cell = tree.create(Widget::Panel, UiStyle {
         width: Sizing::Fixed(28.0), height: Sizing::Fixed(28.0),
-        corner_radius: 14.0, background: bg,
+        corner_radii: [14.0; 4], background: bg,
         align: Align::Center, justify: Justify::Center,
         ..UiStyle::default()
     });

@@ -70,7 +70,7 @@ pub fn render(tree: &mut UiTree, theme: &dyn ThemeProvider) -> UiNodeId {
         }, UiStyle {
             width: Sizing::Fixed(20.0),
             height: Sizing::Fixed(20.0),
-            corner_radius: 10.0,
+            corner_radii: [10.0; 4],
             text_color: Some(text_secondary),
             text_size: Some(10.0),
             align: Align::Center,
@@ -93,7 +93,7 @@ pub fn render(tree: &mut UiTree, theme: &dyn ThemeProvider) -> UiNodeId {
             background: Some(bg_canvas),
             border_color: Some(accent),
             border_width: 2.0,
-            corner_radius: 6.0,
+            corner_radii: [6.0; 4],
             align: Align::Center,
             ..UiStyle::default()
         });
@@ -136,7 +136,7 @@ fn search_container(tree: &mut UiTree, bg: glam::Vec4, border: glam::Vec4) -> Ui
         background: Some(bg),
         border_color: Some(border),
         border_width: 1.0,
-        corner_radius: 6.0,
+        corner_radii: [6.0; 4],
         align: Align::Center,
         ..UiStyle::default()
     })

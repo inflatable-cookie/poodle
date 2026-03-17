@@ -107,7 +107,7 @@ fn skeleton_rect(tree: &mut UiTree, parent: UiNodeId, width: f32, height: f32, r
     let rect = tree.create(Widget::Panel, UiStyle {
         width: Sizing::Fixed(width),
         height: Sizing::Fixed(height),
-        corner_radius: radius,
+        corner_radii: [radius; 4],
         background: Some(color),
         ..UiStyle::default()
     });

@@ -71,7 +71,7 @@ pub fn render(tree: &mut UiTree, theme: &dyn ThemeProvider) -> UiNodeId {
             background: Some(bg_canvas),
             border_color: Some(theme_bridge::border_subtle(theme)),
             border_width: 1.0,
-            corner_radius: 6.0,
+            corner_radii: [6.0; 4],
             opacity: 0.5,
             ..UiStyle::default()
         });
@@ -109,7 +109,7 @@ fn textarea_box(tree: &mut UiTree, bg: glam::Vec4, border: glam::Vec4, height: f
         background: Some(bg),
         border_color: Some(border),
         border_width: 1.0,
-        corner_radius: 6.0,
+        corner_radii: [6.0; 4],
         ..UiStyle::default()
     })
 }

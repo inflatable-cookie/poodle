@@ -49,7 +49,7 @@ pub fn render(tree: &mut UiTree, theme: &dyn ThemeProvider) -> UiNodeId {
                 height: Sizing::Fixed(24.0),
                 padding: Edges { top: 0.0, right: 8.0, bottom: 0.0, left: 8.0 },
                 background: Some(theme_bridge::tint(accent, 0.12)),
-                corner_radius: 4.0, align: Align::Center,
+                corner_radii: [4.0; 4], align: Align::Center,
                 ..UiStyle::default()
             });
             tree.add_child(tags, tag);
@@ -71,7 +71,7 @@ pub fn render(tree: &mut UiTree, theme: &dyn ThemeProvider) -> UiNodeId {
             height: Sizing::Fixed(32.0),
             padding: Edges { top: 0.0, right: 10.0, bottom: 0.0, left: 10.0 },
             background: Some(bg_surface), border_color: Some(border), border_width: 1.0,
-            corner_radius: 6.0, align: Align::Center,
+            corner_radii: [6.0; 4], align: Align::Center,
             ..UiStyle::default()
         });
         tree.add_child(wrapper, search);
@@ -86,7 +86,7 @@ pub fn render(tree: &mut UiTree, theme: &dyn ThemeProvider) -> UiNodeId {
             direction: Direction::Column,
             background: Some(bg_elevated),
             border_color: Some(border), border_width: 1.0,
-            corner_radius: 6.0,
+            corner_radii: [6.0; 4],
             ..UiStyle::default()
         });
         tree.add_child(wrapper, dropdown);
@@ -136,7 +136,7 @@ pub fn render(tree: &mut UiTree, theme: &dyn ThemeProvider) -> UiNodeId {
             height: Sizing::Fixed(32.0),
             padding: Edges { top: 0.0, right: 10.0, bottom: 0.0, left: 10.0 },
             background: Some(bg_surface), border_color: Some(border), border_width: 1.0,
-            corner_radius: 6.0, align: Align::Center,
+            corner_radii: [6.0; 4], align: Align::Center,
             ..UiStyle::default()
         });
         tree.add_child(wrapper, search);

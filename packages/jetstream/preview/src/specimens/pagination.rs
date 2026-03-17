@@ -69,7 +69,7 @@ pub fn render(tree: &mut UiTree, theme: &dyn ThemeProvider) -> UiNodeId {
         }, UiStyle {
             height: Sizing::Fixed(32.0),
             padding: Edges { top: 0.0, right: 12.0, bottom: 0.0, left: 12.0 },
-            corner_radius: 6.0, background: Some(bg_surface),
+            corner_radii: [6.0; 4], background: Some(bg_surface),
             border_color: Some(border), border_width: 1.0,
             text_color: Some(text_primary), text_size: Some(12.0),
             align: Align::Center, justify: Justify::Center,
@@ -87,7 +87,7 @@ pub fn render(tree: &mut UiTree, theme: &dyn ThemeProvider) -> UiNodeId {
         }, UiStyle {
             height: Sizing::Fixed(32.0),
             padding: Edges { top: 0.0, right: 12.0, bottom: 0.0, left: 12.0 },
-            corner_radius: 6.0, background: Some(bg_surface),
+            corner_radii: [6.0; 4], background: Some(bg_surface),
             border_color: Some(border), border_width: 1.0,
             text_color: Some(text_primary), text_size: Some(12.0),
             align: Align::Center, justify: Justify::Center,
@@ -111,7 +111,7 @@ fn page_btn(tree: &mut UiTree, parent: UiNodeId, label: &str, bg: glam::Vec4, bo
         label: label.to_string(), pressed: false, hovered: false,
     }, UiStyle {
         width: Sizing::Fixed(32.0), height: Sizing::Fixed(32.0),
-        corner_radius: 6.0, background: Some(bg),
+        corner_radii: [6.0; 4], background: Some(bg),
         border_color: if active { None } else { Some(border) },
         border_width: if active { 0.0 } else { 1.0 },
         text_color: Some(fg), text_size: Some(12.0),

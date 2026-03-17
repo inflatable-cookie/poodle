@@ -48,7 +48,7 @@ pub fn render(tree: &mut UiTree, theme: &dyn ThemeProvider) -> UiNodeId {
             width: Sizing::Fixed(3.0),
             height: Sizing::Grow(1.0),
             background: Some(tone_color),
-            corner_radius: 1.5,
+            corner_radii: [1.5; 4],
             ..UiStyle::default()
         });
         tree.add_child(callout, bar);

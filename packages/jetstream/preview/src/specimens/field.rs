@@ -115,7 +115,7 @@ pub fn render(tree: &mut UiTree, theme: &dyn ThemeProvider) -> UiNodeId {
             background: Some(theme_bridge::tint(bg_canvas, 0.5)),
             border_color: Some(border),
             border_width: 1.0,
-            corner_radius: 6.0,
+            corner_radii: [6.0; 4],
             align: Align::Center,
             opacity: 0.5,
             ..UiStyle::default()
@@ -166,7 +166,7 @@ fn mock_input(
         background: Some(bg),
         border_color: Some(border),
         border_width: 1.0,
-        corner_radius: 6.0,
+        corner_radii: [6.0; 4],
         align: Align::Center,
         ..UiStyle::default()
     });

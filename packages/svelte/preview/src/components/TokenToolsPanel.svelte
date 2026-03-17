@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { Eyebrow, SearchField, Table, Tabs, type TabItem, type TableColumn, type TableRow } from "@pug/svelte-primitives";
+  import { Eyebrow, Grid, Inline, SearchField, Stack, Surface, Table, Tabs, type TabItem, type TableColumn, type TableRow } from "@pug/svelte-primitives";
 
   export let activePanelId: "token-summary-section" | "token-inspector" = "token-summary-section";
   export let keySemanticTokens: Array<{ path: string; value: string }> = [];
@@ -24,20 +24,23 @@
     id: `token-${i}`,
     cells: { path: token.path, value: token.value },
   }));
+
+  function isColorToken(path: string): boolean {
+    return path.includes(".color.");
+  }
 </script>
 
-<section class="panel token-tools-shell" aria-labelledby="token-tools-heading">
-  <div class="section-header">
-    <div>
-      <Eyebrow>Token tools</Eyebrow>
-      <h2 id="token-tools-heading">Runtime values and emitted-token inspection</h2>
-    </div>
-  </div>
-  <div class="section-meta-bar">
-    <span class="command-shortcut-hint">@pug/svelte-tokens</span>
-    <span class="token-path">packages/tokens/artifacts/css/</span>
-    <span class="token-path">packages/tokens/artifacts/ts/</span>
-  </div>
+<Stack gap="lg" asRole="region" ariaLabel="Token tools">
+  <Stack gap="sm">
+    <Eyebrow>Token tools</Eyebrow>
+    <h2 class="heading">Runtime values and emitted-token inspection</h2>
+  </Stack>
+
+  <Inline gap="md">
+    <span class="hint">@pug/svelte-tokens</span>
+    <span class="path">packages/tokens/artifacts/css/</span>
+    <span class="path">packages/tokens/artifacts/ts/</span>
+  </Inline>
 
   <Tabs
     value={activePanelId}
@@ -48,17 +51,24 @@
     let:activeValue
   >
     {#if activeValue === "token-summary-section"}
-      <div class="summary-grid">
+      <Grid columns="repeat(auto-fit, minmax(14rem, 1fr))" gap="md">
         {#each keySemanticTokens as token}
-          <article class="summary-tile">
-            <span class="token-path">{token.path}</span>
-            <strong>{token.value}</strong>
-          </article>
+          <Surface tone="default" border="subtle" padding="md">
+            <Stack gap="md">
+              <span class="path">{token.path}</span>
+              <span class="value-row">
+                {#if isColorToken(token.path)}
+                  <span class="swatch" style="background: {token.value};" />
+                {/if}
+                <strong class="value">{token.value}</strong>
+              </span>
+            </Stack>
+          </Surface>
         {/each}
-      </div>
+      </Grid>
     {:else}
-      <div class="token-tools-inspector">
-        <div class="filter-field token-tools-inspector__search">
+      <Stack gap="md">
+        <div class="search-field">
           <SearchField
             id="token-inspector-query"
             value={inspectorQuery}
@@ -75,7 +85,64 @@
           ariaLabel="Semantic token inspector"
           emptyMessage="No tokens match the current filter."
         />
-      </div>
+      </Stack>
     {/if}
   </Tabs>
-</section>
+</Stack>
+
+<style>
+  .heading {
+    margin: 0;
+    font-size: 1.75rem;
+    line-height: 1.1;
+  }
+
+  .hint {
+    padding: 0.25rem 0.625rem;
+    border-radius: 999rem;
+    background: color-mix(in srgb, var(--pug-color-accent-base) 18%, transparent);
+    color: var(--pug-color-text-primary);
+    font-size: 0.75rem;
+    font-weight: 700;
+  }
+
+  .path {
+    color: var(--pug-color-text-secondary);
+    font-family: var(--pug-typography-code-family);
+    font-size: 0.75rem;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .value-row {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .swatch {
+    flex-shrink: 0;
+    width: 1.25rem;
+    height: 1.25rem;
+    border: 0.0625rem solid color-mix(in srgb, var(--pug-color-border-default) 60%, transparent);
+    border-radius: var(--pug-radius-control);
+  }
+
+  .value {
+    font-family: var(--pug-typography-code-family);
+    font-size: 0.8125rem;
+  }
+
+  .search-field {
+    min-width: min(17.5rem, 100%);
+    max-width: 26rem;
+  }
+
+  .inspector-count {
+    margin: 0;
+    color: var(--pug-color-text-secondary);
+    font-size: 0.8125rem;
+  }
+</style>

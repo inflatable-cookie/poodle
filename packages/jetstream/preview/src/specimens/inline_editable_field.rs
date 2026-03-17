@@ -23,7 +23,7 @@ pub fn render(tree: &mut UiTree, theme: &dyn ThemeProvider) -> UiNodeId {
             direction: Direction::Row, gap: 8.0, align: Align::Center,
             width: Sizing::Fixed(300.0),
             padding: Edges { top: 6.0, right: 8.0, bottom: 6.0, left: 8.0 },
-            corner_radius: 4.0,
+            corner_radii: [4.0; 4],
             ..UiStyle::default()
         });
         tree.add_child(root, row);
@@ -53,7 +53,7 @@ pub fn render(tree: &mut UiTree, theme: &dyn ThemeProvider) -> UiNodeId {
             height: Sizing::Fixed(32.0),
             padding: Edges { top: 0.0, right: 10.0, bottom: 0.0, left: 10.0 },
             background: Some(bg_surface), border_color: Some(accent), border_width: 2.0,
-            corner_radius: 6.0, align: Align::Center,
+            corner_radii: [6.0; 4], align: Align::Center,
             width: Sizing::Grow(1.0),
             ..UiStyle::default()
         });
@@ -68,7 +68,7 @@ pub fn render(tree: &mut UiTree, theme: &dyn ThemeProvider) -> UiNodeId {
             label: "✓".to_string(), pressed: false, hovered: false,
         }, UiStyle {
             width: Sizing::Fixed(28.0), height: Sizing::Fixed(28.0),
-            corner_radius: 6.0, background: Some(accent),
+            corner_radii: [6.0; 4], background: Some(accent),
             text_color: Some(glam::Vec4::ONE), text_size: Some(14.0),
             align: Align::Center, justify: Justify::Center,
             focusable: true, ..UiStyle::default()
@@ -79,7 +79,7 @@ pub fn render(tree: &mut UiTree, theme: &dyn ThemeProvider) -> UiNodeId {
             label: "✕".to_string(), pressed: false, hovered: false,
         }, UiStyle {
             width: Sizing::Fixed(28.0), height: Sizing::Fixed(28.0),
-            corner_radius: 6.0, border_color: Some(border), border_width: 1.0,
+            corner_radii: [6.0; 4], border_color: Some(border), border_width: 1.0,
             text_color: Some(text_secondary), text_size: Some(14.0),
             align: Align::Center, justify: Justify::Center,
             focusable: true, ..UiStyle::default()

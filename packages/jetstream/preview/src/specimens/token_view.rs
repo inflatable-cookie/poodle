@@ -157,7 +157,7 @@ fn render_color_section(
             width: Sizing::Fixed(140.0),
             background: Some(bg_elevated),
             border_color: Some(border), border_width: 1.0,
-            corner_radius: 6.0,
+            corner_radii: [6.0; 4],
             ..UiStyle::default()
         });
         tree.add_child(grid, card);
@@ -166,7 +166,7 @@ fn render_color_section(
         let swatch = tree.create(Widget::Panel, UiStyle {
             width: Sizing::Grow(1.0), height: Sizing::Fixed(32.0),
             background: Some(resolved),
-            corner_radius: 0.0, // top radius is clipped by parent
+            corner_radii: [0.0; 4], // top radius is clipped by parent
             ..UiStyle::default()
         });
         tree.add_child(card, swatch);

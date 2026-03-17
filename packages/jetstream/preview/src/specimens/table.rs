@@ -28,7 +28,7 @@ pub fn render(tree: &mut UiTree, theme: &dyn ThemeProvider) -> UiNodeId {
             direction: Direction::Column,
             background: Some(bg_elevated),
             border_color: Some(border), border_width: 1.0,
-            corner_radius: 8.0, ..UiStyle::default()
+            corner_radii: [8.0; 4], ..UiStyle::default()
         });
         tree.add_child(root, table);
 
@@ -86,7 +86,7 @@ pub fn render(tree: &mut UiTree, theme: &dyn ThemeProvider) -> UiNodeId {
         let table = tree.create(Widget::Panel, UiStyle {
             direction: Direction::Column,
             border_color: Some(border), border_width: 1.0,
-            corner_radius: 6.0, ..UiStyle::default()
+            corner_radii: [6.0; 4], ..UiStyle::default()
         });
         tree.add_child(root, table);
 

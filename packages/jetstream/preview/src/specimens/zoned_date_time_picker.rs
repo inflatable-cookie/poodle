@@ -57,7 +57,7 @@ fn zoned_input(tree: &mut UiTree, parent: UiNodeId, datetime: &str, tz: &str, bg
         width: Sizing::Fixed(220.0), height: Sizing::Fixed(32.0),
         padding: Edges { top: 0.0, right: 10.0, bottom: 0.0, left: 10.0 },
         background: Some(bg), border_color: Some(border),
-        border_width: 1.0, corner_radius: 6.0,
+        border_width: 1.0, corner_radii: [6.0; 4],
         align: Align::Center, justify: Justify::SpaceBetween,
         ..UiStyle::default()
     });
@@ -76,7 +76,7 @@ fn zoned_input(tree: &mut UiTree, parent: UiNodeId, datetime: &str, tz: &str, bg
     // Timezone badge
     let tz_badge = tree.create(Widget::Label { text: tz.to_string() }, UiStyle {
         padding: Edges { top: 4.0, right: 8.0, bottom: 4.0, left: 8.0 },
-        corner_radius: 4.0, background: Some(bg),
+        corner_radii: [4.0; 4], background: Some(bg),
         border_color: Some(border), border_width: 1.0,
         text_color: Some(muted), text_size: Some(10.0),
         ..UiStyle::default()

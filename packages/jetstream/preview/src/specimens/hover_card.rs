@@ -42,7 +42,7 @@ pub fn render(tree: &mut UiTree, theme: &dyn ThemeProvider) -> UiNodeId {
             background: Some(bg_elevated),
             border_color: Some(border),
             border_width: 1.0,
-            corner_radius: 8.0,
+            corner_radii: [8.0; 4],
             ..UiStyle::default()
         });
         tree.add_child(col, card);
@@ -55,7 +55,7 @@ pub fn render(tree: &mut UiTree, theme: &dyn ThemeProvider) -> UiNodeId {
 
         let avatar = tree.create(Widget::Panel, UiStyle {
             width: Sizing::Fixed(36.0), height: Sizing::Fixed(36.0),
-            corner_radius: 18.0, background: Some(accent),
+            corner_radii: [18.0; 4], background: Some(accent),
             align: Align::Center, justify: Justify::Center,
             ..UiStyle::default()
         });
@@ -107,7 +107,7 @@ pub fn render(tree: &mut UiTree, theme: &dyn ThemeProvider) -> UiNodeId {
             background: Some(bg_elevated),
             border_color: Some(border),
             border_width: 1.0,
-            corner_radius: 8.0,
+            corner_radii: [8.0; 4],
             ..UiStyle::default()
         });
         tree.add_child(col, card);
@@ -115,7 +115,7 @@ pub fn render(tree: &mut UiTree, theme: &dyn ThemeProvider) -> UiNodeId {
         // Image placeholder
         let img = tree.create(Widget::Panel, UiStyle {
             width: Sizing::Grow(1.0), height: Sizing::Fixed(80.0),
-            background: Some(border), corner_radius: 8.0,
+            background: Some(border), corner_radii: [8.0; 4],
             ..UiStyle::default()
         });
         tree.add_child(card, img);

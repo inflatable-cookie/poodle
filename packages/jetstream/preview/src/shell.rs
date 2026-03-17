@@ -114,7 +114,7 @@ pub fn build_shell(
         }, UiStyle {
             height: Sizing::Fixed(28.0),
             padding: Edges { top: 0.0, right: 12.0, bottom: 0.0, left: 12.0 },
-            corner_radius: 6.0,
+            corner_radii: [6.0; 4],
             background: tab_bg,
             border_color: tab_border,
             border_width: if is_active { 1.0 } else { 0.0 },
@@ -455,7 +455,7 @@ fn build_toggle_group(
         }, UiStyle {
             height: Sizing::Fixed(26.0),
             padding: Edges { top: 0.0, right: 8.0, bottom: 0.0, left: 8.0 },
-            corner_radius: 4.0,
+            corner_radii: [4.0; 4],
             background: btn_bg,
             border_color: btn_border,
             border_width: 1.0,
@@ -503,7 +503,7 @@ fn build_probe_toggle(
     }, UiStyle {
         height: Sizing::Fixed(24.0),
         padding: Edges { top: 0.0, right: 8.0, bottom: 0.0, left: 6.0 },
-        corner_radius: 4.0,
+        corner_radii: [4.0; 4],
         background: btn_bg,
         border_color: btn_border,
         border_width: 1.0,

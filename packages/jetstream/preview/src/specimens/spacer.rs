@@ -39,7 +39,7 @@ pub fn render(tree: &mut UiTree, theme: &dyn ThemeProvider) -> UiNodeId {
         background: Some(bg_surface),
         border_color: Some(border),
         border_width: 1.0,
-        corner_radius: 6.0,
+        corner_radii: [6.0; 4],
         ..UiStyle::default()
     });
     tree.add_child(root, row);
@@ -78,7 +78,7 @@ pub fn render(tree: &mut UiTree, theme: &dyn ThemeProvider) -> UiNodeId {
         background: Some(bg_surface),
         border_color: Some(border),
         border_width: 1.0,
-        corner_radius: 6.0,
+        corner_radii: [6.0; 4],
         ..UiStyle::default()
     });
     tree.add_child(root, row2);
@@ -122,7 +122,7 @@ pub fn render(tree: &mut UiTree, theme: &dyn ThemeProvider) -> UiNodeId {
         background: Some(bg_surface),
         border_color: Some(border),
         border_width: 1.0,
-        corner_radius: 6.0,
+        corner_radii: [6.0; 4],
         ..UiStyle::default()
     });
     tree.add_child(root, col);
@@ -146,7 +146,7 @@ fn block(tree: &mut UiTree, label: &str, accent: glam::Vec4, text: glam::Vec4) -
     let node = tree.create(Widget::Panel, UiStyle {
         padding: Edges { top: 4.0, right: 12.0, bottom: 4.0, left: 12.0 },
         background: Some(theme_bridge::tint(accent, 0.20)),
-        corner_radius: 4.0,
+        corner_radii: [4.0; 4],
         align: Align::Center,
         justify: Justify::Center,
         ..UiStyle::default()

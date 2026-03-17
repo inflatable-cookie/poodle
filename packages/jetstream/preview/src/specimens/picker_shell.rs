@@ -116,7 +116,7 @@ fn picker_frame(tree: &mut UiTree, bg: glam::Vec4, border: glam::Vec4) -> UiNode
         width: Sizing::Fixed(260.0),
         background: Some(bg),
         border_color: Some(border), border_width: 1.0,
-        corner_radius: 8.0,
+        corner_radii: [8.0; 4],
         ..UiStyle::default()
     })
 }

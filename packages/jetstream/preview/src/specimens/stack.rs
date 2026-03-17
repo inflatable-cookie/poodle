@@ -39,7 +39,7 @@ pub fn render(tree: &mut UiTree, theme: &dyn ThemeProvider) -> UiNodeId {
             background: Some(bg_surface),
             border_color: Some(border),
             border_width: 1.0,
-            corner_radius: 6.0,
+            corner_radii: [6.0; 4],
             ..UiStyle::default()
         });
         tree.add_child(row, stack);
@@ -68,7 +68,7 @@ pub fn render(tree: &mut UiTree, theme: &dyn ThemeProvider) -> UiNodeId {
         background: Some(bg_surface),
         border_color: Some(border),
         border_width: 1.0,
-        corner_radius: 6.0,
+        corner_radii: [6.0; 4],
         ..UiStyle::default()
     });
     tree.add_child(root, h_stack);
@@ -106,7 +106,7 @@ pub fn render(tree: &mut UiTree, theme: &dyn ThemeProvider) -> UiNodeId {
             background: Some(bg_surface),
             border_color: Some(border),
             border_width: 1.0,
-            corner_radius: 6.0,
+            corner_radii: [6.0; 4],
             ..UiStyle::default()
         });
         tree.add_child(align_row, col);
@@ -143,7 +143,7 @@ fn swatch(tree: &mut UiTree, w: f32, h: f32, color: glam::Vec4) -> UiNodeId {
         width: Sizing::Fixed(w),
         height: Sizing::Fixed(h),
         background: Some(theme_bridge::tint(color, 0.25)),
-        corner_radius: 3.0,
+        corner_radii: [3.0; 4],
         ..UiStyle::default()
     })
 }

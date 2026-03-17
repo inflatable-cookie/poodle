@@ -34,7 +34,7 @@ pub fn render(tree: &mut UiTree, theme: &dyn ThemeProvider) -> UiNodeId {
         let radio = tree.create(Widget::Panel, UiStyle {
             width: Sizing::Fixed(18.0),
             height: Sizing::Fixed(18.0),
-            corner_radius: 9.0,
+            corner_radii: [9.0; 4],
             border_color: Some(if selected { accent } else { border }),
             border_width: if selected { 5.0 } else { 1.5 },
             ..UiStyle::default()
@@ -66,7 +66,7 @@ pub fn render(tree: &mut UiTree, theme: &dyn ThemeProvider) -> UiNodeId {
         let radio = tree.create(Widget::Panel, UiStyle {
             width: Sizing::Fixed(18.0),
             height: Sizing::Fixed(18.0),
-            corner_radius: 9.0,
+            corner_radii: [9.0; 4],
             border_color: Some(if selected { accent } else { border }),
             border_width: if selected { 5.0 } else { 1.5 },
             ..UiStyle::default()

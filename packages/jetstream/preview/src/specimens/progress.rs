@@ -82,7 +82,7 @@ fn progress_bar_sized(tree: &mut UiTree, parent: UiNodeId, fraction: f32, width:
     let track = tree.create(Widget::Panel, UiStyle {
         width: Sizing::Fixed(width),
         height: Sizing::Fixed(height),
-        corner_radius: height / 2.0,
+        corner_radii: [height / 2.0; 4],
         background: Some(bg_color),
         direction: Direction::Row,
         ..UiStyle::default()
@@ -94,7 +94,7 @@ fn progress_bar_sized(tree: &mut UiTree, parent: UiNodeId, fraction: f32, width:
         let fill = tree.create(Widget::Panel, UiStyle {
             width: Sizing::Fixed(fill_w),
             height: Sizing::Fixed(height),
-            corner_radius: height / 2.0,
+            corner_radii: [height / 2.0; 4],
             background: Some(fill_color),
             ..UiStyle::default()
         });

@@ -64,7 +64,7 @@ pub fn render(tree: &mut UiTree, theme: &dyn ThemeProvider) -> UiNodeId {
             background: Some(bg_surface),
             border_color: Some(border),
             border_width: 1.0,
-            corner_radius: 6.0,
+            corner_radii: [6.0; 4],
             ..UiStyle::default()
         });
         tree.add_child(root, block);
@@ -93,7 +93,7 @@ pub fn render(tree: &mut UiTree, theme: &dyn ThemeProvider) -> UiNodeId {
             background: Some(bg_surface),
             border_color: Some(border),
             border_width: 1.0,
-            corner_radius: 6.0,
+            corner_radii: [6.0; 4],
             ..UiStyle::default()
         });
         tree.add_child(root, block);
@@ -137,7 +137,7 @@ fn label(tree: &mut UiTree, parent: UiNodeId, text: &str, color: glam::Vec4) {
 fn inline_code(tree: &mut UiTree, parent: UiNodeId, text: &str, bg: glam::Vec4, border: glam::Vec4, fg: glam::Vec4) {
     let code = tree.create(Widget::Label { text: text.to_string() }, UiStyle {
         padding: Edges { top: 1.0, right: 6.0, bottom: 1.0, left: 6.0 },
-        corner_radius: 4.0,
+        corner_radii: [4.0; 4],
         background: Some(bg),
         border_color: Some(border),
         border_width: 1.0,

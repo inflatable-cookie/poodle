@@ -50,7 +50,7 @@ fn tile(tree: &mut UiTree, parent: UiNodeId, label: &str, value: &str, trend: &s
         direction: Direction::Column,
         width: Sizing::Fixed(120.0), padding: Edges::all(12.0), gap: 4.0,
         background: Some(bg), border_color: Some(border), border_width: 1.0,
-        corner_radius: 8.0,
+        corner_radii: [8.0; 4],
         ..UiStyle::default()
     });
     tree.add_child(parent, card);
@@ -76,7 +76,7 @@ fn compact_tile(tree: &mut UiTree, parent: UiNodeId, label: &str, value: &str, b
         direction: Direction::Column,
         width: Sizing::Fixed(80.0), padding: Edges::all(8.0), gap: 2.0,
         background: Some(bg), border_color: Some(border), border_width: 1.0,
-        corner_radius: 6.0, align: Align::Center,
+        corner_radii: [6.0; 4], align: Align::Center,
         ..UiStyle::default()
     });
     tree.add_child(parent, card);

@@ -70,7 +70,7 @@ fn meter_bar(
     let track = tree.create(Widget::Panel, UiStyle {
         width: Sizing::Fixed(width),
         height: Sizing::Fixed(8.0),
-        corner_radius: 4.0,
+        corner_radii: [4.0; 4],
         background: Some(bg_color),
         direction: Direction::Row,
         ..UiStyle::default()
@@ -82,7 +82,7 @@ fn meter_bar(
         let fill = tree.create(Widget::Panel, UiStyle {
             width: Sizing::Fixed(fill_w),
             height: Sizing::Fixed(8.0),
-            corner_radius: 4.0,
+            corner_radii: [4.0; 4],
             background: Some(fill_color),
             ..UiStyle::default()
         });

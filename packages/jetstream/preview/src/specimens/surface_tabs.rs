@@ -24,7 +24,7 @@ pub fn render(tree: &mut UiTree, theme: &dyn ThemeProvider) -> UiNodeId {
             direction: Direction::Row,
             width: Sizing::Fixed(480.0), height: Sizing::Fixed(34.0),
             background: Some(bg_elevated), border_color: Some(border), border_width: 1.0,
-            corner_radius: 6.0, padding: Edges { top: 4.0, right: 4.0, bottom: 0.0, left: 4.0 },
+            corner_radii: [6.0; 4], padding: Edges { top: 4.0, right: 4.0, bottom: 0.0, left: 4.0 },
             gap: 2.0, align: Align::End,
             ..UiStyle::default()
         });
@@ -40,7 +40,7 @@ pub fn render(tree: &mut UiTree, theme: &dyn ThemeProvider) -> UiNodeId {
                 height: Sizing::Fixed(30.0),
                 padding: Edges { top: 0.0, right: 8.0, bottom: 0.0, left: 12.0 },
                 background: bg,
-                corner_radius: if is_active { 6.0 } else { 4.0 },
+                corner_radii: if is_active { [6.0; 4] } else { [4.0; 4] },
                 gap: 6.0, align: Align::Center,
                 ..UiStyle::default()
             });
@@ -56,7 +56,7 @@ pub fn render(tree: &mut UiTree, theme: &dyn ThemeProvider) -> UiNodeId {
                 label: "\u{2715}".to_string(), pressed: false, hovered: false,
             }, UiStyle {
                 width: Sizing::Fixed(18.0), height: Sizing::Fixed(18.0),
-                corner_radius: 3.0,
+                corner_radii: [3.0; 4],
                 text_color: Some(if is_active { text_secondary } else { theme_bridge::tint(text_secondary, 0.5) }),
                 text_size: Some(9.0),
                 align: Align::Center, justify: Justify::Center, focusable: true,
@@ -81,7 +81,7 @@ pub fn render(tree: &mut UiTree, theme: &dyn ThemeProvider) -> UiNodeId {
             label: "+".to_string(), pressed: false, hovered: false,
         }, UiStyle {
             width: Sizing::Fixed(28.0), height: Sizing::Fixed(28.0),
-            corner_radius: 4.0, text_color: Some(text_secondary), text_size: Some(14.0),
+            corner_radii: [4.0; 4], text_color: Some(text_secondary), text_size: Some(14.0),
             align: Align::Center, justify: Justify::Center, focusable: true,
             ..UiStyle::default()
         });
@@ -94,7 +94,7 @@ pub fn render(tree: &mut UiTree, theme: &dyn ThemeProvider) -> UiNodeId {
         let container = tree.create(Widget::Panel, UiStyle {
             direction: Direction::Column,
             width: Sizing::Fixed(480.0),
-            border_color: Some(border), border_width: 1.0, corner_radius: 8.0,
+            border_color: Some(border), border_width: 1.0, corner_radii: [8.0; 4],
             ..UiStyle::default()
         });
         tree.add_child(root, container);
@@ -129,7 +129,7 @@ pub fn render(tree: &mut UiTree, theme: &dyn ThemeProvider) -> UiNodeId {
             if is_active {
                 let underline = tree.create(Widget::Panel, UiStyle {
                     width: Sizing::Grow(1.0), height: Sizing::Fixed(2.0),
-                    background: Some(accent), corner_radius: 1.0,
+                    background: Some(accent), corner_radii: [1.0; 4],
                     ..UiStyle::default()
                 });
                 tree.add_child(tab, underline);

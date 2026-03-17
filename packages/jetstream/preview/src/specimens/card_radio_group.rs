@@ -34,7 +34,7 @@ pub fn render(tree: &mut UiTree, theme: &dyn ThemeProvider) -> UiNodeId {
                 background: Some(bg_elevated),
                 border_color: Some(if selected { accent } else { border }),
                 border_width: if selected { 2.0 } else { 1.0 },
-                corner_radius: 8.0,
+                corner_radii: [8.0; 4],
                 ..UiStyle::default()
             });
             tree.add_child(row, card);

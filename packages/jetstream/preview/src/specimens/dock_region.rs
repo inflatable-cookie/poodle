@@ -25,7 +25,7 @@ pub fn render(tree: &mut UiTree, theme: &dyn ThemeProvider) -> UiNodeId {
             direction: Direction::Row,
             width: Sizing::Fixed(520.0), height: Sizing::Fixed(260.0),
             background: Some(bg_canvas), border_color: Some(border), border_width: 1.0,
-            corner_radius: 8.0,
+            corner_radii: [8.0; 4],
             ..UiStyle::default()
         });
         tree.add_child(root, dock);

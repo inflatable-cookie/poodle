@@ -24,7 +24,7 @@ pub fn render(tree: &mut UiTree, theme: &dyn ThemeProvider) -> UiNodeId {
             direction: Direction::Column,
             width: Sizing::Fixed(320.0),
             background: Some(bg_surface), border_color: Some(border), border_width: 1.0,
-            corner_radius: 8.0,
+            corner_radii: [8.0; 4],
             ..UiStyle::default()
         });
         tree.add_child(root, panel);
@@ -120,7 +120,7 @@ fn category_section(
             direction: Direction::Row,
             height: Sizing::Fixed(28.0),
             padding: Edges { top: 0.0, right: 8.0, bottom: 0.0, left: 8.0 },
-            corner_radius: 4.0, gap: 8.0, align: Align::Center,
+            corner_radii: [4.0; 4], gap: 8.0, align: Align::Center,
             ..UiStyle::default()
         });
         tree.add_child(section, row);
@@ -136,7 +136,7 @@ fn category_section(
             height: Sizing::Fixed(20.0),
             padding: Edges { top: 0.0, right: 6.0, bottom: 0.0, left: 6.0 },
             background: Some(bg_elevated), border_color: Some(border), border_width: 1.0,
-            corner_radius: 4.0, align: Align::Center, justify: Justify::Center,
+            corner_radii: [4.0; 4], align: Align::Center, justify: Justify::Center,
             ..UiStyle::default()
         });
         tree.add_child(row, pill);

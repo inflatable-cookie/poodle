@@ -76,7 +76,7 @@ impl RenderComponent<SkeletonSpec> for JetstreamAdapter {
         // Resolve corner radius
         let radius_token = spec.radius_token();
         let r = theme.resolve_space(radius_token);
-        js_style.corner_radius = r;
+        js_style.corner_radii = [r; 4];
 
         JetstreamNodeHandle::new("skeleton", "SkeletonSpec", WidgetKind::Panel)
     }

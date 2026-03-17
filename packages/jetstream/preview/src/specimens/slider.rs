@@ -85,7 +85,7 @@ fn slider_track(tree: &mut UiTree, parent: UiNodeId, fraction: f32, width: f32, 
     let track = tree.create(Widget::Panel, UiStyle {
         width: Sizing::Fixed(width),
         height: Sizing::Fixed(4.0),
-        corner_radius: 2.0,
+        corner_radii: [2.0; 4],
         background: Some(border),
         direction: Direction::Row,
         ..UiStyle::default()
@@ -98,7 +98,7 @@ fn slider_track(tree: &mut UiTree, parent: UiNodeId, fraction: f32, width: f32, 
         let fill = tree.create(Widget::Panel, UiStyle {
             width: Sizing::Fixed(fill_w),
             height: Sizing::Fixed(4.0),
-            corner_radius: 2.0,
+            corner_radii: [2.0; 4],
             background: Some(accent),
             ..UiStyle::default()
         });

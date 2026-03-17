@@ -74,7 +74,7 @@ pub fn render(tree: &mut UiTree, theme: &dyn ThemeProvider) -> UiNodeId {
     }, UiStyle {
         width: Sizing::Fixed(32.0),
         height: Sizing::Fixed(32.0),
-        corner_radius: 6.0,
+        corner_radii: [6.0; 4],
         background: Some(theme_bridge::tint(accent, 0.4)),
         text_color: Some(theme_bridge::tint(glam::Vec4::ONE, 0.5)),
         text_size: Some(14.0),
@@ -112,7 +112,7 @@ fn icon_btn(
     }, UiStyle {
         width: Sizing::Fixed(size),
         height: Sizing::Fixed(size),
-        corner_radius: 6.0,
+        corner_radii: [6.0; 4],
         background: bg,
         text_color,
         text_size: Some(14.0),
@@ -140,7 +140,7 @@ fn icon_btn_outlined(
     }, UiStyle {
         width: Sizing::Fixed(size),
         height: Sizing::Fixed(size),
-        corner_radius: 6.0,
+        corner_radii: [6.0; 4],
         background: Some(bg),
         border_color: Some(border),
         border_width: 1.0,

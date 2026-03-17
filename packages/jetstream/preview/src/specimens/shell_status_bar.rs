@@ -25,7 +25,7 @@ pub fn render(tree: &mut UiTree, theme: &dyn ThemeProvider) -> UiNodeId {
             width: Sizing::Fixed(520.0), height: Sizing::Fixed(24.0),
             padding: Edges { top: 0.0, right: 10.0, bottom: 0.0, left: 10.0 },
             background: Some(bg_elevated), border_color: Some(border), border_width: 1.0,
-            corner_radius: 6.0, align: Align::Center,
+            corner_radii: [6.0; 4], align: Align::Center,
             ..UiStyle::default()
         });
         tree.add_child(root, bar);
@@ -40,7 +40,7 @@ pub fn render(tree: &mut UiTree, theme: &dyn ThemeProvider) -> UiNodeId {
 
         let dot = tree.create(Widget::Panel, UiStyle {
             width: Sizing::Fixed(6.0), height: Sizing::Fixed(6.0),
-            corner_radius: 3.0, background: Some(success),
+            corner_radii: [3.0; 4], background: Some(success),
             ..UiStyle::default()
         });
         tree.add_child(left, dot);
@@ -95,7 +95,7 @@ pub fn render(tree: &mut UiTree, theme: &dyn ThemeProvider) -> UiNodeId {
             width: Sizing::Fixed(520.0), height: Sizing::Fixed(20.0),
             padding: Edges { top: 0.0, right: 10.0, bottom: 0.0, left: 10.0 },
             background: Some(bg_elevated), border_color: Some(border), border_width: 1.0,
-            corner_radius: 4.0, align: Align::Center, justify: Justify::SpaceBetween,
+            corner_radii: [4.0; 4], align: Align::Center, justify: Justify::SpaceBetween,
             ..UiStyle::default()
         });
         tree.add_child(root, bar);

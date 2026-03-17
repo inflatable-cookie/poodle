@@ -566,8 +566,8 @@ impl PreviewState {
     }
 
     /// Upload GPU textures for all physical-sized atlases that don't yet have
-    /// a corresponding GPU texture. Only uploads atlases at physical sizes
-    /// (i.e., sizes that will be used by convert_text_commands).
+    /// a corresponding GPU texture, or re-upload any atlas whose pixel data
+    /// has changed (dirty flag from dynamic glyph rasterization).
     fn sync_atlas_textures(
         &mut self,
         gpu: &jetstream_platform::GpuContext,
@@ -576,28 +576,33 @@ impl PreviewState {
         let all_logical_sizes: &[f32] = &[
             9.0, 10.0, 11.0, 12.0, 13.0, 14.0, 16.0, 18.0, 20.0,
         ];
-        if let Some(ref atlases) = self.game_ui.text_atlases {
+        if let Some(ref mut atlases) = self.game_ui.text_atlases {
             for &sz in all_logical_sizes {
                 let phys = (sz * scale).round().max(1.0);
-                // Already uploaded?
-                if self.text_atlas_textures.iter().any(|(s, _)| (*s - phys).abs() < 0.5) {
-                    continue;
-                }
-                if let Some(atlas) = atlases.get(phys) {
-                    let gpu_tex = GpuTexture::from_rgba8(
-                        &gpu.device,
-                        &gpu.queue,
-                        &atlas.pixels,
-                        atlas.width,
-                        atlas.height,
-                        &format!("font_atlas_{phys}px"),
-                        &self.texture_bgl,
-                    );
-                    log::info!(
-                        "Uploaded atlas {}px (logical {}pt) — {}×{}",
-                        phys, sz, atlas.width, atlas.height,
-                    );
-                    self.text_atlas_textures.push((phys, gpu_tex));
+                let existing_idx = self.text_atlas_textures.iter().position(|(s, _)| (*s - phys).abs() < 0.5);
+                if let Some(atlas) = atlases.get_mut(phys) {
+                    if atlas.dirty || existing_idx.is_none() {
+                        let gpu_tex = GpuTexture::from_rgba8(
+                            &gpu.device,
+                            &gpu.queue,
+                            &atlas.pixels,
+                            atlas.width,
+                            atlas.height,
+                            &format!("font_atlas_{phys}px"),
+                            &self.texture_bgl,
+                        );
+                        if let Some(idx) = existing_idx {
+                            // Replace existing texture.
+                            self.text_atlas_textures[idx] = (phys, gpu_tex);
+                        } else {
+                            log::info!(
+                                "Uploaded atlas {}px (logical {}pt) — {}×{}",
+                                phys, sz, atlas.width, atlas.height,
+                            );
+                            self.text_atlas_textures.push((phys, gpu_tex));
+                        }
+                        atlas.mark_clean();
+                    }
                 }
             }
         }
@@ -612,33 +617,38 @@ impl PreviewState {
     }
 
     /// Ensure a GPU texture exists for the given scaled font size, creating it
-    /// from the TextAtlasSet if needed.
+    /// from the TextAtlasSet if needed. Also re-uploads if the atlas is dirty.
     fn ensure_atlas_texture(
         &mut self,
         gpu: &jetstream_platform::GpuContext,
         scaled_size: f32,
     ) {
-        // Already uploaded?
-        if self.find_atlas_texture(scaled_size).is_some() {
-            return;
-        }
-        // Try to get the atlas from GameUi and upload it.
-        if let Some(ref atlases) = self.game_ui.text_atlases {
-            if let Some(atlas) = atlases.get(scaled_size) {
-                let gpu_tex = GpuTexture::from_rgba8(
-                    &gpu.device,
-                    &gpu.queue,
-                    &atlas.pixels,
-                    atlas.width,
-                    atlas.height,
-                    &format!("font_atlas_{scaled_size}px"),
-                    &self.texture_bgl,
-                );
-                log::info!(
-                    "Uploaded new text atlas: {}px ({}×{})",
-                    scaled_size, atlas.width, atlas.height,
-                );
-                self.text_atlas_textures.push((scaled_size, gpu_tex));
+        let existing_idx = self.text_atlas_textures.iter().position(|(s, _)| (*s - scaled_size).abs() < 0.5);
+
+        if let Some(ref mut atlases) = self.game_ui.text_atlases {
+            if let Some(atlas) = atlases.get_mut(scaled_size) {
+                let needs_upload = existing_idx.is_none() || atlas.dirty;
+                if needs_upload {
+                    let gpu_tex = GpuTexture::from_rgba8(
+                        &gpu.device,
+                        &gpu.queue,
+                        &atlas.pixels,
+                        atlas.width,
+                        atlas.height,
+                        &format!("font_atlas_{scaled_size}px"),
+                        &self.texture_bgl,
+                    );
+                    if let Some(idx) = existing_idx {
+                        self.text_atlas_textures[idx] = (scaled_size, gpu_tex);
+                    } else {
+                        log::info!(
+                            "Uploaded new text atlas: {}px ({}×{})",
+                            scaled_size, atlas.width, atlas.height,
+                        );
+                        self.text_atlas_textures.push((scaled_size, gpu_tex));
+                    }
+                    atlas.mark_clean();
+                }
             }
         }
     }

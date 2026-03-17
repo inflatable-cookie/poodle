@@ -85,7 +85,7 @@ fn label(tree: &mut UiTree, parent: UiNodeId, text: &str, color: glam::Vec4) {
 fn pill_basic(tree: &mut UiTree, parent: UiNodeId, text: &str, bg: glam::Vec4, border: glam::Vec4, fg: glam::Vec4) {
     let p = tree.create(Widget::Label { text: text.to_string() }, UiStyle {
         padding: Edges { top: 4.0, right: 10.0, bottom: 4.0, left: 10.0 },
-        corner_radius: 12.0,
+        corner_radii: [12.0; 4],
         background: Some(bg),
         border_color: Some(border),
         border_width: 1.0,
@@ -99,7 +99,7 @@ fn pill_basic(tree: &mut UiTree, parent: UiNodeId, text: &str, bg: glam::Vec4, b
 fn pill_solid(tree: &mut UiTree, parent: UiNodeId, text: &str, bg: glam::Vec4, fg: glam::Vec4) {
     let p = tree.create(Widget::Label { text: text.to_string() }, UiStyle {
         padding: Edges { top: 4.0, right: 10.0, bottom: 4.0, left: 10.0 },
-        corner_radius: 12.0,
+        corner_radii: [12.0; 4],
         background: Some(bg),
         text_color: Some(fg),
         text_size: Some(11.0),
@@ -113,7 +113,7 @@ fn pill_removable(tree: &mut UiTree, parent: UiNodeId, text: &str, bg: glam::Vec
         direction: Direction::Row,
         gap: 4.0,
         padding: Edges { top: 4.0, right: 6.0, bottom: 4.0, left: 10.0 },
-        corner_radius: 12.0,
+        corner_radii: [12.0; 4],
         background: Some(bg),
         border_color: Some(border),
         border_width: 1.0,

@@ -25,7 +25,7 @@ pub fn render(tree: &mut UiTree, theme: &dyn ThemeProvider) -> UiNodeId {
             width: Sizing::Fixed(200.0), height: Sizing::Fixed(32.0),
             padding: Edges { top: 0.0, right: 12.0, bottom: 0.0, left: 12.0 },
             background: Some(bg_elevated), border_color: Some(border), border_width: 1.0,
-            corner_radius: 8.0, align: Align::Center,
+            corner_radii: [8.0; 4], align: Align::Center,
             ..UiStyle::default()
         });
         tree.add_child(root, trigger);
@@ -53,7 +53,7 @@ pub fn render(tree: &mut UiTree, theme: &dyn ThemeProvider) -> UiNodeId {
         let backdrop = tree.create(Widget::Panel, UiStyle {
             width: Sizing::Fixed(400.0), height: Sizing::Fixed(240.0),
             background: Some(glam::Vec4::new(bg_canvas.x * 0.5, bg_canvas.y * 0.5, bg_canvas.z * 0.5, 0.8)),
-            corner_radius: 8.0,
+            corner_radii: [8.0; 4],
             align: Align::Start, justify: Justify::Center,
             padding: Edges { top: 24.0, right: 40.0, bottom: 0.0, left: 40.0 },
             ..UiStyle::default()
@@ -64,7 +64,7 @@ pub fn render(tree: &mut UiTree, theme: &dyn ThemeProvider) -> UiNodeId {
             direction: Direction::Column,
             width: Sizing::Fixed(320.0),
             background: Some(bg_elevated), border_color: Some(border), border_width: 1.0,
-            corner_radius: 10.0,
+            corner_radii: [10.0; 4],
             ..UiStyle::default()
         });
         tree.add_child(backdrop, palette);
@@ -105,7 +105,7 @@ pub fn render(tree: &mut UiTree, theme: &dyn ThemeProvider) -> UiNodeId {
             let row = tree.create(Widget::Panel, UiStyle {
                 height: Sizing::Fixed(28.0),
                 padding: Edges { top: 0.0, right: 8.0, bottom: 0.0, left: 8.0 },
-                background: bg, corner_radius: 4.0, align: Align::Center,
+                background: bg, corner_radii: [4.0; 4], align: Align::Center,
                 ..UiStyle::default()
             });
             tree.add_child(items, row);

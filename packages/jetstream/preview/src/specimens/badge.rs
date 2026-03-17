@@ -75,7 +75,7 @@ pub fn render(tree: &mut UiTree, theme: &dyn ThemeProvider) -> UiNodeId {
             direction: Direction::Row,
             gap: 4.0,
             padding: Edges { top: 3.0, right: 8.0, bottom: 3.0, left: 6.0 },
-            corner_radius: 10.0,
+            corner_radii: [10.0; 4],
             background: Some(success),
             align: Align::Center,
             ..UiStyle::default()
@@ -97,7 +97,7 @@ pub fn render(tree: &mut UiTree, theme: &dyn ThemeProvider) -> UiNodeId {
             direction: Direction::Row,
             gap: 4.0,
             padding: Edges { top: 3.0, right: 8.0, bottom: 3.0, left: 6.0 },
-            corner_radius: 10.0,
+            corner_radii: [10.0; 4],
             border_color: Some(border),
             border_width: 1.0,
             align: Align::Center,
@@ -129,7 +129,7 @@ fn section_label(tree: &mut UiTree, parent: UiNodeId, text: &str, color: glam::V
 fn solid_badge(tree: &mut UiTree, parent: UiNodeId, text: &str, bg: glam::Vec4, fg: glam::Vec4) {
     let badge = tree.create(Widget::Label { text: text.to_string() }, UiStyle {
         padding: Edges { top: 3.0, right: 8.0, bottom: 3.0, left: 8.0 },
-        corner_radius: 10.0,
+        corner_radii: [10.0; 4],
         background: Some(bg),
         text_color: Some(fg),
         text_size: Some(10.0),
@@ -141,7 +141,7 @@ fn solid_badge(tree: &mut UiTree, parent: UiNodeId, text: &str, bg: glam::Vec4, 
 fn outlined_badge(tree: &mut UiTree, parent: UiNodeId, text: &str, color: glam::Vec4) {
     let badge = tree.create(Widget::Label { text: text.to_string() }, UiStyle {
         padding: Edges { top: 3.0, right: 8.0, bottom: 3.0, left: 8.0 },
-        corner_radius: 10.0,
+        corner_radii: [10.0; 4],
         border_color: Some(color),
         border_width: 1.0,
         text_color: Some(color),
@@ -154,7 +154,7 @@ fn outlined_badge(tree: &mut UiTree, parent: UiNodeId, text: &str, color: glam::
 fn dot_badge(tree: &mut UiTree, parent: UiNodeId, text: &str, bg: glam::Vec4, fg: glam::Vec4) {
     let badge = tree.create(Widget::Label { text: text.to_string() }, UiStyle {
         padding: Edges { top: 2.0, right: 6.0, bottom: 2.0, left: 6.0 },
-        corner_radius: 12.0,
+        corner_radii: [12.0; 4],
         background: Some(bg),
         text_color: Some(fg),
         text_size: Some(9.0),

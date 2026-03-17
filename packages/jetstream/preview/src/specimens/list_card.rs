@@ -41,7 +41,7 @@ pub fn render(tree: &mut UiTree, theme: &dyn ThemeProvider) -> UiNodeId {
                 background: Some(bg_elevated),
                 border_color: Some(card_border),
                 border_width: if selected { 2.0 } else { 1.0 },
-                corner_radius: 8.0,
+                corner_radii: [8.0; 4],
                 align: Align::Center,
                 ..UiStyle::default()
             });
@@ -65,7 +65,7 @@ pub fn render(tree: &mut UiTree, theme: &dyn ThemeProvider) -> UiNodeId {
 
             let badge = tree.create(Widget::Label { text: tag.to_string() }, UiStyle {
                 padding: Edges { top: 2.0, right: 8.0, bottom: 2.0, left: 8.0 },
-                corner_radius: 10.0, border_color: Some(border),
+                corner_radii: [10.0; 4], border_color: Some(border),
                 border_width: 1.0, text_color: Some(text_secondary),
                 text_size: Some(10.0), ..UiStyle::default()
             });

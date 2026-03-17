@@ -37,7 +37,7 @@ pub fn render(tree: &mut UiTree, theme: &dyn ThemeProvider) -> UiNodeId {
             background: Some(bg_surface),
             border_color: Some(border),
             border_width: 1.0,
-            corner_radius: 6.0,
+            corner_radii: [6.0; 4],
             opacity: 0.5,
             ..UiStyle::default()
         });
@@ -48,7 +48,7 @@ pub fn render(tree: &mut UiTree, theme: &dyn ThemeProvider) -> UiNodeId {
             let btn = tree.create(Widget::Panel, UiStyle {
                 height: Sizing::Fixed(28.0),
                 padding: Edges { top: 0.0, right: 16.0, bottom: 0.0, left: 16.0 },
-                corner_radius: 4.0,
+                corner_radii: [4.0; 4],
                 background: if selected { Some(theme_bridge::tint(accent, 0.20)) } else { None },
                 align: Align::Center,
                 justify: Justify::Center,
@@ -95,7 +95,7 @@ fn segmented(
         background: Some(bg_surface),
         border_color: Some(border),
         border_width: 1.0,
-        corner_radius: 6.0,
+        corner_radii: [6.0; 4],
         ..UiStyle::default()
     });
     tree.add_child(parent, track);
@@ -109,7 +109,7 @@ fn segmented(
         }, UiStyle {
             height: Sizing::Fixed(28.0),
             padding: Edges { top: 0.0, right: 16.0, bottom: 0.0, left: 16.0 },
-            corner_radius: 4.0,
+            corner_radii: [4.0; 4],
             background: if selected { Some(theme_bridge::tint(accent, 0.20)) } else { None },
             text_color: Some(if selected { text_primary } else { text_secondary }),
             text_size: Some(12.0),

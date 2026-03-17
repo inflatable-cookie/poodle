@@ -57,7 +57,7 @@ pub fn render(tree: &mut UiTree, theme: &dyn ThemeProvider) -> UiNodeId {
             background: Some(bg_canvas),
             border_color: Some(border_color),
             border_width,
-            corner_radius: 6.0,
+            corner_radii: [6.0; 4],
             align: Align::Center,
             opacity,
             ..UiStyle::default()

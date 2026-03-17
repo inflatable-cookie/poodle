@@ -48,7 +48,7 @@ pub fn render(tree: &mut UiTree, theme: &dyn ThemeProvider) -> UiNodeId {
             background: Some(bg_canvas),
             border_color: Some(accent),
             border_width: 2.0,
-            corner_radius: 6.0,
+            corner_radii: [6.0; 4],
             align: Align::Center,
             justify: Justify::SpaceBetween,
             ..UiStyle::default()
@@ -78,7 +78,7 @@ pub fn render(tree: &mut UiTree, theme: &dyn ThemeProvider) -> UiNodeId {
             background: Some(bg_elevated),
             border_color: Some(border),
             border_width: 1.0,
-            corner_radius: 6.0,
+            corner_radii: [6.0; 4],
             ..UiStyle::default()
         });
         tree.add_child(container, dropdown);
@@ -90,7 +90,7 @@ pub fn render(tree: &mut UiTree, theme: &dyn ThemeProvider) -> UiNodeId {
                 width: Sizing::Grow(1.0),
                 height: Sizing::Fixed(28.0),
                 padding: Edges { top: 0.0, right: 8.0, bottom: 0.0, left: 8.0 },
-                corner_radius: 4.0,
+                corner_radii: [4.0; 4],
                 background: if selected { Some(theme_bridge::tint(accent, 0.15)) } else { None },
                 align: Align::Center,
                 ..UiStyle::default()
@@ -117,7 +117,7 @@ pub fn render(tree: &mut UiTree, theme: &dyn ThemeProvider) -> UiNodeId {
             background: Some(bg_canvas),
             border_color: Some(theme_bridge::border_subtle(theme)),
             border_width: 1.0,
-            corner_radius: 6.0,
+            corner_radii: [6.0; 4],
             align: Align::Center,
             justify: Justify::SpaceBetween,
             opacity: 0.5,
@@ -161,7 +161,7 @@ fn select_trigger(tree: &mut UiTree, parent: UiNodeId, text: &str, text_color: g
         background: Some(bg),
         border_color: Some(border),
         border_width: 1.0,
-        corner_radius: 6.0,
+        corner_radii: [6.0; 4],
         align: Align::Center,
         justify: Justify::SpaceBetween,
         ..UiStyle::default()

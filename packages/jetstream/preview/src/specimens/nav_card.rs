@@ -51,7 +51,7 @@ pub fn render(tree: &mut UiTree, theme: &dyn ThemeProvider) -> UiNodeId {
                 padding: Edges { top: 10.0, right: 12.0, bottom: 10.0, left: 12.0 },
                 gap: 8.0, background: Some(bg_elevated),
                 border_color: Some(border), border_width: 1.0,
-                corner_radius: 6.0, align: Align::Center,
+                corner_radii: [6.0; 4], align: Align::Center,
                 justify: Justify::SpaceBetween,
                 ..UiStyle::default()
             });
@@ -95,14 +95,14 @@ fn nav_card(tree: &mut UiTree, parent: UiNodeId, icon: &str, title: &str, desc: 
         width: Sizing::Grow(1.0),
         padding: Edges::all(14.0), gap: 12.0,
         background: Some(bg), border_color: Some(border),
-        border_width: 1.0, corner_radius: 8.0,
+        border_width: 1.0, corner_radii: [8.0; 4],
         align: Align::Start, ..UiStyle::default()
     });
     tree.add_child(parent, card);
 
     let ic = tree.create(Widget::Panel, UiStyle {
         width: Sizing::Fixed(32.0), height: Sizing::Fixed(32.0),
-        corner_radius: 6.0, background: Some(theme_bridge::tint(accent, 0.12)),
+        corner_radii: [6.0; 4], background: Some(theme_bridge::tint(accent, 0.12)),
         align: Align::Center, justify: Justify::Center,
         ..UiStyle::default()
     });

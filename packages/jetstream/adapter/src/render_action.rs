@@ -27,7 +27,8 @@ impl RenderComponent<ButtonSpec> for JetstreamAdapter {
         js_style.border_color = Some(JetstreamColor::from(border_color));
 
         // Resolve corner radius
-        js_style.corner_radius = theme.resolve_radius(spec.radius_token());
+        let r = theme.resolve_radius(spec.radius_token());
+        js_style.corner_radii = [r; 4];
 
         // Resolve focus ring
         let ring_color = theme.resolve_color(spec.focus_ring_color_token());

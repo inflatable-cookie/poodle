@@ -25,7 +25,7 @@ pub fn render(tree: &mut UiTree, theme: &dyn ThemeProvider) -> UiNodeId {
             direction: Direction::Column,
             width: Sizing::Fixed(320.0),
             border_color: Some(border), border_width: 1.0,
-            corner_radius: 8.0, background: Some(bg_elevated),
+            corner_radii: [8.0; 4], background: Some(bg_elevated),
             ..UiStyle::default()
         });
         tree.add_child(root, acc);
@@ -42,7 +42,7 @@ pub fn render(tree: &mut UiTree, theme: &dyn ThemeProvider) -> UiNodeId {
             direction: Direction::Column,
             width: Sizing::Fixed(320.0),
             border_color: Some(border), border_width: 1.0,
-            corner_radius: 8.0, background: Some(bg_elevated),
+            corner_radii: [8.0; 4], background: Some(bg_elevated),
             ..UiStyle::default()
         });
         tree.add_child(root, acc);
@@ -59,7 +59,7 @@ pub fn render(tree: &mut UiTree, theme: &dyn ThemeProvider) -> UiNodeId {
             direction: Direction::Column,
             width: Sizing::Fixed(320.0),
             border_color: Some(border), border_width: 1.0,
-            corner_radius: 8.0, background: Some(bg_elevated),
+            corner_radii: [8.0; 4], background: Some(bg_elevated),
             ..UiStyle::default()
         });
         tree.add_child(root, acc);

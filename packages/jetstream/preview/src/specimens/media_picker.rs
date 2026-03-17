@@ -23,7 +23,7 @@ pub fn render(tree: &mut UiTree, theme: &dyn ThemeProvider) -> UiNodeId {
         let dialog = tree.create(Widget::Panel, UiStyle {
             direction: Direction::Column, width: Sizing::Fixed(420.0),
             background: Some(bg_elevated), border_color: Some(border), border_width: 1.0,
-            corner_radius: 10.0,
+            corner_radii: [10.0; 4],
             ..UiStyle::default()
         });
         tree.add_child(root, dialog);
@@ -53,7 +53,7 @@ pub fn render(tree: &mut UiTree, theme: &dyn ThemeProvider) -> UiNodeId {
             padding: Edges { top: 0.0, right: 10.0, bottom: 0.0, left: 10.0 },
             margin: Edges { top: 0.0, right: 16.0, bottom: 8.0, left: 16.0 },
             background: Some(bg_surface), border_color: Some(border), border_width: 1.0,
-            corner_radius: 6.0, align: Align::Center,
+            corner_radii: [6.0; 4], align: Align::Center,
             ..UiStyle::default()
         });
         tree.add_child(dialog, search);
@@ -90,7 +90,7 @@ pub fn render(tree: &mut UiTree, theme: &dyn ThemeProvider) -> UiNodeId {
                 let card = tree.create(Widget::Panel, UiStyle {
                     width: Sizing::Fixed(120.0), height: Sizing::Fixed(80.0),
                     background: Some(theme_bridge::tint(border, 0.3)),
-                    corner_radius: 4.0,
+                    corner_radii: [4.0; 4],
                     border_color: if selected { Some(accent) } else { None },
                     border_width: if selected { 2.0 } else { 0.0 },
                     align: Align::End, justify: Justify::End,
@@ -102,7 +102,7 @@ pub fn render(tree: &mut UiTree, theme: &dyn ThemeProvider) -> UiNodeId {
                 if selected {
                     let check = tree.create(Widget::Panel, UiStyle {
                         width: Sizing::Fixed(16.0), height: Sizing::Fixed(16.0),
-                        corner_radius: 8.0, background: Some(accent),
+                        corner_radii: [8.0; 4], background: Some(accent),
                         align: Align::Center, justify: Justify::Center,
                         ..UiStyle::default()
                     });
@@ -146,7 +146,7 @@ pub fn render(tree: &mut UiTree, theme: &dyn ThemeProvider) -> UiNodeId {
         }, UiStyle {
             height: Sizing::Fixed(30.0),
             padding: Edges { top: 0.0, right: 14.0, bottom: 0.0, left: 14.0 },
-            corner_radius: 6.0, background: Some(accent),
+            corner_radii: [6.0; 4], background: Some(accent),
             text_color: Some(text_inverse), text_size: Some(12.0),
             align: Align::Center, justify: Justify::Center,
             focusable: true, ..UiStyle::default()

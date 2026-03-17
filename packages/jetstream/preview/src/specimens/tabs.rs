@@ -50,7 +50,7 @@ pub fn render(tree: &mut UiTree, theme: &dyn ThemeProvider) -> UiNodeId {
             if is_active {
                 let underline = tree.create(Widget::Panel, UiStyle {
                     width: Sizing::Grow(1.0), height: Sizing::Fixed(2.0),
-                    background: Some(accent), corner_radius: 1.0,
+                    background: Some(accent), corner_radii: [1.0; 4],
                     ..UiStyle::default()
                 });
                 tree.add_child(tab, underline);
@@ -67,7 +67,7 @@ pub fn render(tree: &mut UiTree, theme: &dyn ThemeProvider) -> UiNodeId {
             padding: Edges::all(4.0),
             background: Some(bg_surface),
             border_color: Some(border), border_width: 1.0,
-            corner_radius: 8.0,
+            corner_radii: [8.0; 4],
             ..UiStyle::default()
         });
         tree.add_child(root, tabs);
@@ -82,7 +82,7 @@ pub fn render(tree: &mut UiTree, theme: &dyn ThemeProvider) -> UiNodeId {
             }, UiStyle {
                 height: Sizing::Fixed(28.0),
                 padding: Edges { top: 0.0, right: 12.0, bottom: 0.0, left: 12.0 },
-                corner_radius: 6.0, background: bg,
+                corner_radii: [6.0; 4], background: bg,
                 text_color: Some(color), text_size: Some(12.0),
                 align: Align::Center, justify: Justify::Center,
                 focusable: true, ..UiStyle::default()
@@ -118,7 +118,7 @@ pub fn render(tree: &mut UiTree, theme: &dyn ThemeProvider) -> UiNodeId {
 
             let badge = tree.create(Widget::Label { text: count.to_string() }, UiStyle {
                 padding: Edges { top: 1.0, right: 6.0, bottom: 1.0, left: 6.0 },
-                corner_radius: 8.0, background: Some(border),
+                corner_radii: [8.0; 4], background: Some(border),
                 text_color: Some(text_secondary), text_size: Some(9.0),
                 ..UiStyle::default()
             });

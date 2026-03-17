@@ -31,7 +31,7 @@ pub fn render(tree: &mut UiTree, theme: &dyn ThemeProvider) -> UiNodeId {
             gap: 8.0, align: Align::Center,
             background: Some(bg_elevated),
             border_color: Some(border), border_width: 1.0,
-            corner_radius: 8.0,
+            corner_radii: [8.0; 4],
             ..UiStyle::default()
         });
         tree.add_child(root, bar);
@@ -42,7 +42,7 @@ pub fn render(tree: &mut UiTree, theme: &dyn ThemeProvider) -> UiNodeId {
             height: Sizing::Fixed(28.0),
             padding: Edges { top: 0.0, right: 10.0, bottom: 0.0, left: 10.0 },
             background: Some(bg_surface), border_color: Some(border), border_width: 1.0,
-            corner_radius: 6.0, align: Align::Center,
+            corner_radii: [6.0; 4], align: Align::Center,
             width: Sizing::Grow(1.0),
             ..UiStyle::default()
         });
@@ -67,7 +67,7 @@ pub fn render(tree: &mut UiTree, theme: &dyn ThemeProvider) -> UiNodeId {
             padding: Edges::all(12.0),
             background: Some(bg_elevated),
             border_color: Some(border), border_width: 1.0,
-            corner_radius: 8.0,
+            corner_radii: [8.0; 4],
             ..UiStyle::default()
         });
         tree.add_child(root, bar);
@@ -84,7 +84,7 @@ pub fn render(tree: &mut UiTree, theme: &dyn ThemeProvider) -> UiNodeId {
             height: Sizing::Fixed(28.0),
             padding: Edges { top: 0.0, right: 10.0, bottom: 0.0, left: 10.0 },
             background: Some(bg_surface), border_color: Some(border), border_width: 1.0,
-            corner_radius: 6.0, align: Align::Center,
+            corner_radii: [6.0; 4], align: Align::Center,
             width: Sizing::Grow(1.0),
             ..UiStyle::default()
         });
@@ -115,7 +115,7 @@ pub fn render(tree: &mut UiTree, theme: &dyn ThemeProvider) -> UiNodeId {
                 height: Sizing::Fixed(22.0),
                 padding: Edges { top: 0.0, right: 8.0, bottom: 0.0, left: 8.0 },
                 background: Some(theme_bridge::tint(accent, 0.12)),
-                corner_radius: 4.0, align: Align::Center,
+                corner_radii: [4.0; 4], align: Align::Center,
                 ..UiStyle::default()
             });
             tree.add_child(tags, chip);
@@ -147,7 +147,7 @@ fn filter_chip(tree: &mut UiTree, parent: UiNodeId, label: &str, active: bool, a
     }, UiStyle {
         height: Sizing::Fixed(28.0),
         padding: Edges { top: 0.0, right: 10.0, bottom: 0.0, left: 10.0 },
-        corner_radius: 6.0, background: chip_bg,
+        corner_radii: [6.0; 4], background: chip_bg,
         border_color: Some(chip_border), border_width: 1.0,
         text_color: Some(color), text_size: Some(11.0),
         align: Align::Center, justify: Justify::Center,

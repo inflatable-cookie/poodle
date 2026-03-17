@@ -21,7 +21,7 @@ pub fn render(tree: &mut UiTree, theme: &dyn ThemeProvider) -> UiNodeId {
         let container = tree.create(Widget::Panel, UiStyle {
             width: Sizing::Fixed(300.0), height: Sizing::Fixed(160.0),
             background: Some(bg_elevated), border_color: Some(border), border_width: 1.0,
-            corner_radius: 8.0,
+            corner_radii: [8.0; 4],
             align: Align::Center, justify: Justify::Center,
             ..UiStyle::default()
         });
@@ -35,7 +35,7 @@ pub fn render(tree: &mut UiTree, theme: &dyn ThemeProvider) -> UiNodeId {
 
         let spinner = tree.create(Widget::Panel, UiStyle {
             width: Sizing::Fixed(32.0), height: Sizing::Fixed(32.0),
-            corner_radius: 16.0,
+            corner_radii: [16.0; 4],
             border_color: Some(accent), border_width: 3.0,
             ..UiStyle::default()
         });
@@ -55,7 +55,7 @@ pub fn render(tree: &mut UiTree, theme: &dyn ThemeProvider) -> UiNodeId {
             width: Sizing::Fixed(300.0),
             padding: Edges::all(16.0),
             background: Some(bg_elevated), border_color: Some(border), border_width: 1.0,
-            corner_radius: 8.0,
+            corner_radii: [8.0; 4],
             ..UiStyle::default()
         });
         tree.add_child(root, container);
@@ -65,7 +65,7 @@ pub fn render(tree: &mut UiTree, theme: &dyn ThemeProvider) -> UiNodeId {
         // Header skeleton
         let h = tree.create(Widget::Panel, UiStyle {
             width: Sizing::Fixed(180.0), height: Sizing::Fixed(16.0),
-            background: Some(skel_color), corner_radius: 4.0, ..UiStyle::default()
+            background: Some(skel_color), corner_radii: [4.0; 4], ..UiStyle::default()
         });
         tree.add_child(container, h);
 
@@ -73,7 +73,7 @@ pub fn render(tree: &mut UiTree, theme: &dyn ThemeProvider) -> UiNodeId {
         for &w in &[268.0, 240.0, 200.0] {
             let line = tree.create(Widget::Panel, UiStyle {
                 width: Sizing::Fixed(w), height: Sizing::Fixed(10.0),
-                background: Some(skel_color), corner_radius: 3.0, ..UiStyle::default()
+                background: Some(skel_color), corner_radii: [3.0; 4], ..UiStyle::default()
             });
             tree.add_child(container, line);
         }
@@ -81,7 +81,7 @@ pub fn render(tree: &mut UiTree, theme: &dyn ThemeProvider) -> UiNodeId {
         // Card skeleton
         let card_skel = tree.create(Widget::Panel, UiStyle {
             width: Sizing::Grow(1.0), height: Sizing::Fixed(60.0),
-            background: Some(skel_color), corner_radius: 6.0, ..UiStyle::default()
+            background: Some(skel_color), corner_radii: [6.0; 4], ..UiStyle::default()
         });
         tree.add_child(container, card_skel);
     }
@@ -94,7 +94,7 @@ pub fn render(tree: &mut UiTree, theme: &dyn ThemeProvider) -> UiNodeId {
             width: Sizing::Fixed(300.0),
             padding: Edges::all(16.0),
             background: Some(bg_elevated), border_color: Some(border), border_width: 1.0,
-            corner_radius: 8.0,
+            corner_radii: [8.0; 4],
             align: Align::Center,
             ..UiStyle::default()
         });
@@ -103,13 +103,13 @@ pub fn render(tree: &mut UiTree, theme: &dyn ThemeProvider) -> UiNodeId {
         let track = tree.create(Widget::Panel, UiStyle {
             width: Sizing::Fixed(268.0), height: Sizing::Fixed(4.0),
             background: Some(theme_bridge::tint(border, 0.5)),
-            corner_radius: 2.0, ..UiStyle::default()
+            corner_radii: [2.0; 4], ..UiStyle::default()
         });
         tree.add_child(container, track);
 
         let fill = tree.create(Widget::Panel, UiStyle {
             width: Sizing::Fixed(160.0), height: Sizing::Fixed(4.0),
-            background: Some(accent), corner_radius: 2.0, ..UiStyle::default()
+            background: Some(accent), corner_radii: [2.0; 4], ..UiStyle::default()
         });
         tree.add_child(track, fill);
 

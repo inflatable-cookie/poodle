@@ -3,7 +3,7 @@
 </script>
 
 <script lang="ts">
-  import { createEventDispatcher, onDestroy } from "svelte";
+  import { createEventDispatcher, onDestroy, tick } from "svelte";
 
   import type { OverlayPlacement } from "./types";
 
@@ -22,6 +22,9 @@
   let openTimer: ReturnType<typeof setTimeout> | null = null;
   let closeTimer: ReturnType<typeof setTimeout> | null = null;
   let uncontrolledOpen = defaultOpen;
+  let triggerElement: HTMLSpanElement | null = null;
+  let surfaceElement: HTMLSpanElement | null = null;
+  let surfaceStyle = "";
 
   $: isControlled = open !== null;
   $: isOpen = isControlled ? open === true : uncontrolledOpen;
@@ -31,7 +34,76 @@
       uncontrolledOpen = nextOpen;
     }
 
+    if (nextOpen) {
+      surfaceStyle = "visibility: hidden;";
+      tick().then(positionSurface);
+    }
+
     dispatch("openChange", { open: nextOpen });
+  }
+
+  function positionSurface(): void {
+    if (!triggerElement || !surfaceElement) {
+      return;
+    }
+
+    const trigger = triggerElement.getBoundingClientRect();
+    const surface = surfaceElement.getBoundingClientRect();
+    const pad = 8;
+    const gap = 8;
+    const vw = window.innerWidth;
+    const vh = window.innerHeight;
+
+    let x: number;
+    let y: number;
+
+    const isVertical = placement.startsWith("top") || placement.startsWith("bottom");
+    const isHorizontal = placement.startsWith("left") || placement.startsWith("right");
+
+    if (isVertical) {
+      if (placement.endsWith("start")) {
+        x = trigger.left;
+      } else if (placement.endsWith("end")) {
+        x = trigger.right - surface.width;
+      } else {
+        x = trigger.left + trigger.width / 2 - surface.width / 2;
+      }
+
+      if (placement.startsWith("top")) {
+        y = trigger.top - surface.height - gap;
+      } else {
+        y = trigger.bottom + gap;
+      }
+    } else if (isHorizontal) {
+      if (placement.startsWith("left")) {
+        x = trigger.left - surface.width - gap;
+      } else {
+        x = trigger.right + gap;
+      }
+
+      y = trigger.top + trigger.height / 2 - surface.height / 2;
+    } else {
+      x = trigger.left + trigger.width / 2 - surface.width / 2;
+      y = trigger.top - surface.height - gap;
+    }
+
+    if (x + surface.width > vw - pad) {
+      x = vw - pad - surface.width;
+    }
+
+    if (x < pad) {
+      x = pad;
+    }
+
+    if (y + surface.height > vh - pad) {
+      y = vh - pad - surface.height;
+    }
+
+    if (y < pad) {
+      y = pad;
+    }
+
+    surfaceStyle = `left: ${x}px; top: ${y}px;`;
   }
 
   function clearTimers(): void {
@@ -74,6 +146,7 @@
   }}
 >
   <span
+    bind:this={triggerElement}
     class="hover-card__trigger"
     role="button"
     tabindex="0"
@@ -85,12 +158,13 @@
 
   {#if isOpen}
     <span
+      bind:this={surfaceElement}
       id={hoverCardId}
       class="hover-card__surface"
-      data-placement={placement}
       role="dialog"
       tabindex="-1"
       aria-label={ariaLabel ?? undefined}
+      style={surfaceStyle}
       on:mouseenter={clearTimers}
       on:mouseleave={scheduleClose}
     >
@@ -115,7 +189,7 @@
   }
 
   .hover-card__surface {
-    position: absolute;
+    position: fixed;
     z-index: var(--pug-overlay-z-menu);
     min-width: 14rem;
     max-width: min(22rem, 90vw);
@@ -125,41 +199,5 @@
     background: color-mix(in srgb, var(--pug-color-background-elevated) 98%, var(--pug-color-background-panel));
     --pug-surface: color-mix(in srgb, var(--pug-color-background-elevated) 98%, var(--pug-color-background-panel));
     box-shadow: var(--pug-elevation-overlay);
-  }
-
-  .hover-card__surface[data-placement^="top"] {
-    bottom: calc(100% + 0.5rem);
-    left: 50%;
-    transform: translateX(-50%);
-  }
-
-  .hover-card__surface[data-placement^="bottom"] {
-    top: calc(100% + 0.5rem);
-    left: 50%;
-    transform: translateX(-50%);
-  }
-
-  .hover-card__surface[data-placement^="left"] {
-    top: 50%;
-    right: calc(100% + 0.5rem);
-    transform: translateY(-50%);
-  }
-
-  .hover-card__surface[data-placement^="right"] {
-    top: 50%;
-    left: calc(100% + 0.5rem);
-    transform: translateY(-50%);
-  }
-
-  .hover-card__surface[data-placement$="start"] {
-    left: 0;
-    right: auto;
-    transform: none;
-  }
-
-  .hover-card__surface[data-placement$="end"] {
-    right: 0;
-    left: auto;
-    transform: none;
   }
 </style>

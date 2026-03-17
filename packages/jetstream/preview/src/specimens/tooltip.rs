@@ -35,7 +35,7 @@ pub fn render(tree: &mut UiTree, theme: &dyn ThemeProvider) -> UiNodeId {
         }, UiStyle {
             height: Sizing::Fixed(28.0),
             padding: Edges { top: 0.0, right: 12.0, bottom: 0.0, left: 12.0 },
-            corner_radius: 6.0, background: Some(bg_surface),
+            corner_radii: [6.0; 4], background: Some(bg_surface),
             border_color: Some(border), border_width: 1.0,
             text_color: Some(text_primary), text_size: Some(11.0),
             align: Align::Center, justify: Justify::Center,
@@ -82,7 +82,7 @@ pub fn render(tree: &mut UiTree, theme: &dyn ThemeProvider) -> UiNodeId {
             direction: Direction::Column,
             padding: Edges { top: 6.0, right: 10.0, bottom: 6.0, left: 10.0 },
             gap: 2.0,
-            corner_radius: 6.0,
+            corner_radii: [6.0; 4],
             background: Some(tooltip_bg),
             ..UiStyle::default()
         });
@@ -113,7 +113,7 @@ fn section_label(tree: &mut UiTree, parent: UiNodeId, text: &str, color: glam::V
 fn tooltip_bubble(tree: &mut UiTree, parent: UiNodeId, text: &str, bg: glam::Vec4, fg: glam::Vec4) {
     let tip = tree.create(Widget::Label { text: text.to_string() }, UiStyle {
         padding: Edges { top: 4.0, right: 8.0, bottom: 4.0, left: 8.0 },
-        corner_radius: 4.0,
+        corner_radii: [4.0; 4],
         background: Some(bg),
         text_color: Some(fg),
         text_size: Some(11.0),

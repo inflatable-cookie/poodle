@@ -160,7 +160,7 @@ fn alert_card(tree: &mut UiTree, width: f32, bg: glam::Vec4, border: glam::Vec4)
         background: Some(bg),
         border_color: Some(border),
         border_width: 1.0,
-        corner_radius: 12.0,
+        corner_radii: [12.0; 4],
         ..UiStyle::default()
     })
 }
@@ -171,7 +171,7 @@ fn btn(tree: &mut UiTree, parent: UiNodeId, text: &str, bg: glam::Vec4, border: 
     }, UiStyle {
         height: Sizing::Fixed(32.0),
         padding: Edges { top: 0.0, right: 16.0, bottom: 0.0, left: 16.0 },
-        corner_radius: 6.0, background: Some(bg),
+        corner_radii: [6.0; 4], background: Some(bg),
         border_color: border, border_width: if border.is_some() { 1.0 } else { 0.0 },
         text_color: Some(fg), text_size: Some(12.0),
         align: Align::Center, justify: Justify::Center,

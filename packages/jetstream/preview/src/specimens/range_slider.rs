@@ -92,7 +92,7 @@ fn range_track(
     let track = tree.create(Widget::Panel, UiStyle {
         width: Sizing::Fixed(width),
         height: Sizing::Fixed(4.0),
-        corner_radius: 2.0,
+        corner_radii: [2.0; 4],
         background: Some(border),
         direction: Direction::Row,
         ..UiStyle::default()
@@ -116,7 +116,7 @@ fn range_track(
         let fill = tree.create(Widget::Panel, UiStyle {
             width: Sizing::Fixed(fill_w),
             height: Sizing::Fixed(4.0),
-            corner_radius: 2.0,
+            corner_radii: [2.0; 4],
             background: Some(accent),
             ..UiStyle::default()
         });

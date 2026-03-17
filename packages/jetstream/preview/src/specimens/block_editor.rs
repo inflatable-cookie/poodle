@@ -27,7 +27,7 @@ pub fn render(tree: &mut UiTree, theme: &dyn ThemeProvider) -> UiNodeId {
             width: Sizing::Fixed(420.0), gap: 2.0,
             background: Some(bg_surface),
             border_color: Some(border), border_width: 1.0,
-            corner_radius: 8.0,
+            corner_radii: [8.0; 4],
             padding: Edges::all(12.0),
             ..UiStyle::default()
         });
@@ -62,7 +62,7 @@ pub fn render(tree: &mut UiTree, theme: &dyn ThemeProvider) -> UiNodeId {
         direction: Direction::Row,
         padding: Edges::all(10.0), gap: 6.0,
         background: Some(theme_bridge::tint(accent, 0.08)),
-        corner_radius: 6.0,
+        corner_radii: [6.0; 4],
         ..UiStyle::default()
     });
     tree.add_child(root, note);
@@ -83,7 +83,7 @@ fn block_item(tree: &mut UiTree, parent: UiNodeId, icon: &str, content: &str, bg
         padding: Edges::all(10.0),
         background: Some(bg),
         border_color: Some(border), border_width: 1.0,
-        corner_radius: 6.0, align: Align::Start,
+        corner_radii: [6.0; 4], align: Align::Start,
         ..UiStyle::default()
     });
     tree.add_child(parent, block);

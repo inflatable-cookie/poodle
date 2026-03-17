@@ -33,7 +33,7 @@ pub fn render(tree: &mut UiTree, theme: &dyn ThemeProvider) -> UiNodeId {
             background: Some(bg_surface),
             border_color: Some(border),
             border_width: 1.0,
-            corner_radius: 8.0,
+            corner_radii: [8.0; 4],
             ..UiStyle::default()
         });
         tree.add_child(root, nav);
@@ -70,7 +70,7 @@ pub fn render(tree: &mut UiTree, theme: &dyn ThemeProvider) -> UiNodeId {
             background: Some(bg_surface),
             border_color: Some(border),
             border_width: 1.0,
-            corner_radius: 8.0,
+            corner_radii: [8.0; 4],
             ..UiStyle::default()
         });
         tree.add_child(col, nav);
@@ -94,7 +94,7 @@ pub fn render(tree: &mut UiTree, theme: &dyn ThemeProvider) -> UiNodeId {
             background: Some(bg_elevated),
             border_color: Some(border),
             border_width: 1.0,
-            corner_radius: 8.0,
+            corner_radii: [8.0; 4],
             ..UiStyle::default()
         });
         tree.add_child(dropdown_offset, dropdown);
@@ -134,7 +134,7 @@ pub fn render(tree: &mut UiTree, theme: &dyn ThemeProvider) -> UiNodeId {
             background: Some(bg_surface),
             border_color: Some(border),
             border_width: 1.0,
-            corner_radius: 8.0,
+            corner_radii: [8.0; 4],
             ..UiStyle::default()
         });
         tree.add_child(root, nav);
@@ -149,7 +149,7 @@ pub fn render(tree: &mut UiTree, theme: &dyn ThemeProvider) -> UiNodeId {
             }, UiStyle {
                 width: Sizing::Grow(1.0), height: Sizing::Fixed(32.0),
                 padding: Edges { top: 0.0, right: 10.0, bottom: 0.0, left: 10.0 },
-                corner_radius: 6.0, background: bg,
+                corner_radii: [6.0; 4], background: bg,
                 text_color: Some(color), text_size: Some(12.0),
                 align: Align::Center, focusable: true,
                 ..UiStyle::default()
@@ -174,7 +174,7 @@ fn nav_item(tree: &mut UiTree, parent: UiNodeId, label: &str, color: glam::Vec4,
     }, UiStyle {
         height: Sizing::Fixed(30.0),
         padding: Edges { top: 0.0, right: 10.0, bottom: 0.0, left: 10.0 },
-        corner_radius: 4.0, text_color: Some(color),
+        corner_radii: [4.0; 4], text_color: Some(color),
         text_size: Some(12.0), align: Align::Center,
         justify: Justify::Center, focusable: true,
         ..UiStyle::default()

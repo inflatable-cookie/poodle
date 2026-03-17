@@ -38,7 +38,7 @@ pub fn render(tree: &mut UiTree, theme: &dyn ThemeProvider) -> UiNodeId {
         background: Some(bg_surface),
         border_color: Some(border),
         border_width: 1.0,
-        corner_radius: 6.0,
+        corner_radii: [6.0; 4],
         align: Align::Center,
         ..UiStyle::default()
     });
@@ -49,7 +49,7 @@ pub fn render(tree: &mut UiTree, theme: &dyn ThemeProvider) -> UiNodeId {
         let pill = tree.create(Widget::Panel, UiStyle {
             padding: Edges { top: 4.0, right: 10.0, bottom: 4.0, left: 10.0 },
             background: Some(theme_bridge::tint(accent, 0.15)),
-            corner_radius: 12.0,
+            corner_radii: [12.0; 4],
             align: Align::Center,
             ..UiStyle::default()
         });
@@ -92,7 +92,7 @@ pub fn render(tree: &mut UiTree, theme: &dyn ThemeProvider) -> UiNodeId {
             background: Some(bg_surface),
             border_color: Some(border),
             border_width: 1.0,
-            corner_radius: 6.0,
+            corner_radii: [6.0; 4],
             ..UiStyle::default()
         });
         tree.add_child(root, row);
@@ -102,7 +102,7 @@ pub fn render(tree: &mut UiTree, theme: &dyn ThemeProvider) -> UiNodeId {
                 width: Sizing::Fixed(40.0),
                 height: Sizing::Fixed(24.0),
                 background: Some(theme_bridge::tint(accent, 0.20)),
-                corner_radius: 4.0,
+                corner_radii: [4.0; 4],
                 ..UiStyle::default()
             });
             tree.add_child(row, block);

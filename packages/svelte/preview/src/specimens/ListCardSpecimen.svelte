@@ -130,6 +130,55 @@
   </div>
 
   <div class="specimen__group">
+    <Eyebrow>Solid fill with accent colors</Eyebrow>
+    <div class="specimen__stack">
+      <ListCard
+        title="Design tokens"
+        subtitle="Foundation layer"
+        leadingShape="rounded-square"
+        leadingFill="solid"
+        accentColor="#6366f1"
+        isInteractive
+        on:click={() => (lastClick = "Design tokens")}
+      >
+        <svelte:fragment slot="leading"><Icon name="layers" /></svelte:fragment>
+      </ListCard>
+      <ListCard
+        title="Components"
+        subtitle="Primitives and composites"
+        leadingShape="rounded-square"
+        leadingFill="solid"
+        accentColor="#ec4899"
+        isInteractive
+        on:click={() => (lastClick = "Components")}
+      >
+        <svelte:fragment slot="leading"><Icon name="grid" /></svelte:fragment>
+      </ListCard>
+      <ListCard
+        title="Documentation"
+        subtitle="Contracts and guides"
+        leadingShape="rounded-square"
+        leadingFill="solid"
+        accentColor="#14b8a6"
+        isInteractive
+        on:click={() => (lastClick = "Documentation")}
+      >
+        <svelte:fragment slot="leading"><Icon name="file-text" /></svelte:fragment>
+      </ListCard>
+      <ListCard
+        title="Default accent (no custom color)"
+        subtitle="Uses theme accent"
+        leadingShape="rounded-square"
+        leadingFill="solid"
+        isInteractive
+        on:click={() => (lastClick = "Default accent")}
+      >
+        <svelte:fragment slot="leading"><Icon name="folder" /></svelte:fragment>
+      </ListCard>
+    </div>
+  </div>
+
+  <div class="specimen__group">
     <Eyebrow>With context menu</Eyebrow>
     <div class="specimen__stack">
       <ContextMenu
@@ -152,6 +201,72 @@
           <svelte:fragment slot="leading"><Icon name="file-text" /></svelte:fragment>
         </ListCard>
       </ContextMenu>
+    </div>
+  </div>
+
+  <div class="specimen__group">
+    <Eyebrow>Not live (dashed border, interactive)</Eyebrow>
+    <div class="specimen__stack">
+      <ListCard
+        title="Unpublished draft"
+        subtitle="Created yesterday · not yet deployed"
+        meta="Draft"
+        isInteractive
+        isNotLive
+        on:click={() => (lastClick = "Unpublished draft")}
+      >
+        <svelte:fragment slot="leading"><Icon name="file-text" /></svelte:fragment>
+      </ListCard>
+      <ListCard
+        title="Staging environment"
+        subtitle="Pending approval"
+        isInteractive
+        isNotLive
+        leadingShape="rounded-square"
+      >
+        <svelte:fragment slot="leading"><Icon name="layers" /></svelte:fragment>
+        <svelte:fragment slot="badges">
+          <Pill tone="caution" size="xs">Pending</Pill>
+        </svelte:fragment>
+      </ListCard>
+    </div>
+  </div>
+
+  <div class="specimen__group">
+    <Eyebrow>Corner sash badges</Eyebrow>
+    <div class="specimen__stack">
+      <ListCard
+        title="Free tier plan"
+        subtitle="No credit card required"
+        sash="Free"
+        isInteractive
+        on:click={() => (lastClick = "Free tier plan")}
+      >
+        <svelte:fragment slot="leading"><Icon name="layers" /></svelte:fragment>
+      </ListCard>
+      <ListCard
+        title="Premium integration"
+        subtitle="Unlocks advanced features"
+        sash="New"
+        sashColor="#6366f1"
+        leadingShape="rounded-square"
+        leadingFill="solid"
+        accentColor="#6366f1"
+        isInteractive
+        on:click={() => (lastClick = "Premium integration")}
+      >
+        <svelte:fragment slot="leading"><Icon name="grid" /></svelte:fragment>
+      </ListCard>
+      <ListCard
+        title="Legacy connector"
+        subtitle="Deprecated — migrate by Q2"
+        sash="EOL"
+        sashColor="#ef4444"
+        isInteractive
+        on:click={() => (lastClick = "Legacy connector")}
+      >
+        <svelte:fragment slot="leading"><Icon name="file-text" /></svelte:fragment>
+      </ListCard>
     </div>
   </div>
 

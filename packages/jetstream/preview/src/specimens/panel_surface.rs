@@ -23,7 +23,7 @@ pub fn render(tree: &mut UiTree, theme: &dyn ThemeProvider) -> UiNodeId {
             direction: Direction::Column,
             width: Sizing::Fixed(300.0), height: Sizing::Fixed(220.0),
             background: Some(bg_surface), border_color: Some(border), border_width: 1.0,
-            corner_radius: 8.0,
+            corner_radii: [8.0; 4],
             ..UiStyle::default()
         });
         tree.add_child(root, panel);
@@ -48,7 +48,7 @@ pub fn render(tree: &mut UiTree, theme: &dyn ThemeProvider) -> UiNodeId {
             label: "\u{25BE}".to_string(), pressed: false, hovered: false,
         }, UiStyle {
             width: Sizing::Fixed(24.0), height: Sizing::Fixed(24.0),
-            corner_radius: 4.0, text_color: Some(text_secondary), text_size: Some(12.0),
+            corner_radii: [4.0; 4], text_color: Some(text_secondary), text_size: Some(12.0),
             align: Align::Center, justify: Justify::Center, focusable: true,
             ..UiStyle::default()
         });
@@ -99,7 +99,7 @@ pub fn render(tree: &mut UiTree, theme: &dyn ThemeProvider) -> UiNodeId {
             direction: Direction::Column,
             width: Sizing::Fixed(300.0), height: Sizing::Fixed(160.0),
             background: Some(bg_surface), border_color: Some(border), border_width: 1.0,
-            corner_radius: 8.0,
+            corner_radii: [8.0; 4],
             ..UiStyle::default()
         });
         tree.add_child(root, panel);

@@ -51,7 +51,7 @@ pub fn render(tree: &mut UiTree, theme: &dyn ThemeProvider) -> UiNodeId {
             let dot = tree.create(Widget::Panel, UiStyle {
                 width: Sizing::Fixed(size),
                 height: Sizing::Fixed(size),
-                corner_radius: size / 2.0,
+                corner_radii: [size / 2.0; 4],
                 background: Some(success),
                 ..UiStyle::default()
             });
@@ -81,7 +81,7 @@ pub fn render(tree: &mut UiTree, theme: &dyn ThemeProvider) -> UiNodeId {
             let dot = tree.create(Widget::Panel, UiStyle {
                 width: Sizing::Fixed(8.0),
                 height: Sizing::Fixed(8.0),
-                corner_radius: 4.0,
+                corner_radii: [4.0; 4],
                 background: Some(color),
                 ..UiStyle::default()
             });
@@ -113,7 +113,7 @@ fn status_row(tree: &mut UiTree, parent: UiNodeId, text: &str, dot_color: glam::
     let dot = tree.create(Widget::Panel, UiStyle {
         width: Sizing::Fixed(8.0),
         height: Sizing::Fixed(8.0),
-        corner_radius: 4.0,
+        corner_radii: [4.0; 4],
         background: Some(dot_color),
         ..UiStyle::default()
     });

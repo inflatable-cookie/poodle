@@ -31,7 +31,7 @@ pub fn render(tree: &mut UiTree, theme: &dyn ThemeProvider) -> UiNodeId {
             background: Some(bg_elevated),
             border_color: Some(border),
             border_width: 1.0,
-            corner_radius: 8.0,
+            corner_radii: [8.0; 4],
             ..UiStyle::default()
         });
         tree.add_child(root, card);
@@ -56,14 +56,14 @@ pub fn render(tree: &mut UiTree, theme: &dyn ThemeProvider) -> UiNodeId {
             background: Some(bg_elevated),
             border_color: Some(border),
             border_width: 1.0,
-            corner_radius: 8.0,
+            corner_radii: [8.0; 4],
             ..UiStyle::default()
         });
         tree.add_child(root, card);
 
         let img = tree.create(Widget::Panel, UiStyle {
             width: Sizing::Grow(1.0), height: Sizing::Fixed(120.0),
-            background: Some(border), corner_radius: 8.0,
+            background: Some(border), corner_radii: [8.0; 4],
             ..UiStyle::default()
         });
         tree.add_child(card, img);
@@ -93,7 +93,7 @@ pub fn render(tree: &mut UiTree, theme: &dyn ThemeProvider) -> UiNodeId {
             direction: Direction::Column,
             width: Sizing::Fixed(280.0),
             background: Some(bg_elevated),
-            border_color: Some(border), border_width: 1.0, corner_radius: 8.0,
+            border_color: Some(border), border_width: 1.0, corner_radii: [8.0; 4],
             ..UiStyle::default()
         });
         tree.add_child(root, card);
@@ -135,7 +135,7 @@ pub fn render(tree: &mut UiTree, theme: &dyn ThemeProvider) -> UiNodeId {
         }, UiStyle {
             height: Sizing::Fixed(28.0),
             padding: Edges { top: 0.0, right: 12.0, bottom: 0.0, left: 12.0 },
-            corner_radius: 6.0, background: Some(accent),
+            corner_radii: [6.0; 4], background: Some(accent),
             text_color: Some(text_inverse), text_size: Some(11.0),
             align: Align::Center, justify: Justify::Center,
             focusable: true, ..UiStyle::default()

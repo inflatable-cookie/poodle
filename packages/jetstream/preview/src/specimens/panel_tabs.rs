@@ -24,7 +24,7 @@ pub fn render(tree: &mut UiTree, theme: &dyn ThemeProvider) -> UiNodeId {
             direction: Direction::Column,
             width: Sizing::Fixed(340.0), height: Sizing::Fixed(240.0),
             background: Some(bg_surface), border_color: Some(border), border_width: 1.0,
-            corner_radius: 8.0,
+            corner_radii: [8.0; 4],
             ..UiStyle::default()
         });
         tree.add_child(root, panel);
@@ -59,7 +59,7 @@ pub fn render(tree: &mut UiTree, theme: &dyn ThemeProvider) -> UiNodeId {
             if is_active {
                 let underline = tree.create(Widget::Panel, UiStyle {
                     width: Sizing::Grow(1.0), height: Sizing::Fixed(2.0),
-                    background: Some(accent), corner_radius: 1.0,
+                    background: Some(accent), corner_radii: [1.0; 4],
                     ..UiStyle::default()
                 });
                 tree.add_child(tab, underline);
@@ -100,7 +100,7 @@ pub fn render(tree: &mut UiTree, theme: &dyn ThemeProvider) -> UiNodeId {
                 height: Sizing::Fixed(22.0),
                 padding: Edges { top: 0.0, right: 8.0, bottom: 0.0, left: 8.0 },
                 background: Some(bg_elevated), border_color: Some(border), border_width: 1.0,
-                corner_radius: 4.0, align: Align::Center,
+                corner_radii: [4.0; 4], align: Align::Center,
                 ..UiStyle::default()
             });
             tree.add_child(row, v_bg);

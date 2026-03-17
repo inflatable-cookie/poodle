@@ -13,7 +13,7 @@ Updated: 2026-03-15
   and surface hover continuity, controlled/uncontrolled open state, placement
   positioning, dialog semantics on surface, keyboard dismissal
 - Out of scope: click-to-open (use Popover), nested hover cards, arrow
-  indicators, viewport collision detection, command menus
+  indicators, command menus
 
 ## 2. Anatomy
 
@@ -123,17 +123,24 @@ OverlayPlacement:
 
 - Root: `display: inline-flex`, `position: relative`
 - Trigger: `display: inline-flex`
-- Surface: absolutely positioned relative to root, placement-dependent offsets
+- Surface: `position: fixed`, positioned via JS after render
 - Surface min-width: `14rem`, max-width: `min(22rem, 90vw)`
 
 ### Placement Positioning
 
-- `top`: bottom: calc(100% + 0.5rem), left: 50%, transform: translateX(-50%)
-- `bottom`: top: calc(100% + 0.5rem), left: 50%, transform: translateX(-50%)
-- `left`: right: calc(100% + 0.5rem), top: 50%, transform: translateY(-50%)
-- `right`: left: calc(100% + 0.5rem), top: 50%, transform: translateY(-50%)
-- `*-start` suffix: left: 0, right: auto, transform: none
-- `*-end` suffix: right: 0, left: auto, transform: none
+Position is calculated in JS using the trigger's viewport coordinates:
+- `top`: centered above trigger with 8px gap
+- `bottom`: centered below trigger with 8px gap
+- `left`: centered left of trigger with 8px gap
+- `right`: centered right of trigger with 8px gap
+- `*-start` suffix: aligned to trigger's start edge
+- `*-end` suffix: aligned to trigger's end edge
+
+### Viewport Clamping
+
+After initial placement, the surface is clamped to stay within 8px of all
+viewport edges. This prevents cards from being clipped when triggers are near
+screen boundaries or inside scrollable containers.
 
 ### Composition
 
@@ -168,7 +175,7 @@ OverlayPlacement:
 
 | Property | Value |
 |----------|-------|
-| `position` | `absolute` |
+| `position` | `fixed` |
 | `z-index` | `var(--pug-overlay-z-menu)` |
 | `min-width` | `14rem` |
 | `max-width` | `min(22rem, 90vw)` |
@@ -179,71 +186,24 @@ OverlayPlacement:
 | `--pug-surface` | `color-mix(in srgb, var(--pug-color-background-elevated) 98%, var(--pug-color-background-panel))` |
 | `box-shadow` | `var(--pug-elevation-overlay)` |
 
-### Surface — Placement `top`
+### Surface Positioning
 
-| Property | Value |
-|----------|-------|
-| `bottom` | `calc(100% + 0.5rem)` |
-| `left` | `50%` |
-| `transform` | `translateX(-50%)` |
-
-### Surface — Placement `bottom`
-
-| Property | Value |
-|----------|-------|
-| `top` | `calc(100% + 0.5rem)` |
-| `left` | `50%` |
-| `transform` | `translateX(-50%)` |
-
-### Surface — Placement `left`
-
-| Property | Value |
-|----------|-------|
-| `right` | `calc(100% + 0.5rem)` |
-| `top` | `50%` |
-| `transform` | `translateY(-50%)` |
-
-### Surface — Placement `right`
-
-| Property | Value |
-|----------|-------|
-| `left` | `calc(100% + 0.5rem)` |
-| `top` | `50%` |
-| `transform` | `translateY(-50%)` |
-
-### Surface — Placement `*-start` suffix
-
-| Property | Value |
-|----------|-------|
-| `left` | `0` |
-| `right` | `auto` |
-| `transform` | `none` |
-
-### Surface — Placement `*-end` suffix
-
-| Property | Value |
-|----------|-------|
-| `right` | `0` |
-| `left` | `auto` |
-| `transform` | `none` |
-
-### Data Attributes
-
-| Attribute | Source |
-|-----------|--------|
-| `data-placement` | resolved placement value |
+Placement offsets (8px gap) and viewport clamping (8px padding) are computed
+in JS after render. The `left` and `top` properties are set via inline style.
+No `data-placement` attribute is emitted — positioning is entirely JS-driven.
 
 ## 9. Svelte Notes
 
 - Root and trigger and surface are `<span>` elements (not `<div>`) for inline context
-- Uses `data-placement` data attribute for positioning styles
+- Surface uses `position: fixed` with JS-computed coordinates for viewport clamping
+- After open, surface renders hidden, measures its bounding rect, then positions with clamping
 - Module-level `nextHoverCardId` counter for unique IDs across instances
 - Separate `openTimer` and `closeTimer` cleared via `clearTimers()` helper
 - Timers cleared on `onDestroy`
 - Surface mouseenter cancels close timer; mouseleave schedules close
 - Escape keydown on trigger or surface calls `clearTimers()` then `setOpen(false)`
 - Slots: named `trigger` slot, default slot for surface content
-- Surface uses same placement rules as Tooltip (0.5rem offset with centering)
+- Surface uses fixed positioning with 8px gap from trigger and 8px viewport padding
 - Max-width is 22rem (narrower than Popover's 24rem)
 
 ## 10. GPUI Notes
@@ -306,7 +266,7 @@ OverlayPlacement:
 - approvers: pending
 - downstream adopters: identity previews, asset summaries, compact profile
   surfaces, data table cells, link previews
-- future follow-up: viewport collision detection, arrow indicator, animation,
-  keep click-owned or action surfaces in Popover/Menu
+- future follow-up: arrow indicator, animation, keep click-owned or action
+  surfaces in Popover/Menu
 
 > **Surface elevation**: HoverCard is a surface creator — see [surface-elevation.md](./surface-elevation.md).

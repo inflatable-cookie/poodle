@@ -92,7 +92,7 @@ pub fn render(tree: &mut UiTree, theme: &dyn ThemeProvider) -> UiNodeId {
         let bar = tree.create(Widget::Panel, UiStyle {
             width: Sizing::Fixed(120.0), height: Sizing::Fixed(4.0),
             background: Some(theme_bridge::tint(accent, 0.3)),
-            corner_radius: 2.0, ..UiStyle::default()
+            corner_radii: [2.0; 4], ..UiStyle::default()
         });
         tree.add_child(loading, bar);
     }
@@ -151,7 +151,7 @@ pub fn render(tree: &mut UiTree, theme: &dyn ThemeProvider) -> UiNodeId {
         }, UiStyle {
             height: Sizing::Fixed(28.0),
             padding: Edges { top: 0.0, right: 12.0, bottom: 0.0, left: 12.0 },
-            corner_radius: 6.0, border_color: Some(border), border_width: 1.0,
+            corner_radii: [6.0; 4], border_color: Some(border), border_width: 1.0,
             text_color: Some(text_primary), text_size: Some(11.0),
             align: Align::Center, justify: Justify::Center,
             focusable: true, ..UiStyle::default()
@@ -168,7 +168,7 @@ fn list_shell_frame(tree: &mut UiTree, bg: glam::Vec4, border: glam::Vec4) -> Ui
         width: Sizing::Fixed(360.0),
         background: Some(bg),
         border_color: Some(border), border_width: 1.0,
-        corner_radius: 8.0,
+        corner_radii: [8.0; 4],
         ..UiStyle::default()
     })
 }

@@ -49,7 +49,7 @@ pub fn render(tree: &mut UiTree, theme: &dyn ThemeProvider) -> UiNodeId {
             let card = tree.create(Widget::Panel, UiStyle {
                 width: Sizing::Fixed(64.0), height: Sizing::Fixed(64.0),
                 background: Some(theme_bridge::tint(border, 0.3)),
-                corner_radius: 6.0,
+                corner_radii: [6.0; 4],
                 align: Align::Center, justify: Justify::Center,
                 ..UiStyle::default()
             });
@@ -86,7 +86,7 @@ fn thumb(tree: &mut UiTree, parent: UiNodeId, name: &str, w: f32, h: f32, border
     let img = tree.create(Widget::Panel, UiStyle {
         width: Sizing::Fixed(w), height: Sizing::Fixed(h),
         background: Some(theme_bridge::tint(border, 0.3)),
-        corner_radius: 6.0,
+        corner_radii: [6.0; 4],
         ..UiStyle::default()
     });
     tree.add_child(card, img);

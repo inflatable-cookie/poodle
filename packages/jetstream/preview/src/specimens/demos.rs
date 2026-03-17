@@ -50,7 +50,7 @@ fn render_overview_shell(tree: &mut UiTree, theme: &dyn ThemeProvider) -> UiNode
             width: Sizing::Grow(1.0), padding: Edges::all(10.0),
             background: Some(theme_bridge::tint(accent, 0.08)),
             border_color: Some(theme_bridge::tint(accent, 0.3)),
-            border_width: 1.0, corner_radius: 6.0, align: Align::Center,
+            border_width: 1.0, corner_radii: [6.0; 4], align: Align::Center,
             ..UiStyle::default()
         });
         tree.add_child(root, banner);
@@ -94,7 +94,7 @@ fn render_overview_shell(tree: &mut UiTree, theme: &dyn ThemeProvider) -> UiNode
                 direction: Direction::Column, gap: 4.0,
                 width: Sizing::Grow(1.0), padding: Edges::all(12.0),
                 background: Some(bg_elevated), border_color: Some(border), border_width: 1.0,
-                corner_radius: 8.0,
+                corner_radii: [8.0; 4],
                 ..UiStyle::default()
             });
             tree.add_child(row, tile);
@@ -125,7 +125,7 @@ fn render_overview_shell(tree: &mut UiTree, theme: &dyn ThemeProvider) -> UiNode
 
         let bar = tree.create(Widget::ProgressBar { value: 0.75 }, UiStyle {
             width: Sizing::Grow(1.0), height: Sizing::Fixed(6.0),
-            corner_radius: 3.0, ..UiStyle::default()
+            corner_radii: [3.0; 4], ..UiStyle::default()
         });
         tree.add_child(progress_col, bar);
     }
@@ -174,7 +174,7 @@ fn render_form_screen(tree: &mut UiTree, theme: &dyn ThemeProvider) -> UiNodeId 
             width: Sizing::Grow(1.0), height: Sizing::Fixed(32.0),
             padding: Edges { top: 0.0, right: 10.0, bottom: 0.0, left: 10.0 },
             background: Some(bg_canvas), border_color: Some(border), border_width: 1.0,
-            corner_radius: 6.0, text_color: Some(text_secondary), text_size: Some(12.0),
+            corner_radii: [6.0; 4], text_color: Some(text_secondary), text_size: Some(12.0),
             align: Align::Center,
             ..UiStyle::default()
         });
@@ -188,7 +188,7 @@ fn render_form_screen(tree: &mut UiTree, theme: &dyn ThemeProvider) -> UiNodeId 
             width: Sizing::Grow(1.0), padding: Edges::all(10.0),
             background: Some(theme_bridge::tint(danger, 0.08)),
             border_color: Some(theme_bridge::tint(danger, 0.3)),
-            border_width: 1.0, corner_radius: 6.0, align: Align::Center,
+            border_width: 1.0, corner_radii: [6.0; 4], align: Align::Center,
             ..UiStyle::default()
         });
         tree.add_child(root, banner);
@@ -218,7 +218,7 @@ fn render_form_screen(tree: &mut UiTree, theme: &dyn ThemeProvider) -> UiNodeId 
         }, UiStyle {
             height: Sizing::Fixed(32.0),
             padding: Edges { top: 0.0, right: 12.0, bottom: 0.0, left: 12.0 },
-            corner_radius: 6.0, border_color: Some(border), border_width: 1.0,
+            corner_radii: [6.0; 4], border_color: Some(border), border_width: 1.0,
             text_color: Some(text_primary), text_size: Some(12.0),
             align: Align::Center, justify: Justify::Center,
             ..UiStyle::default()
@@ -230,7 +230,7 @@ fn render_form_screen(tree: &mut UiTree, theme: &dyn ThemeProvider) -> UiNodeId 
         }, UiStyle {
             height: Sizing::Fixed(32.0),
             padding: Edges { top: 0.0, right: 12.0, bottom: 0.0, left: 12.0 },
-            corner_radius: 6.0, background: Some(accent),
+            corner_radii: [6.0; 4], background: Some(accent),
             text_color: Some(text_inverse), text_size: Some(12.0),
             align: Align::Center, justify: Justify::Center,
             ..UiStyle::default()
@@ -262,7 +262,7 @@ fn render_browse_screen(tree: &mut UiTree, theme: &dyn ThemeProvider) -> UiNodeI
             width: Sizing::Grow(1.0), height: Sizing::Fixed(32.0),
             padding: Edges { top: 0.0, right: 10.0, bottom: 0.0, left: 10.0 },
             background: Some(bg_canvas), border_color: Some(border), border_width: 1.0,
-            corner_radius: 6.0, align: Align::Center,
+            corner_radii: [6.0; 4], align: Align::Center,
             ..UiStyle::default()
         });
         tree.add_child(root, search);
@@ -284,7 +284,7 @@ fn render_browse_screen(tree: &mut UiTree, theme: &dyn ThemeProvider) -> UiNodeI
             direction: Direction::Column,
             width: Sizing::Grow(1.0),
             background: Some(bg_elevated), border_color: Some(border), border_width: 1.0,
-            corner_radius: 8.0,
+            corner_radii: [8.0; 4],
             ..UiStyle::default()
         });
         tree.add_child(root, table);
@@ -403,7 +403,7 @@ fn render_detail_screen(tree: &mut UiTree, theme: &dyn ThemeProvider) -> UiNodeI
             direction: Direction::Column, gap: 6.0,
             width: Sizing::Grow(1.0), padding: Edges::all(12.0),
             background: Some(bg_elevated), border_color: Some(border), border_width: 1.0,
-            corner_radius: 8.0,
+            corner_radii: [8.0; 4],
             ..UiStyle::default()
         });
         tree.add_child(root, overview);
@@ -435,7 +435,7 @@ fn render_detail_screen(tree: &mut UiTree, theme: &dyn ThemeProvider) -> UiNodeI
             let badge = tree.create(Widget::Label { text: badge_text.to_string() }, UiStyle {
                 height: Sizing::Fixed(20.0),
                 padding: Edges { top: 0.0, right: 8.0, bottom: 0.0, left: 8.0 },
-                background: Some(bg), corner_radius: 10.0, align: Align::Center,
+                background: Some(bg), corner_radii: [10.0; 4], align: Align::Center,
                 text_color: Some(if is_accent { accent } else { text_secondary }),
                 text_size: Some(10.0),
                 ..UiStyle::default()
@@ -455,7 +455,7 @@ fn render_detail_screen(tree: &mut UiTree, theme: &dyn ThemeProvider) -> UiNodeI
             direction: Direction::Column, gap: 6.0,
             width: Sizing::Grow(1.0), padding: Edges::all(12.0),
             background: Some(bg_elevated), border_color: Some(border), border_width: 1.0,
-            corner_radius: 8.0,
+            corner_radii: [8.0; 4],
             ..UiStyle::default()
         });
         tree.add_child(root, media);
@@ -535,7 +535,7 @@ fn render_picker_screen(tree: &mut UiTree, theme: &dyn ThemeProvider) -> UiNodeI
         }, UiStyle {
             height: Sizing::Fixed(32.0),
             padding: Edges { top: 0.0, right: 12.0, bottom: 0.0, left: 12.0 },
-            corner_radius: 6.0, background: Some(accent),
+            corner_radii: [6.0; 4], background: Some(accent),
             text_color: Some(text_inverse), text_size: Some(12.0),
             align: Align::Center, justify: Justify::Center,
             ..UiStyle::default()

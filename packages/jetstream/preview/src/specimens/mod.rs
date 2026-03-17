@@ -335,7 +335,7 @@ pub fn build_specimen_page(
         background: Some(bg_elevated),
         border_color: Some(border),
         border_width: 1.0,
-        corner_radius: 8.0,
+        corner_radii: [8.0; 4],
         ..UiStyle::default()
     });
     tree.add_child(page, hero);
@@ -354,7 +354,7 @@ pub fn build_specimen_page(
         text: entry.tier.label().to_string(),
     }, UiStyle {
         padding: Edges { top: 2.0, right: 8.0, bottom: 2.0, left: 8.0 },
-        corner_radius: 4.0,
+        corner_radii: [4.0; 4],
         background: Some(theme_bridge::tint(accent, 0.20)),
         text_color: Some(accent),
         text_size: Some(10.0),
@@ -436,7 +436,7 @@ pub fn build_specimen_card(tree: &mut UiTree, theme: &dyn ThemeProvider) -> UiNo
         background: Some(bg_elevated),
         border_color: Some(border),
         border_width: 1.0,
-        corner_radius: 8.0,
+        corner_radii: [8.0; 4],
         ..UiStyle::default()
     })
 }
@@ -527,7 +527,7 @@ pub fn build_catalogue_landing(
                 background: Some(bg_elevated),
                 border_color: Some(border),
                 border_width: 1.0,
-                corner_radius: 6.0,
+                corner_radii: [6.0; 4],
                 ..UiStyle::default()
             });
             tree.add_child(grid, row);

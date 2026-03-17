@@ -99,7 +99,7 @@ fn menu_frame(tree: &mut UiTree, width: f32, bg: glam::Vec4, border: glam::Vec4)
         background: Some(bg),
         border_color: Some(border),
         border_width: 1.0,
-        corner_radius: 8.0,
+        corner_radii: [8.0; 4],
         ..UiStyle::default()
     })
 }
@@ -121,7 +121,7 @@ fn menu_item(tree: &mut UiTree, parent: UiNodeId, label: &str, shortcut: Option<
         width: Sizing::Grow(1.0),
         height: Sizing::Fixed(28.0),
         padding: Edges { top: 0.0, right: 10.0, bottom: 0.0, left: 10.0 },
-        corner_radius: 4.0,
+        corner_radii: [4.0; 4],
         align: Align::Center,
         justify: Justify::SpaceBetween,
         ..UiStyle::default()
@@ -147,7 +147,7 @@ fn menu_item_colored(tree: &mut UiTree, parent: UiNodeId, label: &str, color: gl
         width: Sizing::Grow(1.0),
         height: Sizing::Fixed(28.0),
         padding: Edges { top: 0.0, right: 10.0, bottom: 0.0, left: 10.0 },
-        corner_radius: 4.0,
+        corner_radii: [4.0; 4],
         align: Align::Center,
         ..UiStyle::default()
     });
@@ -165,7 +165,7 @@ fn menu_item_disabled(tree: &mut UiTree, parent: UiNodeId, label: &str, shortcut
         width: Sizing::Grow(1.0),
         height: Sizing::Fixed(28.0),
         padding: Edges { top: 0.0, right: 10.0, bottom: 0.0, left: 10.0 },
-        corner_radius: 4.0,
+        corner_radii: [4.0; 4],
         align: Align::Center,
         justify: Justify::SpaceBetween,
         opacity: 0.4,
@@ -192,7 +192,7 @@ fn menu_item_submenu(tree: &mut UiTree, parent: UiNodeId, label: &str, fg: glam:
         width: Sizing::Grow(1.0),
         height: Sizing::Fixed(28.0),
         padding: Edges { top: 0.0, right: 10.0, bottom: 0.0, left: 10.0 },
-        corner_radius: 4.0,
+        corner_radii: [4.0; 4],
         align: Align::Center,
         justify: Justify::SpaceBetween,
         ..UiStyle::default()

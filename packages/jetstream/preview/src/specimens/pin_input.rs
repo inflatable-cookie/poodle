@@ -83,7 +83,7 @@ fn pin_row(
             background: Some(bg),
             border_color: Some(cell_border),
             border_width: cell_border_width,
-            corner_radius: 6.0,
+            corner_radii: [6.0; 4],
             align: Align::Center,
             justify: Justify::Center,
             ..UiStyle::default()
@@ -105,7 +105,7 @@ fn pin_row(
                 width: Sizing::Fixed(2.0),
                 height: Sizing::Fixed(20.0),
                 background: Some(accent),
-                corner_radius: 1.0,
+                corner_radii: [1.0; 4],
                 ..UiStyle::default()
             });
             tree.add_child(cell, cursor);
