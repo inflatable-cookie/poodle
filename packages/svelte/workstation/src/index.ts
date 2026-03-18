@@ -1,28 +1,33 @@
-export { default as ActionDiscoveryPanel } from "./ActionDiscoveryPanel.svelte";
-export { default as AppHeader } from "./AppHeader.svelte";
-export { default as CommandPalette } from "./CommandPalette.svelte";
 export { default as DockRegion } from "./DockRegion.svelte";
+export { default as HostedSurface } from "./HostedSurface.svelte";
 export { default as PanelHeader } from "./PanelHeader.svelte";
 export { default as PanelSurface } from "./PanelSurface.svelte";
-export { default as PanelTabs } from "./PanelTabs.svelte";
 export { default as ProjectHeader } from "./ProjectHeader.svelte";
+export { default as ResizeHandle } from "./ResizeHandle.svelte";
 export { default as ShellStatusBar } from "./ShellStatusBar.svelte";
+export { default as SplitDivider } from "./SplitDivider.svelte";
 export { default as SplitView } from "./SplitView.svelte";
-export { default as SurfaceTabs } from "./SurfaceTabs.svelte";
+export { default as StripRail } from "./StripRail.svelte";
 export { default as WorkspaceShell } from "./WorkspaceShell.svelte";
+export { default as WorkspaceWindow } from "./WorkspaceWindow.svelte";
 export {
   parseWorkspaceLayoutSnapshot,
   serializeWorkspaceLayoutSnapshot,
 } from "./persistence";
 export type {
-  ActionDiscoverySection,
-  CommandActionItem,
+  CenterRegionSnapshot,
+  DockCollapsedPosture,
   DockEdge,
+  DockEmphasis,
   DockRegionSnapshot,
-  DiscoveryState,
-  PanelTabItem,
+  HostedSurfaceState,
+  PanelVariant,
   SplitOrientation,
-  SurfaceTabItem,
+  StripEdge,
+  StripItem,
+  StripMode,
+  StripRegionSnapshot,
+  WindowSurface,
   WorkspaceLayoutSnapshot,
   WorkspaceShellState,
 } from "./types";

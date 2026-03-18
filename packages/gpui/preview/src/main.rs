@@ -22,6 +22,9 @@ use component_registry::{COMPOSITES, PRIMITIVES, SHELLS};
 use pug_gpui_components::PugTabs;
 use style_bridge::color_to_hsla;
 
+// Global keyboard actions
+actions!(pug_preview, [Quit, CloseWindow]);
+
 /// Root view for the preview application.
 struct PreviewRoot {
     state: AppState,
@@ -750,6 +753,14 @@ fn main() {
     let cli = parse_cli_args();
 
     Application::new().run(move |cx: &mut App| {
+        // Register keyboard shortcuts
+        cx.bind_keys([
+            KeyBinding::new("cmd-q", Quit, None),
+            KeyBinding::new("cmd-w", CloseWindow, None),
+        ]);
+        cx.on_action(|_: &Quit, cx| cx.quit());
+        cx.on_action(|_: &CloseWindow, cx| cx.quit());
+
         let bounds = Bounds::centered(None, size(px(1280.0), px(800.0)), cx);
         cx.open_window(
             WindowOptions {

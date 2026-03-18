@@ -16,86 +16,86 @@ use crate::{JetstreamAdapter, JetstreamNodeHandle, JetstreamTarget, WidgetKind};
 impl RenderComponent<TextInputSpec> for JetstreamAdapter {
     type Target = JetstreamTarget;
     fn render(&self, spec: &TextInputSpec, style: &StyleDescriptor, theme: &dyn ThemeProvider) -> JetstreamNodeHandle {
-        let mut js_style = map_style(style);
+        let mut mapped = map_style(style);
 
         // Resolve fill (background) color
         let fill_color = theme.resolve_color(spec.fill_token());
-        js_style.background = Some(JetstreamColor::from(fill_color));
+        mapped.visuals.background = Some(JetstreamColor::from(fill_color));
 
         // Resolve border color (varies by validation state)
         let border_color = theme.resolve_color(spec.border_token());
-        js_style.border_color = Some(JetstreamColor::from(border_color));
+        mapped.visuals.border_color = Some(JetstreamColor::from(border_color));
 
         // Resolve corner radius
         let r = theme.resolve_radius(spec.radius_token());
-        js_style.corner_radii = [r; 4];
+        mapped.visuals.corner_radii = [r; 4];
 
         // Resolve text color
         let text_color = theme.resolve_color(spec.text_color_token());
-        js_style.text_color = Some(JetstreamColor::from(text_color));
+        mapped.visuals.text_color = Some(JetstreamColor::from(text_color));
 
         // Resolve placeholder color (for proof — Jetstream text_color covers primary)
         let _placeholder_color = theme.resolve_color(spec.placeholder_color_token());
 
         // Resolve focus ring
         let ring_color = theme.resolve_color(spec.focus_ring_color_token());
-        js_style.focus_ring_color = Some(JetstreamColor::from(ring_color));
-        js_style.focus_ring_width = theme.resolve_space(spec.focus_ring_width_token());
+        mapped.visuals.focus_ring_color = Some(JetstreamColor::from(ring_color));
+        mapped.visuals.focus_ring_width = theme.resolve_space(spec.focus_ring_width_token());
 
         // Handle disabled state
         if spec.is_disabled {
-            js_style.opacity = theme.resolve_opacity(spec.disabled_opacity_token());
+            mapped.visuals.opacity = theme.resolve_opacity(spec.disabled_opacity_token());
         }
 
         let node_id = match &spec.id {
             Some(id) if !id.is_empty() => format!("text-input-{}", id),
             _ => "text-input".to_string(),
         };
-        JetstreamNodeHandle::new(node_id, "TextInputSpec", WidgetKind::TextInput)
+        JetstreamNodeHandle::new(node_id, "TextInputSpec", WidgetKind::TextInput, mapped)
     }
 }
 
 impl RenderComponent<TextAreaSpec> for JetstreamAdapter {
     type Target = JetstreamTarget;
     fn render(&self, spec: &TextAreaSpec, style: &StyleDescriptor, theme: &dyn ThemeProvider) -> JetstreamNodeHandle {
-        let mut js_style = map_style(style);
+        let mut mapped = map_style(style);
 
         // Resolve fill (background) color
         let fill_color = theme.resolve_color(spec.fill_token());
-        js_style.background = Some(JetstreamColor::from(fill_color));
+        mapped.visuals.background = Some(JetstreamColor::from(fill_color));
 
         // Resolve border color (varies by validation state)
         let border_color = theme.resolve_color(spec.border_token());
-        js_style.border_color = Some(JetstreamColor::from(border_color));
+        mapped.visuals.border_color = Some(JetstreamColor::from(border_color));
 
         // Resolve corner radius
         let r = theme.resolve_radius(spec.radius_token());
-        js_style.corner_radii = [r; 4];
+        mapped.visuals.corner_radii = [r; 4];
 
-        JetstreamNodeHandle::new("text-area", "TextAreaSpec", WidgetKind::TextInput)
+        JetstreamNodeHandle::new("text-area", "TextAreaSpec", WidgetKind::TextInput, mapped)
     }
 }
 
 impl RenderComponent<SearchFieldSpec> for JetstreamAdapter {
     type Target = JetstreamTarget;
     fn render(&self, spec: &SearchFieldSpec, style: &StyleDescriptor, theme: &dyn ThemeProvider) -> JetstreamNodeHandle {
-        let mut js_style = map_style(style);
+        let mut mapped = map_style(style);
 
         // Resolve search icon color
         let search_icon_color = theme.resolve_color(spec.search_icon_color_token());
-        js_style.icon_color = Some(JetstreamColor::from(search_icon_color));
+        mapped.visuals.icon_color = Some(JetstreamColor::from(search_icon_color));
 
         // Resolve clear action icon color (for proof)
         let _clear_icon_color = theme.resolve_color(spec.clear_action_icon_color_token());
 
-        JetstreamNodeHandle::new("search-field", "SearchFieldSpec", WidgetKind::TextInput)
+        JetstreamNodeHandle::new("search-field", "SearchFieldSpec", WidgetKind::TextInput, mapped)
     }
 }
 
 impl RenderComponent<FieldSpec> for JetstreamAdapter {
     type Target = JetstreamTarget;
     fn render(&self, spec: &FieldSpec, style: &StyleDescriptor, theme: &dyn ThemeProvider) -> JetstreamNodeHandle {
-        let mut js_style = map_style(style);
+        let mut mapped = map_style(style);
 
         // Resolve label typography size (used as space value for proof)
         let _label_size = theme.resolve_space(spec.label_typography_token());
@@ -108,74 +108,75 @@ impl RenderComponent<FieldSpec> for JetstreamAdapter {
 
         // Resolve description color
         let desc_color = theme.resolve_color(spec.description_color_token());
-        js_style.text_color = Some(JetstreamColor::from(desc_color));
+        mapped.visuals.text_color = Some(JetstreamColor::from(desc_color));
 
         // Resolve row gap (vertical spacing between label, input, description)
-        js_style.gap = theme.resolve_space(spec.row_gap_token());
+        let gap = theme.resolve_space(spec.row_gap_token());
+        mapped.layout.gap = taffy::Size { width: taffy::LengthPercentage::length(gap), height: taffy::LengthPercentage::length(gap) };
 
         // Resolve header gap (spacing between label and optional indicator)
         let _header_gap = theme.resolve_space(spec.header_gap_token());
 
         let node_id = format!("field-{}", spec.id);
-        JetstreamNodeHandle::new(node_id, "FieldSpec", WidgetKind::Panel)
+        JetstreamNodeHandle::new(node_id, "FieldSpec", WidgetKind::Panel, mapped)
     }
 }
 
 impl RenderComponent<NumberEntrySpec> for JetstreamAdapter {
     type Target = JetstreamTarget;
     fn render(&self, spec: &NumberEntrySpec, style: &StyleDescriptor, theme: &dyn ThemeProvider) -> JetstreamNodeHandle {
-        let mut js_style = map_style(style);
+        let mut mapped = map_style(style);
 
         // Resolve border color (varies by validation state)
         let border_color = theme.resolve_color(spec.border_token());
-        js_style.border_color = Some(JetstreamColor::from(border_color));
+        mapped.visuals.border_color = Some(JetstreamColor::from(border_color));
 
         // Handle disabled state
         if spec.is_disabled {
-            js_style.opacity = theme.resolve_opacity(spec.disabled_opacity_token());
+            mapped.visuals.opacity = theme.resolve_opacity(spec.disabled_opacity_token());
         }
 
-        JetstreamNodeHandle::new("number-entry", "NumberEntrySpec", WidgetKind::TextInput)
+        JetstreamNodeHandle::new("number-entry", "NumberEntrySpec", WidgetKind::TextInput, mapped)
     }
 }
 
 impl RenderComponent<PinInputSpec> for JetstreamAdapter {
     type Target = JetstreamTarget;
     fn render(&self, spec: &PinInputSpec, style: &StyleDescriptor, theme: &dyn ThemeProvider) -> JetstreamNodeHandle {
-        let mut js_style = map_style(style);
+        let mut mapped = map_style(style);
 
         // Resolve border color
         let border_color = theme.resolve_color(spec.border_token());
-        js_style.border_color = Some(JetstreamColor::from(border_color));
+        mapped.visuals.border_color = Some(JetstreamColor::from(border_color));
 
         // Resolve focus ring color
         let ring_color = theme.resolve_color(spec.focus_ring_color_token());
-        js_style.focus_ring_color = Some(JetstreamColor::from(ring_color));
+        mapped.visuals.focus_ring_color = Some(JetstreamColor::from(ring_color));
 
         let node_id = format!("pin-input-{}", spec.length);
-        JetstreamNodeHandle::new(node_id, "PinInputSpec", WidgetKind::TextInput)
+        JetstreamNodeHandle::new(node_id, "PinInputSpec", WidgetKind::TextInput, mapped)
     }
 }
 
 impl RenderComponent<EditableLabelSpec> for JetstreamAdapter {
     type Target = JetstreamTarget;
     fn render(&self, spec: &EditableLabelSpec, style: &StyleDescriptor, theme: &dyn ThemeProvider) -> JetstreamNodeHandle {
-        let mut js_style = map_style(style);
+        let mut mapped = map_style(style);
 
         // Resolve text color
         let text_color = theme.resolve_color(spec.text_color_token());
-        js_style.text_color = Some(JetstreamColor::from(text_color));
+        mapped.visuals.text_color = Some(JetstreamColor::from(text_color));
 
         // Resolve edit border color (changes based on editing state)
         let border_color = theme.resolve_color(spec.edit_border_token());
-        js_style.border_color = Some(JetstreamColor::from(border_color));
+        mapped.visuals.border_color = Some(JetstreamColor::from(border_color));
 
         let node_id = if spec.is_editing {
             "editable-label-editing"
         } else {
             "editable-label"
         };
-        JetstreamNodeHandle::new(node_id, "EditableLabelSpec", WidgetKind::Label)
+        JetstreamNodeHandle::new(node_id, "EditableLabelSpec", WidgetKind::Label, mapped)
     }
 }
 
@@ -183,9 +184,9 @@ impl RenderComponent<TimeFieldSpec> for JetstreamAdapter {
     type Target = JetstreamTarget;
     fn render(&self, _spec: &TimeFieldSpec, style: &StyleDescriptor, _theme: &dyn ThemeProvider) -> JetstreamNodeHandle {
         // TimeFieldSpec has no specific token methods — apply base style mapping
-        let _js_style = map_style(style);
+        let mapped = map_style(style);
 
-        JetstreamNodeHandle::new("time-field", "TimeFieldSpec", WidgetKind::TextInput)
+        JetstreamNodeHandle::new("time-field", "TimeFieldSpec", WidgetKind::TextInput, mapped)
     }
 }
 

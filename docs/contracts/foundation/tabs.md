@@ -11,7 +11,7 @@ Updated: 2026-03-15
   active content panel
 - In scope: tablist semantics, tab activation, tab-panel relationship,
   orientation, automatic vs manual activation, three visual variants
-  (underline/card/pill), reorderable tabs, closable tabs, actions slot
+  (underline/card/pill/strip), reorderable tabs, closable tabs, actions slot
 - Out of scope: docking, overflow menus, tab persistence
 
 ## 2. Anatomy
@@ -48,7 +48,7 @@ Updated: 2026-03-15
 | `value` | `string \| null` | `null` | no | controlled active tab |
 | `defaultValue` | `string \| null` | `null` | no | uncontrolled initial active tab |
 | `items` | `TabItem[]` | `[]` | yes | tab definitions |
-| `variant` | `"underline" \| "card" \| "pill"` | `"underline"` | no | visual variant |
+| `variant` | `"underline" \| "card" \| "pill" \| "strip"` | `"underline"` | no | visual variant |
 | `orientation` | `"horizontal" \| "vertical"` | `"horizontal"` | no | navigation axis |
 | `activationMode` | `"automatic" \| "manual"` | `"automatic"` | no | whether focus changes selection |
 | `isReorderable` | `boolean` | `false` | no | enables drag-and-drop and keyboard reorder |
@@ -193,7 +193,7 @@ Updated: 2026-03-15
 | `flex-wrap` | `nowrap` |
 | `overflow` | `auto` |
 
-### List — Card + Pill vertical
+### List — Card + Pill + Strip vertical
 
 | Property | Value |
 |----------|-------|
@@ -279,6 +279,90 @@ Updated: 2026-03-15
 |----------|-------|
 | `background` | `color-mix(in srgb, var(--pug-color-accent-base) 18%, transparent)` |
 | `color` | `var(--pug-color-text-primary)` |
+
+### List — Strip variant
+
+| Property | Value |
+|----------|-------|
+| `display` | `flex` |
+| `gap` | `0` |
+| `flex-wrap` | `nowrap` |
+| `overflow` | `auto` |
+| `padding` | `0 var(--pug-space-panel-x, 0.75rem)` |
+| `border-bottom` | `0.0625rem solid var(--pug-color-border-subtle)` |
+| `background` | `color-mix(in srgb, var(--pug-color-background-panel) 92%, transparent)` |
+
+### Item — Strip variant
+
+| Property | Value |
+|----------|-------|
+| `border-bottom` | `0.125rem solid transparent` |
+| `margin-bottom` | `-0.0625rem` |
+
+### Item — Strip variant (selected)
+
+| Property | Value |
+|----------|-------|
+| `border-bottom-color` | `var(--pug-color-accent-base)` |
+
+### Item — Strip variant (hover)
+
+| Property | Value |
+|----------|-------|
+| `background` | `color-mix(in srgb, var(--pug-color-surface-hover) 50%, transparent)` |
+
+### Tab — Strip variant
+
+| Property | Value |
+|----------|-------|
+| `min-height` | `2.25rem` |
+| `padding` | `0 0.625rem` |
+| `border-radius` | `0` |
+
+### Tab — Strip variant (selected)
+
+| Property | Value |
+|----------|-------|
+| `color` | `var(--pug-color-text-primary)` |
+
+### List — Strip vertical
+
+| Property | Value |
+|----------|-------|
+| `padding` | `var(--pug-space-panel-y, 0.5rem) 0` |
+| `border-bottom` | `0` |
+| `border-right` | `0.0625rem solid var(--pug-color-border-subtle)` |
+
+### Item — Strip vertical
+
+| Property | Value |
+|----------|-------|
+| `border-bottom` | `0` |
+| `border-right` | `0.125rem solid transparent` |
+| `margin-bottom` | `0` |
+| `margin-right` | `-0.0625rem` |
+
+### Item — Strip vertical (selected)
+
+| Property | Value |
+|----------|-------|
+| `border-right-color` | `var(--pug-color-accent-base)` |
+
+### Tab — Strip vertical
+
+| Property | Value |
+|----------|-------|
+| `justify-content` | `center` |
+| `min-height` | `0` |
+| `min-width` | `2.25rem` |
+| `padding` | `0.5rem` |
+
+### Vertical orientation — label + close
+
+| Property | Value |
+|----------|-------|
+| `.pug-tabs__label` `display` | `none` |
+| `.pug-tabs__close` `display` | `none` |
 
 ### Tab — Focus
 

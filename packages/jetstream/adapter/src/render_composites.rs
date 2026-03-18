@@ -25,40 +25,40 @@ use crate::{JetstreamAdapter, JetstreamNodeHandle, JetstreamTarget, WidgetKind};
 impl RenderComponent<FormShellSpec> for JetstreamAdapter {
     type Target = JetstreamTarget;
     fn render(&self, _spec: &FormShellSpec, style: &StyleDescriptor, _theme: &dyn ThemeProvider) -> JetstreamNodeHandle {
-        let _s = map_style(style);
-        JetstreamNodeHandle::new("form-shell", "FormShellSpec", WidgetKind::Panel)
+        let mapped = map_style(style);
+        JetstreamNodeHandle::new("form-shell", "FormShellSpec", WidgetKind::Panel, mapped)
     }
 }
 
 impl RenderComponent<ValidationSummarySpec> for JetstreamAdapter {
     type Target = JetstreamTarget;
     fn render(&self, _spec: &ValidationSummarySpec, style: &StyleDescriptor, _theme: &dyn ThemeProvider) -> JetstreamNodeHandle {
-        let _s = map_style(style);
-        JetstreamNodeHandle::new("validation-summary", "ValidationSummarySpec", WidgetKind::Panel)
+        let mapped = map_style(style);
+        JetstreamNodeHandle::new("validation-summary", "ValidationSummarySpec", WidgetKind::Panel, mapped)
     }
 }
 
 impl RenderComponent<RemediationBannerSpec> for JetstreamAdapter {
     type Target = JetstreamTarget;
     fn render(&self, _spec: &RemediationBannerSpec, style: &StyleDescriptor, _theme: &dyn ThemeProvider) -> JetstreamNodeHandle {
-        let _s = map_style(style);
-        JetstreamNodeHandle::new("remediation-banner", "RemediationBannerSpec", WidgetKind::Panel)
+        let mapped = map_style(style);
+        JetstreamNodeHandle::new("remediation-banner", "RemediationBannerSpec", WidgetKind::Panel, mapped)
     }
 }
 
 impl RenderComponent<InlineRemediationSpec> for JetstreamAdapter {
     type Target = JetstreamTarget;
     fn render(&self, _spec: &InlineRemediationSpec, style: &StyleDescriptor, _theme: &dyn ThemeProvider) -> JetstreamNodeHandle {
-        let _s = map_style(style);
-        JetstreamNodeHandle::new("inline-remediation", "InlineRemediationSpec", WidgetKind::Panel)
+        let mapped = map_style(style);
+        JetstreamNodeHandle::new("inline-remediation", "InlineRemediationSpec", WidgetKind::Panel, mapped)
     }
 }
 
 impl RenderComponent<ConfirmActionSpec> for JetstreamAdapter {
     type Target = JetstreamTarget;
     fn render(&self, _spec: &ConfirmActionSpec, style: &StyleDescriptor, _theme: &dyn ThemeProvider) -> JetstreamNodeHandle {
-        let _s = map_style(style);
-        JetstreamNodeHandle::new("confirm-action", "ConfirmActionSpec", WidgetKind::Panel)
+        let mapped = map_style(style);
+        JetstreamNodeHandle::new("confirm-action", "ConfirmActionSpec", WidgetKind::Panel, mapped)
     }
 }
 
@@ -67,144 +67,144 @@ impl RenderComponent<ConfirmActionSpec> for JetstreamAdapter {
 impl RenderComponent<DataTableSpec> for JetstreamAdapter {
     type Target = JetstreamTarget;
     fn render(&self, _spec: &DataTableSpec, style: &StyleDescriptor, _theme: &dyn ThemeProvider) -> JetstreamNodeHandle {
-        let _s = map_style(style);
-        JetstreamNodeHandle::new("data-table", "DataTableSpec", WidgetKind::List)
+        let mapped = map_style(style);
+        JetstreamNodeHandle::new("data-table", "DataTableSpec", WidgetKind::List, mapped)
     }
 }
 
 impl RenderComponent<ListShellSpec> for JetstreamAdapter {
     type Target = JetstreamTarget;
     fn render(&self, _spec: &ListShellSpec, style: &StyleDescriptor, _theme: &dyn ThemeProvider) -> JetstreamNodeHandle {
-        let _s = map_style(style);
-        JetstreamNodeHandle::new("list-shell", "ListShellSpec", WidgetKind::List)
+        let mapped = map_style(style);
+        JetstreamNodeHandle::new("list-shell", "ListShellSpec", WidgetKind::List, mapped)
     }
 }
 
 impl RenderComponent<GridShellSpec> for JetstreamAdapter {
     type Target = JetstreamTarget;
     fn render(&self, _spec: &GridShellSpec, style: &StyleDescriptor, _theme: &dyn ThemeProvider) -> JetstreamNodeHandle {
-        let _s = map_style(style);
-        JetstreamNodeHandle::new("grid-shell", "GridShellSpec", WidgetKind::Panel)
+        let mapped = map_style(style);
+        JetstreamNodeHandle::new("grid-shell", "GridShellSpec", WidgetKind::Panel, mapped)
     }
 }
 
 impl RenderComponent<DetailShellSpec> for JetstreamAdapter {
     type Target = JetstreamTarget;
     fn render(&self, _spec: &DetailShellSpec, style: &StyleDescriptor, _theme: &dyn ThemeProvider) -> JetstreamNodeHandle {
-        let _s = map_style(style);
-        JetstreamNodeHandle::new("detail-shell", "DetailShellSpec", WidgetKind::Panel)
+        let mapped = map_style(style);
+        JetstreamNodeHandle::new("detail-shell", "DetailShellSpec", WidgetKind::Panel, mapped)
     }
 }
 
 impl RenderComponent<DetailSectionSpec> for JetstreamAdapter {
     type Target = JetstreamTarget;
     fn render(&self, _spec: &DetailSectionSpec, style: &StyleDescriptor, _theme: &dyn ThemeProvider) -> JetstreamNodeHandle {
-        let _s = map_style(style);
-        JetstreamNodeHandle::new("detail-section", "DetailSectionSpec", WidgetKind::Panel)
+        let mapped = map_style(style);
+        JetstreamNodeHandle::new("detail-section", "DetailSectionSpec", WidgetKind::Panel, mapped)
     }
 }
 
 impl RenderComponent<FilterToolbarSpec> for JetstreamAdapter {
     type Target = JetstreamTarget;
     fn render(&self, _spec: &FilterToolbarSpec, style: &StyleDescriptor, _theme: &dyn ThemeProvider) -> JetstreamNodeHandle {
-        let _s = map_style(style);
-        JetstreamNodeHandle::new("filter-toolbar", "FilterToolbarSpec", WidgetKind::Panel)
+        let mapped = map_style(style);
+        JetstreamNodeHandle::new("filter-toolbar", "FilterToolbarSpec", WidgetKind::Panel, mapped)
     }
 }
 
 impl RenderComponent<PickerShellSpec> for JetstreamAdapter {
     type Target = JetstreamTarget;
     fn render(&self, _spec: &PickerShellSpec, style: &StyleDescriptor, _theme: &dyn ThemeProvider) -> JetstreamNodeHandle {
-        let _s = map_style(style);
-        JetstreamNodeHandle::new("picker-shell", "PickerShellSpec", WidgetKind::Panel)
+        let mapped = map_style(style);
+        JetstreamNodeHandle::new("picker-shell", "PickerShellSpec", WidgetKind::Panel, mapped)
     }
 }
 
 impl RenderComponent<SelectionSummarySpec> for JetstreamAdapter {
     type Target = JetstreamTarget;
     fn render(&self, _spec: &SelectionSummarySpec, style: &StyleDescriptor, _theme: &dyn ThemeProvider) -> JetstreamNodeHandle {
-        let _s = map_style(style);
-        JetstreamNodeHandle::new("selection-summary", "SelectionSummarySpec", WidgetKind::Panel)
+        let mapped = map_style(style);
+        JetstreamNodeHandle::new("selection-summary", "SelectionSummarySpec", WidgetKind::Panel, mapped)
     }
 }
 
 impl RenderComponent<PaginationSummarySpec> for JetstreamAdapter {
     type Target = JetstreamTarget;
     fn render(&self, _spec: &PaginationSummarySpec, style: &StyleDescriptor, _theme: &dyn ThemeProvider) -> JetstreamNodeHandle {
-        let _s = map_style(style);
-        JetstreamNodeHandle::new("pagination-summary", "PaginationSummarySpec", WidgetKind::Label)
+        let mapped = map_style(style);
+        JetstreamNodeHandle::new("pagination-summary", "PaginationSummarySpec", WidgetKind::Label, mapped)
     }
 }
 
 impl RenderComponent<EmptyStateSpec> for JetstreamAdapter {
     type Target = JetstreamTarget;
     fn render(&self, _spec: &EmptyStateSpec, style: &StyleDescriptor, _theme: &dyn ThemeProvider) -> JetstreamNodeHandle {
-        let _s = map_style(style);
-        JetstreamNodeHandle::new("empty-state", "EmptyStateSpec", WidgetKind::Panel)
+        let mapped = map_style(style);
+        JetstreamNodeHandle::new("empty-state", "EmptyStateSpec", WidgetKind::Panel, mapped)
     }
 }
 
 impl RenderComponent<PageHeaderSpec> for JetstreamAdapter {
     type Target = JetstreamTarget;
     fn render(&self, _spec: &PageHeaderSpec, style: &StyleDescriptor, _theme: &dyn ThemeProvider) -> JetstreamNodeHandle {
-        let _s = map_style(style);
-        JetstreamNodeHandle::new("page-header", "PageHeaderSpec", WidgetKind::Panel)
+        let mapped = map_style(style);
+        JetstreamNodeHandle::new("page-header", "PageHeaderSpec", WidgetKind::Panel, mapped)
     }
 }
 
 impl RenderComponent<PageLoadingSpec> for JetstreamAdapter {
     type Target = JetstreamTarget;
     fn render(&self, _spec: &PageLoadingSpec, style: &StyleDescriptor, _theme: &dyn ThemeProvider) -> JetstreamNodeHandle {
-        let _s = map_style(style);
-        JetstreamNodeHandle::new("page-loading", "PageLoadingSpec", WidgetKind::Panel)
+        let mapped = map_style(style);
+        JetstreamNodeHandle::new("page-loading", "PageLoadingSpec", WidgetKind::Panel, mapped)
     }
 }
 
 impl RenderComponent<StateTileSpec> for JetstreamAdapter {
     type Target = JetstreamTarget;
     fn render(&self, _spec: &StateTileSpec, style: &StyleDescriptor, _theme: &dyn ThemeProvider) -> JetstreamNodeHandle {
-        let _s = map_style(style);
-        JetstreamNodeHandle::new("state-tile", "StateTileSpec", WidgetKind::Panel)
+        let mapped = map_style(style);
+        JetstreamNodeHandle::new("state-tile", "StateTileSpec", WidgetKind::Panel, mapped)
     }
 }
 
 impl RenderComponent<ToastStackSpec> for JetstreamAdapter {
     type Target = JetstreamTarget;
     fn render(&self, _spec: &ToastStackSpec, style: &StyleDescriptor, _theme: &dyn ThemeProvider) -> JetstreamNodeHandle {
-        let _s = map_style(style);
-        JetstreamNodeHandle::new("toast-stack", "ToastStackSpec", WidgetKind::Panel)
+        let mapped = map_style(style);
+        JetstreamNodeHandle::new("toast-stack", "ToastStackSpec", WidgetKind::Panel, mapped)
     }
 }
 
 impl RenderComponent<LogListSpec> for JetstreamAdapter {
     type Target = JetstreamTarget;
     fn render(&self, _spec: &LogListSpec, style: &StyleDescriptor, _theme: &dyn ThemeProvider) -> JetstreamNodeHandle {
-        let _s = map_style(style);
-        JetstreamNodeHandle::new("log-list", "LogListSpec", WidgetKind::List)
+        let mapped = map_style(style);
+        JetstreamNodeHandle::new("log-list", "LogListSpec", WidgetKind::List, mapped)
     }
 }
 
 impl RenderComponent<NavCardSpec> for JetstreamAdapter {
     type Target = JetstreamTarget;
     fn render(&self, _spec: &NavCardSpec, style: &StyleDescriptor, _theme: &dyn ThemeProvider) -> JetstreamNodeHandle {
-        let _s = map_style(style);
-        JetstreamNodeHandle::new("nav-card", "NavCardSpec", WidgetKind::Button)
+        let mapped = map_style(style);
+        JetstreamNodeHandle::new("nav-card", "NavCardSpec", WidgetKind::Button, mapped)
     }
 }
 
 impl RenderComponent<NavCardGridSpec> for JetstreamAdapter {
     type Target = JetstreamTarget;
     fn render(&self, _spec: &NavCardGridSpec, style: &StyleDescriptor, _theme: &dyn ThemeProvider) -> JetstreamNodeHandle {
-        let _s = map_style(style);
-        JetstreamNodeHandle::new("nav-card-grid", "NavCardGridSpec", WidgetKind::Panel)
+        let mapped = map_style(style);
+        JetstreamNodeHandle::new("nav-card-grid", "NavCardGridSpec", WidgetKind::Panel, mapped)
     }
 }
 
 impl RenderComponent<ListCardSpec> for JetstreamAdapter {
     type Target = JetstreamTarget;
     fn render(&self, _spec: &ListCardSpec, style: &StyleDescriptor, _theme: &dyn ThemeProvider) -> JetstreamNodeHandle {
-        let _s = map_style(style);
-        JetstreamNodeHandle::new("list-card", "ListCardSpec", WidgetKind::Button)
+        let mapped = map_style(style);
+        JetstreamNodeHandle::new("list-card", "ListCardSpec", WidgetKind::Button, mapped)
     }
 }
 
@@ -213,144 +213,144 @@ impl RenderComponent<ListCardSpec> for JetstreamAdapter {
 impl RenderComponent<AudioPlayerSpec> for JetstreamAdapter {
     type Target = JetstreamTarget;
     fn render(&self, _spec: &AudioPlayerSpec, style: &StyleDescriptor, _theme: &dyn ThemeProvider) -> JetstreamNodeHandle {
-        let _s = map_style(style);
-        JetstreamNodeHandle::new("audio-player", "AudioPlayerSpec", WidgetKind::Panel)
+        let mapped = map_style(style);
+        JetstreamNodeHandle::new("audio-player", "AudioPlayerSpec", WidgetKind::Panel, mapped)
     }
 }
 
 impl RenderComponent<VideoPlayerSpec> for JetstreamAdapter {
     type Target = JetstreamTarget;
     fn render(&self, _spec: &VideoPlayerSpec, style: &StyleDescriptor, _theme: &dyn ThemeProvider) -> JetstreamNodeHandle {
-        let _s = map_style(style);
-        JetstreamNodeHandle::new("video-player", "VideoPlayerSpec", WidgetKind::Panel)
+        let mapped = map_style(style);
+        JetstreamNodeHandle::new("video-player", "VideoPlayerSpec", WidgetKind::Panel, mapped)
     }
 }
 
 impl RenderComponent<MediaPickerSpec> for JetstreamAdapter {
     type Target = JetstreamTarget;
     fn render(&self, _spec: &MediaPickerSpec, style: &StyleDescriptor, _theme: &dyn ThemeProvider) -> JetstreamNodeHandle {
-        let _s = map_style(style);
-        JetstreamNodeHandle::new("media-picker", "MediaPickerSpec", WidgetKind::Panel)
+        let mapped = map_style(style);
+        JetstreamNodeHandle::new("media-picker", "MediaPickerSpec", WidgetKind::Panel, mapped)
     }
 }
 
 impl RenderComponent<MediaThumbnailSpec> for JetstreamAdapter {
     type Target = JetstreamTarget;
     fn render(&self, _spec: &MediaThumbnailSpec, style: &StyleDescriptor, _theme: &dyn ThemeProvider) -> JetstreamNodeHandle {
-        let _s = map_style(style);
-        JetstreamNodeHandle::new("media-thumbnail", "MediaThumbnailSpec", WidgetKind::Image)
+        let mapped = map_style(style);
+        JetstreamNodeHandle::new("media-thumbnail", "MediaThumbnailSpec", WidgetKind::Image, mapped)
     }
 }
 
 impl RenderComponent<MediaPreviewSpec> for JetstreamAdapter {
     type Target = JetstreamTarget;
     fn render(&self, _spec: &MediaPreviewSpec, style: &StyleDescriptor, _theme: &dyn ThemeProvider) -> JetstreamNodeHandle {
-        let _s = map_style(style);
-        JetstreamNodeHandle::new("media-preview", "MediaPreviewSpec", WidgetKind::Panel)
+        let mapped = map_style(style);
+        JetstreamNodeHandle::new("media-preview", "MediaPreviewSpec", WidgetKind::Panel, mapped)
     }
 }
 
 impl RenderComponent<MarkdownEditorSpec> for JetstreamAdapter {
     type Target = JetstreamTarget;
     fn render(&self, _spec: &MarkdownEditorSpec, style: &StyleDescriptor, _theme: &dyn ThemeProvider) -> JetstreamNodeHandle {
-        let _s = map_style(style);
-        JetstreamNodeHandle::new("markdown-editor", "MarkdownEditorSpec", WidgetKind::Panel)
+        let mapped = map_style(style);
+        JetstreamNodeHandle::new("markdown-editor", "MarkdownEditorSpec", WidgetKind::Panel, mapped)
     }
 }
 
 impl RenderComponent<BlockEditorSpec> for JetstreamAdapter {
     type Target = JetstreamTarget;
     fn render(&self, _spec: &BlockEditorSpec, style: &StyleDescriptor, _theme: &dyn ThemeProvider) -> JetstreamNodeHandle {
-        let _s = map_style(style);
-        JetstreamNodeHandle::new("block-editor", "BlockEditorSpec", WidgetKind::Panel)
+        let mapped = map_style(style);
+        JetstreamNodeHandle::new("block-editor", "BlockEditorSpec", WidgetKind::Panel, mapped)
     }
 }
 
 impl RenderComponent<EmbedInputSpec> for JetstreamAdapter {
     type Target = JetstreamTarget;
     fn render(&self, _spec: &EmbedInputSpec, style: &StyleDescriptor, _theme: &dyn ThemeProvider) -> JetstreamNodeHandle {
-        let _s = map_style(style);
-        JetstreamNodeHandle::new("embed-input", "EmbedInputSpec", WidgetKind::TextInput)
+        let mapped = map_style(style);
+        JetstreamNodeHandle::new("embed-input", "EmbedInputSpec", WidgetKind::TextInput, mapped)
     }
 }
 
 impl RenderComponent<EmbedPreviewSpec> for JetstreamAdapter {
     type Target = JetstreamTarget;
     fn render(&self, _spec: &EmbedPreviewSpec, style: &StyleDescriptor, _theme: &dyn ThemeProvider) -> JetstreamNodeHandle {
-        let _s = map_style(style);
-        JetstreamNodeHandle::new("embed-preview", "EmbedPreviewSpec", WidgetKind::Panel)
+        let mapped = map_style(style);
+        JetstreamNodeHandle::new("embed-preview", "EmbedPreviewSpec", WidgetKind::Panel, mapped)
     }
 }
 
 impl RenderComponent<EmbedShellSpec> for JetstreamAdapter {
     type Target = JetstreamTarget;
     fn render(&self, _spec: &EmbedShellSpec, style: &StyleDescriptor, _theme: &dyn ThemeProvider) -> JetstreamNodeHandle {
-        let _s = map_style(style);
-        JetstreamNodeHandle::new("embed-shell", "EmbedShellSpec", WidgetKind::Panel)
+        let mapped = map_style(style);
+        JetstreamNodeHandle::new("embed-shell", "EmbedShellSpec", WidgetKind::Panel, mapped)
     }
 }
 
 impl RenderComponent<AutonomousListSpec> for JetstreamAdapter {
     type Target = JetstreamTarget;
     fn render(&self, _spec: &AutonomousListSpec, style: &StyleDescriptor, _theme: &dyn ThemeProvider) -> JetstreamNodeHandle {
-        let _s = map_style(style);
-        JetstreamNodeHandle::new("autonomous-list", "AutonomousListSpec", WidgetKind::List)
+        let mapped = map_style(style);
+        JetstreamNodeHandle::new("autonomous-list", "AutonomousListSpec", WidgetKind::List, mapped)
     }
 }
 
 impl RenderComponent<ReorderableListSpec> for JetstreamAdapter {
     type Target = JetstreamTarget;
     fn render(&self, _spec: &ReorderableListSpec, style: &StyleDescriptor, _theme: &dyn ThemeProvider) -> JetstreamNodeHandle {
-        let _s = map_style(style);
-        JetstreamNodeHandle::new("reorderable-list", "ReorderableListSpec", WidgetKind::List)
+        let mapped = map_style(style);
+        JetstreamNodeHandle::new("reorderable-list", "ReorderableListSpec", WidgetKind::List, mapped)
     }
 }
 
 impl RenderComponent<BreadcrumbsSpec> for JetstreamAdapter {
     type Target = JetstreamTarget;
     fn render(&self, _spec: &BreadcrumbsSpec, style: &StyleDescriptor, _theme: &dyn ThemeProvider) -> JetstreamNodeHandle {
-        let _s = map_style(style);
-        JetstreamNodeHandle::new("breadcrumbs", "BreadcrumbsSpec", WidgetKind::Panel)
+        let mapped = map_style(style);
+        JetstreamNodeHandle::new("breadcrumbs", "BreadcrumbsSpec", WidgetKind::Panel, mapped)
     }
 }
 
 impl RenderComponent<CardRadioGroupSpec> for JetstreamAdapter {
     type Target = JetstreamTarget;
     fn render(&self, _spec: &CardRadioGroupSpec, style: &StyleDescriptor, _theme: &dyn ThemeProvider) -> JetstreamNodeHandle {
-        let _s = map_style(style);
-        JetstreamNodeHandle::new("card-radio-group", "CardRadioGroupSpec", WidgetKind::Panel)
+        let mapped = map_style(style);
+        JetstreamNodeHandle::new("card-radio-group", "CardRadioGroupSpec", WidgetKind::Panel, mapped)
     }
 }
 
 impl RenderComponent<InlineEditableFieldSpec> for JetstreamAdapter {
     type Target = JetstreamTarget;
     fn render(&self, _spec: &InlineEditableFieldSpec, style: &StyleDescriptor, _theme: &dyn ThemeProvider) -> JetstreamNodeHandle {
-        let _s = map_style(style);
-        JetstreamNodeHandle::new("inline-editable-field", "InlineEditableFieldSpec", WidgetKind::TextInput)
+        let mapped = map_style(style);
+        JetstreamNodeHandle::new("inline-editable-field", "InlineEditableFieldSpec", WidgetKind::TextInput, mapped)
     }
 }
 
 impl RenderComponent<OrderBySpec> for JetstreamAdapter {
     type Target = JetstreamTarget;
     fn render(&self, _spec: &OrderBySpec, style: &StyleDescriptor, _theme: &dyn ThemeProvider) -> JetstreamNodeHandle {
-        let _s = map_style(style);
-        JetstreamNodeHandle::new("order-by", "OrderBySpec", WidgetKind::Panel)
+        let mapped = map_style(style);
+        JetstreamNodeHandle::new("order-by", "OrderBySpec", WidgetKind::Panel, mapped)
     }
 }
 
 impl RenderComponent<SlugFieldSpec> for JetstreamAdapter {
     type Target = JetstreamTarget;
     fn render(&self, _spec: &SlugFieldSpec, style: &StyleDescriptor, _theme: &dyn ThemeProvider) -> JetstreamNodeHandle {
-        let _s = map_style(style);
-        JetstreamNodeHandle::new("slug-field", "SlugFieldSpec", WidgetKind::TextInput)
+        let mapped = map_style(style);
+        JetstreamNodeHandle::new("slug-field", "SlugFieldSpec", WidgetKind::TextInput, mapped)
     }
 }
 
 impl RenderComponent<RelationPickerSpec> for JetstreamAdapter {
     type Target = JetstreamTarget;
     fn render(&self, _spec: &RelationPickerSpec, style: &StyleDescriptor, _theme: &dyn ThemeProvider) -> JetstreamNodeHandle {
-        let _s = map_style(style);
-        JetstreamNodeHandle::new("relation-picker", "RelationPickerSpec", WidgetKind::Panel)
+        let mapped = map_style(style);
+        JetstreamNodeHandle::new("relation-picker", "RelationPickerSpec", WidgetKind::Panel, mapped)
     }
 }
 

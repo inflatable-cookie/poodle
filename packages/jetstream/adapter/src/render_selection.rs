@@ -16,90 +16,91 @@ use crate::{JetstreamAdapter, JetstreamNodeHandle, JetstreamTarget, WidgetKind};
 impl RenderComponent<CheckboxSpec> for JetstreamAdapter {
     type Target = JetstreamTarget;
     fn render(&self, spec: &CheckboxSpec, style: &StyleDescriptor, theme: &dyn ThemeProvider) -> JetstreamNodeHandle {
-        let mut s = map_style(style);
+        let mut mapped = map_style(style);
         let c = theme.resolve_color(spec.indicator_fill_token());
-        s.background = Some(JetstreamColor::from(c));
+        mapped.visuals.background = Some(JetstreamColor::from(c));
         let id = match &spec.label {
             Some(label) => format!("checkbox-{}", label.to_lowercase().replace(' ', "-")),
             None => "checkbox".to_string(),
         };
-        JetstreamNodeHandle::new(id, "CheckboxSpec", WidgetKind::Button)
+        JetstreamNodeHandle::new(id, "CheckboxSpec", WidgetKind::Button, mapped)
     }
 }
 
 impl RenderComponent<RadioGroupSpec> for JetstreamAdapter {
     type Target = JetstreamTarget;
     fn render(&self, spec: &RadioGroupSpec, style: &StyleDescriptor, theme: &dyn ThemeProvider) -> JetstreamNodeHandle {
-        let mut s = map_style(style);
-        s.gap = theme.resolve_space(spec.option_gap_token());
-        JetstreamNodeHandle::new("radio-group", "RadioGroupSpec", WidgetKind::Panel)
+        let mut mapped = map_style(style);
+        let gap = theme.resolve_space(spec.option_gap_token());
+        mapped.layout.gap = taffy::Size { width: taffy::LengthPercentage::length(gap), height: taffy::LengthPercentage::length(gap) };
+        JetstreamNodeHandle::new("radio-group", "RadioGroupSpec", WidgetKind::Panel, mapped)
     }
 }
 
 impl RenderComponent<SwitchSpec> for JetstreamAdapter {
     type Target = JetstreamTarget;
     fn render(&self, spec: &SwitchSpec, style: &StyleDescriptor, theme: &dyn ThemeProvider) -> JetstreamNodeHandle {
-        let mut s = map_style(style);
+        let mut mapped = map_style(style);
         let c = theme.resolve_color(spec.track_fill_token());
-        s.background = Some(JetstreamColor::from(c));
+        mapped.visuals.background = Some(JetstreamColor::from(c));
         let id = match &spec.label {
             Some(label) => format!("switch-{}", label.to_lowercase().replace(' ', "-")),
             None => "switch".to_string(),
         };
-        JetstreamNodeHandle::new(id, "SwitchSpec", WidgetKind::Button)
+        JetstreamNodeHandle::new(id, "SwitchSpec", WidgetKind::Button, mapped)
     }
 }
 
 impl RenderComponent<SelectSpec> for JetstreamAdapter {
     type Target = JetstreamTarget;
     fn render(&self, spec: &SelectSpec, style: &StyleDescriptor, theme: &dyn ThemeProvider) -> JetstreamNodeHandle {
-        let mut s = map_style(style);
+        let mut mapped = map_style(style);
         let c = theme.resolve_color(spec.overlay_fill_token());
-        s.background = Some(JetstreamColor::from(c));
-        JetstreamNodeHandle::new("select", "SelectSpec", WidgetKind::Button)
+        mapped.visuals.background = Some(JetstreamColor::from(c));
+        JetstreamNodeHandle::new("select", "SelectSpec", WidgetKind::Button, mapped)
     }
 }
 
 impl RenderComponent<SliderSpec> for JetstreamAdapter {
     type Target = JetstreamTarget;
     fn render(&self, spec: &SliderSpec, style: &StyleDescriptor, theme: &dyn ThemeProvider) -> JetstreamNodeHandle {
-        let mut s = map_style(style);
+        let mut mapped = map_style(style);
         let c = theme.resolve_color(spec.range_fill_token());
-        s.background = Some(JetstreamColor::from(c));
-        s.opacity = spec.normalized_progress() as f32;
-        JetstreamNodeHandle::new("slider", "SliderSpec", WidgetKind::Slider)
+        mapped.visuals.background = Some(JetstreamColor::from(c));
+        mapped.visuals.opacity = spec.normalized_progress() as f32;
+        JetstreamNodeHandle::new("slider", "SliderSpec", WidgetKind::Slider, mapped)
     }
 }
 
 impl RenderComponent<RangeSliderSpec> for JetstreamAdapter {
     type Target = JetstreamTarget;
     fn render(&self, spec: &RangeSliderSpec, style: &StyleDescriptor, theme: &dyn ThemeProvider) -> JetstreamNodeHandle {
-        let mut s = map_style(style);
+        let mut mapped = map_style(style);
         let range_c = theme.resolve_color(spec.range_fill_token());
-        s.background = Some(JetstreamColor::from(range_c));
+        mapped.visuals.background = Some(JetstreamColor::from(range_c));
         let track_c = theme.resolve_color(spec.track_fill_token());
-        s.border_color = Some(JetstreamColor::from(track_c));
-        JetstreamNodeHandle::new("range-slider", "RangeSliderSpec", WidgetKind::Slider)
+        mapped.visuals.border_color = Some(JetstreamColor::from(track_c));
+        JetstreamNodeHandle::new("range-slider", "RangeSliderSpec", WidgetKind::Slider, mapped)
     }
 }
 
 impl RenderComponent<SegmentedControlSpec> for JetstreamAdapter {
     type Target = JetstreamTarget;
     fn render(&self, spec: &SegmentedControlSpec, style: &StyleDescriptor, theme: &dyn ThemeProvider) -> JetstreamNodeHandle {
-        let mut s = map_style(style);
+        let mut mapped = map_style(style);
         let c = theme.resolve_color(spec.selected_fill_token());
-        s.background = Some(JetstreamColor::from(c));
-        JetstreamNodeHandle::new("segmented-control", "SegmentedControlSpec", WidgetKind::Panel)
+        mapped.visuals.background = Some(JetstreamColor::from(c));
+        JetstreamNodeHandle::new("segmented-control", "SegmentedControlSpec", WidgetKind::Panel, mapped)
     }
 }
 
 impl RenderComponent<TriStateSwitchSpec> for JetstreamAdapter {
     type Target = JetstreamTarget;
     fn render(&self, spec: &TriStateSwitchSpec, style: &StyleDescriptor, theme: &dyn ThemeProvider) -> JetstreamNodeHandle {
-        let mut s = map_style(style);
+        let mut mapped = map_style(style);
         let c = theme.resolve_color(spec.track_fill_token());
-        s.background = Some(JetstreamColor::from(c));
-        JetstreamNodeHandle::new("tri-state-switch", "TriStateSwitchSpec", WidgetKind::Button)
+        mapped.visuals.background = Some(JetstreamColor::from(c));
+        JetstreamNodeHandle::new("tri-state-switch", "TriStateSwitchSpec", WidgetKind::Button, mapped)
     }
 }
 

@@ -2,6 +2,7 @@
 
 use jetstream_runtime::game_ui::*;
 use pug_adapter::ThemeProvider;
+use pug_layout::{LayoutIntent, LayoutDirection, LayoutSizing, LayoutEdges, CrossAxisAlignment, MainAxisAlignment};
 
 use crate::theme_bridge;
 
@@ -13,12 +14,11 @@ pub fn render(tree: &mut UiTree, theme: &dyn ThemeProvider) -> UiNodeId {
     let bg_surface = theme_bridge::surface_background(theme);
     let border = theme_bridge::border_subtle(theme);
 
-    let root = tree.create(Widget::Panel, UiStyle {
-        direction: Direction::Column,
-        width: Sizing::Grow(1.0),
-        gap: 20.0,
-        ..UiStyle::default()
-    });
+    let root = tree.create_node(Widget::Panel, pug_jetstream::map_layout(&LayoutIntent::new()
+        .with_direction(LayoutDirection::Column)
+        .with_width(LayoutSizing::Grow)
+        .with_gap(20.0)),
+        NodeStyle::default());
 
     // ── Standard picker ──
     section_label(tree, root, "Standard Picker", text_secondary);
@@ -27,18 +27,16 @@ pub fn render(tree: &mut UiTree, theme: &dyn ThemeProvider) -> UiNodeId {
         tree.add_child(root, picker);
 
         // Search input
-        let search = tree.create(Widget::Panel, UiStyle {
-            direction: Direction::Row, gap: 6.0,
-            padding: Edges { top: 8.0, right: 12.0, bottom: 8.0, left: 12.0 },
-            background: Some(bg_surface),
-            align: Align::Center,
-            ..UiStyle::default()
-        });
+        let search = tree.create_node(Widget::Panel, pug_jetstream::map_layout(&LayoutIntent::new()
+            .with_direction(LayoutDirection::Row)
+            .with_gap(6.0)
+            .with_padding(LayoutEdges { top: 8.0, right: 12.0, bottom: 8.0, left: 12.0 })
+            .with_alignment(MainAxisAlignment::Start, CrossAxisAlignment::Center)),
+            NodeStyle { background: Some(bg_surface), ..NodeStyle::default() });
         tree.add_child(picker, search);
 
-        let search_lbl = tree.create(Widget::Label { text: "🔍 Search items…".to_string() }, UiStyle {
-            text_color: Some(text_secondary), text_size: Some(12.0), ..UiStyle::default()
-        });
+        let search_lbl = tree.create_node(Widget::Label { text: "\u{1f50d} Search items\u{2026}".to_string() }, pug_jetstream::map_layout(&LayoutIntent::new()),
+            NodeStyle { text_color: Some(text_secondary), text_size: Some(12.0), ..NodeStyle::default() });
         tree.add_child(search, search_lbl);
 
         // List
@@ -49,27 +47,29 @@ pub fn render(tree: &mut UiTree, theme: &dyn ThemeProvider) -> UiNodeId {
             ("Date", false),
             ("Elderberry", false),
         ] {
-            let item = tree.create(Widget::Panel, UiStyle {
-                direction: Direction::Row,
-                padding: Edges { top: 8.0, right: 12.0, bottom: 8.0, left: 12.0 },
-                gap: 8.0, align: Align::Center,
-                background: if selected { Some(theme_bridge::tint(accent, 0.08)) } else { None },
-                ..UiStyle::default()
-            });
+            let item = tree.create_node(Widget::Panel, pug_jetstream::map_layout(&LayoutIntent::new()
+                .with_direction(LayoutDirection::Row)
+                .with_padding(LayoutEdges { top: 8.0, right: 12.0, bottom: 8.0, left: 12.0 })
+                .with_gap(8.0)
+                .with_alignment(MainAxisAlignment::Start, CrossAxisAlignment::Center)),
+                NodeStyle {
+                    background: if selected { Some(theme_bridge::tint(accent, 0.08)) } else { None },
+                    ..NodeStyle::default()
+                });
             tree.add_child(picker, item);
 
-            let check = tree.create(Widget::Label {
-                text: if selected { "✓" } else { " " }.to_string(),
-            }, UiStyle {
-                text_color: Some(accent), text_size: Some(12.0),
-                width: Sizing::Fixed(16.0), ..UiStyle::default()
-            });
+            let check = tree.create_node(Widget::Label {
+                text: if selected { "\u{2713}" } else { " " }.to_string(),
+            }, pug_jetstream::map_layout(&LayoutIntent::new()
+                .with_width(LayoutSizing::Fixed(16.0))),
+                NodeStyle { text_color: Some(accent), text_size: Some(12.0), ..NodeStyle::default() });
             tree.add_child(item, check);
 
-            let lbl = tree.create(Widget::Label { text: name.to_string() }, UiStyle {
-                text_color: Some(if selected { accent } else { text_primary }),
-                text_size: Some(12.0), ..UiStyle::default()
-            });
+            let lbl = tree.create_node(Widget::Label { text: name.to_string() }, pug_jetstream::map_layout(&LayoutIntent::new()),
+                NodeStyle {
+                    text_color: Some(if selected { accent } else { text_primary }),
+                    text_size: Some(12.0), ..NodeStyle::default()
+                });
             tree.add_child(item, lbl);
         }
     }
@@ -80,29 +80,26 @@ pub fn render(tree: &mut UiTree, theme: &dyn ThemeProvider) -> UiNodeId {
         let picker = picker_frame(tree, bg_elevated, border);
         tree.add_child(root, picker);
 
-        let search = tree.create(Widget::Panel, UiStyle {
-            direction: Direction::Row, gap: 6.0,
-            padding: Edges { top: 8.0, right: 12.0, bottom: 8.0, left: 12.0 },
-            background: Some(bg_surface), align: Align::Center,
-            ..UiStyle::default()
-        });
+        let search = tree.create_node(Widget::Panel, pug_jetstream::map_layout(&LayoutIntent::new()
+            .with_direction(LayoutDirection::Row)
+            .with_gap(6.0)
+            .with_padding(LayoutEdges { top: 8.0, right: 12.0, bottom: 8.0, left: 12.0 })
+            .with_alignment(MainAxisAlignment::Start, CrossAxisAlignment::Center)),
+            NodeStyle { background: Some(bg_surface), ..NodeStyle::default() });
         tree.add_child(picker, search);
 
-        let search_lbl = tree.create(Widget::Label { text: "🔍 ber".to_string() }, UiStyle {
-            text_color: Some(text_primary), text_size: Some(12.0), ..UiStyle::default()
-        });
+        let search_lbl = tree.create_node(Widget::Label { text: "\u{1f50d} ber".to_string() }, pug_jetstream::map_layout(&LayoutIntent::new()),
+            NodeStyle { text_color: Some(text_primary), text_size: Some(12.0), ..NodeStyle::default() });
         tree.add_child(search, search_lbl);
 
         for &name in &["Blueberry", "Elderberry", "Strawberry"] {
-            let item = tree.create(Widget::Panel, UiStyle {
-                padding: Edges { top: 8.0, right: 12.0, bottom: 8.0, left: 12.0 },
-                ..UiStyle::default()
-            });
+            let item = tree.create_node(Widget::Panel, pug_jetstream::map_layout(&LayoutIntent::new()
+                .with_padding(LayoutEdges { top: 8.0, right: 12.0, bottom: 8.0, left: 12.0 })),
+                NodeStyle::default());
             tree.add_child(picker, item);
 
-            let lbl = tree.create(Widget::Label { text: name.to_string() }, UiStyle {
-                text_color: Some(text_primary), text_size: Some(12.0), ..UiStyle::default()
-            });
+            let lbl = tree.create_node(Widget::Label { text: name.to_string() }, pug_jetstream::map_layout(&LayoutIntent::new()),
+                NodeStyle { text_color: Some(text_primary), text_size: Some(12.0), ..NodeStyle::default() });
             tree.add_child(item, lbl);
         }
     }
@@ -111,19 +108,19 @@ pub fn render(tree: &mut UiTree, theme: &dyn ThemeProvider) -> UiNodeId {
 }
 
 fn picker_frame(tree: &mut UiTree, bg: glam::Vec4, border: glam::Vec4) -> UiNodeId {
-    tree.create(Widget::Panel, UiStyle {
-        direction: Direction::Column,
-        width: Sizing::Fixed(260.0),
-        background: Some(bg),
-        border_color: Some(border), border_width: 1.0,
-        corner_radii: [8.0; 4],
-        ..UiStyle::default()
-    })
+    tree.create_node(Widget::Panel, pug_jetstream::map_layout(&LayoutIntent::new()
+        .with_direction(LayoutDirection::Column)
+        .with_width(LayoutSizing::Fixed(260.0))),
+        NodeStyle {
+            background: Some(bg),
+            border_color: Some(border), border_width: 1.0,
+            corner_radii: [8.0; 4],
+            ..NodeStyle::default()
+        })
 }
 
 fn section_label(tree: &mut UiTree, parent: UiNodeId, text: &str, color: glam::Vec4) {
-    let lbl = tree.create(Widget::Label { text: text.to_string() }, UiStyle {
-        text_color: Some(color), text_size: Some(11.0), ..UiStyle::default()
-    });
+    let lbl = tree.create_node(Widget::Label { text: text.to_string() }, pug_jetstream::map_layout(&LayoutIntent::new()),
+        NodeStyle { text_color: Some(color), text_size: Some(11.0), ..NodeStyle::default() });
     tree.add_child(parent, lbl);
 }

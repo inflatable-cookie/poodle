@@ -22,377 +22,377 @@ use crate::{JetstreamAdapter, JetstreamNodeHandle, JetstreamTarget, WidgetKind};
 impl RenderComponent<ProgressSpec> for JetstreamAdapter {
     type Target = JetstreamTarget;
     fn render(&self, spec: &ProgressSpec, style: &StyleDescriptor, theme: &dyn ThemeProvider) -> JetstreamNodeHandle {
-        let mut js_style = map_style(style);
+        let mut mapped = map_style(style);
 
         // Resolve indicator fill color
         let fill_token = spec.indicator_fill_token();
         let c = theme.resolve_color(fill_token);
-        js_style.background = Some(JetstreamColor::from(c));
+        mapped.visuals.background = Some(JetstreamColor::from(c));
 
-        JetstreamNodeHandle::new("progress", "ProgressSpec", WidgetKind::ProgressBar)
+        JetstreamNodeHandle::new("progress", "ProgressSpec", WidgetKind::ProgressBar, mapped)
     }
 }
 
 impl RenderComponent<BadgeSpec> for JetstreamAdapter {
     type Target = JetstreamTarget;
     fn render(&self, spec: &BadgeSpec, style: &StyleDescriptor, theme: &dyn ThemeProvider) -> JetstreamNodeHandle {
-        let mut js_style = map_style(style);
+        let mut mapped = map_style(style);
 
         // Resolve badge fill color
         let fill_token = spec.fill_token();
         let c = theme.resolve_color(fill_token);
-        js_style.background = Some(JetstreamColor::from(c));
+        mapped.visuals.background = Some(JetstreamColor::from(c));
 
-        JetstreamNodeHandle::new("badge", "BadgeSpec", WidgetKind::Label)
+        JetstreamNodeHandle::new("badge", "BadgeSpec", WidgetKind::Label, mapped)
     }
 }
 
 impl RenderComponent<StatusIndicatorSpec> for JetstreamAdapter {
     type Target = JetstreamTarget;
     fn render(&self, spec: &StatusIndicatorSpec, style: &StyleDescriptor, theme: &dyn ThemeProvider) -> JetstreamNodeHandle {
-        let mut js_style = map_style(style);
+        let mut mapped = map_style(style);
 
         // Resolve status color
         let color_token = spec.status_color_token();
         let c = theme.resolve_color(color_token);
-        js_style.icon_color = Some(JetstreamColor::from(c));
+        mapped.visuals.icon_color = Some(JetstreamColor::from(c));
 
         // Use label for node id when available
         let node_id = spec.label.as_deref().unwrap_or("status-indicator");
-        JetstreamNodeHandle::new(node_id, "StatusIndicatorSpec", WidgetKind::Panel)
+        JetstreamNodeHandle::new(node_id, "StatusIndicatorSpec", WidgetKind::Panel, mapped)
     }
 }
 
 impl RenderComponent<SkeletonSpec> for JetstreamAdapter {
     type Target = JetstreamTarget;
     fn render(&self, spec: &SkeletonSpec, style: &StyleDescriptor, theme: &dyn ThemeProvider) -> JetstreamNodeHandle {
-        let mut js_style = map_style(style);
+        let mut mapped = map_style(style);
 
         // Resolve skeleton fill color
         let fill_token = spec.fill_token();
         let c = theme.resolve_color(fill_token);
-        js_style.background = Some(JetstreamColor::from(c));
+        mapped.visuals.background = Some(JetstreamColor::from(c));
 
         // Resolve corner radius
         let radius_token = spec.radius_token();
         let r = theme.resolve_space(radius_token);
-        js_style.corner_radii = [r; 4];
+        mapped.visuals.corner_radii = [r; 4];
 
-        JetstreamNodeHandle::new("skeleton", "SkeletonSpec", WidgetKind::Panel)
+        JetstreamNodeHandle::new("skeleton", "SkeletonSpec", WidgetKind::Panel, mapped)
     }
 }
 
 impl RenderComponent<MeterSpec> for JetstreamAdapter {
     type Target = JetstreamTarget;
     fn render(&self, spec: &MeterSpec, style: &StyleDescriptor, theme: &dyn ThemeProvider) -> JetstreamNodeHandle {
-        let mut js_style = map_style(style);
+        let mut mapped = map_style(style);
 
         // Resolve meter fill color (indicator)
         let fill_token = spec.fill_token();
         let c = theme.resolve_color(fill_token);
-        js_style.background = Some(JetstreamColor::from(c));
+        mapped.visuals.background = Some(JetstreamColor::from(c));
 
         // Resolve track fill color
         let track_token = spec.track_fill_token();
         let tc = theme.resolve_color(track_token);
-        js_style.border_color = Some(JetstreamColor::from(tc));
+        mapped.visuals.border_color = Some(JetstreamColor::from(tc));
 
-        JetstreamNodeHandle::new("meter", "MeterSpec", WidgetKind::ProgressBar)
+        JetstreamNodeHandle::new("meter", "MeterSpec", WidgetKind::ProgressBar, mapped)
     }
 }
 
 impl RenderComponent<RatingSpec> for JetstreamAdapter {
     type Target = JetstreamTarget;
     fn render(&self, spec: &RatingSpec, style: &StyleDescriptor, theme: &dyn ThemeProvider) -> JetstreamNodeHandle {
-        let mut js_style = map_style(style);
+        let mut mapped = map_style(style);
 
         // Resolve active (filled) star color
         let active_token = spec.active_color_token();
         let ac = theme.resolve_color(active_token);
-        js_style.icon_color = Some(JetstreamColor::from(ac));
+        mapped.visuals.icon_color = Some(JetstreamColor::from(ac));
 
         // Resolve inactive (empty) star color
         let inactive_token = spec.inactive_color_token();
         let ic = theme.resolve_color(inactive_token);
-        js_style.border_color = Some(JetstreamColor::from(ic));
+        mapped.visuals.border_color = Some(JetstreamColor::from(ic));
 
-        JetstreamNodeHandle::new("rating", "RatingSpec", WidgetKind::Panel)
+        JetstreamNodeHandle::new("rating", "RatingSpec", WidgetKind::Panel, mapped)
     }
 }
 
 impl RenderComponent<CodeSpec> for JetstreamAdapter {
     type Target = JetstreamTarget;
     fn render(&self, spec: &CodeSpec, style: &StyleDescriptor, theme: &dyn ThemeProvider) -> JetstreamNodeHandle {
-        let mut js_style = map_style(style);
+        let mut mapped = map_style(style);
 
         // Resolve code block fill color
         let fill_token = spec.fill_token();
         let fc = theme.resolve_color(fill_token);
-        js_style.background = Some(JetstreamColor::from(fc));
+        mapped.visuals.background = Some(JetstreamColor::from(fc));
 
         // Resolve text color
         let text_token = spec.text_color_token();
         let tc = theme.resolve_color(text_token);
-        js_style.text_color = Some(JetstreamColor::from(tc));
+        mapped.visuals.text_color = Some(JetstreamColor::from(tc));
 
         // Resolve border color
         let border_token = spec.border_token();
         let bc = theme.resolve_color(border_token);
-        js_style.border_color = Some(JetstreamColor::from(bc));
+        mapped.visuals.border_color = Some(JetstreamColor::from(bc));
 
-        // Font family — no typography field on JetstreamStyle; acknowledge token
+        // Font family — no typography field on JetstreamVisuals; acknowledge token
         let _font = spec.font_family_token();
 
         // Font size — resolve via space for proof; no typography field to apply
         let _font_size = theme.resolve_space(spec.font_size_token());
 
-        JetstreamNodeHandle::new("code", "CodeSpec", WidgetKind::Label)
+        JetstreamNodeHandle::new("code", "CodeSpec", WidgetKind::Label, mapped)
     }
 }
 
 impl RenderComponent<EyebrowSpec> for JetstreamAdapter {
     type Target = JetstreamTarget;
     fn render(&self, spec: &EyebrowSpec, style: &StyleDescriptor, theme: &dyn ThemeProvider) -> JetstreamNodeHandle {
-        let mut js_style = map_style(style);
+        let mut mapped = map_style(style);
 
         // Resolve text color
         let text_token = spec.text_color_token();
         let tc = theme.resolve_color(text_token);
-        js_style.text_color = Some(JetstreamColor::from(tc));
+        mapped.visuals.text_color = Some(JetstreamColor::from(tc));
 
         // Font size — resolve via space for proof; no typography field to apply
         let _font_size = theme.resolve_space(spec.font_size_token());
 
-        JetstreamNodeHandle::new("eyebrow", "EyebrowSpec", WidgetKind::Label)
+        JetstreamNodeHandle::new("eyebrow", "EyebrowSpec", WidgetKind::Label, mapped)
     }
 }
 
 impl RenderComponent<PillSpec> for JetstreamAdapter {
     type Target = JetstreamTarget;
     fn render(&self, spec: &PillSpec, style: &StyleDescriptor, theme: &dyn ThemeProvider) -> JetstreamNodeHandle {
-        let mut js_style = map_style(style);
+        let mut mapped = map_style(style);
 
         // Resolve pill fill color
         let fill_token = spec.fill_token();
         let fc = theme.resolve_color(fill_token);
-        js_style.background = Some(JetstreamColor::from(fc));
+        mapped.visuals.background = Some(JetstreamColor::from(fc));
 
         // Resolve text color
         let text_token = spec.text_color_token();
         let tc = theme.resolve_color(text_token);
-        js_style.text_color = Some(JetstreamColor::from(tc));
+        mapped.visuals.text_color = Some(JetstreamColor::from(tc));
 
         // Resolve focus ring color
         let ring_token = spec.focus_ring_color_token();
         let rc = theme.resolve_color(ring_token);
-        js_style.focus_ring_color = Some(JetstreamColor::from(rc));
+        mapped.visuals.focus_ring_color = Some(JetstreamColor::from(rc));
 
         // Use pill label for node id
         let node_id = if spec.label.is_empty() { "pill" } else { &spec.label };
-        JetstreamNodeHandle::new(node_id, "PillSpec", WidgetKind::Label)
+        JetstreamNodeHandle::new(node_id, "PillSpec", WidgetKind::Label, mapped)
     }
 }
 
 impl RenderComponent<TimeAgoSpec> for JetstreamAdapter {
     type Target = JetstreamTarget;
     fn render(&self, spec: &TimeAgoSpec, style: &StyleDescriptor, theme: &dyn ThemeProvider) -> JetstreamNodeHandle {
-        let mut js_style = map_style(style);
+        let mut mapped = map_style(style);
 
         // Resolve text color
         let text_token = spec.text_color_token();
         let tc = theme.resolve_color(text_token);
-        js_style.text_color = Some(JetstreamColor::from(tc));
+        mapped.visuals.text_color = Some(JetstreamColor::from(tc));
 
         // Font size — resolve via space for proof; no typography field to apply
         let _font_size = theme.resolve_space(spec.font_size_token());
 
-        JetstreamNodeHandle::new("time-ago", "TimeAgoSpec", WidgetKind::Label)
+        JetstreamNodeHandle::new("time-ago", "TimeAgoSpec", WidgetKind::Label, mapped)
     }
 }
 
 impl RenderComponent<SplitButtonSpec> for JetstreamAdapter {
     type Target = JetstreamTarget;
     fn render(&self, spec: &SplitButtonSpec, style: &StyleDescriptor, theme: &dyn ThemeProvider) -> JetstreamNodeHandle {
-        let mut js_style = map_style(style);
+        let mut mapped = map_style(style);
 
         // Resolve fill color
         let fill_token = spec.fill_token();
         let fc = theme.resolve_color(fill_token);
-        js_style.background = Some(JetstreamColor::from(fc));
+        mapped.visuals.background = Some(JetstreamColor::from(fc));
 
         // Resolve border color
         let border_token = spec.border_token();
         let bc = theme.resolve_color(border_token);
-        js_style.border_color = Some(JetstreamColor::from(bc));
+        mapped.visuals.border_color = Some(JetstreamColor::from(bc));
 
         // Resolve separator color — map to icon_color as visual separator indicator
         let separator_token = spec.separator_token();
         let sc = theme.resolve_color(separator_token);
-        js_style.icon_color = Some(JetstreamColor::from(sc));
+        mapped.visuals.icon_color = Some(JetstreamColor::from(sc));
 
         // Resolve overlay fill — secondary background for dropdown region
         let overlay_token = spec.overlay_fill_token();
         let oc = theme.resolve_color(overlay_token);
-        js_style.text_color = Some(JetstreamColor::from(oc));
+        mapped.visuals.text_color = Some(JetstreamColor::from(oc));
 
-        // Resolve shadow (no shadow field on JetstreamStyle — resolve for proof)
+        // Resolve shadow (no shadow field on JetstreamVisuals — resolve for proof)
         let _shadow = theme.resolve_color(spec.shadow_token());
 
-        JetstreamNodeHandle::new("split-button", "SplitButtonSpec", WidgetKind::Button)
+        JetstreamNodeHandle::new("split-button", "SplitButtonSpec", WidgetKind::Button, mapped)
     }
 }
 
 impl RenderComponent<ColorPickerSpec> for JetstreamAdapter {
     type Target = JetstreamTarget;
     fn render(&self, spec: &ColorPickerSpec, style: &StyleDescriptor, theme: &dyn ThemeProvider) -> JetstreamNodeHandle {
-        let mut js_style = map_style(style);
+        let mut mapped = map_style(style);
 
         // Resolve border color
         let border_token = spec.border_token();
         let bc = theme.resolve_color(border_token);
-        js_style.border_color = Some(JetstreamColor::from(bc));
+        mapped.visuals.border_color = Some(JetstreamColor::from(bc));
 
         // Resolve overlay fill
         let overlay_token = spec.overlay_fill_token();
         let oc = theme.resolve_color(overlay_token);
-        js_style.background = Some(JetstreamColor::from(oc));
+        mapped.visuals.background = Some(JetstreamColor::from(oc));
 
-        // Resolve shadow (no shadow field on JetstreamStyle — resolve for proof)
+        // Resolve shadow (no shadow field on JetstreamVisuals — resolve for proof)
         let _shadow = theme.resolve_color(spec.shadow_token());
 
-        JetstreamNodeHandle::new("color-picker", "ColorPickerSpec", WidgetKind::Panel)
+        JetstreamNodeHandle::new("color-picker", "ColorPickerSpec", WidgetKind::Panel, mapped)
     }
 }
 
 impl RenderComponent<FileUploadSpec> for JetstreamAdapter {
     type Target = JetstreamTarget;
     fn render(&self, spec: &FileUploadSpec, style: &StyleDescriptor, theme: &dyn ThemeProvider) -> JetstreamNodeHandle {
-        let mut js_style = map_style(style);
+        let mut mapped = map_style(style);
 
         // Resolve fill color
         let fill_token = spec.fill_token();
         let fc = theme.resolve_color(fill_token);
-        js_style.background = Some(JetstreamColor::from(fc));
+        mapped.visuals.background = Some(JetstreamColor::from(fc));
 
         // Resolve border color
         let border_token = spec.border_token();
         let bc = theme.resolve_color(border_token);
-        js_style.border_color = Some(JetstreamColor::from(bc));
+        mapped.visuals.border_color = Some(JetstreamColor::from(bc));
 
         // Resolve text color
         let text_token = spec.text_color_token();
         let tc = theme.resolve_color(text_token);
-        js_style.text_color = Some(JetstreamColor::from(tc));
+        mapped.visuals.text_color = Some(JetstreamColor::from(tc));
 
-        JetstreamNodeHandle::new("file-upload", "FileUploadSpec", WidgetKind::Panel)
+        JetstreamNodeHandle::new("file-upload", "FileUploadSpec", WidgetKind::Panel, mapped)
     }
 }
 
 impl RenderComponent<DurationInputSpec> for JetstreamAdapter {
     type Target = JetstreamTarget;
     fn render(&self, spec: &DurationInputSpec, style: &StyleDescriptor, theme: &dyn ThemeProvider) -> JetstreamNodeHandle {
-        let mut js_style = map_style(style);
+        let mut mapped = map_style(style);
 
         // Resolve border color
         let border_token = spec.border_token();
         let bc = theme.resolve_color(border_token);
-        js_style.border_color = Some(JetstreamColor::from(bc));
+        mapped.visuals.border_color = Some(JetstreamColor::from(bc));
 
         // Resolve focus ring color
         let ring_token = spec.focus_ring_color_token();
         let rc = theme.resolve_color(ring_token);
-        js_style.focus_ring_color = Some(JetstreamColor::from(rc));
+        mapped.visuals.focus_ring_color = Some(JetstreamColor::from(rc));
 
-        JetstreamNodeHandle::new("duration-input", "DurationInputSpec", WidgetKind::TextInput)
+        JetstreamNodeHandle::new("duration-input", "DurationInputSpec", WidgetKind::TextInput, mapped)
     }
 }
 
 impl RenderComponent<TimeZoneSelectSpec> for JetstreamAdapter {
     type Target = JetstreamTarget;
     fn render(&self, spec: &TimeZoneSelectSpec, style: &StyleDescriptor, theme: &dyn ThemeProvider) -> JetstreamNodeHandle {
-        let mut js_style = map_style(style);
+        let mut mapped = map_style(style);
 
         // Resolve border color
         let border_token = spec.border_token();
         let bc = theme.resolve_color(border_token);
-        js_style.border_color = Some(JetstreamColor::from(bc));
+        mapped.visuals.border_color = Some(JetstreamColor::from(bc));
 
         // Resolve overlay fill
         let overlay_token = spec.overlay_fill_token();
         let oc = theme.resolve_color(overlay_token);
-        js_style.background = Some(JetstreamColor::from(oc));
+        mapped.visuals.background = Some(JetstreamColor::from(oc));
 
-        JetstreamNodeHandle::new("time-zone-select", "TimeZoneSelectSpec", WidgetKind::Button)
+        JetstreamNodeHandle::new("time-zone-select", "TimeZoneSelectSpec", WidgetKind::Button, mapped)
     }
 }
 
 impl RenderComponent<ZonedDateTimePickerSpec> for JetstreamAdapter {
     type Target = JetstreamTarget;
     fn render(&self, spec: &ZonedDateTimePickerSpec, style: &StyleDescriptor, theme: &dyn ThemeProvider) -> JetstreamNodeHandle {
-        let mut js_style = map_style(style);
+        let mut mapped = map_style(style);
 
         // Resolve border color
         let border_token = spec.border_token();
         let bc = theme.resolve_color(border_token);
-        js_style.border_color = Some(JetstreamColor::from(bc));
+        mapped.visuals.border_color = Some(JetstreamColor::from(bc));
 
         // Resolve overlay fill
         let overlay_token = spec.overlay_fill_token();
         let oc = theme.resolve_color(overlay_token);
-        js_style.background = Some(JetstreamColor::from(oc));
+        mapped.visuals.background = Some(JetstreamColor::from(oc));
 
-        // Resolve shadow (no shadow field on JetstreamStyle — resolve for proof)
+        // Resolve shadow (no shadow field on JetstreamVisuals — resolve for proof)
         let _shadow = theme.resolve_color(spec.shadow_token());
 
-        JetstreamNodeHandle::new("zoned-date-time-picker", "ZonedDateTimePickerSpec", WidgetKind::Panel)
+        JetstreamNodeHandle::new("zoned-date-time-picker", "ZonedDateTimePickerSpec", WidgetKind::Panel, mapped)
     }
 }
 
 impl RenderComponent<CalendarSpec> for JetstreamAdapter {
     type Target = JetstreamTarget;
     fn render(&self, _spec: &CalendarSpec, style: &StyleDescriptor, _theme: &dyn ThemeProvider) -> JetstreamNodeHandle {
-        let _s = map_style(style);
-        JetstreamNodeHandle::new("calendar", "CalendarSpec", WidgetKind::Panel)
+        let mapped = map_style(style);
+        JetstreamNodeHandle::new("calendar", "CalendarSpec", WidgetKind::Panel, mapped)
     }
 }
 
 impl RenderComponent<RangeCalendarSpec> for JetstreamAdapter {
     type Target = JetstreamTarget;
     fn render(&self, _spec: &RangeCalendarSpec, style: &StyleDescriptor, _theme: &dyn ThemeProvider) -> JetstreamNodeHandle {
-        let _s = map_style(style);
-        JetstreamNodeHandle::new("range-calendar", "RangeCalendarSpec", WidgetKind::Panel)
+        let mapped = map_style(style);
+        JetstreamNodeHandle::new("range-calendar", "RangeCalendarSpec", WidgetKind::Panel, mapped)
     }
 }
 
 impl RenderComponent<DatePickerSpec> for JetstreamAdapter {
     type Target = JetstreamTarget;
     fn render(&self, _spec: &DatePickerSpec, style: &StyleDescriptor, _theme: &dyn ThemeProvider) -> JetstreamNodeHandle {
-        let _s = map_style(style);
-        JetstreamNodeHandle::new("date-picker", "DatePickerSpec", WidgetKind::Panel)
+        let mapped = map_style(style);
+        JetstreamNodeHandle::new("date-picker", "DatePickerSpec", WidgetKind::Panel, mapped)
     }
 }
 
 impl RenderComponent<DateRangePickerSpec> for JetstreamAdapter {
     type Target = JetstreamTarget;
     fn render(&self, _spec: &DateRangePickerSpec, style: &StyleDescriptor, _theme: &dyn ThemeProvider) -> JetstreamNodeHandle {
-        let _s = map_style(style);
-        JetstreamNodeHandle::new("date-range-picker", "DateRangePickerSpec", WidgetKind::Panel)
+        let mapped = map_style(style);
+        JetstreamNodeHandle::new("date-range-picker", "DateRangePickerSpec", WidgetKind::Panel, mapped)
     }
 }
 
 impl RenderComponent<DateTimePickerSpec> for JetstreamAdapter {
     type Target = JetstreamTarget;
     fn render(&self, _spec: &DateTimePickerSpec, style: &StyleDescriptor, _theme: &dyn ThemeProvider) -> JetstreamNodeHandle {
-        let _s = map_style(style);
-        JetstreamNodeHandle::new("date-time-picker", "DateTimePickerSpec", WidgetKind::Panel)
+        let mapped = map_style(style);
+        JetstreamNodeHandle::new("date-time-picker", "DateTimePickerSpec", WidgetKind::Panel, mapped)
     }
 }
 
 impl RenderComponent<DateTimeRangePickerSpec> for JetstreamAdapter {
     type Target = JetstreamTarget;
     fn render(&self, _spec: &DateTimeRangePickerSpec, style: &StyleDescriptor, _theme: &dyn ThemeProvider) -> JetstreamNodeHandle {
-        let _s = map_style(style);
-        JetstreamNodeHandle::new("date-time-range-picker", "DateTimeRangePickerSpec", WidgetKind::Panel)
+        let mapped = map_style(style);
+        JetstreamNodeHandle::new("date-time-range-picker", "DateTimeRangePickerSpec", WidgetKind::Panel, mapped)
     }
 }
 

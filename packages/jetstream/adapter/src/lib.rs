@@ -51,9 +51,8 @@ mod style_map;
 mod theme;
 
 pub use style_map::{
-    map_layout, map_style, JetstreamAlign, JetstreamBoxShadow, JetstreamColor,
-    JetstreamDirection, JetstreamEdges, JetstreamJustify, JetstreamOverflow,
-    JetstreamPosition, JetstreamSizing, JetstreamStyle,
+    map_layout, map_style, JetstreamBoxShadow, JetstreamColor,
+    JetstreamEdges, JetstreamMappedStyle, JetstreamVisuals,
 };
 pub use theme::JetstreamThemeProvider;
 
@@ -72,16 +71,17 @@ pub enum WidgetKind {
     TextInput,
 }
 
-/// Opaque handle to a rendered Jetstream UI node.
+/// Handle to a rendered Jetstream UI node, carrying the fully resolved style.
 ///
-/// In the real Jetstream integration this would be a `UiNodeId` (generational
-/// index into `UiTree`). For now it wraps identifiers so the adapter can be
-/// tested and compiled without a Jetstream runtime dependency.
-#[derive(Debug, Clone, PartialEq)]
+/// Produced by `RenderComponent::render()` implementations. The `mapped` field
+/// contains the resolved `taffy::Style` layout and `JetstreamVisuals` that the
+/// preview bridge converts into actual `UiTree` nodes.
+#[derive(Debug, Clone)]
 pub struct JetstreamNodeHandle {
     pub node_id: String,
     pub spec_type: &'static str,
     pub widget_kind: WidgetKind,
+    pub mapped: JetstreamMappedStyle,
 }
 
 impl JetstreamNodeHandle {
@@ -89,11 +89,13 @@ impl JetstreamNodeHandle {
         node_id: impl Into<String>,
         spec_type: &'static str,
         widget_kind: WidgetKind,
+        mapped: JetstreamMappedStyle,
     ) -> Self {
         Self {
             node_id: node_id.into(),
             spec_type,
             widget_kind,
+            mapped,
         }
     }
 }
@@ -201,7 +203,7 @@ mod tests {
 
     #[test]
     fn jetstream_target_produces_node_handles() {
-        let handle = JetstreamNodeHandle::new("btn-1", "ButtonSpec", WidgetKind::Button);
+        let handle = JetstreamNodeHandle::new("btn-1", "ButtonSpec", WidgetKind::Button, JetstreamMappedStyle::default());
         assert_eq!(handle.node_id, "btn-1");
         assert_eq!(handle.spec_type, "ButtonSpec");
         assert_eq!(handle.widget_kind, WidgetKind::Button);

@@ -17,6 +17,7 @@
   import PrimitivesSection from "./sections/PrimitivesSection.svelte";
   import CompositesSection from "./sections/CompositesSection.svelte";
   import ShellsSection from "./sections/ShellsSection.svelte";
+  import WorkstationSection from "./sections/WorkstationSection.svelte";
   import TokensSection from "./sections/TokensSection.svelte";
   import { parseRoute, type Route, type SectionId } from "./router";
 
@@ -30,6 +31,7 @@
     { value: "primitives", label: "Primitives" },
     { value: "composites", label: "Composites" },
     { value: "shells", label: "Shells" },
+    { value: "workstation", label: "Workstation" },
     { value: "tokens", label: "Tokens" },
   ];
 
@@ -174,6 +176,8 @@
       <CompositesSection activeComponent={route.component} />
     {:else if activeSection === "shells"}
       <ShellsSection activeComponent={route.component} />
+    {:else if activeSection === "workstation"}
+      <WorkstationSection activeComponent={route.component} />
     {:else if activeSection === "tokens"}
       <TokensSection {liveTokenValues} />
     {/if}

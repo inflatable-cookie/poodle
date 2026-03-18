@@ -12,6 +12,7 @@ export { default as Checkbox } from "./Checkbox.svelte";
 export { default as Calendar } from "./Calendar.svelte";
 export { default as Combobox } from "./Combobox.svelte";
 export { default as ContextMenu } from "./ContextMenu.svelte";
+export { default as CollapseToggle } from "./CollapseToggle.svelte";
 export { default as Collapsible } from "./Collapsible.svelte";
 export { default as DetailRow } from "./DetailRow.svelte";
 export { default as DatePicker } from "./DatePicker.svelte";
@@ -86,6 +87,7 @@ export type {
   ButtonTone,
   ButtonVariant,
   CalendarWeekStart,
+  CollapseDirection,
   ComboboxOption,
   ControlSize,
   DateTimeValue,

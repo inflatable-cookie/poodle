@@ -2,6 +2,7 @@
 
 use jetstream_runtime::game_ui::*;
 use pug_adapter::ThemeProvider;
+use pug_layout::{LayoutIntent, LayoutDirection, LayoutSizing, LayoutEdges, CrossAxisAlignment, MainAxisAlignment};
 
 use crate::theme_bridge;
 
@@ -13,12 +14,11 @@ pub fn render(tree: &mut UiTree, theme: &dyn ThemeProvider) -> UiNodeId {
     let border = theme_bridge::border_default(theme);
     let accent = theme_bridge::accent_base(theme);
 
-    let root = tree.create(Widget::Panel, UiStyle {
-        direction: Direction::Column,
-        width: Sizing::Grow(1.0),
-        gap: 16.0,
-        ..UiStyle::default()
-    });
+    let root = tree.create_node(Widget::Panel, pug_jetstream::map_layout(&LayoutIntent::new()
+        .with_direction(LayoutDirection::Column)
+        .with_width(LayoutSizing::Grow)
+        .with_gap(16.0)),
+        NodeStyle::default());
 
     // ── Placeholder ──
     label(tree, root, "Placeholder", text_secondary);
@@ -31,77 +31,53 @@ pub fn render(tree: &mut UiTree, theme: &dyn ThemeProvider) -> UiNodeId {
     // ── Open (showing options) ──
     label(tree, root, "Open State", text_secondary);
     {
-        let container = tree.create(Widget::Panel, UiStyle {
-            direction: Direction::Column,
-            width: Sizing::Fixed(240.0),
-            gap: 4.0,
-            ..UiStyle::default()
-        });
+        let container = tree.create_node(Widget::Panel, pug_jetstream::map_layout(&LayoutIntent::new()
+            .with_direction(LayoutDirection::Column)
+            .with_width(LayoutSizing::Fixed(240.0))
+            .with_gap(4.0)),
+            NodeStyle::default());
         tree.add_child(root, container);
 
         // Trigger (focused)
-        let trigger = tree.create(Widget::Panel, UiStyle {
-            direction: Direction::Row,
-            width: Sizing::Grow(1.0),
-            height: Sizing::Fixed(32.0),
-            padding: Edges { top: 0.0, right: 10.0, bottom: 0.0, left: 10.0 },
-            background: Some(bg_canvas),
-            border_color: Some(accent),
-            border_width: 2.0,
-            corner_radii: [6.0; 4],
-            align: Align::Center,
-            justify: Justify::SpaceBetween,
-            ..UiStyle::default()
-        });
+        let trigger = tree.create_node(Widget::Panel, pug_jetstream::map_layout(&LayoutIntent::new()
+            .with_direction(LayoutDirection::Row)
+            .with_width(LayoutSizing::Grow)
+            .with_height(LayoutSizing::Fixed(32.0))
+            .with_padding(LayoutEdges { top: 0.0, right: 10.0, bottom: 0.0, left: 10.0 })
+            .with_alignment(MainAxisAlignment::SpaceBetween, CrossAxisAlignment::Center)),
+            NodeStyle { background: Some(bg_canvas), border_color: Some(accent), border_width: 2.0, corner_radii: [6.0; 4], ..NodeStyle::default() });
         tree.add_child(container, trigger);
 
-        let val = tree.create(Widget::Label { text: "Option B".to_string() }, UiStyle {
-            text_color: Some(text_primary),
-            text_size: Some(12.0),
-            ..UiStyle::default()
-        });
+        let val = tree.create_node(Widget::Label { text: "Option B".to_string() }, pug_jetstream::map_layout(&LayoutIntent::new()),
+            NodeStyle { text_color: Some(text_primary), text_size: Some(12.0), ..NodeStyle::default() });
         tree.add_child(trigger, val);
 
-        let arrow = tree.create(Widget::Label { text: "▴".to_string() }, UiStyle {
-            text_color: Some(text_secondary),
-            text_size: Some(10.0),
-            ..UiStyle::default()
-        });
+        let arrow = tree.create_node(Widget::Label { text: "▴".to_string() }, pug_jetstream::map_layout(&LayoutIntent::new()),
+            NodeStyle { text_color: Some(text_secondary), text_size: Some(10.0), ..NodeStyle::default() });
         tree.add_child(trigger, arrow);
 
         // Dropdown
-        let dropdown = tree.create(Widget::Panel, UiStyle {
-            direction: Direction::Column,
-            width: Sizing::Grow(1.0),
-            padding: Edges::all(4.0),
-            gap: 1.0,
-            background: Some(bg_elevated),
-            border_color: Some(border),
-            border_width: 1.0,
-            corner_radii: [6.0; 4],
-            ..UiStyle::default()
-        });
+        let dropdown = tree.create_node(Widget::Panel, pug_jetstream::map_layout(&LayoutIntent::new()
+            .with_direction(LayoutDirection::Column)
+            .with_width(LayoutSizing::Grow)
+            .with_padding(LayoutEdges::uniform(4.0))
+            .with_gap(1.0)),
+            NodeStyle { background: Some(bg_elevated), border_color: Some(border), border_width: 1.0, corner_radii: [6.0; 4], ..NodeStyle::default() });
         tree.add_child(container, dropdown);
 
         let options = ["Option A", "Option B", "Option C", "Option D"];
         for (i, &opt) in options.iter().enumerate() {
             let selected = i == 1;
-            let item = tree.create(Widget::Panel, UiStyle {
-                width: Sizing::Grow(1.0),
-                height: Sizing::Fixed(28.0),
-                padding: Edges { top: 0.0, right: 8.0, bottom: 0.0, left: 8.0 },
-                corner_radii: [4.0; 4],
-                background: if selected { Some(theme_bridge::tint(accent, 0.15)) } else { None },
-                align: Align::Center,
-                ..UiStyle::default()
-            });
+            let item = tree.create_node(Widget::Panel, pug_jetstream::map_layout(&LayoutIntent::new()
+                .with_width(LayoutSizing::Grow)
+                .with_height(LayoutSizing::Fixed(28.0))
+                .with_padding(LayoutEdges { top: 0.0, right: 8.0, bottom: 0.0, left: 8.0 })
+                .with_alignment(MainAxisAlignment::Start, CrossAxisAlignment::Center)),
+                NodeStyle { corner_radii: [4.0; 4], background: if selected { Some(theme_bridge::tint(accent, 0.15)) } else { None }, ..NodeStyle::default() });
             tree.add_child(dropdown, item);
 
-            let lbl = tree.create(Widget::Label { text: opt.to_string() }, UiStyle {
-                text_color: Some(if selected { accent } else { text_primary }),
-                text_size: Some(12.0),
-                ..UiStyle::default()
-            });
+            let lbl = tree.create_node(Widget::Label { text: opt.to_string() }, pug_jetstream::map_layout(&LayoutIntent::new()),
+                NodeStyle { text_color: Some(if selected { accent } else { text_primary }), text_size: Some(12.0), ..NodeStyle::default() });
             tree.add_child(item, lbl);
         }
     }
@@ -109,34 +85,21 @@ pub fn render(tree: &mut UiTree, theme: &dyn ThemeProvider) -> UiNodeId {
     // ── Disabled ──
     label(tree, root, "Disabled", text_secondary);
     {
-        let trigger = tree.create(Widget::Panel, UiStyle {
-            direction: Direction::Row,
-            width: Sizing::Fixed(240.0),
-            height: Sizing::Fixed(32.0),
-            padding: Edges { top: 0.0, right: 10.0, bottom: 0.0, left: 10.0 },
-            background: Some(bg_canvas),
-            border_color: Some(theme_bridge::border_subtle(theme)),
-            border_width: 1.0,
-            corner_radii: [6.0; 4],
-            align: Align::Center,
-            justify: Justify::SpaceBetween,
-            opacity: 0.5,
-            ..UiStyle::default()
-        });
+        let trigger = tree.create_node(Widget::Panel, pug_jetstream::map_layout(&LayoutIntent::new()
+            .with_direction(LayoutDirection::Row)
+            .with_width(LayoutSizing::Fixed(240.0))
+            .with_height(LayoutSizing::Fixed(32.0))
+            .with_padding(LayoutEdges { top: 0.0, right: 10.0, bottom: 0.0, left: 10.0 })
+            .with_alignment(MainAxisAlignment::SpaceBetween, CrossAxisAlignment::Center)),
+            NodeStyle { background: Some(bg_canvas), border_color: Some(theme_bridge::border_subtle(theme)), border_width: 1.0, corner_radii: [6.0; 4], opacity: 0.5, ..NodeStyle::default() });
         tree.add_child(root, trigger);
 
-        let val = tree.create(Widget::Label { text: "Option A".to_string() }, UiStyle {
-            text_color: Some(text_secondary),
-            text_size: Some(12.0),
-            ..UiStyle::default()
-        });
+        let val = tree.create_node(Widget::Label { text: "Option A".to_string() }, pug_jetstream::map_layout(&LayoutIntent::new()),
+            NodeStyle { text_color: Some(text_secondary), text_size: Some(12.0), ..NodeStyle::default() });
         tree.add_child(trigger, val);
 
-        let arrow = tree.create(Widget::Label { text: "▾".to_string() }, UiStyle {
-            text_color: Some(text_secondary),
-            text_size: Some(10.0),
-            ..UiStyle::default()
-        });
+        let arrow = tree.create_node(Widget::Label { text: "▾".to_string() }, pug_jetstream::map_layout(&LayoutIntent::new()),
+            NodeStyle { text_color: Some(text_secondary), text_size: Some(10.0), ..NodeStyle::default() });
         tree.add_child(trigger, arrow);
     }
 
@@ -144,41 +107,26 @@ pub fn render(tree: &mut UiTree, theme: &dyn ThemeProvider) -> UiNodeId {
 }
 
 fn label(tree: &mut UiTree, parent: UiNodeId, text: &str, color: glam::Vec4) {
-    let lbl = tree.create(Widget::Label { text: text.to_string() }, UiStyle {
-        text_color: Some(color),
-        text_size: Some(11.0),
-        ..UiStyle::default()
-    });
+    let lbl = tree.create_node(Widget::Label { text: text.to_string() }, pug_jetstream::map_layout(&LayoutIntent::new()),
+        NodeStyle { text_color: Some(color), text_size: Some(11.0), ..NodeStyle::default() });
     tree.add_child(parent, lbl);
 }
 
 fn select_trigger(tree: &mut UiTree, parent: UiNodeId, text: &str, text_color: glam::Vec4, bg: glam::Vec4, border: glam::Vec4) {
-    let trigger = tree.create(Widget::Panel, UiStyle {
-        direction: Direction::Row,
-        width: Sizing::Fixed(240.0),
-        height: Sizing::Fixed(32.0),
-        padding: Edges { top: 0.0, right: 10.0, bottom: 0.0, left: 10.0 },
-        background: Some(bg),
-        border_color: Some(border),
-        border_width: 1.0,
-        corner_radii: [6.0; 4],
-        align: Align::Center,
-        justify: Justify::SpaceBetween,
-        ..UiStyle::default()
-    });
+    let trigger = tree.create_node(Widget::Panel, pug_jetstream::map_layout(&LayoutIntent::new()
+        .with_direction(LayoutDirection::Row)
+        .with_width(LayoutSizing::Fixed(240.0))
+        .with_height(LayoutSizing::Fixed(32.0))
+        .with_padding(LayoutEdges { top: 0.0, right: 10.0, bottom: 0.0, left: 10.0 })
+        .with_alignment(MainAxisAlignment::SpaceBetween, CrossAxisAlignment::Center)),
+        NodeStyle { background: Some(bg), border_color: Some(border), border_width: 1.0, corner_radii: [6.0; 4], ..NodeStyle::default() });
     tree.add_child(parent, trigger);
 
-    let val = tree.create(Widget::Label { text: text.to_string() }, UiStyle {
-        text_color: Some(text_color),
-        text_size: Some(12.0),
-        ..UiStyle::default()
-    });
+    let val = tree.create_node(Widget::Label { text: text.to_string() }, pug_jetstream::map_layout(&LayoutIntent::new()),
+        NodeStyle { text_color: Some(text_color), text_size: Some(12.0), ..NodeStyle::default() });
     tree.add_child(trigger, val);
 
-    let arrow = tree.create(Widget::Label { text: "▾".to_string() }, UiStyle {
-        text_color: Some(theme_bridge::tint(text_color, 0.6)),
-        text_size: Some(10.0),
-        ..UiStyle::default()
-    });
+    let arrow = tree.create_node(Widget::Label { text: "▾".to_string() }, pug_jetstream::map_layout(&LayoutIntent::new()),
+        NodeStyle { text_color: Some(theme_bridge::tint(text_color, 0.6)), text_size: Some(10.0), ..NodeStyle::default() });
     tree.add_child(trigger, arrow);
 }

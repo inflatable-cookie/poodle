@@ -13,3 +13,5 @@ pug-composites = { path = "../../contracts/composites" }
 pug-workstation = { path = "../../contracts/workstation" }
 pug-style = { path = "../../contracts/style" }
 pug-tokens = { path = "../../contracts/tokens" }
+taffy = "0.9"
+glam = "0.29"

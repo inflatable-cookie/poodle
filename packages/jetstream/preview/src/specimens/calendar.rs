@@ -2,6 +2,7 @@
 
 use jetstream_runtime::game_ui::*;
 use pug_adapter::ThemeProvider;
+use pug_layout::{CrossAxisAlignment, LayoutDirection, LayoutEdges, LayoutIntent, LayoutSizing, MainAxisAlignment};
 
 use crate::theme_bridge;
 
@@ -13,12 +14,16 @@ pub fn render(tree: &mut UiTree, theme: &dyn ThemeProvider) -> UiNodeId {
     let bg_elevated = theme_bridge::elevated_background(theme);
     let border = theme_bridge::border_subtle(theme);
 
-    let root = tree.create(Widget::Panel, UiStyle {
-        direction: Direction::Column,
-        width: Sizing::Grow(1.0),
-        gap: 20.0,
-        ..UiStyle::default()
-    });
+    let root = tree.create_node(
+        Widget::Panel,
+        pug_jetstream::map_layout(
+            &LayoutIntent::new()
+                .with_direction(LayoutDirection::Column)
+                .with_width(LayoutSizing::Grow)
+                .with_gap(20.0),
+        ),
+        NodeStyle::default(),
+    );
 
     // ── Standard calendar ──
     section_label(tree, root, "March 2026", text_secondary);
@@ -27,29 +32,38 @@ pub fn render(tree: &mut UiTree, theme: &dyn ThemeProvider) -> UiNodeId {
         tree.add_child(root, cal);
 
         // Navigation header
-        let nav = tree.create(Widget::Panel, UiStyle {
-            direction: Direction::Row,
-            width: Sizing::Grow(1.0),
-            padding: Edges { top: 12.0, right: 12.0, bottom: 8.0, left: 12.0 },
-            align: Align::Center,
-            justify: Justify::SpaceBetween,
-            ..UiStyle::default()
-        });
+        let nav = tree.create_node(
+            Widget::Panel,
+            pug_jetstream::map_layout(
+                &LayoutIntent::new()
+                    .with_direction(LayoutDirection::Row)
+                    .with_width(LayoutSizing::Grow)
+                    .with_padding(LayoutEdges { top: 12.0, right: 12.0, bottom: 8.0, left: 12.0 })
+                    .with_alignment(MainAxisAlignment::SpaceBetween, CrossAxisAlignment::Center),
+            ),
+            NodeStyle::default(),
+        );
         tree.add_child(cal, nav);
 
-        let prev = tree.create(Widget::Label { text: "◂".to_string() }, UiStyle {
-            text_color: Some(text_secondary), text_size: Some(14.0), ..UiStyle::default()
-        });
+        let prev = tree.create_node(
+            Widget::Label { text: "◂".to_string() },
+            pug_jetstream::map_layout(&LayoutIntent::new()),
+            NodeStyle { text_color: Some(text_secondary), text_size: Some(14.0), ..NodeStyle::default() },
+        );
         tree.add_child(nav, prev);
 
-        let month = tree.create(Widget::Label { text: "March 2026".to_string() }, UiStyle {
-            text_color: Some(text_primary), text_size: Some(13.0), ..UiStyle::default()
-        });
+        let month = tree.create_node(
+            Widget::Label { text: "March 2026".to_string() },
+            pug_jetstream::map_layout(&LayoutIntent::new()),
+            NodeStyle { text_color: Some(text_primary), text_size: Some(13.0), ..NodeStyle::default() },
+        );
         tree.add_child(nav, month);
 
-        let next = tree.create(Widget::Label { text: "▸".to_string() }, UiStyle {
-            text_color: Some(text_secondary), text_size: Some(14.0), ..UiStyle::default()
-        });
+        let next = tree.create_node(
+            Widget::Label { text: "▸".to_string() },
+            pug_jetstream::map_layout(&LayoutIntent::new()),
+            NodeStyle { text_color: Some(text_secondary), text_size: Some(14.0), ..NodeStyle::default() },
+        );
         tree.add_child(nav, next);
 
         // Day-of-week headers
@@ -85,18 +99,24 @@ pub fn render(tree: &mut UiTree, theme: &dyn ThemeProvider) -> UiNodeId {
         let cal = calendar_card(tree, bg_elevated, border);
         tree.add_child(root, cal);
 
-        let nav = tree.create(Widget::Panel, UiStyle {
-            direction: Direction::Row,
-            width: Sizing::Grow(1.0),
-            padding: Edges { top: 12.0, right: 12.0, bottom: 8.0, left: 12.0 },
-            align: Align::Center, justify: Justify::Center,
-            ..UiStyle::default()
-        });
+        let nav = tree.create_node(
+            Widget::Panel,
+            pug_jetstream::map_layout(
+                &LayoutIntent::new()
+                    .with_direction(LayoutDirection::Row)
+                    .with_width(LayoutSizing::Grow)
+                    .with_padding(LayoutEdges { top: 12.0, right: 12.0, bottom: 8.0, left: 12.0 })
+                    .with_alignment(MainAxisAlignment::Center, CrossAxisAlignment::Center),
+            ),
+            NodeStyle::default(),
+        );
         tree.add_child(cal, nav);
 
-        let month = tree.create(Widget::Label { text: "March 2026".to_string() }, UiStyle {
-            text_color: Some(text_primary), text_size: Some(13.0), ..UiStyle::default()
-        });
+        let month = tree.create_node(
+            Widget::Label { text: "March 2026".to_string() },
+            pug_jetstream::map_layout(&LayoutIntent::new()),
+            NodeStyle { text_color: Some(text_primary), text_size: Some(13.0), ..NodeStyle::default() },
+        );
         tree.add_child(nav, month);
 
         let dow_row = grid_row(tree, cal);
@@ -109,17 +129,27 @@ pub fn render(tree: &mut UiTree, theme: &dyn ThemeProvider) -> UiNodeId {
         for d in 15..=21 {
             if d == 16 {
                 // Today — outlined, not filled
-                let cell = tree.create(Widget::Panel, UiStyle {
-                    width: Sizing::Fixed(28.0), height: Sizing::Fixed(28.0),
-                    corner_radii: [14.0; 4], border_color: Some(accent),
-                    border_width: 1.0, align: Align::Center,
-                    justify: Justify::Center, ..UiStyle::default()
-                });
+                let cell = tree.create_node(
+                    Widget::Panel,
+                    pug_jetstream::map_layout(
+                        &LayoutIntent::new()
+                            .with_width(LayoutSizing::Fixed(28.0))
+                            .with_height(LayoutSizing::Fixed(28.0))
+                            .with_alignment(MainAxisAlignment::Center, CrossAxisAlignment::Center),
+                    ),
+                    NodeStyle {
+                        corner_radii: [14.0; 4], border_color: Some(accent),
+                        border_width: 1.0,
+                        ..NodeStyle::default()
+                    },
+                );
                 tree.add_child(row, cell);
 
-                let lbl = tree.create(Widget::Label { text: "16".to_string() }, UiStyle {
-                    text_color: Some(accent), text_size: Some(11.0), ..UiStyle::default()
-                });
+                let lbl = tree.create_node(
+                    Widget::Label { text: "16".to_string() },
+                    pug_jetstream::map_layout(&LayoutIntent::new()),
+                    NodeStyle { text_color: Some(accent), text_size: Some(11.0), ..NodeStyle::default() },
+                );
                 tree.add_child(cell, lbl);
             } else {
                 day_cell(tree, row, &d.to_string(), text_primary, None, false);
@@ -142,65 +172,93 @@ const SEL: DayState = DayState::Selected;
 const OFF: DayState = DayState::Outside;
 
 fn section_label(tree: &mut UiTree, parent: UiNodeId, text: &str, color: glam::Vec4) {
-    let lbl = tree.create(Widget::Label { text: text.to_string() }, UiStyle {
-        text_color: Some(color), text_size: Some(11.0), ..UiStyle::default()
-    });
+    let lbl = tree.create_node(
+        Widget::Label { text: text.to_string() },
+        pug_jetstream::map_layout(&LayoutIntent::new()),
+        NodeStyle { text_color: Some(color), text_size: Some(11.0), ..NodeStyle::default() },
+    );
     tree.add_child(parent, lbl);
 }
 
 fn calendar_card(tree: &mut UiTree, bg: glam::Vec4, border: glam::Vec4) -> UiNodeId {
-    tree.create(Widget::Panel, UiStyle {
-        direction: Direction::Column,
-        width: Sizing::Fixed(232.0),
-        background: Some(bg),
-        border_color: Some(border),
-        border_width: 1.0,
-        corner_radii: [8.0; 4],
-        padding: Edges { top: 0.0, right: 0.0, bottom: 8.0, left: 0.0 },
-        ..UiStyle::default()
-    })
+    tree.create_node(
+        Widget::Panel,
+        pug_jetstream::map_layout(
+            &LayoutIntent::new()
+                .with_direction(LayoutDirection::Column)
+                .with_width(LayoutSizing::Fixed(232.0))
+                .with_padding(LayoutEdges { top: 0.0, right: 0.0, bottom: 8.0, left: 0.0 }),
+        ),
+        NodeStyle {
+            background: Some(bg),
+            border_color: Some(border),
+            border_width: 1.0,
+            corner_radii: [8.0; 4],
+            ..NodeStyle::default()
+        },
+    )
 }
 
 fn grid_row(tree: &mut UiTree, parent: UiNodeId) -> UiNodeId {
-    let row = tree.create(Widget::Panel, UiStyle {
-        direction: Direction::Row,
-        width: Sizing::Grow(1.0),
-        padding: Edges { top: 0.0, right: 8.0, bottom: 0.0, left: 8.0 },
-        gap: 2.0,
-        justify: Justify::Center,
-        ..UiStyle::default()
-    });
+    let row = tree.create_node(
+        Widget::Panel,
+        pug_jetstream::map_layout(
+            &LayoutIntent::new()
+                .with_direction(LayoutDirection::Row)
+                .with_width(LayoutSizing::Grow)
+                .with_padding(LayoutEdges { top: 0.0, right: 8.0, bottom: 0.0, left: 8.0 })
+                .with_gap(2.0)
+                .with_alignment(MainAxisAlignment::Center, CrossAxisAlignment::Stretch),
+        ),
+        NodeStyle::default(),
+    );
     tree.add_child(parent, row);
     row
 }
 
 fn day_header(tree: &mut UiTree, parent: UiNodeId, text: &str, color: glam::Vec4) {
-    let cell = tree.create(Widget::Panel, UiStyle {
-        width: Sizing::Fixed(28.0), height: Sizing::Fixed(24.0),
-        align: Align::Center, justify: Justify::Center,
-        ..UiStyle::default()
-    });
+    let cell = tree.create_node(
+        Widget::Panel,
+        pug_jetstream::map_layout(
+            &LayoutIntent::new()
+                .with_width(LayoutSizing::Fixed(28.0))
+                .with_height(LayoutSizing::Fixed(24.0))
+                .with_alignment(MainAxisAlignment::Center, CrossAxisAlignment::Center),
+        ),
+        NodeStyle::default(),
+    );
     tree.add_child(parent, cell);
 
-    let lbl = tree.create(Widget::Label { text: text.to_string() }, UiStyle {
-        text_color: Some(color), text_size: Some(10.0), ..UiStyle::default()
-    });
+    let lbl = tree.create_node(
+        Widget::Label { text: text.to_string() },
+        pug_jetstream::map_layout(&LayoutIntent::new()),
+        NodeStyle { text_color: Some(color), text_size: Some(10.0), ..NodeStyle::default() },
+    );
     tree.add_child(cell, lbl);
 }
 
 fn day_cell(tree: &mut UiTree, parent: UiNodeId, text: &str, color: glam::Vec4, bg: Option<glam::Vec4>, _selected: bool) {
-    let cell = tree.create(Widget::Panel, UiStyle {
-        width: Sizing::Fixed(28.0), height: Sizing::Fixed(28.0),
-        corner_radii: [14.0; 4], background: bg,
-        align: Align::Center, justify: Justify::Center,
-        ..UiStyle::default()
-    });
+    let cell = tree.create_node(
+        Widget::Panel,
+        pug_jetstream::map_layout(
+            &LayoutIntent::new()
+                .with_width(LayoutSizing::Fixed(28.0))
+                .with_height(LayoutSizing::Fixed(28.0))
+                .with_alignment(MainAxisAlignment::Center, CrossAxisAlignment::Center),
+        ),
+        NodeStyle {
+            corner_radii: [14.0; 4], background: bg,
+            ..NodeStyle::default()
+        },
+    );
     tree.add_child(parent, cell);
 
     if !text.is_empty() {
-        let lbl = tree.create(Widget::Label { text: text.to_string() }, UiStyle {
-            text_color: Some(color), text_size: Some(11.0), ..UiStyle::default()
-        });
+        let lbl = tree.create_node(
+            Widget::Label { text: text.to_string() },
+            pug_jetstream::map_layout(&LayoutIntent::new()),
+            NodeStyle { text_color: Some(color), text_size: Some(11.0), ..NodeStyle::default() },
+        );
         tree.add_child(cell, lbl);
     }
 }

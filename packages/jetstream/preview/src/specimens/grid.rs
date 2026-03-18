@@ -5,6 +5,7 @@
 
 use jetstream_runtime::game_ui::*;
 use pug_adapter::ThemeProvider;
+use pug_layout::{CrossAxisAlignment, LayoutDirection, LayoutIntent, LayoutSizing, MainAxisAlignment};
 
 use crate::theme_bridge;
 
@@ -16,100 +17,73 @@ pub fn render(tree: &mut UiTree, theme: &dyn ThemeProvider) -> UiNodeId {
     let bg_surface = theme_bridge::surface_background(theme);
     let border = theme_bridge::border_subtle(theme);
 
-    let root = tree.create(Widget::Panel, UiStyle {
-        direction: Direction::Column,
-        width: Sizing::Grow(1.0),
-        gap: 20.0,
-        ..UiStyle::default()
-    });
+    let root = tree.create_node(Widget::Panel, pug_jetstream::map_layout(&LayoutIntent::new()
+        .with_direction(LayoutDirection::Column)
+        .with_width(LayoutSizing::Grow)
+        .with_gap(20.0)),
+        NodeStyle::default());
 
     // ── Column counts ──
     for cols in [2, 3, 4] {
-        let label = tree.create(Widget::Label {
+        let label = tree.create_node(Widget::Label {
             text: format!("{} Columns, gap 8px", cols),
-        }, UiStyle {
-            text_color: Some(text_secondary),
-            text_size: Some(11.0),
-            ..UiStyle::default()
-        });
+        }, pug_jetstream::map_layout(&LayoutIntent::new()),
+            NodeStyle { text_color: Some(text_secondary), text_size: Some(11.0), ..NodeStyle::default() });
         tree.add_child(root, label);
 
         // Two rows of items
         for _ in 0..2 {
-            let row = tree.create(Widget::Panel, UiStyle {
-                direction: Direction::Row,
-                width: Sizing::Grow(1.0),
-                gap: 8.0,
-                ..UiStyle::default()
-            });
+            let row = tree.create_node(Widget::Panel, pug_jetstream::map_layout(&LayoutIntent::new()
+                .with_direction(LayoutDirection::Row)
+                .with_width(LayoutSizing::Grow)
+                .with_gap(8.0)),
+                NodeStyle::default());
             tree.add_child(root, row);
 
             for i in 0..cols {
-                let cell = tree.create(Widget::Panel, UiStyle {
-                    direction: Direction::Column,
-                    width: Sizing::Grow(1.0),
-                    height: Sizing::Fixed(40.0),
-                    background: Some(bg_surface),
-                    border_color: Some(border),
-                    border_width: 1.0,
-                    corner_radii: [4.0; 4],
-                    align: Align::Center,
-                    justify: Justify::Center,
-                    ..UiStyle::default()
-                });
+                let cell = tree.create_node(Widget::Panel, pug_jetstream::map_layout(&LayoutIntent::new()
+                    .with_direction(LayoutDirection::Column)
+                    .with_width(LayoutSizing::Grow)
+                    .with_height(LayoutSizing::Fixed(40.0))
+                    .with_alignment(MainAxisAlignment::Center, CrossAxisAlignment::Center)),
+                    NodeStyle { background: Some(bg_surface), border_color: Some(border), border_width: 1.0, corner_radii: [4.0; 4], ..NodeStyle::default() });
                 tree.add_child(row, cell);
 
-                let cell_label = tree.create(Widget::Label {
+                let cell_label = tree.create_node(Widget::Label {
                     text: format!("Cell {}", i + 1),
-                }, UiStyle {
-                    text_color: Some(text_primary),
-                    text_size: Some(10.0),
-                    ..UiStyle::default()
-                });
+                }, pug_jetstream::map_layout(&LayoutIntent::new()),
+                    NodeStyle { text_color: Some(text_primary), text_size: Some(10.0), ..NodeStyle::default() });
                 tree.add_child(cell, cell_label);
             }
         }
     }
 
     // ── Mixed-width columns ──
-    let mixed_label = tree.create(Widget::Label {
+    let mixed_label = tree.create_node(Widget::Label {
         text: "Mixed widths (1fr + 2fr + 1fr)".to_string(),
-    }, UiStyle {
-        text_color: Some(text_secondary),
-        text_size: Some(11.0),
-        ..UiStyle::default()
-    });
+    }, pug_jetstream::map_layout(&LayoutIntent::new()),
+        NodeStyle { text_color: Some(text_secondary), text_size: Some(11.0), ..NodeStyle::default() });
     tree.add_child(root, mixed_label);
 
-    let mixed_row = tree.create(Widget::Panel, UiStyle {
-        direction: Direction::Row,
-        width: Sizing::Grow(1.0),
-        gap: 8.0,
-        ..UiStyle::default()
-    });
+    let mixed_row = tree.create_node(Widget::Panel, pug_jetstream::map_layout(&LayoutIntent::new()
+        .with_direction(LayoutDirection::Row)
+        .with_width(LayoutSizing::Grow)
+        .with_gap(8.0)),
+        NodeStyle::default());
     tree.add_child(root, mixed_row);
 
     for &weight in &[1.0_f32, 2.0, 1.0] {
-        let cell = tree.create(Widget::Panel, UiStyle {
-            width: Sizing::Grow(weight),
-            height: Sizing::Fixed(48.0),
-            background: Some(theme_bridge::tint(accent, 0.15)),
-            border_color: Some(border),
-            border_width: 1.0,
-            corner_radii: [4.0; 4],
-            align: Align::Center,
-            justify: Justify::Center,
-            ..UiStyle::default()
-        });
+        let cell = tree.create_node(Widget::Panel, pug_jetstream::map_layout(&LayoutIntent::new()
+            .with_width(LayoutSizing::Grow)
+            .with_height(LayoutSizing::Fixed(48.0))
+            .with_alignment(MainAxisAlignment::Center, CrossAxisAlignment::Center)),
+            NodeStyle { background: Some(theme_bridge::tint(accent, 0.15)), border_color: Some(border), border_width: 1.0, corner_radii: [4.0; 4], ..NodeStyle::default() });
         tree.add_child(mixed_row, cell);
 
-        let w_label = tree.create(Widget::Label {
+        let w_label = tree.create_node(Widget::Label {
             text: format!("{}fr", weight as i32),
-        }, UiStyle {
-            text_color: Some(text_primary),
-            text_size: Some(11.0),
-            ..UiStyle::default()
-        });
+        }, pug_jetstream::map_layout(&LayoutIntent::new()),
+            NodeStyle { text_color: Some(text_primary), text_size: Some(11.0), ..NodeStyle::default() });
         tree.add_child(cell, w_label);
     }
 

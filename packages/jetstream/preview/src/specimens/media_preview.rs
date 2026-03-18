@@ -2,6 +2,7 @@
 
 use jetstream_runtime::game_ui::*;
 use pug_adapter::ThemeProvider;
+use pug_layout::{LayoutDirection, LayoutEdges, LayoutIntent, LayoutSizing, CrossAxisAlignment, MainAxisAlignment};
 
 use crate::theme_bridge;
 
@@ -11,37 +12,40 @@ pub fn render(tree: &mut UiTree, theme: &dyn ThemeProvider) -> UiNodeId {
     let bg_elevated = theme_bridge::elevated_background(theme);
     let border = theme_bridge::border_subtle(theme);
 
-    let root = tree.create(Widget::Panel, UiStyle {
-        direction: Direction::Column, width: Sizing::Grow(1.0), gap: 20.0, ..UiStyle::default()
-    });
+    let root = tree.create_node(Widget::Panel, pug_jetstream::map_layout(&LayoutIntent::new()
+        .with_direction(LayoutDirection::Column)
+        .with_width(LayoutSizing::Grow)
+        .with_gap(20.0)), NodeStyle::default());
 
     section_label(tree, root, "Image Preview", text_secondary);
     {
-        let card = tree.create(Widget::Panel, UiStyle {
-            direction: Direction::Column, width: Sizing::Fixed(360.0),
+        let card = tree.create_node(Widget::Panel, pug_jetstream::map_layout(&LayoutIntent::new()
+            .with_direction(LayoutDirection::Column)
+            .with_width(LayoutSizing::Fixed(360.0))), NodeStyle {
             background: Some(bg_elevated), border_color: Some(border), border_width: 1.0,
             corner_radii: [8.0; 4],
-            ..UiStyle::default()
+            ..NodeStyle::default()
         });
         tree.add_child(root, card);
 
-        let img = tree.create(Widget::Panel, UiStyle {
-            width: Sizing::Grow(1.0), height: Sizing::Fixed(180.0),
+        let img = tree.create_node(Widget::Panel, pug_jetstream::map_layout(&LayoutIntent::new()
+            .with_width(LayoutSizing::Grow)
+            .with_height(LayoutSizing::Fixed(180.0))
+            .with_alignment(MainAxisAlignment::Center, CrossAxisAlignment::Center)), NodeStyle {
             background: Some(theme_bridge::tint(border, 0.3)),
-            align: Align::Center, justify: Justify::Center,
-            ..UiStyle::default()
+            ..NodeStyle::default()
         });
         tree.add_child(card, img);
 
-        let placeholder = tree.create(Widget::Label { text: "📷 1920×1080".to_string() }, UiStyle {
-            text_color: Some(theme_bridge::tint(text_primary, 0.3)), text_size: Some(14.0), ..UiStyle::default()
+        let placeholder = tree.create_node(Widget::Label { text: "📷 1920×1080".to_string() }, pug_jetstream::map_layout(&LayoutIntent::new()), NodeStyle {
+            text_color: Some(theme_bridge::tint(text_primary, 0.3)), text_size: Some(14.0), ..NodeStyle::default()
         });
         tree.add_child(img, placeholder);
 
-        let meta = tree.create(Widget::Panel, UiStyle {
-            direction: Direction::Column, padding: Edges::all(12.0), gap: 6.0,
-            ..UiStyle::default()
-        });
+        let meta = tree.create_node(Widget::Panel, pug_jetstream::map_layout(&LayoutIntent::new()
+            .with_direction(LayoutDirection::Column)
+            .with_padding(LayoutEdges::uniform(12.0))
+            .with_gap(6.0)), NodeStyle::default());
         tree.add_child(card, meta);
 
         meta_row(tree, meta, "Filename", "hero-banner.jpg", text_secondary, text_primary);
@@ -55,25 +59,26 @@ pub fn render(tree: &mut UiTree, theme: &dyn ThemeProvider) -> UiNodeId {
 }
 
 fn meta_row(tree: &mut UiTree, parent: UiNodeId, label: &str, value: &str, label_color: glam::Vec4, value_color: glam::Vec4) {
-    let row = tree.create(Widget::Panel, UiStyle {
-        direction: Direction::Row, gap: 12.0, ..UiStyle::default()
-    });
+    let row = tree.create_node(Widget::Panel, pug_jetstream::map_layout(&LayoutIntent::new()
+        .with_direction(LayoutDirection::Row)
+        .with_gap(12.0)), NodeStyle::default());
     tree.add_child(parent, row);
 
-    let l = tree.create(Widget::Label { text: label.to_string() }, UiStyle {
-        text_color: Some(label_color), text_size: Some(10.0), width: Sizing::Fixed(70.0), ..UiStyle::default()
+    let l = tree.create_node(Widget::Label { text: label.to_string() }, pug_jetstream::map_layout(&LayoutIntent::new()
+        .with_width(LayoutSizing::Fixed(70.0))), NodeStyle {
+        text_color: Some(label_color), text_size: Some(10.0), ..NodeStyle::default()
     });
     tree.add_child(row, l);
 
-    let v = tree.create(Widget::Label { text: value.to_string() }, UiStyle {
-        text_color: Some(value_color), text_size: Some(11.0), ..UiStyle::default()
+    let v = tree.create_node(Widget::Label { text: value.to_string() }, pug_jetstream::map_layout(&LayoutIntent::new()), NodeStyle {
+        text_color: Some(value_color), text_size: Some(11.0), ..NodeStyle::default()
     });
     tree.add_child(row, v);
 }
 
 fn section_label(tree: &mut UiTree, parent: UiNodeId, text: &str, color: glam::Vec4) {
-    let lbl = tree.create(Widget::Label { text: text.to_string() }, UiStyle {
-        text_color: Some(color), text_size: Some(11.0), ..UiStyle::default()
+    let lbl = tree.create_node(Widget::Label { text: text.to_string() }, pug_jetstream::map_layout(&LayoutIntent::new()), NodeStyle {
+        text_color: Some(color), text_size: Some(11.0), ..NodeStyle::default()
     });
     tree.add_child(parent, lbl);
 }

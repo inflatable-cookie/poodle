@@ -158,10 +158,11 @@
     display: grid;
     grid-template-columns: minmax(0, 1fr) auto;
     align-items: stretch;
-    min-height: var(--pug-size-control-height);
+    height: var(--pug-size-control-height);
     border: 0.0625rem solid var(--pug-color-border-default);
     border-radius: var(--pug-radius-control);
     background: var(--pug-color-background-surface);
+    overflow: hidden;
   }
 
   .number-entry[data-validation-state="invalid"] {
@@ -196,19 +197,29 @@
 
   .number-entry__steppers {
     display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 0.0625rem;
+    grid-template-rows: 1fr 1fr;
+    gap: 0;
     padding: 0.0625rem;
   }
 
   .number-entry__steppers button {
-    min-width: 1.75rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 1.25rem;
+    min-height: 0;
     border: 0;
     border-radius: calc(var(--pug-radius-control) - 0.125rem);
     background: color-mix(in srgb, var(--pug-color-background-elevated) 88%, transparent);
     color: var(--pug-color-text-primary);
     cursor: pointer;
-    font: inherit;
+    font-size: 0;
+    padding: 0;
+    overflow: hidden;
+  }
+
+  .number-entry__steppers button :global(.pug-icon) {
+    transform: scale(0.625);
   }
 
   .number-entry__steppers button:disabled {

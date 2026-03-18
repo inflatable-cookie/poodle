@@ -2,6 +2,7 @@
 
 use jetstream_runtime::game_ui::*;
 use pug_adapter::ThemeProvider;
+use pug_layout::{CrossAxisAlignment, LayoutDirection, LayoutEdges, LayoutIntent, LayoutSizing, MainAxisAlignment};
 
 use crate::theme_bridge;
 
@@ -13,19 +14,12 @@ pub fn render(tree: &mut UiTree, theme: &dyn ThemeProvider) -> UiNodeId {
     let border_subtle = theme_bridge::border_subtle(theme);
     let accent = theme_bridge::accent_base(theme);
 
-    let root = tree.create(Widget::Panel, UiStyle {
-        direction: Direction::Column,
-        width: Sizing::Grow(1.0),
-        gap: 16.0,
-        ..UiStyle::default()
-    });
+    let root = tree.create_node(Widget::Panel, pug_jetstream::map_layout(&LayoutIntent::new().with_direction(LayoutDirection::Column).with_width(LayoutSizing::Grow).with_gap(16.0)), NodeStyle::default());
 
     // ── Swatch palette ──
     label(tree, root, "Swatch Palette", text_secondary);
     {
-        let grid = tree.create(Widget::Panel, UiStyle {
-            direction: Direction::Row, gap: 6.0, ..UiStyle::default()
-        });
+        let grid = tree.create_node(Widget::Panel, pug_jetstream::map_layout(&LayoutIntent::new().with_direction(LayoutDirection::Row).with_gap(6.0)), NodeStyle::default());
         tree.add_child(root, grid);
 
         let swatches = [
@@ -46,9 +40,7 @@ pub fn render(tree: &mut UiTree, theme: &dyn ThemeProvider) -> UiNodeId {
     // ── Selected state ──
     label(tree, root, "Selected Swatch", text_secondary);
     {
-        let row = tree.create(Widget::Panel, UiStyle {
-            direction: Direction::Row, gap: 6.0, ..UiStyle::default()
-        });
+        let row = tree.create_node(Widget::Panel, pug_jetstream::map_layout(&LayoutIntent::new().with_direction(LayoutDirection::Row).with_gap(6.0)), NodeStyle::default());
         tree.add_child(root, row);
 
         swatch(tree, row, glam::Vec4::new(0.91, 0.30, 0.24, 1.0), 28.0, border_subtle, false);
@@ -60,30 +52,24 @@ pub fn render(tree: &mut UiTree, theme: &dyn ThemeProvider) -> UiNodeId {
     // ── With input field ──
     label(tree, root, "With Hex Input", text_secondary);
     {
-        let row = tree.create(Widget::Panel, UiStyle {
-            direction: Direction::Row, gap: 8.0, align: Align::Center, ..UiStyle::default()
-        });
+        let row = tree.create_node(Widget::Panel, pug_jetstream::map_layout(&LayoutIntent::new().with_direction(LayoutDirection::Row).with_gap(8.0).with_alignment(MainAxisAlignment::Start, CrossAxisAlignment::Center)), NodeStyle::default());
         tree.add_child(root, row);
 
         // Preview swatch
         swatch(tree, row, glam::Vec4::new(0.20, 0.60, 0.86, 1.0), 32.0, border, false);
 
         // Hex input
-        let input = tree.create(Widget::Panel, UiStyle {
-            width: Sizing::Fixed(100.0),
-            height: Sizing::Fixed(32.0),
-            padding: Edges { top: 0.0, right: 10.0, bottom: 0.0, left: 10.0 },
+        let input = tree.create_node(Widget::Panel, pug_jetstream::map_layout(&LayoutIntent::new().with_width(LayoutSizing::Fixed(100.0)).with_height(LayoutSizing::Fixed(32.0)).with_padding(LayoutEdges { top: 0.0, right: 10.0, bottom: 0.0, left: 10.0 }).with_alignment(MainAxisAlignment::Start, CrossAxisAlignment::Center)), NodeStyle {
             background: Some(bg_canvas),
             border_color: Some(border),
             border_width: 1.0,
             corner_radii: [6.0; 4],
-            align: Align::Center,
-            ..UiStyle::default()
+            ..NodeStyle::default()
         });
         tree.add_child(row, input);
 
-        let hex = tree.create(Widget::Label { text: "#3399DB".to_string() }, UiStyle {
-            text_color: Some(text_primary), text_size: Some(12.0), ..UiStyle::default()
+        let hex = tree.create_node(Widget::Label { text: "#3399DB".to_string() }, pug_jetstream::map_layout(&LayoutIntent::new()), NodeStyle {
+            text_color: Some(text_primary), text_size: Some(12.0), ..NodeStyle::default()
         });
         tree.add_child(input, hex);
     }
@@ -91,22 +77,18 @@ pub fn render(tree: &mut UiTree, theme: &dyn ThemeProvider) -> UiNodeId {
     // ── Size variants ──
     label(tree, root, "Size Variants", text_secondary);
     {
-        let row = tree.create(Widget::Panel, UiStyle {
-            direction: Direction::Row, gap: 12.0, align: Align::End, ..UiStyle::default()
-        });
+        let row = tree.create_node(Widget::Panel, pug_jetstream::map_layout(&LayoutIntent::new().with_direction(LayoutDirection::Row).with_gap(12.0).with_alignment(MainAxisAlignment::Start, CrossAxisAlignment::End)), NodeStyle::default());
         tree.add_child(root, row);
 
         let blue = glam::Vec4::new(0.20, 0.60, 0.86, 1.0);
         for &(lbl, size) in &[("Sm", 20.0_f32), ("Md", 28.0), ("Lg", 36.0)] {
-            let col = tree.create(Widget::Panel, UiStyle {
-                direction: Direction::Column, gap: 4.0, align: Align::Center, ..UiStyle::default()
-            });
+            let col = tree.create_node(Widget::Panel, pug_jetstream::map_layout(&LayoutIntent::new().with_direction(LayoutDirection::Column).with_gap(4.0).with_alignment(MainAxisAlignment::Start, CrossAxisAlignment::Center)), NodeStyle::default());
             tree.add_child(row, col);
 
             swatch(tree, col, blue, size, border_subtle, false);
 
-            let l = tree.create(Widget::Label { text: lbl.to_string() }, UiStyle {
-                text_color: Some(text_secondary), text_size: Some(9.0), ..UiStyle::default()
+            let l = tree.create_node(Widget::Label { text: lbl.to_string() }, pug_jetstream::map_layout(&LayoutIntent::new()), NodeStyle {
+                text_color: Some(text_secondary), text_size: Some(9.0), ..NodeStyle::default()
             });
             tree.add_child(col, l);
         }
@@ -115,8 +97,8 @@ pub fn render(tree: &mut UiTree, theme: &dyn ThemeProvider) -> UiNodeId {
     // ── Disabled ──
     label(tree, root, "Disabled", text_secondary);
     {
-        let row = tree.create(Widget::Panel, UiStyle {
-            direction: Direction::Row, gap: 6.0, opacity: 0.5, ..UiStyle::default()
+        let row = tree.create_node(Widget::Panel, pug_jetstream::map_layout(&LayoutIntent::new().with_direction(LayoutDirection::Row).with_gap(6.0)), NodeStyle {
+            opacity: 0.5, ..NodeStyle::default()
         });
         tree.add_child(root, row);
 
@@ -133,21 +115,19 @@ pub fn render(tree: &mut UiTree, theme: &dyn ThemeProvider) -> UiNodeId {
 }
 
 fn label(tree: &mut UiTree, parent: UiNodeId, text: &str, color: glam::Vec4) {
-    let lbl = tree.create(Widget::Label { text: text.to_string() }, UiStyle {
-        text_color: Some(color), text_size: Some(11.0), ..UiStyle::default()
+    let lbl = tree.create_node(Widget::Label { text: text.to_string() }, pug_jetstream::map_layout(&LayoutIntent::new()), NodeStyle {
+        text_color: Some(color), text_size: Some(11.0), ..NodeStyle::default()
     });
     tree.add_child(parent, lbl);
 }
 
 fn swatch(tree: &mut UiTree, parent: UiNodeId, color: glam::Vec4, size: f32, border: glam::Vec4, selected: bool) {
-    let s = tree.create(Widget::Panel, UiStyle {
-        width: Sizing::Fixed(size),
-        height: Sizing::Fixed(size),
+    let s = tree.create_node(Widget::Panel, pug_jetstream::map_layout(&LayoutIntent::new().with_width(LayoutSizing::Fixed(size)).with_height(LayoutSizing::Fixed(size))), NodeStyle {
         corner_radii: [4.0; 4],
         background: Some(color),
         border_color: Some(border),
         border_width: if selected { 2.0 } else { 1.0 },
-        ..UiStyle::default()
+        ..NodeStyle::default()
     });
     tree.add_child(parent, s);
 }

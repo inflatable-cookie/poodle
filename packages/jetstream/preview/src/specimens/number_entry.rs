@@ -2,6 +2,7 @@
 
 use jetstream_runtime::game_ui::*;
 use pug_adapter::ThemeProvider;
+use pug_layout::{LayoutDirection, LayoutIntent, LayoutSizing, CrossAxisAlignment, MainAxisAlignment};
 
 use crate::theme_bridge;
 
@@ -13,12 +14,10 @@ pub fn render(tree: &mut UiTree, theme: &dyn ThemeProvider) -> UiNodeId {
     let border = theme_bridge::border_default(theme);
     let border_subtle = theme_bridge::border_subtle(theme);
 
-    let root = tree.create(Widget::Panel, UiStyle {
-        direction: Direction::Column,
-        width: Sizing::Grow(1.0),
-        gap: 16.0,
-        ..UiStyle::default()
-    });
+    let root = tree.create_node(Widget::Panel, pug_jetstream::map_layout(&LayoutIntent::new()
+        .with_direction(LayoutDirection::Column)
+        .with_width(LayoutSizing::Grow)
+        .with_gap(16.0)), NodeStyle::default());
 
     // ── Standard ──
     label(tree, root, "Standard (value: 5)", text_secondary);
@@ -31,68 +30,63 @@ pub fn render(tree: &mut UiTree, theme: &dyn ThemeProvider) -> UiNodeId {
     // ── At minimum ──
     label(tree, root, "At minimum (decrement disabled)", text_secondary);
     {
-        let group = tree.create(Widget::Panel, UiStyle {
-            direction: Direction::Row,
-            height: Sizing::Fixed(32.0),
-            ..UiStyle::default()
-        });
+        let group = tree.create_node(Widget::Panel, pug_jetstream::map_layout(&LayoutIntent::new()
+            .with_direction(LayoutDirection::Row)
+            .with_height(LayoutSizing::Fixed(32.0))), NodeStyle::default());
         tree.add_child(root, group);
 
         // Disabled decrement
-        let dec = tree.create(Widget::Button {
+        let dec = tree.create_node(Widget::Button {
             label: "−".to_string(),
             pressed: false,
             hovered: false,
-        }, UiStyle {
-            width: Sizing::Fixed(32.0),
-            height: Sizing::Fixed(32.0),
+        }, pug_jetstream::map_layout(&LayoutIntent::new()
+            .with_width(LayoutSizing::Fixed(32.0))
+            .with_height(LayoutSizing::Fixed(32.0))
+            .with_alignment(MainAxisAlignment::Center, CrossAxisAlignment::Center)), NodeStyle {
             background: Some(bg_surface),
             border_color: Some(border_subtle),
             border_width: 1.0,
             text_color: Some(theme_bridge::tint(text_secondary, 0.3)),
             text_size: Some(14.0),
-            align: Align::Center,
-            justify: Justify::Center,
             opacity: 0.5,
-            ..UiStyle::default()
+            ..NodeStyle::default()
         });
         tree.add_child(group, dec);
 
-        let input = tree.create(Widget::Panel, UiStyle {
-            width: Sizing::Fixed(60.0),
-            height: Sizing::Fixed(32.0),
+        let input = tree.create_node(Widget::Panel, pug_jetstream::map_layout(&LayoutIntent::new()
+            .with_width(LayoutSizing::Fixed(60.0))
+            .with_height(LayoutSizing::Fixed(32.0))
+            .with_alignment(MainAxisAlignment::Center, CrossAxisAlignment::Center)), NodeStyle {
             background: Some(bg_canvas),
             border_color: Some(border),
             border_width: 1.0,
-            align: Align::Center,
-            justify: Justify::Center,
-            ..UiStyle::default()
+            ..NodeStyle::default()
         });
         tree.add_child(group, input);
 
-        let val = tree.create(Widget::Label { text: "0".to_string() }, UiStyle {
+        let val = tree.create_node(Widget::Label { text: "0".to_string() }, pug_jetstream::map_layout(&LayoutIntent::new()), NodeStyle {
             text_color: Some(text_primary),
             text_size: Some(12.0),
-            ..UiStyle::default()
+            ..NodeStyle::default()
         });
         tree.add_child(input, val);
 
-        let inc = tree.create(Widget::Button {
+        let inc = tree.create_node(Widget::Button {
             label: "+".to_string(),
             pressed: false,
             hovered: false,
-        }, UiStyle {
-            width: Sizing::Fixed(32.0),
-            height: Sizing::Fixed(32.0),
+        }, pug_jetstream::map_layout(&LayoutIntent::new()
+            .with_width(LayoutSizing::Fixed(32.0))
+            .with_height(LayoutSizing::Fixed(32.0))
+            .with_alignment(MainAxisAlignment::Center, CrossAxisAlignment::Center)), NodeStyle {
             background: Some(bg_surface),
             border_color: Some(border_subtle),
             border_width: 1.0,
             text_color: Some(text_primary),
             text_size: Some(14.0),
-            align: Align::Center,
-            justify: Justify::Center,
             focusable: true,
-            ..UiStyle::default()
+            ..NodeStyle::default()
         });
         tree.add_child(group, inc);
     }
@@ -105,10 +99,10 @@ pub fn render(tree: &mut UiTree, theme: &dyn ThemeProvider) -> UiNodeId {
 }
 
 fn label(tree: &mut UiTree, parent: UiNodeId, text: &str, color: glam::Vec4) {
-    let lbl = tree.create(Widget::Label { text: text.to_string() }, UiStyle {
+    let lbl = tree.create_node(Widget::Label { text: text.to_string() }, pug_jetstream::map_layout(&LayoutIntent::new()), NodeStyle {
         text_color: Some(color),
         text_size: Some(11.0),
-        ..UiStyle::default()
+        ..NodeStyle::default()
     });
     tree.add_child(parent, lbl);
 }
@@ -125,71 +119,68 @@ fn number_input(
     text_secondary: glam::Vec4,
     opacity: f32,
 ) {
-    let group = tree.create(Widget::Panel, UiStyle {
-        direction: Direction::Row,
-        height: Sizing::Fixed(32.0),
+    let group = tree.create_node(Widget::Panel, pug_jetstream::map_layout(&LayoutIntent::new()
+        .with_direction(LayoutDirection::Row)
+        .with_height(LayoutSizing::Fixed(32.0))), NodeStyle {
         opacity,
-        ..UiStyle::default()
+        ..NodeStyle::default()
     });
     tree.add_child(parent, group);
 
     // Decrement
-    let dec = tree.create(Widget::Button {
+    let dec = tree.create_node(Widget::Button {
         label: "−".to_string(),
         pressed: false,
         hovered: false,
-    }, UiStyle {
-        width: Sizing::Fixed(32.0),
-        height: Sizing::Fixed(32.0),
+    }, pug_jetstream::map_layout(&LayoutIntent::new()
+        .with_width(LayoutSizing::Fixed(32.0))
+        .with_height(LayoutSizing::Fixed(32.0))
+        .with_alignment(MainAxisAlignment::Center, CrossAxisAlignment::Center)), NodeStyle {
         background: Some(bg_surface),
         border_color: Some(border_subtle),
         border_width: 1.0,
         text_color: Some(text_secondary),
         text_size: Some(14.0),
-        align: Align::Center,
-        justify: Justify::Center,
         focusable: opacity > 0.9,
-        ..UiStyle::default()
+        ..NodeStyle::default()
     });
     tree.add_child(group, dec);
 
     // Value input
-    let input = tree.create(Widget::Panel, UiStyle {
-        width: Sizing::Fixed(60.0),
-        height: Sizing::Fixed(32.0),
+    let input = tree.create_node(Widget::Panel, pug_jetstream::map_layout(&LayoutIntent::new()
+        .with_width(LayoutSizing::Fixed(60.0))
+        .with_height(LayoutSizing::Fixed(32.0))
+        .with_alignment(MainAxisAlignment::Center, CrossAxisAlignment::Center)), NodeStyle {
         background: Some(bg_canvas),
         border_color: Some(border),
         border_width: 1.0,
-        align: Align::Center,
-        justify: Justify::Center,
-        ..UiStyle::default()
+        ..NodeStyle::default()
     });
     tree.add_child(group, input);
 
-    let val = tree.create(Widget::Label { text: value.to_string() }, UiStyle {
+    let val = tree.create_node(Widget::Label { text: value.to_string() }, pug_jetstream::map_layout(&LayoutIntent::new()), NodeStyle {
         text_color: Some(text_primary),
         text_size: Some(12.0),
-        ..UiStyle::default()
+        ..NodeStyle::default()
     });
     tree.add_child(input, val);
 
     // Increment
-    let inc = tree.create(Widget::Button {
+    let inc = tree.create_node(Widget::Button {
         label: "+".to_string(),
         pressed: false,
         hovered: false,
-    }, UiStyle {
-        width: Sizing::Fixed(32.0),
-        height: Sizing::Fixed(32.0),
+    }, pug_jetstream::map_layout(&LayoutIntent::new()
+        .with_width(LayoutSizing::Fixed(32.0))
+        .with_height(LayoutSizing::Fixed(32.0))
+        .with_alignment(MainAxisAlignment::Center, CrossAxisAlignment::Center)), NodeStyle {
         background: Some(bg_surface),
         border_color: Some(border_subtle),
         border_width: 1.0,
         text_color: Some(text_secondary),
         text_size: Some(14.0),
-        align: Align::Center,
-        justify: Justify::Center,
         focusable: opacity > 0.9,
-        ..UiStyle::default()
+        ..NodeStyle::default()
     });
     tree.add_child(group, inc);
 }

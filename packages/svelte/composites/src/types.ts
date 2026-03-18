@@ -94,6 +94,19 @@ export type ReorderableItem = {
 
 export type { SortField, ActiveSort } from "@pug/svelte-primitives";
 
+export type DiscoveryState = "ready" | "loading" | "error" | "empty" | "no-results";
+
+export type CommandActionItem = {
+  id: string;
+  title: string;
+  description?: string | null;
+  group?: string | null;
+  shortcut?: string | null;
+  keywords?: string[];
+  badge?: string | null;
+  isDisabled?: boolean;
+};
+
 export type ToastItem = {
   id: string;
   title: string;

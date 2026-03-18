@@ -21,6 +21,11 @@
       description: "Structural layout containers that orchestrate page regions, state management, and slot composition.",
       section: "shells",
     },
+    workstation: {
+      label: "Workstation",
+      description: "Workspace-level components for IDE-style layouts: window hosts, strip rails, docks, panels, resize handles, and hosted surfaces.",
+      section: "workstation",
+    },
   };
 
   $: tierLabel = tierConfig[tier].label;

@@ -2,6 +2,7 @@
 
 use jetstream_runtime::game_ui::*;
 use pug_adapter::ThemeProvider;
+use pug_layout::{LayoutDirection, LayoutEdges, LayoutIntent, LayoutSizing, CrossAxisAlignment, MainAxisAlignment};
 
 use crate::theme_bridge;
 
@@ -13,31 +14,29 @@ pub fn render(tree: &mut UiTree, theme: &dyn ThemeProvider) -> UiNodeId {
     let border = theme_bridge::border_subtle(theme);
     let accent = theme_bridge::accent_base(theme);
 
-    let root = tree.create(Widget::Panel, UiStyle {
-        direction: Direction::Column,
-        width: Sizing::Grow(1.0),
-        gap: 20.0,
-        ..UiStyle::default()
-    });
+    let root = tree.create_node(Widget::Panel, pug_jetstream::map_layout(&LayoutIntent::new()
+        .with_direction(LayoutDirection::Column)
+        .with_width(LayoutSizing::Grow)
+        .with_gap(20.0)), NodeStyle::default());
 
     // ── Simple menu ──
     section_label(tree, root, "Simple Menu", text_secondary);
     {
-        let col = tree.create(Widget::Panel, UiStyle {
-            direction: Direction::Column, gap: 4.0, ..UiStyle::default()
-        });
+        let col = tree.create_node(Widget::Panel, pug_jetstream::map_layout(&LayoutIntent::new()
+            .with_direction(LayoutDirection::Column)
+            .with_gap(4.0)), NodeStyle::default());
         tree.add_child(root, col);
 
-        let trigger = tree.create(Widget::Button {
+        let trigger = tree.create_node(Widget::Button {
             label: "Options ▾".to_string(), pressed: false, hovered: false,
-        }, UiStyle {
-            height: Sizing::Fixed(28.0),
-            padding: Edges { top: 0.0, right: 12.0, bottom: 0.0, left: 12.0 },
+        }, pug_jetstream::map_layout(&LayoutIntent::new()
+            .with_height(LayoutSizing::Fixed(28.0))
+            .with_padding(LayoutEdges { top: 0.0, right: 12.0, bottom: 0.0, left: 12.0 })
+            .with_alignment(MainAxisAlignment::Center, CrossAxisAlignment::Center)), NodeStyle {
             corner_radii: [6.0; 4], background: Some(bg_surface),
             border_color: Some(border), border_width: 1.0,
             text_color: Some(text_primary), text_size: Some(11.0),
-            align: Align::Center, justify: Justify::Center,
-            focusable: true, ..UiStyle::default()
+            focusable: true, ..NodeStyle::default()
         });
         tree.add_child(col, trigger);
 
@@ -97,73 +96,78 @@ pub fn render(tree: &mut UiTree, theme: &dyn ThemeProvider) -> UiNodeId {
 }
 
 fn section_label(tree: &mut UiTree, parent: UiNodeId, text: &str, color: glam::Vec4) {
-    let lbl = tree.create(Widget::Label { text: text.to_string() }, UiStyle {
-        text_color: Some(color), text_size: Some(11.0), ..UiStyle::default()
+    let lbl = tree.create_node(Widget::Label { text: text.to_string() }, pug_jetstream::map_layout(&LayoutIntent::new()), NodeStyle {
+        text_color: Some(color), text_size: Some(11.0), ..NodeStyle::default()
     });
     tree.add_child(parent, lbl);
 }
 
 fn menu_card(tree: &mut UiTree, width: f32, bg: glam::Vec4, border: glam::Vec4) -> UiNodeId {
-    tree.create(Widget::Panel, UiStyle {
-        direction: Direction::Column, width: Sizing::Fixed(width),
+    tree.create_node(Widget::Panel, pug_jetstream::map_layout(&LayoutIntent::new()
+        .with_direction(LayoutDirection::Column)
+        .with_width(LayoutSizing::Fixed(width))), NodeStyle {
         background: Some(bg), border_color: Some(border),
         border_width: 1.0, corner_radii: [8.0; 4],
-        ..UiStyle::default()
+        ..NodeStyle::default()
     })
 }
 
 fn menu_list(tree: &mut UiTree, parent: UiNodeId) -> UiNodeId {
-    let list = tree.create(Widget::Panel, UiStyle {
-        direction: Direction::Column, padding: Edges::all(4.0), gap: 1.0,
-        ..UiStyle::default()
-    });
+    let list = tree.create_node(Widget::Panel, pug_jetstream::map_layout(&LayoutIntent::new()
+        .with_direction(LayoutDirection::Column)
+        .with_padding(LayoutEdges::uniform(4.0))
+        .with_gap(1.0)), NodeStyle::default());
     tree.add_child(parent, list);
     list
 }
 
 fn menu_item(tree: &mut UiTree, parent: UiNodeId, label: &str, shortcut: Option<&str>, fg: glam::Vec4, muted: glam::Vec4, _disabled: bool) {
-    let row = tree.create(Widget::Panel, UiStyle {
-        direction: Direction::Row,
-        width: Sizing::Grow(1.0), height: Sizing::Fixed(28.0),
-        padding: Edges { top: 0.0, right: 10.0, bottom: 0.0, left: 10.0 },
-        corner_radii: [4.0; 4], align: Align::Center,
-        justify: Justify::SpaceBetween, ..UiStyle::default()
+    let row = tree.create_node(Widget::Panel, pug_jetstream::map_layout(&LayoutIntent::new()
+        .with_direction(LayoutDirection::Row)
+        .with_width(LayoutSizing::Grow)
+        .with_height(LayoutSizing::Fixed(28.0))
+        .with_padding(LayoutEdges { top: 0.0, right: 10.0, bottom: 0.0, left: 10.0 })
+        .with_alignment(MainAxisAlignment::SpaceBetween, CrossAxisAlignment::Center)), NodeStyle {
+        corner_radii: [4.0; 4], ..NodeStyle::default()
     });
     tree.add_child(parent, row);
 
-    let lbl = tree.create(Widget::Label { text: label.to_string() }, UiStyle {
-        text_color: Some(fg), text_size: Some(12.0), ..UiStyle::default()
+    let lbl = tree.create_node(Widget::Label { text: label.to_string() }, pug_jetstream::map_layout(&LayoutIntent::new()), NodeStyle {
+        text_color: Some(fg), text_size: Some(12.0), ..NodeStyle::default()
     });
     tree.add_child(row, lbl);
 
     if let Some(sc) = shortcut {
-        let s = tree.create(Widget::Label { text: sc.to_string() }, UiStyle {
-            text_color: Some(muted), text_size: Some(10.0), ..UiStyle::default()
+        let s = tree.create_node(Widget::Label { text: sc.to_string() }, pug_jetstream::map_layout(&LayoutIntent::new()), NodeStyle {
+            text_color: Some(muted), text_size: Some(10.0), ..NodeStyle::default()
         });
         tree.add_child(row, s);
     }
 }
 
 fn menu_item_active(tree: &mut UiTree, parent: UiNodeId, label: &str, bg: glam::Vec4, fg: glam::Vec4) {
-    let row = tree.create(Widget::Panel, UiStyle {
-        direction: Direction::Row,
-        width: Sizing::Grow(1.0), height: Sizing::Fixed(28.0),
-        padding: Edges { top: 0.0, right: 10.0, bottom: 0.0, left: 10.0 },
-        corner_radii: [4.0; 4], background: Some(bg), align: Align::Center,
-        ..UiStyle::default()
+    let row = tree.create_node(Widget::Panel, pug_jetstream::map_layout(&LayoutIntent::new()
+        .with_direction(LayoutDirection::Row)
+        .with_width(LayoutSizing::Grow)
+        .with_height(LayoutSizing::Fixed(28.0))
+        .with_padding(LayoutEdges { top: 0.0, right: 10.0, bottom: 0.0, left: 10.0 })
+        .with_alignment(MainAxisAlignment::Start, CrossAxisAlignment::Center)), NodeStyle {
+        corner_radii: [4.0; 4], background: Some(bg),
+        ..NodeStyle::default()
     });
     tree.add_child(parent, row);
 
-    let lbl = tree.create(Widget::Label { text: label.to_string() }, UiStyle {
-        text_color: Some(fg), text_size: Some(12.0), ..UiStyle::default()
+    let lbl = tree.create_node(Widget::Label { text: label.to_string() }, pug_jetstream::map_layout(&LayoutIntent::new()), NodeStyle {
+        text_color: Some(fg), text_size: Some(12.0), ..NodeStyle::default()
     });
     tree.add_child(row, lbl);
 }
 
 fn menu_sep(tree: &mut UiTree, parent: UiNodeId, color: glam::Vec4) {
-    let sep = tree.create(Widget::Panel, UiStyle {
-        width: Sizing::Grow(1.0), height: Sizing::Fixed(1.0),
-        background: Some(color), ..UiStyle::default()
+    let sep = tree.create_node(Widget::Panel, pug_jetstream::map_layout(&LayoutIntent::new()
+        .with_width(LayoutSizing::Grow)
+        .with_height(LayoutSizing::Fixed(1.0))), NodeStyle {
+        background: Some(color), ..NodeStyle::default()
     });
     tree.add_child(parent, sep);
 }

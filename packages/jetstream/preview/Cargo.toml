@@ -15,6 +15,7 @@ pug-adapter = { path = "../../contracts/adapter" }
 pug-primitives = { path = "../../contracts/primitives" }
 pug-composites = { path = "../../contracts/composites" }
 pug-workstation = { path = "../../contracts/workstation" }
+pug-layout = { path = "../../contracts/layout" }
 pug-style = { path = "../../contracts/style" }
 pug-tokens = { path = "../../contracts/tokens" }
 

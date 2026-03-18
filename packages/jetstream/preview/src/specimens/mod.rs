@@ -134,6 +134,7 @@ mod zoned_date_time_picker;
 
 use jetstream_runtime::game_ui::*;
 use pug_adapter::ThemeProvider;
+use pug_layout::{CrossAxisAlignment, LayoutDirection, LayoutEdges, LayoutIntent, LayoutSizing, MainAxisAlignment};
 
 use crate::app_state::{AppState, Section};
 use crate::component_registry::{self, ComponentEntry};
@@ -319,87 +320,89 @@ pub fn build_specimen_page(
     let accent = theme_bridge::accent_base(theme);
 
     // Page root
-    let page = tree.create(Widget::Panel, UiStyle {
-        direction: Direction::Column,
-        width: Sizing::Grow(1.0),
-        gap: 16.0,
-        ..UiStyle::default()
-    });
+    let page = tree.create_node(Widget::Panel, pug_jetstream::map_layout(&LayoutIntent::new()
+        .with_direction(LayoutDirection::Column)
+        .with_width(LayoutSizing::Grow)
+        .with_gap(16.0)),
+        NodeStyle::default());
 
     // ── Hero header ──
-    let hero = tree.create(Widget::Panel, UiStyle {
-        direction: Direction::Column,
-        width: Sizing::Grow(1.0),
-        padding: Edges::all(20.0),
-        gap: 8.0,
-        background: Some(bg_elevated),
-        border_color: Some(border),
-        border_width: 1.0,
-        corner_radii: [8.0; 4],
-        ..UiStyle::default()
-    });
+    let hero = tree.create_node(Widget::Panel, pug_jetstream::map_layout(&LayoutIntent::new()
+        .with_direction(LayoutDirection::Column)
+        .with_width(LayoutSizing::Grow)
+        .with_padding(LayoutEdges::uniform(20.0))
+        .with_gap(8.0)),
+        NodeStyle {
+            background: Some(bg_elevated),
+            border_color: Some(border),
+            border_width: 1.0,
+            corner_radii: [8.0; 4],
+            ..NodeStyle::default()
+        });
     tree.add_child(page, hero);
 
     // Title row: tier badge + component name
-    let title_row = tree.create(Widget::Panel, UiStyle {
-        direction: Direction::Row,
-        gap: 8.0,
-        align: Align::Center,
-        ..UiStyle::default()
-    });
+    let title_row = tree.create_node(Widget::Panel, pug_jetstream::map_layout(&LayoutIntent::new()
+        .with_direction(LayoutDirection::Row)
+        .with_gap(8.0)
+        .with_alignment(MainAxisAlignment::Start, CrossAxisAlignment::Center)),
+        NodeStyle::default());
     tree.add_child(hero, title_row);
 
     // Tier badge
-    let badge = tree.create(Widget::Label {
+    let badge = tree.create_node(Widget::Label {
         text: entry.tier.label().to_string(),
-    }, UiStyle {
-        padding: Edges { top: 2.0, right: 8.0, bottom: 2.0, left: 8.0 },
-        corner_radii: [4.0; 4],
-        background: Some(theme_bridge::tint(accent, 0.20)),
-        text_color: Some(accent),
-        text_size: Some(10.0),
-        ..UiStyle::default()
-    });
+    }, pug_jetstream::map_layout(&LayoutIntent::new()
+        .with_padding(LayoutEdges { top: 2.0, right: 8.0, bottom: 2.0, left: 8.0 })),
+        NodeStyle {
+            corner_radii: [4.0; 4],
+            background: Some(theme_bridge::tint(accent, 0.20)),
+            text_color: Some(accent),
+            text_size: Some(10.0),
+            ..NodeStyle::default()
+        });
     tree.add_child(title_row, badge);
 
     // Component name
-    let name = tree.create(Widget::Label {
+    let name = tree.create_node(Widget::Label {
         text: entry.display_name.to_string(),
-    }, UiStyle {
-        text_color: Some(text_primary),
-        text_size: Some(20.0),
-        ..UiStyle::default()
-    });
+    }, pug_jetstream::map_layout(&LayoutIntent::new()),
+        NodeStyle {
+            text_color: Some(text_primary),
+            text_size: Some(20.0),
+            ..NodeStyle::default()
+        });
     tree.add_child(title_row, name);
 
     // Description
-    let desc = tree.create(Widget::Label {
+    let desc = tree.create_node(Widget::Label {
         text: entry.description.to_string(),
-    }, UiStyle {
-        text_color: Some(text_secondary),
-        text_size: Some(13.0),
-        ..UiStyle::default()
-    });
+    }, pug_jetstream::map_layout(&LayoutIntent::new()),
+        NodeStyle {
+            text_color: Some(text_secondary),
+            text_size: Some(13.0),
+            ..NodeStyle::default()
+        });
     tree.add_child(hero, desc);
 
     // ── Specimen section ──
-    let section = tree.create(Widget::Panel, UiStyle {
-        direction: Direction::Column,
-        width: Sizing::Grow(1.0),
-        gap: 8.0,
-        ..UiStyle::default()
-    });
+    let section = tree.create_node(Widget::Panel, pug_jetstream::map_layout(&LayoutIntent::new()
+        .with_direction(LayoutDirection::Column)
+        .with_width(LayoutSizing::Grow)
+        .with_gap(8.0)),
+        NodeStyle::default());
     tree.add_child(page, section);
 
     // Section title
-    let section_title = tree.create(Widget::Label {
+    let section_title = tree.create_node(Widget::Label {
         text: "Specimen".to_string(),
-    }, UiStyle {
-        text_color: Some(text_secondary),
-        text_size: Some(11.0),
-        padding: Edges { top: 0.0, right: 0.0, bottom: 0.0, left: 2.0 },
-        ..UiStyle::default()
-    });
+    }, pug_jetstream::map_layout(&LayoutIntent::new()
+        .with_padding(LayoutEdges { top: 0.0, right: 0.0, bottom: 0.0, left: 2.0 })),
+        NodeStyle {
+            text_color: Some(text_secondary),
+            text_size: Some(11.0),
+            ..NodeStyle::default()
+        });
     tree.add_child(section, section_title);
 
     // Specimen card container
@@ -410,13 +413,14 @@ pub fn build_specimen_page(
     if let Some(specimen_node) = render_specimen(entry.slug, tree, theme) {
         tree.add_child(card, specimen_node);
     } else {
-        let placeholder = tree.create(Widget::Label {
+        let placeholder = tree.create_node(Widget::Label {
             text: format!("{} — specimen coming soon", entry.display_name),
-        }, UiStyle {
-            text_color: Some(text_secondary),
-            text_size: Some(13.0),
-            ..UiStyle::default()
-        });
+        }, pug_jetstream::map_layout(&LayoutIntent::new()),
+            NodeStyle {
+                text_color: Some(text_secondary),
+                text_size: Some(13.0),
+                ..NodeStyle::default()
+            });
         tree.add_child(card, placeholder);
     }
 
@@ -428,17 +432,18 @@ pub fn build_specimen_card(tree: &mut UiTree, theme: &dyn ThemeProvider) -> UiNo
     let bg_elevated = theme_bridge::elevated_background(theme);
     let border = theme_bridge::border_subtle(theme);
 
-    tree.create(Widget::Panel, UiStyle {
-        direction: Direction::Column,
-        width: Sizing::Grow(1.0),
-        padding: Edges::all(24.0),
-        gap: 12.0,
-        background: Some(bg_elevated),
-        border_color: Some(border),
-        border_width: 1.0,
-        corner_radii: [8.0; 4],
-        ..UiStyle::default()
-    })
+    tree.create_node(Widget::Panel, pug_jetstream::map_layout(&LayoutIntent::new()
+        .with_direction(LayoutDirection::Column)
+        .with_width(LayoutSizing::Grow)
+        .with_padding(LayoutEdges::uniform(24.0))
+        .with_gap(12.0)),
+        NodeStyle {
+            background: Some(bg_elevated),
+            border_color: Some(border),
+            border_width: 1.0,
+            corner_radii: [8.0; 4],
+            ..NodeStyle::default()
+        })
 }
 
 // ── Catalogue landing page ──
@@ -469,22 +474,22 @@ pub fn build_catalogue_landing(
     let border = theme_bridge::border_subtle(theme);
     let accent = theme_bridge::accent_base(theme);
 
-    let landing = tree.create(Widget::Panel, UiStyle {
-        direction: Direction::Column,
-        width: Sizing::Grow(1.0),
-        gap: 24.0,
-        ..UiStyle::default()
-    });
+    let landing = tree.create_node(Widget::Panel, pug_jetstream::map_layout(&LayoutIntent::new()
+        .with_direction(LayoutDirection::Column)
+        .with_width(LayoutSizing::Grow)
+        .with_gap(24.0)),
+        NodeStyle::default());
 
     // Section title
     let section_name = state.section.label();
-    let title = tree.create(Widget::Label {
+    let title = tree.create_node(Widget::Label {
         text: section_name.to_string(),
-    }, UiStyle {
-        text_color: Some(text_primary),
-        text_size: Some(20.0),
-        ..UiStyle::default()
-    });
+    }, pug_jetstream::map_layout(&LayoutIntent::new()),
+        NodeStyle {
+            text_color: Some(text_primary),
+            text_size: Some(20.0),
+            ..NodeStyle::default()
+        });
     tree.add_child(landing, title);
 
     // Description
@@ -495,22 +500,22 @@ pub fn build_catalogue_landing(
         components.len(),
         specimen_count,
     );
-    let desc = tree.create(Widget::Label {
+    let desc = tree.create_node(Widget::Label {
         text: desc_text,
-    }, UiStyle {
-        text_color: Some(text_secondary),
-        text_size: Some(13.0),
-        ..UiStyle::default()
-    });
+    }, pug_jetstream::map_layout(&LayoutIntent::new()),
+        NodeStyle {
+            text_color: Some(text_secondary),
+            text_size: Some(13.0),
+            ..NodeStyle::default()
+        });
     tree.add_child(landing, desc);
 
     // Component overview grid
-    let grid = tree.create(Widget::Panel, UiStyle {
-        direction: Direction::Column,
-        width: Sizing::Grow(1.0),
-        gap: 8.0,
-        ..UiStyle::default()
-    });
+    let grid = tree.create_node(Widget::Panel, pug_jetstream::map_layout(&LayoutIntent::new()
+        .with_direction(LayoutDirection::Column)
+        .with_width(LayoutSizing::Grow)
+        .with_gap(8.0)),
+        NodeStyle::default());
     tree.add_child(landing, grid);
 
     // Show a summary card for each category within the current section
@@ -518,49 +523,53 @@ pub fn build_catalogue_landing(
         // Group by first letter for a compact category overview
         let categories = categorize_components(components);
         for (letter, count) in &categories {
-            let row = tree.create(Widget::Panel, UiStyle {
-                direction: Direction::Row,
-                width: Sizing::Grow(1.0),
-                padding: Edges { top: 6.0, right: 12.0, bottom: 6.0, left: 12.0 },
-                gap: 8.0,
-                align: Align::Center,
-                background: Some(bg_elevated),
-                border_color: Some(border),
-                border_width: 1.0,
-                corner_radii: [6.0; 4],
-                ..UiStyle::default()
-            });
+            let row = tree.create_node(Widget::Panel, pug_jetstream::map_layout(&LayoutIntent::new()
+                .with_direction(LayoutDirection::Row)
+                .with_width(LayoutSizing::Grow)
+                .with_padding(LayoutEdges { top: 6.0, right: 12.0, bottom: 6.0, left: 12.0 })
+                .with_gap(8.0)
+                .with_alignment(MainAxisAlignment::Start, CrossAxisAlignment::Center)),
+                NodeStyle {
+                    background: Some(bg_elevated),
+                    border_color: Some(border),
+                    border_width: 1.0,
+                    corner_radii: [6.0; 4],
+                    ..NodeStyle::default()
+                });
             tree.add_child(grid, row);
 
-            let letter_label = tree.create(Widget::Label {
+            let letter_label = tree.create_node(Widget::Label {
                 text: letter.to_string(),
-            }, UiStyle {
-                text_color: Some(accent),
-                text_size: Some(14.0),
-                ..UiStyle::default()
-            });
+            }, pug_jetstream::map_layout(&LayoutIntent::new()),
+                NodeStyle {
+                    text_color: Some(accent),
+                    text_size: Some(14.0),
+                    ..NodeStyle::default()
+                });
             tree.add_child(row, letter_label);
 
-            let count_label = tree.create(Widget::Label {
+            let count_label = tree.create_node(Widget::Label {
                 text: format!("{} component{}", count, if *count == 1 { "" } else { "s" }),
-            }, UiStyle {
-                text_color: Some(text_secondary),
-                text_size: Some(12.0),
-                ..UiStyle::default()
-            });
+            }, pug_jetstream::map_layout(&LayoutIntent::new()),
+                NodeStyle {
+                    text_color: Some(text_secondary),
+                    text_size: Some(12.0),
+                    ..NodeStyle::default()
+                });
             tree.add_child(row, count_label);
         }
     }
 
     // Instruction hint
-    let hint = tree.create(Widget::Label {
+    let hint = tree.create_node(Widget::Label {
         text: "Select a component from the sidebar to view its specimen.".to_string(),
-    }, UiStyle {
-        text_color: Some(theme_bridge::tint(text_secondary, 0.7)),
-        text_size: Some(12.0),
-        padding: Edges { top: 8.0, right: 0.0, bottom: 0.0, left: 0.0 },
-        ..UiStyle::default()
-    });
+    }, pug_jetstream::map_layout(&LayoutIntent::new()
+        .with_padding(LayoutEdges { top: 8.0, right: 0.0, bottom: 0.0, left: 0.0 })),
+        NodeStyle {
+            text_color: Some(theme_bridge::tint(text_secondary, 0.7)),
+            text_size: Some(12.0),
+            ..NodeStyle::default()
+        });
     tree.add_child(landing, hint);
 
     landing

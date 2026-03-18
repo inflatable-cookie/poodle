@@ -2,6 +2,7 @@
 
 use jetstream_runtime::game_ui::*;
 use pug_adapter::ThemeProvider;
+use pug_layout::{LayoutIntent, LayoutDirection, LayoutSizing, CrossAxisAlignment, MainAxisAlignment};
 
 use crate::theme_bridge;
 
@@ -11,41 +12,37 @@ pub fn render(tree: &mut UiTree, theme: &dyn ThemeProvider) -> UiNodeId {
     let accent = theme_bridge::accent_base(theme);
     let border = theme_bridge::border_default(theme);
 
-    let root = tree.create(Widget::Panel, UiStyle {
-        direction: Direction::Column,
-        width: Sizing::Grow(1.0),
-        gap: 16.0,
-        ..UiStyle::default()
-    });
+    let root = tree.create_node(Widget::Panel, pug_jetstream::map_layout(&LayoutIntent::new()
+        .with_direction(LayoutDirection::Column)
+        .with_width(LayoutSizing::Grow)
+        .with_gap(16.0)),
+        NodeStyle::default());
 
     label(tree, root, "Radio Group (second selected)", text_secondary);
 
     let options = ["Option A", "Option B (selected)", "Option C", "Option D"];
     for (i, &opt) in options.iter().enumerate() {
         let selected = i == 1;
-        let row = tree.create(Widget::Panel, UiStyle {
-            direction: Direction::Row,
-            gap: 8.0,
-            align: Align::Center,
-            ..UiStyle::default()
-        });
+        let row = tree.create_node(Widget::Panel, pug_jetstream::map_layout(&LayoutIntent::new()
+            .with_direction(LayoutDirection::Row)
+            .with_gap(8.0)
+            .with_alignment(MainAxisAlignment::Start, CrossAxisAlignment::Center)),
+            NodeStyle::default());
         tree.add_child(root, row);
 
-        let radio = tree.create(Widget::Panel, UiStyle {
-            width: Sizing::Fixed(18.0),
-            height: Sizing::Fixed(18.0),
-            corner_radii: [9.0; 4],
-            border_color: Some(if selected { accent } else { border }),
-            border_width: if selected { 5.0 } else { 1.5 },
-            ..UiStyle::default()
-        });
+        let radio = tree.create_node(Widget::Panel, pug_jetstream::map_layout(&LayoutIntent::new()
+            .with_width(LayoutSizing::Fixed(18.0))
+            .with_height(LayoutSizing::Fixed(18.0))),
+            NodeStyle {
+                corner_radii: [9.0; 4],
+                border_color: Some(if selected { accent } else { border }),
+                border_width: if selected { 5.0 } else { 1.5 },
+                ..NodeStyle::default()
+            });
         tree.add_child(row, radio);
 
-        let lbl = tree.create(Widget::Label { text: opt.to_string() }, UiStyle {
-            text_color: Some(text_primary),
-            text_size: Some(12.0),
-            ..UiStyle::default()
-        });
+        let lbl = tree.create_node(Widget::Label { text: opt.to_string() }, pug_jetstream::map_layout(&LayoutIntent::new()),
+            NodeStyle { text_color: Some(text_primary), text_size: Some(12.0), ..NodeStyle::default() });
         tree.add_child(row, lbl);
     }
 
@@ -54,30 +51,26 @@ pub fn render(tree: &mut UiTree, theme: &dyn ThemeProvider) -> UiNodeId {
 
     for (i, &opt) in ["Enabled", "Disabled selected"].iter().enumerate() {
         let selected = i == 1;
-        let row = tree.create(Widget::Panel, UiStyle {
-            direction: Direction::Row,
-            gap: 8.0,
-            align: Align::Center,
-            opacity: 0.5,
-            ..UiStyle::default()
-        });
+        let row = tree.create_node(Widget::Panel, pug_jetstream::map_layout(&LayoutIntent::new()
+            .with_direction(LayoutDirection::Row)
+            .with_gap(8.0)
+            .with_alignment(MainAxisAlignment::Start, CrossAxisAlignment::Center)),
+            NodeStyle { opacity: 0.5, ..NodeStyle::default() });
         tree.add_child(root, row);
 
-        let radio = tree.create(Widget::Panel, UiStyle {
-            width: Sizing::Fixed(18.0),
-            height: Sizing::Fixed(18.0),
-            corner_radii: [9.0; 4],
-            border_color: Some(if selected { accent } else { border }),
-            border_width: if selected { 5.0 } else { 1.5 },
-            ..UiStyle::default()
-        });
+        let radio = tree.create_node(Widget::Panel, pug_jetstream::map_layout(&LayoutIntent::new()
+            .with_width(LayoutSizing::Fixed(18.0))
+            .with_height(LayoutSizing::Fixed(18.0))),
+            NodeStyle {
+                corner_radii: [9.0; 4],
+                border_color: Some(if selected { accent } else { border }),
+                border_width: if selected { 5.0 } else { 1.5 },
+                ..NodeStyle::default()
+            });
         tree.add_child(row, radio);
 
-        let lbl = tree.create(Widget::Label { text: opt.to_string() }, UiStyle {
-            text_color: Some(text_primary),
-            text_size: Some(12.0),
-            ..UiStyle::default()
-        });
+        let lbl = tree.create_node(Widget::Label { text: opt.to_string() }, pug_jetstream::map_layout(&LayoutIntent::new()),
+            NodeStyle { text_color: Some(text_primary), text_size: Some(12.0), ..NodeStyle::default() });
         tree.add_child(row, lbl);
     }
 
@@ -85,10 +78,7 @@ pub fn render(tree: &mut UiTree, theme: &dyn ThemeProvider) -> UiNodeId {
 }
 
 fn label(tree: &mut UiTree, parent: UiNodeId, text: &str, color: glam::Vec4) {
-    let lbl = tree.create(Widget::Label { text: text.to_string() }, UiStyle {
-        text_color: Some(color),
-        text_size: Some(11.0),
-        ..UiStyle::default()
-    });
+    let lbl = tree.create_node(Widget::Label { text: text.to_string() }, pug_jetstream::map_layout(&LayoutIntent::new()),
+        NodeStyle { text_color: Some(color), text_size: Some(11.0), ..NodeStyle::default() });
     tree.add_child(parent, lbl);
 }

@@ -2,6 +2,7 @@
 
 use jetstream_runtime::game_ui::*;
 use pug_adapter::ThemeProvider;
+use pug_layout::{LayoutDirection, LayoutEdges, LayoutIntent, LayoutSizing, CrossAxisAlignment, MainAxisAlignment};
 
 use crate::theme_bridge;
 
@@ -12,23 +13,22 @@ pub fn render(tree: &mut UiTree, theme: &dyn ThemeProvider) -> UiNodeId {
     let bg_surface = theme_bridge::surface_background(theme);
     let border = theme_bridge::border_subtle(theme);
 
-    let root = tree.create(Widget::Panel, UiStyle {
-        direction: Direction::Column,
-        width: Sizing::Grow(1.0),
-        gap: 16.0,
-        ..UiStyle::default()
-    });
+    let root = tree.create_node(Widget::Panel, pug_jetstream::map_layout(&LayoutIntent::new()
+        .with_direction(LayoutDirection::Column)
+        .with_width(LayoutSizing::Grow)
+        .with_gap(16.0)), NodeStyle::default());
 
     // ── Standard ──
     section_label(tree, root, "Standard Sort Control", text_secondary);
     {
-        let row = tree.create(Widget::Panel, UiStyle {
-            direction: Direction::Row, gap: 8.0, align: Align::Center, ..UiStyle::default()
-        });
+        let row = tree.create_node(Widget::Panel, pug_jetstream::map_layout(&LayoutIntent::new()
+            .with_direction(LayoutDirection::Row)
+            .with_gap(8.0)
+            .with_alignment(MainAxisAlignment::Start, CrossAxisAlignment::Center)), NodeStyle::default());
         tree.add_child(root, row);
 
-        let lbl = tree.create(Widget::Label { text: "Sort by:".to_string() }, UiStyle {
-            text_color: Some(text_secondary), text_size: Some(11.0), ..UiStyle::default()
+        let lbl = tree.create_node(Widget::Label { text: "Sort by:".to_string() }, pug_jetstream::map_layout(&LayoutIntent::new()), NodeStyle {
+            text_color: Some(text_secondary), text_size: Some(11.0), ..NodeStyle::default()
         });
         tree.add_child(row, lbl);
 
@@ -40,13 +40,14 @@ pub fn render(tree: &mut UiTree, theme: &dyn ThemeProvider) -> UiNodeId {
     // ── Descending ──
     section_label(tree, root, "Descending Sort", text_secondary);
     {
-        let row = tree.create(Widget::Panel, UiStyle {
-            direction: Direction::Row, gap: 8.0, align: Align::Center, ..UiStyle::default()
-        });
+        let row = tree.create_node(Widget::Panel, pug_jetstream::map_layout(&LayoutIntent::new()
+            .with_direction(LayoutDirection::Row)
+            .with_gap(8.0)
+            .with_alignment(MainAxisAlignment::Start, CrossAxisAlignment::Center)), NodeStyle::default());
         tree.add_child(root, row);
 
-        let lbl = tree.create(Widget::Label { text: "Sort by:".to_string() }, UiStyle {
-            text_color: Some(text_secondary), text_size: Some(11.0), ..UiStyle::default()
+        let lbl = tree.create_node(Widget::Label { text: "Sort by:".to_string() }, pug_jetstream::map_layout(&LayoutIntent::new()), NodeStyle {
+            text_color: Some(text_secondary), text_size: Some(11.0), ..NodeStyle::default()
         });
         tree.add_child(row, lbl);
 
@@ -58,23 +59,25 @@ pub fn render(tree: &mut UiTree, theme: &dyn ThemeProvider) -> UiNodeId {
     // ── Dropdown style ──
     section_label(tree, root, "Dropdown Style", text_secondary);
     {
-        let btn = tree.create(Widget::Panel, UiStyle {
-            direction: Direction::Row, gap: 6.0,
-            height: Sizing::Fixed(32.0),
-            padding: Edges { top: 0.0, right: 12.0, bottom: 0.0, left: 12.0 },
+        let btn = tree.create_node(Widget::Panel, pug_jetstream::map_layout(&LayoutIntent::new()
+            .with_direction(LayoutDirection::Row)
+            .with_gap(6.0)
+            .with_height(LayoutSizing::Fixed(32.0))
+            .with_padding(LayoutEdges { top: 0.0, right: 12.0, bottom: 0.0, left: 12.0 })
+            .with_alignment(MainAxisAlignment::Start, CrossAxisAlignment::Center)), NodeStyle {
             background: Some(bg_surface), border_color: Some(border),
-            border_width: 1.0, corner_radii: [6.0; 4], align: Align::Center,
-            ..UiStyle::default()
+            border_width: 1.0, corner_radii: [6.0; 4],
+            ..NodeStyle::default()
         });
         tree.add_child(root, btn);
 
-        let lbl = tree.create(Widget::Label { text: "Sort: Name (A→Z)".to_string() }, UiStyle {
-            text_color: Some(text_primary), text_size: Some(12.0), ..UiStyle::default()
+        let lbl = tree.create_node(Widget::Label { text: "Sort: Name (A→Z)".to_string() }, pug_jetstream::map_layout(&LayoutIntent::new()), NodeStyle {
+            text_color: Some(text_primary), text_size: Some(12.0), ..NodeStyle::default()
         });
         tree.add_child(btn, lbl);
 
-        let chevron = tree.create(Widget::Label { text: "▾".to_string() }, UiStyle {
-            text_color: Some(text_secondary), text_size: Some(10.0), ..UiStyle::default()
+        let chevron = tree.create_node(Widget::Label { text: "▾".to_string() }, pug_jetstream::map_layout(&LayoutIntent::new()), NodeStyle {
+            text_color: Some(text_secondary), text_size: Some(10.0), ..NodeStyle::default()
         });
         tree.add_child(btn, chevron);
     }
@@ -83,8 +86,8 @@ pub fn render(tree: &mut UiTree, theme: &dyn ThemeProvider) -> UiNodeId {
 }
 
 fn section_label(tree: &mut UiTree, parent: UiNodeId, text: &str, color: glam::Vec4) {
-    let lbl = tree.create(Widget::Label { text: text.to_string() }, UiStyle {
-        text_color: Some(color), text_size: Some(11.0), ..UiStyle::default()
+    let lbl = tree.create_node(Widget::Label { text: text.to_string() }, pug_jetstream::map_layout(&LayoutIntent::new()), NodeStyle {
+        text_color: Some(color), text_size: Some(11.0), ..NodeStyle::default()
     });
     tree.add_child(parent, lbl);
 }
@@ -96,16 +99,16 @@ fn sort_chip(tree: &mut UiTree, parent: UiNodeId, label: &str, active: bool, acc
         (Some(bg), border, fg)
     };
 
-    let chip = tree.create(Widget::Button {
+    let chip = tree.create_node(Widget::Button {
         label: label.to_string(), pressed: false, hovered: false,
-    }, UiStyle {
-        height: Sizing::Fixed(26.0),
-        padding: Edges { top: 0.0, right: 10.0, bottom: 0.0, left: 10.0 },
+    }, pug_jetstream::map_layout(&LayoutIntent::new()
+        .with_height(LayoutSizing::Fixed(26.0))
+        .with_padding(LayoutEdges { top: 0.0, right: 10.0, bottom: 0.0, left: 10.0 })
+        .with_alignment(MainAxisAlignment::Center, CrossAxisAlignment::Center)), NodeStyle {
         corner_radii: [13.0; 4], background: chip_bg,
         border_color: Some(chip_border), border_width: 1.0,
         text_color: Some(color), text_size: Some(11.0),
-        align: Align::Center, justify: Justify::Center,
-        focusable: true, ..UiStyle::default()
+        focusable: true, ..NodeStyle::default()
     });
     tree.add_child(parent, chip);
 }

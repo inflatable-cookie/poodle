@@ -1,9 +1,12 @@
+export { default as ActionDiscoveryPanel } from "./ActionDiscoveryPanel.svelte";
+export { default as AppHeader } from "./AppHeader.svelte";
 export { default as AudioPlayer } from "./AudioPlayer.svelte";
 export { default as AutonomousList } from "./AutonomousList.svelte";
 export { default as BlockEditor } from "./BlockEditor.svelte";
 export { default as Breadcrumbs } from "./Breadcrumbs.svelte";
 export { BulkActionBar, Card } from "@pug/svelte-primitives";
 export { default as CardRadioGroup } from "./CardRadioGroup.svelte";
+export { default as CommandPalette } from "./CommandPalette.svelte";
 export { default as ConfirmAction } from "./ConfirmAction.svelte";
 export { default as DataTable } from "./DataTable.svelte";
 export { DetailRow } from "@pug/svelte-primitives";
@@ -45,6 +48,8 @@ export type {
   BulkAction,
   CardRadioItem,
   CardVariant,
+  CommandActionItem,
+  DiscoveryState,
   EditorBlock,
   EmptyStateVariant,
   LogEntry,

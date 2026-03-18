@@ -2,6 +2,7 @@
 
 use jetstream_runtime::game_ui::*;
 use pug_adapter::ThemeProvider;
+use pug_layout::{CrossAxisAlignment, LayoutDirection, LayoutEdges, LayoutIntent, LayoutSizing, MainAxisAlignment};
 
 use crate::theme_bridge;
 
@@ -12,9 +13,9 @@ pub fn render(tree: &mut UiTree, theme: &dyn ThemeProvider) -> UiNodeId {
     let bg_elevated = theme_bridge::elevated_background(theme);
     let border = theme_bridge::border_subtle(theme);
 
-    let root = tree.create(Widget::Panel, UiStyle {
-        direction: Direction::Column, width: Sizing::Grow(1.0), gap: 20.0, ..UiStyle::default()
-    });
+    let root = tree.create_node(Widget::Panel, pug_jetstream::map_layout(&LayoutIntent::new()
+        .with_direction(LayoutDirection::Column).with_width(LayoutSizing::Grow).with_gap(20.0)),
+        NodeStyle::default());
 
     section_label(tree, root, "Video Embed", text_secondary);
     embed_card(tree, root, "▶ YouTube", "How to Build a Game Engine", "youtube.com · 12:34 · 1.2M views", bg_elevated, border, accent, text_primary, text_secondary);
@@ -29,54 +30,43 @@ pub fn render(tree: &mut UiTree, theme: &dyn ThemeProvider) -> UiNodeId {
 }
 
 fn embed_card(tree: &mut UiTree, parent: UiNodeId, provider: &str, title: &str, meta: &str, bg: glam::Vec4, border: glam::Vec4, provider_color: glam::Vec4, title_color: glam::Vec4, meta_color: glam::Vec4) {
-    let card = tree.create(Widget::Panel, UiStyle {
-        direction: Direction::Column,
-        width: Sizing::Fixed(360.0),
-        background: Some(bg), border_color: Some(border), border_width: 1.0,
-        corner_radii: [8.0; 4],
-        ..UiStyle::default()
-    });
+    let card = tree.create_node(Widget::Panel, pug_jetstream::map_layout(&LayoutIntent::new()
+        .with_direction(LayoutDirection::Column)
+        .with_width(LayoutSizing::Fixed(360.0))),
+        NodeStyle { background: Some(bg), border_color: Some(border), border_width: 1.0, corner_radii: [8.0; 4], ..NodeStyle::default() });
     tree.add_child(parent, card);
 
     // Placeholder thumbnail
-    let thumb = tree.create(Widget::Panel, UiStyle {
-        width: Sizing::Grow(1.0), height: Sizing::Fixed(80.0),
-        background: Some(theme_bridge::tint(border, 0.5)),
-        align: Align::Center, justify: Justify::Center,
-        ..UiStyle::default()
-    });
+    let thumb = tree.create_node(Widget::Panel, pug_jetstream::map_layout(&LayoutIntent::new()
+        .with_width(LayoutSizing::Grow).with_height(LayoutSizing::Fixed(80.0))
+        .with_alignment(MainAxisAlignment::Center, CrossAxisAlignment::Center)),
+        NodeStyle { background: Some(theme_bridge::tint(border, 0.5)), ..NodeStyle::default() });
     tree.add_child(card, thumb);
 
-    let play = tree.create(Widget::Label { text: "▶".to_string() }, UiStyle {
-        text_color: Some(theme_bridge::tint(title_color, 0.4)), text_size: Some(24.0), ..UiStyle::default()
-    });
+    let play = tree.create_node(Widget::Label { text: "▶".to_string() }, pug_jetstream::map_layout(&LayoutIntent::new()),
+        NodeStyle { text_color: Some(theme_bridge::tint(title_color, 0.4)), text_size: Some(24.0), ..NodeStyle::default() });
     tree.add_child(thumb, play);
 
-    let body = tree.create(Widget::Panel, UiStyle {
-        direction: Direction::Column, padding: Edges::all(12.0), gap: 4.0,
-        ..UiStyle::default()
-    });
+    let body = tree.create_node(Widget::Panel, pug_jetstream::map_layout(&LayoutIntent::new()
+        .with_direction(LayoutDirection::Column).with_padding(LayoutEdges::uniform(12.0)).with_gap(4.0)),
+        NodeStyle::default());
     tree.add_child(card, body);
 
-    let p = tree.create(Widget::Label { text: provider.to_string() }, UiStyle {
-        text_color: Some(provider_color), text_size: Some(10.0), ..UiStyle::default()
-    });
+    let p = tree.create_node(Widget::Label { text: provider.to_string() }, pug_jetstream::map_layout(&LayoutIntent::new()),
+        NodeStyle { text_color: Some(provider_color), text_size: Some(10.0), ..NodeStyle::default() });
     tree.add_child(body, p);
 
-    let t = tree.create(Widget::Label { text: title.to_string() }, UiStyle {
-        text_color: Some(title_color), text_size: Some(13.0), ..UiStyle::default()
-    });
+    let t = tree.create_node(Widget::Label { text: title.to_string() }, pug_jetstream::map_layout(&LayoutIntent::new()),
+        NodeStyle { text_color: Some(title_color), text_size: Some(13.0), ..NodeStyle::default() });
     tree.add_child(body, t);
 
-    let m = tree.create(Widget::Label { text: meta.to_string() }, UiStyle {
-        text_color: Some(meta_color), text_size: Some(10.0), ..UiStyle::default()
-    });
+    let m = tree.create_node(Widget::Label { text: meta.to_string() }, pug_jetstream::map_layout(&LayoutIntent::new()),
+        NodeStyle { text_color: Some(meta_color), text_size: Some(10.0), ..NodeStyle::default() });
     tree.add_child(body, m);
 }
 
 fn section_label(tree: &mut UiTree, parent: UiNodeId, text: &str, color: glam::Vec4) {
-    let lbl = tree.create(Widget::Label { text: text.to_string() }, UiStyle {
-        text_color: Some(color), text_size: Some(11.0), ..UiStyle::default()
-    });
+    let lbl = tree.create_node(Widget::Label { text: text.to_string() }, pug_jetstream::map_layout(&LayoutIntent::new()),
+        NodeStyle { text_color: Some(color), text_size: Some(11.0), ..NodeStyle::default() });
     tree.add_child(parent, lbl);
 }

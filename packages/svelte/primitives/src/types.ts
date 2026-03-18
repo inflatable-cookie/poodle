@@ -1,6 +1,7 @@
 export type ValidationState = "none" | "invalid" | "valid" | "pending";
 
 export type CalendarWeekStart = "sunday" | "monday";
+export type CollapseDirection = "left" | "right" | "up" | "down";
 export type SpaceScale = "none" | "sm" | "md" | "lg";
 export type ControlSize = "sm" | "md" | "lg";
 export type ButtonVariant = "primary" | "secondary" | "ghost";
@@ -88,7 +89,7 @@ export interface TabItem {
   isClosable?: boolean;
 }
 
-export type TabVariant = "underline" | "card" | "pill";
+export type TabVariant = "underline" | "card" | "pill" | "strip";
 
 /** @deprecated Use TabItem instead */
 export type TabDefinition = TabItem;

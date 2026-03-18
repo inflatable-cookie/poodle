@@ -2,6 +2,7 @@
 
 use jetstream_runtime::game_ui::*;
 use pug_adapter::ThemeProvider;
+use pug_layout::{CrossAxisAlignment, LayoutDirection, LayoutEdges, LayoutIntent, LayoutSizing, MainAxisAlignment};
 
 use crate::theme_bridge;
 
@@ -12,135 +13,116 @@ pub fn render(tree: &mut UiTree, theme: &dyn ThemeProvider) -> UiNodeId {
     let bg_elevated = theme_bridge::elevated_background(theme);
     let border = theme_bridge::border_subtle(theme);
 
-    let root = tree.create(Widget::Panel, UiStyle {
-        direction: Direction::Column,
-        width: Sizing::Grow(1.0),
-        gap: 20.0,
-        ..UiStyle::default()
-    });
+    let root = tree.create_node(Widget::Panel, pug_jetstream::map_layout(&LayoutIntent::new()
+        .with_direction(LayoutDirection::Column)
+        .with_width(LayoutSizing::Grow)
+        .with_gap(20.0)),
+        NodeStyle::default());
 
     // ── User hover card ──
     section_label(tree, root, "User Hover Card", text_secondary);
     {
-        let col = tree.create(Widget::Panel, UiStyle {
-            direction: Direction::Column, gap: 4.0, ..UiStyle::default()
-        });
+        let col = tree.create_node(Widget::Panel, pug_jetstream::map_layout(&LayoutIntent::new()
+            .with_direction(LayoutDirection::Column)
+            .with_gap(4.0)),
+            NodeStyle::default());
         tree.add_child(root, col);
 
         // Trigger link
-        let link = tree.create(Widget::Label { text: "@johndoe".to_string() }, UiStyle {
-            text_color: Some(accent), text_size: Some(12.0), ..UiStyle::default()
-        });
+        let link = tree.create_node(Widget::Label { text: "@johndoe".to_string() }, pug_jetstream::map_layout(&LayoutIntent::new()),
+            NodeStyle { text_color: Some(accent), text_size: Some(12.0), ..NodeStyle::default() });
         tree.add_child(col, link);
 
         // Card
-        let card = tree.create(Widget::Panel, UiStyle {
-            direction: Direction::Column,
-            width: Sizing::Fixed(240.0),
-            padding: Edges::all(16.0),
-            gap: 8.0,
-            background: Some(bg_elevated),
-            border_color: Some(border),
-            border_width: 1.0,
-            corner_radii: [8.0; 4],
-            ..UiStyle::default()
-        });
+        let card = tree.create_node(Widget::Panel, pug_jetstream::map_layout(&LayoutIntent::new()
+            .with_direction(LayoutDirection::Column)
+            .with_width(LayoutSizing::Fixed(240.0))
+            .with_padding(LayoutEdges::uniform(16.0))
+            .with_gap(8.0)),
+            NodeStyle { background: Some(bg_elevated), border_color: Some(border), border_width: 1.0, corner_radii: [8.0; 4], ..NodeStyle::default() });
         tree.add_child(col, card);
 
         // Avatar + name row
-        let header = tree.create(Widget::Panel, UiStyle {
-            direction: Direction::Row, gap: 10.0, align: Align::Center, ..UiStyle::default()
-        });
+        let header = tree.create_node(Widget::Panel, pug_jetstream::map_layout(&LayoutIntent::new()
+            .with_direction(LayoutDirection::Row)
+            .with_gap(10.0)
+            .with_alignment(MainAxisAlignment::Start, CrossAxisAlignment::Center)),
+            NodeStyle::default());
         tree.add_child(card, header);
 
-        let avatar = tree.create(Widget::Panel, UiStyle {
-            width: Sizing::Fixed(36.0), height: Sizing::Fixed(36.0),
-            corner_radii: [18.0; 4], background: Some(accent),
-            align: Align::Center, justify: Justify::Center,
-            ..UiStyle::default()
-        });
+        let avatar = tree.create_node(Widget::Panel, pug_jetstream::map_layout(&LayoutIntent::new()
+            .with_width(LayoutSizing::Fixed(36.0))
+            .with_height(LayoutSizing::Fixed(36.0))
+            .with_alignment(MainAxisAlignment::Center, CrossAxisAlignment::Center)),
+            NodeStyle { corner_radii: [18.0; 4], background: Some(accent), ..NodeStyle::default() });
         tree.add_child(header, avatar);
 
-        let initials = tree.create(Widget::Label { text: "JD".to_string() }, UiStyle {
-            text_color: Some(theme_bridge::text_inverse(theme)),
-            text_size: Some(13.0), ..UiStyle::default()
-        });
+        let initials = tree.create_node(Widget::Label { text: "JD".to_string() }, pug_jetstream::map_layout(&LayoutIntent::new()),
+            NodeStyle { text_color: Some(theme_bridge::text_inverse(theme)), text_size: Some(13.0), ..NodeStyle::default() });
         tree.add_child(avatar, initials);
 
-        let info = tree.create(Widget::Panel, UiStyle {
-            direction: Direction::Column, gap: 2.0, ..UiStyle::default()
-        });
+        let info = tree.create_node(Widget::Panel, pug_jetstream::map_layout(&LayoutIntent::new()
+            .with_direction(LayoutDirection::Column)
+            .with_gap(2.0)),
+            NodeStyle::default());
         tree.add_child(header, info);
 
-        let name = tree.create(Widget::Label { text: "John Doe".to_string() }, UiStyle {
-            text_color: Some(text_primary), text_size: Some(13.0), ..UiStyle::default()
-        });
+        let name = tree.create_node(Widget::Label { text: "John Doe".to_string() }, pug_jetstream::map_layout(&LayoutIntent::new()),
+            NodeStyle { text_color: Some(text_primary), text_size: Some(13.0), ..NodeStyle::default() });
         tree.add_child(info, name);
 
-        let handle = tree.create(Widget::Label { text: "@johndoe".to_string() }, UiStyle {
-            text_color: Some(text_secondary), text_size: Some(11.0), ..UiStyle::default()
-        });
+        let handle = tree.create_node(Widget::Label { text: "@johndoe".to_string() }, pug_jetstream::map_layout(&LayoutIntent::new()),
+            NodeStyle { text_color: Some(text_secondary), text_size: Some(11.0), ..NodeStyle::default() });
         tree.add_child(info, handle);
 
-        let bio = tree.create(Widget::Label { text: "Software engineer. Rust enthusiast.".to_string() }, UiStyle {
-            text_color: Some(text_secondary), text_size: Some(11.0), ..UiStyle::default()
-        });
+        let bio = tree.create_node(Widget::Label { text: "Software engineer. Rust enthusiast.".to_string() }, pug_jetstream::map_layout(&LayoutIntent::new()),
+            NodeStyle { text_color: Some(text_secondary), text_size: Some(11.0), ..NodeStyle::default() });
         tree.add_child(card, bio);
     }
 
     // ── Link hover card ──
     section_label(tree, root, "Link Preview Card", text_secondary);
     {
-        let col = tree.create(Widget::Panel, UiStyle {
-            direction: Direction::Column, gap: 4.0, ..UiStyle::default()
-        });
+        let col = tree.create_node(Widget::Panel, pug_jetstream::map_layout(&LayoutIntent::new()
+            .with_direction(LayoutDirection::Column)
+            .with_gap(4.0)),
+            NodeStyle::default());
         tree.add_child(root, col);
 
-        let link = tree.create(Widget::Label { text: "example.com/article".to_string() }, UiStyle {
-            text_color: Some(accent), text_size: Some(12.0), ..UiStyle::default()
-        });
+        let link = tree.create_node(Widget::Label { text: "example.com/article".to_string() }, pug_jetstream::map_layout(&LayoutIntent::new()),
+            NodeStyle { text_color: Some(accent), text_size: Some(12.0), ..NodeStyle::default() });
         tree.add_child(col, link);
 
-        let card = tree.create(Widget::Panel, UiStyle {
-            direction: Direction::Column,
-            width: Sizing::Fixed(260.0),
-            background: Some(bg_elevated),
-            border_color: Some(border),
-            border_width: 1.0,
-            corner_radii: [8.0; 4],
-            ..UiStyle::default()
-        });
+        let card = tree.create_node(Widget::Panel, pug_jetstream::map_layout(&LayoutIntent::new()
+            .with_direction(LayoutDirection::Column)
+            .with_width(LayoutSizing::Fixed(260.0))),
+            NodeStyle { background: Some(bg_elevated), border_color: Some(border), border_width: 1.0, corner_radii: [8.0; 4], ..NodeStyle::default() });
         tree.add_child(col, card);
 
         // Image placeholder
-        let img = tree.create(Widget::Panel, UiStyle {
-            width: Sizing::Grow(1.0), height: Sizing::Fixed(80.0),
-            background: Some(border), corner_radii: [8.0; 4],
-            ..UiStyle::default()
-        });
+        let img = tree.create_node(Widget::Panel, pug_jetstream::map_layout(&LayoutIntent::new()
+            .with_width(LayoutSizing::Grow)
+            .with_height(LayoutSizing::Fixed(80.0))),
+            NodeStyle { background: Some(border), corner_radii: [8.0; 4], ..NodeStyle::default() });
         tree.add_child(card, img);
 
-        let body = tree.create(Widget::Panel, UiStyle {
-            direction: Direction::Column,
-            padding: Edges::all(12.0), gap: 4.0,
-            ..UiStyle::default()
-        });
+        let body = tree.create_node(Widget::Panel, pug_jetstream::map_layout(&LayoutIntent::new()
+            .with_direction(LayoutDirection::Column)
+            .with_padding(LayoutEdges::uniform(12.0))
+            .with_gap(4.0)),
+            NodeStyle::default());
         tree.add_child(card, body);
 
-        let title = tree.create(Widget::Label { text: "Getting Started with Rust".to_string() }, UiStyle {
-            text_color: Some(text_primary), text_size: Some(13.0), ..UiStyle::default()
-        });
+        let title = tree.create_node(Widget::Label { text: "Getting Started with Rust".to_string() }, pug_jetstream::map_layout(&LayoutIntent::new()),
+            NodeStyle { text_color: Some(text_primary), text_size: Some(13.0), ..NodeStyle::default() });
         tree.add_child(body, title);
 
-        let desc = tree.create(Widget::Label { text: "A beginner-friendly guide to systems programming.".to_string() }, UiStyle {
-            text_color: Some(text_secondary), text_size: Some(11.0), ..UiStyle::default()
-        });
+        let desc = tree.create_node(Widget::Label { text: "A beginner-friendly guide to systems programming.".to_string() }, pug_jetstream::map_layout(&LayoutIntent::new()),
+            NodeStyle { text_color: Some(text_secondary), text_size: Some(11.0), ..NodeStyle::default() });
         tree.add_child(body, desc);
 
-        let domain = tree.create(Widget::Label { text: "example.com".to_string() }, UiStyle {
-            text_color: Some(theme_bridge::tint(text_secondary, 0.6)),
-            text_size: Some(10.0), ..UiStyle::default()
-        });
+        let domain = tree.create_node(Widget::Label { text: "example.com".to_string() }, pug_jetstream::map_layout(&LayoutIntent::new()),
+            NodeStyle { text_color: Some(theme_bridge::tint(text_secondary, 0.6)), text_size: Some(10.0), ..NodeStyle::default() });
         tree.add_child(body, domain);
     }
 
@@ -148,8 +130,7 @@ pub fn render(tree: &mut UiTree, theme: &dyn ThemeProvider) -> UiNodeId {
 }
 
 fn section_label(tree: &mut UiTree, parent: UiNodeId, text: &str, color: glam::Vec4) {
-    let lbl = tree.create(Widget::Label { text: text.to_string() }, UiStyle {
-        text_color: Some(color), text_size: Some(11.0), ..UiStyle::default()
-    });
+    let lbl = tree.create_node(Widget::Label { text: text.to_string() }, pug_jetstream::map_layout(&LayoutIntent::new()),
+        NodeStyle { text_color: Some(color), text_size: Some(11.0), ..NodeStyle::default() });
     tree.add_child(parent, lbl);
 }

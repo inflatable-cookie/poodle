@@ -2,6 +2,7 @@
 
 use jetstream_runtime::game_ui::*;
 use pug_adapter::ThemeProvider;
+use pug_layout::{LayoutIntent, LayoutDirection, LayoutSizing, LayoutEdges, CrossAxisAlignment, MainAxisAlignment};
 
 use crate::theme_bridge;
 
@@ -12,12 +13,11 @@ pub fn render(tree: &mut UiTree, theme: &dyn ThemeProvider) -> UiNodeId {
     let bg_surface = theme_bridge::surface_background(theme);
     let border = theme_bridge::border_subtle(theme);
 
-    let root = tree.create(Widget::Panel, UiStyle {
-        direction: Direction::Column,
-        width: Sizing::Grow(1.0),
-        gap: 16.0,
-        ..UiStyle::default()
-    });
+    let root = tree.create_node(Widget::Panel, pug_jetstream::map_layout(&LayoutIntent::new()
+        .with_direction(LayoutDirection::Column)
+        .with_width(LayoutSizing::Grow)
+        .with_gap(16.0)),
+        NodeStyle::default());
 
     // ── 3 segments ──
     label(tree, root, "3 Segments (second selected)", text_secondary);
@@ -30,37 +30,24 @@ pub fn render(tree: &mut UiTree, theme: &dyn ThemeProvider) -> UiNodeId {
     // ── Disabled ──
     label(tree, root, "Disabled", text_secondary);
     {
-        let track = tree.create(Widget::Panel, UiStyle {
-            direction: Direction::Row,
-            padding: Edges::all(2.0),
-            gap: 2.0,
-            background: Some(bg_surface),
-            border_color: Some(border),
-            border_width: 1.0,
-            corner_radii: [6.0; 4],
-            opacity: 0.5,
-            ..UiStyle::default()
-        });
+        let track = tree.create_node(Widget::Panel, pug_jetstream::map_layout(&LayoutIntent::new()
+            .with_direction(LayoutDirection::Row)
+            .with_padding(LayoutEdges::uniform(2.0))
+            .with_gap(2.0)),
+            NodeStyle { background: Some(bg_surface), border_color: Some(border), border_width: 1.0, corner_radii: [6.0; 4], opacity: 0.5, ..NodeStyle::default() });
         tree.add_child(root, track);
 
         for (i, &seg) in ["On", "Off"].iter().enumerate() {
             let selected = i == 0;
-            let btn = tree.create(Widget::Panel, UiStyle {
-                height: Sizing::Fixed(28.0),
-                padding: Edges { top: 0.0, right: 16.0, bottom: 0.0, left: 16.0 },
-                corner_radii: [4.0; 4],
-                background: if selected { Some(theme_bridge::tint(accent, 0.20)) } else { None },
-                align: Align::Center,
-                justify: Justify::Center,
-                ..UiStyle::default()
-            });
+            let btn = tree.create_node(Widget::Panel, pug_jetstream::map_layout(&LayoutIntent::new()
+                .with_height(LayoutSizing::Fixed(28.0))
+                .with_padding(LayoutEdges { top: 0.0, right: 16.0, bottom: 0.0, left: 16.0 })
+                .with_alignment(MainAxisAlignment::Center, CrossAxisAlignment::Center)),
+                NodeStyle { corner_radii: [4.0; 4], background: if selected { Some(theme_bridge::tint(accent, 0.20)) } else { None }, ..NodeStyle::default() });
             tree.add_child(track, btn);
 
-            let lbl = tree.create(Widget::Label { text: seg.to_string() }, UiStyle {
-                text_color: Some(if selected { text_primary } else { text_secondary }),
-                text_size: Some(12.0),
-                ..UiStyle::default()
-            });
+            let lbl = tree.create_node(Widget::Label { text: seg.to_string() }, pug_jetstream::map_layout(&LayoutIntent::new()),
+                NodeStyle { text_color: Some(if selected { text_primary } else { text_secondary }), text_size: Some(12.0), ..NodeStyle::default() });
             tree.add_child(btn, lbl);
         }
     }
@@ -69,11 +56,8 @@ pub fn render(tree: &mut UiTree, theme: &dyn ThemeProvider) -> UiNodeId {
 }
 
 fn label(tree: &mut UiTree, parent: UiNodeId, text: &str, color: glam::Vec4) {
-    let lbl = tree.create(Widget::Label { text: text.to_string() }, UiStyle {
-        text_color: Some(color),
-        text_size: Some(11.0),
-        ..UiStyle::default()
-    });
+    let lbl = tree.create_node(Widget::Label { text: text.to_string() }, pug_jetstream::map_layout(&LayoutIntent::new()),
+        NodeStyle { text_color: Some(color), text_size: Some(11.0), ..NodeStyle::default() });
     tree.add_child(parent, lbl);
 }
 
@@ -88,36 +72,24 @@ fn segmented(
     bg_surface: glam::Vec4,
     border: glam::Vec4,
 ) {
-    let track = tree.create(Widget::Panel, UiStyle {
-        direction: Direction::Row,
-        padding: Edges::all(2.0),
-        gap: 2.0,
-        background: Some(bg_surface),
-        border_color: Some(border),
-        border_width: 1.0,
-        corner_radii: [6.0; 4],
-        ..UiStyle::default()
-    });
+    let track = tree.create_node(Widget::Panel, pug_jetstream::map_layout(&LayoutIntent::new()
+        .with_direction(LayoutDirection::Row)
+        .with_padding(LayoutEdges::uniform(2.0))
+        .with_gap(2.0)),
+        NodeStyle { background: Some(bg_surface), border_color: Some(border), border_width: 1.0, corner_radii: [6.0; 4], ..NodeStyle::default() });
     tree.add_child(parent, track);
 
     for (i, &seg) in segments.iter().enumerate() {
         let selected = i == selected_idx;
-        let btn = tree.create(Widget::Button {
+        let btn = tree.create_node(Widget::Button {
             label: seg.to_string(),
             pressed: false,
             hovered: false,
-        }, UiStyle {
-            height: Sizing::Fixed(28.0),
-            padding: Edges { top: 0.0, right: 16.0, bottom: 0.0, left: 16.0 },
-            corner_radii: [4.0; 4],
-            background: if selected { Some(theme_bridge::tint(accent, 0.20)) } else { None },
-            text_color: Some(if selected { text_primary } else { text_secondary }),
-            text_size: Some(12.0),
-            align: Align::Center,
-            justify: Justify::Center,
-            focusable: true,
-            ..UiStyle::default()
-        });
+        }, pug_jetstream::map_layout(&LayoutIntent::new()
+            .with_height(LayoutSizing::Fixed(28.0))
+            .with_padding(LayoutEdges { top: 0.0, right: 16.0, bottom: 0.0, left: 16.0 })
+            .with_alignment(MainAxisAlignment::Center, CrossAxisAlignment::Center)),
+            NodeStyle { corner_radii: [4.0; 4], background: if selected { Some(theme_bridge::tint(accent, 0.20)) } else { None }, text_color: Some(if selected { text_primary } else { text_secondary }), text_size: Some(12.0), focusable: true, ..NodeStyle::default() });
         tree.add_child(track, btn);
     }
 }

@@ -2,6 +2,7 @@
 
 use jetstream_runtime::game_ui::*;
 use pug_adapter::ThemeProvider;
+use pug_layout::{LayoutIntent, LayoutDirection, LayoutSizing, LayoutEdges, CrossAxisAlignment, MainAxisAlignment};
 
 use crate::theme_bridge;
 
@@ -15,19 +16,20 @@ pub fn render(tree: &mut UiTree, theme: &dyn ThemeProvider) -> UiNodeId {
     let success = theme_bridge::resolve_vec4(theme, "semantic.color.status.success");
     let danger = theme_bridge::resolve_vec4(theme, "semantic.color.status.danger");
 
-    let root = tree.create(Widget::Panel, UiStyle {
-        direction: Direction::Column,
-        width: Sizing::Grow(1.0),
-        gap: 16.0,
-        ..UiStyle::default()
-    });
+    let root = tree.create_node(Widget::Panel, pug_jetstream::map_layout(&LayoutIntent::new()
+        .with_direction(LayoutDirection::Column)
+        .with_width(LayoutSizing::Grow)
+        .with_gap(16.0)),
+        NodeStyle::default());
 
     // ── Basic pills ──
     label(tree, root, "Basic Pills", text_secondary);
     {
-        let row = tree.create(Widget::Panel, UiStyle {
-            direction: Direction::Row, gap: 6.0, align: Align::Center, ..UiStyle::default()
-        });
+        let row = tree.create_node(Widget::Panel, pug_jetstream::map_layout(&LayoutIntent::new()
+            .with_direction(LayoutDirection::Row)
+            .with_gap(6.0)
+            .with_alignment(MainAxisAlignment::Start, CrossAxisAlignment::Center)),
+            NodeStyle::default());
         tree.add_child(root, row);
 
         pill_basic(tree, row, "Design", bg_surface, border, text_primary);
@@ -38,9 +40,11 @@ pub fn render(tree: &mut UiTree, theme: &dyn ThemeProvider) -> UiNodeId {
     // ── Colored pills ──
     label(tree, root, "Colored Pills", text_secondary);
     {
-        let row = tree.create(Widget::Panel, UiStyle {
-            direction: Direction::Row, gap: 6.0, align: Align::Center, ..UiStyle::default()
-        });
+        let row = tree.create_node(Widget::Panel, pug_jetstream::map_layout(&LayoutIntent::new()
+            .with_direction(LayoutDirection::Row)
+            .with_gap(6.0)
+            .with_alignment(MainAxisAlignment::Start, CrossAxisAlignment::Center)),
+            NodeStyle::default());
         tree.add_child(root, row);
 
         pill_solid(tree, row, "Active", accent, text_inverse);
@@ -49,11 +53,13 @@ pub fn render(tree: &mut UiTree, theme: &dyn ThemeProvider) -> UiNodeId {
     }
 
     // ── Removable pills ──
-    label(tree, root, "Removable (with ✕)", text_secondary);
+    label(tree, root, "Removable (with \u{2715})", text_secondary);
     {
-        let row = tree.create(Widget::Panel, UiStyle {
-            direction: Direction::Row, gap: 6.0, align: Align::Center, ..UiStyle::default()
-        });
+        let row = tree.create_node(Widget::Panel, pug_jetstream::map_layout(&LayoutIntent::new()
+            .with_direction(LayoutDirection::Row)
+            .with_gap(6.0)
+            .with_alignment(MainAxisAlignment::Start, CrossAxisAlignment::Center)),
+            NodeStyle::default());
         tree.add_child(root, row);
 
         pill_removable(tree, row, "React", bg_surface, border, text_primary, text_secondary);
@@ -64,9 +70,11 @@ pub fn render(tree: &mut UiTree, theme: &dyn ThemeProvider) -> UiNodeId {
     // ── Disabled ──
     label(tree, root, "Disabled", text_secondary);
     {
-        let row = tree.create(Widget::Panel, UiStyle {
-            direction: Direction::Row, gap: 6.0, align: Align::Center, opacity: 0.5, ..UiStyle::default()
-        });
+        let row = tree.create_node(Widget::Panel, pug_jetstream::map_layout(&LayoutIntent::new()
+            .with_direction(LayoutDirection::Row)
+            .with_gap(6.0)
+            .with_alignment(MainAxisAlignment::Start, CrossAxisAlignment::Center)),
+            NodeStyle { opacity: 0.5, ..NodeStyle::default() });
         tree.add_child(root, row);
 
         pill_basic(tree, row, "Read-only", bg_surface, border, text_primary);
@@ -76,59 +84,59 @@ pub fn render(tree: &mut UiTree, theme: &dyn ThemeProvider) -> UiNodeId {
 }
 
 fn label(tree: &mut UiTree, parent: UiNodeId, text: &str, color: glam::Vec4) {
-    let lbl = tree.create(Widget::Label { text: text.to_string() }, UiStyle {
-        text_color: Some(color), text_size: Some(11.0), ..UiStyle::default()
-    });
+    let lbl = tree.create_node(Widget::Label { text: text.to_string() }, pug_jetstream::map_layout(&LayoutIntent::new()),
+        NodeStyle { text_color: Some(color), text_size: Some(11.0), ..NodeStyle::default() });
     tree.add_child(parent, lbl);
 }
 
 fn pill_basic(tree: &mut UiTree, parent: UiNodeId, text: &str, bg: glam::Vec4, border: glam::Vec4, fg: glam::Vec4) {
-    let p = tree.create(Widget::Label { text: text.to_string() }, UiStyle {
-        padding: Edges { top: 4.0, right: 10.0, bottom: 4.0, left: 10.0 },
-        corner_radii: [12.0; 4],
-        background: Some(bg),
-        border_color: Some(border),
-        border_width: 1.0,
-        text_color: Some(fg),
-        text_size: Some(11.0),
-        ..UiStyle::default()
-    });
+    let p = tree.create_node(Widget::Label { text: text.to_string() }, pug_jetstream::map_layout(&LayoutIntent::new()
+        .with_padding(LayoutEdges { top: 4.0, right: 10.0, bottom: 4.0, left: 10.0 })),
+        NodeStyle {
+            corner_radii: [12.0; 4],
+            background: Some(bg),
+            border_color: Some(border),
+            border_width: 1.0,
+            text_color: Some(fg),
+            text_size: Some(11.0),
+            ..NodeStyle::default()
+        });
     tree.add_child(parent, p);
 }
 
 fn pill_solid(tree: &mut UiTree, parent: UiNodeId, text: &str, bg: glam::Vec4, fg: glam::Vec4) {
-    let p = tree.create(Widget::Label { text: text.to_string() }, UiStyle {
-        padding: Edges { top: 4.0, right: 10.0, bottom: 4.0, left: 10.0 },
-        corner_radii: [12.0; 4],
-        background: Some(bg),
-        text_color: Some(fg),
-        text_size: Some(11.0),
-        ..UiStyle::default()
-    });
+    let p = tree.create_node(Widget::Label { text: text.to_string() }, pug_jetstream::map_layout(&LayoutIntent::new()
+        .with_padding(LayoutEdges { top: 4.0, right: 10.0, bottom: 4.0, left: 10.0 })),
+        NodeStyle {
+            corner_radii: [12.0; 4],
+            background: Some(bg),
+            text_color: Some(fg),
+            text_size: Some(11.0),
+            ..NodeStyle::default()
+        });
     tree.add_child(parent, p);
 }
 
 fn pill_removable(tree: &mut UiTree, parent: UiNodeId, text: &str, bg: glam::Vec4, border: glam::Vec4, fg: glam::Vec4, fg_muted: glam::Vec4) {
-    let p = tree.create(Widget::Panel, UiStyle {
-        direction: Direction::Row,
-        gap: 4.0,
-        padding: Edges { top: 4.0, right: 6.0, bottom: 4.0, left: 10.0 },
-        corner_radii: [12.0; 4],
-        background: Some(bg),
-        border_color: Some(border),
-        border_width: 1.0,
-        align: Align::Center,
-        ..UiStyle::default()
-    });
+    let p = tree.create_node(Widget::Panel, pug_jetstream::map_layout(&LayoutIntent::new()
+        .with_direction(LayoutDirection::Row)
+        .with_gap(4.0)
+        .with_padding(LayoutEdges { top: 4.0, right: 6.0, bottom: 4.0, left: 10.0 })
+        .with_alignment(MainAxisAlignment::Start, CrossAxisAlignment::Center)),
+        NodeStyle {
+            corner_radii: [12.0; 4],
+            background: Some(bg),
+            border_color: Some(border),
+            border_width: 1.0,
+            ..NodeStyle::default()
+        });
     tree.add_child(parent, p);
 
-    let lbl = tree.create(Widget::Label { text: text.to_string() }, UiStyle {
-        text_color: Some(fg), text_size: Some(11.0), ..UiStyle::default()
-    });
+    let lbl = tree.create_node(Widget::Label { text: text.to_string() }, pug_jetstream::map_layout(&LayoutIntent::new()),
+        NodeStyle { text_color: Some(fg), text_size: Some(11.0), ..NodeStyle::default() });
     tree.add_child(p, lbl);
 
-    let close = tree.create(Widget::Label { text: "✕".to_string() }, UiStyle {
-        text_color: Some(fg_muted), text_size: Some(9.0), ..UiStyle::default()
-    });
+    let close = tree.create_node(Widget::Label { text: "\u{2715}".to_string() }, pug_jetstream::map_layout(&LayoutIntent::new()),
+        NodeStyle { text_color: Some(fg_muted), text_size: Some(9.0), ..NodeStyle::default() });
     tree.add_child(p, close);
 }

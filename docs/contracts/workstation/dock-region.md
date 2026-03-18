@@ -1,7 +1,7 @@
 # DockRegion
 
 Status: seed contract
-Updated: 2026-03-11
+Updated: 2026-03-17
 
 ## 1. Purpose
 
@@ -10,7 +10,8 @@ Updated: 2026-03-11
 - Summary: a collapsible dock area that hosts panel tabs and one active panel
   body within a workstation shell
 - In scope: edge placement, collapse/expand posture, active panel selection,
-  panel-tab strip, empty-drop posture
+  panel-tab strip, empty-drop posture, active-panel emphasis, quieter inactive
+  treatment, collapsed-tab posture with icon-only strip
 - Out of scope: full drag/drop engine, persistence backend, DAW-specific panel
   contents
 
@@ -43,6 +44,8 @@ Updated: 2026-03-11
 | `tabsPlacement` | `"edge" \| "top"` | `"edge"` | no | strip placement |
 | `items` | `Array<{ value: string; label: string; icon?: string }>` | none | yes | hosted panels |
 | `value` | `string \| null` | `null` | no | controlled active panel |
+| `emphasis` | `"standard" \| "quiet" \| "strong"` | `"standard"` | no | visual weight of active panel |
+| `collapsedPosture` | `"hidden" \| "icon-strip"` | `"hidden"` | no | what to show when collapsed |
 | `ariaLabel` | `string \| null` | `null` | no | region label |
 | `onValueChange` | `(value: string) => void` | none | no | active-panel callback |
 | `onCollapsedChange` | `(collapsed: boolean) => void` | none | no | collapse callback |
@@ -61,9 +64,12 @@ Updated: 2026-03-11
 | State | Trigger | Expected Result |
 |-------|---------|-----------------|
 | expanded | default | strip plus active panel body visible |
-| collapsed | `isCollapsed=true` | strip remains, body hidden |
+| collapsed-hidden | `isCollapsed=true`, `collapsedPosture="hidden"` | strip remains, body hidden |
+| collapsed-icon-strip | `isCollapsed=true`, `collapsedPosture="icon-strip"` | icon-only strip visible, body hidden |
 | empty | no items | empty-drop or placeholder posture |
-| active | current value present | one active panel visible |
+| active-standard | `emphasis="standard"` | one active panel visible, standard treatment |
+| active-quiet | `emphasis="quiet"` | active panel visible, quieter chrome and border |
+| active-strong | `emphasis="strong"` | active panel visible, stronger border and header emphasis |
 
 ### Component States
 

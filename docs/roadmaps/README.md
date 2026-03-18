@@ -1,7 +1,7 @@
 # Roadmaps
 
 Status: active
-Updated: 2026-03-15
+Updated: 2026-03-17
 
 Roadmaps hold executable milestone work for Pug.
 
@@ -16,9 +16,9 @@ Roadmaps hold executable milestone work for Pug.
 
 ## Current Generation
 
-- Active generation: none (between generations)
-- Most recently completed generation: `g05`
-- Next generation: `g06` (planned)
+- Active generation: `g12`
+- Most recently completed generation: `g11`
+- Next generation: `g13` (Jetstream workstation parity, after `g12` completes)
 
 ## Generation Map
 
@@ -34,11 +34,23 @@ Roadmaps hold executable milestone work for Pug.
   alignment, and Svelte demo rebuild
 - `g06` shared multi-renderer contract layer — crate restructuring, typed
   token resolution, layout/event/style abstractions, adapter traits, and spec
-  expansion to full 124-component surface (planned)
+  expansion to full 124-component surface
 - `g07` GPUI rendering build-out — adapter crate, primitive and composite
-  rendering, demo-app parity, downstream proof, published docs (planned)
-- `g08` Jetstream rendering build-out — adapter crate, token bridge, component
-  rendering in game engine context, integration demo scene (planned)
+  rendering, demo-app parity, downstream proof, and published docs
+- `g08` Jetstream rendering build-out — adapter crate, token bridge,
+  component rendering in game engine context, and integration demo scene
+- `g09` GPUI first-class component build-out, preview parity, and visual
+  fidelity
+- `g10` Jetstream first-class component build-out, preview app, and visual
+  fidelity
+- `g11` workstation contracts and Svelte implementation — downstream gap audit,
+  generalized workstation contracts with 12-section template, Svelte
+  implementation, and downstream adoption proof
+- `g12` GPUI workstation parity — implements g11 contracts in GPUI, parity
+  evidence, and Loophole Spark downstream proof
+- `g13` Jetstream workstation parity — implements g11 contracts in Jetstream
+  within native rendering constraints, cross-runtime parity evidence, and
+  delta register
 
 ## Planning Standard
 
@@ -67,11 +79,15 @@ express a real program rather than three or four umbrella headings.
 - `g06/README.md`
 - `g07/README.md`
 - `g08/README.md`
+- `g09/README.md`
+- `g10/README.md`
+- `g11/README.md`
+- `g12/README.md`
+- `g13/README.md`
 - `backlog/README.md`
 
 ## Next Task
 
-Execute `g06` in order, beginning with `g06.001` multi-renderer architecture
-audit. `g07` (GPUI build-out) and `g08` (Jetstream build-out) follow after
-`g06` closeout and can run in parallel. Jetstream g04.016 (UI Rendering
-Infrastructure) should be completed before `g08` begins.
+Execute `g12` in order, beginning with `g12.001` GPUI workstation gap audit
+against g11 contracts. `g11` is complete with all contracts and Svelte
+implementation in place.

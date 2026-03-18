@@ -19,104 +19,104 @@ use crate::{JetstreamAdapter, JetstreamNodeHandle, JetstreamTarget, WidgetKind};
 impl RenderComponent<ActionDiscoveryPanelSpec> for JetstreamAdapter {
     type Target = JetstreamTarget;
     fn render(&self, _spec: &ActionDiscoveryPanelSpec, style: &StyleDescriptor, _theme: &dyn ThemeProvider) -> JetstreamNodeHandle {
-        let _s = map_style(style);
-        JetstreamNodeHandle::new("action-discovery-panel", "ActionDiscoveryPanelSpec", WidgetKind::Panel)
+        let mapped = map_style(style);
+        JetstreamNodeHandle::new("action-discovery-panel", "ActionDiscoveryPanelSpec", WidgetKind::Panel, mapped)
     }
 }
 
 impl RenderComponent<AppHeaderSpec> for JetstreamAdapter {
     type Target = JetstreamTarget;
     fn render(&self, _spec: &AppHeaderSpec, style: &StyleDescriptor, _theme: &dyn ThemeProvider) -> JetstreamNodeHandle {
-        let _s = map_style(style);
-        JetstreamNodeHandle::new("app-header", "AppHeaderSpec", WidgetKind::Panel)
+        let mapped = map_style(style);
+        JetstreamNodeHandle::new("app-header", "AppHeaderSpec", WidgetKind::Panel, mapped)
     }
 }
 
 impl RenderComponent<CommandPaletteSpec> for JetstreamAdapter {
     type Target = JetstreamTarget;
     fn render(&self, _spec: &CommandPaletteSpec, style: &StyleDescriptor, _theme: &dyn ThemeProvider) -> JetstreamNodeHandle {
-        let _s = map_style(style);
-        JetstreamNodeHandle::new("command-palette", "CommandPaletteSpec", WidgetKind::Panel)
+        let mapped = map_style(style);
+        JetstreamNodeHandle::new("command-palette", "CommandPaletteSpec", WidgetKind::Panel, mapped)
     }
 }
 
 impl RenderComponent<CommandPaletteShellSpec> for JetstreamAdapter {
     type Target = JetstreamTarget;
     fn render(&self, _spec: &CommandPaletteShellSpec, style: &StyleDescriptor, _theme: &dyn ThemeProvider) -> JetstreamNodeHandle {
-        let _s = map_style(style);
-        JetstreamNodeHandle::new("command-palette-shell", "CommandPaletteShellSpec", WidgetKind::Panel)
+        let mapped = map_style(style);
+        JetstreamNodeHandle::new("command-palette-shell", "CommandPaletteShellSpec", WidgetKind::Panel, mapped)
     }
 }
 
 impl RenderComponent<DockRegionSpec> for JetstreamAdapter {
     type Target = JetstreamTarget;
     fn render(&self, _spec: &DockRegionSpec, style: &StyleDescriptor, _theme: &dyn ThemeProvider) -> JetstreamNodeHandle {
-        let _s = map_style(style);
-        JetstreamNodeHandle::new("dock-region", "DockRegionSpec", WidgetKind::Panel)
+        let mapped = map_style(style);
+        JetstreamNodeHandle::new("dock-region", "DockRegionSpec", WidgetKind::Panel, mapped)
     }
 }
 
 impl RenderComponent<PanelHeaderSpec> for JetstreamAdapter {
     type Target = JetstreamTarget;
     fn render(&self, _spec: &PanelHeaderSpec, style: &StyleDescriptor, _theme: &dyn ThemeProvider) -> JetstreamNodeHandle {
-        let _s = map_style(style);
-        JetstreamNodeHandle::new("panel-header", "PanelHeaderSpec", WidgetKind::Panel)
+        let mapped = map_style(style);
+        JetstreamNodeHandle::new("panel-header", "PanelHeaderSpec", WidgetKind::Panel, mapped)
     }
 }
 
 impl RenderComponent<PanelSurfaceSpec> for JetstreamAdapter {
     type Target = JetstreamTarget;
     fn render(&self, _spec: &PanelSurfaceSpec, style: &StyleDescriptor, _theme: &dyn ThemeProvider) -> JetstreamNodeHandle {
-        let _s = map_style(style);
-        JetstreamNodeHandle::new("panel-surface", "PanelSurfaceSpec", WidgetKind::Panel)
+        let mapped = map_style(style);
+        JetstreamNodeHandle::new("panel-surface", "PanelSurfaceSpec", WidgetKind::Panel, mapped)
     }
 }
 
 impl RenderComponent<PanelTabsSpec> for JetstreamAdapter {
     type Target = JetstreamTarget;
     fn render(&self, _spec: &PanelTabsSpec, style: &StyleDescriptor, _theme: &dyn ThemeProvider) -> JetstreamNodeHandle {
-        let _s = map_style(style);
-        JetstreamNodeHandle::new("panel-tabs", "PanelTabsSpec", WidgetKind::Panel)
+        let mapped = map_style(style);
+        JetstreamNodeHandle::new("panel-tabs", "PanelTabsSpec", WidgetKind::Panel, mapped)
     }
 }
 
 impl RenderComponent<ProjectHeaderSpec> for JetstreamAdapter {
     type Target = JetstreamTarget;
     fn render(&self, _spec: &ProjectHeaderSpec, style: &StyleDescriptor, _theme: &dyn ThemeProvider) -> JetstreamNodeHandle {
-        let _s = map_style(style);
-        JetstreamNodeHandle::new("project-header", "ProjectHeaderSpec", WidgetKind::Panel)
+        let mapped = map_style(style);
+        JetstreamNodeHandle::new("project-header", "ProjectHeaderSpec", WidgetKind::Panel, mapped)
     }
 }
 
 impl RenderComponent<ShellStatusBarSpec> for JetstreamAdapter {
     type Target = JetstreamTarget;
     fn render(&self, _spec: &ShellStatusBarSpec, style: &StyleDescriptor, _theme: &dyn ThemeProvider) -> JetstreamNodeHandle {
-        let _s = map_style(style);
-        JetstreamNodeHandle::new("shell-status-bar", "ShellStatusBarSpec", WidgetKind::Panel)
+        let mapped = map_style(style);
+        JetstreamNodeHandle::new("shell-status-bar", "ShellStatusBarSpec", WidgetKind::Panel, mapped)
     }
 }
 
 impl RenderComponent<SplitViewSpec> for JetstreamAdapter {
     type Target = JetstreamTarget;
     fn render(&self, _spec: &SplitViewSpec, style: &StyleDescriptor, _theme: &dyn ThemeProvider) -> JetstreamNodeHandle {
-        let _s = map_style(style);
-        JetstreamNodeHandle::new("split-view", "SplitViewSpec", WidgetKind::Panel)
+        let mapped = map_style(style);
+        JetstreamNodeHandle::new("split-view", "SplitViewSpec", WidgetKind::Panel, mapped)
     }
 }
 
 impl RenderComponent<SurfaceTabsSpec> for JetstreamAdapter {
     type Target = JetstreamTarget;
     fn render(&self, _spec: &SurfaceTabsSpec, style: &StyleDescriptor, _theme: &dyn ThemeProvider) -> JetstreamNodeHandle {
-        let _s = map_style(style);
-        JetstreamNodeHandle::new("surface-tabs", "SurfaceTabsSpec", WidgetKind::Panel)
+        let mapped = map_style(style);
+        JetstreamNodeHandle::new("surface-tabs", "SurfaceTabsSpec", WidgetKind::Panel, mapped)
     }
 }
 
 impl RenderComponent<WorkspaceShellSpec> for JetstreamAdapter {
     type Target = JetstreamTarget;
     fn render(&self, _spec: &WorkspaceShellSpec, style: &StyleDescriptor, _theme: &dyn ThemeProvider) -> JetstreamNodeHandle {
-        let _s = map_style(style);
-        JetstreamNodeHandle::new("workspace-shell", "WorkspaceShellSpec", WidgetKind::Panel)
+        let mapped = map_style(style);
+        JetstreamNodeHandle::new("workspace-shell", "WorkspaceShellSpec", WidgetKind::Panel, mapped)
     }
 }
 

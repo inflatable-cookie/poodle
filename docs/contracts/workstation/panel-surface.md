@@ -1,7 +1,7 @@
 # Panel Surface
 
 Status: seed contract
-Updated: 2026-03-11
+Updated: 2026-03-17
 
 ## 1. Purpose
 
@@ -10,7 +10,8 @@ Updated: 2026-03-11
 - Summary: a reusable container for docked or floating workstation panels with
   optional header, tabs, and body regions
 - In scope: shell-level panel chrome, header slotting, active/inactive state,
-  body scrolling boundary
+  body scrolling boundary, panel variant system for utility/standard/focused
+  treatment families
 - Out of scope: transport strips, timeline rows, console channels, or any
   Loophole-specific DAW content inside the panel body
 
@@ -41,6 +42,7 @@ Updated: 2026-03-11
 | Prop | Type | Default | Required | Notes |
 |------|------|---------|----------|-------|
 | `title` | `string \| null` | `null` | no | visible title when header is present |
+| `variant` | `"utility" \| "standard" \| "focused"` | `"standard"` | no | visual treatment family |
 | `isActive` | `boolean` | `false` | no | indicates currently focused/selected panel |
 | `isElevated` | `boolean` | `false` | no | floating or prominent shell state |
 | `hasHeader` | `boolean` | `true` | no | allows pure body surfaces when shell chrome lives elsewhere |

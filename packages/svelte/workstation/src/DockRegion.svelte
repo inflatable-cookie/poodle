@@ -7,11 +7,13 @@
   import PanelSurface from "./PanelSurface.svelte";
   import PanelTabs from "./PanelTabs.svelte";
 
-  import type { DockEdge, PanelTabItem } from "./types";
+  import type { DockEdge, DockEmphasis, DockCollapsedPosture, PanelTabItem } from "./types";
 
   export let edge: DockEdge = "left";
   export let isCollapsed = false;
   export let tabsPlacement: "edge" | "top" = "edge";
+  export let emphasis: DockEmphasis = "standard";
+  export let collapsedPosture: DockCollapsedPosture = "hidden";
   export let items: PanelTabItem[] = [];
   export let value: string | null = null;
   export let ariaLabel: string | null = null;
@@ -32,6 +34,8 @@
   data-edge={edge}
   data-collapsed={isCollapsed}
   data-tabs-placement={tabsPlacement}
+  data-emphasis={emphasis}
+  data-collapsed-posture={collapsedPosture}
   aria-label={ariaLabel ?? `${edge} dock`}
 >
   <PanelSurface

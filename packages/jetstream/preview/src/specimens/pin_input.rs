@@ -2,6 +2,7 @@
 
 use jetstream_runtime::game_ui::*;
 use pug_adapter::ThemeProvider;
+use pug_layout::{LayoutIntent, LayoutDirection, LayoutSizing, CrossAxisAlignment, MainAxisAlignment};
 
 use crate::theme_bridge;
 
@@ -12,12 +13,11 @@ pub fn render(tree: &mut UiTree, theme: &dyn ThemeProvider) -> UiNodeId {
     let border_default = theme_bridge::border_default(theme);
     let accent = theme_bridge::accent_base(theme);
 
-    let root = tree.create(Widget::Panel, UiStyle {
-        direction: Direction::Column,
-        width: Sizing::Grow(1.0),
-        gap: 20.0,
-        ..UiStyle::default()
-    });
+    let root = tree.create_node(Widget::Panel, pug_jetstream::map_layout(&LayoutIntent::new()
+        .with_direction(LayoutDirection::Column)
+        .with_width(LayoutSizing::Grow)
+        .with_gap(20.0)),
+        NodeStyle::default());
 
     // ── 4-digit empty ──
     label(tree, root, "4-Digit PIN (empty)", text_secondary);
@@ -37,17 +37,14 @@ pub fn render(tree: &mut UiTree, theme: &dyn ThemeProvider) -> UiNodeId {
 
     // ── Masked mode ──
     label(tree, root, "Masked Mode", text_secondary);
-    pin_row(tree, root, 4, &["●", "●", "●"], true, bg_canvas, border_default, text_primary, text_secondary, accent);
+    pin_row(tree, root, 4, &["\u{25cf}", "\u{25cf}", "\u{25cf}"], true, bg_canvas, border_default, text_primary, text_secondary, accent);
 
     root
 }
 
 fn label(tree: &mut UiTree, parent: UiNodeId, text: &str, color: glam::Vec4) {
-    let lbl = tree.create(Widget::Label { text: text.to_string() }, UiStyle {
-        text_color: Some(color),
-        text_size: Some(11.0),
-        ..UiStyle::default()
-    });
+    let lbl = tree.create_node(Widget::Label { text: text.to_string() }, pug_jetstream::map_layout(&LayoutIntent::new()),
+        NodeStyle { text_color: Some(color), text_size: Some(11.0), ..NodeStyle::default() });
     tree.add_child(parent, lbl);
 }
 
@@ -63,11 +60,10 @@ fn pin_row(
     _text_secondary: glam::Vec4,
     accent: glam::Vec4,
 ) {
-    let row = tree.create(Widget::Panel, UiStyle {
-        direction: Direction::Row,
-        gap: 8.0,
-        ..UiStyle::default()
-    });
+    let row = tree.create_node(Widget::Panel, pug_jetstream::map_layout(&LayoutIntent::new()
+        .with_direction(LayoutDirection::Row)
+        .with_gap(8.0)),
+        NodeStyle::default());
     tree.add_child(parent, row);
 
     for i in 0..digits {
@@ -77,37 +73,31 @@ fn pin_row(
         let cell_border = if is_active { accent } else { border };
         let cell_border_width = if is_active { 2.0 } else { 1.0 };
 
-        let cell = tree.create(Widget::Panel, UiStyle {
-            width: Sizing::Fixed(40.0),
-            height: Sizing::Fixed(44.0),
-            background: Some(bg),
-            border_color: Some(cell_border),
-            border_width: cell_border_width,
-            corner_radii: [6.0; 4],
-            align: Align::Center,
-            justify: Justify::Center,
-            ..UiStyle::default()
-        });
+        let cell = tree.create_node(Widget::Panel, pug_jetstream::map_layout(&LayoutIntent::new()
+            .with_width(LayoutSizing::Fixed(40.0))
+            .with_height(LayoutSizing::Fixed(44.0))
+            .with_alignment(MainAxisAlignment::Center, CrossAxisAlignment::Center)),
+            NodeStyle {
+                background: Some(bg),
+                border_color: Some(cell_border),
+                border_width: cell_border_width,
+                corner_radii: [6.0; 4],
+                ..NodeStyle::default()
+            });
         tree.add_child(row, cell);
 
         if has_value {
-            let val = tree.create(Widget::Label {
+            let val = tree.create_node(Widget::Label {
                 text: values[i].to_string(),
-            }, UiStyle {
-                text_color: Some(text_primary),
-                text_size: Some(18.0),
-                ..UiStyle::default()
-            });
+            }, pug_jetstream::map_layout(&LayoutIntent::new()),
+                NodeStyle { text_color: Some(text_primary), text_size: Some(18.0), ..NodeStyle::default() });
             tree.add_child(cell, val);
         } else if is_active {
             // Cursor indicator
-            let cursor = tree.create(Widget::Panel, UiStyle {
-                width: Sizing::Fixed(2.0),
-                height: Sizing::Fixed(20.0),
-                background: Some(accent),
-                corner_radii: [1.0; 4],
-                ..UiStyle::default()
-            });
+            let cursor = tree.create_node(Widget::Panel, pug_jetstream::map_layout(&LayoutIntent::new()
+                .with_width(LayoutSizing::Fixed(2.0))
+                .with_height(LayoutSizing::Fixed(20.0))),
+                NodeStyle { background: Some(accent), corner_radii: [1.0; 4], ..NodeStyle::default() });
             tree.add_child(cell, cursor);
         }
     }

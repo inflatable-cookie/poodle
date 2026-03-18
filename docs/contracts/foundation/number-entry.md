@@ -123,7 +123,7 @@ Updated: 2026-03-15
 ### Sizing
 
 - Root min-height follows `size-control-height` token
-- Steppers display as a side-by-side pair within a grid column
+- Steppers display as a vertically stacked pair (increment on top, decrement below) within a grid column
 - Input control fills remaining horizontal space via `minmax(0, 1fr)`
 
 ### Composition
@@ -141,7 +141,8 @@ Updated: 2026-03-15
 | `display` | `grid` |
 | `grid-template-columns` | `minmax(0, 1fr) auto` |
 | `align-items` | `stretch` |
-| `min-height` | `var(--pug-size-control-height)` |
+| `height` | `var(--pug-size-control-height)` |
+| `overflow` | `hidden` |
 | `border` | `0.0625rem solid var(--pug-color-border-default)` |
 | `border-radius` | `var(--pug-radius-control)` |
 | `background` | `var(--pug-color-background-surface)` |
@@ -179,21 +180,21 @@ Updated: 2026-03-15
 | Property | Value |
 |----------|-------|
 | `display` | `grid` |
-| `grid-template-columns` | `repeat(2, minmax(0, 1fr))` |
-| `gap` | `0.0625rem` |
+| `grid-template-rows` | `1fr 1fr` |
+| `gap` | `0` |
 | `padding` | `0.0625rem` |
 
 ### Stepper Button `.number-entry__steppers button`
 
 | Property | Value |
 |----------|-------|
-| `min-width` | `1.75rem` |
+| `width` | `1.25rem` |
 | `border` | `0` |
 | `border-radius` | `calc(var(--pug-radius-control) - 0.125rem)` |
 | `background` | `color-mix(in srgb, var(--pug-color-background-elevated) 88%, transparent)` |
 | `color` | `var(--pug-color-text-primary)` |
 | `cursor` | `pointer` |
-| `font` | `inherit` |
+| `padding` | `0` |
 
 ### Stepper Button — disabled
 

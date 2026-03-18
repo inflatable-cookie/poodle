@@ -2,6 +2,7 @@
 
 use jetstream_runtime::game_ui::*;
 use pug_adapter::ThemeProvider;
+use pug_layout::{CrossAxisAlignment, LayoutDirection, LayoutEdges, LayoutIntent, LayoutSizing, MainAxisAlignment};
 
 use crate::theme_bridge;
 
@@ -14,12 +15,11 @@ pub fn render(tree: &mut UiTree, theme: &dyn ThemeProvider) -> UiNodeId {
     let accent = theme_bridge::accent_base(theme);
     let danger = theme_bridge::resolve_vec4(theme, "semantic.color.status.danger");
 
-    let root = tree.create(Widget::Panel, UiStyle {
-        direction: Direction::Column,
-        width: Sizing::Grow(1.0),
-        gap: 16.0,
-        ..UiStyle::default()
-    });
+    let root = tree.create_node(Widget::Panel, pug_jetstream::map_layout(&LayoutIntent::new()
+        .with_direction(LayoutDirection::Column)
+        .with_width(LayoutSizing::Grow)
+        .with_gap(16.0)),
+        NodeStyle::default());
 
     // ── States ──
     let states: &[(&str, &str, glam::Vec4, glam::Vec4, f32)] = &[
@@ -31,56 +31,47 @@ pub fn render(tree: &mut UiTree, theme: &dyn ThemeProvider) -> UiNodeId {
     ];
 
     for &(label, value, text_color, border_color, border_width) in states {
-        let row = tree.create(Widget::Panel, UiStyle {
-            direction: Direction::Row,
-            gap: 12.0,
-            align: Align::Center,
-            ..UiStyle::default()
-        });
+        let row = tree.create_node(Widget::Panel, pug_jetstream::map_layout(&LayoutIntent::new()
+            .with_direction(LayoutDirection::Row)
+            .with_gap(12.0)
+            .with_alignment(MainAxisAlignment::Start, CrossAxisAlignment::Center)),
+            NodeStyle::default());
         tree.add_child(root, row);
 
-        let lbl = tree.create(Widget::Label { text: label.to_string() }, UiStyle {
-            text_color: Some(text_secondary),
-            text_size: Some(11.0),
-            width: Sizing::Fixed(80.0),
-            ..UiStyle::default()
-        });
+        let lbl = tree.create_node(Widget::Label { text: label.to_string() }, pug_jetstream::map_layout(&LayoutIntent::new()
+            .with_width(LayoutSizing::Fixed(80.0))),
+            NodeStyle { text_color: Some(text_secondary), text_size: Some(11.0), ..NodeStyle::default() });
         tree.add_child(row, lbl);
 
         let opacity = if label == "Disabled" { 0.5 } else { 1.0 };
 
-        let input = tree.create(Widget::Panel, UiStyle {
-            direction: Direction::Row,
-            width: Sizing::Fixed(240.0),
-            height: Sizing::Fixed(32.0),
-            padding: Edges { top: 0.0, right: 10.0, bottom: 0.0, left: 10.0 },
-            background: Some(bg_canvas),
-            border_color: Some(border_color),
-            border_width,
-            corner_radii: [6.0; 4],
-            align: Align::Center,
-            opacity,
-            ..UiStyle::default()
-        });
+        let input = tree.create_node(Widget::Panel, pug_jetstream::map_layout(&LayoutIntent::new()
+            .with_direction(LayoutDirection::Row)
+            .with_width(LayoutSizing::Fixed(240.0))
+            .with_height(LayoutSizing::Fixed(32.0))
+            .with_padding(LayoutEdges { top: 0.0, right: 10.0, bottom: 0.0, left: 10.0 })
+            .with_alignment(MainAxisAlignment::Start, CrossAxisAlignment::Center)),
+            NodeStyle {
+                background: Some(bg_canvas),
+                border_color: Some(border_color),
+                border_width,
+                corner_radii: [6.0; 4],
+                opacity,
+                ..NodeStyle::default()
+            });
         tree.add_child(row, input);
 
-        let val = tree.create(Widget::Label { text: value.to_string() }, UiStyle {
-            text_color: Some(text_color),
-            text_size: Some(12.0),
-            ..UiStyle::default()
-        });
+        let val = tree.create_node(Widget::Label { text: value.to_string() }, pug_jetstream::map_layout(&LayoutIntent::new()),
+            NodeStyle { text_color: Some(text_color), text_size: Some(12.0), ..NodeStyle::default() });
         tree.add_child(input, val);
     }
 
     // ── Error message ──
-    let err = tree.create(Widget::Label {
+    let err = tree.create_node(Widget::Label {
         text: "  ↳ Please enter a valid email address".to_string(),
-    }, UiStyle {
-        text_color: Some(danger),
-        text_size: Some(10.0),
-        padding: Edges { top: 0.0, right: 0.0, bottom: 0.0, left: 92.0 },
-        ..UiStyle::default()
-    });
+    }, pug_jetstream::map_layout(&LayoutIntent::new()
+        .with_padding(LayoutEdges { top: 0.0, right: 0.0, bottom: 0.0, left: 92.0 })),
+        NodeStyle { text_color: Some(danger), text_size: Some(10.0), ..NodeStyle::default() });
     tree.add_child(root, err);
 
     root

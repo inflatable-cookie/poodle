@@ -2,6 +2,7 @@
 
 use jetstream_runtime::game_ui::*;
 use pug_adapter::ThemeProvider;
+use pug_layout::{CrossAxisAlignment, LayoutDirection, LayoutEdges, LayoutIntent, LayoutSizing, MainAxisAlignment};
 
 use crate::theme_bridge;
 
@@ -13,12 +14,11 @@ pub fn render(tree: &mut UiTree, theme: &dyn ThemeProvider) -> UiNodeId {
     let bg_surface = theme_bridge::surface_background(theme);
     let border = theme_bridge::border_subtle(theme);
 
-    let root = tree.create(Widget::Panel, UiStyle {
-        direction: Direction::Column,
-        width: Sizing::Grow(1.0),
-        gap: 20.0,
-        ..UiStyle::default()
-    });
+    let root = tree.create_node(Widget::Panel, pug_jetstream::map_layout(&LayoutIntent::new()
+        .with_direction(LayoutDirection::Column)
+        .with_width(LayoutSizing::Grow)
+        .with_gap(20.0)),
+        NodeStyle::default());
 
     // ── End-aligned (default) ──
     label(tree, root, "End-aligned (default)", text_secondary);
@@ -26,10 +26,9 @@ pub fn render(tree: &mut UiTree, theme: &dyn ThemeProvider) -> UiNodeId {
         let row = actions_row(tree, bg_surface, border);
         tree.add_child(root, row);
 
-        let spacer = tree.create(Widget::Panel, UiStyle {
-            width: Sizing::Grow(1.0),
-            ..UiStyle::default()
-        });
+        let spacer = tree.create_node(Widget::Panel, pug_jetstream::map_layout(&LayoutIntent::new()
+            .with_width(LayoutSizing::Grow)),
+            NodeStyle::default());
         tree.add_child(row, spacer);
 
         btn_secondary(tree, row, "Cancel", bg_surface, border, text_primary);
@@ -51,17 +50,13 @@ pub fn render(tree: &mut UiTree, theme: &dyn ThemeProvider) -> UiNodeId {
     {
         let danger = theme_bridge::resolve_vec4(theme, "semantic.color.status.danger");
 
-        let row = tree.create(Widget::Panel, UiStyle {
-            direction: Direction::Row,
-            width: Sizing::Grow(1.0),
-            padding: Edges { top: 12.0, right: 0.0, bottom: 0.0, left: 0.0 },
-            gap: 8.0,
-            align: Align::Center,
-            justify: Justify::SpaceBetween,
-            border_color: Some(border),
-            border_width: 1.0,
-            ..UiStyle::default()
-        });
+        let row = tree.create_node(Widget::Panel, pug_jetstream::map_layout(&LayoutIntent::new()
+            .with_direction(LayoutDirection::Row)
+            .with_width(LayoutSizing::Grow)
+            .with_padding(LayoutEdges { top: 12.0, right: 0.0, bottom: 0.0, left: 0.0 })
+            .with_gap(8.0)
+            .with_alignment(MainAxisAlignment::SpaceBetween, CrossAxisAlignment::Center)),
+            NodeStyle { border_color: Some(border), border_width: 1.0, ..NodeStyle::default() });
         tree.add_child(root, row);
 
         btn_secondary(tree, row, "Delete", bg_surface, danger, danger);
@@ -72,65 +67,43 @@ pub fn render(tree: &mut UiTree, theme: &dyn ThemeProvider) -> UiNodeId {
 }
 
 fn label(tree: &mut UiTree, parent: UiNodeId, text: &str, color: glam::Vec4) {
-    let lbl = tree.create(Widget::Label { text: text.to_string() }, UiStyle {
-        text_color: Some(color),
-        text_size: Some(11.0),
-        ..UiStyle::default()
-    });
+    let lbl = tree.create_node(Widget::Label { text: text.to_string() }, pug_jetstream::map_layout(&LayoutIntent::new()),
+        NodeStyle { text_color: Some(color), text_size: Some(11.0), ..NodeStyle::default() });
     tree.add_child(parent, lbl);
 }
 
 fn actions_row(tree: &mut UiTree, _bg: glam::Vec4, border: glam::Vec4) -> UiNodeId {
-    tree.create(Widget::Panel, UiStyle {
-        direction: Direction::Row,
-        width: Sizing::Grow(1.0),
-        padding: Edges { top: 12.0, right: 0.0, bottom: 0.0, left: 0.0 },
-        gap: 8.0,
-        align: Align::Center,
-        border_color: Some(border),
-        border_width: 1.0,
-        ..UiStyle::default()
-    })
+    tree.create_node(Widget::Panel, pug_jetstream::map_layout(&LayoutIntent::new()
+        .with_direction(LayoutDirection::Row)
+        .with_width(LayoutSizing::Grow)
+        .with_padding(LayoutEdges { top: 12.0, right: 0.0, bottom: 0.0, left: 0.0 })
+        .with_gap(8.0)
+        .with_alignment(MainAxisAlignment::Start, CrossAxisAlignment::Center)),
+        NodeStyle { border_color: Some(border), border_width: 1.0, ..NodeStyle::default() })
 }
 
 fn btn_primary(tree: &mut UiTree, parent: UiNodeId, text: &str, bg: glam::Vec4, fg: glam::Vec4) {
-    let btn = tree.create(Widget::Button {
+    let btn = tree.create_node(Widget::Button {
         label: text.to_string(),
         pressed: false,
         hovered: false,
-    }, UiStyle {
-        height: Sizing::Fixed(32.0),
-        padding: Edges { top: 0.0, right: 16.0, bottom: 0.0, left: 16.0 },
-        corner_radii: [6.0; 4],
-        background: Some(bg),
-        text_color: Some(fg),
-        text_size: Some(12.0),
-        align: Align::Center,
-        justify: Justify::Center,
-        focusable: true,
-        ..UiStyle::default()
-    });
+    }, pug_jetstream::map_layout(&LayoutIntent::new()
+        .with_height(LayoutSizing::Fixed(32.0))
+        .with_padding(LayoutEdges { top: 0.0, right: 16.0, bottom: 0.0, left: 16.0 })
+        .with_alignment(MainAxisAlignment::Center, CrossAxisAlignment::Center)),
+        NodeStyle { corner_radii: [6.0; 4], background: Some(bg), text_color: Some(fg), text_size: Some(12.0), focusable: true, ..NodeStyle::default() });
     tree.add_child(parent, btn);
 }
 
 fn btn_secondary(tree: &mut UiTree, parent: UiNodeId, text: &str, bg: glam::Vec4, border: glam::Vec4, fg: glam::Vec4) {
-    let btn = tree.create(Widget::Button {
+    let btn = tree.create_node(Widget::Button {
         label: text.to_string(),
         pressed: false,
         hovered: false,
-    }, UiStyle {
-        height: Sizing::Fixed(32.0),
-        padding: Edges { top: 0.0, right: 16.0, bottom: 0.0, left: 16.0 },
-        corner_radii: [6.0; 4],
-        background: Some(bg),
-        border_color: Some(border),
-        border_width: 1.0,
-        text_color: Some(fg),
-        text_size: Some(12.0),
-        align: Align::Center,
-        justify: Justify::Center,
-        focusable: true,
-        ..UiStyle::default()
-    });
+    }, pug_jetstream::map_layout(&LayoutIntent::new()
+        .with_height(LayoutSizing::Fixed(32.0))
+        .with_padding(LayoutEdges { top: 0.0, right: 16.0, bottom: 0.0, left: 16.0 })
+        .with_alignment(MainAxisAlignment::Center, CrossAxisAlignment::Center)),
+        NodeStyle { corner_radii: [6.0; 4], background: Some(bg), border_color: Some(border), border_width: 1.0, text_color: Some(fg), text_size: Some(12.0), focusable: true, ..NodeStyle::default() });
     tree.add_child(parent, btn);
 }

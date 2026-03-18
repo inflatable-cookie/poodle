@@ -2,6 +2,7 @@
 
 use jetstream_runtime::game_ui::*;
 use pug_adapter::ThemeProvider;
+use pug_layout::{CrossAxisAlignment, LayoutDirection, LayoutEdges, LayoutIntent, LayoutSizing, MainAxisAlignment};
 
 use crate::theme_bridge;
 
@@ -15,12 +16,7 @@ pub fn render(tree: &mut UiTree, theme: &dyn ThemeProvider) -> UiNodeId {
     let danger = theme_bridge::resolve_vec4(theme, "semantic.color.status.danger");
     let warning = theme_bridge::resolve_vec4(theme, "semantic.color.status.warning");
 
-    let root = tree.create(Widget::Panel, UiStyle {
-        direction: Direction::Column,
-        width: Sizing::Grow(1.0),
-        gap: 24.0,
-        ..UiStyle::default()
-    });
+    let root = tree.create_node(Widget::Panel, pug_jetstream::map_layout(&LayoutIntent::new().with_direction(LayoutDirection::Column).with_width(LayoutSizing::Grow).with_gap(24.0)), NodeStyle::default());
 
     // ── Destructive ──
     section_label(tree, root, "Destructive Confirmation", text_secondary);
@@ -28,64 +24,47 @@ pub fn render(tree: &mut UiTree, theme: &dyn ThemeProvider) -> UiNodeId {
         let dialog = dialog_frame(tree, bg_elevated, border, 340.0);
         tree.add_child(root, dialog);
 
-        let body = tree.create(Widget::Panel, UiStyle {
-            direction: Direction::Column,
-            padding: Edges { top: 20.0, right: 20.0, bottom: 16.0, left: 20.0 },
-            gap: 8.0,
-            ..UiStyle::default()
-        });
+        let body = tree.create_node(Widget::Panel, pug_jetstream::map_layout(&LayoutIntent::new().with_direction(LayoutDirection::Column).with_padding(LayoutEdges { top: 20.0, right: 20.0, bottom: 16.0, left: 20.0 }).with_gap(8.0)), NodeStyle::default());
         tree.add_child(dialog, body);
 
-        let icon = tree.create(Widget::Label { text: "⚠".to_string() }, UiStyle {
-            text_color: Some(danger), text_size: Some(24.0), ..UiStyle::default()
+        let icon = tree.create_node(Widget::Label { text: "⚠".to_string() }, pug_jetstream::map_layout(&LayoutIntent::new()), NodeStyle {
+            text_color: Some(danger), text_size: Some(24.0), ..NodeStyle::default()
         });
         tree.add_child(body, icon);
 
-        let title = tree.create(Widget::Label { text: "Delete 3 items?".to_string() }, UiStyle {
-            text_color: Some(text_primary), text_size: Some(15.0), ..UiStyle::default()
+        let title = tree.create_node(Widget::Label { text: "Delete 3 items?".to_string() }, pug_jetstream::map_layout(&LayoutIntent::new()), NodeStyle {
+            text_color: Some(text_primary), text_size: Some(15.0), ..NodeStyle::default()
         });
         tree.add_child(body, title);
 
-        let desc = tree.create(Widget::Label { text: "This action cannot be undone. The selected items will be permanently removed.".to_string() }, UiStyle {
-            text_color: Some(text_secondary), text_size: Some(12.0), ..UiStyle::default()
+        let desc = tree.create_node(Widget::Label { text: "This action cannot be undone. The selected items will be permanently removed.".to_string() }, pug_jetstream::map_layout(&LayoutIntent::new()), NodeStyle {
+            text_color: Some(text_secondary), text_size: Some(12.0), ..NodeStyle::default()
         });
         tree.add_child(body, desc);
 
-        let sep = tree.create(Widget::Panel, UiStyle {
-            width: Sizing::Grow(1.0), height: Sizing::Fixed(1.0),
-            background: Some(border), ..UiStyle::default()
+        let sep = tree.create_node(Widget::Panel, pug_jetstream::map_layout(&LayoutIntent::new().with_width(LayoutSizing::Grow).with_height(LayoutSizing::Fixed(1.0))), NodeStyle {
+            background: Some(border), ..NodeStyle::default()
         });
         tree.add_child(dialog, sep);
 
-        let footer = tree.create(Widget::Panel, UiStyle {
-            direction: Direction::Row,
-            padding: Edges { top: 12.0, right: 20.0, bottom: 16.0, left: 20.0 },
-            gap: 8.0, justify: Justify::End,
-            ..UiStyle::default()
-        });
+        let footer = tree.create_node(Widget::Panel, pug_jetstream::map_layout(&LayoutIntent::new().with_direction(LayoutDirection::Row).with_padding(LayoutEdges { top: 12.0, right: 20.0, bottom: 16.0, left: 20.0 }).with_gap(8.0).with_alignment(MainAxisAlignment::End, CrossAxisAlignment::Stretch)), NodeStyle::default());
         tree.add_child(dialog, footer);
 
-        let cancel = tree.create(Widget::Button {
+        let cancel = tree.create_node(Widget::Button {
             label: "Cancel".to_string(), pressed: false, hovered: false,
-        }, UiStyle {
-            height: Sizing::Fixed(32.0),
-            padding: Edges { top: 0.0, right: 14.0, bottom: 0.0, left: 14.0 },
+        }, pug_jetstream::map_layout(&LayoutIntent::new().with_height(LayoutSizing::Fixed(32.0)).with_padding(LayoutEdges { top: 0.0, right: 14.0, bottom: 0.0, left: 14.0 }).with_alignment(MainAxisAlignment::Center, CrossAxisAlignment::Center)), NodeStyle {
             corner_radii: [6.0; 4], border_color: Some(border), border_width: 1.0,
             text_color: Some(text_primary), text_size: Some(12.0),
-            align: Align::Center, justify: Justify::Center,
-            focusable: true, ..UiStyle::default()
+            focusable: true, ..NodeStyle::default()
         });
         tree.add_child(footer, cancel);
 
-        let confirm = tree.create(Widget::Button {
+        let confirm = tree.create_node(Widget::Button {
             label: "Delete".to_string(), pressed: false, hovered: false,
-        }, UiStyle {
-            height: Sizing::Fixed(32.0),
-            padding: Edges { top: 0.0, right: 14.0, bottom: 0.0, left: 14.0 },
+        }, pug_jetstream::map_layout(&LayoutIntent::new().with_height(LayoutSizing::Fixed(32.0)).with_padding(LayoutEdges { top: 0.0, right: 14.0, bottom: 0.0, left: 14.0 }).with_alignment(MainAxisAlignment::Center, CrossAxisAlignment::Center)), NodeStyle {
             corner_radii: [6.0; 4], background: Some(danger),
             text_color: Some(text_inverse), text_size: Some(12.0),
-            align: Align::Center, justify: Justify::Center,
-            focusable: true, ..UiStyle::default()
+            focusable: true, ..NodeStyle::default()
         });
         tree.add_child(footer, confirm);
     }
@@ -96,64 +75,47 @@ pub fn render(tree: &mut UiTree, theme: &dyn ThemeProvider) -> UiNodeId {
         let dialog = dialog_frame(tree, bg_elevated, border, 340.0);
         tree.add_child(root, dialog);
 
-        let body = tree.create(Widget::Panel, UiStyle {
-            direction: Direction::Column,
-            padding: Edges { top: 20.0, right: 20.0, bottom: 16.0, left: 20.0 },
-            gap: 8.0,
-            ..UiStyle::default()
-        });
+        let body = tree.create_node(Widget::Panel, pug_jetstream::map_layout(&LayoutIntent::new().with_direction(LayoutDirection::Column).with_padding(LayoutEdges { top: 20.0, right: 20.0, bottom: 16.0, left: 20.0 }).with_gap(8.0)), NodeStyle::default());
         tree.add_child(dialog, body);
 
-        let icon = tree.create(Widget::Label { text: "⚠".to_string() }, UiStyle {
-            text_color: Some(warning), text_size: Some(24.0), ..UiStyle::default()
+        let icon = tree.create_node(Widget::Label { text: "⚠".to_string() }, pug_jetstream::map_layout(&LayoutIntent::new()), NodeStyle {
+            text_color: Some(warning), text_size: Some(24.0), ..NodeStyle::default()
         });
         tree.add_child(body, icon);
 
-        let title = tree.create(Widget::Label { text: "Unsaved Changes".to_string() }, UiStyle {
-            text_color: Some(text_primary), text_size: Some(15.0), ..UiStyle::default()
+        let title = tree.create_node(Widget::Label { text: "Unsaved Changes".to_string() }, pug_jetstream::map_layout(&LayoutIntent::new()), NodeStyle {
+            text_color: Some(text_primary), text_size: Some(15.0), ..NodeStyle::default()
         });
         tree.add_child(body, title);
 
-        let desc = tree.create(Widget::Label { text: "You have unsaved changes. Do you want to save before leaving?".to_string() }, UiStyle {
-            text_color: Some(text_secondary), text_size: Some(12.0), ..UiStyle::default()
+        let desc = tree.create_node(Widget::Label { text: "You have unsaved changes. Do you want to save before leaving?".to_string() }, pug_jetstream::map_layout(&LayoutIntent::new()), NodeStyle {
+            text_color: Some(text_secondary), text_size: Some(12.0), ..NodeStyle::default()
         });
         tree.add_child(body, desc);
 
-        let sep = tree.create(Widget::Panel, UiStyle {
-            width: Sizing::Grow(1.0), height: Sizing::Fixed(1.0),
-            background: Some(border), ..UiStyle::default()
+        let sep = tree.create_node(Widget::Panel, pug_jetstream::map_layout(&LayoutIntent::new().with_width(LayoutSizing::Grow).with_height(LayoutSizing::Fixed(1.0))), NodeStyle {
+            background: Some(border), ..NodeStyle::default()
         });
         tree.add_child(dialog, sep);
 
-        let footer = tree.create(Widget::Panel, UiStyle {
-            direction: Direction::Row,
-            padding: Edges { top: 12.0, right: 20.0, bottom: 16.0, left: 20.0 },
-            gap: 8.0, justify: Justify::End,
-            ..UiStyle::default()
-        });
+        let footer = tree.create_node(Widget::Panel, pug_jetstream::map_layout(&LayoutIntent::new().with_direction(LayoutDirection::Row).with_padding(LayoutEdges { top: 12.0, right: 20.0, bottom: 16.0, left: 20.0 }).with_gap(8.0).with_alignment(MainAxisAlignment::End, CrossAxisAlignment::Stretch)), NodeStyle::default());
         tree.add_child(dialog, footer);
 
-        let discard = tree.create(Widget::Button {
+        let discard = tree.create_node(Widget::Button {
             label: "Discard".to_string(), pressed: false, hovered: false,
-        }, UiStyle {
-            height: Sizing::Fixed(32.0),
-            padding: Edges { top: 0.0, right: 14.0, bottom: 0.0, left: 14.0 },
+        }, pug_jetstream::map_layout(&LayoutIntent::new().with_height(LayoutSizing::Fixed(32.0)).with_padding(LayoutEdges { top: 0.0, right: 14.0, bottom: 0.0, left: 14.0 }).with_alignment(MainAxisAlignment::Center, CrossAxisAlignment::Center)), NodeStyle {
             corner_radii: [6.0; 4], border_color: Some(border), border_width: 1.0,
             text_color: Some(text_primary), text_size: Some(12.0),
-            align: Align::Center, justify: Justify::Center,
-            focusable: true, ..UiStyle::default()
+            focusable: true, ..NodeStyle::default()
         });
         tree.add_child(footer, discard);
 
-        let save = tree.create(Widget::Button {
+        let save = tree.create_node(Widget::Button {
             label: "Save".to_string(), pressed: false, hovered: false,
-        }, UiStyle {
-            height: Sizing::Fixed(32.0),
-            padding: Edges { top: 0.0, right: 14.0, bottom: 0.0, left: 14.0 },
+        }, pug_jetstream::map_layout(&LayoutIntent::new().with_height(LayoutSizing::Fixed(32.0)).with_padding(LayoutEdges { top: 0.0, right: 14.0, bottom: 0.0, left: 14.0 }).with_alignment(MainAxisAlignment::Center, CrossAxisAlignment::Center)), NodeStyle {
             corner_radii: [6.0; 4], background: Some(accent),
             text_color: Some(text_inverse), text_size: Some(12.0),
-            align: Align::Center, justify: Justify::Center,
-            focusable: true, ..UiStyle::default()
+            focusable: true, ..NodeStyle::default()
         });
         tree.add_child(footer, save);
     }
@@ -164,59 +126,42 @@ pub fn render(tree: &mut UiTree, theme: &dyn ThemeProvider) -> UiNodeId {
         let dialog = dialog_frame(tree, bg_elevated, border, 340.0);
         tree.add_child(root, dialog);
 
-        let body = tree.create(Widget::Panel, UiStyle {
-            direction: Direction::Column,
-            padding: Edges { top: 20.0, right: 20.0, bottom: 16.0, left: 20.0 },
-            gap: 8.0,
-            ..UiStyle::default()
-        });
+        let body = tree.create_node(Widget::Panel, pug_jetstream::map_layout(&LayoutIntent::new().with_direction(LayoutDirection::Column).with_padding(LayoutEdges { top: 20.0, right: 20.0, bottom: 16.0, left: 20.0 }).with_gap(8.0)), NodeStyle::default());
         tree.add_child(dialog, body);
 
-        let title = tree.create(Widget::Label { text: "Publish Article?".to_string() }, UiStyle {
-            text_color: Some(text_primary), text_size: Some(15.0), ..UiStyle::default()
+        let title = tree.create_node(Widget::Label { text: "Publish Article?".to_string() }, pug_jetstream::map_layout(&LayoutIntent::new()), NodeStyle {
+            text_color: Some(text_primary), text_size: Some(15.0), ..NodeStyle::default()
         });
         tree.add_child(body, title);
 
-        let desc = tree.create(Widget::Label { text: "This will make the article visible to all users.".to_string() }, UiStyle {
-            text_color: Some(text_secondary), text_size: Some(12.0), ..UiStyle::default()
+        let desc = tree.create_node(Widget::Label { text: "This will make the article visible to all users.".to_string() }, pug_jetstream::map_layout(&LayoutIntent::new()), NodeStyle {
+            text_color: Some(text_secondary), text_size: Some(12.0), ..NodeStyle::default()
         });
         tree.add_child(body, desc);
 
-        let sep = tree.create(Widget::Panel, UiStyle {
-            width: Sizing::Grow(1.0), height: Sizing::Fixed(1.0),
-            background: Some(border), ..UiStyle::default()
+        let sep = tree.create_node(Widget::Panel, pug_jetstream::map_layout(&LayoutIntent::new().with_width(LayoutSizing::Grow).with_height(LayoutSizing::Fixed(1.0))), NodeStyle {
+            background: Some(border), ..NodeStyle::default()
         });
         tree.add_child(dialog, sep);
 
-        let footer = tree.create(Widget::Panel, UiStyle {
-            direction: Direction::Row,
-            padding: Edges { top: 12.0, right: 20.0, bottom: 16.0, left: 20.0 },
-            gap: 8.0, justify: Justify::End,
-            ..UiStyle::default()
-        });
+        let footer = tree.create_node(Widget::Panel, pug_jetstream::map_layout(&LayoutIntent::new().with_direction(LayoutDirection::Row).with_padding(LayoutEdges { top: 12.0, right: 20.0, bottom: 16.0, left: 20.0 }).with_gap(8.0).with_alignment(MainAxisAlignment::End, CrossAxisAlignment::Stretch)), NodeStyle::default());
         tree.add_child(dialog, footer);
 
-        let cancel = tree.create(Widget::Button {
+        let cancel = tree.create_node(Widget::Button {
             label: "Cancel".to_string(), pressed: false, hovered: false,
-        }, UiStyle {
-            height: Sizing::Fixed(32.0),
-            padding: Edges { top: 0.0, right: 14.0, bottom: 0.0, left: 14.0 },
+        }, pug_jetstream::map_layout(&LayoutIntent::new().with_height(LayoutSizing::Fixed(32.0)).with_padding(LayoutEdges { top: 0.0, right: 14.0, bottom: 0.0, left: 14.0 }).with_alignment(MainAxisAlignment::Center, CrossAxisAlignment::Center)), NodeStyle {
             corner_radii: [6.0; 4], border_color: Some(border), border_width: 1.0,
             text_color: Some(text_primary), text_size: Some(12.0),
-            align: Align::Center, justify: Justify::Center,
-            focusable: true, ..UiStyle::default()
+            focusable: true, ..NodeStyle::default()
         });
         tree.add_child(footer, cancel);
 
-        let publish = tree.create(Widget::Button {
+        let publish = tree.create_node(Widget::Button {
             label: "Publish".to_string(), pressed: false, hovered: false,
-        }, UiStyle {
-            height: Sizing::Fixed(32.0),
-            padding: Edges { top: 0.0, right: 14.0, bottom: 0.0, left: 14.0 },
+        }, pug_jetstream::map_layout(&LayoutIntent::new().with_height(LayoutSizing::Fixed(32.0)).with_padding(LayoutEdges { top: 0.0, right: 14.0, bottom: 0.0, left: 14.0 }).with_alignment(MainAxisAlignment::Center, CrossAxisAlignment::Center)), NodeStyle {
             corner_radii: [6.0; 4], background: Some(accent),
             text_color: Some(text_inverse), text_size: Some(12.0),
-            align: Align::Center, justify: Justify::Center,
-            focusable: true, ..UiStyle::default()
+            focusable: true, ..NodeStyle::default()
         });
         tree.add_child(footer, publish);
     }
@@ -225,19 +170,17 @@ pub fn render(tree: &mut UiTree, theme: &dyn ThemeProvider) -> UiNodeId {
 }
 
 fn dialog_frame(tree: &mut UiTree, bg: glam::Vec4, border: glam::Vec4, width: f32) -> UiNodeId {
-    tree.create(Widget::Panel, UiStyle {
-        direction: Direction::Column,
-        width: Sizing::Fixed(width),
+    tree.create_node(Widget::Panel, pug_jetstream::map_layout(&LayoutIntent::new().with_direction(LayoutDirection::Column).with_width(LayoutSizing::Fixed(width))), NodeStyle {
         background: Some(bg),
         border_color: Some(border), border_width: 1.0,
         corner_radii: [10.0; 4],
-        ..UiStyle::default()
+        ..NodeStyle::default()
     })
 }
 
 fn section_label(tree: &mut UiTree, parent: UiNodeId, text: &str, color: glam::Vec4) {
-    let lbl = tree.create(Widget::Label { text: text.to_string() }, UiStyle {
-        text_color: Some(color), text_size: Some(11.0), ..UiStyle::default()
+    let lbl = tree.create_node(Widget::Label { text: text.to_string() }, pug_jetstream::map_layout(&LayoutIntent::new()), NodeStyle {
+        text_color: Some(color), text_size: Some(11.0), ..NodeStyle::default()
     });
     tree.add_child(parent, lbl);
 }

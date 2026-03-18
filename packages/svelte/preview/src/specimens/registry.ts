@@ -111,6 +111,24 @@ import TriStateSwitchSpecimen from "./TriStateSwitchSpecimen.svelte";
 import VideoPlayerSpecimen from "./VideoPlayerSpecimen.svelte";
 import ZonedDateTimePickerSpecimen from "./ZonedDateTimePickerSpecimen.svelte";
 
+// Workstation specimens
+import ActionDiscoveryPanelSpecimen from "./ActionDiscoveryPanelSpecimen.svelte";
+import AppHeaderSpecimen from "./AppHeaderSpecimen.svelte";
+import CollapseToggleSpecimen from "./CollapseToggleSpecimen.svelte";
+import CommandPaletteSpecimen from "./CommandPaletteSpecimen.svelte";
+import DockRegionSpecimen from "./DockRegionSpecimen.svelte";
+import HostedSurfaceSpecimen from "./HostedSurfaceSpecimen.svelte";
+import PanelHeaderSpecimen from "./PanelHeaderSpecimen.svelte";
+import PanelSurfaceSpecimen from "./PanelSurfaceSpecimen.svelte";
+import ProjectHeaderSpecimen from "./ProjectHeaderSpecimen.svelte";
+import ResizeHandleSpecimen from "./ResizeHandleSpecimen.svelte";
+import ShellStatusBarSpecimen from "./ShellStatusBarSpecimen.svelte";
+import SplitDividerSpecimen from "./SplitDividerSpecimen.svelte";
+import SplitViewSpecimen from "./SplitViewSpecimen.svelte";
+import StripRailSpecimen from "./StripRailSpecimen.svelte";
+import WorkspaceShellSpecimen from "./WorkspaceShellSpecimen.svelte";
+import WorkspaceWindowSpecimen from "./WorkspaceWindowSpecimen.svelte";
+
 /**
  * Maps component slugs to their specimen Svelte components.
  * Add entries here as specimens are created.
@@ -227,4 +245,22 @@ export const specimenMap: Record<string, typeof SvelteComponent<any>> = {
   "tri-state-switch": TriStateSwitchSpecimen,
   "video-player": VideoPlayerSpecimen,
   "zoned-date-time-picker": ZonedDateTimePickerSpecimen,
+
+  // Workstation
+  "action-discovery-panel": ActionDiscoveryPanelSpecimen,
+  "app-header": AppHeaderSpecimen,
+  "collapse-toggle": CollapseToggleSpecimen,
+  "command-palette": CommandPaletteSpecimen,
+  "dock-region": DockRegionSpecimen,
+  "hosted-surface": HostedSurfaceSpecimen,
+  "panel-header": PanelHeaderSpecimen,
+  "panel-surface": PanelSurfaceSpecimen,
+  "project-header": ProjectHeaderSpecimen,
+  "resize-handle": ResizeHandleSpecimen,
+  "shell-status-bar": ShellStatusBarSpecimen,
+  "split-divider": SplitDividerSpecimen,
+  "split-view": SplitViewSpecimen,
+  "strip-rail": StripRailSpecimen,
+  "workspace-shell": WorkspaceShellSpecimen,
+  "workspace-window": WorkspaceWindowSpecimen,
 };

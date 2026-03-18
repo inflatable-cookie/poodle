@@ -2,6 +2,7 @@
 
 use jetstream_runtime::game_ui::*;
 use pug_adapter::ThemeProvider;
+use pug_layout::{LayoutIntent, LayoutDirection, LayoutSizing, CrossAxisAlignment, MainAxisAlignment};
 
 use crate::theme_bridge;
 
@@ -13,12 +14,11 @@ pub fn render(tree: &mut UiTree, theme: &dyn ThemeProvider) -> UiNodeId {
     let warning = theme_bridge::resolve_vec4(theme, "semantic.color.status.warning");
     let danger = theme_bridge::resolve_vec4(theme, "semantic.color.status.danger");
 
-    let root = tree.create(Widget::Panel, UiStyle {
-        direction: Direction::Column,
-        width: Sizing::Grow(1.0),
-        gap: 16.0,
-        ..UiStyle::default()
-    });
+    let root = tree.create_node(Widget::Panel, pug_jetstream::map_layout(&LayoutIntent::new()
+        .with_direction(LayoutDirection::Column)
+        .with_width(LayoutSizing::Grow)
+        .with_gap(16.0)),
+        NodeStyle::default());
 
     // ── 0% ──
     label(tree, root, "Empty (0%)", text_secondary);
@@ -43,21 +43,23 @@ pub fn render(tree: &mut UiTree, theme: &dyn ThemeProvider) -> UiNodeId {
     // ── Sizes ──
     label(tree, root, "Size variants", text_secondary);
     {
-        let col = tree.create(Widget::Panel, UiStyle {
-            direction: Direction::Column, gap: 8.0, ..UiStyle::default()
-        });
+        let col = tree.create_node(Widget::Panel, pug_jetstream::map_layout(&LayoutIntent::new()
+            .with_direction(LayoutDirection::Column)
+            .with_gap(8.0)),
+            NodeStyle::default());
         tree.add_child(root, col);
 
         for &(lbl, h) in &[("Thin (2px)", 2.0), ("Default (6px)", 6.0), ("Thick (10px)", 10.0)] {
-            let row = tree.create(Widget::Panel, UiStyle {
-                direction: Direction::Row, gap: 8.0, align: Align::Center, ..UiStyle::default()
-            });
+            let row = tree.create_node(Widget::Panel, pug_jetstream::map_layout(&LayoutIntent::new()
+                .with_direction(LayoutDirection::Row)
+                .with_gap(8.0)
+                .with_alignment(MainAxisAlignment::Start, CrossAxisAlignment::Center)),
+                NodeStyle::default());
             tree.add_child(col, row);
 
-            let l = tree.create(Widget::Label { text: lbl.to_string() }, UiStyle {
-                text_color: Some(text_secondary), text_size: Some(10.0),
-                width: Sizing::Fixed(80.0), ..UiStyle::default()
-            });
+            let l = tree.create_node(Widget::Label { text: lbl.to_string() }, pug_jetstream::map_layout(&LayoutIntent::new()
+                .with_width(LayoutSizing::Fixed(80.0))),
+                NodeStyle { text_color: Some(text_secondary), text_size: Some(10.0), ..NodeStyle::default() });
             tree.add_child(row, l);
 
             progress_bar_sized(tree, row, 0.6, 160.0, h, accent, border);
@@ -68,9 +70,8 @@ pub fn render(tree: &mut UiTree, theme: &dyn ThemeProvider) -> UiNodeId {
 }
 
 fn label(tree: &mut UiTree, parent: UiNodeId, text: &str, color: glam::Vec4) {
-    let lbl = tree.create(Widget::Label { text: text.to_string() }, UiStyle {
-        text_color: Some(color), text_size: Some(11.0), ..UiStyle::default()
-    });
+    let lbl = tree.create_node(Widget::Label { text: text.to_string() }, pug_jetstream::map_layout(&LayoutIntent::new()),
+        NodeStyle { text_color: Some(color), text_size: Some(11.0), ..NodeStyle::default() });
     tree.add_child(parent, lbl);
 }
 
@@ -79,25 +80,19 @@ fn progress_bar(tree: &mut UiTree, parent: UiNodeId, fraction: f32, width: f32, 
 }
 
 fn progress_bar_sized(tree: &mut UiTree, parent: UiNodeId, fraction: f32, width: f32, height: f32, fill_color: glam::Vec4, bg_color: glam::Vec4) {
-    let track = tree.create(Widget::Panel, UiStyle {
-        width: Sizing::Fixed(width),
-        height: Sizing::Fixed(height),
-        corner_radii: [height / 2.0; 4],
-        background: Some(bg_color),
-        direction: Direction::Row,
-        ..UiStyle::default()
-    });
+    let track = tree.create_node(Widget::Panel, pug_jetstream::map_layout(&LayoutIntent::new()
+        .with_width(LayoutSizing::Fixed(width))
+        .with_height(LayoutSizing::Fixed(height))
+        .with_direction(LayoutDirection::Row)),
+        NodeStyle { corner_radii: [height / 2.0; 4], background: Some(bg_color), ..NodeStyle::default() });
     tree.add_child(parent, track);
 
     let fill_w = width * fraction.clamp(0.0, 1.0);
     if fill_w > 0.0 {
-        let fill = tree.create(Widget::Panel, UiStyle {
-            width: Sizing::Fixed(fill_w),
-            height: Sizing::Fixed(height),
-            corner_radii: [height / 2.0; 4],
-            background: Some(fill_color),
-            ..UiStyle::default()
-        });
+        let fill = tree.create_node(Widget::Panel, pug_jetstream::map_layout(&LayoutIntent::new()
+            .with_width(LayoutSizing::Fixed(fill_w))
+            .with_height(LayoutSizing::Fixed(height))),
+            NodeStyle { corner_radii: [height / 2.0; 4], background: Some(fill_color), ..NodeStyle::default() });
         tree.add_child(track, fill);
     }
 }

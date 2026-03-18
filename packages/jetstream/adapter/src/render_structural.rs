@@ -28,36 +28,49 @@ fn resolve_inset(inset: &pug_primitives::Inset, theme: &dyn ThemeProvider) -> Je
     }
 }
 
+/// Convert JetstreamEdges into taffy padding on a layout style.
+fn apply_inset_padding(layout: &mut taffy::Style, edges: &JetstreamEdges) {
+    layout.padding = taffy::Rect {
+        left: taffy::LengthPercentage::length(edges.left),
+        right: taffy::LengthPercentage::length(edges.right),
+        top: taffy::LengthPercentage::length(edges.top),
+        bottom: taffy::LengthPercentage::length(edges.bottom),
+    };
+}
+
 impl RenderComponent<BoxSpec> for JetstreamAdapter {
     type Target = JetstreamTarget;
     fn render(&self, spec: &BoxSpec, style: &StyleDescriptor, theme: &dyn ThemeProvider) -> JetstreamNodeHandle {
-        let mut js_style = map_style(style);
+        let mut mapped = map_style(style);
 
         // Resolve padding tokens
         let inset = spec.resolved_padding();
-        js_style.padding = resolve_inset(&inset, theme);
+        let edges = resolve_inset(&inset, theme);
+        apply_inset_padding(&mut mapped.layout, &edges);
 
         let node_id = spec.role.as_deref().unwrap_or("box");
-        JetstreamNodeHandle::new(node_id, "BoxSpec", WidgetKind::Panel)
+        JetstreamNodeHandle::new(node_id, "BoxSpec", WidgetKind::Panel, mapped)
     }
 }
 
 impl RenderComponent<StackSpec> for JetstreamAdapter {
     type Target = JetstreamTarget;
     fn render(&self, spec: &StackSpec, style: &StyleDescriptor, theme: &dyn ThemeProvider) -> JetstreamNodeHandle {
-        let mut js_style = map_style(style);
+        let mut mapped = map_style(style);
 
         // Resolve gap token
         if let Some(gap_token) = spec.resolved_gap() {
-            js_style.gap = theme.resolve_space(gap_token);
+            let gap = theme.resolve_space(gap_token);
+            mapped.layout.gap = taffy::Size { width: taffy::LengthPercentage::length(gap), height: taffy::LengthPercentage::length(gap) };
         }
 
         // Resolve padding tokens
         let inset = spec.resolved_padding();
-        js_style.padding = resolve_inset(&inset, theme);
+        let edges = resolve_inset(&inset, theme);
+        apply_inset_padding(&mut mapped.layout, &edges);
 
         let node_id = spec.role.as_deref().unwrap_or("stack");
-        JetstreamNodeHandle::new(node_id, "StackSpec", WidgetKind::Panel)
+        JetstreamNodeHandle::new(node_id, "StackSpec", WidgetKind::Panel, mapped)
     }
 }
 
@@ -65,11 +78,12 @@ impl RenderComponent<GridSpec> for JetstreamAdapter {
     type Target = JetstreamTarget;
     fn render(&self, spec: &GridSpec, style: &StyleDescriptor, theme: &dyn ThemeProvider) -> JetstreamNodeHandle {
         // Jetstream has no grid layout -- emulated with nested row/column panels
-        let mut js_style = map_style(style);
+        let mut mapped = map_style(style);
 
         // Resolve gap tokens (use column gap as primary gap value)
         if let Some(col_gap_token) = spec.resolved_column_gap() {
-            js_style.gap = theme.resolve_space(col_gap_token);
+            let gap = theme.resolve_space(col_gap_token);
+            mapped.layout.gap = taffy::Size { width: taffy::LengthPercentage::length(gap), height: taffy::LengthPercentage::length(gap) };
         }
         // Row gap resolved for proof but Jetstream single-gap model uses column gap
         if let Some(_row_gap_token) = spec.resolved_row_gap() {
@@ -78,30 +92,31 @@ impl RenderComponent<GridSpec> for JetstreamAdapter {
 
         // Resolve padding tokens
         let inset = spec.resolved_padding();
-        js_style.padding = resolve_inset(&inset, theme);
+        let edges = resolve_inset(&inset, theme);
+        apply_inset_padding(&mut mapped.layout, &edges);
 
         let node_id = spec.role.as_deref().unwrap_or("grid");
-        JetstreamNodeHandle::new(node_id, "GridSpec", WidgetKind::Panel)
+        JetstreamNodeHandle::new(node_id, "GridSpec", WidgetKind::Panel, mapped)
     }
 }
 
 impl RenderComponent<SurfaceSpec> for JetstreamAdapter {
     type Target = JetstreamTarget;
     fn render(&self, spec: &SurfaceSpec, style: &StyleDescriptor, theme: &dyn ThemeProvider) -> JetstreamNodeHandle {
-        let mut js_style = map_style(style);
+        let mut mapped = map_style(style);
 
         // Resolve background color
         let bg_token = spec.resolved_background_token();
         let bg_color = theme.resolve_color(bg_token);
-        js_style.background = Some(JetstreamColor::from(bg_color));
+        mapped.visuals.background = Some(JetstreamColor::from(bg_color));
 
         // Resolve border color and width
         if let Some(border_color_token) = spec.resolved_border_color() {
             let border_color = theme.resolve_color(border_color_token);
-            js_style.border_color = Some(JetstreamColor::from(border_color));
+            mapped.visuals.border_color = Some(JetstreamColor::from(border_color));
         }
         if let Some(border_width_token) = spec.resolved_border_width() {
-            js_style.border_width = theme.resolve_border_width(border_width_token);
+            mapped.visuals.border_width = theme.resolve_border_width(border_width_token);
         }
 
         // Resolve shadow token (Jetstream has no shadow field -- resolve to prove it works)
@@ -109,97 +124,99 @@ impl RenderComponent<SurfaceSpec> for JetstreamAdapter {
 
         // Resolve padding tokens
         let inset = spec.resolved_padding();
-        js_style.padding = resolve_inset(&inset, theme);
+        let edges = resolve_inset(&inset, theme);
+        apply_inset_padding(&mut mapped.layout, &edges);
 
         let node_id = spec.label.as_deref().unwrap_or("surface");
-        JetstreamNodeHandle::new(node_id, "SurfaceSpec", WidgetKind::Panel)
+        JetstreamNodeHandle::new(node_id, "SurfaceSpec", WidgetKind::Panel, mapped)
     }
 }
 
 impl RenderComponent<SeparatorSpec> for JetstreamAdapter {
     type Target = JetstreamTarget;
     fn render(&self, spec: &SeparatorSpec, style: &StyleDescriptor, theme: &dyn ThemeProvider) -> JetstreamNodeHandle {
-        let mut js_style = map_style(style);
+        let mut mapped = map_style(style);
 
         // Resolve separator color
         let color_token = spec.resolved_color();
         let color = theme.resolve_color(color_token);
-        js_style.border_color = Some(JetstreamColor::from(color));
+        mapped.visuals.border_color = Some(JetstreamColor::from(color));
 
         // Resolve stroke width
         let stroke_token = spec.resolved_stroke_width();
-        js_style.border_width = theme.resolve_border_width(stroke_token);
+        mapped.visuals.border_width = theme.resolve_border_width(stroke_token);
 
-        JetstreamNodeHandle::new("separator", "SeparatorSpec", WidgetKind::Panel)
+        JetstreamNodeHandle::new("separator", "SeparatorSpec", WidgetKind::Panel, mapped)
     }
 }
 
 impl RenderComponent<ScrollShellSpec> for JetstreamAdapter {
     type Target = JetstreamTarget;
     fn render(&self, spec: &ScrollShellSpec, style: &StyleDescriptor, theme: &dyn ThemeProvider) -> JetstreamNodeHandle {
-        let mut js_style = map_style(style);
+        let mut mapped = map_style(style);
 
         // Resolve padding tokens
         let inset = spec.resolved_padding();
-        js_style.padding = resolve_inset(&inset, theme);
+        let edges = resolve_inset(&inset, theme);
+        apply_inset_padding(&mut mapped.layout, &edges);
 
         // Handle focus state
         if spec.is_focusable {
             let ring_color_token = spec.focus_ring_color_token();
             let ring_color = theme.resolve_color(ring_color_token);
-            js_style.focus_ring_color = Some(JetstreamColor::from(ring_color));
+            mapped.visuals.focus_ring_color = Some(JetstreamColor::from(ring_color));
 
             let ring_width_token = spec.focus_ring_width_token();
-            js_style.focus_ring_width = theme.resolve_space(ring_width_token);
+            mapped.visuals.focus_ring_width = theme.resolve_space(ring_width_token);
         }
 
         let node_id = spec.label.as_deref().unwrap_or("scroll-shell");
-        JetstreamNodeHandle::new(node_id, "ScrollShellSpec", WidgetKind::List)
+        JetstreamNodeHandle::new(node_id, "ScrollShellSpec", WidgetKind::List, mapped)
     }
 }
 
 impl RenderComponent<BannerSpec> for JetstreamAdapter {
     type Target = JetstreamTarget;
     fn render(&self, spec: &BannerSpec, style: &StyleDescriptor, theme: &dyn ThemeProvider) -> JetstreamNodeHandle {
-        let mut js_style = map_style(style);
+        let mut mapped = map_style(style);
 
         // Resolve fill (background) color
         let fill_token = spec.fill_token();
         let fill_color = theme.resolve_color(fill_token);
-        js_style.background = Some(JetstreamColor::from(fill_color));
+        mapped.visuals.background = Some(JetstreamColor::from(fill_color));
 
         // Resolve border color
         let border_token = spec.border_token();
         let border_color = theme.resolve_color(border_token);
-        js_style.border_color = Some(JetstreamColor::from(border_color));
+        mapped.visuals.border_color = Some(JetstreamColor::from(border_color));
 
         // Resolve icon color
         let icon_token = spec.icon_color_token();
         let icon_color = theme.resolve_color(icon_token);
-        js_style.icon_color = Some(JetstreamColor::from(icon_color));
+        mapped.visuals.icon_color = Some(JetstreamColor::from(icon_color));
 
         let node_id = spec.title.as_deref().unwrap_or("banner");
-        JetstreamNodeHandle::new(node_id, "BannerSpec", WidgetKind::Panel)
+        JetstreamNodeHandle::new(node_id, "BannerSpec", WidgetKind::Panel, mapped)
     }
 }
 
 impl RenderComponent<CallOutSpec> for JetstreamAdapter {
     type Target = JetstreamTarget;
     fn render(&self, spec: &CallOutSpec, style: &StyleDescriptor, theme: &dyn ThemeProvider) -> JetstreamNodeHandle {
-        let mut js_style = map_style(style);
+        let mut mapped = map_style(style);
 
         // Resolve fill (background) color
         let fill_token = spec.fill_token();
         let fill_color = theme.resolve_color(fill_token);
-        js_style.background = Some(JetstreamColor::from(fill_color));
+        mapped.visuals.background = Some(JetstreamColor::from(fill_color));
 
         // Resolve border color
         let border_token = spec.border_token();
         let border_color = theme.resolve_color(border_token);
-        js_style.border_color = Some(JetstreamColor::from(border_color));
+        mapped.visuals.border_color = Some(JetstreamColor::from(border_color));
 
         let node_id = spec.title.as_deref().unwrap_or("callout");
-        JetstreamNodeHandle::new(node_id, "CallOutSpec", WidgetKind::Panel)
+        JetstreamNodeHandle::new(node_id, "CallOutSpec", WidgetKind::Panel, mapped)
     }
 }
 

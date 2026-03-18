@@ -1,5 +1,8 @@
 <script lang="ts">
+  import type { PanelVariant } from "./types";
+
   export let title: string | null = null;
+  export let variant: PanelVariant = "standard";
   export let isActive = false;
   export let isElevated = false;
   export let hasHeader = true;
@@ -10,6 +13,7 @@
 
 <section
   class="panel-surface"
+  data-variant={variant}
   data-active={isActive}
   data-elevated={isElevated}
   data-body-padding={bodyPadding}
@@ -62,6 +66,27 @@
     border-radius: calc(var(--pug-recipe-panel-surface-radius) - 0.0625rem);
     background: var(--pug-treatment-surface-fill, var(--pug-recipe-panel-surface-fill));
     box-shadow: var(--pug-treatment-surface-shadow, var(--pug-recipe-panel-surface-shadow));
+  }
+
+  .panel-surface[data-variant="utility"] {
+    border-color: color-mix(in srgb, var(--pug-color-border-subtle) 50%, transparent);
+    background: color-mix(in srgb, var(--pug-color-background-panel) 80%, transparent);
+  }
+
+  .panel-surface[data-variant="utility"] .panel-surface__header-title strong {
+    font-size: 0.75rem;
+    font-weight: 500;
+    color: var(--pug-color-text-secondary);
+  }
+
+  .panel-surface[data-variant="focused"] {
+    border-color: color-mix(in srgb, var(--pug-color-border-default) 90%, var(--pug-color-accent-base));
+    background: var(--pug-color-background-panel);
+  }
+
+  .panel-surface[data-variant="focused"] .panel-surface__header-title strong {
+    font-size: 0.9375rem;
+    font-weight: 600;
   }
 
   .panel-surface[data-active="true"] {

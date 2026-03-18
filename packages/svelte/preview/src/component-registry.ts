@@ -1,4 +1,4 @@
-export type ComponentTier = "primitive" | "composite" | "shell";
+export type ComponentTier = "primitive" | "composite" | "shell" | "workstation";
 
 export type ComponentEntry = {
   slug: string;
@@ -34,6 +34,7 @@ function entry(
 
 const P = "@pug/svelte-primitives";
 const C = "@pug/svelte-composites";
+const W = "@pug/svelte-workstation";
 
 export const primitiveComponents: ComponentEntry[] = [
   entry("Accordion", "primitive", P, "Expandable disclosure panels with single or multiple selection.", true),
@@ -48,6 +49,7 @@ export const primitiveComponents: ComponentEntry[] = [
   entry("Checkbox", "primitive", P, "Boolean toggle with label, supporting indeterminate state.", true),
   entry("Code", "primitive", P, "Syntax-highlighted code display with copy button and line numbers.", true),
   entry("ColorPicker", "primitive", P, "Color selection with native picker, hex input, and swatches.", true),
+  entry("CollapseToggle", "primitive", P, "Directional chevron toggle for collapsing/expanding regions.", true),
   entry("Collapsible", "primitive", P, "Show/hide content toggle without accordion grouping.", true),
   entry("Combobox", "primitive", P, "Text input with filtered dropdown suggestions.", true),
   entry("ContextMenu", "primitive", P, "Right-click triggered menu overlay.", true),
@@ -102,7 +104,7 @@ export const primitiveComponents: ComponentEntry[] = [
   entry("Surface", "primitive", P, "Themed container with background, border, and padding variants.", true),
   entry("Switch", "primitive", P, "Toggle switch for on/off states.", true),
   entry("Table", "primitive", P, "Static data table with headers, rows, and alignment.", true),
-  entry("Tabs", "primitive", P, "Unified tabbed interface with underline, card, and pill variants. Supports icons, close, and reorder.", true),
+  entry("Tabs", "primitive", P, "Unified tabbed interface with underline, card, pill, and strip variants. Horizontal and vertical orientation with icons, close, and reorder.", true),
   entry("TextArea", "primitive", P, "Multi-line text input.", true),
   entry("TextInput", "primitive", P, "Single-line text input.", true),
   entry("TimeAgo", "primitive", P, "Live-updating relative timestamp display.", true),
@@ -117,11 +119,14 @@ export const primitiveComponents: ComponentEntry[] = [
 ].sort((a, b) => a.displayName.localeCompare(b.displayName));
 
 export const compositeComponents: ComponentEntry[] = [
+  entry("ActionDiscoveryPanel", "composite", C, "Grouped action list with keyboard navigation, shortcuts, and badges.", true),
+  entry("AppHeader", "composite", C, "Top-level application header with branding and global actions.", true),
   entry("AudioPlayer", "composite", C, "Audio playback with transport controls, volume, and speed.", true),
   entry("AutonomousList", "composite", C, "Self-managing list with add, remove, and optional reorder.", true),
   entry("BlockEditor", "composite", C, "Block-based content editor with paragraph, heading, code, quote, list, image, and divider blocks.", true),
   entry("Breadcrumbs", "composite", C, "Hierarchical navigation trail showing current location.", true),
   entry("CardRadioGroup", "composite", C, "Radio selection across rich card options with keyboard navigation.", true),
+  entry("CommandPalette", "composite", C, "Keyboard-driven command search and execution overlay.", true),
   entry("ConfirmAction", "composite", C, "Trigger element with confirmation prompt before executing dangerous actions.", true),
   entry("DataTable", "composite", C, "Feature-rich table with sorting, selection, and pagination.", true),
   entry("EmbedInput", "composite", C, "URL or embed code input with provider detection and parsing.", true),
@@ -155,10 +160,26 @@ export const shellComponents: ComponentEntry[] = [
   entry("PickerShell", "shell", C, "Container for search-and-select picker workflows.", true),
 ].sort((a, b) => a.displayName.localeCompare(b.displayName));
 
+export const workstationComponents: ComponentEntry[] = [
+  entry("DockRegion", "workstation", W, "Collapsible dock container for panels with emphasis variants.", true),
+  entry("HostedSurface", "workstation", W, "External content host with bounded lifecycle states.", true),
+  entry("PanelHeader", "workstation", W, "Header bar for panel content with title and actions.", true),
+  entry("PanelSurface", "workstation", W, "Panel content area with utility/standard/focused variants.", true),
+  entry("ProjectHeader", "workstation", W, "Project-scoped header with context and navigation.", true),
+  entry("ResizeHandle", "workstation", W, "Drag and keyboard resize handle for split layouts.", true),
+  entry("ShellStatusBar", "workstation", W, "Bottom status bar with slot-based status segments.", true),
+  entry("SplitDivider", "workstation", W, "Resize handle with optional collapse affordances.", true),
+  entry("SplitView", "workstation", W, "Resizable split pane layout.", true),
+  entry("StripRail", "workstation", W, "Four-edge icon/mixed-mode strip for region switching.", true),
+  entry("WorkspaceShell", "workstation", W, "Top-level workspace layout shell with region composition.", true),
+  entry("WorkspaceWindow", "workstation", W, "Window host with surface ownership and slot composition.", true),
+].sort((a, b) => a.displayName.localeCompare(b.displayName));
+
 export const allComponents: ComponentEntry[] = [
   ...primitiveComponents,
   ...compositeComponents,
   ...shellComponents,
+  ...workstationComponents,
 ];
 
 export function findComponent(
@@ -171,6 +192,8 @@ export function findComponent(
       ? compositeComponents
       : tier === "shell"
         ? shellComponents
-        : allComponents;
+        : tier === "workstation"
+          ? workstationComponents
+          : allComponents;
   return list.find((c) => c.slug === slug);
 }

@@ -18,6 +18,7 @@
 
 use jetstream_runtime::game_ui::*;
 use pug_adapter::ThemeProvider;
+use pug_layout::{CrossAxisAlignment, LayoutDirection, LayoutEdges, LayoutIntent, LayoutSizing, MainAxisAlignment};
 
 use crate::app_state::{AppState, ControlSize, Density, Section, ThemePreset};
 use crate::component_registry;
@@ -58,37 +59,36 @@ pub fn build_shell(
     let accent = theme_bridge::accent_base(theme);
 
     // ── Root ──
-    let root = tree.create(Widget::Panel, UiStyle {
-        direction: Direction::Column,
-        width: Sizing::Grow(1.0),
-        height: Sizing::Grow(1.0),
-        background: Some(bg_panel),
-        ..UiStyle::default()
-    });
+    let root = tree.create_node(Widget::Panel,
+        pug_jetstream::map_layout(&LayoutIntent::new()
+            .with_direction(LayoutDirection::Column)
+            .with_width(LayoutSizing::Grow)
+            .with_height(LayoutSizing::Grow)),
+        NodeStyle { background: Some(bg_panel), ..NodeStyle::default() });
     tree.set_root(root);
 
     // ── Tab bar ──
-    let tab_bar = tree.create(Widget::Panel, UiStyle {
-        direction: Direction::Row,
-        width: Sizing::Grow(1.0),
-        height: Sizing::Fixed(44.0),
-        padding: Edges::all(8.0),
-        gap: 4.0,
-        align: Align::Center,
-        background: Some(bg_surface),
-        border_color: Some(border),
-        border_width: 1.0,
-        ..UiStyle::default()
-    });
+    let tab_bar = tree.create_node(Widget::Panel,
+        pug_jetstream::map_layout(&LayoutIntent::new()
+            .with_direction(LayoutDirection::Row)
+            .with_width(LayoutSizing::Grow)
+            .with_height(LayoutSizing::Fixed(44.0))
+            .with_padding(LayoutEdges::uniform(8.0))
+            .with_gap(4.0)
+            .with_alignment(MainAxisAlignment::Start, CrossAxisAlignment::Center)),
+        NodeStyle {
+            background: Some(bg_surface),
+            border_color: Some(border),
+            border_width: 1.0,
+            ..NodeStyle::default()
+        });
     tree.add_child(root, tab_bar);
 
     // Title
-    let title = tree.create(Widget::Label { text: "Pug".to_string() }, UiStyle {
-        text_color: Some(text_primary),
-        text_size: Some(14.0),
-        padding: Edges { top: 0.0, right: 12.0, bottom: 0.0, left: 4.0 },
-        ..UiStyle::default()
-    });
+    let title = tree.create_node(Widget::Label { text: "Pug".to_string() },
+        pug_jetstream::map_layout(&LayoutIntent::new()
+            .with_padding(LayoutEdges { top: 0.0, right: 12.0, bottom: 0.0, left: 4.0 })),
+        NodeStyle { text_color: Some(text_primary), text_size: Some(14.0), ..NodeStyle::default() });
     tree.add_child(tab_bar, title);
 
     // Tab buttons
@@ -107,13 +107,16 @@ pub fn build_shell(
             None
         };
 
-        let tab = tree.create(Widget::Button {
+        let tab = tree.create_node(Widget::Button {
             label: section.label().to_string(),
             pressed: false,
             hovered: false,
-        }, UiStyle {
-            height: Sizing::Fixed(28.0),
-            padding: Edges { top: 0.0, right: 12.0, bottom: 0.0, left: 12.0 },
+        },
+        pug_jetstream::map_layout(&LayoutIntent::new()
+            .with_height(LayoutSizing::Fixed(28.0))
+            .with_padding(LayoutEdges { top: 0.0, right: 12.0, bottom: 0.0, left: 12.0 })
+            .with_alignment(MainAxisAlignment::Center, CrossAxisAlignment::Center)),
+        NodeStyle {
             corner_radii: [6.0; 4],
             background: tab_bg,
             border_color: tab_border,
@@ -121,9 +124,7 @@ pub fn build_shell(
             text_color: Some(tab_text),
             text_size: Some(12.0),
             focusable: true,
-            align: Align::Center,
-            justify: Justify::Center,
-            ..UiStyle::default()
+            ..NodeStyle::default()
         });
         tree.add_child(tab_bar, tab);
         tabs.push(tab);
@@ -134,27 +135,30 @@ pub fn build_shell(
         build_display_controls(tree, root, state, theme);
 
     // ── Content area ──
-    let content_area = tree.create(Widget::Panel, UiStyle {
-        direction: Direction::Row,
-        width: Sizing::Grow(1.0),
-        height: Sizing::Grow(1.0),
-        ..UiStyle::default()
-    });
+    let content_area = tree.create_node(Widget::Panel,
+        pug_jetstream::map_layout(&LayoutIntent::new()
+            .with_direction(LayoutDirection::Row)
+            .with_width(LayoutSizing::Grow)
+            .with_height(LayoutSizing::Grow)),
+        NodeStyle { ..NodeStyle::default() });
     tree.add_child(root, content_area);
 
     // ── Sidebar ──
-    let sidebar = tree.create(Widget::List { scroll_offset: 0.0 }, UiStyle {
-        direction: Direction::Column,
-        width: Sizing::Fixed(224.0),
-        height: Sizing::Grow(1.0),
-        padding: Edges { top: 4.0, right: 0.0, bottom: 4.0, left: 0.0 },
-        gap: 1.0,
-        overflow: Overflow::Scroll,
-        background: Some(bg_surface),
-        border_color: Some(border),
-        border_width: 1.0,
-        ..UiStyle::default()
-    });
+    let sidebar = tree.create_node(Widget::List { scroll_offset: 0.0 },
+        pug_jetstream::map_layout(&LayoutIntent::new()
+            .with_direction(LayoutDirection::Column)
+            .with_width(LayoutSizing::Fixed(224.0))
+            .with_height(LayoutSizing::Grow)
+            .with_padding(LayoutEdges { top: 4.0, right: 0.0, bottom: 4.0, left: 0.0 })
+            .with_gap(1.0)
+            .with_overflow(pug_layout::LayoutOverflow::Hidden, pug_layout::LayoutOverflow::Scroll)),
+        NodeStyle {
+            background: Some(bg_surface),
+            border_color: Some(border),
+            border_width: 1.0,
+            overflow: Overflow::Scroll,
+            ..NodeStyle::default()
+        });
     tree.add_child(content_area, sidebar);
 
     // Sidebar items
@@ -162,14 +166,14 @@ pub fn build_shell(
 
     // ── Specimen area ──
     // Must be a List widget (not Panel) so that scroll_at() can find it.
-    let content = tree.create(Widget::List { scroll_offset: 0.0 }, UiStyle {
-        direction: Direction::Column,
-        width: Sizing::Grow(1.0),
-        height: Sizing::Grow(1.0),
-        padding: Edges::all(16.0),
-        overflow: Overflow::Scroll,
-        ..UiStyle::default()
-    });
+    let content = tree.create_node(Widget::List { scroll_offset: 0.0 },
+        pug_jetstream::map_layout(&LayoutIntent::new()
+            .with_direction(LayoutDirection::Column)
+            .with_width(LayoutSizing::Grow)
+            .with_height(LayoutSizing::Grow)
+            .with_padding(LayoutEdges::uniform(16.0))
+            .with_overflow(pug_layout::LayoutOverflow::Hidden, pug_layout::LayoutOverflow::Scroll)),
+        NodeStyle { overflow: Overflow::Scroll, ..NodeStyle::default() });
     tree.add_child(content_area, content);
 
     // Build content based on current state (specimen page, catalogue landing, or placeholder)
@@ -268,21 +272,23 @@ fn build_sidebar_button(
     };
     let item_text = if is_active { text_primary } else { text_secondary };
 
-    let item = tree.create(Widget::Button {
+    let item = tree.create_node(Widget::Button {
         label: label.to_string(),
         pressed: false,
         hovered: false,
-    }, UiStyle {
-        direction: Direction::Row,
-        width: Sizing::Grow(1.0),
-        height: Sizing::Fixed(32.0),
-        padding: Edges { top: 0.0, right: 8.0, bottom: 0.0, left: 12.0 },
-        align: Align::Center,
+    },
+    pug_jetstream::map_layout(&LayoutIntent::new()
+        .with_direction(LayoutDirection::Row)
+        .with_width(LayoutSizing::Grow)
+        .with_height(LayoutSizing::Fixed(32.0))
+        .with_padding(LayoutEdges { top: 0.0, right: 8.0, bottom: 0.0, left: 12.0 })
+        .with_alignment(MainAxisAlignment::Start, CrossAxisAlignment::Center)),
+    NodeStyle {
         background: item_bg,
         text_color: Some(item_text),
         text_size: Some(12.0),
         focusable: true,
-        ..UiStyle::default()
+        ..NodeStyle::default()
     });
     tree.add_child(sidebar, item);
     item
@@ -333,18 +339,20 @@ fn build_display_controls(
     let border = theme_bridge::border_subtle(theme);
 
     // Controls bar container
-    let bar = tree.create(Widget::Panel, UiStyle {
-        direction: Direction::Row,
-        width: Sizing::Grow(1.0),
-        height: Sizing::Fixed(56.0),
-        padding: Edges { top: 8.0, right: 16.0, bottom: 8.0, left: 16.0 },
-        gap: 24.0,
-        align: Align::Center,
-        background: Some(bg_surface),
-        border_color: Some(border),
-        border_width: 1.0,
-        ..UiStyle::default()
-    });
+    let bar = tree.create_node(Widget::Panel,
+        pug_jetstream::map_layout(&LayoutIntent::new()
+            .with_direction(LayoutDirection::Row)
+            .with_width(LayoutSizing::Grow)
+            .with_height(LayoutSizing::Fixed(56.0))
+            .with_padding(LayoutEdges { top: 8.0, right: 16.0, bottom: 8.0, left: 16.0 })
+            .with_gap(24.0)
+            .with_alignment(MainAxisAlignment::Start, CrossAxisAlignment::Center)),
+        NodeStyle {
+            background: Some(bg_surface),
+            border_color: Some(border),
+            border_width: 1.0,
+            ..NodeStyle::default()
+        });
     tree.add_child(parent, bar);
 
     // Theme group
@@ -363,31 +371,32 @@ fn build_display_controls(
     let size_buttons = build_toggle_group(tree, bar, "SIZE", &size_labels, size_active, state, theme);
 
     // Separator
-    let sep = tree.create(Widget::Panel, UiStyle {
-        width: Sizing::Fixed(1.0),
-        height: Sizing::Fixed(28.0),
-        background: Some(border),
-        ..UiStyle::default()
-    });
+    let sep = tree.create_node(Widget::Panel,
+        pug_jetstream::map_layout(&LayoutIntent::new()
+            .with_width(LayoutSizing::Fixed(1.0))
+            .with_height(LayoutSizing::Fixed(28.0))),
+        NodeStyle { background: Some(border), ..NodeStyle::default() });
     tree.add_child(bar, sep);
 
     // State probes
-    let probes_group = tree.create(Widget::Panel, UiStyle {
-        direction: Direction::Column, gap: 4.0,
-        ..UiStyle::default()
-    });
+    let probes_group = tree.create_node(Widget::Panel,
+        pug_jetstream::map_layout(&LayoutIntent::new()
+            .with_direction(LayoutDirection::Column)
+            .with_gap(4.0)),
+        NodeStyle { ..NodeStyle::default() });
     tree.add_child(bar, probes_group);
 
-    let probes_label = tree.create(Widget::Label { text: "STATE".to_string() }, UiStyle {
-        text_color: Some(text_secondary), text_size: Some(9.0),
-        ..UiStyle::default()
-    });
+    let probes_label = tree.create_node(Widget::Label { text: "STATE".to_string() },
+        pug_jetstream::map_layout(&LayoutIntent::new()),
+        NodeStyle { text_color: Some(text_secondary), text_size: Some(9.0), ..NodeStyle::default() });
     tree.add_child(probes_group, probes_label);
 
-    let probes_row = tree.create(Widget::Panel, UiStyle {
-        direction: Direction::Row, gap: 12.0, align: Align::Center,
-        ..UiStyle::default()
-    });
+    let probes_row = tree.create_node(Widget::Panel,
+        pug_jetstream::map_layout(&LayoutIntent::new()
+            .with_direction(LayoutDirection::Row)
+            .with_gap(12.0)
+            .with_alignment(MainAxisAlignment::Start, CrossAxisAlignment::Center)),
+        NodeStyle { ..NodeStyle::default() });
     tree.add_child(probes_group, probes_row);
 
     let probe_disabled = build_probe_toggle(tree, probes_row, "disabled", state.disabled, theme);
@@ -413,24 +422,25 @@ fn build_toggle_group(
     let border = theme_bridge::border_subtle(theme);
     let bg_canvas = theme_bridge::canvas_background(theme);
 
-    let group = tree.create(Widget::Panel, UiStyle {
-        direction: Direction::Column, gap: 4.0,
-        ..UiStyle::default()
-    });
+    let group = tree.create_node(Widget::Panel,
+        pug_jetstream::map_layout(&LayoutIntent::new()
+            .with_direction(LayoutDirection::Column)
+            .with_gap(4.0)),
+        NodeStyle { ..NodeStyle::default() });
     tree.add_child(parent, group);
 
     // Eyebrow label
-    let lbl = tree.create(Widget::Label { text: label.to_string() }, UiStyle {
-        text_color: Some(text_secondary), text_size: Some(9.0),
-        ..UiStyle::default()
-    });
+    let lbl = tree.create_node(Widget::Label { text: label.to_string() },
+        pug_jetstream::map_layout(&LayoutIntent::new()),
+        NodeStyle { text_color: Some(text_secondary), text_size: Some(9.0), ..NodeStyle::default() });
     tree.add_child(group, lbl);
 
     // Button row
-    let row = tree.create(Widget::Panel, UiStyle {
-        direction: Direction::Row, gap: 2.0,
-        ..UiStyle::default()
-    });
+    let row = tree.create_node(Widget::Panel,
+        pug_jetstream::map_layout(&LayoutIntent::new()
+            .with_direction(LayoutDirection::Row)
+            .with_gap(2.0)),
+        NodeStyle { ..NodeStyle::default() });
     tree.add_child(group, row);
 
     let mut buttons = Vec::with_capacity(options.len());
@@ -448,23 +458,24 @@ fn build_toggle_group(
         };
         let btn_text = if is_active { text_primary } else { text_secondary };
 
-        let btn = tree.create(Widget::Button {
+        let btn = tree.create_node(Widget::Button {
             label: option.to_string(),
             pressed: false,
             hovered: false,
-        }, UiStyle {
-            height: Sizing::Fixed(26.0),
-            padding: Edges { top: 0.0, right: 8.0, bottom: 0.0, left: 8.0 },
+        },
+        pug_jetstream::map_layout(&LayoutIntent::new()
+            .with_height(LayoutSizing::Fixed(26.0))
+            .with_padding(LayoutEdges { top: 0.0, right: 8.0, bottom: 0.0, left: 8.0 })
+            .with_alignment(MainAxisAlignment::Center, CrossAxisAlignment::Center)),
+        NodeStyle {
             corner_radii: [4.0; 4],
             background: btn_bg,
             border_color: btn_border,
             border_width: 1.0,
             text_color: Some(btn_text),
             text_size: Some(10.0),
-            align: Align::Center,
-            justify: Justify::Center,
             focusable: true,
-            ..UiStyle::default()
+            ..NodeStyle::default()
         });
         tree.add_child(row, btn);
         buttons.push(btn);
@@ -496,23 +507,24 @@ fn build_probe_toggle(
     };
     let btn_border = if checked { Some(accent) } else { Some(border) };
 
-    let btn = tree.create(Widget::Button {
+    let btn = tree.create_node(Widget::Button {
         label: display,
         pressed: false,
         hovered: false,
-    }, UiStyle {
-        height: Sizing::Fixed(24.0),
-        padding: Edges { top: 0.0, right: 8.0, bottom: 0.0, left: 6.0 },
+    },
+    pug_jetstream::map_layout(&LayoutIntent::new()
+        .with_height(LayoutSizing::Fixed(24.0))
+        .with_padding(LayoutEdges { top: 0.0, right: 8.0, bottom: 0.0, left: 6.0 })
+        .with_alignment(MainAxisAlignment::Center, CrossAxisAlignment::Center)),
+    NodeStyle {
         corner_radii: [4.0; 4],
         background: btn_bg,
         border_color: btn_border,
         border_width: 1.0,
         text_color: Some(text_color),
         text_size: Some(10.0),
-        align: Align::Center,
-        justify: Justify::Center,
         focusable: true,
-        ..UiStyle::default()
+        ..NodeStyle::default()
     });
     tree.add_child(parent, btn);
     btn

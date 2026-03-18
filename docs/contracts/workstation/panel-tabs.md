@@ -1,7 +1,7 @@
 # PanelTabs
 
 Status: seed contract
-Updated: 2026-03-11
+Updated: 2026-03-17
 
 ## 1. Purpose
 
@@ -10,9 +10,10 @@ Updated: 2026-03-11
 - Summary: a workstation-specific tab strip for switching, reordering, and
   optionally moving panels within a dock or panel group
 - In scope: active panel selection, reorder posture, close/move affordances via
-  context actions, keyboard focus within dense shell tabs
+  context actions, keyboard focus within dense shell tabs, dock-local panel
+  switching within the window-aware workstation model
 - Out of scope: full dock drop orchestration, panel body rendering, document
-  editor semantics
+  editor semantics, product navigation, command routing, project semantics
 
 ## 2. Anatomy
 
@@ -40,6 +41,7 @@ Updated: 2026-03-11
 | `value` | `string` | none | no | controlled active panel |
 | `defaultValue` | `string` | none | no | uncontrolled initial active panel |
 | `isReorderable` | `boolean` | `true` | no | supports reorder posture |
+| `dockId` | `string \| null` | `null` | no | owning dock identity for multi-dock context |
 | `ariaLabel` | `string \| null` | `null` | no | tab-strip label |
 | `onValueChange` | `(value: string) => void` | none | no | active-panel callback |
 | `onReorder` | `(items: string[]) => void` | none | no | reorder callback |

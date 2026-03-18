@@ -3,7 +3,7 @@
 </script>
 
 <script lang="ts">
-  import { createEventDispatcher, tick } from "svelte";
+  import { createEventDispatcher, onDestroy, tick } from "svelte";
 
   import Icon from "./Icon.svelte";
   import { findNextEnabledIndex, firstEnabledIndex } from "./internal";
@@ -46,6 +46,31 @@
     focusIndex = selectedIndex;
   }
   $: hasPanel = $$slots.default;
+  $: isVertical = orientation === "vertical";
+
+  // ── Tooltip (vertical icon-only mode) ──
+
+  let tooltipIndex: number | null = null;
+  let tooltipTimer: ReturnType<typeof setTimeout> | null = null;
+
+  function scheduleTooltip(index: number): void {
+    clearTooltip();
+    tooltipTimer = setTimeout(() => (tooltipIndex = index), 300);
+  }
+
+  function dismissTooltip(): void {
+    clearTooltip();
+    tooltipIndex = null;
+  }
+
+  function clearTooltip(): void {
+    if (tooltipTimer) {
+      clearTimeout(tooltipTimer);
+      tooltipTimer = null;
+    }
+  }
+
+  onDestroy(() => clearTooltip());
 
   function setValue(nextValue: string): void {
     if (!isControlled) {
@@ -218,6 +243,8 @@
         on:dragleave={handleDragLeave}
         on:drop={(e) => handleDrop(e, index)}
         on:dragend={handleDragEnd}
+        on:mouseenter={() => isVertical && scheduleTooltip(index)}
+        on:mouseleave={() => isVertical && dismissTooltip()}
       >
         <button
           bind:this={tabElements[index]}
@@ -229,9 +256,13 @@
           tabindex={focusIndex === index ? 0 : -1}
           aria-selected={currentValue === item.value ? "true" : "false"}
           aria-controls={hasPanel ? `pug-tabpanel-${tabsId}-${item.value}` : undefined}
-          on:focus={() => (focusIndex = index)}
+          on:focus={() => { focusIndex = index; if (isVertical) scheduleTooltip(index); }}
+          on:blur={() => isVertical && dismissTooltip()}
           on:click={() => setValue(item.value)}
-          on:keydown={(event) => handleKeydown(event, index)}
+          on:keydown={(event) => {
+            if (event.key === "Escape" && isVertical) dismissTooltip();
+            handleKeydown(event, index);
+          }}
         >
           {#if item.icon}
             <Icon name={item.icon} size="sm" />
@@ -248,6 +279,12 @@
           >
             <Icon name="x" size="sm" />
           </button>
+        {/if}
+
+        {#if isVertical && tooltipIndex === index}
+          <span class="pug-tabs__tooltip" data-placement="right" role="tooltip">
+            {item.label}
+          </span>
         {/if}
       </div>
     {/each}
@@ -309,21 +346,33 @@
     border-right: 0.0625rem solid color-mix(in srgb, var(--pug-color-border-subtle) 82%, transparent);
   }
 
-  /* Card + Pill: no wrapping, allow scroll */
+  /* Card + Pill + Strip: no wrapping, allow scroll */
   .pug-tabs[data-variant="card"] .pug-tabs__list,
-  .pug-tabs[data-variant="pill"] .pug-tabs__list {
+  .pug-tabs[data-variant="pill"] .pug-tabs__list,
+  .pug-tabs[data-variant="strip"] .pug-tabs__list {
     flex-wrap: nowrap;
     overflow: auto;
   }
 
   .pug-tabs[data-variant="card"][data-orientation="vertical"] .pug-tabs__list,
-  .pug-tabs[data-variant="pill"][data-orientation="vertical"] .pug-tabs__list {
+  .pug-tabs[data-variant="pill"][data-orientation="vertical"] .pug-tabs__list,
+  .pug-tabs[data-variant="strip"][data-orientation="vertical"] .pug-tabs__list {
     flex-direction: column;
+  }
+
+  /* Strip: full-width cohesive bar */
+  .pug-tabs[data-variant="strip"] .pug-tabs__list {
+    display: flex;
+    gap: 0;
+    padding: 0 var(--pug-space-panel-x, 0.75rem);
+    border-bottom: 0.0625rem solid var(--pug-color-border-subtle);
+    background: color-mix(in srgb, var(--pug-color-background-panel) 92%, transparent);
   }
 
   /* ── Item wrapper (for tab + close) ── */
 
   .pug-tabs__item {
+    position: relative;
     display: inline-flex;
     align-items: center;
     min-width: 0;
@@ -389,6 +438,69 @@
   .pug-tabs[data-variant="card"] .pug-tabs__tab {
     padding: 0 0.5rem;
     color: var(--pug-color-text-primary);
+  }
+
+  /* Strip variant: compact tabs in a bar */
+  .pug-tabs[data-variant="strip"] .pug-tabs__item {
+    border-bottom: 0.125rem solid transparent;
+    margin-bottom: -0.0625rem;
+  }
+
+  .pug-tabs[data-variant="strip"] .pug-tabs__item[data-selected="true"] {
+    border-bottom-color: var(--pug-color-accent-base);
+  }
+
+  .pug-tabs[data-variant="strip"] .pug-tabs__item[data-selected="true"] .pug-tabs__tab {
+    color: var(--pug-color-text-primary);
+  }
+
+  .pug-tabs[data-variant="strip"] .pug-tabs__tab {
+    min-height: 2.25rem;
+    padding: 0 0.625rem;
+    border-radius: 0;
+  }
+
+  .pug-tabs[data-variant="strip"] .pug-tabs__item:hover {
+    background: color-mix(in srgb, var(--pug-color-surface-hover) 50%, transparent);
+  }
+
+  .pug-tabs[data-variant="strip"] .pug-tabs__close {
+    margin-right: 0.25rem;
+  }
+
+  /* Strip vertical: border shifts to right edge, icon-only compact tabs */
+  .pug-tabs[data-variant="strip"][data-orientation="vertical"] .pug-tabs__list {
+    padding: var(--pug-space-panel-y, 0.5rem) 0;
+    border-bottom: 0;
+    border-right: 0.0625rem solid var(--pug-color-border-subtle);
+    overflow: visible;
+  }
+
+  .pug-tabs[data-variant="strip"][data-orientation="vertical"] .pug-tabs__item {
+    border-bottom: 0;
+    border-right: 0.125rem solid transparent;
+    margin-bottom: 0;
+    margin-right: -0.0625rem;
+  }
+
+  .pug-tabs[data-variant="strip"][data-orientation="vertical"] .pug-tabs__item[data-selected="true"] {
+    border-right-color: var(--pug-color-accent-base);
+  }
+
+  .pug-tabs[data-variant="strip"][data-orientation="vertical"] .pug-tabs__tab {
+    justify-content: center;
+    min-height: 0;
+    min-width: 2.25rem;
+    padding: 0.5rem;
+  }
+
+  /* Vertical orientation: collapse to icon-only, hide label + close */
+  .pug-tabs[data-orientation="vertical"] .pug-tabs__label {
+    display: none;
+  }
+
+  .pug-tabs[data-orientation="vertical"] .pug-tabs__close {
+    display: none;
   }
 
   /* Pill variant: track container around group */
@@ -463,6 +575,30 @@
     display: inline-flex;
     align-items: center;
     margin-left: auto;
+  }
+
+  /* ── Tooltip (vertical icon-only mode) ── */
+
+  .pug-tabs__tooltip {
+    position: absolute;
+    z-index: var(--pug-overlay-z-menu);
+    max-width: 16rem;
+    padding: 0.375rem 0.5rem;
+    border: 0.0625rem solid color-mix(in srgb, var(--pug-color-border-default) 72%, transparent);
+    border-radius: calc(var(--pug-radius-control) - 0.125rem);
+    background: color-mix(in srgb, var(--pug-color-background-elevated) 98%, var(--pug-color-background-panel));
+    box-shadow: var(--pug-elevation-overlay);
+    color: var(--pug-color-text-primary);
+    font-size: 0.6875rem;
+    line-height: 1.35;
+    white-space: nowrap;
+    pointer-events: none;
+  }
+
+  .pug-tabs__tooltip[data-placement="right"] {
+    top: 50%;
+    left: calc(100% + 0.375rem);
+    transform: translateY(-50%);
   }
 
   /* ── Panel ── */

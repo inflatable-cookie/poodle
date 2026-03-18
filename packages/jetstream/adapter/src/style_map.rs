@@ -1,23 +1,15 @@
 //! Style mapping from Pug's StyleDescriptor to Jetstream-compatible types.
 //!
-//! Jetstream's UiStyle supports:
-//! - Flexbox layout (direction, gap, align, justify)
-//! - Fixed, grow, and constrained sizing (min/max)
-//! - Padding and margin (Edges)
-//! - Background color, border color, border width, corner radius
-//! - Opacity, visibility, disabled state
-//! - Vertical and horizontal scrolling with clipping
-//! - Box shadows (single)
-//! - 2D transforms (translate, rotate, scale) — applied post-layout
-//! - Z-index stacking
-//! - Absolute positioning with insets
+//! Produces a split output matching Jetstream's `create_node()` API:
+//! - `taffy::Style` for layout (flexbox direction, sizing, alignment, padding,
+//!   margin, gap, position, overflow, insets, min/max constraints)
+//! - `JetstreamVisuals` for non-layout visual properties (background, border,
+//!   corner radius, opacity, shadow, text, transforms, focus ring)
 //!
-//! Limitations vs GPUI/CSS:
-//! - No CSS Grid (emulated with nested row/column panels)
-//! - Solid colors only (gradients supported but limited to 2 stops)
-//! - Single box shadow per node
-//! - No momentum or snap scrolling
+//! This eliminates the intermediate `JetstreamStyle` struct that previously
+//! mirrored UiStyle — the adapter now speaks Taffy directly.
 
+use glam::Vec4;
 use pug_layout::{
     CrossAxisAlignment, LayoutDirection, LayoutIntent, LayoutSizing, MainAxisAlignment,
 };
@@ -39,6 +31,13 @@ impl From<pug_tokens::typed::ColorValue> for JetstreamColor {
     }
 }
 
+impl JetstreamColor {
+    /// Convert to a glam Vec4 for use with Jetstream's NodeStyle.
+    pub fn to_vec4(self) -> Vec4 {
+        Vec4::new(self.0, self.1, self.2, self.3)
+    }
+}
+
 /// Jetstream-compatible edges (top, right, bottom, left in pixels).
 #[derive(Debug, Clone, Copy, PartialEq, Default)]
 pub struct JetstreamEdges {
@@ -48,143 +47,53 @@ pub struct JetstreamEdges {
     pub left: f32,
 }
 
-/// Jetstream flexbox direction.
-#[derive(Debug, Clone, Copy, PartialEq)]
-pub enum JetstreamDirection {
-    Row,
-    Column,
-}
-
-/// Jetstream sizing mode.
-#[derive(Debug, Clone, Copy, PartialEq)]
-pub enum JetstreamSizing {
-    Fixed(f32),
-    Grow,
-    Fit,
-}
-
-/// Jetstream main axis alignment.
-#[derive(Debug, Clone, Copy, PartialEq)]
-pub enum JetstreamJustify {
-    Start,
-    Center,
-    End,
-    SpaceBetween,
-}
-
-/// Jetstream cross axis alignment.
-#[derive(Debug, Clone, Copy, PartialEq)]
-pub enum JetstreamAlign {
-    Start,
-    Center,
-    End,
-    Stretch,
-}
-
-/// Jetstream positioning mode.
-#[derive(Debug, Clone, Copy, PartialEq, Default)]
-pub enum JetstreamPosition {
-    /// Normal flow (participates in flexbox layout).
-    #[default]
-    Relative,
-    /// Removed from flow; positioned via inset fields.
-    Absolute,
-}
-
-/// Jetstream overflow behavior.
-#[derive(Debug, Clone, Copy, PartialEq, Default)]
-pub enum JetstreamOverflow {
-    /// Children are not clipped.
-    #[default]
-    Visible,
-    /// Children are clipped to the container's bounds.
-    Hidden,
-    /// Children are clipped and the container scrolls.
-    Scroll,
-}
-
 /// Jetstream box shadow.
 #[derive(Debug, Clone, Copy, PartialEq)]
 pub struct JetstreamBoxShadow {
     pub offset_x: f32,
     pub offset_y: f32,
     pub blur: f32,
+    pub spread: f32,
     pub color: JetstreamColor,
 }
 
-/// Complete Jetstream style — maps to UiStyle fields.
+/// Visual (non-layout) properties for a Jetstream UI node.
+///
+/// Maps 1:1 to `NodeStyle` fields in `jetstream-runtime`. The integration
+/// layer (preview app) converts this to `NodeStyle` with a trivial mapping.
 #[derive(Debug, Clone, PartialEq)]
-pub struct JetstreamStyle {
-    // Layout
-    pub direction: JetstreamDirection,
-    pub width: JetstreamSizing,
-    pub height: JetstreamSizing,
-    pub min_width: f32,
-    pub min_height: f32,
-    pub max_width: f32,
-    pub max_height: f32,
-    pub justify: JetstreamJustify,
-    pub align: JetstreamAlign,
-    pub gap: f32,
-    pub padding: JetstreamEdges,
-    pub margin: JetstreamEdges,
-
-    // Positioning
-    pub position: JetstreamPosition,
-    pub inset_top: Option<f32>,
-    pub inset_right: Option<f32>,
-    pub inset_bottom: Option<f32>,
-    pub inset_left: Option<f32>,
-    pub z_index: i32,
-
-    // Visual
+pub struct JetstreamVisuals {
+    // Colors
     pub background: Option<JetstreamColor>,
     pub text_color: Option<JetstreamColor>,
     pub icon_color: Option<JetstreamColor>,
     pub text_size: Option<f32>,
+
+    // Border
     pub border_color: Option<JetstreamColor>,
     pub border_width: f32,
     pub corner_radii: [f32; 4],
+
+    // Effects
     pub opacity: f32,
     pub visible: bool,
     pub disabled: bool,
-    pub clip_overflow: bool,
-    pub overflow: JetstreamOverflow,
-
-    // Shadow
     pub shadow: Option<JetstreamBoxShadow>,
+    pub z_index: i32,
 
     // Focus
     pub focus_ring_color: Option<JetstreamColor>,
     pub focus_ring_width: f32,
 
-    // Transform (applied post-layout, does not affect flexbox)
+    // Transform (applied post-layout)
     pub transform_translate: [f32; 2],
     pub transform_rotate: f32,
     pub transform_scale: [f32; 2],
 }
 
-impl Default for JetstreamStyle {
+impl Default for JetstreamVisuals {
     fn default() -> Self {
         Self {
-            direction: JetstreamDirection::Column,
-            width: JetstreamSizing::Fit,
-            height: JetstreamSizing::Fit,
-            min_width: 0.0,
-            min_height: 0.0,
-            max_width: f32::INFINITY,
-            max_height: f32::INFINITY,
-            justify: JetstreamJustify::Start,
-            align: JetstreamAlign::Start,
-            gap: 0.0,
-            padding: JetstreamEdges::default(),
-            margin: JetstreamEdges::default(),
-            position: JetstreamPosition::Relative,
-            inset_top: None,
-            inset_right: None,
-            inset_bottom: None,
-            inset_left: None,
-            z_index: 0,
             background: None,
             text_color: None,
             icon_color: None,
@@ -195,9 +104,8 @@ impl Default for JetstreamStyle {
             opacity: 1.0,
             visible: true,
             disabled: false,
-            clip_overflow: false,
-            overflow: JetstreamOverflow::Visible,
             shadow: None,
+            z_index: 0,
             focus_ring_color: None,
             focus_ring_width: 0.0,
             transform_translate: [0.0, 0.0],
@@ -207,107 +115,244 @@ impl Default for JetstreamStyle {
     }
 }
 
-/// Map a `LayoutIntent` to Jetstream layout properties.
-pub fn map_layout(intent: &LayoutIntent) -> JetstreamStyle {
-    let mut style = JetstreamStyle::default();
-
-    style.direction = match intent.direction {
-        LayoutDirection::Row => JetstreamDirection::Row,
-        LayoutDirection::Column => JetstreamDirection::Column,
-    };
-
-    let (sizing, min_w, max_w) = map_sizing(&intent.width);
-    style.width = sizing;
-    style.min_width = min_w;
-    style.max_width = max_w;
-
-    let (sizing, min_h, max_h) = map_sizing(&intent.height);
-    style.height = sizing;
-    style.min_height = min_h;
-    style.max_height = max_h;
-
-    style.justify = match intent.alignment.main {
-        MainAxisAlignment::Start => JetstreamJustify::Start,
-        MainAxisAlignment::Center => JetstreamJustify::Center,
-        MainAxisAlignment::End => JetstreamJustify::End,
-        MainAxisAlignment::SpaceBetween => JetstreamJustify::SpaceBetween,
-    };
-
-    style.align = match intent.alignment.cross {
-        CrossAxisAlignment::Start => JetstreamAlign::Start,
-        CrossAxisAlignment::Center => JetstreamAlign::Center,
-        CrossAxisAlignment::End => JetstreamAlign::End,
-        CrossAxisAlignment::Stretch => JetstreamAlign::Stretch,
-    };
-
-    style.gap = intent.spacing.gap;
-    style.padding = JetstreamEdges {
-        top: intent.spacing.padding.top,
-        right: intent.spacing.padding.right,
-        bottom: intent.spacing.padding.bottom,
-        left: intent.spacing.padding.left,
-    };
-
-    style
+/// Complete mapped output — a taffy layout style + visual properties.
+///
+/// Produced by `map_style()` and consumed by the preview app to create
+/// `UiNode` instances via `tree.create_node(widget, style.layout, style.visuals.into())`.
+#[derive(Debug, Clone)]
+pub struct JetstreamMappedStyle {
+    pub layout: taffy::Style,
+    pub visuals: JetstreamVisuals,
 }
 
-/// Map a `LayoutSizing` to a sizing mode plus min/max constraints.
-fn map_sizing(sizing: &LayoutSizing) -> (JetstreamSizing, f32, f32) {
-    match sizing {
-        LayoutSizing::Fixed(v) => (JetstreamSizing::Fixed(*v), 0.0, f32::INFINITY),
-        LayoutSizing::Grow => (JetstreamSizing::Grow, 0.0, f32::INFINITY),
-        LayoutSizing::Fit => (JetstreamSizing::Fit, 0.0, f32::INFINITY),
-        LayoutSizing::Constrained { min, max } => {
-            let lo = min.unwrap_or(0.0);
-            let hi = max.unwrap_or(f32::INFINITY);
-            // Use Grow within the constraints, allowing the layout engine to
-            // apply min/max clamping. This replaces the previous midpoint hack.
-            (JetstreamSizing::Grow, lo, hi)
+impl Default for JetstreamMappedStyle {
+    fn default() -> Self {
+        Self {
+            layout: taffy::Style {
+                display: taffy::Display::Flex,
+                flex_direction: taffy::FlexDirection::Column,
+                ..Default::default()
+            },
+            visuals: JetstreamVisuals::default(),
         }
     }
 }
 
-/// Convert a complete `StyleDescriptor` to a `JetstreamStyle`.
-pub fn map_style(desc: &StyleDescriptor) -> JetstreamStyle {
-    let mut style = map_layout(&desc.layout);
+// ── Layout mapping ──
+
+/// Map a `LayoutIntent` directly to a `taffy::Style`.
+///
+/// This is the core translation from Pug's layout abstraction to the same
+/// flexbox engine that GPUI uses internally. No intermediate enum layer.
+pub fn map_layout(intent: &LayoutIntent) -> taffy::Style {
+    use taffy::style::{
+        AlignItems, Dimension, FlexDirection, JustifyContent, LengthPercentage,
+        LengthPercentageAuto,
+    };
+
+    let flex_direction = match intent.direction {
+        LayoutDirection::Row => FlexDirection::Row,
+        LayoutDirection::Column => FlexDirection::Column,
+    };
+
+    let (width, min_width, max_width, width_grow, width_shrink) = map_sizing(&intent.width);
+    let (height, min_height, max_height, height_grow, height_shrink) = map_sizing(&intent.height);
+
+    // flex_grow applies to the parent's main axis, but we don't know the
+    // parent direction at this point. We use flex_grow only when BOTH axes
+    // want to grow (Grow×Grow), because:
+    //
+    // - Fixed×Grow (e.g. sidebar): flex_grow=0 prevents the fixed-width node
+    //   from expanding horizontally in a Row parent. align_self:Stretch
+    //   handles the Grow axis (cross axis).
+    // - Grow×Fixed (e.g. tab bar): flex_grow=0 prevents the fixed-height node
+    //   from expanding vertically in a Column parent.
+    // - Grow×Fit (e.g. hero header): flex_grow=0 prevents content-hugging
+    //   nodes from expanding on the main axis.
+    // - Grow×Grow (e.g. content area): flex_grow=1 fills remaining space on
+    //   whichever axis is the parent's main axis.
+    let flex_grow = if width_grow > 0.0 && height_grow > 0.0 {
+        width_grow.max(height_grow)
+    } else {
+        0.0
+    };
+    let flex_shrink = if width_shrink == 0.0 || height_shrink == 0.0 {
+        0.0
+    } else {
+        1.0
+    };
+
+    // If either axis explicitly wants Grow, set align_self to Stretch
+    // so the cross axis fills the parent.
+    let align_self = if matches!(intent.width, LayoutSizing::Grow)
+        || matches!(intent.height, LayoutSizing::Grow)
+    {
+        Some(taffy::style::AlignSelf::Stretch)
+    } else {
+        None
+    };
+
+    let justify_content = match intent.alignment.main {
+        MainAxisAlignment::Start => Some(JustifyContent::FlexStart),
+        MainAxisAlignment::Center => Some(JustifyContent::Center),
+        MainAxisAlignment::End => Some(JustifyContent::FlexEnd),
+        MainAxisAlignment::SpaceBetween => Some(JustifyContent::SpaceBetween),
+    };
+
+    let align_items = match intent.alignment.cross {
+        CrossAxisAlignment::Start => Some(AlignItems::FlexStart),
+        CrossAxisAlignment::Center => Some(AlignItems::Center),
+        CrossAxisAlignment::End => Some(AlignItems::FlexEnd),
+        CrossAxisAlignment::Stretch => Some(AlignItems::Stretch),
+    };
+
+    let lp = |v: f32| -> LengthPercentage { LengthPercentage::length(v) };
+
+    let map_overflow = |o: pug_layout::LayoutOverflow| -> taffy::Overflow {
+        match o {
+            pug_layout::LayoutOverflow::Visible => taffy::Overflow::Visible,
+            pug_layout::LayoutOverflow::Hidden => taffy::Overflow::Hidden,
+            pug_layout::LayoutOverflow::Scroll => taffy::Overflow::Scroll,
+        }
+    };
+    let overflow_x = map_overflow(intent.overflow_x);
+    let overflow_y = map_overflow(intent.overflow_y);
+
+    taffy::Style {
+        display: taffy::Display::Flex,
+        flex_direction,
+        flex_grow,
+        flex_shrink,
+        flex_basis: Dimension::auto(),
+        size: taffy::Size { width, height },
+        min_size: taffy::Size { width: min_width, height: min_height },
+        max_size: taffy::Size { width: max_width, height: max_height },
+        align_items,
+        align_self,
+        justify_content,
+        gap: taffy::Size {
+            width: lp(intent.spacing.gap),
+            height: lp(intent.spacing.gap),
+        },
+        padding: taffy::Rect {
+            left: lp(intent.spacing.padding.left),
+            right: lp(intent.spacing.padding.right),
+            top: lp(intent.spacing.padding.top),
+            bottom: lp(intent.spacing.padding.bottom),
+        },
+        margin: taffy::Rect {
+            left: LengthPercentageAuto::length(intent.spacing.margin.left),
+            right: LengthPercentageAuto::length(intent.spacing.margin.right),
+            top: LengthPercentageAuto::length(intent.spacing.margin.top),
+            bottom: LengthPercentageAuto::length(intent.spacing.margin.bottom),
+        },
+        overflow: taffy::Point {
+            x: overflow_x,
+            y: overflow_y,
+        },
+        ..Default::default()
+    }
+}
+
+/// Map a `LayoutSizing` to (dimension, min, max, flex_grow, flex_shrink).
+fn map_sizing(sizing: &LayoutSizing) -> (taffy::Dimension, taffy::Dimension, taffy::Dimension, f32, f32) {
+    use taffy::Dimension;
+
+    match sizing {
+        LayoutSizing::Fixed(v) => (
+            Dimension::length(*v),
+            Dimension::auto(),
+            Dimension::auto(),
+            0.0,
+            0.0, // Fixed items don't shrink
+        ),
+        LayoutSizing::Grow => (
+            Dimension::auto(),
+            Dimension::length(0.0), // min=0 allows shrinking below content (critical for scroll)
+            Dimension::auto(),
+            1.0,
+            1.0,
+        ),
+        LayoutSizing::Fit => (
+            Dimension::auto(),
+            Dimension::length(0.0), // min=0 allows parent-constrained shrinking
+            Dimension::auto(),
+            0.0,
+            1.0,
+        ),
+        LayoutSizing::Constrained { min, max } => {
+            let min_d = match min {
+                Some(v) if *v > 0.0 => Dimension::length(*v),
+                _ => Dimension::auto(),
+            };
+            let max_d = match max {
+                Some(v) if *v < f32::INFINITY => Dimension::length(*v),
+                _ => Dimension::auto(),
+            };
+            (
+                Dimension::auto(),
+                min_d,
+                max_d,
+                1.0, // Constrained → grow to fill within bounds
+                1.0,
+            )
+        }
+    }
+}
+
+// ── Full style mapping ──
+
+/// Convert a complete `StyleDescriptor` to a `JetstreamMappedStyle`.
+///
+/// Produces a `taffy::Style` for layout and `JetstreamVisuals` for visual
+/// properties, ready to feed into `UiTree::create_node()`.
+pub fn map_style(desc: &StyleDescriptor) -> JetstreamMappedStyle {
+    let layout = map_layout(&desc.layout);
+    let mut visuals = JetstreamVisuals::default();
 
     // Colors
-    style.background = desc.background.map(JetstreamColor::from);
-    style.text_color = desc.text_color.map(JetstreamColor::from);
-    style.icon_color = desc.icon_color.map(JetstreamColor::from);
+    visuals.background = desc.background.map(JetstreamColor::from);
+    visuals.text_color = desc.text_color.map(JetstreamColor::from);
+    visuals.icon_color = desc.icon_color.map(JetstreamColor::from);
 
     // Typography
     if let Some(ref typo) = desc.typography {
-        style.text_size = Some(typo.size);
+        visuals.text_size = Some(typo.size);
     }
 
     // Border
     let border = &desc.border;
     if border.width > 0.0 {
-        style.border_color = Some(JetstreamColor::from(border.color));
-        style.border_width = border.width;
+        visuals.border_color = Some(JetstreamColor::from(border.color));
+        visuals.border_width = border.width;
     }
-    style.corner_radii = [desc.corner_radii.top_left, desc.corner_radii.top_right, desc.corner_radii.bottom_right, desc.corner_radii.bottom_left];
+    visuals.corner_radii = [
+        desc.corner_radii.top_left,
+        desc.corner_radii.top_right,
+        desc.corner_radii.bottom_right,
+        desc.corner_radii.bottom_left,
+    ];
 
     // Shadow
     if let Some(ref shadow) = desc.shadow {
-        style.shadow = Some(JetstreamBoxShadow {
+        visuals.shadow = Some(JetstreamBoxShadow {
             offset_x: shadow.offset_x,
             offset_y: shadow.offset_y,
             blur: shadow.blur,
+            spread: 0.0,
             color: JetstreamColor::from(shadow.color),
         });
     }
 
     // Opacity and visibility
-    style.opacity = desc.opacity;
-    style.visible = desc.visible;
+    visuals.opacity = desc.opacity;
+    visuals.visible = desc.visible;
 
     // Focus ring
-    style.focus_ring_color = desc.focus_ring_color.map(JetstreamColor::from);
-    style.focus_ring_width = desc.focus_ring_width;
+    visuals.focus_ring_color = desc.focus_ring_color.map(JetstreamColor::from);
+    visuals.focus_ring_width = desc.focus_ring_width;
 
-    style
+    JetstreamMappedStyle { layout, visuals }
 }
 
 #[cfg(test)]
@@ -318,8 +363,14 @@ mod tests {
     #[test]
     fn map_layout_produces_correct_direction() {
         let intent = LayoutIntent::new().with_direction(LayoutDirection::Row);
-        let style = map_layout(&intent);
-        assert_eq!(style.direction, JetstreamDirection::Row);
+        let layout = map_layout(&intent);
+        assert_eq!(layout.flex_direction, taffy::FlexDirection::Row);
+    }
+
+    #[test]
+    fn map_layout_produces_column_by_default() {
+        let layout = map_layout(&LayoutIntent::default());
+        assert_eq!(layout.flex_direction, taffy::FlexDirection::Column);
     }
 
     #[test]
@@ -327,38 +378,69 @@ mod tests {
         let intent = LayoutIntent::default()
             .with_width(LayoutSizing::Fixed(200.0))
             .with_height(LayoutSizing::Fixed(100.0));
-        let style = map_layout(&intent);
-        assert_eq!(style.width, JetstreamSizing::Fixed(200.0));
-        assert_eq!(style.height, JetstreamSizing::Fixed(100.0));
+        let layout = map_layout(&intent);
+        assert_eq!(layout.size.width, taffy::Dimension::length(200.0));
+        assert_eq!(layout.size.height, taffy::Dimension::length(100.0));
+        // Fixed items should not grow or shrink
+        assert_eq!(layout.flex_grow, 0.0);
+        assert_eq!(layout.flex_shrink, 0.0);
+    }
+
+    #[test]
+    fn map_layout_handles_grow_sizing() {
+        // Grow×Fixed: flex_grow is 0 (only one axis grows — rely on
+        // align_self:Stretch for the cross axis).
+        let intent = LayoutIntent::default()
+            .with_width(LayoutSizing::Grow)
+            .with_height(LayoutSizing::Fixed(32.0));
+        let layout = map_layout(&intent);
+        assert_eq!(layout.size.width, taffy::Dimension::auto());
+        assert_eq!(layout.size.height, taffy::Dimension::length(32.0));
+        assert_eq!(layout.flex_grow, 0.0);
+        assert_eq!(layout.align_self, Some(taffy::style::AlignSelf::Stretch));
+
+        // Grow×Grow: flex_grow is positive — fills both main and cross axes.
+        let intent_both = LayoutIntent::default()
+            .with_width(LayoutSizing::Grow)
+            .with_height(LayoutSizing::Grow);
+        let layout_both = map_layout(&intent_both);
+        assert!(layout_both.flex_grow > 0.0);
     }
 
     #[test]
     fn map_layout_handles_constrained_sizing() {
         let intent = LayoutIntent::default()
             .with_width(LayoutSizing::Constrained { min: Some(100.0), max: Some(300.0) });
-        let style = map_layout(&intent);
-        assert_eq!(style.width, JetstreamSizing::Grow);
-        assert_eq!(style.min_width, 100.0);
-        assert_eq!(style.max_width, 300.0);
+        let layout = map_layout(&intent);
+        assert_eq!(layout.min_size.width, taffy::Dimension::length(100.0));
+        assert_eq!(layout.max_size.width, taffy::Dimension::length(300.0));
+        // Constrained×Fit: flex_grow=0 (only one axis grows); min/max constrain.
+        assert_eq!(layout.flex_grow, 0.0);
     }
 
     #[test]
     fn map_layout_maps_alignment() {
         let intent = LayoutIntent::default()
             .with_alignment(MainAxisAlignment::Center, CrossAxisAlignment::Stretch);
-        let style = map_layout(&intent);
-        assert_eq!(style.justify, JetstreamJustify::Center);
-        assert_eq!(style.align, JetstreamAlign::Stretch);
+        let layout = map_layout(&intent);
+        assert_eq!(layout.justify_content, Some(taffy::JustifyContent::Center));
+        assert_eq!(layout.align_items, Some(taffy::AlignItems::Stretch));
     }
 
     #[test]
-    fn map_layout_maps_spacing() {
+    fn map_layout_maps_gap() {
+        let intent = LayoutIntent::default().with_gap(8.0);
+        let layout = map_layout(&intent);
+        assert_eq!(layout.gap.width, taffy::LengthPercentage::length(8.0));
+    }
+
+    #[test]
+    fn map_layout_maps_padding() {
         let intent = LayoutIntent::default()
-            .with_gap(8.0)
             .with_padding(LayoutEdges::uniform(4.0));
-        let style = map_layout(&intent);
-        assert_eq!(style.gap, 8.0);
-        assert_eq!(style.padding.top, 4.0);
+        let layout = map_layout(&intent);
+        assert_eq!(layout.padding.left, taffy::LengthPercentage::length(4.0));
+        assert_eq!(layout.padding.top, taffy::LengthPercentage::length(4.0));
     }
 
     #[test]
@@ -368,11 +450,11 @@ mod tests {
             .with_border(2.0, pug_tokens::typed::ColorValue(0.5, 0.5, 0.5, 1.0))
             .with_corner_radii(pug_style::CornerRadii::uniform(4.0))
             .with_opacity(0.8);
-        let style = map_style(&desc);
-        assert_eq!(style.background, Some(JetstreamColor(0.1, 0.2, 0.3, 1.0)));
-        assert_eq!(style.border_width, 2.0);
-        assert_eq!(style.corner_radii, [4.0; 4]);
-        assert!((style.opacity - 0.8).abs() < 0.001);
+        let mapped = map_style(&desc);
+        assert_eq!(mapped.visuals.background, Some(JetstreamColor(0.1, 0.2, 0.3, 1.0)));
+        assert_eq!(mapped.visuals.border_width, 2.0);
+        assert_eq!(mapped.visuals.corner_radii, [4.0; 4]);
+        assert!((mapped.visuals.opacity - 0.8).abs() < 0.001);
     }
 
     #[test]
@@ -384,9 +466,9 @@ mod tests {
                 blur: 4.0,
                 color: pug_tokens::typed::ColorValue(0.0, 0.0, 0.0, 0.25),
             });
-        let style = map_style(&desc);
-        assert!(style.shadow.is_some());
-        let shadow = style.shadow.unwrap();
+        let mapped = map_style(&desc);
+        assert!(mapped.visuals.shadow.is_some());
+        let shadow = mapped.visuals.shadow.unwrap();
         assert_eq!(shadow.offset_y, 2.0);
         assert_eq!(shadow.blur, 4.0);
     }
@@ -400,31 +482,29 @@ mod tests {
                 line_height: 24.0,
                 weight: 600,
             });
-        let style = map_style(&desc);
-        assert_eq!(style.text_size, Some(16.0));
+        let mapped = map_style(&desc);
+        assert_eq!(mapped.visuals.text_size, Some(16.0));
     }
 
     #[test]
-    fn default_style_is_visible_and_opaque() {
-        let style = JetstreamStyle::default();
-        assert!(style.visible);
-        assert_eq!(style.opacity, 1.0);
-        assert_eq!(style.z_index, 0);
-        assert_eq!(style.position, JetstreamPosition::Relative);
-        assert_eq!(style.transform_translate, [0.0, 0.0]);
-        assert_eq!(style.transform_scale, [1.0, 1.0]);
-        assert_eq!(style.transform_rotate, 0.0);
-        assert_eq!(style.min_width, 0.0);
-        assert_eq!(style.max_width, f32::INFINITY);
+    fn default_visuals_are_visible_and_opaque() {
+        let v = JetstreamVisuals::default();
+        assert!(v.visible);
+        assert_eq!(v.opacity, 1.0);
+        assert_eq!(v.z_index, 0);
+        assert_eq!(v.transform_translate, [0.0, 0.0]);
+        assert_eq!(v.transform_scale, [1.0, 1.0]);
+        assert_eq!(v.transform_rotate, 0.0);
     }
 
     #[test]
-    fn constrained_sizing_uses_grow_with_bounds() {
+    fn constrained_sizing_uses_min_max() {
         let intent = LayoutIntent::default()
             .with_width(LayoutSizing::Constrained { min: Some(50.0), max: None });
-        let style = map_layout(&intent);
-        assert_eq!(style.width, JetstreamSizing::Grow);
-        assert_eq!(style.min_width, 50.0);
-        assert_eq!(style.max_width, f32::INFINITY);
+        let layout = map_layout(&intent);
+        assert_eq!(layout.min_size.width, taffy::Dimension::length(50.0));
+        assert_eq!(layout.max_size.width, taffy::Dimension::auto());
+        // Constrained×Fit: flex_grow=0, relies on stretch + min/max constraints.
+        assert_eq!(layout.flex_grow, 0.0);
     }
 }

@@ -127,7 +127,7 @@
     that looks and works identically to the Svelte version
 
 - `g10`
-  - Status: planned
+  - Status: completed
   - Range: `001` to `016`
   - Notes: Jetstream first-class component build-out, preview app, and visual
     fidelity; `g10.001` preview app scaffold and navigation shell, `g10.002`
@@ -140,10 +140,45 @@
     documentation, `g10.014` cross-runtime parity report refresh, `g10.015`
     accessibility and input model verification (keyboard + gamepad), and
     `g10.016` generation closeout; goal is Jetstream preview app with full
-    component coverage and visual fidelity matching Svelte and GPUI; can run
-    in parallel with `g09` after `g08` completes
+    component coverage and visual fidelity matching Svelte and GPUI
+
+- `g11`
+  - Status: completed
+  - Range: `001` to `013`
+  - Notes: workstation contracts and Svelte implementation; `g11.001` audits
+    downstream workstation pressure and freezes the generalized target shape,
+    `g11.002` through `g11.009` define workstation contracts (window hosts,
+    region grammar, strip rails, resize/collapse, docks, tabs, panel variants,
+    hosted surfaces) with formal contract files in `docs/contracts/workstation/`,
+    `g11.010` and `g11.011` implement the new surface in Svelte, `g11.012`
+    refreshes docs/specimens and performs downstream adoption proof, and
+    `g11.013` closes the generation; GPUI and Jetstream implementations are
+    deferred to `g12` and `g13` respectively
+
+- `g12`
+  - Status: planned
+  - Range: `001` to `007`
+  - Notes: GPUI workstation parity; `g12.001` audits g11 contracts against
+    current GPUI surface, `g12.002` and `g12.003` implement workstation
+    substrate in GPUI (windows/regions/strips then docks/tabs/panels/hosted
+    surfaces), `g12.004` adds GPUI preview specimens and demo coverage,
+    `g12.005` produces Svelte/GPUI parity evidence and delta register,
+    `g12.006` performs downstream adoption proof against Loophole Spark, and
+    `g12.007` closes the generation
+
+- `g13`
+  - Status: planned
+  - Range: `001` to `007`
+  - Notes: Jetstream workstation parity; `g13.001` audits g11 contracts
+    against Jetstream rendering constraints, `g13.002` and `g13.003` implement
+    feasible workstation substrate in Jetstream, `g13.004` adds preview
+    specimens and demo coverage, `g13.005` produces cross-runtime parity
+    evidence (Svelte/GPUI/Jetstream), `g13.006` updates the delta register
+    with native adaptations and exclusions, and `g13.007` closes the
+    generation
 
 ## Next Task
 
-Open `g10.001` and begin the Jetstream preview app scaffold and navigation
-shell. `g10` can proceed now that both `g08` and `g09` are complete.
+Open `g11.001` and begin the downstream workstation gap audit and generalized
+target-shape freeze. Keep the generation focused on generalized workstation
+substrate work rather than downstream app semantics.

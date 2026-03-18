@@ -12,46 +12,46 @@ use crate::{JetstreamAdapter, JetstreamNodeHandle, JetstreamTarget, WidgetKind};
 impl RenderComponent<ButtonSpec> for JetstreamAdapter {
     type Target = JetstreamTarget;
     fn render(&self, spec: &ButtonSpec, style: &StyleDescriptor, theme: &dyn ThemeProvider) -> JetstreamNodeHandle {
-        let mut js_style = map_style(style);
+        let mut mapped = map_style(style);
 
         // Resolve fill (background) color from variant
         let fill_color = theme.resolve_color(spec.resolved_fill_token());
-        js_style.background = Some(JetstreamColor::from(fill_color));
+        mapped.visuals.background = Some(JetstreamColor::from(fill_color));
 
         // Resolve text color from variant
         let text_color = theme.resolve_color(spec.resolved_text_token());
-        js_style.text_color = Some(JetstreamColor::from(text_color));
+        mapped.visuals.text_color = Some(JetstreamColor::from(text_color));
 
         // Resolve border color from variant
         let border_color = theme.resolve_color(spec.resolved_border_token());
-        js_style.border_color = Some(JetstreamColor::from(border_color));
+        mapped.visuals.border_color = Some(JetstreamColor::from(border_color));
 
         // Resolve corner radius
         let r = theme.resolve_radius(spec.radius_token());
-        js_style.corner_radii = [r; 4];
+        mapped.visuals.corner_radii = [r; 4];
 
         // Resolve focus ring
         let ring_color = theme.resolve_color(spec.focus_ring_color_token());
-        js_style.focus_ring_color = Some(JetstreamColor::from(ring_color));
-        js_style.focus_ring_width = theme.resolve_space(spec.focus_ring_width_token());
+        mapped.visuals.focus_ring_color = Some(JetstreamColor::from(ring_color));
+        mapped.visuals.focus_ring_width = theme.resolve_space(spec.focus_ring_width_token());
 
         // Handle disabled state
         if spec.is_disabled {
-            js_style.opacity = theme.resolve_opacity(spec.disabled_opacity_token());
+            mapped.visuals.opacity = theme.resolve_opacity(spec.disabled_opacity_token());
         }
 
         let node_id = match &spec.label {
             Some(label) if !label.is_empty() => format!("button-{}", label),
             _ => "button".to_string(),
         };
-        JetstreamNodeHandle::new(node_id, "ButtonSpec", WidgetKind::Button)
+        JetstreamNodeHandle::new(node_id, "ButtonSpec", WidgetKind::Button, mapped)
     }
 }
 
 impl RenderComponent<IconButtonSpec> for JetstreamAdapter {
     type Target = JetstreamTarget;
     fn render(&self, spec: &IconButtonSpec, style: &StyleDescriptor, theme: &dyn ThemeProvider) -> JetstreamNodeHandle {
-        let js_style = map_style(style);
+        let mapped = map_style(style);
 
         // Resolve icon size token (used for width/height constraints)
         let _icon_size = theme.resolve_space(spec.icon_size_token());
@@ -64,48 +64,47 @@ impl RenderComponent<IconButtonSpec> for JetstreamAdapter {
             _ => "icon-button".to_string(),
         };
 
-        // js_style is constructed for proof of style mapping
-        let _ = &js_style;
-
-        JetstreamNodeHandle::new(node_id, "IconButtonSpec", WidgetKind::Button)
+        JetstreamNodeHandle::new(node_id, "IconButtonSpec", WidgetKind::Button, mapped)
     }
 }
 
 impl RenderComponent<FormActionsSpec> for JetstreamAdapter {
     type Target = JetstreamTarget;
     fn render(&self, spec: &FormActionsSpec, style: &StyleDescriptor, theme: &dyn ThemeProvider) -> JetstreamNodeHandle {
-        let mut js_style = map_style(style);
+        let mut mapped = map_style(style);
 
         // Resolve action gap (space between action buttons)
-        js_style.gap = theme.resolve_space(spec.action_gap_token());
+        let gap = theme.resolve_space(spec.action_gap_token());
+        mapped.layout.gap = taffy::Size { width: taffy::LengthPercentage::length(gap), height: taffy::LengthPercentage::length(gap) };
 
         // Resolve stack separation (vertical space above the actions bar)
         let _stack_sep = theme.resolve_space(spec.stack_separation_token());
 
-        JetstreamNodeHandle::new("form-actions", "FormActionsSpec", WidgetKind::Panel)
+        JetstreamNodeHandle::new("form-actions", "FormActionsSpec", WidgetKind::Panel, mapped)
     }
 }
 
 impl RenderComponent<ToolbarSpec> for JetstreamAdapter {
     type Target = JetstreamTarget;
     fn render(&self, spec: &ToolbarSpec, style: &StyleDescriptor, theme: &dyn ThemeProvider) -> JetstreamNodeHandle {
-        let mut js_style = map_style(style);
+        let mut mapped = map_style(style);
 
         // Resolve gap between toolbar items
-        js_style.gap = theme.resolve_space(spec.gap_token());
+        let gap = theme.resolve_space(spec.gap_token());
+        mapped.layout.gap = taffy::Size { width: taffy::LengthPercentage::length(gap), height: taffy::LengthPercentage::length(gap) };
 
         // Resolve separator border if present
         if spec.has_separator {
             let border_color = theme.resolve_color(spec.border_token());
-            js_style.border_color = Some(JetstreamColor::from(border_color));
-            js_style.border_width = 1.0;
+            mapped.visuals.border_color = Some(JetstreamColor::from(border_color));
+            mapped.visuals.border_width = 1.0;
         }
 
         let node_id = match &spec.aria_label {
             Some(label) if !label.is_empty() => format!("toolbar-{}", label),
             _ => "toolbar".to_string(),
         };
-        JetstreamNodeHandle::new(node_id, "ToolbarSpec", WidgetKind::Panel)
+        JetstreamNodeHandle::new(node_id, "ToolbarSpec", WidgetKind::Panel, mapped)
     }
 }
 
