@@ -115,8 +115,6 @@ import AppHeaderSpecimen from "./AppHeaderSpecimen.svelte";
 import CollapseToggleSpecimen from "./CollapseToggleSpecimen.svelte";
 import CommandPaletteSpecimen from "./CommandPaletteSpecimen.svelte";
 import DockRegionSpecimen from "./DockRegionSpecimen.svelte";
-import HostedSurfaceSpecimen from "./HostedSurfaceSpecimen.svelte";
-import PanelHeaderSpecimen from "./PanelHeaderSpecimen.svelte";
 import PanelSurfaceSpecimen from "./PanelSurfaceSpecimen.svelte";
 import ProjectHeaderSpecimen from "./ProjectHeaderSpecimen.svelte";
 import ResizeHandleSpecimen from "./ResizeHandleSpecimen.svelte";
@@ -248,8 +246,6 @@ export const specimenMap: Record<string, typeof SvelteComponent<any>> = {
   "app-header": AppHeaderSpecimen,
   "collapse-toggle": CollapseToggleSpecimen,
   "command-palette": CommandPaletteSpecimen,
-  "hosted-surface": HostedSurfaceSpecimen,
-  "panel-header": PanelHeaderSpecimen,
   "panel-surface": PanelSurfaceSpecimen,
   "project-header": ProjectHeaderSpecimen,
   "resize-handle": ResizeHandleSpecimen,

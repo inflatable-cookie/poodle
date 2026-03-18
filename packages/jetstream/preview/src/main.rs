@@ -286,6 +286,10 @@ impl PreviewState {
     }
 
     /// Regenerate cached text sprite instances from current tree state.
+    ///
+    /// Uses viewport culling (like GPUI): text commands whose rects are
+    /// entirely outside their clip rect are skipped. This means only
+    /// visible text gets shaped by cosmic-text, making scroll fast.
     fn rebuild_text_cache(&mut self) {
         let scale = self.game_ui.scale_factor;
         let draw_commands = collect_draw_commands(
@@ -301,44 +305,59 @@ impl PreviewState {
         for group in &clip_groups {
             let scissor = group.scissor_physical(scale, phys_w, phys_h);
 
-            // Collect all text instances for this clip group.
-            let mut all_instances = Vec::new();
-
-            // Get unique font sizes in this group.
-            let mut font_sizes: Vec<f32> = Vec::new();
-            for cmd in &group.commands {
-                if cmd.text.is_some() {
-                    let scaled = (cmd.text_size * scale).round().max(1.0);
-                    if !font_sizes.iter().any(|s| (*s - scaled).abs() < 0.5) {
-                        font_sizes.push(scaled);
+            // Viewport-cull: skip text commands outside the clip rect.
+            let visible_commands: Vec<&UiDrawCommand> = group.commands
+                .iter()
+                .filter(|cmd| {
+                    if cmd.text.is_none() {
+                        return false;
                     }
+                    // If there's a clip rect, cull commands fully outside it.
+                    if let Some(ref clip) = group.clip {
+                        let r = &cmd.rect;
+                        // Fully above, below, left, or right of clip → skip.
+                        if r.y + r.height < clip.y
+                            || r.y > clip.y + clip.height
+                            || r.x + r.width < clip.x
+                            || r.x > clip.x + clip.width
+                        {
+                            return false;
+                        }
+                    }
+                    true
+                })
+                .collect();
+
+            if visible_commands.is_empty() {
+                continue;
+            }
+
+            // Group visible text by font size.
+            let mut font_sizes: Vec<f32> = Vec::new();
+            for cmd in &visible_commands {
+                let scaled = (cmd.text_size * scale).round().max(1.0);
+                if !font_sizes.iter().any(|s| (*s - scaled).abs() < 0.5) {
+                    font_sizes.push(scaled);
                 }
             }
 
             for scaled_size in &font_sizes {
-                let filtered: Vec<UiDrawCommand> = group.commands
+                let filtered: Vec<UiDrawCommand> = visible_commands
                     .iter()
                     .filter(|cmd| {
-                        if cmd.text.is_some() {
-                            let s = (cmd.text_size * scale).round().max(1.0);
-                            (s - *scaled_size).abs() < 0.5
-                        } else {
-                            false
-                        }
+                        let s = (cmd.text_size * scale).round().max(1.0);
+                        (s - *scaled_size).abs() < 0.5
                     })
+                    .cloned()
                     .cloned()
                     .collect();
 
                 if let Some(ref mut atlases) = self.game_ui.text_atlases {
                     let instances = convert_text_commands(&filtered, atlases, scale);
                     if !instances.is_empty() {
-                        all_instances.push((*scaled_size, instances));
+                        self.cached_text.push((scissor, *scaled_size, instances));
                     }
                 }
-            }
-
-            for (scaled_size, instances) in all_instances {
-                self.cached_text.push((scissor, scaled_size, instances));
             }
         }
     }

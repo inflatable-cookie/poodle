@@ -1,6 +1,4 @@
 export { default as DockRegion } from "./DockRegion.svelte";
-export { default as HostedSurface } from "./HostedSurface.svelte";
-export { default as PanelHeader } from "./PanelHeader.svelte";
 export { default as PanelSurface } from "./PanelSurface.svelte";
 export { default as ProjectHeader } from "./ProjectHeader.svelte";
 export { default as ResizeHandle } from "./ResizeHandle.svelte";
@@ -21,7 +19,6 @@ export type {
   DockEmphasis,
   DockRegionSnapshot,
   DockSizing,
-  HostedSurfaceState,
   PanelDragData,
   PanelTabItem,
   PanelVariant,

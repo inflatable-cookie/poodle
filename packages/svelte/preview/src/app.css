@@ -32,7 +32,7 @@ table {
 
 button,
 input {
-  min-height: var(--pug-size-control-height);
+  min-height: 0;
 }
 
 button:focus-visible,

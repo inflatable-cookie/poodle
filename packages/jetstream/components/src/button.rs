@@ -9,6 +9,7 @@ use jetstream_runtime::ui_element::{self, JsEl};
 use pug_jetstream::JetstreamThemeProvider;
 use pug_primitives::ButtonSpec;
 use pug_primitives::ButtonVariant;
+use pug_primitives::ControlSize;
 
 use crate::theme_ext::{resolve_color, resolve_opacity, resolve_px, resolve_radius};
 
@@ -16,72 +17,147 @@ use crate::theme_ext::{resolve_color, resolve_opacity, resolve_px, resolve_radiu
 ///
 /// Anatomy (from contract):
 /// ```text
-/// [Root]  — button element
+/// [Root]  — button element, inline-flex, centered
 ///   ├── [Spinner]       — conditional (isLoading)
 ///   ├── [Leading Icon]  — optional
-///   ├── [Label]         — optional
+///   ├── [Label]         — text label
 ///   └── [Trailing Icon] — optional
 /// ```
 pub fn js_button(spec: &ButtonSpec, theme: &JetstreamThemeProvider) -> JsEl {
-    // ── Token resolution (every value from spec token methods) ──
-    let fill = resolve_color(theme, spec.resolved_fill_token());
-    let text_color = resolve_color(theme, spec.resolved_text_token());
-    let border_color = resolve_color(theme, spec.resolved_border_token());
-    let radius = resolve_radius(theme, spec.radius_token());
-    let height = resolve_px(theme, spec.control_height_token());
-    let pad_x = resolve_px(theme, spec.horizontal_padding_token());
-    let min_width = resolve_px(theme, spec.control_min_width_token());
-    let gap = resolve_px(theme, "semantic.space.inline.sm");
-    let label_size = resolve_px(theme, "semantic.typography.label.size");
-    let icon_size = resolve_px(theme, spec.icon_size_token());
-
-    let label_text = spec.label.clone().unwrap_or_default();
+    // ── Variant colors ──
+    // Ghost: transparent fill + transparent border (contract: background: transparent, border: transparent)
+    // Danger: direct from token (status.danger fill, text.inverse text)
     let is_ghost = spec.variant == ButtonVariant::Ghost;
+    let is_danger = spec.variant == ButtonVariant::Danger;
+
+    let fill = if is_ghost {
+        glam::Vec4::new(0.0, 0.0, 0.0, 0.0) // transparent
+    } else {
+        resolve_color(theme, spec.resolved_fill_token())
+    };
+
+    let text_color = if is_ghost && is_danger {
+        // Ghost + Danger tone: text = status.danger (contract)
+        resolve_color(theme, "semantic.color.status.danger")
+    } else {
+        resolve_color(theme, spec.resolved_text_token())
+    };
+
+    let border_color = if is_ghost {
+        glam::Vec4::new(0.0, 0.0, 0.0, 0.0) // transparent
+    } else {
+        resolve_color(theme, spec.resolved_border_token())
+    };
+
+    // ── Sizing per ControlSize (contract: sm = height-6, md = height, lg = height+6) ──
+    let base_height = resolve_px(theme, spec.control_height_token());
+    let height = match spec.size {
+        ControlSize::Sm => base_height - 6.0,
+        ControlSize::Md => base_height,
+        ControlSize::Lg => base_height + 6.0,
+    };
+
+    let base_min_width = resolve_px(theme, spec.control_min_width_token());
+    let min_width = match spec.size {
+        ControlSize::Sm => (base_min_width - 12.0).max(0.0), // 68px vs 80px
+        ControlSize::Md => base_min_width,                     // 80px
+        ControlSize::Lg => base_min_width + 12.0,              // 92px
+    };
+
+    let base_pad_x = resolve_px(theme, spec.horizontal_padding_token());
+    let pad_x = match spec.size {
+        ControlSize::Sm => base_pad_x - 2.0,
+        ControlSize::Md => base_pad_x,
+        ControlSize::Lg => base_pad_x + 2.0,
+    };
+
+    // Padding adjustments when icons present (contract: reduce by 2px on icon side)
+    let pad_left = if spec.leading_icon.is_some() { pad_x - 2.0 } else { pad_x };
+    let pad_right = if spec.trailing_icon.is_some() { pad_x - 2.0 } else { pad_x };
+
+    let radius = resolve_radius(theme, spec.radius_token());
+    let gap = 6.0; // contract: 0.375rem = 6px
+
+    // Font size per size (contract: sm=12px, md=label-size, lg=14px)
+    let label_size = match spec.size {
+        ControlSize::Sm => 12.0,
+        ControlSize::Md => resolve_px(theme, "semantic.typography.label.size"),
+        ControlSize::Lg => 14.0,
+    };
+
+    let icon_size = resolve_px(theme, spec.icon_size_token());
     let is_disabled = spec.is_disabled || spec.is_loading;
 
-    // ── Build element — anatomy matches contract ──
-    let mut el = ui_element::button(&label_text)
+    let has_icons = spec.leading_icon.is_some() || spec.trailing_icon.is_some() || spec.is_loading;
+    let label_text = spec.label.clone().unwrap_or_default();
+
+    // ── Build element ──
+    // When icons are present: Button root with empty label, children for layout.
+    // When no icons: Button root carries the label text directly.
+    let button_label = if has_icons { String::new() } else { label_text.clone() };
+
+    let mut el = ui_element::button(&button_label)
         .h(height)
         .min_w(min_width)
-        .px(pad_x)
+        .pl(pad_left)
+        .pr(pad_right)
         .rounded(radius)
         .bg(fill)
         .text_color(text_color)
+        .text_size(label_size)
         .flex_row()
         .items_center()
         .justify_center()
         .gap(gap)
-        .text_size(label_size)
+        .text_align_center()
         .focusable();
 
-    // Border — ghost variant gets transparent border (contract: border: transparent)
-    if is_ghost {
-        // Ghost: no visible border per contract
-    } else {
-        el = el.border_1().border_color(border_color);
-    }
+    // Border — 1px for non-ghost, 1px transparent for ghost (maintains layout)
+    el = el.border(1.0).border_color(border_color);
 
-    // Disabled state — opacity from token, not hardcoded
+    // Disabled/loading state
     if is_disabled {
         let disabled_opacity = resolve_opacity(theme, spec.disabled_opacity_token());
         el = el.opacity(disabled_opacity).disabled(true);
     }
 
-    // Spinner (contract: conditional, when isLoading)
-    if spec.is_loading {
-        el = el.child(ui_element::label("⟳").text_size(icon_size));
-    }
+    // ── Children (only when icons/spinner present) ──
+    if has_icons {
+        // Spinner (contract: conditional, when isLoading)
+        if spec.is_loading {
+            el = el.child(
+                ui_element::label("⟳")
+                    .text_size(icon_size)
+                    .text_color(text_color)
+            );
+        }
 
-    // Leading icon (contract: optional, icon wrapper sized from icon_size_token)
-    if let Some(ref icon) = spec.leading_icon {
-        el = el.child(ui_element::label(icon).text_size(icon_size));
-    }
+        // Leading icon
+        if let Some(ref icon) = spec.leading_icon {
+            el = el.child(
+                ui_element::label(icon)
+                    .text_size(icon_size)
+                    .text_color(text_color)
+            );
+        }
 
-    // Label is carried by Widget::Button, rendered by runtime
+        // Label as child (so Taffy lays it out alongside icons)
+        if !label_text.is_empty() {
+            el = el.child(
+                ui_element::label(&label_text)
+                    .text_size(label_size)
+                    .text_color(text_color)
+            );
+        }
 
-    // Trailing icon
-    if let Some(ref icon) = spec.trailing_icon {
-        el = el.child(ui_element::label(icon).text_size(icon_size));
+        // Trailing icon
+        if let Some(ref icon) = spec.trailing_icon {
+            el = el.child(
+                ui_element::label(icon)
+                    .text_size(icon_size)
+                    .text_color(text_color)
+            );
+        }
     }
 
     el
@@ -96,7 +172,7 @@ mod tests {
     }
 
     #[test]
-    fn primary_button_has_background_and_border() {
+    fn primary_button_has_fill_and_border() {
         let theme = test_theme();
         let spec = ButtonSpec::new()
             .with_variant(ButtonVariant::Primary)
@@ -107,41 +183,46 @@ mod tests {
     }
 
     #[test]
-    fn ghost_button_has_no_border() {
+    fn ghost_button_has_transparent_fill() {
         let theme = test_theme();
         let spec = ButtonSpec::new()
             .with_variant(ButtonVariant::Ghost)
             .with_label("Cancel");
         let el = js_button(&spec, &theme);
-        assert_eq!(el.style.border_width, 0.0);
+        // Ghost: transparent fill (alpha = 0)
+        if let Some(bg) = el.style.background {
+            assert!(bg.w < 0.01, "Ghost bg alpha should be ~0, got {}", bg.w);
+        }
     }
 
     #[test]
-    fn disabled_button_is_marked_disabled() {
+    fn disabled_button_has_reduced_opacity() {
         let theme = test_theme();
         let spec = ButtonSpec::new()
             .with_label("Disabled")
             .with_disabled(true);
         let el = js_button(&spec, &theme);
         assert!(el.style.disabled);
+        assert!(el.style.opacity < 1.0);
     }
 
     #[test]
-    fn button_height_resolves_from_token() {
+    fn sm_button_is_shorter_than_md() {
         let theme = test_theme();
-        let spec = ButtonSpec::new().with_label("Sized");
-        let el = js_button(&spec, &theme);
-        // Height = control_height_token = 36.0px (from typed::semantic)
-        assert!(el.layout.size.height != taffy::Dimension::auto());
+        let sm = js_button(&ButtonSpec::new().with_size(ControlSize::Sm).with_label("S"), &theme);
+        let md = js_button(&ButtonSpec::new().with_size(ControlSize::Md).with_label("M"), &theme);
+        // sm should be 30px (36-6), md should be 36px
+        assert_ne!(sm.layout.size.height, md.layout.size.height,
+            "sm and md should have different heights");
     }
 
     #[test]
-    fn button_gap_resolves_from_token() {
+    fn button_with_icons_has_children() {
         let theme = test_theme();
-        let spec = ButtonSpec::new().with_label("Gap");
+        let spec = ButtonSpec::new()
+            .with_label("Create")
+            .with_leading_icon("+");
         let el = js_button(&spec, &theme);
-        // Gap should be SPACE_INLINE_SM = 8.0px (from typed::semantic), not hardcoded 6.0
-        let expected_gap = crate::theme_ext::resolve_px(&theme, "semantic.space.inline.sm");
-        assert_eq!(el.layout.gap.width, taffy::LengthPercentage::length(expected_gap));
+        assert!(!el.children.is_empty(), "Button with leading icon should have children");
     }
 }

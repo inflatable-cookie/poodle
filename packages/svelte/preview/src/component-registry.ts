@@ -157,8 +157,6 @@ export const compositeComponents: ComponentEntry[] = [
 ].sort((a, b) => a.displayName.localeCompare(b.displayName));
 
 export const workstationComponents: ComponentEntry[] = [
-  entry("HostedSurface", "workstation", W, "External content host with bounded lifecycle states.", true),
-  entry("PanelHeader", "workstation", W, "Header bar for panel content with title and actions.", true),
   entry("PanelSurface", "workstation", W, "Panel content area with utility/standard/focused variants.", true),
   entry("ProjectHeader", "workstation", W, "Project-scoped header with context and navigation.", true),
   entry("ResizeHandle", "workstation", W, "Drag and keyboard resize handle for split layouts.", true),
