@@ -195,7 +195,9 @@ pub enum StatusTone {
 impl StatusTone {
     pub fn color_token(self) -> &'static str {
         match self {
-            Self::Neutral | Self::Info | Self::Pending => semantic::COLOR_ACCENT_BASE,
+            // Contract: neutral uses text-secondary (not accent)
+            Self::Neutral => semantic::COLOR_TEXT_SECONDARY,
+            Self::Info | Self::Pending => semantic::COLOR_ACCENT_BASE,
             Self::Success => semantic::COLOR_STATUS_SUCCESS,
             Self::Warning => semantic::COLOR_STATUS_WARNING,
             Self::Danger => semantic::COLOR_STATUS_DANGER,

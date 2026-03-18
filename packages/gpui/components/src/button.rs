@@ -1,25 +1,20 @@
 //! PugButton — real GPUI component backed by ButtonSpec.
 //!
-//! Resolves all tokens through the spec's token methods and GpuiThemeProvider,
-//! producing a fully styled, interactive gpui element with hover/active/disabled states.
+//! Implements the button contract (`docs/contracts/foundation/button.md`) exactly,
+//! resolving all tokens through ButtonSpec + GpuiThemeProvider, and matching the
+//! Svelte implementation's visual output.
+
+use std::time::Duration;
 
 use gpui::prelude::FluentBuilder;
 use gpui::*;
 use pug_gpui::GpuiThemeProvider;
-use pug_gpui_primitives::{ButtonSpec, ButtonVariant};
+use pug_gpui_primitives::{ButtonSpec, ButtonTone, ButtonVariant, IconSize, IconSpec};
 
-use crate::theme_ext::{resolve_color, resolve_opacity, resolve_px, resolve_radius};
+use crate::icon::PugIcon;
+use crate::theme_ext::{color_mix, color_mix_black, resolve_color, resolve_opacity, resolve_px, resolve_radius};
 
 /// A real GPUI button component backed by `ButtonSpec`.
-///
-/// Usage:
-/// ```ignore
-/// PugButton::new(
-///     ButtonSpec::new().with_variant(ButtonVariant::Primary).with_label("Save"),
-///     &theme,
-/// )
-/// .on_click(|_event, _window, _cx| { /* handler */ })
-/// ```
 pub struct PugButton {
     spec: ButtonSpec,
     theme: GpuiThemeProvider,
@@ -37,13 +32,11 @@ impl PugButton {
         }
     }
 
-    /// Set a unique ID suffix to disambiguate multiple buttons.
     pub fn with_id(mut self, suffix: impl Into<String>) -> Self {
         self.id_suffix = Some(suffix.into());
         self
     }
 
-    /// Set the click handler.
     pub fn on_click(
         mut self,
         handler: impl Fn(&ClickEvent, &mut Window, &mut App) + 'static,
@@ -60,64 +53,108 @@ impl IntoElement for PugButton {
         let theme = &self.theme;
         let spec = &self.spec;
 
-        // Resolve all tokens through the spec + theme
-        let fill = resolve_color(theme, spec.resolved_fill_token());
-        let text_color = resolve_color(theme, spec.resolved_text_token());
-        let border_color = resolve_color(theme, spec.resolved_border_token());
+        // ── Resolve base tokens ──────────────────────────────────
+        let base_fill = resolve_color(theme, spec.resolved_fill_token());
+        let base_text = resolve_color(theme, spec.resolved_text_token());
+        let base_border = resolve_color(theme, spec.resolved_border_token());
+        let elevated = resolve_color(theme, "semantic.color.background.elevated");
+        let text_primary = resolve_color(theme, "semantic.color.text.primary");
         let radius = resolve_radius(theme, spec.radius_token());
-        let height = resolve_px(theme, spec.control_height_token());
-        let pad_x = resolve_px(theme, spec.horizontal_padding_token());
-        let min_width = resolve_px(theme, spec.control_min_width_token());
 
-        // Build element ID
+        // ── Size-aware layout values (contract §7, §8) ──────────
+        let base_height = resolve_px(theme, spec.control_height_token());
+        let height = base_height + px(spec.height_offset_px());
+        let min_width = px(spec.min_width_px());
+        let base_pad_x = resolve_px(theme, spec.horizontal_padding_token());
+        let pad_x = base_pad_x + px(spec.padding_x_offset_px());
+        let font_size = px(spec.font_size_px());
+        let gap = px(6.0); // contract: 0.375rem = 6px
+
+        // Icon padding adjustment (contract §8): reduce padding on icon side by 2px
+        let has_leading = spec.leading_icon.is_some() || spec.is_loading;
+        let has_trailing = spec.trailing_icon.is_some() || spec.chevron;
+        let icon_inset = px(2.0);
+        let pad_left = if has_leading { pad_x - icon_inset } else { pad_x };
+        let pad_right = if has_trailing { pad_x - icon_inset } else { pad_x };
+
+        let is_disabled = spec.is_disabled || spec.is_loading;
+        let is_ghost = spec.variant == ButtonVariant::Ghost;
+
+        // ── Compute variant-specific colors ──────────────────────
+
+        // Danger×secondary needs color-mix blends (contract §8 Tone: danger)
+        let (mut fill, mut border_color, mut text_color) = match (spec.variant, spec.tone) {
+            (ButtonVariant::Secondary, ButtonTone::Danger) => {
+                // fill: color-mix(status-danger 16%, background-surface)
+                let danger = resolve_color(theme, "semantic.color.status.danger");
+                let surface = resolve_color(theme, "semantic.color.background.surface");
+                let border_default = resolve_color(theme, "semantic.color.border.default");
+                let fill = color_mix(danger, surface, 0.16);
+                // border: color-mix(status-danger 46%, border-default)
+                let border = color_mix(danger, border_default, 0.46);
+                (fill, border, base_text)
+            }
+            (ButtonVariant::Primary, _) => {
+                // Primary border: color-mix(accent-base 84%, black)
+                let darkened_border = color_mix_black(base_fill, 0.84);
+                (base_fill, darkened_border, base_text)
+            }
+            _ => (base_fill, base_border, base_text),
+        };
+
+        // Ghost: transparent fill and border (contract §8 CSS Custom Properties)
+        let (mut fill, mut border_color) = if is_ghost {
+            (gpui::transparent_black(), gpui::transparent_black())
+        } else {
+            (fill, border_color)
+        };
+
+        // ── Hover/active colors (contract §8 Hover/Active) ──────
+        // hover fill: color-mix(fill 84%, elevated)
+        // active fill: color-mix(fill 72%, elevated)
+        let hover_fill = if is_ghost {
+            // Ghost hover: mix with elevated at 84% transparency
+            color_mix(fill, elevated, 0.84)
+        } else {
+            color_mix(fill, elevated, 0.84)
+        };
+        let active_fill = color_mix(fill, elevated, 0.72);
+        // hover border: color-mix(border 78%, text-primary)
+        let hover_border = color_mix(border_color, text_primary, 0.78);
+
+        // ── Build element ID ─────────────────────────────────────
         let label_text = spec.label.clone().unwrap_or_default();
         let id_str = if let Some(ref suffix) = self.id_suffix {
             format!("pug-btn-{}", suffix)
         } else {
             format!("pug-btn-{}", label_text)
         };
-        let id = SharedString::from(id_str);
 
-        // Compute hover/active colors based on variant
-        let hover_fill = match spec.variant {
-            ButtonVariant::Ghost => fill.opacity(0.08),
-            _ => fill.opacity(0.85),
-        };
-        let active_fill = match spec.variant {
-            ButtonVariant::Ghost => fill.opacity(0.14),
-            _ => fill.opacity(0.7),
-        };
-        let hover_border = border_color.opacity(0.78);
-
-        let is_disabled = spec.is_disabled || spec.is_loading;
-        let is_ghost = spec.variant == ButtonVariant::Ghost;
-
-        // Build the element
+        // ── Build root element (contract §8 Root) ────────────────
         let mut el = div()
-            .id(id)
+            .id(SharedString::from(id_str))
             .h(height)
             .min_w(min_width)
-            .px(pad_x)
+            .pl(pad_left)
+            .pr(pad_right)
             .rounded(radius)
             .bg(fill)
+            .border_1()
+            .border_color(border_color)
             .text_color(text_color)
             .flex()
             .items_center()
             .justify_center()
-            .gap(px(6.0))
-            .text_sm();
+            .gap(gap)
+            .text_size(font_size)
+            .font_weight(FontWeight::MEDIUM); // contract: typography-label-weight = 500
 
-        // Border — ghost variant gets no visible border
-        if is_ghost {
-            el = el.border_1().border_color(gpui::transparent_black());
-        } else {
-            el = el.border_1().border_color(border_color);
-        }
-
-        // Interactive states
+        // ── Interactive states ────────────────────────────────────
+        let icon_color = text_color;
         if is_disabled {
-            let disabled_opacity = resolve_opacity(theme, spec.disabled_opacity_token());
-            el = el.opacity(disabled_opacity);
+            // contract §8 Disabled: opacity: state-opacity-disabled, cursor: not-allowed
+            let dis_o = resolve_opacity(theme, spec.disabled_opacity_token());
+            el = el.opacity(dis_o);
         } else {
             el = el
                 .cursor_pointer()
@@ -125,35 +162,77 @@ impl IntoElement for PugButton {
                 .active(move |s| s.bg(active_fill));
         }
 
-        // Loading spinner indicator
+        // ── Spinner (contract §8 Spinner) ────────────────────────
+        // Contract: 0.75rem (12px) border spinner, rotating 360° in 0.8s.
+        // We use a custom spinner SVG with GPUI's animation API to rotate it.
         if spec.is_loading {
+            let spinner_size = px(12.0); // 0.75rem
             el = el.child(
-                div()
-                    .text_xs()
-                    .child("⟳"),
+                svg()
+                    .path(SharedString::from("assets/icons/spinner.svg"))
+                    .size(spinner_size)
+                    .flex_shrink_0()
+                    .text_color(icon_color)
+                    .with_animation(
+                        "button-spinner",
+                        Animation::new(Duration::from_millis(800))
+                            .repeat(),
+                        |svg, delta| {
+                            svg.with_transformation(
+                                Transformation::rotate(gpui::radians(delta * std::f32::consts::TAU))
+                            )
+                        },
+                    ),
             );
         }
 
-        // Leading icon placeholder
-        if let Some(ref icon) = spec.leading_icon {
+        // ── Leading icon ─────────────────────────────────────────
+        if let Some(ref icon_name) = spec.leading_icon {
             el = el.child(
-                div().text_xs().child(icon.clone()),
+                PugIcon::new(
+                    IconSpec::new(icon_name.clone()).with_size(IconSize::Sm),
+                    theme,
+                )
+                .with_color(icon_color),
             );
         }
 
-        // Label
+        // ── Label ────────────────────────────────────────────────
         if !label_text.is_empty() {
             el = el.child(label_text);
         }
 
-        // Trailing icon placeholder
-        if let Some(ref icon) = spec.trailing_icon {
+        // ── Trailing icon ────────────────────────────────────────
+        if let Some(ref icon_name) = spec.trailing_icon {
             el = el.child(
-                div().text_xs().child(icon.clone()),
+                PugIcon::new(
+                    IconSpec::new(icon_name.clone()).with_size(IconSize::Sm),
+                    theme,
+                )
+                .with_color(icon_color),
             );
         }
 
-        // Click handler
+        // ── Chevron (contract §8 Chevron) ────────────────────────
+        // opacity: 0.5, margin-left: -2px to tighten from gap
+        if spec.chevron {
+            el = el.child(
+                div()
+                    .flex()
+                    .items_center()
+                    .opacity(0.5)
+                    .ml(px(-2.0))
+                    .child(
+                        PugIcon::new(
+                            IconSpec::new("chevron-down").with_size(IconSize::Sm),
+                            theme,
+                        )
+                        .with_color(icon_color),
+                    ),
+            );
+        }
+
+        // ── Click handler ────────────────────────────────────────
         if let Some(handler) = self.on_click {
             if !is_disabled {
                 el = el.on_click(move |event, window, cx| handler(event, window, cx));

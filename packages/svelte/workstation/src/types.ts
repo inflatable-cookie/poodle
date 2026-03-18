@@ -7,6 +7,12 @@ export type HostedSurfaceState = "ready" | "loading" | "unavailable" | "blocked"
 export type PanelVariant = "utility" | "standard" | "focused";
 export type DockEmphasis = "standard" | "quiet" | "strong";
 export type DockCollapsedPosture = "hidden" | "icon-strip";
+export type DockSizing = "static" | "flexible";
+
+export type PanelDragData = {
+  panelId: string;
+  sourceEdge: DockEdge;
+};
 export type PanelTabItem = {
   value: string;
   label: string;

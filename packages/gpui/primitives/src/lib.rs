@@ -10,6 +10,7 @@ mod code;
 mod collapsible;
 mod color_picker;
 mod context_menu;
+mod icon;
 mod date_picker;
 mod date_range_picker;
 mod date_time_picker;
@@ -88,6 +89,7 @@ pub use file_upload::FileUploadSpec;
 pub use form_actions::FormActionsSpec;
 pub use grid::GridSpec;
 pub use hover_card::HoverCardSpec;
+pub use icon::{IconSize, IconSpec};
 pub use icon_button::IconButtonSpec;
 pub use menu::MenuSpec;
 pub use menubar::MenubarSpec;
@@ -127,7 +129,7 @@ pub use tooltip::TooltipSpec;
 pub use tri_state_switch::TriStateSwitchSpec;
 pub use zoned_date_time_picker::ZonedDateTimePickerSpec;
 pub use types::{
-    AccordionItemSpec, AccordionSelectionValue, Alignment, BadgeVariant, ButtonVariant,
+    AccordionItemSpec, AccordionSelectionValue, Alignment, BadgeVariant, ButtonTone, ButtonVariant,
     CalendarWeekStart, CheckState, ChoiceOption, ControlSize, DateRangeValue, DateTimeRangeValue,
     DateTimeValue, DialogKind, Dimension, Direction, DrawerEdge, FormActionAlign, Inset, MenuEntry,
     MenuItemKind, MenubarEntry, NavigationMenuEntry, Orientation, Overflow, OverlayPlacement,
@@ -276,7 +278,8 @@ mod tests {
 
         assert_eq!(spec.resolved_fill_token(), semantic::COLOR_ACCENT_BASE);
         assert_eq!(spec.resolved_text_token(), semantic::COLOR_TEXT_INVERSE);
-        assert_eq!(spec.icon_size_token(), semantic::SIZE_ICON_LG);
+        // Contract: icons in buttons always render at size="sm"
+        assert_eq!(spec.icon_size_token(), semantic::SIZE_ICON_SM);
         assert!(!spec.activation_allowed());
         assert!(!spec.requires_aria_label());
     }

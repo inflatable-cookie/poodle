@@ -54,11 +54,11 @@ impl SplitButtonSpec {
     }
 
     pub fn fill_token(&self) -> &'static str {
-        self.variant.fill_token()
+        self.variant.fill_token(crate::types::ButtonTone::Default)
     }
 
     pub fn border_token(&self) -> &'static str {
-        self.variant.border_token()
+        self.variant.border_token(crate::types::ButtonTone::Default)
     }
 
     pub fn separator_token(&self) -> &'static str {

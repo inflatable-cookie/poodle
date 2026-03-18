@@ -1,35 +1,68 @@
 <script lang="ts">
   import { DetailShell, DetailSection, PageHeader } from "@pug/svelte-composites";
-  import { Button, DetailRow, Eyebrow } from "@pug/svelte-primitives";
+  import { Button, Badge, DetailRow, Eyebrow, Region, Separator, Surface } from "@pug/svelte-primitives";
 </script>
 
 <div class="specimen">
-  <div class="specimen__group">
-    <Eyebrow>Ready state</Eyebrow>
-    <div class="shell-container">
-      <DetailShell title="Project detail" ariaLabel="Project detail view">
+  <Surface tone="panel" border="subtle" padding="md">
+    <Eyebrow>Layout structure</Eyebrow>
+    <div class="specimen__demo">
+      <DetailShell ariaLabel="Layout regions">
         <svelte:fragment slot="header">
-          <PageHeader title="Pug Design System" eyebrow="Project" subtitle="A comprehensive component library." />
+          <Region label="Header" color="#5b9bd5" minHeight="3rem" />
         </svelte:fragment>
-        <DetailSection title="Overview">
-          <DetailRow label="Status" value="Active" />
+        <Region label="Section 1" color="#70ad47" minHeight="3rem" />
+        <Region label="Section 2" color="#ed7d31" minHeight="3rem" />
+        <Region label="Section 3" color="#a855f7" minHeight="3rem" />
+      </DetailShell>
+    </div>
+  </Surface>
+
+  <Surface tone="panel" border="subtle" padding="md">
+    <Eyebrow>Multi-section layout with header</Eyebrow>
+    <div class="specimen__demo">
+      <DetailShell ariaLabel="Project detail view">
+        <svelte:fragment slot="header">
+          <PageHeader title="Pug Design System" eyebrow="Project" subtitle="A comprehensive component library.">
+            <svelte:fragment slot="actions">
+              <Badge tone="success">Active</Badge>
+              <Button variant="secondary" size="sm">Edit</Button>
+            </svelte:fragment>
+          </PageHeader>
+        </svelte:fragment>
+        <DetailSection title="General">
           <DetailRow label="Owner" value="Clay" />
           <DetailRow label="Created" value="March 2025" />
+          <DetailRow label="Repository" value="github.com/pug-ui/pug" />
+        </DetailSection>
+        <Separator />
+        <DetailSection title="Configuration">
+          <svelte:fragment slot="actions">
+            <Button variant="ghost" size="sm">Reset</Button>
+          </svelte:fragment>
+          <DetailRow label="Theme" value="Dark" />
+          <DetailRow label="Density" value="Compact" />
+          <DetailRow label="Default size" value="Medium" />
+        </DetailSection>
+        <Separator />
+        <DetailSection title="Integrations">
+          <DetailRow label="Figma" value="Connected" />
+          <DetailRow label="Storybook" value="Not configured" />
         </DetailSection>
       </DetailShell>
     </div>
-  </div>
+  </Surface>
 
-  <div class="specimen__group">
+  <Surface tone="panel" border="subtle" padding="md">
     <Eyebrow>Loading state</Eyebrow>
-    <div class="shell-container">
+    <div class="specimen__demo">
       <DetailShell title="Loading" state="loading" ariaLabel="Loading view" />
     </div>
-  </div>
+  </Surface>
 
-  <div class="specimen__group">
+  <Surface tone="panel" border="subtle" padding="md">
     <Eyebrow>Error state</Eyebrow>
-    <div class="shell-container">
+    <div class="specimen__demo">
       <DetailShell
         title="Error"
         state="error"
@@ -38,26 +71,17 @@
         ariaLabel="Error view"
       />
     </div>
-  </div>
+  </Surface>
 </div>
 
 <style>
   .specimen {
     display: flex;
     flex-direction: column;
-    gap: 1.5rem;
+    gap: 1rem;
   }
 
-  .specimen__group {
-    display: flex;
-    flex-direction: column;
-    gap: 0.5rem;
-  }
-
-  .shell-container {
-    height: 14rem;
-    border: 1px solid var(--pug-color-border-default);
-    border-radius: 4px;
-    overflow: hidden;
+  .specimen__demo {
+    margin-top: 0.75rem;
   }
 </style>

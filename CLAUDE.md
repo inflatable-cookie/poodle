@@ -15,19 +15,31 @@ All implementations must faithfully implement the same component contracts. The 
 
 ### No Mockups, No Fakes
 
-**Never create mockup or placeholder implementations.** Every component in every preview app must be a real, working component that goes through the adapter pipeline:
+**Never create mockup or placeholder implementations.** Every component in every preview app must be a real, working component that resolves all visual properties from the token system through the component's Spec.
 
-1. Create the component's `Spec` (e.g., `ButtonSpec`) with proper props
-2. Pass it through `adapter.render(&spec, &style, theme)` to resolve tokens
-3. Materialize the adapter output into platform nodes via `render_bridge`
+A specimen that hand-codes colors, sizes, or layout instead of resolving them from the token system is **worse than having no specimen at all** — it hides incomplete work and makes debugging harder. If a component's spec or token resolution is incomplete, leave the specimen unimplemented until the spec properly resolves the component's tokens.
 
-A specimen that hand-codes colors, sizes, or layout instead of resolving them from the token system is **worse than having no specimen at all** — it hides incomplete work and makes debugging harder. If a component's adapter implementation is incomplete, leave the specimen unimplemented until the adapter properly resolves the component's tokens.
+### Contracts Are The Source of Truth — NO EXCEPTIONS
 
-### Contracts Are The Source of Truth
+**Before writing any component code, read the contract in `docs/contracts/foundation/<component>.md` from start to finish.** The contract is the authoritative specification. Every implementation decision must be traceable to a contract requirement. If something is not in the contract, do not invent it. If something IS in the contract, it MUST be implemented.
 
-- Read the contract in `docs/contracts/foundation/` before implementing any component
-- The contract defines the anatomy (which parts exist), the token targets (which semantic tokens control each visual property), the props, states, and accessibility requirements
-- Implementation must match the contract — not approximate it, not simplify it, not invent alternatives
+The contract defines:
+- **Anatomy**: Which DOM/element parts exist (root, indicator, label, panel, etc.) — every part must be present
+- **Props**: Every prop, its type, and its default value — the Spec struct must match exactly
+- **Token targets**: Which semantic token controls each visual property — hardcoding the resolved value is NEVER acceptable
+- **States**: hover, active, focus, disabled, loading, etc. — each must be handled
+- **Accessibility**: ARIA attributes, roles, keyboard behavior — these are not optional
+- **Sizing**: Exact dimensions in rem/px from tokens — do not guess or approximate
+
+**Checklist for every component implementation:**
+1. ☐ Read the full contract before writing any code
+2. ☐ Every dimension resolves from a token (height, padding, gap, radius, font-size) — ZERO hardcoded px values
+3. ☐ Every color resolves from a token via the Spec's token methods
+4. ☐ Anatomy matches contract (all parts present, correct nesting)
+5. ☐ All props from contract are supported in the Spec
+6. ☐ Disabled/loading states reduce opacity via `disabled_opacity_token()`, not a hardcoded value
+7. ☐ Focus ring implemented where contract requires it
+8. ☐ ARIA attributes applied (role, aria-label, aria-expanded, etc.)
 
 ### Token Resolution Is Mandatory
 
@@ -36,42 +48,49 @@ Components must resolve their visual properties from the semantic token system, 
 - Spacing comes from `theme.resolve_space(spec.some_gap_token())`
 - Radii come from `theme.resolve_radius(spec.radius_token())`
 - Typography comes from token-defined font sizes, weights, and families
+- Dimensions come from token-defined sizes (control-height, min-width, icon-size)
 
-Hardcoded colors like `Vec4::new(0.2, 0.3, 0.4, 1.0)` are never acceptable in component implementations.
+Hardcoded pixel values like `.h(16.0)` or `.text_size(13.0)` in component code are **always wrong**. The correct form is `.h(resolve_px(theme, spec.control_height_token()))`. If a token doesn't exist for a value specified in the contract, add the token — do not hardcode the value.
+
+### Reference Implementation
+
+The **Svelte implementation** (`packages/svelte/primitives/src/`) is the proof reference for visual correctness. When the contract is ambiguous, refer to the Svelte implementation for clarification. The GPUI implementation may have deviations and should not be used as a reference.
 
 ## Development Workflow Rules
 
 - Any changes to Svelte components in `packages/svelte/primitives/src/` must be reflected in the corresponding contract file in `docs/contracts/foundation/`. For example, changes to `Button.svelte` should be mirrored in `docs/contracts/foundation/button.md`. Always keep component implementations and their contracts in sync.
 
 - When implementing a Jetstream component:
-  1. Read the contract (`docs/contracts/foundation/<component>.md`)
-  2. Ensure `pug_primitives` has a complete `Spec` struct matching the contract props
-  3. Implement `RenderComponent<Spec>` in the adapter with proper token resolution
-  4. Write the specimen using the adapter pattern (see `specimens/button.rs` as the reference)
-  5. Add `materialize_*` helpers in `render_bridge.rs` if needed
+  1. **Read the full contract** (`docs/contracts/foundation/<component>.md`) — every section
+  2. Cross-reference the **Svelte implementation** for visual reference
+  3. Ensure `pug_primitives` Spec struct has every prop and token method the contract requires
+  4. Implement `js_<component>()` in `packages/jetstream/components/src/` resolving ALL values from tokens
+  5. Verify: zero hardcoded pixel values, all anatomy parts present, ARIA attributes applied
+  6. Write the specimen in `packages/jetstream/preview/src/specimens/` showing all contract states
 
 - The preview apps (`packages/svelte/preview/`, `packages/jetstream/preview/`) exist to **test that components work correctly**. They are integration tests, not showcases for fake UI.
 
 ## Architecture Quick Reference
 
-### Adapter Pipeline (Jetstream)
+### Component Pipeline (Jetstream)
 
 ```
-ComponentSpec + StyleDescriptor + ThemeProvider
-        ↓ adapter.render()
-JetstreamNodeHandle { layout: taffy::Style, visuals: JetstreamVisuals }
-        ↓ render_bridge::materialize()
-UiTree node (Widget + taffy::Style + NodeStyle)
+ComponentSpec (e.g. ButtonSpec)
+    + JetstreamThemeProvider (token resolution)
+        ↓ js_button(spec, theme) → JsEl
+            (fluent builder: div().h(height).bg(fill).child(...))
+        ↓ game_ui.render_immediate(&root_el)
+            (materialize JsEl tree → UiTree → Taffy layout → draw commands)
 ```
 
 ### Key Crates
 
 - `pug-tokens` — semantic token definitions, themes (dark, light, loophole-studio)
 - `pug-primitives` — component spec structs (ButtonSpec, CheckboxSpec, etc.)
-- `pug-adapter` — `RenderComponent` trait, `ThemeProvider` trait
-- `pug-jetstream` (adapter) — Jetstream adapter implementing `RenderComponent` for each spec
-- `pug-layout` — `LayoutIntent` abstraction shared across platforms
-- `pug-style` — `StyleDescriptor` for visual property descriptions
+- `pug-adapter` — `ThemeProvider` trait
+- `pug-jetstream` (adapter) — `JetstreamThemeProvider` for token resolution
+- `pug-jetstream-components` — Jetstream component implementations (`js_button`, `js_checkbox`, etc.)
+- `jetstream-runtime::ui_element` — `JsEl` fluent builder, `div()`, `label()`, `button()`, `list()`
 
 ### Layout Mapping
 

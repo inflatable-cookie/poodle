@@ -43,7 +43,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
         )
         .child(
             PugIconButton::new(
-                IconButtonSpec::new().with_variant(ButtonVariant::Danger).with_icon("🗑").with_disabled(true),
+                IconButtonSpec::new().with_variant(ButtonVariant::Secondary).with_icon("🗑").with_disabled(true),
                 theme,
             )
             .with_id("del-disabled")

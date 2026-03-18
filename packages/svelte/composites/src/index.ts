@@ -14,16 +14,13 @@ export { default as DetailSection } from "./DetailSection.svelte";
 export { default as DetailShell } from "./DetailShell.svelte";
 export { default as EmbedInput } from "./EmbedInput.svelte";
 export { default as EmbedPreview } from "./EmbedPreview.svelte";
-export { default as EmbedShell } from "./EmbedShell.svelte";
 export { default as EmptyState } from "./EmptyState.svelte";
 export { default as FilterToolbar } from "./FilterToolbar.svelte";
 export { default as FormDialog } from "./FormDialog.svelte";
-export { default as GridShell } from "./GridShell.svelte";
 export { default as InlineEditableField } from "./InlineEditableField.svelte";
 export { ListCard } from "@pug/svelte-primitives";
 export { default as LogList } from "./LogList.svelte";
 export { default as MarkdownEditor } from "./MarkdownEditor.svelte";
-export { default as ListShell } from "./ListShell.svelte";
 export { OrderBy } from "@pug/svelte-primitives";
 export { default as PageLoading } from "./PageLoading.svelte";
 export { default as MediaPicker } from "./MediaPicker.svelte";
@@ -57,7 +54,6 @@ export type {
   MediaKind,
   MediaPickerItem,
   MediaState,
-  MinColumnWidth,
   ActiveSort,
   ParsedEmbed,
   ReorderableItem,

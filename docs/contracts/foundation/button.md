@@ -121,6 +121,7 @@ Updated: 2026-03-15
 - Small: `height: control-height - 0.375rem`, `min-width: 4.25rem`, `padding: 0 (space-control-x - 0.125rem)`, `font-size: 0.75rem`
 - Large: `height: control-height + 0.375rem`, `min-width: 5.75rem`, `padding: 0 (space-control-x + 0.125rem)`, `font-size: 0.875rem`
 - Icon-only: `min-width: 0`, `padding: 0`, `width: control-height` (adjusted for size)
+- Icon padding adjustment: when a leading or trailing icon is present, the padding on that icon's side is reduced by `0.125rem` (2px). This subtly tightens the icon side to balance visual weight against the label side. Applies independently to each side.
 
 ### Composition
 
@@ -137,7 +138,7 @@ Updated: 2026-03-15
 | `display` | `inline-flex` |
 | `align-items` | `center` |
 | `justify-content` | `center` |
-| `gap` | `var(--pug-space-inline-sm)` |
+| `gap` | `0.375rem` (6px) |
 | `min-width` | `5rem` |
 | `height` | `var(--pug-size-control-height)` |
 | `padding` | `0 var(--pug-space-control-x)` |
@@ -181,6 +182,19 @@ Updated: 2026-03-15
 | `sm` | `calc(control-height - 0.375rem)` | `4.25rem` | `0 calc(space-control-x - 0.125rem)` | `0.75rem` |
 | `md` | `control-height` | `5rem` | `0 space-control-x` | `typography-label-size` |
 | `lg` | `calc(control-height + 0.375rem)` | `5.75rem` | `0 calc(space-control-x + 0.125rem)` | `0.875rem` |
+
+### Icon padding adjustments
+
+When a leading icon is present, reduce `padding-left` by `0.125rem` (2px).
+When a trailing icon or chevron is present, reduce `padding-right` by `0.125rem` (2px).
+Both adjustments apply independently.
+
+| Condition | `padding-left` | `padding-right` |
+|-----------|----------------|-----------------|
+| No icons | `space-control-x` | `space-control-x` |
+| Leading icon only | `space-control-x - 0.125rem` | `space-control-x` |
+| Trailing icon only | `space-control-x` | `space-control-x - 0.125rem` |
+| Both icons | `space-control-x - 0.125rem` | `space-control-x - 0.125rem` |
 
 ### Icon-only adjustments
 
@@ -314,6 +328,9 @@ Updated: 2026-03-15
 | active translateY(0.03125rem) may be omitted in GPUI | sub-pixel transform, GPUI limitation | allowed | revisit if GPUI gains sub-pixel transforms |
 | CSS transition timing | GPUI may not support CSS-style transitions | allowed | match where possible |
 | Treatment radius fallback chain | CSS var fallback vs Rust conditional | allowed | same visual result |
+| box-shadow omitted in GPUI | GPUI lacks CSS box-shadow support | allowed | revisit if GPUI adds shadow primitives |
+| letter-spacing omitted in GPUI | GPUI text rendering has no letter-spacing API | allowed | minor visual impact |
+| Spinner uses loader icon in GPUI | GPUI cannot animate CSS border spinners | allowed | same semantic meaning, visual delta accepted |
 
 ## 13. Approval And Adoption Notes
 

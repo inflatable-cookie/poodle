@@ -25,6 +25,8 @@
 
   $: isUnavailable = isDisabled || isLoading;
   $: iconOnly = !$$slots.default;
+  $: hasLeading = $$slots.leading || leadingIcon || isLoading;
+  $: hasTrailing = $$slots.trailing || trailingIcon || chevron;
 </script>
 
 <button
@@ -34,6 +36,8 @@
   data-tone={tone !== "default" ? tone : undefined}
   data-size={size}
   data-icon-only={iconOnly || undefined}
+  data-has-leading={hasLeading || undefined}
+  data-has-trailing={hasTrailing || undefined}
   data-loading={isLoading}
   disabled={isUnavailable}
   aria-label={ariaLabel ?? undefined}
@@ -99,7 +103,7 @@
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    gap: var(--pug-space-inline-sm);
+    gap: 0.375rem;
     min-width: 5rem;
     height: var(--pug-size-control-height);
     padding: 0 var(--pug-space-control-x);
@@ -135,6 +139,31 @@
     height: calc(var(--pug-size-control-height) + 0.375rem);
     padding: 0 calc(var(--pug-space-control-x) + 0.125rem);
     font-size: 0.875rem;
+  }
+
+  /* Icon padding adjustment: reduce padding on icon side by 0.125rem */
+  .button[data-has-leading] {
+    padding-left: calc(var(--pug-space-control-x) - 0.125rem);
+  }
+
+  .button[data-has-trailing] {
+    padding-right: calc(var(--pug-space-control-x) - 0.125rem);
+  }
+
+  .button[data-has-leading][data-size="sm"] {
+    padding-left: calc(var(--pug-space-control-x) - 0.25rem);
+  }
+
+  .button[data-has-trailing][data-size="sm"] {
+    padding-right: calc(var(--pug-space-control-x) - 0.25rem);
+  }
+
+  .button[data-has-leading][data-size="lg"] {
+    padding-left: var(--pug-space-control-x);
+  }
+
+  .button[data-has-trailing][data-size="lg"] {
+    padding-right: var(--pug-space-control-x);
   }
 
   /* Icon-only: square, no min-width */

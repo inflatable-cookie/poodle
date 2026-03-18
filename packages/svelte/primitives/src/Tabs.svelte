@@ -18,6 +18,7 @@
   export let activationMode: TabActivationMode = "automatic";
   export let isReorderable = false;
   export let ariaLabel: string | null = null;
+  export let showTooltips = false;
 
   const dispatch = createEventDispatcher<{
     valueChange: { value: string };
@@ -47,6 +48,7 @@
   }
   $: hasPanel = $$slots.default;
   $: isVertical = orientation === "vertical";
+  $: hasTooltips = isVertical || showTooltips;
 
   // ── Tooltip (vertical icon-only mode) ──
 
@@ -243,8 +245,8 @@
         on:dragleave={handleDragLeave}
         on:drop={(e) => handleDrop(e, index)}
         on:dragend={handleDragEnd}
-        on:mouseenter={() => isVertical && scheduleTooltip(index)}
-        on:mouseleave={() => isVertical && dismissTooltip()}
+        on:mouseenter={() => hasTooltips && scheduleTooltip(index)}
+        on:mouseleave={() => hasTooltips && dismissTooltip()}
       >
         <button
           bind:this={tabElements[index]}
@@ -257,10 +259,10 @@
           aria-selected={currentValue === item.value ? "true" : "false"}
           aria-controls={hasPanel ? `pug-tabpanel-${tabsId}-${item.value}` : undefined}
           on:focus={() => { focusIndex = index; if (isVertical) scheduleTooltip(index); }}
-          on:blur={() => isVertical && dismissTooltip()}
+          on:blur={() => hasTooltips && dismissTooltip()}
           on:click={() => setValue(item.value)}
           on:keydown={(event) => {
-            if (event.key === "Escape" && isVertical) dismissTooltip();
+            if (event.key === "Escape" && hasTooltips) dismissTooltip();
             handleKeydown(event, index);
           }}
         >
@@ -281,8 +283,8 @@
           </button>
         {/if}
 
-        {#if isVertical && tooltipIndex === index}
-          <span class="pug-tabs__tooltip" data-placement="right" role="tooltip">
+        {#if hasTooltips && tooltipIndex === index}
+          <span class="pug-tabs__tooltip" data-placement={isVertical ? "right" : "bottom"} role="tooltip">
             {item.label}
           </span>
         {/if}
@@ -346,18 +348,21 @@
     border-right: 0.0625rem solid color-mix(in srgb, var(--pug-color-border-subtle) 82%, transparent);
   }
 
-  /* Card + Pill + Strip: no wrapping, allow scroll */
+  /* Card + Pill + Strip: no wrapping, allow scroll on main axis only */
   .pug-tabs[data-variant="card"] .pug-tabs__list,
   .pug-tabs[data-variant="pill"] .pug-tabs__list,
   .pug-tabs[data-variant="strip"] .pug-tabs__list {
     flex-wrap: nowrap;
-    overflow: auto;
+    overflow-x: auto;
+    overflow-y: hidden;
   }
 
   .pug-tabs[data-variant="card"][data-orientation="vertical"] .pug-tabs__list,
   .pug-tabs[data-variant="pill"][data-orientation="vertical"] .pug-tabs__list,
   .pug-tabs[data-variant="strip"][data-orientation="vertical"] .pug-tabs__list {
     flex-direction: column;
+    overflow-x: hidden;
+    overflow-y: auto;
   }
 
   /* Strip: full-width cohesive bar */
@@ -599,6 +604,12 @@
     top: 50%;
     left: calc(100% + 0.375rem);
     transform: translateY(-50%);
+  }
+
+  .pug-tabs__tooltip[data-placement="bottom"] {
+    top: calc(100% + 0.375rem);
+    left: 50%;
+    transform: translateX(-50%);
   }
 
   /* ── Panel ── */

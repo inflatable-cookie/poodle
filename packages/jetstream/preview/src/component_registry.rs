@@ -168,12 +168,6 @@ pub fn components_for_section(section: crate::app_state::Section) -> &'static [C
     }
 }
 
-/// Look up a component by slug across all tiers.
-pub fn find_component(slug: &str) -> Option<&'static ComponentEntry> {
-    PRIMITIVES.iter()
-        .chain(COMPOSITES.iter())
-        .find(|c| c.slug == slug)
-}
 
 /// Count of components with live specimens in a section.
 pub fn specimen_count(section: crate::app_state::Section) -> usize {

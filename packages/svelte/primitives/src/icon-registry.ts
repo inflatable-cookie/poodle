@@ -65,7 +65,7 @@ const curatedNames: string[] = [
   "eye-off",
   "file",
   "file-text",
-  "filter",
+  "list-filter",
   "folder",
   "globe",
   "grip-vertical",
@@ -120,9 +120,23 @@ const curatedNames: string[] = [
 
 const allNodes = iconNodes as Record<string, IconNodeElement[]>;
 
-export const defaultIconRegistry: IconRegistry = Object.fromEntries(
-  curatedNames.filter((name) => name in allNodes).map((name) => [name, allNodes[name]]),
-);
+/** Aliases for icon names that changed across Lucide versions. */
+const iconAliases: Record<string, string> = {
+  "filter": "list-filter",
+  "edit": "pencil",
+  "alert-circle": "circle-alert",
+  "check-circle": "circle-check",
+  "more-horizontal": "ellipsis",
+  "more-vertical": "ellipsis-vertical",
+  "unlock": "lock-open",
+};
+
+export const defaultIconRegistry: IconRegistry = Object.fromEntries([
+  ...curatedNames.filter((name) => name in allNodes).map((name) => [name, allNodes[name]]),
+  ...Object.entries(iconAliases)
+    .filter(([, actual]) => actual in allNodes)
+    .map(([alias, actual]) => [alias, allNodes[actual]]),
+]);
 
 export function setIconRegistry(registry: IconRegistry): void {
   setContext(PUG_ICON_CONTEXT, registry);

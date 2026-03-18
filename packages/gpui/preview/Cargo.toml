@@ -26,6 +26,7 @@ pug-gpui-composites = { path = "../composites" }
 pug-gpui-workstation = { path = "../workstation" }
 pug-style = { path = "../../contracts/style" }
 pug-tokens = { path = "../../contracts/tokens" }
+anyhow = "1"
 
 [package.metadata.pug]
 public-intent = true

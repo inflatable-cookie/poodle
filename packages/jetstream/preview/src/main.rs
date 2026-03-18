@@ -96,7 +96,6 @@ struct PreviewState {
     theme: pug_jetstream::JetstreamThemeProvider,
     game_ui: GameUi,
     ui_pass: UiPass,
-    shell: Option<shell::ShellNodes>,
     /// Jetstream Theme for draw command collection.
     draw_theme: Theme,
     /// Text overlay rendering.
@@ -124,6 +123,11 @@ struct PreviewState {
     /// Frames remaining to suppress scroll events (prevents trackpad momentum
     /// from immediately re-scrolling after a navigation change rebuilds the tree).
     scroll_suppress_frames: u8,
+    /// Cached text sprite instances per (clip group, font size), regenerated only on rebuild.
+    /// Each entry: (scissor_rect, scaled_font_size, instances).
+    cached_text: Vec<(Option<[u32; 4]>, f32, Vec<SpriteInstance>)>,
+    /// Whether the text cache needs regenerating (deferred to once per frame).
+    text_cache_dirty: bool,
 }
 
 impl PreviewState {
@@ -203,7 +207,6 @@ impl PreviewState {
             theme: pug_theme,
             game_ui,
             ui_pass,
-            shell: None,
             draw_theme,
             text_pipeline,
             text_camera,
@@ -220,6 +223,8 @@ impl PreviewState {
             screenshot_requested: false,
             surface_format: gpu.surface_format,
             scroll_suppress_frames: 0,
+            cached_text: Vec::new(),
+            text_cache_dirty: false,
         };
 
         // Initial build
@@ -237,69 +242,19 @@ impl PreviewState {
         self.theme = pug_jetstream::JetstreamThemeProvider::from_theme(theme_def)
             .with_scale_factor(self.theme.scale_factor());
 
-        // Save current scroll offsets before tearing down the tree.
-        let saved_sidebar_scroll = if !self.app.reset_sidebar_scroll {
-            self.shell.as_ref().and_then(|s| {
-                self.game_ui.tree.get(s.sidebar).and_then(|n| {
-                    if let Widget::List { scroll_offset } = &n.widget {
-                        Some(*scroll_offset)
-                    } else {
-                        None
-                    }
-                })
-            })
-        } else {
-            None
-        };
-        let saved_content_scroll = if !self.app.reset_content_scroll {
-            self.shell.as_ref().and_then(|s| {
-                self.game_ui.tree.get(s.content).and_then(|n| {
-                    if let Widget::List { scroll_offset } = &n.widget {
-                        Some(*scroll_offset)
-                    } else {
-                        None
-                    }
-                })
-            })
-        } else {
-            None
-        };
+        // Pure function: state → UI description.
+        let ui = shell::build_shell(&self.app, &self.theme);
 
-        // Clear existing tree
-        if let Some(ref shell) = self.shell {
-            self.game_ui.tree.remove(shell.root);
-        }
-        let shell = shell::build_shell(&mut self.game_ui.tree, &self.app, &self.theme);
-        self.shell = Some(shell);
+        // Framework handles everything: clear → materialize → layout.
+        // Scroll offsets are preserved automatically via JsEl ids.
+        self.game_ui.render_immediate(&ui);
+
         self.app.dirty = false;
         self.app.reset_sidebar_scroll = false;
         self.app.reset_content_scroll = false;
 
-        // Restore saved scroll offsets.
-        if let Some(offset) = saved_sidebar_scroll {
-            if let Some(ref s) = self.shell {
-                if let Some(n) = self.game_ui.tree.get_mut(s.sidebar) {
-                    if let Widget::List { scroll_offset } = &mut n.widget {
-                        *scroll_offset = offset;
-                    }
-                }
-            }
-        }
-        if let Some(offset) = saved_content_scroll {
-            if let Some(ref s) = self.shell {
-                if let Some(n) = self.game_ui.tree.get_mut(s.content) {
-                    if let Widget::List { scroll_offset } = &mut n.widget {
-                        *scroll_offset = offset;
-                    }
-                }
-            }
-        }
-
-        // Update the draw theme (used for draw command collection) so that
-        // theme changes are reflected in the rendered output.
+        // Update draw theme and clear color.
         self.draw_theme = build_draw_theme(&self.theme);
-
-        // Update clear color in case the theme changed.
         let canvas = theme_bridge::canvas_background(&self.theme);
         self.clear_color = wgpu::Color {
             r: canvas.x as f64,
@@ -308,20 +263,14 @@ impl PreviewState {
             a: 1.0,
         };
 
-        // Pre-create glyph atlases for every font size used across shell
-        // and specimens. We need atlases at *logical* sizes (for layout text
-        // measurement via TextMeasure) AND at *physical* sizes (for GPU
-        // rendering via convert_text_commands). Both live in the same
-        // TextAtlasSet keyed by their pixel size.
+        // Pre-create glyph atlases.
         let scale = self.game_ui.scale_factor;
         let all_logical_sizes: &[f32] = &[
             9.0, 10.0, 11.0, 12.0, 13.0, 14.0, 16.0, 18.0, 20.0,
         ];
         if let Some(ref mut atlases) = self.game_ui.text_atlases {
             for &sz in all_logical_sizes {
-                // Logical atlas (for TextMeasure during layout).
                 let _ = atlases.get_or_create(sz);
-                // Physical atlas (for GPU rendering at Retina scale).
                 let phys = (sz * scale).round().max(1.0);
                 if (phys - sz).abs() > 0.5 {
                     let _ = atlases.get_or_create(phys);
@@ -329,10 +278,69 @@ impl PreviewState {
             }
         }
 
-        // Use GameUi::layout() which includes text measurement, so that
-        // Sizing::Fit nodes (buttons, labels) get correct intrinsic sizes.
         self.game_ui.theme = self.draw_theme.clone();
-        self.game_ui.layout();
+
+        // Cache text sprite instances — text layout is expensive (cosmic-text
+        // shaping) but only changes on rebuild, not on hover/focus changes.
+        self.rebuild_text_cache();
+    }
+
+    /// Regenerate cached text sprite instances from current tree state.
+    fn rebuild_text_cache(&mut self) {
+        let scale = self.game_ui.scale_factor;
+        let draw_commands = collect_draw_commands(
+            &self.game_ui.tree,
+            &self.game_ui.focus,
+            &self.draw_theme,
+        );
+        let clip_groups = group_by_clip_rect(&draw_commands);
+        let phys_w = self.game_ui.screen_width * scale;
+        let phys_h = self.game_ui.screen_height * scale;
+
+        self.cached_text.clear();
+        for group in &clip_groups {
+            let scissor = group.scissor_physical(scale, phys_w, phys_h);
+
+            // Collect all text instances for this clip group.
+            let mut all_instances = Vec::new();
+
+            // Get unique font sizes in this group.
+            let mut font_sizes: Vec<f32> = Vec::new();
+            for cmd in &group.commands {
+                if cmd.text.is_some() {
+                    let scaled = (cmd.text_size * scale).round().max(1.0);
+                    if !font_sizes.iter().any(|s| (*s - scaled).abs() < 0.5) {
+                        font_sizes.push(scaled);
+                    }
+                }
+            }
+
+            for scaled_size in &font_sizes {
+                let filtered: Vec<UiDrawCommand> = group.commands
+                    .iter()
+                    .filter(|cmd| {
+                        if cmd.text.is_some() {
+                            let s = (cmd.text_size * scale).round().max(1.0);
+                            (s - *scaled_size).abs() < 0.5
+                        } else {
+                            false
+                        }
+                    })
+                    .cloned()
+                    .collect();
+
+                if let Some(ref mut atlases) = self.game_ui.text_atlases {
+                    let instances = convert_text_commands(&filtered, atlases, scale);
+                    if !instances.is_empty() {
+                        all_instances.push((*scaled_size, instances));
+                    }
+                }
+            }
+
+            for (scaled_size, instances) in all_instances {
+                self.cached_text.push((scissor, scaled_size, instances));
+            }
+        }
     }
 
 
@@ -387,7 +395,14 @@ impl PreviewState {
                             if let Some(hit_id) =
                                 self.game_ui.tree.hit_test(self.mouse_x, self.mouse_y)
                             {
-                                self.game_ui.focus.set_focus(Some(hit_id));
+                                // Only focus nodes that are explicitly focusable.
+                                let is_focusable = self.game_ui.tree.get(hit_id)
+                                    .map_or(false, |n| n.style.focusable);
+                                if is_focusable {
+                                    self.game_ui.focus.set_focus(Some(hit_id));
+                                } else {
+                                    self.game_ui.focus.set_focus(None);
+                                }
                                 self.handle_activation(hit_id);
                             }
                         }
@@ -400,6 +415,7 @@ impl PreviewState {
                     if self.scroll_suppress_frames == 0 {
                         let scroll_amount = -*delta_y as f32;
                         self.game_ui.scroll_at(self.mouse_x, self.mouse_y, scroll_amount);
+                        self.text_cache_dirty = true;
                     }
                 }
                 _ => {}
@@ -444,6 +460,12 @@ impl PreviewState {
             self.sync_atlas_textures(frame.gpu);
         }
 
+        // Deferred text cache rebuild (coalesces multiple scroll events per frame).
+        if self.text_cache_dirty {
+            self.rebuild_text_cache();
+            self.text_cache_dirty = false;
+        }
+
         // ── Render ──
         if let Some(surface_view) = frame.surface_view {
             let scale = frame.scale_factor as f32;
@@ -459,7 +481,7 @@ impl PreviewState {
                 },
             );
 
-            // 1) Clear pass — fill surface with canvas background color.
+            // 1) Clear pass
             {
                 let _clear = encoder.begin_render_pass(&wgpu::RenderPassDescriptor {
                     label: Some("clear_pass"),
@@ -477,11 +499,7 @@ impl PreviewState {
                 });
             }
 
-            // 2) UI quad + text passes — grouped by clip_rect for scissor clipping.
-            //
-            // Group draw commands by their clip_rect so we can render each group
-            // with the correct wgpu scissor rect. This ensures scroll container
-            // contents are visually clipped to their parent bounds.
+            // 2) UI quad passes
             let clip_groups = group_by_clip_rect(&draw_commands);
             let phys_w = frame.window_width as f32;
             let phys_h = frame.window_height as f32;
@@ -506,16 +524,43 @@ impl PreviewState {
 
             frame.gpu.queue.submit(std::iter::once(encoder.finish()));
 
-            // 3) Text sprite passes — one per clip group, each with scissor.
-            for group in &clip_groups {
-                let scissor = group.scissor_physical(scale, phys_w, phys_h);
-                self.render_all_text_clipped(
-                    frame.gpu,
-                    surface_view,
-                    &group.commands,
-                    scale,
-                    scissor,
+            // 3) Text sprite passes — use cached instances (no cosmic-text per frame)
+            // Pre-ensure all atlas textures exist.
+            let font_sizes_needed: Vec<f32> = self.cached_text.iter()
+                .map(|(_, sz, _)| *sz)
+                .collect();
+            for sz in &font_sizes_needed {
+                self.ensure_atlas_texture(frame.gpu, *sz);
+            }
+            // Render each cached batch.
+            for i in 0..self.cached_text.len() {
+                let (scissor, scaled_size, ref instances) = self.cached_text[i];
+                if instances.is_empty() {
+                    continue;
+                }
+                let instance_count = instances.len() as u32;
+                // Upload instances — need to reborrow self mutably.
+                if instances.len() > self.text_instance_capacity {
+                    self.text_instance_capacity = instances.len().next_power_of_two();
+                    self.text_instance_buffer = frame.gpu.device.create_buffer(&wgpu::BufferDescriptor {
+                        label: Some("text_instance_buffer"),
+                        size: (self.text_instance_capacity * std::mem::size_of::<SpriteInstance>()) as u64,
+                        usage: wgpu::BufferUsages::VERTEX | wgpu::BufferUsages::COPY_DST,
+                        mapped_at_creation: false,
+                    });
+                }
+                frame.gpu.queue.write_buffer(
+                    &self.text_instance_buffer,
+                    0,
+                    bytemuck::cast_slice(instances),
                 );
+
+                if let Some(atlas_idx) = self.text_atlas_textures
+                    .iter()
+                    .position(|(s, _)| (*s - scaled_size).abs() < 0.5)
+                {
+                    self.render_text_batch(frame.gpu, surface_view, instance_count, atlas_idx, scissor);
+                }
             }
 
             // 4) Screenshot capture (if requested).
@@ -530,47 +575,51 @@ impl PreviewState {
 
     /// Handle activation of a UI node (from click or keyboard).
     fn handle_activation(&mut self, node_id: UiNodeId) {
-        if let Some(ref shell) = self.shell {
-            if let Some(tab_idx) = shell::tab_index_for_node(shell, node_id) {
-                if let Some(&section) = Section::ALL.get(tab_idx) {
+        let token_key = self.game_ui.tree.get(node_id)
+            .and_then(|n| n.style.token_key.clone());
+
+        match shell::parse_action(token_key.as_deref()) {
+            shell::ShellAction::SelectTab(idx) => {
+                if let Some(&section) = Section::ALL.get(idx) {
                     self.app.set_section(section);
                 }
             }
-            if let Some(item_idx) = shell::sidebar_index_for_node(shell, node_id) {
+            shell::ShellAction::SelectSidebarItem(idx) => {
                 match self.app.section {
                     Section::Demo => {
-                        if let Some(&screen) = DemoScreen::ALL.get(item_idx) {
+                        if let Some(&screen) = DemoScreen::ALL.get(idx) {
                             self.app.set_demo_screen(screen);
                         }
                     }
                     _ => {
-                        self.app.set_active_component(Some(item_idx));
+                        self.app.set_active_component(Some(idx));
                     }
                 }
             }
-            if let Some(idx) = shell::theme_index_for_node(shell, node_id) {
+            shell::ShellAction::SelectTheme(idx) => {
                 if let Some(&preset) = ThemePreset::ALL.get(idx) {
                     self.app.set_theme(preset);
                 }
             }
-            if let Some(idx) = shell::density_index_for_node(shell, node_id) {
+            shell::ShellAction::SelectDensity(idx) => {
                 if let Some(&density) = Density::ALL.get(idx) {
                     self.app.set_density(density);
                 }
             }
-            if let Some(idx) = shell::size_index_for_node(shell, node_id) {
+            shell::ShellAction::SelectSize(idx) => {
                 if let Some(&size) = ControlSize::ALL.get(idx) {
                     self.app.set_control_size(size);
                 }
             }
-            if let Some(probe_idx) = shell::probe_index_for_node(shell, node_id) {
-                match probe_idx {
+            shell::ShellAction::ToggleProbe(idx) => {
+                match idx {
                     0 => self.app.toggle_disabled(),
                     1 => self.app.toggle_invalid(),
                     2 => self.app.toggle_busy(),
                     _ => {}
                 }
             }
+            shell::ShellAction::None => {}
         }
     }
 
@@ -617,13 +666,6 @@ impl PreviewState {
         }
     }
 
-    /// Find the GPU texture for the given scaled pixel font size.
-    fn find_atlas_texture(&self, scaled_size: f32) -> Option<&GpuTexture> {
-        self.text_atlas_textures
-            .iter()
-            .find(|(s, _)| (*s - scaled_size).abs() < 0.5)
-            .map(|(_, t)| t)
-    }
 
     /// Ensure a GPU texture exists for the given scaled font size, creating it
     /// from the TextAtlasSet if needed. Also re-uploads if the atlas is dirty.

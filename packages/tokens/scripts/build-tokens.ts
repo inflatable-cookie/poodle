@@ -625,6 +625,15 @@ function buildRustConstants(entries: ResolvedTokenEntry[], stripPrefix: string):
     .join("\n");
 }
 
+function buildRustSemanticPathConstants(entries: ResolvedTokenEntry[], stripPrefix: string): string {
+  return entries
+    .map(
+      (entry) =>
+        `pub const ${rustConstName(entry.path, stripPrefix)}: &str = ${jsString(entry.path)};`,
+    )
+    .join("\n");
+}
+
 function buildRustDefinitionArray(entries: ResolvedTokenEntry[]): string {
   return entries
     .map(
@@ -655,7 +664,7 @@ ${buildRustConstants(primitiveEntries, "primitives")}
 writeFile(
   "rust/semantic.rs",
   `${formatHeader("//")}
-${buildRustConstants(semanticEntries, "semantic")}
+${buildRustSemanticPathConstants(semanticEntries, "semantic")}
 `,
 );
 

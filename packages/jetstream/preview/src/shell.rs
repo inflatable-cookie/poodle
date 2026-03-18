@@ -1,531 +1,320 @@
-//! Navigation shell — builds the UiTree structure for the preview app layout.
+//! Navigation shell — pure function building the preview app layout as JsEl.
 //!
 //! Layout:
 //! ```text
-//! Root (Column, Grow×Grow, panel bg)
-//! ├── TabBar (Row, Fixed height 44px, surface bg, bottom border)
-//! │   ├── Title "Pug" (Label, bold 14px)
-//! │   ├── Tab "Primitives" (Button, focusable)
-//! │   ├── Tab "Composites" (Button, focusable)
-//! │   ├── Tab "Demo" (Button, focusable)
-//! │   └── Tab "Tokens" (Button, focusable)
-//! ├── ContentArea (Row, Grow×Grow)
-//! │   ├── Sidebar (Column, Fixed 224px, overflow Scroll, right border)
-//! │   │   └── Items...
-//! │   └── SpecimenArea (Column, Grow, padding 16px, overflow Scroll)
-//! │       └── Placeholder label
+//! Root (Column, Grow)
+//! ├── TabBar (Row, h=44, surface bg, bottom border)
+//! │   ├── "Pug" title
+//! │   └── Tab buttons...
+//! ├── ControlsBar (Row, h=56, surface bg, bottom border)
+//! │   ├── Theme group
+//! │   ├── Density group
+//! │   ├── Size group
+//! │   └── State probes
+//! └── ContentArea (Row, Grow)
+//!     ├── Sidebar (List, w=224, overflow scroll)
+//!     │   └── Items...
+//!     └── SpecimenArea (List, Grow, overflow scroll)
+//!         └── Content...
 //! ```
 
-use jetstream_runtime::game_ui::*;
-use pug_adapter::ThemeProvider;
-use pug_layout::{CrossAxisAlignment, LayoutDirection, LayoutEdges, LayoutIntent, LayoutSizing, MainAxisAlignment};
+use jetstream_runtime::ui_element::*;
+use pug_jetstream::JetstreamThemeProvider;
+use pug_jetstream_components::theme_ext::*;
 
-use crate::app_state::{AppState, ControlSize, Density, Section, ThemePreset};
+use crate::app_state::*;
 use crate::component_registry;
 use crate::specimens;
-use crate::theme_bridge;
 
-/// Node IDs for the key shell parts, so we can update them on state change.
-pub struct ShellNodes {
-    pub root: UiNodeId,
-    pub tab_bar: UiNodeId,
-    pub sidebar: UiNodeId,
-    pub content: UiNodeId,
-    /// Tab button nodes, in the same order as Section::ALL.
-    pub tabs: Vec<UiNodeId>,
-    /// Sidebar list item nodes, in the order of current section's components.
-    pub sidebar_items: Vec<UiNodeId>,
-    /// Theme toggle button nodes, in order of ThemePreset::ALL.
-    pub theme_buttons: Vec<UiNodeId>,
-    /// Density toggle button nodes, in order of Density::ALL.
-    pub density_buttons: Vec<UiNodeId>,
-    /// Size toggle button nodes, in order of ControlSize::ALL.
-    pub size_buttons: Vec<UiNodeId>,
-    /// State probe button nodes: [disabled, invalid, busy].
-    pub probe_buttons: [UiNodeId; 3],
+/// Build the entire shell as a pure JsEl tree.
+pub fn build_shell(state: &AppState, theme: &JetstreamThemeProvider) -> JsEl {
+    let bg_panel = resolve_color(theme, "semantic.color.background.panel");
+    let bg_surface = resolve_color(theme, "semantic.color.background.surface");
+    let border = resolve_color(theme, "semantic.color.border.subtle");
+
+    div().flex_col().grow().bg(bg_panel)
+        .child(build_tab_bar(state, theme, bg_surface, border))
+        .child(build_controls_bar(state, theme, bg_surface, border))
+        .child(
+            div().flex_row().grow()
+                .child(build_sidebar(state, theme, bg_surface, border))
+                .child(build_content_area(state, theme))
+        )
 }
 
-/// Build the entire shell tree. Returns the root node ID and tracked sub-nodes.
-pub fn build_shell(
-    tree: &mut UiTree,
+/// Tab bar with section navigation.
+fn build_tab_bar(
     state: &AppState,
-    theme: &dyn ThemeProvider,
-) -> ShellNodes {
-    let bg_panel = theme_bridge::panel_background(theme);
-    let bg_surface = theme_bridge::surface_background(theme);
-    let text_primary = theme_bridge::text_primary(theme);
-    let text_secondary = theme_bridge::text_secondary(theme);
-    let border = theme_bridge::border_subtle(theme);
-    let accent = theme_bridge::accent_base(theme);
+    theme: &JetstreamThemeProvider,
+    bg_surface: glam::Vec4,
+    border: glam::Vec4,
+) -> JsEl {
+    let text_primary = resolve_color(theme, "semantic.color.text.primary");
+    let text_secondary = resolve_color(theme, "semantic.color.text.secondary");
+    let accent = resolve_color(theme, "semantic.color.accent.base");
 
-    // ── Root ──
-    let root = tree.create_node(Widget::Panel,
-        pug_jetstream::map_layout(&LayoutIntent::new()
-            .with_direction(LayoutDirection::Column)
-            .with_width(LayoutSizing::Grow)
-            .with_height(LayoutSizing::Grow)),
-        NodeStyle { background: Some(bg_panel), ..NodeStyle::default() });
-    tree.set_root(root);
+    let mut bar = div().flex_row().w_full().h(44.0).px(8.0).gap(4.0)
+        .items_center()
+        .bg(bg_surface).border_1().border_color(border)
+        .child(
+            label("Pug").text_color(text_primary).text_size(14.0).pr(12.0).pl(4.0)
+        );
 
-    // ── Tab bar ──
-    let tab_bar = tree.create_node(Widget::Panel,
-        pug_jetstream::map_layout(&LayoutIntent::new()
-            .with_direction(LayoutDirection::Row)
-            .with_width(LayoutSizing::Grow)
-            .with_height(LayoutSizing::Fixed(44.0))
-            .with_padding(LayoutEdges::uniform(8.0))
-            .with_gap(4.0)
-            .with_alignment(MainAxisAlignment::Start, CrossAxisAlignment::Center)),
-        NodeStyle {
-            background: Some(bg_surface),
-            border_color: Some(border),
-            border_width: 1.0,
-            ..NodeStyle::default()
-        });
-    tree.add_child(root, tab_bar);
-
-    // Title
-    let title = tree.create_node(Widget::Label { text: "Pug".to_string() },
-        pug_jetstream::map_layout(&LayoutIntent::new()
-            .with_padding(LayoutEdges { top: 0.0, right: 12.0, bottom: 0.0, left: 4.0 })),
-        NodeStyle { text_color: Some(text_primary), text_size: Some(14.0), ..NodeStyle::default() });
-    tree.add_child(tab_bar, title);
-
-    // Tab buttons
-    let mut tabs = Vec::new();
     for &section in Section::ALL {
         let is_active = section == state.section;
-        let tab_bg = if is_active {
-            Some(theme_bridge::tint(accent, 0.18))
-        } else {
-            None
-        };
+        let tab_bg = if is_active { Some(tint(accent, 0.18)) } else { None };
         let tab_text = if is_active { text_primary } else { text_secondary };
-        let tab_border = if is_active {
-            Some(theme_bridge::tint(accent, 0.56))
-        } else {
-            None
-        };
+        let tab_border = if is_active { Some(tint(accent, 0.56)) } else { None };
 
-        let tab = tree.create_node(Widget::Button {
-            label: section.label().to_string(),
-            pressed: false,
-            hovered: false,
-        },
-        pug_jetstream::map_layout(&LayoutIntent::new()
-            .with_height(LayoutSizing::Fixed(28.0))
-            .with_padding(LayoutEdges { top: 0.0, right: 12.0, bottom: 0.0, left: 12.0 })
-            .with_alignment(MainAxisAlignment::Center, CrossAxisAlignment::Center)),
-        NodeStyle {
-            corner_radii: [6.0; 4],
-            background: tab_bg,
-            border_color: tab_border,
-            border_width: if is_active { 1.0 } else { 0.0 },
-            text_color: Some(tab_text),
-            text_size: Some(12.0),
-            focusable: true,
-            ..NodeStyle::default()
-        });
-        tree.add_child(tab_bar, tab);
-        tabs.push(tab);
+        bar = bar.child(
+            button(section.label())
+                .id(format!("tab:{}", section.label()))
+                .h(28.0).px(12.0)
+                .items_center().justify_center()
+                .rounded(6.0)
+                .bg_opt(tab_bg)
+                .border(if is_active { 1.0 } else { 0.0 })
+                .border_color_opt(tab_border)
+                .text_color(tab_text).text_size(12.0)
+                .focusable()
+        );
     }
 
-    // ── Display controls bar ──
-    let (theme_buttons, density_buttons, size_buttons, probe_buttons) =
-        build_display_controls(tree, root, state, theme);
-
-    // ── Content area ──
-    let content_area = tree.create_node(Widget::Panel,
-        pug_jetstream::map_layout(&LayoutIntent::new()
-            .with_direction(LayoutDirection::Row)
-            .with_width(LayoutSizing::Grow)
-            .with_height(LayoutSizing::Grow)),
-        NodeStyle { ..NodeStyle::default() });
-    tree.add_child(root, content_area);
-
-    // ── Sidebar ──
-    let sidebar = tree.create_node(Widget::List { scroll_offset: 0.0 },
-        pug_jetstream::map_layout(&LayoutIntent::new()
-            .with_direction(LayoutDirection::Column)
-            .with_width(LayoutSizing::Fixed(224.0))
-            .with_height(LayoutSizing::Grow)
-            .with_padding(LayoutEdges { top: 4.0, right: 0.0, bottom: 4.0, left: 0.0 })
-            .with_gap(1.0)
-            .with_overflow(pug_layout::LayoutOverflow::Hidden, pug_layout::LayoutOverflow::Scroll)),
-        NodeStyle {
-            background: Some(bg_surface),
-            border_color: Some(border),
-            border_width: 1.0,
-            overflow: Overflow::Scroll,
-            ..NodeStyle::default()
-        });
-    tree.add_child(content_area, sidebar);
-
-    // Sidebar items
-    let sidebar_items = build_sidebar_items(tree, sidebar, state, theme);
-
-    // ── Specimen area ──
-    // Must be a List widget (not Panel) so that scroll_at() can find it.
-    let content = tree.create_node(Widget::List { scroll_offset: 0.0 },
-        pug_jetstream::map_layout(&LayoutIntent::new()
-            .with_direction(LayoutDirection::Column)
-            .with_width(LayoutSizing::Grow)
-            .with_height(LayoutSizing::Grow)
-            .with_padding(LayoutEdges::uniform(16.0))
-            .with_overflow(pug_layout::LayoutOverflow::Hidden, pug_layout::LayoutOverflow::Scroll)),
-        NodeStyle { overflow: Overflow::Scroll, ..NodeStyle::default() });
-    tree.add_child(content_area, content);
-
-    // Build content based on current state (specimen page, catalogue landing, or placeholder)
-    let content_node = specimens::build_content(tree, state, theme);
-    tree.add_child(content, content_node);
-
-    ShellNodes {
-        root,
-        tab_bar,
-        sidebar,
-        content,
-        tabs,
-        sidebar_items,
-        theme_buttons,
-        density_buttons,
-        size_buttons,
-        probe_buttons,
-    }
+    bar
 }
 
-/// Build sidebar list items for the current section.
-fn build_sidebar_items(
-    tree: &mut UiTree,
-    sidebar: UiNodeId,
+/// Controls bar with theme, density, size toggles and state probes.
+fn build_controls_bar(
     state: &AppState,
-    theme: &dyn ThemeProvider,
-) -> Vec<UiNodeId> {
-    match state.section {
-        Section::Demo => build_demo_sidebar_items(tree, sidebar, state, theme),
-        _ => build_component_sidebar_items(tree, sidebar, state, theme),
-    }
-}
+    theme: &JetstreamThemeProvider,
+    bg_surface: glam::Vec4,
+    border: glam::Vec4,
+) -> JsEl {
+    let text_secondary = resolve_color(theme, "semantic.color.text.secondary");
 
-/// Build sidebar items for Primitives/Composites sections (component list).
-fn build_component_sidebar_items(
-    tree: &mut UiTree,
-    sidebar: UiNodeId,
-    state: &AppState,
-    theme: &dyn ThemeProvider,
-) -> Vec<UiNodeId> {
-    let components = component_registry::components_for_section(state.section);
-    let text_primary = theme_bridge::text_primary(theme);
-    let text_secondary = theme_bridge::text_secondary(theme);
-    let accent = theme_bridge::accent_base(theme);
-    let active_idx = state.active_component();
-
-    let mut items = Vec::with_capacity(components.len());
-    for (i, entry) in components.iter().enumerate() {
-        let is_active = active_idx == Some(i);
-        let item = build_sidebar_button(tree, sidebar, entry.display_name, is_active,
-            text_primary, text_secondary, accent);
-        items.push(item);
-    }
-
-    items
-}
-
-/// Build sidebar items for the Demo section (demo screen list).
-fn build_demo_sidebar_items(
-    tree: &mut UiTree,
-    sidebar: UiNodeId,
-    state: &AppState,
-    theme: &dyn ThemeProvider,
-) -> Vec<UiNodeId> {
-    use crate::app_state::DemoScreen;
-
-    let text_primary = theme_bridge::text_primary(theme);
-    let text_secondary = theme_bridge::text_secondary(theme);
-    let accent = theme_bridge::accent_base(theme);
-
-    let mut items = Vec::with_capacity(DemoScreen::ALL.len());
-    for (_i, &screen) in DemoScreen::ALL.iter().enumerate() {
-        let is_active = state.active_demo_screen == screen;
-        let item = build_sidebar_button(tree, sidebar, screen.label(), is_active,
-            text_primary, text_secondary, accent);
-        items.push(item);
-    }
-
-    items
-}
-
-/// Create a single sidebar button with active/inactive styling.
-fn build_sidebar_button(
-    tree: &mut UiTree,
-    sidebar: UiNodeId,
-    label: &str,
-    is_active: bool,
-    text_primary: glam::Vec4,
-    text_secondary: glam::Vec4,
-    accent: glam::Vec4,
-) -> UiNodeId {
-    let item_bg = if is_active {
-        Some(theme_bridge::tint(accent, 0.14))
-    } else {
-        None
-    };
-    let item_text = if is_active { text_primary } else { text_secondary };
-
-    let item = tree.create_node(Widget::Button {
-        label: label.to_string(),
-        pressed: false,
-        hovered: false,
-    },
-    pug_jetstream::map_layout(&LayoutIntent::new()
-        .with_direction(LayoutDirection::Row)
-        .with_width(LayoutSizing::Grow)
-        .with_height(LayoutSizing::Fixed(32.0))
-        .with_padding(LayoutEdges { top: 0.0, right: 8.0, bottom: 0.0, left: 12.0 })
-        .with_alignment(MainAxisAlignment::Start, CrossAxisAlignment::Center)),
-    NodeStyle {
-        background: item_bg,
-        text_color: Some(item_text),
-        text_size: Some(12.0),
-        focusable: true,
-        ..NodeStyle::default()
-    });
-    tree.add_child(sidebar, item);
-    item
-}
-
-/// Determine which tab was clicked, given a node ID.
-pub fn tab_index_for_node(shell: &ShellNodes, node: UiNodeId) -> Option<usize> {
-    shell.tabs.iter().position(|&t| t == node)
-}
-
-/// Determine which sidebar item was clicked, given a node ID.
-pub fn sidebar_index_for_node(shell: &ShellNodes, node: UiNodeId) -> Option<usize> {
-    shell.sidebar_items.iter().position(|&t| t == node)
-}
-
-/// Determine which theme button was clicked.
-pub fn theme_index_for_node(shell: &ShellNodes, node: UiNodeId) -> Option<usize> {
-    shell.theme_buttons.iter().position(|&t| t == node)
-}
-
-/// Determine which density button was clicked.
-pub fn density_index_for_node(shell: &ShellNodes, node: UiNodeId) -> Option<usize> {
-    shell.density_buttons.iter().position(|&t| t == node)
-}
-
-/// Determine which size button was clicked.
-pub fn size_index_for_node(shell: &ShellNodes, node: UiNodeId) -> Option<usize> {
-    shell.size_buttons.iter().position(|&t| t == node)
-}
-
-/// Which state probe was clicked? Returns 0=disabled, 1=invalid, 2=busy.
-pub fn probe_index_for_node(shell: &ShellNodes, node: UiNodeId) -> Option<usize> {
-    shell.probe_buttons.iter().position(|&t| t == node)
-}
-
-// ── Display controls bar ──
-
-/// Build the display controls bar with theme, density, size toggles and state probes.
-/// Returns (theme_buttons, density_buttons, size_buttons, probe_buttons).
-fn build_display_controls(
-    tree: &mut UiTree,
-    parent: UiNodeId,
-    state: &AppState,
-    theme: &dyn ThemeProvider,
-) -> (Vec<UiNodeId>, Vec<UiNodeId>, Vec<UiNodeId>, [UiNodeId; 3]) {
-    let text_secondary = theme_bridge::text_secondary(theme);
-    let bg_surface = theme_bridge::surface_background(theme);
-    let border = theme_bridge::border_subtle(theme);
-
-    // Controls bar container
-    let bar = tree.create_node(Widget::Panel,
-        pug_jetstream::map_layout(&LayoutIntent::new()
-            .with_direction(LayoutDirection::Row)
-            .with_width(LayoutSizing::Grow)
-            .with_height(LayoutSizing::Fixed(56.0))
-            .with_padding(LayoutEdges { top: 8.0, right: 16.0, bottom: 8.0, left: 16.0 })
-            .with_gap(24.0)
-            .with_alignment(MainAxisAlignment::Start, CrossAxisAlignment::Center)),
-        NodeStyle {
-            background: Some(bg_surface),
-            border_color: Some(border),
-            border_width: 1.0,
-            ..NodeStyle::default()
-        });
-    tree.add_child(parent, bar);
+    let mut bar = div().flex_row().w_full().h(56.0).px(16.0).gap(24.0)
+        .items_center()
+        .bg(bg_surface).border_1().border_color(border);
 
     // Theme group
     let theme_labels: Vec<&str> = ThemePreset::ALL.iter().map(|t| t.label()).collect();
     let theme_active = ThemePreset::ALL.iter().position(|&t| t == state.theme_preset).unwrap_or(0);
-    let theme_buttons = build_toggle_group(tree, bar, "THEME", &theme_labels, theme_active, state, theme);
+    bar = bar.child(build_toggle_group("THEME", "theme", &theme_labels, theme_active, theme));
 
     // Density group
     let density_labels: Vec<&str> = Density::ALL.iter().map(|d| d.label()).collect();
     let density_active = Density::ALL.iter().position(|&d| d == state.density).unwrap_or(0);
-    let density_buttons = build_toggle_group(tree, bar, "DENSITY", &density_labels, density_active, state, theme);
+    bar = bar.child(build_toggle_group("DENSITY", "density", &density_labels, density_active, theme));
 
     // Size group
     let size_labels: Vec<&str> = ControlSize::ALL.iter().map(|s| s.label()).collect();
     let size_active = ControlSize::ALL.iter().position(|&s| s == state.control_size).unwrap_or(0);
-    let size_buttons = build_toggle_group(tree, bar, "SIZE", &size_labels, size_active, state, theme);
+    bar = bar.child(build_toggle_group("SIZE", "size", &size_labels, size_active, theme));
 
     // Separator
-    let sep = tree.create_node(Widget::Panel,
-        pug_jetstream::map_layout(&LayoutIntent::new()
-            .with_width(LayoutSizing::Fixed(1.0))
-            .with_height(LayoutSizing::Fixed(28.0))),
-        NodeStyle { background: Some(border), ..NodeStyle::default() });
-    tree.add_child(bar, sep);
+    bar = bar.child(div().w(1.0).h(28.0).bg(border));
 
     // State probes
-    let probes_group = tree.create_node(Widget::Panel,
-        pug_jetstream::map_layout(&LayoutIntent::new()
-            .with_direction(LayoutDirection::Column)
-            .with_gap(4.0)),
-        NodeStyle { ..NodeStyle::default() });
-    tree.add_child(bar, probes_group);
+    let probes = div().flex_col().gap(4.0)
+        .child(label("STATE").text_color(text_secondary).text_size(9.0))
+        .child(
+            div().flex_row().gap(12.0).items_center()
+                .child(build_probe_toggle("disabled", state.disabled, theme))
+                .child(build_probe_toggle("invalid", state.invalid, theme))
+                .child(build_probe_toggle("busy", state.busy, theme))
+        );
+    bar = bar.child(probes);
 
-    let probes_label = tree.create_node(Widget::Label { text: "STATE".to_string() },
-        pug_jetstream::map_layout(&LayoutIntent::new()),
-        NodeStyle { text_color: Some(text_secondary), text_size: Some(9.0), ..NodeStyle::default() });
-    tree.add_child(probes_group, probes_label);
-
-    let probes_row = tree.create_node(Widget::Panel,
-        pug_jetstream::map_layout(&LayoutIntent::new()
-            .with_direction(LayoutDirection::Row)
-            .with_gap(12.0)
-            .with_alignment(MainAxisAlignment::Start, CrossAxisAlignment::Center)),
-        NodeStyle { ..NodeStyle::default() });
-    tree.add_child(probes_group, probes_row);
-
-    let probe_disabled = build_probe_toggle(tree, probes_row, "disabled", state.disabled, theme);
-    let probe_invalid = build_probe_toggle(tree, probes_row, "invalid", state.invalid, theme);
-    let probe_busy = build_probe_toggle(tree, probes_row, "busy", state.busy, theme);
-
-    (theme_buttons, density_buttons, size_buttons, [probe_disabled, probe_invalid, probe_busy])
+    bar
 }
 
-/// Build a labeled toggle group (eyebrow label + row of buttons).
+/// A labeled toggle group (eyebrow label + row of buttons).
 fn build_toggle_group(
-    tree: &mut UiTree,
-    parent: UiNodeId,
-    label: &str,
+    eyebrow: &str,
+    id_prefix: &str,
     options: &[&str],
     active: usize,
-    _state: &AppState,
-    theme: &dyn ThemeProvider,
-) -> Vec<UiNodeId> {
-    let text_primary = theme_bridge::text_primary(theme);
-    let text_secondary = theme_bridge::text_secondary(theme);
-    let accent = theme_bridge::accent_base(theme);
-    let border = theme_bridge::border_subtle(theme);
-    let bg_canvas = theme_bridge::canvas_background(theme);
+    theme: &JetstreamThemeProvider,
+) -> JsEl {
+    let text_primary = resolve_color(theme, "semantic.color.text.primary");
+    let text_secondary = resolve_color(theme, "semantic.color.text.secondary");
+    let accent = resolve_color(theme, "semantic.color.accent.base");
+    let border = resolve_color(theme, "semantic.color.border.subtle");
+    let bg_canvas = resolve_color(theme, "semantic.color.background.canvas");
 
-    let group = tree.create_node(Widget::Panel,
-        pug_jetstream::map_layout(&LayoutIntent::new()
-            .with_direction(LayoutDirection::Column)
-            .with_gap(4.0)),
-        NodeStyle { ..NodeStyle::default() });
-    tree.add_child(parent, group);
-
-    // Eyebrow label
-    let lbl = tree.create_node(Widget::Label { text: label.to_string() },
-        pug_jetstream::map_layout(&LayoutIntent::new()),
-        NodeStyle { text_color: Some(text_secondary), text_size: Some(9.0), ..NodeStyle::default() });
-    tree.add_child(group, lbl);
-
-    // Button row
-    let row = tree.create_node(Widget::Panel,
-        pug_jetstream::map_layout(&LayoutIntent::new()
-            .with_direction(LayoutDirection::Row)
-            .with_gap(2.0)),
-        NodeStyle { ..NodeStyle::default() });
-    tree.add_child(group, row);
-
-    let mut buttons = Vec::with_capacity(options.len());
+    let mut row = div().flex_row().gap(2.0);
     for (i, &option) in options.iter().enumerate() {
         let is_active = i == active;
-        let btn_bg = if is_active {
-            Some(theme_bridge::tint(accent, 0.22))
-        } else {
-            Some(theme_bridge::tint(bg_canvas, 0.88))
-        };
-        let btn_border = if is_active {
-            Some(theme_bridge::tint(accent, 0.56))
-        } else {
-            Some(border)
-        };
+        let btn_bg = if is_active { tint(accent, 0.22) } else { tint(bg_canvas, 0.88) };
+        let btn_border = if is_active { tint(accent, 0.56) } else { border };
         let btn_text = if is_active { text_primary } else { text_secondary };
 
-        let btn = tree.create_node(Widget::Button {
-            label: option.to_string(),
-            pressed: false,
-            hovered: false,
-        },
-        pug_jetstream::map_layout(&LayoutIntent::new()
-            .with_height(LayoutSizing::Fixed(26.0))
-            .with_padding(LayoutEdges { top: 0.0, right: 8.0, bottom: 0.0, left: 8.0 })
-            .with_alignment(MainAxisAlignment::Center, CrossAxisAlignment::Center)),
-        NodeStyle {
-            corner_radii: [4.0; 4],
-            background: btn_bg,
-            border_color: btn_border,
-            border_width: 1.0,
-            text_color: Some(btn_text),
-            text_size: Some(10.0),
-            focusable: true,
-            ..NodeStyle::default()
-        });
-        tree.add_child(row, btn);
-        buttons.push(btn);
+        row = row.child(
+            button(option)
+                .id(format!("{id_prefix}:{option}"))
+                .h(26.0).px(8.0)
+                .items_center().justify_center()
+                .rounded(4.0)
+                .bg(btn_bg).border_1().border_color(btn_border)
+                .text_color(btn_text).text_size(10.0)
+                .focusable()
+        );
     }
 
-    buttons
+    div().flex_col().gap(4.0)
+        .child(label(eyebrow).text_color(text_secondary).text_size(9.0))
+        .child(row)
 }
 
-/// Build a single state probe toggle (checkbox-style button).
-fn build_probe_toggle(
-    tree: &mut UiTree,
-    parent: UiNodeId,
-    label: &str,
-    checked: bool,
-    theme: &dyn ThemeProvider,
-) -> UiNodeId {
-    let text_primary = theme_bridge::text_primary(theme);
-    let text_secondary = theme_bridge::text_secondary(theme);
-    let accent = theme_bridge::accent_base(theme);
-    let border = theme_bridge::border_subtle(theme);
+/// A single state probe toggle (checkbox-style button).
+fn build_probe_toggle(name: &str, checked: bool, theme: &JetstreamThemeProvider) -> JsEl {
+    let text_primary = resolve_color(theme, "semantic.color.text.primary");
+    let text_secondary = resolve_color(theme, "semantic.color.text.secondary");
+    let accent = resolve_color(theme, "semantic.color.accent.base");
+    let border = resolve_color(theme, "semantic.color.border.subtle");
 
     let indicator = if checked { "✓ " } else { "○ " };
-    let display = format!("{}{}", indicator, label);
+    let display = format!("{indicator}{name}");
     let text_color = if checked { text_primary } else { text_secondary };
-    let btn_bg = if checked {
-        Some(theme_bridge::tint(accent, 0.14))
-    } else {
-        None
-    };
-    let btn_border = if checked { Some(accent) } else { Some(border) };
+    let btn_bg = if checked { Some(tint(accent, 0.14)) } else { None };
+    let btn_border = if checked { accent } else { border };
 
-    let btn = tree.create_node(Widget::Button {
-        label: display,
-        pressed: false,
-        hovered: false,
-    },
-    pug_jetstream::map_layout(&LayoutIntent::new()
-        .with_height(LayoutSizing::Fixed(24.0))
-        .with_padding(LayoutEdges { top: 0.0, right: 8.0, bottom: 0.0, left: 6.0 })
-        .with_alignment(MainAxisAlignment::Center, CrossAxisAlignment::Center)),
-    NodeStyle {
-        corner_radii: [4.0; 4],
-        background: btn_bg,
-        border_color: btn_border,
-        border_width: 1.0,
-        text_color: Some(text_color),
-        text_size: Some(10.0),
-        focusable: true,
-        ..NodeStyle::default()
-    });
-    tree.add_child(parent, btn);
-    btn
+    button(&display)
+        .id(format!("probe:{name}"))
+        .h(24.0).px(6.0)
+        .items_center().justify_center()
+        .rounded(4.0)
+        .bg_opt(btn_bg).border_1().border_color(btn_border)
+        .text_color(text_color).text_size(10.0)
+        .focusable()
+}
+
+/// Sidebar with component/demo list.
+fn build_sidebar(
+    state: &AppState,
+    theme: &JetstreamThemeProvider,
+    bg_surface: glam::Vec4,
+    border: glam::Vec4,
+) -> JsEl {
+    let text_primary = resolve_color(theme, "semantic.color.text.primary");
+    let text_secondary = resolve_color(theme, "semantic.color.text.secondary");
+    let accent = resolve_color(theme, "semantic.color.accent.base");
+
+    let mut sidebar = div().flex_col().w(224.0).grow().py(4.0).gap(1.0)
+        .overflow_scroll()
+        .id("sidebar")
+        .bg(bg_surface).border_1().border_color(border);
+
+    match state.section {
+        Section::Demo => {
+            for (i, &screen) in DemoScreen::ALL.iter().enumerate() {
+                let is_active = state.active_demo_screen == screen;
+                sidebar = sidebar.child(build_sidebar_item(
+                    screen.label(), &format!("sidebar:{i}"), is_active,
+                    text_primary, text_secondary, accent,
+                ));
+            }
+        }
+        _ => {
+            let components = component_registry::components_for_section(state.section);
+            let active_idx = state.active_component();
+            for (i, entry) in components.iter().enumerate() {
+                let is_active = active_idx == Some(i);
+                sidebar = sidebar.child(build_sidebar_item(
+                    entry.display_name, &format!("sidebar:{i}"), is_active,
+                    text_primary, text_secondary, accent,
+                ));
+            }
+        }
+    }
+
+    sidebar
+}
+
+/// Single sidebar item button.
+fn build_sidebar_item(
+    name: &str,
+    id: &str,
+    is_active: bool,
+    text_primary: glam::Vec4,
+    text_secondary: glam::Vec4,
+    accent: glam::Vec4,
+) -> JsEl {
+    let item_bg = if is_active { Some(tint(accent, 0.14)) } else { None };
+    let item_text = if is_active { text_primary } else { text_secondary };
+
+    button(name)
+        .id(id)
+        .flex_row().h(32.0).self_stretch().px(12.0)
+        .items_center().justify_start()
+        .bg_opt(item_bg)
+        .text_color(item_text).text_size(12.0)
+        .focusable()
+}
+
+/// Content area with specimen or landing page.
+fn build_content_area(state: &AppState, theme: &JetstreamThemeProvider) -> JsEl {
+    div().flex_col().grow().p(16.0)
+        .overflow_scroll()
+        .id("content")
+        .child(specimens::build_content(state, theme))
+}
+
+// ── Interaction helpers ──
+
+/// Parse a clicked node's token_key (set from JsEl.id) to determine what
+/// action to take. Returns a `ShellAction` describing the intent.
+pub enum ShellAction {
+    SelectTab(usize),
+    SelectSidebarItem(usize),
+    SelectTheme(usize),
+    SelectDensity(usize),
+    SelectSize(usize),
+    ToggleProbe(usize), // 0=disabled, 1=invalid, 2=busy
+    None,
+}
+
+/// Parse a node's token_key into a ShellAction.
+pub fn parse_action(token_key: Option<&str>) -> ShellAction {
+    let key = match token_key {
+        Some(k) => k,
+        None => return ShellAction::None,
+    };
+
+    if let Some(tab_name) = key.strip_prefix("tab:") {
+        if let Some(idx) = Section::ALL.iter().position(|s| s.label() == tab_name) {
+            return ShellAction::SelectTab(idx);
+        }
+    }
+    if let Some(idx_str) = key.strip_prefix("sidebar:") {
+        if let Ok(idx) = idx_str.parse::<usize>() {
+            return ShellAction::SelectSidebarItem(idx);
+        }
+    }
+    if let Some(name) = key.strip_prefix("theme:") {
+        if let Some(idx) = ThemePreset::ALL.iter().position(|t| t.label() == name) {
+            return ShellAction::SelectTheme(idx);
+        }
+    }
+    if let Some(name) = key.strip_prefix("density:") {
+        if let Some(idx) = Density::ALL.iter().position(|d| d.label() == name) {
+            return ShellAction::SelectDensity(idx);
+        }
+    }
+    if let Some(name) = key.strip_prefix("size:") {
+        if let Some(idx) = ControlSize::ALL.iter().position(|s| s.label() == name) {
+            return ShellAction::SelectSize(idx);
+        }
+    }
+    if let Some(probe_name) = key.strip_prefix("probe:") {
+        let idx = match probe_name {
+            "disabled" => 0,
+            "invalid" => 1,
+            "busy" => 2,
+            _ => return ShellAction::None,
+        };
+        return ShellAction::ToggleProbe(idx);
+    }
+
+    ShellAction::None
 }

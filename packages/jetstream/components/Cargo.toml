@@ -1,0 +1,14 @@
+[package]
+name = "pug-jetstream-components"
+version = "0.0.0"
+edition = "2021"
+description = "Pug component implementations for Jetstream — token-resolved UI components using the JsEl fluent builder."
+
+[dependencies]
+pug-adapter = { path = "../../contracts/adapter" }
+pug-primitives = { path = "../../contracts/primitives" }
+pug-tokens = { path = "../../contracts/tokens" }
+pug-jetstream = { path = "../adapter" }
+jetstream-runtime = { path = "../../../../jetstream/crates/jetstream-runtime" }
+glam = "0.29"
+taffy = "0.9"

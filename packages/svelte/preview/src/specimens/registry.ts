@@ -35,7 +35,6 @@ import DurationInputSpecimen from "./DurationInputSpecimen.svelte";
 import EditableLabelSpecimen from "./EditableLabelSpecimen.svelte";
 import EmbedInputSpecimen from "./EmbedInputSpecimen.svelte";
 import EmbedPreviewSpecimen from "./EmbedPreviewSpecimen.svelte";
-import EmbedShellSpecimen from "./EmbedShellSpecimen.svelte";
 import EmptyStateSpecimen from "./EmptyStateSpecimen.svelte";
 import EyebrowSpecimen from "./EyebrowSpecimen.svelte";
 import FieldSpecimen from "./FieldSpecimen.svelte";
@@ -43,7 +42,6 @@ import FileUploadSpecimen from "./FileUploadSpecimen.svelte";
 import FilterToolbarSpecimen from "./FilterToolbarSpecimen.svelte";
 import FormActionsSpecimen from "./FormActionsSpecimen.svelte";
 import FormDialogSpecimen from "./FormDialogSpecimen.svelte";
-import GridShellSpecimen from "./GridShellSpecimen.svelte";
 import GridSpecimen from "./GridSpecimen.svelte";
 import HoverCardSpecimen from "./HoverCardSpecimen.svelte";
 import IconSpecimen from "./IconSpecimen.svelte";
@@ -51,7 +49,6 @@ import IconButtonSpecimen from "./IconButtonSpecimen.svelte";
 import InlineEditableFieldSpecimen from "./InlineEditableFieldSpecimen.svelte";
 import InlineSpecimen from "./InlineSpecimen.svelte";
 import ListCardSpecimen from "./ListCardSpecimen.svelte";
-import ListShellSpecimen from "./ListShellSpecimen.svelte";
 import LogListSpecimen from "./LogListSpecimen.svelte";
 import NavCardSpecimen from "./NavCardSpecimen.svelte";
 import MarkdownEditorSpecimen from "./MarkdownEditorSpecimen.svelte";
@@ -77,6 +74,7 @@ import RadioGroupSpecimen from "./RadioGroupSpecimen.svelte";
 import RangeCalendarSpecimen from "./RangeCalendarSpecimen.svelte";
 import RangeSliderSpecimen from "./RangeSliderSpecimen.svelte";
 import RatingSpecimen from "./RatingSpecimen.svelte";
+import RegionSpecimen from "./RegionSpecimen.svelte";
 import ReorderableListSpecimen from "./ReorderableListSpecimen.svelte";
 import RelationPickerSpecimen from "./RelationPickerSpecimen.svelte";
 import ScrollShellSpecimen from "./ScrollShellSpecimen.svelte";
@@ -169,7 +167,6 @@ export const specimenMap: Record<string, typeof SvelteComponent<any>> = {
   "editable-label": EditableLabelSpecimen,
   "embed-input": EmbedInputSpecimen,
   "embed-preview": EmbedPreviewSpecimen,
-  "embed-shell": EmbedShellSpecimen,
   "empty-state": EmptyStateSpecimen,
   eyebrow: EyebrowSpecimen,
   field: FieldSpecimen,
@@ -178,14 +175,12 @@ export const specimenMap: Record<string, typeof SvelteComponent<any>> = {
   "form-actions": FormActionsSpecimen,
   "form-dialog": FormDialogSpecimen,
   grid: GridSpecimen,
-  "grid-shell": GridShellSpecimen,
   "hover-card": HoverCardSpecimen,
   icon: IconSpecimen,
   "icon-button": IconButtonSpecimen,
   "inline-editable-field": InlineEditableFieldSpecimen,
   inline: InlineSpecimen,
   "list-card": ListCardSpecimen,
-  "list-shell": ListShellSpecimen,
   "log-list": LogListSpecimen,
   "markdown-editor": MarkdownEditorSpecimen,
   "media-picker": MediaPickerSpecimen,
@@ -212,6 +207,7 @@ export const specimenMap: Record<string, typeof SvelteComponent<any>> = {
   "range-calendar": RangeCalendarSpecimen,
   "range-slider": RangeSliderSpecimen,
   rating: RatingSpecimen,
+  region: RegionSpecimen,
   "relation-picker": RelationPickerSpecimen,
   "reorderable-list": ReorderableListSpecimen,
   "scroll-shell": ScrollShellSpecimen,
@@ -244,6 +240,7 @@ export const specimenMap: Record<string, typeof SvelteComponent<any>> = {
   tooltip: TooltipSpecimen,
   "tri-state-switch": TriStateSwitchSpecimen,
   "video-player": VideoPlayerSpecimen,
+  "dock-region": DockRegionSpecimen,
   "zoned-date-time-picker": ZonedDateTimePickerSpecimen,
 
   // Workstation
@@ -251,7 +248,6 @@ export const specimenMap: Record<string, typeof SvelteComponent<any>> = {
   "app-header": AppHeaderSpecimen,
   "collapse-toggle": CollapseToggleSpecimen,
   "command-palette": CommandPaletteSpecimen,
-  "dock-region": DockRegionSpecimen,
   "hosted-surface": HostedSurfaceSpecimen,
   "panel-header": PanelHeaderSpecimen,
   "panel-surface": PanelSurfaceSpecimen,

@@ -9,8 +9,9 @@ name = "pug-jetstream-preview"
 path = "src/main.rs"
 
 [dependencies]
-# Pug adapter + contracts
+# Pug adapter + contracts + components
 pug-jetstream = { path = "../adapter" }
+pug-jetstream-components = { path = "../components" }
 pug-adapter = { path = "../../contracts/adapter" }
 pug-primitives = { path = "../../contracts/primitives" }
 pug-composites = { path = "../../contracts/composites" }

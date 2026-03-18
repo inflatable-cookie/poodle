@@ -147,31 +147,57 @@ pub enum ButtonVariant {
     Primary,
     Secondary,
     Ghost,
+}
+
+/// Tone modifier for buttons per the contract.
+/// Danger is a tone applied on top of any variant, not a variant itself.
+#[derive(Clone, Copy, Debug, Eq, PartialEq, Default)]
+pub enum ButtonTone {
+    #[default]
+    Default,
     Danger,
 }
 
 impl ButtonVariant {
-    pub fn fill_token(self) -> &'static str {
-        match self {
-            Self::Primary => semantic::COLOR_ACCENT_BASE,
-            Self::Secondary | Self::Ghost => semantic::COLOR_BACKGROUND_SURFACE,
-            Self::Danger => semantic::COLOR_STATUS_DANGER,
+    /// Resolve fill token accounting for tone modifier.
+    pub fn fill_token(self, tone: ButtonTone) -> &'static str {
+        match (self, tone) {
+            // Ghost: always transparent (no fill)
+            (Self::Ghost, _) => semantic::COLOR_BACKGROUND_SURFACE, // will be made transparent by component
+            // Danger tone on primary: danger fill
+            (Self::Primary, ButtonTone::Danger) => semantic::COLOR_STATUS_DANGER,
+            // Danger tone on secondary: surface fill (same as default secondary)
+            (Self::Secondary, ButtonTone::Danger) => semantic::COLOR_BACKGROUND_SURFACE,
+            // Default tone
+            (Self::Primary, ButtonTone::Default) => semantic::COLOR_ACCENT_BASE,
+            (Self::Secondary, ButtonTone::Default) => semantic::COLOR_BACKGROUND_SURFACE,
         }
     }
 
-    pub fn border_token(self) -> &'static str {
-        match self {
-            Self::Primary => semantic::COLOR_ACCENT_BASE,
-            Self::Secondary => semantic::COLOR_BORDER_DEFAULT,
-            Self::Ghost => semantic::COLOR_BORDER_SUBTLE,
-            Self::Danger => semantic::COLOR_STATUS_DANGER,
+    /// Resolve border token accounting for tone modifier.
+    pub fn border_token(self, tone: ButtonTone) -> &'static str {
+        match (self, tone) {
+            (Self::Ghost, _) => semantic::COLOR_BORDER_SUBTLE, // transparent in component
+            (Self::Primary, ButtonTone::Danger) => semantic::COLOR_STATUS_DANGER,
+            (Self::Secondary, ButtonTone::Danger) => semantic::COLOR_STATUS_DANGER,
+            (Self::Primary, ButtonTone::Default) => semantic::COLOR_ACCENT_BASE,
+            (Self::Secondary, ButtonTone::Default) => semantic::COLOR_BORDER_DEFAULT,
         }
     }
 
-    pub fn text_token(self) -> &'static str {
-        match self {
-            Self::Primary | Self::Danger => semantic::COLOR_TEXT_INVERSE,
-            Self::Secondary | Self::Ghost => semantic::COLOR_TEXT_PRIMARY,
+    /// Resolve text token accounting for tone modifier.
+    pub fn text_token(self, tone: ButtonTone) -> &'static str {
+        match (self, tone) {
+            // Ghost danger: danger text color
+            (Self::Ghost, ButtonTone::Danger) => semantic::COLOR_STATUS_DANGER,
+            // Ghost default: primary text
+            (Self::Ghost, ButtonTone::Default) => semantic::COLOR_TEXT_PRIMARY,
+            // Secondary danger: text-primary per contract §8 Tone: danger
+            (Self::Secondary, ButtonTone::Danger) => semantic::COLOR_TEXT_PRIMARY,
+            // Primary (any fill): inverse text
+            (Self::Primary, _) => semantic::COLOR_TEXT_INVERSE,
+            // Secondary default: primary text
+            (Self::Secondary, ButtonTone::Default) => semantic::COLOR_TEXT_PRIMARY,
         }
     }
 }

@@ -1,4 +1,4 @@
-export type ComponentTier = "primitive" | "composite" | "shell" | "workstation";
+export type ComponentTier = "primitive" | "composite" | "workstation";
 
 export type ComponentEntry = {
   slug: string;
@@ -90,6 +90,7 @@ export const primitiveComponents: ComponentEntry[] = [
   entry("RangeCalendar", "primitive", P, "Calendar grid for selecting a date range.", true),
   entry("RangeSlider", "primitive", P, "Dual-thumb slider for selecting a numeric range.", true),
   entry("Rating", "primitive", P, "Star-based rating input or display.", true),
+  entry("Region", "primitive", P, "Dashed placeholder block for designating layout areas.", true),
   entry("ScrollShell", "primitive", P, "Scrollable container with overflow management.", true),
   entry("SearchField", "primitive", P, "Text input optimized for search with clear action.", true),
   entry("SegmentedControl", "primitive", P, "Inline toggle between mutually exclusive options.", true),
@@ -129,6 +130,8 @@ export const compositeComponents: ComponentEntry[] = [
   entry("CommandPalette", "composite", C, "Keyboard-driven command search and execution overlay.", true),
   entry("ConfirmAction", "composite", C, "Trigger element with confirmation prompt before executing dangerous actions.", true),
   entry("DataTable", "composite", C, "Feature-rich table with sorting, selection, and pagination.", true),
+  entry("DetailSection", "composite", C, "Titled section for grouping detail content.", true),
+  entry("DetailShell", "composite", C, "Full detail page layout with header, sections, and sidebar.", true),
   entry("EmbedInput", "composite", C, "URL or embed code input with provider detection and parsing.", true),
   entry("EmbedPreview", "composite", C, "Rich preview card for embedded content with aspect ratio and loading states.", true),
   entry("EmptyState", "composite", C, "Placeholder for empty data views with messaging and actions.", true),
@@ -142,6 +145,7 @@ export const compositeComponents: ComponentEntry[] = [
   entry("MediaPreview", "composite", C, "Media asset preview with metadata and fallback.", true),
   entry("MediaThumbnail", "composite", C, "Compact media thumbnail with overlay metadata.", true),
   entry("PageHeader", "composite", C, "Page-level header with title, actions, and breadcrumbs.", true),
+  entry("PickerShell", "composite", C, "Container for search-and-select picker workflows.", true),
   entry("RelationPicker", "composite", C, "Searchable picker for selecting related items.", true),
   entry("ReorderableList", "composite", C, "Drag-and-drop reorderable list with keyboard support.", true),
   entry("SelectionSummary", "composite", C, "Summary display of current selection state.", true),
@@ -149,19 +153,10 @@ export const compositeComponents: ComponentEntry[] = [
   entry("StateTile", "composite", C, "Compact label-value tile for status display.", true),
   entry("ToastStack", "composite", C, "Stacked transient notification manager.", true),
   entry("VideoPlayer", "composite", C, "Video playback with overlay controls, fullscreen, and captions.", true),
-].sort((a, b) => a.displayName.localeCompare(b.displayName));
-
-export const shellComponents: ComponentEntry[] = [
-  entry("DetailSection", "shell", C, "Titled section for grouping detail content.", true),
-  entry("DetailShell", "shell", C, "Full detail page layout with header, sections, and sidebar.", true),
-  entry("EmbedShell", "shell", C, "Container for embedded external content with fallback.", true),
-  entry("GridShell", "shell", C, "Grid layout browse view with state management.", true),
-  entry("ListShell", "shell", C, "List layout browse view with state management.", true),
-  entry("PickerShell", "shell", C, "Container for search-and-select picker workflows.", true),
+  entry("DockRegion", "composite", W, "Collapsible dock container for panels with tabs, collapse, and drag-and-drop.", true),
 ].sort((a, b) => a.displayName.localeCompare(b.displayName));
 
 export const workstationComponents: ComponentEntry[] = [
-  entry("DockRegion", "workstation", W, "Collapsible dock container for panels with emphasis variants.", true),
   entry("HostedSurface", "workstation", W, "External content host with bounded lifecycle states.", true),
   entry("PanelHeader", "workstation", W, "Header bar for panel content with title and actions.", true),
   entry("PanelSurface", "workstation", W, "Panel content area with utility/standard/focused variants.", true),
@@ -178,7 +173,6 @@ export const workstationComponents: ComponentEntry[] = [
 export const allComponents: ComponentEntry[] = [
   ...primitiveComponents,
   ...compositeComponents,
-  ...shellComponents,
   ...workstationComponents,
 ];
 
@@ -190,10 +184,8 @@ export function findComponent(
     ? primitiveComponents
     : tier === "composite"
       ? compositeComponents
-      : tier === "shell"
-        ? shellComponents
-        : tier === "workstation"
-          ? workstationComponents
-          : allComponents;
+      : tier === "workstation"
+        ? workstationComponents
+        : allComponents;
   return list.find((c) => c.slug === slug);
 }

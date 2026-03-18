@@ -11,9 +11,43 @@ mod specimens;
 mod style_bridge;
 mod token_view;
 
+use std::borrow::Cow;
+use std::path::PathBuf;
+
 use gpui::*;
 use pug_adapter::ThemeProvider;
 use pug_gpui_primitives::{TabDefinition, TabsSpec, TabVariant};
+
+/// Asset source that loads files from the preview app's directory.
+struct PreviewAssets {
+    base: PathBuf,
+}
+
+impl AssetSource for PreviewAssets {
+    fn load(&self, path: &str) -> anyhow::Result<Option<Cow<'static, [u8]>>> {
+        let full_path = self.base.join(path);
+        match std::fs::read(&full_path) {
+            Ok(data) => Ok(Some(Cow::Owned(data))),
+            Err(e) if e.kind() == std::io::ErrorKind::NotFound => Ok(None),
+            Err(e) => Err(e.into()),
+        }
+    }
+
+    fn list(&self, path: &str) -> anyhow::Result<Vec<SharedString>> {
+        let full_path = self.base.join(path);
+        match std::fs::read_dir(&full_path) {
+            Ok(entries) => Ok(entries
+                .filter_map(|entry| {
+                    entry
+                        .ok()
+                        .and_then(|e| e.file_name().into_string().ok())
+                        .map(SharedString::from)
+                })
+                .collect()),
+            Err(_) => Ok(vec![]),
+        }
+    }
+}
 
 use app_state::{
     AppState, AppearanceTreatment, ControlSize, DemoScreen, Density, Section, ThemePreset,
@@ -62,6 +96,7 @@ impl Render for PreviewRoot {
             .size_full()
             .flex()
             .flex_col()
+            .font_family("Inter")
             .bg(color_to_hsla(canvas_bg))
             .text_color(color_to_hsla(text_primary))
             // ── Top bar ──────────────────────────────────────────────
@@ -752,7 +787,32 @@ fn parse_cli_args() -> CliArgs {
 fn main() {
     let cli = parse_cli_args();
 
-    Application::new().run(move |cx: &mut App| {
+    let assets = PreviewAssets {
+        base: PathBuf::from(env!("CARGO_MANIFEST_DIR")),
+    };
+
+    Application::new().with_assets(assets).run(move |cx: &mut App| {
+        // Load Inter font family — static weights for reliable rendering
+        // (GPUI doesn't support variable font weight axes)
+        let font_dir = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("assets/fonts");
+        let fonts_to_load: Vec<std::borrow::Cow<'static, [u8]>> = [
+            "Inter-Regular.ttf",    // 400
+            "Inter-Medium.ttf",     // 500
+            "Inter-SemiBold.ttf",   // 600
+            "Inter-Bold.ttf",       // 700
+        ]
+        .iter()
+        .filter_map(|name| {
+            std::fs::read(font_dir.join(name))
+                .ok()
+                .map(|data| std::borrow::Cow::Owned(data))
+        })
+        .collect();
+
+        if !fonts_to_load.is_empty() {
+            cx.text_system().add_fonts(fonts_to_load).ok();
+        }
+
         // Register keyboard shortcuts
         cx.bind_keys([
             KeyBinding::new("cmd-q", Quit, None),

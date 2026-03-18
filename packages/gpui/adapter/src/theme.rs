@@ -1,15 +1,12 @@
 //! GPUI theme integration.
 //!
 //! Implements the `ThemeProvider` trait from `pug-adapter` by resolving
-//! string token paths to typed values using the `pug-tokens::typed` module.
+//! semantic token paths to typed values using the `pug-tokens::typed` module.
 //!
-//! The token paths passed to `resolve_*` methods are the `&'static str`
-//! constants from `pug_tokens::semantic` (e.g., `"#2d86f3"`, `"0.0625rem"`).
-//! This provider parses them into the corresponding typed values.
-//!
-//! In a full GPUI integration, this would also consult the active GPUI
-//! `Theme` struct for runtime theme overrides. The current implementation
-//! resolves directly from the static typed token constants.
+//! The token paths passed to `resolve_*` methods are semantic path strings
+//! (e.g., `"semantic.color.accent.base"`, `"semantic.radius.control"`).
+//! The provider checks theme overrides first, then falls back to the
+//! typed constant defaults from the light theme baseline.
 
 use pug_adapter::ThemeProvider;
 use pug_tokens::typed::{self, ColorValue};
@@ -104,12 +101,15 @@ impl GpuiThemeProvider {
         }
     }
 
-    /// Resolve a color token string to a `ColorValue`.
+    /// Resolve a color token to a `ColorValue`.
     ///
-    /// Checks theme overrides first, then accepts hex/rgba formats,
-    /// then falls back to typed constant lookup.
+    /// Resolution order:
+    /// 1. Theme overrides (keyed by semantic path)
+    /// 2. Typed constant defaults (light theme baseline)
+    /// 3. Direct hex/rgba parsing (for inline values)
+    /// 4. Black fallback
     pub fn resolve_color_value(&self, token: &str) -> ColorValue {
-        // Check theme overrides first (token is a semantic path like "semantic.color.accent.base")
+        // 1. Check theme overrides (token is a semantic path like "semantic.color.accent.base")
         for &(path, value) in &self.overrides {
             if path == token {
                 if let Some(color) = Self::parse_hex_color(value) {
@@ -120,18 +120,8 @@ impl GpuiThemeProvider {
                 }
             }
         }
-        if let Some(color) = Self::parse_hex_color(token) {
-            return color;
-        }
-        if let Some(color) = Self::parse_rgba_color(token) {
-            return color;
-        }
-        // Match by semantic path name (e.g., "semantic.color.background.canvas")
-        // or by raw token value (e.g., "#e7eef5"). Both forms are used: the
-        // preview app passes paths, while spec resolved_*_token() methods emit
-        // raw values.
+        // 2. Fall back to typed constant defaults (light theme baseline)
         match token {
-            // Path-based lookup
             "semantic.color.background.canvas" => typed::semantic::COLOR_BACKGROUND_CANVAS,
             "semantic.color.background.surface" => typed::semantic::COLOR_BACKGROUND_SURFACE,
             "semantic.color.background.panel" => typed::semantic::COLOR_BACKGROUND_PANEL,
@@ -151,55 +141,53 @@ impl GpuiThemeProvider {
             "semantic.color.status.danger" => typed::semantic::COLOR_STATUS_DANGER,
             "semantic.color.icon.primary" => typed::semantic::COLOR_ICON_PRIMARY,
             "semantic.color.icon.muted" => typed::semantic::COLOR_ICON_MUTED,
-            // Raw value lookup (hex/rgba values emitted by spec token methods)
-            t if t == pug_tokens::semantic::COLOR_BACKGROUND_CANVAS => typed::semantic::COLOR_BACKGROUND_CANVAS,
-            t if t == pug_tokens::semantic::COLOR_BACKGROUND_SURFACE => typed::semantic::COLOR_BACKGROUND_SURFACE,
-            t if t == pug_tokens::semantic::COLOR_BACKGROUND_PANEL => typed::semantic::COLOR_BACKGROUND_PANEL,
-            t if t == pug_tokens::semantic::COLOR_BACKGROUND_ELEVATED => typed::semantic::COLOR_BACKGROUND_ELEVATED,
-            t if t == pug_tokens::semantic::COLOR_BACKGROUND_OVERLAY => typed::semantic::COLOR_BACKGROUND_OVERLAY,
-            t if t == pug_tokens::semantic::COLOR_TEXT_PRIMARY => typed::semantic::COLOR_TEXT_PRIMARY,
-            t if t == pug_tokens::semantic::COLOR_TEXT_SECONDARY => typed::semantic::COLOR_TEXT_SECONDARY,
-            t if t == pug_tokens::semantic::COLOR_TEXT_INVERSE => typed::semantic::COLOR_TEXT_INVERSE,
-            t if t == pug_tokens::semantic::COLOR_BORDER_SUBTLE => typed::semantic::COLOR_BORDER_SUBTLE,
-            t if t == pug_tokens::semantic::COLOR_BORDER_DEFAULT => typed::semantic::COLOR_BORDER_DEFAULT,
-            t if t == pug_tokens::semantic::COLOR_BORDER_STRONG => typed::semantic::COLOR_BORDER_STRONG,
-            t if t == pug_tokens::semantic::COLOR_ACCENT_BASE => typed::semantic::COLOR_ACCENT_BASE,
-            t if t == pug_tokens::semantic::COLOR_ACCENT_HOVER => typed::semantic::COLOR_ACCENT_HOVER,
-            t if t == pug_tokens::semantic::COLOR_ACCENT_FOCUS_RING => typed::semantic::COLOR_ACCENT_FOCUS_RING,
-            t if t == pug_tokens::semantic::COLOR_STATUS_SUCCESS => typed::semantic::COLOR_STATUS_SUCCESS,
-            t if t == pug_tokens::semantic::COLOR_STATUS_WARNING => typed::semantic::COLOR_STATUS_WARNING,
-            t if t == pug_tokens::semantic::COLOR_STATUS_DANGER => typed::semantic::COLOR_STATUS_DANGER,
-            t if t == pug_tokens::semantic::COLOR_ICON_PRIMARY => typed::semantic::COLOR_ICON_PRIMARY,
-            t if t == pug_tokens::semantic::COLOR_ICON_MUTED => typed::semantic::COLOR_ICON_MUTED,
-            _ => ColorValue(0.0, 0.0, 0.0, 1.0),
+            // 3. Direct hex/rgba parsing (for inline color values)
+            _ => {
+                if let Some(color) = Self::parse_hex_color(token) {
+                    return color;
+                }
+                if let Some(color) = Self::parse_rgba_color(token) {
+                    return color;
+                }
+                ColorValue(0.0, 0.0, 0.0, 1.0)
+            }
         }
     }
 
-    /// Resolve a space/size token string to a pixel value.
+    /// Resolve a space/size token to a pixel value.
+    ///
+    /// Checks theme overrides for density/size mode overrides,
+    /// then falls back to typed constant defaults.
     pub fn resolve_space_value(&self, token: &str) -> f32 {
-        if let Some(px) = Self::parse_dimension(token) {
-            return px;
+        // Check overrides (density modes can override spacing)
+        for &(path, value) in &self.overrides {
+            if path == token {
+                if let Some(px) = Self::parse_dimension(value) {
+                    return px;
+                }
+            }
         }
-        // Match known semantic space tokens
+        // Fall back to typed constant defaults
         match token {
-            t if t == pug_tokens::semantic::SPACE_STACK_SM => typed::semantic::SPACE_STACK_SM.as_f32(),
-            t if t == pug_tokens::semantic::SPACE_STACK_MD => typed::semantic::SPACE_STACK_MD.as_f32(),
-            t if t == pug_tokens::semantic::SPACE_STACK_LG => typed::semantic::SPACE_STACK_LG.as_f32(),
-            t if t == pug_tokens::semantic::SPACE_INLINE_SM => typed::semantic::SPACE_INLINE_SM.as_f32(),
-            t if t == pug_tokens::semantic::SPACE_INLINE_MD => typed::semantic::SPACE_INLINE_MD.as_f32(),
-            t if t == pug_tokens::semantic::SPACE_INLINE_LG => typed::semantic::SPACE_INLINE_LG.as_f32(),
-            t if t == pug_tokens::semantic::SPACE_PANEL_X => typed::semantic::SPACE_PANEL_X.as_f32(),
-            t if t == pug_tokens::semantic::SPACE_PANEL_Y => typed::semantic::SPACE_PANEL_Y.as_f32(),
-            t if t == pug_tokens::semantic::SPACE_CONTROL_X => typed::semantic::SPACE_CONTROL_X.as_f32(),
-            t if t == pug_tokens::semantic::SPACE_CONTROL_Y => typed::semantic::SPACE_CONTROL_Y.as_f32(),
-            t if t == pug_tokens::semantic::SIZE_CONTROL_HEIGHT => typed::semantic::SIZE_CONTROL_HEIGHT.as_f32(),
-            t if t == pug_tokens::semantic::SIZE_CONTROL_MIN_WIDTH => typed::semantic::SIZE_CONTROL_MIN_WIDTH.as_f32(),
-            t if t == pug_tokens::semantic::SIZE_ICON_SM => typed::semantic::SIZE_ICON_SM.as_f32(),
-            t if t == pug_tokens::semantic::SIZE_ICON_MD => typed::semantic::SIZE_ICON_MD.as_f32(),
-            t if t == pug_tokens::semantic::SIZE_ICON_LG => typed::semantic::SIZE_ICON_LG.as_f32(),
-            t if t == pug_tokens::semantic::SIZE_PANEL_HEADER => typed::semantic::SIZE_PANEL_HEADER.as_f32(),
-            t if t == pug_tokens::semantic::ICON_SIZE_DEFAULT => typed::semantic::ICON_SIZE_DEFAULT.as_f32(),
-            _ => 0.0,
+            "semantic.space.stack.sm" => typed::semantic::SPACE_STACK_SM.as_f32(),
+            "semantic.space.stack.md" => typed::semantic::SPACE_STACK_MD.as_f32(),
+            "semantic.space.stack.lg" => typed::semantic::SPACE_STACK_LG.as_f32(),
+            "semantic.space.inline.sm" => typed::semantic::SPACE_INLINE_SM.as_f32(),
+            "semantic.space.inline.md" => typed::semantic::SPACE_INLINE_MD.as_f32(),
+            "semantic.space.inline.lg" => typed::semantic::SPACE_INLINE_LG.as_f32(),
+            "semantic.space.panel.x" => typed::semantic::SPACE_PANEL_X.as_f32(),
+            "semantic.space.panel.y" => typed::semantic::SPACE_PANEL_Y.as_f32(),
+            "semantic.space.control.x" => typed::semantic::SPACE_CONTROL_X.as_f32(),
+            "semantic.space.control.y" => typed::semantic::SPACE_CONTROL_Y.as_f32(),
+            "semantic.size.control.height" => typed::semantic::SIZE_CONTROL_HEIGHT.as_f32(),
+            "semantic.size.control.minWidth" => typed::semantic::SIZE_CONTROL_MIN_WIDTH.as_f32(),
+            "semantic.size.icon.sm" => typed::semantic::SIZE_ICON_SM.as_f32(),
+            "semantic.size.icon.md" => typed::semantic::SIZE_ICON_MD.as_f32(),
+            "semantic.size.icon.lg" => typed::semantic::SIZE_ICON_LG.as_f32(),
+            "semantic.size.panel.header" => typed::semantic::SIZE_PANEL_HEADER.as_f32(),
+            "semantic.icon.size.default" => typed::semantic::ICON_SIZE_DEFAULT.as_f32(),
+            // Direct dimension parsing for inline values
+            _ => Self::parse_dimension(token).unwrap_or(0.0),
         }
     }
 }
@@ -214,36 +202,51 @@ impl ThemeProvider for GpuiThemeProvider {
     }
 
     fn resolve_border_width(&self, token: &str) -> f32 {
-        if let Some(px) = Self::parse_dimension(token) {
-            return px;
+        // Check overrides
+        for &(path, value) in &self.overrides {
+            if path == token {
+                if let Some(px) = Self::parse_dimension(value) {
+                    return px;
+                }
+            }
         }
         match token {
-            t if t == pug_tokens::semantic::BORDER_WIDTH_DEFAULT => typed::semantic::BORDER_WIDTH_DEFAULT.as_f32(),
-            t if t == pug_tokens::semantic::BORDER_WIDTH_FOCUS => typed::semantic::BORDER_WIDTH_FOCUS.as_f32(),
-            _ => 0.0,
+            "semantic.border.width.default" => typed::semantic::BORDER_WIDTH_DEFAULT.as_f32(),
+            "semantic.border.width.focus" => typed::semantic::BORDER_WIDTH_FOCUS.as_f32(),
+            _ => Self::parse_dimension(token).unwrap_or(0.0),
         }
     }
 
     fn resolve_radius(&self, token: &str) -> f32 {
-        if let Some(px) = Self::parse_dimension(token) {
-            return px;
+        // Check overrides
+        for &(path, value) in &self.overrides {
+            if path == token {
+                if let Some(px) = Self::parse_dimension(value) {
+                    return px;
+                }
+            }
         }
         match token {
-            t if t == pug_tokens::semantic::RADIUS_CONTROL => typed::semantic::RADIUS_CONTROL.as_f32(),
-            t if t == pug_tokens::semantic::RADIUS_SURFACE => typed::semantic::RADIUS_SURFACE.as_f32(),
-            t if t == pug_tokens::semantic::RADIUS_PILL => typed::semantic::RADIUS_PILL.as_f32(),
-            _ => 0.0,
+            "semantic.radius.control" => typed::semantic::RADIUS_CONTROL.as_f32(),
+            "semantic.radius.surface" => typed::semantic::RADIUS_SURFACE.as_f32(),
+            "semantic.radius.pill" => typed::semantic::RADIUS_PILL.as_f32(),
+            _ => Self::parse_dimension(token).unwrap_or(0.0),
         }
     }
 
     fn resolve_opacity(&self, token: &str) -> f32 {
-        if let Ok(v) = token.parse::<f32>() {
-            return v;
+        // Check overrides
+        for &(path, value) in &self.overrides {
+            if path == token {
+                if let Ok(v) = value.parse::<f32>() {
+                    return v;
+                }
+            }
         }
         match token {
-            t if t == pug_tokens::semantic::STATE_OPACITY_DISABLED => typed::semantic::STATE_OPACITY_DISABLED,
-            t if t == pug_tokens::semantic::STATE_OPACITY_MUTED => typed::semantic::STATE_OPACITY_MUTED,
-            _ => 1.0,
+            "semantic.state.opacity.disabled" => typed::semantic::STATE_OPACITY_DISABLED,
+            "semantic.state.opacity.muted" => typed::semantic::STATE_OPACITY_MUTED,
+            _ => token.parse::<f32>().unwrap_or(1.0),
         }
     }
 }
@@ -256,13 +259,24 @@ mod tests {
     use super::*;
 
     #[test]
-    fn resolves_hex_color_tokens() {
+    fn resolves_color_from_default_baseline() {
         let theme = GpuiThemeProvider::default();
         let color = theme.resolve_color(semantic::COLOR_ACCENT_BASE);
-        // #2d86f3 → approximately (0.176, 0.525, 0.953, 1.0)
+        // Light baseline: #2d86f3 → approximately (0.176, 0.525, 0.953, 1.0)
         assert!((color.0 - 0.176).abs() < 0.01);
         assert!((color.1 - 0.525).abs() < 0.01);
         assert!((color.2 - 0.953).abs() < 0.01);
+        assert_eq!(color.3, 1.0);
+    }
+
+    #[test]
+    fn dark_theme_overrides_accent_color() {
+        let theme = GpuiThemeProvider::new().with_theme(&pug_tokens::themes::DARK);
+        let color = theme.resolve_color(semantic::COLOR_ACCENT_BASE);
+        // Dark theme: #f0b24d → approximately (0.941, 0.698, 0.302, 1.0)
+        assert!((color.0 - 0.941).abs() < 0.01, "r={}", color.0);
+        assert!((color.1 - 0.698).abs() < 0.01, "g={}", color.1);
+        assert!((color.2 - 0.302).abs() < 0.01, "b={}", color.2);
         assert_eq!(color.3, 1.0);
     }
 
@@ -275,7 +289,7 @@ mod tests {
     }
 
     #[test]
-    fn resolves_rem_space_tokens() {
+    fn resolves_space_tokens() {
         let theme = GpuiThemeProvider::default();
         let space = theme.resolve_space(semantic::SPACE_STACK_MD);
         // 0.75rem = 12px
@@ -319,5 +333,15 @@ mod tests {
     fn scale_factor_is_configurable() {
         let theme = GpuiThemeProvider::new().with_scale_factor(2.0);
         assert_eq!(theme.scale_factor, 2.0);
+    }
+
+    #[test]
+    fn theme_switching_changes_colors() {
+        let dark = GpuiThemeProvider::new().with_theme(&pug_tokens::themes::DARK);
+        let light = GpuiThemeProvider::default();
+        let dark_accent = dark.resolve_color(semantic::COLOR_ACCENT_BASE);
+        let light_accent = light.resolve_color(semantic::COLOR_ACCENT_BASE);
+        // Dark gold vs light blue — they must differ
+        assert!((dark_accent.0 - light_accent.0).abs() > 0.1);
     }
 }

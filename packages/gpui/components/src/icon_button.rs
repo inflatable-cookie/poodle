@@ -46,9 +46,9 @@ impl IntoElement for PugIconButton {
         let theme = &self.theme;
         let spec = &self.spec;
 
-        let fill = resolve_color(theme, spec.variant.fill_token());
-        let text_color = resolve_color(theme, spec.variant.text_token());
-        let border_color = resolve_color(theme, spec.variant.border_token());
+        let fill = resolve_color(theme, spec.variant.fill_token(pug_gpui_primitives::ButtonTone::Default));
+        let text_color = resolve_color(theme, spec.variant.text_token(pug_gpui_primitives::ButtonTone::Default));
+        let border_color = resolve_color(theme, spec.variant.border_token(pug_gpui_primitives::ButtonTone::Default));
         let control_height = resolve_px(theme, spec.control_height_token());
         let radius = resolve_radius(theme, "semantic.radius.control");
 

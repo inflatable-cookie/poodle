@@ -149,7 +149,7 @@ impl AppState {
     pub fn new() -> Self {
         Self {
             section: Section::Primitives,
-            theme_preset: ThemePreset::Light,
+            theme_preset: ThemePreset::Dark,
             density: Density::Comfortable,
             control_size: ControlSize::Md,
             active_primitive: None,

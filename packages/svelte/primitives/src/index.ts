@@ -50,6 +50,7 @@ export { default as PaginationSummary } from "./PaginationSummary.svelte";
 export { default as Progress } from "./Progress.svelte";
 export { default as RadioGroup } from "./RadioGroup.svelte";
 export { default as Rating } from "./Rating.svelte";
+export { default as Region } from "./Region.svelte";
 export { default as RangeCalendar } from "./RangeCalendar.svelte";
 export { default as RangeSlider } from "./RangeSlider.svelte";
 export { default as SearchField } from "./SearchField.svelte";

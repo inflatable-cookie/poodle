@@ -106,21 +106,26 @@ impl ThemeProvider for JetstreamThemeProvider {
     }
 
     fn resolve_space(&self, token: &str) -> f32 {
-        // Parse rem values
+        // Strategy 1: Look up semantic space/size/radius tokens
+        if let Some(val) = match_semantic_space(token) {
+            return val;
+        }
+
+        // Strategy 2: Parse rem values
         if let Some(rem_str) = token.strip_suffix("rem") {
             if let Ok(rem) = rem_str.parse::<f32>() {
                 return rem * 16.0 * self.scale_factor;
             }
         }
 
-        // Parse px values
+        // Strategy 3: Parse px values
         if let Some(px_str) = token.strip_suffix("px") {
             if let Ok(px) = px_str.parse::<f32>() {
                 return px * self.scale_factor;
             }
         }
 
-        // Parse plain numbers
+        // Strategy 4: Parse plain numbers
         if let Ok(val) = token.parse::<f32>() {
             return val * self.scale_factor;
         }
@@ -204,6 +209,91 @@ fn match_semantic_color(token: &str) -> Option<ColorValue> {
     }
 }
 
+/// Match semantic space/size/radius tokens to typed values.
+fn match_semantic_space(token: &str) -> Option<f32> {
+    use pug_tokens::typed;
+    match token {
+        // Size tokens
+        t if t.contains("size.control.height") => Some(typed::semantic::SIZE_CONTROL_HEIGHT.0),
+        t if t.contains("size.control.minWidth") => Some(typed::semantic::SIZE_CONTROL_MIN_WIDTH.0),
+        t if t.contains("size.icon.sm") => Some(typed::semantic::SIZE_ICON_SM.0),
+        t if t.contains("size.icon.md") => Some(typed::semantic::SIZE_ICON_MD.0),
+        t if t.contains("size.icon.lg") => Some(typed::semantic::SIZE_ICON_LG.0),
+        t if t.contains("size.panel.header") => Some(typed::semantic::SIZE_PANEL_HEADER.0),
+        // Space tokens
+        t if t.contains("space.stack.sm") => Some(typed::semantic::SPACE_STACK_SM.0),
+        t if t.contains("space.stack.md") => Some(typed::semantic::SPACE_STACK_MD.0),
+        t if t.contains("space.stack.lg") => Some(typed::semantic::SPACE_STACK_LG.0),
+        t if t.contains("space.inline.sm") => Some(typed::semantic::SPACE_INLINE_SM.0),
+        t if t.contains("space.inline.md") => Some(typed::semantic::SPACE_INLINE_MD.0),
+        t if t.contains("space.inline.lg") => Some(typed::semantic::SPACE_INLINE_LG.0),
+        t if t.contains("space.panel.x") => Some(typed::semantic::SPACE_PANEL_X.0),
+        t if t.contains("space.panel.y") => Some(typed::semantic::SPACE_PANEL_Y.0),
+        t if t.contains("space.control.x") => Some(typed::semantic::SPACE_CONTROL_X.0),
+        t if t.contains("space.control.y") => Some(typed::semantic::SPACE_CONTROL_Y.0),
+        // Radius tokens
+        t if t.contains("radius.control") => Some(typed::semantic::RADIUS_CONTROL.0),
+        t if t.contains("radius.surface") => Some(typed::semantic::RADIUS_SURFACE.0),
+        t if t.contains("radius.pill") => Some(typed::semantic::RADIUS_PILL.0),
+        // Border width tokens
+        t if t.contains("border.width.default") || t.contains("borderWidth.default") => Some(typed::semantic::BORDER_WIDTH_DEFAULT.0),
+        t if t.contains("border.width.focus") || t.contains("borderWidth.focus") => Some(typed::semantic::BORDER_WIDTH_FOCUS.0),
+        // Typography size (common token used by components)
+        t if t.contains("typography.label.size") => Some(13.0), // from typed typography
+        t if t.contains("typography.body.size") => Some(14.0),
+        t if t.contains("typography.heading") => Some(20.0),
+        // Opacity tokens
+        t if t.contains("state.opacity.disabled") => Some(typed::semantic::STATE_OPACITY_DISABLED),
+        t if t.contains("state.opacity.muted") => Some(typed::semantic::STATE_OPACITY_MUTED),
+        _ => None,
+    }
+}
+
+// ── sRGB → linear color conversion ──
+
+/// Convert a single sRGB component to linear light.
+///
+/// Uses the official sRGB transfer function (IEC 61966-2-1).
+pub fn srgb_to_linear(c: f32) -> f32 {
+    if c <= 0.04045 {
+        c / 12.92
+    } else {
+        ((c + 0.055) / 1.055).powf(2.4)
+    }
+}
+
+impl JetstreamThemeProvider {
+    /// Resolve a Pug semantic token to a `glam::Vec4` color in **linear** space.
+    ///
+    /// Pug tokens store colors in sRGB gamma space (matching CSS). This converts
+    /// RGB channels to linear for correct rendering on an sRGB surface. Alpha is
+    /// left unchanged.
+    pub fn resolve_linear_color(&self, token: &str) -> glam::Vec4 {
+        let c = self.resolve_color(token);
+        glam::Vec4::new(
+            srgb_to_linear(c.0),
+            srgb_to_linear(c.1),
+            srgb_to_linear(c.2),
+            c.3,
+        )
+    }
+
+    /// Resolve a space/size token to logical pixels.
+    pub fn resolve_space_px(&self, token: &str) -> f32 {
+        self.resolve_space(token)
+    }
+
+    /// Resolve a radius token to logical pixels.
+    pub fn resolve_radius_px(&self, token: &str) -> f32 {
+        self.resolve_radius(token)
+    }
+
+    /// Resolve an opacity token to a float.
+    pub fn resolve_opacity_value(&self, token: &str) -> f32 {
+        self.resolve_opacity(token)
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use pug_adapter::ThemeProvider;
@@ -265,5 +355,23 @@ mod tests {
         assert_eq!(theme.resolve_color("unknown"), ColorValue(0.0, 0.0, 0.0, 1.0));
         assert_eq!(theme.resolve_space("unknown"), 0.0);
         assert_eq!(theme.resolve_opacity("unknown"), 1.0);
+    }
+
+    #[test]
+    fn resolve_linear_color_converts_srgb() {
+        let theme = JetstreamThemeProvider::default();
+        let linear = theme.resolve_linear_color("semantic.color.text.primary");
+        // Linear values should be lower than sRGB for values > 0.04045.
+        let srgb = theme.resolve_color("semantic.color.text.primary");
+        assert!(linear.x <= srgb.0 || srgb.0 <= 0.04045);
+        assert!(linear.w > 0.0); // alpha should be preserved
+    }
+
+    #[test]
+    fn srgb_to_linear_edge_cases() {
+        assert!((super::srgb_to_linear(0.0)).abs() < 0.001);
+        assert!((super::srgb_to_linear(1.0) - 1.0).abs() < 0.001);
+        // Mid-range: 0.5 sRGB ≈ 0.214 linear
+        assert!((super::srgb_to_linear(0.5) - 0.214).abs() < 0.01);
     }
 }

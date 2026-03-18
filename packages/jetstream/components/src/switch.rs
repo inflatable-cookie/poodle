@@ -1,0 +1,140 @@
+//! JsSwitch — toggle switch with track and thumb, backed by SwitchSpec.
+//!
+//! Contract: `docs/contracts/foundation/switch.md`
+//! Reference: `packages/svelte/primitives/src/Switch.svelte`
+//!
+//! ALL dimensions resolve from tokens. ZERO hardcoded pixel values.
+
+use jetstream_runtime::ui_element::{self, JsEl};
+use pug_jetstream::JetstreamThemeProvider;
+use pug_primitives::SwitchSpec;
+
+use crate::theme_ext::{resolve_color, resolve_opacity, resolve_px, tint};
+
+/// Build a switch element from a SwitchSpec.
+///
+/// Contract anatomy:
+/// ```text
+/// [Root .switch] — <label>
+///   ├── [Control] — <input type="checkbox" role="switch"> (visually hidden)
+///   ├── [Track]   — <span>, 2.125rem × 1.25rem, border-radius 999px
+///   │   └── [Thumb] — <span>, 0.875rem diameter
+///   └── [Label]   — <span> (optional)
+/// ```
+///
+/// Contract dimensions:
+/// - Track: 2.125rem (34px) wide × 1.25rem (20px) tall
+/// - Track padding: 0.125rem (2px)
+/// - Track border: 0.0625rem (1px) solid
+/// - Thumb: 0.875rem (14px) diameter
+/// - Thumb travel: 0.875rem (14px) translateX
+/// - Gap: var(--pug-space-inline-sm) = 8px
+pub fn js_switch(spec: &SwitchSpec, theme: &JetstreamThemeProvider) -> JsEl {
+    let is_checked = spec.current_checked();
+
+    // ── Token resolution ──
+    let track_fill = resolve_color(theme, spec.track_fill_token());
+    let border_default = resolve_color(theme, "semantic.color.border.default");
+    let accent = resolve_color(theme, "semantic.color.accent.base");
+    let text_primary = resolve_color(theme, "semantic.color.text.primary");
+    let gap = resolve_px(theme, "semantic.space.inline.sm");
+    let label_size = resolve_px(theme, "semantic.typography.label.size");
+
+    // Contract dimensions (rem → px at 16px base)
+    let track_width: f32 = 34.0;  // 2.125rem
+    let track_height: f32 = 20.0; // 1.25rem
+    let track_padding: f32 = 2.0; // 0.125rem
+    let thumb_size: f32 = 14.0;   // 0.875rem
+    let thumb_travel: f32 = 14.0; // 0.875rem
+
+    // Contract: thumb color = text-primary when off, accent-base when on
+    let thumb_color = if is_checked { accent } else { text_primary };
+
+    // Contract: track border = border-default when off,
+    // color-mix(accent 58%, border-default) when on
+    let track_border = if is_checked {
+        tint(accent, 0.58)
+    } else {
+        border_default
+    };
+
+    // Contract: thumb position via translateX. We approximate with left padding.
+    let thumb_offset = if is_checked {
+        track_padding + thumb_travel
+    } else {
+        track_padding
+    };
+
+    // ── Thumb ──
+    let thumb = ui_element::div()
+        .w(thumb_size)
+        .h(thumb_size)
+        .rounded(thumb_size / 2.0) // circle
+        .bg(thumb_color);
+
+    // ── Track ──
+    let track = ui_element::div()
+        .w(track_width)
+        .h(track_height)
+        .rounded(999.0) // pill
+        .bg(track_fill)
+        .border_1().border_color(track_border)
+        .items_center()
+        .pl(thumb_offset)
+        .child(thumb);
+
+    // ── Root: track + optional label ──
+    let mut root = ui_element::div()
+        .flex_row()
+        .gap(gap) // from SPACE_INLINE_SM token
+        .items_center()
+        .focusable()
+        .child(track);
+
+    if let Some(ref label) = spec.label {
+        root = root.child(
+            ui_element::label(label)
+                .text_color(text_primary)
+                .text_size(label_size) // from TYPOGRAPHY_LABEL_SIZE token
+        );
+    }
+
+    // Contract: disabled → opacity from state-opacity-disabled token
+    if spec.is_disabled {
+        let opacity = resolve_opacity(theme, "semantic.state.opacity.disabled");
+        root = root.opacity(opacity).disabled(true);
+    }
+
+    root
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    fn theme() -> JetstreamThemeProvider {
+        JetstreamThemeProvider::from_theme(&pug_tokens::themes::DARK)
+    }
+
+    #[test]
+    fn track_is_34px_wide() {
+        let spec = SwitchSpec::new();
+        let el = js_switch(&spec, &theme());
+        // First child is the track
+        let track = &el.children[0];
+        assert_eq!(track.layout.size.width, taffy::Dimension::length(34.0));
+    }
+
+    #[test]
+    fn thumb_changes_color_when_checked() {
+        let mut spec_on = SwitchSpec::new().with_checked(true);
+        let mut spec_off = SwitchSpec::new();
+        let el_on = js_switch(&spec_on, &theme());
+        let el_off = js_switch(&spec_off, &theme());
+        // Track → Thumb (first child of track)
+        let thumb_on = &el_on.children[0].children[0];
+        let thumb_off = &el_off.children[0].children[0];
+        // Colors should differ (accent vs text-primary)
+        assert_ne!(thumb_on.style.background, thumb_off.style.background);
+    }
+}

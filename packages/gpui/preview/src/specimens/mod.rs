@@ -15,6 +15,9 @@ mod callout;
 mod inline;
 mod spacer;
 
+// ── Foundation ────────────────────────────────────────────
+mod icon;
+
 // ── Action ────────────────────────────────────────────────
 mod button;
 mod icon_button;
@@ -170,6 +173,9 @@ pub fn render_single_specimen(
         "callout" => specimen_card("Callout", theme, callout::render(theme)),
         "inline" => specimen_card("Inline", theme, inline::render(theme)),
         "spacer" => specimen_card("Spacer", theme, spacer::render(theme)),
+
+        // ── Foundation ──────────────────────────────────────────
+        "icon" => specimen_card("Icon", theme, icon::render(theme)),
 
         // ── Action ──────────────────────────────────────────────
         "button" => specimen_card("Button", theme, button::render(state, cx)),
