@@ -272,7 +272,32 @@ Updated: 2026-03-15
 | indeterminate set via JS property vs GPUI state | DOM property vs native state model | allowed | same visual and a11y result required |
 | CSS adjacent sibling selectors | Svelte-specific DOM pattern | allowed | GPUI achieves same visual result through state-driven rendering |
 
-## 13. Approval And Adoption Notes
+## 13. Specimen Definitions
+
+All preview apps must render the following specimens identically.
+
+### Default
+
+Three basic checkboxes in a vertical stack with 12px gap:
+
+| Label | Initial State | Notes |
+|-------|--------------|-------|
+| Enable email notifications | unchecked | interactive |
+| Subscribe to marketing emails | unchecked | interactive |
+| I agree to the terms and conditions | unchecked | interactive |
+
+### States
+
+Four state examples in a vertical stack with 12px gap:
+
+| Label | State | Props |
+|-------|-------|-------|
+| Disabled unchecked | unchecked | `isDisabled: true` |
+| Disabled checked | checked | `isDisabled: true` |
+| Mixed / indeterminate | mixed | `checked: "mixed"` |
+| Read-only checked | checked | `isReadOnly: true` |
+
+## 14. Approval And Adoption Notes
 
 - contract status: `detailed contract`
 - approvers: pending

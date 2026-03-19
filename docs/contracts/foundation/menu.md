@@ -312,7 +312,35 @@ Open/closed state and current highlighted item index are required.
 | exact placement collision strategy may differ | overlay engine internals vary by runtime | allowed | keep invocation, dismissal, and item semantics strict |
 | GPUI may use native window overlay instead of CSS absolute | desktop runtime differs from web | allowed | visual density and token usage must match |
 
-## 13. Approval And Adoption Notes
+## 13. Specimen Definitions
+
+All preview apps must render the following specimens identically.
+
+### With shortcuts
+
+Menu with keyboard shortcut annotations:
+
+| Label | Shortcut | State | Type |
+|-------|----------|-------|------|
+| New file | ⌘N | enabled | item |
+| Open… | ⌘O | enabled | item |
+| Save | ⌘S | enabled | item |
+| — | — | — | separator |
+| Export as PDF | — | enabled | item |
+| Print… | ⌘P | disabled | item |
+
+### With checkboxes
+
+Menu with checkbox items:
+
+| Label | Checked | Type |
+|-------|---------|------|
+| Dark mode | true | checkbox |
+| Notifications | false | checkbox |
+| — | — | separator |
+| Settings… | — | item |
+
+## 14. Approval And Adoption Notes
 
 - contract status: `detailed contract`
 - approvers: pending

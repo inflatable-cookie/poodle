@@ -283,7 +283,31 @@ Updated: 2026-03-15
 | color-mix formulas for track tints | GPUI must achieve same visual result by any means | allowed | verify visual parity |
 | CSS adjacent sibling selectors | Svelte-specific DOM pattern | allowed | GPUI uses state-driven rendering |
 
-## 13. Approval And Adoption Notes
+## 13. Specimen Definitions
+
+All preview apps must render the following specimens identically.
+
+### Default
+
+Three basic switches in a vertical stack with 12px gap:
+
+| Label | Initial State | Notes |
+|-------|--------------|-------|
+| Dark mode | off | interactive |
+| Auto-save drafts | off | interactive |
+| Compact view | off | interactive |
+
+### States
+
+Three state examples in a vertical stack with 12px gap:
+
+| Label | State | Props |
+|-------|-------|-------|
+| Disabled off | off | `isDisabled: true` |
+| Disabled on | on | `isDisabled: true` |
+| Read-only on | on | `isReadOnly: true` |
+
+## 14. Approval And Adoption Notes
 
 - contract status: `detailed contract`
 - approvers: pending

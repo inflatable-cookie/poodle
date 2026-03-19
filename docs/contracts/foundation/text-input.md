@@ -347,7 +347,35 @@ Updated: 2026-03-15
 | treatment radius fallback chain | CSS var fallback vs Rust conditional | allowed | same visual result required |
 | color-mix formulas for affix separators | GPUI must achieve same visual result by any means | allowed | verify visual parity |
 
-## 13. Approval And Adoption Notes
+## 13. Specimen Definitions
+
+All preview apps must render the following specimens identically.
+
+### Default
+
+One basic text input with label and help text:
+
+| Label | Placeholder | Help text | Notes |
+|-------|-------------|-----------|-------|
+| Name | Jane Doe | Enter your full name | empty, interactive |
+
+### With validation
+
+One text input showing validation:
+
+| Label | Placeholder | Validation | Notes |
+|-------|-------------|------------|-------|
+| Email | you@example.com | invalid when missing `@`, valid otherwise | shows error message "Please enter a valid email address" when invalid |
+
+### Disabled
+
+One disabled text input:
+
+| Label | Value | Props |
+|-------|-------|-------|
+| API key | sk-••••••••1234 | `isDisabled: true` |
+
+## 14. Approval And Adoption Notes
 
 - contract status: `detailed contract`
 - approvers: pending

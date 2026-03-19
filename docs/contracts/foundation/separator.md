@@ -199,7 +199,37 @@ No internal state.
 |-------|-------------|-----------------|-----------|
 | color-mix transparency blending | GPUI may use direct alpha blending instead of CSS color-mix | allowed | same visual result required |
 
-## 13. Approval And Adoption Notes
+## 13. Specimen Definitions
+
+All preview apps must render the following specimens identically.
+
+### Horizontal (default)
+
+Vertical stack with text above and below:
+
+| Layout |
+|--------|
+| "Content above" |
+| `<Separator />` |
+| "Content below" |
+
+### Vertical
+
+Horizontal row with separators between text:
+
+| Layout |
+|--------|
+| "Left" | `<Separator orientation="vertical" />` | "Center" | `<Separator orientation="vertical" />` | "Right" |
+
+### Decorative
+
+Single separator with `role: "none"`:
+
+| Props |
+|-------|
+| `role="none"` (decorative, no semantic meaning) |
+
+## 14. Approval And Adoption Notes
 
 - contract status: `detailed contract`
 - approvers: pending

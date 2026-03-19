@@ -245,7 +245,30 @@ Closed, pending-open, and open states are required.
 | precise hover timing may vary slightly | platform event timing differs | allowed | keep descriptive semantics and dismissal strict |
 | color-mix transparency blending | GPUI may use direct alpha blending instead of CSS color-mix | allowed | same visual result required |
 
-## 13. Approval And Adoption Notes
+## 13. Specimen Definitions
+
+All preview apps must render the following specimens identically.
+
+### Default
+
+One tooltip with default placement:
+
+| Trigger | Content | Placement |
+|---------|---------|-----------|
+| "Hover me" button (secondary variant) | Save your changes | top (default) |
+
+### Placements
+
+Four tooltips showing all cardinal placements, arranged in a 2×2 grid:
+
+| Trigger | Content | Placement |
+|---------|---------|-----------|
+| "Top" button | Top tooltip | top |
+| "Bottom" button | Bottom tooltip | bottom |
+| "Left" button | Left tooltip | left |
+| "Right" button | Right tooltip | right |
+
+## 14. Approval And Adoption Notes
 
 - contract status: `detailed contract`
 - approvers: pending

@@ -219,7 +219,52 @@ No internal state.
 |-------|-------------|-----------------|-----------|
 | `color-mix` implementation | GPUI may pre-compute blended colors rather than using CSS `color-mix` | allowed | ensure visual equivalence across themes |
 
-## 13. Approval And Adoption Notes
+## 13. Specimen Definitions
+
+All preview apps must render the following specimens identically.
+
+### Tones
+
+Five pills in a horizontal row with 8px gap:
+
+| Content | Tone |
+|---------|------|
+| Neutral | neutral |
+| Info | info |
+| Success | success |
+| Warning | warning |
+| Danger | danger |
+
+### Sizes
+
+Two pills in a horizontal row with 8px gap:
+
+| Content | Size |
+|---------|------|
+| Small | sm |
+| Medium | md |
+
+### Code font
+
+Three pills with `fontFamily: "code"` in a horizontal row:
+
+| Content | Tone | Font |
+|---------|------|------|
+| v2.4.1 | neutral | code |
+| stable | success | code |
+| beta | warning | code |
+
+### Muted
+
+Three muted pills in a horizontal row:
+
+| Content | Tone | Muted |
+|---------|------|-------|
+| Muted neutral | neutral | true |
+| Muted success | success | true |
+| Muted danger | danger | true |
+
+## 14. Approval And Adoption Notes
 
 - contract status: `detailed contract`
 - approvers: pending

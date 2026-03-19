@@ -350,7 +350,35 @@ Updated: 2026-03-15
 | webkit/moz thumb pseudo-elements | browser-specific CSS selectors | allowed | GPUI renders thumb directly |
 | color-mix formulas | GPUI must achieve same visual result by any means | allowed | verify visual parity |
 
-## 13. Approval And Adoption Notes
+## 13. Specimen Definitions
+
+All preview apps must render the following specimens identically.
+
+### Default
+
+One basic slider:
+
+| Label | Min | Max | Value | Step |
+|-------|-----|-----|-------|------|
+| Volume | 0 | 100 | 65 | 1 |
+
+### With step
+
+One slider with explicit step:
+
+| Label | Min | Max | Value | Step |
+|-------|-----|-----|-------|------|
+| Opacity | 0 | 100 | 100 | 10 |
+
+### Disabled
+
+One disabled slider:
+
+| Label | Min | Max | Value | Props |
+|-------|-----|-----|-------|-------|
+| Disabled | 0 | 100 | 40 | `isDisabled: true` |
+
+## 14. Approval And Adoption Notes
 
 - contract status: `detailed contract`
 - approvers: pending

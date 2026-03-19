@@ -257,7 +257,35 @@ SelectItems: Array<SelectOption | SelectOptionGroup>
 | GPUI may use custom overlay instead of native select | GPUI has no native `<select>` equivalent | allowed | must preserve option group support and keyboard navigation |
 | treatment token fallback chain | CSS var fallback vs Rust conditional | allowed | same visual result required |
 
-## 13. Approval And Adoption Notes
+## 13. Specimen Definitions
+
+All preview apps must render the following specimens identically.
+
+### Default (flat options)
+
+One select with flat option list:
+
+| Placeholder | Options | Initial |
+|-------------|---------|---------|
+| Choose a fruit | Apple, Banana, Cherry, Dragonfruit, Elderberry | none selected |
+
+### Grouped options
+
+One select with grouped options:
+
+| Placeholder | Groups | Notes |
+|-------------|--------|-------|
+| Choose an item | Fruits (Apple, Banana, Cherry), Vegetables (Carrot, Broccoli, Spinach [disabled]), Grains (Rice, Wheat) | Spinach is disabled within its group |
+
+### Disabled
+
+One disabled select with pre-selected value:
+
+| Placeholder | Options | Initial | Props |
+|-------------|---------|---------|-------|
+| Choose a fruit | Apple, Banana, Cherry | Banana | `isDisabled: true` |
+
+## 14. Approval And Adoption Notes
 
 - contract status: `detailed contract`
 - approvers: pending

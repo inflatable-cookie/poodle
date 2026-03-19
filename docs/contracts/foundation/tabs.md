@@ -501,7 +501,75 @@ Updated: 2026-03-15
 | Inactive panels may stay mounted or unmounted | runtime rendering strategy differs | allowed | keep semantics and state continuity strict |
 | GPUI uses opacity multiplication instead of CSS color-mix | platform capability | allowed | visual result must match |
 
-## 13. Approval And Adoption Notes
+## 13. Specimen Definitions
+
+All preview apps must render the following specimens identically.
+
+### Underline variant (default, with panel)
+
+Underline tabs with associated panel content:
+
+| Tab label | Panel content | State |
+|-----------|--------------|-------|
+| Overview | "Overview content goes here." | active (default) |
+| Features | "Features content goes here." | inactive |
+| Pricing | "Pricing content goes here." | inactive |
+| FAQ | — | disabled |
+
+### Card variant (closable, reorderable)
+
+Card tabs simulating file tabs:
+
+| Tab label | Props |
+|-----------|-------|
+| index.ts | active (default) |
+| App.svelte | closable |
+| utils.ts | closable |
+| types.ts | closable |
+
+### Pill variant (with icons)
+
+Pill tabs with leading icons:
+
+| Tab label | Icon | State |
+|-----------|------|-------|
+| Home | house | active (default) |
+| Settings | settings | inactive |
+| Users | users | inactive |
+
+### Underline (with icons, no panel)
+
+Underline tabs with icons and no panel below:
+
+| Tab label | Icon | State |
+|-----------|------|-------|
+| Home | house | active (default) |
+| Settings | settings | inactive |
+| Users | users | inactive |
+
+### Strip variant (full-width bar with icons, closable, reorderable)
+
+Full-width strip tabs:
+
+| Tab label | Icon | State |
+|-----------|------|-------|
+| Editor | code | active (default) |
+| Preview | eye | inactive, closable |
+| Terminal | terminal | inactive, closable |
+| Output | file-text | inactive, closable |
+
+### Strip variant — vertical (icon-only, collapsed panel)
+
+Vertical strip with icon-only tabs:
+
+| Icon | aria-label | State |
+|------|------------|-------|
+| folder | Explorer | active (default) |
+| search | Search | inactive |
+| layers | Source Control | inactive |
+| terminal | Debug | inactive |
+
+## 14. Approval And Adoption Notes
 
 - contract status: `detailed contract`
 - approvers: pending

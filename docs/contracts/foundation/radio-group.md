@@ -303,7 +303,35 @@ Updated: 2026-03-15
 | CSS adjacent sibling selectors | Svelte-specific DOM pattern | allowed | GPUI achieves same visual result through state-driven rendering |
 | transition timing | GPUI may not support CSS-style transitions | allowed | match visual feel where possible |
 
-## 13. Approval And Adoption Notes
+## 13. Specimen Definitions
+
+All preview apps must render the following specimens identically.
+
+### Vertical (default)
+
+Vertical radio group with three options:
+
+| Label | Options | Initial | Orientation |
+|-------|---------|---------|-------------|
+| Plan | Free, Pro, Enterprise | Pro | vertical |
+
+### Horizontal
+
+Horizontal radio group with four options:
+
+| Label | Options | Initial | Orientation |
+|-------|---------|---------|-------------|
+| Size | Small, Medium, Large, Extra large | Medium | horizontal |
+
+### Disabled
+
+Disabled vertical radio group:
+
+| Label | Options | Initial | Props |
+|-------|---------|---------|-------|
+| Plan | Free, Pro, Enterprise | Free | `isDisabled: true` |
+
+## 14. Approval And Adoption Notes
 
 - contract status: `detailed contract`
 - approvers: pending

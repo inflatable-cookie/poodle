@@ -295,7 +295,42 @@ Updated: 2026-03-15
 | backdrop as button vs div with click handler | semantic choice for click handling | allowed | backdrop dismissal behavior must match |
 | getFocusableElements utility internals | focus detection mechanism varies | allowed | Tab cycling behavior must match |
 
-## 13. Approval And Adoption Notes
+## 13. Specimen Definitions
+
+All preview apps must render the following specimens identically. Each dialog is triggered by a button in the specimen page.
+
+### Basic dialog
+
+Triggered by "Open dialog" button:
+
+| Property | Value |
+|----------|-------|
+| Title | Confirm action |
+| Description | Are you sure you want to proceed? This action cannot be undone. |
+| Actions | Cancel (secondary), Confirm (primary) |
+
+### Alert dialog
+
+Triggered by "Open alert" button:
+
+| Property | Value |
+|----------|-------|
+| Title | Delete item? |
+| Description | This will permanently remove the item and all associated data. |
+| Actions | Cancel (secondary), Delete (primary, danger tone) |
+
+### No backdrop dismiss
+
+Triggered by "Open persistent" button:
+
+| Property | Value |
+|----------|-------|
+| Title | Persistent dialog |
+| Description | This dialog can only be closed via the buttons or Escape key. |
+| Actions | Got it (primary) |
+| `dismissOnBackdrop` | `false` |
+
+## 14. Approval And Adoption Notes
 
 - contract status: `detailed contract`
 - approvers: pending

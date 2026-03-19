@@ -173,7 +173,36 @@ Updated: 2026-03-15
 | SVG rendering method | GPUI may use path rendering instead of inline SVG | allowed | same visual result |
 | stroke vs fill | GPUI may pre-convert stroke icons to fill | allowed | same visual result |
 
-## 13. Approval And Adoption Notes
+## 13. Specimen Definitions
+
+All preview apps must render the following specimens identically.
+
+### Sizes
+
+Three rows showing the same three icons at different sizes:
+
+| Size | Icons |
+|------|-------|
+| sm | star, heart, settings |
+| md | star, heart, settings |
+| lg | star, heart, settings |
+
+### Color inheritance
+
+Four icons in a horizontal row, each inheriting a different parent text color:
+
+| Icon | Color source | Token |
+|------|-------------|-------|
+| check-circle | primary | `color.text.primary` |
+| info | secondary | `color.text.secondary` |
+| zap | accent | `color.accent.base` |
+| triangle-alert | danger | `color.status.danger` |
+
+### All icons
+
+Grid display of all available icons in the registry at `md` size. Each icon shows its name below it. Clicking an icon copies its name to clipboard.
+
+## 14. Approval And Adoption Notes
 
 - contract status: `detailed contract`
 - approvers: pending

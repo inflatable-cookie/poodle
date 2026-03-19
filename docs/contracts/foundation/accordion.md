@@ -323,7 +323,31 @@ Updated: 2026-03-15
 | CSS color-mix vs GPUI color blending | different color systems per platform | allowed | same visual result required |
 | module-level id counter vs GPUI id generation | different id generation mechanisms | allowed | unique ARIA id pairs required |
 
-## 13. Approval And Adoption Notes
+## 13. Specimen Definitions
+
+All preview apps must render the following specimens identically.
+
+### Single selection
+
+Accordion with `type: "single"` — only one item open at a time:
+
+| Item title | Panel content | Initial state |
+|-----------|---------------|---------------|
+| Getting started | "Follow these steps to set up your project and start building." | closed |
+| API reference | "Complete documentation for all available endpoints and methods." | closed |
+| Accessibility | "Guidelines for building accessible components with proper ARIA support." | closed |
+
+### Multiple selection
+
+Accordion with `type: "multiple"` — multiple items can be open simultaneously:
+
+| Item title | Panel content | Initial state |
+|-----------|---------------|---------------|
+| Design tokens | "Tokens define the visual language of your application." | closed |
+| Keyboard shortcuts | "Common shortcuts for navigating and interacting with components." | closed |
+| Known issues | "Current limitations and workarounds for known bugs." | closed |
+
+## 14. Approval And Adoption Notes
 
 - contract status: `detailed contract`
 - approvers: pending

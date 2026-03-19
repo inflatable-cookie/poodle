@@ -400,7 +400,51 @@ to   { transform: rotate(360deg); }
 | Spinner animation | GPUI may use different animation primitives | allowed | visual effect must match (rotating arc) |
 | translateY active effect | GPUI may not support sub-pixel transforms | allowed | press feedback must be perceptible |
 
-## 13. Approval And Adoption Notes
+## 13. Specimen Definitions
+
+All preview apps must render the following specimens identically.
+
+### Variants
+
+Three icon buttons in a horizontal row with 8px gap:
+
+| Icon | Variant | aria-label |
+|------|---------|------------|
+| plus | primary | Add |
+| settings | secondary | Settings |
+| x | ghost | Close |
+
+### Danger tone
+
+Three icon buttons with danger tone in a horizontal row:
+
+| Icon | Variant | Tone | aria-label |
+|------|---------|------|------------|
+| trash-2 | primary | danger | Delete |
+| trash-2 | secondary | danger | Delete |
+| trash-2 | ghost | danger | Delete |
+
+### Sizes
+
+Three icon buttons at different sizes:
+
+| Icon | Size | aria-label |
+|------|------|------------|
+| star | sm | Favorite |
+| star | md | Favorite |
+| star | lg | Favorite |
+
+### States
+
+Four icon button states:
+
+| Icon | State | Props | aria-label |
+|------|-------|-------|------------|
+| map-pin | pressed | `isPressed: true` | Pin |
+| ban | disabled | `isDisabled: true` | Block |
+| refresh-cw | loading | `isLoading: true` | Refresh |
+
+## 14. Approval And Adoption Notes
 
 - contract status: `detailed contract`
 - approvers: pending

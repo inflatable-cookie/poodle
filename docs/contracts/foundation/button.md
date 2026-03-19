@@ -332,7 +332,75 @@ Both adjustments apply independently.
 | letter-spacing omitted in GPUI | GPUI text rendering has no letter-spacing API | allowed | minor visual impact |
 | Spinner uses loader icon in GPUI | GPUI cannot animate CSS border spinners | allowed | same semantic meaning, visual delta accepted |
 
-## 13. Approval And Adoption Notes
+## 13. Specimen Definitions
+
+All preview apps must render the following specimens identically.
+
+### Variants
+
+Three buttons in a horizontal row with 8px gap:
+
+| Label | Variant | Tone |
+|-------|---------|------|
+| Primary | primary | default |
+| Secondary | secondary | default |
+| Ghost | ghost | default |
+
+### Danger tone
+
+Three buttons in a horizontal row with 8px gap:
+
+| Label | Variant | Tone |
+|-------|---------|------|
+| Danger primary | primary | danger |
+| Danger secondary | secondary | danger |
+| Danger ghost | ghost | danger |
+
+### With icons
+
+Three buttons in a horizontal row with 8px gap:
+
+| Label | Variant | Leading icon | Trailing icon |
+|-------|---------|-------------|--------------|
+| Create | secondary | plus | — |
+| Open | secondary | — | external-link |
+| Save | secondary | save | check |
+
+### With chevron
+
+Three buttons in a horizontal row with 8px gap:
+
+| Label | Variant | Chevron | Leading icon |
+|-------|---------|---------|-------------|
+| Options | secondary | true | — |
+| Actions | primary | true | — |
+| Filter | secondary | true | filter |
+
+### Sizes
+
+Three buttons in a horizontal row with 8px gap, bottom-aligned:
+
+| Label | Variant | Size |
+|-------|---------|------|
+| Small | primary | sm |
+| Medium | primary | md |
+| Large | primary | lg |
+
+### States
+
+Three buttons in a horizontal row with 8px gap:
+
+| Label | Variant | Props |
+|-------|---------|-------|
+| Disabled | primary | `isDisabled: true` |
+| Loading | primary | `isLoading: true` |
+| Disabled secondary | secondary | `isDisabled: true` |
+
+### Click counter
+
+Text element below all specimens showing "Clicks: {n}" that increments when any interactive button above is clicked. Text uses `text.secondary` color at `xs` size.
+
+## 14. Approval And Adoption Notes
 
 - contract status: `detailed contract`
 - approvers: pending

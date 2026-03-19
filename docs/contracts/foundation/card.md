@@ -270,7 +270,44 @@ Updated: 2026-03-15
 | Elevated shadow light vs dark | GPUI may detect color scheme differently than CSS media query | allowed | same visual result |
 | CSS custom property fallback chains | Rust conditionals vs CSS var() fallback | allowed | same visual result |
 
-## 13. Approval And Adoption Notes
+## 13. Specimen Definitions
+
+All preview apps must render the following specimens identically.
+
+### Default variant
+
+Two cards in a horizontal row with 16px gap:
+
+| Title | Body | Footer |
+|-------|------|--------|
+| Project Alpha | "A collaborative workspace for your team to plan, build, and ship products." | "Updated 2 days ago" |
+| Monthly report | "Revenue grew 12% month-over-month with improved conversion rates." | — (no footer) |
+
+### Outlined variant
+
+One card with visible border:
+
+| Title | Body | Variant |
+|-------|------|---------|
+| Settings | "Configure your workspace preferences and notification settings." | outlined |
+
+### Elevated variant
+
+One card with drop shadow:
+
+| Title | Body | Variant |
+|-------|------|---------|
+| Dashboard | "View real-time metrics and performance indicators." | elevated |
+
+### Interactive
+
+One clickable card with hover state:
+
+| Title | Body | Variant | Props |
+|-------|------|---------|-------|
+| Learn more | "Click to explore documentation and guides." | default | `isInteractive: true` |
+
+## 14. Approval And Adoption Notes
 
 - contract status: `detailed contract`
 - approvers: pending

@@ -160,7 +160,33 @@ No internal state.
 |-------|-------------|-----------------|-----------|
 | none | n/a | n/a | n/a |
 
-## 13. Approval And Adoption Notes
+## 13. Specimen Definitions
+
+All preview apps must render the following specimens identically.
+
+### Accent (default)
+
+Four badges in a horizontal row with 8px gap:
+
+| Content | Variant |
+|---------|---------|
+| 3 | accent |
+| 12 | accent |
+| 99+ | accent |
+| New | accent |
+
+### Muted
+
+Four badges in a horizontal row with 8px gap:
+
+| Content | Variant |
+|---------|---------|
+| 3 | muted |
+| 12 | muted |
+| 99+ | muted |
+| Draft | muted |
+
+## 14. Approval And Adoption Notes
 
 - contract status: `detailed contract`
 - approvers: pending

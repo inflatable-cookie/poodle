@@ -209,7 +209,38 @@ internal state.
 |-------|-------------|-----------------|-----------|
 | indeterminate animation details may differ | motion internals are runtime-specific | allowed | keep progress meaning strict |
 
-## 13. Approval And Adoption Notes
+## 13. Specimen Definitions
+
+All preview apps must render the following specimens identically.
+
+### Determinate
+
+Four progress bars in a vertical stack with 16px gap, each full width:
+
+| Label | Value | Max | Notes |
+|-------|-------|-----|-------|
+| Empty | 0 | 100 | 0% filled |
+| 35% | 35 | 100 | partial fill |
+| 72% | 72 | 100 | partial fill |
+| Complete | 100 | 100 | full bar |
+
+### Indeterminate
+
+One indeterminate progress bar, full width:
+
+| Label | Value | Notes |
+|-------|-------|-------|
+| Loading | `undefined` | animated sliding indicator |
+
+### Custom max
+
+One progress bar with a non-100 maximum:
+
+| Label | Value | Max | Notes |
+|-------|-------|-----|-------|
+| Steps | 3 | 5 | shows 60% fill |
+
+## 14. Approval And Adoption Notes
 
 - Contract status: `detailed contract`
 - Approvers: pending
