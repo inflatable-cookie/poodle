@@ -340,7 +340,39 @@ Displays check icon when `copied` is true, copy icon otherwise.
 | syntax highlighting not specified | tokenization is implementation-specific | allowed | may add token color contracts later |
 | clipboard API differs per platform | GPUI uses native clipboard vs navigator.clipboard | allowed | keep 2s feedback timing |
 
-## 13. Approval And Adoption Notes
+## 13. Specimen Definitions
+
+### Block With Language Label
+
+| Label | Props / Config | Expected Visual |
+|-------|---------------|-----------------|
+| Block with language label | `source` = TypeScript import + function snippet, `language="typescript"` | Block code container with toolbar showing "TYPESCRIPT" label and copy button |
+
+### With Line Numbers And Highlight
+
+| Label | Props / Config | Expected Visual |
+|-------|---------------|-----------------|
+| With line numbers and highlight | same TypeScript source, `language="ts"`, `showLineNumbers`, `highlightLines={[3, 4]}` | Block code with line number gutter; lines 3 and 4 have accent background highlight |
+
+### CSS With Max Height
+
+| Label | Props / Config | Expected Visual |
+|-------|---------------|-----------------|
+| CSS with max height | `source` = CSS rule block, `language="css"`, `maxHeight="6rem"` | Block code constrained to 6rem height with vertical scroll if content overflows |
+
+### Inline Code
+
+| Label | Props / Config | Expected Visual |
+|-------|---------------|-----------------|
+| Inline code | `source="npm install"`, `inline` | Compact inline code fragment within surrounding paragraph text |
+
+### No Copy Button
+
+| Label | Props / Config | Expected Visual |
+|-------|---------------|-----------------|
+| No copy button | `source="echo 'hello world'"`, `language="bash"`, `showCopyButton={false}` | Block code with language label but no copy button in toolbar |
+
+## 14. Approval And Adoption Notes
 
 - contract status: `detailed contract`
 - approvers: pending

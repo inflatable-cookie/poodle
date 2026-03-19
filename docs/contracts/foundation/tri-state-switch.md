@@ -246,7 +246,27 @@ are required. Exactly one of three segments is always selected.
 | Color-mix blending | GPUI may approximate color-mix differently | allowed | visual result must be comparable |
 | CSS transition timing | GPUI may not support CSS-style transitions | allowed | match where possible |
 
-## 13. Approval And Adoption Notes
+## 13. Specimen Definitions
+
+### Group: Default
+
+| Label | Props / Config | Expected Visual |
+|-------|---------------|-----------------|
+| Default | `value="default"`, `ariaLabel="Filter mode"` | Three-segment switch with default labels (Exclude, Default, Include); "Default" segment selected with elevated background; live value display below updates on click |
+
+### Group: Custom labels
+
+| Label | Props / Config | Expected Visual |
+|-------|---------------|-----------------|
+| Custom labels | `options={ excluded: "Hide", default: "All", included: "Show" }`, `ariaLabel="Visibility filter"` | Three segments labeled "Hide", "All", "Show" instead of default labels; otherwise identical appearance |
+
+### Group: Disabled
+
+| Label | Props / Config | Expected Visual |
+|-------|---------------|-----------------|
+| Disabled | `value="included"`, `isDisabled=true`, `ariaLabel="Disabled switch"` | "Include" segment selected with success-tinted background; all segments muted and non-interactive |
+
+## 14. Approval And Adoption Notes
 
 - contract status: `detailed contract`
 - approvers: pending

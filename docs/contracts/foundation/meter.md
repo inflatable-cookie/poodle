@@ -207,7 +207,35 @@ fill color in the current implementation.
 | native meter styling may vary | platform visuals are not the contract | allowed | keep measurement semantics strict |
 | hidden native meter is Svelte-specific | GPUI uses native accessibility APIs directly | allowed | ensure semantic parity |
 
-## 13. Approval And Adoption Notes
+## 13. Specimen Definitions
+
+All preview apps must render the following specimens identically.
+
+### Default (50%)
+
+| Label | Props/Config | Expected Visual |
+|-------|-------------|-----------------|
+| Default (50%) | `value=50`, `ariaLabel="Storage usage"` | Track with fill at 50% width; pill-shaped track and fill with success-gradient coloring |
+
+### With thresholds
+
+| Label | Props/Config | Expected Visual |
+|-------|-------------|-----------------|
+| With thresholds | `value=82`, `low=25`, `high=75`, `optimum=50`, `ariaLabel="CPU usage"` | Track with fill at 82% width; value is above the high threshold; annotated "82% -- above high threshold" |
+
+### Low value (optimal range)
+
+| Label | Props/Config | Expected Visual |
+|-------|-------------|-----------------|
+| Low value (optimal range) | `value=30`, `low=25`, `high=75`, `optimum=50`, `ariaLabel="Memory usage"` | Track with fill at 30% width; value is within the normal range; annotated "30% -- within normal range" |
+
+### Custom range (0-500)
+
+| Label | Props/Config | Expected Visual |
+|-------|-------------|-----------------|
+| Custom range (0-500) | `value=350`, `min=0`, `max=500`, `ariaLabel="API calls"` | Track with fill at 70% width (350/500); annotated "350 / 500 API calls used" |
+
+## 14. Approval And Adoption Notes
 
 - Contract status: `detailed contract`
 - Approvers: pending

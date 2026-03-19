@@ -260,7 +260,21 @@ No `data-placement` attribute is emitted — positioning is entirely JS-driven.
 | GPUI uses opacity multiplication instead of CSS color-mix | platform capability | allowed | visual result must match |
 | GPUI timer cancellation uses async tasks instead of clearTimeout | platform capability | allowed | delay behavior must match |
 
-## 13. Approval And Adoption Notes
+## 13. Specimen Definitions
+
+### Group: Default (top placement)
+
+| Label | Props / Config | Expected Visual |
+|-------|---------------|-----------------|
+| User preview hover card | `<HoverCard ariaLabel="User preview">` with inline trigger text ("@clay") and content containing a name heading and bio paragraph | Underlined accent-colored trigger text; hovering (after 180ms delay) opens an elevated surface above the trigger showing a name and description; leaving trigger/surface closes after 120ms delay |
+
+### Group: Bottom placement
+
+| Label | Props / Config | Expected Visual |
+|-------|---------------|-----------------|
+| Repository info hover card | `<HoverCard placement="bottom" ariaLabel="Repository info">` with inline trigger text ("pug/svelte-primitives") and content containing a repo name and stats | Underlined accent-colored trigger text; hovering opens an elevated surface below the trigger showing repository name and summary; surface has dialog role with aria-label |
+
+## 14. Approval And Adoption Notes
 
 - contract status: `detailed contract`
 - approvers: pending

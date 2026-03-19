@@ -295,7 +295,15 @@ index are required.
 | pointer hotspot alignment may differ slightly | coordinate systems differ by runtime | allowed | keep invocation meaning and target restoration strict |
 | GPUI may use native window overlay for context menus | desktop runtime differs from web | allowed | visual density, item semantics, and token usage must match |
 
-## 13. Approval And Adoption Notes
+## 13. Specimen Definitions
+
+### Right-Click Target Area
+
+| Label | Props / Config | Expected Visual |
+|-------|---------------|-----------------|
+| Right-click the area below | `items` array with Cut (shortcut: Cmd+X), Copy (Cmd+C), Paste (Cmd+V), separator, Select all (Cmd+A), separator, Delete (disabled) | Dashed-border target area; right-clicking opens context menu overlay with action items, shortcut labels in meta column, separator dividers, and a disabled Delete item at reduced opacity |
+
+## 14. Approval And Adoption Notes
 
 - contract status: `detailed contract`
 - approvers: pending

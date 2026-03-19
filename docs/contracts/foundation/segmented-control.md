@@ -257,7 +257,27 @@ are required.
 | ID generation strategy | module-level counter vs Rust ID approach | allowed | both must produce unique group names |
 | CSS transition timing | GPUI may not support CSS-style transitions | allowed | match where possible |
 
-## 13. Approval And Adoption Notes
+## 13. Specimen Definitions
+
+### Default
+
+| Label | Props / Config | Expected Visual |
+|-------|---------------|-----------------|
+| Default | `value="grid"`, `ariaLabel="View mode"`, options: Grid, List, Table | Three equal-width segments in a bordered track; Grid segment shows selected state with accent background, inverse text, and inset highlight shadow |
+
+### With Disabled Option
+
+| Label | Props / Config | Expected Visual |
+|-------|---------------|-----------------|
+| With disabled option | `defaultValue="all"`, `ariaLabel="Status filter"`, options: All, Active, Archived, Draft (`isDisabled=true`) | Four segments; All shows selected state; Draft segment at reduced opacity with not-allowed cursor |
+
+### Fully Disabled
+
+| Label | Props / Config | Expected Visual |
+|-------|---------------|-----------------|
+| Fully disabled | `isDisabled=true`, `defaultValue="list"`, `ariaLabel="Disabled control"`, options: Grid, List, Table | All three segments at reduced opacity, not-allowed cursor; List shows selected styling but entire control is non-interactive |
+
+## 14. Approval And Adoption Notes
 
 - contract status: `detailed contract`
 - approvers: pending

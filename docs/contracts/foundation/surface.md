@@ -244,7 +244,33 @@ utility, providing roomier defaults suited to container-level spacing.
 | color-mix transparency blending | GPUI may use direct alpha blending instead of CSS color-mix | allowed | same visual result required |
 | Treatment radius fallback chain | CSS var fallback vs Rust conditional | allowed | same visual result |
 
-## 13. Approval And Adoption Notes
+## 13. Specimen Definitions
+
+### Group: Panel tone (default)
+
+| Label | Props / Config | Expected Visual |
+|-------|---------------|-----------------|
+| Panel surface | `<Surface padding="md" border="subtle">` with text content | Panel-tier background with subtle border, medium padding; the standard container appearance |
+
+### Group: Canvas tone
+
+| Label | Props / Config | Expected Visual |
+|-------|---------------|-----------------|
+| Canvas surface | `<Surface tone="canvas" padding="md" border="subtle">` with text content | Canvas-tier background (sits behind panels as a background layer) with subtle border and medium padding |
+
+### Group: Elevated tone
+
+| Label | Props / Config | Expected Visual |
+|-------|---------------|-----------------|
+| Elevated surface | `<Surface tone="elevated" padding="md" border="subtle" isElevated>` with text content | Elevated-tier background with elevation shadow, subtle border, and medium padding; visually lifted above surrounding content |
+
+### Group: No border
+
+| Label | Props / Config | Expected Visual |
+|-------|---------------|-----------------|
+| Borderless surface | `<Surface padding="md" border="none">` with text content | Panel-tier background with no visible border; only padding and background fill are visible |
+
+## 14. Approval And Adoption Notes
 
 - contract status: `detailed contract`
 - approvers: pending

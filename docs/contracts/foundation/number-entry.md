@@ -249,7 +249,33 @@ Updated: 2026-03-15
 | browser-native spinner visuals suppressed in Svelte | `type="text"` eliminates native spinners; GPUI has none | allowed | keep numeric semantics strict |
 | stepper visual details may differ slightly in GPUI | rendering model differs | allowed | keep stepping behavior and bounds strict |
 
-## 13. Approval And Adoption Notes
+## 13. Specimen Definitions
+
+### Default
+
+| Label | Props / Config | Expected Visual |
+|-------|---------------|-----------------|
+| Default | `value={1}`, `min={0}`, `max={100}`, `ariaLabel="Quantity"` | Numeric field showing value 1; increment/decrement via keyboard; displays current quantity below |
+
+### With Steppers
+
+| Label | Props / Config | Expected Visual |
+|-------|---------------|-----------------|
+| With steppers | `value={29.99}`, `min={0}`, `step={0.01}`, `precision={2}`, `showSteppers`, `ariaLabel="Price"` | Numeric field with visible increment/decrement stepper buttons; value formatted to 2 decimal places; displays price below |
+
+### Disabled
+
+| Label | Props / Config | Expected Visual |
+|-------|---------------|-----------------|
+| Disabled | `value={42}`, `isDisabled` | Numeric field with reduced opacity, non-interactive |
+
+### Invalid
+
+| Label | Props / Config | Expected Visual |
+|-------|---------------|-----------------|
+| Invalid | `value={-5}`, `min={0}`, `validationState="invalid"` | Numeric field with danger border color indicating invalid state |
+
+## 14. Approval And Adoption Notes
 
 - contract status: `detailed contract`
 - approvers: pending

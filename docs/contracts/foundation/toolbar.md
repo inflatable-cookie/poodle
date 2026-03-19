@@ -183,7 +183,42 @@ Updated: 2026-03-15
 | roving focus implementation may differ | runtime focus engines differ | allowed | keep toolbar semantics and keyboard behavior strict |
 | color-mix formula rendering | GPUI may approximate color-mix | allowed | match visual result as closely as possible |
 
-## 13. Approval And Adoption Notes
+## 13. Specimen Definitions
+
+### Horizontal (default)
+
+| Label | Props / Config | Expected Visual |
+|-------|---------------|-----------------|
+| Horizontal (default) | `ariaLabel="Formatting toolbar"`, `orientation="horizontal"` (default) | Horizontal toolbar container with bordered chrome; contains ghost icon buttons (Bold, Italic, Underline), a vertical separator, then ghost icon buttons (Align left, Align center, Align right) |
+
+#### Toolbar Items
+
+| Item | Type | Props / Config | Expected Visual |
+|------|------|---------------|-----------------|
+| Bold | Button | `variant="ghost"`, `size="sm"`, `leadingIcon="bold"`, `ariaLabel="Bold"` | Small ghost icon button |
+| Italic | Button | `variant="ghost"`, `size="sm"`, `leadingIcon="italic"`, `ariaLabel="Italic"` | Small ghost icon button |
+| Underline | Button | `variant="ghost"`, `size="sm"`, `leadingIcon="underline"`, `ariaLabel="Underline"` | Small ghost icon button |
+| (separator) | Separator | `orientation="vertical"` | Vertical divider line |
+| Align left | Button | `variant="ghost"`, `size="sm"`, `leadingIcon="text-align-start"`, `ariaLabel="Align left"` | Small ghost icon button |
+| Align center | Button | `variant="ghost"`, `size="sm"`, `leadingIcon="text-align-center"`, `ariaLabel="Align center"` | Small ghost icon button |
+| Align right | Button | `variant="ghost"`, `size="sm"`, `leadingIcon="text-align-end"`, `ariaLabel="Align right"` | Small ghost icon button |
+
+### With Primary Action
+
+| Label | Props / Config | Expected Visual |
+|-------|---------------|-----------------|
+| With primary action | `ariaLabel="Actions toolbar"` | Horizontal toolbar with secondary text buttons (Discard, Save draft), a vertical separator, then a primary text button (Publish) |
+
+#### Toolbar Items
+
+| Item | Type | Props / Config | Expected Visual |
+|------|------|---------------|-----------------|
+| Discard | Button | `variant="secondary"`, `size="sm"` | Small secondary button with text |
+| Save draft | Button | `variant="secondary"`, `size="sm"` | Small secondary button with text |
+| (separator) | Separator | `orientation="vertical"` | Vertical divider line |
+| Publish | Button | `size="sm"` (primary default) | Small primary button with text |
+
+## 14. Approval And Adoption Notes
 
 - contract status: `detailed contract`
 - approvers: pending

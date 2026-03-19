@@ -258,7 +258,21 @@ Applied when direction is `"horizontal"` or `"both"`:
 | scrollbar visuals may differ | platform-native rendering is acceptable | allowed | keep behavior parity strict |
 | overscroll-behavior | GPUI may not support contain semantics natively | allowed | prevent scroll chaining where possible |
 
-## 13. Approval And Adoption Notes
+## 13. Specimen Definitions
+
+### Group: Vertical scroll
+
+| Label | Props / Config | Expected Visual |
+|-------|---------------|-----------------|
+| Vertical scroll | `direction="vertical"`, `label="Scrollable content"`, 12 Surface children in a 10rem-tall container | Vertical scrollbar visible; 12 bordered surface items stack vertically; scrolling reveals items beyond the viewport |
+
+### Group: Horizontal scroll
+
+| Label | Props / Config | Expected Visual |
+|-------|---------------|-----------------|
+| Horizontal scroll | `direction="horizontal"`, `label="Horizontal items"`, 10 Surface children in a flex row | Horizontal scrollbar visible; 10 bordered surface items arranged in a row; each item has nowrap text "Column N" |
+
+## 14. Approval And Adoption Notes
 
 - contract status: `detailed contract`
 - approvers: pending

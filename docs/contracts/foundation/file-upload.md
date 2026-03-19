@@ -484,7 +484,27 @@ interface FileUploadItem {
 | image preview mechanism differs (blob URL vs native image loading) | platform API differences | allowed | preview must display and be revocable |
 | drag-and-drop visual feedback may differ slightly in GPUI | platform DnD API differences | allowed | must indicate active drop target state |
 
-## 13. Approval And Adoption Notes
+## 13. Specimen Definitions
+
+### Image Upload With Preview
+
+| Label | Props / Config | Expected Visual |
+|-------|---------------|-----------------|
+| Image upload with preview | `accept="image/*"`, `multiple`, `maxFiles={5}`, `maxSize={5 * 1024 * 1024}` | Dropzone accepting image files, multiple selection enabled, preview thumbnails shown for added images |
+
+### Document Upload (Single File)
+
+| Label | Props / Config | Expected Visual |
+|-------|---------------|-----------------|
+| Document upload (single file) | `accept=".pdf,.doc,.docx,.txt"`, `maxSize={10 * 1024 * 1024}`, `showPreview={false}` | Dropzone accepting document types, single file only, no image previews in file list |
+
+### Disabled
+
+| Label | Props / Config | Expected Visual |
+|-------|---------------|-----------------|
+| Disabled | `disabled` | Dropzone at reduced opacity with no pointer events |
+
+## 14. Approval And Adoption Notes
 
 - contract status: `detailed contract`
 - approvers: pending

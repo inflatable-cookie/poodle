@@ -390,7 +390,29 @@ CalendarWeekStart: "sunday" | "monday"
 | color-mix formula implementation | GPUI may use pre-computed color blending | allowed | same visual result required |
 | roving tabindex vs GPUI focus model | focus management implementation differs by platform | allowed | one-day-focusable-at-a-time behavior must match |
 
-## 13. Approval And Adoption Notes
+## 13. Specimen Definitions
+
+All preview apps must render the following specimens identically.
+
+### Default
+
+| Label | Props/Config | Expected Visual |
+|-------|-------------|-----------------|
+| Default | `ariaLabel="Select a date"` | Full month grid with header navigation, weekday labels, and day buttons; no pre-selected date; today receives today border treatment; interactive |
+
+### With pre-selected date
+
+| Label | Props/Config | Expected Visual |
+|-------|-------------|-----------------|
+| With pre-selected date | `defaultValue="2026-03-14"`, `ariaLabel="Calendar with default"` | Month grid with March 14 showing selected treatment (accent background, inverse text) |
+
+### Disabled
+
+| Label | Props/Config | Expected Visual |
+|-------|-------------|-----------------|
+| Disabled | `defaultValue="2026-03-01"`, `isDisabled=true`, `ariaLabel="Disabled calendar"` | Month grid with March 1 selected, reduced opacity on root, cursor not-allowed, all interaction disabled |
+
+## 14. Approval And Adoption Notes
 
 - contract status: `detailed contract`
 - approvers: pending

@@ -225,7 +225,33 @@ Updated: 2026-03-15
 | Transition timing (180ms ease) | GPUI may not support CSS-style transitions | allowed | match where possible |
 | Flex-wrap behavior | GPUI wrapping may differ slightly from CSS flexbox | allowed | items must wrap and remain cohesive |
 
-## 13. Approval And Adoption Notes
+## 13. Specimen Definitions
+
+### Single Selection
+
+| Label | Props / Config | Expected Visual |
+|-------|---------------|-----------------|
+| Single selection | `selectionMode="single"` (default), `value="grid"`, `ariaLabel="View mode"`, options: Grid, List, Board | Three pill-shaped items in a row; Grid item shows selected state with accent-tinted background and border |
+
+### Four Options
+
+| Label | Props / Config | Expected Visual |
+|-------|---------------|-----------------|
+| Four options | `selectionMode="single"` (default), `value="left"`, `ariaLabel="Text alignment"`, options: Left, Center, Right, Justify | Four pill-shaped items; Left item selected |
+
+### Multiple Selection
+
+| Label | Props / Config | Expected Visual |
+|-------|---------------|-----------------|
+| Multiple selection | `selectionMode="multiple"`, `value=["design", "docs"]`, `ariaLabel="Filter tags"`, options: Design, Engineering, Docs | Three pill-shaped items; Design and Docs both show selected state; Engineering shows unselected state |
+
+### Disabled
+
+| Label | Props / Config | Expected Visual |
+|-------|---------------|-----------------|
+| Disabled | `isDisabled=true`, `defaultValue="list"`, `ariaLabel="Disabled toggle group"`, options: Grid, List, Board | All three items at reduced opacity, not-allowed cursor; List shows selected styling but remains non-interactive |
+
+## 14. Approval And Adoption Notes
 
 - contract status: `detailed contract`
 - approvers: pending

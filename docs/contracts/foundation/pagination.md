@@ -242,7 +242,27 @@ Updated: 2026-03-15
 | exact truncation window edges may differ slightly | pagination windowing is implementation-owned | allowed | keep current page and boundary meaning strict |
 | color-mix formula rendering | GPUI may approximate color-mix | allowed | match visual result as closely as possible |
 
-## 13. Approval And Adoption Notes
+## 13. Specimen Definitions
+
+### Default
+
+| Label | Props / Config | Expected Visual |
+|-------|---------------|-----------------|
+| Default | `currentPage=1`, `totalPages=10`, `ariaLabel="Results pagination"` | Previous button (disabled at page 1), page buttons with page 1 highlighted as current, ellipsis truncation for hidden ranges, next button enabled |
+
+### Middle of Range
+
+| Label | Props / Config | Expected Visual |
+|-------|---------------|-----------------|
+| Middle of range | `currentPage=5`, `totalPages=20`, `siblingCount=2`, `ariaLabel="Extended pagination"` | Both previous and next buttons enabled, page 5 highlighted as current, two sibling pages shown on each side, ellipsis for truncated ranges at both ends |
+
+### Few Pages
+
+| Label | Props / Config | Expected Visual |
+|-------|---------------|-----------------|
+| Few pages | `currentPage=2`, `totalPages=3`, `ariaLabel="Short pagination"` | All three page buttons visible (no ellipsis needed), page 2 highlighted as current, previous and next buttons both enabled |
+
+## 14. Approval And Adoption Notes
 
 - contract status: `detailed contract`
 - approvers: pending

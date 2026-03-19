@@ -307,7 +307,21 @@ type ActiveSort = {
 |-------|-------------|-----------------|-----------|
 | Arrow rotation method | GPUI may use different rotation approach | allowed | same visual result |
 
-## 13. Approval And Adoption Notes
+## 13. Specimen Definitions
+
+### Sort Controls
+
+| Label | Props / Config | Expected Visual |
+|-------|---------------|-----------------|
+| Sort controls | `fields`: Name, Date, Size, Type (disabled); `activeSort` bound | Toolbar with "Sort by" label, four field buttons (Type visually disabled), status text showing current sort |
+
+### Disabled
+
+| Label | Props / Config | Expected Visual |
+|-------|---------------|-----------------|
+| Disabled | `fields`: Name, Date; `isDisabled` | Toolbar at reduced opacity with all field buttons disabled |
+
+## 14. Approval And Adoption Notes
 
 - contract status: `detailed contract`
 - approvers: pending

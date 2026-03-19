@@ -206,7 +206,27 @@ Updated: 2026-03-15
 |-------|-------------|-----------------|-----------|
 | Live region announcement | GPUI may use different accessibility announcement method | allowed | same functional result |
 
-## 13. Approval And Adoption Notes
+## 13. Specimen Definitions
+
+### Default
+
+| Label | Props / Config | Expected Visual |
+|-------|---------------|-----------------|
+| Default | `currentPage=1`, `totalPages=8`, `totalItems=156`, `pageSize=20` | Summary text showing item range (e.g., "Showing 1-20 of 156"), page indicator ("Page 1 of 8"), previous button disabled (first page), next button enabled |
+
+### Single Page
+
+| Label | Props / Config | Expected Visual |
+|-------|---------------|-----------------|
+| Single page | `currentPage=1`, `totalPages=1`, `totalItems=12`, `pageSize=20` | Summary text showing full range (e.g., "Showing 1-12 of 12"), both previous and next buttons disabled |
+
+### Large Dataset
+
+| Label | Props / Config | Expected Visual |
+|-------|---------------|-----------------|
+| Large dataset | `currentPage=5`, `totalPages=50`, `totalItems=1000`, `pageSize=20` | Summary text showing mid-range items (e.g., "Showing 81-100 of 1000"), page indicator ("Page 5 of 50"), both buttons enabled |
+
+## 14. Approval And Adoption Notes
 
 - contract status: `detailed contract`
 - approvers: pending

@@ -349,7 +349,41 @@ type CalloutTone = "neutral" | "info" | "success" | "warning" | "danger" | "pend
 | Custom property pattern | GPUI may use direct values instead of CSS custom properties | allowed | final computed colors must match |
 | GPUI still has separate Banner/CallOut | consolidation deferred | allowed | align in future GPUI pass |
 
-## 13. Approval And Adoption Notes
+## 13. Specimen Definitions
+
+All preview apps must render the following specimens identically.
+
+### Tones
+
+Five callouts stacked vertically, one per tone with body content:
+
+| Label | Props/Config | Expected Visual |
+|-------|-------------|-----------------|
+| Neutral callout | `tone="neutral"`, `title="Neutral callout"`, body slot content | Subtle panel background and border with info icon badge, bold title, secondary-color body text |
+| Info | `tone="info"`, `title="Info"`, body slot content | Info-tinted fill and border with info icon badge |
+| Success | `tone="success"`, `title="Success"`, body slot content | Success-tinted fill and border with check icon badge |
+| Warning | `tone="warning"`, `title="Warning"`, body slot content | Warning-tinted fill and border with triangle-alert icon badge |
+| Error | `tone="danger"`, `title="Error"`, body slot content | Danger-tinted fill and border with circle-x icon badge |
+
+### Message prop
+
+| Label | Props/Config | Expected Visual |
+|-------|-------------|-----------------|
+| Information | `tone="info"`, `title="Information"`, `message="This is an informational callout using the message prop instead of slot content."` | Info-tinted callout with title and message rendered as paragraph text |
+
+### Dismissible
+
+| Label | Props/Config | Expected Visual |
+|-------|-------------|-----------------|
+| Dismissible callout | `tone="info"`, `title="Dismissible callout"`, `message="This callout can be dismissed by the user."`, `isDismissible=true` | Info-tinted callout with a visible dismiss (close) button |
+
+### Without title
+
+| Label | Props/Config | Expected Visual |
+|-------|-------------|-----------------|
+| (no title) | `tone="info"`, body slot content only | Info-tinted callout with icon and body text but no bold title |
+
+## 14. Approval And Adoption Notes
 
 - contract status: `detailed contract`
 - approvers: pending

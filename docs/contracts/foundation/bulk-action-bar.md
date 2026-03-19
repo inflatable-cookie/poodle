@@ -228,7 +228,21 @@ type BulkAction = {
 |-------|-------------|-----------------|-----------|
 | Live region announcement | GPUI may use different accessibility announcement method | allowed | same functional result |
 
-## 13. Approval And Adoption Notes
+## 13. Specimen Definitions
+
+### Group: With selection count
+
+| Label | Props / Config | Expected Visual |
+|-------|---------------|-----------------|
+| With selection count | `selectionCount=5`, `totalCount=42`, `actions=[Export (icon: download), Archive (icon: inbox), Delete (icon: trash-2, tone: danger)]` | Bar showing "5 selected of 42" with three action buttons; Delete button has danger styling; clicking any action displays the action id below |
+
+### Group: Single item selected
+
+| Label | Props / Config | Expected Visual |
+|-------|---------------|-----------------|
+| Single item selected | `selectionCount=1`, `actions=[Export (icon: download), Archive (icon: inbox)]` (subset, no danger) | Bar showing "1 selected" (no total); only two action buttons, no danger-toned button |
+
+## 14. Approval And Adoption Notes
 
 - contract status: `detailed contract`
 - approvers: pending

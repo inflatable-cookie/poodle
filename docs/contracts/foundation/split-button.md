@@ -366,7 +366,45 @@ type MenuItem = {
 | Menu animation | GPUI may not support CSS transitions for menu reveal | allowed | match where possible |
 | Click-outside detection | platform-specific event handling | allowed | same behavioral result |
 
-## 13. Approval And Adoption Notes
+## 13. Specimen Definitions
+
+### Group: Primary variant
+
+| Label | Props / Config | Expected Visual |
+|-------|---------------|-----------------|
+| Primary variant | `variant="primary"`, `items=[Save as draft, Save as template, (separator), Discard changes]`, label "Save" | Primary-filled split button with chevron toggle; clicking toggle reveals menu with three items and one separator |
+
+### Group: Secondary variant
+
+| Label | Props / Config | Expected Visual |
+|-------|---------------|-----------------|
+| Secondary variant | `variant="secondary"`, `items=[Export as CSV, Export as JSON, Export as PDF]`, label "Export" | Secondary-styled split button; menu shows three export options without separators |
+
+### Group: Danger tone
+
+| Label | Props / Config | Expected Visual |
+|-------|---------------|-----------------|
+| Danger tone | `tone="danger"`, `items=[Delete selected, Delete all]`, label "Delete" | Danger-tinted split button (danger fill/border/text); menu shows two destructive actions |
+
+### Group: Loading state
+
+| Label | Props / Config | Expected Visual |
+|-------|---------------|-----------------|
+| Loading state | `variant="primary"`, `isLoading=true`, label "Saving..." | Spinner visible in primary half; entire control disabled and non-interactive |
+
+### Group: Disabled
+
+| Label | Props / Config | Expected Visual |
+|-------|---------------|-----------------|
+| Disabled | `variant="secondary"`, `isDisabled=true`, label "Save" | Reduced opacity; cursor not-allowed; no interaction possible |
+
+### Group: Last action
+
+| Label | Props / Config | Expected Visual |
+|-------|---------------|-----------------|
+| Last action | (reactive display) | Text showing the last triggered action from click or menu item selection; confirms event wiring |
+
+## 14. Approval And Adoption Notes
 
 - contract status: `detailed contract`
 - approvers: pending

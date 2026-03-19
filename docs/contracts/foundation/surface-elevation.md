@@ -170,6 +170,34 @@ const bg = colorLerp(surface, textPrimary, 1.0 - ratio);
 
 The mixing ratios (88%, 91%, 93%, 96%) and the `text-primary` mixing target are identical across all renderers.
 
+## Specimen Definitions
+
+Specimen reference: `SurfaceSpecimen.svelte` (demonstrates the Surface component which implements surface elevation tones).
+
+### Group: Panel tone (default)
+
+| Label | Props / Config | Expected Visual |
+|-------|---------------|-----------------|
+| Panel tone | `Surface` with `padding="md"`, `border="subtle"` | Panel-toned surface with subtle border; standard container background |
+
+### Group: Canvas tone
+
+| Label | Props / Config | Expected Visual |
+|-------|---------------|-----------------|
+| Canvas tone | `Surface` with `tone="canvas"`, `padding="md"`, `border="subtle"` | Canvas-toned background (darker/behind panels in dark theme); subtle border |
+
+### Group: Elevated tone
+
+| Label | Props / Config | Expected Visual |
+|-------|---------------|-----------------|
+| Elevated tone | `Surface` with `tone="elevated"`, `padding="md"`, `border="subtle"`, `isElevated=true` | Elevated-toned background (lightest level in dark theme); box shadow for elevation; subtle border |
+
+### Group: No border
+
+| Label | Props / Config | Expected Visual |
+|-------|---------------|-----------------|
+| No border | `Surface` with `padding="md"`, `border="none"` | Panel background with padding; no visible border |
+
 ## Parity Checklist
 
 All three renderers (Svelte, GPUI, Jetstream) must produce visually comparable results when:

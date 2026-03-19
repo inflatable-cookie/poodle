@@ -159,7 +159,21 @@ No internal state.
 |-------|-------------|-----------------|-----------|
 | none | n/a | n/a | n/a |
 
-## 13. Approval And Adoption Notes
+## 13. Specimen Definitions
+
+### Group: Push items apart
+
+| Label | Props / Config | Expected Visual |
+|-------|---------------|-----------------|
+| Two items pushed apart | `<Inline gap="md">` containing a Surface ("Logo"), `<Spacer />`, and a Surface ("Sign in") | First surface pinned to the left edge, second surface pinned to the right edge, with spacer consuming all remaining space between them |
+
+### Group: Between three items
+
+| Label | Props / Config | Expected Visual |
+|-------|---------------|-----------------|
+| Three items with spacers | `<Inline gap="md">` containing Surface ("Left"), `<Spacer />`, Surface ("Center"), `<Spacer />`, Surface ("Right") | Three surfaces evenly distributed across the row; two spacers split remaining space equally, pushing items to left, center, and right positions |
+
+## 14. Approval And Adoption Notes
 
 - contract status: `detailed contract`
 - approvers: pending

@@ -269,7 +269,33 @@ Updated: 2026-03-15
 | `1lh` unit support | GPUI must compute equivalent from line-height and rows | allowed | verify visual height parity |
 | resize handle appearance | platform-native resize affordance is acceptable | allowed | ensure resize: vertical behavior exists |
 
-## 13. Approval And Adoption Notes
+## 13. Specimen Definitions
+
+### Default
+
+| Label | Props / Config | Expected Visual |
+|-------|---------------|-----------------|
+| Default | `placeholder="Write a note…"`, `ariaLabel="Note"` | Empty multiline field with placeholder text; typing emits `valueChange` and displays character count below |
+
+### With Initial Value
+
+| Label | Props / Config | Expected Visual |
+|-------|---------------|-----------------|
+| With initial value | `defaultValue="A brief description about yourself."`, `rows={3}`, `ariaLabel="Biography"` | Multiline field pre-filled with text, 3 visible rows |
+
+### Read-only
+
+| Label | Props / Config | Expected Visual |
+|-------|---------------|-----------------|
+| Read-only | `defaultValue="This content cannot be modified by the user."`, `rows={2}`, `isReadOnly` | Field displays text that can be selected but not edited |
+
+### Disabled
+
+| Label | Props / Config | Expected Visual |
+|-------|---------------|-----------------|
+| Disabled | `placeholder="Disabled"`, `isDisabled` | Field with reduced opacity, non-interactive |
+
+## 14. Approval And Adoption Notes
 
 - contract status: `detailed contract`
 - approvers: pending

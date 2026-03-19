@@ -190,7 +190,27 @@ No internal state.
 |-------|-------------|-----------------|-----------|
 | none | n/a | n/a | n/a |
 
-## 13. Approval And Adoption Notes
+## 13. Specimen Definitions
+
+### Group: Default (md gap)
+
+| Label | Props / Config | Expected Visual |
+|-------|---------------|-----------------|
+| Three stacked items | `<Stack gap="md">` containing 3 Surface children with `padding="sm" border="subtle"` | Three bordered surfaces arranged vertically with medium gap between them |
+
+### Group: Large gap with center alignment
+
+| Label | Props / Config | Expected Visual |
+|-------|---------------|-----------------|
+| Center-aligned pair | `<Stack gap="lg" align="center">` containing 2 Surface children | Two bordered surfaces stacked vertically with large gap, horizontally centered (not stretched to full width) |
+
+### Group: Small gap, compact
+
+| Label | Props / Config | Expected Visual |
+|-------|---------------|-----------------|
+| Four compact items | `<Stack gap="sm">` containing 4 Surface children with `padding="sm" border="subtle"` | Four bordered surfaces stacked tightly with small gap between them |
+
+## 14. Approval And Adoption Notes
 
 - contract status: `detailed contract`
 - approvers: pending

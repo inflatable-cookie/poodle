@@ -175,7 +175,33 @@ No internal state.
 |-------|-------------|-----------------|-----------|
 | none | n/a | n/a | n/a |
 
-## 13. Approval And Adoption Notes
+## 13. Specimen Definitions
+
+### Group: Default (no padding)
+
+| Label | Props / Config | Expected Visual |
+|-------|---------------|-----------------|
+| Default Box | `<Box>` with text content | Neutral container with no padding; content flush against edges |
+
+### Group: With padding
+
+| Label | Props / Config | Expected Visual |
+|-------|---------------|-----------------|
+| Large padding | `<Box padding="lg">` with text content | Content inset by `lg` space scale on all sides |
+
+### Group: Fixed dimensions
+
+| Label | Props / Config | Expected Visual |
+|-------|---------------|-----------------|
+| Fixed 12x6rem | `<Box padding="md" width="12rem" height="6rem">` | Box constrained to exactly 12rem wide and 6rem tall with `md` padding |
+
+### Group: Overflow hidden
+
+| Label | Props / Config | Expected Visual |
+|-------|---------------|-----------------|
+| Clipped content | `<Box padding="sm" width="10rem" height="3rem" overflow="hidden">` with long text | Box clips overflowing text; content does not escape the 10x3rem boundary |
+
+## 14. Approval And Adoption Notes
 
 - contract status: `detailed contract`
 - approvers: pending

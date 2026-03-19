@@ -289,7 +289,21 @@ modal vs non-modal posture.
 | exact edge motion curve may differ | runtime animation systems differ | allowed | keep modality and restoration semantics strict |
 | color-mix transparency blending | GPUI may use direct alpha blending instead of CSS color-mix | allowed | same visual result required |
 
-## 13. Approval And Adoption Notes
+## 13. Specimen Definitions
+
+### Right Edge (default)
+
+| Label | Props / Config | Expected Visual |
+|-------|---------------|-----------------|
+| Right edge (default) | `edge` not set (defaults to `"right"`), `title="Settings"`, `description="Configure your preferences."`, actions slot with Cancel (secondary) and Save (primary) buttons | Drawer slides in from right edge with header, body content, and footer action row |
+
+### Left Edge
+
+| Label | Props / Config | Expected Visual |
+|-------|---------------|-----------------|
+| Left edge | `edge="left"`, `title="Navigation"`, no actions slot | Drawer slides in from left edge with header and body content only, no footer actions |
+
+## 14. Approval And Adoption Notes
 
 - contract status: `detailed contract`
 - approvers: pending

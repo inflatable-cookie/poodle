@@ -370,7 +370,27 @@ Updated: 2026-03-15
 | vertical via CSS rotation vs native | Svelte uses rotate(-90deg); GPUI implements natively | allowed | same visual and interaction result required |
 | color-mix formulas | GPUI must achieve same visual result by any means | allowed | verify visual parity |
 
-## 13. Approval And Adoption Notes
+## 13. Specimen Definitions
+
+### Group: Default
+
+| Label | Props / Config | Expected Visual |
+|-------|---------------|-----------------|
+| Default | `value=[20, 80]`, `min=0`, `max=100`, `ariaLabel="Price range"` | Dual-thumb slider with fill spanning from 20% to 80% of track; live value display showing "$20 -- $80" updates on drag |
+
+### Group: With step
+
+| Label | Props / Config | Expected Visual |
+|-------|---------------|-----------------|
+| With step | `value=[25, 45]`, `min=18`, `max=65`, `step=5`, `ariaLabel="Age range"` | Dual-thumb slider snapping to increments of 5; live value display showing "Ages 25 -- 45" |
+
+### Group: Disabled
+
+| Label | Props / Config | Expected Visual |
+|-------|---------------|-----------------|
+| Disabled | `value=[30, 70]`, `min=0`, `max=100`, `isDisabled=true`, `ariaLabel="Disabled range"` | Reduced opacity; thumbs non-interactive; fill visible between 30% and 70% |
+
+## 14. Approval And Adoption Notes
 
 - contract status: `detailed contract`
 - approvers: pending

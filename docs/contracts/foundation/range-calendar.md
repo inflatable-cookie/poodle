@@ -413,7 +413,29 @@ CalendarWeekStart: "sunday" | "monday"
 | exact range-preview visuals may differ | render polish is implementation-specific | allowed | keep start, end, and in-range semantics strict |
 | roving tabindex vs GPUI focus model | focus management implementation differs by platform | allowed | one-day-focusable-at-a-time behavior must match |
 
-## 13. Approval And Adoption Notes
+## 13. Specimen Definitions
+
+All preview apps must render the following specimens identically.
+
+### Default
+
+| Label | Props/Config | Expected Visual |
+|-------|-------------|-----------------|
+| Default | `ariaLabel="Select a date range"` | Full month grid with header navigation, weekday labels, and day buttons; no pre-selected range; today receives today border treatment; interactive |
+
+### With pre-selected range
+
+| Label | Props/Config | Expected Visual |
+|-------|-------------|-----------------|
+| With pre-selected range | `defaultValue={ start: "2026-03-05", end: "2026-03-12" }`, `ariaLabel="Pre-selected range"` | Month grid with March 5 and March 12 showing range endpoint treatment (accent background, inverse text); days between showing in-range tint |
+
+### Disabled
+
+| Label | Props/Config | Expected Visual |
+|-------|-------------|-----------------|
+| Disabled | `isDisabled=true`, `ariaLabel="Disabled range calendar"` | Month grid with no selection, reduced opacity on root, cursor not-allowed, all interaction disabled |
+
+## 14. Approval And Adoption Notes
 
 - contract status: `detailed contract`
 - approvers: pending

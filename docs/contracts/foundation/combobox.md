@@ -291,7 +291,27 @@ ComboboxOption: {
 | overlay positioning details | GPUI overlay system differs from CSS absolute positioning | allowed | must appear anchored below input visually |
 | color-mix approximation in GPUI | GPUI may not have CSS color-mix; equivalent blending acceptable | allowed | visual result must match |
 
-## 13. Approval And Adoption Notes
+## 13. Specimen Definitions
+
+### Default
+
+| Label | Props / Config | Expected Visual |
+|-------|---------------|-----------------|
+| Default | `options=[Svelte, React, Vue, Angular, SolidJS, Lit]`, `placeholder="Choose a framework..."`, `ariaLabel="Framework"` | Combobox input with placeholder; typing filters options in dropdown list; selecting an option displays selected value below |
+
+### With Descriptions
+
+| Label | Props / Config | Expected Visual |
+|-------|---------------|-----------------|
+| With descriptions | `options=[PostgreSQL (Relational database), MongoDB (Document database), Redis (In-memory key-value store), SQLite (Embedded relational database)]`, `placeholder="Choose a database..."` | Combobox with options showing label and secondary description text below each label |
+
+### Disabled
+
+| Label | Props / Config | Expected Visual |
+|-------|---------------|-----------------|
+| Disabled | `options=[Svelte, React, Vue, Angular, SolidJS, Lit]`, `placeholder="Disabled"`, `isDisabled` | Combobox input with reduced opacity, non-interactive, list cannot open |
+
+## 14. Approval And Adoption Notes
 
 - contract status: `detailed contract`
 - approvers: pending

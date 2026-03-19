@@ -111,7 +111,25 @@ Updated: 2026-03-17
 
 - [ ] icon component internals stay renderer-specific
 
-## 12. Known Deltas
+## 12. Specimen Definitions
+
+### Group: Directions
+
+| Label | Props / Config | Expected Visual |
+|-------|---------------|-----------------|
+| Left | `direction="left"`, `isCollapsed=false` (toggleable) | Chevron pointing left when expanded; toggles on click; label shows "(collapsed)" or "(expanded)" |
+| Right | `direction="right"`, `isCollapsed=false` (toggleable) | Chevron pointing right when expanded; toggles on click; label shows state |
+| Up | `direction="up"`, `isCollapsed=false` (toggleable) | Chevron pointing up when expanded; toggles on click; label shows state |
+| Down | `direction="down"`, `isCollapsed=false` (toggleable) | Chevron pointing down when expanded; toggles on click; label shows state |
+
+### Group: Disabled
+
+| Label | Props / Config | Expected Visual |
+|-------|---------------|-----------------|
+| Disabled left | `direction="left"`, `isDisabled=true` | Muted toggle, non-interactive, left-pointing chevron |
+| Disabled right | `direction="right"`, `isDisabled=true` | Muted toggle, non-interactive, right-pointing chevron |
+
+## 13. Known Deltas
 
 | Delta | Why Allowed | Approval Status | Follow-Up |
 |-------|-------------|-----------------|-----------|

@@ -259,7 +259,27 @@ Updated: 2026-03-15
 | Input field implementation | GPUI text input vs HTML input element | allowed | same visual and behavioral result |
 | tabular-nums font variant | may require GPUI font feature flag | allowed | match where possible |
 
-## 13. Approval And Adoption Notes
+## 13. Specimen Definitions
+
+### Hours, Minutes, Seconds
+
+| Label | Props / Config | Expected Visual |
+|-------|---------------|-----------------|
+| Hours, minutes, seconds | `hours={1}`, `minutes={30}`, `seconds={0}`, `showSeconds={true}` (default) | Three-segment duration input (HH:MM:SS) with colon separators; displays total duration below |
+
+### Hours and Minutes Only
+
+| Label | Props / Config | Expected Visual |
+|-------|---------------|-----------------|
+| Hours and minutes only | `hours={0}`, `minutes={45}`, `showSeconds={false}` | Two-segment duration input (HH:MM) without seconds segment |
+
+### Disabled
+
+| Label | Props / Config | Expected Visual |
+|-------|---------------|-----------------|
+| Disabled | `hours={2}`, `minutes={15}`, `seconds={30}`, `isDisabled` | Three-segment duration input with reduced opacity, non-interactive |
+
+## 14. Approval And Adoption Notes
 
 - contract status: `detailed contract`
 - approvers: pending

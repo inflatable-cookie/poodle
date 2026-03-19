@@ -301,7 +301,39 @@ are owned by the slotted control.
 | grid layout integration | CSS grid-column/grid-area vs GPUI layout system | allowed | same visual positioning result required |
 | id derivation scheme | internal implementation detail | allowed | child controls must receive correct describedBy string |
 
-## 13. Approval And Adoption Notes
+## 13. Specimen Definitions
+
+### Default With Description
+
+| Label | Props / Config | Expected Visual |
+|-------|---------------|-----------------|
+| Default with description | `label="Display name"`, `description="This is how your name appears to other users."`, child TextInput with placeholder | Field with label, description text below label, and text input control |
+
+### Required
+
+| Label | Props / Config | Expected Visual |
+|-------|---------------|-----------------|
+| Required | `label="Email address"`, `isRequired`, child TextInput with placeholder | Field with label and required marker visible, no optional marker |
+
+### With Error
+
+| Label | Props / Config | Expected Visual |
+|-------|---------------|-----------------|
+| With error | `label="Username"`, `error="This username is already taken."`, `validationState="invalid"`, child TextInput with value | Field with label, error message in danger color below the control |
+
+### Valid
+
+| Label | Props / Config | Expected Visual |
+|-------|---------------|-----------------|
+| Valid | `label="Password"`, `validationState="valid"`, `description="Must be at least 8 characters."`, child TextInput with value | Field with label, description text, valid state (no error message) |
+
+### Optional
+
+| Label | Props / Config | Expected Visual |
+|-------|---------------|-----------------|
+| Optional | `label="Phone number"`, `optionalLabel="optional"`, child TextInput with placeholder | Field with label and "optional" marker text in secondary color |
+
+## 14. Approval And Adoption Notes
 
 - contract status: `detailed contract`
 - approvers: pending

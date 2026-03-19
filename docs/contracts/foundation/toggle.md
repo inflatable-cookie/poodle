@@ -251,7 +251,34 @@ Updated: 2026-03-15
 | Stack layout grid details | GPUI grid may differ from CSS grid | allowed | width: 100% and start-aligned content must match |
 | Transition timing | GPUI may not support CSS-style transitions | allowed | match where possible |
 
-## 13. Approval And Adoption Notes
+## 13. Specimen Definitions
+
+### Ghost Variant (default)
+
+| Label | Props / Config | Expected Visual |
+|-------|---------------|-----------------|
+| Bold | `variant="ghost"` (default), `ariaLabel="Bold"`, icon-only (bold icon) | Ghost-styled toggle button with icon, unpressed state |
+| Italic | `variant="ghost"` (default), `ariaLabel="Italic"`, icon-only (italic icon) | Ghost-styled toggle button with icon, unpressed state |
+
+### Primary Variant
+
+| Label | Props / Config | Expected Visual |
+|-------|---------------|-----------------|
+| Pinned | `variant="primary"`, `defaultPressed=true`, `ariaLabel="Pinned"`, pin icon + text | Primary-styled toggle in pressed state with accent background, inverse text |
+
+### Secondary Variant
+
+| Label | Props / Config | Expected Visual |
+|-------|---------------|-----------------|
+| Favorite | `variant="secondary"`, `ariaLabel="Favorite"`, star icon + text | Secondary-styled toggle in unpressed state |
+
+### Disabled
+
+| Label | Props / Config | Expected Visual |
+|-------|---------------|-----------------|
+| Locked | `defaultPressed=true`, `isDisabled=true`, `ariaLabel="Disabled toggle"`, text-only | Ghost-styled toggle in pressed+disabled state, reduced opacity, not-allowed cursor |
+
+## 14. Approval And Adoption Notes
 
 - contract status: `detailed contract`
 - approvers: pending

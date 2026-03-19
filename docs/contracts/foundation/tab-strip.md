@@ -168,7 +168,53 @@ Selection state, roving-focus state, and optional reorder mode are required.
 |-------|-------------|-----------------|-----------|
 | pointer drag preview details may differ | drag visuals are runtime-specific | allowed | keep reorder semantics and announcements strict |
 
-## 13. Approval And Adoption Notes
+## 13. Specimen Definitions
+
+Specimen reference: `TabsSpecimen.svelte` (covers both Tabs and strip variant used by TabStrip).
+
+### Group: Underline variant (default, with panel)
+
+| Label | Props / Config | Expected Visual |
+|-------|---------------|-----------------|
+| Underline variant | `items=[Overview, Features, Pricing, FAQ (disabled)]`, `defaultValue="overview"`, `ariaLabel="Section tabs"`, with panel slot | Underline-styled tab row; "Overview" active with underline indicator; "FAQ" tab disabled; panel below shows active tab value |
+
+### Group: Card variant (closable, reorderable)
+
+| Label | Props / Config | Expected Visual |
+|-------|---------------|-----------------|
+| Card variant | `variant="card"`, `items=[index.ts, App.svelte (closable), utils.ts (closable), types.ts (closable)]`, `defaultValue="App.svelte"`, `isReorderable=true` | Card-styled tabs resembling file tabs; close buttons on closable tabs; drag-to-reorder enabled; closed tab value and reorder result displayed below |
+
+### Group: Pill variant (with icons)
+
+| Label | Props / Config | Expected Visual |
+|-------|---------------|-----------------|
+| Pill variant | `variant="pill"`, `items=[Home (icon: house), Settings (icon: settings), Users (icon: users)]`, `defaultValue="home"` | Pill-shaped tabs with icons preceding labels; "Home" selected with pill background |
+
+### Group: Underline (with icons, no panel)
+
+| Label | Props / Config | Expected Visual |
+|-------|---------------|-----------------|
+| Underline with icons | `items=[Home (icon: house), Settings (icon: settings), Users (icon: users)]`, `defaultValue="home"` | Underline tabs with icons; no panel content below |
+
+### Group: Strip variant (full-width bar with icons, closable, reorderable)
+
+| Label | Props / Config | Expected Visual |
+|-------|---------------|-----------------|
+| Strip variant horizontal | `variant="strip"`, `items=[Editor (icon: code), Preview (icon: eye), Terminal (icon: terminal, closable), Output (icon: file-text, closable)]`, `defaultValue="editor"`, `isReorderable=true` | Full-width strip bar at top of a framed surface; closable and reorderable; surface content area below |
+
+### Group: Strip variant -- vertical (icon-only, collapsed panel)
+
+| Label | Props / Config | Expected Visual |
+|-------|---------------|-----------------|
+| Strip variant vertical | `variant="strip"`, `orientation="vertical"`, `items=[Explorer (icon: folder, closable), Search (icon: search, closable), Source Control (icon: layers, closable), Debug (icon: terminal, closable)]`, `defaultValue="explorer"` | Vertical strip on the left side of a framed row layout; panel content area fills remaining space |
+
+### Group: Strip variant -- collapse toggle
+
+| Label | Props / Config | Expected Visual |
+|-------|---------------|-----------------|
+| Strip collapse toggle | `variant="strip"`, orientation toggles between horizontal (expanded) and vertical (collapsed) via button | When expanded: horizontal strip with reorderable tabs and panel body below; when collapsed: vertical icon-only strip; toggle button switches between states |
+
+## 14. Approval And Adoption Notes
 
 - contract status: `seed contract`
 - approvers: pending

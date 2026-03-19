@@ -347,7 +347,29 @@ TimeZoneOption: {
 | exact native time-entry affordances may differ | platform time controls differ | allowed | keep public value meaning strict |
 | exact timezone option ordering may differ | runtime registries and host option policies differ | allowed | keep committed timezone value semantics strict |
 
-## 13. Approval And Adoption Notes
+## 13. Specimen Definitions
+
+All preview apps must render the following specimens identically.
+
+### Default
+
+| Label | Props/Config | Expected Visual |
+|-------|-------------|-----------------|
+| Default | `ariaLabel="Select date, time, and zone"` | Trigger button showing placeholder text "Select date, time, and zone" with disclosure indicator; interactive, opens calendar, time field, and timezone select overlay on click |
+
+### With default value
+
+| Label | Props/Config | Expected Visual |
+|-------|-------------|-----------------|
+| With default value | `defaultValue={ date: "2026-03-14", time: "10:00", timeZone: "America/Los_Angeles" }`, `ariaLabel="Pre-filled zoned date time"` | Trigger button showing formatted date, time, and timezone instead of placeholder |
+
+### Disabled
+
+| Label | Props/Config | Expected Visual |
+|-------|-------------|-----------------|
+| Disabled | `isDisabled=true`, `ariaLabel="Disabled picker"` | Trigger button with default placeholder, reduced opacity, cursor not-allowed, non-interactive |
+
+## 14. Approval And Adoption Notes
 
 - contract status: `detailed contract`
 - approvers: pending

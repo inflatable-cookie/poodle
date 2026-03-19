@@ -215,7 +215,35 @@ Updated: 2026-03-15
 |-------|-------------|-----------------|-----------|
 | Responsive breakpoint detection | GPUI may use layout-based detection vs CSS media query | allowed | same visual result |
 
-## 13. Approval And Adoption Notes
+## 13. Specimen Definitions
+
+### Basic Label-Value Pairs
+
+| Label | Props / Config | Expected Visual |
+|-------|---------------|-----------------|
+| Name | `label="Name"`, `value="Pug Design System"` | Three-column grid row with label and value |
+| Version | `label="Version"`, `value="2.1.0"` | Three-column grid row with label and value |
+| License | `label="License"`, `value="MIT"` | Three-column grid row with label and value |
+
+### With Description
+
+| Label | Props / Config | Expected Visual |
+|-------|---------------|-----------------|
+| With description | `label="API endpoint"`, `value="https://api.example.com/v2"`, `description="Base URL for all API requests."`, `truncateValue` | Row with label, description below label, and truncated value with ellipsis |
+
+### With Action Slot
+
+| Label | Props / Config | Expected Visual |
+|-------|---------------|-----------------|
+| With action slot | `label="Email"`, `value="clay@example.com"`, action slot containing secondary small "Change" button | Row with label, value, and trailing action button |
+
+### With Value Slot
+
+| Label | Props / Config | Expected Visual |
+|-------|---------------|-----------------|
+| With value slot | `label="Status"`, value slot containing custom status badge | Row with label and custom rendered value content |
+
+## 14. Approval And Adoption Notes
 
 - contract status: `detailed contract`
 - approvers: pending

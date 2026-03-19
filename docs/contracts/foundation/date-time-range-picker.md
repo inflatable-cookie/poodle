@@ -340,7 +340,29 @@ DateTimeRangeValue: {
 | exact close posture after completion may differ | completion timing is implementation-owned | allowed | keep committed value semantics strict |
 | exact native time-entry affordances may differ | platform time controls differ | allowed | keep public value meaning strict |
 
-## 13. Approval And Adoption Notes
+## 13. Specimen Definitions
+
+All preview apps must render the following specimens identically.
+
+### Default
+
+| Label | Props/Config | Expected Visual |
+|-------|-------------|-----------------|
+| Default | `ariaLabel="Select date and time range"` | Trigger button showing placeholder text "Select date and time range" with disclosure indicator; interactive, opens range calendar and paired time fields overlay on click |
+
+### With default range
+
+| Label | Props/Config | Expected Visual |
+|-------|-------------|-----------------|
+| With default range | `defaultValue={ start: { date: "2026-03-10", time: "09:00" }, end: { date: "2026-03-14", time: "17:00" } }`, `ariaLabel="Pre-filled range"` | Trigger button showing formatted date-time range instead of placeholder |
+
+### Disabled
+
+| Label | Props/Config | Expected Visual |
+|-------|-------------|-----------------|
+| Disabled | `isDisabled=true`, `ariaLabel="Disabled range picker"` | Trigger button with default placeholder, reduced opacity, cursor not-allowed, non-interactive |
+
+## 14. Approval And Adoption Notes
 
 - contract status: `detailed contract`
 - approvers: pending

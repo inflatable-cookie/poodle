@@ -187,7 +187,33 @@ Updated: 2026-03-15
 | native editing affordances may differ | platform time-entry controls differ | allowed | keep public value meaning strict |
 | GPUI provides custom time editing UI | no native input[type="time"] in GPUI | allowed | must preserve value format and constraints |
 
-## 13. Approval And Adoption Notes
+## 13. Specimen Definitions
+
+### Default
+
+| Label | Props / Config | Expected Visual |
+|-------|---------------|-----------------|
+| Default | `ariaLabel="Start time"` | Empty time input with platform placeholder; selecting a time displays selected value below |
+
+### With Default Value
+
+| Label | Props / Config | Expected Visual |
+|-------|---------------|-----------------|
+| With default value | `defaultValue="14:30"`, `ariaLabel="Meeting time"` | Time input pre-filled with 14:30 |
+
+### With Min/Max Constraints
+
+| Label | Props / Config | Expected Visual |
+|-------|---------------|-----------------|
+| With min/max constraints | `defaultValue="09:00"`, `min="08:00"`, `max="18:00"`, `ariaLabel="Office hours"` | Time input constrained to 08:00-18:00 range, showing 09:00 |
+
+### Disabled
+
+| Label | Props / Config | Expected Visual |
+|-------|---------------|-----------------|
+| Disabled | `defaultValue="12:00"`, `isDisabled` | Time input showing 12:00, reduced opacity, non-interactive |
+
+## 14. Approval And Adoption Notes
 
 - contract status: `detailed contract`
 - approvers: pending

@@ -188,7 +188,27 @@ to the composed Dialog and Button components.
 |-------|-------------|-----------------|-----------|
 | No unique CSS deltas | delegates entirely to Dialog and Button | n/a | n/a |
 
-## 13. Approval And Adoption Notes
+## 13. Specimen Definitions
+
+### Danger Tone (default)
+
+| Label | Props / Config | Expected Visual |
+|-------|---------------|-----------------|
+| Danger tone (default) | `tone="danger"` (default), `title="Delete this item?"`, `description="This action cannot be undone..."`, `confirmLabel="Delete"`, `cancelLabel="Keep it"` | Dialog with danger-variant confirm button, ghost cancel button, title and description text |
+
+### Warning Tone
+
+| Label | Props / Config | Expected Visual |
+|-------|---------------|-----------------|
+| Warning tone | `tone="warning"`, `title="Reset all settings?"`, `description="Your customized settings will be restored..."`, `confirmLabel="Reset"`, `cancelLabel="Cancel"` | Dialog with primary-variant confirm button (warning tone maps to primary), ghost cancel button |
+
+### With Body Content
+
+| Label | Props / Config | Expected Visual |
+|-------|---------------|-----------------|
+| With body content | `tone="danger"` (default), `title="Remove this user?"`, `description="The following user will lose access..."`, `confirmLabel="Remove"`, default slot contains user card | Dialog with body content rendered between description and action buttons, showing user name and email in a styled card |
+
+## 14. Approval And Adoption Notes
 
 - contract status: `detailed contract`
 - approvers: pending

@@ -313,7 +313,25 @@ Updated: 2026-03-15
 | GPUI uses opacity multiplication instead of CSS color-mix | platform capability | allowed | visual result must match |
 | Viewport content rendering strategy may differ | platform rendering model | allowed | slot props must be equivalent |
 
-## 13. Approval And Adoption Notes
+## 13. Specimen Definitions
+
+### Horizontal Navigation
+
+| Label | Props / Config | Expected Visual |
+|-------|---------------|-----------------|
+| Horizontal navigation | `ariaLabel="Main navigation"`, `value="components"` (initially active), five items: Home, Components, Tokens, Guides, Changelog (disabled) | Horizontal row of pill-style trigger buttons; Components trigger shows active/open styling with accent background and blended border; Changelog trigger shows disabled state at reduced opacity; viewport below shows active section name |
+
+#### Navigation Items
+
+| Item | Props / Config | Expected Visual |
+|------|---------------|-----------------|
+| Home | `value="home"` | Default pill-style trigger |
+| Components | `value="components"`, initially selected | Active trigger with accent background |
+| Tokens | `value="tokens"` | Default pill-style trigger |
+| Guides | `value="guides"` | Default pill-style trigger |
+| Changelog | `value="changelog"`, `isDisabled=true` | Disabled trigger at reduced opacity, not-allowed cursor |
+
+## 14. Approval And Adoption Notes
 
 - contract status: `detailed contract`
 - approvers: pending

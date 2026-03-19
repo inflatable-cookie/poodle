@@ -311,7 +311,29 @@ DateTimeValue: { date: string | null; time: string | null }
 | color-mix approximation in GPUI | GPUI may not have CSS color-mix; equivalent blending acceptable | allowed | visual result must match |
 | exact native time-entry affordances may differ | platform time controls differ | allowed | keep public value and popup semantics strict |
 
-## 13. Approval And Adoption Notes
+## 13. Specimen Definitions
+
+All preview apps must render the following specimens identically.
+
+### Default
+
+| Label | Props/Config | Expected Visual |
+|-------|-------------|-----------------|
+| Default | `ariaLabel="Select date and time"` | Trigger button showing placeholder text "Select date and time" with disclosure indicator; interactive, opens calendar and time field overlay on click |
+
+### With default value
+
+| Label | Props/Config | Expected Visual |
+|-------|-------------|-----------------|
+| With default value | `defaultValue={ date: "2026-03-14", time: "14:30" }`, `ariaLabel="Pre-filled date time"` | Trigger button showing formatted date and time instead of placeholder |
+
+### Disabled
+
+| Label | Props/Config | Expected Visual |
+|-------|-------------|-----------------|
+| Disabled | `isDisabled=true`, `ariaLabel="Disabled date time picker"` | Trigger button with default placeholder, reduced opacity, cursor not-allowed, non-interactive |
+
+## 14. Approval And Adoption Notes
 
 - contract status: `detailed contract`
 - approvers: pending

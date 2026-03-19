@@ -227,7 +227,27 @@ Section 8 for the full root, focus, validation, and disabled token tables.
 | CSS transition timing | GPUI may not support CSS-style transitions | allowed | match where possible |
 | clear button border-radius nesting formula | GPUI must achieve same visual result by any means | allowed | verify visual parity |
 
-## 13. Approval And Adoption Notes
+## 13. Specimen Definitions
+
+### Default
+
+| Label | Props / Config | Expected Visual |
+|-------|---------------|-----------------|
+| Default | `placeholder="Search components..."`, `ariaLabel="Search components"` | Search field with leading search icon and placeholder text; typing shows clear button and displays current query and submitted value below |
+
+### Disabled
+
+| Label | Props / Config | Expected Visual |
+|-------|---------------|-----------------|
+| Disabled | `value="locked query"`, `isDisabled` | Search field with pre-filled value, reduced opacity, non-interactive |
+
+### Read-only
+
+| Label | Props / Config | Expected Visual |
+|-------|---------------|-----------------|
+| Read-only | `value="active filter"`, `isReadOnly` | Search field with pre-filled value, selectable but not editable |
+
+## 14. Approval And Adoption Notes
 
 - contract status: `detailed contract`
 - approvers: pending

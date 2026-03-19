@@ -308,7 +308,27 @@ Updated: 2026-03-15
 | CSS color-mix vs GPUI color blending | different color systems per platform | allowed | same visual result required |
 | module-level id counter vs GPUI id generation | different id generation mechanisms | allowed | unique ARIA id pairs required |
 
-## 13. Approval And Adoption Notes
+## 13. Specimen Definitions
+
+### Group: Default (closed)
+
+| Label | Props / Config | Expected Visual |
+|-------|---------------|-----------------|
+| Closed collapsible | `<Collapsible title="Project settings" description="Configure build options and deploy targets.">` with content | Collapsed disclosure section showing title and description in the trigger; chevron indicator points down; content hidden; gap collapsed to 0 |
+
+### Group: Default open
+
+| Label | Props / Config | Expected Visual |
+|-------|---------------|-----------------|
+| Open collapsible | `<Collapsible title="Advanced options" defaultOpen>` with content | Expanded disclosure section showing title in trigger; chevron rotated 180deg; content region visible below trigger with 0.5rem gap |
+
+### Group: Disabled
+
+| Label | Props / Config | Expected Visual |
+|-------|---------------|-----------------|
+| Disabled collapsible | `<Collapsible title="Locked section" description="Requires admin access." isDisabled>` with content | Collapsed disclosure with reduced opacity (disabled-opacity token); trigger shows not-allowed cursor; clicking does not toggle open state |
+
+## 14. Approval And Adoption Notes
 
 - contract status: `detailed contract`
 - approvers: pending

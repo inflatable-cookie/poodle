@@ -383,7 +383,53 @@ Composes: avatar (2.25rem circle, same as list-item avatar) + line (width
 |-------|-------------|-----------------|-----------|
 | animation technique may differ | GPUI uses programmatic animation vs CSS keyframes | allowed | keep shimmer timing 1.6s linear |
 
-## 13. Approval And Adoption Notes
+## 13. Specimen Definitions
+
+### Group: Basic shapes
+
+| Label | Props / Config | Expected Visual |
+|-------|---------------|-----------------|
+| Line shape | `<Skeleton shape="line" width="12rem" />` | Rectangular placeholder bar, 12rem wide, default line height (0.875rem), with shimmer animation |
+| Circle shape | `<Skeleton shape="circle" width="2.5rem" height="2.5rem" />` | Circular placeholder, 2.5rem diameter, with shimmer animation |
+| Block shape | `<Skeleton shape="block" width="8rem" height="3rem" />` | Large rectangular placeholder block, 8rem wide by 3rem tall, with shimmer animation |
+
+### Group: Preset: avatar-line
+
+| Label | Props / Config | Expected Visual |
+|-------|---------------|-----------------|
+| Avatar-line preset | `<Skeleton preset="avatar-line" />` | Circle avatar placeholder (2.25rem) alongside a text line placeholder (10rem), arranged horizontally with 0.75rem gap |
+
+### Group: Preset: list-item (x3)
+
+| Label | Props / Config | Expected Visual |
+|-------|---------------|-----------------|
+| Three list items | 3x `<Skeleton preset="list-item" />` | Three rows, each with a circle avatar (2.25rem), a primary line (60% width), and a secondary smaller line (40% width), stacked vertically |
+
+### Group: Preset: table-row (x3)
+
+| Label | Props / Config | Expected Visual |
+|-------|---------------|-----------------|
+| Three table rows | 3x `<Skeleton preset="table-row" />` | Three horizontal rows, each with 4 cells at widths 40%/60%/60%/20%, separated by subtle bottom borders |
+
+### Group: Preset: card
+
+| Label | Props / Config | Expected Visual |
+|-------|---------------|-----------------|
+| Two cards | 2x `<Skeleton preset="card" />` in a 2-column grid | Two card placeholders side by side, each with a block header (6rem), three body lines (80%/100%/60%), and pill-shaped footer elements, all within a bordered card frame |
+
+### Group: Preset: detail-section
+
+| Label | Props / Config | Expected Visual |
+|-------|---------------|-----------------|
+| Detail section | `<Skeleton preset="detail-section" lines={4} />` | A heading placeholder (8rem) followed by 4 label-value rows, each with a fixed-width label (6rem) and a flexible value placeholder |
+
+### Group: Static (no animation)
+
+| Label | Props / Config | Expected Visual |
+|-------|---------------|-----------------|
+| Static line | `<Skeleton shape="line" width="10rem" isAnimated={false} />` | Line placeholder (10rem wide) with gradient fill but no shimmer animation |
+
+## 14. Approval And Adoption Notes
 
 - contract status: `detailed contract`
 - approvers: pending

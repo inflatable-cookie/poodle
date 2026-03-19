@@ -308,7 +308,29 @@ CalendarWeekStart: "sunday" | "monday"
 | outside-click detection mechanism | CSS/JS vs native platform event handling | allowed | dismissal behavior must match |
 | surface anchoring gap | platform overlay anchoring may differ slightly | allowed | surface must appear below and aligned to trigger |
 
-## 13. Approval And Adoption Notes
+## 13. Specimen Definitions
+
+All preview apps must render the following specimens identically.
+
+### Default
+
+| Label | Props/Config | Expected Visual |
+|-------|-------------|-----------------|
+| Default | `ariaLabel="Select date"` | Trigger button showing placeholder text "Select date" with disclosure indicator; interactive, opens calendar on click |
+
+### With default value
+
+| Label | Props/Config | Expected Visual |
+|-------|-------------|-----------------|
+| With default value | `defaultValue="2026-03-14"`, `ariaLabel="Pre-filled date"` | Trigger button showing formatted date (March 14, 2026) instead of placeholder |
+
+### Disabled
+
+| Label | Props/Config | Expected Visual |
+|-------|-------------|-----------------|
+| Disabled | `placeholder="Disabled"`, `isDisabled=true`, `ariaLabel="Disabled date picker"` | Trigger button with "Disabled" placeholder, reduced opacity, cursor not-allowed, non-interactive |
+
+## 14. Approval And Adoption Notes
 
 - contract status: `detailed contract`
 - approvers: pending

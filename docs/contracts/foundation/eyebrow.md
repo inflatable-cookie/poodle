@@ -141,7 +141,27 @@ No internal state.
 |-------|-------------|-----------------|-----------|
 | none yet | n/a | pending | review during first implementation |
 
-## 13. Approval And Adoption Notes
+## 13. Specimen Definitions
+
+### Section Label
+
+| Label | Props / Config | Expected Visual |
+|-------|---------------|-----------------|
+| Section label | text content: "Section label", followed by descriptive paragraph | Small uppercase secondary-color label above content |
+
+### Primitive Category
+
+| Label | Props / Config | Expected Visual |
+|-------|---------------|-----------------|
+| Primitive | text content: "Primitive", followed by heading "Button" and description | Eyebrow categorizing a component as primitive type |
+
+### Composite Category
+
+| Label | Props / Config | Expected Visual |
+|-------|---------------|-----------------|
+| Composite | text content: "Composite", followed by heading "DataTable" and description | Eyebrow categorizing a component as composite type |
+
+## 14. Approval And Adoption Notes
 
 - contract status: `detailed contract`
 - approvers: pending

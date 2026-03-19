@@ -182,7 +182,27 @@ No internal state.
 |-------|-------------|-----------------|-----------|
 | none | n/a | n/a | n/a |
 
-## 13. Approval And Adoption Notes
+## 13. Specimen Definitions
+
+### Group: Three columns
+
+| Label | Props / Config | Expected Visual |
+|-------|---------------|-----------------|
+| Equal thirds | `<Grid columns="1fr 1fr 1fr" gap="md">` containing 3 Surface children with `padding="md" border="subtle"` | Three equal-width bordered surfaces in a single row with medium gap |
+
+### Group: Mixed column widths
+
+| Label | Props / Config | Expected Visual |
+|-------|---------------|-----------------|
+| Sidebar + main | `<Grid columns="1fr 2fr" gap="md">` containing 2 Surface children with `padding="md" border="subtle"` | Two bordered surfaces in a row; first takes 1/3 width, second takes 2/3 width, separated by medium gap |
+
+### Group: Auto-fit responsive
+
+| Label | Props / Config | Expected Visual |
+|-------|---------------|-----------------|
+| Five auto-fit items | `<Grid columns="repeat(auto-fit, minmax(8rem, 1fr))" gap="sm">` containing 5 Surface children with `padding="sm" border="subtle"` | Five bordered surfaces that auto-wrap into rows; each cell is at least 8rem wide, with small gap between cells |
+
+## 14. Approval And Adoption Notes
 
 - contract status: `detailed contract`
 - approvers: pending

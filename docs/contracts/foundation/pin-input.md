@@ -199,7 +199,27 @@ Updated: 2026-03-15
 | masking visuals may differ | platform text-entry password rendering differs | allowed | keep fixed-length behavior and completion semantics strict |
 | paste handling details | clipboard API differs across platforms | allowed | ensure paste populates cells correctly on both platforms |
 
-## 13. Approval And Adoption Notes
+## 13. Specimen Definitions
+
+### 6-digit Code
+
+| Label | Props / Config | Expected Visual |
+|-------|---------------|-----------------|
+| 6-digit code | `length={6}`, `ariaLabel="Verification code"` | Six empty cells in a row; typing auto-advances focus; displays entered code on completion |
+
+### 4-digit Masked
+
+| Label | Props / Config | Expected Visual |
+|-------|---------------|-----------------|
+| 4-digit masked | `length={4}`, `mask`, `ariaLabel="PIN"` | Four cells with password masking; entered characters display as dots |
+
+### Disabled
+
+| Label | Props / Config | Expected Visual |
+|-------|---------------|-----------------|
+| Disabled | `length={6}`, `defaultValue="123"`, `isDisabled` | Six cells with first three pre-filled, reduced opacity, non-interactive |
+
+## 14. Approval And Adoption Notes
 
 - contract status: `detailed contract`
 - approvers: pending

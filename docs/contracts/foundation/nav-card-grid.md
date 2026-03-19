@@ -154,7 +154,21 @@ Updated: 2026-03-15
 |-------|-------------|-----------------|-----------|
 | Responsive breakpoint detection | GPUI may use layout-based detection vs CSS media query | allowed | same visual result |
 
-## 13. Approval And Adoption Notes
+## 13. Specimen Definitions
+
+### Navigation Card Grid (2 Columns)
+
+| Label | Props / Config | Expected Visual |
+|-------|---------------|-----------------|
+| 2-column grid | `columns={2}`, 4 NavCard children (Getting Started, Components with badge, Tokens, API Reference disabled) | Responsive 2-column grid of NavCards; disabled card at reduced opacity |
+
+### Single Card (As Link)
+
+| Label | Props / Config | Expected Visual |
+|-------|---------------|-----------------|
+| View Documentation | standalone NavCard (not in grid), `href="#"` | Single NavCard rendered as link outside of any grid container |
+
+## 14. Approval And Adoption Notes
 
 - contract status: `detailed contract`
 - approvers: pending

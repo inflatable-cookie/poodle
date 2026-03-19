@@ -282,7 +282,26 @@ Updated: 2026-03-15
 |-------|-------------|-----------------|-----------|
 | Arrow opacity animation | GPUI may use different animation approach | allowed | same visual result |
 
-## 13. Approval And Adoption Notes
+## 13. Specimen Definitions
+
+### Navigation Card Grid (2 Columns)
+
+| Label | Props / Config | Expected Visual |
+|-------|---------------|-----------------|
+| Getting Started | `title`, `description`, icon slot (home), click handler | NavCard with icon, title, description, arrow hidden until hover |
+| Components | `title`, `description`, `badge="New"`, icon slot (layers), click handler | NavCard with icon, title, inline badge, description |
+| Tokens | `title`, `description`, icon slot (sliders-horizontal), click handler | NavCard with icon, title, description |
+| API Reference | `title`, `description`, `isDisabled`, icon slot (file-text) | Disabled NavCard at reduced opacity with not-allowed cursor |
+
+Cards arranged in a 2-column NavCardGrid.
+
+### Single Card (As Link)
+
+| Label | Props / Config | Expected Visual |
+|-------|---------------|-----------------|
+| View Documentation | `title`, `description`, `href="#"` | NavCard rendered as `<a>` element with link behavior |
+
+## 14. Approval And Adoption Notes
 
 - contract status: `detailed contract`
 - approvers: pending

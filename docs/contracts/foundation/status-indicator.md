@@ -226,7 +226,41 @@ When `status="pending"`, the dot receives:
 | pending animation details may differ | motion internals are runtime-specific | allowed | keep semantic labeling strict |
 | CSS custom property pattern is Svelte-specific | GPUI uses direct color values | allowed | ensure same final colors |
 
-## 13. Approval And Adoption Notes
+## 13. Specimen Definitions
+
+All preview apps must render the following specimens identically.
+
+### All statuses
+
+Six status indicators stacked vertically, one per status with label prop:
+
+| Label | Props/Config | Expected Visual |
+|-------|-------------|-----------------|
+| Neutral | `status="neutral"`, `label="Neutral"` | Dot in text-secondary color with "Neutral" label |
+| Info | `status="info"`, `label="Info"` | Dot in accent-base color with "Info" label |
+| Success | `status="success"`, `label="Success"` | Dot in status-success color with "Success" label |
+| Warning | `status="warning"`, `label="Warning"` | Dot in status-warning color with "Warning" label |
+| Danger | `status="danger"`, `label="Danger"` | Dot in status-danger color with "Danger" label |
+| Pending | `status="pending"`, `label="Pending"` | Dot in accent-base color with pulse animation and "Pending" label |
+
+### Without labels (dot only)
+
+Four status indicators in a horizontal row, dot only with ariaLabel:
+
+| Label | Props/Config | Expected Visual |
+|-------|-------------|-----------------|
+| Online | `status="success"`, `ariaLabel="Online"` | Success-colored dot only, no visible text |
+| Away | `status="warning"`, `ariaLabel="Away"` | Warning-colored dot only, no visible text |
+| Offline | `status="danger"`, `ariaLabel="Offline"` | Danger-colored dot only, no visible text |
+| Unknown | `status="neutral"`, `ariaLabel="Unknown"` | Neutral-colored dot only, no visible text |
+
+### Slot content
+
+| Label | Props/Config | Expected Visual |
+|-------|-------------|-----------------|
+| Build passing | `status="success"`, default slot content "Build passing" | Success-colored dot with "Build passing" text from slot |
+
+## 14. Approval And Adoption Notes
 
 - Contract status: `detailed contract`
 - Approvers: pending

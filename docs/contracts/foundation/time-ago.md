@@ -192,7 +192,35 @@ Values are computed using integer division (floor). Thresholds use seconds:
 | locale formatting may differ slightly | `toLocaleString` output varies by platform/locale | allowed | keep format options consistent |
 | timer precision may differ | GPUI frame-based updates vs JS setInterval | allowed | keep default interval at 30000ms |
 
-## 13. Approval And Adoption Notes
+## 13. Specimen Definitions
+
+### Group: Recent timestamps
+
+| Label | Props / Config | Expected Visual |
+|-------|---------------|-----------------|
+| 2 minutes ago | `datetime=(now - 2min)` | Relative text showing "2m ago"; title tooltip shows absolute date |
+| 3 hours ago | `datetime=(now - 3h)` | Relative text showing "3h ago" |
+| 2 days ago | `datetime=(now - 2d)` | Relative text showing "2d ago" |
+
+### Group: Future timestamp
+
+| Label | Props / Config | Expected Visual |
+|-------|---------------|-----------------|
+| In 5 minutes | `datetime=(now + 5min)` | Relative text showing "in 5m" |
+
+### Group: Static (live updates off)
+
+| Label | Props / Config | Expected Visual |
+|-------|---------------|-----------------|
+| Static | `datetime=(now - 2min)`, `live=false` | Relative text computed once; does not update over time |
+
+### Group: From ISO string
+
+| Label | Props / Config | Expected Visual |
+|-------|---------------|-----------------|
+| ISO string | `datetime="2026-03-14T00:00:00Z"` | Relative text computed from fixed ISO date; live-updates by default |
+
+## 14. Approval And Adoption Notes
 
 - contract status: `detailed contract`
 - approvers: pending

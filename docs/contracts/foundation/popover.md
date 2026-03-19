@@ -249,7 +249,21 @@ Open/closed state and placement state are required.
 | exact placement fallback order may differ | overlay engine internals vary | allowed | keep trigger relation, dismissal, and focus rules strict |
 | color-mix transparency blending | GPUI may use direct alpha blending instead of CSS color-mix | allowed | same visual result required |
 
-## 13. Approval And Adoption Notes
+## 13. Specimen Definitions
+
+### Group: Default (bottom-start)
+
+| Label | Props / Config | Expected Visual |
+|-------|---------------|-----------------|
+| Bottom-start popover | `<Popover ariaLabel="Quick settings">` with a secondary Button trigger ("Open popover") and content containing a heading and paragraph | Button trigger; clicking opens an elevated surface anchored below-start of trigger with heading and descriptive text; dismisses on outside click or Escape |
+
+### Group: Top placement
+
+| Label | Props / Config | Expected Visual |
+|-------|---------------|-----------------|
+| Top popover | `<Popover placement="top" ariaLabel="Help tip">` with a secondary Button trigger ("Show help") and paragraph content | Button trigger; clicking opens an elevated surface anchored above the trigger with descriptive text; offset matches --pug-popover-offset |
+
+## 14. Approval And Adoption Notes
 
 - contract status: `detailed contract`
 - approvers: pending

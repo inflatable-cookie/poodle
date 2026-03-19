@@ -243,7 +243,35 @@ Updated: 2026-03-15
 | glyph style may differ | shape rendering is implementation-specific | allowed | keep ordinal meaning strict |
 | `color-mix` implementation | GPUI may pre-compute blended colors | allowed | ensure visual equivalence across themes |
 
-## 13. Approval And Adoption Notes
+## 13. Specimen Definitions
+
+All preview apps must render the following specimens identically.
+
+### Default (5 stars)
+
+| Label | Props/Config | Expected Visual |
+|-------|-------------|-----------------|
+| Default (5 stars) | `value=3`, `ariaLabel="Rating"` | Row of 5 star items; first 3 filled (accent color), last 2 unfilled (secondary color); interactive with roving focus |
+
+### 10-star scale
+
+| Label | Props/Config | Expected Visual |
+|-------|-------------|-----------------|
+| 10-star scale | `defaultValue=7`, `max=10`, `ariaLabel="Score out of 10"` | Row of 10 star items; first 7 filled, last 3 unfilled |
+
+### Clearable
+
+| Label | Props/Config | Expected Visual |
+|-------|-------------|-----------------|
+| Clearable | `defaultValue=4`, `allowClear=true`, `ariaLabel="Clearable rating"` | Row of 5 star items; first 4 filled; clicking the currently selected star clears the value |
+
+### Disabled
+
+| Label | Props/Config | Expected Visual |
+|-------|-------------|-----------------|
+| Disabled | `defaultValue=2`, `isDisabled=true`, `ariaLabel="Disabled rating"` | Row of 5 star items; first 2 filled; reduced opacity, cursor not-allowed, non-interactive |
+
+## 14. Approval And Adoption Notes
 
 - contract status: `detailed contract`
 - approvers: pending

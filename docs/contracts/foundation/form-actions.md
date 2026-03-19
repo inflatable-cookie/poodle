@@ -168,7 +168,27 @@ State table is sufficient for this layout primitive. No interactive state transi
 |-------|-------------|-----------------|-----------|
 | wrapping behavior may differ slightly | flex-wrap vs GPUI layout wrapping | allowed | keep action order and alignment meaning strict |
 
-## 13. Approval And Adoption Notes
+## 13. Specimen Definitions
+
+### End-Aligned (Default)
+
+| Label | Props / Config | Expected Visual |
+|-------|---------------|-----------------|
+| End-aligned (default) | default `align` (end), children: secondary "Cancel" button + primary "Save changes" button | Buttons right-aligned in the action row |
+
+### Start-Aligned
+
+| Label | Props / Config | Expected Visual |
+|-------|---------------|-----------------|
+| Start-aligned | `align="start"`, children: secondary "Back" button + primary "Continue" button | Buttons left-aligned in the action row |
+
+### Space Between
+
+| Label | Props / Config | Expected Visual |
+|-------|---------------|-----------------|
+| Space between | `align="between"`, children: danger "Delete" button + primary "Save" button | Buttons spread to opposite ends of the action row |
+
+## 14. Approval And Adoption Notes
 
 - contract status: `detailed contract`
 - approvers: pending

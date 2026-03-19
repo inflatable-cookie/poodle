@@ -258,7 +258,33 @@ TableRow: { id: string; cells: Record<string, string> }
 | exact overflow handling may differ | layout internals differ by runtime | allowed | keep structured table meaning strict |
 | color-mix formula rendering | GPUI may approximate color-mix | allowed | match visual result as closely as possible |
 
-## 13. Approval And Adoption Notes
+## 13. Specimen Definitions
+
+### Standard Table
+
+| Label | Props / Config | Expected Visual |
+|-------|---------------|-----------------|
+| Standard table | 4 columns (Name as row header, Role, Status, Hours end-aligned), 4 data rows | Full table with header row and body rows; Name column bold, Hours right-aligned |
+
+### With Caption
+
+| Label | Props / Config | Expected Visual |
+|-------|---------------|-----------------|
+| With caption | same columns and rows as standard, `caption="Q1 team allocation"` | Table with visible caption text above header row |
+
+### Minimal Key-Value
+
+| Label | Props / Config | Expected Visual |
+|-------|---------------|-----------------|
+| Minimal key-value | 2 columns (Property as row header, Value), 3 rows (Version, License, Bundle size) | Compact two-column table for key-value display |
+
+### Empty State
+
+| Label | Props / Config | Expected Visual |
+|-------|---------------|-----------------|
+| Empty state | same 4 columns, `rows={[]}`, `emptyMessage="No team members found."` | Table with header row and single empty-state row spanning all columns |
+
+## 14. Approval And Adoption Notes
 
 - contract status: `detailed contract`
 - approvers: pending

@@ -272,7 +272,29 @@ DateRangeValue: { start: string | null; end: string | null }
 | color-mix approximation in GPUI | GPUI may not have CSS color-mix; equivalent blending acceptable | allowed | visual result must match |
 | date formatting locale support may vary | platform locale registries differ | allowed | keep ISO date value semantics strict |
 
-## 13. Approval And Adoption Notes
+## 13. Specimen Definitions
+
+All preview apps must render the following specimens identically.
+
+### Default
+
+| Label | Props/Config | Expected Visual |
+|-------|-------------|-----------------|
+| Default | `ariaLabel="Select date range"` | Trigger button showing placeholder text "Select date range" with disclosure indicator; interactive, opens range calendar on click |
+
+### With default range
+
+| Label | Props/Config | Expected Visual |
+|-------|-------------|-----------------|
+| With default range | `defaultValue={ start: "2026-03-01", end: "2026-03-14" }`, `ariaLabel="Pre-filled range"` | Trigger button showing formatted date range instead of placeholder |
+
+### Disabled
+
+| Label | Props/Config | Expected Visual |
+|-------|-------------|-----------------|
+| Disabled | `isDisabled=true`, `ariaLabel="Disabled range picker"` | Trigger button with default placeholder, reduced opacity, cursor not-allowed, non-interactive |
+
+## 14. Approval And Adoption Notes
 
 - contract status: `detailed contract`
 - approvers: pending

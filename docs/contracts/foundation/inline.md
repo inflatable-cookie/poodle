@@ -215,7 +215,27 @@ No internal state.
 |-------|-------------|-----------------|-----------|
 | none | n/a | n/a | n/a |
 
-## 13. Approval And Adoption Notes
+## 13. Specimen Definitions
+
+### Group: Default (center-aligned)
+
+| Label | Props / Config | Expected Visual |
+|-------|---------------|-----------------|
+| Three inline items | `<Inline gap="md">` containing 3 Surface children with `padding="sm" border="subtle"`, including one taller item | Three bordered surfaces in a horizontal row with medium gap, vertically center-aligned (shorter items centered against tallest) |
+
+### Group: Justify: between
+
+| Label | Props / Config | Expected Visual |
+|-------|---------------|-----------------|
+| Space-between items | `<Inline gap="md" justify="between">` containing 3 Surface children with `padding="sm" border="subtle"` | Three bordered surfaces distributed across the full width; first pinned left, last pinned right, middle centered between them |
+
+### Group: Wrapping with small gap
+
+| Label | Props / Config | Expected Visual |
+|-------|---------------|-----------------|
+| Eight wrapping tags | `<Inline gap="sm" wrap>` containing 8 Surface children with `padding="sm" border="subtle"` | Eight bordered surfaces in a horizontal flow with small gap; items wrap to additional rows when they exceed the container width |
+
+## 14. Approval And Adoption Notes
 
 - contract status: `detailed contract`
 - approvers: pending

@@ -239,7 +239,27 @@ Updated: 2026-03-15
 | DOM swap vs GPUI entity-state swap | rendering architecture differs | allowed | same visual and semantic result required |
 | color-mix formula rendering | GPUI may approximate color-mix | allowed | match visual result as closely as possible |
 
-## 13. Approval And Adoption Notes
+## 13. Specimen Definitions
+
+### Double-click To Edit (Default)
+
+| Label | Props / Config | Expected Visual |
+|-------|---------------|-----------------|
+| Double-click to edit (default) | `value="Untitled project"`, `ariaLabel="Project title"`, `activationMode="doubleClick"` (default) | Static label showing current value; double-clicking enters edit mode with input and focus ring; committing updates displayed value below |
+
+### Enter/Space Activation
+
+| Label | Props / Config | Expected Visual |
+|-------|---------------|-----------------|
+| Enter/Space activation | `value="Click to rename"`, `activationMode="enterOrSpace"`, `ariaLabel="Subtitle"` | Static label that enters edit mode on click, Enter, or Space; commits on Enter or blur |
+
+### Disabled
+
+| Label | Props / Config | Expected Visual |
+|-------|---------------|-----------------|
+| Disabled | `value="Locked label"`, `isDisabled` | Static label with reduced opacity, no edit activation possible |
+
+## 14. Approval And Adoption Notes
 
 - contract status: `detailed contract`
 - approvers: pending

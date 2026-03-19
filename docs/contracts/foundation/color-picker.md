@@ -403,7 +403,45 @@ Updated: 2026-03-16
 | Replaces native `<input type="color">` with custom popover | native picker is inconsistent across platforms | allowed | unified UX across Svelte and GPUI |
 | GPUI may use GPU shader for gradient pad | CSS pseudo-elements not available in GPUI | allowed | must produce visually equivalent gradient |
 
-## 13. Approval And Adoption Notes
+## 13. Specimen Definitions
+
+### Basic Picker
+
+| Label | Props / Config | Expected Visual |
+|-------|---------------|-----------------|
+| Basic picker | `value="#6366f1"` | Color trigger swatch with hex text input; clicking trigger opens picker surface; displays selected hex value below |
+
+### With Swatches
+
+| Label | Props / Config | Expected Visual |
+|-------|---------------|-----------------|
+| With swatches | `value="#6366f1"`, `swatches=["#ef4444","#f97316","#eab308","#22c55e","#3b82f6","#6366f1","#8b5cf6","#ec4899"]` | Color picker with preset swatch grid in the surface panel; active swatch has primary border |
+
+### With Alpha
+
+| Label | Props / Config | Expected Visual |
+|-------|---------------|-----------------|
+| With alpha | `value="#3b82f6"`, `showAlpha` | Color picker with alpha slider and alpha channel input visible in surface; displays selected value including alpha below |
+
+### Default Open, RGB Mode
+
+| Label | Props / Config | Expected Visual |
+|-------|---------------|-----------------|
+| Default open, RGB mode | `value="#22c55e"`, `defaultOpen`, `defaultMode="rgb"` | Color picker surface initially open with RGB input mode selected in mode toggle; shows R/G/B number entry fields |
+
+### Preview Only (No Input)
+
+| Label | Props / Config | Expected Visual |
+|-------|---------------|-----------------|
+| Preview only (no input) | `value="#6366f1"`, `showInput={false}` | Color trigger swatch only, no inline hex text input beside it |
+
+### Disabled
+
+| Label | Props / Config | Expected Visual |
+|-------|---------------|-----------------|
+| Disabled | `value="#22c55e"`, `isDisabled` | Color picker with reduced opacity, no pointer events |
+
+## 14. Approval And Adoption Notes
 
 - contract status: `detailed contract`
 - approvers: pending

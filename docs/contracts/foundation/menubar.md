@@ -394,7 +394,45 @@ MenuItem: {
 | GPUI uses opacity multiplication instead of CSS color-mix | platform capability | allowed | visual result must match |
 | GPUI outside-click uses mouse-down-outside event | platform capability | allowed | dismissal behavior must match |
 
-## 13. Approval And Adoption Notes
+## 13. Specimen Definitions
+
+### Application Menu Bar
+
+| Label | Props / Config | Expected Visual |
+|-------|---------------|-----------------|
+| Application menu bar | `ariaLabel="Application menu"`, three top-level menus: File, Edit, View | Horizontal menubar with three trigger buttons in a bordered container |
+
+#### File Menu Items
+
+| Label | Props / Config | Expected Visual |
+|-------|---------------|-----------------|
+| New | `shortcutLabel="Cmd+N"` | Action item with shortcut meta |
+| Open... | `shortcutLabel="Cmd+O"` | Action item with shortcut meta |
+| Save | `shortcutLabel="Cmd+S"` | Action item with shortcut meta |
+| (separator) | `kind="separator"` | Horizontal divider |
+| Quit | `shortcutLabel="Cmd+Q"` | Action item with shortcut meta |
+
+#### Edit Menu Items
+
+| Label | Props / Config | Expected Visual |
+|-------|---------------|-----------------|
+| Undo | `shortcutLabel="Cmd+Z"` | Action item with shortcut meta |
+| Redo | `shortcutLabel="Shift+Cmd+Z"` | Action item with shortcut meta |
+| (separator) | `kind="separator"` | Horizontal divider |
+| Cut | `shortcutLabel="Cmd+X"` | Action item with shortcut meta |
+| Copy | `shortcutLabel="Cmd+C"` | Action item with shortcut meta |
+| Paste | `shortcutLabel="Cmd+V"` | Action item with shortcut meta |
+
+#### View Menu Items
+
+| Label | Props / Config | Expected Visual |
+|-------|---------------|-----------------|
+| Zoom in | `shortcutLabel="Cmd++"` | Action item with shortcut meta |
+| Zoom out | `shortcutLabel="Cmd+-"` | Action item with shortcut meta |
+| (separator) | `kind="separator"` | Horizontal divider |
+| Full screen | `shortcutLabel="Ctrl+Cmd+F"` | Action item with shortcut meta |
+
+## 14. Approval And Adoption Notes
 
 - contract status: `detailed contract`
 - approvers: pending
