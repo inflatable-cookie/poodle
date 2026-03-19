@@ -30,6 +30,7 @@ mod number_entry;
 mod pin_input;
 mod toolbar;
 mod editable_label;
+mod toggle;
 
 // ── Selection ─────────────────────────────────────────────
 mod checkbox;
@@ -190,6 +191,7 @@ pub fn render_single_specimen(
         "toolbar" => specimen_card("Toolbar", theme, toolbar::render(state, cx)),
         "time-field" => specimen_card("TimeField", theme, time_field::render(theme)),
         "editable-label" => specimen_card("EditableLabel", theme, editable_label::render(theme)),
+        "toggle" | "toggle-group" => specimen_card("Toggle", theme, toggle::render(state, cx)),
 
         // ── Selection ───────────────────────────────────────────
         "checkbox" => specimen_card("Checkbox", theme, checkbox::render(state, cx)),

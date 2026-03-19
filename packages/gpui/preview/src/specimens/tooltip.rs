@@ -1,27 +1,109 @@
 use gpui::*;
 use pug_adapter::ThemeProvider;
-use pug_gpui_primitives::TooltipSpec;
-use pug_gpui_components::PugTooltip;
+use pug_gpui_primitives::{TooltipSpec, ButtonSpec, ButtonVariant};
+use pug_gpui_components::{PugTooltip, PugButton};
 use pug_gpui::GpuiThemeProvider;
+use pug_gpui_primitives::OverlayPlacement;
 use crate::style_bridge::color_to_hsla;
 
 pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
-    let border = theme.resolve_color("semantic.color.border.default");
     let text_secondary = theme.resolve_color("semantic.color.text.secondary");
 
-    let tooltip_spec = TooltipSpec::new()
-        .with_content("Tooltip content")
+    // ── Default ──────────────────────────────────────────────────────
+    // Contract: "Hover me" button (secondary variant), content="Save your changes", placement=top
+    let default_spec = TooltipSpec::new()
+        .with_content("Save your changes")
+        .with_placement(OverlayPlacement::Top)
         .with_default_open(true);
 
-    div().flex().flex_col().gap(px(4.0))
-        .child(div().text_xs().text_color(color_to_hsla(text_secondary)).child("Tooltip"))
+    let default_trigger = PugButton::new(
+        ButtonSpec::new()
+            .with_variant(ButtonVariant::Secondary)
+            .with_label("Hover me"),
+        theme,
+    ).with_id("tooltip-default-trigger");
+
+    let default_tooltip = PugTooltip::new(default_spec, theme)
+        .with_trigger(default_trigger);
+
+    // ── Placements ───────────────────────────────────────────────────
+    // Contract: 2x2 grid of Top, Bottom, Left, Right tooltips with ghost buttons
+    let top_spec = TooltipSpec::new()
+        .with_content("Top tooltip")
+        .with_placement(OverlayPlacement::Top)
+        .with_default_open(true);
+
+    let top_tooltip = PugTooltip::new(top_spec, theme)
+        .with_trigger(
+            PugButton::new(
+                ButtonSpec::new().with_variant(ButtonVariant::Ghost).with_label("Top"),
+                theme,
+            ).with_id("tooltip-top-trigger")
+        );
+
+    let bottom_spec = TooltipSpec::new()
+        .with_content("Bottom tooltip")
+        .with_placement(OverlayPlacement::Bottom)
+        .with_default_open(true);
+
+    let bottom_tooltip = PugTooltip::new(bottom_spec, theme)
+        .with_trigger(
+            PugButton::new(
+                ButtonSpec::new().with_variant(ButtonVariant::Ghost).with_label("Bottom"),
+                theme,
+            ).with_id("tooltip-bottom-trigger")
+        );
+
+    let left_spec = TooltipSpec::new()
+        .with_content("Left tooltip")
+        .with_placement(OverlayPlacement::Left)
+        .with_default_open(true);
+
+    let left_tooltip = PugTooltip::new(left_spec, theme)
+        .with_trigger(
+            PugButton::new(
+                ButtonSpec::new().with_variant(ButtonVariant::Ghost).with_label("Left"),
+                theme,
+            ).with_id("tooltip-left-trigger")
+        );
+
+    let right_spec = TooltipSpec::new()
+        .with_content("Right tooltip")
+        .with_placement(OverlayPlacement::Right)
+        .with_default_open(true);
+
+    let right_tooltip = PugTooltip::new(right_spec, theme)
+        .with_trigger(
+            PugButton::new(
+                ButtonSpec::new().with_variant(ButtonVariant::Ghost).with_label("Right"),
+                theme,
+            ).with_id("tooltip-right-trigger")
+        );
+
+    div().flex().flex_col().gap(px(16.0))
+        // Default
+        .child(section_label("DEFAULT", text_secondary))
         .child(
-            PugTooltip::new(tooltip_spec, theme)
-                .with_trigger(
-                    div()
-                        .px(px(8.0)).py(px(4.0)).rounded(px(4.0))
-                        .border_1().border_color(color_to_hsla(border)).text_sm()
-                        .child("Hover me")
-                )
+            div().flex().flex_wrap().gap(px(12.0)).items_center()
+                .child(default_tooltip)
         )
+
+        // Placements
+        .child(section_label("PLACEMENTS", text_secondary))
+        .child(
+            div().flex().flex_wrap().gap(px(12.0)).items_center()
+                .child(top_tooltip)
+                .child(bottom_tooltip)
+                .child(left_tooltip)
+                .child(right_tooltip)
+        )
+}
+
+fn section_label(label: &str, color: pug_tokens::typed::ColorValue) -> Div {
+    div()
+        .text_xs()
+        .font_weight(FontWeight::SEMIBOLD)
+        .text_color(color_to_hsla(color))
+        .child(label.to_string())
+        .mb(px(2.0))
 }
