@@ -1,7 +1,16 @@
 [catalog]
 alias = "pug"
 
+[bootstrap]
+setup = ["bootstrap:deps"]
+start = "preview:dev"
+
 [tasks]
+"bootstrap:deps" = [
+  "bun install",
+  "cargo fetch",
+]
+
 # Token system
 "tokens:build" = "bun packages/tokens/scripts/build-tokens.ts"
 
