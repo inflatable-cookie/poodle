@@ -1,16 +1,48 @@
 use gpui::*;
+use pug_adapter::ThemeProvider;
 use pug_gpui::GpuiThemeProvider;
 use pug_gpui_primitives::{DateTimePickerSpec, DateTimeValue};
 use pug_gpui_components::PugDateTimePicker;
+use crate::style_bridge::color_to_hsla;
 
 pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
-    let value = DateTimeValue::new(
-        Some("2026-03-15".to_string()),
-        Some("09:30".to_string()),
-    );
+    let text_secondary = theme.resolve_color("semantic.color.text.secondary");
 
-    let spec = DateTimePickerSpec::new()
-        .with_default_value(value);
+    div().flex().flex_col().gap(px(16.0))
+        // --- Default ---
+        .child(section_label("DEFAULT", text_secondary))
+        .child({
+            let mut spec = DateTimePickerSpec::new();
+            spec.aria_label = Some("Select date and time".to_string());
+            PugDateTimePicker::new(spec, theme).with_id("default")
+        })
+        // --- With default value ---
+        .child(section_label("WITH DEFAULT VALUE", text_secondary))
+        .child({
+            let value = DateTimeValue::new(
+                Some("2026-03-14".to_string()),
+                Some("14:30".to_string()),
+            );
+            let mut spec = DateTimePickerSpec::new()
+                .with_default_value(value);
+            spec.aria_label = Some("Pre-filled date time".to_string());
+            PugDateTimePicker::new(spec, theme).with_id("with-value")
+        })
+        // --- Disabled ---
+        .child(section_label("DISABLED", text_secondary))
+        .child({
+            let mut spec = DateTimePickerSpec::new();
+            spec.is_disabled = true;
+            spec.aria_label = Some("Disabled date time picker".to_string());
+            PugDateTimePicker::new(spec, theme).with_id("disabled")
+        })
+}
 
-    div().child(PugDateTimePicker::new(spec, theme).with_id("specimen"))
+fn section_label(label: &str, color: pug_tokens::typed::ColorValue) -> Div {
+    div()
+        .text_xs()
+        .font_weight(FontWeight::SEMIBOLD)
+        .text_color(color_to_hsla(color))
+        .child(label.to_string())
+        .mb(px(2.0))
 }

@@ -1,27 +1,67 @@
 use gpui::*;
+use pug_adapter::ThemeProvider;
 use pug_gpui_composites::PaginationSummarySpec;
 use pug_gpui_components::PugPaginationSummary;
-use pug_gpui_primitives::ProgressSpec;
-use pug_gpui_components::PugProgress;
+use pug_gpui_primitives::{ButtonSpec, ButtonVariant, ControlSize};
+use pug_gpui_components::PugButton;
 use pug_gpui::GpuiThemeProvider;
-use pug_adapter::ThemeProvider;
 use crate::style_bridge::color_to_hsla;
 
 pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
     let text_secondary = theme.resolve_color("semantic.color.text.secondary");
+    let text_primary = theme.resolve_color("semantic.color.text.primary");
 
-    let pagination = PaginationSummarySpec::new(2, 25, 67);
-    let pagination_empty = PaginationSummarySpec::new(1, 25, 0);
+    // --- Basic ---
+    // title="Components", subtitle="Browse and manage your component library."
+    let basic = div().flex().flex_col().gap(px(4.0))
+        .child(div().text_lg().font_weight(FontWeight::SEMIBOLD).text_color(color_to_hsla(text_primary)).child("Components"))
+        .child(div().text_sm().text_color(color_to_hsla(text_secondary)).child("Browse and manage your component library."));
 
-    div().flex().flex_col().gap(px(8.0))
+    // --- With eyebrow and actions ---
+    // title="Button", eyebrow="Primitive", subtitle="Primary interactive control for triggering actions.", actions
+    let with_eyebrow_actions = div().flex().items_start().justify_between()
         .child(
-            div().flex().items_center().gap(px(4.0)).text_xs().text_color(color_to_hsla(text_secondary))
-                .child("Home").child(div().child("/")).child("Projects").child(div().child("/")).child(div().child("Details"))
+            div().flex().flex_col().gap(px(2.0))
+                .child(div().text_xs().font_weight(FontWeight::MEDIUM).text_color(color_to_hsla(text_secondary)).child("Primitive"))
+                .child(div().text_lg().font_weight(FontWeight::SEMIBOLD).text_color(color_to_hsla(text_primary)).child("Button"))
+                .child(div().text_sm().text_color(color_to_hsla(text_secondary)).child("Primary interactive control for triggering actions."))
         )
-        .child(div().text_lg().child("Page Header Title"))
         .child(
-            PugProgress::new(ProgressSpec::new().with_indeterminate(true), theme)
-        )
-        .child(PugPaginationSummary::new(pagination, theme))
-        .child(PugPaginationSummary::new(pagination_empty, theme))
+            div().flex().gap(px(6.0))
+                .child(
+                    PugButton::new(
+                        ButtonSpec::new().with_variant(ButtonVariant::Secondary).with_label("View source").with_size(ControlSize::Sm),
+                        theme,
+                    ).with_id("ph-source")
+                )
+                .child(
+                    PugButton::new(
+                        ButtonSpec::new().with_variant(ButtonVariant::Primary).with_label("Edit").with_size(ControlSize::Sm),
+                        theme,
+                    ).with_id("ph-edit")
+                )
+        );
+
+    // --- Title only ---
+    // title="Settings"
+    let title_only = div().child(
+        div().text_lg().font_weight(FontWeight::SEMIBOLD).text_color(color_to_hsla(text_primary)).child("Settings")
+    );
+
+    div().flex().flex_col().gap(px(16.0))
+        .child(section_label("BASIC", text_secondary))
+        .child(basic)
+        .child(section_label("WITH EYEBROW AND ACTIONS", text_secondary))
+        .child(with_eyebrow_actions)
+        .child(section_label("TITLE ONLY", text_secondary))
+        .child(title_only)
+}
+
+fn section_label(label: &str, color: pug_tokens::typed::ColorValue) -> Div {
+    div()
+        .text_xs()
+        .font_weight(FontWeight::SEMIBOLD)
+        .text_color(color_to_hsla(color))
+        .child(label.to_string())
+        .mb(px(2.0))
 }

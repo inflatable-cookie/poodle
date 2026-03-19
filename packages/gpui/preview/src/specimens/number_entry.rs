@@ -1,48 +1,62 @@
 use gpui::*;
 use pug_adapter::ThemeProvider;
-use pug_gpui_primitives::{IconButtonSpec, ButtonVariant, TextInputSpec};
-use pug_gpui_components::{PugIconButton, PugTextInput};
-use crate::app_state::AppState;
-use crate::PreviewRoot;
+use pug_gpui::GpuiThemeProvider;
+use pug_gpui_primitives::{NumberEntrySpec, ValidationState};
+use pug_gpui_components::PugNumberEntry;
+use crate::style_bridge::color_to_hsla;
 
-pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
-    let theme = &state.theme;
-    let value = state.specimens.count("number-entry") as i32 + 42;
+pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
+    let text_secondary = theme.resolve_color("semantic.color.text.secondary");
 
-    div().flex().items_center().gap(px(2.0))
+    div().flex().flex_col().gap(px(16.0)).max_w(px(320.0))
+        // --- Default ---
+        .child(section_label("DEFAULT", text_secondary))
         .child(
-            PugIconButton::new(
-                IconButtonSpec::new()
-                    .with_variant(ButtonVariant::Secondary)
-                    .with_icon("−"),
+            PugNumberEntry::new(
+                NumberEntrySpec::new(1.0)
+                    .with_min(0.0)
+                    .with_max(100.0)
+                    .with_aria_label("Quantity"),
                 theme,
             )
-            .with_id("num-minus")
-            .on_click(cx.listener(|this, _e: &ClickEvent, _w, cx| {
-                let val = this.state.specimens.counters.entry("number-entry".to_string()).or_insert(0);
-                if *val > 0 { *val -= 1; }
-                cx.notify();
-            }))
         )
+        // --- With Steppers ---
+        .child(section_label("WITH STEPPERS", text_secondary))
         .child(
-            PugTextInput::new(
-                TextInputSpec::new()
-                    .with_value(format!("{}", value))
+            PugNumberEntry::new(
+                NumberEntrySpec::new(29.99)
+                    .with_min(0.0)
+                    .with_step(0.01)
+                    .with_aria_label("Price"),
+                theme,
+            )
+        )
+        // --- Disabled ---
+        .child(section_label("DISABLED", text_secondary))
+        .child(
+            PugNumberEntry::new(
+                NumberEntrySpec::new(42.0)
                     .with_disabled(true),
                 theme,
             )
         )
+        // --- Invalid ---
+        .child(section_label("INVALID", text_secondary))
         .child(
-            PugIconButton::new(
-                IconButtonSpec::new()
-                    .with_variant(ButtonVariant::Secondary)
-                    .with_icon("+"),
+            PugNumberEntry::new(
+                NumberEntrySpec::new(-5.0)
+                    .with_min(0.0)
+                    .with_validation_state(ValidationState::Invalid),
                 theme,
             )
-            .with_id("num-plus")
-            .on_click(cx.listener(|this, _e: &ClickEvent, _w, cx| {
-                this.state.specimens.increment("number-entry");
-                cx.notify();
-            }))
         )
+}
+
+fn section_label(label: &str, color: pug_tokens::typed::ColorValue) -> Div {
+    div()
+        .text_xs()
+        .font_weight(FontWeight::SEMIBOLD)
+        .text_color(color_to_hsla(color))
+        .child(label.to_string())
+        .mb(px(2.0))
 }

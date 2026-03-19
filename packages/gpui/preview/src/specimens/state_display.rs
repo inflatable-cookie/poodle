@@ -1,30 +1,48 @@
 use gpui::*;
+use pug_adapter::ThemeProvider;
 use pug_gpui_composites::{EmptyStateSpec, EmptyStateVariant, RemediationAction};
 use pug_gpui_components::PugEmptyState;
 use pug_gpui_primitives::ButtonVariant;
 use pug_gpui::GpuiThemeProvider;
+use crate::style_bridge::color_to_hsla;
 
 pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
-    let empty_neutral = EmptyStateSpec::new("No items found")
-        .with_message("Try adjusting your filters or adding new items.")
+    let text_secondary = theme.resolve_color("semantic.color.text.secondary");
+
+    // --- Neutral ---
+    let neutral = EmptyStateSpec::new("No projects yet")
+        .with_message("Create your first project to get started.")
         .with_actions(vec![
-            RemediationAction::new("add", "Add Item").with_variant(ButtonVariant::Primary),
+            RemediationAction::new("create", "Create project").with_variant(ButtonVariant::Primary),
         ]);
 
-    let empty_first_run = EmptyStateSpec::new("Welcome to your workspace")
-        .with_variant(EmptyStateVariant::FirstRun)
-        .with_message("Get started by creating your first project.")
-        .with_actions(vec![
-            RemediationAction::new("create", "Create Project").with_variant(ButtonVariant::Primary),
-            RemediationAction::new("import", "Import"),
-        ]);
-
-    let empty_search = EmptyStateSpec::new("No results")
+    // --- Search ---
+    let search = EmptyStateSpec::new("No results found")
         .with_variant(EmptyStateVariant::Search)
-        .with_message("No items match your search criteria.");
+        .with_message("Try adjusting your search terms or clearing filters.")
+        .with_actions(vec![
+            RemediationAction::new("clear", "Clear filters"),
+        ]);
 
-    div().flex().flex_col().gap(px(12.0))
-        .child(PugEmptyState::new(empty_neutral, theme))
-        .child(PugEmptyState::new(empty_first_run, theme))
-        .child(PugEmptyState::new(empty_search, theme))
+    // --- First run ---
+    let first_run = EmptyStateSpec::new("Welcome to your workspace")
+        .with_variant(EmptyStateVariant::FirstRun)
+        .with_message("This is where your team's components will appear once you start building.");
+
+    div().flex().flex_col().gap(px(16.0))
+        .child(section_label("NEUTRAL", text_secondary))
+        .child(PugEmptyState::new(neutral, theme))
+        .child(section_label("SEARCH", text_secondary))
+        .child(PugEmptyState::new(search, theme))
+        .child(section_label("FIRST RUN", text_secondary))
+        .child(PugEmptyState::new(first_run, theme))
+}
+
+fn section_label(label: &str, color: pug_tokens::typed::ColorValue) -> Div {
+    div()
+        .text_xs()
+        .font_weight(FontWeight::SEMIBOLD)
+        .text_color(color_to_hsla(color))
+        .child(label.to_string())
+        .mb(px(2.0))
 }

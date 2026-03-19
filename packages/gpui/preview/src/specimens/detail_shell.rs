@@ -7,31 +7,147 @@ use crate::style_bridge::color_to_hsla;
 
 pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
     let text_secondary = theme.resolve_color("semantic.color.text.secondary");
+    let accent = theme.resolve_color("semantic.color.accent.base");
+    let border = theme.resolve_color("semantic.color.border.subtle");
 
-    let ready_spec = DetailShellSpec::new()
-        .with_title("Detail View")
-        .with_state(DetailState::Ready);
-
-    let loading_spec = DetailShellSpec::new()
-        .with_title("Loading View")
-        .with_state(DetailState::Loading);
-
-    let error_spec = DetailShellSpec::new()
-        .with_title("Error View")
-        .with_state(DetailState::Error);
-
-    div().flex().flex_col().gap(px(12.0))
+    div().flex().flex_col().gap(px(16.0))
+        // --- Layout structure ---
+        .child(section_label("LAYOUT STRUCTURE", text_secondary))
         .child(
-            div().h(px(120.0)).child(
-                PugDetailShell::new(ready_spec, theme)
-                    .with_content(
-                        div().flex().flex_col().gap(px(4.0))
-                            .child(div().text_xs().text_color(color_to_hsla(text_secondary)).child("Key: Value"))
-                            .child(div().text_xs().text_color(color_to_hsla(text_secondary)).child("Status: Active"))
-                            .child(div().text_xs().text_color(color_to_hsla(text_secondary)).child("Owner: Team Alpha"))
-                    )
+            div().h(px(180.0)).child(
+                PugDetailShell::new(
+                    DetailShellSpec::new(),
+                    theme,
+                )
+                .with_header(
+                    region_block("Header Region", accent, border)
+                )
+                .with_content(
+                    div().flex().flex_col().gap(px(6.0))
+                        .child(region_block("Section 1", accent, border))
+                        .child(region_block("Section 2", accent, border))
+                        .child(region_block("Section 3", accent, border))
+                )
             )
         )
-        .child(div().h(px(80.0)).child(PugDetailShell::new(loading_spec, theme)))
-        .child(div().h(px(80.0)).child(PugDetailShell::new(error_spec, theme)))
+        // --- Multi-section layout with header ---
+        .child(section_label("MULTI-SECTION LAYOUT WITH HEADER", text_secondary))
+        .child(
+            div().h(px(220.0)).child(
+                PugDetailShell::new(
+                    DetailShellSpec::new()
+                        .with_title("Project Settings"),
+                    theme,
+                )
+                .with_content(
+                    div().flex().flex_col().gap(px(10.0))
+                        .child(detail_section("General", &[
+                            ("Name", "My Project"),
+                            ("Slug", "my-project"),
+                            ("Created", "2026-01-15"),
+                        ], text_secondary, border))
+                        .child(detail_section("Configuration", &[
+                            ("Environment", "Production"),
+                            ("Region", "US West"),
+                        ], text_secondary, border))
+                        .child(detail_section("Integrations", &[
+                            ("GitHub", "Connected"),
+                            ("Slack", "Not configured"),
+                        ], text_secondary, border))
+                )
+            )
+        )
+        // --- Loading state ---
+        .child(section_label("LOADING STATE", text_secondary))
+        .child(
+            div().h(px(100.0)).child(
+                PugDetailShell::new(
+                    DetailShellSpec::new()
+                        .with_title("Loading")
+                        .with_state(DetailState::Loading),
+                    theme,
+                )
+            )
+        )
+        // --- Error state ---
+        .child(section_label("ERROR STATE", text_secondary))
+        .child(
+            div().h(px(100.0)).child(
+                PugDetailShell::new(
+                    DetailShellSpec::new()
+                        .with_title("Error")
+                        .with_state(DetailState::Error),
+                    theme,
+                )
+            )
+        )
+}
+
+fn region_block(
+    label: &str,
+    accent: pug_tokens::typed::ColorValue,
+    border: pug_tokens::typed::ColorValue,
+) -> Div {
+    div()
+        .h(px(32.0))
+        .rounded(px(4.0))
+        .border_1()
+        .border_color(color_to_hsla(border))
+        .bg(color_to_hsla(accent).opacity(0.08))
+        .flex()
+        .items_center()
+        .px(px(8.0))
+        .child(
+            div().text_xs()
+                .text_color(color_to_hsla(accent))
+                .child(label.to_string()),
+        )
+}
+
+fn detail_section(
+    title: &str,
+    rows: &[(&str, &str)],
+    text_secondary: pug_tokens::typed::ColorValue,
+    border: pug_tokens::typed::ColorValue,
+) -> Div {
+    let mut section = div()
+        .flex()
+        .flex_col()
+        .gap(px(4.0))
+        .pb(px(8.0))
+        .border_b_1()
+        .border_color(color_to_hsla(border));
+
+    section = section.child(
+        div()
+            .text_sm()
+            .font_weight(FontWeight::SEMIBOLD)
+            .child(title.to_string()),
+    );
+
+    for (key, value) in rows {
+        section = section.child(
+            div().flex().gap(px(8.0))
+                .child(
+                    div().text_xs()
+                        .text_color(color_to_hsla(text_secondary))
+                        .child(key.to_string()),
+                )
+                .child(
+                    div().text_xs()
+                        .child(value.to_string()),
+                ),
+        );
+    }
+
+    section
+}
+
+fn section_label(label: &str, color: pug_tokens::typed::ColorValue) -> Div {
+    div()
+        .text_xs()
+        .font_weight(FontWeight::SEMIBOLD)
+        .text_color(color_to_hsla(color))
+        .child(label.to_string())
+        .mb(px(2.0))
 }

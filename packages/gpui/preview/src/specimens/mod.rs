@@ -191,7 +191,7 @@ pub fn render_single_specimen(
         "search-field" => specimen_card("SearchField", theme, search_field::render(state, cx)),
         "field" => specimen_card("Field", theme, field::render(state, cx)),
         "form-actions" => specimen_card("FormActions", theme, form_actions::render(state, cx)),
-        "number-entry" => specimen_card("NumberEntry", theme, number_entry::render(state, cx)),
+        "number-entry" => specimen_card("NumberEntry", theme, number_entry::render(theme)),
         "pin-input" => specimen_card("PinInput", theme, pin_input::render(theme)),
         "toolbar" => specimen_card("Toolbar", theme, toolbar::render(state, cx)),
         "time-field" => specimen_card("TimeField", theme, time_field::render(theme)),
@@ -227,7 +227,7 @@ pub fn render_single_specimen(
         "eyebrow" => specimen_card("Eyebrow", theme, eyebrow::render(theme)),
         "time-ago" | "duration-input" => specimen_card("TimeAgo + DurationInput", theme, temporal::render(theme)),
         "code" => specimen_card("Code", theme, code::render(theme)),
-        "color-picker" => specimen_card("ColorPicker", theme, color_picker::render(state, cx)),
+        "color-picker" => specimen_card("ColorPicker", theme, color_picker::render(theme)),
         "file-upload" => specimen_card("FileUpload", theme, file_upload::render(theme)),
 
         // ── Overlay ─────────────────────────────────────────────

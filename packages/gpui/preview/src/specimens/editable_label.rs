@@ -1,26 +1,49 @@
 use gpui::*;
+use pug_adapter::ThemeProvider;
 use pug_gpui::GpuiThemeProvider;
 use pug_gpui_primitives::EditableLabelSpec;
 use pug_gpui_components::PugEditableLabel;
+use crate::style_bridge::color_to_hsla;
 
 pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
-    let display_spec = EditableLabelSpec::new()
-        .with_value("Project title");
+    let text_secondary = theme.resolve_color("semantic.color.text.secondary");
 
-    let editing_spec = EditableLabelSpec::new()
-        .with_value("Editing mode")
-        .with_editing(true);
+    div().flex().flex_col().gap(px(16.0))
+        // --- Double-click To Edit (Default) ---
+        .child(section_label("DOUBLE-CLICK TO EDIT (DEFAULT)", text_secondary))
+        .child(
+            PugEditableLabel::new(
+                EditableLabelSpec::new()
+                    .with_value("Untitled project"),
+                theme,
+            )
+        )
+        // --- Enter/Space Activation ---
+        .child(section_label("ENTER/SPACE ACTIVATION", text_secondary))
+        .child(
+            PugEditableLabel::new(
+                EditableLabelSpec::new()
+                    .with_value("Click to rename"),
+                theme,
+            )
+        )
+        // --- Disabled ---
+        .child(section_label("DISABLED", text_secondary))
+        .child(
+            PugEditableLabel::new(
+                EditableLabelSpec::new()
+                    .with_value("Locked label")
+                    .with_disabled(true),
+                theme,
+            )
+        )
+}
 
-    let placeholder_spec = EditableLabelSpec::new()
-        .with_placeholder("Click to edit...");
-
-    let disabled_spec = EditableLabelSpec::new()
-        .with_value("Disabled label")
-        .with_disabled(true);
-
-    div().flex().flex_col().gap(px(8.0))
-        .child(PugEditableLabel::new(display_spec, theme))
-        .child(PugEditableLabel::new(editing_spec, theme))
-        .child(PugEditableLabel::new(placeholder_spec, theme))
-        .child(PugEditableLabel::new(disabled_spec, theme))
+fn section_label(label: &str, color: pug_tokens::typed::ColorValue) -> Div {
+    div()
+        .text_xs()
+        .font_weight(FontWeight::SEMIBOLD)
+        .text_color(color_to_hsla(color))
+        .child(label.to_string())
+        .mb(px(2.0))
 }

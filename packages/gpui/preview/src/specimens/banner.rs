@@ -1,41 +1,89 @@
 use gpui::*;
 use pug_adapter::ThemeProvider;
 use pug_gpui::GpuiThemeProvider;
-use pug_gpui_primitives::{BadgeSpec, BadgeVariant, StatusIndicatorSpec, StatusTone};
-use pug_gpui_components::{PugBadge, PugStatusIndicator};
+use pug_gpui_primitives::{BannerSpec, StatusTone};
+use pug_gpui_components::PugBanner;
 use crate::style_bridge::color_to_hsla;
 
 pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
-    let accent = theme.resolve_color("semantic.color.accent.base");
-    let warning = theme.resolve_color("semantic.color.status.warning");
+    let text_secondary = theme.resolve_color("semantic.color.text.secondary");
 
-    let mut info_badge = BadgeSpec::new().with_variant(BadgeVariant::Accent);
-    info_badge.content = Some("Info".to_string());
-
-    let mut warn_badge = BadgeSpec::new().with_variant(BadgeVariant::Muted);
-    warn_badge.content = Some("Warning".to_string());
-
-    let mut info_status = StatusIndicatorSpec::new().with_status(StatusTone::Neutral);
-    info_status.label = Some("Info banner message".to_string());
-
-    let mut warn_status = StatusIndicatorSpec::new().with_status(StatusTone::Warning);
-    warn_status.label = Some("Warning banner message".to_string());
-
-    div().flex().flex_col().gap(px(6.0))
+    div().flex().flex_col().gap(px(16.0)).max_w(px(400.0))
+        // --- Info ---
+        .child(section_label("INFO", text_secondary))
         .child(
-            div().p(px(8.0)).rounded(px(4.0))
-                .bg(color_to_hsla(accent).opacity(0.1))
-                .border_1().border_color(color_to_hsla(accent).opacity(0.3))
-                .flex().items_center().gap(px(8.0))
-                .child(PugBadge::new(info_badge, theme))
-                .child(PugStatusIndicator::new(info_status, theme))
+            PugBanner::new(
+                BannerSpec::new()
+                    .with_tone(StatusTone::Info)
+                    .with_title("Information")
+                    .with_message("This is an informational banner message."),
+                theme,
+            )
         )
+        // --- Success ---
+        .child(section_label("SUCCESS", text_secondary))
         .child(
-            div().p(px(8.0)).rounded(px(4.0))
-                .bg(color_to_hsla(warning).opacity(0.1))
-                .border_1().border_color(color_to_hsla(warning).opacity(0.3))
-                .flex().items_center().gap(px(8.0))
-                .child(PugBadge::new(warn_badge, theme))
-                .child(PugStatusIndicator::new(warn_status, theme))
+            PugBanner::new(
+                BannerSpec::new()
+                    .with_tone(StatusTone::Success)
+                    .with_title("Success")
+                    .with_message("Operation completed successfully."),
+                theme,
+            )
         )
+        // --- Warning ---
+        .child(section_label("WARNING", text_secondary))
+        .child(
+            PugBanner::new(
+                BannerSpec::new()
+                    .with_tone(StatusTone::Warning)
+                    .with_title("Warning")
+                    .with_message("Please review before proceeding."),
+                theme,
+            )
+        )
+        // --- Danger ---
+        .child(section_label("DANGER", text_secondary))
+        .child(
+            PugBanner::new(
+                BannerSpec::new()
+                    .with_tone(StatusTone::Danger)
+                    .with_title("Error")
+                    .with_message("Something went wrong. Please try again."),
+                theme,
+            )
+        )
+        // --- Dismissible ---
+        .child(section_label("DISMISSIBLE", text_secondary))
+        .child(
+            PugBanner::new(
+                BannerSpec::new()
+                    .with_tone(StatusTone::Info)
+                    .with_title("Dismissible")
+                    .with_message("This banner can be dismissed by the user.")
+                    .with_dismissible(true),
+                theme,
+            )
+        )
+        // --- Without Icon ---
+        .child(section_label("WITHOUT ICON", text_secondary))
+        .child(
+            PugBanner::new(
+                BannerSpec::new()
+                    .with_tone(StatusTone::Neutral)
+                    .with_title("No icon")
+                    .with_message("This banner has no leading icon.")
+                    .with_icon(false),
+                theme,
+            )
+        )
+}
+
+fn section_label(label: &str, color: pug_tokens::typed::ColorValue) -> Div {
+    div()
+        .text_xs()
+        .font_weight(FontWeight::SEMIBOLD)
+        .text_color(color_to_hsla(color))
+        .child(label.to_string())
+        .mb(px(2.0))
 }

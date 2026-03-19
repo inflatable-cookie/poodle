@@ -1,13 +1,45 @@
 use gpui::*;
+use pug_adapter::ThemeProvider;
 use pug_gpui::GpuiThemeProvider;
-use pug_gpui_primitives::{CalendarSpec, CalendarWeekStart};
+use pug_gpui_primitives::CalendarSpec;
 use pug_gpui_components::PugCalendar;
+use crate::style_bridge::color_to_hsla;
 
 pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
-    let spec = CalendarSpec::new()
-        .with_value("2026-03-15")
-        .with_visible_month("2026-03")
-        .with_week_start(CalendarWeekStart::Monday);
+    let text_secondary = theme.resolve_color("semantic.color.text.secondary");
 
-    div().child(PugCalendar::new(spec, theme).with_id("specimen"))
+    div().flex().flex_col().gap(px(16.0))
+        // --- Default ---
+        .child(section_label("DEFAULT", text_secondary))
+        .child({
+            let mut spec = CalendarSpec::new();
+            spec.aria_label = Some("Select a date".to_string());
+            PugCalendar::new(spec, theme).with_id("default")
+        })
+        // --- With pre-selected date ---
+        .child(section_label("WITH PRE-SELECTED DATE", text_secondary))
+        .child({
+            let mut spec = CalendarSpec::new();
+            spec.default_value = Some("2026-03-14".to_string());
+            spec.aria_label = Some("Calendar with default".to_string());
+            PugCalendar::new(spec, theme).with_id("preselected")
+        })
+        // --- Disabled ---
+        .child(section_label("DISABLED", text_secondary))
+        .child({
+            let mut spec = CalendarSpec::new();
+            spec.default_value = Some("2026-03-01".to_string());
+            spec.is_disabled = true;
+            spec.aria_label = Some("Disabled calendar".to_string());
+            PugCalendar::new(spec, theme).with_id("disabled")
+        })
+}
+
+fn section_label(label: &str, color: pug_tokens::typed::ColorValue) -> Div {
+    div()
+        .text_xs()
+        .font_weight(FontWeight::SEMIBOLD)
+        .text_color(color_to_hsla(color))
+        .child(label.to_string())
+        .mb(px(2.0))
 }
