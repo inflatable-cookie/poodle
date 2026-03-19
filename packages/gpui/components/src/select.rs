@@ -3,8 +3,9 @@
 use gpui::prelude::FluentBuilder;
 use gpui::*;
 use pug_gpui::GpuiThemeProvider;
-use pug_gpui_primitives::SelectSpec;
+use pug_gpui_primitives::{IconSize, IconSpec, SelectSpec};
 
+use crate::icon::PugIcon;
 use crate::theme_ext::resolve_color;
 
 /// A real GPUI select/dropdown component backed by `SelectSpec`.
@@ -111,9 +112,15 @@ impl IntoElement for PugSelect {
             )
             .child(
                 div()
-                    .text_xs()
-                    .text_color(text_secondary)
-                    .child(if is_open { "▴" } else { "▾" }),
+                    .opacity(0.5)
+                    .child(
+                        PugIcon::new(
+                            IconSpec::new(if is_open { "chevron-up" } else { "chevron-down" })
+                                .with_size(IconSize::Sm),
+                            theme,
+                        )
+                        .with_color(text_secondary),
+                    ),
             );
 
         if let Some(handler) = self.on_toggle {

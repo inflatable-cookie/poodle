@@ -210,7 +210,7 @@ pub fn render_single_specimen(
 
         // ── Feedback ────────────────────────────────────────────
         "progress" => specimen_card("Progress", theme, progress::render(theme)),
-        "badge" => specimen_card("Badge", theme, badge::render(theme)),
+        "badge" => specimen_card("Badge", theme, badge::render(state, cx)),
         "status-indicator" => specimen_card("StatusIndicator", theme, status_indicator::render(theme)),
         "meter" => specimen_card("Meter", theme, meter::render(theme)),
         "rating" => specimen_card("Rating", theme, rating::render(state, cx)),

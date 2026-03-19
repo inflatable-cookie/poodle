@@ -1,11 +1,15 @@
 //! PugProgress — real GPUI component backed by ProgressSpec.
+//!
+//! Implements the progress contract with animated indeterminate state.
+
+use std::time::Duration;
 
 use gpui::prelude::FluentBuilder;
 use gpui::*;
 use pug_gpui::GpuiThemeProvider;
 use pug_gpui_primitives::ProgressSpec;
 
-use crate::theme_ext::resolve_color;
+use crate::theme_ext::{color_mix, resolve_color};
 
 /// A real GPUI progress bar component backed by `ProgressSpec`.
 pub struct PugProgress {
@@ -30,41 +34,57 @@ impl IntoElement for PugProgress {
         let spec = &self.spec;
 
         let accent = resolve_color(theme, spec.indicator_fill_token());
-        let border = resolve_color(theme, "semantic.color.border.default");
-        let track_bg = resolve_color(theme, "semantic.color.background.surface");
+        let surface = resolve_color(theme, "semantic.color.background.surface");
+        let text_primary = resolve_color(theme, "semantic.color.text.primary");
+        // Contract §8: track bg = color-mix(surface 96%, text-primary)
+        let track_bg = color_mix(surface, text_primary, 0.96);
 
         let progress = spec.normalized_progress();
 
-        let track = div()
+        // Contract §8: root height 0.375rem (6px), radius 999px
+        let mut track = div()
             .w_full()
             .h(px(6.0))
-            .rounded(px(3.0))
+            .rounded(px(999.0))
             .bg(track_bg)
-            .border_1()
-            .border_color(border.opacity(0.3));
+            .overflow_hidden();
 
-        let fill_width = match progress {
+        match progress {
             Some(p) => {
-                // Clamp to 0..1
-                let pct = p.clamp(0.0, 1.0);
-                // Use relative sizing — approximate with fixed widths
-                // In a real app we'd use percentage-based width
-                div()
-                    .h_full()
-                    .rounded(px(3.0))
-                    .bg(accent)
-                    .w(relative(pct as f32))
+                let pct = p.clamp(0.0, 1.0) as f32;
+                // Determinate: solid accent fill at percentage width
+                track = track.child(
+                    div()
+                        .h_full()
+                        .rounded(px(999.0))
+                        .bg(accent)
+                        .w(relative(pct)),
+                );
             }
             None => {
-                // Indeterminate — show a partial bar
-                div()
-                    .h_full()
-                    .rounded(px(3.0))
-                    .bg(accent)
-                    .w(relative(0.4))
+                // Indeterminate: animated bar that slides back and forth
+                // Contract: animation translateX(-100%) to translateX(250%), 1.2s ease-in-out infinite
+                track = track.child(
+                    div()
+                        .h_full()
+                        .rounded(px(999.0))
+                        .bg(accent)
+                        .w(relative(0.3))
+                        .with_animation(
+                            "progress-indeterminate",
+                            Animation::new(Duration::from_millis(1200))
+                                .repeat()
+                                .with_easing(gpui::ease_in_out),
+                            |el, delta| {
+                                // Slide from -30% to 130% of track width
+                                let offset = -0.3 + delta * 1.6;
+                                el.ml(relative(offset))
+                            },
+                        ),
+                );
             }
-        };
+        }
 
-        track.child(fill_width).into_any_element()
+        track.into_any_element()
     }
 }

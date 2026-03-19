@@ -3,8 +3,9 @@
 use gpui::prelude::FluentBuilder;
 use gpui::*;
 use pug_gpui::GpuiThemeProvider;
-use pug_gpui_primitives::{CheckState, CheckboxSpec};
+use pug_gpui_primitives::{CheckState, CheckboxSpec, IconSize, IconSpec};
 
+use crate::icon::PugIcon;
 use crate::theme_ext::resolve_color;
 
 /// A real GPUI checkbox component backed by `CheckboxSpec`.
@@ -78,17 +79,28 @@ impl IntoElement for PugCheckbox {
 
             if is_checked {
                 ind = ind.bg(accent).border_1().border_color(accent);
-                let mark = match state {
-                    CheckState::Mixed => "−",
-                    CheckState::Checked => "✓",
-                    _ => "",
-                };
-                ind = ind.child(
-                    div()
-                        .text_xs()
-                        .text_color(text_inverse)
-                        .child(mark.to_string()),
-                );
+                // Use proper icons for check/minus marks
+                match state {
+                    CheckState::Checked => {
+                        ind = ind.child(
+                            PugIcon::new(
+                                IconSpec::new("check").with_size(IconSize::Sm),
+                                theme,
+                            )
+                            .with_color(text_inverse),
+                        );
+                    }
+                    CheckState::Mixed => {
+                        ind = ind.child(
+                            PugIcon::new(
+                                IconSpec::new("minus").with_size(IconSize::Sm),
+                                theme,
+                            )
+                            .with_color(text_inverse),
+                        );
+                    }
+                    _ => {}
+                }
             } else {
                 ind = ind
                     .bg(surface_bg)

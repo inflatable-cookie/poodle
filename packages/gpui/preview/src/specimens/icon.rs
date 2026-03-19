@@ -22,52 +22,79 @@ const SPECIMEN_ICONS: &[&str] = &[
     "heart", "star",
 ];
 
+/// Icon names used in the sizes section.
+const SIZE_ICONS: &[&str] = &["star", "heart", "settings"];
+
 pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
     let text_secondary = theme.resolve_color("semantic.color.text.secondary");
-    let text_primary = theme.resolve_color("semantic.color.text.primary");
 
     div().flex().flex_col().gap(px(16.0))
-        // Size variants
+        // --- Sizes ---
         .child(section_label("SIZES", text_secondary))
-        .child(
-            div().flex().gap(px(16.0)).items_end()
-                .child(
-                    div().flex().flex_col().items_center().gap(px(4.0))
-                        .child(
-                            div().text_color(color_to_hsla(text_primary))
-                                .child(PugIcon::new(IconSpec::new("star").with_size(IconSize::Sm), theme))
-                        )
-                        .child(
-                            div().text_xs().text_color(color_to_hsla(text_secondary))
-                                .child("sm".to_string())
-                        )
-                )
-                .child(
-                    div().flex().flex_col().items_center().gap(px(4.0))
-                        .child(
-                            div().text_color(color_to_hsla(text_primary))
-                                .child(PugIcon::new(IconSpec::new("star").with_size(IconSize::Md), theme))
-                        )
-                        .child(
-                            div().text_xs().text_color(color_to_hsla(text_secondary))
-                                .child("md".to_string())
-                        )
-                )
-                .child(
-                    div().flex().flex_col().items_center().gap(px(4.0))
-                        .child(
-                            div().text_color(color_to_hsla(text_primary))
-                                .child(PugIcon::new(IconSpec::new("star").with_size(IconSize::Lg), theme))
-                        )
-                        .child(
-                            div().text_xs().text_color(color_to_hsla(text_secondary))
-                                .child("lg".to_string())
-                        )
-                )
-        )
-        // Icon gallery
-        .child(section_label("ICON GALLERY", text_secondary))
+        .child(render_sizes_section(theme))
+        // --- Color Inheritance ---
+        .child(section_label("COLOR INHERITANCE", text_secondary))
+        .child(render_color_inheritance_section(theme))
+        // --- All Icons ---
+        .child(section_label("ALL ICONS", text_secondary))
         .child(render_icon_gallery(theme))
+}
+
+fn render_sizes_section(theme: &GpuiThemeProvider) -> Div {
+    let text_primary = theme.resolve_color("semantic.color.text.primary");
+    let text_secondary = theme.resolve_color("semantic.color.text.secondary");
+
+    let sizes: &[(&str, IconSize)] = &[
+        ("sm", IconSize::Sm),
+        ("md", IconSize::Md),
+        ("lg", IconSize::Lg),
+    ];
+
+    let mut container = div().flex().flex_col().gap(px(12.0));
+
+    for &(size_label, size) in sizes {
+        let mut row = div().flex().gap(px(16.0)).items_center()
+            .child(
+                div().w(px(24.0)).text_xs().text_color(color_to_hsla(text_secondary))
+                    .child(size_label.to_string())
+            );
+
+        for &icon_name in SIZE_ICONS {
+            row = row.child(
+                div().text_color(color_to_hsla(text_primary))
+                    .child(PugIcon::new(IconSpec::new(icon_name).with_size(size), theme))
+            );
+        }
+
+        container = container.child(row);
+    }
+
+    container
+}
+
+fn render_color_inheritance_section(theme: &GpuiThemeProvider) -> Div {
+    let text_primary = theme.resolve_color("semantic.color.text.primary");
+    let text_secondary = theme.resolve_color("semantic.color.text.secondary");
+    let accent = theme.resolve_color("semantic.color.accent.base");
+    let danger = theme.resolve_color("semantic.color.status.danger");
+
+    let items: &[(&str, pug_tokens::typed::ColorValue)] = &[
+        ("check", text_primary),
+        ("info", text_secondary),
+        ("star", accent),
+        ("triangle-alert", danger),
+    ];
+
+    let mut row = div().flex().gap(px(16.0)).items_center();
+
+    for &(icon_name, color) in items {
+        row = row.child(
+            div().text_color(color_to_hsla(color))
+                .child(PugIcon::new(IconSpec::new(icon_name).with_size(IconSize::Md), theme))
+        );
+    }
+
+    row
 }
 
 fn render_icon_gallery(theme: &GpuiThemeProvider) -> Div {

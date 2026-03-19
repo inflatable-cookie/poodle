@@ -73,6 +73,12 @@ impl IntoElement for PugSwitch {
 
         // Knob offset: checked = right (16px), unchecked = left (2px)
         let knob_offset = if is_checked { px(18.0) } else { px(2.0) };
+        // Contract: knob color is text-primary (unchecked) or text-inverse (checked)
+        let knob_color = if is_checked {
+            resolve_color(theme, "semantic.color.text.inverse")
+        } else {
+            text_primary
+        };
 
         let track = div()
             .w(px(36.0))
@@ -88,7 +94,7 @@ impl IntoElement for PugSwitch {
                     .w(px(14.0))
                     .h(px(14.0))
                     .rounded(px(7.0))
-                    .bg(gpui::white())
+                    .bg(knob_color)
                     .shadow_sm()
                     .absolute()
                     .top(px(2.0))
