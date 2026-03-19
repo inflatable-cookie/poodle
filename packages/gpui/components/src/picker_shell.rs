@@ -5,7 +5,7 @@ use gpui::*;
 use pug_gpui::GpuiThemeProvider;
 use pug_gpui_composites::{PickerShellSpec, BrowseState, SelectionMode};
 
-use crate::theme_ext::{resolve_color, resolve_px};
+use crate::theme_ext::{resolve_color, resolve_px, resolve_radius};
 
 /// A real GPUI picker shell component backed by `PickerShellSpec`.
 ///
@@ -53,6 +53,8 @@ impl IntoElement for PugPickerShell {
         let theme = &self.theme;
         let spec = &self.spec;
 
+        let inline_padding = resolve_px(theme, "semantic.space.inline.md");
+        let control_radius = resolve_radius(theme, "semantic.radius.control");
         let footer_gap = resolve_px(theme, spec.footer_gap_token());
         let text_primary = resolve_color(theme, "semantic.color.text.primary");
         let text_secondary = resolve_color(theme, "semantic.color.text.secondary");
@@ -66,7 +68,7 @@ impl IntoElement for PugPickerShell {
             .bg(bg)
             .border_1()
             .border_color(border)
-            .rounded(px(6.0))
+            .rounded(control_radius)
             .overflow_hidden()
             .when(spec.is_modal_like(), |el| {
                 el.shadow_lg().min_w(px(320.0)).max_w(px(480.0))
@@ -75,7 +77,7 @@ impl IntoElement for PugPickerShell {
         // Header
         let mut header = div()
             .w_full()
-            .px(px(12.0))
+            .px(inline_padding)
             .py(px(10.0))
             .flex()
             .flex_col()
@@ -107,7 +109,7 @@ impl IntoElement for PugPickerShell {
             shell = shell.child(
                 div()
                     .w_full()
-                    .px(px(12.0))
+                    .px(inline_padding)
                     .py(px(8.0))
                     .border_b_1()
                     .border_color(border)
@@ -173,7 +175,7 @@ impl IntoElement for PugPickerShell {
             .flex()
             .items_center()
             .gap(footer_gap)
-            .px(px(12.0))
+            .px(inline_padding)
             .py(px(8.0))
             .border_t_1()
             .border_color(border);

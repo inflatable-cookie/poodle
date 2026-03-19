@@ -4,7 +4,7 @@ use gpui::*;
 use pug_gpui::GpuiThemeProvider;
 use pug_gpui_primitives::CodeSpec;
 
-use crate::theme_ext::{resolve_color, resolve_radius};
+use crate::theme_ext::{resolve_color, resolve_px, resolve_radius};
 
 /// A real GPUI code display component backed by `CodeSpec`.
 pub struct PugCode {
@@ -28,13 +28,16 @@ impl IntoElement for PugCode {
         let theme = &self.theme;
         let spec = &self.spec;
 
+        let inline_padding = resolve_px(theme, "semantic.space.inline.md");
+        let inline_gap = resolve_px(theme, "semantic.space.inline.sm");
+
         let fill = resolve_color(theme, spec.fill_token());
         let text_color = resolve_color(theme, spec.text_color_token());
         let border = resolve_color(theme, spec.border_token());
         let radius = resolve_radius(theme, "semantic.radius.control");
 
         let mut el = div()
-            .px(px(12.0))
+            .px(inline_padding)
             .py(px(10.0))
             .rounded(radius)
             .bg(fill)
@@ -55,7 +58,7 @@ impl IntoElement for PugCode {
                 content_col = content_col.child(
                     div()
                         .flex()
-                        .gap(px(8.0))
+                        .gap(inline_gap)
                         .child(
                             div()
                                 .text_color(text_color.opacity(0.4))

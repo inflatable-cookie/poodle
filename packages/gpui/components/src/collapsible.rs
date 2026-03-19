@@ -5,7 +5,7 @@ use gpui::*;
 use pug_gpui::GpuiThemeProvider;
 use pug_gpui_primitives::CollapsibleSpec;
 
-use crate::theme_ext::resolve_color;
+use crate::theme_ext::{resolve_color, resolve_opacity};
 
 /// A real GPUI collapsible component backed by `CollapsibleSpec`.
 pub struct PugCollapsible {
@@ -54,6 +54,8 @@ impl IntoElement for PugCollapsible {
         let theme = &self.theme;
         let spec = &self.spec;
 
+        let disabled_opacity = resolve_opacity(theme, "semantic.state.opacity.disabled");
+        let hover_bg = resolve_color(theme, "semantic.color.background.elevated");
         let text_secondary = resolve_color(theme, "semantic.color.text.secondary");
         let border = resolve_color(theme, "semantic.color.border.default");
         let is_open = spec.current_open();
@@ -75,9 +77,9 @@ impl IntoElement for PugCollapsible {
         if spec.activation_allowed() {
             header = header
                 .cursor_pointer()
-                .hover(|s| s.bg(hsla(0.0, 0.0, 0.5, 0.04)));
+                .hover(|s| s.bg(hover_bg));
         } else {
-            header = header.opacity(0.48);
+            header = header.opacity(disabled_opacity);
         }
 
         // Expand indicator

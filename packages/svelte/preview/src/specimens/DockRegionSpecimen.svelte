@@ -334,8 +334,6 @@
   .specimen__frame--bottom-layout .specimen__flex-main {
     flex: 1 1 0;
     min-height: 0;
-    border-left: 0;
-    border-bottom: 0.0625rem solid var(--pug-color-border-subtle);
   }
 
   .specimen__frame--bottom-layout :global(.dock-region) {
@@ -360,7 +358,6 @@
     justify-content: center;
     font-size: 0.75rem;
     color: var(--pug-color-text-secondary);
-    border-left: 0.0625rem solid var(--pug-color-border-subtle);
   }
 
   .specimen__panel-content {

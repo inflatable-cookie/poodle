@@ -1,6 +1,6 @@
 use gpui::*;
 use pug_adapter::ThemeProvider;
-use pug_gpui_workstation::{
+use pug_gpui_composites::{
     DockRegionSpec, DockEdge, PanelTabItem,
     SplitViewSpec, SplitOrientation,
 };

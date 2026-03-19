@@ -5,7 +5,7 @@ use gpui::*;
 use pug_gpui::GpuiThemeProvider;
 use pug_gpui_primitives::ZonedDateTimePickerSpec;
 
-use crate::theme_ext::resolve_color;
+use crate::theme_ext::{resolve_color, resolve_opacity, resolve_px, resolve_radius};
 
 /// A real GPUI zoned date-time picker component backed by `ZonedDateTimePickerSpec`.
 pub struct PugZonedDateTimePicker {
@@ -29,11 +29,17 @@ impl IntoElement for PugZonedDateTimePicker {
         let theme = &self.theme;
         let spec = &self.spec;
 
+        let control_height = resolve_px(theme, "semantic.size.control.height");
+        let inline_padding = resolve_px(theme, "semantic.space.inline.md");
+        let inline_gap = resolve_px(theme, "semantic.space.inline.sm");
+        let control_radius = resolve_radius(theme, "semantic.radius.control");
+
         let border = resolve_color(theme, spec.border_token());
         let surface_bg = resolve_color(theme, "semantic.color.background.surface");
         let text_primary = resolve_color(theme, "semantic.color.text.primary");
         let text_secondary = resolve_color(theme, "semantic.color.text.secondary");
         let elevated_bg = resolve_color(theme, spec.overlay_fill_token());
+        let disabled_opacity = resolve_opacity(theme, "semantic.state.opacity.disabled");
 
         let display_value = spec
             .value
@@ -51,15 +57,15 @@ impl IntoElement for PugZonedDateTimePicker {
         };
 
         let mut trigger = div()
-            .h(px(36.0))
-            .px(px(12.0))
-            .rounded(px(6.0))
+            .h(control_height)
+            .px(inline_padding)
+            .rounded(control_radius)
             .bg(surface_bg)
             .border_1()
             .border_color(border)
             .flex()
             .items_center()
-            .gap(px(8.0))
+            .gap(inline_gap)
             .text_sm()
             .child(div().flex_1().text_color(text_col).child(display_value.to_string()));
 
@@ -80,7 +86,7 @@ impl IntoElement for PugZonedDateTimePicker {
         );
 
         if spec.is_disabled {
-            trigger = trigger.opacity(0.48);
+            trigger = trigger.opacity(disabled_opacity);
         } else {
             trigger = trigger.cursor_pointer();
         }
@@ -89,7 +95,7 @@ impl IntoElement for PugZonedDateTimePicker {
 
         if spec.is_open {
             let overlay = div()
-                .rounded(px(6.0))
+                .rounded(control_radius)
                 .bg(elevated_bg)
                 .border_1()
                 .border_color(border)

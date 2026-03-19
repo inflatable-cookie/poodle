@@ -5,8 +5,6 @@
   "tokenSource": "pug-gpui-tokens",
   "contractIds": [
     "data-table",
-    "list-shell",
-    "grid-shell",
     "detail-shell",
     "filter-toolbar",
     "pagination-summary",
@@ -19,8 +17,6 @@
   ],
   "exportNames": [
     "DataTableSpec",
-    "ListShellSpec",
-    "GridShellSpec",
     "DetailShellSpec",
     "FilterToolbarSpec",
     "PaginationSummarySpec",

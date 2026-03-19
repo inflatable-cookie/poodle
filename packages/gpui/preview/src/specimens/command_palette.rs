@@ -1,6 +1,6 @@
 use gpui::*;
 use pug_adapter::ThemeProvider;
-use pug_gpui_workstation::{CommandPaletteSpec, CommandActionItem};
+use pug_gpui_composites::{CommandPaletteSpec, CommandActionItem};
 use pug_gpui_components::PugCommandPalette;
 use crate::app_state::AppState;
 use crate::style_bridge::color_to_hsla;

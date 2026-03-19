@@ -6,7 +6,7 @@ use pug_gpui::GpuiThemeProvider;
 use pug_gpui_primitives::DateRangePickerSpec;
 
 use crate::range_calendar::PugRangeCalendar;
-use crate::theme_ext::resolve_color;
+use crate::theme_ext::{resolve_color, resolve_opacity, resolve_px, resolve_radius};
 
 /// A real GPUI date range picker backed by `DateRangePickerSpec`.
 ///
@@ -50,11 +50,18 @@ impl IntoElement for PugDateRangePicker {
         let theme = &self.theme;
         let spec = &self.spec;
 
+        let control_height = resolve_px(theme, "semantic.size.control.height");
+        let inline_padding = resolve_px(theme, "semantic.space.inline.md");
+        let inline_gap = resolve_px(theme, "semantic.space.inline.sm");
+        let control_radius = resolve_radius(theme, "semantic.radius.control");
+
         let elevated_bg = resolve_color(theme, "semantic.color.background.elevated");
         let border = resolve_color(theme, "semantic.color.border.default");
         let text_primary = resolve_color(theme, "semantic.color.text.primary");
         let text_secondary = resolve_color(theme, "semantic.color.text.secondary");
         let accent = resolve_color(theme, "semantic.color.accent.base");
+        let disabled_opacity = resolve_opacity(theme, "semantic.state.opacity.disabled");
+        let hover_bg = resolve_color(theme, "semantic.color.background.elevated");
 
         let range = spec.current_value();
         let display_text = match (&range.start, &range.end) {
@@ -76,24 +83,24 @@ impl IntoElement for PugDateRangePicker {
         // Trigger button
         let mut trigger = div()
             .id(SharedString::from(id_str))
-            .h(px(36.0))
-            .px(px(12.0))
-            .rounded(px(6.0))
+            .h(control_height)
+            .px(inline_padding)
+            .rounded(control_radius)
             .bg(elevated_bg)
             .border_1()
             .border_color(if is_open { accent } else { border })
             .flex()
             .items_center()
             .justify_between()
-            .gap(px(8.0))
+            .gap(inline_gap)
             .text_sm();
 
         if is_disabled {
-            trigger = trigger.opacity(0.48);
+            trigger = trigger.opacity(disabled_opacity);
         } else {
             trigger = trigger
                 .cursor_pointer()
-                .hover(|s| s.bg(hsla(0.0, 0.0, 0.5, 0.04)));
+                .hover(|s| s.bg(hover_bg));
         }
 
         let text_col = if is_placeholder {

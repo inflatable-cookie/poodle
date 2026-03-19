@@ -15,7 +15,7 @@
 use pug_adapter::{RenderComponent, ThemeProvider};
 use pug_composites::{
     BreadcrumbsSpec, ConfirmActionSpec, DataTableSpec, DetailSectionSpec, DetailShellSpec,
-    EmptyStateSpec, FilterToolbarSpec, FormShellSpec, InlineRemediationSpec, ListShellSpec,
+    EmptyStateSpec, FilterToolbarSpec, FormShellSpec, InlineRemediationSpec,
     LogListSpec, MediaPreviewSpec, MediaThumbnailSpec, NavCardGridSpec, NavCardSpec,
     PageHeaderSpec, PageLoadingSpec, PaginationSummarySpec, PickerShellSpec, RelationPickerSpec,
     RemediationBannerSpec, SelectionSummarySpec, StateTileSpec, ToastStackSpec,
@@ -136,7 +136,6 @@ fn render_browse_and_filter(a: &GpuiAdapter, t: &dyn ThemeProvider) -> DemoScree
     screen.push(a.render(&FilterToolbarSpec::new(), &s, t));
     screen.push(a.render(&SearchFieldSpec::new(), &s, t));
     screen.push(a.render(&DataTableSpec::new(vec![], vec![]), &s, t));
-    screen.push(a.render(&ListShellSpec::new(), &s, t));
     screen.push(a.render(&PaginationSummarySpec::new(1, 25, 142), &s, t));
     screen.push(a.render(&EmptyStateSpec::new("No results found"), &s, t));
     screen.push(a.render(&SkeletonSpec::new(), &s, t));

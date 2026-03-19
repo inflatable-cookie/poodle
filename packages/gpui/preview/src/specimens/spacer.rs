@@ -2,7 +2,7 @@ use gpui::*;
 use pug_adapter::ThemeProvider;
 use pug_gpui::GpuiThemeProvider;
 use pug_gpui_primitives::{PaddingScale, SurfaceBorder, SurfaceSpec, SurfaceTone};
-use pug_gpui_components::{PugInline, PugSpacer, PugSurface};
+use pug_gpui_components::{PugSpacer, PugSurface};
 use crate::style_bridge::color_to_hsla;
 
 pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
@@ -26,8 +26,7 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
             div().flex().flex_col().gap(px(8.0))
                 .child(section_label("Push items apart", text_secondary))
                 .child(
-                    PugInline::new(theme)
-                        .with_gap("semantic.space.inline.md")
+                    div().flex().items_center().gap(px(8.0))
                         .child(surface_item("Logo"))
                         .child(PugSpacer::new())
                         .child(surface_item("Sign in"))
@@ -38,8 +37,7 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
             div().flex().flex_col().gap(px(8.0))
                 .child(section_label("Between three items", text_secondary))
                 .child(
-                    PugInline::new(theme)
-                        .with_gap("semantic.space.inline.md")
+                    div().flex().items_center().gap(px(8.0))
                         .child(surface_item("Left"))
                         .child(PugSpacer::new())
                         .child(surface_item("Center"))

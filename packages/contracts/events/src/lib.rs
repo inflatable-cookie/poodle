@@ -110,7 +110,7 @@ pub enum SemanticEvent {
 
     /// Scroll position changed.
     ///
-    /// Emitted by: ScrollShell, DataTable, ListShell
+    /// Emitted by: ScrollShell, DataTable
     /// - GPUI: Scroll event handlers
     /// - Jetstream: `UiEvent::ScrollChanged`
     ScrollChanged {

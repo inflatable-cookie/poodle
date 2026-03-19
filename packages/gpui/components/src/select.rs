@@ -6,7 +6,7 @@ use pug_gpui::GpuiThemeProvider;
 use pug_gpui_primitives::{IconSize, IconSpec, SelectSpec};
 
 use crate::icon::PugIcon;
-use crate::theme_ext::resolve_color;
+use crate::theme_ext::{color_mix, resolve_color, resolve_opacity, resolve_px, resolve_radius};
 
 /// A real GPUI select/dropdown component backed by `SelectSpec`.
 pub struct PugSelect {
@@ -57,12 +57,22 @@ impl IntoElement for PugSelect {
         let theme = &self.theme;
         let spec = &self.spec;
 
+        let control_height = resolve_px(theme, "semantic.size.control.height");
+        let inline_padding = resolve_px(theme, "semantic.space.control.x");
+        let inline_gap = resolve_px(theme, "semantic.space.inline.sm");
+        let control_radius = resolve_radius(theme, "semantic.radius.control");
+        let stack_gap = resolve_px(theme, "semantic.space.stack.sm");
+
+        let disabled_opacity = resolve_opacity(theme, "semantic.state.opacity.disabled");
         let border = resolve_color(theme, "semantic.color.border.default");
         let surface_bg = resolve_color(theme, "semantic.color.background.surface");
+        let elevated_bg = resolve_color(theme, spec.overlay_fill_token());
         let text_primary = resolve_color(theme, "semantic.color.text.primary");
         let text_secondary = resolve_color(theme, "semantic.color.text.secondary");
         let accent = resolve_color(theme, "semantic.color.accent.base");
-        let elevated_bg = resolve_color(theme, spec.overlay_fill_token());
+
+        // Contract: hover = color-mix(fill 84%, elevated)
+        let hover_bg = color_mix(surface_bg, elevated_bg, 0.84);
 
         let trigger_text = spec.trigger_text().unwrap_or(
             spec.placeholder.as_deref().unwrap_or("Select..."),
@@ -80,24 +90,24 @@ impl IntoElement for PugSelect {
         // Trigger button
         let mut trigger = div()
             .id(SharedString::from(id_str))
-            .h(px(36.0))
-            .px(px(12.0))
-            .rounded(px(6.0))
+            .h(control_height)
+            .px(inline_padding)
+            .rounded(control_radius)
             .bg(surface_bg)
             .border_1()
             .border_color(if is_open { accent } else { border })
             .flex()
             .items_center()
             .justify_between()
-            .gap(px(8.0))
+            .gap(inline_gap)
             .text_sm();
 
         if is_disabled {
-            trigger = trigger.opacity(0.48);
+            trigger = trigger.opacity(disabled_opacity);
         } else {
             trigger = trigger
                 .cursor_pointer()
-                .hover(|s| s.bg(hsla(0.0, 0.0, 0.5, 0.04)));
+                .hover(move |s| s.bg(hover_bg));
         }
 
         let text_col = if is_placeholder {
@@ -132,22 +142,22 @@ impl IntoElement for PugSelect {
             }
         }
 
-        let mut wrapper = div().flex().flex_col().gap(px(4.0)).child(trigger);
+        let mut wrapper = div().flex().flex_col().gap(stack_gap).child(trigger);
 
         // Dropdown list (when open)
         if is_open {
+            let option_hover = color_mix(accent, elevated_bg, 0.08);
+            let option_selected = color_mix(accent, elevated_bg, 0.10);
+
             let mut list = div()
-                .rounded(px(6.0))
+                .rounded(control_radius)
                 .bg(elevated_bg)
                 .border_1()
                 .border_color(border)
                 .shadow_md()
-                .py(px(4.0));
+                .py(stack_gap);
 
-            // Collect option values for click handlers
-            let option_values: Vec<String> = spec.options.iter().map(|o| o.value.clone()).collect();
-
-            for (idx, option) in spec.options.iter().enumerate() {
+            for option in spec.options.iter() {
                 let is_selected =
                     spec.current_value() == Some(option.value.as_str());
                 let is_opt_disabled = option.is_disabled;
@@ -159,23 +169,23 @@ impl IntoElement for PugSelect {
 
                 let mut item = div()
                     .id(item_id)
-                    .px(px(10.0))
-                    .py(px(6.0))
+                    .px(inline_padding)
+                    .py(stack_gap)
                     .text_sm()
                     .text_color(text_primary);
 
                 if is_selected {
                     item = item
-                        .bg(accent.opacity(0.1))
+                        .bg(option_selected)
                         .text_color(accent);
                 }
 
                 if is_opt_disabled {
-                    item = item.opacity(0.48);
+                    item = item.opacity(disabled_opacity);
                 } else {
                     item = item
                         .cursor_pointer()
-                        .hover(|s| s.bg(accent.opacity(0.08)));
+                        .hover(move |s| s.bg(option_hover));
                 }
 
                 item = item.child(option.label.clone());

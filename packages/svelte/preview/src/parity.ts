@@ -521,7 +521,7 @@ const packageSurfaceCoverageGroups: PackageSurfaceCoverageGroup[] = [
     status: "previewed",
     sectionIds: ["browse-suite"],
     note: "Browse suite exercises list, grid, and empty-state surface posture.",
-    exportNames: ["EmptyState", "GridShell", "ListShell"],
+    exportNames: ["EmptyState"],
   },
   {
     packageName: "@pug/svelte-composites",
@@ -545,7 +545,7 @@ const packageSurfaceCoverageGroups: PackageSurfaceCoverageGroup[] = [
     status: "previewed",
     sectionIds: ["media-suite"],
     note: "Media suite exercises thumbnail framing, preview fallback, and embed posture.",
-    exportNames: ["EmbedShell", "MediaPreview", "MediaThumbnail"],
+    exportNames: ["MediaPreview", "MediaThumbnail"],
   },
   {
     packageName: "@pug/svelte-composites",

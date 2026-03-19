@@ -4,9 +4,9 @@ use gpui::prelude::FluentBuilder;
 use gpui::*;
 use pug_adapter::ThemeProvider;
 use pug_gpui::GpuiThemeProvider;
-use pug_gpui_workstation::{CommandPaletteSpec, DiscoveryState};
+use pug_gpui_composites::{CommandPaletteSpec, DiscoveryState};
 
-use crate::theme_ext::resolve_color;
+use crate::theme_ext::{resolve_color, resolve_opacity, resolve_px};
 
 /// A real GPUI command palette backed by `CommandPaletteSpec`.
 ///
@@ -60,12 +60,16 @@ impl IntoElement for PugCommandPalette {
         let theme = &self.theme;
         let spec = &self.spec;
 
+        let inline_padding = resolve_px(theme, "semantic.space.inline.md");
+
         let results_bg = resolve_color(theme, spec.results_fill_token());
         let border = resolve_color(theme, "semantic.color.border.default");
         let text_primary = resolve_color(theme, "semantic.color.text.primary");
         let text_secondary = resolve_color(theme, "semantic.color.text.secondary");
         let text_muted = resolve_color(theme, "semantic.color.text.muted");
         let accent = resolve_color(theme, "semantic.color.accent.base");
+        let disabled_opacity = resolve_opacity(theme, "semantic.state.opacity.disabled");
+        let hover_bg = resolve_color(theme, "semantic.color.background.elevated");
 
         let mut palette = div()
             .flex()
@@ -83,7 +87,7 @@ impl IntoElement for PugCommandPalette {
         let search_row = div()
             .flex()
             .items_center()
-            .px(px(12.0))
+            .px(inline_padding)
             .py(px(8.0))
             .border_b_1()
             .border_color(border)
@@ -152,7 +156,7 @@ impl IntoElement for PugCommandPalette {
                 if let Some(group_name) = current_group {
                     results_list = results_list.child(
                         div()
-                            .px(px(12.0))
+                            .px(inline_padding)
                             .py(px(4.0))
                             .text_xs()
                             .font_weight(FontWeight::SEMIBOLD)
@@ -174,7 +178,7 @@ impl IntoElement for PugCommandPalette {
                 .flex()
                 .items_center()
                 .justify_between()
-                .px(px(12.0))
+                .px(inline_padding)
                 .py(px(6.0))
                 .mx(px(4.0))
                 .rounded(px(4.0))
@@ -187,11 +191,11 @@ impl IntoElement for PugCommandPalette {
             }
 
             if action.is_disabled {
-                row = row.opacity(0.48);
+                row = row.opacity(disabled_opacity);
             } else {
                 row = row
                     .cursor_pointer()
-                    .hover(|s| s.bg(hsla(0.0, 0.0, 0.5, 0.06)));
+                    .hover(|s| s.bg(hover_bg));
             }
 
             // Left: title + badge

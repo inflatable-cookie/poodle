@@ -6,7 +6,7 @@ use pug_adapter::ThemeProvider;
 use pug_gpui::GpuiThemeProvider;
 use pug_gpui_primitives::SurfaceSpec;
 
-use crate::theme_ext::resolve_color;
+use crate::theme_ext::{resolve_color, resolve_radius};
 
 /// A real GPUI surface component backed by `SurfaceSpec`.
 pub struct PugSurface {
@@ -38,10 +38,12 @@ impl IntoElement for PugSurface {
         let theme = &self.theme;
         let spec = &self.spec;
 
+        let control_radius = resolve_radius(theme, "semantic.radius.control");
+
         let bg = resolve_color(theme, spec.resolved_background_token());
         let padding = spec.resolved_padding();
 
-        let mut el = div().rounded(px(6.0)).bg(bg);
+        let mut el = div().rounded(control_radius).bg(bg);
 
         // Border
         if let Some(border_token) = spec.resolved_border_color() {

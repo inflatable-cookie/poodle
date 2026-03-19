@@ -19,14 +19,11 @@ built from foundation primitives without embedding app-specific workflow logic.
 - `data-table.md`
 - `bulk-action-bar.md`
 - `pagination-summary.md`
-- `list-shell.md`
-- `grid-shell.md`
 - `selection-summary.md`
 - `picker-shell.md`
 - `relation-picker.md`
 - `media-thumbnail.md`
 - `media-preview.md`
-- `embed-shell.md`
 - `toast-stack.md`
 - `empty-state.md`
 

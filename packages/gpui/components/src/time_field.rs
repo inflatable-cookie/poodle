@@ -3,9 +3,10 @@
 use gpui::prelude::FluentBuilder;
 use gpui::*;
 use pug_gpui::GpuiThemeProvider;
-use pug_gpui_primitives::TimeFieldSpec;
+use pug_gpui_primitives::{IconSize, IconSpec, TimeFieldSpec};
 
-use crate::theme_ext::resolve_color;
+use crate::icon::PugIcon;
+use crate::theme_ext::{color_mix, resolve_color, resolve_opacity, resolve_px, resolve_radius};
 
 /// A real GPUI time field component backed by `TimeFieldSpec`.
 ///
@@ -40,11 +41,20 @@ impl IntoElement for PugTimeField {
         let theme = &self.theme;
         let spec = &self.spec;
 
-        let elevated_bg = resolve_color(theme, "semantic.color.background.elevated");
+        let control_height = resolve_px(theme, "semantic.size.control.height");
+        let control_padding_x = resolve_px(theme, "semantic.space.control.x");
+        let inline_gap = resolve_px(theme, "semantic.space.inline.sm");
+        let control_radius = resolve_radius(theme, "semantic.radius.control");
+
+        let surface_bg = resolve_color(theme, "semantic.color.background.surface");
+        let elevated = resolve_color(theme, "semantic.color.background.elevated");
         let border = resolve_color(theme, "semantic.color.border.default");
         let border_error = resolve_color(theme, "semantic.color.border.error");
         let text_primary = resolve_color(theme, "semantic.color.text.primary");
         let text_secondary = resolve_color(theme, "semantic.color.text.secondary");
+        let disabled_opacity = resolve_opacity(theme, "semantic.state.opacity.disabled");
+
+        let hover_bg = color_mix(surface_bg, elevated, 0.84);
 
         let time_value = spec.current_value();
         let display_text = time_value.unwrap_or("HH:MM").to_string();
@@ -64,19 +74,23 @@ impl IntoElement for PugTimeField {
 
         let mut field = div()
             .id(SharedString::from(id_str))
-            .h(px(36.0))
-            .px(px(12.0))
-            .rounded(px(6.0))
-            .bg(elevated_bg)
+            .h(control_height)
+            .px(control_padding_x)
+            .rounded(control_radius)
+            .bg(surface_bg)
             .border_1()
             .border_color(border_color)
             .flex()
             .items_center()
-            .gap(px(8.0))
+            .gap(inline_gap)
             .text_sm();
 
         if is_disabled {
-            field = field.opacity(0.48);
+            field = field.opacity(disabled_opacity);
+        } else {
+            field = field
+                .cursor_pointer()
+                .hover(move |s| s.bg(hover_bg));
         }
 
         let text_col = if is_placeholder {
@@ -87,10 +101,8 @@ impl IntoElement for PugTimeField {
 
         // Time icon
         field = field.child(
-            div()
-                .text_xs()
-                .text_color(text_secondary)
-                .child("🕐"),
+            PugIcon::new(IconSpec::new("clock").with_size(IconSize::Sm), theme)
+                .with_color(text_secondary),
         );
 
         // Time value

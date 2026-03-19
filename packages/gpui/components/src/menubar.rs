@@ -7,7 +7,7 @@ use pug_gpui::GpuiThemeProvider;
 use pug_gpui_primitives::{MenubarSpec, MenuSpec};
 
 use crate::menu::PugMenu;
-use crate::theme_ext::resolve_color;
+use crate::theme_ext::{resolve_color, resolve_opacity};
 
 /// A real GPUI menubar component backed by `MenubarSpec`.
 ///
@@ -52,6 +52,8 @@ impl IntoElement for PugMenubar {
 
         let accent = resolve_color(theme, "semantic.color.accent.base");
         let text_secondary = resolve_color(theme, "semantic.color.text.secondary");
+        let disabled_opacity = resolve_opacity(theme, "semantic.state.opacity.disabled");
+        let hover_bg = resolve_color(theme, "semantic.color.background.elevated");
         let gap = theme.resolve_space(self.spec.trigger_gap_token());
 
         let current_value = self.spec.current_value().map(|s| s.to_string());
@@ -82,11 +84,11 @@ impl IntoElement for PugMenubar {
             }
 
             if is_disabled {
-                trigger = trigger.opacity(0.48);
+                trigger = trigger.opacity(disabled_opacity);
             } else {
                 trigger = trigger
                     .cursor_pointer()
-                    .hover(|s| s.bg(hsla(0.0, 0.0, 0.5, 0.06)));
+                    .hover(|s| s.bg(hover_bg));
             }
 
             trigger = trigger.child(entry.label.clone());

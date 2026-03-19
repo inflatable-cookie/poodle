@@ -52,6 +52,8 @@ impl IntoElement for PugDataTable {
         let theme = &self.theme;
         let spec = &self.spec;
 
+        let inline_padding = resolve_px(theme, "semantic.space.inline.md");
+
         let header_bg = resolve_color(theme, spec.header_fill_token());
         let border_color = resolve_color(theme, "semantic.color.border.subtle");
         let text_primary = resolve_color(theme, "semantic.color.text.primary");
@@ -84,7 +86,7 @@ impl IntoElement for PugDataTable {
 
             let mut header_cell = div()
                 .flex_1()
-                .px(px(12.0))
+                .px(inline_padding)
                 .py(px(8.0))
                 .text_xs()
                 .font_weight(FontWeight::SEMIBOLD)
@@ -113,7 +115,7 @@ impl IntoElement for PugDataTable {
             header_row = header_row.child(
                 div()
                     .w(px(80.0))
-                    .px(px(12.0))
+                    .px(inline_padding)
                     .py(px(8.0))
                     .text_xs()
                     .text_color(text_secondary),
@@ -131,7 +133,7 @@ impl IntoElement for PugDataTable {
             table = table.child(
                 div()
                     .w_full()
-                    .px(px(12.0))
+                    .px(inline_padding)
                     .py(px(24.0))
                     .text_sm()
                     .text_color(text_secondary)
@@ -162,7 +164,7 @@ impl IntoElement for PugDataTable {
 
                     let cell = div()
                         .flex_1()
-                        .px(px(12.0))
+                        .px(inline_padding)
                         .py(px(10.0))
                         .text_sm()
                         .text_color(text_primary)
@@ -178,7 +180,7 @@ impl IntoElement for PugDataTable {
                     data_row = data_row.child(
                         div()
                             .w(px(80.0))
-                            .px(px(12.0))
+                            .px(inline_padding)
                             .py(px(10.0))
                             .text_xs()
                             .text_color(accent)

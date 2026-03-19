@@ -1,42 +1,58 @@
+mod action_discovery_panel;
+mod app_header;
+mod command_palette;
 mod data_table;
+mod detail_section;
 mod detail_shell;
+mod dock_region;
 mod empty_state;
 mod filter_toolbar;
 mod form_shell;
-mod grid_shell;
 mod inline_remediation;
-mod list_shell;
 mod media_preview;
 mod media_thumbnail;
+mod metric_tile;
+mod page_header;
 mod pagination_summary;
 mod picker_shell;
 mod relation_picker;
 mod remediation_banner;
 mod selection_summary;
+mod shell_status_bar;
+mod split_view;
+mod toast_stack;
 mod types;
 mod validation_summary;
 
+pub use action_discovery_panel::ActionDiscoveryPanelSpec;
+pub use app_header::AppHeaderSpec;
+pub use command_palette::CommandPaletteSpec;
 pub use data_table::DataTableSpec;
+pub use detail_section::DetailSectionSpec;
 pub use detail_shell::{DetailShellSpec, DetailState};
+pub use dock_region::{DockRegionSpec, DockTabsPlacement};
 pub use empty_state::EmptyStateSpec;
 pub use filter_toolbar::FilterToolbarSpec;
 pub use form_shell::FormShellSpec;
-pub use grid_shell::GridShellSpec;
 pub use inline_remediation::InlineRemediationSpec;
-pub use list_shell::ListShellSpec;
 pub use media_preview::MediaPreviewSpec;
 pub use media_thumbnail::MediaThumbnailSpec;
+pub use metric_tile::MetricTileSpec;
+pub use page_header::{PageHeaderAlign, PageHeaderSpec};
 pub use pagination_summary::PaginationSummarySpec;
 pub use picker_shell::PickerShellSpec;
 pub use relation_picker::RelationPickerSpec;
 pub use remediation_banner::RemediationBannerSpec;
 pub use selection_summary::SelectionSummarySpec;
+pub use shell_status_bar::ShellStatusBarSpec;
+pub use split_view::SplitViewSpec;
+pub use toast_stack::{Toast, ToastPosition, ToastStackSpec, ToastTone};
 pub use types::{
-    AnnouncementMode, AspectRatio, BrowseState, EmptyStateVariant, FormActionLayout,
-    FormFieldState, FormSectionSpec, FormStatusSummary, MediaKind, MediaState, MinColumnWidth,
-    PickerItemSpec, PickerVariant, RemediationAction, ScrollOwner, SelectionMode,
-    SelectionSummaryItem, TableColumnSpec, TableRowSpec, TableSortDirection,
-    ValidationSummaryEntry,
+    ActionDiscoverySection, AnnouncementMode, AspectRatio, BrowseState, CommandActionItem,
+    DiscoveryState, DockEdge, EmptyStateVariant, FormActionLayout, FormFieldState, FormSectionSpec,
+    FormStatusSummary, MediaKind, MediaState, MinColumnWidth, PanelTabItem, PickerItemSpec,
+    PickerVariant, RemediationAction, ScrollOwner, SelectionMode, SelectionSummaryItem,
+    SplitOrientation, TableColumnSpec, TableRowSpec, TableSortDirection, ValidationSummaryEntry,
 };
 pub use validation_summary::ValidationSummarySpec;
 
@@ -49,8 +65,6 @@ pub const FORM_VALIDATION_REMEDIATION_EXPORTS: &[&str] = &[
 ];
 pub const DATA_BROWSE_DETAIL_PICKER_MEDIA_EXPORTS: &[&str] = &[
     "DataTableSpec",
-    "ListShellSpec",
-    "GridShellSpec",
     "DetailShellSpec",
     "FilterToolbarSpec",
     "PaginationSummarySpec",
@@ -72,10 +86,10 @@ mod tests {
     use super::{
         AnnouncementMode, AspectRatio, BrowseState, DataTableSpec, DetailShellSpec, DetailState,
         EmptyStateSpec, EmptyStateVariant, FilterToolbarSpec, FormFieldState, FormSectionSpec,
-        FormShellSpec, GridShellSpec, InlineRemediationSpec, ListShellSpec, MediaKind,
-        MediaPreviewSpec, MediaState, MediaThumbnailSpec, MinColumnWidth, PaginationSummarySpec,
+        FormShellSpec, InlineRemediationSpec, MediaKind,
+        MediaPreviewSpec, MediaState, MediaThumbnailSpec, PaginationSummarySpec,
         PickerItemSpec, PickerShellSpec, PickerVariant, RelationPickerSpec, RemediationAction,
-        RemediationBannerSpec, ScrollOwner, SelectionMode, SelectionSummaryItem,
+        RemediationBannerSpec, SelectionMode, SelectionSummaryItem,
         SelectionSummarySpec, TableColumnSpec, TableRowSpec, TableSortDirection,
         ValidationSummaryEntry, ValidationSummarySpec,
     };
@@ -191,21 +205,6 @@ mod tests {
         assert_eq!(spec.select_all_state(), CheckState::Mixed);
         assert_eq!(spec.sortable_column_count(), 1);
         assert_eq!(spec.header_fill_token(), semantic::COLOR_BACKGROUND_SURFACE);
-    }
-
-    #[test]
-    fn list_and_grid_shells_preserve_browse_state_distinctions() {
-        let list = ListShellSpec::new()
-            .with_state(BrowseState::NoResults)
-            .with_scroll_owner(ScrollOwner::Shell);
-        let grid = GridShellSpec::new()
-            .with_state(BrowseState::Loading)
-            .with_min_column_width(MinColumnWidth::Lg);
-
-        assert!(list.is_stateful());
-        assert!(list.differentiates_no_results());
-        assert_eq!(list.viewport_fill_token(), semantic::COLOR_BACKGROUND_PANEL);
-        assert!(!grid.differentiates_no_results());
     }
 
     #[test]

@@ -5,7 +5,7 @@ use gpui::*;
 use pug_gpui::GpuiThemeProvider;
 use pug_gpui_primitives::SwitchSpec;
 
-use crate::theme_ext::resolve_color;
+use crate::theme_ext::{color_mix, resolve_color, resolve_opacity, resolve_px};
 
 /// A real GPUI switch/toggle component backed by `SwitchSpec`.
 pub struct PugSwitch {
@@ -46,12 +46,17 @@ impl IntoElement for PugSwitch {
         let theme = &self.theme;
         let spec = &self.spec;
 
-        let track_fill = resolve_color(theme, spec.track_fill_token());
+        // Contract: gap = space-inline-sm
+        let inline_gap = resolve_px(theme, "semantic.space.inline.sm");
+
+        let disabled_opacity = resolve_opacity(theme, "semantic.state.opacity.disabled");
+        let accent = resolve_color(theme, "semantic.color.accent.base");
         let border = resolve_color(theme, "semantic.color.border.default");
+        let surface_bg = resolve_color(theme, "semantic.color.background.surface");
         let text_primary = resolve_color(theme, "semantic.color.text.primary");
 
         let is_checked = spec.current_checked();
-        let is_interactive = !spec.is_disabled;
+        let is_interactive = !spec.is_disabled && !spec.is_read_only;
 
         let id_str = if let Some(ref suffix) = self.id_suffix {
             format!("pug-switch-{}", suffix)
@@ -62,28 +67,40 @@ impl IntoElement for PugSwitch {
             )
         };
 
-        // Track (36x20 rounded pill)
+        // Contract: track = 2.125rem (34px) wide x 1.25rem (20px) tall
+        let track_w = px(34.0);
+        let track_h = px(20.0);
+        let track_radius = px(10.0); // half of height = pill
+        let track_padding = px(2.0); // 0.125rem
+
+        // Contract: thumb = 0.875rem (14px) diameter
+        let thumb_size = px(14.0);
+        let thumb_radius = px(7.0); // half = circle
+
+        // Contract: thumb travel = 0.875rem (14px)
+        let knob_offset = if is_checked { px(16.0) } else { track_padding };
+
+        // Contract: checked track = accent-base 24% + surface background
         let track_bg = if is_checked {
-            track_fill
+            color_mix(accent, surface_bg, 0.24)
         } else {
-            resolve_color(theme, "semantic.color.background.surface")
+            surface_bg
         };
 
-        let track_border = if is_checked { track_fill } else { border };
-
-        // Knob offset: checked = right (16px), unchecked = left (2px)
-        let knob_offset = if is_checked { px(18.0) } else { px(2.0) };
-        // Contract: knob color is text-primary (unchecked) or text-inverse (checked)
-        let knob_color = if is_checked {
-            resolve_color(theme, "semantic.color.text.inverse")
+        // Contract: checked track border = accent-base 58% + border-default
+        let track_border = if is_checked {
+            color_mix(accent, border, 0.58)
         } else {
-            text_primary
+            border
         };
+
+        // Contract: checked thumb = accent-base, unchecked = text-primary
+        let knob_color = if is_checked { accent } else { text_primary };
 
         let track = div()
-            .w(px(36.0))
-            .h(px(20.0))
-            .rounded(px(10.0))
+            .w(track_w)
+            .h(track_h)
+            .rounded(track_radius)
             .bg(track_bg)
             .border_1()
             .border_color(track_border)
@@ -91,13 +108,13 @@ impl IntoElement for PugSwitch {
             .flex_shrink_0()
             .child(
                 div()
-                    .w(px(14.0))
-                    .h(px(14.0))
-                    .rounded(px(7.0))
+                    .w(thumb_size)
+                    .h(thumb_size)
+                    .rounded(thumb_radius)
                     .bg(knob_color)
                     .shadow_sm()
                     .absolute()
-                    .top(px(2.0))
+                    .top(track_padding)
                     .left(knob_offset),
             );
 
@@ -106,14 +123,14 @@ impl IntoElement for PugSwitch {
             .id(SharedString::from(id_str))
             .flex()
             .items_center()
-            .gap(px(8.0));
+            .gap(inline_gap);
 
         if is_interactive {
             row = row.cursor_pointer();
         }
 
         if spec.is_disabled {
-            row = row.opacity(0.48);
+            row = row.opacity(disabled_opacity);
         }
 
         row = row.child(track);

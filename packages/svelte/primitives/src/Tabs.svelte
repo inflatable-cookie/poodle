@@ -476,7 +476,7 @@
 
   /* Strip vertical: border shifts to right edge, icon-only compact tabs */
   .pug-tabs[data-variant="strip"][data-orientation="vertical"] .pug-tabs__list {
-    padding: var(--pug-space-panel-y, 0.5rem) 0;
+    padding: 0;
     border-bottom: 0;
     border-right: 0.0625rem solid var(--pug-color-border-subtle);
     overflow: visible;
@@ -498,6 +498,14 @@
     min-height: 0;
     min-width: 2.25rem;
     padding: 0.5rem;
+  }
+
+  .pug-tabs[data-variant="strip"][data-orientation="vertical"] .pug-tabs__item:first-child .pug-tabs__tab {
+    padding-top: 0.75rem;
+  }
+
+  .pug-tabs[data-variant="strip"][data-orientation="vertical"] .pug-tabs__item:last-child .pug-tabs__tab {
+    padding-bottom: 0.75rem;
   }
 
   /* Vertical orientation: collapse to icon-only, hide label + close */

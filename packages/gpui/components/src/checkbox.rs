@@ -6,7 +6,7 @@ use pug_gpui::GpuiThemeProvider;
 use pug_gpui_primitives::{CheckState, CheckboxSpec, IconSize, IconSpec};
 
 use crate::icon::PugIcon;
-use crate::theme_ext::resolve_color;
+use crate::theme_ext::{color_mix, resolve_color, resolve_opacity, resolve_px, resolve_radius};
 
 /// A real GPUI checkbox component backed by `CheckboxSpec`.
 pub struct PugCheckbox {
@@ -47,11 +47,19 @@ impl IntoElement for PugCheckbox {
         let theme = &self.theme;
         let spec = &self.spec;
 
+        // Contract: gap = space-inline-sm
+        let inline_gap = resolve_px(theme, "semantic.space.inline.sm");
+        // Contract: indicator = 1.125rem (18px), radius = 0.3125rem (5px)
+        let indicator_size = resolve_px(theme, "semantic.size.icon.md");
+        let indicator_radius = resolve_radius(theme, "semantic.radius.control");
+
+        let disabled_opacity = resolve_opacity(theme, "semantic.state.opacity.disabled");
         let accent = resolve_color(theme, spec.indicator_fill_token());
         let border = resolve_color(theme, "semantic.color.border.default");
         let text_primary = resolve_color(theme, "semantic.color.text.primary");
         let text_inverse = resolve_color(theme, "semantic.color.text.inverse");
         let surface_bg = resolve_color(theme, "semantic.color.background.surface");
+        let elevated = resolve_color(theme, "semantic.color.background.elevated");
 
         let state = spec.current_state();
         let is_checked = matches!(state, CheckState::Checked | CheckState::Mixed);
@@ -69,9 +77,9 @@ impl IntoElement for PugCheckbox {
         // Indicator box
         let indicator = {
             let mut ind = div()
-                .w(px(18.0))
-                .h(px(18.0))
-                .rounded(px(5.0))
+                .w(indicator_size)
+                .h(indicator_size)
+                .rounded(indicator_radius)
                 .flex()
                 .items_center()
                 .justify_center()
@@ -79,7 +87,6 @@ impl IntoElement for PugCheckbox {
 
             if is_checked {
                 ind = ind.bg(accent).border_1().border_color(accent);
-                // Use proper icons for check/minus marks
                 match state {
                     CheckState::Checked => {
                         ind = ind.child(
@@ -112,20 +119,22 @@ impl IntoElement for PugCheckbox {
         };
 
         // Row: indicator + label
+        // Contract: hover = color_mix with elevated
+        let hover_bg = color_mix(surface_bg, elevated, 0.84);
         let mut row = div()
             .id(SharedString::from(id_str))
             .flex()
             .items_center()
-            .gap(px(8.0));
+            .gap(inline_gap);
 
         if is_interactive {
             row = row
                 .cursor_pointer()
-                .hover(|s| s.bg(hsla(0.0, 0.0, 0.5, 0.04)));
+                .hover(move |s| s.bg(hover_bg));
         }
 
         if spec.is_disabled {
-            row = row.opacity(0.48);
+            row = row.opacity(disabled_opacity);
         }
 
         row = row.child(indicator);

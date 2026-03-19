@@ -7,9 +7,10 @@
 use gpui::prelude::FluentBuilder;
 use gpui::*;
 use pug_gpui::GpuiThemeProvider;
-use pug_gpui_primitives::TextInputSpec;
+use pug_gpui_primitives::{IconSize, IconSpec, TextInputSpec};
 
-use crate::theme_ext::resolve_color;
+use crate::icon::PugIcon;
+use crate::theme_ext::{color_mix, resolve_color, resolve_opacity, resolve_px, resolve_radius};
 
 /// A real GPUI text input component backed by `TextInputSpec`.
 pub struct PugTextInput {
@@ -50,10 +51,17 @@ impl IntoElement for PugTextInput {
         let theme = &self.theme;
         let spec = &self.spec;
 
+        let control_height = resolve_px(theme, "semantic.size.control.height");
+        let inline_padding = resolve_px(theme, "semantic.space.control.x");
+        let inline_gap = resolve_px(theme, "semantic.space.inline.sm");
+        let control_radius = resolve_radius(theme, "semantic.radius.control");
+
+        let disabled_opacity = resolve_opacity(theme, "semantic.state.opacity.disabled");
         let border = resolve_color(theme, spec.border_token());
         let surface_bg = resolve_color(theme, "semantic.color.background.surface");
         let text_primary = resolve_color(theme, "semantic.color.text.primary");
         let text_secondary = resolve_color(theme, "semantic.color.text.secondary");
+        let elevated = resolve_color(theme, "semantic.color.background.elevated");
 
         let value = spec.current_value();
         let is_empty = value.is_empty();
@@ -64,6 +72,9 @@ impl IntoElement for PugTextInput {
         };
         let text_col = if is_empty { text_secondary } else { text_primary };
 
+        // Contract: hover = color-mix with elevated
+        let hover_bg = color_mix(surface_bg, elevated, 0.84);
+
         let id_str = if let Some(ref suffix) = self.id_suffix {
             format!("pug-input-{}", suffix)
         } else {
@@ -72,30 +83,33 @@ impl IntoElement for PugTextInput {
 
         let mut el = div()
             .id(SharedString::from(id_str))
-            .h(px(36.0))
-            .px(px(12.0))
-            .rounded(px(6.0))
+            .h(control_height)
+            .px(inline_padding)
+            .rounded(control_radius)
             .bg(surface_bg)
             .border_1()
             .border_color(border)
             .flex()
             .items_center()
-            .gap(px(8.0))
+            .gap(inline_gap)
             .text_sm();
 
         if spec.is_disabled {
-            el = el.opacity(0.48);
+            el = el.opacity(disabled_opacity);
         } else {
-            el = el.cursor_pointer();
+            el = el
+                .cursor_pointer()
+                .hover(move |s| s.bg(hover_bg));
         }
 
-        // Leading icon
+        // Leading icon — render via PugIcon
         if let Some(ref icon) = spec.leading_icon {
             el = el.child(
-                div()
-                    .text_xs()
-                    .text_color(text_secondary)
-                    .child(icon.clone()),
+                PugIcon::new(
+                    IconSpec::new(icon).with_size(IconSize::Sm),
+                    theme,
+                )
+                .with_color(text_secondary),
             );
         }
 
@@ -104,16 +118,20 @@ impl IntoElement for PugTextInput {
             div()
                 .flex_1()
                 .text_color(text_col)
+                .overflow_x_hidden()
+                .text_ellipsis()
+                .whitespace_nowrap()
                 .child(display_text),
         );
 
-        // Trailing icon
+        // Trailing icon — render via PugIcon
         if let Some(ref icon) = spec.trailing_icon {
             el = el.child(
-                div()
-                    .text_xs()
-                    .text_color(text_secondary)
-                    .child(icon.clone()),
+                PugIcon::new(
+                    IconSpec::new(icon).with_size(IconSize::Sm),
+                    theme,
+                )
+                .with_color(text_secondary),
             );
         }
 

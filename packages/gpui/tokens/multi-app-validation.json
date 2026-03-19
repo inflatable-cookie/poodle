@@ -38,7 +38,6 @@
         "foundation/menu.md",
         "foundation/dialog.md",
         "foundation/select.md",
-        "composites/list-shell.md",
         "composites/empty-state.md"
       ],
       "notes": "Exposes whether the shared layer assumes large workstation chrome or panel orchestration by default."

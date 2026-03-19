@@ -16,8 +16,6 @@ compose the same UI families as Svelte against one contract-owned catalogue.
 The `g04.008` tranche extends `pug-gpui-composites` with:
 
 - `DataTableSpec`
-- `ListShellSpec`
-- `GridShellSpec`
 - `DetailShellSpec`
 - `FilterToolbarSpec`
 - `PaginationSummarySpec`
@@ -36,8 +34,6 @@ the widened GPUI primitive and form-shell baseline.
 The crate must stay aligned to the existing shared composite contracts for:
 
 - `data-table`
-- `list-shell`
-- `grid-shell`
 - `detail-shell`
 - `filter-toolbar`
 - `pagination-summary`
@@ -57,7 +53,7 @@ reuse:
   `no-results`
 - shell-owned scroll posture remaining explicit
 - visible-scope selection semantics in data tables
-- card-grid and list-shell neutrality around child item semantics
+- card-grid neutrality around child item semantics
 - filter and pagination summaries remaining textual and reviewable
 
 ## Detail And Picker Rule
@@ -109,8 +105,6 @@ token and primitive baselines for at least:
 - `packages/gpui/composites/README.md`
 - `packages/gpui/composites/src/lib.rs`
 - `packages/gpui/composites/src/data_table.rs`
-- `packages/gpui/composites/src/list_shell.rs`
-- `packages/gpui/composites/src/grid_shell.rs`
 - `packages/gpui/composites/src/detail_shell.rs`
 - `packages/gpui/composites/src/filter_toolbar.rs`
 - `packages/gpui/composites/src/pagination_summary.rs`

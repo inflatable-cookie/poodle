@@ -5,7 +5,7 @@ use gpui::*;
 use pug_gpui::GpuiThemeProvider;
 use pug_gpui_composites::{DetailShellSpec, DetailState};
 
-use crate::theme_ext::resolve_color;
+use crate::theme_ext::{resolve_color, resolve_px};
 
 /// A real GPUI detail shell component backed by `DetailShellSpec`.
 ///
@@ -46,6 +46,8 @@ impl IntoElement for PugDetailShell {
         let theme = &self.theme;
         let spec = &self.spec;
 
+        let inline_gap = resolve_px(theme, "semantic.space.inline.sm");
+
         let body_bg = resolve_color(theme, spec.body_fill_token());
         let text_primary = resolve_color(theme, "semantic.color.text.primary");
         let text_secondary = resolve_color(theme, "semantic.color.text.secondary");
@@ -68,7 +70,7 @@ impl IntoElement for PugDetailShell {
             .border_color(border)
             .flex()
             .items_center()
-            .gap(px(8.0));
+            .gap(inline_gap);
 
         if let Some(ref title) = spec.title {
             header = header.child(

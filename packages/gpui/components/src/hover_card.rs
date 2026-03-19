@@ -5,7 +5,7 @@ use gpui::*;
 use pug_gpui::GpuiThemeProvider;
 use pug_gpui_primitives::HoverCardSpec;
 
-use crate::theme_ext::{resolve_color, resolve_radius};
+use crate::theme_ext::{resolve_color, resolve_px, resolve_radius};
 
 /// A real GPUI hover card component backed by `HoverCardSpec`.
 pub struct PugHoverCard {
@@ -40,12 +40,14 @@ impl IntoElement for PugHoverCard {
             return div().into_any_element();
         }
 
+        let inline_padding = resolve_px(theme, "semantic.space.inline.md");
+
         let fill = resolve_color(theme, spec.fill_token());
         let border = resolve_color(theme, "semantic.color.border.default");
         let radius = resolve_radius(theme, "semantic.radius.surface");
 
         let mut el = div()
-            .px(px(12.0))
+            .px(inline_padding)
             .py(px(10.0))
             .rounded(radius)
             .bg(fill)

@@ -189,7 +189,7 @@ type PanelDragData = {
 - Flexible collapsed (top/bottom): `height: fit-content` (thin horizontal strip)
 - Static: flex container, items `flex: 1 1 0`
 - DockRegion sets `height: 100%` to fill parent containers
-- Resize is handled externally by SplitView/SplitDivider
+- Resize is handled externally by SplitView
 
 ### Stack Direction (static mode)
 

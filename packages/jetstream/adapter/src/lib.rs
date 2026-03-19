@@ -158,14 +158,14 @@ const SUPPORTED_COMPOSITES: &[&str] = &[
     "FormShellSpec", "ValidationSummarySpec", "RemediationBannerSpec",
     "InlineRemediationSpec", "ConfirmActionSpec",
     // Data and browse
-    "DataTableSpec", "ListShellSpec", "GridShellSpec", "DetailShellSpec",
+    "DataTableSpec", "DetailShellSpec",
     "DetailSectionSpec", "FilterToolbarSpec", "PickerShellSpec",
     "RelationPickerSpec", "SelectionSummarySpec", "PaginationSummarySpec",
     "MediaThumbnailSpec", "MediaPreviewSpec", "EmptyStateSpec",
     // Editing, media, navigation, list, operational
     "AudioPlayerSpec", "VideoPlayerSpec", "MediaPickerSpec",
     "MarkdownEditorSpec", "BlockEditorSpec", "EmbedInputSpec",
-    "EmbedPreviewSpec", "EmbedShellSpec", "AutonomousListSpec",
+    "EmbedPreviewSpec", "AutonomousListSpec",
     "ReorderableListSpec", "BreadcrumbsSpec", "CardRadioGroupSpec",
     "InlineEditableFieldSpec", "ListCardSpec", "NavCardSpec",
     "NavCardGridSpec", "OrderBySpec", "PageHeaderSpec", "PageLoadingSpec",
@@ -226,7 +226,7 @@ mod tests {
     #[test]
     fn full_parity_component_counts() {
         assert_eq!(SUPPORTED_PRIMITIVES.len(), 63);
-        assert_eq!(SUPPORTED_COMPOSITES.len(), 41);
+        assert_eq!(SUPPORTED_COMPOSITES.len(), 38);
         assert_eq!(SUPPORTED_WORKSTATION.len(), 13);
     }
 }

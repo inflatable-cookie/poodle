@@ -139,7 +139,7 @@ FormShell, ValidationSummary, RemediationBanner, InlineRemediation,
 ConfirmAction, FormDialog
 
 **008 — Data, browse, detail, and media (est. 12 components):**
-DataTable, ListShell, GridShell, DetailShell, DetailSection, FilterToolbar,
+DataTable, DetailShell, DetailSection, FilterToolbar,
 PickerShell, RelationPicker, SelectionSummary, PaginationSummary,
 MediaThumbnail, MediaPreview
 

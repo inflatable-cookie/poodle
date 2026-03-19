@@ -5,7 +5,7 @@ use gpui::*;
 use pug_gpui::GpuiThemeProvider;
 use pug_gpui_primitives::PillSpec;
 
-use crate::theme_ext::{resolve_color, resolve_radius};
+use crate::theme_ext::{resolve_color, resolve_opacity, resolve_radius};
 
 /// A real GPUI pill component backed by `PillSpec`.
 pub struct PugPill {
@@ -42,6 +42,7 @@ impl IntoElement for PugPill {
         let fill = resolve_color(theme, spec.fill_token());
         let text_color = resolve_color(theme, spec.text_color_token());
         let radius = resolve_radius(theme, "semantic.radius.pill");
+        let disabled_opacity = resolve_opacity(theme, "semantic.state.opacity.disabled");
 
         let mut el = div()
             .px(px(8.0))
@@ -56,7 +57,7 @@ impl IntoElement for PugPill {
             .child(spec.label.clone());
 
         if spec.is_disabled {
-            el = el.opacity(0.5);
+            el = el.opacity(disabled_opacity);
         }
 
         if spec.is_removable {

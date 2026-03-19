@@ -104,7 +104,7 @@ No component-owned events beyond child action behavior.
 
 ### Composition
 
-- parent expectations: `ListShell`, `GridShell`, `DetailShell`, settings scopes
+- parent expectations: `DetailShell`, settings scopes
 - child expectations: text, icon/illustration, and action primitives
 - resizing rules: actions may stack below the message on narrow widths
 

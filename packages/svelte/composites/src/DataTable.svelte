@@ -1,7 +1,7 @@
 <script lang="ts">
   import { createEventDispatcher } from "svelte";
 
-  import { Checkbox, Icon } from "@pug/svelte-primitives";
+  import { Checkbox, Icon, Popover } from "@pug/svelte-primitives";
 
   import type { TableColumn, TableRow, TableSortDirection } from "./types";
 
@@ -28,7 +28,6 @@
     exportCsv: { filename: string };
   }>();
 
-  let columnMenuOpen = false;
 
   $: visibleColumns = columns.filter((c) => !hiddenColumnIds.includes(c.id));
   $: hideableColumns = columns.filter((c) => c.isHideable !== false);
@@ -97,33 +96,24 @@
       {/if}
 
       {#if showColumnVisibility && hideableColumns.length > 0}
-        <div class="data-table__col-menu-wrapper">
-          <button
-            type="button"
-            class="data-table__toolbar-btn"
-            aria-haspopup="true"
-            aria-expanded={columnMenuOpen}
-            on:click={() => (columnMenuOpen = !columnMenuOpen)}
-          >
+        <Popover placement="bottom-end" ariaLabel="Column visibility">
+          <span slot="trigger" class="data-table__toolbar-btn">
             <Icon name="columns-3" size="sm" />
             Columns
-          </button>
-
-          {#if columnMenuOpen}
-            <div class="data-table__col-menu" role="menu">
-              {#each hideableColumns as col}
-                <label class="data-table__col-menu-item">
-                  <Checkbox
-                    ariaLabel={col.label}
-                    isChecked={!hiddenColumnIds.includes(col.id)}
-                    on:checkedChange={() => toggleColumnVisibility(col.id)}
-                  />
-                  <span>{col.label}</span>
-                </label>
-              {/each}
-            </div>
-          {/if}
-        </div>
+          </span>
+          <div class="data-table__col-menu" role="menu">
+            {#each hideableColumns as col}
+              <label class="data-table__col-menu-item">
+                <Checkbox
+                  ariaLabel={col.label}
+                  isChecked={!hiddenColumnIds.includes(col.id)}
+                  on:checkedChange={() => toggleColumnVisibility(col.id)}
+                />
+                <span>{col.label}</span>
+              </label>
+            {/each}
+          </div>
+        </Popover>
       {/if}
     </div>
   {/if}
@@ -264,21 +254,9 @@
     height: 0.875rem;
   }
 
-  .data-table__col-menu-wrapper {
-    position: relative;
-  }
-
   .data-table__col-menu {
-    position: absolute;
-    top: calc(100% + 0.375rem);
-    right: 0;
-    z-index: var(--pug-overlay-z-menu, 100);
-    min-width: 10rem;
-    padding: 0.375rem;
-    border: 0.0625rem solid color-mix(in srgb, var(--pug-color-border-default) 72%, transparent);
-    border-radius: var(--pug-radius-surface);
-    background: color-mix(in srgb, var(--pug-color-background-elevated) 98%, var(--pug-color-background-panel));
-    box-shadow: var(--pug-elevation-overlay);
+    display: flex;
+    flex-direction: column;
   }
 
   .data-table__col-menu-item {
@@ -319,6 +297,7 @@
     border-bottom: 0.0625rem solid var(--pug-color-border-subtle);
     text-align: left;
     vertical-align: middle;
+    font-size: var(--pug-typography-label-size);
   }
 
   thead th {

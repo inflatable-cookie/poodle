@@ -401,8 +401,7 @@
     min-width: 0;
     min-height: 0;
     height: 100%;
-    border: 0.0625rem solid var(--pug-color-border-subtle);
-    border-radius: var(--pug-radius-surface);
+    border: 0;
     background: color-mix(in srgb, var(--pug-color-background-panel) 94%, transparent);
   }
 

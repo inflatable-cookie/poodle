@@ -4,7 +4,7 @@ use gpui::prelude::FluentBuilder;
 use gpui::*;
 use pug_adapter::ThemeProvider;
 use pug_gpui::GpuiThemeProvider;
-use pug_gpui_workstation::{DockEdge, DockRegionSpec, DockTabsPlacement};
+use pug_gpui_composites::{DockEdge, DockRegionSpec, DockTabsPlacement};
 
 use crate::theme_ext::resolve_color;
 
@@ -73,6 +73,7 @@ impl IntoElement for PugDockRegion {
         let text_primary = resolve_color(theme, "semantic.color.text.primary");
         let text_secondary = resolve_color(theme, "semantic.color.text.secondary");
         let accent = resolve_color(theme, "semantic.color.accent.base");
+        let hover_bg = resolve_color(theme, "semantic.color.background.elevated");
 
         let current_value = spec.current_value().map(|s| s.to_string());
         let is_horizontal_edge = matches!(spec.edge, DockEdge::Left | DockEdge::Right);
@@ -143,7 +144,7 @@ impl IntoElement for PugDockRegion {
             } else {
                 tab = tab
                     .text_color(text_secondary)
-                    .hover(|s| s.bg(hsla(0.0, 0.0, 0.5, 0.06)));
+                    .hover(|s| s.bg(hover_bg));
             }
 
             tab = tab.child(item.label.clone());

@@ -10,9 +10,7 @@ mod grid;
 mod surface;
 mod separator;
 mod scroll_shell;
-mod banner;
 mod callout;
-mod inline;
 mod spacer;
 
 // ── Foundation ────────────────────────────────────────────
@@ -54,7 +52,6 @@ mod date_time_range_picker;
 
 // ── Feedback ──────────────────────────────────────────────
 mod progress;
-mod badge;
 mod status_indicator;
 mod meter;
 mod rating;
@@ -91,11 +88,8 @@ mod misc_composites;
 mod media;
 mod editors;
 
-// ── Workstation ───────────────────────────────────────────
-mod workspace;
-mod project_header;
+// ── App Shell ─────────────────────────────────────────────
 mod command_palette;
-mod panel;
 mod dock_split;
 mod status_bar;
 mod action_discovery;
@@ -174,9 +168,7 @@ pub fn render_single_specimen(
         "surface" => specimen_card("Surface", theme, surface::render(theme)),
         "separator" => specimen_card("Separator", theme, separator::render(theme)),
         "scroll-shell" => specimen_card("ScrollShell", theme, scroll_shell::render(theme)),
-        "banner" => specimen_card("Banner", theme, banner::render(theme)),
         "callout" => specimen_card("Callout", theme, callout::render(theme)),
-        "inline" => specimen_card("Inline", theme, inline::render(theme)),
         "spacer" => specimen_card("Spacer", theme, spacer::render(theme)),
 
         // ── Foundation ──────────────────────────────────────────
@@ -218,12 +210,11 @@ pub fn render_single_specimen(
 
         // ── Feedback ────────────────────────────────────────────
         "progress" => specimen_card("Progress", theme, progress::render(theme)),
-        "badge" => specimen_card("Badge", theme, badge::render(state, cx)),
+        "pill" => specimen_card("Pill", theme, pill::render(theme)),
         "status-indicator" => specimen_card("StatusIndicator", theme, status_indicator::render(theme)),
         "meter" => specimen_card("Meter", theme, meter::render(theme)),
         "rating" => specimen_card("Rating", theme, rating::render(theme)),
         "skeleton" => specimen_card("Skeleton", theme, skeleton::render(theme)),
-        "pill" => specimen_card("Pill", theme, pill::render(theme)),
         "eyebrow" => specimen_card("Eyebrow", theme, eyebrow::render(theme)),
         "time-ago" | "duration-input" => specimen_card("TimeAgo + DurationInput", theme, temporal::render(theme)),
         "code" => specimen_card("Code", theme, code::render(theme)),
@@ -247,26 +238,22 @@ pub fn render_single_specimen(
         // ── Composites ──────────────────────────────────────────
         "data-table" => specimen_card("DataTable", theme, data_table::render(state, cx)),
         "detail-shell" | "detail-row" | "detail-section" => specimen_card("DetailShell", theme, detail_shell::render(theme)),
-        "list-shell" | "list-card" | "reorderable-list" => specimen_card("ListShell", theme, detail_shell::render(theme)),
         "nav-card" | "nav-card-grid" | "card" | "card-radio-group" => specimen_card("Cards", theme, cards::render(state, cx)),
         "picker-shell" | "relation-picker" | "selection-summary" | "order-by" => specimen_card("PickerShell", theme, picker::render(state, cx)),
         "page-header" | "breadcrumbs" | "page-loading" | "pagination-summary" => specimen_card("Page Structure", theme, page_structure::render(theme)),
-        "state-tile" | "empty-state" | "toast-stack" => specimen_card("State Display", theme, state_display::render(theme)),
+        "metric-tile" | "state-tile" | "empty-state" | "toast-stack" => specimen_card("State Display", theme, state_display::render(theme)),
         "confirm-action" | "form-dialog" | "filter-toolbar" | "bulk-action-bar" | "slug-field"
-        | "inline-editable-field" | "log-list" | "autonomous-list" | "embed-input"
-        | "embed-preview" | "embed-shell" | "grid-shell" => specimen_card("Misc", theme, misc_composites::render(theme)),
+        | "inline-editable-field" | "log-list" | "editable-list" | "autonomous-list" | "embed-input"
+        | "embed-preview" => specimen_card("Misc", theme, misc_composites::render(theme)),
         "audio-player" | "video-player" | "media-picker" | "media-preview" | "media-thumbnail" => {
             specimen_card("Media", theme, media::render(state, cx))
         }
         "markdown-editor" | "block-editor" => specimen_card("Editors", theme, editors::render(theme)),
 
-        // ── Workstation ─────────────────────────────────────────
-        "workspace-shell" | "app-header" => specimen_card("WorkspaceShell", theme, workspace::render(theme)),
-        "project-header" => specimen_card("ProjectHeader", theme, project_header::render(theme)),
-        "command-palette" | "command-palette-shell" => specimen_card("CommandPalette", theme, command_palette::render(state, cx)),
-        "panel-header" | "panel-surface" | "panel-tabs" => specimen_card("Panel", theme, panel::render(state, cx)),
+        // ── App Shell ───────────────────────────────────────────
+        "command-palette" => specimen_card("CommandPalette", theme, command_palette::render(state, cx)),
         "dock-region" | "split-view" => specimen_card("Dock + SplitView", theme, dock_split::render(theme)),
-        "shell-status-bar" | "surface-tabs" => specimen_card("StatusBar + Tabs", theme, status_bar::render(state, cx)),
+        "status-bar" => specimen_card("StatusBar", theme, status_bar::render(state, cx)),
         "action-discovery-panel" => specimen_card("ActionDiscovery", theme, action_discovery::render(state, cx)),
 
         // Fallback

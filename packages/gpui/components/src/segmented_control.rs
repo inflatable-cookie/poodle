@@ -2,10 +2,11 @@
 
 use gpui::prelude::FluentBuilder;
 use gpui::*;
+use pug_adapter::ThemeProvider;
 use pug_gpui::GpuiThemeProvider;
 use pug_gpui_primitives::SegmentedControlSpec;
 
-use crate::theme_ext::resolve_color;
+use crate::theme_ext::{color_mix, resolve_color, resolve_opacity, resolve_px, resolve_radius};
 
 /// A real GPUI segmented control component backed by `SegmentedControlSpec`.
 pub struct PugSegmentedControl {
@@ -45,24 +46,34 @@ impl IntoElement for PugSegmentedControl {
     fn into_element(self) -> Self::Element {
         let theme = &self.theme;
 
+        let control_padding_x = resolve_px(theme, "semantic.space.control.x");
+        let control_padding_y = resolve_px(theme, "semantic.space.control.y");
+        let control_radius = resolve_radius(theme, "semantic.radius.control");
+        let inner_radius = px(theme.resolve_radius("semantic.radius.control") * 0.6);
+
         let accent = resolve_color(theme, self.spec.selected_fill_token());
         let border = resolve_color(theme, "semantic.color.border.default");
         let text_primary = resolve_color(theme, "semantic.color.text.primary");
         let text_inverse = resolve_color(theme, "semantic.color.text.inverse");
         let surface_bg = resolve_color(theme, "semantic.color.background.surface");
+        let elevated = resolve_color(theme, "semantic.color.background.elevated");
+        let disabled_opacity = resolve_opacity(theme, "semantic.state.opacity.disabled");
+
+        // Contract: hover = color-mix with elevated
+        let hover_bg = color_mix(surface_bg, elevated, 0.84);
 
         let current_value = self.spec.current_value().map(|s| s.to_string());
         let is_disabled = self.spec.is_disabled;
 
         let mut row = div()
             .flex()
-            .rounded(px(6.0))
+            .rounded(control_radius)
             .border_1()
             .border_color(border)
             .bg(surface_bg);
 
         if is_disabled {
-            row = row.opacity(0.48);
+            row = row.opacity(disabled_opacity);
         }
 
         for (i, option) in self.spec.options.iter().enumerate() {
@@ -72,12 +83,12 @@ impl IntoElement for PugSegmentedControl {
 
             let mut seg = div()
                 .id(seg_id)
-                .px(px(12.0))
-                .py(px(6.0))
+                .px(control_padding_x)
+                .py(control_padding_y)
                 .text_sm();
 
             if is_selected {
-                seg = seg.bg(accent).text_color(text_inverse).rounded(px(4.0));
+                seg = seg.bg(accent).text_color(text_inverse).rounded(inner_radius);
             } else {
                 seg = seg.text_color(text_primary);
             }
@@ -85,7 +96,7 @@ impl IntoElement for PugSegmentedControl {
             if !is_disabled && !is_opt_disabled {
                 seg = seg
                     .cursor_pointer()
-                    .hover(|s| s.bg(hsla(0.0, 0.0, 0.5, 0.06)));
+                    .hover(move |s| s.bg(hover_bg));
             }
 
             // Add separator between non-selected items
@@ -96,7 +107,7 @@ impl IntoElement for PugSegmentedControl {
                     row = row.child(
                         div()
                             .w(px(1.0))
-                            .h(px(16.0))
+                            .h_full()
                             .bg(border.opacity(0.5)),
                     );
                 }

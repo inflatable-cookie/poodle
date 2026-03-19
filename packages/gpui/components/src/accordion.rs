@@ -6,7 +6,7 @@ use gpui::*;
 use pug_gpui::GpuiThemeProvider;
 use pug_gpui_primitives::AccordionSpec;
 
-use crate::theme_ext::resolve_color;
+use crate::theme_ext::{resolve_color, resolve_opacity};
 
 /// A real GPUI accordion component backed by `AccordionSpec`.
 pub struct PugAccordion {
@@ -46,6 +46,8 @@ impl IntoElement for PugAccordion {
     fn into_element(self) -> Self::Element {
         let theme = &self.theme;
 
+        let disabled_opacity = resolve_opacity(theme, "semantic.state.opacity.disabled");
+        let hover_bg = resolve_color(theme, "semantic.color.background.elevated");
         let border = resolve_color(theme, self.spec.border_color_token());
         let text_secondary = resolve_color(theme, "semantic.color.text.secondary");
 
@@ -71,9 +73,9 @@ impl IntoElement for PugAccordion {
             if !is_disabled {
                 header = header
                     .cursor_pointer()
-                    .hover(|s| s.bg(hsla(0.0, 0.0, 0.5, 0.04)));
+                    .hover(|s| s.bg(hover_bg));
             } else {
-                header = header.opacity(0.48);
+                header = header.opacity(disabled_opacity);
             }
 
             header = header

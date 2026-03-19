@@ -56,6 +56,7 @@ impl IntoElement for PugFilterToolbar {
         let theme = &self.theme;
         let spec = &self.spec;
 
+        let inline_padding = resolve_px(theme, "semantic.space.inline.md");
         let gap = resolve_px(theme, spec.gap_token());
         let text_primary = resolve_color(theme, "semantic.color.text.primary");
         let text_secondary = resolve_color(theme, "semantic.color.text.secondary");
@@ -67,7 +68,7 @@ impl IntoElement for PugFilterToolbar {
             .flex()
             .items_center()
             .gap(gap)
-            .px(px(12.0))
+            .px(inline_padding)
             .py(px(8.0))
             .border_b_1()
             .border_color(border);

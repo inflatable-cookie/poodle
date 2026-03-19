@@ -32,8 +32,6 @@ Primary repos: `pug`
 - added the machine-readable artifact `packages/gpui/data-browse-detail-picker-media-baseline.json`
 - expanded `packages/gpui/composites` with:
   - `DataTableSpec`
-  - `ListShellSpec`
-  - `GridShellSpec`
   - `DetailShellSpec`
   - `FilterToolbarSpec`
   - `PaginationSummarySpec`

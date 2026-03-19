@@ -3,17 +3,10 @@
 
   import { Icon } from "@pug/svelte-primitives";
 
-  import type { EditorBlock, BlockType } from "./types";
+  import type { EditorBlock, BlockType, BlockTypeDefinition } from "./types";
 
   export let blocks: EditorBlock[] = [{ id: crypto.randomUUID(), type: "paragraph", content: "" }];
-  export let isDisabled = false;
-  export let ariaLabel = "Block editor";
-
-  const dispatch = createEventDispatcher<{
-    change: { blocks: EditorBlock[] };
-  }>();
-
-  const blockTypes: { type: BlockType; label: string; icon: string }[] = [
+  export let blockTypes: BlockTypeDefinition[] = [
     { type: "paragraph", label: "Paragraph", icon: "file-text" },
     { type: "heading", label: "Heading", icon: "hash" },
     { type: "code", label: "Code", icon: "code" },
@@ -22,10 +15,20 @@
     { type: "image", label: "Image", icon: "image" },
     { type: "divider", label: "Divider", icon: "minus" },
   ];
+  export let isDisabled = false;
+  export let ariaLabel = "Block editor";
+
+  const dispatch = createEventDispatcher<{
+    change: { blocks: EditorBlock[] };
+  }>();
 
   let activeBlockId: string | null = null;
   let showAddMenu = false;
   let addMenuIndex = -1;
+  let addMenuAnchor: HTMLElement | null = null;
+  let addMenuStyle = "";
+  let dragSourceIndex: number | null = null;
+  let dragOverIndex: number | null = null;
 
   function emitChange(): void {
     dispatch("change", { blocks: [...blocks] });
@@ -35,7 +38,7 @@
     const newBlock: EditorBlock = {
       id: crypto.randomUUID(),
       type,
-      content: type === "divider" ? "" : "",
+      content: "",
     };
     blocks = [...blocks.slice(0, afterIndex + 1), newBlock, ...blocks.slice(afterIndex + 1)];
     showAddMenu = false;
@@ -61,8 +64,8 @@
     emitChange();
   }
 
-  function updateContent(index: number, content: string): void {
-    blocks[index] = { ...blocks[index], content };
+  function updateBlock(index: number, updates: Partial<EditorBlock>): void {
+    blocks[index] = { ...blocks[index], ...updates };
     blocks = [...blocks];
     emitChange();
   }
@@ -73,152 +76,208 @@
     emitChange();
   }
 
-  function openAddMenu(index: number): void {
+  function openAddMenu(event: MouseEvent, index: number): void {
     addMenuIndex = index;
+    addMenuAnchor = event.currentTarget as HTMLElement;
+    const rect = addMenuAnchor.getBoundingClientRect();
+    addMenuStyle = `top: ${rect.bottom + 4}px; left: ${rect.right}px; transform: translateX(-100%);`;
     showAddMenu = true;
   }
 
-  function handleKeydown(event: KeyboardEvent, index: number): void {
-    if (event.key === "Enter" && !event.shiftKey && blocks[index].type === "paragraph") {
-      event.preventDefault();
-      addBlock("paragraph", index);
+  function handleDragStart(event: DragEvent, index: number): void {
+    if (isDisabled || !event.dataTransfer) return;
+    dragSourceIndex = index;
+    event.dataTransfer.effectAllowed = "move";
+    event.dataTransfer.setData("text/plain", String(index));
+  }
+
+  function handleDragOver(event: DragEvent, index: number): void {
+    if (dragSourceIndex === null || dragSourceIndex === index) {
+      dragOverIndex = null;
+      return;
     }
-    if (event.key === "Backspace" && blocks[index].content === "" && blocks.length > 1) {
-      event.preventDefault();
-      removeBlock(index);
+    event.preventDefault();
+    if (event.dataTransfer) event.dataTransfer.dropEffect = "move";
+    dragOverIndex = index;
+  }
+
+  function handleDragLeave(): void {
+    dragOverIndex = null;
+  }
+
+  function handleDrop(event: DragEvent, targetIndex: number): void {
+    event.preventDefault();
+    if (dragSourceIndex === null || dragSourceIndex === targetIndex) {
+      dragSourceIndex = null;
+      dragOverIndex = null;
+      return;
     }
+    const copy = [...blocks];
+    const [moved] = copy.splice(dragSourceIndex, 1);
+    copy.splice(targetIndex, 0, moved);
+    blocks = copy;
+    dragSourceIndex = null;
+    dragOverIndex = null;
+    emitChange();
+  }
+
+  function handleDragEnd(): void {
+    dragSourceIndex = null;
+    dragOverIndex = null;
   }
 </script>
 
 <div class="block-editor" class:block-editor--disabled={isDisabled} aria-label={ariaLabel}>
   {#each blocks as block, index (block.id)}
+    <!-- svelte-ignore a11y-no-static-element-interactions -->
     <div
       class="block-editor__block"
-      data-type={block.type}
       class:active={activeBlockId === block.id}
+      class:drag-over={dragOverIndex === index}
+      class:dragging={dragSourceIndex === index}
+      data-type={block.type}
       on:click={() => (activeBlockId = block.id)}
       on:keydown={() => {}}
+      on:dragover={(e) => handleDragOver(e, index)}
+      on:dragleave={handleDragLeave}
+      on:drop={(e) => handleDrop(e, index)}
       role="group"
       aria-label="{block.type} block"
     >
-      <div class="block-editor__gutter">
-        <button
-          type="button"
-          class="block-editor__add-btn"
-          title="Add block below"
-          aria-label="Add block after this one"
-          disabled={isDisabled}
-          on:click|stopPropagation={() => openAddMenu(index)}
-        ><Icon name="plus" size="sm" /></button>
-        <div class="block-editor__drag-handle" aria-hidden="true">
+      <div class="block-editor__toolbar">
+        <div class="block-editor__toolbar-left">
+          <!-- svelte-ignore a11y-no-static-element-interactions -->
+          <span
+            class="block-editor__drag-grip"
+            draggable="true"
+            on:dragstart={(e) => handleDragStart(e, index)}
+            on:dragend={handleDragEnd}
+            title="Drag to reorder"
+            aria-hidden="true"
+          ><Icon name="grip-vertical" size="sm" /></span>
+
+          <select
+            class="block-editor__type-select"
+            value={block.type}
+            disabled={isDisabled}
+            on:change={(e) => changeType(index, (e.currentTarget as HTMLSelectElement).value)}
+            aria-label="Block type"
+          >
+            {#each blockTypes as bt}
+              <option value={bt.type}>{bt.label}</option>
+            {/each}
+          </select>
+        </div>
+
+        <div class="block-editor__toolbar-right">
           <button
             type="button"
-            class="block-editor__move-btn"
+            class="block-editor__tool-btn"
             disabled={isDisabled || index === 0}
             on:click|stopPropagation={() => moveBlock(index, -1)}
             aria-label="Move up"
           ><Icon name="arrow-up" size="sm" /></button>
           <button
             type="button"
-            class="block-editor__move-btn"
+            class="block-editor__tool-btn"
             disabled={isDisabled || index === blocks.length - 1}
             on:click|stopPropagation={() => moveBlock(index, 1)}
             aria-label="Move down"
           ><Icon name="arrow-down" size="sm" /></button>
+          <button
+            type="button"
+            class="block-editor__tool-btn block-editor__add-btn"
+            title="Add block below"
+            aria-label="Add block after this one"
+            disabled={isDisabled}
+            on:click|stopPropagation={(e) => openAddMenu(e, index)}
+          ><Icon name="plus" size="sm" /></button>
+          {#if blocks.length > 1}
+            <button
+              type="button"
+              class="block-editor__tool-btn block-editor__remove-btn"
+              disabled={isDisabled}
+              on:click|stopPropagation={() => removeBlock(index)}
+              aria-label="Remove block"
+            ><Icon name="x" size="sm" /></button>
+          {/if}
         </div>
       </div>
 
       <div class="block-editor__content">
-        {#if block.type === "divider"}
-          <hr class="block-editor__divider" />
-        {:else if block.type === "heading"}
-          <input
-            type="text"
-            class="block-editor__heading-input"
-            placeholder="Heading..."
-            disabled={isDisabled}
-            value={block.content}
-            on:input={(e) => updateContent(index, (e.currentTarget as HTMLInputElement).value)}
-            on:keydown={(e) => handleKeydown(e, index)}
-          />
-        {:else if block.type === "code"}
-          <textarea
-            class="block-editor__code-input"
-            placeholder="Code..."
-            disabled={isDisabled}
-            value={block.content}
-            on:input={(e) => updateContent(index, (e.currentTarget as HTMLTextAreaElement).value)}
-            rows="3"
-          ></textarea>
-        {:else if block.type === "image"}
-          <div class="block-editor__image-block">
+        <slot
+          name="block"
+          {block}
+          {index}
+          {isDisabled}
+          update={(updates) => updateBlock(index, updates)}
+        >
+          <!-- Default rendering for built-in types -->
+          {#if block.type === "divider"}
+            <hr class="block-editor__divider" />
+          {:else if block.type === "heading"}
             <input
               type="text"
-              class="block-editor__image-url"
-              placeholder="Image URL..."
+              class="block-editor__input block-editor__input--heading"
+              placeholder="Heading..."
               disabled={isDisabled}
               value={block.content}
-              on:input={(e) => updateContent(index, (e.currentTarget as HTMLInputElement).value)}
+              on:input={(e) => updateBlock(index, { content: (e.currentTarget as HTMLInputElement).value })}
             />
-            {#if block.content}
-              <div class="block-editor__image-preview">
-                <img src={block.content} alt="Block image" />
-              </div>
-            {/if}
-          </div>
-        {:else if block.type === "quote"}
-          <textarea
-            class="block-editor__quote-input"
-            placeholder="Quote..."
-            disabled={isDisabled}
-            value={block.content}
-            on:input={(e) => updateContent(index, (e.currentTarget as HTMLTextAreaElement).value)}
-            on:keydown={(e) => handleKeydown(e, index)}
-            rows="2"
-          ></textarea>
-        {:else if block.type === "list"}
-          <textarea
-            class="block-editor__list-input"
-            placeholder="List items (one per line)..."
-            disabled={isDisabled}
-            value={block.content}
-            on:input={(e) => updateContent(index, (e.currentTarget as HTMLTextAreaElement).value)}
-            rows="3"
-          ></textarea>
-        {:else}
-          <textarea
-            class="block-editor__paragraph-input"
-            placeholder="Type something..."
-            disabled={isDisabled}
-            value={block.content}
-            on:input={(e) => updateContent(index, (e.currentTarget as HTMLTextAreaElement).value)}
-            on:keydown={(e) => handleKeydown(e, index)}
-            rows="1"
-          ></textarea>
-        {/if}
-      </div>
-
-      <div class="block-editor__actions">
-        <select
-          class="block-editor__type-select"
-          value={block.type}
-          disabled={isDisabled}
-          on:change={(e) => changeType(index, (e.currentTarget as HTMLSelectElement).value as BlockType)}
-          aria-label="Block type"
-        >
-          {#each blockTypes as bt}
-            <option value={bt.type}>{bt.icon} {bt.label}</option>
-          {/each}
-        </select>
-        {#if blocks.length > 1}
-          <button
-            type="button"
-            class="block-editor__remove-btn"
-            disabled={isDisabled}
-            on:click|stopPropagation={() => removeBlock(index)}
-            aria-label="Remove block"
-          ><Icon name="x" size="sm" /></button>
-        {/if}
+          {:else if block.type === "code"}
+            <textarea
+              class="block-editor__input block-editor__input--code"
+              placeholder="Code..."
+              disabled={isDisabled}
+              value={block.content}
+              on:input={(e) => updateBlock(index, { content: (e.currentTarget as HTMLTextAreaElement).value })}
+              rows="3"
+            ></textarea>
+          {:else if block.type === "image"}
+            <div class="block-editor__image-block">
+              <input
+                type="text"
+                class="block-editor__input block-editor__input--image-url"
+                placeholder="Image URL..."
+                disabled={isDisabled}
+                value={block.content}
+                on:input={(e) => updateBlock(index, { content: (e.currentTarget as HTMLInputElement).value })}
+              />
+              {#if block.content}
+                <div class="block-editor__image-preview">
+                  <img src={block.content} alt="Block image" />
+                </div>
+              {/if}
+            </div>
+          {:else if block.type === "quote"}
+            <textarea
+              class="block-editor__input block-editor__input--quote"
+              placeholder="Quote..."
+              disabled={isDisabled}
+              value={block.content}
+              on:input={(e) => updateBlock(index, { content: (e.currentTarget as HTMLTextAreaElement).value })}
+              rows="2"
+            ></textarea>
+          {:else if block.type === "list"}
+            <textarea
+              class="block-editor__input block-editor__input--list"
+              placeholder="List items (one per line)..."
+              disabled={isDisabled}
+              value={block.content}
+              on:input={(e) => updateBlock(index, { content: (e.currentTarget as HTMLTextAreaElement).value })}
+              rows="3"
+            ></textarea>
+          {:else}
+            <textarea
+              class="block-editor__input"
+              placeholder="Type something..."
+              disabled={isDisabled}
+              value={block.content}
+              on:input={(e) => updateBlock(index, { content: (e.currentTarget as HTMLTextAreaElement).value })}
+              rows="1"
+            ></textarea>
+          {/if}
+        </slot>
       </div>
     </div>
   {/each}
@@ -227,7 +286,7 @@
     <!-- svelte-ignore a11y-click-events-have-key-events a11y-no-static-element-interactions -->
     <div class="block-editor__add-overlay" on:click={() => (showAddMenu = false)}>
       <!-- svelte-ignore a11y-click-events-have-key-events a11y-no-static-element-interactions -->
-      <div class="block-editor__add-menu" on:click|stopPropagation>
+      <div class="block-editor__add-menu" style={addMenuStyle} on:click|stopPropagation>
         {#each blockTypes as bt}
           <button
             type="button"
@@ -249,6 +308,9 @@
     border-radius: var(--pug-radius-surface);
     background: var(--pug-color-background-surface);
     padding: 0.75rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
   }
 
   .block-editor--disabled {
@@ -258,35 +320,66 @@
 
   .block-editor__block {
     display: flex;
-    gap: 0.375rem;
-    padding: 0.375rem 0;
+    flex-direction: column;
+    border: none;
+    border-radius: var(--pug-radius-control);
+    background: color-mix(in srgb, var(--pug-color-background-elevated) 42%, transparent);
+    transition:
+      background var(--pug-motion-duration-interaction) var(--pug-motion-easing-standard),
+      box-shadow var(--pug-motion-duration-interaction) var(--pug-motion-easing-standard);
+  }
+
+  .block-editor__block.active {
+    background: color-mix(in srgb, var(--pug-color-background-elevated) 72%, transparent);
+  }
+
+  .block-editor__block.drag-over {
+    box-shadow: 0 0 0 0.125rem var(--pug-color-accent-base);
+  }
+
+  .block-editor__block.dragging {
+    opacity: 0.4;
+  }
+
+  .block-editor__toolbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.25rem 0.375rem;
+    border-bottom: none;
+    background: transparent;
+    border-radius: var(--pug-radius-control) var(--pug-radius-control) 0 0;
+  }
+
+  .block-editor__toolbar-left,
+  .block-editor__toolbar-right {
+    display: flex;
+    align-items: center;
+    gap: 0.125rem;
+  }
+
+  .block-editor__drag-grip {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 1.25rem;
+    height: 1.25rem;
+    color: var(--pug-color-text-tertiary);
+    cursor: grab;
     border-radius: var(--pug-radius-control);
     transition: background var(--pug-motion-duration-interaction) var(--pug-motion-easing-standard);
   }
 
-  .block-editor__block:hover,
-  .block-editor__block.active {
-    background: color-mix(in srgb, var(--pug-color-background-elevated) 42%, transparent);
+  .block-editor__drag-grip:hover {
+    background: color-mix(in srgb, var(--pug-color-accent-base) 12%, transparent);
+    color: var(--pug-color-text-secondary);
   }
 
-  .block-editor__gutter {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 0.125rem;
-    padding-top: 0.125rem;
-    opacity: 0;
-    transition: opacity var(--pug-motion-duration-interaction) var(--pug-motion-easing-standard);
+  .block-editor__drag-grip:active {
+    cursor: grabbing;
   }
 
-  .block-editor__block:hover .block-editor__gutter,
-  .block-editor__block.active .block-editor__gutter {
-    opacity: 1;
-  }
-
-  .block-editor__add-btn,
-  .block-editor__move-btn,
-  .block-editor__remove-btn {
+  .block-editor__tool-btn {
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -303,35 +396,44 @@
     transition: background var(--pug-motion-duration-interaction) var(--pug-motion-easing-standard);
   }
 
-  .block-editor__add-btn:hover,
-  .block-editor__move-btn:hover,
-  .block-editor__remove-btn:hover {
+  .block-editor__tool-btn:hover {
     background: color-mix(in srgb, var(--pug-color-accent-base) 16%, transparent);
     color: var(--pug-color-text-primary);
   }
 
-  .block-editor__remove-btn:hover {
+  .block-editor__tool-btn:disabled {
+    opacity: 0.3;
+    cursor: default;
+  }
+
+  .block-editor__tool-btn:disabled:hover {
+    background: transparent;
+    color: var(--pug-color-text-tertiary);
+  }
+
+  .block-editor__remove-btn:hover:not(:disabled) {
     background: color-mix(in srgb, var(--pug-color-status-danger) 16%, transparent);
     color: var(--pug-color-status-danger);
   }
 
-  .block-editor__drag-handle {
-    display: flex;
-    flex-direction: column;
-    gap: 0;
+  .block-editor__type-select {
+    padding: 0.0625rem 0.25rem;
+    border: 0.0625rem solid var(--pug-color-border-subtle);
+    border-radius: var(--pug-radius-control);
+    background: transparent;
+    color: var(--pug-color-text-secondary);
+    font: inherit;
+    font-size: 0.6875rem;
+    cursor: pointer;
   }
 
   .block-editor__content {
-    flex: 1;
-    min-width: 0;
+    padding: 0.375rem 0.5rem;
+    min-height: 1.5rem;
   }
 
-  .block-editor__paragraph-input,
-  .block-editor__heading-input,
-  .block-editor__code-input,
-  .block-editor__quote-input,
-  .block-editor__list-input,
-  .block-editor__image-url {
+  /* Default block input styles — available when using built-in rendering */
+  .block-editor__input {
     width: 100%;
     padding: 0.25rem 0.375rem;
     border: 0;
@@ -344,12 +446,12 @@
     resize: vertical;
   }
 
-  .block-editor__heading-input {
+  .block-editor__input--heading {
     font-size: 1.125rem;
     font-weight: 700;
   }
 
-  .block-editor__code-input {
+  .block-editor__input--code {
     font-family: var(--pug-typography-code-family);
     font-size: 0.8125rem;
     background: color-mix(in srgb, var(--pug-color-background-elevated) 72%, transparent);
@@ -357,15 +459,21 @@
     padding: 0.5rem;
   }
 
-  .block-editor__quote-input {
+  .block-editor__input--quote {
     border-left: 0.1875rem solid var(--pug-color-border-default);
     padding-left: 0.625rem;
     color: var(--pug-color-text-secondary);
     font-style: italic;
   }
 
-  .block-editor__list-input {
+  .block-editor__input--list {
     padding-left: 1rem;
+  }
+
+  .block-editor__input--image-url {
+    font-size: 0.75rem;
+    color: var(--pug-color-text-secondary);
+    font-family: var(--pug-typography-code-family);
   }
 
   .block-editor__divider {
@@ -380,12 +488,6 @@
     gap: 0.375rem;
   }
 
-  .block-editor__image-url {
-    font-size: 0.75rem;
-    color: var(--pug-color-text-secondary);
-    font-family: var(--pug-typography-code-family);
-  }
-
   .block-editor__image-preview img {
     max-width: 100%;
     max-height: 16rem;
@@ -393,41 +495,14 @@
     object-fit: contain;
   }
 
-  .block-editor__actions {
-    display: flex;
-    align-items: flex-start;
-    gap: 0.25rem;
-    padding-top: 0.25rem;
-    opacity: 0;
-    transition: opacity var(--pug-motion-duration-interaction) var(--pug-motion-easing-standard);
-  }
-
-  .block-editor__block:hover .block-editor__actions,
-  .block-editor__block.active .block-editor__actions {
-    opacity: 1;
-  }
-
-  .block-editor__type-select {
-    padding: 0.125rem 0.25rem;
-    border: 0.0625rem solid var(--pug-color-border-default);
-    border-radius: var(--pug-radius-control);
-    background: transparent;
-    color: var(--pug-color-text-secondary);
-    font: inherit;
-    font-size: 0.625rem;
-    cursor: pointer;
-  }
-
   .block-editor__add-overlay {
     position: fixed;
     inset: 0;
     z-index: var(--pug-overlay-z-menu, 100);
-    display: flex;
-    align-items: center;
-    justify-content: center;
   }
 
   .block-editor__add-menu {
+    position: fixed;
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(6rem, 1fr));
     gap: 0.25rem;

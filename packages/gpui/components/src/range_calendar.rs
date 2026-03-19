@@ -5,7 +5,7 @@ use gpui::*;
 use pug_gpui::GpuiThemeProvider;
 use pug_gpui_primitives::RangeCalendarSpec;
 
-use crate::theme_ext::resolve_color;
+use crate::theme_ext::{resolve_color, resolve_opacity, resolve_radius};
 
 const WEEKDAYS_SUN: [&str; 7] = ["Su", "Mo", "Tu", "We", "Th", "Fr", "Sa"];
 
@@ -92,12 +92,15 @@ impl IntoElement for PugRangeCalendar {
         let theme = &self.theme;
         let spec = &self.spec;
 
+        let control_radius = resolve_radius(theme, "semantic.radius.control");
+
         let accent = resolve_color(theme, "semantic.color.accent.base");
         let text_primary = resolve_color(theme, "semantic.color.text.primary");
         let text_secondary = resolve_color(theme, "semantic.color.text.secondary");
         let text_inverse = resolve_color(theme, "semantic.color.text.inverse");
         let surface_bg = resolve_color(theme, "semantic.color.background.surface");
         let border = resolve_color(theme, "semantic.color.border.default");
+        let disabled_opacity = resolve_opacity(theme, "semantic.state.opacity.disabled");
 
         let range = spec.current_value();
 
@@ -156,7 +159,7 @@ impl IntoElement for PugRangeCalendar {
             .border_color(border);
 
         if spec.is_disabled {
-            cal = cal.opacity(0.48);
+            cal = cal.opacity(disabled_opacity);
         }
 
         // Month header
@@ -221,7 +224,7 @@ impl IntoElement for PugRangeCalendar {
 
                     if is_endpoint {
                         cell = cell
-                            .rounded(px(6.0))
+                            .rounded(control_radius)
                             .bg(accent)
                             .text_color(text_inverse)
                             .font_weight(FontWeight::SEMIBOLD);
@@ -231,7 +234,7 @@ impl IntoElement for PugRangeCalendar {
                             .text_color(text_primary);
                     } else {
                         cell = cell
-                            .rounded(px(6.0))
+                            .rounded(control_radius)
                             .text_color(text_primary)
                             .hover(|s| s.bg(accent.opacity(0.08)));
                     }

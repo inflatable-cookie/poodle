@@ -12,8 +12,6 @@ Contract-backed GPUI composite baseline for Pug.
   - `InlineRemediationSpec`
 - current data, browse, detail, picker, and media tranche:
   - `DataTableSpec`
-  - `ListShellSpec`
-  - `GridShellSpec`
   - `DetailShellSpec`
   - `FilterToolbarSpec`
   - `PaginationSummarySpec`

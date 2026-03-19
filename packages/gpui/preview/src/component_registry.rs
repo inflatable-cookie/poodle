@@ -11,8 +11,6 @@ pub struct ComponentEntry {
 pub static PRIMITIVES: &[ComponentEntry] = &[
     ComponentEntry { slug: "accordion", display_name: "Accordion", description: "Expandable disclosure panels." },
     ComponentEntry { slug: "alert-dialog", display_name: "AlertDialog", description: "Focused confirmation modal." },
-    ComponentEntry { slug: "badge", display_name: "Badge", description: "Small status label." },
-    ComponentEntry { slug: "banner", display_name: "Banner", description: "Persistent message bar." },
     ComponentEntry { slug: "box", display_name: "Box", description: "Generic layout container." },
     ComponentEntry { slug: "bulk-action-bar", display_name: "BulkActionBar", description: "Batch action bar." },
     ComponentEntry { slug: "button", display_name: "Button", description: "Primary interactive control." },
@@ -42,7 +40,6 @@ pub static PRIMITIVES: &[ComponentEntry] = &[
     ComponentEntry { slug: "hover-card", display_name: "HoverCard", description: "Rich preview on hover." },
     ComponentEntry { slug: "icon", display_name: "Icon", description: "SVG icon from registry." },
     ComponentEntry { slug: "icon-button", display_name: "IconButton", description: "Icon-only button." },
-    ComponentEntry { slug: "inline", display_name: "Inline", description: "Horizontal flex layout." },
     ComponentEntry { slug: "list-card", display_name: "ListCard", description: "Structured list item card." },
     ComponentEntry { slug: "menu", display_name: "Menu", description: "Dropdown menu." },
     ComponentEntry { slug: "menubar", display_name: "Menubar", description: "Horizontal menu bar." },
@@ -92,7 +89,7 @@ pub static PRIMITIVES: &[ComponentEntry] = &[
 
 pub static COMPOSITES: &[ComponentEntry] = &[
     ComponentEntry { slug: "audio-player", display_name: "AudioPlayer", description: "Audio playback controls." },
-    ComponentEntry { slug: "autonomous-list", display_name: "AutonomousList", description: "Self-managing list." },
+    ComponentEntry { slug: "editable-list", display_name: "EditableList", description: "Self-managing editable list." },
     ComponentEntry { slug: "block-editor", display_name: "BlockEditor", description: "Block-based content editor." },
     ComponentEntry { slug: "breadcrumbs", display_name: "Breadcrumbs", description: "Navigation trail." },
     ComponentEntry { slug: "card-radio-group", display_name: "CardRadioGroup", description: "Radio selection across cards." },
@@ -115,7 +112,7 @@ pub static COMPOSITES: &[ComponentEntry] = &[
     ComponentEntry { slug: "reorderable-list", display_name: "ReorderableList", description: "Drag-and-drop list." },
     ComponentEntry { slug: "selection-summary", display_name: "SelectionSummary", description: "Current selection state." },
     ComponentEntry { slug: "slug-field", display_name: "SlugField", description: "URL-safe slug field." },
-    ComponentEntry { slug: "state-tile", display_name: "StateTile", description: "Compact label-value tile." },
+    ComponentEntry { slug: "metric-tile", display_name: "MetricTile", description: "Compact label-value tile." },
     ComponentEntry { slug: "toast-stack", display_name: "ToastStack", description: "Stacked notification manager." },
     ComponentEntry { slug: "video-player", display_name: "VideoPlayer", description: "Video playback controls." },
 ];
@@ -123,8 +120,5 @@ pub static COMPOSITES: &[ComponentEntry] = &[
 pub static SHELLS: &[ComponentEntry] = &[
     ComponentEntry { slug: "detail-section", display_name: "DetailSection", description: "Titled detail section." },
     ComponentEntry { slug: "detail-shell", display_name: "DetailShell", description: "Full detail page layout." },
-    ComponentEntry { slug: "embed-shell", display_name: "EmbedShell", description: "Container for external content." },
-    ComponentEntry { slug: "grid-shell", display_name: "GridShell", description: "Grid layout browse view." },
-    ComponentEntry { slug: "list-shell", display_name: "ListShell", description: "List layout browse view." },
     ComponentEntry { slug: "picker-shell", display_name: "PickerShell", description: "Search-and-select picker." },
 ];

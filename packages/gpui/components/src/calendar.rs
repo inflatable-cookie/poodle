@@ -5,7 +5,7 @@ use gpui::*;
 use pug_gpui::GpuiThemeProvider;
 use pug_gpui_primitives::CalendarSpec;
 
-use crate::theme_ext::resolve_color;
+use crate::theme_ext::{resolve_color, resolve_opacity, resolve_radius};
 
 /// Weekday header labels (Sunday-first; rotated at render time based on spec).
 const WEEKDAYS_SUN: [&str; 7] = ["Su", "Mo", "Tu", "We", "Th", "Fr", "Sa"];
@@ -99,12 +99,15 @@ impl IntoElement for PugCalendar {
         let theme = &self.theme;
         let spec = &self.spec;
 
+        let control_radius = resolve_radius(theme, "semantic.radius.control");
+
         let accent = resolve_color(theme, "semantic.color.accent.base");
         let text_primary = resolve_color(theme, "semantic.color.text.primary");
         let text_secondary = resolve_color(theme, "semantic.color.text.secondary");
         let text_inverse = resolve_color(theme, "semantic.color.text.inverse");
         let surface_bg = resolve_color(theme, "semantic.color.background.surface");
         let border = resolve_color(theme, "semantic.color.border.default");
+        let disabled_opacity = resolve_opacity(theme, "semantic.state.opacity.disabled");
 
         let selected_date = spec.current_value().map(|s| s.to_string());
         let selected_day = selected_date.as_deref().and_then(Self::parse_day);
@@ -153,7 +156,7 @@ impl IntoElement for PugCalendar {
             .border_color(border);
 
         if spec.is_disabled {
-            cal = cal.opacity(0.48);
+            cal = cal.opacity(disabled_opacity);
         }
 
         // Month header
@@ -210,7 +213,7 @@ impl IntoElement for PugCalendar {
                         .flex()
                         .items_center()
                         .justify_center()
-                        .rounded(px(6.0))
+                        .rounded(control_radius)
                         .text_sm();
 
                     if is_selected {

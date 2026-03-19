@@ -5,7 +5,7 @@ use gpui::*;
 use pug_gpui::GpuiThemeProvider;
 use pug_gpui_primitives::{DrawerEdge, DrawerSpec};
 
-use crate::theme_ext::resolve_color;
+use crate::theme_ext::{resolve_color, resolve_px, resolve_radius};
 
 /// A real GPUI drawer component backed by `DrawerSpec`.
 ///
@@ -47,21 +47,27 @@ impl IntoElement for PugDrawer {
         let theme = &self.theme;
         let spec = &self.spec;
 
+        let inline_gap = resolve_px(theme, "semantic.space.inline.sm");
+        let panel_padding = resolve_px(theme, "semantic.space.panel.x");
+        let surface_radius = resolve_radius(theme, "semantic.radius.surface");
+
         let surface_bg = resolve_color(theme, spec.surface_fill_token());
         let border = resolve_color(theme, "semantic.color.border.default");
+        let text_primary = resolve_color(theme, "semantic.color.text.primary");
         let text_secondary = resolve_color(theme, "semantic.color.text.secondary");
 
         let is_left = spec.edge == DrawerEdge::Left || spec.edge == DrawerEdge::Top;
 
-        // Drawer panel
+        // Drawer panel — content-driven width via flex
         let mut panel = div()
-            .w(px(200.0))
+            .min_w(px(200.0))
             .h_full()
             .bg(surface_bg)
-            .p(px(12.0))
+            .rounded(surface_radius)
+            .p(panel_padding)
             .flex()
             .flex_col()
-            .gap(px(8.0));
+            .gap(inline_gap);
 
         // Border on the side facing the main area
         if is_left {
@@ -72,7 +78,12 @@ impl IntoElement for PugDrawer {
 
         // Title
         if let Some(ref title) = spec.title {
-            panel = panel.child(div().text_sm().child(title.clone()));
+            panel = panel.child(
+                div()
+                    .text_sm()
+                    .text_color(text_primary)
+                    .child(title.clone()),
+            );
         }
 
         // Description
@@ -107,7 +118,7 @@ impl IntoElement for PugDrawer {
                 )
         };
 
-        let mut row = div().flex().h(px(120.0));
+        let mut row = div().flex().h_full();
 
         if is_left {
             row = row.child(panel).child(main);

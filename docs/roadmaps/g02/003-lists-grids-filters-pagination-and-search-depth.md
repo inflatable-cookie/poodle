@@ -8,21 +8,18 @@ Primary repos: `pug`
 
 ## Goals
 
-- [x] define reusable list and grid shells
 - [x] define filter and search-shell contracts
 - [x] define pagination and infinite or progressive loading patterns where
   needed
 
 ## Execution Checklist
 
-- [x] define list-shell and grid-shell families
 - [x] define filter and search composition rules
 - [x] define pagination versus progressive-loading guidance
 - [x] define empty, loading, and no-results states for these shells
 
 ## Acceptance Criteria
 
-- [x] list and grid shells are explicit
 - [x] filter and search-shell contracts are explicit
 - [x] pagination posture is explicit
 

@@ -5,7 +5,7 @@ use gpui::*;
 use pug_gpui::GpuiThemeProvider;
 use pug_gpui_composites::EmptyStateSpec;
 
-use crate::theme_ext::{resolve_color, resolve_px};
+use crate::theme_ext::{resolve_color, resolve_px, resolve_radius};
 
 /// A real GPUI empty state component backed by `EmptyStateSpec`.
 ///
@@ -48,6 +48,8 @@ impl IntoElement for PugEmptyState {
         let theme = &self.theme;
         let spec = &self.spec;
 
+        let inline_gap = resolve_px(theme, "semantic.space.inline.sm");
+        let control_radius = resolve_radius(theme, "semantic.radius.control");
         let gap = resolve_px(theme, spec.layout_gap_token());
         let text_primary = resolve_color(theme, "semantic.color.text.primary");
         let text_secondary = resolve_color(theme, "semantic.color.text.secondary");
@@ -98,7 +100,7 @@ impl IntoElement for PugEmptyState {
 
         // Actions
         if !spec.actions.is_empty() {
-            let mut actions_row = div().flex().gap(px(8.0)).items_center();
+            let mut actions_row = div().flex().gap(inline_gap).items_center();
 
             for action in &spec.actions {
                 let is_primary = action.variant == pug_gpui_primitives::ButtonVariant::Primary;
@@ -110,7 +112,7 @@ impl IntoElement for PugEmptyState {
                     .cursor_pointer()
                     .px(px(16.0))
                     .py(px(8.0))
-                    .rounded(px(6.0))
+                    .rounded(control_radius)
                     .text_sm()
                     .font_weight(FontWeight::MEDIUM)
                     .when(is_primary, |el| {

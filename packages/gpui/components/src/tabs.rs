@@ -10,7 +10,7 @@ use gpui::*;
 use pug_gpui::GpuiThemeProvider;
 use pug_gpui_primitives::{TabsSpec, TabVariant};
 
-use crate::theme_ext::resolve_color;
+use crate::theme_ext::{color_mix, resolve_color, resolve_opacity, resolve_px, resolve_radius};
 
 /// A real GPUI tabs component backed by `TabsSpec`.
 pub struct PugTabs {
@@ -55,9 +55,16 @@ impl PugTabs {
 
     fn render_underline(&self) -> Div {
         let theme = &self.theme;
+        let inline_padding = resolve_px(theme, "semantic.space.inline.md");
+        let control_y = resolve_px(theme, "semantic.space.control.y");
+        let disabled_opacity = resolve_opacity(theme, "semantic.state.opacity.disabled");
         let accent = resolve_color(theme, "semantic.color.accent.base");
         let border = resolve_color(theme, "semantic.color.border.default");
         let text_secondary = resolve_color(theme, "semantic.color.text.secondary");
+        let elevated = resolve_color(theme, "semantic.color.background.elevated");
+
+        // Contract: hover = color-mix with elevated
+        let hover_bg = color_mix(elevated, elevated, 0.5);
 
         let current_value = self.spec.current_value().map(|s| s.to_string());
 
@@ -73,8 +80,8 @@ impl PugTabs {
 
             let mut tab = div()
                 .id(tab_id)
-                .px(px(12.0))
-                .py(px(8.0))
+                .px(inline_padding)
+                .py(control_y)
                 .text_sm();
 
             if is_active {
@@ -87,11 +94,11 @@ impl PugTabs {
             }
 
             if is_disabled {
-                tab = tab.opacity(0.48);
+                tab = tab.opacity(disabled_opacity);
             } else {
                 tab = tab
                     .cursor_pointer()
-                    .hover(|s| s.bg(hsla(0.0, 0.0, 0.5, 0.04)));
+                    .hover(move |s| s.bg(hover_bg));
             }
 
             tab = tab.child(tab_def.label.clone());
@@ -103,25 +110,30 @@ impl PugTabs {
 
     fn render_pill(&self) -> Div {
         let theme = &self.theme;
+        let list_gap = resolve_px(theme, self.spec.list_gap_token());
+        let control_y = resolve_px(theme, "semantic.space.control.y");
+        let control_x = resolve_px(theme, "semantic.space.control.x");
+        let disabled_opacity = resolve_opacity(theme, "semantic.state.opacity.disabled");
         let accent = resolve_color(theme, self.spec.indicator_token());
         let border_subtle = resolve_color(theme, self.spec.list_border_token());
         let text_primary = resolve_color(theme, "semantic.color.text.primary");
         let text_secondary = resolve_color(theme, "semantic.color.text.secondary");
+        let pill_radius = resolve_radius(theme, "semantic.radius.pill");
 
         let current_value = self.spec.current_value().map(|s| s.to_string());
 
-        // Container border: border-subtle with 68% opacity mix (matching Svelte color-mix)
+        // Container border: border-subtle with 68% opacity mix
         let container_border = border_subtle.opacity(border_subtle.a * self.spec.pill_border_opacity());
 
         // Outer pill container
         let mut tabs = div()
             .flex()
             .items_center()
-            .gap(px(2.0))
-            .rounded(px(999.0))
+            .gap(list_gap)
+            .rounded(pill_radius)
             .border_2()
             .border_color(container_border)
-            .p(px(3.0));
+            .p(list_gap);
 
         for tab_def in &self.spec.tabs {
             let is_active = current_value.as_deref() == Some(&tab_def.value);
@@ -130,10 +142,10 @@ impl PugTabs {
 
             let mut tab = div()
                 .id(tab_id)
-                .px(px(10.0))
-                .py(px(3.0))
-                .rounded(px(999.0))
-                .text_size(px(12.0))
+                .px(control_x)
+                .py(control_y)
+                .rounded(pill_radius)
+                .text_xs()
                 .font_weight(FontWeight::SEMIBOLD);
 
             if is_active {
@@ -146,7 +158,7 @@ impl PugTabs {
             }
 
             if is_disabled {
-                tab = tab.opacity(0.48);
+                tab = tab.opacity(disabled_opacity);
             } else {
                 tab = tab.cursor_pointer();
             }
@@ -169,6 +181,7 @@ impl IntoElement for PugTabs {
         };
 
         let current_value = self.spec.current_value().map(|s| s.to_string());
+        let panel_padding = resolve_px(&self.theme, "semantic.space.panel.y");
 
         // Content pane
         let mut wrapper = div().flex().flex_col().child(tab_row);
@@ -176,7 +189,7 @@ impl IntoElement for PugTabs {
         // Show content for active tab
         for (value, content) in self.content {
             if current_value.as_deref() == Some(&value) {
-                wrapper = wrapper.child(div().p(px(12.0)).child(content));
+                wrapper = wrapper.child(div().p(panel_padding).child(content));
                 break;
             }
         }

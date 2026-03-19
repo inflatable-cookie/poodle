@@ -4,9 +4,9 @@ use gpui::prelude::FluentBuilder;
 use gpui::*;
 use pug_adapter::ThemeProvider;
 use pug_gpui::GpuiThemeProvider;
-use pug_gpui_workstation::{ActionDiscoveryPanelSpec, DiscoveryState};
+use pug_gpui_composites::{ActionDiscoveryPanelSpec, DiscoveryState};
 
-use crate::theme_ext::resolve_color;
+use crate::theme_ext::{resolve_color, resolve_opacity};
 
 /// A real GPUI action discovery panel backed by `ActionDiscoveryPanelSpec`.
 ///
@@ -54,6 +54,8 @@ impl IntoElement for PugActionDiscoveryPanel {
         let text_secondary = resolve_color(theme, "semantic.color.text.secondary");
         let text_muted = resolve_color(theme, "semantic.color.text.muted");
         let border = resolve_color(theme, "semantic.color.border.default");
+        let disabled_opacity = resolve_opacity(theme, "semantic.state.opacity.disabled");
+        let hover_bg = resolve_color(theme, "semantic.color.background.elevated");
         let gap = theme.resolve_space(spec.gap_token());
 
         let mut panel = div()
@@ -143,11 +145,11 @@ impl IntoElement for PugActionDiscoveryPanel {
                     .text_color(text_primary);
 
                 if action.is_disabled {
-                    row = row.opacity(0.48);
+                    row = row.opacity(disabled_opacity);
                 } else {
                     row = row
                         .cursor_pointer()
-                        .hover(|s| s.bg(hsla(0.0, 0.0, 0.5, 0.06)));
+                        .hover(|s| s.bg(hover_bg));
                 }
 
                 // Left: title + badge

@@ -5,7 +5,7 @@ use gpui::*;
 use pug_gpui::GpuiThemeProvider;
 use pug_gpui_primitives::FileUploadSpec;
 
-use crate::theme_ext::resolve_color;
+use crate::theme_ext::{resolve_color, resolve_opacity, resolve_px, resolve_radius};
 
 /// A real GPUI file upload drop zone component backed by `FileUploadSpec`.
 pub struct PugFileUpload {
@@ -29,11 +29,16 @@ impl IntoElement for PugFileUpload {
         let theme = &self.theme;
         let spec = &self.spec;
 
+        let inline_padding = resolve_px(theme, "semantic.space.inline.md");
+        let inline_gap = resolve_px(theme, "semantic.space.inline.sm");
+        let control_radius = resolve_radius(theme, "semantic.radius.control");
+
         let fill = resolve_color(theme, spec.fill_token());
         let border = resolve_color(theme, spec.border_token());
         let text_color = resolve_color(theme, spec.text_color_token());
         let text_secondary = resolve_color(theme, "semantic.color.text.secondary");
         let accent = resolve_color(theme, "semantic.color.accent.base");
+        let disabled_opacity = resolve_opacity(theme, "semantic.state.opacity.disabled");
 
         let label = if spec.is_dragging {
             "Drop files here"
@@ -42,9 +47,9 @@ impl IntoElement for PugFileUpload {
         };
 
         let browse_btn = div()
-            .px(px(12.0))
+            .px(inline_padding)
             .py(px(6.0))
-            .rounded(px(6.0))
+            .rounded(control_radius)
             .border_1()
             .border_color(accent)
             .text_sm()
@@ -72,7 +77,7 @@ impl IntoElement for PugFileUpload {
             .flex_col()
             .items_center()
             .justify_center()
-            .gap(px(8.0))
+            .gap(inline_gap)
             .p(px(16.0))
             .child(
                 div()
@@ -84,7 +89,7 @@ impl IntoElement for PugFileUpload {
             .child(accept_hint);
 
         if spec.is_disabled {
-            zone = zone.opacity(0.48);
+            zone = zone.opacity(disabled_opacity);
         }
 
         zone.into_any_element()

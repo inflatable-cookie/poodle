@@ -1,10 +1,11 @@
 //! PugSlider — real GPUI component backed by SliderSpec.
 
 use gpui::*;
+use pug_adapter::ThemeProvider;
 use pug_gpui::GpuiThemeProvider;
 use pug_gpui_primitives::SliderSpec;
 
-use crate::theme_ext::resolve_color;
+use crate::theme_ext::{resolve_color, resolve_opacity, resolve_px};
 
 /// A real GPUI slider component backed by `SliderSpec`.
 pub struct PugSlider {
@@ -28,60 +29,61 @@ impl IntoElement for PugSlider {
         let theme = &self.theme;
         let spec = &self.spec;
 
+        let disabled_opacity = resolve_opacity(theme, "semantic.state.opacity.disabled");
         let accent = resolve_color(theme, spec.range_fill_token());
         let border = resolve_color(theme, "semantic.color.border.default");
         let surface_bg = resolve_color(theme, "semantic.color.background.surface");
+        let text_secondary = resolve_color(theme, "semantic.color.text.secondary");
+        let stack_gap = resolve_px(theme, "semantic.space.stack.sm");
+
+        // Contract: track height = 0.25rem (4px), thumb = 1rem (16px)
+        let track_height = resolve_px(theme, "semantic.space.stack.sm");
+        let track_f = theme.resolve_space("semantic.space.stack.sm");
+        let track_radius = px(track_f / 2.0);
+        let thumb_f = theme.resolve_space("semantic.size.icon.md");
+        let thumb_size = px(thumb_f);
+        let thumb_radius = px(thumb_f / 2.0);
 
         let progress = spec.normalized_progress().clamp(0.0, 1.0) as f32;
 
-        // Track
+        // Track with filled portion
         let track = div()
             .w_full()
-            .h(px(4.0))
-            .rounded(px(2.0))
+            .h(track_height)
+            .rounded(track_radius)
             .bg(surface_bg)
             .border_1()
             .border_color(border.opacity(0.3))
             .relative()
-            // Filled portion
             .child(
                 div()
                     .h_full()
-                    .rounded(px(2.0))
+                    .rounded(track_radius)
                     .bg(accent)
                     .w(relative(progress)),
             );
 
-        // Thumb (positioned at progress point)
-        let thumb = div()
-            .w(px(16.0))
-            .h(px(16.0))
-            .rounded(px(8.0))
-            .bg(accent)
-            .border_1()
-            .border_color(accent)
-            .shadow_sm();
+        // Value labels
+        let labels = div()
+            .flex()
+            .items_center()
+            .justify_between()
+            .text_xs()
+            .text_color(text_secondary)
+            .child(format!("{:.0}", spec.min))
+            .child(format!("{:.0}", spec.clamped_value()))
+            .child(format!("{:.0}", spec.max));
 
         let mut wrapper = div()
             .w_full()
             .flex()
             .flex_col()
-            .gap(px(4.0))
+            .gap(stack_gap)
             .child(track)
-            .child(
-                div()
-                    .flex()
-                    .items_center()
-                    .justify_between()
-                    .text_xs()
-                    .text_color(resolve_color(theme, "semantic.color.text.secondary"))
-                    .child(format!("{:.0}", spec.min))
-                    .child(format!("{:.0}", spec.clamped_value()))
-                    .child(format!("{:.0}", spec.max)),
-            );
+            .child(labels);
 
         if spec.is_disabled {
-            wrapper = wrapper.opacity(0.48);
+            wrapper = wrapper.opacity(disabled_opacity);
         }
 
         wrapper.into_any_element()

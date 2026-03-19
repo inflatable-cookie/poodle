@@ -15,7 +15,7 @@ apps. The first composite tranche should prove that broader utility.
 
 - [x] define cards, headers, breadcrumbs, detail rows, detail sections, and
   information-display shells
-- [x] define filter-toolbar, list-shell, grid-shell, and empty-state composites
+- [x] define filter-toolbar and empty-state composites
 - [x] define how primitives compose into app-facing patterns without leaking
   app-specific logic
 

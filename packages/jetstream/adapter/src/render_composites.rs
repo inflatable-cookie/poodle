@@ -7,8 +7,8 @@ use pug_adapter::{RenderComponent, ThemeProvider};
 use pug_composites::{
     AudioPlayerSpec, AutonomousListSpec, BlockEditorSpec, BreadcrumbsSpec, CardRadioGroupSpec,
     ConfirmActionSpec, DataTableSpec, DetailSectionSpec, DetailShellSpec, EmbedInputSpec,
-    EmbedPreviewSpec, EmbedShellSpec, EmptyStateSpec, FilterToolbarSpec, FormShellSpec,
-    GridShellSpec, InlineEditableFieldSpec, InlineRemediationSpec, ListCardSpec, ListShellSpec,
+    EmbedPreviewSpec, EmptyStateSpec, FilterToolbarSpec, FormShellSpec,
+    InlineEditableFieldSpec, InlineRemediationSpec, ListCardSpec,
     LogListSpec, MarkdownEditorSpec, MediaPickerSpec, MediaPreviewSpec, MediaThumbnailSpec,
     NavCardGridSpec, NavCardSpec, OrderBySpec, PageHeaderSpec, PageLoadingSpec,
     PaginationSummarySpec, PickerShellSpec, RelationPickerSpec, RemediationBannerSpec,
@@ -69,22 +69,6 @@ impl RenderComponent<DataTableSpec> for JetstreamAdapter {
     fn render(&self, _spec: &DataTableSpec, style: &StyleDescriptor, _theme: &dyn ThemeProvider) -> JetstreamNodeHandle {
         let mapped = map_style(style);
         JetstreamNodeHandle::new("data-table", "DataTableSpec", WidgetKind::List, mapped)
-    }
-}
-
-impl RenderComponent<ListShellSpec> for JetstreamAdapter {
-    type Target = JetstreamTarget;
-    fn render(&self, _spec: &ListShellSpec, style: &StyleDescriptor, _theme: &dyn ThemeProvider) -> JetstreamNodeHandle {
-        let mapped = map_style(style);
-        JetstreamNodeHandle::new("list-shell", "ListShellSpec", WidgetKind::List, mapped)
-    }
-}
-
-impl RenderComponent<GridShellSpec> for JetstreamAdapter {
-    type Target = JetstreamTarget;
-    fn render(&self, _spec: &GridShellSpec, style: &StyleDescriptor, _theme: &dyn ThemeProvider) -> JetstreamNodeHandle {
-        let mapped = map_style(style);
-        JetstreamNodeHandle::new("grid-shell", "GridShellSpec", WidgetKind::Panel, mapped)
     }
 }
 
@@ -282,14 +266,6 @@ impl RenderComponent<EmbedPreviewSpec> for JetstreamAdapter {
     }
 }
 
-impl RenderComponent<EmbedShellSpec> for JetstreamAdapter {
-    type Target = JetstreamTarget;
-    fn render(&self, _spec: &EmbedShellSpec, style: &StyleDescriptor, _theme: &dyn ThemeProvider) -> JetstreamNodeHandle {
-        let mapped = map_style(style);
-        JetstreamNodeHandle::new("embed-shell", "EmbedShellSpec", WidgetKind::Panel, mapped)
-    }
-}
-
 impl RenderComponent<AutonomousListSpec> for JetstreamAdapter {
     type Target = JetstreamTarget;
     fn render(&self, _spec: &AutonomousListSpec, style: &StyleDescriptor, _theme: &dyn ThemeProvider) -> JetstreamNodeHandle {
@@ -374,8 +350,6 @@ mod tests {
 
     // Data composites
     #[test] fn data_table() { assert_eq!(a().render(&DataTableSpec::new(vec![], vec![]), &s(), &t()).widget_kind, WidgetKind::List); }
-    #[test] fn list_shell() { assert_eq!(a().render(&ListShellSpec::new(), &s(), &t()).widget_kind, WidgetKind::List); }
-    #[test] fn grid_shell() { assert_eq!(a().render(&GridShellSpec::new(), &s(), &t()).spec_type, "GridShellSpec"); }
     #[test] fn detail_shell() { assert_eq!(a().render(&DetailShellSpec::new(), &s(), &t()).spec_type, "DetailShellSpec"); }
     #[test] fn detail_section() { assert_eq!(a().render(&DetailSectionSpec::new("S"), &s(), &t()).spec_type, "DetailSectionSpec"); }
     #[test] fn filter_toolbar() { assert_eq!(a().render(&FilterToolbarSpec::new(), &s(), &t()).spec_type, "FilterToolbarSpec"); }
@@ -402,7 +376,6 @@ mod tests {
     #[test] fn block_editor() { assert_eq!(a().render(&BlockEditorSpec::new(), &s(), &t()).spec_type, "BlockEditorSpec"); }
     #[test] fn embed_input() { assert_eq!(a().render(&EmbedInputSpec::new(), &s(), &t()).spec_type, "EmbedInputSpec"); }
     #[test] fn embed_preview() { assert_eq!(a().render(&EmbedPreviewSpec::new(), &s(), &t()).spec_type, "EmbedPreviewSpec"); }
-    #[test] fn embed_shell() { assert_eq!(a().render(&EmbedShellSpec::new(), &s(), &t()).spec_type, "EmbedShellSpec"); }
     #[test] fn autonomous_list() { assert_eq!(a().render(&AutonomousListSpec::new(), &s(), &t()).widget_kind, WidgetKind::List); }
     #[test] fn reorderable_list() { assert_eq!(a().render(&ReorderableListSpec::new(), &s(), &t()).widget_kind, WidgetKind::List); }
     #[test] fn breadcrumbs() { assert_eq!(a().render(&BreadcrumbsSpec::new(vec![]), &s(), &t()).spec_type, "BreadcrumbsSpec"); }

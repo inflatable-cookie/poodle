@@ -101,8 +101,8 @@ No component-owned events beyond child control behavior.
 
 ### Composition
 
-- parent expectations: `ListShell`, `GridShell`, browser-style pages, settings
-  views with search/filter affordances
+- parent expectations: browser-style pages, settings views with search/filter
+  affordances
 - child expectations: search fields, selects, segmented controls, buttons,
   badges, pills
 - resizing rules: primary controls remain first in reading and focus order
@@ -181,5 +181,5 @@ A toolbar with search and a secondary action button:
 
 ## Next Task
 
-Use `FilterToolbar` inside `BrowseSearchShell`, `ListShell`, `GridShell`, and
-`DataTable` compositions, and keep query/filter execution owned by the host.
+Use `FilterToolbar` inside `BrowseSearchShell` and `DataTable` compositions, and
+keep query/filter execution owned by the host.

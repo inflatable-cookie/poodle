@@ -213,8 +213,6 @@ The first primitive contracts that explicitly exercise this baseline are:
 - `docs/contracts/composites/detail-row.md`
 - `docs/contracts/composites/detail-shell.md`
 - `docs/contracts/composites/filter-toolbar.md`
-- `docs/contracts/composites/list-shell.md`
-- `docs/contracts/composites/grid-shell.md`
 - `docs/contracts/composites/empty-state.md`
 - `docs/contracts/workstation/app-header.md`
 - `docs/contracts/workstation/project-header.md`

@@ -32,7 +32,7 @@ The first composite tranche is grouped into:
 
 - information display: `Card`, `PageHeader`, `Breadcrumbs`, `DetailRow`,
   `DetailSection`, `DetailShell`, `EmptyState`
-- browse shells: `FilterToolbar`, `ListShell`, `GridShell`
+- browse shells: `FilterToolbar`
 
 These families should cover:
 
@@ -68,7 +68,6 @@ They may not redefine primitive semantics.
 Examples:
 
 - `FilterToolbar` groups controls but does not redefine text-entry semantics
-- `ListShell` owns browse framing but not row-selection semantics
 - `DetailShell` owns scroll/state posture but not field-edit semantics
 
 ## Information Architecture Rule
@@ -142,7 +141,7 @@ Hosts still own:
 
 ## Collection Rule
 
-`ListShell` and `GridShell` define browse framing, not item semantics.
+Browse shells define browse framing, not item semantics.
 
 Therefore:
 
@@ -189,8 +188,6 @@ The first contracts that explicitly exercise this baseline are:
 - `docs/contracts/composites/detail-section.md`
 - `docs/contracts/composites/detail-shell.md`
 - `docs/contracts/composites/filter-toolbar.md`
-- `docs/contracts/composites/list-shell.md`
-- `docs/contracts/composites/grid-shell.md`
 - `docs/contracts/composites/empty-state.md`
 
 ## Next Task

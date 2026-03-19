@@ -6,9 +6,9 @@ Depends on: `005-product-composite-composition-and-information-architecture-rule
 
 ## Purpose
 
-Freeze the composition rules for browse-heavy surfaces so list shells, grid
-shells, filter toolbars, query entry, pagination, and progressive loading all
-share one documented posture.
+Freeze the composition rules for browse-heavy surfaces so filter toolbars,
+query entry, pagination, and progressive loading all share one documented
+posture.
 
 ## Search And Filter Composition Rule
 
@@ -35,7 +35,7 @@ runtimes.
 
 ## Browse Shell Neutrality Rule
 
-List and grid shells own browse framing, not the underlying domain model.
+Browse shells own browse framing, not the underlying domain model.
 
 Hosts still own:
 
@@ -94,12 +94,8 @@ the native accessibility tree.
 ## Seed Evidence
 
 - `docs/contracts/composites/filter-toolbar.md`
-- `docs/contracts/composites/list-shell.md`
-- `docs/contracts/composites/grid-shell.md`
 - `docs/contracts/composites/browse-search-shell.md`
 - `packages/svelte/composites/src/FilterToolbar.svelte`
-- `packages/svelte/composites/src/ListShell.svelte`
-- `packages/svelte/composites/src/GridShell.svelte`
 - `packages/svelte/preview/src/App.svelte`
 
 ## Next Task

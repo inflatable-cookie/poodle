@@ -4,7 +4,7 @@ use gpui::prelude::FluentBuilder;
 use gpui::*;
 use pug_gpui::GpuiThemeProvider;
 
-use crate::theme_ext::{resolve_color, resolve_radius};
+use crate::theme_ext::{resolve_color, resolve_opacity, resolve_radius};
 
 /// A toggle button that renders with a pressed/unpressed visual state.
 pub struct PugToggle {
@@ -64,6 +64,7 @@ impl IntoElement for PugToggle {
         };
         let border = resolve_color(theme, "semantic.color.border.default");
         let radius = resolve_radius(theme, "semantic.radius.control");
+        let disabled_opacity = resolve_opacity(theme, "semantic.state.opacity.disabled");
 
         let id = SharedString::from(format!("pug-toggle-{}", self.label));
 
@@ -83,7 +84,7 @@ impl IntoElement for PugToggle {
             .child(self.label);
 
         if self.is_disabled {
-            el = el.opacity(0.5);
+            el = el.opacity(disabled_opacity);
         } else {
             el = el.cursor_pointer();
             if let Some(handler) = self.on_click {

@@ -50,6 +50,7 @@ export type {
   ActiveSort,
   AspectRatio,
   BlockType,
+  BlockTypeDefinition,
   BrowseState,
   BulkAction,
   CardRadioItem,

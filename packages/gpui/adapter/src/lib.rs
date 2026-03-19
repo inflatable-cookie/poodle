@@ -182,8 +182,6 @@ const SUPPORTED_COMPOSITES: &[&str] = &[
     "ConfirmActionSpec",
     // g07.008 — data, browse, detail, and media
     "DataTableSpec",
-    "ListShellSpec",
-    "GridShellSpec",
     "DetailShellSpec",
     "DetailSectionSpec",
     "FilterToolbarSpec",
@@ -201,7 +199,6 @@ const SUPPORTED_COMPOSITES: &[&str] = &[
     "BlockEditorSpec",
     "EmbedInputSpec",
     "EmbedPreviewSpec",
-    "EmbedShellSpec",
     "AutonomousListSpec",
     "ReorderableListSpec",
     "BreadcrumbsSpec",

@@ -3,9 +3,9 @@
 use gpui::prelude::FluentBuilder;
 use gpui::*;
 use pug_gpui::GpuiThemeProvider;
-use pug_gpui_workstation::AppHeaderSpec;
+use pug_gpui_composites::AppHeaderSpec;
 
-use crate::theme_ext::resolve_color;
+use crate::theme_ext::{resolve_color, resolve_px};
 
 /// A real GPUI app header bar backed by `AppHeaderSpec`.
 ///
@@ -56,6 +56,9 @@ impl IntoElement for PugAppHeader {
         let theme = &self.theme;
         let spec = &self.spec;
 
+        let inline_padding = resolve_px(theme, "semantic.space.inline.md");
+        let inline_gap = resolve_px(theme, "semantic.space.inline.sm");
+
         let bg = resolve_color(theme, spec.background_token());
         let border = resolve_color(theme, "semantic.color.border.default");
         let text_primary = resolve_color(theme, "semantic.color.text.primary");
@@ -66,13 +69,13 @@ impl IntoElement for PugAppHeader {
             .justify_between()
             .w_full()
             .h(px(44.0))
-            .px(px(12.0))
+            .px(inline_padding)
             .bg(bg)
             .border_b_1()
             .border_color(border);
 
         // Left section: leading + title
-        let mut left = div().flex().items_center().gap(px(8.0)).flex_shrink_0();
+        let mut left = div().flex().items_center().gap(inline_gap).flex_shrink_0();
 
         if let Some(leading) = self.leading {
             left = left.child(leading);
@@ -91,7 +94,7 @@ impl IntoElement for PugAppHeader {
         header = header.child(left);
 
         // Right section: actions + utility
-        let mut right = div().flex().items_center().gap(px(8.0)).flex_shrink_0();
+        let mut right = div().flex().items_center().gap(inline_gap).flex_shrink_0();
 
         if let Some(primary_actions) = self.primary_actions {
             right = right.child(primary_actions);

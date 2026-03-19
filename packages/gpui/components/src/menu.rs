@@ -5,7 +5,7 @@ use gpui::*;
 use pug_gpui::GpuiThemeProvider;
 use pug_gpui_primitives::{MenuItemKind, MenuSpec};
 
-use crate::theme_ext::resolve_color;
+use crate::theme_ext::{resolve_color, resolve_opacity, resolve_radius};
 
 /// A real GPUI menu component backed by `MenuSpec`.
 pub struct PugMenu {
@@ -43,14 +43,17 @@ impl IntoElement for PugMenu {
     fn into_element(self) -> Self::Element {
         let theme = &self.theme;
 
+        let control_radius = resolve_radius(theme, "semantic.radius.control");
+
         let surface_bg = resolve_color(theme, self.spec.surface_fill_token());
         let border = resolve_color(theme, "semantic.color.border.default");
         let text_secondary = resolve_color(theme, "semantic.color.text.secondary");
         let accent = resolve_color(theme, "semantic.color.accent.base");
+        let disabled_opacity = resolve_opacity(theme, "semantic.state.opacity.disabled");
 
         let mut menu = div()
             .w(px(180.0))
-            .rounded(px(6.0))
+            .rounded(control_radius)
             .bg(surface_bg)
             .border_1()
             .border_color(border)
@@ -93,7 +96,7 @@ impl IntoElement for PugMenu {
                     .bg(accent.opacity(0.1))
                     .text_color(accent);
             } else if is_disabled {
-                row = row.text_color(text_secondary).opacity(0.48);
+                row = row.text_color(text_secondary).opacity(disabled_opacity);
             } else {
                 row = row
                     .cursor_pointer()

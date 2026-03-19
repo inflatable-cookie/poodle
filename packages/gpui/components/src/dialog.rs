@@ -4,7 +4,7 @@ use gpui::*;
 use pug_gpui::GpuiThemeProvider;
 use pug_gpui_primitives::DialogSpec;
 
-use crate::theme_ext::resolve_color;
+use crate::theme_ext::{resolve_color, resolve_px};
 
 /// A real GPUI dialog component backed by `DialogSpec`.
 ///
@@ -39,6 +39,8 @@ impl IntoElement for PugDialog {
     fn into_element(self) -> Self::Element {
         let theme = &self.theme;
         let spec = &self.spec;
+
+        let inline_gap = resolve_px(theme, "semantic.space.inline.sm");
 
         let surface_bg = resolve_color(theme, spec.surface_fill_token());
         let border = resolve_color(theme, "semantic.color.border.default");
@@ -75,7 +77,7 @@ impl IntoElement for PugDialog {
             dialog = dialog.child(
                 div()
                     .flex()
-                    .gap(px(8.0))
+                    .gap(inline_gap)
                     .justify_end()
                     .child(actions),
             );

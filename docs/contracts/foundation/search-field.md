@@ -252,6 +252,6 @@ Section 8 for the full root, focus, validation, and disabled token tables.
 - contract status: `detailed contract`
 - approvers: pending
 - downstream adopters: Aura browser/search fields, Spark browser/plugin search,
-  filter toolbars, list-shell search, browse-search-shell
+  filter toolbars, browse-search-shell
 - future follow-up: command-palette-specific ranking and discovery heuristics
   belong in workstation-layer milestones, not in the foundation search field

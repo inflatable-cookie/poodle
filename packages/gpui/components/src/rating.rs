@@ -2,9 +2,10 @@
 
 use gpui::*;
 use pug_gpui::GpuiThemeProvider;
-use pug_gpui_primitives::RatingSpec;
+use pug_gpui_primitives::{IconSize, IconSpec, RatingSpec};
 
-use crate::theme_ext::resolve_color;
+use crate::icon::PugIcon;
+use crate::theme_ext::{resolve_color, resolve_opacity, resolve_px};
 
 /// A real GPUI rating component backed by `RatingSpec`.
 pub struct PugRating {
@@ -31,8 +32,10 @@ impl IntoElement for PugRating {
         let active_color = resolve_color(theme, spec.active_color_token());
         let inactive_color = resolve_color(theme, spec.inactive_color_token());
         let filled = spec.filled_count();
+        let disabled_opacity = resolve_opacity(theme, "semantic.state.opacity.disabled");
+        let inline_gap = resolve_px(theme, "semantic.space.inline.sm");
 
-        let mut el = div().flex().items_center().gap(px(2.0));
+        let mut el = div().flex().items_center().gap(inline_gap);
 
         for i in 0..spec.max {
             let color = if i < filled {
@@ -42,15 +45,13 @@ impl IntoElement for PugRating {
             };
 
             el = el.child(
-                div()
-                    .text_sm()
-                    .text_color(color)
-                    .child("*"),
+                PugIcon::new(IconSpec::new("star").with_size(IconSize::Sm), theme)
+                    .with_color(color),
             );
         }
 
         if spec.is_disabled {
-            el = el.opacity(0.5);
+            el = el.opacity(disabled_opacity);
         }
 
         el.into_any_element()

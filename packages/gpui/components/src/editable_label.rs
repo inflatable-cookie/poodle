@@ -5,7 +5,7 @@ use gpui::*;
 use pug_gpui::GpuiThemeProvider;
 use pug_gpui_primitives::EditableLabelSpec;
 
-use crate::theme_ext::resolve_color;
+use crate::theme_ext::{resolve_color, resolve_opacity};
 
 /// A real GPUI editable label component backed by `EditableLabelSpec`.
 pub struct PugEditableLabel {
@@ -31,6 +31,7 @@ impl IntoElement for PugEditableLabel {
 
         let text_color = resolve_color(theme, spec.text_color_token());
         let border_color = resolve_color(theme, spec.edit_border_token());
+        let disabled_opacity = resolve_opacity(theme, "semantic.state.opacity.disabled");
 
         let display_text = if spec.value.is_empty() {
             spec.placeholder.clone().unwrap_or_default()
@@ -63,7 +64,7 @@ impl IntoElement for PugEditableLabel {
         }
 
         if spec.is_disabled {
-            el = el.opacity(0.5);
+            el = el.opacity(disabled_opacity);
         }
 
         el.into_any_element()

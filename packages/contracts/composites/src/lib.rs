@@ -9,15 +9,12 @@ mod detail_section;
 mod detail_shell;
 mod embed_input;
 mod embed_preview;
-mod embed_shell;
 mod empty_state;
 mod filter_toolbar;
 mod form_shell;
-mod grid_shell;
 mod inline_editable_field;
 mod inline_remediation;
 mod list_card;
-mod list_shell;
 mod log_list;
 mod markdown_editor;
 mod media_picker;
@@ -52,15 +49,12 @@ pub use detail_section::DetailSectionSpec;
 pub use detail_shell::{DetailShellSpec, DetailState};
 pub use embed_input::EmbedInputSpec;
 pub use embed_preview::EmbedPreviewSpec;
-pub use embed_shell::EmbedShellSpec;
 pub use empty_state::EmptyStateSpec;
 pub use filter_toolbar::FilterToolbarSpec;
 pub use form_shell::FormShellSpec;
-pub use grid_shell::GridShellSpec;
 pub use inline_editable_field::InlineEditableFieldSpec;
 pub use inline_remediation::InlineRemediationSpec;
 pub use list_card::ListCardSpec;
-pub use list_shell::ListShellSpec;
 pub use log_list::LogListSpec;
 pub use markdown_editor::MarkdownEditorSpec;
 pub use media_picker::MediaPickerSpec;
@@ -99,8 +93,6 @@ pub const FORM_VALIDATION_REMEDIATION_EXPORTS: &[&str] = &[
 ];
 pub const DATA_BROWSE_DETAIL_PICKER_MEDIA_EXPORTS: &[&str] = &[
     "DataTableSpec",
-    "ListShellSpec",
-    "GridShellSpec",
     "DetailShellSpec",
     "FilterToolbarSpec",
     "PaginationSummarySpec",
@@ -122,10 +114,10 @@ mod tests {
     use super::{
         AnnouncementMode, AspectRatio, BrowseState, DataTableSpec, DetailShellSpec, DetailState,
         EmptyStateSpec, EmptyStateVariant, FilterToolbarSpec, FormFieldState, FormSectionSpec,
-        FormShellSpec, GridShellSpec, InlineRemediationSpec, ListShellSpec, MediaKind,
-        MediaPreviewSpec, MediaState, MediaThumbnailSpec, MinColumnWidth, PaginationSummarySpec,
+        FormShellSpec, InlineRemediationSpec, MediaKind,
+        MediaPreviewSpec, MediaState, MediaThumbnailSpec, PaginationSummarySpec,
         PickerItemSpec, PickerShellSpec, PickerVariant, RelationPickerSpec, RemediationAction,
-        RemediationBannerSpec, ScrollOwner, SelectionMode, SelectionSummaryItem,
+        RemediationBannerSpec, SelectionMode, SelectionSummaryItem,
         SelectionSummarySpec, TableColumnSpec, TableRowSpec, TableSortDirection,
         ValidationSummaryEntry, ValidationSummarySpec,
     };
@@ -241,21 +233,6 @@ mod tests {
         assert_eq!(spec.select_all_state(), CheckState::Mixed);
         assert_eq!(spec.sortable_column_count(), 1);
         assert_eq!(spec.header_fill_token(), semantic::COLOR_BACKGROUND_SURFACE);
-    }
-
-    #[test]
-    fn list_and_grid_shells_preserve_browse_state_distinctions() {
-        let list = ListShellSpec::new()
-            .with_state(BrowseState::NoResults)
-            .with_scroll_owner(ScrollOwner::Shell);
-        let grid = GridShellSpec::new()
-            .with_state(BrowseState::Loading)
-            .with_min_column_width(MinColumnWidth::Lg);
-
-        assert!(list.is_stateful());
-        assert!(list.differentiates_no_results());
-        assert_eq!(list.viewport_fill_token(), semantic::COLOR_BACKGROUND_PANEL);
-        assert!(!grid.differentiates_no_results());
     }
 
     #[test]

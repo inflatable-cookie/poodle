@@ -18,19 +18,19 @@ export type LogEntry = {
   message: string;
 };
 
-export type BlockType =
-  | "paragraph"
-  | "heading"
-  | "code"
-  | "quote"
-  | "list"
-  | "image"
-  | "divider";
+export type BlockType = string;
+
+export type BlockTypeDefinition = {
+  type: BlockType;
+  label: string;
+  icon: string;
+};
 
 export type EditorBlock = {
   id: string;
   type: BlockType;
   content: string;
+  [key: string]: unknown;
 };
 
 export type TableColumn = {

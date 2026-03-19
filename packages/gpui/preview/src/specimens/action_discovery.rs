@@ -1,6 +1,6 @@
 use gpui::*;
 use pug_adapter::ThemeProvider;
-use pug_gpui_workstation::{ActionDiscoveryPanelSpec, ActionDiscoverySection, CommandActionItem, DiscoveryState};
+use pug_gpui_composites::{ActionDiscoveryPanelSpec, ActionDiscoverySection, CommandActionItem, DiscoveryState};
 use pug_gpui_components::PugActionDiscoveryPanel;
 use crate::app_state::AppState;
 use crate::style_bridge::color_to_hsla;

@@ -5,7 +5,7 @@ use gpui::*;
 use pug_gpui::GpuiThemeProvider;
 use pug_gpui_primitives::SplitButtonSpec;
 
-use crate::theme_ext::{resolve_color, resolve_px, resolve_radius};
+use crate::theme_ext::{resolve_color, resolve_opacity, resolve_px, resolve_radius};
 
 /// A real GPUI split button component backed by `SplitButtonSpec`.
 pub struct PugSplitButton {
@@ -49,11 +49,14 @@ impl IntoElement for PugSplitButton {
         let theme = &self.theme;
         let spec = &self.spec;
 
+        let inline_padding = resolve_px(theme, "semantic.space.inline.md");
+
         let fill = resolve_color(theme, spec.fill_token());
         let border = resolve_color(theme, spec.border_token());
         let separator = resolve_color(theme, spec.separator_token());
         let radius = resolve_radius(theme, "semantic.radius.control");
         let height = resolve_px(theme, "semantic.size.control-height");
+        let disabled_opacity = resolve_opacity(theme, "semantic.state.opacity.disabled");
 
         let label = spec.label.clone().unwrap_or_default();
         let main_id = SharedString::from("pug-split-btn-main");
@@ -63,7 +66,7 @@ impl IntoElement for PugSplitButton {
         let mut main_btn = div()
             .id(main_id)
             .h(height)
-            .px(px(12.0))
+            .px(inline_padding)
             .bg(fill)
             .rounded_l(radius)
             .border_1()
@@ -118,7 +121,7 @@ impl IntoElement for PugSplitButton {
             .child(dropdown_btn);
 
         if spec.is_disabled {
-            el = el.opacity(0.5);
+            el = el.opacity(disabled_opacity);
         }
 
         el.into_any_element()

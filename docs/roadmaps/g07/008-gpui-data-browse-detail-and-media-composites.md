@@ -15,8 +15,6 @@ composite specs in the GPUI adapter.
 | Spec | Element ID | Notes |
 |------|-----------|-------|
 | DataTableSpec | `data-table` | Sortable, selectable tabular data |
-| ListShellSpec | `list-shell` | Browse list container with state |
-| GridShellSpec | `grid-shell` | Browse grid container with column config |
 | DetailShellSpec | `detail-shell` | Detail view container with state |
 | DetailSectionSpec | `detail-section` | Titled detail content section |
 | FilterToolbarSpec | `filter-toolbar` | Query and filter controls |

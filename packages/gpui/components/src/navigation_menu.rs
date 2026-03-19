@@ -6,7 +6,7 @@ use pug_adapter::ThemeProvider;
 use pug_gpui::GpuiThemeProvider;
 use pug_gpui_primitives::NavigationMenuSpec;
 
-use crate::theme_ext::resolve_color;
+use crate::theme_ext::{resolve_color, resolve_opacity, resolve_px};
 
 /// A real GPUI navigation menu component backed by `NavigationMenuSpec`.
 ///
@@ -49,9 +49,12 @@ impl IntoElement for PugNavigationMenu {
     fn into_element(self) -> Self::Element {
         let theme = &self.theme;
 
+        let inline_padding = resolve_px(theme, "semantic.space.inline.md");
+
         let accent = resolve_color(theme, "semantic.color.accent.base");
         let border = resolve_color(theme, "semantic.color.border.default");
         let text_secondary = resolve_color(theme, "semantic.color.text.secondary");
+        let disabled_opacity = resolve_opacity(theme, "semantic.state.opacity.disabled");
         let gap = theme.resolve_space(self.spec.viewport_gap_token());
 
         let current_value = self.spec.current_value().map(|s| s.to_string());
@@ -70,7 +73,7 @@ impl IntoElement for PugNavigationMenu {
 
             let mut tab = div()
                 .id(item_id)
-                .px(px(12.0))
+                .px(inline_padding)
                 .py(px(8.0))
                 .text_sm();
 
@@ -84,7 +87,7 @@ impl IntoElement for PugNavigationMenu {
             }
 
             if is_disabled {
-                tab = tab.opacity(0.48);
+                tab = tab.opacity(disabled_opacity);
             } else {
                 tab = tab
                     .cursor_pointer()

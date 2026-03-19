@@ -6,7 +6,7 @@ use pug_adapter::ThemeProvider;
 use pug_gpui::GpuiThemeProvider;
 use pug_gpui_primitives::{Orientation, TabStripSpec};
 
-use crate::theme_ext::resolve_color;
+use crate::theme_ext::{resolve_color, resolve_opacity};
 
 /// A real GPUI tab strip component backed by `TabStripSpec`.
 ///
@@ -62,6 +62,8 @@ impl IntoElement for PugTabStrip {
         let accent = resolve_color(theme, "semantic.color.accent.base");
         let border = resolve_color(theme, "semantic.color.border.default");
         let text_secondary = resolve_color(theme, "semantic.color.text.secondary");
+        let disabled_opacity = resolve_opacity(theme, "semantic.state.opacity.disabled");
+        let hover_bg = resolve_color(theme, "semantic.color.background.elevated");
         let gap = theme.resolve_space(self.spec.item_gap_token());
 
         let current_value = self.spec.current_value().map(|s| s.to_string());
@@ -108,11 +110,11 @@ impl IntoElement for PugTabStrip {
             }
 
             if is_disabled {
-                tab = tab.opacity(0.48);
+                tab = tab.opacity(disabled_opacity);
             } else {
                 tab = tab
                     .cursor_pointer()
-                    .hover(|s| s.bg(hsla(0.0, 0.0, 0.5, 0.04)));
+                    .hover(|s| s.bg(hover_bg));
             }
 
             tab = tab.child(item.label.clone());

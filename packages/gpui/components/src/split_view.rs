@@ -3,7 +3,7 @@
 use gpui::prelude::FluentBuilder;
 use gpui::*;
 use pug_gpui::GpuiThemeProvider;
-use pug_gpui_workstation::{SplitOrientation, SplitViewSpec};
+use pug_gpui_composites::{SplitOrientation, SplitViewSpec};
 
 use crate::theme_ext::resolve_color;
 

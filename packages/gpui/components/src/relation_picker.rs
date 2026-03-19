@@ -5,7 +5,7 @@ use gpui::*;
 use pug_gpui::GpuiThemeProvider;
 use pug_gpui_composites::{RelationPickerSpec, BrowseState};
 
-use crate::theme_ext::resolve_color;
+use crate::theme_ext::{resolve_color, resolve_px, resolve_radius};
 
 /// A real GPUI relation picker component backed by `RelationPickerSpec`.
 ///
@@ -42,6 +42,10 @@ impl IntoElement for PugRelationPicker {
         let theme = &self.theme;
         let spec = &self.spec;
 
+        let inline_padding = resolve_px(theme, "semantic.space.inline.md");
+        let inline_gap = resolve_px(theme, "semantic.space.inline.sm");
+        let control_radius = resolve_radius(theme, "semantic.radius.control");
+
         let text_primary = resolve_color(theme, "semantic.color.text.primary");
         let text_secondary = resolve_color(theme, "semantic.color.text.secondary");
         let border = resolve_color(theme, "semantic.color.border.subtle");
@@ -54,7 +58,7 @@ impl IntoElement for PugRelationPicker {
             .bg(bg)
             .border_1()
             .border_color(border)
-            .rounded(px(6.0))
+            .rounded(control_radius)
             .overflow_hidden();
 
         // Search area (if query exists)
@@ -62,7 +66,7 @@ impl IntoElement for PugRelationPicker {
             container = container.child(
                 div()
                     .w_full()
-                    .px(px(12.0))
+                    .px(inline_padding)
                     .py(px(8.0))
                     .border_b_1()
                     .border_color(border)
@@ -144,8 +148,8 @@ impl IntoElement for PugRelationPicker {
                         .w_full()
                         .flex()
                         .items_center()
-                        .gap(px(8.0))
-                        .px(px(12.0))
+                        .gap(inline_gap)
+                        .px(inline_padding)
                         .py(px(8.0))
                         .cursor_pointer()
                         .border_b_1()
@@ -206,7 +210,7 @@ impl IntoElement for PugRelationPicker {
                 .w_full()
                 .flex()
                 .items_center()
-                .px(px(12.0))
+                .px(inline_padding)
                 .py(px(6.0))
                 .border_t_1()
                 .border_color(border)

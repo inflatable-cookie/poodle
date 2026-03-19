@@ -1,7 +1,7 @@
 use gpui::*;
 use pug_adapter::ThemeProvider;
-use pug_gpui_workstation::ShellStatusBarSpec;
-use pug_gpui_components::PugShellStatusBar;
+use pug_gpui_composites::ShellStatusBarSpec;
+use pug_gpui_components::PugStatusBar;
 use pug_gpui_primitives::{StatusIndicatorSpec, StatusTone};
 use pug_gpui_components::PugStatusIndicator;
 use crate::app_state::AppState;
@@ -32,7 +32,7 @@ pub(crate) fn render(state: &AppState, _cx: &mut Context<PreviewRoot>) -> Div {
     div().flex().flex_col().gap(px(16.0))
         .child(section_label("DEFAULT", text_secondary))
         .child(
-            PugShellStatusBar::new(status_spec, theme)
+            PugStatusBar::new(status_spec, theme)
                 .with_leading_items(
                     div().flex().items_center().gap(px(8.0))
                         .child(PugStatusIndicator::new(branch_indicator, theme))

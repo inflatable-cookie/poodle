@@ -2,10 +2,11 @@
 
 use gpui::prelude::FluentBuilder;
 use gpui::*;
+use pug_adapter::ThemeProvider;
 use pug_gpui::GpuiThemeProvider;
 use pug_gpui_primitives::TextAreaSpec;
 
-use crate::theme_ext::resolve_color;
+use crate::theme_ext::{color_mix, resolve_color, resolve_opacity, resolve_px, resolve_radius};
 
 /// A real GPUI text area component backed by `TextAreaSpec`.
 pub struct PugTextArea {
@@ -36,10 +37,19 @@ impl IntoElement for PugTextArea {
         let theme = &self.theme;
         let spec = &self.spec;
 
+        let control_padding_x = resolve_px(theme, "semantic.space.control.x");
+        let control_padding_y = resolve_px(theme, "semantic.space.control.y");
+        let control_radius = resolve_radius(theme, "semantic.radius.control");
+        // Line height from typography token
+        let line_height_f = theme.resolve_space("semantic.typography.body.lineHeight");
+        let line_height = px(line_height_f);
+
         let surface_bg = resolve_color(theme, spec.fill_token());
         let border = resolve_color(theme, spec.border_token());
         let text_primary = resolve_color(theme, "semantic.color.text.primary");
         let text_secondary = resolve_color(theme, "semantic.color.text.secondary");
+        let elevated = resolve_color(theme, "semantic.color.background.elevated");
+        let disabled_opacity = resolve_opacity(theme, "semantic.state.opacity.disabled");
 
         let value = spec.current_value();
         let is_empty = value.is_empty();
@@ -50,7 +60,8 @@ impl IntoElement for PugTextArea {
         };
         let text_col = if is_empty { text_secondary } else { text_primary };
 
-        let row_height = spec.rows as f32 * 20.0;
+        let row_height_f = spec.rows as f32 * line_height_f;
+        let hover_bg = color_mix(surface_bg, elevated, 0.84);
 
         let id_str = if let Some(ref suffix) = self.id_suffix {
             format!("pug-textarea-{}", suffix)
@@ -60,10 +71,10 @@ impl IntoElement for PugTextArea {
 
         let mut el = div()
             .id(SharedString::from(id_str))
-            .min_h(px(row_height))
-            .px(px(12.0))
-            .py(px(8.0))
-            .rounded(px(6.0))
+            .min_h(px(row_height_f))
+            .px(control_padding_x)
+            .py(control_padding_y)
+            .rounded(control_radius)
             .bg(surface_bg)
             .border_1()
             .border_color(border)
@@ -72,7 +83,9 @@ impl IntoElement for PugTextArea {
             .child(display_text);
 
         if spec.is_disabled {
-            el = el.opacity(0.48);
+            el = el.opacity(disabled_opacity);
+        } else {
+            el = el.hover(move |s| s.bg(hover_bg));
         }
 
         el.into_any_element()

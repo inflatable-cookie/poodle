@@ -144,8 +144,6 @@
         "DataTable",
         "BulkActionBar",
         "PaginationSummary",
-        "ListShell",
-        "GridShell",
         "EmptyState",
         "Table",
         "SegmentedControl"
@@ -216,7 +214,6 @@
         "SelectionSummary",
         "MediaThumbnail",
         "MediaPreview",
-        "EmbedShell",
         "Popover",
         "Drawer"
       ],

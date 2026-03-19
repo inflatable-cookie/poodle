@@ -5,7 +5,7 @@ use gpui::*;
 use pug_gpui::GpuiThemeProvider;
 use pug_gpui_composites::{MediaPreviewSpec, MediaKind, MediaState};
 
-use crate::theme_ext::resolve_color;
+use crate::theme_ext::{resolve_color, resolve_px, resolve_radius};
 
 /// A real GPUI media preview component backed by `MediaPreviewSpec`.
 ///
@@ -49,6 +49,10 @@ impl IntoElement for PugMediaPreview {
         let theme = &self.theme;
         let spec = &self.spec;
 
+        let inline_padding = resolve_px(theme, "semantic.space.inline.md");
+        let inline_gap = resolve_px(theme, "semantic.space.inline.sm");
+        let control_radius = resolve_radius(theme, "semantic.radius.control");
+
         let frame_bg = resolve_color(theme, spec.frame_fill_token());
         let text_primary = resolve_color(theme, "semantic.color.text.primary");
         let text_secondary = resolve_color(theme, "semantic.color.text.secondary");
@@ -62,7 +66,7 @@ impl IntoElement for PugMediaPreview {
             .gap(px(12.0))
             .border_1()
             .border_color(border)
-            .rounded(px(6.0))
+            .rounded(control_radius)
             .overflow_hidden();
 
         // Media viewport
@@ -119,7 +123,7 @@ impl IntoElement for PugMediaPreview {
             .flex()
             .flex_col()
             .gap(px(6.0))
-            .px(px(12.0))
+            .px(inline_padding)
             .py(px(10.0));
 
         // Title
@@ -146,7 +150,7 @@ impl IntoElement for PugMediaPreview {
             let mut meta_row = div()
                 .flex()
                 .items_center()
-                .gap(px(8.0));
+                .gap(inline_gap);
 
             for (i, meta) in spec.metadata.iter().enumerate() {
                 if i > 0 {
@@ -176,8 +180,8 @@ impl IntoElement for PugMediaPreview {
                 .w_full()
                 .flex()
                 .items_center()
-                .gap(px(8.0))
-                .px(px(12.0))
+                .gap(inline_gap)
+                .px(inline_padding)
                 .py(px(8.0))
                 .border_t_1()
                 .border_color(border);

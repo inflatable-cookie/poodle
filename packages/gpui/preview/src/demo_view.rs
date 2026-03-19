@@ -8,16 +8,16 @@ use gpui::*;
 use pug_adapter::ThemeProvider;
 use pug_gpui::GpuiThemeProvider;
 use pug_gpui_components::{
-    PugAppHeader, PugBadge, PugBanner, PugButton, PugCheckbox, PugDataTable, PugDetailShell,
-    PugField, PugPaginationSummary, PugPanelSurface, PugProgress, PugSeparator,
-    PugShellStatusBar, PugSurface, PugTextInput,
+    PugAppHeader, PugButton, PugCallout, PugCheckbox, PugDataTable, PugDetailShell,
+    PugField, PugPaginationSummary, PugPill, PugProgress, PugSeparator,
+    PugStatusBar, PugSurface, PugTextInput,
 };
 use pug_gpui_composites::{DataTableSpec, DetailShellSpec, PaginationSummarySpec, TableColumnSpec, TableRowSpec};
 use pug_gpui_primitives::{
-    BadgeSpec, BadgeVariant, BannerSpec, ButtonSpec, ButtonVariant, CheckboxSpec, FieldSpec,
-    ProgressSpec, SeparatorSpec, StatusTone, SurfaceSpec, SurfaceTone, TextInputSpec,
+    ButtonSpec, ButtonVariant, CallOutSpec, CheckboxSpec, FieldSpec,
+    PillSpec, ProgressSpec, SeparatorSpec, StatusTone, SurfaceSpec, SurfaceTone, TextInputSpec,
 };
-use pug_gpui_workstation::{AppHeaderSpec, PanelSurfaceSpec, ShellStatusBarSpec};
+use pug_gpui_composites::{AppHeaderSpec, ShellStatusBarSpec};
 
 use crate::app_state::DemoScreen;
 use crate::style_bridge::color_to_hsla;
@@ -39,13 +39,12 @@ pub fn render_single_screen(theme: &GpuiThemeProvider, screen: DemoScreen) -> Di
 fn render_overview_shell(theme: &GpuiThemeProvider) -> Div {
     let mut content = div().flex().flex_col().gap(px(12.0));
 
-    // Banner — real PugBanner with info tone
-    let banner_spec = BannerSpec::new()
+    // Callout — real PugCallout with info tone
+    let callout_spec = CallOutSpec::new()
         .with_tone(StatusTone::Info)
         .with_title("Welcome")
-        .with_message("Your workspace is ready. 3 items need attention.")
-        .with_icon(true);
-    content = content.child(PugBanner::new(banner_spec, theme));
+        .with_content("Your workspace is ready. 3 items need attention.");
+    content = content.child(PugCallout::new(callout_spec, theme));
 
     // State tiles grid — each tile is a PugSurface with elevated tone
     let text_secondary = theme.resolve_color("semantic.color.text.secondary");
@@ -126,12 +125,11 @@ fn render_form_screen(theme: &GpuiThemeProvider) -> Div {
         content = content.child(PugField::new(field_spec, theme).with_control(input));
     }
 
-    // Validation banner — PugBanner with danger tone
-    let validation_banner = BannerSpec::new()
+    // Validation callout — PugCallout with danger tone
+    let validation_callout = CallOutSpec::new()
         .with_tone(StatusTone::Danger)
-        .with_message("Please correct the errors above")
-        .with_icon(true);
-    content = content.child(PugBanner::new(validation_banner, theme));
+        .with_content("Please correct the errors above");
+    content = content.child(PugCallout::new(validation_callout, theme));
 
     // Action buttons — real PugButton components
     let cancel_spec = ButtonSpec::new()
@@ -269,22 +267,8 @@ fn render_detail_screen(theme: &GpuiThemeProvider) -> Div {
                 div()
                     .flex()
                     .gap(px(6.0))
-                    .child(PugBadge::new(
-                        {
-                            let mut spec = BadgeSpec::new().with_variant(BadgeVariant::Accent);
-                            spec.content = Some(String::from("Published"));
-                            spec
-                        },
-                        theme,
-                    ))
-                    .child(PugBadge::new(
-                        {
-                            let mut spec = BadgeSpec::new().with_variant(BadgeVariant::Muted);
-                            spec.content = Some(String::from("Image"));
-                            spec
-                        },
-                        theme,
-                    )),
+                    .child(PugPill::new(PillSpec::new().with_label("Published"), theme))
+                    .child(PugPill::new(PillSpec::new().with_label("Image"), theme)),
             ),
     );
 
@@ -365,6 +349,8 @@ fn render_picker_screen(theme: &GpuiThemeProvider) -> Div {
 fn render_workspace_screen(theme: &GpuiThemeProvider) -> Div {
     let text_primary = theme.resolve_color("semantic.color.text.primary");
     let text_secondary = theme.resolve_color("semantic.color.text.secondary");
+    let surface_bg = theme.resolve_color("semantic.color.background.surface");
+    let border = theme.resolve_color("semantic.color.border.default");
 
     let mut content = div().flex().flex_col().gap(px(0.0));
 
@@ -380,14 +366,15 @@ fn render_workspace_screen(theme: &GpuiThemeProvider) -> Div {
         PugAppHeader::new(app_header_spec, theme).with_utility_items(branch_label),
     );
 
-    // Split view: left dock panel + main panel
-    let left_dock_spec = PanelSurfaceSpec::new()
-        .with_title("Explorer")
-        .with_active(true);
+    // Split view: left dock panel + main panel (using raw divs since PanelSurface was removed)
     let left_dock_content = div()
         .flex()
         .flex_col()
         .gap(px(4.0))
+        .p(px(8.0))
+        .bg(color_to_hsla(surface_bg))
+        .border_r_1()
+        .border_color(color_to_hsla(border))
         .child(
             div()
                 .text_xs()
@@ -415,14 +402,12 @@ fn render_workspace_screen(theme: &GpuiThemeProvider) -> Div {
                 .child("lib.rs"),
         );
 
-    let main_panel_spec = PanelSurfaceSpec::new()
-        .with_title("Editor")
-        .with_active(true);
     let main_panel_content = div()
         .flex_1()
         .flex()
         .items_center()
         .justify_center()
+        .bg(color_to_hsla(surface_bg))
         .child(
             div()
                 .text_sm()
@@ -435,28 +420,18 @@ fn render_workspace_screen(theme: &GpuiThemeProvider) -> Div {
             .flex()
             .flex_1()
             .min_h(px(200.0))
-            .child(
-                div().w(px(180.0)).child(
-                    PugPanelSurface::new(left_dock_spec, theme)
-                        .with_content(left_dock_content),
-                ),
-            )
-            .child(
-                div().flex_1().child(
-                    PugPanelSurface::new(main_panel_spec, theme)
-                        .with_content(main_panel_content),
-                ),
-            ),
+            .child(div().w(px(180.0)).child(left_dock_content))
+            .child(div().flex_1().child(main_panel_content)),
     );
 
-    // Status bar — real PugShellStatusBar
+    // Status bar — real PugStatusBar
     let status_spec = ShellStatusBarSpec::new().with_summary("Ready");
     let trailing = div()
         .text_xs()
         .text_color(color_to_hsla(text_secondary))
         .child("Ln 42, Col 18");
     content = content.child(
-        PugShellStatusBar::new(status_spec, theme).with_trailing_items(trailing),
+        PugStatusBar::new(status_spec, theme).with_trailing_items(trailing),
     );
 
     content

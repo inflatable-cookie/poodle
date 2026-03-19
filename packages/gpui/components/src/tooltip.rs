@@ -5,7 +5,7 @@ use gpui::*;
 use pug_gpui::GpuiThemeProvider;
 use pug_gpui_primitives::TooltipSpec;
 
-use crate::theme_ext::resolve_color;
+use crate::theme_ext::{resolve_color, resolve_px, resolve_radius};
 
 /// A real GPUI tooltip component backed by `TooltipSpec`.
 ///
@@ -43,8 +43,12 @@ impl IntoElement for PugTooltip {
 
         let fill = resolve_color(theme, spec.fill_token());
         let text_inverse = resolve_color(theme, "semantic.color.text.inverse");
+        let stack_gap = resolve_px(theme, "semantic.space.stack.sm");
+        let control_padding_x = resolve_px(theme, "semantic.space.control.x");
+        let control_padding_y = resolve_px(theme, "semantic.space.control.y");
+        let tooltip_radius = resolve_radius(theme, "semantic.radius.surface");
 
-        let mut wrapper = div().flex().flex_col().gap(px(4.0));
+        let mut wrapper = div().flex().flex_col().gap(stack_gap);
 
         // Trigger
         if let Some(trigger) = self.trigger {
@@ -56,9 +60,9 @@ impl IntoElement for PugTooltip {
             if let Some(ref content) = spec.content {
                 wrapper = wrapper.child(
                     div()
-                        .px(px(8.0))
-                        .py(px(4.0))
-                        .rounded(px(4.0))
+                        .px(control_padding_x)
+                        .py(control_padding_y)
+                        .rounded(tooltip_radius)
                         .bg(fill)
                         .shadow_sm()
                         .child(

@@ -1,13 +1,13 @@
 //! RenderComponent implementations for data, browse, detail, and media composites.
 //!
-//! g07.008: DataTableSpec, ListShellSpec, GridShellSpec, DetailShellSpec,
+//! g07.008: DataTableSpec, DetailShellSpec,
 //! DetailSectionSpec, FilterToolbarSpec, PickerShellSpec, RelationPickerSpec,
 //! SelectionSummarySpec, PaginationSummarySpec, MediaThumbnailSpec, MediaPreviewSpec
 
 use pug_adapter::{RenderComponent, ThemeProvider};
 use pug_composites::{
-    DataTableSpec, DetailSectionSpec, DetailShellSpec, FilterToolbarSpec, GridShellSpec,
-    ListShellSpec, MediaPreviewSpec, MediaThumbnailSpec, PaginationSummarySpec, PickerShellSpec,
+    DataTableSpec, DetailSectionSpec, DetailShellSpec, FilterToolbarSpec,
+    MediaPreviewSpec, MediaThumbnailSpec, PaginationSummarySpec, PickerShellSpec,
     RelationPickerSpec, SelectionSummarySpec,
 };
 use pug_style::StyleDescriptor;
@@ -20,22 +20,6 @@ impl RenderComponent<DataTableSpec> for GpuiAdapter {
     fn render(&self, _spec: &DataTableSpec, style: &StyleDescriptor, _theme: &dyn ThemeProvider) -> GpuiElementHandle {
         let _s = map_style(style);
         GpuiElementHandle::new("data-table", "DataTableSpec")
-    }
-}
-
-impl RenderComponent<ListShellSpec> for GpuiAdapter {
-    type Target = GpuiTarget;
-    fn render(&self, _spec: &ListShellSpec, style: &StyleDescriptor, _theme: &dyn ThemeProvider) -> GpuiElementHandle {
-        let _s = map_style(style);
-        GpuiElementHandle::new("list-shell", "ListShellSpec")
-    }
-}
-
-impl RenderComponent<GridShellSpec> for GpuiAdapter {
-    type Target = GpuiTarget;
-    fn render(&self, _spec: &GridShellSpec, style: &StyleDescriptor, _theme: &dyn ThemeProvider) -> GpuiElementHandle {
-        let _s = map_style(style);
-        GpuiElementHandle::new("grid-shell", "GridShellSpec")
     }
 }
 
@@ -123,8 +107,6 @@ mod tests {
     fn t() -> GpuiThemeProvider { GpuiThemeProvider::default() }
 
     #[test] fn data_table() { assert_eq!(a().render(&DataTableSpec::new(vec![], vec![]), &s(), &t()).spec_type, "DataTableSpec"); }
-    #[test] fn list_shell() { assert_eq!(a().render(&ListShellSpec::new(), &s(), &t()).spec_type, "ListShellSpec"); }
-    #[test] fn grid_shell() { assert_eq!(a().render(&GridShellSpec::new(), &s(), &t()).spec_type, "GridShellSpec"); }
     #[test] fn detail_shell() { assert_eq!(a().render(&DetailShellSpec::new(), &s(), &t()).spec_type, "DetailShellSpec"); }
     #[test] fn detail_section() { assert_eq!(a().render(&DetailSectionSpec::new("Section"), &s(), &t()).spec_type, "DetailSectionSpec"); }
     #[test] fn filter_toolbar() { assert_eq!(a().render(&FilterToolbarSpec::new(), &s(), &t()).spec_type, "FilterToolbarSpec"); }

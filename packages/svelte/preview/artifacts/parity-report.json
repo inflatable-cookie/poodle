@@ -289,19 +289,6 @@
       },
       {
         "packageName": "@pug/svelte-composites",
-        "exportName": "EmbedShell",
-        "kind": "component",
-        "status": "previewed",
-        "note": "Media suite exercises thumbnail framing, preview fallback, and embed posture.",
-        "sectionIds": [
-          "media-suite"
-        ],
-        "sectionTitles": [
-          "Preview framing, embeds, and fallback posture"
-        ]
-      },
-      {
-        "packageName": "@pug/svelte-composites",
         "exportName": "EmptyState",
         "kind": "component",
         "status": "previewed",
@@ -324,32 +311,6 @@
         ],
         "sectionTitles": [
           "Selection, sorting, and bulk actions"
-        ]
-      },
-      {
-        "packageName": "@pug/svelte-composites",
-        "exportName": "GridShell",
-        "kind": "component",
-        "status": "previewed",
-        "note": "Browse suite exercises list, grid, and empty-state surface posture.",
-        "sectionIds": [
-          "browse-suite"
-        ],
-        "sectionTitles": [
-          "Lists, grids, filters, and search depth"
-        ]
-      },
-      {
-        "packageName": "@pug/svelte-composites",
-        "exportName": "ListShell",
-        "kind": "component",
-        "status": "previewed",
-        "note": "Browse suite exercises list, grid, and empty-state surface posture.",
-        "sectionIds": [
-          "browse-suite"
-        ],
-        "sectionTitles": [
-          "Lists, grids, filters, and search depth"
         ]
       },
       {
