@@ -1,52 +1,117 @@
 use gpui::*;
-use pug_gpui_primitives::{ButtonSpec, ButtonVariant, TextInputSpec, FieldSpec, FormActionsSpec};
-use pug_gpui_components::{PugButton, PugTextInput, PugField, PugFormActions};
+use pug_adapter::ThemeProvider;
+use pug_gpui_primitives::{FieldSpec, TextInputSpec, ValidationState};
+use pug_gpui_components::{PugField, PugTextInput};
 use crate::app_state::AppState;
+use crate::style_bridge::color_to_hsla;
 use crate::PreviewRoot;
 
-pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
+pub(crate) fn render(state: &AppState, _cx: &mut Context<PreviewRoot>) -> Div {
     let theme = &state.theme;
-    let submitted = state.specimens.is_on("form-submitted");
+    let text_secondary = theme.resolve_color("semantic.color.text.secondary");
 
-    let field_spec = FieldSpec::new("email-field", "Email")
-        .with_description("We'll never share your email.");
+    div().flex().flex_col().gap(px(24.0))
+        // --- Default with description ---
+        .child(section_label("DEFAULT WITH DESCRIPTION", text_secondary))
+        .child(
+            PugField::new(
+                FieldSpec::new("field-name", "Display name")
+                    .with_description("This is how your name appears to other users."),
+                theme,
+            )
+            .with_control(
+                PugTextInput::new(
+                    TextInputSpec::new()
+                        .with_id("field-name")
+                        .with_placeholder("Enter your name")
+                        .with_aria_label("Display name"),
+                    theme,
+                )
+            )
+        )
+        // --- Required ---
+        .child(section_label("REQUIRED", text_secondary))
+        .child(
+            PugField::new(
+                FieldSpec::new("field-email", "Email address")
+                    .with_required(true),
+                theme,
+            )
+            .with_control(
+                PugTextInput::new(
+                    TextInputSpec::new()
+                        .with_id("field-email")
+                        .with_placeholder("you@example.com")
+                        .with_aria_label("Email address"),
+                    theme,
+                )
+            )
+        )
+        // --- With error ---
+        .child(section_label("WITH ERROR", text_secondary))
+        .child(
+            PugField::new(
+                FieldSpec::new("field-user", "Username")
+                    .with_error("This username is already taken.")
+                    .with_validation_state(ValidationState::Invalid),
+                theme,
+            )
+            .with_control(
+                PugTextInput::new(
+                    TextInputSpec::new()
+                        .with_id("field-user")
+                        .with_value("admin")
+                        .with_validation_state(ValidationState::Invalid)
+                        .with_aria_label("Username"),
+                    theme,
+                )
+            )
+        )
+        // --- Valid ---
+        .child(section_label("VALID", text_secondary))
+        .child(
+            PugField::new(
+                FieldSpec::new("field-pass", "Password")
+                    .with_validation_state(ValidationState::Valid)
+                    .with_description("Must be at least 8 characters."),
+                theme,
+            )
+            .with_control(
+                PugTextInput::new(
+                    TextInputSpec::new()
+                        .with_id("field-pass")
+                        .with_value("\u{2022}\u{2022}\u{2022}\u{2022}\u{2022}\u{2022}\u{2022}\u{2022}\u{2022}\u{2022}")
+                        .with_validation_state(ValidationState::Valid)
+                        .with_aria_label("Password"),
+                    theme,
+                )
+            )
+        )
+        // --- Optional ---
+        .child(section_label("OPTIONAL", text_secondary))
+        .child(
+            PugField::new(
+                FieldSpec::new("field-phone", "Phone number")
+                    .with_optional_label("optional"),
+                theme,
+            )
+            .with_control(
+                PugTextInput::new(
+                    TextInputSpec::new()
+                        .with_id("field-phone")
+                        .with_placeholder("+1 (555) 000-0000")
+                        .with_aria_label("Phone number"),
+                    theme,
+                )
+            )
+        )
+}
 
-    div().flex().flex_col().gap(px(8.0))
-        .child(
-            PugField::new(field_spec, theme)
-                .with_control(
-                    PugTextInput::new(
-                        TextInputSpec::new().with_placeholder("you@example.com"),
-                        theme,
-                    )
-                )
-        )
-        .child(
-            PugFormActions::new(FormActionsSpec::new(), theme)
-                .with_action(
-                    PugButton::new(
-                        ButtonSpec::new().with_variant(ButtonVariant::Secondary).with_label("Cancel"),
-                        theme,
-                    )
-                    .with_id("form-cancel")
-                    .on_click(cx.listener(|this, _e: &ClickEvent, _w, cx| {
-                        let v = this.state.specimens.toggles.entry("form-submitted".to_string()).or_insert(false);
-                        *v = false;
-                        cx.notify();
-                    }))
-                )
-                .with_action(
-                    PugButton::new(
-                        ButtonSpec::new()
-                            .with_variant(ButtonVariant::Primary)
-                            .with_label(if submitted { "Submitted ✓" } else { "Submit" }),
-                        theme,
-                    )
-                    .with_id("form-submit")
-                    .on_click(cx.listener(|this, _e: &ClickEvent, _w, cx| {
-                        this.state.specimens.toggles.insert("form-submitted".to_string(), true);
-                        cx.notify();
-                    }))
-                )
-        )
+fn section_label(label: &str, color: pug_tokens::typed::ColorValue) -> Div {
+    div()
+        .text_xs()
+        .font_weight(FontWeight::SEMIBOLD)
+        .text_color(color_to_hsla(color))
+        .child(label.to_string())
+        .mb(px(2.0))
 }

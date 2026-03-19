@@ -26,6 +26,7 @@ mod text_input;
 mod text_area;
 mod search_field;
 mod field;
+mod form_actions;
 mod number_entry;
 mod pin_input;
 mod toolbar;
@@ -38,6 +39,7 @@ mod radio_group;
 mod switch;
 mod select;
 mod segmented_control;
+mod toggle_group;
 mod slider;
 mod range_slider;
 
@@ -58,6 +60,7 @@ mod meter;
 mod rating;
 mod skeleton;
 mod pill;
+mod eyebrow;
 mod temporal;
 mod code;
 mod color_picker;
@@ -72,6 +75,7 @@ mod popover;
 mod hover_card;
 mod tooltip;
 mod menu;
+mod context_menu;
 mod tabs;
 mod navigation_menu;
 mod menubar;
@@ -185,13 +189,15 @@ pub fn render_single_specimen(
         "text-input" => specimen_card("TextInput", theme, text_input::render(state, cx)),
         "text-area" => specimen_card("TextArea", theme, text_area::render(state, cx)),
         "search-field" => specimen_card("SearchField", theme, search_field::render(state, cx)),
-        "field" | "form-actions" => specimen_card("Field + FormActions", theme, field::render(state, cx)),
+        "field" => specimen_card("Field", theme, field::render(state, cx)),
+        "form-actions" => specimen_card("FormActions", theme, form_actions::render(state, cx)),
         "number-entry" => specimen_card("NumberEntry", theme, number_entry::render(state, cx)),
         "pin-input" => specimen_card("PinInput", theme, pin_input::render(theme)),
         "toolbar" => specimen_card("Toolbar", theme, toolbar::render(state, cx)),
         "time-field" => specimen_card("TimeField", theme, time_field::render(theme)),
         "editable-label" => specimen_card("EditableLabel", theme, editable_label::render(theme)),
-        "toggle" | "toggle-group" => specimen_card("Toggle", theme, toggle::render(state, cx)),
+        "toggle" => specimen_card("Toggle", theme, toggle::render(state, cx)),
+        "toggle-group" => specimen_card("ToggleGroup", theme, toggle_group::render(theme)),
 
         // ── Selection ───────────────────────────────────────────
         "checkbox" => specimen_card("Checkbox", theme, checkbox::render(state, cx)),
@@ -215,9 +221,10 @@ pub fn render_single_specimen(
         "badge" => specimen_card("Badge", theme, badge::render(state, cx)),
         "status-indicator" => specimen_card("StatusIndicator", theme, status_indicator::render(theme)),
         "meter" => specimen_card("Meter", theme, meter::render(theme)),
-        "rating" => specimen_card("Rating", theme, rating::render(state, cx)),
+        "rating" => specimen_card("Rating", theme, rating::render(theme)),
         "skeleton" => specimen_card("Skeleton", theme, skeleton::render(theme)),
-        "pill" | "eyebrow" => specimen_card("Pill + Eyebrow", theme, pill::render(theme)),
+        "pill" => specimen_card("Pill", theme, pill::render(theme)),
+        "eyebrow" => specimen_card("Eyebrow", theme, eyebrow::render(theme)),
         "time-ago" | "duration-input" => specimen_card("TimeAgo + DurationInput", theme, temporal::render(theme)),
         "code" => specimen_card("Code", theme, code::render(theme)),
         "color-picker" => specimen_card("ColorPicker", theme, color_picker::render(state, cx)),
@@ -231,7 +238,8 @@ pub fn render_single_specimen(
         "popover" => specimen_card("Popover", theme, popover::render(state, cx)),
         "hover-card" => specimen_card("HoverCard", theme, hover_card::render(theme)),
         "tooltip" => specimen_card("Tooltip", theme, tooltip::render(theme)),
-        "menu" | "context-menu" => specimen_card("Menu", theme, menu::render(state, cx)),
+        "menu" => specimen_card("Menu", theme, menu::render(state, cx)),
+        "context-menu" => specimen_card("ContextMenu", theme, context_menu::render(theme)),
         "tabs" => specimen_card("Tabs", theme, tabs::render(state, cx)),
         "navigation-menu" => specimen_card("NavigationMenu", theme, navigation_menu::render(state, cx)),
         "menubar" => specimen_card("Menubar", theme, menubar::render(theme)),

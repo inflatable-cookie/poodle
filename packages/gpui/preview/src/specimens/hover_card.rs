@@ -1,45 +1,97 @@
 use gpui::*;
 use pug_adapter::ThemeProvider;
 use pug_gpui::GpuiThemeProvider;
-use pug_gpui_primitives::HoverCardSpec;
+use pug_gpui_primitives::{HoverCardSpec, OverlayPlacement};
 use pug_gpui_components::PugHoverCard;
 use crate::style_bridge::color_to_hsla;
 
 pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
-    let border = theme.resolve_color("semantic.color.border.default");
+    let text_secondary = theme.resolve_color("semantic.color.text.secondary");
+    let accent = theme.resolve_color("semantic.color.accent.base");
 
-    let closed_spec = HoverCardSpec::new();
-
-    let open_spec = HoverCardSpec::new()
+    // --- Group: Default (top placement) ---
+    // Contract: trigger text "@clay", content with name heading and bio paragraph
+    let top_spec = HoverCardSpec::new()
         .with_open(true);
 
-    div().flex().flex_col().gap(px(12.0))
+    // --- Group: Bottom placement ---
+    // Contract: trigger text "pug/svelte-primitives", placement bottom, content with repo name and stats
+    let bottom_spec = HoverCardSpec::new()
+        .with_open(true)
+        .with_placement(OverlayPlacement::Bottom);
+
+    div().flex().flex_col().gap(px(24.0))
+        // Default (top placement)
+        .child(section_label("DEFAULT (TOP PLACEMENT)", text_secondary))
         .child(
-            div().text_xs().child("Trigger (card closed)"),
-        )
-        .child(
-            div().flex().flex_col().gap(px(4.0))
+            div().flex().flex_col().items_start().gap(px(8.0))
+                // Trigger text
                 .child(
                     div()
-                        .px(px(12.0)).py(px(6.0))
-                        .rounded(px(6.0))
-                        .border_1()
-                        .border_color(color_to_hsla(border))
                         .text_sm()
-                        .child("Hover target")
+                        .text_color(color_to_hsla(accent))
+                        .child("@clay".to_string())
                 )
-                .child(PugHoverCard::new(closed_spec, theme)
-                    .with_content(div().text_sm().child("Hidden card")))
-        )
-        .child(
-            div().text_xs().child("Open state"),
-        )
-        .child(
-            PugHoverCard::new(open_spec, theme)
-                .with_content(
-                    div().flex().flex_col().gap(px(4.0))
-                        .child(div().text_sm().font_weight(FontWeight::SEMIBOLD).child("Hover Card"))
-                        .child(div().text_xs().child("Additional details shown on hover."))
+                // Open hover card content
+                .child(
+                    PugHoverCard::new(top_spec, theme)
+                        .with_content(
+                            div().flex().flex_col().gap(px(4.0))
+                                .max_w(px(256.0))
+                                .child(
+                                    div()
+                                        .text_sm()
+                                        .font_weight(FontWeight::SEMIBOLD)
+                                        .child("Clay".to_string())
+                                )
+                                .child(
+                                    div()
+                                        .text_xs()
+                                        .text_color(color_to_hsla(text_secondary))
+                                        .child("Design systems engineer working on Pug. Loves component architecture and accessibility.".to_string())
+                                )
+                        )
                 )
         )
+        // Bottom placement
+        .child(section_label("BOTTOM PLACEMENT", text_secondary))
+        .child(
+            div().flex().flex_col().items_start().gap(px(8.0))
+                // Trigger text
+                .child(
+                    div()
+                        .text_sm()
+                        .text_color(color_to_hsla(accent))
+                        .child("pug/svelte-primitives".to_string())
+                )
+                // Open hover card content
+                .child(
+                    PugHoverCard::new(bottom_spec, theme)
+                        .with_content(
+                            div().flex().flex_col().gap(px(4.0))
+                                .max_w(px(256.0))
+                                .child(
+                                    div()
+                                        .text_sm()
+                                        .font_weight(FontWeight::SEMIBOLD)
+                                        .child("svelte-primitives".to_string())
+                                )
+                                .child(
+                                    div()
+                                        .text_xs()
+                                        .text_color(color_to_hsla(text_secondary))
+                                        .child("Core primitive components for the Pug design system. 64 components, 94% coverage.".to_string())
+                                )
+                        )
+                )
+        )
+}
+
+fn section_label(label: &str, color: pug_tokens::typed::ColorValue) -> Div {
+    div()
+        .text_xs()
+        .font_weight(FontWeight::SEMIBOLD)
+        .text_color(color_to_hsla(color))
+        .child(label.to_string())
+        .mb(px(2.0))
 }

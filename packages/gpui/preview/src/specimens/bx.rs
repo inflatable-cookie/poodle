@@ -1,35 +1,89 @@
 use gpui::*;
 use pug_adapter::ThemeProvider;
 use pug_gpui::GpuiThemeProvider;
-use pug_gpui_primitives::{BoxSpec, PaddingScale};
+use pug_gpui_primitives::{BoxSpec, Overflow, PaddingScale};
 use pug_gpui_components::PugBox;
 use crate::style_bridge::color_to_hsla;
 
 pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
-    let accent = theme.resolve_color("semantic.color.accent.base");
+    let text_secondary = theme.resolve_color("semantic.color.text.secondary");
     let border = theme.resolve_color("semantic.color.border.default");
 
-    let swatch = |opacity: f32| {
+    let demo_outline = |child: AnyElement| {
         div()
-            .w(px(60.0))
-            .h(px(40.0))
-            .rounded(px(4.0))
-            .bg(color_to_hsla(accent).opacity(opacity))
             .border_1()
             .border_color(color_to_hsla(border))
+            .rounded(px(4.0))
+            .child(child)
     };
 
-    div().flex().gap(px(8.0))
+    div().flex().flex_col().gap(px(24.0))
+        // --- Default (no padding) ---
         .child(
-            PugBox::new(BoxSpec::new().with_padding(PaddingScale::Sm), theme)
-                .with_child(swatch(0.2))
+            div().flex().flex_col().gap(px(8.0))
+                .child(section_label("Default (no padding)", text_secondary))
+                .child(demo_outline(
+                    PugBox::new(BoxSpec::new(), theme)
+                        .with_child(
+                            div().text_sm().text_color(color_to_hsla(text_secondary))
+                                .child("Content inside a Box with no padding.".to_string())
+                        )
+                        .into_any_element(),
+                ))
         )
+        // --- With padding ---
         .child(
-            PugBox::new(BoxSpec::new().with_padding(PaddingScale::Md), theme)
-                .with_child(swatch(0.4))
+            div().flex().flex_col().gap(px(8.0))
+                .child(section_label("With padding", text_secondary))
+                .child(demo_outline(
+                    PugBox::new(BoxSpec::new().with_padding(PaddingScale::Lg), theme)
+                        .with_child(
+                            div().text_sm().text_color(color_to_hsla(text_secondary))
+                                .child("Content inside a Box with large padding.".to_string())
+                        )
+                        .into_any_element(),
+                ))
         )
+        // --- Fixed dimensions ---
         .child(
-            PugBox::new(BoxSpec::new().with_padding(PaddingScale::Lg), theme)
-                .with_child(swatch(0.6))
+            div().flex().flex_col().gap(px(8.0))
+                .child(section_label("Fixed dimensions", text_secondary))
+                .child(demo_outline(
+                    div().w(px(192.0)).h(px(96.0)).child(
+                        PugBox::new(BoxSpec::new().with_padding(PaddingScale::Md), theme)
+                            .with_child(
+                                div().text_sm().text_color(color_to_hsla(text_secondary))
+                                    .child("Fixed 12\u{00d7}6rem box.".to_string())
+                            )
+                    ).into_any_element(),
+                ))
         )
+        // --- Overflow hidden ---
+        .child(
+            div().flex().flex_col().gap(px(8.0))
+                .child(section_label("Overflow hidden", text_secondary))
+                .child(demo_outline(
+                    div().w(px(160.0)).h(px(48.0)).overflow_hidden().child(
+                        PugBox::new(
+                            BoxSpec::new()
+                                .with_padding(PaddingScale::Sm)
+                                .with_overflow(Overflow::Hidden),
+                            theme,
+                        )
+                        .with_child(
+                            div().text_sm().text_color(color_to_hsla(text_secondary))
+                                .child("This text is too long and will be clipped by the overflow hidden setting on the box container.".to_string())
+                        )
+                    ).into_any_element(),
+                ))
+        )
+}
+
+fn section_label(label: &str, color: pug_tokens::typed::ColorValue) -> Div {
+    div()
+        .text_xs()
+        .font_weight(FontWeight::SEMIBOLD)
+        .text_color(crate::style_bridge::color_to_hsla(color))
+        .child(label.to_string())
+        .mb(px(2.0))
 }
