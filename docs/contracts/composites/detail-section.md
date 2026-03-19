@@ -152,7 +152,35 @@ No component-owned events beyond child action behavior.
 |-------|-------------|-----------------|-----------|
 | divider rendering may differ | runtime drawing techniques differ | allowed | keep grouping semantics strict |
 
-## 13. Approval And Adoption Notes
+## 13. Specimen Definitions
+
+All preview apps must render the following specimens identically.
+
+### With title and rows
+
+A titled section with description and detail rows:
+
+| Label | Props/Config | Expected Visual |
+|-------|-------------|-----------------|
+| With title and rows | `title="Project details"`, `description="Core metadata for this project."`, four DetailRows (Name, Owner, Created, Status) | heading-led section with description text and vertically stacked detail rows |
+
+### With actions
+
+A titled section with a header action button:
+
+| Label | Props/Config | Expected Visual |
+|-------|-------------|-----------------|
+| With actions | `title="Billing"`, actions slot with secondary sm Edit button, three DetailRows (Plan, Billing cycle, Next invoice) | header split layout with title on start and Edit button on end, detail rows below |
+
+### DetailRow with description
+
+A section demonstrating detail rows that include description text:
+
+| Label | Props/Config | Expected Visual |
+|-------|-------------|-----------------|
+| DetailRow with description | `title="Configuration"`, two DetailRows with `description` prop; first row has `truncateValue` | detail rows with label, value, and supporting description; first value truncates with ellipsis |
+
+## 14. Approval And Adoption Notes
 
 - contract status: `seed contract`
 - approvers: pending

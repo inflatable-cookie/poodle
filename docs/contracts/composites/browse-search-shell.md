@@ -57,7 +57,11 @@ It exists to make three relationships explicit:
 - prefer progressive loading when preserving context matters more than precise
   page position
 
-## 6. Next Task
+## 6. Specimen Definitions
+
+No Svelte specimen file exists for `BrowseSearchShell`. A specimen should be created at `packages/svelte/preview/src/specimens/BrowseSearchShellSpecimen.svelte` when the component is implemented, demonstrating the composition of `FilterToolbar` with at least one browse result shell variant (`ListShell`, `GridShell`, or `DataTable`) across ready, loading, empty, and no-results states.
+
+## 7. Next Task
 
 Use `BrowseSearchShell` as the composition baseline for `g02.003` and later
 browse-heavy tranches instead of reinventing search-and-results structure per

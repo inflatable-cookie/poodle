@@ -158,7 +158,23 @@ required.
 |-------|-------------|-----------------|-----------|
 | exact resize feel may differ | runtime event systems differ | allowed | keep keyboard parity and ratio meaning strict |
 
-## 13. Approval And Adoption Notes
+## 13. Specimen Definitions
+
+Specimen reference: `SplitViewSpecimen.svelte`.
+
+### Group: Horizontal split
+
+| Label | Props / Config | Expected Visual |
+|-------|---------------|-----------------|
+| Horizontal split | `orientation="horizontal"`, primary slot with "Primary pane", secondary slot with "Secondary pane" | Two side-by-side panes divided by a vertical divider; resizable horizontally |
+
+### Group: Vertical split
+
+| Label | Props / Config | Expected Visual |
+|-------|---------------|-----------------|
+| Vertical split | `orientation="vertical"`, primary slot with "Primary pane", secondary slot with "Secondary pane" | Two stacked panes divided by a horizontal divider; resizable vertically |
+
+## 14. Approval And Adoption Notes
 
 - contract status: `seed contract`
 - approvers: pending

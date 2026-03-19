@@ -165,7 +165,15 @@ Selected-tab state, roving-focus state, and optional reorder mode are required.
 |-------|-------------|-----------------|-----------|
 | exact drag preview may differ | runtime drag systems differ | allowed | keep move meaning and keyboard parity strict |
 
-## 13. Approval And Adoption Notes
+## 13. Specimen Definitions
+
+### Default
+
+| Label | Props / Config | Expected Visual |
+|-------|---------------|-----------------|
+| Default | 4 items with icons (Explorer/folder, Search/search, Source Control/git-branch, Debug/bug), controlled `value`, `ariaLabel="Panel tabs"` | Horizontal tab strip with icon+label tabs, one active tab highlighted, active tab value displayed below; clicking tabs switches active state |
+
+## 14. Approval And Adoption Notes
 
 - contract status: `seed contract`
 - approvers: pending

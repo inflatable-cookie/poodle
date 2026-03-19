@@ -195,7 +195,43 @@ in higher-order shell contracts rather than in `PanelSurface` itself.
 |-------|-------------|-----------------|-----------|
 | none yet | n/a | pending first implementation | review once both runtimes host real panel content |
 
-## 13. Approval And Adoption Notes
+## 13. Specimen Definitions
+
+> **Note:** The `PanelSurfaceSpecimen.svelte` has been removed and needs to be recreated. The following specimen groups should be implemented when the specimen is restored.
+
+### Standard Panel
+
+| Label | Props / Config | Expected Visual |
+|-------|---------------|-----------------|
+| Standard panel | `title` set, `variant="standard"`, `hasHeader=true`, body content | Panel surface with header showing title, body viewport with content below |
+
+### Active Panel
+
+| Label | Props / Config | Expected Visual |
+|-------|---------------|-----------------|
+| Active panel | `isActive=true`, `variant="standard"` | Panel with emphasized border or title treatment indicating focused state |
+
+### Elevated Panel
+
+| Label | Props / Config | Expected Visual |
+|-------|---------------|-----------------|
+| Elevated panel | `isElevated=true` | Panel with stronger elevation and contrast for floating posture |
+
+### Headerless Panel
+
+| Label | Props / Config | Expected Visual |
+|-------|---------------|-----------------|
+| Headerless panel | `hasHeader=false` | Body region fills top boundary with no header chrome |
+
+### Variant Comparison
+
+| Label | Props / Config | Expected Visual |
+|-------|---------------|-----------------|
+| Utility variant | `variant="utility"` | Utility-density panel treatment |
+| Standard variant | `variant="standard"` | Standard panel treatment |
+| Focused variant | `variant="focused"` | Focused/emphasized panel treatment |
+
+## 14. Approval And Adoption Notes
 
 - contract status: `seed contract`
 - approvers: pending

@@ -165,7 +165,55 @@ State table is sufficient.
 |-------|-------------|-----------------|-----------|
 | native list behavior may differ internally | runtime list primitives differ | allowed | keep shell semantics and child neutrality strict |
 
-## 13. Approval And Adoption Notes
+## 13. Specimen Definitions
+
+> **Note:** No dedicated `ListShellSpecimen.svelte` currently exists. The
+> `LogListSpecimen.svelte` demonstrates a `LogList` composite that may
+> internally use `ListShell`, and `ListCardSpecimen.svelte` demonstrates
+> `ListCard` rows. A dedicated specimen needs to be created covering the
+> following example groups.
+
+### Ready state with rows
+
+A list shell displaying row content:
+
+| Label | Props/Config | Expected Visual |
+|-------|-------------|-----------------|
+| Ready state with rows | `state="ready"`, row children in vertical list | vertically stacked rows filling available width |
+
+### Empty state
+
+A list shell with no underlying collection:
+
+| Label | Props/Config | Expected Visual |
+|-------|-------------|-----------------|
+| Empty state | `state="empty"` | empty-state region replacing list content |
+
+### No-results state
+
+A list shell after a filter yields no matches:
+
+| Label | Props/Config | Expected Visual |
+|-------|-------------|-----------------|
+| No-results state | `state="no-results"` | query-specific empty posture visible |
+
+### Loading state
+
+A list shell in loading posture:
+
+| Label | Props/Config | Expected Visual |
+|-------|-------------|-----------------|
+| Loading state | `state="loading"` | skeleton or progress indicator visible |
+
+### With filter toolbar
+
+A list shell with header region containing filter controls:
+
+| Label | Props/Config | Expected Visual |
+|-------|-------------|-----------------|
+| With filter toolbar | header slot with FilterToolbar, row children | filter controls above list content with clear visual separation |
+
+## 14. Approval And Adoption Notes
 
 - contract status: `seed contract`
 - approvers: pending

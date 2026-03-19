@@ -140,6 +140,34 @@ Updated: 2026-03-17
 |-------|-------------|-----------------|-----------|
 | none anticipated | — | — | — |
 
+## 13. Specimen Definitions
+
+Specimen reference: `ResizeHandleSpecimen.svelte`.
+
+### Group: Horizontal split (vertical handle)
+
+| Label | Props / Config | Expected Visual |
+|-------|---------------|-----------------|
+| Horizontal split | `orientation="horizontal"`, `ariaLabel="Resize horizontal"`, placed between two panes in a row | Vertical resize handle between left and right panes; drag left/right to resize |
+
+### Group: Vertical split (horizontal handle)
+
+| Label | Props / Config | Expected Visual |
+|-------|---------------|-----------------|
+| Vertical split | `orientation="vertical"`, `ariaLabel="Resize vertical"`, placed between two panes in a column | Horizontal resize handle between top and bottom panes; drag up/down to resize |
+
+### Group: Disabled (horizontal split)
+
+| Label | Props / Config | Expected Visual |
+|-------|---------------|-----------------|
+| Disabled horizontal | `orientation="horizontal"`, `isDisabled`, `ariaLabel="Disabled resize"` | Muted visual, no interaction; handle between left and right panes |
+
+### Group: Disabled (vertical split)
+
+| Label | Props / Config | Expected Visual |
+|-------|---------------|-----------------|
+| Disabled vertical | `orientation="vertical"`, `isDisabled`, `ariaLabel="Disabled resize vertical"` | Muted visual, no interaction; handle between top and bottom panes |
+
 ## Next Task
 
 Implement ResizeHandle in Svelte during `g11.010`.

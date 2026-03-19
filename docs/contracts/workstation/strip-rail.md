@@ -186,7 +186,35 @@ type StripItem = {
 |-------|-------------|-----------------|-----------|
 | none anticipated | — | — | — |
 
-## 13. Approval And Adoption Notes
+## 13. Specimen Definitions
+
+Specimen reference: `StripRailSpecimen.svelte`.
+
+### Group: Vertical (left edge, icon mode)
+
+| Label | Props / Config | Expected Visual |
+|-------|---------------|-----------------|
+| Left edge icon rail | `edge="left"`, `mode="icon"`, items: Explorer (folder), Search (search), Source Control (git-branch, badge "3"), Debug (bug), Extensions (puzzle, group "secondary"), `value="explorer"` | Vertical icon rail along left edge; Explorer active; Source Control shows badge "3"; Extensions in secondary group; active item displayed as hint text |
+
+### Group: Vertical (mixed mode)
+
+| Label | Props / Config | Expected Visual |
+|-------|---------------|-----------------|
+| Left edge mixed rail | `edge="left"`, `mode="mixed"`, items: Files (folder), Search (search), Settings (settings), `value="files"` | Vertical rail with icons and labels visible; Files active |
+
+### Group: Horizontal (top edge)
+
+| Label | Props / Config | Expected Visual |
+|-------|---------------|-----------------|
+| Top edge icon rail | `edge="top"`, `mode="icon"`, items: Home (home), Docs (book-open), API (code), `value="home"` | Horizontal icon rail along top edge; Home active |
+
+### Group: Collapsed
+
+| Label | Props / Config | Expected Visual |
+|-------|---------------|-----------------|
+| Collapsed rail | `edge="left"`, `mode="icon"`, items: Explorer (folder), Search (search), `isCollapsed` | Minimized narrow icon strip or hidden posture |
+
+## 14. Approval And Adoption Notes
 
 - contract status: `seed contract`
 - approvers: pending

@@ -86,6 +86,20 @@ Updated: 2026-03-11
 - [ ] action ordering and clear-selection affordance match
 - [ ] danger-toned actions are visually and semantically distinct in both runtimes
 
+## 12. Specimen Definitions
+
+### With Selection Count
+
+| Label | Props / Config | Expected Visual |
+|-------|---------------|-----------------|
+| With selection count | `selectionCount={5}`, `totalCount={42}`, three actions: Export (icon: download), Archive (icon: inbox), Delete (icon: trash-2, `tone="danger"`) | Bar showing "5 of 42 selected" summary with three action buttons; Delete styled with danger tone |
+
+### Single Item Selected
+
+| Label | Props / Config | Expected Visual |
+|-------|---------------|-----------------|
+| Single item selected | `selectionCount={1}`, two actions: Export and Archive (no danger action) | Bar showing "1 selected" summary with two action buttons |
+
 ## Next Task
 
 Use `BulkActionBar` only when there is real selected scope to act on, rather

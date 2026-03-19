@@ -160,7 +160,17 @@ Closed, opening, open, and closing states are required.
 |-------|-------------|-----------------|-----------|
 | exact result-list implementation may differ | result engines differ by runtime | allowed | keep shell posture and focus semantics strict |
 
-## 13. Approval And Adoption Notes
+## 13. Specimen Definitions
+
+> **Note:** CommandPaletteShell is demonstrated as part of the `CommandPaletteSpecimen`, which exercises the full modal overlay lifecycle including backdrop, query input focus, and dismissal. A dedicated `CommandPaletteShellSpecimen` is not required unless shell-level posture testing needs to be isolated from command result behavior.
+
+### Command Palette (Shell Lifecycle)
+
+| Label | Props / Config | Expected Visual |
+|-------|---------------|-----------------|
+| Command Palette | `open` controlled via trigger Button, grouped command items with shortcuts | Modal overlay with backdrop scrim, centered palette surface, auto-focused query input, scrollable results viewport; dismisses on Escape, backdrop click, or close button with focus restoration |
+
+## 14. Approval And Adoption Notes
 
 - contract status: `seed contract`
 - approvers: pending

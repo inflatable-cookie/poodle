@@ -144,7 +144,33 @@ No component-owned events beyond child action behavior.
 |-------|-------------|-----------------|-----------|
 | native drag integration may differ | runtime window systems differ | allowed | keep interaction order and labeling strict |
 
-## 13. Approval And Adoption Notes
+## 13. Specimen Definitions
+
+### Full App Window Header (Title + Menubar + Utility)
+
+| Label | Props / Config | Expected Visual |
+|-------|---------------|-----------------|
+| Full app window header | `title="Pug Studio"`, actions slot with inline Menubar (File, Edit, View, Help menus with shortcuts), utility slot with 3 ghost IconButtons (search, bell, settings) | Full-width header with app title, integrated menubar, and trailing utility icons; simulated app body area below |
+
+### With Title, Actions, And Utility
+
+| Label | Props / Config | Expected Visual |
+|-------|---------------|-----------------|
+| With title, actions, and utility | `title="My Application"`, actions slot with 2 ghost Buttons ("New", "Open"), utility slot with settings ghost IconButton | Header with title, action buttons in primary region, settings icon trailing |
+
+### Title Only
+
+| Label | Props / Config | Expected Visual |
+|-------|---------------|-----------------|
+| Title only | `title="Pug Workstation"` | Minimal header displaying only the app title, no actions or utility controls |
+
+### Custom Identity Slot
+
+| Label | Props / Config | Expected Visual |
+|-------|---------------|-----------------|
+| Custom identity slot | identity slot with custom logo badge ("P") and bold "Pug Studio" text, utility slot with bell and user ghost IconButtons | Header with custom branded identity region replacing default title, trailing utility icons |
+
+## 14. Approval And Adoption Notes
 
 - contract status: `seed contract`
 - approvers: pending

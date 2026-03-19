@@ -151,7 +151,34 @@ No component-owned events beyond child action or tab behavior.
 |-------|-------------|-----------------|-----------|
 | exact packing priority may differ | runtime layout differs | allowed | keep reachability and identity strict |
 
-## 13. Approval And Adoption Notes
+## 13. Specimen Definitions
+
+Specimen file: `PanelHeaderSpecimen.svelte` (not yet created).
+
+The specimen should demonstrate the following groups based on the contract's states and props:
+
+### Group: Basic panel header
+
+| Label | Props / Config | Expected Visual |
+|-------|---------------|-----------------|
+| With title | `title="Explorer"` | Neutral header chrome with panel title |
+| Active header | `title="Explorer"`, `isActive` | Emphasized title treatment indicating active panel |
+
+### Group: With panel tabs
+
+| Label | Props / Config | Expected Visual |
+|-------|---------------|-----------------|
+| Tabbed header | `title` omitted, panel tabs slot with multiple tabs | Tab row integrated into header chrome |
+| Active tabbed | panel tabs slot, `isActive` | Tabs with active panel emphasis |
+
+### Group: Utility actions
+
+| Label | Props / Config | Expected Visual |
+|-------|---------------|-----------------|
+| With actions | `title="Explorer"`, utility actions slot with icon buttons | Title plus right-aligned utility action icons |
+| Collapsible | `title="Explorer"`, `isCollapsible`, utility actions slot | Collapse affordance visible alongside actions |
+
+## 14. Approval And Adoption Notes
 
 - contract status: `seed contract`
 - approvers: pending

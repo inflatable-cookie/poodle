@@ -152,7 +152,27 @@ No component-owned events beyond child action behavior.
 |-------|-------------|-----------------|-----------|
 | line wrapping may differ slightly | text metrics differ by runtime | allowed | keep hierarchy and order strict |
 
-## 13. Approval And Adoption Notes
+## 13. Specimen Definitions
+
+### Basic
+
+| Label | Props / Config | Expected Visual |
+|-------|---------------|-----------------|
+| Basic | `title="Components"`, `subtitle="Browse and manage your component library."` | Title with subtitle text below |
+
+### With Eyebrow And Actions
+
+| Label | Props / Config | Expected Visual |
+|-------|---------------|-----------------|
+| With eyebrow and actions | `title="Button"`, `eyebrow="Primitive"`, `subtitle="Primary interactive control for triggering actions."`, actions slot with secondary "View source" button and primary "Edit" button (both `size="sm"`) | Eyebrow above title, subtitle below, action buttons trailing |
+
+### Title Only
+
+| Label | Props / Config | Expected Visual |
+|-------|---------------|-----------------|
+| Title only | `title="Settings"` | Compact title row with no subtitle, no eyebrow, no actions |
+
+## 14. Approval And Adoption Notes
 
 - contract status: `seed contract`
 - approvers: pending

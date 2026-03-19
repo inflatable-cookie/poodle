@@ -160,7 +160,43 @@ State table is sufficient.
 |-------|-------------|-----------------|-----------|
 | scroll indicator styling may differ | runtime scroll rendering differs | allowed | keep scroll ownership and focus rules strict |
 
-## 13. Approval And Adoption Notes
+## 13. Specimen Definitions
+
+All preview apps must render the following specimens identically.
+
+### Layout structure
+
+A shell showing placeholder regions for anatomy visualization:
+
+| Label | Props/Config | Expected Visual |
+|-------|-------------|-----------------|
+| Layout structure | header slot with colored Region, three body Regions (Section 1, 2, 3) | shell with distinct header region and stacked body sections, each shown as colored placeholder blocks |
+
+### Multi-section layout with header
+
+A full detail view with PageHeader and multiple DetailSections:
+
+| Label | Props/Config | Expected Visual |
+|-------|-------------|-----------------|
+| Multi-section layout with header | PageHeader with title, eyebrow, subtitle, Badge and Edit button; three DetailSections (General, Configuration with Reset action, Integrations) separated by Separators | complete detail page with identity header, action controls, and grouped detail rows across sections |
+
+### Loading state
+
+A shell in loading posture:
+
+| Label | Props/Config | Expected Visual |
+|-------|-------------|-----------------|
+| Loading state | `title="Loading"`, `state="loading"` | shell with loading/progress indicator replacing body content |
+
+### Error state
+
+A shell in error posture:
+
+| Label | Props/Config | Expected Visual |
+|-------|-------------|-----------------|
+| Error state | `title="Error"`, `state="error"`, `stateTitle="Failed to load"`, `stateMessage="Something went wrong. Please try again."` | shell with error callout replacing body content, showing title and message |
+
+## 14. Approval And Adoption Notes
 
 - contract status: `seed contract`
 - approvers: pending

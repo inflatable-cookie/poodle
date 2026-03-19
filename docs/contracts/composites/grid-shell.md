@@ -167,7 +167,54 @@ State table is sufficient.
 |-------|-------------|-----------------|-----------|
 | exact reflow breakpoints may differ | runtime measurement differs | allowed | keep order and semantic labeling strict |
 
-## 13. Approval And Adoption Notes
+## 13. Specimen Definitions
+
+> **Note:** No `GridShellSpecimen.svelte` currently exists. The existing
+> `GridSpecimen.svelte` demonstrates the `Grid` layout primitive, not the
+> `GridShell` composite. A dedicated specimen needs to be created covering the
+> following example groups.
+
+### Ready state with cards
+
+A grid shell displaying card tiles in a responsive grid:
+
+| Label | Props/Config | Expected Visual |
+|-------|-------------|-----------------|
+| Ready state with cards | `state="ready"`, card children in grid layout | responsive card grid filling available width |
+
+### Empty state
+
+A grid shell with no content:
+
+| Label | Props/Config | Expected Visual |
+|-------|-------------|-----------------|
+| Empty state | `state="empty"` | empty-state region replacing grid content |
+
+### No-results state
+
+A grid shell after a filter yields no matches:
+
+| Label | Props/Config | Expected Visual |
+|-------|-------------|-----------------|
+| No-results state | `state="no-results"` | query-specific empty posture visible |
+
+### Loading state
+
+A grid shell in loading posture:
+
+| Label | Props/Config | Expected Visual |
+|-------|-------------|-----------------|
+| Loading state | `state="loading"` | skeleton or progress indicator visible |
+
+### With filter toolbar
+
+A grid shell with header region containing filter controls:
+
+| Label | Props/Config | Expected Visual |
+|-------|-------------|-----------------|
+| With filter toolbar | header slot with FilterToolbar, card children | filter controls above grid content with clear visual separation |
+
+## 14. Approval And Adoption Notes
 
 - contract status: `seed contract`
 - approvers: pending

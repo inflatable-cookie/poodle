@@ -62,6 +62,20 @@ Updated: 2026-03-11
 - use `popover` for compact transient selection
 - use `modal` when the selection task needs focused workspace and explicit commit/cancel rhythm
 
-## 7. Next Task
+## 7. Specimen Definitions
+
+### Multiple Selection
+
+| Label | Props / Config | Expected Visual |
+|-------|---------------|-----------------|
+| Multiple selection | `title="Select components"`, `description="Choose related components."`, `selectionMode="multiple"`, six candidate items with label/description/meta, two pre-selected (`selectedIds=["btn","card"]`) | Picker with search, candidate list with checkboxes, two items checked, selection summary visible below |
+
+### Single Selection
+
+| Label | Props / Config | Expected Visual |
+|-------|---------------|-----------------|
+| Single selection | `title="Choose a parent"`, same six candidate items, `selectionMode="single"` | Picker with search and candidate list using radio-style single selection, no items pre-selected |
+
+## 8. Next Task
 
 Use `RelationPicker` for attach-or-choose workflows and keep domain-specific relation validation above the composite layer.

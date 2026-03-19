@@ -186,7 +186,42 @@ type HostedSurfaceState =
 |-------|-------------|-----------------|-----------|
 | content hosting mechanism differs | iframe vs native view vs UiTree node | allowed | ensure state and focus semantics are equivalent |
 
-## 13. Approval And Adoption Notes
+## 13. Specimen Definitions
+
+Specimen file: `HostedSurfaceSpecimen.svelte` (not yet created).
+
+The specimen should demonstrate the following groups based on the contract's states and props:
+
+### Group: Ready state (default)
+
+| Label | Props / Config | Expected Visual |
+|-------|---------------|-----------------|
+| Embedded ready | `surfaceId="demo"`, `title="Plugin Editor"`, `state="ready"`, `hosting="embedded"`, content slot with placeholder | Host header with title, content viewport visible, no overlay |
+
+### Group: Host states
+
+| Label | Props / Config | Expected Visual |
+|-------|---------------|-----------------|
+| Loading | `state="loading"`, `title="Plugin Editor"` | Loading indicator overlay covering content viewport |
+| Unavailable | `state="unavailable"`, `stateMessage="Service unavailable"`, `title="Plugin Editor"` | Status overlay with message, content hidden |
+| Blocked | `state="blocked"`, `stateMessage="Access denied"`, `title="Plugin Editor"` | Status overlay with block message |
+| Degraded | `state="degraded"`, `stateMessage="Limited functionality"`, `title="Plugin Editor"` | Content visible with warning indicator in header |
+
+### Group: Action affordances
+
+| Label | Props / Config | Expected Visual |
+|-------|---------------|-----------------|
+| All actions | `state="ready"`, `title="Plugin Editor"`, `isDetachable`, `isReloadable`, `isClosable` | Header shows detach, reload, and close action buttons |
+| Active surface | `state="ready"`, `title="Plugin Editor"`, `isActive` | Stronger border or focus ring indicating active state |
+
+### Group: Hosting modes
+
+| Label | Props / Config | Expected Visual |
+|-------|---------------|-----------------|
+| Embedded | `hosting="embedded"`, `title="Plugin Editor"`, `state="ready"` | Standard embedded surface appearance |
+| Detached | `hosting="detached"`, `title="Plugin Editor"`, `state="ready"` | Visual indicator that surface is externally hosted |
+
+## 14. Approval And Adoption Notes
 
 - contract status: `seed contract`
 - approvers: pending

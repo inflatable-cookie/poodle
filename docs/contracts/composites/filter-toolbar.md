@@ -151,7 +151,27 @@ No component-owned events beyond child control behavior.
 |-------|-------------|-----------------|-----------|
 | sticky realization may differ | runtime layout systems differ | allowed | keep order and label semantics strict |
 
-## 13. Approval And Adoption Notes
+## 13. Specimen Definitions
+
+All preview apps must render the following specimens identically.
+
+### With filters and summary
+
+A toolbar with search, select filter, and result summary:
+
+| Label | Props/Config | Expected Visual |
+|-------|-------------|-----------------|
+| With filters and summary | `summaryText="Showing 24 of 156 items"`, `ariaLabel="Item filters"`, children: SearchField + Select (status filter with All/Active/Archived/Draft options) | toolbar strip with search input, status dropdown, and summary text |
+
+### With secondary actions
+
+A toolbar with search and a secondary action button:
+
+| Label | Props/Config | Expected Visual |
+|-------|-------------|-----------------|
+| With secondary actions | `ariaLabel="Project filters"`, children: SearchField; secondary slot with Reset button | toolbar with search input on start and Reset button on end |
+
+## 14. Approval And Adoption Notes
 
 - contract status: `seed contract`
 - approvers: pending

@@ -150,7 +150,35 @@ State table is sufficient.
 |-------|-------------|-----------------|-----------|
 | overflow interaction may differ | runtime layout constraints differ | allowed | keep navigation meaning and current-item exposure strict |
 
-## 13. Approval And Adoption Notes
+## 13. Specimen Definitions
+
+All preview apps must render the following specimens identically.
+
+### Basic
+
+A three-item breadcrumb trail with navigation callback:
+
+| Label | Props/Config | Expected Visual |
+|-------|-------------|-----------------|
+| Basic | items: Home > Projects > Pug (current) | trail with link-style intermediate items and non-link current item; navigation callback reports clicked value |
+
+### Deep path
+
+A six-item breadcrumb trail with no truncation:
+
+| Label | Props/Config | Expected Visual |
+|-------|-------------|-----------------|
+| Deep path | items: Home > Workspace > Projects > Pug Design System > Primitives > Button (current) | full trail visible with all intermediate links and current-page terminus |
+
+### Collapsed (max 3 visible)
+
+A six-item breadcrumb trail with truncation enabled:
+
+| Label | Props/Config | Expected Visual |
+|-------|-------------|-----------------|
+| Collapsed (max 3 visible) | same deep items, `maxVisibleItems=3` | overflow treatment visible; only three items shown with truncation indicator |
+
+## 14. Approval And Adoption Notes
 
 - contract status: `seed contract`
 - approvers: pending

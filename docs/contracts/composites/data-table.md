@@ -129,6 +129,26 @@ Updated: 2026-03-11
 - [ ] visible-scope select-all semantics match
 - [ ] row-action naming and keyboard semantics match
 
+## 12. Specimen Definitions
+
+All preview apps must render the following specimens identically.
+
+### With sorting, column visibility, and export
+
+A fully interactive data table with five rows of team-member data:
+
+| Label | Props/Config | Expected Visual |
+|-------|-------------|-----------------|
+| With sorting, column visibility, and export | columns: Name (sortable), Email (sortable), Role (sortable), Status (not sortable); 5 rows; `showColumnVisibility`, `showExport`; selection enabled | table with sortable column headers, select-all checkbox, row selection checkboxes, column visibility toggle, export action, and row actions; status bar shows selection count |
+
+### Empty state
+
+A data table with no rows:
+
+| Label | Props/Config | Expected Visual |
+|-------|-------------|-----------------|
+| Empty state | same columns, `rows=[]`, `emptyMessage="No team members match the current filters."` | table header visible with empty-state message in body |
+
 ## Next Task
 
 Pair `DataTable` with `BulkActionBar` and pagination semantics instead of

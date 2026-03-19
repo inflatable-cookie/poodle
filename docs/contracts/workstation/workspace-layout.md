@@ -220,7 +220,40 @@ type CenterRegionSnapshot = {
 |-------|-------------|-----------------|-----------|
 | none anticipated | — | — | — |
 
-## 13. Approval And Adoption Notes
+## 13. Specimen Definitions
+
+No specimen file exists. `WorkspaceLayoutSpecimen.svelte` needs to be created.
+
+WorkspaceLayout is primarily a data structure and region grammar contract rather
+than a visual component. A specimen should demonstrate the layout snapshot system
+by showing how different snapshot configurations produce different region
+arrangements:
+
+### Group: Minimal layout
+
+| Label | Props / Config | Expected Visual |
+|-------|---------------|-----------------|
+| Center only | Snapshot with only `centerTop` populated | Simple single-pane layout with no docks or strips |
+
+### Group: Standard layout
+
+| Label | Props / Config | Expected Visual |
+|-------|---------------|-----------------|
+| With docks | Snapshot with `leftStrip`, `left` dock, `centerTop`, `right` dock | Typical workstation layout with left strip, left dock, center area, and right dock |
+
+### Group: Full layout
+
+| Label | Props / Config | Expected Visual |
+|-------|---------------|-----------------|
+| All regions | Snapshot with all strip, dock, and center regions populated | Dense workstation layout with all four strips, docks, and center area |
+
+### Group: Center split
+
+| Label | Props / Config | Expected Visual |
+|-------|---------------|-----------------|
+| Split center | Snapshot with `centerTop` and `centerBottom` populated | Center area divided vertically between primary and secondary regions |
+
+## 14. Approval And Adoption Notes
 
 - contract status: `seed contract`
 - approvers: pending

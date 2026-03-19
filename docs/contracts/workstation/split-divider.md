@@ -131,6 +131,28 @@ Updated: 2026-03-17
 |-------|-------------|-----------------|-----------|
 | none anticipated | — | — | — |
 
+## 13. Specimen Definitions
+
+Specimen reference: `SplitDividerSpecimen.svelte`.
+
+### Group: Horizontal with collapse affordances
+
+| Label | Props / Config | Expected Visual |
+|-------|---------------|-----------------|
+| Horizontal with collapse | `orientation="horizontal"`, `showCollapseBefore`, `showCollapseAfter`, placed between left and right panes | Vertical divider with collapse buttons for both adjacent panes; resize by drag |
+
+### Group: Vertical with collapse affordances
+
+| Label | Props / Config | Expected Visual |
+|-------|---------------|-----------------|
+| Vertical with collapse | `orientation="vertical"`, `showCollapseBefore`, `showCollapseAfter`, placed between top and bottom panes | Horizontal divider with collapse buttons for both adjacent panes; resize by drag |
+
+### Group: Resize only (no collapse)
+
+| Label | Props / Config | Expected Visual |
+|-------|---------------|-----------------|
+| Resize only | `orientation="horizontal"`, no collapse props, placed between left and right panes | Plain horizontal divider with resize handle only; no collapse buttons |
+
 ## Next Task
 
 Implement SplitDivider in Svelte during `g11.010`.

@@ -152,7 +152,37 @@ No component-owned events beyond optional child action behavior.
 |-------|-------------|-----------------|-----------|
 | line wrapping may differ | text metrics differ | allowed | keep label/value relationship strict |
 
-## 13. Approval And Adoption Notes
+## 13. Specimen Definitions
+
+### Basic Label-Value Pairs
+
+| Label | Props / Config | Expected Visual |
+|-------|---------------|-----------------|
+| Name | `label="Name"`, `value="Pug Design System"` | Simple label-value row |
+| Version | `label="Version"`, `value="2.1.0"` | Simple label-value row |
+| License | `label="License"`, `value="MIT"` | Simple label-value row |
+
+Three rows displayed consecutively with no gap, forming a cohesive detail list.
+
+### With Description
+
+| Label | Props / Config | Expected Visual |
+|-------|---------------|-----------------|
+| API endpoint | `label="API endpoint"`, `value="https://api.example.com/v2"`, `description="Base URL for all API requests."`, `truncateValue` | Expanded label block with description below label; value truncated |
+
+### With Action Slot
+
+| Label | Props / Config | Expected Visual |
+|-------|---------------|-----------------|
+| Email | `label="Email"`, `value="clay@example.com"`, action slot with secondary "Change" button (`size="sm"`) | Label-value row with trailing action button |
+
+### With Value Slot
+
+| Label | Props / Config | Expected Visual |
+|-------|---------------|-----------------|
+| Status | `label="Status"`, value slot with custom "Active" status badge (pill-shaped, success color) | Label with custom rich value content instead of plain text |
+
+## 14. Approval And Adoption Notes
 
 - contract status: `seed contract`
 - approvers: pending

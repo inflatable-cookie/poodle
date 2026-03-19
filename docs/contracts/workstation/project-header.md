@@ -146,7 +146,29 @@ No component-owned events beyond child action behavior.
 |-------|-------------|-----------------|-----------|
 | exact dirty cue styling may differ | runtime shell chrome differs | allowed | keep non-color semantics strict |
 
-## 13. Approval And Adoption Notes
+## 13. Specimen Definitions
+
+> **Note:** The `ProjectHeaderSpecimen.svelte` has been removed and needs to be recreated. The following specimen groups should be implemented when the specimen is restored.
+
+### Clean State
+
+| Label | Props / Config | Expected Visual |
+|-------|---------------|-----------------|
+| Clean state | `title="My Project"` | Neutral project header with title, no dirty indicator |
+
+### Dirty State
+
+| Label | Props / Config | Expected Visual |
+|-------|---------------|-----------------|
+| Dirty state | `title="My Project"`, `isDirty=true` | Project header with unsaved-changes cue visible alongside title |
+
+### With Subtitle And Actions
+
+| Label | Props / Config | Expected Visual |
+|-------|---------------|-----------------|
+| With subtitle and actions | `title="My Project"`, `subtitle="Last saved 2 minutes ago"`, scoped action buttons in actions slot | Header with title, subtitle metadata below, and action controls trailing |
+
+## 14. Approval And Adoption Notes
 
 - contract status: `seed contract`
 - approvers: pending

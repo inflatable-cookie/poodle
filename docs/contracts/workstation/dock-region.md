@@ -273,7 +273,51 @@ type PanelDragData = {
 | Collapsed strip sizing differs by edge | side docks use vertical tabs, top/bottom keep horizontal | allowed | consistent behavior per edge type |
 | No context menu event | not implemented in current iteration | deferred | add in future workspace milestone |
 
-## 13. Approval And Adoption Notes
+## 13. Specimen Definitions
+
+### Static Dock -- Horizontal (Top Edge)
+
+| Label | Props / Config | Expected Visual |
+|-------|---------------|-----------------|
+| Static dock -- horizontal (top edge) | `edge="top"`, `sizing="static"`, 3 items (Meter Strip, Transport, Mixer), reorderable | Horizontal stack of fixed panels along top edge, each panel labeled, separated by subtle borders; panels reorderable via drag |
+
+### Static Dock -- Vertical (Left Edge)
+
+| Label | Props / Config | Expected Visual |
+|-------|---------------|-----------------|
+| Static dock -- vertical (left edge) | `edge="left"`, `sizing="static"`, 2 items (Toolbar, Inspector), reorderable | Vertical left-edge dock with panels stacked horizontally (row direction), each panel labeled and reorderable |
+
+### Flexible Dock -- Expanded (Left Edge)
+
+| Label | Props / Config | Expected Visual |
+|-------|---------------|-----------------|
+| Flexible dock -- expanded (left edge) | `edge="left"`, `sizing="flexible"`, 3 items with icons (Explorer, Search, Source Control), `isCollapsed=false`, controlled `value` | Left dock with horizontal tab strip showing icon+label tabs, active panel body below with content; tabs closable and switchable |
+
+### Flexible Dock -- Collapsed Icon-Strip (Left Edge)
+
+| Label | Props / Config | Expected Visual |
+|-------|---------------|-----------------|
+| Flexible dock -- collapsed icon-strip (left edge) | `edge="left"`, `sizing="flexible"`, 3 items with icons, `isCollapsed=true`, `collapsedPosture="icon-strip"` | Narrow vertical icon-only strip with collapse toggle; no panel body visible; tooltips on hover |
+
+### Interactive Collapse Toggle
+
+| Label | Props / Config | Expected Visual |
+|-------|---------------|-----------------|
+| Interactive collapse toggle | `edge="left"`, `sizing="flexible"`, 3 items with icons (Files, Outline, Debug), `isCollapsed` togglable, `collapsedPosture="icon-strip"`, collapse/expand events bound | Left dock with toggle between expanded (tab strip + body) and collapsed (icon-strip) states; main content area alongside |
+
+### Bottom Edge Dock
+
+| Label | Props / Config | Expected Visual |
+|-------|---------------|-----------------|
+| Bottom edge dock | `edge="bottom"`, `sizing="flexible"`, 3 items with icons (Terminal, Output, Problems), `isCollapsed` togglable, `collapsedPosture="icon-strip"` | Bottom dock with horizontal tabs, panel body expands upward; editor area above; collapses to thin horizontal strip |
+
+### Cross-Region Drag-And-Drop
+
+| Label | Props / Config | Expected Visual |
+|-------|---------------|-----------------|
+| Cross-region drag-and-drop | Two side-by-side DockRegions (left with 3 items: Explorer/Search/Source Control; right with 1 item: Outline), both `edge` appropriate, `canAcceptPanel` enabled, reorder and panelDrop events bound | Two docks in grid layout; tabs draggable between regions; drop zone overlay appears on drag-over; panel counts update after transfer |
+
+## 14. Approval And Adoption Notes
 
 - contract status: `active contract`
 - approvers: pending

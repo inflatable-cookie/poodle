@@ -19,6 +19,26 @@ Updated: 2026-03-11
 - empty discovery states must stay explicit and avoid collapsing into blank shells
 - GPUI-native accessibility mapping notes: GPUI must preserve grouped discovery structure and direct action reachability even where inline workstation panels are fully custom-rendered
 
-## 3. Next Task
+## 3. Specimen Definitions
+
+### Grouped Actions
+
+| Label | Props / Config | Expected Visual |
+|-------|---------------|-----------------|
+| Grouped actions | `items` with 7 actions across 3 groups (File: Save/Open File/Close Tab, Edit: Find in Files/Find and Replace, View: Toggle Terminal/Toggle Sidebar), each with shortcut hints | Grouped action list with section headings (File, Edit, View), action rows showing title and shortcut label |
+
+### With Descriptions And Badges
+
+| Label | Props / Config | Expected Visual |
+|-------|---------------|-----------------|
+| With descriptions and badges | `items` with 3 actions across 2 groups (CI/CD: Deploy to Production with description and "Dangerous" badge, Open Preview with description and shortcut; Tools: Run Linter with shortcut) | Grouped action list with description text below titles, badge pill on dangerous action, shortcut hints on applicable rows |
+
+### Empty State
+
+| Label | Props / Config | Expected Visual |
+|-------|---------------|-----------------|
+| Empty state | `items=[]`, `state="empty"` | Empty discovery posture with no action rows visible |
+
+## 4. Next Task
 
 Use `ActionDiscoveryPanel` when workstation surfaces need visible suggested or recent actions without forcing all discovery through the modal launcher.

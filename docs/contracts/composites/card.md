@@ -163,7 +163,36 @@ State table is sufficient.
 |-------|-------------|-----------------|-----------|
 | exact hover animation may differ | runtime animation mechanics differ | allowed | keep grouping and activation semantics strict |
 
-## 13. Approval And Adoption Notes
+## 13. Specimen Definitions
+
+### Default Variant
+
+| Label | Props / Config | Expected Visual |
+|-------|---------------|-----------------|
+| Project Alpha | default variant, `ariaLabel="Project card"`, header with title, body text, footer with meta timestamp | Card with neutral surface, header/body/footer structure |
+| Monthly report | default variant, `ariaLabel="Stats card"`, header with title, body text, no footer | Card with neutral surface, header and body only |
+
+Two cards displayed side-by-side in a responsive grid (`auto-fit, minmax(14rem, 1fr)`).
+
+### Outlined Variant
+
+| Label | Props / Config | Expected Visual |
+|-------|---------------|-----------------|
+| Outlined card | `variant="outlined"`, `ariaLabel="Outlined card"`, header and body | Card with subtle border emphasis instead of elevation |
+
+### Elevated Variant
+
+| Label | Props / Config | Expected Visual |
+|-------|---------------|-----------------|
+| Elevated card | `variant="elevated"`, `ariaLabel="Elevated card"`, header and body | Card with drop shadow for visual prominence |
+
+### Interactive
+
+| Label | Props / Config | Expected Visual |
+|-------|---------------|-----------------|
+| Interactive card | `isInteractive`, `ariaLabel="Clickable card"`, header and body | Card with hover and focus affordances; cursor changes to pointer on hover |
+
+## 14. Approval And Adoption Notes
 
 - contract status: `seed contract`
 - approvers: pending

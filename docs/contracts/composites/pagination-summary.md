@@ -60,7 +60,27 @@ Updated: 2026-03-11
 | Summary | body typography and subdued text roles | range copy |
 | Actions | control, border, and focus roles | pagination controls |
 
-## 8. Next Task
+## 8. Specimen Definitions
+
+### Default
+
+| Label | Props / Config | Expected Visual |
+|-------|---------------|-----------------|
+| Default | `currentPage={1}`, `totalPages={8}`, `totalItems={156}`, `pageSize={20}`, interactive `onPageChange` handler | Range summary with previous/next controls; previous disabled at page 1; page state updates on navigation |
+
+### Single Page
+
+| Label | Props / Config | Expected Visual |
+|-------|---------------|-----------------|
+| Single page | `currentPage={1}`, `totalPages={1}`, `totalItems={12}`, `pageSize={20}` | Range summary with both previous and next controls disabled |
+
+### Large Dataset
+
+| Label | Props / Config | Expected Visual |
+|-------|---------------|-----------------|
+| Large dataset | `currentPage={5}`, `totalPages={50}`, `totalItems={1000}`, `pageSize={20}` | Range summary showing mid-range page position; both previous and next controls enabled |
+
+## 9. Next Task
 
 Pair `PaginationSummary` with browse and table composites instead of teaching
 row or card items about pagination state directly.

@@ -135,7 +135,37 @@ No internal state. StateTile is a pure display component.
 |-------|-------------|-----------------|-----------|
 | none yet | n/a | pending | review during first implementation |
 
-## 13. Approval And Adoption Notes
+## 13. Specimen Definitions
+
+### Basic Tiles
+
+| Label | Props / Config | Expected Visual |
+|-------|---------------|-----------------|
+| Components | `label="Components"`, `value="85"` | Contained tile with code-style label and bold value |
+| Coverage | `label="Coverage"`, `value="94%"` | Contained tile with code-style label and bold value |
+| Open issues | `label="Open issues"`, `value="12"` | Contained tile with code-style label and bold value |
+| Build time | `label="Build time"`, `value="1.8s"` | Contained tile with code-style label and bold value |
+
+Tiles are displayed in a responsive grid layout (`auto-fit, minmax(10rem, 1fr)`).
+
+### With Trend Indicators
+
+| Label | Props / Config | Expected Visual |
+|-------|---------------|-----------------|
+| Active users | `label="Active users"`, `value="2,847"`, `trend="up"`, `trendLabel="+12.3%"` | Tile with upward trend indicator and positive trend label |
+| Error rate | `label="Error rate"`, `value="0.04%"`, `trend="down"`, `trendLabel="-8%"` | Tile with downward trend indicator and negative trend label |
+| Latency | `label="Latency"`, `value="42ms"`, `trend="flat"`, `trendLabel="No change"` | Tile with flat trend indicator and neutral trend label |
+| Revenue | `label="Revenue"`, `value="$14.2k"`, `trend="up"`, `trendLabel="+3.1%"` | Tile with upward trend indicator and positive trend label |
+
+### With Sparklines
+
+| Label | Props / Config | Expected Visual |
+|-------|---------------|-----------------|
+| Requests/min | `label="Requests/min"`, `value="1,204"`, `trend="up"`, `trendLabel="+5%"`, `sparklineData=[800,920,850,1100,980,1050,1204]` | Tile with trend indicator and inline sparkline chart |
+| CPU usage | `label="CPU usage"`, `value="62%"`, `trend="down"`, `trendLabel="-4%"`, `sparklineData=[75,72,68,70,65,63,62]` | Tile with trend indicator and inline sparkline chart |
+| Memory | `label="Memory"`, `value="4.2 GB"`, `sparklineData=[3.8,3.9,4.0,4.1,4.0,4.1,4.2]` | Tile with sparkline chart, no trend indicator |
+
+## 14. Approval And Adoption Notes
 
 - contract status: `seed contract`
 - approvers: pending

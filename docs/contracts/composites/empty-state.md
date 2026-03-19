@@ -152,7 +152,35 @@ No component-owned events beyond child action behavior.
 |-------|-------------|-----------------|-----------|
 | illustration style may differ | runtime rendering tools differ | allowed | keep textual semantics strict |
 
-## 13. Approval And Adoption Notes
+## 13. Specimen Definitions
+
+All preview apps must render the following specimens identically.
+
+### Neutral
+
+A neutral empty state with action:
+
+| Label | Props/Config | Expected Visual |
+|-------|-------------|-----------------|
+| Neutral | `title="No projects yet"`, `message="Create your first project to get started."`, actions slot with primary Create project button | centered title, supporting message, and primary action button |
+
+### Search
+
+A search-variant empty state with action:
+
+| Label | Props/Config | Expected Visual |
+|-------|-------------|-----------------|
+| Search | `variant="search"`, `title="No results found"`, `message="Try adjusting your search terms or clearing filters."`, actions slot with secondary Clear filters button | search-posture empty state with title, message, and secondary action |
+
+### First run
+
+A first-run variant empty state without actions:
+
+| Label | Props/Config | Expected Visual |
+|-------|-------------|-----------------|
+| First run | `variant="firstRun"`, `title="Welcome to your workspace"`, `message="This is where your team's components will appear once you start building."` | invitational posture with title and message only, no action controls |
+
+## 14. Approval And Adoption Notes
 
 - contract status: `seed contract`
 - approvers: pending

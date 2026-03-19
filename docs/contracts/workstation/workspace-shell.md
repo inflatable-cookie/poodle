@@ -161,7 +161,23 @@ No component-owned events beyond child shell-region behavior.
 |-------|-------------|-----------------|-----------|
 | exact shell chrome packing may differ | runtime shell integration differs | allowed | keep hierarchy and focus rules strict |
 
-## 13. Approval And Adoption Notes
+## 13. Specimen Definitions
+
+Specimen reference: `WorkspaceShellSpecimen.svelte`.
+
+### Group: Default shell
+
+| Label | Props / Config | Expected Visual |
+|-------|---------------|-----------------|
+| Default shell | Slots populated: `appHeader` ("App Header"), `projectHeader` ("Project Header"), `surfaceTabs` ("Surface Tabs"), default slot ("Center content"), `statusBar` ("Status Bar") | Full shell layout with all header rows, center content area, and status bar; each slot shown as a labeled dashed-border placeholder |
+
+### Group: Loading state
+
+| Label | Props / Config | Expected Visual |
+|-------|---------------|-----------------|
+| Loading | `state="loading"`, `stateTitle="Loading workspace"`, `stateMessage="Please wait..."` | Shell in loading posture with title and message displayed; no slot content visible |
+
+## 14. Approval And Adoption Notes
 
 - contract status: `seed contract`
 - approvers: pending

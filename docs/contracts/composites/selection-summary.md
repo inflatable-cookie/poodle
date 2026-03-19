@@ -18,6 +18,26 @@ Updated: 2026-03-11
 - clear-selection remains distinct from confirm/cancel semantics
 - GPUI-native accessibility mapping notes: GPUI must preserve selection summary and per-item removal meaning rather than rendering them as decorative tags
 
-## 3. Next Task
+## 3. Specimen Definitions
+
+### Multiple Items Selected
+
+| Label | Props / Config | Expected Visual |
+|-------|---------------|-----------------|
+| Multiple items selected | `selectionMode="multiple"`, five items (Button, Card, Dialog, Table, Tabs), remove and clear handlers wired | Summary with five removable chips and a clear-all affordance |
+
+### Single Item
+
+| Label | Props / Config | Expected Visual |
+|-------|---------------|-----------------|
+| Single item | `selectionMode="single"`, one item (`"Primary button"`) | Compact summary showing a single selected item chip |
+
+### Truncated (Max 3 Visible)
+
+| Label | Props / Config | Expected Visual |
+|-------|---------------|-----------------|
+| Truncated (max 3 visible) | six items (Alpha through Zeta), `maxVisibleItems={3}` | Three visible chips with an overflow count indicating the remaining three |
+
+## 4. Next Task
 
 Use `SelectionSummary` inside `RelationPicker`, picker shells, and future selection-heavy workflows instead of rebuilding selected-chip summaries ad hoc.

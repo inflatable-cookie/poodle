@@ -41,6 +41,20 @@ It does not change selection meaning.
 - confirm/cancel actions remain explicit and discoverable
 - GPUI-native accessibility mapping notes: GPUI must preserve picker title, search grouping, candidate list semantics, selection summary, and confirm or cancel actions without relying on HTML dialog/popover defaults
 
-## 5. Next Task
+## 5. Specimen Definitions
+
+### Inline Variant (Ready)
+
+| Label | Props / Config | Expected Visual |
+|-------|---------------|-----------------|
+| Inline variant (ready) | `title="Select a component"`, `description="Browse and select from available components."`, `resultCount={12}`, `variant="inline"`, three Surface children as candidate items | Picker shell with title, description, result count, and three candidate rows visible in a constrained container |
+
+### No Results
+
+| Label | Props / Config | Expected Visual |
+|-------|---------------|-----------------|
+| No results | `title="Select an item"`, `state="no-results"`, `stateTitle="No matches"`, `stateMessage="Try a different search term."`, `variant="inline"` | Picker shell showing empty state with "No matches" title and guidance message |
+
+## 6. Next Task
 
 Build concrete workflows such as `RelationPicker` on top of `PickerShell` instead of redefining picker framing per feature.

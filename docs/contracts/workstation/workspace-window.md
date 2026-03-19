@@ -178,7 +178,23 @@ type WindowSurface = {
 |-------|-------------|-----------------|-----------|
 | browser multi-window vs native multi-window | platform constraints | allowed | ensure event model is equivalent |
 
-## 13. Approval And Adoption Notes
+## 13. Specimen Definitions
+
+Specimen reference: `WorkspaceWindowSpecimen.svelte`.
+
+### Group: With surfaces
+
+| Label | Props / Config | Expected Visual |
+|-------|---------------|-----------------|
+| With surfaces | `windowId="main"`, `surfaces=[{id:"editor", label:"Editor"}, {id:"preview", label:"Preview", isClosable:true}]`, `activeSurfaceId="editor"` | Window with surface tabs showing "Editor" (active) and "Preview" (closable); content area below with descriptive text |
+
+### Group: Empty window
+
+| Label | Props / Config | Expected Visual |
+|-------|---------------|-----------------|
+| Empty window | `windowId="secondary"`, `surfaces=[]`, `activeSurfaceId=null` | Empty window posture with no surface tabs; muted italic "No surfaces" placeholder in content area |
+
+## 14. Approval And Adoption Notes
 
 - contract status: `seed contract`
 - approvers: pending
