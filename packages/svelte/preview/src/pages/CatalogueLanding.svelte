@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { Eyebrow, Pill } from "@pug/svelte-primitives";
+  import { Eyebrow } from "@pug/svelte-primitives";
   import type { ComponentEntry, ComponentTier } from "../component-registry";
 
   export let tier: ComponentTier;
@@ -15,11 +15,6 @@
       label: "Composites",
       description: "Higher-order components composed from primitives. Each composite handles a complete workflow pattern.",
       section: "composites",
-    },
-    workstation: {
-      label: "Workstation",
-      description: "Workspace-level components for IDE-style layouts: window hosts, strip rails, docks, panels, resize handles, and hosted surfaces.",
-      section: "workstation",
     },
   };
 
@@ -44,9 +39,6 @@
       >
         <div class="component-card__header">
           <strong class="component-card__name">{component.displayName}</strong>
-          {#if component.hasSpecimen}
-            <Pill tone="success" size="sm">Demo</Pill>
-          {/if}
         </div>
         <p class="component-card__description">{component.description}</p>
       </a>

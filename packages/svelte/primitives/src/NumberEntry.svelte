@@ -40,8 +40,8 @@
   $: if (!isEditing) {
     draftValue = formatNumber(currentValue, precision);
   }
-  $: ariaInvalid = validationState === "invalid" ? "true" : undefined;
-  $: ariaBusy = validationState === "pending" ? "true" : undefined;
+  $: ariaInvalid = validationState === "invalid" ? true : undefined;
+  $: ariaBusy = validationState === "pending" ? true : undefined;
 
   function clampIfNeeded(nextValue: number): number {
     let result = nextValue;

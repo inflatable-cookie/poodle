@@ -15,8 +15,9 @@ start = "preview:dev"
 "tokens:build" = "bun packages/tokens/scripts/build-tokens.ts"
 
 # Preview (documentation site)
-"preview:dev" = "bun run --cwd packages/svelte/preview dev"
-"preview:build" = "bun run --cwd packages/svelte/preview build"
+"svelte:build" = "bun run --cwd packages/svelte/preview build"
+"svelte:run" = "bun run --cwd packages/svelte/preview dev"
+"svelte:preview" = [{ task = "svelte:run"}]
 
 # GPUI native preview (macOS)
 "gpui:build" = "cargo build -p pug-gpui-preview --manifest-path packages/gpui/preview/Cargo.toml"

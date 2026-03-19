@@ -39,6 +39,17 @@
       <Pill isMuted tone="danger">Muted danger</Pill>
     </div>
   </div>
+
+  <div class="specimen__group">
+    <Eyebrow>Badge</Eyebrow>
+    <div class="specimen__row">
+      <Pill appearance="badge">3</Pill>
+      <Pill appearance="badge">12</Pill>
+      <Pill appearance="badge">99+</Pill>
+      <Pill appearance="badge">New</Pill>
+      <Pill appearance="badge" tone="neutral">Draft</Pill>
+    </div>
+  </div>
 </div>
 
 <style>

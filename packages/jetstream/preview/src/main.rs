@@ -228,6 +228,7 @@ impl PreviewState {
         };
 
         // Initial build
+        log::info!("Scale factor: {}, logical: {}×{}", scale_factor, logical_w, logical_h);
         state.rebuild_shell();
         state
     }

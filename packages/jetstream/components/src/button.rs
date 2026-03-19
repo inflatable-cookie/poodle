@@ -8,10 +8,11 @@
 use jetstream_runtime::ui_element::{self, JsEl};
 use pug_jetstream::JetstreamThemeProvider;
 use pug_primitives::ButtonSpec;
+use pug_primitives::ButtonTone;
 use pug_primitives::ButtonVariant;
 use pug_primitives::ControlSize;
 
-use crate::theme_ext::{resolve_color, resolve_opacity, resolve_px, resolve_radius};
+use crate::theme_ext::{resolve_color, resolve_opacity, resolve_px, resolve_radius, tint};
 
 /// Build a Jetstream button element from a ButtonSpec.
 ///
@@ -24,29 +25,33 @@ use crate::theme_ext::{resolve_color, resolve_opacity, resolve_px, resolve_radiu
 ///   └── [Trailing Icon] — optional
 /// ```
 pub fn js_button(spec: &ButtonSpec, theme: &JetstreamThemeProvider) -> JsEl {
-    // ── Variant colors ──
-    // Ghost: transparent fill + transparent border (contract: background: transparent, border: transparent)
-    // Danger: direct from token (status.danger fill, text.inverse text)
     let is_ghost = spec.variant == ButtonVariant::Ghost;
-    let is_danger = spec.variant == ButtonVariant::Danger;
+    let tone = spec.effective_tone();
+    let is_danger_tone = tone == ButtonTone::Danger;
 
-    let fill = if is_ghost {
-        glam::Vec4::new(0.0, 0.0, 0.0, 0.0) // transparent
-    } else {
-        resolve_color(theme, spec.resolved_fill_token())
+    // ── Variant × tone colors (contract) ──
+    let fill = match (spec.variant, is_danger_tone) {
+        (ButtonVariant::Ghost, _) => glam::Vec4::ZERO, // transparent
+        (ButtonVariant::Secondary, true) => {
+            // Danger secondary: color-mix(status-danger 16%, background-surface)
+            let danger = resolve_color(theme, "semantic.color.status.danger");
+            let surface = resolve_color(theme, "semantic.color.background.surface");
+            mix_colors(danger, surface, 0.16)
+        }
+        _ => resolve_color(theme, spec.resolved_fill_token()),
     };
 
-    let text_color = if is_ghost && is_danger {
-        // Ghost + Danger tone: text = status.danger (contract)
-        resolve_color(theme, "semantic.color.status.danger")
-    } else {
-        resolve_color(theme, spec.resolved_text_token())
-    };
+    let text_color = resolve_color(theme, spec.resolved_text_token());
 
-    let border_color = if is_ghost {
-        glam::Vec4::new(0.0, 0.0, 0.0, 0.0) // transparent
-    } else {
-        resolve_color(theme, spec.resolved_border_token())
+    let border_color = match (spec.variant, is_danger_tone) {
+        (ButtonVariant::Ghost, _) => glam::Vec4::ZERO, // transparent
+        (ButtonVariant::Secondary, true) => {
+            // Danger secondary: color-mix(status-danger 46%, border-default)
+            let danger = resolve_color(theme, "semantic.color.status.danger");
+            let border_default = resolve_color(theme, "semantic.color.border.default");
+            mix_colors(danger, border_default, 0.46)
+        }
+        _ => resolve_color(theme, spec.resolved_border_token()),
     };
 
     // ── Sizing per ControlSize (contract: sm = height-6, md = height, lg = height+6) ──
@@ -105,6 +110,7 @@ pub fn js_button(spec: &ButtonSpec, theme: &JetstreamThemeProvider) -> JsEl {
         .bg(fill)
         .text_color(text_color)
         .text_size(label_size)
+        .text_weight(500) // contract: font-weight: var(--pug-typography-label-weight) = 500
         .flex_row()
         .items_center()
         .justify_center()
@@ -161,6 +167,11 @@ pub fn js_button(spec: &ButtonSpec, theme: &JetstreamThemeProvider) -> JsEl {
     }
 
     el
+}
+
+/// Mix two colors: result = a * fraction + b * (1 - fraction).
+fn mix_colors(a: glam::Vec4, b: glam::Vec4, fraction: f32) -> glam::Vec4 {
+    a * fraction + b * (1.0 - fraction)
 }
 
 #[cfg(test)]

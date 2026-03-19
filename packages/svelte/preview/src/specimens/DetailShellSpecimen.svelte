@@ -1,6 +1,6 @@
 <script lang="ts">
   import { DetailShell, DetailSection, PageHeader } from "@pug/svelte-composites";
-  import { Button, Badge, DetailRow, Eyebrow, Region, Separator, Surface } from "@pug/svelte-primitives";
+  import { Button, Pill, DetailRow, Eyebrow, Region, Separator, Surface } from "@pug/svelte-primitives";
 </script>
 
 <div class="specimen">
@@ -25,7 +25,7 @@
         <svelte:fragment slot="header">
           <PageHeader title="Pug Design System" eyebrow="Project" subtitle="A comprehensive component library.">
             <svelte:fragment slot="actions">
-              <Badge tone="success">Active</Badge>
+              <Pill appearance="badge" tone="success">Active</Pill>
               <Button variant="secondary" size="sm">Edit</Button>
             </svelte:fragment>
           </PageHeader>

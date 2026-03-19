@@ -127,7 +127,7 @@ pub use tooltip::TooltipSpec;
 pub use tri_state_switch::TriStateSwitchSpec;
 pub use zoned_date_time_picker::ZonedDateTimePickerSpec;
 pub use types::{
-    AccordionItemSpec, AccordionSelectionValue, Alignment, BadgeVariant, ButtonVariant,
+    AccordionItemSpec, AccordionSelectionValue, Alignment, BadgeVariant, ButtonTone, ButtonVariant,
     CalendarWeekStart, CheckState, ChoiceOption, ControlSize, DateRangeValue, DateTimeRangeValue,
     DateTimeValue, DialogKind, Dimension, Direction, DrawerEdge, FormActionAlign, Inset, MenuEntry,
     MenuItemKind, MenubarEntry, NavigationMenuEntry, Orientation, Overflow, OverlayPlacement,

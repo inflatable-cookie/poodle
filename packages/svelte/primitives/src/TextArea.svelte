@@ -27,8 +27,8 @@
 
   $: isControlled = value !== null;
   $: currentValue = isControlled ? value ?? "" : uncontrolledValue;
-  $: ariaInvalid = validationState === "invalid" ? "true" : undefined;
-  $: ariaBusy = validationState === "pending" ? "true" : undefined;
+  $: ariaInvalid = validationState === "invalid" ? true : undefined;
+  $: ariaBusy = validationState === "pending" ? true : undefined;
 
   function handleInput(event: Event): void {
     const nextValue = (event.currentTarget as HTMLTextAreaElement).value;

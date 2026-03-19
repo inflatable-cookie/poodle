@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { Breadcrumbs, type BreadcrumbItem } from "@pug/svelte-composites";
+  import { Breadcrumbs, type BreadcrumbItem } from "@pug/svelte-primitives";
   import { Eyebrow } from "@pug/svelte-primitives";
 
   const basicItems: BreadcrumbItem[] = [

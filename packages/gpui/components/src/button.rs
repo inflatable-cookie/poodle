@@ -112,15 +112,18 @@ impl IntoElement for PugButton {
         // ── Hover/active colors (contract §8 Hover/Active) ──────
         // hover fill: color-mix(fill 84%, elevated)
         // active fill: color-mix(fill 72%, elevated)
-        let hover_fill = if is_ghost {
-            // Ghost hover: mix with elevated at 84% transparency
-            color_mix(fill, elevated, 0.84)
-        } else {
-            color_mix(fill, elevated, 0.84)
-        };
+        let hover_fill = color_mix(fill, elevated, 0.84);
         let active_fill = color_mix(fill, elevated, 0.72);
         // hover border: color-mix(border 78%, text-primary)
-        let hover_border = color_mix(border_color, text_primary, 0.78);
+        // For ghost, base border is transparent — CSS color-mix(transparent 78%, text-primary)
+        // produces ~22% text-primary. We replicate by mixing the resolved border-default
+        // token with text-primary so the ghost gets a visible border on hover.
+        let hover_border = if is_ghost {
+            let border_default = resolve_color(theme, "semantic.color.border.default");
+            color_mix(border_default, text_primary, 0.78)
+        } else {
+            color_mix(border_color, text_primary, 0.78)
+        };
 
         // ── Build element ID ─────────────────────────────────────
         let label_text = spec.label.clone().unwrap_or_default();

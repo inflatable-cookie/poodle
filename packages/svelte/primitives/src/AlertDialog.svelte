@@ -71,7 +71,7 @@
     <Button
       variant="ghost"
       on:click={handleCancel}
-      disabled={working}
+      isDisabled={working}
     >
       {cancelLabel}
     </Button>
@@ -79,7 +79,7 @@
       variant="primary"
       tone={confirmTone}
       on:click={handleConfirm}
-      disabled={working}
+      isDisabled={working}
     >
       {working ? "Working\u2026" : confirmLabel}
     </Button>

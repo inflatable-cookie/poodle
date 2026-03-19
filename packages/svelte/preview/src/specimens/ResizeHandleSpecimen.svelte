@@ -1,11 +1,11 @@
 <script lang="ts">
   import { Eyebrow } from "@pug/svelte-primitives";
-  import { ResizeHandle } from "@pug/svelte-workstation";
+  import { ResizeHandle } from "@pug/svelte-primitives";
 </script>
 
 <div class="specimen">
   <div class="specimen__group">
-    <Eyebrow>Horizontal</Eyebrow>
+    <Eyebrow>Horizontal split (vertical handle — drag left/right)</Eyebrow>
     <div class="specimen__row">
       <div class="specimen__pane">Left</div>
       <div class="specimen__handle-wrapper specimen__handle-wrapper--horizontal">
@@ -16,7 +16,7 @@
   </div>
 
   <div class="specimen__group">
-    <Eyebrow>Vertical</Eyebrow>
+    <Eyebrow>Vertical split (horizontal handle — drag up/down)</Eyebrow>
     <div class="specimen__col">
       <div class="specimen__pane">Top</div>
       <div class="specimen__handle-wrapper specimen__handle-wrapper--vertical">
@@ -27,13 +27,24 @@
   </div>
 
   <div class="specimen__group">
-    <Eyebrow>Disabled</Eyebrow>
+    <Eyebrow>Disabled (horizontal split)</Eyebrow>
     <div class="specimen__row">
       <div class="specimen__pane">Left</div>
       <div class="specimen__handle-wrapper specimen__handle-wrapper--horizontal">
         <ResizeHandle orientation="horizontal" isDisabled ariaLabel="Disabled resize" />
       </div>
       <div class="specimen__pane">Right</div>
+    </div>
+  </div>
+
+  <div class="specimen__group">
+    <Eyebrow>Disabled (vertical split)</Eyebrow>
+    <div class="specimen__col">
+      <div class="specimen__pane">Top</div>
+      <div class="specimen__handle-wrapper specimen__handle-wrapper--vertical">
+        <ResizeHandle orientation="vertical" isDisabled ariaLabel="Disabled resize vertical" />
+      </div>
+      <div class="specimen__pane">Bottom</div>
     </div>
   </div>
 </div>

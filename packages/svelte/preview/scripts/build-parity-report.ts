@@ -185,7 +185,7 @@ const report = {
     acceptanceHarness: gpuiCrossRuntimeParity.acceptanceHarness,
   },
   packageSurfaceCoverage: {
-    summary: ["@pug/svelte-primitives", "@pug/svelte-composites", "@pug/svelte-workstation"].map((packageName) => {
+    summary: ["@pug/svelte-primitives", "@pug/svelte-composites", "@pug/svelte-composites"].map((packageName) => {
       const entries = packageSurfaceCoverage.filter((entry) => entry.packageName === packageName);
 
       return {

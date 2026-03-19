@@ -366,7 +366,7 @@ function validateSveltePackageSurface(
 
 function validatePackageSurfaceCoverage(
   packagePath: string,
-  packageName: "@pug/svelte-primitives" | "@pug/svelte-composites" | "@pug/svelte-workstation",
+  packageName: "@pug/svelte-primitives" | "@pug/svelte-composites" | "@pug/svelte-composites",
   errors: string[],
 ): void {
   const indexSource = fs.readFileSync(path.join(repoRoot, packagePath, "src", "index.ts"), "utf8");
@@ -3155,10 +3155,8 @@ const componentContractCount = validateComponentContracts(errors);
 validateContractIndexes(errors);
 validateSveltePackageSurface("packages/svelte/primitives", "foundation", "@pug/svelte-primitives", errors);
 validateSveltePackageSurface("packages/svelte/composites", "composites", "@pug/svelte-composites", errors);
-validateSveltePackageSurface("packages/svelte/workstation", "workstation", "@pug/svelte-workstation", errors);
 validatePackageSurfaceCoverage("packages/svelte/primitives", "@pug/svelte-primitives", errors);
 validatePackageSurfaceCoverage("packages/svelte/composites", "@pug/svelte-composites", errors);
-validatePackageSurfaceCoverage("packages/svelte/workstation", "@pug/svelte-workstation", errors);
 validateDocsCatalog(errors);
 validateParityCoverage(errors);
 validateAccessibilityAudit(errors);

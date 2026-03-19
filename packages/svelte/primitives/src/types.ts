@@ -22,7 +22,7 @@ export type StatusTone =
   | "pending";
 export type ToggleVariant = "primary" | "secondary" | "ghost";
 export type PillTone = "neutral" | "success" | "danger";
-export type PillAppearance = "solid" | "subtle";
+export type PillAppearance = "solid" | "subtle" | "badge";
 export type PillSize = "xxs" | "xs" | "sm";
 export type PillFont = "normal" | "mono";
 export type Orientation = "vertical" | "horizontal";
@@ -213,4 +213,13 @@ export type SortField = {
 export type ActiveSort = {
   field: string;
   direction: "asc" | "desc";
+};
+
+export type SplitOrientation = "horizontal" | "vertical";
+
+export type BreadcrumbItem = {
+  value: string;
+  label: string;
+  href?: string;
+  isCurrent?: boolean;
 };

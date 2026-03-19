@@ -1,10 +1,11 @@
 use pug_tokens::semantic;
 
-use crate::types::{ButtonVariant, ControlSize};
+use crate::types::{ButtonTone, ButtonVariant, ControlSize};
 
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct ButtonSpec {
     pub variant: ButtonVariant,
+    pub tone: ButtonTone,
     pub size: ControlSize,
     pub is_disabled: bool,
     pub is_loading: bool,
@@ -19,6 +20,7 @@ impl Default for ButtonSpec {
     fn default() -> Self {
         Self {
             variant: ButtonVariant::Secondary,
+            tone: ButtonTone::Default,
             size: ControlSize::Md,
             is_disabled: false,
             is_loading: false,
@@ -53,6 +55,16 @@ impl ButtonSpec {
 
     pub fn with_loading(mut self, is_loading: bool) -> Self {
         self.is_loading = is_loading;
+        self
+    }
+
+    pub fn with_tone(mut self, tone: ButtonTone) -> Self {
+        self.tone = tone;
+        self
+    }
+
+    pub fn with_danger(mut self) -> Self {
+        self.tone = ButtonTone::Danger;
         self
     }
 
@@ -92,16 +104,25 @@ impl ButtonSpec {
             .unwrap_or(true)
     }
 
+    /// Effective tone: Danger variant forces Danger tone.
+    pub fn effective_tone(&self) -> ButtonTone {
+        if self.variant == ButtonVariant::Danger {
+            ButtonTone::Danger
+        } else {
+            self.tone
+        }
+    }
+
     pub fn resolved_fill_token(&self) -> &'static str {
-        self.variant.fill_token()
+        self.variant.fill_token_with_tone(self.effective_tone())
     }
 
     pub fn resolved_border_token(&self) -> &'static str {
-        self.variant.border_token()
+        self.variant.border_token_with_tone(self.effective_tone())
     }
 
     pub fn resolved_text_token(&self) -> &'static str {
-        self.variant.text_token()
+        self.variant.text_token_with_tone(self.effective_tone())
     }
 
     pub fn control_height_token(&self) -> &'static str {

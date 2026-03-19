@@ -1,26 +1,26 @@
 <script lang="ts">
-  import { Spacer, Inline, Surface, Eyebrow } from "@pug/svelte-primitives";
+  import { Spacer, Stack, Surface, Eyebrow } from "@pug/svelte-primitives";
 </script>
 
 <div class="specimen">
   <div class="specimen__group">
     <Eyebrow>Push items apart</Eyebrow>
-    <Inline gap="md">
+    <Stack direction="row" gap="md">
       <Surface padding="sm" border="subtle"><span>Logo</span></Surface>
       <Spacer />
       <Surface padding="sm" border="subtle"><span>Sign in</span></Surface>
-    </Inline>
+    </Stack>
   </div>
 
   <div class="specimen__group">
     <Eyebrow>Between three items</Eyebrow>
-    <Inline gap="md">
+    <Stack direction="row" gap="md">
       <Surface padding="sm" border="subtle"><span>Left</span></Surface>
       <Spacer />
       <Surface padding="sm" border="subtle"><span>Center</span></Surface>
       <Spacer />
       <Surface padding="sm" border="subtle"><span>Right</span></Surface>
-    </Inline>
+    </Stack>
   </div>
 </div>
 

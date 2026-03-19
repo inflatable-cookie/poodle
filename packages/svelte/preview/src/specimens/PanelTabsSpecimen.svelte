@@ -1,6 +1,6 @@
 <script lang="ts">
   import { Eyebrow } from "@pug/svelte-primitives";
-  import { PanelTabs } from "@pug/svelte-workstation";
+  import { PanelTabs } from "@pug/svelte-composites";
 
   let activeTab = "explorer";
 </script>

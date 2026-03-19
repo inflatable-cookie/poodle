@@ -40,8 +40,7 @@ export type SectionParityTarget = {
 
 export type PublicSveltePackageName =
   | "@pug/svelte-primitives"
-  | "@pug/svelte-composites"
-  | "@pug/svelte-workstation";
+  | "@pug/svelte-composites";
 
 export type PackageSurfaceCoverageStatus = "previewed" | "contract-only";
 
@@ -565,7 +564,7 @@ const packageSurfaceCoverageGroups: PackageSurfaceCoverageGroup[] = [
     exportNames: ["ActionDiscoveryPanel", "CommandPalette"],
   },
   {
-    packageName: "@pug/svelte-workstation",
+    packageName: "@pug/svelte-composites",
     kind: "component",
     status: "previewed",
     sectionIds: ["command-suite"],
@@ -573,7 +572,7 @@ const packageSurfaceCoverageGroups: PackageSurfaceCoverageGroup[] = [
     exportNames: ["PanelHeader"],
   },
   {
-    packageName: "@pug/svelte-workstation",
+    packageName: "@pug/svelte-composites",
     kind: "component",
     status: "previewed",
     sectionIds: ["workspace-suite"],
@@ -584,11 +583,10 @@ const packageSurfaceCoverageGroups: PackageSurfaceCoverageGroup[] = [
       "ProjectHeader",
       "ShellStatusBar",
       "SplitView",
-      "WorkspaceShell",
     ],
   },
   {
-    packageName: "@pug/svelte-workstation",
+    packageName: "@pug/svelte-composites",
     kind: "helper",
     status: "previewed",
     sectionIds: ["workspace-suite"],

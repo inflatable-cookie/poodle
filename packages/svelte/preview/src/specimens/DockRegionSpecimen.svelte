@@ -1,7 +1,7 @@
 <script lang="ts">
   import { Eyebrow, Surface } from "@pug/svelte-primitives";
-  import { DockRegion } from "@pug/svelte-workstation";
-  import type { PanelTabItem, DockEdge } from "@pug/svelte-workstation";
+  import { DockRegion } from "@pug/svelte-composites";
+  import type { PanelTabItem, DockEdge } from "@pug/svelte-composites";
 
   // ── Static dock state ──────────────────────────────────────────────
 

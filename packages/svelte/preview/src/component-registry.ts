@@ -1,4 +1,4 @@
-export type ComponentTier = "primitive" | "composite" | "workstation";
+export type ComponentTier = "primitive" | "composite";
 
 export type ComponentEntry = {
   slug: string;
@@ -34,13 +34,12 @@ function entry(
 
 const P = "@pug/svelte-primitives";
 const C = "@pug/svelte-composites";
-const W = "@pug/svelte-workstation";
 
 export const primitiveComponents: ComponentEntry[] = [
   entry("Accordion", "primitive", P, "Expandable disclosure panels with single or multiple selection.", true),
   entry("AlertDialog", "primitive", P, "Focused confirmation modal for destructive or dangerous actions.", true),
-  entry("Badge", "primitive", P, "Small status label for counts, tags, or indicators.", true),
   entry("Box", "primitive", P, "Generic layout container with configurable padding and alignment.", true),
+  entry("Breadcrumbs", "primitive", P, "Hierarchical navigation trail showing current location.", true),
   entry("BulkActionBar", "primitive", P, "Action bar for batch operations on selected items.", true),
   entry("Button", "primitive", P, "Primary interactive control for triggering actions.", true),
   entry("Calendar", "primitive", P, "Date grid for picking a single date.", true),
@@ -70,7 +69,6 @@ export const primitiveComponents: ComponentEntry[] = [
   entry("HoverCard", "primitive", P, "Rich preview card triggered by hover or focus.", true),
   entry("Icon", "primitive", P, "SVG icon from a swappable registry. Lucide default set.", true),
   entry("IconButton", "primitive", P, "Button variant displaying only an icon.", true),
-  entry("Inline", "primitive", P, "Horizontal flex layout container.", true),
   entry("ListCard", "primitive", P, "Structured list item card with leading/trailing slots.", true),
   entry("Menu", "primitive", P, "Dropdown menu with items, separators, and keyboard navigation.", true),
   entry("Menubar", "primitive", P, "Horizontal menu bar with dropdown sub-menus.", true),
@@ -90,6 +88,8 @@ export const primitiveComponents: ComponentEntry[] = [
   entry("RangeCalendar", "primitive", P, "Calendar grid for selecting a date range.", true),
   entry("RangeSlider", "primitive", P, "Dual-thumb slider for selecting a numeric range.", true),
   entry("Rating", "primitive", P, "Star-based rating input or display.", true),
+  entry("ResizeHandle", "primitive", P, "Drag and keyboard resize handle for split layouts.", true),
+  entry("StatusBar", "primitive", P, "Bottom status bar with leading and trailing slots.", true),
   entry("Region", "primitive", P, "Dashed placeholder block for designating layout areas.", true),
   entry("ScrollShell", "primitive", P, "Scrollable container with overflow management.", true),
   entry("SearchField", "primitive", P, "Text input optimized for search with clear action.", true),
@@ -123,9 +123,8 @@ export const compositeComponents: ComponentEntry[] = [
   entry("ActionDiscoveryPanel", "composite", C, "Grouped action list with keyboard navigation, shortcuts, and badges.", true),
   entry("AppHeader", "composite", C, "Top-level application header with branding and global actions.", true),
   entry("AudioPlayer", "composite", C, "Audio playback with transport controls, volume, and speed.", true),
-  entry("AutonomousList", "composite", C, "Self-managing list with add, remove, and optional reorder.", true),
+  entry("EditableList", "composite", C, "Self-managing list with add, remove, and optional reorder.", true),
   entry("BlockEditor", "composite", C, "Block-based content editor with paragraph, heading, code, quote, list, image, and divider blocks.", true),
-  entry("Breadcrumbs", "composite", C, "Hierarchical navigation trail showing current location.", true),
   entry("CardRadioGroup", "composite", C, "Radio selection across rich card options with keyboard navigation.", true),
   entry("CommandPalette", "composite", C, "Keyboard-driven command search and execution overlay.", true),
   entry("ConfirmAction", "composite", C, "Trigger element with confirmation prompt before executing dangerous actions.", true),
@@ -150,28 +149,16 @@ export const compositeComponents: ComponentEntry[] = [
   entry("ReorderableList", "composite", C, "Drag-and-drop reorderable list with keyboard support.", true),
   entry("SelectionSummary", "composite", C, "Summary display of current selection state.", true),
   entry("SlugField", "composite", C, "URL-safe slug field with auto-generation from source text.", true),
-  entry("StateTile", "composite", C, "Compact label-value tile for status display.", true),
+  entry("MetricTile", "composite", C, "Compact label-value tile for metrics and KPIs.", true),
   entry("ToastStack", "composite", C, "Stacked transient notification manager.", true),
   entry("VideoPlayer", "composite", C, "Video playback with overlay controls, fullscreen, and captions.", true),
-  entry("DockRegion", "composite", W, "Collapsible dock container for panels with tabs, collapse, and drag-and-drop.", true),
-].sort((a, b) => a.displayName.localeCompare(b.displayName));
-
-export const workstationComponents: ComponentEntry[] = [
-  entry("PanelSurface", "workstation", W, "Panel content area with utility/standard/focused variants.", true),
-  entry("ProjectHeader", "workstation", W, "Project-scoped header with context and navigation.", true),
-  entry("ResizeHandle", "workstation", W, "Drag and keyboard resize handle for split layouts.", true),
-  entry("ShellStatusBar", "workstation", W, "Bottom status bar with slot-based status segments.", true),
-  entry("SplitDivider", "workstation", W, "Resize handle with optional collapse affordances.", true),
-  entry("SplitView", "workstation", W, "Resizable split pane layout.", true),
-  entry("StripRail", "workstation", W, "Four-edge icon/mixed-mode strip for region switching.", true),
-  entry("WorkspaceShell", "workstation", W, "Top-level workspace layout shell with region composition.", true),
-  entry("WorkspaceWindow", "workstation", W, "Window host with surface ownership and slot composition.", true),
+  entry("DockRegion", "composite", C, "Collapsible dock container for panels with tabs, collapse, and drag-and-drop.", true),
+  entry("SplitView", "composite", C, "Resizable split pane layout with collapse toggles and drag-to-collapse.", true),
 ].sort((a, b) => a.displayName.localeCompare(b.displayName));
 
 export const allComponents: ComponentEntry[] = [
   ...primitiveComponents,
   ...compositeComponents,
-  ...workstationComponents,
 ];
 
 export function findComponent(
@@ -182,8 +169,6 @@ export function findComponent(
     ? primitiveComponents
     : tier === "composite"
       ? compositeComponents
-      : tier === "workstation"
-        ? workstationComponents
-        : allComponents;
+      : allComponents;
   return list.find((c) => c.slug === slug);
 }

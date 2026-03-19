@@ -1,7 +1,7 @@
 export { default as Accordion } from "./Accordion.svelte";
 export { default as AlertDialog } from "./AlertDialog.svelte";
-export { default as Badge } from "./Badge.svelte";
 export { default as Box } from "./Box.svelte";
+export { default as Breadcrumbs } from "./Breadcrumbs.svelte";
 export { default as BulkActionBar } from "./BulkActionBar.svelte";
 export { default as Button } from "./Button.svelte";
 export { default as Callout } from "./Callout.svelte";
@@ -32,7 +32,6 @@ export { default as HoverCard } from "./HoverCard.svelte";
 export { default as Icon } from "./Icon.svelte";
 export { default as IconButton } from "./IconButton.svelte";
 export { default as IconProvider } from "./IconProvider.svelte";
-export { default as Inline } from "./Inline.svelte";
 export { default as Meter } from "./Meter.svelte";
 export { default as ListCard } from "./ListCard.svelte";
 export { default as ListCardCounter } from "./ListCardCounter.svelte";
@@ -51,6 +50,7 @@ export { default as Progress } from "./Progress.svelte";
 export { default as RadioGroup } from "./RadioGroup.svelte";
 export { default as Rating } from "./Rating.svelte";
 export { default as Region } from "./Region.svelte";
+export { default as ResizeHandle } from "./ResizeHandle.svelte";
 export { default as RangeCalendar } from "./RangeCalendar.svelte";
 export { default as RangeSlider } from "./RangeSlider.svelte";
 export { default as SearchField } from "./SearchField.svelte";
@@ -63,6 +63,7 @@ export { default as Skeleton } from "./Skeleton.svelte";
 export { default as Slider } from "./Slider.svelte";
 export { default as Spacer } from "./Spacer.svelte";
 export { default as Stack } from "./Stack.svelte";
+export { default as StatusBar } from "./StatusBar.svelte";
 export { default as StatusIndicator } from "./StatusIndicator.svelte";
 export { default as Surface } from "./Surface.svelte";
 export { default as Switch } from "./Switch.svelte";
@@ -138,9 +139,11 @@ export type {
   TriStateValue,
   ValidationState,
   ActiveSort,
+  BreadcrumbItem,
   BulkAction,
   CardVariant,
   SortField,
+  SplitOrientation,
   ZonedDateTimeValue,
 } from "./types";
 export type { IconRegistry, IconNodeElement } from "./icon-registry";

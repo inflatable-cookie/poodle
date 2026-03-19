@@ -1,6 +1,6 @@
 <script lang="ts">
   import { PageHeader } from "@pug/svelte-composites";
-  import { Accordion, Button, Card, Collapsible, Eyebrow, Inline, Pill, Toggle } from "@pug/svelte-primitives";
+  import { Accordion, Button, Card, Collapsible, Eyebrow, Stack, Pill, Toggle } from "@pug/svelte-primitives";
 
   import type { DocsFamilyEntry, DocsSectionEntry } from "../catalog";
 
@@ -186,10 +186,10 @@
           eyebrow="Website-style wrapper"
           subtitle="This proof uses app-owned composition plus scoped appearance recipes so cards, header framing, and CTA chrome can shift together."
         >
-          <Inline slot="actions" justify="end" wrap gap="md">
+          <Stack slot="actions" direction="row" justify="end" wrap gap="md">
             <Button variant="secondary">Read pattern notes</Button>
             <Button variant="primary">Launch branded preview</Button>
-          </Inline>
+          </Stack>
         </PageHeader>
 
         <div class="brand-proof-grid">

@@ -7,7 +7,6 @@
         "packages/svelte/tokens",
         "packages/svelte/primitives",
         "packages/svelte/composites",
-        "packages/svelte/workstation",
         "packages/bridges/underlay",
         "packages/svelte/preview"
     ]

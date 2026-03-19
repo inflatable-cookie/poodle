@@ -3,7 +3,7 @@
   "configurations": [
     {
       "name": "preview",
-      "runtimeExecutable": "bun",
+      "runtimeExecutable": "/Users/betterthanclay/.bun/bin/bun",
       "runtimeArgs": ["run", "--cwd", "packages/svelte/preview", "dev"],
       "port": 4173
     }

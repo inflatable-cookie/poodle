@@ -313,6 +313,7 @@
     <button
       type="button"
       class="color-picker__trigger"
+      aria-label="Open color picker"
       aria-haspopup="dialog"
       aria-expanded={isOpen}
       aria-controls={surfaceId}
@@ -356,6 +357,9 @@
           role="slider"
           tabindex="0"
           aria-label="Saturation and brightness"
+          aria-valuemin={0}
+          aria-valuemax={100}
+          aria-valuenow={Math.round(s)}
           aria-valuetext="Saturation {s}%, Brightness {v}%"
           bind:this={gradientElement}
           on:pointerdown={onGradientPointerDown}

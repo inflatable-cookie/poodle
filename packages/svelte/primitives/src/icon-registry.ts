@@ -118,7 +118,7 @@ const curatedNames: string[] = [
   "volume-2",
 ];
 
-const allNodes = iconNodes as Record<string, IconNodeElement[]>;
+const allNodes = iconNodes as unknown as Record<string, IconNodeElement[]>;
 
 /** Aliases for icon names that changed across Lucide versions. */
 const iconAliases: Record<string, string> = {

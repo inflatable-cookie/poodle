@@ -75,6 +75,20 @@
     letter-spacing: 0.02em;
   }
 
+  .pill[data-appearance="badge"] {
+    --pug-pill-fill: color-mix(in srgb, var(--pug-color-accent-base) 18%, transparent);
+    --pug-pill-border: transparent;
+    --pug-pill-text: var(--pug-color-text-primary);
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+  }
+
+  .pill[data-appearance="badge"][data-tone="neutral"] {
+    --pug-pill-fill: color-mix(in srgb, var(--pug-surface) 96%, var(--pug-color-text-primary));
+    --pug-pill-text: var(--pug-color-text-secondary);
+  }
+
   .pill[data-muted="true"] {
     opacity: 0.72;
   }

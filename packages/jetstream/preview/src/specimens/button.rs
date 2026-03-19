@@ -4,7 +4,7 @@ use jetstream_runtime::ui_element::*;
 use pug_jetstream::JetstreamThemeProvider;
 use pug_jetstream_components::button::js_button;
 use pug_jetstream_components::theme_ext::*;
-use pug_primitives::{ButtonSpec, ButtonVariant, ControlSize};
+use pug_primitives::{ButtonSpec, ButtonTone, ButtonVariant, ControlSize};
 
 pub fn render(theme: &JetstreamThemeProvider) -> JsEl {
     let secondary = resolve_color(theme, "semantic.color.text.secondary");
@@ -17,19 +17,19 @@ pub fn render(theme: &JetstreamThemeProvider) -> JsEl {
                 .child(js_button(&ButtonSpec::new().with_variant(ButtonVariant::Secondary).with_label("Secondary"), theme))
                 .child(js_button(&ButtonSpec::new().with_variant(ButtonVariant::Ghost).with_label("Ghost"), theme))
         ))
-        // Danger tone
+        // Danger tone — variant × tone combinations
         .child(group("Danger tone", secondary,
             div().flex_row().gap(8.0).items_center()
-                .child(js_button(&ButtonSpec::new().with_variant(ButtonVariant::Danger).with_label("Danger primary"), theme))
-                .child(js_button(&ButtonSpec::new().with_variant(ButtonVariant::Danger).with_label("Danger secondary"), theme))
-                .child(js_button(&ButtonSpec::new().with_variant(ButtonVariant::Danger).with_label("Danger ghost"), theme))
+                .child(js_button(&ButtonSpec::new().with_variant(ButtonVariant::Primary).with_danger().with_label("Danger primary"), theme))
+                .child(js_button(&ButtonSpec::new().with_variant(ButtonVariant::Secondary).with_danger().with_label("Danger secondary"), theme))
+                .child(js_button(&ButtonSpec::new().with_variant(ButtonVariant::Ghost).with_danger().with_label("Danger ghost"), theme))
         ))
         // With icons
         .child(group("With icons", secondary,
             div().flex_row().gap(8.0).items_center()
-                .child(js_button(&ButtonSpec::new().with_variant(ButtonVariant::Primary).with_label("Leading").with_leading_icon("+"), theme))
-                .child(js_button(&ButtonSpec::new().with_variant(ButtonVariant::Secondary).with_label("Trailing").with_trailing_icon("→"), theme))
-                .child(js_button(&ButtonSpec::new().with_variant(ButtonVariant::Primary).with_label("Both").with_leading_icon("⬇").with_trailing_icon("✓"), theme))
+                .child(js_button(&ButtonSpec::new().with_variant(ButtonVariant::Secondary).with_label("Create").with_leading_icon("+"), theme))
+                .child(js_button(&ButtonSpec::new().with_variant(ButtonVariant::Secondary).with_label("Open").with_trailing_icon("→"), theme))
+                .child(js_button(&ButtonSpec::new().with_variant(ButtonVariant::Secondary).with_label("Save").with_leading_icon("□").with_trailing_icon("✓"), theme))
         ))
         // Sizes
         .child(group("Sizes", secondary,
@@ -43,7 +43,7 @@ pub fn render(theme: &JetstreamThemeProvider) -> JsEl {
             div().flex_row().gap(8.0).items_center()
                 .child(js_button(&ButtonSpec::new().with_variant(ButtonVariant::Primary).with_label("Disabled").with_disabled(true), theme))
                 .child(js_button(&ButtonSpec::new().with_variant(ButtonVariant::Primary).with_label("Loading").with_loading(true), theme))
-                .child(js_button(&ButtonSpec::new().with_variant(ButtonVariant::Secondary).with_label("Disabled").with_disabled(true), theme))
+                .child(js_button(&ButtonSpec::new().with_variant(ButtonVariant::Secondary).with_label("Disabled secondary").with_disabled(true), theme))
         ))
 }
 

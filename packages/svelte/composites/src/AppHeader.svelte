@@ -1,5 +1,6 @@
 <script lang="ts">
   export let title: string | null = null;
+  export let subtitle: string | null = null;
   export let isDragRegion = false;
   export let ariaLabel: string | null = null;
 </script>
@@ -13,7 +14,12 @@
     {#if $$slots.identity}
       <slot name="identity" />
     {:else if title}
-      <strong>{title}</strong>
+      <div class="app-header__title-group">
+        <strong>{title}</strong>
+        {#if subtitle}
+          <span class="app-header__subtitle">{subtitle}</span>
+        {/if}
+      </div>
     {/if}
   </div>
 
@@ -52,9 +58,26 @@
     min-width: 0;
   }
 
+  .app-header__title-group {
+    display: flex;
+    align-items: baseline;
+    gap: var(--pug-space-inline-sm);
+    min-width: 0;
+  }
+
   .app-header__identity strong {
     font-size: 0.9375rem;
     line-height: 1.2;
+    white-space: nowrap;
+  }
+
+  .app-header__subtitle {
+    color: var(--pug-color-text-secondary);
+    font-size: 0.75rem;
+    line-height: 1.2;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
 
   .app-header__utility {

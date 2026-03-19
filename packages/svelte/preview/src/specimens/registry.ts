@@ -2,9 +2,8 @@ import type { SvelteComponent } from "svelte";
 
 import AccordionSpecimen from "./AccordionSpecimen.svelte";
 import AudioPlayerSpecimen from "./AudioPlayerSpecimen.svelte";
-import AutonomousListSpecimen from "./AutonomousListSpecimen.svelte";
+import EditableListSpecimen from "./EditableListSpecimen.svelte";
 import AlertDialogSpecimen from "./AlertDialogSpecimen.svelte";
-import BadgeSpecimen from "./BadgeSpecimen.svelte";
 import BlockEditorSpecimen from "./BlockEditorSpecimen.svelte";
 import BoxSpecimen from "./BoxSpecimen.svelte";
 import BreadcrumbsSpecimen from "./BreadcrumbsSpecimen.svelte";
@@ -47,7 +46,6 @@ import HoverCardSpecimen from "./HoverCardSpecimen.svelte";
 import IconSpecimen from "./IconSpecimen.svelte";
 import IconButtonSpecimen from "./IconButtonSpecimen.svelte";
 import InlineEditableFieldSpecimen from "./InlineEditableFieldSpecimen.svelte";
-import InlineSpecimen from "./InlineSpecimen.svelte";
 import ListCardSpecimen from "./ListCardSpecimen.svelte";
 import LogListSpecimen from "./LogListSpecimen.svelte";
 import NavCardSpecimen from "./NavCardSpecimen.svelte";
@@ -89,7 +87,7 @@ import SpacerSpecimen from "./SpacerSpecimen.svelte";
 import SlugFieldSpecimen from "./SlugFieldSpecimen.svelte";
 import SplitButtonSpecimen from "./SplitButtonSpecimen.svelte";
 import StackSpecimen from "./StackSpecimen.svelte";
-import StateTileSpecimen from "./StateTileSpecimen.svelte";
+import MetricTileSpecimen from "./MetricTileSpecimen.svelte";
 import StatusIndicatorSpecimen from "./StatusIndicatorSpecimen.svelte";
 import SurfaceSpecimen from "./SurfaceSpecimen.svelte";
 import SwitchSpecimen from "./SwitchSpecimen.svelte";
@@ -109,21 +107,15 @@ import TriStateSwitchSpecimen from "./TriStateSwitchSpecimen.svelte";
 import VideoPlayerSpecimen from "./VideoPlayerSpecimen.svelte";
 import ZonedDateTimePickerSpecimen from "./ZonedDateTimePickerSpecimen.svelte";
 
-// Workstation specimens
+// Composite specimens
 import ActionDiscoveryPanelSpecimen from "./ActionDiscoveryPanelSpecimen.svelte";
 import AppHeaderSpecimen from "./AppHeaderSpecimen.svelte";
 import CollapseToggleSpecimen from "./CollapseToggleSpecimen.svelte";
 import CommandPaletteSpecimen from "./CommandPaletteSpecimen.svelte";
 import DockRegionSpecimen from "./DockRegionSpecimen.svelte";
-import PanelSurfaceSpecimen from "./PanelSurfaceSpecimen.svelte";
-import ProjectHeaderSpecimen from "./ProjectHeaderSpecimen.svelte";
 import ResizeHandleSpecimen from "./ResizeHandleSpecimen.svelte";
-import ShellStatusBarSpecimen from "./ShellStatusBarSpecimen.svelte";
-import SplitDividerSpecimen from "./SplitDividerSpecimen.svelte";
+import StatusBarSpecimen from "./StatusBarSpecimen.svelte";
 import SplitViewSpecimen from "./SplitViewSpecimen.svelte";
-import StripRailSpecimen from "./StripRailSpecimen.svelte";
-import WorkspaceShellSpecimen from "./WorkspaceShellSpecimen.svelte";
-import WorkspaceWindowSpecimen from "./WorkspaceWindowSpecimen.svelte";
 
 /**
  * Maps component slugs to their specimen Svelte components.
@@ -132,9 +124,8 @@ import WorkspaceWindowSpecimen from "./WorkspaceWindowSpecimen.svelte";
 export const specimenMap: Record<string, typeof SvelteComponent<any>> = {
   accordion: AccordionSpecimen,
   "audio-player": AudioPlayerSpecimen,
-  "autonomous-list": AutonomousListSpecimen,
+  "editable-list": EditableListSpecimen,
   "alert-dialog": AlertDialogSpecimen,
-  badge: BadgeSpecimen,
   "block-editor": BlockEditorSpecimen,
   box: BoxSpecimen,
   breadcrumbs: BreadcrumbsSpecimen,
@@ -177,7 +168,6 @@ export const specimenMap: Record<string, typeof SvelteComponent<any>> = {
   icon: IconSpecimen,
   "icon-button": IconButtonSpecimen,
   "inline-editable-field": InlineEditableFieldSpecimen,
-  inline: InlineSpecimen,
   "list-card": ListCardSpecimen,
   "log-list": LogListSpecimen,
   "markdown-editor": MarkdownEditorSpecimen,
@@ -206,6 +196,7 @@ export const specimenMap: Record<string, typeof SvelteComponent<any>> = {
   "range-slider": RangeSliderSpecimen,
   rating: RatingSpecimen,
   region: RegionSpecimen,
+  "resize-handle": ResizeHandleSpecimen,
   "relation-picker": RelationPickerSpecimen,
   "reorderable-list": ReorderableListSpecimen,
   "scroll-shell": ScrollShellSpecimen,
@@ -220,7 +211,7 @@ export const specimenMap: Record<string, typeof SvelteComponent<any>> = {
   "slug-field": SlugFieldSpecimen,
   "split-button": SplitButtonSpecimen,
   stack: StackSpecimen,
-  "state-tile": StateTileSpecimen,
+  "metric-tile": MetricTileSpecimen,
   "status-indicator": StatusIndicatorSpecimen,
   surface: SurfaceSpecimen,
   switch: SwitchSpecimen,
@@ -246,13 +237,6 @@ export const specimenMap: Record<string, typeof SvelteComponent<any>> = {
   "app-header": AppHeaderSpecimen,
   "collapse-toggle": CollapseToggleSpecimen,
   "command-palette": CommandPaletteSpecimen,
-  "panel-surface": PanelSurfaceSpecimen,
-  "project-header": ProjectHeaderSpecimen,
-  "resize-handle": ResizeHandleSpecimen,
-  "shell-status-bar": ShellStatusBarSpecimen,
-  "split-divider": SplitDividerSpecimen,
+  "status-bar": StatusBarSpecimen,
   "split-view": SplitViewSpecimen,
-  "strip-rail": StripRailSpecimen,
-  "workspace-shell": WorkspaceShellSpecimen,
-  "workspace-window": WorkspaceWindowSpecimen,
 };

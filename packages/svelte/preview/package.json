@@ -19,7 +19,6 @@
     "@pug/svelte-composites": "workspace:*",
     "@pug/svelte-primitives": "workspace:*",
     "@pug/svelte-tokens": "workspace:*",
-    "@pug/svelte-workstation": "workspace:*",
     "svelte": "^5.38.6"
   },
   "devDependencies": {

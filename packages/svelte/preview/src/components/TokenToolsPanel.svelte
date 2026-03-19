@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { Eyebrow, Grid, Inline, SearchField, Stack, Surface, Table, Tabs, type TabItem, type TableColumn, type TableRow } from "@pug/svelte-primitives";
+  import { Eyebrow, Grid, Stack, SearchField, Surface, Table, Tabs, type TabItem, type TableColumn, type TableRow } from "@pug/svelte-primitives";
 
   export let activePanelId: "token-summary-section" | "token-inspector" = "token-summary-section";
   export let keySemanticTokens: Array<{ path: string; value: string }> = [];
@@ -36,11 +36,11 @@
     <h2 class="heading">Runtime values and emitted-token inspection</h2>
   </Stack>
 
-  <Inline gap="md">
+  <Stack gap="md">
     <span class="hint">@pug/svelte-tokens</span>
     <span class="path">packages/tokens/artifacts/css/</span>
     <span class="path">packages/tokens/artifacts/ts/</span>
-  </Inline>
+  </Stack>
 
   <Tabs
     value={activePanelId}

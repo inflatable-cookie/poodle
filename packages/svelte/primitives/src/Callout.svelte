@@ -35,9 +35,9 @@
         : undefined;
   $: ariaLive =
     announceMode === "assertive"
-      ? "assertive"
+      ? "assertive" as const
       : announceMode === "polite"
-        ? "polite"
+        ? "polite" as const
         : undefined;
 </script>
 

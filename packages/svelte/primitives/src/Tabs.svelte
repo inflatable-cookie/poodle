@@ -236,6 +236,7 @@
     {#each renderedItems as item, index (item.value)}
       <div
         class="pug-tabs__item"
+        role="presentation"
         data-selected={currentValue === item.value}
         data-drag-source={dragSourceIndex === index || undefined}
         data-drop-target={dropTargetIndex === index && dropTargetIndex !== dragSourceIndex || undefined}

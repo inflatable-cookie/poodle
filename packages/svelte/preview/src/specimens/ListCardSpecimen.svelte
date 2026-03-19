@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { ContextMenu, Eyebrow, Icon, ListCard, ListCardCounter, Pill, Badge } from "@pug/svelte-primitives";
+  import { ContextMenu, Eyebrow, Icon, ListCard, ListCardCounter, Pill } from "@pug/svelte-primitives";
 
   let lastClick = "";
 </script>
@@ -86,7 +86,7 @@
       >
         <svelte:fragment slot="leading"><Icon name="layers" /></svelte:fragment>
         <svelte:fragment slot="badges">
-          <Badge variant="muted">3</Badge>
+          <Pill appearance="badge" tone="neutral">3</Pill>
           <Pill tone="caution" size="xs">Review</Pill>
         </svelte:fragment>
       </ListCard>

@@ -114,3 +114,69 @@ export type ToastItem = {
   tone?: ToastTone;
   actionLabel?: string | null;
 };
+
+// --- Layout / Dock types ---
+
+export type SplitOrientation = "horizontal" | "vertical";
+export type DockEdge = "left" | "right" | "top" | "bottom";
+export type PanelVariant = "utility" | "standard" | "focused";
+export type DockEmphasis = "standard" | "quiet" | "strong";
+export type DockCollapsedPosture = "hidden" | "icon-strip";
+export type DockSizing = "static" | "flexible";
+
+export type PanelDragData = {
+  panelId: string;
+  sourceEdge: DockEdge;
+};
+
+export type PanelTabItem = {
+  value: string;
+  label: string;
+  icon?: string | null;
+  isClosable?: boolean;
+};
+
+// --- Snapshot types ---
+
+export type StripRegionSnapshot = {
+  isCollapsed: boolean;
+  activeItem: string | null;
+};
+
+export type CenterRegionSnapshot = {
+  activeSurface: string | null;
+};
+
+export type DockRegionSnapshot = {
+  edge: DockEdge;
+  isCollapsed: boolean;
+  activePanel: string | null;
+  order: string[];
+  tabsPlacement?: "edge" | "top";
+};
+
+export type WorkspaceLayoutSnapshot = {
+  version: 1 | 2;
+  activeSurface: string;
+  surfaceOrder: string[];
+  primarySplitRatio?: number;
+  secondarySplitRatio?: number;
+  leftDock?: DockRegionSnapshot;
+  rightDock?: DockRegionSnapshot;
+  regions?: {
+    topStrip?: StripRegionSnapshot;
+    bottomStrip?: StripRegionSnapshot;
+    leftStrip?: StripRegionSnapshot;
+    rightStrip?: StripRegionSnapshot;
+    left?: DockRegionSnapshot;
+    right?: DockRegionSnapshot;
+    top?: DockRegionSnapshot;
+    bottom?: DockRegionSnapshot;
+    centerTop?: CenterRegionSnapshot;
+    centerBottom?: CenterRegionSnapshot;
+  };
+  splitRatios?: {
+    primary: number;
+    secondary: number;
+  };
+};

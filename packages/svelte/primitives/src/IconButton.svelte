@@ -56,6 +56,7 @@
 
 <span
   class="icon-button-wrap"
+  role="presentation"
   on:mouseenter={scheduleOpen}
   on:mouseleave={dismiss}
 >

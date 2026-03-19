@@ -13,7 +13,16 @@
   export let validationState: ValidationState = "none";
   export let ariaLabel: string | null = null;
   export let describedBy: string | null = null;
-  export let inputMode: HTMLInputElement["inputMode"] | undefined = undefined;
+  export let inputMode:
+    | "none"
+    | "search"
+    | "text"
+    | "tel"
+    | "url"
+    | "email"
+    | "numeric"
+    | "decimal"
+    | null = null;
   export let type: HTMLInputElement["type"] = "text";
   export let prefix: string | null = null;
   export let suffix: string | null = null;
@@ -32,8 +41,8 @@
 
   $: isControlled = value !== null;
   $: currentValue = isControlled ? value ?? "" : uncontrolledValue;
-  $: ariaInvalid = validationState === "invalid" ? "true" : undefined;
-  $: ariaBusy = validationState === "pending" ? "true" : undefined;
+  $: ariaInvalid = validationState === "invalid" ? true : undefined;
+  $: ariaBusy = validationState === "pending" ? true : undefined;
   $: charCount = currentValue.length;
   $: charCountText = maxLength ? `${charCount}/${maxLength}` : `${charCount}`;
   $: isOverLimit = maxLength !== null && charCount > maxLength;
@@ -74,7 +83,7 @@
     {id}
     {name}
     {type}
-    {inputMode}
+    inputmode={inputMode ?? undefined}
     class="text-input__control"
     value={currentValue}
     {placeholder}

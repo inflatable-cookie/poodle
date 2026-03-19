@@ -1,11 +1,11 @@
-export type SectionId = "primitives" | "composites" | "workstation" | "tokens";
+export type SectionId = "primitives" | "composites" | "tokens";
 
 export type Route = {
   section: SectionId;
   component?: string;
 };
 
-const validSections: SectionId[] = ["primitives", "composites", "workstation", "tokens"];
+const validSections: SectionId[] = ["primitives", "composites", "tokens"];
 
 export function parseRoute(hash: string): Route {
   const raw = hash.replace(/^#/, "").trim();

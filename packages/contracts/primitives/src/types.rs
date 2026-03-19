@@ -147,32 +147,64 @@ pub enum ButtonVariant {
     Primary,
     Secondary,
     Ghost,
+    /// Danger is kept for backward compatibility — equivalent to Primary + Danger tone.
+    Danger,
+}
+
+/// Button tone (default or danger). The tone modifies variant colors.
+/// Contract: variant × tone combinations produce different visual treatments.
+#[derive(Clone, Copy, Debug, Eq, PartialEq, Default)]
+pub enum ButtonTone {
+    #[default]
+    Default,
     Danger,
 }
 
 impl ButtonVariant {
-    pub fn fill_token(self) -> &'static str {
-        match self {
-            Self::Primary => semantic::COLOR_ACCENT_BASE,
-            Self::Secondary | Self::Ghost => semantic::COLOR_BACKGROUND_SURFACE,
-            Self::Danger => semantic::COLOR_STATUS_DANGER,
+    /// Fill color token for a variant + tone combination.
+    pub fn fill_token_with_tone(self, tone: ButtonTone) -> &'static str {
+        match (self, tone) {
+            (Self::Primary, ButtonTone::Default) => semantic::COLOR_ACCENT_BASE,
+            (Self::Primary, ButtonTone::Danger) | (Self::Danger, _) => semantic::COLOR_STATUS_DANGER,
+            (Self::Secondary, ButtonTone::Default) => semantic::COLOR_BACKGROUND_SURFACE,
+            (Self::Secondary, ButtonTone::Danger) => semantic::COLOR_STATUS_DANGER, // mixed in component
+            (Self::Ghost, _) => semantic::COLOR_BACKGROUND_SURFACE, // transparent in component
         }
+    }
+
+    /// Border color token for a variant + tone combination.
+    pub fn border_token_with_tone(self, tone: ButtonTone) -> &'static str {
+        match (self, tone) {
+            (Self::Primary, ButtonTone::Default) => semantic::COLOR_ACCENT_BASE,
+            (Self::Primary, ButtonTone::Danger) | (Self::Danger, _) => semantic::COLOR_STATUS_DANGER,
+            (Self::Secondary, ButtonTone::Default) => semantic::COLOR_BORDER_DEFAULT,
+            (Self::Secondary, ButtonTone::Danger) => semantic::COLOR_STATUS_DANGER, // mixed in component
+            (Self::Ghost, _) => semantic::COLOR_BORDER_SUBTLE, // transparent in component
+        }
+    }
+
+    /// Text color token for a variant + tone combination.
+    pub fn text_token_with_tone(self, tone: ButtonTone) -> &'static str {
+        match (self, tone) {
+            (Self::Primary, ButtonTone::Default) => semantic::COLOR_TEXT_INVERSE,
+            (Self::Primary, ButtonTone::Danger) | (Self::Danger, _) => semantic::COLOR_TEXT_INVERSE,
+            (Self::Secondary, _) => semantic::COLOR_TEXT_PRIMARY,
+            (Self::Ghost, ButtonTone::Default) => semantic::COLOR_TEXT_PRIMARY,
+            (Self::Ghost, ButtonTone::Danger) => semantic::COLOR_STATUS_DANGER,
+        }
+    }
+
+    // Legacy methods (no tone = default tone)
+    pub fn fill_token(self) -> &'static str {
+        self.fill_token_with_tone(ButtonTone::Default)
     }
 
     pub fn border_token(self) -> &'static str {
-        match self {
-            Self::Primary => semantic::COLOR_ACCENT_BASE,
-            Self::Secondary => semantic::COLOR_BORDER_DEFAULT,
-            Self::Ghost => semantic::COLOR_BORDER_SUBTLE,
-            Self::Danger => semantic::COLOR_STATUS_DANGER,
-        }
+        self.border_token_with_tone(ButtonTone::Default)
     }
 
     pub fn text_token(self) -> &'static str {
-        match self {
-            Self::Primary | Self::Danger => semantic::COLOR_TEXT_INVERSE,
-            Self::Secondary | Self::Ghost => semantic::COLOR_TEXT_PRIMARY,
-        }
+        self.text_token_with_tone(ButtonTone::Default)
     }
 }
 
