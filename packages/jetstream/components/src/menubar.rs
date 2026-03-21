@@ -1,0 +1,25 @@
+//! Menubar — Jetstream horizontal menu bar backed by MenubarSpec.
+
+use jetstream_runtime::ui_element::{self, JsEl};
+use pug_jetstream::JetstreamThemeProvider;
+use pug_primitives::MenubarSpec;
+
+use crate::theme_ext::resolve_color;
+
+pub fn js_menubar(spec: &MenubarSpec, theme: &JetstreamThemeProvider) -> JsEl {
+    let text_color = resolve_color(theme, "semantic.color.text.primary");
+
+    let mut el = ui_element::div().flex_row().items_center().gap(2.0);
+
+    for entry in &spec.items {
+        el = el.child(
+            ui_element::button(&entry.label)
+                .text_color(text_color)
+                .text_size(13.0)
+                .pl(8.0).pr(8.0).pt(4.0).pb(4.0)
+                .focusable()
+        );
+    }
+
+    el
+}

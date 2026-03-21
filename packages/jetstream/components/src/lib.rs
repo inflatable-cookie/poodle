@@ -83,3 +83,26 @@ pub mod tabs;
 pub mod text_area;
 pub mod text_input;
 pub mod time_ago;
+
+// Complex primitives (g10.005)
+pub mod alert_dialog;
+pub mod breadcrumbs_comp;
+pub mod bulk_action_bar;
+pub mod calendar;
+pub mod combobox;
+pub mod context_menu;
+pub mod date_picker;
+pub mod dialog;
+pub mod drawer;
+pub mod editable_label;
+pub mod hover_card;
+pub mod menu;
+pub mod menubar;
+pub mod navigation_menu;
+pub mod pagination_comp;
+pub mod pin_input;
+pub mod popover;
+pub mod resize_handle;
+pub mod scroll_shell;
+pub mod select;
+pub mod tooltip;
