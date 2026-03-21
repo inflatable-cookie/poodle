@@ -37,7 +37,8 @@
 <style>
   .empty-state {
     display: grid;
-    justify-items: start;
+    justify-items: center;
+    text-align: center;
     gap: var(--pug-space-stack-md);
     padding: calc(var(--pug-space-panel-y) * 1.5) var(--pug-space-panel-x);
     border: 0.0625rem dashed var(--pug-color-border-default);
@@ -69,6 +70,7 @@
   .empty-state__copy {
     display: grid;
     gap: 0.375rem;
+    max-width: 24rem;
   }
 
   .empty-state__copy h3,

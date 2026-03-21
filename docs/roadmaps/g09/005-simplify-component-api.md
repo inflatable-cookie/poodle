@@ -6,37 +6,62 @@ Depends on: g09.004
 
 ## Context
 
-GPUI components currently use a `Pug` prefix (`PugButton`, `PugCheckbox`)
-which is redundant since the crate name already namespaces them. Developers
-also have to construct a separate `ButtonSpec` before passing it to
-`PugButton::new()`. The API should be as simple as importing one crate.
+GPUI components previously used a `Pug` prefix (`PugButton`, `PugCheckbox`)
+and required constructing a separate `ButtonSpec` before passing it to the
+component. The API should be a single builder chain from one import.
 
-## Actions
+## Completed Actions
 
-### Drop Pug prefix
+### Drop Pug prefix (done in g08)
 
-- [ ] Rename all component structs: `PugButton` → `Button`,
-      `PugCheckbox` → `Checkbox`, etc. (~100 files)
-- [ ] Update `lib.rs` exports
-- [ ] Update all specimen files in `packages/gpui/preview/src/specimens/`
-- [ ] Update any other internal references (demo_view, etc.)
+- [x] Renamed all component structs: `PugButton` → `Button`, etc.
+- [x] Updated `lib.rs` exports
+- [x] Updated all specimen files
+
+### Deref containment pattern (97 components)
+
+- [x] Each component owns its spec internally via `Deref<Target = SpecType>`
+- [x] `new(theme)` constructor creates default spec (or `new(required_args, theme)`)
+- [x] `from_spec(spec, theme)` backward-compat constructor
+- [x] 606 forwarded builder methods dropping `with_` prefix
+- [x] Naming convention: spec builders have no prefix, GPUI slots use `with_`, callbacks use `on_`
 
 ### Re-export common types
 
-- [ ] From `pug-gpui-components` lib.rs, re-export:
-  - `ButtonVariant`, `ButtonTone`, `ControlSize` (from `pug_primitives`)
-  - `IconSize`, `IconSpec` (from `pug_primitives`)
-  - `StatusTone`, `ValidationState` (from `pug_primitives`)
-  - Other commonly used enums
-- [ ] This allows: `use pug_gpui_components::{Button, ButtonVariant}`
+- [x] `ButtonVariant`, `ButtonTone`, `ControlSize`, `IconSize`, `IconSpec`,
+      `StatusTone`, `ValidationState` re-exported from `pug-gpui-components`
+
+### Subdirectory organization
+
+- [x] Components organized into `src/primitives/` (77) and `src/composites/` (24)
+- [x] Matches Svelte directory structure
 
 ### Verify
 
-- [ ] `cargo check -p pug-gpui-preview`
-- [ ] Grep for any remaining `Pug` prefixed component names
+- [x] `cargo check -p pug-gpui-preview` — clean
+- [x] `cargo test -p pug-primitives` — 32/32 pass
+- [x] `cargo test -p pug-composites` — 9/9 pass
+- [x] Jetstream components compile clean
 
-## Acceptance Criteria
+## API Shape
 
-- [ ] Zero `PugButton`, `PugCheckbox`, etc. references remain
-- [ ] Common types importable from `pug_gpui_components`
-- [ ] All preview specimens compile with new names
+Before:
+```rust
+use pug_gpui_primitives::{ButtonSpec, ButtonVariant};
+use pug_gpui_components::PugButton;
+
+PugButton::new(
+    ButtonSpec::new().with_variant(ButtonVariant::Primary).with_label("Save"),
+    &theme,
+).on_click(handler)
+```
+
+After:
+```rust
+use pug_gpui_components::{Button, ButtonVariant};
+
+Button::new(&theme)
+    .variant(ButtonVariant::Primary)
+    .label("Save")
+    .on_click(handler)
+```

@@ -35,6 +35,8 @@
 //! ```
 
 pub mod theme_ext;
+
+// Existing components
 pub mod accordion;
 pub mod badge;
 pub mod button;
@@ -43,3 +45,20 @@ pub mod progress;
 pub mod separator;
 pub mod status_indicator;
 pub mod switch;
+
+// Structural primitives (g10.003)
+pub mod banner;
+pub mod bx;
+pub mod callout;
+pub mod card;
+pub mod detail_row;
+pub mod eyebrow;
+pub mod field;
+pub mod form_actions;
+pub mod grid;
+pub mod pill;
+pub mod region;
+pub mod skeleton;
+pub mod stack;
+pub mod surface;
+pub mod toolbar;
