@@ -62,3 +62,24 @@ pub mod skeleton;
 pub mod stack;
 pub mod surface;
 pub mod toolbar;
+
+// Interactive primitives (g10.004)
+pub mod code;
+pub mod collapse_toggle;
+pub mod collapsible;
+pub mod icon;
+pub mod icon_button;
+pub mod meter;
+pub mod number_entry;
+pub mod radio_group;
+pub mod range_slider;
+pub mod rating;
+pub mod search_field;
+pub mod segmented_control;
+pub mod slider;
+pub mod split_button;
+pub mod tab_strip;
+pub mod tabs;
+pub mod text_area;
+pub mod text_input;
+pub mod time_ago;
