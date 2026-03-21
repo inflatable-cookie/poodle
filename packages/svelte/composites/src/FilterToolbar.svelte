@@ -12,7 +12,7 @@
   function handleHeaderClick(e: MouseEvent) {
     if (!collapsible || !collapsed) return;
     const target = e.target as HTMLElement;
-    if (target.closest('.filter-toolbar__actions')) return;
+    if (target.closest('.filter-toolbar__actions') || target.closest('.collapse-toggle')) return;
     collapsed = false;
   }
 </script>

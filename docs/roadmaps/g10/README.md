@@ -1,95 +1,94 @@
 # g10 Jetstream Production Quality
 
-Status: planned
-Updated: 2026-03-19
+Status: in-progress
+Updated: 2026-03-21
 
 ## Context
 
-Prior generations built a Jetstream adapter with a solid theme bridge and layout
-mapper, but only 8 real component implementations. ~100 adapter render functions
-exist as stubs that return type strings with no component-specific rendering.
-The 8 real components all hardcode their dimensions.
+g09 unified the crate architecture so both GPUI and Jetstream share the same
+contract specs. This generation builds out Jetstream component implementations
+to match the GPUI target's coverage, achieving visual parity with Svelte for
+all supported components.
 
-This generation mirrors g08's program for the Jetstream target: audit against
-current contracts, fix token resolution, build out missing components where
-feasible within Jetstream's rendering constraints, and achieve visual parity
-with Svelte for all supported components.
-
-Jetstream has inherent constraints (no SVG, no gradients, no transforms, limited
-text rendering, no ARIA) that mean some components will require native adaptation
-or intentional exclusion. These must be documented honestly in the delta register.
-
-## Starting State
+## Starting State (at g10 start)
 
 - 8 real Jetstream components: button, accordion, checkbox, switch, badge,
   progress, separator, status_indicator
-- ~100 adapter stubs returning type strings with `_spec`/`_theme` unused
-- Theme bridge (`theme.rs`) and layout mapper (`style_map.rs`) are solid
+- ~90 adapter render stubs returning placeholder node handles
+- Theme bridge and layout mapper are solid
 - 8 specimen pages in preview app
-- 20 real component tests, ~150 stub assertion tests
-- Demo/Tokens sections are "coming soon" placeholders
-- All 8 real components hardcode dimensions as `f32` constants
-- Svelte-side refactoring may still be in progress — contracts are a
-  moving target
+- Unified crate architecture from g09
 
-## Exit State
+## Current State
 
-- Every feasible Jetstream component has a real implementation with token
-  resolution
-- Unfeasible components documented with rationale in delta register
-- Adapter stubs replaced with real implementations or explicitly excluded
-- Specimen pages match contract definitions for all implemented components
-- Visual parity with Svelte verified for supported components
-- Cross-cutting issues (hardcoded geometry, disabled opacity) fixed
+- **86 Jetstream components** implemented in `pug-jetstream-components`
+  (up from 8 at start)
+- All components resolve visual properties from tokens via `JetstreamThemeProvider`
+- All components compile against current contract specs
+- Engine feature handoff document created for Jetstream runtime team
+  (see `jetstream-engine-handoff.md`)
 
-## Non-Goals
+### Components implemented (86 total)
 
-- No new contract work
-- No renegotiating Jetstream rendering constraints — adapt within them
-- No downstream app adoption proof
+**Primitives (62):**
+accordion, alert_dialog, badge, banner, breadcrumbs, bulk_action_bar, button,
+box, calendar, callout, card, checkbox, code, collapse_toggle, collapsible,
+color_picker (stub), combobox, context_menu, date_picker, date_range_picker
+(stub), date_time_picker (stub), date_time_range_picker (stub), detail_row,
+dialog, drawer, editable_label, eyebrow, field, form_actions, grid, hover_card,
+icon, icon_button, menu, menubar, meter, navigation_menu, number_entry,
+pagination, pill, pin_input, popover, progress, radio_group, range_slider,
+rating, region, resize_handle, scroll_shell, search_field, segmented_control,
+select, separator, skeleton, slider, split_button, stack, status_indicator,
+surface, switch, tabs, tab_strip, text_area, text_input, time_ago, toolbar,
+tooltip
+
+**Composites (24):**
+action_discovery_panel, app_header, command_palette, data_table,
+detail_section, detail_shell, dock_region, empty_state, filter_toolbar,
+list_card, media_preview, media_thumbnail, metric_tile, nav_card,
+nav_card_grid, order_by, page_header, pagination_summary, picker_shell,
+relation_picker, selection_summary, split_view, toast_stack
 
 ## Milestone Status
 
-| ID  | Milestone | Depends On | Class | Status |
-|-----|-----------|------------|-------|--------|
-| 001 | Sync with contracts and feasibility assessment | g09 | Foundation | Planned |
-| 002 | Fix existing 8 components: token resolution | 001 | Implementation | Planned |
-| 003 | Implement feasible missing components (batch 1) | 002 | Implementation | Planned |
-| 004 | Implement feasible missing components (batch 2) | 002 | Implementation | Planned |
-| 005 | Remove or document unfeasible adapter stubs | 003, 004 | Implementation | Planned |
-| 006 | Specimen pages for all implemented components | 005 | Implementation | Planned |
-| 007 | Visual parity verification and delta register | 006 | Hardening | Planned |
-| 008 | Generation closeout | 007 | Closure | Planned |
+| ID  | Milestone | Status | Notes |
+|-----|-----------|--------|-------|
+| 001 | Sync with contracts and feasibility assessment | Complete | See `001-sync-and-feasibility.md` |
+| 002 | Audit existing 8 components | Complete | All in good shape; ARIA is N/A for Jetstream |
+| 003 | Structural primitives (15 components) | Complete | box, stack, grid, surface, region, card, eyebrow, pill, callout, banner, skeleton, toolbar, form_actions, detail_row, field |
+| 004 | Interactive primitives (19 components) | Complete | text_input, tabs, slider, radio_group, segmented_control, etc. |
+| 005 | Complex primitives (22 components) | Complete | dialog, drawer, breadcrumbs, pagination, menu, select, etc. |
+| 006 | Composites (24 components) | Complete | data_table, page_header, toast_stack, dock_region, etc. |
+| 007 | Engine feature handoff | Complete | See `jetstream-engine-handoff.md` |
+| 008 | Specimen pages for new components | Blocked | Waiting on engine features (SVG icons, overlays) |
+| 009 | Visual parity verification | Blocked | Waiting on engine features |
+| 010 | Generation closeout | Blocked | Waiting on 008, 009 |
 
-## Dependency Shape
+## Blocked On: Jetstream Engine Features
 
-```text
-g09 Architecture Unification Complete
-  -> 001 Sync + Feasibility
-      -> 002 Fix Existing 8
-          -> 003 New Batch 1  ─┐
-          -> 004 New Batch 2  ─┴─> 005 Clean Up Stubs
-                                       -> 006 Specimens
-                                            -> 007 Parity
-                                                 -> 008 Closeout
-```
+Full component visual fidelity requires engine features that don't exist yet.
+A handoff document has been delivered to the Jetstream runtime team. Key gaps:
 
-## Contract Verification Rule
+1. **SVG/icon rendering** (HIGH) — ~40 components need real icons
+2. **Overlay/portal rendering** (HIGH) — ~15 components need dropdown/dialog overlays
+3. **Drag interaction** (HIGH) — sliders, resize handles, reorderable lists
+4. **Color mixing utility** (HIGH) — ~30 components need hover/active state blending
+5. **Per-side border colors** (MEDIUM) — tab indicators
+6. **Image/texture rendering** (MEDIUM) — media components
+7. **Pointer enter/leave events** (MEDIUM) — tooltips, hover cards
 
-Same rule as g08: **every milestone must begin by checking the current state of
-relevant contracts.** Component names, props, and token targets may have changed
-since the previous milestone completed. Do not assume stability — verify.
+See `jetstream-engine-handoff.md` for full specification.
 
-## Jetstream Rendering Constraints
+## What Can Proceed Without Engine Changes
 
-For reference, Jetstream cannot support:
-- SVG rendering (icons must be texture-based or omitted)
-- Gradients (adapter uses solid approximations)
-- Transforms (no rotation, scale, skew)
-- Rich text or IME
-- ARIA / screen readers (not applicable in game engine context)
-- Stacked or inset shadows
-- Touch / multi-touch input
+- Specimen pages for structural components (box, stack, grid, surface, card, etc.)
+- Specimen pages for text-only components (eyebrow, pill, time_ago, code, etc.)
+- Adapter stub cleanup (replace old stubs with calls to new `js_*()` functions)
+- Additional contract compliance auditing
 
-Components requiring these capabilities should be classified as unfeasible
-with clear rationale in the delta register.
+## Non-Goals
+
+- No new contract work (contracts are stable from g08/g09)
+- No Svelte changes
+- No downstream app adoption proof

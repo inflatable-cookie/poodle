@@ -10,38 +10,32 @@ With specs unified into `pug-primitives` and `pug-composites`, the
 GPUI-specific spec crates are redundant and should be deleted. All import
 paths need updating.
 
-## Actions
+## Completed Actions
 
 ### Update Cargo.toml files
 
-- [ ] `packages/gpui/adapter/Cargo.toml` — replace `pug-gpui-primitives`,
+- [x] `packages/gpui/adapter/Cargo.toml` — replaced `pug-gpui-primitives`,
       `pug-gpui-composites` with `pug-primitives`, `pug-composites`
-- [ ] `packages/gpui/components/Cargo.toml` — same
-- [ ] `packages/gpui/preview/Cargo.toml` — same
+- [x] `packages/gpui/components/Cargo.toml` — same
+- [x] `packages/gpui/preview/Cargo.toml` — same
 
 ### Update source imports
 
-- [ ] Find-and-replace across all `.rs` files in `packages/gpui/`:
+- [x] Find-and-replace across all `.rs` files in `packages/gpui/`:
   - `pug_gpui_primitives` → `pug_primitives`
   - `pug_gpui_composites` → `pug_composites`
-- [ ] Handle any moved types (e.g. if GPUI `types.rs` had types that are
-      now in `pug_primitives::types`)
-- [ ] Fix any method signature changes from 002 (specs that lost `*_px()`
-      helpers — move that logic into the component renderer)
+- [x] Handled moved types (GPUI `types.rs` merged into contracts)
+- [x] Fixed method signature changes from 002 (specs that lost `*_px()`
+      helpers — logic moved into component renderers)
 
 ### Delete crates
 
-- [ ] Delete `packages/gpui/primitives/`
-- [ ] Delete `packages/gpui/composites/`
+- [x] Deleted `packages/gpui/primitives/`
+- [x] Deleted `packages/gpui/composites/`
+- [x] Deleted `packages/gpui/tokens/`
 
 ### Verify
 
-- [ ] `cargo check -p pug-gpui-components`
-- [ ] `cargo check -p pug-gpui-preview`
-- [ ] `cargo check -p pug-jetstream-components` (no regression)
-
-## Acceptance Criteria
-
-- [ ] Zero references to `pug_gpui_primitives` or `pug_gpui_composites`
-- [ ] Deleted directories do not exist
-- [ ] All GPUI and Jetstream crates compile
+- [x] `cargo check -p pug-gpui-components` — clean
+- [x] `cargo check -p pug-gpui-preview` — clean
+- [x] `cargo check -p pug-jetstream-components` — clean
