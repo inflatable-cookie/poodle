@@ -8,6 +8,13 @@
   export let columns = 4;
   export let minItemWidth = "10rem";
   export let isSticky = false;
+
+  function handleHeaderClick(e: MouseEvent) {
+    if (!collapsible || !collapsed) return;
+    const target = e.target as HTMLElement;
+    if (target.closest('.filter-toolbar__actions')) return;
+    collapsed = false;
+  }
 </script>
 
 <section
@@ -17,12 +24,19 @@
   role="toolbar"
   aria-label={ariaLabel}
 >
-  <div class="filter-toolbar__header">
+  <!-- svelte-ignore a11y-click-events-have-key-events -->
+  <div
+    class="filter-toolbar__header"
+    role={collapsible && collapsed ? 'button' : undefined}
+    tabindex={collapsible && collapsed ? 0 : undefined}
+    on:click={handleHeaderClick}
+    on:keydown={(e) => { if ((e.key === 'Enter' || e.key === ' ') && collapsible && collapsed) { e.preventDefault(); collapsed = false; } }}
+  >
     {#if collapsible}
       <CollapseToggle
         isCollapsed={collapsed}
         ariaLabel={collapsed ? "Show filters" : "Hide filters"}
-        on:click={() => (collapsed = !collapsed)}
+        on:toggle={(e) => (collapsed = e.detail.isCollapsed)}
       />
     {/if}
 
@@ -72,6 +86,10 @@
     display: flex;
     align-items: center;
     gap: var(--pug-space-inline-sm);
+  }
+
+  .filter-toolbar[data-collapsed="true"] .filter-toolbar__header {
+    cursor: pointer;
   }
 
   .filter-toolbar__summary {
