@@ -1,8 +1,8 @@
 use gpui::*;
 use pug_adapter::ThemeProvider;
 use pug_gpui::GpuiThemeProvider;
-use pug_gpui_primitives::RatingSpec;
-use pug_gpui_components::PugRating;
+use pug_primitives::RatingSpec;
+use pug_gpui_components::Rating;
 
 pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
     let text_secondary = theme.resolve_color("semantic.color.text.secondary");
@@ -12,7 +12,7 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
         .child(
             div().flex().flex_col().gap(px(8.0))
                 .child(section_label("DEFAULT (5 STARS)", text_secondary))
-                .child(PugRating::new(
+                .child(Rating::from_spec(
                     RatingSpec::new().with_value(3.0),
                     theme,
                 ))
@@ -21,7 +21,7 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
         .child(
             div().flex().flex_col().gap(px(8.0))
                 .child(section_label("10-STAR SCALE", text_secondary))
-                .child(PugRating::new(
+                .child(Rating::from_spec(
                     RatingSpec::new().with_value(7.0).with_max(10),
                     theme,
                 ))
@@ -30,7 +30,7 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
         .child(
             div().flex().flex_col().gap(px(8.0))
                 .child(section_label("CLEARABLE", text_secondary))
-                .child(PugRating::new(
+                .child(Rating::from_spec(
                     RatingSpec::new().with_value(4.0),
                     theme,
                 ))
@@ -39,7 +39,7 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
         .child(
             div().flex().flex_col().gap(px(8.0))
                 .child(section_label("DISABLED", text_secondary))
-                .child(PugRating::new(
+                .child(Rating::from_spec(
                     RatingSpec::new().with_value(2.0).with_disabled(true),
                     theme,
                 ))

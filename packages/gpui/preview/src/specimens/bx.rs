@@ -1,8 +1,8 @@
 use gpui::*;
 use pug_adapter::ThemeProvider;
 use pug_gpui::GpuiThemeProvider;
-use pug_gpui_primitives::{BoxSpec, Overflow, PaddingScale};
-use pug_gpui_components::PugBox;
+use pug_primitives::{BoxSpec, Overflow, PaddingScale};
+use pug_gpui_components::Box;
 use crate::style_bridge::color_to_hsla;
 
 pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
@@ -23,7 +23,7 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
             div().flex().flex_col().gap(px(8.0))
                 .child(section_label("Default (no padding)", text_secondary))
                 .child(demo_outline(
-                    PugBox::new(BoxSpec::new(), theme)
+                    Box::from_spec(BoxSpec::new(), theme)
                         .with_child(
                             div().text_sm().text_color(color_to_hsla(text_secondary))
                                 .child("Content inside a Box with no padding.".to_string())
@@ -36,7 +36,7 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
             div().flex().flex_col().gap(px(8.0))
                 .child(section_label("With padding", text_secondary))
                 .child(demo_outline(
-                    PugBox::new(BoxSpec::new().with_padding(PaddingScale::Lg), theme)
+                    Box::from_spec(BoxSpec::new().with_padding(PaddingScale::Lg), theme)
                         .with_child(
                             div().text_sm().text_color(color_to_hsla(text_secondary))
                                 .child("Content inside a Box with large padding.".to_string())
@@ -50,7 +50,7 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
                 .child(section_label("Fixed dimensions", text_secondary))
                 .child(demo_outline(
                     div().w(px(192.0)).h(px(96.0)).child(
-                        PugBox::new(BoxSpec::new().with_padding(PaddingScale::Md), theme)
+                        Box::from_spec(BoxSpec::new().with_padding(PaddingScale::Md), theme)
                             .with_child(
                                 div().text_sm().text_color(color_to_hsla(text_secondary))
                                     .child("Fixed 12\u{00d7}6rem box.".to_string())
@@ -64,7 +64,7 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
                 .child(section_label("Overflow hidden", text_secondary))
                 .child(demo_outline(
                     div().w(px(160.0)).h(px(48.0)).overflow_hidden().child(
-                        PugBox::new(
+                        Box::from_spec(
                             BoxSpec::new()
                                 .with_padding(PaddingScale::Sm)
                                 .with_overflow(Overflow::Hidden),

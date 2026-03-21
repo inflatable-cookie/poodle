@@ -1,7 +1,7 @@
 use gpui::*;
 use pug_adapter::ThemeProvider;
-use pug_gpui_primitives::{SurfaceSpec, SurfaceTone, SurfaceBorder};
-use pug_gpui_components::PugSurface;
+use pug_primitives::{SurfaceSpec, SurfaceTone, SurfaceBorder};
+use pug_gpui_components::Surface;
 use crate::app_state::AppState;
 use crate::style_bridge::color_to_hsla;
 use crate::PreviewRoot;
@@ -20,7 +20,7 @@ pub(crate) fn render(state: &AppState, _cx: &mut Context<PreviewRoot>) -> Div {
                 // Card 1: Project Alpha with footer
                 .child(
                     div().w(px(280.0)).child(
-                        PugSurface::new(
+                        Surface::from_spec(
                             SurfaceSpec::new()
                                 .with_tone(SurfaceTone::Panel)
                                 .with_border(SurfaceBorder::Subtle),
@@ -53,7 +53,7 @@ pub(crate) fn render(state: &AppState, _cx: &mut Context<PreviewRoot>) -> Div {
                 // Card 2: Monthly report without footer
                 .child(
                     div().w(px(280.0)).child(
-                        PugSurface::new(
+                        Surface::from_spec(
                             SurfaceSpec::new()
                                 .with_tone(SurfaceTone::Panel)
                                 .with_border(SurfaceBorder::Subtle),
@@ -78,7 +78,7 @@ pub(crate) fn render(state: &AppState, _cx: &mut Context<PreviewRoot>) -> Div {
         .child(section_label("OUTLINED VARIANT", text_secondary))
         .child(
             div().w(px(280.0)).child(
-                PugSurface::new(
+                Surface::from_spec(
                     SurfaceSpec::new()
                         .with_tone(SurfaceTone::Panel)
                         .with_border(SurfaceBorder::Default),
@@ -102,7 +102,7 @@ pub(crate) fn render(state: &AppState, _cx: &mut Context<PreviewRoot>) -> Div {
         .child(section_label("ELEVATED VARIANT", text_secondary))
         .child(
             div().w(px(280.0)).child(
-                PugSurface::new(
+                Surface::from_spec(
                     SurfaceSpec::new()
                         .with_tone(SurfaceTone::Elevated)
                         .with_border(SurfaceBorder::Subtle)
@@ -131,7 +131,7 @@ pub(crate) fn render(state: &AppState, _cx: &mut Context<PreviewRoot>) -> Div {
                 .cursor_pointer()
                 .hover(|s| s.opacity(0.9))
                 .child(
-                    PugSurface::new(
+                    Surface::from_spec(
                         SurfaceSpec::new()
                             .with_tone(SurfaceTone::Panel)
                             .with_border(SurfaceBorder::Subtle),

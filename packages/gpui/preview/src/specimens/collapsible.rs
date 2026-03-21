@@ -1,7 +1,7 @@
 use gpui::*;
 use pug_adapter::ThemeProvider;
-use pug_gpui_primitives::CollapsibleSpec;
-use pug_gpui_components::PugCollapsible;
+use pug_primitives::CollapsibleSpec;
+use pug_gpui_components::Collapsible;
 use crate::app_state::AppState;
 use crate::style_bridge::color_to_hsla;
 use crate::PreviewRoot;
@@ -24,7 +24,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
         closed_spec
     };
 
-    let closed_collapsible = PugCollapsible::new(closed_spec, theme)
+    let closed_collapsible = Collapsible::from_spec(closed_spec, theme)
         .with_id("specimen-closed")
         .on_toggle(cx.listener(|this, _open: &bool, _w, cx| {
             this.state.specimens.toggle("collapsible-closed");
@@ -55,7 +55,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
         .with_title("Advanced options")
         .with_open(!open_toggled);
 
-    let open_collapsible = PugCollapsible::new(open_spec, theme)
+    let open_collapsible = Collapsible::from_spec(open_spec, theme)
         .with_id("specimen-open")
         .on_toggle(cx.listener(|this, _open: &bool, _w, cx| {
             this.state.specimens.toggle("collapsible-open-toggled");
@@ -85,7 +85,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
         .with_description("Requires admin access.")
         .with_disabled(true);
 
-    let disabled_collapsible = PugCollapsible::new(disabled_spec, theme)
+    let disabled_collapsible = Collapsible::from_spec(disabled_spec, theme)
         .with_id("specimen-disabled")
         .with_content(
             div().text_xs().text_color(color_to_hsla(text_secondary))

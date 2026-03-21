@@ -1,7 +1,7 @@
 use gpui::*;
 use pug_adapter::ThemeProvider;
-use pug_gpui_primitives::{NavigationMenuSpec, NavigationMenuEntry};
-use pug_gpui_components::PugNavigationMenu;
+use pug_primitives::{NavigationMenuSpec, NavigationMenuEntry};
+use pug_gpui_components::NavigationMenu;
 use crate::app_state::AppState;
 use crate::style_bridge::color_to_hsla;
 use crate::PreviewRoot;
@@ -34,7 +34,7 @@ pub(crate) fn render(state: &AppState, _cx: &mut Context<PreviewRoot>) -> Div {
     div().flex().flex_col().gap(px(16.0))
         .child(section_label("HORIZONTAL NAVIGATION", text_secondary))
         .child(
-            PugNavigationMenu::new(spec, theme)
+            NavigationMenu::from_spec(spec, theme)
                 .with_id("specimen-nav")
         )
         .child(

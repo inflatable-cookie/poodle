@@ -1,8 +1,8 @@
 use gpui::*;
 use pug_adapter::ThemeProvider;
 use pug_gpui::GpuiThemeProvider;
-use pug_gpui_primitives::EditableLabelSpec;
-use pug_gpui_components::PugEditableLabel;
+use pug_primitives::EditableLabelSpec;
+use pug_gpui_components::EditableLabel;
 use crate::style_bridge::color_to_hsla;
 
 pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
@@ -12,7 +12,7 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
         // --- Double-click To Edit (Default) ---
         .child(section_label("DOUBLE-CLICK TO EDIT (DEFAULT)", text_secondary))
         .child(
-            PugEditableLabel::new(
+            EditableLabel::from_spec(
                 EditableLabelSpec::new()
                     .with_value("Untitled project"),
                 theme,
@@ -21,7 +21,7 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
         // --- Enter/Space Activation ---
         .child(section_label("ENTER/SPACE ACTIVATION", text_secondary))
         .child(
-            PugEditableLabel::new(
+            EditableLabel::from_spec(
                 EditableLabelSpec::new()
                     .with_value("Click to rename"),
                 theme,
@@ -30,7 +30,7 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
         // --- Disabled ---
         .child(section_label("DISABLED", text_secondary))
         .child(
-            PugEditableLabel::new(
+            EditableLabel::from_spec(
                 EditableLabelSpec::new()
                     .with_value("Locked label")
                     .with_disabled(true),

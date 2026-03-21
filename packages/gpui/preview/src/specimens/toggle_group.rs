@@ -1,7 +1,7 @@
 use gpui::*;
 use pug_adapter::ThemeProvider;
 use pug_gpui::GpuiThemeProvider;
-use pug_gpui_components::{PugToggleGroup, ToggleGroupItem};
+use pug_gpui_components::{ToggleGroup, ToggleGroupItem};
 
 pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
     let text_secondary = theme.resolve_color("semantic.color.text.secondary");
@@ -40,19 +40,19 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
         .child(
             div().flex().flex_col().gap(px(8.0))
                 .child(section_label("SINGLE SELECTION", text_secondary))
-                .child(PugToggleGroup::new(single_items, theme))
+                .child(ToggleGroup::new(single_items, theme))
         )
         // --- Four options ---
         .child(
             div().flex().flex_col().gap(px(8.0))
                 .child(section_label("FOUR OPTIONS", text_secondary))
-                .child(PugToggleGroup::new(four_items, theme))
+                .child(ToggleGroup::new(four_items, theme))
         )
         // --- Multiple selection ---
         .child(
             div().flex().flex_col().gap(px(8.0))
                 .child(section_label("MULTIPLE SELECTION", text_secondary))
-                .child(PugToggleGroup::new(multi_items, theme))
+                .child(ToggleGroup::new(multi_items, theme))
         )
         // --- Disabled ---
         .child(
@@ -60,7 +60,7 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
                 .child(section_label("DISABLED", text_secondary))
                 .child(
                     div().opacity(0.48)
-                        .child(PugToggleGroup::new(disabled_items, theme))
+                        .child(ToggleGroup::new(disabled_items, theme))
                 )
         )
 }

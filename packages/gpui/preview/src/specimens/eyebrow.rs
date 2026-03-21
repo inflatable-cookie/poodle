@@ -1,8 +1,8 @@
 use gpui::*;
 use pug_adapter::ThemeProvider;
 use pug_gpui::GpuiThemeProvider;
-use pug_gpui_primitives::EyebrowSpec;
-use pug_gpui_components::PugEyebrow;
+use pug_primitives::EyebrowSpec;
+use pug_gpui_components::Eyebrow;
 use crate::style_bridge::color_to_hsla;
 
 pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
@@ -14,7 +14,7 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
         .child(
             div().flex().flex_col().gap(px(4.0))
                 .child(section_label("SECTION LABEL", text_secondary))
-                .child(PugEyebrow::new(
+                .child(Eyebrow::from_spec(
                     EyebrowSpec::new().with_content("Section label"),
                     theme,
                 ))
@@ -27,7 +27,7 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
         .child(
             div().flex().flex_col().gap(px(4.0))
                 .child(section_label("PRIMITIVE", text_secondary))
-                .child(PugEyebrow::new(
+                .child(Eyebrow::from_spec(
                     EyebrowSpec::new().with_content("Primitive"),
                     theme,
                 ))
@@ -45,7 +45,7 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
         .child(
             div().flex().flex_col().gap(px(4.0))
                 .child(section_label("COMPOSITE", text_secondary))
-                .child(PugEyebrow::new(
+                .child(Eyebrow::from_spec(
                     EyebrowSpec::new().with_content("Composite"),
                     theme,
                 ))

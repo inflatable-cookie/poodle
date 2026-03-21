@@ -1,0 +1,114 @@
+//! FileUpload — real GPUI component backed by FileUploadSpec.
+
+use gpui::prelude::FluentBuilder;
+use gpui::*;
+use pug_gpui::GpuiThemeProvider;
+use pug_primitives::FileUploadSpec;
+
+use crate::theme_ext::{resolve_color, resolve_opacity, resolve_px, resolve_radius};
+
+/// A real GPUI file upload drop zone component backed by `FileUploadSpec`.
+pub struct FileUpload {
+    spec: FileUploadSpec,
+    theme: GpuiThemeProvider,
+}
+
+impl std::ops::Deref for FileUpload {
+    type Target = FileUploadSpec;
+    fn deref(&self) -> &FileUploadSpec { &self.spec }
+}
+
+impl FileUpload {
+    pub fn new(theme: &GpuiThemeProvider) -> Self {
+        Self { spec: FileUploadSpec::new(), theme: theme.clone() }
+    }
+
+    pub fn from_spec(spec: FileUploadSpec, theme: &GpuiThemeProvider) -> Self {
+        Self {
+            spec,
+            theme: theme.clone(),
+        }
+    }
+
+    // ── Forwarded spec builders ───────────────────────────────
+    pub fn accept(mut self, v: impl Into<String>) -> Self { self.spec.accept = Some(v.into()); self }
+    pub fn max_size(mut self, v: u64) -> Self { self.spec.max_size = Some(v); self }
+    pub fn multiple(mut self, v: bool) -> Self { self.spec.is_multiple = v; self }
+    pub fn disabled(mut self, v: bool) -> Self { self.spec.is_disabled = v; self }
+    pub fn dragging(mut self, v: bool) -> Self { self.spec.is_dragging = v; self }
+
+}
+
+impl IntoElement for FileUpload {
+    type Element = AnyElement;
+
+    fn into_element(self) -> Self::Element {
+        let theme = &self.theme;
+        let spec = &self.spec;
+
+        let inline_padding = resolve_px(theme, "semantic.space.inline.md");
+        let inline_gap = resolve_px(theme, "semantic.space.inline.sm");
+        let control_radius = resolve_radius(theme, "semantic.radius.control");
+
+        let fill = resolve_color(theme, spec.fill_token());
+        let border = resolve_color(theme, spec.border_token());
+        let text_color = resolve_color(theme, spec.text_color_token());
+        let text_secondary = resolve_color(theme, "semantic.color.text.secondary");
+        let accent = resolve_color(theme, "semantic.color.accent.base");
+        let disabled_opacity = resolve_opacity(theme, "semantic.state.opacity.disabled");
+
+        let label = if spec.is_dragging {
+            "Drop files here"
+        } else {
+            "Drag files here or click to browse"
+        };
+
+        let browse_btn = div()
+            .px(inline_padding)
+            .py(px(6.0))
+            .rounded(control_radius)
+            .border_1()
+            .border_color(accent)
+            .text_sm()
+            .text_color(accent)
+            .cursor_pointer()
+            .child("Browse");
+
+        let mut accept_hint = div().text_xs().text_color(text_secondary);
+        if let Some(ref accept) = spec.accept {
+            accept_hint = accept_hint.child(format!("Accepted: {}", accept));
+        }
+
+        let mut zone = div()
+            .w_full()
+            .min_h(px(120.0))
+            .rounded(px(8.0))
+            .bg(if spec.is_dragging {
+                fill.opacity(0.08)
+            } else {
+                fill
+            })
+            .border_1()
+            .border_color(border)
+            .flex()
+            .flex_col()
+            .items_center()
+            .justify_center()
+            .gap(inline_gap)
+            .p(px(16.0))
+            .child(
+                div()
+                    .text_sm()
+                    .text_color(text_color)
+                    .child(label),
+            )
+            .child(browse_btn)
+            .child(accept_hint);
+
+        if spec.is_disabled {
+            zone = zone.opacity(disabled_opacity);
+        }
+
+        zone.into_any_element()
+    }
+}

@@ -1,7 +1,7 @@
 use gpui::*;
 use pug_adapter::ThemeProvider;
-use pug_gpui_primitives::{DrawerSpec, DrawerEdge, ButtonSpec, ButtonVariant};
-use pug_gpui_components::{PugDrawer, PugButton};
+use pug_primitives::{DrawerSpec, DrawerEdge, ButtonSpec, ButtonVariant};
+use pug_gpui_components::{Drawer, Button};
 use crate::app_state::AppState;
 use crate::style_bridge::color_to_hsla;
 use crate::PreviewRoot;
@@ -18,7 +18,7 @@ pub(crate) fn render(state: &AppState, _cx: &mut Context<PreviewRoot>) -> Div {
                 .with_title("Settings")
                 .with_description("Configure your preferences.");
 
-            PugDrawer::new(spec, theme)
+            Drawer::from_spec(spec, theme)
                 .with_content(
                     div().flex().flex_col().gap(px(8.0))
                         .child(
@@ -29,7 +29,7 @@ pub(crate) fn render(state: &AppState, _cx: &mut Context<PreviewRoot>) -> Div {
                 .with_main_content(
                     div().flex().gap(px(6.0)).justify_end()
                         .child(
-                            PugButton::new(
+                            Button::from_spec(
                                 ButtonSpec::new()
                                     .with_variant(ButtonVariant::Secondary)
                                     .with_label("Cancel"),
@@ -38,7 +38,7 @@ pub(crate) fn render(state: &AppState, _cx: &mut Context<PreviewRoot>) -> Div {
                             .with_id("drawer-cancel")
                         )
                         .child(
-                            PugButton::new(
+                            Button::from_spec(
                                 ButtonSpec::new()
                                     .with_variant(ButtonVariant::Primary)
                                     .with_label("Save"),
@@ -55,7 +55,7 @@ pub(crate) fn render(state: &AppState, _cx: &mut Context<PreviewRoot>) -> Div {
                 .with_edge(DrawerEdge::Left)
                 .with_title("Navigation");
 
-            PugDrawer::new(spec, theme)
+            Drawer::from_spec(spec, theme)
                 .with_content(
                     div().text_xs().text_color(color_to_hsla(text_secondary))
                         .child("Navigation body content")

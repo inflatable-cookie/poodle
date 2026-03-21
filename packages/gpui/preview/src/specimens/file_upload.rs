@@ -1,8 +1,8 @@
 use gpui::*;
 use pug_adapter::ThemeProvider;
 use pug_gpui::GpuiThemeProvider;
-use pug_gpui_primitives::FileUploadSpec;
-use pug_gpui_components::PugFileUpload;
+use pug_primitives::FileUploadSpec;
+use pug_gpui_components::FileUpload;
 use crate::style_bridge::color_to_hsla;
 
 pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
@@ -12,7 +12,7 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
         // --- Image Upload With Preview ---
         .child(section_label("IMAGE UPLOAD WITH PREVIEW", text_secondary))
         .child(
-            PugFileUpload::new(
+            FileUpload::from_spec(
                 FileUploadSpec::new()
                     .with_accept("image/*")
                     .with_multiple(true)
@@ -23,7 +23,7 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
         // --- Document Upload (Single File) ---
         .child(section_label("DOCUMENT UPLOAD (SINGLE FILE)", text_secondary))
         .child(
-            PugFileUpload::new(
+            FileUpload::from_spec(
                 FileUploadSpec::new()
                     .with_accept(".pdf,.doc,.docx,.txt")
                     .with_max_size(10 * 1024 * 1024),
@@ -33,7 +33,7 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
         // --- Disabled ---
         .child(section_label("DISABLED", text_secondary))
         .child(
-            PugFileUpload::new(
+            FileUpload::from_spec(
                 FileUploadSpec::new()
                     .with_disabled(true),
                 theme,

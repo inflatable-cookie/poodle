@@ -1,7 +1,7 @@
 use gpui::*;
 use pug_adapter::ThemeProvider;
-use pug_gpui_primitives::{CollapseDirection, CollapseToggleSpec};
-use pug_gpui_components::PugCollapseToggle;
+use pug_primitives::{CollapseDirection, CollapseToggleSpec};
+use pug_gpui_components::CollapseToggle;
 use crate::app_state::AppState;
 use crate::style_bridge::color_to_hsla;
 use crate::PreviewRoot;
@@ -21,7 +21,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
         .child(
             div().flex().gap(px(8.0)).items_center()
                 .child(
-                    PugCollapseToggle::new(
+                    CollapseToggle::from_spec(
                         CollapseToggleSpec::new()
                             .with_direction(CollapseDirection::Left),
                         theme,
@@ -29,7 +29,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                     .with_id("expanded-left")
                 )
                 .child(
-                    PugCollapseToggle::new(
+                    CollapseToggle::from_spec(
                         CollapseToggleSpec::new()
                             .with_direction(CollapseDirection::Right),
                         theme,
@@ -37,7 +37,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                     .with_id("expanded-right")
                 )
                 .child(
-                    PugCollapseToggle::new(
+                    CollapseToggle::from_spec(
                         CollapseToggleSpec::new()
                             .with_direction(CollapseDirection::Up),
                         theme,
@@ -45,7 +45,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                     .with_id("expanded-up")
                 )
                 .child(
-                    PugCollapseToggle::new(
+                    CollapseToggle::from_spec(
                         CollapseToggleSpec::new()
                             .with_direction(CollapseDirection::Down),
                         theme,
@@ -58,7 +58,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
         .child(
             div().flex().gap(px(8.0)).items_center()
                 .child(
-                    PugCollapseToggle::new(
+                    CollapseToggle::from_spec(
                         CollapseToggleSpec::new()
                             .with_direction(CollapseDirection::Left)
                             .with_collapsed(true),
@@ -67,7 +67,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                     .with_id("collapsed-left")
                 )
                 .child(
-                    PugCollapseToggle::new(
+                    CollapseToggle::from_spec(
                         CollapseToggleSpec::new()
                             .with_direction(CollapseDirection::Right)
                             .with_collapsed(true),
@@ -76,7 +76,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                     .with_id("collapsed-right")
                 )
                 .child(
-                    PugCollapseToggle::new(
+                    CollapseToggle::from_spec(
                         CollapseToggleSpec::new()
                             .with_direction(CollapseDirection::Up)
                             .with_collapsed(true),
@@ -85,7 +85,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                     .with_id("collapsed-up")
                 )
                 .child(
-                    PugCollapseToggle::new(
+                    CollapseToggle::from_spec(
                         CollapseToggleSpec::new()
                             .with_direction(CollapseDirection::Down)
                             .with_collapsed(true),
@@ -99,7 +99,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
         .child(
             div().flex().gap(px(8.0)).items_center()
                 .child(
-                    PugCollapseToggle::new(
+                    CollapseToggle::from_spec(
                         CollapseToggleSpec::new()
                             .with_direction(CollapseDirection::Left)
                             .with_collapsed(left_collapsed),
@@ -112,7 +112,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                     }))
                 )
                 .child(
-                    PugCollapseToggle::new(
+                    CollapseToggle::from_spec(
                         CollapseToggleSpec::new()
                             .with_direction(CollapseDirection::Right)
                             .with_collapsed(right_collapsed),
@@ -125,7 +125,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                     }))
                 )
                 .child(
-                    PugCollapseToggle::new(
+                    CollapseToggle::from_spec(
                         CollapseToggleSpec::new()
                             .with_direction(CollapseDirection::Up)
                             .with_collapsed(up_collapsed),
@@ -138,7 +138,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                     }))
                 )
                 .child(
-                    PugCollapseToggle::new(
+                    CollapseToggle::from_spec(
                         CollapseToggleSpec::new()
                             .with_direction(CollapseDirection::Down)
                             .with_collapsed(down_collapsed),
@@ -156,7 +156,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
         .child(
             div().flex().gap(px(8.0)).items_center()
                 .child(
-                    PugCollapseToggle::new(
+                    CollapseToggle::from_spec(
                         CollapseToggleSpec::new()
                             .with_direction(CollapseDirection::Left)
                             .with_disabled(true),
@@ -165,7 +165,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                     .with_id("disabled-left")
                 )
                 .child(
-                    PugCollapseToggle::new(
+                    CollapseToggle::from_spec(
                         CollapseToggleSpec::new()
                             .with_direction(CollapseDirection::Right)
                             .with_disabled(true),

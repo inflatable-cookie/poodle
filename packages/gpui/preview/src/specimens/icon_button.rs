@@ -1,7 +1,7 @@
 use gpui::*;
 use pug_adapter::ThemeProvider;
-use pug_gpui_primitives::{ButtonVariant, ControlSize, IconButtonSpec};
-use pug_gpui_components::PugIconButton;
+use pug_primitives::{ButtonVariant, ControlSize, IconButtonSpec};
+use pug_gpui_components::IconButton;
 use crate::app_state::AppState;
 use crate::style_bridge::color_to_hsla;
 use crate::PreviewRoot;
@@ -16,7 +16,7 @@ pub(crate) fn render(state: &AppState, _cx: &mut Context<PreviewRoot>) -> Div {
         .child(
             div().flex().gap(px(8.0))
                 .child(
-                    PugIconButton::new(
+                    IconButton::from_spec(
                         IconButtonSpec::new()
                             .with_variant(ButtonVariant::Primary)
                             .with_icon("plus")
@@ -26,7 +26,7 @@ pub(crate) fn render(state: &AppState, _cx: &mut Context<PreviewRoot>) -> Div {
                     .with_id("add")
                 )
                 .child(
-                    PugIconButton::new(
+                    IconButton::from_spec(
                         IconButtonSpec::new()
                             .with_variant(ButtonVariant::Secondary)
                             .with_icon("settings")
@@ -36,7 +36,7 @@ pub(crate) fn render(state: &AppState, _cx: &mut Context<PreviewRoot>) -> Div {
                     .with_id("settings")
                 )
                 .child(
-                    PugIconButton::new(
+                    IconButton::from_spec(
                         IconButtonSpec::new()
                             .with_variant(ButtonVariant::Ghost)
                             .with_icon("x")
@@ -51,7 +51,7 @@ pub(crate) fn render(state: &AppState, _cx: &mut Context<PreviewRoot>) -> Div {
         .child(
             div().flex().gap(px(8.0))
                 .child(
-                    PugIconButton::new(
+                    IconButton::from_spec(
                         IconButtonSpec::new()
                             .with_variant(ButtonVariant::Primary)
                             .with_icon("trash-2")
@@ -61,7 +61,7 @@ pub(crate) fn render(state: &AppState, _cx: &mut Context<PreviewRoot>) -> Div {
                     .with_id("danger-primary")
                 )
                 .child(
-                    PugIconButton::new(
+                    IconButton::from_spec(
                         IconButtonSpec::new()
                             .with_variant(ButtonVariant::Secondary)
                             .with_icon("trash-2")
@@ -71,7 +71,7 @@ pub(crate) fn render(state: &AppState, _cx: &mut Context<PreviewRoot>) -> Div {
                     .with_id("danger-secondary")
                 )
                 .child(
-                    PugIconButton::new(
+                    IconButton::from_spec(
                         IconButtonSpec::new()
                             .with_variant(ButtonVariant::Ghost)
                             .with_icon("trash-2")
@@ -86,7 +86,7 @@ pub(crate) fn render(state: &AppState, _cx: &mut Context<PreviewRoot>) -> Div {
         .child(
             div().flex().gap(px(8.0)).items_center()
                 .child(
-                    PugIconButton::new(
+                    IconButton::from_spec(
                         IconButtonSpec::new()
                             .with_icon("star")
                             .with_size(ControlSize::Sm)
@@ -96,7 +96,7 @@ pub(crate) fn render(state: &AppState, _cx: &mut Context<PreviewRoot>) -> Div {
                     .with_id("size-sm")
                 )
                 .child(
-                    PugIconButton::new(
+                    IconButton::from_spec(
                         IconButtonSpec::new()
                             .with_icon("star")
                             .with_size(ControlSize::Md)
@@ -106,7 +106,7 @@ pub(crate) fn render(state: &AppState, _cx: &mut Context<PreviewRoot>) -> Div {
                     .with_id("size-md")
                 )
                 .child(
-                    PugIconButton::new(
+                    IconButton::from_spec(
                         IconButtonSpec::new()
                             .with_icon("star")
                             .with_size(ControlSize::Lg)
@@ -121,7 +121,7 @@ pub(crate) fn render(state: &AppState, _cx: &mut Context<PreviewRoot>) -> Div {
         .child(
             div().flex().gap(px(8.0)).items_center()
                 .child(
-                    PugIconButton::new(
+                    IconButton::from_spec(
                         IconButtonSpec::new()
                             .with_icon("map-pin")
                             .with_pressed(true)
@@ -131,7 +131,7 @@ pub(crate) fn render(state: &AppState, _cx: &mut Context<PreviewRoot>) -> Div {
                     .with_id("state-pressed")
                 )
                 .child(
-                    PugIconButton::new(
+                    IconButton::from_spec(
                         IconButtonSpec::new()
                             .with_icon("settings")
                             .with_disabled(true)
@@ -141,7 +141,7 @@ pub(crate) fn render(state: &AppState, _cx: &mut Context<PreviewRoot>) -> Div {
                     .with_id("state-disabled")
                 )
                 .child(
-                    PugIconButton::new(
+                    IconButton::from_spec(
                         IconButtonSpec::new()
                             .with_icon("loader")
                             .with_loading(true)

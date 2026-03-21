@@ -1,8 +1,8 @@
 use gpui::*;
 use pug_adapter::ThemeProvider;
 use pug_gpui::GpuiThemeProvider;
-use pug_gpui_primitives::RangeSliderSpec;
-use pug_gpui_components::PugRangeSlider;
+use pug_primitives::RangeSliderSpec;
+use pug_gpui_components::RangeSlider;
 use crate::style_bridge::color_to_hsla;
 
 pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
@@ -12,7 +12,7 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
         // --- Default ---
         .child(section_label("DEFAULT", text_secondary))
         .child(
-            PugRangeSlider::new(
+            RangeSlider::from_spec(
                 RangeSliderSpec::new(20.0, 80.0)
                     .with_bounds(0.0, 100.0)
                     .with_aria_label("Price range"),
@@ -22,7 +22,7 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
         // --- With Step ---
         .child(section_label("WITH STEP", text_secondary))
         .child(
-            PugRangeSlider::new(
+            RangeSlider::from_spec(
                 RangeSliderSpec::new(25.0, 45.0)
                     .with_bounds(18.0, 65.0)
                     .with_step(5.0)
@@ -33,7 +33,7 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
         // --- Disabled ---
         .child(section_label("DISABLED", text_secondary))
         .child(
-            PugRangeSlider::new(
+            RangeSlider::from_spec(
                 RangeSliderSpec::new(30.0, 70.0)
                     .with_bounds(0.0, 100.0)
                     .with_disabled(true)

@@ -1,8 +1,8 @@
 use gpui::*;
 use pug_adapter::ThemeProvider;
 use pug_gpui::GpuiThemeProvider;
-use pug_gpui_primitives::CodeSpec;
-use pug_gpui_components::PugCode;
+use pug_primitives::CodeSpec;
+use pug_gpui_components::Code;
 use crate::style_bridge::color_to_hsla;
 
 pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
@@ -18,7 +18,7 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
         .child(
             div().flex().flex_col().gap(px(8.0))
                 .child(section_label("BLOCK WITH LANGUAGE LABEL", text_secondary))
-                .child(PugCode::new(
+                .child(Code::from_spec(
                     CodeSpec::new()
                         .with_content(ts_source)
                         .with_language("typescript"),
@@ -29,7 +29,7 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
         .child(
             div().flex().flex_col().gap(px(8.0))
                 .child(section_label("WITH LINE NUMBERS AND HIGHLIGHT", text_secondary))
-                .child(PugCode::new(
+                .child(Code::from_spec(
                     CodeSpec::new()
                         .with_content(ts_source)
                         .with_language("ts")
@@ -41,7 +41,7 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
         .child(
             div().flex().flex_col().gap(px(8.0))
                 .child(section_label("CSS WITH MAX HEIGHT", text_secondary))
-                .child(PugCode::new(
+                .child(Code::from_spec(
                     CodeSpec::new()
                         .with_content(css_source)
                         .with_language("css"),
@@ -56,7 +56,7 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
                     div().flex().flex_row().flex_wrap().gap(px(4.0)).items_center()
                         .text_sm().text_color(color_to_hsla(text_primary))
                         .child("Use ".to_string())
-                        .child(PugCode::new(
+                        .child(Code::from_spec(
                             CodeSpec::new().with_content("npm install"),
                             theme,
                         ))
@@ -67,7 +67,7 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
         .child(
             div().flex().flex_col().gap(px(8.0))
                 .child(section_label("NO COPY BUTTON", text_secondary))
-                .child(PugCode::new(
+                .child(Code::from_spec(
                     CodeSpec::new()
                         .with_content("echo 'hello world'")
                         .with_language("bash"),

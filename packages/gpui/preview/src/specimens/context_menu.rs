@@ -1,7 +1,7 @@
 use gpui::*;
 use pug_adapter::ThemeProvider;
-use pug_gpui_primitives::{ContextMenuSpec, MenuEntry, MenuItemKind};
-use pug_gpui_components::PugContextMenu;
+use pug_primitives::{ContextMenuSpec, MenuEntry, MenuItemKind};
+use pug_gpui_components::ContextMenu;
 use pug_gpui::GpuiThemeProvider;
 use crate::style_bridge::color_to_hsla;
 
@@ -45,7 +45,7 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
         )
         // Show the context menu open below the target area
         .child(
-            PugContextMenu::new(spec, theme)
+            ContextMenu::from_spec(spec, theme)
                 .with_id("specimen-context-menu")
         )
 }

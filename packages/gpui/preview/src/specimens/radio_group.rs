@@ -1,7 +1,7 @@
 use gpui::*;
 use pug_adapter::ThemeProvider;
-use pug_gpui_primitives::{RadioGroupSpec, ChoiceOption, Orientation};
-use pug_gpui_components::PugRadioGroup;
+use pug_primitives::{RadioGroupSpec, ChoiceOption, Orientation};
+use pug_gpui_components::RadioGroup;
 use crate::app_state::AppState;
 use crate::style_bridge::color_to_hsla;
 use crate::PreviewRoot;
@@ -40,7 +40,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
 
             div().flex().flex_col().gap(px(4.0))
                 .child(
-                    PugRadioGroup::new(spec, theme)
+                    RadioGroup::from_spec(spec, theme)
                         .with_id("radio-plan")
                         .on_change(cx.listener(|this, value: &str, _w, cx| {
                             this.state.specimens.text.insert("radio-plan".to_string(), value.to_string());
@@ -62,7 +62,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
 
             div().flex().flex_col().gap(px(4.0))
                 .child(
-                    PugRadioGroup::new(spec, theme)
+                    RadioGroup::from_spec(spec, theme)
                         .with_id("radio-size")
                         .on_change(cx.listener(|this, value: &str, _w, cx| {
                             this.state.specimens.text.insert("radio-size".to_string(), value.to_string());
@@ -82,7 +82,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                 .with_value("free");
             spec.is_disabled = true;
 
-            PugRadioGroup::new(spec, theme)
+            RadioGroup::from_spec(spec, theme)
                 .with_id("radio-disabled")
         })
 }

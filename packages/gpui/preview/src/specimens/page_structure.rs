@@ -1,9 +1,9 @@
 use gpui::*;
 use pug_adapter::ThemeProvider;
-use pug_gpui_composites::PaginationSummarySpec;
-use pug_gpui_components::PugPaginationSummary;
-use pug_gpui_primitives::{ButtonSpec, ButtonVariant, ControlSize};
-use pug_gpui_components::PugButton;
+use pug_composites::PaginationSummarySpec;
+use pug_gpui_components::PaginationSummary;
+use pug_primitives::{ButtonSpec, ButtonVariant, ControlSize};
+use pug_gpui_components::Button;
 use pug_gpui::GpuiThemeProvider;
 use crate::style_bridge::color_to_hsla;
 
@@ -29,13 +29,13 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
         .child(
             div().flex().gap(px(6.0))
                 .child(
-                    PugButton::new(
+                    Button::from_spec(
                         ButtonSpec::new().with_variant(ButtonVariant::Secondary).with_label("View source").with_size(ControlSize::Sm),
                         theme,
                     ).with_id("ph-source")
                 )
                 .child(
-                    PugButton::new(
+                    Button::from_spec(
                         ButtonSpec::new().with_variant(ButtonVariant::Primary).with_label("Edit").with_size(ControlSize::Sm),
                         theme,
                     ).with_id("ph-edit")

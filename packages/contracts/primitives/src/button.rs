@@ -11,6 +11,7 @@ pub struct ButtonSpec {
     pub is_loading: bool,
     pub leading_icon: Option<String>,
     pub trailing_icon: Option<String>,
+    pub chevron: bool,
     pub aria_label: Option<String>,
     pub described_by: Option<String>,
     pub label: Option<String>,
@@ -26,6 +27,7 @@ impl Default for ButtonSpec {
             is_loading: false,
             leading_icon: None,
             trailing_icon: None,
+            chevron: false,
             aria_label: None,
             described_by: None,
             label: None,
@@ -78,6 +80,11 @@ impl ButtonSpec {
         self
     }
 
+    pub fn with_chevron(mut self, chevron: bool) -> Self {
+        self.chevron = chevron;
+        self
+    }
+
     pub fn with_aria_label(mut self, aria_label: impl Into<String>) -> Self {
         self.aria_label = Some(aria_label.into());
         self
@@ -114,15 +121,15 @@ impl ButtonSpec {
     }
 
     pub fn resolved_fill_token(&self) -> &'static str {
-        self.variant.fill_token_with_tone(self.effective_tone())
+        self.variant.fill_token(self.effective_tone())
     }
 
     pub fn resolved_border_token(&self) -> &'static str {
-        self.variant.border_token_with_tone(self.effective_tone())
+        self.variant.border_token(self.effective_tone())
     }
 
     pub fn resolved_text_token(&self) -> &'static str {
-        self.variant.text_token_with_tone(self.effective_tone())
+        self.variant.text_token(self.effective_tone())
     }
 
     pub fn control_height_token(&self) -> &'static str {
@@ -133,8 +140,9 @@ impl ButtonSpec {
         self.size.control_min_width_token()
     }
 
+    /// Icon size token — always sm in buttons per contract.
     pub fn icon_size_token(&self) -> &'static str {
-        self.size.icon_size_token()
+        semantic::SIZE_ICON_SM
     }
 
     pub fn horizontal_padding_token(&self) -> &'static str {

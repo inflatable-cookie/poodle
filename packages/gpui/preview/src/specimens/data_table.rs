@@ -1,7 +1,7 @@
 use gpui::*;
 use pug_adapter::ThemeProvider;
-use pug_gpui_composites::{DataTableSpec, TableColumnSpec, TableRowSpec, TableSortDirection};
-use pug_gpui_components::PugDataTable;
+use pug_composites::{DataTableSpec, TableColumnSpec, TableRowSpec, TableSortDirection};
+use pug_gpui_components::DataTable;
 use crate::app_state::AppState;
 use crate::style_bridge::color_to_hsla;
 use crate::PreviewRoot;
@@ -68,7 +68,7 @@ pub(crate) fn render(state: &AppState, _cx: &mut Context<PreviewRoot>) -> Div {
         // --- With sorting, column visibility, and export ---
         .child(section_label("WITH SORTING, COLUMN VISIBILITY, AND EXPORT", text_secondary))
         .child(
-            PugDataTable::new(
+            DataTable::from_spec(
                 DataTableSpec::new(columns, rows)
                     .with_selected_row_ids(selected_ids)
                     .with_sort("name", TableSortDirection::Asc)
@@ -79,7 +79,7 @@ pub(crate) fn render(state: &AppState, _cx: &mut Context<PreviewRoot>) -> Div {
         // --- Empty state ---
         .child(section_label("EMPTY STATE", text_secondary))
         .child(
-            PugDataTable::new(
+            DataTable::from_spec(
                 DataTableSpec::new(empty_columns, vec![])
                     .with_empty_message("No team members match the current filters."),
                 theme,

@@ -1,8 +1,8 @@
 use gpui::*;
 use pug_adapter::ThemeProvider;
 use pug_gpui::GpuiThemeProvider;
-use pug_gpui_primitives::{SurfaceSpec, SurfaceTone, SurfaceBorder, PillSpec};
-use pug_gpui_components::{PugSurface, PugPill};
+use pug_primitives::{SurfaceSpec, SurfaceTone, SurfaceBorder, PillSpec};
+use pug_gpui_components::{Surface, Pill};
 use crate::style_bridge::color_to_hsla;
 
 pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
@@ -15,9 +15,9 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
         .with_border(SurfaceBorder::Default);
 
     div().flex().flex_col().gap(px(6.0))
-        .child(PugPill::new(time_ago_pill, theme))
+        .child(Pill::from_spec(time_ago_pill, theme))
         .child(
-            PugSurface::new(surface_spec, theme)
+            Surface::from_spec(surface_spec, theme)
                 .with_content(
                     div().flex().items_center().gap(px(4.0))
                         .child(div().text_sm().child("01"))

@@ -1,6 +1,6 @@
 # g09.008 Generation Closeout
 
-Status: planned
+Status: complete
 Owner: Pug Core
 Depends on: g09.007
 

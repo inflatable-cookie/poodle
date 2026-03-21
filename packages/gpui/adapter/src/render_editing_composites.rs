@@ -9,11 +9,14 @@
 
 use pug_adapter::{RenderComponent, ThemeProvider};
 use pug_composites::{
-    AudioPlayerSpec, AutonomousListSpec, BlockEditorSpec, BreadcrumbsSpec, CardRadioGroupSpec,
+    AudioPlayerSpec, AutonomousListSpec, BlockEditorSpec, CardRadioGroupSpec,
     EmbedInputSpec, EmbedPreviewSpec, EmptyStateSpec, InlineEditableFieldSpec,
-    ListCardSpec, LogListSpec, MarkdownEditorSpec, MediaPickerSpec, NavCardGridSpec, NavCardSpec,
-    OrderBySpec, PageHeaderSpec, PageLoadingSpec, ReorderableListSpec, SlugFieldSpec,
+    LogListSpec, MarkdownEditorSpec, MediaPickerSpec,
+    PageHeaderSpec, PageLoadingSpec, ReorderableListSpec, SlugFieldSpec,
     StateTileSpec, ToastStackSpec, VideoPlayerSpec,
+};
+use pug_primitives::{
+    BreadcrumbsSpec, ListCardSpec, NavCardGridSpec, NavCardSpec, OrderBySpec,
 };
 use pug_style::StyleDescriptor;
 

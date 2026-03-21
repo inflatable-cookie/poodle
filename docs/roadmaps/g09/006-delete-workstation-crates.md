@@ -1,6 +1,6 @@
 # g09.006 Delete Workstation Crates
 
-Status: planned
+Status: complete
 Owner: Pug Core
 Depends on: g09.004
 

@@ -1,10 +1,10 @@
 use gpui::*;
 use pug_adapter::ThemeProvider;
-use pug_gpui_composites::{
+use pug_composites::{
     DockRegionSpec, DockEdge, PanelTabItem,
     SplitViewSpec, SplitOrientation,
 };
-use pug_gpui_components::{PugDockRegion, PugSplitView};
+use pug_gpui_components::{DockRegion, SplitView};
 use pug_gpui::GpuiThemeProvider;
 use crate::style_bridge::color_to_hsla;
 
@@ -47,7 +47,7 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
         .child(
             div().h(px(140.0)).flex().child(
                 div().w(px(180.0)).h_full().child(
-                    PugDockRegion::new(flex_expanded_spec, theme)
+                    DockRegion::from_spec(flex_expanded_spec, theme)
                         .with_content(
                             div().p(px(8.0))
                                 .child(div().text_xs().text_color(color_to_hsla(text_secondary)).child("Explorer panel content"))
@@ -59,7 +59,7 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
         .child(section_label("FLEXIBLE DOCK -- COLLAPSED ICON-STRIP (LEFT EDGE)", text_secondary))
         .child(
             div().h(px(100.0)).flex().child(
-                PugDockRegion::new(flex_collapsed_spec, theme)
+                DockRegion::from_spec(flex_collapsed_spec, theme)
                     .with_content(div())
             )
         )
@@ -67,7 +67,7 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
         .child(section_label("HORIZONTAL SPLIT", text_secondary))
         .child(
             div().h(px(100.0)).child(
-                PugSplitView::new(h_split_spec, theme)
+                SplitView::from_spec(h_split_spec, theme)
                     .with_primary(
                         div().p(px(8.0))
                             .child(div().text_xs().text_color(color_to_hsla(text_secondary)).child("Primary pane"))
@@ -82,7 +82,7 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
         .child(section_label("VERTICAL SPLIT", text_secondary))
         .child(
             div().h(px(120.0)).child(
-                PugSplitView::new(v_split_spec, theme)
+                SplitView::from_spec(v_split_spec, theme)
                     .with_primary(
                         div().p(px(8.0))
                             .child(div().text_xs().text_color(color_to_hsla(text_secondary)).child("Primary pane"))

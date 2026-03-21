@@ -1,8 +1,8 @@
 use gpui::*;
 use pug_adapter::ThemeProvider;
 use pug_gpui::GpuiThemeProvider;
-use pug_gpui_primitives::SkeletonSpec;
-use pug_gpui_components::PugSkeleton;
+use pug_primitives::SkeletonSpec;
+use pug_gpui_components::Skeleton;
 use crate::style_bridge::color_to_hsla;
 
 pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
@@ -17,7 +17,7 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
                 .child(
                     div().flex().flex_row().flex_wrap().gap(px(12.0)).items_center()
                         // Line shape: 12rem wide
-                        .child(PugSkeleton::new(
+                        .child(Skeleton::from_spec(
                             SkeletonSpec::new()
                                 .with_shape("line")
                                 .with_width("192.0")
@@ -25,7 +25,7 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
                             theme,
                         ))
                         // Circle shape: 2.5rem diameter
-                        .child(PugSkeleton::new(
+                        .child(Skeleton::from_spec(
                             SkeletonSpec::new()
                                 .with_shape("circle")
                                 .with_width("40.0")
@@ -33,7 +33,7 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
                             theme,
                         ))
                         // Block shape: 8rem x 3rem
-                        .child(PugSkeleton::new(
+                        .child(Skeleton::from_spec(
                             SkeletonSpec::new()
                                 .with_shape("block")
                                 .with_width("128.0")
@@ -49,7 +49,7 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
                 .child(
                     div().flex().flex_row().items_center().gap(px(12.0))
                         // Avatar circle 2.25rem
-                        .child(PugSkeleton::new(
+                        .child(Skeleton::from_spec(
                             SkeletonSpec::new()
                                 .with_shape("circle")
                                 .with_width("36.0")
@@ -57,7 +57,7 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
                             theme,
                         ))
                         // Line 10rem
-                        .child(PugSkeleton::new(
+                        .child(Skeleton::from_spec(
                             SkeletonSpec::new()
                                 .with_shape("line")
                                 .with_width("160.0")
@@ -102,7 +102,7 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
         .child(
             div().flex().flex_col().gap(px(12.0))
                 .child(section_label("Static (no animation)", text_secondary))
-                .child(PugSkeleton::new(
+                .child(Skeleton::from_spec(
                     SkeletonSpec::new()
                         .with_shape("line")
                         .with_width("160.0")
@@ -118,7 +118,7 @@ fn list_item_preset(theme: &GpuiThemeProvider) -> Div {
     div().flex().flex_row().items_center().gap(px(12.0)).py(px(8.0))
         // Avatar 2.25rem circle
         .child(
-            div().flex_shrink_0().child(PugSkeleton::new(
+            div().flex_shrink_0().child(Skeleton::from_spec(
                 SkeletonSpec::new()
                     .with_shape("circle")
                     .with_width("36.0")
@@ -130,7 +130,7 @@ fn list_item_preset(theme: &GpuiThemeProvider) -> Div {
         .child(
             div().flex().flex_col().gap(px(6.0)).flex_1().min_w(px(0.0))
                 .child(
-                    div().w(relative(0.6)).child(PugSkeleton::new(
+                    div().w(relative(0.6)).child(Skeleton::from_spec(
                         SkeletonSpec::new()
                             .with_shape("line")
                             .with_height("14.0"),
@@ -138,7 +138,7 @@ fn list_item_preset(theme: &GpuiThemeProvider) -> Div {
                     ))
                 )
                 .child(
-                    div().w(relative(0.4)).child(PugSkeleton::new(
+                    div().w(relative(0.4)).child(Skeleton::from_spec(
                         SkeletonSpec::new()
                             .with_shape("line")
                             .with_height("11.0"),
@@ -159,25 +159,25 @@ fn table_row_preset(
         .border_b_1()
         .border_color(color_to_hsla(border).opacity(0.42))
         .child(
-            div().w(relative(0.4)).child(PugSkeleton::new(
+            div().w(relative(0.4)).child(Skeleton::from_spec(
                 SkeletonSpec::new().with_shape("line").with_height("14.0"),
                 theme,
             ))
         )
         .child(
-            div().w(relative(0.6)).child(PugSkeleton::new(
+            div().w(relative(0.6)).child(Skeleton::from_spec(
                 SkeletonSpec::new().with_shape("line").with_height("14.0"),
                 theme,
             ))
         )
         .child(
-            div().w(relative(0.6)).child(PugSkeleton::new(
+            div().w(relative(0.6)).child(Skeleton::from_spec(
                 SkeletonSpec::new().with_shape("line").with_height("14.0"),
                 theme,
             ))
         )
         .child(
-            div().w(relative(0.2)).child(PugSkeleton::new(
+            div().w(relative(0.2)).child(Skeleton::from_spec(
                 SkeletonSpec::new().with_shape("line").with_height("14.0"),
                 theme,
             ))
@@ -197,7 +197,7 @@ fn card_preset(
         .rounded(px(6.0))
         .flex_1()
         // Block header 6rem
-        .child(PugSkeleton::new(
+        .child(Skeleton::from_spec(
             SkeletonSpec::new()
                 .with_shape("block")
                 .with_height("96.0"),
@@ -207,17 +207,17 @@ fn card_preset(
         .child(
             div().flex().flex_col().gap(px(6.0))
                 .child(
-                    div().w(relative(0.8)).child(PugSkeleton::new(
+                    div().w(relative(0.8)).child(Skeleton::from_spec(
                         SkeletonSpec::new().with_shape("line").with_height("14.0"),
                         theme,
                     ))
                 )
-                .child(PugSkeleton::new(
+                .child(Skeleton::from_spec(
                     SkeletonSpec::new().with_shape("line").with_height("14.0"),
                     theme,
                 ))
                 .child(
-                    div().w(relative(0.6)).child(PugSkeleton::new(
+                    div().w(relative(0.6)).child(Skeleton::from_spec(
                         SkeletonSpec::new().with_shape("line").with_height("14.0"),
                         theme,
                     ))
@@ -226,14 +226,14 @@ fn card_preset(
         // Footer: pill elements
         .child(
             div().flex().flex_row().gap(px(8.0)).pt(px(4.0))
-                .child(PugSkeleton::new(
+                .child(Skeleton::from_spec(
                     SkeletonSpec::new()
                         .with_shape("circle")
                         .with_width("56.0")
                         .with_height("20.0"),
                     theme,
                 ))
-                .child(PugSkeleton::new(
+                .child(Skeleton::from_spec(
                     SkeletonSpec::new()
                         .with_shape("circle")
                         .with_width("56.0")
@@ -249,7 +249,7 @@ fn detail_section_preset(theme: &GpuiThemeProvider, lines: usize) -> Div {
 
     // Heading: 8rem wide, 1rem tall
     el = el.child(
-        div().mb(px(4.0)).child(PugSkeleton::new(
+        div().mb(px(4.0)).child(Skeleton::from_spec(
             SkeletonSpec::new()
                 .with_shape("line")
                 .with_width("128.0")
@@ -263,7 +263,7 @@ fn detail_section_preset(theme: &GpuiThemeProvider, lines: usize) -> Div {
         el = el.child(
             div().flex().flex_row().gap(px(16.0)).items_center()
                 .child(
-                    div().flex_shrink_0().w(px(96.0)).child(PugSkeleton::new(
+                    div().flex_shrink_0().w(px(96.0)).child(Skeleton::from_spec(
                         SkeletonSpec::new()
                             .with_shape("line")
                             .with_width("96.0")
@@ -272,7 +272,7 @@ fn detail_section_preset(theme: &GpuiThemeProvider, lines: usize) -> Div {
                     ))
                 )
                 .child(
-                    div().flex_1().max_w(px(224.0)).child(PugSkeleton::new(
+                    div().flex_1().max_w(px(224.0)).child(Skeleton::from_spec(
                         SkeletonSpec::new()
                             .with_shape("line")
                             .with_height("12.0"),

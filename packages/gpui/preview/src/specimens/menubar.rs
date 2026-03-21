@@ -1,7 +1,7 @@
 use gpui::*;
 use pug_adapter::ThemeProvider;
-use pug_gpui_primitives::{MenubarSpec, MenubarEntry, MenuEntry, MenuItemKind};
-use pug_gpui_components::PugMenubar;
+use pug_primitives::{MenubarSpec, MenubarEntry, MenuEntry, MenuItemKind};
+use pug_gpui_components::Menubar;
 use pug_gpui::GpuiThemeProvider;
 use crate::style_bridge::color_to_hsla;
 
@@ -42,7 +42,7 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
     div().flex().flex_col().gap(px(16.0))
         .child(section_label("APPLICATION MENU BAR", text_secondary))
         .child(
-            PugMenubar::new(spec, theme).with_id("specimen-menubar")
+            Menubar::from_spec(spec, theme).with_id("specimen-menubar")
         )
 }
 

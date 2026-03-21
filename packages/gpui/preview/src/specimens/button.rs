@@ -1,7 +1,7 @@
 use gpui::*;
 use pug_adapter::ThemeProvider;
-use pug_gpui_primitives::{ButtonSpec, ButtonTone, ButtonVariant, ControlSize};
-use pug_gpui_components::PugButton;
+use pug_primitives::{ButtonSpec, ButtonTone, ButtonVariant, ControlSize};
+use pug_gpui_components::Button;
 use crate::app_state::AppState;
 use crate::style_bridge::color_to_hsla;
 use crate::PreviewRoot;
@@ -24,7 +24,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
         .child(
             div().flex().gap(px(8.0)).flex_wrap()
                 .child(
-                    PugButton::new(
+                    Button::from_spec(
                         ButtonSpec::new().with_variant(ButtonVariant::Primary).with_label("Primary"),
                         theme,
                     )
@@ -35,7 +35,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                     }))
                 )
                 .child(
-                    PugButton::new(
+                    Button::from_spec(
                         ButtonSpec::new().with_variant(ButtonVariant::Secondary).with_label("Secondary"),
                         theme,
                     )
@@ -46,7 +46,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                     }))
                 )
                 .child(
-                    PugButton::new(
+                    Button::from_spec(
                         ButtonSpec::new().with_variant(ButtonVariant::Ghost).with_label("Ghost"),
                         theme,
                     )
@@ -64,7 +64,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
         .child(
             div().flex().gap(px(8.0)).flex_wrap()
                 .child(
-                    PugButton::new(
+                    Button::from_spec(
                         ButtonSpec::new()
                             .with_variant(ButtonVariant::Primary)
                             .with_tone(ButtonTone::Danger)
@@ -74,7 +74,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                     .with_id("danger-primary")
                 )
                 .child(
-                    PugButton::new(
+                    Button::from_spec(
                         ButtonSpec::new()
                             .with_variant(ButtonVariant::Secondary)
                             .with_tone(ButtonTone::Danger)
@@ -84,7 +84,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                     .with_id("danger-secondary")
                 )
                 .child(
-                    PugButton::new(
+                    Button::from_spec(
                         ButtonSpec::new()
                             .with_variant(ButtonVariant::Ghost)
                             .with_tone(ButtonTone::Danger)
@@ -101,7 +101,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
         .child(
             div().flex().gap(px(8.0)).flex_wrap()
                 .child(
-                    PugButton::new(
+                    Button::from_spec(
                         ButtonSpec::new()
                             .with_variant(ButtonVariant::Secondary)
                             .with_leading_icon("plus")
@@ -111,7 +111,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                     .with_id("icon-create")
                 )
                 .child(
-                    PugButton::new(
+                    Button::from_spec(
                         ButtonSpec::new()
                             .with_variant(ButtonVariant::Secondary)
                             .with_trailing_icon("external-link")
@@ -121,7 +121,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                     .with_id("icon-open")
                 )
                 .child(
-                    PugButton::new(
+                    Button::from_spec(
                         ButtonSpec::new()
                             .with_variant(ButtonVariant::Secondary)
                             .with_leading_icon("save")
@@ -139,7 +139,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
         .child(
             div().flex().gap(px(8.0)).flex_wrap()
                 .child(
-                    PugButton::new(
+                    Button::from_spec(
                         ButtonSpec::new()
                             .with_variant(ButtonVariant::Secondary)
                             .with_chevron(true)
@@ -149,7 +149,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                     .with_id("chevron-options")
                 )
                 .child(
-                    PugButton::new(
+                    Button::from_spec(
                         ButtonSpec::new()
                             .with_variant(ButtonVariant::Primary)
                             .with_chevron(true)
@@ -159,7 +159,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                     .with_id("chevron-actions")
                 )
                 .child(
-                    PugButton::new(
+                    Button::from_spec(
                         ButtonSpec::new()
                             .with_variant(ButtonVariant::Secondary)
                             .with_leading_icon("filter")
@@ -177,7 +177,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
         .child(
             div().flex().gap(px(8.0)).flex_wrap().items_end()
                 .child(
-                    PugButton::new(
+                    Button::from_spec(
                         ButtonSpec::new()
                             .with_variant(ButtonVariant::Primary)
                             .with_size(ControlSize::Sm)
@@ -187,7 +187,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                     .with_id("size-sm")
                 )
                 .child(
-                    PugButton::new(
+                    Button::from_spec(
                         ButtonSpec::new()
                             .with_variant(ButtonVariant::Primary)
                             .with_size(ControlSize::Md)
@@ -197,7 +197,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                     .with_id("size-md")
                 )
                 .child(
-                    PugButton::new(
+                    Button::from_spec(
                         ButtonSpec::new()
                             .with_variant(ButtonVariant::Primary)
                             .with_size(ControlSize::Lg)
@@ -214,7 +214,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
         .child(
             div().flex().gap(px(8.0)).flex_wrap()
                 .child(
-                    PugButton::new(
+                    Button::from_spec(
                         ButtonSpec::new()
                             .with_variant(ButtonVariant::Primary)
                             .with_disabled(true)
@@ -224,7 +224,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                     .with_id("disabled")
                 )
                 .child(
-                    PugButton::new(
+                    Button::from_spec(
                         ButtonSpec::new()
                             .with_variant(ButtonVariant::Primary)
                             .with_loading(true)
@@ -234,7 +234,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                     .with_id("loading")
                 )
                 .child(
-                    PugButton::new(
+                    Button::from_spec(
                         ButtonSpec::new()
                             .with_variant(ButtonVariant::Secondary)
                             .with_disabled(true)

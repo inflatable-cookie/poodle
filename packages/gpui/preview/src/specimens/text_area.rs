@@ -1,7 +1,7 @@
 use gpui::*;
 use pug_adapter::ThemeProvider;
-use pug_gpui_primitives::TextAreaSpec;
-use pug_gpui_components::PugTextArea;
+use pug_primitives::TextAreaSpec;
+use pug_gpui_components::TextArea;
 use crate::app_state::AppState;
 use crate::style_bridge::color_to_hsla;
 use crate::PreviewRoot;
@@ -14,7 +14,7 @@ pub(crate) fn render(state: &AppState, _cx: &mut Context<PreviewRoot>) -> Div {
         // --- Default ---
         .child(section_label("DEFAULT", text_secondary))
         .child(
-            PugTextArea::new(
+            TextArea::from_spec(
                 TextAreaSpec::new()
                     .with_placeholder("Write a note\u{2026}")
                     .with_aria_label("Note"),
@@ -25,7 +25,7 @@ pub(crate) fn render(state: &AppState, _cx: &mut Context<PreviewRoot>) -> Div {
         // --- With initial value ---
         .child(section_label("WITH INITIAL VALUE", text_secondary))
         .child(
-            PugTextArea::new(
+            TextArea::from_spec(
                 TextAreaSpec::new()
                     .with_default_value("A brief description about yourself.")
                     .with_rows(3)
@@ -37,7 +37,7 @@ pub(crate) fn render(state: &AppState, _cx: &mut Context<PreviewRoot>) -> Div {
         // --- Read-only ---
         .child(section_label("READ-ONLY", text_secondary))
         .child(
-            PugTextArea::new(
+            TextArea::from_spec(
                 TextAreaSpec::new()
                     .with_default_value("This content cannot be modified by the user.")
                     .with_rows(2)
@@ -50,7 +50,7 @@ pub(crate) fn render(state: &AppState, _cx: &mut Context<PreviewRoot>) -> Div {
         // --- Disabled ---
         .child(section_label("DISABLED", text_secondary))
         .child(
-            PugTextArea::new(
+            TextArea::from_spec(
                 TextAreaSpec::new()
                     .with_placeholder("Disabled")
                     .with_disabled(true)

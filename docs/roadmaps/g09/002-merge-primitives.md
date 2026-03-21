@@ -1,6 +1,6 @@
 # g09.002 Merge GPUI-Only Specs into Contracts Primitives
 
-Status: planned
+Status: complete
 Owner: Pug Core
 Depends on: g09.001
 
@@ -30,31 +30,32 @@ These exist in `pug-gpui-primitives` but not `pug-primitives`:
 
 ## Diverged Specs
 
-For specs that exist in both crates, the GPUI version may have additions.
-Known divergences:
-
-- **ButtonSpec**: GPUI adds `chevron: bool`, `height_offset_px()`,
-  `min_width_px()`, `padding_x_offset_px()`, `font_size_px()`,
-  `icon_wrapper_size_px()`. The `chevron` field should be added to the
-  shared spec. The `*_px()` methods are rendering concerns — move them
-  to the GPUI component renderer.
-- **Other specs**: Audit each for similar patterns.
+- **ButtonSpec**: Added `chevron: bool` field and `with_chevron()` builder to
+  shared spec. Fixed `icon_size_token()` to always return `SIZE_ICON_SM` per
+  contract. The `*_px()` methods remain in GPUI only (rendering concerns).
+- **ListCardSpec**: Removed `leading_size_px()` and `leading_radius_px()` from
+  shared spec (hardcoded pixel values → renderer concern).
+- **PaginationSpec**: Removed `page_gap_px()` and `nav_gap_px()` from shared
+  spec (hardcoded pixel values → renderer concern).
+- **types.rs**: Added `TabVariant` enum to contracts (was only in GPUI).
 
 ## Actions
 
-- [ ] Copy 12 missing module files into `packages/contracts/primitives/src/`
-- [ ] Update token imports: `pug_gpui_tokens` → `pug_tokens`
-- [ ] Register modules in `packages/contracts/primitives/src/lib.rs`
-- [ ] For each diverged spec:
-  - Add genuinely missing fields/methods to the shared version
-  - Do NOT copy hardcoded pixel helpers — those go in the renderer
-- [ ] Merge any extra types/enums from GPUI `types.rs` into contracts `types.rs`
-- [ ] `cargo check -p pug-primitives`
-- [ ] `cargo check -p pug-jetstream-components` (must not break Jetstream)
+- [x] Copy 12 missing module files into `packages/contracts/primitives/src/`
+- [x] Token imports already use `pug_tokens` (files were from post-g09.001 GPUI)
+- [x] Register modules in `packages/contracts/primitives/src/lib.rs`
+- [x] For each diverged spec:
+  - Added `chevron` field to ButtonSpec
+  - Fixed `icon_size_token()` to always return `SIZE_ICON_SM`
+  - Removed hardcoded pixel helpers from list_card and pagination
+- [x] Added `TabVariant` enum to contracts `types.rs`
+- [x] `cargo check -p pug-primitives` — passes
+- [x] `cargo test -p pug-primitives` — 32 tests pass
+- [x] `cargo check -p pug-jetstream-components` — passes (no regression)
 
 ## Acceptance Criteria
 
-- [ ] `pug-primitives` has all 77 modules
-- [ ] No hardcoded pixel values in any spec's methods
-- [ ] Token methods return token path strings, not pixel values
-- [ ] Jetstream crates still compile
+- [x] `pug-primitives` has all 77 modules
+- [x] No hardcoded pixel values in shared spec methods
+- [x] Token methods return token path strings, not pixel values
+- [x] Jetstream crates still compile

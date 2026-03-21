@@ -1,6 +1,6 @@
 use gpui::*;
 use pug_adapter::ThemeProvider;
-use pug_gpui_components::toggle::PugToggle;
+use pug_gpui_components::toggle::Toggle;
 use crate::app_state::AppState;
 use crate::PreviewRoot;
 
@@ -19,7 +19,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
         .child(
             div().flex().gap(px(4.0))
                 .child(
-                    PugToggle::new("Bold", theme)
+                    Toggle::new("Bold", theme)
                         .with_pressed(bold_pressed)
                         .on_click(cx.listener(|this, _e: &ClickEvent, _w, cx| {
                             this.state.specimens.toggle("toggle-bold");
@@ -27,7 +27,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                         }))
                 )
                 .child(
-                    PugToggle::new("Italic", theme)
+                    Toggle::new("Italic", theme)
                         .with_pressed(italic_pressed)
                         .on_click(cx.listener(|this, _e: &ClickEvent, _w, cx| {
                             this.state.specimens.toggle("toggle-italic");
@@ -38,7 +38,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
         // --- Primary variant ---
         .child(section_label("PRIMARY VARIANT", text_secondary))
         .child(
-            PugToggle::new("Pinned", theme)
+            Toggle::new("Pinned", theme)
                 .with_pressed(pinned_pressed)
                 .on_click(cx.listener(|this, _e: &ClickEvent, _w, cx| {
                     this.state.specimens.toggle("toggle-pinned-off");
@@ -48,7 +48,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
         // --- Secondary variant ---
         .child(section_label("SECONDARY VARIANT", text_secondary))
         .child(
-            PugToggle::new("Favorite", theme)
+            Toggle::new("Favorite", theme)
                 .with_pressed(favorite_pressed)
                 .on_click(cx.listener(|this, _e: &ClickEvent, _w, cx| {
                     this.state.specimens.toggle("toggle-favorite");
@@ -58,7 +58,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
         // --- Disabled ---
         .child(section_label("DISABLED", text_secondary))
         .child(
-            PugToggle::new("Locked", theme)
+            Toggle::new("Locked", theme)
                 .with_pressed(true)
                 .with_disabled(true)
         )

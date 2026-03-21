@@ -1,8 +1,8 @@
 use gpui::*;
 use pug_adapter::ThemeProvider;
 use pug_gpui::GpuiThemeProvider;
-use pug_gpui_primitives::MeterSpec;
-use pug_gpui_components::PugMeter;
+use pug_primitives::MeterSpec;
+use pug_gpui_components::Meter;
 use crate::style_bridge::color_to_hsla;
 
 pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
@@ -13,7 +13,7 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
         .child(
             div().flex().flex_col().gap(px(8.0))
                 .child(section_label("DEFAULT (50%)", text_secondary))
-                .child(PugMeter::new(
+                .child(Meter::from_spec(
                     MeterSpec::new()
                         .with_value(50.0)
                         .with_max(100.0)
@@ -25,7 +25,7 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
         .child(
             div().flex().flex_col().gap(px(8.0))
                 .child(section_label("WITH THRESHOLDS", text_secondary))
-                .child(PugMeter::new(
+                .child(Meter::from_spec(
                     MeterSpec::new()
                         .with_value(82.0)
                         .with_max(100.0)
@@ -44,7 +44,7 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
         .child(
             div().flex().flex_col().gap(px(8.0))
                 .child(section_label("LOW VALUE (OPTIMAL RANGE)", text_secondary))
-                .child(PugMeter::new(
+                .child(Meter::from_spec(
                     MeterSpec::new()
                         .with_value(30.0)
                         .with_max(100.0)
@@ -63,7 +63,7 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
         .child(
             div().flex().flex_col().gap(px(8.0))
                 .child(section_label("CUSTOM RANGE (0\u{2013}500)", text_secondary))
-                .child(PugMeter::new(
+                .child(Meter::from_spec(
                     MeterSpec::new()
                         .with_value(350.0)
                         .with_min(0.0)

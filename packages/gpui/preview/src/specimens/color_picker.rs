@@ -1,8 +1,8 @@
 use gpui::*;
 use pug_adapter::ThemeProvider;
 use pug_gpui::GpuiThemeProvider;
-use pug_gpui_primitives::ColorPickerSpec;
-use pug_gpui_components::PugColorPicker;
+use pug_primitives::ColorPickerSpec;
+use pug_gpui_components::ColorPicker;
 use crate::style_bridge::color_to_hsla;
 
 pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
@@ -12,7 +12,7 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
         // --- Basic Picker ---
         .child(section_label("BASIC PICKER", text_secondary))
         .child(
-            PugColorPicker::new(
+            ColorPicker::from_spec(
                 ColorPickerSpec::new()
                     .with_value("#6366f1"),
                 theme,
@@ -21,7 +21,7 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
         // --- With Alpha ---
         .child(section_label("WITH ALPHA", text_secondary))
         .child(
-            PugColorPicker::new(
+            ColorPicker::from_spec(
                 ColorPickerSpec::new()
                     .with_value("#3b82f6")
                     .with_show_alpha(true),
@@ -31,7 +31,7 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
         // --- Default Open ---
         .child(section_label("DEFAULT OPEN, RGB MODE", text_secondary))
         .child(
-            PugColorPicker::new(
+            ColorPicker::from_spec(
                 ColorPickerSpec::new()
                     .with_value("#22c55e")
                     .with_open(true),
@@ -41,7 +41,7 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
         // --- Preview Only (No Input) ---
         .child(section_label("PREVIEW ONLY (NO INPUT)", text_secondary))
         .child(
-            PugColorPicker::new(
+            ColorPicker::from_spec(
                 ColorPickerSpec::new()
                     .with_value("#6366f1"),
                 theme,
@@ -50,7 +50,7 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
         // --- Disabled ---
         .child(section_label("DISABLED", text_secondary))
         .child(
-            PugColorPicker::new(
+            ColorPicker::from_spec(
                 ColorPickerSpec::new()
                     .with_value("#22c55e")
                     .with_disabled(true),

@@ -1,10 +1,10 @@
 use gpui::*;
 use pug_adapter::ThemeProvider;
-use pug_gpui_composites::{
+use pug_composites::{
     PaginationSummarySpec,
     SelectionSummarySpec, SelectionSummaryItem, RemediationAction,
 };
-use pug_gpui_components::{PugPaginationSummary, PugSelectionSummary};
+use pug_gpui_components::{PaginationSummary, SelectionSummary};
 use pug_gpui::GpuiThemeProvider;
 use crate::style_bridge::color_to_hsla;
 
@@ -17,7 +17,7 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
         // --- Default ---
         .child(section_label("PAGINATION: DEFAULT", text_secondary))
         .child(
-            PugPaginationSummary::new(
+            PaginationSummary::from_spec(
                 PaginationSummarySpec::new(1, 20, 156),
                 theme,
             )
@@ -25,7 +25,7 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
         // --- Single page ---
         .child(section_label("PAGINATION: SINGLE PAGE", text_secondary))
         .child(
-            PugPaginationSummary::new(
+            PaginationSummary::from_spec(
                 PaginationSummarySpec::new(1, 20, 12),
                 theme,
             )
@@ -33,7 +33,7 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
         // --- Large dataset ---
         .child(section_label("PAGINATION: LARGE DATASET", text_secondary))
         .child(
-            PugPaginationSummary::new(
+            PaginationSummary::from_spec(
                 PaginationSummarySpec::new(5, 20, 1000),
                 theme,
             )
@@ -44,7 +44,7 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
         // --- Multiple items selected ---
         .child(section_label("SELECTION: MULTIPLE ITEMS SELECTED", text_secondary))
         .child(
-            PugSelectionSummary::new(
+            SelectionSummary::from_spec(
                 SelectionSummarySpec::new(vec![
                     SelectionSummaryItem::new("btn", "Button"),
                     SelectionSummaryItem::new("card", "Card"),
@@ -59,7 +59,7 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
         // --- Single item ---
         .child(section_label("SELECTION: SINGLE ITEM", text_secondary))
         .child(
-            PugSelectionSummary::new(
+            SelectionSummary::from_spec(
                 SelectionSummarySpec::new(vec![
                     SelectionSummaryItem::new("primary-btn", "Primary button"),
                 ]),
@@ -69,7 +69,7 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
         // --- Truncated (max 3 visible) ---
         .child(section_label("SELECTION: TRUNCATED (MAX 3 VISIBLE)", text_secondary))
         .child(
-            PugSelectionSummary::new(
+            SelectionSummary::from_spec(
                 SelectionSummarySpec::new(vec![
                     SelectionSummaryItem::new("alpha", "Alpha"),
                     SelectionSummaryItem::new("beta", "Beta"),

@@ -1,8 +1,8 @@
 use gpui::*;
 use pug_adapter::ThemeProvider;
 use pug_gpui::GpuiThemeProvider;
-use pug_gpui_primitives::{StatusIndicatorSpec, StatusTone};
-use pug_gpui_components::PugStatusIndicator;
+use pug_primitives::{StatusIndicatorSpec, StatusTone};
+use pug_gpui_components::StatusIndicator;
 
 pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
     let text_secondary = theme.resolve_color("semantic.color.text.secondary");
@@ -50,12 +50,12 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
                 .child(section_label("ALL STATUSES", text_secondary))
                 .child(
                     div().flex().flex_col().gap(px(8.0))
-                        .child(PugStatusIndicator::new(neutral, theme))
-                        .child(PugStatusIndicator::new(info, theme))
-                        .child(PugStatusIndicator::new(success, theme))
-                        .child(PugStatusIndicator::new(warning, theme))
-                        .child(PugStatusIndicator::new(danger, theme))
-                        .child(PugStatusIndicator::new(pending, theme))
+                        .child(StatusIndicator::from_spec(neutral, theme))
+                        .child(StatusIndicator::from_spec(info, theme))
+                        .child(StatusIndicator::from_spec(success, theme))
+                        .child(StatusIndicator::from_spec(warning, theme))
+                        .child(StatusIndicator::from_spec(danger, theme))
+                        .child(StatusIndicator::from_spec(pending, theme))
                 )
         )
         // --- Without labels (dot only) ---
@@ -64,17 +64,17 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
                 .child(section_label("WITHOUT LABELS (DOT ONLY)", text_secondary))
                 .child(
                     div().flex().gap(px(16.0)).items_center()
-                        .child(PugStatusIndicator::new(online, theme))
-                        .child(PugStatusIndicator::new(away, theme))
-                        .child(PugStatusIndicator::new(offline, theme))
-                        .child(PugStatusIndicator::new(unknown, theme))
+                        .child(StatusIndicator::from_spec(online, theme))
+                        .child(StatusIndicator::from_spec(away, theme))
+                        .child(StatusIndicator::from_spec(offline, theme))
+                        .child(StatusIndicator::from_spec(unknown, theme))
                 )
         )
         // --- Slot content ---
         .child(
             div().flex().flex_col().gap(px(8.0))
                 .child(section_label("SLOT CONTENT", text_secondary))
-                .child(PugStatusIndicator::new(build, theme))
+                .child(StatusIndicator::from_spec(build, theme))
         )
 }
 

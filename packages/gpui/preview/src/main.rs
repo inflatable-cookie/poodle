@@ -16,7 +16,7 @@ use std::path::PathBuf;
 
 use gpui::*;
 use pug_adapter::ThemeProvider;
-use pug_gpui_primitives::{TabDefinition, TabsSpec, TabVariant};
+use pug_primitives::{TabDefinition, TabsSpec, TabVariant};
 
 /// Asset source that loads files from the preview app's directory.
 struct PreviewAssets {
@@ -53,7 +53,7 @@ use app_state::{
     AppState, AppearanceTreatment, ControlSize, DemoScreen, Density, Section, ThemePreset,
 };
 use component_registry::{COMPOSITES, PRIMITIVES, SHELLS};
-use pug_gpui_components::PugTabs;
+use pug_gpui_components::Tabs;
 use style_bridge::color_to_hsla;
 
 // Global keyboard actions
@@ -143,7 +143,7 @@ impl Render for PreviewRoot {
 }
 
 impl PreviewRoot {
-    /// Pill-style nav tabs using PugTabs with the Pill variant.
+    /// Pill-style nav tabs using Tabs with the Pill variant.
     fn render_nav_tabs(
         &self,
         _text_secondary: pug_tokens::typed::ColorValue,
@@ -160,7 +160,7 @@ impl PreviewRoot {
             .with_variant(TabVariant::Pill)
             .with_value(active_value);
 
-        PugTabs::new(spec, &self.state.theme)
+        Tabs::from_spec(spec, &self.state.theme)
             .with_id("nav-tabs")
     }
 

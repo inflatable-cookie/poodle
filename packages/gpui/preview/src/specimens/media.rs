@@ -1,9 +1,9 @@
 use gpui::*;
 use pug_adapter::ThemeProvider;
-use pug_gpui_composites::{
+use pug_composites::{
     MediaPreviewSpec, MediaThumbnailSpec, AspectRatio, MediaKind, MediaState,
 };
-use pug_gpui_components::{PugMediaPreview, PugMediaThumbnail};
+use pug_gpui_components::{MediaPreview, MediaThumbnail};
 use crate::app_state::AppState;
 use crate::style_bridge::color_to_hsla;
 use crate::PreviewRoot;
@@ -18,7 +18,7 @@ pub(crate) fn render(state: &AppState, _cx: &mut Context<PreviewRoot>) -> Div {
         // --- Image preview ---
         .child(section_label("MEDIA PREVIEW: IMAGE PREVIEW", text_secondary))
         .child(
-            PugMediaPreview::new(
+            MediaPreview::from_spec(
                 MediaPreviewSpec::new(MediaKind::Image, "Hero banner")
                     .with_description("Main landing page banner image for the product launch.")
                     .with_metadata(vec![
@@ -32,7 +32,7 @@ pub(crate) fn render(state: &AppState, _cx: &mut Context<PreviewRoot>) -> Div {
         // --- Video preview ---
         .child(section_label("MEDIA PREVIEW: VIDEO PREVIEW", text_secondary))
         .child(
-            PugMediaPreview::new(
+            MediaPreview::from_spec(
                 MediaPreviewSpec::new(MediaKind::Video, "Onboarding walkthrough")
                     .with_metadata(vec![
                         "3:42".into(),
@@ -44,7 +44,7 @@ pub(crate) fn render(state: &AppState, _cx: &mut Context<PreviewRoot>) -> Div {
         // --- Error state ---
         .child(section_label("MEDIA PREVIEW: ERROR STATE", text_secondary))
         .child(
-            PugMediaPreview::new(
+            MediaPreview::from_spec(
                 MediaPreviewSpec::new(MediaKind::Document, "Corrupted file")
                     .with_state(MediaState::Error),
                 theme,
@@ -58,7 +58,7 @@ pub(crate) fn render(state: &AppState, _cx: &mut Context<PreviewRoot>) -> Div {
         .child(
             div().flex().gap(px(8.0)).flex_wrap()
                 .child(
-                    PugMediaThumbnail::new(
+                    MediaThumbnail::from_spec(
                         MediaThumbnailSpec::new(MediaKind::Image)
                             .with_title("Photo 1")
                             .with_badge_label("New")
@@ -67,7 +67,7 @@ pub(crate) fn render(state: &AppState, _cx: &mut Context<PreviewRoot>) -> Div {
                     )
                 )
                 .child(
-                    PugMediaThumbnail::new(
+                    MediaThumbnail::from_spec(
                         MediaThumbnailSpec::new(MediaKind::Image)
                             .with_title("Photo 2")
                             .with_meta("2.4 MB")
@@ -76,7 +76,7 @@ pub(crate) fn render(state: &AppState, _cx: &mut Context<PreviewRoot>) -> Div {
                     )
                 )
                 .child(
-                    PugMediaThumbnail::new(
+                    MediaThumbnail::from_spec(
                         MediaThumbnailSpec::new(MediaKind::Video)
                             .with_title("Clip")
                             .with_badge_label("HD")
@@ -91,7 +91,7 @@ pub(crate) fn render(state: &AppState, _cx: &mut Context<PreviewRoot>) -> Div {
         .child(
             div().flex().gap(px(8.0)).flex_wrap()
                 .child(
-                    PugMediaThumbnail::new(
+                    MediaThumbnail::from_spec(
                         MediaThumbnailSpec::new(MediaKind::Document)
                             .with_title("Report.pdf")
                             .with_aspect_ratio(AspectRatio::Landscape),
@@ -99,7 +99,7 @@ pub(crate) fn render(state: &AppState, _cx: &mut Context<PreviewRoot>) -> Div {
                     )
                 )
                 .child(
-                    PugMediaThumbnail::new(
+                    MediaThumbnail::from_spec(
                         MediaThumbnailSpec::new(MediaKind::Audio)
                             .with_title("Interview.mp3")
                             .with_aspect_ratio(AspectRatio::Landscape),
@@ -110,7 +110,7 @@ pub(crate) fn render(state: &AppState, _cx: &mut Context<PreviewRoot>) -> Div {
         // --- Loading state ---
         .child(section_label("MEDIA THUMBNAIL: LOADING STATE", text_secondary))
         .child(
-            PugMediaThumbnail::new(
+            MediaThumbnail::from_spec(
                 MediaThumbnailSpec::new(MediaKind::Image)
                     .with_state(MediaState::Loading)
                     .with_aspect_ratio(AspectRatio::Square),

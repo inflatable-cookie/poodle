@@ -1,7 +1,7 @@
 use gpui::*;
 use pug_adapter::ThemeProvider;
-use pug_gpui_composites::{DetailShellSpec, DetailState};
-use pug_gpui_components::PugDetailShell;
+use pug_composites::{DetailShellSpec, DetailState};
+use pug_gpui_components::DetailShell;
 use pug_gpui::GpuiThemeProvider;
 use crate::style_bridge::color_to_hsla;
 
@@ -15,7 +15,7 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
         .child(section_label("LAYOUT STRUCTURE", text_secondary))
         .child(
             div().h(px(180.0)).child(
-                PugDetailShell::new(
+                DetailShell::from_spec(
                     DetailShellSpec::new(),
                     theme,
                 )
@@ -34,7 +34,7 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
         .child(section_label("MULTI-SECTION LAYOUT WITH HEADER", text_secondary))
         .child(
             div().h(px(220.0)).child(
-                PugDetailShell::new(
+                DetailShell::from_spec(
                     DetailShellSpec::new()
                         .with_title("Project Settings"),
                     theme,
@@ -61,7 +61,7 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
         .child(section_label("LOADING STATE", text_secondary))
         .child(
             div().h(px(100.0)).child(
-                PugDetailShell::new(
+                DetailShell::from_spec(
                     DetailShellSpec::new()
                         .with_title("Loading")
                         .with_state(DetailState::Loading),
@@ -73,7 +73,7 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
         .child(section_label("ERROR STATE", text_secondary))
         .child(
             div().h(px(100.0)).child(
-                PugDetailShell::new(
+                DetailShell::from_spec(
                     DetailShellSpec::new()
                         .with_title("Error")
                         .with_state(DetailState::Error),

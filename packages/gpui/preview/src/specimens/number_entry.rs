@@ -1,8 +1,8 @@
 use gpui::*;
 use pug_adapter::ThemeProvider;
 use pug_gpui::GpuiThemeProvider;
-use pug_gpui_primitives::{NumberEntrySpec, ValidationState};
-use pug_gpui_components::PugNumberEntry;
+use pug_primitives::{NumberEntrySpec, ValidationState};
+use pug_gpui_components::NumberEntry;
 use crate::style_bridge::color_to_hsla;
 
 pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
@@ -12,7 +12,7 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
         // --- Default ---
         .child(section_label("DEFAULT", text_secondary))
         .child(
-            PugNumberEntry::new(
+            NumberEntry::from_spec(
                 NumberEntrySpec::new(1.0)
                     .with_min(0.0)
                     .with_max(100.0)
@@ -23,7 +23,7 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
         // --- With Steppers ---
         .child(section_label("WITH STEPPERS", text_secondary))
         .child(
-            PugNumberEntry::new(
+            NumberEntry::from_spec(
                 NumberEntrySpec::new(29.99)
                     .with_min(0.0)
                     .with_step(0.01)
@@ -34,7 +34,7 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
         // --- Disabled ---
         .child(section_label("DISABLED", text_secondary))
         .child(
-            PugNumberEntry::new(
+            NumberEntry::from_spec(
                 NumberEntrySpec::new(42.0)
                     .with_disabled(true),
                 theme,
@@ -43,7 +43,7 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
         // --- Invalid ---
         .child(section_label("INVALID", text_secondary))
         .child(
-            PugNumberEntry::new(
+            NumberEntry::from_spec(
                 NumberEntrySpec::new(-5.0)
                     .with_min(0.0)
                     .with_validation_state(ValidationState::Invalid),

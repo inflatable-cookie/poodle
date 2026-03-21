@@ -1,8 +1,8 @@
 use gpui::*;
 use pug_adapter::ThemeProvider;
 use pug_gpui::GpuiThemeProvider;
-use pug_gpui_primitives::PinInputSpec;
-use pug_gpui_components::PugPinInput;
+use pug_primitives::PinInputSpec;
+use pug_gpui_components::PinInput;
 use crate::style_bridge::color_to_hsla;
 
 pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
@@ -12,7 +12,7 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
         // --- 6-digit Code ---
         .child(section_label("6-DIGIT CODE", text_secondary))
         .child(
-            PugPinInput::new(
+            PinInput::from_spec(
                 PinInputSpec::new(6)
                     .with_aria_label("Verification code"),
                 theme,
@@ -21,7 +21,7 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
         // --- 4-digit Masked ---
         .child(section_label("4-DIGIT MASKED", text_secondary))
         .child(
-            PugPinInput::new(
+            PinInput::from_spec(
                 PinInputSpec::new(4)
                     .with_masked(true)
                     .with_aria_label("PIN"),
@@ -31,7 +31,7 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
         // --- Disabled ---
         .child(section_label("DISABLED", text_secondary))
         .child(
-            PugPinInput::new(
+            PinInput::from_spec(
                 PinInputSpec::new(6)
                     .with_value("123")
                     .with_disabled(true),

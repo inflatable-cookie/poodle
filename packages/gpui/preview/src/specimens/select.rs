@@ -1,7 +1,7 @@
 use gpui::*;
 use pug_adapter::ThemeProvider;
-use pug_gpui_primitives::{SelectSpec, ChoiceOption};
-use pug_gpui_components::PugSelect;
+use pug_primitives::{SelectSpec, ChoiceOption};
+use pug_gpui_components::Select;
 use crate::app_state::AppState;
 use crate::style_bridge::color_to_hsla;
 use crate::PreviewRoot;
@@ -53,7 +53,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
 
             div().flex().flex_col().gap(px(4.0)).max_w(px(320.0))
                 .child(
-                    PugSelect::new(spec, theme)
+                    Select::from_spec(spec, theme)
                         .with_id("select-default")
                         .on_toggle(cx.listener(|this, _open: &bool, _w, cx| {
                             this.state.specimens.toggle("select-default-open");
@@ -70,7 +70,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
 
             div().flex().flex_col().gap(px(4.0)).max_w(px(320.0))
                 .child(
-                    PugSelect::new(spec, theme)
+                    Select::from_spec(spec, theme)
                         .with_id("select-grouped")
                         .on_toggle(cx.listener(|this, _open: &bool, _w, cx| {
                             this.state.specimens.toggle("select-grouped-open");
@@ -88,7 +88,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
 
             div().flex().flex_col().gap(px(4.0)).max_w(px(320.0))
                 .child(
-                    PugSelect::new(spec, theme)
+                    Select::from_spec(spec, theme)
                         .with_id("select-disabled")
                 )
         })

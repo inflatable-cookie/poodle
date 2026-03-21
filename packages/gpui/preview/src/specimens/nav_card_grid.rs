@@ -1,8 +1,8 @@
 use gpui::*;
 use pug_adapter::ThemeProvider;
 use pug_gpui::GpuiThemeProvider;
-use pug_gpui_primitives::{NavCardGridSpec, SurfaceSpec, SurfaceTone, SurfaceBorder, PaddingScale};
-use pug_gpui_components::{PugNavCardGrid, PugSurface};
+use pug_primitives::{NavCardGridSpec, SurfaceSpec, SurfaceTone, SurfaceBorder, PaddingScale};
+use pug_gpui_components::{NavCardGrid, Surface};
 use crate::style_bridge::color_to_hsla;
 
 pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
@@ -10,7 +10,7 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
     let text_secondary = theme.resolve_color("semantic.color.text.secondary");
 
     let nav_card = |title: &str, description: &str| {
-        PugSurface::new(
+        Surface::from_spec(
             SurfaceSpec::new()
                 .with_tone(SurfaceTone::Panel)
                 .with_border(SurfaceBorder::Subtle)
@@ -35,7 +35,7 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
         // --- 2 columns (default) ---
         .child(section_label("2 COLUMNS (DEFAULT)", text_secondary))
         .child(
-            PugNavCardGrid::new(NavCardGridSpec::new(), theme)
+            NavCardGrid::from_spec(NavCardGridSpec::new(), theme)
                 .with_child(nav_card("Getting Started", "Learn the basics of the platform"))
                 .with_child(nav_card("Components", "Browse the component library"))
                 .with_child(nav_card("Tokens", "Design token reference"))
@@ -44,7 +44,7 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
         // --- 3 columns ---
         .child(section_label("3 COLUMNS", text_secondary))
         .child(
-            PugNavCardGrid::new(NavCardGridSpec::new().with_columns(3), theme)
+            NavCardGrid::from_spec(NavCardGridSpec::new().with_columns(3), theme)
                 .with_child(nav_card("Overview", "System overview"))
                 .with_child(nav_card("Installation", "Setup guide"))
                 .with_child(nav_card("Configuration", "Config options"))
@@ -55,14 +55,14 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
         // --- 1 column ---
         .child(section_label("1 COLUMN", text_secondary))
         .child(
-            PugNavCardGrid::new(NavCardGridSpec::new().with_columns(1), theme)
+            NavCardGrid::from_spec(NavCardGridSpec::new().with_columns(1), theme)
                 .with_child(nav_card("Dashboard", "View your project dashboard"))
                 .with_child(nav_card("Settings", "Configure preferences"))
         )
         // --- 4 columns ---
         .child(section_label("4 COLUMNS", text_secondary))
         .child(
-            PugNavCardGrid::new(NavCardGridSpec::new().with_columns(4), theme)
+            NavCardGrid::from_spec(NavCardGridSpec::new().with_columns(4), theme)
                 .with_child(nav_card("Home", "Return home"))
                 .with_child(nav_card("Search", "Find content"))
                 .with_child(nav_card("Recent", "Recent items"))
@@ -71,7 +71,7 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
         // --- With aria-label ---
         .child(section_label("WITH ARIA-LABEL", text_secondary))
         .child(
-            PugNavCardGrid::new(
+            NavCardGrid::from_spec(
                 NavCardGridSpec::new()
                     .with_columns(2)
                     .with_aria_label("Documentation navigation"),

@@ -1,7 +1,7 @@
 use gpui::*;
 use pug_adapter::ThemeProvider;
-use pug_gpui_primitives::{TabsSpec, TabDefinition, TabVariant};
-use pug_gpui_components::PugTabs;
+use pug_primitives::{TabsSpec, TabDefinition, TabVariant};
+use pug_gpui_components::Tabs;
 use crate::app_state::AppState;
 use crate::style_bridge::color_to_hsla;
 use crate::PreviewRoot;
@@ -32,7 +32,7 @@ pub(crate) fn render(state: &AppState, _cx: &mut Context<PreviewRoot>) -> Div {
         .with_value(underline_value)
         .with_aria_label("Section tabs");
 
-    let mut underline_component = PugTabs::new(underline_spec, theme)
+    let mut underline_component = Tabs::from_spec(underline_spec, theme)
         .with_id("specimen-underline");
 
     underline_component = underline_component
@@ -68,7 +68,7 @@ pub(crate) fn render(state: &AppState, _cx: &mut Context<PreviewRoot>) -> Div {
         .with_value("index.ts")
         .with_aria_label("Open files");
 
-    let card_component = PugTabs::new(card_spec, theme)
+    let card_component = Tabs::from_spec(card_spec, theme)
         .with_id("specimen-card");
 
     // ── Pill variant (with icons) ────────────────────────────────────
@@ -86,7 +86,7 @@ pub(crate) fn render(state: &AppState, _cx: &mut Context<PreviewRoot>) -> Div {
         .with_value("home")
         .with_aria_label("Navigation");
 
-    let pill_component = PugTabs::new(pill_spec, theme)
+    let pill_component = Tabs::from_spec(pill_spec, theme)
         .with_id("specimen-pill");
 
     // ── Underline (with icons, no panel) ─────────────────────────────
@@ -104,7 +104,7 @@ pub(crate) fn render(state: &AppState, _cx: &mut Context<PreviewRoot>) -> Div {
         .with_value("home")
         .with_aria_label("Icon tabs");
 
-    let underline_icon_component = PugTabs::new(underline_icon_spec, theme)
+    let underline_icon_component = Tabs::from_spec(underline_icon_spec, theme)
         .with_id("specimen-underline-icons");
 
     // ── Strip variant specimens omitted ──────────────────────────────

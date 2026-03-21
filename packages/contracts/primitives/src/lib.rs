@@ -1,20 +1,26 @@
 mod accordion;
+mod alert_dialog;
 mod badge;
 mod banner;
 mod r#box;
+mod breadcrumbs;
+mod bulk_action_bar;
 mod button;
 mod calendar;
 mod call_out;
+mod card;
 mod checkbox;
 mod code;
 mod collapse_toggle;
 mod collapsible;
 mod color_picker;
+mod combobox;
 mod context_menu;
 mod date_picker;
 mod date_range_picker;
 mod date_time_picker;
 mod date_time_range_picker;
+mod detail_row;
 mod dialog;
 mod drawer;
 mod duration_input;
@@ -25,13 +31,18 @@ mod file_upload;
 mod form_actions;
 mod grid;
 mod hover_card;
+mod icon;
 mod icon_button;
+mod list_card;
 mod menu;
 mod menubar;
 mod meter;
+mod nav_card;
 mod nav_card_grid;
 mod navigation_menu;
 mod number_entry;
+mod order_by;
+mod pagination;
 mod pill;
 mod pin_input;
 mod popover;
@@ -56,6 +67,7 @@ mod surface;
 mod switch;
 mod tab_strip;
 mod tabs;
+mod table;
 mod text_area;
 mod text_input;
 mod time_ago;
@@ -68,21 +80,27 @@ mod types;
 mod zoned_date_time_picker;
 
 pub use accordion::AccordionSpec;
+pub use alert_dialog::{AlertDialogSpec, AlertDialogTone};
 pub use badge::BadgeSpec;
 pub use banner::BannerSpec;
+pub use breadcrumbs::{BreadcrumbItem, BreadcrumbsSpec};
+pub use bulk_action_bar::{BulkAction, BulkActionBarSpec, BulkActionTone};
 pub use button::ButtonSpec;
 pub use calendar::CalendarSpec;
 pub use call_out::CallOutSpec;
+pub use card::{CardLayout, CardSpec, CardVariant};
 pub use checkbox::CheckboxSpec;
 pub use code::CodeSpec;
 pub use collapse_toggle::{CollapseDirection, CollapseToggleSpec};
 pub use collapsible::CollapsibleSpec;
 pub use color_picker::ColorPickerSpec;
+pub use combobox::{ComboboxOption, ComboboxSpec};
 pub use context_menu::ContextMenuSpec;
 pub use date_picker::DatePickerSpec;
 pub use date_range_picker::DateRangePickerSpec;
 pub use date_time_picker::DateTimePickerSpec;
 pub use date_time_range_picker::DateTimeRangePickerSpec;
+pub use detail_row::DetailRowSpec;
 pub use dialog::DialogSpec;
 pub use drawer::DrawerSpec;
 pub use duration_input::DurationInputSpec;
@@ -93,13 +111,18 @@ pub use file_upload::FileUploadSpec;
 pub use form_actions::FormActionsSpec;
 pub use grid::GridSpec;
 pub use hover_card::HoverCardSpec;
+pub use icon::{IconSize, IconSpec};
 pub use icon_button::IconButtonSpec;
+pub use list_card::{LeadingFill, LeadingShape, ListCardSpec};
 pub use menu::MenuSpec;
 pub use menubar::MenubarSpec;
 pub use meter::MeterSpec;
+pub use nav_card::NavCardSpec;
 pub use nav_card_grid::NavCardGridSpec;
 pub use navigation_menu::NavigationMenuSpec;
 pub use number_entry::NumberEntrySpec;
+pub use order_by::{ActiveSort, OrderBySpec, SortDirection, SortField};
+pub use pagination::{PageItem, PaginationSpec};
 pub use pill::PillSpec;
 pub use pin_input::PinInputSpec;
 pub use popover::PopoverSpec;
@@ -125,6 +148,7 @@ pub use surface::SurfaceSpec;
 pub use switch::SwitchSpec;
 pub use tab_strip::TabStripSpec;
 pub use tabs::TabsSpec;
+pub use table::{ColumnAlign, TableColumn, TableRow, TableSpec};
 pub use text_area::TextAreaSpec;
 pub use text_input::TextInputSpec;
 pub use time_ago::TimeAgoSpec;
@@ -140,7 +164,8 @@ pub use types::{
     DateTimeValue, DialogKind, Dimension, Direction, DrawerEdge, FormActionAlign, Inset, MenuEntry,
     MenuItemKind, MenubarEntry, NavigationMenuEntry, Orientation, Overflow, OverlayPlacement,
     PaddingScale, PopoverInitialFocus, RuleTone, SeparatorOrientation, StatusTone, SurfaceBorder,
-    SurfaceRole, SurfaceTone, TabActivationMode, TabDefinition, TabStripItem, ValidationState,
+    SurfaceRole, SurfaceTone, TabActivationMode, TabDefinition, TabStripItem, TabVariant,
+    ValidationState,
 };
 
 pub const CURRENT_GENERATION: &str = "g06.002";
@@ -283,7 +308,8 @@ mod tests {
 
         assert_eq!(spec.resolved_fill_token(), semantic::COLOR_ACCENT_BASE);
         assert_eq!(spec.resolved_text_token(), semantic::COLOR_TEXT_INVERSE);
-        assert_eq!(spec.icon_size_token(), semantic::SIZE_ICON_LG);
+        // Contract: icons in buttons always render at size="sm"
+        assert_eq!(spec.icon_size_token(), semantic::SIZE_ICON_SM);
         assert!(!spec.activation_allowed());
         assert!(!spec.requires_aria_label());
     }

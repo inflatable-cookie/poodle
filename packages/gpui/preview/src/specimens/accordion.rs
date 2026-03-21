@@ -1,7 +1,7 @@
 use gpui::*;
 use pug_adapter::ThemeProvider;
-use pug_gpui_primitives::{AccordionSpec, AccordionItemSpec, AccordionSelectionValue};
-use pug_gpui_components::PugAccordion;
+use pug_primitives::{AccordionSpec, AccordionItemSpec, AccordionSelectionValue};
+use pug_gpui_components::Accordion;
 use crate::app_state::AppState;
 use crate::style_bridge::color_to_hsla;
 use crate::PreviewRoot;
@@ -76,7 +76,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
         // --- Single selection ---
         .child(section_label("SINGLE SELECTION", text_secondary))
         .child(
-            PugAccordion::new(single_spec, theme)
+            Accordion::from_spec(single_spec, theme)
                 .with_id("specimen-accordion-single")
                 .on_toggle(cx.listener(|this, value: &str, _w, cx| {
                     let key = format!("accordion-single-{}", value);
@@ -99,7 +99,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
         // --- Multiple selection ---
         .child(section_label("MULTIPLE SELECTION", text_secondary))
         .child(
-            PugAccordion::new(multi_spec, theme)
+            Accordion::from_spec(multi_spec, theme)
                 .with_id("specimen-accordion-multi")
                 .on_toggle(cx.listener(|this, value: &str, _w, cx| {
                     let key = format!("accordion-multi-{}", value);

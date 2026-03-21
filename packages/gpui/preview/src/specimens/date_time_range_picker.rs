@@ -1,8 +1,8 @@
 use gpui::*;
 use pug_adapter::ThemeProvider;
 use pug_gpui::GpuiThemeProvider;
-use pug_gpui_primitives::{DateTimeRangePickerSpec, DateTimeRangeValue, DateTimeValue};
-use pug_gpui_components::PugDateTimeRangePicker;
+use pug_primitives::{DateTimeRangePickerSpec, DateTimeRangeValue, DateTimeValue};
+use pug_gpui_components::DateTimeRangePicker;
 use crate::style_bridge::color_to_hsla;
 
 pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
@@ -14,7 +14,7 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
         .child({
             let mut spec = DateTimeRangePickerSpec::new();
             spec.aria_label = Some("Select date and time range".to_string());
-            PugDateTimeRangePicker::new(spec, theme).with_id("default")
+            DateTimeRangePicker::from_spec(spec, theme).with_id("default")
         })
         // --- With default range ---
         .child(section_label("WITH DEFAULT RANGE", text_secondary))
@@ -32,7 +32,7 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
             let mut spec = DateTimeRangePickerSpec::new()
                 .with_default_value(range);
             spec.aria_label = Some("Pre-filled range".to_string());
-            PugDateTimeRangePicker::new(spec, theme).with_id("with-range")
+            DateTimeRangePicker::from_spec(spec, theme).with_id("with-range")
         })
         // --- Disabled ---
         .child(section_label("DISABLED", text_secondary))
@@ -40,7 +40,7 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
             let mut spec = DateTimeRangePickerSpec::new();
             spec.is_disabled = true;
             spec.aria_label = Some("Disabled range picker".to_string());
-            PugDateTimeRangePicker::new(spec, theme).with_id("disabled")
+            DateTimeRangePicker::from_spec(spec, theme).with_id("disabled")
         })
 }
 

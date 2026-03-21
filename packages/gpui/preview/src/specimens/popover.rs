@@ -1,7 +1,7 @@
 use gpui::*;
 use pug_adapter::ThemeProvider;
-use pug_gpui_primitives::{ButtonSpec, ButtonVariant, PopoverSpec, OverlayPlacement};
-use pug_gpui_components::{PugButton, PugPopover};
+use pug_primitives::{ButtonSpec, ButtonVariant, PopoverSpec, OverlayPlacement};
+use pug_gpui_components::{Button, Popover};
 use crate::app_state::AppState;
 use crate::style_bridge::color_to_hsla;
 use crate::PreviewRoot;
@@ -18,14 +18,14 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
         // --- Default (bottom-start) ---
         .child(section_label("DEFAULT (BOTTOM-START)", text_secondary))
         .child(
-            PugPopover::new(
+            Popover::from_spec(
                 PopoverSpec::new()
                     .with_open(popover_default_open)
                     .with_aria_label("Quick settings"),
                 theme,
             )
             .with_trigger(
-                PugButton::new(
+                Button::from_spec(
                     ButtonSpec::new()
                         .with_variant(ButtonVariant::Secondary)
                         .with_label("Open popover"),
@@ -57,7 +57,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
         // --- Top placement ---
         .child(section_label("TOP PLACEMENT", text_secondary))
         .child(
-            PugPopover::new(
+            Popover::from_spec(
                 PopoverSpec::new()
                     .with_open(popover_top_open)
                     .with_placement(OverlayPlacement::Top)
@@ -65,7 +65,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                 theme,
             )
             .with_trigger(
-                PugButton::new(
+                Button::from_spec(
                     ButtonSpec::new()
                         .with_variant(ButtonVariant::Secondary)
                         .with_label("Show help"),

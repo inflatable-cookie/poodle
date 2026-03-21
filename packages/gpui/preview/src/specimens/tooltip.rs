@@ -1,9 +1,9 @@
 use gpui::*;
 use pug_adapter::ThemeProvider;
-use pug_gpui_primitives::{TooltipSpec, ButtonSpec, ButtonVariant};
-use pug_gpui_components::{PugTooltip, PugButton};
+use pug_primitives::{TooltipSpec, ButtonSpec, ButtonVariant};
+use pug_gpui_components::{Tooltip, Button};
 use pug_gpui::GpuiThemeProvider;
-use pug_gpui_primitives::OverlayPlacement;
+use pug_primitives::OverlayPlacement;
 use crate::style_bridge::color_to_hsla;
 
 pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
@@ -16,14 +16,14 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
         .with_placement(OverlayPlacement::Top)
         .with_default_open(true);
 
-    let default_trigger = PugButton::new(
+    let default_trigger = Button::from_spec(
         ButtonSpec::new()
             .with_variant(ButtonVariant::Secondary)
             .with_label("Hover me"),
         theme,
     ).with_id("tooltip-default-trigger");
 
-    let default_tooltip = PugTooltip::new(default_spec, theme)
+    let default_tooltip = Tooltip::from_spec(default_spec, theme)
         .with_trigger(default_trigger);
 
     // ── Placements ───────────────────────────────────────────────────
@@ -33,9 +33,9 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
         .with_placement(OverlayPlacement::Top)
         .with_default_open(true);
 
-    let top_tooltip = PugTooltip::new(top_spec, theme)
+    let top_tooltip = Tooltip::from_spec(top_spec, theme)
         .with_trigger(
-            PugButton::new(
+            Button::from_spec(
                 ButtonSpec::new().with_variant(ButtonVariant::Ghost).with_label("Top"),
                 theme,
             ).with_id("tooltip-top-trigger")
@@ -46,9 +46,9 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
         .with_placement(OverlayPlacement::Bottom)
         .with_default_open(true);
 
-    let bottom_tooltip = PugTooltip::new(bottom_spec, theme)
+    let bottom_tooltip = Tooltip::from_spec(bottom_spec, theme)
         .with_trigger(
-            PugButton::new(
+            Button::from_spec(
                 ButtonSpec::new().with_variant(ButtonVariant::Ghost).with_label("Bottom"),
                 theme,
             ).with_id("tooltip-bottom-trigger")
@@ -59,9 +59,9 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
         .with_placement(OverlayPlacement::Left)
         .with_default_open(true);
 
-    let left_tooltip = PugTooltip::new(left_spec, theme)
+    let left_tooltip = Tooltip::from_spec(left_spec, theme)
         .with_trigger(
-            PugButton::new(
+            Button::from_spec(
                 ButtonSpec::new().with_variant(ButtonVariant::Ghost).with_label("Left"),
                 theme,
             ).with_id("tooltip-left-trigger")
@@ -72,9 +72,9 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
         .with_placement(OverlayPlacement::Right)
         .with_default_open(true);
 
-    let right_tooltip = PugTooltip::new(right_spec, theme)
+    let right_tooltip = Tooltip::from_spec(right_spec, theme)
         .with_trigger(
-            PugButton::new(
+            Button::from_spec(
                 ButtonSpec::new().with_variant(ButtonVariant::Ghost).with_label("Right"),
                 theme,
             ).with_id("tooltip-right-trigger")

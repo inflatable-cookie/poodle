@@ -1,8 +1,8 @@
 use gpui::*;
 use pug_adapter::ThemeProvider;
 use pug_gpui::GpuiThemeProvider;
-use pug_gpui_primitives::{RangeCalendarSpec, DateRangeValue};
-use pug_gpui_components::PugRangeCalendar;
+use pug_primitives::{RangeCalendarSpec, DateRangeValue};
+use pug_gpui_components::RangeCalendar;
 use crate::style_bridge::color_to_hsla;
 
 pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
@@ -14,7 +14,7 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
         .child({
             let mut spec = RangeCalendarSpec::new();
             spec.aria_label = Some("Select a date range".to_string());
-            PugRangeCalendar::new(spec, theme).with_id("default")
+            RangeCalendar::from_spec(spec, theme).with_id("default")
         })
         // --- With pre-selected range ---
         .child(section_label("WITH PRE-SELECTED RANGE", text_secondary))
@@ -26,7 +26,7 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
             let mut spec = RangeCalendarSpec::new()
                 .with_default_value(range);
             spec.aria_label = Some("Pre-selected range".to_string());
-            PugRangeCalendar::new(spec, theme).with_id("preselected")
+            RangeCalendar::from_spec(spec, theme).with_id("preselected")
         })
         // --- Disabled ---
         .child(section_label("DISABLED", text_secondary))
@@ -34,7 +34,7 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
             let mut spec = RangeCalendarSpec::new();
             spec.is_disabled = true;
             spec.aria_label = Some("Disabled range calendar".to_string());
-            PugRangeCalendar::new(spec, theme).with_id("disabled")
+            RangeCalendar::from_spec(spec, theme).with_id("disabled")
         })
 }
 

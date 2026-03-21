@@ -1,14 +1,13 @@
 <script lang="ts">
   import { createEventDispatcher } from "svelte";
 
-  import { TextArea, Pill, Field } from "@pug/svelte-primitives";
+  import { TextArea, Pill } from "@pug/svelte-primitives";
 
   import type { ParsedEmbed } from "./types";
 
   export let value = "";
   export let parsed: ParsedEmbed | null = null;
   export let placeholder = "Paste a URL or embed code...";
-  export let label: string | null = null;
   export let parseDebounce = 300;
   export let providers: string[] = [];
   export let disabled = false;
@@ -92,7 +91,8 @@
     dispatch("parse", { parsed, error });
   }
 
-  function handleInput(): void {
+  function handleValueChange(event: CustomEvent<{ value: string }>): void {
+    value = event.detail.value;
     dispatch("change", { value });
 
     if (parseTimer) {
@@ -104,25 +104,13 @@
 </script>
 
 <div class="embed-input">
-  {#if label}
-    <Field {label}>
-      <TextArea
-        bind:value
-        {placeholder}
-        {disabled}
-        rows={3}
-        on:input={handleInput}
-      />
-    </Field>
-  {:else}
-    <TextArea
-      bind:value
-      {placeholder}
-      {disabled}
-      rows={3}
-      on:input={handleInput}
-    />
-  {/if}
+  <TextArea
+    {value}
+    {placeholder}
+    {disabled}
+    rows={3}
+    on:valueChange={handleValueChange}
+  />
 
   <div class="embed-input__status">
     {#if error}

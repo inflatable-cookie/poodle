@@ -1,10 +1,10 @@
 use gpui::*;
 use pug_adapter::ThemeProvider;
-use pug_gpui_primitives::{
+use pug_primitives::{
     ButtonSpec, ButtonVariant, ControlSize, SeparatorSpec, SeparatorOrientation,
     RuleTone, ToolbarSpec,
 };
-use pug_gpui_components::{PugButton, PugSeparator, PugToolbar};
+use pug_gpui_components::{Button, Separator, Toolbar};
 use crate::app_state::AppState;
 use crate::style_bridge::color_to_hsla;
 use crate::PreviewRoot;
@@ -17,13 +17,13 @@ pub(crate) fn render(state: &AppState, _cx: &mut Context<PreviewRoot>) -> Div {
         // --- Horizontal (default) ---
         .child(section_label("HORIZONTAL (DEFAULT)", text_secondary))
         .child(
-            PugToolbar::new(
+            Toolbar::from_spec(
                 ToolbarSpec::new()
                     .with_aria_label("Formatting toolbar"),
                 theme,
             )
             .child(
-                PugButton::new(
+                Button::from_spec(
                     ButtonSpec::new()
                         .with_variant(ButtonVariant::Ghost)
                         .with_size(ControlSize::Sm)
@@ -33,7 +33,7 @@ pub(crate) fn render(state: &AppState, _cx: &mut Context<PreviewRoot>) -> Div {
                 .with_id("toolbar-bold")
             )
             .child(
-                PugButton::new(
+                Button::from_spec(
                     ButtonSpec::new()
                         .with_variant(ButtonVariant::Ghost)
                         .with_size(ControlSize::Sm)
@@ -43,7 +43,7 @@ pub(crate) fn render(state: &AppState, _cx: &mut Context<PreviewRoot>) -> Div {
                 .with_id("toolbar-italic")
             )
             .child(
-                PugButton::new(
+                Button::from_spec(
                     ButtonSpec::new()
                         .with_variant(ButtonVariant::Ghost)
                         .with_size(ControlSize::Sm)
@@ -53,7 +53,7 @@ pub(crate) fn render(state: &AppState, _cx: &mut Context<PreviewRoot>) -> Div {
                 .with_id("toolbar-underline")
             )
             .child(
-                PugSeparator::new(
+                Separator::from_spec(
                     SeparatorSpec::new()
                         .with_orientation(SeparatorOrientation::Vertical)
                         .with_tone(RuleTone::Subtle),
@@ -61,7 +61,7 @@ pub(crate) fn render(state: &AppState, _cx: &mut Context<PreviewRoot>) -> Div {
                 )
             )
             .child(
-                PugButton::new(
+                Button::from_spec(
                     ButtonSpec::new()
                         .with_variant(ButtonVariant::Ghost)
                         .with_size(ControlSize::Sm)
@@ -71,7 +71,7 @@ pub(crate) fn render(state: &AppState, _cx: &mut Context<PreviewRoot>) -> Div {
                 .with_id("toolbar-align-left")
             )
             .child(
-                PugButton::new(
+                Button::from_spec(
                     ButtonSpec::new()
                         .with_variant(ButtonVariant::Ghost)
                         .with_size(ControlSize::Sm)
@@ -81,7 +81,7 @@ pub(crate) fn render(state: &AppState, _cx: &mut Context<PreviewRoot>) -> Div {
                 .with_id("toolbar-align-center")
             )
             .child(
-                PugButton::new(
+                Button::from_spec(
                     ButtonSpec::new()
                         .with_variant(ButtonVariant::Ghost)
                         .with_size(ControlSize::Sm)
@@ -94,13 +94,13 @@ pub(crate) fn render(state: &AppState, _cx: &mut Context<PreviewRoot>) -> Div {
         // --- With primary action ---
         .child(section_label("WITH PRIMARY ACTION", text_secondary))
         .child(
-            PugToolbar::new(
+            Toolbar::from_spec(
                 ToolbarSpec::new()
                     .with_aria_label("Actions toolbar"),
                 theme,
             )
             .child(
-                PugButton::new(
+                Button::from_spec(
                     ButtonSpec::new()
                         .with_variant(ButtonVariant::Secondary)
                         .with_size(ControlSize::Sm)
@@ -110,7 +110,7 @@ pub(crate) fn render(state: &AppState, _cx: &mut Context<PreviewRoot>) -> Div {
                 .with_id("toolbar-discard")
             )
             .child(
-                PugButton::new(
+                Button::from_spec(
                     ButtonSpec::new()
                         .with_variant(ButtonVariant::Secondary)
                         .with_size(ControlSize::Sm)
@@ -120,7 +120,7 @@ pub(crate) fn render(state: &AppState, _cx: &mut Context<PreviewRoot>) -> Div {
                 .with_id("toolbar-save-draft")
             )
             .child(
-                PugSeparator::new(
+                Separator::from_spec(
                     SeparatorSpec::new()
                         .with_orientation(SeparatorOrientation::Vertical)
                         .with_tone(RuleTone::Subtle),
@@ -128,7 +128,7 @@ pub(crate) fn render(state: &AppState, _cx: &mut Context<PreviewRoot>) -> Div {
                 )
             )
             .child(
-                PugButton::new(
+                Button::from_spec(
                     ButtonSpec::new()
                         .with_variant(ButtonVariant::Primary)
                         .with_size(ControlSize::Sm)

@@ -1,8 +1,8 @@
 use gpui::*;
 use pug_adapter::ThemeProvider;
 use pug_gpui::GpuiThemeProvider;
-use pug_gpui_primitives::{SeparatorSpec, SeparatorOrientation, RuleTone};
-use pug_gpui_components::PugSeparator;
+use pug_primitives::{SeparatorSpec, SeparatorOrientation, RuleTone};
+use pug_gpui_components::Separator;
 use crate::style_bridge::color_to_hsla;
 
 pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
@@ -17,7 +17,7 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
                     div().text_sm().text_color(color_to_hsla(text_secondary))
                         .child("Content above".to_string()),
                 )
-                .child(PugSeparator::new(SeparatorSpec::new(), theme))
+                .child(Separator::from_spec(SeparatorSpec::new(), theme))
                 .child(
                     div().text_sm().text_color(color_to_hsla(text_secondary))
                         .child("Content below".to_string()),
@@ -31,7 +31,7 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
                     div().text_sm().text_color(color_to_hsla(text_secondary))
                         .child("Left".to_string()),
                 )
-                .child(PugSeparator::new(
+                .child(Separator::from_spec(
                     SeparatorSpec::new().with_orientation(SeparatorOrientation::Vertical),
                     theme,
                 ))
@@ -39,7 +39,7 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
                     div().text_sm().text_color(color_to_hsla(text_secondary))
                         .child("Center".to_string()),
                 )
-                .child(PugSeparator::new(
+                .child(Separator::from_spec(
                     SeparatorSpec::new().with_orientation(SeparatorOrientation::Vertical),
                     theme,
                 ))
@@ -50,7 +50,7 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
         )
         // --- Decorative ---
         .child(section_label("DECORATIVE", text_secondary))
-        .child(PugSeparator::new(
+        .child(Separator::from_spec(
             SeparatorSpec::new().with_decorative(true),
             theme,
         ))

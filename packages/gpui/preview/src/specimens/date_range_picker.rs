@@ -1,8 +1,8 @@
 use gpui::*;
 use pug_adapter::ThemeProvider;
 use pug_gpui::GpuiThemeProvider;
-use pug_gpui_primitives::{DateRangePickerSpec, DateRangeValue};
-use pug_gpui_components::PugDateRangePicker;
+use pug_primitives::{DateRangePickerSpec, DateRangeValue};
+use pug_gpui_components::DateRangePicker;
 use crate::style_bridge::color_to_hsla;
 
 pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
@@ -14,7 +14,7 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
         .child({
             let mut spec = DateRangePickerSpec::new();
             spec.aria_label = Some("Select date range".to_string());
-            PugDateRangePicker::new(spec, theme).with_id("default")
+            DateRangePicker::from_spec(spec, theme).with_id("default")
         })
         // --- With default range ---
         .child(section_label("WITH DEFAULT RANGE", text_secondary))
@@ -26,7 +26,7 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
             let mut spec = DateRangePickerSpec::new()
                 .with_default_value(range);
             spec.aria_label = Some("Pre-filled range".to_string());
-            PugDateRangePicker::new(spec, theme).with_id("with-range")
+            DateRangePicker::from_spec(spec, theme).with_id("with-range")
         })
         // --- Disabled ---
         .child(section_label("DISABLED", text_secondary))
@@ -34,7 +34,7 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
             let mut spec = DateRangePickerSpec::new();
             spec.is_disabled = true;
             spec.aria_label = Some("Disabled range picker".to_string());
-            PugDateRangePicker::new(spec, theme).with_id("disabled")
+            DateRangePicker::from_spec(spec, theme).with_id("disabled")
         })
 }
 

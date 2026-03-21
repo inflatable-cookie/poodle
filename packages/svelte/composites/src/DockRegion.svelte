@@ -515,14 +515,37 @@
   .dock-region__strip[data-orientation="vertical"] {
     display: flex;
     flex-direction: column;
-    align-items: center;
-    gap: var(--pug-space-stack-sm);
-    padding: var(--pug-space-panel-y, 0.5rem) 0;
+    align-items: stretch;
+    gap: 0;
+    padding: 0;
+    border-right: 0.0625rem solid var(--pug-color-border-subtle);
   }
 
   .dock-region__strip[data-orientation="vertical"] :global(.pug-tabs) {
     flex: 1 1 0;
     min-height: 0;
+  }
+
+  .dock-region__strip[data-orientation="vertical"] > :global(.collapse-toggle) {
+    align-self: center;
+    padding: var(--pug-space-panel-y, 0.5rem) 0;
+  }
+
+  /* Override Tabs grid so the list column stretches to fill the strip width.
+     The default vertical Tabs uses `grid-template-columns: auto minmax(0,1fr)`
+     which sizes the list to content. We need it to fill so the active item's
+     accent border sits flush on the strip's right divider. */
+  .dock-region__strip[data-orientation="vertical"] :global(.pug-tabs) {
+    grid-template-columns: 1fr !important;
+  }
+
+  .dock-region__strip[data-orientation="vertical"] :global(.pug-tabs__list) {
+    border-right: 0 !important;
+  }
+
+  /* Ensure items' accent border overlaps the strip's border-right */
+  .dock-region__strip[data-orientation="vertical"] :global(.pug-tabs__item) {
+    margin-right: -0.0625rem !important;
   }
 
   /* ── Flexible collapsed (hidden) ── */

@@ -1,6 +1,6 @@
 # g09.005 Simplify Component API
 
-Status: planned
+Status: complete
 Owner: Pug Core
 Depends on: g09.004
 

@@ -1,8 +1,8 @@
 use gpui::*;
 use pug_adapter::ThemeProvider;
 use pug_gpui::GpuiThemeProvider;
-use pug_gpui_primitives::{ScrollShellSpec, Direction};
-use pug_gpui_components::PugScrollShell;
+use pug_primitives::{ScrollShellSpec, Direction};
+use pug_gpui_components::ScrollShell;
 use crate::style_bridge::color_to_hsla;
 
 pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
@@ -30,7 +30,7 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
         .child(section_label("VERTICAL SCROLL", text_secondary))
         .child(
             div().h(px(160.0)).child(
-                PugScrollShell::new(
+                ScrollShell::from_spec(
                     ScrollShellSpec::new()
                         .with_direction(Direction::Vertical)
                         .with_label("Scrollable content"),
@@ -54,7 +54,7 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
         .child(section_label("HORIZONTAL SCROLL", text_secondary))
         .child(
             div().h(px(40.0)).child(
-                PugScrollShell::new(
+                ScrollShell::from_spec(
                     ScrollShellSpec::new()
                         .with_direction(Direction::Horizontal)
                         .with_label("Horizontal items"),

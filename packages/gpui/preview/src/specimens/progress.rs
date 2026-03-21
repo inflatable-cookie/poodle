@@ -1,8 +1,8 @@
 use gpui::*;
 use pug_adapter::ThemeProvider;
 use pug_gpui::GpuiThemeProvider;
-use pug_gpui_primitives::ProgressSpec;
-use pug_gpui_components::PugProgress;
+use pug_primitives::ProgressSpec;
+use pug_gpui_components::Progress;
 use crate::style_bridge::color_to_hsla;
 
 pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
@@ -44,7 +44,7 @@ fn progress_item(
             div().text_xs().text_color(color_to_hsla(label_color))
                 .child(label.to_string())
         )
-        .child(PugProgress::new(spec, theme))
+        .child(Progress::from_spec(spec, theme))
 }
 
 fn section_label(label: &str, color: pug_tokens::typed::ColorValue) -> Div {

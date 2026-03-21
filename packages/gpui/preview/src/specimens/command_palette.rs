@@ -1,7 +1,7 @@
 use gpui::*;
 use pug_adapter::ThemeProvider;
-use pug_gpui_composites::{CommandPaletteSpec, CommandActionItem};
-use pug_gpui_components::PugCommandPalette;
+use pug_composites::{CommandPaletteSpec, CommandActionItem};
+use pug_gpui_components::CommandPalette;
 use crate::app_state::AppState;
 use crate::style_bridge::color_to_hsla;
 use crate::PreviewRoot;
@@ -40,7 +40,7 @@ pub(crate) fn render(state: &AppState, _cx: &mut Context<PreviewRoot>) -> Div {
         .child(section_label("COMMAND PALETTE", text_secondary))
         .child(
             div().w(px(480.0)).child(
-                PugCommandPalette::new(spec, theme)
+                CommandPalette::from_spec(spec, theme)
                     .with_id("cmd-palette")
             )
         )

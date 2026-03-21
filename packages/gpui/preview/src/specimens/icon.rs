@@ -1,8 +1,8 @@
 use gpui::*;
 use pug_adapter::ThemeProvider;
 use pug_gpui::GpuiThemeProvider;
-use pug_gpui_primitives::{IconSize, IconSpec};
-use pug_gpui_components::PugIcon;
+use pug_primitives::{IconSize, IconSpec};
+use pug_gpui_components::Icon;
 use crate::style_bridge::color_to_hsla;
 
 /// A curated set of icon names to display in the specimen.
@@ -62,7 +62,7 @@ fn render_sizes_section(theme: &GpuiThemeProvider) -> Div {
         for &icon_name in SIZE_ICONS {
             row = row.child(
                 div().text_color(color_to_hsla(text_primary))
-                    .child(PugIcon::new(IconSpec::new(icon_name).with_size(size), theme))
+                    .child(Icon::from_spec(IconSpec::new(icon_name).with_size(size), theme))
             );
         }
 
@@ -90,7 +90,7 @@ fn render_color_inheritance_section(theme: &GpuiThemeProvider) -> Div {
     for &(icon_name, color) in items {
         row = row.child(
             div().text_color(color_to_hsla(color))
-                .child(PugIcon::new(IconSpec::new(icon_name).with_size(IconSize::Md), theme))
+                .child(Icon::from_spec(IconSpec::new(icon_name).with_size(IconSize::Md), theme))
         );
     }
 
@@ -117,7 +117,7 @@ fn render_icon_gallery(theme: &GpuiThemeProvider) -> Div {
                 .py(px(6.0))
                 .child(
                     div().text_color(color_to_hsla(text_primary))
-                        .child(PugIcon::new(IconSpec::new(name).with_size(IconSize::Md), theme))
+                        .child(Icon::from_spec(IconSpec::new(name).with_size(IconSize::Md), theme))
                 )
                 .child(
                     div().text_color(color_to_hsla(text_secondary))

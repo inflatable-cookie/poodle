@@ -17,12 +17,10 @@ gpui = "0.2.2"
 # Pug adapter + contracts + real components
 pug-gpui = { path = "../adapter" }
 pug-gpui-components = { path = "../components" }
-pug-gpui-primitives = { path = "../primitives" }
 pug-adapter = { path = "../../contracts/adapter" }
 pug-primitives = { path = "../../contracts/primitives" }
 pug-composites = { path = "../../contracts/composites" }
 pug-workstation = { path = "../../contracts/workstation" }
-pug-gpui-composites = { path = "../composites" }
 pug-style = { path = "../../contracts/style" }
 pug-tokens = { path = "../../contracts/tokens" }
 anyhow = "1"

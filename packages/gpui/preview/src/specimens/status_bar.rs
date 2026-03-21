@@ -1,9 +1,9 @@
 use gpui::*;
 use pug_adapter::ThemeProvider;
-use pug_gpui_composites::ShellStatusBarSpec;
-use pug_gpui_components::PugStatusBar;
-use pug_gpui_primitives::{StatusIndicatorSpec, StatusTone};
-use pug_gpui_components::PugStatusIndicator;
+use pug_composites::ShellStatusBarSpec;
+use pug_gpui_components::StatusBar;
+use pug_primitives::{StatusIndicatorSpec, StatusTone};
+use pug_gpui_components::StatusIndicator;
 use crate::app_state::AppState;
 use crate::style_bridge::color_to_hsla;
 use crate::PreviewRoot;
@@ -32,11 +32,11 @@ pub(crate) fn render(state: &AppState, _cx: &mut Context<PreviewRoot>) -> Div {
     div().flex().flex_col().gap(px(16.0))
         .child(section_label("DEFAULT", text_secondary))
         .child(
-            PugStatusBar::new(status_spec, theme)
+            StatusBar::from_spec(status_spec, theme)
                 .with_leading_items(
                     div().flex().items_center().gap(px(8.0))
-                        .child(PugStatusIndicator::new(branch_indicator, theme))
-                        .child(PugStatusIndicator::new(error_indicator, theme))
+                        .child(StatusIndicator::from_spec(branch_indicator, theme))
+                        .child(StatusIndicator::from_spec(error_indicator, theme))
                 )
                 .with_trailing_items(
                     div().flex().items_center().gap(px(8.0))

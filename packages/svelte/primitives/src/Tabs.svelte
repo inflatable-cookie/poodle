@@ -486,7 +486,7 @@
     border-bottom: 0;
     border-right: 0.125rem solid transparent;
     margin-bottom: 0;
-    margin-right: -0.0625rem;
+    margin-right: -0.125rem;
   }
 
   .pug-tabs[data-variant="strip"][data-orientation="vertical"] .pug-tabs__item[data-selected="true"] {

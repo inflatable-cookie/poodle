@@ -1,6 +1,6 @@
 # g09.001 Unify Token Crates
 
-Status: planned
+Status: complete
 Owner: Pug Core
 Depends on: —
 
@@ -13,17 +13,18 @@ unnecessary overhead.
 
 ## Actions
 
-- [ ] Confirm `pug-tokens` already exports `typed` module
-- [ ] Update `pug-gpui-primitives` Cargo.toml: `pug-gpui-tokens` → `pug-tokens`
-- [ ] Update `pug-gpui-composites` Cargo.toml: same
-- [ ] Update `pug-gpui` (adapter) Cargo.toml: same (if it references gpui-tokens)
-- [ ] Find-and-replace `use pug_gpui_tokens::` → `use pug_tokens::` across all
-      GPUI crate source files
-- [ ] Delete `packages/gpui/tokens/` directory
-- [ ] `cargo check` for all GPUI crates
+- [x] Confirm `pug-tokens` already exports `typed` module
+- [x] Update `pug-gpui-primitives` Cargo.toml: `pug-gpui-tokens` → `pug-tokens`
+- [x] Update `pug-gpui-composites` Cargo.toml: same
+- [x] Update `pug-gpui-workstation` Cargo.toml: same
+- [x] Find-and-replace `use pug_gpui_tokens::` → `use pug_tokens::` across all
+      GPUI crate source files (primitives, composites, workstation)
+- [x] Delete `packages/gpui/tokens/` directory
+- [x] `cargo check` for all GPUI crates (primitives, composites, workstation,
+      components, preview — all pass)
 
 ## Acceptance Criteria
 
-- [ ] Zero references to `pug-gpui-tokens` or `pug_gpui_tokens` anywhere
-- [ ] `packages/gpui/tokens/` directory does not exist
-- [ ] All GPUI crates compile
+- [x] Zero references to `pug-gpui-tokens` or `pug_gpui_tokens` in source
+- [x] `packages/gpui/tokens/` directory does not exist
+- [x] All GPUI crates compile

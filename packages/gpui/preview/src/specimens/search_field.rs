@@ -1,7 +1,7 @@
 use gpui::*;
 use pug_adapter::ThemeProvider;
-use pug_gpui_primitives::SearchFieldSpec;
-use pug_gpui_components::PugSearchField;
+use pug_primitives::SearchFieldSpec;
+use pug_gpui_components::SearchField;
 use crate::app_state::AppState;
 use crate::style_bridge::color_to_hsla;
 use crate::PreviewRoot;
@@ -14,7 +14,7 @@ pub(crate) fn render(state: &AppState, _cx: &mut Context<PreviewRoot>) -> Div {
         // --- Default ---
         .child(section_label("DEFAULT", text_secondary))
         .child(
-            PugSearchField::new(
+            SearchField::from_spec(
                 SearchFieldSpec::new()
                     .with_placeholder("Search components...")
                     .with_aria_label("Search components"),
@@ -25,7 +25,7 @@ pub(crate) fn render(state: &AppState, _cx: &mut Context<PreviewRoot>) -> Div {
         // --- Disabled ---
         .child(section_label("DISABLED", text_secondary))
         .child(
-            PugSearchField::new(
+            SearchField::from_spec(
                 SearchFieldSpec::new()
                     .with_value("locked query")
                     .with_disabled(true)
@@ -37,7 +37,7 @@ pub(crate) fn render(state: &AppState, _cx: &mut Context<PreviewRoot>) -> Div {
         // --- Read-only ---
         .child(section_label("READ-ONLY", text_secondary))
         .child(
-            PugSearchField::new(
+            SearchField::from_spec(
                 SearchFieldSpec::new()
                     .with_value("active filter")
                     .with_read_only(true)

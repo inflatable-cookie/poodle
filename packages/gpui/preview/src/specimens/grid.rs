@@ -1,8 +1,8 @@
 use gpui::*;
 use pug_adapter::ThemeProvider;
 use pug_gpui::GpuiThemeProvider;
-use pug_gpui_primitives::{GridSpec, PaddingScale, SurfaceBorder, SurfaceSpec, SurfaceTone};
-use pug_gpui_components::{PugGrid, PugSurface};
+use pug_primitives::{GridSpec, PaddingScale, SurfaceBorder, SurfaceSpec, SurfaceTone};
+use pug_gpui_components::{Grid, Surface};
 use crate::style_bridge::color_to_hsla;
 
 pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
@@ -13,7 +13,7 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
             .with_tone(SurfaceTone::Panel)
             .with_border(SurfaceBorder::Subtle)
             .with_padding(PaddingScale::Md);
-        PugSurface::new(spec, theme)
+        Surface::from_spec(spec, theme)
             .with_content(
                 div().text_sm().text_color(color_to_hsla(text_secondary))
                     .child(label.to_string()),
@@ -25,7 +25,7 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
             .with_tone(SurfaceTone::Panel)
             .with_border(SurfaceBorder::Subtle)
             .with_padding(PaddingScale::Sm);
-        PugSurface::new(spec, theme)
+        Surface::from_spec(spec, theme)
             .with_content(
                 div().text_sm().text_color(color_to_hsla(text_secondary))
                     .child(label.to_string()),
@@ -38,7 +38,7 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
             div().flex().flex_col().gap(px(8.0))
                 .child(section_label("Three columns", text_secondary))
                 .child(
-                    PugGrid::new(
+                    Grid::from_spec(
                         GridSpec::new()
                             .with_columns("1fr 1fr 1fr")
                             .with_gap(PaddingScale::Md),
@@ -54,7 +54,7 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
             div().flex().flex_col().gap(px(8.0))
                 .child(section_label("Mixed column widths", text_secondary))
                 .child(
-                    PugGrid::new(
+                    Grid::from_spec(
                         GridSpec::new()
                             .with_columns("1fr 2fr")
                             .with_gap(PaddingScale::Md),
@@ -69,7 +69,7 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
             div().flex().flex_col().gap(px(8.0))
                 .child(section_label("Auto-fit responsive", text_secondary))
                 .child(
-                    PugGrid::new(
+                    Grid::from_spec(
                         GridSpec::new()
                             .with_columns("repeat(auto-fit, minmax(8rem, 1fr))")
                             .with_gap(PaddingScale::Sm),

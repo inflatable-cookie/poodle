@@ -1,11 +1,19 @@
 use pug_tokens::semantic;
 
+#[derive(Clone, Copy, Debug, Default, Eq, PartialEq)]
+pub enum PageHeaderAlign {
+    Start,
+    #[default]
+    Between,
+}
+
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct PageHeaderSpec {
     pub title: String,
     pub subtitle: Option<String>,
-    pub action_count: usize,
-    pub has_back_button: bool,
+    pub eyebrow: Option<String>,
+    pub align: PageHeaderAlign,
+    pub aria_label: Option<String>,
 }
 
 impl PageHeaderSpec {
@@ -13,8 +21,9 @@ impl PageHeaderSpec {
         Self {
             title: title.into(),
             subtitle: None,
-            action_count: 0,
-            has_back_button: false,
+            eyebrow: None,
+            align: PageHeaderAlign::default(),
+            aria_label: None,
         }
     }
 
@@ -23,25 +32,46 @@ impl PageHeaderSpec {
         self
     }
 
-    pub fn with_action_count(mut self, action_count: usize) -> Self {
-        self.action_count = action_count;
+    pub fn with_eyebrow(mut self, eyebrow: impl Into<String>) -> Self {
+        self.eyebrow = Some(eyebrow.into());
         self
     }
 
-    pub fn with_back_button(mut self, has_back_button: bool) -> Self {
-        self.has_back_button = has_back_button;
+    pub fn with_align(mut self, align: PageHeaderAlign) -> Self {
+        self.align = align;
         self
     }
 
-    pub fn fill_token(&self) -> &'static str {
-        semantic::COLOR_BACKGROUND_PANEL
+    pub fn with_aria_label(mut self, aria_label: impl Into<String>) -> Self {
+        self.aria_label = Some(aria_label.into());
+        self
     }
 
-    pub fn text_color_token(&self) -> &'static str {
+    pub fn title_color_token(&self) -> &'static str {
         semantic::COLOR_TEXT_PRIMARY
     }
 
+    pub fn subtitle_color_token(&self) -> &'static str {
+        semantic::COLOR_TEXT_SECONDARY
+    }
+
+    pub fn eyebrow_color_token(&self) -> &'static str {
+        semantic::COLOR_TEXT_SECONDARY
+    }
+
+    pub fn separator_color_token(&self) -> &'static str {
+        semantic::COLOR_BORDER_SUBTLE
+    }
+
     pub fn gap_token(&self) -> &'static str {
+        semantic::SPACE_STACK_SM
+    }
+
+    pub fn header_gap_token(&self) -> &'static str {
         semantic::SPACE_INLINE_MD
+    }
+
+    pub fn padding_y_token(&self) -> &'static str {
+        semantic::SPACE_PANEL_Y
     }
 }

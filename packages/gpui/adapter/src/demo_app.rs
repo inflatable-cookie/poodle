@@ -14,18 +14,18 @@
 
 use pug_adapter::{RenderComponent, ThemeProvider};
 use pug_composites::{
-    BreadcrumbsSpec, ConfirmActionSpec, DataTableSpec, DetailSectionSpec, DetailShellSpec,
+    ConfirmActionSpec, DataTableSpec, DetailSectionSpec, DetailShellSpec,
     EmptyStateSpec, FilterToolbarSpec, FormShellSpec, InlineRemediationSpec,
-    LogListSpec, MediaPreviewSpec, MediaThumbnailSpec, NavCardGridSpec, NavCardSpec,
+    LogListSpec, MediaPreviewSpec, MediaThumbnailSpec,
     PageHeaderSpec, PageLoadingSpec, PaginationSummarySpec, PickerShellSpec, RelationPickerSpec,
     RemediationBannerSpec, SelectionSummarySpec, StateTileSpec, ToastStackSpec,
     ValidationSummarySpec,
 };
 use pug_primitives::{
-    AccordionSpec, BadgeSpec, BannerSpec, BoxSpec, ButtonSpec, CheckboxSpec, FieldSpec, GridSpec,
-    MenuSpec, ProgressSpec, SearchFieldSpec, SelectSpec, SeparatorSpec, SkeletonSpec, StackSpec,
-    StatusIndicatorSpec, SurfaceSpec, SwitchSpec, TabsSpec, TextAreaSpec, TextInputSpec,
-    ToolbarSpec,
+    AccordionSpec, BadgeSpec, BannerSpec, BoxSpec, BreadcrumbsSpec, ButtonSpec, CheckboxSpec,
+    FieldSpec, GridSpec, MenuSpec, NavCardGridSpec, NavCardSpec, ProgressSpec, SearchFieldSpec,
+    SelectSpec, SeparatorSpec, SkeletonSpec, StackSpec, StatusIndicatorSpec, SurfaceSpec,
+    SwitchSpec, TabsSpec, TextAreaSpec, TextInputSpec, ToolbarSpec,
 };
 use pug_style::StyleDescriptor;
 use pug_workstation::{
@@ -96,8 +96,8 @@ fn render_overview_shell(a: &GpuiAdapter, t: &dyn ThemeProvider) -> DemoScreen {
     screen.push(a.render(&BadgeSpec::new(), &s, t));
     screen.push(a.render(&ProgressSpec::new(), &s, t));
     screen.push(a.render(&ToastStackSpec::new(), &s, t));
-    screen.push(a.render(&NavCardGridSpec::new(4), &s, t));
-    screen.push(a.render(&NavCardSpec::new("Recent project"), &s, t));
+    screen.push(a.render(&NavCardGridSpec::new().with_columns(4), &s, t));
+    screen.push(a.render(&NavCardSpec::new().with_title("Recent project"), &s, t));
     screen.push(a.render(&LogListSpec::new(), &s, t));
 
     screen
@@ -153,8 +153,8 @@ fn render_detail_and_review(a: &GpuiAdapter, t: &dyn ThemeProvider) -> DemoScree
 
     screen.push(a.render(&SurfaceSpec::new(), &s, t));
     screen.push(a.render(&DetailShellSpec::new(), &s, t));
-    screen.push(a.render(&DetailSectionSpec::new("Overview"), &s, t));
-    screen.push(a.render(&DetailSectionSpec::new("Media"), &s, t));
+    screen.push(a.render(&DetailSectionSpec::new().with_title("Overview"), &s, t));
+    screen.push(a.render(&DetailSectionSpec::new().with_title("Media"), &s, t));
     screen.push(a.render(&MediaThumbnailSpec::new(pug_composites::MediaKind::Image), &s, t));
     screen.push(a.render(&MediaPreviewSpec::new(pug_composites::MediaKind::Audio, "Track preview"), &s, t));
     screen.push(a.render(&BreadcrumbsSpec::new(vec![]), &s, t));

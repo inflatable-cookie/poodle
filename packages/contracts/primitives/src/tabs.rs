@@ -1,12 +1,13 @@
 use pug_tokens::semantic;
 
-use crate::types::{Orientation, TabActivationMode, TabDefinition};
+use crate::types::{Orientation, TabActivationMode, TabDefinition, TabVariant};
 
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct TabsSpec {
     pub tabs: Vec<TabDefinition>,
     pub value: Option<String>,
     pub default_value: Option<String>,
+    pub variant: TabVariant,
     pub orientation: Orientation,
     pub activation_mode: TabActivationMode,
     pub aria_label: Option<String>,
@@ -18,6 +19,7 @@ impl Default for TabsSpec {
             tabs: Vec::new(),
             value: None,
             default_value: None,
+            variant: TabVariant::Underline,
             orientation: Orientation::Horizontal,
             activation_mode: TabActivationMode::Automatic,
             aria_label: None,
@@ -40,6 +42,11 @@ impl TabsSpec {
 
     pub fn with_default_value(mut self, default_value: impl Into<String>) -> Self {
         self.default_value = Some(default_value.into());
+        self
+    }
+
+    pub fn with_variant(mut self, variant: TabVariant) -> Self {
+        self.variant = variant;
         self
     }
 
@@ -85,5 +92,17 @@ impl TabsSpec {
 
     pub fn indicator_token(&self) -> &'static str {
         semantic::COLOR_ACCENT_BASE
+    }
+
+    pub fn list_border_token(&self) -> &'static str {
+        semantic::COLOR_BORDER_SUBTLE
+    }
+
+    pub fn pill_border_opacity(&self) -> f32 {
+        0.68
+    }
+
+    pub fn pill_active_bg_opacity(&self) -> f32 {
+        0.18
     }
 }

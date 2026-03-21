@@ -1,7 +1,7 @@
 use gpui::*;
 use pug_adapter::ThemeProvider;
-use pug_gpui_primitives::{ButtonSpec, ButtonTone, ButtonVariant, DialogKind, DialogSpec};
-use pug_gpui_components::{PugButton, PugDialog};
+use pug_primitives::{ButtonSpec, ButtonTone, ButtonVariant, DialogKind, DialogSpec};
+use pug_gpui_components::{Button, Dialog};
 use crate::app_state::AppState;
 use crate::style_bridge::color_to_hsla;
 use crate::PreviewRoot;
@@ -22,7 +22,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
 
             // Trigger button
             col = col.child(
-                PugButton::new(
+                Button::from_spec(
                     ButtonSpec::new().with_variant(ButtonVariant::Secondary).with_label("Open dialog"),
                     theme,
                 )
@@ -41,7 +41,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
 
                 let actions = div().flex().gap(px(8.0))
                     .child(
-                        PugButton::new(
+                        Button::from_spec(
                             ButtonSpec::new().with_variant(ButtonVariant::Ghost).with_label("Cancel"),
                             theme,
                         )
@@ -52,7 +52,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                         }))
                     )
                     .child(
-                        PugButton::new(
+                        Button::from_spec(
                             ButtonSpec::new().with_variant(ButtonVariant::Primary).with_label("Confirm"),
                             theme,
                         )
@@ -64,7 +64,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                     );
 
                 col = col.child(
-                    PugDialog::new(spec, theme)
+                    Dialog::from_spec(spec, theme)
                         .with_actions(actions)
                 );
             }
@@ -77,7 +77,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
             let mut col = div().flex().flex_col().gap(px(8.0));
 
             col = col.child(
-                PugButton::new(
+                Button::from_spec(
                     ButtonSpec::new()
                         .with_variant(ButtonVariant::Primary)
                         .with_tone(ButtonTone::Danger)
@@ -99,7 +99,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
 
                 let actions = div().flex().gap(px(8.0))
                     .child(
-                        PugButton::new(
+                        Button::from_spec(
                             ButtonSpec::new().with_variant(ButtonVariant::Ghost).with_label("Cancel"),
                             theme,
                         )
@@ -110,7 +110,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                         }))
                     )
                     .child(
-                        PugButton::new(
+                        Button::from_spec(
                             ButtonSpec::new()
                                 .with_variant(ButtonVariant::Primary)
                                 .with_tone(ButtonTone::Danger)
@@ -125,7 +125,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                     );
 
                 col = col.child(
-                    PugDialog::new(spec, theme)
+                    Dialog::from_spec(spec, theme)
                         .with_actions(actions)
                 );
             }
@@ -138,7 +138,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
             let mut col = div().flex().flex_col().gap(px(8.0));
 
             col = col.child(
-                PugButton::new(
+                Button::from_spec(
                     ButtonSpec::new().with_variant(ButtonVariant::Secondary).with_label("Open persistent dialog"),
                     theme,
                 )
@@ -157,7 +157,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
 
                 let actions = div().flex().gap(px(8.0))
                     .child(
-                        PugButton::new(
+                        Button::from_spec(
                             ButtonSpec::new().with_variant(ButtonVariant::Primary).with_label("Got it"),
                             theme,
                         )
@@ -169,7 +169,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                     );
 
                 col = col.child(
-                    PugDialog::new(spec, theme)
+                    Dialog::from_spec(spec, theme)
                         .with_actions(actions)
                 );
             }

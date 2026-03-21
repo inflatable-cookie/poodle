@@ -1,8 +1,8 @@
 use gpui::*;
 use pug_adapter::ThemeProvider;
 use pug_gpui::GpuiThemeProvider;
-use pug_gpui_primitives::DatePickerSpec;
-use pug_gpui_components::PugDatePicker;
+use pug_primitives::DatePickerSpec;
+use pug_gpui_components::DatePicker;
 use crate::style_bridge::color_to_hsla;
 
 pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
@@ -14,7 +14,7 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
         .child({
             let mut spec = DatePickerSpec::new();
             spec.aria_label = Some("Select date".to_string());
-            PugDatePicker::new(spec, theme).with_id("default")
+            DatePicker::from_spec(spec, theme).with_id("default")
         })
         // --- With default value ---
         .child(section_label("WITH DEFAULT VALUE", text_secondary))
@@ -22,7 +22,7 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
             let mut spec = DatePickerSpec::new()
                 .with_default_value("2026-03-14");
             spec.aria_label = Some("Pre-filled date".to_string());
-            PugDatePicker::new(spec, theme).with_id("with-value")
+            DatePicker::from_spec(spec, theme).with_id("with-value")
         })
         // --- Disabled ---
         .child(section_label("DISABLED", text_secondary))
@@ -31,7 +31,7 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
             spec.placeholder = "Disabled".to_string();
             spec.is_disabled = true;
             spec.aria_label = Some("Disabled date picker".to_string());
-            PugDatePicker::new(spec, theme).with_id("disabled")
+            DatePicker::from_spec(spec, theme).with_id("disabled")
         })
 }
 

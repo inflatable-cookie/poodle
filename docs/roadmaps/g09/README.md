@@ -1,6 +1,6 @@
 # g09 Architecture Unification
 
-Status: planned
+Status: complete
 Updated: 2026-03-19
 
 ## Context
@@ -125,14 +125,14 @@ Same pattern, same types, different output.
 
 | ID  | Milestone | Depends On | Class | Status |
 |-----|-----------|------------|-------|--------|
-| 001 | Unify token crates | — | Foundation | Planned |
-| 002 | Merge GPUI-only specs into contracts primitives | 001 | Foundation | Planned |
-| 003 | Merge composite specs | 002 | Foundation | Planned |
-| 004 | Delete duplicate GPUI crates and update imports | 003 | Migration | Planned |
-| 005 | Simplify component API (drop Pug prefix, re-export types) | 004 | API | Planned |
-| 006 | Delete workstation crates | 004 | Cleanup | Planned |
-| 007 | Verify both targets compile and preview apps run | 005, 006 | Hardening | Planned |
-| 008 | Generation closeout | 007 | Closure | Planned |
+| 001 | Unify token crates | — | Foundation | Complete |
+| 002 | Merge GPUI-only specs into contracts primitives | 001 | Foundation | Complete |
+| 003 | Merge composite specs | 002 | Foundation | Complete |
+| 004 | Delete duplicate GPUI crates and update imports | 003 | Migration | Complete |
+| 005 | Simplify component API (drop Pug prefix, re-export types) | 004 | API | Complete |
+| 006 | Delete workstation crates | 004 | Cleanup | Complete |
+| 007 | Verify both targets compile and preview apps run | 005, 006 | Hardening | Complete |
+| 008 | Generation closeout | 007 | Closure | Complete |
 
 ## Dependency Shape
 

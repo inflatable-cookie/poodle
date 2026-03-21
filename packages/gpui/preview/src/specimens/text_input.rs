@@ -1,7 +1,7 @@
 use gpui::*;
 use pug_adapter::ThemeProvider;
-use pug_gpui_primitives::{FieldSpec, TextInputSpec, ValidationState};
-use pug_gpui_components::{PugField, PugTextInput};
+use pug_primitives::{FieldSpec, TextInputSpec, ValidationState};
+use pug_gpui_components::{Field, TextInput};
 use crate::app_state::AppState;
 use crate::style_bridge::color_to_hsla;
 use crate::PreviewRoot;
@@ -14,13 +14,13 @@ pub(crate) fn render(state: &AppState, _cx: &mut Context<PreviewRoot>) -> Div {
         // --- Default ---
         .child(section_label("DEFAULT", text_secondary))
         .child(
-            PugField::new(
+            Field::from_spec(
                 FieldSpec::new("name-field", "Name")
                     .with_description("Enter your full name."),
                 theme,
             )
             .with_control(
-                PugTextInput::new(
+                TextInput::from_spec(
                     TextInputSpec::new()
                         .with_id("name-field")
                         .with_placeholder("Jane Doe"),
@@ -31,14 +31,14 @@ pub(crate) fn render(state: &AppState, _cx: &mut Context<PreviewRoot>) -> Div {
         // --- With validation ---
         .child(section_label("WITH VALIDATION", text_secondary))
         .child(
-            PugField::new(
+            Field::from_spec(
                 FieldSpec::new("email-field", "Email")
                     .with_validation_state(ValidationState::Invalid)
                     .with_error("Please enter a valid email address."),
                 theme,
             )
             .with_control(
-                PugTextInput::new(
+                TextInput::from_spec(
                     TextInputSpec::new()
                         .with_id("email-field")
                         .with_placeholder("you@example.com")
@@ -50,12 +50,12 @@ pub(crate) fn render(state: &AppState, _cx: &mut Context<PreviewRoot>) -> Div {
         // --- Disabled ---
         .child(section_label("DISABLED", text_secondary))
         .child(
-            PugField::new(
+            Field::from_spec(
                 FieldSpec::new("disabled-field", "API key"),
                 theme,
             )
             .with_control(
-                PugTextInput::new(
+                TextInput::from_spec(
                     TextInputSpec::new()
                         .with_id("disabled-field")
                         .with_value("sk-\u{2022}\u{2022}\u{2022}\u{2022}\u{2022}\u{2022}\u{2022}\u{2022}1234")

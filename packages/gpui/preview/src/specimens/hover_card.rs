@@ -1,8 +1,8 @@
 use gpui::*;
 use pug_adapter::ThemeProvider;
 use pug_gpui::GpuiThemeProvider;
-use pug_gpui_primitives::{HoverCardSpec, OverlayPlacement};
-use pug_gpui_components::PugHoverCard;
+use pug_primitives::{HoverCardSpec, OverlayPlacement};
+use pug_gpui_components::HoverCard;
 use crate::style_bridge::color_to_hsla;
 
 pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
@@ -34,7 +34,7 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
                 )
                 // Open hover card content
                 .child(
-                    PugHoverCard::new(top_spec, theme)
+                    HoverCard::from_spec(top_spec, theme)
                         .with_content(
                             div().flex().flex_col().gap(px(4.0))
                                 .max_w(px(256.0))
@@ -66,7 +66,7 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
                 )
                 // Open hover card content
                 .child(
-                    PugHoverCard::new(bottom_spec, theme)
+                    HoverCard::from_spec(bottom_spec, theme)
                         .with_content(
                             div().flex().flex_col().gap(px(4.0))
                                 .max_w(px(256.0))

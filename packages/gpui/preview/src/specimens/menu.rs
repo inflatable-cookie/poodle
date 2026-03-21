@@ -1,7 +1,7 @@
 use gpui::*;
 use pug_adapter::ThemeProvider;
-use pug_gpui_primitives::{MenuSpec, MenuEntry, MenuItemKind};
-use pug_gpui_components::PugMenu;
+use pug_primitives::{MenuSpec, MenuEntry, MenuItemKind};
+use pug_gpui_components::Menu;
 use crate::app_state::AppState;
 use crate::style_bridge::color_to_hsla;
 use crate::PreviewRoot;
@@ -42,13 +42,13 @@ pub(crate) fn render(state: &AppState, _cx: &mut Context<PreviewRoot>) -> Div {
         // With shortcuts
         .child(section_label("WITH SHORTCUTS", text_secondary))
         .child(
-            PugMenu::new(file_spec, theme)
+            Menu::from_spec(file_spec, theme)
                 .with_id("specimen-menu-shortcuts")
         )
         // With checkboxes
         .child(section_label("WITH CHECKBOXES", text_secondary))
         .child(
-            PugMenu::new(settings_spec, theme)
+            Menu::from_spec(settings_spec, theme)
                 .with_id("specimen-menu-checkboxes")
         )
 }

@@ -1,7 +1,7 @@
 use gpui::*;
 use pug_adapter::ThemeProvider;
-use pug_gpui_primitives::SwitchSpec;
-use pug_gpui_components::PugSwitch;
+use pug_primitives::SwitchSpec;
+use pug_gpui_components::Switch;
 use crate::app_state::AppState;
 use crate::style_bridge::color_to_hsla;
 use crate::PreviewRoot;
@@ -26,7 +26,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                 let mut spec = SwitchSpec::new().with_checked(is_on);
                 spec.label = Some(label.to_string());
                 col = col.child(
-                    PugSwitch::new(spec, theme)
+                    Switch::from_spec(spec, theme)
                         .with_id(key)
                         .on_change(cx.listener(move |this, _checked: &bool, _w, cx| {
                             this.state.specimens.toggle(&key_owned);
@@ -46,7 +46,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
             spec.label = Some("Disabled off".to_string());
             spec.is_disabled = true;
             col = col.child(
-                PugSwitch::new(spec, theme).with_id("sw-disabled-off")
+                Switch::from_spec(spec, theme).with_id("sw-disabled-off")
             );
 
             // Disabled on
@@ -54,7 +54,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
             spec.label = Some("Disabled on".to_string());
             spec.is_disabled = true;
             col = col.child(
-                PugSwitch::new(spec, theme).with_id("sw-disabled-on")
+                Switch::from_spec(spec, theme).with_id("sw-disabled-on")
             );
 
             // Read-only on (using disabled since GPUI doesn't support readonly)
@@ -62,7 +62,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
             spec.label = Some("Read-only on".to_string());
             spec.is_disabled = true;
             col = col.child(
-                PugSwitch::new(spec, theme).with_id("sw-readonly-on")
+                Switch::from_spec(spec, theme).with_id("sw-readonly-on")
             );
 
             col

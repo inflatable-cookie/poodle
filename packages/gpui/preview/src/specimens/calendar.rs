@@ -1,8 +1,8 @@
 use gpui::*;
 use pug_adapter::ThemeProvider;
 use pug_gpui::GpuiThemeProvider;
-use pug_gpui_primitives::CalendarSpec;
-use pug_gpui_components::PugCalendar;
+use pug_primitives::CalendarSpec;
+use pug_gpui_components::Calendar;
 use crate::style_bridge::color_to_hsla;
 
 pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
@@ -14,7 +14,7 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
         .child({
             let mut spec = CalendarSpec::new();
             spec.aria_label = Some("Select a date".to_string());
-            PugCalendar::new(spec, theme).with_id("default")
+            Calendar::from_spec(spec, theme).with_id("default")
         })
         // --- With pre-selected date ---
         .child(section_label("WITH PRE-SELECTED DATE", text_secondary))
@@ -22,7 +22,7 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
             let mut spec = CalendarSpec::new();
             spec.default_value = Some("2026-03-14".to_string());
             spec.aria_label = Some("Calendar with default".to_string());
-            PugCalendar::new(spec, theme).with_id("preselected")
+            Calendar::from_spec(spec, theme).with_id("preselected")
         })
         // --- Disabled ---
         .child(section_label("DISABLED", text_secondary))
@@ -31,7 +31,7 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
             spec.default_value = Some("2026-03-01".to_string());
             spec.is_disabled = true;
             spec.aria_label = Some("Disabled calendar".to_string());
-            PugCalendar::new(spec, theme).with_id("disabled")
+            Calendar::from_spec(spec, theme).with_id("disabled")
         })
 }
 

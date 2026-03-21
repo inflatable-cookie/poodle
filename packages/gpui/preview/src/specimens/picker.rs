@@ -1,9 +1,9 @@
 use gpui::*;
 use pug_adapter::ThemeProvider;
-use pug_gpui_composites::{
+use pug_composites::{
     PickerShellSpec, PickerVariant, BrowseState,
 };
-use pug_gpui_components::PugPickerShell;
+use pug_gpui_components::PickerShell;
 use crate::app_state::AppState;
 use crate::style_bridge::color_to_hsla;
 use crate::PreviewRoot;
@@ -27,7 +27,7 @@ pub(crate) fn render(state: &AppState, _cx: &mut Context<PreviewRoot>) -> Div {
     div().flex().flex_col().gap(px(16.0))
         .child(section_label("INLINE VARIANT (READY)", text_secondary))
         .child(
-            PugPickerShell::new(inline_spec, theme)
+            PickerShell::from_spec(inline_spec, theme)
                 .with_results(
                     div().flex().flex_col()
                         .child(div().px(px(12.0)).py(px(8.0)).text_sm().child("Button"))
@@ -37,7 +37,7 @@ pub(crate) fn render(state: &AppState, _cx: &mut Context<PreviewRoot>) -> Div {
         )
         .child(section_label("NO RESULTS", text_secondary))
         .child(
-            PugPickerShell::new(no_results_spec, theme)
+            PickerShell::from_spec(no_results_spec, theme)
                 .with_results(div())
         )
 }

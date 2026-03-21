@@ -1,8 +1,8 @@
 use gpui::*;
 use pug_adapter::ThemeProvider;
 use pug_gpui::GpuiThemeProvider;
-use pug_gpui_primitives::{Orientation, ResizeHandleSpec};
-use pug_gpui_components::PugResizeHandle;
+use pug_primitives::{Orientation, ResizeHandleSpec};
+use pug_gpui_components::ResizeHandle;
 use crate::style_bridge::color_to_hsla;
 
 pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
@@ -23,7 +23,7 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
                 .rounded(px(6.0))
                 .overflow_hidden()
                 .child(pane("Left", text_secondary, panel_bg))
-                .child(PugResizeHandle::new(
+                .child(ResizeHandle::from_spec(
                     ResizeHandleSpec::new()
                         .with_orientation(Orientation::Horizontal)
                         .with_aria_label("Resize horizontal"),
@@ -43,7 +43,7 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
                 .rounded(px(6.0))
                 .overflow_hidden()
                 .child(pane("Top", text_secondary, panel_bg))
-                .child(PugResizeHandle::new(
+                .child(ResizeHandle::from_spec(
                     ResizeHandleSpec::new()
                         .with_orientation(Orientation::Vertical)
                         .with_aria_label("Resize vertical"),
@@ -63,7 +63,7 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
                 .rounded(px(6.0))
                 .overflow_hidden()
                 .child(pane("Left", text_secondary, panel_bg))
-                .child(PugResizeHandle::new(
+                .child(ResizeHandle::from_spec(
                     ResizeHandleSpec::new()
                         .with_orientation(Orientation::Horizontal)
                         .with_disabled(true)
@@ -84,7 +84,7 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
                 .rounded(px(6.0))
                 .overflow_hidden()
                 .child(pane("Top", text_secondary, panel_bg))
-                .child(PugResizeHandle::new(
+                .child(ResizeHandle::from_spec(
                     ResizeHandleSpec::new()
                         .with_orientation(Orientation::Vertical)
                         .with_disabled(true)

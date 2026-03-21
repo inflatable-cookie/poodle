@@ -1,6 +1,6 @@
 # g09.007 Verify Both Targets
 
-Status: planned
+Status: complete
 Owner: Pug Core
 Depends on: g09.005, g09.006
 

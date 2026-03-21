@@ -1,8 +1,8 @@
 use gpui::*;
 use pug_adapter::ThemeProvider;
 use pug_gpui::GpuiThemeProvider;
-use pug_gpui_primitives::SliderSpec;
-use pug_gpui_components::PugSlider;
+use pug_primitives::SliderSpec;
+use pug_gpui_components::Slider;
 use crate::style_bridge::color_to_hsla;
 
 pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
@@ -17,7 +17,7 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
             spec.aria_label = Some("Volume".to_string());
 
             div().flex().flex_col().gap(px(4.0))
-                .child(PugSlider::new(spec, theme))
+                .child(Slider::from_spec(spec, theme))
         })
         // --- With step ---
         .child(section_label("WITH STEP", text_secondary))
@@ -27,7 +27,7 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
             spec.aria_label = Some("Opacity".to_string());
 
             div().flex().flex_col().gap(px(4.0))
-                .child(PugSlider::new(spec, theme))
+                .child(Slider::from_spec(spec, theme))
         })
         // --- Disabled ---
         .child(section_label("DISABLED", text_secondary))
@@ -37,7 +37,7 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
             spec.aria_label = Some("Disabled".to_string());
 
             div().flex().flex_col().gap(px(4.0))
-                .child(PugSlider::new(spec, theme))
+                .child(Slider::from_spec(spec, theme))
         })
 }
 

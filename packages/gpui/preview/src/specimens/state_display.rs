@@ -1,8 +1,8 @@
 use gpui::*;
 use pug_adapter::ThemeProvider;
-use pug_gpui_composites::{EmptyStateSpec, EmptyStateVariant, RemediationAction};
-use pug_gpui_components::PugEmptyState;
-use pug_gpui_primitives::ButtonVariant;
+use pug_composites::{EmptyStateSpec, EmptyStateVariant, RemediationAction};
+use pug_gpui_components::EmptyState;
+use pug_primitives::ButtonVariant;
 use pug_gpui::GpuiThemeProvider;
 use crate::style_bridge::color_to_hsla;
 
@@ -31,11 +31,11 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
 
     div().flex().flex_col().gap(px(16.0))
         .child(section_label("NEUTRAL", text_secondary))
-        .child(PugEmptyState::new(neutral, theme))
+        .child(EmptyState::from_spec(neutral, theme))
         .child(section_label("SEARCH", text_secondary))
-        .child(PugEmptyState::new(search, theme))
+        .child(EmptyState::from_spec(search, theme))
         .child(section_label("FIRST RUN", text_secondary))
-        .child(PugEmptyState::new(first_run, theme))
+        .child(EmptyState::from_spec(first_run, theme))
 }
 
 fn section_label(label: &str, color: pug_tokens::typed::ColorValue) -> Div {

@@ -161,50 +161,37 @@ pub enum ButtonTone {
 }
 
 impl ButtonVariant {
-    /// Fill color token for a variant + tone combination.
-    pub fn fill_token_with_tone(self, tone: ButtonTone) -> &'static str {
+    /// Resolve fill token accounting for tone modifier.
+    pub fn fill_token(self, tone: ButtonTone) -> &'static str {
         match (self, tone) {
-            (Self::Primary, ButtonTone::Default) => semantic::COLOR_ACCENT_BASE,
-            (Self::Primary, ButtonTone::Danger) | (Self::Danger, _) => semantic::COLOR_STATUS_DANGER,
-            (Self::Secondary, ButtonTone::Default) => semantic::COLOR_BACKGROUND_SURFACE,
-            (Self::Secondary, ButtonTone::Danger) => semantic::COLOR_STATUS_DANGER, // mixed in component
             (Self::Ghost, _) => semantic::COLOR_BACKGROUND_SURFACE, // transparent in component
-        }
-    }
-
-    /// Border color token for a variant + tone combination.
-    pub fn border_token_with_tone(self, tone: ButtonTone) -> &'static str {
-        match (self, tone) {
-            (Self::Primary, ButtonTone::Default) => semantic::COLOR_ACCENT_BASE,
             (Self::Primary, ButtonTone::Danger) | (Self::Danger, _) => semantic::COLOR_STATUS_DANGER,
-            (Self::Secondary, ButtonTone::Default) => semantic::COLOR_BORDER_DEFAULT,
-            (Self::Secondary, ButtonTone::Danger) => semantic::COLOR_STATUS_DANGER, // mixed in component
-            (Self::Ghost, _) => semantic::COLOR_BORDER_SUBTLE, // transparent in component
+            (Self::Secondary, ButtonTone::Danger) => semantic::COLOR_BACKGROUND_SURFACE,
+            (Self::Primary, ButtonTone::Default) => semantic::COLOR_ACCENT_BASE,
+            (Self::Secondary, ButtonTone::Default) => semantic::COLOR_BACKGROUND_SURFACE,
         }
     }
 
-    /// Text color token for a variant + tone combination.
-    pub fn text_token_with_tone(self, tone: ButtonTone) -> &'static str {
+    /// Resolve border token accounting for tone modifier.
+    pub fn border_token(self, tone: ButtonTone) -> &'static str {
         match (self, tone) {
-            (Self::Primary, ButtonTone::Default) => semantic::COLOR_TEXT_INVERSE,
-            (Self::Primary, ButtonTone::Danger) | (Self::Danger, _) => semantic::COLOR_TEXT_INVERSE,
-            (Self::Secondary, _) => semantic::COLOR_TEXT_PRIMARY,
-            (Self::Ghost, ButtonTone::Default) => semantic::COLOR_TEXT_PRIMARY,
-            (Self::Ghost, ButtonTone::Danger) => semantic::COLOR_STATUS_DANGER,
+            (Self::Ghost, _) => semantic::COLOR_BORDER_SUBTLE, // transparent in component
+            (Self::Primary, ButtonTone::Danger) | (Self::Danger, _) => semantic::COLOR_STATUS_DANGER,
+            (Self::Secondary, ButtonTone::Danger) => semantic::COLOR_STATUS_DANGER,
+            (Self::Primary, ButtonTone::Default) => semantic::COLOR_ACCENT_BASE,
+            (Self::Secondary, ButtonTone::Default) => semantic::COLOR_BORDER_DEFAULT,
         }
     }
 
-    // Legacy methods (no tone = default tone)
-    pub fn fill_token(self) -> &'static str {
-        self.fill_token_with_tone(ButtonTone::Default)
-    }
-
-    pub fn border_token(self) -> &'static str {
-        self.border_token_with_tone(ButtonTone::Default)
-    }
-
-    pub fn text_token(self) -> &'static str {
-        self.text_token_with_tone(ButtonTone::Default)
+    /// Resolve text token accounting for tone modifier.
+    pub fn text_token(self, tone: ButtonTone) -> &'static str {
+        match (self, tone) {
+            (Self::Ghost, ButtonTone::Danger) => semantic::COLOR_STATUS_DANGER,
+            (Self::Ghost, ButtonTone::Default) => semantic::COLOR_TEXT_PRIMARY,
+            (Self::Secondary, ButtonTone::Danger) => semantic::COLOR_TEXT_PRIMARY,
+            (Self::Primary, _) | (Self::Danger, _) => semantic::COLOR_TEXT_INVERSE,
+            (Self::Secondary, ButtonTone::Default) => semantic::COLOR_TEXT_PRIMARY,
+        }
     }
 }
 
@@ -492,6 +479,13 @@ pub enum DrawerEdge {
     Right,
     Top,
     Bottom,
+}
+
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub enum TabVariant {
+    Underline,
+    Card,
+    Pill,
 }
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]

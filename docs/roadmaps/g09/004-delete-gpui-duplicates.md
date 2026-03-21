@@ -1,6 +1,6 @@
 # g09.004 Delete Duplicate GPUI Crates and Update Imports
 
-Status: planned
+Status: complete
 Owner: Pug Core
 Depends on: g09.003
 

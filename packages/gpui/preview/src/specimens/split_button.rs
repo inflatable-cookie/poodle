@@ -1,7 +1,7 @@
 use gpui::*;
 use pug_adapter::ThemeProvider;
-use pug_gpui_primitives::{ButtonVariant, SplitButtonSpec};
-use pug_gpui_components::PugSplitButton;
+use pug_primitives::{ButtonVariant, SplitButtonSpec};
+use pug_gpui_components::SplitButton;
 use crate::app_state::AppState;
 use crate::style_bridge::color_to_hsla;
 use crate::PreviewRoot;
@@ -17,7 +17,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
         // --- Primary variant ---
         .child(section_label("PRIMARY VARIANT", text_secondary))
         .child(
-            PugSplitButton::new(
+            SplitButton::from_spec(
                 SplitButtonSpec::new()
                     .with_variant(ButtonVariant::Primary)
                     .with_label("Save"),
@@ -41,7 +41,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
         // --- Secondary variant ---
         .child(section_label("SECONDARY VARIANT", text_secondary))
         .child(
-            PugSplitButton::new(
+            SplitButton::from_spec(
                 SplitButtonSpec::new()
                     .with_variant(ButtonVariant::Secondary)
                     .with_label("Export"),
@@ -65,7 +65,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
         // --- Danger tone ---
         .child(section_label("DANGER TONE", text_secondary))
         .child(
-            PugSplitButton::new(
+            SplitButton::from_spec(
                 SplitButtonSpec::new()
                     .with_variant(ButtonVariant::Secondary)
                     .with_label("Delete"),
@@ -82,7 +82,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
         // --- Loading state ---
         .child(section_label("LOADING STATE", text_secondary))
         .child(
-            PugSplitButton::new(
+            SplitButton::from_spec(
                 SplitButtonSpec::new()
                     .with_variant(ButtonVariant::Primary)
                     .with_label("Saving...")
@@ -93,7 +93,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
         // --- Disabled ---
         .child(section_label("DISABLED", text_secondary))
         .child(
-            PugSplitButton::new(
+            SplitButton::from_spec(
                 SplitButtonSpec::new()
                     .with_variant(ButtonVariant::Secondary)
                     .with_label("Save")

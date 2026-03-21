@@ -5,15 +5,18 @@
 
 use pug_adapter::{RenderComponent, ThemeProvider};
 use pug_composites::{
-    AudioPlayerSpec, AutonomousListSpec, BlockEditorSpec, BreadcrumbsSpec, CardRadioGroupSpec,
+    AudioPlayerSpec, AutonomousListSpec, BlockEditorSpec, CardRadioGroupSpec,
     ConfirmActionSpec, DataTableSpec, DetailSectionSpec, DetailShellSpec, EmbedInputSpec,
     EmbedPreviewSpec, EmptyStateSpec, FilterToolbarSpec, FormShellSpec,
-    InlineEditableFieldSpec, InlineRemediationSpec, ListCardSpec,
+    InlineEditableFieldSpec, InlineRemediationSpec,
     LogListSpec, MarkdownEditorSpec, MediaPickerSpec, MediaPreviewSpec, MediaThumbnailSpec,
-    NavCardGridSpec, NavCardSpec, OrderBySpec, PageHeaderSpec, PageLoadingSpec,
+    PageHeaderSpec, PageLoadingSpec,
     PaginationSummarySpec, PickerShellSpec, RelationPickerSpec, RemediationBannerSpec,
     ReorderableListSpec, SelectionSummarySpec, SlugFieldSpec, StateTileSpec, ToastStackSpec,
     ValidationSummarySpec, VideoPlayerSpec,
+};
+use pug_primitives::{
+    BreadcrumbsSpec, ListCardSpec, NavCardGridSpec, NavCardSpec, OrderBySpec,
 };
 use pug_style::StyleDescriptor;
 

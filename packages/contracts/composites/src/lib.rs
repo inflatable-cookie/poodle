@@ -1,12 +1,15 @@
+mod action_discovery_panel;
+mod app_header;
 mod audio_player;
 mod autonomous_list;
 mod block_editor;
-mod breadcrumbs;
 mod card_radio_group;
+mod command_palette;
 mod confirm_action;
 mod data_table;
 mod detail_section;
 mod detail_shell;
+mod dock_region;
 mod embed_input;
 mod embed_preview;
 mod empty_state;
@@ -14,15 +17,12 @@ mod filter_toolbar;
 mod form_shell;
 mod inline_editable_field;
 mod inline_remediation;
-mod list_card;
 mod log_list;
 mod markdown_editor;
 mod media_picker;
 mod media_preview;
 mod media_thumbnail;
-mod nav_card;
-mod nav_card_grid;
-mod order_by;
+mod metric_tile;
 mod page_header;
 mod page_loading;
 mod pagination_summary;
@@ -31,22 +31,27 @@ mod relation_picker;
 mod remediation_banner;
 mod reorderable_list;
 mod selection_summary;
+mod shell_status_bar;
 mod slug_field;
+mod split_view;
 mod state_tile;
 mod toast_stack;
 mod types;
 mod validation_summary;
 mod video_player;
 
+pub use action_discovery_panel::ActionDiscoveryPanelSpec;
+pub use app_header::AppHeaderSpec;
 pub use audio_player::AudioPlayerSpec;
 pub use autonomous_list::AutonomousListSpec;
 pub use block_editor::BlockEditorSpec;
-pub use breadcrumbs::BreadcrumbsSpec;
 pub use card_radio_group::CardRadioGroupSpec;
+pub use command_palette::CommandPaletteSpec;
 pub use confirm_action::ConfirmActionSpec;
 pub use data_table::DataTableSpec;
 pub use detail_section::DetailSectionSpec;
 pub use detail_shell::{DetailShellSpec, DetailState};
+pub use dock_region::{DockRegionSpec, DockTabsPlacement};
 pub use embed_input::EmbedInputSpec;
 pub use embed_preview::EmbedPreviewSpec;
 pub use empty_state::EmptyStateSpec;
@@ -54,16 +59,13 @@ pub use filter_toolbar::FilterToolbarSpec;
 pub use form_shell::FormShellSpec;
 pub use inline_editable_field::InlineEditableFieldSpec;
 pub use inline_remediation::InlineRemediationSpec;
-pub use list_card::ListCardSpec;
 pub use log_list::LogListSpec;
 pub use markdown_editor::MarkdownEditorSpec;
 pub use media_picker::MediaPickerSpec;
 pub use media_preview::MediaPreviewSpec;
 pub use media_thumbnail::MediaThumbnailSpec;
-pub use nav_card::NavCardSpec;
-pub use nav_card_grid::NavCardGridSpec;
-pub use order_by::OrderBySpec;
-pub use page_header::PageHeaderSpec;
+pub use metric_tile::MetricTileSpec;
+pub use page_header::{PageHeaderAlign, PageHeaderSpec};
 pub use page_loading::PageLoadingSpec;
 pub use pagination_summary::PaginationSummarySpec;
 pub use picker_shell::PickerShellSpec;
@@ -71,14 +73,17 @@ pub use relation_picker::RelationPickerSpec;
 pub use remediation_banner::RemediationBannerSpec;
 pub use reorderable_list::ReorderableListSpec;
 pub use selection_summary::SelectionSummarySpec;
+pub use shell_status_bar::ShellStatusBarSpec;
 pub use slug_field::SlugFieldSpec;
+pub use split_view::SplitViewSpec;
 pub use state_tile::StateTileSpec;
-pub use toast_stack::ToastStackSpec;
+pub use toast_stack::{Toast, ToastPosition, ToastStackSpec, ToastTone};
 pub use types::{
-    AnnouncementMode, AspectRatio, BreadcrumbItem, BrowseState, EmptyStateVariant,
-    FormActionLayout, FormFieldState, FormSectionSpec, FormStatusSummary, MediaKind, MediaState,
-    MinColumnWidth, PickerItemSpec, PickerVariant, RemediationAction, ScrollOwner, SelectionMode,
-    SelectionSummaryItem, TableColumnSpec, TableRowSpec, TableSortDirection,
+    ActionDiscoverySection, AnnouncementMode, AspectRatio, BrowseState,
+    CommandActionItem, DiscoveryState, DockEdge, EmptyStateVariant, FormActionLayout,
+    FormFieldState, FormSectionSpec, FormStatusSummary, MediaKind, MediaState, MinColumnWidth,
+    PanelTabItem, PickerItemSpec, PickerVariant, RemediationAction, ScrollOwner, SelectionMode,
+    SelectionSummaryItem, SplitOrientation, TableColumnSpec, TableRowSpec, TableSortDirection,
     ValidationSummaryEntry,
 };
 pub use validation_summary::ValidationSummarySpec;

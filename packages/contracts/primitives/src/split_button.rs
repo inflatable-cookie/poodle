@@ -1,6 +1,6 @@
 use pug_tokens::semantic;
 
-use crate::types::{ButtonVariant, ControlSize};
+use crate::types::{ButtonTone, ButtonVariant, ControlSize};
 
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct SplitButtonSpec {
@@ -54,11 +54,11 @@ impl SplitButtonSpec {
     }
 
     pub fn fill_token(&self) -> &'static str {
-        self.variant.fill_token()
+        self.variant.fill_token(ButtonTone::Default)
     }
 
     pub fn border_token(&self) -> &'static str {
-        self.variant.border_token()
+        self.variant.border_token(ButtonTone::Default)
     }
 
     pub fn separator_token(&self) -> &'static str {

@@ -1,7 +1,7 @@
 use gpui::*;
 use pug_adapter::ThemeProvider;
-use pug_gpui_composites::{ActionDiscoveryPanelSpec, ActionDiscoverySection, CommandActionItem, DiscoveryState};
-use pug_gpui_components::PugActionDiscoveryPanel;
+use pug_composites::{ActionDiscoveryPanelSpec, ActionDiscoverySection, CommandActionItem, DiscoveryState};
+use pug_gpui_components::ActionDiscoveryPanel;
 use crate::app_state::AppState;
 use crate::style_bridge::color_to_hsla;
 use crate::PreviewRoot;
@@ -73,17 +73,17 @@ pub(crate) fn render(state: &AppState, _cx: &mut Context<PreviewRoot>) -> Div {
     div().flex().flex_col().gap(px(16.0))
         .child(section_label("GROUPED ACTIONS", text_secondary))
         .child(
-            PugActionDiscoveryPanel::new(grouped_spec, theme)
+            ActionDiscoveryPanel::from_spec(grouped_spec, theme)
                 .with_id("action-disc-grouped")
         )
         .child(section_label("WITH DESCRIPTIONS AND BADGES", text_secondary))
         .child(
-            PugActionDiscoveryPanel::new(desc_spec, theme)
+            ActionDiscoveryPanel::from_spec(desc_spec, theme)
                 .with_id("action-disc-desc")
         )
         .child(section_label("EMPTY STATE", text_secondary))
         .child(
-            PugActionDiscoveryPanel::new(empty_spec, theme)
+            ActionDiscoveryPanel::from_spec(empty_spec, theme)
                 .with_id("action-disc-empty")
         )
 }

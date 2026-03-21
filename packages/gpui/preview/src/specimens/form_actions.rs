@@ -1,7 +1,7 @@
 use gpui::*;
 use pug_adapter::ThemeProvider;
-use pug_gpui_primitives::{ButtonSpec, ButtonTone, ButtonVariant, FormActionAlign, FormActionsSpec};
-use pug_gpui_components::{PugButton, PugFormActions};
+use pug_primitives::{ButtonSpec, ButtonTone, ButtonVariant, FormActionAlign, FormActionsSpec};
+use pug_gpui_components::{Button, FormActions};
 use crate::app_state::AppState;
 use crate::style_bridge::color_to_hsla;
 use crate::PreviewRoot;
@@ -14,9 +14,9 @@ pub(crate) fn render(state: &AppState, _cx: &mut Context<PreviewRoot>) -> Div {
         // --- End-aligned (default) ---
         .child(section_label("END-ALIGNED (DEFAULT)", text_secondary))
         .child(
-            PugFormActions::new(FormActionsSpec::new(), theme)
+            FormActions::from_spec(FormActionsSpec::new(), theme)
                 .with_action(
-                    PugButton::new(
+                    Button::from_spec(
                         ButtonSpec::new()
                             .with_variant(ButtonVariant::Secondary)
                             .with_label("Cancel"),
@@ -25,7 +25,7 @@ pub(crate) fn render(state: &AppState, _cx: &mut Context<PreviewRoot>) -> Div {
                     .with_id("fa-cancel-end")
                 )
                 .with_action(
-                    PugButton::new(
+                    Button::from_spec(
                         ButtonSpec::new()
                             .with_variant(ButtonVariant::Primary)
                             .with_label("Save changes"),
@@ -37,12 +37,12 @@ pub(crate) fn render(state: &AppState, _cx: &mut Context<PreviewRoot>) -> Div {
         // --- Start-aligned ---
         .child(section_label("START-ALIGNED", text_secondary))
         .child(
-            PugFormActions::new(
+            FormActions::from_spec(
                 FormActionsSpec::new().with_align(FormActionAlign::Start),
                 theme,
             )
                 .with_action(
-                    PugButton::new(
+                    Button::from_spec(
                         ButtonSpec::new()
                             .with_variant(ButtonVariant::Secondary)
                             .with_label("Back"),
@@ -51,7 +51,7 @@ pub(crate) fn render(state: &AppState, _cx: &mut Context<PreviewRoot>) -> Div {
                     .with_id("fa-back-start")
                 )
                 .with_action(
-                    PugButton::new(
+                    Button::from_spec(
                         ButtonSpec::new()
                             .with_variant(ButtonVariant::Primary)
                             .with_label("Continue"),
@@ -63,12 +63,12 @@ pub(crate) fn render(state: &AppState, _cx: &mut Context<PreviewRoot>) -> Div {
         // --- Space between ---
         .child(section_label("SPACE BETWEEN", text_secondary))
         .child(
-            PugFormActions::new(
+            FormActions::from_spec(
                 FormActionsSpec::new().with_align(FormActionAlign::Between),
                 theme,
             )
                 .with_action(
-                    PugButton::new(
+                    Button::from_spec(
                         ButtonSpec::new()
                             .with_variant(ButtonVariant::Primary)
                             .with_tone(ButtonTone::Danger)
@@ -78,7 +78,7 @@ pub(crate) fn render(state: &AppState, _cx: &mut Context<PreviewRoot>) -> Div {
                     .with_id("fa-delete-between")
                 )
                 .with_action(
-                    PugButton::new(
+                    Button::from_spec(
                         ButtonSpec::new()
                             .with_variant(ButtonVariant::Primary)
                             .with_label("Save"),

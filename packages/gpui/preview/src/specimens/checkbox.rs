@@ -1,7 +1,7 @@
 use gpui::*;
 use pug_adapter::ThemeProvider;
-use pug_gpui_primitives::CheckboxSpec;
-use pug_gpui_components::PugCheckbox;
+use pug_primitives::CheckboxSpec;
+use pug_gpui_components::Checkbox;
 use crate::app_state::AppState;
 use crate::style_bridge::color_to_hsla;
 use crate::PreviewRoot;
@@ -24,7 +24,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                 let checked = state.specimens.is_on(key);
                 let key_owned = key.to_string();
                 col = col.child(
-                    PugCheckbox::new(
+                    Checkbox::from_spec(
                         CheckboxSpec::new()
                             .with_checked(checked)
                             .with_label(label),
@@ -44,7 +44,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
         .child(
             div().flex().flex_col().gap(px(12.0))
                 .child(
-                    PugCheckbox::new(
+                    Checkbox::from_spec(
                         CheckboxSpec::new()
                             .with_checked(false)
                             .with_disabled(true)
@@ -54,7 +54,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                     .with_id("cb-disabled-unchecked")
                 )
                 .child(
-                    PugCheckbox::new(
+                    Checkbox::from_spec(
                         CheckboxSpec::new()
                             .with_checked(true)
                             .with_disabled(true)
@@ -64,7 +64,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                     .with_id("cb-disabled-checked")
                 )
                 .child(
-                    PugCheckbox::new(
+                    Checkbox::from_spec(
                         CheckboxSpec::new()
                             .with_mixed(true)
                             .with_label("Mixed / indeterminate"),
@@ -73,7 +73,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                     .with_id("cb-mixed")
                 )
                 .child(
-                    PugCheckbox::new(
+                    Checkbox::from_spec(
                         CheckboxSpec::new()
                             .with_checked(true)
                             .with_disabled(true)

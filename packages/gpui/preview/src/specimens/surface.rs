@@ -1,8 +1,8 @@
 use gpui::*;
 use pug_adapter::ThemeProvider;
 use pug_gpui::GpuiThemeProvider;
-use pug_gpui_primitives::{PaddingScale, SurfaceBorder, SurfaceSpec, SurfaceTone};
-use pug_gpui_components::PugSurface;
+use pug_primitives::{PaddingScale, SurfaceBorder, SurfaceSpec, SurfaceTone};
+use pug_gpui_components::Surface;
 use crate::style_bridge::color_to_hsla;
 
 pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
@@ -14,7 +14,7 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
             div().flex().flex_col().gap(px(8.0))
                 .child(section_label("Panel tone (default)", text_secondary))
                 .child(
-                    PugSurface::new(
+                    Surface::from_spec(
                         SurfaceSpec::new()
                             .with_tone(SurfaceTone::Panel)
                             .with_border(SurfaceBorder::Subtle)
@@ -32,7 +32,7 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
             div().flex().flex_col().gap(px(8.0))
                 .child(section_label("Canvas tone", text_secondary))
                 .child(
-                    PugSurface::new(
+                    Surface::from_spec(
                         SurfaceSpec::new()
                             .with_tone(SurfaceTone::Canvas)
                             .with_border(SurfaceBorder::Subtle)
@@ -50,7 +50,7 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
             div().flex().flex_col().gap(px(8.0))
                 .child(section_label("Elevated tone", text_secondary))
                 .child(
-                    PugSurface::new(
+                    Surface::from_spec(
                         SurfaceSpec::new()
                             .with_tone(SurfaceTone::Elevated)
                             .with_border(SurfaceBorder::Subtle)
@@ -69,7 +69,7 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
             div().flex().flex_col().gap(px(8.0))
                 .child(section_label("No border", text_secondary))
                 .child(
-                    PugSurface::new(
+                    Surface::from_spec(
                         SurfaceSpec::new()
                             .with_tone(SurfaceTone::Panel)
                             .with_border(SurfaceBorder::None)

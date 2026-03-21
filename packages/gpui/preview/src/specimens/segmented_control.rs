@@ -1,7 +1,7 @@
 use gpui::*;
 use pug_adapter::ThemeProvider;
-use pug_gpui_primitives::{SegmentedControlSpec, ChoiceOption};
-use pug_gpui_components::PugSegmentedControl;
+use pug_primitives::{SegmentedControlSpec, ChoiceOption};
+use pug_gpui_components::SegmentedControl;
 use crate::app_state::AppState;
 use crate::PreviewRoot;
 
@@ -49,7 +49,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
             div().flex().flex_col().gap(px(8.0))
                 .child(section_label("DEFAULT", text_secondary))
                 .child(
-                    PugSegmentedControl::new(default_spec, theme)
+                    SegmentedControl::from_spec(default_spec, theme)
                         .with_id("seg-default")
                         .on_change(cx.listener(|this, value: &str, _w, cx| {
                             let idx = match value {
@@ -68,7 +68,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
             div().flex().flex_col().gap(px(8.0))
                 .child(section_label("WITH DISABLED OPTION", text_secondary))
                 .child(
-                    PugSegmentedControl::new(disabled_opt_spec, theme)
+                    SegmentedControl::from_spec(disabled_opt_spec, theme)
                         .with_id("seg-disabled-opt")
                 )
         )
@@ -77,7 +77,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
             div().flex().flex_col().gap(px(8.0))
                 .child(section_label("FULLY DISABLED", text_secondary))
                 .child(
-                    PugSegmentedControl::new(fully_disabled_spec, theme)
+                    SegmentedControl::from_spec(fully_disabled_spec, theme)
                         .with_id("seg-fully-disabled")
                 )
         )
