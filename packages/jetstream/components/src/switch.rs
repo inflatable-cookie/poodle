@@ -5,11 +5,12 @@
 //!
 //! ALL dimensions resolve from tokens. ZERO hardcoded pixel values.
 
+use jetstream_runtime::game_ui::Color;
 use jetstream_runtime::ui_element::{self, JsEl};
 use pug_jetstream::JetstreamThemeProvider;
 use pug_primitives::SwitchSpec;
 
-use crate::theme_ext::{resolve_color, resolve_opacity, resolve_px, tint};
+use crate::theme_ext::{resolve_color, resolve_opacity, resolve_px};
 
 /// Build a switch element from a SwitchSpec.
 ///
@@ -52,10 +53,12 @@ pub fn js_switch(spec: &SwitchSpec, theme: &JetstreamThemeProvider) -> JsEl {
 
     // Contract: track border = border-default when off,
     // color-mix(accent 58%, border-default) when on
+    let accent_c: Color = accent.into();
+    let border_c: Color = border_default.into();
     let track_border = if is_checked {
-        tint(accent, 0.58)
+        accent_c.mix(border_c, 0.58)
     } else {
-        border_default
+        border_c
     };
 
     // Contract: thumb position via translateX. We approximate with left padding.

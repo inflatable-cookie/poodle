@@ -7,10 +7,10 @@ Updated: 2026-03-21
 
 - Component name: `FormLayout`
 - Layer: `composites`
-- Summary: a responsive form grid with error/success messaging, field error
-  summary, and action button area
-- In scope: field grid layout, form-level messaging, field error summary,
-  action button placement
+- Summary: a responsive form grid with multi-column support, error/success
+  messaging, field error summary, and action button area
+- In scope: field grid layout with mixed column widths, form-level messaging,
+  field error summary, action button placement, responsive collapsing
 - Out of scope: form submission logic, validation orchestration, individual
   field state management
 
@@ -28,7 +28,7 @@ Updated: 2026-03-21
 
 | Part | Required | Description | Token Targets |
 |------|----------|-------------|---------------|
-| Root | yes | vertical flex container | gap |
+| Root | yes | vertical flex container with container queries | gap |
 | Description | no | introductory help text | typography, text-secondary |
 | Error Callout | no | form-level error message | via Callout danger tone |
 | Success Callout | no | form-level success message | via Callout success tone |
@@ -42,7 +42,7 @@ Updated: 2026-03-21
 
 | Prop | Type | Default | Required | Notes |
 |------|------|---------|----------|-------|
-| `columns` | `number` | `2` | no | grid columns at full width |
+| `columns` | `number` | `6` | no | base grid columns — 6 enables mixed 2-col and 3-col layouts |
 | `error` | `string \| null` | `null` | no | form-level error message |
 | `success` | `string \| null` | `null` | no | form-level success message |
 | `fieldErrors` | `Record<string, string> \| null` | `null` | no | per-field error map |
@@ -54,6 +54,23 @@ Updated: 2026-03-21
 |------|---------|
 | default | form fields (Field components placed in the grid) |
 | `actions` | action buttons (rendered inside FormActions) |
+
+### Grid Column System
+
+The default 6-column grid enables flexible multi-column layouts using Field's
+`span` prop:
+
+| Span | Width | Use case |
+|------|-------|----------|
+| `span={2}` | 1/3 width | three fields per row |
+| `span={3}` | 1/2 width | two fields per row |
+| `span={6}` | full width | full-width fields (textarea, notes) |
+
+Rows can freely mix 2-col and 3-col divisions. For example, a row of three
+name fields (`span={2}` each) followed by a row of two contact fields
+(`span={3}` each) works naturally.
+
+For simple single-column forms (e.g. inside a dialog), use `columns={1}`.
 
 ### Controlled And Uncontrolled
 
@@ -104,10 +121,15 @@ No component-owned events.
 
 ### Sizing
 
-- Fields grid: `repeat(columns, 1fr)` at full width
-- @media ≤640px: collapses to single column
-- Gap: `stack-sm` vertically, `inline-md` horizontally
-- Field `span` prop controls `grid-column: span N` for full-width fields
+- Fields grid: `repeat(columns, 1fr)` at full container width
+- Uses container queries (not viewport media queries) for responsive behavior
+- Responsive breakpoints based on container width:
+  - **>600px**: full grid (default 6 columns)
+  - **480–600px**: 2-column grid — 3-col rows collapse to 2+1 across two rows,
+    full-width fields span both columns, all other spans reset to 1
+  - **<480px**: single column, all spans reset to 1
+- Gap: `stack-lg` vertically, `inline-md` horizontally
+- Field `span` prop controls `grid-column: span N`
 
 ### Composition
 
@@ -119,23 +141,27 @@ No component-owned events.
 
 | Part | Token | Purpose |
 |------|-------|---------|
-| Root | `space-stack-sm` | vertical gap between sections |
+| Root | `space-stack-lg` | vertical gap between sections |
 | Description | `text-secondary`, `body-size` | help text styling |
 | Field Error Summary | `status-danger` | error background/border tint |
-| Fields Grid | `space-stack-sm`, `space-inline-md` | grid gap |
+| Fields Grid | `space-stack-lg`, `space-inline-md` | grid gap |
 | Actions | via FormActions primitive | button layout |
 
 ## 9. Svelte Notes
 
 - reuses Callout primitive for error/success banners
 - reuses FormActions primitive for action button layout
+- root element uses `container-type: inline-size` for container queries
 - grid columns driven by CSS custom property `--fl-columns`
 - Field `span` prop maps to `grid-column: span N` naturally
+- at 2-col breakpoint, `span 6` fields use `grid-column: 1 / -1` to stay
+  full width; all other spans reset to `span 1`
 
 ## 10. GPUI Notes
 
 - expected crate/module surface: `pug_gpui::composites::form_layout`
 - grid layout maps to flex with wrap in GPUI
+- responsive collapsing may use different thresholds per platform
 
 ## 11. Parity Checklist
 
@@ -149,30 +175,41 @@ No component-owned events.
 
 - [ ] grid layout and responsive breakpoints comparable
 - [ ] spacing and typography use equivalent token roles
+- [ ] multi-column mixing (2-col + 3-col rows) supported
 
 ### Tier 3: Implementation Freedom
 
 - [ ] grid vs flex realization stays internal
+- [ ] container query vs media query approach stays internal
 
 ## 12. Known Deltas
 
 | Delta | Why Allowed | Approval Status | Follow-Up |
 |-------|-------------|-----------------|-----------|
 | grid vs flex layout | GPUI lacks CSS grid | allowed | maintain equivalent visual result |
+| responsive thresholds | container size detection differs per platform | allowed | ensure equivalent column reduction |
 
 ## 13. Specimen Definitions
 
 All preview apps must render the following specimens identically.
 
-### Two-column grid
+### Two-column layout (span 3 = half)
 
-A two-column form with spanning fields:
+A form using span 3 for half-width fields:
 
 | Label | Props/Config | Expected Visual |
 |-------|-------------|-----------------|
-| Two-column grid | `description="Fill in the details..."`, default columns, fields: first/last name (1 col each), email (span 2), role/region selects, notes textarea (span 2), actions: Cancel + Create user | responsive 2-column grid with full-width spanning fields |
+| Two-column layout | `description="Fill in the details..."`, default 6-col grid, fields: first/last name (span 3 each), email (span 6), role/region selects (span 3 each), notes textarea (span 6), actions: Cancel + Create user | two fields per row with full-width spanning fields |
 
-### Single column
+### Mixed 2-col and 3-col rows
+
+A form mixing half-width and third-width fields:
+
+| Label | Props/Config | Expected Visual |
+|-------|-------------|-----------------|
+| Mixed 2-col and 3-col rows | `description="Mixing..."`, fields: first/middle/last name (span 2 each = 3-col row), email/phone (span 3 each = 2-col row), role/region/country (span 2 each = 3-col row), bio (span 6 = full), actions: Cancel + Save | mixed column widths with 3-col and 2-col rows in same form |
+
+### Single column (columns=1)
 
 A single-column form:
 
@@ -186,7 +223,7 @@ A form showing error state:
 
 | Label | Props/Config | Expected Visual |
 |-------|-------------|-----------------|
-| With error and field errors | `error="Unable to save..."`, `fieldErrors={Email: "...", Role: "..."}`, fields with invalid validation state | danger callout, field error list, and invalid fields |
+| With error and field errors | `error="Unable to save..."`, `fieldErrors={Email: "...", Role: "..."}`, fields with invalid validation state (span 3 each) | danger callout, field error list, and invalid fields |
 
 ### With success message
 

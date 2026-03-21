@@ -5,6 +5,7 @@
 //!
 //! ALL dimensions resolve from tokens. ZERO hardcoded pixel values.
 
+use jetstream_runtime::game_ui::Color;
 use jetstream_runtime::ui_element::{self, JsEl};
 use pug_jetstream::JetstreamThemeProvider;
 use pug_primitives::ButtonSpec;
@@ -12,7 +13,7 @@ use pug_primitives::ButtonTone;
 use pug_primitives::ButtonVariant;
 use pug_primitives::ControlSize;
 
-use crate::theme_ext::{resolve_color, resolve_opacity, resolve_px, resolve_radius, tint};
+use crate::theme_ext::{resolve_color, resolve_opacity, resolve_px, resolve_radius};
 
 /// Build a Jetstream button element from a ButtonSpec.
 ///
@@ -30,29 +31,36 @@ pub fn js_button(spec: &ButtonSpec, theme: &JetstreamThemeProvider) -> JsEl {
     let is_danger_tone = tone == ButtonTone::Danger;
 
     // ── Variant × tone colors (contract) ──
-    let fill = match (spec.variant, is_danger_tone) {
-        (ButtonVariant::Ghost, _) => glam::Vec4::ZERO, // transparent
+    let fill: Color = match (spec.variant, is_danger_tone) {
+        (ButtonVariant::Ghost, _) => Color::TRANSPARENT,
         (ButtonVariant::Secondary, true) => {
             // Danger secondary: color-mix(status-danger 16%, background-surface)
-            let danger = resolve_color(theme, "semantic.color.status.danger");
-            let surface = resolve_color(theme, "semantic.color.background.surface");
-            mix_colors(danger, surface, 0.16)
+            let danger: Color = resolve_color(theme, "semantic.color.status.danger").into();
+            let surface: Color = resolve_color(theme, "semantic.color.background.surface").into();
+            danger.mix(surface, 0.16)
         }
-        _ => resolve_color(theme, spec.resolved_fill_token()),
+        _ => resolve_color(theme, spec.resolved_fill_token()).into(),
     };
 
-    let text_color = resolve_color(theme, spec.resolved_text_token());
+    let text_color: Color = resolve_color(theme, spec.resolved_text_token()).into();
 
-    let border_color = match (spec.variant, is_danger_tone) {
-        (ButtonVariant::Ghost, _) => glam::Vec4::ZERO, // transparent
+    let border_color: Color = match (spec.variant, is_danger_tone) {
+        (ButtonVariant::Ghost, _) => Color::TRANSPARENT,
         (ButtonVariant::Secondary, true) => {
             // Danger secondary: color-mix(status-danger 46%, border-default)
-            let danger = resolve_color(theme, "semantic.color.status.danger");
-            let border_default = resolve_color(theme, "semantic.color.border.default");
-            mix_colors(danger, border_default, 0.46)
+            let danger: Color = resolve_color(theme, "semantic.color.status.danger").into();
+            let border_default: Color = resolve_color(theme, "semantic.color.border.default").into();
+            danger.mix(border_default, 0.46)
         }
-        _ => resolve_color(theme, spec.resolved_border_token()),
+        _ => resolve_color(theme, spec.resolved_border_token()).into(),
     };
+
+    // Hover/active colors (contract: mix fill with elevated)
+    let elevated: Color = resolve_color(theme, "semantic.color.background.elevated").into();
+    let hover_fill = fill.mix(elevated, 0.84);
+    let active_fill = fill.mix(elevated, 0.72);
+    let text_primary: Color = resolve_color(theme, "semantic.color.text.primary").into();
+    let hover_border = border_color.mix(text_primary, 0.78);
 
     // ── Sizing per ControlSize (contract: sm = height-6, md = height, lg = height+6) ──
     let base_height = resolve_px(theme, spec.control_height_token());
@@ -121,6 +129,14 @@ pub fn js_button(spec: &ButtonSpec, theme: &JetstreamThemeProvider) -> JsEl {
     // Border — 1px for non-ghost, 1px transparent for ghost (maintains layout)
     el = el.border(1.0).border_color(border_color);
 
+    // Hover/active state overrides (contract color-mix formulas)
+    if !is_disabled {
+        el = el
+            .hover(|s| s.bg(hover_fill).border_color(hover_border))
+            .active(|s| s.bg(active_fill))
+            .cursor_pointer();
+    }
+
     // Disabled/loading state
     if is_disabled {
         let disabled_opacity = resolve_opacity(theme, spec.disabled_opacity_token());
@@ -129,20 +145,22 @@ pub fn js_button(spec: &ButtonSpec, theme: &JetstreamThemeProvider) -> JsEl {
 
     // ── Children (only when icons/spinner present) ──
     if has_icons {
-        // Spinner (contract: conditional, when isLoading)
+        // Spinner (contract: rotating indicator when isLoading)
         if spec.is_loading {
             el = el.child(
-                ui_element::label("⟳")
-                    .text_size(icon_size)
+                ui_element::icon("loader")
+                    .w(icon_size)
+                    .h(icon_size)
                     .text_color(text_color)
             );
         }
 
-        // Leading icon
-        if let Some(ref icon) = spec.leading_icon {
+        // Leading icon (SVG icon by name)
+        if let Some(ref icon_name) = spec.leading_icon {
             el = el.child(
-                ui_element::label(icon)
-                    .text_size(icon_size)
+                ui_element::icon(icon_name.as_str())
+                    .w(icon_size)
+                    .h(icon_size)
                     .text_color(text_color)
             );
         }
@@ -156,22 +174,18 @@ pub fn js_button(spec: &ButtonSpec, theme: &JetstreamThemeProvider) -> JsEl {
             );
         }
 
-        // Trailing icon
-        if let Some(ref icon) = spec.trailing_icon {
+        // Trailing icon (SVG icon by name)
+        if let Some(ref icon_name) = spec.trailing_icon {
             el = el.child(
-                ui_element::label(icon)
-                    .text_size(icon_size)
+                ui_element::icon(icon_name.as_str())
+                    .w(icon_size)
+                    .h(icon_size)
                     .text_color(text_color)
             );
         }
     }
 
     el
-}
-
-/// Mix two colors: result = a * fraction + b * (1 - fraction).
-fn mix_colors(a: glam::Vec4, b: glam::Vec4, fraction: f32) -> glam::Vec4 {
-    a * fraction + b * (1.0 - fraction)
 }
 
 #[cfg(test)]
@@ -202,7 +216,7 @@ mod tests {
         let el = js_button(&spec, &theme);
         // Ghost: transparent fill (alpha = 0)
         if let Some(bg) = el.style.background {
-            assert!(bg.w < 0.01, "Ghost bg alpha should be ~0, got {}", bg.w);
+            assert!(bg.a < 0.01, "Ghost bg alpha should be ~0, got {}", bg.a);
         }
     }
 

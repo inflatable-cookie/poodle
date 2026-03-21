@@ -20,6 +20,7 @@
 
 use jetstream_runtime::ui_element::*;
 use pug_jetstream::JetstreamThemeProvider;
+use jetstream_runtime::game_ui::Color;
 use pug_jetstream_components::theme_ext::*;
 
 use crate::app_state::*;
@@ -62,9 +63,9 @@ fn build_tab_bar(
 
     for &section in Section::ALL {
         let is_active = section == state.section;
-        let tab_bg = if is_active { Some(tint(accent, 0.18)) } else { None };
+        let tab_bg: Option<Color> = if is_active { Some(tint(accent, 0.18).into()) } else { None };
         let tab_text = if is_active { text_primary } else { text_secondary };
-        let tab_border = if is_active { Some(tint(accent, 0.56)) } else { None };
+        let tab_border: Option<Color> = if is_active { Some(tint(accent, 0.56).into()) } else { None };
 
         bar = bar.child(
             button(section.label())
@@ -176,7 +177,7 @@ fn build_probe_toggle(name: &str, checked: bool, theme: &JetstreamThemeProvider)
     let indicator = if checked { "✓ " } else { "○ " };
     let display = format!("{indicator}{name}");
     let text_color = if checked { text_primary } else { text_secondary };
-    let btn_bg = if checked { Some(tint(accent, 0.14)) } else { None };
+    let btn_bg: Option<Color> = if checked { Some(tint(accent, 0.14).into()) } else { None };
     let btn_border = if checked { accent } else { border };
 
     button(&display)
@@ -240,7 +241,7 @@ fn build_sidebar_item(
     text_secondary: glam::Vec4,
     accent: glam::Vec4,
 ) -> JsEl {
-    let item_bg = if is_active { Some(tint(accent, 0.14)) } else { None };
+    let item_bg: Option<Color> = if is_active { Some(tint(accent, 0.14).into()) } else { None };
     let item_text = if is_active { text_primary } else { text_secondary };
 
     button(name)

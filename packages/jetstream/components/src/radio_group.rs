@@ -18,14 +18,33 @@ pub fn js_radio_group(spec: &RadioGroupSpec, theme: &JetstreamThemeProvider) -> 
         Orientation::Vertical => ui_element::div().flex_col().gap(gap),
     };
 
+    let label_size = resolve_px(theme, "semantic.typography.label.size");
+
     for option in &spec.options {
         let is_selected = selected_value == Some(option.value.as_str());
         let indicator_color = if is_selected { accent } else { border };
+        let indicator_bg = if is_selected { accent } else { glam::Vec4::ZERO };
 
-        let indicator = if is_selected { "◉" } else { "○" };
-        let mut row = ui_element::div().flex_row().items_center().gap(6.0);
-        row = row.child(ui_element::label(indicator).text_color(indicator_color).text_size(14.0));
-        row = row.child(ui_element::label(&option.label).text_color(text_color).text_size(13.0));
+        // Radio indicator: 18px circle with inner dot when selected
+        let mut indicator = ui_element::div()
+            .w(18.0).h(18.0)
+            .rounded(9.0) // circle
+            .border(1.0).border_color(indicator_color)
+            .items_center().justify_center();
+
+        if is_selected {
+            // Inner dot (contract: 8px filled circle)
+            indicator = indicator.child(
+                ui_element::div()
+                    .w(8.0).h(8.0)
+                    .rounded(4.0)
+                    .bg(indicator_bg)
+            );
+        }
+
+        let mut row = ui_element::div().flex_row().items_center().gap(6.0).cursor_pointer();
+        row = row.child(indicator);
+        row = row.child(ui_element::label(&option.label).text_color(text_color).text_size(label_size));
         el = el.child(row);
     }
 

@@ -5,12 +5,32 @@
 
 pub mod accordion;
 pub mod badge;
+pub mod banner;
 pub mod button;
+pub mod bx;
+pub mod callout;
+pub mod card;
 pub mod checkbox;
+pub mod eyebrow;
+pub mod form_actions;
+pub mod grid;
+pub mod icon;
+pub mod icon_button;
+pub mod pill;
 pub mod progress;
+pub mod radio_group;
+pub mod region;
+pub mod select;
 pub mod separator;
+pub mod skeleton;
+pub mod slider;
+pub mod stack;
 pub mod status_indicator;
+pub mod surface;
 pub mod switch;
+pub mod tabs;
+pub mod text_input;
+pub mod toolbar;
 
 use jetstream_runtime::ui_element::*;
 use pug_jetstream::JetstreamThemeProvider;
@@ -114,12 +134,32 @@ fn render_specimen(slug: &str, theme: &JetstreamThemeProvider) -> Option<JsEl> {
     match slug {
         "accordion" => Some(accordion::render(theme)),
         "badge" => Some(badge::render(theme)),
+        "banner" => Some(banner::render(theme)),
+        "box" => Some(bx::render(theme)),
         "button" => Some(button::render(theme)),
+        "callout" => Some(callout::render(theme)),
+        "card" => Some(card::render(theme)),
         "checkbox" => Some(checkbox::render(theme)),
+        "eyebrow" => Some(eyebrow::render(theme)),
+        "form-actions" => Some(form_actions::render(theme)),
+        "grid" => Some(grid::render(theme)),
+        "icon" => Some(icon::render(theme)),
+        "icon-button" => Some(icon_button::render(theme)),
+        "pill" => Some(pill::render(theme)),
         "progress" => Some(progress::render(theme)),
+        "radio-group" => Some(radio_group::render(theme)),
+        "region" => Some(region::render(theme)),
+        "select" => Some(select::render(theme)),
         "separator" => Some(separator::render(theme)),
+        "skeleton" => Some(skeleton::render(theme)),
+        "slider" => Some(slider::render(theme)),
+        "stack" => Some(stack::render(theme)),
         "status-indicator" => Some(status_indicator::render(theme)),
+        "surface" => Some(surface::render(theme)),
         "switch" => Some(switch::render(theme)),
+        "tabs" => Some(tabs::render(theme)),
+        "text-input" => Some(text_input::render(theme)),
+        "toolbar" => Some(toolbar::render(theme)),
         _ => None,
     }
 }

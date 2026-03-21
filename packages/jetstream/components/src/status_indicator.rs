@@ -91,7 +91,7 @@ mod tests {
         );
         // Neutral status should resolve to text-secondary, not accent-base
         let dot = &el.children[0];
-        let expected = resolve_color(&theme, "semantic.color.text.secondary");
+        let expected: jetstream_runtime::game_ui::Color = resolve_color(&theme, "semantic.color.text.secondary").into();
         assert_eq!(dot.style.background, Some(expected));
     }
 }

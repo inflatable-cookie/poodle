@@ -41,30 +41,42 @@ pub fn js_checkbox(spec: &CheckboxSpec, theme: &JetstreamThemeProvider) -> JsEl 
     let state = spec.current_state();
     let is_checked = matches!(state, CheckState::Checked | CheckState::Mixed);
 
-    // Contract: mark glyph per state
-    let mark_text = match state {
-        CheckState::Checked => "✓",
-        CheckState::Mixed => "—",
-        CheckState::Unchecked => "",
-    };
+    // Contract: mark icon per state (Svelte uses Icon name="check"/"minus")
     let mark_color = if is_checked { text_inverse } else { text_primary };
 
     // Contract: indicator border = accent-base when checked, border-default when unchecked
     let indicator_border = if is_checked { indicator_fill } else { border_default };
+    // Contract: indicator bg = accent-base when checked, background-surface when unchecked
+    let surface = resolve_color(theme, "semantic.color.background.surface");
+    let indicator_bg = if is_checked { indicator_fill } else { surface };
 
     // ── Indicator (contract: 1.125rem = 18px, border-radius 0.3125rem = 5px) ──
-    let indicator = ui_element::div()
+    let mut indicator = ui_element::div()
         .w(18.0)  // 1.125rem
         .h(18.0)  // 1.125rem
         .rounded(5.0) // 0.3125rem
-        .bg(indicator_fill)
+        .bg(indicator_bg)
         .border_1().border_color(indicator_border)
-        .items_center().justify_center()
-        .child(
-            ui_element::label(mark_text)
-                .text_color(mark_color)
-                .text_size(14.0) // 0.875rem — mark size from contract
-        );
+        .items_center().justify_center();
+
+    // Mark: SVG icon (contract: check for checked, minus for mixed)
+    match state {
+        CheckState::Checked => {
+            indicator = indicator.child(
+                ui_element::icon("check")
+                    .w(14.0).h(14.0) // 0.875rem mark size
+                    .text_color(mark_color)
+            );
+        }
+        CheckState::Mixed => {
+            indicator = indicator.child(
+                ui_element::icon("minus")
+                    .w(14.0).h(14.0)
+                    .text_color(mark_color)
+            );
+        }
+        CheckState::Unchecked => {}
+    }
 
     // ── Root: label + indicator + optional label text ──
     let mut root = ui_element::div()

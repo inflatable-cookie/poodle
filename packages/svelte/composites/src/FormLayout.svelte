@@ -1,7 +1,7 @@
 <script lang="ts">
   import { Callout, FormActions } from "@pug/svelte-primitives";
 
-  export let columns = 2;
+  export let columns = 6;
   export let error: string | null = null;
   export let success: string | null = null;
   export let fieldErrors: Record<string, string> | null = null;
@@ -49,7 +49,7 @@
   .form-layout {
     display: flex;
     flex-direction: column;
-    gap: var(--pug-space-stack-md);
+    gap: var(--pug-space-stack-lg);
   }
 
   .form-layout__description {
@@ -81,13 +81,32 @@
     margin-bottom: 0.125rem;
   }
 
-  .form-layout__grid {
-    display: grid;
-    grid-template-columns: repeat(var(--fl-columns, 2), 1fr);
-    gap: var(--pug-space-stack-md) var(--pug-space-inline-md);
+  .form-layout {
+    container-type: inline-size;
   }
 
-  @media (max-width: 640px) {
+  .form-layout__grid {
+    display: grid;
+    grid-template-columns: repeat(var(--fl-columns, 6), 1fr);
+    gap: var(--pug-space-stack-lg) var(--pug-space-inline-md);
+  }
+
+  @container (max-width: 600px) {
+    .form-layout__grid {
+      grid-template-columns: repeat(2, 1fr);
+    }
+
+    .form-layout__grid :global([style*="grid-column"]) {
+      grid-column: span 1 !important;
+    }
+
+    .form-layout__grid :global([style*="span 6"]),
+    .form-layout__grid :global([style*="span -1"]) {
+      grid-column: 1 / -1 !important;
+    }
+  }
+
+  @container (max-width: 480px) {
     .form-layout__grid {
       grid-template-columns: 1fr;
     }
