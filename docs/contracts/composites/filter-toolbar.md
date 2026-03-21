@@ -1,34 +1,40 @@
 # FilterToolbar
 
 Status: seed contract
-Updated: 2026-03-11
+Updated: 2026-03-21
 
 ## 1. Purpose
 
 - Component name: `FilterToolbar`
 - Layer: `composites`
-- Summary: a compact control strip for search, filtering, sorting, and result
-  summary affordances above lists or grids
-- In scope: search and filter control grouping, result summary slot, secondary
-  actions, responsive stacking
-- Out of scope: result data ownership, domain-specific filter logic, command
-  palette behavior
+- Summary: a compact, optionally collapsible control strip for search, filtering,
+  sorting, and result summary affordances above lists or grids
+- In scope: search and filter control grouping, responsive grid layout, collapsible
+  state, result summary, action buttons, secondary actions
+- Out of scope: result data ownership, domain-specific filter logic, active filter
+  pill management, command palette behavior
 
 ## 2. Anatomy
 
 ```text
 [Root Toolbar]
-  ├── [Primary Controls]
-  ├── [Summary] (optional)
+  ├── [Header]
+  │     ├── [CollapseToggle] (optional)
+  │     ├── [Summary] (optional)
+  │     └── [Actions] (optional)
+  ├── [Controls Grid] (hidden when collapsed)
   └── [Secondary Actions] (optional)
 ```
 
 | Part | Required | Description | Token Targets |
 |------|----------|-------------|---------------|
-| Root Toolbar | yes | control grouping container | surface, spacing, separator |
-| Primary Controls | yes | search/filter/sort controls | gap, wrap |
-| Summary | no | result count or active-filter summary | typography, text color |
-| Secondary Actions | no | clear, create, export, or related actions | action spacing |
+| Root Toolbar | yes | control grouping container | surface, spacing, border, radius |
+| Header | yes | row containing toggle, summary, and actions | gap, alignment |
+| CollapseToggle | no | chevron toggle to show/hide controls | via CollapseToggle primitive |
+| Summary | no | result count or active-filter summary text | typography, text-secondary |
+| Actions | no | icon buttons (refresh, etc.) aligned right | gap |
+| Controls Grid | yes | responsive grid of filter controls | grid columns, gap |
+| Secondary Actions | no | clear, create, export, or related actions | gap |
 
 ## 3. Props And Inputs
 
@@ -36,13 +42,25 @@ Updated: 2026-03-11
 
 | Prop | Type | Default | Required | Notes |
 |------|------|---------|----------|-------|
-| `summaryText` | `string \| null` | `null` | no | visible summary copy |
-| `isSticky` | `boolean` | `false` | no | allows sticky browse controls when host supports it |
 | `ariaLabel` | `string` | `"Filters"` | no | toolbar/group label |
+| `summaryText` | `string \| null` | `null` | no | visible summary copy in header |
+| `collapsible` | `boolean` | `false` | no | whether controls can be collapsed |
+| `collapsed` | `boolean` | `false` | no | current collapsed state (bindable) |
+| `columns` | `number` | `4` | no | number of grid columns at full width |
+| `minItemWidth` | `string` | `"10rem"` | no | minimum width per grid item |
+| `isSticky` | `boolean` | `false` | no | sticky positioning when host supports it |
+
+### Slots
+
+| Slot | Purpose |
+|------|---------|
+| default | filter controls (SearchField, Select, etc.) placed in the grid |
+| `actions` | icon buttons in the header row (refresh, settings, etc.) |
+| `secondary` | trailing actions below the grid (reset, export, etc.) |
 
 ### Controlled And Uncontrolled
 
-- declarative control-group composite
+- `collapsed` is bindable for two-way control
 - filter state is fully host-owned
 
 ## 4. States
@@ -51,10 +69,11 @@ Updated: 2026-03-11
 
 | State | Trigger | Expected Result |
 |-------|---------|-----------------|
-| simple | controls only | compact control strip |
-| summarized | `summaryText` present | summary region visible |
-| no-results summary | host reports zero matches | summary remains textual rather than icon-only |
-| sticky | `isSticky=true` | sticky positioning treatment where supported |
+| expanded | default or `collapsed=false` | header + controls grid visible |
+| collapsed | `collapsible=true`, `collapsed=true` | header only, controls hidden |
+| summarized | `summaryText` present | summary text in header row |
+| with-actions | actions slot populated | icon buttons right-aligned in header |
+| sticky | `isSticky=true` | sticky positioning with elevation |
 
 ### Component States
 
@@ -62,15 +81,14 @@ State table is sufficient.
 
 ## 5. Events
 
-No component-owned events beyond child control behavior.
+No component-owned events beyond child control behavior and collapse toggle.
 
 ## 6. Accessibility
 
 ### Semantics
 
-- Role: toolbar, group, or labeled region depending on content density and
-  action posture
-- Required attributes: stable accessible label for the control group
+- Role: `toolbar` with accessible label
+- Required attributes: `aria-label` for the control group
 - Optional attributes: summary description relationship when helpful
 - Labeling rules: the summary supplements the toolbar; it does not replace the
   accessible label
@@ -79,7 +97,8 @@ No component-owned events beyond child control behavior.
 
 | Key | Behavior |
 |-----|----------|
-| `Tab` | moves through contained controls in DOM or view order |
+| `Tab` | moves through contained controls in DOM order |
+| `Enter`/`Space` | toggles collapse when CollapseToggle is focused |
 | toolbar-internal arrows | only where child controls define them |
 
 ### Focus And Announcement
@@ -87,42 +106,45 @@ No component-owned events beyond child control behavior.
 - focus entry: the toolbar container is not focusable by default
 - focus exit: sticky positioning must not create duplicate focus order
 - live-region behavior: summary changes may be announced only when the host
-  decides the result update is material; the toolbar itself should not force a
-  live region
-- GPUI-native accessibility mapping notes: GPUI must preserve labeled group or
-  toolbar semantics and logical control order even when layout compacts or wraps
+  decides the result update is material
+- collapse toggle: managed by CollapseToggle primitive accessibility
 
 ## 7. Layout
 
 ### Sizing
 
-- controls may wrap into multiple lines at narrow widths
-- summary and actions may stack below controls when constrained
+- controls grid uses CSS grid with responsive breakpoints:
+  - full width: `columns` columns (default 4)
+  - ≤960px: 2 columns
+  - ≤640px: 1 column
+- each grid item has a minimum width of `minItemWidth` (default `10rem`)
+- summary and actions remain in the header row at all widths
 
 ### Composition
 
 - parent expectations: browser-style pages, settings views with search/filter
   affordances
 - child expectations: search fields, selects, segmented controls, buttons,
-  badges, pills
+  icon buttons
 - resizing rules: primary controls remain first in reading and focus order
-- host rule: changing query or filters may reset pagination or progressive-load
-  windows, but that policy stays host-owned and explicit
 
 ## 8. Token Usage
 
 | Part | Token | Purpose |
 |------|-------|---------|
-| Root Toolbar | surface, spacing, and separator roles | grouping shell |
-| Summary | subdued text roles | result metadata |
-| Secondary Actions | action gap roles | trailing controls |
-| Sticky posture | surface/elevation roles | persistent browse chrome |
+| Root Toolbar | `border-subtle`, `radius-surface`, `background-elevated` | grouping shell |
+| Header | `space-inline-sm` | header row gap |
+| Summary | `text-secondary`, `label-size` | result metadata |
+| Controls Grid | `space-inline-sm` | grid gap |
+| Secondary Actions | `space-inline-sm` | trailing controls gap |
+| Sticky posture | `elevation-surface` | persistent browse chrome |
 
 ## 9. Svelte Notes
 
-- expected substrate: `Inline`, `Stack`, `Surface`, and foundation controls
-- wrapper strategy: sticky behavior is allowed implementation detail when it
-  does not change semantics or focus order
+- uses CollapseToggle primitive for collapse affordance
+- controls grid uses CSS custom properties (`--ft-columns`, `--ft-min-width`)
+  driven by props
+- `collapsed` prop supports `bind:collapsed` for two-way binding
 
 ## 10. GPUI Notes
 
@@ -136,40 +158,59 @@ No component-owned events beyond child control behavior.
 
 - [ ] labeled-group semantics and control order match
 - [ ] summary meaning and placement in the accessibility tree match
+- [ ] collapse behavior hides/shows controls consistently
 
 ### Tier 2: Visual Parity
 
-- [ ] control grouping, spacing, and sticky emphasis use comparable token roles
+- [ ] control grouping, spacing, and grid layout use comparable token roles
+- [ ] responsive breakpoints produce equivalent column reduction
 
 ### Tier 3: Implementation Freedom
 
-- [ ] wrap and sticky mechanics stay internal
+- [ ] wrap, sticky, and grid mechanics stay internal
 
 ## 12. Known Deltas
 
 | Delta | Why Allowed | Approval Status | Follow-Up |
 |-------|-------------|-----------------|-----------|
 | sticky realization may differ | runtime layout systems differ | allowed | keep order and label semantics strict |
+| grid breakpoints may vary | viewport detection differs per platform | allowed | ensure column reduction at equivalent widths |
 
 ## 13. Specimen Definitions
 
 All preview apps must render the following specimens identically.
 
-### With filters and summary
+### Responsive grid layout
 
-A toolbar with search, select filter, and result summary:
-
-| Label | Props/Config | Expected Visual |
-|-------|-------------|-----------------|
-| With filters and summary | `summaryText="Showing 24 of 156 items"`, `ariaLabel="Item filters"`, children: SearchField + Select (status filter with All/Active/Archived/Draft options) | toolbar strip with search input, status dropdown, and summary text |
-
-### With secondary actions
-
-A toolbar with search and a secondary action button:
+A toolbar with four filter controls in a responsive grid:
 
 | Label | Props/Config | Expected Visual |
 |-------|-------------|-----------------|
-| With secondary actions | `ariaLabel="Project filters"`, children: SearchField; secondary slot with Reset button | toolbar with search input on start and Reset button on end |
+| Responsive grid layout | `summaryText="Showing 24 of 156 items"`, children: SearchField + 3 Selects (status, type, owner) | toolbar with summary text and 4 controls in responsive grid |
+
+### Collapsible with actions
+
+A collapsible toolbar with action buttons, expanded by default:
+
+| Label | Props/Config | Expected Visual |
+|-------|-------------|-----------------|
+| Collapsible with actions | `collapsible`, `summaryText="Showing 24 of 156 items"`, actions slot: refresh IconButton, children: SearchField + 2 Selects | toolbar with collapse toggle, summary, refresh button, and filter controls |
+
+### Collapsed by default
+
+A collapsible toolbar starting in collapsed state:
+
+| Label | Props/Config | Expected Visual |
+|-------|-------------|-----------------|
+| Collapsed by default | `collapsible`, `collapsed`, `summaryText="3 filters active"`, actions slot: refresh IconButton, children: SearchField + Select | compact header row with expand toggle, summary text, and refresh button |
+
+### With secondary slot
+
+A toolbar with secondary actions below the grid:
+
+| Label | Props/Config | Expected Visual |
+|-------|-------------|-----------------|
+| With secondary slot | `columns={3}`, children: SearchField + 2 Selects; secondary slot: Reset all button | toolbar with 3-column grid and trailing Reset all button |
 
 ## 14. Approval And Adoption Notes
 
@@ -177,9 +218,5 @@ A toolbar with search and a secondary action button:
 - approvers: pending
 - downstream adopters: settings search/filter bars, collection browsers,
   inspector filter strips
-- future follow-up: pair with richer query-builder composites if needed later
-
-## Next Task
-
-Use `FilterToolbar` inside `BrowseSearchShell` and `DataTable` compositions, and
-keep query/filter execution owned by the host.
+- future follow-up: consumers may compose active filter pills in the secondary
+  slot or header for richer filter feedback

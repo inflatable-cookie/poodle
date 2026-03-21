@@ -6,6 +6,7 @@ description = "Pug component implementations for Jetstream — token-resolved UI
 
 [dependencies]
 pug-adapter = { path = "../../contracts/adapter" }
+pug-composites = { path = "../../contracts/composites" }
 pug-primitives = { path = "../../contracts/primitives" }
 pug-tokens = { path = "../../contracts/tokens" }
 pug-jetstream = { path = "../adapter" }
