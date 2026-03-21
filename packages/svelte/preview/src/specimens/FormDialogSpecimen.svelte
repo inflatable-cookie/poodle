@@ -50,14 +50,12 @@
       on:cancel={() => (basicOpen = false)}
       on:openChange={(e) => (basicOpen = e.detail.open ? true : null)}
     >
-      <div class="form-fields">
-        <Field label="Full name">
-          <TextInput bind:value={name} placeholder="Enter name" />
-        </Field>
-        <Field label="Role">
-          <Select options={roleOptions} bind:value={role} placeholder="Select role" />
-        </Field>
-      </div>
+      <Field label="Full name">
+        <TextInput bind:value={name} placeholder="Enter name" />
+      </Field>
+      <Field label="Role">
+        <Select options={roleOptions} bind:value={role} placeholder="Select role" />
+      </Field>
     </FormDialog>
   </div>
 
@@ -74,11 +72,9 @@
       on:cancel={() => { errorOpen = false; error = null; }}
       on:openChange={(e) => { if (!e.detail.open) { errorOpen = null; error = null; } }}
     >
-      <div class="form-fields">
-        <Field label="Email">
-          <TextInput value="existing@example.com" placeholder="Enter email" />
-        </Field>
-      </div>
+      <Field label="Email">
+        <TextInput value="existing@example.com" placeholder="Enter email" />
+      </Field>
     </FormDialog>
   </div>
 
@@ -101,12 +97,6 @@
     display: flex;
     flex-direction: column;
     gap: 0.5rem;
-  }
-
-  .form-fields {
-    display: flex;
-    flex-direction: column;
-    gap: 0.75rem;
   }
 
   p {

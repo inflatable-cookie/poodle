@@ -213,6 +213,6 @@
     flex-wrap: wrap;
     gap: var(--pug-space-inline-sm);
     justify-content: flex-end;
-    margin-top: var(--pug-space-stack-md);
+    margin-top: var(--pug-space-stack-lg);
   }
 </style>

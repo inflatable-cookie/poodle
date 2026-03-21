@@ -1,7 +1,9 @@
 <script lang="ts">
   import { createEventDispatcher } from "svelte";
 
-  import { Dialog, Button, Callout } from "@pug/svelte-primitives";
+  import { Dialog, Button } from "@pug/svelte-primitives";
+
+  import FormLayout from "./FormLayout.svelte";
 
   export let open: boolean | null = null;
   export let title: string;
@@ -52,13 +54,9 @@
   dismissOnBackdrop={!submitting}
   on:openChange={handleOpenChange}
 >
-  {#if error}
-    <div class="form-dialog__error">
-      <Callout tone="danger" message={error} />
-    </div>
-  {/if}
-
-  <slot {submitting} />
+  <FormLayout {error} columns={1}>
+    <slot {submitting} />
+  </FormLayout>
 
   <svelte:fragment slot="actions">
     <Button
@@ -77,9 +75,3 @@
     </Button>
   </svelte:fragment>
 </Dialog>
-
-<style>
-  .form-dialog__error {
-    margin-bottom: var(--pug-space-stack-sm, 0.5rem);
-  }
-</style>

@@ -41,6 +41,7 @@ import FileUploadSpecimen from "./FileUploadSpecimen.svelte";
 import FilterToolbarSpecimen from "./FilterToolbarSpecimen.svelte";
 import FormActionsSpecimen from "./FormActionsSpecimen.svelte";
 import FormDialogSpecimen from "./FormDialogSpecimen.svelte";
+import FormLayoutSpecimen from "./FormLayoutSpecimen.svelte";
 import GridSpecimen from "./GridSpecimen.svelte";
 import HoverCardSpecimen from "./HoverCardSpecimen.svelte";
 import IconSpecimen from "./IconSpecimen.svelte";
@@ -163,6 +164,7 @@ export const specimenMap: Record<string, typeof SvelteComponent<any>> = {
   "filter-toolbar": FilterToolbarSpecimen,
   "form-actions": FormActionsSpecimen,
   "form-dialog": FormDialogSpecimen,
+  "form-layout": FormLayoutSpecimen,
   grid: GridSpecimen,
   "hover-card": HoverCardSpecimen,
   icon: IconSpecimen,

@@ -18,6 +18,7 @@ export { default as EmbedPreview } from "./EmbedPreview.svelte";
 export { default as EmptyState } from "./EmptyState.svelte";
 export { default as FilterToolbar } from "./FilterToolbar.svelte";
 export { default as FormDialog } from "./FormDialog.svelte";
+export { default as FormLayout } from "./FormLayout.svelte";
 export { default as InlineEditableField } from "./InlineEditableField.svelte";
 export { ListCard } from "@pug/svelte-primitives";
 export { default as LogList } from "./LogList.svelte";
