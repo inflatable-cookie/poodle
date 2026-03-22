@@ -3,7 +3,9 @@
 use gpui::*;
 use pug_gpui::GpuiThemeProvider;
 use pug_composites::{SplitOrientation, SplitViewSpec};
+use pug_primitives::{IconSize, IconSpec};
 
+use crate::primitives::Icon;
 use crate::theme_ext::resolve_color;
 
 /// A real GPUI split view backed by `SplitViewSpec`.
@@ -112,7 +114,36 @@ impl IntoElement for SplitView {
 
         // Divider
         if !spec.is_primary_collapsed && !spec.is_secondary_collapsed {
-            let mut divider = div().flex_shrink_0();
+            let icon_color = resolve_color(theme, "semantic.color.icon.primary");
+            let surface_bg = resolve_color(theme, "semantic.color.surface.raised");
+
+            // Determine chevron direction based on orientation
+            let chevron_name = if is_horizontal {
+                "chevron-left"
+            } else {
+                "chevron-up"
+            };
+
+            let collapse_icon = Icon::from_spec(
+                IconSpec::new(chevron_name).with_size(IconSize::Sm),
+                theme,
+            )
+            .with_color(icon_color);
+
+            // Collapse toggle indicator: 16x16 circle centered on divider
+            let toggle_indicator = div()
+                .absolute()
+                .flex()
+                .items_center()
+                .justify_center()
+                .size(px(16.0))
+                .rounded(px(8.0))
+                .bg(surface_bg)
+                .border_1()
+                .border_color(border)
+                .child(collapse_icon);
+
+            let mut divider = div().flex_shrink_0().relative();
 
             if is_horizontal {
                 divider = divider
@@ -122,7 +153,8 @@ impl IntoElement for SplitView {
                     .flex()
                     .items_center()
                     .justify_center()
-                    .child(div().w(px(1.0)).h_full().bg(border));
+                    .child(div().w(px(1.0)).h_full().bg(border))
+                    .child(toggle_indicator);
             } else {
                 divider = divider
                     .h(px(4.0))
@@ -131,7 +163,8 @@ impl IntoElement for SplitView {
                     .flex()
                     .items_center()
                     .justify_center()
-                    .child(div().h(px(1.0)).w_full().bg(border));
+                    .child(div().h(px(1.0)).w_full().bg(border))
+                    .child(toggle_indicator);
             }
 
             divider = divider.hover(|s| {

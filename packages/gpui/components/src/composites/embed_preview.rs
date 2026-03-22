@@ -42,7 +42,7 @@ impl IntoElement for EmbedPreview {
         if self.spec.is_loading {
             el = el.child(
                 div().flex().items_center().gap(px(8.0)).py(px(8.0))
-                    .child(div().text_xs().text_color(desc_color).child("Loading embed..."))
+                    .child(div().text_size(px(12.0)).text_color(desc_color).child("Loading embed..."))
             );
             return el.into_any_element();
         }
@@ -53,10 +53,32 @@ impl IntoElement for EmbedPreview {
             || self.spec.provider.is_some();
         if !has_content {
             el = el.child(
-                div().py(px(8.0)).text_xs().text_color(desc_color)
+                div().py(px(8.0)).text_size(px(12.0)).text_color(desc_color)
                     .child("No embed data available")
             );
             return el.into_any_element();
+        }
+
+        // Iframe placeholder when a thumbnail URL is available
+        if self.spec.thumbnail_url.is_some() {
+            el = el.child(
+                div()
+                    .w_full()
+                    .h(px(180.0))
+                    .rounded(radius)
+                    .bg(resolve_color(&self.theme, "semantic.color.background.subtle"))
+                    .border_1()
+                    .border_color(border)
+                    .flex()
+                    .items_center()
+                    .justify_center()
+                    .child(
+                        div()
+                            .text_size(px(12.0))
+                            .text_color(desc_color)
+                            .child("Embed preview")
+                    )
+            );
         }
 
         // Normal content rendering
@@ -64,10 +86,10 @@ impl IntoElement for EmbedPreview {
             el = el.child(div().text_size(px(14.0)).text_color(title_color).font_weight(FontWeight::MEDIUM).child(title.clone()));
         }
         if let Some(ref desc) = self.spec.description {
-            el = el.child(div().text_xs().text_color(desc_color).child(desc.clone()));
+            el = el.child(div().text_size(px(12.0)).line_height(relative(1.4)).text_color(desc_color).child(desc.clone()));
         }
         if let Some(ref provider) = self.spec.provider {
-            el = el.child(div().text_xs().text_color(desc_color).child(provider.clone()));
+            el = el.child(div().text_size(px(12.0)).text_color(desc_color).child(provider.clone()));
         }
         el.into_any_element()
     }

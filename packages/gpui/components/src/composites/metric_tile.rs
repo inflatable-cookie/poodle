@@ -62,14 +62,16 @@ impl IntoElement for MetricTile {
             .py(padding)
             .child(
                 div()
-                    .text_xs()
+                    .text_size(px(12.0))
+                    .line_height(relative(1.3))
                     .text_color(label_color)
                     .child(spec.label.clone()),
             )
             .child(
                 div()
-                    .text_base()
+                    .text_size(px(16.0))
                     .font_weight(FontWeight::BOLD)
+                    .line_height(relative(1.2))
                     .text_color(value_color)
                     .child(spec.value.clone()),
             )

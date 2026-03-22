@@ -159,6 +159,151 @@ impl IntoElement for DateTimePicker {
             }
         }
 
-        trigger.into_any_element()
+        let mut container = div()
+            .flex()
+            .flex_col()
+            .gap(px(4.0))
+            .child(trigger);
+
+        if is_open {
+            let section_padding = resolve_px(theme, "semantic.space.stack.md");
+            let inner_gap = resolve_px(theme, "semantic.space.stack.sm");
+
+            let weekdays = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
+
+            // Weekday header row
+            let mut weekday_row = div()
+                .flex()
+                .items_center()
+                .gap(px(2.0));
+            for day in &weekdays {
+                weekday_row = weekday_row.child(
+                    div()
+                        .flex_1()
+                        .flex()
+                        .justify_center()
+                        .text_size(px(11.0))
+                        .text_color(text_secondary)
+                        .child(*day),
+                );
+            }
+
+            // Placeholder grid rows (6 rows x 7 cols)
+            let mut grid = div().flex().flex_col().gap(px(2.0));
+            for _row in 0..6 {
+                let mut row = div().flex().items_center().gap(px(2.0));
+                for _col in 0..7 {
+                    row = row.child(
+                        div()
+                            .flex_1()
+                            .h(px(28.0))
+                            .flex()
+                            .items_center()
+                            .justify_center()
+                            .rounded(control_radius)
+                            .text_size(px(12.0))
+                            .text_color(text_secondary)
+                            .child("—"),
+                    );
+                }
+                grid = grid.child(row);
+            }
+
+            // Calendar section
+            let calendar_section = div()
+                .p(section_padding)
+                .flex()
+                .flex_col()
+                .gap(inner_gap)
+                .child(
+                    div()
+                        .text_size(px(14.0))
+                        .font_weight(FontWeight::SEMIBOLD)
+                        .text_color(text_primary)
+                        .child("Select date"),
+                )
+                .child(weekday_row)
+                .child(grid);
+
+            // Separator
+            let separator = div()
+                .w_full()
+                .h(px(1.0))
+                .bg(border);
+
+            // Time section
+            let time_display = value.time.as_deref().unwrap_or("--:--");
+            let time_section = div()
+                .p(section_padding)
+                .flex()
+                .items_center()
+                .justify_between()
+                .child(
+                    div()
+                        .text_size(px(13.0))
+                        .text_color(text_secondary)
+                        .child("Time"),
+                )
+                .child(
+                    div()
+                        .px(inline_padding)
+                        .h(px(28.0))
+                        .rounded(control_radius)
+                        .bg(surface_bg)
+                        .border_1()
+                        .border_color(border)
+                        .flex()
+                        .items_center()
+                        .text_size(px(13.0))
+                        .text_color(text_primary)
+                        .child(time_display.to_string()),
+                );
+
+            // Bottom action bar
+            let action_bar = div()
+                .p(section_padding)
+                .border_t_1()
+                .border_color(border)
+                .flex()
+                .items_center()
+                .justify_between()
+                .child(
+                    div()
+                        .text_size(px(12.0))
+                        .text_color(accent)
+                        .cursor_pointer()
+                        .child("Today"),
+                )
+                .child(
+                    div()
+                        .px(inline_padding)
+                        .h(px(28.0))
+                        .rounded(control_radius)
+                        .bg(accent)
+                        .flex()
+                        .items_center()
+                        .justify_center()
+                        .text_size(px(12.0))
+                        .text_color(elevated_bg)
+                        .cursor_pointer()
+                        .child("Done"),
+                );
+
+            let overlay = div()
+                .rounded(control_radius)
+                .bg(elevated_bg)
+                .border_1()
+                .border_color(border)
+                .shadow_md()
+                .overflow_hidden()
+                .child(calendar_section)
+                .child(separator)
+                .child(time_section)
+                .child(action_bar);
+
+            container = container.child(overlay);
+        }
+
+        container.into_any_element()
     }
 }

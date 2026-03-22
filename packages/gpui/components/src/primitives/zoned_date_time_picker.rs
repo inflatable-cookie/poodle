@@ -2,8 +2,9 @@
 
 use gpui::*;
 use pug_gpui::GpuiThemeProvider;
-use pug_primitives::ZonedDateTimePickerSpec;
+use pug_primitives::{IconSize, IconSpec, ZonedDateTimePickerSpec};
 
+use super::icon::Icon;
 use crate::theme_ext::{resolve_color, resolve_opacity, resolve_px, resolve_radius};
 
 /// A real GPUI zoned date-time picker component backed by `ZonedDateTimePickerSpec`.
@@ -97,10 +98,12 @@ impl IntoElement for ZonedDateTimePicker {
         }
 
         trigger = trigger.child(
-            div()
-                .text_xs()
-                .text_color(text_secondary)
-                .child(if spec.is_open { "\u{25b4}" } else { "\u{25be}" }),
+            Icon::from_spec(
+                IconSpec::new(if spec.is_open { "chevron-up" } else { "chevron-down" })
+                    .with_size(IconSize::Sm),
+                theme,
+            )
+            .with_color(text_secondary),
         );
 
         trigger = trigger.focus(move |s| s.border_color(focus_ring));
@@ -116,6 +119,83 @@ impl IntoElement for ZonedDateTimePicker {
         let mut wrapper = div().flex().flex_col().gap(px(4.0)).child(trigger);
 
         if spec.is_open {
+            let time_display = spec
+                .value
+                .as_deref()
+                .unwrap_or("--:--");
+
+            let tz_overlay_display = spec
+                .time_zone
+                .as_deref()
+                .unwrap_or("Select timezone...");
+            let tz_has_value = spec.time_zone.is_some();
+
+            let weekdays = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
+
+            let mut weekday_row = div().flex().gap(px(4.0));
+            for day in &weekdays {
+                weekday_row = weekday_row.child(
+                    div()
+                        .flex_1()
+                        .text_size(px(11.0))
+                        .text_color(text_secondary)
+                        .child(day.to_string()),
+                );
+            }
+
+            // Calendar section
+            let calendar_section = div()
+                .flex()
+                .flex_col()
+                .gap(px(8.0))
+                .child(
+                    div()
+                        .text_size(px(14.0))
+                        .font_weight(FontWeight::SEMIBOLD)
+                        .text_color(text_primary)
+                        .child("Select date"),
+                )
+                .child(weekday_row)
+                .child(div().min_h(px(180.0)));
+
+            // Time section
+            let time_section = div()
+                .flex()
+                .flex_col()
+                .gap(px(4.0))
+                .py(px(8.0))
+                .child(
+                    div()
+                        .text_size(px(12.0))
+                        .text_color(text_secondary)
+                        .child("Time"),
+                )
+                .child(
+                    div()
+                        .text_size(px(14.0))
+                        .text_color(text_primary)
+                        .child(time_display.to_string()),
+                );
+
+            // Timezone section
+            let timezone_section = div()
+                .flex()
+                .flex_col()
+                .gap(px(4.0))
+                .py(px(8.0))
+                .child(
+                    div()
+                        .text_size(px(12.0))
+                        .text_color(text_secondary)
+                        .child("Time zone"),
+                )
+                .child(
+                    div()
+                        .text_size(px(14.0))
+                        .text_color(if tz_has_value { text_primary } else { text_secondary })
+                        .child(tz_overlay_display.to_string()),
+                );
+
             let overlay = div()
                 .rounded(control_radius)
                 .bg(elevated_bg)
@@ -123,9 +203,13 @@ impl IntoElement for ZonedDateTimePicker {
                 .border_color(border)
                 .shadow_md()
                 .p(px(16.0))
-                .text_size(px(14.0))
-                .text_color(text_primary)
-                .child("Calendar + time picker + timezone selector");
+                .flex()
+                .flex_col()
+                .child(calendar_section)
+                .child(div().border_b_1().border_color(border))
+                .child(time_section)
+                .child(div().border_b_1().border_color(border))
+                .child(timezone_section);
 
             wrapper = wrapper.child(overlay);
         }

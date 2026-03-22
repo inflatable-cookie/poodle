@@ -142,14 +142,37 @@ impl IntoElement for Drawer {
                 )
         };
 
-        let mut row = div().flex().h_full();
+        if spec.is_modal {
+            // Modal mode: main as base layer, backdrop overlay on top
+            let mut backdrop = div()
+                .absolute()
+                .inset_0()
+                .bg(hsla(0.0 / 360.0, 0.0, 0.0, 0.4))
+                .flex();
 
-        if is_left {
-            row = row.child(drawer_panel).child(main);
+            if is_left {
+                backdrop = backdrop.child(drawer_panel).child(div().flex_1());
+            } else {
+                backdrop = backdrop.child(div().flex_1()).child(drawer_panel);
+            }
+
+            div()
+                .relative()
+                .size_full()
+                .child(main)
+                .child(backdrop)
+                .into_any_element()
         } else {
-            row = row.child(main).child(drawer_panel);
-        }
+            // Inline mode: side-by-side flex row
+            let mut row = div().flex().h_full();
 
-        row.into_any_element()
+            if is_left {
+                row = row.child(drawer_panel).child(main);
+            } else {
+                row = row.child(main).child(drawer_panel);
+            }
+
+            row.into_any_element()
+        }
     }
 }

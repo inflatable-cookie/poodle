@@ -11,6 +11,8 @@ use crate::theme_ext::{resolve_color, resolve_px, resolve_radius};
 pub struct Callout {
     spec: CallOutSpec,
     theme: GpuiThemeProvider,
+    is_dismissible: bool,
+    on_dismiss: Option<Box<dyn Fn(&ClickEvent, &mut Window, &mut App) + 'static>>,
 }
 
 impl std::ops::Deref for Callout {
@@ -20,13 +22,20 @@ impl std::ops::Deref for Callout {
 
 impl Callout {
     pub fn new(theme: &GpuiThemeProvider) -> Self {
-        Self { spec: CallOutSpec::new(), theme: theme.clone() }
+        Self {
+            spec: CallOutSpec::new(),
+            theme: theme.clone(),
+            is_dismissible: false,
+            on_dismiss: None,
+        }
     }
 
     pub fn from_spec(spec: CallOutSpec, theme: &GpuiThemeProvider) -> Self {
         Self {
             spec,
             theme: theme.clone(),
+            is_dismissible: false,
+            on_dismiss: None,
         }
     }
 
@@ -35,6 +44,18 @@ impl Callout {
     pub fn title(mut self, v: impl Into<String>) -> Self { self.spec.title = Some(v.into()); self }
     pub fn content(mut self, v: impl Into<String>) -> Self { self.spec.content = Some(v.into()); self }
 
+    /// Alias for `content` — some contracts call it `message`.
+    pub fn message(mut self, v: impl Into<String>) -> Self { self.spec.content = Some(v.into()); self }
+
+    pub fn dismissible(mut self, v: bool) -> Self { self.is_dismissible = v; self }
+
+    pub fn on_dismiss(
+        mut self,
+        handler: impl Fn(&ClickEvent, &mut Window, &mut App) + 'static,
+    ) -> Self {
+        self.on_dismiss = Some(Box::new(handler));
+        self
+    }
 }
 
 impl IntoElement for Callout {
@@ -113,6 +134,30 @@ impl IntoElement for Callout {
         }
 
         el = el.child(content_col);
+
+        // Dismiss button column — shown when dismissible
+        if self.is_dismissible {
+            let dismiss_id = SharedString::from("pug-callout-dismiss");
+            let mut dismiss_btn = div()
+                .id(dismiss_id)
+                .flex_shrink_0()
+                .cursor_pointer()
+                .pt(px(2.0))
+                .child(
+                    Icon::from_spec(
+                        IconSpec::new("x").with_size(IconSize::Sm),
+                        theme,
+                    )
+                    .with_color(text_secondary),
+                );
+
+            if let Some(handler) = self.on_dismiss {
+                dismiss_btn =
+                    dismiss_btn.on_click(move |event, window, cx| handler(event, window, cx));
+            }
+
+            el = el.child(dismiss_btn);
+        }
 
         el.into_any_element()
     }

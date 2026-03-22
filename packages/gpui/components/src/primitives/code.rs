@@ -10,6 +10,8 @@ use crate::theme_ext::{resolve_color, resolve_px, resolve_radius};
 pub struct Code {
     spec: CodeSpec,
     theme: GpuiThemeProvider,
+    is_inline: bool,
+    max_height_px: Option<f32>,
 }
 
 impl std::ops::Deref for Code {
@@ -19,13 +21,15 @@ impl std::ops::Deref for Code {
 
 impl Code {
     pub fn new(theme: &GpuiThemeProvider) -> Self {
-        Self { spec: CodeSpec::new(), theme: theme.clone() }
+        Self { spec: CodeSpec::new(), theme: theme.clone(), is_inline: false, max_height_px: None }
     }
 
     pub fn from_spec(spec: CodeSpec, theme: &GpuiThemeProvider) -> Self {
         Self {
             spec,
             theme: theme.clone(),
+            is_inline: false,
+            max_height_px: None,
         }
     }
 
@@ -34,6 +38,10 @@ impl Code {
     pub fn language(mut self, v: impl Into<String>) -> Self { self.spec.language = Some(v.into()); self }
     pub fn show_line_numbers(mut self, v: bool) -> Self { self.spec.show_line_numbers = v; self }
     pub fn copyable(mut self, v: bool) -> Self { self.spec.is_copyable = v; self }
+
+    // ── Local builders ────────────────────────────────────────
+    pub fn inline(mut self, v: bool) -> Self { self.is_inline = v; self }
+    pub fn max_height(mut self, v: f32) -> Self { self.max_height_px = Some(v); self }
 
 }
 
@@ -44,12 +52,27 @@ impl IntoElement for Code {
         let theme = &self.theme;
         let spec = &self.spec;
 
+        let fill = resolve_color(theme, spec.fill_token());
+        let text_color = resolve_color(theme, spec.text_color_token());
+
+        // ── Inline mode: minimal span-like rendering ──────────
+        if self.is_inline {
+            return div()
+                .px(px(4.0))
+                .py(px(1.0))
+                .rounded(px(3.0))
+                .bg(fill.opacity(0.6))
+                .text_size(px(13.0))
+                .text_color(text_color)
+                .child(spec.content.clone())
+                .into_any_element();
+        }
+
+        // ── Block mode ────────────────────────────────────────
         let panel_x = resolve_px(theme, "semantic.space.panel.x");
         let panel_y = resolve_px(theme, "semantic.space.panel.y");
         let inline_gap = resolve_px(theme, "semantic.space.inline.sm");
 
-        let fill = resolve_color(theme, spec.fill_token());
-        let text_color = resolve_color(theme, spec.text_color_token());
         let border = resolve_color(theme, spec.border_token());
         let text_secondary = resolve_color(theme, "semantic.color.text.secondary");
         // Contract: radius-surface, not radius-control
@@ -108,6 +131,11 @@ impl IntoElement for Code {
 
         // Code content area
         let mut code_area = div().px(panel_x).py(panel_y);
+
+        // Apply max_height constraint if set
+        if let Some(mh) = self.max_height_px {
+            code_area = code_area.max_h(px(mh)).overflow_hidden();
+        }
 
         // Content with optional line numbers
         if spec.show_line_numbers {

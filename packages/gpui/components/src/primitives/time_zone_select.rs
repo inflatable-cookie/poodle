@@ -2,9 +2,10 @@
 
 use gpui::*;
 use pug_gpui::GpuiThemeProvider;
-use pug_primitives::TimeZoneSelectSpec;
+use pug_primitives::{IconSize, IconSpec, TimeZoneSelectSpec};
 
 use crate::theme_ext::{resolve_color, resolve_opacity, resolve_px, resolve_radius};
+use super::icon::Icon;
 
 /// A real GPUI timezone select dropdown component backed by `TimeZoneSelectSpec`.
 pub struct TimeZoneSelect {
@@ -68,6 +69,7 @@ impl IntoElement for TimeZoneSelect {
         };
 
         let focus_ring = resolve_color(theme, "semantic.color.accent.focusRing");
+        let hover_bg = resolve_color(theme, "semantic.color.background.hover");
 
         let mut trigger = div()
             .id(SharedString::from("pug-tz-select"))
@@ -84,10 +86,10 @@ impl IntoElement for TimeZoneSelect {
             .text_size(px(14.0))
             .child(div().text_color(text_col).child(trigger_text))
             .child(
-                div()
-                    .text_xs()
-                    .text_color(text_secondary)
-                    .child(if spec.is_open { "\u{25b4}" } else { "\u{25be}" }),
+                Icon::from_spec(
+                    IconSpec::new(if spec.is_open { "chevron-up" } else { "chevron-down" }).with_size(IconSize::Sm),
+                    theme,
+                ).with_color(text_secondary),
             );
 
         trigger = trigger.focus(move |s| s.border_color(focus_ring));
@@ -103,7 +105,21 @@ impl IntoElement for TimeZoneSelect {
         let mut wrapper = div().flex().flex_col().gap(px(4.0)).child(trigger);
 
         if spec.is_open {
-            let dropdown = div()
+            let timezones = [
+                "UTC",
+                "America/New_York",
+                "America/Chicago",
+                "America/Denver",
+                "America/Los_Angeles",
+                "Europe/London",
+                "Europe/Paris",
+                "Europe/Berlin",
+                "Asia/Tokyo",
+                "Asia/Shanghai",
+                "Australia/Sydney",
+            ];
+
+            let mut dropdown = div()
                 .rounded(control_radius)
                 .bg(elevated_bg)
                 .border_1()
@@ -111,25 +127,18 @@ impl IntoElement for TimeZoneSelect {
                 .shadow_md()
                 .py(px(4.0))
                 .text_size(px(14.0))
-                .text_color(text_primary)
-                .child(
+                .text_color(text_primary);
+
+            for tz in timezones {
+                dropdown = dropdown.child(
                     div()
                         .px(px(10.0))
                         .py(px(6.0))
-                        .child("UTC"),
-                )
-                .child(
-                    div()
-                        .px(px(10.0))
-                        .py(px(6.0))
-                        .child("America/New_York"),
-                )
-                .child(
-                    div()
-                        .px(px(10.0))
-                        .py(px(6.0))
-                        .child("Europe/London"),
+                        .cursor_pointer()
+                        .hover(move |s| s.bg(hover_bg))
+                        .child(tz),
                 );
+            }
 
             wrapper = wrapper.child(dropdown);
         }

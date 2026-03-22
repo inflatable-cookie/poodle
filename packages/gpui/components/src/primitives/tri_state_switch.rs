@@ -1,12 +1,17 @@
 //! TriStateSwitch — real GPUI component backed by TriStateSwitchSpec.
+//!
+//! Renders as a 3-segment radiogroup: Excluded | Default | Included.
 
 use gpui::*;
 use pug_gpui::GpuiThemeProvider;
 use pug_primitives::{CheckState, TriStateSwitchSpec};
 
-use crate::theme_ext::{color_mix, resolve_color, resolve_opacity, resolve_px};
+use crate::theme_ext::{resolve_color, resolve_opacity, resolve_px};
 
 /// A real GPUI tri-state switch component backed by `TriStateSwitchSpec`.
+///
+/// Renders as a 3-segment radiogroup (Excluded / Default / Included) instead
+/// of a sliding switch.
 pub struct TriStateSwitch {
     spec: TriStateSwitchSpec,
     theme: GpuiThemeProvider,
@@ -36,7 +41,6 @@ impl TriStateSwitch {
     pub fn label(mut self, v: impl Into<String>) -> Self { self.spec.label = Some(v.into()); self }
     pub fn disabled(mut self, v: bool) -> Self { self.spec.is_disabled = v; self }
 
-
     pub fn on_click(
         mut self,
         handler: impl Fn(&ClickEvent, &mut Window, &mut App) + 'static,
@@ -55,91 +59,114 @@ impl IntoElement for TriStateSwitch {
 
         let inline_gap = resolve_px(theme, "semantic.space.inline.sm");
 
-        let accent = resolve_color(theme, "semantic.color.accent.base");
-        let border = resolve_color(theme, "semantic.color.border.default");
+        // Colors
+        let border_color = resolve_color(theme, "semantic.color.border.default");
         let surface_bg = resolve_color(theme, "semantic.color.background.surface");
         let text_primary = resolve_color(theme, "semantic.color.text.primary");
-        let thumb_color = resolve_color(theme, "semantic.color.text.inverse");
+        let text_secondary = resolve_color(theme, "semantic.color.text.secondary");
+        let danger = resolve_color(theme, "semantic.color.status.danger");
+        let success = resolve_color(theme, "semantic.color.status.success");
+        let elevated_bg = resolve_color(theme, "semantic.color.background.elevated");
+        let focus_ring = resolve_color(theme, "semantic.color.accent.focusRing");
         let disabled_opacity = resolve_opacity(theme, "semantic.state.opacity.disabled");
 
-        // Contract: same dimensions as regular switch
-        // Track = 2.125rem (34px) wide x 1.25rem (20px) tall
-        let track_w = px(34.0);
-        let track_h = px(20.0);
-        let track_radius = px(10.0); // pill
-        let track_padding = px(2.0);
+        // Active segment background colors (with subtle opacity for danger/success)
+        let danger_bg = Hsla { a: 0.15, ..danger };
+        let success_bg = Hsla { a: 0.15, ..success };
 
-        // Thumb = 0.875rem (14px) diameter
-        let thumb_size = px(14.0);
-        let thumb_radius = px(7.0);
+        // Determine which segment is active
+        let is_excluded = matches!(spec.state, CheckState::Unchecked);
+        let is_default = matches!(spec.state, CheckState::Mixed);
+        let is_included = matches!(spec.state, CheckState::Checked);
 
-        // Thumb position: unchecked=left(2), mixed=center(10), checked=right(18)
-        let thumb_offset = match spec.state {
-            CheckState::Unchecked => track_padding,
-            CheckState::Mixed => px(10.0),
-            CheckState::Checked => px(18.0),
+        // ── Build individual segments ──────────────────────────
+
+        let segment_base = |label: &'static str| {
+            div()
+                .flex_1()
+                .flex()
+                .items_center()
+                .justify_center()
+                .py(px(4.0))
+                .px(px(8.0))
+                .text_size(px(12.0))
+                .font_weight(FontWeight::MEDIUM)
+                .child(label)
         };
 
-        // Track fill based on state
-        let track_bg = match spec.state {
-            CheckState::Checked => color_mix(accent, surface_bg, 0.24),
-            CheckState::Mixed => color_mix(accent, surface_bg, 0.12),
-            CheckState::Unchecked => surface_bg,
+        // Excluded segment (left)
+        let excluded_seg = if is_excluded {
+            segment_base("\u{2715}") // ✕
+                .bg(danger_bg)
+                .text_color(danger)
+        } else {
+            segment_base("\u{2715}")
+                .bg(gpui::transparent_black())
+                .text_color(text_secondary)
         };
 
-        let track_border = match spec.state {
-            CheckState::Checked => color_mix(accent, border, 0.58),
-            CheckState::Mixed => color_mix(accent, border, 0.30),
-            CheckState::Unchecked => border,
+        // Default segment (center)
+        let default_seg = if is_default {
+            segment_base("\u{2014}") // —
+                .bg(elevated_bg)
+                .text_color(text_primary)
+        } else {
+            segment_base("\u{2014}")
+                .bg(gpui::transparent_black())
+                .text_color(text_secondary)
         };
 
-        // Knob color: accent when checked/mixed, inverse otherwise
-        let knob_color = match spec.state {
-            CheckState::Checked | CheckState::Mixed => accent,
-            CheckState::Unchecked => thumb_color,
+        // Included segment (right)
+        let included_seg = if is_included {
+            segment_base("\u{2713}") // ✓
+                .bg(success_bg)
+                .text_color(success)
+        } else {
+            segment_base("\u{2713}")
+                .bg(gpui::transparent_black())
+                .text_color(text_secondary)
         };
+
+        // ── Container (pill-shaped segmented control) ──────────
 
         let switch_id = SharedString::from("pug-tri-state-switch");
 
-        let mut track = div()
+        let mut container = div()
             .id(switch_id)
-            .w(track_w)
-            .h(track_h)
-            .rounded(track_radius)
-            .bg(track_bg)
+            .flex()
+            .flex_row()
+            .rounded(px(10.0))
             .border_1()
-            .border_color(track_border)
-            .relative()
-            .child(
-                div()
-                    .absolute()
-                    .top(track_padding)
-                    .left(thumb_offset)
-                    .w(thumb_size)
-                    .h(thumb_size)
-                    .rounded(thumb_radius)
-                    .bg(knob_color),
-            );
+            .border_color(border_color)
+            .bg(surface_bg)
+            .overflow_hidden()
+            .child(excluded_seg)
+            .child(default_seg)
+            .child(included_seg);
 
-        let focus_ring = resolve_color(theme, "semantic.color.accent.focusRing");
-        track = track.focus(move |s| s.border_color(focus_ring));
+        // Focus ring
+        container = container.focus(move |s| s.border_color(focus_ring));
 
+        // Disabled / interactive handling
         if !spec.is_disabled {
-            track = track.cursor_pointer();
+            container = container.cursor_pointer();
             if let Some(handler) = self.on_click {
-                track = track.on_click(move |event, window, cx| handler(event, window, cx));
+                container =
+                    container.on_click(move |event, window, cx| handler(event, window, cx));
             }
         } else {
-            track = track
+            container = container
                 .opacity(disabled_opacity)
                 .cursor(CursorStyle::OperationNotAllowed);
         }
+
+        // ── Outer wrapper with optional label ──────────────────
 
         let mut el = div()
             .flex()
             .items_center()
             .gap(inline_gap)
-            .child(track);
+            .child(container);
 
         if let Some(ref label) = spec.label {
             el = el.child(
