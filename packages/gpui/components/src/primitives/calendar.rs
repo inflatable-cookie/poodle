@@ -180,7 +180,9 @@ impl IntoElement for Calendar {
         cal = cal.focus(move |s| s.border_color(focus_ring));
 
         if spec.is_disabled {
-            cal = cal.opacity(disabled_opacity);
+            cal = cal
+                .opacity(disabled_opacity)
+                .cursor(CursorStyle::OperationNotAllowed);
         }
 
         // Month header

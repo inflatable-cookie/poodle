@@ -203,7 +203,9 @@ impl IntoElement for Select {
                 }
 
                 if is_opt_disabled {
-                    item = item.opacity(disabled_opacity);
+                    item = item
+                        .opacity(disabled_opacity)
+                        .cursor(CursorStyle::OperationNotAllowed);
                 } else {
                     item = item
                         .cursor_pointer()
