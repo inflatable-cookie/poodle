@@ -125,7 +125,7 @@ impl IntoElement for RangeSlider {
             .flex()
             .items_center()
             .justify_between()
-            .text_xs()
+            .text_size(px(12.0))
             .text_color(text_secondary)
             .child(format!("{:.0}", spec.clamped_low()))
             .child(format!("{:.0}", spec.clamped_high()));

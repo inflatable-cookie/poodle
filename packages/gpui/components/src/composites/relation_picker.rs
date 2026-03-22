@@ -100,7 +100,7 @@ impl IntoElement for RelationPicker {
             // Root label
             breadcrumb_row = breadcrumb_row.child(
                 div()
-                    .text_xs()
+                    .text_size(px(12.0))
                     .text_color(text_secondary)
                     .child("Root"),
             );
@@ -118,7 +118,7 @@ impl IntoElement for RelationPicker {
                 // Segment label
                 breadcrumb_row = breadcrumb_row.child(
                     div()
-                        .text_xs()
+                        .text_size(px(12.0))
                         .text_color(text_primary)
                         .child(segment.clone()),
                 );
@@ -244,7 +244,7 @@ impl IntoElement for RelationPicker {
                     if let Some(ref desc) = item.description {
                         item_content = item_content.child(
                             div()
-                                .text_xs()
+                                .text_size(px(12.0))
                                 .text_color(text_secondary)
                                 .child(desc.clone()),
                         );
@@ -256,7 +256,7 @@ impl IntoElement for RelationPicker {
                     if let Some(ref meta) = item.meta {
                         item_el = item_el.child(
                             div()
-                                .text_xs()
+                                .text_size(px(12.0))
                                 .text_color(text_secondary.opacity(0.7))
                                 .child(meta.clone()),
                         );
@@ -282,7 +282,7 @@ impl IntoElement for RelationPicker {
                 .border_color(border)
                 .child(
                     div()
-                        .text_xs()
+                        .text_size(px(12.0))
                         .text_color(text_secondary)
                         .child(format!(
                             "{} of {} selected",

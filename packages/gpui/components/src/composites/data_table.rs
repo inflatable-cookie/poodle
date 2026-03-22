@@ -109,7 +109,7 @@ impl IntoElement for DataTable {
                 .flex_1()
                 .px(inline_padding)
                 .py(px(8.0))
-                .text_xs()
+                .text_size(px(12.0))
                 .font_weight(FontWeight::SEMIBOLD)
                 .text_color(text_secondary)
                 .when(col.align_end, |el| el.text_right());
@@ -138,7 +138,7 @@ impl IntoElement for DataTable {
                     .w(px(80.0))
                     .px(inline_padding)
                     .py(px(8.0))
-                    .text_xs()
+                    .text_size(px(12.0))
                     .text_color(text_secondary),
             );
         }
@@ -209,7 +209,7 @@ impl IntoElement for DataTable {
                             .w(px(80.0))
                             .px(inline_padding)
                             .py(px(10.0))
-                            .text_xs()
+                            .text_size(px(12.0))
                             .text_color(accent)
                             .child(action_label),
                     );

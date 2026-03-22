@@ -59,7 +59,7 @@ impl IntoElement for MarkdownEditor {
         // Helper: mode button
         let mode_btn = |label: &str, is_active: bool| -> Div {
             let mut btn = div()
-                .text_xs().px(px(8.0)).py(px(2.0)).rounded(px(4.0))
+                .text_size(px(12.0)).px(px(8.0)).py(px(2.0)).rounded(px(4.0))
                 .cursor(CursorStyle::PointingHand);
             if is_active {
                 btn = btn.bg(active_bg).text_color(text_color);

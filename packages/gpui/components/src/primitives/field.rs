@@ -83,7 +83,7 @@ impl IntoElement for Field {
             if let Some(ref opt_label) = spec.optional_label {
                 label_row = label_row.child(
                     div()
-                        .text_xs()
+                        .text_size(px(12.0))
                         .text_color(description_color)
                         .child(opt_label.clone()),
                 );
@@ -96,7 +96,7 @@ impl IntoElement for Field {
         if let Some(ref description) = spec.description {
             col = col.child(
                 div()
-                    .text_xs()
+                    .text_size(px(12.0))
                     .text_color(description_color)
                     .child(description.clone()),
             );
@@ -112,7 +112,7 @@ impl IntoElement for Field {
             if let Some(ref error) = spec.error {
                 col = col.child(
                     div()
-                        .text_xs()
+                        .text_size(px(12.0))
                         .text_color(error_color)
                         .child(error.clone()),
                 );
@@ -124,7 +124,7 @@ impl IntoElement for Field {
             if let Some(ref pending) = spec.pending_message {
                 col = col.child(
                     div()
-                        .text_xs()
+                        .text_size(px(12.0))
                         .text_color(description_color)
                         .child(pending.clone()),
                 );

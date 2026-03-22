@@ -158,7 +158,7 @@ impl IntoElement for ListCard {
             if let Some(ref subtitle) = spec.subtitle {
                 col = col.child(
                     div()
-                        .text_xs()
+                        .text_size(px(12.0))
                         .text_color(subtitle_color)
                         .overflow_x_hidden()
                         .text_ellipsis()
@@ -177,7 +177,7 @@ impl IntoElement for ListCard {
         // ── Meta section ────────────────────────────────────────────
         let meta_el = spec.meta.as_ref().map(|meta| {
             div()
-                .text_xs()
+                .text_size(px(12.0))
                 .text_color(meta_color)
                 .flex_shrink_0()
                 .child(meta.clone())

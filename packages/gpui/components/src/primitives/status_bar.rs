@@ -87,7 +87,7 @@ impl IntoElement for StatusBar {
         if let Some(ref summary) = spec.summary {
             left = left.child(
                 div()
-                    .text_xs()
+                    .text_size(px(12.0))
                     .text_color(text_secondary)
                     .overflow_x_hidden()
                     .whitespace_nowrap()

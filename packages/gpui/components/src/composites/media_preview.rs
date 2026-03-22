@@ -124,7 +124,7 @@ impl IntoElement for MediaPreview {
                     )
                     .child(
                         div()
-                            .text_xs()
+                            .text_size(px(12.0))
                             .text_color(text_secondary)
                             .child(String::from(fallback_msg)),
                     ),
@@ -147,7 +147,7 @@ impl IntoElement for MediaPreview {
         // Title
         info = info.child(
             div()
-                .text_base()
+                .text_size(px(16.0))
                 .font_weight(FontWeight::SEMIBOLD)
                 .text_color(text_primary)
                 .child(spec.title.clone()),
@@ -174,14 +174,14 @@ impl IntoElement for MediaPreview {
                 if i > 0 {
                     meta_row = meta_row.child(
                         div()
-                            .text_xs()
+                            .text_size(px(12.0))
                             .text_color(text_secondary.opacity(0.5))
                             .child("\u{00B7}"),
                     );
                 }
                 meta_row = meta_row.child(
                     div()
-                        .text_xs()
+                        .text_size(px(12.0))
                         .text_color(text_secondary)
                         .child(meta.clone()),
                 );
@@ -209,7 +209,7 @@ impl IntoElement for MediaPreview {
                 let btn = div()
                     .id(action_id)
                     .cursor_pointer()
-                    .text_xs()
+                    .text_size(px(12.0))
                     .font_weight(FontWeight::MEDIUM)
                     .text_color(accent)
                     .when(action.is_disabled, |el| el.opacity(0.5))

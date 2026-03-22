@@ -67,7 +67,7 @@ impl IntoElement for Pill {
             .py(px(2.0))
             .rounded(radius)
             .bg(fill)
-            .text_xs()
+            .text_size(px(12.0))
             .text_color(text_color)
             .flex()
             .items_center()
@@ -87,7 +87,7 @@ impl IntoElement for Pill {
             let mut remove_btn = div()
                 .id(remove_id)
                 .cursor_pointer()
-                .text_xs()
+                .text_size(px(12.0))
                 .child("x");
 
             if let Some(handler) = self.on_remove {

@@ -101,7 +101,7 @@ impl IntoElement for PageHeader {
         if let Some(ref eyebrow) = spec.eyebrow {
             title_block = title_block.child(
                 div()
-                    .text_xs()
+                    .text_size(px(12.0))
                     .font_weight(FontWeight::SEMIBOLD)
                     .text_color(eyebrow_color)
                     .child(eyebrow.clone()),
@@ -110,7 +110,7 @@ impl IntoElement for PageHeader {
 
         title_block = title_block.child(
             div()
-                .text_base()
+                .text_size(px(16.0))
                 .font_weight(FontWeight::BOLD)
                 .text_color(title_color)
                 .child(spec.title.clone()),

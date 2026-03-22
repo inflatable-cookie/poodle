@@ -117,7 +117,7 @@ impl IntoElement for PickerShell {
         if let Some(ref description) = spec.description {
             header = header.child(
                 div()
-                    .text_xs()
+                    .text_size(px(12.0))
                     .text_color(text_secondary)
                     .child(description.clone()),
             );
@@ -217,7 +217,7 @@ impl IntoElement for PickerShell {
 
         footer = footer.child(
             div()
-                .text_xs()
+                .text_size(px(12.0))
                 .text_color(text_secondary)
                 .child(selection_label),
         );
@@ -226,7 +226,7 @@ impl IntoElement for PickerShell {
         if let Some(count) = spec.result_count {
             footer = footer.child(
                 div()
-                    .text_xs()
+                    .text_size(px(12.0))
                     .text_color(text_secondary.opacity(0.7))
                     .child(format!("{} result{}", count, if count == 1 { "" } else { "s" })),
             );

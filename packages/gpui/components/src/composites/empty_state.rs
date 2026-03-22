@@ -96,7 +96,7 @@ impl IntoElement for EmptyState {
         // Title
         container = container.child(
             div()
-                .text_base()
+                .text_size(px(16.0))
                 .font_weight(FontWeight::SEMIBOLD)
                 .text_color(text_primary)
                 .text_center()

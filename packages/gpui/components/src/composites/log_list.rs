@@ -113,7 +113,7 @@ impl IntoElement for LogList {
                 .child(filter_icon)
                 .child(
                     div()
-                        .text_xs()
+                        .text_size(px(12.0))
                         .text_color(text_secondary)
                         .child(
                             self.spec.filter_level
@@ -134,7 +134,7 @@ impl IntoElement for LogList {
                 .child(search_icon)
                 .child(
                     div()
-                        .text_xs()
+                        .text_size(px(12.0))
                         .text_color(text_secondary)
                         .child("Search logs\u{2026}"),
                 ),

@@ -90,7 +90,7 @@ impl IntoElement for NumberEntry {
             .justify_center()
             .rounded(stepper_inner_radius)
             .bg(stepper_bg)
-            .text_xs()
+            .text_size(px(12.0))
             .text_color(text_secondary)
             .cursor_pointer()
             .child("+");
@@ -104,7 +104,7 @@ impl IntoElement for NumberEntry {
             .justify_center()
             .rounded(stepper_inner_radius)
             .bg(stepper_bg)
-            .text_xs()
+            .text_size(px(12.0))
             .text_color(text_secondary)
             .cursor_pointer()
             .child("\u{2212}");

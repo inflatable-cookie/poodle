@@ -91,7 +91,7 @@ impl IntoElement for ZonedDateTimePicker {
         if !tz_display.is_empty() {
             trigger = trigger.child(
                 div()
-                    .text_xs()
+                    .text_size(px(12.0))
                     .text_color(text_secondary)
                     .child(tz_display.to_string()),
             );

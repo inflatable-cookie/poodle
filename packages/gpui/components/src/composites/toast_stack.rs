@@ -122,7 +122,7 @@ impl IntoElement for ToastStack {
             if let Some(ref message) = toast.message {
                 content_col = content_col.child(
                     div()
-                        .text_xs()
+                        .text_size(px(12.0))
                         .text_color(message_color)
                         .child(message.clone()),
                 );
@@ -136,7 +136,7 @@ impl IntoElement for ToastStack {
                 let mut action_btn = div()
                     .id(action_element_id)
                     .cursor_pointer()
-                    .text_xs()
+                    .text_size(px(12.0))
                     .font_weight(FontWeight::MEDIUM)
                     .text_color(accent)
                     .mt(px(4.0))

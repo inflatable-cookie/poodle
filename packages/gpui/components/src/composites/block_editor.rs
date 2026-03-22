@@ -99,7 +99,7 @@ impl IntoElement for BlockEditor {
                     ).with_color(muted)
                 )
                 .child(
-                    div().text_xs().text_color(muted).child("Add block")
+                    div().text_size(px(12.0)).text_color(muted).child("Add block")
                 )
         );
 

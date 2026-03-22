@@ -95,7 +95,7 @@ impl IntoElement for FileUpload {
             .cursor_pointer()
             .child("Browse");
 
-        let mut accept_hint = div().text_xs().text_color(text_secondary);
+        let mut accept_hint = div().text_size(px(12.0)).text_color(text_secondary);
         if let Some(ref accept) = spec.accept {
             accept_hint = accept_hint.child(format!("Accepted: {}", accept));
         }

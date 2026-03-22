@@ -122,7 +122,7 @@ impl IntoElement for FilterToolbar {
                     .py(px(2.0))
                     .rounded(px(10.0))
                     .bg(accent.opacity(0.12))
-                    .text_xs()
+                    .text_size(px(12.0))
                     .text_color(accent)
                     .child(format!(
                         "{} filter{}",
@@ -140,7 +140,7 @@ impl IntoElement for FilterToolbar {
         if let Some(count) = spec.result_count {
             toolbar = toolbar.child(
                 div()
-                    .text_xs()
+                    .text_size(px(12.0))
                     .text_color(text_secondary)
                     .child(format!(
                         "{} result{}",
@@ -156,7 +156,7 @@ impl IntoElement for FilterToolbar {
             let mut clear_btn = div()
                 .id(clear_id)
                 .cursor_pointer()
-                .text_xs()
+                .text_size(px(12.0))
                 .text_color(accent)
                 .child("Clear");
 

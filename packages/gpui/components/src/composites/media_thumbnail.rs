@@ -121,7 +121,7 @@ impl IntoElement for MediaThumbnail {
                     )
                     .child(
                         div()
-                            .text_xs()
+                            .text_size(px(12.0))
                             .text_color(text_secondary.opacity(0.7))
                             .child(String::from(state_label)),
                     ),
@@ -141,7 +141,7 @@ impl IntoElement for MediaThumbnail {
                     .py(px(2.0))
                     .rounded(px(4.0))
                     .bg(accent)
-                    .text_xs()
+                    .text_size(px(12.0))
                     .text_color(gpui::white())
                     .child(badge_label.clone()),
             );
@@ -167,7 +167,7 @@ impl IntoElement for MediaThumbnail {
             if let Some(ref meta) = spec.meta {
                 caption = caption.child(
                     div()
-                        .text_xs()
+                        .text_size(px(12.0))
                         .text_color(text_secondary)
                         .child(meta.clone()),
                 );

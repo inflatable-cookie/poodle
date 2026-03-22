@@ -110,7 +110,7 @@ impl IntoElement for DetailSection {
             if let Some(ref description) = spec.description {
                 title_block = title_block.child(
                     div()
-                        .text_xs()
+                        .text_size(px(12.0))
                         .text_color(description_color)
                         .child(description.clone()),
                 );

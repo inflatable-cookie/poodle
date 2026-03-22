@@ -59,7 +59,7 @@ impl IntoElement for EmbedInput {
         let mut status_area = div()
             .h(px(20.0)).px(px(4.0))
             .flex().items_center().gap(px(6.0))
-            .text_xs().text_color(status_color);
+            .text_size(px(12.0)).text_color(status_color);
         if spec.is_loading {
             status_area = status_area.child("Loading...");
         } else {

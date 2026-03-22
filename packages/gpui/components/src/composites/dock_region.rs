@@ -148,9 +148,9 @@ impl IntoElement for DockRegion {
                 .rounded(px(3.0));
 
             if is_tabs_on_edge {
-                tab = tab.w_full().py(px(6.0)).text_xs();
+                tab = tab.w_full().py(px(6.0)).text_size(px(12.0));
             } else {
-                tab = tab.px(px(8.0)).py(px(4.0)).text_xs();
+                tab = tab.px(px(8.0)).py(px(4.0)).text_size(px(12.0));
             }
 
             if is_active {

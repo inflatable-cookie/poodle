@@ -126,7 +126,7 @@ impl IntoElement for ActionDiscoveryPanel {
                 div()
                     .px(px(8.0))
                     .py(px(4.0))
-                    .text_xs()
+                    .text_size(px(12.0))
                     .font_weight(FontWeight::SEMIBOLD)
                     .text_color(text_muted)
                     .child(section.title.clone()),
@@ -137,7 +137,7 @@ impl IntoElement for ActionDiscoveryPanel {
                 section_el = section_el.child(
                     div()
                         .px(px(8.0))
-                        .text_xs()
+                        .text_size(px(12.0))
                         .text_color(text_secondary)
                         .child(desc.clone()),
                 );
@@ -178,7 +178,7 @@ impl IntoElement for ActionDiscoveryPanel {
                 if let Some(ref badge) = action.badge {
                     left = left.child(
                         div()
-                            .text_xs()
+                            .text_size(px(12.0))
                             .px(px(4.0))
                             .py(px(1.0))
                             .rounded(px(3.0))
@@ -194,7 +194,7 @@ impl IntoElement for ActionDiscoveryPanel {
                 if let Some(ref shortcut) = action.shortcut {
                     row = row.child(
                         div()
-                            .text_xs()
+                            .text_size(px(12.0))
                             .text_color(text_muted)
                             .child(shortcut.clone()),
                     );

@@ -72,7 +72,7 @@ impl IntoElement for AudioPlayer {
             .px(px(12.0)).py(px(8.0))
             .flex().flex_row().items_center().gap(px(8.0))
             .child(div().cursor_pointer().child(play_icon))
-            .child(div().text_xs().text_color(muted_color).child(time))
+            .child(div().text_size(px(12.0)).text_color(muted_color).child(time))
             .child(track_bar)
             .child(div().cursor_pointer().child(mute_icon))
             .into_any_element()

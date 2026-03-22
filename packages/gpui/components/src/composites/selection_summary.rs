@@ -97,7 +97,7 @@ impl IntoElement for SelectionSummary {
 
             pill = pill.child(
                 div()
-                    .text_xs()
+                    .text_size(px(12.0))
                     .text_color(text_primary)
                     .child(item.label.clone()),
             );
@@ -105,7 +105,7 @@ impl IntoElement for SelectionSummary {
             if let Some(ref meta) = item.meta {
                 pill = pill.child(
                     div()
-                        .text_xs()
+                        .text_size(px(12.0))
                         .text_color(text_secondary.opacity(0.7))
                         .child(meta.clone()),
                 );
@@ -115,7 +115,7 @@ impl IntoElement for SelectionSummary {
             pill = pill.child(
                 div()
                     .cursor_pointer()
-                    .text_xs()
+                    .text_size(px(12.0))
                     .text_color(text_secondary)
                     .child("\u{2715}"),
             );
@@ -130,7 +130,7 @@ impl IntoElement for SelectionSummary {
                 let mut clear_btn = div()
                     .id(clear_id)
                     .cursor_pointer()
-                    .text_xs()
+                    .text_size(px(12.0))
                     .font_weight(FontWeight::MEDIUM)
                     .text_color(accent)
                     .child(clear_action.label.clone());

@@ -90,7 +90,7 @@ impl IntoElement for DetailShell {
         if let Some(ref title) = spec.title {
             header = header.child(
                 div()
-                    .text_base()
+                    .text_size(px(16.0))
                     .font_weight(FontWeight::SEMIBOLD)
                     .text_color(text_primary)
                     .child(title.clone()),
