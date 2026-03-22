@@ -6,7 +6,7 @@ use pug_gpui::GpuiThemeProvider;
 use pug_primitives::{IconSize, IconSpec};
 use pug_composites::AudioPlayerSpec;
 use crate::primitives::Icon;
-use crate::theme_ext::{resolve_color, resolve_radius};
+use crate::theme_ext::{color_mix, resolve_color, resolve_radius};
 
 pub struct AudioPlayer {
     spec: AudioPlayerSpec,
@@ -34,6 +34,9 @@ impl IntoElement for AudioPlayer {
         let control_color = resolve_color(&self.theme, self.spec.control_color_token());
         let radius = resolve_radius(&self.theme, "semantic.radius.surface");
         let muted_color = resolve_color(&self.theme, "semantic.color.text.secondary");
+        let accent = resolve_color(&self.theme, "semantic.color.accent.base");
+        let focus_ring = resolve_color(&self.theme, "semantic.color.accent.focusRing");
+        let hover_bg = color_mix(accent, fill, 0.12);
 
         // Play / Pause icon
         let play_icon_name = if self.spec.is_playing { "pause" } else { "play" };
@@ -71,10 +74,32 @@ impl IntoElement for AudioPlayer {
             .bg(fill).rounded(radius)
             .px(px(12.0)).py(px(8.0))
             .flex().flex_row().items_center().gap(px(8.0))
-            .child(div().cursor_pointer().child(play_icon))
+            .child(
+                div()
+                    .id(SharedString::from("pug-audio-play"))
+                    .focusable()
+                    .cursor_pointer()
+                    .w(px(32.0)).h(px(32.0))
+                    .rounded(px(4.0))
+                    .flex().items_center().justify_center()
+                    .hover(move |s| s.bg(hover_bg))
+                    .focus(move |s| s.border_color(focus_ring))
+                    .child(play_icon)
+            )
             .child(div().text_size(px(12.0)).text_color(muted_color).child(time))
             .child(track_bar)
-            .child(div().cursor_pointer().child(mute_icon))
+            .child(
+                div()
+                    .id(SharedString::from("pug-audio-mute"))
+                    .focusable()
+                    .cursor_pointer()
+                    .w(px(32.0)).h(px(32.0))
+                    .rounded(px(4.0))
+                    .flex().items_center().justify_center()
+                    .hover(move |s| s.bg(hover_bg))
+                    .focus(move |s| s.border_color(focus_ring))
+                    .child(mute_icon)
+            )
             .into_any_element()
     }
 }

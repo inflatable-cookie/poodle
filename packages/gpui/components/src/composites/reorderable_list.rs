@@ -41,7 +41,7 @@ impl IntoElement for ReorderableList {
         let drag_bg = resolve_color(theme, "semantic.color.surface.raised");
 
         let mut el = div().flex().flex_col().gap(gap);
-        for child in self.children {
+        for (idx, child) in self.children.into_iter().enumerate() {
             let grip_icon = Icon::from_spec(
                 IconSpec::new("grip-vertical").with_size(IconSize::Sm),
                 theme,
@@ -55,7 +55,11 @@ impl IntoElement for ReorderableList {
                 .px(px(2.0))
                 .child(grip_icon);
 
+            let row_id = SharedString::from(format!("pug-reorder-item-{}", idx));
+            let focus_ring = resolve_color(theme, "semantic.color.accent.focusRing");
             let row = div()
+                .id(row_id)
+                .focusable()
                 .flex()
                 .flex_row()
                 .items_center()
@@ -64,6 +68,7 @@ impl IntoElement for ReorderableList {
                 .py(px(2.0))
                 .rounded(px(4.0))
                 .hover(|s| s.bg(drag_bg))
+                .focus(move |s| s.border_color(focus_ring))
                 .child(handle)
                 .child(child);
             el = el.child(row);

@@ -101,7 +101,9 @@ impl IntoElement for TabStrip {
                 .border_color(border);
         }
 
-        for item in &self.spec.items {
+        let tab_values: Vec<String> = self.spec.items.iter().map(|i| i.value.clone()).collect();
+
+        for (idx, item) in self.spec.items.iter().enumerate() {
             let is_active = current_value.as_deref() == Some(item.value.as_str());
             let is_disabled = item.is_disabled;
             let item_id = SharedString::from(format!("{}-{}", self.id_prefix, item.value));
@@ -151,6 +153,23 @@ impl IntoElement for TabStrip {
                     tab = tab.on_click(move |_event, window, cx| {
                         handler(&val, window, cx);
                     });
+
+                    // Arrow key navigation
+                    let handler = self.on_change.as_ref().unwrap().clone();
+                    let tvs = tab_values.clone();
+                    let current_idx = idx;
+                    tab = tab.on_key_down(move |event: &KeyDownEvent, window, cx| {
+                        let next_idx = if event.keystroke.key == "right" || event.keystroke.key == "down" {
+                            Some((current_idx + 1) % tvs.len())
+                        } else if event.keystroke.key == "left" || event.keystroke.key == "up" {
+                            Some(if current_idx == 0 { tvs.len() - 1 } else { current_idx - 1 })
+                        } else {
+                            None
+                        };
+                        if let Some(i) = next_idx {
+                            handler(&tvs[i], window, cx);
+                        }
+                    });
                 }
             }
 
@@ -158,18 +177,30 @@ impl IntoElement for TabStrip {
 
             // Close button for closable tabs
             if item.is_closable {
-                tab = tab.child(
-                    div()
-                        .ml(px(4.0))
-                        .cursor_pointer()
-                        .child(
-                            Icon::from_spec(
-                                IconSpec::new("x").with_size(IconSize::Sm),
-                                theme,
-                            )
-                            .with_color(text_secondary),
-                        ),
-                );
+                let close_icon = Icon::from_spec(
+                    IconSpec::new("x").with_size(IconSize::Sm),
+                    theme,
+                ).with_color(text_secondary);
+
+                let mut close_btn = div()
+                    .id(SharedString::from(format!("{}-close-{}", self.id_prefix, item.value)))
+                    .ml(px(4.0))
+                    .cursor_pointer()
+                    .w(px(20.0)).h(px(20.0))
+                    .rounded(px(4.0))
+                    .flex().items_center().justify_center()
+                    .hover(|s| s.bg(hover_bg))
+                    .child(close_icon);
+
+                if let Some(ref handler) = self.on_close {
+                    let handler = handler.clone();
+                    let val = item.value.clone();
+                    close_btn = close_btn.on_click(move |_event, window, cx| {
+                        handler(&val, window, cx);
+                    });
+                }
+
+                tab = tab.child(close_btn);
             }
 
             strip = strip.child(tab);

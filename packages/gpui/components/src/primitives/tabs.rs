@@ -91,7 +91,9 @@ impl Tabs {
             .border_b_1()
             .border_color(border);
 
-        for tab_def in &self.spec.tabs {
+        let tab_values: Vec<String> = self.spec.tabs.iter().map(|t| t.value.clone()).collect();
+
+        for (idx, tab_def) in self.spec.tabs.iter().enumerate() {
             let is_active = current_value.as_deref() == Some(&tab_def.value);
             let is_disabled = tab_def.is_disabled;
             let tab_id = SharedString::from(format!("{}-{}", self.id_prefix, tab_def.value));
@@ -130,6 +132,25 @@ impl Tabs {
                         handler(&val, window, cx);
                     });
                 }
+
+                // Arrow key navigation
+                if let Some(ref handler) = self.on_change {
+                    let handler = handler.clone();
+                    let nav_values = tab_values.clone();
+                    let current_idx = idx;
+                    tab = tab.on_key_down(move |event: &KeyDownEvent, window, cx| {
+                        let next_idx = if event.keystroke.key == "right" || event.keystroke.key == "down" {
+                            Some((current_idx + 1) % nav_values.len())
+                        } else if event.keystroke.key == "left" || event.keystroke.key == "up" {
+                            Some(if current_idx == 0 { nav_values.len() - 1 } else { current_idx - 1 })
+                        } else {
+                            None
+                        };
+                        if let Some(i) = next_idx {
+                            handler(&nav_values[i], window, cx);
+                        }
+                    });
+                }
             }
 
             tab = tab.child(tab_def.label.clone());
@@ -159,7 +180,9 @@ impl Tabs {
             .items_end()
             .gap(px(2.0)); // small gap between card tabs
 
-        for tab_def in &self.spec.tabs {
+        let tab_values: Vec<String> = self.spec.tabs.iter().map(|t| t.value.clone()).collect();
+
+        for (idx, tab_def) in self.spec.tabs.iter().enumerate() {
             let is_active = current_value.as_deref() == Some(&tab_def.value);
             let is_disabled = tab_def.is_disabled;
             let tab_id = SharedString::from(format!("{}-{}", self.id_prefix, tab_def.value));
@@ -205,6 +228,25 @@ impl Tabs {
                         handler(&val, window, cx);
                     });
                 }
+
+                // Arrow key navigation
+                if let Some(ref handler) = self.on_change {
+                    let handler = handler.clone();
+                    let nav_values = tab_values.clone();
+                    let current_idx = idx;
+                    tab = tab.on_key_down(move |event: &KeyDownEvent, window, cx| {
+                        let next_idx = if event.keystroke.key == "right" || event.keystroke.key == "down" {
+                            Some((current_idx + 1) % nav_values.len())
+                        } else if event.keystroke.key == "left" || event.keystroke.key == "up" {
+                            Some(if current_idx == 0 { nav_values.len() - 1 } else { current_idx - 1 })
+                        } else {
+                            None
+                        };
+                        if let Some(i) = next_idx {
+                            handler(&nav_values[i], window, cx);
+                        }
+                    });
+                }
             }
 
             tab = tab.child(tab_def.label.clone());
@@ -242,7 +284,9 @@ impl Tabs {
             .border_color(container_border)
             .p(list_gap);
 
-        for tab_def in &self.spec.tabs {
+        let tab_values: Vec<String> = self.spec.tabs.iter().map(|t| t.value.clone()).collect();
+
+        for (idx, tab_def) in self.spec.tabs.iter().enumerate() {
             let is_active = current_value.as_deref() == Some(&tab_def.value);
             let is_disabled = tab_def.is_disabled;
             let tab_id = SharedString::from(format!("{}-{}", self.id_prefix, tab_def.value));
@@ -278,6 +322,25 @@ impl Tabs {
                     let val = tab_def.value.clone();
                     tab = tab.on_click(move |_event, window, cx| {
                         handler(&val, window, cx);
+                    });
+                }
+
+                // Arrow key navigation
+                if let Some(ref handler) = self.on_change {
+                    let handler = handler.clone();
+                    let nav_values = tab_values.clone();
+                    let current_idx = idx;
+                    tab = tab.on_key_down(move |event: &KeyDownEvent, window, cx| {
+                        let next_idx = if event.keystroke.key == "right" || event.keystroke.key == "down" {
+                            Some((current_idx + 1) % nav_values.len())
+                        } else if event.keystroke.key == "left" || event.keystroke.key == "up" {
+                            Some(if current_idx == 0 { nav_values.len() - 1 } else { current_idx - 1 })
+                        } else {
+                            None
+                        };
+                        if let Some(i) = next_idx {
+                            handler(&nav_values[i], window, cx);
+                        }
                     });
                 }
             }

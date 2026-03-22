@@ -98,10 +98,28 @@ impl IntoElement for Rating {
                     .hover(move |s| s.text_color(hover_color));
 
                 if let Some(ref cb) = handler {
-                    let cb = cb.clone();
+                    let cb_click = cb.clone();
                     let star_value = (i + 1) as usize; // 1-based rating value
                     star_wrapper = star_wrapper
-                        .on_click(move |event, window, cx| cb(star_value, event, window, cx));
+                        .on_click(move |event, window, cx| cb_click(star_value, event, window, cx));
+
+                    // Arrow key navigation: Left decreases, Right increases
+                    let cb_key = cb.clone();
+                    let current_i = i;
+                    let max = spec.max;
+                    star_wrapper = star_wrapper
+                        .on_key_down(move |event: &KeyDownEvent, window, cx| {
+                            let new_val = if event.keystroke.key == "right" || event.keystroke.key == "up" {
+                                Some(((current_i + 1) as usize + 1).min(max as usize))
+                            } else if event.keystroke.key == "left" || event.keystroke.key == "down" {
+                                Some((current_i as usize).max(1))
+                            } else {
+                                None
+                            };
+                            if let Some(v) = new_val {
+                                cb_key(v, &ClickEvent::default(), window, cx);
+                            }
+                        });
                 }
 
                 el = el.child(star_wrapper);

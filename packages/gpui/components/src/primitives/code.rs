@@ -2,7 +2,8 @@
 
 use gpui::*;
 use pug_gpui::GpuiThemeProvider;
-use pug_primitives::CodeSpec;
+use pug_primitives::{CodeSpec, IconSize, IconSpec};
+use crate::primitives::Icon;
 
 use crate::theme_ext::{resolve_color, resolve_px, resolve_radius};
 
@@ -119,10 +120,17 @@ impl IntoElement for Code {
             if spec.is_copyable {
                 toolbar = toolbar.child(
                     div()
-                        .text_size(px(11.0))
-                        .text_color(text_secondary)
                         .cursor_pointer()
-                        .child("Copy"),
+                        .w(px(24.0)).h(px(24.0))
+                        .rounded(px(4.0))
+                        .flex().items_center().justify_center()
+                        .hover(|s| s.bg(fill.opacity(0.8)))
+                        .child(
+                            Icon::from_spec(
+                                IconSpec::new("clipboard-copy").with_size(IconSize::Sm),
+                                theme,
+                            ).with_color(text_secondary)
+                        ),
                 );
             }
 

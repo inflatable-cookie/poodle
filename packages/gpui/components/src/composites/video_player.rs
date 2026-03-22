@@ -6,7 +6,7 @@ use pug_gpui::GpuiThemeProvider;
 use pug_primitives::{IconSize, IconSpec};
 use pug_composites::VideoPlayerSpec;
 use crate::primitives::Icon;
-use crate::theme_ext::{resolve_color, resolve_px, resolve_radius};
+use crate::theme_ext::{resolve_color, resolve_radius};
 
 pub struct VideoPlayer {
     spec: VideoPlayerSpec,
@@ -124,6 +124,35 @@ impl IntoElement for VideoPlayer {
         };
 
         // ── Control bar ─────────────────────────────────────────────────
+
+        // Helper: control button wrapper 28x28
+        let ctrl_btn = |child: AnyElement| -> Div {
+            div()
+                .cursor_pointer()
+                .w(px(28.0)).h(px(28.0))
+                .rounded(px(4.0))
+                .flex().items_center().justify_center()
+                .hover(|s| s.bg(text_color.opacity(0.15)))
+                .child(child)
+        };
+
+        // Left group: play + seek + time
+        let left_group = div()
+            .flex().flex_row().items_center().gap(px(8.0)).flex_grow()
+            .child(ctrl_btn(play_icon.into_any_element()))
+            .child(track_bar)
+            .child(div().text_size(px(12.0)).text_color(text_color).child(time));
+
+        // Right group: mute + fullscreen + captions
+        let mut right_group = div()
+            .flex().flex_row().items_center().gap(px(4.0))
+            .child(ctrl_btn(mute_icon.into_any_element()))
+            .child(ctrl_btn(fullscreen_icon.into_any_element()));
+
+        if let Some(cap_el) = captions_icon {
+            right_group = right_group.child(cap_el);
+        }
+
         let control_bar = div()
             .bg(overlay)
             .px(px(12.0))
@@ -132,12 +161,8 @@ impl IntoElement for VideoPlayer {
             .flex_row()
             .items_center()
             .gap(px(8.0))
-            .child(div().cursor_pointer().child(play_icon))
-            .child(track_bar)
-            .child(div().text_size(px(12.0)).text_color(text_color).child(time))
-            .child(div().cursor_pointer().child(mute_icon))
-            .child(div().cursor_pointer().child(fullscreen_icon))
-            .children(captions_icon);
+            .child(left_group)
+            .child(right_group);
 
         // ── Outer container ─────────────────────────────────────────────
         div()

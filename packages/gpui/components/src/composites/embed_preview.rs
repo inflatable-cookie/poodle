@@ -120,10 +120,24 @@ impl IntoElement for EmbedPreview {
 
         // Iframe placeholder area when a thumbnail URL is available
         if self.spec.thumbnail_url.is_some() {
+            // Play icon overlay for video previews
+            let play_overlay = div()
+                .flex().items_center().justify_center()
+                .w(px(48.0)).h(px(48.0))
+                .rounded(px(24.0))
+                .bg(hsla(0.0, 0.0, 0.0, 0.6))
+                .child(
+                    Icon::from_spec(
+                        IconSpec::new("play").with_size(IconSize::Md),
+                        theme,
+                    ).with_color(gpui::white())
+                );
+
             el = el.child(
                 div()
                     .w_full()
-                    .h(px(180.0))
+                    // 16:9 aspect ratio approximation (56.25% of width)
+                    .min_h(px(200.0))
                     .rounded(radius)
                     .bg(subtle_bg)
                     .border_1()
@@ -131,12 +145,8 @@ impl IntoElement for EmbedPreview {
                     .flex()
                     .items_center()
                     .justify_center()
-                    .child(
-                        div()
-                            .text_size(px(12.0))
-                            .text_color(desc_color)
-                            .child("Embed preview"),
-                    ),
+                    .overflow_hidden()
+                    .child(play_overlay),
             );
         }
 

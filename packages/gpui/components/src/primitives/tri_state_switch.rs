@@ -152,8 +152,16 @@ impl IntoElement for TriStateSwitch {
         if !spec.is_disabled {
             container = container.cursor_pointer();
             if let Some(handler) = self.on_click {
+                let handler = std::rc::Rc::new(handler);
+                let click_handler = handler.clone();
                 container =
-                    container.on_click(move |event, window, cx| handler(event, window, cx));
+                    container.on_click(move |event, window, cx| click_handler(event, window, cx));
+                let key_handler = handler.clone();
+                container = container.on_key_down(move |event: &KeyDownEvent, window, cx| {
+                    if event.keystroke.key == "space" || event.keystroke.key == "enter" {
+                        key_handler(&ClickEvent::default(), window, cx);
+                    }
+                });
             }
         } else {
             container = container
