@@ -14,6 +14,7 @@ pub struct DurationInput {
     spec: DurationInputSpec,
     theme: GpuiThemeProvider,
     id_suffix: Option<String>,
+    on_change: Option<Box<dyn Fn(&str, &mut Window, &mut App) + 'static>>,
 }
 
 impl std::ops::Deref for DurationInput {
@@ -23,7 +24,7 @@ impl std::ops::Deref for DurationInput {
 
 impl DurationInput {
     pub fn new(theme: &GpuiThemeProvider) -> Self {
-        Self { spec: DurationInputSpec::new(), theme: theme.clone(), id_suffix: None }
+        Self { spec: DurationInputSpec::new(), theme: theme.clone(), id_suffix: None, on_change: None }
     }
 
     pub fn from_spec(spec: DurationInputSpec, theme: &GpuiThemeProvider) -> Self {
@@ -31,6 +32,7 @@ impl DurationInput {
             spec,
             theme: theme.clone(),
             id_suffix: None,
+            on_change: None,
         }
     }
 
@@ -42,6 +44,12 @@ impl DurationInput {
 
     pub fn with_id(mut self, suffix: impl Into<String>) -> Self {
         self.id_suffix = Some(suffix.into());
+        self
+    }
+
+    /// Called when the duration value changes.
+    pub fn on_change(mut self, handler: impl Fn(&str, &mut Window, &mut App) + 'static) -> Self {
+        self.on_change = Some(Box::new(handler));
         self
     }
 }
@@ -147,6 +155,45 @@ impl IntoElement for DurationInput {
             // Contract: focus-within = border switches to focus ring color
             .focus(move |s| s.border_color(focus_ring))
             .child(segments);
+
+        // ArrowUp/ArrowDown to increment/decrement total seconds
+        if !spec.is_disabled {
+            if let Some(handler) = self.on_change {
+                let current_display = display.to_string();
+                let show_seconds = spec.show_seconds;
+                wrapper = wrapper.on_key_down(move |event: &KeyDownEvent, window, cx| {
+                    let delta: i64 = if event.keystroke.key == "up" {
+                        60 // increment by 1 minute
+                    } else if event.keystroke.key == "down" {
+                        -60 // decrement by 1 minute
+                    } else {
+                        return;
+                    };
+                    // Parse current value as total seconds
+                    let parts: Vec<&str> = current_display.split(':').collect();
+                    let mut total_secs: i64 = 0;
+                    if let Some(h) = parts.first().and_then(|s| s.parse::<i64>().ok()) {
+                        total_secs += h * 3600;
+                    }
+                    if let Some(m) = parts.get(1).and_then(|s| s.parse::<i64>().ok()) {
+                        total_secs += m * 60;
+                    }
+                    if let Some(s) = parts.get(2).and_then(|s| s.parse::<i64>().ok()) {
+                        total_secs += s;
+                    }
+                    total_secs = (total_secs + delta).max(0);
+                    let h = total_secs / 3600;
+                    let m = (total_secs % 3600) / 60;
+                    let s = total_secs % 60;
+                    let new_val = if show_seconds {
+                        format!("{:02}:{:02}:{:02}", h, m, s)
+                    } else {
+                        format!("{:02}:{:02}", h, m)
+                    };
+                    handler(&new_val, window, cx);
+                });
+            }
+        }
 
         if spec.is_disabled {
             wrapper = wrapper

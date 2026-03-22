@@ -129,15 +129,17 @@ impl IntoElement for Combobox {
         let on_open_change_rc: Option<std::rc::Rc<dyn Fn(bool, &mut Window, &mut App)>> =
             self.on_open_change.map(|h| std::rc::Rc::from(h));
 
-        // Collect first non-disabled filtered option value for Enter key selection
-        let first_selectable_value: Option<String> = if is_open {
+        // Collect non-disabled filtered option values for keyboard navigation
+        let selectable_values: Vec<String> = if is_open {
             spec.filtered_options()
                 .iter()
-                .find(|o| !o.is_disabled)
+                .filter(|o| !o.is_disabled)
                 .map(|o| o.value.clone())
+                .collect()
         } else {
-            None
+            Vec::new()
         };
+        let first_selectable_value = selectable_values.first().cloned();
 
         // ── Input display text ──────────────────────────────────────
         let display_text = if !spec.query.is_empty() {
@@ -196,6 +198,11 @@ impl IntoElement for Combobox {
                 let key_change = on_change_rc.clone();
                 let key_open = on_open_change_rc.clone();
                 let enter_value = first_selectable_value.clone();
+                let nav_values = selectable_values.clone();
+                let current_sel = current_value.clone();
+                let on_query_rc: Option<std::rc::Rc<dyn Fn(&str, &mut Window, &mut App)>> =
+                    self.on_query_change.map(|h| std::rc::Rc::from(h));
+                let current_query = spec.query.clone();
 
                 input = input.on_key_down(move |event: &KeyDownEvent, window, cx| {
                     match event.keystroke.key.as_str() {
@@ -218,8 +225,55 @@ impl IntoElement for Combobox {
                                 }
                             }
                         }
-                        "arrowdown" | "arrowup" => {
-                            // Open the list if closed
+                        "down" | "up" => {
+                            if !is_open {
+                                // Open the list if closed
+                                if let Some(ref handler) = key_open {
+                                    handler(true, window, cx);
+                                }
+                            } else if !nav_values.is_empty() {
+                                // Navigate between options
+                                let current_idx = current_sel.as_deref()
+                                    .and_then(|cv| nav_values.iter().position(|v| v == cv));
+                                let next_idx = match event.keystroke.key.as_str() {
+                                    "down" => match current_idx {
+                                        Some(i) => (i + 1) % nav_values.len(),
+                                        None => 0,
+                                    },
+                                    _ => match current_idx {
+                                        Some(0) | None => nav_values.len() - 1,
+                                        Some(i) => i - 1,
+                                    },
+                                };
+                                if let Some(ref handler) = key_change {
+                                    handler(&nav_values[next_idx], window, cx);
+                                }
+                            }
+                        }
+                        "backspace" => {
+                            // Delete last char from query
+                            if let Some(ref handler) = on_query_rc {
+                                let mut chars: Vec<char> = current_query.chars().collect();
+                                if !chars.is_empty() {
+                                    chars.pop();
+                                    let new_q: String = chars.into_iter().collect();
+                                    handler(&new_q, window, cx);
+                                }
+                            }
+                            // Open on typing
+                            if !is_open {
+                                if let Some(ref handler) = key_open {
+                                    handler(true, window, cx);
+                                }
+                            }
+                        }
+                        key if key.len() == 1 && !event.keystroke.modifiers.platform && !event.keystroke.modifiers.control => {
+                            // Type into query
+                            if let Some(ref handler) = on_query_rc {
+                                let new_q = format!("{}{}", current_query, key);
+                                handler(&new_q, window, cx);
+                            }
+                            // Open on typing
                             if !is_open {
                                 if let Some(ref handler) = key_open {
                                     handler(true, window, cx);
@@ -357,7 +411,7 @@ impl IntoElement for Combobox {
         // Contract: min-width 14rem
         let mut root = div()
             .w_full()
-            .min_w(px(192.0)) // 12rem
+            .min_w(px(224.0)) // 14rem
             .relative()
             .flex()
             .flex_col()

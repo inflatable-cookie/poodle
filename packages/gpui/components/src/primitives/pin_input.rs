@@ -14,6 +14,8 @@ pub struct PinInput {
     spec: PinInputSpec,
     theme: GpuiThemeProvider,
     id_suffix: Option<String>,
+    on_change: Option<Box<dyn Fn(&str, &mut Window, &mut App) + 'static>>,
+    on_complete: Option<Box<dyn Fn(&str, &mut Window, &mut App) + 'static>>,
 }
 
 impl std::ops::Deref for PinInput {
@@ -23,7 +25,7 @@ impl std::ops::Deref for PinInput {
 
 impl PinInput {
     pub fn new(theme: &GpuiThemeProvider) -> Self {
-        Self { spec: PinInputSpec::default(), theme: theme.clone(), id_suffix: None }
+        Self { spec: PinInputSpec::default(), theme: theme.clone(), id_suffix: None, on_change: None, on_complete: None }
     }
 
     pub fn from_spec(spec: PinInputSpec, theme: &GpuiThemeProvider) -> Self {
@@ -31,6 +33,8 @@ impl PinInput {
             spec,
             theme: theme.clone(),
             id_suffix: None,
+            on_change: None,
+            on_complete: None,
         }
     }
 
@@ -43,6 +47,18 @@ impl PinInput {
 
     pub fn with_id(mut self, suffix: impl Into<String>) -> Self {
         self.id_suffix = Some(suffix.into());
+        self
+    }
+
+    /// Called when the pin value changes (on digit entry or backspace).
+    pub fn on_change(mut self, handler: impl Fn(&str, &mut Window, &mut App) + 'static) -> Self {
+        self.on_change = Some(Box::new(handler));
+        self
+    }
+
+    /// Called when the pin is fully entered (all cells filled).
+    pub fn on_complete(mut self, handler: impl Fn(&str, &mut Window, &mut App) + 'static) -> Self {
+        self.on_complete = Some(Box::new(handler));
         self
     }
 }
@@ -109,6 +125,52 @@ impl IntoElement for PinInput {
         }
 
         let mut wrapper = row;
+
+        // Keyboard input: digits auto-advance, backspace retreats
+        if !spec.is_disabled {
+            let current_value = spec.value.clone();
+            let length = spec.length;
+            let on_change_rc: Option<std::rc::Rc<dyn Fn(&str, &mut Window, &mut App)>> =
+                self.on_change.map(|h| std::rc::Rc::from(h));
+            let on_complete_rc: Option<std::rc::Rc<dyn Fn(&str, &mut Window, &mut App)>> =
+                self.on_complete.map(|h| std::rc::Rc::from(h));
+
+            if on_change_rc.is_some() || on_complete_rc.is_some() {
+                let change_handler = on_change_rc.clone();
+                let complete_handler = on_complete_rc.clone();
+                wrapper = wrapper.on_key_down(move |event: &KeyDownEvent, window, cx| {
+                    let key = event.keystroke.key.as_str();
+                    if key == "backspace" {
+                        // Remove last character
+                        if !current_value.is_empty() {
+                            let mut chars: Vec<char> = current_value.chars().collect();
+                            chars.pop();
+                            let new_val: String = chars.into_iter().collect();
+                            if let Some(ref handler) = change_handler {
+                                handler(&new_val, window, cx);
+                            }
+                        }
+                    } else if key.len() == 1 && !event.keystroke.modifiers.platform && !event.keystroke.modifiers.control {
+                        let ch = key.chars().next().unwrap();
+                        // Only accept digits (or any single char if not masked-numeric)
+                        if ch.is_ascii_digit() || ch.is_ascii_alphanumeric() {
+                            if current_value.len() < length {
+                                let new_val = format!("{}{}", current_value, ch);
+                                if let Some(ref handler) = change_handler {
+                                    handler(&new_val, window, cx);
+                                }
+                                // Auto-complete when all cells filled
+                                if new_val.len() == length {
+                                    if let Some(ref handler) = complete_handler {
+                                        handler(&new_val, window, cx);
+                                    }
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+        }
 
         if spec.is_disabled {
             wrapper = wrapper

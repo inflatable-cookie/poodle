@@ -14,6 +14,7 @@ pub struct TimeField {
     spec: TimeFieldSpec,
     theme: GpuiThemeProvider,
     id_suffix: Option<String>,
+    on_change: Option<Box<dyn Fn(&str, &mut Window, &mut App) + 'static>>,
 }
 
 impl std::ops::Deref for TimeField {
@@ -23,7 +24,7 @@ impl std::ops::Deref for TimeField {
 
 impl TimeField {
     pub fn new(theme: &GpuiThemeProvider) -> Self {
-        Self { spec: TimeFieldSpec::new(), theme: theme.clone(), id_suffix: None }
+        Self { spec: TimeFieldSpec::new(), theme: theme.clone(), id_suffix: None, on_change: None }
     }
 
     pub fn from_spec(spec: TimeFieldSpec, theme: &GpuiThemeProvider) -> Self {
@@ -31,6 +32,7 @@ impl TimeField {
             spec,
             theme: theme.clone(),
             id_suffix: None,
+            on_change: None,
         }
     }
 
@@ -47,6 +49,12 @@ impl TimeField {
 
     pub fn with_id(mut self, suffix: impl Into<String>) -> Self {
         self.id_suffix = Some(suffix.into());
+        self
+    }
+
+    /// Called when the time value changes.
+    pub fn on_change(mut self, handler: impl Fn(&str, &mut Window, &mut App) + 'static) -> Self {
+        self.on_change = Some(Box::new(handler));
         self
     }
 }
@@ -105,6 +113,32 @@ impl IntoElement for TimeField {
             field = field
                 .opacity(disabled_opacity)
                 .cursor(CursorStyle::OperationNotAllowed);
+        }
+
+        // ArrowUp/ArrowDown to increment/decrement time by step minutes
+        if !spec.is_disabled {
+            if let Some(handler) = self.on_change {
+                let current_display = display_text.clone();
+                let step = spec.step as i64;
+                field = field.on_key_down(move |event: &KeyDownEvent, window, cx| {
+                    let delta: i64 = if event.keystroke.key == "up" {
+                        step.max(1)
+                    } else if event.keystroke.key == "down" {
+                        -(step.max(1))
+                    } else {
+                        return;
+                    };
+                    // Parse HH:MM
+                    let parts: Vec<&str> = current_display.split(':').collect();
+                    let h = parts.first().and_then(|s| s.parse::<i64>().ok()).unwrap_or(0);
+                    let m = parts.get(1).and_then(|s| s.parse::<i64>().ok()).unwrap_or(0);
+                    let mut total_mins = h * 60 + m + delta;
+                    if total_mins < 0 { total_mins += 24 * 60; }
+                    total_mins %= 24 * 60;
+                    let new_val = format!("{:02}:{:02}", total_mins / 60, total_mins % 60);
+                    handler(&new_val, window, cx);
+                });
+            }
         }
 
         // Time value display
