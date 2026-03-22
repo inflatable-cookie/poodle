@@ -224,7 +224,8 @@ impl IntoElement for Button {
             el = el
                 .cursor_pointer()
                 .hover(move |s| s.bg(hover_fill).border_color(hover_border))
-                .active(move |s| s.bg(active_fill));
+                // Contract: active translateY(1px) press effect
+                .active(move |s| s.bg(active_fill).mt(px(1.0)));
         }
 
         // ── Spinner (contract §8 Spinner) ────────────────────────

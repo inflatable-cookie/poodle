@@ -150,9 +150,9 @@ impl IntoElement for DatePicker {
         trigger = trigger
             .child(div().text_color(text_col).flex_1().child(display_text))
             .child(
+                // Contract: calendar icon indicator (not chevron)
                 Icon::from_spec(
-                    IconSpec::new(if is_open { "chevron-up" } else { "chevron-down" })
-                        .with_size(IconSize::Sm),
+                    IconSpec::new("calendar").with_size(IconSize::Sm),
                     theme,
                 )
                 .with_color(icon_muted),
@@ -189,8 +189,32 @@ impl IntoElement for DatePicker {
                 cal_spec = cal_spec.with_visible_month(val);
             }
 
-            let calendar = Calendar::from_spec(cal_spec, theme);
-            wrapper = wrapper.child(calendar);
+            let panel_bg = resolve_color(theme, "semantic.color.background.panel");
+            let surface_raw = resolve_color(theme, "semantic.color.background.elevated");
+            let panel_border = resolve_color(theme, "semantic.color.border.default");
+            // Calendar surface container
+            let cal_surface = div()
+                .rounded(resolve_radius(theme, "semantic.radius.surface"))
+                .bg(color_mix(surface_raw, panel_bg, 0.98))
+                .border_1()
+                .border_color(color_mix(panel_border, panel_bg, 0.72))
+                .shadow(vec![
+                    gpui::BoxShadow {
+                        color: hsla(0.0, 0.0, 0.0, 0.10),
+                        offset: point(px(0.0), px(4.0)),
+                        blur_radius: px(16.0),
+                        spread_radius: px(0.0),
+                    },
+                    gpui::BoxShadow {
+                        color: hsla(0.0, 0.0, 0.0, 0.06),
+                        offset: point(px(0.0), px(1.0)),
+                        blur_radius: px(4.0),
+                        spread_radius: px(0.0),
+                    },
+                ])
+                .p(px(12.0))
+                .child(Calendar::from_spec(cal_spec, theme));
+            wrapper = wrapper.child(cal_surface);
         }
 
         wrapper.into_any_element()

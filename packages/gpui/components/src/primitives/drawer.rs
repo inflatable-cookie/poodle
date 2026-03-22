@@ -81,16 +81,31 @@ impl IntoElement for Drawer {
 
         let is_left = spec.edge == DrawerEdge::Left || spec.edge == DrawerEdge::Top;
 
-        // Contract: drawer radius = 0, min-width 200px, shadow
+        // Contract: drawer radius = 0, min-width min(28rem, 100vw) ≈ 448px, shadow
         let mut drawer_panel = div()
-            .min_w(px(200.0))
+            .min_w(px(448.0))
             .h_full()
+            .rounded(px(0.0)) // Contract: drawer radius = 0
             .bg(surface_bg)
             .p(panel_padding)
             .flex()
             .flex_col()
             .gap(stack_gap)
-            .shadow_md();
+            // Contract: elevation-dialog shadow
+            .shadow(vec![
+                gpui::BoxShadow {
+                    color: hsla(0.0, 0.0, 0.0, 0.12),
+                    offset: point(px(0.0), px(8.0)),
+                    blur_radius: px(24.0),
+                    spread_radius: px(0.0),
+                },
+                gpui::BoxShadow {
+                    color: hsla(0.0, 0.0, 0.0, 0.08),
+                    offset: point(px(0.0), px(2.0)),
+                    blur_radius: px(8.0),
+                    spread_radius: px(0.0),
+                },
+            ]);
 
         // Contract: border on side facing main area only
         if is_left {

@@ -92,9 +92,26 @@ impl IntoElement for Dialog {
             .bg(bg)
             .border_1()
             .border_color(border)
-            .shadow_lg()
+            // Contract: elevation-dialog shadow
+            .shadow(vec![
+                gpui::BoxShadow {
+                    color: hsla(0.0, 0.0, 0.0, 0.12),
+                    offset: point(px(0.0), px(8.0)),
+                    blur_radius: px(24.0),
+                    spread_radius: px(0.0),
+                },
+                gpui::BoxShadow {
+                    color: hsla(0.0, 0.0, 0.0, 0.08),
+                    offset: point(px(0.0), px(2.0)),
+                    blur_radius: px(8.0),
+                    spread_radius: px(0.0),
+                },
+            ])
             .flex()
             .flex_col()
+            // Contract: min-width 24rem (384px), max-width 32rem (512px)
+            .min_w(px(384.0))
+            .max_w(px(512.0))
             // Contract: header gap 0.5rem (8px)
             .gap(px(8.0));
 

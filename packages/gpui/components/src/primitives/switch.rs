@@ -115,6 +115,9 @@ impl IntoElement for Switch {
         // Contract: checked thumb = accent-base, unchecked = text-primary
         let knob_color = if is_checked { accent } else { text_primary };
 
+        // Contract: track inset shadow = inset 0 0 0 1px white/8%
+        let inset_shadow_color = hsla(0.0, 0.0, 1.0, 0.08);
+
         let track = div()
             .w(track_w)
             .h(track_h)
@@ -124,13 +127,34 @@ impl IntoElement for Switch {
             .border_color(track_border)
             .relative()
             .flex_shrink_0()
+            // Contract: inset shadow simulated via inner border highlight
+            .shadow(vec![gpui::BoxShadow {
+                color: inset_shadow_color,
+                offset: point(px(0.0), px(0.0)),
+                blur_radius: px(0.0),
+                spread_radius: px(1.0),
+            }])
             .child(
                 div()
                     .w(thumb_size)
                     .h(thumb_size)
                     .rounded(thumb_radius)
                     .bg(knob_color)
-                    .shadow_sm()
+                    // Contract: thumb shadow = 0 1px 2px rgba(0,0,0,0.2), 0 0 1px rgba(0,0,0,0.1)
+                    .shadow(vec![
+                        gpui::BoxShadow {
+                            color: hsla(0.0, 0.0, 0.0, 0.2),
+                            offset: point(px(0.0), px(1.0)),
+                            blur_radius: px(2.0),
+                            spread_radius: px(0.0),
+                        },
+                        gpui::BoxShadow {
+                            color: hsla(0.0, 0.0, 0.0, 0.1),
+                            offset: point(px(0.0), px(0.0)),
+                            blur_radius: px(1.0),
+                            spread_radius: px(0.0),
+                        },
+                    ])
                     .absolute()
                     .top(track_padding)
                     .left(knob_offset),

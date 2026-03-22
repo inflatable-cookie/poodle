@@ -130,12 +130,11 @@ impl IntoElement for Code {
         }
 
         // Code content area
-        let mut code_area = div().px(panel_x).py(panel_y);
+        let mut code_area = div().id("pug-code-area").px(panel_x).py(panel_y);
 
-        // Apply max_height constraint if set
-        if let Some(mh) = self.max_height_px {
-            code_area = code_area.max_h(px(mh)).overflow_hidden();
-        }
+        // Apply max_height constraint (default 320px per contract)
+        let mh = self.max_height_px.unwrap_or(320.0);
+        code_area = code_area.max_h(px(mh)).overflow_y_scroll();
 
         // Content with optional line numbers
         if spec.show_line_numbers {

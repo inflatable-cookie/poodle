@@ -101,7 +101,7 @@ impl Tabs {
                 .focusable()
                 .px(inline_padding)
                 .py(control_y)
-                .text_size(px(12.0)).font_weight(FontWeight::SEMIBOLD);
+                .text_size(px(13.0)).font_weight(FontWeight::SEMIBOLD);
 
             if is_active {
                 tab = tab
@@ -168,7 +168,7 @@ impl Tabs {
                 .id(tab_id)
                 .px(inline_padding)
                 .py(control_y)
-                .text_size(px(12.0)).font_weight(FontWeight::SEMIBOLD)
+                .text_size(px(13.0)).font_weight(FontWeight::SEMIBOLD)
                 .border_1()
                 .rounded_t(radius);
 
@@ -252,7 +252,7 @@ impl Tabs {
                 .px(control_x)
                 .py(control_y)
                 .rounded(pill_radius)
-                .text_size(px(12.0))
+                .text_size(px(13.0))
                 .font_weight(FontWeight::SEMIBOLD);
 
             if is_active {

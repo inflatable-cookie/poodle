@@ -102,7 +102,8 @@ impl IntoElement for IconButton {
 
         // ── Hover/active/pressed fills ────────────────────────────
         let hover_fill = color_mix(fill, elevated, 0.84);
-        let hover_border = color_mix(border_color, text_primary, 0.78);
+        // Contract: hover border = 74% text-primary mix (darkening)
+        let hover_border = color_mix(border_color, text_primary, 0.74);
         let active_fill = color_mix(fill, elevated, 0.72);
         // Pressed: accent-tinted background (contract: 20% accent mix)
         let pressed_fill = color_mix(accent, fill, 0.20);
@@ -115,6 +116,9 @@ impl IntoElement for IconButton {
         };
 
         // ── Build root ────────────────────────────────────────────
+        // Contract: pressed = double inset shadow
+        let pressed_border = color_mix(border_color, text_primary, 0.74);
+
         let mut el = div()
             .id(SharedString::from(id_str))
             .focusable()
@@ -124,10 +128,28 @@ impl IntoElement for IconButton {
             .bg(if is_pressed { pressed_fill } else { fill })
             .text_color(text_color)
             .border_1()
-            .border_color(border_color)
+            .border_color(if is_pressed { pressed_border } else { border_color })
             .flex()
             .items_center()
             .justify_center();
+
+        // Contract: pressed = double inset shadow (accent 8%, accent 12%)
+        if is_pressed {
+            el = el.shadow(vec![
+                gpui::BoxShadow {
+                    color: accent.opacity(0.08),
+                    offset: point(px(0.0), px(1.0)),
+                    blur_radius: px(2.0),
+                    spread_radius: px(0.0),
+                },
+                gpui::BoxShadow {
+                    color: accent.opacity(0.12),
+                    offset: point(px(0.0), px(0.0)),
+                    blur_radius: px(0.0),
+                    spread_radius: px(1.0),
+                },
+            ]);
+        }
 
         // ── Focus ring ────────────────────────────────────────────
         el = el.focus(move |s| s.border_color(focus_ring_color));

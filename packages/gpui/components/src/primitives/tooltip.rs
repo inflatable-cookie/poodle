@@ -81,15 +81,24 @@ impl IntoElement for Tooltip {
                 wrapper = wrapper.child(
                     div()
                         .px(px(8.0))  // 0.5rem
-                        .py(px(6.0))  // 0.375rem
+                        .py(px(4.0))  // 0.25rem
                         .rounded(tooltip_radius)
                         .bg(fill)
                         .border_1()
                         .border_color(tooltip_border)
-                        .shadow_md()
-                        // Contract: font 0.75rem (12px)
+                        // Contract: elevation-tooltip shadow
+                        .shadow(vec![
+                            gpui::BoxShadow {
+                                color: hsla(0.0, 0.0, 0.0, 0.12),
+                                offset: point(px(0.0), px(2.0)),
+                                blur_radius: px(8.0),
+                                spread_radius: px(0.0),
+                            },
+                        ])
+                        // Contract: font 0.75rem (12px), max-width 20rem (320px)
                         .text_size(px(12.0))
                         .text_color(text_primary)
+                        .max_w(px(320.0))
                         .child(content.clone()),
                 );
             }

@@ -84,10 +84,16 @@ impl IntoElement for Rating {
                 let star_id = SharedString::from(format!("pug-rating-star-{}", i));
                 let hover_color = active_color;
 
+                // Contract: touch target 2rem (32px) per star
                 let mut star_wrapper = div()
                     .id(star_id)
                     .focusable()
                     .cursor_pointer()
+                    .min_w(px(32.0))
+                    .min_h(px(32.0))
+                    .flex()
+                    .items_center()
+                    .justify_center()
                     .child(icon)
                     .hover(move |s| s.text_color(hover_color));
 

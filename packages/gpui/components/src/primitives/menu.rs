@@ -94,7 +94,21 @@ impl IntoElement for Menu {
             .bg(surface_bg)
             .border_1()
             .border_color(border)
-            .shadow_md()
+            // Contract: elevation-popover shadow
+            .shadow(vec![
+                gpui::BoxShadow {
+                    color: hsla(0.0, 0.0, 0.0, 0.10),
+                    offset: point(px(0.0), px(4.0)),
+                    blur_radius: px(16.0),
+                    spread_radius: px(0.0),
+                },
+                gpui::BoxShadow {
+                    color: hsla(0.0, 0.0, 0.0, 0.06),
+                    offset: point(px(0.0), px(1.0)),
+                    blur_radius: px(4.0),
+                    spread_radius: px(0.0),
+                },
+            ])
             .p(px(4.0)); // 0.25rem
 
         for item in &self.spec.items {

@@ -93,9 +93,26 @@ impl IntoElement for Popover {
                         .bg(surface_bg)
                         .border_1()
                         .border_color(border)
-                        .shadow_lg()
+                        // Contract: elevation-popover shadow
+                        .shadow(vec![
+                            gpui::BoxShadow {
+                                color: hsla(0.0, 0.0, 0.0, 0.10),
+                                offset: point(px(0.0), px(4.0)),
+                                blur_radius: px(16.0),
+                                spread_radius: px(0.0),
+                            },
+                            gpui::BoxShadow {
+                                color: hsla(0.0, 0.0, 0.0, 0.06),
+                                offset: point(px(0.0), px(1.0)),
+                                blur_radius: px(4.0),
+                                spread_radius: px(0.0),
+                            },
+                        ])
                         .px(panel_x)
                         .py(panel_y)
+                        // Contract: min-width 12rem (192px), max-width 24rem (384px)
+                        .min_w(px(192.0))
+                        .max_w(px(384.0))
                         .child(content),
                 );
             }

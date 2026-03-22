@@ -123,7 +123,16 @@ impl IntoElement for SegmentedControl {
                 .focus(move |s| s.border_color(focus_ring));
 
             if is_selected {
-                seg = seg.bg(accent).text_color(text_inverse).rounded(inner_radius);
+                // Contract: selected segment with inset shadow
+                seg = seg.bg(accent).text_color(text_inverse).rounded(inner_radius)
+                    .shadow(vec![
+                        gpui::BoxShadow {
+                            color: hsla(0.0, 0.0, 0.0, 0.12),
+                            offset: point(px(0.0), px(1.0)),
+                            blur_radius: px(2.0),
+                            spread_radius: px(0.0),
+                        },
+                    ]);
             } else {
                 // Contract: unselected text = text-secondary
                 seg = seg.text_color(text_secondary);

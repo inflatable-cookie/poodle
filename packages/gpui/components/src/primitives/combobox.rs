@@ -175,7 +175,21 @@ impl IntoElement for Combobox {
                 .bg(list_fill)
                 .border_1()
                 .border_color(list_border)
-                .shadow_md()
+                // Contract: elevation-popover shadow
+                .shadow(vec![
+                    gpui::BoxShadow {
+                        color: hsla(0.0, 0.0, 0.0, 0.10),
+                        offset: point(px(0.0), px(4.0)),
+                        blur_radius: px(16.0),
+                        spread_radius: px(0.0),
+                    },
+                    gpui::BoxShadow {
+                        color: hsla(0.0, 0.0, 0.0, 0.06),
+                        offset: point(px(0.0), px(1.0)),
+                        blur_radius: px(4.0),
+                        spread_radius: px(0.0),
+                    },
+                ])
                 .flex()
                 .flex_col()
                 .gap(px(2.0)) // Contract: gap 0.125rem

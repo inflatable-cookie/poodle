@@ -193,7 +193,21 @@ impl IntoElement for Select {
                 .bg(elevated_bg)
                 .border_1()
                 .border_color(border)
-                .shadow_md()
+                // Contract: elevation-popover shadow
+                .shadow(vec![
+                    gpui::BoxShadow {
+                        color: hsla(0.0, 0.0, 0.0, 0.10),
+                        offset: point(px(0.0), px(4.0)),
+                        blur_radius: px(16.0),
+                        spread_radius: px(0.0),
+                    },
+                    gpui::BoxShadow {
+                        color: hsla(0.0, 0.0, 0.0, 0.06),
+                        offset: point(px(0.0), px(1.0)),
+                        blur_radius: px(4.0),
+                        spread_radius: px(0.0),
+                    },
+                ])
                 .py(stack_gap)
                 .max_h(px(240.0))
                 .overflow_y_scroll();

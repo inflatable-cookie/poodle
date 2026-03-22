@@ -5,7 +5,7 @@ use pug_adapter::ThemeProvider;
 use pug_gpui::GpuiThemeProvider;
 use pug_primitives::{PaddingScale, SurfaceBorder, SurfaceRole, SurfaceSpec, SurfaceTone};
 
-use crate::theme_ext::{resolve_color, resolve_radius};
+use crate::theme_ext::{color_mix, resolve_color, resolve_radius};
 
 /// A real GPUI surface component backed by `SurfaceSpec`.
 pub struct Surface {
@@ -58,8 +58,12 @@ impl IntoElement for Surface {
         // Contract: use radius.surface, not radius.control
         let surface_radius = resolve_radius(theme, spec.radius_token());
 
-        let bg = resolve_color(theme, spec.resolved_background_token());
+        let bg_raw = resolve_color(theme, spec.resolved_background_token());
+        let panel = resolve_color(theme, "semantic.color.background.panel");
         let padding = spec.resolved_padding();
+
+        // Contract: surface bg = color-mix(resolved-bg 96%, panel)
+        let bg = color_mix(bg_raw, panel, 0.96);
 
         let mut el = div().rounded(surface_radius).bg(bg);
 
@@ -69,9 +73,22 @@ impl IntoElement for Surface {
             el = el.border_1().border_color(border_color);
         }
 
-        // Shadow for elevated surfaces
+        // Shadow for elevated surfaces — Contract: elevation-surface shadow
         if spec.is_elevated || spec.tone == SurfaceTone::Elevated {
-            el = el.shadow_md();
+            el = el.shadow(vec![
+                gpui::BoxShadow {
+                    color: hsla(0.0, 0.0, 0.0, 0.08),
+                    offset: point(px(0.0), px(2.0)),
+                    blur_radius: px(8.0),
+                    spread_radius: px(0.0),
+                },
+                gpui::BoxShadow {
+                    color: hsla(0.0, 0.0, 0.0, 0.04),
+                    offset: point(px(0.0), px(1.0)),
+                    blur_radius: px(2.0),
+                    spread_radius: px(0.0),
+                },
+            ]);
         }
 
         // Padding

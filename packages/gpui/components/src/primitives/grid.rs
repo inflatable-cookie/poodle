@@ -80,11 +80,11 @@ impl IntoElement for Grid {
 
         let mut el = div().flex().flex_wrap();
 
-        // Column gap (used for both column and row gap in flex-wrap approximation)
+        // Column gap
         if let Some(gap_token) = spec.resolved_column_gap() {
-            el = el.gap(resolve_px(theme, gap_token));
+            el = el.gap_x(resolve_px(theme, gap_token));
         }
-        // Row gap (applied as row_gap if available and different from column gap)
+        // Row gap (applied same as column gap for consistent grid spacing)
         if let Some(row_gap_token) = spec.resolved_row_gap() {
             el = el.gap_y(resolve_px(theme, row_gap_token));
         }

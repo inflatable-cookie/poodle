@@ -117,6 +117,7 @@ impl IntoElement for AlertDialog {
             .items_center()
             .justify_center()
             .bg(self.backdrop_fill)
+            .occlude()
             .child(
                 // Dialog card
                 div()
@@ -127,7 +128,21 @@ impl IntoElement for AlertDialog {
                     .rounded(self.dialog_radius)
                     .border_1()
                     .border_color(self.border_color)
-                    .shadow_lg()
+                    // Contract: elevation-dialog shadow
+                    .shadow(vec![
+                        gpui::BoxShadow {
+                            color: hsla(0.0, 0.0, 0.0, 0.12),
+                            offset: point(px(0.0), px(8.0)),
+                            blur_radius: px(24.0),
+                            spread_radius: px(0.0),
+                        },
+                        gpui::BoxShadow {
+                            color: hsla(0.0, 0.0, 0.0, 0.08),
+                            offset: point(px(0.0), px(2.0)),
+                            blur_radius: px(8.0),
+                            spread_radius: px(0.0),
+                        },
+                    ])
                     .px(self.padding_x)
                     .py(self.padding_y)
                     .gap(self.content_gap)

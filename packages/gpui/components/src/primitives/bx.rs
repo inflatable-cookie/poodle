@@ -102,10 +102,17 @@ impl IntoElement for Box {
             el = el.py(resolve_px(theme, v));
         }
 
-        // Overflow
+        // Overflow — Auto/Scroll require id() for scroll support
         match spec.overflow {
             Overflow::Hidden | Overflow::Clip => {
                 el = el.overflow_hidden();
+            }
+            Overflow::Auto | Overflow::Scroll => {
+                // Children
+                for child in self.children {
+                    el = el.child(child);
+                }
+                return el.id("pug-box").overflow_y_scroll().into_any_element();
             }
             Overflow::Visible => {}
         }
