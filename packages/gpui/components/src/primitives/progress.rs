@@ -4,7 +4,6 @@
 
 use std::time::Duration;
 
-use gpui::prelude::FluentBuilder;
 use gpui::*;
 use pug_gpui::GpuiThemeProvider;
 use pug_primitives::ProgressSpec;
@@ -53,12 +52,12 @@ impl IntoElement for Progress {
         let accent = resolve_color(theme, spec.indicator_fill_token());
         let surface = resolve_color(theme, "semantic.color.background.surface");
         let text_primary = resolve_color(theme, "semantic.color.text.primary");
-        // Contract §8: track bg = color-mix(surface 96%, text-primary)
+        // Contract: track bg = color-mix(surface 96%, text-primary)
         let track_bg = color_mix(surface, text_primary, 0.96);
 
         let progress = spec.normalized_progress();
 
-        // Contract §8: root height 0.375rem (6px), radius 999px
+        // Contract: track height 0.5rem (8px), radius 999px
         let mut track = div()
             .w_full()
             .h(px(8.0))
@@ -80,21 +79,21 @@ impl IntoElement for Progress {
             }
             None => {
                 // Indeterminate: animated bar that slides back and forth
-                // Contract: animation translateX(-100%) to translateX(250%), 1.2s ease-in-out infinite
+                // Contract: width 40%, animation translateX(-100%) to translateX(250%), 1.2s ease-in-out infinite
                 track = track.child(
                     div()
                         .h_full()
                         .rounded(px(999.0))
                         .bg(accent)
-                        .w(relative(0.3))
+                        .w(relative(0.4))
                         .with_animation(
                             "progress-indeterminate",
                             Animation::new(Duration::from_millis(1200))
                                 .repeat()
                                 .with_easing(gpui::ease_in_out),
                             |el, delta| {
-                                // Slide from -30% to 130% of track width
-                                let offset = -0.3 + delta * 1.6;
+                                // Slide from -40% to 140% of track width
+                                let offset = -0.4 + delta * 1.8;
                                 el.ml(relative(offset))
                             },
                         ),

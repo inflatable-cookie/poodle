@@ -1,6 +1,5 @@
 //! Callout — real GPUI component backed by CallOutSpec (contract: callout).
 
-use gpui::prelude::FluentBuilder;
 use gpui::*;
 use pug_gpui::GpuiThemeProvider;
 use pug_primitives::{CallOutSpec, StatusTone};
@@ -44,16 +43,20 @@ impl IntoElement for Callout {
         let theme = &self.theme;
         let spec = &self.spec;
 
-        let inline_padding = resolve_px(theme, "semantic.space.inline.md");
+        let panel_x = resolve_px(theme, "semantic.space.panel.x");
+        let panel_y = resolve_px(theme, "semantic.space.panel.y");
 
         let fill = resolve_color(theme, spec.fill_token());
         let border = resolve_color(theme, spec.border_token());
+        let text_primary = resolve_color(theme, "semantic.color.text.primary");
+        let text_secondary = resolve_color(theme, "semantic.color.text.secondary");
         let radius = resolve_radius(theme, "semantic.radius.surface");
 
+        // Contract: left border 3px, tone-colored bg at 10% opacity
         let mut el = div()
             .w_full()
-            .px(inline_padding)
-            .py(px(10.0))
+            .px(panel_x)
+            .py(panel_y)
             .rounded(radius)
             .bg(fill.opacity(0.1))
             .border_l(px(3.0))
@@ -62,19 +65,23 @@ impl IntoElement for Callout {
             .flex_col()
             .gap(px(4.0));
 
+        // Contract: title font 0.875rem (14px), weight 600
         if let Some(ref title) = spec.title {
             el = el.child(
                 div()
-                    .text_sm()
+                    .text_size(px(14.0))
                     .font_weight(FontWeight::SEMIBOLD)
+                    .text_color(text_primary)
                     .child(title.clone()),
             );
         }
 
+        // Contract: content font 0.875rem (14px)
         if let Some(ref content) = spec.content {
             el = el.child(
                 div()
-                    .text_sm()
+                    .text_size(px(14.0))
+                    .text_color(text_secondary)
                     .child(content.clone()),
             );
         }

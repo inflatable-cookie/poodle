@@ -44,23 +44,26 @@ impl IntoElement for Code {
         let theme = &self.theme;
         let spec = &self.spec;
 
-        let inline_padding = resolve_px(theme, "semantic.space.inline.md");
+        let panel_x = resolve_px(theme, "semantic.space.panel.x");
+        let panel_y = resolve_px(theme, "semantic.space.panel.y");
         let inline_gap = resolve_px(theme, "semantic.space.inline.sm");
 
         let fill = resolve_color(theme, spec.fill_token());
         let text_color = resolve_color(theme, spec.text_color_token());
         let border = resolve_color(theme, spec.border_token());
-        let radius = resolve_radius(theme, "semantic.radius.control");
+        // Contract: radius-surface, not radius-control
+        let radius = resolve_radius(theme, "semantic.radius.surface");
 
         let mut el = div()
-            .px(inline_padding)
-            .py(px(10.0))
+            .px(panel_x)
+            .py(panel_y)
             .rounded(radius)
             .bg(fill)
             .border_1()
             .border_color(border)
             .text_color(text_color)
-            .text_xs()
+            // Contract: font 0.8125rem (13px), code family
+            .text_size(px(13.0))
             .overflow_hidden();
 
         // Content with optional line numbers

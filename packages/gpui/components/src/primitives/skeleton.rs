@@ -1,6 +1,5 @@
 //! Skeleton — real GPUI component backed by SkeletonSpec.
 
-use gpui::prelude::FluentBuilder;
 use gpui::*;
 use pug_gpui::GpuiThemeProvider;
 use pug_primitives::SkeletonSpec;
@@ -64,14 +63,15 @@ impl IntoElement for Skeleton {
             el = el.w_full();
         }
 
+        // Contract: default line height is 14px (0.875rem), not 16px
         if let Some(ref h) = spec.height {
             if let Ok(val) = h.parse::<f32>() {
                 el = el.h(px(val));
             } else {
-                el = el.h(px(16.0));
+                el = el.h(px(14.0));
             }
         } else {
-            el = el.h(px(16.0));
+            el = el.h(px(14.0));
         }
 
         el.into_any_element()

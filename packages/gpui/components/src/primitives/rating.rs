@@ -5,7 +5,7 @@ use pug_gpui::GpuiThemeProvider;
 use pug_primitives::{IconSize, IconSpec, RatingSpec};
 
 use super::icon::Icon;
-use crate::theme_ext::{resolve_color, resolve_opacity, resolve_px};
+use crate::theme_ext::{resolve_color, resolve_opacity};
 
 /// A real GPUI rating component backed by `RatingSpec`.
 pub struct Rating {
@@ -49,9 +49,9 @@ impl IntoElement for Rating {
         let inactive_color = resolve_color(theme, spec.inactive_color_token());
         let filled = spec.filled_count();
         let disabled_opacity = resolve_opacity(theme, "semantic.state.opacity.disabled");
-        let inline_gap = resolve_px(theme, "semantic.space.inline.sm");
 
-        let mut el = div().flex().items_center().gap(inline_gap);
+        // Contract: gap 0.125rem (2px)
+        let mut el = div().flex().items_center().gap(px(2.0));
 
         for i in 0..spec.max {
             let color = if i < filled {
@@ -67,7 +67,9 @@ impl IntoElement for Rating {
         }
 
         if spec.is_disabled {
-            el = el.opacity(disabled_opacity);
+            el = el
+                .opacity(disabled_opacity)
+                .cursor(CursorStyle::OperationNotAllowed);
         }
 
         el.into_any_element()

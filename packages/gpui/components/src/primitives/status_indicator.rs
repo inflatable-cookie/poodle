@@ -1,6 +1,5 @@
 //! StatusIndicator — real GPUI component backed by StatusIndicatorSpec.
 
-use gpui::prelude::FluentBuilder;
 use gpui::*;
 use pug_gpui::GpuiThemeProvider;
 use pug_primitives::{StatusIndicatorSpec, StatusTone};
@@ -47,23 +46,26 @@ impl IntoElement for StatusIndicator {
         let status_color = resolve_color(theme, spec.status_color_token());
         let text_primary = resolve_color(theme, "semantic.color.text.primary");
 
+        // Contract: gap 0.4375rem (7px)
         let mut row = div().flex().items_center().gap(px(7.0));
 
-        // Status dot
+        // Contract: dot 0.5625rem (9px)
         row = row.child(
             div()
-                .w(px(8.0))
-                .h(px(8.0))
-                .rounded(px(4.0))
+                .w(px(9.0))
+                .h(px(9.0))
+                .rounded(px(4.5))
                 .bg(status_color)
                 .flex_shrink_0(),
         );
 
-        // Label
+        // Contract: label font 0.75rem (12px), weight 600, line-height 1.3
         if let Some(ref label) = spec.label {
             row = row.child(
                 div()
-                    .text_sm()
+                    .text_size(px(12.0))
+                    .font_weight(FontWeight::SEMIBOLD)
+                    .line_height(relative(1.3))
                     .text_color(text_primary)
                     .child(label.clone()),
             );
