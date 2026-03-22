@@ -1,45 +1,46 @@
-//! Toggle — a pressed-state button variant.
+//! Toggle — pressable button with persistent pressed state.
+//!
+//! Contract: `docs/contracts/foundation/toggle.md`
 
 use gpui::prelude::FluentBuilder;
 use gpui::*;
 use pug_gpui::GpuiThemeProvider;
+use pug_primitives::{ButtonVariant, ControlSize, ToggleLayout, ToggleSpec};
 
-use crate::theme_ext::{resolve_color, resolve_opacity, resolve_radius};
+use crate::theme_ext::{color_mix, color_mix_black, resolve_color, resolve_opacity, resolve_px, resolve_radius};
 
-/// A toggle button that renders with a pressed/unpressed visual state.
 pub struct Toggle {
+    spec: ToggleSpec,
     theme: GpuiThemeProvider,
-    label: String,
-    is_pressed: bool,
-    is_disabled: bool,
     on_click: Option<Box<dyn Fn(&ClickEvent, &mut Window, &mut App) + 'static>>,
 }
 
+impl std::ops::Deref for Toggle {
+    type Target = ToggleSpec;
+    fn deref(&self) -> &ToggleSpec { &self.spec }
+}
+
 impl Toggle {
-    pub fn new(label: impl Into<String>, theme: &GpuiThemeProvider) -> Self {
-        Self {
-            theme: theme.clone(),
-            label: label.into(),
-            is_pressed: false,
-            is_disabled: false,
-            on_click: None,
-        }
+    pub fn new(theme: &GpuiThemeProvider) -> Self {
+        Self { spec: ToggleSpec::new(), theme: theme.clone(), on_click: None }
     }
 
-    pub fn with_pressed(mut self, is_pressed: bool) -> Self {
-        self.is_pressed = is_pressed;
-        self
+    pub fn from_spec(spec: ToggleSpec, theme: &GpuiThemeProvider) -> Self {
+        Self { spec, theme: theme.clone(), on_click: None }
     }
 
-    pub fn with_disabled(mut self, is_disabled: bool) -> Self {
-        self.is_disabled = is_disabled;
-        self
-    }
+    // ── Forwarded spec builders ───────────────────────────────
+    pub fn pressed(mut self, v: bool) -> Self { self.spec.is_pressed = Some(v); self }
+    pub fn default_pressed(mut self, v: bool) -> Self { self.spec.default_pressed = v; self }
+    pub fn variant(mut self, v: ButtonVariant) -> Self { self.spec.variant = v; self }
+    pub fn size(mut self, v: ControlSize) -> Self { self.spec.size = v; self }
+    pub fn layout(mut self, v: ToggleLayout) -> Self { self.spec.layout = v; self }
+    pub fn disabled(mut self, v: bool) -> Self { self.spec.is_disabled = v; self }
+    pub fn aria_label(mut self, v: impl Into<String>) -> Self { self.spec.aria_label = Some(v.into()); self }
+    pub fn label(mut self, v: impl Into<String>) -> Self { self.spec.label = Some(v.into()); self }
 
-    pub fn on_click(
-        mut self,
-        handler: impl Fn(&ClickEvent, &mut Window, &mut App) + 'static,
-    ) -> Self {
+    // ── GPUI-specific ─────────────────────────────────────────
+    pub fn on_click(mut self, handler: impl Fn(&ClickEvent, &mut Window, &mut App) + 'static) -> Self {
         self.on_click = Some(Box::new(handler));
         self
     }
@@ -50,46 +51,84 @@ impl IntoElement for Toggle {
 
     fn into_element(self) -> Self::Element {
         let theme = &self.theme;
+        let spec = &self.spec;
+        let is_pressed = spec.current_pressed();
 
-        let (fill, text_color) = if self.is_pressed {
-            (
-                resolve_color(theme, "semantic.color.accent.base"),
-                resolve_color(theme, "semantic.color.text.inverse"),
-            )
-        } else {
-            (
-                resolve_color(theme, "semantic.color.background.surface"),
-                resolve_color(theme, "semantic.color.text.primary"),
-            )
+        // ── Size ──────────────────────────────────────────────────
+        let base_height = resolve_px(theme, spec.control_height_token());
+        let size_offset: f32 = match spec.size {
+            ControlSize::Sm => -6.0, ControlSize::Md => 0.0, ControlSize::Lg => 6.0,
         };
-        let border = resolve_color(theme, "semantic.color.border.default");
-        let radius = resolve_radius(theme, "semantic.radius.control");
-        let disabled_opacity = resolve_opacity(theme, "semantic.state.opacity.disabled");
+        let height = base_height + px(size_offset);
+        let pad_x = resolve_px(theme, "semantic.space.control.x");
+        let font_size: f32 = match spec.size {
+            ControlSize::Sm => 12.0, ControlSize::Md => 12.0, ControlSize::Lg => 14.0,
+        };
+        let radius = resolve_radius(theme, spec.radius_token());
+        let focus_ring = resolve_color(theme, spec.focus_ring_color_token());
 
-        let id = SharedString::from(format!("pug-toggle-{}", self.label));
+        // ── Colors ────────────────────────────────────────────────
+        let accent = resolve_color(theme, "semantic.color.accent.base");
+        let surface = resolve_color(theme, "semantic.color.background.surface");
+        let elevated = resolve_color(theme, "semantic.color.background.elevated");
+        let text_primary = resolve_color(theme, "semantic.color.text.primary");
+        let text_inverse = resolve_color(theme, "semantic.color.text.inverse");
+        let border_default = resolve_color(theme, "semantic.color.border.default");
+
+        let (fill, text_color, border_color) = if is_pressed {
+            // Pressed: accent bg, accent border (darkened), inverse text
+            let pressed_border = color_mix_black(accent, 0.78);
+            (accent, text_inverse, pressed_border)
+        } else {
+            // Unpressed: variant-specific
+            match spec.variant {
+                ButtonVariant::Ghost => (gpui::transparent_black(), text_primary, gpui::transparent_black()),
+                ButtonVariant::Primary => {
+                    let darkened = color_mix_black(accent, 0.84);
+                    (accent, text_inverse, darkened)
+                }
+                _ => (surface, text_primary, border_default),
+            }
+        };
+
+        let hover_fill = color_mix(fill, elevated, 0.84);
+
+        // ── Build ─────────────────────────────────────────────────
+        let label_text = spec.label.clone().unwrap_or_default();
+        let id = SharedString::from(format!("pug-toggle-{}", label_text));
 
         let mut el = div()
             .id(id)
-            .px(px(10.0))
-            .py(px(4.0))
+            .h(height)
+            .min_w(px(36.0)) // contract: 2.25rem
+            .px(pad_x)
             .rounded(radius)
             .bg(fill)
-            .border_1()
-            .border_color(border)
-            .text_sm()
+            .border_1().border_color(border_color)
             .text_color(text_color)
-            .flex()
-            .items_center()
-            .justify_center()
-            .child(self.label);
+            .text_size(px(font_size))
+            .font_weight(FontWeight::SEMIBOLD)
+            .line_height(relative(1.0))
+            .flex().items_center().justify_center()
+            .focus(move |s| s.border_color(focus_ring));
 
-        if self.is_disabled {
-            el = el.opacity(disabled_opacity);
+        // Stack layout = full width
+        if spec.layout == ToggleLayout::Stack {
+            el = el.w_full();
+        }
+
+        if spec.is_disabled {
+            let opacity = resolve_opacity(theme, spec.disabled_opacity_token());
+            el = el.opacity(opacity).cursor(CursorStyle::OperationNotAllowed);
         } else {
-            el = el.cursor_pointer();
+            el = el.cursor_pointer().hover(move |s| s.bg(hover_fill));
             if let Some(handler) = self.on_click {
                 el = el.on_click(move |event, window, cx| handler(event, window, cx));
             }
+        }
+
+        if !label_text.is_empty() {
+            el = el.child(div().whitespace_nowrap().child(label_text));
         }
 
         el.into_any_element()

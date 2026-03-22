@@ -159,7 +159,7 @@ pub use time_ago::TimeAgo;
 pub use time_field::TimeField;
 pub use time_zone_select::TimeZoneSelect;
 pub use toggle::Toggle;
-pub use toggle_group::{ToggleGroup, ToggleGroupItem};
+pub use toggle_group::ToggleGroup;
 pub use toolbar::Toolbar;
 pub use tooltip::Tooltip;
 pub use tri_state_switch::TriStateSwitch;

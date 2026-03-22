@@ -19,16 +19,16 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
         .child(
             div().flex().gap(px(4.0))
                 .child(
-                    Toggle::new("Bold", theme)
-                        .with_pressed(bold_pressed)
+                    Toggle::new(theme).label("Bold")
+                        .pressed(bold_pressed)
                         .on_click(cx.listener(|this, _e: &ClickEvent, _w, cx| {
                             this.state.specimens.toggle("toggle-bold");
                             cx.notify();
                         }))
                 )
                 .child(
-                    Toggle::new("Italic", theme)
-                        .with_pressed(italic_pressed)
+                    Toggle::new(theme).label("Italic")
+                        .pressed(italic_pressed)
                         .on_click(cx.listener(|this, _e: &ClickEvent, _w, cx| {
                             this.state.specimens.toggle("toggle-italic");
                             cx.notify();
@@ -38,8 +38,8 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
         // --- Primary variant ---
         .child(section_label("PRIMARY VARIANT", text_secondary))
         .child(
-            Toggle::new("Pinned", theme)
-                .with_pressed(pinned_pressed)
+            Toggle::new(theme).label("Pinned")
+                .pressed(pinned_pressed)
                 .on_click(cx.listener(|this, _e: &ClickEvent, _w, cx| {
                     this.state.specimens.toggle("toggle-pinned-off");
                     cx.notify();
@@ -48,8 +48,8 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
         // --- Secondary variant ---
         .child(section_label("SECONDARY VARIANT", text_secondary))
         .child(
-            Toggle::new("Favorite", theme)
-                .with_pressed(favorite_pressed)
+            Toggle::new(theme).label("Favorite")
+                .pressed(favorite_pressed)
                 .on_click(cx.listener(|this, _e: &ClickEvent, _w, cx| {
                     this.state.specimens.toggle("toggle-favorite");
                     cx.notify();
@@ -58,9 +58,9 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
         // --- Disabled ---
         .child(section_label("DISABLED", text_secondary))
         .child(
-            Toggle::new("Locked", theme)
-                .with_pressed(true)
-                .with_disabled(true)
+            Toggle::new(theme).label("Locked")
+                .pressed(true)
+                .disabled(true)
         )
 }
 

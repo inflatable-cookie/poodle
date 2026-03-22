@@ -1,66 +1,68 @@
 use gpui::*;
 use pug_adapter::ThemeProvider;
 use pug_gpui::GpuiThemeProvider;
-use pug_gpui_components::{ToggleGroup, ToggleGroupItem};
+use pug_gpui_components::ToggleGroup;
+use pug_primitives::ToggleGroupOption;
 
 pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
     let text_secondary = theme.resolve_color("semantic.color.text.secondary");
 
     // --- Single selection: Grid (selected) / List / Board ---
-    let single_items = vec![
-        ToggleGroupItem::new("Grid").with_pressed(true),
-        ToggleGroupItem::new("List").with_pressed(false),
-        ToggleGroupItem::new("Board").with_pressed(false),
+    let single_options = vec![
+        ToggleGroupOption::new("grid", "Grid"),
+        ToggleGroupOption::new("list", "List"),
+        ToggleGroupOption::new("board", "Board"),
     ];
 
     // --- Four options: Left (selected) / Center / Right / Justify ---
-    let four_items = vec![
-        ToggleGroupItem::new("Left").with_pressed(true),
-        ToggleGroupItem::new("Center").with_pressed(false),
-        ToggleGroupItem::new("Right").with_pressed(false),
-        ToggleGroupItem::new("Justify").with_pressed(false),
+    let four_options = vec![
+        ToggleGroupOption::new("left", "Left"),
+        ToggleGroupOption::new("center", "Center"),
+        ToggleGroupOption::new("right", "Right"),
+        ToggleGroupOption::new("justify", "Justify"),
     ];
 
-    // --- Multiple selection: Design + Docs selected, Engineering not ---
-    let multi_items = vec![
-        ToggleGroupItem::new("Design").with_pressed(true),
-        ToggleGroupItem::new("Engineering").with_pressed(false),
-        ToggleGroupItem::new("Docs").with_pressed(true),
+    // --- Multiple selection: Design + Docs selected ---
+    let multi_options = vec![
+        ToggleGroupOption::new("design", "Design"),
+        ToggleGroupOption::new("engineering", "Engineering"),
+        ToggleGroupOption::new("docs", "Docs"),
     ];
 
-    // --- Disabled: List selected, all disabled ---
-    let disabled_items = vec![
-        ToggleGroupItem::new("Grid").with_pressed(false),
-        ToggleGroupItem::new("List").with_pressed(true),
-        ToggleGroupItem::new("Board").with_pressed(false),
+    // --- Disabled ---
+    let disabled_options = vec![
+        ToggleGroupOption::new("grid", "Grid"),
+        ToggleGroupOption::new("list", "List"),
+        ToggleGroupOption::new("board", "Board"),
     ];
 
     div().flex().flex_col().gap(px(24.0))
-        // --- Single selection ---
         .child(
             div().flex().flex_col().gap(px(8.0))
                 .child(section_label("SINGLE SELECTION", text_secondary))
-                .child(ToggleGroup::new(single_items, theme))
+                .child(ToggleGroup::new(single_options, theme).default_value(vec!["grid".to_string()]))
         )
-        // --- Four options ---
         .child(
             div().flex().flex_col().gap(px(8.0))
                 .child(section_label("FOUR OPTIONS", text_secondary))
-                .child(ToggleGroup::new(four_items, theme))
+                .child(ToggleGroup::new(four_options, theme).default_value(vec!["left".to_string()]))
         )
-        // --- Multiple selection ---
         .child(
             div().flex().flex_col().gap(px(8.0))
                 .child(section_label("MULTIPLE SELECTION", text_secondary))
-                .child(ToggleGroup::new(multi_items, theme))
+                .child(
+                    ToggleGroup::new(multi_options, theme)
+                        .default_value(vec!["design".to_string(), "docs".to_string()])
+                        .selection_mode(pug_primitives::ToggleGroupSelectionMode::Multiple)
+                )
         )
-        // --- Disabled ---
         .child(
             div().flex().flex_col().gap(px(8.0))
                 .child(section_label("DISABLED", text_secondary))
                 .child(
-                    div().opacity(0.48)
-                        .child(ToggleGroup::new(disabled_items, theme))
+                    ToggleGroup::new(disabled_options, theme)
+                        .default_value(vec!["list".to_string()])
+                        .disabled(true)
                 )
         )
 }
