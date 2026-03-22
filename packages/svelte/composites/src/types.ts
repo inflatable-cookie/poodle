@@ -63,6 +63,35 @@ export type PickerItem = {
   meta?: string | null;
 };
 
+export type DrillDownItem = PickerItem & {
+  count?: number;
+  hasChildren?: boolean;
+};
+
+export type DrillDownContext = Record<string, string>;
+
+export type DrillDownSearchFn = (
+  query: string,
+  context: DrillDownContext,
+) => DrillDownItem[] | Promise<DrillDownItem[]>;
+
+export type DrillDownLevel = {
+  key: string;
+  label: string;
+  items: DrillDownItem[] | DrillDownSearchFn;
+  searchPlaceholder?: string;
+};
+
+export type DrillDownItemsFn = (
+  query: string,
+  context: DrillDownContext,
+) => PickerItem[] | Promise<PickerItem[]>;
+
+export type DrillDownConfig = {
+  levels: DrillDownLevel[];
+  finalItems?: DrillDownItemsFn;
+};
+
 export type MediaPickerItem = {
   id: string;
   label: string;

@@ -14,7 +14,11 @@ pub fn js_pagination(spec: &PaginationSpec, theme: &JetstreamThemeProvider) -> J
     let mut el = ui_element::div().flex_row().items_center().gap(4.0);
 
     // Previous button
-    el = el.child(ui_element::button("‹").text_color(muted).text_size(16.0).focusable());
+    el = el.child(
+        ui_element::button("")
+            .child(ui_element::icon("chevron-left").w(16.0).h(16.0).text_color(muted))
+            .focusable()
+    );
 
     // Page numbers
     let total = spec.total_pages;
@@ -31,7 +35,11 @@ pub fn js_pagination(spec: &PaginationSpec, theme: &JetstreamThemeProvider) -> J
     }
 
     // Next button
-    el = el.child(ui_element::button("›").text_color(muted).text_size(16.0).focusable());
+    el = el.child(
+        ui_element::button("")
+            .child(ui_element::icon("chevron-right").w(16.0).h(16.0).text_color(muted))
+            .focusable()
+    );
 
     el
 }

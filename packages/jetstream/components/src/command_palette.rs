@@ -16,14 +16,18 @@ pub fn js_command_palette(spec: &CommandPaletteSpec, theme: &JetstreamThemeProvi
         .border(1.0).border_color(border)
         .rounded(radius)
         .flex_col()
-        .min_w(400.0).min_h(200.0);
+        .min_w(400.0).min_h(200.0)
+        .shadow_lg()
+        .overlay();
 
-    // Search input area
+    // Search input area with icon
     el = el.child(
         ui_element::div()
+            .flex_row().items_center().gap(8.0)
             .pl(12.0).pr(12.0).pt(8.0).pb(8.0)
-            .border(1.0).border_color(border)
-            .child(ui_element::label("Type a command...").text_color(text_muted).text_size(14.0))
+            .border_b_1().border_color(border)
+            .child(ui_element::icon("search").w(16.0).h(16.0).text_color(text_muted))
+            .child(ui_element::label("Type a command...").text_color(text_muted).text_size(14.0).grow())
     );
 
     // Action list

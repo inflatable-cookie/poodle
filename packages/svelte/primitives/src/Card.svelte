@@ -72,7 +72,7 @@
     display: grid;
     align-content: start;
     gap: var(--pug-space-stack-md);
-    padding: var(--pug-space-panel-y) var(--pug-space-panel-x);
+    padding: var(--pug-space-panel-x);
     border: 0.0625rem solid var(--pug-recipe-card-border);
     border-radius: var(--pug-recipe-card-radius);
     background: var(

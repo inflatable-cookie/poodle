@@ -11,15 +11,19 @@ pub fn js_collapse_toggle(spec: &CollapseToggleSpec, theme: &JetstreamThemeProvi
     let radius = resolve_radius(theme, spec.radius_token());
     let text_color = resolve_color(theme, spec.text_color_token());
 
-    let chevron = if spec.is_collapsed { "▸" } else { "▾" };
+    let chevron_icon = if spec.is_collapsed { "chevron-right" } else { "chevron-down" };
 
-    let mut el = ui_element::button(chevron)
-        .text_size(icon_size)
-        .text_color(text_color)
+    let mut el = ui_element::button("")
         .rounded(radius)
         .w(24.0).h(24.0)
         .flex_row().items_center().justify_center()
-        .focusable();
+        .focusable()
+        .cursor_pointer()
+        .child(
+            ui_element::icon(chevron_icon)
+                .w(icon_size).h(icon_size)
+                .text_color(text_color)
+        );
 
     if spec.is_disabled {
         let opacity = resolve_opacity(theme, spec.disabled_opacity_token());

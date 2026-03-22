@@ -35,8 +35,8 @@ pub fn js_split_button(spec: &SplitButtonSpec, theme: &JetstreamThemeProvider) -
 
     // Dropdown trigger
     el = el.child(
-        ui_element::button("▾")
-            .text_color(text_color).text_size(10.0)
+        ui_element::button("")
+            .child(ui_element::icon("chevron-down").w(14.0).h(14.0).text_color(text_color))
             .pl(6.0).pr(6.0)
             .focusable()
     );

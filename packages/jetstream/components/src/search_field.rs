@@ -26,8 +26,8 @@ pub fn js_search_field(spec: &SearchFieldSpec, theme: &JetstreamThemeProvider) -
         .items_center()
         .gap(6.0);
 
-    // Search icon (text glyph)
-    el = el.child(ui_element::label("⌕").text_color(icon_color).text_size(14.0));
+    // Search icon (SVG)
+    el = el.child(ui_element::icon("search").w(16.0).h(16.0).text_color(icon_color));
 
     // Value
     el = el.child(ui_element::label(display).text_color(text_color).text_size(13.0).grow());

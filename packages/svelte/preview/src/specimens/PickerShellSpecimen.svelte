@@ -6,20 +6,16 @@
 <div class="specimen">
   <div class="specimen__group">
     <Eyebrow>Inline variant (ready)</Eyebrow>
-    <div class="shell-container">
-      <PickerShell title="Select a component" description="Browse and select from available components." resultCount={12} variant="inline">
-        <Surface padding="sm" border="subtle"><p>Component A</p></Surface>
-        <Surface padding="sm" border="subtle"><p>Component B</p></Surface>
-        <Surface padding="sm" border="subtle"><p>Component C</p></Surface>
-      </PickerShell>
-    </div>
+    <PickerShell title="Select a component" description="Browse and select from available components." resultCount={12} variant="inline">
+      <Surface padding="sm" border="subtle"><p>Component A</p></Surface>
+      <Surface padding="sm" border="subtle"><p>Component B</p></Surface>
+      <Surface padding="sm" border="subtle"><p>Component C</p></Surface>
+    </PickerShell>
   </div>
 
   <div class="specimen__group">
     <Eyebrow>No results</Eyebrow>
-    <div class="shell-container">
-      <PickerShell title="Select an item" state="no-results" stateTitle="No matches" stateMessage="Try a different search term." variant="inline" />
-    </div>
+    <PickerShell title="Select an item" state="no-results" stateTitle="No matches" stateMessage="Try a different search term." variant="inline" />
   </div>
 </div>
 
@@ -34,13 +30,6 @@
     display: flex;
     flex-direction: column;
     gap: 0.5rem;
-  }
-
-  .shell-container {
-    height: 16rem;
-    border: 1px solid var(--pug-color-border-default);
-    border-radius: 4px;
-    overflow: hidden;
   }
 
   p {

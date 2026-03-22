@@ -137,7 +137,6 @@ export const compositeComponents: ComponentEntry[] = [
   entry("FilterToolbar", "composite", C, "Toolbar with filter controls for data views.", true),
   entry("FormDialog", "composite", C, "Modal dialog with embedded form, validation, and submit/cancel actions.", true),
   entry("FormLayout", "composite", C, "Responsive form grid with error messaging and field layout.", true),
-  entry("InlineEditableField", "composite", C, "Click-to-edit inline text field with save and cancel.", true),
   entry("LogList", "composite", C, "Timestamped log viewer with level filtering and auto-scroll.", true),
   entry("MarkdownEditor", "composite", C, "Markdown authoring with formatting toolbar and live preview.", true),
   entry("PageLoading", "composite", C, "Full-viewport loading overlay with spinner, progress, and cancel.", true),

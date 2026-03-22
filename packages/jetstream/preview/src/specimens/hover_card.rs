@@ -1,0 +1,40 @@
+//! HoverCard specimen — hover cards with content.
+
+use jetstream_runtime::ui_element::*;
+use pug_jetstream::JetstreamThemeProvider;
+use pug_jetstream_components::hover_card::js_hover_card;
+use pug_jetstream_components::theme_ext::*;
+use pug_primitives::HoverCardSpec;
+
+pub fn render(theme: &JetstreamThemeProvider) -> JsEl {
+    let secondary = resolve_color(theme, "semantic.color.text.secondary");
+    let text_primary = resolve_color(theme, "semantic.color.text.primary");
+
+    div().flex_col().gap(24.0)
+        // With user profile content
+        .child(group("With content", secondary,
+            js_hover_card(&HoverCardSpec::new(), theme, Some(
+                div().flex_col().gap(8.0).p(12.0)
+                    .child(label("Jane Doe").text_color(text_primary).text_size(14.0))
+                    .child(label("Software Engineer").text_color(secondary).text_size(13.0))
+                    .child(label("Joined March 2024").text_color(secondary).text_size(12.0))
+            ))
+        ))
+        // With minimal content
+        .child(group("Minimal content", secondary,
+            js_hover_card(&HoverCardSpec::new(), theme, Some(
+                div().p(12.0)
+                    .child(label("Quick preview").text_color(text_primary).text_size(13.0))
+            ))
+        ))
+        // Empty
+        .child(group("Empty (no content)", secondary,
+            js_hover_card(&HoverCardSpec::new(), theme, None)
+        ))
+}
+
+fn group(title: &str, text_secondary: glam::Vec4, content: JsEl) -> JsEl {
+    div().flex_col().gap(8.0)
+        .child(label(title).text_color(text_secondary).text_size(11.0))
+        .child(content)
+}

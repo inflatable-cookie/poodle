@@ -8,10 +8,15 @@
   export let isDisabled = false;
   export let activationMode: EditableLabelActivationMode = "doubleClick";
   export let selectOnFocus = true;
+  export let variant: "default" | "flush" = "default";
+  export let emptyText: string | null = null;
+  export let placeholder: string | null = null;
+  export let maxLength: number | null = null;
+  export let showEditIcon = false;
 
   const dispatch = createEventDispatcher<{
     editStart: void;
-    commit: { value: string };
+    commit: { value: string; previousValue: string };
     cancel: void;
   }>();
 
@@ -23,10 +28,11 @@
     draftValue = value;
   }
 
+  $: displayValue = value || emptyText || "";
+  $: isEmpty = !value && !!emptyText;
+
   async function startEditing(): Promise<void> {
-    if (isDisabled || activationMode === "programmatic") {
-      return;
-    }
+    if (isDisabled || activationMode === "programmatic") return;
 
     draftValue = value;
     isEditing = true;
@@ -35,16 +41,15 @@
 
     if (inputElement) {
       inputElement.focus();
-
-      if (selectOnFocus) {
-        inputElement.select();
-      }
+      if (selectOnFocus) inputElement.select();
     }
   }
 
   function commit(): void {
+    const trimmed = draftValue.trim();
+    const previousValue = value;
     isEditing = false;
-    dispatch("commit", { value: draftValue.trim() });
+    dispatch("commit", { value: trimmed, previousValue });
   }
 
   function cancel(): void {
@@ -54,59 +59,56 @@
   }
 </script>
 
-<div class="editable-label" data-editing={isEditing} data-disabled={isDisabled}>
+<div
+  class="editable-label"
+  data-editing={isEditing}
+  data-disabled={isDisabled}
+  data-variant={variant}
+>
   {#if isEditing}
     <input
       bind:this={inputElement}
       class="editable-label__input"
       type="text"
       value={draftValue}
-      on:input={(event) => (draftValue = (event.currentTarget as HTMLInputElement).value)}
+      {placeholder}
+      maxlength={maxLength}
+      on:input={(event) => (draftValue = (event.currentTarget).value)}
       on:blur={() => commit()}
       on:keydown={(event) => {
-        if (event.key === "Enter") {
-          commit();
-        }
-
-        if (event.key === "Escape") {
-          event.preventDefault();
-          cancel();
-        }
+        if (event.key === "Enter") commit();
+        if (event.key === "Escape") { event.preventDefault(); cancel(); }
       }}
     />
   {:else}
     <button
       type="button"
       class="editable-label__display"
+      class:editable-label__display--empty={isEmpty}
       disabled={isDisabled}
       aria-label={ariaLabel}
-      on:dblclick={() => {
-        if (activationMode === "doubleClick") {
-          startEditing();
-        }
-      }}
+      on:dblclick={() => { if (activationMode === "doubleClick") startEditing(); }}
+      on:click={() => { if (activationMode === "enterOrSpace") startEditing(); }}
       on:keydown={(event) => {
-        if (
-          activationMode === "enterOrSpace" &&
-          (event.key === "Enter" || event.key === " ")
-        ) {
+        if (activationMode === "enterOrSpace" && (event.key === "Enter" || event.key === " ")) {
           event.preventDefault();
           startEditing();
         }
       }}
-      on:click={() => {
-        if (activationMode === "enterOrSpace") {
-          startEditing();
-        }
-      }}
     >
-      <span class="editable-label__text">{value}</span>
+      <span class="editable-label__text">{displayValue}</span>
+      {#if showEditIcon}
+        <svg class="editable-label__icon" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+          <path d="M11.5 2.5l2 2-8 8H3.5v-2l8-8z" stroke="currentColor" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round" />
+        </svg>
+      {/if}
     </button>
   {/if}
 </div>
 
 <style>
   .editable-label {
+    display: inline-flex;
     min-width: 0;
   }
 
@@ -127,14 +129,22 @@
   }
 
   .editable-label__display {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.375rem;
     cursor: text;
   }
 
   .editable-label__display:hover:not(:disabled),
   .editable-label__display:focus-visible {
     border-color: color-mix(in srgb, var(--pug-color-border-default) 72%, transparent);
-    background: color-mix(in srgb, var(--pug-surface) 93%, var(--pug-color-text-primary));
+    background: color-mix(in srgb, var(--pug-color-background-surface) 52%, transparent);
     outline: none;
+  }
+
+  .editable-label__display:focus-visible {
+    outline: var(--pug-border-width-focus) solid var(--pug-color-accent-focusRing);
+    outline-offset: 0.0625rem;
   }
 
   .editable-label__input {
@@ -149,5 +159,43 @@
   .editable-label[data-disabled="true"] .editable-label__display {
     cursor: not-allowed;
     opacity: var(--pug-state-opacity-disabled);
+  }
+
+  .editable-label__display--empty .editable-label__text {
+    color: var(--pug-color-text-secondary);
+    font-style: italic;
+  }
+
+  .editable-label__icon {
+    width: 0.75rem;
+    height: 0.75rem;
+    color: var(--pug-color-text-secondary);
+    opacity: 0;
+    transition: opacity var(--pug-motion-duration-interaction, 0.15s) var(--pug-motion-easing-standard, ease);
+  }
+
+  .editable-label__display:hover:not(:disabled) .editable-label__icon,
+  .editable-label__display:focus-visible .editable-label__icon {
+    opacity: 1;
+  }
+
+  /* Flush variant */
+  .editable-label[data-variant="flush"] .editable-label__display,
+  .editable-label[data-variant="flush"] .editable-label__input {
+    padding: 0;
+    border: none;
+    border-radius: 0;
+  }
+
+  .editable-label[data-variant="flush"] .editable-label__display:hover:not(:disabled),
+  .editable-label[data-variant="flush"] .editable-label__display:focus-visible {
+    border: none;
+    background: transparent;
+  }
+
+  .editable-label[data-variant="flush"] .editable-label__input {
+    border-bottom: 0.0625rem solid var(--pug-color-accent-focusRing);
+    box-shadow: none;
+    background: transparent;
   }
 </style>

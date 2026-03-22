@@ -1,35 +1,82 @@
 <script lang="ts">
   import { EditableLabel, Eyebrow } from "@pug/svelte-primitives";
 
-  let title = "Untitled project";
-  let subtitle = "Click to rename";
+  let title = "My project title";
+  let emptyValue = "";
+  let flushValue = "Inline heading";
+  let lastEvent = "";
 </script>
 
 <div class="specimen">
   <div class="specimen__group">
     <Eyebrow>Double-click to edit (default)</Eyebrow>
     <EditableLabel
-      value={title}
+      bind:value={title}
       ariaLabel="Project title"
-      on:commit={(e) => (title = e.detail.value)}
+      on:commit={(e) => (lastEvent = `Committed: "${e.detail.value}" (was: "${e.detail.previousValue}")`)}
+      on:cancel={() => (lastEvent = "Edit cancelled")}
     />
-    <p>Current value: <strong>{title}</strong></p>
   </div>
 
   <div class="specimen__group">
-    <Eyebrow>Enter/Space activation</Eyebrow>
+    <Eyebrow>Click to edit with icon</Eyebrow>
     <EditableLabel
-      value={subtitle}
+      bind:value={title}
+      ariaLabel="Project title"
       activationMode="enterOrSpace"
-      ariaLabel="Subtitle"
-      on:commit={(e) => (subtitle = e.detail.value)}
+      showEditIcon
+      on:commit={(e) => (lastEvent = `Committed: "${e.detail.value}"`)}
+    />
+  </div>
+
+  <div class="specimen__group">
+    <Eyebrow>Empty state</Eyebrow>
+    <EditableLabel
+      bind:value={emptyValue}
+      ariaLabel="Description"
+      activationMode="enterOrSpace"
+      emptyText="Add a description…"
+      on:commit={(e) => (lastEvent = `Committed: "${e.detail.value}"`)}
+    />
+  </div>
+
+  <div class="specimen__group">
+    <Eyebrow>Flush variant</Eyebrow>
+    <EditableLabel
+      bind:value={flushValue}
+      ariaLabel="Heading"
+      variant="flush"
+      activationMode="enterOrSpace"
+      showEditIcon
+    />
+  </div>
+
+  <div class="specimen__group">
+    <Eyebrow>With max length</Eyebrow>
+    <EditableLabel
+      value="Short text"
+      ariaLabel="Short text"
+      activationMode="enterOrSpace"
+      maxLength={20}
+      placeholder="Enter text…"
     />
   </div>
 
   <div class="specimen__group">
     <Eyebrow>Disabled</Eyebrow>
-    <EditableLabel value="Locked label" isDisabled ariaLabel="Disabled label" />
+    <EditableLabel
+      value="Read-only value"
+      ariaLabel="Read-only"
+      isDisabled
+    />
   </div>
+
+  {#if lastEvent}
+    <div class="specimen__group">
+      <Eyebrow>Last event</Eyebrow>
+      <p>{lastEvent}</p>
+    </div>
+  {/if}
 </div>
 
 <style>
@@ -45,9 +92,5 @@
     gap: 0.5rem;
   }
 
-  .specimen__group p {
-    margin: 0;
-    font-size: 0.875rem;
-    color: var(--pug-color-text-secondary);
-  }
+  p { margin: 0; }
 </style>

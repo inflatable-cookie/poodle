@@ -58,6 +58,7 @@
     border: 0.0625rem solid transparent;
     border-radius: var(--pug-radius-surface);
     background: color-mix(in srgb, var(--pug-color-background-panel) 94%, transparent);
+    font-size: var(--pug-typography-label-size, 0.75rem);
   }
 
   .selection-summary__header {

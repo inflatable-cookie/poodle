@@ -103,8 +103,8 @@
   }
 
   .callout[data-tone="info"] {
-    --pug-callout-fill: color-mix(in srgb, var(--pug-color-status-info) 10%, var(--pug-color-background-panel));
-    --pug-callout-border: color-mix(in srgb, var(--pug-color-status-info) 34%, var(--pug-color-border-default));
+    --pug-callout-fill: color-mix(in srgb, var(--pug-color-status-info, #3b82f6) 10%, var(--pug-color-background-panel));
+    --pug-callout-border: color-mix(in srgb, var(--pug-color-status-info, #3b82f6) 34%, var(--pug-color-border-default));
   }
 
   .callout[data-tone="success"] {

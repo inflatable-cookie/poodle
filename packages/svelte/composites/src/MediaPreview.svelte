@@ -67,7 +67,6 @@
     <slot />
   </div>
 
-  <slot name="footer" slot="footer" />
 </Card>
 
 <style>

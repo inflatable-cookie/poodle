@@ -18,17 +18,22 @@ pub fn js_menu(spec: &MenuSpec, theme: &JetstreamThemeProvider) -> JsEl {
         .rounded(radius)
         .flex_col()
         .pt(4.0).pb(4.0)
-        .min_w(160.0);
+        .min_w(160.0)
+        .shadow_md()
+        .overlay();
 
     for entry in &spec.items {
-        el = el.child(
-            ui_element::button(&entry.label)
-                .text_color(text_color)
-                .text_size(13.0)
-                .pl(12.0).pr(12.0).pt(6.0).pb(6.0)
-                .grow()
-                .focusable()
+        let mut item = ui_element::div()
+            .flex_row().items_center().gap(8.0)
+            .pl(12.0).pr(12.0).pt(6.0).pb(6.0)
+            .cursor_pointer()
+            .focusable();
+
+        item = item.child(
+            ui_element::label(&entry.label).text_color(text_color).text_size(13.0).grow()
         );
+
+        el = el.child(item);
     }
 
     el

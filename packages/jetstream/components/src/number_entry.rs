@@ -21,8 +21,11 @@ pub fn js_number_entry(spec: &NumberEntrySpec, theme: &JetstreamThemeProvider) -
         .h(36.0)
         .flex_row().items_center();
 
-    // Decrement button
-    el = el.child(ui_element::button("−").text_size(14.0).pl(8.0).pr(4.0).focusable());
+    // Decrement button (SVG icon)
+    el = el.child(
+        ui_element::button("").pl(8.0).pr(4.0).focusable().cursor_pointer()
+            .child(ui_element::icon("minus").w(14.0).h(14.0).text_color(text_color))
+    );
 
     // Value display
     el = el.child(
@@ -31,8 +34,11 @@ pub fn js_number_entry(spec: &NumberEntrySpec, theme: &JetstreamThemeProvider) -
             .grow().text_align_center()
     );
 
-    // Increment button
-    el = el.child(ui_element::button("+").text_size(14.0).pl(4.0).pr(8.0).focusable());
+    // Increment button (SVG icon)
+    el = el.child(
+        ui_element::button("").pl(4.0).pr(8.0).focusable().cursor_pointer()
+            .child(ui_element::icon("plus").w(14.0).h(14.0).text_color(text_color))
+    );
 
     if spec.is_disabled {
         let opacity = resolve_opacity(theme, spec.disabled_opacity_token());

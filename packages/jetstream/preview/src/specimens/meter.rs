@@ -1,0 +1,34 @@
+//! Meter specimen — meters at different fill levels.
+
+use jetstream_runtime::ui_element::*;
+use pug_jetstream::JetstreamThemeProvider;
+use pug_jetstream_components::meter::js_meter;
+use pug_jetstream_components::theme_ext::*;
+use pug_primitives::MeterSpec;
+
+pub fn render(theme: &JetstreamThemeProvider) -> JsEl {
+    let secondary = resolve_color(theme, "semantic.color.text.secondary");
+
+    div().flex_col().gap(24.0)
+        // Low
+        .child(group("Low (25%)", secondary,
+            div().w(300.0)
+                .child(js_meter(&MeterSpec::new().with_value(0.25).with_min(0.0).with_max(1.0), theme))
+        ))
+        // Half
+        .child(group("Half (50%)", secondary,
+            div().w(300.0)
+                .child(js_meter(&MeterSpec::new().with_value(0.5).with_min(0.0).with_max(1.0), theme))
+        ))
+        // High
+        .child(group("High (90%)", secondary,
+            div().w(300.0)
+                .child(js_meter(&MeterSpec::new().with_value(0.9).with_min(0.0).with_max(1.0), theme))
+        ))
+}
+
+fn group(title: &str, text_secondary: glam::Vec4, content: JsEl) -> JsEl {
+    div().flex_col().gap(8.0)
+        .child(label(title).text_color(text_secondary).text_size(11.0))
+        .child(content)
+}

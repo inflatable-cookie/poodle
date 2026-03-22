@@ -137,8 +137,10 @@ impl PreviewState {
         height: u32,
         scale_factor: f64,
     ) -> Self {
-        let logical_w = width as f32 / scale_factor as f32;
-        let logical_h = height as f32 / scale_factor as f32;
+        // width/height from PlatformFrame.window_width/height are already
+        // in logical pixels (physical / scale_factor). Don't divide again.
+        let logical_w = width as f32;
+        let logical_h = height as f32;
 
         let mut game_ui = GameUi::with_text(logical_w, logical_h);
         game_ui.set_scale_factor(scale_factor as f32);
@@ -161,7 +163,11 @@ impl PreviewState {
         };
 
         // ── Text rendering setup (mirrors OverlayRenderer pattern) ──
-        let ortho = Mat4::orthographic_rh(0.0, width as f32, height as f32, 0.0, -1.0, 1.0);
+        // Ortho projection uses physical pixels since text sprites are positioned
+        // in physical coordinates by convert_text_commands.
+        let phys_w = (width as f64 * scale_factor).round() as f32;
+        let phys_h = (height as f64 * scale_factor).round() as f32;
+        let ortho = Mat4::orthographic_rh(0.0, phys_w, phys_h, 0.0, -1.0, 1.0);
         let text_camera = CameraGpu::from_matrix(&gpu.device, ortho);
 
         let shader = create_sprite_shader(&gpu.device);
@@ -240,8 +246,9 @@ impl PreviewState {
             ThemePreset::Light => &pug_tokens::themes::LIGHT,
             ThemePreset::LoopholeStudio => &pug_tokens::themes::LOOPHOLE_STUDIO,
         };
-        self.theme = pug_jetstream::JetstreamThemeProvider::from_theme(theme_def)
-            .with_scale_factor(self.theme.scale_factor());
+        // Theme resolves tokens in logical pixels (scale_factor=1.0).
+        // The engine handles logical→physical conversion via GameUi.scale_factor.
+        self.theme = pug_jetstream::JetstreamThemeProvider::from_theme(theme_def);
 
         // Pure function: state → UI description.
         let ui = shell::build_shell(&self.app, &self.theme);
@@ -368,20 +375,22 @@ impl PreviewState {
         &mut self,
         frame: &jetstream_platform::PlatformFrame<'_>,
     ) -> ControlFlow {
-        // Handle window resize
-        let logical_w = frame.window_width as f32 / frame.scale_factor as f32;
-        let logical_h = frame.window_height as f32 / frame.scale_factor as f32;
+        // Handle window resize.
+        // frame.window_width/height are already logical pixels.
+        let logical_w = frame.window_width as f32;
+        let logical_h = frame.window_height as f32;
         if (logical_w - self.game_ui.screen_width).abs() > 0.5
             || (logical_h - self.game_ui.screen_height).abs() > 0.5
         {
             self.game_ui.resize(logical_w, logical_h);
+            self.game_ui.set_scale_factor(frame.scale_factor as f32);
             self.app.dirty = true;
 
-            // Update text camera ortho projection for new window size.
+            // Update text camera ortho projection in physical pixels.
             let ortho = Mat4::orthographic_rh(
                 0.0,
-                frame.window_width as f32,
-                frame.window_height as f32,
+                frame.physical_width as f32,
+                frame.physical_height as f32,
                 0.0,
                 -1.0,
                 1.0,
@@ -401,7 +410,7 @@ impl PreviewState {
                     log::info!("Screenshot requested (F12)");
                 }
                 PlatformEvent::MouseMoved { x, y } => {
-                    // Physical pixels → logical pixels.
+                    // Winit 0.30 CursorMoved reports physical pixels.
                     self.mouse_x = *x as f32 / scale;
                     self.mouse_y = *y as f32 / scale;
                 }
@@ -521,8 +530,8 @@ impl PreviewState {
 
             // 2) UI quad passes
             let clip_groups = group_by_clip_rect(&draw_commands);
-            let phys_w = frame.window_width as f32;
-            let phys_h = frame.window_height as f32;
+            let phys_w = frame.physical_width as f32;
+            let phys_h = frame.physical_height as f32;
 
             self.ui_pass.upload_quad_geometry(&frame.gpu.queue);
 
@@ -586,7 +595,7 @@ impl PreviewState {
             // 4) Screenshot capture (if requested).
             if self.screenshot_requested {
                 self.screenshot_requested = false;
-                self.capture_screenshot(frame.gpu, frame.window_width, frame.window_height);
+                self.capture_screenshot(frame.gpu, frame.physical_width, frame.physical_height);
             }
         }
 

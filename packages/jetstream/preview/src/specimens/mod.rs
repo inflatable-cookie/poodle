@@ -4,33 +4,91 @@
 //! The framework wraps specimens in a consistent card layout with a hero header.
 
 pub mod accordion;
+pub mod action_discovery_panel;
+pub mod alert_dialog;
+pub mod app_header;
 pub mod badge;
 pub mod banner;
+pub mod breadcrumbs;
+pub mod bulk_action_bar;
 pub mod button;
 pub mod bx;
+pub mod calendar;
 pub mod callout;
 pub mod card;
 pub mod checkbox;
+pub mod code;
+pub mod collapse_toggle;
+pub mod collapsible;
+pub mod combobox;
+pub mod command_palette;
+pub mod context_menu;
+pub mod data_table;
+pub mod date_picker;
+pub mod detail_row;
+pub mod detail_section;
+pub mod detail_shell;
+pub mod dialog;
+pub mod dock_region;
+pub mod drawer;
+pub mod editable_label;
+pub mod empty_state;
 pub mod eyebrow;
+pub mod field;
+pub mod filter_toolbar;
 pub mod form_actions;
 pub mod grid;
+pub mod hover_card;
 pub mod icon;
 pub mod icon_button;
+pub mod list_card;
+pub mod media_preview;
+pub mod media_thumbnail;
+pub mod menu;
+pub mod menubar;
+pub mod meter;
+pub mod metric_tile;
+pub mod nav_card;
+pub mod nav_card_grid;
+pub mod navigation_menu;
+pub mod number_entry;
+pub mod order_by;
+pub mod page_header;
+pub mod pagination;
+pub mod pagination_summary;
+pub mod picker_shell;
 pub mod pill;
+pub mod pin_input;
+pub mod popover;
 pub mod progress;
 pub mod radio_group;
+pub mod range_slider;
+pub mod rating;
 pub mod region;
+pub mod relation_picker;
+pub mod resize_handle;
+pub mod scroll_shell;
+pub mod search_field;
+pub mod segmented_control;
 pub mod select;
+pub mod selection_summary;
 pub mod separator;
 pub mod skeleton;
 pub mod slider;
+pub mod split_button;
+pub mod split_view;
 pub mod stack;
 pub mod status_indicator;
 pub mod surface;
 pub mod switch;
+pub mod tab_strip;
 pub mod tabs;
+pub mod text_area;
 pub mod text_input;
+pub mod time_ago;
+pub mod toast_stack;
 pub mod toolbar;
+pub mod tooltip;
 
 use jetstream_runtime::ui_element::*;
 use pug_jetstream::JetstreamThemeProvider;
@@ -133,33 +191,91 @@ fn build_specimen_page(entry: &ComponentEntry, theme: &JetstreamThemeProvider) -
 fn render_specimen(slug: &str, theme: &JetstreamThemeProvider) -> Option<JsEl> {
     match slug {
         "accordion" => Some(accordion::render(theme)),
+        "action-discovery-panel" => Some(action_discovery_panel::render(theme)),
+        "alert-dialog" => Some(alert_dialog::render(theme)),
+        "app-header" => Some(app_header::render(theme)),
         "badge" => Some(badge::render(theme)),
         "banner" => Some(banner::render(theme)),
         "box" => Some(bx::render(theme)),
+        "breadcrumbs" => Some(breadcrumbs::render(theme)),
+        "bulk-action-bar" => Some(bulk_action_bar::render(theme)),
         "button" => Some(button::render(theme)),
+        "calendar" => Some(calendar::render(theme)),
         "callout" => Some(callout::render(theme)),
         "card" => Some(card::render(theme)),
         "checkbox" => Some(checkbox::render(theme)),
+        "code" => Some(code::render(theme)),
+        "collapse-toggle" => Some(collapse_toggle::render(theme)),
+        "collapsible" => Some(collapsible::render(theme)),
+        "combobox" => Some(combobox::render(theme)),
+        "command-palette" => Some(command_palette::render(theme)),
+        "context-menu" => Some(context_menu::render(theme)),
+        "data-table" => Some(data_table::render(theme)),
+        "date-picker" => Some(date_picker::render(theme)),
+        "detail-row" => Some(detail_row::render(theme)),
+        "detail-section" => Some(detail_section::render(theme)),
+        "detail-shell" => Some(detail_shell::render(theme)),
+        "dialog" => Some(dialog::render(theme)),
+        "dock-region" => Some(dock_region::render(theme)),
+        "drawer" => Some(drawer::render(theme)),
+        "editable-label" => Some(editable_label::render(theme)),
+        "empty-state" => Some(empty_state::render(theme)),
         "eyebrow" => Some(eyebrow::render(theme)),
+        "field" => Some(field::render(theme)),
+        "filter-toolbar" => Some(filter_toolbar::render(theme)),
         "form-actions" => Some(form_actions::render(theme)),
         "grid" => Some(grid::render(theme)),
+        "hover-card" => Some(hover_card::render(theme)),
         "icon" => Some(icon::render(theme)),
         "icon-button" => Some(icon_button::render(theme)),
+        "list-card" => Some(list_card::render(theme)),
+        "media-preview" => Some(media_preview::render(theme)),
+        "media-thumbnail" => Some(media_thumbnail::render(theme)),
+        "menu" => Some(menu::render(theme)),
+        "menubar" => Some(menubar::render(theme)),
+        "meter" => Some(meter::render(theme)),
+        "metric-tile" => Some(metric_tile::render(theme)),
+        "nav-card" => Some(nav_card::render(theme)),
+        "nav-card-grid" => Some(nav_card_grid::render(theme)),
+        "navigation-menu" => Some(navigation_menu::render(theme)),
+        "number-entry" => Some(number_entry::render(theme)),
+        "order-by" => Some(order_by::render(theme)),
+        "page-header" => Some(page_header::render(theme)),
+        "pagination" => Some(pagination::render(theme)),
+        "pagination-summary" => Some(pagination_summary::render(theme)),
+        "picker-shell" => Some(picker_shell::render(theme)),
         "pill" => Some(pill::render(theme)),
+        "pin-input" => Some(pin_input::render(theme)),
+        "popover" => Some(popover::render(theme)),
         "progress" => Some(progress::render(theme)),
         "radio-group" => Some(radio_group::render(theme)),
+        "range-slider" => Some(range_slider::render(theme)),
+        "rating" => Some(rating::render(theme)),
         "region" => Some(region::render(theme)),
+        "relation-picker" => Some(relation_picker::render(theme)),
+        "resize-handle" => Some(resize_handle::render(theme)),
+        "scroll-shell" => Some(scroll_shell::render(theme)),
+        "search-field" => Some(search_field::render(theme)),
+        "segmented-control" => Some(segmented_control::render(theme)),
         "select" => Some(select::render(theme)),
+        "selection-summary" => Some(selection_summary::render(theme)),
         "separator" => Some(separator::render(theme)),
         "skeleton" => Some(skeleton::render(theme)),
         "slider" => Some(slider::render(theme)),
+        "split-button" => Some(split_button::render(theme)),
+        "split-view" => Some(split_view::render(theme)),
         "stack" => Some(stack::render(theme)),
         "status-indicator" => Some(status_indicator::render(theme)),
         "surface" => Some(surface::render(theme)),
         "switch" => Some(switch::render(theme)),
+        "tab-strip" => Some(tab_strip::render(theme)),
         "tabs" => Some(tabs::render(theme)),
+        "text-area" => Some(text_area::render(theme)),
         "text-input" => Some(text_input::render(theme)),
+        "time-ago" => Some(time_ago::render(theme)),
+        "toast-stack" => Some(toast_stack::render(theme)),
         "toolbar" => Some(toolbar::render(theme)),
+        "tooltip" => Some(tooltip::render(theme)),
         _ => None,
     }
 }

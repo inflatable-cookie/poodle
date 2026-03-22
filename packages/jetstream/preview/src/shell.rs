@@ -201,7 +201,8 @@ fn build_sidebar(
     let text_secondary = resolve_color(theme, "semantic.color.text.secondary");
     let accent = resolve_color(theme, "semantic.color.accent.base");
 
-    let mut sidebar = div().flex_col().w(224.0).grow().py(4.0).gap(1.0)
+    let mut sidebar = div().flex_col().w(224.0).flex_shrink_0().self_stretch()
+        .py(4.0).gap(1.0)
         .overflow_scroll()
         .id("sidebar")
         .bg(bg_surface).border_1().border_color(border);

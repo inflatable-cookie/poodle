@@ -1,7 +1,7 @@
 <script lang="ts">
   import { createEventDispatcher } from "svelte";
 
-  import { Icon } from "@pug/svelte-primitives";
+  import { Button, Icon } from "@pug/svelte-primitives";
 
   import type { ToastItem } from "./types";
 
@@ -23,22 +23,24 @@
       aria-live={item.tone === "danger" ? "assertive" : "polite"}
       aria-atomic="true"
     >
+      <button type="button" class="toast__dismiss" aria-label={`Dismiss ${item.title}`} on:click={() => dispatch("dismiss", { id: item.id })}>
+        <Icon name="x" size="sm" />
+      </button>
+
       <div class="toast__copy">
         <strong>{item.title}</strong>
         {#if item.message}
           <p>{item.message}</p>
         {/if}
       </div>
-      <div class="toast__actions">
-        {#if item.actionLabel}
-          <button type="button" class="toast__action" on:click={() => dispatch("action", { id: item.id })}>
+
+      {#if item.actionLabel}
+        <div class="toast__actions">
+          <Button variant="secondary" size="sm" on:click={() => dispatch("action", { id: item.id })}>
             {item.actionLabel}
-          </button>
-        {/if}
-        <button type="button" class="toast__dismiss" aria-label={`Dismiss ${item.title}`} on:click={() => dispatch("dismiss", { id: item.id })}>
-          <Icon name="x" size="sm" />
-        </button>
-      </div>
+          </Button>
+        </div>
+      {/if}
     </article>
   {/each}
 </section>
@@ -50,11 +52,11 @@
   }
 
   .toast {
-    --pug-toast-tone: var(--pug-color-accent-base);
+    --pug-toast-tone: var(--pug-color-status-info, #3b82f6);
     display: grid;
-    grid-template-columns: minmax(0, 1fr) auto;
-    gap: var(--pug-space-inline-md);
-    padding: var(--pug-space-panel-y) var(--pug-space-panel-x);
+    gap: var(--pug-space-stack-sm);
+    padding: var(--pug-space-panel-x);
+    padding-right: calc(var(--pug-space-panel-x) + 1.5rem);
     border: 0.0625rem solid color-mix(in srgb, var(--pug-toast-tone) 34%, var(--pug-color-border-default));
     border-radius: calc(var(--pug-radius-surface) - 0.125rem);
     background:
@@ -78,7 +80,7 @@
   }
 
   .toast[data-tone="info"] {
-    --pug-toast-tone: var(--pug-color-accent-base);
+    --pug-toast-tone: var(--pug-color-status-info, #3b82f6);
   }
 
   .toast[data-tone="success"] {
@@ -91,6 +93,28 @@
 
   .toast[data-tone="danger"] {
     --pug-toast-tone: var(--pug-color-status-danger);
+  }
+
+  .toast__dismiss {
+    position: absolute;
+    top: 0.375rem;
+    right: 0.375rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 1.25rem;
+    height: 1.25rem;
+    padding: 0;
+    border: none;
+    border-radius: var(--pug-radius-sm, 0.25rem);
+    background: transparent;
+    color: var(--pug-color-text-secondary);
+    cursor: pointer;
+  }
+
+  .toast__dismiss:hover {
+    color: var(--pug-color-text-primary);
+    background: color-mix(in srgb, var(--pug-color-background-surface) 60%, transparent);
   }
 
   .toast__copy {
@@ -111,34 +135,6 @@
 
   .toast__actions {
     display: flex;
-    align-items: start;
-    gap: var(--pug-space-inline-sm);
-  }
-
-  .toast__action,
-  .toast__dismiss {
-    min-height: 1.75rem;
-    padding: 0 0.625rem;
-    border: 0.0625rem solid var(--pug-color-border-default);
-    border-radius: var(--pug-radius-pill);
-    background: color-mix(in srgb, var(--pug-color-background-surface) 82%, transparent);
-    color: var(--pug-color-text-primary);
-    cursor: pointer;
-    font: inherit;
-  }
-
-  .toast__dismiss {
-    width: 1.75rem;
-    padding: 0;
-  }
-
-  .toast__action {
-    border-color: color-mix(in srgb, var(--pug-toast-tone) 30%, var(--pug-color-border-default));
-    background: color-mix(in srgb, var(--pug-toast-tone) 10%, var(--pug-color-background-surface));
-  }
-
-  .toast__dismiss {
-    border-color: color-mix(in srgb, var(--pug-toast-tone) 24%, var(--pug-color-border-default));
-    background: color-mix(in srgb, var(--pug-color-background-surface) 88%, transparent);
+    justify-content: flex-start;
   }
 </style>

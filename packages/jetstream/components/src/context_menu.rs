@@ -1,6 +1,7 @@
 //! ContextMenu — Jetstream context menu backed by ContextMenuSpec.
 //!
-//! Renders as inline menu (no right-click overlay in Jetstream).
+//! Contract: `docs/contracts/foundation/context-menu.md`
+//! Uses overlay() for the menu panel.
 
 use jetstream_runtime::ui_element::{self, JsEl};
 use pug_jetstream::JetstreamThemeProvider;
@@ -20,17 +21,23 @@ pub fn js_context_menu(spec: &ContextMenuSpec, theme: &JetstreamThemeProvider) -
         .rounded(radius)
         .flex_col()
         .pt(4.0).pb(4.0)
-        .min_w(160.0);
+        .min_w(160.0)
+        .shadow_md()
+        .overlay();
 
     for item in &spec.menu.items {
-        el = el.child(
-            ui_element::button(&item.label)
-                .text_color(text_color)
-                .text_size(13.0)
-                .pl(12.0).pr(12.0).pt(6.0).pb(6.0)
-                .grow()
-                .focusable()
+        // Menu items with icon if available
+        let mut item_el = ui_element::div()
+            .flex_row().items_center().gap(8.0)
+            .pl(12.0).pr(12.0).pt(6.0).pb(6.0)
+            .cursor_pointer()
+            .focusable();
+
+        item_el = item_el.child(
+            ui_element::label(&item.label).text_color(text_color).text_size(13.0).grow()
         );
+
+        el = el.child(item_el);
     }
 
     el

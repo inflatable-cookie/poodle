@@ -46,7 +46,6 @@ import GridSpecimen from "./GridSpecimen.svelte";
 import HoverCardSpecimen from "./HoverCardSpecimen.svelte";
 import IconSpecimen from "./IconSpecimen.svelte";
 import IconButtonSpecimen from "./IconButtonSpecimen.svelte";
-import InlineEditableFieldSpecimen from "./InlineEditableFieldSpecimen.svelte";
 import ListCardSpecimen from "./ListCardSpecimen.svelte";
 import LogListSpecimen from "./LogListSpecimen.svelte";
 import NavCardSpecimen from "./NavCardSpecimen.svelte";
@@ -169,7 +168,6 @@ export const specimenMap: Record<string, typeof SvelteComponent<any>> = {
   "hover-card": HoverCardSpecimen,
   icon: IconSpecimen,
   "icon-button": IconButtonSpecimen,
-  "inline-editable-field": InlineEditableFieldSpecimen,
   "list-card": ListCardSpecimen,
   "log-list": LogListSpecimen,
   "markdown-editor": MarkdownEditorSpecimen,
