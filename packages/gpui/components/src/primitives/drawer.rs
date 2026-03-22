@@ -160,10 +160,12 @@ impl IntoElement for Drawer {
         if spec.is_modal {
             // Modal mode: main as base layer, backdrop overlay on top
             let mut backdrop = div()
+                .id("pug-drawer-backdrop")
                 .absolute()
                 .inset_0()
-                .bg(hsla(0.0 / 360.0, 0.0, 0.0, 0.4))
-                .flex();
+                .bg(hsla(0.0, 0.0, 0.0, 0.5))
+                .flex()
+                .occlude();
 
             if is_left {
                 backdrop = backdrop.child(drawer_panel).child(div().flex_1());

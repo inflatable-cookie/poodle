@@ -103,6 +103,8 @@ impl IntoElement for SegmentedControl {
             row = row.opacity(disabled_opacity).cursor(CursorStyle::OperationNotAllowed);
         }
 
+        let option_values: Vec<String> = self.spec.options.iter().map(|o| o.value.clone()).collect();
+
         for (i, option) in self.spec.options.iter().enumerate() {
             let is_selected = current_value.as_deref() == Some(&option.value);
             let is_opt_disabled = option.is_disabled;
@@ -112,6 +114,8 @@ impl IntoElement for SegmentedControl {
             let mut seg = div()
                 .id(seg_id)
                 .focusable()
+                .border_1()
+                .border_color(gpui::transparent_black())
                 .px(px(12.0))
                 .h(segment_height)
                 .text_size(px(12.0))
@@ -148,6 +152,25 @@ impl IntoElement for SegmentedControl {
                     let val = option.value.clone();
                     seg = seg.on_click(move |_event, window, cx| {
                         handler(&val, window, cx);
+                    });
+                }
+
+                // Arrow key roving focus (left/right wraps around)
+                if let Some(ref handler) = self.on_change {
+                    let handler = handler.clone();
+                    let nav_values = option_values.clone();
+                    let current_idx = i;
+                    seg = seg.on_key_down(move |event: &KeyDownEvent, window, cx| {
+                        let next_idx = if event.keystroke.key == "right" {
+                            Some((current_idx + 1) % nav_values.len())
+                        } else if event.keystroke.key == "left" {
+                            Some(if current_idx == 0 { nav_values.len() - 1 } else { current_idx - 1 })
+                        } else {
+                            None
+                        };
+                        if let Some(idx) = next_idx {
+                            handler(&nav_values[idx], window, cx);
+                        }
                     });
                 }
             }

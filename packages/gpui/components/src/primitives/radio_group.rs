@@ -91,7 +91,9 @@ impl IntoElement for RadioGroup {
             Orientation::Vertical => div().flex().flex_col().gap(group_gap),
         };
 
-        for option in &spec.options {
+        let option_values: Vec<String> = spec.options.iter().map(|o| o.value.clone()).collect();
+
+        for (idx, option) in spec.options.iter().enumerate() {
             let is_selected = current_value.as_deref() == Some(&option.value);
             let is_disabled = spec.is_disabled || option.is_disabled;
             let option_id = SharedString::from(format!("{}-{}", self.id_prefix, option.value));
@@ -134,6 +136,9 @@ impl IntoElement for RadioGroup {
                     let key_handler = handler.clone();
                     let val = option.value.clone();
                     let val2 = option.value.clone();
+                    let arrow_handler = handler.clone();
+                    let ovs = option_values.clone();
+                    let current_idx = idx;
                     row = row
                         .on_click(move |_event, window, cx| {
                             click_handler(&val, window, cx);
@@ -141,6 +146,12 @@ impl IntoElement for RadioGroup {
                         .on_key_down(move |event: &KeyDownEvent, window, cx| {
                             if event.keystroke.key == "space" || event.keystroke.key == "enter" {
                                 key_handler(&val2, window, cx);
+                            } else if event.keystroke.key == "down" || event.keystroke.key == "right" {
+                                let next = (current_idx + 1) % ovs.len();
+                                arrow_handler(&ovs[next], window, cx);
+                            } else if event.keystroke.key == "up" || event.keystroke.key == "left" {
+                                let prev = if current_idx == 0 { ovs.len() - 1 } else { current_idx - 1 };
+                                arrow_handler(&ovs[prev], window, cx);
                             }
                         });
                 }

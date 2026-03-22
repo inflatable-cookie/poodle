@@ -68,7 +68,9 @@ impl IntoElement for ToggleGroup {
             .flex_wrap()
             .gap(gap);
 
-        for option in &spec.options {
+        let option_values: Vec<String> = spec.options.iter().map(|o| o.value.clone()).collect();
+
+        for (idx, option) in spec.options.iter().enumerate() {
             let is_selected = spec.is_selected(&option.value);
             let item_disabled = option.is_disabled || spec.is_disabled;
 
@@ -101,10 +103,28 @@ impl IntoElement for ToggleGroup {
                 item = item.cursor_pointer().hover(move |s| s.bg(hover_fill));
 
                 if let Some(ref handler) = self.on_change {
-                    let handler = handler.clone();
+                    let click_handler = handler.clone();
                     let val = option.value.clone();
                     item = item.on_click(move |_event, window, cx| {
-                        handler(&val, window, cx);
+                        click_handler(&val, window, cx);
+                    });
+
+                    // Space/Enter to toggle + arrow keys to navigate
+                    let key_handler = handler.clone();
+                    let arrow_handler = handler.clone();
+                    let val2 = option.value.clone();
+                    let ovs = option_values.clone();
+                    let current_idx = idx;
+                    item = item.on_key_down(move |event: &KeyDownEvent, window, cx| {
+                        if event.keystroke.key == "space" || event.keystroke.key == "enter" {
+                            key_handler(&val2, window, cx);
+                        } else if event.keystroke.key == "right" || event.keystroke.key == "down" {
+                            let next = (current_idx + 1) % ovs.len();
+                            arrow_handler(&ovs[next], window, cx);
+                        } else if event.keystroke.key == "left" || event.keystroke.key == "up" {
+                            let prev = if current_idx == 0 { ovs.len() - 1 } else { current_idx - 1 };
+                            arrow_handler(&ovs[prev], window, cx);
+                        }
                     });
                 }
             }

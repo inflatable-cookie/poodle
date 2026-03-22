@@ -2,7 +2,8 @@
 //!
 //! Contract: grid root min-width 14rem, input with focus ring,
 //! absolutely positioned list with overlay shadow.
-//! Option padding 0.375rem 0.5rem, radius control-0.125rem.
+//! Option padding uses semantic.space.control.{x,y}, radius control-0.125rem.
+//! Keyboard: Enter selects first match, Escape closes, Arrow opens list.
 
 use gpui::prelude::FluentBuilder;
 use gpui::*;
@@ -18,6 +19,7 @@ pub struct Combobox {
     id_suffix: Option<String>,
     on_change: Option<Box<dyn Fn(&str, &mut Window, &mut App) + 'static>>,
     on_query_change: Option<Box<dyn Fn(&str, &mut Window, &mut App) + 'static>>,
+    on_open_change: Option<Box<dyn Fn(bool, &mut Window, &mut App) + 'static>>,
 }
 
 impl std::ops::Deref for Combobox {
@@ -27,7 +29,7 @@ impl std::ops::Deref for Combobox {
 
 impl Combobox {
     pub fn new(theme: &GpuiThemeProvider) -> Self {
-        Self { spec: ComboboxSpec::new(), theme: theme.clone(), id_suffix: None, on_change: None, on_query_change: None }
+        Self { spec: ComboboxSpec::new(), theme: theme.clone(), id_suffix: None, on_change: None, on_query_change: None, on_open_change: None }
     }
 
     pub fn from_spec(spec: ComboboxSpec, theme: &GpuiThemeProvider) -> Self {
@@ -37,6 +39,7 @@ impl Combobox {
             id_suffix: None,
             on_change: None,
             on_query_change: None,
+            on_open_change: None,
         }
     }
 
@@ -68,6 +71,14 @@ impl Combobox {
         handler: impl Fn(&str, &mut Window, &mut App) + 'static,
     ) -> Self {
         self.on_query_change = Some(Box::new(handler));
+        self
+    }
+
+    pub fn on_open_change(
+        mut self,
+        handler: impl Fn(bool, &mut Window, &mut App) + 'static,
+    ) -> Self {
+        self.on_open_change = Some(Box::new(handler));
         self
     }
 }
@@ -106,11 +117,27 @@ impl IntoElement for Combobox {
         // Contract: option radius = control - 0.125rem
         let option_radius = resolve_radius(theme, "semantic.radius.control") - px(2.0);
         let option_padding_x = resolve_px(theme, "semantic.space.control.x");
-        let option_padding_y = resolve_px(theme, "semantic.space.stack.sm");
+        let option_padding_y = resolve_px(theme, "semantic.space.control.y");
 
         let is_disabled = spec.is_disabled;
         let is_open = spec.is_open;
         let current_value = spec.current_value().map(|s| s.to_string());
+
+        // Wrap callbacks in Rc for sharing across closures
+        let on_change_rc: Option<std::rc::Rc<dyn Fn(&str, &mut Window, &mut App)>> =
+            self.on_change.map(|h| std::rc::Rc::from(h));
+        let on_open_change_rc: Option<std::rc::Rc<dyn Fn(bool, &mut Window, &mut App)>> =
+            self.on_open_change.map(|h| std::rc::Rc::from(h));
+
+        // Collect first non-disabled filtered option value for Enter key selection
+        let first_selectable_value: Option<String> = if is_open {
+            spec.filtered_options()
+                .iter()
+                .find(|o| !o.is_disabled)
+                .map(|o| o.value.clone())
+        } else {
+            None
+        };
 
         // ── Input display text ──────────────────────────────────────
         let display_text = if !spec.query.is_empty() {
@@ -146,7 +173,7 @@ impl IntoElement for Combobox {
                     .child(display_text)
             };
 
-            div()
+            let mut input = div()
                 .id(SharedString::from(id_str))
                 .focusable()
                 .w_full()
@@ -162,7 +189,57 @@ impl IntoElement for Combobox {
                 // Contract: focus ring on input
                 .focus(move |s| s.border_color(focus_ring))
                 .when(!is_disabled, |el| el.cursor_pointer())
-                .child(text_el.flex_grow().min_w_0().overflow_x_hidden().text_ellipsis())
+                .child(text_el.flex_grow().min_w_0().overflow_x_hidden().text_ellipsis());
+
+            // Keyboard navigation on focused input
+            if !is_disabled {
+                let key_change = on_change_rc.clone();
+                let key_open = on_open_change_rc.clone();
+                let enter_value = first_selectable_value.clone();
+
+                input = input.on_key_down(move |event: &KeyDownEvent, window, cx| {
+                    match event.keystroke.key.as_str() {
+                        "enter" => {
+                            // Select first matching non-disabled option
+                            if let Some(ref val) = enter_value {
+                                if let Some(ref handler) = key_change {
+                                    handler(val, window, cx);
+                                }
+                                // Close after selection
+                                if let Some(ref handler) = key_open {
+                                    handler(false, window, cx);
+                                }
+                            }
+                        }
+                        "escape" => {
+                            if is_open {
+                                if let Some(ref handler) = key_open {
+                                    handler(false, window, cx);
+                                }
+                            }
+                        }
+                        "arrowdown" | "arrowup" => {
+                            // Open the list if closed
+                            if !is_open {
+                                if let Some(ref handler) = key_open {
+                                    handler(true, window, cx);
+                                }
+                            }
+                        }
+                        _ => {}
+                    }
+                });
+
+                // Click to toggle open state
+                let click_open = on_open_change_rc.clone();
+                input = input.on_click(move |_event, window, cx| {
+                    if let Some(ref handler) = click_open {
+                        handler(!is_open, window, cx);
+                    }
+                });
+            }
+
+            input
         };
 
         // ── Option list (when open) ─────────────────────────────────
@@ -208,15 +285,17 @@ impl IntoElement for Combobox {
                         .child("No results"),
                 );
             } else {
-                for option in &filtered {
+                for (idx, option) in filtered.iter().enumerate() {
                     let is_selected = current_value
                         .as_deref()
                         .map(|v| v == option.value)
                         .unwrap_or(false);
                     let is_option_disabled = option.is_disabled;
+                    let option_id = SharedString::from(format!("pug-combobox-opt-{}", idx));
 
                     // Contract: option padding uses resolved tokens
                     let mut option_el = div()
+                        .id(option_id)
                         .w_full()
                         .px(option_padding_x)
                         .py(option_padding_y)
@@ -232,6 +311,21 @@ impl IntoElement for Combobox {
                         .when(is_option_disabled, |el| {
                             el.opacity(disabled_opacity)
                         });
+
+                    // Click handler to select option
+                    if !is_option_disabled {
+                        let val = option.value.clone();
+                        let change_handler = on_change_rc.clone();
+                        let close_handler = on_open_change_rc.clone();
+                        option_el = option_el.on_click(move |_event, window, cx| {
+                            if let Some(ref handler) = change_handler {
+                                handler(&val, window, cx);
+                            }
+                            if let Some(ref handler) = close_handler {
+                                handler(false, window, cx);
+                            }
+                        });
+                    }
 
                     option_el = option_el.child(
                         div()

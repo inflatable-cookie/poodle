@@ -14,6 +14,8 @@ pub struct NumberEntry {
     spec: NumberEntrySpec,
     theme: GpuiThemeProvider,
     id_suffix: Option<String>,
+    on_increment: Option<Box<dyn Fn(&mut Window, &mut App) + 'static>>,
+    on_decrement: Option<Box<dyn Fn(&mut Window, &mut App) + 'static>>,
 }
 
 impl std::ops::Deref for NumberEntry {
@@ -23,7 +25,7 @@ impl std::ops::Deref for NumberEntry {
 
 impl NumberEntry {
     pub fn new(theme: &GpuiThemeProvider) -> Self {
-        Self { spec: NumberEntrySpec::default(), theme: theme.clone(), id_suffix: None }
+        Self { spec: NumberEntrySpec::default(), theme: theme.clone(), id_suffix: None, on_increment: None, on_decrement: None }
     }
 
     pub fn from_spec(spec: NumberEntrySpec, theme: &GpuiThemeProvider) -> Self {
@@ -31,6 +33,8 @@ impl NumberEntry {
             spec,
             theme: theme.clone(),
             id_suffix: None,
+            on_increment: None,
+            on_decrement: None,
         }
     }
 
@@ -45,6 +49,22 @@ impl NumberEntry {
 
     pub fn with_id(mut self, suffix: impl Into<String>) -> Self {
         self.id_suffix = Some(suffix.into());
+        self
+    }
+
+    pub fn on_increment(
+        mut self,
+        handler: impl Fn(&mut Window, &mut App) + 'static,
+    ) -> Self {
+        self.on_increment = Some(Box::new(handler));
+        self
+    }
+
+    pub fn on_decrement(
+        mut self,
+        handler: impl Fn(&mut Window, &mut App) + 'static,
+    ) -> Self {
+        self.on_decrement = Some(Box::new(handler));
         self
     }
 }
@@ -81,8 +101,15 @@ impl IntoElement for NumberEntry {
             "pug-number-entry".to_string()
         };
 
+        // Wrap callbacks in Rc for sharing across stepper clicks + keyboard handler
+        let on_inc_rc: Option<std::rc::Rc<dyn Fn(&mut Window, &mut App)>> =
+            self.on_increment.map(|h| std::rc::Rc::from(h));
+        let on_dec_rc: Option<std::rc::Rc<dyn Fn(&mut Window, &mut App)>> =
+            self.on_decrement.map(|h| std::rc::Rc::from(h));
+
         // Increment button (top)
-        let inc_btn = div()
+        let mut inc_btn = div()
+            .id("pug-number-entry-inc")
             .w(stepper_width)
             .flex_1()
             .flex()
@@ -95,8 +122,18 @@ impl IntoElement for NumberEntry {
             .cursor_pointer()
             .child("+");
 
+        if !spec.is_disabled {
+            if let Some(ref handler) = on_inc_rc {
+                let handler = handler.clone();
+                inc_btn = inc_btn.on_click(move |_event, window, cx| {
+                    handler(window, cx);
+                });
+            }
+        }
+
         // Decrement button (bottom)
-        let dec_btn = div()
+        let mut dec_btn = div()
+            .id("pug-number-entry-dec")
             .w(stepper_width)
             .flex_1()
             .flex()
@@ -108,6 +145,15 @@ impl IntoElement for NumberEntry {
             .text_color(text_secondary)
             .cursor_pointer()
             .child("\u{2212}");
+
+        if !spec.is_disabled {
+            if let Some(ref handler) = on_dec_rc {
+                let handler = handler.clone();
+                dec_btn = dec_btn.on_click(move |_event, window, cx| {
+                    handler(window, cx);
+                });
+            }
+        }
 
         // Vertical stepper column
         let steppers = div()
@@ -146,6 +192,27 @@ impl IntoElement for NumberEntry {
             .focus(move |s| s.border_color(focus_ring))
             .child(value_display)
             .child(steppers);
+
+        // Contract: ArrowUp increments, ArrowDown decrements
+        if !spec.is_disabled {
+            let key_inc = on_inc_rc.clone();
+            let key_dec = on_dec_rc.clone();
+            wrapper = wrapper.on_key_down(move |event: &KeyDownEvent, window, cx| {
+                match event.keystroke.key.as_str() {
+                    "up" => {
+                        if let Some(ref handler) = key_inc {
+                            handler(window, cx);
+                        }
+                    }
+                    "down" => {
+                        if let Some(ref handler) = key_dec {
+                            handler(window, cx);
+                        }
+                    }
+                    _ => {}
+                }
+            });
+        }
 
         if spec.is_disabled {
             wrapper = wrapper
