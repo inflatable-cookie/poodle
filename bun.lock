@@ -17,13 +17,21 @@
         "svelte": "^5.38.6",
       },
     },
+    "packages/svelte/icons-lucide": {
+      "name": "@pug/icons-lucide",
+      "version": "0.0.0",
+      "dependencies": {
+        "lucide-static": "^0.577.0",
+      },
+    },
     "packages/svelte/preview": {
       "name": "@pug/svelte-preview",
       "dependencies": {
+        "@pug/icons-lucide": "workspace:*",
         "@pug/svelte-composites": "workspace:*",
         "@pug/svelte-primitives": "workspace:*",
         "@pug/svelte-tokens": "workspace:*",
-        "@pug/svelte-workstation": "workspace:*",
+        "lucide-static": "^0.577.0",
         "svelte": "^5.38.6",
       },
       "devDependencies": {
@@ -37,23 +45,12 @@
       "version": "0.0.0",
       "dependencies": {
         "@pug/svelte-tokens": "workspace:*",
-        "lucide-static": "^0.577.0",
         "svelte": "^5.38.6",
       },
     },
     "packages/svelte/tokens": {
       "name": "@pug/svelte-tokens",
       "version": "0.0.0",
-    },
-    "packages/svelte/workstation": {
-      "name": "@pug/svelte-workstation",
-      "version": "0.0.0",
-      "dependencies": {
-        "@pug/svelte-composites": "workspace:*",
-        "@pug/svelte-primitives": "workspace:*",
-        "@pug/svelte-tokens": "workspace:*",
-        "svelte": "^5.38.6",
-      },
     },
     "packages/tokens": {
       "name": "@pug/tokens",
@@ -125,6 +122,8 @@
 
     "@pug/bridge-underlay": ["@pug/bridge-underlay@workspace:packages/bridges/underlay"],
 
+    "@pug/icons-lucide": ["@pug/icons-lucide@workspace:packages/svelte/icons-lucide"],
+
     "@pug/svelte-composites": ["@pug/svelte-composites@workspace:packages/svelte/composites"],
 
     "@pug/svelte-preview": ["@pug/svelte-preview@workspace:packages/svelte/preview"],
@@ -132,8 +131,6 @@
     "@pug/svelte-primitives": ["@pug/svelte-primitives@workspace:packages/svelte/primitives"],
 
     "@pug/svelte-tokens": ["@pug/svelte-tokens@workspace:packages/svelte/tokens"],
-
-    "@pug/svelte-workstation": ["@pug/svelte-workstation@workspace:packages/svelte/workstation"],
 
     "@pug/tokens": ["@pug/tokens@workspace:packages/tokens"],
 

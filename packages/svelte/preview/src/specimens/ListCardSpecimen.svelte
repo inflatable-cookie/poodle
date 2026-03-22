@@ -1,5 +1,6 @@
 <script lang="ts">
   import { ContextMenu, Eyebrow, Icon, ListCard, ListCardCounter, Pill } from "@pug/svelte-primitives";
+  import { folder, layers, grid2x2 } from "@pug/icons-lucide";
 
   let lastClick = "";
 </script>
@@ -15,7 +16,7 @@
         isInteractive
         on:click={() => (lastClick = "design-system-v2.figma")}
       >
-        <svelte:fragment slot="leading"><Icon name="folder" /></svelte:fragment>
+        <svelte:fragment slot="leading"><Icon icon={folder} /></svelte:fragment>
       </ListCard>
       <ListCard
         title="component-specs.pdf"
@@ -32,7 +33,7 @@
         meta="48 MB"
         isDisabled
       >
-        <svelte:fragment slot="leading"><Icon name="layers" /></svelte:fragment>
+        <svelte:fragment slot="leading"><Icon icon={layers} /></svelte:fragment>
       </ListCard>
     </div>
   </div>
@@ -84,7 +85,7 @@
         isInteractive
         on:click={() => (lastClick = "Q4 planning deck")}
       >
-        <svelte:fragment slot="leading"><Icon name="layers" /></svelte:fragment>
+        <svelte:fragment slot="leading"><Icon icon={layers} /></svelte:fragment>
         <svelte:fragment slot="badges">
           <Pill appearance="badge" tone="neutral">3</Pill>
           <Pill tone="caution" size="xs">Review</Pill>
@@ -103,7 +104,7 @@
         isInteractive
         on:click={() => (lastClick = "Design system")}
       >
-        <svelte:fragment slot="leading"><Icon name="folder" /></svelte:fragment>
+        <svelte:fragment slot="leading"><Icon icon={folder} /></svelte:fragment>
         <svelte:fragment slot="badges">
           <Pill tone="positive" size="xs">Active</Pill>
         </svelte:fragment>
@@ -120,7 +121,7 @@
         isInteractive
         on:click={() => (lastClick = "Brand guidelines")}
       >
-        <svelte:fragment slot="leading"><Icon name="folder" /></svelte:fragment>
+        <svelte:fragment slot="leading"><Icon icon={folder} /></svelte:fragment>
         <svelte:fragment slot="footer">
           <ListCardCounter icon="file-text" count={6} tooltip="6 documents" />
           <ListCardCounter icon="image" count={42} tooltip="42 images" />
@@ -141,7 +142,7 @@
         isInteractive
         on:click={() => (lastClick = "Design tokens")}
       >
-        <svelte:fragment slot="leading"><Icon name="layers" /></svelte:fragment>
+        <svelte:fragment slot="leading"><Icon icon={layers} /></svelte:fragment>
       </ListCard>
       <ListCard
         title="Components"
@@ -152,7 +153,7 @@
         isInteractive
         on:click={() => (lastClick = "Components")}
       >
-        <svelte:fragment slot="leading"><Icon name="grid" /></svelte:fragment>
+        <svelte:fragment slot="leading"><Icon icon={grid2x2} /></svelte:fragment>
       </ListCard>
       <ListCard
         title="Documentation"
@@ -173,7 +174,7 @@
         isInteractive
         on:click={() => (lastClick = "Default accent")}
       >
-        <svelte:fragment slot="leading"><Icon name="folder" /></svelte:fragment>
+        <svelte:fragment slot="leading"><Icon icon={folder} /></svelte:fragment>
       </ListCard>
     </div>
   </div>
@@ -224,7 +225,7 @@
         isNotLive
         leadingShape="rounded-square"
       >
-        <svelte:fragment slot="leading"><Icon name="layers" /></svelte:fragment>
+        <svelte:fragment slot="leading"><Icon icon={layers} /></svelte:fragment>
         <svelte:fragment slot="badges">
           <Pill tone="caution" size="xs">Pending</Pill>
         </svelte:fragment>
@@ -242,7 +243,7 @@
         isInteractive
         on:click={() => (lastClick = "Free tier plan")}
       >
-        <svelte:fragment slot="leading"><Icon name="layers" /></svelte:fragment>
+        <svelte:fragment slot="leading"><Icon icon={layers} /></svelte:fragment>
       </ListCard>
       <ListCard
         title="Premium integration"
@@ -255,7 +256,7 @@
         isInteractive
         on:click={() => (lastClick = "Premium integration")}
       >
-        <svelte:fragment slot="leading"><Icon name="grid" /></svelte:fragment>
+        <svelte:fragment slot="leading"><Icon icon={grid2x2} /></svelte:fragment>
       </ListCard>
       <ListCard
         title="Legacy connector"

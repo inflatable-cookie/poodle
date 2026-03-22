@@ -268,7 +268,7 @@
           }}
         >
           {#if item.icon}
-            <Icon name={item.icon} size="sm" />
+            <Icon icon={item.icon} size="sm" />
           {/if}
           <span class="pug-tabs__label">{item.label}</span>
         </button>

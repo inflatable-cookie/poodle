@@ -8,6 +8,7 @@
         "packages/svelte/primitives",
         "packages/svelte/composites",
         "packages/bridges/underlay",
+        "packages/svelte/icons-lucide",
         "packages/svelte/preview"
     ]
 }

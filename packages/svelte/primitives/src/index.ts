@@ -82,6 +82,7 @@ export { default as TriStateSwitch } from "./TriStateSwitch.svelte";
 export { default as Menubar } from "./Menubar.svelte";
 export { default as ZonedDateTimePicker } from "./ZonedDateTimePicker.svelte";
 export type {
+  IconProp,
   AccordionItem,
   AlertDialogTone,
   CalloutAnnounceMode,
@@ -146,5 +147,4 @@ export type {
   SplitOrientation,
   ZonedDateTimeValue,
 } from "./types";
-export type { IconRegistry, IconNodeElement } from "./icon-registry";
-export { defaultIconRegistry } from "./icon-registry";
+export type { IconNodeElement, IconNodes, IconSet } from "./icon-registry";

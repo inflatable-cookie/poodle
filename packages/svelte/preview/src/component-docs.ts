@@ -1295,17 +1295,57 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
 
   icon: {
     props: [
-      { name: "name", type: "string", required: true, description: "Name of the icon to display." },
+      { name: "icon", type: "IconNodes | string | null", required: true, description: "The icon to display. Pass an IconNodes array (from @pug/icons-lucide or lucide-static) for tree-shaking, or a string name to resolve from an IconProvider set or the built-in internals." },
+      { name: "name", type: "string | null", default: "null", description: "Deprecated. Use icon instead. Alias kept for internal convenience." },
       { name: "size", type: "ControlSize", default: '"md"', description: "Size of the icon." },
-      { name: "ariaLabel", type: "string | null", default: "null", description: "Accessible label for the icon." },
+      { name: "ariaLabel", type: "string | null", default: "null", description: "Accessible label for the icon. When set, the SVG receives role=\"img\"; otherwise it is role=\"presentation\"." },
     ],
     slots: [],
     events: [],
-    usage: `<script lang="ts">
+    usage: `<!-- Tree-shakeable: import individual icons from @pug/icons-lucide -->
+<script lang="ts">
   import { Icon } from "@pug/svelte-primitives";
+  import { search, heart, star } from "@pug/icons-lucide";
 </script>
 
-<Icon name="check" size="md" ariaLabel="Success" />`,
+<Icon icon={search} size="md" ariaLabel="Search" />
+<Icon icon={heart} size="sm" />
+<Icon icon={star} size="lg" />
+
+<!-- String name: resolves from IconProvider or built-in internals -->
+<Icon icon="chevron-down" size="sm" />
+
+<!-- Bulk icon set via provider -->
+<script lang="ts">
+  import { Icon, IconProvider } from "@pug/svelte-primitives";
+  import iconNodes from "lucide-static/icon-nodes.json";
+</script>
+
+<IconProvider icons={iconNodes}>
+  <Icon icon="rocket" />
+  <Icon icon="flame" />
+</IconProvider>`,
+  },
+
+  "icon-provider": {
+    props: [
+      { name: "icons", type: "IconSet", required: true, description: "A complete icon set mapping kebab-case names to SVG node arrays. Any icon set in this format works — lucide-static/icon-nodes.json, a Phosphor equivalent, or a custom set. String-based icon lookups resolve from this set first, then fall back to the 35 built-in internal icons." },
+    ],
+    slots: [
+      { name: "default", description: "Child content. All descendant Icon components will resolve string names from this icon set." },
+    ],
+    events: [],
+    usage: `<script lang="ts">
+  import { IconProvider, Icon } from "@pug/svelte-primitives";
+  import iconNodes from "lucide-static/icon-nodes.json";
+</script>
+
+<!-- All 1700+ Lucide icons available by name within the provider -->
+<IconProvider icons={iconNodes}>
+  <Icon icon="rocket" />
+  <Icon icon="flame" />
+  <Icon icon="shield-check" />
+</IconProvider>`,
   },
 
   "icon-button": {
@@ -1313,7 +1353,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
       { name: "variant", type: "ButtonVariant", default: '"ghost"', description: "Visual variant of the button." },
       { name: "tone", type: "ButtonTone", default: '"default"', description: "Color tone of the button." },
       { name: "size", type: "ControlSize", default: '"md"', description: "Size of the button." },
-      { name: "icon", type: "string", required: true, description: "Name of the icon to display." },
+      { name: "icon", type: "IconProp", required: true, description: "The icon to display. Accepts an IconNodes array or a string name." },
       { name: "ariaLabel", type: "string", required: true, description: "Accessible label for the button (required since there is no text)." },
       { name: "tooltip", type: "string | null", default: "null", description: "Tooltip text shown on hover." },
       { name: "tooltipPlacement", type: "OverlayPlacement", default: '"top"', description: "Placement of the tooltip." },
@@ -1333,9 +1373,15 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
     ],
     usage: `<script lang="ts">
   import { IconButton } from "@pug/svelte-primitives";
+  import { trash2, plus, settings } from "@pug/icons-lucide";
 </script>
 
-<IconButton icon="trash" ariaLabel="Delete item" variant="ghost" tone="default" tooltip="Delete" />`,
+<!-- Direct import (tree-shakeable) -->
+<IconButton icon={trash2} ariaLabel="Delete item" variant="ghost" tone="danger" tooltip="Delete" />
+<IconButton icon={plus} ariaLabel="Add" variant="primary" />
+
+<!-- String name (built-in internals) -->
+<IconButton icon="search" ariaLabel="Search" variant="secondary" />`,
   },
 
   "list-card": {

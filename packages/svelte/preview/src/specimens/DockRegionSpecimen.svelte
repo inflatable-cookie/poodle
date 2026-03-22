@@ -2,6 +2,7 @@
   import { Eyebrow, Surface } from "@pug/svelte-primitives";
   import { DockRegion } from "@pug/svelte-composites";
   import type { PanelTabItem, DockEdge } from "@pug/svelte-composites";
+  import { folder, code, list as listIcon, terminal } from "@pug/icons-lucide";
 
   // ── Static dock state ──────────────────────────────────────────────
 
@@ -32,9 +33,9 @@
   let flexCollapsed = false;
 
   const flexItems: PanelTabItem[] = [
-    { value: "explorer", label: "Explorer", icon: "folder", isClosable: true },
+    { value: "explorer", label: "Explorer", icon: folder, isClosable: true },
     { value: "search", label: "Search", icon: "search", isClosable: true },
-    { value: "git", label: "Source Control", icon: "code", isClosable: false },
+    { value: "git", label: "Source Control", icon: code, isClosable: false },
   ];
 
   // ── Interactive collapse state ─────────────────────────────────────
@@ -43,9 +44,9 @@
   let interactiveActive = "files";
 
   const interactiveItems: PanelTabItem[] = [
-    { value: "files", label: "Files", icon: "folder", isClosable: true },
-    { value: "outline", label: "Outline", icon: "list", isClosable: true },
-    { value: "debug", label: "Debug", icon: "terminal", isClosable: false },
+    { value: "files", label: "Files", icon: folder, isClosable: true },
+    { value: "outline", label: "Outline", icon: listIcon, isClosable: true },
+    { value: "debug", label: "Debug", icon: terminal, isClosable: false },
   ];
 
   // ── Bottom dock state ───────────────────────────────────────────────
@@ -54,7 +55,7 @@
   let bottomActive = "terminal";
 
   const bottomItems: PanelTabItem[] = [
-    { value: "terminal", label: "Terminal", icon: "terminal", isClosable: true },
+    { value: "terminal", label: "Terminal", icon: terminal, isClosable: true },
     { value: "output", label: "Output", icon: "file-text", isClosable: true },
     { value: "problems", label: "Problems", icon: "alert-circle", isClosable: false },
   ];
@@ -62,12 +63,12 @@
   // ── Cross-region drag-and-drop state ───────────────────────────────
 
   let leftItems: PanelTabItem[] = [
-    { value: "explorer", label: "Explorer", icon: "folder", isClosable: true },
+    { value: "explorer", label: "Explorer", icon: folder, isClosable: true },
     { value: "search", label: "Search", icon: "search", isClosable: true },
-    { value: "git", label: "Source Control", icon: "code", isClosable: true },
+    { value: "git", label: "Source Control", icon: code, isClosable: true },
   ];
   let rightItems: PanelTabItem[] = [
-    { value: "outline", label: "Outline", icon: "list", isClosable: true },
+    { value: "outline", label: "Outline", icon: listIcon, isClosable: true },
   ];
   let leftActive = "explorer";
   let rightActive = "outline";

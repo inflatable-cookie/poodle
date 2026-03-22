@@ -1,0 +1,28 @@
+{
+  "name": "@pug/icons-lucide",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Tree-shakeable Lucide icon entries for the Pug icon system.",
+  "sideEffects": false,
+  "exports": {
+    ".": "./src/index.ts",
+    "./icons/*": "./src/icons/*.ts"
+  },
+  "files": [
+    "src",
+    "README.md"
+  ],
+  "pugRelease": {
+    "publicIntent": true,
+    "channel": "preview",
+    "stability": "pre-release"
+  },
+  "scripts": {
+    "generate": "node generate.mjs",
+    "postinstall": "node generate.mjs"
+  },
+  "dependencies": {
+    "lucide-static": "^0.577.0"
+  }
+}

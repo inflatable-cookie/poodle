@@ -1,14 +1,24 @@
 <script lang="ts">
   import type { ControlSize } from "./types";
+  import type { IconNodes } from "./icon-registry";
 
-  import { getIconRegistry } from "./icon-registry";
+  import { resolveIconNodes, getIconSet } from "./icon-registry";
 
-  export let name: string;
+  /**
+   * The icon to display. Accepts:
+   * - An `IconNodes` array (e.g. from `lucide-static/icon-nodes.json`)
+   * - A string name resolved from the `IconProvider` icon set or built-in internals
+   */
+  export let icon: IconNodes | string | null = null;
+  /** @deprecated Use `icon` instead. Alias kept for internal convenience. */
+  export let name: string | null = null;
   export let size: ControlSize = "md";
   export let ariaLabel: string | null = null;
 
-  $: registry = getIconRegistry();
-  $: nodes = registry[name] ?? [];
+  const iconSet = getIconSet();
+
+  $: resolvedIcon = icon ?? name;
+  $: nodes = resolveIconNodes(resolvedIcon, iconSet);
 </script>
 
 <svg

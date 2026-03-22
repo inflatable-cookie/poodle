@@ -293,7 +293,7 @@
             class="block-editor__add-menu-item"
             on:click={() => addBlock(bt.type, addMenuIndex)}
           >
-            <span class="block-editor__add-menu-icon"><Icon name={bt.icon} size="sm" /></span>
+            <span class="block-editor__add-menu-icon"><Icon icon={bt.icon} size="sm" /></span>
             <span>{bt.label}</span>
           </button>
         {/each}

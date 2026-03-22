@@ -6,12 +6,12 @@
   import { createEventDispatcher, onDestroy } from "svelte";
 
   import Icon from "./Icon.svelte";
-  import type { ButtonTone, ButtonVariant, ControlSize, OverlayPlacement } from "./types";
+  import type { ButtonTone, ButtonVariant, ControlSize, IconProp, OverlayPlacement } from "./types";
 
   export let variant: ButtonVariant = "ghost";
   export let tone: ButtonTone = "default";
   export let size: ControlSize = "md";
-  export let icon: string;
+  export let icon: IconProp;
   export let ariaLabel: string;
   export let tooltip: string | null = null;
   export let tooltipPlacement: OverlayPlacement = "top";
@@ -86,7 +86,7 @@
       <span class="icon-button__spinner" aria-hidden="true"></span>
     {:else}
       <span class="icon-button__glyph" aria-hidden="true">
-        <slot><Icon name={icon} size="md" /></slot>
+        <slot><Icon icon={icon} size="md" /></slot>
       </span>
     {/if}
   </button>

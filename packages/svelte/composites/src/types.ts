@@ -1,3 +1,5 @@
+import type { IconProp } from "@pug/svelte-primitives/types";
+
 export type TableSortDirection = "asc" | "desc";
 export type BrowseState = "ready" | "empty" | "loading" | "error" | "no-results";
 export type MinColumnWidth = "sm" | "md" | "lg";
@@ -23,7 +25,7 @@ export type BlockType = string;
 export type BlockTypeDefinition = {
   type: BlockType;
   label: string;
-  icon: string;
+  icon: IconProp;
 };
 
 export type EditorBlock = {
@@ -161,7 +163,7 @@ export type PanelDragData = {
 export type PanelTabItem = {
   value: string;
   label: string;
-  icon?: string | null;
+  icon?: IconProp | null;
   isClosable?: boolean;
 };
 

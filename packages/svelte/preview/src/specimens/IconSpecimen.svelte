@@ -1,7 +1,10 @@
 <script lang="ts">
-  import { Icon, IconProvider, Eyebrow, defaultIconRegistry } from "@pug/svelte-primitives";
+  import { Icon, IconProvider, Eyebrow } from "@pug/svelte-primitives";
+  import type { IconSet } from "@pug/svelte-primitives";
+  import iconNodes from "lucide-static/icon-nodes.json";
+  import { heart, settings, zap, circleCheck, info, triangleAlert, star, search, pencil } from "@pug/icons-lucide";
 
-  const iconNames = Object.keys(defaultIconRegistry).sort();
+  const allIconNames = Object.keys(iconNodes as IconSet).sort();
 
   let copiedName = "";
 
@@ -13,94 +16,141 @@
     }, 1200);
   }
 
-  const overrideRegistry = {
-    ...defaultIconRegistry,
-    check: [["path", { d: "M20 6 9 17l-5-5" }]],
-    x: [["path", { d: "M18 6 6 18" }], ["path", { d: "m6 6 12 12" }]],
-    star: [
-      ["polygon", { points: "12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" }],
-    ],
-  };
+  // The 35 built-in internal icons that work without an IconProvider
+  const builtinNames = [
+    "arrow-down", "arrow-right", "arrow-up", "check", "chevron-down",
+    "chevron-left", "chevron-right", "chevron-up", "circle-alert",
+    "circle-check", "circle-x", "columns-3", "download", "ellipsis",
+    "ellipsis-vertical", "external-link", "file-text", "grip-vertical",
+    "image", "inbox", "info", "list-filter", "loader", "lock-open",
+    "minus", "music", "pencil", "play", "plus", "search", "star",
+    "trending-down", "trending-up", "triangle-alert", "x",
+  ];
 </script>
 
 <div class="specimen">
   <div class="specimen__group">
-    <Eyebrow>Sizes</Eyebrow>
+    <Eyebrow>Direct import — tree-shakeable</Eyebrow>
+    <p class="hint">
+      Import individual icons from <code>@pug/icons-lucide</code>.
+      Only the icons you use are included in the bundle.
+    </p>
     <div class="size-row">
       <div class="size-demo">
         <span class="size-label">sm</span>
-        <Icon name="star" size="sm" />
-        <Icon name="heart" size="sm" />
-        <Icon name="settings" size="sm" />
+        <Icon icon={star} size="sm" />
+        <Icon icon={heart} size="sm" />
+        <Icon icon={settings} size="sm" />
       </div>
       <div class="size-demo">
         <span class="size-label">md</span>
-        <Icon name="star" size="md" />
-        <Icon name="heart" size="md" />
-        <Icon name="settings" size="md" />
+        <Icon icon={star} size="md" />
+        <Icon icon={heart} size="md" />
+        <Icon icon={settings} size="md" />
       </div>
       <div class="size-demo">
         <span class="size-label">lg</span>
-        <Icon name="star" size="lg" />
-        <Icon name="heart" size="lg" />
-        <Icon name="settings" size="lg" />
+        <Icon icon={star} size="lg" />
+        <Icon icon={heart} size="lg" />
+        <Icon icon={settings} size="lg" />
       </div>
+    </div>
+    <div class="code-hint">
+      <code>import {"{"} star, heart, settings {"}"} from "@pug/icons-lucide";</code>
+      <br />
+      <code>&lt;Icon icon={"{star}"} size="md" /&gt;</code>
     </div>
   </div>
 
   <div class="specimen__group">
     <Eyebrow>Color inheritance</Eyebrow>
+    <p class="hint">
+      Icons inherit <code>currentColor</code> from their parent element.
+    </p>
     <div class="color-row">
       <span class="color-demo" style="color: var(--pug-color-icon-primary)">
-        <Icon name="check-circle" /> Primary
+        <Icon icon={circleCheck} /> Primary
       </span>
       <span class="color-demo" style="color: var(--pug-color-icon-muted)">
-        <Icon name="info" /> Muted
+        <Icon icon={info} /> Muted
       </span>
       <span class="color-demo" style="color: var(--pug-color-accent-base)">
-        <Icon name="zap" /> Accent
+        <Icon icon={zap} /> Accent
       </span>
       <span class="color-demo" style="color: var(--pug-color-status-danger)">
-        <Icon name="triangle-alert" /> Danger
+        <Icon icon={triangleAlert} /> Danger
       </span>
     </div>
   </div>
 
   <div class="specimen__group">
-    <Eyebrow>IconProvider override</Eyebrow>
-    <div class="override-row">
-      <div class="override-demo">
-        <span class="override-label">Default</span>
-        <Icon name="check" />
-        <Icon name="x" />
-        <Icon name="star" />
-      </div>
-      <IconProvider registry={overrideRegistry}>
-        <div class="override-demo">
-          <span class="override-label">Overridden</span>
-          <Icon name="check" />
-          <Icon name="x" />
-          <Icon name="star" />
-        </div>
-      </IconProvider>
+    <Eyebrow>Accessibility</Eyebrow>
+    <p class="hint">
+      Set <code>ariaLabel</code> for meaningful icons. Decorative icons
+      are automatically <code>aria-hidden</code>.
+    </p>
+    <div class="color-row">
+      <span class="color-demo">
+        <Icon icon={search} ariaLabel="Search" /> with ariaLabel (role="img")
+      </span>
+      <span class="color-demo">
+        <Icon icon={pencil} /> without ariaLabel (aria-hidden)
+      </span>
     </div>
   </div>
 
   <div class="specimen__group">
-    <Eyebrow>All icons ({iconNames.length})</Eyebrow>
-    <div class="icon-grid">
-      {#each iconNames as name}
+    <Eyebrow>Built-in internal icons ({builtinNames.length})</Eyebrow>
+    <p class="hint">
+      These icons are embedded in the framework and work with string names
+      without any <code>IconProvider</code>. They cover component chrome
+      (chevrons, check, x, plus, etc.).
+    </p>
+    <div class="icon-grid icon-grid--compact">
+      {#each builtinNames as name}
         <button
           class="icon-cell"
           class:copied={copiedName === name}
           on:click={() => copyName(name)}
           title={name}
         >
-          <Icon {name} size="md" />
+          <Icon icon={name} size="md" />
           <span class="icon-name">{name}</span>
         </button>
       {/each}
     </div>
+    <div class="code-hint">
+      <code>&lt;Icon icon="chevron-down" size="sm" /&gt;</code>
+    </div>
+  </div>
+
+  <div class="specimen__group">
+    <Eyebrow>All icons via IconProvider ({allIconNames.length})</Eyebrow>
+    <p class="hint">
+      Wrap your app (or a subtree) in <code>&lt;IconProvider&gt;</code> with
+      a full icon set to enable string-based lookups for any icon.
+      Click any icon to copy its name.
+    </p>
+    <div class="code-hint">
+      <code>import iconNodes from "lucide-static/icon-nodes.json";</code>
+      <br />
+      <code>&lt;IconProvider icons={"{iconNodes}"}&gt; ... &lt;/IconProvider&gt;</code>
+    </div>
+    <IconProvider icons={iconNodes}>
+      <div class="icon-grid">
+        {#each allIconNames as name}
+          <button
+            class="icon-cell"
+            class:copied={copiedName === name}
+            on:click={() => copyName(name)}
+            title={name}
+          >
+            <Icon icon={name} size="md" />
+            <span class="icon-name">{name}</span>
+          </button>
+        {/each}
+      </div>
+    </IconProvider>
   </div>
 </div>
 
@@ -115,6 +165,35 @@
     display: flex;
     flex-direction: column;
     gap: 0.5rem;
+  }
+
+  .hint {
+    font-size: 0.75rem;
+    color: var(--pug-color-text-secondary);
+    line-height: 1.5;
+    margin: 0;
+  }
+
+  .hint code {
+    font-family: var(--pug-typography-code-family);
+    font-size: 0.6875rem;
+    padding: 0.0625rem 0.25rem;
+    border-radius: 0.1875rem;
+    background: color-mix(in srgb, var(--pug-color-background-surface) 64%, transparent);
+  }
+
+  .code-hint {
+    font-family: var(--pug-typography-code-family);
+    font-size: 0.6875rem;
+    color: var(--pug-color-text-muted);
+    line-height: 1.6;
+    padding: 0.5rem 0.75rem;
+    border-radius: var(--pug-radius-control);
+    background: color-mix(in srgb, var(--pug-color-background-surface) 48%, transparent);
+  }
+
+  .code-hint code {
+    font-family: inherit;
   }
 
   .size-row {
@@ -140,6 +219,7 @@
     display: flex;
     gap: 1.25rem;
     align-items: center;
+    flex-wrap: wrap;
   }
 
   .color-demo {
@@ -149,29 +229,14 @@
     font-size: 0.75rem;
   }
 
-  .override-row {
-    display: flex;
-    gap: 1.5rem;
-    align-items: center;
-  }
-
-  .override-demo {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-  }
-
-  .override-label {
-    font-size: 0.6875rem;
-    font-family: var(--pug-typography-code-family);
-    color: var(--pug-color-text-muted);
-    min-width: 4rem;
-  }
-
   .icon-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(6.5rem, 1fr));
     gap: 0.125rem;
+  }
+
+  .icon-grid--compact {
+    grid-template-columns: repeat(auto-fill, minmax(5.5rem, 1fr));
   }
 
   .icon-cell {

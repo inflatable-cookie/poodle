@@ -16,7 +16,9 @@
     "accessibility:report": "bun scripts/build-accessibility-report.ts"
   },
   "dependencies": {
+    "@pug/icons-lucide": "workspace:*",
     "@pug/svelte-composites": "workspace:*",
+    "lucide-static": "^0.577.0",
     "@pug/svelte-primitives": "workspace:*",
     "@pug/svelte-tokens": "workspace:*",
     "svelte": "^5.38.6"

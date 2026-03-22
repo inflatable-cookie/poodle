@@ -2,7 +2,7 @@
   import { createEventDispatcher } from "svelte";
 
   import Icon from "./Icon.svelte";
-  import type { ButtonTone, ButtonVariant, ControlSize } from "./types";
+  import type { ButtonTone, ButtonVariant, ControlSize, IconProp } from "./types";
 
   export let variant: ButtonVariant = "secondary";
   export let tone: ButtonTone = "default";
@@ -10,8 +10,8 @@
   export let type: HTMLButtonElement["type"] = "button";
   export let isDisabled = false;
   export let isLoading = false;
-  export let leadingIcon: string | null = null;
-  export let trailingIcon: string | null = null;
+  export let leadingIcon: IconProp | null = null;
+  export let trailingIcon: IconProp | null = null;
   export let chevron = false;
   export let ariaLabel: string | null = null;
   export let describedBy: string | null = null;
@@ -56,7 +56,7 @@
       {#if $$slots.leading}
         <slot name="leading" />
       {:else if leadingIcon}
-        <Icon name={leadingIcon} size="sm" />
+        <Icon icon={leadingIcon} size="sm" />
       {/if}
     </span>
   {/if}
@@ -72,7 +72,7 @@
       {#if $$slots.trailing}
         <slot name="trailing" />
       {:else if trailingIcon}
-        <Icon name={trailingIcon} size="sm" />
+        <Icon icon={trailingIcon} size="sm" />
       {/if}
     </span>
   {/if}

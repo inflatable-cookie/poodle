@@ -1,5 +1,6 @@
 <script lang="ts">
   import { Toggle, Eyebrow, Icon } from "@pug/svelte-primitives";
+  import { bold as boldIcon, italic as italicIcon, pin, star } from "@pug/icons-lucide";
 
   let bold = false;
   let italic = false;
@@ -13,24 +14,24 @@
         isPressed={bold}
         ariaLabel="Bold"
         on:pressedChange={(e) => (bold = e.detail.pressed)}
-      ><Icon name="bold" size="sm" /></Toggle>
+      ><Icon icon={boldIcon} size="sm" /></Toggle>
       <Toggle
         isPressed={italic}
         ariaLabel="Italic"
         on:pressedChange={(e) => (italic = e.detail.pressed)}
-      ><Icon name="italic" size="sm" /></Toggle>
+      ><Icon icon={italicIcon} size="sm" /></Toggle>
     </div>
     <p>Bold: {bold}, Italic: {italic}</p>
   </div>
 
   <div class="specimen__group">
     <Eyebrow>Primary variant</Eyebrow>
-    <Toggle variant="primary" defaultPressed ariaLabel="Pinned"><Icon name="pin" size="sm" /> Pinned</Toggle>
+    <Toggle variant="primary" defaultPressed ariaLabel="Pinned"><Icon icon={pin} size="sm" /> Pinned</Toggle>
   </div>
 
   <div class="specimen__group">
     <Eyebrow>Secondary variant</Eyebrow>
-    <Toggle variant="secondary" ariaLabel="Favorite"><Icon name="star" size="sm" /> Favorite</Toggle>
+    <Toggle variant="secondary" ariaLabel="Favorite"><Icon icon={star} size="sm" /> Favorite</Toggle>
   </div>
 
   <div class="specimen__group">

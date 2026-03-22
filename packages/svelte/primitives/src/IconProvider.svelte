@@ -1,11 +1,16 @@
 <script lang="ts">
-  import type { IconRegistry } from "./icon-registry";
+  import type { IconSet } from "./icon-registry";
 
-  import { setIconRegistry } from "./icon-registry";
+  import { setIconSet } from "./icon-registry";
 
-  export let registry: IconRegistry;
+  // A complete icon set mapping kebab-case names to SVG node arrays.
+  // Any icon set in this format works — lucide-static/icon-nodes.json,
+  // a Phosphor equivalent, or a custom set.
+  // String-based icon lookups (including Pug component chrome) resolve
+  // from this set first, then fall back to the built-in defaults.
+  export let icons: IconSet;
 
-  setIconRegistry(registry);
+  setIconSet(icons);
 </script>
 
 <slot />

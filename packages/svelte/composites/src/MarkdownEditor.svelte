@@ -111,7 +111,7 @@
           disabled={isDisabled || mode === "preview"}
           on:click={tool.action}
         >
-          <Icon name={tool.icon} size="sm" />
+          <Icon icon={tool.icon} size="sm" />
         </button>
       {/each}
     </div>

@@ -1,3 +1,7 @@
+import type { IconNodes } from "./icon-registry";
+
+export type IconProp = IconNodes | string;
+
 export type ValidationState = "none" | "invalid" | "valid" | "pending";
 
 export type CalendarWeekStart = "sunday" | "monday";
@@ -84,7 +88,7 @@ export interface ToggleGroupOption {
 export interface TabItem {
   value: string;
   label: string;
-  icon?: string;
+  icon?: IconProp;
   isDisabled?: boolean;
   isClosable?: boolean;
 }
@@ -200,7 +204,7 @@ export type CardVariant = "default" | "outlined" | "elevated";
 export type BulkAction = {
   id: string;
   label: string;
-  icon?: string;
+  icon?: IconProp;
   tone?: "default" | "danger";
 };
 
