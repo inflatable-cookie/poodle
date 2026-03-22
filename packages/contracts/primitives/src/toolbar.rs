@@ -43,6 +43,14 @@ impl ToolbarSpec {
         semantic::COLOR_BORDER_SUBTLE
     }
 
+    pub fn bg_token(&self) -> &'static str {
+        semantic::COLOR_BACKGROUND_PANEL
+    }
+
+    pub fn padding_token(&self) -> &'static str {
+        semantic::SPACE_INLINE_SM
+    }
+
     pub fn gap_token(&self) -> &'static str {
         semantic::SPACE_INLINE_SM
     }

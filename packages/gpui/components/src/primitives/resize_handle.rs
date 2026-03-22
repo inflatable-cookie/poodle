@@ -1,6 +1,5 @@
 //! ResizeHandle — real GPUI component backed by ResizeHandleSpec.
 
-use gpui::prelude::FluentBuilder;
 use gpui::*;
 use pug_gpui::GpuiThemeProvider;
 use pug_primitives::{Orientation, ResizeHandleSpec};
@@ -15,6 +14,7 @@ use crate::theme_ext::{color_mix, resolve_color, resolve_opacity};
 pub struct ResizeHandle {
     spec: ResizeHandleSpec,
     theme: GpuiThemeProvider,
+    id_prefix: String,
 }
 
 impl std::ops::Deref for ResizeHandle {
@@ -24,13 +24,14 @@ impl std::ops::Deref for ResizeHandle {
 
 impl ResizeHandle {
     pub fn new(theme: &GpuiThemeProvider) -> Self {
-        Self { spec: ResizeHandleSpec::new(), theme: theme.clone() }
+        Self { spec: ResizeHandleSpec::new(), theme: theme.clone(), id_prefix: "pug-resize".to_string() }
     }
 
     pub fn from_spec(spec: ResizeHandleSpec, theme: &GpuiThemeProvider) -> Self {
         Self {
             spec,
             theme: theme.clone(),
+            id_prefix: "pug-resize".to_string(),
         }
     }
 
@@ -42,6 +43,10 @@ impl ResizeHandle {
     pub fn aria_value_min(mut self, v: f32) -> Self { self.spec.aria_value_min = v; self }
     pub fn aria_value_max(mut self, v: f32) -> Self { self.spec.aria_value_max = v; self }
 
+    pub fn with_id(mut self, prefix: impl Into<String>) -> Self {
+        self.id_prefix = prefix.into();
+        self
+    }
 }
 
 impl IntoElement for ResizeHandle {
@@ -54,22 +59,25 @@ impl IntoElement for ResizeHandle {
         // Resolve tokens
         let border_color = resolve_color(theme, spec.border_color_token());
         let hover_color = resolve_color(theme, spec.hover_color_token());
+        let focus_ring = resolve_color(theme, spec.focus_ring_color_token());
         let disabled_opacity = resolve_opacity(theme, spec.disabled_opacity_token());
 
         // Idle line color: 82% border-default mixed with transparent (Svelte: color-mix 82%)
         let idle_line_color = color_mix(border_color, hsla(0.0, 0.0, 0.0, 0.0), 0.82);
 
         let is_horizontal = spec.orientation == Orientation::Horizontal;
+        let handle_id = SharedString::from(format!("{}-handle", self.id_prefix));
 
         // Hit target container: 8px perpendicular to resize direction.
         // Contains a centered 2px visual affordance line.
-        // On hover, the container bg changes to a subtle accent to give feedback
-        // across the full 8px hit area.
         let mut container = div()
+            .id(handle_id)
             .flex()
             .items_center()
             .justify_center()
-            .flex_shrink_0();
+            .flex_shrink_0()
+            // Focus ring
+            .focus(move |s| s.border_color(focus_ring));
 
         // Visual affordance: 2px line centered in hit target
         let line = if is_horizontal {
@@ -86,11 +94,11 @@ impl IntoElement for ResizeHandle {
 
         // Disabled state: reduced opacity, default cursor, no hover
         if spec.is_disabled {
-            container = container.opacity(disabled_opacity).cursor_default();
+            container = container
+                .opacity(disabled_opacity)
+                .cursor(CursorStyle::OperationNotAllowed);
         } else {
             // Hover: accent color fills the hit target area as visual feedback.
-            // The accent bg covers the 8px hit area with a subtle tint, and
-            // the 2px idle line remains visible underneath.
             let accent_hover = hover_color.opacity(0.3);
             container = container.hover(move |s| s.bg(accent_hover));
         }

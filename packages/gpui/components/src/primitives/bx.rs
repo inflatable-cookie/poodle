@@ -1,6 +1,5 @@
 //! Box — real GPUI component backed by BoxSpec.
 
-use gpui::prelude::FluentBuilder;
 use gpui::*;
 use pug_gpui::GpuiThemeProvider;
 use pug_primitives::{BoxSpec, Dimension, Overflow, PaddingScale};
@@ -48,6 +47,17 @@ impl Box {
     }
 }
 
+/// Try to parse a Dimension string as px (e.g. "100px" -> Some(100.0), "50%" -> None).
+fn parse_dimension_px(dim: &Dimension) -> Option<f32> {
+    let s = dim.as_str().trim();
+    if let Some(stripped) = s.strip_suffix("px") {
+        stripped.trim().parse::<f32>().ok()
+    } else {
+        // Try plain number as px
+        s.parse::<f32>().ok()
+    }
+}
+
 impl IntoElement for Box {
     type Element = AnyElement;
 
@@ -57,6 +67,32 @@ impl IntoElement for Box {
         let padding = spec.resolved_padding();
 
         let mut el = div();
+
+        // Width / Height / MinWidth / MinHeight
+        if let Some(ref w) = spec.width {
+            if let Some(v) = parse_dimension_px(w) {
+                el = el.w(px(v));
+            } else if w.as_str() == "100%" {
+                el = el.w_full();
+            }
+        }
+        if let Some(ref h) = spec.height {
+            if let Some(v) = parse_dimension_px(h) {
+                el = el.h(px(v));
+            } else if h.as_str() == "100%" {
+                el = el.h_full();
+            }
+        }
+        if let Some(ref mw) = spec.min_width {
+            if let Some(v) = parse_dimension_px(mw) {
+                el = el.min_w(px(v));
+            }
+        }
+        if let Some(ref mh) = spec.min_height {
+            if let Some(v) = parse_dimension_px(mh) {
+                el = el.min_h(px(v));
+            }
+        }
 
         // Padding
         if let Some(h) = padding.horizontal {

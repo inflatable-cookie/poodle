@@ -4,13 +4,14 @@ use gpui::*;
 use pug_gpui::GpuiThemeProvider;
 use pug_primitives::{Direction, PaddingScale, ScrollShellSpec, SurfaceRole};
 
-use crate::theme_ext::resolve_px;
+use crate::theme_ext::{resolve_color, resolve_px, resolve_radius};
 
 /// A scrollable container with directional overflow.
 ///
 /// Note: gpui handles scrolling differently from web — this component
-/// applies overflow_hidden and padding from the spec. For true scrolling,
-/// use gpui's built-in scroll view primitives.
+/// applies overflow_hidden and padding from the spec, with direction-
+/// appropriate flex layout. For true scrolling, use gpui's built-in
+/// scroll view primitives.
 pub struct ScrollShell {
     spec: ScrollShellSpec,
     theme: GpuiThemeProvider,
@@ -57,7 +58,31 @@ impl IntoElement for ScrollShell {
         let spec = &self.spec;
         let padding = spec.resolved_padding();
 
-        let mut el = div().overflow_hidden();
+        let surface_radius = resolve_radius(theme, "semantic.radius.surface");
+        let focus_ring = resolve_color(theme, spec.focus_ring_color_token());
+
+        let mut el = div()
+            .overflow_hidden()
+            .rounded(surface_radius);
+
+        // Direction-based flex layout
+        match spec.direction {
+            Direction::Vertical => {
+                el = el.flex().flex_col();
+            }
+            Direction::Horizontal => {
+                el = el.flex().flex_row();
+            }
+            Direction::Both => {
+                // Both directions: use flex-wrap column
+                el = el.flex().flex_col();
+            }
+        }
+
+        // Focus ring for focusable shells
+        if spec.is_focusable {
+            el = el.focus(move |s| s.border_color(focus_ring));
+        }
 
         // Padding
         if let Some(h) = padding.horizontal {

@@ -1,6 +1,5 @@
 //! Surface — real GPUI component backed by SurfaceSpec.
 
-use gpui::prelude::FluentBuilder;
 use gpui::*;
 use pug_adapter::ThemeProvider;
 use pug_gpui::GpuiThemeProvider;
@@ -56,17 +55,23 @@ impl IntoElement for Surface {
         let theme = &self.theme;
         let spec = &self.spec;
 
-        let control_radius = resolve_radius(theme, "semantic.radius.control");
+        // Contract: use radius.surface, not radius.control
+        let surface_radius = resolve_radius(theme, spec.radius_token());
 
         let bg = resolve_color(theme, spec.resolved_background_token());
         let padding = spec.resolved_padding();
 
-        let mut el = div().rounded(control_radius).bg(bg);
+        let mut el = div().rounded(surface_radius).bg(bg);
 
         // Border
         if let Some(border_token) = spec.resolved_border_color() {
             let border_color = resolve_color(theme, border_token);
             el = el.border_1().border_color(border_color);
+        }
+
+        // Shadow for elevated surfaces
+        if spec.is_elevated || spec.tone == SurfaceTone::Elevated {
+            el = el.shadow_md();
         }
 
         // Padding

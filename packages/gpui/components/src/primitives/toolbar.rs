@@ -1,11 +1,10 @@
 //! Toolbar — real GPUI component backed by ToolbarSpec.
 
-use gpui::prelude::FluentBuilder;
 use gpui::*;
 use pug_gpui::GpuiThemeProvider;
 use pug_primitives::{Alignment, ToolbarSpec};
 
-use crate::theme_ext::{resolve_color, resolve_px};
+use crate::theme_ext::{color_mix, resolve_color, resolve_px};
 
 /// A real GPUI horizontal toolbar component backed by `ToolbarSpec`.
 pub struct Toolbar {
@@ -51,15 +50,20 @@ impl IntoElement for Toolbar {
         let theme = &self.theme;
         let spec = &self.spec;
 
-        let border = resolve_color(theme, spec.border_token());
+        let border_raw = resolve_color(theme, spec.border_token());
+        let panel = resolve_color(theme, spec.bg_token());
         let gap = resolve_px(theme, spec.gap_token());
+        let padding = resolve_px(theme, spec.padding_token());
+
+        // Contract: border color-mix 78% border-subtle
+        let border = color_mix(border_raw, panel, 0.78);
 
         let mut el = div()
             .flex()
             .items_center()
             .gap(gap)
-            .px(px(8.0))
-            .py(px(4.0));
+            // Contract: padding 0.25rem (4px)
+            .p(padding);
 
         match spec.alignment {
             Alignment::Start => {}

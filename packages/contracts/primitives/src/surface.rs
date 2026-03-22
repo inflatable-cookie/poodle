@@ -80,6 +80,10 @@ impl SurfaceSpec {
         }
     }
 
+    pub fn radius_token(&self) -> &'static str {
+        semantic::RADIUS_SURFACE
+    }
+
     pub fn resolved_padding(&self) -> Inset {
         self.padding.panel_inset()
     }

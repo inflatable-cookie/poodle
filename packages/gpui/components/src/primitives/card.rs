@@ -1,12 +1,12 @@
-use gpui::prelude::FluentBuilder;
 use gpui::*;
 use pug_gpui::GpuiThemeProvider;
 use pug_primitives::{CardLayout, CardSpec, CardVariant};
-use crate::theme_ext::{resolve_color, resolve_opacity, resolve_px, resolve_radius};
+use crate::theme_ext::{color_mix, resolve_color, resolve_opacity, resolve_px, resolve_radius};
 
 pub struct Card {
     spec: CardSpec,
     theme: GpuiThemeProvider,
+    id_prefix: String,
     header: Option<AnyElement>,
     body: Option<AnyElement>,
     footer: Option<AnyElement>,
@@ -22,6 +22,7 @@ impl Card {
         Self {
             spec: CardSpec::new(),
             theme: theme.clone(),
+            id_prefix: "pug-card".to_string(),
             header: None,
             body: None,
             footer: None,
@@ -32,6 +33,7 @@ impl Card {
         Self {
             spec,
             theme: theme.clone(),
+            id_prefix: "pug-card".to_string(),
             header: None,
             body: None,
             footer: None,
@@ -44,6 +46,11 @@ impl Card {
     pub fn interactive(mut self) -> Self { self.spec.is_interactive = true; self }
     pub fn selected(mut self) -> Self { self.spec.is_selected = true; self }
     pub fn aria_label(mut self, v: impl Into<String>) -> Self { self.spec.aria_label = Some(v.into()); self }
+
+    pub fn with_id(mut self, prefix: impl Into<String>) -> Self {
+        self.id_prefix = prefix.into();
+        self
+    }
 
     // ── GPUI-specific builders ────────────────────────────────
     pub fn with_header(mut self, header: impl IntoElement) -> Self {
@@ -76,20 +83,35 @@ impl IntoElement for Card {
         let selected_border_color = spec.selected_border_token().map(|t| resolve_color(theme, t));
         let hover_fill = spec.hover_fill_token().map(|t| resolve_color(theme, t));
         let _disabled_opacity = resolve_opacity(theme, spec.disabled_opacity_token());
+        let focus_ring = resolve_color(theme, spec.focus_ring_color_token());
         let gap = resolve_px(theme, spec.gap_token());
         let padding_x = resolve_px(theme, spec.padding_x_token());
         let padding_y = resolve_px(theme, spec.padding_y_token());
 
+        // Contract: compact layout uses smaller padding (0.5rem x 0.625rem)
+        let (effective_px, effective_py) = match spec.layout {
+            CardLayout::Compact => (px(10.0), px(8.0)), // 0.625rem, 0.5rem
+            _ => (padding_x, padding_y),
+        };
+
+        let border_subtle = resolve_color(theme, "semantic.color.border.subtle");
+        let panel = resolve_color(theme, "semantic.color.background.panel");
+        // Contract: footer divider 72% border-subtle
+        let footer_divider = color_mix(border_subtle, panel, 0.72);
+
         let is_horizontal = matches!(spec.layout, CardLayout::Horizontal);
+        let card_id = SharedString::from(self.id_prefix.clone());
 
         let mut el = div()
-            .id("card")
+            .id(card_id)
             .bg(fill)
             .rounded(radius)
-            .px(padding_x)
-            .py(padding_y)
+            .px(effective_px)
+            .py(effective_py)
             .gap(gap)
-            .overflow_hidden();
+            .overflow_hidden()
+            // Focus ring
+            .focus(move |s| s.border_color(focus_ring));
 
         // Layout direction
         if is_horizontal {
@@ -105,6 +127,11 @@ impl IntoElement for Card {
             el = el.border_1().border_color(border);
         }
 
+        // Shadow for elevated variant
+        if matches!(spec.variant, CardVariant::Elevated) {
+            el = el.shadow_md();
+        }
+
         // Interactive hover
         if let Some(hover_fill) = hover_fill {
             el = el.cursor_pointer().hover(|s| s.bg(hover_fill));
@@ -114,7 +141,6 @@ impl IntoElement for Card {
         if let Some(header) = self.header {
             el = el.child(
                 div()
-                    .id("card-header")
                     .flex_shrink_0()
                     .child(header),
             );
@@ -124,18 +150,19 @@ impl IntoElement for Card {
         if let Some(body) = self.body {
             el = el.child(
                 div()
-                    .id("card-body")
                     .flex_grow()
                     .child(body),
             );
         }
 
-        // Footer slot
+        // Footer slot — with top divider per contract
         if let Some(footer) = self.footer {
             el = el.child(
                 div()
-                    .id("card-footer")
                     .flex_shrink_0()
+                    .border_t_1()
+                    .border_color(footer_divider)
+                    .pt(gap) // Use gap as top padding for visual separation
                     .child(footer),
             );
         }
