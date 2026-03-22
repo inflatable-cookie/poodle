@@ -65,8 +65,9 @@ impl IntoElement for Checkbox {
         // Contract: gap = space-inline-sm
         let inline_gap = resolve_px(theme, "semantic.space.inline.sm");
         // Contract: indicator = 1.125rem (18px), radius = 0.3125rem (5px)
-        let indicator_size = resolve_px(theme, "semantic.size.icon.md");
-        let indicator_radius = resolve_radius(theme, "semantic.radius.control");
+        let indicator_size = px(18.0); // contract: 1.125rem fixed
+        let indicator_radius = px(5.0); // contract: 0.3125rem fixed
+        let focus_ring_color = resolve_color(theme, "semantic.color.accent.focusRing");
 
         let disabled_opacity = resolve_opacity(theme, "semantic.state.opacity.disabled");
         let accent = resolve_color(theme, spec.indicator_fill_token());
@@ -134,22 +135,20 @@ impl IntoElement for Checkbox {
         };
 
         // Row: indicator + label
-        // Contract: hover = color_mix with elevated
-        let hover_bg = color_mix(surface_bg, elevated, 0.84);
         let mut row = div()
             .id(SharedString::from(id_str))
             .flex()
             .items_center()
-            .gap(inline_gap);
+            .gap(inline_gap)
+            // Focus ring on indicator via parent focus
+            .focus(move |s| s.border_color(focus_ring_color));
 
         if is_interactive {
-            row = row
-                .cursor_pointer()
-                .hover(move |s| s.bg(hover_bg));
+            row = row.cursor_pointer();
         }
 
         if spec.is_disabled {
-            row = row.opacity(disabled_opacity);
+            row = row.opacity(disabled_opacity).cursor(CursorStyle::OperationNotAllowed);
         }
 
         row = row.child(indicator);
