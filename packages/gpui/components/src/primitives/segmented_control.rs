@@ -63,34 +63,46 @@ impl IntoElement for SegmentedControl {
     fn into_element(self) -> Self::Element {
         let theme = &self.theme;
 
-        let control_padding_x = resolve_px(theme, "semantic.space.control.x");
-        let control_padding_y = resolve_px(theme, "semantic.space.control.y");
+        // Contract: root bg = color-mix(surface 93%, text-primary)
+        // Contract: root border = color-mix(border-subtle 84%, transparent)
+        // Contract: inner radius = calc(radius-control - 0.125rem)
         let control_radius = resolve_radius(theme, "semantic.radius.control");
-        let inner_radius = px(theme.resolve_radius("semantic.radius.control") * 0.6);
+        let inner_radius = (control_radius - px(2.0)).max(px(0.0));
 
         let accent = resolve_color(theme, self.spec.selected_fill_token());
-        let border = resolve_color(theme, "semantic.color.border.default");
+        let border_subtle = resolve_color(theme, "semantic.color.border.subtle");
         let text_primary = resolve_color(theme, "semantic.color.text.primary");
+        let text_secondary = resolve_color(theme, "semantic.color.text.secondary");
         let text_inverse = resolve_color(theme, "semantic.color.text.inverse");
         let surface_bg = resolve_color(theme, "semantic.color.background.surface");
         let elevated = resolve_color(theme, "semantic.color.background.elevated");
         let disabled_opacity = resolve_opacity(theme, "semantic.state.opacity.disabled");
+        let focus_ring = resolve_color(theme, "semantic.color.accent.focusRing");
 
-        // Contract: hover = color-mix with elevated
+        // Contract: root bg = surface 93% mix with text-primary
+        let root_bg = color_mix(surface_bg, text_primary, 0.93);
+        // Contract: root border = border-subtle 84%
+        let root_border = Hsla { a: border_subtle.a * 0.84, ..border_subtle };
+
         let hover_bg = color_mix(surface_bg, elevated, 0.84);
 
         let current_value = self.spec.current_value().map(|s| s.to_string());
         let is_disabled = self.spec.is_disabled;
 
+        let control_height = resolve_px(theme, "semantic.size.control.height");
+        // Contract: segment min-height = calc(control-height - 0.25rem)
+        let segment_height = control_height - px(4.0);
+
         let mut row = div()
             .flex()
             .rounded(control_radius)
             .border_1()
-            .border_color(border)
-            .bg(surface_bg);
+            .border_color(root_border)
+            .bg(root_bg)
+            .h(control_height);
 
         if is_disabled {
-            row = row.opacity(disabled_opacity);
+            row = row.opacity(disabled_opacity).cursor(CursorStyle::OperationNotAllowed);
         }
 
         for (i, option) in self.spec.options.iter().enumerate() {
@@ -98,16 +110,24 @@ impl IntoElement for SegmentedControl {
             let is_opt_disabled = option.is_disabled;
             let seg_id = SharedString::from(format!("{}-{}", self.id_prefix, option.value));
 
+            // Contract: font 0.75rem (12px), weight 600, padding 0 0.75rem (12px)
             let mut seg = div()
                 .id(seg_id)
-                .px(control_padding_x)
-                .py(control_padding_y)
-                .text_sm();
+                .px(px(12.0))
+                .h(segment_height)
+                .text_size(px(12.0))
+                .font_weight(FontWeight::SEMIBOLD)
+                .flex().items_center().justify_center()
+                .whitespace_nowrap()
+                .overflow_x_hidden()
+                .text_ellipsis()
+                .focus(move |s| s.border_color(focus_ring));
 
             if is_selected {
                 seg = seg.bg(accent).text_color(text_inverse).rounded(inner_radius);
             } else {
-                seg = seg.text_color(text_primary);
+                // Contract: unselected text = text-secondary
+                seg = seg.text_color(text_secondary);
             }
 
             if !is_disabled && !is_opt_disabled {
@@ -125,7 +145,7 @@ impl IntoElement for SegmentedControl {
                         div()
                             .w(px(1.0))
                             .h_full()
-                            .bg(border.opacity(0.5)),
+                            .bg(root_border),
                     );
                 }
             }

@@ -108,6 +108,9 @@ impl IntoElement for Select {
             "pug-select".to_string()
         };
 
+        let focus_ring = resolve_color(theme, "semantic.color.accent.focusRing");
+        let icon_muted = resolve_color(theme, "semantic.color.icon.muted");
+
         // Trigger button
         let mut trigger = div()
             .id(SharedString::from(id_str))
@@ -121,10 +124,11 @@ impl IntoElement for Select {
             .items_center()
             .justify_between()
             .gap(inline_gap)
-            .text_sm();
+            .text_sm()
+            .focus(move |s| s.border_color(focus_ring));
 
         if is_disabled {
-            trigger = trigger.opacity(disabled_opacity);
+            trigger = trigger.opacity(disabled_opacity).cursor(CursorStyle::OperationNotAllowed);
         } else {
             trigger = trigger
                 .cursor_pointer()
@@ -137,21 +141,18 @@ impl IntoElement for Select {
             text_primary
         };
 
+        // Contract: indicator uses icon-muted color, not text-secondary with opacity
         trigger = trigger
             .child(
-                div().text_color(text_col).child(trigger_text.to_string()),
+                div().text_color(text_col).flex_1().child(trigger_text.to_string()),
             )
             .child(
-                div()
-                    .opacity(0.5)
-                    .child(
-                        Icon::from_spec(
-                            IconSpec::new(if is_open { "chevron-up" } else { "chevron-down" })
-                                .with_size(IconSize::Sm),
-                            theme,
-                        )
-                        .with_color(text_secondary),
-                    ),
+                Icon::from_spec(
+                    IconSpec::new(if is_open { "chevron-up" } else { "chevron-down" })
+                        .with_size(IconSize::Sm),
+                    theme,
+                )
+                .with_color(icon_muted),
             );
 
         if let Some(handler) = self.on_toggle {

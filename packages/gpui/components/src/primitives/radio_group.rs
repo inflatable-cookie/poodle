@@ -64,96 +64,78 @@ impl IntoElement for RadioGroup {
 
     fn into_element(self) -> Self::Element {
         let theme = &self.theme;
+        let spec = &self.spec;
 
-        // Contract: gap = space-inline-sm
-        let inline_gap = resolve_px(theme, "semantic.space.inline.sm");
-        // Contract: indicator = 1.125rem (18px), same as checkbox
-        let indicator_f = theme.resolve_space("semantic.size.icon.md");
-        let indicator_size = px(indicator_f);
-        let indicator_half = px(indicator_f / 2.0);
-        // Contract: inner dot = ~33% of indicator
-        let dot_f = indicator_f / 3.0;
-        let dot_size = px(dot_f);
-        let dot_half = px(dot_f / 2.0);
+        // Contract: indicator = 1.125rem (18px), dot = 0.5rem (8px)
+        let indicator_size = px(18.0);
+        let dot_size = px(8.0);
+
+        // Contract: gap per orientation
+        let group_gap = resolve_px(theme, spec.option_gap_token());
+        let option_gap = resolve_px(theme, "semantic.space.inline.sm");
 
         let disabled_opacity = resolve_opacity(theme, "semantic.state.opacity.disabled");
         let accent = resolve_color(theme, "semantic.color.accent.base");
         let border = resolve_color(theme, "semantic.color.border.default");
         let text_primary = resolve_color(theme, "semantic.color.text.primary");
-        let text_inverse = resolve_color(theme, "semantic.color.text.inverse");
         let surface_bg = resolve_color(theme, "semantic.color.background.surface");
-        let elevated = resolve_color(theme, "semantic.color.background.elevated");
+        let focus_ring = resolve_color(theme, "semantic.color.accent.focusRing");
 
-        // Contract: hover = color-mix with elevated
-        let hover_bg = color_mix(surface_bg, elevated, 0.84);
+        let current_value = spec.current_value().map(|s| s.to_string());
 
-        let current_value = self.spec.current_value().map(|s| s.to_string());
-        let is_group_disabled = self.spec.is_disabled;
+        // Contract: grid layout, orientation drives flow
+        let mut group = match spec.orientation {
+            Orientation::Horizontal => div().flex().flex_row().items_center().gap(group_gap),
+            Orientation::Vertical => div().flex().flex_col().gap(group_gap),
+        };
 
-        let mut group = div().flex().flex_col().gap(inline_gap);
-
-        if let Some(ref label) = self.spec.aria_label {
-            group = group.child(
-                div().text_sm().text_color(text_primary).child(label.to_string()),
-            );
-        }
-
-        for option in &self.spec.options {
+        for option in &spec.options {
             let is_selected = current_value.as_deref() == Some(&option.value);
-            let is_disabled = is_group_disabled || option.is_disabled;
-            let option_id =
-                SharedString::from(format!("{}-{}", self.id_prefix, option.value));
+            let is_disabled = spec.is_disabled || option.is_disabled;
+            let option_id = SharedString::from(format!("{}-{}", self.id_prefix, option.value));
 
-            // Radio circle indicator
-            let indicator = {
-                let mut circle = div()
-                    .w(indicator_size)
-                    .h(indicator_size)
-                    .rounded(indicator_half)
-                    .flex()
-                    .items_center()
-                    .justify_center()
-                    .flex_shrink_0();
+            // Contract: indicator = circle, border-default, surface bg
+            // Checked: border-color = accent (NOT fill), dot bg = accent
+            let mut indicator = div()
+                .w(indicator_size).h(indicator_size)
+                .rounded(px(999.0))
+                .bg(surface_bg)
+                .border_1()
+                .border_color(if is_selected { accent } else { border })
+                .flex().items_center().justify_center()
+                .flex_shrink_0();
 
-                if is_selected {
-                    circle = circle
-                        .bg(accent)
-                        .border_1()
-                        .border_color(accent)
-                        .child(
-                            div()
-                                .w(dot_size)
-                                .h(dot_size)
-                                .rounded(dot_half)
-                                .bg(text_inverse),
-                        );
-                } else {
-                    circle = circle
-                        .bg(surface_bg)
-                        .border_1()
-                        .border_color(border);
-                }
-
-                circle
-            };
+            // Contract: dot always present, transparent when unchecked, accent when checked
+            indicator = indicator.child(
+                div()
+                    .w(dot_size).h(dot_size)
+                    .rounded(px(999.0))
+                    .bg(if is_selected { accent } else { gpui::transparent_black() })
+            );
 
             let mut row = div()
                 .id(option_id)
-                .flex()
-                .items_center()
-                .gap(inline_gap);
+                .flex().items_center()
+                .gap(option_gap)
+                .min_w(px(0.0))
+                .focus(move |s| s.border_color(focus_ring));
 
             if is_disabled {
-                row = row.opacity(disabled_opacity);
+                row = row.opacity(disabled_opacity).cursor(CursorStyle::OperationNotAllowed);
             } else {
-                row = row
-                    .cursor_pointer()
-                    .hover(move |s| s.bg(hover_bg));
+                row = row.cursor_pointer();
             }
 
-            row = row
-                .child(indicator)
-                .child(div().text_sm().text_color(text_primary).child(option.label.clone()));
+            row = row.child(indicator);
+
+            // Label with contract typography
+            row = row.child(
+                div()
+                    .text_sm()
+                    .text_color(text_primary)
+                    .min_w(px(0.0))
+                    .child(option.label.clone())
+            );
 
             group = group.child(row);
         }

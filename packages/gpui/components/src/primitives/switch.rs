@@ -95,8 +95,9 @@ impl IntoElement for Switch {
         let thumb_size = px(14.0);
         let thumb_radius = px(7.0); // half = circle
 
-        // Contract: thumb travel = 0.875rem (14px)
-        let knob_offset = if is_checked { px(16.0) } else { track_padding };
+        // Contract: thumb travel = translateX(0.875rem) = 14px
+        let knob_offset = if is_checked { px(14.0) + track_padding } else { track_padding };
+        let focus_ring = resolve_color(theme, "semantic.color.accent.focusRing");
 
         // Contract: checked track = accent-base 24% + surface background
         let track_bg = if is_checked {
@@ -141,14 +142,15 @@ impl IntoElement for Switch {
             .id(SharedString::from(id_str))
             .flex()
             .items_center()
-            .gap(inline_gap);
-
-        if is_interactive {
-            row = row.cursor_pointer();
-        }
+            .gap(inline_gap)
+            .focus(move |s| s.border_color(focus_ring));
 
         if spec.is_disabled {
-            row = row.opacity(disabled_opacity);
+            row = row.opacity(disabled_opacity).cursor(CursorStyle::OperationNotAllowed);
+        } else if spec.is_read_only {
+            row = row.cursor_default();
+        } else {
+            row = row.cursor_pointer();
         }
 
         row = row.child(track);
