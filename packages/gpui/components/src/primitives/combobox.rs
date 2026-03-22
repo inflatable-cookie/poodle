@@ -1,4 +1,8 @@
 //! Combobox — real GPUI component backed by ComboboxSpec.
+//!
+//! Contract: grid root min-width 14rem, input with focus ring,
+//! absolutely positioned list with overlay shadow.
+//! Option padding 0.375rem 0.5rem, radius control-0.125rem.
 
 use gpui::prelude::FluentBuilder;
 use gpui::*;
@@ -11,6 +15,7 @@ use crate::theme_ext::{color_mix, resolve_color, resolve_opacity, resolve_px, re
 pub struct Combobox {
     spec: ComboboxSpec,
     theme: GpuiThemeProvider,
+    id_suffix: Option<String>,
     on_change: Option<Box<dyn Fn(&str, &mut Window, &mut App) + 'static>>,
     on_query_change: Option<Box<dyn Fn(&str, &mut Window, &mut App) + 'static>>,
 }
@@ -22,13 +27,14 @@ impl std::ops::Deref for Combobox {
 
 impl Combobox {
     pub fn new(theme: &GpuiThemeProvider) -> Self {
-        Self { spec: ComboboxSpec::new(), theme: theme.clone(), on_change: None, on_query_change: None }
+        Self { spec: ComboboxSpec::new(), theme: theme.clone(), id_suffix: None, on_change: None, on_query_change: None }
     }
 
     pub fn from_spec(spec: ComboboxSpec, theme: &GpuiThemeProvider) -> Self {
         Self {
             spec,
             theme: theme.clone(),
+            id_suffix: None,
             on_change: None,
             on_query_change: None,
         }
@@ -44,6 +50,10 @@ impl Combobox {
     pub fn query(mut self, v: impl Into<String>) -> Self { self.spec.query = v.into(); self }
     pub fn aria_label(mut self, v: impl Into<String>) -> Self { self.spec.aria_label = Some(v.into()); self }
 
+    pub fn with_id(mut self, suffix: impl Into<String>) -> Self {
+        self.id_suffix = Some(suffix.into());
+        self
+    }
 
     pub fn on_change(
         mut self,
@@ -76,6 +86,8 @@ impl IntoElement for Combobox {
         let input_placeholder = resolve_color(theme, spec.input_placeholder_token());
         let input_radius = resolve_radius(theme, spec.input_radius_token());
         let input_height = resolve_px(theme, spec.input_height_token());
+        let input_padding_x = resolve_px(theme, "semantic.space.control.x");
+        let focus_ring = resolve_color(theme, spec.focus_ring_color_token());
         let disabled_opacity = resolve_opacity(theme, spec.disabled_opacity_token());
 
         // ── Resolve list tokens ─────────────────────────────────────
@@ -91,6 +103,9 @@ impl IntoElement for Combobox {
         let option_desc_color = resolve_color(theme, spec.option_description_token());
         let empty_text = resolve_color(theme, spec.empty_text_token());
 
+        // Contract: option radius = control - 0.125rem
+        let option_radius = input_radius - px(2.0);
+
         let is_disabled = spec.is_disabled;
         let is_open = spec.is_open;
         let current_value = spec.current_value().map(|s| s.to_string());
@@ -104,6 +119,12 @@ impl IntoElement for Combobox {
             String::new()
         };
         let show_placeholder = display_text.is_empty();
+
+        let id_str = if let Some(ref suffix) = self.id_suffix {
+            format!("pug-combobox-{}", suffix)
+        } else {
+            "pug-combobox".to_string()
+        };
 
         // ── Input field ─────────────────────────────────────────────
         let input_el = {
@@ -123,28 +144,22 @@ impl IntoElement for Combobox {
                     .child(display_text)
             };
 
-            // Chevron arrow indicator
-            let chevron = div()
-                .text_xs()
-                .text_color(input_placeholder)
-                .child(if is_open { "\u{25B2}" } else { "\u{25BC}" });
-
             div()
+                .id(SharedString::from(id_str))
                 .w_full()
-                .h(input_height)
-                .px(px(10.0))
+                .min_h(input_height) // Contract: min-height, not fixed
+                .px(input_padding_x)
                 .flex()
                 .flex_row()
                 .items_center()
-                .justify_between()
-                .gap(px(8.0))
                 .rounded(input_radius)
                 .bg(input_fill)
                 .border_1()
                 .border_color(input_border)
+                // Contract: focus ring on input
+                .focus(move |s| s.border_color(focus_ring))
                 .when(!is_disabled, |el| el.cursor_pointer())
                 .child(text_el.flex_grow().min_w_0().overflow_x_hidden().text_ellipsis())
-                .child(chevron)
         };
 
         // ── Option list (when open) ─────────────────────────────────
@@ -153,23 +168,24 @@ impl IntoElement for Combobox {
 
             let mut list = div()
                 .w_full()
-                .mt(px(4.0))
+                .mt(px(6.0)) // Contract: top calc(100% + 0.375rem)
                 .rounded(list_radius)
                 .bg(list_fill)
                 .border_1()
                 .border_color(list_border)
+                .shadow_md()
                 .flex()
                 .flex_col()
-                .py(px(4.0))
+                .gap(px(2.0)) // Contract: gap 0.125rem
+                .p(px(4.0)) // Contract: padding 0.25rem
                 .overflow_hidden()
                 .max_h(px(240.0));
 
             if filtered.is_empty() {
                 list = list.child(
                     div()
-                        .px(px(10.0))
-                        .py(px(8.0))
-                        .text_sm()
+                        .p(px(8.0)) // Contract: padding 0.5rem
+                        .text_size(px(11.0)) // Contract: 0.6875rem
                         .text_color(empty_text)
                         .child("No results"),
                 );
@@ -181,13 +197,15 @@ impl IntoElement for Combobox {
                         .unwrap_or(false);
                     let is_option_disabled = option.is_disabled;
 
+                    // Contract: option padding 0.375rem 0.5rem
                     let mut option_el = div()
                         .w_full()
-                        .px(px(10.0))
-                        .py(px(6.0))
+                        .px(px(8.0))  // 0.5rem
+                        .py(px(6.0)) // 0.375rem
                         .flex()
                         .flex_col()
                         .gap(px(2.0))
+                        .rounded(option_radius)
                         .when(is_selected, |el| el.bg(option_highlight))
                         .when(!is_option_disabled, |el| {
                             el.cursor_pointer()
@@ -205,9 +223,10 @@ impl IntoElement for Combobox {
                     );
 
                     if let Some(ref desc) = option.description {
+                        // Contract: description 0.6875rem, line-height 1.35
                         option_el = option_el.child(
                             div()
-                                .text_xs()
+                                .text_size(px(11.0)) // 0.6875rem
                                 .text_color(option_desc_color)
                                 .child(desc.clone()),
                         );
@@ -223,8 +242,10 @@ impl IntoElement for Combobox {
         };
 
         // ── Root container ──────────────────────────────────────────
+        // Contract: min-width 14rem
         let mut root = div()
             .w_full()
+            .min_w(px(224.0)) // 14rem
             .relative()
             .flex()
             .flex_col()
@@ -235,7 +256,9 @@ impl IntoElement for Combobox {
         }
 
         if is_disabled {
-            root = root.opacity(disabled_opacity);
+            root = root
+                .opacity(disabled_opacity)
+                .cursor(CursorStyle::OperationNotAllowed);
         }
 
         root.into_any_element()

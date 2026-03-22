@@ -53,4 +53,24 @@ impl DurationInputSpec {
     pub fn focus_ring_color_token(&self) -> &'static str {
         semantic::COLOR_ACCENT_FOCUS_RING
     }
+
+    pub fn fill_token(&self) -> &'static str {
+        semantic::COLOR_BACKGROUND_SURFACE
+    }
+
+    pub fn radius_token(&self) -> &'static str {
+        semantic::RADIUS_CONTROL
+    }
+
+    pub fn text_color_token(&self) -> &'static str {
+        semantic::COLOR_TEXT_PRIMARY
+    }
+
+    pub fn text_secondary_token(&self) -> &'static str {
+        semantic::COLOR_TEXT_SECONDARY
+    }
+
+    pub fn disabled_opacity_token(&self) -> &'static str {
+        semantic::STATE_OPACITY_DISABLED
+    }
 }

@@ -1,11 +1,15 @@
 //! ColorPicker — real GPUI component backed by ColorPickerSpec.
+//!
+//! Contract: 2.25rem square trigger with color swatch,
+//! elevated surface overlay with swatch grid.
+//! Focus ring on trigger. No hover.
 
 use gpui::prelude::FluentBuilder;
 use gpui::*;
 use pug_gpui::GpuiThemeProvider;
 use pug_primitives::ColorPickerSpec;
 
-use crate::theme_ext::{color_mix, resolve_color, resolve_opacity, resolve_px, resolve_radius};
+use crate::theme_ext::{resolve_color, resolve_opacity, resolve_px, resolve_radius};
 
 /// Parse a hex color string (e.g. "#ff0000") into an Hsla color.
 fn parse_hex_color(hex: &str) -> Hsla {
@@ -21,6 +25,7 @@ fn parse_hex_color(hex: &str) -> Hsla {
 pub struct ColorPicker {
     spec: ColorPickerSpec,
     theme: GpuiThemeProvider,
+    id_suffix: Option<String>,
 }
 
 impl std::ops::Deref for ColorPicker {
@@ -30,13 +35,14 @@ impl std::ops::Deref for ColorPicker {
 
 impl ColorPicker {
     pub fn new(theme: &GpuiThemeProvider) -> Self {
-        Self { spec: ColorPickerSpec::new(), theme: theme.clone() }
+        Self { spec: ColorPickerSpec::new(), theme: theme.clone(), id_suffix: None }
     }
 
     pub fn from_spec(spec: ColorPickerSpec, theme: &GpuiThemeProvider) -> Self {
         Self {
             spec,
             theme: theme.clone(),
+            id_suffix: None,
         }
     }
 
@@ -47,6 +53,10 @@ impl ColorPicker {
     pub fn disabled(mut self, v: bool) -> Self { self.spec.is_disabled = v; self }
     pub fn show_alpha(mut self, v: bool) -> Self { self.spec.show_alpha = v; self }
 
+    pub fn with_id(mut self, suffix: impl Into<String>) -> Self {
+        self.id_suffix = Some(suffix.into());
+        self
+    }
 }
 
 impl IntoElement for ColorPicker {
@@ -56,71 +66,62 @@ impl IntoElement for ColorPicker {
         let theme = &self.theme;
         let spec = &self.spec;
 
-        let control_height = resolve_px(theme, "semantic.size.control.height");
-        let control_padding_x = resolve_px(theme, "semantic.space.control.x");
-        let inline_gap = resolve_px(theme, "semantic.space.inline.sm");
         let stack_gap = resolve_px(theme, "semantic.space.stack.sm");
-        let control_radius = resolve_radius(theme, "semantic.radius.control");
-        let swatch_radius = resolve_radius(theme, "semantic.radius.surface");
-        let swatch_size = resolve_px(theme, "semantic.size.icon.lg");
+        let trigger_radius = resolve_radius(theme, spec.trigger_radius_token());
+        let surface_radius = resolve_radius(theme, spec.surface_radius_token());
 
         let border = resolve_color(theme, spec.border_token());
-        let surface_bg = resolve_color(theme, "semantic.color.background.surface");
         let elevated_bg = resolve_color(theme, spec.overlay_fill_token());
-        let elevated = resolve_color(theme, "semantic.color.background.elevated");
         let text_primary = resolve_color(theme, "semantic.color.text.primary");
         let text_secondary = resolve_color(theme, "semantic.color.text.secondary");
-        let disabled_opacity = resolve_opacity(theme, "semantic.state.opacity.disabled");
-
-        let hover_bg = color_mix(surface_bg, elevated, 0.84);
+        let focus_ring = resolve_color(theme, spec.focus_ring_color_token());
+        let disabled_opacity = resolve_opacity(theme, spec.disabled_opacity_token());
 
         let current = spec
             .current_value()
             .unwrap_or("#000000")
             .to_string();
-
-        // Parse current color for the preview swatch
         let current_color = parse_hex_color(&current);
 
-        // Color swatch trigger
+        // Contract: trigger 2.25rem × 2.25rem square
+        let trigger_size = px(36.0); // 2.25rem
+
+        let id_str = if let Some(ref suffix) = self.id_suffix {
+            format!("pug-color-picker-{}", suffix)
+        } else {
+            "pug-color-picker".to_string()
+        };
+
         let mut trigger = div()
-            .h(control_height)
-            .px(control_padding_x)
-            .rounded(control_radius)
-            .bg(surface_bg)
+            .id(SharedString::from(id_str))
+            .w(trigger_size)
+            .h(trigger_size)
+            .rounded(trigger_radius)
+            .bg(current_color)
             .border_1()
             .border_color(border)
-            .flex()
-            .items_center()
-            .gap(inline_gap)
-            .text_sm()
-            .child(
-                div()
-                    .w(swatch_size)
-                    .h(swatch_size)
-                    .rounded(swatch_radius)
-                    .border_1()
-                    .border_color(border)
-                    .bg(current_color),
-            )
-            .child(
-                div()
-                    .text_color(text_primary)
-                    .child(current.clone()),
-            );
+            .cursor_pointer()
+            // Contract: focus ring on trigger
+            .focus(move |s| s.border_color(focus_ring));
 
         if spec.is_disabled {
-            trigger = trigger.opacity(disabled_opacity);
-        } else {
             trigger = trigger
-                .cursor_pointer()
-                .hover(move |s| s.bg(hover_bg));
+                .opacity(disabled_opacity)
+                .cursor(CursorStyle::OperationNotAllowed);
         }
 
-        let mut wrapper = div().flex().flex_col().gap(stack_gap).child(trigger);
+        let mut wrapper = div()
+            .relative()
+            .flex()
+            .flex_col()
+            .gap(stack_gap)
+            .child(trigger);
 
-        if spec.is_open {
-            // Swatch grid overlay
+        if spec.is_open && !spec.is_disabled {
+            // Contract: swatch size 1.25rem, border-radius 0.1875rem
+            let swatch_size = px(20.0); // 1.25rem
+            let swatch_radius = px(3.0); // 0.1875rem
+
             let mut grid = div()
                 .flex()
                 .flex_wrap()
@@ -145,20 +146,23 @@ impl IntoElement for ColorPicker {
                 );
             }
 
+            // Contract: surface width 24rem, padding 0.75rem
             let overlay = div()
-                .rounded(control_radius)
+                .w(px(384.0)) // 24rem
+                .rounded(surface_radius)
                 .bg(elevated_bg)
                 .border_1()
                 .border_color(border)
                 .shadow_md()
-                .p(control_padding_x)
+                .p(px(12.0)) // 0.75rem
                 .flex()
                 .flex_col()
-                .gap(inline_gap)
+                .gap(px(8.0))
                 .child(grid)
                 .child(
+                    // Hex display with code font, 0.75rem
                     div()
-                        .text_xs()
+                        .text_size(px(12.0))
                         .text_color(text_secondary)
                         .child(format!("Selected: {}", current)),
                 );

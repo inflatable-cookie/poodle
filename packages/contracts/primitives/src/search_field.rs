@@ -1,6 +1,7 @@
 use pug_tokens::semantic;
 
 use crate::text_input::TextInputSpec;
+use crate::types::ValidationState;
 
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct SearchFieldSpec {
@@ -12,6 +13,8 @@ pub struct SearchFieldSpec {
     pub is_read_only: bool,
     pub show_clear_button: bool,
     pub submit_enabled: bool,
+    pub validation_state: ValidationState,
+    pub described_by: Option<String>,
 }
 
 impl Default for SearchFieldSpec {
@@ -25,6 +28,8 @@ impl Default for SearchFieldSpec {
             is_read_only: false,
             show_clear_button: true,
             submit_enabled: true,
+            validation_state: ValidationState::None,
+            described_by: None,
         }
     }
 }
@@ -74,6 +79,16 @@ impl SearchFieldSpec {
         self
     }
 
+    pub fn with_validation_state(mut self, validation_state: ValidationState) -> Self {
+        self.validation_state = validation_state;
+        self
+    }
+
+    pub fn with_described_by(mut self, described_by: impl Into<String>) -> Self {
+        self.described_by = Some(described_by.into());
+        self
+    }
+
     pub fn current_value(&self) -> &str {
         self.value.as_deref().unwrap_or(self.default_value.as_str())
     }
@@ -98,12 +113,17 @@ impl SearchFieldSpec {
             .with_submit_enabled(self.submit_enabled)
             .with_read_only(self.is_read_only)
             .with_disabled(self.is_disabled)
+            .with_validation_state(self.validation_state)
             .with_leading_icon("search");
 
         if let Some(value) = &self.value {
             input = input.with_value(value.clone());
         } else if !self.default_value.is_empty() {
             input = input.with_default_value(self.default_value.clone());
+        }
+
+        if let Some(ref desc) = self.described_by {
+            input = input.with_description_id(desc.clone());
         }
 
         if self.shows_clear_action() {

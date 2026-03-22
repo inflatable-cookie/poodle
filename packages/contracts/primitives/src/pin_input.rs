@@ -12,7 +12,7 @@ pub struct PinInputSpec {
 impl Default for PinInputSpec {
     fn default() -> Self {
         Self {
-            length: 4,
+            length: 6,
             value: String::new(),
             is_masked: false,
             is_disabled: false,
@@ -63,5 +63,21 @@ impl PinInputSpec {
 
     pub fn focus_ring_color_token(&self) -> &'static str {
         semantic::COLOR_ACCENT_FOCUS_RING
+    }
+
+    pub fn fill_token(&self) -> &'static str {
+        semantic::COLOR_BACKGROUND_SURFACE
+    }
+
+    pub fn text_color_token(&self) -> &'static str {
+        semantic::COLOR_TEXT_PRIMARY
+    }
+
+    pub fn radius_token(&self) -> &'static str {
+        semantic::RADIUS_CONTROL
+    }
+
+    pub fn disabled_opacity_token(&self) -> &'static str {
+        semantic::STATE_OPACITY_DISABLED
     }
 }

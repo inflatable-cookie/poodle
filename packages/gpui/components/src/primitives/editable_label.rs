@@ -1,16 +1,21 @@
 //! EditableLabel — real GPUI component backed by EditableLabelSpec.
+//!
+//! Contract: inline-flex, padding 0.375rem 0.5rem,
+//! transparent border in display mode, accent border in editing mode.
+//! Hover hint in display mode. Focus ring via border.
 
 use gpui::prelude::FluentBuilder;
 use gpui::*;
 use pug_gpui::GpuiThemeProvider;
 use pug_primitives::EditableLabelSpec;
 
-use crate::theme_ext::{resolve_color, resolve_opacity};
+use crate::theme_ext::{color_mix, resolve_color, resolve_opacity, resolve_radius};
 
 /// A real GPUI editable label component backed by `EditableLabelSpec`.
 pub struct EditableLabel {
     spec: EditableLabelSpec,
     theme: GpuiThemeProvider,
+    id_suffix: Option<String>,
 }
 
 impl std::ops::Deref for EditableLabel {
@@ -20,13 +25,14 @@ impl std::ops::Deref for EditableLabel {
 
 impl EditableLabel {
     pub fn new(theme: &GpuiThemeProvider) -> Self {
-        Self { spec: EditableLabelSpec::new(), theme: theme.clone() }
+        Self { spec: EditableLabelSpec::new(), theme: theme.clone(), id_suffix: None }
     }
 
     pub fn from_spec(spec: EditableLabelSpec, theme: &GpuiThemeProvider) -> Self {
         Self {
             spec,
             theme: theme.clone(),
+            id_suffix: None,
         }
     }
 
@@ -36,6 +42,10 @@ impl EditableLabel {
     pub fn editing(mut self, v: bool) -> Self { self.spec.is_editing = v; self }
     pub fn disabled(mut self, v: bool) -> Self { self.spec.is_disabled = v; self }
 
+    pub fn with_id(mut self, suffix: impl Into<String>) -> Self {
+        self.id_suffix = Some(suffix.into());
+        self
+    }
 }
 
 impl IntoElement for EditableLabel {
@@ -46,41 +56,65 @@ impl IntoElement for EditableLabel {
         let spec = &self.spec;
 
         let text_color = resolve_color(theme, spec.text_color_token());
+        let placeholder_color = resolve_color(theme, spec.placeholder_color_token());
         let border_color = resolve_color(theme, spec.edit_border_token());
-        let disabled_opacity = resolve_opacity(theme, "semantic.state.opacity.disabled");
+        let focus_ring = resolve_color(theme, spec.focus_ring_color_token());
+        let control_radius = resolve_radius(theme, spec.radius_token());
+        let disabled_opacity = resolve_opacity(theme, spec.disabled_opacity_token());
 
-        let display_text = if spec.value.is_empty() {
+        // Contract: hover hint border in display mode
+        let surface_bg = resolve_color(theme, "semantic.color.background.surface");
+        let default_border = resolve_color(theme, "semantic.color.border.default");
+        let hover_border = color_mix(default_border, surface_bg, 0.72);
+        let hover_bg = color_mix(surface_bg, gpui::transparent_black(), 0.52);
+
+        let is_empty = spec.value.is_empty();
+        let display_text = if is_empty {
             spec.placeholder.clone().unwrap_or_default()
         } else {
             spec.value.clone()
         };
 
-        let text_opacity = if spec.value.is_empty() { 0.5 } else { 1.0 };
+        let text_col = if is_empty { placeholder_color } else { text_color };
 
+        let id_str = if let Some(ref suffix) = self.id_suffix {
+            format!("pug-editable-label-{}", suffix)
+        } else {
+            "pug-editable-label".to_string()
+        };
+
+        // Contract: padding 0.375rem 0.5rem
         let mut el = div()
-            .px(px(4.0))
-            .py(px(2.0))
+            .id(SharedString::from(id_str))
+            .px(px(8.0))  // 0.5rem
+            .py(px(6.0))  // 0.375rem
+            .rounded(control_radius)
             .text_sm()
-            .text_color(text_color)
-            .child(
-                div()
-                    .opacity(text_opacity as f32)
-                    .child(display_text),
-            );
+            .text_color(text_col)
+            .border_1()
+            .child(display_text);
 
         if spec.is_editing {
+            // Contract: editing mode — accent border + surface bg
             el = el
-                .border_1()
                 .border_color(border_color)
-                .rounded(px(4.0));
+                .bg(surface_bg)
+                .focus(move |s| s.border_color(focus_ring));
         } else {
+            // Contract: display mode — transparent border, hover hint
             el = el
-                .border_1()
-                .border_color(gpui::transparent_black());
+                .border_color(gpui::transparent_black())
+                .when(!spec.is_disabled, |el| {
+                    el.cursor_pointer()
+                        .hover(move |s| s.border_color(hover_border).bg(hover_bg))
+                })
+                .focus(move |s| s.border_color(focus_ring));
         }
 
         if spec.is_disabled {
-            el = el.opacity(disabled_opacity);
+            el = el
+                .opacity(disabled_opacity)
+                .cursor(CursorStyle::OperationNotAllowed);
         }
 
         el.into_any_element()

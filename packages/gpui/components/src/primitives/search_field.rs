@@ -4,7 +4,7 @@
 
 use gpui::*;
 use pug_gpui::GpuiThemeProvider;
-use pug_primitives::SearchFieldSpec;
+use pug_primitives::{SearchFieldSpec, ValidationState};
 
 use super::text_input::TextInput;
 
@@ -44,6 +44,8 @@ impl SearchField {
     pub fn read_only(mut self, v: bool) -> Self { self.spec.is_read_only = v; self }
     pub fn show_clear_button(mut self, v: bool) -> Self { self.spec.show_clear_button = v; self }
     pub fn submit_enabled(mut self, v: bool) -> Self { self.spec.submit_enabled = v; self }
+    pub fn validation_state(mut self, v: ValidationState) -> Self { self.spec.validation_state = v; self }
+    pub fn described_by(mut self, v: impl Into<String>) -> Self { self.spec.described_by = Some(v.into()); self }
 
 
     pub fn with_id(mut self, suffix: impl Into<String>) -> Self {

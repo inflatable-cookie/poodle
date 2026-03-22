@@ -70,4 +70,16 @@ impl FileUploadSpec {
     pub fn text_color_token(&self) -> &'static str {
         semantic::COLOR_TEXT_PRIMARY
     }
+
+    pub fn radius_token(&self) -> &'static str {
+        semantic::RADIUS_SURFACE
+    }
+
+    pub fn disabled_opacity_token(&self) -> &'static str {
+        semantic::STATE_OPACITY_DISABLED
+    }
+
+    pub fn focus_border_token(&self) -> &'static str {
+        semantic::COLOR_ACCENT_FOCUS_RING
+    }
 }

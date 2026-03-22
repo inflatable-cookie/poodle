@@ -1,3 +1,5 @@
+use pug_tokens::semantic;
+
 use crate::types::ValidationState;
 
 #[derive(Clone, Debug, Eq, PartialEq)]
@@ -51,5 +53,33 @@ impl TimeFieldSpec {
 
     pub fn current_value(&self) -> Option<&str> {
         self.value.as_deref().or(self.default_value.as_deref())
+    }
+
+    pub fn fill_token(&self) -> &'static str {
+        semantic::COLOR_BACKGROUND_SURFACE
+    }
+
+    pub fn border_token(&self) -> &'static str {
+        self.validation_state.border_token()
+    }
+
+    pub fn radius_token(&self) -> &'static str {
+        semantic::RADIUS_CONTROL
+    }
+
+    pub fn text_color_token(&self) -> &'static str {
+        semantic::COLOR_TEXT_PRIMARY
+    }
+
+    pub fn placeholder_color_token(&self) -> &'static str {
+        semantic::COLOR_TEXT_SECONDARY
+    }
+
+    pub fn focus_ring_color_token(&self) -> &'static str {
+        semantic::COLOR_ACCENT_FOCUS_RING
+    }
+
+    pub fn disabled_opacity_token(&self) -> &'static str {
+        semantic::STATE_OPACITY_DISABLED
     }
 }
