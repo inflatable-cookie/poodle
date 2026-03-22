@@ -1,6 +1,5 @@
 //! Calendar — real GPUI component backed by CalendarSpec.
 
-use gpui::prelude::FluentBuilder;
 use gpui::*;
 use pug_gpui::GpuiThemeProvider;
 use pug_primitives::{CalendarSpec, CalendarWeekStart};
@@ -162,14 +161,17 @@ impl IntoElement for Calendar {
             year
         );
 
+        let surface_radius = resolve_radius(theme, "semantic.radius.surface");
+
         // Build the calendar container
+        // Contract: padding 0.75rem (12px), radius-surface, gap 0.25rem (4px)
         let mut cal = div()
             .id(SharedString::from(id_str))
             .flex()
             .flex_col()
             .gap(px(4.0))
             .p(px(12.0))
-            .rounded(px(8.0))
+            .rounded(surface_radius)
             .bg(surface_bg)
             .border_1()
             .border_color(border);
@@ -201,7 +203,9 @@ impl IntoElement for Calendar {
                     .flex()
                     .items_center()
                     .justify_center()
-                    .text_xs()
+                    // Contract: weekday font 0.6875rem (11px), weight 600, uppercase
+                    .text_size(px(11.0))
+                    .font_weight(FontWeight::SEMIBOLD)
                     .text_color(text_secondary)
                     .child(WEEKDAYS_SUN[idx]),
             );
@@ -246,7 +250,9 @@ impl IntoElement for Calendar {
                             .hover(|s| s.bg(accent.opacity(0.08)));
                     }
 
-                    if !spec.is_disabled {
+                    if spec.is_disabled {
+                        cell = cell.cursor(CursorStyle::OperationNotAllowed);
+                    } else {
                         cell = cell.cursor_pointer();
                     }
 

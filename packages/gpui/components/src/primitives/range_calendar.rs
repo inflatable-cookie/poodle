@@ -1,6 +1,5 @@
 //! RangeCalendar — real GPUI component backed by RangeCalendarSpec.
 
-use gpui::prelude::FluentBuilder;
 use gpui::*;
 use pug_gpui::GpuiThemeProvider;
 use pug_primitives::{CalendarWeekStart, DateRangeValue, RangeCalendarSpec};
@@ -166,13 +165,15 @@ impl IntoElement for RangeCalendar {
             year
         );
 
+        let surface_radius = resolve_radius(theme, "semantic.radius.surface");
+
         let mut cal = div()
             .id(SharedString::from(id_str))
             .flex()
             .flex_col()
             .gap(px(4.0))
             .p(px(12.0))
-            .rounded(px(8.0))
+            .rounded(surface_radius)
             .bg(surface_bg)
             .border_1()
             .border_color(border);

@@ -1,6 +1,5 @@
 //! DateRangePicker — real GPUI component backed by DateRangePickerSpec.
 
-use gpui::prelude::FluentBuilder;
 use gpui::*;
 use pug_gpui::GpuiThemeProvider;
 use pug_primitives::{CalendarWeekStart, DateRangePickerSpec, DateRangeValue};
