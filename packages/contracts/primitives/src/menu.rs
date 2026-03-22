@@ -73,4 +73,28 @@ impl MenuSpec {
     pub fn shadow_token(&self) -> &'static str {
         semantic::ELEVATION_OVERLAY
     }
+
+    pub fn overlay_border_token(&self) -> &'static str {
+        semantic::COLOR_BORDER_DEFAULT
+    }
+
+    pub fn overlay_radius_token(&self) -> &'static str {
+        semantic::RADIUS_SURFACE
+    }
+
+    pub fn item_text_token(&self) -> &'static str {
+        semantic::COLOR_TEXT_PRIMARY
+    }
+
+    pub fn item_highlight_token(&self) -> &'static str {
+        semantic::COLOR_ACCENT_BASE
+    }
+
+    pub fn separator_color_token(&self) -> &'static str {
+        semantic::COLOR_BORDER_SUBTLE
+    }
+
+    pub fn disabled_opacity_token(&self) -> &'static str {
+        semantic::STATE_OPACITY_DISABLED
+    }
 }

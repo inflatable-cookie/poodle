@@ -1,4 +1,8 @@
 //! NavigationMenu — real GPUI component backed by NavigationMenuSpec.
+//!
+//! Contract: pill-style bordered triggers (not underline tabs),
+//! trigger font 0.75rem/600, min-height control-height - 0.125rem,
+//! viewport with border/radius/bg/shadow.
 
 use gpui::prelude::FluentBuilder;
 use gpui::*;
@@ -6,12 +10,9 @@ use pug_adapter::ThemeProvider;
 use pug_gpui::GpuiThemeProvider;
 use pug_primitives::{NavigationMenuEntry, NavigationMenuSpec};
 
-use crate::theme_ext::{resolve_color, resolve_opacity, resolve_px};
+use crate::theme_ext::{color_mix, resolve_color, resolve_opacity, resolve_px, resolve_radius};
 
 /// A real GPUI navigation menu component backed by `NavigationMenuSpec`.
-///
-/// Renders a horizontal nav bar with items, showing active state
-/// and optional descriptions for the selected item.
 pub struct NavigationMenu {
     spec: NavigationMenuSpec,
     theme: GpuiThemeProvider,
@@ -44,7 +45,6 @@ impl NavigationMenu {
     pub fn default_value(mut self, v: impl Into<String>) -> Self { self.spec.default_value = Some(v.into()); self }
     pub fn aria_label(mut self, v: impl Into<String>) -> Self { self.spec.aria_label = Some(v.into()); self }
 
-
     pub fn with_id(mut self, prefix: impl Into<String>) -> Self {
         self.id_prefix = prefix.into();
         self
@@ -65,66 +65,111 @@ impl IntoElement for NavigationMenu {
     fn into_element(self) -> Self::Element {
         let theme = &self.theme;
 
-        let inline_padding = resolve_px(theme, "semantic.space.inline.md");
+        let control_height = resolve_px(theme, "semantic.size.control.height");
+        let trigger_radius = resolve_radius(theme, self.spec.trigger_radius_token());
+        let viewport_radius = resolve_radius(theme, self.spec.viewport_radius_token());
+        let viewport_gap = theme.resolve_space(self.spec.viewport_gap_token());
+        let panel_x = resolve_px(theme, "semantic.space.panel.x");
+        let panel_y = resolve_px(theme, "semantic.space.panel.y");
 
         let accent = resolve_color(theme, "semantic.color.accent.base");
-        let border = resolve_color(theme, "semantic.color.border.default");
+        let text_primary = resolve_color(theme, "semantic.color.text.primary");
         let text_secondary = resolve_color(theme, "semantic.color.text.secondary");
-        let disabled_opacity = resolve_opacity(theme, "semantic.state.opacity.disabled");
-        let gap = theme.resolve_space(self.spec.viewport_gap_token());
+        let surface = resolve_color(theme, "semantic.color.background.surface");
+        let panel = resolve_color(theme, "semantic.color.background.panel");
+        let border_subtle = resolve_color(theme, "semantic.color.border.subtle");
+        let border_default = resolve_color(theme, "semantic.color.border.default");
+        let disabled_opacity = resolve_opacity(theme, self.spec.disabled_opacity_token());
+
+        // Contract: trigger bg 88% surface, border 72% border-subtle
+        let trigger_bg = color_mix(surface, gpui::transparent_black(), 0.88);
+        let trigger_border = color_mix(border_subtle, panel, 0.72);
+        // Contract: active 16% accent, active border 42% accent/border-default
+        let active_bg = color_mix(accent, panel, 0.16);
+        let active_border = color_mix(accent, border_default, 0.58);
+        // Contract: hover 12% accent
+        let hover_bg = color_mix(accent, panel, 0.12);
+        // Contract: viewport border 74% border-subtle, bg 96% panel
+        let viewport_border = color_mix(border_subtle, panel, 0.74);
+        let viewport_bg = color_mix(panel, gpui::transparent_black(), 0.96);
+
+        // Contract: trigger min-height = control-height - 0.125rem
+        let trigger_height = control_height - px(2.0);
 
         let current_value = self.spec.current_value().map(|s| s.to_string());
 
+        // Contract: list = inline-flex, flex-wrap, gap 0.25rem
         let mut nav_row = div()
             .flex()
+            .flex_wrap()
             .items_center()
-            .gap(px(gap))
-            .border_b_1()
-            .border_color(border);
+            .gap(px(4.0)); // 0.25rem
 
         for item in &self.spec.items {
             let is_active = current_value.as_deref() == Some(item.value.as_str());
             let is_disabled = item.is_disabled;
             let item_id = SharedString::from(format!("{}-{}", self.id_prefix, item.value));
 
-            let mut tab = div()
+            // Contract: pill-style trigger with border, padding 0 0.875rem
+            let mut trigger = div()
                 .id(item_id)
-                .px(inline_padding)
-                .py(px(8.0))
-                .text_sm();
+                .flex()
+                .items_center()
+                .min_h(trigger_height)
+                .px(px(14.0)) // 0.875rem
+                .border_1()
+                .rounded(trigger_radius)
+                // Contract: font 0.75rem / 600
+                .text_size(px(12.0))
+                .font_weight(FontWeight::SEMIBOLD);
 
             if is_active {
-                tab = tab
-                    .text_color(accent)
-                    .border_b_2()
-                    .border_color(accent);
+                trigger = trigger
+                    .bg(active_bg)
+                    .border_color(active_border)
+                    .text_color(text_primary);
             } else {
-                tab = tab.text_color(text_secondary);
+                trigger = trigger
+                    .bg(trigger_bg)
+                    .border_color(trigger_border)
+                    .text_color(text_primary);
             }
 
             if is_disabled {
-                tab = tab.opacity(disabled_opacity);
+                trigger = trigger
+                    .opacity(disabled_opacity)
+                    .cursor(CursorStyle::OperationNotAllowed);
             } else {
-                tab = tab
+                trigger = trigger
                     .cursor_pointer()
-                    .hover(|s| s.bg(accent.opacity(0.06)));
+                    .hover(|s| s.bg(hover_bg));
             }
 
-            tab = tab.child(item.label.clone());
-            nav_row = nav_row.child(tab);
+            trigger = trigger.child(item.label.clone());
+            nav_row = nav_row.child(trigger);
         }
 
-        // Show description for active item in a viewport area below
-        let mut wrapper = div().flex().flex_col();
+        // Contract: root is grid with gap 0.5rem
+        let mut wrapper = div()
+            .flex()
+            .flex_col()
+            .gap(px(viewport_gap));
         wrapper = wrapper.child(nav_row);
 
+        // Viewport: show description for active item with border/radius/bg/shadow
         if let Some(ref current) = current_value {
             if let Some(item) = self.spec.items.iter().find(|i| &i.value == current) {
                 if let Some(ref desc) = item.description {
                     wrapper = wrapper.child(
                         div()
-                            .p(px(12.0))
-                            .text_xs()
+                            .px(panel_x)
+                            .py(panel_y)
+                            .border_1()
+                            .border_color(viewport_border)
+                            .rounded(viewport_radius)
+                            .bg(viewport_bg)
+                            .shadow_md()
+                            .text_sm()
                             .text_color(text_secondary)
                             .child(desc.clone()),
                     );

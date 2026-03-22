@@ -1,4 +1,7 @@
 //! Menubar — real GPUI component backed by MenubarSpec.
+//!
+//! Contract: list chrome (border/radius/bg/padding), trigger font 0.75rem/600,
+//! trigger padding 0 0.75rem, min-height 2rem, hover accent 14%.
 
 use gpui::prelude::FluentBuilder;
 use gpui::*;
@@ -7,12 +10,9 @@ use pug_gpui::GpuiThemeProvider;
 use pug_primitives::{MenuSpec, MenubarEntry, MenubarSpec};
 
 use super::menu::Menu;
-use crate::theme_ext::{resolve_color, resolve_opacity};
+use crate::theme_ext::{color_mix, resolve_color, resolve_opacity, resolve_radius};
 
 /// A real GPUI menubar component backed by `MenubarSpec`.
-///
-/// Renders a horizontal bar of menu triggers. When a trigger is active,
-/// shows the associated dropdown menu below it.
 pub struct Menubar {
     spec: MenubarSpec,
     theme: GpuiThemeProvider,
@@ -45,7 +45,6 @@ impl Menubar {
     pub fn default_value(mut self, v: impl Into<String>) -> Self { self.spec.default_value = Some(v.into()); self }
     pub fn aria_label(mut self, v: impl Into<String>) -> Self { self.spec.aria_label = Some(v.into()); self }
 
-
     pub fn with_id(mut self, prefix: impl Into<String>) -> Self {
         self.id_prefix = prefix.into();
         self
@@ -67,44 +66,62 @@ impl IntoElement for Menubar {
         let theme = &self.theme;
 
         let accent = resolve_color(theme, "semantic.color.accent.base");
-        let text_secondary = resolve_color(theme, "semantic.color.text.secondary");
-        let disabled_opacity = resolve_opacity(theme, "semantic.state.opacity.disabled");
-        let hover_bg = resolve_color(theme, "semantic.color.background.elevated");
+        let panel = resolve_color(theme, "semantic.color.background.panel");
+        let text_primary = resolve_color(theme, "semantic.color.text.primary");
+        let border_subtle = resolve_color(theme, self.spec.list_border_token());
+        let list_radius = resolve_radius(theme, self.spec.list_radius_token());
+        let control_radius = resolve_radius(theme, "semantic.radius.control");
+        let disabled_opacity = resolve_opacity(theme, self.spec.disabled_opacity_token());
         let gap = theme.resolve_space(self.spec.trigger_gap_token());
+
+        // Contract: list border 72% border-subtle, bg 96% panel
+        let list_border = color_mix(border_subtle, panel, 0.72);
+        let list_bg = color_mix(panel, gpui::transparent_black(), 0.96);
+        // Contract: trigger hover 14% accent
+        let trigger_hover = color_mix(accent, panel, 0.14);
 
         let current_value = self.spec.current_value().map(|s| s.to_string());
 
+        // Contract: list has border/radius/bg/padding
         let mut trigger_row = div()
             .flex()
             .items_center()
-            .gap(px(gap));
+            .gap(px(2.0)) // Contract: gap 0.125rem
+            .p(px(3.0)) // Contract: padding 0.1875rem
+            .border_1()
+            .border_color(list_border)
+            .rounded(list_radius)
+            .bg(list_bg);
 
         for entry in &self.spec.items {
             let is_active = current_value.as_deref() == Some(entry.value.as_str());
             let is_disabled = entry.is_disabled;
             let item_id = SharedString::from(format!("{}-{}", self.id_prefix, entry.value));
 
+            // Contract: trigger min-height 2rem, padding 0 0.75rem, font 0.75rem/600
             let mut trigger = div()
                 .id(item_id)
-                .px(px(8.0))
-                .py(px(4.0))
-                .rounded(px(4.0))
-                .text_sm();
+                .flex()
+                .items_center()
+                .min_h(px(32.0)) // 2rem
+                .px(px(12.0)) // 0.75rem
+                .rounded(control_radius)
+                .text_size(px(12.0)) // 0.75rem
+                .font_weight(FontWeight::SEMIBOLD)
+                .text_color(text_primary);
 
             if is_active {
-                trigger = trigger
-                    .text_color(accent)
-                    .bg(accent.opacity(0.08));
-            } else {
-                trigger = trigger.text_color(text_secondary);
+                trigger = trigger.bg(trigger_hover);
             }
 
             if is_disabled {
-                trigger = trigger.opacity(disabled_opacity);
+                trigger = trigger
+                    .opacity(disabled_opacity)
+                    .cursor(CursorStyle::OperationNotAllowed);
             } else {
                 trigger = trigger
                     .cursor_pointer()
-                    .hover(|s| s.bg(hover_bg));
+                    .hover(|s| s.bg(trigger_hover));
             }
 
             trigger = trigger.child(entry.label.clone());

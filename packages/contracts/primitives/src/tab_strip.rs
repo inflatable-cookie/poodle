@@ -82,4 +82,12 @@ impl TabStripSpec {
     pub fn item_gap_token(&self) -> &'static str {
         semantic::SPACE_INLINE_SM
     }
+
+    pub fn focus_ring_color_token(&self) -> &'static str {
+        semantic::COLOR_ACCENT_FOCUS_RING
+    }
+
+    pub fn disabled_opacity_token(&self) -> &'static str {
+        semantic::STATE_OPACITY_DISABLED
+    }
 }

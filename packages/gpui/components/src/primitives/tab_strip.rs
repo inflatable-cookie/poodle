@@ -1,4 +1,7 @@
 //! TabStrip — real GPUI component backed by TabStripSpec.
+//!
+//! Closable file/document tabs distinct from content-switching Tabs.
+//! Contract: focus ring, disabled cursor, spec token usage.
 
 use gpui::prelude::FluentBuilder;
 use gpui::*;
@@ -9,9 +12,6 @@ use pug_primitives::{Orientation, TabStripItem, TabStripSpec};
 use crate::theme_ext::{resolve_color, resolve_opacity};
 
 /// A real GPUI tab strip component backed by `TabStripSpec`.
-///
-/// Renders closable file/document tabs (like editor tabs),
-/// distinct from content-switching `Tabs`.
 pub struct TabStrip {
     spec: TabStripSpec,
     theme: GpuiThemeProvider,
@@ -48,7 +48,6 @@ impl TabStrip {
     pub fn reorderable(mut self, v: bool) -> Self { self.spec.is_reorderable = v; self }
     pub fn aria_label(mut self, v: impl Into<String>) -> Self { self.spec.aria_label = Some(v.into()); self }
 
-
     pub fn with_id(mut self, prefix: impl Into<String>) -> Self {
         self.id_prefix = prefix.into();
         self
@@ -79,8 +78,10 @@ impl IntoElement for TabStrip {
 
         let accent = resolve_color(theme, "semantic.color.accent.base");
         let border = resolve_color(theme, "semantic.color.border.default");
+        let text_primary = resolve_color(theme, "semantic.color.text.primary");
         let text_secondary = resolve_color(theme, "semantic.color.text.secondary");
-        let disabled_opacity = resolve_opacity(theme, "semantic.state.opacity.disabled");
+        let focus_ring = resolve_color(theme, self.spec.focus_ring_color_token());
+        let disabled_opacity = resolve_opacity(theme, self.spec.disabled_opacity_token());
         let hover_bg = resolve_color(theme, "semantic.color.background.elevated");
         let gap = theme.resolve_space(self.spec.item_gap_token());
 
@@ -111,7 +112,12 @@ impl IntoElement for TabStrip {
                 .gap(px(6.0))
                 .px(px(10.0))
                 .py(px(6.0))
-                .text_xs();
+                // Contract: label font
+                .text_size(px(12.0))
+                .font_weight(FontWeight::SEMIBOLD)
+                .text_color(text_primary)
+                // Focus ring
+                .focus(move |s| s.border_color(focus_ring));
 
             if is_active {
                 if is_vertical {
@@ -120,6 +126,7 @@ impl IntoElement for TabStrip {
                         .bg(accent.opacity(0.08));
                 } else {
                     tab = tab
+                        .text_color(accent)
                         .border_b_1()
                         .border_color(accent);
                 }
@@ -128,7 +135,9 @@ impl IntoElement for TabStrip {
             }
 
             if is_disabled {
-                tab = tab.opacity(disabled_opacity);
+                tab = tab
+                    .opacity(disabled_opacity)
+                    .cursor(CursorStyle::OperationNotAllowed);
             } else {
                 tab = tab
                     .cursor_pointer()
@@ -144,6 +153,7 @@ impl IntoElement for TabStrip {
                         .text_xs()
                         .text_color(text_secondary)
                         .ml(px(4.0))
+                        .cursor_pointer()
                         .child("×"),
                 );
             }

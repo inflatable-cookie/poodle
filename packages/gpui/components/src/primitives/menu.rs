@@ -1,11 +1,15 @@
 //! Menu — real GPUI component backed by MenuSpec.
+//!
+//! Contract: overlay min-width 14rem, radius-surface, 98% elevated/panel bg,
+//! item padding 0.375rem 0.5rem, min-height 2rem, radius control-0.125rem,
+//! hover accent 16%, disabled cursor not-allowed.
 
 use gpui::prelude::FluentBuilder;
 use gpui::*;
 use pug_gpui::GpuiThemeProvider;
 use pug_primitives::{MenuEntry, MenuItemKind, MenuSpec, OverlayPlacement};
 
-use crate::theme_ext::{resolve_color, resolve_opacity, resolve_radius};
+use crate::theme_ext::{color_mix, resolve_color, resolve_opacity, resolve_radius};
 
 /// A real GPUI menu component backed by `MenuSpec`.
 pub struct Menu {
@@ -41,7 +45,6 @@ impl Menu {
     pub fn placement(mut self, v: OverlayPlacement) -> Self { self.spec.placement = v; self }
     pub fn aria_label(mut self, v: impl Into<String>) -> Self { self.spec.aria_label = Some(v.into()); self }
 
-
     pub fn with_id(mut self, prefix: impl Into<String>) -> Self {
         self.id_prefix = prefix.into();
         self
@@ -60,32 +63,48 @@ impl IntoElement for Menu {
     fn into_element(self) -> Self::Element {
         let theme = &self.theme;
 
+        let overlay_radius = resolve_radius(theme, self.spec.overlay_radius_token());
         let control_radius = resolve_radius(theme, "semantic.radius.control");
+        // Contract: item radius = control - 0.125rem
+        let item_radius = control_radius - px(2.0);
 
-        let surface_bg = resolve_color(theme, self.spec.surface_fill_token());
-        let border = resolve_color(theme, "semantic.color.border.default");
+        let elevated = resolve_color(theme, self.spec.surface_fill_token());
+        let panel = resolve_color(theme, "semantic.color.background.panel");
+        // Contract: 98% elevated, 2% panel
+        let surface_bg = color_mix(elevated, panel, 0.98);
+        let border_raw = resolve_color(theme, self.spec.overlay_border_token());
+        // Contract: 72% border-default
+        let border = color_mix(border_raw, panel, 0.72);
+        let text_primary = resolve_color(theme, self.spec.item_text_token());
         let text_secondary = resolve_color(theme, "semantic.color.text.secondary");
-        let accent = resolve_color(theme, "semantic.color.accent.base");
-        let disabled_opacity = resolve_opacity(theme, "semantic.state.opacity.disabled");
+        let accent = resolve_color(theme, self.spec.item_highlight_token());
+        // Contract: 16% accent for hover
+        let item_hover = color_mix(accent, panel, 0.16);
+        let separator_raw = resolve_color(theme, self.spec.separator_color_token());
+        // Contract: 72% border-subtle
+        let separator_color = color_mix(separator_raw, panel, 0.72);
+        let disabled_opacity = resolve_opacity(theme, self.spec.disabled_opacity_token());
 
+        // Contract: min-width 14rem, padding 0.25rem
         let mut menu = div()
-            .w(px(180.0))
-            .rounded(control_radius)
+            .min_w(px(224.0)) // 14rem
+            .rounded(overlay_radius)
             .bg(surface_bg)
             .border_1()
             .border_color(border)
             .shadow_md()
-            .py(px(4.0));
+            .p(px(4.0)); // 0.25rem
 
         for item in &self.spec.items {
             // Separator
             if item.kind == MenuItemKind::Separator {
+                // Contract: height 0.0625rem, margin 0.25rem 0
                 menu = menu.child(
                     div()
+                        .w_full()
                         .h(px(1.0))
-                        .mx(px(4.0))
-                        .my(px(2.0))
-                        .bg(border),
+                        .my(px(4.0)) // 0.25rem
+                        .bg(separator_color),
                 );
                 continue;
             }
@@ -99,25 +118,34 @@ impl IntoElement for Menu {
             let is_checked = item.is_checked;
             let item_id = SharedString::from(format!("{}-{}", self.id_prefix, item.value));
 
+            // Contract: item min-height 2rem, padding 0.375rem 0.5rem
             let mut row = div()
                 .id(item_id)
-                .px(px(10.0))
-                .py(px(6.0))
-                .text_sm()
+                .w_full()
+                .min_h(px(32.0)) // 2rem
+                .px(px(8.0))  // 0.5rem
+                .py(px(6.0)) // 0.375rem
+                .rounded(item_radius)
+                // Contract: font 0.875rem
+                .text_size(px(14.0))
                 .flex()
                 .items_center()
                 .justify_between();
 
             if is_active {
                 row = row
-                    .bg(accent.opacity(0.1))
+                    .bg(item_hover)
                     .text_color(accent);
             } else if is_disabled {
-                row = row.text_color(text_secondary).opacity(disabled_opacity);
+                row = row
+                    .text_color(text_secondary)
+                    .opacity(disabled_opacity)
+                    .cursor(CursorStyle::OperationNotAllowed);
             } else {
                 row = row
+                    .text_color(text_primary)
                     .cursor_pointer()
-                    .hover(|s| s.bg(accent.opacity(0.08)));
+                    .hover(|s| s.bg(item_hover));
             }
 
             // Label + checkbox indicator
@@ -130,11 +158,11 @@ impl IntoElement for Menu {
             label_row = label_row.child(item.label.clone());
             row = row.child(label_row);
 
-            // Shortcut hint
+            // Shortcut hint — Contract: code font 0.6875rem
             if let Some(ref shortcut) = item.shortcut_label {
                 row = row.child(
                     div()
-                        .text_xs()
+                        .text_size(px(11.0)) // 0.6875rem
                         .text_color(text_secondary)
                         .child(shortcut.clone()),
                 );

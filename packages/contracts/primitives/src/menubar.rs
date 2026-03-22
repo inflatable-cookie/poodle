@@ -64,4 +64,20 @@ impl MenubarSpec {
     pub fn trigger_gap_token(&self) -> &'static str {
         semantic::SPACE_INLINE_SM
     }
+
+    pub fn list_border_token(&self) -> &'static str {
+        semantic::COLOR_BORDER_SUBTLE
+    }
+
+    pub fn list_radius_token(&self) -> &'static str {
+        semantic::RADIUS_SURFACE
+    }
+
+    pub fn list_bg_token(&self) -> &'static str {
+        semantic::COLOR_BACKGROUND_PANEL
+    }
+
+    pub fn disabled_opacity_token(&self) -> &'static str {
+        semantic::STATE_OPACITY_DISABLED
+    }
 }

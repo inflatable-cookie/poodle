@@ -1,3 +1,8 @@
+//! Breadcrumbs — real GPUI component backed by BreadcrumbsSpec.
+//!
+//! Contract: flex-wrap, separator opacity 0.4, body font size,
+//! current item in primary color, links in secondary.
+
 use gpui::prelude::FluentBuilder;
 use gpui::*;
 use pug_gpui::GpuiThemeProvider;
@@ -46,7 +51,6 @@ impl Breadcrumbs {
     // ── Forwarded spec builders ───────────────────────────────
     pub fn items(mut self, v: Vec<BreadcrumbItem>) -> Self { self.spec.items = v; self }
 
-
     pub fn on_navigate(
         mut self,
         handler: impl Fn(&str, &mut Window, &mut App) + 'static,
@@ -83,19 +87,24 @@ impl IntoElement for Breadcrumbs {
         let current_text_color = self.current_text_color;
         let gap = self.gap;
 
+        // Contract: flex-wrap, body font size
         let mut container = div()
             .flex()
             .flex_row()
+            .flex_wrap()
             .items_center()
-            .gap(gap);
+            .gap(gap)
+            .text_sm(); // body size
 
         let on_navigate = self.on_navigate;
 
         for (i, item) in visible_items.iter().enumerate() {
             if i > 0 {
+                // Contract: separator opacity 0.4
                 container = container.child(
                     div()
                         .text_color(separator_color)
+                        .opacity(0.4)
                         .child("/"),
                 );
             }
@@ -117,19 +126,13 @@ impl IntoElement for Breadcrumbs {
                     .hover(|style| style.text_color(hover_color));
 
                 let item_el = if on_navigate.is_some() {
-                    // We can't move the callback into multiple closures,
-                    // so we use a shared reference approach via the parent.
-                    // For GPUI, each clickable item needs its own handler.
-                    // Since we can't clone Box<dyn Fn>, we skip attaching
-                    // click handlers here and rely on the parent to handle
-                    // navigation via the on_navigate callback pattern.
                     item_el.child(item.label.clone())
                 } else {
                     item_el.child(item.label.clone())
                 };
 
                 container = container.child(item_el);
-                let _ = value; // suppress unused warning
+                let _ = value;
             }
         }
 

@@ -64,4 +64,16 @@ impl NavigationMenuSpec {
     pub fn viewport_gap_token(&self) -> &'static str {
         semantic::SPACE_STACK_MD
     }
+
+    pub fn trigger_radius_token(&self) -> &'static str {
+        semantic::RADIUS_CONTROL
+    }
+
+    pub fn viewport_radius_token(&self) -> &'static str {
+        semantic::RADIUS_SURFACE
+    }
+
+    pub fn disabled_opacity_token(&self) -> &'static str {
+        semantic::STATE_OPACITY_DISABLED
+    }
 }
