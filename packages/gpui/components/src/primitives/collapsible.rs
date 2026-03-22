@@ -7,7 +7,7 @@ use pug_gpui::GpuiThemeProvider;
 use pug_primitives::{CollapsibleSpec, IconSize, IconSpec};
 
 use super::icon::Icon;
-use crate::theme_ext::{resolve_color, resolve_opacity, resolve_radius};
+use crate::theme_ext::{color_mix, resolve_color, resolve_opacity, resolve_px, resolve_radius};
 
 pub struct Collapsible {
     spec: CollapsibleSpec,
@@ -65,20 +65,16 @@ impl IntoElement for Collapsible {
 
         let text_primary = resolve_color(theme, "semantic.color.text.primary");
         let text_secondary = resolve_color(theme, "semantic.color.text.secondary");
-        let border_subtle = resolve_color(theme, "semantic.color.border.subtle");
-        let surface_bg = resolve_color(theme, "semantic.color.background.surface");
+        let border_color = resolve_color(theme, "semantic.color.border.subtle");
+        let panel_bg = resolve_color(theme, "semantic.color.background.panel");
         let radius = resolve_radius(theme, "semantic.radius.surface");
         let focus_ring = resolve_color(theme, "semantic.color.accent.focusRing");
+        let panel_pad = resolve_px(theme, "semantic.space.panel.x");
 
-        // Contract: border = color-mix(border-subtle 42%, transparent)
-        let root_border = Hsla { a: border_subtle.a * 0.42, ..border_subtle };
-        // Contract: bg = color-mix(surface 88%, text-primary)
-        let root_bg = Hsla {
-            h: surface_bg.h * 0.88 + text_primary.h * 0.12,
-            s: surface_bg.s * 0.88 + text_primary.s * 0.12,
-            l: surface_bg.l * 0.88 + text_primary.l * 0.12,
-            a: surface_bg.a,
-        };
+        // Contract: border = color-mix(border-color, panel-bg, 0.72) for subtle border
+        let root_border = color_mix(border_color, panel_bg, 0.72);
+        // Contract: bg = color-mix(panel-bg, transparent-black, 0.96)
+        let root_bg = color_mix(panel_bg, gpui::transparent_black(), 0.96);
 
         let id_str = if let Some(ref suffix) = self.id_suffix {
             format!("pug-collapsible-{}", suffix)
@@ -92,8 +88,8 @@ impl IntoElement for Collapsible {
             .flex().flex_col()
             .gap(gap)
             .min_w(px(0.0))
-            // Contract: padding 0.875rem 1rem
-            .px(px(16.0)).py(px(14.0))
+            // Contract: padding from panel spacing token
+            .p(panel_pad)
             .border_1().border_color(root_border)
             .rounded(radius)
             .bg(root_bg);
@@ -113,7 +109,7 @@ impl IntoElement for Collapsible {
             title_block = title_block.child(
                 div()
                     .text_color(text_primary)
-                    .text_size(px(16.0)) // contract: heading 1rem = 16px
+                    .text_size(px(14.0)) // contract: heading 0.875rem = 14px
                     .font_weight(FontWeight::BOLD)
                     .line_height(relative(1.2))
                     .child(title_text.clone())

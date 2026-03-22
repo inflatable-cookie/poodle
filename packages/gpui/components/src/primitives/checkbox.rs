@@ -2,9 +2,8 @@
 
 use gpui::*;
 use pug_gpui::GpuiThemeProvider;
-use pug_primitives::{CheckState, CheckboxSpec, IconSize, IconSpec};
+use pug_primitives::{CheckState, CheckboxSpec};
 
-use super::icon::Icon;
 use crate::theme_ext::{resolve_color, resolve_opacity, resolve_px};
 
 /// A real GPUI checkbox component backed by `CheckboxSpec`.
@@ -74,7 +73,7 @@ impl IntoElement for Checkbox {
         let text_primary = resolve_color(theme, "semantic.color.text.primary");
         let text_inverse = resolve_color(theme, "semantic.color.text.inverse");
         let surface_bg = resolve_color(theme, "semantic.color.background.surface");
-        let elevated = resolve_color(theme, "semantic.color.background.elevated");
+        let _elevated = resolve_color(theme, "semantic.color.background.elevated");
 
         let state = spec.current_state();
         let is_checked = matches!(state, CheckState::Checked | CheckState::Mixed);
@@ -100,25 +99,28 @@ impl IntoElement for Checkbox {
                 .justify_center()
                 .flex_shrink_0();
 
+            // Contract: check mark inside indicator = 0.875rem = 14px
+            let mark_size = px(14.0);
+
             if is_checked {
                 ind = ind.bg(accent).border_1().border_color(accent);
                 match state {
                     CheckState::Checked => {
                         ind = ind.child(
-                            Icon::from_spec(
-                                IconSpec::new("check").with_size(IconSize::Sm),
-                                theme,
-                            )
-                            .with_color(text_inverse),
+                            svg()
+                                .path(SharedString::from("assets/icons/check.svg"))
+                                .size(mark_size)
+                                .flex_shrink_0()
+                                .text_color(text_inverse),
                         );
                     }
                     CheckState::Mixed => {
                         ind = ind.child(
-                            Icon::from_spec(
-                                IconSpec::new("minus").with_size(IconSize::Sm),
-                                theme,
-                            )
-                            .with_color(text_inverse),
+                            svg()
+                                .path(SharedString::from("assets/icons/minus.svg"))
+                                .size(mark_size)
+                                .flex_shrink_0()
+                                .text_color(text_inverse),
                         );
                     }
                     _ => {}

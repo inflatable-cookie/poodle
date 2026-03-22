@@ -104,7 +104,9 @@ impl IntoElement for Combobox {
         let empty_text = resolve_color(theme, spec.empty_text_token());
 
         // Contract: option radius = control - 0.125rem
-        let option_radius = input_radius - px(2.0);
+        let option_radius = resolve_radius(theme, "semantic.radius.control") - px(2.0);
+        let option_padding_x = resolve_px(theme, "semantic.space.control.x");
+        let option_padding_y = resolve_px(theme, "semantic.space.stack.sm");
 
         let is_disabled = spec.is_disabled;
         let is_open = spec.is_open;
@@ -201,7 +203,7 @@ impl IntoElement for Combobox {
                 list = list.child(
                     div()
                         .p(px(8.0)) // Contract: padding 0.5rem
-                        .text_size(px(11.0)) // Contract: 0.6875rem
+                        .text_size(px(14.0)) // Contract: body text size
                         .text_color(empty_text)
                         .child("No results"),
                 );
@@ -213,11 +215,11 @@ impl IntoElement for Combobox {
                         .unwrap_or(false);
                     let is_option_disabled = option.is_disabled;
 
-                    // Contract: option padding 0.375rem 0.5rem
+                    // Contract: option padding uses resolved tokens
                     let mut option_el = div()
                         .w_full()
-                        .px(px(8.0))  // 0.5rem
-                        .py(px(6.0)) // 0.375rem
+                        .px(option_padding_x)
+                        .py(option_padding_y)
                         .flex()
                         .flex_col()
                         .gap(px(2.0))
@@ -261,7 +263,7 @@ impl IntoElement for Combobox {
         // Contract: min-width 14rem
         let mut root = div()
             .w_full()
-            .min_w(px(224.0)) // 14rem
+            .min_w(px(192.0)) // 12rem
             .relative()
             .flex()
             .flex_col()

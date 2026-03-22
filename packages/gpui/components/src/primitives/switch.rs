@@ -102,7 +102,7 @@ impl IntoElement for Switch {
         let track_bg = if is_checked {
             color_mix(accent, surface_bg, 0.24)
         } else {
-            color_mix(border, surface_bg, 0.86)
+            color_mix(surface_bg, gpui::transparent_black(), 0.86)
         };
 
         // Contract: checked track border = accent-base 58% + border-default

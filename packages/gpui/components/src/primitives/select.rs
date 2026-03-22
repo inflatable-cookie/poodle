@@ -180,7 +180,7 @@ impl IntoElement for Select {
             }
         }
 
-        let mut wrapper = div().flex().flex_col().gap(stack_gap).child(trigger);
+        let mut wrapper = div().flex().flex_col().gap(stack_gap).min_w(px(128.0)).child(trigger);
 
         // Dropdown list (when open)
         if is_open {

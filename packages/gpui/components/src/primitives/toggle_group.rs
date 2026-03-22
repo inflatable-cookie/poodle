@@ -89,7 +89,7 @@ impl IntoElement for ToggleGroup {
                 .bg(fill)
                 .border_1().border_color(border_color)
                 .text_color(text_color)
-                .text_size(px(12.0))
+                .text_size(px(13.0))
                 .font_weight(FontWeight::SEMIBOLD)
                 .flex().items_center().justify_center()
                 .focus(move |s| s.border_color(focus_ring));

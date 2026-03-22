@@ -50,12 +50,13 @@ impl IntoElement for Toolbar {
         let theme = &self.theme;
         let spec = &self.spec;
 
-        let border_raw = resolve_color(theme, spec.border_token());
-        let panel = resolve_color(theme, spec.bg_token());
+        let bg = resolve_color(theme, "semantic.color.background.surface");
+        let border_raw = resolve_color(theme, "semantic.color.border.default");
+        let panel = resolve_color(theme, "semantic.color.background.panel");
         let gap = resolve_px(theme, spec.gap_token());
-        let padding = resolve_px(theme, spec.padding_token());
+        let padding = resolve_px(theme, "semantic.space.inline.xs");
 
-        // Contract: border color-mix 78% border-subtle
+        // Contract: border color-mix 78% border-default over panel
         let border = color_mix(border_raw, panel, 0.78);
 
         let mut el = div()
@@ -64,8 +65,8 @@ impl IntoElement for Toolbar {
             .gap(gap)
             // Contract: padding 0.25rem (4px)
             .p(padding)
-            // Contract: background panel
-            .bg(panel)
+            // Contract: background surface
+            .bg(bg)
             // Contract: border color-mix 78% of border-default applied always
             .border_1()
             .border_color(border);
