@@ -120,14 +120,22 @@ impl IntoElement for Accordion {
                     .with_color(text_secondary)
                 });
 
-            // Click handler
+            // Click + keyboard handler
             if !is_disabled {
                 if let Some(ref handler) = self.on_toggle {
-                    let handler = handler.clone();
+                    let click_handler = handler.clone();
+                    let key_handler = handler.clone();
                     let value = item.value.clone();
-                    header = header.on_click(move |_event, window, cx| {
-                        handler(&value, window, cx);
-                    });
+                    let value2 = item.value.clone();
+                    header = header
+                        .on_click(move |_event, window, cx| {
+                            click_handler(&value, window, cx);
+                        })
+                        .on_key_down(move |event: &KeyDownEvent, window, cx| {
+                            if event.keystroke.key == "space" || event.keystroke.key == "enter" {
+                                key_handler(&value2, window, cx);
+                            }
+                        });
                 }
             }
 

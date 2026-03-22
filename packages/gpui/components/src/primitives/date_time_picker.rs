@@ -154,9 +154,19 @@ impl IntoElement for DateTimePicker {
         if let Some(handler) = self.on_toggle {
             if !is_disabled {
                 let next_open = !is_open;
-                trigger = trigger.on_click(move |_event, window, cx| {
-                    handler(&next_open, window, cx);
-                });
+                let handler = std::rc::Rc::new(handler);
+                let key_handler = handler.clone();
+                trigger = trigger
+                    .on_click(move |_event, window, cx| {
+                        handler(&next_open, window, cx);
+                    })
+                    .on_key_down(move |event: &KeyDownEvent, window, cx| {
+                        if event.keystroke.key == "space" || event.keystroke.key == "enter" {
+                            key_handler(&next_open, window, cx);
+                        } else if event.keystroke.key == "escape" && is_open {
+                            key_handler(&false, window, cx);
+                        }
+                    });
             }
         }
 

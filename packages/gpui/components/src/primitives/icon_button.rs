@@ -162,10 +162,18 @@ impl IntoElement for IconButton {
             );
         }
 
-        // ── Click handler ─────────────────────────────────────────
+        // ── Click + keyboard handler ─────────────────────────────
         if let Some(handler) = self.on_click {
             if !is_unavailable {
-                el = el.on_click(move |event, window, cx| handler(event, window, cx));
+                let handler = std::rc::Rc::new(handler);
+                let key_handler = handler.clone();
+                el = el
+                    .on_click(move |event, window, cx| handler(event, window, cx))
+                    .on_key_down(move |event: &KeyDownEvent, window, cx| {
+                        if event.keystroke.key == "space" || event.keystroke.key == "enter" {
+                            key_handler(&ClickEvent::default(), window, cx);
+                        }
+                    });
             }
         }
 

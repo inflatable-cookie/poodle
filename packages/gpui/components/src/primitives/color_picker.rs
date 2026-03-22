@@ -25,6 +25,7 @@ pub struct ColorPicker {
     spec: ColorPickerSpec,
     theme: GpuiThemeProvider,
     id_suffix: Option<String>,
+    on_toggle: Option<Box<dyn Fn(&bool, &mut Window, &mut App) + 'static>>,
 }
 
 impl std::ops::Deref for ColorPicker {
@@ -34,7 +35,7 @@ impl std::ops::Deref for ColorPicker {
 
 impl ColorPicker {
     pub fn new(theme: &GpuiThemeProvider) -> Self {
-        Self { spec: ColorPickerSpec::new(), theme: theme.clone(), id_suffix: None }
+        Self { spec: ColorPickerSpec::new(), theme: theme.clone(), id_suffix: None, on_toggle: None }
     }
 
     pub fn from_spec(spec: ColorPickerSpec, theme: &GpuiThemeProvider) -> Self {
@@ -42,6 +43,7 @@ impl ColorPicker {
             spec,
             theme: theme.clone(),
             id_suffix: None,
+            on_toggle: None,
         }
     }
 
@@ -55,6 +57,14 @@ impl ColorPicker {
 
     pub fn with_id(mut self, suffix: impl Into<String>) -> Self {
         self.id_suffix = Some(suffix.into());
+        self
+    }
+
+    pub fn on_toggle(
+        mut self,
+        handler: impl Fn(&bool, &mut Window, &mut App) + 'static,
+    ) -> Self {
+        self.on_toggle = Some(Box::new(handler));
         self
     }
 }
@@ -109,6 +119,28 @@ impl IntoElement for ColorPicker {
             trigger = trigger
                 .opacity(disabled_opacity)
                 .cursor(CursorStyle::OperationNotAllowed);
+        }
+
+        let is_open = spec.is_open;
+        let is_disabled = spec.is_disabled;
+
+        if let Some(handler) = self.on_toggle {
+            if !is_disabled {
+                let next_open = !is_open;
+                let handler = std::rc::Rc::new(handler);
+                let key_handler = handler.clone();
+                trigger = trigger
+                    .on_click(move |_event, window, cx| {
+                        handler(&next_open, window, cx);
+                    })
+                    .on_key_down(move |event: &KeyDownEvent, window, cx| {
+                        if event.keystroke.key == "space" || event.keystroke.key == "enter" {
+                            key_handler(&next_open, window, cx);
+                        } else if event.keystroke.key == "escape" && is_open {
+                            key_handler(&false, window, cx);
+                        }
+                    });
+            }
         }
 
         let mut wrapper = div()

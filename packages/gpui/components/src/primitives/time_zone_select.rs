@@ -11,6 +11,7 @@ use super::icon::Icon;
 pub struct TimeZoneSelect {
     spec: TimeZoneSelectSpec,
     theme: GpuiThemeProvider,
+    on_toggle: Option<Box<dyn Fn(&bool, &mut Window, &mut App) + 'static>>,
 }
 
 impl std::ops::Deref for TimeZoneSelect {
@@ -20,13 +21,14 @@ impl std::ops::Deref for TimeZoneSelect {
 
 impl TimeZoneSelect {
     pub fn new(theme: &GpuiThemeProvider) -> Self {
-        Self { spec: TimeZoneSelectSpec::new(), theme: theme.clone() }
+        Self { spec: TimeZoneSelectSpec::new(), theme: theme.clone(), on_toggle: None }
     }
 
     pub fn from_spec(spec: TimeZoneSelectSpec, theme: &GpuiThemeProvider) -> Self {
         Self {
             spec,
             theme: theme.clone(),
+            on_toggle: None,
         }
     }
 
@@ -36,6 +38,13 @@ impl TimeZoneSelect {
     pub fn open(mut self, v: bool) -> Self { self.spec.is_open = v; self }
     pub fn disabled(mut self, v: bool) -> Self { self.spec.is_disabled = v; self }
 
+    pub fn on_toggle(
+        mut self,
+        handler: impl Fn(&bool, &mut Window, &mut App) + 'static,
+    ) -> Self {
+        self.on_toggle = Some(Box::new(handler));
+        self
+    }
 }
 
 impl IntoElement for TimeZoneSelect {
@@ -101,6 +110,28 @@ impl IntoElement for TimeZoneSelect {
                 .cursor(CursorStyle::OperationNotAllowed);
         } else {
             trigger = trigger.cursor_pointer();
+        }
+
+        let is_open = spec.is_open;
+        let is_disabled = spec.is_disabled;
+
+        if let Some(handler) = self.on_toggle {
+            if !is_disabled {
+                let next_open = !is_open;
+                let handler = std::rc::Rc::new(handler);
+                let key_handler = handler.clone();
+                trigger = trigger
+                    .on_click(move |_event, window, cx| {
+                        handler(&next_open, window, cx);
+                    })
+                    .on_key_down(move |event: &KeyDownEvent, window, cx| {
+                        if event.keystroke.key == "space" || event.keystroke.key == "enter" {
+                            key_handler(&next_open, window, cx);
+                        } else if event.keystroke.key == "escape" && is_open {
+                            key_handler(&false, window, cx);
+                        }
+                    });
+            }
         }
 
         let mut wrapper = div().flex().flex_col().gap(px(4.0)).child(trigger);
