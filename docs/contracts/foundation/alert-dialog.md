@@ -22,14 +22,14 @@ Updated: 2026-03-15
   ├── [Description]  via Dialog description prop
   └── [Actions slot]
       ├── [Cancel Button]  <Button variant="ghost">
-      └── [Confirm Button]  <Button variant="primary"|"danger">
+      └── [Confirm Button]  <Button variant="primary" tone={confirmTone}>
 ```
 
 | Part | Required | Description | Token Targets |
 |------|----------|-------------|---------------|
 | Root (Dialog) | yes | composed Dialog with kind="alertdialog" | delegates to Dialog |
 | Cancel Button | yes | ghost Button for cancel action | delegates to Button |
-| Confirm Button | yes | primary or danger Button for confirm action | delegates to Button |
+| Confirm Button | yes | primary Button with tone from confirmTone | delegates to Button |
 
 ## 3. Props And Inputs
 
@@ -40,7 +40,7 @@ Updated: 2026-03-15
 | `open` | `boolean \| null` | `null` | no | controlled open state; `null` = uncontrolled |
 | `title` | `string` | — | yes | visible title text passed to Dialog |
 | `description` | `string \| null` | `null` | no | description text passed to Dialog |
-| `tone` | `"danger" \| "warning"` | `"danger"` | no | controls confirm button variant |
+| `tone` | `"danger" \| "warning"` | `"danger"` | no | controls confirm button tone (variant is always `"primary"`) |
 | `confirmLabel` | `string` | `"Confirm"` | no | label for confirm button |
 | `cancelLabel` | `string` | `"Cancel"` | no | label for cancel button |
 | `ariaLabel` | `string \| null` | `null` | no | optional explicit accessible name |
@@ -65,14 +65,14 @@ Updated: 2026-03-15
 | closed | `open=false` or default | dialog not rendered |
 | open | `open=true` or triggered | dialog visible with cancel and confirm buttons |
 | working | confirm activated | dismiss on escape and backdrop disabled, buttons remain visible |
-| danger tone | `tone="danger"` (default) | confirm button uses variant="danger" |
-| warning tone | `tone="warning"` | confirm button uses variant="primary" |
+| danger tone | `tone="danger"` (default) | confirm button uses variant="primary" with tone="danger" |
+| warning tone | `tone="warning"` | confirm button uses variant="primary" with tone="warning" |
 
 ## 5. Events
 
 | Event | When It Fires | Payload | Notes |
 |-------|---------------|---------|-------|
-| `confirm` | confirm button clicked | `void` | fires after working state resolves |
+| `confirm` | confirm button clicked | `void` | fires immediately; working state is synchronous |
 | `cancel` | cancel button clicked or dialog dismissed | `void` | suppressed while working |
 | `openChange` | dialog open state changes | `{open: boolean}` | passthrough from Dialog |
 
@@ -121,12 +121,12 @@ Updated: 2026-03-15
 AlertDialog has no unique CSS of its own. All visual presentation is delegated
 to the composed Dialog and Button components.
 
-### Confirm Button variant mapping
+### Confirm Button mapping
 
-| Tone | Button variant |
-|------|---------------|
-| `"danger"` | `"danger"` |
-| `"warning"` | `"primary"` |
+| Tone | Button variant | Button tone |
+|------|---------------|-------------|
+| `"danger"` | `"primary"` | `"danger"` |
+| `"warning"` | `"primary"` | `"warning"` |
 
 ### Cancel Button
 
@@ -148,7 +148,7 @@ to the composed Dialog and Button components.
 ## 9. Svelte Notes
 
 - Composes `Dialog` component directly; does not replicate Dialog internals
-- `working` state is a reactive `$state(false)` boolean
+- `working` state is a `let working = false` variable (Svelte 4 style)
 - Confirm handler sets `working = true`, dispatches `confirm`, caller resolves
 - `data-tone` attribute on root for testing hooks
 - Cancel button calls Dialog close and dispatches `cancel`

@@ -1,51 +1,162 @@
 # MediaPreview
 
-Status: seed contract
-Updated: 2026-03-11
+Status: contract
+Updated: 2026-03-22
 
 ## 1. Purpose
 
 - Component name: `MediaPreview`
 - Layer: `composites`
-- Summary: a richer asset-preview surface that combines framed media, textual identity, metadata, and optional footer actions
-- In scope: title, supporting description, media frame, metadata chips, caption/body content, optional footer actions, and explicit preview state posture
-- Out of scope: transport controls, editing tools, waveform/video rendering engines, or app-specific asset workflows
+- Summary: a rich asset-preview surface that composes `Card` with
+  `MediaThumbnail` to combine framed media, textual identity, metadata chips,
+  and body content
+- In scope: title, eyebrow, description, media frame, metadata chips, caption,
+  badge, thumbnail meta, state posture, aspect ratio, card variant
+- Out of scope: transport controls, editing tools, waveform/video rendering
+  engines, or app-specific asset workflows
 
-## 2. Accessibility
+## 2. Types
 
-- title and supporting context must stay textual and visible outside the preview frame
-- preview state messaging must remain readable even when the renderer fails or no generated preview exists
-- footer actions must stay reachable independently of whether the media surface is available
-- GPUI-native accessibility mapping notes: GPUI must preserve local title, metadata, and fallback structure rather than exposing the preview as an unlabeled textured surface
+### MediaKind
 
-## 3. Specimen Definitions
+```ts
+type MediaKind = "image" | "audio" | "video" | "document" | "embed";
+```
 
-All preview apps must render the following specimens identically.
+### MediaState
 
-### Image preview
+```ts
+type MediaState = "ready" | "loading" | "error" | "empty";
+```
 
-A media preview configured for an image asset:
+### AspectRatio
+
+```ts
+type AspectRatio = "square" | "landscape" | "portrait" | "video";
+```
+
+### CardVariant
+
+```ts
+type CardVariant = "default" | "elevated" | "outlined";
+```
+
+## 3. Anatomy
+
+```text
+[Card]  ariaLabel, hasMedia=true
+  ├── slot:media
+  │     └── [MediaThumbnail]
+  │           ├── frame with aspect ratio
+  │           │     ├── slot:media content  (ready)
+  │           │     └── state display       (loading/error/empty)
+  │           └── badge overlay  (optional)
+  ├── slot:header
+  │     └── [Header]
+  │           ├── [Heading]
+  │           │     ├── <p> eyebrow       (optional)
+  │           │     ├── <h3> title
+  │           │     └── <p> description   (optional)
+  │           └── [Meta List]  (optional)
+  │                 ├── <li> thumbnailMeta (optional)
+  │                 └── <li> meta[...]
+  └── [Body]
+        ├── <p> caption  (optional)
+        └── slot:default
+```
+
+| Part | Required | Description |
+|------|----------|-------------|
+| Card | yes | outer card container with variant and media flag |
+| MediaThumbnail | yes | framed preview area in card media slot |
+| Header | yes | title block with optional eyebrow, description, metadata |
+| Eyebrow | no | uppercase secondary label above title |
+| Title | yes | primary heading |
+| Description | no | secondary text below title |
+| Meta List | no | pill-styled metadata items |
+| Body | no | caption and default slot content below header |
+
+## 4. Props
+
+| Prop | Type | Default | Required | Notes |
+|------|------|---------|----------|-------|
+| `title` | `string` | none | yes | primary heading text |
+| `description` | `string \| null` | `null` | no | secondary text below title |
+| `eyebrow` | `string \| null` | `null` | no | uppercase label above title |
+| `caption` | `string \| null` | `null` | no | text paragraph below header |
+| `meta` | `string[]` | `[]` | no | metadata items rendered as pills |
+| `badge` | `string \| null` | `null` | no | overlay badge on thumbnail |
+| `thumbnailMeta` | `string \| null` | `null` | no | extra metadata item prepended to meta list |
+| `kind` | `MediaKind` | `"image"` | no | media type passed to MediaThumbnail |
+| `state` | `MediaState` | `"ready"` | no | state posture passed to MediaThumbnail |
+| `aspectRatio` | `AspectRatio` | `"landscape"` | no | aspect ratio passed to MediaThumbnail |
+| `variant` | `CardVariant` | `"default"` | no | card visual variant |
+| `ariaLabel` | `string \| null` | `null` | no | accessible label; falls back to `title` |
+| `stateTitle` | `string \| null` | `null` | no | heading for non-ready state in thumbnail |
+| `stateMessage` | `string \| null` | `null` | no | body text for non-ready state in thumbnail |
+
+## 5. Slots
+
+| Slot | Purpose | Fallback |
+|------|---------|----------|
+| `media` | custom media content inside MediaThumbnail frame | MediaThumbnail placeholder |
+| default | additional body content below caption | none |
+
+## 6. Events
+
+No component-owned events.
+
+## 7. States
+
+State is delegated to the `MediaThumbnail` component:
+
+| State | Trigger | Expected Result |
+|-------|---------|-----------------|
+| ready | `state="ready"` | media slot or placeholder visible in frame |
+| loading | `state="loading"` | loading indicator in frame |
+| error | `state="error"` | error message in frame |
+| empty | `state="empty"` | empty message in frame |
+
+Card header and body always render regardless of media state.
+
+## 8. Accessibility
+
+- Card receives `ariaLabel` (falls back to `title`)
+- MediaThumbnail receives `ariaLabel={title}` for frame description
+- Meta list has `aria-label="preview metadata"`
+- Title and context remain textual and visible outside the preview frame
+- State messaging remains readable when the renderer fails
+
+## 9. Visual Rules
+
+- Eyebrow: secondary color, 0.6875rem, weight 600, uppercase, letter-spacing 0.12em
+- Title: 1.25rem, line-height 1.2
+- Description, caption, meta: secondary color, 0.8125rem, line-height 1.5
+- Meta items: pill-styled with radius-control, surface background at 70%
+- Light theme: meta items get subtle inset border
+
+## 10. Composition
+
+- Composes: `Card` (from primitives), `MediaThumbnail`
+- MediaThumbnail is configured with `title={null}` and `meta={null}` since
+  the preview handles its own header section
+
+## 11. Specimen Definitions
+
+### Image Preview
 
 | Label | Props/Config | Expected Visual |
 |-------|-------------|-----------------|
 | Image preview | `title="Hero banner"`, `description="Main landing page banner image for the product launch."`, `eyebrow="Image"`, `meta=["1920 x 1080", "245 KB", "PNG"]`, `kind="image"`, `aspectRatio="landscape"`, media slot with placeholder | framed landscape media area with title, description, eyebrow label, and metadata chips below |
 
-### Video preview
-
-A media preview configured for a video asset:
+### Video Preview
 
 | Label | Props/Config | Expected Visual |
 |-------|-------------|-----------------|
 | Video preview | `title="Onboarding walkthrough"`, `eyebrow="Video"`, `meta=["3:42", "48 MB"]`, `kind="video"`, `aspectRatio="video"`, media slot with placeholder | framed video-ratio media area with title, eyebrow, and duration/size metadata |
 
-### Error state
-
-A media preview in error posture:
+### Error State
 
 | Label | Props/Config | Expected Visual |
 |-------|-------------|-----------------|
 | Error state | `title="Corrupted file"`, `kind="document"`, `state="error"`, `stateTitle="Preview unavailable"`, `stateMessage="This file cannot be previewed."`, `aspectRatio="landscape"` | framed area with error messaging replacing media content; title and error details visible |
-
-## 4. Next Task
-
-Use `MediaPreview` for asset inspection, attachment, and detail-display workflows instead of mixing raw thumbnails and ad hoc metadata cards.

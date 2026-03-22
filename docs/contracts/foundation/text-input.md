@@ -232,7 +232,7 @@ Updated: 2026-03-15
 | `justify-content` | `center` |
 | `color` | `var(--pug-color-icon-muted)` |
 | `font-family` | `var(--pug-typography-code-family)` |
-| `font-size` | `var(--pug-size-icon-default)` |
+| `font-size` | `var(--pug-icon-size-default)` |
 
 ### Affix `.text-input__affix`
 

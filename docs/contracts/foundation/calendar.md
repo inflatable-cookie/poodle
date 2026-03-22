@@ -21,7 +21,7 @@ Updated: 2026-03-15
 [Root .calendar]  <div>
   ├── [Header .calendar__header]  <div>
   │     ├── [Previous Button .calendar__nav]  <button>
-  │     ├── [Month Label .calendar__month-label]  <span>
+  │     ├── [Month Label .calendar__month]  <span>
   │     └── [Next Button .calendar__nav]  <button>
   ├── [Weekday Row .calendar__weekdays]  <div>
   │     └── [Weekday Label .calendar__weekday]... <span>
@@ -179,7 +179,7 @@ CalendarWeekStart: "sunday" | "monday"
 | `align-items` | `center` |
 | `gap` | `0.5rem` |
 
-### Month Label `.calendar__month-label`
+### Month Label `.calendar__month`
 
 | Property | Value |
 |----------|-------|
@@ -203,6 +203,7 @@ CalendarWeekStart: "sunday" | "monday"
 | `background` | `var(--pug-color-background-surface)` |
 | `color` | `var(--pug-color-text-primary)` |
 | `cursor` | `pointer` |
+| `font` | `inherit` |
 
 ### Nav Button — hover
 
@@ -224,6 +225,7 @@ CalendarWeekStart: "sunday" | "monday"
 | `display` | `grid` |
 | `grid-template-columns` | `repeat(7, minmax(0, 1fr))` |
 | `align-items` | `center` |
+| `gap` | `0.125rem` |
 
 ### Weekday Label `.calendar__weekday`
 
@@ -310,7 +312,14 @@ CalendarWeekStart: "sunday" | "monday"
 |----------|-------|
 | `background` | `color-mix(in srgb, var(--pug-color-accent-base) 88%, white 8%)` |
 
-### Root — disabled
+### Nav Button — disabled (`.calendar__nav:disabled`)
+
+| Property | Value |
+|----------|-------|
+| `cursor` | `not-allowed` |
+| `opacity` | `var(--pug-state-opacity-disabled)` |
+
+### Day Button — disabled (`.calendar__day:disabled`)
 
 | Property | Value |
 |----------|-------|

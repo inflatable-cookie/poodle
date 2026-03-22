@@ -6,7 +6,7 @@ Updated: 2026-03-11
 ## 1. Purpose
 
 - Component name: `Breadcrumbs`
-- Layer: `composites`
+- Layer: `foundation`
 - Summary: a compact hierarchical path navigation trail for product pages or
   detail surfaces
 - In scope: path items, current-page indication, truncation/overflow posture,
@@ -39,7 +39,7 @@ Updated: 2026-03-11
 | `items` | `Array<{ value: string; label: string; href?: string; isCurrent?: boolean }>` | none | yes | hierarchy items |
 | `ariaLabel` | `string` | `"Breadcrumb"` | no | navigation label |
 | `maxVisibleItems` | `number \| null` | `null` | no | optional truncation threshold |
-| `onNavigate` | `(value: string) => void` | none | no | callback when host owns navigation |
+| `on:navigate` | — | — | no | Svelte event: `dispatch("navigate", { value: item.value })` |
 
 ### Controlled And Uncontrolled
 
@@ -64,7 +64,7 @@ State table is sufficient.
 
 | Event | When It Fires | Payload | Notes |
 |-------|---------------|---------|-------|
-| `onNavigate` | non-current item activates | item value | only when host owns navigation |
+| `navigate` | non-current item activates | `{ value: string }` | dispatched via Svelte `dispatch("navigate", { value: item.value })` |
 
 ## 6. Accessibility
 
@@ -106,14 +106,35 @@ State table is sufficient.
 - composition rule: breadcrumbs provide hierarchy context before local page
   identity; they do not replace the page heading itself
 
-## 8. Token Usage
+## 8. Token Usage — Exact Values
 
-| Part | Token | Purpose |
-|------|-------|---------|
-| Path Item | subdued and primary text roles | hierarchy emphasis |
-| Current Item | text emphasis roles | current location |
-| Separator | icon or muted text roles | delimiter |
-| Root Nav | spacing roles | trail layout |
+### Root Nav `.breadcrumbs`
+
+| Property | Value |
+|----------|-------|
+| `display` | `flex` |
+| `flex-wrap` | `wrap` |
+| `align-items` | `center` |
+| `gap` | `var(--pug-space-inline-sm)` |
+| `font-size` | `var(--pug-typography-body-size)` |
+
+### Path Item (link)
+
+| Property | Value |
+|----------|-------|
+| `color` | `var(--pug-color-text-secondary)` |
+
+### Current Item
+
+| Property | Value |
+|----------|-------|
+| `color` | `var(--pug-color-text-primary)` |
+
+### Separator
+
+| Property | Value |
+|----------|-------|
+| `opacity` | `0.4` |
 
 ## 9. Svelte Notes
 

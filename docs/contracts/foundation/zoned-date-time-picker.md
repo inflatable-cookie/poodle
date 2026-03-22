@@ -27,10 +27,10 @@ Updated: 2026-03-15
               ├── [Calendar] (composed)
               └── [Fields .zoned-date-time-picker__fields]
                     ├── [Field .zoned-date-time-picker__field]
-                    │     ├── [Field Label .zoned-date-time-picker__field-label]  <span> ("Time")
+                    │     ├── [Field Label .zoned-date-time-picker__label]  <label> ("Time")
                     │     └── [TimeField] (composed)
                     └── [Field .zoned-date-time-picker__field]
-                          ├── [Field Label .zoned-date-time-picker__field-label]  <span> ("Time zone")
+                          ├── [Field Label .zoned-date-time-picker__label]  <label> ("Time zone")
                           └── [TimeZoneSelect] (composed)
 ```
 
@@ -60,7 +60,7 @@ Updated: 2026-03-15
 | `open` | `boolean \| null` | `null` | no | controlled open state |
 | `defaultOpen` | `boolean` | `false` | no | uncontrolled initial open state |
 | `placeholder` | `string` | `"Select date, time, and zone"` | no | shown when no value selected |
-| `weekStartsOn` | `"sunday" \| "monday"` | `"sunday"` | no | first day of the week |
+| `weekStartsOn` | `"sunday" \| "monday"` | `"monday"` | no | first day of the week |
 | `locale` | `string` | `"en-US"` | no | locale for date formatting |
 | `timeZoneOptions` | `TimeZoneOption[]` | `[]` | no | curated list of timezone options; empty uses internal defaults |
 | `isDisabled` | `boolean` | `false` | no | disables the trigger |
@@ -222,7 +222,6 @@ TimeZoneOption: {
 |----------|-------|
 | `color` | `var(--pug-color-text-secondary)` |
 | `font-size` | `0.75rem` |
-| `line-height` | `1` |
 
 ### Surface `.zoned-date-time-picker__surface`
 
@@ -259,7 +258,7 @@ TimeZoneOption: {
 | `display` | `grid` |
 | `gap` | `0.375rem` |
 
-### Field Label `.zoned-date-time-picker__field-label`
+### Field Label `.zoned-date-time-picker__label`
 
 | Property | Value |
 |----------|-------|

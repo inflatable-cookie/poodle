@@ -22,7 +22,7 @@ Updated: 2026-03-15
 [Root .range-calendar]  <div>
   ├── [Header .range-calendar__header]  <div>
   │     ├── [Previous Button .range-calendar__nav]  <button>
-  │     ├── [Month Label .range-calendar__month-label]  <span>
+  │     ├── [Month Label .range-calendar__month]  <span>
   │     └── [Next Button .range-calendar__nav]  <button>
   ├── [Weekday Row .range-calendar__weekdays]  <div>
   │     └── [Weekday Label .range-calendar__weekday]... <span>
@@ -184,7 +184,7 @@ CalendarWeekStart: "sunday" | "monday"
 | `align-items` | `center` |
 | `gap` | `0.5rem` |
 
-### Month Label `.range-calendar__month-label`
+### Month Label `.range-calendar__month`
 
 | Property | Value |
 |----------|-------|

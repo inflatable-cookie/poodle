@@ -19,11 +19,11 @@ Updated: 2026-03-15
 ## 2. Anatomy
 
 ```text
-[Root .detail-row]  <div>
+[Root .detail-row]  <dl>
   ├── [Label Block .detail-row__label-block]  <div>
-  │   ├── [Label .detail-row__label]  <p>
+  │   ├── [Label .detail-row__label]  <dt>
   │   └── [Description .detail-row__description]  <p> (optional)
-  ├── [Value .detail-row__value]  <p> (or value slot)
+  ├── [Value .detail-row__value]  <dd> (or value slot)
   └── [Action .detail-row__action]  (optional, via action slot)
 ```
 
@@ -118,7 +118,7 @@ Updated: 2026-03-15
 | `align-items` | `center` |
 | `padding` | `0.75rem 0.875rem` |
 | `border-radius` | `calc(var(--pug-radius-surface) - 0.0625rem)` |
-| `background` | `color-mix(in srgb, var(--pug-surface) 72%, var(--pug-color-background-elevated))` |
+| `background` | `color-mix(in srgb, var(--pug-surface) 93%, var(--pug-color-text-primary))` |
 
 ### Label Block
 

@@ -7,11 +7,12 @@ Updated: 2026-03-15
 
 - Component name: `Stack`
 - Layer: `foundation`
-- Summary: a vertical flex layout primitive for arranging children in a column
-  with consistent spacing and cross-axis alignment
-- In scope: vertical flow, gap spacing, cross-axis alignment, interior padding
-- Out of scope: horizontal layout (use Inline), grid placement (use Grid),
-  interactive list semantics, scroll behavior
+- Summary: a general-purpose flex container supporting both vertical and
+  horizontal layout with consistent spacing and cross-axis alignment
+- In scope: vertical and horizontal flow, gap spacing, cross-axis alignment,
+  main-axis justification, wrapping, interior padding
+- Out of scope: grid placement (use Grid), interactive list semantics, scroll
+  behavior
 
 ## 2. Anatomy
 
@@ -31,8 +32,11 @@ Updated: 2026-03-15
 
 | Prop | Type | Default | Required | Notes |
 |------|------|---------|----------|-------|
-| `gap` | `SpaceScale` | `"md"` | no | vertical spacing between children |
-| `align` | `LayoutAlign` | `"stretch"` | no | cross-axis (horizontal) alignment |
+| `direction` | `"column" \| "row"` | `"column"` | no | flex direction (vertical or horizontal) |
+| `gap` | `SpaceScale` | `"md"` | no | spacing between children |
+| `align` | `LayoutAlign` | `"stretch"` | no | cross-axis alignment |
+| `justify` | `LayoutJustify` | — | no | main-axis justification |
+| `wrap` | `boolean` | `false` | no | whether children wrap to next line |
 | `padding` | `SpaceScale` | `"none"` | no | interior spacing |
 | `asRole` | `string \| null` | `null` | no | explicit semantic role opt-in |
 | `ariaLabel` | `string \| null` | `null` | no | accessible name when role is set |
@@ -41,6 +45,7 @@ Updated: 2026-03-15
 
 - `SpaceScale`: `"none" \| "sm" \| "md" \| "lg"`
 - `LayoutAlign`: `"start" \| "end" \| "center" \| "stretch"`
+- `LayoutJustify`: `"start" \| "end" \| "center" \| "space-between"`
 
 ### Controlled And Uncontrolled
 
@@ -105,7 +110,7 @@ No internal state.
 | Property | Value |
 |----------|-------|
 | `display` | `flex` |
-| `flex-direction` | `column` |
+| `flex-direction` | `column` (default; `row` when `direction="row"`) |
 | `min-width` | `0` |
 | `min-height` | `0` |
 
@@ -125,6 +130,12 @@ No internal state.
 | `align-items` | `align="end"` | `flex-end` |
 | `align-items` | `align="center"` | `center` |
 | `align-items` | `align="stretch"` | `stretch` |
+| `justify-content` | `justify="start"` | `flex-start` |
+| `justify-content` | `justify="end"` | `flex-end` |
+| `justify-content` | `justify="center"` | `center` |
+| `justify-content` | `justify="space-between"` | `space-between` |
+| `flex-wrap` | `wrap=true` | `wrap` |
+| `flex-direction` | `direction="row"` | `row` |
 
 ### SpaceScale Token Map
 

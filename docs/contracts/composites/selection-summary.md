@@ -1,24 +1,179 @@
 # SelectionSummary
 
 Status: seed contract
-Updated: 2026-03-11
+Updated: 2026-03-22
 
 ## 1. Purpose
 
 - Component name: `SelectionSummary`
 - Layer: `composites`
-- Summary: a compact summary of the current selected scope with optional removal and clear-selection affordances
-- In scope: selected item count, selected chips/tags, clear action, overflow count
-- Out of scope: candidate browsing, confirm/cancel workflow, pagination-aware selection semantics
+- Summary: a compact summary of the current selection with removable chips,
+  overflow count, and clear-all affordance
+- In scope: selected item count/label, removable chips, clear action,
+  overflow truncation, single vs multiple display modes
+- Out of scope: candidate browsing, confirm/cancel workflow,
+  pagination-aware selection semantics
 
-## 2. Accessibility
+## 2. Anatomy
 
-- summary text must stay textual and explicit
-- chip removal actions need accessible names tied to the selected item
-- clear-selection remains distinct from confirm/cancel semantics
-- GPUI-native accessibility mapping notes: GPUI must preserve selection summary and per-item removal meaning rather than rendering them as decorative tags
+```text
+[Root]
+  ├── [Header]
+  │     ├── [CountLabel]
+  │     └── [ClearButton]  (when items.length > 0)
+  └── [Chips]              (when items.length > 0)
+        ├── [Chip...]
+        │     ├── [ChipLabel]
+        │     └── [RemoveIcon]
+        └── [Overflow]     (when items.length > maxVisibleItems)
+```
 
-## 3. Specimen Definitions
+| Part | Required | Description | Token Targets |
+|------|----------|-------------|---------------|
+| Root | yes | `<section>` with `aria-label="Current selection"` | background-panel, radius-surface, border, label-size |
+| Header | yes | flex row with count label and clear button | layout only |
+| CountLabel | yes | "N selected" (multiple) or "Selected item" / "No selection" (single) | text-primary (inherited bold) |
+| ClearButton | no | "Clear" button, visible when items exist | surface background, control radius/height |
+| Chips | no | flex-wrap container for removable chip buttons | layout only |
+| Chip | no | button showing item label with remove (x) icon | surface background, control radius |
+| Overflow | no | "+N more" text for truncated items | text-secondary, surface background |
+
+## 3. Props And Inputs
+
+### Public Props
+
+| Prop | Type | Default | Required | Notes |
+|------|------|---------|----------|-------|
+| `items` | `Array<{ id: string; label: string }>` | `[]` | no | selected items to display |
+| `selectionMode` | `"single" \| "multiple"` | `"multiple"` | no | controls header label text |
+| `maxVisibleItems` | `number` | `4` | no | max chips shown before overflow |
+
+### Controlled And Uncontrolled
+
+- display composite; items list is externally driven
+- no internal state
+
+## 4. States
+
+### Visual States
+
+| State | Trigger | Expected Result |
+|-------|---------|-----------------|
+| empty | `items` is empty | header shows "No selection" (single) or "0 selected" (multiple); no chips, no clear button |
+| populated | `items` has entries | header shows count, clear button visible, chips rendered |
+| truncated | `items.length > maxVisibleItems` | only first `maxVisibleItems` chips shown, overflow badge shows "+N more" |
+
+### Component States
+
+No internal state. Visible items and overflow count are derived from props.
+
+## 5. Events
+
+| Event | When It Fires | Payload | Notes |
+|-------|---------------|---------|-------|
+| `remove` | chip remove button clicked | `{ id: string }` | host removes the item from selection |
+| `clear` | clear button clicked | `void` | host clears all selections |
+
+## 6. Accessibility
+
+### Semantics
+
+- Role: `<section>` with `aria-label="Current selection"`
+- Chip buttons have `aria-label="Remove {item.label}"`
+- Remove icon (x) is `aria-hidden="true"`
+
+### Keyboard
+
+| Key | Behavior |
+|-----|----------|
+| `Tab` | navigates between clear button and chip buttons |
+| `Enter` / `Space` | activates focused button (clear or remove) |
+
+### Focus And Announcement
+
+- focus entry: clear button or first chip
+- live-region behavior: none
+- GPUI-native accessibility mapping notes: GPUI must preserve selection summary
+  and per-item removal meaning rather than rendering them as decorative tags
+
+## 7. Layout
+
+### Sizing
+
+- fills available width
+- gap between header and chips: `--pug-space-stack-sm`
+- chips container uses flex-wrap with gap `--pug-space-inline-sm`
+- chip min-height: 2rem
+- chip inline padding: 0.75rem
+- chip internal gap: 0.5rem
+- overflow badge line-height: 2rem, padding 0 0.625rem
+
+### Composition
+
+- parent expectations: PickerShell selection slot, standalone selection displays
+- child expectations: none (self-contained)
+- resizing rules: chips wrap to multiple rows
+
+## 8. Token Usage
+
+| Part | Token | Purpose |
+|------|-------|---------|
+| Root | `--pug-color-background-panel` | container background (94% alpha mix) |
+| Root | `--pug-radius-surface` | corner radius |
+| Root | `--pug-typography-label-size` | base font size (fallback 0.75rem) |
+| Root | `--pug-space-panel-y` / `--pug-space-panel-x` | container padding |
+| Header | `--pug-space-inline-md` | gap between label and clear button |
+| ClearButton | `--pug-color-background-surface` | button background (76% alpha mix) |
+| ClearButton | `--pug-radius-control` | button radius |
+| ClearButton | `--pug-size-control-height` | button min-height |
+| ClearButton | `--pug-space-control-x` | button horizontal padding |
+| Chip | `--pug-color-background-surface` | chip background (76% alpha mix) |
+| Chip | `--pug-radius-control` | chip radius |
+| Chip | `--pug-color-text-primary` | chip text color |
+| Overflow | `--pug-color-text-secondary` | overflow text color |
+| Overflow | `--pug-color-background-surface` | overflow background (58% alpha mix) |
+| Overflow | `--pug-radius-control` | overflow radius |
+| Root (light) | `--pug-color-border-default` | light theme outer border (14% alpha mix) |
+| Root (light) | `--pug-color-border-subtle` | light theme inset shadow border |
+
+## 9. Svelte Notes
+
+- uses `createEventDispatcher` for `remove` and `clear` events
+- `visibleItems` and `overflowCount` derived reactively from `items` and `maxVisibleItems`
+- uses `Icon` primitive for the remove (x) icon with `size="sm"`
+- light theme has additional border and inset box-shadow treatment
+
+## 10. GPUI Notes
+
+- expected crate/module surface: `pug_gpui::composites::selection_summary`
+- render as section with header row and chip container
+
+## 11. Parity Checklist
+
+### Tier 1: Strict Parity
+
+- [ ] all props have the same meaning and defaults
+- [ ] event names and payloads match
+- [ ] maxVisibleItems truncation behavior matches
+- [ ] selectionMode header text matches
+
+### Tier 2: Visual Parity
+
+- [ ] chip styling matches
+- [ ] overflow badge styling matches
+- [ ] light theme treatment matches
+
+### Tier 3: Implementation Freedom
+
+- [ ] rendering internals stay internal
+
+## 12. Known Deltas
+
+| Delta | Why Allowed | Approval Status | Follow-Up |
+|-------|-------------|-----------------|-----------|
+| none yet | n/a | pending | review during first implementation |
+
+## 13. Specimen Definitions
 
 ### Multiple Items Selected
 
@@ -38,6 +193,11 @@ Updated: 2026-03-11
 |-------|---------------|-----------------|
 | Truncated (max 3 visible) | six items (Alpha through Zeta), `maxVisibleItems={3}` | Three visible chips with an overflow count indicating the remaining three |
 
-## 4. Next Task
+## 14. Approval And Adoption Notes
 
-Use `SelectionSummary` inside `RelationPicker`, picker shells, and future selection-heavy workflows instead of rebuilding selected-chip summaries ad hoc.
+- contract status: `seed contract`
+- approvers: pending
+- downstream adopters: RelationPicker, picker shells, selection-heavy workflows
+- future follow-up: use `SelectionSummary` inside `RelationPicker`, picker
+  shells, and future selection-heavy workflows instead of rebuilding
+  selected-chip summaries ad hoc

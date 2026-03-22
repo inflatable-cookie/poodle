@@ -71,8 +71,8 @@ Updated: 2026-03-15
 ### Semantics
 
 - Root: `role="group"`, `aria-label="Pagination"`
-- Previous button: `aria-label="Previous page"`
-- Next button: `aria-label="Next page"`
+- Previous button: uses text content "Previous" (no aria-label)
+- Next button: uses text content "Next" (no aria-label)
 - Disabled buttons: `disabled` attribute set
 - Summary text: live region for page change announcements
 
@@ -133,7 +133,7 @@ Updated: 2026-03-15
 | `align-items` | `center` |
 | `gap` | `var(--pug-space-inline-sm)` |
 
-### Button
+### Button `.pagination-summary__actions button`
 
 | Property | Value |
 |----------|-------|

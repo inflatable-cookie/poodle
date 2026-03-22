@@ -19,7 +19,7 @@ Updated: 2026-03-15
 
 ```text
 [Root .menu]  <div>
-  ├── [Trigger .menu__trigger]  <button or slot>
+  ├── [Trigger .menu__trigger]  <div role="button"> (wraps trigger slot)
   └── [Overlay .menu__overlay]  <div role="menu">
         └── [Item .menu__item | Separator .menu__separator]...
               └── [Meta .menu__meta] (optional shortcut label)
@@ -35,6 +35,12 @@ Updated: 2026-03-15
 | Separator | no | groups item clusters | border, spacing |
 
 ## 3. Props And Inputs
+
+### Slots
+
+| Slot | Purpose |
+|------|---------|
+| `trigger` | named slot for custom trigger content; wrapped in `<div class="menu__trigger">` with `role="button"` |
 
 ### Public Props
 

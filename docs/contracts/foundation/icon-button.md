@@ -19,16 +19,18 @@ Updated: 2026-03-16
 ## 2. Anatomy
 
 ```text
-[Root .icon-button]  <button>
-  ├── [Glyph .icon-button__glyph]  <span>  (when not loading)
-  ├── [Spinner .icon-button__spinner]  <span>  (when loading)
-  └── [Tooltip .icon-button__tooltip]  <div role="tooltip">  (shown on hover/focus)
+[Wrapper .icon-button-wrap]  <span>
+  └── [Root .icon-button]  <button>
+        ├── [Glyph .icon-button__glyph]  <span>  (when not loading; contains default slot for custom icon content)
+        ├── [Spinner .icon-button__spinner]  <span>  (when loading)
+        └── [Tooltip .icon-button__tooltip]  <span role="tooltip">  (shown on hover/focus)
 ```
 
 | Part | Required | Description | Token Targets |
 |------|----------|-------------|---------------|
+| Wrapper | yes | outer positioning container for button and tooltip | — |
 | Root | yes | compact action surface, square button | background, border, radius, focus ring, size |
-| Glyph | yes | visible icon character display | icon color, icon size, code font |
+| Glyph | yes | visible icon character display; contains default slot for custom icon content | icon color, icon size, code font |
 | Spinner | no | animated loading indicator replacing glyph | border color, animation |
 | Tooltip | no | built-in tooltip surface shown on hover/focus after 300ms delay | background, text color, radius, padding, placement |
 
@@ -122,7 +124,7 @@ type OverlayPlacement = "top" | "bottom" | "left" | "right"
 - `aria-busy="true"` when `isLoading=true`
 - `aria-pressed` when `isPressed !== null` (renders true or false)
 - `aria-describedby` links to the built-in tooltip element (auto-generated id);
-  when `describedBy` prop is also provided, both ids are combined
+  when the tooltip is open, the tooltip id replaces any `describedBy` value (not combined)
 - The tooltip element uses `role="tooltip"` and is referenced by
   `aria-describedby` on the button
 - `disabled` attribute when `isDisabled=true` or `isLoading=true`
@@ -325,7 +327,7 @@ to   { transform: rotate(360deg); }
 - Icon glyph is `aria-hidden` as the accessible name comes from `ariaLabel`
 - border-radius uses `--pug-treatment-interactive-solid-radius` with
   fallback to `--pug-radius-control`
-- Built-in tooltip renders as a `<div role="tooltip">` with auto-generated
+- Built-in tooltip renders as a `<span role="tooltip">` with auto-generated
   `id`, linked to the button via `aria-describedby`
 - Tooltip displays `tooltip` prop text when provided, otherwise falls back
   to `ariaLabel`
@@ -366,7 +368,7 @@ to   { transform: rotate(360deg); }
 - [ ] tooltip shows `ariaLabel` by default, `tooltip` prop when provided
 - [ ] tooltip appears on hover/focus with 300ms delay
 - [ ] tooltip dismisses on mouseleave, blur, and Escape key
-- [ ] describedBy passthrough matches (combined with tooltip id)
+- [ ] describedBy passthrough matches (tooltip id replaces describedBy when open)
 
 ### Tier 2: Visual Parity
 

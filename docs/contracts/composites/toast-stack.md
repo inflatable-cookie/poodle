@@ -1,26 +1,230 @@
 # ToastStack
 
 Status: seed contract
-Updated: 2026-03-11
+Updated: 2026-03-22
 
 ## 1. Purpose
 
 - Component name: `ToastStack`
 - Layer: `composites`
-- Summary: a transient notification stack for low-interruption confirmations, warnings, and recoverable failures
-- In scope: toast ordering, title/message copy, optional action affordance, dismissal, and polite live-region posture
-- Out of scope: long-lived inline status, blocking errors, background queue persistence, or system notification integration
+- Summary: a transient notification stack for low-interruption confirmations,
+  warnings, and recoverable failures
+- In scope: toast ordering, title/message copy, optional action affordance,
+  dismissal, tone-based styling, left accent bar, polite live-region posture
+- Out of scope: long-lived inline status, blocking errors, background queue
+  persistence, system notification integration, auto-dismiss timers
 
-## 2. Accessibility
+## 2. Anatomy
 
-- toasts must remain textual and independently dismissible
-- transient notifications should announce politely and avoid stealing focus
-- higher-severity failure toasts may escalate announcement urgency when the host
-  treats them as materially disruptive
-- optional actions need explicit names and must not replace the core message
-- GPUI-native accessibility mapping notes: GPUI must preserve transient notification meaning and dismiss/action reachability even where there is no web-style live region
+```text
+[Stack]
+  └── [Toast...]
+        ├── [DismissButton]
+        ├── [Copy]
+        │     ├── [Title]
+        │     └── [Message]   (optional)
+        └── [Actions]         (optional)
+              └── [ActionButton]
+```
 
-## 3. Specimen Definitions
+| Part | Required | Description | Token Targets |
+|------|----------|-------------|---------------|
+| Stack | yes | `<section>` container with `role="list"` | stack gap |
+| Toast | yes | `<article>` with `role="listitem"` | tone color, border, background, elevation, radius |
+| AccentBar | yes | `::before` pseudo-element left accent stripe | tone color (82% mix with white) |
+| DismissButton | yes | absolute-positioned close button (x icon) | text-secondary, hover: text-primary |
+| Copy | yes | title and optional message | layout only |
+| Title | yes | `<strong>` toast heading | text-primary (inherited) |
+| Message | no | `<p>` toast detail text | text-secondary, font-size 0.8125rem |
+| Actions | no | container for action button(s) | layout only |
+| ActionButton | no | `Button` primitive (variant="secondary", size="sm") | (uses Button primitive tokens) |
+
+## 3. Props And Inputs
+
+### Public Props
+
+| Prop | Type | Default | Required | Notes |
+|------|------|---------|----------|-------|
+| `items` | `ToastItem[]` | `[]` | no | toast items to display |
+| `ariaLabel` | `string` | `"Notifications"` | no | accessible name for the stack section |
+
+### Types
+
+```typescript
+type ToastTone = "info" | "success" | "warning" | "danger";
+
+type ToastItem = {
+  id: string;
+  title: string;
+  message?: string | null;
+  tone?: ToastTone;
+  actionLabel?: string | null;
+};
+```
+
+### Controlled And Uncontrolled
+
+- items list is externally driven; host owns add/remove logic
+- no internal state
+
+## 4. States
+
+### Visual States
+
+| State | Trigger | Expected Result |
+|-------|---------|-----------------|
+| empty | `items` is empty | nothing rendered |
+| populated | `items` has entries | stack of toast articles |
+| info | `tone="info"` (or undefined) | blue accent bar and border tint (fallback `#3b82f6`) |
+| success | `tone="success"` | success-colored accent bar and border tint |
+| warning | `tone="warning"` | warning-colored accent bar and border tint |
+| danger | `tone="danger"` | danger-colored accent bar and border tint; `aria-live="assertive"` |
+
+### Component States
+
+No internal state. Toast list is externally managed.
+
+## 5. Events
+
+| Event | When It Fires | Payload | Notes |
+|-------|---------------|---------|-------|
+| `dismiss` | dismiss button clicked | `{ id: string }` | host removes toast from items |
+| `action` | action button clicked | `{ id: string }` | host handles the action (e.g. navigate, retry) |
+
+## 6. Visual Rules
+
+### Tone Colors
+
+Each toast uses a CSS custom property `--pug-toast-tone` set per tone:
+
+| Tone | Token | Fallback |
+|------|-------|----------|
+| `info` | `--pug-color-status-info` | `#3b82f6` (blue) |
+| `success` | `--pug-color-status-success` | -- |
+| `warning` | `--pug-color-status-warning` | -- |
+| `danger` | `--pug-color-status-danger` | -- |
+
+The tone color is used for:
+- **Left accent bar**: 3px wide, `::before` pseudo-element, `inset: 0 auto 0 0`,
+  color at 82% mix with 6% white
+- **Border**: 1px solid, tone at 34% mixed with `--pug-color-border-default`
+- **Background gradient**: left edge has 12% tone blended into elevated background,
+  fading to 98% elevated background at 18% gradient stop
+
+### Elevation
+
+- toasts use `--pug-elevation-overlay` box shadow
+- background uses `--pug-color-background-elevated` at 96% alpha mix
+
+## 7. Accessibility
+
+### Semantics
+
+- Stack: `<section>` with `aria-label`, `aria-live="polite"`,
+  `aria-atomic="false"`, `role="list"`
+- Toast: `<article>` with `role="listitem"`, `aria-atomic="true"`
+- Toast live region: `aria-live="polite"` by default; `aria-live="assertive"`
+  for `tone="danger"`
+- Dismiss button: `aria-label="Dismiss {item.title}"`
+
+### Keyboard
+
+| Key | Behavior |
+|-----|----------|
+| `Tab` | navigates between dismiss buttons and action buttons |
+| `Enter` / `Space` | activates focused button (dismiss or action) |
+
+### Focus And Announcement
+
+- focus entry: dismiss button of first toast, or action button if present
+- transient notifications announce politely and avoid stealing focus
+- danger toasts escalate to assertive announcement
+- GPUI-native accessibility mapping notes: GPUI must preserve transient
+  notification meaning and dismiss/action reachability even where there is
+  no web-style live region
+
+## 8. Layout
+
+### Sizing
+
+- stack gap: `--pug-space-stack-sm`
+- toast padding: `--pug-space-panel-x` (with extra 1.5rem on right for dismiss button)
+- toast internal gap: `--pug-space-stack-sm`
+- toast border-radius: `calc(--pug-radius-surface - 0.125rem)`
+- dismiss button: 1.25rem x 1.25rem, positioned top-right (0.375rem inset)
+- accent bar width: 0.1875rem (3px)
+
+### Composition
+
+- composes: `Button` primitive (for action buttons), `Icon` primitive (for dismiss x)
+- parent expectations: positioned container (fixed/absolute) for toast overlay
+- child expectations: none (self-contained)
+- resizing rules: toasts fill container width
+
+## 9. Token Usage
+
+| Part | Token | Purpose |
+|------|-------|---------|
+| Stack | `--pug-space-stack-sm` | gap between toasts |
+| Toast | `--pug-color-border-default` | base border (mixed with tone) |
+| Toast | `--pug-radius-surface` | corner radius (minus 0.125rem) |
+| Toast | `--pug-color-background-elevated` | toast background (96% alpha mix) |
+| Toast | `--pug-elevation-overlay` | box shadow |
+| Toast | `--pug-space-panel-x` | toast padding |
+| Toast (info) | `--pug-color-status-info` | info tone color (fallback #3b82f6) |
+| Toast (success) | `--pug-color-status-success` | success tone color |
+| Toast (warning) | `--pug-color-status-warning` | warning tone color |
+| Toast (danger) | `--pug-color-status-danger` | danger tone color |
+| DismissButton | `--pug-color-text-secondary` | default icon color |
+| DismissButton hover | `--pug-color-text-primary` | hover icon color |
+| DismissButton hover | `--pug-color-background-surface` | hover background (60% alpha mix) |
+| DismissButton | `--pug-radius-sm` | button radius (fallback 0.25rem) |
+| Message | `--pug-color-text-secondary` | message text color |
+
+## 10. Svelte Notes
+
+- uses `createEventDispatcher` for `dismiss` and `action` events
+- uses `Button` primitive (variant="secondary", size="sm") for action buttons
+- uses `Icon` primitive (name="x", size="sm") for dismiss button
+- toast tone set via `data-tone` attribute and CSS custom property
+- items keyed by `item.id` in `{#each}` block
+- `ToastItem` type imported from shared `types.ts`
+
+## 11. GPUI Notes
+
+- expected crate/module surface: `pug_gpui::composites::toast_stack`
+- tone-based accent bar may use platform-specific drawing
+- assertive announcement for danger tone must be preserved
+
+## 12. Parity Checklist
+
+### Tier 1: Strict Parity
+
+- [ ] all props have the same meaning and defaults
+- [ ] event names and payloads match
+- [ ] ToastItem type matches
+- [ ] tone mapping matches (info/success/warning/danger)
+- [ ] aria-live escalation for danger tone matches
+
+### Tier 2: Visual Parity
+
+- [ ] left accent bar rendering matches
+- [ ] tone color treatment matches (border, gradient, accent)
+- [ ] elevation and background treatment match
+- [ ] dismiss button placement matches
+
+### Tier 3: Implementation Freedom
+
+- [ ] rendering internals stay internal
+- [ ] animation/transition approach may differ
+
+## 13. Known Deltas
+
+| Delta | Why Allowed | Approval Status | Follow-Up |
+|-------|-------------|-----------------|-----------|
+| none yet | n/a | pending | review during first implementation |
+
+## 14. Specimen Definitions
 
 ### Interactive Stack
 
@@ -30,8 +234,17 @@ Updated: 2026-03-11
 | Info toast with action | `title="New version available"`, `message="Update to v2.1 for the latest features."`, `tone="info"`, `actionLabel="Update"` | Toast with info styling, action button, dismiss affordance |
 | Warning toast | `title="Rate limit warning"`, `message="You are approaching your API limit."`, `tone="warning"` | Toast with warning styling, dismiss affordance |
 
-The specimen includes an "Add toast" button that appends new toasts cycling through info, success, warning, and danger tones. Dismiss and action handlers remove toasts from the stack. Toasts are rendered in a stacked layout within a positioned container.
+The specimen includes an "Add toast" button that appends new toasts cycling
+through info, success, warning, and danger tones. Dismiss and action handlers
+remove toasts from the stack. Toasts are rendered in a stacked layout within
+a positioned container.
 
-## 4. Next Task
+## 15. Approval And Adoption Notes
 
-Use `ToastStack` for transient confirmations and recoverable warnings while keeping long-lived or blocking conditions on persistent inline surfaces.
+- contract status: `seed contract`
+- approvers: pending
+- downstream adopters: application-level notification systems, workspace
+  feedback, recoverable error display
+- future follow-up: use `ToastStack` for transient confirmations and
+  recoverable warnings while keeping long-lived or blocking conditions on
+  persistent inline surfaces; consider auto-dismiss timer support

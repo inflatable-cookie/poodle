@@ -149,6 +149,16 @@ No internal state.
 |-----------------|-------|
 | `--pug-pill-fill` | `color-mix(in srgb, var(--pug-pill-fill) 50%, transparent)` |
 
+### Appearance: badge `.pill[data-appearance="badge"]`
+
+| Custom Property / Property | Value |
+|----------------------------|-------|
+| `--pug-pill-fill` | accent-tinted fill (tone-specific color at low opacity) |
+| `--pug-pill-border` | `transparent` |
+| `--pug-pill-text` | tone-specific accent color |
+| `text-transform` | `uppercase` |
+| `font-weight` | `700` |
+
 ### Size: xxs `.pill[data-size="xxs"]`
 
 | Property | Value |
@@ -225,34 +235,33 @@ All preview apps must render the following specimens identically.
 
 ### Tones
 
-Five pills in a horizontal row with 8px gap:
+Three pills in a horizontal row with 8px gap:
 
 | Content | Tone |
 |---------|------|
 | Neutral | neutral |
-| Info | info |
 | Success | success |
-| Warning | warning |
 | Danger | danger |
 
 ### Sizes
 
-Two pills in a horizontal row with 8px gap:
+Three pills in a horizontal row with 8px gap:
 
 | Content | Size |
 |---------|------|
-| Small | sm |
-| Medium | md |
+| XXS | xxs |
+| XS | xs |
+| SM | sm |
 
 ### Code font
 
-Three pills with `fontFamily: "code"` in a horizontal row:
+Three pills with `font: "mono"` in a horizontal row:
 
 | Content | Tone | Font |
 |---------|------|------|
-| v2.4.1 | neutral | code |
-| stable | success | code |
-| beta | warning | code |
+| v2.4.1 | neutral | mono |
+| stable | success | mono |
+| beta | danger | mono |
 
 ### Muted
 

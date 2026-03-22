@@ -17,7 +17,7 @@ Updated: 2026-03-15
 ## 2. Anatomy
 
 ```text
-[Root .icon]  <svg>
+[Root .pug-icon]  <svg>
   └── [Path data]  (from registry lookup)
 ```
 
@@ -104,6 +104,8 @@ Updated: 2026-03-15
 | Attribute | Value |
 |-----------|-------|
 | `viewBox` | `"0 0 24 24"` |
+| `width` | `"24"` |
+| `height` | `"24"` |
 | `fill` | `"none"` |
 | `stroke` | `"currentColor"` |
 | `stroke-width` | `"2"` |
@@ -133,9 +135,8 @@ Updated: 2026-03-15
 
 ## 9. Svelte Notes
 
-- Uses `getIconRegistry()` context to resolve icon name to SVG path data
-- SVG rendered with `{@html}` for path content from registry
-- `data-icon` attribute set to icon name for testing hooks
+- Uses `getIconRegistry()` context to resolve icon name to SVG node data
+- SVG rendered with structured element rendering using `{#each nodes}` for path content from registry
 - `data-size` attribute for size variant
 
 ## 10. GPUI Notes

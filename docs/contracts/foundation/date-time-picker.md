@@ -54,7 +54,7 @@ Updated: 2026-03-15
 | `open` | `boolean \| null` | `null` | no | controlled open state |
 | `defaultOpen` | `boolean` | `false` | no | uncontrolled initial open state |
 | `placeholder` | `string` | `"Select date and time"` | no | shown when no value selected |
-| `weekStartsOn` | `"sunday" \| "monday"` | `"sunday"` | no | first day of the week |
+| `weekStartsOn` | `"sunday" \| "monday"` | `"monday"` | no | first day of the week |
 | `locale` | `string` | `"en-US"` | no | locale for date formatting |
 | `isDisabled` | `boolean` | `false` | no | disables the trigger |
 | `ariaLabel` | `string \| null` | `null` | no | required when no visible label exists |

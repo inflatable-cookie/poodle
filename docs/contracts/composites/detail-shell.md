@@ -1,7 +1,7 @@
 # DetailShell
 
-Status: seed contract
-Updated: 2026-03-11
+Status: contract
+Updated: 2026-03-22
 
 ## 1. Purpose
 
@@ -10,74 +10,83 @@ Updated: 2026-03-11
 - Summary: a reusable information-display shell for a single record, entity, or
   settings scope
 - In scope: header region, scrollable detail body, empty/loading/error posture,
-  section stack
+  state title and message, section stack
 - Out of scope: domain-specific data fetching, editable form workflows,
   workstation panel chrome
 
-## 2. Anatomy
+## 2. Types
+
+### BrowseState (subset)
+
+DetailShell uses `Exclude<BrowseState, "no-results">`:
+
+```ts
+type DetailShellState = "ready" | "empty" | "loading" | "error";
+```
+
+## 3. Anatomy
 
 ```text
-[Root Shell]
-  ├── [Header Region] (optional)
-  ├── [State Region] (optional)
-  └── [Body Scroll Region]
-        └── [Detail Sections or Custom Content]
+[Root Shell]  <section> aria-label
+  ├── [Header Region]  (optional)
+  │     └── slot:header  OR  <h2> title
+  ├── [Body]  (when state="ready")
+  │     └── slot:default
+  └── [State Region]  (when state != "ready")
+        └── slot:state  OR  default state content
+              ├── <strong> stateTitle
+              └── <p> stateMessage  (optional)
 ```
 
 | Part | Required | Description | Token Targets |
 |------|----------|-------------|---------------|
-| Root Shell | yes | overall detail container | spacing, background |
-| Header Region | no | page identity and top actions | spacing, separator |
-| State Region | no | empty, loading, or callout state | spacing |
-| Body Scroll Region | yes | main content viewport | scroll, spacing, surface |
+| Root Shell | yes | overall detail container | spacing |
+| Header Region | no | page identity and top actions | spacing |
+| Body | yes (when ready) | main content area | spacing |
+| State Region | yes (when not ready) | empty, loading, or error content | spacing, background |
 
-## 3. Props And Inputs
-
-### Public Props
+## 4. Props
 
 | Prop | Type | Default | Required | Notes |
 |------|------|---------|----------|-------|
-| `title` | `string \| null` | `null` | no | convenience shorthand when no external header composite is supplied |
-| `scrollMode` | `"shell" \| "body"` | `"body"` | no | who owns vertical scrolling |
+| `title` | `string \| null` | `null` | no | convenience shorthand rendered as `<h2>` when no header slot |
+| `scrollMode` | `"shell" \| "body"` | `"body"` | no | who owns vertical scrolling; exposed as `data-scroll-mode` |
 | `state` | `"ready" \| "empty" \| "loading" \| "error"` | `"ready"` | no | high-level content posture |
-| `ariaLabel` | `string \| null` | `null` | no | optional region label |
+| `ariaLabel` | `string \| null` | `null` | no | accessible label for the section |
+| `stateTitle` | `string \| null` | `null` | no | heading text for state region; falls back to "Detail state" |
+| `stateMessage` | `string \| null` | `null` | no | body text for state region |
 
-### Controlled And Uncontrolled
+## 5. Slots
 
-- declarative composite shell
-- state posture is controlled by the host application
+| Slot | Purpose | Fallback |
+|------|---------|----------|
+| `header` | custom header content (PageHeader, actions) | `<h2>{title}</h2>` when title is set |
+| `state` | custom state region content | default `<strong>` + `<p>` state display |
+| default | body content when `state="ready"` | none |
 
-## 4. States
+## 6. Events
 
-### Visual States
+No component-owned events.
+
+## 7. States
 
 | State | Trigger | Expected Result |
 |-------|---------|-----------------|
-| ready | `state="ready"` | content visible |
-| empty | `state="empty"` | empty-state region replaces content |
-| loading | `state="loading"` | skeleton/progress region visible |
-| error | `state="error"` | callout region visible |
+| ready | `state="ready"` | body slot content visible |
+| empty | `state="empty"` | state region replaces body |
+| loading | `state="loading"` | state region replaces body |
+| error | `state="error"` | state region replaces body |
 
-### Component States
+The state region renders with `data-state` attribute reflecting the current
+state value.
 
-State table is sufficient.
-
-## 5. Events
-
-| Event | When It Fires | Payload | Notes |
-|-------|---------------|---------|-------|
-| `onScroll` | body viewport scrolls | framework-native event | optional passthrough |
-
-## 6. Accessibility
+## 8. Accessibility
 
 ### Semantics
 
-- Role: usually `main`, `region`, or grouped content shell depending on parent
-  context
-- Required attributes: accessible name when the shell is a named destination
-- Optional attributes: heading association and state-region descriptions
-- Labeling rules: when the shell hosts a primary detail destination, heading
-  hierarchy should make that destination obvious
+- Element: `<section>` with `aria-label` when provided
+- Heading hierarchy: `<h2>` when using title prop fallback
+- State region uses host-provided content or slot for custom accessibility
 
 ### Keyboard
 
@@ -88,123 +97,49 @@ State table is sufficient.
 
 ### Focus And Announcement
 
-- focus entry: the shell itself is not focusable by default unless it owns a
-  scroll destination
-- focus exit: state transitions should preserve or restore a sensible focus
-  target when content changes materially
-- live-region behavior: loading and error transitions should surface through
-  child `Progress`, `Skeleton`, or `Callout` semantics rather than
-  ad hoc shell announcements
+- The shell itself is not focusable by default
+- State transitions should preserve or restore a sensible focus target when
+  content changes
 - GPUI-native accessibility mapping notes: GPUI must preserve named-region
-  semantics, scroll ownership, and sensible focus continuity when loading, error,
-  or empty content replaces the body
+  semantics, scroll ownership, and focus continuity when state changes
 
-## 7. Layout
+## 9. Layout
 
-### Sizing
+- Root: grid with `gap: --pug-space-stack-lg`
+- Body and state regions: grid with `gap: --pug-space-stack-lg`
+- State region: padded with doubled panel spacing, subtle background,
+  `border-radius: --pug-radius-surface`
 
-- shell fills assigned parent region
-- body scroll viewport should tolerate long section stacks
-
-### Composition
-
-- parent expectations: product page bodies, settings scopes, inspector-like
-  detail panes in product apps
-- child expectations: `PageHeader`, `DetailSection`, `ScrollShell`,
-  `EmptyState`, `Callout`, and feedback primitives
-- resizing rules: header and state regions remain visible without obscuring body
-  reachability
-- state rule: `DetailShell` uses `ready`, `empty`, `loading`, and `error`;
-  browse-specific `no-results` posture does not belong here
-
-## 8. Token Usage
+## 10. Token Usage
 
 | Part | Token | Purpose |
 |------|-------|---------|
-| Root Shell | background and spacing roles | page shell |
-| Header Region | separator and spacing roles | top identity |
-| State Region | spacing roles | transient state messages |
-| Body Scroll Region | `ScrollShell` and surface roles | content viewport |
+| Root Shell | `space-stack-lg` | section stacking |
+| State Region | `background-panel`, `background-elevated`, `radius-surface` | state container |
+| State message | `text-secondary`, `typography-body-*` | state body text |
 
-## 9. Svelte Notes
+## 11. Specimen Definitions
 
-- expected substrate: `Stack` plus `ScrollShell` and other composites
-- wrapper strategy: host should compose explicit `PageHeader` and `DetailSection`
-  children rather than overloading the shell with domain fields
-
-## 10. GPUI Notes
-
-- expected crate/module surface: `pug_gpui::composites::detail_shell`
-- implementation-only details: GPUI may model the body as a native scroll view,
-  but state swaps and focus continuity still require deliberate handling
-
-## 11. Parity Checklist
-
-### Tier 1: Strict Parity
-
-- [ ] named-region and scroll-owner semantics match
-- [ ] empty/loading/error posture meaning matches
-- [ ] focus continuity across state changes matches
-
-### Tier 2: Visual Parity
-
-- [ ] shell spacing and section stack hierarchy use comparable token roles
-
-### Tier 3: Implementation Freedom
-
-- [ ] viewport implementation and mount strategy stay internal
-
-## 12. Known Deltas
-
-| Delta | Why Allowed | Approval Status | Follow-Up |
-|-------|-------------|-----------------|-----------|
-| scroll indicator styling may differ | runtime scroll rendering differs | allowed | keep scroll ownership and focus rules strict |
-
-## 13. Specimen Definitions
-
-All preview apps must render the following specimens identically.
-
-### Layout structure
-
-A shell showing placeholder regions for anatomy visualization:
+### Layout Structure
 
 | Label | Props/Config | Expected Visual |
 |-------|-------------|-----------------|
 | Layout structure | header slot with colored Region, three body Regions (Section 1, 2, 3) | shell with distinct header region and stacked body sections, each shown as colored placeholder blocks |
 
-### Multi-section layout with header
-
-A full detail view with PageHeader and multiple DetailSections:
+### Multi-Section Layout With Header
 
 | Label | Props/Config | Expected Visual |
 |-------|-------------|-----------------|
 | Multi-section layout with header | PageHeader with title, eyebrow, subtitle, Badge and Edit button; three DetailSections (General, Configuration with Reset action, Integrations) separated by Separators | complete detail page with identity header, action controls, and grouped detail rows across sections |
 
-### Loading state
-
-A shell in loading posture:
+### Loading State
 
 | Label | Props/Config | Expected Visual |
 |-------|-------------|-----------------|
 | Loading state | `title="Loading"`, `state="loading"` | shell with loading/progress indicator replacing body content |
 
-### Error state
-
-A shell in error posture:
+### Error State
 
 | Label | Props/Config | Expected Visual |
 |-------|-------------|-----------------|
 | Error state | `title="Error"`, `state="error"`, `stateTitle="Failed to load"`, `stateMessage="Something went wrong. Please try again."` | shell with error callout replacing body content, showing title and message |
-
-## 14. Approval And Adoption Notes
-
-- contract status: `seed contract`
-- approvers: pending
-- downstream adopters: settings scopes, detail inspectors, entity pages
-- future follow-up: connect editable detail and form workflows in later milestones
-
-## Next Task
-
-Use `DetailShell` as the framing layer for local identity, summary cards, and
-structured detail sections while keeping models, fetch state, and mutation
-logic outside the composite.

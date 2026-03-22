@@ -79,12 +79,34 @@ Updated: 2026-03-17
 - parent expectations: any collapsible region boundary, divider, panel header, or sidebar
 - child expectations: none
 
-## 8. Token Usage
+## 8. Token Usage — Exact Values
 
-| Part | Token | Purpose |
-|------|-------|---------|
-| Button | icon button roles | interactive affordance |
-| Icon | icon color roles | directional indicator |
+### Toggle Button
+
+| Property | Value |
+|----------|-------|
+| `padding` | `0.125rem` |
+| `border-radius` | `var(--pug-radius-sm, 0.25rem)` |
+| `color` | `var(--pug-color-text-muted)` |
+
+### Toggle Button — hover
+
+| Property | Value |
+|----------|-------|
+| `background` | `var(--pug-color-surface-hover)` |
+| `color` | `var(--pug-color-text-default)` |
+
+### Toggle Button — disabled
+
+| Property | Value |
+|----------|-------|
+| `opacity` | `0.4` |
+
+### Toggle Button — focus-visible
+
+| Property | Value |
+|----------|-------|
+| `outline-offset` | `0.0625rem` |
 
 ## 9. Svelte Notes
 

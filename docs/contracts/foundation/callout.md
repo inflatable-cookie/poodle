@@ -164,7 +164,7 @@ type CalloutTone = "neutral" | "info" | "success" | "warning" | "danger" | "pend
 | `--pug-callout-border` | `color-mix(in srgb, var(--pug-color-border-subtle) 88%, transparent)` |
 | `display` | `grid` |
 | `grid-template-columns` | `minmax(0, 1fr) auto auto` |
-| `align-items` | `start` |
+| `align-items` | `center` |
 | `gap` | `var(--pug-space-inline-md)` |
 | `padding` | `var(--pug-space-panel-y) var(--pug-space-panel-x)` |
 | `border` | `0.0625rem solid var(--pug-callout-border)` |
@@ -177,8 +177,8 @@ type CalloutTone = "neutral" | "info" | "success" | "warning" | "danger" | "pend
 
 | Property | Value |
 |----------|-------|
-| `--pug-callout-fill` | `color-mix(in srgb, var(--pug-color-status-info) 10%, var(--pug-color-background-panel))` |
-| `--pug-callout-border` | `color-mix(in srgb, var(--pug-color-status-info) 34%, var(--pug-color-border-default))` |
+| `--pug-callout-fill` | `color-mix(in srgb, var(--pug-color-status-info, #3b82f6) 10%, var(--pug-color-background-panel))` |
+| `--pug-callout-border` | `color-mix(in srgb, var(--pug-color-status-info, #3b82f6) 34%, var(--pug-color-border-default))` |
 
 ### Root — tone: success
 
@@ -209,6 +209,10 @@ type CalloutTone = "neutral" | "info" | "success" | "warning" | "danger" | "pend
 | `--pug-callout-border` | `color-mix(in srgb, var(--pug-color-accent-base) 26%, var(--pug-color-border-default))` |
 
 ### Body `.callout__body`
+
+| Property | Value |
+|----------|-------|
+| `align-self` | `start` |
 
 | Property | Value |
 |----------|-------|
@@ -281,6 +285,15 @@ type CalloutTone = "neutral" | "info" | "success" | "warning" | "danger" | "pend
 | `background` | `transparent` |
 | `color` | `var(--pug-color-text-secondary)` |
 | `cursor` | `pointer` |
+| `margin-right` | `calc(-0.5 * var(--pug-space-panel-x))` |
+| `font` | `inherit` |
+
+### Dismiss — focus-visible
+
+| Property | Value |
+|----------|-------|
+| `outline` | `var(--pug-border-width-focus) solid var(--pug-color-accent-focusRing)` |
+| `outline-offset` | `0.0625rem` |
 
 ## 9. Svelte Notes
 

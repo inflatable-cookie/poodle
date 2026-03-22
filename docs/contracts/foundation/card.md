@@ -18,7 +18,7 @@ Updated: 2026-03-15
 ## 2. Anatomy
 
 ```text
-[Root .card]  <div>
+[Root .card]  <article>
   ├── [Media .card__media]  (optional, via media slot)
   ├── [Header .card__header]  (optional, via header slot)
   ├── [Body .card__body]  (default slot)
@@ -83,8 +83,8 @@ Updated: 2026-03-15
 
 ### Semantics
 
-- Role: none (generic container) by default
-- When interactive: `role="button"`, `tabindex="0"`, `aria-label` from prop
+- Root element: `<article>`
+- When interactive: CSS `cursor: pointer` is applied; ARIA roles and keyboard interaction are not currently implemented
 - When selected: `aria-selected="true"` (when interactive)
 - Landmark: none
 
@@ -138,7 +138,7 @@ Updated: 2026-03-15
 | `display` | `grid` |
 | `align-content` | `start` |
 | `gap` | `var(--pug-space-stack-md)` |
-| `padding` | `var(--pug-space-panel-y) var(--pug-space-panel-x)` |
+| `padding` | `var(--pug-space-panel-x)` |
 | `border` | `0.0625rem solid var(--pug-recipe-card-border)` |
 | `border-radius` | `var(--pug-recipe-card-radius)` |
 | `background` | `var(--pug-treatment-surface-fill, var(--pug-recipe-card-fill))` |

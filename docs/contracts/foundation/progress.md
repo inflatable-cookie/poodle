@@ -25,7 +25,7 @@ Updated: 2026-03-15
 | Part | Element | Required | Description |
 |------|---------|----------|-------------|
 | Root | `div` | yes | progress host and track background |
-| Indicator | `div` | yes | completed or active fill bar |
+| Indicator | `span` | yes | completed or active fill bar |
 
 The root element doubles as the track. There is no separate track element.
 
@@ -125,7 +125,7 @@ internal state.
 | `width` | `100%` |
 | `min-height` | `0.5rem` |
 | `border-radius` | `999px` |
-| `background` | `color-mix(in srgb, var(--pug-surface) 80%, var(--pug-color-background-elevated))` |
+| `background` | `color-mix(in srgb, var(--pug-surface) 96%, var(--pug-color-text-primary))` |
 
 ### Indicator `.progress__indicator`
 

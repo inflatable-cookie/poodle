@@ -217,7 +217,7 @@ Updated: 2026-03-15
 | `flex-wrap` | `wrap` |
 | `gap` | `var(--pug-space-inline-sm)` |
 | `justify-content` | `flex-end` |
-| `margin-top` | `var(--pug-space-stack-md)` |
+| `margin-top` | `var(--pug-space-stack-lg)` |
 
 ## 9. Svelte Notes
 
@@ -275,7 +275,7 @@ Updated: 2026-03-15
 - [ ] title typography (heading-family, 1rem, 1.2) matches
 - [ ] description color (text-secondary) and margin reset match
 - [ ] actions flex layout (wrap, flex-end, space-inline-sm gap) matches
-- [ ] actions margin-top (space-stack-md) matches
+- [ ] actions margin-top (space-stack-lg) matches
 - [ ] wrapper z-index uses overlay-z-dialog
 - [ ] wrapper padding (2rem) matches
 

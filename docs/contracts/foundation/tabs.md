@@ -53,6 +53,7 @@ Updated: 2026-03-15
 | `activationMode` | `"automatic" \| "manual"` | `"automatic"` | no | whether focus changes selection |
 | `isReorderable` | `boolean` | `false` | no | enables drag-and-drop and keyboard reorder |
 | `ariaLabel` | `string \| null` | `null` | no | accessible name for the tablist |
+| `showTooltips` | `boolean` | `false` | no | shows tooltips on tab hover |
 
 ### TabItem Type
 
@@ -66,7 +67,7 @@ Updated: 2026-03-15
 
 ### Controlled And Uncontrolled
 
-- controlled: `value` plus `onValueChange` event
+- controlled: `value` plus `valueChange` event (Svelte dispatch)
 - uncontrolled: `defaultValue` — internal state tracks selection
 - fallback: first non-disabled tab is selected when neither value nor defaultValue is set
 - `activationMode` changes whether focus movement commits selection

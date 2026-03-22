@@ -50,6 +50,7 @@ Updated: 2026-03-15
 type BulkAction = {
   id: string;
   label: string;
+  icon?: string;
   tone?: "default" | "danger";
 };
 ```
@@ -125,7 +126,7 @@ type BulkAction = {
 | `padding` | `var(--pug-space-panel-y) var(--pug-space-panel-x)` |
 | `border` | `0.0625rem solid var(--pug-color-border-subtle)` |
 | `border-radius` | `var(--pug-radius-surface)` |
-| `background` | `color-mix(in srgb, var(--pug-color-accent-base) 10%, var(--pug-color-background-panel))` |
+| `background` | `--pug-recipe-bulk-fill: color-mix(in srgb, var(--pug-color-background-panel) 93%, var(--pug-color-text-primary))` |
 
 ### Summary
 
@@ -186,8 +187,9 @@ type BulkAction = {
 - `data-tone` attribute on danger action buttons
 - Summary text uses template: `"{selectionCount} selected"` with optional
   `"of {totalCount}"` span
-- Action buttons rendered from `actions` array prop
-- Clear action may be a ghost button or integrated into summary
+- Action buttons rendered from `actions` array prop; actions with `icon` render as IconButton
+- Clear button is an IconButton with `icon="x"`
+- Summary count is wrapped in a `<strong>` tag
 
 ## 10. GPUI Notes
 

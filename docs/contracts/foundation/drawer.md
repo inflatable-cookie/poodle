@@ -98,11 +98,12 @@ modal vs non-modal posture.
 
 ### Semantics
 
-- Role: dialog-like overlay semantics with modal state depending on `isModal`
+- Surface: `role="dialog"` on the surface element
 - Required attributes: accessible title from `title` prop or `ariaLabel`,
   description when present, drawer modality state
 - Optional attributes: close button label and helper relations
 - Labeling rules: non-modal drawers still need a stable accessible label
+- Backdrop: `aria-label="Dismiss drawer backdrop"` on the backdrop button
 
 ### Keyboard
 
@@ -238,6 +239,7 @@ modal vs non-modal posture.
 | Attribute | Source |
 |-----------|--------|
 | `data-edge` | `edge` prop |
+| `data-modal` | `isModal` prop |
 
 ## 9. Svelte Notes
 

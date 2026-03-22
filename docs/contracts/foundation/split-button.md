@@ -62,8 +62,9 @@ type MenuItem = {
   value: string;
   label: string;
   isDisabled?: boolean;
+  kind?: "action";
 } | {
-  separator: true;
+  kind: "separator";
 };
 ```
 

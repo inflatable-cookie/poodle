@@ -191,8 +191,9 @@ are required. Exactly one of three segments is always selected.
 - Uses native `<button>` elements with `role="radio"` and `aria-checked`
 - Root uses `role="radiogroup"` with `aria-label` from prop
 - Fixed segment order is enforced: excluded, default, included
-- `data-value` attribute on each segment for styling hooks
+- `data-state` attribute on each segment for styling hooks
 - `data-selected` attribute on the currently selected segment
+- Note: keyboard navigation (arrow keys, Space) is not currently implemented; only click events change the selected segment
 - Semantic background coloring uses status-danger (excluded), background-elevated
   (default), and status-success (included) via color-mix
 - Transition uses motion-duration-interaction and motion-easing-standard tokens

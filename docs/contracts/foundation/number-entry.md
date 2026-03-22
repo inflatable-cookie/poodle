@@ -70,7 +70,7 @@ Updated: 2026-03-15
 | valid | `validationState="valid"` | border-color changes to `status-success` |
 | pending | `validationState="pending"` | border-color changes to `accent-base` |
 | disabled | `isDisabled=true` | non-interactive, stepper buttons show `cursor: not-allowed`, `opacity: state-opacity-disabled` |
-| readOnly | `isReadOnly=true` | selectable but not editable |
+| readOnly | `isReadOnly=true` | selectable but not editable; stepper buttons also disabled |
 
 ### Component States
 
@@ -86,9 +86,9 @@ Updated: 2026-03-15
 | Event | When It Fires | Payload | Notes |
 |-------|---------------|---------|-------|
 | `valueChange` | numeric value changes (commit) | `{ value: number \| null }` | fires on blur-commit, stepper action, or keyboard step |
-| `submit` | Enter key pressed | none | signals explicit commit |
-| `increment` | value stepped up | none | via stepper button or ArrowUp |
-| `decrement` | value stepped down | none | via stepper button or ArrowDown |
+| `submit` | Enter key pressed | `{ value: number \| null }` | signals explicit commit |
+| `increment` | value stepped up | `{ value: number \| null }` | via stepper button or ArrowUp |
+| `decrement` | value stepped down | `{ value: number \| null }` | via stepper button or ArrowDown |
 | `focus` | control receives focus | native event | passthrough |
 | `blur` | control loses focus | native event | triggers clamp-and-snap logic |
 
@@ -98,7 +98,7 @@ Updated: 2026-03-15
 
 - Role: uses `<input type="text" inputmode="decimal">` (not `type="number"` to avoid browser-native spinner conflicts)
 - Required attributes: accessible name from external label or `ariaLabel`
-- Optional attributes: `aria-describedby` from `describedBy`, `aria-invalid` when validationState is `"invalid"`, `aria-readonly` when `isReadOnly`
+- Optional attributes: `aria-describedby` from `describedBy`, `aria-invalid` when validationState is `"invalid"`, `aria-readonly` when `isReadOnly`, `aria-busy` when validationState is `"pending"`
 - Labeling rules: placeholder text never counts as the accessible name
 
 ### Keyboard

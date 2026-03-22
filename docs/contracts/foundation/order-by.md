@@ -211,7 +211,7 @@ type ActiveSort = {
 | Property | Value |
 |----------|-------|
 | `outline` | `var(--pug-border-width-focus) solid var(--pug-color-accent-focusRing)` |
-| `outline-offset` | `0.125rem` |
+| `outline-offset` | `0.0625rem` |
 
 ### Arrow
 
@@ -260,7 +260,7 @@ type ActiveSort = {
 
 - Toggle cycle: clicking inactive field sets asc; clicking active asc field
   sets desc; clicking active desc field clears sort (null)
-- `data-active`, `data-direction` attributes on active field button
+- `.order-by__field--active` CSS class on active field button (not `data-active` attribute), `data-direction` attribute for direction
 - Reset button conditionally rendered when activeSort is non-null
 - `aria-pressed` on each field button reflects active state
 - Toolbar keyboard navigation uses `roving tabindex` pattern

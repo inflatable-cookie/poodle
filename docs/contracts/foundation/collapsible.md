@@ -142,7 +142,7 @@ Updated: 2026-03-15
 | `padding` | `0.875rem 1rem` |
 | `border` | `0.0625rem solid color-mix(in srgb, var(--pug-color-border-subtle) 42%, transparent)` |
 | `border-radius` | `var(--pug-radius-surface)` |
-| `background` | `color-mix(in srgb, var(--pug-surface) 50%, var(--pug-color-background-elevated))` |
+| `background` | `color-mix(in srgb, var(--pug-surface) 88%, var(--pug-color-text-primary))` |
 | `box-shadow` | `inset 0 0.0625rem 0 color-mix(in srgb, var(--pug-color-text-inverse) 8%, transparent)` |
 
 ### Root closed (`.collapsible[data-open="false"]`)

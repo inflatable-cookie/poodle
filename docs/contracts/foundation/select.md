@@ -151,8 +151,8 @@ SelectItems: Array<SelectOption | SelectOptionGroup>
 | Property | Value |
 |----------|-------|
 | `border-color` | `var(--pug-color-accent-focusRing)` |
-| `background` | `var(--pug-treatment-fill-focus, var(--pug-color-background-surface))` |
-| `box-shadow` | `var(--pug-treatment-shadow-focus, 0 0 0 var(--pug-border-width-focus) color-mix(in srgb, var(--pug-color-accent-focusRing) 28%, transparent))` |
+| `background` | `var(--pug-treatment-interactive-subtle-fill-focus, var(--pug-color-background-surface))` |
+| `box-shadow` | `var(--pug-treatment-interactive-subtle-shadow-focus, 0 0 0 var(--pug-border-width-focus) color-mix(in srgb, var(--pug-color-accent-focusRing) 28%, transparent))` |
 
 ### Root — has disabled select
 

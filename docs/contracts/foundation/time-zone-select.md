@@ -39,7 +39,7 @@ Updated: 2026-03-15
 | `id` | `string \| undefined` | `undefined` | no | HTML id for the select element |
 | `value` | `string \| null` | `null` | no | controlled selected timezone identifier |
 | `defaultValue` | `string \| null` | `null` | no | uncontrolled initial timezone |
-| `placeholder` | `string` | `"Select time zone"` | no | shown when no value selected |
+| `placeholder` | `string \| null` | `"Select time zone"` | no | shown when no value selected |
 | `options` | `TimeZoneOption[]` | `defaultTimeZoneOptions()` | no | timezone option list |
 | `isDisabled` | `boolean` | `false` | no | disables the select |
 | `ariaLabel` | `string \| null` | `null` | no | required when no visible label exists |
@@ -49,7 +49,7 @@ Updated: 2026-03-15
 ### Type Definitions
 
 ```
-TimeZoneOption: { value: string; label: string }
+TimeZoneOption: { value: string; label: string; isDisabled?: boolean }
 ```
 
 ### Controlled And Uncontrolled
@@ -190,7 +190,7 @@ TimeZoneOption: { value: string; label: string }
 - Uses a native `<select>` element for full platform accessibility
 - `appearance: none` on the select removes native browser chrome; the custom indicator provides the disclosure chevron
 - `data-placeholder="true"` attribute on shell signals placeholder state for CSS targeting
-- Placeholder rendered as a disabled, hidden `<option>` with `selected` when no value is set
+- Placeholder rendered as a disabled `<option>` with `selected` when no value is set
 - `defaultTimeZoneOptions()` utility provides a reasonable IANA timezone list as fallback
 - Transition applies to border-color, box-shadow, and background for smooth focus treatment
 

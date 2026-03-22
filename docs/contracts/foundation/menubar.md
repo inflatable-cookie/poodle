@@ -119,7 +119,7 @@ MenuItem: {
 - Triggers: `role="menuitem"`, `aria-haspopup="menu"`, `aria-expanded`
   reflecting whether their submenu is open, `aria-controls` pointing to
   overlay id
-- Overlay: `role="menu"`, `aria-labelledby` pointing to trigger id
+- Overlay: `role="menu"`, `aria-label={item.label}`
 - Items: `role="menuitem"` for action kind, `role="menuitemcheckbox"` for
   checkbox kind, `role="menuitemradio"` for radio kind
 - Checked items: `aria-checked` attribute

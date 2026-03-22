@@ -1,79 +1,75 @@
 # AppHeader
 
-Status: seed contract
-Updated: 2026-03-11
+Status: contract
+Updated: 2026-03-22
 
 ## 1. Purpose
 
 - Component name: `AppHeader`
-- Layer: `workstation`
-- Summary: a global workstation shell header for app identity, global actions,
-  and window-level utility status
-- In scope: app identity, global action slots, optional status/connection
-  indicators, drag-region posture, shell utility placement
+- Layer: `composites`
+- Summary: a global shell header for app identity, global actions, and
+  window-level utility status
+- In scope: app identity with title and subtitle, global action slots, optional
+  utility indicators, drag-region posture, responsive collapse
 - Out of scope: project-specific title/details, transport controls, timeline or
   mixer widgets
 
 ## 2. Anatomy
 
 ```text
-[Root Header]
+[Root Header]  <header>
   ├── [Identity Region]
-  ├── [Primary Actions] (optional)
-  └── [Utility Status] (optional)
+  │     └── [Title Group]  (when no identity slot)
+  │           ├── <strong> title
+  │           └── <span> subtitle  (optional)
+  ├── [Actions Region]  (optional slot)
+  └── [Utility Region]  (optional slot)
 ```
 
 | Part | Required | Description | Token Targets |
 |------|----------|-------------|---------------|
 | Root Header | yes | top shell chrome | background, border, height |
-| Identity Region | yes | app name/icon/window identity | typography, icon, spacing |
-| Primary Actions | no | global shell actions | gap, action roles |
-| Utility Status | no | connection/status indicators | text, status, spacing |
+| Identity Region | yes | app name/icon or custom identity slot | typography, icon, spacing |
+| Title Group | no | default identity when no slot provided | title + subtitle layout |
+| Actions Region | no | global shell actions | gap, action roles |
+| Utility Region | no | connection/status indicators | text, status, spacing |
 
-## 3. Props And Inputs
-
-### Public Props
+## 3. Props
 
 | Prop | Type | Default | Required | Notes |
 |------|------|---------|----------|-------|
-| `title` | `string \| null` | `null` | no | visible app title |
-| `isDragRegion` | `boolean` | `false` | no | allows native window drag posture where supported |
-| `ariaLabel` | `string \| null` | `null` | no | optional region label |
+| `title` | `string \| null` | `null` | no | visible app title; ignored when `identity` slot is provided |
+| `subtitle` | `string \| null` | `null` | no | secondary text shown alongside title in baseline alignment |
+| `isDragRegion` | `boolean` | `false` | no | enables native window drag posture via `data-drag-region` attribute |
+| `ariaLabel` | `string \| null` | `null` | no | accessible label for the header; falls back to `title` |
 
-### Controlled And Uncontrolled
+## 4. Slots
 
-- declarative shell header
-- global actions and utility-status content remain host-owned children
+| Slot | Purpose | Fallback |
+|------|---------|----------|
+| `identity` | custom identity content (logo, branded element) | title/subtitle text |
+| `actions` | primary global actions (buttons, menubar) | none |
+| `utility` | trailing utility controls (icon buttons, status) | none |
 
-## 4. States
-
-### Visual States
+## 5. States
 
 | State | Trigger | Expected Result |
 |-------|---------|-----------------|
-| standard | default | steady shell header |
+| standard | default | steady shell header with three-column grid |
 | drag-region | `isDragRegion=true` | header supports window dragging where supported |
-| utility-heavy | utility content present | status/utility space reserved |
+| collapsed | viewport <= 45rem | single-column layout; utility region left-aligned |
 
-### Component States
+## 6. Events
 
-State table is sufficient.
+No component-owned events. Child action behavior is host-owned.
 
-## 5. Events
-
-No component-owned events beyond child action behavior.
-
-## 6. Accessibility
+## 7. Accessibility
 
 ### Semantics
 
-- Role: banner, toolbar region, or neutral shell header depending on host
-  structure
-- Required attributes: meaningful label when the header is an addressable shell
-  region
-- Optional attributes: utility-status descriptions
-- Labeling rules: drag-region behavior must not suppress or hide interactive
-  controls from assistive technology
+- Element: `<header>` with `aria-label` (falls back to `title`)
+- Drag-region behavior must not suppress or hide interactive controls from
+  assistive technology
 
 ### Keyboard
 
@@ -83,68 +79,42 @@ No component-owned events beyond child action behavior.
 
 ### Focus And Announcement
 
-- focus entry: the header itself is not focusable by default
-- focus exit: utility/status updates should not reorder global actions
-- live-region behavior: none by default; child status indicators own any needed
-  announcements
+- The header itself is not focusable by default
+- Utility/status updates should not reorder global actions
 - GPUI-native accessibility mapping notes: GPUI must preserve labeled header or
   toolbar structure even when integrated with native title-bar mechanics
 
-## 7. Layout
+## 8. Layout
 
-### Sizing
+### Default (>45rem)
 
-- fixed shell-header height within theme control-size expectations
-- actions and status may compress or overflow according to host policy
+- Three-column grid: `minmax(0, 1fr) auto auto`
+- Gap: `--pug-space-inline-md`
+- Min-height: `2.75rem`
+- Padding: `0.375rem --pug-space-panel-x`
+- Border-bottom: `0.0625rem solid --pug-color-border-subtle`
+
+### Responsive (<=45rem)
+
+- Single-column grid: `1fr`
+- Utility region switches to `justify-content: flex-start`
 
 ### Composition
 
-- parent expectations: top-level workspace shell
-- child expectations: action clusters, status indicators, identity text/icon
-- resizing rules: identity remains stable while utility actions compress first
+- Parent expectations: top-level workspace shell
+- Child expectations: action clusters, status indicators, identity text/icon
+- Resizing rules: identity remains stable while utility actions compress first
 
-## 8. Token Usage
+## 9. Token Usage
 
 | Part | Token | Purpose |
 |------|-------|---------|
-| Root Header | shell background, border, and height roles | shell chrome |
-| Identity Region | typography and icon roles | app identity |
-| Primary Actions | action spacing roles | command grouping |
-| Utility Status | status and subdued text roles | shell metadata |
+| Root Header | `background-panel`, `border-subtle` | shell chrome |
+| Identity title | font-size `0.9375rem`, line-height `1.2` | app identity |
+| Subtitle | `text-secondary`, font-size `0.75rem` | secondary text |
+| Actions/Utility | `space-inline-sm` gap | control grouping |
 
-## 9. Svelte Notes
-
-- expected substrate: `Surface`, `Inline`, and button/status primitives
-- wrapper strategy: browser drag-region styling stays implementation detail
-
-## 10. GPUI Notes
-
-- expected crate/module surface: `pug_gpui::workstation::app_header`
-- implementation-only details: native window-chrome integration is allowed, but
-  control order, labeling, and utility semantics remain Pug-owned
-
-## 11. Parity Checklist
-
-### Tier 1: Strict Parity
-
-- [ ] app-header identity and utility-region semantics match
-- [ ] interactive control order and naming match
-
-### Tier 2: Visual Parity
-
-- [ ] shell-header proportion and hierarchy use comparable token roles
-
-### Tier 3: Implementation Freedom
-
-- [ ] drag-region and native chrome integration stay internal
-
-## 12. Known Deltas
-
-| Delta | Why Allowed | Approval Status | Follow-Up |
-|-------|-------------|-----------------|-----------|
-| native drag integration may differ | runtime window systems differ | allowed | keep interaction order and labeling strict |
-
-## 13. Specimen Definitions
+## 10. Specimen Definitions
 
 ### Full App Window Header (Title + Menubar + Utility)
 
@@ -169,15 +139,3 @@ No component-owned events beyond child action behavior.
 | Label | Props / Config | Expected Visual |
 |-------|---------------|-----------------|
 | Custom identity slot | identity slot with custom logo badge ("P") and bold "Pug Studio" text, utility slot with bell and user ghost IconButtons | Header with custom branded identity region replacing default title, trailing utility icons |
-
-## 14. Approval And Adoption Notes
-
-- contract status: `seed contract`
-- approvers: pending
-- downstream adopters: workstation window shells, multi-window desktop apps
-- future follow-up: connect status-bar and deeper shell-utility patterns later
-
-## Next Task
-
-Use `AppHeader` for global workstation shell identity and keep project- or
-surface-specific context in `ProjectHeader`.

@@ -1,25 +1,142 @@
 # ActionDiscoveryPanel
 
-Status: seed contract
-Updated: 2026-03-11
+Status: contract
+Updated: 2026-03-22
 
 ## 1. Purpose
 
 - Component name: `ActionDiscoveryPanel`
-- Layer: `workstation`
-- Summary: an inline workstation discovery surface for suggested, recent, or scoped command groups outside the modal palette
-- In scope: grouped action sections, invocation hinting, actionable rows, and empty discovery posture
-- Out of scope: global modal launch behavior, full ranking engines, persistence of recents, or app-specific command generation
+- Layer: `composites`
+- Summary: an inline discovery surface for suggested, recent, or scoped command
+  groups; used standalone or composed inside `CommandPalette`
+- In scope: grouped action sections, active-result tracking, keyboard navigation,
+  loading/error/empty/no-results posture, badge and shortcut display
+- Out of scope: global modal launch behavior, full ranking engines, persistence
+  of recents, or app-specific command generation
 
-## 2. Accessibility
+## 2. Types
 
-- grouped action sections need visible headings and accessible action names
-- grouped sections should remain addressable as navigation/discovery structure rather than anonymous stacks
-- inline discovery actions must be keyboard reachable without requiring the modal palette
-- empty discovery states must stay explicit and avoid collapsing into blank shells
-- GPUI-native accessibility mapping notes: GPUI must preserve grouped discovery structure and direct action reachability even where inline workstation panels are fully custom-rendered
+### CommandActionItem
 
-## 3. Specimen Definitions
+```ts
+type CommandActionItem = {
+  id: string;
+  title: string;
+  description?: string | null;
+  group?: string | null;
+  shortcut?: string | null;
+  keywords?: string[];
+  badge?: string | null;
+  isDisabled?: boolean;
+};
+```
+
+### DiscoveryState
+
+```ts
+type DiscoveryState = "ready" | "loading" | "error" | "empty" | "no-results";
+```
+
+## 3. Anatomy
+
+```text
+[Root]  role="listbox"
+  ├── [State Region]  (loading / error / empty / no-results)
+  │     ├── [Skeleton Rows]  (loading)
+  │     └── [EmptyState]     (error / empty / no-results)
+  └── [Group...]  (ready)
+        ├── [Eyebrow]  group heading
+        └── [List]  <ul>
+              └── [Item...]  <li> role="option" aria-selected
+                    └── [ListCard]
+                          ├── title
+                          ├── subtitle  (description)
+                          └── trailing slot
+                                ├── [Badge]  (optional)
+                                └── [Kbd]    (optional shortcut)
+```
+
+| Part | Required | Description |
+|------|----------|-------------|
+| Root | yes | scrollable listbox container |
+| Group | yes (when ready) | section wrapper with Eyebrow heading |
+| List | yes (when ready) | unordered list of action items |
+| Item | yes (when ready) | individual action option with ListCard |
+| Skeleton Rows | yes (when loading) | 5 placeholder rows |
+| EmptyState | yes (when error/empty/no-results) | contextual empty message |
+
+## 4. Props
+
+| Prop | Type | Default | Required | Notes |
+|------|------|---------|----------|-------|
+| `items` | `CommandActionItem[]` | `[]` | no | full list of action items; grouped by `item.group` (defaults to `"Commands"`) |
+| `state` | `DiscoveryState` | `"ready"` | no | controls which region renders |
+| `activeId` | `string \| null` | `null` | no | currently highlighted item id; two-way bindable |
+| `ariaLabel` | `string` | `"Actions"` | no | accessible label for the listbox root |
+
+## 5. Events
+
+| Event | When It Fires | Payload |
+|-------|---------------|---------|
+| `itemSelect` | user clicks an item or calls `selectActive()` | `{ id: string }` |
+| `activeChange` | active item changes via keyboard or mouse | `{ id: string \| null }` |
+
+## 6. Exported Methods
+
+| Method | Signature | Description |
+|--------|-----------|-------------|
+| `moveActive` | `(step: 1 \| -1) => void` | move active highlight up or down through enabled items, wrapping at boundaries |
+| `moveToBoundary` | `(direction: "start" \| "end") => void` | jump active highlight to first or last enabled item |
+| `selectActive` | `() => void` | dispatch `itemSelect` for the currently active item |
+| `getEnabledItems` | `() => CommandActionItem[]` | return the current list of non-disabled items |
+
+These methods are designed for parent components (such as `CommandPalette`) to
+drive keyboard navigation from the outside.
+
+## 7. States
+
+| State | Trigger | Expected Result |
+|-------|---------|-----------------|
+| ready | `state="ready"` and items present | grouped action list rendered |
+| loading | `state="loading"` | 5 skeleton rows shown |
+| error | `state="error"` | EmptyState with title "Could not load actions" |
+| empty | `state="empty"` | EmptyState with title "No actions available" |
+| no-results | `state="no-results"` | EmptyState with title "No matching actions", search variant |
+
+## 8. Accessibility
+
+### Semantics
+
+- Root: `role="listbox"` with `aria-label`
+- Each item: `role="option"` with `aria-selected` reflecting active state
+- Disabled items are rendered but not navigable via `moveActive`
+
+### Keyboard
+
+Keyboard navigation is not handled internally. The parent component must call
+the exported methods (`moveActive`, `moveToBoundary`, `selectActive`) in
+response to keyboard events.
+
+### Focus And Announcement
+
+- The active item scrolls into view automatically via `scrollIntoView({ block: "nearest" })`
+- Mouse enter and focus on a ListCard sets that item as active
+
+## 9. Visual Rules
+
+- Items grouped by `item.group` field; default group name is `"Commands"`
+- Active item receives accent-tinted background with inset box-shadow
+- Badge and shortcut (kbd) rendered in trailing slot with pill styling
+- Shortcut uses monospace (`code-family`) typography
+- Skeleton rows during loading: two Skeleton elements per row (48% and 20% width)
+
+## 10. Composition
+
+- Composes: `Eyebrow`, `ListCard`, `Skeleton`, `EmptyState`
+- Used by: `CommandPalette`
+- Items are filtered internally to derive `enabledItems` (items where `isDisabled` is falsy)
+
+## 11. Specimen Definitions
 
 ### Grouped Actions
 
@@ -37,8 +154,4 @@ Updated: 2026-03-11
 
 | Label | Props / Config | Expected Visual |
 |-------|---------------|-----------------|
-| Empty state | `items=[]`, `state="empty"` | Empty discovery posture with no action rows visible |
-
-## 4. Next Task
-
-Use `ActionDiscoveryPanel` when workstation surfaces need visible suggested or recent actions without forcing all discovery through the modal launcher.
+| Empty state | `items=[]`, `state="empty"` | Empty discovery posture with "No actions available" message |

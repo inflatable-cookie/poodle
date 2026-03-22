@@ -246,7 +246,7 @@ Displays check icon when `copied` is true, copy icon otherwise.
 | `display` | `block` |
 | `font-family` | `var(--pug-typography-code-family)` |
 | `font-size` | `0.8125rem` |
-| `line-height` | `1.625` |
+| `line-height` | `1.4` |
 | `color` | `var(--pug-color-text-primary)` |
 | `tab-size` | `2` |
 | `white-space` | `pre` |

@@ -142,7 +142,7 @@ fill color in the current implementation.
 | `overflow` | `hidden` |
 | `min-height` | `0.5rem` |
 | `border-radius` | `999px` |
-| `background` | `color-mix(in srgb, var(--pug-surface) 80%, var(--pug-color-background-elevated))` |
+| `background` | `color-mix(in srgb, var(--pug-surface) 96%, var(--pug-color-text-primary))` |
 
 ### Fill `.meter__fill`
 

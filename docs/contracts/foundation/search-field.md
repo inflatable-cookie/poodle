@@ -145,8 +145,8 @@ Section 8 for the full root, focus, validation, and disabled token tables.
 | `display` | `inline-flex` |
 | `align-items` | `center` |
 | `justify-content` | `center` |
-| `width` | `var(--pug-size-icon-default)` |
-| `height` | `var(--pug-size-icon-default)` |
+| `width` | `var(--pug-icon-size-default)` |
+| `height` | `var(--pug-icon-size-default)` |
 | `padding` | `0` |
 | `border` | `0` |
 | `background` | `transparent` |
@@ -166,7 +166,7 @@ Section 8 for the full root, focus, validation, and disabled token tables.
 | Property | Value |
 |----------|-------|
 | `outline` | `var(--pug-border-width-focus) solid var(--pug-color-accent-focusRing)` |
-| `outline-offset` | `0` |
+| `outline-offset` | `0.125rem` |
 
 ## 9. Svelte Notes
 

@@ -143,7 +143,7 @@ are required.
 | `padding` | `0.125rem` |
 | `border` | `0.0625rem solid color-mix(in srgb, var(--pug-color-border-subtle) 84%, transparent)` |
 | `border-radius` | `var(--pug-radius-control)` |
-| `background` | `color-mix(in srgb, var(--pug-surface) 72%, var(--pug-color-background-elevated))` |
+| `background` | `color-mix(in srgb, var(--pug-surface) 93%, var(--pug-color-text-primary))` |
 
 ### Segment `.segmented-control__segment`
 

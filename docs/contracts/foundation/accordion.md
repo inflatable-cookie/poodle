@@ -167,7 +167,7 @@ Updated: 2026-03-15
 | `padding` | `0.875rem 1rem` |
 | `border` | `0.0625rem solid color-mix(in srgb, var(--pug-color-border-subtle) 36%, transparent)` |
 | `border-radius` | `var(--pug-radius-surface)` |
-| `background` | `color-mix(in srgb, var(--pug-surface) 50%, var(--pug-color-background-elevated))` |
+| `background` | `color-mix(in srgb, var(--pug-surface) 93%, var(--pug-color-text-primary))` |
 | `box-shadow` | `inset 0 0.0625rem 0 color-mix(in srgb, var(--pug-color-text-inverse) 8%, transparent)` |
 
 ### Heading `.accordion__heading`
@@ -333,7 +333,7 @@ Accordion with `type: "single"` — only one item open at a time:
 
 | Item title | Panel content | Initial state |
 |-----------|---------------|---------------|
-| Getting started | "Follow these steps to set up your project and start building." | closed |
+| Getting started | "Follow these steps to set up your project and start building." | open (`defaultValue="getting-started"`) |
 | API reference | "Complete documentation for all available endpoints and methods." | closed |
 | Accessibility | "Guidelines for building accessible components with proper ARIA support." | closed |
 
@@ -343,8 +343,8 @@ Accordion with `type: "multiple"` — multiple items can be open simultaneously:
 
 | Item title | Panel content | Initial state |
 |-----------|---------------|---------------|
-| Design tokens | "Tokens define the visual language of your application." | closed |
-| Keyboard shortcuts | "Common shortcuts for navigating and interacting with components." | closed |
+| Design tokens | "Tokens define the visual language of your application." | open (`defaultValue={["design", "keyboard"]}`) |
+| Keyboard shortcuts | "Common shortcuts for navigating and interacting with components." | open (`defaultValue={["design", "keyboard"]}`) |
 | Known issues | "Current limitations and workarounds for known bugs." | closed |
 
 ## 14. Approval And Adoption Notes

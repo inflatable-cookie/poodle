@@ -72,7 +72,7 @@ Updated: 2026-03-15
 
 - Role: `toolbar` (`role="toolbar"` on root)
 - `aria-label`: from prop (required when no visible title exists)
-- `aria-orientation`: set to match `orientation` prop
+- `aria-orientation`: set to match `orientation` prop (note: not currently implemented in Svelte; only `data-orientation` is set)
 - `tabindex="0"` on root for initial focus entry into the toolbar group
 - Slotted items: `tabindex="-1"` except the currently roving-focused item (`tabindex="0"`)
 
@@ -85,8 +85,8 @@ Updated: 2026-03-15
 | `Arrow Left` | moves focus to previous item (horizontal mode, wrapping) |
 | `Arrow Down` | moves focus to next item (vertical mode, wrapping) |
 | `Arrow Up` | moves focus to previous item (vertical mode, wrapping) |
-| `Home` | moves focus to first item |
-| `End` | moves focus to last item |
+| `Home` | moves focus to first item (not currently implemented) |
+| `End` | moves focus to last item (not currently implemented) |
 
 ### Focus And Announcement
 

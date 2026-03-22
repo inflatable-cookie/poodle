@@ -1,30 +1,41 @@
-# StateTile
+# MetricTile
 
 Status: seed contract
-Updated: 2026-03-13
+Updated: 2026-03-22
 
 ## 1. Purpose
 
-- Component name: `StateTile`
+- Component name: `MetricTile`
 - Layer: `composites`
-- Summary: a compact metadata display tile showing a label and its current value,
-  used for exposing state signals, configuration keys, or runtime metadata
-- In scope: label-value pairs with contained surface treatment, code-style labels
-- Out of scope: interactive editing, multi-value display, charts or gauges
+- Summary: a compact metric display tile showing a label, current value, optional
+  trend indicator, and optional sparkline chart
+- In scope: label-value pairs with contained surface treatment, code-style labels,
+  trend direction with icon and label, inline sparkline SVG
+- Out of scope: interactive editing, multi-value display, full charts or gauges
 
 ## 2. Anatomy
 
 ```text
 [Root]
   ├── [Label]
-  └── [Value]
+  ├── [Body]
+  │     ├── [Value]
+  │     └── [Sparkline]  (optional)
+  └── [Trend]            (optional)
+        ├── [TrendArrow]
+        └── [TrendLabel]  (optional)
 ```
 
 | Part | Required | Description | Token Targets |
 |------|----------|-------------|---------------|
 | Root | yes | contained tile surface | background, radius, border |
 | Label | yes | code-style metadata key | typography (code family), secondary color |
+| Body | yes | horizontal row holding value and optional sparkline | layout only |
 | Value | yes | bold display value | typography (body), primary color |
+| Sparkline | no | inline SVG line chart rendered from data points | tertiary color for stroke |
+| Trend | no | trend direction indicator row | status colors (success, danger, tertiary) |
+| TrendArrow | no | icon indicating direction (trending-up, trending-down, arrow-right) | inherits trend color |
+| TrendLabel | no | textual label for the trend (e.g. "+12.3%") | inherits trend color |
 
 ## 3. Props And Inputs
 
@@ -32,13 +43,16 @@ Updated: 2026-03-13
 
 | Prop | Type | Default | Required | Notes |
 |------|------|---------|----------|-------|
-| `label` | `string` | — | yes | metadata key or signal name |
-| `value` | `string` | — | yes | current value to display |
+| `label` | `string` | -- | yes | metadata key or signal name |
+| `value` | `string` | -- | yes | current value to display |
 | `ariaLabel` | `string \| null` | `null` | no | overrides computed `label: value` accessible name |
+| `trend` | `"up" \| "down" \| "flat" \| null` | `null` | no | trend direction indicator |
+| `trendLabel` | `string \| null` | `null` | no | descriptive label for trend (e.g. "+12.3%", "-8%") |
+| `sparklineData` | `number[] \| null` | `null` | no | data points for inline sparkline; requires 2+ values |
 
 ### Controlled And Uncontrolled
 
-- display composite only; value is always externally driven
+- display composite only; all values are externally driven
 
 ## 4. States
 
@@ -47,10 +61,16 @@ Updated: 2026-03-13
 | State | Trigger | Expected Result |
 |-------|---------|-----------------|
 | default | render | contained tile with label above bold value |
+| with-trend | `trend` is non-null | trend row appears below body with directional icon and optional label |
+| with-sparkline | `sparklineData` has 2+ values | inline SVG sparkline appears beside value |
+| trend-up | `trend="up"` | trend text and icon colored with success status color |
+| trend-down | `trend="down"` | trend text and icon colored with danger status color |
+| trend-flat | `trend="flat"` | trend text and icon colored with tertiary text color |
 
 ### Component States
 
-No internal state. StateTile is a pure display component.
+No internal state. MetricTile is a pure display component. The sparkline path is
+derived from `sparklineData` via a pure function.
 
 ## 5. Events
 
@@ -67,6 +87,8 @@ No internal state. StateTile is a pure display component.
 - Optional attributes: `aria-label` for composite accessible name
 - Labeling rules: defaults to `"label: value"` pattern when no explicit
   `ariaLabel` is provided
+- Sparkline SVG is `aria-hidden="true"` (decorative)
+- Trend arrow icon is `aria-hidden="true"` (the trend label conveys meaning)
 
 ### Keyboard
 
@@ -86,6 +108,8 @@ No internal state. StateTile is a pure display component.
 
 - fills available width by default (block-level)
 - minimum content height driven by label + value stack
+- sparkline has fixed dimensions: 4rem wide, 1.5rem tall
+- internal gap: 0.375rem between label, body, and trend rows
 
 ### Composition
 
@@ -97,21 +121,33 @@ No internal state. StateTile is a pure display component.
 
 | Part | Token | Purpose |
 |------|-------|---------|
-| Root | `--pug-color-background-surface` | tile background fill |
+| Root | `--pug-color-background-surface` | tile background fill (60% alpha mix) |
 | Root | `--pug-radius-surface` | corner radius |
+| Root (light) | `--pug-treatment-surface-fill` | light theme override background |
 | Label | `--pug-color-text-secondary` | subdued label color |
 | Label | `--pug-typography-code-family` | monospace label styling |
 | Value | `--pug-color-text-primary` (inherited) | value emphasis |
+| Sparkline | `--pug-color-text-tertiary` | sparkline stroke color |
+| Trend (up) | `--pug-color-status-success` | positive trend color |
+| Trend (down) | `--pug-color-status-danger` | negative trend color |
+| Trend (flat) | `--pug-color-text-tertiary` | neutral trend color |
+| Trend (default) | `--pug-color-text-secondary` | base trend text color |
+| TrendArrow | (inherited) | inherits trend color |
 
 ## 9. Svelte Notes
 
-- simple `<div>` with two styled children
+- root uses `<div class="state-tile">` with CSS class prefix `state-tile__`
+- sparkline is built via a pure `buildSparkline()` function that generates an SVG path
+  from data points (viewBox 0 0 64 24, stroke-width 1.5, round linecap/linejoin)
+- trend icons use the `Icon` primitive with `size="sm"`:
+  `trending-up`, `trending-down`, `arrow-right`
 - light theme override uses `--pug-treatment-surface-fill`
 
 ## 10. GPUI Notes
 
-- expected crate/module surface: `pug_gpui::composites::state_tile`
+- expected crate/module surface: `pug_gpui::composites::metric_tile`
 - render as vertical stack of styled text within contained surface
+- sparkline rendering may use platform-specific drawing primitives
 
 ## 11. Parity Checklist
 
@@ -119,15 +155,20 @@ No internal state. StateTile is a pure display component.
 
 - [ ] label and value props have the same meaning
 - [ ] accessible name computation matches
+- [ ] trend prop values and visual mapping match
+- [ ] sparklineData produces consistent visual output
 
 ### Tier 2: Visual Parity
 
 - [ ] tile surface treatment matches
 - [ ] typography hierarchy matches (code label, bold value)
+- [ ] trend colors map to correct status tokens
+- [ ] sparkline dimensions and stroke match
 
 ### Tier 3: Implementation Freedom
 
 - [ ] rendering internals stay internal
+- [ ] sparkline path generation algorithm may differ
 
 ## 12. Known Deltas
 

@@ -19,16 +19,16 @@ Updated: 2026-03-15
 ```text
 [Root .duration-input]  <div role="group">
   ├── [Hours Segment .duration-input__segment]
-  │   ├── [Label .duration-input__label]  <span> "HH"
-  │   └── [Field .duration-input__field]  <input type="text">
+  │   ├── [Label .duration-input__label]  <label for="dur-hours"> "h"
+  │   └── [Field .duration-input__field]  <input type="text" id="dur-hours">
   ├── [Separator .duration-input__separator]  <span> ":"
   ├── [Minutes Segment .duration-input__segment]
-  │   ├── [Label .duration-input__label]  <span> "MM"
-  │   └── [Field .duration-input__field]  <input type="text">
+  │   ├── [Label .duration-input__label]  <label for="dur-minutes"> "m"
+  │   └── [Field .duration-input__field]  <input type="text" id="dur-minutes">
   ├── [Separator .duration-input__separator]  <span> ":" (conditional)
   └── [Seconds Segment .duration-input__segment]  (conditional, when showSeconds)
-      ├── [Label .duration-input__label]  <span> "SS"
-      └── [Field .duration-input__field]  <input type="text">
+      ├── [Label .duration-input__label]  <label for="dur-seconds"> "s"
+      └── [Field .duration-input__field]  <input type="text" id="dur-seconds">
 ```
 
 | Part | Required | Description | Token Targets |
@@ -84,7 +84,7 @@ Updated: 2026-03-15
 
 - Root: `role="group"`, `aria-label` from prop
 - Each field: `<input>` with `aria-label` ("Hours", "Minutes", "Seconds")
-- Labels: `aria-hidden="true"` (visual only, fields have own aria-labels)
+- Labels: `<label>` elements with `for` attributes linking to hardcoded field IDs (`dur-hours`, `dur-minutes`, `dur-seconds`)
 - Disabled: fields receive `disabled` attribute
 
 ### Keyboard
