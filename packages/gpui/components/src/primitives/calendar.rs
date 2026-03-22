@@ -176,6 +176,9 @@ impl IntoElement for Calendar {
             .border_1()
             .border_color(border);
 
+        let focus_ring = resolve_color(theme, "semantic.color.accent.focusRing");
+        cal = cal.focus(move |s| s.border_color(focus_ring));
+
         if spec.is_disabled {
             cal = cal.opacity(disabled_opacity);
         }

@@ -88,6 +88,7 @@ impl IntoElement for CommandPalette {
         let accent = resolve_color(theme, "semantic.color.accent.base");
         let disabled_opacity = resolve_opacity(theme, "semantic.state.opacity.disabled");
         let hover_bg = resolve_color(theme, "semantic.color.background.elevated");
+        let focus_ring = resolve_color(theme, "semantic.color.accent.focusRing");
 
         let mut palette = div()
             .flex()
@@ -208,8 +209,12 @@ impl IntoElement for CommandPalette {
                 row = row.text_color(text_primary);
             }
 
+            row = row.focus(move |s| s.border_color(focus_ring));
+
             if action.is_disabled {
-                row = row.opacity(disabled_opacity);
+                row = row
+                    .opacity(disabled_opacity)
+                    .cursor(CursorStyle::OperationNotAllowed);
             } else {
                 row = row
                     .cursor_pointer()

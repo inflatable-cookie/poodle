@@ -80,6 +80,7 @@ impl IntoElement for NavigationMenu {
         let border_subtle = resolve_color(theme, "semantic.color.border.subtle");
         let border_default = resolve_color(theme, "semantic.color.border.default");
         let disabled_opacity = resolve_opacity(theme, self.spec.disabled_opacity_token());
+        let focus_ring = resolve_color(theme, "semantic.color.accent.focusRing");
 
         // Contract: trigger bg 88% surface, border 72% border-subtle
         let trigger_bg = color_mix(surface, gpui::transparent_black(), 0.88);
@@ -134,6 +135,8 @@ impl IntoElement for NavigationMenu {
                     .border_color(trigger_border)
                     .text_color(text_primary);
             }
+
+            trigger = trigger.focus(move |s| s.border_color(focus_ring));
 
             if is_disabled {
                 trigger = trigger

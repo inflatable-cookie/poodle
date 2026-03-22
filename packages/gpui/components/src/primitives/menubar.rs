@@ -72,6 +72,7 @@ impl IntoElement for Menubar {
         let list_radius = resolve_radius(theme, self.spec.list_radius_token());
         let control_radius = resolve_radius(theme, "semantic.radius.control");
         let disabled_opacity = resolve_opacity(theme, self.spec.disabled_opacity_token());
+        let focus_ring = resolve_color(theme, "semantic.color.accent.focusRing");
         let gap = theme.resolve_space(self.spec.trigger_gap_token());
 
         // Contract: list border 72% border-subtle, bg 96% panel
@@ -109,6 +110,8 @@ impl IntoElement for Menubar {
                 .text_size(px(12.0)) // 0.75rem
                 .font_weight(FontWeight::SEMIBOLD)
                 .text_color(text_primary);
+
+            trigger = trigger.focus(move |s| s.border_color(focus_ring));
 
             if is_active {
                 trigger = trigger.bg(trigger_hover);

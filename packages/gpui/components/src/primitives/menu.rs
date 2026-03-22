@@ -84,6 +84,7 @@ impl IntoElement for Menu {
         // Contract: 72% border-subtle
         let separator_color = color_mix(separator_raw, panel, 0.72);
         let disabled_opacity = resolve_opacity(theme, self.spec.disabled_opacity_token());
+        let focus_ring = resolve_color(theme, "semantic.color.accent.focusRing");
 
         // Contract: min-width 14rem, padding 0.25rem
         let mut menu = div()
@@ -131,6 +132,8 @@ impl IntoElement for Menu {
                 .flex()
                 .items_center()
                 .justify_between();
+
+            row = row.focus(move |s| s.border_color(focus_ring));
 
             if is_active {
                 row = row
