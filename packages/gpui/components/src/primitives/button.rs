@@ -6,7 +6,6 @@
 
 use std::time::Duration;
 
-use gpui::prelude::FluentBuilder;
 use gpui::*;
 use pug_gpui::GpuiThemeProvider;
 use pug_primitives::{ButtonSpec, ButtonTone, ButtonVariant, ControlSize, IconSize, IconSpec};

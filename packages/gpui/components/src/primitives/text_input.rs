@@ -4,13 +4,12 @@
 //! a styled container displaying the current value. Real text editing would
 //! require gpui's internal input handling.
 
-use gpui::prelude::FluentBuilder;
 use gpui::*;
 use pug_gpui::GpuiThemeProvider;
 use pug_primitives::{IconSize, IconSpec, TextInputSpec, ValidationState};
 
 use super::icon::Icon;
-use crate::theme_ext::{color_mix, resolve_color, resolve_opacity, resolve_px, resolve_radius};
+use crate::theme_ext::{resolve_color, resolve_opacity, resolve_px, resolve_radius};
 
 /// A real GPUI text input component backed by `TextInputSpec`.
 pub struct TextInput {
@@ -118,7 +117,7 @@ impl IntoElement for TextInput {
             .flex()
             .items_center()
             .gap(inline_gap)
-            .text_sm()
+            .text_size(px(14.0))
             .text_color(text_primary)
             // Contract: focus-within = border switches to focus ring color
             .focus(move |s| s.border_color(focus_ring));

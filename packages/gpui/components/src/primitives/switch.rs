@@ -1,6 +1,5 @@
 //! Switch — real GPUI component backed by SwitchSpec.
 
-use gpui::prelude::FluentBuilder;
 use gpui::*;
 use pug_gpui::GpuiThemeProvider;
 use pug_primitives::SwitchSpec;
@@ -158,7 +157,7 @@ impl IntoElement for Switch {
         if let Some(ref label) = spec.label {
             row = row.child(
                 div()
-                    .text_sm()
+                    .text_size(px(14.0))
                     .text_color(text_primary)
                     .child(label.clone()),
             );

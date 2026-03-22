@@ -3,7 +3,6 @@
 //! Contract: flex-wrap, separator opacity 0.4, body font size,
 //! current item in primary color, links in secondary.
 
-use gpui::prelude::FluentBuilder;
 use gpui::*;
 use pug_gpui::GpuiThemeProvider;
 use pug_primitives::{BreadcrumbItem, BreadcrumbsSpec};
@@ -94,7 +93,7 @@ impl IntoElement for Breadcrumbs {
             .flex_wrap()
             .items_center()
             .gap(gap)
-            .text_sm(); // body size
+            .text_size(px(14.0)); // 0.875rem — body size per contract
 
         let on_navigate = self.on_navigate;
 

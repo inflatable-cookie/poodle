@@ -153,7 +153,10 @@ impl Pagination {
         let radius = self.radius;
         let button_height = self.button_height;
 
+        let page_id = SharedString::from(format!("pug-pg-page-{}", page));
+
         div()
+            .id(page_id)
             .flex()
             .items_center()
             .justify_center()

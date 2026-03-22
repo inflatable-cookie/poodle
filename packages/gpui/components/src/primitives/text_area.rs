@@ -1,12 +1,11 @@
 //! TextArea — real GPUI component backed by TextAreaSpec.
 
-use gpui::prelude::FluentBuilder;
 use gpui::*;
 use pug_adapter::ThemeProvider;
 use pug_gpui::GpuiThemeProvider;
 use pug_primitives::{TextAreaSpec, ValidationState};
 
-use crate::theme_ext::{color_mix, resolve_color, resolve_opacity, resolve_px, resolve_radius};
+use crate::theme_ext::{resolve_color, resolve_opacity, resolve_px, resolve_radius};
 
 /// A real GPUI text area component backed by `TextAreaSpec`.
 pub struct TextArea {
@@ -101,7 +100,7 @@ impl IntoElement for TextArea {
             .bg(surface_bg)
             .border_1()
             .border_color(border)
-            .text_sm()
+            .text_size(px(14.0))
             .text_color(text_col)
             // Contract: focus-within = border switches to focus ring
             .focus(move |s| s.border_color(focus_ring))

@@ -1,12 +1,10 @@
 //! RadioGroup — real GPUI component backed by RadioGroupSpec.
 
-use gpui::prelude::FluentBuilder;
 use gpui::*;
-use pug_adapter::ThemeProvider;
 use pug_gpui::GpuiThemeProvider;
 use pug_primitives::{ChoiceOption, Orientation, RadioGroupSpec};
 
-use crate::theme_ext::{color_mix, resolve_color, resolve_opacity, resolve_px};
+use crate::theme_ext::{resolve_color, resolve_opacity, resolve_px};
 
 /// A real GPUI radio group component backed by `RadioGroupSpec`.
 pub struct RadioGroup {
@@ -131,7 +129,7 @@ impl IntoElement for RadioGroup {
             // Label with contract typography
             row = row.child(
                 div()
-                    .text_sm()
+                    .text_size(px(14.0))
                     .text_color(text_primary)
                     .min_w(px(0.0))
                     .child(option.label.clone())

@@ -2,7 +2,6 @@
 //!
 //! Contract: `docs/contracts/foundation/icon-button.md`
 
-use gpui::prelude::FluentBuilder;
 use gpui::*;
 use pug_gpui::GpuiThemeProvider;
 use pug_primitives::{ButtonTone, ButtonVariant, ControlSize, IconButtonSpec, IconSize, IconSpec};

@@ -3,7 +3,6 @@
 //! Closable file/document tabs distinct from content-switching Tabs.
 //! Contract: focus ring, disabled cursor, spec token usage.
 
-use gpui::prelude::FluentBuilder;
 use gpui::*;
 use pug_adapter::ThemeProvider;
 use pug_gpui::GpuiThemeProvider;

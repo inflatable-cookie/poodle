@@ -1,12 +1,11 @@
 //! Checkbox — real GPUI component backed by CheckboxSpec.
 
-use gpui::prelude::FluentBuilder;
 use gpui::*;
 use pug_gpui::GpuiThemeProvider;
 use pug_primitives::{CheckState, CheckboxSpec, IconSize, IconSpec};
 
 use super::icon::Icon;
-use crate::theme_ext::{color_mix, resolve_color, resolve_opacity, resolve_px, resolve_radius};
+use crate::theme_ext::{resolve_color, resolve_opacity, resolve_px};
 
 /// A real GPUI checkbox component backed by `CheckboxSpec`.
 pub struct Checkbox {
@@ -156,7 +155,7 @@ impl IntoElement for Checkbox {
         if let Some(ref label) = spec.label {
             row = row.child(
                 div()
-                    .text_sm()
+                    .text_size(px(14.0))
                     .text_color(text_primary)
                     .child(label.clone()),
             );

@@ -2,7 +2,6 @@
 //!
 //! Contract: `docs/contracts/foundation/toggle.md`
 
-use gpui::prelude::FluentBuilder;
 use gpui::*;
 use pug_gpui::GpuiThemeProvider;
 use pug_primitives::{ButtonVariant, ControlSize, ToggleLayout, ToggleSpec};
