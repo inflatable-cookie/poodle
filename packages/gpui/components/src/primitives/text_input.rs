@@ -87,10 +87,10 @@ impl IntoElement for TextInput {
 
         let disabled_opacity = resolve_opacity(theme, "semantic.state.opacity.disabled");
         let border = resolve_color(theme, spec.border_token());
-        let surface_bg = resolve_color(theme, "semantic.color.background.surface");
-        let text_primary = resolve_color(theme, "semantic.color.text.primary");
-        let text_secondary = resolve_color(theme, "semantic.color.text.secondary");
-        let elevated = resolve_color(theme, "semantic.color.background.elevated");
+        let surface_bg = resolve_color(theme, spec.fill_token());
+        let text_primary = resolve_color(theme, spec.text_color_token());
+        let text_secondary = resolve_color(theme, spec.placeholder_color_token());
+        let focus_ring = resolve_color(theme, spec.focus_ring_color_token());
 
         let value = spec.current_value();
         let is_empty = value.is_empty();
@@ -101,9 +101,6 @@ impl IntoElement for TextInput {
         };
         let text_col = if is_empty { text_secondary } else { text_primary };
 
-        // Contract: hover = color-mix with elevated
-        let hover_bg = color_mix(surface_bg, elevated, 0.84);
-
         let id_str = if let Some(ref suffix) = self.id_suffix {
             format!("pug-input-{}", suffix)
         } else {
@@ -112,7 +109,7 @@ impl IntoElement for TextInput {
 
         let mut el = div()
             .id(SharedString::from(id_str))
-            .h(control_height)
+            .min_h(control_height) // contract: min-height, not fixed height
             .px(inline_padding)
             .rounded(control_radius)
             .bg(surface_bg)
@@ -121,14 +118,13 @@ impl IntoElement for TextInput {
             .flex()
             .items_center()
             .gap(inline_gap)
-            .text_sm();
+            .text_sm()
+            .text_color(text_primary)
+            // Contract: focus-within = border switches to focus ring color
+            .focus(move |s| s.border_color(focus_ring));
 
         if spec.is_disabled {
-            el = el.opacity(disabled_opacity);
-        } else {
-            el = el
-                .cursor_pointer()
-                .hover(move |s| s.bg(hover_bg));
+            el = el.opacity(disabled_opacity).cursor(CursorStyle::OperationNotAllowed);
         }
 
         // Leading icon — render via Icon

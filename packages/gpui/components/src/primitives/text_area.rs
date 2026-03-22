@@ -84,7 +84,7 @@ impl IntoElement for TextArea {
         let text_col = if is_empty { text_secondary } else { text_primary };
 
         let row_height_f = spec.rows as f32 * line_height_f;
-        let hover_bg = color_mix(surface_bg, elevated, 0.84);
+        let focus_ring = resolve_color(theme, "semantic.color.accent.focusRing");
 
         let id_str = if let Some(ref suffix) = self.id_suffix {
             format!("pug-textarea-{}", suffix)
@@ -103,12 +103,12 @@ impl IntoElement for TextArea {
             .border_color(border)
             .text_sm()
             .text_color(text_col)
+            // Contract: focus-within = border switches to focus ring
+            .focus(move |s| s.border_color(focus_ring))
             .child(display_text);
 
         if spec.is_disabled {
-            el = el.opacity(disabled_opacity);
-        } else {
-            el = el.hover(move |s| s.bg(hover_bg));
+            el = el.opacity(disabled_opacity).cursor(CursorStyle::OperationNotAllowed);
         }
 
         el.into_any_element()
