@@ -1,9 +1,13 @@
 <script lang="ts">
   import { Eyebrow, Pill, Separator, Surface } from "@pug/svelte-primitives";
+  import UsageDocs from "../components/UsageDocs.svelte";
   import type { ComponentEntry } from "../component-registry";
+  import { componentDocsMap } from "../component-docs";
 
   export let entry: ComponentEntry;
   export let specimenComponent: any = null;
+
+  $: docs = componentDocsMap[entry.slug] ?? null;
 </script>
 
 <article class="component-page">
@@ -45,6 +49,11 @@
     <h2 class="component-page__section-title">Import</h2>
     <pre class="component-page__code"><code>import {"{"} {entry.displayName} {"}"} from "{entry.packageName}";</code></pre>
   </section>
+
+  {#if docs}
+    <Separator />
+    <UsageDocs {docs} />
+  {/if}
 </article>
 
 <style>
