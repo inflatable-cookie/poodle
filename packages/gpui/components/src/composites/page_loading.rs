@@ -10,6 +10,7 @@ use crate::theme_ext::{resolve_color, resolve_radius};
 pub struct PageLoading {
     spec: PageLoadingSpec,
     theme: GpuiThemeProvider,
+    on_cancel: Option<Box<dyn Fn(&mut Window, &mut App) + 'static>>,
 }
 
 impl std::ops::Deref for PageLoading {
@@ -19,10 +20,14 @@ impl std::ops::Deref for PageLoading {
 
 impl PageLoading {
     pub fn new(theme: &GpuiThemeProvider) -> Self {
-        Self { spec: PageLoadingSpec::new(), theme: theme.clone() }
+        Self { spec: PageLoadingSpec::new(), theme: theme.clone(), on_cancel: None }
     }
     pub fn from_spec(spec: PageLoadingSpec, theme: &GpuiThemeProvider) -> Self {
-        Self { spec, theme: theme.clone() }
+        Self { spec, theme: theme.clone(), on_cancel: None }
+    }
+    pub fn on_cancel(mut self, handler: impl Fn(&mut Window, &mut App) + 'static) -> Self {
+        self.on_cancel = Some(Box::new(handler));
+        self
     }
 }
 
@@ -70,6 +75,27 @@ impl IntoElement for PageLoading {
         // Message
         if let Some(ref msg) = self.spec.message {
             card = card.child(div().text_size(px(14.0)).text_color(text_color).child(msg.clone()));
+        }
+
+        // Cancel button
+        if let Some(handler) = self.on_cancel {
+            let muted = resolve_color(theme, "semantic.color.text.secondary");
+            let hover_bg = resolve_color(theme, "semantic.color.background.elevated");
+            let control_radius = resolve_radius(theme, "semantic.radius.control");
+            card = card.child(
+                div()
+                    .id("pug-page-loading-cancel")
+                    .text_size(px(13.0))
+                    .text_color(muted)
+                    .cursor_pointer()
+                    .px(px(12.0)).py(px(6.0))
+                    .rounded(control_radius)
+                    .hover(move |s| s.bg(hover_bg))
+                    .child("Cancel")
+                    .on_click(move |_event, window, cx| {
+                        handler(window, cx);
+                    })
+            );
         }
 
         // Full-page backdrop

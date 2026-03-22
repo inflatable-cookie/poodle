@@ -12,6 +12,7 @@ pub struct HoverCard {
     theme: GpuiThemeProvider,
     trigger: Option<AnyElement>,
     content: Option<AnyElement>,
+    on_open_change: Option<std::rc::Rc<dyn Fn(bool, &mut Window, &mut App) + 'static>>,
 }
 
 impl std::ops::Deref for HoverCard {
@@ -21,7 +22,7 @@ impl std::ops::Deref for HoverCard {
 
 impl HoverCard {
     pub fn new(theme: &GpuiThemeProvider) -> Self {
-        Self { spec: HoverCardSpec::new(), theme: theme.clone(), trigger: None, content: None }
+        Self { spec: HoverCardSpec::new(), theme: theme.clone(), trigger: None, content: None, on_open_change: None }
     }
 
     pub fn from_spec(spec: HoverCardSpec, theme: &GpuiThemeProvider) -> Self {
@@ -30,6 +31,7 @@ impl HoverCard {
             theme: theme.clone(),
             trigger: None,
             content: None,
+            on_open_change: None,
         }
     }
 
@@ -45,6 +47,12 @@ impl HoverCard {
 
     pub fn with_content(mut self, content: impl IntoElement) -> Self {
         self.content = Some(content.into_any_element());
+        self
+    }
+
+    /// Called when the hover card open state should change (e.g., Escape to close).
+    pub fn on_open_change(mut self, handler: impl Fn(bool, &mut Window, &mut App) + 'static) -> Self {
+        self.on_open_change = Some(std::rc::Rc::new(handler));
         self
     }
 }
@@ -74,6 +82,8 @@ impl IntoElement for HoverCard {
         // Surface content (shown when open)
         if spec.is_open {
             let mut surface = div()
+                .id("pug-hover-card-surface")
+                .focusable()
                 .px(inline_padding)
                 .py(px(10.0))
                 .rounded(radius)
@@ -100,6 +110,16 @@ impl IntoElement for HoverCard {
 
             if let Some(content) = self.content {
                 surface = surface.child(content);
+            }
+
+            // Escape key to close
+            if let Some(ref handler) = self.on_open_change {
+                let esc_handler = handler.clone();
+                surface = surface.on_key_down(move |event: &KeyDownEvent, window, cx| {
+                    if event.keystroke.key == "escape" {
+                        esc_handler(false, window, cx);
+                    }
+                });
             }
 
             wrapper = wrapper.child(surface);

@@ -174,6 +174,16 @@ impl IntoElement for SplitButton {
             root = root.opacity(opacity).cursor(CursorStyle::OperationNotAllowed);
         }
 
+        // ── Click handlers on halves ────────────────────────────────
+        if !is_unavailable {
+            if let Some(handler) = self.on_click {
+                primary = primary.on_click(move |event, window, cx| handler(event, window, cx));
+            }
+            if let Some(handler) = self.on_dropdown {
+                toggle = toggle.on_click(move |event, window, cx| handler(event, window, cx));
+            }
+        }
+
         root = root.child(primary).child(divider).child(toggle);
 
         // ── Menu overlay (when open) ──────────────────────────────
@@ -225,13 +235,6 @@ impl IntoElement for SplitButton {
                 }
             }
             root = root.child(menu);
-        }
-
-        // ── Click handlers ────────────────────────────────────────
-        if let Some(handler) = self.on_click {
-            if !is_unavailable {
-                root = root.on_click(move |event, window, cx| handler(event, window, cx));
-            }
         }
 
         root.into_any_element()

@@ -13,6 +13,8 @@ pub struct ConfirmAction {
     theme: GpuiThemeProvider,
     /// Optional trigger element that opens the confirmation dialog.
     trigger: Option<AnyElement>,
+    on_confirm: Option<Box<dyn Fn(&mut Window, &mut App) + 'static>>,
+    on_cancel: Option<Box<dyn Fn(&mut Window, &mut App) + 'static>>,
 }
 
 impl std::ops::Deref for ConfirmAction {
@@ -26,15 +28,27 @@ impl ConfirmAction {
             spec: ConfirmActionSpec::new("Confirm", "Are you sure?", "Confirm", "Cancel"),
             theme: theme.clone(),
             trigger: None,
+            on_confirm: None,
+            on_cancel: None,
         }
     }
     pub fn from_spec(spec: ConfirmActionSpec, theme: &GpuiThemeProvider) -> Self {
-        Self { spec, theme: theme.clone(), trigger: None }
+        Self { spec, theme: theme.clone(), trigger: None, on_confirm: None, on_cancel: None }
     }
 
     /// Set a trigger element (e.g. a button) that opens the confirmation dialog.
     pub fn with_trigger(mut self, trigger: impl IntoElement) -> Self {
         self.trigger = Some(trigger.into_any_element());
+        self
+    }
+
+    pub fn on_confirm(mut self, handler: impl Fn(&mut Window, &mut App) + 'static) -> Self {
+        self.on_confirm = Some(Box::new(handler));
+        self
+    }
+
+    pub fn on_cancel(mut self, handler: impl Fn(&mut Window, &mut App) + 'static) -> Self {
+        self.on_cancel = Some(Box::new(handler));
         self
     }
 }
@@ -76,28 +90,43 @@ impl IntoElement for ConfirmAction {
 
         let control_radius = resolve_radius(theme, "semantic.radius.control");
         let hover_fill = resolve_color(theme, "semantic.color.background.elevated");
+
+        let mut cancel_btn = div()
+            .id("pug-confirm-cancel")
+            .text_size(px(14.0))
+            .text_color(title_color)
+            .cursor_pointer()
+            .px(px(12.0)).py(px(6.0))
+            .rounded(control_radius)
+            .hover(move |s| s.bg(hover_fill))
+            .child(spec.cancel_label.clone());
+
+        if let Some(handler) = self.on_cancel {
+            cancel_btn = cancel_btn.on_click(move |_event, window, cx| {
+                handler(window, cx);
+            });
+        }
+
+        let mut confirm_btn = div()
+            .id("pug-confirm-ok")
+            .text_size(px(14.0))
+            .text_color(gpui::white())
+            .bg(confirm_fill)
+            .rounded(control_radius)
+            .px(px(12.0)).py(px(6.0))
+            .cursor_pointer()
+            .font_weight(FontWeight::MEDIUM)
+            .child(spec.confirm_label.clone());
+
+        if let Some(handler) = self.on_confirm {
+            confirm_btn = confirm_btn.on_click(move |_event, window, cx| {
+                handler(window, cx);
+            });
+        }
+
         let actions = div().flex().flex_row().flex_wrap().gap(px(8.0)).justify_end()
-            .child(
-                div()
-                    .text_size(px(14.0))
-                    .text_color(title_color)
-                    .cursor_pointer()
-                    .px(px(12.0)).py(px(6.0))
-                    .rounded(control_radius)
-                    .hover(move |s| s.bg(hover_fill))
-                    .child(spec.cancel_label.clone())
-            )
-            .child(
-                div()
-                    .text_size(px(14.0))
-                    .text_color(gpui::white())
-                    .bg(confirm_fill)
-                    .rounded(control_radius)
-                    .px(px(12.0)).py(px(6.0))
-                    .cursor_pointer()
-                    .font_weight(FontWeight::MEDIUM)
-                    .child(spec.confirm_label.clone())
-            );
+            .child(cancel_btn)
+            .child(confirm_btn);
         dialog = dialog.child(actions);
 
         // Backdrop overlay — full-viewport scrim with centered dialog

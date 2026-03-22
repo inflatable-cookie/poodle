@@ -17,6 +17,8 @@ pub struct Popover {
     trigger: Option<AnyElement>,
     /// The floating content shown when open.
     content: Option<AnyElement>,
+    /// Called when the popover open state should change (Escape to close).
+    on_open_change: Option<std::rc::Rc<dyn Fn(bool, &mut Window, &mut App) + 'static>>,
 }
 
 impl std::ops::Deref for Popover {
@@ -26,7 +28,7 @@ impl std::ops::Deref for Popover {
 
 impl Popover {
     pub fn new(theme: &GpuiThemeProvider) -> Self {
-        Self { spec: PopoverSpec::new(), theme: theme.clone(), trigger: None, content: None }
+        Self { spec: PopoverSpec::new(), theme: theme.clone(), trigger: None, content: None, on_open_change: None }
     }
 
     pub fn from_spec(spec: PopoverSpec, theme: &GpuiThemeProvider) -> Self {
@@ -35,6 +37,7 @@ impl Popover {
             theme: theme.clone(),
             trigger: None,
             content: None,
+            on_open_change: None,
         }
     }
 
@@ -54,6 +57,12 @@ impl Popover {
 
     pub fn with_content(mut self, content: impl IntoElement) -> Self {
         self.content = Some(content.into_any_element());
+        self
+    }
+
+    /// Called when the popover open state should change (e.g., Escape to close).
+    pub fn on_open_change(mut self, handler: impl Fn(bool, &mut Window, &mut App) + 'static) -> Self {
+        self.on_open_change = Some(std::rc::Rc::new(handler));
         self
     }
 }
@@ -87,10 +96,11 @@ impl IntoElement for Popover {
         // Floating content (shown when open)
         if spec.current_open() {
             if let Some(content) = self.content {
-                wrapper = wrapper.child(
-                    div()
-                        .rounded(radius)
-                        .bg(surface_bg)
+                let mut surface = div()
+                    .id("pug-popover-surface")
+                    .focusable()
+                    .rounded(radius)
+                    .bg(surface_bg)
                         .border_1()
                         .border_color(border)
                         // Contract: elevation-popover shadow
@@ -108,13 +118,24 @@ impl IntoElement for Popover {
                                 spread_radius: px(0.0),
                             },
                         ])
-                        .px(panel_x)
-                        .py(panel_y)
-                        // Contract: min-width 12rem (192px), max-width 24rem (384px)
-                        .min_w(px(192.0))
-                        .max_w(px(384.0))
-                        .child(content),
-                );
+                    .px(panel_x)
+                    .py(panel_y)
+                    // Contract: min-width 12rem (192px), max-width 24rem (384px)
+                    .min_w(px(192.0))
+                    .max_w(px(384.0))
+                    .child(content);
+
+                // Escape key to close
+                if let Some(ref handler) = self.on_open_change {
+                    let esc_handler = handler.clone();
+                    surface = surface.on_key_down(move |event: &KeyDownEvent, window, cx| {
+                        if event.keystroke.key == "escape" {
+                            esc_handler(false, window, cx);
+                        }
+                    });
+                }
+
+                wrapper = wrapper.child(surface);
             }
         }
 

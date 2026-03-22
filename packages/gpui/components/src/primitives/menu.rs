@@ -125,6 +125,12 @@ impl IntoElement for Menu {
             ])
             .p(px(4.0)); // 0.25rem
 
+        // Collect focusable (non-separator, non-disabled) item values for arrow key navigation
+        let focusable_values: Vec<String> = self.spec.items.iter()
+            .filter(|i| i.kind != MenuItemKind::Separator && !i.is_disabled)
+            .map(|i| i.value.clone())
+            .collect();
+
         for item in &self.spec.items {
             // Separator
             if item.kind == MenuItemKind::Separator {
@@ -165,22 +171,41 @@ impl IntoElement for Menu {
 
             row = row.focus(move |s| s.border_color(focus_ring));
 
-            // Keyboard: Enter/Space to select, Escape to close
+            // Keyboard: Enter/Space to select, Escape to close, ArrowUp/ArrowDown to navigate
             if !is_disabled {
-                if let Some(ref handler) = self.on_select {
-                    let key_handler = handler.clone();
-                    let val = item.value.clone();
-                    let close_handler = self.on_close.clone();
-                    row = row.on_key_down(move |event: &KeyDownEvent, window, cx| {
-                        if event.keystroke.key == "enter" || event.keystroke.key == "space" {
-                            key_handler(&val, window, cx);
-                        } else if event.keystroke.key == "escape" {
-                            if let Some(ref close) = close_handler {
-                                close(window, cx);
+                let key_select = self.on_select.clone();
+                let key_close = self.on_close.clone();
+                let val = item.value.clone();
+                let nav_values = focusable_values.clone();
+                let nav_select = self.on_select.clone();
+                row = row.on_key_down(move |event: &KeyDownEvent, window, cx| {
+                    let key = event.keystroke.key.as_str();
+                    if key == "enter" || key == "space" {
+                        if let Some(ref handler) = key_select {
+                            handler(&val, window, cx);
+                        }
+                    } else if key == "escape" {
+                        if let Some(ref close) = key_close {
+                            close(window, cx);
+                        }
+                    } else if key == "down" || key == "right" {
+                        // Move to next item (wrapping)
+                        if let Some(idx) = nav_values.iter().position(|v| v == &val) {
+                            let next = (idx + 1) % nav_values.len();
+                            if let Some(ref handler) = nav_select {
+                                handler(&nav_values[next], window, cx);
                             }
                         }
-                    });
-                }
+                    } else if key == "up" || key == "left" {
+                        // Move to previous item (wrapping)
+                        if let Some(idx) = nav_values.iter().position(|v| v == &val) {
+                            let prev = if idx == 0 { nav_values.len() - 1 } else { idx - 1 };
+                            if let Some(ref handler) = nav_select {
+                                handler(&nav_values[prev], window, cx);
+                            }
+                        }
+                    }
+                });
             }
 
             if is_active {

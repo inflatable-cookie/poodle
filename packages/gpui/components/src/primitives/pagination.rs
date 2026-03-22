@@ -28,7 +28,7 @@ pub struct Pagination {
     radius: Pixels,
     button_height: Pixels,
     // Callback
-    on_page_change: Option<Box<dyn Fn(usize, &mut Window, &mut App) + 'static>>,
+    on_page_change: Option<std::rc::Rc<dyn Fn(usize, &mut Window, &mut App) + 'static>>,
 }
 
 impl std::ops::Deref for Pagination {
@@ -87,7 +87,7 @@ impl Pagination {
         mut self,
         handler: impl Fn(usize, &mut Window, &mut App) + 'static,
     ) -> Self {
-        self.on_page_change = Some(Box::new(handler));
+        self.on_page_change = Some(std::rc::Rc::new(handler));
         self
     }
 
@@ -95,7 +95,7 @@ impl Pagination {
         &self,
         icon_name: &str,
         disabled: bool,
-        _target_page: usize,
+        target_page: usize,
         id: &str,
     ) -> AnyElement {
         let theme = &self.theme;
@@ -108,7 +108,7 @@ impl Pagination {
         let button_height = self.button_height;
         let disabled_opacity = self.disabled_opacity;
 
-        div()
+        let mut btn = div()
             .id(SharedString::from(id.to_string()))
             .focusable()
             .flex()
@@ -138,8 +138,19 @@ impl Pagination {
                     theme,
                 )
                 .with_color(text_color),
-            )
-            .into_any_element()
+            );
+
+        // Wire click handler for navigation
+        if !disabled {
+            if let Some(ref handler) = self.on_page_change {
+                let handler = handler.clone();
+                btn = btn.on_click(move |_event, window, cx| {
+                    handler(target_page, window, cx);
+                });
+            }
+        }
+
+        btn.into_any_element()
     }
 
     fn render_page_button(&self, page: usize) -> AnyElement {
@@ -162,7 +173,7 @@ impl Pagination {
 
         let page_id = SharedString::from(format!("pug-pg-page-{}", page));
 
-        div()
+        let mut btn = div()
             .id(page_id)
             .flex()
             .items_center()
@@ -187,8 +198,19 @@ impl Pagination {
                 el.cursor_pointer()
                     .hover(|style| style.bg(hover_fill))
             })
-            .child(page.to_string())
-            .into_any_element()
+            .child(page.to_string());
+
+        // Wire click handler for page selection
+        if !is_current {
+            if let Some(ref handler) = self.on_page_change {
+                let handler = handler.clone();
+                btn = btn.on_click(move |_event, window, cx| {
+                    handler(page, window, cx);
+                });
+            }
+        }
+
+        btn.into_any_element()
     }
 
     fn render_ellipsis(&self) -> AnyElement {

@@ -16,7 +16,7 @@ pub struct Breadcrumbs {
     separator_color: Hsla,
     hover_color: Hsla,
     gap: Pixels,
-    on_navigate: Option<Box<dyn Fn(&str, &mut Window, &mut App)>>,
+    on_navigate: Option<std::rc::Rc<dyn Fn(&str, &mut Window, &mut App)>>,
 }
 
 impl std::ops::Deref for Breadcrumbs {
@@ -54,7 +54,7 @@ impl Breadcrumbs {
         mut self,
         handler: impl Fn(&str, &mut Window, &mut App) + 'static,
     ) -> Self {
-        self.on_navigate = Some(Box::new(handler));
+        self.on_navigate = Some(std::rc::Rc::new(handler));
         self
     }
 }
@@ -118,20 +118,23 @@ impl IntoElement for Breadcrumbs {
                         .child(item.label.clone()),
                 );
             } else {
-                let value = item.value.clone();
-                let item_el = div()
+                let crumb_id = SharedString::from(format!("pug-crumb-{}", i));
+                let mut item_el = div()
+                    .id(crumb_id)
                     .text_color(text_color)
                     .cursor_pointer()
-                    .hover(|style| style.text_color(hover_color));
+                    .hover(|style| style.text_color(hover_color))
+                    .child(item.label.clone());
 
-                let item_el = if on_navigate.is_some() {
-                    item_el.child(item.label.clone())
-                } else {
-                    item_el.child(item.label.clone())
-                };
+                if let Some(ref handler) = on_navigate {
+                    let handler = handler.clone();
+                    let value = item.value.clone();
+                    item_el = item_el.on_click(move |_event, window, cx| {
+                        handler(&value, window, cx);
+                    });
+                }
 
                 container = container.child(item_el);
-                let _ = value;
             }
         }
 

@@ -18,6 +18,8 @@ pub struct ContextMenu {
     selected_value: Option<String>,
     /// The element that, when right-clicked, opens the context menu.
     trigger: Option<AnyElement>,
+    on_select: Option<Box<dyn Fn(&str, &mut Window, &mut App) + 'static>>,
+    on_close: Option<Box<dyn Fn(&mut Window, &mut App) + 'static>>,
 }
 
 impl std::ops::Deref for ContextMenu {
@@ -27,7 +29,7 @@ impl std::ops::Deref for ContextMenu {
 
 impl ContextMenu {
     pub fn new(theme: &GpuiThemeProvider) -> Self {
-        Self { spec: ContextMenuSpec::default(), theme: theme.clone(), id_prefix: String::new(), selected_value: None, trigger: None }
+        Self { spec: ContextMenuSpec::default(), theme: theme.clone(), id_prefix: String::new(), selected_value: None, trigger: None, on_select: None, on_close: None }
     }
 
     pub fn from_spec(spec: ContextMenuSpec, theme: &GpuiThemeProvider) -> Self {
@@ -37,6 +39,8 @@ impl ContextMenu {
             id_prefix: "pug-ctx-menu".to_string(),
             selected_value: None,
             trigger: None,
+            on_select: None,
+            on_close: None,
         }
     }
 
@@ -59,6 +63,16 @@ impl ContextMenu {
         self.selected_value = Some(value.into());
         self
     }
+
+    pub fn on_select(mut self, handler: impl Fn(&str, &mut Window, &mut App) + 'static) -> Self {
+        self.on_select = Some(Box::new(handler));
+        self
+    }
+
+    pub fn on_close(mut self, handler: impl Fn(&mut Window, &mut App) + 'static) -> Self {
+        self.on_close = Some(Box::new(handler));
+        self
+    }
 }
 
 impl IntoElement for ContextMenu {
@@ -71,6 +85,12 @@ impl IntoElement for ContextMenu {
 
         if let Some(selected) = self.selected_value {
             menu = menu.with_selected(selected);
+        }
+        if let Some(handler) = self.on_select {
+            menu = menu.on_select(handler);
+        }
+        if let Some(handler) = self.on_close {
+            menu = menu.on_close(handler);
         }
 
         // Apply fixed positioning at anchor point when provided

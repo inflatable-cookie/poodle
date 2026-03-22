@@ -17,6 +17,8 @@ pub struct Dialog {
     actions: Option<AnyElement>,
     /// Content slot — body content between description and actions.
     content: Option<AnyElement>,
+    /// Called when the dialog should close (Escape key, backdrop click).
+    on_close: Option<std::rc::Rc<dyn Fn(&mut Window, &mut App) + 'static>>,
 }
 
 impl std::ops::Deref for Dialog {
@@ -26,7 +28,7 @@ impl std::ops::Deref for Dialog {
 
 impl Dialog {
     pub fn new(theme: &GpuiThemeProvider) -> Self {
-        Self { spec: DialogSpec::new(), theme: theme.clone(), actions: None, content: None }
+        Self { spec: DialogSpec::new(), theme: theme.clone(), actions: None, content: None, on_close: None }
     }
 
     pub fn from_spec(spec: DialogSpec, theme: &GpuiThemeProvider) -> Self {
@@ -35,6 +37,7 @@ impl Dialog {
             theme: theme.clone(),
             actions: None,
             content: None,
+            on_close: None,
         }
     }
 
@@ -48,6 +51,12 @@ impl Dialog {
     pub fn dismiss_on_backdrop(mut self, v: bool) -> Self { self.spec.dismiss_on_backdrop = v; self }
     pub fn aria_label(mut self, v: impl Into<String>) -> Self { self.spec.aria_label = Some(v.into()); self }
 
+
+    /// Called when the dialog should close (Escape, backdrop click).
+    pub fn on_close(mut self, handler: impl Fn(&mut Window, &mut App) + 'static) -> Self {
+        self.on_close = Some(std::rc::Rc::new(handler));
+        self
+    }
 
     /// Add body content between the description and actions.
     pub fn with_content(mut self, content: impl IntoElement) -> Self {
@@ -86,6 +95,8 @@ impl IntoElement for Dialog {
         let bg = color_mix(surface_bg, panel, 0.98);
 
         let mut dialog = div()
+            .id("pug-dialog")
+            .focusable()
             .px(panel_x)
             .py(panel_y)
             .rounded(radius)
@@ -154,8 +165,20 @@ impl IntoElement for Dialog {
             );
         }
 
+        // Escape key on dialog surface
+        if spec.dismiss_on_escape {
+            if let Some(ref handler) = self.on_close {
+                let esc_handler = handler.clone();
+                dialog = dialog.on_key_down(move |event: &KeyDownEvent, window, cx| {
+                    if event.keystroke.key == "escape" {
+                        esc_handler(window, cx);
+                    }
+                });
+            }
+        }
+
         // Backdrop overlay — full-viewport scrim with centered dialog
-        let backdrop = div()
+        let mut backdrop = div()
             .id("pug-dialog-backdrop")
             .absolute()
             .inset_0()
@@ -165,6 +188,16 @@ impl IntoElement for Dialog {
             .justify_center()
             .occlude()
             .child(dialog);
+
+        // Backdrop click to dismiss
+        if spec.dismiss_on_backdrop {
+            if let Some(ref handler) = self.on_close {
+                let click_handler = handler.clone();
+                backdrop = backdrop.on_click(move |_event, window, cx| {
+                    click_handler(window, cx);
+                });
+            }
+        }
 
         backdrop.into_any_element()
     }

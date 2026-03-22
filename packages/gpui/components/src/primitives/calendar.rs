@@ -18,7 +18,7 @@ pub struct Calendar {
     spec: CalendarSpec,
     theme: GpuiThemeProvider,
     id_suffix: Option<String>,
-    on_select: Option<Box<dyn Fn(&str, &mut Window, &mut App) + 'static>>,
+    on_select: Option<std::rc::Rc<dyn Fn(&str, &mut Window, &mut App) + 'static>>,
     /// Called when prev/next month is clicked, with the new "YYYY-MM" string.
     on_navigate: Option<std::rc::Rc<dyn Fn(&str, &mut Window, &mut App) + 'static>>,
 }
@@ -62,7 +62,7 @@ impl Calendar {
         mut self,
         handler: impl Fn(&str, &mut Window, &mut App) + 'static,
     ) -> Self {
-        self.on_select = Some(Box::new(handler));
+        self.on_select = Some(std::rc::Rc::new(handler));
         self
     }
 
@@ -421,6 +421,17 @@ impl IntoElement for Calendar {
                         cell = cell.cursor(CursorStyle::OperationNotAllowed);
                     } else {
                         cell = cell.cursor_pointer();
+                    }
+
+                    // Wire on_select click handler
+                    if !spec.is_disabled {
+                        if let Some(ref handler) = self.on_select {
+                            let handler = handler.clone();
+                            let date_str = format!("{:04}-{:02}-{:02}", year, month, day_num);
+                            cell = cell.on_click(move |_event, window, cx| {
+                                handler(&date_str, window, cx);
+                            });
+                        }
                     }
 
                     cell = cell.child(format!("{}", day_num));

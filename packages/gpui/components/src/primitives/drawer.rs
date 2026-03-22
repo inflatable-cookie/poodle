@@ -16,6 +16,8 @@ pub struct Drawer {
     content: Option<AnyElement>,
     /// The main area content (shown next to the drawer).
     main_content: Option<AnyElement>,
+    /// Called when the drawer should close (Escape key, backdrop click).
+    on_close: Option<std::rc::Rc<dyn Fn(&mut Window, &mut App) + 'static>>,
 }
 
 impl std::ops::Deref for Drawer {
@@ -25,7 +27,7 @@ impl std::ops::Deref for Drawer {
 
 impl Drawer {
     pub fn new(theme: &GpuiThemeProvider) -> Self {
-        Self { spec: DrawerSpec::new(), theme: theme.clone(), content: None, main_content: None }
+        Self { spec: DrawerSpec::new(), theme: theme.clone(), content: None, main_content: None, on_close: None }
     }
 
     pub fn from_spec(spec: DrawerSpec, theme: &GpuiThemeProvider) -> Self {
@@ -34,6 +36,7 @@ impl Drawer {
             theme: theme.clone(),
             content: None,
             main_content: None,
+            on_close: None,
         }
     }
 
@@ -56,6 +59,12 @@ impl Drawer {
 
     pub fn with_main_content(mut self, main: impl IntoElement) -> Self {
         self.main_content = Some(main.into_any_element());
+        self
+    }
+
+    /// Called when the drawer should close (Escape, backdrop click).
+    pub fn on_close(mut self, handler: impl Fn(&mut Window, &mut App) + 'static) -> Self {
+        self.on_close = Some(std::rc::Rc::new(handler));
         self
     }
 }
@@ -83,6 +92,8 @@ impl IntoElement for Drawer {
 
         // Contract: drawer radius = 0, min-width min(28rem, 100vw) ≈ 448px, shadow
         let mut drawer_panel = div()
+            .id("pug-drawer-panel")
+            .focusable()
             .min_w(px(448.0))
             .h_full()
             .rounded(px(0.0)) // Contract: drawer radius = 0
@@ -135,6 +146,18 @@ impl IntoElement for Drawer {
             );
         }
 
+        // Escape key to close
+        if spec.dismiss_on_escape {
+            if let Some(ref handler) = self.on_close {
+                let esc_handler = handler.clone();
+                drawer_panel = drawer_panel.on_key_down(move |event: &KeyDownEvent, window, cx| {
+                    if event.keystroke.key == "escape" {
+                        esc_handler(window, cx);
+                    }
+                });
+            }
+        }
+
         // Content
         if let Some(content) = self.content {
             drawer_panel = drawer_panel.child(content);
@@ -166,6 +189,16 @@ impl IntoElement for Drawer {
                 .bg(hsla(0.0, 0.0, 0.0, 0.5))
                 .flex()
                 .occlude();
+
+            // Backdrop click to dismiss
+            if spec.dismiss_on_backdrop {
+                if let Some(ref handler) = self.on_close {
+                    let click_handler = handler.clone();
+                    backdrop = backdrop.on_click(move |_event, window, cx| {
+                        click_handler(window, cx);
+                    });
+                }
+            }
 
             if is_left {
                 backdrop = backdrop.child(drawer_panel).child(div().flex_1());
