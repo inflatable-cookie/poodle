@@ -19,6 +19,8 @@ pub struct Calendar {
     theme: GpuiThemeProvider,
     id_suffix: Option<String>,
     on_select: Option<Box<dyn Fn(&str, &mut Window, &mut App) + 'static>>,
+    /// Called when prev/next month is clicked, with the new "YYYY-MM" string.
+    on_navigate: Option<std::rc::Rc<dyn Fn(&str, &mut Window, &mut App) + 'static>>,
 }
 
 impl std::ops::Deref for Calendar {
@@ -28,7 +30,7 @@ impl std::ops::Deref for Calendar {
 
 impl Calendar {
     pub fn new(theme: &GpuiThemeProvider) -> Self {
-        Self { spec: CalendarSpec::new(), theme: theme.clone(), id_suffix: None, on_select: None }
+        Self { spec: CalendarSpec::new(), theme: theme.clone(), id_suffix: None, on_select: None, on_navigate: None }
     }
 
     pub fn from_spec(spec: CalendarSpec, theme: &GpuiThemeProvider) -> Self {
@@ -37,6 +39,7 @@ impl Calendar {
             theme: theme.clone(),
             id_suffix: None,
             on_select: None,
+            on_navigate: None,
         }
     }
 
@@ -60,6 +63,15 @@ impl Calendar {
         handler: impl Fn(&str, &mut Window, &mut App) + 'static,
     ) -> Self {
         self.on_select = Some(Box::new(handler));
+        self
+    }
+
+    /// Called when prev/next month navigation is clicked.
+    pub fn on_navigate(
+        mut self,
+        handler: impl Fn(&str, &mut Window, &mut App) + 'static,
+    ) -> Self {
+        self.on_navigate = Some(std::rc::Rc::new(handler));
         self
     }
 
@@ -224,35 +236,77 @@ impl IntoElement for Calendar {
                 .cursor(CursorStyle::OperationNotAllowed);
         }
 
+        // Compute prev/next month strings for navigation
+        let prev_month_str = {
+            let (py, pm) = if month == 1 { (year - 1, 12) } else { (year, month - 1) };
+            format!("{:04}-{:02}", py, pm)
+        };
+        let next_month_str = {
+            let (ny, nm) = if month == 12 { (year + 1, 1) } else { (year, month + 1) };
+            format!("{:04}-{:02}", ny, nm)
+        };
+
         // Contract: nav header with prev/next month buttons and centered month label
         let nav_btn_hover = color_mix(elevated_bg, surface_bg, 0.84);
+
+        let mut prev_btn = div()
+            .id("pug-cal-prev")
+            .w(px(28.0))
+            .h(px(28.0))
+            .flex()
+            .items_center()
+            .justify_center()
+            .rounded(control_radius)
+            .cursor_pointer()
+            .hover(move |s| s.bg(nav_btn_hover))
+            .child(
+                Icon::from_spec(
+                    IconSpec::new("chevron-left").with_size(IconSize::Sm),
+                    theme,
+                )
+                .with_color(icon_muted),
+            );
+
+        if let Some(ref handler) = self.on_navigate {
+            let handler = handler.clone();
+            let prev = prev_month_str.clone();
+            prev_btn = prev_btn.on_click(move |_event, window, cx| {
+                handler(&prev, window, cx);
+            });
+        }
+
+        let mut next_btn = div()
+            .id("pug-cal-next")
+            .w(px(28.0))
+            .h(px(28.0))
+            .flex()
+            .items_center()
+            .justify_center()
+            .rounded(control_radius)
+            .cursor_pointer()
+            .child(
+                Icon::from_spec(
+                    IconSpec::new("chevron-right").with_size(IconSize::Sm),
+                    theme,
+                )
+                .with_color(icon_muted),
+            );
+
+        if let Some(ref handler) = self.on_navigate {
+            let handler = handler.clone();
+            let next = next_month_str.clone();
+            next_btn = next_btn.on_click(move |_event, window, cx| {
+                handler(&next, window, cx);
+            });
+        }
+
         let nav_header = div()
             .flex()
             .items_center()
             .justify_between()
             .py(px(4.0))
+            .child(prev_btn)
             .child(
-                // Prev month button
-                div()
-                    .id("pug-cal-prev")
-                    .w(px(28.0))
-                    .h(px(28.0))
-                    .flex()
-                    .items_center()
-                    .justify_center()
-                    .rounded(control_radius)
-                    .cursor_pointer()
-                    .hover(move |s| s.bg(nav_btn_hover))
-                    .child(
-                        Icon::from_spec(
-                            IconSpec::new("chevron-left").with_size(IconSize::Sm),
-                            theme,
-                        )
-                        .with_color(icon_muted),
-                    ),
-            )
-            .child(
-                // Month/year label — centered
                 div()
                     .flex_1()
                     .text_center()
@@ -261,26 +315,7 @@ impl IntoElement for Calendar {
                     .text_color(text_primary)
                     .child(month_label),
             )
-            .child(
-                // Next month button
-                div()
-                    .id("pug-cal-next")
-                    .w(px(28.0))
-                    .h(px(28.0))
-                    .flex()
-                    .items_center()
-                    .justify_center()
-                    .rounded(control_radius)
-                    .cursor_pointer()
-                    .hover(move |s| s.bg(nav_btn_hover))
-                    .child(
-                        Icon::from_spec(
-                            IconSpec::new("chevron-right").with_size(IconSize::Sm),
-                            theme,
-                        )
-                        .with_color(icon_muted),
-                    ),
-            );
+            .child(next_btn);
 
         cal = cal.child(nav_header);
 
