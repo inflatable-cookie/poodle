@@ -1,4 +1,6 @@
 //! IconButton — real GPUI component backed by IconButtonSpec.
+//!
+//! Contract: `docs/contracts/foundation/icon-button.md`
 
 use gpui::prelude::FluentBuilder;
 use gpui::*;
@@ -6,7 +8,7 @@ use pug_gpui::GpuiThemeProvider;
 use pug_primitives::{ButtonTone, ButtonVariant, ControlSize, IconButtonSpec, IconSize, IconSpec};
 
 use super::icon::Icon;
-use crate::theme_ext::{color_mix, resolve_color, resolve_opacity, resolve_px, resolve_radius};
+use crate::theme_ext::{color_mix, color_mix_black, resolve_color, resolve_opacity, resolve_px, resolve_radius};
 
 /// A real GPUI icon button component backed by `IconButtonSpec`.
 pub struct IconButton {
@@ -28,13 +30,7 @@ impl IconButton {
     }
 
     pub fn from_spec(spec: IconButtonSpec, theme: &GpuiThemeProvider) -> Self {
-        Self {
-            spec,
-            theme: theme.clone(),
-            id_suffix: None,
-            tone: ButtonTone::Default,
-            on_click: None,
-        }
+        Self { spec, theme: theme.clone(), id_suffix: None, tone: ButtonTone::Default, on_click: None }
     }
 
     // ── Forwarded spec builders ───────────────────────────────
@@ -46,13 +42,12 @@ impl IconButton {
     pub fn loading(mut self, v: bool) -> Self { self.spec.is_loading = v; self }
     pub fn pressed(mut self, v: bool) -> Self { self.spec.is_pressed = Some(v); self }
 
-
     pub fn with_id(mut self, suffix: impl Into<String>) -> Self {
         self.id_suffix = Some(suffix.into());
         self
     }
 
-    pub fn with_tone(mut self, tone: ButtonTone) -> Self {
+    pub fn tone(mut self, tone: ButtonTone) -> Self {
         self.tone = tone;
         self
     }
@@ -74,16 +69,44 @@ impl IntoElement for IconButton {
         let spec = &self.spec;
         let tone = self.tone;
 
-        let fill = resolve_color(theme, spec.variant.fill_token(tone));
+        // ── Resolve variant colors ────────────────────────────────
+        let base_fill = resolve_color(theme, spec.variant.fill_token(tone));
         let text_color = resolve_color(theme, spec.variant.text_token(tone));
-        let border_color = resolve_color(theme, spec.variant.border_token(tone));
-        let control_height = resolve_px(theme, spec.control_height_token());
-        let radius = resolve_radius(theme, "semantic.radius.control");
+        let base_border = resolve_color(theme, spec.variant.border_token(tone));
+        let text_primary = resolve_color(theme, "semantic.color.text.primary");
         let elevated = resolve_color(theme, "semantic.color.background.elevated");
+        let accent = resolve_color(theme, "semantic.color.accent.base");
+        let radius = resolve_radius(theme, "semantic.radius.control");
+        let focus_ring_color = resolve_color(theme, "semantic.color.accent.focusRing");
 
-        let is_disabled = spec.is_disabled;
-        let is_loading = spec.is_loading;
+        // ── Size adjustments (contract: sm -0.375rem, lg +0.375rem) ──
+        let base_height = resolve_px(theme, spec.control_height_token());
+        let size_offset: f32 = match spec.size {
+            ControlSize::Sm => -6.0,
+            ControlSize::Md => 0.0,
+            ControlSize::Lg => 6.0,
+        };
+        let control_size = base_height + px(size_offset);
+
+        // ── Variant-specific colors ───────────────────────────────
+        let (fill, border_color) = match spec.variant {
+            ButtonVariant::Primary => {
+                let darkened = color_mix_black(base_fill, 0.84);
+                (base_fill, darkened)
+            }
+            ButtonVariant::Ghost => (gpui::transparent_black(), gpui::transparent_black()),
+            _ => (base_fill, base_border),
+        };
+
+        let is_unavailable = spec.is_disabled || spec.is_loading;
         let is_pressed = spec.is_pressed.unwrap_or(false);
+
+        // ── Hover/active/pressed fills ────────────────────────────
+        let hover_fill = color_mix(fill, elevated, 0.84);
+        let hover_border = color_mix(border_color, text_primary, 0.78);
+        let active_fill = color_mix(fill, elevated, 0.72);
+        // Pressed: accent-tinted background (contract: 20% accent mix)
+        let pressed_fill = color_mix(accent, fill, 0.20);
 
         let icon_name = spec.icon.clone().unwrap_or_default();
         let id_str = if let Some(ref suffix) = self.id_suffix {
@@ -92,16 +115,13 @@ impl IntoElement for IconButton {
             format!("pug-icon-btn-{}", icon_name)
         };
 
-        // Contract: hover = color-mix(fill 84%, elevated), active = 72%
-        let hover_fill = color_mix(fill, elevated, 0.84);
-        let active_fill = color_mix(fill, elevated, 0.72);
-
+        // ── Build root ────────────────────────────────────────────
         let mut el = div()
             .id(SharedString::from(id_str))
-            .w(control_height)
-            .h(control_height)
+            .w(control_size)
+            .h(control_size)
             .rounded(radius)
-            .bg(fill)
+            .bg(if is_pressed { pressed_fill } else { fill })
             .text_color(text_color)
             .border_1()
             .border_color(border_color)
@@ -109,31 +129,29 @@ impl IntoElement for IconButton {
             .items_center()
             .justify_center();
 
-        if is_pressed {
-            el = el.bg(active_fill);
-        }
+        // ── Focus ring ────────────────────────────────────────────
+        el = el.focus(move |s| s.border_color(focus_ring_color));
 
-        if is_disabled || is_loading {
+        // ── Interactive states ────────────────────────────────────
+        if is_unavailable {
             let opacity = resolve_opacity(theme, "semantic.state.opacity.disabled");
-            el = el.opacity(opacity);
+            el = el.opacity(opacity).cursor(CursorStyle::OperationNotAllowed);
         } else {
             el = el
                 .cursor_pointer()
-                .hover(move |s| s.bg(hover_fill))
+                .hover(move |s| s.bg(hover_fill).border_color(hover_border))
                 .active(move |s| s.bg(active_fill));
         }
 
-        // Render icon via Icon (SVG) or spinner when loading
-        if is_loading {
-            if !icon_name.is_empty() {
-                el = el.child(
-                    Icon::from_spec(
-                        IconSpec::new("loader").with_size(IconSize::Sm),
-                        theme,
-                    )
-                    .with_color(text_color),
-                );
-            }
+        // ── Icon / spinner ────────────────────────────────────────
+        if spec.is_loading {
+            el = el.child(
+                Icon::from_spec(
+                    IconSpec::new("loader").with_size(IconSize::Sm),
+                    theme,
+                )
+                .with_color(text_color),
+            );
         } else if !icon_name.is_empty() {
             el = el.child(
                 Icon::from_spec(
@@ -144,9 +162,9 @@ impl IntoElement for IconButton {
             );
         }
 
-        // Click handler
+        // ── Click handler ─────────────────────────────────────────
         if let Some(handler) = self.on_click {
-            if spec.activation_allowed() {
+            if !is_unavailable {
                 el = el.on_click(move |event, window, cx| handler(event, window, cx));
             }
         }

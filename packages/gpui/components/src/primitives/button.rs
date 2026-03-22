@@ -181,13 +181,13 @@ impl IntoElement for Button {
             format!("pug-btn-{}", label_text)
         };
 
+        // ── Icon-only detection (contract §8 Icon-only) ──────────
+        let is_icon_only = label_text.is_empty() && !spec.chevron;
+
         // ── Build root element (contract §8 Root) ────────────────
         let mut el = div()
             .id(SharedString::from(id_str))
             .h(height)
-            .min_w(min_width)
-            .pl(pad_left)
-            .pr(pad_right)
             .rounded(radius)
             .bg(fill)
             .border_1()
@@ -198,14 +198,28 @@ impl IntoElement for Button {
             .justify_center()
             .gap(gap)
             .text_size(font_size)
-            .font_weight(FontWeight::MEDIUM); // contract: typography-label-weight = 500
+            .font_weight(FontWeight::MEDIUM) // contract: typography-label-weight = 500
+            .line_height(relative(1.0));
+
+        // Icon-only: square button, no min-width, no padding
+        if is_icon_only {
+            el = el.w(height);
+        } else {
+            el = el.min_w(min_width).pl(pad_left).pr(pad_right);
+        }
+
+        // ── Focus ring (contract §8 Focus) ────────────────────────
+        // GPUI has no CSS outline equivalent. We approximate with border-color
+        // change on focus. Known delta: no outline-offset separation.
+        let focus_ring_color = resolve_color(theme, spec.focus_ring_color_token());
+        el = el.focus(move |s| s.border_color(focus_ring_color));
 
         // ── Interactive states ────────────────────────────────────
         let icon_color = text_color;
         if is_disabled {
             // contract §8 Disabled: opacity: state-opacity-disabled, cursor: not-allowed
             let dis_o = resolve_opacity(theme, spec.disabled_opacity_token());
-            el = el.opacity(dis_o);
+            el = el.opacity(dis_o).cursor(CursorStyle::OperationNotAllowed);
         } else {
             el = el
                 .cursor_pointer()
@@ -248,9 +262,14 @@ impl IntoElement for Button {
             );
         }
 
-        // ── Label ────────────────────────────────────────────────
+        // ── Label (contract §8 Label) ─────────────────────────────
         if !label_text.is_empty() {
-            el = el.child(label_text);
+            el = el.child(
+                div()
+                    .whitespace_nowrap()
+                    .min_w(px(0.0))
+                    .child(label_text),
+            );
         }
 
         // ── Trailing icon ────────────────────────────────────────
