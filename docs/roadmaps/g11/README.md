@@ -41,11 +41,11 @@ compliance, using the contracts as the spec and Svelte as the visual reference.
 | 001 | Reorganize misplaced components (6) | — | Complete |
 | 002 | Implement missing composites (17) | 001 | Complete |
 | 003 | Inputs batch (11 components) | contract audit | Planned |
-| 004 | Selection batch (8 components) | contract audit | Planned |
-| 005 | Buttons batch (3 components) | contract audit | Planned |
-| 006 | Navigation batch (8 components) | contract audit | Planned |
-| 007 | Layout batch (13 components) | contract audit | Planned |
-| 008 | Feedback batch (13 components) | contract audit | Planned |
+| 004 | Selection batch (8 components) | contract audit | In Progress (7/8, tri_state_switch deferred) |
+| 005 | Buttons batch (3 components) | contract audit | Complete |
+| 006 | Navigation batch (8 components) | contract audit | In Progress (tabs fixed) |
+| 007 | Layout batch (13 components) | contract audit | In Progress (stack, form_actions fixed) |
+| 008 | Feedback batch (13 components) | contract audit | In Progress (progress, status_indicator, eyebrow fixed) |
 | 009 | Overlay batch (8 components) | contract audit | Planned |
 | 010 | Temporal batch (8 components) | contract audit | Planned |
 | 011 | Composites batch (41+ components) | contract audit | Planned |
