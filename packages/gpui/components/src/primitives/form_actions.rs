@@ -50,17 +50,16 @@ impl IntoElement for FormActions {
 
     fn into_element(self) -> Self::Element {
         let theme = &self.theme;
-        let border = resolve_color(theme, "semantic.color.border.default");
         let gap = theme.resolve_space(self.spec.action_gap_token());
         let separation = theme.resolve_space(self.spec.stack_separation_token());
 
+        // Contract says no border, only padding-top for separation
         let mut row = div()
             .flex()
+            .flex_wrap() // contract: wraps on narrow widths
             .items_center()
             .gap(px(gap))
-            .pt(px(separation))
-            .border_t_1()
-            .border_color(border);
+            .pt(px(separation));
 
         // Alignment
         match self.spec.align {

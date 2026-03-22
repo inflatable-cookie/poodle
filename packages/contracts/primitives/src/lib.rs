@@ -144,7 +144,7 @@ pub use separator::SeparatorSpec;
 pub use skeleton::SkeletonSpec;
 pub use slider::SliderSpec;
 pub use split_button::{SplitButtonSpec, SplitMenuItem};
-pub use stack::StackSpec;
+pub use stack::{LayoutJustify, StackDirection, StackSpec};
 pub use status_indicator::StatusIndicatorSpec;
 pub use surface::SurfaceSpec;
 pub use switch::SwitchSpec;

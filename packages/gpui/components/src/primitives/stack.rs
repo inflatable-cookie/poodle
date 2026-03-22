@@ -1,12 +1,15 @@
 //! Stack — real GPUI component backed by StackSpec.
+//!
+//! Contract: `docs/contracts/foundation/stack.md`
 
+use gpui::prelude::FluentBuilder;
 use gpui::*;
 use pug_gpui::GpuiThemeProvider;
-use pug_primitives::{Alignment, PaddingScale, StackSpec};
+use pug_primitives::{Alignment, LayoutJustify, PaddingScale, StackDirection, StackSpec};
 
 use crate::theme_ext::resolve_px;
 
-/// A vertical stack layout with gap and alignment.
+/// A flex layout container with direction, gap, alignment, and justification.
 pub struct Stack {
     spec: StackSpec,
     theme: GpuiThemeProvider,
@@ -28,10 +31,14 @@ impl Stack {
     }
 
     // ── Forwarded spec builders ───────────────────────────────
+    pub fn direction(mut self, v: StackDirection) -> Self { self.spec.direction = v; self }
     pub fn gap(mut self, v: PaddingScale) -> Self { self.spec.gap = v; self }
     pub fn align(mut self, v: Alignment) -> Self { self.spec.align = v; self }
+    pub fn justify(mut self, v: LayoutJustify) -> Self { self.spec.justify = Some(v); self }
+    pub fn wrap(mut self, v: bool) -> Self { self.spec.wrap = v; self }
     pub fn padding(mut self, v: PaddingScale) -> Self { self.spec.padding = v; self }
     pub fn role(mut self, v: impl Into<String>) -> Self { self.spec.role = Some(v.into()); self }
+    pub fn aria_label(mut self, v: impl Into<String>) -> Self { self.spec.aria_label = Some(v.into()); self }
 
     // ── GPUI-specific builders ────────────────────────────────
     pub fn with_child(mut self, child: impl IntoElement) -> Self {
@@ -48,19 +55,39 @@ impl IntoElement for Stack {
         let spec = &self.spec;
         let padding = spec.resolved_padding();
 
-        let mut el = div().flex().flex_col();
+        // Direction
+        let mut el = div().flex();
+        match spec.direction {
+            StackDirection::Column => { el = el.flex_col(); }
+            StackDirection::Row => { el = el.flex_row(); }
+        }
+
+        // Wrap
+        if spec.wrap {
+            el = el.flex_wrap();
+        }
 
         // Gap
         if let Some(gap_token) = spec.resolved_gap() {
             el = el.gap(resolve_px(theme, gap_token));
         }
 
-        // Alignment (cross-axis for a column)
+        // Cross-axis alignment
         match spec.align {
             Alignment::Start => { el = el.items_start(); }
             Alignment::Center => { el = el.items_center(); }
             Alignment::End => { el = el.items_end(); }
-            Alignment::Stretch => {} // default flex behavior
+            Alignment::Stretch => {} // default
+        }
+
+        // Main-axis justification
+        if let Some(justify) = &spec.justify {
+            match justify {
+                LayoutJustify::Start => { el = el.justify_start(); }
+                LayoutJustify::End => { el = el.justify_end(); }
+                LayoutJustify::Center => { el = el.justify_center(); }
+                LayoutJustify::SpaceBetween => { el = el.justify_between(); }
+            }
         }
 
         // Padding
