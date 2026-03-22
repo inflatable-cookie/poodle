@@ -5,12 +5,11 @@
 //! - Card: bordered tabs
 //! - Pill: rounded pill container with tinted active state
 
-use gpui::prelude::FluentBuilder;
 use gpui::*;
 use pug_gpui::GpuiThemeProvider;
 use pug_primitives::{Orientation, TabActivationMode, TabDefinition, TabVariant, TabsSpec};
 
-use crate::theme_ext::{color_mix, resolve_color, resolve_opacity, resolve_px, resolve_radius};
+use crate::theme_ext::{resolve_color, resolve_opacity, resolve_px, resolve_radius};
 
 /// A real GPUI tabs component backed by `TabsSpec`.
 pub struct Tabs {
@@ -76,14 +75,14 @@ impl Tabs {
         let theme = &self.theme;
         let inline_padding = resolve_px(theme, "semantic.space.inline.md");
         let control_y = resolve_px(theme, "semantic.space.control.y");
-        let disabled_opacity = resolve_opacity(theme, "semantic.state.opacity.disabled");
-        let accent = resolve_color(theme, "semantic.color.accent.base");
-        let border = resolve_color(theme, "semantic.color.border.subtle");
+        let disabled_opacity = resolve_opacity(theme, self.spec.disabled_opacity_token());
+        let accent = resolve_color(theme, self.spec.indicator_token());
+        let border = resolve_color(theme, self.spec.list_border_token());
         let text_secondary = resolve_color(theme, "semantic.color.text.secondary");
         let elevated = resolve_color(theme, "semantic.color.background.elevated");
+        let focus_ring = resolve_color(theme, self.spec.focus_ring_color_token());
 
-        // Contract: hover = color-mix with elevated
-        let hover_bg = color_mix(elevated, elevated, 0.5);
+        let hover_bg = elevated;
 
         let current_value = self.spec.current_value().map(|s| s.to_string());
 
@@ -112,8 +111,12 @@ impl Tabs {
                 tab = tab.text_color(text_secondary);
             }
 
+            tab = tab.focus(move |s| s.border_color(focus_ring));
+
             if is_disabled {
-                tab = tab.opacity(disabled_opacity);
+                tab = tab
+                    .opacity(disabled_opacity)
+                    .cursor(CursorStyle::OperationNotAllowed);
             } else {
                 tab = tab
                     .cursor_pointer()
@@ -132,12 +135,13 @@ impl Tabs {
         let list_gap = resolve_px(theme, self.spec.list_gap_token());
         let control_y = resolve_px(theme, "semantic.space.control.y");
         let control_x = resolve_px(theme, "semantic.space.control.x");
-        let disabled_opacity = resolve_opacity(theme, "semantic.state.opacity.disabled");
+        let disabled_opacity = resolve_opacity(theme, self.spec.disabled_opacity_token());
         let accent = resolve_color(theme, self.spec.indicator_token());
         let border_subtle = resolve_color(theme, self.spec.list_border_token());
         let text_primary = resolve_color(theme, "semantic.color.text.primary");
         let text_secondary = resolve_color(theme, "semantic.color.text.secondary");
         let pill_radius = resolve_radius(theme, "semantic.radius.pill");
+        let focus_ring = resolve_color(theme, self.spec.focus_ring_color_token());
 
         let current_value = self.spec.current_value().map(|s| s.to_string());
 
@@ -176,8 +180,12 @@ impl Tabs {
                 tab = tab.text_color(text_secondary);
             }
 
+            tab = tab.focus(move |s| s.border_color(focus_ring));
+
             if is_disabled {
-                tab = tab.opacity(disabled_opacity);
+                tab = tab
+                    .opacity(disabled_opacity)
+                    .cursor(CursorStyle::OperationNotAllowed);
             } else {
                 tab = tab.cursor_pointer();
             }

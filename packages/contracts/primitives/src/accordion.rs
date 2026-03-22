@@ -87,4 +87,12 @@ impl AccordionSpec {
     pub fn border_color_token(&self) -> &'static str {
         semantic::COLOR_BORDER_DEFAULT
     }
+
+    pub fn focus_ring_color_token(&self) -> &'static str {
+        semantic::COLOR_ACCENT_FOCUS_RING
+    }
+
+    pub fn disabled_opacity_token(&self) -> &'static str {
+        semantic::STATE_OPACITY_DISABLED
+    }
 }

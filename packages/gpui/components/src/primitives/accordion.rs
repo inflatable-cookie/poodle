@@ -1,7 +1,6 @@
 //! Accordion — real GPUI component backed by AccordionSpec.
 
 use std::rc::Rc;
-use gpui::prelude::FluentBuilder;
 use gpui::*;
 use pug_gpui::GpuiThemeProvider;
 use pug_primitives::{AccordionItemSpec, AccordionSelectionValue, AccordionSpec};
@@ -64,10 +63,11 @@ impl IntoElement for Accordion {
     fn into_element(self) -> Self::Element {
         let theme = &self.theme;
 
-        let disabled_opacity = resolve_opacity(theme, "semantic.state.opacity.disabled");
+        let disabled_opacity = resolve_opacity(theme, self.spec.disabled_opacity_token());
         let hover_bg = resolve_color(theme, "semantic.color.background.elevated");
         let border = resolve_color(theme, self.spec.border_color_token());
         let text_secondary = resolve_color(theme, "semantic.color.text.secondary");
+        let focus_ring = resolve_color(theme, self.spec.focus_ring_color_token());
 
         let expanded = self.spec.expanded_values();
 
@@ -88,12 +88,16 @@ impl IntoElement for Accordion {
                 .border_b_1()
                 .border_color(border);
 
+            header = header.focus(move |s| s.border_color(focus_ring));
+
             if !is_disabled {
                 header = header
                     .cursor_pointer()
                     .hover(|s| s.bg(hover_bg));
             } else {
-                header = header.opacity(disabled_opacity);
+                header = header
+                    .opacity(disabled_opacity)
+                    .cursor(CursorStyle::OperationNotAllowed);
             }
 
             header = header

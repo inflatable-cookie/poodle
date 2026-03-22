@@ -136,8 +136,14 @@ impl IntoElement for DateTimeRangePicker {
             .gap(inline_gap)
             .text_sm();
 
+        // Focus ring
+        let focus_ring = resolve_color(theme, "semantic.color.accent.focusRing");
+        trigger = trigger.focus(move |s| s.border_color(focus_ring));
+
         if is_disabled {
-            trigger = trigger.opacity(disabled_opacity);
+            trigger = trigger
+                .opacity(disabled_opacity)
+                .cursor(CursorStyle::OperationNotAllowed);
         } else {
             trigger = trigger
                 .cursor_pointer()

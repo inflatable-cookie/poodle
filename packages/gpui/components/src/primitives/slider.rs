@@ -7,6 +7,8 @@ use pug_primitives::{Orientation, SliderSpec};
 
 use crate::theme_ext::{resolve_color, resolve_opacity, resolve_px};
 
+static SLIDER_ID_COUNTER: std::sync::atomic::AtomicU32 = std::sync::atomic::AtomicU32::new(0);
+
 /// A real GPUI slider component backed by `SliderSpec`.
 pub struct Slider {
     spec: SliderSpec,
@@ -94,7 +96,15 @@ impl IntoElement for Slider {
             .child(format!("{:.0}", spec.clamped_value()))
             .child(format!("{:.0}", spec.max));
 
+        let focus_ring = resolve_color(theme, spec.focus_ring_color_token());
+
+        let slider_id = SharedString::from(format!(
+            "pug-slider-{}",
+            SLIDER_ID_COUNTER.fetch_add(1, std::sync::atomic::Ordering::Relaxed)
+        ));
+
         let mut wrapper = div()
+            .id(slider_id)
             .w_full()
             .flex()
             .flex_col()
@@ -102,8 +112,12 @@ impl IntoElement for Slider {
             .child(track)
             .child(labels);
 
+        wrapper = wrapper.focus(move |s| s.border_color(focus_ring));
+
         if spec.is_disabled {
-            wrapper = wrapper.opacity(disabled_opacity);
+            wrapper = wrapper
+                .opacity(disabled_opacity)
+                .cursor(CursorStyle::OperationNotAllowed);
         }
 
         wrapper.into_any_element()

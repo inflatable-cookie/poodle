@@ -105,4 +105,12 @@ impl TabsSpec {
     pub fn pill_active_bg_opacity(&self) -> f32 {
         0.18
     }
+
+    pub fn focus_ring_color_token(&self) -> &'static str {
+        semantic::COLOR_ACCENT_FOCUS_RING
+    }
+
+    pub fn disabled_opacity_token(&self) -> &'static str {
+        semantic::STATE_OPACITY_DISABLED
+    }
 }

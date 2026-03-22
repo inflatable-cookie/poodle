@@ -63,4 +63,12 @@ impl SliderSpec {
     pub fn range_fill_token(&self) -> &'static str {
         semantic::COLOR_ACCENT_BASE
     }
+
+    pub fn focus_ring_color_token(&self) -> &'static str {
+        semantic::COLOR_ACCENT_FOCUS_RING
+    }
+
+    pub fn disabled_opacity_token(&self) -> &'static str {
+        semantic::STATE_OPACITY_DISABLED
+    }
 }
