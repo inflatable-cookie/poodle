@@ -224,11 +224,12 @@ impl IntoElement for RelationPicker {
             BrowseState::Ready => {
                 // Item list
                 let mut list = div()
+                    .id("relation-picker-list")
                     .w_full()
                     .flex()
                     .flex_col()
                     .max_h(px(240.0))
-                    .overflow_hidden();
+                    .overflow_y_scroll();
 
                 for item in &spec.items {
                     let is_selected = spec

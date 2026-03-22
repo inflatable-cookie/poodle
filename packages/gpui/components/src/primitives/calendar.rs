@@ -319,6 +319,72 @@ impl IntoElement for Calendar {
 
         cal = cal.child(nav_header);
 
+        // Keyboard navigation: arrow keys move day selection, PageUp/PageDown change month
+        if !spec.is_disabled {
+            let key_select = self.on_select.clone();
+            let key_navigate = self.on_navigate.clone();
+            let key_year = year;
+            let key_month = month;
+            let key_days = days_count;
+            let key_selected = selected_date.clone();
+            let key_prev = prev_month_str.clone();
+            let key_next = next_month_str.clone();
+
+            cal = cal.on_key_down(move |event: &KeyDownEvent, window, cx| {
+                let key = event.keystroke.key.as_str();
+                match key {
+                    "left" | "right" | "up" | "down" => {
+                        let current_day = key_selected.as_deref()
+                            .and_then(|s| {
+                                let parts: Vec<&str> = s.split('-').collect();
+                                if parts.len() == 3 {
+                                    let sy = parts[0].parse::<i32>().ok()?;
+                                    let sm = parts[1].parse::<u32>().ok()?;
+                                    let sd = parts[2].parse::<u32>().ok()?;
+                                    if sy == key_year && sm == key_month { Some(sd) } else { None }
+                                } else { None }
+                            })
+                            .unwrap_or(1);
+
+                        let delta: i32 = match key {
+                            "left" => -1,
+                            "right" => 1,
+                            "up" => -7,
+                            "down" => 7,
+                            _ => 0,
+                        };
+
+                        let new_day = current_day as i32 + delta;
+                        if new_day >= 1 && new_day <= key_days as i32 {
+                            if let Some(ref handler) = key_select {
+                                let date_str = format!("{:04}-{:02}-{:02}", key_year, key_month, new_day);
+                                handler(&date_str, window, cx);
+                            }
+                        } else if new_day < 1 {
+                            if let Some(ref handler) = key_navigate {
+                                handler(&key_prev, window, cx);
+                            }
+                        } else {
+                            if let Some(ref handler) = key_navigate {
+                                handler(&key_next, window, cx);
+                            }
+                        }
+                    }
+                    "pageup" => {
+                        if let Some(ref handler) = key_navigate {
+                            handler(&key_prev, window, cx);
+                        }
+                    }
+                    "pagedown" => {
+                        if let Some(ref handler) = key_navigate {
+                            handler(&key_next, window, cx);
+                        }
+                    }
+                    _ => {}
+                }
+            });
+        }
+
         // Weekday headers row
         // Contract: weekday font 0.6875rem (11px), weight 600, uppercase
         let mut header_row = div().flex().gap(px(2.0));

@@ -17,6 +17,7 @@ pub struct Menubar {
     theme: GpuiThemeProvider,
     id_prefix: String,
     on_select: Option<Box<dyn Fn(&str, &mut Window, &mut App) + 'static>>,
+    on_trigger: Option<Box<dyn Fn(&str, &mut Window, &mut App) + 'static>>,
 }
 
 impl std::ops::Deref for Menubar {
@@ -26,7 +27,7 @@ impl std::ops::Deref for Menubar {
 
 impl Menubar {
     pub fn new(theme: &GpuiThemeProvider) -> Self {
-        Self { spec: MenubarSpec::default(), theme: theme.clone(), id_prefix: String::new(), on_select: None }
+        Self { spec: MenubarSpec::default(), theme: theme.clone(), id_prefix: String::new(), on_select: None, on_trigger: None }
     }
 
     pub fn from_spec(spec: MenubarSpec, theme: &GpuiThemeProvider) -> Self {
@@ -35,6 +36,7 @@ impl Menubar {
             theme: theme.clone(),
             id_prefix: "pug-menubar".to_string(),
             on_select: None,
+            on_trigger: None,
         }
     }
 
@@ -54,6 +56,15 @@ impl Menubar {
         handler: impl Fn(&str, &mut Window, &mut App) + 'static,
     ) -> Self {
         self.on_select = Some(Box::new(handler));
+        self
+    }
+
+    /// Called when a menubar trigger is clicked to open/close a menu.
+    pub fn on_trigger(
+        mut self,
+        handler: impl Fn(&str, &mut Window, &mut App) + 'static,
+    ) -> Self {
+        self.on_trigger = Some(Box::new(handler));
         self
     }
 }
@@ -81,6 +92,12 @@ impl IntoElement for Menubar {
         let trigger_hover = color_mix(accent, panel, 0.14);
 
         let current_value = self.spec.current_value().map(|s| s.to_string());
+
+        // Wrap callbacks in Rc for sharing across trigger + menu closures
+        let on_trigger_rc: Option<std::rc::Rc<dyn Fn(&str, &mut Window, &mut App)>> =
+            self.on_trigger.map(|h| std::rc::Rc::from(h));
+        let on_select_rc: Option<std::rc::Rc<dyn Fn(&str, &mut Window, &mut App)>> =
+            self.on_select.map(|h| std::rc::Rc::from(h));
 
         // Contract: list has border/radius/bg/padding
         let mut trigger_row = div()
@@ -125,6 +142,15 @@ impl IntoElement for Menubar {
                 trigger = trigger
                     .cursor_pointer()
                     .hover(|s| s.bg(trigger_hover));
+
+                // Click to open/close menu for this trigger
+                if let Some(ref handler) = on_trigger_rc {
+                    let handler = handler.clone();
+                    let val = entry.value.clone();
+                    trigger = trigger.on_click(move |_event, window, cx| {
+                        handler(&val, window, cx);
+                    });
+                }
             }
 
             trigger = trigger.child(entry.label.clone());
@@ -138,10 +164,18 @@ impl IntoElement for Menubar {
         if let Some(entry) = self.spec.current_menu() {
             if !entry.items.is_empty() {
                 let menu_spec = MenuSpec::new(entry.items.clone());
-                wrapper = wrapper.child(
-                    Menu::from_spec(menu_spec, &self.theme)
-                        .with_id(format!("{}-dropdown", self.id_prefix)),
-                );
+                let mut menu = Menu::from_spec(menu_spec, &self.theme)
+                    .with_id(format!("{}-dropdown", self.id_prefix));
+
+                // Wire on_select through to the menu
+                if let Some(ref handler) = on_select_rc {
+                    let handler = handler.clone();
+                    menu = menu.on_select(move |val, window, cx| {
+                        handler(val, window, cx);
+                    });
+                }
+
+                wrapper = wrapper.child(menu);
             }
         }
 

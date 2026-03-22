@@ -161,23 +161,72 @@ impl IntoElement for Select {
         let on_change_rc: Option<std::rc::Rc<dyn Fn(&str, &mut Window, &mut App)>> =
             self.on_change.map(|h| std::rc::Rc::from(h));
 
-        if let Some(ref handler) = on_toggle_rc {
-            if !is_disabled {
-                let next_open = !is_open;
-                let click_handler = handler.clone();
-                let key_handler = handler.clone();
-                trigger = trigger
-                    .on_click(move |_event, window, cx| {
-                        click_handler(&next_open, window, cx);
-                    })
-                    .on_key_down(move |event: &KeyDownEvent, window, cx| {
-                        if event.keystroke.key == "space" || event.keystroke.key == "enter" {
-                            key_handler(&next_open, window, cx);
-                        } else if event.keystroke.key == "escape" && is_open {
-                            key_handler(&false, window, cx);
-                        }
-                    });
+        // Collect selectable option values for keyboard navigation
+        let selectable_values: Vec<String> = spec.options.iter()
+            .filter(|o| !o.is_disabled)
+            .map(|o| o.value.clone())
+            .collect();
+        let current_value = spec.current_value().map(|s| s.to_string());
+
+        if !is_disabled {
+            let click_toggle = on_toggle_rc.clone();
+            let key_toggle = on_toggle_rc.clone();
+            let key_change = on_change_rc.clone();
+            let key_close = on_toggle_rc.clone();
+            let nav_values = selectable_values.clone();
+            let current_sel = current_value.clone();
+            let next_open = !is_open;
+
+            if let Some(ref handler) = click_toggle {
+                let handler = handler.clone();
+                trigger = trigger.on_click(move |_event, window, cx| {
+                    handler(&next_open, window, cx);
+                });
             }
+
+            trigger = trigger.on_key_down(move |event: &KeyDownEvent, window, cx| {
+                let key = event.keystroke.key.as_str();
+                match key {
+                    "space" | "enter" => {
+                        if let Some(ref handler) = key_toggle {
+                            handler(&next_open, window, cx);
+                        }
+                    }
+                    "escape" => {
+                        if is_open {
+                            if let Some(ref handler) = key_toggle {
+                                handler(&false, window, cx);
+                            }
+                        }
+                    }
+                    "down" | "up" => {
+                        if !is_open {
+                            // Open the dropdown
+                            if let Some(ref handler) = key_toggle {
+                                handler(&true, window, cx);
+                            }
+                        } else if !nav_values.is_empty() {
+                            // Navigate between options
+                            let current_idx = current_sel.as_deref()
+                                .and_then(|cv| nav_values.iter().position(|v| v == cv));
+                            let next_idx = match key {
+                                "down" => match current_idx {
+                                    Some(i) => (i + 1) % nav_values.len(),
+                                    None => 0,
+                                },
+                                _ => match current_idx {
+                                    Some(0) | None => nav_values.len() - 1,
+                                    Some(i) => i - 1,
+                                },
+                            };
+                            if let Some(ref handler) = key_change {
+                                handler(&nav_values[next_idx], window, cx);
+                            }
+                        }
+                    }
+                    _ => {}
+                }
+            });
         }
 
         let mut wrapper = div().flex().flex_col().gap(stack_gap).min_w(px(128.0)).child(trigger);
