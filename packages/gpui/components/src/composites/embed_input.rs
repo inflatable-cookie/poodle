@@ -35,15 +35,18 @@ impl IntoElement for EmbedInput {
         let radius = resolve_radius(theme, "semantic.radius.control");
         let text_color = resolve_color(theme, "semantic.color.text.primary");
         let placeholder_color = resolve_color(theme, "semantic.color.text.secondary");
+        let focus_ring = resolve_color(theme, "semantic.color.accent.focusRing");
         let display = if spec.value.is_empty() { spec.placeholder.as_deref().unwrap_or("Paste URL...") } else { &spec.value };
         let color = if spec.value.is_empty() { placeholder_color } else { text_color };
 
         // Multi-line text area (3 rows) instead of single-line input
         let mut textarea = div()
+            .id("pug-embed-input")
             .bg(fill).border_1().border_color(border).rounded(radius)
             .min_h(px(72.0)).px(px(12.0)).py(px(8.0))
             .flex().items_start()
             .text_size(px(14.0)).text_color(color)
+            .focus(move |s| s.border_color(focus_ring))
             .child(display.to_string());
         if spec.is_disabled {
             textarea = textarea.opacity(resolve_opacity(theme, "semantic.state.opacity.disabled"));

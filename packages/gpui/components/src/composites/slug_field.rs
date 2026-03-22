@@ -37,9 +37,11 @@ impl IntoElement for SlugField {
         let fill = resolve_color(theme, "semantic.color.background.surface");
         let muted = resolve_color(theme, "semantic.color.text.secondary");
 
-        let mut el = div().flex().flex_row().items_center()
+        let focus_ring = resolve_color(theme, "semantic.color.accent.focusRing");
+        let mut el = div().id("pug-slug-field").flex().flex_row().items_center()
             .bg(fill).border_1().border_color(border).rounded(radius)
-            .h(px(36.0));
+            .h(px(36.0))
+            .focus(move |s| s.border_color(focus_ring));
 
         if let Some(ref prefix) = spec.prefix {
             el = el.child(div().text_size(px(14.0)).text_color(muted).pl(px(12.0)).child(prefix.clone()));

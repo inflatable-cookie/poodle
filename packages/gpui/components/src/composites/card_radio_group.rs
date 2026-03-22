@@ -37,9 +37,12 @@ impl IntoElement for CardRadioGroup {
         let accent = resolve_color(theme, "semantic.color.accent.base");
         let selected = spec.value.as_deref().or(spec.default_value.as_deref());
 
+        let focus_ring = resolve_color(theme, "semantic.color.accent.focusRing");
+
         let mut el = div().flex().flex_row().flex_wrap().gap(px(8.0));
-        for option in &spec.options {
+        for (idx, option) in spec.options.iter().enumerate() {
             let is_selected = selected == Some(option.value.as_str());
+            let is_option_disabled = spec.is_disabled || option.is_disabled;
             let fill = if is_selected { selected_fill } else { unselected_fill };
             let border_c = if is_selected { accent } else { border };
             let bw = if is_selected { 2.0 } else { 1.0 };
@@ -63,16 +66,26 @@ impl IntoElement for CardRadioGroup {
             let content = div().flex().flex_col().gap(px(2.0))
                 .child(div().text_size(px(14.0)).text_color(text_color).child(option.label.clone()));
 
-            let card = div()
+            let card_id = SharedString::from(format!("pug-card-radio-{}", idx));
+            let mut card = div()
+                .id(card_id)
                 .flex_1()
                 .min_w(px(200.0))
                 .bg(fill).rounded(radius)
                 .border(px(bw)).border_color(border_c)
                 .px(px(16.0)).py(px(12.0))
-                .cursor_pointer()
                 .flex().items_center().gap(px(10.0))
+                .focus(move |s| s.border_color(focus_ring))
                 .child(indicator)
                 .child(content);
+
+            if is_option_disabled {
+                let opacity = resolve_opacity(theme, "semantic.state.opacity.disabled");
+                card = card.opacity(opacity).cursor(CursorStyle::OperationNotAllowed);
+            } else {
+                card = card.cursor_pointer();
+            }
+
             el = el.child(card);
         }
         if spec.is_disabled {

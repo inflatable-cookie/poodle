@@ -110,9 +110,14 @@ impl IntoElement for EditableList {
         }
 
         // Add button
+        let add_icon = Icon::from_spec(
+            IconSpec::new("plus").with_size(IconSize::Sm),
+            theme,
+        ).with_color(accent);
         let add_btn = div().flex().flex_row().items_center().gap(px(4.0))
             .cursor_pointer()
-            .child(div().text_size(px(14.0)).text_color(accent).child(format!("+ {}", self.add_label)));
+            .child(add_icon)
+            .child(div().text_size(px(14.0)).text_color(accent).child(self.add_label.clone()));
         el = el.child(add_btn);
 
         if self.is_disabled {

@@ -4,7 +4,9 @@ use gpui::prelude::FluentBuilder;
 use gpui::*;
 use pug_gpui::GpuiThemeProvider;
 use pug_composites::{DataTableSpec, TableColumnSpec, TableRowSpec, TableSortDirection};
+use pug_primitives::{IconSize, IconSpec};
 
+use crate::primitives::Icon;
 use crate::theme_ext::{resolve_color, resolve_px};
 
 /// A real GPUI data table component backed by `DataTableSpec`.
@@ -115,11 +117,19 @@ impl IntoElement for DataTable {
                 .when(col.align_end, |el| el.text_right());
 
             if is_sorted {
-                let direction_indicator = match spec.sort_direction {
-                    pug_composites::TableSortDirection::Asc => " \u{2191}",
-                    pug_composites::TableSortDirection::Desc => " \u{2193}",
+                let sort_icon_name = match spec.sort_direction {
+                    pug_composites::TableSortDirection::Asc => "arrow-up",
+                    pug_composites::TableSortDirection::Desc => "arrow-down",
                 };
-                header_cell = header_cell.child(format!("{}{}", label, direction_indicator));
+                header_cell = header_cell
+                    .flex().items_center().gap(px(4.0))
+                    .child(label)
+                    .child(
+                        Icon::from_spec(
+                            IconSpec::new(sort_icon_name).with_size(IconSize::Sm),
+                            theme,
+                        ).with_color(text_secondary),
+                    );
             } else {
                 header_cell = header_cell.child(label);
             }
