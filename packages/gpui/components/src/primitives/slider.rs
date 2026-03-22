@@ -96,7 +96,16 @@ impl IntoElement for Slider {
                     .rounded(thumb_radius)
                     .bg(accent)
                     .border_1()
-                    .border_color(accent),
+                    .border_color(accent)
+                    // Contract: thumb shadow
+                    .shadow(vec![
+                        gpui::BoxShadow {
+                            color: hsla(0.0, 0.0, 0.0, 0.2),
+                            offset: point(px(0.0), px(1.0)),
+                            blur_radius: px(3.0),
+                            spread_radius: px(0.0),
+                        },
+                    ]),
             );
 
         // Value labels

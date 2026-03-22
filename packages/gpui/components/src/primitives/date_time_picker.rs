@@ -144,8 +144,7 @@ impl IntoElement for DateTimePicker {
             .child(div().text_color(text_col).flex_1().child(display_text))
             .child(
                 Icon::from_spec(
-                    IconSpec::new(if is_open { "chevron-up" } else { "chevron-down" })
-                        .with_size(IconSize::Sm),
+                    IconSpec::new("calendar").with_size(IconSize::Sm),
                     theme,
                 )
                 .with_color(icon_muted),

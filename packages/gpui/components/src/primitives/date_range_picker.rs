@@ -144,8 +144,7 @@ impl IntoElement for DateRangePicker {
             .child(div().text_color(text_col).flex_1().child(display_text))
             .child(
                 Icon::from_spec(
-                    IconSpec::new(if is_open { "chevron-up" } else { "chevron-down" })
-                        .with_size(IconSize::Sm),
+                    IconSpec::new("calendar").with_size(IconSize::Sm),
                     theme,
                 )
                 .with_color(icon_muted),
@@ -183,7 +182,15 @@ impl IntoElement for DateRangePicker {
             }
 
             let calendar = RangeCalendar::from_spec(cal_spec, theme);
-            wrapper = wrapper.child(calendar);
+            let overlay = div()
+                .rounded(control_radius)
+                .bg(elevated_bg)
+                .border_1()
+                .border_color(border)
+                .shadow_md()
+                .overflow_hidden()
+                .child(calendar);
+            wrapper = wrapper.child(overlay);
         }
 
         wrapper.into_any_element()

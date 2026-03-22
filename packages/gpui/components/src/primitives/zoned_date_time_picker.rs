@@ -64,6 +64,7 @@ impl IntoElement for ZonedDateTimePicker {
         let text_primary = resolve_color(theme, "semantic.color.text.primary");
         let text_secondary = resolve_color(theme, "semantic.color.text.secondary");
         let elevated_bg = resolve_color(theme, spec.overlay_fill_token());
+        let icon_muted = resolve_color(theme, "semantic.color.icon.muted");
         let disabled_opacity = resolve_opacity(theme, "semantic.state.opacity.disabled");
 
         let display_value = spec
@@ -109,11 +110,10 @@ impl IntoElement for ZonedDateTimePicker {
 
         trigger = trigger.child(
             Icon::from_spec(
-                IconSpec::new(if spec.is_open { "chevron-up" } else { "chevron-down" })
-                    .with_size(IconSize::Sm),
+                IconSpec::new("calendar").with_size(IconSize::Sm),
                 theme,
             )
-            .with_color(text_secondary),
+            .with_color(icon_muted),
         );
 
         trigger = trigger.focus(move |s| s.border_color(focus_ring));

@@ -108,7 +108,7 @@ impl IntoElement for SplitButton {
         let mut root = div()
             .id("pug-split-btn")
             .flex()
-            .items_end()
+            .items_center()
             .rounded(radius);
 
         // ── Primary half ──────────────────────────────────────────
@@ -142,7 +142,7 @@ impl IntoElement for SplitButton {
         }
 
         // ── Divider (60% height, centered) ────────────────────────
-        let divider = div().w(px(1.0)).h(height * 0.6).my_auto().bg(separator_color);
+        let divider = div().w(px(1.0)).h(relative(0.6)).my_auto().bg(separator_color);
 
         // ── Toggle half ───────────────────────────────────────────
         let mut toggle = div()
