@@ -1,6 +1,5 @@
 //! AppHeader — real GPUI component backed by AppHeaderSpec.
 
-use gpui::prelude::FluentBuilder;
 use gpui::*;
 use pug_gpui::GpuiThemeProvider;
 use pug_composites::AppHeaderSpec;
@@ -101,7 +100,7 @@ impl IntoElement for AppHeader {
         if let Some(ref title) = spec.title {
             left = left.child(
                 div()
-                    .text_sm()
+                    .text_size(px(14.0))
                     .font_weight(FontWeight::SEMIBOLD)
                     .text_color(text_primary)
                     .child(title.clone()),

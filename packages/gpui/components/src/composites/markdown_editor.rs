@@ -1,6 +1,5 @@
 //! MarkdownEditor — markdown editing with preview backed by MarkdownEditorSpec.
 
-use gpui::prelude::FluentBuilder;
 use gpui::*;
 use pug_gpui::GpuiThemeProvider;
 use pug_composites::MarkdownEditorSpec;
@@ -48,7 +47,7 @@ impl IntoElement for MarkdownEditor {
             .child(div().text_xs().text_color(muted).child("I"))
             .child(div().text_xs().text_color(muted).child("H")));
         // Editor area
-        el = el.child(div().px(px(12.0)).py(px(8.0)).flex_grow().text_sm().text_color(color).child(display.to_string()));
+        el = el.child(div().px(px(12.0)).py(px(8.0)).flex_grow().text_size(px(14.0)).text_color(color).child(display.to_string()));
 
         if self.spec.is_disabled {
             el = el.opacity(resolve_opacity(&self.theme, "semantic.state.opacity.disabled"));

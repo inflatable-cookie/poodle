@@ -2,9 +2,10 @@
 
 use gpui::*;
 use pug_gpui::GpuiThemeProvider;
-use pug_primitives::{CalendarSpec, CalendarWeekStart};
+use pug_primitives::{CalendarSpec, CalendarWeekStart, IconSize, IconSpec};
 
-use crate::theme_ext::{resolve_color, resolve_opacity, resolve_radius};
+use super::icon::Icon;
+use crate::theme_ext::{color_mix, resolve_color, resolve_opacity, resolve_radius};
 
 /// Weekday header labels (Sunday-first; rotated at render time based on spec).
 const WEEKDAYS_SUN: [&str; 7] = ["Su", "Mo", "Tu", "We", "Th", "Fr", "Sa"];
@@ -108,6 +109,22 @@ impl Calendar {
         let m = month as usize;
         ((y + y / 4 - y / 100 + y / 400 + t[m - 1] + 1) % 7) as u32
     }
+
+    /// Convert days since Unix epoch to (year, month, day).
+    fn days_to_ymd(days: i64) -> (i32, u32, u32) {
+        // Algorithm from https://howardhinnant.github.io/date_algorithms.html
+        let z = days + 719468;
+        let era = (if z >= 0 { z } else { z - 146096 }) / 146097;
+        let doe = (z - era * 146097) as u32;
+        let yoe = (doe - doe / 1460 + doe / 36524 - doe / 146096) / 365;
+        let y = yoe as i64 + era * 400;
+        let doy = doe - (365 * yoe + yoe / 4 - yoe / 100);
+        let mp = (5 * doy + 2) / 153;
+        let d = doy - (153 * mp + 2) / 5 + 1;
+        let m = if mp < 10 { mp + 3 } else { mp - 9 };
+        let y = if m <= 2 { y + 1 } else { y };
+        (y as i32, m, d)
+    }
 }
 
 impl IntoElement for Calendar {
@@ -124,8 +141,15 @@ impl IntoElement for Calendar {
         let text_secondary = resolve_color(theme, "semantic.color.text.secondary");
         let text_inverse = resolve_color(theme, "semantic.color.text.inverse");
         let surface_bg = resolve_color(theme, "semantic.color.background.surface");
+        let elevated_bg = resolve_color(theme, "semantic.color.background.elevated");
         let border = resolve_color(theme, "semantic.color.border.default");
+        let icon_muted = resolve_color(theme, "semantic.color.icon.muted");
         let disabled_opacity = resolve_opacity(theme, "semantic.state.opacity.disabled");
+
+        // Contract: hover = color-mix(accent 8%, surface)
+        let hover_bg = color_mix(accent, surface_bg, 0.08);
+        // Contract: today cell border = border-default
+        let today_border = border;
 
         let selected_date = spec.current_value().map(|s| s.to_string());
         let selected_day = selected_date.as_deref().and_then(Self::parse_day);
@@ -135,6 +159,20 @@ impl IntoElement for Calendar {
             .effective_visible_month()
             .and_then(Self::parse_year_month)
             .unwrap_or((2026, 1));
+
+        // Compute "today" for highlighting (YYYY-MM-DD)
+        // Simple approach: check if today is in the visible month
+        let today_day: Option<u32> = {
+            // Use a static today value for consistency within a single render
+            let now = std::time::SystemTime::now()
+                .duration_since(std::time::UNIX_EPOCH)
+                .unwrap_or_default()
+                .as_secs();
+            let days_since_epoch = now / 86400;
+            // Approximate date calculation
+            let (ty, tm, td) = Self::days_to_ymd(days_since_epoch as i64);
+            if ty == year && tm == month { Some(td) } else { None }
+        };
 
         let days_count = Self::days_in_month(year, month);
         let first_dow = Self::first_day_of_week(year, month);
@@ -185,19 +223,68 @@ impl IntoElement for Calendar {
                 .cursor(CursorStyle::OperationNotAllowed);
         }
 
-        // Month header
-        cal = cal.child(
-            div()
-                .flex()
-                .justify_center()
-                .py(px(4.0))
-                .text_sm()
-                .font_weight(FontWeight::SEMIBOLD)
-                .text_color(text_primary)
-                .child(month_label),
-        );
+        // Contract: nav header with prev/next month buttons and centered month label
+        let nav_btn_hover = color_mix(elevated_bg, surface_bg, 0.84);
+        let nav_header = div()
+            .flex()
+            .items_center()
+            .justify_between()
+            .py(px(4.0))
+            .child(
+                // Prev month button
+                div()
+                    .id("pug-cal-prev")
+                    .w(px(28.0))
+                    .h(px(28.0))
+                    .flex()
+                    .items_center()
+                    .justify_center()
+                    .rounded(control_radius)
+                    .cursor_pointer()
+                    .hover(move |s| s.bg(nav_btn_hover))
+                    .child(
+                        Icon::from_spec(
+                            IconSpec::new("chevron-left").with_size(IconSize::Sm),
+                            theme,
+                        )
+                        .with_color(icon_muted),
+                    ),
+            )
+            .child(
+                // Month/year label — centered
+                div()
+                    .flex_1()
+                    .text_center()
+                    .text_size(px(14.0))
+                    .font_weight(FontWeight::SEMIBOLD)
+                    .text_color(text_primary)
+                    .child(month_label),
+            )
+            .child(
+                // Next month button
+                div()
+                    .id("pug-cal-next")
+                    .w(px(28.0))
+                    .h(px(28.0))
+                    .flex()
+                    .items_center()
+                    .justify_center()
+                    .rounded(control_radius)
+                    .cursor_pointer()
+                    .hover(move |s| s.bg(nav_btn_hover))
+                    .child(
+                        Icon::from_spec(
+                            IconSpec::new("chevron-right").with_size(IconSize::Sm),
+                            theme,
+                        )
+                        .with_color(icon_muted),
+                    ),
+            );
+
+        cal = cal.child(nav_header);
 
         // Weekday headers row
+        // Contract: weekday font 0.6875rem (11px), weight 600, uppercase
         let mut header_row = div().flex().gap(px(2.0));
         for i in 0..7u32 {
             let idx = ((i + week_start_offset) % 7) as usize;
@@ -208,11 +295,10 @@ impl IntoElement for Calendar {
                     .flex()
                     .items_center()
                     .justify_center()
-                    // Contract: weekday font 0.6875rem (11px), weight 600, uppercase
                     .text_size(px(11.0))
                     .font_weight(FontWeight::SEMIBOLD)
                     .text_color(text_secondary)
-                    .child(WEEKDAYS_SUN[idx]),
+                    .child(WEEKDAYS_SUN[idx].to_uppercase()),
             );
         }
         cal = cal.child(header_row);
@@ -222,16 +308,48 @@ impl IntoElement for Calendar {
         let total_cells = start_offset + days_count;
         let rows = (total_cells + 6) / 7;
 
+        // Compute previous month's days for leading outside-month cells
+        let (prev_year, prev_month) = if month == 1 { (year - 1, 12) } else { (year, month - 1) };
+        let prev_month_days = Self::days_in_month(prev_year, prev_month);
+
         for row in 0..rows {
             let mut day_row = div().flex().gap(px(2.0));
             for col in 0..7u32 {
                 let cell_idx = row * 7 + col;
-                if cell_idx < start_offset || cell_idx >= start_offset + days_count {
-                    // Empty cell
-                    day_row = day_row.child(div().w(px(32.0)).h(px(32.0)));
+                if cell_idx < start_offset {
+                    // Outside-month cell (previous month)
+                    let outside_day = prev_month_days - (start_offset - cell_idx - 1);
+                    day_row = day_row.child(
+                        div()
+                            .w(px(32.0))
+                            .h(px(32.0))
+                            .flex()
+                            .items_center()
+                            .justify_center()
+                            .rounded(control_radius)
+                            .text_size(px(14.0))
+                            .text_color(text_secondary.opacity(0.4))
+                            .child(format!("{}", outside_day)),
+                    );
+                } else if cell_idx >= start_offset + days_count {
+                    // Outside-month cell (next month)
+                    let outside_day = cell_idx - start_offset - days_count + 1;
+                    day_row = day_row.child(
+                        div()
+                            .w(px(32.0))
+                            .h(px(32.0))
+                            .flex()
+                            .items_center()
+                            .justify_center()
+                            .rounded(control_radius)
+                            .text_size(px(14.0))
+                            .text_color(text_secondary.opacity(0.4))
+                            .child(format!("{}", outside_day)),
+                    );
                 } else {
                     let day_num = cell_idx - start_offset + 1;
                     let is_selected = selected_day == Some(day_num);
+                    let is_today = today_day == Some(day_num);
 
                     let cell_id = SharedString::from(format!("pug-cal-day-{}", day_num));
                     let mut cell = div()
@@ -242,7 +360,7 @@ impl IntoElement for Calendar {
                         .items_center()
                         .justify_center()
                         .rounded(control_radius)
-                        .text_sm();
+                        .text_size(px(14.0));
 
                     if is_selected {
                         cell = cell
@@ -250,9 +368,16 @@ impl IntoElement for Calendar {
                             .text_color(text_inverse)
                             .font_weight(FontWeight::SEMIBOLD);
                     } else {
-                        cell = cell
-                            .text_color(text_primary)
-                            .hover(|s| s.bg(accent.opacity(0.08)));
+                        cell = cell.text_color(text_primary);
+                        // Contract: today = border ring around cell
+                        if is_today {
+                            cell = cell
+                                .border_1()
+                                .border_color(today_border)
+                                .font_weight(FontWeight::SEMIBOLD);
+                        }
+                        // Contract: hover = color-mix(accent 8%, surface)
+                        cell = cell.hover(move |s| s.bg(hover_bg));
                     }
 
                     if spec.is_disabled {

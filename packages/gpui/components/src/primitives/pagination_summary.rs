@@ -87,7 +87,7 @@ impl IntoElement for PaginationSummary {
         // Summary label
         container = container.child(
             div()
-                .text_sm()
+                .text_size(px(14.0))
                 .text_color(text_secondary)
                 .child(summary_text),
         );

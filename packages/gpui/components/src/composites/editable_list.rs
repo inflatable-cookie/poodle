@@ -1,7 +1,6 @@
 //! EditableList — list with add/remove capabilities.
 //! No contract spec exists — implemented from Svelte reference.
 
-use gpui::prelude::FluentBuilder;
 use gpui::*;
 use pug_gpui::GpuiThemeProvider;
 use crate::theme_ext::{resolve_color, resolve_opacity, resolve_px};
@@ -42,7 +41,7 @@ impl IntoElement for EditableList {
         }
         let add_btn = div().flex().flex_row().items_center().gap(px(4.0))
             .cursor_pointer()
-            .child(div().text_sm().text_color(accent).child(format!("+ {}", self.add_label)));
+            .child(div().text_size(px(14.0)).text_color(accent).child(format!("+ {}", self.add_label)));
         el = el.child(add_btn);
         if self.is_disabled {
             let opacity = resolve_opacity(&self.theme, "semantic.state.opacity.disabled");

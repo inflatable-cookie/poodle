@@ -156,7 +156,7 @@ impl IntoElement for DataTable {
                     .w_full()
                     .px(inline_padding)
                     .py(px(24.0))
-                    .text_sm()
+                    .text_size(px(14.0))
                     .text_color(text_secondary)
                     .text_center()
                     .child(String::from(empty_msg)),
@@ -187,7 +187,7 @@ impl IntoElement for DataTable {
                         .flex_1()
                         .px(inline_padding)
                         .py(px(10.0))
-                        .text_sm()
+                        .text_size(px(14.0))
                         .text_color(text_primary)
                         .when(col.align_end, |el| el.text_right())
                         .child(cell_value);

@@ -86,20 +86,28 @@
 
 <style>
   .button {
-    --pug-button-fill: var(--pug-color-background-surface);
-    --pug-button-fill-hover: color-mix(
-      in srgb,
-      var(--pug-button-fill) 84%,
-      var(--pug-color-background-elevated)
+    --pug-button-fill: var(
+      --pug-treatment-interactive-fill,
+      var(--pug-color-background-surface)
+    );
+    --pug-button-fill-hover: var(
+      --pug-treatment-interactive-fill-active,
+      color-mix(in srgb, var(--pug-color-background-surface) 84%, var(--pug-color-background-elevated))
     );
     --pug-button-fill-active: color-mix(
       in srgb,
-      var(--pug-button-fill) 72%,
+      var(--pug-color-background-surface) 72%,
       var(--pug-color-background-elevated)
     );
-    --pug-button-border: var(--pug-color-border-default);
+    --pug-button-border: var(
+      --pug-treatment-interactive-border,
+      var(--pug-color-border-default)
+    );
     --pug-button-text: var(--pug-color-text-primary);
-    --pug-button-shadow: inset 0 0.0625rem 0 color-mix(in srgb, white 8%, transparent);
+    --pug-button-shadow: var(
+      --pug-treatment-interactive-shadow,
+      inset 0 0.0625rem 0 color-mix(in srgb, white 8%, transparent)
+    );
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -108,7 +116,7 @@
     height: var(--pug-size-control-height);
     padding: 0 var(--pug-space-control-x);
     border: 0.0625rem solid var(--pug-button-border);
-    border-radius: var(--pug-treatment-interactive-solid-radius, var(--pug-radius-control));
+    border-radius: var(--pug-treatment-interactive-radius, var(--pug-radius-control));
     background: var(--pug-button-fill);
     box-shadow: var(--pug-button-shadow);
     color: var(--pug-button-text);
@@ -182,12 +190,27 @@
   }
 
   .button[data-variant="primary"] {
-    --pug-button-fill: var(--pug-color-accent-base);
-    --pug-button-border: color-mix(in srgb, var(--pug-color-accent-base) 84%, black);
-    --pug-button-text: var(--pug-color-text-inverse);
-    --pug-button-shadow:
+    --pug-button-fill: var(
+      --pug-treatment-interactive-primary-fill,
+      var(--pug-color-accent-base)
+    );
+    --pug-button-fill-hover: var(
+      --pug-treatment-interactive-primary-fill-hover,
+      color-mix(in srgb, white 12%, var(--pug-color-accent-base))
+    );
+    --pug-button-border: var(
+      --pug-treatment-interactive-primary-border,
+      color-mix(in srgb, var(--pug-color-accent-base) 84%, black)
+    );
+    --pug-button-text: var(
+      --pug-treatment-interactive-primary-text,
+      var(--pug-color-text-inverse)
+    );
+    --pug-button-shadow: var(
+      --pug-treatment-interactive-primary-shadow,
       inset 0 0.0625rem 0 color-mix(in srgb, white 14%, transparent),
-      0 0.375rem 1.125rem color-mix(in srgb, black 18%, transparent);
+      0 0.375rem 1.125rem color-mix(in srgb, black 18%, transparent)
+    );
   }
 
   .button[data-variant="ghost"] {
@@ -220,7 +243,14 @@
 
   .button:hover:not(:disabled) {
     background: var(--pug-button-fill-hover);
-    border-color: color-mix(in srgb, var(--pug-button-border) 78%, var(--pug-color-text-primary));
+    border-color: var(
+      --pug-treatment-interactive-border-active,
+      color-mix(in srgb, var(--pug-button-border) 78%, var(--pug-color-text-primary))
+    );
+    box-shadow: var(
+      --pug-treatment-interactive-shadow-active,
+      var(--pug-button-shadow)
+    );
   }
 
   .button:active:not(:disabled) {

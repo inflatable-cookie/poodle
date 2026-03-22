@@ -284,16 +284,16 @@
   .menubar__trigger {
     display: inline-flex;
     align-items: center;
-    min-height: 2rem;
-    padding: 0 0.75rem;
+    min-height: calc(var(--pug-size-control-height) - 0.25rem);
+    padding: 0 var(--pug-space-control-x);
     border: 0;
     border-radius: var(--pug-radius-control);
     background: transparent;
     color: var(--pug-color-text-primary);
     cursor: pointer;
     font-family: var(--pug-typography-label-family);
-    font-size: 0.75rem;
-    font-weight: 600;
+    font-size: var(--pug-typography-label-size);
+    font-weight: var(--pug-typography-label-weight);
     line-height: 1;
   }
 
@@ -311,10 +311,16 @@
     z-index: var(--pug-overlay-z-menu);
     min-width: 12rem;
     padding: 0.25rem;
-    border: 0.0625rem solid color-mix(in srgb, var(--pug-color-border-default) 72%, transparent);
-    border-radius: var(--pug-radius-surface);
-    background: color-mix(in srgb, var(--pug-color-background-elevated) 98%, var(--pug-color-background-panel));
-    box-shadow: var(--pug-elevation-overlay);
+    border: 0.0625rem solid var(
+      --pug-treatment-surface-elevated-border,
+      color-mix(in srgb, var(--pug-color-border-default) 72%, transparent)
+    );
+    border-radius: var(--pug-treatment-surface-elevated-radius, var(--pug-radius-surface));
+    background: var(
+      --pug-treatment-surface-elevated-fill,
+      color-mix(in srgb, var(--pug-color-background-elevated) 98%, var(--pug-color-background-panel))
+    );
+    box-shadow: var(--pug-treatment-surface-elevated-shadow, var(--pug-elevation-overlay));
   }
 
   .menubar__item {
@@ -322,15 +328,15 @@
     grid-template-columns: minmax(0, 1fr) auto;
     align-items: center;
     width: 100%;
-    min-height: 2rem;
-    padding: 0.375rem 0.5rem;
+    min-height: calc(var(--pug-size-control-height) - 0.25rem);
+    padding: var(--pug-space-control-y) var(--pug-space-control-x);
     border: 0;
     border-radius: calc(var(--pug-radius-control) - 0.125rem);
     background: transparent;
     color: var(--pug-color-text-primary);
     cursor: pointer;
     font: inherit;
-    font-size: 0.875rem;
+    font-size: var(--pug-typography-body-size);
     text-align: left;
   }
 

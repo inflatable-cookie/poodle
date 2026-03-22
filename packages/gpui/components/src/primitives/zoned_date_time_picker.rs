@@ -84,7 +84,7 @@ impl IntoElement for ZonedDateTimePicker {
             .flex()
             .items_center()
             .gap(inline_gap)
-            .text_sm()
+            .text_size(px(14.0))
             .child(div().flex_1().text_color(text_col).child(display_value.to_string()));
 
         if !tz_display.is_empty() {
@@ -123,7 +123,7 @@ impl IntoElement for ZonedDateTimePicker {
                 .border_color(border)
                 .shadow_md()
                 .p(px(16.0))
-                .text_sm()
+                .text_size(px(14.0))
                 .text_color(text_primary)
                 .child("Calendar + time picker + timezone selector");
 

@@ -69,7 +69,7 @@
 
   .empty-state__copy {
     display: grid;
-    gap: 0.375rem;
+    gap: var(--pug-space-inline-sm);
     max-width: 24rem;
   }
 

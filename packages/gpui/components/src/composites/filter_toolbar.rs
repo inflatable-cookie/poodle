@@ -1,6 +1,5 @@
 //! FilterToolbar — real GPUI component backed by FilterToolbarSpec.
 
-use gpui::prelude::FluentBuilder;
 use gpui::*;
 use pug_gpui::GpuiThemeProvider;
 use pug_composites::FilterToolbarSpec;
@@ -96,7 +95,7 @@ impl IntoElement for FilterToolbar {
             if !query.is_empty() {
                 toolbar = toolbar.child(
                     div()
-                        .text_sm()
+                        .text_size(px(14.0))
                         .text_color(text_primary)
                         .child(format!("\u{1F50D} {}", query)),
                 );

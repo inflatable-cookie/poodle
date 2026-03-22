@@ -165,18 +165,35 @@
   .combobox__input {
     min-height: var(--pug-size-control-height);
     padding: 0 var(--pug-space-control-x);
-    border: 0.0625rem solid var(--pug-color-border-default);
-    border-radius: var(--pug-radius-control);
-    background: var(--pug-color-background-surface);
+    border: 0.0625rem solid var(
+      --pug-treatment-interactive-subtle-border,
+      var(--pug-color-border-default)
+    );
+    border-radius: var(--pug-treatment-interactive-subtle-radius, var(--pug-radius-control));
+    background: var(--pug-treatment-interactive-subtle-fill, var(--pug-color-background-surface));
+    box-shadow: var(--pug-treatment-interactive-subtle-shadow, none);
     color: var(--pug-color-text-primary);
     font-family: var(--pug-typography-body-family);
     font-size: var(--pug-typography-body-size);
     line-height: var(--pug-typography-body-lineHeight);
+    transition:
+      border-color var(--pug-motion-duration-interaction) var(--pug-motion-easing-standard),
+      box-shadow var(--pug-motion-duration-interaction) var(--pug-motion-easing-standard),
+      background var(--pug-motion-duration-interaction) var(--pug-motion-easing-standard);
   }
 
   .combobox__input:focus-visible {
-    outline: var(--pug-border-width-focus) solid var(--pug-color-accent-focusRing);
-    outline-offset: 0.125rem;
+    border-color: var(--pug-color-accent-focusRing);
+    background: var(
+      --pug-treatment-interactive-subtle-fill-focus,
+      var(--pug-color-background-surface)
+    );
+    box-shadow: var(
+      --pug-treatment-interactive-subtle-shadow-focus,
+      0 0 0 var(--pug-border-width-focus)
+        color-mix(in srgb, var(--pug-color-accent-focusRing) 28%, transparent)
+    );
+    outline: none;
   }
 
   .combobox__list {
@@ -188,10 +205,16 @@
     display: grid;
     gap: 0.125rem;
     padding: 0.25rem;
-    border: 0.0625rem solid color-mix(in srgb, var(--pug-color-border-default) 72%, transparent);
-    border-radius: var(--pug-radius-surface);
-    background: color-mix(in srgb, var(--pug-color-background-elevated) 98%, var(--pug-color-background-panel));
-    box-shadow: var(--pug-elevation-overlay);
+    border: 0.0625rem solid var(
+      --pug-treatment-surface-elevated-border,
+      color-mix(in srgb, var(--pug-color-border-default) 72%, transparent)
+    );
+    border-radius: var(--pug-treatment-surface-elevated-radius, var(--pug-radius-surface));
+    background: var(
+      --pug-treatment-surface-elevated-fill,
+      color-mix(in srgb, var(--pug-color-background-elevated) 98%, var(--pug-color-background-panel))
+    );
+    box-shadow: var(--pug-treatment-surface-elevated-shadow, var(--pug-elevation-overlay));
   }
 
   .combobox__option {

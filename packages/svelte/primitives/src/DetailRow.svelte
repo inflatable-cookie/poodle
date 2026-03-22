@@ -35,7 +35,7 @@
     grid-template-columns: 11.25rem minmax(0, 1fr) auto;
     gap: var(--pug-space-inline-md);
     align-items: center;
-    padding: 0.75rem 0.875rem;
+    padding: var(--pug-space-panel-y) var(--pug-space-panel-x);
     border-radius: calc(var(--pug-radius-surface) - 0.0625rem);
     background: color-mix(in srgb, var(--pug-surface) 93%, var(--pug-color-text-primary));
   }
@@ -48,7 +48,7 @@
 
   .detail-row__label-block {
     display: grid;
-    gap: 0.25rem;
+    gap: var(--pug-space-inline-sm);
     min-width: 0;
   }
 

@@ -4,7 +4,6 @@
 //! radius-surface, panel padding. No hover on root.
 //! Note: GPUI has no dashed border — we approximate with solid.
 
-use gpui::prelude::FluentBuilder;
 use gpui::*;
 use pug_gpui::GpuiThemeProvider;
 use pug_primitives::FileUploadSpec;
@@ -90,7 +89,7 @@ impl IntoElement for FileUpload {
             .rounded(control_radius)
             .border_1()
             .border_color(accent)
-            .text_sm()
+            .text_size(px(14.0))
             .text_color(accent)
             .cursor_pointer()
             .child("Browse");
@@ -127,7 +126,7 @@ impl IntoElement for FileUpload {
             .focus(move |s| s.border_color(focus_border))
             .child(
                 div()
-                    .text_sm()
+                    .text_size(px(14.0))
                     .text_color(text_color)
                     .child(label),
             )

@@ -36,10 +36,16 @@
 
 <style>
   .surface {
-    --pug-surface-fill: color-mix(in srgb, var(--pug-color-background-surface) 96%, transparent);
+    --pug-surface-fill: var(
+      --pug-treatment-surface-fill,
+      color-mix(in srgb, var(--pug-color-background-surface) 96%, transparent)
+    );
     --pug-surface: var(--pug-surface-fill);
-    --pug-surface-border: color-mix(in srgb, var(--pug-color-border-subtle) 74%, transparent);
-    --pug-surface-shadow: none;
+    --pug-surface-border: var(
+      --pug-treatment-surface-border,
+      color-mix(in srgb, var(--pug-color-border-subtle) 74%, transparent)
+    );
+    --pug-surface-shadow: var(--pug-treatment-surface-shadow, none);
     min-width: 0;
     min-height: 0;
     border: 0.0625rem solid var(--pug-surface-border);
@@ -54,12 +60,18 @@
 
   .surface[data-tone="elevated"],
   .surface[data-elevated="true"] {
-    --pug-surface-fill: color-mix(
-      in srgb,
-      var(--pug-color-background-elevated) 96%,
-      var(--pug-color-background-panel)
+    --pug-surface-fill: var(
+      --pug-treatment-surface-elevated-fill,
+      color-mix(in srgb, var(--pug-color-background-elevated) 96%, var(--pug-color-background-panel))
     );
-    --pug-surface-shadow: var(--pug-elevation-surface);
+    --pug-surface-border: var(
+      --pug-treatment-surface-elevated-border,
+      color-mix(in srgb, var(--pug-color-border-subtle) 74%, transparent)
+    );
+    --pug-surface-shadow: var(
+      --pug-treatment-surface-elevated-shadow,
+      var(--pug-elevation-surface)
+    );
   }
 
   .surface[data-border="none"] {

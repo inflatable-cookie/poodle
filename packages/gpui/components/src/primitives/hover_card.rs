@@ -1,6 +1,5 @@
 //! HoverCard — real GPUI component backed by HoverCardSpec.
 
-use gpui::prelude::FluentBuilder;
 use gpui::*;
 use pug_gpui::GpuiThemeProvider;
 use pug_primitives::{HoverCardSpec, OverlayPlacement};

@@ -3,7 +3,6 @@
 //! Contract: grid layout with input field + vertical steppers.
 //! Focus ring via border-color on focus. No hover on root.
 
-use gpui::prelude::FluentBuilder;
 use gpui::*;
 use pug_gpui::GpuiThemeProvider;
 use pug_primitives::{NumberEntrySpec, ValidationState};
@@ -127,7 +126,7 @@ impl IntoElement for NumberEntry {
             .px(control_padding_x)
             .flex()
             .items_center()
-            .text_sm()
+            .text_size(px(14.0))
             .text_color(text_primary)
             .child(display_value);
 

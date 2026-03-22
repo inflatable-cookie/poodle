@@ -91,9 +91,9 @@
 
   .selection-summary__chip {
     display: inline-flex;
-    gap: 0.5rem;
+    gap: var(--pug-space-inline-md);
     align-items: center;
-    min-height: 2rem;
+    min-height: calc(var(--pug-size-control-height) - 0.25rem);
     padding: 0 0.75rem;
   }
 

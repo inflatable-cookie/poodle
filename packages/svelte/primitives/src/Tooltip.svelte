@@ -101,10 +101,19 @@
     z-index: var(--pug-overlay-z-menu);
     max-width: 16rem;
     padding: 0.375rem 0.5rem;
-    border: 0.0625rem solid color-mix(in srgb, var(--pug-color-border-default) 72%, transparent);
-    border-radius: calc(var(--pug-radius-control) - 0.125rem);
-    background: color-mix(in srgb, var(--pug-color-background-elevated) 98%, var(--pug-color-background-panel));
-    box-shadow: var(--pug-elevation-overlay);
+    border: 0.0625rem solid var(
+      --pug-treatment-surface-elevated-border,
+      color-mix(in srgb, var(--pug-color-border-default) 72%, transparent)
+    );
+    border-radius: var(
+      --pug-treatment-surface-elevated-radius,
+      calc(var(--pug-radius-control) - 0.125rem)
+    );
+    background: var(
+      --pug-treatment-surface-elevated-fill,
+      color-mix(in srgb, var(--pug-color-background-elevated) 98%, var(--pug-color-background-panel))
+    );
+    box-shadow: var(--pug-treatment-surface-elevated-shadow, var(--pug-elevation-overlay));
     color: var(--pug-color-text-primary);
     font-size: 0.6875rem;
     line-height: 1.35;

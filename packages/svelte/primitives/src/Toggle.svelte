@@ -49,8 +49,14 @@
 
 <style>
   .toggle {
-    --pug-toggle-fill: color-mix(in srgb, var(--pug-color-background-surface) 86%, transparent);
-    --pug-toggle-border: color-mix(in srgb, var(--pug-color-border-subtle) 78%, transparent);
+    --pug-toggle-fill: var(
+      --pug-treatment-interactive-fill,
+      color-mix(in srgb, var(--pug-color-background-surface) 86%, transparent)
+    );
+    --pug-toggle-border: var(
+      --pug-treatment-interactive-border,
+      color-mix(in srgb, var(--pug-color-border-subtle) 78%, transparent)
+    );
     --pug-toggle-text: var(--pug-color-text-primary);
     display: inline-flex;
     align-items: center;
@@ -60,8 +66,9 @@
     height: var(--pug-size-control-height);
     padding: 0 var(--pug-space-control-x);
     border: 0.0625rem solid var(--pug-toggle-border);
-    border-radius: var(--pug-radius-control);
+    border-radius: var(--pug-treatment-interactive-radius, var(--pug-radius-control));
     background: var(--pug-toggle-fill);
+    box-shadow: var(--pug-treatment-interactive-shadow, none);
     color: var(--pug-toggle-text);
     cursor: pointer;
     font-family: var(--pug-typography-label-family);
@@ -106,8 +113,19 @@
   }
 
   .toggle[data-pressed="true"] {
-    background: var(--pug-color-accent-base);
-    border-color: color-mix(in srgb, var(--pug-color-accent-base) 78%, black);
+    background:
+      linear-gradient(
+        color-mix(in srgb, var(--pug-color-accent-base) 82%, transparent),
+        color-mix(in srgb, var(--pug-color-accent-base) 82%, transparent)
+      ),
+      var(
+        --pug-treatment-interactive-fill,
+        var(--pug-color-accent-base)
+      );
+    border-color: var(
+      --pug-treatment-interactive-border-active,
+      color-mix(in srgb, var(--pug-color-accent-base) 78%, black)
+    );
     color: var(--pug-color-text-inverse);
   }
 

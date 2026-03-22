@@ -3,7 +3,6 @@
 //! Contract: list chrome (border/radius/bg/padding), trigger font 0.75rem/600,
 //! trigger padding 0 0.75rem, min-height 2rem, hover accent 14%.
 
-use gpui::prelude::FluentBuilder;
 use gpui::*;
 use pug_adapter::ThemeProvider;
 use pug_gpui::GpuiThemeProvider;

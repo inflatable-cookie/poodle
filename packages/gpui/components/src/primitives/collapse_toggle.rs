@@ -4,7 +4,6 @@
 //! Implements the collapse-toggle contract exactly, resolving all tokens
 //! through CollapseToggleSpec + GpuiThemeProvider.
 
-use gpui::prelude::FluentBuilder;
 use gpui::*;
 use pug_gpui::GpuiThemeProvider;
 use pug_primitives::{CollapseDirection, CollapseToggleSpec, IconSize, IconSpec};

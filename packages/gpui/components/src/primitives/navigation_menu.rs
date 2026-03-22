@@ -4,7 +4,6 @@
 //! trigger font 0.75rem/600, min-height control-height - 0.125rem,
 //! viewport with border/radius/bg/shadow.
 
-use gpui::prelude::FluentBuilder;
 use gpui::*;
 use pug_adapter::ThemeProvider;
 use pug_gpui::GpuiThemeProvider;
@@ -172,7 +171,7 @@ impl IntoElement for NavigationMenu {
                             .rounded(viewport_radius)
                             .bg(viewport_bg)
                             .shadow_md()
-                            .text_sm()
+                            .text_size(px(14.0))
                             .text_color(text_secondary)
                             .child(desc.clone()),
                     );

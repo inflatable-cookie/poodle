@@ -201,11 +201,20 @@
     height: 100vh;
     overflow: auto;
     padding: var(--pug-space-panel-y) var(--pug-space-panel-x);
-    border: 0.0625rem solid color-mix(in srgb, var(--pug-color-border-default) 78%, transparent);
+    border: 0.0625rem solid var(
+      --pug-treatment-surface-elevated-border,
+      color-mix(in srgb, var(--pug-color-border-default) 78%, transparent)
+    );
     border-radius: 0;
-    background: color-mix(in srgb, var(--pug-color-background-elevated) 98%, var(--pug-color-background-panel));
-    --pug-surface: color-mix(in srgb, var(--pug-color-background-elevated) 98%, var(--pug-color-background-panel));
-    box-shadow: var(--pug-elevation-dialog);
+    background: var(
+      --pug-treatment-surface-elevated-fill,
+      color-mix(in srgb, var(--pug-color-background-elevated) 98%, var(--pug-color-background-panel))
+    );
+    --pug-surface: var(
+      --pug-treatment-surface-elevated-fill,
+      color-mix(in srgb, var(--pug-color-background-elevated) 98%, var(--pug-color-background-panel))
+    );
+    box-shadow: var(--pug-treatment-surface-elevated-shadow, var(--pug-elevation-dialog));
   }
 
   .drawer[data-edge="top"] .drawer__surface,

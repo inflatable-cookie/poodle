@@ -107,7 +107,7 @@ impl IntoElement for EmptyState {
         if let Some(ref message) = spec.message {
             container = container.child(
                 div()
-                    .text_sm()
+                    .text_size(px(14.0))
                     .text_color(text_secondary)
                     .text_center()
                     .max_w(px(400.0))
@@ -130,7 +130,7 @@ impl IntoElement for EmptyState {
                     .px(px(16.0))
                     .py(px(8.0))
                     .rounded(control_radius)
-                    .text_sm()
+                    .text_size(px(14.0))
                     .font_weight(FontWeight::MEDIUM)
                     .when(is_primary, |el| {
                         el.bg(accent).text_color(gpui::white())

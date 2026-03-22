@@ -100,8 +100,8 @@
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    width: 1.125rem;
-    height: 1.125rem;
+    width: calc(var(--pug-size-icon-default) + 0.125rem);
+    height: calc(var(--pug-size-icon-default) + 0.125rem);
     border: 0.0625rem solid var(--pug-color-border-default);
     border-radius: 999px;
     background: var(--pug-color-background-surface);
@@ -111,8 +111,8 @@
   }
 
   .radio-group__dot {
-    width: 0.5rem;
-    height: 0.5rem;
+    width: calc(var(--pug-size-icon-default) * 0.5);
+    height: calc(var(--pug-size-icon-default) * 0.5);
     border-radius: 999px;
     background: transparent;
     transition: background var(--pug-motion-duration-interaction) var(--pug-motion-easing-standard);

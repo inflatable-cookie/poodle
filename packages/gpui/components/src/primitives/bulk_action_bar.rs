@@ -1,6 +1,5 @@
 //! BulkActionBar — real GPUI component backed by BulkActionBarSpec.
 
-use gpui::prelude::FluentBuilder;
 use gpui::*;
 use pug_gpui::GpuiThemeProvider;
 use pug_primitives::{BulkAction, BulkActionBarSpec, BulkActionTone};
@@ -82,7 +81,7 @@ impl IntoElement for BulkActionBar {
             let count_text = format!("{}", spec.selection_count);
             row = row.child(
                 div()
-                    .text_sm()
+                    .text_size(px(14.0))
                     .font_weight(FontWeight::SEMIBOLD)
                     .text_color(text_color)
                     .child(count_text),
@@ -91,7 +90,7 @@ impl IntoElement for BulkActionBar {
                 Some(total) => {
                     row = row.child(
                         div()
-                            .text_sm()
+                            .text_size(px(14.0))
                             .text_color(total_text_color)
                             .child(format!("of {} selected", total)),
                     );
@@ -99,7 +98,7 @@ impl IntoElement for BulkActionBar {
                 None => {
                     row = row.child(
                         div()
-                            .text_sm()
+                            .text_size(px(14.0))
                             .text_color(text_color)
                             .child("selected".to_string()),
                     );
@@ -129,7 +128,7 @@ impl IntoElement for BulkActionBar {
                     .cursor_pointer()
                     .child(
                         div()
-                            .text_sm()
+                            .text_size(px(14.0))
                             .text_color(btn_text)
                             .child(action.label.clone()),
                     );

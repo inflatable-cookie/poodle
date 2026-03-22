@@ -1,6 +1,5 @@
 //! PageHeader — real GPUI component backed by PageHeaderSpec.
 
-use gpui::prelude::FluentBuilder;
 use gpui::*;
 use pug_gpui::GpuiThemeProvider;
 use pug_composites::{PageHeaderAlign, PageHeaderSpec};
@@ -120,7 +119,7 @@ impl IntoElement for PageHeader {
         if let Some(ref subtitle) = spec.subtitle {
             title_block = title_block.child(
                 div()
-                    .text_sm()
+                    .text_size(px(14.0))
                     .text_color(subtitle_color)
                     .child(subtitle.clone()),
             );

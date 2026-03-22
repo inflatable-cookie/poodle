@@ -43,11 +43,11 @@ impl IntoElement for ConfirmAction {
             .min_w(px(360.0));
 
         el = el.child(div().text_color(title_color).font_weight(FontWeight::SEMIBOLD).child(spec.title.clone()));
-        el = el.child(div().text_sm().text_color(msg_color).child(spec.message.clone()));
+        el = el.child(div().text_size(px(14.0)).text_color(msg_color).child(spec.message.clone()));
 
         let actions = div().flex().flex_row().gap(px(8.0)).justify_end()
-            .child(div().text_sm().text_color(title_color).cursor_pointer().child(spec.cancel_label.clone()))
-            .child(div().text_sm().text_color(gpui::white()).bg(confirm_fill)
+            .child(div().text_size(px(14.0)).text_color(title_color).cursor_pointer().child(spec.cancel_label.clone()))
+            .child(div().text_size(px(14.0)).text_color(gpui::white()).bg(confirm_fill)
                 .rounded(resolve_radius(theme, "semantic.radius.control"))
                 .px(px(12.0)).py(px(6.0)).cursor_pointer()
                 .child(spec.confirm_label.clone()));

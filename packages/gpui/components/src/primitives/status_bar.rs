@@ -1,6 +1,5 @@
 //! StatusBar — real GPUI component backed by StatusBarSpec (contract: status-bar).
 
-use gpui::prelude::FluentBuilder;
 use gpui::*;
 use pug_gpui::GpuiThemeProvider;
 use pug_composites::ShellStatusBarSpec;

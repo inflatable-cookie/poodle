@@ -118,7 +118,7 @@ impl IntoElement for MediaPreview {
                     .gap(px(4.0))
                     .child(
                         div()
-                            .text_sm()
+                            .text_size(px(14.0))
                             .text_color(text_secondary)
                             .child(format!("[{}]", kind_label)),
                     )
@@ -157,7 +157,7 @@ impl IntoElement for MediaPreview {
         if let Some(ref description) = spec.description {
             info = info.child(
                 div()
-                    .text_sm()
+                    .text_size(px(14.0))
                     .text_color(text_secondary)
                     .child(description.clone()),
             );

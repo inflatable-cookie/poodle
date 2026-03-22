@@ -17,6 +17,7 @@
   import PrimitivesSection from "./sections/PrimitivesSection.svelte";
   import CompositesSection from "./sections/CompositesSection.svelte";
   import TokensSection from "./sections/TokensSection.svelte";
+  import TreatmentsSection from "./sections/TreatmentsSection.svelte";
   import { parseRoute, type Route, type SectionId } from "./router";
 
   type ThemeName = keyof typeof themes;
@@ -29,6 +30,7 @@
     { value: "primitives", label: "Primitives" },
     { value: "composites", label: "Composites" },
     { value: "tokens", label: "Tokens" },
+    { value: "treatments", label: "Treatments" },
   ];
 
   const semanticPaths = Object.keys(cssVars) as SemanticTokenPath[];
@@ -172,6 +174,8 @@
       <CompositesSection activeComponent={route.component} />
     {:else if activeSection === "tokens"}
       <TokensSection {liveTokenValues} />
+    {:else if activeSection === "treatments"}
+      <TreatmentsSection />
     {/if}
   </main>
 </div>

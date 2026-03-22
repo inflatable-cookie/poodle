@@ -101,7 +101,7 @@ impl IntoElement for Accordion {
             }
 
             header = header
-                .child(div().text_sm().child(item.label.clone()))
+                .child(div().text_size(px(14.0)).child(item.label.clone()))
                 .child(
                     div()
                         .text_xs()

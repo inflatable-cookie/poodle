@@ -332,12 +332,12 @@
     display: inline-flex;
     flex-wrap: wrap;
     align-items: stretch;
-    gap: 0.25rem;
+    gap: var(--pug-space-inline-sm);
   }
 
   /* Underline: bottom border on list */
   .pug-tabs[data-variant="underline"] .pug-tabs__list {
-    padding-bottom: 0.25rem;
+    padding-bottom: var(--pug-space-inline-sm);
     border-bottom: 0.0625rem solid color-mix(in srgb, var(--pug-color-border-subtle) 82%, transparent);
   }
 
@@ -387,9 +387,16 @@
   /* Card variant: bordered card items */
   .pug-tabs[data-variant="card"] .pug-tabs__item {
     gap: 0;
-    border: 0.0625rem solid color-mix(in srgb, var(--pug-color-border-subtle) 68%, transparent);
-    border-radius: var(--pug-radius-control);
-    background: color-mix(in srgb, var(--pug-color-background-surface) 92%, transparent);
+    border: 0.0625rem solid var(
+      --pug-treatment-interactive-border,
+      color-mix(in srgb, var(--pug-color-border-subtle) 68%, transparent)
+    );
+    border-radius: var(--pug-treatment-interactive-radius, var(--pug-radius-control));
+    background: var(
+      --pug-treatment-interactive-fill,
+      color-mix(in srgb, var(--pug-color-background-surface) 92%, transparent)
+    );
+    box-shadow: var(--pug-treatment-interactive-shadow, none);
   }
 
   .pug-tabs[data-variant="card"] .pug-tabs__item[data-selected="true"] {
@@ -418,14 +425,14 @@
     align-items: center;
     gap: var(--pug-space-inline-sm);
     min-height: calc(var(--pug-size-control-height) - 0.25rem);
-    padding: 0 0.75rem;
+    padding: 0 var(--pug-space-control-x);
     border: 0;
     background: transparent;
     color: var(--pug-color-text-secondary);
     cursor: pointer;
     font-family: var(--pug-typography-label-family);
-    font-size: 0.75rem;
-    font-weight: 600;
+    font-size: var(--pug-typography-label-size);
+    font-weight: var(--pug-typography-label-weight);
     line-height: 1;
     white-space: nowrap;
   }
@@ -442,7 +449,7 @@
 
   /* Card variant: transparent tab inside card */
   .pug-tabs[data-variant="card"] .pug-tabs__tab {
-    padding: 0 0.5rem;
+    padding: 0 var(--pug-space-control-x);
     color: var(--pug-color-text-primary);
   }
 
@@ -461,8 +468,8 @@
   }
 
   .pug-tabs[data-variant="strip"] .pug-tabs__tab {
-    min-height: 2.25rem;
-    padding: 0 0.625rem;
+    min-height: var(--pug-size-control-height);
+    padding: 0 var(--pug-space-control-x);
     border-radius: 0;
   }
 
@@ -496,8 +503,8 @@
   .pug-tabs[data-variant="strip"][data-orientation="vertical"] .pug-tabs__tab {
     justify-content: center;
     min-height: 0;
-    min-width: 2.25rem;
-    padding: 0.5rem;
+    min-width: var(--pug-size-control-height);
+    padding: var(--pug-space-control-x);
   }
 
   .pug-tabs[data-variant="strip"][data-orientation="vertical"] .pug-tabs__item:first-child .pug-tabs__tab {
@@ -528,7 +535,7 @@
 
   .pug-tabs[data-variant="pill"] .pug-tabs__tab {
     min-height: calc(var(--pug-size-control-height) - 0.5rem);
-    padding: 0 0.625rem;
+    padding: 0 var(--pug-space-control-x);
     border-radius: 999px;
   }
 

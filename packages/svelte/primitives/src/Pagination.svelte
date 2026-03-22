@@ -98,23 +98,23 @@
   .pagination {
     display: inline-flex;
     align-items: center;
-    gap: 0.375rem;
+    gap: var(--pug-space-inline-sm);
     flex-wrap: wrap;
   }
 
   .pagination__pages {
     display: inline-flex;
     align-items: center;
-    gap: 0.25rem;
+    gap: var(--pug-space-inline-sm);
   }
 
   .pagination__button {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    min-width: 2.25rem;
+    min-width: var(--pug-size-control-height);
     height: calc(var(--pug-size-control-height) - 0.125rem);
-    padding: 0 0.75rem;
+    padding: 0 var(--pug-space-control-x);
     border: 0.0625rem solid color-mix(in srgb, var(--pug-color-border-default) 78%, transparent);
     border-radius: var(--pug-radius-control);
     background: var(--pug-color-background-surface);

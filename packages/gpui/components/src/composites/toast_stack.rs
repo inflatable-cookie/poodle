@@ -2,7 +2,6 @@
 
 use std::rc::Rc;
 
-use gpui::prelude::FluentBuilder;
 use gpui::*;
 use pug_gpui::GpuiThemeProvider;
 use pug_composites::{Toast, ToastPosition, ToastStackSpec};
@@ -114,7 +113,7 @@ impl IntoElement for ToastStack {
                 .flex_grow()
                 .child(
                     div()
-                        .text_sm()
+                        .text_size(px(14.0))
                         .font_weight(FontWeight::SEMIBOLD)
                         .text_color(title_color)
                         .child(toast.title.clone()),
@@ -158,7 +157,7 @@ impl IntoElement for ToastStack {
             let mut dismiss_btn = div()
                 .id(dismiss_element_id)
                 .cursor_pointer()
-                .text_sm()
+                .text_size(px(14.0))
                 .text_color(dismiss_color)
                 .pl(px(8.0))
                 .child("\u{00d7}"); // multiplication sign as close icon

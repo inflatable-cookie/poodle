@@ -1,6 +1,5 @@
 //! DetailShell — real GPUI component backed by DetailShellSpec.
 
-use gpui::prelude::FluentBuilder;
 use gpui::*;
 use pug_gpui::GpuiThemeProvider;
 use pug_composites::{DetailShellSpec, DetailState, ScrollOwner};
@@ -126,7 +125,7 @@ impl IntoElement for DetailShell {
                 .py(px(32.0))
                 .child(
                     div()
-                        .text_sm()
+                        .text_size(px(14.0))
                         .text_color(text_secondary)
                         .child("Loading\u{2026}"),
                 ),
@@ -139,7 +138,7 @@ impl IntoElement for DetailShell {
                 .py(px(32.0))
                 .child(
                     div()
-                        .text_sm()
+                        .text_size(px(14.0))
                         .text_color(resolve_color(theme, "semantic.color.status.danger"))
                         .child("An error occurred loading this content."),
                 ),
@@ -152,7 +151,7 @@ impl IntoElement for DetailShell {
                 .py(px(32.0))
                 .child(
                     div()
-                        .text_sm()
+                        .text_size(px(14.0))
                         .text_color(text_secondary)
                         .child("No content available."),
                 ),

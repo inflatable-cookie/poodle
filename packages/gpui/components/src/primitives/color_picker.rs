@@ -4,7 +4,6 @@
 //! elevated surface overlay with swatch grid.
 //! Focus ring on trigger. No hover.
 
-use gpui::prelude::FluentBuilder;
 use gpui::*;
 use pug_gpui::GpuiThemeProvider;
 use pug_primitives::ColorPickerSpec;

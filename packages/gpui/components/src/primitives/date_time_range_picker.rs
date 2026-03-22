@@ -2,9 +2,10 @@
 
 use gpui::*;
 use pug_gpui::GpuiThemeProvider;
-use pug_primitives::{CalendarWeekStart, DateTimeRangePickerSpec, DateTimeRangeValue};
+use pug_primitives::{CalendarWeekStart, DateTimeRangePickerSpec, DateTimeRangeValue, IconSize, IconSpec};
 
-use crate::theme_ext::{resolve_color, resolve_opacity, resolve_px, resolve_radius};
+use super::icon::Icon;
+use crate::theme_ext::{color_mix, resolve_color, resolve_opacity, resolve_px, resolve_radius};
 
 /// A real GPUI date-time range picker backed by `DateTimeRangePickerSpec`.
 ///
@@ -86,13 +87,15 @@ impl IntoElement for DateTimeRangePicker {
         let inline_gap = resolve_px(theme, "semantic.space.inline.sm");
         let control_radius = resolve_radius(theme, "semantic.radius.control");
 
+        let surface_bg = resolve_color(theme, "semantic.color.background.surface");
         let elevated_bg = resolve_color(theme, "semantic.color.background.elevated");
         let border = resolve_color(theme, "semantic.color.border.default");
         let text_primary = resolve_color(theme, "semantic.color.text.primary");
         let text_secondary = resolve_color(theme, "semantic.color.text.secondary");
+        let icon_muted = resolve_color(theme, "semantic.color.icon.muted");
         let accent = resolve_color(theme, "semantic.color.accent.base");
         let disabled_opacity = resolve_opacity(theme, "semantic.state.opacity.disabled");
-        let hover_bg = resolve_color(theme, "semantic.color.background.elevated");
+        let hover_bg = color_mix(surface_bg, elevated_bg, 0.84);
 
         let value = spec.current_value();
         let start_text = Self::format_datetime(
@@ -127,14 +130,15 @@ impl IntoElement for DateTimeRangePicker {
             .h(control_height)
             .px(inline_padding)
             .rounded(control_radius)
-            .bg(elevated_bg)
+            .bg(surface_bg)
             .border_1()
             .border_color(if is_open { accent } else { border })
             .flex()
             .items_center()
             .justify_between()
             .gap(inline_gap)
-            .text_sm();
+            .text_size(px(14.0))
+            .min_w(px(288.0)); // Contract: min-width 18rem
 
         // Focus ring
         let focus_ring = resolve_color(theme, "semantic.color.accent.focusRing");
@@ -157,12 +161,14 @@ impl IntoElement for DateTimeRangePicker {
         };
 
         trigger = trigger
-            .child(div().text_color(text_col).child(display_text))
+            .child(div().text_color(text_col).flex_1().child(display_text))
             .child(
-                div()
-                    .text_xs()
-                    .text_color(text_secondary)
-                    .child("📅"),
+                Icon::from_spec(
+                    IconSpec::new(if is_open { "chevron-up" } else { "chevron-down" })
+                        .with_size(IconSize::Sm),
+                    theme,
+                )
+                .with_color(icon_muted),
             );
 
         if let Some(handler) = self.on_toggle {

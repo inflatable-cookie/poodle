@@ -130,7 +130,7 @@ impl IntoElement for Combobox {
         let input_el = {
             let text_el = if show_placeholder {
                 div()
-                    .text_sm()
+                    .text_size(px(14.0))
                     .text_color(input_placeholder)
                     .child(
                         spec.placeholder
@@ -139,7 +139,7 @@ impl IntoElement for Combobox {
                     )
             } else {
                 div()
-                    .text_sm()
+                    .text_size(px(14.0))
                     .text_color(input_text)
                     .child(display_text)
             };
@@ -217,7 +217,7 @@ impl IntoElement for Combobox {
 
                     option_el = option_el.child(
                         div()
-                            .text_sm()
+                            .text_size(px(14.0))
                             .text_color(option_text)
                             .child(option.label.clone()),
                     );

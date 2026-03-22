@@ -2584,5 +2584,444 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
 <Switch label="Enable notifications" bind:isChecked={notifications} />`,
   },
 
-  // Batch 4: T–Z continues below
+  table: {
+    props: [
+      { name: "columns", type: "TableColumn[]", default: "[]", description: "Column definitions for the table." },
+      { name: "rows", type: "TableRow[]", default: "[]", description: "Row data to render in the table." },
+      { name: "caption", type: "string | null", default: "null", description: "Visible caption for the table." },
+      { name: "emptyMessage", type: "string", default: '"No rows available."', description: "Message shown when there are no rows." },
+      { name: "ariaLabel", type: "string | null", default: "null", description: "Accessible label for the table." },
+    ],
+    slots: [],
+    events: [],
+    usage: `<script lang="ts">
+  import { Table } from "@pug/svelte-primitives";
+
+  const columns = [
+    { key: "name", label: "Name" },
+    { key: "email", label: "Email" },
+  ];
+  const rows = [
+    { name: "Alice", email: "alice@example.com" },
+    { name: "Bob", email: "bob@example.com" },
+  ];
+</script>
+
+<Table {columns} {rows} caption="Team members" />`,
+  },
+
+  tabs: {
+    props: [
+      { name: "value", type: "string | null", default: "null", description: "Controlled active tab value." },
+      { name: "defaultValue", type: "string | null", default: "null", description: "Initial active tab for uncontrolled mode." },
+      { name: "items", type: "TabItem[]", default: "[]", description: "Array of tab items to render." },
+      { name: "variant", type: "TabVariant", default: '"underline"', description: "Visual style variant of the tabs." },
+      { name: "orientation", type: "Orientation", default: '"horizontal"', description: "Layout orientation of the tab list." },
+      { name: "activationMode", type: "TabActivationMode", default: '"automatic"', description: "Whether tabs activate on focus or on click." },
+      { name: "isReorderable", type: "boolean", default: "false", description: "Whether tabs can be reordered via drag." },
+      { name: "ariaLabel", type: "string | null", default: "null", description: "Accessible label for the tab list." },
+      { name: "showTooltips", type: "boolean", default: "false", description: "Whether to show tooltips on tab triggers." },
+    ],
+    slots: [
+      { name: "default", description: "Tab panel content. Receives slot props: activeValue." },
+      { name: "actions", description: "Actions rendered alongside the tab list." },
+    ],
+    events: [
+      { name: "valueChange", payload: "{ value: string }", description: "Fires when the active tab changes." },
+      { name: "reorder", payload: "{ items: string[] }", description: "Fires when tabs are reordered." },
+      { name: "close", payload: "{ value: string }", description: "Fires when a tab close button is clicked." },
+    ],
+    usage: `<script lang="ts">
+  import { Tabs } from "@pug/svelte-primitives";
+
+  const items = [
+    { value: "overview", label: "Overview" },
+    { value: "settings", label: "Settings" },
+  ];
+</script>
+
+<Tabs {items} defaultValue="overview">
+  {#snippet default({ activeValue })}
+    {#if activeValue === "overview"}
+      <p>Overview content here.</p>
+    {:else}
+      <p>Settings content here.</p>
+    {/if}
+  {/snippet}
+</Tabs>`,
+  },
+
+  "text-area": {
+    props: [
+      { name: "id", type: "string", required: true, description: "HTML id attribute for the textarea." },
+      { name: "value", type: "string | null", default: "null", description: "Controlled value of the textarea." },
+      { name: "defaultValue", type: "string", default: '""', description: "Initial value for uncontrolled mode." },
+      { name: "placeholder", type: "string | null", default: "null", description: "Placeholder text when empty." },
+      { name: "rows", type: "number", default: "4", description: "Number of visible text rows." },
+      { name: "name", type: "string | undefined", default: "undefined", description: "Form field name." },
+      { name: "isDisabled", type: "boolean", default: "false", description: "Whether the textarea is disabled." },
+      { name: "isReadOnly", type: "boolean", default: "false", description: "Whether the textarea is read-only." },
+      { name: "validationState", type: "ValidationState", default: '"none"', description: "Current validation state." },
+      { name: "ariaLabel", type: "string | null", default: "null", description: "Accessible label for the textarea." },
+      { name: "describedBy", type: "string | null", default: "null", description: "ID of the element describing this textarea." },
+    ],
+    slots: [],
+    events: [
+      { name: "valueChange", payload: "{ value: string }", description: "Fires when the textarea value changes." },
+      { name: "submit", payload: "{ value: string }", description: "Fires on submit (e.g. Cmd+Enter)." },
+      { name: "cancel", payload: "void", description: "Fires when editing is cancelled." },
+      { name: "focus", payload: "FocusEvent", description: "Fires when the textarea receives focus." },
+      { name: "blur", payload: "FocusEvent", description: "Fires when the textarea loses focus." },
+    ],
+    usage: `<script lang="ts">
+  import { TextArea } from "@pug/svelte-primitives";
+
+  let comment = "";
+</script>
+
+<TextArea id="comment" bind:value={comment} placeholder="Write a comment…" rows={4} />`,
+  },
+
+  "text-input": {
+    props: [
+      { name: "id", type: "string", required: true, description: "HTML id attribute for the input." },
+      { name: "value", type: "string | null", default: "null", description: "Controlled value of the input." },
+      { name: "defaultValue", type: "string", default: '""', description: "Initial value for uncontrolled mode." },
+      { name: "placeholder", type: "string | null", default: "null", description: "Placeholder text when empty." },
+      { name: "name", type: "string | undefined", default: "undefined", description: "Form field name." },
+      { name: "isDisabled", type: "boolean", default: "false", description: "Whether the input is disabled." },
+      { name: "isReadOnly", type: "boolean", default: "false", description: "Whether the input is read-only." },
+      { name: "validationState", type: "ValidationState", default: '"none"', description: "Current validation state." },
+      { name: "ariaLabel", type: "string | null", default: "null", description: "Accessible label for the input." },
+      { name: "describedBy", type: "string | null", default: "null", description: "ID of the element describing this input." },
+      { name: "inputMode", type: "string | null", default: "null", description: "Hint for virtual keyboard type." },
+      { name: "type", type: 'HTMLInputElement["type"]', default: '"text"', description: "HTML input type attribute." },
+      { name: "prefix", type: "string | null", default: "null", description: "Static prefix text shown inside the input." },
+      { name: "suffix", type: "string | null", default: "null", description: "Static suffix text shown inside the input." },
+      { name: "maxLength", type: "number | null", default: "null", description: "Maximum character length." },
+      { name: "showCharCount", type: "boolean", default: "false", description: "Whether to display a character count." },
+    ],
+    slots: [
+      { name: "leading", description: "Content rendered before the input (e.g. icon)." },
+      { name: "trailing", description: "Content rendered after the input (e.g. icon)." },
+    ],
+    events: [
+      { name: "valueChange", payload: "{ value: string }", description: "Fires when the input value changes." },
+      { name: "submit", payload: "{ value: string }", description: "Fires on Enter key press." },
+      { name: "cancel", payload: "void", description: "Fires when editing is cancelled." },
+      { name: "focus", payload: "FocusEvent", description: "Fires when the input receives focus." },
+      { name: "blur", payload: "FocusEvent", description: "Fires when the input loses focus." },
+    ],
+    usage: `<script lang="ts">
+  import { TextInput } from "@pug/svelte-primitives";
+
+  let email = "";
+</script>
+
+<TextInput id="email" bind:value={email} placeholder="you@example.com" type="email" />`,
+  },
+
+  "time-ago": {
+    props: [
+      { name: "datetime", type: "Date | string | number", required: true, description: "The date/time to display relative to now." },
+      { name: "live", type: "boolean", default: "true", description: "Whether the display updates automatically." },
+      { name: "interval", type: "number", default: "30000", description: "Update interval in milliseconds when live." },
+      { name: "ariaLabel", type: "string | null", default: "null", description: "Accessible label override." },
+    ],
+    slots: [],
+    events: [],
+    usage: `<script lang="ts">
+  import { TimeAgo } from "@pug/svelte-primitives";
+</script>
+
+<TimeAgo datetime={new Date("2026-03-20T12:00:00Z")} live />`,
+  },
+
+  "time-field": {
+    props: [
+      { name: "id", type: "string | null", default: "null", description: "HTML id attribute for the field." },
+      { name: "value", type: "string | null", default: "null", description: "Controlled time value (e.g. \"14:30\")." },
+      { name: "defaultValue", type: "string | null", default: "null", description: "Initial time value for uncontrolled mode." },
+      { name: "min", type: "string | null", default: "null", description: "Minimum allowed time." },
+      { name: "max", type: "string | null", default: "null", description: "Maximum allowed time." },
+      { name: "step", type: "number", default: "60", description: "Step interval in seconds." },
+      { name: "isDisabled", type: "boolean", default: "false", description: "Whether the field is disabled." },
+      { name: "ariaLabel", type: "string | null", default: "null", description: "Accessible label for the time field." },
+      { name: "describedBy", type: "string | null", default: "null", description: "ID of the element describing this field." },
+    ],
+    slots: [],
+    events: [
+      { name: "valueChange", payload: "{ value: string | null }", description: "Fires when the time value changes." },
+    ],
+    usage: `<script lang="ts">
+  import { TimeField } from "@pug/svelte-primitives";
+
+  let time = "09:00";
+</script>
+
+<TimeField id="start-time" bind:value={time} min="08:00" max="18:00" step={60} />`,
+  },
+
+  "time-zone-select": {
+    props: [
+      { name: "id", type: "string | undefined", default: "undefined", description: "HTML id attribute for the select." },
+      { name: "value", type: "string | null", default: "null", description: "Controlled selected time zone." },
+      { name: "defaultValue", type: "string | null", default: "null", description: "Initial time zone for uncontrolled mode." },
+      { name: "placeholder", type: "string | null", default: '"Select time zone"', description: "Placeholder text when no value is selected." },
+      { name: "options", type: "TimeZoneOption[]", default: "[]", description: "Available time zone options." },
+      { name: "isDisabled", type: "boolean", default: "false", description: "Whether the select is disabled." },
+      { name: "ariaLabel", type: "string | null", default: "null", description: "Accessible label for the select." },
+      { name: "describedBy", type: "string | null", default: "null", description: "ID of the element describing this select." },
+      { name: "name", type: "string | undefined", default: "undefined", description: "Form field name." },
+    ],
+    slots: [],
+    events: [
+      { name: "valueChange", payload: "{ value: string }", description: "Fires when the selected time zone changes." },
+    ],
+    usage: `<script lang="ts">
+  import { TimeZoneSelect } from "@pug/svelte-primitives";
+
+  let tz = "America/New_York";
+</script>
+
+<TimeZoneSelect id="tz" bind:value={tz} placeholder="Select time zone" />`,
+  },
+
+  "toast-stack": {
+    props: [
+      { name: "items", type: "ToastItem[]", default: "[]", description: "Array of toast notification items." },
+      { name: "ariaLabel", type: "string", default: '"Notifications"', description: "Accessible label for the toast region." },
+    ],
+    slots: [],
+    events: [
+      { name: "dismiss", payload: "{ id: string }", description: "Fires when a toast is dismissed." },
+      { name: "action", payload: "{ id: string }", description: "Fires when a toast action button is clicked." },
+    ],
+    usage: `<script lang="ts">
+  import { ToastStack } from "@pug/svelte-composites";
+
+  let toasts = [
+    { id: "1", title: "Saved", description: "Your changes have been saved." },
+  ];
+</script>
+
+<ToastStack items={toasts} on:dismiss={(e) => { toasts = toasts.filter(t => t.id !== e.detail.id); }} />`,
+  },
+
+  toggle: {
+    props: [
+      { name: "isPressed", type: "boolean | null", default: "null", description: "Controlled pressed state." },
+      { name: "defaultPressed", type: "boolean", default: "false", description: "Initial pressed state for uncontrolled mode." },
+      { name: "variant", type: "ToggleVariant", default: '"ghost"', description: "Visual style variant." },
+      { name: "size", type: "ControlSize", default: '"md"', description: "Size of the toggle button." },
+      { name: "layout", type: '"inline" | "stack"', default: '"inline"', description: "Layout direction of icon and label." },
+      { name: "isDisabled", type: "boolean", default: "false", description: "Whether the toggle is disabled." },
+      { name: "ariaLabel", type: "string | null", default: "null", description: "Accessible label for the toggle." },
+      { name: "className", type: "string", default: '""', description: "Additional CSS class name." },
+    ],
+    slots: [
+      { name: "default", description: "Content rendered inside the toggle button." },
+    ],
+    events: [
+      { name: "pressedChange", payload: "{ pressed: boolean }", description: "Fires when the pressed state changes." },
+    ],
+    usage: `<script lang="ts">
+  import { Toggle } from "@pug/svelte-primitives";
+
+  let bold = false;
+</script>
+
+<Toggle bind:isPressed={bold} ariaLabel="Bold">
+  <strong>B</strong>
+</Toggle>`,
+  },
+
+  "toggle-group": {
+    props: [
+      { name: "value", type: "string | string[] | null", default: "null", description: "Controlled selected value(s)." },
+      { name: "defaultValue", type: "string | string[] | null", default: "null", description: "Initial selected value(s) for uncontrolled mode." },
+      { name: "options", type: "ToggleGroupOption[]", default: "[]", description: "Array of toggle options." },
+      { name: "selectionMode", type: '"single" | "multiple"', default: '"single"', description: "Whether one or many toggles can be active." },
+      { name: "isDisabled", type: "boolean", default: "false", description: "Whether the entire group is disabled." },
+      { name: "ariaLabel", type: "string | null", default: "null", description: "Accessible label for the toggle group." },
+    ],
+    slots: [],
+    events: [
+      { name: "valueChange", payload: "{ value: string | string[] }", description: "Fires when the selected value(s) change." },
+    ],
+    usage: `<script lang="ts">
+  import { ToggleGroup } from "@pug/svelte-primitives";
+
+  const options = [
+    { value: "left", label: "Left" },
+    { value: "center", label: "Center" },
+    { value: "right", label: "Right" },
+  ];
+</script>
+
+<ToggleGroup {options} defaultValue="left" ariaLabel="Text alignment" />`,
+  },
+
+  toolbar: {
+    props: [
+      { name: "orientation", type: "Orientation", default: '"horizontal"', description: "Layout orientation of the toolbar." },
+      { name: "ariaLabel", type: "string | null", default: "null", description: "Accessible label for the toolbar." },
+    ],
+    slots: [
+      { name: "default", description: "Toolbar items (buttons, separators, etc.)." },
+    ],
+    events: [],
+    usage: `<script lang="ts">
+  import { Toolbar } from "@pug/svelte-primitives";
+  import { Button } from "@pug/svelte-primitives";
+</script>
+
+<Toolbar ariaLabel="Formatting">
+  <Button variant="ghost">Bold</Button>
+  <Button variant="ghost">Italic</Button>
+</Toolbar>`,
+  },
+
+  tooltip: {
+    props: [
+      { name: "content", type: "string", required: true, description: "Text content displayed in the tooltip." },
+      { name: "open", type: "boolean | null", default: "null", description: "Controlled open state." },
+      { name: "defaultOpen", type: "boolean", default: "false", description: "Initial open state for uncontrolled mode." },
+      { name: "delayMs", type: "number", default: "300", description: "Delay in milliseconds before the tooltip appears." },
+      { name: "placement", type: "OverlayPlacement", default: '"top"', description: "Preferred placement of the tooltip." },
+    ],
+    slots: [
+      { name: "default", description: "Trigger element the tooltip is anchored to." },
+    ],
+    events: [
+      { name: "openChange", payload: "{ open: boolean }", description: "Fires when the tooltip open state changes." },
+    ],
+    usage: `<script lang="ts">
+  import { Tooltip } from "@pug/svelte-primitives";
+  import { Button } from "@pug/svelte-primitives";
+</script>
+
+<Tooltip content="Save your work" placement="top">
+  <Button>Save</Button>
+</Tooltip>`,
+  },
+
+  "tri-state-switch": {
+    props: [
+      { name: "value", type: "TriStateValue", default: '"default"', description: "Current tri-state value." },
+      { name: "options", type: "Record<TriStateValue, string>", default: '{ excluded: "Exclude", default: "Default", included: "Include" }', description: "Labels for each state." },
+      { name: "isDisabled", type: "boolean", default: "false", description: "Whether the switch is disabled." },
+      { name: "ariaLabel", type: "string", required: true, description: "Accessible label for the switch." },
+    ],
+    slots: [],
+    events: [
+      { name: "valueChange", payload: "{ value: TriStateValue }", description: "Fires when the tri-state value changes." },
+    ],
+    usage: `<script lang="ts">
+  import { TriStateSwitch } from "@pug/svelte-primitives";
+
+  let filter = "default";
+</script>
+
+<TriStateSwitch bind:value={filter} ariaLabel="Include archived items" />`,
+  },
+
+  "video-player": {
+    props: [
+      { name: "src", type: "string", required: true, description: "URL of the video file to play." },
+      { name: "poster", type: "string | null", default: "null", description: "URL of the poster image shown before playback." },
+      { name: "aspectRatio", type: "number", default: "16/9", description: "Aspect ratio of the video player." },
+      { name: "ariaLabel", type: "string", default: '"Video player"', description: "Accessible label for the player." },
+      { name: "showCaptions", type: "boolean", default: "false", description: "Whether captions are displayed by default." },
+      { name: "captionsSrc", type: "string | null", default: "null", description: "URL of the captions/subtitles file." },
+    ],
+    slots: [],
+    events: [],
+    usage: `<script lang="ts">
+  import { VideoPlayer } from "@pug/svelte-composites";
+</script>
+
+<VideoPlayer src="/videos/intro.mp4" poster="/images/poster.jpg" showCaptions />`,
+  },
+
+  "zoned-date-time-picker": {
+    props: [
+      { name: "value", type: "ZonedDateTimeValue | null", default: "null", description: "Controlled date/time/zone value." },
+      { name: "defaultValue", type: "ZonedDateTimeValue", default: '{ date: null, time: null, timeZone: null }', description: "Initial value for uncontrolled mode." },
+      { name: "open", type: "boolean | null", default: "null", description: "Controlled open state of the picker." },
+      { name: "defaultOpen", type: "boolean", default: "false", description: "Initial open state for uncontrolled mode." },
+      { name: "placeholder", type: "string", default: '"Select date, time, and zone"', description: "Placeholder text when no value is selected." },
+      { name: "weekStartsOn", type: "CalendarWeekStart", default: '"monday"', description: "First day of the week in the calendar." },
+      { name: "locale", type: "string", default: '"en-US"', description: "Locale for date formatting." },
+      { name: "timeZoneOptions", type: "TimeZoneOption[]", default: "[]", description: "Available time zone options." },
+      { name: "isDisabled", type: "boolean", default: "false", description: "Whether the picker is disabled." },
+      { name: "ariaLabel", type: "string | null", default: "null", description: "Accessible label for the picker." },
+    ],
+    slots: [
+      { name: "default", description: "Custom trigger content for the picker." },
+    ],
+    events: [
+      { name: "valueChange", payload: "{ value: ZonedDateTimeValue }", description: "Fires when the date/time/zone value changes." },
+      { name: "openChange", payload: "{ open: boolean }", description: "Fires when the picker open state changes." },
+    ],
+    usage: `<script lang="ts">
+  import { ZonedDateTimePicker } from "@pug/svelte-primitives";
+
+  let meeting = { date: null, time: null, timeZone: "America/New_York" };
+</script>
+
+<ZonedDateTimePicker bind:value={meeting} placeholder="Pick date, time & zone" />`,
+  },
+
+  "action-discovery-panel": {
+    props: [
+      { name: "items", type: "CommandActionItem[]", default: "[]", description: "Array of discoverable action items." },
+      { name: "state", type: "DiscoveryState", default: '"ready"', description: "Current state of the discovery panel." },
+      { name: "activeId", type: "string | null", default: "null", description: "ID of the currently active/highlighted item." },
+      { name: "ariaLabel", type: "string", default: '"Actions"', description: "Accessible label for the panel." },
+    ],
+    slots: [],
+    events: [
+      { name: "itemSelect", payload: "{ id: string }", description: "Fires when an action item is selected." },
+      { name: "activeChange", payload: "{ id: string | null }", description: "Fires when the active item changes." },
+    ],
+    usage: `<script lang="ts">
+  import { ActionDiscoveryPanel } from "@pug/svelte-composites";
+
+  const items = [
+    { id: "copy", label: "Copy", shortcut: "Cmd+C" },
+    { id: "paste", label: "Paste", shortcut: "Cmd+V" },
+  ];
+</script>
+
+<ActionDiscoveryPanel {items} on:itemSelect={(e) => console.log(e.detail.id)} />`,
+  },
+
+  "app-header": {
+    props: [
+      { name: "title", type: "string | null", default: "null", description: "Primary title displayed in the header." },
+      { name: "subtitle", type: "string | null", default: "null", description: "Secondary subtitle below the title." },
+      { name: "isDragRegion", type: "boolean", default: "false", description: "Whether the header acts as a window drag region." },
+      { name: "ariaLabel", type: "string | null", default: "null", description: "Accessible label for the header." },
+    ],
+    slots: [
+      { name: "identity", description: "Custom content for the identity/logo area." },
+      { name: "actions", description: "Primary action buttons in the header." },
+      { name: "utility", description: "Utility controls (e.g. user menu, settings)." },
+    ],
+    events: [],
+    usage: `<script lang="ts">
+  import { AppHeader } from "@pug/svelte-composites";
+  import { Button } from "@pug/svelte-primitives";
+</script>
+
+<AppHeader title="My App" subtitle="Dashboard">
+  {#snippet actions()}
+    <Button variant="primary">New</Button>
+  {/snippet}
+</AppHeader>`,
+  },
 };
+
+// Alias: nav-card-grid shares docs with nav-card
+componentDocsMap["nav-card-grid"] = componentDocsMap["nav-card"];

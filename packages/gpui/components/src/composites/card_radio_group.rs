@@ -1,6 +1,5 @@
 //! CardRadioGroup — selectable card group backed by CardRadioGroupSpec.
 
-use gpui::prelude::FluentBuilder;
 use gpui::*;
 use pug_gpui::GpuiThemeProvider;
 use pug_composites::CardRadioGroupSpec;
@@ -49,7 +48,7 @@ impl IntoElement for CardRadioGroup {
                 .border(px(bw)).border_color(border_c)
                 .px(px(16.0)).py(px(12.0))
                 .cursor_pointer()
-                .child(div().text_sm().text_color(text_color).child(option.label.clone()));
+                .child(div().text_size(px(14.0)).text_color(text_color).child(option.label.clone()));
             el = el.child(card);
         }
         if spec.is_disabled {

@@ -88,7 +88,7 @@ impl IntoElement for RelationPicker {
                     .py(px(8.0))
                     .border_b_1()
                     .border_color(border)
-                    .text_sm()
+                    .text_size(px(14.0))
                     .text_color(text_primary)
                     .child(format!("Search: {}", spec.query)),
             );
@@ -106,7 +106,7 @@ impl IntoElement for RelationPicker {
                         .py(px(24.0))
                         .child(
                             div()
-                                .text_sm()
+                                .text_size(px(14.0))
                                 .text_color(text_secondary)
                                 .child("Loading\u{2026}"),
                         ),
@@ -122,7 +122,7 @@ impl IntoElement for RelationPicker {
                         .py(px(24.0))
                         .child(
                             div()
-                                .text_sm()
+                                .text_size(px(14.0))
                                 .text_color(resolve_color(theme, "semantic.color.status.danger"))
                                 .child("Failed to load items."),
                         ),
@@ -138,7 +138,7 @@ impl IntoElement for RelationPicker {
                         .py(px(24.0))
                         .child(
                             div()
-                                .text_sm()
+                                .text_size(px(14.0))
                                 .text_color(text_secondary)
                                 .child("No items found."),
                         ),
@@ -178,7 +178,7 @@ impl IntoElement for RelationPicker {
                     let check = if is_selected { "\u{2713}" } else { "\u{25CB}" };
                     item_el = item_el.child(
                         div()
-                            .text_sm()
+                            .text_size(px(14.0))
                             .text_color(if is_selected { accent } else { text_secondary })
                             .child(check),
                     );
@@ -188,7 +188,7 @@ impl IntoElement for RelationPicker {
 
                     item_content = item_content.child(
                         div()
-                            .text_sm()
+                            .text_size(px(14.0))
                             .text_color(text_primary)
                             .child(item.label.clone()),
                     );

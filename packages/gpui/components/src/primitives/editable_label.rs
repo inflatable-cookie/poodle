@@ -89,7 +89,7 @@ impl IntoElement for EditableLabel {
             .px(px(8.0))  // 0.5rem
             .py(px(6.0))  // 0.375rem
             .rounded(control_radius)
-            .text_sm()
+            .text_size(px(14.0))
             .text_color(text_col)
             .border_1()
             .child(display_text);

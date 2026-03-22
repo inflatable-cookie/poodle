@@ -3,7 +3,6 @@
 //! Contract: inline-flex segments with labels, gap 0.125rem,
 //! focus-within border change. No hover on root.
 
-use gpui::prelude::FluentBuilder;
 use gpui::*;
 use pug_gpui::GpuiThemeProvider;
 use pug_primitives::{DurationInputSpec, ValidationState};
@@ -88,7 +87,7 @@ impl IntoElement for DurationInput {
                 // Separator colon
                 segments = segments.child(
                     div()
-                        .text_sm()
+                        .text_size(px(14.0))
                         .text_color(text_secondary)
                         .font_weight(FontWeight::SEMIBOLD)
                         .pb(px(2.0))
@@ -116,7 +115,7 @@ impl IntoElement for DurationInput {
                     div()
                         .w(px(28.0)) // 1.75rem
                         .text_center()
-                        .text_sm()
+                        .text_size(px(14.0))
                         .text_color(text_primary)
                         .child(part.to_string()),
                 );

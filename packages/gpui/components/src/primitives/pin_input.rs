@@ -3,7 +3,6 @@
 //! Contract: fixed-length code-entry with per-cell focus rings.
 //! Cell: 2.25rem × 2.5rem, gap 0.375rem, code font 1rem.
 
-use gpui::prelude::FluentBuilder;
 use gpui::*;
 use pug_gpui::GpuiThemeProvider;
 use pug_primitives::PinInputSpec;

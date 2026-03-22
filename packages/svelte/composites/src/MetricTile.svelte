@@ -64,8 +64,8 @@
 <style>
   .state-tile {
     display: grid;
-    gap: 0.375rem;
-    padding: 0.875rem;
+    gap: var(--pug-space-inline-sm);
+    padding: var(--pug-space-panel-y) var(--pug-space-panel-x);
     border: 0.0625rem solid transparent;
     border-radius: var(--pug-radius-surface);
     background: color-mix(in srgb, var(--pug-color-background-surface) 60%, transparent);
@@ -80,7 +80,7 @@
   .state-tile__body {
     display: flex;
     align-items: center;
-    gap: 0.625rem;
+    gap: var(--pug-space-inline-md);
   }
 
   .state-tile__value {

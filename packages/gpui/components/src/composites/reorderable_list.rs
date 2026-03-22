@@ -1,6 +1,5 @@
 //! ReorderableList — drag-to-reorder list backed by ReorderableListSpec.
 
-use gpui::prelude::FluentBuilder;
 use gpui::*;
 use pug_gpui::GpuiThemeProvider;
 use pug_composites::ReorderableListSpec;
@@ -41,7 +40,7 @@ impl IntoElement for ReorderableList {
         let mut el = div().flex().flex_col().gap(gap);
         for child in self.children {
             let row = div().flex().flex_row().items_center().gap(px(8.0))
-                .child(div().text_color(handle_color).text_sm().child("⋮⋮"))
+                .child(div().text_color(handle_color).text_size(px(14.0)).child("⋮⋮"))
                 .child(child);
             el = el.child(row);
         }

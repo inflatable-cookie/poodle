@@ -53,8 +53,8 @@
   .toolbar {
     display: inline-flex;
     align-items: center;
-    gap: 0.25rem;
-    padding: 0.25rem;
+    gap: var(--pug-space-inline-sm);
+    padding: var(--pug-space-inline-sm);
     border: 0.0625rem solid color-mix(in srgb, var(--pug-color-border-subtle) 78%, transparent);
     border-radius: var(--pug-radius-surface);
     background: color-mix(in srgb, var(--pug-color-background-panel) 94%, transparent);

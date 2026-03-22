@@ -143,7 +143,7 @@ Updated: 2026-03-15
 | `height` | `var(--pug-size-control-height)` |
 | `padding` | `0 var(--pug-space-control-x)` |
 | `border` | `0.0625rem solid var(--pug-color-border-default)` |
-| `border-radius` | `var(--pug-treatment-interactive-solid-radius, var(--pug-radius-control))` |
+| `border-radius` | `var(--pug-treatment-interactive-radius, var(--pug-radius-control))` |
 | `background` | `var(--pug-color-background-surface)` |
 | `box-shadow` | `inset 0 0.0625rem 0 color-mix(in srgb, white 8%, transparent)` |
 | `color` | `var(--pug-color-text-primary)` |
@@ -283,7 +283,7 @@ Both adjustments apply independently.
 - `isUnavailable = isDisabled || isLoading` — both disable the native button
 - Icon component rendered at size="sm" for leadingIcon/trailingIcon props
 - Supports named slots `leading` and `trailing` for custom icon content
-- Treatment token: `--pug-treatment-interactive-solid-radius` with fallback to `--pug-radius-control`
+- Treatment token: `--pug-treatment-interactive-radius` with fallback to `--pug-radius-control`
 - Chevron renders `chevron-down` icon from registry at size `sm`, positioned after all other content
 
 ## 10. GPUI Notes

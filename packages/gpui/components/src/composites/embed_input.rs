@@ -1,6 +1,5 @@
 //! EmbedInput — URL input for embedding external content backed by EmbedInputSpec.
 
-use gpui::prelude::FluentBuilder;
 use gpui::*;
 use pug_gpui::GpuiThemeProvider;
 use pug_composites::EmbedInputSpec;
@@ -42,7 +41,7 @@ impl IntoElement for EmbedInput {
             .bg(fill).border_1().border_color(border).rounded(radius)
             .h(px(36.0)).px(px(12.0))
             .flex().items_center()
-            .text_sm().text_color(color)
+            .text_size(px(14.0)).text_color(color)
             .child(display.to_string());
         if spec.is_disabled {
             el = el.opacity(resolve_opacity(theme, "semantic.state.opacity.disabled"));

@@ -1,6 +1,5 @@
 //! Field — real GPUI component backed by FieldSpec.
 
-use gpui::prelude::FluentBuilder;
 use gpui::*;
 use pug_gpui::GpuiThemeProvider;
 use pug_primitives::{FieldSpec, ValidationState};
@@ -71,14 +70,14 @@ impl IntoElement for Field {
         let mut label_row = div().flex().items_center().gap(px(4.0));
         label_row = label_row.child(
             div()
-                .text_sm()
+                .text_size(px(14.0))
                 .text_color(text_primary)
                 .child(spec.label.clone()),
         );
 
         if spec.is_required {
             label_row = label_row.child(
-                div().text_sm().text_color(error_color).child("*"),
+                div().text_size(px(14.0)).text_color(error_color).child("*"),
             );
         } else if spec.shows_optional_label() {
             if let Some(ref opt_label) = spec.optional_label {

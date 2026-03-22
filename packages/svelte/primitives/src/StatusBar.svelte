@@ -26,7 +26,7 @@
     align-items: center;
     justify-content: space-between;
     gap: var(--pug-space-inline-md);
-    padding: 0.625rem var(--pug-space-panel-x);
+    padding: var(--pug-space-panel-y) var(--pug-space-panel-x);
     border-top: 0.0625rem solid var(--pug-color-border-subtle);
     background: color-mix(in srgb, var(--pug-color-background-panel) 94%, transparent);
     color: var(--pug-color-text-secondary);

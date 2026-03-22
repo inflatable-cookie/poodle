@@ -1,6 +1,5 @@
 //! InlineEditableField — click-to-edit field backed by InlineEditableFieldSpec.
 
-use gpui::prelude::FluentBuilder;
 use gpui::*;
 use pug_gpui::GpuiThemeProvider;
 use pug_composites::InlineEditableFieldSpec;
@@ -38,7 +37,7 @@ impl IntoElement for InlineEditableField {
         let display_color = if spec.value.is_empty() { placeholder_color } else { text_color };
 
         let mut el = div()
-            .text_sm().text_color(display_color)
+            .text_size(px(14.0)).text_color(display_color)
             .child(display.to_string());
 
         if spec.is_editing {

@@ -1,6 +1,5 @@
 //! EmbedPreview — preview of embedded content backed by EmbedPreviewSpec.
 
-use gpui::prelude::FluentBuilder;
 use gpui::*;
 use pug_gpui::GpuiThemeProvider;
 use pug_composites::EmbedPreviewSpec;
@@ -39,7 +38,7 @@ impl IntoElement for EmbedPreview {
             .px(px(16.0)).py(px(12.0))
             .flex().flex_col().gap(px(4.0));
         if let Some(ref title) = self.spec.title {
-            el = el.child(div().text_sm().text_color(title_color).font_weight(FontWeight::MEDIUM).child(title.clone()));
+            el = el.child(div().text_size(px(14.0)).text_color(title_color).font_weight(FontWeight::MEDIUM).child(title.clone()));
         }
         if let Some(ref desc) = self.spec.description {
             el = el.child(div().text_xs().text_color(desc_color).child(desc.clone()));

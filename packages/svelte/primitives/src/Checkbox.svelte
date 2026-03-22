@@ -87,8 +87,8 @@
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    width: 1.125rem;
-    height: 1.125rem;
+    width: calc(var(--pug-size-icon-default) + 0.125rem);
+    height: calc(var(--pug-size-icon-default) + 0.125rem);
     border: 0.0625rem solid var(--pug-color-border-default);
     border-radius: 0.3125rem;
     background: var(--pug-color-background-surface);
@@ -110,8 +110,8 @@
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    width: 0.875rem;
-    height: 0.875rem;
+    width: calc(var(--pug-size-icon-default) - 0.125rem);
+    height: calc(var(--pug-size-icon-default) - 0.125rem);
     line-height: 1;
   }
 

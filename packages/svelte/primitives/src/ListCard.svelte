@@ -87,8 +87,8 @@
   .list-card {
     display: flex;
     align-items: center;
-    gap: 0.75rem;
-    padding: 0.625rem 0.75rem;
+    gap: var(--pug-space-inline-md);
+    padding: var(--pug-space-panel-y) var(--pug-space-panel-x);
     border: 0.0625rem solid color-mix(in srgb, var(--pug-color-border-subtle) 18%, transparent);
     border-radius: var(--pug-radius-control);
     background: color-mix(in srgb, var(--pug-surface) 88%, var(--pug-color-text-primary));
@@ -171,7 +171,7 @@
   .list-card__header {
     display: flex;
     align-items: baseline;
-    gap: 0.375rem;
+    gap: var(--pug-space-inline-sm);
   }
 
   .list-card__title {
@@ -190,7 +190,7 @@
     flex-shrink: 0;
     display: flex;
     align-items: center;
-    gap: 0.25rem;
+    gap: var(--pug-space-inline-sm);
   }
 
   .list-card__subtitle {
@@ -204,7 +204,7 @@
   .list-card__footer {
     display: flex;
     align-items: center;
-    gap: 0.5rem;
+    gap: var(--pug-space-inline-md);
     margin-top: 0.125rem;
   }
 

@@ -50,8 +50,8 @@ impl IntoElement for FormDialog {
             el = el.child(content);
         }
         let actions = div().flex().flex_row().gap(px(8.0)).justify_end()
-            .child(div().text_sm().text_color(title_color).cursor_pointer().child(self.cancel_label))
-            .child(div().text_sm().text_color(gpui::white())
+            .child(div().text_size(px(14.0)).text_color(title_color).cursor_pointer().child(self.cancel_label))
+            .child(div().text_size(px(14.0)).text_color(gpui::white())
                 .bg(resolve_color(&self.theme, "semantic.color.accent.base"))
                 .rounded(resolve_radius(&self.theme, "semantic.radius.control"))
                 .px(px(12.0)).py(px(6.0)).cursor_pointer()

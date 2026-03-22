@@ -77,9 +77,9 @@
 <style>
   .collapsible {
     display: grid;
-    gap: 0.5rem;
+    gap: var(--pug-space-stack-md);
     min-width: 0;
-    padding: 0.875rem 1rem;
+    padding: var(--pug-space-panel-y) var(--pug-space-panel-x);
     border: 0.0625rem solid color-mix(in srgb, var(--pug-color-border-subtle) 42%, transparent);
     border-radius: var(--pug-radius-surface);
     background: color-mix(in srgb, var(--pug-surface) 88%, var(--pug-color-text-primary));
@@ -98,7 +98,7 @@
     display: grid;
     grid-template-columns: minmax(0, 1fr) auto;
     align-items: center;
-    gap: 0.75rem;
+    gap: var(--pug-space-inline-md);
     width: 100%;
     padding: 0;
     border: 0;
@@ -121,7 +121,7 @@
 
   .collapsible__heading {
     display: grid;
-    gap: 0.3125rem;
+    gap: var(--pug-space-inline-sm);
     min-width: 0;
   }
 

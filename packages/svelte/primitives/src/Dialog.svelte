@@ -180,11 +180,20 @@
     max-height: min(80vh, 42rem);
     overflow: auto;
     padding: var(--pug-space-panel-y) var(--pug-space-panel-x);
-    border: 0.0625rem solid color-mix(in srgb, var(--pug-color-border-default) 78%, transparent);
-    border-radius: var(--pug-radius-surface);
-    background: color-mix(in srgb, var(--pug-color-background-elevated) 98%, var(--pug-color-background-panel));
-    --pug-surface: color-mix(in srgb, var(--pug-color-background-elevated) 98%, var(--pug-color-background-panel));
-    box-shadow: var(--pug-elevation-dialog);
+    border: 0.0625rem solid var(
+      --pug-treatment-surface-elevated-border,
+      color-mix(in srgb, var(--pug-color-border-default) 78%, transparent)
+    );
+    border-radius: var(--pug-treatment-surface-elevated-radius, var(--pug-radius-surface));
+    background: var(
+      --pug-treatment-surface-elevated-fill,
+      color-mix(in srgb, var(--pug-color-background-elevated) 98%, var(--pug-color-background-panel))
+    );
+    --pug-surface: var(
+      --pug-treatment-surface-elevated-fill,
+      color-mix(in srgb, var(--pug-color-background-elevated) 98%, var(--pug-color-background-panel))
+    );
+    box-shadow: var(--pug-treatment-surface-elevated-shadow, var(--pug-elevation-dialog));
   }
 
   .dialog__header {

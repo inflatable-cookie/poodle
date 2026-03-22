@@ -76,12 +76,12 @@
 <style>
   .pin-input {
     display: inline-flex;
-    gap: 0.375rem;
+    gap: var(--pug-space-inline-sm);
   }
 
   .pin-input__cell {
-    width: 2.25rem;
-    height: 2.5rem;
+    width: var(--pug-size-control-height);
+    height: calc(var(--pug-size-control-height) + 0.25rem);
     padding: 0;
     border: 0.0625rem solid var(--pug-color-border-default);
     border-radius: var(--pug-radius-control);

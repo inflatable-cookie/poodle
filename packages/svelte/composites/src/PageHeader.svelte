@@ -65,7 +65,7 @@
 
   .page-header__title-block {
     display: grid;
-    gap: 0.375rem;
+    gap: var(--pug-space-inline-sm);
   }
 
   .page-header__title,

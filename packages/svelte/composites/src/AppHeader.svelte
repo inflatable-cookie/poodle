@@ -42,8 +42,8 @@
     grid-template-columns: minmax(0, 1fr) auto auto;
     gap: var(--pug-space-inline-md);
     align-items: center;
-    min-height: 2.75rem;
-    padding: 0.375rem var(--pug-space-panel-x);
+    min-height: var(--pug-size-panel-header);
+    padding: var(--pug-space-control-y) var(--pug-space-panel-x);
     border-bottom: 0.0625rem solid var(--pug-color-border-subtle);
     background: color-mix(in srgb, var(--pug-color-background-panel) 94%, transparent);
     overflow: visible;

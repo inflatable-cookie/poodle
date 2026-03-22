@@ -84,8 +84,8 @@
   .nav-card {
     display: flex;
     align-items: center;
-    gap: 0.75rem;
-    padding: 0.875rem 1rem;
+    gap: var(--pug-space-inline-md);
+    padding: var(--pug-space-panel-y) var(--pug-space-panel-x);
     border: 0.0625rem solid color-mix(in srgb, var(--pug-color-border-subtle) 32%, transparent);
     border-radius: var(--pug-radius-surface);
     background: var(--pug-color-background-surface);
@@ -140,7 +140,7 @@
   .nav-card__title {
     display: flex;
     align-items: center;
-    gap: 0.375rem;
+    gap: var(--pug-space-inline-sm);
     font-family: var(--pug-typography-label-family);
     font-size: var(--pug-typography-label-size);
     font-weight: 600;

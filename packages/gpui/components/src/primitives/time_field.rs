@@ -3,7 +3,6 @@
 //! Contract: input-like control with min-height, focus ring via border,
 //! no hover, no clock icon (contract doesn't specify one).
 
-use gpui::prelude::FluentBuilder;
 use gpui::*;
 use pug_gpui::GpuiThemeProvider;
 use pug_primitives::{TimeFieldSpec, ValidationState};
@@ -96,7 +95,7 @@ impl IntoElement for TimeField {
             .border_color(border)
             .flex()
             .items_center()
-            .text_sm()
+            .text_size(px(14.0))
             .text_color(text_primary)
             // Contract: focus = outline/border change to focus ring
             .focus(move |s| s.border_color(focus_ring));

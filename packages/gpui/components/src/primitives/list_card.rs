@@ -146,7 +146,7 @@ impl IntoElement for ListCard {
 
             col = col.child(
                 div()
-                    .text_sm()
+                    .text_size(px(14.0))
                     .font_weight(FontWeight::SEMIBOLD)
                     .text_color(title_color)
                     .overflow_x_hidden()

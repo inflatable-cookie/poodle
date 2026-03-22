@@ -117,6 +117,7 @@
       var(--pug-color-background-elevated)
     );
     --pug-icon-button-border: transparent;
+    --pug-icon-button-shadow: none;
     --pug-icon-button-text: var(--pug-color-text-primary);
     display: inline-flex;
     align-items: center;
@@ -125,9 +126,9 @@
     height: var(--pug-size-control-height);
     padding: 0;
     border: 0.0625rem solid var(--pug-icon-button-border);
-    border-radius: var(--pug-treatment-interactive-solid-radius, var(--pug-radius-control));
+    border-radius: var(--pug-treatment-interactive-radius, var(--pug-radius-control));
     background: var(--pug-icon-button-fill);
-    box-shadow: none;
+    box-shadow: var(--pug-icon-button-shadow);
     color: var(--pug-icon-button-text);
     cursor: pointer;
     transition:
@@ -148,16 +149,37 @@
   }
 
   .icon-button[data-variant="primary"] {
-    --pug-icon-button-fill: var(--pug-color-accent-base);
-    --pug-icon-button-border: color-mix(in srgb, var(--pug-color-accent-base) 84%, black);
-    --pug-icon-button-text: var(--pug-color-text-inverse);
-    box-shadow: inset 0 0.0625rem 0 color-mix(in srgb, white 8%, transparent);
+    --pug-icon-button-fill: var(
+      --pug-treatment-interactive-primary-fill,
+      var(--pug-color-accent-base)
+    );
+    --pug-icon-button-border: var(
+      --pug-treatment-interactive-primary-border,
+      color-mix(in srgb, var(--pug-color-accent-base) 84%, black)
+    );
+    --pug-icon-button-text: var(
+      --pug-treatment-interactive-primary-text,
+      var(--pug-color-text-inverse)
+    );
+    --pug-icon-button-shadow: var(
+      --pug-treatment-interactive-primary-shadow,
+      inset 0 0.0625rem 0 color-mix(in srgb, white 8%, transparent)
+    );
   }
 
   .icon-button[data-variant="secondary"] {
-    --pug-icon-button-fill: var(--pug-color-background-surface);
-    --pug-icon-button-border: var(--pug-color-border-default);
-    box-shadow: inset 0 0.0625rem 0 color-mix(in srgb, white 8%, transparent);
+    --pug-icon-button-fill: var(
+      --pug-treatment-interactive-fill,
+      var(--pug-color-background-surface)
+    );
+    --pug-icon-button-border: var(
+      --pug-treatment-interactive-border,
+      var(--pug-color-border-default)
+    );
+    --pug-icon-button-shadow: var(
+      --pug-treatment-interactive-shadow,
+      inset 0 0.0625rem 0 color-mix(in srgb, white 8%, transparent)
+    );
   }
 
   .icon-button[data-tone="danger"] {
@@ -193,6 +215,7 @@
   .icon-button:hover:not(:disabled) {
     background: var(--pug-icon-button-fill-hover);
     border-color: color-mix(in srgb, var(--pug-icon-button-border) 74%, var(--pug-color-text-primary));
+    box-shadow: var(--pug-treatment-interactive-shadow-active, var(--pug-icon-button-shadow));
   }
 
   .icon-button:active:not(:disabled) {

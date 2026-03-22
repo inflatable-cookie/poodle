@@ -2,13 +2,12 @@
 //!
 //! Contract: `docs/contracts/foundation/collapsible.md`
 
-use gpui::prelude::FluentBuilder;
 use gpui::*;
 use pug_gpui::GpuiThemeProvider;
 use pug_primitives::{CollapsibleSpec, IconSize, IconSpec};
 
 use super::icon::Icon;
-use crate::theme_ext::{resolve_color, resolve_opacity, resolve_px, resolve_radius};
+use crate::theme_ext::{resolve_color, resolve_opacity, resolve_radius};
 
 pub struct Collapsible {
     spec: CollapsibleSpec,

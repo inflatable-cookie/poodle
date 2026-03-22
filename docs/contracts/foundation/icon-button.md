@@ -194,7 +194,7 @@ type OverlayPlacement = "top" | "bottom" | "left" | "right"
 | `height` | `var(--pug-size-control-height)` |
 | `padding` | `0` |
 | `border` | `0.0625rem solid var(--pug-icon-button-border)` |
-| `border-radius` | `var(--pug-treatment-interactive-solid-radius, var(--pug-radius-control))` |
+| `border-radius` | `var(--pug-treatment-interactive-radius, var(--pug-radius-control))` |
 | `background` | `var(--pug-icon-button-fill)` |
 | `box-shadow` | `none` (ghost default); `inset 0 0.0625rem 0 color-mix(in srgb, white 8%, transparent)` (primary/secondary) |
 | `color` | `var(--pug-icon-button-text)` |
@@ -332,7 +332,7 @@ to   { transform: rotate(360deg); }
   duplicating transition declarations
 - `data-variant`, `data-tone`, and `data-size` attributes on root for CSS targeting
 - Icon glyph is `aria-hidden` as the accessible name comes from `ariaLabel`
-- border-radius uses `--pug-treatment-interactive-solid-radius` with
+- border-radius uses `--pug-treatment-interactive-radius` with
   fallback to `--pug-radius-control`
 - Built-in tooltip renders as a `<span role="tooltip">` with auto-generated
   `id`, linked to the button via `aria-describedby`

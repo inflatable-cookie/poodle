@@ -116,7 +116,7 @@
   .editable-label__input {
     width: 100%;
     min-width: 0;
-    padding: 0.375rem 0.5rem;
+    padding: var(--pug-space-control-y) var(--pug-space-control-x);
     border: 0.0625rem solid transparent;
     border-radius: var(--pug-radius-control);
     background: transparent;
@@ -131,7 +131,7 @@
   .editable-label__display {
     display: inline-flex;
     align-items: center;
-    gap: 0.375rem;
+    gap: var(--pug-space-inline-sm);
     cursor: text;
   }
 

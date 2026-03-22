@@ -1,4 +1,3 @@
-use gpui::prelude::FluentBuilder;
 use gpui::*;
 use pug_gpui::GpuiThemeProvider;
 use pug_primitives::{ColumnAlign, TableColumn, TableRow, TableSpec};

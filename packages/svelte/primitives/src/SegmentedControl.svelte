@@ -58,9 +58,16 @@
     grid-auto-columns: minmax(0, 1fr);
     gap: 0.125rem;
     padding: 0.125rem;
-    border: 0.0625rem solid color-mix(in srgb, var(--pug-color-border-subtle) 84%, transparent);
-    border-radius: var(--pug-radius-control);
-    background: color-mix(in srgb, var(--pug-surface) 93%, var(--pug-color-text-primary));
+    border: 0.0625rem solid var(
+      --pug-treatment-interactive-border,
+      color-mix(in srgb, var(--pug-color-border-subtle) 84%, transparent)
+    );
+    border-radius: var(--pug-treatment-interactive-radius, var(--pug-radius-control));
+    background: var(
+      --pug-treatment-interactive-fill,
+      color-mix(in srgb, var(--pug-surface) 93%, var(--pug-color-text-primary))
+    );
+    box-shadow: var(--pug-treatment-interactive-shadow, none);
   }
 
   .segmented-control__segment {
@@ -81,7 +88,7 @@
     min-width: 0;
     min-height: calc(var(--pug-size-control-height) - 0.25rem);
     padding: 0 0.75rem;
-    border-radius: calc(var(--pug-radius-control) - 0.125rem);
+    border-radius: calc(var(--pug-treatment-interactive-radius, var(--pug-radius-control)) - 0.125rem);
     color: var(--pug-color-text-secondary);
     font-family: var(--pug-typography-label-family);
     font-size: 0.75rem;

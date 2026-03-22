@@ -2,7 +2,6 @@
 
 use gpui::prelude::FluentBuilder;
 use gpui::*;
-use pug_adapter::ThemeProvider;
 use pug_gpui::GpuiThemeProvider;
 use pug_composites::{CommandActionItem, CommandPaletteSpec, DiscoveryState};
 
@@ -113,7 +112,7 @@ impl IntoElement for CommandPalette {
             .child(
                 div()
                     .flex_1()
-                    .text_sm()
+                    .text_size(px(14.0))
                     .text_color(text_primary)
                     .when(spec.query.is_empty(), |el| {
                         el.text_color(text_muted).child("Type a command\u{2026}")
@@ -130,7 +129,7 @@ impl IntoElement for CommandPalette {
                 palette = palette.child(
                     div()
                         .p(px(16.0))
-                        .text_sm()
+                        .text_size(px(14.0))
                         .text_color(text_secondary)
                         .child("Searching\u{2026}"),
                 );
@@ -140,7 +139,7 @@ impl IntoElement for CommandPalette {
                 palette = palette.child(
                     div()
                         .p(px(16.0))
-                        .text_sm()
+                        .text_size(px(14.0))
                         .text_color(resolve_color(theme, "semantic.color.status.danger"))
                         .child("Error loading commands"),
                 );
@@ -150,7 +149,7 @@ impl IntoElement for CommandPalette {
                 palette = palette.child(
                     div()
                         .p(px(16.0))
-                        .text_sm()
+                        .text_size(px(14.0))
                         .text_color(text_secondary)
                         .child("No matching commands"),
                 );
@@ -201,7 +200,7 @@ impl IntoElement for CommandPalette {
                 .py(px(6.0))
                 .mx(px(4.0))
                 .rounded(px(4.0))
-                .text_sm();
+                .text_size(px(14.0));
 
             if is_active {
                 row = row.bg(accent.opacity(0.10)).text_color(accent);

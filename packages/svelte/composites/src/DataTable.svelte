@@ -218,8 +218,8 @@
     display: flex;
     align-items: center;
     justify-content: flex-end;
-    gap: 0.5rem;
-    padding: 0.5rem 0.75rem;
+    gap: var(--pug-space-inline-md);
+    padding: var(--pug-space-control-y) var(--pug-space-panel-x);
     border-bottom: 0.0625rem solid var(--pug-color-border-subtle);
     background: color-mix(in srgb, var(--pug-color-background-elevated) 92%, transparent);
   }
@@ -227,8 +227,8 @@
   .data-table__toolbar-btn {
     display: inline-flex;
     align-items: center;
-    gap: 0.375rem;
-    padding: 0.25rem 0.625rem;
+    gap: var(--pug-space-inline-sm);
+    padding: var(--pug-space-control-y) var(--pug-space-control-x);
     border: 0.0625rem solid var(--pug-color-border-default);
     border-radius: var(--pug-radius-control);
     background: var(--pug-color-background-surface);
@@ -262,8 +262,8 @@
   .data-table__col-menu-item {
     display: flex;
     align-items: center;
-    gap: 0.5rem;
-    padding: 0.375rem 0.5rem;
+    gap: var(--pug-space-inline-md);
+    padding: var(--pug-space-control-y) var(--pug-space-control-x);
     border-radius: calc(var(--pug-radius-control) - 0.125rem);
     cursor: pointer;
     font-size: var(--pug-typography-label-size);

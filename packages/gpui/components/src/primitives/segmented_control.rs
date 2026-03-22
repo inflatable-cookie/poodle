@@ -1,8 +1,6 @@
 //! SegmentedControl — real GPUI component backed by SegmentedControlSpec.
 
-use gpui::prelude::FluentBuilder;
 use gpui::*;
-use pug_adapter::ThemeProvider;
 use pug_gpui::GpuiThemeProvider;
 use pug_primitives::{ChoiceOption, SegmentedControlSpec};
 

@@ -152,23 +152,23 @@
 <style>
   .navigation-menu {
     display: grid;
-    gap: 0.5rem;
+    gap: var(--pug-space-stack-md);
     min-width: 0;
   }
 
   .navigation-menu__list {
     display: inline-flex;
     flex-wrap: wrap;
-    gap: 0.25rem;
+    gap: var(--pug-space-inline-sm);
     align-items: center;
   }
 
   .navigation-menu__trigger {
     display: inline-flex;
     align-items: center;
-    gap: 0.375rem;
+    gap: var(--pug-space-inline-sm);
     min-height: calc(var(--pug-size-control-height) - 0.125rem);
-    padding: 0 0.875rem;
+    padding: 0 var(--pug-space-control-x);
     border: 0.0625rem solid color-mix(in srgb, var(--pug-color-border-subtle) 72%, transparent);
     border-radius: var(--pug-radius-control);
     background: color-mix(in srgb, var(--pug-color-background-surface) 88%, transparent);

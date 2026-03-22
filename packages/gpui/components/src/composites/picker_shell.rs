@@ -108,7 +108,7 @@ impl IntoElement for PickerShell {
 
         header = header.child(
             div()
-                .text_sm()
+                .text_size(px(14.0))
                 .font_weight(FontWeight::SEMIBOLD)
                 .text_color(text_primary)
                 .child(spec.title.clone()),
@@ -148,7 +148,7 @@ impl IntoElement for PickerShell {
                 .py(px(24.0))
                 .child(
                     div()
-                        .text_sm()
+                        .text_size(px(14.0))
                         .text_color(text_secondary)
                         .child("Searching\u{2026}"),
                 ),
@@ -160,7 +160,7 @@ impl IntoElement for PickerShell {
                 .py(px(24.0))
                 .child(
                     div()
-                        .text_sm()
+                        .text_size(px(14.0))
                         .text_color(resolve_color(theme, "semantic.color.status.danger"))
                         .child("Search failed."),
                 ),
@@ -172,7 +172,7 @@ impl IntoElement for PickerShell {
                 .py(px(24.0))
                 .child(
                     div()
-                        .text_sm()
+                        .text_size(px(14.0))
                         .text_color(text_secondary)
                         .child("No results found."),
                 ),

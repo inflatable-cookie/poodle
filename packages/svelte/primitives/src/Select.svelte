@@ -81,7 +81,10 @@
     gap: var(--pug-space-inline-sm);
     min-height: var(--pug-size-control-height);
     padding: 0 var(--pug-space-control-x);
-    border: 0.0625rem solid var(--pug-color-border-default);
+    border: 0.0625rem solid var(
+      --pug-treatment-interactive-subtle-border,
+      var(--pug-color-border-default)
+    );
     border-radius: var(--pug-treatment-interactive-subtle-radius, var(--pug-radius-control));
     background: var(--pug-treatment-interactive-subtle-fill, var(--pug-color-background-surface));
     box-shadow: var(--pug-treatment-interactive-subtle-shadow, none);

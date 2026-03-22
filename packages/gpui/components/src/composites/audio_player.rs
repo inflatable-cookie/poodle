@@ -1,7 +1,6 @@
 //! AudioPlayer — audio playback controls backed by AudioPlayerSpec.
 //! GPUI cannot play audio — this renders the UI chrome only.
 
-use gpui::prelude::FluentBuilder;
 use gpui::*;
 use pug_gpui::GpuiThemeProvider;
 use pug_composites::AudioPlayerSpec;

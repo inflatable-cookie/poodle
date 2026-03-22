@@ -1,6 +1,5 @@
 //! PageLoading — full-page loading state backed by PageLoadingSpec.
 
-use gpui::prelude::FluentBuilder;
 use gpui::*;
 use pug_gpui::GpuiThemeProvider;
 use pug_composites::PageLoadingSpec;
@@ -41,7 +40,7 @@ impl IntoElement for PageLoading {
         // Spinner placeholder
         el = el.child(div().text_color(accent).text_size(px(24.0)).child("⟳"));
         if let Some(ref msg) = self.spec.message {
-            el = el.child(div().text_sm().text_color(text_color).child(msg.clone()));
+            el = el.child(div().text_size(px(14.0)).text_color(text_color).child(msg.clone()));
         }
         el.into_any_element()
     }

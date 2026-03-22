@@ -80,9 +80,16 @@
   .toggle-group__item {
     min-height: calc(var(--pug-size-control-height) - 0.25rem);
     padding: 0 0.75rem;
-    border: 0.0625rem solid color-mix(in srgb, var(--pug-color-border-subtle) 82%, transparent);
-    border-radius: var(--pug-radius-control);
-    background: color-mix(in srgb, var(--pug-surface) 93%, var(--pug-color-text-primary));
+    border: 0.0625rem solid var(
+      --pug-treatment-interactive-border,
+      color-mix(in srgb, var(--pug-color-border-subtle) 82%, transparent)
+    );
+    border-radius: var(--pug-treatment-interactive-radius, var(--pug-radius-control));
+    background: var(
+      --pug-treatment-interactive-fill,
+      color-mix(in srgb, var(--pug-surface) 93%, var(--pug-color-text-primary))
+    );
+    box-shadow: var(--pug-treatment-interactive-shadow, none);
     color: var(--pug-color-text-primary);
     cursor: pointer;
     font-family: var(--pug-typography-label-family);
@@ -92,12 +99,24 @@
     transition:
       border-color 180ms ease,
       background 180ms ease,
+      box-shadow 180ms ease,
       color 180ms ease;
   }
 
   .toggle-group__item.selected {
-    background: color-mix(in srgb, var(--pug-color-accent-base) 22%, transparent);
-    border-color: color-mix(in srgb, var(--pug-color-accent-base) 42%, var(--pug-color-border-default));
+    background:
+      linear-gradient(
+        color-mix(in srgb, var(--pug-color-accent-base) 22%, transparent),
+        color-mix(in srgb, var(--pug-color-accent-base) 22%, transparent)
+      ),
+      var(
+        --pug-treatment-interactive-fill,
+        color-mix(in srgb, var(--pug-surface) 93%, var(--pug-color-text-primary))
+      );
+    border-color: var(
+      --pug-treatment-interactive-border-active,
+      color-mix(in srgb, var(--pug-color-accent-base) 42%, var(--pug-color-border-default))
+    );
   }
 
   .toggle-group__item:focus-visible {

@@ -1,6 +1,5 @@
 //! MetricTile — real GPUI component backed by MetricTileSpec.
 
-use gpui::prelude::FluentBuilder;
 use gpui::*;
 use pug_gpui::GpuiThemeProvider;
 use pug_composites::MetricTileSpec;

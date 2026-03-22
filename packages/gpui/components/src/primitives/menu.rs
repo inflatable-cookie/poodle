@@ -4,7 +4,6 @@
 //! item padding 0.375rem 0.5rem, min-height 2rem, radius control-0.125rem,
 //! hover accent 16%, disabled cursor not-allowed.
 
-use gpui::prelude::FluentBuilder;
 use gpui::*;
 use pug_gpui::GpuiThemeProvider;
 use pug_primitives::{MenuEntry, MenuItemKind, MenuSpec, OverlayPlacement};

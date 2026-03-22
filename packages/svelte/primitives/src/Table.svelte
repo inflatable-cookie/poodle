@@ -87,7 +87,7 @@
   .table__header,
   .table__cell,
   .table__empty {
-    padding: 0.6875rem 0.875rem;
+    padding: var(--pug-space-control-y) var(--pug-space-panel-x);
     border-bottom: 0.0625rem solid color-mix(in srgb, var(--pug-color-border-subtle) 72%, transparent);
     text-align: left;
     vertical-align: middle;

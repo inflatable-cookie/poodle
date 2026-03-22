@@ -1,6 +1,5 @@
 //! SlugField — URL slug input backed by SlugFieldSpec.
 
-use gpui::prelude::FluentBuilder;
 use gpui::*;
 use pug_gpui::GpuiThemeProvider;
 use pug_composites::SlugFieldSpec;
@@ -41,9 +40,9 @@ impl IntoElement for SlugField {
             .h(px(36.0));
 
         if let Some(ref prefix) = spec.prefix {
-            el = el.child(div().text_sm().text_color(muted).pl(px(12.0)).child(prefix.clone()));
+            el = el.child(div().text_size(px(14.0)).text_color(muted).pl(px(12.0)).child(prefix.clone()));
         }
-        el = el.child(div().text_sm().text_color(text_color).px(px(8.0)).child(spec.value.clone()));
+        el = el.child(div().text_size(px(14.0)).text_color(text_color).px(px(8.0)).child(spec.value.clone()));
         if spec.is_disabled {
             let opacity = resolve_opacity(theme, "semantic.state.opacity.disabled");
             el = el.opacity(opacity);

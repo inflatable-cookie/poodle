@@ -144,7 +144,7 @@ impl IntoElement for TriStateSwitch {
         if let Some(ref label) = spec.label {
             el = el.child(
                 div()
-                    .text_sm()
+                    .text_size(px(14.0))
                     .text_color(text_primary)
                     .child(label.clone()),
             );

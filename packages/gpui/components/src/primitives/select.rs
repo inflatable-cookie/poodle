@@ -123,7 +123,7 @@ impl IntoElement for Select {
             .items_center()
             .justify_between()
             .gap(inline_gap)
-            .text_sm()
+            .text_size(px(14.0))
             .focus(move |s| s.border_color(focus_ring));
 
         if is_disabled {
@@ -192,7 +192,7 @@ impl IntoElement for Select {
                     .id(item_id)
                     .px(inline_padding)
                     .py(stack_gap)
-                    .text_sm()
+                    .text_size(px(14.0))
                     .text_color(text_primary);
 
                 if is_selected {

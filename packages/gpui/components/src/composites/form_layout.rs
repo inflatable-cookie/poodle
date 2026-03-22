@@ -1,7 +1,6 @@
 //! FormLayout — form layout container with columns and validation display.
 //! No contract spec — implemented from Svelte reference.
 
-use gpui::prelude::FluentBuilder;
 use gpui::*;
 use pug_gpui::GpuiThemeProvider;
 use crate::theme_ext::{resolve_color, resolve_px};
@@ -49,13 +48,13 @@ impl IntoElement for FormLayout {
         let mut el = div().flex().flex_col().gap(gap);
 
         if let Some(ref desc) = self.description {
-            el = el.child(div().text_sm().text_color(desc_color).child(desc.clone()));
+            el = el.child(div().text_size(px(14.0)).text_color(desc_color).child(desc.clone()));
         }
         if let Some(ref error) = self.error {
-            el = el.child(div().text_sm().text_color(error_color).child(error.clone()));
+            el = el.child(div().text_size(px(14.0)).text_color(error_color).child(error.clone()));
         }
         if let Some(ref success) = self.success {
-            el = el.child(div().text_sm().text_color(success_color).child(success.clone()));
+            el = el.child(div().text_size(px(14.0)).text_color(success_color).child(success.clone()));
         }
 
         // Form fields

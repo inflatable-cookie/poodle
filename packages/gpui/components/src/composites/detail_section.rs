@@ -1,6 +1,5 @@
 //! DetailSection — real GPUI component backed by DetailSectionSpec.
 
-use gpui::prelude::FluentBuilder;
 use gpui::*;
 use pug_gpui::GpuiThemeProvider;
 use pug_composites::DetailSectionSpec;
@@ -101,7 +100,7 @@ impl IntoElement for DetailSection {
             if let Some(ref title) = spec.title {
                 title_block = title_block.child(
                     div()
-                        .text_sm()
+                        .text_size(px(14.0))
                         .font_weight(FontWeight::BOLD)
                         .text_color(title_color)
                         .child(title.clone()),

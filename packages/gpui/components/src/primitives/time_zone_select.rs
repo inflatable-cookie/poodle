@@ -81,7 +81,7 @@ impl IntoElement for TimeZoneSelect {
             .items_center()
             .justify_between()
             .gap(inline_gap)
-            .text_sm()
+            .text_size(px(14.0))
             .child(div().text_color(text_col).child(trigger_text))
             .child(
                 div()
@@ -110,7 +110,7 @@ impl IntoElement for TimeZoneSelect {
                 .border_color(border)
                 .shadow_md()
                 .py(px(4.0))
-                .text_sm()
+                .text_size(px(14.0))
                 .text_color(text_primary)
                 .child(
                     div()

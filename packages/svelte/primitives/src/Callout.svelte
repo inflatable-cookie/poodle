@@ -151,7 +151,7 @@
 
   .callout__content {
     display: grid;
-    gap: 0.25rem;
+    gap: var(--pug-space-inline-sm);
     min-width: 0;
   }
 

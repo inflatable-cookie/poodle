@@ -1,6 +1,5 @@
 //! MediaThumbnail — real GPUI component backed by MediaThumbnailSpec.
 
-use gpui::prelude::FluentBuilder;
 use gpui::*;
 use pug_gpui::GpuiThemeProvider;
 use pug_composites::{MediaThumbnailSpec, AspectRatio, MediaKind, MediaState};
@@ -116,7 +115,7 @@ impl IntoElement for MediaThumbnail {
                     .gap(px(4.0))
                     .child(
                         div()
-                            .text_sm()
+                            .text_size(px(14.0))
                             .text_color(text_secondary)
                             .child(format!("[{}]", kind_label)),
                     )
@@ -157,7 +156,7 @@ impl IntoElement for MediaThumbnail {
             if let Some(ref title) = spec.title {
                 caption = caption.child(
                     div()
-                        .text_sm()
+                        .text_size(px(14.0))
                         .font_weight(FontWeight::MEDIUM)
                         .text_color(text_primary)
                         .overflow_x_hidden()

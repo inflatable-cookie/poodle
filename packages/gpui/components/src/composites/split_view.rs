@@ -1,6 +1,5 @@
 //! SplitView — real GPUI component backed by SplitViewSpec.
 
-use gpui::prelude::FluentBuilder;
 use gpui::*;
 use pug_gpui::GpuiThemeProvider;
 use pug_composites::{SplitOrientation, SplitViewSpec};

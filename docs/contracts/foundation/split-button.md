@@ -172,7 +172,7 @@ type MenuItem = {
 | `display` | `inline-flex` |
 | `align-items` | `stretch` |
 | `width` | `fit-content` |
-| `border-radius` | `var(--pug-treatment-interactive-solid-radius, var(--pug-radius-control))` |
+| `border-radius` | `var(--pug-treatment-interactive-radius, var(--pug-radius-control))` |
 
 ### Primary and Toggle (shared)
 
@@ -209,7 +209,7 @@ type MenuItem = {
 | `min-width` | `4rem` |
 | `padding` | `0 var(--pug-space-control-x)` |
 | `border-right` | `0` |
-| `border-radius` | `var(--pug-treatment-interactive-solid-radius, var(--pug-radius-control)) 0 0 var(--pug-treatment-interactive-solid-radius, var(--pug-radius-control))` |
+| `border-radius` | `var(--pug-treatment-interactive-radius, var(--pug-radius-control)) 0 0 var(--pug-treatment-interactive-radius, var(--pug-radius-control))` |
 
 ### Toggle half
 
@@ -218,7 +218,7 @@ type MenuItem = {
 | `width` | `2rem` |
 | `padding` | `0` |
 | `border-left` | `0` |
-| `border-radius` | `0 var(--pug-treatment-interactive-solid-radius, var(--pug-radius-control)) var(--pug-treatment-interactive-solid-radius, var(--pug-radius-control)) 0` |
+| `border-radius` | `0 var(--pug-treatment-interactive-radius, var(--pug-radius-control)) var(--pug-treatment-interactive-radius, var(--pug-radius-control)) 0` |
 
 ### Divider
 

@@ -1,6 +1,5 @@
 //! ActionDiscoveryPanel — real GPUI component backed by ActionDiscoveryPanelSpec.
 
-use gpui::prelude::FluentBuilder;
 use gpui::*;
 use pug_adapter::ThemeProvider;
 use pug_gpui::GpuiThemeProvider;
@@ -85,7 +84,7 @@ impl IntoElement for ActionDiscoveryPanel {
                 panel = panel.child(
                     div()
                         .p(px(16.0))
-                        .text_sm()
+                        .text_size(px(14.0))
                         .text_color(text_secondary)
                         .child("Loading actions\u{2026}"),
                 );
@@ -95,7 +94,7 @@ impl IntoElement for ActionDiscoveryPanel {
                 panel = panel.child(
                     div()
                         .p(px(16.0))
-                        .text_sm()
+                        .text_size(px(14.0))
                         .text_color(resolve_color(theme, "semantic.color.status.danger"))
                         .child("Failed to load actions"),
                 );
@@ -109,7 +108,7 @@ impl IntoElement for ActionDiscoveryPanel {
                 panel = panel.child(
                     div()
                         .p(px(16.0))
-                        .text_sm()
+                        .text_size(px(14.0))
                         .text_color(text_secondary)
                         .child(msg.to_string()),
                 );
@@ -157,7 +156,7 @@ impl IntoElement for ActionDiscoveryPanel {
                     .px(px(8.0))
                     .py(px(6.0))
                     .rounded(px(4.0))
-                    .text_sm()
+                    .text_size(px(14.0))
                     .text_color(text_primary);
 
                 row = row.focus(move |s| s.border_color(focus_ring));

@@ -85,8 +85,8 @@
   .switch__track {
     display: inline-flex;
     align-items: center;
-    width: 2.125rem;
-    height: 1.25rem;
+    width: calc(var(--pug-size-icon-default) * 2 + 0.125rem);
+    height: calc(var(--pug-size-icon-default) + 0.25rem);
     padding: 0.125rem;
     border: 0.0625rem solid var(--pug-color-border-default);
     border-radius: 999px;
@@ -99,8 +99,8 @@
   }
 
   .switch__thumb {
-    width: 0.875rem;
-    height: 0.875rem;
+    width: calc(var(--pug-size-icon-default) - 0.125rem);
+    height: calc(var(--pug-size-icon-default) - 0.125rem);
     border-radius: 999px;
     background: var(--pug-color-text-primary);
     box-shadow: 0 0.125rem 0.5rem color-mix(in srgb, black 18%, transparent);
@@ -117,7 +117,7 @@
 
   .switch__control:checked + .switch__track .switch__thumb {
     background: var(--pug-color-accent-base);
-    transform: translateX(0.875rem);
+    transform: translateX(calc(var(--pug-size-icon-default) - 0.125rem));
   }
 
   .switch__control:focus-visible + .switch__track {

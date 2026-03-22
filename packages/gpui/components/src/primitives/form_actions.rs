@@ -5,7 +5,6 @@ use pug_adapter::ThemeProvider;
 use pug_gpui::GpuiThemeProvider;
 use pug_primitives::{FormActionAlign, FormActionsSpec};
 
-use crate::theme_ext::resolve_color;
 
 /// A real GPUI form actions bar backed by `FormActionsSpec`.
 ///
