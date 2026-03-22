@@ -109,14 +109,108 @@ No component-owned events beyond child action behavior.
 - composition rule: breadcrumbs, when present, remain above the title block and
   do not collapse into the same semantic role as the page title
 
-## 8. Token Usage
+## 8. Token Usage And Precise CSS
 
-| Part | Token | Purpose |
-|------|-------|---------|
-| Root Header | spacing and separator roles | region spacing |
-| Title Block | display/heading typography and text roles | hierarchy |
-| Breadcrumbs Region | subdued text roles | path context |
-| Actions | action spacing roles | command grouping |
+### Data Attributes
+
+| Attribute | Element | Values |
+|-----------|---------|--------|
+| `data-align` | root `<header>` | `"start"`, `"between"` |
+
+### Recipe Custom Properties
+
+| Property | Default |
+|----------|---------|
+| `--pug-recipe-page-header-padding-block-start` | `0` |
+| `--pug-recipe-page-header-padding-inline` | `0` |
+| `--pug-recipe-page-header-padding-block-end` | `calc(var(--pug-space-stack-md) + 0.125rem)` |
+| `--pug-recipe-page-header-fill` | `transparent` |
+| `--pug-recipe-page-header-border` | `transparent` |
+| `--pug-recipe-page-header-shadow` | `none` |
+| `--pug-recipe-page-header-radius` | `var(--pug-radius-surface)` |
+
+### Root
+
+| Property | Value |
+|----------|-------|
+| display | `grid` |
+| gap | `var(--pug-space-stack-md)` |
+| align-items | `end` |
+| padding | `var(--pug-recipe-page-header-padding-block-start) var(--pug-recipe-page-header-padding-inline) var(--pug-recipe-page-header-padding-block-end)` |
+| border | `0.0625rem solid var(--pug-recipe-page-header-border)` |
+| border-radius | `var(--pug-recipe-page-header-radius)` |
+| background | `var(--pug-recipe-page-header-fill)` |
+| box-shadow | `var(--pug-recipe-page-header-shadow)` |
+
+#### Root Alignment Variant (`[data-align="between"]`)
+
+| Property | Value |
+|----------|-------|
+| grid-template-columns | `minmax(0, 1fr) auto` |
+
+### Content
+
+| Property | Value |
+|----------|-------|
+| display | `grid` |
+| gap | `var(--pug-space-stack-md)` |
+
+### Title Block
+
+| Property | Value |
+|----------|-------|
+| display | `grid` |
+| gap | `0.375rem` |
+
+### Title (h2)
+
+| Property | Value |
+|----------|-------|
+| margin | `0` |
+| font-family | `var(--pug-typography-heading-family)` |
+| font-size | `1.75rem` |
+| line-height | `1.1` |
+| font-weight | `700` |
+
+### Eyebrow
+
+| Property | Value |
+|----------|-------|
+| margin | `0` |
+| color | `var(--pug-color-text-secondary)` |
+| font-size | `0.6875rem` |
+| font-weight | `600` |
+| letter-spacing | `0.12em` |
+| text-transform | `uppercase` |
+
+### Subtitle
+
+| Property | Value |
+|----------|-------|
+| margin | `0` |
+| color | `var(--pug-color-text-secondary)` |
+| font-size | `var(--pug-typography-body-size)` |
+| line-height | `var(--pug-typography-body-lineHeight)` |
+
+### Actions
+
+| Property | Value |
+|----------|-------|
+| display | `flex` |
+| flex-wrap | `wrap` |
+| gap | `var(--pug-space-inline-md)` |
+| justify-content | `flex-end` |
+| align-items | `start` |
+
+### Responsive Breakpoints
+
+| Breakpoint | Selector | Property | Value |
+|------------|----------|----------|-------|
+| `max-width: 45rem` | `[data-align="between"]` | grid-template-columns | `1fr` |
+
+### Light Theme Overrides
+
+None.
 
 ## 9. Svelte Notes
 

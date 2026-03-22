@@ -112,7 +112,16 @@ When `stateTitle` is null, the component uses these defaults:
 - Placeholder icon: `aria-hidden="true"` (decorative)
 - Textual identity must remain available when visual preview cannot render
 
-## 9. Visual Rules
+## 9. Visual Rules And Precise CSS
+
+### Data Attributes
+
+| Attribute | Element | Values |
+|-----------|---------|--------|
+| `data-kind` | root `<figure>` | `"image"`, `"audio"`, `"video"`, `"document"`, `"embed"` |
+| `data-state` | root `<figure>` | `"ready"`, `"loading"`, `"error"`, `"empty"` |
+| `data-aspect-ratio` | root `<figure>` | `"square"`, `"landscape"`, `"portrait"`, `"video"` |
+| `data-presentation` | root `<figure>` | `"default"`, `"compact"` |
 
 ### Fallback Icons By Kind
 
@@ -124,46 +133,147 @@ When `stateTitle` is null, the component uses these defaults:
 | document | `file-text` |
 | embed | `external-link` |
 
-### Aspect Ratios
+### Root
 
-| Value | Ratio |
-|-------|-------|
-| square | 1:1 |
-| landscape | 16:10 |
-| portrait | 3:4 |
-| video | 16:9 |
+| Property | Value |
+|----------|-------|
+| display | `grid` |
+| gap | `var(--pug-space-stack-sm)` |
+| margin | `0` |
+
+#### Root Compact (`[data-presentation="compact"]`)
+
+| Property | Value |
+|----------|-------|
+| gap | `0` |
 
 ### Frame
 
-- Border: `0.0625rem solid --pug-color-border-subtle`
-- Border-radius: `calc(--pug-radius-surface - 0.125rem)`
-- Background: radial gradient with accent-base at 18% from top-left, over
-  panel background at 94%
+| Property | Value |
+|----------|-------|
+| position | `relative` |
+| overflow | `hidden` |
+| border | `0.0625rem solid var(--pug-color-border-subtle)` |
+| border-radius | `calc(var(--pug-radius-surface) - 0.125rem)` |
+| background | `radial-gradient(circle at top left, color-mix(in srgb, var(--pug-color-accent-base) 18%, transparent), transparent 38%), color-mix(in srgb, var(--pug-color-background-panel) 94%, transparent)` |
+
+### Aspect Ratios
+
+| data-aspect-ratio | CSS aspect-ratio |
+|-------------------|------------------|
+| `square` | `1 / 1` |
+| `landscape` | `16 / 10` |
+| `portrait` | `3 / 4` |
+| `video` | `16 / 9` |
+
+### Placeholder
+
+| Property | Value |
+|----------|-------|
+| display | `grid` |
+| place-items | `center` |
+| width | `100%` |
+| height | `100%` |
+| padding | `var(--pug-space-panel-y) var(--pug-space-panel-x)` |
+| icon font-size | `1.75rem` |
+| icon color | `var(--pug-color-text-secondary)` |
+
+### State Display
+
+| Property | Value |
+|----------|-------|
+| display | `grid` |
+| gap | `var(--pug-space-stack-sm)` |
+| align-content | `end` |
+| justify-items | `start` |
+| padding | `var(--pug-space-panel-y) var(--pug-space-panel-x)` |
+| text-align | `left` |
+| background | `linear-gradient(180deg, transparent, color-mix(in srgb, var(--pug-color-background-panel) 46%, transparent)), color-mix(in srgb, var(--pug-color-background-surface) 78%, transparent)` |
+| width | `100%` |
+| height | `100%` |
+
+#### State Display Compact
+
+| Property | Value |
+|----------|-------|
+| align-content | `center` |
+| padding | `0.875rem` |
+| strong font-size | `0.875rem` |
+| strong line-height | `1.35` |
+
+### State Text
+
+| Element | Property | Value |
+|---------|----------|-------|
+| `p` | color | `var(--pug-color-text-secondary)` |
+| `p` | font-size | `0.8125rem` |
+| `p` | line-height | `1.5` |
+| `strong`, `p` | margin | `0` |
+
+### Caption
+
+| Property | Value |
+|----------|-------|
+| display | `grid` |
+| gap | `0.125rem` |
+
+#### Caption Title
+
+| Property | Value |
+|----------|-------|
+| font-size | `0.875rem` |
+| line-height | `1.35` |
+
+#### Caption Meta
+
+| Property | Value |
+|----------|-------|
+| color | `var(--pug-color-text-secondary)` |
+| font-size | `0.8125rem` |
+| line-height | `1.5` |
 
 ### Badge
 
-- Position: absolute, top-right (0.625rem inset; 0.5rem in compact)
-- Min-height: 1.5rem
-- Uppercase, 0.6875rem, weight 600, letter-spacing 0.04em
-- Backdrop-filter: blur(1rem)
+| Property | Value |
+|----------|-------|
+| position | `absolute` |
+| top | `0.625rem` (default) / `0.5rem` (compact) |
+| right | `0.625rem` (default) / `0.5rem` (compact) |
+| display | `inline-flex` |
+| align-items | `center` |
+| justify-content | `center` |
+| min-height | `1.5rem` |
+| padding | `0 0.625rem` |
+| border-radius | `var(--pug-radius-control)` |
+| backdrop-filter | `blur(1rem)` |
+| background | `color-mix(in srgb, var(--pug-color-background-surface) 74%, transparent)` |
+| color | `var(--pug-color-text-primary)` |
+| font-size | `0.6875rem` |
+| font-weight | `600` |
+| letter-spacing | `0.04em` |
+| text-transform | `uppercase` |
 
 ### Play Indicator
 
-- Position: absolute, bottom-left (0.625rem inset)
-- 2rem x 2rem circle with backdrop blur
-- Shows for audio (music icon) and video (play icon) kinds
+| Property | Value |
+|----------|-------|
+| position | `absolute` |
+| left | `0.625rem` |
+| bottom | `0.625rem` |
+| display | `inline-flex` |
+| align-items | `center` |
+| justify-content | `center` |
+| width | `2rem` |
+| height | `2rem` |
+| border-radius | `var(--pug-radius-control)` |
+| backdrop-filter | `blur(1rem)` |
+| background | `color-mix(in srgb, var(--pug-color-background-elevated) 78%, transparent)` |
+| color | `var(--pug-color-text-primary)` |
+| font-size | `0.9375rem` |
 
-### Caption (non-compact only)
+### Light Theme Overrides
 
-- Title: 0.875rem, weight bold, line-height 1.35
-- Meta: secondary color, 0.8125rem, line-height 1.5
-
-### Compact Mode
-
-- Caption hidden entirely
-- State message (`<p>`) hidden
-- State content vertically centered with smaller padding
-- State title: 0.875rem, line-height 1.35
+None.
 
 ## 10. Composition
 

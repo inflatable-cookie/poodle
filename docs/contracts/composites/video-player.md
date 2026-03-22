@@ -140,16 +140,150 @@ No custom events dispatched. All interaction is internal (play/pause/seek/volume
 
 Standalone component. Does not compose other Pug primitives.
 
-## 8. Token Usage
+## 8. Token Usage And Precise CSS
 
-| Property | Token |
+Note: The video player renders against a black background regardless of theme.
+Most colors use hardcoded `rgba(255,255,255,...)` values intentionally.
+
+### Root
+
+| Property | Value |
 |----------|-------|
-| Root radius | `radius-surface` |
-| Progress fill color | `color-accent-base` |
-| Control button radius | `radius-control` |
-| Time font | `typography-code-family` |
+| position | `relative` |
+| overflow | `hidden` |
+| border-radius | `var(--pug-radius-surface)` |
+| background | `#000` |
+| cursor | `pointer` |
+| aspect-ratio | set via inline style from `aspectRatio` prop |
 
-Note: Many colors in the video player use hardcoded `rgba(255,255,255,...)` values rather than tokens, as the video player always renders against a black background regardless of theme.
+### Video Element
+
+| Property | Value |
+|----------|-------|
+| display | `block` |
+| width | `100%` |
+| height | `100%` |
+| object-fit | `contain` |
+
+### Big Play Button
+
+| Property | Value |
+|----------|-------|
+| position | `absolute` |
+| top | `50%` |
+| left | `50%` |
+| transform | `translate(-50%, -50%)` |
+| width | `4rem` |
+| height | `4rem` |
+| padding | `0` |
+| border | `0` |
+| background | `transparent` |
+| color | `rgba(255, 255, 255, 0.9)` |
+| transition | `transform 0.2s ease` |
+| `:hover` transform | `translate(-50%, -50%) scale(1.1)` |
+| SVG circle | cx=24, cy=24, r=22, stroke-width=2, opacity=0.6 |
+| SVG play path | `M18 14l16 10-16 10V14z` |
+
+### Controls Overlay
+
+| Property | Value |
+|----------|-------|
+| position | `absolute` |
+| bottom | `0` |
+| left | `0` |
+| right | `0` |
+| background | `linear-gradient(transparent, rgba(0, 0, 0, 0.7))` |
+| padding | `1.5rem 0.5rem 0.375rem` |
+| opacity | `0` (default), `1` (`.visible`) |
+| transition | `opacity 0.3s ease` |
+| cursor | `default` |
+
+### Progress Bar
+
+| Property | Value |
+|----------|-------|
+| position | `relative` |
+| height | `0.25rem` |
+| margin-bottom | `0.375rem` |
+| background | `rgba(255, 255, 255, 0.2)` |
+| border-radius | `999rem` |
+| overflow | `hidden` |
+
+### Progress Fill
+
+| Property | Value |
+|----------|-------|
+| height | `100%` |
+| background | `var(--pug-color-accent-base, #6366f1)` |
+| border-radius | `999rem` |
+| transition | `width 0.1s linear` |
+
+### Seek Slider (transparent overlay)
+
+| Property | Value |
+|----------|-------|
+| position | `absolute` |
+| top | `-0.375rem` |
+| left | `0` |
+| width | `100%` |
+| height | `1rem` |
+| opacity | `0` |
+| margin | `0` |
+
+### Control Bar
+
+| Property | Value |
+|----------|-------|
+| display | `flex` |
+| align-items | `center` |
+| justify-content | `space-between` |
+
+### Bar Left / Bar Right
+
+| Property | Value |
+|----------|-------|
+| display | `flex` |
+| align-items | `center` |
+| gap | `0.375rem` |
+
+### Control Button
+
+| Property | Value |
+|----------|-------|
+| display | `inline-flex` |
+| align-items | `center` |
+| justify-content | `center` |
+| width | `1.75rem` |
+| height | `1.75rem` |
+| padding | `0` |
+| border | `0` |
+| border-radius | `var(--pug-radius-control)` |
+| background | `transparent` |
+| color | `rgba(255, 255, 255, 0.9)` |
+| transition | `background 0.15s ease` |
+| `:hover` background | `rgba(255, 255, 255, 0.15)` |
+| SVG icon size | `0.875rem x 0.875rem` |
+
+### Volume Slider
+
+| Property | Value |
+|----------|-------|
+| width | `3.5rem` |
+| height | `0.25rem` |
+| accent-color | `white` |
+
+### Time Display
+
+| Property | Value |
+|----------|-------|
+| font-family | `var(--pug-typography-code-family)` |
+| font-size | `0.6875rem` |
+| color | `rgba(255, 255, 255, 0.8)` |
+| white-space | `nowrap` |
+
+### Light Theme Overrides
+
+None (video player uses hardcoded dark-on-black colors).
 
 ## 9. Svelte Notes
 

@@ -155,6 +155,14 @@ Updated: 2026-03-21
 
 ## 8. Token Usage — Exact Values
 
+### Data Attributes
+
+| Attribute | Value | Notes |
+|-----------|-------|-------|
+| `data-editing` | `{isEditing}` | reflects current editing state |
+| `data-disabled` | `{isDisabled}` | reflects disabled state |
+| `data-variant` | `{variant}` | `"default"` or `"flush"` |
+
 ### Root `.editable-label`
 
 | Property | Value |

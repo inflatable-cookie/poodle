@@ -147,6 +147,84 @@ No component-owned events.
 | Fields Grid | `space-stack-lg`, `space-inline-md` | grid gap |
 | Actions | via FormActions primitive | button layout |
 
+### Token Usage — Exact CSS Values
+
+#### `.form-layout` (Root)
+
+| Property | Value |
+|----------|-------|
+| `display` | `flex` |
+| `flex-direction` | `column` |
+| `gap` | `var(--pug-space-stack-lg)` |
+| `container-type` | `inline-size` |
+
+#### `.form-layout__description`
+
+| Property | Value |
+|----------|-------|
+| `margin` | `0` |
+| `color` | `var(--pug-color-text-secondary)` |
+| `font-size` | `var(--pug-typography-body-size, 0.875rem)` |
+| `line-height` | `var(--pug-typography-body-lineHeight, 1.5)` |
+
+#### `.form-layout__field-errors`
+
+| Property | Value |
+|----------|-------|
+| `padding` | `var(--pug-space-panel-y, 0.75rem) var(--pug-space-panel-x, 1rem)` |
+| `border-radius` | `var(--pug-radius-surface, 0.5rem)` |
+| `background` | `color-mix(in srgb, var(--pug-color-status-danger) 8%, transparent)` |
+| `border` | `0.0625rem solid color-mix(in srgb, var(--pug-color-status-danger) 40%, transparent)` |
+| `font-size` | `var(--pug-typography-label-size, 0.75rem)` |
+
+#### `.form-layout__field-errors p`
+
+| Property | Value |
+|----------|-------|
+| `margin` | `0 0 0.25rem` |
+| `font-weight` | `600` |
+
+#### `.form-layout__field-errors ul`
+
+| Property | Value |
+|----------|-------|
+| `margin` | `0` |
+| `padding-left` | `1.25rem` |
+
+#### `.form-layout__field-errors li`
+
+| Property | Value |
+|----------|-------|
+| `margin-bottom` | `0.125rem` |
+
+#### `.form-layout__grid`
+
+| Property | Value |
+|----------|-------|
+| `display` | `grid` |
+| `grid-template-columns` | `repeat(var(--fl-columns, 6), 1fr)` |
+| `gap` | `var(--pug-space-stack-lg) var(--pug-space-inline-md)` |
+
+The `--fl-columns` CSS variable is set inline from the `columns` prop.
+
+### Container Query Breakpoints
+
+Uses `container-type: inline-size` on the root element (not viewport media queries).
+
+#### `@container (max-width: 600px)`
+
+| Selector | Property | Value |
+|----------|----------|-------|
+| `.form-layout__grid` | `grid-template-columns` | `repeat(2, 1fr)` |
+| `.form-layout__grid :global([style*="grid-column"])` | `grid-column` | `span 1 !important` |
+| `.form-layout__grid :global([style*="span 6"])`, `:global([style*="span -1"])` | `grid-column` | `1 / -1 !important` |
+
+#### `@container (max-width: 480px)`
+
+| Selector | Property | Value |
+|----------|----------|-------|
+| `.form-layout__grid` | `grid-template-columns` | `1fr` |
+
 ## 9. Svelte Notes
 
 - reuses Callout primitive for error/success banners

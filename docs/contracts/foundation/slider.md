@@ -90,7 +90,7 @@ Updated: 2026-03-15
 - `aria-valuemax`: from max prop
 - `aria-valuenow`: from value prop
 - `aria-valuetext`: from valueText prop when provided
-- `aria-orientation`: set to match orientation prop
+- `aria-orientation`: NOT currently set on the range input; orientation is conveyed via `data-orientation` on the root element only
 - `disabled`: native disabled attribute when isDisabled
 - Labeling rules: visible label or programmatic ariaLabel required
 

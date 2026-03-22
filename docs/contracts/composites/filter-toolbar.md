@@ -139,6 +139,101 @@ No component-owned events beyond child control behavior and collapse toggle.
 | Secondary Actions | `space-inline-sm` | trailing controls gap |
 | Sticky posture | `elevation-surface` | persistent browse chrome |
 
+### Token Usage — Exact CSS Values
+
+#### `.filter-toolbar` (Root)
+
+| Property | Value |
+|----------|-------|
+| `display` | `grid` |
+| `gap` | `var(--pug-space-stack-sm)` |
+| `padding` | `var(--pug-space-panel-y) var(--pug-space-panel-x)` |
+| `border` | `0.0625rem solid var(--pug-color-border-subtle)` |
+| `border-radius` | `var(--pug-radius-surface)` |
+| `background` | `color-mix(in srgb, var(--pug-color-background-elevated) 92%, transparent)` |
+
+#### `.filter-toolbar[data-sticky="true"]`
+
+| Property | Value |
+|----------|-------|
+| `box-shadow` | `var(--pug-elevation-surface)` |
+
+#### `.filter-toolbar__header`
+
+| Property | Value |
+|----------|-------|
+| `display` | `flex` |
+| `align-items` | `center` |
+| `gap` | `var(--pug-space-inline-sm)` |
+
+#### `.filter-toolbar[data-collapsed="true"] .filter-toolbar__header`
+
+| Property | Value |
+|----------|-------|
+| `cursor` | `pointer` |
+
+#### `.filter-toolbar__summary`
+
+| Property | Value |
+|----------|-------|
+| `margin` | `0` |
+| `flex` | `1` |
+| `color` | `var(--pug-color-text-secondary)` |
+| `font-size` | `var(--pug-typography-label-size, 0.75rem)` |
+| `line-height` | `var(--pug-typography-label-lineHeight, 1.4)` |
+
+#### `.filter-toolbar__actions`
+
+| Property | Value |
+|----------|-------|
+| `display` | `flex` |
+| `align-items` | `center` |
+| `gap` | `var(--pug-space-inline-xs, 0.25rem)` |
+| `margin-left` | `auto` |
+
+#### `.filter-toolbar__controls`
+
+| Property | Value |
+|----------|-------|
+| `display` | `grid` |
+| `grid-template-columns` | `repeat(var(--ft-columns, 4), minmax(var(--ft-min-width, 10rem), 1fr))` |
+| `gap` | `var(--pug-space-inline-sm)` |
+| `align-items` | `end` |
+
+The `--ft-columns` and `--ft-min-width` CSS variables are set inline from the `columns` and `minItemWidth` props.
+
+#### `.filter-toolbar__secondary`
+
+| Property | Value |
+|----------|-------|
+| `display` | `flex` |
+| `flex-wrap` | `wrap` |
+| `gap` | `var(--pug-space-inline-sm)` |
+| `align-items` | `center` |
+
+### Responsive Breakpoint: `max-width: 960px`
+
+#### `.filter-toolbar__controls`
+
+| Property | Value |
+|----------|-------|
+| `grid-template-columns` | `repeat(2, minmax(var(--ft-min-width, 10rem), 1fr))` |
+
+### Responsive Breakpoint: `max-width: 640px`
+
+#### `.filter-toolbar__controls`
+
+| Property | Value |
+|----------|-------|
+| `grid-template-columns` | `1fr` |
+
+### Data Attributes Used for CSS Selectors
+
+| Attribute | Element | Purpose |
+|-----------|---------|---------|
+| `data-sticky` | `.filter-toolbar` root | enables elevation shadow for sticky positioning |
+| `data-collapsed` | `.filter-toolbar` root | controls collapsed state styling (header cursor) |
+
 ## 9. Svelte Notes
 
 - uses CollapseToggle primitive for collapse affordance

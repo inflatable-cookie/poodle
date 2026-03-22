@@ -168,6 +168,221 @@ the table:
 | Hover row | `accent-base` at 5% | hover feedback |
 | Sort/action buttons | `border-width-focus`, `accent-focusRing` | focus ring |
 
+### Token Usage — Exact CSS Values
+
+#### `.data-table` (Root)
+
+| Property | Value |
+|----------|-------|
+| `overflow` | `auto` |
+| `border` | `0.0625rem solid var(--pug-color-border-subtle)` |
+| `border-radius` | `var(--pug-radius-surface)` |
+| `background` | `var(--pug-color-background-panel)` |
+
+#### `.data-table__toolbar`
+
+| Property | Value |
+|----------|-------|
+| `display` | `flex` |
+| `align-items` | `center` |
+| `justify-content` | `flex-end` |
+| `gap` | `0.5rem` |
+| `padding` | `0.5rem 0.75rem` |
+| `border-bottom` | `0.0625rem solid var(--pug-color-border-subtle)` |
+| `background` | `color-mix(in srgb, var(--pug-color-background-elevated) 92%, transparent)` |
+
+#### `.data-table__toolbar-btn`
+
+| Property | Value |
+|----------|-------|
+| `display` | `inline-flex` |
+| `align-items` | `center` |
+| `gap` | `0.375rem` |
+| `padding` | `0.25rem 0.625rem` |
+| `border` | `0.0625rem solid var(--pug-color-border-default)` |
+| `border-radius` | `var(--pug-radius-control)` |
+| `background` | `var(--pug-color-background-surface)` |
+| `color` | `var(--pug-color-text-secondary)` |
+| `cursor` | `pointer` |
+| `font` | `inherit` |
+| `font-size` | `var(--pug-typography-label-size)` |
+| `line-height` | `1` |
+| `transition` | `background var(--pug-motion-duration-interaction) var(--pug-motion-easing-standard)` |
+
+#### `.data-table__toolbar-btn:hover`
+
+| Property | Value |
+|----------|-------|
+| `background` | `color-mix(in srgb, var(--pug-color-background-elevated) 72%, transparent)` |
+
+#### `.data-table__toolbar-btn:focus-visible`
+
+| Property | Value |
+|----------|-------|
+| `outline` | `var(--pug-border-width-focus) solid var(--pug-color-accent-focusRing)` |
+| `outline-offset` | `0.125rem` |
+
+#### `.data-table__toolbar-btn :global(.pug-icon)`
+
+| Property | Value |
+|----------|-------|
+| `width` | `0.875rem` |
+| `height` | `0.875rem` |
+
+#### `.data-table__col-menu`
+
+| Property | Value |
+|----------|-------|
+| `display` | `flex` |
+| `flex-direction` | `column` |
+
+#### `.data-table__col-menu-item`
+
+| Property | Value |
+|----------|-------|
+| `display` | `flex` |
+| `align-items` | `center` |
+| `gap` | `0.5rem` |
+| `padding` | `0.375rem 0.5rem` |
+| `border-radius` | `calc(var(--pug-radius-control) - 0.125rem)` |
+| `cursor` | `pointer` |
+| `font-size` | `var(--pug-typography-label-size)` |
+| `color` | `var(--pug-color-text-primary)` |
+
+#### `.data-table__col-menu-item:hover`
+
+| Property | Value |
+|----------|-------|
+| `background` | `color-mix(in srgb, var(--pug-color-accent-base) 12%, transparent)` |
+
+#### `table`
+
+| Property | Value |
+|----------|-------|
+| `width` | `100%` |
+| `border-collapse` | `collapse` |
+
+#### `.data-table__caption` (Visually Hidden)
+
+| Property | Value |
+|----------|-------|
+| `position` | `absolute` |
+| `width` | `0.0625rem` |
+| `height` | `0.0625rem` |
+| `padding` | `0` |
+| `margin` | `-0.0625rem` |
+| `overflow` | `hidden` |
+| `clip` | `rect(0, 0, 0, 0)` |
+| `white-space` | `nowrap` |
+| `border` | `0` |
+
+#### `th`, `td`
+
+| Property | Value |
+|----------|-------|
+| `padding` | `var(--pug-space-panel-y) var(--pug-space-panel-x)` |
+| `border-bottom` | `0.0625rem solid var(--pug-color-border-subtle)` |
+| `text-align` | `left` |
+| `vertical-align` | `middle` |
+| `font-size` | `var(--pug-typography-label-size)` |
+
+#### `thead th`
+
+| Property | Value |
+|----------|-------|
+| `color` | `var(--pug-color-text-secondary)` |
+| `font-family` | `var(--pug-typography-label-family)` |
+| `font-size` | `var(--pug-typography-label-size)` |
+| `font-weight` | `var(--pug-typography-label-weight)` |
+| `line-height` | `var(--pug-typography-label-lineHeight)` |
+| `background` | `color-mix(in srgb, var(--pug-color-background-elevated) 92%, transparent)` |
+
+#### `tbody tr.selected`
+
+| Property | Value |
+|----------|-------|
+| `background` | `color-mix(in srgb, var(--pug-color-accent-base) 8%, transparent)` |
+
+#### `tbody tr:hover`
+
+| Property | Value |
+|----------|-------|
+| `background` | `color-mix(in srgb, var(--pug-color-accent-base) 5%, transparent)` |
+
+#### `.data-table__selection`
+
+| Property | Value |
+|----------|-------|
+| `width` | `3.25rem` |
+
+#### `.data-table__sort`, `.data-table__actions button`
+
+| Property | Value |
+|----------|-------|
+| `display` | `inline-flex` |
+| `align-items` | `center` |
+| `gap` | `var(--pug-space-inline-sm)` |
+| `min-height` | `var(--pug-size-control-height)` |
+| `padding` | `0` |
+| `border` | `0` |
+| `background` | `transparent` |
+| `color` | `inherit` |
+| `cursor` | `pointer` |
+| `font` | `inherit` |
+
+#### `.data-table__sort:focus-visible`, `.data-table__actions button:focus-visible`
+
+| Property | Value |
+|----------|-------|
+| `outline` | `var(--pug-border-width-focus) solid var(--pug-color-accent-focusRing)` |
+| `outline-offset` | `0.125rem` |
+| `border-radius` | `var(--pug-radius-control)` |
+
+#### `.data-table__cell`
+
+| Property | Value |
+|----------|-------|
+| `display` | `grid` |
+| `gap` | `0.25rem` |
+
+#### `.data-table__cell small`
+
+| Property | Value |
+|----------|-------|
+| `color` | `var(--pug-color-text-secondary)` |
+| `font-family` | `var(--pug-typography-body-family)` |
+| `font-size` | `var(--pug-typography-body-size)` |
+| `line-height` | `var(--pug-typography-body-lineHeight)` |
+
+#### `.end-align`
+
+| Property | Value |
+|----------|-------|
+| `text-align` | `right` |
+
+#### `.data-table__actions-header`, `.data-table__actions`
+
+| Property | Value |
+|----------|-------|
+| `width` | `7.5rem` |
+| `text-align` | `right` |
+
+#### `.data-table__empty`
+
+| Property | Value |
+|----------|-------|
+| `color` | `var(--pug-color-text-secondary)` |
+| `font-family` | `var(--pug-typography-body-family)` |
+| `font-size` | `var(--pug-typography-body-size)` |
+| `line-height` | `var(--pug-typography-body-lineHeight)` |
+
+### CSS Classes Used for State Selectors
+
+| Class | Element | Purpose |
+|-------|---------|---------|
+| `.selected` | `tbody tr` | selected row highlight |
+| `.end-align` | `th`, `td` | right-aligned columns |
+
 ## 11. Specimen Definitions
 
 ### With Sorting, Column Visibility, And Export

@@ -117,6 +117,74 @@ No component-owned events beyond child action behavior.
 | Section Body | spacing and surface roles | content container |
 | Actions | action spacing roles | control cluster |
 
+### Token Usage — Exact CSS Values
+
+#### `.detail-section` (Root)
+
+| Property | Value |
+|----------|-------|
+| `display` | `grid` |
+| `gap` | `calc(var(--pug-space-stack-md) + 0.125rem)` |
+| `padding-top` | `calc(var(--pug-space-stack-md) + 0.125rem)` |
+
+#### `.detail-section[data-separated="true"]`
+
+| Property | Value |
+|----------|-------|
+| `border-top` | `0` |
+
+#### `.detail-section__header`
+
+| Property | Value |
+|----------|-------|
+| `display` | `flex` |
+| `flex-wrap` | `wrap` |
+| `justify-content` | `space-between` |
+| `gap` | `var(--pug-space-inline-md)` |
+| `align-items` | `start` |
+
+#### `.detail-section__title-block`
+
+| Property | Value |
+|----------|-------|
+| `display` | `grid` |
+| `gap` | `0.375rem` |
+
+#### `.detail-section__title`, `.detail-section__description`
+
+| Property | Value |
+|----------|-------|
+| `margin` | `0` |
+
+#### `.detail-section__title`
+
+| Property | Value |
+|----------|-------|
+| `font-family` | `var(--pug-typography-heading-family)` |
+| `font-size` | `1.125rem` |
+| `line-height` | `1.2` |
+
+#### `.detail-section__description`
+
+| Property | Value |
+|----------|-------|
+| `color` | `var(--pug-color-text-secondary)` |
+| `font-size` | `var(--pug-typography-body-size)` |
+| `line-height` | `var(--pug-typography-body-lineHeight)` |
+
+#### `.detail-section__body`
+
+| Property | Value |
+|----------|-------|
+| `display` | `grid` |
+| `gap` | `var(--pug-space-stack-sm)` |
+
+### Data Attributes Used for CSS Selectors
+
+| Attribute | Element | Purpose |
+|-----------|---------|---------|
+| `data-separated` | `.detail-section` root `<section>` | controls border-top separation styling |
+
 ## 9. Svelte Notes
 
 - expected substrate: `Stack`, `Inline`, `Separator`, and heading semantics

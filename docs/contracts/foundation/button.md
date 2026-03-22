@@ -276,7 +276,10 @@ Both adjustments apply independently.
 ## 9. Svelte Notes
 
 - Uses CSS custom properties (`--pug-button-fill`, etc.) for the variant system
-- `data-variant`, `data-tone`, `data-size`, `data-icon-only`, `data-loading` data attributes
+- `data-variant`, `data-tone`, `data-size`, `data-icon-only`, `data-loading`, `data-has-leading`, `data-has-trailing` data attributes
+- `data-tone` only emits when tone is not `"default"` (omitted otherwise)
+- `data-loading` always emits (even as `"false"`)
+- `data-has-leading` and `data-has-trailing` emit presence-only (value is truthy or attribute is omitted)
 - `isUnavailable = isDisabled || isLoading` — both disable the native button
 - Icon component rendered at size="sm" for leadingIcon/trailingIcon props
 - Supports named slots `leading` and `trailing` for custom icon content

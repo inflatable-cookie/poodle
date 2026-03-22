@@ -118,6 +118,99 @@ No component-owned events beyond child action behavior.
 | Message | subdued text roles | explanation |
 | Actions | action spacing roles | remediation controls |
 
+### Token Usage — Exact CSS Values
+
+#### `.empty-state` (Root)
+
+| Property | Value |
+|----------|-------|
+| `display` | `grid` |
+| `justify-items` | `center` |
+| `text-align` | `center` |
+| `gap` | `var(--pug-space-stack-md)` |
+| `padding` | `calc(var(--pug-space-panel-y) * 1.5) var(--pug-space-panel-x)` |
+| `border` | `0.0625rem dashed var(--pug-color-border-default)` |
+| `border-radius` | `calc(var(--pug-radius-surface) - 0.125rem)` |
+| `background` | `color-mix(in srgb, var(--pug-color-background-surface) 76%, transparent)` |
+
+#### `.empty-state[data-variant="search"]`
+
+| Property | Value |
+|----------|-------|
+| `background` | `color-mix(in srgb, var(--pug-color-accent-base) 7%, transparent)` |
+
+#### `.empty-state[data-variant="firstRun"]`
+
+| Property | Value |
+|----------|-------|
+| `background` | `color-mix(in srgb, var(--pug-color-status-success) 7%, transparent)` |
+
+#### `.empty-state__visual`
+
+| Property | Value |
+|----------|-------|
+| `display` | `inline-flex` |
+| `align-items` | `center` |
+| `justify-content` | `center` |
+| `width` | `2.25rem` |
+| `height` | `2.25rem` |
+| `border-radius` | `999rem` |
+| `background` | `color-mix(in srgb, var(--pug-color-background-panel) 90%, transparent)` |
+| `color` | `var(--pug-color-text-secondary)` |
+| `font-size` | `1.125rem` |
+| `font-weight` | `600` |
+
+#### `.empty-state__copy`
+
+| Property | Value |
+|----------|-------|
+| `display` | `grid` |
+| `gap` | `0.375rem` |
+| `max-width` | `24rem` |
+
+#### `.empty-state__copy h3`, `.empty-state__copy p`
+
+| Property | Value |
+|----------|-------|
+| `margin` | `0` |
+
+#### `.empty-state__copy h3`
+
+| Property | Value |
+|----------|-------|
+| `font-size` | `1.125rem` |
+| `line-height` | `1.2` |
+
+#### `.empty-state__copy p`
+
+| Property | Value |
+|----------|-------|
+| `color` | `var(--pug-color-text-secondary)` |
+| `font-size` | `0.8125rem` |
+| `line-height` | `1.5` |
+
+#### `.empty-state__actions`
+
+| Property | Value |
+|----------|-------|
+| `display` | `flex` |
+| `flex-wrap` | `wrap` |
+| `gap` | `var(--pug-space-inline-sm)` |
+
+### Variant Icons
+
+| Variant | Icon |
+|---------|------|
+| `neutral` | `inbox` |
+| `search` | `search` |
+| `firstRun` | `plus` |
+
+### Data Attributes Used for CSS Selectors
+
+| Attribute | Element | Purpose |
+|-----------|---------|---------|
+| `data-variant` | `.empty-state` root `<section>` | controls variant-specific background color |
+
 ## 9. Svelte Notes
 
 - expected substrate: `Stack`, `Inline`, icon primitives, and button family

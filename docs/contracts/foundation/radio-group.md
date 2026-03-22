@@ -98,7 +98,7 @@ Updated: 2026-03-15
 - `aria-label`: from ariaLabel prop on the root; required when no visible group
   label exists
 - `aria-describedby`: from describedBy prop on the root
-- `aria-orientation`: set to match the orientation prop
+- `aria-orientation`: NOT currently set on the radiogroup element; orientation is conveyed via `data-orientation` attribute only
 - Each radio input: native `<input type="radio">` with shared `name` attribute
 - Per-option `disabled`: native disabled attribute
 - Labeling rules: group must have an accessible name; each option label is

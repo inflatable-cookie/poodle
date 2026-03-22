@@ -164,23 +164,94 @@ No internal state. PickerShell is a layout container.
   form action bars
 - resizing rules: shell stretches to fill container; popover variant caps width
 
-## 10. Token Usage
+## 10. Token Usage And Precise CSS
 
-| Part | Token | Purpose |
-|------|-------|---------|
-| Root | `--pug-color-border-subtle` | container border |
-| Root | `--pug-radius-surface` | corner radius |
-| Root | `--pug-color-background-panel` | container background (94% alpha mix) |
-| Root (popover) | `--pug-elevation-overlay` | popover shadow |
-| Root (modal) | `--pug-elevation-dialog` | modal shadow |
-| Root (modal) | `--pug-color-background-elevated` | elevated background (96% alpha mix) |
-| Header | `--pug-space-inline-md` | gap between title and meta |
-| Title | (none, uses 1.25rem font-size) | heading size |
-| Description/Meta | `--pug-color-text-secondary` | subdued text color |
-| Meta | `--pug-space-inline-sm` | gap between count items |
-| State area | `--pug-color-background-surface` | state fallback background (86% alpha mix) |
-| State area | `--pug-color-border-subtle` | state area border |
-| State area | `--pug-space-stack-sm` | gap within state content |
+### Data Attributes
+
+| Attribute | Element | Values |
+|-----------|---------|--------|
+| `data-variant` | root `<section>` | `"inline"`, `"popover"`, `"modal"` |
+| `data-state` | root `<section>` | `"ready"`, `"empty"`, `"loading"`, `"error"`, `"no-results"` |
+
+### Root
+
+| Property | Value |
+|----------|-------|
+| display | `grid` |
+| gap | `var(--pug-space-stack-md)` |
+| padding | `var(--pug-space-panel-y) var(--pug-space-panel-x)` |
+| border | `0.0625rem solid var(--pug-color-border-subtle)` |
+| border-radius | `var(--pug-radius-surface)` |
+| background | `color-mix(in srgb, var(--pug-color-background-panel) 94%, transparent)` |
+
+#### Variant: Popover (`[data-variant="popover"]`)
+
+| Property | Value |
+|----------|-------|
+| max-width | `30rem` |
+| box-shadow | `var(--pug-elevation-overlay)` |
+
+#### Variant: Modal (`[data-variant="modal"]`)
+
+| Property | Value |
+|----------|-------|
+| box-shadow | `var(--pug-elevation-dialog)` |
+| background | `color-mix(in srgb, var(--pug-color-background-elevated) 96%, transparent)` |
+
+### Header
+
+| Property | Value |
+|----------|-------|
+| display | `flex` |
+| flex-wrap | `wrap` |
+| justify-content | `space-between` |
+| gap | `var(--pug-space-inline-md)` |
+
+### Title (h3)
+
+| Property | Value |
+|----------|-------|
+| margin | `0` |
+| font-size | `1.25rem` |
+| line-height | `1.2` |
+
+### Description, Meta, State Text, Status
+
+| Property | Value |
+|----------|-------|
+| color | `var(--pug-color-text-secondary)` |
+| font-size | `0.8125rem` |
+| line-height | `1.5` |
+
+### Status
+
+| Property | Value |
+|----------|-------|
+| margin | `0` |
+
+### Meta
+
+| Property | Value |
+|----------|-------|
+| display | `flex` |
+| flex-wrap | `wrap` |
+| gap | `var(--pug-space-inline-sm)` |
+| align-items | `baseline` |
+
+### State Area
+
+| Property | Value |
+|----------|-------|
+| display | `grid` |
+| gap | `var(--pug-space-stack-sm)` |
+| padding | `calc(var(--pug-space-panel-y) * 1.5) var(--pug-space-panel-x)` |
+| border | `0.0625rem solid var(--pug-color-border-subtle)` |
+| border-radius | `var(--pug-radius-surface)` |
+| background | `color-mix(in srgb, var(--pug-color-background-surface) 86%, transparent)` |
+
+### Light Theme Overrides
+
+None.
 
 ## 11. Svelte Notes
 

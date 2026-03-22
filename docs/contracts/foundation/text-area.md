@@ -84,7 +84,7 @@ Updated: 2026-03-15
 - `aria-label`: from ariaLabel prop; required when no external label exists
 - `aria-describedby`: from describedBy prop
 - `aria-invalid`: `"true"` when validationState is `"invalid"`
-- `aria-readonly`: set when isReadOnly
+- `readonly`: native readonly attribute set when isReadOnly (note: `aria-readonly` is NOT explicitly set; the native `readonly` attribute is used instead)
 - `disabled`: native disabled attribute when isDisabled
 - `rows`: from rows prop, sets initial visible height
 - Labeling rules: placeholder text never counts as the accessible name
@@ -206,7 +206,7 @@ Updated: 2026-03-15
   layout
 - CSS custom properties (`--pug-text-area-*`) enable treatment-level theming;
   same treatment token chain as TextInput but with `text-area` prefix
-- `data-validation` data attribute drives validation border-color via CSS
+- `data-validation-state` data attribute drives validation border-color via CSS
   attribute selectors
 - Controlled mode: when `value` prop is non-null, the textarea value is bound
   to it; `valueChange` must be handled to update

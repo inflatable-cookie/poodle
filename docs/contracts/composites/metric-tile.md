@@ -117,22 +117,91 @@ derived from `sparklineData` via a pure function.
 - child expectations: none (self-contained)
 - resizing rules: tile stretches horizontally, value text truncates if needed
 
-## 8. Token Usage
+## 8. Token Usage And Precise CSS
 
-| Part | Token | Purpose |
-|------|-------|---------|
-| Root | `--pug-color-background-surface` | tile background fill (60% alpha mix) |
-| Root | `--pug-radius-surface` | corner radius |
-| Root (light) | `--pug-treatment-surface-fill` | light theme override background |
-| Label | `--pug-color-text-secondary` | subdued label color |
-| Label | `--pug-typography-code-family` | monospace label styling |
-| Value | `--pug-color-text-primary` (inherited) | value emphasis |
-| Sparkline | `--pug-color-text-tertiary` | sparkline stroke color |
-| Trend (up) | `--pug-color-status-success` | positive trend color |
-| Trend (down) | `--pug-color-status-danger` | negative trend color |
-| Trend (flat) | `--pug-color-text-tertiary` | neutral trend color |
-| Trend (default) | `--pug-color-text-secondary` | base trend text color |
-| TrendArrow | (inherited) | inherits trend color |
+### Data Attributes
+
+| Attribute | Element | Values |
+|-----------|---------|--------|
+| `data-trend` | trend `<span>` | `"up"`, `"down"`, `"flat"` |
+
+### Root
+
+| Property | Value |
+|----------|-------|
+| display | `grid` |
+| gap | `0.375rem` |
+| padding | `0.875rem` |
+| border | `0.0625rem solid transparent` |
+| border-radius | `var(--pug-radius-surface)` |
+| background | `color-mix(in srgb, var(--pug-color-background-surface) 60%, transparent)` |
+
+### Label
+
+| Property | Value |
+|----------|-------|
+| color | `var(--pug-color-text-secondary)` |
+| font-family | `var(--pug-typography-code-family)` |
+| font-size | `0.75rem` |
+
+### Body
+
+| Property | Value |
+|----------|-------|
+| display | `flex` |
+| align-items | `center` |
+| gap | `0.625rem` |
+
+### Value
+
+| Property | Value |
+|----------|-------|
+| font-size | `1rem` |
+
+### Sparkline
+
+| Property | Value |
+|----------|-------|
+| width | `4rem` |
+| height | `1.5rem` |
+| color | `var(--pug-color-text-tertiary)` |
+| flex-shrink | `0` |
+| SVG viewBox | `0 0 64 24` |
+| SVG stroke-width | `1.5` |
+| SVG stroke-linecap | `round` |
+| SVG stroke-linejoin | `round` |
+
+### Trend
+
+| Property | Value |
+|----------|-------|
+| display | `inline-flex` |
+| align-items | `center` |
+| gap | `0.25rem` |
+| font-size | `0.75rem` |
+| font-family | `var(--pug-typography-code-family)` |
+| color | `var(--pug-color-text-secondary)` |
+
+#### Trend Colors By Data-Trend
+
+| data-trend | color |
+|------------|-------|
+| `up` | `var(--pug-color-status-success, #22c55e)` |
+| `down` | `var(--pug-color-status-danger, #ef4444)` |
+| `flat` | `var(--pug-color-text-tertiary)` |
+
+### Trend Arrow
+
+| Property | Value |
+|----------|-------|
+| font-size | `0.875rem` |
+| line-height | `1` |
+
+### Light Theme Overrides
+
+| Selector | Property | Value |
+|----------|----------|-------|
+| `:global([data-theme="light"]) .state-tile` | background | `var(--pug-treatment-surface-fill)` |
 
 ## 9. Svelte Notes
 

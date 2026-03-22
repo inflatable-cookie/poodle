@@ -41,7 +41,7 @@ Updated: 2026-03-15
 | `placement` | `OverlayPlacement` | `"bottom-start"` | no | placement hint |
 | `offset` | `number` | `8` | no | trigger gap in pixels, set as CSS custom property |
 | `dismissOnOutsideInteract` | `boolean` | `true` | no | outside dismissal |
-| `initialFocus` | `"first-focusable" \| "content"` | `"first-focusable"` | no | initial focus strategy |
+| `initialFocus` | `"first-focusable" \| "content" \| "none"` | `"first-focusable"` | no | initial focus strategy |
 | `ariaLabel` | `string \| null` | `null` | no | optional label when no internal heading exists |
 
 ### Type Definitions
@@ -91,10 +91,11 @@ Open/closed state and placement state are required.
 
 ### Semantics
 
-- Role: non-modal dialog, group, or descriptive overlay depending on content
-- Required attributes: trigger-to-content relationship and accessible naming
+- Trigger: `role="button"`, `tabindex="0"`, `aria-expanded` (true/false), `aria-controls` (surface id when open)
+- Surface: `role="dialog"`, `tabindex` set to `0` when `initialFocus="content"` or `-1` otherwise
+- Required attributes: trigger-to-content relationship via `aria-controls` and accessible naming
   when the content acts as a meaningful region
-- Optional attributes: description relation and heading association
+- Optional attributes: `aria-label` on surface, description relation and heading association
 - Labeling rules: if content is interactive or long-lived, it must have a
   stable accessible label
 

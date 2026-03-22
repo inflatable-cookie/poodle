@@ -118,7 +118,170 @@ Uses `CommandActionItem` and `DiscoveryState` from `ActionDiscoveryPanel`.
 - Grid rows: `auto auto auto minmax(0, 1fr)`
 - Responsive (<=45rem): width adjusts, header goes single-column, reduced padding
 
-## 9. Composition
+## 9. Token Usage — Exact CSS Values
+
+#### `.command-palette__overlay`
+
+| Property | Value |
+|----------|-------|
+| `position` | `fixed` |
+| `inset` | `0` |
+| `background` | `color-mix(in srgb, black 44%, transparent)` |
+| `backdrop-filter` | `blur(0.5rem)` |
+| `z-index` | `40` |
+
+#### `.command-palette` (Dialog)
+
+| Property | Value |
+|----------|-------|
+| `position` | `fixed` |
+| `top` | `50%` |
+| `left` | `50%` |
+| `display` | `grid` |
+| `grid-template-rows` | `auto auto auto minmax(0, 1fr)` |
+| `gap` | `var(--pug-space-stack-md)` |
+| `width` | `min(45rem, calc(100vw - 2rem))` |
+| `max-height` | `min(78vh, 52.5rem)` |
+| `min-height` | `0` |
+| `padding` | `var(--pug-space-panel-y) var(--pug-space-panel-x)` |
+| `border` | `0.0625rem solid color-mix(in srgb, var(--pug-color-border-default) 42%, transparent)` |
+| `border-radius` | `calc(var(--pug-radius-surface) + 0.125rem)` |
+| `background` | `color-mix(in srgb, var(--pug-color-background-elevated) 98%, transparent)` |
+| `box-shadow` | `var(--pug-elevation-dialog)` |
+| `overflow` | `hidden` |
+| `overscroll-behavior` | `contain` |
+| `transform` | `translate(-50%, -50%)` |
+| `z-index` | `41` |
+
+#### `.command-palette__header`
+
+| Property | Value |
+|----------|-------|
+| `display` | `grid` |
+| `grid-template-columns` | `minmax(0, 1fr) auto` |
+| `gap` | `var(--pug-space-inline-md)` |
+| `align-items` | `start` |
+
+#### `.command-palette__header h3`, `.command-palette__header p`
+
+| Property | Value |
+|----------|-------|
+| `margin` | `0` |
+
+#### `.command-palette__header h3`
+
+| Property | Value |
+|----------|-------|
+| `font-size` | `1.375rem` |
+| `line-height` | `1.2` |
+
+#### `.command-palette__header p`
+
+| Property | Value |
+|----------|-------|
+| `color` | `var(--pug-color-text-secondary)` |
+| `font-size` | `0.8125rem` |
+| `line-height` | `1.5` |
+
+#### `.command-palette__meta`
+
+| Property | Value |
+|----------|-------|
+| `display` | `flex` |
+| `gap` | `var(--pug-space-inline-sm)` |
+| `align-items` | `center` |
+
+#### `.command-palette__hint`
+
+| Property | Value |
+|----------|-------|
+| `display` | `inline-flex` |
+| `align-items` | `center` |
+| `justify-content` | `center` |
+| `min-height` | `1.5rem` |
+| `padding` | `0 0.5rem` |
+| `border-radius` | `var(--pug-radius-control)` |
+| `background` | `color-mix(in srgb, var(--pug-color-background-surface) 76%, transparent)` |
+| `color` | `var(--pug-color-text-secondary)` |
+| `font-family` | `var(--pug-typography-code-family)` |
+| `font-size` | `0.75rem` |
+
+#### `.command-palette__close`
+
+| Property | Value |
+|----------|-------|
+| `display` | `inline-flex` |
+| `align-items` | `center` |
+| `justify-content` | `center` |
+| `width` | `1.75rem` |
+| `height` | `1.75rem` |
+| `padding` | `0` |
+| `border` | `0` |
+| `border-radius` | `calc(var(--pug-radius-control) - 0.0625rem)` |
+| `background` | `color-mix(in srgb, var(--pug-color-background-surface) 62%, transparent)` |
+| `color` | `var(--pug-color-text-secondary)` |
+| `cursor` | `pointer` |
+| `font` | `inherit` |
+
+#### `.command-palette__close:hover`
+
+| Property | Value |
+|----------|-------|
+| `background` | `color-mix(in srgb, var(--pug-color-background-surface) 84%, transparent)` |
+| `color` | `var(--pug-color-text-primary)` |
+
+#### `.command-palette__close:focus-visible`
+
+| Property | Value |
+|----------|-------|
+| `outline` | `var(--pug-border-width-focus) solid var(--pug-color-accent-focusRing)` |
+| `outline-offset` | `0.125rem` |
+
+#### `.command-palette__status`
+
+| Property | Value |
+|----------|-------|
+| `margin` | `0` |
+| `color` | `var(--pug-color-text-secondary)` |
+| `font-size` | `0.8125rem` |
+| `line-height` | `1.5` |
+
+### Light Theme Override: `:global([data-theme="light"]) .command-palette`
+
+| Property | Value |
+|----------|-------|
+| `border-color` | `color-mix(in srgb, var(--pug-color-border-default) 24%, transparent)` |
+| `box-shadow` | `0 1.125rem 2.75rem rgba(49, 66, 85, 0.1), inset 0 0.0625rem 0 rgba(255, 255, 255, 0.72)` |
+
+### Responsive Breakpoint: `max-width: 45rem`
+
+#### `.command-palette`
+
+| Property | Value |
+|----------|-------|
+| `width` | `min(100vw - 1.25rem, 45rem)` |
+| `max-height` | `calc(100vh - 1.25rem)` |
+| `padding` | `1rem` |
+
+#### `.command-palette__header`
+
+| Property | Value |
+|----------|-------|
+| `grid-template-columns` | `1fr` |
+
+#### `.command-palette__meta`
+
+| Property | Value |
+|----------|-------|
+| `justify-content` | `flex-start` |
+
+### Data Attributes Used for CSS Selectors
+
+| Attribute | Element | Purpose |
+|-----------|---------|---------|
+| `data-theme` | global (`:global([data-theme="light"])`) | light theme override selector |
+
+## 10. Composition
 
 - Composes: `SearchField`, `Icon`, `ActionDiscoveryPanel`
 - The SearchField dispatches `valueChange`, `clear`, `cancel`, and `submit`

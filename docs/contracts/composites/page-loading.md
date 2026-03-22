@@ -118,27 +118,99 @@ None.
 
 Uses the `Progress` primitive for determinate progress display.
 
-## 8. Token Usage
+## 8. Token Usage And Precise CSS
 
-| Property | Token |
+### Root
+
+| Property | Value |
 |----------|-------|
-| Root z-index | `overlay-z-modal` |
-| Backdrop bg | `color-background-base` at 62% mix |
-| Card bg | `color-background-elevated` |
-| Card border | `color-border-default` at 42% mix |
-| Card radius | `radius-surface` |
-| Card shadow | `elevation-overlay` |
-| Spinner color | `color-accent-base` |
-| Message font-size | `typography-label-size` |
-| Message color | `color-text-secondary` |
-| Cancel border | `color-border-default` |
-| Cancel radius | `radius-control` |
-| Cancel text | `color-text-secondary` |
-| Cancel font-size | `typography-label-size` |
-| Cancel hover bg | `color-background-surface` at 72% mix |
-| Cancel focus ring | `color-accent-focusRing`, `border-width-focus` |
-| Motion duration | `motion-duration-interaction` |
-| Motion easing | `motion-easing-standard` |
+| position | `fixed` |
+| inset | `0` |
+| z-index | `var(--pug-overlay-z-modal, 1000)` |
+| display | `flex` |
+| align-items | `center` |
+| justify-content | `center` |
+
+### Backdrop
+
+| Property | Value |
+|----------|-------|
+| position | `absolute` |
+| inset | `0` |
+| background | `color-mix(in srgb, var(--pug-color-background-base, #000) 62%, transparent)` |
+| backdrop-filter | `blur(2px)` |
+
+### Card
+
+| Property | Value |
+|----------|-------|
+| position | `relative` |
+| display | `flex` |
+| flex-direction | `column` |
+| align-items | `center` |
+| gap | `1rem` |
+| min-width | `14rem` |
+| max-width | `20rem` |
+| padding | `2rem 2.5rem` |
+| border | `1px solid color-mix(in srgb, var(--pug-color-border-default) 42%, transparent)` |
+| border-radius | `var(--pug-radius-surface)` |
+| background | `var(--pug-color-background-elevated)` |
+| box-shadow | `var(--pug-elevation-overlay)` |
+
+### Spinner
+
+| Property | Value |
+|----------|-------|
+| width | `2.5rem` |
+| height | `2.5rem` |
+| color | `var(--pug-color-accent-base)` |
+| SVG viewBox | `0 0 36 36` |
+| circle r | `15` |
+| stroke-width | `2.5` |
+| background circle opacity | `0.2` |
+| arc stroke-dasharray | `70 30` |
+| arc stroke-linecap | `round` |
+| animation | `page-loading-spin 1s linear infinite` (rotate 360deg) |
+
+### Progress
+
+| Property | Value |
+|----------|-------|
+| width | `100%` |
+
+### Message
+
+| Property | Value |
+|----------|-------|
+| margin | `0` |
+| font-size | `var(--pug-typography-label-size, 0.8125rem)` |
+| color | `var(--pug-color-text-secondary)` |
+| text-align | `center` |
+| line-height | `1.4` |
+
+### Cancel Button
+
+| Property | Value |
+|----------|-------|
+| padding | `0.375rem 0.875rem` |
+| border | `1px solid var(--pug-color-border-default)` |
+| border-radius | `var(--pug-radius-control)` |
+| background | `transparent` |
+| color | `var(--pug-color-text-secondary)` |
+| font-size | `var(--pug-typography-label-size, 0.8125rem)` |
+| transition | `background var(--pug-motion-duration-interaction) var(--pug-motion-easing-standard)` |
+
+#### Cancel Button States
+
+| State | Property | Value |
+|-------|----------|-------|
+| `:hover` | background | `color-mix(in srgb, var(--pug-color-background-surface) 72%, transparent)` |
+| `:focus-visible` | outline | `var(--pug-border-width-focus) solid var(--pug-color-accent-focusRing)` |
+| `:focus-visible` | outline-offset | `0.125rem` |
+
+### Light Theme Overrides
+
+None.
 
 ## 9. Svelte Notes
 

@@ -114,6 +114,85 @@ No component-owned events. Child action behavior is host-owned.
 | Subtitle | `text-secondary`, font-size `0.75rem` | secondary text |
 | Actions/Utility | `space-inline-sm` gap | control grouping |
 
+### Token Usage — Exact CSS Values
+
+#### `.app-header` (Root)
+
+| Property | Value |
+|----------|-------|
+| `display` | `grid` |
+| `grid-template-columns` | `minmax(0, 1fr) auto auto` |
+| `gap` | `var(--pug-space-inline-md)` |
+| `align-items` | `center` |
+| `min-height` | `2.75rem` |
+| `padding` | `0.375rem var(--pug-space-panel-x)` |
+| `border-bottom` | `0.0625rem solid var(--pug-color-border-subtle)` |
+| `background` | `color-mix(in srgb, var(--pug-color-background-panel) 94%, transparent)` |
+| `overflow` | `visible` |
+
+#### `.app-header__identity`, `.app-header__actions`, `.app-header__utility` (Shared)
+
+| Property | Value |
+|----------|-------|
+| `display` | `flex` |
+| `align-items` | `center` |
+| `gap` | `var(--pug-space-inline-sm)` |
+| `min-width` | `0` |
+
+#### `.app-header__title-group`
+
+| Property | Value |
+|----------|-------|
+| `display` | `flex` |
+| `align-items` | `baseline` |
+| `gap` | `var(--pug-space-inline-sm)` |
+| `min-width` | `0` |
+
+#### `.app-header__identity strong` (Title)
+
+| Property | Value |
+|----------|-------|
+| `font-size` | `0.9375rem` |
+| `line-height` | `1.2` |
+| `white-space` | `nowrap` |
+
+#### `.app-header__subtitle`
+
+| Property | Value |
+|----------|-------|
+| `color` | `var(--pug-color-text-secondary)` |
+| `font-size` | `0.75rem` |
+| `line-height` | `1.2` |
+| `white-space` | `nowrap` |
+| `overflow` | `hidden` |
+| `text-overflow` | `ellipsis` |
+
+#### `.app-header__utility` (Additional)
+
+| Property | Value |
+|----------|-------|
+| `justify-content` | `flex-end` |
+
+### Responsive Breakpoint: `max-width: 45rem`
+
+#### `.app-header`
+
+| Property | Value |
+|----------|-------|
+| `grid-template-columns` | `1fr` |
+
+#### `.app-header__utility`
+
+| Property | Value |
+|----------|-------|
+| `justify-content` | `flex-start` |
+
+### Data Attributes Used for CSS Selectors
+
+| Attribute | Element | Purpose |
+|-----------|---------|---------|
+| `data-drag-region` | `<header>` root | enables native window drag posture |
+
 ## 10. Specimen Definitions
 
 ### Full App Window Header (Title + Menubar + Utility)

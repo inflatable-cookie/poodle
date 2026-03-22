@@ -293,7 +293,7 @@ type CalloutTone = "neutral" | "info" | "success" | "warning" | "danger" | "pend
 | Property | Value |
 |----------|-------|
 | `outline` | `var(--pug-border-width-focus) solid var(--pug-color-accent-focusRing)` |
-| `outline-offset` | `0.0625rem` |
+| `outline-offset` | `0.125rem` |
 
 ## 9. Svelte Notes
 

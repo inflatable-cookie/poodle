@@ -136,6 +136,89 @@ No internal state. Visible items and overflow count are derived from props.
 | Root (light) | `--pug-color-border-default` | light theme outer border (14% alpha mix) |
 | Root (light) | `--pug-color-border-subtle` | light theme inset shadow border |
 
+### Token Usage — Exact CSS Values
+
+#### `.selection-summary` (Root)
+
+| Property | Value |
+|----------|-------|
+| `display` | `grid` |
+| `gap` | `var(--pug-space-stack-sm)` |
+| `padding` | `var(--pug-space-panel-y) var(--pug-space-panel-x)` |
+| `border` | `0.0625rem solid transparent` |
+| `border-radius` | `var(--pug-radius-surface)` |
+| `background` | `color-mix(in srgb, var(--pug-color-background-panel) 94%, transparent)` |
+| `font-size` | `var(--pug-typography-label-size, 0.75rem)` |
+
+#### `.selection-summary__header`
+
+| Property | Value |
+|----------|-------|
+| `display` | `flex` |
+| `justify-content` | `space-between` |
+| `gap` | `var(--pug-space-inline-md)` |
+| `align-items` | `center` |
+
+#### `.selection-summary__header button`, `.selection-summary__chip` (Shared)
+
+| Property | Value |
+|----------|-------|
+| `border` | `0.0625rem solid transparent` |
+| `border-radius` | `var(--pug-radius-control)` |
+| `background` | `color-mix(in srgb, var(--pug-color-background-surface) 76%, transparent)` |
+| `color` | `var(--pug-color-text-primary)` |
+| `cursor` | `pointer` |
+| `font` | `inherit` |
+
+#### `.selection-summary__header button` (Clear Button)
+
+| Property | Value |
+|----------|-------|
+| `min-height` | `var(--pug-size-control-height)` |
+| `padding` | `0 var(--pug-space-control-x)` |
+
+#### `.selection-summary__chips`
+
+| Property | Value |
+|----------|-------|
+| `display` | `flex` |
+| `flex-wrap` | `wrap` |
+| `gap` | `var(--pug-space-inline-sm)` |
+
+#### `.selection-summary__chip`
+
+| Property | Value |
+|----------|-------|
+| `display` | `inline-flex` |
+| `gap` | `0.5rem` |
+| `align-items` | `center` |
+| `min-height` | `2rem` |
+| `padding` | `0 0.75rem` |
+
+#### `.selection-summary__overflow`
+
+| Property | Value |
+|----------|-------|
+| `color` | `var(--pug-color-text-secondary)` |
+| `font-size` | `0.8125rem` |
+| `line-height` | `2rem` |
+| `padding` | `0 0.625rem` |
+| `border-radius` | `var(--pug-radius-control)` |
+| `background` | `color-mix(in srgb, var(--pug-color-background-surface) 58%, transparent)` |
+
+### Light Theme Override: `:global([data-theme="light"]) .selection-summary`
+
+| Property | Value |
+|----------|-------|
+| `border-color` | `color-mix(in srgb, var(--pug-color-border-default) 14%, transparent)` |
+| `box-shadow` | `inset 0 0 0 0.0625rem color-mix(in srgb, var(--pug-color-border-subtle) 32%, transparent), 0 0.375rem 1rem rgba(49, 66, 85, 0.03)` |
+
+### Data Attributes Used for CSS Selectors
+
+| Attribute | Element | Purpose |
+|-----------|---------|---------|
+| `data-theme` | global (`:global([data-theme="light"])`) | light theme override selector |
+
 ## 9. Svelte Notes
 
 - uses `createEventDispatcher` for `remove` and `clear` events

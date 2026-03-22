@@ -119,22 +119,85 @@ After keyboard reorder, focus follows the moved item to its new position.
 
 Standalone component. Items can be customized via the `item` slot.
 
-## 8. Token Usage
+## 8. Token Usage And Precise CSS
 
-| Property | Token |
+### Data Attributes
+
+| Attribute | Element | Values |
+|-----------|---------|--------|
+| `data-disabled` | root `<ul>` | `"true"`, `"false"` |
+| `data-reorder-index` | item `<li>` | numeric index |
+
+### Root
+
+| Property | Value |
 |----------|-------|
-| Item background | `color-background-surface` |
-| Item hover bg | `color-background-elevated` blended with `color-background-surface` |
-| Item radius | `radius-control` |
-| Item focus ring | `color-accent-focusRing`, `border-width-focus` |
-| Drop target border | `color-accent-base` |
-| Drop target bg | `color-accent-base` at 8% mix |
-| Handle color | `color-text-secondary` |
-| Content font | `typography-body-family`, `typography-body-size` |
-| Content color | `color-text-primary` |
-| Disabled opacity | `state-opacity-disabled` |
-| Motion duration | `motion-duration-interaction` |
-| Motion easing | `motion-easing-standard` |
+| list-style | `none` |
+| margin | `0` |
+| padding | `0` |
+| display | `flex` |
+| flex-direction | `column` |
+| gap | `0.125rem` |
+
+#### Root Disabled (`[data-disabled="true"]`)
+
+| Property | Value |
+|----------|-------|
+| opacity | `var(--pug-state-opacity-disabled)` |
+| pointer-events | `none` |
+
+### Item
+
+| Property | Value |
+|----------|-------|
+| display | `flex` |
+| align-items | `center` |
+| gap | `0.5rem` |
+| padding | `0.5rem 0.625rem` |
+| border | `0.0625rem solid transparent` |
+| border-radius | `var(--pug-radius-control)` |
+| background | `var(--pug-color-background-surface)` |
+| cursor | `grab` |
+| transition | `background var(--pug-motion-duration-interaction) var(--pug-motion-easing-standard), border-color var(--pug-motion-duration-interaction) var(--pug-motion-easing-standard)` |
+
+#### Item States
+
+| State | Property | Value |
+|-------|----------|-------|
+| `:hover` | background | `color-mix(in srgb, var(--pug-color-background-elevated) 52%, var(--pug-color-background-surface))` |
+| `:focus-visible` | outline | `var(--pug-border-width-focus) solid var(--pug-color-accent-focusRing)` |
+| `:focus-visible` | outline-offset | `-0.0625rem` |
+| `--dragging` | opacity | `0.4` |
+| `--drop-target` | border-color | `var(--pug-color-accent-base)` |
+| `--drop-target` | background | `color-mix(in srgb, var(--pug-color-accent-base) 8%, var(--pug-color-background-surface))` |
+
+### Handle
+
+| Property | Value |
+|----------|-------|
+| display | `flex` |
+| align-items | `center` |
+| justify-content | `center` |
+| flex-shrink | `0` |
+| width | `1rem` |
+| height | `1rem` |
+| color | `var(--pug-color-text-secondary)` |
+| cursor | `grab` |
+| SVG icon | 6-dot grip pattern (circles at cx=5/11, cy=4/8/12, r=1.25) |
+
+### Content
+
+| Property | Value |
+|----------|-------|
+| flex | `1` |
+| min-width | `0` |
+| font-family | `var(--pug-typography-body-family)` |
+| font-size | `var(--pug-typography-body-size)` |
+| color | `var(--pug-color-text-primary)` |
+
+### Light Theme Overrides
+
+None.
 
 ## 9. Svelte Notes
 

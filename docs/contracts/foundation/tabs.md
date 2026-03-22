@@ -135,8 +135,8 @@ Updated: 2026-03-15
 - Root: `display: grid`, `gap: space-stack-md`, `min-width: 0`
 - Vertical: `grid-template-columns: auto minmax(0, 1fr)`, `align-items: start`
 - List: `display: inline-flex`, `flex-wrap: wrap` (underline), `flex-wrap: nowrap` (card/pill)
-- Card/Pill overflow: `overflow: auto`
-- Item: `display: inline-flex`, `align-items: center`, `min-width: 0`
+- Card/Pill/Strip overflow: `overflow-x: auto; overflow-y: hidden`
+- Item: `display: inline-flex`, `align-items: center`, `min-width: 0`, `position: relative`
 
 ### Composition
 
@@ -187,12 +187,13 @@ Updated: 2026-03-15
 | `border-bottom` | `0` |
 | `border-right` | `0.0625rem solid color-mix(in srgb, var(--pug-color-border-subtle) 82%, transparent)` |
 
-### List — Card + Pill
+### List — Card + Pill + Strip
 
 | Property | Value |
 |----------|-------|
 | `flex-wrap` | `nowrap` |
-| `overflow` | `auto` |
+| `overflow-x` | `auto` |
+| `overflow-y` | `hidden` |
 
 ### List — Card + Pill + Strip vertical
 
@@ -262,8 +263,7 @@ Updated: 2026-03-15
 
 | Property | Value |
 |----------|-------|
-| `min-height` | `calc(var(--pug-size-control-height) - 0.75rem)` |
-| `padding` | `0 0.625rem` |
+| `padding` | `0 0.5rem` |
 | `color` | `var(--pug-color-text-primary)` |
 
 ### Tab — Pill variant
@@ -287,8 +287,6 @@ Updated: 2026-03-15
 |----------|-------|
 | `display` | `flex` |
 | `gap` | `0` |
-| `flex-wrap` | `nowrap` |
-| `overflow` | `auto` |
 | `padding` | `0 var(--pug-space-panel-x, 0.75rem)` |
 | `border-bottom` | `0.0625rem solid var(--pug-color-border-subtle)` |
 | `background` | `color-mix(in srgb, var(--pug-color-background-panel) 92%, transparent)` |
@@ -330,7 +328,8 @@ Updated: 2026-03-15
 
 | Property | Value |
 |----------|-------|
-| `padding` | `var(--pug-space-panel-y, 0.5rem) 0` |
+| `padding` | `0` |
+| `overflow` | `visible` |
 | `border-bottom` | `0` |
 | `border-right` | `0.0625rem solid var(--pug-color-border-subtle)` |
 
@@ -341,13 +340,25 @@ Updated: 2026-03-15
 | `border-bottom` | `0` |
 | `border-right` | `0.125rem solid transparent` |
 | `margin-bottom` | `0` |
-| `margin-right` | `-0.0625rem` |
+| `margin-right` | `-0.125rem` |
 
 ### Item — Strip vertical (selected)
 
 | Property | Value |
 |----------|-------|
 | `border-right-color` | `var(--pug-color-accent-base)` |
+
+### Item — Strip vertical (first-child)
+
+| Property | Value |
+|----------|-------|
+| `padding-top` | `0.75rem` |
+
+### Item — Strip vertical (last-child)
+
+| Property | Value |
+|----------|-------|
+| `padding-bottom` | `0.75rem` |
 
 ### Tab — Strip vertical
 
@@ -395,12 +406,14 @@ Updated: 2026-03-15
 | `justify-content` | `center` |
 | `width` | `1.25rem` |
 | `height` | `1.25rem` |
+| `min-height` | `0` |
 | `padding` | `0` |
 | `border` | `0` |
 | `border-radius` | `calc(var(--pug-radius-control) - 0.125rem)` |
 | `background` | `transparent` |
 | `color` | `var(--pug-color-text-secondary)` |
 | `cursor` | `pointer` |
+| `margin-right` | `0.25rem` |
 
 ### Close button — Hover
 

@@ -235,6 +235,235 @@ type PanelDragData = {
 | Drop zone | `accent-base` at 10% opacity | drag-over indicator |
 | Compact tooltip | `background-elevated`, `border-default`, `elevation-overlay` | hover label |
 
+### Token Usage — Exact CSS Values
+
+#### `.dock-region` (Root)
+
+| Property | Value |
+|----------|-------|
+| `position` | `relative` |
+| `display` | `grid` |
+| `min-width` | `0` |
+| `min-height` | `0` |
+| `height` | `100%` |
+| `border` | `0` |
+| `background` | `color-mix(in srgb, var(--pug-color-background-panel) 94%, transparent)` |
+
+#### `.dock-region[data-emphasis="quiet"]`
+
+| Property | Value |
+|----------|-------|
+| `border-color` | `transparent` |
+| `background` | `transparent` |
+
+#### `.dock-region[data-emphasis="strong"]`
+
+| Property | Value |
+|----------|-------|
+| `border-color` | `color-mix(in srgb, var(--pug-color-accent-base) 32%, var(--pug-color-border-subtle))` |
+
+#### `.dock-region[data-sizing="static"]`
+
+| Property | Value |
+|----------|-------|
+| `grid-template-rows` | `1fr` |
+
+#### `.dock-region__stack`
+
+| Property | Value |
+|----------|-------|
+| `display` | `flex` |
+| `min-width` | `0` |
+| `min-height` | `0` |
+
+#### `.dock-region__stack[data-direction="column"]`
+
+| Property | Value |
+|----------|-------|
+| `flex-direction` | `column` |
+
+#### `.dock-region__stack[data-direction="row"]`
+
+| Property | Value |
+|----------|-------|
+| `flex-direction` | `row` |
+
+#### `.dock-region__stack-item`
+
+| Property | Value |
+|----------|-------|
+| `flex` | `1 1 0` |
+| `min-width` | `0` |
+| `min-height` | `0` |
+| `cursor` | `grab` |
+
+#### `.dock-region__stack-item[data-drag-source]`
+
+| Property | Value |
+|----------|-------|
+| `opacity` | `0.4` |
+
+#### `.dock-region__stack-item[data-drop-target]`
+
+| Property | Value |
+|----------|-------|
+| `box-shadow` | `inset 0 0 0 0.125rem var(--pug-color-accent-base)` |
+| `border-radius` | `var(--pug-radius-control)` |
+
+#### `.dock-region[data-sizing="flexible"]:not([data-collapsed])` (Expanded)
+
+| Property | Value |
+|----------|-------|
+| `grid-template-rows` | `auto minmax(0, 1fr)` |
+
+#### `.dock-region__strip[data-orientation="horizontal"]`
+
+| Property | Value |
+|----------|-------|
+| `display` | `flex` |
+| `align-items` | `center` |
+| `gap` | `var(--pug-space-inline-sm)` |
+| `padding-right` | `0.5rem` |
+| `border-bottom` | `0.0625rem solid var(--pug-color-border-subtle)` |
+
+#### `.dock-region__tabs`
+
+| Property | Value |
+|----------|-------|
+| `flex` | `1 1 0` |
+| `min-width` | `0` |
+
+#### `.dock-region__strip[data-orientation="horizontal"] :global(.pug-tabs[data-variant="strip"] .pug-tabs__list)`
+
+| Property | Value |
+|----------|-------|
+| `border-bottom` | `0` |
+
+#### `.dock-region__strip[data-compact] :global(.pug-tabs__label)`, `.dock-region__strip[data-compact] :global(.pug-tabs__close)`
+
+| Property | Value |
+|----------|-------|
+| `display` | `none` |
+
+#### `.dock-region__strip[data-compact] :global(.pug-tabs__tab)`
+
+| Property | Value |
+|----------|-------|
+| `padding` | `0 0.5rem` |
+| `justify-content` | `center` |
+
+#### `.dock-region__strip[data-compact] :global(.pug-tabs__list)`
+
+| Property | Value |
+|----------|-------|
+| `overflow` | `visible` |
+
+#### `.dock-region__body`
+
+| Property | Value |
+|----------|-------|
+| `min-height` | `0` |
+| `overflow` | `auto` |
+
+#### `.dock-region[data-collapsed][data-collapsed-posture="icon-strip"]`
+
+| Property | Value |
+|----------|-------|
+| `grid-template-rows` | `1fr` |
+
+#### `.dock-region[data-collapsed][data-collapsed-posture="icon-strip"][data-edge="left"]`, `[data-edge="right"]`
+
+| Property | Value |
+|----------|-------|
+| `width` | `fit-content` |
+
+#### `.dock-region[data-collapsed][data-collapsed-posture="icon-strip"][data-edge="top"]`, `[data-edge="bottom"]`
+
+| Property | Value |
+|----------|-------|
+| `height` | `fit-content` |
+
+#### `.dock-region__strip[data-orientation="vertical"]`
+
+| Property | Value |
+|----------|-------|
+| `display` | `flex` |
+| `flex-direction` | `column` |
+| `align-items` | `stretch` |
+| `gap` | `0` |
+| `padding` | `0` |
+| `border-right` | `0.0625rem solid var(--pug-color-border-subtle)` |
+
+#### `.dock-region__strip[data-orientation="vertical"] :global(.pug-tabs)`
+
+| Property | Value |
+|----------|-------|
+| `flex` | `1 1 0` |
+| `min-height` | `0` |
+| `grid-template-columns` | `1fr !important` |
+
+#### `.dock-region__strip[data-orientation="vertical"] :global(.pug-tabs__list)`
+
+| Property | Value |
+|----------|-------|
+| `border-right` | `0 !important` |
+
+#### `.dock-region__strip[data-orientation="vertical"] :global(.pug-tabs__item)`
+
+| Property | Value |
+|----------|-------|
+| `margin-right` | `-0.0625rem !important` |
+
+#### `.dock-region__strip[data-orientation="vertical"] > :global(.collapse-toggle)`
+
+| Property | Value |
+|----------|-------|
+| `align-self` | `center` |
+| `padding` | `var(--pug-space-panel-y, 0.5rem) 0` |
+
+#### `.dock-region[data-collapsed][data-collapsed-posture="hidden"]`
+
+| Property | Value |
+|----------|-------|
+| `border-color` | `transparent` |
+| `background` | `transparent` |
+
+#### `.dock-region__edge-toggle`
+
+| Property | Value |
+|----------|-------|
+| `display` | `flex` |
+| `align-items` | `center` |
+| `justify-content` | `center` |
+| `padding` | `var(--pug-space-panel-y, 0.5rem)` |
+
+#### `.dock-region__drop-zone`
+
+| Property | Value |
+|----------|-------|
+| `position` | `absolute` |
+| `inset` | `0` |
+| `z-index` | `10` |
+| `border` | `0.125rem dashed var(--pug-color-accent-base)` |
+| `border-radius` | `var(--pug-radius-surface)` |
+| `background` | `color-mix(in srgb, var(--pug-color-accent-base) 10%, transparent)` |
+| `pointer-events` | `none` |
+
+### Data Attributes Used for CSS Selectors
+
+| Attribute | Element | Purpose |
+|-----------|---------|---------|
+| `data-edge` | `.dock-region` root | dock placement: `left`, `right`, `top`, `bottom` |
+| `data-sizing` | `.dock-region` root | sizing mode: `static`, `flexible` |
+| `data-emphasis` | `.dock-region` root | emphasis variant: `standard`, `quiet`, `strong` |
+| `data-collapsed` | `.dock-region` root | present when dock is collapsed |
+| `data-collapsed-posture` | `.dock-region` root | collapsed display mode: `icon-strip`, `hidden` |
+| `data-direction` | `.dock-region__stack` | stack flow direction: `column`, `row` |
+| `data-orientation` | `.dock-region__strip` | strip orientation: `horizontal`, `vertical` |
+| `data-compact` | `.dock-region__strip` | present when tabs auto-collapse to icon-only |
+| `data-drag-source` | `.dock-region__stack-item` | marks item being dragged |
+| `data-drop-target` | `.dock-region__stack-item` | marks item as drop target |
+
 ## 10. Svelte Notes
 
 - Composes Tabs (`variant="strip"`) and CollapseToggle from `@pug/svelte-primitives`

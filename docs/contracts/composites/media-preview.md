@@ -127,13 +127,73 @@ Card header and body always render regardless of media state.
 - Title and context remain textual and visible outside the preview frame
 - State messaging remains readable when the renderer fails
 
-## 9. Visual Rules
+## 9. Visual Rules And Precise CSS
 
-- Eyebrow: secondary color, 0.6875rem, weight 600, uppercase, letter-spacing 0.12em
-- Title: 1.25rem, line-height 1.2
-- Description, caption, meta: secondary color, 0.8125rem, line-height 1.5
-- Meta items: pill-styled with radius-control, surface background at 70%
-- Light theme: meta items get subtle inset border
+### Header, Heading, Body
+
+| Property | Value |
+|----------|-------|
+| display | `grid` |
+| gap | `var(--pug-space-stack-sm)` |
+
+### Header (override)
+
+| Property | Value |
+|----------|-------|
+| gap | `var(--pug-space-stack-md)` |
+
+### Eyebrow
+
+| Property | Value |
+|----------|-------|
+| margin | `0` |
+| color | `var(--pug-color-text-secondary)` |
+| font-size | `0.6875rem` |
+| font-weight | `600` |
+| letter-spacing | `0.12em` |
+| text-transform | `uppercase` |
+
+### Title (h3)
+
+| Property | Value |
+|----------|-------|
+| margin | `0` |
+| font-size | `1.25rem` |
+| line-height | `1.2` |
+
+### Description, Caption, Meta
+
+| Property | Value |
+|----------|-------|
+| margin | `0` |
+| color | `var(--pug-color-text-secondary)` |
+| font-size | `0.8125rem` |
+| line-height | `1.5` |
+
+### Meta List
+
+| Property | Value |
+|----------|-------|
+| display | `flex` |
+| flex-wrap | `wrap` |
+| gap | `var(--pug-space-inline-sm)` |
+| margin | `0` |
+| padding | `0` |
+| list-style | `none` |
+
+### Meta List Item
+
+| Property | Value |
+|----------|-------|
+| padding | `0.375rem 0.625rem` |
+| border-radius | `var(--pug-radius-control)` |
+| background | `color-mix(in srgb, var(--pug-color-background-surface) 70%, transparent)` |
+
+### Light Theme Overrides
+
+| Selector | Property | Value |
+|----------|----------|-------|
+| `:global([data-theme="light"]) .media-preview__meta li` | box-shadow | `inset 0 0 0 0.0625rem color-mix(in srgb, var(--pug-color-border-subtle) 32%, transparent)` |
 
 ## 10. Composition
 

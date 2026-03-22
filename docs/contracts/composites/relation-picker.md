@@ -220,21 +220,215 @@ When `drillDown` is provided, the picker enters a hierarchical navigation mode:
 - parent expectations: inline containers, popovers, modal dialogs
 - child expectations: candidate items are internally rendered from `items` prop
 
-## 10. Token Usage
+## 10. Token Usage And Precise CSS
 
-| Part | Token | Purpose |
-|------|-------|---------|
-| Candidate item | `--pug-color-border-subtle` | item border |
-| Candidate item | `--pug-radius-surface` | item radius |
-| Candidate item | `--pug-color-background-surface` | item background (86% alpha mix) |
-| Candidate (selected) | `--pug-color-accent-base` | selected border (60% mix) and background (10% mix) |
-| Candidate description | `--pug-color-text-secondary` | subdued text |
-| Candidate focus | `--pug-color-accent-focusRing` | focus outline |
-| Drill breadcrumb | `--pug-color-accent-base` | breadcrumb link color |
-| Drill level label | `--pug-color-text-secondary` | uppercase level heading |
-| Drill item hover | `--pug-color-background-surface` | hover background |
-| Drill item focus | `--pug-color-accent-focusRing` | focus outline |
-| Footer note | `--pug-color-text-secondary` | subdued footer text |
+### Data Attributes
+
+| Attribute | Element | Values |
+|-----------|---------|--------|
+| `data-selected` | candidate item `<li>` | `"true"`, `"false"` |
+
+### Drill Breadcrumbs
+
+| Property | Value |
+|----------|-------|
+| display | `flex` |
+| align-items | `center` |
+| gap | `0.25rem` |
+| padding-bottom | `var(--pug-space-stack-sm)` |
+
+### Drill Breadcrumbs Back Button
+
+| Property | Value |
+|----------|-------|
+| display | `flex` |
+| align-items | `center` |
+| justify-content | `center` |
+| width | `1.5rem` |
+| height | `1.5rem` |
+| padding | `0` |
+| border | `none` |
+| border-radius | `var(--pug-radius-sm, 0.25rem)` |
+| background | `transparent` |
+| color | `var(--pug-color-text-secondary)` |
+| `:hover` background | `var(--pug-color-surface-hover, rgba(148, 163, 184, 0.12))` |
+| `:hover` color | `var(--pug-color-text-primary)` |
+
+### Drill Breadcrumbs Separator
+
+| Property | Value |
+|----------|-------|
+| color | `var(--pug-color-text-secondary)` |
+| font-size | `0.6875rem` |
+| opacity | `0.6` |
+
+### Drill Breadcrumbs Item
+
+| Property | Value |
+|----------|-------|
+| padding | `0.125rem 0.375rem` |
+| border | `none` |
+| border-radius | `var(--pug-radius-sm, 0.25rem)` |
+| background | `transparent` |
+| color | `var(--pug-color-accent-base)` |
+| font-size | `0.75rem` |
+| font-weight | `500` |
+| white-space | `nowrap` |
+| overflow | `hidden` |
+| text-overflow | `ellipsis` |
+| max-width | `8rem` |
+| `:hover` background | `var(--pug-color-surface-hover, rgba(148, 163, 184, 0.12))` |
+
+### Drill Level Label
+
+| Property | Value |
+|----------|-------|
+| font-size | `0.6875rem` |
+| font-weight | `600` |
+| text-transform | `uppercase` |
+| letter-spacing | `0.08em` |
+| color | `var(--pug-color-text-secondary)` |
+| padding-bottom | `0.25rem` |
+
+### Drill List
+
+| Property | Value |
+|----------|-------|
+| display | `grid` |
+| gap | `0.125rem` |
+| margin | `0` |
+| padding | `0` |
+| list-style | `none` |
+
+### Drill List Button
+
+| Property | Value |
+|----------|-------|
+| display | `flex` |
+| align-items | `center` |
+| justify-content | `space-between` |
+| gap | `var(--pug-space-inline-md)` |
+| width | `100%` |
+| padding | `0.5rem 0.625rem` |
+| border | `none` |
+| border-radius | `var(--pug-radius-control)` |
+| background | `transparent` |
+| color | `var(--pug-color-text-primary)` |
+| text-align | `left` |
+| font-size | `0.875rem` |
+| `:hover` background | `color-mix(in srgb, var(--pug-color-background-surface) 60%, transparent)` |
+| `:focus-visible` outline | `var(--pug-border-width-focus) solid var(--pug-color-accent-focusRing)` |
+| `:focus-visible` outline-offset | `-0.0625rem` |
+
+### Drill List Copy
+
+| Property | Value |
+|----------|-------|
+| display | `grid` |
+| gap | `0.125rem` |
+| strong font-weight | `500` |
+| strong overflow/text-overflow | `hidden` / `ellipsis` |
+| small color | `var(--pug-color-text-secondary)` |
+| small font-size | `0.75rem` |
+
+### Drill List Meta
+
+| Property | Value |
+|----------|-------|
+| display | `flex` |
+| align-items | `center` |
+| gap | `0.25rem` |
+| flex-shrink | `0` |
+| color | `var(--pug-color-text-secondary)` |
+| count font-size | `0.6875rem` |
+| count opacity | `0.7` |
+
+### Drill List Empty
+
+| Property | Value |
+|----------|-------|
+| padding | `1.25rem` |
+| text-align | `center` |
+| color | `var(--pug-color-text-secondary)` |
+| font-size | `0.8125rem` |
+
+### Candidate List
+
+| Property | Value |
+|----------|-------|
+| display | `grid` |
+| gap | `var(--pug-space-stack-sm)` |
+| margin | `0` |
+| padding | `0` |
+| list-style | `none` |
+
+### Candidate Item
+
+| Property | Value |
+|----------|-------|
+| display | `grid` |
+| grid-template-columns | `auto minmax(0, 1fr) auto` |
+| align-items | `center` |
+| gap | `var(--pug-space-inline-md)` |
+| padding | `var(--pug-space-panel-y) var(--pug-space-panel-x)` |
+| border | `0.0625rem solid var(--pug-color-border-subtle)` |
+| border-radius | `var(--pug-radius-surface)` |
+| background | `color-mix(in srgb, var(--pug-color-background-surface) 86%, transparent)` |
+| color | `var(--pug-color-text-primary)` |
+| font-size | `var(--pug-typography-label-size, 0.75rem)` |
+
+#### Candidate Item Selected (`[data-selected="true"]`)
+
+| Property | Value |
+|----------|-------|
+| border-color | `color-mix(in srgb, var(--pug-color-accent-base) 60%, transparent)` |
+| background | `color-mix(in srgb, var(--pug-color-accent-base) 10%, transparent)` |
+
+### Candidate Item Button
+
+| Property | Value |
+|----------|-------|
+| display | `grid` |
+| grid-template-columns | `minmax(0, 1fr)` |
+| gap | `0.25rem` |
+| padding | `0` |
+| border | `0` |
+| background | `transparent` |
+| `:focus-visible` outline | `var(--pug-border-width-focus) solid var(--pug-color-accent-focusRing)` |
+| `:focus-visible` outline-offset | `0.125rem` |
+| `:focus-visible` border-radius | `var(--pug-radius-control)` |
+
+### Candidate Copy
+
+| Property | Value |
+|----------|-------|
+| display | `grid` |
+| gap | `0.25rem` |
+| small color | `var(--pug-color-text-secondary)` |
+| small font-size | `0.8125rem` |
+| small line-height | `1.5` |
+
+### Footer Note
+
+| Property | Value |
+|----------|-------|
+| margin | `0` |
+| color | `var(--pug-color-text-secondary)` |
+| font-size | `0.8125rem` |
+| line-height | `1.5` |
+
+### Footer Actions
+
+| Property | Value |
+|----------|-------|
+| display | `flex` |
+| flex-wrap | `wrap` |
+| gap | `var(--pug-space-inline-sm)` |
+| justify-content | `flex-end` |
+
+### Light Theme Overrides
+
+None.
 
 ## 11. Svelte Notes
 

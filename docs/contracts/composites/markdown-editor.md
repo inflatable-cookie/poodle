@@ -129,41 +129,198 @@ None.
 
 In split mode the textarea gets a right border (`border-subtle`) to visually separate from the preview pane.
 
-## 8. Token Usage
+## 8. Token Usage And Precise CSS
 
-| Property | Token |
+### Data Attributes
+
+| Attribute | Element | Values |
+|-----------|---------|--------|
+| `data-mode` | body `<div>` | `"edit"`, `"preview"`, `"split"` |
+
+### Root
+
+| Property | Value |
 |----------|-------|
-| Root border | `color-border-default` |
-| Root background | `color-background-surface` |
-| Root radius | `radius-surface` |
-| Toolbar background | `color-background-elevated` at 72% mix |
-| Toolbar bottom border | `color-border-subtle` |
-| Tool button text | `color-text-secondary` |
-| Tool button hover bg | `color-accent-base` at 12% |
-| Tool button hover text | `color-text-primary` |
-| Tool button focus ring | `color-accent-focusRing`, `border-width-focus` |
-| Tool button radius | `radius-control` |
-| Tool button font | `typography-code-family` |
-| Mode button text | `color-text-secondary` |
-| Mode button active bg | `color-accent-base` at 16% |
-| Mode button active text | `color-text-primary` |
-| Mode switcher border | `color-border-default` |
-| Mode switcher radius | `radius-control` |
-| Textarea color | `color-text-primary` |
-| Textarea font | `typography-code-family` |
-| Textarea placeholder | `color-text-tertiary` |
-| Preview font | `typography-body-family` |
-| Preview text | `color-text-primary` |
-| Preview code bg | `color-background-elevated` at 72% |
-| Preview code font | `typography-code-family` |
-| Preview blockquote border | `color-border-default` |
-| Preview blockquote text | `color-text-secondary` |
-| Preview hr | `color-border-subtle` |
-| Preview link color | `color-accent-default` |
-| Disabled opacity | `state-opacity-disabled` |
-| Split divider | `color-border-subtle` |
-| Motion duration | `motion-duration-interaction` |
-| Motion easing | `motion-easing-standard` |
+| border | `0.0625rem solid var(--pug-color-border-default)` |
+| border-radius | `var(--pug-radius-surface)` |
+| background | `var(--pug-color-background-surface)` |
+| overflow | `hidden` |
+
+### Root (Disabled)
+
+| Property | Value |
+|----------|-------|
+| opacity | `var(--pug-state-opacity-disabled)` |
+| pointer-events | `none` |
+
+### Toolbar
+
+| Property | Value |
+|----------|-------|
+| display | `flex` |
+| align-items | `center` |
+| justify-content | `space-between` |
+| gap | `0.5rem` |
+| padding | `0.375rem 0.5rem` |
+| border-bottom | `0.0625rem solid var(--pug-color-border-subtle)` |
+| background | `color-mix(in srgb, var(--pug-color-background-elevated) 72%, transparent)` |
+| flex-wrap | `wrap` |
+
+### Tools Container
+
+| Property | Value |
+|----------|-------|
+| display | `flex` |
+| gap | `0.125rem` |
+
+### Tool Button
+
+| Property | Value |
+|----------|-------|
+| display | `inline-flex` |
+| align-items | `center` |
+| justify-content | `center` |
+| width | `1.75rem` |
+| height | `1.75rem` |
+| padding | `0` |
+| border | `0` |
+| border-radius | `var(--pug-radius-control)` |
+| background | `transparent` |
+| color | `var(--pug-color-text-secondary)` |
+| font-family | `var(--pug-typography-code-family)` |
+| font-size | `0.75rem` |
+| font-weight | `600` |
+| line-height | `1` |
+| transition | `background var(--pug-motion-duration-interaction) var(--pug-motion-easing-standard)` |
+
+#### Tool Button States
+
+| State | Property | Value |
+|-------|----------|-------|
+| `:hover:not(:disabled)` | background | `color-mix(in srgb, var(--pug-color-accent-base) 12%, transparent)` |
+| `:hover:not(:disabled)` | color | `var(--pug-color-text-primary)` |
+| `:focus-visible` | outline | `var(--pug-border-width-focus) solid var(--pug-color-accent-focusRing)` |
+| `:focus-visible` | outline-offset | `0.0625rem` |
+| `:disabled` | opacity | `0.4` |
+| `:disabled` | cursor | `default` |
+
+### Mode Switcher
+
+| Property | Value |
+|----------|-------|
+| display | `flex` |
+| gap | `0.125rem` |
+| border | `0.0625rem solid var(--pug-color-border-default)` |
+| border-radius | `var(--pug-radius-control)` |
+| overflow | `hidden` |
+
+### Mode Button
+
+| Property | Value |
+|----------|-------|
+| padding | `0.1875rem 0.5rem` |
+| border | `0` |
+| background | `transparent` |
+| color | `var(--pug-color-text-secondary)` |
+| font-size | `0.6875rem` |
+| line-height | `1` |
+| transition | `background var(--pug-motion-duration-interaction) var(--pug-motion-easing-standard)` |
+
+#### Mode Button States
+
+| State | Property | Value |
+|-------|----------|-------|
+| `:hover` | background | `color-mix(in srgb, var(--pug-color-background-elevated) 72%, transparent)` |
+| `.active` | background | `color-mix(in srgb, var(--pug-color-accent-base) 16%, transparent)` |
+| `.active` | color | `var(--pug-color-text-primary)` |
+
+### Body
+
+| Property | Value |
+|----------|-------|
+| display | `flex` |
+
+#### Body Split Mode (`[data-mode="split"]`)
+
+| Property | Value |
+|----------|-------|
+| gap | `0` |
+| textarea flex | `1`, right border `0.0625rem solid var(--pug-color-border-subtle)` |
+| preview flex | `1` |
+
+### Textarea
+
+| Property | Value |
+|----------|-------|
+| flex | `1` |
+| width | `100%` |
+| padding | `0.75rem` |
+| border | `0` |
+| background | `transparent` |
+| color | `var(--pug-color-text-primary)` |
+| font-family | `var(--pug-typography-code-family)` |
+| font-size | `0.8125rem` |
+| line-height | `1.6` |
+| resize | `vertical` |
+| outline | `none` |
+| `::placeholder` color | `var(--pug-color-text-tertiary)` |
+
+### Preview Pane
+
+| Property | Value |
+|----------|-------|
+| flex | `1` |
+| padding | `0.75rem` |
+| font-family | `var(--pug-typography-body-family)` |
+| font-size | `0.875rem` |
+| line-height | `1.6` |
+| color | `var(--pug-color-text-primary)` |
+| overflow-y | `auto` |
+
+### Preview Rendered Elements
+
+| Element | Property | Value |
+|---------|----------|-------|
+| `h1` | font-size | `1.25rem` |
+| `h1` | font-weight | `700` |
+| `h1` | margin | `0 0 0.5rem` |
+| `h2` | font-size | `1.0625rem` |
+| `h2` | font-weight | `600` |
+| `h2` | margin | `0 0 0.375rem` |
+| `h3` | font-size | `0.9375rem` |
+| `h3` | font-weight | `600` |
+| `h3` | margin | `0 0 0.25rem` |
+| `p` | margin | `0 0 0.5rem` |
+| `strong` | font-weight | `700` |
+| `code` | padding | `0.125rem 0.25rem` |
+| `code` | border-radius | `var(--pug-radius-control)` |
+| `code` | background | `color-mix(in srgb, var(--pug-color-background-elevated) 72%, transparent)` |
+| `code` | font-family | `var(--pug-typography-code-family)` |
+| `code` | font-size | `0.8125rem` |
+| `blockquote` | margin | `0 0 0.5rem` |
+| `blockquote` | padding | `0.375rem 0.75rem` |
+| `blockquote` | border-left | `0.1875rem solid var(--pug-color-border-default)` |
+| `blockquote` | color | `var(--pug-color-text-secondary)` |
+| `li` | margin | `0 0 0.125rem` |
+| `li` | padding-left | `0.25rem` |
+| `li` | list-style | `disc inside` |
+| `hr` | border | `0` |
+| `hr` | border-top | `0.0625rem solid var(--pug-color-border-subtle)` |
+| `hr` | margin | `0.75rem 0` |
+| `a` | color | `var(--pug-color-accent-default, #6366f1)` |
+| `a` | text-decoration | `underline` |
+
+### Preview Empty
+
+| Property | Value |
+|----------|-------|
+| color | `var(--pug-color-text-tertiary)` |
+| font-style | `italic` |
+| margin | `0` |
+
+### Light Theme Overrides
+
+None.
 
 ## 9. Svelte Notes
 

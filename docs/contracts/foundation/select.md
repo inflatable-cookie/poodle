@@ -30,7 +30,7 @@ Updated: 2026-03-15
 |------|----------|-------------|---------------|
 | Root | yes | styled wrapper providing field chrome | background, border, radius, shadow, focus ring |
 | Control | yes | native `<select>` element | typography, text color, appearance reset |
-| Indicator | yes | decorative disclosure chevron | icon color, font-family |
+| Indicator | yes | decorative disclosure chevron (Icon component) | icon color |
 | Option | yes | selectable value | text color, font-weight |
 | Option Group | no | labeled group of options | font-weight, text color |
 
@@ -53,9 +53,9 @@ Updated: 2026-03-15
 ### Type Definitions
 
 ```
-SelectOption: { value: string; label: string; isDisabled?: boolean }
+SelectOption: { value: string; label: string; isDisabled?: boolean; group?: string }
 SelectOptionGroup: { label: string; options: SelectOption[] }
-SelectItems: Array<SelectOption | SelectOptionGroup>
+SelectItems: SelectOption[] | SelectOptionGroup[]
 ```
 
 ### Controlled And Uncontrolled
@@ -79,7 +79,7 @@ SelectItems: Array<SelectOption | SelectOptionGroup>
 | State | Trigger | Expected Result |
 |-------|---------|-----------------|
 | value selected | user picks an option | `valueChange` fires with selected option value |
-| placeholder shown | no value and placeholder set | placeholder option displayed, disabled, hidden in dropdown |
+| placeholder shown | no value and placeholder set | placeholder option displayed, disabled in dropdown |
 
 ## 5. Events
 
@@ -188,9 +188,6 @@ SelectItems: Array<SelectOption | SelectOptionGroup>
 | Property | Value |
 |----------|-------|
 | `color` | `var(--pug-color-icon-muted)` |
-| `font-family` | `var(--pug-typography-code-family)` |
-| `font-size` | `0.75rem` |
-| `line-height` | `1` |
 | `pointer-events` | `none` |
 
 ### Option Group `.select__control optgroup`
@@ -213,7 +210,7 @@ SelectItems: Array<SelectOption | SelectOptionGroup>
 - `appearance: none` on the select removes native browser chrome; the custom indicator provides the disclosure chevron
 - `data-placeholder="true"` attribute on root signals placeholder state for CSS targeting
 - Treatment tokens (`--pug-treatment-interactive-subtle-*`) provide themed styling with fallbacks to base tokens
-- Placeholder rendered as a disabled, hidden `<option>` with `selected` when no value is set
+- Placeholder rendered as a disabled `<option>` with `selected` when no value is set
 - Option groups rendered as native `<optgroup>` elements
 
 ## 10. GPUI Notes
@@ -240,7 +237,7 @@ SelectItems: Array<SelectOption | SelectOptionGroup>
 - [ ] treatment token system matches (subtle radius, fill, shadow with fallbacks)
 - [ ] focus-within treatment matches (border-color, background, box-shadow)
 - [ ] placeholder color (text-secondary) matches
-- [ ] indicator color (icon-muted) and font (code-family, 0.75rem) match
+- [ ] indicator color (icon-muted) matches
 - [ ] disabled opacity matches
 - [ ] optgroup font-weight (600) and color (text-secondary) match
 

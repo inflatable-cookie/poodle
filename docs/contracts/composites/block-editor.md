@@ -111,6 +111,320 @@ When the `block` slot is not provided, the component falls back to built-in rend
 - Grid of block type options with icon + label
 - `background-elevated`, `border-default`, `elevation-overlay` shadow
 
+### Token Usage — Exact CSS Values
+
+#### `.block-editor` (Root)
+
+| Property | Value |
+|----------|-------|
+| `border` | `0.0625rem solid var(--pug-color-border-default)` |
+| `border-radius` | `var(--pug-radius-surface)` |
+| `background` | `var(--pug-color-background-surface)` |
+| `padding` | `0.75rem` |
+| `display` | `flex` |
+| `flex-direction` | `column` |
+| `gap` | `0.5rem` |
+
+#### `.block-editor--disabled`
+
+| Property | Value |
+|----------|-------|
+| `opacity` | `var(--pug-state-opacity-disabled)` |
+| `pointer-events` | `none` |
+
+#### `.block-editor__block`
+
+| Property | Value |
+|----------|-------|
+| `display` | `flex` |
+| `flex-direction` | `column` |
+| `border` | `none` |
+| `border-radius` | `var(--pug-radius-control)` |
+| `background` | `color-mix(in srgb, var(--pug-color-background-elevated) 42%, transparent)` |
+| `transition` | `background var(--pug-motion-duration-interaction) var(--pug-motion-easing-standard), box-shadow var(--pug-motion-duration-interaction) var(--pug-motion-easing-standard)` |
+
+#### `.block-editor__block.active`
+
+| Property | Value |
+|----------|-------|
+| `background` | `color-mix(in srgb, var(--pug-color-background-elevated) 72%, transparent)` |
+
+#### `.block-editor__block.drag-over`
+
+| Property | Value |
+|----------|-------|
+| `box-shadow` | `0 0 0 0.125rem var(--pug-color-accent-base)` |
+
+#### `.block-editor__block.dragging`
+
+| Property | Value |
+|----------|-------|
+| `opacity` | `0.4` |
+
+#### `.block-editor__toolbar`
+
+| Property | Value |
+|----------|-------|
+| `display` | `flex` |
+| `align-items` | `center` |
+| `justify-content` | `space-between` |
+| `padding` | `0.25rem 0.375rem` |
+| `border-bottom` | `none` |
+| `background` | `transparent` |
+| `border-radius` | `var(--pug-radius-control) var(--pug-radius-control) 0 0` |
+
+#### `.block-editor__toolbar-left`, `.block-editor__toolbar-right`
+
+| Property | Value |
+|----------|-------|
+| `display` | `flex` |
+| `align-items` | `center` |
+| `gap` | `0.125rem` |
+
+#### `.block-editor__drag-grip`
+
+| Property | Value |
+|----------|-------|
+| `display` | `inline-flex` |
+| `align-items` | `center` |
+| `justify-content` | `center` |
+| `width` | `1.25rem` |
+| `height` | `1.25rem` |
+| `color` | `var(--pug-color-text-tertiary)` |
+| `cursor` | `grab` |
+| `border-radius` | `var(--pug-radius-control)` |
+| `transition` | `background var(--pug-motion-duration-interaction) var(--pug-motion-easing-standard)` |
+
+#### `.block-editor__drag-grip:hover`
+
+| Property | Value |
+|----------|-------|
+| `background` | `color-mix(in srgb, var(--pug-color-accent-base) 12%, transparent)` |
+| `color` | `var(--pug-color-text-secondary)` |
+
+#### `.block-editor__drag-grip:active`
+
+| Property | Value |
+|----------|-------|
+| `cursor` | `grabbing` |
+
+#### `.block-editor__tool-btn`
+
+| Property | Value |
+|----------|-------|
+| `display` | `inline-flex` |
+| `align-items` | `center` |
+| `justify-content` | `center` |
+| `width` | `1.25rem` |
+| `height` | `1.25rem` |
+| `padding` | `0` |
+| `border` | `0` |
+| `border-radius` | `var(--pug-radius-control)` |
+| `background` | `transparent` |
+| `color` | `var(--pug-color-text-tertiary)` |
+| `cursor` | `pointer` |
+| `font-size` | `0.75rem` |
+| `line-height` | `1` |
+| `transition` | `background var(--pug-motion-duration-interaction) var(--pug-motion-easing-standard)` |
+
+#### `.block-editor__tool-btn:hover`
+
+| Property | Value |
+|----------|-------|
+| `background` | `color-mix(in srgb, var(--pug-color-accent-base) 16%, transparent)` |
+| `color` | `var(--pug-color-text-primary)` |
+
+#### `.block-editor__tool-btn:disabled`
+
+| Property | Value |
+|----------|-------|
+| `opacity` | `0.3` |
+| `cursor` | `default` |
+
+#### `.block-editor__tool-btn:disabled:hover`
+
+| Property | Value |
+|----------|-------|
+| `background` | `transparent` |
+| `color` | `var(--pug-color-text-tertiary)` |
+
+#### `.block-editor__remove-btn:hover:not(:disabled)`
+
+| Property | Value |
+|----------|-------|
+| `background` | `color-mix(in srgb, var(--pug-color-status-danger) 16%, transparent)` |
+| `color` | `var(--pug-color-status-danger)` |
+
+#### `.block-editor__type-select`
+
+| Property | Value |
+|----------|-------|
+| `padding` | `0.0625rem 0.25rem` |
+| `border` | `0.0625rem solid var(--pug-color-border-subtle)` |
+| `border-radius` | `var(--pug-radius-control)` |
+| `background` | `transparent` |
+| `color` | `var(--pug-color-text-secondary)` |
+| `font` | `inherit` |
+| `font-size` | `0.6875rem` |
+| `cursor` | `pointer` |
+
+#### `.block-editor__content`
+
+| Property | Value |
+|----------|-------|
+| `padding` | `0.375rem 0.5rem` |
+| `min-height` | `1.5rem` |
+
+#### `.block-editor__input` (Default)
+
+| Property | Value |
+|----------|-------|
+| `width` | `100%` |
+| `padding` | `0.25rem 0.375rem` |
+| `border` | `0` |
+| `background` | `transparent` |
+| `color` | `var(--pug-color-text-primary)` |
+| `font-family` | `var(--pug-typography-body-family)` |
+| `font-size` | `0.875rem` |
+| `line-height` | `1.6` |
+| `outline` | `none` |
+| `resize` | `vertical` |
+
+#### `.block-editor__input--heading`
+
+| Property | Value |
+|----------|-------|
+| `font-size` | `1.125rem` |
+| `font-weight` | `700` |
+
+#### `.block-editor__input--code`
+
+| Property | Value |
+|----------|-------|
+| `font-family` | `var(--pug-typography-code-family)` |
+| `font-size` | `0.8125rem` |
+| `background` | `color-mix(in srgb, var(--pug-color-background-elevated) 72%, transparent)` |
+| `border-radius` | `var(--pug-radius-control)` |
+| `padding` | `0.5rem` |
+
+#### `.block-editor__input--quote`
+
+| Property | Value |
+|----------|-------|
+| `border-left` | `0.1875rem solid var(--pug-color-border-default)` |
+| `padding-left` | `0.625rem` |
+| `color` | `var(--pug-color-text-secondary)` |
+| `font-style` | `italic` |
+
+#### `.block-editor__input--list`
+
+| Property | Value |
+|----------|-------|
+| `padding-left` | `1rem` |
+
+#### `.block-editor__input--image-url`
+
+| Property | Value |
+|----------|-------|
+| `font-size` | `0.75rem` |
+| `color` | `var(--pug-color-text-secondary)` |
+| `font-family` | `var(--pug-typography-code-family)` |
+
+#### `.block-editor__divider`
+
+| Property | Value |
+|----------|-------|
+| `border` | `0` |
+| `border-top` | `0.0625rem solid var(--pug-color-border-subtle)` |
+| `margin` | `0.5rem 0` |
+
+#### `.block-editor__image-block`
+
+| Property | Value |
+|----------|-------|
+| `display` | `flex` |
+| `flex-direction` | `column` |
+| `gap` | `0.375rem` |
+
+#### `.block-editor__image-preview img`
+
+| Property | Value |
+|----------|-------|
+| `max-width` | `100%` |
+| `max-height` | `16rem` |
+| `border-radius` | `var(--pug-radius-control)` |
+| `object-fit` | `contain` |
+
+#### `.block-editor__add-overlay`
+
+| Property | Value |
+|----------|-------|
+| `position` | `fixed` |
+| `inset` | `0` |
+| `z-index` | `var(--pug-overlay-z-menu, 100)` |
+
+#### `.block-editor__add-menu`
+
+| Property | Value |
+|----------|-------|
+| `position` | `fixed` |
+| `display` | `grid` |
+| `grid-template-columns` | `repeat(auto-fill, minmax(6rem, 1fr))` |
+| `gap` | `0.25rem` |
+| `padding` | `0.5rem` |
+| `border` | `0.0625rem solid var(--pug-color-border-default)` |
+| `border-radius` | `var(--pug-radius-surface)` |
+| `background` | `var(--pug-color-background-elevated)` |
+| `box-shadow` | `var(--pug-elevation-overlay)` |
+| `min-width` | `16rem` |
+
+#### `.block-editor__add-menu-item`
+
+| Property | Value |
+|----------|-------|
+| `display` | `flex` |
+| `align-items` | `center` |
+| `gap` | `0.375rem` |
+| `padding` | `0.5rem` |
+| `border` | `0` |
+| `border-radius` | `var(--pug-radius-control)` |
+| `background` | `transparent` |
+| `color` | `var(--pug-color-text-primary)` |
+| `cursor` | `pointer` |
+| `font` | `inherit` |
+| `font-size` | `0.8125rem` |
+| `text-align` | `left` |
+| `transition` | `background var(--pug-motion-duration-interaction) var(--pug-motion-easing-standard)` |
+
+#### `.block-editor__add-menu-item:hover`
+
+| Property | Value |
+|----------|-------|
+| `background` | `color-mix(in srgb, var(--pug-color-accent-base) 12%, transparent)` |
+
+#### `.block-editor__add-menu-icon`
+
+| Property | Value |
+|----------|-------|
+| `font-size` | `0.875rem` |
+| `width` | `1.25rem` |
+| `text-align` | `center` |
+
+### Data Attributes Used for CSS Selectors
+
+| Attribute | Element | Purpose |
+|-----------|---------|---------|
+| `data-type` | `.block-editor__block` | block type identifier (paragraph, heading, code, etc.) |
+
+### CSS Classes Used for State Selectors
+
+| Class | Element | Purpose |
+|-------|---------|---------|
+| `.active` | `.block-editor__block` | currently focused/active block |
+| `.drag-over` | `.block-editor__block` | drop target highlight during drag |
+| `.dragging` | `.block-editor__block` | source block during drag |
+| `.block-editor--disabled` | `.block-editor` | disabled state on root |
+
 ## 8. Reordering
 
 Blocks can be reordered two ways:

@@ -55,7 +55,7 @@ Updated: 2026-03-15
 | `validationState` | `"none" \| "invalid" \| "valid" \| "pending"` | `"none"` | no | visual and assistive validation state |
 | `ariaLabel` | `string \| null` | `null` | no | required when no external label exists |
 | `describedBy` | `string \| null` | `null` | no | aria-describedby target |
-| `inputMode` | `string \| undefined` | `undefined` | no | virtual keyboard hint (e.g. "numeric") |
+| `inputMode` | `"none" \| "search" \| "text" \| "tel" \| "url" \| "email" \| "numeric" \| "decimal" \| null` | `null` | no | virtual keyboard hint |
 | `type` | `string` | `"text"` | no | HTML input type attribute |
 | `prefix` | `string \| null` | `null` | no | static text before input (e.g. "$") |
 | `suffix` | `string \| null` | `null` | no | static text after input (e.g. "kg") |
@@ -103,7 +103,7 @@ Updated: 2026-03-15
 - `aria-label`: from ariaLabel prop; required when no external label exists
 - `aria-describedby`: from describedBy prop
 - `aria-invalid`: `"true"` when validationState is `"invalid"`
-- `aria-readonly`: set when isReadOnly
+- `readonly`: native readonly attribute set when isReadOnly (note: `aria-readonly` is NOT explicitly set; the native `readonly` attribute is used instead)
 - `disabled`: native disabled attribute when isDisabled
 - `maxlength`: from maxLength prop
 - `inputmode`: from inputMode prop
@@ -285,7 +285,7 @@ Updated: 2026-03-15
 - CSS custom properties (`--pug-text-input-*`) enable treatment-level theming
 - Treatment token chain: `--pug-treatment-interactive-subtle-radius` falls back
   to `--pug-radius-control`
-- `data-validation` data attribute drives validation border-color via CSS
+- `data-validation-state` data attribute drives validation border-color via CSS
   attribute selectors
 - Controlled mode: when `value` prop is non-null, the input value is bound to
   it; `valueChange` must be handled to update

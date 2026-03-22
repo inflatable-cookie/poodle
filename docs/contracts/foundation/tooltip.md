@@ -17,9 +17,9 @@ Updated: 2026-03-15
 ## 2. Anatomy
 
 ```text
-[Root .tooltip]  <div>
-  ├── [Trigger .tooltip__trigger]  <div>
-  └── [Bubble .tooltip__bubble]  <div> (conditional, role="tooltip")
+[Root .tooltip]  <span>  role="presentation"
+  ├── [Trigger .tooltip__trigger]  <span>  role="button" tabindex="0"
+  └── [Bubble .tooltip__bubble]  <span> (conditional, role="tooltip")
         └── [Content text]
 ```
 
@@ -88,9 +88,9 @@ Closed, pending-open, and open states are required.
 
 ### Semantics
 
-- Role: bubble has `role="tooltip"`
+- Role: root has `role="presentation"`; trigger has `role="button"` and `tabindex="0"`; bubble has `role="tooltip"`
 - Required attributes: trigger has `aria-describedby` pointing to the tooltip
-  bubble's `id`; tooltip content supplements a trigger's accessible name
+  bubble's `id` (set when tooltip is open); tooltip content supplements a trigger's accessible name
 - Optional attributes: none in the baseline contract
 - Labeling rules: tooltip content supplements a trigger; it does not replace a
   missing accessible name

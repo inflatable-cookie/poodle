@@ -130,6 +130,103 @@ response to keyboard events.
 - Shortcut uses monospace (`code-family`) typography
 - Skeleton rows during loading: two Skeleton elements per row (48% and 20% width)
 
+### Token Usage — Exact CSS Values
+
+#### `.action-discovery-panel` (Root)
+
+| Property | Value |
+|----------|-------|
+| `display` | `grid` |
+| `gap` | `0.75rem` |
+| `min-height` | `0` |
+| `overflow` | `auto` |
+| `overscroll-behavior` | `contain` |
+
+#### `.action-discovery-panel__group`
+
+| Property | Value |
+|----------|-------|
+| `display` | `grid` |
+| `gap` | `0.375rem` |
+
+#### `.action-discovery-panel__list`
+
+| Property | Value |
+|----------|-------|
+| `display` | `grid` |
+| `gap` | `0.25rem` |
+| `margin` | `0` |
+| `padding` | `0` |
+| `list-style` | `none` |
+
+#### `.action-discovery-panel__list li[aria-selected="true"] :global(.list-card)` (Active Item)
+
+| Property | Value |
+|----------|-------|
+| `border-color` | `transparent` |
+| `background` | `color-mix(in srgb, var(--pug-color-accent-base) 18%, var(--pug-color-background-elevated))` |
+| `box-shadow` | `inset 0 0 0 0.0625rem color-mix(in srgb, var(--pug-color-accent-base) 22%, transparent)` |
+
+#### `.action-discovery-panel__trailing`
+
+| Property | Value |
+|----------|-------|
+| `display` | `flex` |
+| `flex-wrap` | `wrap` |
+| `gap` | `0.375rem` |
+| `align-items` | `center` |
+
+#### `.action-discovery-panel__badge`, `.action-discovery-panel__kbd` (Shared)
+
+| Property | Value |
+|----------|-------|
+| `display` | `inline-flex` |
+| `align-items` | `center` |
+| `justify-content` | `center` |
+| `min-height` | `1.5rem` |
+| `padding` | `0 0.5rem` |
+| `border-radius` | `var(--pug-radius-control)` |
+| `background` | `color-mix(in srgb, var(--pug-color-background-surface) 76%, transparent)` |
+| `color` | `var(--pug-color-text-secondary)` |
+| `font-size` | `0.75rem` |
+
+#### `.action-discovery-panel__kbd` (Additional)
+
+| Property | Value |
+|----------|-------|
+| `font-family` | `var(--pug-typography-code-family)` |
+
+#### `.action-discovery-panel__state`
+
+| Property | Value |
+|----------|-------|
+| `display` | `grid` |
+| `gap` | `var(--pug-space-stack-sm)` |
+
+#### `.action-discovery-panel__skeletons`
+
+| Property | Value |
+|----------|-------|
+| `display` | `grid` |
+| `gap` | `var(--pug-space-stack-sm)` |
+
+#### `.action-discovery-panel__skeleton-row`
+
+| Property | Value |
+|----------|-------|
+| `display` | `grid` |
+| `grid-template-columns` | `minmax(0, 1fr) auto` |
+| `gap` | `var(--pug-space-inline-md)` |
+| `padding` | `0.875rem` |
+| `border-radius` | `calc(var(--pug-radius-surface) - 0.125rem)` |
+| `background` | `color-mix(in srgb, var(--pug-color-background-surface) 72%, transparent)` |
+
+### Data Attributes Used for CSS Selectors
+
+| Attribute | Element | Purpose |
+|-----------|---------|---------|
+| `aria-selected` | `<li>` items | targets active item styling via `li[aria-selected="true"]` |
+
 ## 10. Composition
 
 - Composes: `Eyebrow`, `ListCard`, `Skeleton`, `EmptyState`

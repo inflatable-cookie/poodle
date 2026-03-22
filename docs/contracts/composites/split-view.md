@@ -163,16 +163,103 @@ During resize dragging, the split view supports automatic collapse:
 - resizing rules: child focus continuity should survive ratio changes and
   collapse/restore operations
 
-## 10. Token Usage
+## 10. Token Usage And Precise CSS
 
-| Part | Token | Purpose |
-|------|-------|---------|
-| Root | (none) | pure flex layout container |
-| Divider | (none, delegates to ResizeHandle) | resize affordance |
-| Toggles | (none, delegates to CollapseToggle) | collapse/expand affordance |
+### Data Attributes
 
-Token usage for ResizeHandle and CollapseToggle is defined in their
+| Attribute | Element | Values |
+|-----------|---------|--------|
+| `data-orientation` | root `<div>`, divider `<div>` | `"horizontal"`, `"vertical"` |
+| `data-primary-collapsed` | root `<div>` | present when true |
+| `data-secondary-collapsed` | root `<div>` | present when true |
+| `data-disabled` | divider `<div>` | present when true |
+| `data-has-toggles` | divider `<div>` | present when true |
+
+### Root
+
+| Property | Value |
+|----------|-------|
+| display | `flex` |
+| min-height | `0` |
+| min-width | `0` |
+| height | `100%` |
+| width | `100%` |
+
+#### Root Vertical (`[data-orientation="vertical"]`)
+
+| Property | Value |
+|----------|-------|
+| flex-direction | `column` |
+
+### Pane
+
+| Property | Value |
+|----------|-------|
+| min-width | `0` |
+| min-height | `0` |
+
+### Divider
+
+| Property | Value |
+|----------|-------|
+| position | `relative` |
+| display | `flex` |
+| align-items | `center` |
+| justify-content | `center` |
+| flex-shrink | `0` |
+
+#### Divider Horizontal
+
+| Property | Value |
+|----------|-------|
+| width | `0.5rem` |
+| height | `100%` |
+
+#### Divider Vertical
+
+| Property | Value |
+|----------|-------|
+| height | `0.5rem` |
+| width | `100%` |
+
+### Toggles
+
+| Property | Value |
+|----------|-------|
+| position | `absolute` |
+| z-index | `1` |
+| display | `flex` |
+| align-items | `center` |
+| gap | `0.25rem` |
+| pointer-events | `none` |
+| children `*` pointer-events | `auto` |
+
+#### Toggles Horizontal
+
+| Property | Value |
+|----------|-------|
+| flex-direction | `column` |
+| top | `50%` |
+| left | `50%` |
+| transform | `translate(-50%, -50%)` |
+
+#### Toggles Vertical
+
+| Property | Value |
+|----------|-------|
+| flex-direction | `row` |
+| top | `50%` |
+| left | `50%` |
+| transform | `translate(-50%, -50%)` |
+
+### Composed Primitives
+
+Token usage for `ResizeHandle` and `CollapseToggle` is defined in their
 respective primitive contracts.
+
+### Light Theme Overrides
+
+None.
 
 ## 11. Svelte Notes
 

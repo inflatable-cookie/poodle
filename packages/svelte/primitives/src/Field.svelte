@@ -28,7 +28,7 @@
   class="field"
   data-validation-state={validationState}
   style={[
-    span ? `grid-column: span ${span === "full" ? "-1" : span}` : "",
+    span ? (span === "full" ? "grid-column: 1 / -1" : `grid-column: span ${span}`) : "",
     gridArea ? `grid-area: ${gridArea}` : "",
   ].filter(Boolean).join("; ") || undefined}
 >

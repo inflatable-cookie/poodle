@@ -238,6 +238,13 @@ type OverlayPlacement = "top" | "bottom" | "left" | "right"
 | `[data-variant="primary"][data-tone="danger"]` | `var(--pug-color-status-danger)` | `color-mix(in srgb, var(--pug-color-status-danger) 84%, black)` | `var(--pug-color-text-inverse)` |
 | `[data-variant="ghost"][data-tone="danger"]` | `transparent` | `transparent` | `var(--pug-color-status-danger)` |
 
+### Ghost danger hover
+
+| Selector | Property | Value |
+|----------|----------|-------|
+| `.icon-button[data-variant="ghost"][data-tone="danger"]:hover:not(:disabled)` | `--pug-icon-button-border` | `color-mix(in srgb, var(--pug-color-status-danger) 46%, var(--pug-color-border-default))` |
+| `.icon-button[data-variant="ghost"][data-tone="danger"]:hover:not(:disabled)` | `background` | `color-mix(in srgb, var(--pug-color-status-danger) 10%, transparent)` |
+
 ### Root — Pressed (`isPressed=true`)
 
 | Property | Value |
@@ -297,8 +304,8 @@ with the button surface across all sizes.
 | `display` | `inline-flex` |
 | `align-items` | `center` |
 | `justify-content` | `center` |
-| `width` | `var(--pug-size-icon-md)` |
-| `height` | `var(--pug-size-icon-md)` |
+| `width` | `45%` |
+| `height` | `45%` |
 | `border` | `0.125rem solid color-mix(in srgb, currentColor 24%, transparent)` |
 | `border-top-color` | `currentColor` |
 | `border-radius` | `999px` |

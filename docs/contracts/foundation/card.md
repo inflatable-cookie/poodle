@@ -84,23 +84,19 @@ Updated: 2026-03-15
 ### Semantics
 
 - Root element: `<article>`
-- When interactive: CSS `cursor: pointer` is applied; ARIA roles and keyboard interaction are not currently implemented
-- When selected: `aria-selected="true"` (when interactive)
+- When interactive: CSS `cursor: pointer` is applied; no ARIA roles, keyboard interaction, or focus management are currently implemented (see Known Deltas)
 - Landmark: none
 
 ### Keyboard
 
 | Key | Behavior |
 |-----|----------|
-| `Enter` | activates card (when interactive) |
-| `Space` | activates card (when interactive) |
 | `Tab` | moves focus to next focusable element |
 
 ### Focus And Announcement
 
-- focus entry: card root receives visible focus ring (when interactive)
-- focus exit: focus ring clears immediately
 - non-interactive cards are not focusable
+- interactive cards do not currently receive focus (see Known Deltas)
 
 ## 7. Layout
 
@@ -141,7 +137,7 @@ Updated: 2026-03-15
 | `padding` | `var(--pug-space-panel-x)` |
 | `border` | `0.0625rem solid var(--pug-recipe-card-border)` |
 | `border-radius` | `var(--pug-recipe-card-radius)` |
-| `background` | `var(--pug-treatment-surface-fill, var(--pug-recipe-card-fill))` |
+| `background` | `var(--pug-treatment-surface-fill, color-mix(in srgb, var(--pug-surface) 88%, var(--pug-color-text-primary)))` |
 | `--pug-surface` | `var(--pug-treatment-surface-fill, var(--pug-recipe-card-fill))` |
 | `box-shadow` | `var(--pug-treatment-surface-shadow, var(--pug-recipe-card-shadow))` |
 
@@ -269,6 +265,7 @@ Updated: 2026-03-15
 |-------|-------------|-----------------|-----------|
 | Elevated shadow light vs dark | GPUI may detect color scheme differently than CSS media query | allowed | same visual result |
 | CSS custom property fallback chains | Rust conditionals vs CSS var() fallback | allowed | same visual result |
+| Interactive card accessibility | `aria-selected`, `role="button"`, `tabindex="0"`, and Enter/Space keyboard activation are documented in the contract but NOT implemented in Svelte; interactive cards only apply `cursor: pointer` | known gap | implement in a future pass |
 
 ## 13. Specimen Definitions
 

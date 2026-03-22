@@ -144,49 +144,191 @@ None. The component is display-only; entries are provided externally.
 
 Uses `Icon` primitive for the scroll-to-bottom button arrow icon.
 
-## 8. Token Usage
+## 8. Token Usage And Precise CSS
 
-| Property | Token |
+### Data Attributes
+
+| Attribute | Element | Values |
+|-----------|---------|--------|
+| `data-level` | entry `<div>` | `"info"`, `"warn"`, `"error"` |
+
+### Root
+
+| Property | Value |
 |----------|-------|
-| Root border | `color-border-subtle` |
-| Root radius | `radius-surface` |
-| Root background | `color-background-panel` |
-| Toolbar background | `color-background-elevated` at 92% mix |
-| Toolbar border | `color-border-subtle` |
-| Filter button border | `color-border-default` |
-| Filter button radius | `radius-control` |
-| Filter button text | `color-text-secondary` |
-| Filter button font | `typography-code-family` |
-| Filter active (all/info) bg | `color-accent-base` at 16% |
-| Filter active (all/info) border | `color-accent-base` at 42% |
-| Filter active text | `color-text-primary` |
-| Filter active (warn) bg | `color-status-warning` at 16% |
-| Filter active (warn) border | `color-status-warning` at 42% |
-| Filter active (error) bg | `color-status-danger` at 16% |
-| Filter active (error) border | `color-status-danger` at 42% |
-| Search border | `color-border-default` |
-| Search bg | `color-background-surface` |
-| Search text | `color-text-primary` |
-| Search focus border | `color-accent-focusRing` |
-| Search font | `typography-code-family` |
-| Scroll container font | `typography-code-family` |
-| Entry border | `color-border-subtle` at 42% |
-| Entry hover bg | `color-background-elevated` at 42% |
-| Entry warn bg | `color-status-warning` at 6% |
-| Entry error bg | `color-status-danger` at 8% |
-| Timestamp color | `color-text-tertiary` |
-| Level info color | `color-accent-base` |
-| Level warn color | `color-status-warning` |
-| Level error color | `color-status-danger` |
-| Message color | `color-text-primary` |
-| Empty text color | `color-text-tertiary` |
-| Scroll button border | `color-border-default` |
-| Scroll button bg | `color-background-elevated` |
-| Scroll button text | `color-accent-base` |
-| Scroll button shadow | `elevation-overlay` |
-| Scroll button hover bg | `color-accent-base` at 12% |
-| Motion duration | `motion-duration-interaction` |
-| Motion easing | `motion-easing-standard` |
+| display | `flex` |
+| flex-direction | `column` |
+| border | `0.0625rem solid var(--pug-color-border-subtle)` |
+| border-radius | `var(--pug-radius-surface)` |
+| background | `var(--pug-color-background-panel)` |
+| overflow | `hidden` |
+| position | `relative` |
+
+### Toolbar
+
+| Property | Value |
+|----------|-------|
+| display | `flex` |
+| align-items | `center` |
+| gap | `0.5rem` |
+| padding | `0.375rem 0.5rem` |
+| border-bottom | `0.0625rem solid var(--pug-color-border-subtle)` |
+| background | `color-mix(in srgb, var(--pug-color-background-elevated) 92%, transparent)` |
+| flex-wrap | `wrap` |
+
+### Filters Container
+
+| Property | Value |
+|----------|-------|
+| display | `flex` |
+| gap | `0.25rem` |
+
+### Filter Button
+
+| Property | Value |
+|----------|-------|
+| display | `inline-flex` |
+| align-items | `center` |
+| gap | `0.25rem` |
+| padding | `0.1875rem 0.5rem` |
+| border | `0.0625rem solid var(--pug-color-border-default)` |
+| border-radius | `var(--pug-radius-control)` |
+| background | `transparent` |
+| color | `var(--pug-color-text-secondary)` |
+| font-size | `0.6875rem` |
+| font-family | `var(--pug-typography-code-family)` |
+| line-height | `1` |
+| transition | `background var(--pug-motion-duration-interaction) var(--pug-motion-easing-standard)` |
+
+#### Filter Button States
+
+| State | Property | Value |
+|-------|----------|-------|
+| `:hover` | background | `color-mix(in srgb, var(--pug-color-background-elevated) 72%, transparent)` |
+| `.active` (all/info) | background | `color-mix(in srgb, var(--pug-color-accent-base) 16%, transparent)` |
+| `.active` (all/info) | border-color | `color-mix(in srgb, var(--pug-color-accent-base) 42%, transparent)` |
+| `.active` (all/info) | color | `var(--pug-color-text-primary)` |
+| `.active` (warn) | background | `color-mix(in srgb, var(--pug-color-status-warning, #eab308) 16%, transparent)` |
+| `.active` (warn) | border-color | `color-mix(in srgb, var(--pug-color-status-warning, #eab308) 42%, transparent)` |
+| `.active` (error) | background | `color-mix(in srgb, var(--pug-color-status-danger, #ef4444) 16%, transparent)` |
+| `.active` (error) | border-color | `color-mix(in srgb, var(--pug-color-status-danger, #ef4444) 42%, transparent)` |
+
+### Count Badge
+
+| Property | Value |
+|----------|-------|
+| opacity | `0.7` |
+| font-size | `0.625rem` |
+
+### Search Input
+
+| Property | Value |
+|----------|-------|
+| flex | `1` |
+| min-width | `8rem` |
+| padding | `0.1875rem 0.5rem` |
+| border | `0.0625rem solid var(--pug-color-border-default)` |
+| border-radius | `var(--pug-radius-control)` |
+| background | `var(--pug-color-background-surface)` |
+| color | `var(--pug-color-text-primary)` |
+| font-size | `0.6875rem` |
+| font-family | `var(--pug-typography-code-family)` |
+| outline | `none` |
+| `:focus` border-color | `var(--pug-color-accent-focusRing)` |
+
+### Scroll Container
+
+| Property | Value |
+|----------|-------|
+| max-height | `20rem` |
+| overflow-y | `auto` |
+| font-family | `var(--pug-typography-code-family)` |
+| font-size | `0.75rem` |
+| line-height | `1.6` |
+
+### Entry
+
+| Property | Value |
+|----------|-------|
+| display | `flex` |
+| gap | `0.625rem` |
+| padding | `0.125rem 0.5rem` |
+| border-bottom | `0.0625rem solid color-mix(in srgb, var(--pug-color-border-subtle) 42%, transparent)` |
+
+#### Entry States
+
+| State | Property | Value |
+|-------|----------|-------|
+| `:hover` | background | `color-mix(in srgb, var(--pug-color-background-elevated) 42%, transparent)` |
+| `[data-level="warn"]` | background | `color-mix(in srgb, var(--pug-color-status-warning, #eab308) 6%, transparent)` |
+| `[data-level="error"]` | background | `color-mix(in srgb, var(--pug-color-status-danger, #ef4444) 8%, transparent)` |
+
+### Timestamp
+
+| Property | Value |
+|----------|-------|
+| color | `var(--pug-color-text-tertiary)` |
+| flex-shrink | `0` |
+| white-space | `nowrap` |
+
+### Level Badge
+
+| Property | Value |
+|----------|-------|
+| flex-shrink | `0` |
+| width | `3rem` |
+| text-align | `right` |
+| font-weight | `600` |
+
+#### Level Badge Colors By Data-Level
+
+| data-level | color |
+|------------|-------|
+| `info` | `var(--pug-color-accent-base, #6366f1)` |
+| `warn` | `var(--pug-color-status-warning, #eab308)` |
+| `error` | `var(--pug-color-status-danger, #ef4444)` |
+
+### Message
+
+| Property | Value |
+|----------|-------|
+| flex | `1` |
+| min-width | `0` |
+| word-break | `break-word` |
+| color | `var(--pug-color-text-primary)` |
+
+### Empty Message
+
+| Property | Value |
+|----------|-------|
+| display | `flex` |
+| align-items | `center` |
+| justify-content | `center` |
+| min-height | `4rem` |
+| color | `var(--pug-color-text-tertiary)` |
+| font-size | `0.8125rem` |
+
+### Scroll-To-Bottom Button
+
+| Property | Value |
+|----------|-------|
+| position | `absolute` |
+| bottom | `0.5rem` |
+| left | `50%` |
+| transform | `translateX(-50%)` |
+| padding | `0.25rem 0.75rem` |
+| border | `0.0625rem solid var(--pug-color-border-default)` |
+| border-radius | `999rem` |
+| background | `var(--pug-color-background-elevated)` |
+| color | `var(--pug-color-accent-base)` |
+| font-size | `0.6875rem` |
+| box-shadow | `var(--pug-elevation-overlay)` |
+| transition | `background var(--pug-motion-duration-interaction) var(--pug-motion-easing-standard)` |
+| `:hover` background | `color-mix(in srgb, var(--pug-color-accent-base) 12%, transparent)` |
+
+### Light Theme Overrides
+
+None.
 
 ## 9. Svelte Notes
 

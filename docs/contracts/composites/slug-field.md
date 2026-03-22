@@ -124,25 +124,72 @@ None.
 
 Composes `Field` and `TextInput` from primitives. The `TextInput` `prefix` prop displays the URL prefix.
 
-## 8. Token Usage
+## 8. Token Usage And Precise CSS
 
-| Property | Token |
+### Root
+
+| Property | Value |
 |----------|-------|
-| Root gap | `space-stack-sm` |
-| Reset button height | `size-control-height` |
-| Reset button border | `color-border-default` |
-| Reset button radius | `radius-control` |
-| Reset button bg | `color-background-surface` |
-| Reset button text | `color-text-secondary` |
-| Reset button font | `typography-label-family`, `typography-label-weight` |
-| Reset button hover bg | `color-background-surface` mixed with `color-background-elevated` |
-| Reset button hover border | `color-border-default` mixed with `color-text-primary` |
-| Reset button focus ring | `color-accent-focusRing`, `border-width-focus` |
-| Hint text color | `color-text-secondary` |
-| Hint code font | `typography-code-family` |
-| Hint code bg | `color-background-panel` mixed with `color-background-elevated` |
-| Motion duration | `motion-duration-interaction` |
-| Motion easing | `motion-easing-standard` |
+| display | `grid` |
+| gap | `var(--pug-space-stack-sm)` |
+
+### Row
+
+| Property | Value |
+|----------|-------|
+| display | `flex` |
+| align-items | `center` |
+| gap | `0.5rem` |
+| `.text-input` child | `flex: 1` |
+
+### Reset Button
+
+| Property | Value |
+|----------|-------|
+| display | `inline-flex` |
+| align-items | `center` |
+| height | `var(--pug-size-control-height)` |
+| padding | `0 0.625rem` |
+| border | `0.0625rem solid var(--pug-color-border-default)` |
+| border-radius | `var(--pug-radius-control)` |
+| background | `var(--pug-color-background-surface)` |
+| color | `var(--pug-color-text-secondary)` |
+| font-family | `var(--pug-typography-label-family)` |
+| font-size | `0.75rem` |
+| font-weight | `var(--pug-typography-label-weight)` |
+| white-space | `nowrap` |
+| transition | `background var(--pug-motion-duration-interaction) var(--pug-motion-easing-standard), border-color var(--pug-motion-duration-interaction) var(--pug-motion-easing-standard)` |
+
+#### Reset Button States
+
+| State | Property | Value |
+|-------|----------|-------|
+| `:hover` | background | `color-mix(in srgb, var(--pug-color-background-surface) 84%, var(--pug-color-background-elevated))` |
+| `:hover` | border-color | `color-mix(in srgb, var(--pug-color-border-default) 78%, var(--pug-color-text-primary))` |
+| `:focus-visible` | outline | `var(--pug-border-width-focus) solid var(--pug-color-accent-focusRing)` |
+| `:focus-visible` | outline-offset | `0.125rem` |
+
+### Hint
+
+| Property | Value |
+|----------|-------|
+| margin | `0` |
+| font-size | `0.75rem` |
+| color | `var(--pug-color-text-secondary)` |
+
+### Hint Code
+
+| Property | Value |
+|----------|-------|
+| font-family | `var(--pug-typography-code-family)` |
+| font-size | `0.6875rem` |
+| padding | `0.0625rem 0.25rem` |
+| border-radius | `0.1875rem` |
+| background | `color-mix(in srgb, var(--pug-color-background-panel) 72%, var(--pug-color-background-elevated))` |
+
+### Light Theme Overrides
+
+None.
 
 ## 9. Svelte Notes
 

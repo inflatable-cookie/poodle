@@ -160,6 +160,104 @@ type CardRadioItem = {
 | Title | `--pug-color-text-primary` | title text color |
 | Description | `--pug-color-text-secondary` | description text color |
 
+### Token Usage — Exact CSS Values
+
+#### `.card-radio-group` (Root)
+
+| Property | Value |
+|----------|-------|
+| `display` | `grid` |
+| `grid-template-columns` | `repeat(var(--columns, 2), 1fr)` |
+| `gap` | `0.75rem` |
+
+The `--columns` CSS variable is set inline from the `columns` prop (1, 2, 3, or 4).
+
+#### `.card-radio-group__option`
+
+| Property | Value |
+|----------|-------|
+| `cursor` | `pointer` |
+| `outline` | `none` |
+
+#### `.card-radio-group__option:focus-visible :global(.card)`
+
+| Property | Value |
+|----------|-------|
+| `outline` | `var(--pug-border-width-focus) solid var(--pug-color-accent-focusRing)` |
+| `outline-offset` | `0.125rem` |
+
+#### `.card-radio-group__option[aria-disabled="true"]`
+
+| Property | Value |
+|----------|-------|
+| `cursor` | `not-allowed` |
+| `opacity` | `var(--pug-state-opacity-disabled)` |
+
+#### `.card-radio-group__header`
+
+| Property | Value |
+|----------|-------|
+| `display` | `flex` |
+| `align-items` | `center` |
+| `gap` | `0.5rem` |
+
+#### `.card-radio-group__indicator` (Unchecked)
+
+| Property | Value |
+|----------|-------|
+| `display` | `flex` |
+| `align-items` | `center` |
+| `justify-content` | `center` |
+| `width` | `1.125rem` |
+| `height` | `1.125rem` |
+| `flex-shrink` | `0` |
+| `border` | `0.125rem solid var(--pug-color-border-default)` |
+| `border-radius` | `999px` |
+| `background` | `transparent` |
+| `transition` | `border-color var(--pug-motion-duration-interaction) var(--pug-motion-easing-standard), background var(--pug-motion-duration-interaction) var(--pug-motion-easing-standard)` |
+
+#### `.card-radio-group__indicator[data-checked="true"]` (Checked)
+
+| Property | Value |
+|----------|-------|
+| `border-color` | `var(--pug-color-accent-base)` |
+| `background` | `var(--pug-color-accent-base)` |
+
+#### `.card-radio-group__dot`
+
+| Property | Value |
+|----------|-------|
+| `width` | `0.375rem` |
+| `height` | `0.375rem` |
+| `border-radius` | `999px` |
+| `background` | `var(--pug-color-text-inverse)` |
+
+#### `.card-radio-group__title`
+
+| Property | Value |
+|----------|-------|
+| `font-size` | `0.9375rem` |
+| `font-weight` | `600` |
+| `color` | `var(--pug-color-text-primary)` |
+
+#### `.card-radio-group__description`
+
+| Property | Value |
+|----------|-------|
+| `margin` | `0` |
+| `font-size` | `0.8125rem` |
+| `line-height` | `1.5` |
+| `color` | `var(--pug-color-text-secondary)` |
+
+### Data Attributes Used for CSS Selectors
+
+| Attribute | Element | Purpose |
+|-----------|---------|---------|
+| `data-checked` | `.card-radio-group__indicator` | targets checked indicator styling |
+| `data-disabled` | `.card-radio-group__indicator`, `.card-radio-group__title`, `.card-radio-group__description` | marks disabled items (not currently used for CSS but present in markup) |
+| `data-card-radio-index` | `.card-radio-group__option` | used for DOM focus management via `querySelector` |
+| `aria-disabled` | `.card-radio-group__option` | targets disabled option styling |
+
 ## 9. Svelte Notes
 
 - Uses `createEventDispatcher` for `change` event

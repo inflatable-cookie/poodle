@@ -161,25 +161,107 @@ The tone color is used for:
 - child expectations: none (self-contained)
 - resizing rules: toasts fill container width
 
-## 9. Token Usage
+## 9. Token Usage And Precise CSS
 
-| Part | Token | Purpose |
-|------|-------|---------|
-| Stack | `--pug-space-stack-sm` | gap between toasts |
-| Toast | `--pug-color-border-default` | base border (mixed with tone) |
-| Toast | `--pug-radius-surface` | corner radius (minus 0.125rem) |
-| Toast | `--pug-color-background-elevated` | toast background (96% alpha mix) |
-| Toast | `--pug-elevation-overlay` | box shadow |
-| Toast | `--pug-space-panel-x` | toast padding |
-| Toast (info) | `--pug-color-status-info` | info tone color (fallback #3b82f6) |
-| Toast (success) | `--pug-color-status-success` | success tone color |
-| Toast (warning) | `--pug-color-status-warning` | warning tone color |
-| Toast (danger) | `--pug-color-status-danger` | danger tone color |
-| DismissButton | `--pug-color-text-secondary` | default icon color |
-| DismissButton hover | `--pug-color-text-primary` | hover icon color |
-| DismissButton hover | `--pug-color-background-surface` | hover background (60% alpha mix) |
-| DismissButton | `--pug-radius-sm` | button radius (fallback 0.25rem) |
-| Message | `--pug-color-text-secondary` | message text color |
+### Data Attributes
+
+| Attribute | Element | Values |
+|-----------|---------|--------|
+| `data-tone` | toast `<article>` | `"info"`, `"success"`, `"warning"`, `"danger"` |
+
+### Stack
+
+| Property | Value |
+|----------|-------|
+| display | `grid` |
+| gap | `var(--pug-space-stack-sm)` |
+
+### Toast
+
+| Property | Value |
+|----------|-------|
+| `--pug-toast-tone` | (set per tone, see below) |
+| display | `grid` |
+| gap | `var(--pug-space-stack-sm)` |
+| padding | `var(--pug-space-panel-x)` |
+| padding-right | `calc(var(--pug-space-panel-x) + 1.5rem)` |
+| border | `0.0625rem solid color-mix(in srgb, var(--pug-toast-tone) 34%, var(--pug-color-border-default))` |
+| border-radius | `calc(var(--pug-radius-surface) - 0.125rem)` |
+| background | `linear-gradient(90deg, color-mix(in srgb, var(--pug-toast-tone) 12%, transparent), color-mix(in srgb, var(--pug-color-background-elevated) 98%, transparent) 18%), color-mix(in srgb, var(--pug-color-background-elevated) 96%, transparent)` |
+| box-shadow | `var(--pug-elevation-overlay)` |
+| position | `relative` |
+| overflow | `hidden` |
+
+### Toast Accent Bar (`::before`)
+
+| Property | Value |
+|----------|-------|
+| content | `""` |
+| position | `absolute` |
+| inset | `0 auto 0 0` |
+| width | `0.1875rem` |
+| background | `color-mix(in srgb, var(--pug-toast-tone) 82%, white 6%)` |
+
+### Tone Custom Property Values
+
+| `data-tone` | `--pug-toast-tone` |
+|-------------|-------------------|
+| `info` (default) | `var(--pug-color-status-info, #3b82f6)` |
+| `success` | `var(--pug-color-status-success)` |
+| `warning` | `var(--pug-color-status-warning)` |
+| `danger` | `var(--pug-color-status-danger)` |
+
+### Dismiss Button
+
+| Property | Value |
+|----------|-------|
+| position | `absolute` |
+| top | `0.375rem` |
+| right | `0.375rem` |
+| display | `inline-flex` |
+| align-items | `center` |
+| justify-content | `center` |
+| width | `1.25rem` |
+| height | `1.25rem` |
+| padding | `0` |
+| border | `none` |
+| border-radius | `var(--pug-radius-sm, 0.25rem)` |
+| background | `transparent` |
+| color | `var(--pug-color-text-secondary)` |
+
+#### Dismiss Button Hover
+
+| Property | Value |
+|----------|-------|
+| color | `var(--pug-color-text-primary)` |
+| background | `color-mix(in srgb, var(--pug-color-background-surface) 60%, transparent)` |
+
+### Copy Container
+
+| Property | Value |
+|----------|-------|
+| display | `grid` |
+| gap | `0.25rem` |
+| `strong`, `p` margin | `0` |
+
+### Message Text (`p`)
+
+| Property | Value |
+|----------|-------|
+| color | `var(--pug-color-text-secondary)` |
+| font-size | `0.8125rem` |
+| line-height | `1.5` |
+
+### Actions Container
+
+| Property | Value |
+|----------|-------|
+| display | `flex` |
+| justify-content | `flex-start` |
+
+### Light Theme Overrides
+
+None.
 
 ## 10. Svelte Notes
 
