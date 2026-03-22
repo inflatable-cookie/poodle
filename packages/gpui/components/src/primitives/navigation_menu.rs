@@ -98,6 +98,10 @@ impl IntoElement for NavigationMenu {
 
         let current_value = self.spec.current_value().map(|s| s.to_string());
 
+        // Wrap on_change in Rc for sharing across item clicks
+        let on_change_rc: Option<std::rc::Rc<dyn Fn(&str, &mut Window, &mut App)>> =
+            self.on_change.map(|h| std::rc::Rc::from(h));
+
         // Contract: list = inline-flex, flex-wrap, gap 0.25rem
         let mut nav_row = div()
             .flex()
@@ -146,6 +150,14 @@ impl IntoElement for NavigationMenu {
                 trigger = trigger
                     .cursor_pointer()
                     .hover(|s| s.bg(hover_bg));
+
+                if let Some(ref handler) = on_change_rc {
+                    let handler = handler.clone();
+                    let val = item.value.clone();
+                    trigger = trigger.on_click(move |_event, window, cx| {
+                        handler(&val, window, cx);
+                    });
+                }
             }
 
             trigger = trigger.child(item.label.clone());
