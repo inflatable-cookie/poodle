@@ -78,7 +78,7 @@ impl Tabs {
         let control_y = resolve_px(theme, "semantic.space.control.y");
         let disabled_opacity = resolve_opacity(theme, "semantic.state.opacity.disabled");
         let accent = resolve_color(theme, "semantic.color.accent.base");
-        let border = resolve_color(theme, "semantic.color.border.default");
+        let border = resolve_color(theme, "semantic.color.border.subtle");
         let text_secondary = resolve_color(theme, "semantic.color.text.secondary");
         let elevated = resolve_color(theme, "semantic.color.background.elevated");
 
@@ -101,7 +101,7 @@ impl Tabs {
                 .id(tab_id)
                 .px(inline_padding)
                 .py(control_y)
-                .text_sm();
+                .text_size(px(12.0)).font_weight(FontWeight::SEMIBOLD);
 
             if is_active {
                 tab = tab
