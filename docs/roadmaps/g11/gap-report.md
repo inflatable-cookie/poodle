@@ -1,10 +1,43 @@
 # g11 GPUI Contract Compliance — Gap Report
 
-Status: complete
+Status: resolved (remaining items are platform limitations or require spec-level changes)
 Updated: 2026-03-22
 
 This document records every gap between the GPUI component implementations
 and their contract specifications. It serves as the work list for g11.003–011.
+
+## Resolution Summary
+
+The vast majority of gaps documented below have been **resolved** across multiple
+implementation passes. The remaining unresolved items fall into these categories:
+
+1. **GPUI platform limitations** — ARIA attributes (`role`, `aria-*`), CSS grid,
+   dashed borders, `<nav>`/`<time>`/`<button>` HTML semantics, and letter-spacing
+   are not supported by GPUI. These are known deltas.
+
+2. **Spec-level additions needed** — Some contract props (e.g., TextInput
+   prefix/suffix/maxLength, TabDefinition icon/closable, ResizeHandle on_resize
+   callback) require fields to be added to the contracts crate before the GPUI
+   component can implement them.
+
+3. **Very minor token precision** — A few components have 1–2px differences from
+   the contract (e.g., specific dot sizes, sub-pixel border radii). These are
+   cosmetic and below the threshold of visual impact.
+
+### What was resolved
+
+Every GPUI component now has:
+- **Focus ring** via `.focus(move |s| s.border_color(focus_ring))`
+- **Keyboard handlers** (Space/Enter toggle, Escape close, Arrow navigation)
+- **Color-mix formulas** for fills, borders, and hover states
+- **Elevation shadows** (dialog, popover, tooltip, surface levels)
+- **Proper typography** (14px body, semibold labels, code-family sizing)
+- **Token resolution** through spec methods + `resolve_color/px/radius/opacity`
+- **Disabled states** with opacity + `CursorStyle::OperationNotAllowed`
+- **Overlay/backdrop** composition with `.occlude()` for modals
+- **Scrollable containers** with `.id()` + `.overflow_y_scroll()`
+- **Text editing** via `on_key_down` (single chars, backspace, Enter/Escape)
+- **Interactive composites** (media players, editors, pickers, tables, etc.)
 
 ---
 
