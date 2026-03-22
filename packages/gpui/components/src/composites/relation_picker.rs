@@ -1,5 +1,6 @@
 //! RelationPicker — real GPUI component backed by RelationPickerSpec.
 
+use std::rc::Rc;
 use gpui::prelude::FluentBuilder;
 use gpui::*;
 use pug_gpui::GpuiThemeProvider;
@@ -16,7 +17,8 @@ use crate::theme_ext::{resolve_color, resolve_px, resolve_radius};
 pub struct RelationPicker {
     spec: RelationPickerSpec,
     theme: GpuiThemeProvider,
-    on_select: Option<Box<dyn Fn(&str, &ClickEvent, &mut Window, &mut App) + 'static>>,
+    on_select: Option<Rc<dyn Fn(&str, &ClickEvent, &mut Window, &mut App) + 'static>>,
+    on_breadcrumb_click: Option<Rc<dyn Fn(usize, &ClickEvent, &mut Window, &mut App) + 'static>>,
     /// Current drill-down path (e.g. ["Projects", "Backend"]).
     drill_path: Vec<String>,
 }
@@ -28,7 +30,7 @@ impl std::ops::Deref for RelationPicker {
 
 impl RelationPicker {
     pub fn new(items: Vec<PickerItemSpec>, theme: &GpuiThemeProvider) -> Self {
-        Self { spec: RelationPickerSpec::new(items), theme: theme.clone(), on_select: None, drill_path: Vec::new() }
+        Self { spec: RelationPickerSpec::new(items), theme: theme.clone(), on_select: None, on_breadcrumb_click: None, drill_path: Vec::new() }
     }
 
     pub fn from_spec(spec: RelationPickerSpec, theme: &GpuiThemeProvider) -> Self {
@@ -36,6 +38,7 @@ impl RelationPicker {
             spec,
             theme: theme.clone(),
             on_select: None,
+            on_breadcrumb_click: None,
             drill_path: Vec::new(),
         }
     }
@@ -54,7 +57,15 @@ impl RelationPicker {
         mut self,
         handler: impl Fn(&str, &ClickEvent, &mut Window, &mut App) + 'static,
     ) -> Self {
-        self.on_select = Some(Box::new(handler));
+        self.on_select = Some(Rc::new(handler));
+        self
+    }
+
+    pub fn on_breadcrumb_click(
+        mut self,
+        handler: impl Fn(usize, &ClickEvent, &mut Window, &mut App) + 'static,
+    ) -> Self {
+        self.on_breadcrumb_click = Some(Rc::new(handler));
         self
     }
 }
@@ -98,14 +109,23 @@ impl IntoElement for RelationPicker {
                 .border_color(border);
 
             // Root label
-            breadcrumb_row = breadcrumb_row.child(
-                div()
+            {
+                let mut root_el = div()
+                    .id("relation-picker-breadcrumb-root")
                     .text_size(px(12.0))
                     .text_color(text_secondary)
-                    .child("Root"),
-            );
+                    .cursor_pointer()
+                    .child("Root");
+                if let Some(ref handler) = self.on_breadcrumb_click {
+                    let handler = handler.clone();
+                    root_el = root_el.on_click(move |ev, win, app| {
+                        handler(0, ev, win, app);
+                    });
+                }
+                breadcrumb_row = breadcrumb_row.child(root_el);
+            }
 
-            for segment in &self.drill_path {
+            for (idx, segment) in self.drill_path.iter().enumerate() {
                 // Chevron separator
                 breadcrumb_row = breadcrumb_row.child(
                     Icon::from_spec(
@@ -116,12 +136,21 @@ impl IntoElement for RelationPicker {
                 );
 
                 // Segment label
-                breadcrumb_row = breadcrumb_row.child(
-                    div()
-                        .text_size(px(12.0))
-                        .text_color(text_primary)
-                        .child(segment.clone()),
-                );
+                let seg_id = SharedString::from(format!("relation-picker-breadcrumb-{}", idx));
+                let mut seg_el = div()
+                    .id(seg_id)
+                    .text_size(px(12.0))
+                    .text_color(text_primary)
+                    .cursor_pointer()
+                    .child(segment.clone());
+                if let Some(ref handler) = self.on_breadcrumb_click {
+                    let handler = handler.clone();
+                    let depth = idx + 1;
+                    seg_el = seg_el.on_click(move |ev, win, app| {
+                        handler(depth, ev, win, app);
+                    });
+                }
+                breadcrumb_row = breadcrumb_row.child(seg_el);
             }
 
             container = container.child(breadcrumb_row);
@@ -260,6 +289,14 @@ impl IntoElement for RelationPicker {
                                 .text_color(text_secondary.opacity(0.7))
                                 .child(meta.clone()),
                         );
+                    }
+
+                    if let Some(ref handler) = self.on_select {
+                        let handler = handler.clone();
+                        let id = item.id.clone();
+                        item_el = item_el.on_click(move |ev, win, app| {
+                            handler(&id, ev, win, app);
+                        });
                     }
 
                     list = list.child(item_el);

@@ -18,6 +18,8 @@ pub struct Menu {
     theme: GpuiThemeProvider,
     id_prefix: String,
     selected_value: Option<String>,
+    on_select: Option<std::rc::Rc<dyn Fn(&str, &mut Window, &mut App) + 'static>>,
+    on_close: Option<std::rc::Rc<dyn Fn(&mut Window, &mut App) + 'static>>,
 }
 
 impl std::ops::Deref for Menu {
@@ -27,7 +29,7 @@ impl std::ops::Deref for Menu {
 
 impl Menu {
     pub fn new(theme: &GpuiThemeProvider) -> Self {
-        Self { spec: MenuSpec::default(), theme: theme.clone(), id_prefix: String::new(), selected_value: None }
+        Self { spec: MenuSpec::default(), theme: theme.clone(), id_prefix: String::new(), selected_value: None, on_select: None, on_close: None }
     }
 
     pub fn from_spec(spec: MenuSpec, theme: &GpuiThemeProvider) -> Self {
@@ -36,7 +38,19 @@ impl Menu {
             theme: theme.clone(),
             id_prefix: "pug-menu".to_string(),
             selected_value: None,
+            on_select: None,
+            on_close: None,
         }
+    }
+
+    pub fn on_select(mut self, handler: impl Fn(&str, &mut Window, &mut App) + 'static) -> Self {
+        self.on_select = Some(std::rc::Rc::new(handler));
+        self
+    }
+
+    pub fn on_close(mut self, handler: impl Fn(&mut Window, &mut App) + 'static) -> Self {
+        self.on_close = Some(std::rc::Rc::new(handler));
+        self
     }
 
     // ── Forwarded spec builders ───────────────────────────────
@@ -151,6 +165,24 @@ impl IntoElement for Menu {
 
             row = row.focus(move |s| s.border_color(focus_ring));
 
+            // Keyboard: Enter/Space to select, Escape to close
+            if !is_disabled {
+                if let Some(ref handler) = self.on_select {
+                    let key_handler = handler.clone();
+                    let val = item.value.clone();
+                    let close_handler = self.on_close.clone();
+                    row = row.on_key_down(move |event: &KeyDownEvent, window, cx| {
+                        if event.keystroke.key == "enter" || event.keystroke.key == "space" {
+                            key_handler(&val, window, cx);
+                        } else if event.keystroke.key == "escape" {
+                            if let Some(ref close) = close_handler {
+                                close(window, cx);
+                            }
+                        }
+                    });
+                }
+            }
+
             if is_active {
                 row = row
                     .bg(item_hover)
@@ -165,6 +197,15 @@ impl IntoElement for Menu {
                     .text_color(text_primary)
                     .cursor_pointer()
                     .hover(|s| s.bg(item_hover));
+
+                // Click to select item
+                if let Some(ref handler) = self.on_select {
+                    let handler = handler.clone();
+                    let val = item.value.clone();
+                    row = row.on_click(move |_event, window, cx| {
+                        handler(&val, window, cx);
+                    });
+                }
             }
 
             // Label + checkbox indicator

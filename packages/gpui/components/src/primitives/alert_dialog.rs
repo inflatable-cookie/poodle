@@ -191,7 +191,7 @@ impl IntoElement for AlertDialog {
                                     .hover(|s| s.bg(hsla(0.0, 0.0, 0.5, 0.1)))
                                     .child(self.spec.cancel_label.clone())
                                     .when_some(self.on_cancel, |el, handler| {
-                                        el.on_mouse_down(MouseButton::Left, move |_, window, app| {
+                                        el.on_click(move |_, window, app| {
                                             handler(window, app);
                                         })
                                     }),
@@ -209,7 +209,7 @@ impl IntoElement for AlertDialog {
                                     .hover(|s| s.opacity(0.9))
                                     .child(self.spec.confirm_label.clone())
                                     .when_some(self.on_confirm, |el, handler| {
-                                        el.on_mouse_down(MouseButton::Left, move |_, window, app| {
+                                        el.on_click(move |_, window, app| {
                                             handler(window, app);
                                         })
                                     }),

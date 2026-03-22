@@ -1,5 +1,6 @@
 //! MediaPicker — media selection/upload interface backed by MediaPickerSpec.
 
+use std::rc::Rc;
 use gpui::prelude::FluentBuilder;
 use gpui::*;
 use pug_gpui::GpuiThemeProvider;
@@ -30,6 +31,9 @@ pub struct MediaPicker {
     active_tab: MediaPickerTab,
     thumbnails: Vec<MediaPickerItem>,
     content: Option<AnyElement>,
+    on_select: Option<Rc<dyn Fn(&str, &ClickEvent, &mut Window, &mut App) + 'static>>,
+    on_confirm: Option<Rc<dyn Fn(&ClickEvent, &mut Window, &mut App) + 'static>>,
+    on_tab_change: Option<Rc<dyn Fn(MediaPickerTab, &ClickEvent, &mut Window, &mut App) + 'static>>,
 }
 
 impl std::ops::Deref for MediaPicker {
@@ -45,6 +49,9 @@ impl MediaPicker {
             active_tab: MediaPickerTab::Browse,
             thumbnails: Vec::new(),
             content: None,
+            on_select: None,
+            on_confirm: None,
+            on_tab_change: None,
         }
     }
     pub fn from_spec(spec: MediaPickerSpec, theme: &GpuiThemeProvider) -> Self {
@@ -54,6 +61,9 @@ impl MediaPicker {
             active_tab: MediaPickerTab::Browse,
             thumbnails: Vec::new(),
             content: None,
+            on_select: None,
+            on_confirm: None,
+            on_tab_change: None,
         }
     }
     pub fn with_content(mut self, c: impl IntoElement) -> Self {
@@ -67,6 +77,27 @@ impl MediaPicker {
     }
     pub fn with_thumbnails(mut self, thumbs: impl IntoIterator<Item = MediaPickerItem>) -> Self {
         self.thumbnails.extend(thumbs); self
+    }
+    pub fn on_select(
+        mut self,
+        handler: impl Fn(&str, &ClickEvent, &mut Window, &mut App) + 'static,
+    ) -> Self {
+        self.on_select = Some(Rc::new(handler));
+        self
+    }
+    pub fn on_confirm(
+        mut self,
+        handler: impl Fn(&ClickEvent, &mut Window, &mut App) + 'static,
+    ) -> Self {
+        self.on_confirm = Some(Rc::new(handler));
+        self
+    }
+    pub fn on_tab_change(
+        mut self,
+        handler: impl Fn(MediaPickerTab, &ClickEvent, &mut Window, &mut App) + 'static,
+    ) -> Self {
+        self.on_tab_change = Some(Rc::new(handler));
+        self
     }
 }
 
@@ -161,26 +192,48 @@ impl IntoElement for MediaPicker {
             theme,
         ).with_color(if !browse_active { accent } else { text_secondary });
 
+        let on_tab_change = self.on_tab_change;
+
+        let browse_tab = {
+            let mut el = tab_item("Browse", browse_active)
+                .id("media-picker-tab-browse")
+                .flex()
+                .items_center()
+                .gap(px(4.0))
+                .child(browse_icon)
+                .child("Browse");
+            if let Some(ref handler) = on_tab_change {
+                let handler = handler.clone();
+                el = el.on_click(move |ev, win, app| {
+                    handler(MediaPickerTab::Browse, ev, win, app);
+                });
+            }
+            el
+        };
+
+        let upload_tab = {
+            let mut el = tab_item("Upload", !browse_active)
+                .id("media-picker-tab-upload")
+                .flex()
+                .items_center()
+                .gap(px(4.0))
+                .child(upload_icon)
+                .child("Upload");
+            if let Some(ref handler) = on_tab_change {
+                let handler = handler.clone();
+                el = el.on_click(move |ev, win, app| {
+                    handler(MediaPickerTab::Upload, ev, win, app);
+                });
+            }
+            el
+        };
+
         let tabs = div()
             .flex()
             .border_b_1()
             .border_color(border_color)
-            .child(
-                tab_item("Browse", browse_active)
-                    .flex()
-                    .items_center()
-                    .gap(px(4.0))
-                    .child(browse_icon)
-                    .child("Browse"),
-            )
-            .child(
-                tab_item("Upload", !browse_active)
-                    .flex()
-                    .items_center()
-                    .gap(px(4.0))
-                    .child(upload_icon)
-                    .child("Upload"),
-            );
+            .child(browse_tab)
+            .child(upload_tab);
 
         dialog = dialog.child(tabs);
 
@@ -245,11 +298,16 @@ impl IntoElement for MediaPicker {
             );
         }
 
+        let on_select = self.on_select;
+
         for thumb in &self.thumbnails {
             let selected_border = if thumb.is_selected { accent } else { border_color };
             let border_w = if thumb.is_selected { px(2.0) } else { px(1.0) };
 
-            let item = div()
+            let item_id = SharedString::from(format!("media-picker-thumb-{}", thumb.id));
+
+            let mut item = div()
+                .id(item_id)
                 .w(px(96.0))
                 .h(px(96.0))
                 .rounded(px(6.0))
@@ -277,6 +335,14 @@ impl IntoElement for MediaPicker {
                         .overflow_x_hidden()
                         .child(thumb.label.clone()),
                 );
+
+            if let Some(ref handler) = on_select {
+                let handler = handler.clone();
+                let thumb_id = thumb.id.clone();
+                item = item.on_click(move |ev, win, app| {
+                    handler(&thumb_id, ev, win, app);
+                });
+            }
 
             grid = grid.child(item);
         }
@@ -306,8 +372,9 @@ impl IntoElement for MediaPicker {
                         if selected == 1 { "" } else { "s" },
                     )),
             )
-            .child(
-                div()
+            .child({
+                let mut confirm_btn = div()
+                    .id("media-picker-confirm")
                     .px(px(14.0))
                     .py(px(6.0))
                     .rounded(px(6.0))
@@ -316,8 +383,15 @@ impl IntoElement for MediaPicker {
                     .text_size(px(13.0))
                     .font_weight(FontWeight::MEDIUM)
                     .cursor_pointer()
-                    .child("Confirm"),
-            );
+                    .child("Confirm");
+                if let Some(ref handler) = self.on_confirm {
+                    let handler = handler.clone();
+                    confirm_btn = confirm_btn.on_click(move |ev, win, app| {
+                        handler(ev, win, app);
+                    });
+                }
+                confirm_btn
+            });
 
         dialog = dialog.child(footer);
 

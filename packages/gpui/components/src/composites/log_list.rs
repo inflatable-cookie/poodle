@@ -49,6 +49,8 @@ pub struct LogList {
     theme: GpuiThemeProvider,
     entries: Vec<LogEntry>,
     children: Vec<AnyElement>,
+    on_filter_change: Option<Box<dyn Fn(&str, &mut Window, &mut App)>>,
+    on_search: Option<Box<dyn Fn(&str, &mut Window, &mut App)>>,
 }
 
 impl std::ops::Deref for LogList {
@@ -58,10 +60,10 @@ impl std::ops::Deref for LogList {
 
 impl LogList {
     pub fn new(theme: &GpuiThemeProvider) -> Self {
-        Self { spec: LogListSpec::new(), theme: theme.clone(), entries: Vec::new(), children: Vec::new() }
+        Self { spec: LogListSpec::new(), theme: theme.clone(), entries: Vec::new(), children: Vec::new(), on_filter_change: None, on_search: None }
     }
     pub fn from_spec(spec: LogListSpec, theme: &GpuiThemeProvider) -> Self {
-        Self { spec, theme: theme.clone(), entries: Vec::new(), children: Vec::new() }
+        Self { spec, theme: theme.clone(), entries: Vec::new(), children: Vec::new(), on_filter_change: None, on_search: None }
     }
     pub fn with_child(mut self, child: impl IntoElement) -> Self {
         self.children.push(child.into_any_element()); self
@@ -71,6 +73,12 @@ impl LogList {
     }
     pub fn with_entries(mut self, entries: impl IntoIterator<Item = LogEntry>) -> Self {
         self.entries.extend(entries); self
+    }
+    pub fn on_filter_change(mut self, handler: impl Fn(&str, &mut Window, &mut App) + 'static) -> Self {
+        self.on_filter_change = Some(Box::new(handler)); self
+    }
+    pub fn on_search(mut self, handler: impl Fn(&str, &mut Window, &mut App) + 'static) -> Self {
+        self.on_search = Some(Box::new(handler)); self
     }
 }
 
@@ -104,48 +112,72 @@ impl IntoElement for LogList {
             .border_b_1()
             .border_color(border_color);
 
-        // Filter level indicator
-        toolbar = toolbar.child(
-            div()
-                .flex()
-                .items_center()
-                .gap(px(4.0))
-                .child(filter_icon)
-                .child(
-                    div()
-                        .text_size(px(12.0))
-                        .text_color(text_secondary)
-                        .child(
-                            self.spec.filter_level
-                                .clone()
-                                .unwrap_or_else(|| "All levels".into()),
-                        ),
-                ),
-        );
+        // Filter level button
+        let filter_label: SharedString = self.spec.filter_level
+            .clone()
+            .unwrap_or_else(|| "All levels".into())
+            .into();
+        let filter_label_cb = filter_label.clone();
+        let mut filter_btn = div()
+            .id("log-list-filter-btn")
+            .cursor_pointer()
+            .flex()
+            .items_center()
+            .gap(px(4.0))
+            .rounded(px(4.0))
+            .px(px(4.0))
+            .py(px(2.0))
+            .hover(|s| s.bg(hsla(0.0, 0.0, 0.5, 0.08)))
+            .focus(move |s| s.border_color(resolve_color(theme, "semantic.color.accent.focusRing")))
+            .child(filter_icon)
+            .child(
+                div()
+                    .text_size(px(12.0))
+                    .text_color(text_secondary)
+                    .child(filter_label),
+            );
+        if let Some(handler) = self.on_filter_change {
+            filter_btn = filter_btn.on_click(move |_, window, cx| {
+                handler(&filter_label_cb, window, cx);
+            });
+        }
+        toolbar = toolbar.child(filter_btn);
 
-        // Search placeholder
-        toolbar = toolbar.child(
-            div()
-                .flex_grow()
-                .flex()
-                .items_center()
-                .justify_end()
-                .gap(px(4.0))
-                .child(search_icon)
-                .child(
-                    div()
-                        .text_size(px(12.0))
-                        .text_color(text_secondary)
-                        .child("Search logs\u{2026}"),
-                ),
-        );
+        // Search button
+        let mut search_btn = div()
+            .id("log-list-search-btn")
+            .cursor_pointer()
+            .flex_grow()
+            .flex()
+            .items_center()
+            .justify_end()
+            .gap(px(4.0))
+            .rounded(px(4.0))
+            .px(px(4.0))
+            .py(px(2.0))
+            .hover(|s| s.bg(hsla(0.0, 0.0, 0.5, 0.08)))
+            .focus(move |s| s.border_color(resolve_color(theme, "semantic.color.accent.focusRing")))
+            .child(search_icon)
+            .child(
+                div()
+                    .text_size(px(12.0))
+                    .text_color(text_secondary)
+                    .child("Search logs\u{2026}"),
+            );
+        if let Some(handler) = self.on_search {
+            search_btn = search_btn.on_click(move |_, window, cx| {
+                handler("", window, cx);
+            });
+        }
+        toolbar = toolbar.child(search_btn);
 
         // ── Entry rows ───────────────────────────────────────────
         let mut rows = div()
+            .id("log-list-entries")
             .flex()
             .flex_col()
             .gap(gap)
-            .overflow_hidden()
+            .overflow_y_scroll()
             .flex_grow()
             .px(px(12.0))
             .py(px(6.0));
@@ -203,10 +235,11 @@ impl IntoElement for LogList {
 
         // ── Scroll-to-bottom hint ────────────────────────────────
         let mut container = div()
+            .id("log-list-container")
             .bg(fill)
             .flex()
             .flex_col()
-            .overflow_y_hidden()
+            .overflow_hidden()
             .child(toolbar)
             .child(rows);
 

@@ -83,6 +83,12 @@ impl IntoElement for DataTable {
         let text_secondary = resolve_color(theme, "semantic.color.text.secondary");
         let accent = resolve_color(theme, "semantic.color.accent.base");
 
+        // Wrap handlers in Rc for sharing across closures
+        let on_sort: Option<std::rc::Rc<dyn Fn(&str, &ClickEvent, &mut Window, &mut App)>> =
+            self.on_sort.map(|h| std::rc::Rc::from(h));
+        let on_row_click: Option<std::rc::Rc<dyn Fn(&str, &ClickEvent, &mut Window, &mut App)>> =
+            self.on_row_click.map(|h| std::rc::Rc::from(h));
+
         let mut table = div()
             .w_full()
             .flex()
@@ -138,7 +144,20 @@ impl IntoElement for DataTable {
                 header_cell = header_cell.cursor_pointer();
             }
 
-            header_row = header_row.child(header_cell);
+            // Wrap in stateful element for sort click handling
+            let header_id = SharedString::from(format!("dt-header-{}", col.id));
+            let mut stateful_header = header_cell.id(header_id);
+            if col.is_sortable {
+                if let Some(ref handler) = on_sort {
+                    let handler = handler.clone();
+                    let col_id = col.id.clone();
+                    stateful_header = stateful_header.on_click(move |event, window, cx| {
+                        handler(&col_id, event, window, cx);
+                    });
+                }
+            }
+
+            header_row = header_row.child(stateful_header);
         }
 
         // Row action column header
@@ -182,14 +201,24 @@ impl IntoElement for DataTable {
                 let selected_bg = accent.opacity(0.08);
 
                 let mut data_row = div()
+                    .id(SharedString::from(format!("dt-row-{}", row.id)))
                     .w_full()
                     .flex()
                     .border_b_1()
                     .border_color(border_color.opacity(0.5))
+                    .cursor_pointer()
                     .when(is_selected, |el| el.bg(selected_bg))
                     .when(!is_selected, move |el| {
                         el.hover(move |s| s.bg(row_hover_bg))
                     });
+
+                if let Some(ref handler) = on_row_click {
+                    let handler = handler.clone();
+                    let row_id = row.id.clone();
+                    data_row = data_row.on_click(move |event, window, cx| {
+                        handler(&row_id, event, window, cx);
+                    });
+                }
 
                 for col in &spec.columns {
                     let cell_value = row
@@ -214,15 +243,27 @@ impl IntoElement for DataTable {
                 // Row action button
                 if spec.show_row_actions {
                     let action_label = spec.row_action_label.clone();
-                    data_row = data_row.child(
-                        div()
-                            .w(px(80.0))
-                            .px(inline_padding)
-                            .py(px(10.0))
-                            .text_size(px(12.0))
-                            .text_color(accent)
-                            .child(action_label),
-                    );
+                    let action_id = SharedString::from(format!("dt-action-{}", row.id));
+                    let mut action_btn = div()
+                        .id(action_id)
+                        .w(px(80.0))
+                        .px(inline_padding)
+                        .py(px(10.0))
+                        .text_size(px(12.0))
+                        .text_color(accent)
+                        .cursor_pointer()
+                        .hover(|s| s.font_weight(FontWeight::SEMIBOLD))
+                        .child(action_label);
+
+                    if let Some(ref handler) = on_row_click {
+                        let handler = handler.clone();
+                        let row_id = row.id.clone();
+                        action_btn = action_btn
+                            .on_click(move |event, window, cx| {
+                                handler(&row_id, event, window, cx);
+                            });
+                    }
+                    data_row = data_row.child(action_btn);
                 }
 
                 table = table.child(data_row);

@@ -26,6 +26,7 @@ pub struct ColorPicker {
     theme: GpuiThemeProvider,
     id_suffix: Option<String>,
     on_toggle: Option<Box<dyn Fn(&bool, &mut Window, &mut App) + 'static>>,
+    on_change: Option<std::rc::Rc<dyn Fn(&str, &mut Window, &mut App) + 'static>>,
 }
 
 impl std::ops::Deref for ColorPicker {
@@ -35,7 +36,7 @@ impl std::ops::Deref for ColorPicker {
 
 impl ColorPicker {
     pub fn new(theme: &GpuiThemeProvider) -> Self {
-        Self { spec: ColorPickerSpec::new(), theme: theme.clone(), id_suffix: None, on_toggle: None }
+        Self { spec: ColorPickerSpec::new(), theme: theme.clone(), id_suffix: None, on_toggle: None, on_change: None }
     }
 
     pub fn from_spec(spec: ColorPickerSpec, theme: &GpuiThemeProvider) -> Self {
@@ -44,6 +45,7 @@ impl ColorPicker {
             theme: theme.clone(),
             id_suffix: None,
             on_toggle: None,
+            on_change: None,
         }
     }
 
@@ -65,6 +67,14 @@ impl ColorPicker {
         handler: impl Fn(&bool, &mut Window, &mut App) + 'static,
     ) -> Self {
         self.on_toggle = Some(Box::new(handler));
+        self
+    }
+
+    pub fn on_change(
+        mut self,
+        handler: impl Fn(&str, &mut Window, &mut App) + 'static,
+    ) -> Self {
+        self.on_change = Some(std::rc::Rc::new(handler));
         self
     }
 }
@@ -188,18 +198,36 @@ impl IntoElement for ColorPicker {
                     .flex_wrap()
                     .gap(stack_gap);
 
-                for color_hex in &spec.swatches {
+                for (idx, color_hex) in spec.swatches.iter().enumerate() {
                     let swatch_color = parse_hex_color(color_hex);
-                    grid = grid.child(
-                        div()
-                            .w(swatch_size)
-                            .h(swatch_size)
-                            .rounded(swatch_radius)
-                            .border_1()
-                            .border_color(border)
-                            .bg(swatch_color)
-                            .cursor_pointer(),
-                    );
+                    let swatch_id = SharedString::from(format!(
+                        "{}-swatch-{}",
+                        if let Some(ref suffix) = self.id_suffix {
+                            format!("pug-color-picker-{}", suffix)
+                        } else {
+                            "pug-color-picker".to_string()
+                        },
+                        idx,
+                    ));
+                    let mut swatch = div()
+                        .id(swatch_id)
+                        .w(swatch_size)
+                        .h(swatch_size)
+                        .rounded(swatch_radius)
+                        .border_1()
+                        .border_color(border)
+                        .bg(swatch_color)
+                        .cursor_pointer();
+
+                    if let Some(ref on_change) = self.on_change {
+                        let handler = on_change.clone();
+                        let hex_value = color_hex.clone();
+                        swatch = swatch.on_click(move |_event, window, cx| {
+                            handler(&hex_value, window, cx);
+                        });
+                    }
+
+                    grid = grid.child(swatch);
                 }
                 overlay = overlay.child(grid);
             }
