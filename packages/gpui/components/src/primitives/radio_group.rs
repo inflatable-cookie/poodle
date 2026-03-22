@@ -81,6 +81,10 @@ impl IntoElement for RadioGroup {
 
         let current_value = spec.current_value().map(|s| s.to_string());
 
+        // Wrap on_change in Rc so it can be shared across option closures
+        let on_change: Option<std::rc::Rc<dyn Fn(&str, &mut Window, &mut App)>> =
+            self.on_change.map(|h| std::rc::Rc::from(h));
+
         // Contract: grid layout, orientation drives flow
         let mut group = match spec.orientation {
             Orientation::Horizontal => div().flex().flex_row().items_center().gap(group_gap),
@@ -113,6 +117,7 @@ impl IntoElement for RadioGroup {
 
             let mut row = div()
                 .id(option_id)
+                .focusable()
                 .flex().items_center()
                 .gap(option_gap)
                 .min_w(px(0.0))
@@ -122,6 +127,23 @@ impl IntoElement for RadioGroup {
                 row = row.opacity(disabled_opacity).cursor(CursorStyle::OperationNotAllowed);
             } else {
                 row = row.cursor_pointer();
+
+                // Click + keyboard handlers
+                if let Some(ref handler) = on_change {
+                    let click_handler = handler.clone();
+                    let key_handler = handler.clone();
+                    let val = option.value.clone();
+                    let val2 = option.value.clone();
+                    row = row
+                        .on_click(move |_event, window, cx| {
+                            click_handler(&val, window, cx);
+                        })
+                        .on_key_down(move |event: &KeyDownEvent, window, cx| {
+                            if event.keystroke.key == "space" || event.keystroke.key == "enter" {
+                                key_handler(&val2, window, cx);
+                            }
+                        });
+                }
             }
 
             row = row.child(indicator);

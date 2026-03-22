@@ -155,6 +155,7 @@ impl IntoElement for FilterToolbar {
             let clear_id = SharedString::from("filter-toolbar-clear");
             let mut clear_btn = div()
                 .id(clear_id)
+                .focusable()
                 .cursor_pointer()
                 .text_size(px(12.0))
                 .text_color(accent)

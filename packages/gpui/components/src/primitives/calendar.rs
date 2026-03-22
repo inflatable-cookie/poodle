@@ -205,6 +205,7 @@ impl IntoElement for Calendar {
         // Contract: padding 0.75rem (12px), radius-surface, gap 0.25rem (4px)
         let mut cal = div()
             .id(SharedString::from(id_str))
+            .focusable()
             .flex()
             .flex_col()
             .gap(px(4.0))
@@ -354,6 +355,7 @@ impl IntoElement for Calendar {
                     let cell_id = SharedString::from(format!("pug-cal-day-{}", day_num));
                     let mut cell = div()
                         .id(cell_id)
+                        .focusable()
                         .w(px(32.0))
                         .h(px(32.0))
                         .flex()

@@ -71,12 +71,14 @@ impl IntoElement for ConfirmAction {
 
         // Backdrop overlay — full-viewport scrim with centered dialog
         let backdrop = div()
+            .id("pug-confirm-backdrop")
             .absolute()
             .inset_0()
             .bg(hsla(0.0, 0.0, 0.0, 0.5))
             .flex()
             .items_center()
             .justify_center()
+            .occlude()
             .child(dialog);
 
         // If a trigger is provided, render it alongside the backdrop.

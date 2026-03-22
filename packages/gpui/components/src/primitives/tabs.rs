@@ -98,6 +98,7 @@ impl Tabs {
 
             let mut tab = div()
                 .id(tab_id)
+                .focusable()
                 .px(inline_padding)
                 .py(control_y)
                 .text_size(px(12.0)).font_weight(FontWeight::SEMIBOLD);

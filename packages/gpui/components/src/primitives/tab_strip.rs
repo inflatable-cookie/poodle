@@ -108,6 +108,7 @@ impl IntoElement for TabStrip {
 
             let mut tab = div()
                 .id(item_id)
+                .focusable()
                 .flex()
                 .items_center()
                 .gap(px(6.0))

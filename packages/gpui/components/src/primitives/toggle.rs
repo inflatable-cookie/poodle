@@ -98,6 +98,7 @@ impl IntoElement for Toggle {
 
         let mut el = div()
             .id(id)
+            .focusable()
             .h(height)
             .min_w(px(36.0)) // contract: 2.25rem
             .px(pad_x)
@@ -122,7 +123,15 @@ impl IntoElement for Toggle {
         } else {
             el = el.cursor_pointer().hover(move |s| s.bg(hover_fill));
             if let Some(handler) = self.on_click {
-                el = el.on_click(move |event, window, cx| handler(event, window, cx));
+                let handler = std::rc::Rc::new(handler);
+                let key_handler = handler.clone();
+                el = el
+                    .on_click(move |event, window, cx| handler(event, window, cx))
+                    .on_key_down(move |event: &KeyDownEvent, window, cx| {
+                        if event.keystroke.key == "space" || event.keystroke.key == "enter" {
+                            key_handler(&ClickEvent::default(), window, cx);
+                        }
+                    });
             }
         }
 

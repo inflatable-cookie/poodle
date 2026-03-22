@@ -82,6 +82,7 @@ impl IntoElement for ToggleGroup {
 
             let mut item = div()
                 .id(SharedString::from(format!("tg-{}", option.value)))
+                .focusable()
                 .px(px(12.0))
                 .py(px(4.0))
                 .rounded(radius)

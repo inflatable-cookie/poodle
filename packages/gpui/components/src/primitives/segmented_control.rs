@@ -111,6 +111,7 @@ impl IntoElement for SegmentedControl {
             // Contract: font 0.75rem (12px), weight 600, padding 0 0.75rem (12px)
             let mut seg = div()
                 .id(seg_id)
+                .focusable()
                 .px(px(12.0))
                 .h(segment_height)
                 .text_size(px(12.0))

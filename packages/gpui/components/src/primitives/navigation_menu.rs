@@ -113,6 +113,7 @@ impl IntoElement for NavigationMenu {
             // Contract: pill-style trigger with border, padding 0 0.875rem
             let mut trigger = div()
                 .id(item_id)
+                .focusable()
                 .flex()
                 .items_center()
                 .min_h(trigger_height)

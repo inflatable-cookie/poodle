@@ -69,6 +69,7 @@ impl IntoElement for CardRadioGroup {
             let card_id = SharedString::from(format!("pug-card-radio-{}", idx));
             let mut card = div()
                 .id(card_id)
+                .focusable()
                 .flex_1()
                 .min_w(px(200.0))
                 .bg(fill).rounded(radius)

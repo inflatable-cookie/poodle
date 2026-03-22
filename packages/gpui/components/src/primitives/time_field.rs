@@ -87,6 +87,7 @@ impl IntoElement for TimeField {
 
         let mut field = div()
             .id(SharedString::from(id_str))
+            .focusable()
             .min_h(control_height) // Contract: min-height, not fixed height
             .px(control_padding_x)
             .rounded(control_radius)

@@ -139,6 +139,7 @@ impl IntoElement for Switch {
         // Row: track + label
         let mut row = div()
             .id(SharedString::from(id_str))
+            .focusable()
             .flex()
             .items_center()
             .gap(inline_gap)
@@ -163,13 +164,21 @@ impl IntoElement for Switch {
             );
         }
 
-        // Click handler
+        // Click + keyboard handlers
         if let Some(handler) = self.on_change {
             if is_interactive {
                 let next = !is_checked;
-                row = row.on_click(move |_event, window, cx| {
-                    handler(&next, window, cx);
-                });
+                let handler = std::rc::Rc::new(handler);
+                let key_handler = handler.clone();
+                row = row
+                    .on_click(move |_event, window, cx| {
+                        handler(&next, window, cx);
+                    })
+                    .on_key_down(move |event: &KeyDownEvent, window, cx| {
+                        if event.keystroke.key == "space" || event.keystroke.key == "enter" {
+                            key_handler(&next, window, cx);
+                        }
+                    });
             }
         }
 

@@ -101,6 +101,7 @@ impl IntoElement for Collapsible {
         // ── Trigger (contract: grid 1fr auto, gap 0.75rem) ──
         let mut trigger = div()
             .id(SharedString::from(id_str))
+            .focusable()
             .flex().items_center()
             .gap(px(12.0)) // 0.75rem
             .w_full()
@@ -144,13 +145,21 @@ impl IntoElement for Collapsible {
             trigger = trigger.cursor(CursorStyle::OperationNotAllowed);
         }
 
-        // Click handler
+        // Click + keyboard handlers
         if let Some(handler) = self.on_toggle {
             if spec.activation_allowed() {
                 let next_open = !is_open;
-                trigger = trigger.on_click(move |_event, window, cx| {
-                    handler(&next_open, window, cx);
-                });
+                let handler = std::rc::Rc::new(handler);
+                let key_handler = handler.clone();
+                trigger = trigger
+                    .on_click(move |_event, window, cx| {
+                        handler(&next_open, window, cx);
+                    })
+                    .on_key_down(move |event: &KeyDownEvent, window, cx| {
+                        if event.keystroke.key == "space" || event.keystroke.key == "enter" {
+                            key_handler(&next_open, window, cx);
+                        }
+                    });
             }
         }
 

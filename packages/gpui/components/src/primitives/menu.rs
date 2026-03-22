@@ -123,6 +123,7 @@ impl IntoElement for Menu {
             // Contract: item min-height 2rem, padding 0.375rem 0.5rem
             let mut row = div()
                 .id(item_id)
+                .focusable()
                 .w_full()
                 .min_h(px(32.0)) // 2rem
                 .px(px(8.0))  // 0.5rem

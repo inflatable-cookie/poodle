@@ -86,6 +86,7 @@ impl IntoElement for Rating {
 
                 let mut star_wrapper = div()
                     .id(star_id)
+                    .focusable()
                     .cursor_pointer()
                     .child(icon)
                     .hover(move |s| s.text_color(hover_color));

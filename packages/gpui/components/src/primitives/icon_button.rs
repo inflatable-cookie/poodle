@@ -117,6 +117,7 @@ impl IntoElement for IconButton {
         // ── Build root ────────────────────────────────────────────
         let mut el = div()
             .id(SharedString::from(id_str))
+            .focusable()
             .w(control_size)
             .h(control_size)
             .rounded(radius)

@@ -135,6 +135,7 @@ impl IntoElement for DurationInput {
         // Contract: padding 0.25rem control-x, border, radius, surface bg
         let mut wrapper = div()
             .id(SharedString::from(id_str))
+            .focusable()
             .py(px(4.0)) // 0.25rem
             .px(control_padding_x)
             .rounded(control_radius)

@@ -94,6 +94,7 @@ impl IntoElement for ColorPicker {
 
         let mut trigger = div()
             .id(SharedString::from(id_str))
+            .focusable()
             .w(trigger_size)
             .h(trigger_size)
             .rounded(trigger_radius)

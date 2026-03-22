@@ -116,6 +116,7 @@ impl IntoElement for SplitButton {
 
         let mut primary = div()
             .id("pug-split-primary")
+            .focusable()
             .h(height)
             .min_w(px(64.0))
             .px(pad_x)
@@ -146,6 +147,7 @@ impl IntoElement for SplitButton {
         // ── Toggle half ───────────────────────────────────────────
         let mut toggle = div()
             .id("pug-split-toggle")
+            .focusable()
             .h(height)
             .w(px(32.0))
             .bg(fill)

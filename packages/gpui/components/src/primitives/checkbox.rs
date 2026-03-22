@@ -136,6 +136,7 @@ impl IntoElement for Checkbox {
         // Row: indicator + label
         let mut row = div()
             .id(SharedString::from(id_str))
+            .focusable()
             .flex()
             .items_center()
             .gap(inline_gap)
@@ -161,13 +162,21 @@ impl IntoElement for Checkbox {
             );
         }
 
-        // Click handler
+        // Click + keyboard handlers
         if let Some(handler) = self.on_change {
             if is_interactive {
                 let next_checked = !is_checked;
-                row = row.on_click(move |_event, window, cx| {
-                    handler(&next_checked, window, cx);
-                });
+                let handler = std::rc::Rc::new(handler);
+                let key_handler = handler.clone();
+                row = row
+                    .on_click(move |_event, window, cx| {
+                        handler(&next_checked, window, cx);
+                    })
+                    .on_key_down(move |event: &KeyDownEvent, window, cx| {
+                        if event.keystroke.key == "space" || event.keystroke.key == "enter" {
+                            key_handler(&next_checked, window, cx);
+                        }
+                    });
             }
         }
 

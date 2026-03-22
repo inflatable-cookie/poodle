@@ -63,6 +63,7 @@ impl IntoElement for Pill {
 
         let mut el = div()
             .id(SharedString::from("pug-pill"))
+            .focusable()
             .px(px(8.0))
             .py(px(2.0))
             .rounded(radius)

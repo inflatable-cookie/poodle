@@ -193,6 +193,7 @@ impl IntoElement for CommandPalette {
 
             let mut row = div()
                 .id(action_el_id)
+                .focusable()
                 .flex()
                 .items_center()
                 .justify_between()

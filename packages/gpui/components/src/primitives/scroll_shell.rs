@@ -61,27 +61,28 @@ impl IntoElement for ScrollShell {
         let surface_radius = resolve_radius(theme, "semantic.radius.surface");
         let focus_ring = resolve_color(theme, spec.focus_ring_color_token());
 
+        let id_str = spec.label.as_deref().unwrap_or("scroll-shell");
         let mut el = div()
-            .overflow_hidden()
+            .id(SharedString::from(format!("pug-{}", id_str)))
             .rounded(surface_radius)
             .flex_1();
 
-        // Direction-based flex layout
+        // Direction-based flex layout + real scrolling
         match spec.direction {
             Direction::Vertical => {
-                el = el.flex().flex_col().min_h_0();
+                el = el.flex().flex_col().min_h_0().overflow_y_scroll();
             }
             Direction::Horizontal => {
-                el = el.flex().flex_row().min_w_0();
+                el = el.flex().flex_row().min_w_0().overflow_x_scroll();
             }
             Direction::Both => {
-                el = el.flex().flex_col().min_h_0().min_w_0();
+                el = el.flex().flex_col().min_h_0().min_w_0().overflow_scroll();
             }
         }
 
         // Focus ring for focusable shells
         if spec.is_focusable {
-            el = el.focus(move |s| s.border_color(focus_ring));
+            el = el.focusable().focus(move |s| s.border_color(focus_ring));
         }
 
         // Padding

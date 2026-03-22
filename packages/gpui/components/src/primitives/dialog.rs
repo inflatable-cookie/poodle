@@ -139,12 +139,14 @@ impl IntoElement for Dialog {
 
         // Backdrop overlay — full-viewport scrim with centered dialog
         let backdrop = div()
+            .id("pug-dialog-backdrop")
             .absolute()
             .inset_0()
             .bg(hsla(0.0, 0.0, 0.0, 0.5))
             .flex()
             .items_center()
             .justify_center()
+            .occlude()
             .child(dialog);
 
         backdrop.into_any_element()

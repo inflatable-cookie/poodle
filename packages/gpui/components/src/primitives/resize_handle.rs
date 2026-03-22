@@ -72,6 +72,7 @@ impl IntoElement for ResizeHandle {
         // Contains a centered 2px visual affordance line.
         let mut container = div()
             .id(handle_id)
+            .focusable()
             .flex()
             .items_center()
             .justify_center()

@@ -108,6 +108,7 @@ impl IntoElement for TextInput {
 
         let mut el = div()
             .id(SharedString::from(id_str))
+            .focusable()
             .min_h(control_height) // contract: min-height, not fixed height
             .px(inline_padding)
             .rounded(control_radius)

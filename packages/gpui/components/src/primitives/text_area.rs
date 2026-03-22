@@ -93,6 +93,7 @@ impl IntoElement for TextArea {
 
         let mut el = div()
             .id(SharedString::from(id_str))
+            .focusable()
             .min_h(px(row_height_f))
             .px(control_padding_x)
             .py(control_padding_y)

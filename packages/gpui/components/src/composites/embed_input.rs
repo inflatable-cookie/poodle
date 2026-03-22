@@ -42,6 +42,7 @@ impl IntoElement for EmbedInput {
         // Multi-line text area (3 rows) instead of single-line input
         let mut textarea = div()
             .id("pug-embed-input")
+            .focusable()
             .bg(fill).border_1().border_color(border).rounded(radius)
             .min_h(px(72.0)).px(px(12.0)).py(px(8.0))
             .flex().items_start()

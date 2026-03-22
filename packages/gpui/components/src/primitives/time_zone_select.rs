@@ -73,6 +73,7 @@ impl IntoElement for TimeZoneSelect {
 
         let mut trigger = div()
             .id(SharedString::from("pug-tz-select"))
+            .focusable()
             .h(control_height)
             .px(inline_padding)
             .rounded(control_radius)

@@ -110,6 +110,7 @@ impl Pagination {
 
         div()
             .id(SharedString::from(id.to_string()))
+            .focusable()
             .flex()
             .items_center()
             .justify_center()

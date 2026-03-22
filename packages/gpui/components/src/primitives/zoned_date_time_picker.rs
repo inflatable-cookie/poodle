@@ -76,6 +76,7 @@ impl IntoElement for ZonedDateTimePicker {
 
         let mut trigger = div()
             .id(SharedString::from("pug-zoned-dt-picker"))
+            .focusable()
             .h(control_height)
             .px(inline_padding)
             .rounded(control_radius)

@@ -113,6 +113,7 @@ impl IntoElement for Select {
         // Trigger button
         let mut trigger = div()
             .id(SharedString::from(id_str))
+            .focusable()
             .h(control_height)
             .px(inline_padding)
             .rounded(control_radius)
@@ -157,9 +158,19 @@ impl IntoElement for Select {
         if let Some(handler) = self.on_toggle {
             if !is_disabled {
                 let next_open = !is_open;
-                trigger = trigger.on_click(move |_event, window, cx| {
-                    handler(&next_open, window, cx);
-                });
+                let handler = std::rc::Rc::new(handler);
+                let key_handler = handler.clone();
+                trigger = trigger
+                    .on_click(move |_event, window, cx| {
+                        handler(&next_open, window, cx);
+                    })
+                    .on_key_down(move |event: &KeyDownEvent, window, cx| {
+                        if event.keystroke.key == "space" || event.keystroke.key == "enter" {
+                            key_handler(&next_open, window, cx);
+                        } else if event.keystroke.key == "escape" && is_open {
+                            key_handler(&false, window, cx);
+                        }
+                    });
             }
         }
 
@@ -171,12 +182,15 @@ impl IntoElement for Select {
             let option_selected = color_mix(accent, elevated_bg, 0.10);
 
             let mut list = div()
+                .id("pug-select-list")
                 .rounded(control_radius)
                 .bg(elevated_bg)
                 .border_1()
                 .border_color(border)
                 .shadow_md()
-                .py(stack_gap);
+                .py(stack_gap)
+                .max_h(px(240.0))
+                .overflow_y_scroll();
 
             for option in spec.options.iter() {
                 let is_selected =

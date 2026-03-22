@@ -46,6 +46,7 @@ impl IntoElement for InlineEditableField {
             // Editing mode: bordered input-like field
             let mut el = div()
                 .id("pug-inline-edit")
+                .focusable()
                 .border_1()
                 .border_color(border)
                 .rounded(radius)
@@ -71,6 +72,7 @@ impl IntoElement for InlineEditableField {
 
             let mut el = div()
                 .id("pug-inline-edit-display")
+                .focusable()
                 .flex()
                 .items_center()
                 .gap(px(4.0))

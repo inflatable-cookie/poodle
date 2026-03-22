@@ -114,6 +114,7 @@ impl IntoElement for DatePicker {
         // Trigger button
         let mut trigger = div()
             .id(SharedString::from(id_str))
+            .focusable()
             .h(control_height)
             .px(inline_padding)
             .rounded(control_radius)

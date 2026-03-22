@@ -146,6 +146,7 @@ impl IntoElement for Combobox {
 
             div()
                 .id(SharedString::from(id_str))
+                .focusable()
                 .w_full()
                 .min_h(input_height) // Contract: min-height, not fixed
                 .px(input_padding_x)
@@ -167,6 +168,7 @@ impl IntoElement for Combobox {
             let filtered = spec.filtered_options();
 
             let mut list = div()
+                .id("pug-combobox-list")
                 .w_full()
                 .mt(px(6.0)) // Contract: top calc(100% + 0.375rem)
                 .rounded(list_radius)
@@ -178,7 +180,7 @@ impl IntoElement for Combobox {
                 .flex_col()
                 .gap(px(2.0)) // Contract: gap 0.125rem
                 .p(px(4.0)) // Contract: padding 0.25rem
-                .overflow_hidden()
+                .overflow_y_scroll()
                 .max_h(px(240.0));
 
             if filtered.is_empty() {

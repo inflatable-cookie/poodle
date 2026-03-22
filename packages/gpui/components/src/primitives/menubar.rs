@@ -101,6 +101,7 @@ impl IntoElement for Menubar {
             // Contract: trigger min-height 2rem, padding 0 0.75rem, font 0.75rem/600
             let mut trigger = div()
                 .id(item_id)
+                .focusable()
                 .flex()
                 .items_center()
                 .min_h(px(32.0)) // 2rem

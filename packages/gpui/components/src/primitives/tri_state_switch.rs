@@ -133,6 +133,7 @@ impl IntoElement for TriStateSwitch {
 
         let mut container = div()
             .id(switch_id)
+            .focusable()
             .flex()
             .flex_row()
             .rounded(px(10.0))

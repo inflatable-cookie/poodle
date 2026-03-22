@@ -82,6 +82,7 @@ impl IntoElement for Accordion {
             // Header
             let mut header = div()
                 .id(item_id)
+                .focusable()
                 .flex()
                 .items_center()
                 .justify_between()

@@ -119,6 +119,7 @@ impl IntoElement for Slider {
 
         let mut wrapper = div()
             .id(slider_id)
+            .focusable()
             .w_full()
             .flex()
             .flex_col()

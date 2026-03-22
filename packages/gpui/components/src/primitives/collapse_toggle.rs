@@ -93,6 +93,7 @@ impl IntoElement for CollapseToggle {
         // ── Build root element ───────────────────────────────────
         let mut el = div()
             .id(SharedString::from(id_str))
+            .focusable()
             .w(button_size)
             .h(button_size)
             .rounded(radius)

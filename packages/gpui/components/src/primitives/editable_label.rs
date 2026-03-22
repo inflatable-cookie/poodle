@@ -86,6 +86,7 @@ impl IntoElement for EditableLabel {
         // Contract: padding 0.375rem 0.5rem
         let mut el = div()
             .id(SharedString::from(id_str))
+            .focusable()
             .px(px(8.0))  // 0.5rem
             .py(px(6.0))  // 0.375rem
             .rounded(control_radius)

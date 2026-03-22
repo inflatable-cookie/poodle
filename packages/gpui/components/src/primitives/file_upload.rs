@@ -117,6 +117,7 @@ impl IntoElement for FileUpload {
         // Contract: min-height 8rem, dashed border (solid here — GPUI has no dashed)
         let mut zone = div()
             .id(SharedString::from(id_str))
+            .focusable()
             .w_full()
             .min_h(px(128.0)) // 8rem
             .rounded(dropzone_radius)
