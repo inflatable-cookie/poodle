@@ -1,6 +1,5 @@
 //! Tooltip — real GPUI component backed by TooltipSpec.
 
-use gpui::prelude::FluentBuilder;
 use gpui::*;
 use pug_gpui::GpuiThemeProvider;
 use pug_primitives::{OverlayPlacement, TooltipSpec};
@@ -59,11 +58,11 @@ impl IntoElement for Tooltip {
         let spec = &self.spec;
 
         let fill = resolve_color(theme, spec.fill_token());
+        // Contract: text-inverse for tooltip text (dark bg, light text)
         let text_inverse = resolve_color(theme, "semantic.color.text.inverse");
         let stack_gap = resolve_px(theme, "semantic.space.stack.sm");
-        let control_padding_x = resolve_px(theme, "semantic.space.control.x");
-        let control_padding_y = resolve_px(theme, "semantic.space.control.y");
-        let tooltip_radius = resolve_radius(theme, "semantic.radius.surface");
+        // Contract: padding 0.375rem 0.5rem (6px 8px)
+        let tooltip_radius = resolve_radius(theme, "semantic.radius.control");
 
         let mut wrapper = div().flex().flex_col().gap(stack_gap);
 
@@ -77,14 +76,15 @@ impl IntoElement for Tooltip {
             if let Some(ref content) = spec.content {
                 wrapper = wrapper.child(
                     div()
-                        .px(control_padding_x)
-                        .py(control_padding_y)
+                        .px(px(8.0))  // 0.5rem
+                        .py(px(6.0))  // 0.375rem
                         .rounded(tooltip_radius)
                         .bg(fill)
                         .shadow_sm()
                         .child(
                             div()
-                                .text_xs()
+                                // Contract: font 0.75rem (12px)
+                                .text_size(px(12.0))
                                 .text_color(text_inverse)
                                 .child(content.clone()),
                         ),

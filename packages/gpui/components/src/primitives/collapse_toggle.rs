@@ -104,10 +104,16 @@ impl IntoElement for CollapseToggle {
             .justify_center()
             .line_height(px(1.0));
 
+        // Focus ring
+        let focus_ring = resolve_color(theme, spec.focus_ring_color_token());
+        el = el.focus(move |s| s.border_color(focus_ring));
+
         // ── Interactive states ───────────────────────────────────
         if is_disabled {
             let disabled_opacity = resolve_opacity(theme, spec.disabled_opacity_token());
-            el = el.opacity(disabled_opacity);
+            el = el
+                .opacity(disabled_opacity)
+                .cursor(CursorStyle::OperationNotAllowed);
         } else {
             el = el
                 .cursor_pointer()

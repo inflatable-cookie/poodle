@@ -1,11 +1,10 @@
 //! Popover — real GPUI component backed by PopoverSpec.
 
-use gpui::prelude::FluentBuilder;
 use gpui::*;
 use pug_gpui::GpuiThemeProvider;
 use pug_primitives::{OverlayPlacement, PopoverInitialFocus, PopoverSpec};
 
-use crate::theme_ext::resolve_color;
+use crate::theme_ext::{color_mix, resolve_color, resolve_px, resolve_radius};
 
 /// A real GPUI popover component backed by `PopoverSpec`.
 ///
@@ -66,8 +65,17 @@ impl IntoElement for Popover {
         let theme = &self.theme;
         let spec = &self.spec;
 
-        let surface_bg = resolve_color(theme, spec.surface_fill_token());
-        let border = resolve_color(theme, "semantic.color.border.default");
+        let surface_raw = resolve_color(theme, spec.surface_fill_token());
+        let panel = resolve_color(theme, "semantic.color.background.panel");
+        let border_raw = resolve_color(theme, "semantic.color.border.default");
+        let panel_x = resolve_px(theme, "semantic.space.panel.x");
+        let panel_y = resolve_px(theme, "semantic.space.panel.y");
+        // Contract: radius-surface
+        let radius = resolve_radius(theme, "semantic.radius.surface");
+
+        // Contract: bg 98% surface, border 72% border-default
+        let surface_bg = color_mix(surface_raw, panel, 0.98);
+        let border = color_mix(border_raw, panel, 0.72);
 
         let mut wrapper = div().flex().flex_col().gap(px(spec.offset as f32));
 
@@ -81,12 +89,13 @@ impl IntoElement for Popover {
             if let Some(content) = self.content {
                 wrapper = wrapper.child(
                     div()
-                        .rounded(px(8.0))
+                        .rounded(radius)
                         .bg(surface_bg)
                         .border_1()
                         .border_color(border)
                         .shadow_lg()
-                        .p(px(12.0))
+                        .px(panel_x)
+                        .py(panel_y)
                         .child(content),
                 );
             }

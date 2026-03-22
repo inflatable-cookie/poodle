@@ -18,7 +18,7 @@ impl Default for TooltipSpec {
             content: None,
             open: None,
             default_open: false,
-            delay_ms: 400,
+            delay_ms: 300,
             placement: OverlayPlacement::Top,
             aria_label: None,
         }

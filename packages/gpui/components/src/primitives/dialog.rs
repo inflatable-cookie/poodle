@@ -4,7 +4,7 @@ use gpui::*;
 use pug_gpui::GpuiThemeProvider;
 use pug_primitives::{DialogKind, DialogSpec};
 
-use crate::theme_ext::{resolve_color, resolve_px};
+use crate::theme_ext::{color_mix, resolve_color, resolve_px, resolve_radius};
 
 /// A real GPUI dialog component backed by `DialogSpec`.
 ///
@@ -60,45 +60,65 @@ impl IntoElement for Dialog {
         let theme = &self.theme;
         let spec = &self.spec;
 
-        let inline_gap = resolve_px(theme, "semantic.space.inline.sm");
+        let actions_gap = resolve_px(theme, "semantic.space.inline.sm");
+        let panel_x = resolve_px(theme, "semantic.space.panel.x");
+        let panel_y = resolve_px(theme, "semantic.space.panel.y");
 
         let surface_bg = resolve_color(theme, spec.surface_fill_token());
-        let border = resolve_color(theme, "semantic.color.border.default");
+        let panel = resolve_color(theme, "semantic.color.background.panel");
+        let border_raw = resolve_color(theme, "semantic.color.border.default");
+        let text_primary = resolve_color(theme, "semantic.color.text.primary");
         let text_secondary = resolve_color(theme, "semantic.color.text.secondary");
+        // Contract: radius-surface
+        let radius = resolve_radius(theme, "semantic.radius.surface");
+
+        // Contract: border 72% border-default, bg 98% elevated
+        let border = color_mix(border_raw, panel, 0.72);
+        let bg = color_mix(surface_bg, panel, 0.98);
 
         let mut dialog = div()
-            .p(px(16.0))
-            .rounded(px(8.0))
-            .bg(surface_bg)
+            .px(panel_x)
+            .py(panel_y)
+            .rounded(radius)
+            .bg(bg)
             .border_1()
             .border_color(border)
             .shadow_lg()
             .flex()
             .flex_col()
-            .gap(px(12.0));
+            // Contract: header gap 0.5rem (8px)
+            .gap(px(8.0));
 
-        // Title
+        // Contract: title font 1.125rem (18px), weight 600
         if let Some(ref title) = spec.title {
-            dialog = dialog.child(div().text_base().child(title.clone()));
+            dialog = dialog.child(
+                div()
+                    .text_size(px(18.0))
+                    .font_weight(FontWeight::SEMIBOLD)
+                    .text_color(text_primary)
+                    .child(title.clone()),
+            );
         }
 
-        // Description
+        // Contract: description font 0.875rem (14px)
         if let Some(ref description) = spec.description {
             dialog = dialog.child(
                 div()
-                    .text_sm()
+                    .text_size(px(14.0))
                     .text_color(text_secondary)
                     .child(description.clone()),
             );
         }
 
-        // Actions slot
+        // Actions slot — Contract: flex-wrap, justify-end
         if let Some(actions) = self.actions {
             dialog = dialog.child(
                 div()
                     .flex()
-                    .gap(inline_gap)
+                    .flex_wrap()
+                    .gap(actions_gap)
                     .justify_end()
+                    .pt(px(8.0)) // Visual separation from content
                     .child(actions),
             );
         }
