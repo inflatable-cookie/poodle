@@ -12,6 +12,9 @@ pub struct TextArea {
     spec: TextAreaSpec,
     theme: GpuiThemeProvider,
     id_suffix: Option<String>,
+    on_change: Option<std::rc::Rc<dyn Fn(&str, &mut Window, &mut App) + 'static>>,
+    on_submit: Option<Box<dyn Fn(&str, &mut Window, &mut App) + 'static>>,
+    on_cancel: Option<Box<dyn Fn(&mut Window, &mut App) + 'static>>,
 }
 
 impl std::ops::Deref for TextArea {
@@ -21,7 +24,7 @@ impl std::ops::Deref for TextArea {
 
 impl TextArea {
     pub fn new(theme: &GpuiThemeProvider) -> Self {
-        Self { spec: TextAreaSpec::new(), theme: theme.clone(), id_suffix: None }
+        Self { spec: TextAreaSpec::new(), theme: theme.clone(), id_suffix: None, on_change: None, on_submit: None, on_cancel: None }
     }
 
     pub fn from_spec(spec: TextAreaSpec, theme: &GpuiThemeProvider) -> Self {
@@ -29,6 +32,9 @@ impl TextArea {
             spec,
             theme: theme.clone(),
             id_suffix: None,
+            on_change: None,
+            on_submit: None,
+            on_cancel: None,
         }
     }
 
@@ -48,6 +54,24 @@ impl TextArea {
 
     pub fn with_id(mut self, suffix: impl Into<String>) -> Self {
         self.id_suffix = Some(suffix.into());
+        self
+    }
+
+    /// Called when the text value changes.
+    pub fn on_change(mut self, handler: impl Fn(&str, &mut Window, &mut App) + 'static) -> Self {
+        self.on_change = Some(std::rc::Rc::new(handler));
+        self
+    }
+
+    /// Called on Ctrl+Enter / Cmd+Enter submit.
+    pub fn on_submit(mut self, handler: impl Fn(&str, &mut Window, &mut App) + 'static) -> Self {
+        self.on_submit = Some(Box::new(handler));
+        self
+    }
+
+    /// Called on Escape.
+    pub fn on_cancel(mut self, handler: impl Fn(&mut Window, &mut App) + 'static) -> Self {
+        self.on_cancel = Some(Box::new(handler));
         self
     }
 }
@@ -109,6 +133,50 @@ impl IntoElement for TextArea {
 
         if spec.is_disabled {
             el = el.opacity(disabled_opacity).cursor(CursorStyle::OperationNotAllowed);
+        }
+
+        // Keyboard handlers for text editing
+        if !spec.is_disabled && !spec.is_read_only {
+            let current_value = value.to_string();
+            let on_change = self.on_change.clone();
+            let on_submit = self.on_submit;
+            let on_cancel = self.on_cancel;
+
+            el = el.on_key_down(move |event: &KeyDownEvent, window, cx| {
+                let key = event.keystroke.key.as_str();
+                if key == "enter" {
+                    if event.keystroke.modifiers.platform || event.keystroke.modifiers.control {
+                        // Ctrl/Cmd+Enter = submit
+                        if let Some(ref handler) = on_submit {
+                            handler(&current_value, window, cx);
+                        }
+                    } else {
+                        // Plain Enter = newline
+                        if let Some(ref handler) = on_change {
+                            let new_val = format!("{}\n", current_value);
+                            handler(&new_val, window, cx);
+                        }
+                    }
+                } else if key == "escape" {
+                    if let Some(ref handler) = on_cancel {
+                        handler(window, cx);
+                    }
+                } else if key == "backspace" {
+                    if let Some(ref handler) = on_change {
+                        let mut chars: Vec<char> = current_value.chars().collect();
+                        if !chars.is_empty() {
+                            chars.pop();
+                            let new_val: String = chars.into_iter().collect();
+                            handler(&new_val, window, cx);
+                        }
+                    }
+                } else if key.len() == 1 && !event.keystroke.modifiers.platform && !event.keystroke.modifiers.control {
+                    if let Some(ref handler) = on_change {
+                        let new_val = format!("{}{}", current_value, key);
+                        handler(&new_val, window, cx);
+                    }
+                }
+            });
         }
 
         el.into_any_element()

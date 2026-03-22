@@ -17,6 +17,9 @@ pub struct TextInput {
     theme: GpuiThemeProvider,
     id_suffix: Option<String>,
     on_focus: Option<Box<dyn Fn(&mut Window, &mut App) + 'static>>,
+    on_change: Option<std::rc::Rc<dyn Fn(&str, &mut Window, &mut App) + 'static>>,
+    on_submit: Option<Box<dyn Fn(&str, &mut Window, &mut App) + 'static>>,
+    on_cancel: Option<Box<dyn Fn(&mut Window, &mut App) + 'static>>,
 }
 
 impl std::ops::Deref for TextInput {
@@ -26,7 +29,7 @@ impl std::ops::Deref for TextInput {
 
 impl TextInput {
     pub fn new(theme: &GpuiThemeProvider) -> Self {
-        Self { spec: TextInputSpec::new(), theme: theme.clone(), id_suffix: None, on_focus: None }
+        Self { spec: TextInputSpec::new(), theme: theme.clone(), id_suffix: None, on_focus: None, on_change: None, on_submit: None, on_cancel: None }
     }
 
     pub fn from_spec(spec: TextInputSpec, theme: &GpuiThemeProvider) -> Self {
@@ -35,6 +38,9 @@ impl TextInput {
             theme: theme.clone(),
             id_suffix: None,
             on_focus: None,
+            on_change: None,
+            on_submit: None,
+            on_cancel: None,
         }
     }
 
@@ -68,6 +74,33 @@ impl TextInput {
         handler: impl Fn(&mut Window, &mut App) + 'static,
     ) -> Self {
         self.on_focus = Some(Box::new(handler));
+        self
+    }
+
+    /// Called when the input value changes.
+    pub fn on_change(
+        mut self,
+        handler: impl Fn(&str, &mut Window, &mut App) + 'static,
+    ) -> Self {
+        self.on_change = Some(std::rc::Rc::new(handler));
+        self
+    }
+
+    /// Called when the user presses Enter (submit).
+    pub fn on_submit(
+        mut self,
+        handler: impl Fn(&str, &mut Window, &mut App) + 'static,
+    ) -> Self {
+        self.on_submit = Some(Box::new(handler));
+        self
+    }
+
+    /// Called when the user presses Escape (cancel).
+    pub fn on_cancel(
+        mut self,
+        handler: impl Fn(&mut Window, &mut App) + 'static,
+    ) -> Self {
+        self.on_cancel = Some(Box::new(handler));
         self
     }
 }
@@ -158,6 +191,42 @@ impl IntoElement for TextInput {
                 )
                 .with_color(text_secondary),
             );
+        }
+
+        // Keyboard handlers for text editing
+        if !spec.is_disabled && !spec.is_read_only {
+            let current_value = value.to_string();
+            let on_change = self.on_change.clone();
+            let on_submit = self.on_submit;
+            let on_cancel = self.on_cancel;
+
+            el = el.on_key_down(move |event: &KeyDownEvent, window, cx| {
+                let key = event.keystroke.key.as_str();
+                if key == "enter" {
+                    if let Some(ref handler) = on_submit {
+                        handler(&current_value, window, cx);
+                    }
+                } else if key == "escape" {
+                    if let Some(ref handler) = on_cancel {
+                        handler(window, cx);
+                    }
+                } else if key == "backspace" {
+                    if let Some(ref handler) = on_change {
+                        let mut chars: Vec<char> = current_value.chars().collect();
+                        if !chars.is_empty() {
+                            chars.pop();
+                            let new_val: String = chars.into_iter().collect();
+                            handler(&new_val, window, cx);
+                        }
+                    }
+                } else if key.len() == 1 && !event.keystroke.modifiers.platform && !event.keystroke.modifiers.control {
+                    // Single printable character
+                    if let Some(ref handler) = on_change {
+                        let new_val = format!("{}{}", current_value, key);
+                        handler(&new_val, window, cx);
+                    }
+                }
+            });
         }
 
         // Focus click handler

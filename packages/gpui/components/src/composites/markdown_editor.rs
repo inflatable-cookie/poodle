@@ -10,6 +10,8 @@ use crate::theme_ext::{resolve_color, resolve_opacity, resolve_radius};
 pub struct MarkdownEditor {
     spec: MarkdownEditorSpec,
     theme: GpuiThemeProvider,
+    on_change: Option<Box<dyn Fn(&str, &mut Window, &mut App) + 'static>>,
+    on_mode_change: Option<Box<dyn Fn(&str, &mut Window, &mut App) + 'static>>,
 }
 
 impl std::ops::Deref for MarkdownEditor {
@@ -19,10 +21,20 @@ impl std::ops::Deref for MarkdownEditor {
 
 impl MarkdownEditor {
     pub fn new(theme: &GpuiThemeProvider) -> Self {
-        Self { spec: MarkdownEditorSpec::new(), theme: theme.clone() }
+        Self { spec: MarkdownEditorSpec::new(), theme: theme.clone(), on_change: None, on_mode_change: None }
     }
     pub fn from_spec(spec: MarkdownEditorSpec, theme: &GpuiThemeProvider) -> Self {
-        Self { spec, theme: theme.clone() }
+        Self { spec, theme: theme.clone(), on_change: None, on_mode_change: None }
+    }
+
+    /// Called when the markdown content changes.
+    pub fn on_change(mut self, handler: impl Fn(&str, &mut Window, &mut App) + 'static) -> Self {
+        self.on_change = Some(Box::new(handler)); self
+    }
+
+    /// Called when the editing mode changes (edit/split/preview).
+    pub fn on_mode_change(mut self, handler: impl Fn(&str, &mut Window, &mut App) + 'static) -> Self {
+        self.on_mode_change = Some(Box::new(handler)); self
     }
 }
 
@@ -56,18 +68,9 @@ impl IntoElement for MarkdownEditor {
                 )
         };
 
-        // Helper: mode button
-        let mode_btn = |label: &str, is_active: bool| -> Div {
-            let mut btn = div()
-                .text_size(px(12.0)).px(px(8.0)).py(px(2.0)).rounded(px(4.0))
-                .cursor(CursorStyle::PointingHand);
-            if is_active {
-                btn = btn.bg(active_bg).text_color(text_color);
-            } else {
-                btn = btn.text_color(muted).hover(|s| s.bg(hover_bg));
-            }
-            btn.child(label.to_string())
-        };
+        // Wrap on_mode_change in Rc for sharing across buttons
+        let on_mode_rc: Option<std::rc::Rc<dyn Fn(&str, &mut Window, &mut App)>> =
+            self.on_mode_change.map(|h| std::rc::Rc::from(h));
 
         let min_h = self.spec.min_height.as_deref()
             .and_then(|v| v.trim_end_matches("px").parse::<f32>().ok())
@@ -85,6 +88,33 @@ impl IntoElement for MarkdownEditor {
         // Toolbar separator
         let separator = || -> Div {
             div().w(px(1.0)).h(px(16.0)).bg(border).mx(px(4.0))
+        };
+
+        // Helper: mode switcher button
+        let mode_btn = |label: &'static str, is_active: bool, mode_val: &'static str,
+                        handler: &Option<std::rc::Rc<dyn Fn(&str, &mut Window, &mut App)>>| -> Stateful<Div> {
+            let id = SharedString::from(format!("pug-md-mode-{}", mode_val));
+            let mut btn = div()
+                .id(id)
+                .px(px(8.0)).py(px(2.0)).rounded(px(3.0))
+                .text_size(px(12.0))
+                .cursor(CursorStyle::PointingHand)
+                .child(label.to_string());
+            if is_active {
+                btn = btn.bg(active_bg).text_color(text_color);
+            } else {
+                btn = btn.text_color(muted).hover(|s| s.bg(hover_bg));
+            }
+            if !is_active {
+                if let Some(ref h) = handler {
+                    let h = h.clone();
+                    let mv = mode_val.to_string();
+                    btn = btn.on_click(move |_event, window, cx| {
+                        h(&mv, window, cx);
+                    });
+                }
+            }
+            btn
         };
 
         // Toolbar
@@ -110,9 +140,9 @@ impl IntoElement for MarkdownEditor {
                     div().flex().flex_row().gap(px(2.0))
                         .px(px(2.0)).py(px(2.0))
                         .rounded(px(4.0))
-                        .child(mode_btn("Edit", mode == "edit"))
-                        .child(mode_btn("Split", mode == "split"))
-                        .child(mode_btn("Preview", mode == "preview"))
+                        .child(mode_btn("Edit", mode == "edit", "edit", &on_mode_rc))
+                        .child(mode_btn("Split", mode == "split", "split", &on_mode_rc))
+                        .child(mode_btn("Preview", mode == "preview", "preview", &on_mode_rc))
                 )
         );
 
@@ -121,12 +151,41 @@ impl IntoElement for MarkdownEditor {
 
         let content_area = if is_edit {
             // Editor pane
-            let editor_pane = div()
+            let mut editor_pane = div()
                 .id("pug-md-editor-pane")
+                .focusable()
                 .px(px(12.0)).py(px(8.0)).flex_grow().flex_basis(px(0.0))
                 .text_size(px(14.0)).text_color(color)
                 .overflow_y_scroll()
                 .child(display.to_string());
+
+            // Basic text editing via key events
+            if !self.spec.is_disabled {
+                let current_value = self.spec.value.clone();
+                let on_change_rc: Option<std::rc::Rc<dyn Fn(&str, &mut Window, &mut App)>> =
+                    self.on_change.map(|h| std::rc::Rc::from(h));
+                if let Some(ref handler) = on_change_rc {
+                    let handler = handler.clone();
+                    editor_pane = editor_pane.on_key_down(move |event: &KeyDownEvent, window, cx| {
+                        let key = event.keystroke.key.as_str();
+                        if key == "enter" {
+                            let new_val = format!("{}\n", current_value);
+                            handler(&new_val, window, cx);
+                        } else if key == "backspace" {
+                            let mut chars: Vec<char> = current_value.chars().collect();
+                            if !chars.is_empty() {
+                                chars.pop();
+                                let new_val: String = chars.into_iter().collect();
+                                handler(&new_val, window, cx);
+                            }
+                        } else if key.len() == 1 && !event.keystroke.modifiers.platform && !event.keystroke.modifiers.control {
+                            let new_val = format!("{}{}", current_value, key);
+                            handler(&new_val, window, cx);
+                        }
+                    });
+                }
+            }
+
             content_area.child(editor_pane)
         } else {
             content_area

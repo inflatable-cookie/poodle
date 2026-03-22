@@ -16,6 +16,7 @@ pub struct NumberEntry {
     id_suffix: Option<String>,
     on_increment: Option<Box<dyn Fn(&mut Window, &mut App) + 'static>>,
     on_decrement: Option<Box<dyn Fn(&mut Window, &mut App) + 'static>>,
+    on_change: Option<Box<dyn Fn(f64, &mut Window, &mut App) + 'static>>,
 }
 
 impl std::ops::Deref for NumberEntry {
@@ -25,7 +26,7 @@ impl std::ops::Deref for NumberEntry {
 
 impl NumberEntry {
     pub fn new(theme: &GpuiThemeProvider) -> Self {
-        Self { spec: NumberEntrySpec::default(), theme: theme.clone(), id_suffix: None, on_increment: None, on_decrement: None }
+        Self { spec: NumberEntrySpec::default(), theme: theme.clone(), id_suffix: None, on_increment: None, on_decrement: None, on_change: None }
     }
 
     pub fn from_spec(spec: NumberEntrySpec, theme: &GpuiThemeProvider) -> Self {
@@ -35,6 +36,7 @@ impl NumberEntry {
             id_suffix: None,
             on_increment: None,
             on_decrement: None,
+            on_change: None,
         }
     }
 
@@ -65,6 +67,15 @@ impl NumberEntry {
         handler: impl Fn(&mut Window, &mut App) + 'static,
     ) -> Self {
         self.on_decrement = Some(Box::new(handler));
+        self
+    }
+
+    /// Called when the value changes (from stepper or direct editing).
+    pub fn on_change(
+        mut self,
+        handler: impl Fn(f64, &mut Window, &mut App) + 'static,
+    ) -> Self {
+        self.on_change = Some(Box::new(handler));
         self
     }
 }

@@ -109,6 +109,8 @@ pub enum Overflow {
     Visible,
     Hidden,
     Clip,
+    Auto,
+    Scroll,
 }
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
@@ -383,6 +385,7 @@ pub enum CalendarWeekStart {
 pub struct ChoiceOption {
     pub value: String,
     pub label: String,
+    pub description: Option<String>,
     pub aria_label: Option<String>,
     pub is_disabled: bool,
 }
@@ -392,9 +395,15 @@ impl ChoiceOption {
         Self {
             value: value.into(),
             label: label.into(),
+            description: None,
             aria_label: None,
             is_disabled: false,
         }
+    }
+
+    pub fn with_description(mut self, description: impl Into<String>) -> Self {
+        self.description = Some(description.into());
+        self
     }
 
     pub fn with_aria_label(mut self, aria_label: impl Into<String>) -> Self {

@@ -14,7 +14,7 @@ impl Default for CodeSpec {
             content: String::new(),
             language: None,
             show_line_numbers: false,
-            is_copyable: false,
+            is_copyable: true,
         }
     }
 }

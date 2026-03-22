@@ -16,6 +16,9 @@ pub struct EditableLabel {
     spec: EditableLabelSpec,
     theme: GpuiThemeProvider,
     id_suffix: Option<String>,
+    on_change: Option<std::rc::Rc<dyn Fn(&str, &mut Window, &mut App) + 'static>>,
+    on_commit: Option<Box<dyn Fn(&str, &mut Window, &mut App) + 'static>>,
+    on_cancel: Option<Box<dyn Fn(&mut Window, &mut App) + 'static>>,
 }
 
 impl std::ops::Deref for EditableLabel {
@@ -25,7 +28,7 @@ impl std::ops::Deref for EditableLabel {
 
 impl EditableLabel {
     pub fn new(theme: &GpuiThemeProvider) -> Self {
-        Self { spec: EditableLabelSpec::new(), theme: theme.clone(), id_suffix: None }
+        Self { spec: EditableLabelSpec::new(), theme: theme.clone(), id_suffix: None, on_change: None, on_commit: None, on_cancel: None }
     }
 
     pub fn from_spec(spec: EditableLabelSpec, theme: &GpuiThemeProvider) -> Self {
@@ -33,6 +36,9 @@ impl EditableLabel {
             spec,
             theme: theme.clone(),
             id_suffix: None,
+            on_change: None,
+            on_commit: None,
+            on_cancel: None,
         }
     }
 
@@ -45,6 +51,21 @@ impl EditableLabel {
     pub fn with_id(mut self, suffix: impl Into<String>) -> Self {
         self.id_suffix = Some(suffix.into());
         self
+    }
+
+    /// Called when the value changes during editing.
+    pub fn on_change(mut self, handler: impl Fn(&str, &mut Window, &mut App) + 'static) -> Self {
+        self.on_change = Some(std::rc::Rc::new(handler)); self
+    }
+
+    /// Called when editing is committed (Enter key).
+    pub fn on_commit(mut self, handler: impl Fn(&str, &mut Window, &mut App) + 'static) -> Self {
+        self.on_commit = Some(Box::new(handler)); self
+    }
+
+    /// Called when editing is cancelled (Escape key).
+    pub fn on_cancel(mut self, handler: impl Fn(&mut Window, &mut App) + 'static) -> Self {
+        self.on_cancel = Some(Box::new(handler)); self
     }
 }
 
@@ -116,6 +137,41 @@ impl IntoElement for EditableLabel {
             el = el
                 .opacity(disabled_opacity)
                 .cursor(CursorStyle::OperationNotAllowed);
+        }
+
+        // Keyboard handlers when editing
+        if spec.is_editing && !spec.is_disabled {
+            let current_value = spec.value.clone();
+            let on_change = self.on_change.clone();
+            let on_commit = self.on_commit;
+            let on_cancel = self.on_cancel;
+
+            el = el.on_key_down(move |event: &KeyDownEvent, window, cx| {
+                let key = event.keystroke.key.as_str();
+                if key == "enter" {
+                    if let Some(ref handler) = on_commit {
+                        handler(&current_value, window, cx);
+                    }
+                } else if key == "escape" {
+                    if let Some(ref handler) = on_cancel {
+                        handler(window, cx);
+                    }
+                } else if key == "backspace" {
+                    if let Some(ref handler) = on_change {
+                        let mut chars: Vec<char> = current_value.chars().collect();
+                        if !chars.is_empty() {
+                            chars.pop();
+                            let new_val: String = chars.into_iter().collect();
+                            handler(&new_val, window, cx);
+                        }
+                    }
+                } else if key.len() == 1 && !event.keystroke.modifiers.platform && !event.keystroke.modifiers.control {
+                    if let Some(ref handler) = on_change {
+                        let new_val = format!("{}{}", current_value, key);
+                        handler(&new_val, window, cx);
+                    }
+                }
+            });
         }
 
         el.into_any_element()

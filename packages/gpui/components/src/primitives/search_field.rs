@@ -14,6 +14,10 @@ pub struct SearchField {
     theme: GpuiThemeProvider,
     id_suffix: Option<String>,
     on_focus: Option<Box<dyn Fn(&mut Window, &mut App) + 'static>>,
+    on_change: Option<Box<dyn Fn(&str, &mut Window, &mut App) + 'static>>,
+    on_submit: Option<Box<dyn Fn(&str, &mut Window, &mut App) + 'static>>,
+    on_cancel: Option<Box<dyn Fn(&mut Window, &mut App) + 'static>>,
+    on_clear: Option<Box<dyn Fn(&mut Window, &mut App) + 'static>>,
 }
 
 impl std::ops::Deref for SearchField {
@@ -23,7 +27,7 @@ impl std::ops::Deref for SearchField {
 
 impl SearchField {
     pub fn new(theme: &GpuiThemeProvider) -> Self {
-        Self { spec: SearchFieldSpec::new(), theme: theme.clone(), id_suffix: None, on_focus: None }
+        Self { spec: SearchFieldSpec::new(), theme: theme.clone(), id_suffix: None, on_focus: None, on_change: None, on_submit: None, on_cancel: None, on_clear: None }
     }
 
     pub fn from_spec(spec: SearchFieldSpec, theme: &GpuiThemeProvider) -> Self {
@@ -32,6 +36,10 @@ impl SearchField {
             theme: theme.clone(),
             id_suffix: None,
             on_focus: None,
+            on_change: None,
+            on_submit: None,
+            on_cancel: None,
+            on_clear: None,
         }
     }
 
@@ -60,6 +68,22 @@ impl SearchField {
         self.on_focus = Some(Box::new(handler));
         self
     }
+
+    pub fn on_change(mut self, handler: impl Fn(&str, &mut Window, &mut App) + 'static) -> Self {
+        self.on_change = Some(Box::new(handler)); self
+    }
+
+    pub fn on_submit(mut self, handler: impl Fn(&str, &mut Window, &mut App) + 'static) -> Self {
+        self.on_submit = Some(Box::new(handler)); self
+    }
+
+    pub fn on_cancel(mut self, handler: impl Fn(&mut Window, &mut App) + 'static) -> Self {
+        self.on_cancel = Some(Box::new(handler)); self
+    }
+
+    pub fn on_clear(mut self, handler: impl Fn(&mut Window, &mut App) + 'static) -> Self {
+        self.on_clear = Some(Box::new(handler)); self
+    }
 }
 
 impl IntoElement for SearchField {
@@ -82,6 +106,15 @@ impl IntoElement for SearchField {
 
         if let Some(handler) = self.on_focus {
             input = input.on_focus(handler);
+        }
+        if let Some(handler) = self.on_change {
+            input = input.on_change(handler);
+        }
+        if let Some(handler) = self.on_submit {
+            input = input.on_submit(handler);
+        }
+        if let Some(handler) = self.on_cancel {
+            input = input.on_cancel(handler);
         }
 
         input.into_element()
