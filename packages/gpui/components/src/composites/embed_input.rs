@@ -36,48 +36,84 @@ impl IntoElement for EmbedInput {
         let text_color = resolve_color(theme, "semantic.color.text.primary");
         let placeholder_color = resolve_color(theme, "semantic.color.text.secondary");
         let focus_ring = resolve_color(theme, "semantic.color.accent.focusRing");
-        let display = if spec.value.is_empty() { spec.placeholder.as_deref().unwrap_or("Paste URL...") } else { &spec.value };
+        let danger_color = resolve_color(theme, "semantic.color.status.danger");
+        let success_color = resolve_color(theme, "semantic.color.status.success");
+        let warning_color = resolve_color(theme, "semantic.color.status.warning");
+
+        let display = if spec.value.is_empty() {
+            spec.placeholder.as_deref().unwrap_or("Paste URL or embed code...")
+        } else {
+            &spec.value
+        };
         let color = if spec.value.is_empty() { placeholder_color } else { text_color };
 
-        // Multi-line text area (3 rows) instead of single-line input
+        // Multi-line text area (min 3 rows ~72px) for URL / embed code
         let mut textarea = div()
             .id("pug-embed-input")
             .focusable()
-            .bg(fill).border_1().border_color(border).rounded(radius)
-            .min_h(px(72.0)).px(px(12.0)).py(px(8.0))
-            .flex().items_start()
-            .text_size(px(14.0)).text_color(color)
+            .bg(fill)
+            .border_1()
+            .border_color(border)
+            .rounded(radius)
+            .min_h(px(72.0))
+            .w_full()
+            .px(px(12.0))
+            .py(px(8.0))
+            .flex()
+            .flex_col()
+            .items_start()
+            .overflow_hidden()
+            .text_size(px(14.0))
+            .line_height(relative(1.5))
+            .text_color(color)
             .focus(move |s| s.border_color(focus_ring))
             .child(display.to_string());
+
         if spec.is_disabled {
-            textarea = textarea.opacity(resolve_opacity(theme, "semantic.state.opacity.disabled"));
+            textarea = textarea
+                .opacity(resolve_opacity(theme, "semantic.state.opacity.disabled"))
+                .cursor_not_allowed();
         }
 
-        // Status area below the input
-        let status_color = match spec.validation_state {
-            ValidationState::Invalid => resolve_color(theme, "semantic.color.status.danger"),
-            ValidationState::Valid => resolve_color(theme, "semantic.color.status.success"),
-            ValidationState::Pending => resolve_color(theme, "semantic.color.status.warning"),
-            ValidationState::None => placeholder_color,
-        };
-        let mut status_area = div()
-            .h(px(20.0)).px(px(4.0))
-            .flex().items_center().gap(px(6.0))
-            .text_size(px(12.0)).text_color(status_color);
-        if spec.is_loading {
-            status_area = status_area.child("Loading...");
+        // Status area below the textarea: error (red), success (green), pending (warning), or provider info
+        let (status_color, status_text) = if spec.is_loading {
+            (placeholder_color, Some("Resolving...".to_string()))
         } else {
             match spec.validation_state {
-                ValidationState::Invalid => { status_area = status_area.child("Invalid URL"); }
-                ValidationState::Valid => { status_area = status_area.child("Valid"); }
-                ValidationState::Pending => { status_area = status_area.child("Validating..."); }
-                ValidationState::None => {}
+                ValidationState::Invalid => {
+                    (danger_color, Some("Invalid URL or embed code".to_string()))
+                }
+                ValidationState::Valid => {
+                    (success_color, Some("Valid embed".to_string()))
+                }
+                ValidationState::Pending => {
+                    (warning_color, Some("Validating...".to_string()))
+                }
+                ValidationState::None => (placeholder_color, None),
             }
+        };
+
+        let mut wrapper = div().flex().flex_col().gap(px(4.0)).w_full().child(textarea);
+
+        if let Some(text) = status_text {
+            let status_indicator = match spec.validation_state {
+                ValidationState::Invalid => "\u{2022} ",
+                ValidationState::Valid => "\u{2713} ",
+                ValidationState::Pending => "\u{2022} ",
+                _ => "",
+            };
+            let status_area = div()
+                .min_h(px(20.0))
+                .px(px(4.0))
+                .flex()
+                .items_center()
+                .gap(px(4.0))
+                .text_size(px(12.0))
+                .text_color(status_color)
+                .child(format!("{}{}", status_indicator, text));
+            wrapper = wrapper.child(status_area);
         }
 
-        div().flex().flex_col().gap(px(4.0))
-            .child(textarea)
-            .child(status_area)
-            .into_any_element()
+        wrapper.into_any_element()
     }
 }

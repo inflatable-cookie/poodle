@@ -3,7 +3,7 @@
 use gpui::*;
 use pug_gpui::GpuiThemeProvider;
 use pug_composites::CardRadioGroupSpec;
-use crate::theme_ext::{resolve_color, resolve_opacity, resolve_radius};
+use crate::theme_ext::{color_mix, resolve_color, resolve_px, resolve_radius, resolve_opacity};
 
 pub struct CardRadioGroup {
     spec: CardRadioGroupSpec,
@@ -35,17 +35,26 @@ impl IntoElement for CardRadioGroup {
     fn into_element(self) -> Self::Element {
         let theme = &self.theme;
         let spec = &self.spec;
-        let selected_fill = resolve_color(theme, spec.selected_fill_token());
         let unselected_fill = resolve_color(theme, spec.unselected_fill_token());
         let border = resolve_color(theme, spec.border_token());
         let radius = resolve_radius(theme, "semantic.radius.surface");
         let text_color = resolve_color(theme, "semantic.color.text.primary");
+        let text_secondary = resolve_color(theme, "semantic.color.text.secondary");
         let accent = resolve_color(theme, "semantic.color.accent.base");
+        let focus_ring = resolve_color(theme, "semantic.color.accent.focusRing");
         let selected = spec.value.as_deref().or(spec.default_value.as_deref());
 
-        let focus_ring = resolve_color(theme, "semantic.color.accent.focusRing");
+        // Selected card: accent-tinted background (color-mix accent 12%)
+        let selected_fill = color_mix(accent, unselected_fill, 0.12);
 
-        let mut el = div().flex().flex_row().flex_wrap().gap(px(8.0));
+        // Grid-like layout: flex-wrap with gap
+        let mut el = div()
+            .flex()
+            .flex_row()
+            .flex_wrap()
+            .gap(px(8.0))
+;
+
         for (idx, option) in spec.options.iter().enumerate() {
             let is_selected = selected == Some(option.value.as_str());
             let is_option_disabled = spec.is_disabled || option.is_disabled;
@@ -53,42 +62,74 @@ impl IntoElement for CardRadioGroup {
             let border_c = if is_selected { accent } else { border };
             let bw = if is_selected { 2.0 } else { 1.0 };
 
-            // Radio indicator: circle with inner dot when selected
+            // Radio indicator: 18px outer circle with border, 8px inner dot when selected
             let indicator = div()
-                .w(px(18.0)).h(px(18.0))
+                .w(px(18.0))
+                .h(px(18.0))
                 .rounded(px(999.0))
                 .bg(unselected_fill)
                 .border_1()
                 .border_color(if is_selected { accent } else { border })
-                .flex().items_center().justify_center()
+                .flex()
+                .items_center()
+                .justify_center()
                 .flex_shrink_0()
                 .child(
                     div()
-                        .w(px(8.0)).h(px(8.0))
+                        .w(px(8.0))
+                        .h(px(8.0))
                         .rounded(px(999.0))
-                        .bg(if is_selected { accent } else { gpui::transparent_black() })
+                        .bg(if is_selected { accent } else { gpui::transparent_black() }),
                 );
 
-            let content = div().flex().flex_col().gap(px(2.0))
-                .child(div().text_size(px(14.0)).text_color(text_color).child(option.label.clone()));
+            // Content: label + optional description
+            let mut content = div()
+                .flex()
+                .flex_col()
+                .gap(px(2.0))
+                .child(
+                    div()
+                        .text_size(px(14.0))
+                        .text_color(text_color)
+                        .child(option.label.clone()),
+                );
+
+            // Show description below label if present
+            if let Some(ref description) = option.description {
+                content = content.child(
+                    div()
+                        .text_size(px(12.0))
+                        .text_color(text_secondary)
+                        .child(description.clone()),
+                );
+            }
 
             let card_id = SharedString::from(format!("pug-card-radio-{}", idx));
             let mut card = div()
                 .id(card_id)
                 .focusable()
+                // Grid-like sizing: flex-1 with min-width for wrapping
                 .flex_1()
                 .min_w(px(200.0))
-                .bg(fill).rounded(radius)
-                .border(px(bw)).border_color(border_c)
-                .px(px(16.0)).py(px(12.0))
-                .flex().items_center().gap(px(10.0))
+                .bg(fill)
+                .rounded(radius)
+                .border(px(bw))
+                .border_color(border_c)
+                .px(px(16.0))
+                .py(px(12.0))
+                .flex()
+                .items_center()
+                .gap(px(10.0))
+                // Focus ring
                 .focus(move |s| s.border_color(focus_ring))
                 .child(indicator)
                 .child(content);
 
             if is_option_disabled {
                 let opacity = resolve_opacity(theme, "semantic.state.opacity.disabled");
-                card = card.opacity(opacity).cursor(CursorStyle::OperationNotAllowed);
+                card = card
+                    .opacity(opacity)
+                    .cursor(CursorStyle::OperationNotAllowed);
             } else {
                 card = card.cursor_pointer();
 

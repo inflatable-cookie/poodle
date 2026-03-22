@@ -56,7 +56,20 @@ impl IntoElement for ConfirmAction {
             .px(px(24.0)).py(px(20.0))
             .flex().flex_col().gap(px(16.0))
             .min_w(px(360.0))
-            .shadow_lg();
+            .shadow(vec![
+                gpui::BoxShadow {
+                    color: hsla(0.0, 0.0, 0.0, 0.12),
+                    offset: point(px(0.0), px(8.0)),
+                    blur_radius: px(24.0),
+                    spread_radius: px(0.0),
+                },
+                gpui::BoxShadow {
+                    color: hsla(0.0, 0.0, 0.0, 0.08),
+                    offset: point(px(0.0), px(2.0)),
+                    blur_radius: px(8.0),
+                    spread_radius: px(0.0),
+                },
+            ]);
 
         dialog = dialog.child(div().text_size(px(18.0)).text_color(title_color).font_weight(FontWeight::SEMIBOLD).child(spec.title.clone()));
         dialog = dialog.child(div().text_size(px(14.0)).text_color(msg_color).child(spec.message.clone()));

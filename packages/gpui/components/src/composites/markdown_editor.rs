@@ -69,35 +69,98 @@ impl IntoElement for MarkdownEditor {
             btn.child(label.to_string())
         };
 
+        let min_h = self.spec.min_height.as_deref()
+            .and_then(|v| v.trim_end_matches("px").parse::<f32>().ok())
+            .unwrap_or(200.0);
+
         let mut el = div()
             .bg(fill).border_1().border_color(border).rounded(radius)
-            .flex().flex_col().min_h(px(200.0));
+            .flex().flex_col().min_h(px(min_h))
+            .overflow_hidden();
+
+        let mode = self.spec.mode.as_str();
+        let is_edit = mode == "edit" || mode == "split";
+        let is_preview = mode == "preview" || mode == "split";
+
+        // Toolbar separator
+        let separator = || -> Div {
+            div().w(px(1.0)).h(px(16.0)).bg(border).mx(px(4.0))
+        };
 
         // Toolbar
         el = el.child(
             div().bg(toolbar_fill).px(px(8.0)).py(px(4.0))
                 .flex().flex_row().items_center().gap(px(2.0))
                 .border_b_1().border_color(border)
-                // Formatting icons
+                // Text formatting icons
                 .child(toolbar_btn("bold", &self.theme))
                 .child(toolbar_btn("italic", &self.theme))
-                .child(toolbar_btn("heading-1", &self.theme))
-                // Spacer
+                .child(toolbar_btn("heading", &self.theme))
+                .child(toolbar_btn("code", &self.theme))
+                // Separator
+                .child(separator())
+                // Structure icons
+                .child(toolbar_btn("link", &self.theme))
+                .child(toolbar_btn("list", &self.theme))
+                .child(toolbar_btn("quote", &self.theme))
+                // Spacer pushes mode switcher to the right
                 .child(div().flex_grow())
-                // Mode indicator buttons
+                // Mode switcher segment
                 .child(
                     div().flex().flex_row().gap(px(2.0))
-                        .child(mode_btn("Edit", true))
-                        .child(mode_btn("Preview", false))
+                        .px(px(2.0)).py(px(2.0))
+                        .rounded(px(4.0))
+                        .child(mode_btn("Edit", mode == "edit"))
+                        .child(mode_btn("Split", mode == "split"))
+                        .child(mode_btn("Preview", mode == "preview"))
                 )
         );
 
-        // Editor area
-        el = el.child(
-            div().px(px(12.0)).py(px(8.0)).flex_grow()
+        // Content area: edit pane, preview pane, or both (split)
+        let content_area = div().flex().flex_row().flex_grow().min_h(px(0.0));
+
+        let content_area = if is_edit {
+            // Editor pane
+            let editor_pane = div()
+                .id("pug-md-editor-pane")
+                .px(px(12.0)).py(px(8.0)).flex_grow().flex_basis(px(0.0))
                 .text_size(px(14.0)).text_color(color)
-                .child(display.to_string())
-        );
+                .overflow_y_scroll()
+                .child(display.to_string());
+            content_area.child(editor_pane)
+        } else {
+            content_area
+        };
+
+        let content_area = if is_edit && is_preview {
+            // Vertical divider between panes in split mode
+            content_area.child(
+                div().w(px(1.0)).bg(border)
+            )
+        } else {
+            content_area
+        };
+
+        let content_area = if is_preview {
+            // Preview pane
+            let preview_content = if self.spec.value.is_empty() {
+                "Nothing to preview".to_string()
+            } else {
+                self.spec.value.clone()
+            };
+            let preview_text_color = if self.spec.value.is_empty() { muted } else { text_color };
+            let preview_pane = div()
+                .id("pug-md-preview-pane")
+                .px(px(12.0)).py(px(8.0)).flex_grow().flex_basis(px(0.0))
+                .text_size(px(14.0)).text_color(preview_text_color)
+                .overflow_y_scroll()
+                .child(preview_content);
+            content_area.child(preview_pane)
+        } else {
+            content_area
+        };
+
+        el = el.child(content_area);
 
         if self.spec.is_disabled {
             el = el.opacity(resolve_opacity(&self.theme, "semantic.state.opacity.disabled"));

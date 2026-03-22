@@ -156,7 +156,20 @@ impl IntoElement for TimeZoneSelect {
                 .bg(elevated_bg)
                 .border_1()
                 .border_color(border)
-                .shadow_md()
+                .shadow(vec![
+                    gpui::BoxShadow {
+                        color: hsla(0.0, 0.0, 0.0, 0.10),
+                        offset: point(px(0.0), px(4.0)),
+                        blur_radius: px(16.0),
+                        spread_radius: px(0.0),
+                    },
+                    gpui::BoxShadow {
+                        color: hsla(0.0, 0.0, 0.0, 0.06),
+                        offset: point(px(0.0), px(1.0)),
+                        blur_radius: px(4.0),
+                        spread_radius: px(0.0),
+                    },
+                ])
                 .py(px(4.0))
                 .text_size(px(14.0))
                 .text_color(text_primary);
