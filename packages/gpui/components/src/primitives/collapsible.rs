@@ -1,19 +1,20 @@
 //! Collapsible — real GPUI component backed by CollapsibleSpec.
+//!
+//! Contract: `docs/contracts/foundation/collapsible.md`
 
 use gpui::prelude::FluentBuilder;
 use gpui::*;
 use pug_gpui::GpuiThemeProvider;
-use pug_primitives::CollapsibleSpec;
+use pug_primitives::{CollapsibleSpec, IconSize, IconSpec};
 
-use crate::theme_ext::{resolve_color, resolve_opacity};
+use super::icon::Icon;
+use crate::theme_ext::{resolve_color, resolve_opacity, resolve_px, resolve_radius};
 
-/// A real GPUI collapsible component backed by `CollapsibleSpec`.
 pub struct Collapsible {
     spec: CollapsibleSpec,
     theme: GpuiThemeProvider,
     id_suffix: Option<String>,
     on_toggle: Option<Box<dyn Fn(&bool, &mut Window, &mut App) + 'static>>,
-    /// The content to show when expanded.
     content: Option<AnyElement>,
 }
 
@@ -28,13 +29,7 @@ impl Collapsible {
     }
 
     pub fn from_spec(spec: CollapsibleSpec, theme: &GpuiThemeProvider) -> Self {
-        Self {
-            spec,
-            theme: theme.clone(),
-            id_suffix: None,
-            on_toggle: None,
-            content: None,
-        }
+        Self { spec, theme: theme.clone(), id_suffix: None, on_toggle: None, content: None }
     }
 
     // ── Forwarded spec builders ───────────────────────────────
@@ -45,16 +40,12 @@ impl Collapsible {
     pub fn disabled(mut self, v: bool) -> Self { self.spec.is_disabled = v; self }
     pub fn aria_label(mut self, v: impl Into<String>) -> Self { self.spec.aria_label = Some(v.into()); self }
 
-
     pub fn with_id(mut self, suffix: impl Into<String>) -> Self {
         self.id_suffix = Some(suffix.into());
         self
     }
 
-    pub fn on_toggle(
-        mut self,
-        handler: impl Fn(&bool, &mut Window, &mut App) + 'static,
-    ) -> Self {
+    pub fn on_toggle(mut self, handler: impl Fn(&bool, &mut Window, &mut App) + 'static) -> Self {
         self.on_toggle = Some(Box::new(handler));
         self
     }
@@ -71,12 +62,24 @@ impl IntoElement for Collapsible {
     fn into_element(self) -> Self::Element {
         let theme = &self.theme;
         let spec = &self.spec;
-
-        let disabled_opacity = resolve_opacity(theme, "semantic.state.opacity.disabled");
-        let hover_bg = resolve_color(theme, "semantic.color.background.elevated");
-        let text_secondary = resolve_color(theme, "semantic.color.text.secondary");
-        let border = resolve_color(theme, "semantic.color.border.default");
         let is_open = spec.current_open();
+
+        let text_primary = resolve_color(theme, "semantic.color.text.primary");
+        let text_secondary = resolve_color(theme, "semantic.color.text.secondary");
+        let border_subtle = resolve_color(theme, "semantic.color.border.subtle");
+        let surface_bg = resolve_color(theme, "semantic.color.background.surface");
+        let radius = resolve_radius(theme, "semantic.radius.surface");
+        let focus_ring = resolve_color(theme, "semantic.color.accent.focusRing");
+
+        // Contract: border = color-mix(border-subtle 42%, transparent)
+        let root_border = Hsla { a: border_subtle.a * 0.42, ..border_subtle };
+        // Contract: bg = color-mix(surface 88%, text-primary)
+        let root_bg = Hsla {
+            h: surface_bg.h * 0.88 + text_primary.h * 0.12,
+            s: surface_bg.s * 0.88 + text_primary.s * 0.12,
+            l: surface_bg.l * 0.88 + text_primary.l * 0.12,
+            a: surface_bg.a,
+        };
 
         let id_str = if let Some(ref suffix) = self.id_suffix {
             format!("pug-collapsible-{}", suffix)
@@ -84,59 +87,88 @@ impl IntoElement for Collapsible {
             "pug-collapsible".to_string()
         };
 
-        // Header/trigger
-        let mut header = div()
+        // ── Root (contract: grid, gap 0.5rem when open, 0 when closed) ──
+        let gap = if is_open { px(8.0) } else { px(0.0) }; // 0.5rem = 8px
+        let mut root = div()
+            .flex().flex_col()
+            .gap(gap)
+            .min_w(px(0.0))
+            // Contract: padding 0.875rem 1rem
+            .px(px(16.0)).py(px(14.0))
+            .border_1().border_color(root_border)
+            .rounded(radius)
+            .bg(root_bg);
+
+        // ── Trigger (contract: grid 1fr auto, gap 0.75rem) ──
+        let mut trigger = div()
             .id(SharedString::from(id_str))
-            .flex()
-            .items_center()
-            .gap(px(6.0))
-            .py(px(6.0));
+            .flex().items_center()
+            .gap(px(12.0)) // 0.75rem
+            .w_full()
+            .focus(move |s| s.border_color(focus_ring));
 
-        if spec.activation_allowed() {
-            header = header
-                .cursor_pointer()
-                .hover(|s| s.bg(hover_bg));
-        } else {
-            header = header.opacity(disabled_opacity);
+        // Title block (1fr)
+        let mut title_block = div().flex().flex_col().flex_1().min_w(px(0.0));
+        if let Some(ref title_text) = spec.title {
+            title_block = title_block.child(
+                div()
+                    .text_color(text_primary)
+                    .text_size(px(16.0)) // contract: heading 1rem = 16px
+                    .font_weight(FontWeight::BOLD)
+                    .line_height(relative(1.2))
+                    .child(title_text.clone())
+            );
         }
+        if let Some(ref desc) = spec.description {
+            title_block = title_block.child(
+                div()
+                    .text_color(text_secondary)
+                    .text_size(px(13.0))
+                    .child(desc.clone())
+            );
+        }
+        trigger = trigger.child(title_block);
 
-        // Expand indicator
-        header = header.child(
-            div()
-                .text_xs()
-                .text_color(text_secondary)
-                .child(if is_open { "▾" } else { "▸" }),
+        // Chevron indicator (auto)
+        trigger = trigger.child(
+            Icon::from_spec(
+                IconSpec::new("chevron-down").with_size(IconSize::Sm),
+                theme,
+            )
+            .with_color(text_secondary),
         );
 
-        // Title
-        if let Some(ref title) = spec.title {
-            header = header.child(div().text_sm().child(title.clone()));
+        if spec.activation_allowed() {
+            trigger = trigger.cursor_pointer();
+        } else {
+            trigger = trigger.cursor(CursorStyle::OperationNotAllowed);
         }
 
         // Click handler
         if let Some(handler) = self.on_toggle {
             if spec.activation_allowed() {
                 let next_open = !is_open;
-                header = header.on_click(move |_event, window, cx| {
+                trigger = trigger.on_click(move |_event, window, cx| {
                     handler(&next_open, window, cx);
                 });
             }
         }
 
-        let mut col = div()
-            .flex()
-            .flex_col()
-            .border_b_1()
-            .border_color(border)
-            .child(header);
+        root = root.child(trigger);
 
-        // Content (when open)
+        // ── Content region (only when open) ──
         if is_open {
             if let Some(content) = self.content {
-                col = col.child(div().py(px(6.0)).pl(px(16.0)).child(content));
+                root = root.child(content);
             }
         }
 
-        col.into_any_element()
+        // ── Disabled ──
+        if spec.is_disabled {
+            let opacity = resolve_opacity(theme, "semantic.state.opacity.disabled");
+            root = root.opacity(opacity);
+        }
+
+        root.into_any_element()
     }
 }
