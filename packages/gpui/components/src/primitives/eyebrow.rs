@@ -42,12 +42,16 @@ impl IntoElement for Eyebrow {
         let spec = &self.spec;
 
         let text_color = resolve_color(theme, spec.text_color_token());
-        let label = spec.content.clone().unwrap_or_default();
+        // Contract: uppercase the content
+        let label = spec.content.clone().unwrap_or_default().to_uppercase();
 
+        // Contract: 0.6875rem (11px), weight 600, line-height 1.5
+        // letter-spacing 0.12em not available in GPUI (known delta)
         div()
-            .text_xs()
+            .text_size(px(11.0))
             .text_color(text_color)
             .font_weight(FontWeight::SEMIBOLD)
+            .line_height(relative(1.5))
             .child(label)
             .into_any_element()
     }

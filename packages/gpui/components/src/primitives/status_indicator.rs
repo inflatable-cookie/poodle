@@ -47,7 +47,7 @@ impl IntoElement for StatusIndicator {
         let status_color = resolve_color(theme, spec.status_color_token());
         let text_primary = resolve_color(theme, "semantic.color.text.primary");
 
-        let mut row = div().flex().items_center().gap(px(6.0));
+        let mut row = div().flex().items_center().gap(px(7.0));
 
         // Status dot
         row = row.child(

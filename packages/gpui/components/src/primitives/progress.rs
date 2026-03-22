@@ -61,7 +61,7 @@ impl IntoElement for Progress {
         // Contract §8: root height 0.375rem (6px), radius 999px
         let mut track = div()
             .w_full()
-            .h(px(6.0))
+            .h(px(8.0))
             .rounded(px(999.0))
             .bg(track_bg)
             .overflow_hidden();
