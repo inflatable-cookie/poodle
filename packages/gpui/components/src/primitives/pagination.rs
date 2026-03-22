@@ -7,12 +7,14 @@
 use gpui::prelude::FluentBuilder;
 use gpui::*;
 use pug_gpui::GpuiThemeProvider;
-use pug_primitives::{PageItem, PaginationSpec};
+use pug_primitives::{IconSize, IconSpec, PageItem, PaginationSpec};
 
+use super::icon::Icon;
 use crate::theme_ext::{color_mix, resolve_color, resolve_opacity, resolve_px, resolve_radius};
 
 pub struct Pagination {
     spec: PaginationSpec,
+    theme: GpuiThemeProvider,
     // Pre-resolved values
     button_fill: Hsla,
     button_border: Hsla,
@@ -58,6 +60,7 @@ impl Pagination {
         let button_height = control_height - px(2.0);
 
         Self {
+            theme: theme.clone(),
             button_fill: surface_fill,
             button_border,
             button_text: resolve_color(theme, spec.button_text_token()),
@@ -90,11 +93,12 @@ impl Pagination {
 
     fn render_nav_button(
         &self,
-        label: &str,
+        icon_name: &str,
         disabled: bool,
         _target_page: usize,
         id: &str,
     ) -> AnyElement {
+        let theme = &self.theme;
         let fill = self.button_fill;
         let border = self.button_border;
         let text_color = self.button_text;
@@ -112,15 +116,11 @@ impl Pagination {
             // Contract: min-width 2.25rem
             .min_w(px(36.0))
             .h(button_height)
-            .px(px(12.0)) // 0.75rem
+            .px(px(8.0)) // 0.5rem
             .bg(fill)
             .border_1()
             .border_color(border)
             .rounded(radius)
-            .text_color(text_color)
-            // Contract: label font 0.75rem / 600
-            .text_size(px(12.0))
-            .font_weight(FontWeight::SEMIBOLD)
             // Focus ring
             .focus(move |s| s.border_color(focus_ring))
             .when(disabled, |el| {
@@ -131,7 +131,13 @@ impl Pagination {
                 el.cursor_pointer()
                     .hover(|style| style.bg(hover_fill))
             })
-            .child(label.to_string())
+            .child(
+                Icon::from_spec(
+                    IconSpec::new(icon_name).with_size(IconSize::Sm),
+                    theme,
+                )
+                .with_color(text_color),
+            )
             .into_any_element()
     }
 
@@ -220,7 +226,7 @@ impl IntoElement for Pagination {
 
         // Prev button
         let prev_page = if current_page > 1 { current_page - 1 } else { 1 };
-        root = root.child(self.render_nav_button("\u{2039}", is_first, prev_page, "pug-pg-prev"));
+        root = root.child(self.render_nav_button("chevron-left", is_first, prev_page, "pug-pg-prev"));
 
         // Page buttons container
         let mut pages_container = div()
@@ -248,7 +254,7 @@ impl IntoElement for Pagination {
         } else {
             self.spec.total_pages
         };
-        root = root.child(self.render_nav_button("\u{203A}", is_last, next_page, "pug-pg-next"));
+        root = root.child(self.render_nav_button("chevron-right", is_last, next_page, "pug-pg-next"));
 
         root.into_any_element()
     }

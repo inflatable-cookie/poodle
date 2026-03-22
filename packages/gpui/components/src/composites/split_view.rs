@@ -119,13 +119,19 @@ impl IntoElement for SplitView {
                     .w(px(4.0))
                     .h_full()
                     .cursor_col_resize()
-                    .bg(border);
+                    .flex()
+                    .items_center()
+                    .justify_center()
+                    .child(div().w(px(1.0)).h_full().bg(border));
             } else {
                 divider = divider
                     .h(px(4.0))
                     .w_full()
                     .cursor_row_resize()
-                    .bg(border);
+                    .flex()
+                    .items_center()
+                    .justify_center()
+                    .child(div().h(px(1.0)).w_full().bg(border));
             }
 
             divider = divider.hover(|s| {

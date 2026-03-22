@@ -6,8 +6,9 @@
 
 use gpui::*;
 use pug_gpui::GpuiThemeProvider;
-use pug_primitives::FileUploadSpec;
+use pug_primitives::{FileUploadSpec, IconSize, IconSpec};
 
+use super::icon::Icon;
 use crate::theme_ext::{resolve_color, resolve_opacity, resolve_px, resolve_radius};
 
 /// A real GPUI file upload drop zone component backed by `FileUploadSpec`.
@@ -106,6 +107,13 @@ impl IntoElement for FileUpload {
             fill
         };
 
+        // Contract: upload icon — Md size for dropzone prominence
+        let upload_icon = Icon::from_spec(
+            IconSpec::new("upload").with_size(IconSize::Md),
+            theme,
+        )
+        .with_color(text_secondary);
+
         // Contract: min-height 8rem, dashed border (solid here — GPUI has no dashed)
         let mut zone = div()
             .id(SharedString::from(id_str))
@@ -124,6 +132,7 @@ impl IntoElement for FileUpload {
             .py(panel_padding_y)
             // Contract: focus = border-color change
             .focus(move |s| s.border_color(focus_border))
+            .child(upload_icon)
             .child(
                 div()
                     .text_size(px(14.0))

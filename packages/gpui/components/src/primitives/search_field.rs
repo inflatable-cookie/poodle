@@ -66,7 +66,14 @@ impl IntoElement for SearchField {
     type Element = AnyElement;
 
     fn into_element(self) -> Self::Element {
-        let input_spec = self.spec.as_text_input_spec();
+        let mut input_spec = self.spec.as_text_input_spec();
+
+        // Contract fix: the spec emits trailing_icon("clear") but the actual
+        // icon asset is "x". Remap so the Icon component resolves correctly.
+        if input_spec.trailing_icon.as_deref() == Some("clear") {
+            input_spec.trailing_icon = Some("x".to_string());
+        }
+
         let mut input = TextInput::from_spec(input_spec, &self.theme);
 
         if let Some(suffix) = self.id_suffix {

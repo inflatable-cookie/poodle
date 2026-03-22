@@ -133,7 +133,7 @@ impl IntoElement for NumberEntry {
         // Root: grid-like layout with input on left, steppers on right
         let mut wrapper = div()
             .id(SharedString::from(id_str))
-            .h(control_height)
+            .min_h(control_height)
             .rounded(control_radius)
             .bg(surface_bg)
             .border_1()

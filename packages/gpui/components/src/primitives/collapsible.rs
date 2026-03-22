@@ -129,9 +129,10 @@ impl IntoElement for Collapsible {
         trigger = trigger.child(title_block);
 
         // Chevron indicator (auto)
+        let chevron_icon = if is_open { "chevron-down" } else { "chevron-right" };
         trigger = trigger.child(
             Icon::from_spec(
-                IconSpec::new("chevron-down").with_size(IconSize::Sm),
+                IconSpec::new(chevron_icon).with_size(IconSize::Sm),
                 theme,
             )
             .with_color(text_secondary),

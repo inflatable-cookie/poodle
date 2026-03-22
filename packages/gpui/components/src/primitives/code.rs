@@ -51,12 +51,11 @@ impl IntoElement for Code {
         let fill = resolve_color(theme, spec.fill_token());
         let text_color = resolve_color(theme, spec.text_color_token());
         let border = resolve_color(theme, spec.border_token());
+        let text_secondary = resolve_color(theme, "semantic.color.text.secondary");
         // Contract: radius-surface, not radius-control
         let radius = resolve_radius(theme, "semantic.radius.surface");
 
         let mut el = div()
-            .px(panel_x)
-            .py(panel_y)
             .rounded(radius)
             .bg(fill)
             .border_1()
@@ -64,7 +63,51 @@ impl IntoElement for Code {
             .text_color(text_color)
             // Contract: font 0.8125rem (13px), code family
             .text_size(px(13.0))
-            .overflow_hidden();
+            .overflow_hidden()
+            .flex()
+            .flex_col();
+
+        // Contract: toolbar with language label and copy button
+        let has_toolbar = spec.language.is_some() || spec.is_copyable;
+        if has_toolbar {
+            let mut toolbar = div()
+                .flex()
+                .items_center()
+                .justify_between()
+                .px(panel_x)
+                .py(px(6.0)) // 0.375rem
+                .border_b_1()
+                .border_color(border);
+
+            // Language label
+            if let Some(ref lang) = spec.language {
+                toolbar = toolbar.child(
+                    div()
+                        .text_size(px(11.0)) // 0.6875rem
+                        .text_color(text_secondary)
+                        .font_weight(FontWeight::SEMIBOLD)
+                        .child(lang.to_uppercase()),
+                );
+            } else {
+                toolbar = toolbar.child(div()); // spacer
+            }
+
+            // Copy button placeholder
+            if spec.is_copyable {
+                toolbar = toolbar.child(
+                    div()
+                        .text_size(px(11.0))
+                        .text_color(text_secondary)
+                        .cursor_pointer()
+                        .child("Copy"),
+                );
+            }
+
+            el = el.child(toolbar);
+        }
+
+        // Code content area
+        let mut code_area = div().px(panel_x).py(panel_y);
 
         // Content with optional line numbers
         if spec.show_line_numbers {
@@ -87,10 +130,12 @@ impl IntoElement for Code {
                 );
             }
 
-            el = el.child(content_col);
+            code_area = code_area.child(content_col);
         } else {
-            el = el.child(spec.content.clone());
+            code_area = code_area.child(spec.content.clone());
         }
+
+        el = el.child(code_area);
 
         el.into_any_element()
     }

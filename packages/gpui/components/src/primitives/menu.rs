@@ -6,7 +6,9 @@
 
 use gpui::*;
 use pug_gpui::GpuiThemeProvider;
-use pug_primitives::{MenuEntry, MenuItemKind, MenuSpec, OverlayPlacement};
+use pug_primitives::{IconSize, IconSpec, MenuEntry, MenuItemKind, MenuSpec, OverlayPlacement};
+
+use super::icon::Icon;
 
 use crate::theme_ext::{color_mix, resolve_color, resolve_opacity, resolve_radius};
 
@@ -154,7 +156,11 @@ impl IntoElement for Menu {
             let mut label_row = div().flex().items_center().gap(px(6.0));
             if is_checked {
                 label_row = label_row.child(
-                    div().text_xs().text_color(accent).child("✓"),
+                    Icon::from_spec(
+                        IconSpec::new("check").with_size(IconSize::Sm),
+                        theme,
+                    )
+                    .with_color(accent),
                 );
             }
             label_row = label_row.child(item.label.clone());

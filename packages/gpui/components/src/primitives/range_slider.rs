@@ -55,7 +55,7 @@ impl IntoElement for RangeSlider {
         let border = resolve_color(theme, "semantic.color.border.default");
         let surface_bg = resolve_color(theme, spec.track_fill_token());
         let text_secondary = resolve_color(theme, "semantic.color.text.secondary");
-        let disabled_opacity = resolve_opacity(theme, "semantic.state.opacity.disabled");
+        let disabled_opacity = resolve_opacity(theme, spec.disabled_opacity_token());
         let stack_gap = resolve_px(theme, "semantic.space.stack.sm");
 
         // Track dimensions

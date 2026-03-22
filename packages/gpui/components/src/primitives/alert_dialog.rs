@@ -9,6 +9,7 @@ pub struct AlertDialog {
     backdrop_fill: Hsla,
     dialog_fill: Hsla,
     dialog_radius: Pixels,
+    button_radius: Pixels,
     title_color: Hsla,
     description_color: Hsla,
     confirm_fill: Hsla,
@@ -35,6 +36,7 @@ impl AlertDialog {
             backdrop_fill: resolve_color(theme, spec.backdrop_fill_token()),
             dialog_fill: resolve_color(theme, spec.dialog_fill_token()),
             dialog_radius: resolve_radius(theme, spec.dialog_radius_token()),
+            button_radius: resolve_radius(theme, spec.button_radius_token()),
             title_color: resolve_color(theme, spec.title_color_token()),
             description_color: resolve_color(theme, spec.description_color_token()),
             confirm_fill: resolve_color(theme, spec.confirm_fill_token()),
@@ -56,6 +58,7 @@ impl AlertDialog {
             backdrop_fill: resolve_color(theme, spec.backdrop_fill_token()),
             dialog_fill: resolve_color(theme, spec.dialog_fill_token()),
             dialog_radius: resolve_radius(theme, spec.dialog_radius_token()),
+            button_radius: resolve_radius(theme, spec.button_radius_token()),
             title_color: resolve_color(theme, spec.title_color_token()),
             description_color: resolve_color(theme, spec.description_color_token()),
             confirm_fill: resolve_color(theme, spec.confirm_fill_token()),
@@ -124,6 +127,7 @@ impl IntoElement for AlertDialog {
                     .rounded(self.dialog_radius)
                     .border_1()
                     .border_color(self.border_color)
+                    .shadow_lg()
                     .px(self.padding_x)
                     .py(self.padding_y)
                     .gap(self.content_gap)
@@ -167,7 +171,7 @@ impl IntoElement for AlertDialog {
                                     .cursor_pointer()
                                     .px(self.padding_x)
                                     .py(px(6.0))
-                                    .rounded(self.dialog_radius)
+                                    .rounded(self.button_radius)
                                     .text_color(self.cancel_text_color)
                                     .hover(|s| s.bg(hsla(0.0, 0.0, 0.5, 0.1)))
                                     .child(self.spec.cancel_label.clone())
@@ -184,7 +188,7 @@ impl IntoElement for AlertDialog {
                                     .cursor_pointer()
                                     .px(self.padding_x)
                                     .py(px(6.0))
-                                    .rounded(self.dialog_radius)
+                                    .rounded(self.button_radius)
                                     .bg(self.confirm_fill)
                                     .text_color(self.confirm_text_color)
                                     .hover(|s| s.opacity(0.9))

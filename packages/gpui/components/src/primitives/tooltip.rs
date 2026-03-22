@@ -4,7 +4,7 @@ use gpui::*;
 use pug_gpui::GpuiThemeProvider;
 use pug_primitives::{OverlayPlacement, TooltipSpec};
 
-use crate::theme_ext::{resolve_color, resolve_px, resolve_radius};
+use crate::theme_ext::{color_mix, resolve_color, resolve_px, resolve_radius};
 
 /// A real GPUI tooltip component backed by `TooltipSpec`.
 ///
@@ -58,11 +58,15 @@ impl IntoElement for Tooltip {
         let spec = &self.spec;
 
         let fill = resolve_color(theme, spec.fill_token());
-        // Contract: text-inverse for tooltip text (dark bg, light text)
-        let text_inverse = resolve_color(theme, "semantic.color.text.inverse");
+        let panel = resolve_color(theme, "semantic.color.background.panel");
+        // Contract: text color = text-primary (tooltip uses dark elevated bg)
+        let text_primary = resolve_color(theme, "semantic.color.text.primary");
+        let border_raw = resolve_color(theme, "semantic.color.border.default");
         let stack_gap = resolve_px(theme, "semantic.space.stack.sm");
-        // Contract: padding 0.375rem 0.5rem (6px 8px)
-        let tooltip_radius = resolve_radius(theme, "semantic.radius.control");
+        // Contract: radius-sm (smaller than control)
+        let tooltip_radius = resolve_radius(theme, "semantic.radius.control") - px(2.0);
+        // Contract: border = 72% border-default
+        let tooltip_border = color_mix(border_raw, panel, 0.72);
 
         let mut wrapper = div().flex().flex_col().gap(stack_gap);
 
@@ -80,14 +84,13 @@ impl IntoElement for Tooltip {
                         .py(px(6.0))  // 0.375rem
                         .rounded(tooltip_radius)
                         .bg(fill)
-                        .shadow_sm()
-                        .child(
-                            div()
-                                // Contract: font 0.75rem (12px)
-                                .text_size(px(12.0))
-                                .text_color(text_inverse)
-                                .child(content.clone()),
-                        ),
+                        .border_1()
+                        .border_color(tooltip_border)
+                        .shadow_md()
+                        // Contract: font 0.75rem (12px)
+                        .text_size(px(12.0))
+                        .text_color(text_primary)
+                        .child(content.clone()),
                 );
             }
         }

@@ -51,6 +51,7 @@ impl ColorPicker {
     pub fn open(mut self, v: bool) -> Self { self.spec.is_open = v; self }
     pub fn disabled(mut self, v: bool) -> Self { self.spec.is_disabled = v; self }
     pub fn show_alpha(mut self, v: bool) -> Self { self.spec.show_alpha = v; self }
+    pub fn swatches(mut self, v: Vec<String>) -> Self { self.spec.swatches = v; self }
 
     pub fn with_id(mut self, suffix: impl Into<String>) -> Self {
         self.id_suffix = Some(suffix.into());
@@ -121,32 +122,8 @@ impl IntoElement for ColorPicker {
             let swatch_size = px(20.0); // 1.25rem
             let swatch_radius = px(3.0); // 0.1875rem
 
-            let mut grid = div()
-                .flex()
-                .flex_wrap()
-                .gap(stack_gap);
-
-            let preset_colors = [
-                "#000000", "#ffffff", "#ff0000", "#00ff00",
-                "#0000ff", "#ffff00", "#ff00ff", "#00ffff",
-            ];
-
-            for color_hex in &preset_colors {
-                let swatch_color = parse_hex_color(color_hex);
-                grid = grid.child(
-                    div()
-                        .w(swatch_size)
-                        .h(swatch_size)
-                        .rounded(swatch_radius)
-                        .border_1()
-                        .border_color(border)
-                        .bg(swatch_color)
-                        .cursor_pointer(),
-                );
-            }
-
             // Contract: surface width 24rem, padding 0.75rem
-            let overlay = div()
+            let mut overlay = div()
                 .w(px(384.0)) // 24rem
                 .rounded(surface_radius)
                 .bg(elevated_bg)
@@ -156,9 +133,32 @@ impl IntoElement for ColorPicker {
                 .p(px(12.0)) // 0.75rem
                 .flex()
                 .flex_col()
-                .gap(px(8.0))
-                .child(grid)
-                .child(
+                .gap(px(8.0));
+
+            // Swatch grid — only rendered when caller supplies swatches
+            if !spec.swatches.is_empty() {
+                let mut grid = div()
+                    .flex()
+                    .flex_wrap()
+                    .gap(stack_gap);
+
+                for color_hex in &spec.swatches {
+                    let swatch_color = parse_hex_color(color_hex);
+                    grid = grid.child(
+                        div()
+                            .w(swatch_size)
+                            .h(swatch_size)
+                            .rounded(swatch_radius)
+                            .border_1()
+                            .border_color(border)
+                            .bg(swatch_color)
+                            .cursor_pointer(),
+                    );
+                }
+                overlay = overlay.child(grid);
+            }
+
+            overlay = overlay.child(
                     // Hex display with code font, 0.75rem
                     div()
                         .text_size(px(12.0))

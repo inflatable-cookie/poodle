@@ -78,13 +78,17 @@ impl IntoElement for FilterToolbar {
         let accent = resolve_color(theme, "semantic.color.accent.base");
         let border = resolve_color(theme, "semantic.color.border.subtle");
 
+        let block_padding = resolve_px(theme, "semantic.space.inline.sm");
+
         let mut toolbar = div()
             .w_full()
             .flex()
+            .flex_row()
+            .flex_wrap()
             .items_center()
             .gap(gap)
             .px(inline_padding)
-            .py(px(8.0))
+            .py(block_padding)
             .border_b_1()
             .border_color(border);
 

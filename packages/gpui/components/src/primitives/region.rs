@@ -75,9 +75,10 @@ impl IntoElement for Region {
             el = el.child(
                 div()
                     .text_color(label_color)
-                    // Contract: label font 0.625rem (10px), semibold, uppercase
-                    .text_size(px(10.0))
+                    // Contract: label font 0.6875rem (11px), semibold, uppercase, line-height 1.5
+                    .text_size(px(11.0))
                     .font_weight(FontWeight::SEMIBOLD)
+                    .line_height(relative(1.5))
                     .child(spec.label.to_uppercase()),
             );
         }

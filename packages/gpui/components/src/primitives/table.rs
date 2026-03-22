@@ -149,6 +149,7 @@ impl IntoElement for Table {
                     .py(px(8.0))
                     .text_color(self.caption_text)
                     .text_size(px(12.0))
+                    .line_height(relative(1.4))
                     .child(caption.clone()),
             );
         }
@@ -170,6 +171,7 @@ impl IntoElement for Table {
                     .py(cell_pad_v)
                     .text_color(self.header_text)
                     .text_size(px(11.0))
+                    .line_height(relative(1.4))
                     .font_weight(FontWeight::SEMIBOLD);
 
                 if col.align == ColumnAlign::End {
@@ -193,6 +195,8 @@ impl IntoElement for Table {
                     .py(px(32.0))
                     .px(cell_pad_h)
                     .text_color(self.empty_text)
+                    .text_size(px(13.0))
+                    .line_height(relative(1.4))
                     .child(self.spec.empty_message.clone()),
             );
         } else {
@@ -214,7 +218,8 @@ impl IntoElement for Table {
                         .px(cell_pad_h)
                         .py(cell_pad_v)
                         .text_color(self.cell_text)
-                        .text_size(px(13.0));
+                        .text_size(px(13.0))
+                        .line_height(relative(1.4));
 
                     if col.align == ColumnAlign::End {
                         cell = cell.flex().justify_end();

@@ -2,8 +2,9 @@
 
 use gpui::*;
 use pug_gpui::GpuiThemeProvider;
-use pug_primitives::{CallOutSpec, StatusTone};
+use pug_primitives::{CallOutSpec, IconSize, IconSpec, StatusTone};
 
+use super::icon::Icon;
 use crate::theme_ext::{resolve_color, resolve_px, resolve_radius};
 
 /// A real GPUI call-out component backed by `CallOutSpec`.
@@ -52,22 +53,47 @@ impl IntoElement for Callout {
         let text_secondary = resolve_color(theme, "semantic.color.text.secondary");
         let radius = resolve_radius(theme, "semantic.radius.surface");
 
-        // Contract: left border 3px, tone-colored bg at 10% opacity
+        // Contract: tone icon name
+        let icon_name = match spec.tone {
+            StatusTone::Info => "info",
+            StatusTone::Success => "check-circle",
+            StatusTone::Warning => "alert-triangle",
+            StatusTone::Danger => "alert-circle",
+            _ => "info",
+        };
+
+        // Contract: full border, tone-colored bg at 10% opacity, grid layout with icon
         let mut el = div()
             .w_full()
             .px(panel_x)
             .py(panel_y)
             .rounded(radius)
             .bg(fill.opacity(0.1))
-            .border_l(px(3.0))
+            .border_1()
             .border_color(border)
             .flex()
-            .flex_col()
-            .gap(px(4.0));
+            .gap(px(12.0)); // 0.75rem gap between icon and content
+
+        // Icon column — Contract: tone-colored status icon
+        el = el.child(
+            div()
+                .flex_shrink_0()
+                .pt(px(2.0))
+                .child(
+                    Icon::from_spec(
+                        IconSpec::new(icon_name).with_size(IconSize::Sm),
+                        theme,
+                    )
+                    .with_color(border),
+                ),
+        );
+
+        // Content column
+        let mut content_col = div().flex().flex_col().gap(px(4.0)).flex_1().min_w(px(0.0));
 
         // Contract: title font 0.875rem (14px), weight 600
         if let Some(ref title) = spec.title {
-            el = el.child(
+            content_col = content_col.child(
                 div()
                     .text_size(px(14.0))
                     .font_weight(FontWeight::SEMIBOLD)
@@ -78,13 +104,15 @@ impl IntoElement for Callout {
 
         // Contract: content font 0.875rem (14px)
         if let Some(ref content) = spec.content {
-            el = el.child(
+            content_col = content_col.child(
                 div()
                     .text_size(px(14.0))
                     .text_color(text_secondary)
                     .child(content.clone()),
             );
         }
+
+        el = el.child(content_col);
 
         el.into_any_element()
     }

@@ -3,6 +3,7 @@
 use gpui::*;
 use pug_gpui::GpuiThemeProvider;
 use pug_composites::EmbedInputSpec;
+use pug_primitives::ValidationState;
 use crate::theme_ext::{resolve_color, resolve_opacity, resolve_radius};
 
 pub struct EmbedInput {
@@ -37,15 +38,42 @@ impl IntoElement for EmbedInput {
         let display = if spec.value.is_empty() { spec.placeholder.as_deref().unwrap_or("Paste URL...") } else { &spec.value };
         let color = if spec.value.is_empty() { placeholder_color } else { text_color };
 
-        let mut el = div()
+        // Multi-line text area (3 rows) instead of single-line input
+        let mut textarea = div()
             .bg(fill).border_1().border_color(border).rounded(radius)
-            .h(px(36.0)).px(px(12.0))
-            .flex().items_center()
+            .min_h(px(72.0)).px(px(12.0)).py(px(8.0))
+            .flex().items_start()
             .text_size(px(14.0)).text_color(color)
             .child(display.to_string());
         if spec.is_disabled {
-            el = el.opacity(resolve_opacity(theme, "semantic.state.opacity.disabled"));
+            textarea = textarea.opacity(resolve_opacity(theme, "semantic.state.opacity.disabled"));
         }
-        el.into_any_element()
+
+        // Status area below the input
+        let status_color = match spec.validation_state {
+            ValidationState::Invalid => resolve_color(theme, "semantic.color.status.danger"),
+            ValidationState::Valid => resolve_color(theme, "semantic.color.status.success"),
+            ValidationState::Pending => resolve_color(theme, "semantic.color.status.warning"),
+            ValidationState::None => placeholder_color,
+        };
+        let mut status_area = div()
+            .h(px(20.0)).px(px(4.0))
+            .flex().items_center().gap(px(6.0))
+            .text_xs().text_color(status_color);
+        if spec.is_loading {
+            status_area = status_area.child("Loading...");
+        } else {
+            match spec.validation_state {
+                ValidationState::Invalid => { status_area = status_area.child("Invalid URL"); }
+                ValidationState::Valid => { status_area = status_area.child("Valid"); }
+                ValidationState::Pending => { status_area = status_area.child("Validating..."); }
+                ValidationState::None => {}
+            }
+        }
+
+        div().flex().flex_col().gap(px(4.0))
+            .child(textarea)
+            .child(status_area)
+            .into_any_element()
     }
 }

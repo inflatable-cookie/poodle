@@ -1,4 +1,7 @@
 //! ConfirmAction — confirmation dialog backed by ConfirmActionSpec.
+//!
+//! Renders an AlertDialog-style overlay with backdrop, trigger button,
+//! and confirm/cancel actions.
 
 use gpui::*;
 use pug_gpui::GpuiThemeProvider;
@@ -8,6 +11,8 @@ use crate::theme_ext::{resolve_color, resolve_radius};
 pub struct ConfirmAction {
     spec: ConfirmActionSpec,
     theme: GpuiThemeProvider,
+    /// Optional trigger element that opens the confirmation dialog.
+    trigger: Option<AnyElement>,
 }
 
 impl std::ops::Deref for ConfirmAction {
@@ -17,10 +22,20 @@ impl std::ops::Deref for ConfirmAction {
 
 impl ConfirmAction {
     pub fn new(theme: &GpuiThemeProvider) -> Self {
-        Self { spec: ConfirmActionSpec::new("Confirm", "Are you sure?", "Confirm", "Cancel"), theme: theme.clone() }
+        Self {
+            spec: ConfirmActionSpec::new("Confirm", "Are you sure?", "Confirm", "Cancel"),
+            theme: theme.clone(),
+            trigger: None,
+        }
     }
     pub fn from_spec(spec: ConfirmActionSpec, theme: &GpuiThemeProvider) -> Self {
-        Self { spec, theme: theme.clone() }
+        Self { spec, theme: theme.clone(), trigger: None }
+    }
+
+    /// Set a trigger element (e.g. a button) that opens the confirmation dialog.
+    pub fn with_trigger(mut self, trigger: impl IntoElement) -> Self {
+        self.trigger = Some(trigger.into_any_element());
+        self
     }
 }
 
@@ -36,14 +51,15 @@ impl IntoElement for ConfirmAction {
         let msg_color = resolve_color(theme, "semantic.color.text.secondary");
         let confirm_fill = resolve_color(theme, spec.confirm_fill_token());
 
-        let mut el = div()
+        let mut dialog = div()
             .bg(fill).border_1().border_color(border).rounded(radius)
             .px(px(24.0)).py(px(20.0))
             .flex().flex_col().gap(px(16.0))
-            .min_w(px(360.0));
+            .min_w(px(360.0))
+            .shadow_lg();
 
-        el = el.child(div().text_color(title_color).font_weight(FontWeight::SEMIBOLD).child(spec.title.clone()));
-        el = el.child(div().text_size(px(14.0)).text_color(msg_color).child(spec.message.clone()));
+        dialog = dialog.child(div().text_color(title_color).font_weight(FontWeight::SEMIBOLD).child(spec.title.clone()));
+        dialog = dialog.child(div().text_size(px(14.0)).text_color(msg_color).child(spec.message.clone()));
 
         let actions = div().flex().flex_row().gap(px(8.0)).justify_end()
             .child(div().text_size(px(14.0)).text_color(title_color).cursor_pointer().child(spec.cancel_label.clone()))
@@ -51,7 +67,27 @@ impl IntoElement for ConfirmAction {
                 .rounded(resolve_radius(theme, "semantic.radius.control"))
                 .px(px(12.0)).py(px(6.0)).cursor_pointer()
                 .child(spec.confirm_label.clone()));
-        el = el.child(actions);
-        el.into_any_element()
+        dialog = dialog.child(actions);
+
+        // Backdrop overlay — full-viewport scrim with centered dialog
+        let backdrop = div()
+            .absolute()
+            .inset_0()
+            .bg(hsla(0.0, 0.0, 0.0, 0.5))
+            .flex()
+            .items_center()
+            .justify_center()
+            .child(dialog);
+
+        // If a trigger is provided, render it alongside the backdrop.
+        // The trigger is what the user clicks to open the confirmation.
+        if let Some(trigger) = self.trigger {
+            div()
+                .child(trigger)
+                .child(backdrop)
+                .into_any_element()
+        } else {
+            backdrop.into_any_element()
+        }
     }
 }

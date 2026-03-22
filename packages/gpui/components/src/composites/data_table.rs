@@ -168,12 +168,18 @@ impl IntoElement for DataTable {
                     .iter()
                     .any(|sid| sid == &row.id);
 
+                let row_hover_bg = accent.opacity(0.04);
+                let selected_bg = accent.opacity(0.08);
+
                 let mut data_row = div()
                     .w_full()
                     .flex()
                     .border_b_1()
                     .border_color(border_color.opacity(0.5))
-                    .when(is_selected, |el| el.bg(accent.opacity(0.08)));
+                    .when(is_selected, |el| el.bg(selected_bg))
+                    .when(!is_selected, move |el| {
+                        el.hover(move |s| s.bg(row_hover_bg))
+                    });
 
                 for col in &spec.columns {
                     let cell_value = row

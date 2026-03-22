@@ -63,19 +63,19 @@ impl IntoElement for ScrollShell {
 
         let mut el = div()
             .overflow_hidden()
-            .rounded(surface_radius);
+            .rounded(surface_radius)
+            .flex_1();
 
         // Direction-based flex layout
         match spec.direction {
             Direction::Vertical => {
-                el = el.flex().flex_col();
+                el = el.flex().flex_col().min_h_0();
             }
             Direction::Horizontal => {
-                el = el.flex().flex_row();
+                el = el.flex().flex_row().min_w_0();
             }
             Direction::Both => {
-                // Both directions: use flex-wrap column
-                el = el.flex().flex_col();
+                el = el.flex().flex_col().min_h_0().min_w_0();
             }
         }
 

@@ -73,8 +73,10 @@ impl RenderComponent<GridSpec> for GpuiAdapter {
         if let Some(col_gap_token) = spec.resolved_column_gap() {
             gpui_style.gap = theme.resolve_space(col_gap_token);
         }
-        // Row gap resolved but GPUI uses single gap — column gap takes priority
-        let _row_gap = spec.resolved_row_gap().map(|t| theme.resolve_space(t));
+        // Row gap applied separately so flex-wrap grids get correct vertical spacing
+        if let Some(row_gap_token) = spec.resolved_row_gap() {
+            gpui_style.row_gap = theme.resolve_space(row_gap_token);
+        }
         gpui_style.padding = resolve_inset_padding(theme, &spec.resolved_padding());
         GpuiElementHandle::new(
             format!("grid-{}", spec.role.as_deref().unwrap_or("anonymous")),

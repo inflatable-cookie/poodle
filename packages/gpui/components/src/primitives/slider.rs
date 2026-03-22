@@ -51,7 +51,7 @@ impl IntoElement for Slider {
         let theme = &self.theme;
         let spec = &self.spec;
 
-        let disabled_opacity = resolve_opacity(theme, "semantic.state.opacity.disabled");
+        let disabled_opacity = resolve_opacity(theme, spec.disabled_opacity_token());
         let accent = resolve_color(theme, spec.range_fill_token());
         let border = resolve_color(theme, "semantic.color.border.default");
         let surface_bg = resolve_color(theme, "semantic.color.background.surface");
@@ -68,7 +68,7 @@ impl IntoElement for Slider {
 
         let progress = spec.normalized_progress().clamp(0.0, 1.0) as f32;
 
-        // Track with filled portion
+        // Track with filled portion and thumb
         let track = div()
             .w_full()
             .h(track_height)
@@ -83,6 +83,20 @@ impl IntoElement for Slider {
                     .rounded(track_radius)
                     .bg(accent)
                     .w(relative(progress)),
+            )
+            // Thumb
+            .child(
+                div()
+                    .absolute()
+                    .top(px(-(thumb_f - track_f) / 2.0))
+                    .left(relative(progress))
+                    .ml(px(-(thumb_f / 2.0)))
+                    .w(thumb_size)
+                    .h(thumb_size)
+                    .rounded(thumb_radius)
+                    .bg(accent)
+                    .border_1()
+                    .border_color(accent),
             );
 
         // Value labels

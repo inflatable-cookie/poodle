@@ -84,13 +84,13 @@ impl IntoElement for DurationInput {
         let parts: Vec<&str> = display.split(':').collect();
         for (i, part) in parts.iter().enumerate() {
             if i > 0 {
-                // Separator colon
+                // Separator colon — contract: body-size, weight 600, line-height 1
                 segments = segments.child(
                     div()
                         .text_size(px(14.0))
+                        .line_height(px(14.0))
                         .text_color(text_secondary)
                         .font_weight(FontWeight::SEMIBOLD)
-                        .pb(px(2.0))
                         .child(":"),
                 );
             }
@@ -100,22 +100,25 @@ impl IntoElement for DurationInput {
             let segment = div()
                 .flex()
                 .flex_col()
+                .items_center()
                 .gap(px(2.0)) // 0.125rem
                 .p(px(2.0))
                 .rounded(px(3.0)) // 0.1875rem
                 .child(
-                    // Label: 0.5625rem, uppercase, secondary
+                    // Label: 0.5625rem, uppercase, secondary, line-height 1
                     div()
                         .text_size(px(9.0)) // 0.5625rem
+                        .line_height(px(9.0))
                         .text_color(text_secondary)
                         .child(label.to_string()),
                 )
                 .child(
-                    // Field: 1.75rem wide, code font, body size, centered
+                    // Field: 1.75rem wide, body size, centered, line-height 1
                     div()
                         .w(px(28.0)) // 1.75rem
                         .text_center()
                         .text_size(px(14.0))
+                        .line_height(px(14.0))
                         .text_color(text_primary)
                         .child(part.to_string()),
                 );

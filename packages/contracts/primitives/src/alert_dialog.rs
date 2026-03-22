@@ -116,7 +116,7 @@ impl AlertDialogSpec {
     }
 
     pub fn actions_gap_token(&self) -> &'static str {
-        semantic::SPACE_INLINE_MD
+        semantic::SPACE_INLINE_SM
     }
 
     pub fn padding_x_token(&self) -> &'static str {
@@ -129,6 +129,10 @@ impl AlertDialogSpec {
 
     pub fn border_token(&self) -> &'static str {
         semantic::COLOR_BORDER_SUBTLE
+    }
+
+    pub fn button_radius_token(&self) -> &'static str {
+        semantic::RADIUS_CONTROL
     }
 
     pub fn focus_ring_color_token(&self) -> &'static str {

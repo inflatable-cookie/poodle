@@ -3,8 +3,9 @@
 use std::rc::Rc;
 use gpui::*;
 use pug_gpui::GpuiThemeProvider;
-use pug_primitives::{AccordionItemSpec, AccordionSelectionValue, AccordionSpec};
+use pug_primitives::{AccordionItemSpec, AccordionSelectionValue, AccordionSpec, IconSize, IconSpec};
 
+use super::icon::Icon;
 use crate::theme_ext::{resolve_color, resolve_opacity};
 
 /// A real GPUI accordion component backed by `AccordionSpec`.
@@ -100,14 +101,23 @@ impl IntoElement for Accordion {
                     .cursor(CursorStyle::OperationNotAllowed);
             }
 
+            // Label with contract typography
             header = header
-                .child(div().text_size(px(14.0)).child(item.label.clone()))
                 .child(
                     div()
-                        .text_xs()
-                        .text_color(text_secondary)
-                        .child(if is_open { "▾" } else { "▸" }),
-                );
+                        .text_size(px(14.0))
+                        .font_weight(FontWeight::SEMIBOLD)
+                        .line_height(relative(1.4))
+                        .child(item.label.clone()),
+                )
+                .child({
+                    let chevron_name = if is_open { "chevron-down" } else { "chevron-right" };
+                    Icon::from_spec(
+                        IconSpec::new(chevron_name).with_size(IconSize::Sm),
+                        theme,
+                    )
+                    .with_color(text_secondary)
+                });
 
             // Click handler
             if !is_disabled {
@@ -133,7 +143,8 @@ impl IntoElement for Accordion {
                             .border_color(border)
                             .child(
                                 div()
-                                    .text_xs()
+                                    .text_size(px(13.0))
+                                    .line_height(relative(1.5))
                                     .text_color(text_secondary)
                                     .child(desc.clone()),
                             ),

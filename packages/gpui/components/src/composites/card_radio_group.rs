@@ -37,18 +37,42 @@ impl IntoElement for CardRadioGroup {
         let accent = resolve_color(theme, "semantic.color.accent.base");
         let selected = spec.value.as_deref().or(spec.default_value.as_deref());
 
-        let mut el = div().flex().flex_col().gap(px(8.0));
+        let mut el = div().flex().flex_row().flex_wrap().gap(px(8.0));
         for option in &spec.options {
             let is_selected = selected == Some(option.value.as_str());
             let fill = if is_selected { selected_fill } else { unselected_fill };
             let border_c = if is_selected { accent } else { border };
             let bw = if is_selected { 2.0 } else { 1.0 };
+
+            // Radio indicator: circle with inner dot when selected
+            let indicator = div()
+                .w(px(18.0)).h(px(18.0))
+                .rounded(px(999.0))
+                .bg(unselected_fill)
+                .border_1()
+                .border_color(if is_selected { accent } else { border })
+                .flex().items_center().justify_center()
+                .flex_shrink_0()
+                .child(
+                    div()
+                        .w(px(8.0)).h(px(8.0))
+                        .rounded(px(999.0))
+                        .bg(if is_selected { accent } else { gpui::transparent_black() })
+                );
+
+            let content = div().flex().flex_col().gap(px(2.0))
+                .child(div().text_size(px(14.0)).text_color(text_color).child(option.label.clone()));
+
             let card = div()
+                .flex_1()
+                .min_w(px(200.0))
                 .bg(fill).rounded(radius)
                 .border(px(bw)).border_color(border_c)
                 .px(px(16.0)).py(px(12.0))
                 .cursor_pointer()
-                .child(div().text_size(px(14.0)).text_color(text_color).child(option.label.clone()));
+                .flex().items_center().gap(px(10.0))
+                .child(indicator)
+                .child(content);
             el = el.child(card);
         }
         if spec.is_disabled {

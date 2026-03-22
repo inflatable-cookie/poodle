@@ -1,5 +1,7 @@
 //! Skeleton — real GPUI component backed by SkeletonSpec.
 
+use std::time::Duration;
+
 use gpui::*;
 use pug_gpui::GpuiThemeProvider;
 use pug_primitives::SkeletonSpec;
@@ -49,8 +51,7 @@ impl IntoElement for Skeleton {
 
         let mut el = div()
             .rounded(radius)
-            .bg(fill)
-            .opacity(0.5);
+            .bg(fill);
 
         // Dimensions
         if let Some(ref w) = spec.width {
@@ -74,6 +75,21 @@ impl IntoElement for Skeleton {
             el = el.h(px(14.0));
         }
 
-        el.into_any_element()
+        // Shimmer animation or static opacity
+        if spec.is_animated {
+            el.with_animation(
+                "skeleton-shimmer",
+                Animation::new(Duration::from_millis(1500))
+                    .repeat()
+                    .with_easing(gpui::ease_in_out),
+                |el, delta| {
+                    // Pulse opacity between 0.3 and 0.7
+                    let opacity = 0.3 + delta * 0.4;
+                    el.opacity(opacity)
+                },
+            ).into_any_element()
+        } else {
+            el.opacity(0.5).into_any_element()
+        }
     }
 }

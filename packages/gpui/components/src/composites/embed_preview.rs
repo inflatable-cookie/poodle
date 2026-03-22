@@ -37,6 +37,29 @@ impl IntoElement for EmbedPreview {
             .bg(fill).border_1().border_color(border).rounded(radius)
             .px(px(16.0)).py(px(12.0))
             .flex().flex_col().gap(px(4.0));
+
+        // Loading state
+        if self.spec.is_loading {
+            el = el.child(
+                div().flex().items_center().gap(px(8.0)).py(px(8.0))
+                    .child(div().text_xs().text_color(desc_color).child("Loading embed..."))
+            );
+            return el.into_any_element();
+        }
+
+        // Empty state — no title, description, or provider
+        let has_content = self.spec.title.is_some()
+            || self.spec.description.is_some()
+            || self.spec.provider.is_some();
+        if !has_content {
+            el = el.child(
+                div().py(px(8.0)).text_xs().text_color(desc_color)
+                    .child("No embed data available")
+            );
+            return el.into_any_element();
+        }
+
+        // Normal content rendering
         if let Some(ref title) = self.spec.title {
             el = el.child(div().text_size(px(14.0)).text_color(title_color).font_weight(FontWeight::MEDIUM).child(title.clone()));
         }

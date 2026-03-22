@@ -4,6 +4,7 @@ use pug_tokens::semantic;
 pub struct ColorPickerSpec {
     pub value: Option<String>,
     pub default_value: Option<String>,
+    pub swatches: Vec<String>,
     pub is_open: bool,
     pub is_disabled: bool,
     pub show_alpha: bool,
@@ -14,6 +15,7 @@ impl Default for ColorPickerSpec {
         Self {
             value: None,
             default_value: None,
+            swatches: Vec::new(),
             is_open: false,
             is_disabled: false,
             show_alpha: false,
@@ -33,6 +35,11 @@ impl ColorPickerSpec {
 
     pub fn with_default_value(mut self, default_value: impl Into<String>) -> Self {
         self.default_value = Some(default_value.into());
+        self
+    }
+
+    pub fn with_swatches(mut self, swatches: Vec<String>) -> Self {
+        self.swatches = swatches;
         self
     }
 

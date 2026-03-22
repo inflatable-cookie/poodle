@@ -4,7 +4,9 @@ use gpui::prelude::FluentBuilder;
 use gpui::*;
 use pug_gpui::GpuiThemeProvider;
 use pug_composites::{BrowseState, PickerItemSpec, PickerVariant, RelationPickerSpec, SelectionMode};
+use pug_primitives::{IconSize, IconSpec};
 
+use crate::primitives::Icon;
 use crate::theme_ext::{resolve_color, resolve_px, resolve_radius};
 
 /// A real GPUI relation picker component backed by `RelationPickerSpec`.
@@ -15,6 +17,8 @@ pub struct RelationPicker {
     spec: RelationPickerSpec,
     theme: GpuiThemeProvider,
     on_select: Option<Box<dyn Fn(&str, &ClickEvent, &mut Window, &mut App) + 'static>>,
+    /// Current drill-down path (e.g. ["Projects", "Backend"]).
+    drill_path: Vec<String>,
 }
 
 impl std::ops::Deref for RelationPicker {
@@ -24,7 +28,7 @@ impl std::ops::Deref for RelationPicker {
 
 impl RelationPicker {
     pub fn new(items: Vec<PickerItemSpec>, theme: &GpuiThemeProvider) -> Self {
-        Self { spec: RelationPickerSpec::new(items), theme: theme.clone(), on_select: None }
+        Self { spec: RelationPickerSpec::new(items), theme: theme.clone(), on_select: None, drill_path: Vec::new() }
     }
 
     pub fn from_spec(spec: RelationPickerSpec, theme: &GpuiThemeProvider) -> Self {
@@ -32,6 +36,7 @@ impl RelationPicker {
             spec,
             theme: theme.clone(),
             on_select: None,
+            drill_path: Vec::new(),
         }
     }
 
@@ -42,6 +47,7 @@ impl RelationPicker {
     pub fn selection_mode(mut self, v: SelectionMode) -> Self { self.spec.selection_mode = v; self }
     pub fn variant(mut self, v: PickerVariant) -> Self { self.spec.variant = v; self }
     pub fn state(mut self, v: BrowseState) -> Self { self.spec.state = v; self }
+    pub fn with_drill_path(mut self, path: Vec<String>) -> Self { self.drill_path = path; self }
 
 
     pub fn on_select(
@@ -78,6 +84,48 @@ impl IntoElement for RelationPicker {
             .border_color(border)
             .rounded(control_radius)
             .overflow_hidden();
+
+        // Drill-down breadcrumb navigation
+        if !self.drill_path.is_empty() {
+            let mut breadcrumb_row = div()
+                .w_full()
+                .flex()
+                .items_center()
+                .gap(px(4.0))
+                .px(inline_padding)
+                .py(px(6.0))
+                .border_b_1()
+                .border_color(border);
+
+            // Root label
+            breadcrumb_row = breadcrumb_row.child(
+                div()
+                    .text_xs()
+                    .text_color(text_secondary)
+                    .child("Root"),
+            );
+
+            for segment in &self.drill_path {
+                // Chevron separator
+                breadcrumb_row = breadcrumb_row.child(
+                    Icon::from_spec(
+                        IconSpec::new("chevron-right").with_size(IconSize::Sm),
+                        &self.theme,
+                    )
+                    .with_color(text_secondary.opacity(0.6)),
+                );
+
+                // Segment label
+                breadcrumb_row = breadcrumb_row.child(
+                    div()
+                        .text_xs()
+                        .text_color(text_primary)
+                        .child(segment.clone()),
+                );
+            }
+
+            container = container.child(breadcrumb_row);
+        }
 
         // Search area (if query exists)
         if !spec.query.is_empty() {

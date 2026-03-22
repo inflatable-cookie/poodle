@@ -3,6 +3,8 @@
 use gpui::*;
 use pug_gpui::GpuiThemeProvider;
 use pug_composites::BlockEditorSpec;
+use pug_primitives::{IconSize, IconSpec};
+use crate::primitives::Icon;
 use crate::theme_ext::{resolve_color, resolve_opacity, resolve_px, resolve_radius};
 
 pub struct BlockEditor {
@@ -35,13 +37,72 @@ impl IntoElement for BlockEditor {
         let border = resolve_color(&self.theme, self.spec.border_token());
         let gap = resolve_px(&self.theme, self.spec.block_gap_token());
         let radius = resolve_radius(&self.theme, "semantic.radius.surface");
+        let muted = resolve_color(&self.theme, "semantic.color.text.secondary");
+        let hover_bg = resolve_color(&self.theme, "semantic.color.bg.hover");
 
         let mut el = div()
             .bg(fill).border_1().border_color(border).rounded(radius)
             .flex().flex_col().gap(gap)
             .px(px(12.0)).py(px(8.0))
             .min_h(px(120.0));
-        for child in self.children { el = el.child(child); }
+
+        // Wrap each child block with a drag handle and remove button
+        for child in self.children {
+            let block_row = div()
+                .flex().flex_row().items_center().gap(px(6.0))
+                .group("block-row")
+                // Drag handle
+                .child(
+                    div()
+                        .cursor(CursorStyle::PointingHand)
+                        .flex().items_center().justify_center()
+                        .w(px(20.0)).h(px(20.0)).rounded(px(4.0))
+                        .hover(|s| s.bg(hover_bg))
+                        .child(
+                            Icon::from_spec(
+                                IconSpec::new("grip-vertical").with_size(IconSize::Sm),
+                                &self.theme,
+                            ).with_color(muted)
+                        )
+                )
+                // Block content
+                .child(div().flex_grow().child(child))
+                // Remove button
+                .child(
+                    div()
+                        .cursor(CursorStyle::PointingHand)
+                        .flex().items_center().justify_center()
+                        .w(px(20.0)).h(px(20.0)).rounded(px(4.0))
+                        .hover(|s| s.bg(hover_bg))
+                        .child(
+                            Icon::from_spec(
+                                IconSpec::new("x").with_size(IconSize::Sm),
+                                &self.theme,
+                            ).with_color(muted)
+                        )
+                );
+            el = el.child(block_row);
+        }
+
+        // "Add block" button at the bottom
+        el = el.child(
+            div()
+                .flex().flex_row().items_center().justify_center().gap(px(4.0))
+                .py(px(6.0))
+                .cursor(CursorStyle::PointingHand)
+                .rounded(px(4.0))
+                .hover(|s| s.bg(hover_bg))
+                .child(
+                    Icon::from_spec(
+                        IconSpec::new("plus").with_size(IconSize::Sm),
+                        &self.theme,
+                    ).with_color(muted)
+                )
+                .child(
+                    div().text_xs().text_color(muted).child("Add block")
+                )
+        );
+
         if self.spec.is_disabled {
             el = el.opacity(resolve_opacity(&self.theme, "semantic.state.opacity.disabled"));
         }

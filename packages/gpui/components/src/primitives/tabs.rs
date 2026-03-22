@@ -130,6 +130,71 @@ impl Tabs {
         tab_row
     }
 
+    fn render_card(&self) -> Div {
+        let theme = &self.theme;
+        let inline_padding = resolve_px(theme, "semantic.space.inline.md");
+        let control_y = resolve_px(theme, "semantic.space.control.y");
+        let disabled_opacity = resolve_opacity(theme, self.spec.disabled_opacity_token());
+        let accent = resolve_color(theme, self.spec.indicator_token());
+        let border = resolve_color(theme, self.spec.list_border_token());
+        let text_secondary = resolve_color(theme, "semantic.color.text.secondary");
+        let surface_bg = resolve_color(theme, "semantic.color.background.surface");
+        let elevated = resolve_color(theme, "semantic.color.background.elevated");
+        let radius = resolve_radius(theme, "semantic.radius.control");
+        let focus_ring = resolve_color(theme, self.spec.focus_ring_color_token());
+
+        let current_value = self.spec.current_value().map(|s| s.to_string());
+
+        let mut tab_row = div()
+            .flex()
+            .items_end()
+            .gap(px(2.0)); // small gap between card tabs
+
+        for tab_def in &self.spec.tabs {
+            let is_active = current_value.as_deref() == Some(&tab_def.value);
+            let is_disabled = tab_def.is_disabled;
+            let tab_id = SharedString::from(format!("{}-{}", self.id_prefix, tab_def.value));
+
+            let mut tab = div()
+                .id(tab_id)
+                .px(inline_padding)
+                .py(control_y)
+                .text_size(px(12.0)).font_weight(FontWeight::SEMIBOLD)
+                .border_1()
+                .rounded_t(radius);
+
+            if is_active {
+                tab = tab
+                    .text_color(accent)
+                    .bg(surface_bg)
+                    .border_color(border)
+                    .border_b_0(); // blend with content below
+            } else {
+                tab = tab
+                    .text_color(text_secondary)
+                    .bg(gpui::transparent_black())
+                    .border_color(gpui::transparent_black());
+            }
+
+            tab = tab.focus(move |s| s.border_color(focus_ring));
+
+            if is_disabled {
+                tab = tab
+                    .opacity(disabled_opacity)
+                    .cursor(CursorStyle::OperationNotAllowed);
+            } else if !is_active {
+                tab = tab
+                    .cursor_pointer()
+                    .hover(move |s| s.bg(elevated));
+            }
+
+            tab = tab.child(tab_def.label.clone());
+            tab_row = tab_row.child(tab);
+        }
+
+        tab_row
+    }
+
     fn render_pill(&self) -> Div {
         let theme = &self.theme;
         let list_gap = resolve_px(theme, self.spec.list_gap_token());
@@ -168,7 +233,7 @@ impl Tabs {
                 .px(control_x)
                 .py(control_y)
                 .rounded(pill_radius)
-                .text_xs()
+                .text_size(px(12.0))
                 .font_weight(FontWeight::SEMIBOLD);
 
             if is_active {
@@ -204,6 +269,7 @@ impl IntoElement for Tabs {
     fn into_element(self) -> Self::Element {
         let tab_row = match self.spec.variant {
             TabVariant::Pill => self.render_pill(),
+            TabVariant::Card => self.render_card(),
             _ => self.render_underline(),
         };
 

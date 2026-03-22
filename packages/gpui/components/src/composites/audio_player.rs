@@ -3,7 +3,9 @@
 
 use gpui::*;
 use pug_gpui::GpuiThemeProvider;
+use pug_primitives::{IconSize, IconSpec};
 use pug_composites::AudioPlayerSpec;
+use crate::primitives::Icon;
 use crate::theme_ext::{resolve_color, resolve_radius};
 
 pub struct AudioPlayer {
@@ -31,17 +33,48 @@ impl IntoElement for AudioPlayer {
         let fill = resolve_color(&self.theme, self.spec.fill_token());
         let control_color = resolve_color(&self.theme, self.spec.control_color_token());
         let radius = resolve_radius(&self.theme, "semantic.radius.surface");
-        let muted = resolve_color(&self.theme, "semantic.color.text.secondary");
+        let muted_color = resolve_color(&self.theme, "semantic.color.text.secondary");
 
-        let play_icon = if self.spec.is_playing { "⏸" } else { "▶" };
+        // Play / Pause icon
+        let play_icon_name = if self.spec.is_playing { "pause" } else { "play" };
+        let play_icon = Icon::from_spec(
+            IconSpec::new(play_icon_name).with_size(IconSize::Sm),
+            &self.theme,
+        ).with_color(control_color);
+
+        // Time label
         let time = format!("{:.0}s / {:.0}s", self.spec.current_time, self.spec.duration);
+
+        // Progress / seek bar
+        let progress_pct = (self.spec.progress() * 100.0).clamp(0.0, 100.0);
+        let track_bar = div()
+            .h(px(4.0))
+            .flex_grow()
+            .rounded(px(2.0))
+            .bg(resolve_color(&self.theme, "semantic.color.border.default"))
+            .child(
+                div()
+                    .h_full()
+                    .rounded(px(2.0))
+                    .bg(control_color)
+                    .w(relative(progress_pct as f32 / 100.0)),
+            );
+
+        // Mute / unmute icon
+        let mute_icon_name = if self.spec.is_muted { "volume-x" } else { "volume-2" };
+        let mute_icon = Icon::from_spec(
+            IconSpec::new(mute_icon_name).with_size(IconSize::Sm),
+            &self.theme,
+        ).with_color(control_color);
 
         div()
             .bg(fill).rounded(radius)
             .px(px(12.0)).py(px(8.0))
             .flex().flex_row().items_center().gap(px(8.0))
-            .child(div().text_color(control_color).cursor_pointer().child(play_icon))
-            .child(div().text_xs().text_color(muted).child(time))
+            .child(div().cursor_pointer().child(play_icon))
+            .child(div().text_xs().text_color(muted_color).child(time))
+            .child(track_bar)
+            .child(div().cursor_pointer().child(mute_icon))
             .into_any_element()
     }
 }

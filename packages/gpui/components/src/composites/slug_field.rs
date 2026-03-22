@@ -3,6 +3,8 @@
 use gpui::*;
 use pug_gpui::GpuiThemeProvider;
 use pug_composites::SlugFieldSpec;
+use pug_primitives::{IconSize, IconSpec};
+use crate::primitives::Icon;
 use crate::theme_ext::{resolve_color, resolve_opacity, resolve_radius};
 
 pub struct SlugField {
@@ -42,7 +44,35 @@ impl IntoElement for SlugField {
         if let Some(ref prefix) = spec.prefix {
             el = el.child(div().text_size(px(14.0)).text_color(muted).pl(px(12.0)).child(prefix.clone()));
         }
-        el = el.child(div().text_size(px(14.0)).text_color(text_color).px(px(8.0)).child(spec.value.clone()));
+        el = el.child(
+            div()
+                .flex_1()
+                .text_size(px(14.0))
+                .text_color(text_color)
+                .px(px(8.0))
+                .child(spec.value.clone()),
+        );
+
+        // Reset button (x icon) to clear the slug value
+        if !spec.value.is_empty() && !spec.is_disabled {
+            let icon_color = resolve_color(theme, "semantic.color.text.secondary");
+            el = el.child(
+                div()
+                    .flex()
+                    .items_center()
+                    .justify_center()
+                    .pr(px(8.0))
+                    .cursor_pointer()
+                    .child(
+                        Icon::from_spec(
+                            IconSpec::new("x").with_size(IconSize::Sm),
+                            theme,
+                        )
+                        .with_color(icon_color),
+                    ),
+            );
+        }
+
         if spec.is_disabled {
             let opacity = resolve_opacity(theme, "semantic.state.opacity.disabled");
             el = el.opacity(opacity);

@@ -63,7 +63,12 @@ impl IntoElement for Toolbar {
             .items_center()
             .gap(gap)
             // Contract: padding 0.25rem (4px)
-            .p(padding);
+            .p(padding)
+            // Contract: background panel
+            .bg(panel)
+            // Contract: border color-mix 78% of border-default applied always
+            .border_1()
+            .border_color(border);
 
         match spec.alignment {
             Alignment::Start => {}
@@ -77,7 +82,8 @@ impl IntoElement for Toolbar {
         }
 
         if spec.has_separator {
-            el = el.border_b_1().border_color(border);
+            // Additional bottom separator emphasis (border color already set above)
+            el = el.border_b_2();
         }
 
         for child in self.children {

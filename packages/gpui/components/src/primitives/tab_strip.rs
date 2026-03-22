@@ -6,7 +6,9 @@
 use gpui::*;
 use pug_adapter::ThemeProvider;
 use pug_gpui::GpuiThemeProvider;
-use pug_primitives::{Orientation, TabStripItem, TabStripSpec};
+use pug_primitives::{IconSize, IconSpec, Orientation, TabStripItem, TabStripSpec};
+
+use super::icon::Icon;
 
 use crate::theme_ext::{resolve_color, resolve_opacity};
 
@@ -149,11 +151,15 @@ impl IntoElement for TabStrip {
             if item.is_closable {
                 tab = tab.child(
                     div()
-                        .text_xs()
-                        .text_color(text_secondary)
                         .ml(px(4.0))
                         .cursor_pointer()
-                        .child("×"),
+                        .child(
+                            Icon::from_spec(
+                                IconSpec::new("x").with_size(IconSize::Sm),
+                                theme,
+                            )
+                            .with_color(text_secondary),
+                        ),
                 );
             }
 

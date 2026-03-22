@@ -15,6 +15,8 @@ pub struct Dialog {
     theme: GpuiThemeProvider,
     /// Actions slot — typically buttons rendered by the parent.
     actions: Option<AnyElement>,
+    /// Content slot — body content between description and actions.
+    content: Option<AnyElement>,
 }
 
 impl std::ops::Deref for Dialog {
@@ -24,7 +26,7 @@ impl std::ops::Deref for Dialog {
 
 impl Dialog {
     pub fn new(theme: &GpuiThemeProvider) -> Self {
-        Self { spec: DialogSpec::new(), theme: theme.clone(), actions: None }
+        Self { spec: DialogSpec::new(), theme: theme.clone(), actions: None, content: None }
     }
 
     pub fn from_spec(spec: DialogSpec, theme: &GpuiThemeProvider) -> Self {
@@ -32,6 +34,7 @@ impl Dialog {
             spec,
             theme: theme.clone(),
             actions: None,
+            content: None,
         }
     }
 
@@ -45,6 +48,12 @@ impl Dialog {
     pub fn dismiss_on_backdrop(mut self, v: bool) -> Self { self.spec.dismiss_on_backdrop = v; self }
     pub fn aria_label(mut self, v: impl Into<String>) -> Self { self.spec.aria_label = Some(v.into()); self }
 
+
+    /// Add body content between the description and actions.
+    pub fn with_content(mut self, content: impl IntoElement) -> Self {
+        self.content = Some(content.into_any_element());
+        self
+    }
 
     /// Add an actions row (e.g., Cancel + Confirm buttons).
     pub fn with_actions(mut self, actions: impl IntoElement) -> Self {
@@ -110,6 +119,11 @@ impl IntoElement for Dialog {
             );
         }
 
+        // Content slot — body content between description and actions
+        if let Some(content) = self.content {
+            dialog = dialog.child(content);
+        }
+
         // Actions slot — Contract: flex-wrap, justify-end
         if let Some(actions) = self.actions {
             dialog = dialog.child(
@@ -123,6 +137,16 @@ impl IntoElement for Dialog {
             );
         }
 
-        dialog.into_any_element()
+        // Backdrop overlay — full-viewport scrim with centered dialog
+        let backdrop = div()
+            .absolute()
+            .inset_0()
+            .bg(hsla(0.0, 0.0, 0.0, 0.5))
+            .flex()
+            .items_center()
+            .justify_center()
+            .child(dialog);
+
+        backdrop.into_any_element()
     }
 }
