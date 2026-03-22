@@ -8,6 +8,7 @@ use crate::theme_ext::{resolve_color, resolve_opacity, resolve_radius};
 pub struct CardRadioGroup {
     spec: CardRadioGroupSpec,
     theme: GpuiThemeProvider,
+    on_change: Option<std::rc::Rc<dyn Fn(&str, &mut Window, &mut App) + 'static>>,
 }
 
 impl std::ops::Deref for CardRadioGroup {
@@ -17,10 +18,15 @@ impl std::ops::Deref for CardRadioGroup {
 
 impl CardRadioGroup {
     pub fn new(theme: &GpuiThemeProvider) -> Self {
-        Self { spec: CardRadioGroupSpec::new(Vec::new()), theme: theme.clone() }
+        Self { spec: CardRadioGroupSpec::new(Vec::new()), theme: theme.clone(), on_change: None }
     }
     pub fn from_spec(spec: CardRadioGroupSpec, theme: &GpuiThemeProvider) -> Self {
-        Self { spec, theme: theme.clone() }
+        Self { spec, theme: theme.clone(), on_change: None }
+    }
+
+    pub fn on_change(mut self, handler: impl Fn(&str, &mut Window, &mut App) + 'static) -> Self {
+        self.on_change = Some(std::rc::Rc::new(handler));
+        self
     }
 }
 
@@ -85,6 +91,14 @@ impl IntoElement for CardRadioGroup {
                 card = card.opacity(opacity).cursor(CursorStyle::OperationNotAllowed);
             } else {
                 card = card.cursor_pointer();
+
+                if let Some(ref handler) = self.on_change {
+                    let handler = handler.clone();
+                    let val = option.value.clone();
+                    card = card.on_click(move |_event, window, cx| {
+                        handler(&val, window, cx);
+                    });
+                }
             }
 
             el = el.child(card);

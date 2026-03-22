@@ -155,14 +155,20 @@ impl IntoElement for Select {
                 .with_color(icon_muted),
             );
 
-        if let Some(handler) = self.on_toggle {
+        // Wrap callbacks in Rc for sharing across trigger + option closures
+        let on_toggle_rc: Option<std::rc::Rc<dyn Fn(&bool, &mut Window, &mut App)>> =
+            self.on_toggle.map(|h| std::rc::Rc::from(h));
+        let on_change_rc: Option<std::rc::Rc<dyn Fn(&str, &mut Window, &mut App)>> =
+            self.on_change.map(|h| std::rc::Rc::from(h));
+
+        if let Some(ref handler) = on_toggle_rc {
             if !is_disabled {
                 let next_open = !is_open;
-                let handler = std::rc::Rc::new(handler);
+                let click_handler = handler.clone();
                 let key_handler = handler.clone();
                 trigger = trigger
                     .on_click(move |_event, window, cx| {
-                        handler(&next_open, window, cx);
+                        click_handler(&next_open, window, cx);
                     })
                     .on_key_down(move |event: &KeyDownEvent, window, cx| {
                         if event.keystroke.key == "space" || event.keystroke.key == "enter" {
@@ -223,6 +229,19 @@ impl IntoElement for Select {
                     item = item
                         .cursor_pointer()
                         .hover(move |s| s.bg(option_hover));
+
+                    // Click handler: select option and close dropdown
+                    if let Some(ref change_handler) = on_change_rc {
+                        let change_handler = change_handler.clone();
+                        let close_handler = on_toggle_rc.clone();
+                        let val = option.value.clone();
+                        item = item.on_click(move |_event, window, cx| {
+                            change_handler(&val, window, cx);
+                            if let Some(ref close) = close_handler {
+                                close(&false, window, cx);
+                            }
+                        });
+                    }
                 }
 
                 item = item.child(option.label.clone());

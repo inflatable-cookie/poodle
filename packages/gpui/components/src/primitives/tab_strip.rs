@@ -17,8 +17,8 @@ pub struct TabStrip {
     spec: TabStripSpec,
     theme: GpuiThemeProvider,
     id_prefix: String,
-    on_change: Option<Box<dyn Fn(&str, &mut Window, &mut App) + 'static>>,
-    on_close: Option<Box<dyn Fn(&str, &mut Window, &mut App) + 'static>>,
+    on_change: Option<std::rc::Rc<dyn Fn(&str, &mut Window, &mut App) + 'static>>,
+    on_close: Option<std::rc::Rc<dyn Fn(&str, &mut Window, &mut App) + 'static>>,
 }
 
 impl std::ops::Deref for TabStrip {
@@ -58,7 +58,7 @@ impl TabStrip {
         mut self,
         handler: impl Fn(&str, &mut Window, &mut App) + 'static,
     ) -> Self {
-        self.on_change = Some(Box::new(handler));
+        self.on_change = Some(std::rc::Rc::new(handler));
         self
     }
 
@@ -66,7 +66,7 @@ impl TabStrip {
         mut self,
         handler: impl Fn(&str, &mut Window, &mut App) + 'static,
     ) -> Self {
-        self.on_close = Some(Box::new(handler));
+        self.on_close = Some(std::rc::Rc::new(handler));
         self
     }
 }
@@ -144,6 +144,14 @@ impl IntoElement for TabStrip {
                 tab = tab
                     .cursor_pointer()
                     .hover(|s| s.bg(hover_bg));
+
+                if let Some(ref handler) = self.on_change {
+                    let handler = handler.clone();
+                    let val = item.value.clone();
+                    tab = tab.on_click(move |_event, window, cx| {
+                        handler(&val, window, cx);
+                    });
+                }
             }
 
             tab = tab.child(item.label.clone());

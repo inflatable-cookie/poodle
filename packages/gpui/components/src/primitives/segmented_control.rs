@@ -11,7 +11,7 @@ pub struct SegmentedControl {
     spec: SegmentedControlSpec,
     theme: GpuiThemeProvider,
     id_prefix: String,
-    on_change: Option<Box<dyn Fn(&str, &mut Window, &mut App) + 'static>>,
+    on_change: Option<std::rc::Rc<dyn Fn(&str, &mut Window, &mut App) + 'static>>,
 }
 
 impl std::ops::Deref for SegmentedControl {
@@ -50,7 +50,7 @@ impl SegmentedControl {
         mut self,
         handler: impl Fn(&str, &mut Window, &mut App) + 'static,
     ) -> Self {
-        self.on_change = Some(Box::new(handler));
+        self.on_change = Some(std::rc::Rc::new(handler));
         self
     }
 }
@@ -133,6 +133,14 @@ impl IntoElement for SegmentedControl {
                 seg = seg
                     .cursor_pointer()
                     .hover(move |s| s.bg(hover_bg));
+
+                if let Some(ref handler) = self.on_change {
+                    let handler = handler.clone();
+                    let val = option.value.clone();
+                    seg = seg.on_click(move |_event, window, cx| {
+                        handler(&val, window, cx);
+                    });
+                }
             }
 
             // Add separator between non-selected items

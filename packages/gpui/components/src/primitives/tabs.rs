@@ -16,7 +16,7 @@ pub struct Tabs {
     spec: TabsSpec,
     theme: GpuiThemeProvider,
     id_prefix: String,
-    on_change: Option<Box<dyn Fn(&str, &mut Window, &mut App) + 'static>>,
+    on_change: Option<std::rc::Rc<dyn Fn(&str, &mut Window, &mut App) + 'static>>,
     /// Content elements keyed by tab value.
     content: Vec<(String, AnyElement)>,
 }
@@ -60,7 +60,7 @@ impl Tabs {
         mut self,
         handler: impl Fn(&str, &mut Window, &mut App) + 'static,
     ) -> Self {
-        self.on_change = Some(Box::new(handler));
+        self.on_change = Some(std::rc::Rc::new(handler));
         self
     }
 
@@ -122,6 +122,14 @@ impl Tabs {
                 tab = tab
                     .cursor_pointer()
                     .hover(move |s| s.bg(hover_bg));
+
+                if let Some(ref handler) = self.on_change {
+                    let handler = handler.clone();
+                    let val = tab_def.value.clone();
+                    tab = tab.on_click(move |_event, window, cx| {
+                        handler(&val, window, cx);
+                    });
+                }
             }
 
             tab = tab.child(tab_def.label.clone());
@@ -189,6 +197,16 @@ impl Tabs {
                     .hover(move |s| s.bg(elevated));
             }
 
+            if !is_disabled {
+                if let Some(ref handler) = self.on_change {
+                    let handler = handler.clone();
+                    let val = tab_def.value.clone();
+                    tab = tab.on_click(move |_event, window, cx| {
+                        handler(&val, window, cx);
+                    });
+                }
+            }
+
             tab = tab.child(tab_def.label.clone());
             tab_row = tab_row.child(tab);
         }
@@ -254,6 +272,14 @@ impl Tabs {
                     .cursor(CursorStyle::OperationNotAllowed);
             } else {
                 tab = tab.cursor_pointer();
+
+                if let Some(ref handler) = self.on_change {
+                    let handler = handler.clone();
+                    let val = tab_def.value.clone();
+                    tab = tab.on_click(move |_event, window, cx| {
+                        handler(&val, window, cx);
+                    });
+                }
             }
 
             tab = tab.child(tab_def.label.clone());
