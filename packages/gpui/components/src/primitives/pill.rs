@@ -1,6 +1,5 @@
 //! Pill — real GPUI component backed by PillSpec.
 
-use gpui::prelude::FluentBuilder;
 use gpui::*;
 use pug_gpui::GpuiThemeProvider;
 use pug_primitives::PillSpec;
@@ -60,7 +59,10 @@ impl IntoElement for Pill {
         let radius = resolve_radius(theme, "semantic.radius.pill");
         let disabled_opacity = resolve_opacity(theme, "semantic.state.opacity.disabled");
 
+        let focus_ring = resolve_color(theme, spec.focus_ring_color_token());
+
         let mut el = div()
+            .id(SharedString::from("pug-pill"))
             .px(px(8.0))
             .py(px(2.0))
             .rounded(radius)
@@ -72,8 +74,12 @@ impl IntoElement for Pill {
             .gap(px(4.0))
             .child(spec.label.clone());
 
+        el = el.focus(move |s| s.border_color(focus_ring));
+
         if spec.is_disabled {
-            el = el.opacity(disabled_opacity);
+            el = el
+                .opacity(disabled_opacity)
+                .cursor(CursorStyle::OperationNotAllowed);
         }
 
         if spec.is_removable {

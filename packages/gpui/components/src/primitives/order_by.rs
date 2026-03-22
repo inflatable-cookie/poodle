@@ -1,4 +1,3 @@
-use gpui::prelude::FluentBuilder;
 use gpui::*;
 use pug_gpui::GpuiThemeProvider;
 use pug_primitives::{OrderBySpec, SortDirection};
@@ -167,19 +166,23 @@ impl IntoElement for OrderBy {
                 .child(field.label.clone())
                 .children(direction_indicator);
 
+            {
+                let focus_ring_color = self.focus_ring_color;
+                btn = btn.focus(move |s| s.border_color(focus_ring_color));
+            }
+
             if field_disabled {
-                btn = btn.opacity(self.disabled_opacity);
+                btn = btn
+                    .opacity(self.disabled_opacity)
+                    .cursor(CursorStyle::OperationNotAllowed);
             } else {
                 let field_hover_fill = self.field_hover_fill;
-                let focus_ring_color = self.focus_ring_color;
 
                 btn = btn.cursor_pointer();
 
                 if !is_active {
                     btn = btn.hover(|style| style.bg(field_hover_fill));
                 }
-
-                let _ = focus_ring_color;
 
                 if let Some(ref on_sort) = on_sort {
                     let on_sort_ptr = on_sort as *const Box<dyn Fn(&str, &SortDirection, &mut Window, &mut App)>;
@@ -220,6 +223,7 @@ impl IntoElement for OrderBy {
                 .text_color(reset_color)
                 .cursor_pointer()
                 .hover(|style| style.bg(self.field_hover_fill))
+                .focus(move |s| s.border_color(focus_ring_color))
                 .child("\u{00D7}");
 
             if let Some(on_reset) = self.on_reset {

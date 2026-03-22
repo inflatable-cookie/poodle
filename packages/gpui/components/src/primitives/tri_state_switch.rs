@@ -1,6 +1,5 @@
 //! TriStateSwitch — real GPUI component backed by TriStateSwitchSpec.
 
-use gpui::prelude::FluentBuilder;
 use gpui::*;
 use pug_gpui::GpuiThemeProvider;
 use pug_primitives::{CheckState, TriStateSwitchSpec};
@@ -122,13 +121,18 @@ impl IntoElement for TriStateSwitch {
                     .bg(knob_color),
             );
 
+        let focus_ring = resolve_color(theme, "semantic.color.accent.focusRing");
+        track = track.focus(move |s| s.border_color(focus_ring));
+
         if !spec.is_disabled {
             track = track.cursor_pointer();
             if let Some(handler) = self.on_click {
                 track = track.on_click(move |event, window, cx| handler(event, window, cx));
             }
         } else {
-            track = track.opacity(disabled_opacity);
+            track = track
+                .opacity(disabled_opacity)
+                .cursor(CursorStyle::OperationNotAllowed);
         }
 
         let mut el = div()

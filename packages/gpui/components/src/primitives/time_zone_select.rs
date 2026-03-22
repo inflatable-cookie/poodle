@@ -1,6 +1,5 @@
 //! TimeZoneSelect — real GPUI component backed by TimeZoneSelectSpec.
 
-use gpui::prelude::FluentBuilder;
 use gpui::*;
 use pug_gpui::GpuiThemeProvider;
 use pug_primitives::TimeZoneSelectSpec;
@@ -68,7 +67,10 @@ impl IntoElement for TimeZoneSelect {
             text_primary
         };
 
+        let focus_ring = resolve_color(theme, "semantic.color.accent.focusRing");
+
         let mut trigger = div()
+            .id(SharedString::from("pug-tz-select"))
             .h(control_height)
             .px(inline_padding)
             .rounded(control_radius)
@@ -88,8 +90,12 @@ impl IntoElement for TimeZoneSelect {
                     .child(if spec.is_open { "\u{25b4}" } else { "\u{25be}" }),
             );
 
+        trigger = trigger.focus(move |s| s.border_color(focus_ring));
+
         if spec.is_disabled {
-            trigger = trigger.opacity(disabled_opacity);
+            trigger = trigger
+                .opacity(disabled_opacity)
+                .cursor(CursorStyle::OperationNotAllowed);
         } else {
             trigger = trigger.cursor_pointer();
         }

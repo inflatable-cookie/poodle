@@ -1,6 +1,5 @@
 //! ListCard — real GPUI component backed by ListCardSpec.
 
-use gpui::prelude::FluentBuilder;
 use gpui::*;
 use pug_gpui::GpuiThemeProvider;
 use pug_primitives::{LeadingFill, LeadingShape, ListCardSpec};
@@ -186,6 +185,7 @@ impl IntoElement for ListCard {
 
         // ── Root container ──────────────────────────────────────────
         let mut root = div()
+            .id(SharedString::from(format!("pug-list-card-{}", spec.title)))
             .w_full()
             .px(px(12.0))
             .py(px(10.0))
@@ -208,6 +208,8 @@ impl IntoElement for ListCard {
             root = root.child(trailing);
         }
 
+        root = root.focus(move |s| s.border_color(focus_ring_color));
+
         // ── Interactive hover state ─────────────────────────────────
         if is_interactive {
             root = root
@@ -222,7 +224,9 @@ impl IntoElement for ListCard {
 
         // ── Disabled state ──────────────────────────────────────────
         if is_disabled {
-            root = root.opacity(disabled_opacity);
+            root = root
+                .opacity(disabled_opacity)
+                .cursor(CursorStyle::OperationNotAllowed);
         }
 
         root.into_any_element()

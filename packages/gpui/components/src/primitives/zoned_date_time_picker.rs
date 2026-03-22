@@ -1,6 +1,5 @@
 //! ZonedDateTimePicker — real GPUI component backed by ZonedDateTimePickerSpec.
 
-use gpui::prelude::FluentBuilder;
 use gpui::*;
 use pug_gpui::GpuiThemeProvider;
 use pug_primitives::ZonedDateTimePickerSpec;
@@ -72,7 +71,10 @@ impl IntoElement for ZonedDateTimePicker {
             text_primary
         };
 
+        let focus_ring = resolve_color(theme, "semantic.color.accent.focusRing");
+
         let mut trigger = div()
+            .id(SharedString::from("pug-zoned-dt-picker"))
             .h(control_height)
             .px(inline_padding)
             .rounded(control_radius)
@@ -101,8 +103,12 @@ impl IntoElement for ZonedDateTimePicker {
                 .child(if spec.is_open { "\u{25b4}" } else { "\u{25be}" }),
         );
 
+        trigger = trigger.focus(move |s| s.border_color(focus_ring));
+
         if spec.is_disabled {
-            trigger = trigger.opacity(disabled_opacity);
+            trigger = trigger
+                .opacity(disabled_opacity)
+                .cursor(CursorStyle::OperationNotAllowed);
         } else {
             trigger = trigger.cursor_pointer();
         }

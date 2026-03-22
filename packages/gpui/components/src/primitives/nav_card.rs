@@ -1,4 +1,3 @@
-use gpui::prelude::FluentBuilder;
 use gpui::*;
 use pug_gpui::GpuiThemeProvider;
 use pug_primitives::NavCardSpec;
@@ -186,8 +185,12 @@ impl IntoElement for NavCard {
             .child(content)
             .child(arrow);
 
+        root = root.focus(move |s| s.border_color(focus_ring_color));
+
         if is_disabled {
-            root = root.opacity(disabled_opacity);
+            root = root
+                .opacity(disabled_opacity)
+                .cursor(CursorStyle::OperationNotAllowed);
         } else {
             root = root
                 .cursor_pointer()
