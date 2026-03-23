@@ -3,9 +3,9 @@ use pug_adapter::ThemeProvider;
 use pug_primitives::{
     ListCardSpec, LeadingShape, LeadingFill,
     StatusIndicatorSpec, StatusTone, PillSpec, PillTone,
-    IconSpec, IconSize,
+    IconSpec, IconSize, ContextMenuSpec, MenuEntry, MenuItemKind,
 };
-use pug_gpui_components::{ListCard, StatusIndicator, Pill, Icon};
+use pug_gpui_components::{ListCard, StatusIndicator, Pill, Icon, ContextMenu};
 use crate::app_state::AppState;
 use crate::style_bridge::color_to_hsla;
 use crate::PreviewRoot;
@@ -280,6 +280,45 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                         ).with_color(gpui::white())
                     )
                 )
+        )
+
+        // ── With context menu ─────────────────────────────────────
+        .child(section_label("WITH CONTEXT MENU", text_secondary))
+        .child(
+            ContextMenu::from_spec(
+                ContextMenuSpec::new(vec![
+                    MenuEntry::new("open", "Open"),
+                    MenuEntry::new("rename", "Rename"),
+                    MenuEntry::new("duplicate", "Duplicate"),
+                    MenuEntry::new("sep", "").with_kind(MenuItemKind::Separator),
+                    MenuEntry::new("delete", "Delete"),
+                ])
+                .with_open(true),
+                theme,
+            )
+            .with_trigger(
+                ListCard::from_spec(
+                    ListCardSpec::new()
+                        .with_title("Right-click for actions")
+                        .with_subtitle("Context menu on the whole card")
+                        .with_meta("12 KB")
+                        .with_interactive(true),
+                    theme,
+                )
+                .with_leading(
+                    Icon::from_spec(
+                        IconSpec::new("file-text").with_size(IconSize::Sm),
+                        theme,
+                    ).with_color(color_to_hsla(text_muted))
+                )
+            )
+            .on_select(cx.listener(|this, val: &str, _w, cx| {
+                this.state.specimens.text.insert(
+                    "list-card-clicked".to_string(),
+                    format!("Action: {}", val),
+                );
+                cx.notify();
+            }))
         )
 
         // ── Corner sash badges ────────────────────────────────────
