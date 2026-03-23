@@ -42,19 +42,37 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
                 )
                 .with_content(
                     div().flex().flex_col().gap(px(10.0))
-                        .child(detail_section("General", &[
-                            ("Name", "My Project"),
-                            ("Slug", "my-project"),
-                            ("Created", "2026-01-15"),
-                        ], text_secondary, border))
-                        .child(detail_section("Configuration", &[
-                            ("Environment", "Production"),
-                            ("Region", "US West"),
-                        ], text_secondary, border))
-                        .child(detail_section("Integrations", &[
-                            ("GitHub", "Connected"),
-                            ("Slack", "Not configured"),
-                        ], text_secondary, border))
+                        .child(
+                            DetailSection::from_spec(
+                                DetailSectionSpec::new().with_title("General"),
+                                theme,
+                            ).with_body(
+                                div().flex().flex_col()
+                                    .child(DetailRow::from_spec(DetailRowSpec::new("Name").with_value("My Project"), theme))
+                                    .child(DetailRow::from_spec(DetailRowSpec::new("Slug").with_value("my-project"), theme))
+                                    .child(DetailRow::from_spec(DetailRowSpec::new("Created").with_value("2026-01-15"), theme))
+                            )
+                        )
+                        .child(
+                            DetailSection::from_spec(
+                                DetailSectionSpec::new().with_title("Configuration"),
+                                theme,
+                            ).with_body(
+                                div().flex().flex_col()
+                                    .child(DetailRow::from_spec(DetailRowSpec::new("Environment").with_value("Production"), theme))
+                                    .child(DetailRow::from_spec(DetailRowSpec::new("Region").with_value("US West"), theme))
+                            )
+                        )
+                        .child(
+                            DetailSection::from_spec(
+                                DetailSectionSpec::new().with_title("Integrations"),
+                                theme,
+                            ).with_body(
+                                div().flex().flex_col()
+                                    .child(DetailRow::from_spec(DetailRowSpec::new("GitHub").with_value("Connected"), theme))
+                                    .child(DetailRow::from_spec(DetailRowSpec::new("Slack").with_value("Not configured"), theme))
+                            )
+                        )
                 )
             )
         )
@@ -241,45 +259,6 @@ fn region_block(
                 .text_color(color_to_hsla(accent))
                 .child(label.to_string()),
         )
-}
-
-fn detail_section(
-    title: &str,
-    rows: &[(&str, &str)],
-    text_secondary: pug_tokens::typed::ColorValue,
-    border: pug_tokens::typed::ColorValue,
-) -> Div {
-    let mut section = div()
-        .flex()
-        .flex_col()
-        .gap(px(4.0))
-        .pb(px(8.0))
-        .border_b_1()
-        .border_color(color_to_hsla(border));
-
-    section = section.child(
-        div()
-            .text_sm()
-            .font_weight(FontWeight::SEMIBOLD)
-            .child(title.to_string()),
-    );
-
-    for (key, value) in rows {
-        section = section.child(
-            div().flex().gap(px(8.0))
-                .child(
-                    div().text_xs()
-                        .text_color(color_to_hsla(text_secondary))
-                        .child(key.to_string()),
-                )
-                .child(
-                    div().text_xs()
-                        .child(value.to_string()),
-                ),
-        );
-    }
-
-    section
 }
 
 fn section_label(label: &str, color: pug_tokens::typed::ColorValue) -> Div {

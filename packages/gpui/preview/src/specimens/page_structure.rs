@@ -70,13 +70,14 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
                 theme,
             )
             .with_breadcrumbs(
-                div().flex().items_center().gap(px(4.0)).text_xs()
-                    .text_color(color_to_hsla(text_secondary))
-                    .child("Home")
-                    .child(div().child("/").mx(px(2.0)))
-                    .child("Components")
-                    .child(div().child("/").mx(px(2.0)))
-                    .child("Primitives")
+                Breadcrumbs::from_spec(
+                    BreadcrumbsSpec::new(vec![
+                        BreadcrumbItem::new("home", "Home"),
+                        BreadcrumbItem::new("components", "Components"),
+                        BreadcrumbItem::new("primitives", "Primitives"),
+                    ]),
+                    theme,
+                )
             )
         )
 
