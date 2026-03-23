@@ -116,7 +116,7 @@ impl IntoElement for DataTable {
             let mut header_cell = div()
                 .flex_1()
                 .px(inline_padding)
-                .py(px(8.0))
+                .py(px(12.0))
                 .text_size(px(12.0))
                 .font_weight(FontWeight::SEMIBOLD)
                 .text_color(text_secondary)
@@ -164,9 +164,9 @@ impl IntoElement for DataTable {
         if spec.show_row_actions {
             header_row = header_row.child(
                 div()
-                    .w(px(80.0))
+                    .w(px(120.0))
                     .px(inline_padding)
-                    .py(px(8.0))
+                    .py(px(12.0))
                     .text_size(px(12.0))
                     .text_color(text_secondary),
             );
@@ -231,7 +231,7 @@ impl IntoElement for DataTable {
                     let cell = div()
                         .flex_1()
                         .px(inline_padding)
-                        .py(px(10.0))
+                        .py(px(12.0))
                         .text_size(px(14.0))
                         .text_color(text_primary)
                         .when(col.align_end, |el| el.text_right())
@@ -246,9 +246,9 @@ impl IntoElement for DataTable {
                     let action_id = SharedString::from(format!("dt-action-{}", row.id));
                     let mut action_btn = div()
                         .id(action_id)
-                        .w(px(80.0))
+                        .w(px(120.0))
                         .px(inline_padding)
-                        .py(px(10.0))
+                        .py(px(12.0))
                         .text_size(px(12.0))
                         .text_color(accent)
                         .cursor_pointer()
