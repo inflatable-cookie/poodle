@@ -5,25 +5,37 @@ use pug_primitives::{IconSize, IconSpec};
 use pug_gpui_components::Icon;
 use crate::style_bridge::color_to_hsla;
 
-/// A curated set of icon names to display in the specimen.
+/// A curated set of icon names to display in the gallery.
 const SPECIMEN_ICONS: &[&str] = &[
     // Navigation
-    "arrow-left", "arrow-right", "chevron-down", "chevron-left",
-    "chevron-right", "chevron-up", "menu", "x",
+    "arrow-left", "arrow-right", "arrow-up", "arrow-down",
+    "chevron-down", "chevron-left", "chevron-right", "chevron-up",
+    "menu", "x", "corner-up-left", "move",
     // Actions
     "check", "copy", "download", "edit", "external-link",
     "minus", "plus", "save", "trash-2", "upload",
+    "refresh-cw", "redo", "undo", "share",
     // Status
-    "alert-circle", "check-circle", "info", "loader",
+    "alert-circle", "alert-triangle", "check-circle", "info",
+    "loader", "ban", "shield", "shield-check",
     // Objects
-    "bell", "calendar", "clock", "eye", "file", "filter",
-    "folder", "lock", "mail", "search", "settings", "user",
+    "bell", "calendar", "clock", "eye", "eye-off",
+    "file", "file-text", "filter", "folder", "folder-open",
+    "globe", "hash", "image", "layers", "link",
+    "lock", "unlock", "mail", "map-pin", "message-circle",
+    "monitor", "paperclip", "search", "settings", "tag",
+    "terminal", "type", "user", "users", "zap",
+    // Media
+    "play", "pause", "volume-2", "mic",
     // More
-    "heart", "star",
+    "bookmark", "code", "database", "git-branch",
+    "heart", "home", "key", "layout-grid",
+    "list", "maximize", "minimize", "palette",
+    "pencil", "pie-chart", "bar-chart", "star",
 ];
 
 /// Icon names used in the sizes section.
-const SIZE_ICONS: &[&str] = &["star", "heart", "settings"];
+const SIZE_ICONS: &[&str] = &["star", "heart", "settings", "search"];
 
 pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
     let text_secondary = theme.resolve_color("semantic.color.text.secondary");
@@ -35,8 +47,14 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
         // --- Color Inheritance ---
         .child(section_label("COLOR INHERITANCE", text_secondary))
         .child(render_color_inheritance_section(theme))
+        // --- Accessibility ---
+        .child(section_label("ACCESSIBILITY", text_secondary))
+        .child(render_accessibility_section(theme))
         // --- All Icons ---
-        .child(section_label("ALL ICONS", text_secondary))
+        .child(section_label(
+            &format!("ALL ICONS ({})", SPECIMEN_ICONS.len()),
+            text_secondary,
+        ))
         .child(render_icon_gallery(theme))
 }
 
@@ -76,25 +94,73 @@ fn render_color_inheritance_section(theme: &GpuiThemeProvider) -> Div {
     let text_primary = theme.resolve_color("semantic.color.text.primary");
     let text_secondary = theme.resolve_color("semantic.color.text.secondary");
     let accent = theme.resolve_color("semantic.color.accent.base");
+    let success = theme.resolve_color("semantic.color.status.success");
+    let warning = theme.resolve_color("semantic.color.status.warning");
     let danger = theme.resolve_color("semantic.color.status.danger");
 
-    let items: &[(&str, pug_tokens::typed::ColorValue)] = &[
-        ("check", text_primary),
-        ("info", text_secondary),
-        ("star", accent),
-        ("triangle-alert", danger),
+    let items: &[(&str, &str, pug_tokens::typed::ColorValue)] = &[
+        ("check", "Primary", text_primary),
+        ("info", "Secondary", text_secondary),
+        ("star", "Accent", accent),
+        ("check-circle", "Success", success),
+        ("alert-triangle", "Warning", warning),
+        ("alert-circle", "Danger", danger),
     ];
 
-    let mut row = div().flex().gap(px(16.0)).items_center();
+    let mut row = div().flex().gap(px(20.0)).items_center();
 
-    for &(icon_name, color) in items {
+    for &(icon_name, label, color) in items {
         row = row.child(
-            div().text_color(color_to_hsla(color))
-                .child(Icon::from_spec(IconSpec::new(icon_name).with_size(IconSize::Md), theme))
+            div().flex().flex_col().items_center().gap(px(4.0))
+                .child(
+                    div().text_color(color_to_hsla(color))
+                        .child(Icon::from_spec(IconSpec::new(icon_name).with_size(IconSize::Md), theme))
+                )
+                .child(
+                    div().text_size(px(10.0)).text_color(color_to_hsla(text_secondary))
+                        .child(label.to_string())
+                )
         );
     }
 
     row
+}
+
+fn render_accessibility_section(theme: &GpuiThemeProvider) -> Div {
+    let text_secondary = theme.resolve_color("semantic.color.text.secondary");
+    let text_primary = theme.resolve_color("semantic.color.text.primary");
+
+    div().flex().flex_col().gap(px(8.0))
+        .child(
+            div().flex().items_center().gap(px(8.0))
+                .child(
+                    div().text_color(color_to_hsla(text_primary))
+                        .child(Icon::from_spec(
+                            IconSpec::new("search")
+                                .with_size(IconSize::Md)
+                                .with_aria_label("Search"),
+                            theme,
+                        ))
+                )
+                .child(
+                    div().text_xs().text_color(color_to_hsla(text_secondary))
+                        .child("With aria-label=\"Search\" — announced by screen readers")
+                )
+        )
+        .child(
+            div().flex().items_center().gap(px(8.0))
+                .child(
+                    div().text_color(color_to_hsla(text_primary))
+                        .child(Icon::from_spec(
+                            IconSpec::new("chevron-right").with_size(IconSize::Md),
+                            theme,
+                        ))
+                )
+                .child(
+                    div().text_xs().text_color(color_to_hsla(text_secondary))
+                        .child("Without aria-label — hidden from assistive technology")
+                )
+        )
 }
 
 fn render_icon_gallery(theme: &GpuiThemeProvider) -> Div {
@@ -104,7 +170,7 @@ fn render_icon_gallery(theme: &GpuiThemeProvider) -> Div {
     let mut gallery = div()
         .flex()
         .flex_wrap()
-        .gap(px(8.0));
+        .gap(px(6.0));
 
     for &name in SPECIMEN_ICONS {
         gallery = gallery.child(
@@ -112,7 +178,7 @@ fn render_icon_gallery(theme: &GpuiThemeProvider) -> Div {
                 .flex()
                 .flex_col()
                 .items_center()
-                .gap(px(4.0))
+                .gap(px(3.0))
                 .w(px(64.0))
                 .py(px(6.0))
                 .child(

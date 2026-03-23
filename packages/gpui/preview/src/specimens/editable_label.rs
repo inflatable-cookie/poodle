@@ -18,6 +18,8 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
         .unwrap_or_else(|| "Click to rename".to_string());
     let rename_editing = state.specimens.is_on("editable-label-rename-editing");
 
+    let last_event = state.specimens.text.get("editable-label-event").cloned();
+
     div().flex().flex_col().gap(px(16.0))
         // --- Double-click To Edit (Default) ---
         .child(section_label("DOUBLE-CLICK TO EDIT (DEFAULT)", text_secondary))
@@ -28,6 +30,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                     .with_editing(label_editing),
                 theme,
             )
+            .with_id("default")
             .on_change(cx.listener(|this, val: &str, _w, cx| {
                 this.state.specimens.text.insert("editable-label-value".to_string(), val.to_string());
                 cx.notify();
@@ -35,12 +38,16 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
             .on_commit(cx.listener(|this, val: &str, _w, cx| {
                 this.state.specimens.text.insert("editable-label-value".to_string(), val.to_string());
                 this.state.specimens.toggles.insert("editable-label-editing".to_string(), false);
+                this.state.specimens.text.insert(
+                    "editable-label-event".to_string(),
+                    format!("Committed: \"{}\"", val),
+                );
                 cx.notify();
             }))
-            // Note: on_cancel takes Fn(&mut Window, &mut App) which can't use cx.listener
         )
-        // --- Enter/Space Activation ---
-        .child(section_label("ENTER/SPACE ACTIVATION", text_secondary))
+
+        // --- Click to edit with icon ---
+        .child(section_label("CLICK TO EDIT WITH ICON", text_secondary))
         .child(
             EditableLabel::from_spec(
                 EditableLabelSpec::new()
@@ -48,6 +55,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                     .with_editing(rename_editing),
                 theme,
             )
+            .with_id("with-icon")
             .on_change(cx.listener(|this, val: &str, _w, cx| {
                 this.state.specimens.text.insert("editable-label-rename".to_string(), val.to_string());
                 cx.notify();
@@ -55,9 +63,44 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
             .on_commit(cx.listener(|this, val: &str, _w, cx| {
                 this.state.specimens.text.insert("editable-label-rename".to_string(), val.to_string());
                 this.state.specimens.toggles.insert("editable-label-rename-editing".to_string(), false);
+                this.state.specimens.text.insert(
+                    "editable-label-event".to_string(),
+                    format!("Committed: \"{}\"", val),
+                );
                 cx.notify();
             }))
         )
+
+        // --- Empty state (placeholder) ---
+        .child(section_label("EMPTY STATE (PLACEHOLDER)", text_secondary))
+        .child(
+            EditableLabel::from_spec(
+                EditableLabelSpec::new()
+                    .with_placeholder("Add a description…"),
+                theme,
+            )
+            .with_id("empty")
+            .on_commit(cx.listener(|this, val: &str, _w, cx| {
+                this.state.specimens.text.insert(
+                    "editable-label-event".to_string(),
+                    format!("Committed empty-state: \"{}\"", val),
+                );
+                cx.notify();
+            }))
+        )
+
+        // --- Pre-filled editing ---
+        .child(section_label("PRE-FILLED (EDITING MODE)", text_secondary))
+        .child(
+            EditableLabel::from_spec(
+                EditableLabelSpec::new()
+                    .with_value("Currently editing this label")
+                    .with_editing(true),
+                theme,
+            )
+            .with_id("prefilled")
+        )
+
         // --- Disabled ---
         .child(section_label("DISABLED", text_secondary))
         .child(
@@ -67,6 +110,17 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                     .with_disabled(true),
                 theme,
             )
+            .with_id("disabled")
+        )
+
+        // --- Last event ---
+        .child(section_label("LAST EVENT", text_secondary))
+        .child(
+            div().text_xs().text_color(color_to_hsla(text_secondary))
+                .child(match last_event {
+                    Some(ref evt) => evt.clone(),
+                    None => "No events yet — edit a label above.".to_string(),
+                })
         )
 }
 
