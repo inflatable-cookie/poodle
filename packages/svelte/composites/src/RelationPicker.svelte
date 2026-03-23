@@ -152,10 +152,12 @@
     finalItemsLoaded = null;
   }
 
-  function handleDrillSearchKeydown(event: KeyboardEvent): void {
-    if (event.key === "Escape" || (event.key === "Backspace" && !drillSearchQuery)) {
+  function handleDrillSearchKeydown(event: CustomEvent<KeyboardEvent>): void {
+    const keyboardEvent = event.detail;
+
+    if (keyboardEvent.key === "Escape" || (keyboardEvent.key === "Backspace" && !drillSearchQuery)) {
       if (drillDepth > 0) {
-        event.preventDefault();
+        keyboardEvent.preventDefault();
         drillBack();
       }
     }

@@ -33,6 +33,7 @@
     valueChange: { value: string };
     submit: { value: string };
     cancel: void;
+    keydown: KeyboardEvent;
     focus: FocusEvent;
     blur: FocusEvent;
   }>();
@@ -58,6 +59,8 @@
   }
 
   function handleKeydown(event: KeyboardEvent): void {
+    dispatch("keydown", event);
+
     if (event.key === "Enter") {
       dispatch("submit", { value: currentValue });
     }

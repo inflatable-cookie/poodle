@@ -126,11 +126,6 @@
     padding: var(--pug-space-panel-y) var(--pug-space-panel-x);
   }
 
-  .media-thumbnail__placeholder span {
-    font-size: 1.75rem;
-    color: var(--pug-color-text-secondary);
-  }
-
   .media-thumbnail__state {
     gap: var(--pug-space-stack-sm);
     align-content: end;

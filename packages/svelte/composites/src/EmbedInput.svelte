@@ -5,6 +5,7 @@
 
   import type { ParsedEmbed } from "./types";
 
+  export let id = "embed-input";
   export let value = "";
   export let parsed: ParsedEmbed | null = null;
   export let placeholder = "Paste a URL or embed code...";
@@ -105,9 +106,10 @@
 
 <div class="embed-input">
   <TextArea
+    {id}
     {value}
     {placeholder}
-    {disabled}
+    isDisabled={disabled}
     rows={3}
     on:valueChange={handleValueChange}
   />

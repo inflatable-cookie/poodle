@@ -270,18 +270,21 @@
   on:drop={handleRegionDrop}
 >
   {#if isDragOver}
-    <div class="dock-region__drop-zone" />
+    <div class="dock-region__drop-zone"></div>
   {/if}
 
   {#if sizing === "static"}
     <!-- Static: stacked panels, no tabs, no collapse -->
     <div class="dock-region__stack" data-direction={stackDirection}>
       {#each items as item, index (item.value)}
+        <!-- svelte-ignore a11y-no-static-element-interactions -->
         <div
           class="dock-region__stack-item"
           data-drop-target={dropInsertIndex === index || undefined}
           data-drag-source={dragSourceIndex === index || undefined}
           draggable="true"
+          role="group"
+          aria-label={item.label ?? `Panel ${index + 1}`}
           on:dragstart={(e) => handleStackItemDragStart(e, index)}
           on:dragover={(e) => handleStackItemDragOver(e, index)}
           on:dragleave={handleStackItemDragLeave}

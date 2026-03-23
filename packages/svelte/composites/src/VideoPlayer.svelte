@@ -87,6 +87,15 @@
     }
   }
 
+  function handleWrapperKeydown(event: KeyboardEvent): void {
+    if (event.target !== wrapperEl) return;
+
+    if (event.key === " " || event.key === "Enter") {
+      event.preventDefault();
+      togglePlay();
+    }
+  }
+
   onMount(() => {
     if (!videoEl) return;
 
@@ -120,14 +129,17 @@
   });
 </script>
 
-<!-- svelte-ignore a11y-no-static-element-interactions -->
 <div
   class="video-player"
   bind:this={wrapperEl}
   style="aspect-ratio: {aspectRatio}"
+  role="button"
+  tabindex="0"
   on:mousemove={resetControlsTimer}
   on:click={togglePlay}
+  on:keydown={handleWrapperKeydown}
   aria-label={ariaLabel}
+  aria-pressed={isPlaying}
 >
   <!-- svelte-ignore a11y-media-has-caption -->
   <video

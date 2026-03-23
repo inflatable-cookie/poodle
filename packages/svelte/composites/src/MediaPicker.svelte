@@ -65,6 +65,7 @@
     {#if activeTab === "browse"}
       <div class="media-picker__search">
         <TextInput
+          id="media-picker-search"
           bind:value={searchQuery}
           placeholder="Search media..."
         />

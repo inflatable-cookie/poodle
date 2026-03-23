@@ -129,15 +129,14 @@
 
 <div class="block-editor" class:block-editor--disabled={isDisabled} aria-label={ariaLabel}>
   {#each blocks as block, index (block.id)}
-    <!-- svelte-ignore a11y-no-static-element-interactions -->
+    <!-- svelte-ignore a11y-no-noninteractive-element-interactions -->
     <div
       class="block-editor__block"
       class:active={activeBlockId === block.id}
       class:drag-over={dragOverIndex === index}
       class:dragging={dragSourceIndex === index}
       data-type={block.type}
-      on:click={() => (activeBlockId = block.id)}
-      on:keydown={() => {}}
+      on:focusin={() => (activeBlockId = block.id)}
       on:dragover={(e) => handleDragOver(e, index)}
       on:dragleave={handleDragLeave}
       on:drop={(e) => handleDrop(e, index)}
@@ -210,7 +209,7 @@
           {block}
           {index}
           {isDisabled}
-          update={(updates) => updateBlock(index, updates)}
+          update={(updates: Partial<EditorBlock>) => updateBlock(index, updates)}
         >
           <!-- Default rendering for built-in types -->
           {#if block.type === "divider"}
@@ -245,7 +244,7 @@
               />
               {#if block.content}
                 <div class="block-editor__image-preview">
-                  <img src={block.content} alt="Block image" />
+                  <img src={block.content} alt="Block preview" />
                 </div>
               {/if}
             </div>

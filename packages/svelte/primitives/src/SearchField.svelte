@@ -21,6 +21,7 @@
     submit: { value: string };
     clear: void;
     cancel: void;
+    keydown: KeyboardEvent;
   }>();
 
   let uncontrolledValue = defaultValue;
@@ -63,6 +64,7 @@
   on:valueChange={handleValueChange}
   on:submit={(event) => dispatch("submit", event.detail)}
   on:cancel={() => dispatch("cancel")}
+  on:keydown={(event) => dispatch("keydown", event.detail)}
 >
   <span slot="leading" aria-hidden="true"><Icon name="search" size="sm" /></span>
   <svelte:fragment slot="trailing">

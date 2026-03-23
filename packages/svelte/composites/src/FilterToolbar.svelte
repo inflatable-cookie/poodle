@@ -17,39 +17,58 @@
   }
 </script>
 
-<section
+<div
   class="filter-toolbar"
   data-sticky={isSticky}
   data-collapsed={collapsible && collapsed}
   role="toolbar"
   aria-label={ariaLabel}
 >
-  <!-- svelte-ignore a11y-click-events-have-key-events -->
-  <div
-    class="filter-toolbar__header"
-    role={collapsible && collapsed ? 'button' : undefined}
-    tabindex={collapsible && collapsed ? 0 : undefined}
-    on:click={handleHeaderClick}
-    on:keydown={(e) => { if ((e.key === 'Enter' || e.key === ' ') && collapsible && collapsed) { e.preventDefault(); collapsed = false; } }}
-  >
-    {#if collapsible}
+  {#if collapsible && collapsed}
+    <button
+      type="button"
+      class="filter-toolbar__header filter-toolbar__header--button"
+      on:click={handleHeaderClick}
+      aria-expanded="false"
+      aria-label={summaryText ? `Show filters. ${summaryText}` : "Show filters"}
+    >
       <CollapseToggle
         isCollapsed={collapsed}
-        ariaLabel={collapsed ? "Show filters" : "Hide filters"}
+        ariaLabel="Show filters"
         on:toggle={(e) => (collapsed = e.detail.isCollapsed)}
       />
-    {/if}
 
-    {#if summaryText}
-      <p class="filter-toolbar__summary">{summaryText}</p>
-    {/if}
+      {#if summaryText}
+        <span class="filter-toolbar__summary">{summaryText}</span>
+      {/if}
 
-    {#if $$slots.actions}
-      <div class="filter-toolbar__actions">
-        <slot name="actions" />
-      </div>
-    {/if}
-  </div>
+      {#if $$slots.actions}
+        <span class="filter-toolbar__actions">
+          <slot name="actions" />
+        </span>
+      {/if}
+    </button>
+  {:else}
+    <div class="filter-toolbar__header">
+      {#if collapsible}
+        <CollapseToggle
+          isCollapsed={collapsed}
+          ariaLabel={collapsed ? "Show filters" : "Hide filters"}
+          on:toggle={(e) => (collapsed = e.detail.isCollapsed)}
+        />
+      {/if}
+
+      {#if summaryText}
+        <p class="filter-toolbar__summary">{summaryText}</p>
+      {/if}
+
+      {#if $$slots.actions}
+        <div class="filter-toolbar__actions">
+          <slot name="actions" />
+        </div>
+      {/if}
+    </div>
+  {/if}
 
   {#if !collapsible || !collapsed}
     <div
@@ -66,7 +85,7 @@
       <slot name="secondary" />
     </div>
   {/if}
-</section>
+</div>
 
 <style>
   .filter-toolbar {
@@ -88,8 +107,19 @@
     gap: var(--pug-space-inline-sm);
   }
 
-  .filter-toolbar[data-collapsed="true"] .filter-toolbar__header {
+  .filter-toolbar__header--button {
+    width: 100%;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    color: inherit;
+    text-align: left;
     cursor: pointer;
+  }
+
+  .filter-toolbar__header--button:focus-visible {
+    outline: var(--pug-border-width-focus) solid var(--pug-color-accent-focusRing);
+    outline-offset: 0.125rem;
   }
 
   .filter-toolbar__summary {

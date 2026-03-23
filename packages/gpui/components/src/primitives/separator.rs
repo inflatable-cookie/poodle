@@ -4,7 +4,7 @@ use gpui::*;
 use pug_gpui::GpuiThemeProvider;
 use pug_primitives::{RuleTone, SeparatorOrientation, SeparatorSpec};
 
-use crate::theme_ext::{color_mix, resolve_color};
+use crate::theme_ext::resolve_color;
 
 /// A real GPUI separator component backed by `SeparatorSpec`.
 pub struct Separator {
@@ -37,11 +37,10 @@ impl IntoElement for Separator {
 
     fn into_element(self) -> Self::Element {
         let raw_color = resolve_color(&self.theme, self.spec.resolved_color());
-        let panel = resolve_color(&self.theme, "semantic.color.background.panel");
 
-        // Contract: subtle tone applies 72% color-mix
+        // Contract: subtle tone applies 72% opacity approximation
         let color = match self.spec.tone {
-            RuleTone::Subtle => color_mix(raw_color, panel, 0.72),
+            RuleTone::Subtle => Hsla { a: raw_color.a * 0.72, ..raw_color },
             RuleTone::Default => raw_color,
         };
 
