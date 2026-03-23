@@ -6,6 +6,15 @@ use pug_primitives::{LeadingFill, LeadingShape, ListCardSpec};
 
 use crate::theme_ext::{color_mix, resolve_color, resolve_opacity, resolve_radius};
 
+fn parse_hex_to_hsla(hex: &str) -> Option<Hsla> {
+    let hex = hex.trim_start_matches('#');
+    if hex.len() < 6 { return None; }
+    let r = u8::from_str_radix(&hex[0..2], 16).ok()? as f32 / 255.0;
+    let g = u8::from_str_radix(&hex[2..4], 16).ok()? as f32 / 255.0;
+    let b = u8::from_str_radix(&hex[4..6], 16).ok()? as f32 / 255.0;
+    Some(Hsla::from(Rgba { r, g, b, a: 1.0 }))
+}
+
 /// A real GPUI list-card component backed by `ListCardSpec`.
 pub struct ListCard {
     spec: ListCardSpec,
@@ -13,6 +22,7 @@ pub struct ListCard {
     leading: Option<AnyElement>,
     footer: Option<AnyElement>,
     trailing: Option<AnyElement>,
+    icon_color: Hsla,
     on_click: Option<Box<dyn Fn(&ClickEvent, &mut Window, &mut App) + 'static>>,
 }
 
@@ -30,6 +40,7 @@ impl ListCard {
             leading: None,
             footer: None,
             trailing: None,
+            icon_color: gpui::white(),
             on_click: None,
         }
     }
@@ -41,6 +52,7 @@ impl ListCard {
             leading: None,
             footer: None,
             trailing: None,
+            icon_color: gpui::white(),
             on_click: None,
         }
     }
@@ -183,6 +195,29 @@ impl IntoElement for ListCard {
                 .child(meta.clone())
         });
 
+        // ── Sash badge ────────────────────────────────────────────
+        let sash_el = spec.sash.as_ref().map(|sash_text| {
+            let sash_bg = spec.sash_color.as_ref()
+                .and_then(|c| parse_hex_to_hsla(c))
+                .unwrap_or_else(|| resolve_color(theme, "semantic.color.status.success"));
+
+            div()
+                .absolute()
+                .top(px(0.0))
+                .right(px(0.0))
+                .px(px(6.0))
+                .py(px(2.0))
+                .rounded_bl(px(4.0))
+                .bg(sash_bg)
+                .text_color(gpui::white())
+                .text_size(px(9.0))
+                .font_weight(FontWeight::BOLD)
+                .line_height(px(12.0))
+                .child(sash_text.to_uppercase())
+        });
+
+        let has_sash = sash_el.is_some();
+
         // ── Root container ──────────────────────────────────────────
         let mut root = div()
             .id(SharedString::from(format!("pug-list-card-{}", spec.title)))
@@ -200,12 +235,20 @@ impl IntoElement for ListCard {
             .child(leading_el)
             .child(body);
 
+        if has_sash {
+            root = root.relative().overflow_hidden();
+        }
+
         if let Some(meta) = meta_el {
             root = root.child(meta);
         }
 
         if let Some(trailing) = self.trailing {
             root = root.child(trailing);
+        }
+
+        if let Some(sash) = sash_el {
+            root = root.child(sash);
         }
 
         root = root.focus(move |s| s.border_color(focus_ring_color));

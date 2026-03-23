@@ -282,6 +282,86 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                 )
         )
 
+        // ── Corner sash badges ────────────────────────────────────
+        .child(section_label("CORNER SASH BADGES", text_secondary))
+        .child(
+            div().flex().flex_col().gap(px(6.0))
+                .child(
+                    ListCard::from_spec(
+                        ListCardSpec::new()
+                            .with_title("Free tier plan")
+                            .with_subtitle("No credit card required")
+                            .with_sash("Free")
+                            .with_interactive(true),
+                        theme,
+                    )
+                    .with_leading(
+                        Icon::from_spec(
+                            IconSpec::new("layers").with_size(IconSize::Sm),
+                            theme,
+                        ).with_color(color_to_hsla(text_muted))
+                    )
+                    .on_click(cx.listener(|this, _e: &ClickEvent, _w, cx| {
+                        this.state.specimens.text.insert(
+                            "list-card-clicked".to_string(),
+                            "Free tier plan".to_string(),
+                        );
+                        cx.notify();
+                    }))
+                )
+                .child(
+                    ListCard::from_spec(
+                        ListCardSpec::new()
+                            .with_title("Premium integration")
+                            .with_subtitle("Unlocks advanced features")
+                            .with_leading_shape(LeadingShape::RoundedSquare)
+                            .with_leading_fill(LeadingFill::Solid)
+                            .with_accent_color("#6366f1")
+                            .with_sash("New")
+                            .with_sash_color("#6366f1")
+                            .with_interactive(true),
+                        theme,
+                    )
+                    .with_leading(
+                        Icon::from_spec(
+                            IconSpec::new("grid-2x2").with_size(IconSize::Md),
+                            theme,
+                        ).with_color(gpui::white())
+                    )
+                    .on_click(cx.listener(|this, _e: &ClickEvent, _w, cx| {
+                        this.state.specimens.text.insert(
+                            "list-card-clicked".to_string(),
+                            "Premium integration".to_string(),
+                        );
+                        cx.notify();
+                    }))
+                )
+                .child(
+                    ListCard::from_spec(
+                        ListCardSpec::new()
+                            .with_title("Legacy connector")
+                            .with_subtitle("Deprecated — migrate by Q2")
+                            .with_sash("EOL")
+                            .with_sash_color("#ef4444")
+                            .with_interactive(true),
+                        theme,
+                    )
+                    .with_leading(
+                        Icon::from_spec(
+                            IconSpec::new("file-text").with_size(IconSize::Sm),
+                            theme,
+                        ).with_color(color_to_hsla(text_muted))
+                    )
+                    .on_click(cx.listener(|this, _e: &ClickEvent, _w, cx| {
+                        this.state.specimens.text.insert(
+                            "list-card-clicked".to_string(),
+                            "Legacy connector".to_string(),
+                        );
+                        cx.notify();
+                    }))
+                )
+        )
+
         // ── Not live ──────────────────────────────────────────────
         .child(section_label("NOT LIVE (DRAFT STATE)", text_secondary))
         .child(

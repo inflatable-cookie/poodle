@@ -109,6 +109,11 @@ impl ListCardSpec {
         self
     }
 
+    pub fn with_sash_color(mut self, color: impl Into<String>) -> Self {
+        self.sash_color = Some(color.into());
+        self
+    }
+
     pub fn with_accent_color(mut self, color: impl Into<String>) -> Self {
         self.accent_color = Some(color.into());
         self
