@@ -72,9 +72,10 @@ impl IntoElement for Slider {
         let text_secondary = resolve_color(theme, "semantic.color.text.secondary");
         let stack_gap = resolve_px(theme, "semantic.space.stack.sm");
 
-        // Contract: track height = 0.25rem (4px), thumb = 1rem (16px)
-        let track_height = resolve_px(theme, "semantic.space.stack.sm");
-        let track_f = theme.resolve_space("semantic.space.stack.sm");
+        let elevated_bg = resolve_color(theme, "semantic.color.background.elevated");
+        // Svelte: track height = 0.375rem (6px), thumb = 1rem (16px)
+        let track_height = px(6.0);
+        let track_f: f32 = 6.0;
         let track_radius = px(track_f / 2.0);
         let thumb_f = theme.resolve_space("semantic.size.icon.md");
         let thumb_size = px(thumb_f);
@@ -108,15 +109,16 @@ impl IntoElement for Slider {
                     .w(thumb_size)
                     .h(thumb_size)
                     .rounded(thumb_radius)
-                    .bg(accent)
+                    // Svelte: thumb bg = elevated, border = border-default
+                    .bg(elevated_bg)
                     .border_1()
-                    .border_color(accent)
-                    // Contract: thumb shadow
+                    .border_color(border)
+                    // Svelte: 0 0.125rem 0.5rem shadow
                     .shadow(vec![
                         gpui::BoxShadow {
-                            color: hsla(0.0, 0.0, 0.0, 0.2),
-                            offset: point(px(0.0), px(1.0)),
-                            blur_radius: px(3.0),
+                            color: hsla(0.0, 0.0, 0.0, 0.18),
+                            offset: point(px(0.0), px(2.0)),
+                            blur_radius: px(8.0),
                             spread_radius: px(0.0),
                         },
                     ]),

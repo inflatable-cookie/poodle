@@ -47,13 +47,17 @@ impl IntoElement for Meter {
         let theme = &self.theme;
         let spec = &self.spec;
 
-        let fill = resolve_color(theme, spec.fill_token());
+        // Svelte: fill uses status-success, not generic fill_token
+        let success_color = resolve_color(theme, "semantic.color.status.success");
         let surface_bg = resolve_color(theme, "semantic.color.background.surface");
+        let text_primary = resolve_color(theme, "semantic.color.text.primary");
         let radius = resolve_radius(theme, "semantic.radius.pill");
         let progress = spec.normalized_progress();
 
-        // Contract: track bg = color-mix(surface 92%, transparent-black)
-        let track_fill = color_mix(surface_bg, gpui::transparent_black(), 0.92);
+        // Svelte: track bg = color-mix(surface 96%, text-primary)
+        let track_fill = color_mix(surface_bg, text_primary, 0.96);
+        // Use status-success as the fill color (Svelte uses gradient but GPUI doesn't support gradients)
+        let fill = success_color;
 
         let fill_width_pct = (progress * 100.0) as f32;
 

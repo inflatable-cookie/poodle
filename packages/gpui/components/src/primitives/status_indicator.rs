@@ -49,14 +49,21 @@ impl IntoElement for StatusIndicator {
         // Contract: gap 0.4375rem (7px)
         let mut row = div().flex().items_center().gap(px(7.0));
 
-        // Contract: dot 0.5625rem (9px)
+        // Svelte: dot 0.5625rem (9px) with full circle radius and shadow ring
         row = row.child(
             div()
                 .w(px(9.0))
                 .h(px(9.0))
-                .rounded(px(4.5))
+                .rounded(px(999.0))
                 .bg(status_color)
-                .flex_shrink_0(),
+                .flex_shrink_0()
+                // Svelte: 18% opacity shadow ring
+                .shadow(vec![gpui::BoxShadow {
+                    color: Hsla { a: status_color.a * 0.18, ..status_color },
+                    offset: point(px(0.0), px(0.0)),
+                    blur_radius: px(4.0),
+                    spread_radius: px(1.0),
+                }]),
         );
 
         // Contract: label font 0.75rem (12px), weight 600, line-height 1.3

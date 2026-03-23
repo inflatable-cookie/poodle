@@ -64,9 +64,10 @@ impl IntoElement for RadioGroup {
         let theme = &self.theme;
         let spec = &self.spec;
 
-        // Contract: indicator = 1.125rem (18px), dot = 0.5rem (8px)
-        let indicator_size = px(18.0);
-        let dot_size = px(8.0);
+        // Svelte: indicator = calc(icon-default + 0.125rem) ≈ 18px, dot = calc(icon-default * 0.5) = 8px
+        let icon_default = resolve_px(theme, "semantic.size.icon.default");
+        let indicator_size = icon_default + px(2.0);
+        let dot_size = icon_default * 0.5;
 
         // Contract: gap per orientation
         let group_gap = resolve_px(theme, spec.option_gap_token());
