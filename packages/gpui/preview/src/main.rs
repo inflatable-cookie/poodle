@@ -148,7 +148,7 @@ impl PreviewRoot {
         &self,
         _text_secondary: pug_tokens::typed::ColorValue,
         _accent: pug_tokens::typed::ColorValue,
-        _cx: &mut Context<Self>,
+        cx: &mut Context<Self>,
     ) -> impl IntoElement {
         let active_value = self.state.section.label();
         let tab_defs: Vec<TabDefinition> = Section::ALL
@@ -162,6 +162,17 @@ impl PreviewRoot {
 
         Tabs::from_spec(spec, &self.state.theme)
             .with_id("nav-tabs")
+            .on_change(cx.listener(|this, val: &str, _w, cx| {
+                match val {
+                    "Primitives" => this.state.section = Section::Primitives,
+                    "Composites" => this.state.section = Section::Composites,
+                    "Shells" => this.state.section = Section::Shells,
+                    "Demo" => this.state.section = Section::Demo,
+                    "Tokens" => this.state.section = Section::Tokens,
+                    _ => {}
+                }
+                cx.notify();
+            }))
     }
 
     /// Right-aligned pills showing current theme, density, and size.
