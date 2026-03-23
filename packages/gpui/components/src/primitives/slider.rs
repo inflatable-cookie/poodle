@@ -13,6 +13,8 @@ static SLIDER_ID_COUNTER: std::sync::atomic::AtomicU32 = std::sync::atomic::Atom
 pub struct Slider {
     spec: SliderSpec,
     theme: GpuiThemeProvider,
+    id: Option<SharedString>,
+    on_change: Option<Box<dyn Fn(&f64, &mut Window, &mut App) + 'static>>,
 }
 
 impl std::ops::Deref for Slider {
@@ -22,14 +24,26 @@ impl std::ops::Deref for Slider {
 
 impl Slider {
     pub fn new(theme: &GpuiThemeProvider) -> Self {
-        Self { spec: SliderSpec::default(), theme: theme.clone() }
+        Self { spec: SliderSpec::default(), theme: theme.clone(), id: None, on_change: None }
     }
 
     pub fn from_spec(spec: SliderSpec, theme: &GpuiThemeProvider) -> Self {
         Self {
             spec,
             theme: theme.clone(),
+            id: None,
+            on_change: None,
         }
+    }
+
+    pub fn with_id(mut self, id: impl Into<SharedString>) -> Self {
+        self.id = Some(id.into());
+        self
+    }
+
+    pub fn on_change(mut self, handler: impl Fn(&f64, &mut Window, &mut App) + 'static) -> Self {
+        self.on_change = Some(Box::new(handler));
+        self
     }
 
     // ── Forwarded spec builders ───────────────────────────────
@@ -121,10 +135,16 @@ impl IntoElement for Slider {
 
         let focus_ring = resolve_color(theme, spec.focus_ring_color_token());
 
-        let slider_id = SharedString::from(format!(
+        let slider_id: SharedString = self.id.unwrap_or_else(|| SharedString::from(format!(
             "pug-slider-{}",
             SLIDER_ID_COUNTER.fetch_add(1, std::sync::atomic::Ordering::Relaxed)
-        ));
+        )));
+
+        let on_change = self.on_change;
+        let min = spec.min;
+        let max = spec.max;
+        let step = spec.step;
+        let is_disabled = spec.is_disabled;
 
         let mut wrapper = div()
             .id(slider_id)
@@ -133,15 +153,51 @@ impl IntoElement for Slider {
             .flex()
             .flex_col()
             .gap(stack_gap)
+            .cursor(if is_disabled { CursorStyle::OperationNotAllowed } else { CursorStyle::PointingHand })
             .child(track)
             .child(labels);
 
         wrapper = wrapper.focus(move |s| s.border_color(focus_ring));
 
-        if spec.is_disabled {
+        if is_disabled {
             wrapper = wrapper
-                .opacity(disabled_opacity)
-                .cursor(CursorStyle::OperationNotAllowed);
+                .opacity(disabled_opacity);
+        } else if let Some(on_change) = on_change {
+            // Compute value from click position using Pixels arithmetic
+            let compute_value = move |pos_x: Pixels, origin_x: Pixels, width: Pixels| -> Option<f64> {
+                let local = pos_x - origin_x;
+                // Use px division: local / width gives a ratio
+                // Pixels supports Div<Pixels> -> f32 via: local / width
+                let ratio_f32 = local / width;
+                let ratio = (ratio_f32 as f64).clamp(0.0, 1.0);
+                let raw = min + ratio * (max - min);
+                let stepped = if step > 0.0 {
+                    (raw / step).round() * step
+                } else {
+                    raw
+                };
+                Some(stepped.clamp(min, max))
+            };
+
+            let on_change = std::rc::Rc::new(on_change);
+            let on_change_drag = on_change.clone();
+            let compute_drag = compute_value;
+
+            wrapper = wrapper
+                .on_mouse_down(MouseButton::Left, move |event, window, cx| {
+                    let bounds = window.bounds();
+                    if let Some(val) = compute_value(event.position.x, bounds.origin.x, bounds.size.width) {
+                        on_change(&val, window, cx);
+                    }
+                })
+                .on_mouse_move(move |event, window, cx| {
+                    if event.pressed_button == Some(MouseButton::Left) {
+                        let bounds = window.bounds();
+                        if let Some(val) = compute_drag(event.position.x, bounds.origin.x, bounds.size.width) {
+                            on_change_drag(&val, window, cx);
+                        }
+                    }
+                });
         }
 
         wrapper.into_any_element()

@@ -1,7 +1,8 @@
 use gpui::*;
+use gpui::prelude::FluentBuilder;
 use pug_adapter::ThemeProvider;
-use pug_primitives::{TabsSpec, TabDefinition, TabVariant};
-use pug_gpui_components::Tabs;
+use pug_primitives::{TabsSpec, TabDefinition, TabVariant, TabStripSpec, TabStripItem, Orientation};
+use pug_gpui_components::{Tabs, TabStrip};
 use crate::app_state::AppState;
 use crate::style_bridge::color_to_hsla;
 use crate::PreviewRoot;
@@ -9,8 +10,12 @@ use crate::PreviewRoot;
 pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
     let theme = &state.theme;
     let text_secondary = theme.resolve_color("semantic.color.text.secondary");
+    let border = theme.resolve_color("semantic.color.border.default");
+    let bg_surface = theme.resolve_color("semantic.color.background.surface");
 
-    // ── Underline variant (default, with panel) ──────────────────────
+    // ═══════════════════════════════════════════════════════════════════
+    // 1. UNDERLINE VARIANT (DEFAULT, WITH PANEL)
+    // ═══════════════════════════════════════════════════════════════════
     let underline_tabs = vec![
         TabDefinition::new("overview", "Overview"),
         TabDefinition::new("features", "Features"),
@@ -28,14 +33,19 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
         .with_value(&underline_value)
         .with_aria_label("Section tabs");
 
-    let mut underline_component = Tabs::from_spec(underline_spec, theme)
+    let panel_text = match underline_value.as_str() {
+        "overview" => "Overview content — this is the landing page with a summary of all features.",
+        "features" => "Features content — explore the full feature set and capabilities.",
+        "pricing" => "Pricing content — compare plans and find the right fit for your team.",
+        _ => "",
+    };
+
+    let underline_component = Tabs::from_spec(underline_spec, theme)
         .with_id("specimen-underline")
         .on_change(cx.listener(|this, val: &str, _w, cx| {
             this.state.specimens.text.insert("tabs-underline-value".to_string(), val.to_string());
             cx.notify();
-        }));
-
-    underline_component = underline_component
+        }))
         .with_content(
             "overview".to_string(),
             div().p(px(12.0)).text_size(px(14.0)).text_color(color_to_hsla(text_secondary))
@@ -52,7 +62,9 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                 .child("Pricing content — compare plans and find the right fit for your team.".to_string()),
         );
 
-    // ── Card variant ─────────────────────────────────────────────────
+    // ═══════════════════════════════════════════════════════════════════
+    // 2. CARD VARIANT (CLOSABLE, REORDERABLE)
+    // ═══════════════════════════════════════════════════════════════════
     let card_tabs = vec![
         TabDefinition::new("index.ts", "index.ts"),
         TabDefinition::new("App.svelte", "App.svelte"),
@@ -77,7 +89,9 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
             cx.notify();
         }));
 
-    // ── Pill variant ─────────────────────────────────────────────────
+    // ═══════════════════════════════════════════════════════════════════
+    // 3. PILL VARIANT (WITH ICONS)
+    // ═══════════════════════════════════════════════════════════════════
     let pill_tabs = vec![
         TabDefinition::new("home", "Home"),
         TabDefinition::new("settings", "Settings"),
@@ -101,7 +115,9 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
             cx.notify();
         }));
 
-    // ── Underline (no panel) ─────────────────────────────────────────
+    // ═══════════════════════════════════════════════════════════════════
+    // 4. UNDERLINE WITH ICONS (NO PANEL)
+    // ═══════════════════════════════════════════════════════════════════
     let underline_icon_tabs = vec![
         TabDefinition::new("home", "Home"),
         TabDefinition::new("settings", "Settings"),
@@ -125,22 +141,246 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
             cx.notify();
         }));
 
-    div().flex().flex_col().gap(px(16.0))
-        // Underline variant (default, with panel)
+    // ═══════════════════════════════════════════════════════════════════
+    // 5. STRIP VARIANT (HORIZONTAL, CLOSABLE, REORDERABLE)
+    // ═══════════════════════════════════════════════════════════════════
+    let strip_items = vec![
+        TabStripItem::new("main.rs", "main.rs").with_closable(true),
+        TabStripItem::new("lib.rs", "lib.rs").with_closable(true),
+        TabStripItem::new("mod.rs", "mod.rs").with_closable(true),
+        TabStripItem::new("Cargo.toml", "Cargo.toml"),
+    ];
+
+    let strip_value = state.specimens.text.get("tabs-strip-value")
+        .map(|s| s.as_str())
+        .unwrap_or("main.rs")
+        .to_string();
+
+    let last_strip_closed = state.specimens.text.get("tabs-strip-closed")
+        .cloned()
+        .unwrap_or_default();
+    let last_strip_reorder = state.specimens.text.get("tabs-strip-reorder")
+        .cloned()
+        .unwrap_or_default();
+
+    let strip_spec = TabStripSpec::new(strip_items)
+        .with_value(&strip_value)
+        .with_reorderable(true)
+        .with_aria_label("File tabs");
+
+    let strip_component = TabStrip::from_spec(strip_spec, theme)
+        .with_id("specimen-strip")
+        .on_change(cx.listener(|this, val: &str, _w, cx| {
+            this.state.specimens.text.insert("tabs-strip-value".to_string(), val.to_string());
+            cx.notify();
+        }))
+        .on_close(cx.listener(|this, val: &str, _w, cx| {
+            this.state.specimens.text.insert("tabs-strip-closed".to_string(), val.to_string());
+            cx.notify();
+        }));
+
+    // ═══════════════════════════════════════════════════════════════════
+    // 6. STRIP VARIANT (VERTICAL)
+    // ═══════════════════════════════════════════════════════════════════
+    let vertical_items = vec![
+        TabStripItem::new("files", "Files"),
+        TabStripItem::new("search", "Search"),
+        TabStripItem::new("git", "Git"),
+        TabStripItem::new("extensions", "Extensions"),
+    ];
+
+    let vertical_value = state.specimens.text.get("tabs-vertical-value")
+        .map(|s| s.as_str())
+        .unwrap_or("files")
+        .to_string();
+
+    let vertical_spec = TabStripSpec::new(vertical_items)
+        .with_value(&vertical_value)
+        .with_orientation(Orientation::Vertical)
+        .with_aria_label("Activity bar");
+
+    let vertical_component = TabStrip::from_spec(vertical_spec, theme)
+        .with_id("specimen-vertical")
+        .on_change(cx.listener(|this, val: &str, _w, cx| {
+            this.state.specimens.text.insert("tabs-vertical-value".to_string(), val.to_string());
+            cx.notify();
+        }));
+
+    // ═══════════════════════════════════════════════════════════════════
+    // 7. COLLAPSE TOGGLE
+    // ═══════════════════════════════════════════════════════════════════
+    let panel_collapsed = state.specimens.is_on("tabs-panel-collapsed");
+
+    let collapse_items = vec![
+        TabStripItem::new("editor", "Editor").with_closable(true),
+        TabStripItem::new("terminal", "Terminal").with_closable(true),
+        TabStripItem::new("output", "Output"),
+    ];
+
+    let collapse_value = state.specimens.text.get("tabs-collapse-value")
+        .map(|s| s.as_str())
+        .unwrap_or("editor")
+        .to_string();
+
+    let collapse_orientation = if panel_collapsed {
+        Orientation::Vertical
+    } else {
+        Orientation::Horizontal
+    };
+
+    let collapse_spec = TabStripSpec::new(collapse_items)
+        .with_value(&collapse_value)
+        .with_orientation(collapse_orientation)
+        .with_reorderable(true)
+        .with_aria_label("Panel tabs");
+
+    let collapse_component = TabStrip::from_spec(collapse_spec, theme)
+        .with_id("specimen-collapse")
+        .on_change(cx.listener(|this, val: &str, _w, cx| {
+            this.state.specimens.text.insert("tabs-collapse-value".to_string(), val.to_string());
+            cx.notify();
+        }));
+
+    // ═══════════════════════════════════════════════════════════════════
+    // ASSEMBLE
+    // ═══════════════════════════════════════════════════════════════════
+    div().flex().flex_col().gap(px(24.0))
+        // 1. Underline variant (default, with panel)
         .child(section_label("UNDERLINE VARIANT (DEFAULT, WITH PANEL)", text_secondary))
         .child(underline_component)
 
-        // Card variant
+        // 2. Card variant (closable, reorderable)
         .child(section_label("CARD VARIANT", text_secondary))
         .child(card_component)
 
-        // Pill variant
+        // 3. Pill variant
         .child(section_label("PILL VARIANT", text_secondary))
         .child(pill_component)
 
-        // Underline (no panel)
-        .child(section_label("UNDERLINE (NO PANEL)", text_secondary))
+        // 4. Underline with icons (no panel)
+        .child(section_label("UNDERLINE WITH ICONS (NO PANEL)", text_secondary))
         .child(underline_icon_component)
+
+        // 5. Strip variant (horizontal, closable, reorderable)
+        .child(section_label("STRIP VARIANT (CLOSABLE, REORDERABLE)", text_secondary))
+        .child(
+            // Frame container simulating an editor panel
+            div()
+                .rounded(px(6.0))
+                .border_1()
+                .border_color(color_to_hsla(border))
+                .overflow_hidden()
+                .child(strip_component)
+                .child(
+                    div()
+                        .p(px(16.0))
+                        .bg(color_to_hsla(bg_surface))
+                        .min_h(px(48.0))
+                        .text_sm()
+                        .text_color(color_to_hsla(text_secondary))
+                        .child("Surface content area")
+                )
+        )
+        .when(!last_strip_closed.is_empty(), |d| {
+            d.child(
+                div().text_sm().text_color(color_to_hsla(text_secondary))
+                    .child(format!("Last closed: {}", last_strip_closed))
+            )
+        })
+        .when(!last_strip_reorder.is_empty(), |d| {
+            d.child(
+                div().text_sm().text_color(color_to_hsla(text_secondary))
+                    .child(format!("Last reordered: {}", last_strip_reorder))
+            )
+        })
+
+        // 6. Strip variant (vertical)
+        .child(section_label("STRIP VARIANT (VERTICAL)", text_secondary))
+        .child(
+            div()
+                .flex()
+                .rounded(px(6.0))
+                .border_1()
+                .border_color(color_to_hsla(border))
+                .overflow_hidden()
+                .h(px(160.0))
+                .child(vertical_component)
+                .child(
+                    div()
+                        .flex_1()
+                        .p(px(16.0))
+                        .bg(color_to_hsla(bg_surface))
+                        .text_sm()
+                        .text_color(color_to_hsla(text_secondary))
+                        .child(format!("Active: {}", vertical_value))
+                )
+        )
+
+        // 7. Collapse toggle
+        .child(section_label("COLLAPSE TOGGLE", text_secondary))
+        .child(
+            div().flex().flex_col().gap(px(8.0))
+                .child(
+                    div()
+                        .flex()
+                        .gap(px(8.0))
+                        .items_center()
+                        .child(
+                            div()
+                                .id("collapse-toggle-btn")
+                                .px(px(8.0))
+                                .py(px(4.0))
+                                .rounded(px(4.0))
+                                .border_1()
+                                .border_color(color_to_hsla(border))
+                                .text_xs()
+                                .cursor_pointer()
+                                .text_color(color_to_hsla(text_secondary))
+                                .child(if panel_collapsed { "Expand" } else { "Collapse" })
+                                .on_click(cx.listener(|this, _e: &ClickEvent, _w, cx| {
+                                    this.state.specimens.toggle("tabs-panel-collapsed");
+                                    cx.notify();
+                                }))
+                        )
+                        .child(
+                            div().text_xs().text_color(color_to_hsla(text_secondary))
+                                .child(if panel_collapsed { "Vertical (collapsed)" } else { "Horizontal (expanded)" })
+                        )
+                )
+                .child(
+                    div()
+                        .rounded(px(6.0))
+                        .border_1()
+                        .border_color(color_to_hsla(border))
+                        .overflow_hidden()
+                        .when(panel_collapsed, |d| {
+                            d.flex().h(px(120.0))
+                        })
+                        .child(collapse_component)
+                        .when(!panel_collapsed, |d| {
+                            d.child(
+                                div()
+                                    .p(px(16.0))
+                                    .bg(color_to_hsla(bg_surface))
+                                    .min_h(px(48.0))
+                                    .text_sm()
+                                    .text_color(color_to_hsla(text_secondary))
+                                    .child(format!("Panel: {}", collapse_value))
+                            )
+                        })
+                        .when(panel_collapsed, |d| {
+                            d.child(
+                                div()
+                                    .flex_1()
+                                    .p(px(16.0))
+                                    .bg(color_to_hsla(bg_surface))
+                                    .text_sm()
+                                    .text_color(color_to_hsla(text_secondary))
+                                    .child(format!("Panel: {}", collapse_value))
+                            )
+                        })
+                )
+        )
 }
 
 fn section_label(label: &str, color: pug_tokens::typed::ColorValue) -> Div {

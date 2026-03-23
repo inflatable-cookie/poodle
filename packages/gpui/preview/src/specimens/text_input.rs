@@ -14,7 +14,13 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
     let name_value = state.specimens.text.get("text-input-name").cloned()
         .unwrap_or_default();
     let email_value = state.specimens.text.get("text-input-email").cloned()
-        .unwrap_or_default();
+        .unwrap_or_else(|| "invalid-email".to_string());
+    let email_is_valid = email_value.contains('@');
+    let validation_state = if email_is_valid {
+        ValidationState::Valid
+    } else {
+        ValidationState::Invalid
+    };
 
     div().flex().flex_col().gap(px(24.0))
         // --- Default ---
@@ -42,10 +48,14 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
         // --- With validation ---
         .child(section_label("WITH VALIDATION", text_secondary))
         .child(
-            Field::from_spec(
-                FieldSpec::new("email-field", "Email")
-                    .with_validation_state(ValidationState::Invalid)
-                    .with_error("Please enter a valid email address."),
+            Field::from_spec({
+                    let mut field = FieldSpec::new("email-field", "Email")
+                        .with_validation_state(validation_state);
+                    if !email_is_valid {
+                        field = field.with_error("Please enter a valid email address.");
+                    }
+                    field
+                },
                 theme,
             )
             .with_control(
@@ -54,7 +64,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                         .with_id("email-field")
                         .with_placeholder("you@example.com")
                         .with_value(&email_value)
-                        .with_validation_state(ValidationState::Invalid),
+                        .with_validation_state(validation_state),
                     theme,
                 )
                 .on_change(cx.listener(|this, val: &str, _w, cx| {

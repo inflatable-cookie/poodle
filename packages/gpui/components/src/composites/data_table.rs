@@ -16,8 +16,8 @@ use crate::theme_ext::{resolve_color, resolve_px};
 pub struct DataTable {
     spec: DataTableSpec,
     theme: GpuiThemeProvider,
-    on_row_click: Option<Box<dyn Fn(&str, &ClickEvent, &mut Window, &mut App) + 'static>>,
-    on_sort: Option<Box<dyn Fn(&str, &ClickEvent, &mut Window, &mut App) + 'static>>,
+    on_row_click: Option<Box<dyn Fn(&str, &mut Window, &mut App) + 'static>>,
+    on_sort: Option<Box<dyn Fn(&str, &mut Window, &mut App) + 'static>>,
 }
 
 impl std::ops::Deref for DataTable {
@@ -53,7 +53,7 @@ impl DataTable {
 
     pub fn on_row_click(
         mut self,
-        handler: impl Fn(&str, &ClickEvent, &mut Window, &mut App) + 'static,
+        handler: impl Fn(&str, &mut Window, &mut App) + 'static,
     ) -> Self {
         self.on_row_click = Some(Box::new(handler));
         self
@@ -61,7 +61,7 @@ impl DataTable {
 
     pub fn on_sort(
         mut self,
-        handler: impl Fn(&str, &ClickEvent, &mut Window, &mut App) + 'static,
+        handler: impl Fn(&str, &mut Window, &mut App) + 'static,
     ) -> Self {
         self.on_sort = Some(Box::new(handler));
         self
@@ -84,9 +84,9 @@ impl IntoElement for DataTable {
         let accent = resolve_color(theme, "semantic.color.accent.base");
 
         // Wrap handlers in Rc for sharing across closures
-        let on_sort: Option<std::rc::Rc<dyn Fn(&str, &ClickEvent, &mut Window, &mut App)>> =
+        let on_sort: Option<std::rc::Rc<dyn Fn(&str, &mut Window, &mut App)>> =
             self.on_sort.map(|h| std::rc::Rc::from(h));
-        let on_row_click: Option<std::rc::Rc<dyn Fn(&str, &ClickEvent, &mut Window, &mut App)>> =
+        let on_row_click: Option<std::rc::Rc<dyn Fn(&str, &mut Window, &mut App)>> =
             self.on_row_click.map(|h| std::rc::Rc::from(h));
 
         let mut table = div()
@@ -151,8 +151,8 @@ impl IntoElement for DataTable {
                 if let Some(ref handler) = on_sort {
                     let handler = handler.clone();
                     let col_id = col.id.clone();
-                    stateful_header = stateful_header.on_click(move |event, window, cx| {
-                        handler(&col_id, event, window, cx);
+                    stateful_header = stateful_header.on_click(move |_event, window, cx| {
+                        handler(&col_id, window, cx);
                     });
                 }
             }
@@ -216,7 +216,7 @@ impl IntoElement for DataTable {
                     let handler = handler.clone();
                     let row_id = row.id.clone();
                     data_row = data_row.on_click(move |event, window, cx| {
-                        handler(&row_id, event, window, cx);
+                        handler(&row_id, window, cx);
                     });
                 }
 
@@ -260,7 +260,7 @@ impl IntoElement for DataTable {
                         let row_id = row.id.clone();
                         action_btn = action_btn
                             .on_click(move |event, window, cx| {
-                                handler(&row_id, event, window, cx);
+                                handler(&row_id, window, cx);
                             });
                     }
                     data_row = data_row.child(action_btn);

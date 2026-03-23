@@ -1,4 +1,5 @@
 use gpui::*;
+use gpui::prelude::FluentBuilder;
 use pug_adapter::ThemeProvider;
 use pug_composites::{DataTableSpec, TableColumnSpec, TableRowSpec, TableSortDirection};
 use pug_gpui_components::DataTable;
@@ -6,7 +7,7 @@ use crate::app_state::AppState;
 use crate::style_bridge::color_to_hsla;
 use crate::PreviewRoot;
 
-pub(crate) fn render(state: &AppState, _cx: &mut Context<PreviewRoot>) -> Div {
+pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
     let theme = &state.theme;
     let text_secondary = theme.resolve_color("semantic.color.text.secondary");
 
@@ -50,12 +51,30 @@ pub(crate) fn render(state: &AppState, _cx: &mut Context<PreviewRoot>) -> Div {
         ]),
     ];
 
-    let selected_idx = state.specimens.selected("table-row");
-    let selected_ids = if selected_idx < rows.len() {
-        vec![format!("{}", selected_idx + 1)]
+    // Track sort state
+    let sort_col = state.specimens.text.get("dt-sort-col")
+        .cloned()
+        .unwrap_or_else(|| "name".to_string());
+    let sort_dir_str = state.specimens.text.get("dt-sort-dir")
+        .cloned()
+        .unwrap_or_else(|| "asc".to_string());
+    let sort_dir = if sort_dir_str == "desc" {
+        TableSortDirection::Desc
     } else {
-        vec![]
+        TableSortDirection::Asc
     };
+
+    // Track last action
+    let last_action = state.specimens.text.get("dt-last-action")
+        .cloned()
+        .unwrap_or_default();
+
+    // Track selected rows
+    let selected_ids: Vec<String> = (1..=5)
+        .filter(|i| state.specimens.is_on(&format!("dt-row-{}", i)))
+        .map(|i| format!("{}", i))
+        .collect();
+    let selected_count = selected_ids.len();
 
     let empty_columns = vec![
         TableColumnSpec::new("name", "Name").with_sortable(true),
@@ -71,11 +90,49 @@ pub(crate) fn render(state: &AppState, _cx: &mut Context<PreviewRoot>) -> Div {
             DataTable::from_spec(
                 DataTableSpec::new(columns, rows)
                     .with_selected_row_ids(selected_ids)
-                    .with_sort("name", TableSortDirection::Asc)
+                    .with_sort(&sort_col, sort_dir)
                     .with_row_action_label("Open"),
                 theme,
             )
+            .on_sort(cx.listener(|this, col_id: &str, _w, cx| {
+                let current_col = this.state.specimens.text.get("dt-sort-col")
+                    .cloned()
+                    .unwrap_or_else(|| "name".to_string());
+                let current_dir = this.state.specimens.text.get("dt-sort-dir")
+                    .cloned()
+                    .unwrap_or_else(|| "asc".to_string());
+
+                if col_id == current_col {
+                    // Toggle direction
+                    let new_dir = if current_dir == "asc" { "desc" } else { "asc" };
+                    this.state.specimens.text.insert("dt-sort-dir".to_string(), new_dir.to_string());
+                } else {
+                    this.state.specimens.text.insert("dt-sort-col".to_string(), col_id.to_string());
+                    this.state.specimens.text.insert("dt-sort-dir".to_string(), "asc".to_string());
+                }
+                cx.notify();
+            }))
+            .on_row_click(cx.listener(|this, row_id: &str, _w, cx| {
+                this.state.specimens.toggle(&format!("dt-row-{}", row_id));
+                this.state.specimens.text.insert(
+                    "dt-last-action".to_string(),
+                    format!("Clicked row {}", row_id),
+                );
+                cx.notify();
+            }))
         )
+        // Status line
+        .when(!last_action.is_empty(), |d| {
+            d.child(
+                div().text_sm().text_color(color_to_hsla(text_secondary))
+                    .child(last_action)
+            )
+        })
+        .child(
+            div().text_sm().text_color(color_to_hsla(text_secondary))
+                .child(format!("{} of 5 selected", selected_count))
+        )
+
         // --- Empty state ---
         .child(section_label("EMPTY STATE", text_secondary))
         .child(

@@ -1,4 +1,5 @@
 use gpui::*;
+use gpui::prelude::FluentBuilder;
 use pug_adapter::ThemeProvider;
 use pug_primitives::{ButtonSpec, ButtonTone, ButtonVariant, ControlSize};
 use pug_gpui_components::Button;
@@ -10,11 +11,9 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
     let theme = &state.theme;
     let text_secondary = theme.resolve_color("semantic.color.text.secondary");
     let click_count = state.specimens.count("btn-clicks");
-
-    let click_handler = cx.listener(|this, _e: &ClickEvent, _w, cx| {
-        this.state.specimens.increment("btn-clicks");
-        cx.notify();
-    });
+    let last_clicked = state.specimens.text.get("btn-last-clicked")
+        .cloned()
+        .unwrap_or_default();
 
     div().flex().flex_col().gap(px(16.0))
         // --- Variants ---
@@ -31,6 +30,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                     .with_id("primary")
                     .on_click(cx.listener(|this, _e: &ClickEvent, _w, cx| {
                         this.state.specimens.increment("btn-clicks");
+                        this.state.specimens.text.insert("btn-last-clicked".to_string(), "Primary".to_string());
                         cx.notify();
                     }))
                 )
@@ -42,6 +42,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                     .with_id("secondary")
                     .on_click(cx.listener(|this, _e: &ClickEvent, _w, cx| {
                         this.state.specimens.increment("btn-clicks");
+                        this.state.specimens.text.insert("btn-last-clicked".to_string(), "Secondary".to_string());
                         cx.notify();
                     }))
                 )
@@ -53,6 +54,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                     .with_id("ghost")
                     .on_click(cx.listener(|this, _e: &ClickEvent, _w, cx| {
                         this.state.specimens.increment("btn-clicks");
+                        this.state.specimens.text.insert("btn-last-clicked".to_string(), "Ghost".to_string());
                         cx.notify();
                     }))
                 )
@@ -246,8 +248,17 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
         )
         // --- Click counter ---
         .child(
-            div().text_xs().text_color(color_to_hsla(text_secondary))
-                .child(format!("Clicks: {}", click_count))
+            div().flex().flex_col().gap(px(2.0))
+                .child(
+                    div().text_sm().text_color(color_to_hsla(text_secondary))
+                        .child(format!("Clicks: {}", click_count))
+                )
+                .when(!last_clicked.is_empty(), |d| {
+                    d.child(
+                        div().text_sm().text_color(color_to_hsla(text_secondary))
+                            .child(format!("Last clicked: {}", last_clicked))
+                    )
+                })
         )
 }
 

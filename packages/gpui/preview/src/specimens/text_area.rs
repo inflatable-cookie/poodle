@@ -1,4 +1,5 @@
 use gpui::*;
+use gpui::prelude::FluentBuilder;
 use pug_adapter::ThemeProvider;
 use pug_primitives::TextAreaSpec;
 use pug_gpui_components::TextArea;
@@ -15,22 +16,32 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
     let bio_value = state.specimens.text.get("textarea-bio").cloned()
         .unwrap_or_else(|| "A brief description about yourself.".to_string());
 
-    div().flex().flex_col().gap(px(24.0))
+    div().flex().flex_col().gap(px(24.0)).max_w(px(384.0))
         // --- Default ---
         .child(section_label("DEFAULT", text_secondary))
         .child(
-            TextArea::from_spec(
-                TextAreaSpec::new()
-                    .with_placeholder("Write a note\u{2026}")
-                    .with_value(&default_value)
-                    .with_aria_label("Note"),
-                theme,
-            )
-            .with_id("ta-default")
-            .on_change(cx.listener(|this, val: &str, _w, cx| {
-                this.state.specimens.text.insert("textarea-default".to_string(), val.to_string());
-                cx.notify();
-            }))
+            div().flex().flex_col().gap(px(4.0))
+                .child(
+                    TextArea::from_spec(
+                        TextAreaSpec::new()
+                            .with_placeholder("Write a note\u{2026}")
+                            .with_value(&default_value)
+                            .with_aria_label("Note"),
+                        theme,
+                    )
+                    .with_id("ta-default")
+                    .on_change(cx.listener(|this, val: &str, _w, cx| {
+                        this.state.specimens.text.insert("textarea-default".to_string(), val.to_string());
+                        cx.notify();
+                    }))
+                )
+                .when(!default_value.is_empty(), |d| {
+                    d.child(
+                        div().text_sm()
+                            .text_color(color_to_hsla(text_secondary))
+                            .child(format!("{} characters", default_value.len()))
+                    )
+                })
         )
         // --- With initial value ---
         .child(section_label("WITH INITIAL VALUE", text_secondary))
