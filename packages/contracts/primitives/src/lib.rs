@@ -125,7 +125,7 @@ pub use navigation_menu::NavigationMenuSpec;
 pub use number_entry::NumberEntrySpec;
 pub use order_by::{ActiveSort, OrderBySpec, SortDirection, SortField};
 pub use pagination::{PageItem, PaginationSpec};
-pub use pill::PillSpec;
+pub use pill::{PillAppearance, PillFont, PillSize, PillSpec, PillTone};
 pub use pin_input::PinInputSpec;
 pub use popover::PopoverSpec;
 pub use progress::ProgressSpec;

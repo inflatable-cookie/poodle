@@ -1,4 +1,5 @@
 use gpui::*;
+use gpui::prelude::FluentBuilder;
 use pug_adapter::ThemeProvider;
 use pug_primitives::{ContextMenuSpec, MenuEntry, MenuItemKind};
 use pug_gpui_components::ContextMenu;
@@ -9,7 +10,7 @@ use crate::PreviewRoot;
 pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
     let theme = &state.theme;
     let text_secondary = theme.resolve_color("semantic.color.text.secondary");
-    let text_primary = theme.resolve_color("semantic.color.text.primary");
+    let border = theme.resolve_color("semantic.color.border.default");
 
     let last_action = state.specimens.text.get("context-menu-action").cloned();
 
@@ -26,22 +27,45 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
     let spec = ContextMenuSpec::new(items)
         .with_default_open(true);
 
+    // Build a right-click target area matching Svelte's dashed bordered zone
+    let target_area = div()
+        .h(px(128.0))
+        .w_full()
+        .border_1()
+        .border_color(color_to_hsla(border))
+        .rounded(px(6.0))
+        .flex()
+        .items_center()
+        .justify_center()
+        .child(
+            div()
+                .text_sm()
+                .text_color(color_to_hsla(text_secondary))
+                .child("Right-click this area".to_string())
+        );
+
     div().flex().flex_col().gap(px(16.0))
-        .child(section_label("CONTEXT MENU (SHOWN INLINE)", text_secondary))
+        .child(section_label("RIGHT-CLICK THE AREA BELOW", text_secondary))
         .child(
             ContextMenu::from_spec(spec, theme)
                 .with_id("specimen-context-menu")
+                .with_trigger(target_area)
                 .on_select(cx.listener(|this, val: &str, _w, cx| {
-                    this.state.specimens.text.insert("context-menu-action".to_string(), val.to_string());
+                    this.state.specimens.text.insert(
+                        "context-menu-action".to_string(),
+                        val.to_string(),
+                    );
                     cx.notify();
                 }))
         )
-        .child(
-            div()
-                .text_size(px(12.0))
-                .text_color(color_to_hsla(text_primary))
-                .child(format!("Last action: {}", last_action.as_deref().unwrap_or("(none)")))
-        )
+        .when(last_action.is_some(), |d| {
+            d.child(
+                div()
+                    .text_sm()
+                    .text_color(color_to_hsla(text_secondary))
+                    .child(format!("Last action: {}", last_action.as_deref().unwrap_or("")))
+            )
+        })
 }
 
 fn section_label(label: &str, color: pug_tokens::typed::ColorValue) -> Div {

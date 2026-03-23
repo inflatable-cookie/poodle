@@ -6,12 +6,10 @@ use crate::app_state::AppState;
 use crate::style_bridge::color_to_hsla;
 use crate::PreviewRoot;
 
-pub(crate) fn render(state: &AppState, _cx: &mut Context<PreviewRoot>) -> Div {
+pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
     let theme = &state.theme;
     let text_secondary = theme.resolve_color("semantic.color.text.secondary");
 
-    // Contract: Horizontal navigation with ariaLabel="Main navigation", value="components" (initially active)
-    // Five items: Home, Components, Tokens, Guides, Changelog (disabled)
     let items = vec![
         NavigationMenuEntry::new("home", "Home"),
         NavigationMenuEntry::new("components", "Components"),
@@ -20,12 +18,9 @@ pub(crate) fn render(state: &AppState, _cx: &mut Context<PreviewRoot>) -> Div {
         NavigationMenuEntry::new("changelog", "Changelog").with_disabled(true),
     ];
 
-    let selected = state.specimens.selected("navmenu-active");
-    let active_value = if selected == 0 {
-        "components".to_string()
-    } else {
-        format!("{}", selected)
-    };
+    let active_value = state.specimens.text.get("navmenu-active")
+        .cloned()
+        .unwrap_or_else(|| "components".to_string());
 
     let spec = NavigationMenuSpec::new(items)
         .with_value(active_value.clone())
@@ -36,6 +31,13 @@ pub(crate) fn render(state: &AppState, _cx: &mut Context<PreviewRoot>) -> Div {
         .child(
             NavigationMenu::from_spec(spec, theme)
                 .with_id("specimen-nav")
+                .on_change(cx.listener(|this, val: &str, _w, cx| {
+                    this.state.specimens.text.insert(
+                        "navmenu-active".to_string(),
+                        val.to_string(),
+                    );
+                    cx.notify();
+                }))
         )
         .child(
             div()
