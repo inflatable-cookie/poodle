@@ -2,15 +2,16 @@
 
 ## Active Execution Track
 
-- `g08`
-  - Status: active
-  - Range: `001` to `009`
-  - Notes: consolidated GPUI production-quality, contract-compliance, specimen, accessibility, and visual-parity work
-
 - `g09`
+  - Status: active
+  - Range: `001` to `008`, with extension required
+  - Notes: GPUI remains the current execution focus. The original `g09.001` through `g09.008` tranche completed the architecture-unification work, but the generation stays open because substantial GPUI work still remains before closeout.
+
+## Next Planned Generation
+
+- `g10`
   - Status: planned
-  - Range: `001` to `008`
-  - Notes: consolidated Jetstream production-quality, feasibility, specimen, and parity work
+  - Notes: Jetstream-focused follow-on generation that starts after `g09` reaches a genuine closeout state
 
 ## Completed Foundations
 
@@ -49,23 +50,16 @@
   - Range: `001` to `015`
   - Notes: GPUI rendering build-out, adapter crate, theme integration, primitive and composite rendering, workstation shell updates, and cross-runtime parity reporting
 
-## Preserved Historical Planning
+- `g08`
+  - Status: completed
+  - Range: `001` to `011`
+  - Notes: consolidated GPUI production-quality, contract-compliance, specimen, accessibility, and visual-parity work
 
-- `g10`
-  - Status: preserved reference
-  - Notes: historical Jetstream production-quality plan from before the roadmap consolidation
+## Removed Generations
 
 - `g11`
-  - Status: preserved reference
-  - Notes: historical GPUI contract-compliance plan from before the roadmap consolidation
-
-Use `g10` and `g11` for historical context only unless their useful decisions are intentionally re-imported into the active `g08` or `g09` track.
-
-## What Was Consolidated
-
-The previous later-generation plan was reduced to the current `g08` and `g09` execution track after an audit found inflated completion claims and stale sequencing assumptions in the old `g08` through `g13` material.
-
-Useful architectural decisions and constraint notes from that older plan are preserved in `docs/roadmaps/archive/g08-g11-reference-notes.md`.
+  - Status: removed
+  - Notes: this generation no longer exists as part of the live roadmap structure; its former scope was merged down and should be treated as superseded
 
 ## Working Rule
 
@@ -73,8 +67,8 @@ When roadmap files disagree:
 
 1. treat this index as the top-level source of truth
 2. treat `docs/roadmaps/README.md` as the entrypoint
-3. treat `g10` and `g11` as historical context unless explicitly reactivated
+3. treat `g09` as the active generation until it is explicitly closed
 
 ## Next Task
 
-Execute `g08.001`, then continue reconciling any generation README that still reads as active execution despite being superseded by the consolidated `g08` or `g09` track.
+Add the remaining GPUI milestones needed to extend `g09`, then start `g10` only after `g09` has an explicit closeout path.

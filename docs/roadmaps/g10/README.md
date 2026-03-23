@@ -1,33 +1,27 @@
-# g10 Historical Jetstream Production-Quality Plan
+# g10 Jetstream Focus
 
-Status: archived
+Status: planned
 Updated: 2026-03-23
 
 ## Context
 
-This file preserves a pre-consolidation Jetstream execution plan.
-It is not the active roadmap program.
+`g10` is the next generation after `g09`.
+It should stay focused on Jetstream-specific execution once the remaining GPUI work in `g09` is actually closed.
 
-The active Jetstream path now lives in `g09`, which replaced the older higher-numbered generations after an audit found inflated completion claims and stale assumptions about implementation coverage.
+## Scope
 
-## Why This Still Exists
+- Jetstream renderer feasibility and constraints
+- Jetstream component implementation depth
+- Jetstream specimen and preview coverage
+- Jetstream parity evidence and documented deltas
+- Jetstream-specific closeout work
 
-- it captures useful Jetstream constraints and sequencing ideas
-- it documents the kind of runtime gaps that blocked full parity work
-- it may still contain implementation notes worth reusing in `g09`
+## Working Rule
 
-## How To Read It
-
-- treat milestone status in this file as historical only
-- do not use it to infer current repo progress
-- pull forward only concrete decisions that still match the actual codebase and the consolidated roadmap
-
-## Replacement
-
-- active GPUI execution track: `../g08/README.md`
-- active Jetstream execution track: `../g09/README.md`
-- canonical roadmap status: `../generation-index.md`
+- do not use `g10` to absorb unfinished GPUI work
+- keep GPUI continuation inside `g09`
+- use this generation for the Jetstream-focused tranche only after `g09` has a credible end state
 
 ## Next Task
 
-Mine any still-useful Jetstream constraints or implementation notes from this historical plan into the active `g09` track, then keep this file as archival context only.
+Leave `g10` as the next Jetstream-focused generation and postpone detailed milestone expansion until the extended `g09` plan is defined.
