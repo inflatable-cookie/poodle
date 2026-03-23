@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { SegmentedControl, Eyebrow, type SegmentedControlOption } from "@flint/svelte-primitives";
+  import { SegmentedControl, Eyebrow, type SegmentedControlOption } from "@poodle/svelte-primitives";
 
   const viewOptions: SegmentedControlOption[] = [
     { value: "grid", label: "Grid" },
@@ -56,6 +56,6 @@
   .specimen__group p {
     margin: 0;
     font-size: 0.875rem;
-    color: var(--flint-color-text-secondary);
+    color: var(--poodle-color-text-secondary);
   }
 </style>

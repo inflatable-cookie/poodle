@@ -1,7 +1,7 @@
 <script lang="ts">
   import { createEventDispatcher } from "svelte";
 
-  import { TextArea, Pill } from "@flint/svelte-primitives";
+  import { TextArea, Pill } from "@poodle/svelte-primitives";
 
   import type { ParsedEmbed } from "./types";
 
@@ -140,10 +140,10 @@
   }
 
   .embed-input__error {
-    color: var(--flint-color-text-danger, #ef4444);
+    color: var(--poodle-color-text-danger, #ef4444);
   }
 
   .embed-input__success {
-    color: var(--flint-color-text-success, #22c55e);
+    color: var(--poodle-color-text-success, #22c55e);
   }
 </style>

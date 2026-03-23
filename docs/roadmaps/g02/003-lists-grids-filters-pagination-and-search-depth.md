@@ -1,10 +1,10 @@
 # g02.003 Lists, Grids, Filters, Pagination, And Search Depth
 
 Status: completed
-Owner: Flint Core
+Owner: Poodle Core
 Updated: 2026-03-11
 Depends on: g01.014
-Primary repos: `flint`
+Primary repos: `poodle`
 
 ## Goals
 

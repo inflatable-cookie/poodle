@@ -1,10 +1,10 @@
 # g05.011 Cross-Runtime Parity Report, Intentional Delta Register, And Acceptance-Harness Expansion
 
 Status: completed
-Owner: Flint Core
+Owner: Poodle Core
 Updated: 2026-03-12
 Depends on: g05.007, g05.008, g05.009, g05.010
-Primary repos: `flint`
+Primary repos: `poodle`
 
 ## Goals
 

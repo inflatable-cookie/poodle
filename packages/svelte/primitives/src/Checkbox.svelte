@@ -67,13 +67,13 @@
   .checkbox {
     display: inline-flex;
     align-items: center;
-    gap: var(--flint-space-inline-sm);
-    color: var(--flint-color-text-primary);
+    gap: var(--poodle-space-inline-sm);
+    color: var(--poodle-color-text-primary);
     cursor: pointer;
   }
 
   .checkbox[data-disabled="true"] {
-    opacity: var(--flint-state-opacity-disabled);
+    opacity: var(--poodle-state-opacity-disabled);
     cursor: not-allowed;
   }
 
@@ -87,22 +87,22 @@
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    width: calc(var(--flint-size-icon-default) + 0.125rem);
-    height: calc(var(--flint-size-icon-default) + 0.125rem);
-    border: 0.0625rem solid var(--flint-color-border-default);
+    width: calc(var(--poodle-size-icon-default) + 0.125rem);
+    height: calc(var(--poodle-size-icon-default) + 0.125rem);
+    border: 0.0625rem solid var(--poodle-color-border-default);
     border-radius: 0.3125rem;
-    background: var(--flint-color-background-surface);
-    color: var(--flint-color-text-inverse);
+    background: var(--poodle-color-background-surface);
+    color: var(--poodle-color-text-inverse);
   }
 
   .checkbox__control:checked + .checkbox__indicator,
   .checkbox__control:indeterminate + .checkbox__indicator {
-    border-color: var(--flint-color-accent-base);
-    background: var(--flint-color-accent-base);
+    border-color: var(--poodle-color-accent-base);
+    background: var(--poodle-color-accent-base);
   }
 
   .checkbox__control:focus-visible + .checkbox__indicator {
-    outline: var(--flint-border-width-focus) solid var(--flint-color-accent-focusRing);
+    outline: var(--poodle-border-width-focus) solid var(--poodle-color-accent-focusRing);
     outline-offset: 0.125rem;
   }
 
@@ -110,15 +110,15 @@
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    width: calc(var(--flint-size-icon-default) - 0.125rem);
-    height: calc(var(--flint-size-icon-default) - 0.125rem);
+    width: calc(var(--poodle-size-icon-default) - 0.125rem);
+    height: calc(var(--poodle-size-icon-default) - 0.125rem);
     line-height: 1;
   }
 
   .checkbox__label {
-    font-family: var(--flint-typography-label-family);
-    font-size: var(--flint-typography-label-size);
-    font-weight: var(--flint-typography-label-weight);
-    line-height: var(--flint-typography-label-lineHeight);
+    font-family: var(--poodle-typography-label-family);
+    font-size: var(--poodle-typography-label-size);
+    font-weight: var(--poodle-typography-label-weight);
+    line-height: var(--poodle-typography-label-lineHeight);
   }
 </style>

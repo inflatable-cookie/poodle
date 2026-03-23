@@ -1,9 +1,9 @@
 //! ReorderableList — drag-to-reorder list backed by ReorderableListSpec.
 
 use gpui::*;
-use flint_gpui::GpuiThemeProvider;
-use flint_primitives::{IconSize, IconSpec};
-use flint_composites::ReorderableListSpec;
+use poodle_gpui::GpuiThemeProvider;
+use poodle_primitives::{IconSize, IconSpec};
+use poodle_composites::ReorderableListSpec;
 use crate::primitives::Icon;
 use crate::theme_ext::{resolve_color, resolve_opacity, resolve_px};
 
@@ -55,7 +55,7 @@ impl IntoElement for ReorderableList {
                 .px(px(2.0))
                 .child(grip_icon);
 
-            let row_id = SharedString::from(format!("flint-reorder-item-{}", idx));
+            let row_id = SharedString::from(format!("poodle-reorder-item-{}", idx));
             let focus_ring = resolve_color(theme, "semantic.color.accent.focusRing");
             let row = div()
                 .id(row_id)

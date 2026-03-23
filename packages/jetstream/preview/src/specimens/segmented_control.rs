@@ -1,10 +1,10 @@
 //! SegmentedControl specimen — segmented controls with selection and disabled state.
 
 use jetstream_runtime::ui_element::*;
-use flint_jetstream::JetstreamThemeProvider;
-use flint_jetstream_components::segmented_control::js_segmented_control;
-use flint_jetstream_components::theme_ext::*;
-use flint_primitives::{ChoiceOption, SegmentedControlSpec};
+use poodle_jetstream::JetstreamThemeProvider;
+use poodle_jetstream_components::segmented_control::js_segmented_control;
+use poodle_jetstream_components::theme_ext::*;
+use poodle_primitives::{ChoiceOption, SegmentedControlSpec};
 
 pub fn render(theme: &JetstreamThemeProvider) -> JsEl {
     let secondary = resolve_color(theme, "semantic.color.text.secondary");

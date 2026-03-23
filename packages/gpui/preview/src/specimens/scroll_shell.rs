@@ -1,8 +1,8 @@
 use gpui::*;
-use flint_adapter::ThemeProvider;
-use flint_gpui::GpuiThemeProvider;
-use flint_primitives::{Direction, EyebrowSpec, ScrollShellSpec};
-use flint_gpui_components::{Eyebrow, ScrollShell};
+use poodle_adapter::ThemeProvider;
+use poodle_gpui::GpuiThemeProvider;
+use poodle_primitives::{Direction, EyebrowSpec, ScrollShellSpec};
+use poodle_gpui_components::{Eyebrow, ScrollShell};
 use crate::style_bridge::color_to_hsla;
 
 pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
@@ -85,8 +85,8 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
 
 fn column_item(
     label: &str,
-    border: flint_tokens::typed::ColorValue,
-    text: flint_tokens::typed::ColorValue,
+    border: poodle_tokens::typed::ColorValue,
+    text: poodle_tokens::typed::ColorValue,
 ) -> Div {
     div()
         .h(px(28.0))

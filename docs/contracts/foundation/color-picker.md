@@ -178,7 +178,7 @@ Updated: 2026-03-16
 
 | Property | Value |
 |----------|-------|
-| `opacity` | `var(--flint-state-opacity-disabled)` |
+| `opacity` | `var(--poodle-state-opacity-disabled)` |
 | `pointer-events` | `none` |
 
 ### Trigger `.color-picker__trigger`
@@ -189,8 +189,8 @@ Updated: 2026-03-16
 | `height` | `2.25rem` |
 | `min-height` | `0` |
 | `padding` | `0` |
-| `border` | `0.0625rem solid color-mix(in srgb, var(--flint-color-border-default) 62%, transparent)` |
-| `border-radius` | `var(--flint-radius-control)` |
+| `border` | `0.0625rem solid color-mix(in srgb, var(--poodle-color-border-default) 62%, transparent)` |
+| `border-radius` | `var(--poodle-radius-control)` |
 | `background` | `transparent` |
 | `cursor` | `pointer` |
 | `overflow` | `hidden` |
@@ -206,10 +206,10 @@ Updated: 2026-03-16
 | `width` | `24rem` |
 | `margin-top` | `0.25rem` |
 | `padding` | `0.75rem` |
-| `border` | `0.0625rem solid var(--flint-color-border-subtle)` |
-| `border-radius` | `var(--flint-radius-surface)` |
-| `background` | `var(--flint-color-background-elevated)` |
-| `box-shadow` | `var(--flint-shadow-lg)` |
+| `border` | `0.0625rem solid var(--poodle-color-border-subtle)` |
+| `border-radius` | `var(--poodle-radius-surface)` |
+| `background` | `var(--poodle-color-background-elevated)` |
+| `box-shadow` | `var(--poodle-shadow-lg)` |
 
 ### Picker Area `.color-picker__picker-area`
 
@@ -265,7 +265,7 @@ Updated: 2026-03-16
 
 | Property | Value |
 |----------|-------|
-| `background` | `linear-gradient(to right, transparent, var(--flint-cp-alpha-color)), repeating-conic-gradient(checkerboard)` |
+| `background` | `linear-gradient(to right, transparent, var(--poodle-cp-alpha-color)), repeating-conic-gradient(checkerboard)` |
 | fill | hidden |
 
 ### Text Input (surface) `.color-picker__text-input`
@@ -275,17 +275,17 @@ Updated: 2026-03-16
 | `height` | `2rem` |
 | `min-height` | `0` |
 | `padding` | `0 0.375rem` |
-| `font-family` | `var(--flint-typography-code-family)` |
+| `font-family` | `var(--poodle-typography-code-family)` |
 | `font-size` | `0.75rem` |
 
 ### Input Label `.color-picker__input-label`
 
 | Property | Value |
 |----------|-------|
-| `font-family` | `var(--flint-typography-label-family)` |
+| `font-family` | `var(--poodle-typography-label-family)` |
 | `font-size` | `0.625rem` |
-| `font-weight` | `var(--flint-typography-label-weight)` |
-| `color` | `var(--flint-color-text-secondary)` |
+| `font-weight` | `var(--poodle-typography-label-weight)` |
+| `color` | `var(--poodle-color-text-secondary)` |
 | `text-transform` | `uppercase` |
 
 ### Swatches `.color-picker__swatches`
@@ -296,7 +296,7 @@ Updated: 2026-03-16
 | `flex-wrap` | `wrap` |
 | `gap` | `0.25rem` |
 | `padding-top` | `0.25rem` |
-| `border-top` | `0.0625rem solid color-mix(in srgb, var(--flint-color-border-subtle) 42%, transparent)` |
+| `border-top` | `0.0625rem solid color-mix(in srgb, var(--poodle-color-border-subtle) 42%, transparent)` |
 
 ### Swatch `.color-picker__swatch`
 
@@ -320,8 +320,8 @@ Updated: 2026-03-16
 
 | Property | Value |
 |----------|-------|
-| `border-color` | `var(--flint-color-text-primary)` |
-| `box-shadow` | `0 0 0 0.0625rem var(--flint-color-background-surface)` |
+| `border-color` | `var(--poodle-color-text-primary)` |
+| `box-shadow` | `0 0 0 0.0625rem var(--poodle-color-background-surface)` |
 
 ## 9. Svelte Notes
 
@@ -342,7 +342,7 @@ Updated: 2026-03-16
 
 ## 10. GPUI Notes
 
-- expected crate/module surface: `flint_gpui::primitives::color_picker`
+- expected crate/module surface: `poodle_gpui::primitives::color_picker`
 - GPUI should implement its own gradient pad rendering (GPU shader or
   equivalent) rather than CSS pseudo-elements
 - Hue strip: render a horizontal gradient through all hue stops

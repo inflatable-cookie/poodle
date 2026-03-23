@@ -22,7 +22,7 @@ That means:
 - the child control must receive the wrapper's relationship ids or
   GPUI-equivalent metadata
 
-Flint should not duplicate label and error wiring inside each individual form
+Poodle should not duplicate label and error wiring inside each individual form
 control implementation.
 
 ## Validation State Rule

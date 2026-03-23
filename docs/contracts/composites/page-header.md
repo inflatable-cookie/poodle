@@ -121,26 +121,26 @@ No component-owned events beyond child action behavior.
 
 | Property | Default |
 |----------|---------|
-| `--flint-recipe-page-header-padding-block-start` | `0` |
-| `--flint-recipe-page-header-padding-inline` | `0` |
-| `--flint-recipe-page-header-padding-block-end` | `calc(var(--flint-space-stack-md) + 0.125rem)` |
-| `--flint-recipe-page-header-fill` | `transparent` |
-| `--flint-recipe-page-header-border` | `transparent` |
-| `--flint-recipe-page-header-shadow` | `none` |
-| `--flint-recipe-page-header-radius` | `var(--flint-radius-surface)` |
+| `--poodle-recipe-page-header-padding-block-start` | `0` |
+| `--poodle-recipe-page-header-padding-inline` | `0` |
+| `--poodle-recipe-page-header-padding-block-end` | `calc(var(--poodle-space-stack-md) + 0.125rem)` |
+| `--poodle-recipe-page-header-fill` | `transparent` |
+| `--poodle-recipe-page-header-border` | `transparent` |
+| `--poodle-recipe-page-header-shadow` | `none` |
+| `--poodle-recipe-page-header-radius` | `var(--poodle-radius-surface)` |
 
 ### Root
 
 | Property | Value |
 |----------|-------|
 | display | `grid` |
-| gap | `var(--flint-space-stack-md)` |
+| gap | `var(--poodle-space-stack-md)` |
 | align-items | `end` |
-| padding | `var(--flint-recipe-page-header-padding-block-start) var(--flint-recipe-page-header-padding-inline) var(--flint-recipe-page-header-padding-block-end)` |
-| border | `0.0625rem solid var(--flint-recipe-page-header-border)` |
-| border-radius | `var(--flint-recipe-page-header-radius)` |
-| background | `var(--flint-recipe-page-header-fill)` |
-| box-shadow | `var(--flint-recipe-page-header-shadow)` |
+| padding | `var(--poodle-recipe-page-header-padding-block-start) var(--poodle-recipe-page-header-padding-inline) var(--poodle-recipe-page-header-padding-block-end)` |
+| border | `0.0625rem solid var(--poodle-recipe-page-header-border)` |
+| border-radius | `var(--poodle-recipe-page-header-radius)` |
+| background | `var(--poodle-recipe-page-header-fill)` |
+| box-shadow | `var(--poodle-recipe-page-header-shadow)` |
 
 #### Root Alignment Variant (`[data-align="between"]`)
 
@@ -153,7 +153,7 @@ No component-owned events beyond child action behavior.
 | Property | Value |
 |----------|-------|
 | display | `grid` |
-| gap | `var(--flint-space-stack-md)` |
+| gap | `var(--poodle-space-stack-md)` |
 
 ### Title Block
 
@@ -167,7 +167,7 @@ No component-owned events beyond child action behavior.
 | Property | Value |
 |----------|-------|
 | margin | `0` |
-| font-family | `var(--flint-typography-heading-family)` |
+| font-family | `var(--poodle-typography-heading-family)` |
 | font-size | `1.75rem` |
 | line-height | `1.1` |
 | font-weight | `700` |
@@ -177,7 +177,7 @@ No component-owned events beyond child action behavior.
 | Property | Value |
 |----------|-------|
 | margin | `0` |
-| color | `var(--flint-color-text-secondary)` |
+| color | `var(--poodle-color-text-secondary)` |
 | font-size | `0.6875rem` |
 | font-weight | `600` |
 | letter-spacing | `0.12em` |
@@ -188,9 +188,9 @@ No component-owned events beyond child action behavior.
 | Property | Value |
 |----------|-------|
 | margin | `0` |
-| color | `var(--flint-color-text-secondary)` |
-| font-size | `var(--flint-typography-body-size)` |
-| line-height | `var(--flint-typography-body-lineHeight)` |
+| color | `var(--poodle-color-text-secondary)` |
+| font-size | `var(--poodle-typography-body-size)` |
+| line-height | `var(--poodle-typography-body-lineHeight)` |
 
 ### Actions
 
@@ -198,7 +198,7 @@ No component-owned events beyond child action behavior.
 |----------|-------|
 | display | `flex` |
 | flex-wrap | `wrap` |
-| gap | `var(--flint-space-inline-md)` |
+| gap | `var(--poodle-space-inline-md)` |
 | justify-content | `flex-end` |
 | align-items | `start` |
 
@@ -215,12 +215,12 @@ None.
 ## 9. Svelte Notes
 
 - expected substrate: `Stack`/`Inline` composition with semantic heading
-- wrapper strategy: slots for breadcrumbs and actions stay Flint-owned surface
+- wrapper strategy: slots for breadcrumbs and actions stay Poodle-owned surface
   conventions
 
 ## 10. GPUI Notes
 
-- expected crate/module surface: `flint_gpui::composites::page_header`
+- expected crate/module surface: `poodle_gpui::composites::page_header`
 - implementation-only details: GPUI heading semantics may use named region and
   text hierarchy APIs rather than HTML headings, but the accessible structure
   still needs to be explicit

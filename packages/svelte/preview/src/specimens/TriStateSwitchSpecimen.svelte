@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { TriStateSwitch, Eyebrow, type TriStateValue } from "@flint/svelte-primitives";
+  import { TriStateSwitch, Eyebrow, type TriStateValue } from "@poodle/svelte-primitives";
 
   let filter: TriStateValue = "default";
 </script>
@@ -45,6 +45,6 @@
   .specimen__group p {
     margin: 0;
     font-size: 0.875rem;
-    color: var(--flint-color-text-secondary);
+    color: var(--poodle-color-text-secondary);
   }
 </style>

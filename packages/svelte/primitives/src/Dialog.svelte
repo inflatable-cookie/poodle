@@ -158,7 +158,7 @@
   .dialog {
     position: fixed;
     inset: 0;
-    z-index: var(--flint-overlay-z-dialog);
+    z-index: var(--poodle-overlay-z-dialog);
     display: grid;
     place-items: center;
     padding: 2rem;
@@ -169,7 +169,7 @@
     inset: 0;
     padding: 0;
     border: 0;
-    background: var(--flint-color-background-overlay);
+    background: var(--poodle-color-background-overlay);
     cursor: default;
   }
 
@@ -179,38 +179,38 @@
     width: min(34rem, 100%);
     max-height: min(80vh, 42rem);
     overflow: auto;
-    padding: var(--flint-space-panel-y) var(--flint-space-panel-x);
+    padding: var(--poodle-space-panel-y) var(--poodle-space-panel-x);
     border: 0.0625rem solid var(
-      --flint-treatment-surface-elevated-border,
-      color-mix(in srgb, var(--flint-color-border-default) 78%, transparent)
+      --poodle-treatment-surface-elevated-border,
+      color-mix(in srgb, var(--poodle-color-border-default) 78%, transparent)
     );
-    border-radius: var(--flint-treatment-surface-elevated-radius, var(--flint-radius-surface));
+    border-radius: var(--poodle-treatment-surface-elevated-radius, var(--poodle-radius-surface));
     background: var(
-      --flint-treatment-surface-elevated-fill,
-      color-mix(in srgb, var(--flint-color-background-elevated) 98%, var(--flint-color-background-panel))
+      --poodle-treatment-surface-elevated-fill,
+      color-mix(in srgb, var(--poodle-color-background-elevated) 98%, var(--poodle-color-background-panel))
     );
-    --flint-surface: var(
-      --flint-treatment-surface-elevated-fill,
-      color-mix(in srgb, var(--flint-color-background-elevated) 98%, var(--flint-color-background-panel))
+    --poodle-surface: var(
+      --poodle-treatment-surface-elevated-fill,
+      color-mix(in srgb, var(--poodle-color-background-elevated) 98%, var(--poodle-color-background-panel))
     );
-    box-shadow: var(--flint-treatment-surface-elevated-shadow, var(--flint-elevation-dialog));
+    box-shadow: var(--poodle-treatment-surface-elevated-shadow, var(--poodle-elevation-dialog));
   }
 
   .dialog__header {
     display: grid;
     gap: 0.375rem;
-    margin-bottom: var(--flint-space-stack-md);
+    margin-bottom: var(--poodle-space-stack-md);
   }
 
   .dialog__header strong {
-    font-family: var(--flint-typography-heading-family);
+    font-family: var(--poodle-typography-heading-family);
     font-size: 1rem;
     line-height: 1.2;
   }
 
   .dialog__header p {
     margin: 0;
-    color: var(--flint-color-text-secondary);
+    color: var(--poodle-color-text-secondary);
   }
 
   .dialog__body {
@@ -220,8 +220,8 @@
   .dialog__actions {
     display: flex;
     flex-wrap: wrap;
-    gap: var(--flint-space-inline-sm);
+    gap: var(--poodle-space-inline-sm);
     justify-content: flex-end;
-    margin-top: var(--flint-space-stack-lg);
+    margin-top: var(--poodle-space-stack-lg);
   }
 </style>

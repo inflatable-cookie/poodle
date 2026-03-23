@@ -1,14 +1,14 @@
 # g02.001 Forms And Validation System Depth
 
 Status: completed
-Owner: Flint Core
+Owner: Poodle Core
 Updated: 2026-03-11
 Depends on: g01.014
-Primary repos: `flint`
+Primary repos: `poodle`
 
 ## Context
 
-With the primitive layer in place, Flint needs a cohesive form system rather than
+With the primitive layer in place, Poodle needs a cohesive form system rather than
 isolated inputs.
 
 ## Goals

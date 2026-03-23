@@ -5,7 +5,7 @@ Updated: 2026-03-14
 
 ## Objective
 
-Audit the existing `flint-gpui-*` crates, classify every module and type as
+Audit the existing `poodle-gpui-*` crates, classify every module and type as
 renderer-agnostic or GPUI-biased, and produce the extraction plan that defines
 the new crate topology, naming conventions, and migration path. Document
 Jetstream's `game_ui` API surface as a second rendering consumer to validate
@@ -17,10 +17,10 @@ that the shared contracts can serve both targets.
 
 | Crate | Location | Modules | Types | Dependencies |
 |-------|----------|---------|-------|--------------|
-| `flint-gpui-tokens` | `packages/gpui/tokens/` | 5 (semantic, primitives, themes, density, metadata) | String constants only | None |
-| `flint-gpui-primitives` | `packages/gpui/primitives/` | 43 (42 specs + types) | 42 specs, 50+ shared enums/structs | `flint-gpui-tokens` |
-| `flint-gpui-composites` | `packages/gpui/composites/` | 18 (16 specs + types + lib) | 16 specs, 18+ shared types | `flint-gpui-primitives`, `flint-gpui-tokens` |
-| `flint-gpui-workstation` | `packages/gpui/workstation/` | 16 (13 specs + types + persistence + lib) | 13 specs, 10 shared types | `flint-gpui-composites`, `flint-gpui-primitives`, `flint-gpui-tokens`, `serde`, `serde_json` |
+| `poodle-gpui-tokens` | `packages/gpui/tokens/` | 5 (semantic, primitives, themes, density, metadata) | String constants only | None |
+| `poodle-gpui-primitives` | `packages/gpui/primitives/` | 43 (42 specs + types) | 42 specs, 50+ shared enums/structs | `poodle-gpui-tokens` |
+| `poodle-gpui-composites` | `packages/gpui/composites/` | 18 (16 specs + types + lib) | 16 specs, 18+ shared types | `poodle-gpui-primitives`, `poodle-gpui-tokens` |
+| `poodle-gpui-workstation` | `packages/gpui/workstation/` | 16 (13 specs + types + persistence + lib) | 13 specs, 10 shared types | `poodle-gpui-composites`, `poodle-gpui-primitives`, `poodle-gpui-tokens`, `serde`, `serde_json` |
 
 ### Renderer-Agnostic vs GPUI-Biased Classification
 
@@ -42,9 +42,9 @@ that the shared contracts can serve both targets.
 
 **GPUI-biased by naming only (rename required, logic unchanged):**
 
-- Crate names: `flint-gpui-tokens`, `flint-gpui-primitives`, `flint-gpui-composites`,
-  `flint-gpui-workstation`
-- Import paths: `flint_gpui_tokens::semantic`, `flint_gpui_primitives::ButtonSpec`, etc.
+- Crate names: `poodle-gpui-tokens`, `poodle-gpui-primitives`, `poodle-gpui-composites`,
+  `poodle-gpui-workstation`
+- Import paths: `poodle_gpui_tokens::semantic`, `poodle_gpui_primitives::ButtonSpec`, etc.
 - `CURRENT_GENERATION` constants reference GPUI-specific milestone IDs
 - Cargo.toml `name` and `description` fields mention GPUI
 
@@ -66,7 +66,7 @@ not a logic separation.
 
 Based on the Jetstream rendering constraint profile:
 
-| Capability | Jetstream `game_ui` | Flint Contract Mapping |
+| Capability | Jetstream `game_ui` | Poodle Contract Mapping |
 |------------|---------------------|---------------------|
 | **Layout** | Flexbox: `Direction`, `Sizing`, `Align`, `Justify`, `Edges` | Maps to `LayoutDirection`, `LayoutSizing`, `LayoutAlignment`, `LayoutSpacing` |
 | **Colors** | `Vec4` (`[f32; 4]`) | Requires typed `ColorValue` from token system |
@@ -76,7 +76,7 @@ Based on the Jetstream rendering constraint profile:
 | **Shadows** | Single box shadow (offset, blur, color) | Maps to `ShadowValue` (subset) |
 | **Text** | Glyph atlas, single-style runs, LTR Latin | Maps to `TypographyValue` (font enum, size f32, weight u16) |
 | **Opacity** | `f32` 0.0–1.0 | Direct map |
-| **Widgets** | 8 variants: Container, Text, Image, Button, Checkbox, Slider, TextInput, ScrollView | Flint specs decompose into these primitives at render time |
+| **Widgets** | 8 variants: Container, Text, Image, Button, Checkbox, Slider, TextInput, ScrollView | Poodle specs decompose into these primitives at render time |
 | **Events** | `UiEvent` enum: Clicked, ValueChanged, FocusGained, FocusLost, TextChanged, ScrollChanged, DragStarted, DragMoved, DragEnded, KeyPressed | Maps to semantic event abstraction |
 | **Focus** | `FocusState` with tab order, directional navigation | Maps to focus model in specs |
 | **Screens** | `ScreenStack` with modal/transparent flags | Maps to dialog/drawer overlay model |
@@ -100,14 +100,14 @@ Based on the Jetstream rendering constraint profile:
 ```text
 packages/
   contracts/
-    tokens/          → flint-tokens        (was flint-gpui-tokens)
-    primitives/      → flint-primitives    (was flint-gpui-primitives)
-    composites/      → flint-composites    (was flint-gpui-composites)
-    workstation/     → flint-workstation   (was flint-gpui-workstation)
-    layout/          → flint-layout        (NEW: layout intent types)
-    events/          → flint-events        (NEW: semantic event types)
-    style/           → flint-style         (NEW: style descriptor IR)
-    adapter/         → flint-adapter       (NEW: renderer adapter traits)
+    tokens/          → poodle-tokens        (was poodle-gpui-tokens)
+    primitives/      → poodle-primitives    (was poodle-gpui-primitives)
+    composites/      → poodle-composites    (was poodle-gpui-composites)
+    workstation/     → poodle-workstation   (was poodle-gpui-workstation)
+    layout/          → poodle-layout        (NEW: layout intent types)
+    events/          → poodle-events        (NEW: semantic event types)
+    style/           → poodle-style         (NEW: style descriptor IR)
+    adapter/         → poodle-adapter       (NEW: renderer adapter traits)
   gpui/
     (retains validation artifacts, baselines, proof JSONs)
     (optional: thin re-export crates for backward compat during transition)
@@ -117,14 +117,14 @@ packages/
 
 | Old | New | Rust Crate Name |
 |-----|-----|-----------------|
-| `flint-gpui-tokens` | `flint-tokens` | `flint_tokens` |
-| `flint-gpui-primitives` | `flint-primitives` | `flint_primitives` |
-| `flint-gpui-composites` | `flint-composites` | `flint_composites` |
-| `flint-gpui-workstation` | `flint-workstation` | `flint_workstation` |
-| (new) | `flint-layout` | `flint_layout` |
-| (new) | `flint-events` | `flint_events` |
-| (new) | `flint-style` | `flint_style` |
-| (new) | `flint-adapter` | `flint_adapter` |
+| `poodle-gpui-tokens` | `poodle-tokens` | `poodle_tokens` |
+| `poodle-gpui-primitives` | `poodle-primitives` | `poodle_primitives` |
+| `poodle-gpui-composites` | `poodle-composites` | `poodle_composites` |
+| `poodle-gpui-workstation` | `poodle-workstation` | `poodle_workstation` |
+| (new) | `poodle-layout` | `poodle_layout` |
+| (new) | `poodle-events` | `poodle_events` |
+| (new) | `poodle-style` | `poodle_style` |
+| (new) | `poodle-adapter` | `poodle_adapter` |
 
 ### Migration Path
 
@@ -137,33 +137,33 @@ packages/
    Rust artifacts with `ColorValue`, `SpaceValue`, `RadiusValue`, `BorderValue`,
    `ShadowValue`, `TypographyValue`. String constants remain for backward compat.
 
-3. **g06.004** — Create `flint-layout` crate with renderer-agnostic layout intent
+3. **g06.004** — Create `poodle-layout` crate with renderer-agnostic layout intent
    types. These map to both GPUI's styling API and Jetstream's `UiStyle`.
 
-4. **g06.005** — Create `flint-events` crate with semantic event types that map
+4. **g06.005** — Create `poodle-events` crate with semantic event types that map
    to both GPUI's event subscriptions and Jetstream's `UiEvent` enum.
 
-5. **g06.006** — Create `flint-style` crate with `StyleDescriptor` that captures
+5. **g06.006** — Create `poodle-style` crate with `StyleDescriptor` that captures
    resolved visual properties using typed tokens. Spec structs gain
    `resolve_style()` methods.
 
-6. **g06.007** — Create `flint-adapter` crate defining `RenderComponent<Target>`,
+6. **g06.007** — Create `poodle-adapter` crate defining `RenderComponent<Target>`,
    `ThemeProvider`, and `EventSink` traits.
 
-7. **g06.008–012** — Add 53 new spec structs to `flint-primitives` and
-   `flint-composites`, using typed tokens and layout intent from the start.
+7. **g06.008–012** — Add 53 new spec structs to `poodle-primitives` and
+   `poodle-composites`, using typed tokens and layout intent from the start.
 
 ### Dependency Graph (Exit State)
 
 ```text
-flint-tokens
-  ├── flint-layout (uses typed token values for spacing)
-  ├── flint-events (no token dependency, pure semantic types)
-  ├── flint-primitives (spec structs, uses tokens + layout)
-  │     └── flint-composites (uses primitives + tokens)
-  │           └── flint-workstation (uses composites + primitives + tokens)
-  ├── flint-style (uses tokens, layout; resolves spec → visual descriptor)
-  └── flint-adapter (uses style, events; defines renderer traits)
+poodle-tokens
+  ├── poodle-layout (uses typed token values for spacing)
+  ├── poodle-events (no token dependency, pure semantic types)
+  ├── poodle-primitives (spec structs, uses tokens + layout)
+  │     └── poodle-composites (uses primitives + tokens)
+  │           └── poodle-workstation (uses composites + primitives + tokens)
+  ├── poodle-style (uses tokens, layout; resolves spec → visual descriptor)
+  └── poodle-adapter (uses style, events; defines renderer traits)
 ```
 
 ### Token Build Pipeline Changes (g06.003 Preview)

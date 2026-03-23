@@ -1,6 +1,6 @@
 <script lang="ts">
-  import { Eyebrow, Button, IconButton, Menubar } from "@flint/svelte-primitives";
-  import { AppHeader } from "@flint/svelte-composites";
+  import { Eyebrow, Button, IconButton, Menubar } from "@poodle/svelte-primitives";
+  import { AppHeader } from "@poodle/svelte-composites";
 
   const menuItems = [
     {
@@ -52,7 +52,7 @@
   <div class="specimen__group">
     <Eyebrow>Full app window header (title + menubar + utility)</Eyebrow>
     <div class="specimen__frame specimen__frame--app">
-      <AppHeader title="Flint Studio">
+      <AppHeader title="Poodle Studio">
         <svelte:fragment slot="actions">
           <div class="specimen__menubar-inline">
             <Menubar items={menuItems} ariaLabel="Application menu" />
@@ -88,7 +88,7 @@
   <div class="specimen__group">
     <Eyebrow>Title only</Eyebrow>
     <div class="specimen__frame">
-      <AppHeader title="Flint Workstation" />
+      <AppHeader title="Poodle Workstation" />
     </div>
   </div>
 
@@ -98,7 +98,7 @@
       <AppHeader>
         <svelte:fragment slot="identity">
           <span class="specimen__logo">P</span>
-          <strong>Flint Studio</strong>
+          <strong>Poodle Studio</strong>
         </svelte:fragment>
         <svelte:fragment slot="utility">
           <IconButton icon="bell" size="sm" variant="ghost" ariaLabel="Notifications" />
@@ -123,8 +123,8 @@
   }
 
   .specimen__frame {
-    border: 0.0625rem solid var(--flint-color-border-subtle);
-    border-radius: var(--flint-radius-surface);
+    border: 0.0625rem solid var(--poodle-color-border-subtle);
+    border-radius: var(--poodle-radius-surface);
     overflow: visible;
   }
 
@@ -145,9 +145,9 @@
     align-items: center;
     justify-content: center;
     height: 8rem;
-    color: var(--flint-color-text-muted);
+    color: var(--poodle-color-text-muted);
     font-size: 0.8125rem;
-    background: var(--flint-color-background-panel);
+    background: var(--poodle-color-background-panel);
   }
 
   .specimen__app-body p {
@@ -161,7 +161,7 @@
     width: 1.5rem;
     height: 1.5rem;
     border-radius: 0.25rem;
-    background: var(--flint-color-accent-base);
+    background: var(--poodle-color-accent-base);
     color: #fff;
     font-size: 0.75rem;
     font-weight: 700;

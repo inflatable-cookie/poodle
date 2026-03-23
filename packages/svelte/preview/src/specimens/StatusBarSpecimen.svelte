@@ -1,6 +1,6 @@
 <script lang="ts">
-  import { Eyebrow } from "@flint/svelte-primitives";
-  import { StatusBar } from "@flint/svelte-primitives";
+  import { Eyebrow } from "@poodle/svelte-primitives";
+  import { StatusBar } from "@poodle/svelte-primitives";
 </script>
 
 <div class="specimen">
@@ -43,14 +43,14 @@
   }
 
   .specimen__frame {
-    border: 0.0625rem solid var(--flint-color-border-subtle);
-    border-radius: var(--flint-radius-surface);
+    border: 0.0625rem solid var(--poodle-color-border-subtle);
+    border-radius: var(--poodle-radius-surface);
     overflow: hidden;
   }
 
   .specimen__status-item {
     font-size: 0.75rem;
-    color: var(--flint-color-text-secondary);
+    color: var(--poodle-color-text-secondary);
     padding: 0 0.375rem;
   }
 </style>

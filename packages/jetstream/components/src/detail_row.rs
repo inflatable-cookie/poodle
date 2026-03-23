@@ -1,8 +1,8 @@
 //! DetailRow — Jetstream label/value row backed by DetailRowSpec.
 
 use jetstream_runtime::ui_element::{self, JsEl};
-use flint_jetstream::JetstreamThemeProvider;
-use flint_primitives::DetailRowSpec;
+use poodle_jetstream::JetstreamThemeProvider;
+use poodle_primitives::DetailRowSpec;
 
 use crate::theme_ext::{resolve_color, resolve_px, resolve_radius};
 

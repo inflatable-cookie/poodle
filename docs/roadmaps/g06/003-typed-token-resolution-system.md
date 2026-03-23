@@ -57,5 +57,5 @@ module is additive — existing consumers continue to work unmodified.
 - [x] All 79 primitive tokens classified and emitted as typed constants
 - [x] Shadow values correctly parse `0 0.25rem 0.75rem rgba(...)` format
 - [x] Color values correctly parse both `#hex` and `rgba()` formats
-- [x] `flint-tokens` crate compiles (warnings for unused items expected)
+- [x] `poodle-tokens` crate compiles (warnings for unused items expected)
 - [x] All 45 downstream tests pass across primitives/composites/workstation

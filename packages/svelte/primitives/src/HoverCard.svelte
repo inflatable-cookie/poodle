@@ -18,7 +18,7 @@
     openChange: { open: boolean };
   }>();
 
-  const hoverCardId = `flint-hover-card-${++nextHoverCardId}`;
+  const hoverCardId = `poodle-hover-card-${++nextHoverCardId}`;
   let openTimer: ReturnType<typeof setTimeout> | null = null;
   let closeTimer: ReturnType<typeof setTimeout> | null = null;
   let uncontrolledOpen = defaultOpen;
@@ -184,29 +184,29 @@
   }
 
   .hover-card__trigger:focus-visible {
-    outline: var(--flint-border-width-focus) solid var(--flint-color-accent-focusRing);
+    outline: var(--poodle-border-width-focus) solid var(--poodle-color-accent-focusRing);
     outline-offset: 0.125rem;
   }
 
   .hover-card__surface {
     position: fixed;
-    z-index: var(--flint-overlay-z-menu);
+    z-index: var(--poodle-overlay-z-menu);
     min-width: 14rem;
     max-width: min(22rem, 90vw);
-    padding: var(--flint-space-panel-y) var(--flint-space-panel-x);
+    padding: var(--poodle-space-panel-y) var(--poodle-space-panel-x);
     border: 0.0625rem solid var(
-      --flint-treatment-surface-elevated-border,
-      color-mix(in srgb, var(--flint-color-border-default) 72%, transparent)
+      --poodle-treatment-surface-elevated-border,
+      color-mix(in srgb, var(--poodle-color-border-default) 72%, transparent)
     );
-    border-radius: var(--flint-treatment-surface-elevated-radius, var(--flint-radius-surface));
+    border-radius: var(--poodle-treatment-surface-elevated-radius, var(--poodle-radius-surface));
     background: var(
-      --flint-treatment-surface-elevated-fill,
-      color-mix(in srgb, var(--flint-color-background-elevated) 98%, var(--flint-color-background-panel))
+      --poodle-treatment-surface-elevated-fill,
+      color-mix(in srgb, var(--poodle-color-background-elevated) 98%, var(--poodle-color-background-panel))
     );
-    --flint-surface: var(
-      --flint-treatment-surface-elevated-fill,
-      color-mix(in srgb, var(--flint-color-background-elevated) 98%, var(--flint-color-background-panel))
+    --poodle-surface: var(
+      --poodle-treatment-surface-elevated-fill,
+      color-mix(in srgb, var(--poodle-color-background-elevated) 98%, var(--poodle-color-background-panel))
     );
-    box-shadow: var(--flint-treatment-surface-elevated-shadow, var(--flint-elevation-overlay));
+    box-shadow: var(--poodle-treatment-surface-elevated-shadow, var(--poodle-elevation-overlay));
   }
 </style>

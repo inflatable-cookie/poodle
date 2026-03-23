@@ -6,15 +6,15 @@
 //! TimeZoneSelectSpec, ZonedDateTimePickerSpec, CalendarSpec, RangeCalendarSpec,
 //! DatePickerSpec, DateRangePickerSpec, DateTimePickerSpec, DateTimeRangePickerSpec
 
-use flint_adapter::{RenderComponent, ThemeProvider};
-use flint_primitives::{
+use poodle_adapter::{RenderComponent, ThemeProvider};
+use poodle_primitives::{
     BadgeSpec, CalendarSpec, CodeSpec, ColorPickerSpec, DatePickerSpec, DateRangePickerSpec,
     DateTimePickerSpec, DateTimeRangePickerSpec, DurationInputSpec, EyebrowSpec, FileUploadSpec,
     MeterSpec, PillSpec, ProgressSpec, RangeCalendarSpec, RatingSpec, SkeletonSpec,
     SplitButtonSpec, StatusIndicatorSpec, TimeAgoSpec, TimeZoneSelectSpec,
     ZonedDateTimePickerSpec,
 };
-use flint_style::StyleDescriptor;
+use poodle_style::StyleDescriptor;
 
 use crate::style_map::{map_style, JetstreamColor};
 use crate::{JetstreamAdapter, JetstreamNodeHandle, JetstreamTarget, WidgetKind};
@@ -398,9 +398,9 @@ impl RenderComponent<DateTimeRangePickerSpec> for JetstreamAdapter {
 
 #[cfg(test)]
 mod tests {
-    use flint_adapter::RenderComponent;
-    use flint_primitives::*;
-    use flint_style::StyleDescriptor;
+    use poodle_adapter::RenderComponent;
+    use poodle_primitives::*;
+    use poodle_style::StyleDescriptor;
     use crate::{JetstreamAdapter, WidgetKind, theme::JetstreamThemeProvider};
 
     fn a() -> JetstreamAdapter { JetstreamAdapter::new(JetstreamThemeProvider::default()) }

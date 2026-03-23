@@ -10,7 +10,7 @@ multi-renderer: renamed crates, typed token resolution, layout intent
 abstraction, event model, style descriptors, renderer adapter traits, and
 expanded spec coverage to the full 124-component Svelte surface.
 
-`g07` builds the GPUI rendering adapter — the code that takes Flint's
+`g07` builds the GPUI rendering adapter — the code that takes Poodle's
 renderer-agnostic spec structs, resolved styles, and semantic events and maps
 them to GPUI's native element, styling, and event APIs. This generation also
 brings GPUI up to parity with the g04-expanded Svelte surface, implements the
@@ -21,8 +21,8 @@ consume the shared contract layer from `g06` without modifying it.
 
 ## Starting State
 
-- shared contract crates (`flint-primitives`, `flint-composites`, `flint-workstation`,
-  `flint-tokens`) provide renderer-agnostic specs for all 124 components
+- shared contract crates (`poodle-primitives`, `poodle-composites`, `poodle-workstation`,
+  `poodle-tokens`) provide renderer-agnostic specs for all 124 components
 - typed token resolution emits `[f32; 4]` colors, `f32` pixel values
 - renderer adapter trait is defined and documented
 - style descriptor IR captures resolved visual properties
@@ -31,7 +31,7 @@ consume the shared contract layer from `g06` without modifying it.
 
 ## Exit State
 
-- GPUI rendering adapter crate (`flint-gpui`) implements the adapter trait for
+- GPUI rendering adapter crate (`poodle-gpui`) implements the adapter trait for
   all component categories
 - GPUI implementations exist for all g04-added components where parity is
   appropriate
@@ -100,10 +100,10 @@ g06.015 Shared Contracts Complete
 
 ### 001 — GPUI Adapter Crate Setup and Theme Integration
 
-Create `flint-gpui` crate that implements the renderer adapter trait from g06.007.
+Create `poodle-gpui` crate that implements the renderer adapter trait from g06.007.
 Set up GPUI theme integration using g06.003's typed token values. Verify that
 GPUI's styling API can consume resolved style descriptors from g06.006. This
-crate replaces the old `flint-gpui-*` re-export pattern with an actual rendering
+crate replaces the old `poodle-gpui-*` re-export pattern with an actual rendering
 implementation.
 
 ### 002–006 — Primitive Rendering Batches
@@ -170,7 +170,7 @@ remaining gaps.
 ### 013 — GPUI Downstream Reference-App Adoption Proof
 
 Deploy GPUI components in a real downstream or reference application. Validate
-multi-app consumption of the `flint-gpui` crate. Document integration patterns
+multi-app consumption of the `poodle-gpui` crate. Document integration patterns
 and any friction points.
 
 ### 014 — Published Docs Platform and Evaluator Onboarding

@@ -1,15 +1,15 @@
 # g04.016 Existing Component Feature Gap Hardening
 
 Status: planned
-Owner: Flint Core
+Owner: Poodle Core
 Updated: 2026-03-14
 Depends on: g04.002 through g04.012
-Primary repos: `flint`
+Primary repos: `poodle`
 
 ## Goals
 
 - [ ] close all remaining feature gaps identified in the Underlay parity audit
-  for existing Flint components
+  for existing Poodle components
 - [ ] ensure feature-extended components maintain backward compatibility
 
 ## Execution Checklist

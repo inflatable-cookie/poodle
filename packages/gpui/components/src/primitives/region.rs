@@ -1,8 +1,8 @@
 //! Region — presentational placeholder block with dashed border.
 
 use gpui::*;
-use flint_gpui::GpuiThemeProvider;
-use flint_primitives::RegionSpec;
+use poodle_gpui::GpuiThemeProvider;
+use poodle_primitives::RegionSpec;
 
 use crate::theme_ext::{resolve_color, resolve_px, resolve_radius};
 

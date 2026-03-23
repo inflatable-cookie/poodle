@@ -1,17 +1,17 @@
 # g09.003 Merge Composite Specs
 
 Status: complete
-Owner: Flint Core
+Owner: Poodle Core
 Depends on: g09.002
 
 ## Context
 
-7 modules exist in `flint-gpui-composites` but not `flint-composites`. Shared
+7 modules exist in `poodle-gpui-composites` but not `poodle-composites`. Shared
 types in `types.rs` also differ between the two crates.
 
 ## Missing Modules (7)
 
-These exist in `flint-gpui-composites` but not `flint-composites`:
+These exist in `poodle-gpui-composites` but not `poodle-composites`:
 
 1. `action_discovery_panel`
 2. `app_header`
@@ -24,8 +24,8 @@ These exist in `flint-gpui-composites` but not `flint-composites`:
 ## Actions
 
 - [x] Copy 7 missing module files into `packages/contracts/composites/src/`
-- [x] Fix imports: `flint_gpui_primitives` → `flint_primitives`,
-      `flint_gpui_tokens` → `flint_tokens`
+- [x] Fix imports: `poodle_gpui_primitives` → `poodle_primitives`,
+      `poodle_gpui_tokens` → `poodle_tokens`
 - [x] Register modules in `packages/contracts/composites/src/lib.rs`
 - [x] Merge GPUI types.rs additions into contracts types.rs:
   - `DiscoveryState`, `SplitOrientation`, `DockEdge`
@@ -34,11 +34,11 @@ These exist in `flint-gpui-composites` but not `flint-composites`:
       (more complete token methods, `PageHeaderAlign`, `Toast`, `ToastTone`,
       `ToastPosition`)
 - [x] Replace stub `detail_section.rs` with GPUI version (more complete API)
-- [x] `cargo check -p flint-composites` — passes
-- [x] `cargo test -p flint-composites` — 9 tests pass
+- [x] `cargo check -p poodle-composites` — passes
+- [x] `cargo test -p poodle-composites` — 9 tests pass
 
 ## Acceptance Criteria
 
-- [x] `flint-composites` contains all modules from both sources
-- [x] All composite specs reference `flint_tokens` and `flint_primitives`
+- [x] `poodle-composites` contains all modules from both sources
+- [x] All composite specs reference `poodle_tokens` and `poodle_primitives`
 - [x] Compiles cleanly

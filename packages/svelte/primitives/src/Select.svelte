@@ -78,61 +78,61 @@
     display: grid;
     grid-template-columns: minmax(0, 1fr) auto;
     align-items: center;
-    gap: var(--flint-space-inline-sm);
-    min-height: var(--flint-size-control-height);
-    padding: 0 var(--flint-space-control-x);
+    gap: var(--poodle-space-inline-sm);
+    min-height: var(--poodle-size-control-height);
+    padding: 0 var(--poodle-space-control-x);
     border: 0.0625rem solid var(
-      --flint-treatment-interactive-subtle-border,
-      var(--flint-color-border-default)
+      --poodle-treatment-interactive-subtle-border,
+      var(--poodle-color-border-default)
     );
-    border-radius: var(--flint-treatment-interactive-subtle-radius, var(--flint-radius-control));
-    background: var(--flint-treatment-interactive-subtle-fill, var(--flint-color-background-surface));
-    box-shadow: var(--flint-treatment-interactive-subtle-shadow, none);
+    border-radius: var(--poodle-treatment-interactive-subtle-radius, var(--poodle-radius-control));
+    background: var(--poodle-treatment-interactive-subtle-fill, var(--poodle-color-background-surface));
+    box-shadow: var(--poodle-treatment-interactive-subtle-shadow, none);
     transition:
-      border-color var(--flint-motion-duration-interaction) var(--flint-motion-easing-standard),
-      box-shadow var(--flint-motion-duration-interaction) var(--flint-motion-easing-standard),
-      background var(--flint-motion-duration-interaction) var(--flint-motion-easing-standard);
+      border-color var(--poodle-motion-duration-interaction) var(--poodle-motion-easing-standard),
+      box-shadow var(--poodle-motion-duration-interaction) var(--poodle-motion-easing-standard),
+      background var(--poodle-motion-duration-interaction) var(--poodle-motion-easing-standard);
   }
 
   .select:focus-within {
-    border-color: var(--flint-color-accent-focusRing);
+    border-color: var(--poodle-color-accent-focusRing);
     background: var(
-      --flint-treatment-interactive-subtle-fill-focus,
-      var(--flint-color-background-surface)
+      --poodle-treatment-interactive-subtle-fill-focus,
+      var(--poodle-color-background-surface)
     );
     box-shadow: var(
-      --flint-treatment-interactive-subtle-shadow-focus,
-      0 0 0 var(--flint-border-width-focus)
-        color-mix(in srgb, var(--flint-color-accent-focusRing) 28%, transparent)
+      --poodle-treatment-interactive-subtle-shadow-focus,
+      0 0 0 var(--poodle-border-width-focus)
+        color-mix(in srgb, var(--poodle-color-accent-focusRing) 28%, transparent)
     );
   }
 
   .select:has(.select__control:disabled) {
-    opacity: var(--flint-state-opacity-disabled);
+    opacity: var(--poodle-state-opacity-disabled);
   }
 
   .select__control {
     min-width: 0;
     width: 100%;
-    height: calc(var(--flint-size-control-height) - (var(--flint-border-width-default) * 2));
+    height: calc(var(--poodle-size-control-height) - (var(--poodle-border-width-default) * 2));
     padding: 0;
     border: 0;
     background: transparent;
-    color: var(--flint-color-text-primary);
-    font-family: var(--flint-typography-body-family);
-    font-size: var(--flint-typography-body-size);
-    line-height: var(--flint-typography-body-lineHeight);
+    color: var(--poodle-color-text-primary);
+    font-family: var(--poodle-typography-body-family);
+    font-size: var(--poodle-typography-body-size);
+    line-height: var(--poodle-typography-body-lineHeight);
     outline: 0;
     appearance: none;
   }
 
   .select[data-placeholder="true"] .select__control {
-    color: var(--flint-color-text-secondary);
+    color: var(--poodle-color-text-secondary);
   }
 
   .select__indicator {
-    color: var(--flint-color-icon-muted);
-    font-family: var(--flint-typography-code-family);
+    color: var(--poodle-color-icon-muted);
+    font-family: var(--poodle-typography-code-family);
     font-size: 0.75rem;
     line-height: 1;
     pointer-events: none;
@@ -140,11 +140,11 @@
 
   .select__control optgroup {
     font-weight: 600;
-    color: var(--flint-color-text-secondary);
+    color: var(--poodle-color-text-secondary);
   }
 
   .select__control option {
     font-weight: normal;
-    color: var(--flint-color-text-primary);
+    color: var(--poodle-color-text-primary);
   }
 </style>

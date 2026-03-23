@@ -3,9 +3,9 @@
 use std::rc::Rc;
 use gpui::prelude::FluentBuilder;
 use gpui::*;
-use flint_gpui::GpuiThemeProvider;
-use flint_primitives::{IconSize, IconSpec};
-use flint_composites::MediaPickerSpec;
+use poodle_gpui::GpuiThemeProvider;
+use poodle_primitives::{IconSize, IconSpec};
+use poodle_composites::MediaPickerSpec;
 use crate::primitives::Icon;
 use crate::theme_ext::{resolve_color, resolve_radius};
 

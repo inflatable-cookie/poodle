@@ -3,8 +3,8 @@
 //! Contract: `docs/contracts/foundation/split-button.md`
 
 use gpui::*;
-use flint_gpui::GpuiThemeProvider;
-use flint_primitives::{
+use poodle_gpui::GpuiThemeProvider;
+use poodle_primitives::{
     ButtonTone, ButtonVariant, ControlSize, IconSize, IconSpec, SplitButtonSpec, SplitMenuItem,
 };
 
@@ -106,7 +106,7 @@ impl IntoElement for SplitButton {
 
         // ── Root ──────────────────────────────────────────────────
         let mut root = div()
-            .id("flint-split-btn")
+            .id("poodle-split-btn")
             .flex()
             .items_center()
             .rounded(radius);
@@ -115,7 +115,7 @@ impl IntoElement for SplitButton {
         let label_text = spec.label.clone().unwrap_or_default();
 
         let mut primary = div()
-            .id("flint-split-primary")
+            .id("poodle-split-primary")
             .focusable()
             .h(height)
             .min_w(px(64.0))
@@ -146,7 +146,7 @@ impl IntoElement for SplitButton {
 
         // ── Toggle half ───────────────────────────────────────────
         let mut toggle = div()
-            .id("flint-split-toggle")
+            .id("poodle-split-toggle")
             .focusable()
             .h(height)
             .w(px(32.0))

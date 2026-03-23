@@ -1,14 +1,14 @@
 # g01.011 Product Composites And Information Architecture Baseline
 
 Status: completed
-Owner: Flint Core
+Owner: Poodle Core
 Updated: 2026-03-11
 Depends on: g01.007, g01.008, g01.009, g01.010
-Primary repos: `flint`
+Primary repos: `poodle`
 
 ## Context
 
-Flint needs to serve Underlay-style product applications as well as workstation
+Poodle needs to serve Underlay-style product applications as well as workstation
 apps. The first composite tranche should prove that broader utility.
 
 ## Goals

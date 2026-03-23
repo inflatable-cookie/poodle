@@ -1,8 +1,8 @@
 //! Code — real GPUI component backed by CodeSpec.
 
 use gpui::*;
-use flint_gpui::GpuiThemeProvider;
-use flint_primitives::{CodeSpec, IconSize, IconSpec};
+use poodle_gpui::GpuiThemeProvider;
+use poodle_primitives::{CodeSpec, IconSize, IconSpec};
 use crate::primitives::Icon;
 
 use crate::theme_ext::{resolve_color, resolve_px, resolve_radius};
@@ -130,7 +130,7 @@ impl IntoElement for Code {
         }
 
         // Code content area
-        let mut code_area = div().id("flint-code-area").px(panel_x).py(panel_y);
+        let mut code_area = div().id("poodle-code-area").px(panel_x).py(panel_y);
 
         // Apply max_height constraint
         if let Some(mh) = spec.max_height {

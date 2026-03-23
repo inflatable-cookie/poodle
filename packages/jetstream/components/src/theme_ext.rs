@@ -1,9 +1,9 @@
-//! Theme extension helpers — resolve Flint tokens to Jetstream-compatible values.
+//! Theme extension helpers — resolve Poodle tokens to Jetstream-compatible values.
 //!
 //! Mirrors `packages/gpui/components/src/theme_ext.rs` for API parity.
 
 use glam::Vec4;
-use flint_jetstream::JetstreamThemeProvider;
+use poodle_jetstream::JetstreamThemeProvider;
 
 /// Resolve a semantic color token to a linear-space Vec4.
 pub fn resolve_color(theme: &JetstreamThemeProvider, token: &str) -> Vec4 {

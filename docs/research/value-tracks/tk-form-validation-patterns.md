@@ -203,7 +203,7 @@ interface FormState {
 
 ---
 
-## Recommendations for Flint
+## Recommendations for Poodle
 
 ### Form Component Suite
 
@@ -229,7 +229,7 @@ Layer 2 - Forms
 **Svelte (using formsnap or similar):**
 ```svelte
 <script>
-  import { Form } from '@flint/svelte';
+  import { Form } from '@poodle/svelte';
   
   const schema = z.object({
     email: z.string().email(),

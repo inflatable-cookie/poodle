@@ -12,7 +12,7 @@ token reference, and component coverage evidence.
 
 ### Crate documentation
 
-The `flint-gpui` crate includes:
+The `poodle-gpui` crate includes:
 
 - **Module-level docs** (`lib.rs`) — Architecture overview, adapter pattern diagram
 - **Public API docs** — `GpuiAdapter`, `GpuiThemeProvider`, `GpuiElementHandle`, style types
@@ -38,9 +38,9 @@ The `flint-gpui` crate includes:
 ### Token reference
 
 Tokens are documented in the contract crates:
-- `flint-tokens/src/lib.rs` — re-exports semantic, typed, density modules
-- `flint-tokens/src/typed/semantic.rs` — 76 typed token constants
-- `flint-tokens/src/semantic.rs` — string-form token constants
+- `poodle-tokens/src/lib.rs` — re-exports semantic, typed, density modules
+- `poodle-tokens/src/typed/semantic.rs` — 76 typed token constants
+- `poodle-tokens/src/semantic.rs` — string-form token constants
 
 ### Integration guide summary
 

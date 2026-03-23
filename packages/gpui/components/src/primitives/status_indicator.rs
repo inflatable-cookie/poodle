@@ -1,8 +1,8 @@
 //! StatusIndicator — real GPUI component backed by StatusIndicatorSpec.
 
 use gpui::*;
-use flint_gpui::GpuiThemeProvider;
-use flint_primitives::{StatusIndicatorSpec, StatusTone};
+use poodle_gpui::GpuiThemeProvider;
+use poodle_primitives::{StatusIndicatorSpec, StatusTone};
 
 use crate::theme_ext::resolve_color;
 

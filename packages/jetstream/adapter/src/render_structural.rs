@@ -5,19 +5,19 @@
 //!
 //! All structural primitives map to Widget::Panel in Jetstream.
 
-use flint_adapter::{RenderComponent, ThemeProvider};
-use flint_primitives::{
+use poodle_adapter::{RenderComponent, ThemeProvider};
+use poodle_primitives::{
     BannerSpec, BoxSpec, CallOutSpec, GridSpec, ScrollShellSpec, SeparatorSpec, StackSpec,
     SurfaceSpec,
 };
-use flint_style::StyleDescriptor;
+use poodle_style::StyleDescriptor;
 
 use crate::style_map::{map_style, JetstreamColor, JetstreamEdges};
 use crate::{JetstreamAdapter, JetstreamNodeHandle, JetstreamTarget, WidgetKind};
 
 /// Resolve an `Inset` (horizontal/vertical token pair) into `JetstreamEdges`
 /// using the theme's `resolve_space` method.
-fn resolve_inset(inset: &flint_primitives::Inset, theme: &dyn ThemeProvider) -> JetstreamEdges {
+fn resolve_inset(inset: &poodle_primitives::Inset, theme: &dyn ThemeProvider) -> JetstreamEdges {
     let h = inset.horizontal.map(|t| theme.resolve_space(t)).unwrap_or(0.0);
     let v = inset.vertical.map(|t| theme.resolve_space(t)).unwrap_or(0.0);
     JetstreamEdges {
@@ -222,9 +222,9 @@ impl RenderComponent<CallOutSpec> for JetstreamAdapter {
 
 #[cfg(test)]
 mod tests {
-    use flint_adapter::RenderComponent;
-    use flint_primitives::*;
-    use flint_style::StyleDescriptor;
+    use poodle_adapter::RenderComponent;
+    use poodle_primitives::*;
+    use poodle_style::StyleDescriptor;
     use crate::{JetstreamAdapter, WidgetKind, theme::JetstreamThemeProvider};
 
     fn a() -> JetstreamAdapter { JetstreamAdapter::new(JetstreamThemeProvider::default()) }

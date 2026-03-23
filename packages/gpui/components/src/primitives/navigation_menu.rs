@@ -5,9 +5,9 @@
 //! viewport with border/radius/bg/shadow.
 
 use gpui::*;
-use flint_adapter::ThemeProvider;
-use flint_gpui::GpuiThemeProvider;
-use flint_primitives::{NavigationMenuEntry, NavigationMenuSpec};
+use poodle_adapter::ThemeProvider;
+use poodle_gpui::GpuiThemeProvider;
+use poodle_primitives::{NavigationMenuEntry, NavigationMenuSpec};
 
 use crate::theme_ext::{color_mix, resolve_color, resolve_opacity, resolve_px, resolve_radius};
 
@@ -33,7 +33,7 @@ impl NavigationMenu {
         Self {
             spec,
             theme: theme.clone(),
-            id_prefix: "flint-nav".to_string(),
+            id_prefix: "poodle-nav".to_string(),
             on_change: None,
         }
     }

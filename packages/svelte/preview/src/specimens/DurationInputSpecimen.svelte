@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { DurationInput, Eyebrow } from "@flint/svelte-primitives";
+  import { DurationInput, Eyebrow } from "@poodle/svelte-primitives";
 
   let hours = 1;
   let minutes = 30;

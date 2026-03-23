@@ -1,5 +1,5 @@
-use flint_primitives::StatusTone;
-use flint_tokens::semantic;
+use poodle_primitives::StatusTone;
+use poodle_tokens::semantic;
 
 use crate::types::{ActionDiscoverySection, DiscoveryState};
 

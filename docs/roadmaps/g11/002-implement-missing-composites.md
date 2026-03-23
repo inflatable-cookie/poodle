@@ -1,7 +1,7 @@
 # g11.002 Implement Missing Composites
 
 Status: planned
-Owner: Flint Core
+Owner: Poodle Core
 Depends on: g11.001
 
 ## Context

@@ -1,7 +1,7 @@
 # g08.010 Visual Parity Verification And Delta Register
 
 Status: complete
-Owner: Flint Core
+Owner: Poodle Core
 Depends on: g08.009
 
 ## Verification Summary
@@ -20,7 +20,7 @@ violations).
 interpolation) matching CSS `color-mix(in srgb, ...)`. No opacity-based
 hover workarounds remain.
 
-**Icons**: All icon slots use `FlintIcon` with SVG rendering. Replaced: clock emoji
+**Icons**: All icon slots use `PoodleIcon` with SVG rendering. Replaced: clock emoji
 (time_field), star text (rating), text-based icons in various components.
 
 **Disabled States**: All components use `resolve_opacity(theme,

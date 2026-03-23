@@ -1,8 +1,8 @@
 //! AppHeader — real GPUI component backed by AppHeaderSpec.
 
 use gpui::*;
-use flint_gpui::GpuiThemeProvider;
-use flint_composites::AppHeaderSpec;
+use poodle_gpui::GpuiThemeProvider;
+use poodle_composites::AppHeaderSpec;
 
 use crate::theme_ext::{resolve_color, resolve_px};
 

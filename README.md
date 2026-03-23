@@ -1,6 +1,6 @@
-# Flint
+# Poodle
 
-Flint is a generalized UI system for teams that need the same documented
+Poodle is a generalized UI system for teams that need the same documented
 component contract implemented in both Svelte and GPUI.
 
 It is intended to serve:
@@ -8,22 +8,22 @@ It is intended to serve:
 - desktop/workstation apps such as Loophole through shared tokens, primitives,
   and reusable shell components
 - Underlay-based web apps through internal token and component adoption without
-  leaking Flint into app code
+  leaking Poodle into app code
 
 ## Documentation System
 
-Flint uses a Northstar-shaped documentation surface under `docs/`.
+Poodle uses a Northstar-shaped documentation surface under `docs/`.
 
 Start here:
 
-1. `docs/vision/001-flint-vision.md`
-2. `docs/architecture/001-flint-system-shape.md`
+1. `docs/vision/001-poodle-vision.md`
+2. `docs/architecture/001-poodle-system-shape.md`
 3. `docs/roadmaps/README.md`
 4. `docs/roadmaps/g04/README.md`
 
 ## Current Direction
 
-Flint is planned as:
+Poodle is planned as:
 
 - one semantic token system
 - one docs-first component contract surface

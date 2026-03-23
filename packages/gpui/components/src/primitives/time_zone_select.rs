@@ -1,8 +1,8 @@
 //! TimeZoneSelect — real GPUI component backed by TimeZoneSelectSpec.
 
 use gpui::*;
-use flint_gpui::GpuiThemeProvider;
-use flint_primitives::{IconSize, IconSpec, TimeZoneSelectSpec};
+use poodle_gpui::GpuiThemeProvider;
+use poodle_primitives::{IconSize, IconSpec, TimeZoneSelectSpec};
 
 use crate::theme_ext::{resolve_color, resolve_opacity, resolve_px, resolve_radius};
 use super::icon::Icon;
@@ -81,7 +81,7 @@ impl IntoElement for TimeZoneSelect {
         let hover_bg = resolve_color(theme, "semantic.color.background.hover");
 
         let mut trigger = div()
-            .id(SharedString::from("flint-tz-select"))
+            .id(SharedString::from("poodle-tz-select"))
             .focusable()
             .h(control_height)
             .px(inline_padding)

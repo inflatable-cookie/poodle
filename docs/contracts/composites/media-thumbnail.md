@@ -138,7 +138,7 @@ When `stateTitle` is null, the component uses these defaults:
 | Property | Value |
 |----------|-------|
 | display | `grid` |
-| gap | `var(--flint-space-stack-sm)` |
+| gap | `var(--poodle-space-stack-sm)` |
 | margin | `0` |
 
 #### Root Compact (`[data-presentation="compact"]`)
@@ -153,9 +153,9 @@ When `stateTitle` is null, the component uses these defaults:
 |----------|-------|
 | position | `relative` |
 | overflow | `hidden` |
-| border | `0.0625rem solid var(--flint-color-border-subtle)` |
-| border-radius | `calc(var(--flint-radius-surface) - 0.125rem)` |
-| background | `radial-gradient(circle at top left, color-mix(in srgb, var(--flint-color-accent-base) 18%, transparent), transparent 38%), color-mix(in srgb, var(--flint-color-background-panel) 94%, transparent)` |
+| border | `0.0625rem solid var(--poodle-color-border-subtle)` |
+| border-radius | `calc(var(--poodle-radius-surface) - 0.125rem)` |
+| background | `radial-gradient(circle at top left, color-mix(in srgb, var(--poodle-color-accent-base) 18%, transparent), transparent 38%), color-mix(in srgb, var(--poodle-color-background-panel) 94%, transparent)` |
 
 ### Aspect Ratios
 
@@ -174,21 +174,21 @@ When `stateTitle` is null, the component uses these defaults:
 | place-items | `center` |
 | width | `100%` |
 | height | `100%` |
-| padding | `var(--flint-space-panel-y) var(--flint-space-panel-x)` |
+| padding | `var(--poodle-space-panel-y) var(--poodle-space-panel-x)` |
 | icon font-size | `1.75rem` |
-| icon color | `var(--flint-color-text-secondary)` |
+| icon color | `var(--poodle-color-text-secondary)` |
 
 ### State Display
 
 | Property | Value |
 |----------|-------|
 | display | `grid` |
-| gap | `var(--flint-space-stack-sm)` |
+| gap | `var(--poodle-space-stack-sm)` |
 | align-content | `end` |
 | justify-items | `start` |
-| padding | `var(--flint-space-panel-y) var(--flint-space-panel-x)` |
+| padding | `var(--poodle-space-panel-y) var(--poodle-space-panel-x)` |
 | text-align | `left` |
-| background | `linear-gradient(180deg, transparent, color-mix(in srgb, var(--flint-color-background-panel) 46%, transparent)), color-mix(in srgb, var(--flint-color-background-surface) 78%, transparent)` |
+| background | `linear-gradient(180deg, transparent, color-mix(in srgb, var(--poodle-color-background-panel) 46%, transparent)), color-mix(in srgb, var(--poodle-color-background-surface) 78%, transparent)` |
 | width | `100%` |
 | height | `100%` |
 
@@ -205,7 +205,7 @@ When `stateTitle` is null, the component uses these defaults:
 
 | Element | Property | Value |
 |---------|----------|-------|
-| `p` | color | `var(--flint-color-text-secondary)` |
+| `p` | color | `var(--poodle-color-text-secondary)` |
 | `p` | font-size | `0.8125rem` |
 | `p` | line-height | `1.5` |
 | `strong`, `p` | margin | `0` |
@@ -228,7 +228,7 @@ When `stateTitle` is null, the component uses these defaults:
 
 | Property | Value |
 |----------|-------|
-| color | `var(--flint-color-text-secondary)` |
+| color | `var(--poodle-color-text-secondary)` |
 | font-size | `0.8125rem` |
 | line-height | `1.5` |
 
@@ -244,10 +244,10 @@ When `stateTitle` is null, the component uses these defaults:
 | justify-content | `center` |
 | min-height | `1.5rem` |
 | padding | `0 0.625rem` |
-| border-radius | `var(--flint-radius-control)` |
+| border-radius | `var(--poodle-radius-control)` |
 | backdrop-filter | `blur(1rem)` |
-| background | `color-mix(in srgb, var(--flint-color-background-surface) 74%, transparent)` |
-| color | `var(--flint-color-text-primary)` |
+| background | `color-mix(in srgb, var(--poodle-color-background-surface) 74%, transparent)` |
+| color | `var(--poodle-color-text-primary)` |
 | font-size | `0.6875rem` |
 | font-weight | `600` |
 | letter-spacing | `0.04em` |
@@ -265,10 +265,10 @@ When `stateTitle` is null, the component uses these defaults:
 | justify-content | `center` |
 | width | `2rem` |
 | height | `2rem` |
-| border-radius | `var(--flint-radius-control)` |
+| border-radius | `var(--poodle-radius-control)` |
 | backdrop-filter | `blur(1rem)` |
-| background | `color-mix(in srgb, var(--flint-color-background-elevated) 78%, transparent)` |
-| color | `var(--flint-color-text-primary)` |
+| background | `color-mix(in srgb, var(--poodle-color-background-elevated) 78%, transparent)` |
+| color | `var(--poodle-color-text-primary)` |
 | font-size | `0.9375rem` |
 
 ### Light Theme Overrides

@@ -6,7 +6,7 @@ Depends on: `003-accessibility-and-assistive-technology-baseline.md`, `019-advan
 
 ## Purpose
 
-Freeze the minimum accessibility-audit posture Flint should enforce during
+Freeze the minimum accessibility-audit posture Poodle should enforce during
 `g03`, without pretending that browser preview coverage alone proves native
 assistive-technology conformance.
 
@@ -19,7 +19,7 @@ is still blocked or remains only manual proof rather than explicit conformance.
 Accessibility audit posture must be machine-readable, section based, and honest
 about cross-runtime deltas.
 
-Flint should not treat accessibility as an implied outcome of contract docs,
+Poodle should not treat accessibility as an implied outcome of contract docs,
 preview examples, or visual parity. The audit surface must state which areas
 are explicit, which still require manual review, and which GPUI claims remain
 blocked or manual-only.
@@ -47,7 +47,7 @@ The current accessibility audit baseline lives in:
 
 ## Cross-Runtime Delta Rule
 
-Flint must document cross-runtime accessibility deltas explicitly whenever Svelte
+Poodle must document cross-runtime accessibility deltas explicitly whenever Svelte
 or browser-native behavior does part of the work automatically and GPUI will
 need different implementation machinery.
 
@@ -62,14 +62,14 @@ Common acceptable delta examples include:
 
 ## Honesty Rule
 
-Flint may say:
+Poodle may say:
 
 - the current accessibility audit surface is explicit
 - a section has stable review routes and named manual checks
 - a GPUI accessibility claim is blocked until native evidence exists
 - a GPUI accessibility claim remains manual until mounted runtime proof exists
 
-Flint may not say:
+Poodle may not say:
 
 - browser preview coverage proves native assistive-technology conformance
 - GPUI accessibility is validated without runnable native evidence

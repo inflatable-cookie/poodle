@@ -33,11 +33,11 @@
   .detail-row {
     display: grid;
     grid-template-columns: 11.25rem minmax(0, 1fr) auto;
-    gap: var(--flint-space-inline-md);
+    gap: var(--poodle-space-inline-md);
     align-items: center;
-    padding: var(--flint-space-panel-y) var(--flint-space-panel-x);
-    border-radius: calc(var(--flint-radius-surface) - 0.0625rem);
-    background: color-mix(in srgb, var(--flint-surface) 93%, var(--flint-color-text-primary));
+    padding: var(--poodle-space-panel-y) var(--poodle-space-panel-x);
+    border-radius: calc(var(--poodle-radius-surface) - 0.0625rem);
+    background: color-mix(in srgb, var(--poodle-surface) 93%, var(--poodle-color-text-primary));
   }
 
   .detail-row__label,
@@ -48,28 +48,28 @@
 
   .detail-row__label-block {
     display: grid;
-    gap: var(--flint-space-inline-sm);
+    gap: var(--poodle-space-inline-sm);
     min-width: 0;
   }
 
   .detail-row__label {
-    color: var(--flint-color-text-secondary);
-    font-family: var(--flint-typography-label-family);
-    font-size: var(--flint-typography-label-size);
-    line-height: var(--flint-typography-label-lineHeight);
+    color: var(--poodle-color-text-secondary);
+    font-family: var(--poodle-typography-label-family);
+    font-size: var(--poodle-typography-label-size);
+    line-height: var(--poodle-typography-label-lineHeight);
   }
 
   .detail-row__description {
-    color: var(--flint-color-text-secondary);
+    color: var(--poodle-color-text-secondary);
     font-size: 0.8125rem;
     line-height: 1.5;
   }
 
   .detail-row__value {
-    color: var(--flint-color-text-primary);
-    font-family: var(--flint-typography-body-family);
-    font-size: var(--flint-typography-body-size);
-    line-height: var(--flint-typography-body-lineHeight);
+    color: var(--poodle-color-text-primary);
+    font-family: var(--poodle-typography-body-family);
+    font-size: var(--poodle-typography-body-size);
+    line-height: var(--poodle-typography-body-lineHeight);
     min-width: 0;
   }
 

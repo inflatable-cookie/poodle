@@ -1,10 +1,10 @@
 //! TextInput specimen — text inputs with placeholder, value, and disabled states.
 
 use jetstream_runtime::ui_element::*;
-use flint_jetstream::JetstreamThemeProvider;
-use flint_jetstream_components::text_input::js_text_input;
-use flint_jetstream_components::theme_ext::*;
-use flint_primitives::TextInputSpec;
+use poodle_jetstream::JetstreamThemeProvider;
+use poodle_jetstream_components::text_input::js_text_input;
+use poodle_jetstream_components::theme_ext::*;
+use poodle_primitives::TextInputSpec;
 
 pub fn render(theme: &JetstreamThemeProvider) -> JsEl {
     let secondary = resolve_color(theme, "semantic.color.text.secondary");

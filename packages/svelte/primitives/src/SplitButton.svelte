@@ -182,71 +182,71 @@
 
 <style>
   .split-button {
-    --flint-split-fill: var(
-      --flint-treatment-interactive-fill,
-      var(--flint-color-background-surface)
+    --poodle-split-fill: var(
+      --poodle-treatment-interactive-fill,
+      var(--poodle-color-background-surface)
     );
-    --flint-split-fill-hover: color-mix(
+    --poodle-split-fill-hover: color-mix(
       in srgb,
-      var(--flint-split-fill) 84%,
-      var(--flint-color-background-elevated)
+      var(--poodle-split-fill) 84%,
+      var(--poodle-color-background-elevated)
     );
-    --flint-split-border: var(
-      --flint-treatment-interactive-border,
-      var(--flint-color-border-default)
+    --poodle-split-border: var(
+      --poodle-treatment-interactive-border,
+      var(--poodle-color-border-default)
     );
-    --flint-split-shadow: var(
-      --flint-treatment-interactive-shadow,
+    --poodle-split-shadow: var(
+      --poodle-treatment-interactive-shadow,
       none
     );
-    --flint-split-text: var(--flint-color-text-primary);
+    --poodle-split-text: var(--poodle-color-text-primary);
     position: relative;
     display: inline-flex;
     align-items: stretch;
     width: fit-content;
-    border-radius: var(--flint-treatment-interactive-radius, var(--flint-radius-control));
+    border-radius: var(--poodle-treatment-interactive-radius, var(--poodle-radius-control));
   }
 
   .split-button[data-variant="primary"] {
-    --flint-split-fill: var(
-      --flint-treatment-interactive-primary-fill,
-      var(--flint-color-accent-base)
+    --poodle-split-fill: var(
+      --poodle-treatment-interactive-primary-fill,
+      var(--poodle-color-accent-base)
     );
-    --flint-split-border: var(
-      --flint-treatment-interactive-primary-border,
-      color-mix(in srgb, var(--flint-color-accent-base) 84%, black)
+    --poodle-split-border: var(
+      --poodle-treatment-interactive-primary-border,
+      color-mix(in srgb, var(--poodle-color-accent-base) 84%, black)
     );
-    --flint-split-shadow: var(
-      --flint-treatment-interactive-primary-shadow,
+    --poodle-split-shadow: var(
+      --poodle-treatment-interactive-primary-shadow,
       none
     );
-    --flint-split-text: var(
-      --flint-treatment-interactive-primary-text,
-      var(--flint-color-text-inverse)
+    --poodle-split-text: var(
+      --poodle-treatment-interactive-primary-text,
+      var(--poodle-color-text-inverse)
     );
   }
 
   .split-button[data-variant="ghost"] {
-    --flint-split-fill: color-mix(in srgb, var(--flint-color-background-surface) 42%, transparent);
-    --flint-split-border: color-mix(in srgb, var(--flint-color-border-subtle) 72%, transparent);
+    --poodle-split-fill: color-mix(in srgb, var(--poodle-color-background-surface) 42%, transparent);
+    --poodle-split-border: color-mix(in srgb, var(--poodle-color-border-subtle) 72%, transparent);
   }
 
   .split-button[data-tone="danger"] {
-    --flint-split-fill: color-mix(in srgb, var(--flint-color-status-danger) 16%, var(--flint-color-background-surface));
-    --flint-split-border: color-mix(in srgb, var(--flint-color-status-danger) 46%, var(--flint-color-border-default));
-    --flint-split-text: var(--flint-color-text-primary);
+    --poodle-split-fill: color-mix(in srgb, var(--poodle-color-status-danger) 16%, var(--poodle-color-background-surface));
+    --poodle-split-border: color-mix(in srgb, var(--poodle-color-status-danger) 46%, var(--poodle-color-border-default));
+    --poodle-split-text: var(--poodle-color-text-primary);
   }
 
   .split-button[data-variant="primary"][data-tone="danger"] {
-    --flint-split-fill: var(--flint-color-status-danger);
-    --flint-split-border: color-mix(in srgb, var(--flint-color-status-danger) 84%, black);
-    --flint-split-text: var(--flint-color-text-inverse);
+    --poodle-split-fill: var(--poodle-color-status-danger);
+    --poodle-split-border: color-mix(in srgb, var(--poodle-color-status-danger) 84%, black);
+    --poodle-split-text: var(--poodle-color-text-inverse);
   }
 
   .split-button[data-variant="ghost"][data-tone="danger"] {
-    --flint-split-fill: transparent;
-    --flint-split-border: transparent;
-    --flint-split-text: var(--flint-color-status-danger);
+    --poodle-split-fill: transparent;
+    --poodle-split-border: transparent;
+    --poodle-split-text: var(--poodle-color-status-danger);
   }
 
   .split-button__primary,
@@ -254,83 +254,83 @@
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    height: var(--flint-size-control-height);
-    border: 0.0625rem solid var(--flint-split-border);
-    background: var(--flint-split-fill);
-    box-shadow: var(--flint-split-shadow);
-    color: var(--flint-split-text);
+    height: var(--poodle-size-control-height);
+    border: 0.0625rem solid var(--poodle-split-border);
+    background: var(--poodle-split-fill);
+    box-shadow: var(--poodle-split-shadow);
+    color: var(--poodle-split-text);
     cursor: pointer;
-    font-family: var(--flint-typography-label-family);
-    font-size: var(--flint-typography-label-size);
-    font-weight: var(--flint-typography-label-weight);
+    font-family: var(--poodle-typography-label-family);
+    font-size: var(--poodle-typography-label-size);
+    font-weight: var(--poodle-typography-label-weight);
     letter-spacing: 0.01em;
     line-height: 1;
     transition:
-      background var(--flint-motion-duration-interaction) var(--flint-motion-easing-standard),
-      border-color var(--flint-motion-duration-interaction) var(--flint-motion-easing-standard),
-      box-shadow var(--flint-motion-duration-interaction) var(--flint-motion-easing-standard);
+      background var(--poodle-motion-duration-interaction) var(--poodle-motion-easing-standard),
+      border-color var(--poodle-motion-duration-interaction) var(--poodle-motion-easing-standard),
+      box-shadow var(--poodle-motion-duration-interaction) var(--poodle-motion-easing-standard);
   }
 
   .split-button[data-size="sm"] .split-button__primary,
   .split-button[data-size="sm"] .split-button__toggle {
-    height: calc(var(--flint-size-control-height) - 0.375rem);
+    height: calc(var(--poodle-size-control-height) - 0.375rem);
     font-size: 0.75rem;
   }
 
   .split-button[data-size="lg"] .split-button__primary,
   .split-button[data-size="lg"] .split-button__toggle {
-    height: calc(var(--flint-size-control-height) + 0.375rem);
+    height: calc(var(--poodle-size-control-height) + 0.375rem);
     font-size: 0.875rem;
   }
 
   .split-button__primary {
-    gap: var(--flint-space-inline-sm);
+    gap: var(--poodle-space-inline-sm);
     min-width: 4rem;
-    padding: 0 var(--flint-space-control-x);
+    padding: 0 var(--poodle-space-control-x);
     border-right: 0;
-    border-radius: var(--flint-treatment-interactive-radius, var(--flint-radius-control)) 0 0 var(--flint-treatment-interactive-radius, var(--flint-radius-control));
+    border-radius: var(--poodle-treatment-interactive-radius, var(--poodle-radius-control)) 0 0 var(--poodle-treatment-interactive-radius, var(--poodle-radius-control));
   }
 
   .split-button__primary:hover:not(:disabled) {
-    background: var(--flint-split-fill-hover);
+    background: var(--poodle-split-fill-hover);
   }
 
   .split-button__primary:focus-visible {
-    outline: var(--flint-border-width-focus) solid var(--flint-color-accent-focusRing);
+    outline: var(--poodle-border-width-focus) solid var(--poodle-color-accent-focusRing);
     outline-offset: 0.125rem;
     z-index: 1;
   }
 
   .split-button__primary:disabled {
     cursor: not-allowed;
-    opacity: var(--flint-state-opacity-disabled);
+    opacity: var(--poodle-state-opacity-disabled);
   }
 
   .split-button__toggle {
     width: 2rem;
     padding: 0;
     border-left: 0;
-    border-radius: 0 var(--flint-treatment-interactive-radius, var(--flint-radius-control)) var(--flint-treatment-interactive-radius, var(--flint-radius-control)) 0;
+    border-radius: 0 var(--poodle-treatment-interactive-radius, var(--poodle-radius-control)) var(--poodle-treatment-interactive-radius, var(--poodle-radius-control)) 0;
   }
 
   .split-button__toggle:hover:not(:disabled) {
-    background: var(--flint-split-fill-hover);
+    background: var(--poodle-split-fill-hover);
   }
 
   .split-button__toggle:focus-visible {
-    outline: var(--flint-border-width-focus) solid var(--flint-color-accent-focusRing);
+    outline: var(--poodle-border-width-focus) solid var(--poodle-color-accent-focusRing);
     outline-offset: 0.125rem;
     z-index: 1;
   }
 
   .split-button__toggle:disabled {
     cursor: not-allowed;
-    opacity: var(--flint-state-opacity-disabled);
+    opacity: var(--poodle-state-opacity-disabled);
   }
 
   .split-button__divider {
     width: 0.0625rem;
-    background: color-mix(in srgb, var(--flint-split-text) 22%, transparent);
+    background: color-mix(in srgb, var(--poodle-split-text) 22%, transparent);
     align-self: center;
     height: 60%;
   }
@@ -364,52 +364,52 @@
     position: absolute;
     top: calc(100% + 0.375rem);
     left: 0;
-    z-index: var(--flint-overlay-z-menu);
+    z-index: var(--poodle-overlay-z-menu);
     min-width: 12rem;
     padding: 0.25rem;
     border: 0.0625rem solid var(
-      --flint-treatment-surface-elevated-border,
-      color-mix(in srgb, var(--flint-color-border-default) 72%, transparent)
+      --poodle-treatment-surface-elevated-border,
+      color-mix(in srgb, var(--poodle-color-border-default) 72%, transparent)
     );
-    border-radius: var(--flint-treatment-surface-elevated-radius, var(--flint-radius-surface));
+    border-radius: var(--poodle-treatment-surface-elevated-radius, var(--poodle-radius-surface));
     background: var(
-      --flint-treatment-surface-elevated-fill,
-      color-mix(in srgb, var(--flint-color-background-elevated) 98%, var(--flint-color-background-panel))
+      --poodle-treatment-surface-elevated-fill,
+      color-mix(in srgb, var(--poodle-color-background-elevated) 98%, var(--poodle-color-background-panel))
     );
-    box-shadow: var(--flint-treatment-surface-elevated-shadow, var(--flint-elevation-overlay));
+    box-shadow: var(--poodle-treatment-surface-elevated-shadow, var(--poodle-elevation-overlay));
   }
 
   .split-button__item {
     display: flex;
     align-items: center;
     width: 100%;
-    min-height: calc(var(--flint-size-control-height) - 0.25rem);
-    padding: var(--flint-space-control-y) var(--flint-space-control-x);
+    min-height: calc(var(--poodle-size-control-height) - 0.25rem);
+    padding: var(--poodle-space-control-y) var(--poodle-space-control-x);
     border: 0;
-    border-radius: calc(var(--flint-radius-control) - 0.125rem);
+    border-radius: calc(var(--poodle-radius-control) - 0.125rem);
     background: transparent;
-    color: var(--flint-color-text-primary);
+    color: var(--poodle-color-text-primary);
     cursor: pointer;
     font: inherit;
-    font-size: var(--flint-typography-label-size);
+    font-size: var(--poodle-typography-label-size);
     text-align: left;
   }
 
   .split-button__item:hover:not(:disabled),
   .split-button__item:focus-visible {
-    background: color-mix(in srgb, var(--flint-color-accent-base) 16%, transparent);
+    background: color-mix(in srgb, var(--poodle-color-accent-base) 16%, transparent);
     outline: none;
   }
 
   .split-button__item:disabled {
     cursor: not-allowed;
-    opacity: var(--flint-state-opacity-disabled);
+    opacity: var(--poodle-state-opacity-disabled);
   }
 
   .split-button__separator {
     width: 100%;
     height: 0.0625rem;
     margin: 0.25rem 0;
-    background: color-mix(in srgb, var(--flint-color-border-subtle) 72%, transparent);
+    background: color-mix(in srgb, var(--poodle-color-border-subtle) 72%, transparent);
   }
 </style>

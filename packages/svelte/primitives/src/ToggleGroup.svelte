@@ -78,21 +78,21 @@
   }
 
   .toggle-group__item {
-    min-height: calc(var(--flint-size-control-height) - 0.25rem);
+    min-height: calc(var(--poodle-size-control-height) - 0.25rem);
     padding: 0 0.75rem;
     border: 0.0625rem solid var(
-      --flint-treatment-interactive-border,
-      color-mix(in srgb, var(--flint-color-border-subtle) 82%, transparent)
+      --poodle-treatment-interactive-border,
+      color-mix(in srgb, var(--poodle-color-border-subtle) 82%, transparent)
     );
-    border-radius: var(--flint-treatment-interactive-radius, var(--flint-radius-control));
+    border-radius: var(--poodle-treatment-interactive-radius, var(--poodle-radius-control));
     background: var(
-      --flint-treatment-interactive-fill,
-      color-mix(in srgb, var(--flint-surface) 93%, var(--flint-color-text-primary))
+      --poodle-treatment-interactive-fill,
+      color-mix(in srgb, var(--poodle-surface) 93%, var(--poodle-color-text-primary))
     );
-    box-shadow: var(--flint-treatment-interactive-shadow, none);
-    color: var(--flint-color-text-primary);
+    box-shadow: var(--poodle-treatment-interactive-shadow, none);
+    color: var(--poodle-color-text-primary);
     cursor: pointer;
-    font-family: var(--flint-typography-label-family);
+    font-family: var(--poodle-typography-label-family);
     font-size: 0.75rem;
     font-weight: 600;
     line-height: 1;
@@ -106,26 +106,26 @@
   .toggle-group__item.selected {
     background:
       linear-gradient(
-        color-mix(in srgb, var(--flint-color-accent-base) 22%, transparent),
-        color-mix(in srgb, var(--flint-color-accent-base) 22%, transparent)
+        color-mix(in srgb, var(--poodle-color-accent-base) 22%, transparent),
+        color-mix(in srgb, var(--poodle-color-accent-base) 22%, transparent)
       ),
       var(
-        --flint-treatment-interactive-fill,
-        color-mix(in srgb, var(--flint-surface) 93%, var(--flint-color-text-primary))
+        --poodle-treatment-interactive-fill,
+        color-mix(in srgb, var(--poodle-surface) 93%, var(--poodle-color-text-primary))
       );
     border-color: var(
-      --flint-treatment-interactive-border-active,
-      color-mix(in srgb, var(--flint-color-accent-base) 42%, var(--flint-color-border-default))
+      --poodle-treatment-interactive-border-active,
+      color-mix(in srgb, var(--poodle-color-accent-base) 42%, var(--poodle-color-border-default))
     );
   }
 
   .toggle-group__item:focus-visible {
-    outline: var(--flint-border-width-focus) solid var(--flint-color-accent-focusRing);
+    outline: var(--poodle-border-width-focus) solid var(--poodle-color-accent-focusRing);
     outline-offset: 0.125rem;
   }
 
   .toggle-group__item:disabled {
     cursor: not-allowed;
-    opacity: var(--flint-state-opacity-disabled);
+    opacity: var(--poodle-state-opacity-disabled);
   }
 </style>

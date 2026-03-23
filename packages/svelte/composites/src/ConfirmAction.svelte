@@ -1,9 +1,9 @@
 <script lang="ts">
   import { createEventDispatcher } from "svelte";
 
-  import { AlertDialog, Button } from "@flint/svelte-primitives";
+  import { AlertDialog, Button } from "@poodle/svelte-primitives";
 
-  import type { AlertDialogTone } from "@flint/svelte-primitives";
+  import type { AlertDialogTone } from "@poodle/svelte-primitives";
 
   export let title: string;
   export let description: string | null = null;

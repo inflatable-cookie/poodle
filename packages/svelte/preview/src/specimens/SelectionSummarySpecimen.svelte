@@ -1,6 +1,6 @@
 <script lang="ts">
-  import { SelectionSummary } from "@flint/svelte-composites";
-  import { Eyebrow } from "@flint/svelte-primitives";
+  import { SelectionSummary } from "@poodle/svelte-composites";
+  import { Eyebrow } from "@poodle/svelte-primitives";
 
   let items = [
     { id: "1", label: "Button" },

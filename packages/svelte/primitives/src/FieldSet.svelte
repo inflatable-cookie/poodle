@@ -34,15 +34,15 @@
   }
 
   .fieldset__legend {
-    color: var(--flint-color-text-secondary);
-    font-family: var(--flint-typography-label-family);
+    color: var(--poodle-color-text-secondary);
+    font-family: var(--poodle-typography-label-family);
     font-size: 0.6875rem;
     font-weight: 600;
     letter-spacing: 0.12em;
     line-height: 1.5;
     text-transform: uppercase;
     padding: 0;
-    margin-bottom: var(--flint-space-stack-sm);
+    margin-bottom: var(--poodle-space-stack-sm);
   }
 
   .fieldset__fields {

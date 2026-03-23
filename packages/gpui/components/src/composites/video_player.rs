@@ -2,9 +2,9 @@
 //! GPUI cannot play video — this renders the UI chrome only.
 
 use gpui::*;
-use flint_gpui::GpuiThemeProvider;
-use flint_primitives::{IconSize, IconSpec};
-use flint_composites::VideoPlayerSpec;
+use poodle_gpui::GpuiThemeProvider;
+use poodle_primitives::{IconSize, IconSpec};
+use poodle_composites::VideoPlayerSpec;
 use crate::primitives::Icon;
 use crate::theme_ext::{resolve_color, resolve_radius};
 

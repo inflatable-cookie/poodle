@@ -26,8 +26,8 @@
   $: lowerPercent = ((lowerValue - min) / (safeMax - min)) * 100;
   $: upperPercent = ((upperValue - min) / (safeMax - min)) * 100;
   $: rangeStyle = joinStyles([
-    `--flint-range-start: ${lowerPercent}%`,
-    `--flint-range-end: ${upperPercent}%`,
+    `--poodle-range-start: ${lowerPercent}%`,
+    `--poodle-range-end: ${upperPercent}%`,
   ]);
 
   function normalizeLower(nextValue: number): [number, number] {
@@ -105,7 +105,7 @@
   }
 
   .range-slider[data-disabled="true"] {
-    opacity: var(--flint-state-opacity-disabled);
+    opacity: var(--poodle-state-opacity-disabled);
   }
 
   .range-slider__track {
@@ -114,7 +114,7 @@
     height: 0.375rem;
     transform: translateY(-50%);
     border-radius: 999px;
-    background: color-mix(in srgb, var(--flint-color-background-surface) 88%, transparent);
+    background: color-mix(in srgb, var(--poodle-color-background-surface) 88%, transparent);
   }
 
   .range-slider[data-orientation="vertical"] .range-slider__track {
@@ -126,18 +126,18 @@
 
   .range-slider__fill {
     position: absolute;
-    left: var(--flint-range-start);
-    width: calc(var(--flint-range-end) - var(--flint-range-start));
+    left: var(--poodle-range-start);
+    width: calc(var(--poodle-range-end) - var(--poodle-range-start));
     height: 100%;
     border-radius: inherit;
-    background: var(--flint-color-accent-base);
+    background: var(--poodle-color-accent-base);
   }
 
   .range-slider[data-orientation="vertical"] .range-slider__fill {
     left: 0;
-    bottom: var(--flint-range-start);
+    bottom: var(--poodle-range-start);
     width: 100%;
-    height: calc(var(--flint-range-end) - var(--flint-range-start));
+    height: calc(var(--poodle-range-end) - var(--poodle-range-start));
   }
 
   .range-slider__control {
@@ -174,9 +174,9 @@
     width: 1rem;
     height: 1rem;
     margin-top: -0.3125rem;
-    border: 0.0625rem solid var(--flint-color-border-default);
+    border: 0.0625rem solid var(--poodle-color-border-default);
     border-radius: 999px;
-    background: var(--flint-color-background-elevated);
+    background: var(--poodle-color-background-elevated);
     box-shadow: 0 0.125rem 0.5rem color-mix(in srgb, black 18%, transparent);
     appearance: none;
     pointer-events: auto;
@@ -185,9 +185,9 @@
   .range-slider__control::-moz-range-thumb {
     width: 1rem;
     height: 1rem;
-    border: 0.0625rem solid var(--flint-color-border-default);
+    border: 0.0625rem solid var(--poodle-color-border-default);
     border-radius: 999px;
-    background: var(--flint-color-background-elevated);
+    background: var(--poodle-color-background-elevated);
     box-shadow: 0 0.125rem 0.5rem color-mix(in srgb, black 18%, transparent);
     pointer-events: auto;
   }
@@ -198,13 +198,13 @@
 
   .range-slider__control:focus-visible::-webkit-slider-thumb {
     box-shadow:
-      0 0 0 0.1875rem color-mix(in srgb, var(--flint-color-accent-focusRing) 32%, transparent),
+      0 0 0 0.1875rem color-mix(in srgb, var(--poodle-color-accent-focusRing) 32%, transparent),
       0 0.125rem 0.5rem color-mix(in srgb, black 18%, transparent);
   }
 
   .range-slider__control:focus-visible::-moz-range-thumb {
     box-shadow:
-      0 0 0 0.1875rem color-mix(in srgb, var(--flint-color-accent-focusRing) 32%, transparent),
+      0 0 0 0.1875rem color-mix(in srgb, var(--poodle-color-accent-focusRing) 32%, transparent),
       0 0.125rem 0.5rem color-mix(in srgb, black 18%, transparent);
   }
 </style>

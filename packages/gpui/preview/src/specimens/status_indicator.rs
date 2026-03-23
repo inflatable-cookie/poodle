@@ -1,7 +1,7 @@
 use gpui::*;
-use flint_gpui::GpuiThemeProvider;
-use flint_primitives::{EyebrowSpec, StatusIndicatorSpec, StatusTone};
-use flint_gpui_components::{Eyebrow, StatusIndicator};
+use poodle_gpui::GpuiThemeProvider;
+use poodle_primitives::{EyebrowSpec, StatusIndicatorSpec, StatusTone};
+use poodle_gpui_components::{Eyebrow, StatusIndicator};
 
 pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
     // --- All statuses ---

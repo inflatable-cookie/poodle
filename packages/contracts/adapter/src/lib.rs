@@ -1,19 +1,19 @@
-//! Renderer adapter traits for Flint.
+//! Renderer adapter traits for Poodle.
 //!
 //! These traits define the contract that rendering adapters implement to map
-//! Flint component specs and resolved styles to a target renderer's native
+//! Poodle component specs and resolved styles to a target renderer's native
 //! element/node types.
 //!
 //! ## Adapter Implementations
 //!
-//! - **GPUI adapter** (`flint-gpui`, g07): Maps specs to GPUI `Element` types
+//! - **GPUI adapter** (`poodle-gpui`, g07): Maps specs to GPUI `Element` types
 //!   using GPUI's styling API and event subscription model.
-//! - **Jetstream adapter** (`flint-jetstream`, g08): Maps specs to Jetstream
+//! - **Jetstream adapter** (`poodle-jetstream`, g08): Maps specs to Jetstream
 //!   `UiTree` widget variants using `UiStyle` and `UiEvent` pipeline.
 
-use flint_events::SemanticEvent;
-use flint_style::StyleDescriptor;
-use flint_tokens::typed::ColorValue;
+use poodle_events::SemanticEvent;
+use poodle_style::StyleDescriptor;
+use poodle_tokens::typed::ColorValue;
 
 /// Provides resolved token values for the current theme context.
 ///
@@ -63,10 +63,10 @@ pub trait RenderTarget {
     type Handle;
 }
 
-/// Maps a Flint component spec and resolved style to the renderer's native output.
+/// Maps a Poodle component spec and resolved style to the renderer's native output.
 ///
 /// This is the core trait that adapters implement for each component. The
-/// `Spec` type parameter is a Flint spec struct (e.g., `ButtonSpec`, `DialogSpec`),
+/// `Spec` type parameter is a Poodle spec struct (e.g., `ButtonSpec`, `DialogSpec`),
 /// and `Target` is the rendering system.
 ///
 /// ## Example (conceptual)
@@ -117,8 +117,8 @@ pub trait AdapterManifest {
 
 #[cfg(test)]
 mod tests {
-    use flint_events::EventValue;
-    use flint_tokens::typed::ColorValue;
+    use poodle_events::EventValue;
+    use poodle_tokens::typed::ColorValue;
 
     use super::*;
 

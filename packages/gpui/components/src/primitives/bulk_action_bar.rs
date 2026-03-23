@@ -2,8 +2,8 @@
 
 use std::rc::Rc;
 use gpui::*;
-use flint_gpui::GpuiThemeProvider;
-use flint_primitives::{BulkAction, BulkActionBarSpec, BulkActionTone};
+use poodle_gpui::GpuiThemeProvider;
+use poodle_primitives::{BulkAction, BulkActionBarSpec, BulkActionTone};
 
 use crate::theme_ext::{color_mix, resolve_color, resolve_px, resolve_radius};
 

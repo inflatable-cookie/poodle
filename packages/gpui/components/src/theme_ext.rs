@@ -1,8 +1,8 @@
-//! Theme extension utilities for bridging flint token values to gpui types.
+//! Theme extension utilities for bridging poodle token values to gpui types.
 
 use gpui::*;
-use flint_adapter::ThemeProvider;
-use flint_gpui::GpuiThemeProvider;
+use poodle_adapter::ThemeProvider;
+use poodle_gpui::GpuiThemeProvider;
 
 /// Resolve a color token string through the theme and convert to Hsla.
 pub fn resolve_color(theme: &GpuiThemeProvider, token: &str) -> Hsla {

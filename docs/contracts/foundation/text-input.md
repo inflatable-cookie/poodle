@@ -157,10 +157,10 @@ Updated: 2026-03-15
 
 | Var | Default Value | Focus Value |
 |-----|---------------|-------------|
-| `--flint-text-input-radius` | `var(--flint-treatment-interactive-subtle-radius, var(--flint-radius-control))` | — |
-| `--flint-text-input-fill` | `var(--flint-treatment-interactive-subtle-fill, var(--flint-color-background-surface))` | `var(--flint-text-input-fill-focus)` |
-| `--flint-text-input-border` | `var(--flint-treatment-interactive-subtle-border, var(--flint-color-border-default))` | `var(--flint-text-input-border-focus)` |
-| `--flint-text-input-shadow` | (none by default) | `var(--flint-text-input-shadow-focus)` fallback `0 0 0 var(--flint-border-width-focus) color-mix(in srgb, var(--flint-color-accent-focusRing) 28%, transparent)` |
+| `--poodle-text-input-radius` | `var(--poodle-treatment-interactive-subtle-radius, var(--poodle-radius-control))` | — |
+| `--poodle-text-input-fill` | `var(--poodle-treatment-interactive-subtle-fill, var(--poodle-color-background-surface))` | `var(--poodle-text-input-fill-focus)` |
+| `--poodle-text-input-border` | `var(--poodle-treatment-interactive-subtle-border, var(--poodle-color-border-default))` | `var(--poodle-text-input-border-focus)` |
+| `--poodle-text-input-shadow` | (none by default) | `var(--poodle-text-input-shadow-focus)` fallback `0 0 0 var(--poodle-border-width-focus) color-mix(in srgb, var(--poodle-color-accent-focusRing) 28%, transparent)` |
 
 ### Root `.text-input`
 
@@ -168,37 +168,37 @@ Updated: 2026-03-15
 |----------|-------|
 | `display` | `flex` |
 | `align-items` | `center` |
-| `gap` | `var(--flint-space-inline-sm)` |
-| `min-height` | `var(--flint-size-control-height)` |
-| `padding` | `0 var(--flint-space-control-x)` |
-| `border` | `0.0625rem solid var(--flint-text-input-border)` |
-| `border-radius` | `var(--flint-text-input-radius)` |
-| `background` | `var(--flint-text-input-fill)` |
-| `color` | `var(--flint-color-text-primary)` |
-| `box-shadow` | `var(--flint-text-input-shadow)` |
-| `transition` | `border-color, box-shadow, background` all at `var(--flint-motion-duration-interaction) var(--flint-motion-easing-standard)` |
+| `gap` | `var(--poodle-space-inline-sm)` |
+| `min-height` | `var(--poodle-size-control-height)` |
+| `padding` | `0 var(--poodle-space-control-x)` |
+| `border` | `0.0625rem solid var(--poodle-text-input-border)` |
+| `border-radius` | `var(--poodle-text-input-radius)` |
+| `background` | `var(--poodle-text-input-fill)` |
+| `color` | `var(--poodle-color-text-primary)` |
+| `box-shadow` | `var(--poodle-text-input-shadow)` |
+| `transition` | `border-color, box-shadow, background` all at `var(--poodle-motion-duration-interaction) var(--poodle-motion-easing-standard)` |
 
 ### Root focus-within
 
 | Property | Value |
 |----------|-------|
-| `border-color` | `var(--flint-text-input-border-focus)` |
-| `background` | `var(--flint-text-input-fill-focus)` |
-| `box-shadow` | `var(--flint-text-input-shadow-focus)` fallback `0 0 0 var(--flint-border-width-focus) color-mix(in srgb, var(--flint-color-accent-focusRing) 28%, transparent)` |
+| `border-color` | `var(--poodle-text-input-border-focus)` |
+| `background` | `var(--poodle-text-input-fill-focus)` |
+| `box-shadow` | `var(--poodle-text-input-shadow-focus)` fallback `0 0 0 var(--poodle-border-width-focus) color-mix(in srgb, var(--poodle-color-accent-focusRing) 28%, transparent)` |
 
 ### Root validation states
 
 | State | `border-color` |
 |-------|----------------|
-| `invalid` | `var(--flint-color-status-danger)` |
-| `valid` | `var(--flint-color-status-success)` |
-| `pending` | `var(--flint-color-accent-base)` |
+| `invalid` | `var(--poodle-color-status-danger)` |
+| `valid` | `var(--poodle-color-status-success)` |
+| `pending` | `var(--poodle-color-accent-base)` |
 
 ### Root disabled (`:has(:disabled)`)
 
 | Property | Value |
 |----------|-------|
-| `opacity` | `var(--flint-state-opacity-disabled)` |
+| `opacity` | `var(--poodle-state-opacity-disabled)` |
 
 ### Input Control `.text-input__control`
 
@@ -207,21 +207,21 @@ Updated: 2026-03-15
 | `flex` | `1` |
 | `min-width` | `0` |
 | `width` | `100%` |
-| `height` | `calc(var(--flint-size-control-height) - (var(--flint-border-width-default) * 2))` |
+| `height` | `calc(var(--poodle-size-control-height) - (var(--poodle-border-width-default) * 2))` |
 | `padding` | `0` |
 | `border` | `0` |
 | `background` | `transparent` |
 | `color` | `inherit` |
-| `font-family` | `var(--flint-typography-body-family)` |
-| `font-size` | `var(--flint-typography-body-size)` |
-| `line-height` | `var(--flint-typography-body-lineHeight)` |
+| `font-family` | `var(--poodle-typography-body-family)` |
+| `font-size` | `var(--poodle-typography-body-size)` |
+| `line-height` | `var(--poodle-typography-body-lineHeight)` |
 | `outline` | `0` |
 
 ### Input Control `::placeholder`
 
 | Property | Value |
 |----------|-------|
-| `color` | `var(--flint-color-text-secondary)` |
+| `color` | `var(--poodle-color-text-secondary)` |
 
 ### Affordance `.text-input__affordance`
 
@@ -230,9 +230,9 @@ Updated: 2026-03-15
 | `display` | `inline-flex` |
 | `align-items` | `center` |
 | `justify-content` | `center` |
-| `color` | `var(--flint-color-icon-muted)` |
-| `font-family` | `var(--flint-typography-code-family)` |
-| `font-size` | `var(--flint-icon-size-default)` |
+| `color` | `var(--poodle-color-icon-muted)` |
+| `font-family` | `var(--poodle-typography-code-family)` |
+| `font-size` | `var(--poodle-icon-size-default)` |
 
 ### Affix `.text-input__affix`
 
@@ -240,9 +240,9 @@ Updated: 2026-03-15
 |----------|-------|
 | `display` | `inline-flex` |
 | `align-items` | `center` |
-| `color` | `var(--flint-color-text-secondary)` |
-| `font-family` | `var(--flint-typography-body-family)` |
-| `font-size` | `var(--flint-typography-body-size)` |
+| `color` | `var(--poodle-color-text-secondary)` |
+| `font-family` | `var(--poodle-typography-body-family)` |
+| `font-size` | `var(--poodle-typography-body-size)` |
 | `white-space` | `nowrap` |
 | `user-select` | `none` |
 
@@ -250,17 +250,17 @@ Updated: 2026-03-15
 
 | Property | Value |
 |----------|-------|
-| `padding-right` | `var(--flint-space-inline-sm)` |
-| `border-right` | `0.0625rem solid color-mix(in srgb, var(--flint-color-border-subtle) 52%, transparent)` |
-| `margin-right` | `var(--flint-space-inline-sm)` |
+| `padding-right` | `var(--poodle-space-inline-sm)` |
+| `border-right` | `0.0625rem solid color-mix(in srgb, var(--poodle-color-border-subtle) 52%, transparent)` |
+| `margin-right` | `var(--poodle-space-inline-sm)` |
 
 ### Suffix `.text-input__affix--suffix`
 
 | Property | Value |
 |----------|-------|
-| `padding-left` | `var(--flint-space-inline-sm)` |
-| `border-left` | `0.0625rem solid color-mix(in srgb, var(--flint-color-border-subtle) 52%, transparent)` |
-| `margin-left` | `var(--flint-space-inline-sm)` |
+| `padding-left` | `var(--poodle-space-inline-sm)` |
+| `border-left` | `0.0625rem solid color-mix(in srgb, var(--poodle-color-border-subtle) 52%, transparent)` |
+| `margin-left` | `var(--poodle-space-inline-sm)` |
 
 ### Character Count `.text-input__char-count`
 
@@ -268,8 +268,8 @@ Updated: 2026-03-15
 |----------|-------|
 | `display` | `inline-flex` |
 | `align-items` | `center` |
-| `color` | `var(--flint-color-text-secondary)` |
-| `font-family` | `var(--flint-typography-code-family)` |
+| `color` | `var(--poodle-color-text-secondary)` |
+| `font-family` | `var(--poodle-typography-code-family)` |
 | `font-size` | `0.6875rem` |
 | `white-space` | `nowrap` |
 
@@ -277,14 +277,14 @@ Updated: 2026-03-15
 
 | Property | Value |
 |----------|-------|
-| `color` | `var(--flint-color-status-danger)` |
+| `color` | `var(--poodle-color-status-danger)` |
 
 ## 9. Svelte Notes
 
 - Uses native `<input>` element inside a styled `<div>` wrapper
-- CSS custom properties (`--flint-text-input-*`) enable treatment-level theming
-- Treatment token chain: `--flint-treatment-interactive-subtle-radius` falls back
-  to `--flint-radius-control`
+- CSS custom properties (`--poodle-text-input-*`) enable treatment-level theming
+- Treatment token chain: `--poodle-treatment-interactive-subtle-radius` falls back
+  to `--poodle-radius-control`
 - `data-validation-state` data attribute drives validation border-color via CSS
   attribute selectors
 - Controlled mode: when `value` prop is non-null, the input value is bound to
@@ -299,7 +299,7 @@ Updated: 2026-03-15
 
 ## 10. GPUI Notes
 
-- expected crate/module surface: `flint_gpui::primitives::text_input`
+- expected crate/module surface: `poodle_gpui::primitives::text_input`
 - GPUI implementation must intentionally handle caret movement, selection,
   clipboard shortcuts, IME composition, and text-focused keybinding suppression
 - while focused, application-global shortcuts should defer to the text control

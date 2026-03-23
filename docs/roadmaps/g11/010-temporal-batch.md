@@ -1,7 +1,7 @@
 # g11.010 Temporal Batch
 
 Status: planned
-Owner: Flint Core
+Owner: Poodle Core
 Depends on: contract audit
 
 ## Components

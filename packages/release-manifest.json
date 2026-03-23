@@ -8,7 +8,7 @@
   },
   "packages": [
     {
-      "name": "@flint/tokens",
+      "name": "@poodle/tokens",
       "path": "packages/tokens",
       "kind": "source-of-truth",
       "language": "typescript",
@@ -16,7 +16,7 @@
       "channel": "internal"
     },
     {
-      "name": "@flint/svelte-tokens",
+      "name": "@poodle/svelte-tokens",
       "path": "packages/svelte/tokens",
       "kind": "runtime-package",
       "language": "typescript",
@@ -24,7 +24,7 @@
       "channel": "preview"
     },
     {
-      "name": "@flint/svelte-primitives",
+      "name": "@poodle/svelte-primitives",
       "path": "packages/svelte/primitives",
       "kind": "runtime-package",
       "language": "typescript",
@@ -32,7 +32,7 @@
       "channel": "preview"
     },
     {
-      "name": "@flint/svelte-composites",
+      "name": "@poodle/svelte-composites",
       "path": "packages/svelte/composites",
       "kind": "runtime-package",
       "language": "typescript",
@@ -40,7 +40,7 @@
       "channel": "preview"
     },
     {
-      "name": "@flint/icons-lucide",
+      "name": "@poodle/icons-lucide",
       "path": "packages/svelte/icons-lucide",
       "kind": "runtime-package",
       "language": "typescript",
@@ -48,7 +48,7 @@
       "channel": "preview"
     },
     {
-      "name": "@flint/bridge-underlay",
+      "name": "@poodle/bridge-underlay",
       "path": "packages/bridges/underlay",
       "kind": "bridge",
       "language": "typescript",
@@ -56,7 +56,7 @@
       "channel": "internal"
     },
     {
-      "name": "@flint/svelte-preview",
+      "name": "@poodle/svelte-preview",
       "path": "packages/svelte/preview",
       "kind": "tooling",
       "language": "typescript",
@@ -64,7 +64,7 @@
       "channel": "internal"
     },
     {
-      "name": "flint-adapter",
+      "name": "poodle-adapter",
       "path": "packages/contracts/adapter",
       "kind": "contract-crate",
       "language": "rust",
@@ -72,7 +72,7 @@
       "channel": "preview"
     },
     {
-      "name": "flint-composites",
+      "name": "poodle-composites",
       "path": "packages/contracts/composites",
       "kind": "contract-crate",
       "language": "rust",
@@ -80,7 +80,7 @@
       "channel": "preview"
     },
     {
-      "name": "flint-events",
+      "name": "poodle-events",
       "path": "packages/contracts/events",
       "kind": "contract-crate",
       "language": "rust",
@@ -88,7 +88,7 @@
       "channel": "preview"
     },
     {
-      "name": "flint-layout",
+      "name": "poodle-layout",
       "path": "packages/contracts/layout",
       "kind": "contract-crate",
       "language": "rust",
@@ -96,7 +96,7 @@
       "channel": "preview"
     },
     {
-      "name": "flint-primitives",
+      "name": "poodle-primitives",
       "path": "packages/contracts/primitives",
       "kind": "contract-crate",
       "language": "rust",
@@ -104,7 +104,7 @@
       "channel": "preview"
     },
     {
-      "name": "flint-style",
+      "name": "poodle-style",
       "path": "packages/contracts/style",
       "kind": "contract-crate",
       "language": "rust",
@@ -112,7 +112,7 @@
       "channel": "preview"
     },
     {
-      "name": "flint-tokens",
+      "name": "poodle-tokens",
       "path": "packages/contracts/tokens",
       "kind": "contract-crate",
       "language": "rust",
@@ -120,7 +120,7 @@
       "channel": "preview"
     },
     {
-      "name": "flint-workstation",
+      "name": "poodle-workstation",
       "path": "packages/contracts/workstation",
       "kind": "contract-crate",
       "language": "rust",
@@ -128,7 +128,7 @@
       "channel": "preview"
     },
     {
-      "name": "flint-gpui",
+      "name": "poodle-gpui",
       "path": "packages/gpui/adapter",
       "kind": "renderer-adapter",
       "language": "rust",
@@ -136,7 +136,7 @@
       "channel": "preview"
     },
     {
-      "name": "flint-gpui-components",
+      "name": "poodle-gpui-components",
       "path": "packages/gpui/components",
       "kind": "renderer-components",
       "language": "rust",
@@ -144,7 +144,7 @@
       "channel": "preview"
     },
     {
-      "name": "flint-gpui-preview",
+      "name": "poodle-gpui-preview",
       "path": "packages/gpui/preview",
       "kind": "native-preview",
       "language": "rust",
@@ -152,7 +152,7 @@
       "channel": "preview"
     },
     {
-      "name": "flint-jetstream",
+      "name": "poodle-jetstream",
       "path": "packages/jetstream/adapter",
       "kind": "renderer-adapter",
       "language": "rust",
@@ -160,7 +160,7 @@
       "channel": "preview"
     },
     {
-      "name": "flint-jetstream-components",
+      "name": "poodle-jetstream-components",
       "path": "packages/jetstream/components",
       "kind": "renderer-components",
       "language": "rust",
@@ -168,7 +168,7 @@
       "channel": "preview"
     },
     {
-      "name": "flint-jetstream-preview",
+      "name": "poodle-jetstream-preview",
       "path": "packages/jetstream/preview",
       "kind": "native-preview",
       "language": "rust",

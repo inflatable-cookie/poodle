@@ -1,10 +1,10 @@
 # g01.007 Layout, Surface, And Scrolling Primitives
 
 Status: completed
-Owner: Flint Core
+Owner: Poodle Core
 Updated: 2026-03-11
 Depends on: g01.003, g01.004, g01.005, g01.006
-Primary repos: `flint`
+Primary repos: `poodle`
 
 ## Context
 

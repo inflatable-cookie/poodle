@@ -1,9 +1,9 @@
 use gpui::*;
 use gpui::prelude::FluentBuilder;
-use flint_adapter::ThemeProvider;
-use flint_primitives::{SurfaceSpec, SurfaceTone, SurfaceBorder, ChoiceOption, EyebrowSpec};
-use flint_composites::CardRadioGroupSpec;
-use flint_gpui_components::{Surface, CardRadioGroup, Eyebrow};
+use poodle_adapter::ThemeProvider;
+use poodle_primitives::{SurfaceSpec, SurfaceTone, SurfaceBorder, ChoiceOption, EyebrowSpec};
+use poodle_composites::CardRadioGroupSpec;
+use poodle_gpui_components::{Surface, CardRadioGroup, Eyebrow};
 use crate::app_state::AppState;
 use crate::style_bridge::color_to_hsla;
 use crate::PreviewRoot;

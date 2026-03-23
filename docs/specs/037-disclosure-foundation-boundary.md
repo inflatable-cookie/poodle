@@ -6,7 +6,7 @@ Depends on: `028-primitive-baseline-and-bits-aligned-surface.md`, `029-advanced-
 
 ## Purpose
 
-Define the disclosure family that belongs in Flint foundation for web-oriented
+Define the disclosure family that belongs in Poodle foundation for web-oriented
 products and docs surfaces, and make clear where single-block disclosure ends
 and grouped disclosure begins.
 
@@ -53,7 +53,7 @@ use cases happen inside larger docs or settings shells.
 
 ## Naming Rule
 
-Flint keeps both names explicit:
+Poodle keeps both names explicit:
 
 - `Collapsible` for one revealable block
 - `Accordion` for grouped disclosure items

@@ -1,10 +1,10 @@
 //! Combobox specimen — comboboxes with placeholder, value, and disabled states.
 
 use jetstream_runtime::ui_element::*;
-use flint_jetstream::JetstreamThemeProvider;
-use flint_jetstream_components::combobox::js_combobox;
-use flint_jetstream_components::theme_ext::*;
-use flint_primitives::{ComboboxOption, ComboboxSpec};
+use poodle_jetstream::JetstreamThemeProvider;
+use poodle_jetstream_components::combobox::js_combobox;
+use poodle_jetstream_components::theme_ext::*;
+use poodle_primitives::{ComboboxOption, ComboboxSpec};
 
 pub fn render(theme: &JetstreamThemeProvider) -> JsEl {
     let secondary = resolve_color(theme, "semantic.color.text.secondary");

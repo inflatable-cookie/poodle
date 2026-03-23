@@ -1,4 +1,4 @@
-//! Style mapping from Flint's StyleDescriptor to Jetstream-compatible types.
+//! Style mapping from Poodle's StyleDescriptor to Jetstream-compatible types.
 //!
 //! Produces a split output matching Jetstream's `create_node()` API:
 //! - `taffy::Style` for layout (flexbox direction, sizing, alignment, padding,
@@ -10,10 +10,10 @@
 //! mirrored UiStyle — the adapter now speaks Taffy directly.
 
 use glam::Vec4;
-use flint_layout::{
+use poodle_layout::{
     CrossAxisAlignment, LayoutDirection, LayoutIntent, LayoutSizing, MainAxisAlignment,
 };
-use flint_style::StyleDescriptor;
+use poodle_style::StyleDescriptor;
 
 /// Jetstream-compatible color value (Vec4: r, g, b, a in 0.0..1.0).
 #[derive(Debug, Clone, Copy, PartialEq)]
@@ -25,8 +25,8 @@ impl Default for JetstreamColor {
     }
 }
 
-impl From<flint_tokens::typed::ColorValue> for JetstreamColor {
-    fn from(c: flint_tokens::typed::ColorValue) -> Self {
+impl From<poodle_tokens::typed::ColorValue> for JetstreamColor {
+    fn from(c: poodle_tokens::typed::ColorValue) -> Self {
         Self(c.0, c.1, c.2, c.3)
     }
 }
@@ -142,7 +142,7 @@ impl Default for JetstreamMappedStyle {
 
 /// Map a `LayoutIntent` directly to a `taffy::Style`.
 ///
-/// This is the core translation from Flint's layout abstraction to the same
+/// This is the core translation from Poodle's layout abstraction to the same
 /// flexbox engine that GPUI uses internally. No intermediate enum layer.
 pub fn map_layout(intent: &LayoutIntent) -> taffy::Style {
     use taffy::style::{
@@ -208,11 +208,11 @@ pub fn map_layout(intent: &LayoutIntent) -> taffy::Style {
 
     let lp = |v: f32| -> LengthPercentage { LengthPercentage::length(v) };
 
-    let map_overflow = |o: flint_layout::LayoutOverflow| -> taffy::Overflow {
+    let map_overflow = |o: poodle_layout::LayoutOverflow| -> taffy::Overflow {
         match o {
-            flint_layout::LayoutOverflow::Visible => taffy::Overflow::Visible,
-            flint_layout::LayoutOverflow::Hidden => taffy::Overflow::Hidden,
-            flint_layout::LayoutOverflow::Scroll => taffy::Overflow::Scroll,
+            poodle_layout::LayoutOverflow::Visible => taffy::Overflow::Visible,
+            poodle_layout::LayoutOverflow::Hidden => taffy::Overflow::Hidden,
+            poodle_layout::LayoutOverflow::Scroll => taffy::Overflow::Scroll,
         }
     };
     let overflow_x = map_overflow(intent.overflow_x);
@@ -357,7 +357,7 @@ pub fn map_style(desc: &StyleDescriptor) -> JetstreamMappedStyle {
 
 #[cfg(test)]
 mod tests {
-    use flint_layout::LayoutEdges;
+    use poodle_layout::LayoutEdges;
     use super::*;
 
     #[test]
@@ -446,9 +446,9 @@ mod tests {
     #[test]
     fn map_style_converts_full_descriptor() {
         let desc = StyleDescriptor::new()
-            .with_background(flint_tokens::typed::ColorValue(0.1, 0.2, 0.3, 1.0))
-            .with_border(2.0, flint_tokens::typed::ColorValue(0.5, 0.5, 0.5, 1.0))
-            .with_corner_radii(flint_style::CornerRadii::uniform(4.0))
+            .with_background(poodle_tokens::typed::ColorValue(0.1, 0.2, 0.3, 1.0))
+            .with_border(2.0, poodle_tokens::typed::ColorValue(0.5, 0.5, 0.5, 1.0))
+            .with_corner_radii(poodle_style::CornerRadii::uniform(4.0))
             .with_opacity(0.8);
         let mapped = map_style(&desc);
         assert_eq!(mapped.visuals.background, Some(JetstreamColor(0.1, 0.2, 0.3, 1.0)));
@@ -460,11 +460,11 @@ mod tests {
     #[test]
     fn map_style_converts_shadow() {
         let desc = StyleDescriptor::new()
-            .with_shadow(flint_tokens::typed::ShadowValue {
+            .with_shadow(poodle_tokens::typed::ShadowValue {
                 offset_x: 0.0,
                 offset_y: 2.0,
                 blur: 4.0,
-                color: flint_tokens::typed::ColorValue(0.0, 0.0, 0.0, 0.25),
+                color: poodle_tokens::typed::ColorValue(0.0, 0.0, 0.0, 0.25),
             });
         let mapped = map_style(&desc);
         assert!(mapped.visuals.shadow.is_some());
@@ -476,8 +476,8 @@ mod tests {
     #[test]
     fn map_style_converts_typography() {
         let desc = StyleDescriptor::new()
-            .with_typography(flint_style::TypographyDescriptor {
-                family: flint_style::FontFamily::Sans,
+            .with_typography(poodle_style::TypographyDescriptor {
+                family: poodle_style::FontFamily::Sans,
                 size: 16.0,
                 line_height: 24.0,
                 weight: 600,

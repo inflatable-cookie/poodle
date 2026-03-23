@@ -6,8 +6,8 @@
 //! ALL dimensions from contract. ZERO hardcoded values.
 
 use jetstream_runtime::ui_element::{self, JsEl};
-use flint_jetstream::JetstreamThemeProvider;
-use flint_primitives::StatusIndicatorSpec;
+use poodle_jetstream::JetstreamThemeProvider;
+use poodle_primitives::StatusIndicatorSpec;
 
 use crate::theme_ext::resolve_color;
 
@@ -65,10 +65,10 @@ pub fn js_status_indicator(spec: &StatusIndicatorSpec, theme: &JetstreamThemePro
 #[cfg(test)]
 mod tests {
     use super::*;
-    use flint_primitives::StatusTone;
+    use poodle_primitives::StatusTone;
 
     fn theme() -> JetstreamThemeProvider {
-        JetstreamThemeProvider::from_theme(&flint_tokens::themes::DARK)
+        JetstreamThemeProvider::from_theme(&poodle_tokens::themes::DARK)
     }
 
     #[test]

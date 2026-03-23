@@ -1,14 +1,14 @@
 # g03.009 Additional GPUI App Adoption And Multi-App Validation
 
 Status: completed
-Owner: Flint Core
+Owner: Poodle Core
 Updated: 2026-03-12
 Depends on: g03.001, g03.002, g03.003, g03.004, g03.005, g03.006
-Primary repos: `flint`, downstream GPUI apps
+Primary repos: `poodle`, downstream GPUI apps
 
 ## Goals
 
-- [x] validate Flint against more than one GPUI app context
+- [x] validate Poodle against more than one GPUI app context
 - [x] identify app-specific assumptions hiding in the shared layer
 
 ## Execution Checklist

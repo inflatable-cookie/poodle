@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { Eyebrow, CollapseToggle } from "@flint/svelte-primitives";
+  import { Eyebrow, CollapseToggle } from "@poodle/svelte-primitives";
 
   let collapsedLeft = false;
   let collapsedRight = false;
@@ -83,6 +83,6 @@
 
   .specimen__labeled span {
     font-size: 0.75rem;
-    color: var(--flint-color-text-secondary);
+    color: var(--poodle-color-text-secondary);
   }
 </style>

@@ -1,7 +1,7 @@
 <script lang="ts">
-  import { ReorderableList } from "@flint/svelte-composites";
-  import { Eyebrow } from "@flint/svelte-primitives";
-  import type { ReorderableItem } from "@flint/svelte-composites";
+  import { ReorderableList } from "@poodle/svelte-composites";
+  import { Eyebrow } from "@poodle/svelte-primitives";
+  import type { ReorderableItem } from "@poodle/svelte-composites";
 
   let items: ReorderableItem[] = [
     { id: "1", label: "First item" },

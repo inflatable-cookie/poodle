@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { BulkActionBar, Eyebrow, type BulkAction } from "@flint/svelte-primitives";
+  import { BulkActionBar, Eyebrow, type BulkAction } from "@poodle/svelte-primitives";
 
   const actions: BulkAction[] = [
     { id: "export", label: "Export", icon: "download" },
@@ -46,6 +46,6 @@
   .specimen__group p {
     margin: 0;
     font-size: 0.875rem;
-    color: var(--flint-color-text-secondary);
+    color: var(--poodle-color-text-secondary);
   }
 </style>

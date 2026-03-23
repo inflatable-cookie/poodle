@@ -1,5 +1,5 @@
 :root {
-  font-family: var(--flint-typography-body-family);
+  font-family: var(--poodle-typography-body-family);
   background: #0f1720;
   color: #e8eef5;
 }
@@ -37,7 +37,7 @@ input {
 
 button:focus-visible,
 input:focus-visible {
-  outline: var(--flint-border-width-focus) solid var(--flint-color-accent-focusRing);
+  outline: var(--poodle-border-width-focus) solid var(--poodle-color-accent-focusRing);
   outline-offset: 0.125rem;
 }
 
@@ -54,297 +54,297 @@ input:focus-visible {
 }
 
 .app-shell {
-  --flint-surface: var(--flint-color-background-canvas);
-  --flint-treatment-interactive-radius: var(--flint-radius-control);
-  --flint-treatment-interactive-fill: color-mix(in srgb, var(--flint-color-background-surface) 80%, transparent);
-  --flint-treatment-interactive-fill-active: color-mix(
+  --poodle-surface: var(--poodle-color-background-canvas);
+  --poodle-treatment-interactive-radius: var(--poodle-radius-control);
+  --poodle-treatment-interactive-fill: color-mix(in srgb, var(--poodle-color-background-surface) 80%, transparent);
+  --poodle-treatment-interactive-fill-active: color-mix(
     in srgb,
-    var(--flint-color-accent-base) 24%,
-    var(--flint-color-background-elevated)
+    var(--poodle-color-accent-base) 24%,
+    var(--poodle-color-background-elevated)
   );
-  --flint-treatment-interactive-border: color-mix(
+  --poodle-treatment-interactive-border: color-mix(
     in srgb,
-    var(--flint-color-border-subtle) 52%,
+    var(--poodle-color-border-subtle) 52%,
     transparent
   );
-  --flint-treatment-interactive-border-active: color-mix(
+  --poodle-treatment-interactive-border-active: color-mix(
     in srgb,
-    var(--flint-color-accent-base) 24%,
-    var(--flint-color-border-subtle)
+    var(--poodle-color-accent-base) 24%,
+    var(--poodle-color-border-subtle)
   );
-  --flint-treatment-interactive-shadow: none;
-  --flint-treatment-interactive-shadow-active: inset 0 0.0625rem 0
-    color-mix(in srgb, var(--flint-color-text-inverse) 10%, transparent);
-  --flint-treatment-interactive-primary-radius: var(--flint-radius-control);
-  --flint-treatment-interactive-primary-fill: var(--flint-color-accent-base);
-  --flint-treatment-interactive-primary-fill-hover: color-mix(
+  --poodle-treatment-interactive-shadow: none;
+  --poodle-treatment-interactive-shadow-active: inset 0 0.0625rem 0
+    color-mix(in srgb, var(--poodle-color-text-inverse) 10%, transparent);
+  --poodle-treatment-interactive-primary-radius: var(--poodle-radius-control);
+  --poodle-treatment-interactive-primary-fill: var(--poodle-color-accent-base);
+  --poodle-treatment-interactive-primary-fill-hover: color-mix(
     in srgb,
     white 12%,
-    var(--flint-color-accent-base)
+    var(--poodle-color-accent-base)
   );
-  --flint-treatment-interactive-primary-border: color-mix(
+  --poodle-treatment-interactive-primary-border: color-mix(
     in srgb,
-    var(--flint-color-accent-base) 86%,
+    var(--poodle-color-accent-base) 86%,
     black
   );
-  --flint-treatment-interactive-primary-shadow: none;
-  --flint-treatment-interactive-primary-text: var(--flint-color-text-inverse);
-  --flint-treatment-interactive-subtle-radius: var(--flint-radius-control);
-  --flint-treatment-interactive-subtle-fill: color-mix(
+  --poodle-treatment-interactive-primary-shadow: none;
+  --poodle-treatment-interactive-primary-text: var(--poodle-color-text-inverse);
+  --poodle-treatment-interactive-subtle-radius: var(--poodle-radius-control);
+  --poodle-treatment-interactive-subtle-fill: color-mix(
     in srgb,
-    var(--flint-color-background-surface) 82%,
+    var(--poodle-color-background-surface) 82%,
     transparent
   );
-  --flint-treatment-interactive-subtle-fill-hover: color-mix(
+  --poodle-treatment-interactive-subtle-fill-hover: color-mix(
     in srgb,
-    var(--flint-color-background-surface) 88%,
+    var(--poodle-color-background-surface) 88%,
     transparent
   );
-  --flint-treatment-interactive-subtle-fill-focus: var(
-    --flint-treatment-interactive-subtle-fill
+  --poodle-treatment-interactive-subtle-fill-focus: var(
+    --poodle-treatment-interactive-subtle-fill
   );
-  --flint-treatment-interactive-subtle-border: color-mix(
+  --poodle-treatment-interactive-subtle-border: color-mix(
     in srgb,
-    var(--flint-color-border-default) 72%,
+    var(--poodle-color-border-default) 72%,
     transparent
   );
-  --flint-treatment-interactive-subtle-border-hover: color-mix(
+  --poodle-treatment-interactive-subtle-border-hover: color-mix(
     in srgb,
-    var(--flint-color-border-default) 92%,
+    var(--poodle-color-border-default) 92%,
     transparent
   );
-  --flint-treatment-interactive-subtle-border-focus: var(--flint-color-accent-focusRing);
-  --flint-treatment-interactive-subtle-shadow: none;
-  --flint-treatment-interactive-subtle-shadow-hover:
-    inset 0 0.0625rem 0 color-mix(in srgb, var(--flint-color-text-inverse) 10%, transparent);
-  --flint-treatment-interactive-subtle-shadow-focus:
-    0 0 0 var(--flint-border-width-focus)
-      color-mix(in srgb, var(--flint-color-accent-focusRing) 28%, transparent),
-    inset 0 0.0625rem 0 color-mix(in srgb, var(--flint-color-text-inverse) 8%, transparent);
-  --flint-treatment-surface-radius: var(--flint-radius-surface);
-  --flint-treatment-surface-fill: color-mix(
+  --poodle-treatment-interactive-subtle-border-focus: var(--poodle-color-accent-focusRing);
+  --poodle-treatment-interactive-subtle-shadow: none;
+  --poodle-treatment-interactive-subtle-shadow-hover:
+    inset 0 0.0625rem 0 color-mix(in srgb, var(--poodle-color-text-inverse) 10%, transparent);
+  --poodle-treatment-interactive-subtle-shadow-focus:
+    0 0 0 var(--poodle-border-width-focus)
+      color-mix(in srgb, var(--poodle-color-accent-focusRing) 28%, transparent),
+    inset 0 0.0625rem 0 color-mix(in srgb, var(--poodle-color-text-inverse) 8%, transparent);
+  --poodle-treatment-surface-radius: var(--poodle-radius-surface);
+  --poodle-treatment-surface-fill: color-mix(
     in srgb,
-    var(--flint-color-background-panel) 96%,
-    var(--flint-color-background-elevated)
+    var(--poodle-color-background-panel) 96%,
+    var(--poodle-color-background-elevated)
   );
-  --flint-treatment-surface-border: color-mix(
+  --poodle-treatment-surface-border: color-mix(
     in srgb,
-    var(--flint-color-border-subtle) 30%,
+    var(--poodle-color-border-subtle) 30%,
     transparent
   );
-  --flint-treatment-surface-shadow:
-    inset 0 0 0 0.0625rem color-mix(in srgb, var(--flint-color-border-subtle) 18%, transparent);
-  --flint-treatment-surface-hover-fill: color-mix(
+  --poodle-treatment-surface-shadow:
+    inset 0 0 0 0.0625rem color-mix(in srgb, var(--poodle-color-border-subtle) 18%, transparent);
+  --poodle-treatment-surface-hover-fill: color-mix(
     in srgb,
-    var(--flint-color-background-elevated) 94%,
-    var(--flint-color-background-panel)
+    var(--poodle-color-background-elevated) 94%,
+    var(--poodle-color-background-panel)
   );
-  --flint-treatment-surface-hover-border: color-mix(
+  --poodle-treatment-surface-hover-border: color-mix(
     in srgb,
-    var(--flint-color-border-default) 48%,
+    var(--poodle-color-border-default) 48%,
     transparent
   );
-  --flint-treatment-surface-hover-shadow: var(--flint-treatment-surface-shadow);
-  --flint-treatment-surface-elevated-radius: var(--flint-radius-surface);
-  --flint-treatment-surface-elevated-fill: color-mix(
+  --poodle-treatment-surface-hover-shadow: var(--poodle-treatment-surface-shadow);
+  --poodle-treatment-surface-elevated-radius: var(--poodle-radius-surface);
+  --poodle-treatment-surface-elevated-fill: color-mix(
     in srgb,
-    var(--flint-color-background-elevated) 94%,
+    var(--poodle-color-background-elevated) 94%,
     transparent
   );
-  --flint-treatment-surface-elevated-border: color-mix(
+  --poodle-treatment-surface-elevated-border: color-mix(
     in srgb,
-    var(--flint-color-border-default) 22%,
+    var(--poodle-color-border-default) 22%,
     transparent
   );
-  --flint-treatment-surface-elevated-shadow: var(--flint-elevation-surface);
-  --flint-treatment-surface-header-fill: color-mix(
+  --poodle-treatment-surface-elevated-shadow: var(--poodle-elevation-surface);
+  --poodle-treatment-surface-header-fill: color-mix(
     in srgb,
-    var(--flint-color-background-elevated) 52%,
+    var(--poodle-color-background-elevated) 52%,
     transparent
   );
-  --flint-treatment-surface-divider: color-mix(
+  --poodle-treatment-surface-divider: color-mix(
     in srgb,
-    var(--flint-color-border-subtle) 48%,
+    var(--poodle-color-border-subtle) 48%,
     transparent
   );
-  color: var(--flint-color-text-primary);
-  background: var(--flint-color-background-canvas);
+  color: var(--poodle-color-text-primary);
+  background: var(--poodle-color-background-canvas);
 }
 
 .app-shell[data-appearance-treatment="brand-raised"] {
-  --flint-treatment-interactive-fill:
+  --poodle-treatment-interactive-fill:
     linear-gradient(
       180deg,
       color-mix(in srgb, white 18%, transparent),
       color-mix(in srgb, white 2%, transparent)
     ),
-    color-mix(in srgb, var(--flint-color-background-elevated) 92%, var(--flint-color-background-surface));
-  --flint-treatment-interactive-fill-active:
+    color-mix(in srgb, var(--poodle-color-background-elevated) 92%, var(--poodle-color-background-surface));
+  --poodle-treatment-interactive-fill-active:
     linear-gradient(
       180deg,
       color-mix(in srgb, white 18%, transparent),
       color-mix(in srgb, white 2%, transparent)
     ),
-    color-mix(in srgb, var(--flint-color-accent-base) 24%, var(--flint-color-background-elevated));
-  --flint-treatment-interactive-border: color-mix(
+    color-mix(in srgb, var(--poodle-color-accent-base) 24%, var(--poodle-color-background-elevated));
+  --poodle-treatment-interactive-border: color-mix(
     in srgb,
-    var(--flint-color-border-default) 72%,
+    var(--poodle-color-border-default) 72%,
     transparent
   );
-  --flint-treatment-interactive-border-active: color-mix(
+  --poodle-treatment-interactive-border-active: color-mix(
     in srgb,
-    var(--flint-color-accent-base) 44%,
-    var(--flint-color-border-default)
+    var(--poodle-color-accent-base) 44%,
+    var(--poodle-color-border-default)
   );
-  --flint-treatment-interactive-shadow:
+  --poodle-treatment-interactive-shadow:
     inset 0 0.0625rem 0 rgba(255, 255, 255, 0.1),
     0 0.125rem 0.375rem rgba(9, 13, 18, 0.1);
-  --flint-treatment-interactive-shadow-active:
+  --poodle-treatment-interactive-shadow-active:
     inset 0 0.0625rem 0 rgba(255, 255, 255, 0.2),
     0 0.375rem 1rem rgba(9, 13, 18, 0.16);
-  --flint-treatment-interactive-primary-fill:
+  --poodle-treatment-interactive-primary-fill:
     linear-gradient(
       180deg,
       color-mix(in srgb, white 24%, transparent),
       color-mix(in srgb, white 0%, transparent)
     ),
-    var(--flint-color-accent-base);
-  --flint-treatment-interactive-primary-fill-hover:
+    var(--poodle-color-accent-base);
+  --poodle-treatment-interactive-primary-fill-hover:
     linear-gradient(
       180deg,
       color-mix(in srgb, white 30%, transparent),
       color-mix(in srgb, white 6%, transparent)
     ),
-    color-mix(in srgb, white 6%, var(--flint-color-accent-base));
-  --flint-treatment-interactive-primary-border: color-mix(
+    color-mix(in srgb, white 6%, var(--poodle-color-accent-base));
+  --poodle-treatment-interactive-primary-border: color-mix(
     in srgb,
-    var(--flint-color-accent-base) 72%,
+    var(--poodle-color-accent-base) 72%,
     black
   );
-  --flint-treatment-interactive-primary-shadow:
+  --poodle-treatment-interactive-primary-shadow:
     inset 0 0.0625rem 0 rgba(255, 255, 255, 0.22),
     0 0.5rem 1.125rem rgba(9, 13, 18, 0.2);
-  --flint-treatment-interactive-subtle-fill:
+  --poodle-treatment-interactive-subtle-fill:
     linear-gradient(
       180deg,
       color-mix(in srgb, white 10%, transparent),
       color-mix(in srgb, white 0%, transparent)
     ),
-    color-mix(in srgb, var(--flint-color-background-surface) 84%, transparent);
-  --flint-treatment-interactive-subtle-fill-hover:
+    color-mix(in srgb, var(--poodle-color-background-surface) 84%, transparent);
+  --poodle-treatment-interactive-subtle-fill-hover:
     linear-gradient(
       180deg,
       color-mix(in srgb, white 16%, transparent),
       color-mix(in srgb, white 2%, transparent)
     ),
-    color-mix(in srgb, var(--flint-color-background-surface) 88%, transparent);
-  --flint-treatment-interactive-subtle-fill-focus: var(
-    --flint-treatment-interactive-subtle-fill-hover
+    color-mix(in srgb, var(--poodle-color-background-surface) 88%, transparent);
+  --poodle-treatment-interactive-subtle-fill-focus: var(
+    --poodle-treatment-interactive-subtle-fill-hover
   );
-  --flint-treatment-interactive-subtle-border: color-mix(
+  --poodle-treatment-interactive-subtle-border: color-mix(
     in srgb,
-    var(--flint-color-border-default) 76%,
+    var(--poodle-color-border-default) 76%,
     transparent
   );
-  --flint-treatment-interactive-subtle-border-hover: color-mix(
+  --poodle-treatment-interactive-subtle-border-hover: color-mix(
     in srgb,
-    var(--flint-color-accent-base) 34%,
-    var(--flint-color-border-default)
+    var(--poodle-color-accent-base) 34%,
+    var(--poodle-color-border-default)
   );
-  --flint-treatment-interactive-subtle-shadow:
+  --poodle-treatment-interactive-subtle-shadow:
     inset 0 0.0625rem 0 rgba(255, 255, 255, 0.08);
-  --flint-treatment-interactive-subtle-shadow-hover:
+  --poodle-treatment-interactive-subtle-shadow-hover:
     inset 0 0.0625rem 0 rgba(255, 255, 255, 0.12),
     0 0.375rem 0.875rem rgba(9, 13, 18, 0.1);
-  --flint-treatment-interactive-subtle-shadow-focus:
-    0 0 0 var(--flint-border-width-focus)
-      color-mix(in srgb, var(--flint-color-accent-focusRing) 28%, transparent),
+  --poodle-treatment-interactive-subtle-shadow-focus:
+    0 0 0 var(--poodle-border-width-focus)
+      color-mix(in srgb, var(--poodle-color-accent-focusRing) 28%, transparent),
     inset 0 0.0625rem 0 rgba(255, 255, 255, 0.14);
-  --flint-treatment-surface-fill:
+  --poodle-treatment-surface-fill:
     linear-gradient(
       180deg,
       color-mix(in srgb, white 14%, transparent),
       color-mix(in srgb, white 2%, transparent)
     ),
-    color-mix(in srgb, var(--flint-color-background-panel) 92%, var(--flint-color-background-elevated));
-  --flint-treatment-surface-border: color-mix(
+    color-mix(in srgb, var(--poodle-color-background-panel) 92%, var(--poodle-color-background-elevated));
+  --poodle-treatment-surface-border: color-mix(
     in srgb,
-    var(--flint-color-border-default) 72%,
+    var(--poodle-color-border-default) 72%,
     transparent
   );
-  --flint-treatment-surface-shadow:
+  --poodle-treatment-surface-shadow:
     inset 0 0.0625rem 0 rgba(255, 255, 255, 0.08),
     0 0.625rem 1.5rem rgba(9, 13, 18, 0.1);
-  --flint-treatment-surface-hover-fill:
+  --poodle-treatment-surface-hover-fill:
     linear-gradient(
       180deg,
       color-mix(in srgb, white 18%, transparent),
       color-mix(in srgb, white 4%, transparent)
     ),
-    color-mix(in srgb, var(--flint-color-background-elevated) 94%, var(--flint-color-background-panel));
-  --flint-treatment-surface-hover-border: color-mix(
+    color-mix(in srgb, var(--poodle-color-background-elevated) 94%, var(--poodle-color-background-panel));
+  --poodle-treatment-surface-hover-border: color-mix(
     in srgb,
-    var(--flint-color-accent-base) 28%,
-    var(--flint-color-border-default)
+    var(--poodle-color-accent-base) 28%,
+    var(--poodle-color-border-default)
   );
-  --flint-treatment-surface-hover-shadow:
+  --poodle-treatment-surface-hover-shadow:
     inset 0 0.0625rem 0 rgba(255, 255, 255, 0.12),
     0 0.875rem 1.875rem rgba(9, 13, 18, 0.14);
-  --flint-treatment-surface-elevated-fill:
+  --poodle-treatment-surface-elevated-fill:
     linear-gradient(
       180deg,
       color-mix(in srgb, white 20%, transparent),
       color-mix(in srgb, white 4%, transparent)
     ),
-    color-mix(in srgb, var(--flint-color-background-elevated) 96%, transparent);
-  --flint-treatment-surface-elevated-border: color-mix(
+    color-mix(in srgb, var(--poodle-color-background-elevated) 96%, transparent);
+  --poodle-treatment-surface-elevated-border: color-mix(
     in srgb,
-    var(--flint-color-accent-base) 18%,
-    var(--flint-color-border-default)
+    var(--poodle-color-accent-base) 18%,
+    var(--poodle-color-border-default)
   );
-  --flint-treatment-surface-elevated-shadow:
+  --poodle-treatment-surface-elevated-shadow:
     inset 0 0.0625rem 0 rgba(255, 255, 255, 0.16),
     0 1rem 2.25rem rgba(9, 13, 18, 0.18);
-  --flint-treatment-surface-header-fill:
+  --poodle-treatment-surface-header-fill:
     linear-gradient(
       180deg,
       color-mix(in srgb, white 16%, transparent),
       color-mix(in srgb, white 0%, transparent)
     ),
-    color-mix(in srgb, var(--flint-color-background-elevated) 60%, transparent);
-  --flint-treatment-surface-divider: color-mix(
+    color-mix(in srgb, var(--poodle-color-background-elevated) 60%, transparent);
+  --poodle-treatment-surface-divider: color-mix(
     in srgb,
-    var(--flint-color-border-default) 68%,
+    var(--poodle-color-border-default) 68%,
     transparent
   );
 }
 
 .app-shell[data-appearance-treatment="brand-raised"][data-theme="light"] {
-  --flint-treatment-interactive-shadow:
+  --poodle-treatment-interactive-shadow:
     inset 0 0.0625rem 0 rgba(255, 255, 255, 0.48),
     0 0.125rem 0.375rem rgba(49, 66, 85, 0.06);
-  --flint-treatment-interactive-shadow-active:
+  --poodle-treatment-interactive-shadow-active:
     inset 0 0.0625rem 0 rgba(255, 255, 255, 0.58),
     0 0.375rem 0.875rem rgba(49, 66, 85, 0.08);
-  --flint-treatment-interactive-primary-shadow:
+  --poodle-treatment-interactive-primary-shadow:
     inset 0 0.0625rem 0 rgba(255, 255, 255, 0.34),
     0 0.4375rem 0.9375rem rgba(49, 66, 85, 0.12);
-  --flint-treatment-interactive-subtle-shadow:
+  --poodle-treatment-interactive-subtle-shadow:
     inset 0 0.0625rem 0 rgba(255, 255, 255, 0.48);
-  --flint-treatment-interactive-subtle-shadow-hover:
+  --poodle-treatment-interactive-subtle-shadow-hover:
     inset 0 0.0625rem 0 rgba(255, 255, 255, 0.56),
     0 0.4375rem 0.9375rem rgba(49, 66, 85, 0.08);
-  --flint-treatment-interactive-subtle-shadow-focus:
-    0 0 0 var(--flint-border-width-focus)
-      color-mix(in srgb, var(--flint-color-accent-focusRing) 24%, transparent),
+  --poodle-treatment-interactive-subtle-shadow-focus:
+    0 0 0 var(--poodle-border-width-focus)
+      color-mix(in srgb, var(--poodle-color-accent-focusRing) 24%, transparent),
     inset 0 0.0625rem 0 rgba(255, 255, 255, 0.56);
-  --flint-treatment-surface-shadow:
+  --poodle-treatment-surface-shadow:
     inset 0 0.0625rem 0 rgba(255, 255, 255, 0.64),
     0 0.625rem 1.375rem rgba(49, 66, 85, 0.08);
-  --flint-treatment-surface-hover-shadow:
+  --poodle-treatment-surface-hover-shadow:
     inset 0 0.0625rem 0 rgba(255, 255, 255, 0.72),
     0 0.875rem 1.625rem rgba(49, 66, 85, 0.1);
-  --flint-treatment-surface-elevated-shadow:
+  --poodle-treatment-surface-elevated-shadow:
     inset 0 0.0625rem 0 rgba(255, 255, 255, 0.78),
     0 1rem 2rem rgba(49, 66, 85, 0.12);
 }
@@ -353,8 +353,8 @@ input:focus-visible {
   color-scheme: light;
   background: color-mix(
     in srgb,
-    var(--flint-color-background-canvas) 84%,
-    var(--flint-color-background-surface)
+    var(--poodle-color-background-canvas) 84%,
+    var(--poodle-color-background-surface)
   );
 }
 
@@ -362,8 +362,8 @@ input:focus-visible {
   color-scheme: dark;
   background: color-mix(
     in srgb,
-    var(--flint-color-background-canvas) 88%,
-    var(--flint-color-background-panel)
+    var(--poodle-color-background-canvas) 88%,
+    var(--poodle-color-background-panel)
   );
 }
 
@@ -371,8 +371,8 @@ input:focus-visible {
   color-scheme: dark;
   background: color-mix(
     in srgb,
-    var(--flint-color-background-canvas) 86%,
-    var(--flint-color-background-panel)
+    var(--poodle-color-background-canvas) 86%,
+    var(--poodle-color-background-panel)
   );
 }
 
@@ -384,7 +384,7 @@ input:focus-visible {
 }
 
 .meta-list {
-  color: var(--flint-color-text-secondary);
+  color: var(--poodle-color-text-secondary);
   margin: 0;
   font-size: 0.8125rem;
   line-height: 1.5;
@@ -398,7 +398,7 @@ input:focus-visible {
 
 .docs-link-chip:focus-visible,
 .docs-section-card:focus-visible {
-  outline: var(--flint-border-width-focus) solid var(--flint-color-accent-focusRing);
+  outline: var(--poodle-border-width-focus) solid var(--poodle-color-accent-focusRing);
   outline-offset: 0.125rem;
 }
 
@@ -410,27 +410,27 @@ input:focus-visible {
   align-content: start;
   gap: 1.125rem;
   padding: 1.5rem;
-  background: var(--flint-color-background-canvas);
-  color: var(--flint-color-text-primary);
+  background: var(--poodle-color-background-canvas);
+  color: var(--poodle-color-text-primary);
   transition:
-    background var(--flint-motion-duration-interaction) var(--flint-motion-easing-standard),
-    color var(--flint-motion-duration-interaction) var(--flint-motion-easing-standard);
+    background var(--poodle-motion-duration-interaction) var(--poodle-motion-easing-standard),
+    color var(--poodle-motion-duration-interaction) var(--poodle-motion-easing-standard);
 }
 
 .panel {
   display: grid;
   gap: var(--preview-section-gap);
   padding: var(--preview-section-gutter);
-  border: 0.0625rem solid var(--flint-treatment-surface-elevated-border);
-  border-radius: calc(var(--flint-radius-surface) + 0.125rem);
-  background: var(--flint-treatment-surface-elevated-fill);
-  box-shadow: var(--flint-treatment-surface-elevated-shadow);
+  border: 0.0625rem solid var(--poodle-treatment-surface-elevated-border);
+  border-radius: calc(var(--poodle-radius-surface) + 0.125rem);
+  background: var(--poodle-treatment-surface-elevated-fill);
+  box-shadow: var(--poodle-treatment-surface-elevated-shadow);
   scroll-margin-top: 1.125rem;
 }
 
 .app-shell[data-theme="light"] .panel {
-  border-color: var(--flint-treatment-surface-elevated-border);
-  box-shadow: var(--flint-treatment-surface-elevated-shadow);
+  border-color: var(--poodle-treatment-surface-elevated-border);
+  box-shadow: var(--poodle-treatment-surface-elevated-shadow);
 }
 
 .app-shell[data-theme="light"] .docs-family-card,
@@ -438,13 +438,13 @@ input:focus-visible {
 .app-shell[data-theme="light"] .summary-tile,
 .app-shell[data-theme="light"] .behavior-item,
 .app-shell[data-theme="light"] .workspace-persistence-panel {
-  background: var(--flint-treatment-surface-fill);
-  box-shadow: var(--flint-treatment-surface-shadow);
+  background: var(--poodle-treatment-surface-fill);
+  box-shadow: var(--poodle-treatment-surface-shadow);
 }
 
 .docs-section-card,
 .docs-link-chip {
-  border: 0.0625rem solid var(--flint-treatment-interactive-border);
+  border: 0.0625rem solid var(--poodle-treatment-interactive-border);
   color: inherit;
 }
 
@@ -490,10 +490,10 @@ input:focus-visible {
   gap: 1rem;
   min-height: 100%;
   padding: 1rem;
-  border: 0.0625rem solid var(--flint-treatment-surface-border);
-  border-radius: var(--flint-radius-surface);
-  background: var(--flint-treatment-surface-fill);
-  box-shadow: var(--flint-treatment-surface-shadow);
+  border: 0.0625rem solid var(--poodle-treatment-surface-border);
+  border-radius: var(--poodle-radius-surface);
+  background: var(--poodle-treatment-surface-fill);
+  box-shadow: var(--poodle-treatment-surface-shadow);
   color: inherit;
   transition:
     border-color 180ms ease,
@@ -540,10 +540,10 @@ input:focus-visible {
   align-items: center;
   min-height: 2rem;
   padding: 0 0.625rem;
-  border-radius: var(--flint-treatment-interactive-radius);
-  background: var(--flint-treatment-interactive-fill);
-  color: var(--flint-color-text-primary);
-  box-shadow: var(--flint-treatment-interactive-shadow);
+  border-radius: var(--poodle-treatment-interactive-radius);
+  background: var(--poodle-treatment-interactive-fill);
+  color: var(--poodle-color-text-primary);
+  box-shadow: var(--poodle-treatment-interactive-shadow);
   font-size: 0.75rem;
   cursor: pointer;
   text-align: left;
@@ -556,7 +556,7 @@ input:focus-visible {
 
 .docs-section-card p {
   margin: 0;
-  color: var(--flint-color-text-secondary);
+  color: var(--poodle-color-text-secondary);
   font-size: 0.8125rem;
   line-height: 1.5;
 }
@@ -566,13 +566,13 @@ input:focus-visible {
   align-items: center;
   min-height: 1.5rem;
   padding: 0 0.5rem;
-  border-radius: var(--flint-radius-control);
+  border-radius: var(--poodle-radius-control);
   background: color-mix(
     in srgb,
-    var(--flint-color-background-surface) 78%,
-    var(--flint-color-background-elevated)
+    var(--poodle-color-background-surface) 78%,
+    var(--poodle-color-background-elevated)
   );
-  color: var(--flint-color-text-secondary);
+  color: var(--poodle-color-text-secondary);
   font-size: 0.6875rem;
 }
 
@@ -587,46 +587,46 @@ input:focus-visible {
 .docs-link-chip:focus-visible,
 .docs-family-card:hover,
 .docs-section-card:hover {
-  border-color: var(--flint-treatment-surface-hover-border);
-  background: var(--flint-treatment-surface-hover-fill);
-  box-shadow: var(--flint-treatment-surface-hover-shadow);
+  border-color: var(--poodle-treatment-surface-hover-border);
+  background: var(--poodle-treatment-surface-hover-fill);
+  box-shadow: var(--poodle-treatment-surface-hover-shadow);
   transform: translateY(-0.0625rem);
 }
 
 .brand-proof-scope {
-  --brand-proof-accent: color-mix(in srgb, #f59e0b 58%, var(--flint-color-accent-base));
+  --brand-proof-accent: color-mix(in srgb, #f59e0b 58%, var(--poodle-color-accent-base));
   --brand-proof-ember: color-mix(in srgb, #fb7185 40%, var(--brand-proof-accent));
-  --flint-treatment-surface-fill:
+  --poodle-treatment-surface-fill:
     linear-gradient(
       180deg,
       color-mix(in srgb, white 18%, transparent),
       color-mix(in srgb, white 4%, transparent)
     ),
-    color-mix(in srgb, var(--flint-color-background-elevated) 94%, var(--flint-color-background-panel));
-  --flint-treatment-surface-border: color-mix(
+    color-mix(in srgb, var(--poodle-color-background-elevated) 94%, var(--poodle-color-background-panel));
+  --poodle-treatment-surface-border: color-mix(
     in srgb,
     var(--brand-proof-accent) 26%,
-    var(--flint-color-border-default)
+    var(--poodle-color-border-default)
   );
-  --flint-treatment-surface-shadow:
+  --poodle-treatment-surface-shadow:
     inset 0 0.0625rem 0 color-mix(in srgb, white 18%, transparent),
     0 0.875rem 2rem rgba(12, 17, 24, 0.12);
-  --flint-treatment-surface-hover-fill:
+  --poodle-treatment-surface-hover-fill:
     linear-gradient(
       180deg,
       color-mix(in srgb, white 24%, transparent),
       color-mix(in srgb, white 8%, transparent)
     ),
-    color-mix(in srgb, var(--flint-color-background-elevated) 96%, var(--flint-color-background-panel));
-  --flint-treatment-surface-hover-border: color-mix(
+    color-mix(in srgb, var(--poodle-color-background-elevated) 96%, var(--poodle-color-background-panel));
+  --poodle-treatment-surface-hover-border: color-mix(
     in srgb,
     var(--brand-proof-accent) 42%,
-    var(--flint-color-border-default)
+    var(--poodle-color-border-default)
   );
-  --flint-treatment-surface-hover-shadow:
+  --poodle-treatment-surface-hover-shadow:
     inset 0 0.0625rem 0 color-mix(in srgb, white 24%, transparent),
     0 1rem 2.5rem rgba(12, 17, 24, 0.16);
-  --flint-treatment-surface-elevated-fill:
+  --poodle-treatment-surface-elevated-fill:
     linear-gradient(
       180deg,
       color-mix(in srgb, white 28%, transparent),
@@ -637,50 +637,50 @@ input:focus-visible {
       color-mix(in srgb, var(--brand-proof-accent) 18%, transparent),
       color-mix(in srgb, var(--brand-proof-ember) 12%, transparent)
     ),
-    color-mix(in srgb, var(--flint-color-background-elevated) 98%, transparent);
-  --flint-treatment-surface-elevated-border: color-mix(
+    color-mix(in srgb, var(--poodle-color-background-elevated) 98%, transparent);
+  --poodle-treatment-surface-elevated-border: color-mix(
     in srgb,
     var(--brand-proof-accent) 32%,
-    var(--flint-color-border-default)
+    var(--poodle-color-border-default)
   );
-  --flint-treatment-surface-elevated-shadow:
+  --poodle-treatment-surface-elevated-shadow:
     inset 0 0.0625rem 0 color-mix(in srgb, white 32%, transparent),
     0 1.25rem 2.75rem rgba(12, 17, 24, 0.18);
-  --flint-treatment-interactive-border: color-mix(
+  --poodle-treatment-interactive-border: color-mix(
     in srgb,
     var(--brand-proof-accent) 24%,
-    var(--flint-color-border-default)
+    var(--poodle-color-border-default)
   );
-  --flint-treatment-interactive-fill:
+  --poodle-treatment-interactive-fill:
     linear-gradient(
       180deg,
       color-mix(in srgb, white 16%, transparent),
       color-mix(in srgb, white 4%, transparent)
     ),
-    color-mix(in srgb, var(--flint-color-background-elevated) 92%, var(--flint-color-background-surface));
-  --flint-treatment-interactive-fill-active:
+    color-mix(in srgb, var(--poodle-color-background-elevated) 92%, var(--poodle-color-background-surface));
+  --poodle-treatment-interactive-fill-active:
     linear-gradient(
       180deg,
       color-mix(in srgb, white 18%, transparent),
       color-mix(in srgb, white 6%, transparent)
     ),
-    color-mix(in srgb, var(--brand-proof-accent) 18%, var(--flint-color-background-elevated));
-  --flint-treatment-interactive-border-active: color-mix(
+    color-mix(in srgb, var(--brand-proof-accent) 18%, var(--poodle-color-background-elevated));
+  --poodle-treatment-interactive-border-active: color-mix(
     in srgb,
     var(--brand-proof-accent) 46%,
-    var(--flint-color-border-default)
+    var(--poodle-color-border-default)
   );
-  --flint-treatment-interactive-shadow-active:
+  --poodle-treatment-interactive-shadow-active:
     inset 0 0.0625rem 0 color-mix(in srgb, white 28%, transparent),
     0 0.5rem 1.25rem rgba(12, 17, 24, 0.12);
-  --flint-treatment-interactive-primary-fill:
+  --poodle-treatment-interactive-primary-fill:
     linear-gradient(
       180deg,
       color-mix(in srgb, white 18%, transparent),
       color-mix(in srgb, white 0%, transparent)
     ),
     linear-gradient(135deg, var(--brand-proof-accent), var(--brand-proof-ember));
-  --flint-treatment-interactive-primary-fill-hover:
+  --poodle-treatment-interactive-primary-fill-hover:
     linear-gradient(
       180deg,
       color-mix(in srgb, white 24%, transparent),
@@ -691,28 +691,28 @@ input:focus-visible {
       color-mix(in srgb, white 6%, var(--brand-proof-accent)),
       color-mix(in srgb, white 4%, var(--brand-proof-ember))
     );
-  --flint-treatment-interactive-primary-border: color-mix(
+  --poodle-treatment-interactive-primary-border: color-mix(
     in srgb,
     var(--brand-proof-ember) 72%,
     black
   );
-  --flint-treatment-interactive-primary-shadow:
+  --poodle-treatment-interactive-primary-shadow:
     inset 0 0.0625rem 0 color-mix(in srgb, white 34%, transparent),
     0 0.75rem 1.5rem rgba(12, 17, 24, 0.18);
-  --flint-recipe-page-header-padding-block-start: 1.5rem;
-  --flint-recipe-page-header-padding-inline: 1.5rem;
-  --flint-recipe-page-header-padding-block-end: 1.375rem;
-  --flint-recipe-page-header-fill: var(--flint-treatment-surface-elevated-fill);
-  --flint-recipe-page-header-border: var(--flint-treatment-surface-elevated-border);
-  --flint-recipe-page-header-shadow: var(--flint-treatment-surface-elevated-shadow);
-  --flint-recipe-page-header-radius: calc(var(--flint-radius-surface) + 0.25rem);
+  --poodle-recipe-page-header-padding-block-start: 1.5rem;
+  --poodle-recipe-page-header-padding-inline: 1.5rem;
+  --poodle-recipe-page-header-padding-block-end: 1.375rem;
+  --poodle-recipe-page-header-fill: var(--poodle-treatment-surface-elevated-fill);
+  --poodle-recipe-page-header-border: var(--poodle-treatment-surface-elevated-border);
+  --poodle-recipe-page-header-shadow: var(--poodle-treatment-surface-elevated-shadow);
+  --poodle-recipe-page-header-radius: calc(var(--poodle-radius-surface) + 0.25rem);
   display: grid;
   gap: 1.25rem;
   padding: 1.25rem;
-  border-radius: calc(var(--flint-radius-surface) + 0.25rem);
+  border-radius: calc(var(--poodle-radius-surface) + 0.25rem);
   background:
     radial-gradient(circle at top right, color-mix(in srgb, var(--brand-proof-accent) 18%, transparent), transparent 32%),
-    linear-gradient(180deg, color-mix(in srgb, var(--flint-color-background-surface) 74%, transparent), color-mix(in srgb, var(--flint-color-background-panel) 82%, transparent));
+    linear-gradient(180deg, color-mix(in srgb, var(--poodle-color-background-surface) 74%, transparent), color-mix(in srgb, var(--poodle-color-background-panel) 82%, transparent));
 }
 
 .brand-proof-grid {
@@ -722,16 +722,16 @@ input:focus-visible {
 }
 
 .app-shell[data-theme="light"] .brand-proof-scope {
-  --flint-treatment-surface-shadow:
+  --poodle-treatment-surface-shadow:
     inset 0 0.0625rem 0 rgba(255, 255, 255, 0.78),
     0 0.875rem 1.75rem rgba(49, 66, 85, 0.08);
-  --flint-treatment-surface-hover-shadow:
+  --poodle-treatment-surface-hover-shadow:
     inset 0 0.0625rem 0 rgba(255, 255, 255, 0.84),
     0 1rem 2rem rgba(49, 66, 85, 0.1);
-  --flint-treatment-surface-elevated-shadow:
+  --poodle-treatment-surface-elevated-shadow:
     inset 0 0.0625rem 0 rgba(255, 255, 255, 0.86),
     0 1.125rem 2.25rem rgba(49, 66, 85, 0.12);
-  --flint-treatment-interactive-primary-shadow:
+  --poodle-treatment-interactive-primary-shadow:
     inset 0 0.0625rem 0 rgba(255, 255, 255, 0.42),
     0 0.75rem 1.5rem rgba(49, 66, 85, 0.14);
 }
@@ -744,10 +744,10 @@ input:focus-visible {
   display: grid;
   gap: 1.125rem;
   padding: 1.25rem;
-  border: 0.0625rem solid var(--flint-treatment-surface-border);
-  border-radius: var(--flint-radius-surface);
-  background: var(--flint-treatment-surface-fill);
-  box-shadow: var(--flint-treatment-surface-shadow);
+  border: 0.0625rem solid var(--poodle-treatment-surface-border);
+  border-radius: var(--poodle-radius-surface);
+  background: var(--poodle-treatment-surface-fill);
+  box-shadow: var(--poodle-treatment-surface-shadow);
 }
 
 .behavior-list {
@@ -759,8 +759,8 @@ input:focus-visible {
   gap: 0.375rem;
   padding: 0.875rem;
   border: 0.0625rem solid transparent;
-  border-radius: var(--flint-radius-surface);
-  background: color-mix(in srgb, var(--flint-color-background-surface) 60%, transparent);
+  border-radius: var(--poodle-radius-surface);
+  background: color-mix(in srgb, var(--poodle-color-background-surface) 60%, transparent);
 }
 
 .behavior-item strong {
@@ -769,7 +769,7 @@ input:focus-visible {
 
 .behavior-item p {
   margin: 0;
-  color: var(--flint-color-text-secondary);
+  color: var(--poodle-color-text-secondary);
   font-size: 0.8125rem;
   line-height: 1.5;
 }
@@ -789,7 +789,7 @@ input:focus-visible {
 }
 
 .detail-card-meta {
-  color: var(--flint-color-text-secondary);
+  color: var(--poodle-color-text-secondary);
   font-size: 0.8125rem;
   line-height: 1.5;
 }
@@ -805,8 +805,8 @@ input:focus-visible {
   min-width: 0;
   padding: 0.75rem;
   border: 0.0625rem solid transparent;
-  border-radius: var(--flint-radius-surface);
-  background: color-mix(in srgb, var(--flint-color-background-panel) 94%, transparent);
+  border-radius: var(--poodle-radius-surface);
+  background: color-mix(in srgb, var(--poodle-color-background-panel) 94%, transparent);
   color: inherit;
   text-align: left;
   cursor: pointer;
@@ -817,7 +817,7 @@ input:focus-visible {
 
 .media-strip__item[data-pressed="true"] {
   border-color: transparent;
-  background: color-mix(in srgb, var(--flint-color-accent-base) 22%, var(--flint-color-background-elevated));
+  background: color-mix(in srgb, var(--poodle-color-accent-base) 22%, var(--poodle-color-background-elevated));
 }
 
 .command-shortcut-hint {
@@ -826,10 +826,10 @@ input:focus-visible {
   justify-content: center;
   min-height: 1.75rem;
   padding: 0 0.625rem;
-  border-radius: var(--flint-radius-control);
-  background: color-mix(in srgb, var(--flint-color-background-surface) 80%, transparent);
-  color: var(--flint-color-text-secondary);
-  font-family: var(--flint-typography-code-family);
+  border-radius: var(--poodle-radius-control);
+  background: color-mix(in srgb, var(--poodle-color-background-surface) 80%, transparent);
+  color: var(--poodle-color-text-secondary);
+  font-family: var(--poodle-typography-code-family);
   font-size: 0.6875rem;
 }
 
@@ -857,7 +857,7 @@ input:focus-visible {
   gap: 0.5rem;
   margin: 0;
   padding-left: 1.125rem;
-  color: var(--flint-color-text-secondary);
+  color: var(--poodle-color-text-secondary);
   font-size: 0.8125rem;
   line-height: 1.5;
 }
@@ -890,10 +890,10 @@ input:focus-visible {
 .workspace-persistence-panel pre {
   margin: 0;
   padding: 0.875rem;
-  border-radius: calc(var(--flint-radius-surface) - 0.0625rem);
-  background: color-mix(in srgb, var(--flint-color-background-canvas) 82%, transparent);
-  color: var(--flint-color-text-primary);
-  font-family: var(--flint-typography-code-family);
+  border-radius: calc(var(--poodle-radius-surface) - 0.0625rem);
+  background: color-mix(in srgb, var(--poodle-color-background-canvas) 82%, transparent);
+  color: var(--poodle-color-text-primary);
+  font-family: var(--poodle-typography-code-family);
   font-size: 0.75rem;
   line-height: 1.5;
   overflow: auto;
@@ -904,7 +904,7 @@ input:focus-visible {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: var(--flint-space-inline-sm);
+  gap: var(--poodle-space-inline-sm);
 }
 
 .workspace-identity__mark {
@@ -914,8 +914,8 @@ input:focus-visible {
   width: 1.625rem;
   height: 1.625rem;
   border-radius: 999rem;
-  background: color-mix(in srgb, var(--flint-color-accent-base) 18%, transparent);
-  color: var(--flint-color-text-primary);
+  background: color-mix(in srgb, var(--poodle-color-accent-base) 18%, transparent);
+  color: var(--poodle-color-text-primary);
   font-weight: 700;
 }
 
@@ -933,13 +933,13 @@ input:focus-visible {
 }
 
 .summary-tile strong {
-  font-family: var(--flint-typography-code-family);
+  font-family: var(--poodle-typography-code-family);
   font-size: 0.8125rem;
 }
 
 .token-path {
-  color: var(--flint-color-text-secondary);
-  font-family: var(--flint-typography-code-family);
+  color: var(--poodle-color-text-secondary);
+  font-family: var(--poodle-typography-code-family);
   font-size: 0.75rem;
 }
 
@@ -949,18 +949,18 @@ input:focus-visible {
 
 .inspector-count {
   margin: 0 0 0.75rem;
-  color: var(--flint-color-text-secondary);
+  color: var(--poodle-color-text-secondary);
   font-size: 0.8125rem;
 }
 
 .token-tools-shell {
   display: grid;
-  gap: var(--flint-space-stack-lg);
+  gap: var(--poodle-space-stack-lg);
 }
 
 .token-tools-inspector {
   display: grid;
-  gap: var(--flint-space-stack-md);
+  gap: var(--poodle-space-stack-md);
 }
 
 .token-tools-inspector__search {
@@ -971,9 +971,9 @@ input:focus-visible {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  gap: var(--flint-space-inline-md);
+  gap: var(--poodle-space-inline-md);
   padding: 0.875rem 1rem;
-  border-bottom: 0.0625rem solid color-mix(in srgb, var(--flint-color-border-subtle) 44%, transparent);
+  border-bottom: 0.0625rem solid color-mix(in srgb, var(--poodle-color-border-subtle) 44%, transparent);
 }
 
 .browse-list-item:last-child {
@@ -982,7 +982,7 @@ input:focus-visible {
 
 .browse-list-item p {
   margin: 0.25rem 0 0;
-  color: var(--flint-color-text-secondary);
+  color: var(--poodle-color-text-secondary);
 }
 
 @media (max-width: 68.75rem) {

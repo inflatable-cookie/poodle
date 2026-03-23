@@ -31,8 +31,8 @@ surface creator
 
 | Input | Type | Required | Notes |
 |-------|------|----------|-------|
-| `--flint-surface` | CSS custom property | yes for surface creators | Must match the creator's computed background value |
-| surface context | renderer context value | yes for GPUI and Jetstream creators | Native equivalent of `--flint-surface` |
+| `--poodle-surface` | CSS custom property | yes for surface creators | Must match the creator's computed background value |
+| surface context | renderer context value | yes for GPUI and Jetstream creators | Native equivalent of `--poodle-surface` |
 | mix ratio | tokenised constant | yes for consumers | Keeps contrast tiers consistent across renderers |
 
 ## 4. States
@@ -70,6 +70,6 @@ components layered on top of it must preserve their own keyboard contracts.
 
 | Part | Token | Purpose |
 |------|-------|---------|
-| creator | `--flint-surface` | Canonical current surface value for descendants |
-| consumer | `--flint-color-text-primary` | Contrast-mix target across themes |
+| creator | `--poodle-surface` | Canonical current surface value for descendants |
+| consumer | `--poodle-color-text-primary` | Contrast-mix target across themes |
 | consumer | surface mix ratios | Keeps strong, medium, and subtle elevation tiers aligned |

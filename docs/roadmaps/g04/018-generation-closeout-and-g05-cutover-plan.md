@@ -1,10 +1,10 @@
 # g04.018 Generation Closeout And `g05` Cutover Plan
 
 Status: planned
-Owner: Flint Core
+Owner: Poodle Core
 Updated: 2026-03-14
 Depends on: g04.017
-Primary repos: `flint`
+Primary repos: `poodle`
 
 ## Goals
 

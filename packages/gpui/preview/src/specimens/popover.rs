@@ -1,7 +1,7 @@
 use gpui::*;
-use flint_adapter::ThemeProvider;
-use flint_primitives::{ButtonSpec, ButtonVariant, PopoverSpec, OverlayPlacement, EyebrowSpec};
-use flint_gpui_components::{Button, Popover, Eyebrow};
+use poodle_adapter::ThemeProvider;
+use poodle_primitives::{ButtonSpec, ButtonVariant, PopoverSpec, OverlayPlacement, EyebrowSpec};
+use poodle_gpui_components::{Button, Popover, Eyebrow};
 use crate::app_state::AppState;
 use crate::style_bridge::color_to_hsla;
 use crate::PreviewRoot;

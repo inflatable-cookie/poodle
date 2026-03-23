@@ -55,7 +55,7 @@ Updated: 2026-03-15
 
 | Var | Description |
 |-----|-------------|
-| `--flint-slider-percent` | computed as `((value - min) / (max - min)) * 100%`; drives fill width/height |
+| `--poodle-slider-percent` | computed as `((value - min) / (max - min)) * 100%`; drives fill width/height |
 
 ## 4. States
 
@@ -161,7 +161,7 @@ Updated: 2026-03-15
 
 | Property | Value |
 |----------|-------|
-| `opacity` | `var(--flint-state-opacity-disabled)` |
+| `opacity` | `var(--poodle-state-opacity-disabled)` |
 
 ### Track `.slider__track`
 
@@ -172,7 +172,7 @@ Updated: 2026-03-15
 | `height` | `0.375rem` |
 | `transform` | `translateY(-50%)` |
 | `border-radius` | `999px` |
-| `background` | `color-mix(in srgb, var(--flint-color-background-surface) 88%, transparent)` |
+| `background` | `color-mix(in srgb, var(--poodle-color-background-surface) 88%, transparent)` |
 
 ### Track vertical `[data-orientation="vertical"] .slider__track`
 
@@ -188,10 +188,10 @@ Updated: 2026-03-15
 | Property | Value |
 |----------|-------|
 | `display` | `block` |
-| `width` | `var(--flint-slider-percent)` |
+| `width` | `var(--poodle-slider-percent)` |
 | `height` | `100%` |
 | `border-radius` | `inherit` |
-| `background` | `var(--flint-color-accent-base)` |
+| `background` | `var(--poodle-color-accent-base)` |
 
 ### Fill vertical `[data-orientation="vertical"] .slider__fill`
 
@@ -200,7 +200,7 @@ Updated: 2026-03-15
 | `position` | `absolute` |
 | `bottom` | `0` |
 | `width` | `100%` |
-| `height` | `var(--flint-slider-percent)` |
+| `height` | `var(--poodle-slider-percent)` |
 
 ### Control `.slider__control`
 
@@ -234,9 +234,9 @@ Updated: 2026-03-15
 | `width` | `1rem` |
 | `height` | `1rem` |
 | `margin-top` | `-0.3125rem` |
-| `border` | `0.0625rem solid var(--flint-color-border-default)` |
+| `border` | `0.0625rem solid var(--poodle-color-border-default)` |
 | `border-radius` | `999px` |
-| `background` | `var(--flint-color-background-elevated)` |
+| `background` | `var(--poodle-color-background-elevated)` |
 | `box-shadow` | `0 0.125rem 0.5rem color-mix(in srgb, black 18%, transparent)` |
 | `appearance` | `none` |
 | `-webkit-appearance` | `none` |
@@ -247,9 +247,9 @@ Updated: 2026-03-15
 |----------|-------|
 | `width` | `1rem` |
 | `height` | `1rem` |
-| `border` | `0.0625rem solid var(--flint-color-border-default)` |
+| `border` | `0.0625rem solid var(--poodle-color-border-default)` |
 | `border-radius` | `999px` |
-| `background` | `var(--flint-color-background-elevated)` |
+| `background` | `var(--poodle-color-background-elevated)` |
 | `box-shadow` | `0 0.125rem 0.5rem color-mix(in srgb, black 18%, transparent)` |
 | `appearance` | `none` |
 
@@ -257,13 +257,13 @@ Updated: 2026-03-15
 
 | Property | Value |
 |----------|-------|
-| `box-shadow` | `0 0 0 0.1875rem color-mix(in srgb, var(--flint-color-accent-focusRing) 32%, transparent), 0 0.125rem 0.5rem color-mix(in srgb, black 18%, transparent)` |
+| `box-shadow` | `0 0 0 0.1875rem color-mix(in srgb, var(--poodle-color-accent-focusRing) 32%, transparent), 0 0.125rem 0.5rem color-mix(in srgb, black 18%, transparent)` |
 
 ### Thumb focus `:focus-visible::-moz-range-thumb`
 
 | Property | Value |
 |----------|-------|
-| `box-shadow` | `0 0 0 0.1875rem color-mix(in srgb, var(--flint-color-accent-focusRing) 32%, transparent), 0 0.125rem 0.5rem color-mix(in srgb, black 18%, transparent)` |
+| `box-shadow` | `0 0 0 0.1875rem color-mix(in srgb, var(--poodle-color-accent-focusRing) 32%, transparent), 0 0.125rem 0.5rem color-mix(in srgb, black 18%, transparent)` |
 
 ### Track pseudo `::-webkit-slider-runnable-track`
 
@@ -283,7 +283,7 @@ Updated: 2026-03-15
 
 - Uses a native `<input type="range">` overlaid on a custom track/fill for
   visual rendering
-- The CSS custom property `--flint-slider-percent` is computed reactively:
+- The CSS custom property `--poodle-slider-percent` is computed reactively:
   `((value - min) / (max - min)) * 100 + '%'` and set as an inline style on
   the root element
 - The native range input is styled with `appearance: none` and transparent
@@ -300,7 +300,7 @@ Updated: 2026-03-15
 
 ## 10. GPUI Notes
 
-- expected crate/module surface: `flint_gpui::primitives::slider`
+- expected crate/module surface: `poodle_gpui::primitives::slider`
 - GPUI implementation must intentionally expose thumb focus, keyboard
   adjustments (arrow keys, Home, End), and current value semantics through
   native accessibility APIs

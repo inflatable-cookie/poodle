@@ -1,4 +1,4 @@
-//! Reference application demonstrating downstream consumption of flint-gpui.
+//! Reference application demonstrating downstream consumption of poodle-gpui.
 //!
 //! g07.013: This example shows how an external application would:
 //! 1. Create a GpuiAdapter with a theme provider
@@ -8,19 +8,19 @@
 //!
 //! This serves as the "downstream reference-app adoption proof" for g07.
 
-use flint_adapter::{AdapterManifest, RenderComponent, ThemeProvider};
-use flint_composites::{DataTableSpec, DetailShellSpec, FormShellSpec, PageHeaderSpec};
-use flint_gpui::{GpuiAdapter, GpuiThemeProvider};
-use flint_primitives::{ButtonSpec, StackSpec, SurfaceSpec, TextInputSpec};
-use flint_style::StyleDescriptor;
-use flint_workstation::{AppHeaderSpec, WorkspaceShellSpec};
+use poodle_adapter::{AdapterManifest, RenderComponent, ThemeProvider};
+use poodle_composites::{DataTableSpec, DetailShellSpec, FormShellSpec, PageHeaderSpec};
+use poodle_gpui::{GpuiAdapter, GpuiThemeProvider};
+use poodle_primitives::{ButtonSpec, StackSpec, SurfaceSpec, TextInputSpec};
+use poodle_style::StyleDescriptor;
+use poodle_workstation::{AppHeaderSpec, WorkspaceShellSpec};
 
 fn main() {
     // 1. Create the adapter with default theme
     let theme = GpuiThemeProvider::default();
     let adapter = GpuiAdapter::new(theme);
 
-    println!("=== Flint GPUI Reference App ===\n");
+    println!("=== Poodle GPUI Reference App ===\n");
     println!("Adapter: {}", adapter.name());
     println!(
         "Supported components: {}",
@@ -71,7 +71,7 @@ fn main() {
 
     // 4. Demonstrate multi-app consumption via demo_app module
     println!("\n=== Demo App Screens ===\n");
-    let screens = flint_gpui::demo_app::render_all_screens(&adapter);
+    let screens = poodle_gpui::demo_app::render_all_screens(&adapter);
     for screen in &screens {
         println!(
             "  {} — {} components",

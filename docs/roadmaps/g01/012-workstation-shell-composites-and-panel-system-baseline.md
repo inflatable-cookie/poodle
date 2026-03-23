@@ -1,14 +1,14 @@
 # g01.012 Workstation-Shell Composites And Panel System Baseline
 
 Status: completed
-Owner: Flint Core
+Owner: Poodle Core
 Updated: 2026-03-11
 Depends on: g01.007, g01.008, g01.009, g01.010
-Primary repos: `flint`
+Primary repos: `poodle`
 
 ## Context
 
-Flint is expected to support desktop/workstation applications beyond simple web
+Poodle is expected to support desktop/workstation applications beyond simple web
 product UIs. That requires an explicit shell layer.
 
 ## Goals
@@ -27,7 +27,7 @@ product UIs. That requires an explicit shell layer.
 - [x] define the workstation-shell component families in scope
 - [x] define panel, tab, and dock interactions at the contract level
 - [x] define layout persistence and shell-state expectations at a high level
-- [x] document where app-specific workstation widgets begin and Flint ends
+- [x] document where app-specific workstation widgets begin and Poodle ends
 
 ## Acceptance Criteria
 

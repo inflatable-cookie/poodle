@@ -5,8 +5,8 @@
 //! Focus ring on trigger. No hover.
 
 use gpui::*;
-use flint_gpui::GpuiThemeProvider;
-use flint_primitives::ColorPickerSpec;
+use poodle_gpui::GpuiThemeProvider;
+use poodle_primitives::ColorPickerSpec;
 
 use crate::theme_ext::{resolve_color, resolve_opacity, resolve_px, resolve_radius};
 
@@ -107,9 +107,9 @@ impl IntoElement for ColorPicker {
         let trigger_size = px(36.0); // 2.25rem
 
         let id_str = if let Some(ref suffix) = self.id_suffix {
-            format!("flint-color-picker-{}", suffix)
+            format!("poodle-color-picker-{}", suffix)
         } else {
-            "flint-color-picker".to_string()
+            "poodle-color-picker".to_string()
         };
 
         let mut trigger = div()
@@ -203,9 +203,9 @@ impl IntoElement for ColorPicker {
                     let swatch_id = SharedString::from(format!(
                         "{}-swatch-{}",
                         if let Some(ref suffix) = self.id_suffix {
-                            format!("flint-color-picker-{}", suffix)
+                            format!("poodle-color-picker-{}", suffix)
                         } else {
-                            "flint-color-picker".to_string()
+                            "poodle-color-picker".to_string()
                         },
                         idx,
                     ));
@@ -236,9 +236,9 @@ impl IntoElement for ColorPicker {
             // Only render when show_input is true (default)
             if spec.show_input {
                 let mode_label = match spec.default_mode {
-                    flint_primitives::ColorInputMode::Hex => "HEX",
-                    flint_primitives::ColorInputMode::Rgb => "RGB",
-                    flint_primitives::ColorInputMode::Hsl => "HSL",
+                    poodle_primitives::ColorInputMode::Hex => "HEX",
+                    poodle_primitives::ColorInputMode::Rgb => "RGB",
+                    poodle_primitives::ColorInputMode::Hsl => "HSL",
                 };
 
                 // Mode label
@@ -253,9 +253,9 @@ impl IntoElement for ColorPicker {
                 let hex_id = SharedString::from(format!(
                     "{}-hex",
                     if let Some(ref suffix) = self.id_suffix {
-                        format!("flint-color-picker-{}", suffix)
+                        format!("poodle-color-picker-{}", suffix)
                     } else {
-                        "flint-color-picker".to_string()
+                        "poodle-color-picker".to_string()
                     },
                 ));
 

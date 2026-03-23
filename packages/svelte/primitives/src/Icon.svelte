@@ -22,7 +22,7 @@
 </script>
 
 <svg
-  class="flint-icon"
+  class="poodle-icon"
   data-size={size}
   xmlns="http://www.w3.org/2000/svg"
   width="24"
@@ -57,21 +57,21 @@
 </svg>
 
 <style>
-  .flint-icon {
+  .poodle-icon {
     display: inline-block;
-    width: var(--flint-size-icon-md);
-    height: var(--flint-size-icon-md);
+    width: var(--poodle-size-icon-md);
+    height: var(--poodle-size-icon-md);
     vertical-align: middle;
     flex-shrink: 0;
   }
 
-  .flint-icon[data-size="sm"] {
-    width: var(--flint-size-icon-sm);
-    height: var(--flint-size-icon-sm);
+  .poodle-icon[data-size="sm"] {
+    width: var(--poodle-size-icon-sm);
+    height: var(--poodle-size-icon-sm);
   }
 
-  .flint-icon[data-size="lg"] {
-    width: var(--flint-size-icon-lg);
-    height: var(--flint-size-icon-lg);
+  .poodle-icon[data-size="lg"] {
+    width: var(--poodle-size-icon-lg);
+    height: var(--poodle-size-icon-lg);
   }
 </style>

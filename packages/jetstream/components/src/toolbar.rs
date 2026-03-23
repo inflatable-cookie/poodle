@@ -1,8 +1,8 @@
 //! Toolbar — Jetstream toolbar container backed by ToolbarSpec.
 
 use jetstream_runtime::ui_element::{self, JsEl};
-use flint_jetstream::JetstreamThemeProvider;
-use flint_primitives::{Alignment, ToolbarSpec};
+use poodle_jetstream::JetstreamThemeProvider;
+use poodle_primitives::{Alignment, ToolbarSpec};
 
 use crate::theme_ext::resolve_px;
 

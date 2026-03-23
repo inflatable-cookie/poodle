@@ -1,9 +1,9 @@
 //! Surface — real GPUI component backed by SurfaceSpec.
 
 use gpui::*;
-use flint_adapter::ThemeProvider;
-use flint_gpui::GpuiThemeProvider;
-use flint_primitives::{PaddingScale, SurfaceBorder, SurfaceRole, SurfaceSpec, SurfaceTone};
+use poodle_adapter::ThemeProvider;
+use poodle_gpui::GpuiThemeProvider;
+use poodle_primitives::{PaddingScale, SurfaceBorder, SurfaceRole, SurfaceSpec, SurfaceTone};
 
 use crate::theme_ext::{color_mix, resolve_color, resolve_radius};
 

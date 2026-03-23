@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { Table, Eyebrow, type TableColumn, type TableRow } from "@flint/svelte-primitives";
+  import { Table, Eyebrow, type TableColumn, type TableRow } from "@poodle/svelte-primitives";
 
   const columns: TableColumn[] = [
     { id: "name", label: "Name", isRowHeader: true },

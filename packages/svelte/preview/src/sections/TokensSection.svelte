@@ -1,6 +1,6 @@
 <script lang="ts">
-  import { cssVars } from "@flint/svelte-tokens";
-  import { Surface } from "@flint/svelte-primitives";
+  import { cssVars } from "@poodle/svelte-tokens";
+  import { Surface } from "@poodle/svelte-primitives";
   import TokenToolsPanel from "../components/TokenToolsPanel.svelte";
 
   export let liveTokenValues: Partial<Record<string, string>> = {};

@@ -1,7 +1,7 @@
 //! NavCard — Jetstream navigation card backed by NavCardSpec.
 use jetstream_runtime::ui_element::{self, JsEl};
-use flint_jetstream::JetstreamThemeProvider;
-use flint_primitives::NavCardSpec;
+use poodle_jetstream::JetstreamThemeProvider;
+use poodle_primitives::NavCardSpec;
 use crate::theme_ext::{resolve_color, resolve_radius};
 
 pub fn js_nav_card(spec: &NavCardSpec, theme: &JetstreamThemeProvider) -> JsEl {

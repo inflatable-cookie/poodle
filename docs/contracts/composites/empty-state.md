@@ -127,23 +127,23 @@ No component-owned events beyond child action behavior.
 | `display` | `grid` |
 | `justify-items` | `center` |
 | `text-align` | `center` |
-| `gap` | `var(--flint-space-stack-md)` |
-| `padding` | `calc(var(--flint-space-panel-y) * 1.5) var(--flint-space-panel-x)` |
-| `border` | `0.0625rem dashed var(--flint-color-border-default)` |
-| `border-radius` | `calc(var(--flint-radius-surface) - 0.125rem)` |
-| `background` | `color-mix(in srgb, var(--flint-color-background-surface) 76%, transparent)` |
+| `gap` | `var(--poodle-space-stack-md)` |
+| `padding` | `calc(var(--poodle-space-panel-y) * 1.5) var(--poodle-space-panel-x)` |
+| `border` | `0.0625rem dashed var(--poodle-color-border-default)` |
+| `border-radius` | `calc(var(--poodle-radius-surface) - 0.125rem)` |
+| `background` | `color-mix(in srgb, var(--poodle-color-background-surface) 76%, transparent)` |
 
 #### `.empty-state[data-variant="search"]`
 
 | Property | Value |
 |----------|-------|
-| `background` | `color-mix(in srgb, var(--flint-color-accent-base) 7%, transparent)` |
+| `background` | `color-mix(in srgb, var(--poodle-color-accent-base) 7%, transparent)` |
 
 #### `.empty-state[data-variant="firstRun"]`
 
 | Property | Value |
 |----------|-------|
-| `background` | `color-mix(in srgb, var(--flint-color-status-success) 7%, transparent)` |
+| `background` | `color-mix(in srgb, var(--poodle-color-status-success) 7%, transparent)` |
 
 #### `.empty-state__visual`
 
@@ -155,8 +155,8 @@ No component-owned events beyond child action behavior.
 | `width` | `2.25rem` |
 | `height` | `2.25rem` |
 | `border-radius` | `999rem` |
-| `background` | `color-mix(in srgb, var(--flint-color-background-panel) 90%, transparent)` |
-| `color` | `var(--flint-color-text-secondary)` |
+| `background` | `color-mix(in srgb, var(--poodle-color-background-panel) 90%, transparent)` |
+| `color` | `var(--poodle-color-text-secondary)` |
 | `font-size` | `1.125rem` |
 | `font-weight` | `600` |
 
@@ -185,7 +185,7 @@ No component-owned events beyond child action behavior.
 
 | Property | Value |
 |----------|-------|
-| `color` | `var(--flint-color-text-secondary)` |
+| `color` | `var(--poodle-color-text-secondary)` |
 | `font-size` | `0.8125rem` |
 | `line-height` | `1.5` |
 
@@ -195,7 +195,7 @@ No component-owned events beyond child action behavior.
 |----------|-------|
 | `display` | `flex` |
 | `flex-wrap` | `wrap` |
-| `gap` | `var(--flint-space-inline-sm)` |
+| `gap` | `var(--poodle-space-inline-sm)` |
 
 ### Variant Icons
 
@@ -219,7 +219,7 @@ No component-owned events beyond child action behavior.
 
 ## 10. GPUI Notes
 
-- expected crate/module surface: `flint_gpui::composites::empty_state`
+- expected crate/module surface: `poodle_gpui::composites::empty_state`
 - implementation-only details: GPUI may use native layout and icon rendering,
   but the textual message and accessible action names remain the semantic core
 

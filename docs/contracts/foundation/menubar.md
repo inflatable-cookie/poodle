@@ -194,9 +194,9 @@ MenuItem: {
 | `display` | `inline-flex` |
 | `gap` | `0.125rem` |
 | `padding` | `0.1875rem` |
-| `border` | `0.0625rem solid color-mix(in srgb, var(--flint-color-border-subtle) 72%, transparent)` |
-| `border-radius` | `var(--flint-radius-surface)` |
-| `background` | `color-mix(in srgb, var(--flint-color-background-panel) 96%, transparent)` |
+| `border` | `0.0625rem solid color-mix(in srgb, var(--poodle-color-border-subtle) 72%, transparent)` |
+| `border-radius` | `var(--poodle-radius-surface)` |
+| `background` | `color-mix(in srgb, var(--poodle-color-background-panel) 96%, transparent)` |
 
 ### Group `.menubar__group`
 
@@ -214,11 +214,11 @@ MenuItem: {
 | `min-height` | `2rem` |
 | `padding` | `0 0.75rem` |
 | `border` | `0` |
-| `border-radius` | `var(--flint-radius-control)` |
+| `border-radius` | `var(--poodle-radius-control)` |
 | `background` | `transparent` |
-| `color` | `var(--flint-color-text-primary)` |
+| `color` | `var(--poodle-color-text-primary)` |
 | `cursor` | `pointer` |
-| `font-family` | `var(--flint-typography-label-family)` |
+| `font-family` | `var(--poodle-typography-label-family)` |
 | `font-size` | `0.75rem` |
 | `font-weight` | `600` |
 | `line-height` | `1` |
@@ -227,7 +227,7 @@ MenuItem: {
 
 | Property | Value |
 |----------|-------|
-| `background` | `color-mix(in srgb, var(--flint-color-accent-base) 14%, transparent)` |
+| `background` | `color-mix(in srgb, var(--poodle-color-accent-base) 14%, transparent)` |
 | `outline` | `none` |
 
 ### Trigger — Disabled
@@ -235,7 +235,7 @@ MenuItem: {
 | Property | Value |
 |----------|-------|
 | `cursor` | `not-allowed` |
-| `opacity` | `var(--flint-state-opacity-disabled)` |
+| `opacity` | `var(--poodle-state-opacity-disabled)` |
 
 ### Overlay `.menubar__overlay`
 
@@ -244,13 +244,13 @@ MenuItem: {
 | `position` | `absolute` |
 | `top` | `calc(100% + 0.25rem)` |
 | `left` | `0` |
-| `z-index` | `var(--flint-overlay-z-menu)` |
+| `z-index` | `var(--poodle-overlay-z-menu)` |
 | `min-width` | `12rem` |
 | `padding` | `0.25rem` |
-| `border` | `0.0625rem solid color-mix(in srgb, var(--flint-color-border-default) 72%, transparent)` |
-| `border-radius` | `var(--flint-radius-surface)` |
-| `background` | `color-mix(in srgb, var(--flint-color-background-elevated) 98%, var(--flint-color-background-panel))` |
-| `box-shadow` | `var(--flint-elevation-overlay)` |
+| `border` | `0.0625rem solid color-mix(in srgb, var(--poodle-color-border-default) 72%, transparent)` |
+| `border-radius` | `var(--poodle-radius-surface)` |
+| `background` | `color-mix(in srgb, var(--poodle-color-background-elevated) 98%, var(--poodle-color-background-panel))` |
+| `box-shadow` | `var(--poodle-elevation-overlay)` |
 
 ### Item `.menubar__item`
 
@@ -263,9 +263,9 @@ MenuItem: {
 | `min-height` | `2rem` |
 | `padding` | `0.375rem 0.5rem` |
 | `border` | `0` |
-| `border-radius` | `calc(var(--flint-radius-control) - 0.125rem)` |
+| `border-radius` | `calc(var(--poodle-radius-control) - 0.125rem)` |
 | `background` | `transparent` |
-| `color` | `var(--flint-color-text-primary)` |
+| `color` | `var(--poodle-color-text-primary)` |
 | `cursor` | `pointer` |
 | `font` | `inherit` |
 | `font-size` | `0.875rem` |
@@ -275,7 +275,7 @@ MenuItem: {
 
 | Property | Value |
 |----------|-------|
-| `background` | `color-mix(in srgb, var(--flint-color-accent-base) 16%, transparent)` |
+| `background` | `color-mix(in srgb, var(--poodle-color-accent-base) 16%, transparent)` |
 | `outline` | `none` |
 
 ### Item — Disabled
@@ -283,14 +283,14 @@ MenuItem: {
 | Property | Value |
 |----------|-------|
 | `cursor` | `not-allowed` |
-| `opacity` | `var(--flint-state-opacity-disabled)` |
+| `opacity` | `var(--poodle-state-opacity-disabled)` |
 
 ### Meta `.menubar__meta`
 
 | Property | Value |
 |----------|-------|
-| `color` | `var(--flint-color-text-secondary)` |
-| `font-family` | `var(--flint-typography-code-family)` |
+| `color` | `var(--poodle-color-text-secondary)` |
+| `font-family` | `var(--poodle-typography-code-family)` |
 | `font-size` | `0.6875rem` |
 
 ### Separator `.menubar__separator`
@@ -300,7 +300,7 @@ MenuItem: {
 | `width` | `100%` |
 | `height` | `0.0625rem` |
 | `margin` | `0.25rem 0` |
-| `background` | `color-mix(in srgb, var(--flint-color-border-subtle) 72%, transparent)` |
+| `background` | `color-mix(in srgb, var(--poodle-color-border-subtle) 72%, transparent)` |
 
 ## 9. Svelte Notes
 
@@ -322,9 +322,9 @@ MenuItem: {
 
 ## 10. GPUI Notes
 
-- expected crate/module surface: `flint_gpui::components::menubar`
+- expected crate/module surface: `poodle_gpui::components::menubar`
 - Spec struct: `MenubarSpec` in primitives crate holds item tree
-- Component struct: `FlintMenubar` in components crate renders via `IntoElement`
+- Component struct: `PoodleMenubar` in components crate renders via `IntoElement`
 - GPUI must model the menubar as a horizontal menu container with submenu
   relationships and roving focus semantics
 - The list chrome (border, background, padding) must be reproduced as a

@@ -1,6 +1,6 @@
 <script lang="ts">
-  import { PageHeader } from "@flint/svelte-composites";
-  import { Button, Eyebrow } from "@flint/svelte-primitives";
+  import { PageHeader } from "@poodle/svelte-composites";
+  import { Button, Eyebrow } from "@poodle/svelte-primitives";
 </script>
 
 <div class="specimen">

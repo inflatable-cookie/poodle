@@ -1,8 +1,8 @@
 //! RangeCalendar — real GPUI component backed by RangeCalendarSpec.
 
 use gpui::*;
-use flint_gpui::GpuiThemeProvider;
-use flint_primitives::{CalendarWeekStart, DateRangeValue, IconSize, IconSpec, RangeCalendarSpec};
+use poodle_gpui::GpuiThemeProvider;
+use poodle_primitives::{CalendarWeekStart, DateRangeValue, IconSize, IconSpec, RangeCalendarSpec};
 
 use super::icon::Icon;
 use crate::theme_ext::{color_mix, resolve_color, resolve_opacity, resolve_radius};
@@ -180,14 +180,14 @@ impl IntoElement for RangeCalendar {
         let first_dow = Self::first_day_of_week(year, month);
 
         let week_start_offset: u32 = match spec.week_starts_on {
-            flint_primitives::CalendarWeekStart::Monday => 1,
+            poodle_primitives::CalendarWeekStart::Monday => 1,
             _ => 0,
         };
 
         let id_str = if let Some(ref suffix) = self.id_suffix {
-            format!("flint-range-cal-{}", suffix)
+            format!("poodle-range-cal-{}", suffix)
         } else {
-            "flint-range-cal".to_string()
+            "poodle-range-cal".to_string()
         };
 
         let month_names = [
@@ -231,7 +231,7 @@ impl IntoElement for RangeCalendar {
             .py(px(4.0))
             .child(
                 div()
-                    .id("flint-rcal-prev")
+                    .id("poodle-rcal-prev")
                     .w(px(28.0))
                     .h(px(28.0))
                     .flex()
@@ -259,7 +259,7 @@ impl IntoElement for RangeCalendar {
             )
             .child(
                 div()
-                    .id("flint-rcal-next")
+                    .id("poodle-rcal-next")
                     .w(px(28.0))
                     .h(px(28.0))
                     .flex()

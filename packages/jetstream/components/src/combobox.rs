@@ -5,8 +5,8 @@
 
 use jetstream_runtime::game_ui::Color;
 use jetstream_runtime::ui_element::{self, JsEl};
-use flint_jetstream::JetstreamThemeProvider;
-use flint_primitives::ComboboxSpec;
+use poodle_jetstream::JetstreamThemeProvider;
+use poodle_primitives::ComboboxSpec;
 
 use crate::theme_ext::{resolve_color, resolve_radius};
 

@@ -1,16 +1,16 @@
-//! Bridge between flint-gpui style types and real gpui style types.
+//! Bridge between poodle-gpui style types and real gpui style types.
 //!
 //! Converts `GpuiColor` / `ColorValue` to `gpui::Hsla` and applies
 //! `GpuiStyle` fields to gpui `Div` elements via `Styled` trait methods.
 
 use gpui::*;
-use flint_gpui::{
+use poodle_gpui::{
     GpuiAlignItems, GpuiColor, GpuiFlexDirection, GpuiJustifyContent, GpuiLength, GpuiOverflow,
     GpuiStyle,
 };
-use flint_tokens::typed::ColorValue;
+use poodle_tokens::typed::ColorValue;
 
-/// Convert a Flint `ColorValue` (RGBA f32) to gpui's `Hsla`.
+/// Convert a Poodle `ColorValue` (RGBA f32) to gpui's `Hsla`.
 pub fn color_to_hsla(c: ColorValue) -> Hsla {
     let rgba = gpui::Rgba {
         r: c.0,

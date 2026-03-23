@@ -143,7 +143,7 @@ model in this baseline contract.
 | `width` | `100%` |
 | `height` | `100%` |
 | `overflow` | `hidden` |
-| `border-radius` | `var(--flint-radius-surface)` |
+| `border-radius` | `var(--poodle-radius-surface)` |
 
 ### Viewport (.scroll-shell__viewport) — base styles
 
@@ -166,7 +166,7 @@ model in this baseline contract.
 
 | Property | Value |
 |----------|-------|
-| `outline` | `var(--flint-border-width-focus) solid var(--flint-color-accent-focusRing)` |
+| `outline` | `var(--poodle-border-width-focus) solid var(--poodle-color-accent-focusRing)` |
 | `outline-offset` | `0.125rem` |
 
 ### Content — horizontal mode (.scroll-shell__content--h)
@@ -182,8 +182,8 @@ Applied when direction is `"horizontal"` or `"both"`:
 | Scale | Value |
 |-------|-------|
 | `none` | `0` |
-| `sm` | `var(--flint-space-inline-sm)` |
-| `md` | `var(--flint-space-panel-y)` |
+| `sm` | `var(--poodle-space-inline-sm)` |
+| `md` | `var(--poodle-space-panel-y)` |
 
 ### Viewport Attributes (conditional)
 
@@ -215,12 +215,12 @@ Applied when direction is `"horizontal"` or `"both"`:
 
 ## 10. GPUI Notes
 
-- expected crate/module surface: `flint_gpui::components::scroll_shell`
+- expected crate/module surface: `poodle_gpui::components::scroll_shell`
 - Spec struct: `ScrollShellSpec` in primitives crate
 - GPUI scroll ownership, focusability, and assistive-technology signaling must
   be implemented explicitly
 - if GPUI lacks automatic parity for keyboard scrolling or spoken scroll-region
-  semantics, Flint must add that behavior rather than documenting it away
+  semantics, Poodle must add that behavior rather than documenting it away
 - visual scrollbar appearance may differ between platforms (known delta), but
   scrollability and focus behavior must not
 - `overscroll-behavior: contain` equivalent must prevent scroll chaining where

@@ -1,10 +1,10 @@
 //! Breadcrumbs specimen — breadcrumb navigation with multiple items.
 
 use jetstream_runtime::ui_element::*;
-use flint_jetstream::JetstreamThemeProvider;
-use flint_jetstream_components::breadcrumbs_comp::js_breadcrumbs;
-use flint_jetstream_components::theme_ext::*;
-use flint_primitives::{BreadcrumbItem, BreadcrumbsSpec};
+use poodle_jetstream::JetstreamThemeProvider;
+use poodle_jetstream_components::breadcrumbs_comp::js_breadcrumbs;
+use poodle_jetstream_components::theme_ext::*;
+use poodle_primitives::{BreadcrumbItem, BreadcrumbsSpec};
 
 pub fn render(theme: &JetstreamThemeProvider) -> JsEl {
     let secondary = resolve_color(theme, "semantic.color.text.secondary");

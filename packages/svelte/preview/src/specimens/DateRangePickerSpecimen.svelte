@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { DateRangePicker, Eyebrow } from "@flint/svelte-primitives";
+  import { DateRangePicker, Eyebrow } from "@poodle/svelte-primitives";
 
   let range = { start: "", end: "" };
 </script>
@@ -47,6 +47,6 @@
   .specimen__group p {
     margin: 0;
     font-size: 0.875rem;
-    color: var(--flint-color-text-secondary);
+    color: var(--poodle-color-text-secondary);
   }
 </style>

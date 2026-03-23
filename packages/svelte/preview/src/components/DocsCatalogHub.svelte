@@ -1,6 +1,6 @@
 <script lang="ts">
-  import { PageHeader } from "@flint/svelte-composites";
-  import { Accordion, Button, Card, Collapsible, Eyebrow, Stack, Pill, Toggle } from "@flint/svelte-primitives";
+  import { PageHeader } from "@poodle/svelte-composites";
+  import { Accordion, Button, Card, Collapsible, Eyebrow, Stack, Pill, Toggle } from "@poodle/svelte-primitives";
 
   import type { DocsFamilyEntry, DocsSectionEntry } from "../catalog";
 

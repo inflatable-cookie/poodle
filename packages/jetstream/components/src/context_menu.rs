@@ -4,8 +4,8 @@
 //! Uses overlay() for the menu panel.
 
 use jetstream_runtime::ui_element::{self, JsEl};
-use flint_jetstream::JetstreamThemeProvider;
-use flint_primitives::ContextMenuSpec;
+use poodle_jetstream::JetstreamThemeProvider;
+use poodle_primitives::ContextMenuSpec;
 
 use crate::theme_ext::{resolve_color, resolve_radius};
 

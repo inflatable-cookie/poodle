@@ -105,9 +105,9 @@ State table is sufficient for this layout primitive. No interactive state transi
 |----------|-------|
 | `display` | `flex` |
 | `flex-wrap` | `wrap` |
-| `gap` | `var(--flint-space-inline-md)` |
+| `gap` | `var(--poodle-space-inline-md)` |
 | `align-items` | `center` |
-| `padding-top` | `var(--flint-space-stack-sm)` |
+| `padding-top` | `var(--poodle-space-stack-sm)` |
 
 ### Root — `align="start"`
 
@@ -136,7 +136,7 @@ State table is sufficient for this layout primitive. No interactive state transi
 
 ## 10. GPUI Notes
 
-- expected crate/module surface: `flint_gpui::primitives::form_actions`
+- expected crate/module surface: `poodle_gpui::primitives::form_actions`
 - Spec struct: `FormActionsSpec` in primitives crate
 - GPUI must preserve action order, wrapping behavior intent, and logical focus sequence
 - The three alignment modes map to equivalent flex layout behaviors in GPUI

@@ -17,7 +17,7 @@ Updated: 2026-03-15
 ## 2. Anatomy
 
 ```text
-[Root .flint-icon]  <svg>
+[Root .poodle-icon]  <svg>
   └── [Path data]  (from registry lookup)
 ```
 
@@ -79,9 +79,9 @@ Updated: 2026-03-15
 
 ### Sizing
 
-- sm: `var(--flint-size-icon-sm)` square
-- md: `var(--flint-size-icon-md)` square
-- lg: `var(--flint-size-icon-lg)` square
+- sm: `var(--poodle-size-icon-sm)` square
+- md: `var(--poodle-size-icon-md)` square
+- lg: `var(--poodle-size-icon-lg)` square
 
 ### Composition
 
@@ -116,22 +116,22 @@ Updated: 2026-03-15
 
 | Property | Value |
 |----------|-------|
-| `width` | `var(--flint-size-icon-sm)` |
-| `height` | `var(--flint-size-icon-sm)` |
+| `width` | `var(--poodle-size-icon-sm)` |
+| `height` | `var(--poodle-size-icon-sm)` |
 
 ### Size md
 
 | Property | Value |
 |----------|-------|
-| `width` | `var(--flint-size-icon-md)` |
-| `height` | `var(--flint-size-icon-md)` |
+| `width` | `var(--poodle-size-icon-md)` |
+| `height` | `var(--poodle-size-icon-md)` |
 
 ### Size lg
 
 | Property | Value |
 |----------|-------|
-| `width` | `var(--flint-size-icon-lg)` |
-| `height` | `var(--flint-size-icon-lg)` |
+| `width` | `var(--poodle-size-icon-lg)` |
+| `height` | `var(--poodle-size-icon-lg)` |
 
 ## 9. Svelte Notes
 
@@ -141,9 +141,9 @@ Updated: 2026-03-15
 
 ## 10. GPUI Notes
 
-- expected crate/module surface: `flint_gpui::components::icon`
+- expected crate/module surface: `poodle_gpui::components::icon`
 - Spec struct: `IconSpec` in primitives crate
-- Component struct: `FlintIcon` in components crate
+- Component struct: `PoodleIcon` in components crate
 - Icon registry is a shared resource (Arc or global)
 - SVG rendering uses GPUI's native SVG support or path rendering
 - stroke-based icons may need conversion to filled paths for GPUI

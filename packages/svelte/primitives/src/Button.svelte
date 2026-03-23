@@ -86,26 +86,26 @@
 
 <style>
   .button {
-    --flint-button-fill: var(
-      --flint-treatment-interactive-fill,
-      var(--flint-color-background-surface)
+    --poodle-button-fill: var(
+      --poodle-treatment-interactive-fill,
+      var(--poodle-color-background-surface)
     );
-    --flint-button-fill-hover: var(
-      --flint-treatment-interactive-fill-active,
-      color-mix(in srgb, var(--flint-color-background-surface) 84%, var(--flint-color-background-elevated))
+    --poodle-button-fill-hover: var(
+      --poodle-treatment-interactive-fill-active,
+      color-mix(in srgb, var(--poodle-color-background-surface) 84%, var(--poodle-color-background-elevated))
     );
-    --flint-button-fill-active: color-mix(
+    --poodle-button-fill-active: color-mix(
       in srgb,
-      var(--flint-color-background-surface) 72%,
-      var(--flint-color-background-elevated)
+      var(--poodle-color-background-surface) 72%,
+      var(--poodle-color-background-elevated)
     );
-    --flint-button-border: var(
-      --flint-treatment-interactive-border,
-      var(--flint-color-border-default)
+    --poodle-button-border: var(
+      --poodle-treatment-interactive-border,
+      var(--poodle-color-border-default)
     );
-    --flint-button-text: var(--flint-color-text-primary);
-    --flint-button-shadow: var(
-      --flint-treatment-interactive-shadow,
+    --poodle-button-text: var(--poodle-color-text-primary);
+    --poodle-button-shadow: var(
+      --poodle-treatment-interactive-shadow,
       inset 0 0.0625rem 0 color-mix(in srgb, white 8%, transparent)
     );
     display: inline-flex;
@@ -113,159 +113,159 @@
     justify-content: center;
     gap: 0.375rem;
     min-width: 5rem;
-    height: var(--flint-size-control-height);
-    padding: 0 var(--flint-space-control-x);
-    border: 0.0625rem solid var(--flint-button-border);
-    border-radius: var(--flint-treatment-interactive-radius, var(--flint-radius-control));
-    background: var(--flint-button-fill);
-    box-shadow: var(--flint-button-shadow);
-    color: var(--flint-button-text);
+    height: var(--poodle-size-control-height);
+    padding: 0 var(--poodle-space-control-x);
+    border: 0.0625rem solid var(--poodle-button-border);
+    border-radius: var(--poodle-treatment-interactive-radius, var(--poodle-radius-control));
+    background: var(--poodle-button-fill);
+    box-shadow: var(--poodle-button-shadow);
+    color: var(--poodle-button-text);
     cursor: pointer;
-    font-family: var(--flint-typography-label-family);
-    font-size: var(--flint-typography-label-size);
-    font-weight: var(--flint-typography-label-weight);
+    font-family: var(--poodle-typography-label-family);
+    font-size: var(--poodle-typography-label-size);
+    font-weight: var(--poodle-typography-label-weight);
     letter-spacing: 0.01em;
     line-height: 1;
     text-decoration: none;
     transition:
-      background var(--flint-motion-duration-interaction) var(--flint-motion-easing-standard),
-      border-color var(--flint-motion-duration-interaction) var(--flint-motion-easing-standard),
-      color var(--flint-motion-duration-interaction) var(--flint-motion-easing-standard),
-      box-shadow var(--flint-motion-duration-interaction) var(--flint-motion-easing-standard),
-      transform var(--flint-motion-duration-interaction) var(--flint-motion-easing-standard);
+      background var(--poodle-motion-duration-interaction) var(--poodle-motion-easing-standard),
+      border-color var(--poodle-motion-duration-interaction) var(--poodle-motion-easing-standard),
+      color var(--poodle-motion-duration-interaction) var(--poodle-motion-easing-standard),
+      box-shadow var(--poodle-motion-duration-interaction) var(--poodle-motion-easing-standard),
+      transform var(--poodle-motion-duration-interaction) var(--poodle-motion-easing-standard);
   }
 
   .button[data-size="sm"] {
     min-width: 4.25rem;
-    height: calc(var(--flint-size-control-height) - 0.375rem);
-    padding: 0 calc(var(--flint-space-control-x) - 0.125rem);
+    height: calc(var(--poodle-size-control-height) - 0.375rem);
+    padding: 0 calc(var(--poodle-space-control-x) - 0.125rem);
     font-size: 0.75rem;
   }
 
   .button[data-size="lg"] {
     min-width: 5.75rem;
-    height: calc(var(--flint-size-control-height) + 0.375rem);
-    padding: 0 calc(var(--flint-space-control-x) + 0.125rem);
+    height: calc(var(--poodle-size-control-height) + 0.375rem);
+    padding: 0 calc(var(--poodle-space-control-x) + 0.125rem);
     font-size: 0.875rem;
   }
 
   /* Icon padding adjustment: reduce padding on icon side by 0.125rem */
   .button[data-has-leading] {
-    padding-left: calc(var(--flint-space-control-x) - 0.125rem);
+    padding-left: calc(var(--poodle-space-control-x) - 0.125rem);
   }
 
   .button[data-has-trailing] {
-    padding-right: calc(var(--flint-space-control-x) - 0.125rem);
+    padding-right: calc(var(--poodle-space-control-x) - 0.125rem);
   }
 
   .button[data-has-leading][data-size="sm"] {
-    padding-left: calc(var(--flint-space-control-x) - 0.25rem);
+    padding-left: calc(var(--poodle-space-control-x) - 0.25rem);
   }
 
   .button[data-has-trailing][data-size="sm"] {
-    padding-right: calc(var(--flint-space-control-x) - 0.25rem);
+    padding-right: calc(var(--poodle-space-control-x) - 0.25rem);
   }
 
   .button[data-has-leading][data-size="lg"] {
-    padding-left: var(--flint-space-control-x);
+    padding-left: var(--poodle-space-control-x);
   }
 
   .button[data-has-trailing][data-size="lg"] {
-    padding-right: var(--flint-space-control-x);
+    padding-right: var(--poodle-space-control-x);
   }
 
   /* Icon-only: square, no min-width */
   .button[data-icon-only] {
     min-width: 0;
     padding: 0;
-    width: var(--flint-size-control-height);
+    width: var(--poodle-size-control-height);
   }
 
   .button[data-icon-only][data-size="sm"] {
-    width: calc(var(--flint-size-control-height) - 0.375rem);
+    width: calc(var(--poodle-size-control-height) - 0.375rem);
   }
 
   .button[data-icon-only][data-size="lg"] {
-    width: calc(var(--flint-size-control-height) + 0.375rem);
+    width: calc(var(--poodle-size-control-height) + 0.375rem);
   }
 
   .button[data-variant="primary"] {
-    --flint-button-fill: var(
-      --flint-treatment-interactive-primary-fill,
-      var(--flint-color-accent-base)
+    --poodle-button-fill: var(
+      --poodle-treatment-interactive-primary-fill,
+      var(--poodle-color-accent-base)
     );
-    --flint-button-fill-hover: var(
-      --flint-treatment-interactive-primary-fill-hover,
-      color-mix(in srgb, white 12%, var(--flint-color-accent-base))
+    --poodle-button-fill-hover: var(
+      --poodle-treatment-interactive-primary-fill-hover,
+      color-mix(in srgb, white 12%, var(--poodle-color-accent-base))
     );
-    --flint-button-border: var(
-      --flint-treatment-interactive-primary-border,
-      color-mix(in srgb, var(--flint-color-accent-base) 84%, black)
+    --poodle-button-border: var(
+      --poodle-treatment-interactive-primary-border,
+      color-mix(in srgb, var(--poodle-color-accent-base) 84%, black)
     );
-    --flint-button-text: var(
-      --flint-treatment-interactive-primary-text,
-      var(--flint-color-text-inverse)
+    --poodle-button-text: var(
+      --poodle-treatment-interactive-primary-text,
+      var(--poodle-color-text-inverse)
     );
-    --flint-button-shadow: var(
-      --flint-treatment-interactive-primary-shadow,
+    --poodle-button-shadow: var(
+      --poodle-treatment-interactive-primary-shadow,
       inset 0 0.0625rem 0 color-mix(in srgb, white 14%, transparent),
       0 0.375rem 1.125rem color-mix(in srgb, black 18%, transparent)
     );
   }
 
   .button[data-variant="ghost"] {
-    --flint-button-fill: transparent;
-    --flint-button-border: transparent;
-    --flint-button-shadow: none;
+    --poodle-button-fill: transparent;
+    --poodle-button-border: transparent;
+    --poodle-button-shadow: none;
   }
 
   .button[data-tone="danger"] {
-    --flint-button-fill: color-mix(in srgb, var(--flint-color-status-danger) 16%, var(--flint-color-background-surface));
-    --flint-button-border: color-mix(in srgb, var(--flint-color-status-danger) 46%, var(--flint-color-border-default));
-    --flint-button-text: var(--flint-color-text-primary);
+    --poodle-button-fill: color-mix(in srgb, var(--poodle-color-status-danger) 16%, var(--poodle-color-background-surface));
+    --poodle-button-border: color-mix(in srgb, var(--poodle-color-status-danger) 46%, var(--poodle-color-border-default));
+    --poodle-button-text: var(--poodle-color-text-primary);
   }
 
   .button[data-variant="primary"][data-tone="danger"] {
-    --flint-button-fill: var(--flint-color-status-danger);
-    --flint-button-border: color-mix(in srgb, var(--flint-color-status-danger) 84%, black);
-    --flint-button-text: var(--flint-color-text-inverse);
-    --flint-button-shadow:
+    --poodle-button-fill: var(--poodle-color-status-danger);
+    --poodle-button-border: color-mix(in srgb, var(--poodle-color-status-danger) 84%, black);
+    --poodle-button-text: var(--poodle-color-text-inverse);
+    --poodle-button-shadow:
       inset 0 0.0625rem 0 color-mix(in srgb, white 14%, transparent),
       0 0.375rem 1.125rem color-mix(in srgb, black 18%, transparent);
   }
 
   .button[data-variant="ghost"][data-tone="danger"] {
-    --flint-button-fill: transparent;
-    --flint-button-border: transparent;
-    --flint-button-text: var(--flint-color-status-danger);
-    --flint-button-shadow: none;
+    --poodle-button-fill: transparent;
+    --poodle-button-border: transparent;
+    --poodle-button-text: var(--poodle-color-status-danger);
+    --poodle-button-shadow: none;
   }
 
   .button:hover:not(:disabled) {
-    background: var(--flint-button-fill-hover);
+    background: var(--poodle-button-fill-hover);
     border-color: var(
-      --flint-treatment-interactive-border-active,
-      color-mix(in srgb, var(--flint-button-border) 78%, var(--flint-color-text-primary))
+      --poodle-treatment-interactive-border-active,
+      color-mix(in srgb, var(--poodle-button-border) 78%, var(--poodle-color-text-primary))
     );
     box-shadow: var(
-      --flint-treatment-interactive-shadow-active,
-      var(--flint-button-shadow)
+      --poodle-treatment-interactive-shadow-active,
+      var(--poodle-button-shadow)
     );
   }
 
   .button:active:not(:disabled) {
-    background: var(--flint-button-fill-active);
+    background: var(--poodle-button-fill-active);
     transform: translateY(0.03125rem);
   }
 
   .button:focus-visible {
-    outline: var(--flint-border-width-focus) solid var(--flint-color-accent-focusRing);
+    outline: var(--poodle-border-width-focus) solid var(--poodle-color-accent-focusRing);
     outline-offset: 0.125rem;
   }
 
   .button:disabled {
     cursor: not-allowed;
-    opacity: var(--flint-state-opacity-disabled);
+    opacity: var(--poodle-state-opacity-disabled);
   }
 
   .button__label {
@@ -277,9 +277,9 @@
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    width: var(--flint-size-icon-md);
-    height: var(--flint-size-icon-md);
-    font-family: var(--flint-typography-code-family);
+    width: var(--poodle-size-icon-md);
+    height: var(--poodle-size-icon-md);
+    font-family: var(--poodle-typography-code-family);
     font-size: 0.875rem;
     line-height: 1;
   }
@@ -289,7 +289,7 @@
     align-items: center;
     justify-content: center;
     opacity: 0.5;
-    margin-left: calc(var(--flint-space-inline-sm) * -0.25);
+    margin-left: calc(var(--poodle-space-inline-sm) * -0.25);
   }
 
   .button__spinner {

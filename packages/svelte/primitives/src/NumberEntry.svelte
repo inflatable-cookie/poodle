@@ -158,40 +158,40 @@
     display: grid;
     grid-template-columns: minmax(0, 1fr) auto;
     align-items: stretch;
-    height: var(--flint-size-control-height);
-    border: 0.0625rem solid var(--flint-color-border-default);
-    border-radius: var(--flint-radius-control);
-    background: var(--flint-color-background-surface);
+    height: var(--poodle-size-control-height);
+    border: 0.0625rem solid var(--poodle-color-border-default);
+    border-radius: var(--poodle-radius-control);
+    background: var(--poodle-color-background-surface);
     overflow: hidden;
   }
 
   .number-entry[data-validation-state="invalid"] {
-    border-color: var(--flint-color-status-danger);
+    border-color: var(--poodle-color-status-danger);
   }
 
   .number-entry[data-validation-state="valid"] {
-    border-color: var(--flint-color-status-success);
+    border-color: var(--poodle-color-status-success);
   }
 
   .number-entry[data-validation-state="pending"] {
-    border-color: var(--flint-color-accent-base);
+    border-color: var(--poodle-color-accent-base);
   }
 
   .number-entry:focus-within {
     box-shadow:
-      0 0 0 var(--flint-border-width-focus)
-      color-mix(in srgb, var(--flint-color-accent-focusRing) 28%, transparent);
+      0 0 0 var(--poodle-border-width-focus)
+      color-mix(in srgb, var(--poodle-color-accent-focusRing) 28%, transparent);
   }
 
   .number-entry__control {
     min-width: 0;
-    padding: 0 var(--flint-space-control-x);
+    padding: 0 var(--poodle-space-control-x);
     border: 0;
     background: transparent;
-    color: var(--flint-color-text-primary);
-    font-family: var(--flint-typography-body-family);
-    font-size: var(--flint-typography-body-size);
-    line-height: var(--flint-typography-body-lineHeight);
+    color: var(--poodle-color-text-primary);
+    font-family: var(--poodle-typography-body-family);
+    font-size: var(--poodle-typography-body-size);
+    line-height: var(--poodle-typography-body-lineHeight);
     outline: 0;
   }
 
@@ -209,21 +209,21 @@
     width: 1.25rem;
     min-height: 0;
     border: 0;
-    border-radius: calc(var(--flint-radius-control) - 0.125rem);
-    background: color-mix(in srgb, var(--flint-color-background-elevated) 88%, transparent);
-    color: var(--flint-color-text-primary);
+    border-radius: calc(var(--poodle-radius-control) - 0.125rem);
+    background: color-mix(in srgb, var(--poodle-color-background-elevated) 88%, transparent);
+    color: var(--poodle-color-text-primary);
     cursor: pointer;
     font-size: 0;
     padding: 0;
     overflow: hidden;
   }
 
-  .number-entry__steppers button :global(.flint-icon) {
+  .number-entry__steppers button :global(.poodle-icon) {
     transform: scale(0.625);
   }
 
   .number-entry__steppers button:disabled {
     cursor: not-allowed;
-    opacity: var(--flint-state-opacity-disabled);
+    opacity: var(--poodle-state-opacity-disabled);
   }
 </style>

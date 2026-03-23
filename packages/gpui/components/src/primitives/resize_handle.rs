@@ -1,8 +1,8 @@
 //! ResizeHandle — real GPUI component backed by ResizeHandleSpec.
 
 use gpui::*;
-use flint_gpui::GpuiThemeProvider;
-use flint_primitives::{Orientation, ResizeHandleSpec};
+use poodle_gpui::GpuiThemeProvider;
+use poodle_primitives::{Orientation, ResizeHandleSpec};
 
 use crate::theme_ext::{color_mix, resolve_color, resolve_opacity};
 
@@ -24,14 +24,14 @@ impl std::ops::Deref for ResizeHandle {
 
 impl ResizeHandle {
     pub fn new(theme: &GpuiThemeProvider) -> Self {
-        Self { spec: ResizeHandleSpec::new(), theme: theme.clone(), id_prefix: "flint-resize".to_string() }
+        Self { spec: ResizeHandleSpec::new(), theme: theme.clone(), id_prefix: "poodle-resize".to_string() }
     }
 
     pub fn from_spec(spec: ResizeHandleSpec, theme: &GpuiThemeProvider) -> Self {
         Self {
             spec,
             theme: theme.clone(),
-            id_prefix: "flint-resize".to_string(),
+            id_prefix: "poodle-resize".to_string(),
         }
     }
 

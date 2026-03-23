@@ -1,5 +1,5 @@
-use flint_primitives::OverlayPlacement;
-use flint_tokens::semantic;
+use poodle_primitives::OverlayPlacement;
+use poodle_tokens::semantic;
 
 use crate::types::{CommandActionItem, DiscoveryState};
 

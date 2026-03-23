@@ -1,10 +1,10 @@
 //! BulkActionBar specimen — contextual action bar for bulk selections.
 
 use jetstream_runtime::ui_element::*;
-use flint_jetstream::JetstreamThemeProvider;
-use flint_jetstream_components::bulk_action_bar::js_bulk_action_bar;
-use flint_jetstream_components::theme_ext::*;
-use flint_primitives::{BulkAction, BulkActionBarSpec};
+use poodle_jetstream::JetstreamThemeProvider;
+use poodle_jetstream_components::bulk_action_bar::js_bulk_action_bar;
+use poodle_jetstream_components::theme_ext::*;
+use poodle_primitives::{BulkAction, BulkActionBarSpec};
 
 pub fn render(theme: &JetstreamThemeProvider) -> JsEl {
     let secondary = resolve_color(theme, "semantic.color.text.secondary");

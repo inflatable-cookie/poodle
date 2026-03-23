@@ -1,15 +1,15 @@
 # Underlay Bridge
 
 Underlay bridge scaffolding for token aliases, theme translation, and
-wrapper-preservation rules that ingest Flint artifacts without exposing Flint
+wrapper-preservation rules that ingest Poodle artifacts without exposing Poodle
 directly to Underlay app code.
 
 ## Current Purpose
 
-In `g03`, this package is the zero-leak adapter layer between Flint and
+In `g03`, this package is the zero-leak adapter layer between Poodle and
 Underlay-owned public APIs.
 
-It exists to let Underlay adopt Flint internally while keeping:
+It exists to let Underlay adopt Poodle internally while keeping:
 
 - Underlay-owned import paths
 - Underlay-owned component names
@@ -20,7 +20,7 @@ It is not:
 
 - a public app-facing UI kit
 - a second canonical token source
-- a place where Flint naming becomes the public Underlay contract
+- a place where Poodle naming becomes the public Underlay contract
 
 ## Package Shape
 
@@ -29,7 +29,7 @@ packages/bridges/underlay/
   README.md
   package.json
   css/
-    flint-to-underlay.css
+    poodle-to-underlay.css
   ts/
     index.ts
     token-map.ts
@@ -40,7 +40,7 @@ packages/bridges/underlay/
 
 ## Ownership Rule
 
-- Flint owns canonical token meaning and component contracts.
+- Poodle owns canonical token meaning and component contracts.
 - The bridge owns alias maps and wrapper-preservation guidance.
 - Underlay owns app-facing APIs and rollout.
 
@@ -48,10 +48,10 @@ packages/bridges/underlay/
 
 Underlay apps should not need:
 
-- direct Flint imports
-- Flint token variable names
-- Flint component names
-- Flint-specific prop names
+- direct Poodle imports
+- Poodle token variable names
+- Poodle component names
+- Poodle-specific prop names
 
 ## Current Public Bridge Surface
 
@@ -63,7 +63,7 @@ The bridge currently exports:
 - `zero-leak-proof`
 
 These exports are bridge-owned adoption artifacts. They describe how Underlay
-may consume Flint, but they do not redefine Flint canonically.
+may consume Poodle, but they do not redefine Poodle canonically.
 
 ## Current Zero-Leak Proof
 
@@ -87,7 +87,7 @@ The current proof surfaces are:
 Each of these surfaces assumes:
 
 - app-facing imports stay Underlay-owned
-- Flint internals may sit underneath wrappers
+- Poodle internals may sit underneath wrappers
 - bridge-local token aliases and theme maps remain internal implementation detail
 
 ## Remaining Adoption Friction

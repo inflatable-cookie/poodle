@@ -1,13 +1,13 @@
 [package]
-name = "flint-tokens"
+name = "poodle-tokens"
 version = "0.0.0"
 edition = "2021"
-description = "Generated Flint token bindings for multi-renderer consumers."
+description = "Generated Poodle token bindings for multi-renderer consumers."
 
 [lib]
 path = "src/lib.rs"
 
-[package.metadata.flint]
+[package.metadata.poodle]
 public-intent = true
 channel = "preview"
 stability = "pre-release"

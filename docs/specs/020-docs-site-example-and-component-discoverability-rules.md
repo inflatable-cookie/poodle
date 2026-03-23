@@ -6,7 +6,7 @@ Depends on: `019-advanced-catalog-accessibility-focus-keyboard-and-state-rules.m
 
 ## Purpose
 
-Freeze the first serious docs-site and examples baseline so Flint can present one
+Freeze the first serious docs-site and examples baseline so Poodle can present one
 adoption-facing surface that connects contracts, implementations, tokens, and
 stateful examples.
 

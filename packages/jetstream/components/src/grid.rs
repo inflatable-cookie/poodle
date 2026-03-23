@@ -5,8 +5,8 @@
 //! uniformly.
 
 use jetstream_runtime::ui_element::{self, JsEl};
-use flint_jetstream::JetstreamThemeProvider;
-use flint_primitives::GridSpec;
+use poodle_jetstream::JetstreamThemeProvider;
+use poodle_primitives::GridSpec;
 
 use crate::theme_ext::resolve_px;
 

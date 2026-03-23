@@ -1,8 +1,8 @@
 //! RangeSlider — Jetstream range slider backed by RangeSliderSpec.
 
 use jetstream_runtime::ui_element::{self, JsEl};
-use flint_jetstream::JetstreamThemeProvider;
-use flint_primitives::RangeSliderSpec;
+use poodle_jetstream::JetstreamThemeProvider;
+use poodle_primitives::RangeSliderSpec;
 
 use crate::theme_ext::{resolve_color, resolve_opacity};
 

@@ -1,4 +1,4 @@
-use flint_tokens::semantic;
+use poodle_tokens::semantic;
 
 use crate::types::Orientation;
 
@@ -79,13 +79,13 @@ impl ResizeHandleSpec {
     // -- Token methods --
 
     /// Border color for the visual affordance line in idle state.
-    /// Matches Svelte: `color-mix(in srgb, var(--flint-color-border-default) 82%, transparent)`.
+    /// Matches Svelte: `color-mix(in srgb, var(--poodle-color-border-default) 82%, transparent)`.
     pub fn border_color_token(&self) -> &'static str {
         semantic::COLOR_BORDER_DEFAULT
     }
 
     /// Highlight color for hover and active/dragging states.
-    /// Matches Svelte: `var(--flint-color-accent-base)`.
+    /// Matches Svelte: `var(--poodle-color-accent-base)`.
     pub fn hover_color_token(&self) -> &'static str {
         semantic::COLOR_ACCENT_BASE
     }

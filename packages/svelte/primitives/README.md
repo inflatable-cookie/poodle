@@ -1,6 +1,6 @@
-# Flint Svelte Primitives
+# Poodle Svelte Primitives
 
-Contract-backed Svelte primitive surface for the first generalized Flint baseline.
+Contract-backed Svelte primitive surface for the first generalized Poodle baseline.
 
 ## Public Surface
 
@@ -88,8 +88,8 @@ Contract-backed Svelte primitive surface for the first generalized Flint baselin
 - `Tooltip`
 - `TriStateSwitch`
 - `ZonedDateTimePicker`
-- root import: `@flint/svelte-primitives`
-- type-only import: `@flint/svelte-primitives/types`
+- root import: `@poodle/svelte-primitives`
+- type-only import: `@poodle/svelte-primitives/types`
 
 ## Purpose
 
@@ -121,7 +121,7 @@ Contract-backed Svelte primitive surface for the first generalized Flint baselin
   persistent navigation disclosure from persistent command-menu ownership
 - promote only the low-level data surfaces that are truly foundation-safe while
   keeping command discovery and richer table behavior above foundation
-- keep the public API contract-owned by Flint even where Bits-aligned headless
+- keep the public API contract-owned by Poodle even where Bits-aligned headless
   primitives remain the expected Svelte-side substrate
 - give the preview app and downstream adopters a reusable primitive package
   instead of relying on inline demo controls or composite-only entry points

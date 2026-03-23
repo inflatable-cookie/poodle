@@ -1,6 +1,6 @@
 <script lang="ts">
-  import { SplitButton, Eyebrow } from "@flint/svelte-primitives";
-  import type { MenuItem } from "@flint/svelte-primitives";
+  import { SplitButton, Eyebrow } from "@poodle/svelte-primitives";
+  import type { MenuItem } from "@poodle/svelte-primitives";
 
   let lastAction = "";
 

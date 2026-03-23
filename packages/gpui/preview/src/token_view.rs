@@ -1,9 +1,9 @@
 //! Token inspector — displays all semantic tokens with swatches and resolved values.
 
 use gpui::*;
-use flint_adapter::ThemeProvider;
-use flint_gpui::GpuiThemeProvider;
-use flint_tokens::semantic;
+use poodle_adapter::ThemeProvider;
+use poodle_gpui::GpuiThemeProvider;
+use poodle_tokens::semantic;
 use crate::style_bridge::color_to_hsla;
 
 /// Render the token inspector view.

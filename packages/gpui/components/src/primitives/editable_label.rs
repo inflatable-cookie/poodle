@@ -6,8 +6,8 @@
 
 use gpui::prelude::FluentBuilder;
 use gpui::*;
-use flint_gpui::GpuiThemeProvider;
-use flint_primitives::EditableLabelSpec;
+use poodle_gpui::GpuiThemeProvider;
+use poodle_primitives::EditableLabelSpec;
 
 use crate::theme_ext::{color_mix, resolve_color, resolve_opacity, resolve_radius};
 
@@ -99,9 +99,9 @@ impl IntoElement for EditableLabel {
         let text_col = if is_empty { placeholder_color } else { text_color };
 
         let id_str = if let Some(ref suffix) = self.id_suffix {
-            format!("flint-editable-label-{}", suffix)
+            format!("poodle-editable-label-{}", suffix)
         } else {
-            "flint-editable-label".to_string()
+            "poodle-editable-label".to_string()
         };
 
         // Contract: padding 0.375rem 0.5rem

@@ -1,6 +1,6 @@
 <script lang="ts">
   import { createEventDispatcher } from "svelte";
-  import { Progress } from "@flint/svelte-primitives";
+  import { Progress } from "@poodle/svelte-primitives";
 
   export let isVisible = true;
   export let value: number | null = null;
@@ -69,7 +69,7 @@
   .page-loading {
     position: fixed;
     inset: 0;
-    z-index: var(--flint-overlay-z-modal, 1000);
+    z-index: var(--poodle-overlay-z-modal, 1000);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -78,7 +78,7 @@
   .page-loading__backdrop {
     position: absolute;
     inset: 0;
-    background: color-mix(in srgb, var(--flint-color-background-base, #000) 62%, transparent);
+    background: color-mix(in srgb, var(--poodle-color-background-base, #000) 62%, transparent);
     backdrop-filter: blur(2px);
   }
 
@@ -91,16 +91,16 @@
     min-width: 14rem;
     max-width: 20rem;
     padding: 2rem 2.5rem;
-    border: 1px solid color-mix(in srgb, var(--flint-color-border-default) 42%, transparent);
-    border-radius: var(--flint-radius-surface);
-    background: var(--flint-color-background-elevated);
-    box-shadow: var(--flint-elevation-overlay);
+    border: 1px solid color-mix(in srgb, var(--poodle-color-border-default) 42%, transparent);
+    border-radius: var(--poodle-radius-surface);
+    background: var(--poodle-color-background-elevated);
+    box-shadow: var(--poodle-elevation-overlay);
   }
 
   .page-loading__spinner {
     width: 2.5rem;
     height: 2.5rem;
-    color: var(--flint-color-accent-base);
+    color: var(--poodle-color-accent-base);
   }
 
   .page-loading__spinner svg {
@@ -125,30 +125,30 @@
 
   .page-loading__message {
     margin: 0;
-    font-size: var(--flint-typography-label-size, 0.8125rem);
-    color: var(--flint-color-text-secondary);
+    font-size: var(--poodle-typography-label-size, 0.8125rem);
+    color: var(--poodle-color-text-secondary);
     text-align: center;
     line-height: 1.4;
   }
 
   .page-loading__cancel {
     padding: 0.375rem 0.875rem;
-    border: 1px solid var(--flint-color-border-default);
-    border-radius: var(--flint-radius-control);
+    border: 1px solid var(--poodle-color-border-default);
+    border-radius: var(--poodle-radius-control);
     background: transparent;
-    color: var(--flint-color-text-secondary);
+    color: var(--poodle-color-text-secondary);
     font: inherit;
-    font-size: var(--flint-typography-label-size, 0.8125rem);
+    font-size: var(--poodle-typography-label-size, 0.8125rem);
     cursor: pointer;
-    transition: background var(--flint-motion-duration-interaction) var(--flint-motion-easing-standard);
+    transition: background var(--poodle-motion-duration-interaction) var(--poodle-motion-easing-standard);
   }
 
   .page-loading__cancel:hover {
-    background: color-mix(in srgb, var(--flint-color-background-surface) 72%, transparent);
+    background: color-mix(in srgb, var(--poodle-color-background-surface) 72%, transparent);
   }
 
   .page-loading__cancel:focus-visible {
-    outline: var(--flint-border-width-focus) solid var(--flint-color-accent-focusRing);
+    outline: var(--poodle-border-width-focus) solid var(--poodle-color-accent-focusRing);
     outline-offset: 0.125rem;
   }
 </style>

@@ -14,7 +14,7 @@ without drifting into app-specific workstation logic.
 
 ## Package Rule
 
-The `g04.009` tranche introduces `flint-gpui-workstation` with:
+The `g04.009` tranche introduces `poodle-gpui-workstation` with:
 
 - `AppHeaderSpec`
 - `ProjectHeaderSpec`

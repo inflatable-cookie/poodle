@@ -1,6 +1,6 @@
 use gpui::*;
-use flint_primitives::{CheckboxSpec, EyebrowSpec};
-use flint_gpui_components::{Checkbox, Eyebrow};
+use poodle_primitives::{CheckboxSpec, EyebrowSpec};
+use poodle_gpui_components::{Checkbox, Eyebrow};
 use crate::app_state::AppState;
 use crate::PreviewRoot;
 

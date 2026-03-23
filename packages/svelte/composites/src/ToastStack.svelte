@@ -1,7 +1,7 @@
 <script lang="ts">
   import { createEventDispatcher } from "svelte";
 
-  import { Button, Icon } from "@flint/svelte-primitives";
+  import { Button, Icon } from "@poodle/svelte-primitives";
 
   import type { ToastItem } from "./types";
 
@@ -48,25 +48,25 @@
 <style>
   .toast-stack {
     display: grid;
-    gap: var(--flint-space-stack-sm);
+    gap: var(--poodle-space-stack-sm);
   }
 
   .toast {
-    --flint-toast-tone: var(--flint-color-status-info, #3b82f6);
+    --poodle-toast-tone: var(--poodle-color-status-info, #3b82f6);
     display: grid;
-    gap: var(--flint-space-stack-sm);
-    padding: var(--flint-space-panel-x);
-    padding-right: calc(var(--flint-space-panel-x) + 1.5rem);
-    border: 0.0625rem solid color-mix(in srgb, var(--flint-toast-tone) 34%, var(--flint-color-border-default));
-    border-radius: calc(var(--flint-radius-surface) - 0.125rem);
+    gap: var(--poodle-space-stack-sm);
+    padding: var(--poodle-space-panel-x);
+    padding-right: calc(var(--poodle-space-panel-x) + 1.5rem);
+    border: 0.0625rem solid color-mix(in srgb, var(--poodle-toast-tone) 34%, var(--poodle-color-border-default));
+    border-radius: calc(var(--poodle-radius-surface) - 0.125rem);
     background:
       linear-gradient(
         90deg,
-        color-mix(in srgb, var(--flint-toast-tone) 12%, transparent),
-        color-mix(in srgb, var(--flint-color-background-elevated) 98%, transparent) 18%
+        color-mix(in srgb, var(--poodle-toast-tone) 12%, transparent),
+        color-mix(in srgb, var(--poodle-color-background-elevated) 98%, transparent) 18%
       ),
-      color-mix(in srgb, var(--flint-color-background-elevated) 96%, transparent);
-    box-shadow: var(--flint-elevation-overlay);
+      color-mix(in srgb, var(--poodle-color-background-elevated) 96%, transparent);
+    box-shadow: var(--poodle-elevation-overlay);
     position: relative;
     overflow: hidden;
   }
@@ -76,23 +76,23 @@
     position: absolute;
     inset: 0 auto 0 0;
     width: 0.1875rem;
-    background: color-mix(in srgb, var(--flint-toast-tone) 82%, white 6%);
+    background: color-mix(in srgb, var(--poodle-toast-tone) 82%, white 6%);
   }
 
   .toast[data-tone="info"] {
-    --flint-toast-tone: var(--flint-color-status-info, #3b82f6);
+    --poodle-toast-tone: var(--poodle-color-status-info, #3b82f6);
   }
 
   .toast[data-tone="success"] {
-    --flint-toast-tone: var(--flint-color-status-success);
+    --poodle-toast-tone: var(--poodle-color-status-success);
   }
 
   .toast[data-tone="warning"] {
-    --flint-toast-tone: var(--flint-color-status-warning);
+    --poodle-toast-tone: var(--poodle-color-status-warning);
   }
 
   .toast[data-tone="danger"] {
-    --flint-toast-tone: var(--flint-color-status-danger);
+    --poodle-toast-tone: var(--poodle-color-status-danger);
   }
 
   .toast__dismiss {
@@ -106,15 +106,15 @@
     height: 1.25rem;
     padding: 0;
     border: none;
-    border-radius: var(--flint-radius-sm, 0.25rem);
+    border-radius: var(--poodle-radius-sm, 0.25rem);
     background: transparent;
-    color: var(--flint-color-text-secondary);
+    color: var(--poodle-color-text-secondary);
     cursor: pointer;
   }
 
   .toast__dismiss:hover {
-    color: var(--flint-color-text-primary);
-    background: color-mix(in srgb, var(--flint-color-background-surface) 60%, transparent);
+    color: var(--poodle-color-text-primary);
+    background: color-mix(in srgb, var(--poodle-color-background-surface) 60%, transparent);
   }
 
   .toast__copy {
@@ -128,7 +128,7 @@
   }
 
   .toast__copy p {
-    color: var(--flint-color-text-secondary);
+    color: var(--poodle-color-text-secondary);
     font-size: 0.8125rem;
     line-height: 1.5;
   }

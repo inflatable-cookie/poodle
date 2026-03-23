@@ -12,7 +12,7 @@ meaning.
 
 ## Structured Data Rule
 
-When content is genuinely tabular, Flint should use table semantics rather than a
+When content is genuinely tabular, Poodle should use table semantics rather than a
 generic list disguised as rows and columns.
 
 This requires:

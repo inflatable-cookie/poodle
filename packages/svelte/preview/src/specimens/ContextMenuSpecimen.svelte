@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { ContextMenu, Eyebrow, type MenuItem } from "@flint/svelte-primitives";
+  import { ContextMenu, Eyebrow, type MenuItem } from "@poodle/svelte-primitives";
 
   const items: MenuItem[] = [
     { value: "cut", label: "Cut", shortcutLabel: "⌘X" },
@@ -46,13 +46,13 @@
     align-items: center;
     justify-content: center;
     height: 8rem;
-    border: 2px dashed var(--flint-color-border-default);
+    border: 2px dashed var(--poodle-color-border-default);
     border-radius: 4px;
   }
 
   p {
     margin: 0;
     font-size: 0.875rem;
-    color: var(--flint-color-text-secondary);
+    color: var(--poodle-color-text-secondary);
   }
 </style>

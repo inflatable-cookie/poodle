@@ -1,10 +1,10 @@
 # g04.010 Loading, Skeleton Presets, And Progress Patterns
 
 Status: planned
-Owner: Flint Core
+Owner: Poodle Core
 Updated: 2026-03-14
 Depends on: g04.001
-Primary repos: `flint`
+Primary repos: `poodle`
 
 ## Goals
 
@@ -17,10 +17,10 @@ Primary repos: `flint`
 
 - [ ] amend Skeleton contract: add preset prop with values like `table-row`,
   `card`, `list-item`, `detail-section`, `avatar-line`
-- [ ] implement Skeleton presets in `@flint/svelte-primitives`
+- [ ] implement Skeleton presets in `@poodle/svelte-primitives`
 - [ ] write contract for PageLoading: full-viewport overlay, spinner or progress
   bar, status message, cancel option
-- [ ] implement PageLoading composite in `@flint/svelte-composites`
+- [ ] implement PageLoading composite in `@poodle/svelte-composites`
 - [ ] update Skeleton specimen with preset examples
 - [ ] create PageLoading specimen
 - [ ] register PageLoading in component-registry.ts and specimen registry

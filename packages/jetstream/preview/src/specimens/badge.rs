@@ -1,10 +1,10 @@
 //! Badge specimen.
 
 use jetstream_runtime::ui_element::*;
-use flint_jetstream::JetstreamThemeProvider;
-use flint_jetstream_components::badge::js_badge;
-use flint_jetstream_components::theme_ext::*;
-use flint_primitives::{BadgeSpec, BadgeVariant};
+use poodle_jetstream::JetstreamThemeProvider;
+use poodle_jetstream_components::badge::js_badge;
+use poodle_jetstream_components::theme_ext::*;
+use poodle_primitives::{BadgeSpec, BadgeVariant};
 
 pub fn render(theme: &JetstreamThemeProvider) -> JsEl {
     let secondary = resolve_color(theme, "semantic.color.text.secondary");

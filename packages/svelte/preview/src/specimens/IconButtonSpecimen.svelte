@@ -1,6 +1,6 @@
 <script lang="ts">
-  import { IconButton, Eyebrow } from "@flint/svelte-primitives";
-  import { plus, settings, x, trash2, star, mapPin, ban, refreshCw } from "@flint/icons-lucide";
+  import { IconButton, Eyebrow } from "@poodle/svelte-primitives";
+  import { plus, settings, x, trash2, star, mapPin, ban, refreshCw } from "@poodle/icons-lucide";
 </script>
 
 <div class="specimen">

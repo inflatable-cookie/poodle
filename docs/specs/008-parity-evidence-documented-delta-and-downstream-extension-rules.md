@@ -10,14 +10,14 @@ Close `g01` with explicit rules for:
 
 - what counts as parity evidence
 - how intentional deltas are documented and approved
-- how downstream repos extend Flint without bloating or forking it
+- how downstream repos extend Poodle without bloating or forking it
 - and what `g02` may assume as stable baseline
 
 ## Core Rule
 
 Shared-surface quality is not proven by a contract file alone.
 
-Flint requires:
+Poodle requires:
 
 - a canonical contract
 - a documented implementation target
@@ -105,7 +105,7 @@ core implementations.
 
 ## Downstream Extension Rule
 
-Downstream repos may extend Flint above the canonical layer.
+Downstream repos may extend Poodle above the canonical layer.
 
 They may build:
 
@@ -121,7 +121,7 @@ They must do so by composing:
 - canonical contracts
 - bridge/adapter layers where relevant
 
-They may not redefine Flint's canonical meaning in place.
+They may not redefine Poodle's canonical meaning in place.
 
 ## Downstream Extension Contract
 
@@ -137,8 +137,8 @@ They may not redefine Flint's canonical meaning in place.
 ### Forbidden Downstream Behavior
 
 - forking canonical token meaning while still claiming the same token names
-- redefining a Flint contract locally without recording the divergence
-- pushing app-specific DAW widgets back into Flint core as if they were generic
+- redefining a Poodle contract locally without recording the divergence
+- pushing app-specific DAW widgets back into Poodle core as if they were generic
   primitives
 - treating bridge-local aliases as canonical token source
 - relying on undocumented deltas as stable extension points
@@ -150,7 +150,7 @@ A downstream pattern becomes an upstream candidate only when:
 - it is demonstrably reusable across more than one app or shell context
 - it can be described without app-specific nouns at its core
 - it composes cleanly from the existing layers
-- and it raises the shared baseline instead of smuggling app policy into Flint
+- and it raises the shared baseline instead of smuggling app policy into Poodle
 
 “Loophole needs it” is not sufficient by itself.
 
@@ -173,7 +173,7 @@ A downstream pattern becomes an upstream candidate only when:
 
 ## Stable `g01` Surface Summary
 
-At `g01` close, Flint has:
+At `g01` close, Poodle has:
 
 - token schema and artifact emission
 - Svelte and GPUI substrate policy

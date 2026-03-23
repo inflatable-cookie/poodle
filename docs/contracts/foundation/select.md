@@ -137,28 +137,28 @@ SelectItems: SelectOption[] | SelectOptionGroup[]
 | `display` | `grid` |
 | `grid-template-columns` | `minmax(0, 1fr) auto` |
 | `align-items` | `center` |
-| `gap` | `var(--flint-space-inline-sm)` |
-| `min-height` | `var(--flint-size-control-height)` |
-| `padding` | `0 var(--flint-space-control-x)` |
-| `border` | `0.0625rem solid var(--flint-color-border-default)` |
-| `border-radius` | `var(--flint-treatment-interactive-subtle-radius, var(--flint-radius-control))` |
-| `background` | `var(--flint-treatment-interactive-subtle-fill, var(--flint-color-background-surface))` |
-| `box-shadow` | `var(--flint-treatment-interactive-subtle-shadow, none)` |
+| `gap` | `var(--poodle-space-inline-sm)` |
+| `min-height` | `var(--poodle-size-control-height)` |
+| `padding` | `0 var(--poodle-space-control-x)` |
+| `border` | `0.0625rem solid var(--poodle-color-border-default)` |
+| `border-radius` | `var(--poodle-treatment-interactive-subtle-radius, var(--poodle-radius-control))` |
+| `background` | `var(--poodle-treatment-interactive-subtle-fill, var(--poodle-color-background-surface))` |
+| `box-shadow` | `var(--poodle-treatment-interactive-subtle-shadow, none)` |
 | `transition` | `border-color, box-shadow, background` |
 
 ### Root — focus-within
 
 | Property | Value |
 |----------|-------|
-| `border-color` | `var(--flint-color-accent-focusRing)` |
-| `background` | `var(--flint-treatment-interactive-subtle-fill-focus, var(--flint-color-background-surface))` |
-| `box-shadow` | `var(--flint-treatment-interactive-subtle-shadow-focus, 0 0 0 var(--flint-border-width-focus) color-mix(in srgb, var(--flint-color-accent-focusRing) 28%, transparent))` |
+| `border-color` | `var(--poodle-color-accent-focusRing)` |
+| `background` | `var(--poodle-treatment-interactive-subtle-fill-focus, var(--poodle-color-background-surface))` |
+| `box-shadow` | `var(--poodle-treatment-interactive-subtle-shadow-focus, 0 0 0 var(--poodle-border-width-focus) color-mix(in srgb, var(--poodle-color-accent-focusRing) 28%, transparent))` |
 
 ### Root — has disabled select
 
 | Property | Value |
 |----------|-------|
-| `opacity` | `var(--flint-state-opacity-disabled)` |
+| `opacity` | `var(--poodle-state-opacity-disabled)` |
 
 ### Control `.select__control`
 
@@ -166,14 +166,14 @@ SelectItems: SelectOption[] | SelectOptionGroup[]
 |----------|-------|
 | `min-width` | `0` |
 | `width` | `100%` |
-| `height` | `calc(var(--flint-size-control-height) - (var(--flint-border-width-default) * 2))` |
+| `height` | `calc(var(--poodle-size-control-height) - (var(--poodle-border-width-default) * 2))` |
 | `padding` | `0` |
 | `border` | `0` |
 | `background` | `transparent` |
-| `color` | `var(--flint-color-text-primary)` |
-| `font-family` | `var(--flint-typography-body-family)` |
-| `font-size` | `var(--flint-typography-body-size)` |
-| `line-height` | `var(--flint-typography-body-lineHeight)` |
+| `color` | `var(--poodle-color-text-primary)` |
+| `font-family` | `var(--poodle-typography-body-family)` |
+| `font-size` | `var(--poodle-typography-body-size)` |
+| `line-height` | `var(--poodle-typography-body-lineHeight)` |
 | `outline` | `0` |
 | `appearance` | `none` |
 
@@ -181,13 +181,13 @@ SelectItems: SelectOption[] | SelectOptionGroup[]
 
 | Property | Value |
 |----------|-------|
-| `color` | `var(--flint-color-text-secondary)` |
+| `color` | `var(--poodle-color-text-secondary)` |
 
 ### Indicator `.select__indicator`
 
 | Property | Value |
 |----------|-------|
-| `color` | `var(--flint-color-icon-muted)` |
+| `color` | `var(--poodle-color-icon-muted)` |
 | `pointer-events` | `none` |
 
 ### Option Group `.select__control optgroup`
@@ -195,27 +195,27 @@ SelectItems: SelectOption[] | SelectOptionGroup[]
 | Property | Value |
 |----------|-------|
 | `font-weight` | `600` |
-| `color` | `var(--flint-color-text-secondary)` |
+| `color` | `var(--poodle-color-text-secondary)` |
 
 ### Option `.select__control option`
 
 | Property | Value |
 |----------|-------|
 | `font-weight` | `normal` |
-| `color` | `var(--flint-color-text-primary)` |
+| `color` | `var(--poodle-color-text-primary)` |
 
 ## 9. Svelte Notes
 
 - Uses a native `<select>` element for full platform accessibility without a custom overlay
 - `appearance: none` on the select removes native browser chrome; the custom indicator provides the disclosure chevron
 - `data-placeholder="true"` attribute on root signals placeholder state for CSS targeting
-- Treatment tokens (`--flint-treatment-interactive-subtle-*`) provide themed styling with fallbacks to base tokens
+- Treatment tokens (`--poodle-treatment-interactive-subtle-*`) provide themed styling with fallbacks to base tokens
 - Placeholder rendered as a disabled `<option>` with `selected` when no value is set
 - Option groups rendered as native `<optgroup>` elements
 
 ## 10. GPUI Notes
 
-- expected crate/module surface: `flint_gpui::primitives::select`
+- expected crate/module surface: `poodle_gpui::primitives::select`
 - GPUI must model the select as a trigger that opens a platform-appropriate option list
 - Must expose selected value, expanded state, and option list through native accessibility tree
 - Treatment token fallback chain can be modeled as: use treatment token if set, else base token

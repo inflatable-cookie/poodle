@@ -1,8 +1,8 @@
 use gpui::*;
-use flint_adapter::ThemeProvider;
-use flint_gpui::GpuiThemeProvider;
-use flint_primitives::{EyebrowSpec, Orientation, ResizeHandleSpec};
-use flint_gpui_components::{Eyebrow, ResizeHandle};
+use poodle_adapter::ThemeProvider;
+use poodle_gpui::GpuiThemeProvider;
+use poodle_primitives::{EyebrowSpec, Orientation, ResizeHandleSpec};
+use poodle_gpui_components::{Eyebrow, ResizeHandle};
 use crate::style_bridge::color_to_hsla;
 
 pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
@@ -110,8 +110,8 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
 /// A mock pane for specimen layout context.
 fn pane(
     label: &str,
-    text_color: flint_tokens::typed::ColorValue,
-    bg_color: flint_tokens::typed::ColorValue,
+    text_color: poodle_tokens::typed::ColorValue,
+    bg_color: poodle_tokens::typed::ColorValue,
 ) -> Div {
     div()
         .flex_1()

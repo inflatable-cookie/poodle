@@ -5,7 +5,7 @@ import { underlayTokenMap } from "./token-map";
 export type UnderlayAdoptionSurfaceProof = {
   underlayExport: string;
   bridgeOwner: "underlay-bridge";
-  appImportsFlintDirectly: false;
+  appImportsPoodleDirectly: false;
   appFacingImport: string;
   usesBridgeTokenAliases: boolean;
   usesBridgeThemeRegistration: boolean;
@@ -13,10 +13,10 @@ export type UnderlayAdoptionSurfaceProof = {
 };
 
 export type UnderlayZeroLeakProof = {
-  packageName: "@flint/bridge-underlay";
+  packageName: "@poodle/bridge-underlay";
   proofVersion: 1;
   zeroLeakRules: readonly string[];
-  directFlintImportsAllowedInApps: false;
+  directPoodleImportsAllowedInApps: false;
   canonicalDependencyShape: "bridge-owned";
   proofSurfaces: UnderlayAdoptionSurfaceProof[];
   remainingFriction: string[];
@@ -26,7 +26,7 @@ export const underlayAdoptionSurfaceProof: UnderlayAdoptionSurfaceProof[] = unde
   (policy) => ({
     underlayExport: policy.underlayExport,
     bridgeOwner: "underlay-bridge",
-    appImportsFlintDirectly: false,
+    appImportsPoodleDirectly: false,
     appFacingImport: `@underlay/ui/${policy.underlayExport}`,
     usesBridgeTokenAliases: true,
     usesBridgeThemeRegistration: true,
@@ -37,15 +37,15 @@ export const underlayAdoptionSurfaceProof: UnderlayAdoptionSurfaceProof[] = unde
 export const underlayRemainingAdoptionFriction = [
   "Underlay-owned theme registration names are still placeholders and should be replaced by real Underlay canonical IDs during adoption.",
   "Wrapper prop translation remains policy-only until the first Underlay-owned wrapper package consumes the bridge in a downstream repo.",
-  "Accessibility parity still requires downstream wrapper evidence once real Underlay surfaces adopt Flint-backed internals.",
+  "Accessibility parity still requires downstream wrapper evidence once real Underlay surfaces adopt Poodle-backed internals.",
   "Bridge-local token aliases remain intentionally narrow and should widen only in response to concrete Underlay adoption pressure.",
 ] as const;
 
 export const underlayZeroLeakProof: UnderlayZeroLeakProof = {
-  packageName: "@flint/bridge-underlay",
+  packageName: "@poodle/bridge-underlay",
   proofVersion: 1,
   zeroLeakRules: underlayZeroLeakRules,
-  directFlintImportsAllowedInApps: false,
+  directPoodleImportsAllowedInApps: false,
   canonicalDependencyShape: "bridge-owned",
   proofSurfaces: underlayAdoptionSurfaceProof,
   remainingFriction: [...underlayRemainingAdoptionFriction],
@@ -64,7 +64,7 @@ export function validateUnderlayZeroLeakProof(): void {
     throw new Error("Underlay zero-leak proof requires at least one wrapper-backed adoption surface.");
   }
 
-  if (underlayAdoptionSurfaceProof.some((surface) => surface.appImportsFlintDirectly)) {
-    throw new Error("Underlay zero-leak proof failed: app-facing surfaces may not import Flint directly.");
+  if (underlayAdoptionSurfaceProof.some((surface) => surface.appImportsPoodleDirectly)) {
+    throw new Error("Underlay zero-leak proof failed: app-facing surfaces may not import Poodle directly.");
   }
 }

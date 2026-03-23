@@ -1,4 +1,4 @@
-use flint_primitives::{ButtonVariant, FormActionAlign, StatusTone, ValidationState};
+use poodle_primitives::{ButtonVariant, FormActionAlign, StatusTone, ValidationState};
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub enum AnnouncementMode {

@@ -59,9 +59,9 @@ const sharedDemoAppAuditPath = path.join(repoRoot, "packages", "shared-demo-app-
 const sharedDemoAppContractPath = path.join(repoRoot, "packages", "shared-demo-app-contract.json");
 const workstationContractsPath = path.join(contractsDir, "workstation");
 const hasWorkstationContracts = fs.existsSync(workstationContractsPath);
-const gpuiAdapterCrateName = "flint-gpui";
+const gpuiAdapterCrateName = "poodle-gpui";
 const gpuiAdapterCratePath = "packages/gpui/adapter";
-const gpuiTokenSource = "flint-tokens";
+const gpuiTokenSource = "poodle-tokens";
 
 function collectMarkdownFiles(directory: string): string[] {
   return fs
@@ -195,7 +195,7 @@ function parseNumberedHeadingSequence(markdown: string): number[] {
   return Array.from(markdown.matchAll(/^##\s+(\d+)\.\s+.+$/gm), (match) => Number(match[1]));
 }
 
-function parseCargoFlintMetadata(source: string): {
+function parseCargoPoodleMetadata(source: string): {
   name: string | null;
   publicIntent: boolean | null;
   channel: string | null;
@@ -370,7 +370,7 @@ function validateSveltePackageSurface(
 
 function validatePackageSurfaceCoverage(
   packagePath: string,
-  packageName: "@flint/svelte-primitives" | "@flint/svelte-composites" | "@flint/svelte-composites",
+  packageName: "@poodle/svelte-primitives" | "@poodle/svelte-composites" | "@poodle/svelte-composites",
   errors: string[],
 ): void {
   const indexSource = fs.readFileSync(path.join(repoRoot, packagePath, "src", "index.ts"), "utf8");
@@ -768,7 +768,7 @@ function validateReleaseOperations(errors: string[]): void {
       const packageJsonPath = path.join(repoRoot, manifestEntry.path, "package.json");
       const packageJson = JSON.parse(fs.readFileSync(packageJsonPath, "utf8")) as {
         name?: string;
-        flintRelease?: {
+        poodleRelease?: {
           publicIntent?: boolean;
           channel?: string;
           stability?: string;
@@ -776,23 +776,23 @@ function validateReleaseOperations(errors: string[]): void {
       };
 
       expect(packageJson.name === manifestEntry.name, `${packageJsonPath} name does not match release manifest.`, errors);
-      expect(Boolean(packageJson.flintRelease), `${packageJsonPath} is missing flintRelease metadata.`, errors);
+      expect(Boolean(packageJson.poodleRelease), `${packageJsonPath} is missing poodleRelease metadata.`, errors);
 
-      if (packageJson.flintRelease) {
+      if (packageJson.poodleRelease) {
         expect(
-          packageJson.flintRelease.publicIntent === manifestEntry.publicIntent,
-          `${packageJsonPath} flintRelease.publicIntent does not match release manifest.`,
+          packageJson.poodleRelease.publicIntent === manifestEntry.publicIntent,
+          `${packageJsonPath} poodleRelease.publicIntent does not match release manifest.`,
           errors,
         );
         expect(
-          packageJson.flintRelease.channel === manifestEntry.channel,
-          `${packageJsonPath} flintRelease.channel does not match release manifest.`,
+          packageJson.poodleRelease.channel === manifestEntry.channel,
+          `${packageJsonPath} poodleRelease.channel does not match release manifest.`,
           errors,
         );
 
         if (manifestEntry.channel === "preview") {
           expect(
-            packageJson.flintRelease.stability === "pre-release",
+            packageJson.poodleRelease.stability === "pre-release",
             `${packageJsonPath} preview packages must use stability "pre-release".`,
             errors,
           );
@@ -800,7 +800,7 @@ function validateReleaseOperations(errors: string[]): void {
       }
     } else if (manifestEntry.language === "rust") {
       const cargoPath = path.join(repoRoot, manifestEntry.path, "Cargo.toml");
-      const cargoMetadata = parseCargoFlintMetadata(fs.readFileSync(cargoPath, "utf8"));
+      const cargoMetadata = parseCargoPoodleMetadata(fs.readFileSync(cargoPath, "utf8"));
 
       expect(cargoMetadata.name === manifestEntry.name, `${cargoPath} package name does not match release manifest.`, errors);
       expect(
@@ -1363,7 +1363,7 @@ function validateGpuiPreviewBaseline(errors: string[]): { previewSectionCount: n
   expect(previewBaseline.generation === "g04.002", "packages/gpui/preview-app-baseline.json must target g04.002.", errors);
   expect(
     previewBaseline.themeRuntime.tokenSource === gpuiTokenSource,
-    "packages/gpui/preview-app-baseline.json must use flint-tokens as token source.",
+    "packages/gpui/preview-app-baseline.json must use poodle-tokens as token source.",
     errors,
   );
   compareLists(
@@ -1462,12 +1462,12 @@ function validateGpuiStructuralBaseline(errors: string[]): { structuralExportCou
   );
   expect(
     structuralBaseline.crateName === gpuiAdapterCrateName,
-    "packages/gpui/structural-primitives-baseline.json must target the flint-gpui adapter crate.",
+    "packages/gpui/structural-primitives-baseline.json must target the poodle-gpui adapter crate.",
     errors,
   );
   expect(
     structuralBaseline.tokenSource === gpuiTokenSource,
-    "packages/gpui/structural-primitives-baseline.json must use flint-tokens as token source.",
+    "packages/gpui/structural-primitives-baseline.json must use poodle-tokens as token source.",
     errors,
   );
   compareLists(
@@ -1553,12 +1553,12 @@ function validateGpuiActionFieldBaseline(errors: string[]): { actionFieldExportC
   );
   expect(
     actionFieldBaseline.crateName === gpuiAdapterCrateName,
-    "packages/gpui/action-field-primitives-baseline.json must target the flint-gpui adapter crate.",
+    "packages/gpui/action-field-primitives-baseline.json must target the poodle-gpui adapter crate.",
     errors,
   );
   expect(
     actionFieldBaseline.tokenSource === gpuiTokenSource,
-    "packages/gpui/action-field-primitives-baseline.json must use flint-tokens as token source.",
+    "packages/gpui/action-field-primitives-baseline.json must use poodle-tokens as token source.",
     errors,
   );
   compareLists(
@@ -1659,12 +1659,12 @@ function validateGpuiSelectionFeedbackDateBaseline(errors: string[]): { selectio
   );
   expect(
     baseline.crateName === gpuiAdapterCrateName,
-    "packages/gpui/selection-feedback-date-baseline.json must target the flint-gpui adapter crate.",
+    "packages/gpui/selection-feedback-date-baseline.json must target the poodle-gpui adapter crate.",
     errors,
   );
   expect(
     baseline.tokenSource === gpuiTokenSource,
-    "packages/gpui/selection-feedback-date-baseline.json must use flint-tokens as token source.",
+    "packages/gpui/selection-feedback-date-baseline.json must use poodle-tokens as token source.",
     errors,
   );
   compareLists(
@@ -1752,12 +1752,12 @@ function validateGpuiOverlayNavigationMenuBaseline(errors: string[]): { overlayN
   );
   expect(
     baseline.crateName === gpuiAdapterCrateName,
-    "packages/gpui/overlay-navigation-menu-baseline.json must target the flint-gpui adapter crate.",
+    "packages/gpui/overlay-navigation-menu-baseline.json must target the poodle-gpui adapter crate.",
     errors,
   );
   expect(
     baseline.tokenSource === gpuiTokenSource,
-    "packages/gpui/overlay-navigation-menu-baseline.json must use flint-tokens as token source.",
+    "packages/gpui/overlay-navigation-menu-baseline.json must use poodle-tokens as token source.",
     errors,
   );
   compareLists(
@@ -1824,12 +1824,12 @@ function validateGpuiFormValidationRemediationBaseline(errors: string[]): { gpui
   );
   expect(
     baseline.crateName === gpuiAdapterCrateName,
-    "packages/gpui/form-validation-remediation-composites-baseline.json must target the flint-gpui adapter crate.",
+    "packages/gpui/form-validation-remediation-composites-baseline.json must target the poodle-gpui adapter crate.",
     errors,
   );
   expect(
     baseline.tokenSource === gpuiTokenSource,
-    "packages/gpui/form-validation-remediation-composites-baseline.json must use flint-tokens as token source.",
+    "packages/gpui/form-validation-remediation-composites-baseline.json must use poodle-tokens as token source.",
     errors,
   );
   compareLists(
@@ -1918,12 +1918,12 @@ function validateGpuiDataBrowseDetailPickerMediaBaseline(errors: string[]): { gp
   );
   expect(
     baseline.crateName === gpuiAdapterCrateName,
-    "packages/gpui/data-browse-detail-picker-media-baseline.json must target the flint-gpui adapter crate.",
+    "packages/gpui/data-browse-detail-picker-media-baseline.json must target the poodle-gpui adapter crate.",
     errors,
   );
   expect(
     baseline.tokenSource === gpuiTokenSource,
-    "packages/gpui/data-browse-detail-picker-media-baseline.json must use flint-tokens as token source.",
+    "packages/gpui/data-browse-detail-picker-media-baseline.json must use poodle-tokens as token source.",
     errors,
   );
   compareLists(
@@ -2018,12 +2018,12 @@ function validateGpuiWorkstationBaseline(errors: string[]): { gpuiWorkstationExp
   );
   expect(
     baseline.crateName === gpuiAdapterCrateName,
-    "packages/gpui/workstation-shell-command-layout-baseline.json must target the flint-gpui adapter crate.",
+    "packages/gpui/workstation-shell-command-layout-baseline.json must target the poodle-gpui adapter crate.",
     errors,
   );
   expect(
     baseline.tokenSource === gpuiTokenSource,
-    "packages/gpui/workstation-shell-command-layout-baseline.json must use flint-tokens as token source.",
+    "packages/gpui/workstation-shell-command-layout-baseline.json must use poodle-tokens as token source.",
     errors,
   );
   compareLists(
@@ -3153,10 +3153,10 @@ function validateSharedDemoAppContract(errors: string[]): {
 const errors: string[] = [];
 const componentContractCount = validateComponentContracts(errors);
 validateContractIndexes(errors);
-validateSveltePackageSurface("packages/svelte/primitives", "foundation", "@flint/svelte-primitives", errors);
-validateSveltePackageSurface("packages/svelte/composites", "composites", "@flint/svelte-composites", errors);
-validatePackageSurfaceCoverage("packages/svelte/primitives", "@flint/svelte-primitives", errors);
-validatePackageSurfaceCoverage("packages/svelte/composites", "@flint/svelte-composites", errors);
+validateSveltePackageSurface("packages/svelte/primitives", "foundation", "@poodle/svelte-primitives", errors);
+validateSveltePackageSurface("packages/svelte/composites", "composites", "@poodle/svelte-composites", errors);
+validatePackageSurfaceCoverage("packages/svelte/primitives", "@poodle/svelte-primitives", errors);
+validatePackageSurfaceCoverage("packages/svelte/composites", "@poodle/svelte-composites", errors);
 validateDocsCatalog(errors);
 validateParityCoverage(errors);
 validateAccessibilityAudit(errors);

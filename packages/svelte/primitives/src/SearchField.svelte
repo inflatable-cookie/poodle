@@ -86,28 +86,28 @@
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    width: var(--flint-icon-size-default);
-    height: var(--flint-icon-size-default);
+    width: var(--poodle-icon-size-default);
+    height: var(--poodle-icon-size-default);
     padding: 0;
     border: 0;
     background: transparent;
-    color: var(--flint-color-icon-muted);
+    color: var(--poodle-color-icon-muted);
     cursor: pointer;
     border-radius: calc(
-      var(--flint-treatment-interactive-subtle-radius, var(--flint-radius-control)) - 0.0625rem
+      var(--poodle-treatment-interactive-subtle-radius, var(--poodle-radius-control)) - 0.0625rem
     );
   }
 
   .search-field__clear:hover {
     background: var(
-      --flint-treatment-interactive-subtle-fill-hover,
-      color-mix(in srgb, var(--flint-color-background-surface) 84%, transparent)
+      --poodle-treatment-interactive-subtle-fill-hover,
+      color-mix(in srgb, var(--poodle-color-background-surface) 84%, transparent)
     );
-    color: var(--flint-color-text-primary);
+    color: var(--poodle-color-text-primary);
   }
 
   .search-field__clear:focus-visible {
-    outline: var(--flint-border-width-focus) solid var(--flint-color-accent-focusRing);
+    outline: var(--poodle-border-width-focus) solid var(--poodle-color-accent-focusRing);
     outline-offset: 0.125rem;
   }
 </style>

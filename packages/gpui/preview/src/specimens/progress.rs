@@ -1,7 +1,7 @@
 use gpui::*;
-use flint_gpui::GpuiThemeProvider;
-use flint_primitives::{ProgressSpec, EyebrowSpec};
-use flint_gpui_components::{Progress, Eyebrow};
+use poodle_gpui::GpuiThemeProvider;
+use poodle_primitives::{ProgressSpec, EyebrowSpec};
+use poodle_gpui_components::{Progress, Eyebrow};
 
 pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
     div().flex().flex_col().gap(px(24.0))

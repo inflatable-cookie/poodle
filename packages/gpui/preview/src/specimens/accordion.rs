@@ -1,7 +1,7 @@
 use gpui::*;
-use flint_adapter::ThemeProvider;
-use flint_primitives::{AccordionSpec, AccordionItemSpec, AccordionSelectionValue, EyebrowSpec};
-use flint_gpui_components::{Accordion, Eyebrow};
+use poodle_adapter::ThemeProvider;
+use poodle_primitives::{AccordionSpec, AccordionItemSpec, AccordionSelectionValue, EyebrowSpec};
+use poodle_gpui_components::{Accordion, Eyebrow};
 use crate::app_state::AppState;
 use crate::PreviewRoot;
 
@@ -83,7 +83,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
     ];
 
     let multi_content: Vec<(&str, &str)> = vec![
-        ("design", "Components consume semantic tokens like --flint-color-text-primary and --flint-size-control-height rather than hard-coded values. Switching themes at runtime updates every component instantly without re-rendering."),
+        ("design", "Components consume semantic tokens like --poodle-color-text-primary and --poodle-size-control-height rather than hard-coded values. Switching themes at runtime updates every component instantly without re-rendering."),
         ("keyboard", "Arrow keys move focus between accordion headers. Enter or Space toggles the focused panel. Home and End jump to the first and last header respectively. Tab moves focus out of the accordion entirely."),
         ("known-issues", "Animation on panel expand/collapse is not yet implemented. The component does not support nested accordions. Horizontal orientation is planned but not available in this release."),
     ];

@@ -6,7 +6,7 @@ Depends on: `002-component-contract-template-and-parity-rules.md`, `008-parity-e
 
 ## Purpose
 
-Freeze what parity evidence Flint should automate now, which harness surfaces are
+Freeze what parity evidence Poodle should automate now, which harness surfaces are
 allowed to stand in for repeat review, and which parity judgments must remain
 manual until later generations add deeper runtime coverage.
 
@@ -160,14 +160,14 @@ At minimum the route state must encode:
 
 Automation must not overclaim.
 
-Flint may say:
+Poodle may say:
 
 - a parity target is registered
 - a review route exists
 - a report was generated
 - a surface is suitable for repeat visual or interaction review
 
-Flint may not say:
+Poodle may not say:
 
 - GPUI parity is proven without GPUI evidence
 - accessibility is fully validated from route generation alone

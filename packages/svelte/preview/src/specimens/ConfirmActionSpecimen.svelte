@@ -1,6 +1,6 @@
 <script lang="ts">
-  import { ConfirmAction } from "@flint/svelte-composites";
-  import { Eyebrow, Button, IconButton } from "@flint/svelte-primitives";
+  import { ConfirmAction } from "@poodle/svelte-composites";
+  import { Eyebrow, Button, IconButton } from "@poodle/svelte-primitives";
 
   let lastAction = "";
 </script>
@@ -82,11 +82,11 @@
   .key-display {
     padding: 0.5rem 0.75rem;
     border-radius: 0.375rem;
-    background: var(--flint-color-background-panel, #1a1a1a);
+    background: var(--poodle-color-background-panel, #1a1a1a);
   }
 
   .key-display code {
-    font-family: var(--flint-typography-mono-family, monospace);
+    font-family: var(--poodle-typography-mono-family, monospace);
     font-size: 0.8125rem;
   }
 

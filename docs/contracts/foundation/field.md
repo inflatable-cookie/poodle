@@ -163,7 +163,7 @@ are owned by the slotted control.
 | Property | Value |
 |----------|-------|
 | `display` | `grid` |
-| `gap` | `var(--flint-space-stack-sm)` |
+| `gap` | `var(--poodle-space-stack-sm)` |
 
 ### Root inline styles (conditional)
 
@@ -180,63 +180,63 @@ are owned by the slotted control.
 | `display` | `flex` |
 | `align-items` | `baseline` |
 | `justify-content` | `space-between` |
-| `gap` | `var(--flint-space-inline-md)` |
+| `gap` | `var(--poodle-space-inline-md)` |
 
 ### Label `.field__label`
 
 | Property | Value |
 |----------|-------|
-| `color` | `var(--flint-color-text-primary)` |
-| `font-family` | `var(--flint-typography-label-family)` |
-| `font-size` | `var(--flint-typography-label-size)` |
-| `font-weight` | `var(--flint-typography-label-weight)` |
-| `line-height` | `var(--flint-typography-label-lineHeight)` |
+| `color` | `var(--poodle-color-text-primary)` |
+| `font-family` | `var(--poodle-typography-label-family)` |
+| `font-size` | `var(--poodle-typography-label-size)` |
+| `font-weight` | `var(--poodle-typography-label-weight)` |
+| `line-height` | `var(--poodle-typography-label-lineHeight)` |
 | `margin` | `0` |
 
 ### Required Marker `.field__required`
 
 | Property | Value |
 |----------|-------|
-| `color` | `var(--flint-color-status-danger)` |
+| `color` | `var(--poodle-color-status-danger)` |
 
 ### Optional Marker `.field__optional`
 
 | Property | Value |
 |----------|-------|
-| `color` | `var(--flint-color-text-secondary)` |
-| `font-family` | `var(--flint-typography-body-family)` |
+| `color` | `var(--poodle-color-text-secondary)` |
+| `font-family` | `var(--poodle-typography-body-family)` |
 | `font-size` | `0.75rem` |
-| `line-height` | `var(--flint-typography-body-lineHeight)` |
+| `line-height` | `var(--poodle-typography-body-lineHeight)` |
 | `margin` | `0` |
 
 ### Description `.field__description`
 
 | Property | Value |
 |----------|-------|
-| `color` | `var(--flint-color-text-secondary)` |
-| `font-family` | `var(--flint-typography-body-family)` |
+| `color` | `var(--poodle-color-text-secondary)` |
+| `font-family` | `var(--poodle-typography-body-family)` |
 | `font-size` | `0.75rem` |
-| `line-height` | `var(--flint-typography-body-lineHeight)` |
+| `line-height` | `var(--poodle-typography-body-lineHeight)` |
 | `margin` | `0` |
 
 ### Error Message `.field__message--error`
 
 | Property | Value |
 |----------|-------|
-| `color` | `var(--flint-color-status-danger)` |
-| `font-family` | `var(--flint-typography-body-family)` |
+| `color` | `var(--poodle-color-status-danger)` |
+| `font-family` | `var(--poodle-typography-body-family)` |
 | `font-size` | `0.75rem` |
-| `line-height` | `var(--flint-typography-body-lineHeight)` |
+| `line-height` | `var(--poodle-typography-body-lineHeight)` |
 | `margin` | `0` |
 
 ### Pending Message `.field__message--pending`
 
 | Property | Value |
 |----------|-------|
-| `color` | `var(--flint-color-text-secondary)` |
-| `font-family` | `var(--flint-typography-body-family)` |
+| `color` | `var(--poodle-color-text-secondary)` |
+| `font-family` | `var(--poodle-typography-body-family)` |
 | `font-size` | `0.75rem` |
-| `line-height` | `var(--flint-typography-body-lineHeight)` |
+| `line-height` | `var(--poodle-typography-body-lineHeight)` |
 | `margin` | `0` |
 
 ## 9. Svelte Notes
@@ -255,7 +255,7 @@ are owned by the slotted control.
 
 ## 10. GPUI Notes
 
-- expected crate/module surface: `flint_gpui::primitives::field`
+- expected crate/module surface: `poodle_gpui::primitives::field`
 - GPUI implementation must explicitly model label-to-control and
   description/error relationships in the accessible tree
 - Since GPUI has no HTML `<label for>` equivalent, the accessible name

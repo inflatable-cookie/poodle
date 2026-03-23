@@ -1,7 +1,7 @@
 <script lang="ts">
   import { createEventDispatcher, tick } from "svelte";
 
-  import { Icon } from "@flint/svelte-primitives";
+  import { Icon } from "@poodle/svelte-primitives";
 
   import type { EditorBlock, BlockType, BlockTypeDefinition } from "./types";
 
@@ -303,9 +303,9 @@
 
 <style>
   .block-editor {
-    border: 0.0625rem solid var(--flint-color-border-default);
-    border-radius: var(--flint-radius-surface);
-    background: var(--flint-color-background-surface);
+    border: 0.0625rem solid var(--poodle-color-border-default);
+    border-radius: var(--poodle-radius-surface);
+    background: var(--poodle-color-background-surface);
     padding: 0.75rem;
     display: flex;
     flex-direction: column;
@@ -313,7 +313,7 @@
   }
 
   .block-editor--disabled {
-    opacity: var(--flint-state-opacity-disabled);
+    opacity: var(--poodle-state-opacity-disabled);
     pointer-events: none;
   }
 
@@ -321,19 +321,19 @@
     display: flex;
     flex-direction: column;
     border: none;
-    border-radius: var(--flint-radius-control);
-    background: color-mix(in srgb, var(--flint-color-background-elevated) 42%, transparent);
+    border-radius: var(--poodle-radius-control);
+    background: color-mix(in srgb, var(--poodle-color-background-elevated) 42%, transparent);
     transition:
-      background var(--flint-motion-duration-interaction) var(--flint-motion-easing-standard),
-      box-shadow var(--flint-motion-duration-interaction) var(--flint-motion-easing-standard);
+      background var(--poodle-motion-duration-interaction) var(--poodle-motion-easing-standard),
+      box-shadow var(--poodle-motion-duration-interaction) var(--poodle-motion-easing-standard);
   }
 
   .block-editor__block.active {
-    background: color-mix(in srgb, var(--flint-color-background-elevated) 72%, transparent);
+    background: color-mix(in srgb, var(--poodle-color-background-elevated) 72%, transparent);
   }
 
   .block-editor__block.drag-over {
-    box-shadow: 0 0 0 0.125rem var(--flint-color-accent-base);
+    box-shadow: 0 0 0 0.125rem var(--poodle-color-accent-base);
   }
 
   .block-editor__block.dragging {
@@ -347,7 +347,7 @@
     padding: 0.25rem 0.375rem;
     border-bottom: none;
     background: transparent;
-    border-radius: var(--flint-radius-control) var(--flint-radius-control) 0 0;
+    border-radius: var(--poodle-radius-control) var(--poodle-radius-control) 0 0;
   }
 
   .block-editor__toolbar-left,
@@ -363,15 +363,15 @@
     justify-content: center;
     width: 1.25rem;
     height: 1.25rem;
-    color: var(--flint-color-text-tertiary);
+    color: var(--poodle-color-text-tertiary);
     cursor: grab;
-    border-radius: var(--flint-radius-control);
-    transition: background var(--flint-motion-duration-interaction) var(--flint-motion-easing-standard);
+    border-radius: var(--poodle-radius-control);
+    transition: background var(--poodle-motion-duration-interaction) var(--poodle-motion-easing-standard);
   }
 
   .block-editor__drag-grip:hover {
-    background: color-mix(in srgb, var(--flint-color-accent-base) 12%, transparent);
-    color: var(--flint-color-text-secondary);
+    background: color-mix(in srgb, var(--poodle-color-accent-base) 12%, transparent);
+    color: var(--poodle-color-text-secondary);
   }
 
   .block-editor__drag-grip:active {
@@ -386,18 +386,18 @@
     height: 1.25rem;
     padding: 0;
     border: 0;
-    border-radius: var(--flint-radius-control);
+    border-radius: var(--poodle-radius-control);
     background: transparent;
-    color: var(--flint-color-text-tertiary);
+    color: var(--poodle-color-text-tertiary);
     cursor: pointer;
     font-size: 0.75rem;
     line-height: 1;
-    transition: background var(--flint-motion-duration-interaction) var(--flint-motion-easing-standard);
+    transition: background var(--poodle-motion-duration-interaction) var(--poodle-motion-easing-standard);
   }
 
   .block-editor__tool-btn:hover {
-    background: color-mix(in srgb, var(--flint-color-accent-base) 16%, transparent);
-    color: var(--flint-color-text-primary);
+    background: color-mix(in srgb, var(--poodle-color-accent-base) 16%, transparent);
+    color: var(--poodle-color-text-primary);
   }
 
   .block-editor__tool-btn:disabled {
@@ -407,20 +407,20 @@
 
   .block-editor__tool-btn:disabled:hover {
     background: transparent;
-    color: var(--flint-color-text-tertiary);
+    color: var(--poodle-color-text-tertiary);
   }
 
   .block-editor__remove-btn:hover:not(:disabled) {
-    background: color-mix(in srgb, var(--flint-color-status-danger) 16%, transparent);
-    color: var(--flint-color-status-danger);
+    background: color-mix(in srgb, var(--poodle-color-status-danger) 16%, transparent);
+    color: var(--poodle-color-status-danger);
   }
 
   .block-editor__type-select {
     padding: 0.0625rem 0.25rem;
-    border: 0.0625rem solid var(--flint-color-border-subtle);
-    border-radius: var(--flint-radius-control);
+    border: 0.0625rem solid var(--poodle-color-border-subtle);
+    border-radius: var(--poodle-radius-control);
     background: transparent;
-    color: var(--flint-color-text-secondary);
+    color: var(--poodle-color-text-secondary);
     font: inherit;
     font-size: 0.6875rem;
     cursor: pointer;
@@ -437,8 +437,8 @@
     padding: 0.25rem 0.375rem;
     border: 0;
     background: transparent;
-    color: var(--flint-color-text-primary);
-    font-family: var(--flint-typography-body-family);
+    color: var(--poodle-color-text-primary);
+    font-family: var(--poodle-typography-body-family);
     font-size: 0.875rem;
     line-height: 1.6;
     outline: none;
@@ -451,17 +451,17 @@
   }
 
   .block-editor__input--code {
-    font-family: var(--flint-typography-code-family);
+    font-family: var(--poodle-typography-code-family);
     font-size: 0.8125rem;
-    background: color-mix(in srgb, var(--flint-color-background-elevated) 72%, transparent);
-    border-radius: var(--flint-radius-control);
+    background: color-mix(in srgb, var(--poodle-color-background-elevated) 72%, transparent);
+    border-radius: var(--poodle-radius-control);
     padding: 0.5rem;
   }
 
   .block-editor__input--quote {
-    border-left: 0.1875rem solid var(--flint-color-border-default);
+    border-left: 0.1875rem solid var(--poodle-color-border-default);
     padding-left: 0.625rem;
-    color: var(--flint-color-text-secondary);
+    color: var(--poodle-color-text-secondary);
     font-style: italic;
   }
 
@@ -471,13 +471,13 @@
 
   .block-editor__input--image-url {
     font-size: 0.75rem;
-    color: var(--flint-color-text-secondary);
-    font-family: var(--flint-typography-code-family);
+    color: var(--poodle-color-text-secondary);
+    font-family: var(--poodle-typography-code-family);
   }
 
   .block-editor__divider {
     border: 0;
-    border-top: 0.0625rem solid var(--flint-color-border-subtle);
+    border-top: 0.0625rem solid var(--poodle-color-border-subtle);
     margin: 0.5rem 0;
   }
 
@@ -490,14 +490,14 @@
   .block-editor__image-preview img {
     max-width: 100%;
     max-height: 16rem;
-    border-radius: var(--flint-radius-control);
+    border-radius: var(--poodle-radius-control);
     object-fit: contain;
   }
 
   .block-editor__add-overlay {
     position: fixed;
     inset: 0;
-    z-index: var(--flint-overlay-z-menu, 100);
+    z-index: var(--poodle-overlay-z-menu, 100);
   }
 
   .block-editor__add-menu {
@@ -506,10 +506,10 @@
     grid-template-columns: repeat(auto-fill, minmax(6rem, 1fr));
     gap: 0.25rem;
     padding: 0.5rem;
-    border: 0.0625rem solid var(--flint-color-border-default);
-    border-radius: var(--flint-radius-surface);
-    background: var(--flint-color-background-elevated);
-    box-shadow: var(--flint-elevation-overlay);
+    border: 0.0625rem solid var(--poodle-color-border-default);
+    border-radius: var(--poodle-radius-surface);
+    background: var(--poodle-color-background-elevated);
+    box-shadow: var(--poodle-elevation-overlay);
     min-width: 16rem;
   }
 
@@ -519,18 +519,18 @@
     gap: 0.375rem;
     padding: 0.5rem;
     border: 0;
-    border-radius: var(--flint-radius-control);
+    border-radius: var(--poodle-radius-control);
     background: transparent;
-    color: var(--flint-color-text-primary);
+    color: var(--poodle-color-text-primary);
     cursor: pointer;
     font: inherit;
     font-size: 0.8125rem;
     text-align: left;
-    transition: background var(--flint-motion-duration-interaction) var(--flint-motion-easing-standard);
+    transition: background var(--poodle-motion-duration-interaction) var(--poodle-motion-easing-standard);
   }
 
   .block-editor__add-menu-item:hover {
-    background: color-mix(in srgb, var(--flint-color-accent-base) 12%, transparent);
+    background: color-mix(in srgb, var(--poodle-color-accent-base) 12%, transparent);
   }
 
   .block-editor__add-menu-icon {

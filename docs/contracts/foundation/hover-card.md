@@ -168,7 +168,7 @@ screen boundaries or inside scrollable containers.
 
 | Property | Value |
 |----------|-------|
-| `outline` | `var(--flint-border-width-focus) solid var(--flint-color-accent-focusRing)` |
+| `outline` | `var(--poodle-border-width-focus) solid var(--poodle-color-accent-focusRing)` |
 | `outline-offset` | `0.125rem` |
 
 ### Surface `.hover-card__surface`
@@ -176,15 +176,15 @@ screen boundaries or inside scrollable containers.
 | Property | Value |
 |----------|-------|
 | `position` | `fixed` |
-| `z-index` | `var(--flint-overlay-z-menu)` |
+| `z-index` | `var(--poodle-overlay-z-menu)` |
 | `min-width` | `14rem` |
 | `max-width` | `min(22rem, 90vw)` |
-| `padding` | `var(--flint-space-panel-y) var(--flint-space-panel-x)` |
-| `border` | `0.0625rem solid color-mix(in srgb, var(--flint-color-border-default) 72%, transparent)` |
-| `border-radius` | `var(--flint-radius-surface)` |
-| `background` | `color-mix(in srgb, var(--flint-color-background-elevated) 98%, var(--flint-color-background-panel))` |
-| `--flint-surface` | `color-mix(in srgb, var(--flint-color-background-elevated) 98%, var(--flint-color-background-panel))` |
-| `box-shadow` | `var(--flint-elevation-overlay)` |
+| `padding` | `var(--poodle-space-panel-y) var(--poodle-space-panel-x)` |
+| `border` | `0.0625rem solid color-mix(in srgb, var(--poodle-color-border-default) 72%, transparent)` |
+| `border-radius` | `var(--poodle-radius-surface)` |
+| `background` | `color-mix(in srgb, var(--poodle-color-background-elevated) 98%, var(--poodle-color-background-panel))` |
+| `--poodle-surface` | `color-mix(in srgb, var(--poodle-color-background-elevated) 98%, var(--poodle-color-background-panel))` |
+| `box-shadow` | `var(--poodle-elevation-overlay)` |
 
 ### Surface Positioning
 
@@ -208,9 +208,9 @@ No `data-placement` attribute is emitted — positioning is entirely JS-driven.
 
 ## 10. GPUI Notes
 
-- expected crate/module surface: `flint_gpui::components::hover_card`
+- expected crate/module surface: `poodle_gpui::components::hover_card`
 - Spec struct: `HoverCardSpec` in primitives crate holds placement + delay config
-- Component struct: `FlintHoverCard` in components crate renders via `IntoElement`
+- Component struct: `PoodleHoverCard` in components crate renders via `IntoElement`
 - GPUI must model `color-mix` as `token.opacity(token.a * multiplier)` since GPUI has no CSS color-mix
 - Border opacity: 72% on border-default
 - Background: 98% elevated mixed with panel (approximate as 0.98 multiplier on elevated)
@@ -272,7 +272,7 @@ No `data-placement` attribute is emitted — positioning is entirely JS-driven.
 
 | Label | Props / Config | Expected Visual |
 |-------|---------------|-----------------|
-| Repository info hover card | `<HoverCard placement="bottom" ariaLabel="Repository info">` with inline trigger text ("flint/svelte-primitives") and content containing a repo name and stats | Underlined accent-colored trigger text; hovering opens an elevated surface below the trigger showing repository name and summary; surface has dialog role with aria-label |
+| Repository info hover card | `<HoverCard placement="bottom" ariaLabel="Repository info">` with inline trigger text ("poodle/svelte-primitives") and content containing a repo name and stats | Underlined accent-colored trigger text; hovering opens an elevated surface below the trigger showing repository name and summary; surface has dialog role with aria-label |
 
 ## 14. Approval And Adoption Notes
 

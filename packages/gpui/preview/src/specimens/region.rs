@@ -1,7 +1,7 @@
 use gpui::*;
-use flint_gpui::GpuiThemeProvider;
-use flint_primitives::{EyebrowSpec, RegionSpec};
-use flint_gpui_components::{Eyebrow, Region};
+use poodle_gpui::GpuiThemeProvider;
+use poodle_primitives::{EyebrowSpec, RegionSpec};
+use poodle_gpui_components::{Eyebrow, Region};
 
 pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
 

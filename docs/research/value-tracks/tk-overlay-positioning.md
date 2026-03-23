@@ -40,7 +40,7 @@ Research popover, dialog, menu, and tooltip positioning patterns to inform:
 - Better performance
 - Native scroll anchoring
 
-**Status:** Expected baseline 2026. Not yet ready for Flint's initial implementation.
+**Status:** Expected baseline 2026. Not yet ready for Poodle's initial implementation.
 
 ### Floating UI (Current Standard)
 
@@ -181,7 +181,7 @@ useFloating({
 
 ---
 
-## Recommendations for Flint
+## Recommendations for Poodle
 
 ### Overlay Component Suite
 
@@ -224,7 +224,7 @@ interface PositioningProps {
 - Collision detection
 - Arrow positioning
 
-**Flint adds:**
+**Poodle adds:**
 - Token-based styling
 - Consistent animation patterns
 - Positioning presets
@@ -255,12 +255,12 @@ Overlay::new(
 
 **Token-Based:**
 ```css
-/* Flint tokens */
---flint-z-dropdown: 1000;
---flint-z-popover: 1010;
---flint-z-tooltip: 1020;
---flint-modal-backdrop: 1030;
---flint-z-modal: 1040;
+/* Poodle tokens */
+--poodle-z-dropdown: 1000;
+--poodle-z-popover: 1010;
+--poodle-z-tooltip: 1020;
+--poodle-modal-backdrop: 1030;
+--poodle-z-modal: 1040;
 ```
 
 **GPUI Equivalent:**

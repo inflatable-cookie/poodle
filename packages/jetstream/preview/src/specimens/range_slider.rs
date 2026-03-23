@@ -1,10 +1,10 @@
 //! RangeSlider specimen — dual-thumb range selection slider.
 
 use jetstream_runtime::ui_element::*;
-use flint_jetstream::JetstreamThemeProvider;
-use flint_jetstream_components::range_slider::js_range_slider;
-use flint_jetstream_components::theme_ext::*;
-use flint_primitives::RangeSliderSpec;
+use poodle_jetstream::JetstreamThemeProvider;
+use poodle_jetstream_components::range_slider::js_range_slider;
+use poodle_jetstream_components::theme_ext::*;
+use poodle_primitives::RangeSliderSpec;
 
 pub fn render(theme: &JetstreamThemeProvider) -> JsEl {
     let secondary = resolve_color(theme, "semantic.color.text.secondary");

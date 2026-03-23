@@ -1,9 +1,9 @@
 {
-  "name": "@flint/icons-lucide",
+  "name": "@poodle/icons-lucide",
   "version": "0.0.0",
   "private": true,
   "type": "module",
-  "description": "Tree-shakeable Lucide icon entries for the Flint icon system.",
+  "description": "Tree-shakeable Lucide icon entries for the Poodle icon system.",
   "sideEffects": false,
   "exports": {
     ".": "./src/index.ts",
@@ -13,7 +13,7 @@
     "src",
     "README.md"
   ],
-  "flintRelease": {
+  "poodleRelease": {
     "publicIntent": true,
     "channel": "preview",
     "stability": "pre-release"

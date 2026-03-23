@@ -15,16 +15,16 @@ renderer-neutral naming, and relocate them from `packages/gpui/` to
 
 | Old Crate | New Crate | Old Path | New Path |
 |-----------|-----------|----------|----------|
-| `flint-gpui-tokens` | `flint-tokens` | `packages/gpui/tokens/` | `packages/contracts/tokens/` |
-| `flint-gpui-primitives` | `flint-primitives` | `packages/gpui/primitives/` | `packages/contracts/primitives/` |
-| `flint-gpui-composites` | `flint-composites` | `packages/gpui/composites/` | `packages/contracts/composites/` |
-| `flint-gpui-workstation` | `flint-workstation` | `packages/gpui/workstation/` | `packages/contracts/workstation/` |
+| `poodle-gpui-tokens` | `poodle-tokens` | `packages/gpui/tokens/` | `packages/contracts/tokens/` |
+| `poodle-gpui-primitives` | `poodle-primitives` | `packages/gpui/primitives/` | `packages/contracts/primitives/` |
+| `poodle-gpui-composites` | `poodle-composites` | `packages/gpui/composites/` | `packages/contracts/composites/` |
+| `poodle-gpui-workstation` | `poodle-workstation` | `packages/gpui/workstation/` | `packages/contracts/workstation/` |
 
 ### Import Updates
 
-All `use flint_gpui_tokens::` → `use flint_tokens::`
-All `use flint_gpui_primitives::` → `use flint_primitives::`
-All `use flint_gpui_composites::` → `use flint_composites::`
+All `use poodle_gpui_tokens::` → `use poodle_tokens::`
+All `use poodle_gpui_primitives::` → `use poodle_primitives::`
+All `use poodle_gpui_composites::` → `use poodle_composites::`
 
 Updated across 77 source files spanning all four crates.
 
@@ -46,9 +46,9 @@ remains valid — the depth from `packages/contracts/tokens/src/` to
 
 ## Verification
 
-- [x] `flint-tokens` — `cargo check` passes
-- [x] `flint-primitives` — `cargo check` passes, 29 tests pass
-- [x] `flint-composites` — `cargo check` passes, 10 tests pass
-- [x] `flint-workstation` — `cargo check` passes, 6 tests pass
-- [x] Zero references to `flint_gpui_*` remain in contracts source
+- [x] `poodle-tokens` — `cargo check` passes
+- [x] `poodle-primitives` — `cargo check` passes, 29 tests pass
+- [x] `poodle-composites` — `cargo check` passes, 10 tests pass
+- [x] `poodle-workstation` — `cargo check` passes, 6 tests pass
+- [x] Zero references to `poodle_gpui_*` remain in contracts source
 - [x] Old `packages/gpui/` retained for validation artifacts and baselines

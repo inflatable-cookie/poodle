@@ -25,7 +25,7 @@ All 15 milestones completed:
 
 ## Deliverables
 
-### flint-gpui crate
+### poodle-gpui crate
 
 | Metric | Value |
 |--------|-------|

@@ -2,12 +2,12 @@
 
 Status: completed
 Date: 2026-03-11
-Owner: Flint Core
+Owner: Poodle Core
 
 ## Summary
 
 - added a real browser inspection surface at `packages/svelte/preview`
-- wired the preview to emitted Flint token CSS artifacts and the Svelte token
+- wired the preview to emitted Poodle token CSS artifacts and the Svelte token
   runtime package
 - added root Bun scripts for preview build and local development
 - corrected the root Bun workspace list so only JavaScript packages are treated

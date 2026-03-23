@@ -3,8 +3,8 @@
 //! Contract: `docs/contracts/foundation/toggle-group.md`
 
 use gpui::*;
-use flint_gpui::GpuiThemeProvider;
-use flint_primitives::{ToggleGroupOption, ToggleGroupSelectionMode, ToggleGroupSpec};
+use poodle_gpui::GpuiThemeProvider;
+use poodle_primitives::{ToggleGroupOption, ToggleGroupSelectionMode, ToggleGroupSpec};
 
 use crate::theme_ext::{color_mix, resolve_color, resolve_opacity, resolve_px, resolve_radius};
 

@@ -1,22 +1,22 @@
 [package]
-name = "flint-jetstream"
+name = "poodle-jetstream"
 version = "0.0.0"
 edition = "2021"
-description = "Jetstream rendering adapter for Flint — maps shared contract specs and resolved styles to Jetstream UiTree nodes."
+description = "Jetstream rendering adapter for Poodle — maps shared contract specs and resolved styles to Jetstream UiTree nodes."
 
 [dependencies]
-flint-adapter = { path = "../../contracts/adapter" }
-flint-events = { path = "../../contracts/events" }
-flint-layout = { path = "../../contracts/layout" }
-flint-primitives = { path = "../../contracts/primitives" }
-flint-composites = { path = "../../contracts/composites" }
-flint-workstation = { path = "../../contracts/workstation" }
-flint-style = { path = "../../contracts/style" }
-flint-tokens = { path = "../../contracts/tokens" }
+poodle-adapter = { path = "../../contracts/adapter" }
+poodle-events = { path = "../../contracts/events" }
+poodle-layout = { path = "../../contracts/layout" }
+poodle-primitives = { path = "../../contracts/primitives" }
+poodle-composites = { path = "../../contracts/composites" }
+poodle-workstation = { path = "../../contracts/workstation" }
+poodle-style = { path = "../../contracts/style" }
+poodle-tokens = { path = "../../contracts/tokens" }
 taffy = "0.9"
 glam = "0.29"
 
-[package.metadata.flint]
+[package.metadata.poodle]
 public-intent = true
 channel = "preview"
 stability = "pre-release"

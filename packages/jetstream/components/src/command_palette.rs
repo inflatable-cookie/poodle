@@ -1,7 +1,7 @@
 //! CommandPalette — Jetstream command palette backed by CommandPaletteSpec.
 use jetstream_runtime::ui_element::{self, JsEl};
-use flint_jetstream::JetstreamThemeProvider;
-use flint_composites::CommandPaletteSpec;
+use poodle_jetstream::JetstreamThemeProvider;
+use poodle_composites::CommandPaletteSpec;
 use crate::theme_ext::{resolve_color, resolve_radius};
 
 pub fn js_command_palette(spec: &CommandPaletteSpec, theme: &JetstreamThemeProvider) -> JsEl {

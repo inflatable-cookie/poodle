@@ -1,7 +1,7 @@
 <script lang="ts">
-  import { EmbedPreview } from "@flint/svelte-composites";
-  import { Eyebrow } from "@flint/svelte-primitives";
-  import type { ParsedEmbed } from "@flint/svelte-composites";
+  import { EmbedPreview } from "@poodle/svelte-composites";
+  import { Eyebrow } from "@poodle/svelte-primitives";
+  import type { ParsedEmbed } from "@poodle/svelte-composites";
 
   const youtubeParsed: ParsedEmbed = {
     provider: "youtube",

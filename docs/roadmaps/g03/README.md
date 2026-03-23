@@ -5,7 +5,7 @@ Updated: 2026-03-12
 
 ## Context
 
-`g03` is the hardening and first-adoption generation. By this point Flint should
+`g03` is the hardening and first-adoption generation. By this point Poodle should
 already have a credible token system, component catalogue, workstation-shell
 layer, docs surface, packaging baseline, and a much cleaner review surface than
 the rougher `g02` build-out phase. The work here is to start real downstream

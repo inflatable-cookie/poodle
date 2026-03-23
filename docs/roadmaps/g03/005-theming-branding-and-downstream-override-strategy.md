@@ -1,10 +1,10 @@
 # g03.005 Theming, Branding, And Downstream Override Strategy
 
 Status: completed
-Owner: Flint Core
+Owner: Poodle Core
 Updated: 2026-03-12
 Depends on: g03.001
-Primary repos: `flint`
+Primary repos: `poodle`
 
 ## Goals
 

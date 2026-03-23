@@ -4,8 +4,8 @@
 //! no hover, no clock icon (contract doesn't specify one).
 
 use gpui::*;
-use flint_gpui::GpuiThemeProvider;
-use flint_primitives::{TimeFieldSpec, ValidationState};
+use poodle_gpui::GpuiThemeProvider;
+use poodle_primitives::{TimeFieldSpec, ValidationState};
 
 use crate::theme_ext::{resolve_color, resolve_opacity, resolve_px, resolve_radius};
 
@@ -82,9 +82,9 @@ impl IntoElement for TimeField {
         let is_placeholder = time_value.is_none();
 
         let id_str = if let Some(ref suffix) = self.id_suffix {
-            format!("flint-time-field-{}", suffix)
+            format!("poodle-time-field-{}", suffix)
         } else {
-            "flint-time-field".to_string()
+            "poodle-time-field".to_string()
         };
 
         let text_col = if is_placeholder {

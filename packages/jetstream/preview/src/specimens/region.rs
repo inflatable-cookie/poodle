@@ -1,10 +1,10 @@
 //! Region specimen — semantic regions with labels and borders.
 
 use jetstream_runtime::ui_element::*;
-use flint_jetstream::JetstreamThemeProvider;
-use flint_jetstream_components::region::js_region;
-use flint_jetstream_components::theme_ext::*;
-use flint_primitives::RegionSpec;
+use poodle_jetstream::JetstreamThemeProvider;
+use poodle_jetstream_components::region::js_region;
+use poodle_jetstream_components::theme_ext::*;
+use poodle_primitives::RegionSpec;
 
 pub fn render(theme: &JetstreamThemeProvider) -> JsEl {
     let secondary = resolve_color(theme, "semantic.color.text.secondary");

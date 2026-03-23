@@ -1,10 +1,10 @@
 //! Box specimen — container with padding and overflow.
 
 use jetstream_runtime::ui_element::*;
-use flint_jetstream::JetstreamThemeProvider;
-use flint_jetstream_components::bx::js_box;
-use flint_jetstream_components::theme_ext::*;
-use flint_primitives::{BoxSpec, PaddingScale};
+use poodle_jetstream::JetstreamThemeProvider;
+use poodle_jetstream_components::bx::js_box;
+use poodle_jetstream_components::theme_ext::*;
+use poodle_primitives::{BoxSpec, PaddingScale};
 
 pub fn render(theme: &JetstreamThemeProvider) -> JsEl {
     let secondary = resolve_color(theme, "semantic.color.text.secondary");

@@ -1,8 +1,8 @@
 use gpui::*;
-use flint_adapter::ThemeProvider;
-use flint_primitives::EyebrowSpec;
-use flint_gpui_components::toggle::Toggle;
-use flint_gpui_components::Eyebrow;
+use poodle_adapter::ThemeProvider;
+use poodle_primitives::EyebrowSpec;
+use poodle_gpui_components::toggle::Toggle;
+use poodle_gpui_components::Eyebrow;
 use crate::app_state::AppState;
 use crate::PreviewRoot;
 

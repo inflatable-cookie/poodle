@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { Icon } from "@flint/svelte-primitives";
+  import { Icon } from "@poodle/svelte-primitives";
 
   import type { AspectRatio, MediaKind, MediaState } from "./types";
 
@@ -78,7 +78,7 @@
 <style>
   .media-thumbnail {
     display: grid;
-    gap: var(--flint-space-stack-sm);
+    gap: var(--poodle-space-stack-sm);
     margin: 0;
   }
 
@@ -89,11 +89,11 @@
   .media-thumbnail__frame {
     position: relative;
     overflow: hidden;
-    border: 0.0625rem solid var(--flint-color-border-subtle);
-    border-radius: calc(var(--flint-radius-surface) - 0.125rem);
+    border: 0.0625rem solid var(--poodle-color-border-subtle);
+    border-radius: calc(var(--poodle-radius-surface) - 0.125rem);
     background:
-      radial-gradient(circle at top left, color-mix(in srgb, var(--flint-color-accent-base) 18%, transparent), transparent 38%),
-      color-mix(in srgb, var(--flint-color-background-panel) 94%, transparent);
+      radial-gradient(circle at top left, color-mix(in srgb, var(--poodle-color-accent-base) 18%, transparent), transparent 38%),
+      color-mix(in srgb, var(--poodle-color-background-panel) 94%, transparent);
   }
 
   .media-thumbnail[data-aspect-ratio="square"] .media-thumbnail__frame {
@@ -123,18 +123,18 @@
     place-items: center;
     width: 100%;
     height: 100%;
-    padding: var(--flint-space-panel-y) var(--flint-space-panel-x);
+    padding: var(--poodle-space-panel-y) var(--poodle-space-panel-x);
   }
 
   .media-thumbnail__state {
-    gap: var(--flint-space-stack-sm);
+    gap: var(--poodle-space-stack-sm);
     align-content: end;
     justify-items: start;
-    padding: var(--flint-space-panel-y) var(--flint-space-panel-x);
+    padding: var(--poodle-space-panel-y) var(--poodle-space-panel-x);
     text-align: left;
     background:
-      linear-gradient(180deg, transparent, color-mix(in srgb, var(--flint-color-background-panel) 46%, transparent)),
-      color-mix(in srgb, var(--flint-color-background-surface) 78%, transparent);
+      linear-gradient(180deg, transparent, color-mix(in srgb, var(--poodle-color-background-panel) 46%, transparent)),
+      color-mix(in srgb, var(--poodle-color-background-surface) 78%, transparent);
   }
 
   .media-thumbnail__state strong,
@@ -154,7 +154,7 @@
 
   .media-thumbnail__state p,
   .media-thumbnail__caption span {
-    color: var(--flint-color-text-secondary);
+    color: var(--poodle-color-text-secondary);
     font-size: 0.8125rem;
     line-height: 1.5;
   }
@@ -175,7 +175,7 @@
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    border-radius: var(--flint-radius-control);
+    border-radius: var(--poodle-radius-control);
     backdrop-filter: blur(1rem);
   }
 
@@ -184,8 +184,8 @@
     right: 0.625rem;
     min-height: 1.5rem;
     padding: 0 0.625rem;
-    background: color-mix(in srgb, var(--flint-color-background-surface) 74%, transparent);
-    color: var(--flint-color-text-primary);
+    background: color-mix(in srgb, var(--poodle-color-background-surface) 74%, transparent);
+    color: var(--poodle-color-text-primary);
     font-size: 0.6875rem;
     font-weight: 600;
     letter-spacing: 0.04em;
@@ -202,8 +202,8 @@
     bottom: 0.625rem;
     width: 2rem;
     height: 2rem;
-    background: color-mix(in srgb, var(--flint-color-background-elevated) 78%, transparent);
-    color: var(--flint-color-text-primary);
+    background: color-mix(in srgb, var(--poodle-color-background-elevated) 78%, transparent);
+    color: var(--poodle-color-text-primary);
     font-size: 0.9375rem;
   }
 </style>

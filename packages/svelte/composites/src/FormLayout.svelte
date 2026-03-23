@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { Callout, FormActions } from "@flint/svelte-primitives";
+  import { Callout, FormActions } from "@poodle/svelte-primitives";
 
   export let columns = 6;
   export let error: string | null = null;
@@ -49,22 +49,22 @@
   .form-layout {
     display: flex;
     flex-direction: column;
-    gap: var(--flint-space-stack-lg);
+    gap: var(--poodle-space-stack-lg);
   }
 
   .form-layout__description {
     margin: 0;
-    color: var(--flint-color-text-secondary);
-    font-size: var(--flint-typography-body-size, 0.875rem);
-    line-height: var(--flint-typography-body-lineHeight, 1.5);
+    color: var(--poodle-color-text-secondary);
+    font-size: var(--poodle-typography-body-size, 0.875rem);
+    line-height: var(--poodle-typography-body-lineHeight, 1.5);
   }
 
   .form-layout__field-errors {
-    padding: var(--flint-space-panel-y, 0.75rem) var(--flint-space-panel-x, 1rem);
-    border-radius: var(--flint-radius-surface, 0.5rem);
-    background: color-mix(in srgb, var(--flint-color-status-danger) 8%, transparent);
-    border: 0.0625rem solid color-mix(in srgb, var(--flint-color-status-danger) 40%, transparent);
-    font-size: var(--flint-typography-label-size, 0.75rem);
+    padding: var(--poodle-space-panel-y, 0.75rem) var(--poodle-space-panel-x, 1rem);
+    border-radius: var(--poodle-radius-surface, 0.5rem);
+    background: color-mix(in srgb, var(--poodle-color-status-danger) 8%, transparent);
+    border: 0.0625rem solid color-mix(in srgb, var(--poodle-color-status-danger) 40%, transparent);
+    font-size: var(--poodle-typography-label-size, 0.75rem);
   }
 
   .form-layout__field-errors p {
@@ -88,7 +88,7 @@
   .form-layout__grid {
     display: grid;
     grid-template-columns: repeat(var(--fl-columns, 6), 1fr);
-    gap: var(--flint-space-stack-lg) var(--flint-space-inline-md);
+    gap: var(--poodle-space-stack-lg) var(--poodle-space-inline-md);
   }
 
   @container (max-width: 600px) {

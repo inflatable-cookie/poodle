@@ -1,10 +1,10 @@
-# Flint GPUI Preview App — Visual Quality Pass (Handover)
+# Poodle GPUI Preview App — Visual Quality Pass (Handover)
 
 ## Context
-You're continuing a systematic visual quality pass of the Flint design system's GPUI preview app. The goal is to make the GPUI preview **pixel-equivalent to the Svelte preview** — matching visual appearance, interactivity, and state management across all ~85 specimen pages.
+You're continuing a systematic visual quality pass of the Poodle design system's GPUI preview app. The goal is to make the GPUI preview **pixel-equivalent to the Svelte preview** — matching visual appearance, interactivity, and state management across all ~85 specimen pages.
 
 ## Project Structure
-- **Repo root**: `/Users/betterthanclay/Dev/projects/flint`
+- **Repo root**: `/Users/betterthanclay/Dev/projects/poodle`
 - **GPUI preview app**: `/packages/gpui/preview/` — run with `cargo run` from that directory
 - **Svelte preview app**: `/packages/svelte/preview/` — run with `npm run dev` (or similar)
 - **GPUI components**: `/packages/gpui/components/src/primitives/` and `.../composites/`

@@ -21,7 +21,7 @@ Research DAW/pro-tool UI patterns for panels, docks, split views, and workspace 
 
 VS Code uses a **6-area layout model**:
 
-| Area | Description | Flint Equivalent |
+| Area | Description | Poodle Equivalent |
 |------|-------------|----------------|
 | **Editor** | Main content area | Document/workspace surface |
 | **Primary Side Bar** | Explorer, Search, etc. | Left panel group |
@@ -168,9 +168,9 @@ SplitContainer
 
 ---
 
-## Recommendations for Flint
+## Recommendations for Poodle
 
-### Flint's Workstation Layer Scope
+### Poodle's Workstation Layer Scope
 
 **In Scope (Layer 3 - Workstation Shell):**
 - Panel surface/Shell components
@@ -241,7 +241,7 @@ Layer 3 - Workstation Shell
 
 ### Persistence Strategy
 
-**Flint Provides:**
+**Poodle Provides:**
 - Layout structure types
 - Serialization format
 - Change events

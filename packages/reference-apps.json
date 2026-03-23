@@ -5,12 +5,12 @@
       "label": "Direct Svelte consumer reference app",
       "format": "reference-app-shape",
       "status": "docs-backed",
-      "audience": "teams importing Flint packages directly",
+      "audience": "teams importing Poodle packages directly",
       "packageEntryPoints": [
-        "@flint/svelte-tokens",
-        "@flint/svelte-primitives",
-        "@flint/svelte-composites",
-        "@flint/icons-lucide"
+        "@poodle/svelte-tokens",
+        "@poodle/svelte-primitives",
+        "@poodle/svelte-composites",
+        "@poodle/icons-lucide"
       ],
       "exampleSectionIds": [
         "catalog-hub",
@@ -38,9 +38,9 @@
       "label": "Underlay bridge-mediated reference app",
       "format": "reference-app-shape",
       "status": "proof-backed",
-      "audience": "teams preserving an existing app-local API while adopting Flint internally",
+      "audience": "teams preserving an existing app-local API while adopting Poodle internally",
       "packageEntryPoints": [
-        "@flint/bridge-underlay"
+        "@poodle/bridge-underlay"
       ],
       "exampleSectionIds": [
         "catalog-hub",
@@ -48,8 +48,8 @@
         "notification-suite"
       ],
       "onboardingSteps": [
-        "Adopt Flint only behind bridge-owned aliases and wrappers.",
-        "Keep app imports Flint-agnostic and route all compatibility translation through the bridge.",
+        "Adopt Poodle only behind bridge-owned aliases and wrappers.",
+        "Keep app imports Poodle-agnostic and route all compatibility translation through the bridge.",
         "Treat wrapper translation, host integration, and rollout pacing as downstream-owned concerns."
       ],
       "evidencePaths": [
@@ -68,10 +68,10 @@
       "status": "proof-backed",
       "audience": "teams adopting generic shell and dock surfaces while keeping domain widgets downstream-owned",
       "packageEntryPoints": [
-        "@flint/svelte-tokens",
-        "@flint/svelte-primitives",
-        "@flint/svelte-composites",
-        "@flint/icons-lucide"
+        "@poodle/svelte-tokens",
+        "@poodle/svelte-primitives",
+        "@poodle/svelte-composites",
+        "@poodle/icons-lucide"
       ],
       "exampleSectionIds": [
         "command-suite",
@@ -99,7 +99,7 @@
       "status": "preview-backed",
       "audience": "evaluators and adopters learning the system before direct integration",
       "packageEntryPoints": [
-        "@flint/svelte-preview"
+        "@poodle/svelte-preview"
       ],
       "exampleSectionIds": [
         "catalog-hub",
@@ -164,7 +164,7 @@
       ],
       "primaryReferenceShapeId": "underlay-bridge-consumer",
       "nonGoals": [
-        "Do not expose Flint package names directly in downstream app imports.",
+        "Do not expose Poodle package names directly in downstream app imports.",
         "Do not widen bridge aliases without concrete downstream pressure."
       ]
     },

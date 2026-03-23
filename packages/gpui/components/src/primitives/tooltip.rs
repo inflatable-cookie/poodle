@@ -1,8 +1,8 @@
 //! Tooltip — real GPUI component backed by TooltipSpec.
 
 use gpui::*;
-use flint_gpui::GpuiThemeProvider;
-use flint_primitives::{OverlayPlacement, TooltipSpec};
+use poodle_gpui::GpuiThemeProvider;
+use poodle_primitives::{OverlayPlacement, TooltipSpec};
 
 use crate::theme_ext::{color_mix, resolve_color, resolve_px, resolve_radius};
 

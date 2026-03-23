@@ -1,19 +1,19 @@
 [package]
-name = "flint-adapter"
+name = "poodle-adapter"
 version = "0.0.0"
 edition = "2021"
-description = "Renderer adapter traits for Flint multi-renderer targets."
+description = "Renderer adapter traits for Poodle multi-renderer targets."
 
 [lib]
 path = "src/lib.rs"
 
 [dependencies]
-flint-events = { path = "../events" }
-flint-layout = { path = "../layout" }
-flint-style = { path = "../style" }
-flint-tokens = { path = "../tokens" }
+poodle-events = { path = "../events" }
+poodle-layout = { path = "../layout" }
+poodle-style = { path = "../style" }
+poodle-tokens = { path = "../tokens" }
 
-[package.metadata.flint]
+[package.metadata.poodle]
 public-intent = true
 channel = "preview"
 stability = "pre-release"

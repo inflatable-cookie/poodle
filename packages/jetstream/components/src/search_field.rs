@@ -1,8 +1,8 @@
 //! SearchField — Jetstream search input backed by SearchFieldSpec.
 
 use jetstream_runtime::ui_element::{self, JsEl};
-use flint_jetstream::JetstreamThemeProvider;
-use flint_primitives::SearchFieldSpec;
+use poodle_jetstream::JetstreamThemeProvider;
+use poodle_primitives::SearchFieldSpec;
 
 use crate::theme_ext::resolve_color;
 

@@ -94,8 +94,8 @@ No internal state.
 | Property | Value |
 |----------|-------|
 | `margin` | `0` |
-| `color` | `var(--flint-color-text-secondary)` |
-| `font-family` | `var(--flint-typography-label-family)` |
+| `color` | `var(--poodle-color-text-secondary)` |
+| `font-family` | `var(--poodle-typography-label-family)` |
 | `font-size` | `0.6875rem` |
 | `font-weight` | `600` |
 | `letter-spacing` | `0.12em` |
@@ -110,7 +110,7 @@ No internal state.
 
 ## 10. GPUI Notes
 
-- expected crate/module surface: `flint_gpui::primitives::eyebrow`
+- expected crate/module surface: `poodle_gpui::primitives::eyebrow`
 - render as styled text with uppercase transform and letter-spacing
 - GPUI text rendering should apply the equivalent of `text-transform: uppercase`
   either by transforming the string or via a text style flag
@@ -129,7 +129,7 @@ No internal state.
 - [ ] letter-spacing matches 0.12em
 - [ ] text-transform uppercase applied
 - [ ] line-height matches 1.5
-- [ ] color matches `--flint-color-text-secondary`
+- [ ] color matches `--poodle-color-text-secondary`
 
 ### Tier 3: Implementation Freedom
 

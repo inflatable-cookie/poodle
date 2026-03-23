@@ -71,7 +71,7 @@ Research Svelte headless UI patterns and component library architectures to info
 
 ---
 
-## Implications for Flint
+## Implications for Poodle
 
 *(To be synthesized)*
 

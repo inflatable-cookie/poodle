@@ -1,7 +1,7 @@
 # g08.005 High-Visibility Component Fixes (Batch 1)
 
 Status: complete
-Owner: Flint Core
+Owner: Poodle Core
 Depends on: g08.004
 
 ## Contract Check
@@ -16,7 +16,7 @@ session, update the implementation to match before proceeding.
 ### icon_button
 
 - [ ] Verify contract: `docs/contracts/foundation/icon-button.md`
-- [ ] Replace raw text icon rendering with `FlintIcon` (SVG icons)
+- [ ] Replace raw text icon rendering with `PoodleIcon` (SVG icons)
 - [ ] Replace `.opacity()` hover/active with `color_mix` pattern
 - [ ] Resolve radius from spec token
 - [ ] Support all variants: default, ghost, danger
@@ -40,14 +40,14 @@ session, update the implementation to match before proceeding.
 
 - [ ] Verify contract: `docs/contracts/foundation/text-input.md`
 - [ ] Resolve height, padding, radius, gap from spec tokens
-- [ ] Support leading/trailing icon slots via `FlintIcon`
+- [ ] Support leading/trailing icon slots via `PoodleIcon`
 
 ### select
 
 - [ ] Verify contract: `docs/contracts/foundation/select.md`
 - [ ] Resolve height, padding, radius from spec tokens
 - [ ] Replace hardcoded hover color with `color_mix`
-- [ ] Verify chevron icons render via `FlintIcon`
+- [ ] Verify chevron icons render via `PoodleIcon`
 
 ### tabs
 
@@ -60,6 +60,6 @@ session, update the implementation to match before proceeding.
 
 - [ ] All 6 components verified against current contracts
 - [ ] All visual values resolve from tokens — zero hardcoded px
-- [ ] All icon slots use `FlintIcon`
+- [ ] All icon slots use `PoodleIcon`
 - [ ] Hover/active states use `color_mix`
 - [ ] Components compile and render correctly

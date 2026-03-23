@@ -1,4 +1,4 @@
-use flint_tokens::semantic;
+use poodle_tokens::semantic;
 
 /// MetricTile — a compact metadata display tile showing a label and value.
 #[derive(Clone, Debug, Eq, PartialEq)]

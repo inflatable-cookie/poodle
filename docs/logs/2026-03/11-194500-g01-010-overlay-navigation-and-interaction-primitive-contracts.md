@@ -36,7 +36,7 @@
 - Spark's archived focus-state handling reinforced that overlay contracts must
   explicitly defend text focus, modal focus trapping, and command-surface
   restoration on the GPUI side
-- the result is still generic Flint surface, not Loophole-specific UI:
+- the result is still generic Poodle surface, not Loophole-specific UI:
   workstation and product composites will build above these primitives in the
   next roadmap step
 

@@ -11,18 +11,18 @@ the bridge hardening posture explicit before larger Underlay rollout work.
 
 ## Core Rule
 
-Underlay may adopt Flint internally only through bridge-owned aliases, wrappers,
+Underlay may adopt Poodle internally only through bridge-owned aliases, wrappers,
 and migration helpers.
 
 An adoption proof is zero-leak only when Underlay app code can consume the
-surface without importing Flint directly or depending on Flint naming.
+surface without importing Poodle directly or depending on Poodle naming.
 
 ## Zero-Leak Proof Rule
 
 The bridge must provide a machine-readable proof artifact that states:
 
 - the package remains bridge-owned rather than app-facing
-- direct Flint imports are not allowed in Underlay app code
+- direct Poodle imports are not allowed in Underlay app code
 - the current wrapper-backed adoption surfaces
 - the bridge-local token and theme indirection posture
 - the remaining adoption friction still blocking wider rollout
@@ -42,7 +42,7 @@ It should remain narrow and declarative in this generation.
 Every zero-leak proof baseline must make these claims explicit:
 
 - app-facing imports stay Underlay-owned
-- wrapper-backed surfaces may use Flint internally
+- wrapper-backed surfaces may use Poodle internally
 - bridge-owned token aliases remain implementation detail
 - bridge-owned theme IDs and mode IDs remain mapping artifacts, not canonical renames
 - remaining migration or accessibility friction is recorded rather than implied
@@ -58,7 +58,7 @@ The bridge should be hardened by:
 
 The bridge should not be hardened by:
 
-- exposing Flint package names as recommended app imports
+- exposing Poodle package names as recommended app imports
 - widening the alias map speculatively without adoption pressure
 - inventing app-facing abstractions that Underlay should own itself
 
@@ -66,8 +66,8 @@ The bridge should not be hardened by:
 
 The current seed proof covers:
 
-- token alias mapping from emitted Flint artifacts
-- theme and mode mapping from emitted Flint themes
+- token alias mapping from emitted Poodle artifacts
+- theme and mode mapping from emitted Poodle themes
 - wrapper-preservation policies for initial Underlay-facing surfaces
 - a zero-leak proof manifest with explicit remaining friction
 
@@ -92,17 +92,17 @@ The current expected friction classes are:
 
 ## Honesty Rule
 
-Flint may say:
+Poodle may say:
 
 - the bridge package exposes a zero-leak proof artifact
 - wrapper-backed adoption surfaces are identified
 - current remaining friction is explicit
 
-Flint may not say:
+Poodle may not say:
 
 - Underlay production rollout is complete
 - zero accessibility risk remains without downstream wrapper evidence
-- Underlay apps can adopt Flint directly
+- Underlay apps can adopt Poodle directly
 
 ## Next Task
 

@@ -1,10 +1,10 @@
 # g01.006 GPUI Substrate And Rust Token-Binding Baseline
 
 Status: completed
-Owner: Flint Core
+Owner: Poodle Core
 Updated: 2026-03-11
 Depends on: g01.002, g01.004
-Primary repos: `flint`
+Primary repos: `poodle`
 
 ## Research Inputs
 
@@ -13,7 +13,7 @@ Primary repos: `flint`
 
 ## Context
 
-Flint's second implementation target is GPUI. It needs the same semantic contract
+Poodle's second implementation target is GPUI. It needs the same semantic contract
 as Svelte without being forced into browser-shaped abstractions.
 
 ## Goals

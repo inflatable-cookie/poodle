@@ -34,7 +34,7 @@
   for shell-region hierarchy, panel tabs, collapse semantics, command-palette
   focus restoration, and keyboard-reachable split dividers
 - the resulting layer stays generic enough for multiple workstation-style apps
-  while keeping DAW-specific widgets outside Flint core
+  while keeping DAW-specific widgets outside Poodle core
 
 ## Accessibility
 
@@ -57,7 +57,7 @@
 
 - execute `g01.013` for the Underlay bridge and token-ingestion baseline
 - keep Underlay-facing integration behind bridge/adaptor ownership rather than
-  exposing Flint contracts directly to app code
+  exposing Poodle contracts directly to app code
 
 ## Next Task
 

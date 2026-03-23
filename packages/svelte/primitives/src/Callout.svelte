@@ -88,50 +88,50 @@
 
 <style>
   .callout {
-    --flint-callout-fill: color-mix(in srgb, var(--flint-color-background-panel) 94%, transparent);
-    --flint-callout-border: color-mix(in srgb, var(--flint-color-border-subtle) 88%, transparent);
+    --poodle-callout-fill: color-mix(in srgb, var(--poodle-color-background-panel) 94%, transparent);
+    --poodle-callout-border: color-mix(in srgb, var(--poodle-color-border-subtle) 88%, transparent);
     display: grid;
     grid-template-columns: minmax(0, 1fr) auto auto;
     align-items: center;
-    gap: var(--flint-space-inline-md);
-    padding: var(--flint-space-panel-y) var(--flint-space-panel-x);
-    border: 0.0625rem solid var(--flint-callout-border);
-    border-radius: var(--flint-radius-surface);
-    background: var(--flint-callout-fill);
-    --flint-surface: var(--flint-callout-fill);
-    color: var(--flint-color-text-primary);
+    gap: var(--poodle-space-inline-md);
+    padding: var(--poodle-space-panel-y) var(--poodle-space-panel-x);
+    border: 0.0625rem solid var(--poodle-callout-border);
+    border-radius: var(--poodle-radius-surface);
+    background: var(--poodle-callout-fill);
+    --poodle-surface: var(--poodle-callout-fill);
+    color: var(--poodle-color-text-primary);
   }
 
   .callout[data-tone="info"] {
-    --flint-callout-fill: color-mix(in srgb, var(--flint-color-status-info, #3b82f6) 10%, var(--flint-color-background-panel));
-    --flint-callout-border: color-mix(in srgb, var(--flint-color-status-info, #3b82f6) 34%, var(--flint-color-border-default));
+    --poodle-callout-fill: color-mix(in srgb, var(--poodle-color-status-info, #3b82f6) 10%, var(--poodle-color-background-panel));
+    --poodle-callout-border: color-mix(in srgb, var(--poodle-color-status-info, #3b82f6) 34%, var(--poodle-color-border-default));
   }
 
   .callout[data-tone="success"] {
-    --flint-callout-fill: color-mix(in srgb, var(--flint-color-status-success) 10%, var(--flint-color-background-panel));
-    --flint-callout-border: color-mix(in srgb, var(--flint-color-status-success) 34%, var(--flint-color-border-default));
+    --poodle-callout-fill: color-mix(in srgb, var(--poodle-color-status-success) 10%, var(--poodle-color-background-panel));
+    --poodle-callout-border: color-mix(in srgb, var(--poodle-color-status-success) 34%, var(--poodle-color-border-default));
   }
 
   .callout[data-tone="warning"] {
-    --flint-callout-fill: color-mix(in srgb, var(--flint-color-status-warning) 10%, var(--flint-color-background-panel));
-    --flint-callout-border: color-mix(in srgb, var(--flint-color-status-warning) 34%, var(--flint-color-border-default));
+    --poodle-callout-fill: color-mix(in srgb, var(--poodle-color-status-warning) 10%, var(--poodle-color-background-panel));
+    --poodle-callout-border: color-mix(in srgb, var(--poodle-color-status-warning) 34%, var(--poodle-color-border-default));
   }
 
   .callout[data-tone="danger"] {
-    --flint-callout-fill: color-mix(in srgb, var(--flint-color-status-danger) 10%, var(--flint-color-background-panel));
-    --flint-callout-border: color-mix(in srgb, var(--flint-color-status-danger) 34%, var(--flint-color-border-default));
+    --poodle-callout-fill: color-mix(in srgb, var(--poodle-color-status-danger) 10%, var(--poodle-color-background-panel));
+    --poodle-callout-border: color-mix(in srgb, var(--poodle-color-status-danger) 34%, var(--poodle-color-border-default));
   }
 
   .callout[data-tone="pending"] {
-    --flint-callout-fill: color-mix(in srgb, var(--flint-color-accent-base) 8%, var(--flint-color-background-panel));
-    --flint-callout-border: color-mix(in srgb, var(--flint-color-accent-base) 26%, var(--flint-color-border-default));
+    --poodle-callout-fill: color-mix(in srgb, var(--poodle-color-accent-base) 8%, var(--poodle-color-background-panel));
+    --poodle-callout-border: color-mix(in srgb, var(--poodle-color-accent-base) 26%, var(--poodle-color-border-default));
   }
 
   .callout__body {
     display: grid;
     grid-template-columns: auto minmax(0, 1fr);
     align-self: start;
-    gap: var(--flint-space-inline-md);
+    gap: var(--poodle-space-inline-md);
     min-width: 0;
   }
 
@@ -142,8 +142,8 @@
     width: 1.375rem;
     height: 1.375rem;
     border-radius: 999px;
-    background: color-mix(in srgb, var(--flint-color-background-surface) 78%, transparent);
-    font-family: var(--flint-typography-code-family);
+    background: color-mix(in srgb, var(--poodle-color-background-surface) 78%, transparent);
+    font-family: var(--poodle-typography-code-family);
     font-size: 0.75rem;
     font-weight: 700;
     line-height: 1;
@@ -151,27 +151,27 @@
 
   .callout__content {
     display: grid;
-    gap: var(--flint-space-inline-sm);
+    gap: var(--poodle-space-inline-sm);
     min-width: 0;
   }
 
   .callout__content :global(p) {
     margin: 0;
-    color: var(--flint-color-text-secondary);
+    color: var(--poodle-color-text-secondary);
     font-size: 0.8125rem;
     line-height: 1.5;
   }
 
   .callout__content strong {
-    font-family: var(--flint-typography-label-family);
-    font-size: var(--flint-typography-label-size);
-    line-height: var(--flint-typography-label-lineHeight);
+    font-family: var(--poodle-typography-label-family);
+    font-size: var(--poodle-typography-label-size);
+    line-height: var(--poodle-typography-label-lineHeight);
   }
 
   .callout__actions {
     display: flex;
     flex-wrap: wrap;
-    gap: var(--flint-space-inline-sm);
+    gap: var(--poodle-space-inline-sm);
     align-items: center;
     justify-content: flex-end;
   }
@@ -180,18 +180,18 @@
     width: 1.75rem;
     height: 1.75rem;
     min-height: 0;
-    margin-right: calc(-0.5 * var(--flint-space-panel-x));
+    margin-right: calc(-0.5 * var(--poodle-space-panel-x));
     padding: 0;
     border: 0;
-    border-radius: calc(var(--flint-radius-control) - 0.0625rem);
+    border-radius: calc(var(--poodle-radius-control) - 0.0625rem);
     background: transparent;
-    color: var(--flint-color-text-secondary);
+    color: var(--poodle-color-text-secondary);
     cursor: pointer;
     font: inherit;
   }
 
   .callout__dismiss:focus-visible {
-    outline: var(--flint-border-width-focus) solid var(--flint-color-accent-focusRing);
+    outline: var(--poodle-border-width-focus) solid var(--poodle-color-accent-focusRing);
     outline-offset: 0.125rem;
   }
 

@@ -123,10 +123,10 @@ No internal state. Animation is purely CSS-driven.
 | Property | Value |
 |----------|-------|
 | `display` | `block` |
-| `width` | `var(--flint-skeleton-width, 100%)` |
-| `height` | `var(--flint-skeleton-height, 0.875rem)` |
-| `border-radius` | `var(--flint-radius-control)` |
-| `background` | `linear-gradient(90deg, color-mix(in srgb, var(--flint-color-background-elevated) 88%, transparent) 0%, color-mix(in srgb, var(--flint-color-background-surface) 92%, white) 48%, color-mix(in srgb, var(--flint-color-background-elevated) 88%, transparent) 100%)` |
+| `width` | `var(--poodle-skeleton-width, 100%)` |
+| `height` | `var(--poodle-skeleton-height, 0.875rem)` |
+| `border-radius` | `var(--poodle-radius-control)` |
+| `background` | `linear-gradient(90deg, color-mix(in srgb, var(--poodle-color-background-elevated) 88%, transparent) 0%, color-mix(in srgb, var(--poodle-color-background-surface) 92%, white) 48%, color-mix(in srgb, var(--poodle-color-background-elevated) 88%, transparent) 100%)` |
 | `background-size` | `220% 100%` |
 
 ### Shape override: circle
@@ -141,7 +141,7 @@ Resolved defaults when no width/height props: width `2.5rem`, height `2.5rem`.
 
 | Property | Value |
 |----------|-------|
-| `border-radius` | `calc(var(--flint-radius-surface) - 0.25rem)` |
+| `border-radius` | `calc(var(--poodle-radius-surface) - 0.25rem)` |
 
 Resolved defaults when no width/height props: width `100%`, height `6rem`.
 
@@ -177,7 +177,7 @@ All preset roots set `aria-hidden="true"` and `data-animated={isAnimated}`.
 | `flex-direction` | `row` |
 | `gap` | `0.75rem` |
 | `padding` | `0.625rem 0` |
-| `border-bottom` | `1px solid color-mix(in srgb, var(--flint-color-border-subtle) 42%, transparent)` |
+| `border-bottom` | `1px solid color-mix(in srgb, var(--poodle-color-border-subtle) 42%, transparent)` |
 
 #### Cell `.skeleton--cell`
 
@@ -195,15 +195,15 @@ i=3 `20%`.
 |----------|-------|
 | `gap` | `0.75rem` |
 | `padding` | `1rem` |
-| `border` | `1px solid color-mix(in srgb, var(--flint-color-border-default) 42%, transparent)` |
-| `border-radius` | `var(--flint-radius-surface)` |
+| `border` | `1px solid color-mix(in srgb, var(--poodle-color-border-default) 42%, transparent)` |
+| `border-radius` | `var(--poodle-radius-surface)` |
 
 #### Block header `.skeleton--block-header`
 
 | Property | Value |
 |----------|-------|
 | `height` | `6rem` |
-| `border-radius` | `calc(var(--flint-radius-surface) - 0.375rem)` |
+| `border-radius` | `calc(var(--poodle-radius-surface) - 0.375rem)` |
 
 #### Card body `.skeleton-preset__card-body`
 
@@ -330,15 +330,15 @@ Composes: avatar (2.25rem circle, same as list-item avatar) + line (width
   attribute
 - Shape variants applied via class: `skeleton--line`, `skeleton--circle`,
   `skeleton--block`
-- Width/height applied as CSS custom properties `--flint-skeleton-width` and
-  `--flint-skeleton-height` via inline style
+- Width/height applied as CSS custom properties `--poodle-skeleton-width` and
+  `--poodle-skeleton-height` via inline style
 - Presets render a wrapper `<div>` with `skeleton-preset` class, containing
   multiple child `<div class="skeleton">` elements
 - No events, no slots, no lifecycle hooks beyond animation
 
 ## 10. GPUI Notes
 
-- expected crate/module surface: `flint_gpui::primitives::skeleton`
+- expected crate/module surface: `poodle_gpui::primitives::skeleton`
 - GPUI color-mix: `color-mix(in srgb, X 88%, transparent)` maps to
   `color.opacity(color.a * 0.88)`
 - GPUI linear-gradient: must compose 3-stop gradient for shimmer base
@@ -363,8 +363,8 @@ Composes: avatar (2.25rem circle, same as list-item avatar) + line (width
 - [ ] background-size 220% 100% matches
 - [ ] animation duration 1.6s linear infinite matches
 - [ ] keyframe positions 200% to -20% match
-- [ ] shape radius: line uses `--flint-radius-control`, circle uses `999rem`,
-      block uses `calc(--flint-radius-surface - 0.25rem)`
+- [ ] shape radius: line uses `--poodle-radius-control`, circle uses `999rem`,
+      block uses `calc(--poodle-radius-surface - 0.25rem)`
 - [ ] all preset spacing (gap, padding) matches exactly
 - [ ] table-row: 4 cells with 40%/60%/60%/20% widths
 - [ ] card: block-header 6rem, body 3 lines at 80%/100%/60%, pill 3.5rem

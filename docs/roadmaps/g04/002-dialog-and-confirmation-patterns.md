@@ -1,10 +1,10 @@
 # g04.002 Dialog And Confirmation Patterns
 
 Status: completed
-Owner: Flint Core
+Owner: Poodle Core
 Updated: 2026-03-14
 Depends on: g04.001
-Primary repos: `flint`
+Primary repos: `poodle`
 
 ## Goals
 
@@ -19,13 +19,13 @@ Primary repos: `flint`
 
 - [ ] write contract for AlertDialog: title, description, confirm/cancel labels,
   tone (danger/warning), async confirm handler
-- [ ] implement AlertDialog primitive in `@flint/svelte-primitives`
+- [ ] implement AlertDialog primitive in `@poodle/svelte-primitives`
 - [ ] write contract for FormDialog: extends Dialog with form props, field
   layout, submit/cancel, validation state
-- [ ] implement FormDialog composite in `@flint/svelte-composites`
+- [ ] implement FormDialog composite in `@poodle/svelte-composites`
 - [ ] write contract for ConfirmAction: trigger element, confirmation popover or
   inline prompt, confirm/cancel, loading state
-- [ ] implement ConfirmAction composite in `@flint/svelte-composites`
+- [ ] implement ConfirmAction composite in `@poodle/svelte-composites`
 - [ ] create specimens for all three components
 - [ ] register in component-registry.ts and specimen registry
 

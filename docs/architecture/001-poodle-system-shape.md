@@ -1,11 +1,11 @@
-# 001 Flint System Shape
+# 001 Poodle System Shape
 
 Status: active
 Updated: 2026-03-11
 
 ## Overview
 
-Flint should be structured around one contract surface and multiple
+Poodle should be structured around one contract surface and multiple
 implementation/runtime surfaces.
 
 ## Research Inputs
@@ -46,7 +46,7 @@ The exact folder names can change, but the ownership split should remain:
   they become real requirements
 - `bridges/underlay/`
   Underlay-facing token and component adaptation, owned so Underlay apps stay
-  Flint-agnostic
+  Poodle-agnostic
 - `docs/`
   Northstar vision, architecture, roadmap, logs, research, and specs
 
@@ -54,7 +54,7 @@ The exact folder names can change, but the ownership split should remain:
 
 ### Canonical Format: W3C DTCG
 
-Flint adopts the W3C Design Tokens Community Group (DTCG) format (version 2025.10)
+Poodle adopts the W3C Design Tokens Community Group (DTCG) format (version 2025.10)
 as the canonical token specification.
 
 **Rationale:**
@@ -114,7 +114,7 @@ tokens/
 
 ### Artifact Emission: Style Dictionary 4.0
 
-Flint uses **Style Dictionary 4.0** for multi-platform token emission.
+Poodle uses **Style Dictionary 4.0** for multi-platform token emission.
 
 **Platforms:**
 | Platform | Output | Format |
@@ -126,8 +126,8 @@ Flint uses **Style Dictionary 4.0** for multi-platform token emission.
 **Naming Conventions:**
 | Layer | Token Path | CSS | TypeScript | Rust |
 |-------|------------|-----|------------|------|
-| Primitive | `primitives.color.blue.500` | `--flint-blue-500` | `primitives.color.blue[500]` | `flint::primitives::color::BLUE_500` |
-| Semantic | `semantic.color.background.primary` | `--flint-color-background-primary` | `tokens.color.background.primary` | `flint::semantic::color::BACKGROUND_PRIMARY` |
+| Primitive | `primitives.color.blue.500` | `--poodle-blue-500` | `primitives.color.blue[500]` | `poodle::primitives::color::BLUE_500` |
+| Semantic | `semantic.color.background.primary` | `--poodle-color-background-primary` | `tokens.color.background.primary` | `poodle::semantic::color::BACKGROUND_PRIMARY` |
 
 **Emission Strategy:**
 - CSS: CSS custom properties with `[data-theme]` selectors
@@ -164,7 +164,7 @@ pub struct Theme {
 
 ### Contract-First Development
 
-All Flint components must have an approved contract document before
+All Poodle components must have an approved contract document before
 implementation begins.
 
 **Workflow:**
@@ -235,7 +235,7 @@ Every component contract must include:
 
 ## Layer Model
 
-Flint should explicitly separate three component layers.
+Poodle should explicitly separate three component layers.
 
 ### Layer 1 - Foundation
 
@@ -276,14 +276,14 @@ GPUI apps:
 - inspector shell, browser shell, history shell, utility sidebars
 - workspace window and multi-surface navigation
 
-This layer is in scope for Flint because Loophole is not the only likely consumer
+This layer is in scope for Poodle because Loophole is not the only likely consumer
 of workstation-style desktop UI.
 
 ## Extension Boundary
 
-App-specific component systems should build above Flint.
+App-specific component systems should build above Poodle.
 
-Examples that should stay outside Flint core:
+Examples that should stay outside Poodle core:
 
 - Loophole transport bars
 - arrangement timelines
@@ -292,18 +292,18 @@ Examples that should stay outside Flint core:
 - automation lanes
 - plugin/device-chain editors
 
-Flint should instead provide the tokens, shells, controls, tabs, surfaces, and
+Poodle should instead provide the tokens, shells, controls, tabs, surfaces, and
 interaction rules those systems depend on.
 
 ## Underlay Integration Rule
 
-Underlay should not become a thin public mirror of Flint. The intended shape is:
+Underlay should not become a thin public mirror of Poodle. The intended shape is:
 
-- Flint emits semantic tokens and reusable internal components
-- Flint theme definitions should translate into both CSS/browser and Rust/GPUI
+- Poodle emits semantic tokens and reusable internal components
+- Poodle theme definitions should translate into both CSS/browser and Rust/GPUI
   forms from the same source model
 - Underlay maps those tokens into Underlay-owned CSS/runtime systems
-- Underlay wraps or reuses Flint components where it helps, while preserving
+- Underlay wraps or reuses Poodle components where it helps, while preserving
   Underlay-facing app APIs
 - Underlay apps continue to think in Underlay terms
 
@@ -314,23 +314,23 @@ headless primitives (accessibility, state management, event handling).
 
 **Bits UI Integration:**
 - Bits provides 40+ headless primitives (Dialog, DropdownMenu, etc.)
-- Flint components wrap Bits primitives with token-based styling
+- Poodle components wrap Bits primitives with token-based styling
 - Bits is an implementation detail, not a public dependency
-- Flint owns the public component contract
+- Poodle owns the public component contract
 
 **Requirements:**
-- Flint docs define the public contract
-- Flint tokens define the styling vocabulary
-- Flint theme definitions remain canonical even when realized as CSS custom
+- Poodle docs define the public contract
+- Poodle tokens define the styling vocabulary
+- Poodle theme definitions remain canonical even when realized as CSS custom
   properties or browser runtime helpers
-- Flint decides what parity means
+- Poodle decides what parity means
 - swapping Bits or bypassing Bits later must remain possible
 - Svelte-first convenience must not redefine the canonical contract in a way
   that blocks future web implementations such as React
 
 **Wrapper Pattern:**
 ```svelte
-<!-- Flint wraps Bits -->
+<!-- Poodle wraps Bits -->
 <script>
   import { Button as BitsButton } from "bits-ui";
   import { getTokenClasses } from "$lib/tokens";
@@ -358,14 +358,14 @@ need to mimic browser internals. Parity should be evaluated on:
 - Components implement `IntoElement` or `Render` trait
 - State via `Model<T>` with `observe`/`notify` or `subscribe`/`emit`
 - Styling via Tailwind-like API: `div().flex().bg(cx.theme().background)`
-- Theme access via `cx.theme()` which uses Flint-generated token structs
+- Theme access via `cx.theme()` which uses Poodle-generated token structs
 
 GPUI-first convenience must not redefine the canonical contract in a way that
 blocks future desktop-oriented implementations.
 
 ## Extensible Implementation Rule
 
-Flint should optimize for Svelte and GPUI now, but the contract and token model
+Poodle should optimize for Svelte and GPUI now, but the contract and token model
 must remain implementation-extensible.
 
 That means:
@@ -381,7 +381,7 @@ That means:
 
 ## Theme Translation Rule
 
-Flint themes should be authored once at the semantic layer and translated into
+Poodle themes should be authored once at the semantic layer and translated into
 runtime-specific artifacts rather than hand-maintained per framework.
 
 That means:
@@ -396,7 +396,7 @@ That means:
 
 ## Full Component Suite Map
 
-The current planning surface for the potential Flint suite is:
+The current planning surface for the potential Poodle suite is:
 
 ### Tokens
 

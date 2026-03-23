@@ -1,10 +1,10 @@
 //! DetailRow specimen — key-value pair rows.
 
 use jetstream_runtime::ui_element::*;
-use flint_jetstream::JetstreamThemeProvider;
-use flint_jetstream_components::detail_row::js_detail_row;
-use flint_jetstream_components::theme_ext::*;
-use flint_primitives::DetailRowSpec;
+use poodle_jetstream::JetstreamThemeProvider;
+use poodle_jetstream_components::detail_row::js_detail_row;
+use poodle_jetstream_components::theme_ext::*;
+use poodle_primitives::DetailRowSpec;
 
 pub fn render(theme: &JetstreamThemeProvider) -> JsEl {
     let secondary = resolve_color(theme, "semantic.color.text.secondary");

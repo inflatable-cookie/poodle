@@ -122,11 +122,11 @@ type BulkAction = {
 | `flex-wrap` | `wrap` |
 | `align-items` | `center` |
 | `justify-content` | `space-between` |
-| `gap` | `var(--flint-space-inline-md)` |
-| `padding` | `var(--flint-space-panel-y) var(--flint-space-panel-x)` |
-| `border` | `0.0625rem solid var(--flint-color-border-subtle)` |
-| `border-radius` | `var(--flint-radius-surface)` |
-| `background` | `--flint-recipe-bulk-fill: color-mix(in srgb, var(--flint-color-background-panel) 93%, var(--flint-color-text-primary))` |
+| `gap` | `var(--poodle-space-inline-md)` |
+| `padding` | `var(--poodle-space-panel-y) var(--poodle-space-panel-x)` |
+| `border` | `0.0625rem solid var(--poodle-color-border-subtle)` |
+| `border-radius` | `var(--poodle-radius-surface)` |
+| `background` | `--poodle-recipe-bulk-fill: color-mix(in srgb, var(--poodle-color-background-panel) 93%, var(--poodle-color-text-primary))` |
 
 ### Summary
 
@@ -134,18 +134,18 @@ type BulkAction = {
 |----------|-------|
 | `display` | `flex` |
 | `flex-wrap` | `wrap` |
-| `gap` | `var(--flint-space-inline-sm)` |
+| `gap` | `var(--poodle-space-inline-sm)` |
 | `align-items` | `baseline` |
-| `color` | `var(--flint-color-text-primary)` |
-| `font-family` | `var(--flint-typography-body-family)` |
-| `font-size` | `var(--flint-typography-body-size)` |
-| `line-height` | `var(--flint-typography-body-lineHeight)` |
+| `color` | `var(--poodle-color-text-primary)` |
+| `font-family` | `var(--poodle-typography-body-family)` |
+| `font-size` | `var(--poodle-typography-body-size)` |
+| `line-height` | `var(--poodle-typography-body-lineHeight)` |
 
 ### Summary total span
 
 | Property | Value |
 |----------|-------|
-| `color` | `var(--flint-color-text-secondary)` |
+| `color` | `var(--poodle-color-text-secondary)` |
 
 ### Actions
 
@@ -153,32 +153,32 @@ type BulkAction = {
 |----------|-------|
 | `display` | `flex` |
 | `flex-wrap` | `wrap` |
-| `gap` | `var(--flint-space-inline-sm)` |
+| `gap` | `var(--poodle-space-inline-sm)` |
 
 ### Button (default tone)
 
 | Property | Value |
 |----------|-------|
-| `min-height` | `var(--flint-size-control-height)` |
-| `padding` | `0 var(--flint-space-control-x)` |
-| `border` | `0.0625rem solid var(--flint-color-border-default)` |
-| `border-radius` | `var(--flint-radius-control)` |
-| `background` | `var(--flint-color-background-surface)` |
-| `color` | `var(--flint-color-text-primary)` |
+| `min-height` | `var(--poodle-size-control-height)` |
+| `padding` | `0 var(--poodle-space-control-x)` |
+| `border` | `0.0625rem solid var(--poodle-color-border-default)` |
+| `border-radius` | `var(--poodle-radius-control)` |
+| `background` | `var(--poodle-color-background-surface)` |
+| `color` | `var(--poodle-color-text-primary)` |
 | `cursor` | `pointer` |
 
 ### Button (danger tone)
 
 | Property | Value |
 |----------|-------|
-| `border-color` | `color-mix(in srgb, var(--flint-color-status-danger) 65%, transparent)` |
-| `color` | `var(--flint-color-status-danger)` |
+| `border-color` | `color-mix(in srgb, var(--poodle-color-status-danger) 65%, transparent)` |
+| `color` | `var(--poodle-color-status-danger)` |
 
 ### Button focus
 
 | Property | Value |
 |----------|-------|
-| `outline` | `var(--flint-border-width-focus) solid var(--flint-color-accent-focusRing)` |
+| `outline` | `var(--poodle-border-width-focus) solid var(--poodle-color-accent-focusRing)` |
 | `outline-offset` | `0.125rem` |
 
 ## 9. Svelte Notes
@@ -193,9 +193,9 @@ type BulkAction = {
 
 ## 10. GPUI Notes
 
-- expected crate/module surface: `flint_gpui::components::bulk_action_bar`
+- expected crate/module surface: `poodle_gpui::components::bulk_action_bar`
 - Spec struct: `BulkActionBarSpec` in primitives crate
-- Component struct: `FlintBulkActionBar` in components crate
+- Component struct: `PoodleBulkActionBar` in components crate
 - Action callbacks identified by `id` string
 - Accent-tinted background uses color-mix equivalent in Rust
 - Danger tone maps to status-danger color tokens

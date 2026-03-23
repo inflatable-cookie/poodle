@@ -1,4 +1,4 @@
-import { controlSizes, densityModes, themes } from "@flint/svelte-tokens";
+import { controlSizes, densityModes, themes } from "@poodle/svelte-tokens";
 import { docsSections } from "./catalog";
 
 export type ThemeName = keyof typeof themes;
@@ -39,8 +39,8 @@ export type SectionParityTarget = {
 };
 
 export type PublicSveltePackageName =
-  | "@flint/svelte-primitives"
-  | "@flint/svelte-composites";
+  | "@poodle/svelte-primitives"
+  | "@poodle/svelte-composites";
 
 export type PackageSurfaceCoverageStatus = "previewed" | "contract-only";
 
@@ -422,7 +422,7 @@ export const previewHarnessBoundary = {
 
 const packageSurfaceCoverageGroups: PackageSurfaceCoverageGroup[] = [
   {
-    packageName: "@flint/svelte-primitives",
+    packageName: "@poodle/svelte-primitives",
     kind: "component",
     status: "previewed",
     sectionIds: ["form-suite"],
@@ -441,7 +441,7 @@ const packageSurfaceCoverageGroups: PackageSurfaceCoverageGroup[] = [
     ],
   },
   {
-    packageName: "@flint/svelte-primitives",
+    packageName: "@poodle/svelte-primitives",
     kind: "component",
     status: "previewed",
     sectionIds: ["notification-suite"],
@@ -449,7 +449,7 @@ const packageSurfaceCoverageGroups: PackageSurfaceCoverageGroup[] = [
     exportNames: ["Menu", "Skeleton", "StatusIndicator", "Tabs", "Toolbar"],
   },
   {
-    packageName: "@flint/svelte-primitives",
+    packageName: "@poodle/svelte-primitives",
     kind: "component",
     status: "previewed",
     sectionIds: ["catalog-hub"],
@@ -457,7 +457,7 @@ const packageSurfaceCoverageGroups: PackageSurfaceCoverageGroup[] = [
     exportNames: ["Accordion", "Button", "Checkbox", "Collapsible", "Pill", "Select", "Toggle", "ToggleGroup"],
   },
   {
-    packageName: "@flint/svelte-primitives",
+    packageName: "@poodle/svelte-primitives",
     kind: "component",
     status: "previewed",
     sectionIds: ["catalog-hub"],
@@ -465,7 +465,7 @@ const packageSurfaceCoverageGroups: PackageSurfaceCoverageGroup[] = [
     exportNames: ["Drawer", "Popover", "SegmentedControl", "Table"],
   },
   {
-    packageName: "@flint/svelte-primitives",
+    packageName: "@poodle/svelte-primitives",
     kind: "component",
     status: "previewed",
     sectionIds: ["catalog-hub"],
@@ -531,7 +531,7 @@ const packageSurfaceCoverageGroups: PackageSurfaceCoverageGroup[] = [
     ],
   },
   {
-    packageName: "@flint/svelte-composites",
+    packageName: "@poodle/svelte-composites",
     kind: "component",
     status: "previewed",
     sectionIds: ["table-suite"],
@@ -539,7 +539,7 @@ const packageSurfaceCoverageGroups: PackageSurfaceCoverageGroup[] = [
     exportNames: ["DataTable", "FilterToolbar"],
   },
   {
-    packageName: "@flint/svelte-composites",
+    packageName: "@poodle/svelte-composites",
     kind: "component",
     status: "previewed",
     sectionIds: ["browse-suite"],
@@ -547,7 +547,7 @@ const packageSurfaceCoverageGroups: PackageSurfaceCoverageGroup[] = [
     exportNames: ["EmptyState"],
   },
   {
-    packageName: "@flint/svelte-composites",
+    packageName: "@poodle/svelte-composites",
     kind: "component",
     status: "previewed",
     sectionIds: ["detail-suite"],
@@ -555,7 +555,7 @@ const packageSurfaceCoverageGroups: PackageSurfaceCoverageGroup[] = [
     exportNames: ["DetailSection", "DetailShell", "PageHeader"],
   },
   {
-    packageName: "@flint/svelte-composites",
+    packageName: "@poodle/svelte-composites",
     kind: "component",
     status: "previewed",
     sectionIds: ["picker-suite", "detail-suite"],
@@ -563,7 +563,7 @@ const packageSurfaceCoverageGroups: PackageSurfaceCoverageGroup[] = [
     exportNames: ["PickerShell", "RelationPicker", "SelectionSummary"],
   },
   {
-    packageName: "@flint/svelte-composites",
+    packageName: "@poodle/svelte-composites",
     kind: "component",
     status: "previewed",
     sectionIds: ["media-suite"],
@@ -571,7 +571,7 @@ const packageSurfaceCoverageGroups: PackageSurfaceCoverageGroup[] = [
     exportNames: ["MediaPreview", "MediaThumbnail"],
   },
   {
-    packageName: "@flint/svelte-composites",
+    packageName: "@poodle/svelte-composites",
     kind: "component",
     status: "previewed",
     sectionIds: ["notification-suite"],
@@ -579,7 +579,7 @@ const packageSurfaceCoverageGroups: PackageSurfaceCoverageGroup[] = [
     exportNames: ["ToastStack"],
   },
   {
-    packageName: "@flint/svelte-composites",
+    packageName: "@poodle/svelte-composites",
     kind: "component",
     status: "previewed",
     sectionIds: ["command-suite"],
@@ -587,7 +587,7 @@ const packageSurfaceCoverageGroups: PackageSurfaceCoverageGroup[] = [
     exportNames: ["ActionDiscoveryPanel", "CommandPalette"],
   },
   {
-    packageName: "@flint/svelte-composites",
+    packageName: "@poodle/svelte-composites",
     kind: "component",
     status: "previewed",
     sectionIds: ["workspace-suite"],
@@ -595,7 +595,7 @@ const packageSurfaceCoverageGroups: PackageSurfaceCoverageGroup[] = [
     exportNames: ["AppHeader", "DockRegion", "SplitView"],
   },
   {
-    packageName: "@flint/svelte-composites",
+    packageName: "@poodle/svelte-composites",
     kind: "component",
     status: "previewed",
     sectionIds: ["catalog-hub"],
@@ -621,7 +621,7 @@ const packageSurfaceCoverageGroups: PackageSurfaceCoverageGroup[] = [
     ],
   },
   {
-    packageName: "@flint/svelte-composites",
+    packageName: "@poodle/svelte-composites",
     kind: "helper",
     status: "previewed",
     sectionIds: ["catalog-hub"],
@@ -641,7 +641,7 @@ const packageSurfaceCoverageGroups: PackageSurfaceCoverageGroup[] = [
     ],
   },
   {
-    packageName: "@flint/svelte-composites",
+    packageName: "@poodle/svelte-composites",
     kind: "helper",
     status: "previewed",
     sectionIds: ["workspace-suite"],

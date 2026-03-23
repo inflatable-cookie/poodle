@@ -1,10 +1,10 @@
 //! SplitButton specimen — primary action with dropdown trigger.
 
 use jetstream_runtime::ui_element::*;
-use flint_jetstream::JetstreamThemeProvider;
-use flint_jetstream_components::split_button::js_split_button;
-use flint_jetstream_components::theme_ext::*;
-use flint_primitives::SplitButtonSpec;
+use poodle_jetstream::JetstreamThemeProvider;
+use poodle_jetstream_components::split_button::js_split_button;
+use poodle_jetstream_components::theme_ext::*;
+use poodle_primitives::SplitButtonSpec;
 
 pub fn render(theme: &JetstreamThemeProvider) -> JsEl {
     let secondary = resolve_color(theme, "semantic.color.text.secondary");

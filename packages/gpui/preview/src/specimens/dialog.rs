@@ -1,6 +1,6 @@
 use gpui::*;
-use flint_primitives::{ButtonSpec, ButtonTone, ButtonVariant, DialogKind, DialogSpec, AlertDialogSpec, AlertDialogTone, EyebrowSpec};
-use flint_gpui_components::{Button, Dialog, AlertDialog, Eyebrow};
+use poodle_primitives::{ButtonSpec, ButtonTone, ButtonVariant, DialogKind, DialogSpec, AlertDialogSpec, AlertDialogTone, EyebrowSpec};
+use poodle_gpui_components::{Button, Dialog, AlertDialog, Eyebrow};
 use crate::app_state::AppState;
 use crate::PreviewRoot;
 

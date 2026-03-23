@@ -1,8 +1,8 @@
 {
   "generation": "g04.006",
-  "crateName": "flint-gpui",
+  "crateName": "poodle-gpui",
   "cratePath": "packages/gpui/adapter",
-  "tokenSource": "flint-tokens",
+  "tokenSource": "poodle-tokens",
   "contractIds": [
     "accordion",
     "collapsible",

@@ -1,14 +1,14 @@
 # g10.001 Sync with Contracts and Feasibility Assessment
 
 Status: complete
-Owner: Flint Core
+Owner: Poodle Core
 Depends on: g09
 
 ## Starting State
 
 8 real Jetstream components exist: accordion, badge, button, checkbox, progress,
 separator, status_indicator, switch. All use token resolution via `js_*()` functions
-in `flint-jetstream-components`. The adapter layer has ~20 real renders and ~71 stubs.
+in `poodle-jetstream-components`. The adapter layer has ~20 real renders and ~71 stubs.
 
 ## Jetstream Rendering Constraints
 

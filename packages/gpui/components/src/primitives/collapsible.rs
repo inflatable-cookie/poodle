@@ -3,8 +3,8 @@
 //! Contract: `docs/contracts/foundation/collapsible.md`
 
 use gpui::*;
-use flint_gpui::GpuiThemeProvider;
-use flint_primitives::{CollapsibleSpec, IconSize, IconSpec};
+use poodle_gpui::GpuiThemeProvider;
+use poodle_primitives::{CollapsibleSpec, IconSize, IconSpec};
 
 use super::icon::Icon;
 use crate::theme_ext::{color_mix, resolve_color, resolve_opacity, resolve_px, resolve_radius};
@@ -78,9 +78,9 @@ impl IntoElement for Collapsible {
         let root_bg = color_mix(surface_bg, text_primary, 0.88);
 
         let id_str = if let Some(ref suffix) = self.id_suffix {
-            format!("flint-collapsible-{}", suffix)
+            format!("poodle-collapsible-{}", suffix)
         } else {
-            "flint-collapsible".to_string()
+            "poodle-collapsible".to_string()
         };
 
         // ── Root (contract: grid, gap 0.5rem when open, 0 when closed) ──

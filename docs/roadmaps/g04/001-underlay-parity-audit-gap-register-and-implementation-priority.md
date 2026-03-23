@@ -1,10 +1,10 @@
 # g04.001 Underlay Parity Audit, Gap Register, And Implementation Priority
 
 Status: completed
-Owner: Flint Core
+Owner: Poodle Core
 Updated: 2026-03-14
 Depends on: g03.014
-Primary repos: `flint`
+Primary repos: `poodle`
 
 ## Goals
 
@@ -19,7 +19,7 @@ Primary repos: `flint`
 - [ ] create `docs/specs/underlay-parity-gap-register.json` with structured
   entries for each identified gap
 - [ ] classify each gap as new-component, feature-extension, or pattern-only
-- [ ] assign target layer: `@flint/svelte-primitives` or `@flint/svelte-composites`
+- [ ] assign target layer: `@poodle/svelte-primitives` or `@poodle/svelte-composites`
 - [ ] define contract requirements: new contract, contract amendment, or
   implementation-only
 - [ ] identify shared patterns that multiple new components will need (e.g.,

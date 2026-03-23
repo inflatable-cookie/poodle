@@ -46,7 +46,7 @@
     overflow: hidden;
     min-height: 0.5rem;
     border-radius: 999px;
-    background: color-mix(in srgb, var(--flint-surface) 96%, var(--flint-color-text-primary));
+    background: color-mix(in srgb, var(--poodle-surface) 96%, var(--poodle-color-text-primary));
   }
 
   .meter__fill {
@@ -55,8 +55,8 @@
     border-radius: inherit;
     background: linear-gradient(
       90deg,
-      color-mix(in srgb, var(--flint-color-status-success) 82%, white),
-      var(--flint-color-status-success)
+      color-mix(in srgb, var(--poodle-color-status-success) 82%, white),
+      var(--poodle-color-status-success)
     );
   }
 </style>

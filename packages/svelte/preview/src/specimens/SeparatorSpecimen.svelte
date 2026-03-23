@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { Separator, Eyebrow } from "@flint/svelte-primitives";
+  import { Separator, Eyebrow } from "@poodle/svelte-primitives";
 </script>
 
 <div class="specimen">
@@ -44,7 +44,7 @@
   .specimen__group span {
     margin: 0;
     font-size: 0.875rem;
-    color: var(--flint-color-text-secondary);
+    color: var(--poodle-color-text-secondary);
   }
 
   .specimen__row {

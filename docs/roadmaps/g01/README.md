@@ -5,7 +5,7 @@ Updated: 2026-03-11
 
 ## Context
 
-`g01` is the generation that turns Flint from a repo concept into a real shared
+`g01` is the generation that turns Poodle from a repo concept into a real shared
 UI-system program. It freezes the ownership model, creates the token and
 contract baseline, builds the first cross-framework primitives, defines the
 workstation-shell layer, and proves the first Underlay bridge.

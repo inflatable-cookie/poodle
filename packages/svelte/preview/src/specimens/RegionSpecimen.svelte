@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { Region, Eyebrow, Stack } from "@flint/svelte-primitives";
+  import { Region, Eyebrow, Stack } from "@poodle/svelte-primitives";
 </script>
 
 <div class="specimen">

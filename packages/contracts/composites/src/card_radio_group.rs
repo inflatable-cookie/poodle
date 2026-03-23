@@ -1,5 +1,5 @@
-use flint_primitives::ChoiceOption;
-use flint_tokens::semantic;
+use poodle_primitives::ChoiceOption;
+use poodle_tokens::semantic;
 
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct CardRadioGroupSpec {

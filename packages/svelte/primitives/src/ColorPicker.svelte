@@ -36,7 +36,7 @@
   }>();
 
   const pickerId = ++nextColorPickerId;
-  const surfaceId = `flint-color-picker-surface-${pickerId}`;
+  const surfaceId = `poodle-color-picker-surface-${pickerId}`;
 
   let rootElement: HTMLDivElement | null = null;
   let gradientElement: HTMLDivElement | null = null;
@@ -392,7 +392,7 @@
           {#if showAlpha}
             <div
               class="color-picker__alpha-wrap"
-              style="--flint-cp-alpha-color: {currentHex}"
+              style="--poodle-cp-alpha-color: {currentHex}"
             >
               <Slider
                 value={Math.round(alpha * 100)}
@@ -581,7 +581,7 @@
   }
 
   .color-picker[data-disabled] {
-    opacity: var(--flint-state-opacity-disabled);
+    opacity: var(--poodle-state-opacity-disabled);
     pointer-events: none;
   }
 
@@ -600,18 +600,18 @@
     min-height: 0;
     flex-shrink: 0;
     padding: 0;
-    border: 0.0625rem solid color-mix(in srgb, var(--flint-color-border-default) 62%, transparent);
-    border-radius: var(--flint-radius-control);
+    border: 0.0625rem solid color-mix(in srgb, var(--poodle-color-border-default) 62%, transparent);
+    border-radius: var(--poodle-radius-control);
     background: transparent;
     cursor: pointer;
     overflow: hidden;
     transition:
-      border-color var(--flint-motion-duration-interaction) var(--flint-motion-easing-standard),
-      box-shadow var(--flint-motion-duration-interaction) var(--flint-motion-easing-standard);
+      border-color var(--poodle-motion-duration-interaction) var(--poodle-motion-easing-standard),
+      box-shadow var(--poodle-motion-duration-interaction) var(--poodle-motion-easing-standard);
   }
 
   .color-picker__trigger:focus-visible {
-    outline: var(--flint-border-width-focus) solid var(--flint-color-accent-focusRing);
+    outline: var(--poodle-border-width-focus) solid var(--poodle-color-accent-focusRing);
     outline-offset: 0.0625rem;
   }
 
@@ -627,23 +627,23 @@
     width: 6.5rem;
     height: 2.25rem;
     min-height: 0;
-    padding: 0 var(--flint-space-control-x);
-    border: 0.0625rem solid var(--flint-color-border-default);
-    border-radius: var(--flint-radius-control);
-    background: var(--flint-color-background-surface);
-    color: var(--flint-color-text-primary);
-    font-family: var(--flint-typography-code-family);
+    padding: 0 var(--poodle-space-control-x);
+    border: 0.0625rem solid var(--poodle-color-border-default);
+    border-radius: var(--poodle-radius-control);
+    background: var(--poodle-color-background-surface);
+    color: var(--poodle-color-text-primary);
+    font-family: var(--poodle-typography-code-family);
     font-size: 0.8125rem;
     outline: none;
     transition:
-      border-color var(--flint-motion-duration-interaction) var(--flint-motion-easing-standard),
-      box-shadow var(--flint-motion-duration-interaction) var(--flint-motion-easing-standard);
+      border-color var(--poodle-motion-duration-interaction) var(--poodle-motion-easing-standard),
+      box-shadow var(--poodle-motion-duration-interaction) var(--poodle-motion-easing-standard);
   }
 
   .color-picker__input:focus {
-    border-color: var(--flint-color-accent-focusRing);
-    box-shadow: 0 0 0 var(--flint-border-width-focus)
-      color-mix(in srgb, var(--flint-color-accent-focusRing) 28%, transparent);
+    border-color: var(--poodle-color-accent-focusRing);
+    box-shadow: 0 0 0 var(--poodle-border-width-focus)
+      color-mix(in srgb, var(--poodle-color-accent-focusRing) 28%, transparent);
   }
 
   /* ── Surface (popover) ───────────────────────────────────── */
@@ -659,10 +659,10 @@
     width: 24rem;
     margin-top: 0.25rem;
     padding: 0.75rem;
-    border: 0.0625rem solid var(--flint-color-border-subtle);
-    border-radius: var(--flint-radius-surface);
-    background: var(--flint-color-background-elevated);
-    box-shadow: var(--flint-shadow-lg);
+    border: 0.0625rem solid var(--poodle-color-border-subtle);
+    border-radius: var(--poodle-radius-surface);
+    background: var(--poodle-color-background-elevated);
+    box-shadow: var(--poodle-shadow-lg);
   }
 
   /* ── Picker area (gradient + controls side by side) ────── */
@@ -709,7 +709,7 @@
   }
 
   .color-picker__gradient:focus-visible {
-    outline: var(--flint-border-width-focus) solid var(--flint-color-accent-focusRing);
+    outline: var(--poodle-border-width-focus) solid var(--poodle-color-accent-focusRing);
     outline-offset: 0.0625rem;
   }
 
@@ -762,7 +762,7 @@
       linear-gradient(
         to right,
         transparent,
-        var(--flint-cp-alpha-color, #000)
+        var(--poodle-cp-alpha-color, #000)
       ),
       repeating-conic-gradient(
         #d0d0d0 0% 25%,
@@ -817,30 +817,30 @@
     height: 2rem;
     min-height: 0;
     padding: 0 0.375rem;
-    border: 0.0625rem solid var(--flint-color-border-default);
-    border-radius: var(--flint-radius-control);
-    background: var(--flint-color-background-surface);
-    color: var(--flint-color-text-primary);
-    font-family: var(--flint-typography-code-family);
+    border: 0.0625rem solid var(--poodle-color-border-default);
+    border-radius: var(--poodle-radius-control);
+    background: var(--poodle-color-background-surface);
+    color: var(--poodle-color-text-primary);
+    font-family: var(--poodle-typography-code-family);
     font-size: 0.75rem;
     outline: none;
     transition:
-      border-color var(--flint-motion-duration-interaction) var(--flint-motion-easing-standard),
-      box-shadow var(--flint-motion-duration-interaction) var(--flint-motion-easing-standard);
+      border-color var(--poodle-motion-duration-interaction) var(--poodle-motion-easing-standard),
+      box-shadow var(--poodle-motion-duration-interaction) var(--poodle-motion-easing-standard);
   }
 
   .color-picker__text-input:focus {
-    border-color: var(--flint-color-accent-focusRing);
-    box-shadow: 0 0 0 var(--flint-border-width-focus)
-      color-mix(in srgb, var(--flint-color-accent-focusRing) 28%, transparent);
+    border-color: var(--poodle-color-accent-focusRing);
+    box-shadow: 0 0 0 var(--poodle-border-width-focus)
+      color-mix(in srgb, var(--poodle-color-accent-focusRing) 28%, transparent);
   }
 
   .color-picker__input-label {
     display: block;
-    font-family: var(--flint-typography-label-family);
+    font-family: var(--poodle-typography-label-family);
     font-size: 0.625rem;
-    font-weight: var(--flint-typography-label-weight);
-    color: var(--flint-color-text-secondary);
+    font-weight: var(--poodle-typography-label-weight);
+    color: var(--poodle-color-text-secondary);
     text-align: center;
     text-transform: uppercase;
     letter-spacing: 0.04em;
@@ -854,7 +854,7 @@
     flex-wrap: wrap;
     gap: 0.25rem;
     padding-top: 0.25rem;
-    border-top: 0.0625rem solid color-mix(in srgb, var(--flint-color-border-subtle) 42%, transparent);
+    border-top: 0.0625rem solid color-mix(in srgb, var(--poodle-color-border-subtle) 42%, transparent);
   }
 
   .color-picker__swatch {
@@ -866,8 +866,8 @@
     border-radius: 0.1875rem;
     cursor: pointer;
     transition:
-      border-color var(--flint-motion-duration-interaction) var(--flint-motion-easing-standard),
-      transform var(--flint-motion-duration-interaction) var(--flint-motion-easing-standard);
+      border-color var(--poodle-motion-duration-interaction) var(--poodle-motion-easing-standard),
+      transform var(--poodle-motion-duration-interaction) var(--poodle-motion-easing-standard);
   }
 
   .color-picker__swatch:hover {
@@ -875,12 +875,12 @@
   }
 
   .color-picker__swatch:focus-visible {
-    outline: var(--flint-border-width-focus) solid var(--flint-color-accent-focusRing);
+    outline: var(--poodle-border-width-focus) solid var(--poodle-color-accent-focusRing);
     outline-offset: 0.0625rem;
   }
 
   .color-picker__swatch--active {
-    border-color: var(--flint-color-text-primary);
-    box-shadow: 0 0 0 0.0625rem var(--flint-color-background-surface);
+    border-color: var(--poodle-color-text-primary);
+    box-shadow: 0 0 0 0.0625rem var(--poodle-color-background-surface);
   }
 </style>

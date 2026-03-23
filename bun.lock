@@ -3,38 +3,38 @@
   "configVersion": 1,
   "workspaces": {
     "": {
-      "name": "flint",
+      "name": "poodle",
     },
     "packages/bridges/underlay": {
-      "name": "@flint/bridge-underlay",
+      "name": "@poodle/bridge-underlay",
     },
     "packages/svelte/composites": {
-      "name": "@flint/svelte-composites",
+      "name": "@poodle/svelte-composites",
       "version": "0.0.0",
       "peerDependencies": {
-        "@flint/svelte-primitives": "0.0.0",
-        "@flint/svelte-tokens": "0.0.0",
+        "@poodle/svelte-primitives": "0.0.0",
+        "@poodle/svelte-tokens": "0.0.0",
         "svelte": "^5.38.6",
       },
       "optionalPeers": [
-        "@flint/svelte-primitives",
-        "@flint/svelte-tokens",
+        "@poodle/svelte-primitives",
+        "@poodle/svelte-tokens",
       ],
     },
     "packages/svelte/icons-lucide": {
-      "name": "@flint/icons-lucide",
+      "name": "@poodle/icons-lucide",
       "version": "0.0.0",
       "dependencies": {
         "lucide-static": "^0.577.0",
       },
     },
     "packages/svelte/preview": {
-      "name": "@flint/svelte-preview",
+      "name": "@poodle/svelte-preview",
       "dependencies": {
-        "@flint/icons-lucide": "workspace:*",
-        "@flint/svelte-composites": "workspace:*",
-        "@flint/svelte-primitives": "workspace:*",
-        "@flint/svelte-tokens": "workspace:*",
+        "@poodle/icons-lucide": "workspace:*",
+        "@poodle/svelte-composites": "workspace:*",
+        "@poodle/svelte-primitives": "workspace:*",
+        "@poodle/svelte-tokens": "workspace:*",
         "lucide-static": "^0.577.0",
         "svelte": "^5.38.6",
       },
@@ -45,22 +45,22 @@
       },
     },
     "packages/svelte/primitives": {
-      "name": "@flint/svelte-primitives",
+      "name": "@poodle/svelte-primitives",
       "version": "0.0.0",
       "peerDependencies": {
-        "@flint/svelte-tokens": "0.0.0",
+        "@poodle/svelte-tokens": "0.0.0",
         "svelte": "^5.38.6",
       },
       "optionalPeers": [
-        "@flint/svelte-tokens",
+        "@poodle/svelte-tokens",
       ],
     },
     "packages/svelte/tokens": {
-      "name": "@flint/svelte-tokens",
+      "name": "@poodle/svelte-tokens",
       "version": "0.0.0",
     },
     "packages/tokens": {
-      "name": "@flint/tokens",
+      "name": "@poodle/tokens",
       "version": "0.0.0",
     },
   },
@@ -117,20 +117,6 @@
 
     "@esbuild/win32-x64": ["@esbuild/win32-x64@0.27.3", "", { "os": "win32", "cpu": "x64" }, "sha512-4uJGhsxuptu3OcpVAzli+/gWusVGwZZHTlS63hh++ehExkVT8SgiEf7/uC/PclrPPkLhZqGgCTjd0VWLo6xMqA=="],
 
-    "@flint/bridge-underlay": ["@flint/bridge-underlay@workspace:packages/bridges/underlay"],
-
-    "@flint/icons-lucide": ["@flint/icons-lucide@workspace:packages/svelte/icons-lucide"],
-
-    "@flint/svelte-composites": ["@flint/svelte-composites@workspace:packages/svelte/composites"],
-
-    "@flint/svelte-preview": ["@flint/svelte-preview@workspace:packages/svelte/preview"],
-
-    "@flint/svelte-primitives": ["@flint/svelte-primitives@workspace:packages/svelte/primitives"],
-
-    "@flint/svelte-tokens": ["@flint/svelte-tokens@workspace:packages/svelte/tokens"],
-
-    "@flint/tokens": ["@flint/tokens@workspace:packages/tokens"],
-
     "@jridgewell/gen-mapping": ["@jridgewell/gen-mapping@0.3.13", "", { "dependencies": { "@jridgewell/sourcemap-codec": "^1.5.0", "@jridgewell/trace-mapping": "^0.3.24" } }, "sha512-2kkt/7niJ6MgEPxF0bYdQ6etZaA+fQvDcLKckhy1yIQOzaoKjBBjSj63/aLVjYE3qhRt5dvM+uUyfCg6UKCBbA=="],
 
     "@jridgewell/remapping": ["@jridgewell/remapping@2.3.5", "", { "dependencies": { "@jridgewell/gen-mapping": "^0.3.5", "@jridgewell/trace-mapping": "^0.3.24" } }, "sha512-LI9u/+laYG4Ds1TDKSJW2YPrIlcVYOwi2fUC6xB43lueCjgxV4lffOCZCtYFiH6TNOX+tQKXx97T4IKHbhyHEQ=="],
@@ -140,6 +126,20 @@
     "@jridgewell/sourcemap-codec": ["@jridgewell/sourcemap-codec@1.5.5", "", {}, "sha512-cYQ9310grqxueWbl+WuIUIaiUaDcj7WOq5fVhEljNVgRfOUhY9fy2zTvfoqWsnebh8Sl70VScFbICvJnLKB0Og=="],
 
     "@jridgewell/trace-mapping": ["@jridgewell/trace-mapping@0.3.31", "", { "dependencies": { "@jridgewell/resolve-uri": "^3.1.0", "@jridgewell/sourcemap-codec": "^1.4.14" } }, "sha512-zzNR+SdQSDJzc8joaeP8QQoCQr8NuYx2dIIytl1QeBEZHJ9uW6hebsrYgbz8hJwUQao3TWCMtmfV8Nu1twOLAw=="],
+
+    "@poodle/bridge-underlay": ["@poodle/bridge-underlay@workspace:packages/bridges/underlay"],
+
+    "@poodle/icons-lucide": ["@poodle/icons-lucide@workspace:packages/svelte/icons-lucide"],
+
+    "@poodle/svelte-composites": ["@poodle/svelte-composites@workspace:packages/svelte/composites"],
+
+    "@poodle/svelte-preview": ["@poodle/svelte-preview@workspace:packages/svelte/preview"],
+
+    "@poodle/svelte-primitives": ["@poodle/svelte-primitives@workspace:packages/svelte/primitives"],
+
+    "@poodle/svelte-tokens": ["@poodle/svelte-tokens@workspace:packages/svelte/tokens"],
+
+    "@poodle/tokens": ["@poodle/tokens@workspace:packages/tokens"],
 
     "@rollup/rollup-android-arm-eabi": ["@rollup/rollup-android-arm-eabi@4.59.0", "", { "os": "android", "cpu": "arm" }, "sha512-upnNBkA6ZH2VKGcBj9Fyl9IGNPULcjXRlg0LLeaioQWueH30p6IXtJEbKAgvyv+mJaMxSm1l6xwDXYjpEMiLMg=="],
 

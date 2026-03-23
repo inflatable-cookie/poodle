@@ -6,7 +6,7 @@ Updated: 2026-03-14
 ## Objective
 
 Publish a document defining Jetstream's UI system capabilities and constraints
-as a Flint rendering target. This is the contract between Flint g08 (Jetstream
+as a Poodle rendering target. This is the contract between Poodle g08 (Jetstream
 build-out) and Jetstream g04.016 (UI rendering infrastructure).
 
 ## Jetstream `game_ui` System Overview
@@ -20,7 +20,7 @@ surface with 3D content.
 
 Jetstream provides 8 built-in widget variants:
 
-| Widget | Purpose | Flint Mapping |
+| Widget | Purpose | Poodle Mapping |
 |--------|---------|------------|
 | `Container` | Box with background, border, corners, padding | BoxSpec, SurfaceSpec, structural containers |
 | `Text` | Single-style text run | Labels, descriptions, headings |
@@ -31,7 +31,7 @@ Jetstream provides 8 built-in widget variants:
 | `TextInput` | Single-line text entry | TextInputSpec |
 | `ScrollView` | Vertical-scroll container | ScrollShellSpec |
 
-Complex Flint components decompose into combinations of these primitives.
+Complex Poodle components decompose into combinations of these primitives.
 
 ## Layout Model
 
@@ -54,7 +54,7 @@ Complex Flint components decompose into combinations of these primitives.
 
 ## Styling Capabilities
 
-| Property | Jetstream Support | Flint Mapping |
+| Property | Jetstream Support | Poodle Mapping |
 |----------|-------------------|------------|
 | Background color | `Vec4` solid color | `StyleDescriptor.background` via `ColorValue` |
 | Border | Solid color, uniform width, per-side not supported | `StyleDescriptor.border` |
@@ -125,7 +125,7 @@ Complex Flint components decompose into combinations of these primitives.
 
 ## Known Limitations (Intentional Deltas)
 
-These are capabilities that Flint supports in Svelte/GPUI but Jetstream
+These are capabilities that Poodle supports in Svelte/GPUI but Jetstream
 intentionally does not implement:
 
 | Limitation | Impact | Adapter Strategy |

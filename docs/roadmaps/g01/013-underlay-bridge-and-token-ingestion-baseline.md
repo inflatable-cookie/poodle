@@ -1,20 +1,20 @@
 # g01.013 Underlay Bridge And Token-Ingestion Baseline
 
 Status: completed
-Owner: Flint Core
+Owner: Poodle Core
 Updated: 2026-03-11
 Depends on: g01.003, g01.011, g01.012
-Primary repos: `flint`, `underlay`
+Primary repos: `poodle`, `underlay`
 
 ## Context
 
-Underlay is one of the main prospective Svelte-side consumers of Flint, but it
+Underlay is one of the main prospective Svelte-side consumers of Poodle, but it
 must remain the public surface for Underlay apps.
 
 ## Goals
 
-- [x] define how Underlay ingests Flint tokens
-- [x] define how Underlay wraps or reuses Flint components without exposing Flint to
+- [x] define how Underlay ingests Poodle tokens
+- [x] define how Underlay wraps or reuses Poodle components without exposing Poodle to
   app code
 - [x] define namespace, mapping, and ownership rules for token bridging
 - [x] define what stays Underlay-owned versus what can be shared directly
@@ -23,7 +23,7 @@ must remain the public surface for Underlay apps.
 
 - [x] define the token-ingestion model for Underlay
 - [x] define wrapper-preservation rules for Underlay components
-- [x] define ownership boundaries between Flint internals and Underlay public APIs
+- [x] define ownership boundaries between Poodle internals and Underlay public APIs
 - [x] document expected migration pressure points before adoption begins
 
 ## Acceptance Criteria

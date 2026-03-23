@@ -1,8 +1,8 @@
-# 2026-03-11 Flint Northstar Bootstrap, Roadmap Densification, And Checklist Contracts
+# 2026-03-11 Poodle Northstar Bootstrap, Roadmap Densification, And Checklist Contracts
 
 ## Changed
 
-- added a Northstar-shaped `docs/` surface to the Flint repo
+- added a Northstar-shaped `docs/` surface to the Poodle repo
 - wrote the initial repo vision and architecture
 - replaced the lightweight roadmap surface with denser generations and explicit
   ranges
@@ -11,7 +11,7 @@
 - expanded `g02` into a 16-milestone advanced-composite and adoption generation
 - expanded `g03` into a 14-milestone hardening and maturity generation
 - aligned the roadmap posture more closely to the substantive generation style
-  used in Chorus, while still keeping Flint smaller than Loophole-scale programs
+  used in Chorus, while still keeping Poodle smaller than Loophole-scale programs
 - converted the milestone files from brief scopes into actionable checklist
   contracts with explicit goals, execution checklists, acceptance criteria, and
   deliverables where appropriate

@@ -1,10 +1,10 @@
 # g01.003 Token Artifact Emission, Themes, And Density Modes
 
 Status: completed
-Owner: Flint Core
+Owner: Poodle Core
 Updated: 2026-03-11
 Depends on: g01.002
-Primary repos: `flint`
+Primary repos: `poodle`
 
 ## Research Inputs
 

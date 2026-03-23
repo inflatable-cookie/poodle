@@ -1,10 +1,10 @@
 //! Rating specimen — ratings at different values and disabled state.
 
 use jetstream_runtime::ui_element::*;
-use flint_jetstream::JetstreamThemeProvider;
-use flint_jetstream_components::rating::js_rating;
-use flint_jetstream_components::theme_ext::*;
-use flint_primitives::RatingSpec;
+use poodle_jetstream::JetstreamThemeProvider;
+use poodle_jetstream_components::rating::js_rating;
+use poodle_jetstream_components::theme_ext::*;
+use poodle_primitives::RatingSpec;
 
 pub fn render(theme: &JetstreamThemeProvider) -> JsEl {
     let secondary = resolve_color(theme, "semantic.color.text.secondary");

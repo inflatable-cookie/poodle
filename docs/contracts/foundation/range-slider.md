@@ -61,8 +61,8 @@ Updated: 2026-03-15
 
 | Var | Description |
 |-----|-------------|
-| `--flint-range-start` | computed as `((lower - min) / (max - min)) * 100%`; positions fill start |
-| `--flint-range-end` | computed as `((upper - min) / (max - min)) * 100%`; positions fill end |
+| `--poodle-range-start` | computed as `((lower - min) / (max - min)) * 100%`; positions fill start |
+| `--poodle-range-end` | computed as `((upper - min) / (max - min)) * 100%`; positions fill end |
 
 ## 4. States
 
@@ -170,7 +170,7 @@ Updated: 2026-03-15
 
 | Property | Value |
 |----------|-------|
-| `opacity` | `var(--flint-state-opacity-disabled)` |
+| `opacity` | `var(--poodle-state-opacity-disabled)` |
 
 ### Track `.range-slider__track`
 
@@ -181,7 +181,7 @@ Updated: 2026-03-15
 | `height` | `0.375rem` |
 | `transform` | `translateY(-50%)` |
 | `border-radius` | `999px` |
-| `background` | `color-mix(in srgb, var(--flint-color-background-surface) 88%, transparent)` |
+| `background` | `color-mix(in srgb, var(--poodle-color-background-surface) 88%, transparent)` |
 
 ### Track vertical `[data-orientation="vertical"] .range-slider__track`
 
@@ -197,20 +197,20 @@ Updated: 2026-03-15
 | Property | Value |
 |----------|-------|
 | `position` | `absolute` |
-| `left` | `var(--flint-range-start)` |
-| `width` | `calc(var(--flint-range-end) - var(--flint-range-start))` |
+| `left` | `var(--poodle-range-start)` |
+| `width` | `calc(var(--poodle-range-end) - var(--poodle-range-start))` |
 | `height` | `100%` |
 | `border-radius` | `inherit` |
-| `background` | `var(--flint-color-accent-base)` |
+| `background` | `var(--poodle-color-accent-base)` |
 
 ### Fill vertical `[data-orientation="vertical"] .range-slider__fill`
 
 | Property | Value |
 |----------|-------|
 | `left` | `0` |
-| `bottom` | `var(--flint-range-start)` |
+| `bottom` | `var(--poodle-range-start)` |
 | `width` | `100%` |
-| `height` | `calc(var(--flint-range-end) - var(--flint-range-start))` |
+| `height` | `calc(var(--poodle-range-end) - var(--poodle-range-start))` |
 
 ### Control `.range-slider__control`
 
@@ -250,9 +250,9 @@ Updated: 2026-03-15
 | `width` | `1rem` |
 | `height` | `1rem` |
 | `margin-top` | `-0.3125rem` |
-| `border` | `0.0625rem solid var(--flint-color-border-default)` |
+| `border` | `0.0625rem solid var(--poodle-color-border-default)` |
 | `border-radius` | `999px` |
-| `background` | `var(--flint-color-background-elevated)` |
+| `background` | `var(--poodle-color-background-elevated)` |
 | `box-shadow` | `0 0.125rem 0.5rem color-mix(in srgb, black 18%, transparent)` |
 | `appearance` | `none` |
 | `-webkit-appearance` | `none` |
@@ -264,9 +264,9 @@ Updated: 2026-03-15
 |----------|-------|
 | `width` | `1rem` |
 | `height` | `1rem` |
-| `border` | `0.0625rem solid var(--flint-color-border-default)` |
+| `border` | `0.0625rem solid var(--poodle-color-border-default)` |
 | `border-radius` | `999px` |
-| `background` | `var(--flint-color-background-elevated)` |
+| `background` | `var(--poodle-color-background-elevated)` |
 | `box-shadow` | `0 0.125rem 0.5rem color-mix(in srgb, black 18%, transparent)` |
 | `appearance` | `none` |
 | `pointer-events` | `auto` |
@@ -275,13 +275,13 @@ Updated: 2026-03-15
 
 | Property | Value |
 |----------|-------|
-| `box-shadow` | `0 0 0 0.1875rem color-mix(in srgb, var(--flint-color-accent-focusRing) 32%, transparent), 0 0.125rem 0.5rem color-mix(in srgb, black 18%, transparent)` |
+| `box-shadow` | `0 0 0 0.1875rem color-mix(in srgb, var(--poodle-color-accent-focusRing) 32%, transparent), 0 0.125rem 0.5rem color-mix(in srgb, black 18%, transparent)` |
 
 ### Thumb focus `:focus-visible::-moz-range-thumb`
 
 | Property | Value |
 |----------|-------|
-| `box-shadow` | `0 0 0 0.1875rem color-mix(in srgb, var(--flint-color-accent-focusRing) 32%, transparent), 0 0.125rem 0.5rem color-mix(in srgb, black 18%, transparent)` |
+| `box-shadow` | `0 0 0 0.1875rem color-mix(in srgb, var(--poodle-color-accent-focusRing) 32%, transparent), 0 0.125rem 0.5rem color-mix(in srgb, black 18%, transparent)` |
 
 ### Track pseudo `::-webkit-slider-runnable-track`
 
@@ -304,7 +304,7 @@ Updated: 2026-03-15
 - Both inputs have `pointer-events: none` on the control element, with
   `pointer-events: auto` restored on the thumb pseudo-elements, so only the
   thumbs are grabbable
-- CSS custom properties `--flint-range-start` and `--flint-range-end` are computed
+- CSS custom properties `--poodle-range-start` and `--poodle-range-end` are computed
   reactively and set as inline styles on the root element
 - The fill element uses `left` and `calc(end - start)` for width in horizontal
   mode, `bottom` and `calc(end - start)` for height in vertical mode
@@ -319,7 +319,7 @@ Updated: 2026-03-15
 
 ## 10. GPUI Notes
 
-- expected crate/module surface: `flint_gpui::primitives::range_slider`
+- expected crate/module surface: `poodle_gpui::primitives::range_slider`
 - GPUI implementation must expose two separately focusable value handles with
   distinct accessibility names ("minimum"/"maximum") and keyboard adjustment
   behavior

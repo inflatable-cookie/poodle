@@ -142,7 +142,7 @@ Selection state, roving-focus state, and optional reorder mode are required.
 
 ## 10. GPUI Notes
 
-- expected crate/module surface: `flint_gpui::primitives::tab_strip`
+- expected crate/module surface: `poodle_gpui::primitives::tab_strip`
 - GPUI implementation must preserve keyboard reorder access, accessible move
   announcements, and deterministic post-close focus placement
 

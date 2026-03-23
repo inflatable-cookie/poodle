@@ -23,19 +23,19 @@
 
 <style>
   .pill {
-    --flint-pill-fill: color-mix(in srgb, var(--flint-color-background-surface) 90%, transparent);
-    --flint-pill-border: color-mix(in srgb, var(--flint-color-border-subtle) 82%, transparent);
-    --flint-pill-text: var(--flint-color-text-secondary);
+    --poodle-pill-fill: color-mix(in srgb, var(--poodle-color-background-surface) 90%, transparent);
+    --poodle-pill-border: color-mix(in srgb, var(--poodle-color-border-subtle) 82%, transparent);
+    --poodle-pill-text: var(--poodle-color-text-secondary);
     display: inline-flex;
     align-items: center;
     justify-content: center;
     min-height: 1.25rem;
     padding: 0.1875rem 0.5rem;
-    border: 0.0625rem solid var(--flint-pill-border);
+    border: 0.0625rem solid var(--poodle-pill-border);
     border-radius: 999px;
-    background: var(--flint-pill-fill);
-    color: var(--flint-pill-text);
-    font-family: var(--flint-typography-label-family);
+    background: var(--poodle-pill-fill);
+    color: var(--poodle-pill-text);
+    font-family: var(--poodle-typography-label-family);
     font-size: 0.6875rem;
     font-weight: 600;
     line-height: 1;
@@ -43,19 +43,19 @@
   }
 
   .pill[data-tone="success"] {
-    --flint-pill-fill: color-mix(in srgb, var(--flint-color-status-success) 14%, var(--flint-color-background-surface));
-    --flint-pill-border: color-mix(in srgb, var(--flint-color-status-success) 38%, var(--flint-color-border-subtle));
-    --flint-pill-text: var(--flint-color-text-primary);
+    --poodle-pill-fill: color-mix(in srgb, var(--poodle-color-status-success) 14%, var(--poodle-color-background-surface));
+    --poodle-pill-border: color-mix(in srgb, var(--poodle-color-status-success) 38%, var(--poodle-color-border-subtle));
+    --poodle-pill-text: var(--poodle-color-text-primary);
   }
 
   .pill[data-tone="danger"] {
-    --flint-pill-fill: color-mix(in srgb, var(--flint-color-status-danger) 14%, var(--flint-color-background-surface));
-    --flint-pill-border: color-mix(in srgb, var(--flint-color-status-danger) 38%, var(--flint-color-border-subtle));
-    --flint-pill-text: var(--flint-color-text-primary);
+    --poodle-pill-fill: color-mix(in srgb, var(--poodle-color-status-danger) 14%, var(--poodle-color-background-surface));
+    --poodle-pill-border: color-mix(in srgb, var(--poodle-color-status-danger) 38%, var(--poodle-color-border-subtle));
+    --poodle-pill-text: var(--poodle-color-text-primary);
   }
 
   .pill[data-appearance="subtle"] {
-    --flint-pill-fill: color-mix(in srgb, var(--flint-pill-fill) 50%, transparent);
+    --poodle-pill-fill: color-mix(in srgb, var(--poodle-pill-fill) 50%, transparent);
   }
 
   .pill[data-size="xxs"] {
@@ -71,22 +71,22 @@
   }
 
   .pill[data-font="mono"] {
-    font-family: var(--flint-typography-code-family);
+    font-family: var(--poodle-typography-code-family);
     letter-spacing: 0.02em;
   }
 
   .pill[data-appearance="badge"] {
-    --flint-pill-fill: color-mix(in srgb, var(--flint-color-accent-base) 18%, transparent);
-    --flint-pill-border: transparent;
-    --flint-pill-text: var(--flint-color-text-primary);
+    --poodle-pill-fill: color-mix(in srgb, var(--poodle-color-accent-base) 18%, transparent);
+    --poodle-pill-border: transparent;
+    --poodle-pill-text: var(--poodle-color-text-primary);
     font-weight: 700;
     letter-spacing: 0.04em;
     text-transform: uppercase;
   }
 
   .pill[data-appearance="badge"][data-tone="neutral"] {
-    --flint-pill-fill: color-mix(in srgb, var(--flint-surface) 96%, var(--flint-color-text-primary));
-    --flint-pill-text: var(--flint-color-text-secondary);
+    --poodle-pill-fill: color-mix(in srgb, var(--poodle-surface) 96%, var(--poodle-color-text-primary));
+    --poodle-pill-text: var(--poodle-color-text-secondary);
   }
 
   .pill[data-muted="true"] {

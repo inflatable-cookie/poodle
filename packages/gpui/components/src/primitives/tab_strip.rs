@@ -4,9 +4,9 @@
 //! Contract: focus ring, disabled cursor, spec token usage.
 
 use gpui::*;
-use flint_adapter::ThemeProvider;
-use flint_gpui::GpuiThemeProvider;
-use flint_primitives::{IconSize, IconSpec, Orientation, TabStripItem, TabStripSpec};
+use poodle_adapter::ThemeProvider;
+use poodle_gpui::GpuiThemeProvider;
+use poodle_primitives::{IconSize, IconSpec, Orientation, TabStripItem, TabStripSpec};
 
 use super::icon::Icon;
 
@@ -35,7 +35,7 @@ impl TabStrip {
         Self {
             spec,
             theme: theme.clone(),
-            id_prefix: "flint-tabstrip".to_string(),
+            id_prefix: "poodle-tabstrip".to_string(),
             on_change: None,
             on_close: None,
         }

@@ -4,8 +4,8 @@
 
 use jetstream_runtime::game_ui::Color;
 use jetstream_runtime::ui_element::{self, JsEl};
-use flint_jetstream::JetstreamThemeProvider;
-use flint_primitives::{BannerSpec, StatusTone};
+use poodle_jetstream::JetstreamThemeProvider;
+use poodle_primitives::{BannerSpec, StatusTone};
 
 use crate::theme_ext::resolve_color;
 

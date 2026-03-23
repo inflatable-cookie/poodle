@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { NumberEntry, Eyebrow } from "@flint/svelte-primitives";
+  import { NumberEntry, Eyebrow } from "@poodle/svelte-primitives";
 
   let quantity = 1;
   let price = 29.99;
@@ -62,6 +62,6 @@
   .specimen__group p {
     margin: 0;
     font-size: 0.875rem;
-    color: var(--flint-color-text-secondary);
+    color: var(--poodle-color-text-secondary);
   }
 </style>

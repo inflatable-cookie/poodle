@@ -133,7 +133,7 @@
   .resize-handle__line {
     position: absolute;
     border-radius: 999rem;
-    background: color-mix(in srgb, var(--flint-color-border-default) 82%, transparent);
+    background: color-mix(in srgb, var(--poodle-color-border-default) 82%, transparent);
     transition: background 120ms ease;
   }
 
@@ -149,11 +149,11 @@
 
   .resize-handle:hover .resize-handle__line,
   .resize-handle[data-dragging] .resize-handle__line {
-    background: var(--flint-color-accent-base);
+    background: var(--poodle-color-accent-base);
   }
 
   .resize-handle:focus-visible {
-    outline: var(--flint-border-width-focus) solid var(--flint-color-accent-focusRing);
+    outline: var(--poodle-border-width-focus) solid var(--poodle-color-accent-focusRing);
     outline-offset: 0.0625rem;
   }
 </style>

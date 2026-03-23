@@ -4,9 +4,9 @@
 //! trigger padding 0 0.75rem, min-height 2rem, hover accent 14%.
 
 use gpui::*;
-use flint_adapter::ThemeProvider;
-use flint_gpui::GpuiThemeProvider;
-use flint_primitives::{MenuSpec, MenubarEntry, MenubarSpec};
+use poodle_adapter::ThemeProvider;
+use poodle_gpui::GpuiThemeProvider;
+use poodle_primitives::{MenuSpec, MenubarEntry, MenubarSpec};
 
 use super::menu::Menu;
 use crate::theme_ext::{color_mix, resolve_color, resolve_opacity, resolve_radius};
@@ -34,7 +34,7 @@ impl Menubar {
         Self {
             spec,
             theme: theme.clone(),
-            id_prefix: "flint-menubar".to_string(),
+            id_prefix: "poodle-menubar".to_string(),
             on_select: None,
             on_trigger: None,
         }

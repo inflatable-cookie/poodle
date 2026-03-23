@@ -1,7 +1,7 @@
 use gpui::*;
-use flint_adapter::ThemeProvider;
-use flint_primitives::{DrawerSpec, DrawerEdge, ButtonSpec, ButtonVariant, EyebrowSpec};
-use flint_gpui_components::{Drawer, Button, Eyebrow};
+use poodle_adapter::ThemeProvider;
+use poodle_primitives::{DrawerSpec, DrawerEdge, ButtonSpec, ButtonVariant, EyebrowSpec};
+use poodle_gpui_components::{Drawer, Button, Eyebrow};
 use crate::app_state::AppState;
 use crate::style_bridge::color_to_hsla;
 use crate::PreviewRoot;

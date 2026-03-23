@@ -1,10 +1,10 @@
 //! CollapseToggle specimen — collapse toggles in collapsed and expanded states.
 
 use jetstream_runtime::ui_element::*;
-use flint_jetstream::JetstreamThemeProvider;
-use flint_jetstream_components::collapse_toggle::js_collapse_toggle;
-use flint_jetstream_components::theme_ext::*;
-use flint_primitives::CollapseToggleSpec;
+use poodle_jetstream::JetstreamThemeProvider;
+use poodle_jetstream_components::collapse_toggle::js_collapse_toggle;
+use poodle_jetstream_components::theme_ext::*;
+use poodle_primitives::CollapseToggleSpec;
 
 pub fn render(theme: &JetstreamThemeProvider) -> JsEl {
     let secondary = resolve_color(theme, "semantic.color.text.secondary");

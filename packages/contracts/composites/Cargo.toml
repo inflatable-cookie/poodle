@@ -1,17 +1,17 @@
 [package]
-name = "flint-composites"
+name = "poodle-composites"
 version = "0.0.0"
 edition = "2021"
-description = "Contract-backed composite specs for Flint multi-renderer targets."
+description = "Contract-backed composite specs for Poodle multi-renderer targets."
 
 [lib]
 path = "src/lib.rs"
 
 [dependencies]
-flint-primitives = { path = "../primitives" }
-flint-tokens = { path = "../tokens" }
+poodle-primitives = { path = "../primitives" }
+poodle-tokens = { path = "../tokens" }
 
-[package.metadata.flint]
+[package.metadata.poodle]
 public-intent = true
 channel = "preview"
 stability = "pre-release"

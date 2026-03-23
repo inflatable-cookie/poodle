@@ -58,53 +58,53 @@
     flex-wrap: wrap;
     align-items: center;
     justify-content: space-between;
-    gap: var(--flint-space-inline-md);
-    padding: var(--flint-space-panel-y) var(--flint-space-panel-x);
-    border: 0.0625rem solid var(--flint-color-border-subtle);
-    border-radius: var(--flint-radius-surface);
-    --flint-recipe-bulk-fill: color-mix(in srgb, var(--flint-color-background-panel) 93%, var(--flint-color-text-primary));
-    background: var(--flint-recipe-bulk-fill);
-    --flint-surface: var(--flint-recipe-bulk-fill);
+    gap: var(--poodle-space-inline-md);
+    padding: var(--poodle-space-panel-y) var(--poodle-space-panel-x);
+    border: 0.0625rem solid var(--poodle-color-border-subtle);
+    border-radius: var(--poodle-radius-surface);
+    --poodle-recipe-bulk-fill: color-mix(in srgb, var(--poodle-color-background-panel) 93%, var(--poodle-color-text-primary));
+    background: var(--poodle-recipe-bulk-fill);
+    --poodle-surface: var(--poodle-recipe-bulk-fill);
   }
 
   .bulk-action-bar__summary {
     display: flex;
     flex-wrap: wrap;
-    gap: var(--flint-space-inline-sm);
+    gap: var(--poodle-space-inline-sm);
     align-items: baseline;
-    color: var(--flint-color-text-primary);
-    font-family: var(--flint-typography-body-family);
-    font-size: var(--flint-typography-body-size);
-    line-height: var(--flint-typography-body-lineHeight);
+    color: var(--poodle-color-text-primary);
+    font-family: var(--poodle-typography-body-family);
+    font-size: var(--poodle-typography-body-size);
+    line-height: var(--poodle-typography-body-lineHeight);
   }
 
   .bulk-action-bar__summary span {
-    color: var(--flint-color-text-secondary);
+    color: var(--poodle-color-text-secondary);
   }
 
   .bulk-action-bar__actions {
     display: flex;
     flex-wrap: wrap;
-    gap: var(--flint-space-inline-sm);
+    gap: var(--poodle-space-inline-sm);
   }
 
   .bulk-action-bar__button {
-    min-height: var(--flint-size-control-height);
-    padding: 0 var(--flint-space-control-x);
-    border: 0.0625rem solid var(--flint-color-border-default);
-    border-radius: var(--flint-radius-control);
-    background: var(--flint-color-background-surface);
-    color: var(--flint-color-text-primary);
+    min-height: var(--poodle-size-control-height);
+    padding: 0 var(--poodle-space-control-x);
+    border: 0.0625rem solid var(--poodle-color-border-default);
+    border-radius: var(--poodle-radius-control);
+    background: var(--poodle-color-background-surface);
+    color: var(--poodle-color-text-primary);
     cursor: pointer;
   }
 
   .bulk-action-bar__button[data-tone="danger"] {
-    border-color: color-mix(in srgb, var(--flint-color-status-danger) 65%, transparent);
-    color: var(--flint-color-status-danger);
+    border-color: color-mix(in srgb, var(--poodle-color-status-danger) 65%, transparent);
+    color: var(--poodle-color-status-danger);
   }
 
   .bulk-action-bar__button:focus-visible {
-    outline: var(--flint-border-width-focus) solid var(--flint-color-accent-focusRing);
+    outline: var(--poodle-border-width-focus) solid var(--poodle-color-accent-focusRing);
     outline-offset: 0.125rem;
   }
 </style>

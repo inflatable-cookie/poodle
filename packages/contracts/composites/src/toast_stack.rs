@@ -1,4 +1,4 @@
-use flint_tokens::semantic;
+use poodle_tokens::semantic;
 
 /// Tone for a toast notification.
 #[derive(Clone, Copy, Debug, Default, Eq, PartialEq)]

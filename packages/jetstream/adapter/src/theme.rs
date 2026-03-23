@@ -1,19 +1,19 @@
-//! Jetstream theme provider — resolves Flint token paths to typed values
+//! Jetstream theme provider — resolves Poodle token paths to typed values
 //! compatible with Jetstream's Vec4 colors and f32 pixel values.
 //!
-//! g08.002: Token bridge between Flint's semantic token system and Jetstream's
+//! g08.002: Token bridge between Poodle's semantic token system and Jetstream's
 //! theme model. Uses the same resolution strategy as GPUI (parse string values
 //! directly, match against typed constants, fall back to safe defaults).
 
 use std::collections::HashMap;
 
-use flint_adapter::ThemeProvider;
-use flint_tokens::typed::{self, ColorValue};
-use flint_tokens::themes::ThemeDefinition;
+use poodle_adapter::ThemeProvider;
+use poodle_tokens::typed::{self, ColorValue};
+use poodle_tokens::themes::ThemeDefinition;
 
 /// Theme provider for the Jetstream rendering adapter.
 ///
-/// Resolves Flint semantic token strings to typed values. Supports runtime
+/// Resolves Poodle semantic token strings to typed values. Supports runtime
 /// theme switching by applying color overrides from a `ThemeDefinition`.
 #[derive(Debug, Clone)]
 pub struct JetstreamThemeProvider {
@@ -26,7 +26,7 @@ pub struct JetstreamThemeProvider {
 
 impl Default for JetstreamThemeProvider {
     fn default() -> Self {
-        Self::from_theme(&flint_tokens::themes::LIGHT)
+        Self::from_theme(&poodle_tokens::themes::LIGHT)
     }
 }
 
@@ -215,7 +215,7 @@ fn match_semantic_color(token: &str) -> Option<ColorValue> {
 
 /// Match semantic space/size/radius tokens to typed values.
 fn match_semantic_space(token: &str) -> Option<f32> {
-    use flint_tokens::typed;
+    use poodle_tokens::typed;
     match token {
         // Size tokens
         t if t.contains("size.control.height") => Some(typed::semantic::SIZE_CONTROL_HEIGHT.0),
@@ -267,9 +267,9 @@ pub fn srgb_to_linear(c: f32) -> f32 {
 }
 
 impl JetstreamThemeProvider {
-    /// Resolve a Flint semantic token to a `glam::Vec4` color in **linear** space.
+    /// Resolve a Poodle semantic token to a `glam::Vec4` color in **linear** space.
     ///
-    /// Flint tokens store colors in sRGB gamma space (matching CSS). This converts
+    /// Poodle tokens store colors in sRGB gamma space (matching CSS). This converts
     /// RGB channels to linear for correct rendering on an sRGB surface. Alpha is
     /// left unchanged.
     pub fn resolve_linear_color(&self, token: &str) -> glam::Vec4 {
@@ -300,7 +300,7 @@ impl JetstreamThemeProvider {
 
 #[cfg(test)]
 mod tests {
-    use flint_adapter::ThemeProvider;
+    use poodle_adapter::ThemeProvider;
     use super::*;
 
     #[test]

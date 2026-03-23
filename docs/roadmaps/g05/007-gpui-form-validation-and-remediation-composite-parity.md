@@ -1,10 +1,10 @@
 # g05.007 GPUI Form, Validation, And Remediation Composite Parity
 
 Status: completed
-Owner: Flint Core
+Owner: Poodle Core
 Updated: 2026-03-12
 Depends on: g05.004, g05.005, g05.006
-Primary repos: `flint`
+Primary repos: `poodle`
 
 ## Goals
 

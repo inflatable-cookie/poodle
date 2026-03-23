@@ -76,29 +76,29 @@
 <style>
   .pin-input {
     display: inline-flex;
-    gap: var(--flint-space-inline-sm);
+    gap: var(--poodle-space-inline-sm);
   }
 
   .pin-input__cell {
-    width: var(--flint-size-control-height);
-    height: calc(var(--flint-size-control-height) + 0.25rem);
+    width: var(--poodle-size-control-height);
+    height: calc(var(--poodle-size-control-height) + 0.25rem);
     padding: 0;
-    border: 0.0625rem solid var(--flint-color-border-default);
-    border-radius: var(--flint-radius-control);
-    background: var(--flint-color-background-surface);
-    color: var(--flint-color-text-primary);
-    font-family: var(--flint-typography-code-family);
+    border: 0.0625rem solid var(--poodle-color-border-default);
+    border-radius: var(--poodle-radius-control);
+    background: var(--poodle-color-background-surface);
+    color: var(--poodle-color-text-primary);
+    font-family: var(--poodle-typography-code-family);
     font-size: 1rem;
     line-height: 1;
     text-align: center;
   }
 
   .pin-input__cell:focus-visible {
-    outline: var(--flint-border-width-focus) solid var(--flint-color-accent-focusRing);
+    outline: var(--poodle-border-width-focus) solid var(--poodle-color-accent-focusRing);
     outline-offset: 0.125rem;
   }
 
   .pin-input__cell:disabled {
-    opacity: var(--flint-state-opacity-disabled);
+    opacity: var(--poodle-state-opacity-disabled);
   }
 </style>

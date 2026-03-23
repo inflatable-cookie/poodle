@@ -4,8 +4,8 @@
 //! and confirm/cancel actions.
 
 use gpui::*;
-use flint_gpui::GpuiThemeProvider;
-use flint_composites::ConfirmActionSpec;
+use poodle_gpui::GpuiThemeProvider;
+use poodle_composites::ConfirmActionSpec;
 use crate::theme_ext::{resolve_color, resolve_radius};
 
 pub struct ConfirmAction {
@@ -92,7 +92,7 @@ impl IntoElement for ConfirmAction {
         let hover_fill = resolve_color(theme, "semantic.color.background.elevated");
 
         let mut cancel_btn = div()
-            .id("flint-confirm-cancel")
+            .id("poodle-confirm-cancel")
             .text_size(px(14.0))
             .text_color(title_color)
             .cursor_pointer()
@@ -108,7 +108,7 @@ impl IntoElement for ConfirmAction {
         }
 
         let mut confirm_btn = div()
-            .id("flint-confirm-ok")
+            .id("poodle-confirm-ok")
             .text_size(px(14.0))
             .text_color(gpui::white())
             .bg(confirm_fill)
@@ -131,7 +131,7 @@ impl IntoElement for ConfirmAction {
 
         // Backdrop overlay — full-viewport scrim with centered dialog
         let backdrop = div()
-            .id("flint-confirm-backdrop")
+            .id("poodle-confirm-backdrop")
             .absolute()
             .inset_0()
             .bg(hsla(0.0, 0.0, 0.0, 0.5))

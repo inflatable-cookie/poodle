@@ -1,10 +1,10 @@
 //! ResizeHandle specimen — draggable resize divider.
 
 use jetstream_runtime::ui_element::*;
-use flint_jetstream::JetstreamThemeProvider;
-use flint_jetstream_components::resize_handle::js_resize_handle;
-use flint_jetstream_components::theme_ext::*;
-use flint_primitives::{Orientation, ResizeHandleSpec};
+use poodle_jetstream::JetstreamThemeProvider;
+use poodle_jetstream_components::resize_handle::js_resize_handle;
+use poodle_jetstream_components::theme_ext::*;
+use poodle_primitives::{Orientation, ResizeHandleSpec};
 
 pub fn render(theme: &JetstreamThemeProvider) -> JsEl {
     let secondary = resolve_color(theme, "semantic.color.text.secondary");

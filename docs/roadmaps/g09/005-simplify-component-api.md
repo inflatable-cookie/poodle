@@ -1,20 +1,20 @@
 # g09.005 Simplify Component API
 
 Status: complete
-Owner: Flint Core
+Owner: Poodle Core
 Depends on: g09.004
 
 ## Context
 
-GPUI components previously used a `Flint` prefix (`FlintButton`, `FlintCheckbox`)
+GPUI components previously used a `Poodle` prefix (`PoodleButton`, `PoodleCheckbox`)
 and required constructing a separate `ButtonSpec` before passing it to the
 component. The API should be a single builder chain from one import.
 
 ## Completed Actions
 
-### Drop Flint prefix (done in g08)
+### Drop Poodle prefix (done in g08)
 
-- [x] Renamed all component structs: `FlintButton` → `Button`, etc.
+- [x] Renamed all component structs: `PoodleButton` → `Button`, etc.
 - [x] Updated `lib.rs` exports
 - [x] Updated all specimen files
 
@@ -29,7 +29,7 @@ component. The API should be a single builder chain from one import.
 ### Re-export common types
 
 - [x] `ButtonVariant`, `ButtonTone`, `ControlSize`, `IconSize`, `IconSpec`,
-      `StatusTone`, `ValidationState` re-exported from `flint-gpui-components`
+      `StatusTone`, `ValidationState` re-exported from `poodle-gpui-components`
 
 ### Subdirectory organization
 
@@ -38,19 +38,19 @@ component. The API should be a single builder chain from one import.
 
 ### Verify
 
-- [x] `cargo check -p flint-gpui-preview` — clean
-- [x] `cargo test -p flint-primitives` — 32/32 pass
-- [x] `cargo test -p flint-composites` — 9/9 pass
+- [x] `cargo check -p poodle-gpui-preview` — clean
+- [x] `cargo test -p poodle-primitives` — 32/32 pass
+- [x] `cargo test -p poodle-composites` — 9/9 pass
 - [x] Jetstream components compile clean
 
 ## API Shape
 
 Before:
 ```rust
-use flint_gpui_primitives::{ButtonSpec, ButtonVariant};
-use flint_gpui_components::FlintButton;
+use poodle_gpui_primitives::{ButtonSpec, ButtonVariant};
+use poodle_gpui_components::PoodleButton;
 
-FlintButton::new(
+PoodleButton::new(
     ButtonSpec::new().with_variant(ButtonVariant::Primary).with_label("Save"),
     &theme,
 ).on_click(handler)
@@ -58,7 +58,7 @@ FlintButton::new(
 
 After:
 ```rust
-use flint_gpui_components::{Button, ButtonVariant};
+use poodle_gpui_components::{Button, ButtonVariant};
 
 Button::new(&theme)
     .variant(ButtonVariant::Primary)

@@ -21,11 +21,11 @@
 
 ## Bridge Posture
 
-- Flint remains the canonical home of tokens and contracts
+- Poodle remains the canonical home of tokens and contracts
 - Underlay remains the public API surface for Underlay apps
 - the bridge package owns alias maps, theme translation, wrapper-preservation
   rules, and migration pressure documentation
-- Underlay apps should not need direct Flint imports, Flint token names, or Flint
+- Underlay apps should not need direct Poodle imports, Poodle token names, or Poodle
   component names
 
 ## Accessibility

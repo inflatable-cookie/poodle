@@ -1,8 +1,8 @@
 //! Meter — Jetstream meter component backed by MeterSpec.
 
 use jetstream_runtime::ui_element::{self, JsEl};
-use flint_jetstream::JetstreamThemeProvider;
-use flint_primitives::MeterSpec;
+use poodle_jetstream::JetstreamThemeProvider;
+use poodle_primitives::MeterSpec;
 
 use crate::theme_ext::resolve_color;
 

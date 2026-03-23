@@ -12,7 +12,7 @@ What is being studied in this dossier (specific component, application, pattern)
 
 ## Context
 
-Background on why this specimen is relevant to Flint.
+Background on why this specimen is relevant to Poodle.
 
 ---
 
@@ -36,13 +36,13 @@ What are the inputs/outputs?
 
 What patterns does this demonstrate?
 What works well?
-What would Flint do differently?
+What would Poodle do differently?
 
 ---
 
-## Lessons for Flint
+## Lessons for Poodle
 
-Specific takeaways applicable to Flint's design.
+Specific takeaways applicable to Poodle's design.
 
 ---
 

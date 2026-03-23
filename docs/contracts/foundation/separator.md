@@ -106,20 +106,20 @@ No internal state.
 
 | Var | Default Value |
 |-----|---------------|
-| `--flint-separator-color` | `color-mix(in srgb, var(--flint-color-border-subtle) 72%, transparent)` |
+| `--poodle-separator-color` | `color-mix(in srgb, var(--poodle-color-border-subtle) 72%, transparent)` |
 
 ### Root (.separator) — base styles
 
 | Property | Value |
 |----------|-------|
 | `flex` | `0 0 auto` |
-| `background` | `var(--flint-separator-color)` |
+| `background` | `var(--poodle-separator-color)` |
 
 ### Tone: default — .separator[data-tone="default"]
 
 | Var | Value |
 |-----|-------|
-| `--flint-separator-color` | `var(--flint-color-border-default)` |
+| `--poodle-separator-color` | `var(--poodle-color-border-default)` |
 
 ### Orientation: horizontal — .separator[data-orientation="horizontal"]
 
@@ -164,7 +164,7 @@ No internal state.
 
 ## 10. GPUI Notes
 
-- expected crate/module surface: `flint_gpui::components::separator`
+- expected crate/module surface: `poodle_gpui::components::separator`
 - Spec struct: `SeparatorSpec` in primitives crate
 - GPUI implementation must distinguish decorative rules from semantic
   separators in the native accessibility tree

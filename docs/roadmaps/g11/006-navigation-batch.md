@@ -1,7 +1,7 @@
 # g11.006 Navigation Batch
 
 Status: planned
-Owner: Flint Core
+Owner: Poodle Core
 Depends on: contract audit
 
 ## Components
@@ -15,7 +15,7 @@ context_menu
       uses `Tabs.svelte` for both tab variants). GPUI has separate `tab_strip.rs`.
       Verify this is the intended split or if tab_strip should be merged into tabs.
 - [ ] `breadcrumbs` — lives in `primitives/` in GPUI (moved in g11.001), verify
-      Rust spec `BreadcrumbsSpec` is in `flint-primitives` not `flint-composites`
+      Rust spec `BreadcrumbsSpec` is in `poodle-primitives` not `poodle-composites`
 - [ ] `pagination` — verify Rust spec `PaginationSpec` is complete against contract
 
 ## Per-Component Compliance

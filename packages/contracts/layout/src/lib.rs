@@ -1,4 +1,4 @@
-//! Renderer-agnostic layout intent types for Flint.
+//! Renderer-agnostic layout intent types for Poodle.
 //!
 //! These types describe layout intent without committing to a specific rendering
 //! target. Both GPUI (CSS-like flexbox) and Jetstream (`UiStyle` with `Direction`,

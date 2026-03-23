@@ -1,5 +1,5 @@
-use flint_primitives::ValidationState;
-use flint_tokens::semantic;
+use poodle_primitives::ValidationState;
+use poodle_tokens::semantic;
 
 use crate::types::{AnnouncementMode, ValidationSummaryEntry};
 

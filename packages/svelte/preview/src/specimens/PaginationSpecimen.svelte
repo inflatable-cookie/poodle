@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { Pagination, Eyebrow } from "@flint/svelte-primitives";
+  import { Pagination, Eyebrow } from "@poodle/svelte-primitives";
 
   let page1 = 1;
   let page2 = 5;
@@ -51,6 +51,6 @@
   .specimen__group p {
     margin: 0;
     font-size: 0.875rem;
-    color: var(--flint-color-text-secondary);
+    color: var(--poodle-color-text-secondary);
   }
 </style>

@@ -51,16 +51,16 @@
     justify-content: center;
     padding: 0.125rem;
     border: 0;
-    border-radius: var(--flint-radius-sm, 0.25rem);
+    border-radius: var(--poodle-radius-sm, 0.25rem);
     background: transparent;
-    color: var(--flint-color-text-muted);
+    color: var(--poodle-color-text-muted);
     cursor: pointer;
     line-height: 1;
   }
 
   .collapse-toggle:hover {
-    background: var(--flint-color-surface-hover);
-    color: var(--flint-color-text-default);
+    background: var(--poodle-color-surface-hover);
+    color: var(--poodle-color-text-default);
   }
 
   .collapse-toggle:disabled {
@@ -69,7 +69,7 @@
   }
 
   .collapse-toggle:focus-visible {
-    outline: var(--flint-border-width-focus) solid var(--flint-color-accent-focusRing);
+    outline: var(--poodle-border-width-focus) solid var(--poodle-color-accent-focusRing);
     outline-offset: 0.0625rem;
   }
 </style>

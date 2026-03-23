@@ -1,19 +1,19 @@
 # g09.002 Merge GPUI-Only Specs into Contracts Primitives
 
 Status: complete
-Owner: Flint Core
+Owner: Poodle Core
 Depends on: g09.001
 
 ## Context
 
-`flint-gpui-primitives` has 77 modules; `flint-primitives` has 65. The 12 extra
+`poodle-gpui-primitives` has 77 modules; `poodle-primitives` has 65. The 12 extra
 modules in GPUI need to move into the shared crate. Additionally, some specs
 that exist in both crates have diverged — GPUI versions added hardcoded pixel
 helpers that belong in the renderer, not the spec.
 
 ## Missing Modules (12)
 
-These exist in `flint-gpui-primitives` but not `flint-primitives`:
+These exist in `poodle-gpui-primitives` but not `poodle-primitives`:
 
 1. `alert_dialog`
 2. `breadcrumbs`
@@ -42,20 +42,20 @@ These exist in `flint-gpui-primitives` but not `flint-primitives`:
 ## Actions
 
 - [x] Copy 12 missing module files into `packages/contracts/primitives/src/`
-- [x] Token imports already use `flint_tokens` (files were from post-g09.001 GPUI)
+- [x] Token imports already use `poodle_tokens` (files were from post-g09.001 GPUI)
 - [x] Register modules in `packages/contracts/primitives/src/lib.rs`
 - [x] For each diverged spec:
   - Added `chevron` field to ButtonSpec
   - Fixed `icon_size_token()` to always return `SIZE_ICON_SM`
   - Removed hardcoded pixel helpers from list_card and pagination
 - [x] Added `TabVariant` enum to contracts `types.rs`
-- [x] `cargo check -p flint-primitives` — passes
-- [x] `cargo test -p flint-primitives` — 32 tests pass
-- [x] `cargo check -p flint-jetstream-components` — passes (no regression)
+- [x] `cargo check -p poodle-primitives` — passes
+- [x] `cargo test -p poodle-primitives` — 32 tests pass
+- [x] `cargo check -p poodle-jetstream-components` — passes (no regression)
 
 ## Acceptance Criteria
 
-- [x] `flint-primitives` has all 77 modules
+- [x] `poodle-primitives` has all 77 modules
 - [x] No hardcoded pixel values in shared spec methods
 - [x] Token methods return token path strings, not pixel values
 - [x] Jetstream crates still compile

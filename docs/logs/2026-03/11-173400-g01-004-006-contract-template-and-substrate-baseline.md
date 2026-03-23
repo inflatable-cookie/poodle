@@ -28,7 +28,7 @@
   choosing the first workstation example, which is why the seed composite is
   `PanelSurface` rather than a product-only composite
 - kept the shell contract generic so it supports Aura/Spark first without
-  collapsing Flint into Loophole-specific DAW widgets
+  collapsing Poodle into Loophole-specific DAW widgets
 - kept the Svelte substrate policy explicit that Bits may accelerate behavior
   but may not become the public contract
 - kept the GPUI substrate policy explicit that generated Rust token artifacts,

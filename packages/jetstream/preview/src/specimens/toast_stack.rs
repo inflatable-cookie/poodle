@@ -1,10 +1,10 @@
 //! ToastStack specimen — notification toast stack.
 
 use jetstream_runtime::ui_element::*;
-use flint_jetstream::JetstreamThemeProvider;
-use flint_jetstream_components::toast_stack::js_toast_stack;
-use flint_jetstream_components::theme_ext::*;
-use flint_composites::{Toast, ToastStackSpec, ToastTone};
+use poodle_jetstream::JetstreamThemeProvider;
+use poodle_jetstream_components::toast_stack::js_toast_stack;
+use poodle_jetstream_components::theme_ext::*;
+use poodle_composites::{Toast, ToastStackSpec, ToastTone};
 
 pub fn render(theme: &JetstreamThemeProvider) -> JsEl {
     let secondary = resolve_color(theme, "semantic.color.text.secondary");

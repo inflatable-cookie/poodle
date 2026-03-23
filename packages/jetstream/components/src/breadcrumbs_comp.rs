@@ -1,8 +1,8 @@
 //! Breadcrumbs — Jetstream breadcrumb navigation backed by BreadcrumbsSpec.
 
 use jetstream_runtime::ui_element::{self, JsEl};
-use flint_jetstream::JetstreamThemeProvider;
-use flint_primitives::BreadcrumbsSpec;
+use poodle_jetstream::JetstreamThemeProvider;
+use poodle_primitives::BreadcrumbsSpec;
 
 use crate::theme_ext::resolve_color;
 

@@ -129,11 +129,11 @@ Updated: 2026-03-15
 | `width` | `2.25rem` |
 | `height` | `2.5rem` |
 | `padding` | `0` |
-| `border` | `0.0625rem solid var(--flint-color-border-default)` |
-| `border-radius` | `var(--flint-radius-control)` |
-| `background` | `var(--flint-color-background-surface)` |
-| `color` | `var(--flint-color-text-primary)` |
-| `font-family` | `var(--flint-typography-code-family)` |
+| `border` | `0.0625rem solid var(--poodle-color-border-default)` |
+| `border-radius` | `var(--poodle-radius-control)` |
+| `background` | `var(--poodle-color-background-surface)` |
+| `color` | `var(--poodle-color-text-primary)` |
+| `font-family` | `var(--poodle-typography-code-family)` |
 | `font-size` | `1rem` |
 | `line-height` | `1` |
 | `text-align` | `center` |
@@ -142,14 +142,14 @@ Updated: 2026-03-15
 
 | Property | Value |
 |----------|-------|
-| `outline` | `var(--flint-border-width-focus) solid var(--flint-color-accent-focusRing)` |
+| `outline` | `var(--poodle-border-width-focus) solid var(--poodle-color-accent-focusRing)` |
 | `outline-offset` | `0.125rem` |
 
 ### Cell — disabled
 
 | Property | Value |
 |----------|-------|
-| `opacity` | `var(--flint-state-opacity-disabled)` |
+| `opacity` | `var(--poodle-state-opacity-disabled)` |
 
 ## 9. Svelte Notes
 
@@ -162,7 +162,7 @@ Updated: 2026-03-15
 
 ## 10. GPUI Notes
 
-- expected crate/module surface: `flint_gpui::primitives::pin_input`
+- expected crate/module surface: `poodle_gpui::primitives::pin_input`
 - GPUI must implement per-cell focus traversal with auto-advance semantics
 - Masking in GPUI uses platform-native password character rendering
 - The group must suppress global keyboard shortcuts while any cell is focused to allow digit entry

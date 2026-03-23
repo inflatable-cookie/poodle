@@ -9,8 +9,8 @@ This document tracks which research outputs are intended to inform which archite
 
 | Research Document | Target Architecture | Status | Translation Memo |
 |-------------------|---------------------|--------|------------------|
-| [hub-gpui](./source-hubs/hub-gpui.md) | [architecture/001-flint-system-shape.md](../architecture/001-flint-system-shape.md) | 🟢 complete | [tm-token-system](./translation-memos/tm-token-system.md) |
-| [hub-bits](./source-hubs/hub-bits.md) | [architecture/001-flint-system-shape.md](../architecture/001-flint-system-shape.md) | 🟢 complete | [tm-svelte-substrate](./translation-memos/tm-svelte-substrate.md) |
+| [hub-gpui](./source-hubs/hub-gpui.md) | [architecture/001-poodle-system-shape.md](../architecture/001-poodle-system-shape.md) | 🟢 complete | [tm-token-system](./translation-memos/tm-token-system.md) |
+| [hub-bits](./source-hubs/hub-bits.md) | [architecture/001-poodle-system-shape.md](../architecture/001-poodle-system-shape.md) | 🟢 complete | [tm-svelte-substrate](./translation-memos/tm-svelte-substrate.md) |
 | [tk-design-token-systems](./value-tracks/tk-design-token-systems.md) | Token system design | 🟢 complete | [tm-token-system](./translation-memos/tm-token-system.md) |
 | [tk-cross-framework-contracts](./value-tracks/tk-cross-framework-contracts.md) | Contract template | 🟢 complete | [tm-contract-template](./translation-memos/tm-contract-template.md) |
 
@@ -37,5 +37,5 @@ This documents which architecture decisions depend on research.
 ## Next Task
 
 1. Review translation memos (all three)
-2. Update architecture/001-flint-system-shape.md with research decisions
+2. Update architecture/001-poodle-system-shape.md with research decisions
 3. Begin g01.002 token schema implementation

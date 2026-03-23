@@ -3,8 +3,8 @@
 use std::time::{SystemTime, UNIX_EPOCH};
 
 use gpui::*;
-use flint_gpui::GpuiThemeProvider;
-use flint_primitives::TimeAgoSpec;
+use poodle_gpui::GpuiThemeProvider;
+use poodle_primitives::TimeAgoSpec;
 
 use crate::theme_ext::resolve_color;
 

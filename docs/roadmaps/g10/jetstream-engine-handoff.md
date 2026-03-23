@@ -1,12 +1,12 @@
-# Jetstream Engine Feature Handoff — Flint Component Parity
+# Jetstream Engine Feature Handoff — Poodle Component Parity
 
 ## Context
 
-Flint has 86 Jetstream component implementations that compile and resolve tokens
+Poodle has 86 Jetstream component implementations that compile and resolve tokens
 from the theme system. However, many components are currently **structurally
 incomplete** because the Jetstream engine (`jetstream-runtime`) lacks rendering
 features that GPUI provides natively. This document specifies exactly what the
-engine needs so that every Flint component can render with full visual fidelity.
+engine needs so that every Poodle component can render with full visual fidelity.
 
 The GPUI implementation is the reference. If GPUI can do it, Jetstream must
 be able to do it.
@@ -127,7 +127,7 @@ impl Color {
 
 ### 4. Gradient Backgrounds
 
-**Used by:** Not directly used by Flint components currently, but the engine already
+**Used by:** Not directly used by Poodle components currently, but the engine already
 supports linear and radial gradients in `UiDrawCommand`. The JsEl builder just
 doesn't expose them.
 
@@ -138,7 +138,7 @@ fn bg_gradient_linear(angle_deg: f32, stops: &[(Color, f32)]) -> Self
 fn bg_gradient_radial(center: [f32; 2], radius: f32, stops: &[(Color, f32)]) -> Self
 ```
 
-**Priority:** LOW — no immediate Flint use, but useful for future components.
+**Priority:** LOW — no immediate Poodle use, but useful for future components.
 
 ---
 
@@ -327,5 +327,5 @@ All engine changes are in `jetstream/crates/jetstream-runtime/`:
 | `src/ui_element.rs` | New JsEl builder methods: `icon()`, `image()`, `overlay()`, `on_drag()`, `on_pointer_enter/leave()`, `on_scroll()`, per-side border colors |
 | `src/game_ui.rs` | SVG rasterizer integration, overlay rendering pass, drag state machine, pointer tracking, image texture pipeline, color mix utility |
 
-Flint component files to update after engine features land:
+Poodle component files to update after engine features land:
 - `packages/jetstream/components/src/` — all 86 components, updating icon rendering from text glyphs to real SVG icons, adding proper overlay rendering for dropdowns/dialogs, implementing drag for sliders/resize

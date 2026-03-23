@@ -5,20 +5,20 @@ Updated: 2026-03-14
 
 ## Objective
 
-Create the `flint-gpui` adapter crate that implements the renderer adapter traits
+Create the `poodle-gpui` adapter crate that implements the renderer adapter traits
 from g06.007. Set up GPUI theme integration using g06.003's typed token values.
 Verify that GPUI's styling API can consume resolved style descriptors from
 g06.006.
 
 ## Deliverables
 
-### New Crate: `flint-gpui`
+### New Crate: `poodle-gpui`
 
 | Property | Value |
 |----------|-------|
 | Path | `packages/gpui/adapter/` |
-| Crate name | `flint-gpui` |
-| Dependencies | `flint-adapter`, `flint-events`, `flint-layout`, `flint-primitives`, `flint-composites`, `flint-workstation`, `flint-style`, `flint-tokens` |
+| Crate name | `poodle-gpui` |
+| Dependencies | `poodle-adapter`, `poodle-events`, `poodle-layout`, `poodle-primitives`, `poodle-composites`, `poodle-workstation`, `poodle-style`, `poodle-tokens` |
 
 ### Modules
 
@@ -34,8 +34,8 @@ The `GpuiThemeProvider` resolves token strings (the `&'static str` values
 emitted by spec `resolved_*_token()` methods) to typed values:
 
 1. **Direct parsing**: Hex colors (`#RRGGBB`), rgba strings, rem/px dimensions
-2. **Semantic lookup**: String constants matched against `flint_tokens::semantic`
-   are mapped to their typed equivalents from `flint_tokens::typed::semantic`
+2. **Semantic lookup**: String constants matched against `poodle_tokens::semantic`
+   are mapped to their typed equivalents from `poodle_tokens::typed::semantic`
 3. **Safe fallback**: Unknown tokens return neutral defaults (black color, 0.0
    size, 1.0 opacity)
 
@@ -61,7 +61,7 @@ when GPUI runtime dependency is added):
 
 ## Verification
 
-- [x] `flint-gpui` crate compiles with all 8 contract crate dependencies
+- [x] `poodle-gpui` crate compiles with all 8 contract crate dependencies
 - [x] `GpuiThemeProvider` implements `ThemeProvider` trait
 - [x] Theme resolves all 19 semantic color tokens to typed `ColorValue`
 - [x] Theme resolves all 17 semantic space/size tokens to `f32` pixels

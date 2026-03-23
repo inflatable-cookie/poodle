@@ -1,7 +1,7 @@
 <script lang="ts">
-  import { CardRadioGroup } from "@flint/svelte-composites";
-  import { Eyebrow } from "@flint/svelte-primitives";
-  import type { CardRadioItem } from "@flint/svelte-composites";
+  import { CardRadioGroup } from "@poodle/svelte-composites";
+  import { Eyebrow } from "@poodle/svelte-primitives";
+  import type { CardRadioItem } from "@poodle/svelte-composites";
 
   let planValue: string | null = "pro";
   let sizeValue: string | null = null;

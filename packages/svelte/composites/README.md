@@ -1,6 +1,6 @@
-# Flint Svelte Composites
+# Poodle Svelte Composites
 
-First Svelte composite implementation surface for contract-backed Flint browse
+First Svelte composite implementation surface for contract-backed Poodle browse
 and data components.
 
 ## Public Surface
@@ -52,8 +52,8 @@ and data components.
 - `VideoPlayer`
 - `parseWorkspaceLayoutSnapshot`
 - `serializeWorkspaceLayoutSnapshot`
-- root import: `@flint/svelte-composites`
-- type-only import: `@flint/svelte-composites/types`
+- root import: `@poodle/svelte-composites`
+- type-only import: `@poodle/svelte-composites/types`
 
 ## Stability Notes
 

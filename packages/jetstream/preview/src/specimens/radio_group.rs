@@ -1,10 +1,10 @@
 //! RadioGroup specimen — radio buttons in horizontal and vertical layouts.
 
 use jetstream_runtime::ui_element::*;
-use flint_jetstream::JetstreamThemeProvider;
-use flint_jetstream_components::radio_group::js_radio_group;
-use flint_jetstream_components::theme_ext::*;
-use flint_primitives::{ChoiceOption, Orientation, RadioGroupSpec};
+use poodle_jetstream::JetstreamThemeProvider;
+use poodle_jetstream_components::radio_group::js_radio_group;
+use poodle_jetstream_components::theme_ext::*;
+use poodle_primitives::{ChoiceOption, Orientation, RadioGroupSpec};
 
 pub fn render(theme: &JetstreamThemeProvider) -> JsEl {
     let secondary = resolve_color(theme, "semantic.color.text.secondary");

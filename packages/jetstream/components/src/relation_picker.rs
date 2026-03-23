@@ -1,7 +1,7 @@
 //! RelationPicker — Jetstream relation picker backed by RelationPickerSpec.
 use jetstream_runtime::ui_element::{self, JsEl};
-use flint_jetstream::JetstreamThemeProvider;
-use flint_composites::RelationPickerSpec;
+use poodle_jetstream::JetstreamThemeProvider;
+use poodle_composites::RelationPickerSpec;
 use crate::theme_ext::resolve_color;
 
 pub fn js_relation_picker(spec: &RelationPickerSpec, theme: &JetstreamThemeProvider) -> JsEl {

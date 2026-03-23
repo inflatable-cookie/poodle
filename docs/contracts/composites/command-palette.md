@@ -139,15 +139,15 @@ Uses `CommandActionItem` and `DiscoveryState` from `ActionDiscoveryPanel`.
 | `left` | `50%` |
 | `display` | `grid` |
 | `grid-template-rows` | `auto auto auto minmax(0, 1fr)` |
-| `gap` | `var(--flint-space-stack-md)` |
+| `gap` | `var(--poodle-space-stack-md)` |
 | `width` | `min(45rem, calc(100vw - 2rem))` |
 | `max-height` | `min(78vh, 52.5rem)` |
 | `min-height` | `0` |
-| `padding` | `var(--flint-space-panel-y) var(--flint-space-panel-x)` |
-| `border` | `0.0625rem solid color-mix(in srgb, var(--flint-color-border-default) 42%, transparent)` |
-| `border-radius` | `calc(var(--flint-radius-surface) + 0.125rem)` |
-| `background` | `color-mix(in srgb, var(--flint-color-background-elevated) 98%, transparent)` |
-| `box-shadow` | `var(--flint-elevation-dialog)` |
+| `padding` | `var(--poodle-space-panel-y) var(--poodle-space-panel-x)` |
+| `border` | `0.0625rem solid color-mix(in srgb, var(--poodle-color-border-default) 42%, transparent)` |
+| `border-radius` | `calc(var(--poodle-radius-surface) + 0.125rem)` |
+| `background` | `color-mix(in srgb, var(--poodle-color-background-elevated) 98%, transparent)` |
+| `box-shadow` | `var(--poodle-elevation-dialog)` |
 | `overflow` | `hidden` |
 | `overscroll-behavior` | `contain` |
 | `transform` | `translate(-50%, -50%)` |
@@ -159,7 +159,7 @@ Uses `CommandActionItem` and `DiscoveryState` from `ActionDiscoveryPanel`.
 |----------|-------|
 | `display` | `grid` |
 | `grid-template-columns` | `minmax(0, 1fr) auto` |
-| `gap` | `var(--flint-space-inline-md)` |
+| `gap` | `var(--poodle-space-inline-md)` |
 | `align-items` | `start` |
 
 #### `.command-palette__header h3`, `.command-palette__header p`
@@ -179,7 +179,7 @@ Uses `CommandActionItem` and `DiscoveryState` from `ActionDiscoveryPanel`.
 
 | Property | Value |
 |----------|-------|
-| `color` | `var(--flint-color-text-secondary)` |
+| `color` | `var(--poodle-color-text-secondary)` |
 | `font-size` | `0.8125rem` |
 | `line-height` | `1.5` |
 
@@ -188,7 +188,7 @@ Uses `CommandActionItem` and `DiscoveryState` from `ActionDiscoveryPanel`.
 | Property | Value |
 |----------|-------|
 | `display` | `flex` |
-| `gap` | `var(--flint-space-inline-sm)` |
+| `gap` | `var(--poodle-space-inline-sm)` |
 | `align-items` | `center` |
 
 #### `.command-palette__hint`
@@ -200,10 +200,10 @@ Uses `CommandActionItem` and `DiscoveryState` from `ActionDiscoveryPanel`.
 | `justify-content` | `center` |
 | `min-height` | `1.5rem` |
 | `padding` | `0 0.5rem` |
-| `border-radius` | `var(--flint-radius-control)` |
-| `background` | `color-mix(in srgb, var(--flint-color-background-surface) 76%, transparent)` |
-| `color` | `var(--flint-color-text-secondary)` |
-| `font-family` | `var(--flint-typography-code-family)` |
+| `border-radius` | `var(--poodle-radius-control)` |
+| `background` | `color-mix(in srgb, var(--poodle-color-background-surface) 76%, transparent)` |
+| `color` | `var(--poodle-color-text-secondary)` |
+| `font-family` | `var(--poodle-typography-code-family)` |
 | `font-size` | `0.75rem` |
 
 #### `.command-palette__close`
@@ -217,9 +217,9 @@ Uses `CommandActionItem` and `DiscoveryState` from `ActionDiscoveryPanel`.
 | `height` | `1.75rem` |
 | `padding` | `0` |
 | `border` | `0` |
-| `border-radius` | `calc(var(--flint-radius-control) - 0.0625rem)` |
-| `background` | `color-mix(in srgb, var(--flint-color-background-surface) 62%, transparent)` |
-| `color` | `var(--flint-color-text-secondary)` |
+| `border-radius` | `calc(var(--poodle-radius-control) - 0.0625rem)` |
+| `background` | `color-mix(in srgb, var(--poodle-color-background-surface) 62%, transparent)` |
+| `color` | `var(--poodle-color-text-secondary)` |
 | `cursor` | `pointer` |
 | `font` | `inherit` |
 
@@ -227,14 +227,14 @@ Uses `CommandActionItem` and `DiscoveryState` from `ActionDiscoveryPanel`.
 
 | Property | Value |
 |----------|-------|
-| `background` | `color-mix(in srgb, var(--flint-color-background-surface) 84%, transparent)` |
-| `color` | `var(--flint-color-text-primary)` |
+| `background` | `color-mix(in srgb, var(--poodle-color-background-surface) 84%, transparent)` |
+| `color` | `var(--poodle-color-text-primary)` |
 
 #### `.command-palette__close:focus-visible`
 
 | Property | Value |
 |----------|-------|
-| `outline` | `var(--flint-border-width-focus) solid var(--flint-color-accent-focusRing)` |
+| `outline` | `var(--poodle-border-width-focus) solid var(--poodle-color-accent-focusRing)` |
 | `outline-offset` | `0.125rem` |
 
 #### `.command-palette__status`
@@ -242,7 +242,7 @@ Uses `CommandActionItem` and `DiscoveryState` from `ActionDiscoveryPanel`.
 | Property | Value |
 |----------|-------|
 | `margin` | `0` |
-| `color` | `var(--flint-color-text-secondary)` |
+| `color` | `var(--poodle-color-text-secondary)` |
 | `font-size` | `0.8125rem` |
 | `line-height` | `1.5` |
 
@@ -250,7 +250,7 @@ Uses `CommandActionItem` and `DiscoveryState` from `ActionDiscoveryPanel`.
 
 | Property | Value |
 |----------|-------|
-| `border-color` | `color-mix(in srgb, var(--flint-color-border-default) 24%, transparent)` |
+| `border-color` | `color-mix(in srgb, var(--poodle-color-border-default) 24%, transparent)` |
 | `box-shadow` | `0 1.125rem 2.75rem rgba(49, 66, 85, 0.1), inset 0 0.0625rem 0 rgba(255, 255, 255, 0.72)` |
 
 ### Responsive Breakpoint: `max-width: 45rem`

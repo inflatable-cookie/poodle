@@ -13,7 +13,7 @@ the shared spec layer.
 
 ### Demo app module (demo_app.rs)
 
-Public module added to `flint-gpui` crate with:
+Public module added to `poodle-gpui` crate with:
 
 - `DemoScreen` struct tracking rendered element handles per screen
 - `render_all_screens()` function assembling all 6 screens

@@ -3,8 +3,8 @@
 //! Delegates rendering to TextInput via `as_text_input_spec()`.
 
 use gpui::*;
-use flint_gpui::GpuiThemeProvider;
-use flint_primitives::{SearchFieldSpec, ValidationState};
+use poodle_gpui::GpuiThemeProvider;
+use poodle_primitives::{SearchFieldSpec, ValidationState};
 
 use super::text_input::TextInput;
 

@@ -1,8 +1,8 @@
 //! Calendar — real GPUI component backed by CalendarSpec.
 
 use gpui::*;
-use flint_gpui::GpuiThemeProvider;
-use flint_primitives::{CalendarSpec, CalendarWeekStart, IconSize, IconSpec};
+use poodle_gpui::GpuiThemeProvider;
+use poodle_primitives::{CalendarSpec, CalendarWeekStart, IconSize, IconSpec};
 
 use super::icon::Icon;
 use crate::theme_ext::{color_mix, resolve_color, resolve_opacity, resolve_radius};
@@ -191,14 +191,14 @@ impl IntoElement for Calendar {
 
         // Determine week-start offset (Sunday = 0, Monday = 1)
         let week_start_offset: u32 = match spec.week_starts_on {
-            flint_primitives::CalendarWeekStart::Monday => 1,
+            poodle_primitives::CalendarWeekStart::Monday => 1,
             _ => 0,
         };
 
         let id_str = if let Some(ref suffix) = self.id_suffix {
-            format!("flint-calendar-{}", suffix)
+            format!("poodle-calendar-{}", suffix)
         } else {
-            "flint-calendar".to_string()
+            "poodle-calendar".to_string()
         };
 
         let month_names = [
@@ -255,7 +255,7 @@ impl IntoElement for Calendar {
         let nav_btn_hover = color_mix(elevated_bg, surface_bg, 0.84);
 
         let mut prev_btn = div()
-            .id("flint-cal-prev")
+            .id("poodle-cal-prev")
             .w(px(28.0))
             .h(px(28.0))
             .flex()
@@ -281,7 +281,7 @@ impl IntoElement for Calendar {
         }
 
         let mut next_btn = div()
-            .id("flint-cal-next")
+            .id("poodle-cal-next")
             .w(px(28.0))
             .h(px(28.0))
             .flex()
@@ -458,7 +458,7 @@ impl IntoElement for Calendar {
                     let is_selected = selected_day == Some(day_num);
                     let is_today = today_day == Some(day_num);
 
-                    let cell_id = SharedString::from(format!("flint-cal-day-{}", day_num));
+                    let cell_id = SharedString::from(format!("poodle-cal-day-{}", day_num));
                     let mut cell = div()
                         .id(cell_id)
                         .focusable()

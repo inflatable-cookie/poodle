@@ -3,11 +3,11 @@
   "configVersion": 1,
   "workspaces": {
     "": {
-      "name": "@flint/install-smoke",
+      "name": "@poodle/install-smoke",
       "dependencies": {
-        "@flint/svelte-composites": "file:../composites",
-        "@flint/svelte-primitives": "file:../primitives",
-        "@flint/svelte-tokens": "file:../tokens",
+        "@poodle/svelte-composites": "file:../composites",
+        "@poodle/svelte-primitives": "file:../primitives",
+        "@poodle/svelte-tokens": "file:../tokens",
         "svelte": "^5.38.6",
       },
       "devDependencies": {
@@ -81,11 +81,11 @@
 
     "@jridgewell/trace-mapping": ["@jridgewell/trace-mapping@0.3.31", "", { "dependencies": { "@jridgewell/resolve-uri": "^3.1.0", "@jridgewell/sourcemap-codec": "^1.4.14" } }, "sha512-zzNR+SdQSDJzc8joaeP8QQoCQr8NuYx2dIIytl1QeBEZHJ9uW6hebsrYgbz8hJwUQao3TWCMtmfV8Nu1twOLAw=="],
 
-    "@flint/svelte-composites": ["@flint/svelte-composites@file:../composites", { "peerDependencies": { "@flint/svelte-primitives": "0.0.0", "@flint/svelte-tokens": "0.0.0", "svelte": "^5.38.6" }, "optionalPeers": ["@flint/svelte-primitives", "@flint/svelte-tokens"] }],
+    "@poodle/svelte-composites": ["@poodle/svelte-composites@file:../composites", { "peerDependencies": { "@poodle/svelte-primitives": "0.0.0", "@poodle/svelte-tokens": "0.0.0", "svelte": "^5.38.6" }, "optionalPeers": ["@poodle/svelte-primitives", "@poodle/svelte-tokens"] }],
 
-    "@flint/svelte-primitives": ["@flint/svelte-primitives@file:../primitives", { "peerDependencies": { "@flint/svelte-tokens": "0.0.0", "svelte": "^5.38.6" }, "optionalPeers": ["@flint/svelte-tokens"] }],
+    "@poodle/svelte-primitives": ["@poodle/svelte-primitives@file:../primitives", { "peerDependencies": { "@poodle/svelte-tokens": "0.0.0", "svelte": "^5.38.6" }, "optionalPeers": ["@poodle/svelte-tokens"] }],
 
-    "@flint/svelte-tokens": ["@flint/svelte-tokens@file:../tokens", {}],
+    "@poodle/svelte-tokens": ["@poodle/svelte-tokens@file:../tokens", {}],
 
     "@rollup/rollup-android-arm-eabi": ["@rollup/rollup-android-arm-eabi@4.60.0", "", { "os": "android", "cpu": "arm" }, "sha512-WOhNW9K8bR3kf4zLxbfg6Pxu2ybOUbB2AjMDHSQx86LIF4rH4Ft7vmMwNt0loO0eonglSNy4cpD3MKXXKQu0/A=="],
 

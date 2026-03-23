@@ -6,7 +6,7 @@ Depends on: `021-public-package-api-stability-and-parity-debt-baseline.md`, `022
 
 ## Purpose
 
-Freeze the minimum operational posture Flint should enforce for proposing,
+Freeze the minimum operational posture Poodle should enforce for proposing,
 classifying, deprecating, and removing changes while all public-intent packages
 remain on the preview channel.
 
@@ -51,7 +51,7 @@ The current generation still has only two active channels:
 - `internal`
 
 `stable` exists only as a reserved future channel and is explicitly disabled in
-the current operations baseline. Flint may not imply stable release operations
+the current operations baseline. Poodle may not imply stable release operations
 until a later milestone promotes that channel deliberately.
 
 ## Deprecation Rule
@@ -102,14 +102,14 @@ The current operations baseline lives in:
 
 ## Honesty Rule
 
-Flint may say:
+Poodle may say:
 
 - preview packages are release-facing but still pre-release
 - breaking changes may still occur in `0.x`
 - internal packages do not carry downstream compatibility guarantees
 - a stable channel is intentionally unavailable
 
-Flint may not say:
+Poodle may not say:
 
 - preview implies stable compatibility guarantees
 - public-intent packages may remove surfaces without deprecation records

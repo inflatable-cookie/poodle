@@ -6,7 +6,7 @@ Depends on: `021-public-package-api-stability-and-parity-debt-baseline.md`, `025
 
 ## Purpose
 
-Freeze the minimum performance posture Flint should enforce during the `g03`
+Freeze the minimum performance posture Poodle should enforce during the `g03`
 adoption generation, without pretending that the current repo has a full
 benchmark harness or cross-runtime profiler.
 
@@ -16,7 +16,7 @@ priorities while both implementations are still maturing.
 
 ## Core Rule
 
-Flint should remove avoidable work first, then document the remaining expensive
+Poodle should remove avoidable work first, then document the remaining expensive
 areas honestly.
 
 The current generation is not required to publish exhaustive benchmark tables.
@@ -104,13 +104,13 @@ Priority order for the remainder of `g03` is:
 
 ## Honesty Rule
 
-Flint may say:
+Poodle may say:
 
 - a likely hotspot was identified
 - avoidable repeated work was removed
 - a runtime-specific hardening priority was recorded
 
-Flint may not say:
+Poodle may not say:
 
 - the suite is benchmarked comprehensively
 - GPUI render cost is proven acceptable without GPUI evidence

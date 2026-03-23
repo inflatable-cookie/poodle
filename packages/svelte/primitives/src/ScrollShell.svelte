@@ -49,7 +49,7 @@
     width: 100%;
     height: 100%;
     overflow: hidden;
-    border-radius: var(--flint-radius-surface);
+    border-radius: var(--poodle-radius-surface);
   }
 
   .scroll-shell__viewport {
@@ -64,7 +64,7 @@
   }
 
   .scroll-shell__viewport:focus-visible {
-    outline: var(--flint-border-width-focus) solid var(--flint-color-accent-focusRing);
+    outline: var(--poodle-border-width-focus) solid var(--poodle-color-accent-focusRing);
     outline-offset: 0.125rem;
   }
 </style>

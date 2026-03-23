@@ -9,7 +9,7 @@ Priority: high (informs g01.006)
 
 Research GPUI-specific implementation patterns and idioms to inform:
 - GPUI substrate policy (g01.006)
-- How Flint components translate to GPUI
+- How Poodle components translate to GPUI
 - GPUI-native patterns that differ from web
 - Performance considerations
 
@@ -77,7 +77,7 @@ Research GPUI-specific implementation patterns and idioms to inform:
 
 ---
 
-## Implications for Flint
+## Implications for Poodle
 
 *(To be synthesized)*
 

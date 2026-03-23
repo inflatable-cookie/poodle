@@ -1,8 +1,8 @@
 //! PinInput — Jetstream PIN code input backed by PinInputSpec.
 
 use jetstream_runtime::ui_element::{self, JsEl};
-use flint_jetstream::JetstreamThemeProvider;
-use flint_primitives::PinInputSpec;
+use poodle_jetstream::JetstreamThemeProvider;
+use poodle_primitives::PinInputSpec;
 
 use crate::theme_ext::{resolve_color, resolve_radius};
 

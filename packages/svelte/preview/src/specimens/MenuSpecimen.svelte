@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { Menu, Button, Eyebrow, type MenuItem } from "@flint/svelte-primitives";
+  import { Menu, Button, Eyebrow, type MenuItem } from "@poodle/svelte-primitives";
 
   const fileItems: MenuItem[] = [
     { value: "new", label: "New file", shortcutLabel: "⌘N" },
@@ -55,6 +55,6 @@
   .specimen__group p {
     margin: 0;
     font-size: 0.875rem;
-    color: var(--flint-color-text-secondary);
+    color: var(--poodle-color-text-secondary);
   }
 </style>

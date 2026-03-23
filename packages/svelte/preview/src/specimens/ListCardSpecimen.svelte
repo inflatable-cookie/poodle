@@ -1,6 +1,6 @@
 <script lang="ts">
-  import { ContextMenu, Eyebrow, Icon, ListCard, ListCardCounter, Pill } from "@flint/svelte-primitives";
-  import { folder, layers, grid2x2 } from "@flint/icons-lucide";
+  import { ContextMenu, Eyebrow, Icon, ListCard, ListCardCounter, Pill } from "@poodle/svelte-primitives";
+  import { folder, layers, grid2x2 } from "@poodle/icons-lucide";
 
   let lastClick = "";
 </script>

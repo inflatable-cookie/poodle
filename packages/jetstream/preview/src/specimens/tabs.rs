@@ -1,10 +1,10 @@
 //! Tabs specimen — tab bars with different selected states.
 
 use jetstream_runtime::ui_element::*;
-use flint_jetstream::JetstreamThemeProvider;
-use flint_jetstream_components::tabs::js_tabs;
-use flint_jetstream_components::theme_ext::*;
-use flint_primitives::{TabDefinition, TabsSpec};
+use poodle_jetstream::JetstreamThemeProvider;
+use poodle_jetstream_components::tabs::js_tabs;
+use poodle_jetstream_components::theme_ext::*;
+use poodle_primitives::{TabDefinition, TabsSpec};
 
 pub fn render(theme: &JetstreamThemeProvider) -> JsEl {
     let secondary = resolve_color(theme, "semantic.color.text.secondary");

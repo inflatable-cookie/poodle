@@ -37,7 +37,7 @@ region (root)
 
 | State | Trigger | Expected Result |
 |-------|---------|-----------------|
-| default | no custom color | Dashed border and muted text use Flint semantic tokens |
+| default | no custom color | Dashed border and muted text use Poodle semantic tokens |
 | custom-color | `color` set | Border and label both adopt the supplied custom color |
 
 ## 5. Accessibility
@@ -65,9 +65,9 @@ Region is non-interactive and should not be keyboard-focusable.
 
 | Part | Token | Purpose |
 |------|-------|---------|
-| `root` | `--flint-color-border-default` | Default dashed outline color |
-| `root` | `--flint-radius-surface` | Shared surface rounding |
-| `root` | `--flint-space-inline-md` | Interior spacing |
-| `label` | `--flint-color-text-tertiary` | Muted placeholder label color |
-| `label` | `--flint-typography-label-family` | Label family |
-| `label` | `--flint-typography-label-size` | Label size |
+| `root` | `--poodle-color-border-default` | Default dashed outline color |
+| `root` | `--poodle-radius-surface` | Shared surface rounding |
+| `root` | `--poodle-space-inline-md` | Interior spacing |
+| `label` | `--poodle-color-text-tertiary` | Muted placeholder label color |
+| `label` | `--poodle-typography-label-family` | Label family |
+| `label` | `--poodle-typography-label-size` | Label size |

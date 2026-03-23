@@ -1,6 +1,6 @@
 <script lang="ts">
-  import { Icon, IconProvider, Eyebrow } from "@flint/svelte-primitives";
-  import type { IconSet, IconNodes } from "@flint/svelte-primitives";
+  import { Icon, IconProvider, Eyebrow } from "@poodle/svelte-primitives";
+  import type { IconSet, IconNodes } from "@poodle/svelte-primitives";
   import iconNodes from "lucide-static/icon-nodes.json";
 
   // A small custom icon set to demonstrate swappability
@@ -98,17 +98,17 @@
 
   .hint {
     font-size: 0.75rem;
-    color: var(--flint-color-text-secondary);
+    color: var(--poodle-color-text-secondary);
     line-height: 1.5;
     margin: 0;
   }
 
   .hint code {
-    font-family: var(--flint-typography-code-family);
+    font-family: var(--poodle-typography-code-family);
     font-size: 0.6875rem;
     padding: 0.0625rem 0.25rem;
     border-radius: 0.1875rem;
-    background: color-mix(in srgb, var(--flint-color-background-surface) 64%, transparent);
+    background: color-mix(in srgb, var(--poodle-color-background-surface) 64%, transparent);
   }
 
   .icon-row {
@@ -128,8 +128,8 @@
 
   .label {
     font-size: 0.5625rem;
-    font-family: var(--flint-typography-code-family);
-    color: var(--flint-color-text-muted);
+    font-family: var(--poodle-typography-code-family);
+    color: var(--poodle-color-text-muted);
     text-align: center;
     word-break: break-all;
     line-height: 1.3;

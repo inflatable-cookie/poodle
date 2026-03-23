@@ -6,13 +6,13 @@ Depends on: `001-token-source-and-artifact-contract.md`
 
 ## Purpose
 
-Freeze the normative rules for Flint component contracts so every new component
+Freeze the normative rules for Poodle component contracts so every new component
 is specified against one repeatable template before Svelte or GPUI
 implementation begins.
 
 ## Contract Source Of Truth
 
-Flint component contracts live under `docs/contracts/`.
+Poodle component contracts live under `docs/contracts/`.
 
 Each component must belong to exactly one of these contract layers:
 

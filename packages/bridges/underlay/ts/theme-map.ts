@@ -2,53 +2,53 @@ import { controlSizes, densityModes, themes } from "../../../tokens/artifacts/ts
 
 export type UnderlayThemeBridge = {
   underlayThemeId: string;
-  flintThemeId: keyof typeof themes;
+  poodleThemeId: keyof typeof themes;
   cssFile: string;
   note?: string;
 };
 
 export type UnderlayModeBridge = {
   underlayModeId: string;
-  flintModeId: string;
+  poodleModeId: string;
   selector: string;
 };
 
 // These IDs are bridge-local placeholders until Underlay provides its own
 // canonical registration names. They keep the mapping explicit without leaking
-// Flint naming directly into app code.
+// Poodle naming directly into app code.
 export const underlayThemeMap: UnderlayThemeBridge[] = [
   {
     underlayThemeId: "underlay-default",
-    flintThemeId: "light",
-    cssFile: "packages/tokens/artifacts/css/flint-theme-light.css",
+    poodleThemeId: "light",
+    cssFile: "packages/tokens/artifacts/css/poodle-theme-light.css",
   },
   {
     underlayThemeId: "underlay-night",
-    flintThemeId: "dark",
-    cssFile: "packages/tokens/artifacts/css/flint-theme-dark.css",
+    poodleThemeId: "dark",
+    cssFile: "packages/tokens/artifacts/css/poodle-theme-dark.css",
   },
   {
     underlayThemeId: "underlay-studio",
-    flintThemeId: "loophole-studio",
-    cssFile: "packages/tokens/artifacts/css/flint-theme-loophole-studio.css",
+    poodleThemeId: "loophole-studio",
+    cssFile: "packages/tokens/artifacts/css/poodle-theme-loophole-studio.css",
     note: "Reserved for workstation-oriented adoption pressure from Aura and Spark.",
   },
 ];
 
 export const underlayDensityModeMap: UnderlayModeBridge[] = Object.entries(densityModes).map(
-  ([flintModeId, value]) => ({
-    underlayModeId: `underlay-density-${flintModeId}`,
-    flintModeId,
+  ([poodleModeId, value]) => ({
+    underlayModeId: `underlay-density-${poodleModeId}`,
+    poodleModeId,
     selector: value.selector,
   }),
 );
 
 export const underlayControlSizeMap: UnderlayModeBridge[] = Object.entries(controlSizes).map(
-  ([flintModeId, value]) => ({
-    underlayModeId: `underlay-control-size-${flintModeId}`,
-    flintModeId,
+  ([poodleModeId, value]) => ({
+    underlayModeId: `underlay-control-size-${poodleModeId}`,
+    poodleModeId,
     selector: value.selector,
   }),
 );
 
-export const canonicalFlintThemes = Object.keys(themes);
+export const canonicalPoodleThemes = Object.keys(themes);

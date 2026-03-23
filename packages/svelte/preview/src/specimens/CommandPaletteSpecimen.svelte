@@ -1,6 +1,6 @@
 <script lang="ts">
-  import { Eyebrow, Button } from "@flint/svelte-primitives";
-  import { CommandPalette } from "@flint/svelte-composites";
+  import { Eyebrow, Button } from "@poodle/svelte-primitives";
+  import { CommandPalette } from "@poodle/svelte-composites";
 
   let open = false;
 </script>
@@ -42,7 +42,7 @@
 
   .specimen__hint {
     font-size: 0.8125rem;
-    color: var(--flint-color-text-secondary);
+    color: var(--poodle-color-text-secondary);
     margin: 0;
   }
 </style>

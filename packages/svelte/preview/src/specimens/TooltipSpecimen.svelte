@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { Tooltip, Button, Eyebrow } from "@flint/svelte-primitives";
+  import { Tooltip, Button, Eyebrow } from "@poodle/svelte-primitives";
 </script>
 
 <div class="specimen">

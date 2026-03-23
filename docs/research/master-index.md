@@ -5,7 +5,7 @@ Updated: 2026-03-11
 
 ## Research Program Overview
 
-Flint requires comparative research across three external substrate systems (GPUI, Bits, Underlay) and multiple design domain precedents before freezing implementation details. This research program follows the Northstar structure:
+Poodle requires comparative research across three external substrate systems (GPUI, Bits, Underlay) and multiple design domain precedents before freezing implementation details. This research program follows the Northstar structure:
 
 - **[source-hubs/](./source-hubs/)** - External system intelligence (GPUI, Bits, Underlay)
 - **[value-tracks/](./value-tracks/)** - Domain research topics with implementation implications
@@ -17,7 +17,7 @@ Flint requires comparative research across three external substrate systems (GPU
 
 ## Source Hubs
 
-Source hubs document external systems that Flint builds upon or integrates with. Each hub tracks capabilities, constraints, and API surfaces.
+Source hubs document external systems that Poodle builds upon or integrates with. Each hub tracks capabilities, constraints, and API surfaces.
 
 | Hub | Purpose | Critical For | Status |
 |-----|---------|--------------|--------|
@@ -29,7 +29,7 @@ Source hubs document external systems that Flint builds upon or integrates with.
 
 ## Value Tracks
 
-Value tracks research domain precedents and patterns. They answer "what are the options?" and "what should Flint adopt?"
+Value tracks research domain precedents and patterns. They answer "what are the options?" and "what should Poodle adopt?"
 
 ### Phase 1: Foundation (blocks g01.002-g01.006)
 
@@ -147,7 +147,7 @@ Phase 2 value tracks now **COMPLETE**:
 ### Architecture Integration
 
 All research has been integrated into:
-- `docs/architecture/001-flint-system-shape.md`
+- `docs/architecture/001-poodle-system-shape.md`
 - `docs/architecture/002-token-system-and-package-layout.md`
 
 ### Ready for Implementation

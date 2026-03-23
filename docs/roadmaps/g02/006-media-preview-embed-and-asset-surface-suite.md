@@ -1,10 +1,10 @@
 # g02.006 Media Preview, Embed, And Asset-Surface Suite
 
 Status: completed
-Owner: Flint Core
+Owner: Poodle Core
 Updated: 2026-03-11
 Depends on: g02.004
-Primary repos: `flint`
+Primary repos: `poodle`
 
 ## Goals
 

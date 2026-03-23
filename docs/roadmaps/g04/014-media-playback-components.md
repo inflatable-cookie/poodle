@@ -1,10 +1,10 @@
 # g04.014 Media Playback Components
 
 Status: planned
-Owner: Flint Core
+Owner: Poodle Core
 Updated: 2026-03-14
 Depends on: g04.001
-Primary repos: `flint`
+Primary repos: `poodle`
 
 ## Goals
 
@@ -17,10 +17,10 @@ Primary repos: `flint`
 
 - [ ] write contract for AudioPlayer: src, play/pause, seek bar, volume,
   duration display, playback speed, waveform visualization (optional)
-- [ ] implement AudioPlayer composite in `@flint/svelte-composites`
+- [ ] implement AudioPlayer composite in `@poodle/svelte-composites`
 - [ ] write contract for VideoPlayer: src, play/pause, seek bar, volume,
   fullscreen, aspect ratio, poster image, captions/subtitles
-- [ ] implement VideoPlayer composite in `@flint/svelte-composites`
+- [ ] implement VideoPlayer composite in `@poodle/svelte-composites`
 - [ ] create specimens for AudioPlayer and VideoPlayer
 - [ ] register in component-registry.ts and specimen registry
 
@@ -32,7 +32,7 @@ Primary repos: `flint`
 - [ ] VideoPlayer renders video with overlay controls
 - [ ] VideoPlayer supports fullscreen toggle
 - [ ] VideoPlayer displays poster image before playback
-- [ ] both components use Flint tokens for consistent styling
+- [ ] both components use Poodle tokens for consistent styling
 - [ ] both components pass build and render in the preview catalogue
 
 ## Next Task

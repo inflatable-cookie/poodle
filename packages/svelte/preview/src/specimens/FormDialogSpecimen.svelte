@@ -1,6 +1,6 @@
 <script lang="ts">
-  import { FormDialog } from "@flint/svelte-composites";
-  import { Button, Eyebrow, TextInput, Field, Select } from "@flint/svelte-primitives";
+  import { FormDialog } from "@poodle/svelte-composites";
+  import { Button, Eyebrow, TextInput, Field, Select } from "@poodle/svelte-primitives";
 
   let basicOpen: boolean | null = null;
   let errorOpen: boolean | null = null;

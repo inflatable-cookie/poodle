@@ -111,10 +111,10 @@ pub const DATA_BROWSE_DETAIL_PICKER_MEDIA_EXPORTS: &[&str] = &[
 
 #[cfg(test)]
 mod tests {
-    use flint_primitives::{
+    use poodle_primitives::{
         ButtonVariant, CheckState, FormActionAlign, StatusTone, ValidationState,
     };
-    use flint_tokens::semantic;
+    use poodle_tokens::semantic;
 
     use super::{
         AnnouncementMode, AspectRatio, BrowseState, DataTableSpec, DetailShellSpec, DetailState,

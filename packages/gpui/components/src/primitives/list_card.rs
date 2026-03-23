@@ -1,8 +1,8 @@
 //! ListCard — real GPUI component backed by ListCardSpec.
 
 use gpui::*;
-use flint_gpui::GpuiThemeProvider;
-use flint_primitives::{LeadingFill, LeadingShape, ListCardSpec};
+use poodle_gpui::GpuiThemeProvider;
+use poodle_primitives::{LeadingFill, LeadingShape, ListCardSpec};
 
 use crate::theme_ext::{color_mix, resolve_color, resolve_opacity, resolve_radius};
 
@@ -220,7 +220,7 @@ impl IntoElement for ListCard {
 
         // ── Root container ──────────────────────────────────────────
         let mut root = div()
-            .id(SharedString::from(format!("flint-list-card-{}", spec.title)))
+            .id(SharedString::from(format!("poodle-list-card-{}", spec.title)))
             .w_full()
             .px(px(12.0))
             .py(px(10.0))

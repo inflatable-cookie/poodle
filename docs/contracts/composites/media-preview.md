@@ -134,20 +134,20 @@ Card header and body always render regardless of media state.
 | Property | Value |
 |----------|-------|
 | display | `grid` |
-| gap | `var(--flint-space-stack-sm)` |
+| gap | `var(--poodle-space-stack-sm)` |
 
 ### Header (override)
 
 | Property | Value |
 |----------|-------|
-| gap | `var(--flint-space-stack-md)` |
+| gap | `var(--poodle-space-stack-md)` |
 
 ### Eyebrow
 
 | Property | Value |
 |----------|-------|
 | margin | `0` |
-| color | `var(--flint-color-text-secondary)` |
+| color | `var(--poodle-color-text-secondary)` |
 | font-size | `0.6875rem` |
 | font-weight | `600` |
 | letter-spacing | `0.12em` |
@@ -166,7 +166,7 @@ Card header and body always render regardless of media state.
 | Property | Value |
 |----------|-------|
 | margin | `0` |
-| color | `var(--flint-color-text-secondary)` |
+| color | `var(--poodle-color-text-secondary)` |
 | font-size | `0.8125rem` |
 | line-height | `1.5` |
 
@@ -176,7 +176,7 @@ Card header and body always render regardless of media state.
 |----------|-------|
 | display | `flex` |
 | flex-wrap | `wrap` |
-| gap | `var(--flint-space-inline-sm)` |
+| gap | `var(--poodle-space-inline-sm)` |
 | margin | `0` |
 | padding | `0` |
 | list-style | `none` |
@@ -186,14 +186,14 @@ Card header and body always render regardless of media state.
 | Property | Value |
 |----------|-------|
 | padding | `0.375rem 0.625rem` |
-| border-radius | `var(--flint-radius-control)` |
-| background | `color-mix(in srgb, var(--flint-color-background-surface) 70%, transparent)` |
+| border-radius | `var(--poodle-radius-control)` |
+| background | `color-mix(in srgb, var(--poodle-color-background-surface) 70%, transparent)` |
 
 ### Light Theme Overrides
 
 | Selector | Property | Value |
 |----------|----------|-------|
-| `:global([data-theme="light"]) .media-preview__meta li` | box-shadow | `inset 0 0 0 0.0625rem color-mix(in srgb, var(--flint-color-border-subtle) 32%, transparent)` |
+| `:global([data-theme="light"]) .media-preview__meta li` | box-shadow | `inset 0 0 0 0.0625rem color-mix(in srgb, var(--poodle-color-border-subtle) 32%, transparent)` |
 
 ## 10. Composition
 

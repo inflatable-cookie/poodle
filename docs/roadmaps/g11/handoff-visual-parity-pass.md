@@ -2,13 +2,13 @@
 
 ## Context
 
-You are continuing a systematic visual quality pass of the Flint design system's GPUI preview app. The goal is to make the GPUI preview **pixel-equivalent to the Svelte preview** — matching visual appearance, interactivity, and state management across all specimen pages.
+You are continuing a systematic visual quality pass of the Poodle design system's GPUI preview app. The goal is to make the GPUI preview **pixel-equivalent to the Svelte preview** — matching visual appearance, interactivity, and state management across all specimen pages.
 
 This is the third thread working on g11 GPUI Contract Compliance. The first thread did the gap audit and began component fixes. The second thread (documented in `handoff-gpui-compliance.md`) continued component fixes. This thread completed specimen structural alignment and verified component rendering against Svelte screenshots.
 
 ## Project Structure
 
-- **Repo root**: `/Users/betterthanclay/Dev/projects/flint`
+- **Repo root**: `/Users/betterthanclay/Dev/projects/poodle`
 - **GPUI preview app**: `packages/gpui/preview/` — run with `cargo run` from that directory
 - **Svelte preview app**: `packages/svelte/preview/` — run with `npm run dev` (serves on localhost, port varies)
 - **GPUI components**: `packages/gpui/components/src/primitives/` and `.../composites/`
@@ -22,7 +22,7 @@ This is the third thread working on g11 GPUI Contract Compliance. The first thre
 
 ## Architecture Quick Reference
 
-- Components use a **spec + Deref pattern**: shared Rust specs (e.g., `ButtonSpec`) live in `flint-primitives`/`flint-composites`. GPUI components own a spec internally via `Deref<Target = SpecType>`.
+- Components use a **spec + Deref pattern**: shared Rust specs (e.g., `ButtonSpec`) live in `poodle-primitives`/`poodle-composites`. GPUI components own a spec internally via `Deref<Target = SpecType>`.
 - Two constructor patterns: `Component::new(theme)` (creates default spec) and `Component::from_spec(spec, theme)` (takes pre-built spec). All specimens use `from_spec`.
 - Specimens have two signatures: `render(theme: &GpuiThemeProvider)` (static) or `render(state: &AppState, cx: &mut Context<PreviewRoot>)` (interactive with state).
 - Interactive state uses `cx.listener(|this, val: &T, _w, cx| { ... })` — note `&T` reference parameter.

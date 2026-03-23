@@ -137,10 +137,10 @@ Updated: 2026-03-15
 
 | Var | Default Value | Focus Value |
 |-----|---------------|-------------|
-| `--flint-text-area-radius` | `var(--flint-treatment-interactive-subtle-radius, var(--flint-radius-control))` | — |
-| `--flint-text-area-fill` | `var(--flint-treatment-interactive-subtle-fill, var(--flint-color-background-surface))` | `var(--flint-text-area-fill-focus)` |
-| `--flint-text-area-border` | `var(--flint-treatment-interactive-subtle-border, var(--flint-color-border-default))` | `var(--flint-text-area-border-focus)` |
-| `--flint-text-area-shadow` | (none by default) | `var(--flint-text-area-shadow-focus)` fallback `0 0 0 var(--flint-border-width-focus) color-mix(in srgb, var(--flint-color-accent-focusRing) 28%, transparent)` |
+| `--poodle-text-area-radius` | `var(--poodle-treatment-interactive-subtle-radius, var(--poodle-radius-control))` | — |
+| `--poodle-text-area-fill` | `var(--poodle-treatment-interactive-subtle-fill, var(--poodle-color-background-surface))` | `var(--poodle-text-area-fill-focus)` |
+| `--poodle-text-area-border` | `var(--poodle-treatment-interactive-subtle-border, var(--poodle-color-border-default))` | `var(--poodle-text-area-border-focus)` |
+| `--poodle-text-area-shadow` | (none by default) | `var(--poodle-text-area-shadow-focus)` fallback `0 0 0 var(--poodle-border-width-focus) color-mix(in srgb, var(--poodle-color-accent-focusRing) 28%, transparent)` |
 
 ### Root `.text-area`
 
@@ -148,34 +148,34 @@ Updated: 2026-03-15
 |----------|-------|
 | `display` | `grid` |
 | `min-height` | `0` |
-| `border` | `0.0625rem solid var(--flint-text-area-border)` |
-| `border-radius` | `var(--flint-text-area-radius)` |
-| `background` | `var(--flint-text-area-fill)` |
-| `color` | `var(--flint-color-text-primary)` |
-| `box-shadow` | `var(--flint-text-area-shadow)` |
-| `transition` | `border-color, box-shadow, background` all at `var(--flint-motion-duration-interaction) var(--flint-motion-easing-standard)` |
+| `border` | `0.0625rem solid var(--poodle-text-area-border)` |
+| `border-radius` | `var(--poodle-text-area-radius)` |
+| `background` | `var(--poodle-text-area-fill)` |
+| `color` | `var(--poodle-color-text-primary)` |
+| `box-shadow` | `var(--poodle-text-area-shadow)` |
+| `transition` | `border-color, box-shadow, background` all at `var(--poodle-motion-duration-interaction) var(--poodle-motion-easing-standard)` |
 
 ### Root focus-within
 
 | Property | Value |
 |----------|-------|
-| `border-color` | `var(--flint-text-area-border-focus)` |
-| `background` | `var(--flint-text-area-fill-focus)` |
-| `box-shadow` | `var(--flint-text-area-shadow-focus)` fallback `0 0 0 var(--flint-border-width-focus) color-mix(in srgb, var(--flint-color-accent-focusRing) 28%, transparent)` |
+| `border-color` | `var(--poodle-text-area-border-focus)` |
+| `background` | `var(--poodle-text-area-fill-focus)` |
+| `box-shadow` | `var(--poodle-text-area-shadow-focus)` fallback `0 0 0 var(--poodle-border-width-focus) color-mix(in srgb, var(--poodle-color-accent-focusRing) 28%, transparent)` |
 
 ### Root validation states
 
 | State | `border-color` |
 |-------|----------------|
-| `invalid` | `var(--flint-color-status-danger)` |
-| `valid` | `var(--flint-color-status-success)` |
-| `pending` | `var(--flint-color-accent-base)` |
+| `invalid` | `var(--poodle-color-status-danger)` |
+| `valid` | `var(--poodle-color-status-success)` |
+| `pending` | `var(--poodle-color-accent-base)` |
 
 ### Root disabled (`:has(:disabled)`)
 
 | Property | Value |
 |----------|-------|
-| `opacity` | `var(--flint-state-opacity-disabled)` |
+| `opacity` | `var(--poodle-state-opacity-disabled)` |
 
 ### Text Area Control `.text-area__control`
 
@@ -184,27 +184,27 @@ Updated: 2026-03-15
 | `min-width` | `0` |
 | `width` | `100%` |
 | `min-height` | `calc(1lh * 4)` (based on rows prop, default 4) |
-| `padding` | `var(--flint-space-control-y) var(--flint-space-control-x)` |
+| `padding` | `var(--poodle-space-control-y) var(--poodle-space-control-x)` |
 | `border` | `0` |
 | `resize` | `vertical` |
 | `background` | `transparent` |
 | `color` | `inherit` |
-| `font-family` | `var(--flint-typography-body-family)` |
-| `font-size` | `var(--flint-typography-body-size)` |
-| `line-height` | `var(--flint-typography-body-lineHeight)` |
+| `font-family` | `var(--poodle-typography-body-family)` |
+| `font-size` | `var(--poodle-typography-body-size)` |
+| `line-height` | `var(--poodle-typography-body-lineHeight)` |
 | `outline` | `0` |
 
 ### Text Area Control `::placeholder`
 
 | Property | Value |
 |----------|-------|
-| `color` | `var(--flint-color-text-secondary)` |
+| `color` | `var(--poodle-color-text-secondary)` |
 
 ## 9. Svelte Notes
 
 - Uses native `<textarea>` element inside a styled `<div>` wrapper with grid
   layout
-- CSS custom properties (`--flint-text-area-*`) enable treatment-level theming;
+- CSS custom properties (`--poodle-text-area-*`) enable treatment-level theming;
   same treatment token chain as TextInput but with `text-area` prefix
 - `data-validation-state` data attribute drives validation border-color via CSS
   attribute selectors
@@ -220,7 +220,7 @@ Updated: 2026-03-15
 
 ## 10. GPUI Notes
 
-- expected crate/module surface: `flint_gpui::primitives::text_area`
+- expected crate/module surface: `poodle_gpui::primitives::text_area`
 - GPUI implementation must intentionally support multiline caret movement,
   selection, vertical scrolling, IME composition, and text-focused shortcut
   suppression

@@ -2,9 +2,9 @@
 
 use gpui::prelude::FluentBuilder;
 use gpui::*;
-use flint_gpui::GpuiThemeProvider;
-use flint_composites::{DataTableSpec, TableColumnSpec, TableRowSpec, TableSortDirection};
-use flint_primitives::{IconSize, IconSpec};
+use poodle_gpui::GpuiThemeProvider;
+use poodle_composites::{DataTableSpec, TableColumnSpec, TableRowSpec, TableSortDirection};
+use poodle_primitives::{IconSize, IconSpec};
 
 use crate::primitives::Icon;
 use crate::theme_ext::{resolve_color, resolve_px};
@@ -124,8 +124,8 @@ impl IntoElement for DataTable {
 
             if is_sorted {
                 let sort_icon_name = match spec.sort_direction {
-                    flint_composites::TableSortDirection::Asc => "arrow-up",
-                    flint_composites::TableSortDirection::Desc => "arrow-down",
+                    poodle_composites::TableSortDirection::Asc => "arrow-up",
+                    poodle_composites::TableSortDirection::Desc => "arrow-down",
                 };
                 header_cell = header_cell
                     .flex().items_center().gap(px(4.0))

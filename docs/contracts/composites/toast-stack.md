@@ -95,26 +95,26 @@ No internal state. Toast list is externally managed.
 
 ### Tone Colors
 
-Each toast uses a CSS custom property `--flint-toast-tone` set per tone:
+Each toast uses a CSS custom property `--poodle-toast-tone` set per tone:
 
 | Tone | Token | Fallback |
 |------|-------|----------|
-| `info` | `--flint-color-status-info` | `#3b82f6` (blue) |
-| `success` | `--flint-color-status-success` | -- |
-| `warning` | `--flint-color-status-warning` | -- |
-| `danger` | `--flint-color-status-danger` | -- |
+| `info` | `--poodle-color-status-info` | `#3b82f6` (blue) |
+| `success` | `--poodle-color-status-success` | -- |
+| `warning` | `--poodle-color-status-warning` | -- |
+| `danger` | `--poodle-color-status-danger` | -- |
 
 The tone color is used for:
 - **Left accent bar**: 3px wide, `::before` pseudo-element, `inset: 0 auto 0 0`,
   color at 82% mix with 6% white
-- **Border**: 1px solid, tone at 34% mixed with `--flint-color-border-default`
+- **Border**: 1px solid, tone at 34% mixed with `--poodle-color-border-default`
 - **Background gradient**: left edge has 12% tone blended into elevated background,
   fading to 98% elevated background at 18% gradient stop
 
 ### Elevation
 
-- toasts use `--flint-elevation-overlay` box shadow
-- background uses `--flint-color-background-elevated` at 96% alpha mix
+- toasts use `--poodle-elevation-overlay` box shadow
+- background uses `--poodle-color-background-elevated` at 96% alpha mix
 
 ## 7. Accessibility
 
@@ -147,10 +147,10 @@ The tone color is used for:
 
 ### Sizing
 
-- stack gap: `--flint-space-stack-sm`
-- toast padding: `--flint-space-panel-x` (with extra 1.5rem on right for dismiss button)
-- toast internal gap: `--flint-space-stack-sm`
-- toast border-radius: `calc(--flint-radius-surface - 0.125rem)`
+- stack gap: `--poodle-space-stack-sm`
+- toast padding: `--poodle-space-panel-x` (with extra 1.5rem on right for dismiss button)
+- toast internal gap: `--poodle-space-stack-sm`
+- toast border-radius: `calc(--poodle-radius-surface - 0.125rem)`
 - dismiss button: 1.25rem x 1.25rem, positioned top-right (0.375rem inset)
 - accent bar width: 0.1875rem (3px)
 
@@ -174,21 +174,21 @@ The tone color is used for:
 | Property | Value |
 |----------|-------|
 | display | `grid` |
-| gap | `var(--flint-space-stack-sm)` |
+| gap | `var(--poodle-space-stack-sm)` |
 
 ### Toast
 
 | Property | Value |
 |----------|-------|
-| `--flint-toast-tone` | (set per tone, see below) |
+| `--poodle-toast-tone` | (set per tone, see below) |
 | display | `grid` |
-| gap | `var(--flint-space-stack-sm)` |
-| padding | `var(--flint-space-panel-x)` |
-| padding-right | `calc(var(--flint-space-panel-x) + 1.5rem)` |
-| border | `0.0625rem solid color-mix(in srgb, var(--flint-toast-tone) 34%, var(--flint-color-border-default))` |
-| border-radius | `calc(var(--flint-radius-surface) - 0.125rem)` |
-| background | `linear-gradient(90deg, color-mix(in srgb, var(--flint-toast-tone) 12%, transparent), color-mix(in srgb, var(--flint-color-background-elevated) 98%, transparent) 18%), color-mix(in srgb, var(--flint-color-background-elevated) 96%, transparent)` |
-| box-shadow | `var(--flint-elevation-overlay)` |
+| gap | `var(--poodle-space-stack-sm)` |
+| padding | `var(--poodle-space-panel-x)` |
+| padding-right | `calc(var(--poodle-space-panel-x) + 1.5rem)` |
+| border | `0.0625rem solid color-mix(in srgb, var(--poodle-toast-tone) 34%, var(--poodle-color-border-default))` |
+| border-radius | `calc(var(--poodle-radius-surface) - 0.125rem)` |
+| background | `linear-gradient(90deg, color-mix(in srgb, var(--poodle-toast-tone) 12%, transparent), color-mix(in srgb, var(--poodle-color-background-elevated) 98%, transparent) 18%), color-mix(in srgb, var(--poodle-color-background-elevated) 96%, transparent)` |
+| box-shadow | `var(--poodle-elevation-overlay)` |
 | position | `relative` |
 | overflow | `hidden` |
 
@@ -200,16 +200,16 @@ The tone color is used for:
 | position | `absolute` |
 | inset | `0 auto 0 0` |
 | width | `0.1875rem` |
-| background | `color-mix(in srgb, var(--flint-toast-tone) 82%, white 6%)` |
+| background | `color-mix(in srgb, var(--poodle-toast-tone) 82%, white 6%)` |
 
 ### Tone Custom Property Values
 
-| `data-tone` | `--flint-toast-tone` |
+| `data-tone` | `--poodle-toast-tone` |
 |-------------|-------------------|
-| `info` (default) | `var(--flint-color-status-info, #3b82f6)` |
-| `success` | `var(--flint-color-status-success)` |
-| `warning` | `var(--flint-color-status-warning)` |
-| `danger` | `var(--flint-color-status-danger)` |
+| `info` (default) | `var(--poodle-color-status-info, #3b82f6)` |
+| `success` | `var(--poodle-color-status-success)` |
+| `warning` | `var(--poodle-color-status-warning)` |
+| `danger` | `var(--poodle-color-status-danger)` |
 
 ### Dismiss Button
 
@@ -225,16 +225,16 @@ The tone color is used for:
 | height | `1.25rem` |
 | padding | `0` |
 | border | `none` |
-| border-radius | `var(--flint-radius-sm, 0.25rem)` |
+| border-radius | `var(--poodle-radius-sm, 0.25rem)` |
 | background | `transparent` |
-| color | `var(--flint-color-text-secondary)` |
+| color | `var(--poodle-color-text-secondary)` |
 
 #### Dismiss Button Hover
 
 | Property | Value |
 |----------|-------|
-| color | `var(--flint-color-text-primary)` |
-| background | `color-mix(in srgb, var(--flint-color-background-surface) 60%, transparent)` |
+| color | `var(--poodle-color-text-primary)` |
+| background | `color-mix(in srgb, var(--poodle-color-background-surface) 60%, transparent)` |
 
 ### Copy Container
 
@@ -248,7 +248,7 @@ The tone color is used for:
 
 | Property | Value |
 |----------|-------|
-| color | `var(--flint-color-text-secondary)` |
+| color | `var(--poodle-color-text-secondary)` |
 | font-size | `0.8125rem` |
 | line-height | `1.5` |
 
@@ -274,7 +274,7 @@ None.
 
 ## 11. GPUI Notes
 
-- expected crate/module surface: `flint_gpui::composites::toast_stack`
+- expected crate/module surface: `poodle_gpui::composites::toast_stack`
 - tone-based accent bar may use platform-specific drawing
 - assertive announcement for danger tone must be preserved
 

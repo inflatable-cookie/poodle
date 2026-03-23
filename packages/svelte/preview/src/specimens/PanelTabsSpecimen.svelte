@@ -1,6 +1,6 @@
 <script lang="ts">
-  import { Eyebrow } from "@flint/svelte-primitives";
-  import { PanelTabs } from "@flint/svelte-composites";
+  import { Eyebrow } from "@poodle/svelte-primitives";
+  import { PanelTabs } from "@poodle/svelte-composites";
 
   let activeTab = "explorer";
 </script>
@@ -39,14 +39,14 @@
   }
 
   .specimen__frame {
-    border: 0.0625rem solid var(--flint-color-border-subtle);
-    border-radius: var(--flint-radius-surface);
+    border: 0.0625rem solid var(--poodle-color-border-subtle);
+    border-radius: var(--poodle-radius-surface);
     overflow: hidden;
   }
 
   .specimen__hint {
     font-size: 0.75rem;
-    color: var(--flint-color-text-secondary);
+    color: var(--poodle-color-text-secondary);
     margin: 0;
   }
 </style>

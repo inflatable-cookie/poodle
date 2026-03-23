@@ -1,10 +1,10 @@
 # g04.007 List Interaction, Reordering, And Sort Controls
 
 Status: planned
-Owner: Flint Core
+Owner: Poodle Core
 Updated: 2026-03-14
 Depends on: g04.001
-Primary repos: `flint`
+Primary repos: `poodle`
 
 ## Goals
 
@@ -17,13 +17,13 @@ Primary repos: `flint`
 
 - [ ] write contract for ReorderableList: items array, drag handles, drop
   indicators, onReorder callback, keyboard reorder support
-- [ ] implement ReorderableList composite in `@flint/svelte-composites`
+- [ ] implement ReorderableList composite in `@poodle/svelte-composites`
 - [ ] write contract for AutonomousList: items with add/remove/reorder, inline
   editing, empty state, max items
-- [ ] implement AutonomousList composite in `@flint/svelte-composites`
+- [ ] implement AutonomousList composite in `@poodle/svelte-composites`
 - [ ] write contract for OrderBy: sort fields, active sort, direction toggle,
   multi-sort, reset
-- [ ] implement OrderBy composite in `@flint/svelte-composites`
+- [ ] implement OrderBy composite in `@poodle/svelte-composites`
 - [ ] create specimens for all three components
 - [ ] register in component-registry.ts and specimen registry
 

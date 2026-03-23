@@ -1,12 +1,12 @@
 use gpui::*;
-use flint_adapter::ThemeProvider;
-use flint_primitives::{
+use poodle_adapter::ThemeProvider;
+use poodle_primitives::{
     ListCardSpec, LeadingShape, LeadingFill,
     StatusIndicatorSpec, StatusTone, PillSpec, PillTone,
     IconSpec, IconSize, ContextMenuSpec, MenuEntry, MenuItemKind,
     EyebrowSpec,
 };
-use flint_gpui_components::{ListCard, StatusIndicator, Pill, Icon, ContextMenu, Eyebrow};
+use poodle_gpui_components::{ListCard, StatusIndicator, Pill, Icon, ContextMenu, Eyebrow};
 use crate::app_state::AppState;
 use crate::style_bridge::color_to_hsla;
 use crate::PreviewRoot;
@@ -512,8 +512,8 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
 fn counter_item(
     label: &str,
     icon_name: &str,
-    color: flint_tokens::typed::ColorValue,
-    theme: &flint_gpui::GpuiThemeProvider,
+    color: poodle_tokens::typed::ColorValue,
+    theme: &poodle_gpui::GpuiThemeProvider,
 ) -> Div {
     div()
         .flex()

@@ -1,24 +1,24 @@
 {
-  "name": "@flint/svelte-tokens",
+  "name": "@poodle/svelte-tokens",
   "version": "0.0.0",
   "private": true,
   "type": "module",
-  "description": "Flint Svelte token and theme helpers backed by generated artifacts.",
+  "description": "Poodle Svelte token and theme helpers backed by generated artifacts.",
   "svelte": "./src/index.ts",
   "exports": {
     ".": "./src/index.ts",
     "./runtime": "./src/runtime.ts",
     "./css": "./src/css.ts",
-    "./styles.css": "./src/generated/css/flint-tokens.css",
-    "./css/flint-tokens.css": "./src/generated/css/flint-tokens.css",
-    "./theme-light.css": "./src/generated/css/flint-theme-light.css",
-    "./theme-dark.css": "./src/generated/css/flint-theme-dark.css",
-    "./theme-loophole-studio.css": "./src/generated/css/flint-theme-loophole-studio.css",
-    "./density-compact.css": "./src/generated/css/flint-density-compact.css",
-    "./density-comfortable.css": "./src/generated/css/flint-density-comfortable.css",
-    "./control-size-sm.css": "./src/generated/css/flint-control-size-sm.css",
-    "./control-size-md.css": "./src/generated/css/flint-control-size-md.css",
-    "./control-size-lg.css": "./src/generated/css/flint-control-size-lg.css",
+    "./styles.css": "./src/generated/css/poodle-tokens.css",
+    "./css/poodle-tokens.css": "./src/generated/css/poodle-tokens.css",
+    "./theme-light.css": "./src/generated/css/poodle-theme-light.css",
+    "./theme-dark.css": "./src/generated/css/poodle-theme-dark.css",
+    "./theme-loophole-studio.css": "./src/generated/css/poodle-theme-loophole-studio.css",
+    "./density-compact.css": "./src/generated/css/poodle-density-compact.css",
+    "./density-comfortable.css": "./src/generated/css/poodle-density-comfortable.css",
+    "./control-size-sm.css": "./src/generated/css/poodle-control-size-sm.css",
+    "./control-size-md.css": "./src/generated/css/poodle-control-size-md.css",
+    "./control-size-lg.css": "./src/generated/css/poodle-control-size-lg.css",
     "./themes": "./src/themes.ts",
     "./metadata": "./src/metadata.ts",
     "./units": "./src/units.ts"
@@ -27,7 +27,7 @@
     "src",
     "README.md"
   ],
-  "flintRelease": {
+  "poodleRelease": {
     "publicIntent": true,
     "channel": "preview",
     "stability": "pre-release"

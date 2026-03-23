@@ -22,7 +22,7 @@
   $: safeMax = max <= min ? min + 1 : max;
   $: safeValue = clamp(snapToStep(value, min, step), min, safeMax);
   $: percentage = ((safeValue - min) / (safeMax - min)) * 100;
-  $: sliderStyle = joinStyles([`--flint-slider-percent: ${percentage}%`]);
+  $: sliderStyle = joinStyles([`--poodle-slider-percent: ${percentage}%`]);
 
   function parseValue(nextRawValue: string): number {
     return clamp(snapToStep(Number(nextRawValue), min, step), min, safeMax);
@@ -68,7 +68,7 @@
   }
 
   .slider[data-disabled="true"] {
-    opacity: var(--flint-state-opacity-disabled);
+    opacity: var(--poodle-state-opacity-disabled);
   }
 
   .slider__track {
@@ -77,7 +77,7 @@
     height: 0.375rem;
     transform: translateY(-50%);
     border-radius: 999px;
-    background: color-mix(in srgb, var(--flint-color-background-surface) 88%, transparent);
+    background: color-mix(in srgb, var(--poodle-color-background-surface) 88%, transparent);
   }
 
   .slider[data-orientation="vertical"] .slider__track {
@@ -89,17 +89,17 @@
 
   .slider__fill {
     display: block;
-    width: var(--flint-slider-percent);
+    width: var(--poodle-slider-percent);
     height: 100%;
     border-radius: inherit;
-    background: var(--flint-color-accent-base);
+    background: var(--poodle-color-accent-base);
   }
 
   .slider[data-orientation="vertical"] .slider__fill {
     position: absolute;
     bottom: 0;
     width: 100%;
-    height: var(--flint-slider-percent);
+    height: var(--poodle-slider-percent);
   }
 
   .slider__control {
@@ -130,9 +130,9 @@
     width: 1rem;
     height: 1rem;
     margin-top: -0.3125rem;
-    border: 0.0625rem solid var(--flint-color-border-default);
+    border: 0.0625rem solid var(--poodle-color-border-default);
     border-radius: 999px;
-    background: var(--flint-color-background-elevated);
+    background: var(--poodle-color-background-elevated);
     box-shadow: 0 0.125rem 0.5rem color-mix(in srgb, black 18%, transparent);
     appearance: none;
   }
@@ -140,9 +140,9 @@
   .slider__control::-moz-range-thumb {
     width: 1rem;
     height: 1rem;
-    border: 0.0625rem solid var(--flint-color-border-default);
+    border: 0.0625rem solid var(--poodle-color-border-default);
     border-radius: 999px;
-    background: var(--flint-color-background-elevated);
+    background: var(--poodle-color-background-elevated);
     box-shadow: 0 0.125rem 0.5rem color-mix(in srgb, black 18%, transparent);
   }
 
@@ -152,13 +152,13 @@
 
   .slider__control:focus-visible::-webkit-slider-thumb {
     box-shadow:
-      0 0 0 0.1875rem color-mix(in srgb, var(--flint-color-accent-focusRing) 32%, transparent),
+      0 0 0 0.1875rem color-mix(in srgb, var(--poodle-color-accent-focusRing) 32%, transparent),
       0 0.125rem 0.5rem color-mix(in srgb, black 18%, transparent);
   }
 
   .slider__control:focus-visible::-moz-range-thumb {
     box-shadow:
-      0 0 0 0.1875rem color-mix(in srgb, var(--flint-color-accent-focusRing) 32%, transparent),
+      0 0 0 0.1875rem color-mix(in srgb, var(--poodle-color-accent-focusRing) 32%, transparent),
       0 0.125rem 0.5rem color-mix(in srgb, black 18%, transparent);
   }
 </style>

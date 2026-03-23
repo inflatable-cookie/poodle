@@ -3,16 +3,16 @@
     {
       "id": "preview-docs-harness",
       "label": "Svelte preview docs harness",
-      "consumerShape": "browser review surface for direct Flint evaluation",
+      "consumerShape": "browser review surface for direct Poodle evaluation",
       "runtime": "browser",
       "adoptionModel": "internal acceptance harness",
       "status": "baseline",
       "coveredPackages": [
-        "@flint/svelte-tokens",
-        "@flint/svelte-primitives",
-        "@flint/svelte-composites",
-        "@flint/icons-lucide",
-        "@flint/svelte-preview"
+        "@poodle/svelte-tokens",
+        "@poodle/svelte-primitives",
+        "@poodle/svelte-composites",
+        "@poodle/icons-lucide",
+        "@poodle/svelte-preview"
       ],
       "evidenceArtifacts": [
         "packages/svelte/preview/artifacts/parity-report.json",
@@ -45,10 +45,10 @@
       "adoptionModel": "bridge-mediated",
       "status": "proof-backed",
       "coveredPackages": [
-        "@flint/bridge-underlay",
-        "@flint/svelte-tokens",
-        "@flint/svelte-primitives",
-        "@flint/svelte-composites"
+        "@poodle/bridge-underlay",
+        "@poodle/svelte-tokens",
+        "@poodle/svelte-primitives",
+        "@poodle/svelte-composites"
       ],
       "evidenceArtifacts": [
         "packages/bridges/underlay/ts/zero-leak-proof.ts",
@@ -72,15 +72,15 @@
     {
       "id": "loophole-foundation-adoption",
       "label": "Loophole foundation adoption",
-      "consumerShape": "direct downstream Svelte adoption on top of Flint primitives and composites",
+      "consumerShape": "direct downstream Svelte adoption on top of Poodle primitives and composites",
       "runtime": "web or desktop shell",
       "adoptionModel": "direct package consumption",
       "status": "proof-backed",
       "coveredPackages": [
-        "@flint/svelte-tokens",
-        "@flint/svelte-primitives",
-        "@flint/svelte-composites",
-        "@flint/icons-lucide"
+        "@poodle/svelte-tokens",
+        "@poodle/svelte-primitives",
+        "@poodle/svelte-composites",
+        "@poodle/icons-lucide"
       ],
       "evidenceArtifacts": [
         "packages/svelte/primitives/README.md",
@@ -98,7 +98,7 @@
         "bun run docs:build"
       ],
       "blockers": [
-        "DAW-specific widgets and runtime behavior remain downstream-owned and therefore outside Flint acceptance proof."
+        "DAW-specific widgets and runtime behavior remain downstream-owned and therefore outside Poodle acceptance proof."
       ]
     },
     {
@@ -109,12 +109,12 @@
       "adoptionModel": "matrix-only",
       "status": "matrix-only",
       "coveredPackages": [
-        "flint-primitives",
-        "flint-composites",
-        "flint-workstation",
-        "flint-gpui",
-        "flint-gpui-components",
-        "flint-gpui-preview"
+        "poodle-primitives",
+        "poodle-composites",
+        "poodle-workstation",
+        "poodle-gpui",
+        "poodle-gpui-components",
+        "poodle-gpui-preview"
       ],
       "evidenceArtifacts": [
         "packages/gpui/cross-runtime-parity-report.json",

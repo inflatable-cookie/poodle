@@ -11,21 +11,21 @@ make the DAW-extension boundary explicit before later app-adoption work widens.
 
 ## Core Rule
 
-Loophole may consume Flint directly as a downstream foundation consumer, but it
+Loophole may consume Poodle directly as a downstream foundation consumer, but it
 must do so by building upward from canonical tokens, primitives, composites,
 and workstation shells.
 
 Loophole-specific DAW widgets remain Loophole-owned even when they sit on top
-of Flint foundations.
+of Poodle foundations.
 
 ## Adoption Rule
 
 The current allowed Loophole adoption layers are:
 
-- `@flint/svelte-tokens`
-- `@flint/svelte-primitives`
-- `@flint/svelte-composites`
-- `@flint/svelte-workstation`
+- `@poodle/svelte-tokens`
+- `@poodle/svelte-primitives`
+- `@poodle/svelte-composites`
+- `@poodle/svelte-workstation`
 
 These packages are sufficient for a first foundation adoption proof when the
 downstream app still owns:
@@ -38,9 +38,9 @@ downstream app still owns:
 
 ## DAW Boundary Rule
 
-Flint may own generic workstation shell and panel-system surfaces.
+Poodle may own generic workstation shell and panel-system surfaces.
 
-Flint may not own Loophole-specific DAW surfaces such as:
+Poodle may not own Loophole-specific DAW surfaces such as:
 
 - transport bars
 - timelines
@@ -51,7 +51,7 @@ Flint may not own Loophole-specific DAW surfaces such as:
 - session rulers
 - meter-bridge or console-specific widgets
 
-Those remain downstream-owned even when they compose Flint buttons, tabs, panel
+Those remain downstream-owned even when they compose Poodle buttons, tabs, panel
 surfaces, split views, and command discovery.
 
 ## Proof Artifact Rule
@@ -59,7 +59,7 @@ surfaces, split views, and command discovery.
 The Loophole foundation adoption proof must exist as a machine-readable
 artifact that records:
 
-- the allowed Flint package surface
+- the allowed Poodle package surface
 - the currently approved workstation exports
 - the DAW surfaces that remain downstream-owned
 - the current boundary rules
@@ -96,16 +96,16 @@ The current adoption proof must still record:
 
 ## Honesty Rule
 
-Flint may say:
+Poodle may say:
 
-- Loophole can adopt Flint foundations directly
+- Loophole can adopt Poodle foundations directly
 - the DAW-extension boundary is explicit
 - the shared workstation layer is suitable as generic shell foundation
 
-Flint may not say:
+Poodle may not say:
 
 - Loophole production adoption is complete
-- DAW widgets now belong in Flint core
+- DAW widgets now belong in Poodle core
 - workstation-shell parity alone proves all Loophole runtime concerns are solved
 
 ## Seed Baseline

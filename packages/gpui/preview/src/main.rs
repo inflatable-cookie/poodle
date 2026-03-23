@@ -1,4 +1,4 @@
-//! Flint GPUI Preview — native macOS preview application for the Flint design system.
+//! Poodle GPUI Preview — native macOS preview application for the Poodle design system.
 //!
 //! Matches the Svelte preview app layout: top bar with pill tabs,
 //! display controls bar, and section-specific content areas.
@@ -15,8 +15,8 @@ use std::borrow::Cow;
 use std::path::PathBuf;
 
 use gpui::*;
-use flint_adapter::ThemeProvider;
-use flint_primitives::{TabDefinition, TabsSpec, TabVariant};
+use poodle_adapter::ThemeProvider;
+use poodle_primitives::{TabDefinition, TabsSpec, TabVariant};
 
 /// Asset source that loads files from the preview app's directory.
 struct PreviewAssets {
@@ -53,11 +53,11 @@ use app_state::{
     AppState, AppearanceTreatment, ControlSize, DemoScreen, Density, Section, ThemePreset,
 };
 use component_registry::{COMPOSITES, PRIMITIVES, SHELLS};
-use flint_gpui_components::Tabs;
+use poodle_gpui_components::Tabs;
 use style_bridge::color_to_hsla;
 
 // Global keyboard actions
-actions!(flint_preview, [Quit, CloseWindow]);
+actions!(poodle_preview, [Quit, CloseWindow]);
 
 /// Root view for the preview application.
 struct PreviewRoot {
@@ -114,7 +114,7 @@ impl Render for PreviewRoot {
                     .border_b_1()
                     .border_color(color_to_hsla(border_subtle))
                     // Title — bold, 16px
-                    .child(div().text_size(px(16.0)).font_weight(FontWeight::BOLD).child("Flint"))
+                    .child(div().text_size(px(16.0)).font_weight(FontWeight::BOLD).child("Poodle"))
                     // Nav tabs (pill style)
                     .child(self.render_nav_tabs(text_secondary, accent, cx))
                     // Spacer
@@ -146,8 +146,8 @@ impl PreviewRoot {
     /// Pill-style nav tabs using Tabs with the Pill variant.
     fn render_nav_tabs(
         &self,
-        _text_secondary: flint_tokens::typed::ColorValue,
-        _accent: flint_tokens::typed::ColorValue,
+        _text_secondary: poodle_tokens::typed::ColorValue,
+        _accent: poodle_tokens::typed::ColorValue,
         cx: &mut Context<Self>,
     ) -> impl IntoElement {
         let active_value = self.state.section.label();
@@ -179,8 +179,8 @@ impl PreviewRoot {
     /// Matches Svelte: 11px text, 999px radius, 1px subtle border, 3px 8px padding.
     fn render_status_pills(
         &self,
-        text_secondary: flint_tokens::typed::ColorValue,
-        border: flint_tokens::typed::ColorValue,
+        text_secondary: poodle_tokens::typed::ColorValue,
+        border: poodle_tokens::typed::ColorValue,
     ) -> Div {
         // Svelte computed: bg srgb(0.094, 0.094, 0.094 / 0.9), border srgb(0.776, 0.776, 0.776 / 0.116)
         let canvas_bg = self.state.theme.resolve_color("semantic.color.background.canvas");
@@ -211,11 +211,11 @@ impl PreviewRoot {
     /// Matches Svelte: 80px height, panel bg, 12px 16px padding, 20px/32px gap.
     fn render_display_controls(
         &self,
-        text_secondary: flint_tokens::typed::ColorValue,
-        accent: flint_tokens::typed::ColorValue,
-        border: flint_tokens::typed::ColorValue,
-        border_subtle: flint_tokens::typed::ColorValue,
-        panel_bg: flint_tokens::typed::ColorValue,
+        text_secondary: poodle_tokens::typed::ColorValue,
+        accent: poodle_tokens::typed::ColorValue,
+        border: poodle_tokens::typed::ColorValue,
+        border_subtle: poodle_tokens::typed::ColorValue,
+        panel_bg: poodle_tokens::typed::ColorValue,
         h: Pixels,
         cx: &mut Context<Self>,
     ) -> Div {
@@ -275,10 +275,10 @@ impl PreviewRoot {
     fn render_toggle_group(
         &self,
         label: &'static str,
-        text_secondary: flint_tokens::typed::ColorValue,
+        text_secondary: poodle_tokens::typed::ColorValue,
         options: &[(&str, bool)],
-        accent: flint_tokens::typed::ColorValue,
-        _border: flint_tokens::typed::ColorValue,
+        accent: poodle_tokens::typed::ColorValue,
+        _border: poodle_tokens::typed::ColorValue,
         group_id: &'static str,
         cx: &mut Context<Self>,
     ) -> Div {
@@ -352,9 +352,9 @@ impl PreviewRoot {
     /// State probe checkboxes (disabled, invalid, busy).
     fn render_state_probes(
         &self,
-        text_secondary: flint_tokens::typed::ColorValue,
-        accent: flint_tokens::typed::ColorValue,
-        border: flint_tokens::typed::ColorValue,
+        text_secondary: poodle_tokens::typed::ColorValue,
+        accent: poodle_tokens::typed::ColorValue,
+        border: poodle_tokens::typed::ColorValue,
         cx: &mut Context<Self>,
     ) -> Div {
         let check = |label: &'static str, checked: bool, on_toggle: fn(&mut AppState)| {
@@ -560,7 +560,7 @@ impl PreviewRoot {
                         div()
                             .text_xs()
                             .text_color(color_to_hsla(text_secondary))
-                            .child("Specimen preview — rendered through flint-gpui adapter"),
+                            .child("Specimen preview — rendered through poodle-gpui adapter"),
                     )
                     .child(self.render_component_specimen(comp.slug, cx)),
             );
@@ -577,11 +577,11 @@ impl PreviewRoot {
     fn render_catalogue_landing(
         &self,
         components: &[component_registry::ComponentEntry],
-        _theme: &flint_gpui::GpuiThemeProvider,
+        _theme: &poodle_gpui::GpuiThemeProvider,
         available_h: Pixels,
-        text_secondary: flint_tokens::typed::ColorValue,
-        border: flint_tokens::typed::ColorValue,
-        elevated_bg: flint_tokens::typed::ColorValue,
+        text_secondary: poodle_tokens::typed::ColorValue,
+        border: poodle_tokens::typed::ColorValue,
+        elevated_bg: poodle_tokens::typed::ColorValue,
     ) -> Div {
         let mut grid = div().flex().flex_wrap().gap(px(12.0));
 

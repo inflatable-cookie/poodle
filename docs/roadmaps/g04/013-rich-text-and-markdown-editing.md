@@ -1,10 +1,10 @@
 # g04.013 Rich Text And Markdown Editing
 
 Status: planned
-Owner: Flint Core
+Owner: Poodle Core
 Updated: 2026-03-14
 Depends on: g04.001
-Primary repos: `flint`
+Primary repos: `poodle`
 
 ## Goals
 
@@ -17,8 +17,8 @@ Primary repos: `flint`
 - [ ] write contract for MarkdownEditor: source text binding, toolbar actions
   (bold, italic, heading, link, image, list, code, quote), preview toggle,
   split-view mode, image upload integration
-- [ ] implement MarkdownEditor composite in `@flint/svelte-composites`
-- [ ] implement toolbar with Flint IconButton and ToggleGroup components
+- [ ] implement MarkdownEditor composite in `@poodle/svelte-composites`
+- [ ] implement toolbar with Poodle IconButton and ToggleGroup components
 - [ ] implement markdown preview rendering with sanitization
 - [ ] implement split-view mode (edit + preview side by side)
 - [ ] create MarkdownEditor specimen

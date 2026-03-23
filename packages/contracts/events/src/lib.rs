@@ -1,4 +1,4 @@
-//! Renderer-agnostic semantic event types for Flint.
+//! Renderer-agnostic semantic event types for Poodle.
 //!
 //! These events describe component interactions in terms of user intent rather
 //! than low-level input. Rendering adapters map from their native event systems:
@@ -6,7 +6,7 @@
 //! - **GPUI**: Mouse/keyboard event subscriptions → semantic events
 //! - **Jetstream**: `UiEvent` enum (Clicked, ValueChanged, etc.) → semantic events
 
-/// A semantic event emitted by a Flint component.
+/// A semantic event emitted by a Poodle component.
 ///
 /// Each variant describes a meaningful interaction that both rendering targets
 /// can produce from their native event systems.

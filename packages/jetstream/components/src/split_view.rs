@@ -1,7 +1,7 @@
 //! SplitView — Jetstream split view backed by SplitViewSpec.
 use jetstream_runtime::ui_element::{self, JsEl};
-use flint_jetstream::JetstreamThemeProvider;
-use flint_composites::{SplitOrientation, SplitViewSpec};
+use poodle_jetstream::JetstreamThemeProvider;
+use poodle_composites::{SplitOrientation, SplitViewSpec};
 
 pub fn js_split_view(spec: &SplitViewSpec, _theme: &JetstreamThemeProvider, primary: Option<JsEl>, secondary: Option<JsEl>) -> JsEl {
     let mut el = match spec.orientation {

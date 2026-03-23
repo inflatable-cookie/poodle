@@ -143,7 +143,7 @@ Standalone component. Items can be customized via the `item` slot.
 
 | Property | Value |
 |----------|-------|
-| opacity | `var(--flint-state-opacity-disabled)` |
+| opacity | `var(--poodle-state-opacity-disabled)` |
 | pointer-events | `none` |
 
 ### Item
@@ -155,21 +155,21 @@ Standalone component. Items can be customized via the `item` slot.
 | gap | `0.5rem` |
 | padding | `0.5rem 0.625rem` |
 | border | `0.0625rem solid transparent` |
-| border-radius | `var(--flint-radius-control)` |
-| background | `var(--flint-color-background-surface)` |
+| border-radius | `var(--poodle-radius-control)` |
+| background | `var(--poodle-color-background-surface)` |
 | cursor | `grab` |
-| transition | `background var(--flint-motion-duration-interaction) var(--flint-motion-easing-standard), border-color var(--flint-motion-duration-interaction) var(--flint-motion-easing-standard)` |
+| transition | `background var(--poodle-motion-duration-interaction) var(--poodle-motion-easing-standard), border-color var(--poodle-motion-duration-interaction) var(--poodle-motion-easing-standard)` |
 
 #### Item States
 
 | State | Property | Value |
 |-------|----------|-------|
-| `:hover` | background | `color-mix(in srgb, var(--flint-color-background-elevated) 52%, var(--flint-color-background-surface))` |
-| `:focus-visible` | outline | `var(--flint-border-width-focus) solid var(--flint-color-accent-focusRing)` |
+| `:hover` | background | `color-mix(in srgb, var(--poodle-color-background-elevated) 52%, var(--poodle-color-background-surface))` |
+| `:focus-visible` | outline | `var(--poodle-border-width-focus) solid var(--poodle-color-accent-focusRing)` |
 | `:focus-visible` | outline-offset | `-0.0625rem` |
 | `--dragging` | opacity | `0.4` |
-| `--drop-target` | border-color | `var(--flint-color-accent-base)` |
-| `--drop-target` | background | `color-mix(in srgb, var(--flint-color-accent-base) 8%, var(--flint-color-background-surface))` |
+| `--drop-target` | border-color | `var(--poodle-color-accent-base)` |
+| `--drop-target` | background | `color-mix(in srgb, var(--poodle-color-accent-base) 8%, var(--poodle-color-background-surface))` |
 
 ### Handle
 
@@ -181,7 +181,7 @@ Standalone component. Items can be customized via the `item` slot.
 | flex-shrink | `0` |
 | width | `1rem` |
 | height | `1rem` |
-| color | `var(--flint-color-text-secondary)` |
+| color | `var(--poodle-color-text-secondary)` |
 | cursor | `grab` |
 | SVG icon | 6-dot grip pattern (circles at cx=5/11, cy=4/8/12, r=1.25) |
 
@@ -191,9 +191,9 @@ Standalone component. Items can be customized via the `item` slot.
 |----------|-------|
 | flex | `1` |
 | min-width | `0` |
-| font-family | `var(--flint-typography-body-family)` |
-| font-size | `var(--flint-typography-body-size)` |
-| color | `var(--flint-color-text-primary)` |
+| font-family | `var(--poodle-typography-body-family)` |
+| font-size | `var(--poodle-typography-body-size)` |
+| color | `var(--poodle-color-text-primary)` |
 
 ### Light Theme Overrides
 

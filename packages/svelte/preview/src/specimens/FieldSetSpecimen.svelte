@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { FieldSet, Field, TextInput, Select, Eyebrow } from "@flint/svelte-primitives";
+  import { FieldSet, Field, TextInput, Select, Eyebrow } from "@poodle/svelte-primitives";
 </script>
 
 <div class="specimen">
@@ -123,6 +123,6 @@
   .form-demo {
     display: flex;
     flex-direction: column;
-    gap: var(--flint-space-stack-lg);
+    gap: var(--poodle-space-stack-lg);
   }
 </style>

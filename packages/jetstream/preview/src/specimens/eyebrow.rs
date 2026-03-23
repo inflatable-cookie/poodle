@@ -1,10 +1,10 @@
 //! Eyebrow specimen — small label component.
 
 use jetstream_runtime::ui_element::*;
-use flint_jetstream::JetstreamThemeProvider;
-use flint_jetstream_components::eyebrow::js_eyebrow;
-use flint_jetstream_components::theme_ext::*;
-use flint_primitives::EyebrowSpec;
+use poodle_jetstream::JetstreamThemeProvider;
+use poodle_jetstream_components::eyebrow::js_eyebrow;
+use poodle_jetstream_components::theme_ext::*;
+use poodle_primitives::EyebrowSpec;
 
 pub fn render(theme: &JetstreamThemeProvider) -> JsEl {
     let secondary = resolve_color(theme, "semantic.color.text.secondary");

@@ -1,15 +1,15 @@
 # g05.004 GPUI Action, Text-Entry, And Field Primitives
 
 Status: completed
-Owner: Flint Core
+Owner: Poodle Core
 Updated: 2026-03-12
 Depends on: g05.001, g05.002, g05.003
-Primary repos: `flint`
+Primary repos: `poodle`
 
 ## Goals
 
 - [x] implement the core GPUI action and text-entry primitives
-- [x] keep field semantics aligned with the existing Flint contracts rather than
+- [x] keep field semantics aligned with the existing Poodle contracts rather than
   ad hoc native widget assumptions
 
 ## Execution Checklist

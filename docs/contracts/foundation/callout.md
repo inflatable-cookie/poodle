@@ -84,7 +84,7 @@ type CalloutTone = "neutral" | "info" | "success" | "warning" | "danger" | "pend
 | State | Trigger | Expected Result |
 |-------|---------|-----------------|
 | neutral | `tone="neutral"` (default) | subtle panel background and border |
-| info | `tone="info"` | info-status-tinted fill and border (dedicated blue `--flint-color-status-info` token) |
+| info | `tone="info"` | info-status-tinted fill and border (dedicated blue `--poodle-color-status-info` token) |
 | success | `tone="success"` | success-tinted fill and border |
 | warning | `tone="warning"` | warning-tinted fill and border |
 | danger | `tone="danger"` | danger-tinted fill and border |
@@ -160,53 +160,53 @@ type CalloutTone = "neutral" | "info" | "success" | "warning" | "danger" | "pend
 
 | Property | Value |
 |----------|-------|
-| `--flint-callout-fill` | `color-mix(in srgb, var(--flint-color-background-panel) 94%, transparent)` |
-| `--flint-callout-border` | `color-mix(in srgb, var(--flint-color-border-subtle) 88%, transparent)` |
+| `--poodle-callout-fill` | `color-mix(in srgb, var(--poodle-color-background-panel) 94%, transparent)` |
+| `--poodle-callout-border` | `color-mix(in srgb, var(--poodle-color-border-subtle) 88%, transparent)` |
 | `display` | `grid` |
 | `grid-template-columns` | `minmax(0, 1fr) auto auto` |
 | `align-items` | `center` |
-| `gap` | `var(--flint-space-inline-md)` |
-| `padding` | `var(--flint-space-panel-y) var(--flint-space-panel-x)` |
-| `border` | `0.0625rem solid var(--flint-callout-border)` |
-| `border-radius` | `var(--flint-radius-surface)` |
-| `background` | `var(--flint-callout-fill)` |
-| `--flint-surface` | `var(--flint-callout-fill)` |
-| `color` | `var(--flint-color-text-primary)` |
+| `gap` | `var(--poodle-space-inline-md)` |
+| `padding` | `var(--poodle-space-panel-y) var(--poodle-space-panel-x)` |
+| `border` | `0.0625rem solid var(--poodle-callout-border)` |
+| `border-radius` | `var(--poodle-radius-surface)` |
+| `background` | `var(--poodle-callout-fill)` |
+| `--poodle-surface` | `var(--poodle-callout-fill)` |
+| `color` | `var(--poodle-color-text-primary)` |
 
 ### Root — tone: info
 
 | Property | Value |
 |----------|-------|
-| `--flint-callout-fill` | `color-mix(in srgb, var(--flint-color-status-info, #3b82f6) 10%, var(--flint-color-background-panel))` |
-| `--flint-callout-border` | `color-mix(in srgb, var(--flint-color-status-info, #3b82f6) 34%, var(--flint-color-border-default))` |
+| `--poodle-callout-fill` | `color-mix(in srgb, var(--poodle-color-status-info, #3b82f6) 10%, var(--poodle-color-background-panel))` |
+| `--poodle-callout-border` | `color-mix(in srgb, var(--poodle-color-status-info, #3b82f6) 34%, var(--poodle-color-border-default))` |
 
 ### Root — tone: success
 
 | Property | Value |
 |----------|-------|
-| `--flint-callout-fill` | `color-mix(in srgb, var(--flint-color-status-success) 10%, var(--flint-color-background-panel))` |
-| `--flint-callout-border` | `color-mix(in srgb, var(--flint-color-status-success) 34%, var(--flint-color-border-default))` |
+| `--poodle-callout-fill` | `color-mix(in srgb, var(--poodle-color-status-success) 10%, var(--poodle-color-background-panel))` |
+| `--poodle-callout-border` | `color-mix(in srgb, var(--poodle-color-status-success) 34%, var(--poodle-color-border-default))` |
 
 ### Root — tone: warning
 
 | Property | Value |
 |----------|-------|
-| `--flint-callout-fill` | `color-mix(in srgb, var(--flint-color-status-warning) 10%, var(--flint-color-background-panel))` |
-| `--flint-callout-border` | `color-mix(in srgb, var(--flint-color-status-warning) 34%, var(--flint-color-border-default))` |
+| `--poodle-callout-fill` | `color-mix(in srgb, var(--poodle-color-status-warning) 10%, var(--poodle-color-background-panel))` |
+| `--poodle-callout-border` | `color-mix(in srgb, var(--poodle-color-status-warning) 34%, var(--poodle-color-border-default))` |
 
 ### Root — tone: danger
 
 | Property | Value |
 |----------|-------|
-| `--flint-callout-fill` | `color-mix(in srgb, var(--flint-color-status-danger) 10%, var(--flint-color-background-panel))` |
-| `--flint-callout-border` | `color-mix(in srgb, var(--flint-color-status-danger) 34%, var(--flint-color-border-default))` |
+| `--poodle-callout-fill` | `color-mix(in srgb, var(--poodle-color-status-danger) 10%, var(--poodle-color-background-panel))` |
+| `--poodle-callout-border` | `color-mix(in srgb, var(--poodle-color-status-danger) 34%, var(--poodle-color-border-default))` |
 
 ### Root — tone: pending
 
 | Property | Value |
 |----------|-------|
-| `--flint-callout-fill` | `color-mix(in srgb, var(--flint-color-accent-base) 8%, var(--flint-color-background-panel))` |
-| `--flint-callout-border` | `color-mix(in srgb, var(--flint-color-accent-base) 26%, var(--flint-color-border-default))` |
+| `--poodle-callout-fill` | `color-mix(in srgb, var(--poodle-color-accent-base) 8%, var(--poodle-color-background-panel))` |
+| `--poodle-callout-border` | `color-mix(in srgb, var(--poodle-color-accent-base) 26%, var(--poodle-color-border-default))` |
 
 ### Body `.callout__body`
 
@@ -218,7 +218,7 @@ type CalloutTone = "neutral" | "info" | "success" | "warning" | "danger" | "pend
 |----------|-------|
 | `display` | `grid` |
 | `grid-template-columns` | `auto minmax(0, 1fr)` |
-| `gap` | `var(--flint-space-inline-md)` |
+| `gap` | `var(--poodle-space-inline-md)` |
 | `min-width` | `0` |
 
 ### Icon `.callout__icon`
@@ -231,8 +231,8 @@ type CalloutTone = "neutral" | "info" | "success" | "warning" | "danger" | "pend
 | `width` | `1.375rem` |
 | `height` | `1.375rem` |
 | `border-radius` | `999px` |
-| `background` | `color-mix(in srgb, var(--flint-color-background-surface) 78%, transparent)` |
-| `font-family` | `var(--flint-typography-code-family)` |
+| `background` | `color-mix(in srgb, var(--poodle-color-background-surface) 78%, transparent)` |
+| `font-family` | `var(--poodle-typography-code-family)` |
 | `font-size` | `0.75rem` |
 | `font-weight` | `700` |
 | `line-height` | `1` |
@@ -250,7 +250,7 @@ type CalloutTone = "neutral" | "info" | "success" | "warning" | "danger" | "pend
 | Property | Value |
 |----------|-------|
 | `margin` | `0` |
-| `color` | `var(--flint-color-text-secondary)` |
+| `color` | `var(--poodle-color-text-secondary)` |
 | `font-size` | `0.8125rem` |
 | `line-height` | `1.5` |
 
@@ -258,9 +258,9 @@ type CalloutTone = "neutral" | "info" | "success" | "warning" | "danger" | "pend
 
 | Property | Value |
 |----------|-------|
-| `font-family` | `var(--flint-typography-label-family)` |
-| `font-size` | `var(--flint-typography-label-size)` |
-| `line-height` | `var(--flint-typography-label-lineHeight)` |
+| `font-family` | `var(--poodle-typography-label-family)` |
+| `font-size` | `var(--poodle-typography-label-size)` |
+| `line-height` | `var(--poodle-typography-label-lineHeight)` |
 
 ### Actions `.callout__actions`
 
@@ -268,7 +268,7 @@ type CalloutTone = "neutral" | "info" | "success" | "warning" | "danger" | "pend
 |----------|-------|
 | `display` | `flex` |
 | `flex-wrap` | `wrap` |
-| `gap` | `var(--flint-space-inline-sm)` |
+| `gap` | `var(--poodle-space-inline-sm)` |
 | `align-items` | `center` |
 | `justify-content` | `flex-end` |
 
@@ -281,18 +281,18 @@ type CalloutTone = "neutral" | "info" | "success" | "warning" | "danger" | "pend
 | `min-height` | `0` |
 | `padding` | `0` |
 | `border` | `0` |
-| `border-radius` | `calc(var(--flint-radius-control) - 0.0625rem)` |
+| `border-radius` | `calc(var(--poodle-radius-control) - 0.0625rem)` |
 | `background` | `transparent` |
-| `color` | `var(--flint-color-text-secondary)` |
+| `color` | `var(--poodle-color-text-secondary)` |
 | `cursor` | `pointer` |
-| `margin-right` | `calc(-0.5 * var(--flint-space-panel-x))` |
+| `margin-right` | `calc(-0.5 * var(--poodle-space-panel-x))` |
 | `font` | `inherit` |
 
 ### Dismiss — focus-visible
 
 | Property | Value |
 |----------|-------|
-| `outline` | `var(--flint-border-width-focus) solid var(--flint-color-accent-focusRing)` |
+| `outline` | `var(--poodle-border-width-focus) solid var(--poodle-color-accent-focusRing)` |
 | `outline-offset` | `0.125rem` |
 
 ## 9. Svelte Notes
@@ -302,7 +302,7 @@ type CalloutTone = "neutral" | "info" | "success" | "warning" | "danger" | "pend
 - Default icon is rendered based on tone mapping when no icon slot content
   is provided
 - `data-tone` attribute on root for CSS tone targeting
-- Custom properties `--flint-callout-fill` and `--flint-callout-border` are set
+- Custom properties `--poodle-callout-fill` and `--poodle-callout-border` are set
   per tone variant
 - Content slot projects into `.callout__content` after the optional title
 - Actions slot and dismiss button conditionally rendered
@@ -311,7 +311,7 @@ type CalloutTone = "neutral" | "info" | "success" | "warning" | "danger" | "pend
 
 ## 10. GPUI Notes
 
-- expected crate/module surface: `flint_gpui::primitives::callout`
+- expected crate/module surface: `poodle_gpui::primitives::callout`
 - When announceMode is assertive, expose as an alert; otherwise keep
   informational and non-announcing
 - Icon badge uses circular border-radius (999px)

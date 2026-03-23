@@ -1,17 +1,17 @@
-# Flint Svelte Tokens
+# Poodle Svelte Tokens
 
-Public Svelte-facing token surface for emitted Flint token artifacts.
+Public Svelte-facing token surface for emitted Poodle token artifacts.
 
 ## Public Surface
 
-- root import: `@flint/svelte-tokens`
-- runtime helpers: `@flint/svelte-tokens/runtime`
-- CSS helper exports: `@flint/svelte-tokens/css`
-- CSS asset export: `@flint/svelte-tokens/styles.css`
-- legacy-compatible CSS asset export: `@flint/svelte-tokens/css/flint-tokens.css`
-- generated themes: `@flint/svelte-tokens/themes`
-- generated metadata: `@flint/svelte-tokens/metadata`
-- relative-unit helpers: `@flint/svelte-tokens/units`
+- root import: `@poodle/svelte-tokens`
+- runtime helpers: `@poodle/svelte-tokens/runtime`
+- CSS helper exports: `@poodle/svelte-tokens/css`
+- CSS asset export: `@poodle/svelte-tokens/styles.css`
+- legacy-compatible CSS asset export: `@poodle/svelte-tokens/css/poodle-tokens.css`
+- generated themes: `@poodle/svelte-tokens/themes`
+- generated metadata: `@poodle/svelte-tokens/metadata`
+- relative-unit helpers: `@poodle/svelte-tokens/units`
 
 ## Stability Notes
 

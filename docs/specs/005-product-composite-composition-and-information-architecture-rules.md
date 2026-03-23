@@ -6,7 +6,7 @@ Depends on: `002-component-contract-template-and-parity-rules.md`, `003-accessib
 
 ## Purpose
 
-Freeze the first rules for product-style composites so Flint can support
+Freeze the first rules for product-style composites so Poodle can support
 Underlay-style applications and Loophole-adjacent product surfaces without
 smuggling app-specific workflows into the shared contract layer.
 

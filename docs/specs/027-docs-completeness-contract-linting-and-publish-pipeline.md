@@ -6,7 +6,7 @@ Depends on: `020-docs-site-example-and-component-discoverability-rules.md`, `024
 
 ## Purpose
 
-Freeze what “docs complete enough to trust” means for Flint right now, what
+Freeze what “docs complete enough to trust” means for Poodle right now, what
 contract files must satisfy structurally before they count as source of truth,
 and what the repo may honestly call a publishable docs artifact while the
 larger docs-site program is still preview-driven.
@@ -101,7 +101,7 @@ independently as the Svelte layer grows.
 
 ## Publish Pipeline Rule
 
-Flint does not yet claim a public multi-version docs website.
+Poodle does not yet claim a public multi-version docs website.
 
 The current publishable artifact is narrower and internal:
 

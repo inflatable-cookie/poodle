@@ -1,6 +1,6 @@
 <script lang="ts">
-  import { Eyebrow, Region } from "@flint/svelte-primitives";
-  import { SplitView } from "@flint/svelte-composites";
+  import { Eyebrow, Region } from "@poodle/svelte-primitives";
+  import { SplitView } from "@poodle/svelte-composites";
 </script>
 
 <div class="specimen">
@@ -137,8 +137,8 @@
 
   .specimen__frame {
     height: 10rem;
-    border: 0.0625rem solid var(--flint-color-border-subtle);
-    border-radius: var(--flint-radius-surface);
+    border: 0.0625rem solid var(--poodle-color-border-subtle);
+    border-radius: var(--poodle-radius-surface);
     overflow: visible;
   }
 
@@ -151,7 +151,7 @@
     height: 100%;
   }
 
-  .specimen__fill :global(.flint-region) {
+  .specimen__fill :global(.poodle-region) {
     height: 100%;
     min-height: 0;
   }

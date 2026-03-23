@@ -10,7 +10,7 @@
 - froze the documented-delta approval posture for cross-runtime and bridge-layer
   differences
 - froze the downstream extension contract so Loophole and future apps extend
-  Flint above the canonical layers instead of redefining them in place
+  Poodle above the canonical layers instead of redefining them in place
 - recorded the stable `g01` baseline that `g02` can now treat as established
 - updated the roadmap and index surfaces so `g01` reads as complete and
   `g02.001` is the explicit next task

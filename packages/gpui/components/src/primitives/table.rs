@@ -1,6 +1,6 @@
 use gpui::*;
-use flint_gpui::GpuiThemeProvider;
-use flint_primitives::{ColumnAlign, TableColumn, TableRow, TableSpec};
+use poodle_gpui::GpuiThemeProvider;
+use poodle_primitives::{ColumnAlign, TableColumn, TableRow, TableSpec};
 
 use crate::theme_ext::{color_mix, resolve_color, resolve_radius};
 

@@ -1,6 +1,6 @@
 use gpui::*;
-use flint_gpui::GpuiThemeProvider;
-use flint_primitives::NavCardSpec;
+use poodle_gpui::GpuiThemeProvider;
+use poodle_primitives::NavCardSpec;
 use crate::theme_ext::{resolve_color, resolve_opacity, resolve_radius};
 
 pub struct NavCard {

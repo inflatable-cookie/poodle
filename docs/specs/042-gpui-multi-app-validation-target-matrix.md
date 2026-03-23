@@ -18,7 +18,7 @@ cannot currently prove.
 When runnable downstream GPUI apps are absent, multi-app validation must exist
 as an explicit target matrix plus an assumption inventory.
 
-Flint should not claim production-ready GPUI multi-app validation from token
+Poodle should not claim production-ready GPUI multi-app validation from token
 artifacts or contract notes alone.
 
 ## Validation Target Rule
@@ -61,13 +61,13 @@ The matrix must explicitly challenge these assumption classes:
 
 ## Honesty Rule
 
-Flint may say:
+Poodle may say:
 
 - a GPUI multi-app validation target matrix exists
 - hidden shared-layer assumptions are explicitly named
 - blockers to stronger GPUI claims are recorded
 
-Flint may not say:
+Poodle may not say:
 
 - multiple GPUI apps are already adopted in production
 - GPUI component parity is proven by the current repo

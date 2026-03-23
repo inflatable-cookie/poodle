@@ -123,9 +123,9 @@ Updated: 2026-03-15
 
 ## 10. GPUI Notes
 
-- expected crate/module surface: `flint_gpui::components::nav_card_grid`
+- expected crate/module surface: `poodle_gpui::components::nav_card_grid`
 - Spec struct: `NavCardGridSpec` in primitives crate
-- Component struct: `FlintNavCardGrid` in components crate
+- Component struct: `PoodleNavCardGrid` in components crate
 - Grid layout maps to GPUI's layout system with equal-width columns
 - Responsive breakpoint uses GPUI layout measurements for available width
 - Navigation landmark semantics may map to GPUI's accessibility tree

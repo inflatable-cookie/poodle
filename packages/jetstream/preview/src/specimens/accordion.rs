@@ -1,10 +1,10 @@
 //! Accordion specimen.
 
 use jetstream_runtime::ui_element::*;
-use flint_jetstream::JetstreamThemeProvider;
-use flint_jetstream_components::accordion::js_accordion;
-use flint_jetstream_components::theme_ext::*;
-use flint_primitives::{AccordionItemSpec, AccordionSelectionValue, AccordionSpec};
+use poodle_jetstream::JetstreamThemeProvider;
+use poodle_jetstream_components::accordion::js_accordion;
+use poodle_jetstream_components::theme_ext::*;
+use poodle_primitives::{AccordionItemSpec, AccordionSelectionValue, AccordionSpec};
 
 pub fn render(theme: &JetstreamThemeProvider) -> JsEl {
     let secondary = resolve_color(theme, "semantic.color.text.secondary");
@@ -39,7 +39,7 @@ pub fn render(theme: &JetstreamThemeProvider) -> JsEl {
                 AccordionItemSpec {
                     value: "tokens".into(),
                     label: "Design tokens".into(),
-                    description: Some("Components consume semantic tokens like --flint-color-text-primary rather than hard-coded values.".into()),
+                    description: Some("Components consume semantic tokens like --poodle-color-text-primary rather than hard-coded values.".into()),
                     is_disabled: false,
                 },
                 AccordionItemSpec {

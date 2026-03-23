@@ -1,7 +1,7 @@
 <script lang="ts">
   import { createEventDispatcher } from "svelte";
 
-  import { Icon } from "@flint/svelte-primitives";
+  import { Icon } from "@poodle/svelte-primitives";
 
   export let items: Array<{ id: string; label: string }> = [];
   export let selectionMode: "single" | "multiple" = "multiple";
@@ -53,63 +53,63 @@
 <style>
   .selection-summary {
     display: grid;
-    gap: var(--flint-space-stack-sm);
-    padding: var(--flint-space-panel-y) var(--flint-space-panel-x);
+    gap: var(--poodle-space-stack-sm);
+    padding: var(--poodle-space-panel-y) var(--poodle-space-panel-x);
     border: 0.0625rem solid transparent;
-    border-radius: var(--flint-radius-surface);
-    background: color-mix(in srgb, var(--flint-color-background-panel) 94%, transparent);
-    font-size: var(--flint-typography-label-size, 0.75rem);
+    border-radius: var(--poodle-radius-surface);
+    background: color-mix(in srgb, var(--poodle-color-background-panel) 94%, transparent);
+    font-size: var(--poodle-typography-label-size, 0.75rem);
   }
 
   .selection-summary__header {
     display: flex;
     justify-content: space-between;
-    gap: var(--flint-space-inline-md);
+    gap: var(--poodle-space-inline-md);
     align-items: center;
   }
 
   .selection-summary__header button,
   .selection-summary__chip {
     border: 0.0625rem solid transparent;
-    border-radius: var(--flint-radius-control);
-    background: color-mix(in srgb, var(--flint-color-background-surface) 76%, transparent);
-    color: var(--flint-color-text-primary);
+    border-radius: var(--poodle-radius-control);
+    background: color-mix(in srgb, var(--poodle-color-background-surface) 76%, transparent);
+    color: var(--poodle-color-text-primary);
     cursor: pointer;
     font: inherit;
   }
 
   .selection-summary__header button {
-    min-height: var(--flint-size-control-height);
-    padding: 0 var(--flint-space-control-x);
+    min-height: var(--poodle-size-control-height);
+    padding: 0 var(--poodle-space-control-x);
   }
 
   .selection-summary__chips {
     display: flex;
     flex-wrap: wrap;
-    gap: var(--flint-space-inline-sm);
+    gap: var(--poodle-space-inline-sm);
   }
 
   .selection-summary__chip {
     display: inline-flex;
-    gap: var(--flint-space-inline-md);
+    gap: var(--poodle-space-inline-md);
     align-items: center;
-    min-height: calc(var(--flint-size-control-height) - 0.25rem);
+    min-height: calc(var(--poodle-size-control-height) - 0.25rem);
     padding: 0 0.75rem;
   }
 
   .selection-summary__overflow {
-    color: var(--flint-color-text-secondary);
+    color: var(--poodle-color-text-secondary);
     font-size: 0.8125rem;
     line-height: 2rem;
     padding: 0 0.625rem;
-    border-radius: var(--flint-radius-control);
-    background: color-mix(in srgb, var(--flint-color-background-surface) 58%, transparent);
+    border-radius: var(--poodle-radius-control);
+    background: color-mix(in srgb, var(--poodle-color-background-surface) 58%, transparent);
   }
 
   :global([data-theme="light"]) .selection-summary {
-    border-color: color-mix(in srgb, var(--flint-color-border-default) 14%, transparent);
+    border-color: color-mix(in srgb, var(--poodle-color-border-default) 14%, transparent);
     box-shadow:
-      inset 0 0 0 0.0625rem color-mix(in srgb, var(--flint-color-border-subtle) 32%, transparent),
+      inset 0 0 0 0.0625rem color-mix(in srgb, var(--poodle-color-border-subtle) 32%, transparent),
       0 0.375rem 1rem rgba(49, 66, 85, 0.03);
   }
 </style>

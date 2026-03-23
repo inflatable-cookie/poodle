@@ -1,13 +1,13 @@
 [package]
-name = "flint-events"
+name = "poodle-events"
 version = "0.0.0"
 edition = "2021"
-description = "Renderer-agnostic semantic event types for Flint multi-renderer targets."
+description = "Renderer-agnostic semantic event types for Poodle multi-renderer targets."
 
 [lib]
 path = "src/lib.rs"
 
-[package.metadata.flint]
+[package.metadata.poodle]
 public-intent = true
 channel = "preview"
 stability = "pre-release"

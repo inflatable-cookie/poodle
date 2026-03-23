@@ -7,15 +7,15 @@
 //! For now they are standalone structs that mirror GPUI's styling API, allowing
 //! the mapping logic to be tested and compiled without a GPUI runtime dependency.
 
-use flint_layout::{
+use poodle_layout::{
     CrossAxisAlignment, LayoutDirection, LayoutEdges, LayoutIntent, LayoutOverflow,
     LayoutSizing, MainAxisAlignment,
 };
-use flint_style::{
+use poodle_style::{
     BorderDescriptor, CornerRadii, CursorHint, FontFamily, StyleDescriptor,
     TypographyDescriptor,
 };
-use flint_tokens::typed::{ColorValue, ShadowValue};
+use poodle_tokens::typed::{ColorValue, ShadowValue};
 
 /// GPUI-compatible RGBA color (mirrors `gpui::Rgba` / `gpui::Hsla`).
 #[derive(Debug, Clone, Copy, PartialEq)]
@@ -387,9 +387,9 @@ pub fn map_style(desc: &StyleDescriptor) -> GpuiStyle {
 
 #[cfg(test)]
 mod tests {
-    use flint_layout::{LayoutDirection, LayoutEdges, LayoutIntent, LayoutSizing, MainAxisAlignment, CrossAxisAlignment};
-    use flint_style::{CursorHint, StyleDescriptor, TypographyDescriptor, FontFamily, CornerRadii};
-    use flint_tokens::typed::ColorValue;
+    use poodle_layout::{LayoutDirection, LayoutEdges, LayoutIntent, LayoutSizing, MainAxisAlignment, CrossAxisAlignment};
+    use poodle_style::{CursorHint, StyleDescriptor, TypographyDescriptor, FontFamily, CornerRadii};
+    use poodle_tokens::typed::ColorValue;
 
     use super::*;
 

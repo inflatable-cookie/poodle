@@ -5,9 +5,9 @@
 //! PanelTabsSpec, ProjectHeaderSpec, ShellStatusBarSpec, SplitViewSpec,
 //! SurfaceTabsSpec, WorkspaceShellSpec
 
-use flint_adapter::{RenderComponent, ThemeProvider};
-use flint_style::StyleDescriptor;
-use flint_workstation::{
+use poodle_adapter::{RenderComponent, ThemeProvider};
+use poodle_style::StyleDescriptor;
+use poodle_workstation::{
     ActionDiscoveryPanelSpec, AppHeaderSpec, CommandPaletteShellSpec, CommandPaletteSpec,
     DockRegionSpec, PanelHeaderSpec, PanelSurfaceSpec, PanelTabsSpec, ProjectHeaderSpec,
     ShellStatusBarSpec, SplitViewSpec, SurfaceTabsSpec, WorkspaceShellSpec,
@@ -122,9 +122,9 @@ impl RenderComponent<WorkspaceShellSpec> for GpuiAdapter {
 
 #[cfg(test)]
 mod tests {
-    use flint_adapter::RenderComponent;
-    use flint_style::StyleDescriptor;
-    use flint_workstation::*;
+    use poodle_adapter::RenderComponent;
+    use poodle_style::StyleDescriptor;
+    use poodle_workstation::*;
     use crate::{GpuiAdapter, theme::GpuiThemeProvider};
 
     fn a() -> GpuiAdapter { GpuiAdapter::new(GpuiThemeProvider::default()) }

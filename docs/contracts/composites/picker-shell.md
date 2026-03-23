@@ -152,8 +152,8 @@ No internal state. PickerShell is a layout container.
 
 ### Sizing
 
-- gap between sections: `--flint-space-stack-md`
-- padding: `--flint-space-panel-y` / `--flint-space-panel-x`
+- gap between sections: `--poodle-space-stack-md`
+- padding: `--poodle-space-panel-y` / `--poodle-space-panel-x`
 - header uses flex wrap with `justify-content: space-between`
 - state area has additional padding (1.5x panel-y) and inner border
 
@@ -178,25 +178,25 @@ No internal state. PickerShell is a layout container.
 | Property | Value |
 |----------|-------|
 | display | `grid` |
-| gap | `var(--flint-space-stack-md)` |
-| padding | `var(--flint-space-panel-y) var(--flint-space-panel-x)` |
-| border | `0.0625rem solid var(--flint-color-border-subtle)` |
-| border-radius | `var(--flint-radius-surface)` |
-| background | `color-mix(in srgb, var(--flint-color-background-panel) 94%, transparent)` |
+| gap | `var(--poodle-space-stack-md)` |
+| padding | `var(--poodle-space-panel-y) var(--poodle-space-panel-x)` |
+| border | `0.0625rem solid var(--poodle-color-border-subtle)` |
+| border-radius | `var(--poodle-radius-surface)` |
+| background | `color-mix(in srgb, var(--poodle-color-background-panel) 94%, transparent)` |
 
 #### Variant: Popover (`[data-variant="popover"]`)
 
 | Property | Value |
 |----------|-------|
 | max-width | `30rem` |
-| box-shadow | `var(--flint-elevation-overlay)` |
+| box-shadow | `var(--poodle-elevation-overlay)` |
 
 #### Variant: Modal (`[data-variant="modal"]`)
 
 | Property | Value |
 |----------|-------|
-| box-shadow | `var(--flint-elevation-dialog)` |
-| background | `color-mix(in srgb, var(--flint-color-background-elevated) 96%, transparent)` |
+| box-shadow | `var(--poodle-elevation-dialog)` |
+| background | `color-mix(in srgb, var(--poodle-color-background-elevated) 96%, transparent)` |
 
 ### Header
 
@@ -205,7 +205,7 @@ No internal state. PickerShell is a layout container.
 | display | `flex` |
 | flex-wrap | `wrap` |
 | justify-content | `space-between` |
-| gap | `var(--flint-space-inline-md)` |
+| gap | `var(--poodle-space-inline-md)` |
 
 ### Title (h3)
 
@@ -219,7 +219,7 @@ No internal state. PickerShell is a layout container.
 
 | Property | Value |
 |----------|-------|
-| color | `var(--flint-color-text-secondary)` |
+| color | `var(--poodle-color-text-secondary)` |
 | font-size | `0.8125rem` |
 | line-height | `1.5` |
 
@@ -235,7 +235,7 @@ No internal state. PickerShell is a layout container.
 |----------|-------|
 | display | `flex` |
 | flex-wrap | `wrap` |
-| gap | `var(--flint-space-inline-sm)` |
+| gap | `var(--poodle-space-inline-sm)` |
 | align-items | `baseline` |
 
 ### State Area
@@ -243,11 +243,11 @@ No internal state. PickerShell is a layout container.
 | Property | Value |
 |----------|-------|
 | display | `grid` |
-| gap | `var(--flint-space-stack-sm)` |
-| padding | `calc(var(--flint-space-panel-y) * 1.5) var(--flint-space-panel-x)` |
-| border | `0.0625rem solid var(--flint-color-border-subtle)` |
-| border-radius | `var(--flint-radius-surface)` |
-| background | `color-mix(in srgb, var(--flint-color-background-surface) 86%, transparent)` |
+| gap | `var(--poodle-space-stack-sm)` |
+| padding | `calc(var(--poodle-space-panel-y) * 1.5) var(--poodle-space-panel-x)` |
+| border | `0.0625rem solid var(--poodle-color-border-subtle)` |
+| border-radius | `var(--poodle-radius-surface)` |
+| background | `color-mix(in srgb, var(--poodle-color-background-surface) 86%, transparent)` |
 
 ### Light Theme Overrides
 
@@ -261,7 +261,7 @@ None.
 
 ## 12. GPUI Notes
 
-- expected crate/module surface: `flint_gpui::composites::picker_shell`
+- expected crate/module surface: `poodle_gpui::composites::picker_shell`
 - implementation should preserve slot-equivalent regions as child containers
 
 ## 13. Parity Checklist

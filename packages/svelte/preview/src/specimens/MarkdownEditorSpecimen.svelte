@@ -1,6 +1,6 @@
 <script lang="ts">
-  import { MarkdownEditor } from "@flint/svelte-composites";
-  import { Eyebrow } from "@flint/svelte-primitives";
+  import { MarkdownEditor } from "@poodle/svelte-composites";
+  import { Eyebrow } from "@poodle/svelte-primitives";
 
   let content = `# Hello World
 
@@ -14,7 +14,7 @@ This is a **markdown editor** with *formatting* support.
 
 > This is a blockquote
 
-Check out [Flint](https://example.com) for more.`;
+Check out [Poodle](https://example.com) for more.`;
 
   let emptyContent = "";
 </script>

@@ -1,7 +1,7 @@
 <script lang="ts">
   import { createEventDispatcher, tick } from "svelte";
 
-  import { Icon } from "@flint/svelte-primitives";
+  import { Icon } from "@poodle/svelte-primitives";
 
   export let value = "";
   export let placeholder = "Write markdown...";
@@ -166,14 +166,14 @@
 
 <style>
   .md-editor {
-    border: 0.0625rem solid var(--flint-color-border-default);
-    border-radius: var(--flint-radius-surface);
-    background: var(--flint-color-background-surface);
+    border: 0.0625rem solid var(--poodle-color-border-default);
+    border-radius: var(--poodle-radius-surface);
+    background: var(--poodle-color-background-surface);
     overflow: hidden;
   }
 
   .md-editor--disabled {
-    opacity: var(--flint-state-opacity-disabled);
+    opacity: var(--poodle-state-opacity-disabled);
     pointer-events: none;
   }
 
@@ -183,8 +183,8 @@
     justify-content: space-between;
     gap: 0.5rem;
     padding: 0.375rem 0.5rem;
-    border-bottom: 0.0625rem solid var(--flint-color-border-subtle);
-    background: color-mix(in srgb, var(--flint-color-background-elevated) 72%, transparent);
+    border-bottom: 0.0625rem solid var(--poodle-color-border-subtle);
+    background: color-mix(in srgb, var(--poodle-color-background-elevated) 72%, transparent);
     flex-wrap: wrap;
   }
 
@@ -201,24 +201,24 @@
     height: 1.75rem;
     padding: 0;
     border: 0;
-    border-radius: var(--flint-radius-control);
+    border-radius: var(--poodle-radius-control);
     background: transparent;
-    color: var(--flint-color-text-secondary);
+    color: var(--poodle-color-text-secondary);
     cursor: pointer;
-    font-family: var(--flint-typography-code-family);
+    font-family: var(--poodle-typography-code-family);
     font-size: 0.75rem;
     font-weight: 600;
     line-height: 1;
-    transition: background var(--flint-motion-duration-interaction) var(--flint-motion-easing-standard);
+    transition: background var(--poodle-motion-duration-interaction) var(--poodle-motion-easing-standard);
   }
 
   .md-editor__tool-btn:hover:not(:disabled) {
-    background: color-mix(in srgb, var(--flint-color-accent-base) 12%, transparent);
-    color: var(--flint-color-text-primary);
+    background: color-mix(in srgb, var(--poodle-color-accent-base) 12%, transparent);
+    color: var(--poodle-color-text-primary);
   }
 
   .md-editor__tool-btn:focus-visible {
-    outline: var(--flint-border-width-focus) solid var(--flint-color-accent-focusRing);
+    outline: var(--poodle-border-width-focus) solid var(--poodle-color-accent-focusRing);
     outline-offset: 0.0625rem;
   }
 
@@ -230,8 +230,8 @@
   .md-editor__modes {
     display: flex;
     gap: 0.125rem;
-    border: 0.0625rem solid var(--flint-color-border-default);
-    border-radius: var(--flint-radius-control);
+    border: 0.0625rem solid var(--poodle-color-border-default);
+    border-radius: var(--poodle-radius-control);
     overflow: hidden;
   }
 
@@ -239,21 +239,21 @@
     padding: 0.1875rem 0.5rem;
     border: 0;
     background: transparent;
-    color: var(--flint-color-text-secondary);
+    color: var(--poodle-color-text-secondary);
     cursor: pointer;
     font: inherit;
     font-size: 0.6875rem;
     line-height: 1;
-    transition: background var(--flint-motion-duration-interaction) var(--flint-motion-easing-standard);
+    transition: background var(--poodle-motion-duration-interaction) var(--poodle-motion-easing-standard);
   }
 
   .md-editor__mode-btn:hover {
-    background: color-mix(in srgb, var(--flint-color-background-elevated) 72%, transparent);
+    background: color-mix(in srgb, var(--poodle-color-background-elevated) 72%, transparent);
   }
 
   .md-editor__mode-btn.active {
-    background: color-mix(in srgb, var(--flint-color-accent-base) 16%, transparent);
-    color: var(--flint-color-text-primary);
+    background: color-mix(in srgb, var(--poodle-color-accent-base) 16%, transparent);
+    color: var(--poodle-color-text-primary);
   }
 
   .md-editor__body {
@@ -266,7 +266,7 @@
 
   .md-editor__body[data-mode="split"] .md-editor__textarea {
     flex: 1;
-    border-right: 0.0625rem solid var(--flint-color-border-subtle);
+    border-right: 0.0625rem solid var(--poodle-color-border-subtle);
   }
 
   .md-editor__body[data-mode="split"] .md-editor__preview {
@@ -279,8 +279,8 @@
     padding: 0.75rem;
     border: 0;
     background: transparent;
-    color: var(--flint-color-text-primary);
-    font-family: var(--flint-typography-code-family);
+    color: var(--poodle-color-text-primary);
+    font-family: var(--poodle-typography-code-family);
     font-size: 0.8125rem;
     line-height: 1.6;
     resize: vertical;
@@ -288,16 +288,16 @@
   }
 
   .md-editor__textarea::placeholder {
-    color: var(--flint-color-text-tertiary);
+    color: var(--poodle-color-text-tertiary);
   }
 
   .md-editor__preview {
     flex: 1;
     padding: 0.75rem;
-    font-family: var(--flint-typography-body-family);
+    font-family: var(--poodle-typography-body-family);
     font-size: 0.875rem;
     line-height: 1.6;
-    color: var(--flint-color-text-primary);
+    color: var(--poodle-color-text-primary);
     overflow-y: auto;
   }
 
@@ -329,17 +329,17 @@
 
   .md-editor__preview :global(code) {
     padding: 0.125rem 0.25rem;
-    border-radius: var(--flint-radius-control);
-    background: color-mix(in srgb, var(--flint-color-background-elevated) 72%, transparent);
-    font-family: var(--flint-typography-code-family);
+    border-radius: var(--poodle-radius-control);
+    background: color-mix(in srgb, var(--poodle-color-background-elevated) 72%, transparent);
+    font-family: var(--poodle-typography-code-family);
     font-size: 0.8125rem;
   }
 
   .md-editor__preview :global(blockquote) {
     margin: 0 0 0.5rem;
     padding: 0.375rem 0.75rem;
-    border-left: 0.1875rem solid var(--flint-color-border-default);
-    color: var(--flint-color-text-secondary);
+    border-left: 0.1875rem solid var(--poodle-color-border-default);
+    color: var(--poodle-color-text-secondary);
   }
 
   .md-editor__preview :global(li) {
@@ -350,17 +350,17 @@
 
   .md-editor__preview :global(hr) {
     border: 0;
-    border-top: 0.0625rem solid var(--flint-color-border-subtle);
+    border-top: 0.0625rem solid var(--poodle-color-border-subtle);
     margin: 0.75rem 0;
   }
 
   .md-editor__preview :global(a) {
-    color: var(--flint-color-accent-default, #6366f1);
+    color: var(--poodle-color-accent-default, #6366f1);
     text-decoration: underline;
   }
 
   .md-editor__preview-empty {
-    color: var(--flint-color-text-tertiary);
+    color: var(--poodle-color-text-tertiary);
     font-style: italic;
     margin: 0;
   }

@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { ColorPicker, Eyebrow } from "@flint/svelte-primitives";
+  import { ColorPicker, Eyebrow } from "@poodle/svelte-primitives";
 
   let color = "#6366f1";
   let alphaColor = "#3b82f6";

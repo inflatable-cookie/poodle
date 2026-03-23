@@ -1,14 +1,14 @@
 # AGENTS
 
-Scope: whole `flint/` repository.
+Scope: whole `poodle/` repository.
 
 ## Hard Rules
 
-- Treat `docs/` as the authority for Flint vision, architecture, roadmap, and execution status.
-- Keep Flint focused on generalized tokens, primitives, and reusable composites; do not fold app-specific DAW widgets into the core library.
+- Treat `docs/` as the authority for Poodle vision, architecture, roadmap, and execution status.
+- Keep Poodle focused on generalized tokens, primitives, and reusable composites; do not fold app-specific DAW widgets into the core library.
 - Keep Svelte and GPUI implementations aligned to one documented contract; parity means semantic inputs, states, behavior, and token usage first.
-- Keep Underlay-facing integration behind Underlay-owned adapters and token bridges; app code should not need to know Flint exists.
-- Treat Bits Svelte as an implementation detail where useful, not as Flint's public contract.
+- Keep Underlay-facing integration behind Underlay-owned adapters and token bridges; app code should not need to know Poodle exists.
+- Treat Bits Svelte as an implementation detail where useful, not as Poodle's public contract.
 - Keep AGENTS content lean: scope, hard rules, validation, links.
 
 ## Validate
@@ -19,13 +19,13 @@ Scope: whole `flint/` repository.
 
 - `README.md`
 - `docs/README.md`
-- `docs/vision/001-flint-vision.md`
-- `docs/architecture/001-flint-system-shape.md`
+- `docs/vision/001-poodle-vision.md`
+- `docs/architecture/001-poodle-system-shape.md`
 - `docs/roadmaps/README.md`
 
 ## Task Runner
 
-Flint uses [Effigy](https://github.com/inflatable-cookie/effigy) as its task runner.
+Poodle uses [Effigy](https://github.com/inflatable-cookie/effigy) as its task runner.
 
 Common commands:
 - `effigy tasks` — list all available tasks

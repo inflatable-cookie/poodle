@@ -1,7 +1,7 @@
 //! DetailSection — Jetstream detail section backed by DetailSectionSpec.
 use jetstream_runtime::ui_element::{self, JsEl};
-use flint_jetstream::JetstreamThemeProvider;
-use flint_composites::DetailSectionSpec;
+use poodle_jetstream::JetstreamThemeProvider;
+use poodle_composites::DetailSectionSpec;
 use crate::theme_ext::{resolve_color, resolve_px};
 
 pub fn js_detail_section(spec: &DetailSectionSpec, theme: &JetstreamThemeProvider, body: Option<JsEl>) -> JsEl {

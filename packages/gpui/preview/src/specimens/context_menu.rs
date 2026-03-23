@@ -1,8 +1,8 @@
 use gpui::*;
 use gpui::prelude::FluentBuilder;
-use flint_adapter::ThemeProvider;
-use flint_primitives::{ContextMenuSpec, MenuEntry, MenuItemKind, EyebrowSpec};
-use flint_gpui_components::{ContextMenu, Eyebrow};
+use poodle_adapter::ThemeProvider;
+use poodle_primitives::{ContextMenuSpec, MenuEntry, MenuItemKind, EyebrowSpec};
+use poodle_gpui_components::{ContextMenu, Eyebrow};
 use crate::app_state::AppState;
 use crate::style_bridge::color_to_hsla;
 use crate::PreviewRoot;

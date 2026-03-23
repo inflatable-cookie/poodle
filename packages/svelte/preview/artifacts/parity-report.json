@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-03-23T18:35:56.810Z",
+  "generatedAt": "2026-03-23T18:40:09.772Z",
   "artifact": "packages/svelte/preview/artifacts/parity-report.json",
   "previewBasePath": "/",
   "automatedBoundary": [
@@ -148,12 +148,12 @@
       "suiteId": "gpui-target-matrix",
       "status": "matrix-only",
       "coveredPackages": [
-        "flint-primitives",
-        "flint-composites",
-        "flint-workstation",
-        "flint-gpui",
-        "flint-gpui-components",
-        "flint-gpui-preview"
+        "poodle-primitives",
+        "poodle-composites",
+        "poodle-workstation",
+        "poodle-gpui",
+        "poodle-gpui-components",
+        "poodle-gpui-preview"
       ],
       "evidenceArtifacts": [
         "packages/gpui/cross-runtime-parity-report.json",
@@ -178,7 +178,7 @@
   "packageSurfaceCoverage": {
     "summary": [
       {
-        "packageName": "@flint/svelte-primitives",
+        "packageName": "@poodle/svelte-primitives",
         "exportCount": 84,
         "componentCount": 84,
         "helperCount": 0,
@@ -186,7 +186,7 @@
         "contractOnlyCount": 0
       },
       {
-        "packageName": "@flint/svelte-composites",
+        "packageName": "@poodle/svelte-composites",
         "exportCount": 47,
         "componentCount": 34,
         "helperCount": 13,
@@ -194,7 +194,7 @@
         "contractOnlyCount": 0
       },
       {
-        "packageName": "@flint/svelte-composites",
+        "packageName": "@poodle/svelte-composites",
         "exportCount": 47,
         "componentCount": 34,
         "helperCount": 13,
@@ -204,7 +204,7 @@
     ],
     "exports": [
       {
-        "packageName": "@flint/svelte-composites",
+        "packageName": "@poodle/svelte-composites",
         "exportName": "ActionDiscoveryPanel",
         "kind": "component",
         "status": "previewed",
@@ -217,7 +217,7 @@
         ]
       },
       {
-        "packageName": "@flint/svelte-composites",
+        "packageName": "@poodle/svelte-composites",
         "exportName": "AppHeader",
         "kind": "component",
         "status": "previewed",
@@ -230,7 +230,7 @@
         ]
       },
       {
-        "packageName": "@flint/svelte-composites",
+        "packageName": "@poodle/svelte-composites",
         "exportName": "AudioPlayer",
         "kind": "component",
         "status": "previewed",
@@ -243,7 +243,7 @@
         ]
       },
       {
-        "packageName": "@flint/svelte-composites",
+        "packageName": "@poodle/svelte-composites",
         "exportName": "BlockEditor",
         "kind": "component",
         "status": "previewed",
@@ -256,7 +256,7 @@
         ]
       },
       {
-        "packageName": "@flint/svelte-composites",
+        "packageName": "@poodle/svelte-composites",
         "exportName": "Breadcrumbs",
         "kind": "helper",
         "status": "previewed",
@@ -269,7 +269,7 @@
         ]
       },
       {
-        "packageName": "@flint/svelte-composites",
+        "packageName": "@poodle/svelte-composites",
         "exportName": "BulkActionBar",
         "kind": "helper",
         "status": "previewed",
@@ -282,7 +282,7 @@
         ]
       },
       {
-        "packageName": "@flint/svelte-composites",
+        "packageName": "@poodle/svelte-composites",
         "exportName": "Card",
         "kind": "helper",
         "status": "previewed",
@@ -295,7 +295,7 @@
         ]
       },
       {
-        "packageName": "@flint/svelte-composites",
+        "packageName": "@poodle/svelte-composites",
         "exportName": "CardRadioGroup",
         "kind": "component",
         "status": "previewed",
@@ -308,7 +308,7 @@
         ]
       },
       {
-        "packageName": "@flint/svelte-composites",
+        "packageName": "@poodle/svelte-composites",
         "exportName": "CommandPalette",
         "kind": "component",
         "status": "previewed",
@@ -321,7 +321,7 @@
         ]
       },
       {
-        "packageName": "@flint/svelte-composites",
+        "packageName": "@poodle/svelte-composites",
         "exportName": "ConfirmAction",
         "kind": "component",
         "status": "previewed",
@@ -334,7 +334,7 @@
         ]
       },
       {
-        "packageName": "@flint/svelte-composites",
+        "packageName": "@poodle/svelte-composites",
         "exportName": "DataTable",
         "kind": "component",
         "status": "previewed",
@@ -347,7 +347,7 @@
         ]
       },
       {
-        "packageName": "@flint/svelte-composites",
+        "packageName": "@poodle/svelte-composites",
         "exportName": "DetailRow",
         "kind": "helper",
         "status": "previewed",
@@ -360,7 +360,7 @@
         ]
       },
       {
-        "packageName": "@flint/svelte-composites",
+        "packageName": "@poodle/svelte-composites",
         "exportName": "DetailSection",
         "kind": "component",
         "status": "previewed",
@@ -373,7 +373,7 @@
         ]
       },
       {
-        "packageName": "@flint/svelte-composites",
+        "packageName": "@poodle/svelte-composites",
         "exportName": "DetailShell",
         "kind": "component",
         "status": "previewed",
@@ -386,7 +386,7 @@
         ]
       },
       {
-        "packageName": "@flint/svelte-composites",
+        "packageName": "@poodle/svelte-composites",
         "exportName": "DockRegion",
         "kind": "component",
         "status": "previewed",
@@ -399,7 +399,7 @@
         ]
       },
       {
-        "packageName": "@flint/svelte-composites",
+        "packageName": "@poodle/svelte-composites",
         "exportName": "EditableList",
         "kind": "component",
         "status": "previewed",
@@ -412,7 +412,7 @@
         ]
       },
       {
-        "packageName": "@flint/svelte-composites",
+        "packageName": "@poodle/svelte-composites",
         "exportName": "EmbedInput",
         "kind": "component",
         "status": "previewed",
@@ -425,7 +425,7 @@
         ]
       },
       {
-        "packageName": "@flint/svelte-composites",
+        "packageName": "@poodle/svelte-composites",
         "exportName": "EmbedPreview",
         "kind": "component",
         "status": "previewed",
@@ -438,7 +438,7 @@
         ]
       },
       {
-        "packageName": "@flint/svelte-composites",
+        "packageName": "@poodle/svelte-composites",
         "exportName": "EmptyState",
         "kind": "component",
         "status": "previewed",
@@ -451,7 +451,7 @@
         ]
       },
       {
-        "packageName": "@flint/svelte-composites",
+        "packageName": "@poodle/svelte-composites",
         "exportName": "FilterToolbar",
         "kind": "component",
         "status": "previewed",
@@ -464,7 +464,7 @@
         ]
       },
       {
-        "packageName": "@flint/svelte-composites",
+        "packageName": "@poodle/svelte-composites",
         "exportName": "FormDialog",
         "kind": "component",
         "status": "previewed",
@@ -477,7 +477,7 @@
         ]
       },
       {
-        "packageName": "@flint/svelte-composites",
+        "packageName": "@poodle/svelte-composites",
         "exportName": "FormLayout",
         "kind": "component",
         "status": "previewed",
@@ -490,7 +490,7 @@
         ]
       },
       {
-        "packageName": "@flint/svelte-composites",
+        "packageName": "@poodle/svelte-composites",
         "exportName": "ListCard",
         "kind": "helper",
         "status": "previewed",
@@ -503,7 +503,7 @@
         ]
       },
       {
-        "packageName": "@flint/svelte-composites",
+        "packageName": "@poodle/svelte-composites",
         "exportName": "LogList",
         "kind": "component",
         "status": "previewed",
@@ -516,7 +516,7 @@
         ]
       },
       {
-        "packageName": "@flint/svelte-composites",
+        "packageName": "@poodle/svelte-composites",
         "exportName": "MarkdownEditor",
         "kind": "component",
         "status": "previewed",
@@ -529,7 +529,7 @@
         ]
       },
       {
-        "packageName": "@flint/svelte-composites",
+        "packageName": "@poodle/svelte-composites",
         "exportName": "MediaPicker",
         "kind": "component",
         "status": "previewed",
@@ -542,7 +542,7 @@
         ]
       },
       {
-        "packageName": "@flint/svelte-composites",
+        "packageName": "@poodle/svelte-composites",
         "exportName": "MediaPreview",
         "kind": "component",
         "status": "previewed",
@@ -555,7 +555,7 @@
         ]
       },
       {
-        "packageName": "@flint/svelte-composites",
+        "packageName": "@poodle/svelte-composites",
         "exportName": "MediaThumbnail",
         "kind": "component",
         "status": "previewed",
@@ -568,7 +568,7 @@
         ]
       },
       {
-        "packageName": "@flint/svelte-composites",
+        "packageName": "@poodle/svelte-composites",
         "exportName": "MetricTile",
         "kind": "component",
         "status": "previewed",
@@ -581,7 +581,7 @@
         ]
       },
       {
-        "packageName": "@flint/svelte-composites",
+        "packageName": "@poodle/svelte-composites",
         "exportName": "NavCard",
         "kind": "helper",
         "status": "previewed",
@@ -594,7 +594,7 @@
         ]
       },
       {
-        "packageName": "@flint/svelte-composites",
+        "packageName": "@poodle/svelte-composites",
         "exportName": "NavCardGrid",
         "kind": "helper",
         "status": "previewed",
@@ -607,7 +607,7 @@
         ]
       },
       {
-        "packageName": "@flint/svelte-composites",
+        "packageName": "@poodle/svelte-composites",
         "exportName": "OrderBy",
         "kind": "helper",
         "status": "previewed",
@@ -620,7 +620,7 @@
         ]
       },
       {
-        "packageName": "@flint/svelte-composites",
+        "packageName": "@poodle/svelte-composites",
         "exportName": "PageHeader",
         "kind": "component",
         "status": "previewed",
@@ -633,7 +633,7 @@
         ]
       },
       {
-        "packageName": "@flint/svelte-composites",
+        "packageName": "@poodle/svelte-composites",
         "exportName": "PageLoading",
         "kind": "component",
         "status": "previewed",
@@ -646,7 +646,7 @@
         ]
       },
       {
-        "packageName": "@flint/svelte-composites",
+        "packageName": "@poodle/svelte-composites",
         "exportName": "PaginationSummary",
         "kind": "helper",
         "status": "previewed",
@@ -659,7 +659,7 @@
         ]
       },
       {
-        "packageName": "@flint/svelte-composites",
+        "packageName": "@poodle/svelte-composites",
         "exportName": "parseWorkspaceLayoutSnapshot",
         "kind": "helper",
         "status": "previewed",
@@ -672,7 +672,7 @@
         ]
       },
       {
-        "packageName": "@flint/svelte-composites",
+        "packageName": "@poodle/svelte-composites",
         "exportName": "PickerShell",
         "kind": "component",
         "status": "previewed",
@@ -687,7 +687,7 @@
         ]
       },
       {
-        "packageName": "@flint/svelte-composites",
+        "packageName": "@poodle/svelte-composites",
         "exportName": "RelationPicker",
         "kind": "component",
         "status": "previewed",
@@ -702,7 +702,7 @@
         ]
       },
       {
-        "packageName": "@flint/svelte-composites",
+        "packageName": "@poodle/svelte-composites",
         "exportName": "ReorderableList",
         "kind": "component",
         "status": "previewed",
@@ -715,7 +715,7 @@
         ]
       },
       {
-        "packageName": "@flint/svelte-composites",
+        "packageName": "@poodle/svelte-composites",
         "exportName": "ResizeHandle",
         "kind": "helper",
         "status": "previewed",
@@ -728,7 +728,7 @@
         ]
       },
       {
-        "packageName": "@flint/svelte-composites",
+        "packageName": "@poodle/svelte-composites",
         "exportName": "SelectionSummary",
         "kind": "component",
         "status": "previewed",
@@ -743,7 +743,7 @@
         ]
       },
       {
-        "packageName": "@flint/svelte-composites",
+        "packageName": "@poodle/svelte-composites",
         "exportName": "serializeWorkspaceLayoutSnapshot",
         "kind": "helper",
         "status": "previewed",
@@ -756,7 +756,7 @@
         ]
       },
       {
-        "packageName": "@flint/svelte-composites",
+        "packageName": "@poodle/svelte-composites",
         "exportName": "SlugField",
         "kind": "component",
         "status": "previewed",
@@ -769,7 +769,7 @@
         ]
       },
       {
-        "packageName": "@flint/svelte-composites",
+        "packageName": "@poodle/svelte-composites",
         "exportName": "SplitView",
         "kind": "component",
         "status": "previewed",
@@ -782,7 +782,7 @@
         ]
       },
       {
-        "packageName": "@flint/svelte-composites",
+        "packageName": "@poodle/svelte-composites",
         "exportName": "StatusBar",
         "kind": "helper",
         "status": "previewed",
@@ -795,7 +795,7 @@
         ]
       },
       {
-        "packageName": "@flint/svelte-composites",
+        "packageName": "@poodle/svelte-composites",
         "exportName": "ToastStack",
         "kind": "component",
         "status": "previewed",
@@ -808,7 +808,7 @@
         ]
       },
       {
-        "packageName": "@flint/svelte-composites",
+        "packageName": "@poodle/svelte-composites",
         "exportName": "VideoPlayer",
         "kind": "component",
         "status": "previewed",
@@ -821,7 +821,7 @@
         ]
       },
       {
-        "packageName": "@flint/svelte-primitives",
+        "packageName": "@poodle/svelte-primitives",
         "exportName": "Accordion",
         "kind": "component",
         "status": "previewed",
@@ -834,7 +834,7 @@
         ]
       },
       {
-        "packageName": "@flint/svelte-primitives",
+        "packageName": "@poodle/svelte-primitives",
         "exportName": "AlertDialog",
         "kind": "component",
         "status": "previewed",
@@ -847,7 +847,7 @@
         ]
       },
       {
-        "packageName": "@flint/svelte-primitives",
+        "packageName": "@poodle/svelte-primitives",
         "exportName": "Box",
         "kind": "component",
         "status": "previewed",
@@ -860,7 +860,7 @@
         ]
       },
       {
-        "packageName": "@flint/svelte-primitives",
+        "packageName": "@poodle/svelte-primitives",
         "exportName": "Breadcrumbs",
         "kind": "component",
         "status": "previewed",
@@ -873,7 +873,7 @@
         ]
       },
       {
-        "packageName": "@flint/svelte-primitives",
+        "packageName": "@poodle/svelte-primitives",
         "exportName": "BulkActionBar",
         "kind": "component",
         "status": "previewed",
@@ -886,7 +886,7 @@
         ]
       },
       {
-        "packageName": "@flint/svelte-primitives",
+        "packageName": "@poodle/svelte-primitives",
         "exportName": "Button",
         "kind": "component",
         "status": "previewed",
@@ -899,7 +899,7 @@
         ]
       },
       {
-        "packageName": "@flint/svelte-primitives",
+        "packageName": "@poodle/svelte-primitives",
         "exportName": "Calendar",
         "kind": "component",
         "status": "previewed",
@@ -912,7 +912,7 @@
         ]
       },
       {
-        "packageName": "@flint/svelte-primitives",
+        "packageName": "@poodle/svelte-primitives",
         "exportName": "Callout",
         "kind": "component",
         "status": "previewed",
@@ -925,7 +925,7 @@
         ]
       },
       {
-        "packageName": "@flint/svelte-primitives",
+        "packageName": "@poodle/svelte-primitives",
         "exportName": "Card",
         "kind": "component",
         "status": "previewed",
@@ -938,7 +938,7 @@
         ]
       },
       {
-        "packageName": "@flint/svelte-primitives",
+        "packageName": "@poodle/svelte-primitives",
         "exportName": "Checkbox",
         "kind": "component",
         "status": "previewed",
@@ -951,7 +951,7 @@
         ]
       },
       {
-        "packageName": "@flint/svelte-primitives",
+        "packageName": "@poodle/svelte-primitives",
         "exportName": "Code",
         "kind": "component",
         "status": "previewed",
@@ -964,7 +964,7 @@
         ]
       },
       {
-        "packageName": "@flint/svelte-primitives",
+        "packageName": "@poodle/svelte-primitives",
         "exportName": "CollapseToggle",
         "kind": "component",
         "status": "previewed",
@@ -977,7 +977,7 @@
         ]
       },
       {
-        "packageName": "@flint/svelte-primitives",
+        "packageName": "@poodle/svelte-primitives",
         "exportName": "Collapsible",
         "kind": "component",
         "status": "previewed",
@@ -990,7 +990,7 @@
         ]
       },
       {
-        "packageName": "@flint/svelte-primitives",
+        "packageName": "@poodle/svelte-primitives",
         "exportName": "ColorPicker",
         "kind": "component",
         "status": "previewed",
@@ -1003,7 +1003,7 @@
         ]
       },
       {
-        "packageName": "@flint/svelte-primitives",
+        "packageName": "@poodle/svelte-primitives",
         "exportName": "Combobox",
         "kind": "component",
         "status": "previewed",
@@ -1016,7 +1016,7 @@
         ]
       },
       {
-        "packageName": "@flint/svelte-primitives",
+        "packageName": "@poodle/svelte-primitives",
         "exportName": "ContextMenu",
         "kind": "component",
         "status": "previewed",
@@ -1029,7 +1029,7 @@
         ]
       },
       {
-        "packageName": "@flint/svelte-primitives",
+        "packageName": "@poodle/svelte-primitives",
         "exportName": "DatePicker",
         "kind": "component",
         "status": "previewed",
@@ -1042,7 +1042,7 @@
         ]
       },
       {
-        "packageName": "@flint/svelte-primitives",
+        "packageName": "@poodle/svelte-primitives",
         "exportName": "DateRangePicker",
         "kind": "component",
         "status": "previewed",
@@ -1055,7 +1055,7 @@
         ]
       },
       {
-        "packageName": "@flint/svelte-primitives",
+        "packageName": "@poodle/svelte-primitives",
         "exportName": "DateTimePicker",
         "kind": "component",
         "status": "previewed",
@@ -1068,7 +1068,7 @@
         ]
       },
       {
-        "packageName": "@flint/svelte-primitives",
+        "packageName": "@poodle/svelte-primitives",
         "exportName": "DateTimeRangePicker",
         "kind": "component",
         "status": "previewed",
@@ -1081,7 +1081,7 @@
         ]
       },
       {
-        "packageName": "@flint/svelte-primitives",
+        "packageName": "@poodle/svelte-primitives",
         "exportName": "DetailRow",
         "kind": "component",
         "status": "previewed",
@@ -1094,7 +1094,7 @@
         ]
       },
       {
-        "packageName": "@flint/svelte-primitives",
+        "packageName": "@poodle/svelte-primitives",
         "exportName": "Dialog",
         "kind": "component",
         "status": "previewed",
@@ -1107,7 +1107,7 @@
         ]
       },
       {
-        "packageName": "@flint/svelte-primitives",
+        "packageName": "@poodle/svelte-primitives",
         "exportName": "Drawer",
         "kind": "component",
         "status": "previewed",
@@ -1120,7 +1120,7 @@
         ]
       },
       {
-        "packageName": "@flint/svelte-primitives",
+        "packageName": "@poodle/svelte-primitives",
         "exportName": "DurationInput",
         "kind": "component",
         "status": "previewed",
@@ -1133,7 +1133,7 @@
         ]
       },
       {
-        "packageName": "@flint/svelte-primitives",
+        "packageName": "@poodle/svelte-primitives",
         "exportName": "EditableLabel",
         "kind": "component",
         "status": "previewed",
@@ -1146,7 +1146,7 @@
         ]
       },
       {
-        "packageName": "@flint/svelte-primitives",
+        "packageName": "@poodle/svelte-primitives",
         "exportName": "Eyebrow",
         "kind": "component",
         "status": "previewed",
@@ -1159,7 +1159,7 @@
         ]
       },
       {
-        "packageName": "@flint/svelte-primitives",
+        "packageName": "@poodle/svelte-primitives",
         "exportName": "Field",
         "kind": "component",
         "status": "previewed",
@@ -1172,7 +1172,7 @@
         ]
       },
       {
-        "packageName": "@flint/svelte-primitives",
+        "packageName": "@poodle/svelte-primitives",
         "exportName": "FieldSet",
         "kind": "component",
         "status": "previewed",
@@ -1185,7 +1185,7 @@
         ]
       },
       {
-        "packageName": "@flint/svelte-primitives",
+        "packageName": "@poodle/svelte-primitives",
         "exportName": "FileUpload",
         "kind": "component",
         "status": "previewed",
@@ -1198,7 +1198,7 @@
         ]
       },
       {
-        "packageName": "@flint/svelte-primitives",
+        "packageName": "@poodle/svelte-primitives",
         "exportName": "FormActions",
         "kind": "component",
         "status": "previewed",
@@ -1211,7 +1211,7 @@
         ]
       },
       {
-        "packageName": "@flint/svelte-primitives",
+        "packageName": "@poodle/svelte-primitives",
         "exportName": "Grid",
         "kind": "component",
         "status": "previewed",
@@ -1224,7 +1224,7 @@
         ]
       },
       {
-        "packageName": "@flint/svelte-primitives",
+        "packageName": "@poodle/svelte-primitives",
         "exportName": "HoverCard",
         "kind": "component",
         "status": "previewed",
@@ -1237,7 +1237,7 @@
         ]
       },
       {
-        "packageName": "@flint/svelte-primitives",
+        "packageName": "@poodle/svelte-primitives",
         "exportName": "Icon",
         "kind": "component",
         "status": "previewed",
@@ -1250,7 +1250,7 @@
         ]
       },
       {
-        "packageName": "@flint/svelte-primitives",
+        "packageName": "@poodle/svelte-primitives",
         "exportName": "IconButton",
         "kind": "component",
         "status": "previewed",
@@ -1263,7 +1263,7 @@
         ]
       },
       {
-        "packageName": "@flint/svelte-primitives",
+        "packageName": "@poodle/svelte-primitives",
         "exportName": "IconProvider",
         "kind": "component",
         "status": "previewed",
@@ -1276,7 +1276,7 @@
         ]
       },
       {
-        "packageName": "@flint/svelte-primitives",
+        "packageName": "@poodle/svelte-primitives",
         "exportName": "ListCard",
         "kind": "component",
         "status": "previewed",
@@ -1289,7 +1289,7 @@
         ]
       },
       {
-        "packageName": "@flint/svelte-primitives",
+        "packageName": "@poodle/svelte-primitives",
         "exportName": "ListCardCounter",
         "kind": "component",
         "status": "previewed",
@@ -1302,7 +1302,7 @@
         ]
       },
       {
-        "packageName": "@flint/svelte-primitives",
+        "packageName": "@poodle/svelte-primitives",
         "exportName": "Menu",
         "kind": "component",
         "status": "previewed",
@@ -1315,7 +1315,7 @@
         ]
       },
       {
-        "packageName": "@flint/svelte-primitives",
+        "packageName": "@poodle/svelte-primitives",
         "exportName": "Menubar",
         "kind": "component",
         "status": "previewed",
@@ -1328,7 +1328,7 @@
         ]
       },
       {
-        "packageName": "@flint/svelte-primitives",
+        "packageName": "@poodle/svelte-primitives",
         "exportName": "Meter",
         "kind": "component",
         "status": "previewed",
@@ -1341,7 +1341,7 @@
         ]
       },
       {
-        "packageName": "@flint/svelte-primitives",
+        "packageName": "@poodle/svelte-primitives",
         "exportName": "NavCard",
         "kind": "component",
         "status": "previewed",
@@ -1354,7 +1354,7 @@
         ]
       },
       {
-        "packageName": "@flint/svelte-primitives",
+        "packageName": "@poodle/svelte-primitives",
         "exportName": "NavCardGrid",
         "kind": "component",
         "status": "previewed",
@@ -1367,7 +1367,7 @@
         ]
       },
       {
-        "packageName": "@flint/svelte-primitives",
+        "packageName": "@poodle/svelte-primitives",
         "exportName": "NavigationMenu",
         "kind": "component",
         "status": "previewed",
@@ -1380,7 +1380,7 @@
         ]
       },
       {
-        "packageName": "@flint/svelte-primitives",
+        "packageName": "@poodle/svelte-primitives",
         "exportName": "NumberEntry",
         "kind": "component",
         "status": "previewed",
@@ -1393,7 +1393,7 @@
         ]
       },
       {
-        "packageName": "@flint/svelte-primitives",
+        "packageName": "@poodle/svelte-primitives",
         "exportName": "OrderBy",
         "kind": "component",
         "status": "previewed",
@@ -1406,7 +1406,7 @@
         ]
       },
       {
-        "packageName": "@flint/svelte-primitives",
+        "packageName": "@poodle/svelte-primitives",
         "exportName": "Pagination",
         "kind": "component",
         "status": "previewed",
@@ -1419,7 +1419,7 @@
         ]
       },
       {
-        "packageName": "@flint/svelte-primitives",
+        "packageName": "@poodle/svelte-primitives",
         "exportName": "PaginationSummary",
         "kind": "component",
         "status": "previewed",
@@ -1432,7 +1432,7 @@
         ]
       },
       {
-        "packageName": "@flint/svelte-primitives",
+        "packageName": "@poodle/svelte-primitives",
         "exportName": "Pill",
         "kind": "component",
         "status": "previewed",
@@ -1445,7 +1445,7 @@
         ]
       },
       {
-        "packageName": "@flint/svelte-primitives",
+        "packageName": "@poodle/svelte-primitives",
         "exportName": "PinInput",
         "kind": "component",
         "status": "previewed",
@@ -1458,7 +1458,7 @@
         ]
       },
       {
-        "packageName": "@flint/svelte-primitives",
+        "packageName": "@poodle/svelte-primitives",
         "exportName": "Popover",
         "kind": "component",
         "status": "previewed",
@@ -1471,7 +1471,7 @@
         ]
       },
       {
-        "packageName": "@flint/svelte-primitives",
+        "packageName": "@poodle/svelte-primitives",
         "exportName": "Progress",
         "kind": "component",
         "status": "previewed",
@@ -1484,7 +1484,7 @@
         ]
       },
       {
-        "packageName": "@flint/svelte-primitives",
+        "packageName": "@poodle/svelte-primitives",
         "exportName": "RadioGroup",
         "kind": "component",
         "status": "previewed",
@@ -1497,7 +1497,7 @@
         ]
       },
       {
-        "packageName": "@flint/svelte-primitives",
+        "packageName": "@poodle/svelte-primitives",
         "exportName": "RangeCalendar",
         "kind": "component",
         "status": "previewed",
@@ -1510,7 +1510,7 @@
         ]
       },
       {
-        "packageName": "@flint/svelte-primitives",
+        "packageName": "@poodle/svelte-primitives",
         "exportName": "RangeSlider",
         "kind": "component",
         "status": "previewed",
@@ -1523,7 +1523,7 @@
         ]
       },
       {
-        "packageName": "@flint/svelte-primitives",
+        "packageName": "@poodle/svelte-primitives",
         "exportName": "Rating",
         "kind": "component",
         "status": "previewed",
@@ -1536,7 +1536,7 @@
         ]
       },
       {
-        "packageName": "@flint/svelte-primitives",
+        "packageName": "@poodle/svelte-primitives",
         "exportName": "Region",
         "kind": "component",
         "status": "previewed",
@@ -1549,7 +1549,7 @@
         ]
       },
       {
-        "packageName": "@flint/svelte-primitives",
+        "packageName": "@poodle/svelte-primitives",
         "exportName": "ResizeHandle",
         "kind": "component",
         "status": "previewed",
@@ -1562,7 +1562,7 @@
         ]
       },
       {
-        "packageName": "@flint/svelte-primitives",
+        "packageName": "@poodle/svelte-primitives",
         "exportName": "ScrollShell",
         "kind": "component",
         "status": "previewed",
@@ -1575,7 +1575,7 @@
         ]
       },
       {
-        "packageName": "@flint/svelte-primitives",
+        "packageName": "@poodle/svelte-primitives",
         "exportName": "SearchField",
         "kind": "component",
         "status": "previewed",
@@ -1588,7 +1588,7 @@
         ]
       },
       {
-        "packageName": "@flint/svelte-primitives",
+        "packageName": "@poodle/svelte-primitives",
         "exportName": "SegmentedControl",
         "kind": "component",
         "status": "previewed",
@@ -1601,7 +1601,7 @@
         ]
       },
       {
-        "packageName": "@flint/svelte-primitives",
+        "packageName": "@poodle/svelte-primitives",
         "exportName": "Select",
         "kind": "component",
         "status": "previewed",
@@ -1614,7 +1614,7 @@
         ]
       },
       {
-        "packageName": "@flint/svelte-primitives",
+        "packageName": "@poodle/svelte-primitives",
         "exportName": "Separator",
         "kind": "component",
         "status": "previewed",
@@ -1627,7 +1627,7 @@
         ]
       },
       {
-        "packageName": "@flint/svelte-primitives",
+        "packageName": "@poodle/svelte-primitives",
         "exportName": "Skeleton",
         "kind": "component",
         "status": "previewed",
@@ -1640,7 +1640,7 @@
         ]
       },
       {
-        "packageName": "@flint/svelte-primitives",
+        "packageName": "@poodle/svelte-primitives",
         "exportName": "Slider",
         "kind": "component",
         "status": "previewed",
@@ -1653,7 +1653,7 @@
         ]
       },
       {
-        "packageName": "@flint/svelte-primitives",
+        "packageName": "@poodle/svelte-primitives",
         "exportName": "Spacer",
         "kind": "component",
         "status": "previewed",
@@ -1666,7 +1666,7 @@
         ]
       },
       {
-        "packageName": "@flint/svelte-primitives",
+        "packageName": "@poodle/svelte-primitives",
         "exportName": "SplitButton",
         "kind": "component",
         "status": "previewed",
@@ -1679,7 +1679,7 @@
         ]
       },
       {
-        "packageName": "@flint/svelte-primitives",
+        "packageName": "@poodle/svelte-primitives",
         "exportName": "Stack",
         "kind": "component",
         "status": "previewed",
@@ -1692,7 +1692,7 @@
         ]
       },
       {
-        "packageName": "@flint/svelte-primitives",
+        "packageName": "@poodle/svelte-primitives",
         "exportName": "StatusBar",
         "kind": "component",
         "status": "previewed",
@@ -1705,7 +1705,7 @@
         ]
       },
       {
-        "packageName": "@flint/svelte-primitives",
+        "packageName": "@poodle/svelte-primitives",
         "exportName": "StatusIndicator",
         "kind": "component",
         "status": "previewed",
@@ -1718,7 +1718,7 @@
         ]
       },
       {
-        "packageName": "@flint/svelte-primitives",
+        "packageName": "@poodle/svelte-primitives",
         "exportName": "Surface",
         "kind": "component",
         "status": "previewed",
@@ -1731,7 +1731,7 @@
         ]
       },
       {
-        "packageName": "@flint/svelte-primitives",
+        "packageName": "@poodle/svelte-primitives",
         "exportName": "Switch",
         "kind": "component",
         "status": "previewed",
@@ -1744,7 +1744,7 @@
         ]
       },
       {
-        "packageName": "@flint/svelte-primitives",
+        "packageName": "@poodle/svelte-primitives",
         "exportName": "Table",
         "kind": "component",
         "status": "previewed",
@@ -1757,7 +1757,7 @@
         ]
       },
       {
-        "packageName": "@flint/svelte-primitives",
+        "packageName": "@poodle/svelte-primitives",
         "exportName": "Tabs",
         "kind": "component",
         "status": "previewed",
@@ -1770,7 +1770,7 @@
         ]
       },
       {
-        "packageName": "@flint/svelte-primitives",
+        "packageName": "@poodle/svelte-primitives",
         "exportName": "TextArea",
         "kind": "component",
         "status": "previewed",
@@ -1783,7 +1783,7 @@
         ]
       },
       {
-        "packageName": "@flint/svelte-primitives",
+        "packageName": "@poodle/svelte-primitives",
         "exportName": "TextInput",
         "kind": "component",
         "status": "previewed",
@@ -1796,7 +1796,7 @@
         ]
       },
       {
-        "packageName": "@flint/svelte-primitives",
+        "packageName": "@poodle/svelte-primitives",
         "exportName": "TimeAgo",
         "kind": "component",
         "status": "previewed",
@@ -1809,7 +1809,7 @@
         ]
       },
       {
-        "packageName": "@flint/svelte-primitives",
+        "packageName": "@poodle/svelte-primitives",
         "exportName": "TimeField",
         "kind": "component",
         "status": "previewed",
@@ -1822,7 +1822,7 @@
         ]
       },
       {
-        "packageName": "@flint/svelte-primitives",
+        "packageName": "@poodle/svelte-primitives",
         "exportName": "TimeZoneSelect",
         "kind": "component",
         "status": "previewed",
@@ -1835,7 +1835,7 @@
         ]
       },
       {
-        "packageName": "@flint/svelte-primitives",
+        "packageName": "@poodle/svelte-primitives",
         "exportName": "Toggle",
         "kind": "component",
         "status": "previewed",
@@ -1848,7 +1848,7 @@
         ]
       },
       {
-        "packageName": "@flint/svelte-primitives",
+        "packageName": "@poodle/svelte-primitives",
         "exportName": "ToggleGroup",
         "kind": "component",
         "status": "previewed",
@@ -1861,7 +1861,7 @@
         ]
       },
       {
-        "packageName": "@flint/svelte-primitives",
+        "packageName": "@poodle/svelte-primitives",
         "exportName": "Toolbar",
         "kind": "component",
         "status": "previewed",
@@ -1874,7 +1874,7 @@
         ]
       },
       {
-        "packageName": "@flint/svelte-primitives",
+        "packageName": "@poodle/svelte-primitives",
         "exportName": "Tooltip",
         "kind": "component",
         "status": "previewed",
@@ -1887,7 +1887,7 @@
         ]
       },
       {
-        "packageName": "@flint/svelte-primitives",
+        "packageName": "@poodle/svelte-primitives",
         "exportName": "TriStateSwitch",
         "kind": "component",
         "status": "previewed",
@@ -1900,7 +1900,7 @@
         ]
       },
       {
-        "packageName": "@flint/svelte-primitives",
+        "packageName": "@poodle/svelte-primitives",
         "exportName": "ZonedDateTimePicker",
         "kind": "component",
         "status": "previewed",
@@ -2009,7 +2009,7 @@
       "sectionId": "form-suite",
       "title": "Form baseline and validation posture",
       "layer": "foundation",
-      "packageName": "@flint/svelte-primitives",
+      "packageName": "@poodle/svelte-primitives",
       "contractRoot": "docs/contracts/foundation/",
       "summary": "Field wrappers, inputs, search, and action rows with validation and announcement posture.",
       "harnessCoverage": {
@@ -2081,7 +2081,7 @@
       "sectionId": "table-suite",
       "title": "Selection, sorting, and bulk actions",
       "layer": "composites",
-      "packageName": "@flint/svelte-composites",
+      "packageName": "@poodle/svelte-composites",
       "contractRoot": "docs/contracts/composites/",
       "summary": "Structured rows with visible-scope selection, sort semantics, row actions, and pagination context.",
       "harnessCoverage": {
@@ -2129,7 +2129,7 @@
       "sectionId": "browse-suite",
       "title": "Lists, grids, filters, and search depth",
       "layer": "composites",
-      "packageName": "@flint/svelte-composites",
+      "packageName": "@poodle/svelte-composites",
       "contractRoot": "docs/contracts/composites/",
       "summary": "Browse shells that separate ready, loading, empty, and no-results posture across list and grid views.",
       "harnessCoverage": {
@@ -2177,7 +2177,7 @@
       "sectionId": "detail-suite",
       "title": "Detail display, cards, headers, and navigation",
       "layer": "composites",
-      "packageName": "@flint/svelte-composites",
+      "packageName": "@poodle/svelte-composites",
       "contractRoot": "docs/contracts/composites/",
       "summary": "Readonly detail surfaces with breadcrumb context, page headers, cards, and section hierarchy.",
       "harnessCoverage": {
@@ -2225,7 +2225,7 @@
       "sectionId": "picker-suite",
       "title": "Picker, relation, and selection workflows",
       "layer": "composites",
-      "packageName": "@flint/svelte-composites",
+      "packageName": "@poodle/svelte-composites",
       "contractRoot": "docs/contracts/composites/",
       "summary": "Searchable attach-or-choose flows with selection summaries, commit/cancel rhythm, and keyboard traversal.",
       "harnessCoverage": {
@@ -2273,7 +2273,7 @@
       "sectionId": "media-suite",
       "title": "Preview framing, embeds, and fallback posture",
       "layer": "composites",
-      "packageName": "@flint/svelte-composites",
+      "packageName": "@poodle/svelte-composites",
       "contractRoot": "docs/contracts/composites/",
       "summary": "Media surfaces that keep framing, metadata, and fallback meaning explicit without owning playback engines.",
       "harnessCoverage": {
@@ -2321,7 +2321,7 @@
       "sectionId": "notification-suite",
       "title": "Banners, toasts, skeletons, and remediation",
       "layer": "composites",
-      "packageName": "@flint/svelte-primitives + @flint/svelte-composites",
+      "packageName": "@poodle/svelte-primitives + @poodle/svelte-composites",
       "contractRoot": "docs/contracts/foundation/ + docs/contracts/composites/",
       "summary": "Persistent and transient state surfaces with loading, remediation, and announcement posture.",
       "harnessCoverage": {
@@ -2369,7 +2369,7 @@
       "sectionId": "command-suite",
       "title": "Palette search, grouped actions, and inline rediscovery",
       "layer": "composites",
-      "packageName": "@flint/svelte-composites",
+      "packageName": "@poodle/svelte-composites",
       "contractRoot": "docs/contracts/composites/",
       "summary": "Modal and inline command discovery with grouped results, focus containment, and keyboard movement.",
       "harnessCoverage": {
@@ -2417,7 +2417,7 @@
       "sectionId": "workspace-suite",
       "title": "Headers, dock orchestration, and workspace shell posture",
       "layer": "composites",
-      "packageName": "@flint/svelte-composites",
+      "packageName": "@poodle/svelte-composites",
       "contractRoot": "docs/contracts/composites/",
       "summary": "App and project headers, docks, tabs, split views, and host-owned layout snapshots.",
       "harnessCoverage": {
@@ -2465,7 +2465,7 @@
       "sectionId": "token-summary-section",
       "title": "Runtime-critical values",
       "layer": "tokens",
-      "packageName": "@flint/svelte-tokens",
+      "packageName": "@poodle/svelte-tokens",
       "contractRoot": "packages/tokens/",
       "summary": "Live values pulled from the active emitted theme, density, and control-size overlays.",
       "harnessCoverage": {
@@ -2524,7 +2524,7 @@
       "sectionId": "token-inspector",
       "title": "Search the emitted token tree",
       "layer": "tokens",
-      "packageName": "@flint/svelte-tokens",
+      "packageName": "@poodle/svelte-tokens",
       "contractRoot": "packages/tokens/artifacts/",
       "summary": "Searchable inspection of the emitted semantic token paths and their active computed values.",
       "harnessCoverage": {

@@ -1,9 +1,9 @@
 use gpui::*;
 use gpui::prelude::FluentBuilder;
-use flint_adapter::ThemeProvider;
-use flint_composites::{CommandPaletteSpec, CommandActionItem};
-use flint_primitives::EyebrowSpec;
-use flint_gpui_components::{CommandPalette, Eyebrow};
+use poodle_adapter::ThemeProvider;
+use poodle_composites::{CommandPaletteSpec, CommandActionItem};
+use poodle_primitives::EyebrowSpec;
+use poodle_gpui_components::{CommandPalette, Eyebrow};
 use crate::app_state::AppState;
 use crate::style_bridge::color_to_hsla;
 use crate::PreviewRoot;

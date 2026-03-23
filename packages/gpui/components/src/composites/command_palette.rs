@@ -2,11 +2,11 @@
 
 use gpui::prelude::FluentBuilder;
 use gpui::*;
-use flint_gpui::GpuiThemeProvider;
-use flint_composites::{CommandActionItem, CommandPaletteSpec, DiscoveryState};
+use poodle_gpui::GpuiThemeProvider;
+use poodle_composites::{CommandActionItem, CommandPaletteSpec, DiscoveryState};
 
 use crate::theme_ext::{resolve_color, resolve_opacity, resolve_px};
-use flint_primitives::{OverlayPlacement};
+use poodle_primitives::{OverlayPlacement};
 
 /// A real GPUI command palette backed by `CommandPaletteSpec`.
 ///
@@ -34,7 +34,7 @@ impl CommandPalette {
         Self {
             spec,
             theme: theme.clone(),
-            id_prefix: "flint-cmd-palette".to_string(),
+            id_prefix: "poodle-cmd-palette".to_string(),
             on_select: None,
             on_query_change: None,
         }

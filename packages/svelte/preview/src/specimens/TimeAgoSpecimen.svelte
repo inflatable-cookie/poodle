@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { TimeAgo, Eyebrow } from "@flint/svelte-primitives";
+  import { TimeAgo, Eyebrow } from "@poodle/svelte-primitives";
 
   const now = Date.now();
   const twoMinutesAgo = new Date(now - 2 * 60 * 1000);
@@ -65,7 +65,7 @@
 
   .specimen__label {
     font-size: 0.8125rem;
-    color: var(--flint-color-text-secondary);
+    color: var(--poodle-color-text-secondary);
     min-width: 8rem;
   }
 </style>

@@ -1,17 +1,17 @@
 [package]
-name = "flint-style"
+name = "poodle-style"
 version = "0.0.0"
 edition = "2021"
-description = "Resolved style descriptor IR for Flint multi-renderer targets."
+description = "Resolved style descriptor IR for Poodle multi-renderer targets."
 
 [lib]
 path = "src/lib.rs"
 
 [dependencies]
-flint-tokens = { path = "../tokens" }
-flint-layout = { path = "../layout" }
+poodle-tokens = { path = "../tokens" }
+poodle-layout = { path = "../layout" }
 
-[package.metadata.flint]
+[package.metadata.poodle]
 public-intent = true
 channel = "preview"
 stability = "pre-release"

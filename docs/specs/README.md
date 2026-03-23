@@ -3,7 +3,7 @@
 Status: active
 Updated: 2026-03-13
 
-Specs will hold normative definitions once Flint starts freezing token schemas,
+Specs will hold normative definitions once Poodle starts freezing token schemas,
 component contracts, parity rules, and emitted artifact shapes.
 
 ## Planned Spec Areas

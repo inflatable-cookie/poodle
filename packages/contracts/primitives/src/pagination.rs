@@ -1,4 +1,4 @@
-use flint_tokens::semantic;
+use poodle_tokens::semantic;
 
 #[derive(Debug, Clone, PartialEq)]
 pub enum PageItem {

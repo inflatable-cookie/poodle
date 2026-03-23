@@ -6,7 +6,7 @@ Depends on: `021-public-package-api-stability-and-parity-debt-baseline.md`
 
 ## Purpose
 
-Freeze the packaging and release posture for the current Flint package set so the
+Freeze the packaging and release posture for the current Poodle package set so the
 repo can distinguish public-intent packages from internal-only packages before
 downstream adoption starts.
 
@@ -65,20 +65,20 @@ The current release posture is:
 
 ### Preview Channel Public-Intent Packages
 
-- `@flint/svelte-tokens`
-- `@flint/svelte-primitives`
-- `@flint/svelte-composites`
-- `@flint/svelte-workstation`
-- `flint-gpui-tokens`
-- `flint-gpui-primitives`
-- `flint-gpui-composites`
-- `flint-gpui-workstation`
+- `@poodle/svelte-tokens`
+- `@poodle/svelte-primitives`
+- `@poodle/svelte-composites`
+- `@poodle/svelte-workstation`
+- `poodle-gpui-tokens`
+- `poodle-gpui-primitives`
+- `poodle-gpui-composites`
+- `poodle-gpui-workstation`
 
 ### Internal Packages
 
-- `@flint/tokens`
-- `@flint/bridge-underlay`
-- `@flint/svelte-preview`
+- `@poodle/tokens`
+- `@poodle/bridge-underlay`
+- `@poodle/svelte-preview`
 
 ## Consumption Rule
 

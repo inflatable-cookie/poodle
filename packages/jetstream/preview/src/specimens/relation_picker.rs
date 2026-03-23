@@ -1,10 +1,10 @@
 //! RelationPicker specimen — entity relationship picker.
 
 use jetstream_runtime::ui_element::*;
-use flint_jetstream::JetstreamThemeProvider;
-use flint_jetstream_components::relation_picker::js_relation_picker;
-use flint_jetstream_components::theme_ext::*;
-use flint_composites::{PickerItemSpec, RelationPickerSpec};
+use poodle_jetstream::JetstreamThemeProvider;
+use poodle_jetstream_components::relation_picker::js_relation_picker;
+use poodle_jetstream_components::theme_ext::*;
+use poodle_composites::{PickerItemSpec, RelationPickerSpec};
 
 pub fn render(theme: &JetstreamThemeProvider) -> JsEl {
     let secondary = resolve_color(theme, "semantic.color.text.secondary");

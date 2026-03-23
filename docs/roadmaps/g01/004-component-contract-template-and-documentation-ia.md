@@ -1,10 +1,10 @@
 # g01.004 Component Contract Template And Documentation IA
 
 Status: completed
-Owner: Flint Core
+Owner: Poodle Core
 Updated: 2026-03-11
 Depends on: g01.001, g01.002
-Primary repos: `flint`
+Primary repos: `poodle`
 
 ## Research Inputs
 
@@ -13,7 +13,7 @@ Primary repos: `flint`
 
 ## Context
 
-Flint's distinguishing promise is docs-first shared contracts. That means the
+Poodle's distinguishing promise is docs-first shared contracts. That means the
 documentation system for components is not incidental; it is part of the
 product.
 

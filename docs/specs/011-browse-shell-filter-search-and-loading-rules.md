@@ -62,7 +62,7 @@ Use progressive loading when:
 - appending results beneath the current context is the better experience
 - hosts can load more without breaking focus continuity
 
-Flint does not force one policy globally.
+Poodle does not force one policy globally.
 It requires the chosen policy to be explicit and coherent.
 
 ## Focus Continuity Rule

@@ -112,17 +112,17 @@ Updated: 2026-03-15
 | `flex-wrap` | `wrap` |
 | `justify-content` | `space-between` |
 | `align-items` | `center` |
-| `gap` | `var(--flint-space-inline-md)` |
+| `gap` | `var(--poodle-space-inline-md)` |
 
 ### Copy
 
 | Property | Value |
 |----------|-------|
 | `margin` | `0` |
-| `color` | `var(--flint-color-text-secondary)` |
-| `font-family` | `var(--flint-typography-body-family)` |
-| `font-size` | `var(--flint-typography-body-size)` |
-| `line-height` | `var(--flint-typography-body-lineHeight)` |
+| `color` | `var(--poodle-color-text-secondary)` |
+| `font-family` | `var(--poodle-typography-body-family)` |
+| `font-size` | `var(--poodle-typography-body-size)` |
+| `line-height` | `var(--poodle-typography-body-lineHeight)` |
 
 ### Actions
 
@@ -131,32 +131,32 @@ Updated: 2026-03-15
 | `display` | `flex` |
 | `flex-wrap` | `wrap` |
 | `align-items` | `center` |
-| `gap` | `var(--flint-space-inline-sm)` |
+| `gap` | `var(--poodle-space-inline-sm)` |
 
 ### Button `.pagination-summary__actions button`
 
 | Property | Value |
 |----------|-------|
-| `min-height` | `var(--flint-size-control-height)` |
-| `padding` | `0 var(--flint-space-control-x)` |
-| `border` | `0.0625rem solid var(--flint-color-border-default)` |
-| `border-radius` | `var(--flint-radius-control)` |
-| `background` | `var(--flint-color-background-surface)` |
-| `color` | `var(--flint-color-text-primary)` |
+| `min-height` | `var(--poodle-size-control-height)` |
+| `padding` | `0 var(--poodle-space-control-x)` |
+| `border` | `0.0625rem solid var(--poodle-color-border-default)` |
+| `border-radius` | `var(--poodle-radius-control)` |
+| `background` | `var(--poodle-color-background-surface)` |
+| `color` | `var(--poodle-color-text-primary)` |
 | `cursor` | `pointer` |
 
 ### Button disabled
 
 | Property | Value |
 |----------|-------|
-| `opacity` | `var(--flint-state-opacity-disabled)` |
+| `opacity` | `var(--poodle-state-opacity-disabled)` |
 | `cursor` | `not-allowed` |
 
 ### Button focus
 
 | Property | Value |
 |----------|-------|
-| `outline` | `var(--flint-border-width-focus) solid var(--flint-color-accent-focusRing)` |
+| `outline` | `var(--poodle-border-width-focus) solid var(--poodle-color-accent-focusRing)` |
 | `outline-offset` | `0.125rem` |
 
 ## 9. Svelte Notes
@@ -171,9 +171,9 @@ Updated: 2026-03-15
 
 ## 10. GPUI Notes
 
-- expected crate/module surface: `flint_gpui::components::pagination_summary`
+- expected crate/module surface: `poodle_gpui::components::pagination_summary`
 - Spec struct: `PaginationSummarySpec` in primitives crate
-- Component struct: `FlintPaginationSummary` in components crate
+- Component struct: `PoodlePaginationSummary` in components crate
 - Range calculation is pure function
 - Previous/next callbacks receive target page number
 - Boundary disabling is computed from currentPage and totalPages

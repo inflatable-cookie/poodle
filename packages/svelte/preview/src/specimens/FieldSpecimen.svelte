@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { Field, TextInput, Eyebrow } from "@flint/svelte-primitives";
+  import { Field, TextInput, Eyebrow } from "@poodle/svelte-primitives";
 </script>
 
 <div class="specimen">

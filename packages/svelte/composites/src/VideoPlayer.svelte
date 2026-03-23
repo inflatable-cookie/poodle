@@ -260,7 +260,7 @@
   .video-player {
     position: relative;
     overflow: hidden;
-    border-radius: var(--flint-radius-surface);
+    border-radius: var(--poodle-radius-surface);
     background: #000;
     cursor: pointer;
   }
@@ -323,7 +323,7 @@
 
   .video-player__progress-fill {
     height: 100%;
-    background: var(--flint-color-accent-base, #6366f1);
+    background: var(--poodle-color-accent-base, #6366f1);
     border-radius: 999rem;
     transition: width 0.1s linear;
   }
@@ -360,7 +360,7 @@
     height: 1.75rem;
     padding: 0;
     border: 0;
-    border-radius: var(--flint-radius-control);
+    border-radius: var(--poodle-radius-control);
     background: transparent;
     color: rgba(255, 255, 255, 0.9);
     cursor: pointer;
@@ -383,7 +383,7 @@
   }
 
   .video-player__time {
-    font-family: var(--flint-typography-code-family);
+    font-family: var(--poodle-typography-code-family);
     font-size: 0.6875rem;
     color: rgba(255, 255, 255, 0.8);
     white-space: nowrap;

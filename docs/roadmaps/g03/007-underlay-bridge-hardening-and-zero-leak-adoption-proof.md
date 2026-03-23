@@ -1,21 +1,21 @@
 # g03.007 Underlay Adoption Tranche, Bridge Hardening, And Zero-Leak Proof
 
 Status: completed
-Owner: Flint Core
+Owner: Poodle Core
 Updated: 2026-03-12
 Depends on: g03.001, g03.002, g03.003, g03.004, g03.005, g03.006
-Primary repos: `flint`, `underlay`
+Primary repos: `poodle`, `underlay`
 
 ## Goals
 
-- [x] validate the first real Underlay adoption tranche without exposing Flint
+- [x] validate the first real Underlay adoption tranche without exposing Poodle
   publicly
 - [x] harden bridge boundaries and migration posture
 - [x] record remaining adoption friction clearly
 
 ## Execution Checklist
 
-- [x] validate the first Underlay-owned adoption surfaces with no public Flint leakage
+- [x] validate the first Underlay-owned adoption surfaces with no public Poodle leakage
 - [x] harden bridge boundaries and migration posture
 - [x] record remaining adoption friction clearly
 

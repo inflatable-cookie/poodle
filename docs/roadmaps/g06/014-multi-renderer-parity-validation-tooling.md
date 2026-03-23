@@ -25,11 +25,11 @@ Published at `docs/specs/multi-renderer-parity-validation.json`.
 
 | Crate | Status | Verification |
 |-------|--------|-------------|
-| `flint-tokens` | Typed module added | Colors, spaces, shadows, durations all parse correctly |
-| `flint-layout` | Complete | All layout properties map to both targets |
-| `flint-events` | Complete | All semantic events map to both targets |
-| `flint-style` | Complete | StyleDescriptor covers all visual properties |
-| `flint-adapter` | Complete | All trait definitions published |
+| `poodle-tokens` | Typed module added | Colors, spaces, shadows, durations all parse correctly |
+| `poodle-layout` | Complete | All layout properties map to both targets |
+| `poodle-events` | Complete | All semantic events map to both targets |
+| `poodle-style` | Complete | StyleDescriptor covers all visual properties |
+| `poodle-adapter` | Complete | All trait definitions published |
 
 ### Known Deltas (Intentional)
 

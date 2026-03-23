@@ -1,10 +1,10 @@
 # g04.009 Navigation Cards And List Card Patterns
 
 Status: planned
-Owner: Flint Core
+Owner: Poodle Core
 Updated: 2026-03-14
 Depends on: g04.001
-Primary repos: `flint`
+Primary repos: `poodle`
 
 ## Goals
 
@@ -16,13 +16,13 @@ Primary repos: `flint`
 
 - [ ] write contract for NavCard: title, description, icon, href/onClick, badge,
   disabled state, hover/focus styling
-- [ ] implement NavCard composite in `@flint/svelte-composites`
+- [ ] implement NavCard composite in `@poodle/svelte-composites`
 - [ ] write contract for NavCardGrid: items array, column config, responsive
   breakpoints, gap
-- [ ] implement NavCardGrid composite in `@flint/svelte-composites`
+- [ ] implement NavCardGrid composite in `@poodle/svelte-composites`
 - [ ] write contract for ListCard: title, subtitle, metadata slots, leading
   icon/avatar, trailing action, click handler
-- [ ] implement ListCard composite in `@flint/svelte-composites`
+- [ ] implement ListCard composite in `@poodle/svelte-composites`
 - [ ] create specimens for all three components
 - [ ] register in component-registry.ts and specimen registry
 

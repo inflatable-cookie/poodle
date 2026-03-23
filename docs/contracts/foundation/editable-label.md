@@ -137,7 +137,7 @@ Updated: 2026-03-21
 
 - Padding: `0.375rem 0.5rem`
 - Border: `0.0625rem solid transparent` (visible on hover/focus)
-- Border-radius: `var(--flint-radius-control)`
+- Border-radius: `var(--poodle-radius-control)`
 - Hover/focus: subtle border and background hint
 
 #### Flush variant
@@ -178,13 +178,13 @@ Updated: 2026-03-21
 | `min-width` | `0` |
 | `padding` | `0.375rem 0.5rem` |
 | `border` | `0.0625rem solid transparent` |
-| `border-radius` | `var(--flint-radius-control)` |
+| `border-radius` | `var(--poodle-radius-control)` |
 | `background` | `transparent` |
-| `color` | `var(--flint-color-text-primary)` |
-| `font-family` | `var(--flint-typography-label-family)` |
-| `font-size` | `var(--flint-typography-label-size)` |
-| `font-weight` | `var(--flint-typography-label-weight)` |
-| `line-height` | `var(--flint-typography-label-lineHeight)` |
+| `color` | `var(--poodle-color-text-primary)` |
+| `font-family` | `var(--poodle-typography-label-family)` |
+| `font-size` | `var(--poodle-typography-label-size)` |
+| `font-weight` | `var(--poodle-typography-label-weight)` |
+| `line-height` | `var(--poodle-typography-label-lineHeight)` |
 | `text-align` | `left` |
 
 ### Display `.editable-label__display`
@@ -200,38 +200,38 @@ Updated: 2026-03-21
 
 | Property | Value |
 |----------|-------|
-| `border-color` | `color-mix(in srgb, var(--flint-color-border-default) 72%, transparent)` |
-| `background` | `color-mix(in srgb, var(--flint-color-background-surface) 52%, transparent)` |
+| `border-color` | `color-mix(in srgb, var(--poodle-color-border-default) 72%, transparent)` |
+| `background` | `color-mix(in srgb, var(--poodle-color-background-surface) 52%, transparent)` |
 | `outline` | `none` |
 
 ### Display — focus-visible
 
 | Property | Value |
 |----------|-------|
-| `outline` | `var(--flint-border-width-focus) solid var(--flint-color-accent-focusRing)` |
+| `outline` | `var(--poodle-border-width-focus) solid var(--poodle-color-accent-focusRing)` |
 | `outline-offset` | `0.0625rem` |
 
 ### Input `.editable-label__input` (editing state)
 
 | Property | Value |
 |----------|-------|
-| `border-color` | `var(--flint-color-accent-focusRing)` |
-| `background` | `var(--flint-color-background-surface)` |
+| `border-color` | `var(--poodle-color-accent-focusRing)` |
+| `background` | `var(--poodle-color-background-surface)` |
 | `outline` | `none` |
-| `box-shadow` | `0 0 0 var(--flint-border-width-focus) color-mix(in srgb, var(--flint-color-accent-focusRing) 28%, transparent)` |
+| `box-shadow` | `0 0 0 var(--poodle-border-width-focus) color-mix(in srgb, var(--poodle-color-accent-focusRing) 28%, transparent)` |
 
 ### Display — disabled
 
 | Property | Value |
 |----------|-------|
 | `cursor` | `not-allowed` |
-| `opacity` | `var(--flint-state-opacity-disabled)` |
+| `opacity` | `var(--poodle-state-opacity-disabled)` |
 
 ### Empty state text
 
 | Property | Value |
 |----------|-------|
-| `color` | `var(--flint-color-text-secondary)` |
+| `color` | `var(--poodle-color-text-secondary)` |
 | `font-style` | `italic` |
 
 ### Edit icon `.editable-label__icon`
@@ -240,7 +240,7 @@ Updated: 2026-03-21
 |----------|-------|
 | `width` | `0.75rem` |
 | `height` | `0.75rem` |
-| `color` | `var(--flint-color-text-secondary)` |
+| `color` | `var(--poodle-color-text-secondary)` |
 | `opacity` | `0` (visible on hover/focus) |
 
 ### Flush variant overrides
@@ -251,7 +251,7 @@ Updated: 2026-03-21
 | Display/Input `border` | `none` |
 | Display/Input `border-radius` | `0` |
 | Display hover/focus `background` | `transparent` |
-| Input `border-bottom` | `0.0625rem solid var(--flint-color-accent-focusRing)` |
+| Input `border-bottom` | `0.0625rem solid var(--poodle-color-accent-focusRing)` |
 | Input `box-shadow` | `none` |
 
 ## 9. Svelte Notes
@@ -271,7 +271,7 @@ Updated: 2026-03-21
 
 ## 10. GPUI Notes
 
-- expected crate/module surface: `flint_gpui::primitives::editable_label`
+- expected crate/module surface: `poodle_gpui::primitives::editable_label`
 - Spec struct: `EditableLabelSpec` in primitives crate
 - GPUI must preserve mode-switching semantics, focus transfer, and suppression of global shortcuts while inline text editor is active
 - Display-to-input swap is an entity-state transition rather than DOM swap

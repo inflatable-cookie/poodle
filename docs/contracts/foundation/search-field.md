@@ -134,7 +134,7 @@ Updated: 2026-03-15
 ### Inherited from TextInput
 
 SearchField inherits all root, input control, and affordance styling from
-TextInput. The treatment CSS custom properties use the `--flint-text-input-*`
+TextInput. The treatment CSS custom properties use the `--poodle-text-input-*`
 namespace since the root element is a TextInput. See the TextInput contract
 Section 8 for the full root, focus, validation, and disabled token tables.
 
@@ -145,27 +145,27 @@ Section 8 for the full root, focus, validation, and disabled token tables.
 | `display` | `inline-flex` |
 | `align-items` | `center` |
 | `justify-content` | `center` |
-| `width` | `var(--flint-icon-size-default)` |
-| `height` | `var(--flint-icon-size-default)` |
+| `width` | `var(--poodle-icon-size-default)` |
+| `height` | `var(--poodle-icon-size-default)` |
 | `padding` | `0` |
 | `border` | `0` |
 | `background` | `transparent` |
-| `color` | `var(--flint-color-icon-muted)` |
+| `color` | `var(--poodle-color-icon-muted)` |
 | `cursor` | `pointer` |
-| `border-radius` | `calc(var(--flint-treatment-interactive-subtle-radius) - 0.0625rem)` |
+| `border-radius` | `calc(var(--poodle-treatment-interactive-subtle-radius) - 0.0625rem)` |
 
 ### Clear Button hover
 
 | Property | Value |
 |----------|-------|
-| `background` | `var(--flint-treatment-interactive-subtle-fill-hover, color-mix(in srgb, var(--flint-color-background-surface) 84%, transparent))` |
-| `color` | `var(--flint-color-text-primary)` |
+| `background` | `var(--poodle-treatment-interactive-subtle-fill-hover, color-mix(in srgb, var(--poodle-color-background-surface) 84%, transparent))` |
+| `color` | `var(--poodle-color-text-primary)` |
 
 ### Clear Button focus-visible
 
 | Property | Value |
 |----------|-------|
-| `outline` | `var(--flint-border-width-focus) solid var(--flint-color-accent-focusRing)` |
+| `outline` | `var(--poodle-border-width-focus) solid var(--poodle-color-accent-focusRing)` |
 | `outline-offset` | `0.125rem` |
 
 ## 9. Svelte Notes
@@ -183,7 +183,7 @@ Section 8 for the full root, focus, validation, and disabled token tables.
 
 ## 10. GPUI Notes
 
-- expected crate/module surface: `flint_gpui::primitives::search_field`
+- expected crate/module surface: `poodle_gpui::primitives::search_field`
 - GPUI implementation should compose or extend the TextInput primitive rather
   than duplicating text-editing internals
 - clear button must have its own accessible name ("Clear search" or equivalent)

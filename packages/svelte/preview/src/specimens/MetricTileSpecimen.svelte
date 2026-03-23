@@ -1,6 +1,6 @@
 <script lang="ts">
-  import { MetricTile } from "@flint/svelte-composites";
-  import { Eyebrow } from "@flint/svelte-primitives";
+  import { MetricTile } from "@poodle/svelte-composites";
+  import { Eyebrow } from "@poodle/svelte-primitives";
 </script>
 
 <div class="specimen">

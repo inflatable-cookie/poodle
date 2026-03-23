@@ -1,4 +1,4 @@
-use flint_tokens::semantic;
+use poodle_tokens::semantic;
 
 use crate::text_input::TextInputSpec;
 use crate::types::ValidationState;

@@ -1,8 +1,8 @@
 //! Code — Jetstream code block backed by CodeSpec.
 
 use jetstream_runtime::ui_element::{self, JsEl};
-use flint_jetstream::JetstreamThemeProvider;
-use flint_primitives::CodeSpec;
+use poodle_jetstream::JetstreamThemeProvider;
+use poodle_primitives::CodeSpec;
 
 use crate::theme_ext::{resolve_color, resolve_px, resolve_radius};
 

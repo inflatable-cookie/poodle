@@ -7,7 +7,7 @@ Target: g01.005
 
 ## Summary
 
-Flint's Svelte implementation will use Bits UI as an implementation substrate for headless primitives (accessibility, state management, event handling) while Flint maintains ownership of the public contract, token-based styling, and semantic component API. Bits UI is treated as an internal implementation detail, not a public dependency.
+Poodle's Svelte implementation will use Bits UI as an implementation substrate for headless primitives (accessibility, state management, event handling) while Poodle maintains ownership of the public contract, token-based styling, and semantic component API. Bits UI is treated as an internal implementation detail, not a public dependency.
 
 ---
 
@@ -25,7 +25,7 @@ Flint's Svelte implementation will use Bits UI as an implementation substrate fo
 
 ### 1. Bits UI as Implementation Substrate
 
-**Decision:** Flint will use Bits UI v1.0+ as the implementation substrate for Svelte components.
+**Decision:** Poodle will use Bits UI v1.0+ as the implementation substrate for Svelte components.
 
 **Rationale:**
 - Bits provides 40+ high-quality headless primitives
@@ -45,26 +45,26 @@ Flint's Svelte implementation will use Bits UI as an implementation substrate fo
 - ✅ Form integration
 
 **Out of Scope for Bits:**
-- ❌ Layout primitives (Box, Stack, Grid) - Flint implements
-- ❌ Styling (tokens, variants) - Flint implements
-- ❌ Workstation components (dock, split) - Flint implements
+- ❌ Layout primitives (Box, Stack, Grid) - Poodle implements
+- ❌ Styling (tokens, variants) - Poodle implements
+- ❌ Workstation components (dock, split) - Poodle implements
 
 ### 2. Wrapper Component Pattern
 
-**Decision:** Flint components will be wrappers around Bits primitives.
+**Decision:** Poodle components will be wrappers around Bits primitives.
 
 **Pattern Structure:**
 ```
-Flint Component (public API)
+Poodle Component (public API)
     ↓ wraps
 Bits UI Primitive (behavior/accessibility)
     ↓ applies
-Flint Tokens (styling)
+Poodle Tokens (styling)
 ```
 
 **Example:**
 ```svelte
-<!-- FlintButton.svelte -->
+<!-- PoodleButton.svelte -->
 <script lang="ts">
   import { Button as BitsButton } from "bits-ui";
   import type { ButtonProps } from "./contract";
@@ -75,7 +75,7 @@ Flint Tokens (styling)
     ...rest 
   }: ButtonProps = $props();
   
-  // Flint defines variant/size mapping to tokens
+  // Poodle defines variant/size mapping to tokens
   const classes = getTokenClasses({ variant, size, component: 'button' });
 </script>
 
@@ -85,16 +85,16 @@ Flint Tokens (styling)
 ```
 
 **Benefits:**
-- Flint owns public API contract
-- Bits can be swapped without changing Flint API
-- Token system fully controlled by Flint
-- Flint-specific documentation
+- Poodle owns public API contract
+- Bits can be swapped without changing Poodle API
+- Token system fully controlled by Poodle
+- Poodle-specific documentation
 
 ### 3. Public Contract Ownership
 
-**Decision:** Flint defines and owns the public component contract, not Bits.
+**Decision:** Poodle defines and owns the public component contract, not Bits.
 
-**Flint Owns:**
+**Poodle Owns:**
 - Component props interface (naming, types, defaults)
 - Semantic variants (primary, secondary, ghost)
 - Control sizes (sm, md, lg)
@@ -108,44 +108,44 @@ Flint Tokens (styling)
 - State management
 
 **Consequences:**
-- Flint props may differ from Bits props (intentionally)
-- Flint adds semantic layer on top of Bits primitives
-- Flint documentation doesn't reference Bits
+- Poodle props may differ from Bits props (intentionally)
+- Poodle adds semantic layer on top of Bits primitives
+- Poodle documentation doesn't reference Bits
 
 ### 4. Token Integration Strategy
 
-**Decision:** Flint tokens applied via `class` props using CSS custom properties.
+**Decision:** Poodle tokens applied via `class` props using CSS custom properties.
 
 **Approach:**
 ```svelte
 <BitsButton.Root 
-  class="bg-[var(--flint-color-background-primary)] 
-         text-[var(--flint-color-text-primary)]
-         hover:bg-[var(--flint-color-background-hover)]"
+  class="bg-[var(--poodle-color-background-primary)] 
+         text-[var(--poodle-color-text-primary)]
+         hover:bg-[var(--poodle-color-background-hover)]"
 >
 ```
 
 **Alternative with Tailwind:**
 ```svelte
-<!-- tailwind.config.ts references Flint tokens -->
+<!-- tailwind.config.ts references Poodle tokens -->
 <BitsButton.Root class="bg-background-primary text-text-primary">
 ```
 
 **Token Application:**
-- Flint components map semantic props to token classes
+- Poodle components map semantic props to token classes
 - Data attributes (`data-state`, `data-highlighted`) for state-based styling
-- Flint provides `getTokenClasses()` utility for consistent mapping
+- Poodle provides `getTokenClasses()` utility for consistent mapping
 
 ### 5. Compound Component Exposure
 
-**Decision:** Flint may expose compound component patterns where appropriate.
+**Decision:** Poodle may expose compound component patterns where appropriate.
 
 **Options:**
 
 **Option A: Wrapped Compound (Recommended)**
 ```svelte
 <script>
-  import { Dialog } from "@flint/svelte";
+  import { Dialog } from "@poodle/svelte";
 </script>
 
 <Dialog.Root>
@@ -155,7 +155,7 @@ Flint Tokens (styling)
   </Dialog.Content>
 </Dialog.Root>
 ```
-- Flint exports wrapped compound components
+- Poodle exports wrapped compound components
 - Full control over each part's styling
 - Consistent with Bits/shadcn patterns
 
@@ -170,22 +170,22 @@ Flint Tokens (styling)
 
 ### 6. Extension Limits
 
-**Decision:** Document that Flint components are not directly extensible from Bits.
+**Decision:** Document that Poodle components are not directly extensible from Bits.
 
 **Policy:**
-- Apps should use Flint components, not Bits directly
-- If Bits-level customization needed, use Bits directly (outside Flint)
-- Flint doesn't expose Bits types or internals
-- Flint component props are the extension point
+- Apps should use Poodle components, not Bits directly
+- If Bits-level customization needed, use Bits directly (outside Poodle)
+- Poodle doesn't expose Bits types or internals
+- Poodle component props are the extension point
 
 **Rationale:**
-- Maintains Flint's contract ownership
+- Maintains Poodle's contract ownership
 - Prevents accidental coupling to Bits
-- Allows Flint to swap Bits in future if needed
+- Allows Poodle to swap Bits in future if needed
 
 ### 7. Form Integration
 
-**Decision:** Flint form components use Bits form primitives with Flint styling.
+**Decision:** Poodle form components use Bits form primitives with Poodle styling.
 
 **Bits Form Primitives:**
 - Checkbox
@@ -196,21 +196,21 @@ Flint Tokens (styling)
 - Date Picker / Date Field
 - PIN Input
 
-**Flint Adds:**
+**Poodle Adds:**
 - Field wrappers with labels, error messages
 - Validation state styling
 - Form layout components (FormRow, FormGroup)
-- Integration with Flint validation patterns
+- Integration with Poodle validation patterns
 
 ### 8. Version and Maintenance Policy
 
 **Decision:** Bits UI updates absorbed internally; no breaking change exposure.
 
 **Policy:**
-- Flint specifies compatible Bits version in dependencies
-- Minor Bits updates: absorb in Flint patch release
-- Major Bits updates: evaluate impact, may require Flint major release
-- Flint's public API remains stable regardless of Bits changes
+- Poodle specifies compatible Bits version in dependencies
+- Minor Bits updates: absorb in Poodle patch release
+- Major Bits updates: evaluate impact, may require Poodle major release
+- Poodle's public API remains stable regardless of Bits changes
 
 **Current Recommendation:**
 - Target Bits UI v1.0.x (stable, Svelte 5)
@@ -225,7 +225,7 @@ Flint Tokens (styling)
 - [ ] Create wrapper component patterns in `svelte/src/components/`
 - [ ] Implement token-to-class mapping utility
 - [ ] Create first wrapped component (Button) as pattern example
-- [ ] Document "Flint owns the contract" rule in architecture
+- [ ] Document "Poodle owns the contract" rule in architecture
 - [ ] Update g01.005 milestone as complete
 
 ---
@@ -240,13 +240,13 @@ Flint Tokens (styling)
 
 ## Appendix: Component Mapping
 
-| Flint Component | Bits Primitive | Notes |
+| Poodle Component | Bits Primitive | Notes |
 |---------------|----------------|-------|
 | Button | Button | Direct wrapper |
 | Checkbox | Checkbox | + label wrapper |
 | Dialog | Dialog | Full compound |
 | DropdownMenu | DropdownMenu | Full compound |
-| Input | (implement) | Bits provides low-level, Flint adds styled input |
+| Input | (implement) | Bits provides low-level, Poodle adds styled input |
 | Popover | Popover | Full compound |
 | RadioGroup | RadioGroup | + label wrapper |
 | Select | Select | Full compound |
@@ -254,17 +254,17 @@ Flint Tokens (styling)
 | Switch | Switch | + label wrapper |
 | Tabs | Tabs | Full compound |
 | Tooltip | Tooltip | Full compound |
-| Calendar | Calendar | Flint adds styling |
+| Calendar | Calendar | Poodle adds styling |
 | DatePicker | DatePicker | Composed primitive |
-| Command | Command | Flint adds styling |
-| Table | Table | Flint adds token styling |
+| Command | Command | Poodle adds styling |
+| Table | Table | Poodle adds token styling |
 
 ---
 
 ## Appendix: Wrapper Template
 
 ```svelte
-<!-- Template for Flint component wrapping Bits -->
+<!-- Template for Poodle component wrapping Bits -->
 <script lang="ts">
   import { Component as BitsComponent } from "bits-ui";
   import { cn } from "$lib/utils";

@@ -1,7 +1,7 @@
 # g08.003 Implement Missing Components Batch 2 (Composites + Remaining)
 
 Status: complete
-Owner: Flint Core
+Owner: Poodle Core
 Depends on: g08.001
 
 ## Contract Check
@@ -21,9 +21,9 @@ milestone implements them from scratch to production quality.
 
 - [ ] Read contract: `docs/contracts/composites/detail-section.md`
 - [ ] Read Svelte implementation
-- [ ] Create spec struct in `flint-gpui-composites`
-- [ ] Implement component in `flint-gpui-components`
-- [ ] Write specimen in `flint-gpui-preview`
+- [ ] Create spec struct in `poodle-gpui-composites`
+- [ ] Implement component in `poodle-gpui-components`
+- [ ] Write specimen in `poodle-gpui-preview`
 - [ ] Pass 10-point quality checklist
 
 ### metric-tile
@@ -53,4 +53,4 @@ milestone implements them from scratch to production quality.
 - [ ] All 4 pass the 10-point quality checklist (see README)
 - [ ] All 4 have specimen pages in the preview app
 - [ ] Zero hardcoded px values in any new component
-- [ ] Clean compile with `cargo check -p flint-gpui-preview`
+- [ ] Clean compile with `cargo check -p poodle-gpui-preview`

@@ -116,22 +116,22 @@ No internal state.
 | `grid-template-columns` | always | direct `columns` prop value |
 | `grid-template-rows` | when `rows` is set | direct `rows` prop value |
 | `gap` | `gap="none"` | `0` |
-| `gap` | `gap="sm"` | `var(--flint-space-inline-sm)` |
-| `gap` | `gap="md"` | `var(--flint-space-panel-y)` |
-| `gap` | `gap="lg"` | `var(--flint-space-panel-x)` |
+| `gap` | `gap="sm"` | `var(--poodle-space-inline-sm)` |
+| `gap` | `gap="md"` | `var(--poodle-space-panel-y)` |
+| `gap` | `gap="lg"` | `var(--poodle-space-panel-x)` |
 | `padding` | `padding="none"` | `0` |
-| `padding` | `padding="sm"` | `var(--flint-space-inline-sm)` |
-| `padding` | `padding="md"` | `var(--flint-space-panel-y)` |
-| `padding` | `padding="lg"` | `var(--flint-space-panel-x)` |
+| `padding` | `padding="sm"` | `var(--poodle-space-inline-sm)` |
+| `padding` | `padding="md"` | `var(--poodle-space-panel-y)` |
+| `padding` | `padding="lg"` | `var(--poodle-space-panel-x)` |
 
 ### SpaceScale Token Map
 
 | Scale | Resolved Value |
 |-------|---------------|
 | `"none"` | `0` |
-| `"sm"` | `var(--flint-space-inline-sm)` |
-| `"md"` | `var(--flint-space-panel-y)` |
-| `"lg"` | `var(--flint-space-panel-x)` |
+| `"sm"` | `var(--poodle-space-inline-sm)` |
+| `"md"` | `var(--poodle-space-panel-y)` |
+| `"lg"` | `var(--poodle-space-panel-x)` |
 
 ## 9. Svelte Notes
 
@@ -146,7 +146,7 @@ No internal state.
 
 ## 10. GPUI Notes
 
-- Expected crate/module surface: `flint_gpui::components::grid`
+- Expected crate/module surface: `poodle_gpui::components::grid`
 - GPUI may need custom placement helpers to emulate CSS grid track definitions
 - `columns` and `rows` string props must be parsed into equivalent track sizes
 - SpaceScale mapping must use the same design token values

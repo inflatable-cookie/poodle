@@ -1,10 +1,10 @@
 # g05.014 Svelte Demo-App Rebuild, Component Adoption, And Coverage Upgrade
 
 Status: completed
-Owner: Flint Core
+Owner: Poodle Core
 Updated: 2026-03-13
 Depends on: g05.012, g05.013
-Primary repos: `flint`
+Primary repos: `poodle`
 
 ## Goals
 

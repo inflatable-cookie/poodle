@@ -53,11 +53,11 @@
   .toolbar {
     display: inline-flex;
     align-items: center;
-    gap: var(--flint-space-inline-sm);
-    padding: var(--flint-space-inline-sm);
-    border: 0.0625rem solid color-mix(in srgb, var(--flint-color-border-subtle) 78%, transparent);
-    border-radius: var(--flint-radius-surface);
-    background: color-mix(in srgb, var(--flint-color-background-panel) 94%, transparent);
+    gap: var(--poodle-space-inline-sm);
+    padding: var(--poodle-space-inline-sm);
+    border: 0.0625rem solid color-mix(in srgb, var(--poodle-color-border-subtle) 78%, transparent);
+    border-radius: var(--poodle-radius-surface);
+    background: color-mix(in srgb, var(--poodle-color-background-panel) 94%, transparent);
   }
 
   .toolbar[data-orientation="vertical"] {

@@ -1,7 +1,7 @@
 # g11.007 Layout Batch
 
 Status: planned
-Owner: Flint Core
+Owner: Poodle Core
 Depends on: contract audit
 
 ## Components

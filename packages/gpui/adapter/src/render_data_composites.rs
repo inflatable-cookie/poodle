@@ -4,13 +4,13 @@
 //! DetailSectionSpec, FilterToolbarSpec, PickerShellSpec, RelationPickerSpec,
 //! SelectionSummarySpec, PaginationSummarySpec, MediaThumbnailSpec, MediaPreviewSpec
 
-use flint_adapter::{RenderComponent, ThemeProvider};
-use flint_composites::{
+use poodle_adapter::{RenderComponent, ThemeProvider};
+use poodle_composites::{
     DataTableSpec, DetailSectionSpec, DetailShellSpec, FilterToolbarSpec,
     MediaPreviewSpec, MediaThumbnailSpec, PaginationSummarySpec, PickerShellSpec,
     RelationPickerSpec, SelectionSummarySpec,
 };
-use flint_style::StyleDescriptor;
+use poodle_style::StyleDescriptor;
 
 use crate::style_map::map_style;
 use crate::{GpuiAdapter, GpuiElementHandle, GpuiTarget};
@@ -97,9 +97,9 @@ impl RenderComponent<MediaPreviewSpec> for GpuiAdapter {
 
 #[cfg(test)]
 mod tests {
-    use flint_adapter::RenderComponent;
-    use flint_composites::*;
-    use flint_style::StyleDescriptor;
+    use poodle_adapter::RenderComponent;
+    use poodle_composites::*;
+    use poodle_style::StyleDescriptor;
     use crate::{GpuiAdapter, theme::GpuiThemeProvider};
 
     fn a() -> GpuiAdapter { GpuiAdapter::new(GpuiThemeProvider::default()) }

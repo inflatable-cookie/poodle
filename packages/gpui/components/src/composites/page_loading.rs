@@ -1,9 +1,9 @@
 //! PageLoading — full-page loading state backed by PageLoadingSpec.
 
 use gpui::*;
-use flint_gpui::GpuiThemeProvider;
-use flint_composites::PageLoadingSpec;
-use flint_primitives::{IconSize, IconSpec};
+use poodle_gpui::GpuiThemeProvider;
+use poodle_composites::PageLoadingSpec;
+use poodle_primitives::{IconSize, IconSpec};
 use crate::primitives::Icon;
 use crate::theme_ext::{resolve_color, resolve_radius};
 
@@ -84,7 +84,7 @@ impl IntoElement for PageLoading {
             let control_radius = resolve_radius(theme, "semantic.radius.control");
             card = card.child(
                 div()
-                    .id("flint-page-loading-cancel")
+                    .id("poodle-page-loading-cancel")
                     .text_size(px(13.0))
                     .text_color(muted)
                     .cursor_pointer()

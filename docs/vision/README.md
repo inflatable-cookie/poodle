@@ -3,12 +3,12 @@
 Status: active
 Updated: 2026-03-11
 
-Vision defines what Flint is for, what it is not for, and what success looks
+Vision defines what Poodle is for, what it is not for, and what success looks
 like across the ecosystem.
 
 ## Active Vision
 
-- `001-flint-vision.md`
+- `001-poodle-vision.md`
 
 ## Next Task
 

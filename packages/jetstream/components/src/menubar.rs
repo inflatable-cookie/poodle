@@ -1,8 +1,8 @@
 //! Menubar — Jetstream horizontal menu bar backed by MenubarSpec.
 
 use jetstream_runtime::ui_element::{self, JsEl};
-use flint_jetstream::JetstreamThemeProvider;
-use flint_primitives::MenubarSpec;
+use poodle_jetstream::JetstreamThemeProvider;
+use poodle_primitives::MenubarSpec;
 
 use crate::theme_ext::resolve_color;
 

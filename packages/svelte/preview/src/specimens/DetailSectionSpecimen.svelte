@@ -1,13 +1,13 @@
 <script lang="ts">
-  import { DetailSection } from "@flint/svelte-composites";
-  import { Button, DetailRow, Eyebrow } from "@flint/svelte-primitives";
+  import { DetailSection } from "@poodle/svelte-composites";
+  import { Button, DetailRow, Eyebrow } from "@poodle/svelte-primitives";
 </script>
 
 <div class="specimen">
   <div class="specimen__group">
     <Eyebrow>With title and rows</Eyebrow>
     <DetailSection title="Project details" description="Core metadata for this project.">
-      <DetailRow label="Name" value="Flint Design System" />
+      <DetailRow label="Name" value="Poodle Design System" />
       <DetailRow label="Owner" value="Clay + Aura" />
       <DetailRow label="Created" value="March 2025" />
       <DetailRow label="Status" value="Active" />

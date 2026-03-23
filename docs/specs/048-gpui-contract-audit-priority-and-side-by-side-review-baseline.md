@@ -9,7 +9,7 @@ Depends on: `008-parity-evidence-documented-delta-and-downstream-extension-rules
 Freeze the implementation order and parity posture for `g04` before GPUI work
 turns into a pile of ad hoc native widgets.
 
-This baseline exists so Flint can move from token-only GPUI posture toward the
+This baseline exists so Poodle can move from token-only GPUI posture toward the
 same contract-owned UI in Svelte and GPUI, without confusing “native
 adaptation” with “anything goes” and without pretending that every browser
 preview section deserves identical native treatment.
@@ -91,13 +91,13 @@ that never aligned with the shared foundation layer.
 
 ## Honesty Rule
 
-Flint may say:
+Poodle may say:
 
 - GPUI implementation order is explicit
 - some sections require direct parity while others require native adaptation
 - side-by-side review is a first-class parity tool for the shared UI
 
-Flint may not say:
+Poodle may not say:
 
 - browser preview parity is enough to imply GPUI parity
 - native adaptation means Loophole-facing UI can drift freely from Svelte

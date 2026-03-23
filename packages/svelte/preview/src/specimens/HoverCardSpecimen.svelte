@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { HoverCard, Eyebrow } from "@flint/svelte-primitives";
+  import { HoverCard, Eyebrow } from "@poodle/svelte-primitives";
 </script>
 
 <div class="specimen">
@@ -9,7 +9,7 @@
       <span slot="trigger" class="trigger-link">@clay</span>
       <div class="card-content">
         <strong>Clay</strong>
-        <p>Design systems engineer working on Flint. Loves component architecture and accessibility.</p>
+        <p>Design systems engineer working on Poodle. Loves component architecture and accessibility.</p>
       </div>
     </HoverCard>
   </div>
@@ -17,10 +17,10 @@
   <div class="specimen__group">
     <Eyebrow>Bottom placement</Eyebrow>
     <HoverCard placement="bottom" ariaLabel="Repository info">
-      <span slot="trigger" class="trigger-link">flint/svelte-primitives</span>
+      <span slot="trigger" class="trigger-link">poodle/svelte-primitives</span>
       <div class="card-content">
         <strong>svelte-primitives</strong>
-        <p>Core primitive components for the Flint design system. 64 components, 94% coverage.</p>
+        <p>Core primitive components for the Poodle design system. 64 components, 94% coverage.</p>
       </div>
     </HoverCard>
   </div>
@@ -41,7 +41,7 @@
   }
 
   .trigger-link {
-    color: var(--flint-color-text-accent);
+    color: var(--poodle-color-text-accent);
     text-decoration: underline;
     cursor: pointer;
     font-size: 0.875rem;
@@ -60,6 +60,6 @@
   .card-content p {
     margin: 0;
     font-size: 0.8125rem;
-    color: var(--flint-color-text-secondary);
+    color: var(--poodle-color-text-secondary);
   }
 </style>

@@ -1,10 +1,10 @@
 //! Calendar specimen — date grid display.
 
 use jetstream_runtime::ui_element::*;
-use flint_jetstream::JetstreamThemeProvider;
-use flint_jetstream_components::calendar::js_calendar;
-use flint_jetstream_components::theme_ext::*;
-use flint_primitives::CalendarSpec;
+use poodle_jetstream::JetstreamThemeProvider;
+use poodle_jetstream_components::calendar::js_calendar;
+use poodle_jetstream_components::theme_ext::*;
+use poodle_primitives::CalendarSpec;
 
 pub fn render(theme: &JetstreamThemeProvider) -> JsEl {
     let secondary = resolve_color(theme, "semantic.color.text.secondary");

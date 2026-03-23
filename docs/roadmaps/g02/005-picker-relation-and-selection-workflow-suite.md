@@ -1,10 +1,10 @@
 # g02.005 Picker, Relation, And Selection Workflow Suite
 
 Status: completed
-Owner: Flint Core
+Owner: Poodle Core
 Updated: 2026-03-11
 Depends on: g02.001, g02.003, g02.004
-Primary repos: `flint`
+Primary repos: `poodle`
 
 ## Goals
 

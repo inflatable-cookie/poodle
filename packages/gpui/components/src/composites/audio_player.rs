@@ -2,9 +2,9 @@
 //! GPUI cannot play audio — this renders the UI chrome only.
 
 use gpui::*;
-use flint_gpui::GpuiThemeProvider;
-use flint_primitives::{IconSize, IconSpec};
-use flint_composites::AudioPlayerSpec;
+use poodle_gpui::GpuiThemeProvider;
+use poodle_primitives::{IconSize, IconSpec};
+use poodle_composites::AudioPlayerSpec;
 use crate::primitives::Icon;
 use crate::theme_ext::{color_mix, resolve_color, resolve_radius};
 
@@ -76,7 +76,7 @@ impl IntoElement for AudioPlayer {
             .flex().flex_row().items_center().gap(px(8.0))
             .child(
                 div()
-                    .id(SharedString::from("flint-audio-play"))
+                    .id(SharedString::from("poodle-audio-play"))
                     .focusable()
                     .cursor_pointer()
                     .w(px(32.0)).h(px(32.0))
@@ -90,7 +90,7 @@ impl IntoElement for AudioPlayer {
             .child(track_bar)
             .child(
                 div()
-                    .id(SharedString::from("flint-audio-mute"))
+                    .id(SharedString::from("poodle-audio-mute"))
                     .focusable()
                     .cursor_pointer()
                     .w(px(32.0)).h(px(32.0))

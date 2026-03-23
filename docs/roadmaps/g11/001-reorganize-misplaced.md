@@ -1,7 +1,7 @@
 # g11.001 Reorganize Misplaced Components
 
 Status: complete
-Owner: Flint Core
+Owner: Poodle Core
 
 ## Context
 
@@ -14,4 +14,4 @@ Owner: Flint Core
       pagination_summary from `composites/` to `primitives/`
 - [x] Updated `composites/mod.rs` — removed 6 module declarations and re-exports
 - [x] Updated `primitives/mod.rs` — added 6 module declarations and re-exports
-- [x] `cargo check -p flint-gpui-preview` — clean
+- [x] `cargo check -p poodle-gpui-preview` — clean

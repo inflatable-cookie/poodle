@@ -1,7 +1,7 @@
 //! ToastStack — Jetstream toast notification stack backed by ToastStackSpec.
 use jetstream_runtime::ui_element::{self, JsEl};
-use flint_jetstream::JetstreamThemeProvider;
-use flint_composites::ToastStackSpec;
+use poodle_jetstream::JetstreamThemeProvider;
+use poodle_composites::ToastStackSpec;
 use crate::theme_ext::{resolve_color, resolve_radius};
 
 pub fn js_toast_stack(spec: &ToastStackSpec, theme: &JetstreamThemeProvider) -> JsEl {

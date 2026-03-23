@@ -80,28 +80,28 @@
 <style>
   .picker-shell {
     display: grid;
-    gap: var(--flint-space-stack-md);
-    padding: var(--flint-space-panel-y) var(--flint-space-panel-x);
-    border: 0.0625rem solid var(--flint-color-border-subtle);
-    border-radius: var(--flint-radius-surface);
-    background: color-mix(in srgb, var(--flint-color-background-panel) 94%, transparent);
+    gap: var(--poodle-space-stack-md);
+    padding: var(--poodle-space-panel-y) var(--poodle-space-panel-x);
+    border: 0.0625rem solid var(--poodle-color-border-subtle);
+    border-radius: var(--poodle-radius-surface);
+    background: color-mix(in srgb, var(--poodle-color-background-panel) 94%, transparent);
   }
 
   .picker-shell[data-variant="popover"] {
     max-width: 30rem;
-    box-shadow: var(--flint-elevation-overlay);
+    box-shadow: var(--poodle-elevation-overlay);
   }
 
   .picker-shell[data-variant="modal"] {
-    box-shadow: var(--flint-elevation-dialog);
-    background: color-mix(in srgb, var(--flint-color-background-elevated) 96%, transparent);
+    box-shadow: var(--poodle-elevation-dialog);
+    background: color-mix(in srgb, var(--poodle-color-background-elevated) 96%, transparent);
   }
 
   .picker-shell__header {
     display: flex;
     flex-wrap: wrap;
     justify-content: space-between;
-    gap: var(--flint-space-inline-md);
+    gap: var(--poodle-space-inline-md);
   }
 
   .picker-shell__title,
@@ -118,7 +118,7 @@
   .picker-shell__meta,
   .picker-shell__state p,
   .picker-shell__status {
-    color: var(--flint-color-text-secondary);
+    color: var(--poodle-color-text-secondary);
     font-size: 0.8125rem;
     line-height: 1.5;
   }
@@ -130,17 +130,17 @@
   .picker-shell__meta {
     display: flex;
     flex-wrap: wrap;
-    gap: var(--flint-space-inline-sm);
+    gap: var(--poodle-space-inline-sm);
     align-items: baseline;
   }
 
   .picker-shell__state {
     display: grid;
-    gap: var(--flint-space-stack-sm);
-    padding: calc(var(--flint-space-panel-y) * 1.5) var(--flint-space-panel-x);
-    border: 0.0625rem solid var(--flint-color-border-subtle);
-    border-radius: var(--flint-radius-surface);
-    background: color-mix(in srgb, var(--flint-color-background-surface) 86%, transparent);
+    gap: var(--poodle-space-stack-sm);
+    padding: calc(var(--poodle-space-panel-y) * 1.5) var(--poodle-space-panel-x);
+    border: 0.0625rem solid var(--poodle-color-border-subtle);
+    border-radius: var(--poodle-radius-surface);
+    background: color-mix(in srgb, var(--poodle-color-background-surface) 86%, transparent);
   }
 
   .picker-shell__state strong,

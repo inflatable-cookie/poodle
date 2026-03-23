@@ -1,7 +1,7 @@
 # g11.012 Visual Parity Verification
 
 Status: planned
-Owner: Flint Core
+Owner: Poodle Core
 Depends on: g11.003–011
 
 ## Actions

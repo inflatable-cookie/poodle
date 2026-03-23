@@ -11,8 +11,8 @@
         "token-inspector"
       ],
       "packageFocus": [
-        "flint-tokens",
-        "flint-gpui-preview"
+        "poodle-tokens",
+        "poodle-gpui-preview"
       ]
     },
     {
@@ -24,8 +24,8 @@
         "notification-suite"
       ],
       "packageFocus": [
-        "flint-gpui",
-        "flint-gpui-components"
+        "poodle-gpui",
+        "poodle-gpui-components"
       ]
     },
     {
@@ -40,8 +40,8 @@
         "media-suite"
       ],
       "packageFocus": [
-        "flint-gpui",
-        "flint-gpui-components"
+        "poodle-gpui",
+        "poodle-gpui-components"
       ]
     },
     {
@@ -53,9 +53,9 @@
         "workspace-suite"
       ],
       "packageFocus": [
-        "flint-gpui",
-        "flint-gpui-components",
-        "flint-gpui-preview"
+        "poodle-gpui",
+        "poodle-gpui-components",
+        "poodle-gpui-preview"
       ]
     }
   ],
@@ -162,7 +162,7 @@
       "sideBySideReview": true,
       "reasons": [
         "The workstation shell is the most important shared Loophole-facing UI target above primitives and composites.",
-        "This is the strongest place to prove Flint can build the same UI in Svelte and GPUI."
+        "This is the strongest place to prove Poodle can build the same UI in Svelte and GPUI."
       ]
     },
     {

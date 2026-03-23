@@ -6,12 +6,12 @@
 //! - FormActionsSpec, TimeFieldSpec
 //! - EditableLabelSpec, NumberEntrySpec, PinInputSpec, ToolbarSpec
 
-use flint_adapter::{RenderComponent, ThemeProvider};
-use flint_primitives::{
+use poodle_adapter::{RenderComponent, ThemeProvider};
+use poodle_primitives::{
     ButtonSpec, EditableLabelSpec, FieldSpec, FormActionsSpec, IconButtonSpec, NumberEntrySpec,
     PinInputSpec, SearchFieldSpec, TextAreaSpec, TextInputSpec, TimeFieldSpec, ToolbarSpec,
 };
-use flint_style::StyleDescriptor;
+use poodle_style::StyleDescriptor;
 
 use crate::style_map::map_style;
 use crate::{GpuiAdapter, GpuiElementHandle, GpuiTarget};
@@ -350,13 +350,13 @@ impl RenderComponent<ToolbarSpec> for GpuiAdapter {
 
 #[cfg(test)]
 mod tests {
-    use flint_adapter::RenderComponent;
-    use flint_primitives::{
+    use poodle_adapter::RenderComponent;
+    use poodle_primitives::{
         ButtonSpec, EditableLabelSpec, FieldSpec, FormActionsSpec, IconButtonSpec,
         NumberEntrySpec, PinInputSpec, SearchFieldSpec, TextAreaSpec, TextInputSpec,
         TimeFieldSpec, ToolbarSpec,
     };
-    use flint_style::StyleDescriptor;
+    use poodle_style::StyleDescriptor;
 
     use crate::theme::GpuiThemeProvider;
     use crate::GpuiAdapter;

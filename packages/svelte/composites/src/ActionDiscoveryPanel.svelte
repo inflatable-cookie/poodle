@@ -1,7 +1,7 @@
 <script lang="ts">
   import { createEventDispatcher } from "svelte";
 
-  import { Eyebrow, ListCard, Skeleton } from "@flint/svelte-primitives";
+  import { Eyebrow, ListCard, Skeleton } from "@poodle/svelte-primitives";
   import EmptyState from "./EmptyState.svelte";
 
   import type { CommandActionItem, DiscoveryState } from "./types";
@@ -154,8 +154,8 @@
 
   .action-discovery-panel__list li[aria-selected="true"] :global(.list-card) {
     border-color: transparent;
-    background: color-mix(in srgb, var(--flint-color-accent-base) 18%, var(--flint-color-background-elevated));
-    box-shadow: inset 0 0 0 0.0625rem color-mix(in srgb, var(--flint-color-accent-base) 22%, transparent);
+    background: color-mix(in srgb, var(--poodle-color-accent-base) 18%, var(--poodle-color-background-elevated));
+    box-shadow: inset 0 0 0 0.0625rem color-mix(in srgb, var(--poodle-color-accent-base) 22%, transparent);
   }
 
   .action-discovery-panel__trailing {
@@ -172,32 +172,32 @@
     justify-content: center;
     min-height: 1.5rem;
     padding: 0 0.5rem;
-    border-radius: var(--flint-radius-control);
-    background: color-mix(in srgb, var(--flint-color-background-surface) 76%, transparent);
-    color: var(--flint-color-text-secondary);
+    border-radius: var(--poodle-radius-control);
+    background: color-mix(in srgb, var(--poodle-color-background-surface) 76%, transparent);
+    color: var(--poodle-color-text-secondary);
     font-size: 0.75rem;
   }
 
   .action-discovery-panel__kbd {
-    font-family: var(--flint-typography-code-family);
+    font-family: var(--poodle-typography-code-family);
   }
 
   .action-discovery-panel__state {
     display: grid;
-    gap: var(--flint-space-stack-sm);
+    gap: var(--poodle-space-stack-sm);
   }
 
   .action-discovery-panel__skeletons {
     display: grid;
-    gap: var(--flint-space-stack-sm);
+    gap: var(--poodle-space-stack-sm);
   }
 
   .action-discovery-panel__skeleton-row {
     display: grid;
     grid-template-columns: minmax(0, 1fr) auto;
-    gap: var(--flint-space-inline-md);
+    gap: var(--poodle-space-inline-md);
     padding: 0.875rem;
-    border-radius: calc(var(--flint-radius-surface) - 0.125rem);
-    background: color-mix(in srgb, var(--flint-color-background-surface) 72%, transparent);
+    border-radius: calc(var(--poodle-radius-surface) - 0.125rem);
+    background: color-mix(in srgb, var(--poodle-color-background-surface) 72%, transparent);
   }
 </style>

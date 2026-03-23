@@ -8,7 +8,7 @@ Updated: 2026-03-15
 - Component name: `TimeField`
 - Layer: `foundation`
 - Summary: a time-only value control for local wall-clock entry using a native
-  time input with Flint field chrome
+  time input with Poodle field chrome
 - In scope: time value entry, min/max constraints, step sizing, disabled state,
   controlled and uncontrolled value models
 - Out of scope: timezone conversion, date ownership, recurrence, schedule
@@ -115,21 +115,21 @@ Updated: 2026-03-15
 
 | Property | Value |
 |----------|-------|
-| `min-height` | `var(--flint-size-control-height)` |
-| `padding` | `0 var(--flint-space-control-x)` |
-| `border` | `0.0625rem solid var(--flint-color-border-default)` |
-| `border-radius` | `var(--flint-radius-control)` |
-| `background` | `var(--flint-color-background-surface)` |
-| `color` | `var(--flint-color-text-primary)` |
-| `font-family` | `var(--flint-typography-body-family)` |
-| `font-size` | `var(--flint-typography-body-size)` |
-| `line-height` | `var(--flint-typography-body-lineHeight)` |
+| `min-height` | `var(--poodle-size-control-height)` |
+| `padding` | `0 var(--poodle-space-control-x)` |
+| `border` | `0.0625rem solid var(--poodle-color-border-default)` |
+| `border-radius` | `var(--poodle-radius-control)` |
+| `background` | `var(--poodle-color-background-surface)` |
+| `color` | `var(--poodle-color-text-primary)` |
+| `font-family` | `var(--poodle-typography-body-family)` |
+| `font-size` | `var(--poodle-typography-body-size)` |
+| `line-height` | `var(--poodle-typography-body-lineHeight)` |
 
 ### Input — focus
 
 | Property | Value |
 |----------|-------|
-| `outline` | `var(--flint-border-width-focus) solid var(--flint-color-accent-focusRing)` |
+| `outline` | `var(--poodle-border-width-focus) solid var(--poodle-color-accent-focusRing)` |
 | `outline-offset` | `0.125rem` |
 
 ### Input — disabled
@@ -137,19 +137,19 @@ Updated: 2026-03-15
 | Property | Value |
 |----------|-------|
 | `cursor` | `not-allowed` |
-| `opacity` | `var(--flint-state-opacity-disabled)` |
+| `opacity` | `var(--poodle-state-opacity-disabled)` |
 
 ## 9. Svelte Notes
 
 - Uses native `<input type="time">` for platform accessibility and time-entry UX
 - `appearance: none` may be needed for consistent cross-browser styling
 - Public value uses local time strings in HH:MM or HH:MM:SS form
-- Browser-native time picker UI is allowed; Flint does not override it
+- Browser-native time picker UI is allowed; Poodle does not override it
 - Treatment tokens may be added for themed styling with fallbacks
 
 ## 10. GPUI Notes
 
-- expected crate/module surface: `flint_gpui::primitives::time_field`
+- expected crate/module surface: `poodle_gpui::primitives::time_field`
 - Spec struct: `TimeFieldSpec` in primitives crate
 - GPUI must provide its own time-entry editing UI since there is no native input[type="time"]
 - Must expose time value, min/max constraints, and step through accessibility tree

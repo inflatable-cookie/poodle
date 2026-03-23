@@ -87,14 +87,14 @@
   .list-card {
     display: flex;
     align-items: center;
-    gap: var(--flint-space-inline-md);
-    padding: var(--flint-space-panel-y) var(--flint-space-panel-x);
-    border: 0.0625rem solid color-mix(in srgb, var(--flint-color-border-subtle) 18%, transparent);
-    border-radius: var(--flint-radius-control);
-    background: color-mix(in srgb, var(--flint-surface) 88%, var(--flint-color-text-primary));
+    gap: var(--poodle-space-inline-md);
+    padding: var(--poodle-space-panel-y) var(--poodle-space-panel-x);
+    border: 0.0625rem solid color-mix(in srgb, var(--poodle-color-border-subtle) 18%, transparent);
+    border-radius: var(--poodle-radius-control);
+    background: color-mix(in srgb, var(--poodle-surface) 88%, var(--poodle-color-text-primary));
     transition:
-      background var(--flint-motion-duration-interaction) var(--flint-motion-easing-standard),
-      border-color var(--flint-motion-duration-interaction) var(--flint-motion-easing-standard);
+      background var(--poodle-motion-duration-interaction) var(--poodle-motion-easing-standard),
+      border-color var(--poodle-motion-duration-interaction) var(--poodle-motion-easing-standard);
   }
 
   .list-card--has-sash {
@@ -107,29 +107,29 @@
   }
 
   .list-card--interactive:hover:not([data-disabled="true"]) {
-    background: color-mix(in srgb, var(--flint-surface) 82%, var(--flint-color-text-primary));
-    border-color: color-mix(in srgb, var(--flint-color-border-default) 52%, transparent);
+    background: color-mix(in srgb, var(--poodle-surface) 82%, var(--poodle-color-text-primary));
+    border-color: color-mix(in srgb, var(--poodle-color-border-default) 52%, transparent);
   }
 
   .list-card:focus-visible {
-    outline: var(--flint-border-width-focus) solid var(--flint-color-accent-focusRing);
+    outline: var(--poodle-border-width-focus) solid var(--poodle-color-accent-focusRing);
     outline-offset: -0.0625rem;
   }
 
   .list-card[data-disabled="true"] {
     cursor: not-allowed;
-    opacity: var(--flint-state-opacity-disabled);
+    opacity: var(--poodle-state-opacity-disabled);
   }
 
   .list-card[data-not-live="true"] {
-    border: 0.1875rem dashed color-mix(in srgb, var(--flint-color-border-default) 72%, transparent);
-    background: color-mix(in srgb, var(--flint-surface) 32%, transparent);
+    border: 0.1875rem dashed color-mix(in srgb, var(--poodle-color-border-default) 72%, transparent);
+    background: color-mix(in srgb, var(--poodle-surface) 32%, transparent);
     filter: grayscale(1);
     opacity: 0.72;
   }
 
   .list-card[data-not-live="true"]:hover:not([data-disabled="true"]) {
-    border-color: var(--flint-color-border-default);
+    border-color: var(--poodle-color-border-default);
     filter: grayscale(0);
     opacity: 1;
   }
@@ -143,8 +143,8 @@
     height: 2rem;
     overflow: hidden;
     border-radius: 999px;
-    background: color-mix(in srgb, var(--list-card-accent, var(--flint-color-accent-base)) 12%, transparent);
-    color: var(--list-card-accent, var(--flint-color-accent-base));
+    background: color-mix(in srgb, var(--list-card-accent, var(--poodle-color-accent-base)) 12%, transparent);
+    color: var(--list-card-accent, var(--poodle-color-accent-base));
     font-size: 0.875rem;
     font-weight: 600;
   }
@@ -152,11 +152,11 @@
   .list-card[data-leading-shape="rounded-square"] .list-card__leading {
     width: 2.75rem;
     height: 2.75rem;
-    border-radius: var(--flint-radius-control);
+    border-radius: var(--poodle-radius-control);
   }
 
   .list-card[data-leading-fill="solid"] .list-card__leading {
-    background: var(--list-card-accent, var(--flint-color-accent-base));
+    background: var(--list-card-accent, var(--poodle-color-accent-base));
     color: #fff;
   }
 
@@ -171,16 +171,16 @@
   .list-card__header {
     display: flex;
     align-items: baseline;
-    gap: var(--flint-space-inline-sm);
+    gap: var(--poodle-space-inline-sm);
   }
 
   .list-card__title {
     flex: 1;
     min-width: 0;
-    font-family: var(--flint-typography-body-family);
-    font-size: var(--flint-typography-body-size);
+    font-family: var(--poodle-typography-body-family);
+    font-size: var(--poodle-typography-body-size);
     font-weight: 500;
-    color: var(--flint-color-text-primary);
+    color: var(--poodle-color-text-primary);
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
@@ -190,12 +190,12 @@
     flex-shrink: 0;
     display: flex;
     align-items: center;
-    gap: var(--flint-space-inline-sm);
+    gap: var(--poodle-space-inline-sm);
   }
 
   .list-card__subtitle {
     font-size: 0.75rem;
-    color: var(--flint-color-text-secondary);
+    color: var(--poodle-color-text-secondary);
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
@@ -204,14 +204,14 @@
   .list-card__footer {
     display: flex;
     align-items: center;
-    gap: var(--flint-space-inline-md);
+    gap: var(--poodle-space-inline-md);
     margin-top: 0.125rem;
   }
 
   .list-card__meta {
     flex-shrink: 0;
     font-size: 0.75rem;
-    color: var(--flint-color-text-secondary);
+    color: var(--poodle-color-text-secondary);
     font-variant-numeric: tabular-nums;
   }
 
@@ -230,7 +230,7 @@
     justify-content: center;
     width: 6rem;
     padding: 0.125rem 0;
-    background: var(--list-card-sash, var(--flint-color-positive-base, #22c55e));
+    background: var(--list-card-sash, var(--poodle-color-positive-base, #22c55e));
     color: #fff;
     font-size: 0.5625rem;
     font-weight: 700;

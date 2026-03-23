@@ -1,8 +1,8 @@
 use gpui::*;
-use flint_adapter::ThemeProvider;
-use flint_gpui::GpuiThemeProvider;
-use flint_primitives::{EyebrowSpec, RangeSliderSpec};
-use flint_gpui_components::{Eyebrow, RangeSlider};
+use poodle_adapter::ThemeProvider;
+use poodle_gpui::GpuiThemeProvider;
+use poodle_primitives::{EyebrowSpec, RangeSliderSpec};
+use poodle_gpui_components::{Eyebrow, RangeSlider};
 use crate::style_bridge::color_to_hsla;
 
 pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {

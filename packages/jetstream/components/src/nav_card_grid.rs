@@ -1,7 +1,7 @@
 //! NavCardGrid — Jetstream nav card grid backed by NavCardGridSpec.
 use jetstream_runtime::ui_element::{self, JsEl};
-use flint_jetstream::JetstreamThemeProvider;
-use flint_primitives::NavCardGridSpec;
+use poodle_jetstream::JetstreamThemeProvider;
+use poodle_primitives::NavCardGridSpec;
 
 pub fn js_nav_card_grid(_spec: &NavCardGridSpec, _theme: &JetstreamThemeProvider, children: Vec<JsEl>) -> JsEl {
     let mut el = ui_element::div().flex_row().flex_wrap().gap(12.0);

@@ -10,9 +10,9 @@ also useful architectural decisions and constraint documentation preserved here.
 
 ### Adapter Pipeline
 
-The `flint-jetstream` adapter depends on 8 contract crates: `flint-tokens`,
-`flint-layout`, `flint-events`, `flint-style`, `flint-adapter`, `flint-primitives`,
-`flint-composites`, `flint-workstation`. The adapter owns the mapping between Flint
+The `poodle-jetstream` adapter depends on 8 contract crates: `poodle-tokens`,
+`poodle-layout`, `poodle-events`, `poodle-style`, `poodle-adapter`, `poodle-primitives`,
+`poodle-composites`, `poodle-workstation`. The adapter owns the mapping between Poodle
 spec identity and Jetstream `UiNodeId` handles.
 
 Core type mapping:
@@ -93,13 +93,13 @@ only the primary shadow.
 
 - GPUI uses `gpui::Svg` via alpha mask — `stroke="white"` required for
   visibility (black = zero luminance = invisible)
-- `FlintIcon` wraps SVG rendering with text_color application
+- `PoodleIcon` wraps SVG rendering with text_color application
 - CSS `opacity` vs color alpha: element-level `.opacity()` works like CSS
   opacity; reducing individual color alpha makes dark-on-dark invisible
 - `color_mix(a, b, ratio)` helper for hover/active blending
 - Font rendering: static weight TTF files (Regular 400, Medium 500,
   SemiBold 600, Bold 700) registered in GPUI's font system
-- `TabStripSpec` → `FlintTabStrip` has no separate Svelte counterpart
+- `TabStripSpec` → `PoodleTabStrip` has no separate Svelte counterpart
 
 ---
 
@@ -107,9 +107,9 @@ only the primary shadow.
 
 **NOTE**: Workstation components are being consolidated into primitives and
 composites. These boundary decisions may be partially deprecated but the
-Flint-vs-downstream distinction remains useful.
+Poodle-vs-downstream distinction remains useful.
 
-**Belongs in Flint**:
+**Belongs in Poodle**:
 - Window host model, surface identity, surface-to-window ownership
 - Region grammar and layout snapshots
 - Strip rails (all four edges, icon-first and mixed-content modes)
@@ -118,7 +118,7 @@ Flint-vs-downstream distinction remains useful.
 - Panel variant system (utility/standard/focused)
 - Hosted-surface container with bounded states
 
-**Must stay downstream / out of Flint**:
+**Must stay downstream / out of Poodle**:
 - DAW semantics (transport, timeline, mixer, automation, etc.)
 - Window management policy (which surfaces open, default positions)
 - Panel assignment policy (which panels go where, pinning rules)

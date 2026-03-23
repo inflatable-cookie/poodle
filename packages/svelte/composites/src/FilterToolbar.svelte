@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { Icon, CollapseToggle } from "@flint/svelte-primitives";
+  import { Icon, CollapseToggle } from "@poodle/svelte-primitives";
 
   export let ariaLabel = "Filters";
   export let summaryText: string | null = null;
@@ -90,21 +90,21 @@
 <style>
   .filter-toolbar {
     display: grid;
-    gap: var(--flint-space-stack-sm);
-    padding: var(--flint-space-panel-y) var(--flint-space-panel-x);
-    border: 0.0625rem solid var(--flint-color-border-subtle);
-    border-radius: var(--flint-radius-surface);
-    background: color-mix(in srgb, var(--flint-color-background-elevated) 92%, transparent);
+    gap: var(--poodle-space-stack-sm);
+    padding: var(--poodle-space-panel-y) var(--poodle-space-panel-x);
+    border: 0.0625rem solid var(--poodle-color-border-subtle);
+    border-radius: var(--poodle-radius-surface);
+    background: color-mix(in srgb, var(--poodle-color-background-elevated) 92%, transparent);
   }
 
   .filter-toolbar[data-sticky="true"] {
-    box-shadow: var(--flint-elevation-surface);
+    box-shadow: var(--poodle-elevation-surface);
   }
 
   .filter-toolbar__header {
     display: flex;
     align-items: center;
-    gap: var(--flint-space-inline-sm);
+    gap: var(--poodle-space-inline-sm);
   }
 
   .filter-toolbar__header--button {
@@ -118,22 +118,22 @@
   }
 
   .filter-toolbar__header--button:focus-visible {
-    outline: var(--flint-border-width-focus) solid var(--flint-color-accent-focusRing);
+    outline: var(--poodle-border-width-focus) solid var(--poodle-color-accent-focusRing);
     outline-offset: 0.125rem;
   }
 
   .filter-toolbar__summary {
     margin: 0;
     flex: 1;
-    color: var(--flint-color-text-secondary);
-    font-size: var(--flint-typography-label-size, 0.75rem);
-    line-height: var(--flint-typography-label-lineHeight, 1.4);
+    color: var(--poodle-color-text-secondary);
+    font-size: var(--poodle-typography-label-size, 0.75rem);
+    line-height: var(--poodle-typography-label-lineHeight, 1.4);
   }
 
   .filter-toolbar__actions {
     display: flex;
     align-items: center;
-    gap: var(--flint-space-inline-xs, 0.25rem);
+    gap: var(--poodle-space-inline-xs, 0.25rem);
     margin-left: auto;
   }
 
@@ -143,7 +143,7 @@
       var(--ft-columns, 4),
       minmax(var(--ft-min-width, 10rem), 1fr)
     );
-    gap: var(--flint-space-inline-sm);
+    gap: var(--poodle-space-inline-sm);
     align-items: end;
   }
 
@@ -162,7 +162,7 @@
   .filter-toolbar__secondary {
     display: flex;
     flex-wrap: wrap;
-    gap: var(--flint-space-inline-sm);
+    gap: var(--poodle-space-inline-sm);
     align-items: center;
   }
 </style>

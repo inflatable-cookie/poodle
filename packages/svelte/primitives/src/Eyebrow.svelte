@@ -9,8 +9,8 @@
 <style>
   .eyebrow {
     margin: 0;
-    color: var(--flint-color-text-secondary);
-    font-family: var(--flint-typography-label-family);
+    color: var(--poodle-color-text-secondary);
+    font-family: var(--poodle-typography-label-family);
     font-size: 0.6875rem;
     font-weight: 600;
     letter-spacing: 0.12em;

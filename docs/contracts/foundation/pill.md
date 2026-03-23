@@ -109,11 +109,11 @@ No internal state.
 | `justify-content` | `center` |
 | `min-height` | `1.25rem` |
 | `padding` | `0.1875rem 0.5rem` |
-| `border` | `0.0625rem solid var(--flint-pill-border)` |
+| `border` | `0.0625rem solid var(--poodle-pill-border)` |
 | `border-radius` | `999px` |
-| `background` | `var(--flint-pill-fill)` |
-| `color` | `var(--flint-pill-text)` |
-| `font-family` | `var(--flint-typography-label-family)` |
+| `background` | `var(--poodle-pill-fill)` |
+| `color` | `var(--poodle-pill-text)` |
+| `font-family` | `var(--poodle-typography-label-family)` |
 | `font-size` | `0.6875rem` |
 | `font-weight` | `600` |
 | `line-height` | `1` |
@@ -123,39 +123,39 @@ No internal state.
 
 | Custom Property | Value |
 |-----------------|-------|
-| `--flint-pill-fill` | `color-mix(in srgb, var(--flint-color-background-surface) 90%, transparent)` |
-| `--flint-pill-border` | `color-mix(in srgb, var(--flint-color-border-subtle) 82%, transparent)` |
-| `--flint-pill-text` | `var(--flint-color-text-secondary)` |
+| `--poodle-pill-fill` | `color-mix(in srgb, var(--poodle-color-background-surface) 90%, transparent)` |
+| `--poodle-pill-border` | `color-mix(in srgb, var(--poodle-color-border-subtle) 82%, transparent)` |
+| `--poodle-pill-text` | `var(--poodle-color-text-secondary)` |
 
 ### Tone: success `.pill[data-tone="success"]`
 
 | Custom Property | Value |
 |-----------------|-------|
-| `--flint-pill-fill` | `color-mix(in srgb, var(--flint-color-status-success) 14%, var(--flint-color-background-surface))` |
-| `--flint-pill-border` | `color-mix(in srgb, var(--flint-color-status-success) 38%, var(--flint-color-border-subtle))` |
-| `--flint-pill-text` | `var(--flint-color-text-primary)` |
+| `--poodle-pill-fill` | `color-mix(in srgb, var(--poodle-color-status-success) 14%, var(--poodle-color-background-surface))` |
+| `--poodle-pill-border` | `color-mix(in srgb, var(--poodle-color-status-success) 38%, var(--poodle-color-border-subtle))` |
+| `--poodle-pill-text` | `var(--poodle-color-text-primary)` |
 
 ### Tone: danger `.pill[data-tone="danger"]`
 
 | Custom Property | Value |
 |-----------------|-------|
-| `--flint-pill-fill` | `color-mix(in srgb, var(--flint-color-status-danger) 14%, var(--flint-color-background-surface))` |
-| `--flint-pill-border` | `color-mix(in srgb, var(--flint-color-status-danger) 38%, var(--flint-color-border-subtle))` |
-| `--flint-pill-text` | `var(--flint-color-text-primary)` |
+| `--poodle-pill-fill` | `color-mix(in srgb, var(--poodle-color-status-danger) 14%, var(--poodle-color-background-surface))` |
+| `--poodle-pill-border` | `color-mix(in srgb, var(--poodle-color-status-danger) 38%, var(--poodle-color-border-subtle))` |
+| `--poodle-pill-text` | `var(--poodle-color-text-primary)` |
 
 ### Appearance: subtle `.pill[data-appearance="subtle"]`
 
 | Custom Property | Value |
 |-----------------|-------|
-| `--flint-pill-fill` | `color-mix(in srgb, var(--flint-pill-fill) 50%, transparent)` |
+| `--poodle-pill-fill` | `color-mix(in srgb, var(--poodle-pill-fill) 50%, transparent)` |
 
 ### Appearance: badge `.pill[data-appearance="badge"]`
 
 | Custom Property / Property | Value |
 |----------------------------|-------|
-| `--flint-pill-fill` | accent-tinted fill (tone-specific color at low opacity) |
-| `--flint-pill-border` | `transparent` |
-| `--flint-pill-text` | tone-specific accent color |
+| `--poodle-pill-fill` | accent-tinted fill (tone-specific color at low opacity) |
+| `--poodle-pill-border` | `transparent` |
+| `--poodle-pill-text` | tone-specific accent color |
 | `text-transform` | `uppercase` |
 | `font-weight` | `700` |
 
@@ -179,7 +179,7 @@ No internal state.
 
 | Property | Value |
 |----------|-------|
-| `font-family` | `var(--flint-typography-code-family)` |
+| `font-family` | `var(--poodle-typography-code-family)` |
 | `letter-spacing` | `0.02em` |
 
 ### Muted `.pill[data-muted="true"]`
@@ -193,13 +193,13 @@ No internal state.
 - Renders as a styled inline `<span>` with a default slot
 - Tone, appearance, size, font, and muted state are driven via `data-*`
   attributes for CSS selector targeting
-- Component custom properties (`--flint-pill-fill`, `--flint-pill-border`,
-  `--flint-pill-text`) are set on the root element and consumed by the same
+- Component custom properties (`--poodle-pill-fill`, `--poodle-pill-border`,
+  `--poodle-pill-text`) are set on the root element and consumed by the same
   element's CSS, enabling tone overrides without class proliferation
 
 ## 10. GPUI Notes
 
-- expected crate/module surface: `flint_gpui::primitives::pill`
+- expected crate/module surface: `poodle_gpui::primitives::pill`
 - keep semantics non-interactive unless wrapped by a control-specific contract
 - `color-mix` blending should be replicated using equivalent alpha-blended color
   calculations in GPUI's color system

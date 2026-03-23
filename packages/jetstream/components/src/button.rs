@@ -7,11 +7,11 @@
 
 use jetstream_runtime::game_ui::Color;
 use jetstream_runtime::ui_element::{self, JsEl};
-use flint_jetstream::JetstreamThemeProvider;
-use flint_primitives::ButtonSpec;
-use flint_primitives::ButtonTone;
-use flint_primitives::ButtonVariant;
-use flint_primitives::ControlSize;
+use poodle_jetstream::JetstreamThemeProvider;
+use poodle_primitives::ButtonSpec;
+use poodle_primitives::ButtonTone;
+use poodle_primitives::ButtonVariant;
+use poodle_primitives::ControlSize;
 
 use crate::theme_ext::{resolve_color, resolve_opacity, resolve_px, resolve_radius};
 
@@ -118,7 +118,7 @@ pub fn js_button(spec: &ButtonSpec, theme: &JetstreamThemeProvider) -> JsEl {
         .bg(fill)
         .text_color(text_color)
         .text_size(label_size)
-        .text_weight(500) // contract: font-weight: var(--flint-typography-label-weight) = 500
+        .text_weight(500) // contract: font-weight: var(--poodle-typography-label-weight) = 500
         .flex_row()
         .items_center()
         .justify_center()
@@ -193,7 +193,7 @@ mod tests {
     use super::*;
 
     fn test_theme() -> JetstreamThemeProvider {
-        JetstreamThemeProvider::from_theme(&flint_tokens::themes::DARK)
+        JetstreamThemeProvider::from_theme(&poodle_tokens::themes::DARK)
     }
 
     #[test]

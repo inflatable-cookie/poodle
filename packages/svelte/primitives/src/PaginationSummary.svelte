@@ -47,41 +47,41 @@
     flex-wrap: wrap;
     justify-content: space-between;
     align-items: center;
-    gap: var(--flint-space-inline-md);
+    gap: var(--poodle-space-inline-md);
   }
 
   .pagination-summary__copy {
     margin: 0;
-    color: var(--flint-color-text-secondary);
-    font-family: var(--flint-typography-body-family);
-    font-size: var(--flint-typography-body-size);
-    line-height: var(--flint-typography-body-lineHeight);
+    color: var(--poodle-color-text-secondary);
+    font-family: var(--poodle-typography-body-family);
+    font-size: var(--poodle-typography-body-size);
+    line-height: var(--poodle-typography-body-lineHeight);
   }
 
   .pagination-summary__actions {
     display: flex;
     flex-wrap: wrap;
     align-items: center;
-    gap: var(--flint-space-inline-sm);
+    gap: var(--poodle-space-inline-sm);
   }
 
   .pagination-summary__actions button {
-    min-height: var(--flint-size-control-height);
-    padding: 0 var(--flint-space-control-x);
-    border: 0.0625rem solid var(--flint-color-border-default);
-    border-radius: var(--flint-radius-control);
-    background: var(--flint-color-background-surface);
-    color: var(--flint-color-text-primary);
+    min-height: var(--poodle-size-control-height);
+    padding: 0 var(--poodle-space-control-x);
+    border: 0.0625rem solid var(--poodle-color-border-default);
+    border-radius: var(--poodle-radius-control);
+    background: var(--poodle-color-background-surface);
+    color: var(--poodle-color-text-primary);
     cursor: pointer;
   }
 
   .pagination-summary__actions button:disabled {
-    opacity: var(--flint-state-opacity-disabled);
+    opacity: var(--poodle-state-opacity-disabled);
     cursor: not-allowed;
   }
 
   .pagination-summary__actions button:focus-visible {
-    outline: var(--flint-border-width-focus) solid var(--flint-color-accent-focusRing);
+    outline: var(--poodle-border-width-focus) solid var(--poodle-color-accent-focusRing);
     outline-offset: 0.125rem;
   }
 </style>

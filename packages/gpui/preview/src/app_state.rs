@@ -4,7 +4,7 @@
 //! appearance treatment, state probes, active section, and component selection.
 
 use std::collections::HashMap;
-use flint_gpui::GpuiThemeProvider;
+use poodle_gpui::GpuiThemeProvider;
 
 /// Which top-level section is active.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -66,13 +66,13 @@ impl ThemePreset {
         match self {
             ThemePreset::Default => GpuiThemeProvider::new(),
             ThemePreset::Dark => {
-                GpuiThemeProvider::new().with_theme(&flint_tokens::themes::DARK)
+                GpuiThemeProvider::new().with_theme(&poodle_tokens::themes::DARK)
             }
             ThemePreset::Light => {
-                GpuiThemeProvider::new().with_theme(&flint_tokens::themes::LIGHT)
+                GpuiThemeProvider::new().with_theme(&poodle_tokens::themes::LIGHT)
             }
             ThemePreset::LoopholeStudio => {
-                GpuiThemeProvider::new().with_theme(&flint_tokens::themes::LOOPHOLE_STUDIO)
+                GpuiThemeProvider::new().with_theme(&poodle_tokens::themes::LOOPHOLE_STUDIO)
             }
         }
     }

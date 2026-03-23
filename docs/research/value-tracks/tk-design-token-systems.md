@@ -7,7 +7,7 @@ Priority: critical (blocks g01.002, g01.003)
 
 ## Purpose
 
-Research design token taxonomy patterns, standards, and tooling to inform Flint's:
+Research design token taxonomy patterns, standards, and tooling to inform Poodle's:
 - Canonical token schema (g01.002)
 - Artifact emission for CSS/TypeScript/Rust (g01.003)
 - Naming conventions across platforms
@@ -114,13 +114,13 @@ Research design token taxonomy patterns, standards, and tooling to inform Flint'
 **Web (CSS):**
 ```css
 :root {
-  --flint-color-background-primary: #ffffff;
-  --flint-color-text-primary: #1a1a1a;
+  --poodle-color-background-primary: #ffffff;
+  --poodle-color-text-primary: #1a1a1a;
 }
 
 [data-theme="dark"] {
-  --flint-color-background-primary: #1a1a1a;
-  --flint-color-text-primary: #ffffff;
+  --poodle-color-background-primary: #1a1a1a;
+  --poodle-color-text-primary: #ffffff;
 }
 ```
 
@@ -129,11 +129,11 @@ Research design token taxonomy patterns, standards, and tooling to inform Flint'
 export const tokens = {
   color: {
     background: {
-      primary: 'var(--flint-color-background-primary)',
-      secondary: 'var(--flint-color-background-secondary)',
+      primary: 'var(--poodle-color-background-primary)',
+      secondary: 'var(--poodle-color-background-secondary)',
     },
     text: {
-      primary: 'var(--flint-color-text-primary)',
+      primary: 'var(--poodle-color-text-primary)',
     },
   },
 } as const;
@@ -170,7 +170,7 @@ pub struct BackgroundColors {
 - GPUI handles DPI/scale separately
 - No native CSS custom property equivalent
 
-**Recommended Flint Strategy:**
+**Recommended Poodle Strategy:**
 - Define modes in DTCG: `light`, `dark`, `density` (compact/default/comfortable)
 - Emit separate CSS files or CSS layers for each theme
 - Emit Rust code for each theme variant
@@ -178,11 +178,11 @@ pub struct BackgroundColors {
 
 ---
 
-## Recommendations for Flint
+## Recommendations for Poodle
 
 ### Token Taxonomy
 
-**Flint Token Hierarchy:**
+**Poodle Token Hierarchy:**
 ```
 tokens/
 ├── primitives/
@@ -204,9 +204,9 @@ tokens/
 | Platform | Token Path | Output Name |
 |----------|------------|-------------|
 | Source | `semantic.color.background.primary` | - |
-| CSS | - | `--flint-color-background-primary` |
+| CSS | - | `--poodle-color-background-primary` |
 | TypeScript | `tokens.color.background.primary` | camelCase |
-| Rust | `flint::semantic::color::BACKGROUND_PRIMARY` | SCREAMING_SNAKE_CASE |
+| Rust | `poodle::semantic::color::BACKGROUND_PRIMARY` | SCREAMING_SNAKE_CASE |
 
 ### Emission Strategy
 
@@ -225,7 +225,7 @@ tokens/
 **Adopt W3C DTCG as canonical format because:**
 1. Industry standard (Adobe, Figma, Sketch, Tokens Studio support)
 2. Interoperability with design tools
-3. Flint can accept DTCG tokens from external sources
+3. Poodle can accept DTCG tokens from external sources
 4. Future-proof specification
 
 ---

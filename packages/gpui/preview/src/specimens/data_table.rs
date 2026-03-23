@@ -1,9 +1,9 @@
 use gpui::*;
 use gpui::prelude::FluentBuilder;
-use flint_adapter::ThemeProvider;
-use flint_composites::{DataTableSpec, TableColumnSpec, TableRowSpec, TableSortDirection};
-use flint_primitives::EyebrowSpec;
-use flint_gpui_components::{DataTable, Eyebrow};
+use poodle_adapter::ThemeProvider;
+use poodle_composites::{DataTableSpec, TableColumnSpec, TableRowSpec, TableSortDirection};
+use poodle_primitives::EyebrowSpec;
+use poodle_gpui_components::{DataTable, Eyebrow};
 use crate::app_state::AppState;
 use crate::style_bridge::color_to_hsla;
 use crate::PreviewRoot;

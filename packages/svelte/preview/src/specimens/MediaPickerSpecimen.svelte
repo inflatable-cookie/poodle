@@ -1,7 +1,7 @@
 <script lang="ts">
-  import { MediaPicker } from "@flint/svelte-composites";
-  import { Eyebrow, Button } from "@flint/svelte-primitives";
-  import type { MediaPickerItem } from "@flint/svelte-composites";
+  import { MediaPicker } from "@poodle/svelte-composites";
+  import { Eyebrow, Button } from "@poodle/svelte-primitives";
+  import type { MediaPickerItem } from "@poodle/svelte-composites";
 
   let open: boolean | null = null;
   let selected = "";

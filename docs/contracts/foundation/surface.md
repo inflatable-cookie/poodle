@@ -119,10 +119,10 @@ No internal state.
 
 | Var | Default Value |
 |-----|---------------|
-| `--flint-surface-fill` | `color-mix(in srgb, var(--flint-color-background-surface) 96%, transparent)` |
-| `--flint-surface` | `var(--flint-surface-fill)` — propagates surface context to descendants (see [surface-elevation](./surface-elevation.md)) |
-| `--flint-surface-border` | `color-mix(in srgb, var(--flint-color-border-subtle) 74%, transparent)` |
-| `--flint-surface-shadow` | `none` |
+| `--poodle-surface-fill` | `color-mix(in srgb, var(--poodle-color-background-surface) 96%, transparent)` |
+| `--poodle-surface` | `var(--poodle-surface-fill)` — propagates surface context to descendants (see [surface-elevation](./surface-elevation.md)) |
+| `--poodle-surface-border` | `color-mix(in srgb, var(--poodle-color-border-subtle) 74%, transparent)` |
+| `--poodle-surface-shadow` | `none` |
 
 ### Root (.surface) — base styles
 
@@ -130,30 +130,30 @@ No internal state.
 |----------|-------|
 | `min-width` | `0` |
 | `min-height` | `0` |
-| `border` | `0.0625rem solid var(--flint-surface-border)` |
-| `border-radius` | `var(--flint-treatment-surface-radius, var(--flint-radius-surface))` |
-| `background` | `var(--flint-surface-fill)` |
-| `box-shadow` | `var(--flint-surface-shadow)` |
+| `border` | `0.0625rem solid var(--poodle-surface-border)` |
+| `border-radius` | `var(--poodle-treatment-surface-radius, var(--poodle-radius-surface))` |
+| `background` | `var(--poodle-surface-fill)` |
+| `box-shadow` | `var(--poodle-surface-shadow)` |
 
 ### Tone: canvas — .surface[data-tone="canvas"]
 
 | Var | Value |
 |-----|-------|
-| `--flint-surface-fill` | `color-mix(in srgb, var(--flint-color-background-canvas) 98%, transparent)` |
+| `--poodle-surface-fill` | `color-mix(in srgb, var(--poodle-color-background-canvas) 98%, transparent)` |
 
 ### Tone: elevated — .surface[data-tone="elevated"]
 
 | Var | Value |
 |-----|-------|
-| `--flint-surface-fill` | `color-mix(in srgb, var(--flint-color-background-elevated) 96%, var(--flint-color-background-panel))` |
-| `--flint-surface-shadow` | `var(--flint-elevation-surface)` |
+| `--poodle-surface-fill` | `color-mix(in srgb, var(--poodle-color-background-elevated) 96%, var(--poodle-color-background-panel))` |
+| `--poodle-surface-shadow` | `var(--poodle-elevation-surface)` |
 
 ### isElevated override — .surface[data-elevated="true"]
 
 | Var | Value |
 |-----|-------|
-| `--flint-surface-fill` | `color-mix(in srgb, var(--flint-color-background-elevated) 96%, var(--flint-color-background-panel))` |
-| `--flint-surface-shadow` | `var(--flint-elevation-surface)` |
+| `--poodle-surface-fill` | `color-mix(in srgb, var(--poodle-color-background-elevated) 96%, var(--poodle-color-background-panel))` |
+| `--poodle-surface-shadow` | `var(--poodle-elevation-surface)` |
 
 ### Border: none — .surface[data-border="none"]
 
@@ -165,7 +165,7 @@ No internal state.
 
 | Var | Value |
 |-----|-------|
-| `--flint-surface-border` | `var(--flint-color-border-default)` |
+| `--poodle-surface-border` | `var(--poodle-color-border-default)` |
 
 ### Padding (Surface-specific mapping, applied as inline style)
 
@@ -175,7 +175,7 @@ utility, providing roomier defaults suited to container-level spacing.
 | Scale | Value |
 |-------|-------|
 | `none` | `0` |
-| `sm` | `var(--flint-space-panel-y)` (0.5rem) |
+| `sm` | `var(--poodle-space-panel-y)` (0.5rem) |
 | `md` | `1rem` |
 | `lg` | `1.5rem` |
 
@@ -193,21 +193,21 @@ utility, providing roomier defaults suited to container-level spacing.
 - padding applied as inline style via shared `scaleToSpace` utility
 - when `asRole` is set, the `role` attribute is applied to the root element
 - when `label` is set, `aria-label` is applied to the root element
-- treatment token `--flint-treatment-surface-radius` allows theme-level radius
-  overrides with fallback to `--flint-radius-surface`
-- CSS custom properties (`--flint-surface-fill`, `--flint-surface-border`,
-  `--flint-surface-shadow`) are set on the root and overridden by data-attribute
+- treatment token `--poodle-treatment-surface-radius` allows theme-level radius
+  overrides with fallback to `--poodle-radius-surface`
+- CSS custom properties (`--poodle-surface-fill`, `--poodle-surface-border`,
+  `--poodle-surface-shadow`) are set on the root and overridden by data-attribute
   selectors for tone, border, and elevation variants
 - `color-mix` blending creates semi-transparent fills that layer naturally
   when surfaces are nested
 
 ## 10. GPUI Notes
 
-- expected crate/module surface: `flint_gpui::components::surface`
+- expected crate/module surface: `poodle_gpui::components::surface`
 - Spec struct: `SurfaceSpec` in primitives crate
 - tone and border variants must produce matching fill colors using equivalent
   color-mix logic
-- elevation shadow (`--flint-elevation-surface`) maps to GPUI shadow drawing
+- elevation shadow (`--poodle-elevation-surface`) maps to GPUI shadow drawing
 - treatment radius fallback: use treatment token if set, else radius-surface
 - region/group semantics must map into platform accessibility APIs when
   `asRole` is provided

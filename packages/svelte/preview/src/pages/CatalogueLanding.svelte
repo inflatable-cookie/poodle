@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { Eyebrow } from "@flint/svelte-primitives";
+  import { Eyebrow } from "@poodle/svelte-primitives";
   import type { ComponentEntry, ComponentTier } from "../component-registry";
 
   export let tier: ComponentTier;
@@ -59,11 +59,11 @@
     margin: 0.25rem 0 0.5rem;
     font-size: 1.5rem;
     font-weight: 700;
-    color: var(--flint-color-text-primary);
+    color: var(--poodle-color-text-primary);
   }
 
   .catalogue-landing__header p {
-    color: var(--flint-color-text-secondary);
+    color: var(--poodle-color-text-secondary);
     font-size: 0.875rem;
     line-height: 1.5;
   }
@@ -73,7 +73,7 @@
     font-size: 0.75rem;
     text-transform: uppercase;
     letter-spacing: 0.04em;
-    color: var(--flint-color-text-secondary);
+    color: var(--poodle-color-text-secondary);
   }
 
   .catalogue-landing__grid {
@@ -85,17 +85,17 @@
   .component-card {
     display: block;
     padding: 1rem;
-    border: 0.0625rem solid color-mix(in srgb, var(--flint-color-border-subtle) 60%, transparent);
-    border-radius: var(--flint-radius-surface);
-    background: color-mix(in srgb, var(--flint-color-background-panel) 90%, transparent);
+    border: 0.0625rem solid color-mix(in srgb, var(--poodle-color-border-subtle) 60%, transparent);
+    border-radius: var(--poodle-radius-surface);
+    background: color-mix(in srgb, var(--poodle-color-background-panel) 90%, transparent);
     text-decoration: none;
     color: inherit;
     transition: border-color 0.15s, background 0.15s;
   }
 
   .component-card:hover {
-    border-color: var(--flint-color-border-default);
-    background: var(--flint-color-background-elevated);
+    border-color: var(--poodle-color-border-default);
+    background: var(--poodle-color-background-elevated);
   }
 
   .component-card__header {
@@ -108,13 +108,13 @@
   .component-card__name {
     font-size: 0.9375rem;
     font-weight: 600;
-    color: var(--flint-color-text-primary);
+    color: var(--poodle-color-text-primary);
   }
 
   .component-card__description {
     font-size: 0.8125rem;
     line-height: 1.45;
-    color: var(--flint-color-text-secondary);
+    color: var(--poodle-color-text-secondary);
     margin: 0;
   }
 </style>

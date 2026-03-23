@@ -38,10 +38,10 @@
   <button
     type="button"
     class="collapsible__trigger"
-    id={`flint-collapsible-trigger-${collapsibleId}`}
+    id={`poodle-collapsible-trigger-${collapsibleId}`}
     disabled={isDisabled}
     aria-expanded={isOpen ? "true" : "false"}
-    aria-controls={`flint-collapsible-content-${collapsibleId}`}
+    aria-controls={`poodle-collapsible-content-${collapsibleId}`}
     aria-label={title ? undefined : ariaLabel ?? undefined}
     on:click={() => setOpen(!isOpen)}
   >
@@ -64,9 +64,9 @@
   {#if isOpen}
     <div
       class="collapsible__content"
-      id={`flint-collapsible-content-${collapsibleId}`}
+      id={`poodle-collapsible-content-${collapsibleId}`}
       role="region"
-      aria-labelledby={`flint-collapsible-trigger-${collapsibleId}`}
+      aria-labelledby={`poodle-collapsible-trigger-${collapsibleId}`}
       transition:slide={{ duration: 180 }}
     >
       <slot />
@@ -77,13 +77,13 @@
 <style>
   .collapsible {
     display: grid;
-    gap: var(--flint-space-stack-md);
+    gap: var(--poodle-space-stack-md);
     min-width: 0;
-    padding: var(--flint-space-panel-y) var(--flint-space-panel-x);
-    border: 0.0625rem solid color-mix(in srgb, var(--flint-color-border-subtle) 42%, transparent);
-    border-radius: var(--flint-radius-surface);
-    background: color-mix(in srgb, var(--flint-surface) 88%, var(--flint-color-text-primary));
-    box-shadow: inset 0 0.0625rem 0 color-mix(in srgb, var(--flint-color-text-inverse) 8%, transparent);
+    padding: var(--poodle-space-panel-y) var(--poodle-space-panel-x);
+    border: 0.0625rem solid color-mix(in srgb, var(--poodle-color-border-subtle) 42%, transparent);
+    border-radius: var(--poodle-radius-surface);
+    background: color-mix(in srgb, var(--poodle-surface) 88%, var(--poodle-color-text-primary));
+    box-shadow: inset 0 0.0625rem 0 color-mix(in srgb, var(--poodle-color-text-inverse) 8%, transparent);
   }
 
   .collapsible[data-open="false"] {
@@ -91,19 +91,19 @@
   }
 
   .collapsible[data-disabled="true"] {
-    opacity: var(--flint-state-opacity-disabled);
+    opacity: var(--poodle-state-opacity-disabled);
   }
 
   .collapsible__trigger {
     display: grid;
     grid-template-columns: minmax(0, 1fr) auto;
     align-items: center;
-    gap: var(--flint-space-inline-md);
+    gap: var(--poodle-space-inline-md);
     width: 100%;
     padding: 0;
     border: 0;
     background: transparent;
-    color: var(--flint-color-text-primary);
+    color: var(--poodle-color-text-primary);
     cursor: pointer;
     text-align: left;
     font: inherit;
@@ -114,36 +114,36 @@
   }
 
   .collapsible__trigger:focus-visible {
-    outline: var(--flint-border-width-focus) solid var(--flint-color-accent-focusRing);
+    outline: var(--poodle-border-width-focus) solid var(--poodle-color-accent-focusRing);
     outline-offset: 0.125rem;
-    border-radius: calc(var(--flint-radius-control) - 0.125rem);
+    border-radius: calc(var(--poodle-radius-control) - 0.125rem);
   }
 
   .collapsible__heading {
     display: grid;
-    gap: var(--flint-space-inline-sm);
+    gap: var(--poodle-space-inline-sm);
     min-width: 0;
   }
 
   .collapsible__title {
-    font-family: var(--flint-typography-heading-family);
+    font-family: var(--poodle-typography-heading-family);
     font-size: 1rem;
     font-weight: 700;
     line-height: 1.2;
   }
 
   .collapsible__description {
-    color: var(--flint-color-text-secondary);
+    color: var(--poodle-color-text-secondary);
     font-size: 0.8125rem;
     line-height: 1.45;
   }
 
   .collapsible__indicator {
-    color: var(--flint-color-text-secondary);
-    font-family: var(--flint-typography-code-family);
+    color: var(--poodle-color-text-secondary);
+    font-family: var(--poodle-typography-code-family);
     font-size: 0.75rem;
     line-height: 1;
-    transition: transform var(--flint-motion-duration-interaction) var(--flint-motion-easing-standard);
+    transition: transform var(--poodle-motion-duration-interaction) var(--poodle-motion-easing-standard);
   }
 
   .collapsible[data-open="true"] .collapsible__indicator {

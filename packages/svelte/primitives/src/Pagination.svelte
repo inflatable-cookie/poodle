@@ -98,42 +98,42 @@
   .pagination {
     display: inline-flex;
     align-items: center;
-    gap: var(--flint-space-inline-sm);
+    gap: var(--poodle-space-inline-sm);
     flex-wrap: wrap;
   }
 
   .pagination__pages {
     display: inline-flex;
     align-items: center;
-    gap: var(--flint-space-inline-sm);
+    gap: var(--poodle-space-inline-sm);
   }
 
   .pagination__button {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    min-width: var(--flint-size-control-height);
-    height: calc(var(--flint-size-control-height) - 0.125rem);
-    padding: 0 var(--flint-space-control-x);
-    border: 0.0625rem solid color-mix(in srgb, var(--flint-color-border-default) 78%, transparent);
-    border-radius: var(--flint-radius-control);
-    background: var(--flint-color-background-surface);
-    color: var(--flint-color-text-primary);
+    min-width: var(--poodle-size-control-height);
+    height: calc(var(--poodle-size-control-height) - 0.125rem);
+    padding: 0 var(--poodle-space-control-x);
+    border: 0.0625rem solid color-mix(in srgb, var(--poodle-color-border-default) 78%, transparent);
+    border-radius: var(--poodle-radius-control);
+    background: var(--poodle-color-background-surface);
+    color: var(--poodle-color-text-primary);
     cursor: pointer;
-    font-family: var(--flint-typography-label-family);
+    font-family: var(--poodle-typography-label-family);
     font-size: 0.75rem;
     font-weight: 600;
     line-height: 1;
   }
 
   .pagination__button[data-current="true"] {
-    background: color-mix(in srgb, var(--flint-color-accent-base) 18%, transparent);
-    border-color: color-mix(in srgb, var(--flint-color-accent-base) 42%, var(--flint-color-border-default));
+    background: color-mix(in srgb, var(--poodle-color-accent-base) 18%, transparent);
+    border-color: color-mix(in srgb, var(--poodle-color-accent-base) 42%, var(--poodle-color-border-default));
   }
 
   .pagination__button:hover:not(:disabled),
   .pagination__button:focus-visible {
-    background: color-mix(in srgb, var(--flint-color-accent-base) 12%, transparent);
+    background: color-mix(in srgb, var(--poodle-color-accent-base) 12%, transparent);
     outline: none;
   }
 
@@ -142,14 +142,14 @@
     align-items: center;
     justify-content: center;
     min-width: 1.5rem;
-    color: var(--flint-color-text-secondary);
-    font-family: var(--flint-typography-label-family);
+    color: var(--poodle-color-text-secondary);
+    font-family: var(--poodle-typography-label-family);
     font-size: 0.75rem;
     font-weight: 600;
   }
 
   .pagination__button:disabled {
     cursor: not-allowed;
-    opacity: var(--flint-state-opacity-disabled);
+    opacity: var(--poodle-state-opacity-disabled);
   }
 </style>

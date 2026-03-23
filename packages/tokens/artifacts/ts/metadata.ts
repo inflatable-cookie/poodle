@@ -2,7 +2,7 @@
 
 export const manifest = {
   "$schema": "https://www.designtokens.org/TR/2025.10/format/",
-  "name": "@flint/tokens",
+  "name": "@poodle/tokens",
   "version": "0.0.0",
   "canonicalFormat": "W3C DTCG 2025.10",
   "artifactBaseline": "Style Dictionary 4.x target shapes with bootstrap local emission script",
@@ -36,12 +36,12 @@ export const manifest = {
   ],
   "artifactTargets": {
     "css": [
-      "packages/tokens/artifacts/css/flint-tokens.css",
-      "packages/tokens/artifacts/css/flint-theme-light.css",
-      "packages/tokens/artifacts/css/flint-theme-dark.css",
-      "packages/tokens/artifacts/css/flint-theme-loophole-studio.css",
-      "packages/tokens/artifacts/css/flint-density-compact.css",
-      "packages/tokens/artifacts/css/flint-density-comfortable.css"
+      "packages/tokens/artifacts/css/poodle-tokens.css",
+      "packages/tokens/artifacts/css/poodle-theme-light.css",
+      "packages/tokens/artifacts/css/poodle-theme-dark.css",
+      "packages/tokens/artifacts/css/poodle-theme-loophole-studio.css",
+      "packages/tokens/artifacts/css/poodle-density-compact.css",
+      "packages/tokens/artifacts/css/poodle-density-comfortable.css"
     ],
     "ts": [
       "packages/tokens/artifacts/ts/index.ts",

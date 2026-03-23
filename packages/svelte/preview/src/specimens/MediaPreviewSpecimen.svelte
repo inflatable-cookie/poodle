@@ -1,6 +1,6 @@
 <script lang="ts">
-  import { MediaPreview } from "@flint/svelte-composites";
-  import { Eyebrow } from "@flint/svelte-primitives";
+  import { MediaPreview } from "@poodle/svelte-composites";
+  import { Eyebrow } from "@poodle/svelte-primitives";
 </script>
 
 <div class="specimen">
@@ -64,8 +64,8 @@
     justify-content: center;
     width: 100%;
     height: 100%;
-    background: var(--flint-color-bg-subtle);
-    color: var(--flint-color-text-secondary);
+    background: var(--poodle-color-bg-subtle);
+    color: var(--poodle-color-text-secondary);
     font-size: 0.875rem;
   }
 </style>

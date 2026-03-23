@@ -1,7 +1,7 @@
 //! FilterToolbar — Jetstream filter toolbar backed by FilterToolbarSpec.
 use jetstream_runtime::ui_element::{self, JsEl};
-use flint_jetstream::JetstreamThemeProvider;
-use flint_composites::FilterToolbarSpec;
+use poodle_jetstream::JetstreamThemeProvider;
+use poodle_composites::FilterToolbarSpec;
 use crate::theme_ext::resolve_px;
 
 pub fn js_filter_toolbar(spec: &FilterToolbarSpec, theme: &JetstreamThemeProvider, search: Option<JsEl>, filters: Option<JsEl>) -> JsEl {

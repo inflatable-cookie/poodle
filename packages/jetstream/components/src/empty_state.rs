@@ -1,7 +1,7 @@
 //! EmptyState — Jetstream empty state backed by EmptyStateSpec.
 use jetstream_runtime::ui_element::{self, JsEl};
-use flint_jetstream::JetstreamThemeProvider;
-use flint_composites::EmptyStateSpec;
+use poodle_jetstream::JetstreamThemeProvider;
+use poodle_composites::EmptyStateSpec;
 use crate::theme_ext::{resolve_color, resolve_px};
 
 pub fn js_empty_state(spec: &EmptyStateSpec, theme: &JetstreamThemeProvider) -> JsEl {

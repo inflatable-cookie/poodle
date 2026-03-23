@@ -52,19 +52,19 @@
   .breadcrumbs__list {
     display: flex;
     flex-wrap: wrap;
-    gap: var(--flint-space-inline-sm);
+    gap: var(--poodle-space-inline-sm);
     margin: 0;
     padding: 0;
     list-style: none;
-    color: var(--flint-color-text-secondary);
-    font-size: var(--flint-typography-body-size);
-    line-height: var(--flint-typography-body-lineHeight);
+    color: var(--poodle-color-text-secondary);
+    font-size: var(--poodle-typography-body-size);
+    line-height: var(--poodle-typography-body-lineHeight);
   }
 
   .breadcrumbs__item {
     display: inline-flex;
     align-items: center;
-    gap: var(--flint-space-inline-sm);
+    gap: var(--poodle-space-inline-sm);
   }
 
   .breadcrumbs a,
@@ -84,6 +84,6 @@
   }
 
   .breadcrumbs [aria-current="page"] {
-    color: var(--flint-color-text-primary);
+    color: var(--poodle-color-text-primary);
   }
 </style>

@@ -1,4 +1,4 @@
-//! Flint component implementations for Jetstream.
+//! Poodle component implementations for Jetstream.
 //!
 //! # CONTRACT ADHERENCE IS MANDATORY
 //!
@@ -28,8 +28,8 @@
 //!    check `packages/svelte/primitives/src/` for the correct behavior.
 //!
 //! ```rust,ignore
-//! use flint_jetstream_components::button::js_button;
-//! use flint_primitives::ButtonSpec;
+//! use poodle_jetstream_components::button::js_button;
+//! use poodle_primitives::ButtonSpec;
 //!
 //! let el = js_button(&ButtonSpec::new().with_label("Save"), &theme);
 //! ```

@@ -1,6 +1,6 @@
-//! Jetstream rendering adapter for Flint.
+//! Jetstream rendering adapter for Poodle.
 //!
-//! This crate implements the renderer adapter traits from `flint-adapter` for
+//! This crate implements the renderer adapter traits from `poodle-adapter` for
 //! Jetstream, a wgpu-based game engine with a retained-mode UI system. It
 //! provides:
 //!
@@ -14,13 +14,13 @@
 //! ## Architecture
 //!
 //! ```text
-//! Shared Contract Layer (flint-primitives, flint-composites, flint-workstation)
+//! Shared Contract Layer (poodle-primitives, poodle-composites, poodle-workstation)
 //!     │
 //!     ▼
-//! flint-adapter traits (ThemeProvider, RenderComponent, AdapterManifest)
+//! poodle-adapter traits (ThemeProvider, RenderComponent, AdapterManifest)
 //!     │
 //!     ▼
-//! flint-jetstream (this crate) — Jetstream-specific implementations
+//! poodle-jetstream (this crate) — Jetstream-specific implementations
 //!     │
 //!     ▼
 //! Jetstream UI tree (UiNode, UiStyle, Widget, UiEvent)
@@ -35,7 +35,7 @@
 //! - Parent-child relationships for layout computation
 //! - Focus state for keyboard/gamepad navigation
 //!
-//! Flint specs map to one or more `UiNode` entries. The adapter produces
+//! Poodle specs map to one or more `UiNode` entries. The adapter produces
 //! `JetstreamNodeHandle` values that track the spec-to-node mapping.
 
 pub mod demo_scene;
@@ -56,7 +56,7 @@ pub use style_map::{
 };
 pub use theme::JetstreamThemeProvider;
 
-use flint_adapter::{AdapterManifest, RenderTarget};
+use poodle_adapter::{AdapterManifest, RenderTarget};
 
 /// Represents a Jetstream UI widget type that a spec maps to.
 #[derive(Debug, Clone, Copy, PartialEq)]
@@ -198,7 +198,7 @@ impl AdapterManifest for JetstreamAdapter {
 
 #[cfg(test)]
 mod tests {
-    use flint_adapter::ThemeProvider;
+    use poodle_adapter::ThemeProvider;
     use super::*;
 
     #[test]

@@ -1,7 +1,7 @@
 use gpui::*;
-use flint_gpui::GpuiThemeProvider;
-use flint_primitives::{PillAppearance, PillFont, PillSize, PillSpec, PillTone, EyebrowSpec};
-use flint_gpui_components::{Pill, Eyebrow};
+use poodle_gpui::GpuiThemeProvider;
+use poodle_primitives::{PillAppearance, PillFont, PillSize, PillSpec, PillTone, EyebrowSpec};
+use poodle_gpui_components::{Pill, Eyebrow};
 
 pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
     div().flex().flex_col().gap(px(24.0))

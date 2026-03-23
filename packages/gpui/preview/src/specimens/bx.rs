@@ -1,8 +1,8 @@
 use gpui::*;
-use flint_adapter::ThemeProvider;
-use flint_gpui::GpuiThemeProvider;
-use flint_primitives::{BoxSpec, EyebrowSpec, Overflow, PaddingScale};
-use flint_gpui_components::{Box, Eyebrow};
+use poodle_adapter::ThemeProvider;
+use poodle_gpui::GpuiThemeProvider;
+use poodle_primitives::{BoxSpec, EyebrowSpec, Overflow, PaddingScale};
+use poodle_gpui_components::{Box, Eyebrow};
 use crate::style_bridge::color_to_hsla;
 
 pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {

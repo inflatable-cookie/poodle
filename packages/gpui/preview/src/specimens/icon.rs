@@ -1,8 +1,8 @@
 use gpui::*;
-use flint_adapter::ThemeProvider;
-use flint_gpui::GpuiThemeProvider;
-use flint_primitives::{IconSize, IconSpec, EyebrowSpec};
-use flint_gpui_components::{Icon, Eyebrow};
+use poodle_adapter::ThemeProvider;
+use poodle_gpui::GpuiThemeProvider;
+use poodle_primitives::{IconSize, IconSpec, EyebrowSpec};
+use poodle_gpui_components::{Icon, Eyebrow};
 use crate::style_bridge::color_to_hsla;
 
 /// A curated set of icon names to display in the gallery.
@@ -105,7 +105,7 @@ fn render_color_inheritance_section(theme: &GpuiThemeProvider) -> Div {
     let warning = theme.resolve_color("semantic.color.status.warning");
     let danger = theme.resolve_color("semantic.color.status.danger");
 
-    let items: &[(&str, &str, flint_tokens::typed::ColorValue)] = &[
+    let items: &[(&str, &str, poodle_tokens::typed::ColorValue)] = &[
         ("check", "Primary", text_primary),
         ("info", "Secondary", text_secondary),
         ("star", "Accent", accent),

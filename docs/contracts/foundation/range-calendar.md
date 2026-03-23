@@ -188,7 +188,7 @@ CalendarWeekStart: "sunday" | "monday"
 
 | Property | Value |
 |----------|-------|
-| `font-family` | `var(--flint-typography-label-family)` |
+| `font-family` | `var(--poodle-typography-label-family)` |
 | `font-size` | `0.8125rem` |
 | `font-weight` | `600` |
 | `letter-spacing` | `0.02em` |
@@ -203,23 +203,23 @@ CalendarWeekStart: "sunday" | "monday"
 | `justify-content` | `center` |
 | `width` | `2rem` |
 | `height` | `2rem` |
-| `border` | `0.0625rem solid var(--flint-color-border-default)` |
-| `border-radius` | `var(--flint-radius-control)` |
-| `background` | `var(--flint-color-background-surface)` |
-| `color` | `var(--flint-color-text-primary)` |
+| `border` | `0.0625rem solid var(--poodle-color-border-default)` |
+| `border-radius` | `var(--poodle-radius-control)` |
+| `background` | `var(--poodle-color-background-surface)` |
+| `color` | `var(--poodle-color-text-primary)` |
 | `cursor` | `pointer` |
 
 ### Nav Button — hover
 
 | Property | Value |
 |----------|-------|
-| `background` | `color-mix(in srgb, var(--flint-color-background-surface) 82%, var(--flint-color-background-elevated))` |
+| `background` | `color-mix(in srgb, var(--poodle-color-background-surface) 82%, var(--poodle-color-background-elevated))` |
 
 ### Nav Button — focus-visible
 
 | Property | Value |
 |----------|-------|
-| `outline` | `var(--flint-border-width-focus) solid var(--flint-color-accent-focusRing)` |
+| `outline` | `var(--poodle-border-width-focus) solid var(--poodle-color-accent-focusRing)` |
 | `outline-offset` | `0.125rem` |
 
 ### Weekday Row `.range-calendar__weekdays`
@@ -234,8 +234,8 @@ CalendarWeekStart: "sunday" | "monday"
 
 | Property | Value |
 |----------|-------|
-| `color` | `var(--flint-color-text-secondary)` |
-| `font-family` | `var(--flint-typography-label-family)` |
+| `color` | `var(--poodle-color-text-secondary)` |
+| `font-family` | `var(--poodle-typography-label-family)` |
 | `font-size` | `0.6875rem` |
 | `font-weight` | `600` |
 | `letter-spacing` | `0.04em` |
@@ -273,11 +273,11 @@ CalendarWeekStart: "sunday" | "monday"
 | `min-height` | `2.25rem` |
 | `padding` | `0.25rem` |
 | `border` | `0.0625rem solid transparent` |
-| `border-radius` | `var(--flint-radius-control)` |
+| `border-radius` | `var(--poodle-radius-control)` |
 | `background` | `transparent` |
-| `color` | `var(--flint-color-text-primary)` |
+| `color` | `var(--poodle-color-text-primary)` |
 | `cursor` | `pointer` |
-| `font-family` | `var(--flint-typography-label-family)` |
+| `font-family` | `var(--poodle-typography-label-family)` |
 | `font-size` | `0.75rem` |
 | `font-weight` | `500` |
 
@@ -285,55 +285,55 @@ CalendarWeekStart: "sunday" | "monday"
 
 | Property | Value |
 |----------|-------|
-| `color` | `var(--flint-color-text-secondary)` |
+| `color` | `var(--poodle-color-text-secondary)` |
 | `opacity` | `0.72` |
 
 ### Day Button — today
 
 | Property | Value |
 |----------|-------|
-| `border-color` | `color-mix(in srgb, var(--flint-color-accent-base) 44%, var(--flint-color-border-default))` |
+| `border-color` | `color-mix(in srgb, var(--poodle-color-accent-base) 44%, var(--poodle-color-border-default))` |
 
 ### Day Button — in-range `[data-in-range="true"]`
 
 | Property | Value |
 |----------|-------|
-| `background` | `color-mix(in srgb, var(--flint-color-accent-base) 16%, transparent)` |
+| `background` | `color-mix(in srgb, var(--poodle-color-accent-base) 16%, transparent)` |
 
 ### Day Button — range-start `[data-range-start]`
 
 | Property | Value |
 |----------|-------|
-| `background` | `var(--flint-color-accent-base)` |
-| `color` | `var(--flint-color-text-inverse)` |
+| `background` | `var(--poodle-color-accent-base)` |
+| `color` | `var(--poodle-color-text-inverse)` |
 
 ### Day Button — range-end `[data-range-end]`
 
 | Property | Value |
 |----------|-------|
-| `background` | `var(--flint-color-accent-base)` |
-| `color` | `var(--flint-color-text-inverse)` |
+| `background` | `var(--poodle-color-accent-base)` |
+| `color` | `var(--poodle-color-text-inverse)` |
 
 ### Day Button — hover / focus-visible
 
 | Property | Value |
 |----------|-------|
-| `border-color` | `color-mix(in srgb, var(--flint-color-accent-base) 46%, var(--flint-color-border-default))` |
-| `background` | `color-mix(in srgb, var(--flint-color-accent-base) 14%, transparent)` |
+| `border-color` | `color-mix(in srgb, var(--poodle-color-accent-base) 46%, var(--poodle-color-border-default))` |
+| `background` | `color-mix(in srgb, var(--poodle-color-accent-base) 14%, transparent)` |
 | `outline` | `none` |
 
 ### Day Button — range-start/range-end hover
 
 | Property | Value |
 |----------|-------|
-| `background` | `color-mix(in srgb, var(--flint-color-accent-base) 88%, white 8%)` |
+| `background` | `color-mix(in srgb, var(--poodle-color-accent-base) 88%, white 8%)` |
 
 ### Root — disabled
 
 | Property | Value |
 |----------|-------|
 | `cursor` | `not-allowed` |
-| `opacity` | `var(--flint-state-opacity-disabled)` |
+| `opacity` | `var(--poodle-state-opacity-disabled)` |
 
 ## 9. Svelte Notes
 
@@ -354,7 +354,7 @@ CalendarWeekStart: "sunday" | "monday"
 
 ## 10. GPUI Notes
 
-- expected crate/module surface: `flint_gpui::primitives::range_calendar`
+- expected crate/module surface: `poodle_gpui::primitives::range_calendar`
 - GPUI must model the grid as a 7-column structure with row and cell semantics
 - Each day must be an interactive element exposing selected state and date label
 - Range-start and range-end days must both expose `aria-selected` state

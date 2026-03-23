@@ -175,9 +175,9 @@ the table:
 | Property | Value |
 |----------|-------|
 | `overflow` | `auto` |
-| `border` | `0.0625rem solid var(--flint-color-border-subtle)` |
-| `border-radius` | `var(--flint-radius-surface)` |
-| `background` | `var(--flint-color-background-panel)` |
+| `border` | `0.0625rem solid var(--poodle-color-border-subtle)` |
+| `border-radius` | `var(--poodle-radius-surface)` |
+| `background` | `var(--poodle-color-background-panel)` |
 
 #### `.data-table__toolbar`
 
@@ -188,8 +188,8 @@ the table:
 | `justify-content` | `flex-end` |
 | `gap` | `0.5rem` |
 | `padding` | `0.5rem 0.75rem` |
-| `border-bottom` | `0.0625rem solid var(--flint-color-border-subtle)` |
-| `background` | `color-mix(in srgb, var(--flint-color-background-elevated) 92%, transparent)` |
+| `border-bottom` | `0.0625rem solid var(--poodle-color-border-subtle)` |
+| `background` | `color-mix(in srgb, var(--poodle-color-background-elevated) 92%, transparent)` |
 
 #### `.data-table__toolbar-btn`
 
@@ -199,30 +199,30 @@ the table:
 | `align-items` | `center` |
 | `gap` | `0.375rem` |
 | `padding` | `0.25rem 0.625rem` |
-| `border` | `0.0625rem solid var(--flint-color-border-default)` |
-| `border-radius` | `var(--flint-radius-control)` |
-| `background` | `var(--flint-color-background-surface)` |
-| `color` | `var(--flint-color-text-secondary)` |
+| `border` | `0.0625rem solid var(--poodle-color-border-default)` |
+| `border-radius` | `var(--poodle-radius-control)` |
+| `background` | `var(--poodle-color-background-surface)` |
+| `color` | `var(--poodle-color-text-secondary)` |
 | `cursor` | `pointer` |
 | `font` | `inherit` |
-| `font-size` | `var(--flint-typography-label-size)` |
+| `font-size` | `var(--poodle-typography-label-size)` |
 | `line-height` | `1` |
-| `transition` | `background var(--flint-motion-duration-interaction) var(--flint-motion-easing-standard)` |
+| `transition` | `background var(--poodle-motion-duration-interaction) var(--poodle-motion-easing-standard)` |
 
 #### `.data-table__toolbar-btn:hover`
 
 | Property | Value |
 |----------|-------|
-| `background` | `color-mix(in srgb, var(--flint-color-background-elevated) 72%, transparent)` |
+| `background` | `color-mix(in srgb, var(--poodle-color-background-elevated) 72%, transparent)` |
 
 #### `.data-table__toolbar-btn:focus-visible`
 
 | Property | Value |
 |----------|-------|
-| `outline` | `var(--flint-border-width-focus) solid var(--flint-color-accent-focusRing)` |
+| `outline` | `var(--poodle-border-width-focus) solid var(--poodle-color-accent-focusRing)` |
 | `outline-offset` | `0.125rem` |
 
-#### `.data-table__toolbar-btn :global(.flint-icon)`
+#### `.data-table__toolbar-btn :global(.poodle-icon)`
 
 | Property | Value |
 |----------|-------|
@@ -244,16 +244,16 @@ the table:
 | `align-items` | `center` |
 | `gap` | `0.5rem` |
 | `padding` | `0.375rem 0.5rem` |
-| `border-radius` | `calc(var(--flint-radius-control) - 0.125rem)` |
+| `border-radius` | `calc(var(--poodle-radius-control) - 0.125rem)` |
 | `cursor` | `pointer` |
-| `font-size` | `var(--flint-typography-label-size)` |
-| `color` | `var(--flint-color-text-primary)` |
+| `font-size` | `var(--poodle-typography-label-size)` |
+| `color` | `var(--poodle-color-text-primary)` |
 
 #### `.data-table__col-menu-item:hover`
 
 | Property | Value |
 |----------|-------|
-| `background` | `color-mix(in srgb, var(--flint-color-accent-base) 12%, transparent)` |
+| `background` | `color-mix(in srgb, var(--poodle-color-accent-base) 12%, transparent)` |
 
 #### `table`
 
@@ -280,34 +280,34 @@ the table:
 
 | Property | Value |
 |----------|-------|
-| `padding` | `var(--flint-space-panel-y) var(--flint-space-panel-x)` |
-| `border-bottom` | `0.0625rem solid var(--flint-color-border-subtle)` |
+| `padding` | `var(--poodle-space-panel-y) var(--poodle-space-panel-x)` |
+| `border-bottom` | `0.0625rem solid var(--poodle-color-border-subtle)` |
 | `text-align` | `left` |
 | `vertical-align` | `middle` |
-| `font-size` | `var(--flint-typography-label-size)` |
+| `font-size` | `var(--poodle-typography-label-size)` |
 
 #### `thead th`
 
 | Property | Value |
 |----------|-------|
-| `color` | `var(--flint-color-text-secondary)` |
-| `font-family` | `var(--flint-typography-label-family)` |
-| `font-size` | `var(--flint-typography-label-size)` |
-| `font-weight` | `var(--flint-typography-label-weight)` |
-| `line-height` | `var(--flint-typography-label-lineHeight)` |
-| `background` | `color-mix(in srgb, var(--flint-color-background-elevated) 92%, transparent)` |
+| `color` | `var(--poodle-color-text-secondary)` |
+| `font-family` | `var(--poodle-typography-label-family)` |
+| `font-size` | `var(--poodle-typography-label-size)` |
+| `font-weight` | `var(--poodle-typography-label-weight)` |
+| `line-height` | `var(--poodle-typography-label-lineHeight)` |
+| `background` | `color-mix(in srgb, var(--poodle-color-background-elevated) 92%, transparent)` |
 
 #### `tbody tr.selected`
 
 | Property | Value |
 |----------|-------|
-| `background` | `color-mix(in srgb, var(--flint-color-accent-base) 8%, transparent)` |
+| `background` | `color-mix(in srgb, var(--poodle-color-accent-base) 8%, transparent)` |
 
 #### `tbody tr:hover`
 
 | Property | Value |
 |----------|-------|
-| `background` | `color-mix(in srgb, var(--flint-color-accent-base) 5%, transparent)` |
+| `background` | `color-mix(in srgb, var(--poodle-color-accent-base) 5%, transparent)` |
 
 #### `.data-table__selection`
 
@@ -321,8 +321,8 @@ the table:
 |----------|-------|
 | `display` | `inline-flex` |
 | `align-items` | `center` |
-| `gap` | `var(--flint-space-inline-sm)` |
-| `min-height` | `var(--flint-size-control-height)` |
+| `gap` | `var(--poodle-space-inline-sm)` |
+| `min-height` | `var(--poodle-size-control-height)` |
 | `padding` | `0` |
 | `border` | `0` |
 | `background` | `transparent` |
@@ -334,9 +334,9 @@ the table:
 
 | Property | Value |
 |----------|-------|
-| `outline` | `var(--flint-border-width-focus) solid var(--flint-color-accent-focusRing)` |
+| `outline` | `var(--poodle-border-width-focus) solid var(--poodle-color-accent-focusRing)` |
 | `outline-offset` | `0.125rem` |
-| `border-radius` | `var(--flint-radius-control)` |
+| `border-radius` | `var(--poodle-radius-control)` |
 
 #### `.data-table__cell`
 
@@ -349,10 +349,10 @@ the table:
 
 | Property | Value |
 |----------|-------|
-| `color` | `var(--flint-color-text-secondary)` |
-| `font-family` | `var(--flint-typography-body-family)` |
-| `font-size` | `var(--flint-typography-body-size)` |
-| `line-height` | `var(--flint-typography-body-lineHeight)` |
+| `color` | `var(--poodle-color-text-secondary)` |
+| `font-family` | `var(--poodle-typography-body-family)` |
+| `font-size` | `var(--poodle-typography-body-size)` |
+| `line-height` | `var(--poodle-typography-body-lineHeight)` |
 
 #### `.end-align`
 
@@ -371,10 +371,10 @@ the table:
 
 | Property | Value |
 |----------|-------|
-| `color` | `var(--flint-color-text-secondary)` |
-| `font-family` | `var(--flint-typography-body-family)` |
-| `font-size` | `var(--flint-typography-body-size)` |
-| `line-height` | `var(--flint-typography-body-lineHeight)` |
+| `color` | `var(--poodle-color-text-secondary)` |
+| `font-family` | `var(--poodle-typography-body-family)` |
+| `font-size` | `var(--poodle-typography-body-size)` |
+| `line-height` | `var(--poodle-typography-body-lineHeight)` |
 
 ### CSS Classes Used for State Selectors
 

@@ -1,7 +1,7 @@
 <script lang="ts">
-  import { BlockEditor } from "@flint/svelte-composites";
-  import type { EditorBlock, BlockTypeDefinition } from "@flint/svelte-composites";
-  import { Eyebrow } from "@flint/svelte-primitives";
+  import { BlockEditor } from "@poodle/svelte-composites";
+  import type { EditorBlock, BlockTypeDefinition } from "@poodle/svelte-composites";
+  import { Eyebrow } from "@poodle/svelte-primitives";
 
   let blocks: EditorBlock[] = [
     { id: "1", type: "heading", content: "Welcome to the Block Editor" },
@@ -98,11 +98,11 @@
   .specimen__count {
     margin: 0;
     font-size: 0.75rem;
-    color: var(--flint-color-text-tertiary);
+    color: var(--poodle-color-text-tertiary);
   }
 
   .custom-callout {
-    border-left: 0.1875rem solid var(--flint-color-accent-base);
+    border-left: 0.1875rem solid var(--poodle-color-accent-base);
     padding-left: 0.625rem;
   }
 
@@ -113,8 +113,8 @@
     padding: 0.25rem 0.375rem;
     border: 0;
     background: transparent;
-    color: var(--flint-color-text-primary);
-    font-family: var(--flint-typography-body-family);
+    color: var(--poodle-color-text-primary);
+    font-family: var(--poodle-typography-body-family);
     font-size: 0.875rem;
     line-height: 1.6;
     outline: none;
@@ -122,8 +122,8 @@
   }
 
   .custom-embed__input {
-    font-family: var(--flint-typography-code-family);
+    font-family: var(--poodle-typography-code-family);
     font-size: 0.8125rem;
-    color: var(--flint-color-text-secondary);
+    color: var(--poodle-color-text-secondary);
   }
 </style>

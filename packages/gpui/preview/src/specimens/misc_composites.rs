@@ -1,5 +1,5 @@
 use gpui::*;
-use flint_composites::{
+use poodle_composites::{
     PaginationSummarySpec,
     SelectionSummarySpec, SelectionSummaryItem, RemediationAction,
     ConfirmActionSpec,
@@ -9,13 +9,13 @@ use flint_composites::{
     FilterToolbarSpec,
     InlineEditableFieldSpec,
 };
-use flint_gpui_components::{
+use poodle_gpui_components::{
     PaginationSummary, SelectionSummary,
     ConfirmAction, SlugField, EmbedInput, EmbedPreview,
     LogList, LogEntry, LogLevel, FilterToolbar, InlineEditableField,
     EditableList, Button, BulkActionBar, FormDialog, Field, TextInput, Eyebrow,
 };
-use flint_primitives::{ButtonSpec, ButtonVariant, StatusTone, BulkActionBarSpec, BulkAction, BulkActionTone, TextInputSpec, EyebrowSpec};
+use poodle_primitives::{ButtonSpec, ButtonVariant, StatusTone, BulkActionBarSpec, BulkAction, BulkActionTone, TextInputSpec, EyebrowSpec};
 use crate::app_state::AppState;
 use crate::PreviewRoot;
 

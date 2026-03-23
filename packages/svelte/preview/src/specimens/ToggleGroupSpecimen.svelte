@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { ToggleGroup, Eyebrow, type ToggleGroupOption } from "@flint/svelte-primitives";
+  import { ToggleGroup, Eyebrow, type ToggleGroupOption } from "@poodle/svelte-primitives";
 
   const viewOptions: ToggleGroupOption[] = [
     { value: "grid", label: "Grid" },
@@ -86,6 +86,6 @@
   .specimen__group p {
     margin: 0;
     font-size: 0.875rem;
-    color: var(--flint-color-text-secondary);
+    color: var(--poodle-color-text-secondary);
   }
 </style>

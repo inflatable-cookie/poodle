@@ -1,18 +1,18 @@
 <script lang="ts">
-  import { Eyebrow, Separator, Surface, Button, Pill } from "@flint/svelte-primitives";
+  import { Eyebrow, Separator, Surface, Button, Pill } from "@poodle/svelte-primitives";
 
   const treatmentRoles = [
     {
       name: "interactive",
       description: "General interactive surfaces — secondary buttons, toggles, menu triggers.",
       variables: [
-        { name: "--flint-treatment-interactive-radius", purpose: "Border radius" },
-        { name: "--flint-treatment-interactive-fill", purpose: "Resting background" },
-        { name: "--flint-treatment-interactive-fill-active", purpose: "Hover/active background" },
-        { name: "--flint-treatment-interactive-border", purpose: "Resting border color" },
-        { name: "--flint-treatment-interactive-border-active", purpose: "Hover/active border color" },
-        { name: "--flint-treatment-interactive-shadow", purpose: "Resting shadow" },
-        { name: "--flint-treatment-interactive-shadow-active", purpose: "Hover/active shadow" },
+        { name: "--poodle-treatment-interactive-radius", purpose: "Border radius" },
+        { name: "--poodle-treatment-interactive-fill", purpose: "Resting background" },
+        { name: "--poodle-treatment-interactive-fill-active", purpose: "Hover/active background" },
+        { name: "--poodle-treatment-interactive-border", purpose: "Resting border color" },
+        { name: "--poodle-treatment-interactive-border-active", purpose: "Hover/active border color" },
+        { name: "--poodle-treatment-interactive-shadow", purpose: "Resting shadow" },
+        { name: "--poodle-treatment-interactive-shadow-active", purpose: "Hover/active shadow" },
       ],
       components: ["Button (secondary)", "IconButton (secondary)", "SplitButton", "Toggle", "ToggleGroup", "SegmentedControl (track)", "Tabs (card items)"],
     },
@@ -20,12 +20,12 @@
       name: "interactive-primary",
       description: "Primary action buttons and prominent call-to-action surfaces.",
       variables: [
-        { name: "--flint-treatment-interactive-primary-radius", purpose: "Border radius" },
-        { name: "--flint-treatment-interactive-primary-fill", purpose: "Resting background" },
-        { name: "--flint-treatment-interactive-primary-fill-hover", purpose: "Hover background" },
-        { name: "--flint-treatment-interactive-primary-border", purpose: "Resting border color" },
-        { name: "--flint-treatment-interactive-primary-shadow", purpose: "Shadow" },
-        { name: "--flint-treatment-interactive-primary-text", purpose: "Text/icon color" },
+        { name: "--poodle-treatment-interactive-primary-radius", purpose: "Border radius" },
+        { name: "--poodle-treatment-interactive-primary-fill", purpose: "Resting background" },
+        { name: "--poodle-treatment-interactive-primary-fill-hover", purpose: "Hover background" },
+        { name: "--poodle-treatment-interactive-primary-border", purpose: "Resting border color" },
+        { name: "--poodle-treatment-interactive-primary-shadow", purpose: "Shadow" },
+        { name: "--poodle-treatment-interactive-primary-text", purpose: "Text/icon color" },
       ],
       components: ["Button (primary)", "SplitButton (primary)", "IconButton (primary)"],
     },
@@ -33,16 +33,16 @@
       name: "interactive-subtle",
       description: "Text inputs, selects, search fields — controls with subtle chrome.",
       variables: [
-        { name: "--flint-treatment-interactive-subtle-radius", purpose: "Border radius" },
-        { name: "--flint-treatment-interactive-subtle-fill", purpose: "Resting background" },
-        { name: "--flint-treatment-interactive-subtle-fill-hover", purpose: "Hover background" },
-        { name: "--flint-treatment-interactive-subtle-fill-focus", purpose: "Focus background" },
-        { name: "--flint-treatment-interactive-subtle-border", purpose: "Resting border" },
-        { name: "--flint-treatment-interactive-subtle-border-hover", purpose: "Hover border" },
-        { name: "--flint-treatment-interactive-subtle-border-focus", purpose: "Focus border" },
-        { name: "--flint-treatment-interactive-subtle-shadow", purpose: "Resting shadow" },
-        { name: "--flint-treatment-interactive-subtle-shadow-hover", purpose: "Hover shadow" },
-        { name: "--flint-treatment-interactive-subtle-shadow-focus", purpose: "Focus shadow" },
+        { name: "--poodle-treatment-interactive-subtle-radius", purpose: "Border radius" },
+        { name: "--poodle-treatment-interactive-subtle-fill", purpose: "Resting background" },
+        { name: "--poodle-treatment-interactive-subtle-fill-hover", purpose: "Hover background" },
+        { name: "--poodle-treatment-interactive-subtle-fill-focus", purpose: "Focus background" },
+        { name: "--poodle-treatment-interactive-subtle-border", purpose: "Resting border" },
+        { name: "--poodle-treatment-interactive-subtle-border-hover", purpose: "Hover border" },
+        { name: "--poodle-treatment-interactive-subtle-border-focus", purpose: "Focus border" },
+        { name: "--poodle-treatment-interactive-subtle-shadow", purpose: "Resting shadow" },
+        { name: "--poodle-treatment-interactive-subtle-shadow-hover", purpose: "Hover shadow" },
+        { name: "--poodle-treatment-interactive-subtle-shadow-focus", purpose: "Focus shadow" },
       ],
       components: ["TextInput", "TextArea", "SearchField", "Select", "Combobox (input)"],
     },
@@ -50,15 +50,15 @@
       name: "surface",
       description: "Panel backgrounds, card frames, and container surfaces.",
       variables: [
-        { name: "--flint-treatment-surface-radius", purpose: "Border radius" },
-        { name: "--flint-treatment-surface-fill", purpose: "Background" },
-        { name: "--flint-treatment-surface-border", purpose: "Border color" },
-        { name: "--flint-treatment-surface-shadow", purpose: "Shadow" },
-        { name: "--flint-treatment-surface-hover-fill", purpose: "Hover background" },
-        { name: "--flint-treatment-surface-hover-border", purpose: "Hover border" },
-        { name: "--flint-treatment-surface-hover-shadow", purpose: "Hover shadow" },
-        { name: "--flint-treatment-surface-header-fill", purpose: "Card/section header fill" },
-        { name: "--flint-treatment-surface-divider", purpose: "Internal divider color" },
+        { name: "--poodle-treatment-surface-radius", purpose: "Border radius" },
+        { name: "--poodle-treatment-surface-fill", purpose: "Background" },
+        { name: "--poodle-treatment-surface-border", purpose: "Border color" },
+        { name: "--poodle-treatment-surface-shadow", purpose: "Shadow" },
+        { name: "--poodle-treatment-surface-hover-fill", purpose: "Hover background" },
+        { name: "--poodle-treatment-surface-hover-border", purpose: "Hover border" },
+        { name: "--poodle-treatment-surface-hover-shadow", purpose: "Hover shadow" },
+        { name: "--poodle-treatment-surface-header-fill", purpose: "Card/section header fill" },
+        { name: "--poodle-treatment-surface-divider", purpose: "Internal divider color" },
       ],
       components: ["Surface", "Card (default/outlined)", "MetricTile"],
     },
@@ -66,10 +66,10 @@
       name: "surface-elevated",
       description: "Elevated surfaces — dialogs, drawers, popovers, elevated cards.",
       variables: [
-        { name: "--flint-treatment-surface-elevated-radius", purpose: "Border radius" },
-        { name: "--flint-treatment-surface-elevated-fill", purpose: "Background" },
-        { name: "--flint-treatment-surface-elevated-border", purpose: "Border color" },
-        { name: "--flint-treatment-surface-elevated-shadow", purpose: "Shadow" },
+        { name: "--poodle-treatment-surface-elevated-radius", purpose: "Border radius" },
+        { name: "--poodle-treatment-surface-elevated-fill", purpose: "Background" },
+        { name: "--poodle-treatment-surface-elevated-border", purpose: "Border color" },
+        { name: "--poodle-treatment-surface-elevated-shadow", purpose: "Shadow" },
       ],
       components: ["Surface (elevated)", "Card (elevated)", "Dialog", "Drawer", "Popover", "Menu (overlay)", "HoverCard", "Tooltip", "Combobox (list)", "SplitButton (menu)"],
     },
@@ -111,7 +111,7 @@
         <div class="layer-card">
           <Eyebrow>Layer 3</Eyebrow>
           <strong>App-Owned Wrappers &amp; Composites</strong>
-          <p>Structural brand expression built by composing Flint primitives.</p>
+          <p>Structural brand expression built by composing Poodle primitives.</p>
         </div>
       </div>
     </section>
@@ -126,8 +126,8 @@
       </p>
       <pre class="treatments-page__code"><code>{`.text-input {
   background: var(
-    --flint-treatment-interactive-subtle-fill,
-    var(--flint-color-background-surface)
+    --poodle-treatment-interactive-subtle-fill,
+    var(--poodle-color-background-surface)
   );
 }`}</code></pre>
       <p class="treatments-page__body">
@@ -192,21 +192,21 @@
         All descendants inherit treatment values through the CSS cascade.
       </p>
       <pre class="treatments-page__code"><code>{`<div data-appearance-treatment="brand-raised">
-  <!-- All Flint components inside inherit treatment values -->
+  <!-- All Poodle components inside inherit treatment values -->
 </div>`}</code></pre>
       <p class="treatments-page__body">
         Then define CSS that overrides treatment variables when that attribute is present:
       </p>
       <pre class="treatments-page__code"><code>{`[data-appearance-treatment="brand-raised"] {
-  --flint-treatment-interactive-fill:
+  --poodle-treatment-interactive-fill:
     linear-gradient(180deg, rgba(255,255,255,0.14), transparent),
-    var(--flint-color-background-elevated);
-  --flint-treatment-interactive-primary-fill:
+    var(--poodle-color-background-elevated);
+  --poodle-treatment-interactive-primary-fill:
     linear-gradient(180deg, rgba(255,255,255,0.24), transparent),
-    var(--flint-color-accent-base);
-  --flint-treatment-surface-fill:
+    var(--poodle-color-accent-base);
+  --poodle-treatment-surface-fill:
     linear-gradient(180deg, rgba(255,255,255,0.14), transparent),
-    var(--flint-color-background-panel);
+    var(--poodle-color-background-panel);
   /* ... all other treatment variables */
 }`}</code></pre>
     </section>
@@ -288,14 +288,14 @@
   .treatments-page__title {
     font-size: 2rem;
     font-weight: 700;
-    color: var(--flint-color-text-primary);
+    color: var(--poodle-color-text-primary);
     margin: 0 0 0.75rem;
   }
 
   .treatments-page__description {
     font-size: 1rem;
     line-height: 1.6;
-    color: var(--flint-color-text-secondary);
+    color: var(--poodle-color-text-secondary);
     margin: 0;
   }
 
@@ -306,14 +306,14 @@
   .treatments-page__heading {
     font-size: 1.125rem;
     font-weight: 600;
-    color: var(--flint-color-text-primary);
+    color: var(--poodle-color-text-primary);
     margin: 0 0 1rem;
   }
 
   .treatments-page__body {
     font-size: 0.875rem;
     line-height: 1.6;
-    color: var(--flint-color-text-secondary);
+    color: var(--poodle-color-text-secondary);
     margin: 0 0 1rem;
   }
 
@@ -322,18 +322,18 @@
     font-size: 0.8125rem;
     padding: 0.0625rem 0.25rem;
     border-radius: 0.1875rem;
-    background: color-mix(in srgb, var(--flint-color-background-canvas) 80%, transparent);
+    background: color-mix(in srgb, var(--poodle-color-background-canvas) 80%, transparent);
   }
 
   .treatments-page__code {
     padding: 0.75rem 1rem;
-    border-radius: var(--flint-radius-surface);
-    background: color-mix(in srgb, var(--flint-color-background-canvas) 90%, transparent);
-    border: 0.0625rem solid color-mix(in srgb, var(--flint-color-border-subtle) 50%, transparent);
+    border-radius: var(--poodle-radius-surface);
+    background: color-mix(in srgb, var(--poodle-color-background-canvas) 90%, transparent);
+    border: 0.0625rem solid color-mix(in srgb, var(--poodle-color-border-subtle) 50%, transparent);
     font-family: "SF Mono", "Fira Code", monospace;
     font-size: 0.8125rem;
     line-height: 1.6;
-    color: var(--flint-color-text-primary);
+    color: var(--poodle-color-text-primary);
     overflow-x: auto;
     margin: 0 0 1rem;
     white-space: pre;
@@ -348,14 +348,14 @@
     display: grid;
     gap: 0.25rem;
     padding: 1rem;
-    border: 0.0625rem solid color-mix(in srgb, var(--flint-color-border-subtle) 40%, transparent);
-    border-radius: var(--flint-radius-surface);
-    background: color-mix(in srgb, var(--flint-color-background-surface) 60%, transparent);
+    border: 0.0625rem solid color-mix(in srgb, var(--poodle-color-border-subtle) 40%, transparent);
+    border-radius: var(--poodle-radius-surface);
+    background: color-mix(in srgb, var(--poodle-color-background-surface) 60%, transparent);
   }
 
   .layer-card--active {
-    border-color: color-mix(in srgb, var(--flint-color-accent-base) 32%, var(--flint-color-border-default));
-    background: color-mix(in srgb, var(--flint-color-accent-base) 6%, var(--flint-color-background-surface));
+    border-color: color-mix(in srgb, var(--poodle-color-accent-base) 32%, var(--poodle-color-border-default));
+    background: color-mix(in srgb, var(--poodle-color-accent-base) 6%, var(--poodle-color-background-surface));
   }
 
   .layer-card strong {
@@ -365,7 +365,7 @@
   .layer-card p {
     margin: 0;
     font-size: 0.8125rem;
-    color: var(--flint-color-text-secondary);
+    color: var(--poodle-color-text-secondary);
     line-height: 1.5;
   }
 
@@ -374,8 +374,8 @@
     gap: 0.5rem;
     padding: 1rem;
     margin-bottom: 0.75rem;
-    border: 0.0625rem solid color-mix(in srgb, var(--flint-color-border-subtle) 40%, transparent);
-    border-radius: var(--flint-radius-surface);
+    border: 0.0625rem solid color-mix(in srgb, var(--poodle-color-border-subtle) 40%, transparent);
+    border-radius: var(--poodle-radius-surface);
   }
 
   .role-card__header {
@@ -390,7 +390,7 @@
     font-size: 0.9375rem;
     font-weight: 600;
     margin: 0;
-    color: var(--flint-color-text-primary);
+    color: var(--poodle-color-text-primary);
   }
 
   .role-card__pills {
@@ -402,7 +402,7 @@
   .role-card__description {
     margin: 0;
     font-size: 0.8125rem;
-    color: var(--flint-color-text-secondary);
+    color: var(--poodle-color-text-secondary);
     line-height: 1.5;
   }
 
@@ -420,9 +420,9 @@
   .role-card__table th {
     text-align: left;
     font-weight: 600;
-    color: var(--flint-color-text-secondary);
+    color: var(--poodle-color-text-secondary);
     padding: 0.375rem 0.75rem;
-    border-bottom: 0.0625rem solid var(--flint-color-border-subtle);
+    border-bottom: 0.0625rem solid var(--poodle-color-border-subtle);
     font-size: 0.6875rem;
     text-transform: uppercase;
     letter-spacing: 0.05em;
@@ -430,8 +430,8 @@
 
   .role-card__table td {
     padding: 0.375rem 0.75rem;
-    border-bottom: 0.0625rem solid color-mix(in srgb, var(--flint-color-border-subtle) 40%, transparent);
-    color: var(--flint-color-text-secondary);
+    border-bottom: 0.0625rem solid color-mix(in srgb, var(--poodle-color-border-subtle) 40%, transparent);
+    color: var(--poodle-color-text-secondary);
   }
 
   .role-card__table tbody tr:last-child td {
@@ -441,7 +441,7 @@
   .role-card__var code {
     font-family: "SF Mono", "Fira Code", monospace;
     font-size: 0.75rem;
-    color: var(--flint-color-text-primary);
+    color: var(--poodle-color-text-primary);
     white-space: nowrap;
   }
 
@@ -464,8 +464,8 @@
     width: 2rem;
     height: 2rem;
     border-radius: 999px;
-    background: color-mix(in srgb, var(--flint-color-accent-base) 16%, transparent);
-    color: var(--flint-color-text-primary);
+    background: color-mix(in srgb, var(--poodle-color-accent-base) 16%, transparent);
+    color: var(--poodle-color-text-primary);
     font-size: 0.8125rem;
     font-weight: 700;
   }
@@ -482,7 +482,7 @@
   .step__content p {
     margin: 0;
     font-size: 0.8125rem;
-    color: var(--flint-color-text-secondary);
+    color: var(--poodle-color-text-secondary);
     line-height: 1.5;
   }
 
@@ -491,7 +491,7 @@
     font-size: 0.75rem;
     padding: 0.0625rem 0.25rem;
     border-radius: 0.1875rem;
-    background: color-mix(in srgb, var(--flint-color-background-canvas) 80%, transparent);
+    background: color-mix(in srgb, var(--poodle-color-background-canvas) 80%, transparent);
   }
 
   .rule-list {
@@ -503,8 +503,8 @@
     display: grid;
     gap: 0.25rem;
     padding: 0.875rem;
-    border-radius: var(--flint-radius-surface);
-    background: color-mix(in srgb, var(--flint-color-background-surface) 60%, transparent);
+    border-radius: var(--poodle-radius-surface);
+    background: color-mix(in srgb, var(--poodle-color-background-surface) 60%, transparent);
   }
 
   .rule strong {
@@ -514,7 +514,7 @@
   .rule p {
     margin: 0;
     font-size: 0.8125rem;
-    color: var(--flint-color-text-secondary);
+    color: var(--poodle-color-text-secondary);
     line-height: 1.5;
   }
 </style>

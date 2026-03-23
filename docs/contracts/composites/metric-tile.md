@@ -133,15 +133,15 @@ derived from `sparklineData` via a pure function.
 | gap | `0.375rem` |
 | padding | `0.875rem` |
 | border | `0.0625rem solid transparent` |
-| border-radius | `var(--flint-radius-surface)` |
-| background | `color-mix(in srgb, var(--flint-color-background-surface) 60%, transparent)` |
+| border-radius | `var(--poodle-radius-surface)` |
+| background | `color-mix(in srgb, var(--poodle-color-background-surface) 60%, transparent)` |
 
 ### Label
 
 | Property | Value |
 |----------|-------|
-| color | `var(--flint-color-text-secondary)` |
-| font-family | `var(--flint-typography-code-family)` |
+| color | `var(--poodle-color-text-secondary)` |
+| font-family | `var(--poodle-typography-code-family)` |
 | font-size | `0.75rem` |
 
 ### Body
@@ -164,7 +164,7 @@ derived from `sparklineData` via a pure function.
 |----------|-------|
 | width | `4rem` |
 | height | `1.5rem` |
-| color | `var(--flint-color-text-tertiary)` |
+| color | `var(--poodle-color-text-tertiary)` |
 | flex-shrink | `0` |
 | SVG viewBox | `0 0 64 24` |
 | SVG stroke-width | `1.5` |
@@ -179,16 +179,16 @@ derived from `sparklineData` via a pure function.
 | align-items | `center` |
 | gap | `0.25rem` |
 | font-size | `0.75rem` |
-| font-family | `var(--flint-typography-code-family)` |
-| color | `var(--flint-color-text-secondary)` |
+| font-family | `var(--poodle-typography-code-family)` |
+| color | `var(--poodle-color-text-secondary)` |
 
 #### Trend Colors By Data-Trend
 
 | data-trend | color |
 |------------|-------|
-| `up` | `var(--flint-color-status-success, #22c55e)` |
-| `down` | `var(--flint-color-status-danger, #ef4444)` |
-| `flat` | `var(--flint-color-text-tertiary)` |
+| `up` | `var(--poodle-color-status-success, #22c55e)` |
+| `down` | `var(--poodle-color-status-danger, #ef4444)` |
+| `flat` | `var(--poodle-color-text-tertiary)` |
 
 ### Trend Arrow
 
@@ -201,7 +201,7 @@ derived from `sparklineData` via a pure function.
 
 | Selector | Property | Value |
 |----------|----------|-------|
-| `:global([data-theme="light"]) .state-tile` | background | `var(--flint-treatment-surface-fill)` |
+| `:global([data-theme="light"]) .state-tile` | background | `var(--poodle-treatment-surface-fill)` |
 
 ## 9. Svelte Notes
 
@@ -210,11 +210,11 @@ derived from `sparklineData` via a pure function.
   from data points (viewBox 0 0 64 24, stroke-width 1.5, round linecap/linejoin)
 - trend icons use the `Icon` primitive with `size="sm"`:
   `trending-up`, `trending-down`, `arrow-right`
-- light theme override uses `--flint-treatment-surface-fill`
+- light theme override uses `--poodle-treatment-surface-fill`
 
 ## 10. GPUI Notes
 
-- expected crate/module surface: `flint_gpui::composites::metric_tile`
+- expected crate/module surface: `poodle_gpui::composites::metric_tile`
 - render as vertical stack of styled text within contained surface
 - sparkline rendering may use platform-specific drawing primitives
 

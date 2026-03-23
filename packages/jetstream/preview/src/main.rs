@@ -1,7 +1,7 @@
-//! Flint Jetstream Preview — standalone preview application for showcasing
-//! Flint design system components rendered via the Jetstream game engine.
+//! Poodle Jetstream Preview — standalone preview application for showcasing
+//! Poodle design system components rendered via the Jetstream game engine.
 //!
-//! Run with: `cargo run -p flint-jetstream-preview`
+//! Run with: `cargo run -p poodle-jetstream-preview`
 
 mod app_state;
 mod component_registry;
@@ -23,7 +23,7 @@ use jetstream_renderer::sprite::{
 use jetstream_renderer::texture::GpuTexture;
 use jetstream_renderer::ui_pass::UiPass;
 use jetstream_runtime::game_ui::*;
-use flint_adapter::ThemeProvider;
+use poodle_adapter::ThemeProvider;
 use wgpu::util::DeviceExt;
 
 use app_state::{AppState, ControlSize, DemoScreen, Density, Section, ThemePreset};
@@ -93,7 +93,7 @@ fn rects_eq(a: &Rect, b: &Rect) -> bool {
 /// Persistent state across frames.
 struct PreviewState {
     app: AppState,
-    theme: flint_jetstream::JetstreamThemeProvider,
+    theme: poodle_jetstream::JetstreamThemeProvider,
     game_ui: GameUi,
     ui_pass: UiPass,
     /// Jetstream Theme for draw command collection.
@@ -148,13 +148,13 @@ impl PreviewState {
 
         let ui_pass = UiPass::new(&gpu.device, gpu.surface_format);
 
-        // Build a Jetstream Theme with colors from the Flint token system.
-        let flint_theme = flint_jetstream::JetstreamThemeProvider::default();
-        let draw_theme = build_draw_theme(&flint_theme);
+        // Build a Jetstream Theme with colors from the Poodle token system.
+        let poodle_theme = poodle_jetstream::JetstreamThemeProvider::default();
+        let draw_theme = build_draw_theme(&poodle_theme);
 
-        // Set clear color from Flint canvas background (linear space — already
+        // Set clear color from Poodle canvas background (linear space — already
         // converted by theme_bridge::resolve_vec4).
-        let canvas = theme_bridge::canvas_background(&flint_theme);
+        let canvas = theme_bridge::canvas_background(&poodle_theme);
         let clear_color = wgpu::Color {
             r: canvas.x as f64,
             g: canvas.y as f64,
@@ -210,7 +210,7 @@ impl PreviewState {
 
         let mut state = Self {
             app: AppState::new(),
-            theme: flint_theme,
+            theme: poodle_theme,
             game_ui,
             ui_pass,
             draw_theme,
@@ -242,13 +242,13 @@ impl PreviewState {
     fn rebuild_shell(&mut self) {
         // Update the theme provider to match the selected preset.
         let theme_def = match self.app.theme_preset {
-            ThemePreset::Dark => &flint_tokens::themes::DARK,
-            ThemePreset::Light => &flint_tokens::themes::LIGHT,
-            ThemePreset::LoopholeStudio => &flint_tokens::themes::LOOPHOLE_STUDIO,
+            ThemePreset::Dark => &poodle_tokens::themes::DARK,
+            ThemePreset::Light => &poodle_tokens::themes::LIGHT,
+            ThemePreset::LoopholeStudio => &poodle_tokens::themes::LOOPHOLE_STUDIO,
         };
         // Theme resolves tokens in logical pixels (scale_factor=1.0).
         // The engine handles logical→physical conversion via GameUi.scale_factor.
-        self.theme = flint_jetstream::JetstreamThemeProvider::from_theme(theme_def);
+        self.theme = poodle_jetstream::JetstreamThemeProvider::from_theme(theme_def);
 
         // Pure function: state → UI description.
         let ui = shell::build_shell(&self.app, &self.theme);
@@ -506,7 +506,7 @@ impl PreviewState {
 
             let mut encoder = frame.gpu.device.create_command_encoder(
                 &wgpu::CommandEncoderDescriptor {
-                    label: Some("flint_preview_encoder"),
+                    label: Some("poodle_preview_encoder"),
                 },
             );
 
@@ -1063,17 +1063,17 @@ impl PreviewState {
                 drop(data);
                 staging_buffer.unmap();
 
-                // Save into docs/screenshots/ when running from the flint repo,
+                // Save into docs/screenshots/ when running from the poodle repo,
                 // otherwise fall back to the current working directory.
                 let timestamp = std::time::SystemTime::now()
                     .duration_since(std::time::UNIX_EPOCH)
                     .unwrap_or_default()
                     .as_secs();
-                let filename = format!("flint-preview-screenshot-{timestamp}.png");
+                let filename = format!("poodle-preview-screenshot-{timestamp}.png");
 
                 let dir = std::path::Path::new("docs/screenshots");
                 let path = if dir.parent().map_or(false, |p| p.join("effigy.toml").exists()) {
-                    // We're in the flint repo root (or a child thereof).
+                    // We're in the poodle repo root (or a child thereof).
                     let _ = std::fs::create_dir_all(dir);
                     dir.join(&filename).to_string_lossy().into_owned()
                 } else {
@@ -1096,9 +1096,9 @@ impl PreviewState {
     }
 }
 
-/// Build a Jetstream `Theme` from Flint tokens for draw command rendering.
-fn build_draw_theme(flint_theme: &dyn ThemeProvider) -> Theme {
-    let resolve = |token: &str| -> Vec4 { theme_bridge::resolve_vec4(flint_theme, token) };
+/// Build a Jetstream `Theme` from Poodle tokens for draw command rendering.
+fn build_draw_theme(poodle_theme: &dyn ThemeProvider) -> Theme {
+    let resolve = |token: &str| -> Vec4 { theme_bridge::resolve_vec4(poodle_theme, token) };
 
     Theme {
         text_color: resolve("semantic.color.text.primary"),
@@ -1120,11 +1120,11 @@ fn build_draw_theme(flint_theme: &dyn ThemeProvider) -> Theme {
 fn main() {
     env_logger::Builder::from_env(env_logger::Env::default().default_filter_or("info")).init();
 
-    log::info!("Starting Flint Jetstream Preview...");
+    log::info!("Starting Poodle Jetstream Preview...");
 
     let config = PlatformConfig {
         window: WindowConfig {
-            title: "Flint — Jetstream Preview".to_string(),
+            title: "Poodle — Jetstream Preview".to_string(),
             width: 1280,
             height: 800,
             resizable: true,

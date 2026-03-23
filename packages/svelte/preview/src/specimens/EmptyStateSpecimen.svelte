@@ -1,6 +1,6 @@
 <script lang="ts">
-  import { EmptyState } from "@flint/svelte-composites";
-  import { Button, Eyebrow } from "@flint/svelte-primitives";
+  import { EmptyState } from "@poodle/svelte-composites";
+  import { Button, Eyebrow } from "@poodle/svelte-primitives";
 </script>
 
 <div class="specimen">

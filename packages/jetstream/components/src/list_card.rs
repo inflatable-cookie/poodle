@@ -1,7 +1,7 @@
 //! ListCard — Jetstream list card backed by ListCardSpec.
 use jetstream_runtime::ui_element::{self, JsEl};
-use flint_jetstream::JetstreamThemeProvider;
-use flint_primitives::ListCardSpec;
+use poodle_jetstream::JetstreamThemeProvider;
+use poodle_primitives::ListCardSpec;
 use crate::theme_ext::{resolve_color, resolve_radius};
 
 pub fn js_list_card(spec: &ListCardSpec, theme: &JetstreamThemeProvider) -> JsEl {

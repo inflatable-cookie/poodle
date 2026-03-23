@@ -11,7 +11,7 @@ translation.
 
 ## Deliverables
 
-New crate: `flint-style` at `packages/contracts/style/`
+New crate: `poodle-style` at `packages/contracts/style/`
 
 ### Types
 
@@ -26,20 +26,20 @@ New crate: `flint-style` at `packages/contracts/style/`
 
 ### Design
 
-- Uses `ColorValue` and `ShadowValue` from `flint-tokens::typed` for numeric
+- Uses `ColorValue` and `ShadowValue` from `poodle-tokens::typed` for numeric
   color/shadow values
-- Uses `LayoutIntent` from `flint-layout` for layout properties
+- Uses `LayoutIntent` from `poodle-layout` for layout properties
 - All dimension values are resolved `f32` pixels
 - Builder pattern for construction
 - Query methods: `is_visible()`, `has_focus_ring()`
 
 ### Dependencies
 
-- `flint-tokens` — typed color and shadow values
-- `flint-layout` — layout intent types
+- `poodle-tokens` — typed color and shadow values
+- `poodle-layout` — layout intent types
 
 ## Verification
 
-- [x] `flint-style` crate compiles
+- [x] `poodle-style` crate compiles
 - [x] 4 tests pass covering defaults, builder composition, visibility, typography
-- [x] Typed token re-export added to `flint-tokens` lib.rs
+- [x] Typed token re-export added to `poodle-tokens` lib.rs

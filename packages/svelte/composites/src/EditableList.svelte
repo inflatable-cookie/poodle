@@ -133,7 +133,7 @@
   }
 
   .autonomous-list[data-disabled="true"] {
-    opacity: var(--flint-state-opacity-disabled);
+    opacity: var(--poodle-state-opacity-disabled);
   }
 
   .autonomous-list__static {
@@ -149,8 +149,8 @@
     display: flex;
     align-items: center;
     padding: 0.5rem 0.625rem;
-    border-radius: var(--flint-radius-control);
-    background: var(--flint-color-background-surface);
+    border-radius: var(--poodle-radius-control);
+    background: var(--poodle-color-background-surface);
   }
 
   .autonomous-list__item-row {
@@ -179,13 +179,13 @@
     border: 0;
     border-radius: 0.25rem;
     background: transparent;
-    color: var(--flint-color-text-secondary);
+    color: var(--poodle-color-text-secondary);
     cursor: pointer;
-    transition: color var(--flint-motion-duration-interaction) var(--flint-motion-easing-standard);
+    transition: color var(--poodle-motion-duration-interaction) var(--poodle-motion-easing-standard);
   }
 
   .autonomous-list__remove:hover:not(:disabled) {
-    color: var(--flint-color-status-danger);
+    color: var(--poodle-color-status-danger);
   }
 
   .autonomous-list__remove svg {
@@ -201,57 +201,57 @@
   .autonomous-list__input {
     flex: 1;
     min-width: 0;
-    height: var(--flint-size-control-height);
-    padding: 0 var(--flint-space-control-x);
-    border: 0.0625rem solid var(--flint-color-border-default);
-    border-radius: var(--flint-radius-control);
-    background: var(--flint-color-background-surface);
-    color: var(--flint-color-text-primary);
-    font-family: var(--flint-typography-body-family);
-    font-size: var(--flint-typography-body-size);
+    height: var(--poodle-size-control-height);
+    padding: 0 var(--poodle-space-control-x);
+    border: 0.0625rem solid var(--poodle-color-border-default);
+    border-radius: var(--poodle-radius-control);
+    background: var(--poodle-color-background-surface);
+    color: var(--poodle-color-text-primary);
+    font-family: var(--poodle-typography-body-family);
+    font-size: var(--poodle-typography-body-size);
     outline: none;
   }
 
   .autonomous-list__input:focus {
-    border-color: var(--flint-color-accent-focusRing);
-    box-shadow: 0 0 0 var(--flint-border-width-focus)
-      color-mix(in srgb, var(--flint-color-accent-focusRing) 28%, transparent);
+    border-color: var(--poodle-color-accent-focusRing);
+    box-shadow: 0 0 0 var(--poodle-border-width-focus)
+      color-mix(in srgb, var(--poodle-color-accent-focusRing) 28%, transparent);
   }
 
   .autonomous-list__input::placeholder {
-    color: var(--flint-color-text-secondary);
+    color: var(--poodle-color-text-secondary);
   }
 
   .autonomous-list__add-btn {
     display: inline-flex;
     align-items: center;
-    height: var(--flint-size-control-height);
+    height: var(--poodle-size-control-height);
     padding: 0 0.75rem;
-    border: 0.0625rem solid var(--flint-color-border-default);
-    border-radius: var(--flint-radius-control);
-    background: var(--flint-color-background-surface);
-    color: var(--flint-color-text-primary);
+    border: 0.0625rem solid var(--poodle-color-border-default);
+    border-radius: var(--poodle-radius-control);
+    background: var(--poodle-color-background-surface);
+    color: var(--poodle-color-text-primary);
     cursor: pointer;
-    font-family: var(--flint-typography-label-family);
-    font-size: var(--flint-typography-label-size);
-    font-weight: var(--flint-typography-label-weight);
+    font-family: var(--poodle-typography-label-family);
+    font-size: var(--poodle-typography-label-size);
+    font-weight: var(--poodle-typography-label-weight);
     transition:
-      background var(--flint-motion-duration-interaction) var(--flint-motion-easing-standard),
-      border-color var(--flint-motion-duration-interaction) var(--flint-motion-easing-standard);
+      background var(--poodle-motion-duration-interaction) var(--poodle-motion-easing-standard),
+      border-color var(--poodle-motion-duration-interaction) var(--poodle-motion-easing-standard);
   }
 
   .autonomous-list__add-btn:hover:not(:disabled) {
-    background: color-mix(in srgb, var(--flint-color-background-surface) 84%, var(--flint-color-background-elevated));
+    background: color-mix(in srgb, var(--poodle-color-background-surface) 84%, var(--poodle-color-background-elevated));
   }
 
   .autonomous-list__add-btn:disabled {
     cursor: not-allowed;
-    opacity: var(--flint-state-opacity-disabled);
+    opacity: var(--poodle-state-opacity-disabled);
   }
 
   .autonomous-list__count {
     font-size: 0.6875rem;
-    color: var(--flint-color-text-secondary);
+    color: var(--poodle-color-text-secondary);
     font-variant-numeric: tabular-nums;
     align-self: flex-end;
   }

@@ -1,10 +1,10 @@
 //! ListCard specimen — card items for list views.
 
 use jetstream_runtime::ui_element::*;
-use flint_jetstream::JetstreamThemeProvider;
-use flint_jetstream_components::list_card::js_list_card;
-use flint_jetstream_components::theme_ext::*;
-use flint_primitives::ListCardSpec;
+use poodle_jetstream::JetstreamThemeProvider;
+use poodle_jetstream_components::list_card::js_list_card;
+use poodle_jetstream_components::theme_ext::*;
+use poodle_primitives::ListCardSpec;
 
 pub fn render(theme: &JetstreamThemeProvider) -> JsEl {
     let secondary = resolve_color(theme, "semantic.color.text.secondary");

@@ -2,7 +2,7 @@
 
 Status: active
 Updated: 2026-03-11
-Depends on: `001-flint-system-shape.md`
+Depends on: `001-poodle-system-shape.md`
 
 ## Purpose
 
@@ -11,7 +11,7 @@ layout and implementation plan, including a translatable theme system that can
 feed both browser/Svelte and GPUI consumers from one source.
 
 This document specifies the concrete package structure and build toolchain for
-the token system architecture defined in `001-flint-system-shape.md`.
+the token system architecture defined in `001-poodle-system-shape.md`.
 
 ## Research Inputs
 
@@ -23,13 +23,13 @@ This note should stay aligned with:
 
 ## Working Repository Shape
 
-Flint should add the token system through a small number of explicit top-level
+Poodle should add the token system through a small number of explicit top-level
 workspaces rather than through ad hoc framework folders.
 
 Recommended first layout:
 
 ```text
-flint/
+poodle/
   docs/
   packages/
     tokens/
@@ -167,7 +167,7 @@ export default {
       transformGroup: 'css',
       buildPath: '../artifacts/css/',
       files: [{
-        destination: 'flint-tokens.css',
+        destination: 'poodle-tokens.css',
         format: 'css/variables'
       }]
     },
@@ -200,11 +200,11 @@ Planned files:
 ```text
 packages/tokens/artifacts/
   css/
-    flint-tokens.css              # Base tokens as CSS custom properties
-    flint-theme-light.css         # Light theme overrides
-    flint-theme-dark.css          # Dark theme overrides
-    flint-density-compact.css     # Compact density overrides
-    flint-density-comfortable.css # Comfortable density overrides
+    poodle-tokens.css              # Base tokens as CSS custom properties
+    poodle-theme-light.css         # Light theme overrides
+    poodle-theme-dark.css          # Dark theme overrides
+    poodle-density-compact.css     # Compact density overrides
+    poodle-density-comfortable.css # Comfortable density overrides
   ts/
     index.ts                    # Token object exports
     themes.ts                   # Theme object exports
@@ -220,17 +220,17 @@ packages/tokens/artifacts/
 
 **CSS Output Example:**
 ```css
-/* flint-tokens.css */
+/* poodle-tokens.css */
 :root {
-  --flint-color-blue-500: #3b82f6;
-  --flint-color-background-primary: var(--flint-color-white);
-  --flint-color-text-primary: var(--flint-color-gray-900);
+  --poodle-color-blue-500: #3b82f6;
+  --poodle-color-background-primary: var(--poodle-color-white);
+  --poodle-color-text-primary: var(--poodle-color-gray-900);
 }
 
-/* flint-theme-dark.css */
+/* poodle-theme-dark.css */
 [data-theme="dark"] {
-  --flint-color-background-primary: var(--flint-color-gray-900);
-  --flint-color-text-primary: var(--flint-color-white);
+  --poodle-color-background-primary: var(--poodle-color-gray-900);
+  --poodle-color-text-primary: var(--poodle-color-white);
 }
 ```
 
@@ -298,11 +298,11 @@ packages/gpui/tokens/
 **GPUI Theme Integration:**
 ```rust
 // packages/gpui/tokens/src/theme_ext.rs
-use flint_tokens::semantic::color;
+use poodle_tokens::semantic::color;
 use gpui::Theme;
 
 impl Theme {
-    pub fn flint_light() -> Self {
+    pub fn poodle_light() -> Self {
         Self {
             background: color::BACKGROUND_PRIMARY,
             text: color::TEXT_PRIMARY,
@@ -362,7 +362,7 @@ git add packages/tokens/artifacts/
 
 ## Future Implementation Slot
 
-Flint should not build React or other additional targets now, but the package
+Poodle should not build React or other additional targets now, but the package
 layout should leave room for them.
 
 If a future target becomes real, it should land under a dedicated package such
@@ -379,7 +379,7 @@ rather than creating a second canonical contract path.
 
 ## Underlay Bridge Layout
 
-Underlay integration should live behind a bridge layer that maps Flint semantics
+Underlay integration should live behind a bridge layer that maps Poodle semantics
 into Underlay-owned conventions.
 
 Planned first files:
@@ -387,7 +387,7 @@ Planned first files:
 ```text
 packages/bridges/underlay/
   css/
-    flint-to-underlay.css     # CSS variable mapping
+    poodle-to-underlay.css     # CSS variable mapping
   ts/
     token-map.ts            # Token name mapping
     theme-map.ts            # Theme value mapping
@@ -395,9 +395,9 @@ packages/bridges/underlay/
 ```
 
 This keeps the public Underlay API stable while still allowing Underlay to
-consume Flint tokens internally.
+consume Poodle tokens internally.
 
-It also means an Underlay consumer should be able to ingest a Flint-authored
+It also means an Underlay consumer should be able to ingest a Poodle-authored
 theme through Underlay-owned mapping without needing a separate hand-authored
 theme definition for the same brand or app.
 
@@ -444,7 +444,7 @@ The first implementation tranche only needs to prove:
 
 ## References
 
-- [001-flint-system-shape.md](./001-flint-system-shape.md) - Token system specification
+- [001-poodle-system-shape.md](./001-poodle-system-shape.md) - Token system specification
 - [../research/translation-memos/tm-token-system.md](../research/translation-memos/tm-token-system.md) - Token system research decisions
 - [W3C DTCG Specification](https://www.designtokens.org/tr/2025.10/) - Canonical token format
 - [Style Dictionary](https://styledictionary.com/) - Multi-platform emission tool

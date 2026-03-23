@@ -1,4 +1,4 @@
-use flint_tokens::semantic;
+use poodle_tokens::semantic;
 
 /// Spec for NavCardGrid — a responsive grid layout container for NavCard items.
 ///
@@ -65,6 +65,6 @@ mod tests {
     #[test]
     fn gap_token_is_inline_md() {
         let spec = NavCardGridSpec::new();
-        assert_eq!(spec.gap_token(), flint_tokens::semantic::SPACE_INLINE_MD);
+        assert_eq!(spec.gap_token(), poodle_tokens::semantic::SPACE_INLINE_MD);
     }
 }

@@ -1,8 +1,8 @@
 //! DateRangePicker — real GPUI component backed by DateRangePickerSpec.
 
 use gpui::*;
-use flint_gpui::GpuiThemeProvider;
-use flint_primitives::{CalendarWeekStart, DateRangePickerSpec, DateRangeValue, IconSize, IconSpec};
+use poodle_gpui::GpuiThemeProvider;
+use poodle_primitives::{CalendarWeekStart, DateRangePickerSpec, DateRangeValue, IconSize, IconSpec};
 
 use super::icon::Icon;
 use super::range_calendar::RangeCalendar;
@@ -99,9 +99,9 @@ impl IntoElement for DateRangePicker {
         let is_disabled = spec.is_disabled;
 
         let id_str = if let Some(ref suffix) = self.id_suffix {
-            format!("flint-date-range-picker-{}", suffix)
+            format!("poodle-date-range-picker-{}", suffix)
         } else {
-            "flint-date-range-picker".to_string()
+            "poodle-date-range-picker".to_string()
         };
 
         // Trigger button
@@ -173,7 +173,7 @@ impl IntoElement for DateRangePicker {
 
         // Range calendar dropdown when open
         if is_open {
-            let mut cal_spec = flint_primitives::RangeCalendarSpec::new();
+            let mut cal_spec = poodle_primitives::RangeCalendarSpec::new();
             cal_spec.week_starts_on = spec.week_starts_on.clone();
             cal_spec.value = Some(range.clone());
 

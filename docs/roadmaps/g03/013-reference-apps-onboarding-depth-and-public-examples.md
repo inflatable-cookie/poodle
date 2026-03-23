@@ -1,10 +1,10 @@
 # g03.013 Reference Apps, Onboarding Depth, And Public Examples
 
 Status: completed
-Owner: Flint Core
+Owner: Poodle Core
 Updated: 2026-03-12
 Depends on: g03.003, g03.012
-Primary repos: `flint`
+Primary repos: `poodle`
 
 ## Goals
 

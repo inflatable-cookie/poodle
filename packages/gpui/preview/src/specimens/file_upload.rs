@@ -1,7 +1,7 @@
 use gpui::*;
-use flint_primitives::{FileUploadSpec, EyebrowSpec};
-use flint_gpui_components::{FileUpload, Eyebrow};
-use flint_gpui::GpuiThemeProvider;
+use poodle_primitives::{FileUploadSpec, EyebrowSpec};
+use poodle_gpui_components::{FileUpload, Eyebrow};
+use poodle_gpui::GpuiThemeProvider;
 
 pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
     div().flex().flex_col().gap(px(24.0)).max_w(px(400.0))

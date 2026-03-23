@@ -6,7 +6,7 @@
 //   swift capture-window.swift [owner_substring] [output_path]
 //
 // Defaults:
-//   owner_substring = "flint-preview"
+//   owner_substring = "poodle-preview"
 //   output_path     = "/tmp/gpui-capture.png"
 //
 // The script finds the first on-screen normal window (layer 0) whose
@@ -36,7 +36,7 @@ func findWindow(ownerContains: String) -> WindowInfo? {
         let layer = d["kCGWindowLayer"] as? Int ?? -1
         let needle = ownerContains.lowercased()
         let ownerMatch = name.lowercased().contains(needle)
-        let titleMatch = title.lowercased() == needle  // exact title match to avoid "Flint" matching "Flint Docs Preview"
+        let titleMatch = title.lowercased() == needle  // exact title match to avoid "Poodle" matching "Poodle Docs Preview"
         if layer == 0 && (ownerMatch || titleMatch) {
             if let bounds = d["kCGWindowBounds"] as? NSDictionary {
                 let x = bounds["X"] as? Int ?? 0
@@ -84,7 +84,7 @@ func captureRegion(x: Int, y: Int, width: Int, height: Int, outputPath: String) 
 // --- Main ---
 
 let args = CommandLine.arguments
-let ownerSubstring = args.count > 1 ? args[1] : "flint-preview"
+let ownerSubstring = args.count > 1 ? args[1] : "poodle-preview"
 let outputPath = args.count > 2 ? args[2] : "/tmp/gpui-capture.png"
 
 guard let win = findWindow(ownerContains: ownerSubstring) else {

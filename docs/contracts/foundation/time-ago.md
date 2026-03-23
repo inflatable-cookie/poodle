@@ -109,9 +109,9 @@ Updated: 2026-03-15
 
 | Property | Value |
 |----------|-------|
-| `color` | `var(--flint-color-text-secondary)` |
-| `font-family` | `var(--flint-typography-body-family)` |
-| `font-size` | `var(--flint-typography-body-size)` |
+| `color` | `var(--poodle-color-text-secondary)` |
+| `font-family` | `var(--poodle-typography-body-family)` |
+| `font-size` | `var(--poodle-typography-body-size)` |
 | `font-variant-numeric` | `tabular-nums` |
 | `cursor` | `default` |
 
@@ -149,7 +149,7 @@ Values are computed using integer division (floor). Thresholds use seconds:
 
 ## 10. GPUI Notes
 
-- expected crate/module surface: `flint_gpui::primitives::time_ago`
+- expected crate/module surface: `poodle_gpui::primitives::time_ago`
 - GPUI must implement periodic re-render when `live=true` using a timer or
   frame-based update mechanism
 - `toLocaleString` for title: GPUI should use platform locale formatting or
@@ -173,9 +173,9 @@ Values are computed using integer division (floor). Thresholds use seconds:
 
 ### Tier 2: Visual Parity
 
-- [ ] color uses `--flint-color-text-secondary`
-- [ ] font-family uses `--flint-typography-body-family`
-- [ ] font-size uses `--flint-typography-body-size`
+- [ ] color uses `--poodle-color-text-secondary`
+- [ ] font-family uses `--poodle-typography-body-family`
+- [ ] font-size uses `--poodle-typography-body-size`
 - [ ] font-variant-numeric tabular-nums matches
 - [ ] cursor default matches
 

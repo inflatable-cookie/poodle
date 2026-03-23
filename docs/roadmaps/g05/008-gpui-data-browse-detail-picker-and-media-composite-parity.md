@@ -1,10 +1,10 @@
 # g05.008 GPUI Data, Browse, Detail, Picker, And Media Composite Parity
 
 Status: completed
-Owner: Flint Core
+Owner: Poodle Core
 Updated: 2026-03-12
 Depends on: g05.003, g05.004, g05.005, g05.006, g05.007
-Primary repos: `flint`
+Primary repos: `poodle`
 
 ## Goals
 

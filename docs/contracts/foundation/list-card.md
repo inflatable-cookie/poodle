@@ -147,9 +147,9 @@ Updated: 2026-03-16
 | `align-items` | `center` |
 | `gap` | `0.75rem` |
 | `padding` | `0.625rem 0.75rem` |
-| `border` | `0.0625rem solid color-mix(in srgb, var(--flint-color-border-subtle) 18%, transparent)` |
-| `border-radius` | `var(--flint-radius-control)` |
-| `background` | `color-mix(in srgb, var(--flint-surface) 88%, var(--flint-color-text-primary))` |
+| `border` | `0.0625rem solid color-mix(in srgb, var(--poodle-color-border-subtle) 18%, transparent)` |
+| `border-radius` | `var(--poodle-radius-control)` |
+| `background` | `color-mix(in srgb, var(--poodle-surface) 88%, var(--poodle-color-text-primary))` |
 | `transition` | `background, border-color` at `motion-duration-interaction motion-easing-standard` |
 
 ### Root interactive hover
@@ -157,14 +157,14 @@ Updated: 2026-03-16
 | Property | Value |
 |----------|-------|
 | `cursor` | `pointer` |
-| `background` | `color-mix(in srgb, var(--flint-surface) 82%, var(--flint-color-text-primary))` |
-| `border-color` | `color-mix(in srgb, var(--flint-color-border-default) 52%, transparent)` |
+| `background` | `color-mix(in srgb, var(--poodle-surface) 82%, var(--poodle-color-text-primary))` |
+| `border-color` | `color-mix(in srgb, var(--poodle-color-border-default) 52%, transparent)` |
 
 ### Root focus
 
 | Property | Value |
 |----------|-------|
-| `outline` | `var(--flint-border-width-focus) solid var(--flint-color-accent-focusRing)` |
+| `outline` | `var(--poodle-border-width-focus) solid var(--poodle-color-accent-focusRing)` |
 | `outline-offset` | `-0.0625rem` |
 
 ### Root disabled
@@ -172,14 +172,14 @@ Updated: 2026-03-16
 | Property | Value |
 |----------|-------|
 | `cursor` | `not-allowed` |
-| `opacity` | `var(--flint-state-opacity-disabled)` |
+| `opacity` | `var(--poodle-state-opacity-disabled)` |
 
 ### Root not-live
 
 | Property | Value |
 |----------|-------|
-| `border` | `0.1875rem dashed color-mix(in srgb, var(--flint-color-border-default) 72%, transparent)` (border-color becomes `var(--flint-color-border-default)` on hover) |
-| `background` | `color-mix(in srgb, var(--flint-surface) 32%, transparent)` |
+| `border` | `0.1875rem dashed color-mix(in srgb, var(--poodle-color-border-default) 72%, transparent)` (border-color becomes `var(--poodle-color-border-default)` on hover) |
+| `background` | `color-mix(in srgb, var(--poodle-surface) 32%, transparent)` |
 | `filter` | `grayscale(1)` (restores to `grayscale(0)` on hover) |
 | `opacity` | `0.72` (restores to `1` on hover) |
 
@@ -195,7 +195,7 @@ Updated: 2026-03-16
 | `align-items` | `center` |
 | `justify-content` | `center` |
 | `padding` | `0.125rem 0` |
-| `background` | `var(--list-card-sash, var(--flint-color-positive-base, #22c55e))` |
+| `background` | `var(--list-card-sash, var(--poodle-color-positive-base, #22c55e))` |
 | `color` | `#fff` |
 | `font-size` | `0.5625rem` |
 | `font-weight` | `700` |
@@ -215,9 +215,9 @@ Updated: 2026-03-16
 | `width` | `2rem` (circle) or `2.75rem` (rounded-square) |
 | `height` | `2rem` (circle) or `2.75rem` (rounded-square) |
 | `overflow` | `hidden` |
-| `border-radius` | `999px` (circle) or `var(--flint-radius-control)` (rounded-square) |
-| `background` | tint: `color-mix(in srgb, var(--list-card-accent, var(--flint-color-accent-base)) 12%, transparent)` — solid: `var(--list-card-accent, var(--flint-color-accent-base))` |
-| `color` | tint: `var(--list-card-accent, var(--flint-color-accent-base))` — solid: `#fff` |
+| `border-radius` | `999px` (circle) or `var(--poodle-radius-control)` (rounded-square) |
+| `background` | tint: `color-mix(in srgb, var(--list-card-accent, var(--poodle-color-accent-base)) 12%, transparent)` — solid: `var(--list-card-accent, var(--poodle-color-accent-base))` |
+| `color` | tint: `var(--list-card-accent, var(--poodle-color-accent-base))` — solid: `#fff` |
 | `font-size` | `0.875rem` |
 | `font-weight` | `600` |
 
@@ -245,10 +245,10 @@ Updated: 2026-03-16
 |----------|-------|
 | `flex` | `1` |
 | `min-width` | `0` |
-| `font-family` | `var(--flint-typography-body-family)` |
-| `font-size` | `var(--flint-typography-body-size)` |
+| `font-family` | `var(--poodle-typography-body-family)` |
+| `font-size` | `var(--poodle-typography-body-size)` |
 | `font-weight` | `500` |
-| `color` | `var(--flint-color-text-primary)` |
+| `color` | `var(--poodle-color-text-primary)` |
 | `overflow` | `hidden` |
 | `text-overflow` | `ellipsis` |
 | `white-space` | `nowrap` |
@@ -267,7 +267,7 @@ Updated: 2026-03-16
 | Property | Value |
 |----------|-------|
 | `font-size` | `0.75rem` |
-| `color` | `var(--flint-color-text-secondary)` |
+| `color` | `var(--poodle-color-text-secondary)` |
 | `overflow` | `hidden` |
 | `text-overflow` | `ellipsis` |
 | `white-space` | `nowrap` |
@@ -287,7 +287,7 @@ Updated: 2026-03-16
 |----------|-------|
 | `flex-shrink` | `0` |
 | `font-size` | `0.75rem` |
-| `color` | `var(--flint-color-text-secondary)` |
+| `color` | `var(--poodle-color-text-secondary)` |
 | `font-variant-numeric` | `tabular-nums` |
 
 ### Trailing slot
@@ -318,11 +318,11 @@ A small companion component for rendering icon + count pairs in the footer slot.
 | `display` | `inline-flex` |
 | `align-items` | `center` |
 | `gap` | `0.25rem` |
-| `color` | `var(--flint-color-text-secondary)` |
+| `color` | `var(--poodle-color-text-secondary)` |
 | `font-size` | `0.75rem` |
 | `font-variant-numeric` | `tabular-nums` |
 
-- Anchor variant: `color: var(--flint-color-text-primary)` on hover
+- Anchor variant: `color: var(--poodle-color-text-primary)` on hover
 
 ## 10. Svelte Notes
 
@@ -340,9 +340,9 @@ A small companion component for rendering icon + count pairs in the footer slot.
 
 ## 11. GPUI Notes
 
-- expected crate/module surface: `flint_gpui::components::list_card`
+- expected crate/module surface: `poodle_gpui::components::list_card`
 - Spec struct: `ListCardSpec` in primitives crate
-- Component struct: `FlintListCard` in components crate
+- Component struct: `PoodleListCard` in components crate
 - Flex layout with fixed-width leading column
 - Text truncation uses GPUI's text ellipsis support
 - `tabular-nums` may require GPUI font feature flag

@@ -1,6 +1,6 @@
-# Flint Docs
+# Poodle Docs
 
-Flint uses a Northstar-shaped documentation system inside `docs/`.
+Poodle uses a Northstar-shaped documentation system inside `docs/`.
 
 ## Core Sections
 
@@ -17,8 +17,8 @@ Flint uses a Northstar-shaped documentation system inside `docs/`.
 
 ## Start Here
 
-1. Read `vision/001-flint-vision.md`.
-2. Read `architecture/001-flint-system-shape.md`.
+1. Read `vision/001-poodle-vision.md`.
+2. Read `architecture/001-poodle-system-shape.md`.
 3. Read `roadmaps/README.md`.
 4. Read the current generation under `roadmaps/g04/`.
 

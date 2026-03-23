@@ -1,7 +1,7 @@
 # g11.013 Generation Closeout
 
 Status: planned
-Owner: Flint Core
+Owner: Poodle Core
 Depends on: g11.012
 
 ## Actions

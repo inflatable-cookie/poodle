@@ -15,7 +15,7 @@ types themselves carry no GPUI dependency.
 `g06` restructures the shared Rust layer to be explicitly multi-renderer. The
 existing spec types become the foundation for rendering adapters targeting both
 GPUI (Zed's native UI framework) and Jetstream (a wgpu-based game engine with
-a retained-mode UI system). A future Jetstream adapter (Flint g08) requires that
+a retained-mode UI system). A future Jetstream adapter (Poodle g08) requires that
 contracts, tokens, and layout intent are expressed in renderer-agnostic terms
 that map cleanly to Jetstream's `UiTree`, `UiStyle`, `Vec4` colors, and `f32`
 pixel values — not just GPUI's styling API and CSS-like string tokens.
@@ -27,7 +27,7 @@ Svelte surface established in `g04`.
 
 - 42 primitive specs, 13 composite specs, 12 workstation specs (all Rust,
   builder pattern, token accessor methods)
-- spec crates live under `packages/gpui/` with `flint-gpui-*` naming
+- spec crates live under `packages/gpui/` with `poodle-gpui-*` naming
 - token artifacts are string constants (`&'static str` hex colors, rem values)
 - 124 Svelte components total (71 primitives, 41 composites, 12 workstation)
 - 53 Svelte components have no Rust spec equivalent
@@ -38,7 +38,7 @@ Svelte surface established in `g04`.
 
 ## Exit State
 
-- shared contract crates are renamed and restructured as `flint-contracts-*`
+- shared contract crates are renamed and restructured as `poodle-contracts-*`
   (no renderer name in the crate path)
 - token system supports typed output (parsed `Vec4`-compatible colors, `f32`
   pixel values) alongside existing string constants
@@ -109,7 +109,7 @@ g05.014 Demo Alignment Complete
 
 ### 001 — Multi-Renderer Architecture Audit and Extraction Plan
 
-Audit the existing `flint-gpui-*` crates and identify what is genuinely
+Audit the existing `poodle-gpui-*` crates and identify what is genuinely
 renderer-agnostic vs what carries GPUI assumptions. Produce an extraction plan
 that defines the new crate topology, naming conventions, and migration path.
 Document Jetstream's `game_ui` API surface as a second consumer to validate
@@ -118,12 +118,12 @@ that the contracts can serve both targets.
 ### 002 — Contract Crate Restructuring and Rename
 
 Rename and restructure the shared Rust crates:
-- `flint-gpui-tokens` → `flint-tokens` (token constants and typed resolution)
-- `flint-gpui-primitives` → `flint-primitives` (spec structs and shared enums)
-- `flint-gpui-composites` → `flint-composites` (composite spec structs)
-- `flint-gpui-workstation` → `flint-workstation` (workstation spec structs)
+- `poodle-gpui-tokens` → `poodle-tokens` (token constants and typed resolution)
+- `poodle-gpui-primitives` → `poodle-primitives` (spec structs and shared enums)
+- `poodle-gpui-composites` → `poodle-composites` (composite spec structs)
+- `poodle-gpui-workstation` → `poodle-workstation` (workstation spec structs)
 
-Preserve the existing `flint-gpui-*` crate names as thin re-export wrappers
+Preserve the existing `poodle-gpui-*` crate names as thin re-export wrappers
 during transition if needed for existing consumers. Update all internal imports.
 
 ### 003 — Typed Token Resolution System
@@ -224,7 +224,7 @@ from the start.
 
 ### 013 — Jetstream Rendering Constraint Document
 
-Publish a document in the Flint repo that describes Jetstream's UI system
+Publish a document in the Poodle repo that describes Jetstream's UI system
 capabilities and constraints as a rendering target:
 - Available widget primitives and their properties
 - Layout model (flexbox-like, pixel units, no grid)
@@ -236,7 +236,7 @@ capabilities and constraints as a rendering target:
 - Known limitations (no rich text, no complex scripts, no CSS Grid, no
   transforms, no gradients)
 
-This document is the contract between Flint g08 and Jetstream g04.016.
+This document is the contract between Poodle g08 and Jetstream g04.016.
 
 ### 014 — Multi-Renderer Parity Validation Tooling
 

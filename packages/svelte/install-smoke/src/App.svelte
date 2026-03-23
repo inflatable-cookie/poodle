@@ -1,7 +1,7 @@
 <script lang="ts">
-  import { MetricTile } from "@flint/svelte-composites";
-  import { Button, Pill } from "@flint/svelte-primitives";
-  import { applyThemeAttributes } from "@flint/svelte-tokens/runtime";
+  import { MetricTile } from "@poodle/svelte-composites";
+  import { Button, Pill } from "@poodle/svelte-primitives";
+  import { applyThemeAttributes } from "@poodle/svelte-tokens/runtime";
   import { onMount } from "svelte";
 
   let shell: HTMLDivElement | null = null;

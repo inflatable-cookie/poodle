@@ -1,23 +1,23 @@
-//! Demo screen renderer — converts adapter demo screens into real Flint components.
+//! Demo screen renderer — converts adapter demo screens into real Poodle components.
 //!
-//! Each screen uses the real `Flint*` component constructors from `flint_gpui_components`,
+//! Each screen uses the real `Poodle*` component constructors from `poodle_gpui_components`,
 //! backed by spec structs from the gpui spec crates. Raw `div()` calls are only used
-//! for structural layout where no specific Flint component maps (e.g., breadcrumb trails).
+//! for structural layout where no specific Poodle component maps (e.g., breadcrumb trails).
 
 use gpui::*;
-use flint_adapter::ThemeProvider;
-use flint_gpui::GpuiThemeProvider;
-use flint_gpui_components::{
+use poodle_adapter::ThemeProvider;
+use poodle_gpui::GpuiThemeProvider;
+use poodle_gpui_components::{
     AppHeader, Button, Callout, Checkbox, DataTable, DetailShell,
     Field, PaginationSummary, Pill, Progress, Separator,
     StatusBar, Surface, TextInput,
 };
-use flint_composites::{DataTableSpec, DetailShellSpec, PaginationSummarySpec, TableColumnSpec, TableRowSpec};
-use flint_primitives::{
+use poodle_composites::{DataTableSpec, DetailShellSpec, PaginationSummarySpec, TableColumnSpec, TableRowSpec};
+use poodle_primitives::{
     ButtonSpec, ButtonVariant, CallOutSpec, CheckboxSpec, FieldSpec,
     PillSpec, ProgressSpec, SeparatorSpec, StatusTone, SurfaceSpec, SurfaceTone, TextInputSpec,
 };
-use flint_composites::{AppHeaderSpec, ShellStatusBarSpec};
+use poodle_composites::{AppHeaderSpec, ShellStatusBarSpec};
 
 use crate::app_state::DemoScreen;
 use crate::style_bridge::color_to_hsla;
@@ -224,7 +224,7 @@ fn render_detail_screen(theme: &GpuiThemeProvider) -> Div {
 
     let mut content = div().flex().flex_col().gap(px(12.0));
 
-    // Breadcrumbs — kept as raw div() (no specific Flint component for breadcrumbs)
+    // Breadcrumbs — kept as raw div() (no specific Poodle component for breadcrumbs)
     content = content.child(
         div()
             .flex()

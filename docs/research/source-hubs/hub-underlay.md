@@ -31,16 +31,16 @@ Document Underlay's token/runtime system and integration constraints to inform:
 ### Token Integration
 
 - [ ] How does Underlay currently handle design tokens?
-- [ ] What token format would Underlay consume from Flint?
-- [ ] How would Underlay map Flint tokens to Underlay CSS/runtime?
+- [ ] What token format would Underlay consume from Poodle?
+- [ ] How would Underlay map Poodle tokens to Underlay CSS/runtime?
 - [ ] What namespace/ownership boundaries are needed?
 
 ### Component Integration
 
-- [ ] How would Underlay wrap Flint components?
+- [ ] How would Underlay wrap Poodle components?
 - [ ] What is the wrapper preservation rule?
-- [ ] How does Underlay maintain its public API while using Flint internally?
-- [ ] Which Underlay components could be Flint-backed vs. stay Underlay-owned?
+- [ ] How does Underlay maintain its public API while using Poodle internally?
+- [ ] Which Underlay components could be Poodle-backed vs. stay Underlay-owned?
 
 ### Adoption Path
 
@@ -56,7 +56,7 @@ Document Underlay's token/runtime system and integration constraints to inform:
 
 ---
 
-## Implications for Flint
+## Implications for Poodle
 
 *(To be synthesized when research begins)*
 

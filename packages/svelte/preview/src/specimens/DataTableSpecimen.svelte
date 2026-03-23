@@ -1,7 +1,7 @@
 <script lang="ts">
-  import { DataTable } from "@flint/svelte-composites";
-  import type { TableColumn, TableRow } from "@flint/svelte-composites";
-  import { Eyebrow } from "@flint/svelte-primitives";
+  import { DataTable } from "@poodle/svelte-composites";
+  import type { TableColumn, TableRow } from "@poodle/svelte-composites";
+  import { Eyebrow } from "@poodle/svelte-primitives";
 
   const columns: TableColumn[] = [
     { id: "name", label: "Name", isSortable: true, isHideable: false },
@@ -111,6 +111,6 @@
   .selection-count {
     margin: 0;
     font-size: 0.8125rem;
-    color: var(--flint-color-text-secondary);
+    color: var(--poodle-color-text-secondary);
   }
 </style>

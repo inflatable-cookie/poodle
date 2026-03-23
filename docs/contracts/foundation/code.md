@@ -141,9 +141,9 @@ Updated: 2026-03-15
 | `display` | `inline` |
 | `padding` | `0.125rem 0.375rem` |
 | `border-radius` | `0.25rem` |
-| `background` | `color-mix(in srgb, var(--flint-color-background-panel) 72%, var(--flint-color-background-elevated))` |
-| `color` | `var(--flint-color-text-primary)` |
-| `font-family` | `var(--flint-typography-code-family)` |
+| `background` | `color-mix(in srgb, var(--poodle-color-background-panel) 72%, var(--poodle-color-background-elevated))` |
+| `color` | `var(--poodle-color-text-primary)` |
+| `font-family` | `var(--poodle-typography-code-family)` |
 | `font-size` | `0.8125em` |
 | `line-height` | `1.5` |
 
@@ -153,9 +153,9 @@ Updated: 2026-03-15
 |----------|-------|
 | `display` | `flex` |
 | `flex-direction` | `column` |
-| `border` | `0.0625rem solid color-mix(in srgb, var(--flint-color-border-subtle) 42%, transparent)` |
-| `border-radius` | `var(--flint-radius-surface)` |
-| `background` | `color-mix(in srgb, var(--flint-color-background-panel) 92%, var(--flint-color-background-elevated))` |
+| `border` | `0.0625rem solid color-mix(in srgb, var(--poodle-color-border-subtle) 42%, transparent)` |
+| `border-radius` | `var(--poodle-radius-surface)` |
+| `background` | `color-mix(in srgb, var(--poodle-color-background-panel) 92%, var(--poodle-color-background-elevated))` |
 | `overflow` | `hidden` |
 
 `maxHeight` applied as inline style on root when prop is provided.
@@ -168,16 +168,16 @@ Updated: 2026-03-15
 | `align-items` | `center` |
 | `justify-content` | `space-between` |
 | `padding` | `0.375rem 0.625rem` |
-| `border-bottom` | `0.0625rem solid color-mix(in srgb, var(--flint-color-border-subtle) 32%, transparent)` |
+| `border-bottom` | `0.0625rem solid color-mix(in srgb, var(--poodle-color-border-subtle) 32%, transparent)` |
 
 ### Language label `.code__language`
 
 | Property | Value |
 |----------|-------|
-| `font-family` | `var(--flint-typography-label-family)` |
+| `font-family` | `var(--poodle-typography-label-family)` |
 | `font-size` | `0.6875rem` |
-| `font-weight` | `var(--flint-typography-label-weight)` |
-| `color` | `var(--flint-color-text-secondary)` |
+| `font-weight` | `var(--poodle-typography-label-weight)` |
+| `color` | `var(--poodle-color-text-secondary)` |
 | `text-transform` | `uppercase` |
 | `letter-spacing` | `0.05em` |
 
@@ -201,21 +201,21 @@ Updated: 2026-03-15
 | `border` | `0` |
 | `border-radius` | `0.25rem` |
 | `background` | `transparent` |
-| `color` | `var(--flint-color-text-secondary)` |
+| `color` | `var(--poodle-color-text-secondary)` |
 | `cursor` | `pointer` |
-| `transition` | `color var(--flint-motion-duration-interaction) var(--flint-motion-easing-standard)` |
+| `transition` | `color var(--poodle-motion-duration-interaction) var(--poodle-motion-easing-standard)` |
 
 ### Copy button — hover
 
 | Property | Value |
 |----------|-------|
-| `color` | `var(--flint-color-text-primary)` |
+| `color` | `var(--poodle-color-text-primary)` |
 
 ### Copy button — focus-visible
 
 | Property | Value |
 |----------|-------|
-| `outline` | `var(--flint-border-width-focus) solid var(--flint-color-accent-focusRing)` |
+| `outline` | `var(--poodle-border-width-focus) solid var(--poodle-color-accent-focusRing)` |
 
 ### Copy button SVG icon
 
@@ -244,10 +244,10 @@ Displays check icon when `copied` is true, copy icon otherwise.
 | Property | Value |
 |----------|-------|
 | `display` | `block` |
-| `font-family` | `var(--flint-typography-code-family)` |
+| `font-family` | `var(--poodle-typography-code-family)` |
 | `font-size` | `0.8125rem` |
 | `line-height` | `1.4` |
-| `color` | `var(--flint-color-text-primary)` |
+| `color` | `var(--poodle-color-text-primary)` |
 | `tab-size` | `2` |
 | `white-space` | `pre` |
 
@@ -261,7 +261,7 @@ Displays check icon when `copied` is true, copy icon otherwise.
 
 | Property | Value |
 |----------|-------|
-| `background` | `color-mix(in srgb, var(--flint-color-accent-base) 12%, transparent)` |
+| `background` | `color-mix(in srgb, var(--poodle-color-accent-base) 12%, transparent)` |
 | `margin` | `0 -1rem` |
 | `padding` | `0 1rem` |
 
@@ -272,7 +272,7 @@ Displays check icon when `copied` is true, copy icon otherwise.
 | `display` | `inline-block` |
 | `width` | `2.5rem` |
 | `padding-right` | `1rem` |
-| `color` | `var(--flint-color-text-secondary)` |
+| `color` | `var(--poodle-color-text-secondary)` |
 | `text-align` | `right` |
 | `user-select` | `none` |
 | `font-variant-numeric` | `tabular-nums` |
@@ -289,7 +289,7 @@ Displays check icon when `copied` is true, copy icon otherwise.
 
 ## 10. GPUI Notes
 
-- expected crate/module surface: `flint_gpui::primitives::code`
+- expected crate/module surface: `poodle_gpui::primitives::code`
 - Inline mode: GPUI renders as a styled text run within a parent text element
 - Block mode: GPUI uses a scrollable container with monospace text rendering
 - Copy button: GPUI must use platform clipboard API
@@ -318,7 +318,7 @@ Displays check icon when `copied` is true, copy icon otherwise.
 - [ ] inline background color-mix (panel 72%, elevated) matches
 - [ ] inline font-size 0.8125em matches
 - [ ] block border 0.0625rem color-mix (border-subtle 42%) matches
-- [ ] block border-radius uses `--flint-radius-surface`
+- [ ] block border-radius uses `--poodle-radius-surface`
 - [ ] block background color-mix (panel 92%, elevated) matches
 - [ ] toolbar padding 0.375rem 0.625rem matches
 - [ ] toolbar border-bottom 0.0625rem color-mix (border-subtle 32%) matches

@@ -1,9 +1,9 @@
 //! BlockEditor — block-based content editor backed by BlockEditorSpec.
 
 use gpui::*;
-use flint_gpui::GpuiThemeProvider;
-use flint_composites::BlockEditorSpec;
-use flint_primitives::{IconSize, IconSpec};
+use poodle_gpui::GpuiThemeProvider;
+use poodle_composites::BlockEditorSpec;
+use poodle_primitives::{IconSize, IconSpec};
 use crate::primitives::Icon;
 use crate::theme_ext::{resolve_color, resolve_opacity, resolve_px, resolve_radius};
 

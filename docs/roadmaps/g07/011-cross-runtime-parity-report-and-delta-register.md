@@ -26,14 +26,14 @@ Both renderers consume the same contract crates from g06:
 
 | Crate | Purpose | Svelte | GPUI |
 |-------|---------|--------|------|
-| flint-tokens | Token constants + typed resolution | via JSON artifacts | via Rust typed module |
-| flint-primitives | 64 primitive specs | ✓ | ✓ |
-| flint-composites | 41 composite specs | ✓ | ✓ |
-| flint-workstation | 13 workstation specs | ✓ | ✓ |
-| flint-layout | Layout intent types | N/A (CSS native) | ✓ maps to GpuiStyle |
-| flint-events | Semantic event types | N/A (DOM native) | ✓ (defined, not yet wired) |
-| flint-style | Style descriptor IR | N/A (CSS native) | ✓ maps to GpuiStyle |
-| flint-adapter | Renderer adapter traits | N/A (Svelte is reference) | ✓ implements traits |
+| poodle-tokens | Token constants + typed resolution | via JSON artifacts | via Rust typed module |
+| poodle-primitives | 64 primitive specs | ✓ | ✓ |
+| poodle-composites | 41 composite specs | ✓ | ✓ |
+| poodle-workstation | 13 workstation specs | ✓ | ✓ |
+| poodle-layout | Layout intent types | N/A (CSS native) | ✓ maps to GpuiStyle |
+| poodle-events | Semantic event types | N/A (DOM native) | ✓ (defined, not yet wired) |
+| poodle-style | Style descriptor IR | N/A (CSS native) | ✓ maps to GpuiStyle |
+| poodle-adapter | Renderer adapter traits | N/A (Svelte is reference) | ✓ implements traits |
 
 ### Parity Tiers
 

@@ -134,13 +134,13 @@ Always return focus to trigger element when:
 ```css
 /* Don't remove focus outline */
 *:focus {
-  outline: 2px solid var(--flint-color-focus);
+  outline: 2px solid var(--poodle-color-focus);
   outline-offset: 2px;
 }
 
 /* Or use :focus-visible for keyboard only */
 *:focus-visible {
-  outline: 2px solid var(--flint-color-focus);
+  outline: 2px solid var(--poodle-color-focus);
   outline-offset: 2px;
 }
 ```
@@ -195,7 +195,7 @@ Always return focus to trigger element when:
 
 ---
 
-## Recommendations for Flint
+## Recommendations for Poodle
 
 ### Accessibility Requirements for All Components
 

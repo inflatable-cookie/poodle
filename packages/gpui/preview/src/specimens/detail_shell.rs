@@ -1,9 +1,9 @@
 use gpui::*;
-use flint_adapter::ThemeProvider;
-use flint_composites::{DetailShellSpec, DetailState, DetailSectionSpec};
-use flint_gpui_components::{DetailShell, DetailRow, DetailSection, Button, Eyebrow};
-use flint_primitives::{DetailRowSpec, ButtonSpec, ButtonVariant, ControlSize, EyebrowSpec};
-use flint_gpui::GpuiThemeProvider;
+use poodle_adapter::ThemeProvider;
+use poodle_composites::{DetailShellSpec, DetailState, DetailSectionSpec};
+use poodle_gpui_components::{DetailShell, DetailRow, DetailSection, Button, Eyebrow};
+use poodle_primitives::{DetailRowSpec, ButtonSpec, ButtonVariant, ControlSize, EyebrowSpec};
+use poodle_gpui::GpuiThemeProvider;
 use crate::style_bridge::color_to_hsla;
 
 pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
@@ -89,7 +89,7 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
                 .child(
                     div().flex().flex_col()
                         .child(DetailRow::from_spec(
-                            DetailRowSpec::new("Name").with_value("Flint Design System"),
+                            DetailRowSpec::new("Name").with_value("Poodle Design System"),
                             theme,
                         ))
                         .child(DetailRow::from_spec(
@@ -176,7 +176,7 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
                     )
                     .with_body(
                         div().flex().flex_col()
-                            .child(DetailRow::from_spec(DetailRowSpec::new("Name").with_value("Flint Design System"), theme))
+                            .child(DetailRow::from_spec(DetailRowSpec::new("Name").with_value("Poodle Design System"), theme))
                             .child(DetailRow::from_spec(DetailRowSpec::new("Owner").with_value("Clay + Aura"), theme))
                             .child(DetailRow::from_spec(DetailRowSpec::new("Created").with_value("March 2025"), theme))
                             .child(DetailRow::from_spec(DetailRowSpec::new("Status").with_value("Active"), theme))
@@ -275,8 +275,8 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
 
 fn region_block(
     label: &str,
-    accent: flint_tokens::typed::ColorValue,
-    border: flint_tokens::typed::ColorValue,
+    accent: poodle_tokens::typed::ColorValue,
+    border: poodle_tokens::typed::ColorValue,
 ) -> Div {
     div()
         .h(px(32.0))

@@ -21,7 +21,7 @@ all supported components.
 
 ## Current State
 
-- **86 Jetstream components** implemented in `flint-jetstream-components`
+- **86 Jetstream components** implemented in `poodle-jetstream-components`
   (up from 8 at start)
 - All components resolve visual properties from tokens via `JetstreamThemeProvider`
 - All components compile against current contract specs

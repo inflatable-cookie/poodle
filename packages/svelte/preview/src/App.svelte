@@ -5,12 +5,12 @@
     themes,
     densityModes,
     controlSizes,
-  } from "@flint/svelte-tokens";
+  } from "@poodle/svelte-tokens";
   import {
     Pill,
     Tabs,
     type TabItem,
-  } from "@flint/svelte-primitives";
+  } from "@poodle/svelte-primitives";
   import { onMount } from "svelte";
 
   import DisplayControls from "./components/DisplayControls.svelte";
@@ -123,7 +123,7 @@
 </script>
 
 <svelte:head>
-  <title>Flint Docs Preview</title>
+  <title>Poodle Docs Preview</title>
 </svelte:head>
 
 <svelte:window
@@ -134,7 +134,7 @@
 <div class="app-shell" data-appearance-treatment={appearanceTreatment} bind:this={appShell}>
   <header class="app-top-bar">
     <div class="app-top-bar__title">
-      <strong>Flint</strong>
+      <strong>Poodle</strong>
     </div>
     <Tabs
       value={activeSection}
@@ -192,15 +192,15 @@
     align-items: center;
     gap: 1rem;
     padding: 0.5rem 1rem;
-    border-bottom: 0.0625rem solid var(--flint-color-border-subtle);
-    background: var(--flint-color-background-elevated);
+    border-bottom: 0.0625rem solid var(--poodle-color-border-subtle);
+    background: var(--poodle-color-background-elevated);
     flex-shrink: 0;
   }
 
   .app-top-bar__title strong {
     font-size: 1rem;
     font-weight: 700;
-    color: var(--flint-color-text-primary);
+    color: var(--poodle-color-text-primary);
     white-space: nowrap;
   }
 

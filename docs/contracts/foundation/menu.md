@@ -166,7 +166,7 @@ Open/closed state and current highlighted item index are required.
 
 | Property | Value |
 |----------|-------|
-| `outline` | `var(--flint-border-width-focus) solid var(--flint-color-accent-focusRing)` |
+| `outline` | `var(--poodle-border-width-focus) solid var(--poodle-color-accent-focusRing)` |
 | `outline-offset` | `0.125rem` |
 
 ### Overlay `.menu__overlay`
@@ -174,13 +174,13 @@ Open/closed state and current highlighted item index are required.
 | Property | Value |
 |----------|-------|
 | `position` | `absolute` |
-| `z-index` | `var(--flint-overlay-z-menu)` |
+| `z-index` | `var(--poodle-overlay-z-menu)` |
 | `min-width` | `14rem` |
 | `padding` | `0.25rem` |
-| `border` | `0.0625rem solid color-mix(in srgb, var(--flint-color-border-default) 72%, transparent)` |
-| `border-radius` | `var(--flint-radius-surface)` |
-| `background` | `color-mix(in srgb, var(--flint-color-background-elevated) 98%, var(--flint-color-background-panel))` |
-| `box-shadow` | `var(--flint-elevation-overlay)` |
+| `border` | `0.0625rem solid color-mix(in srgb, var(--poodle-color-border-default) 72%, transparent)` |
+| `border-radius` | `var(--poodle-radius-surface)` |
+| `background` | `color-mix(in srgb, var(--poodle-color-background-elevated) 98%, var(--poodle-color-background-panel))` |
+| `box-shadow` | `var(--poodle-elevation-overlay)` |
 
 ### Overlay — placement: bottom-start (default)
 
@@ -223,9 +223,9 @@ Open/closed state and current highlighted item index are required.
 | `min-height` | `2rem` |
 | `padding` | `0.375rem 0.5rem` |
 | `border` | `0` |
-| `border-radius` | `calc(var(--flint-radius-control) - 0.125rem)` |
+| `border-radius` | `calc(var(--poodle-radius-control) - 0.125rem)` |
 | `background` | `transparent` |
-| `color` | `var(--flint-color-text-primary)` |
+| `color` | `var(--poodle-color-text-primary)` |
 | `cursor` | `pointer` |
 | `font` | `inherit` |
 | `font-size` | `0.875rem` |
@@ -235,7 +235,7 @@ Open/closed state and current highlighted item index are required.
 
 | Property | Value |
 |----------|-------|
-| `background` | `color-mix(in srgb, var(--flint-color-accent-base) 16%, transparent)` |
+| `background` | `color-mix(in srgb, var(--poodle-color-accent-base) 16%, transparent)` |
 | `outline` | `none` |
 
 ### Item — disabled
@@ -243,14 +243,14 @@ Open/closed state and current highlighted item index are required.
 | Property | Value |
 |----------|-------|
 | `cursor` | `not-allowed` |
-| `opacity` | `var(--flint-state-opacity-disabled)` |
+| `opacity` | `var(--poodle-state-opacity-disabled)` |
 
 ### Meta `.menu__meta`
 
 | Property | Value |
 |----------|-------|
-| `color` | `var(--flint-color-text-secondary)` |
-| `font-family` | `var(--flint-typography-code-family)` |
+| `color` | `var(--poodle-color-text-secondary)` |
+| `font-family` | `var(--poodle-typography-code-family)` |
 | `font-size` | `0.6875rem` |
 
 ### Separator `.menu__separator`
@@ -260,7 +260,7 @@ Open/closed state and current highlighted item index are required.
 | `width` | `100%` |
 | `height` | `0.0625rem` |
 | `margin` | `0.25rem 0` |
-| `background` | `color-mix(in srgb, var(--flint-color-border-subtle) 72%, transparent)` |
+| `background` | `color-mix(in srgb, var(--poodle-color-border-subtle) 72%, transparent)` |
 
 ## 9. Svelte Notes
 
@@ -274,7 +274,7 @@ Open/closed state and current highlighted item index are required.
 
 ## 10. GPUI Notes
 
-- expected crate/module surface: `flint_gpui::primitives::menu`
+- expected crate/module surface: `poodle_gpui::primitives::menu`
 - GPUI implementation must intentionally manage overlay focus, highlighted-item
   semantics, and checked-item exposure while keeping the invoking control and
   menu relationship accessible

@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { TimeField, Eyebrow } from "@flint/svelte-primitives";
+  import { TimeField, Eyebrow } from "@poodle/svelte-primitives";
 
   let time = "";
 </script>
@@ -50,6 +50,6 @@
   .specimen__group p {
     margin: 0;
     font-size: 0.875rem;
-    color: var(--flint-color-text-secondary);
+    color: var(--poodle-color-text-secondary);
   }
 </style>

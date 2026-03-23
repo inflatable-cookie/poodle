@@ -12,8 +12,8 @@
 //! 5. Picker and selection — picker shell, relation picker, selection summary
 //! 6. Command and workspace — workspace shell, command palette, docks
 
-use flint_adapter::{RenderComponent, ThemeProvider};
-use flint_composites::{
+use poodle_adapter::{RenderComponent, ThemeProvider};
+use poodle_composites::{
     ConfirmActionSpec, DataTableSpec, DetailSectionSpec, DetailShellSpec,
     EmptyStateSpec, FilterToolbarSpec, FormShellSpec, InlineRemediationSpec,
     LogListSpec, MediaPreviewSpec, MediaThumbnailSpec,
@@ -21,14 +21,14 @@ use flint_composites::{
     RemediationBannerSpec, SelectionSummarySpec, StateTileSpec, ToastStackSpec,
     ValidationSummarySpec,
 };
-use flint_primitives::{
+use poodle_primitives::{
     AccordionSpec, BadgeSpec, BannerSpec, BoxSpec, BreadcrumbsSpec, ButtonSpec, CheckboxSpec,
     FieldSpec, GridSpec, MenuSpec, NavCardGridSpec, NavCardSpec, ProgressSpec, SearchFieldSpec,
     SelectSpec, SeparatorSpec, SkeletonSpec, StackSpec, StatusIndicatorSpec, SurfaceSpec,
     SwitchSpec, TabsSpec, TextAreaSpec, TextInputSpec, ToolbarSpec,
 };
-use flint_style::StyleDescriptor;
-use flint_workstation::{
+use poodle_style::StyleDescriptor;
+use poodle_workstation::{
     AppHeaderSpec, CommandPaletteShellSpec, CommandPaletteSpec, DockEdge, DockRegionSpec,
     PanelHeaderSpec, PanelSurfaceSpec, ProjectHeaderSpec, ShellStatusBarSpec, SplitOrientation,
     SplitViewSpec, WorkspaceShellSpec,
@@ -155,8 +155,8 @@ fn render_detail_and_review(a: &GpuiAdapter, t: &dyn ThemeProvider) -> DemoScree
     screen.push(a.render(&DetailShellSpec::new(), &s, t));
     screen.push(a.render(&DetailSectionSpec::new().with_title("Overview"), &s, t));
     screen.push(a.render(&DetailSectionSpec::new().with_title("Media"), &s, t));
-    screen.push(a.render(&MediaThumbnailSpec::new(flint_composites::MediaKind::Image), &s, t));
-    screen.push(a.render(&MediaPreviewSpec::new(flint_composites::MediaKind::Audio, "Track preview"), &s, t));
+    screen.push(a.render(&MediaThumbnailSpec::new(poodle_composites::MediaKind::Image), &s, t));
+    screen.push(a.render(&MediaPreviewSpec::new(poodle_composites::MediaKind::Audio, "Track preview"), &s, t));
     screen.push(a.render(&BreadcrumbsSpec::new(vec![]), &s, t));
     screen.push(a.render(&AccordionSpec::new(vec![]), &s, t));
     screen.push(a.render(&BoxSpec::new(), &s, t));

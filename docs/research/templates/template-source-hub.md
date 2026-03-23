@@ -6,7 +6,7 @@ Updated: YYYY-MM-DD
 
 ## Purpose
 
-Brief description of what external system this hub documents and what Flint decisions it informs.
+Brief description of what external system this hub documents and what Poodle decisions it informs.
 
 ---
 
@@ -52,7 +52,7 @@ Brief description of what external system this hub documents and what Flint deci
 
 ---
 
-## Implications for Flint
+## Implications for Poodle
 
 *(To be synthesized into translation memo)*
 

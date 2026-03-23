@@ -109,9 +109,9 @@ Updated: 2026-03-15
 - Root: `aria-label` from prop when provided
 - Heading: `<h3>` wrapping each trigger
 - Trigger: `<button type="button">` with `aria-expanded` and `aria-controls`
-- Trigger: `id="flint-accordion-trigger-{accordionId}-{item.value}"`
+- Trigger: `id="poodle-accordion-trigger-{accordionId}-{item.value}"`
 - Panel: `role="region"` with `aria-labelledby` pointing to trigger id
-- Panel: `id="flint-accordion-panel-{accordionId}-{item.value}"`
+- Panel: `id="poodle-accordion-panel-{accordionId}-{item.value}"`
 - Module-level `nextAccordionId` counter provides unique id namespaces
 
 ### Keyboard
@@ -165,10 +165,10 @@ Updated: 2026-03-15
 | `gap` | `0.75rem` |
 | `min-width` | `0` |
 | `padding` | `0.875rem 1rem` |
-| `border` | `0.0625rem solid color-mix(in srgb, var(--flint-color-border-subtle) 36%, transparent)` |
-| `border-radius` | `var(--flint-radius-surface)` |
-| `background` | `color-mix(in srgb, var(--flint-surface) 93%, var(--flint-color-text-primary))` |
-| `box-shadow` | `inset 0 0.0625rem 0 color-mix(in srgb, var(--flint-color-text-inverse) 8%, transparent)` |
+| `border` | `0.0625rem solid color-mix(in srgb, var(--poodle-color-border-subtle) 36%, transparent)` |
+| `border-radius` | `var(--poodle-radius-surface)` |
+| `background` | `color-mix(in srgb, var(--poodle-surface) 93%, var(--poodle-color-text-primary))` |
+| `box-shadow` | `inset 0 0.0625rem 0 color-mix(in srgb, var(--poodle-color-text-inverse) 8%, transparent)` |
 
 ### Heading `.accordion__heading`
 
@@ -188,7 +188,7 @@ Updated: 2026-03-15
 | `padding` | `0` |
 | `border` | `0` |
 | `background` | `transparent` |
-| `color` | `var(--flint-color-text-primary)` |
+| `color` | `var(--poodle-color-text-primary)` |
 | `cursor` | `pointer` |
 | `text-align` | `left` |
 | `font` | `inherit` |
@@ -198,15 +198,15 @@ Updated: 2026-03-15
 | Property | Value |
 |----------|-------|
 | `cursor` | `not-allowed` |
-| `opacity` | `var(--flint-state-opacity-disabled)` |
+| `opacity` | `var(--poodle-state-opacity-disabled)` |
 
 ### Trigger focus (`:focus-visible`)
 
 | Property | Value |
 |----------|-------|
-| `outline` | `var(--flint-border-width-focus) solid var(--flint-color-accent-focusRing)` |
+| `outline` | `var(--poodle-border-width-focus) solid var(--poodle-color-accent-focusRing)` |
 | `outline-offset` | `0.125rem` |
-| `border-radius` | `calc(var(--flint-radius-control) - 0.125rem)` |
+| `border-radius` | `calc(var(--poodle-radius-control) - 0.125rem)` |
 
 ### Summary `.accordion__summary`
 
@@ -220,7 +220,7 @@ Updated: 2026-03-15
 
 | Property | Value |
 |----------|-------|
-| `font-family` | `var(--flint-typography-heading-family)` |
+| `font-family` | `var(--poodle-typography-heading-family)` |
 | `font-size` | `1rem` |
 | `font-weight` | `700` |
 | `line-height` | `1.2` |
@@ -229,7 +229,7 @@ Updated: 2026-03-15
 
 | Property | Value |
 |----------|-------|
-| `color` | `var(--flint-color-text-secondary)` |
+| `color` | `var(--poodle-color-text-secondary)` |
 | `font-size` | `0.8125rem` |
 | `line-height` | `1.45` |
 
@@ -237,11 +237,11 @@ Updated: 2026-03-15
 
 | Property | Value |
 |----------|-------|
-| `color` | `var(--flint-color-text-secondary)` |
-| `font-family` | `var(--flint-typography-code-family)` |
+| `color` | `var(--poodle-color-text-secondary)` |
+| `font-family` | `var(--poodle-typography-code-family)` |
 | `font-size` | `0.75rem` |
 | `line-height` | `1` |
-| `transition` | `transform var(--flint-motion-duration-interaction) var(--flint-motion-easing-standard)` |
+| `transition` | `transform var(--poodle-motion-duration-interaction) var(--poodle-motion-easing-standard)` |
 
 ### Indicator open (`.accordion__item[data-open="true"] .accordion__indicator`)
 
@@ -273,7 +273,7 @@ Updated: 2026-03-15
 
 ## 10. GPUI Notes
 
-- expected crate/module surface: `flint_gpui::primitives::accordion`
+- expected crate/module surface: `poodle_gpui::primitives::accordion`
 - GPUI must expose button role with expanded state on each trigger
 - Region association between trigger and panel must be maintained
 - Group role required in multiple mode

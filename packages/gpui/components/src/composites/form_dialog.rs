@@ -4,7 +4,7 @@
 
 use gpui::prelude::FluentBuilder;
 use gpui::*;
-use flint_gpui::GpuiThemeProvider;
+use poodle_gpui::GpuiThemeProvider;
 use crate::primitives::Dialog;
 use crate::composites::FormLayout;
 use crate::theme_ext::{color_mix, resolve_color, resolve_px, resolve_radius};

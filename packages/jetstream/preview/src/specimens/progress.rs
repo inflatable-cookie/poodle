@@ -1,10 +1,10 @@
 //! Progress specimen.
 
 use jetstream_runtime::ui_element::*;
-use flint_jetstream::JetstreamThemeProvider;
-use flint_jetstream_components::progress::js_progress;
-use flint_jetstream_components::theme_ext::*;
-use flint_primitives::ProgressSpec;
+use poodle_jetstream::JetstreamThemeProvider;
+use poodle_jetstream_components::progress::js_progress;
+use poodle_jetstream_components::theme_ext::*;
+use poodle_primitives::ProgressSpec;
 
 pub fn render(theme: &JetstreamThemeProvider) -> JsEl {
     let secondary = resolve_color(theme, "semantic.color.text.secondary");

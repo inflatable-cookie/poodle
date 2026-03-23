@@ -1,10 +1,10 @@
 //! MetricTile specimen — single metric display tile.
 
 use jetstream_runtime::ui_element::*;
-use flint_jetstream::JetstreamThemeProvider;
-use flint_jetstream_components::metric_tile::js_metric_tile;
-use flint_jetstream_components::theme_ext::*;
-use flint_composites::MetricTileSpec;
+use poodle_jetstream::JetstreamThemeProvider;
+use poodle_jetstream_components::metric_tile::js_metric_tile;
+use poodle_jetstream_components::theme_ext::*;
+use poodle_composites::MetricTileSpec;
 
 pub fn render(theme: &JetstreamThemeProvider) -> JsEl {
     let secondary = resolve_color(theme, "semantic.color.text.secondary");

@@ -1,10 +1,10 @@
 # g04.004 Button And Card Pattern Extensions
 
 Status: planned
-Owner: Flint Core
+Owner: Poodle Core
 Updated: 2026-03-14
 Depends on: g04.001
-Primary repos: `flint`
+Primary repos: `poodle`
 
 ## Goals
 
@@ -19,10 +19,10 @@ Primary repos: `flint`
 
 - [ ] write contract for SplitButton: primary action, dropdown items, disabled
   state, loading state, size variants
-- [ ] implement SplitButton primitive in `@flint/svelte-primitives`
+- [ ] implement SplitButton primitive in `@poodle/svelte-primitives`
 - [ ] write contract for CardRadioGroup: card items with title/description/icon,
   single selection, disabled items, controlled value
-- [ ] implement CardRadioGroup composite in `@flint/svelte-composites`
+- [ ] implement CardRadioGroup composite in `@poodle/svelte-composites`
 - [ ] extend Button contract with split variant support
 - [ ] extend Card contract with radio-selection mode and visual-selection state
 - [ ] create specimens for SplitButton and CardRadioGroup

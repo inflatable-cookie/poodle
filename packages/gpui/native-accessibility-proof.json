@@ -15,7 +15,7 @@
   "layerProof": [
     {
       "id": "primitives",
-      "crateName": "flint-gpui",
+      "crateName": "poodle-gpui",
       "cratePath": "packages/gpui/adapter",
       "contractIds": [
         "accordion",
@@ -121,7 +121,7 @@
     },
     {
       "id": "composites",
-      "crateName": "flint-gpui",
+      "crateName": "poodle-gpui",
       "cratePath": "packages/gpui/adapter",
       "contractIds": [
         "banner",
@@ -172,7 +172,7 @@
     },
     {
       "id": "workstation",
-      "crateName": "flint-gpui",
+      "crateName": "poodle-gpui",
       "cratePath": "packages/gpui/adapter",
       "contractIds": [
         "action-discovery-panel",

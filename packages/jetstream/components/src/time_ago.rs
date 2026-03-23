@@ -1,8 +1,8 @@
 //! TimeAgo — Jetstream relative time label backed by TimeAgoSpec.
 
 use jetstream_runtime::ui_element::{self, JsEl};
-use flint_jetstream::JetstreamThemeProvider;
-use flint_primitives::TimeAgoSpec;
+use poodle_jetstream::JetstreamThemeProvider;
+use poodle_primitives::TimeAgoSpec;
 
 use crate::theme_ext::{resolve_color, resolve_px};
 

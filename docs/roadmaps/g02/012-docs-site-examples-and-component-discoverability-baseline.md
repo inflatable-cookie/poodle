@@ -1,10 +1,10 @@
 # g02.012 Docs Site, Examples, And Component Discoverability Baseline
 
 Status: completed
-Owner: Flint Core
+Owner: Poodle Core
 Updated: 2026-03-11
 Depends on: g02.001, g02.002, g02.003, g02.004, g02.005, g02.006, g02.007, g02.008, g02.009, g02.010, g02.011
-Primary repos: `flint`
+Primary repos: `poodle`
 
 ## Goals
 

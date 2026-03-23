@@ -1,24 +1,24 @@
 [package]
-name = "flint-jetstream-preview"
+name = "poodle-jetstream-preview"
 version = "0.0.0"
 edition = "2024"
-description = "Jetstream preview application for the Flint design system — showcases all Flint components rendered via the Jetstream game engine."
+description = "Jetstream preview application for the Poodle design system — showcases all Poodle components rendered via the Jetstream game engine."
 
 [[bin]]
-name = "flint-jetstream-preview"
+name = "poodle-jetstream-preview"
 path = "src/main.rs"
 
 [dependencies]
-# Flint adapter + contracts + components
-flint-jetstream = { path = "../adapter" }
-flint-jetstream-components = { path = "../components" }
-flint-adapter = { path = "../../contracts/adapter" }
-flint-primitives = { path = "../../contracts/primitives" }
-flint-composites = { path = "../../contracts/composites" }
-flint-workstation = { path = "../../contracts/workstation" }
-flint-layout = { path = "../../contracts/layout" }
-flint-style = { path = "../../contracts/style" }
-flint-tokens = { path = "../../contracts/tokens" }
+# Poodle adapter + contracts + components
+poodle-jetstream = { path = "../adapter" }
+poodle-jetstream-components = { path = "../components" }
+poodle-adapter = { path = "../../contracts/adapter" }
+poodle-primitives = { path = "../../contracts/primitives" }
+poodle-composites = { path = "../../contracts/composites" }
+poodle-workstation = { path = "../../contracts/workstation" }
+poodle-layout = { path = "../../contracts/layout" }
+poodle-style = { path = "../../contracts/style" }
+poodle-tokens = { path = "../../contracts/tokens" }
 
 # Jetstream runtime (cross-repo path)
 jetstream-runtime = { path = "../../../../jetstream/crates/jetstream-runtime" }
@@ -34,7 +34,7 @@ image = { version = "0.25", default-features = false, features = ["png"] }
 env_logger = "0.11"
 log = "0.4"
 
-[package.metadata.flint]
+[package.metadata.poodle]
 public-intent = true
 channel = "preview"
 stability = "pre-release"

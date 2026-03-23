@@ -1,10 +1,10 @@
 use gpui::*;
-use flint_composites::{
+use poodle_composites::{
     MediaPreviewSpec, MediaThumbnailSpec, AspectRatio, MediaKind, MediaState,
     AudioPlayerSpec, VideoPlayerSpec, MediaPickerSpec,
 };
-use flint_primitives::EyebrowSpec;
-use flint_gpui_components::{
+use poodle_primitives::EyebrowSpec;
+use poodle_gpui_components::{
     MediaPreview, MediaThumbnail, AudioPlayer, VideoPlayer,
     MediaPicker, MediaPickerItem, Eyebrow,
 };

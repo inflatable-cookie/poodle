@@ -1,9 +1,9 @@
 {
-  "name": "@flint/svelte-preview",
+  "name": "@poodle/svelte-preview",
   "private": true,
   "type": "module",
-  "description": "Internal preview and docs harness for Flint.",
-  "flintRelease": {
+  "description": "Internal preview and docs harness for Poodle.",
+  "poodleRelease": {
     "publicIntent": false,
     "channel": "internal",
     "stability": "internal-only"
@@ -16,11 +16,11 @@
     "accessibility:report": "bun scripts/build-accessibility-report.ts"
   },
   "dependencies": {
-    "@flint/icons-lucide": "workspace:*",
-    "@flint/svelte-composites": "workspace:*",
+    "@poodle/icons-lucide": "workspace:*",
+    "@poodle/svelte-composites": "workspace:*",
     "lucide-static": "^0.577.0",
-    "@flint/svelte-primitives": "workspace:*",
-    "@flint/svelte-tokens": "workspace:*",
+    "@poodle/svelte-primitives": "workspace:*",
+    "@poodle/svelte-tokens": "workspace:*",
     "svelte": "^5.38.6"
   },
   "devDependencies": {

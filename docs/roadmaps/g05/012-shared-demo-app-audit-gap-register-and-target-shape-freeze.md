@@ -1,10 +1,10 @@
 # g05.012 Shared Demo-App Audit, Gap Register, And Target-Shape Freeze
 
 Status: completed
-Owner: Flint Core
+Owner: Poodle Core
 Updated: 2026-03-13
 Depends on: g05.009, g05.010, g05.011
-Primary repos: `flint`
+Primary repos: `poodle`
 
 ## Goals
 
@@ -47,9 +47,9 @@ Primary repos: `flint`
     `token-inspector` remain useful preview infrastructure but are not the main
     shared demo target GPUI should reproduce
 - made the current coverage debt explicit using the generated parity report:
-  - `@flint/svelte-primitives`: `14/63` previewed
-  - `@flint/svelte-composites`: `18/20` previewed
-  - `@flint/svelte-workstation`: `12/14` previewed
+  - `@poodle/svelte-primitives`: `14/63` previewed
+  - `@poodle/svelte-composites`: `18/20` previewed
+  - `@poodle/svelte-workstation`: `12/14` previewed
 - froze the main audit findings: docs-shell leakage, monolithic entry shape,
   broad but shallow coverage, missing coherent app story, and excessive
   preview-glue ownership

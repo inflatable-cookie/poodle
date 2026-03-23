@@ -4,8 +4,8 @@
 //! Uses overlay() to escape parent clip rects and render on top.
 
 use jetstream_runtime::ui_element::{self, JsEl};
-use flint_jetstream::JetstreamThemeProvider;
-use flint_primitives::PopoverSpec;
+use poodle_jetstream::JetstreamThemeProvider;
+use poodle_primitives::PopoverSpec;
 
 use crate::theme_ext::{resolve_color, resolve_radius};
 

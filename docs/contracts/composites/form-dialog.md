@@ -140,8 +140,8 @@ No component-specific tokens; FormDialog is purely compositional.
 ## 9. Svelte Notes
 
 - Uses `createEventDispatcher` for `submit`, `cancel`, and `openChange` events
-- Composes `Dialog`, `Button` from `@flint/svelte-primitives` and `FormLayout`
-  from `@flint/svelte-composites`
+- Composes `Dialog`, `Button` from `@poodle/svelte-primitives` and `FormLayout`
+  from `@poodle/svelte-composites`
 - Submit button text switches between `submitLabel` and `"Submitting..."` (with
   Unicode ellipsis character U+2026)
 - Cancel handler calls internal `setOpen(false)` which emits `openChange`
@@ -150,7 +150,7 @@ No component-specific tokens; FormDialog is purely compositional.
 
 ## 10. GPUI Notes
 
-- Expected crate/module surface: `flint_gpui::composites::form_dialog`
+- Expected crate/module surface: `poodle_gpui::composites::form_dialog`
 - Compose Dialog, FormLayout, and Button from their respective crates
 - Submitting state must prevent dismiss and disable buttons
 

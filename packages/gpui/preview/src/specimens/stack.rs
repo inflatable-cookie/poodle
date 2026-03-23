@@ -1,11 +1,11 @@
 use gpui::*;
-use flint_adapter::ThemeProvider;
-use flint_gpui::GpuiThemeProvider;
-use flint_primitives::{
+use poodle_adapter::ThemeProvider;
+use poodle_gpui::GpuiThemeProvider;
+use poodle_primitives::{
     Alignment, EyebrowSpec, LayoutJustify, PaddingScale, StackDirection, StackSpec,
     SurfaceBorder, SurfaceSpec, SurfaceTone,
 };
-use flint_gpui_components::{Eyebrow, Stack, Surface};
+use poodle_gpui_components::{Eyebrow, Stack, Surface};
 use crate::style_bridge::color_to_hsla;
 
 pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {

@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { Eyebrow } from "@flint/svelte-primitives";
+  import { Eyebrow } from "@poodle/svelte-primitives";
 </script>
 
 <div class="specimen">
@@ -37,12 +37,12 @@
   .specimen__group p {
     margin: 0;
     font-size: 0.875rem;
-    color: var(--flint-color-text-secondary);
+    color: var(--poodle-color-text-secondary);
   }
 
   .demo-heading {
     margin: 0;
     font-size: 1.25rem;
-    color: var(--flint-color-text-primary);
+    color: var(--poodle-color-text-primary);
   }
 </style>

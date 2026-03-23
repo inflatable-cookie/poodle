@@ -1,9 +1,9 @@
 {
-  "name": "@flint/svelte-primitives",
+  "name": "@poodle/svelte-primitives",
   "version": "0.0.0",
   "private": true,
   "type": "module",
-  "description": "Flint Svelte primitive component surface.",
+  "description": "Poodle Svelte primitive component surface.",
   "svelte": "./src/index.ts",
   "exports": {
     ".": "./src/index.ts",
@@ -13,17 +13,17 @@
     "src",
     "README.md"
   ],
-  "flintRelease": {
+  "poodleRelease": {
     "publicIntent": true,
     "channel": "preview",
     "stability": "pre-release"
   },
   "peerDependencies": {
-    "@flint/svelte-tokens": "0.0.0",
+    "@poodle/svelte-tokens": "0.0.0",
     "svelte": "^5.38.6"
   },
   "peerDependenciesMeta": {
-    "@flint/svelte-tokens": {
+    "@poodle/svelte-tokens": {
       "optional": true
     }
   }

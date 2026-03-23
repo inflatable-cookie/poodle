@@ -4,8 +4,8 @@
 //! Focus ring via border-color on focus. No hover on root.
 
 use gpui::*;
-use flint_gpui::GpuiThemeProvider;
-use flint_primitives::{IconSize, IconSpec, NumberEntrySpec, ValidationState};
+use poodle_gpui::GpuiThemeProvider;
+use poodle_primitives::{IconSize, IconSpec, NumberEntrySpec, ValidationState};
 
 use super::icon::Icon;
 use crate::theme_ext::{color_mix, resolve_color, resolve_opacity, resolve_px, resolve_radius};
@@ -108,9 +108,9 @@ impl IntoElement for NumberEntry {
         let stepper_inner_radius = resolve_radius(theme, spec.radius_token()) - px(2.0);
 
         let id_str = if let Some(ref suffix) = self.id_suffix {
-            format!("flint-number-entry-{}", suffix)
+            format!("poodle-number-entry-{}", suffix)
         } else {
-            "flint-number-entry".to_string()
+            "poodle-number-entry".to_string()
         };
 
         // Wrap callbacks in Rc for sharing across stepper clicks + keyboard handler
@@ -121,7 +121,7 @@ impl IntoElement for NumberEntry {
 
         // Increment button (top) — Svelte uses Icon component
         let mut inc_btn = div()
-            .id("flint-number-entry-inc")
+            .id("poodle-number-entry-inc")
             .w(stepper_width)
             .flex_1()
             .flex()
@@ -150,7 +150,7 @@ impl IntoElement for NumberEntry {
 
         // Decrement button (bottom) — Svelte uses Icon component
         let mut dec_btn = div()
-            .id("flint-number-entry-dec")
+            .id("poodle-number-entry-dec")
             .w(stepper_width)
             .flex_1()
             .flex()

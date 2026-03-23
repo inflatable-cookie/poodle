@@ -67,51 +67,51 @@
     display: grid;
     grid-template-columns: minmax(0, 1fr) auto;
     align-items: center;
-    gap: var(--flint-space-inline-sm);
-    min-height: var(--flint-size-control-height);
-    padding: 0 var(--flint-space-control-x);
-    border: 0.0625rem solid var(--flint-color-border-default);
-    border-radius: var(--flint-radius-control);
-    background: var(--flint-color-background-surface);
+    gap: var(--poodle-space-inline-sm);
+    min-height: var(--poodle-size-control-height);
+    padding: 0 var(--poodle-space-control-x);
+    border: 0.0625rem solid var(--poodle-color-border-default);
+    border-radius: var(--poodle-radius-control);
+    background: var(--poodle-color-background-surface);
     transition:
-      border-color var(--flint-motion-duration-interaction) var(--flint-motion-easing-standard),
-      box-shadow var(--flint-motion-duration-interaction) var(--flint-motion-easing-standard),
-      background var(--flint-motion-duration-interaction) var(--flint-motion-easing-standard);
+      border-color var(--poodle-motion-duration-interaction) var(--poodle-motion-easing-standard),
+      box-shadow var(--poodle-motion-duration-interaction) var(--poodle-motion-easing-standard),
+      background var(--poodle-motion-duration-interaction) var(--poodle-motion-easing-standard);
   }
 
   .time-zone-select:focus-within {
-    border-color: var(--flint-color-accent-focusRing);
+    border-color: var(--poodle-color-accent-focusRing);
     box-shadow:
-      0 0 0 var(--flint-border-width-focus)
-        color-mix(in srgb, var(--flint-color-accent-focusRing) 28%, transparent);
+      0 0 0 var(--poodle-border-width-focus)
+        color-mix(in srgb, var(--poodle-color-accent-focusRing) 28%, transparent);
   }
 
   .time-zone-select:has(.time-zone-select__control:disabled) {
-    opacity: var(--flint-state-opacity-disabled);
+    opacity: var(--poodle-state-opacity-disabled);
   }
 
   .time-zone-select__control {
     min-width: 0;
     width: 100%;
-    height: calc(var(--flint-size-control-height) - (var(--flint-border-width-default) * 2));
+    height: calc(var(--poodle-size-control-height) - (var(--poodle-border-width-default) * 2));
     padding: 0;
     border: 0;
     background: transparent;
-    color: var(--flint-color-text-primary);
-    font-family: var(--flint-typography-body-family);
-    font-size: var(--flint-typography-body-size);
-    line-height: var(--flint-typography-body-lineHeight);
+    color: var(--poodle-color-text-primary);
+    font-family: var(--poodle-typography-body-family);
+    font-size: var(--poodle-typography-body-size);
+    line-height: var(--poodle-typography-body-lineHeight);
     outline: 0;
     appearance: none;
   }
 
   .time-zone-select[data-placeholder="true"] .time-zone-select__control {
-    color: var(--flint-color-text-secondary);
+    color: var(--poodle-color-text-secondary);
   }
 
   .time-zone-select__indicator {
-    color: var(--flint-color-icon-muted);
-    font-family: var(--flint-typography-code-family);
+    color: var(--poodle-color-icon-muted);
+    font-family: var(--poodle-typography-code-family);
     font-size: 0.75rem;
     line-height: 1;
     pointer-events: none;

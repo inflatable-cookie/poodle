@@ -1,10 +1,10 @@
 //! Banner specimen — status banners with different tones.
 
 use jetstream_runtime::ui_element::*;
-use flint_jetstream::JetstreamThemeProvider;
-use flint_jetstream_components::banner::js_banner;
-use flint_jetstream_components::theme_ext::*;
-use flint_primitives::{BannerSpec, StatusTone};
+use poodle_jetstream::JetstreamThemeProvider;
+use poodle_jetstream_components::banner::js_banner;
+use poodle_jetstream_components::theme_ext::*;
+use poodle_primitives::{BannerSpec, StatusTone};
 
 pub fn render(theme: &JetstreamThemeProvider) -> JsEl {
     let secondary = resolve_color(theme, "semantic.color.text.secondary");

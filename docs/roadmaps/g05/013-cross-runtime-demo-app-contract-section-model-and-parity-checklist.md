@@ -1,10 +1,10 @@
 # g05.013 Cross-Runtime Demo-App Contract, Section Model, And Parity Checklist
 
 Status: completed
-Owner: Flint Core
+Owner: Poodle Core
 Updated: 2026-03-13
 Depends on: g05.011, g05.012
-Primary repos: `flint`
+Primary repos: `poodle`
 
 ## Goals
 

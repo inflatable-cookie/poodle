@@ -80,14 +80,14 @@
   }
 
   .order-by[data-disabled="true"] {
-    opacity: var(--flint-state-opacity-disabled);
+    opacity: var(--poodle-state-opacity-disabled);
   }
 
   .order-by__label {
-    font-family: var(--flint-typography-label-family);
+    font-family: var(--poodle-typography-label-family);
     font-size: 0.75rem;
-    font-weight: var(--flint-typography-label-weight);
-    color: var(--flint-color-text-secondary);
+    font-weight: var(--poodle-typography-label-weight);
+    color: var(--poodle-color-text-secondary);
     text-transform: uppercase;
     letter-spacing: 0.05em;
   }
@@ -104,43 +104,43 @@
     gap: 0.25rem;
     height: 1.75rem;
     padding: 0 0.5rem;
-    border: 0.0625rem solid var(--flint-color-border-default);
-    border-radius: var(--flint-radius-control);
-    background: var(--flint-color-background-surface);
-    color: var(--flint-color-text-primary);
+    border: 0.0625rem solid var(--poodle-color-border-default);
+    border-radius: var(--poodle-radius-control);
+    background: var(--poodle-color-background-surface);
+    color: var(--poodle-color-text-primary);
     cursor: pointer;
-    font-family: var(--flint-typography-label-family);
+    font-family: var(--poodle-typography-label-family);
     font-size: 0.75rem;
-    font-weight: var(--flint-typography-label-weight);
+    font-weight: var(--poodle-typography-label-weight);
     transition:
-      background var(--flint-motion-duration-interaction) var(--flint-motion-easing-standard),
-      border-color var(--flint-motion-duration-interaction) var(--flint-motion-easing-standard);
+      background var(--poodle-motion-duration-interaction) var(--poodle-motion-easing-standard),
+      border-color var(--poodle-motion-duration-interaction) var(--poodle-motion-easing-standard);
   }
 
   .order-by__field:hover:not(:disabled) {
-    background: color-mix(in srgb, var(--flint-color-background-surface) 84%, var(--flint-color-background-elevated));
+    background: color-mix(in srgb, var(--poodle-color-background-surface) 84%, var(--poodle-color-background-elevated));
   }
 
   .order-by__field:focus-visible {
-    outline: var(--flint-border-width-focus) solid var(--flint-color-accent-focusRing);
+    outline: var(--poodle-border-width-focus) solid var(--poodle-color-accent-focusRing);
     outline-offset: 0.0625rem;
   }
 
   .order-by__field:disabled {
     cursor: not-allowed;
-    opacity: var(--flint-state-opacity-disabled);
+    opacity: var(--poodle-state-opacity-disabled);
   }
 
   .order-by__field--active {
-    border-color: var(--flint-color-accent-base);
-    background: color-mix(in srgb, var(--flint-color-accent-base) 12%, var(--flint-color-background-surface));
-    color: var(--flint-color-accent-base);
+    border-color: var(--poodle-color-accent-base);
+    background: color-mix(in srgb, var(--poodle-color-accent-base) 12%, var(--poodle-color-background-surface));
+    color: var(--poodle-color-accent-base);
   }
 
   .order-by__arrow {
     width: 0.75rem;
     height: 0.75rem;
-    transition: transform var(--flint-motion-duration-interaction) var(--flint-motion-easing-standard);
+    transition: transform var(--poodle-motion-duration-interaction) var(--poodle-motion-easing-standard);
   }
 
   .order-by__arrow[data-direction="desc"] {
@@ -155,19 +155,19 @@
     height: 1.5rem;
     padding: 0;
     border: 0;
-    border-radius: var(--flint-radius-control);
+    border-radius: var(--poodle-radius-control);
     background: transparent;
-    color: var(--flint-color-text-secondary);
+    color: var(--poodle-color-text-secondary);
     cursor: pointer;
-    transition: color var(--flint-motion-duration-interaction) var(--flint-motion-easing-standard);
+    transition: color var(--poodle-motion-duration-interaction) var(--poodle-motion-easing-standard);
   }
 
   .order-by__reset:hover {
-    color: var(--flint-color-text-primary);
+    color: var(--poodle-color-text-primary);
   }
 
   .order-by__reset:focus-visible {
-    outline: var(--flint-border-width-focus) solid var(--flint-color-accent-focusRing);
+    outline: var(--poodle-border-width-focus) solid var(--poodle-color-accent-focusRing);
   }
 
   .order-by__reset svg {

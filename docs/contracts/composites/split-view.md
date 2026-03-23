@@ -266,13 +266,13 @@ None.
 - uses `createEventDispatcher` for all events
 - `bind:this={container}` on root for computing raw ratio from mouse position
 - `rawRatio()` converts mouse position to ratio using container bounding rect
-- primary/secondary collapse toggles use `CollapseToggle` from `@flint/svelte-primitives`
+- primary/secondary collapse toggles use `CollapseToggle` from `@poodle/svelte-primitives`
 - resize events handled via `ResizeHandle` `resizeStart`/`resizeMove`/`resizeStep` events
 - pane visibility controlled via `{#if !isPrimaryCollapsed}` / `{#if !isSecondaryCollapsed}`
 
 ## 12. GPUI Notes
 
-- expected crate/module surface: `flint_gpui::composites::split_view`
+- expected crate/module surface: `poodle_gpui::composites::split_view`
 - implementation-only details: GPUI may use native splitter support or custom
   layout code, but keyboard resizing, orientation semantics, and collapse state
   remain required

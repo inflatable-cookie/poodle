@@ -1,8 +1,8 @@
 use gpui::*;
-use flint_adapter::ThemeProvider;
-use flint_primitives::EyebrowSpec;
-use flint_composites::{MarkdownEditorSpec, BlockEditorSpec};
-use flint_gpui_components::{MarkdownEditor, BlockEditor, Eyebrow};
+use poodle_adapter::ThemeProvider;
+use poodle_primitives::EyebrowSpec;
+use poodle_composites::{MarkdownEditorSpec, BlockEditorSpec};
+use poodle_gpui_components::{MarkdownEditor, BlockEditor, Eyebrow};
 use crate::app_state::AppState;
 use crate::style_bridge::color_to_hsla;
 use crate::PreviewRoot;

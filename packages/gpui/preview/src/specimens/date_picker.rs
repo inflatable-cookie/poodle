@@ -1,7 +1,7 @@
 use gpui::*;
-use flint_adapter::ThemeProvider;
-use flint_primitives::{DatePickerSpec, EyebrowSpec};
-use flint_gpui_components::{DatePicker, Eyebrow};
+use poodle_adapter::ThemeProvider;
+use poodle_primitives::{DatePickerSpec, EyebrowSpec};
+use poodle_gpui_components::{DatePicker, Eyebrow};
 use crate::app_state::AppState;
 use crate::style_bridge::color_to_hsla;
 use crate::PreviewRoot;

@@ -1,8 +1,8 @@
 //! TabStrip — Jetstream standalone tab bar backed by TabStripSpec.
 
 use jetstream_runtime::ui_element::{self, JsEl};
-use flint_jetstream::JetstreamThemeProvider;
-use flint_primitives::TabStripSpec;
+use poodle_jetstream::JetstreamThemeProvider;
+use poodle_primitives::TabStripSpec;
 
 use crate::theme_ext::{resolve_color, resolve_px};
 

@@ -2,34 +2,34 @@
 
 Status: active
 Updated: 2026-03-11
-Depends on: `001-flint-system-shape.md`, `002-token-system-and-package-layout.md`, `003-component-docs-ia-and-implementation-substrates.md`
+Depends on: `001-poodle-system-shape.md`, `002-token-system-and-package-layout.md`, `003-component-docs-ia-and-implementation-substrates.md`
 
 ## Purpose
 
-Freeze the ownership model for Underlay integration now that Flint has explicit
+Freeze the ownership model for Underlay integration now that Poodle has explicit
 token, primitive, product-composite, and workstation-shell surfaces.
 
 ## Core Rule
 
 Underlay remains the public framework surface for Underlay apps.
 
-Flint may supply:
+Poodle may supply:
 
 - canonical tokens
 - shared component contracts
 - internal implementation surfaces
 - and bridge helpers
 
-Flint may not require Underlay apps to:
+Poodle may not require Underlay apps to:
 
-- import Flint directly
-- adopt Flint prop names directly
-- think in Flint component-layer taxonomy
-- or treat Flint as the app-facing source of truth
+- import Poodle directly
+- adopt Poodle prop names directly
+- think in Poodle component-layer taxonomy
+- or treat Poodle as the app-facing source of truth
 
 ## Bridge Package Rule
 
-The Flint-owned Underlay bridge lives at:
+The Poodle-owned Underlay bridge lives at:
 
 ```text
 packages/bridges/underlay/
@@ -65,7 +65,7 @@ The bridge must not:
 
 ## Wrapper Preservation Rule
 
-Underlay wrappers may adapt Flint implementations internally, but they must
+Underlay wrappers may adapt Poodle implementations internally, but they must
 preserve Underlay's public API surface.
 
 That includes:
@@ -75,17 +75,17 @@ That includes:
 - Underlay-owned composition patterns
 - Underlay-owned migration cadence
 
-Flint components may sit underneath those wrappers where it helps.
+Poodle components may sit underneath those wrappers where it helps.
 They may not become the new required import path for Underlay apps.
 
 ## Ownership Split
 
-### Flint Owns
+### Poodle Owns
 
 - canonical token schema
 - emitted token artifacts
 - canonical component contracts
-- Flint Svelte and GPUI implementations
+- Poodle Svelte and GPUI implementations
 - bridge package structure and baseline mapping rules
 
 ### Underlay Owns
@@ -109,14 +109,14 @@ appear before implementation begins.
 
 Likely pressure points include:
 
-- token naming mismatches between Flint semantic roles and Underlay runtime names
+- token naming mismatches between Poodle semantic roles and Underlay runtime names
 - theme registration shape and CSS variable application order
 - wrapper prop translation for existing Underlay components
-- accessibility parity where Underlay wrappers compose Flint primitives or
+- accessibility parity where Underlay wrappers compose Poodle primitives or
   composites
 - shell versus product-surface layering in Underlay apps
 
-These are bridge concerns, not reasons to weaken the canonical Flint contract.
+These are bridge concerns, not reasons to weaken the canonical Poodle contract.
 
 ## Accessibility Rule
 
@@ -149,7 +149,7 @@ packages/bridges/underlay/
   README.md
   package.json
   css/
-    flint-to-underlay.css
+    poodle-to-underlay.css
   ts/
     index.ts
     token-map.ts

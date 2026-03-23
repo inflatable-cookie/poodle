@@ -2,12 +2,12 @@
 
 Status: active
 Updated: 2026-03-11
-Depends on: `001-flint-system-shape.md`, `002-token-system-and-package-layout.md`
+Depends on: `001-poodle-system-shape.md`, `002-token-system-and-package-layout.md`
 
 ## Purpose
 
 Freeze the contract-documentation information architecture plus the first
-implementation-substrate rules for Svelte and GPUI so Flint can grow from token
+implementation-substrate rules for Svelte and GPUI so Poodle can grow from token
 infrastructure into real shared components without leaking runtime-specific
 assumptions into the canonical contract.
 
@@ -23,7 +23,7 @@ This note should stay aligned with:
 
 ## Documentation Information Architecture
 
-Flint now carries three contract layers under `docs/contracts/`:
+Poodle now carries three contract layers under `docs/contracts/`:
 
 - `foundation/` for primitives and low-level layout
 - `composites/` for reusable application/productivity components
@@ -39,7 +39,7 @@ an implementation changelog.
 
 ### Posture
 
-Flint's Svelte implementation may use Bits as an internal substrate, but Bits is
+Poodle's Svelte implementation may use Bits as an internal substrate, but Bits is
 not the public contract source of truth.
 
 ### What Bits May Own
@@ -50,7 +50,7 @@ not the public contract source of truth.
 - overlay plumbing
 - compound state management where Bits already provides stable primitives
 
-### What Flint Must Own
+### What Poodle Must Own
 
 - public prop names and types
 - semantic variants and sizes
@@ -60,7 +60,7 @@ not the public contract source of truth.
 
 ### Wrapper Rule
 
-Bits-backed components must be wrapped in Flint-owned components or part wrappers
+Bits-backed components must be wrapped in Poodle-owned components or part wrappers
 before they are public.
 
 App code should not need:
@@ -79,11 +79,11 @@ Svelte implementations consume generated token artifacts through:
 - wrapper-owned `class` and `data-*` styling conventions
 
 The browser-side styling system may use utility classes or authored CSS, but
-the semantic token source remains Flint-owned.
+the semantic token source remains Poodle-owned.
 
 ### Compound Versus Simple Exports
 
-Use Flint compound exports for complex structures such as dialogs, menus, tabs,
+Use Poodle compound exports for complex structures such as dialogs, menus, tabs,
 and selects when part-level control is essential.
 
 Use a simplified single-surface export when:
@@ -101,7 +101,7 @@ detail rather than as the contract.
 
 ### Posture
 
-Flint's GPUI implementation is a native GPUI surface, not a browser abstraction
+Poodle's GPUI implementation is a native GPUI surface, not a browser abstraction
 ported into Rust.
 
 ### Crate Shape
@@ -130,7 +130,7 @@ It must not define hand-maintained duplicate canonical values for:
 ### Theme Access Rule
 
 GPUI components should read semantic roles through generated theme helpers or a
-Flint-owned theme layer assembled from generated Rust outputs.
+Poodle-owned theme layer assembled from generated Rust outputs.
 
 The token meaning lives in the schema/artifact layer, not inside GPUI render
 code.

@@ -7,7 +7,7 @@ Priority: [critical | high | medium | low] (blocks or informs which milestones)
 
 ## Purpose
 
-Brief description of the domain being researched and what Flint decisions it informs.
+Brief description of the domain being researched and what Poodle decisions it informs.
 
 ---
 
@@ -53,7 +53,7 @@ Brief description of the domain being researched and what Flint decisions it inf
 
 ---
 
-## Recommendations for Flint
+## Recommendations for Poodle
 
 *(To be synthesized into translation memo)*
 

@@ -1,10 +1,10 @@
 //! DatePicker specimen — date selection input.
 
 use jetstream_runtime::ui_element::*;
-use flint_jetstream::JetstreamThemeProvider;
-use flint_jetstream_components::date_picker::js_date_picker;
-use flint_jetstream_components::theme_ext::*;
-use flint_primitives::DatePickerSpec;
+use poodle_jetstream::JetstreamThemeProvider;
+use poodle_jetstream_components::date_picker::js_date_picker;
+use poodle_jetstream_components::theme_ext::*;
+use poodle_primitives::DatePickerSpec;
 
 pub fn render(theme: &JetstreamThemeProvider) -> JsEl {
     let secondary = resolve_color(theme, "semantic.color.text.secondary");

@@ -1,10 +1,10 @@
 //! Menubar specimen — horizontal menu bars with dropdown entries.
 
 use jetstream_runtime::ui_element::*;
-use flint_jetstream::JetstreamThemeProvider;
-use flint_jetstream_components::menubar::js_menubar;
-use flint_jetstream_components::theme_ext::*;
-use flint_primitives::{MenubarEntry, MenubarSpec, MenuEntry};
+use poodle_jetstream::JetstreamThemeProvider;
+use poodle_jetstream_components::menubar::js_menubar;
+use poodle_jetstream_components::theme_ext::*;
+use poodle_primitives::{MenubarEntry, MenubarSpec, MenuEntry};
 
 pub fn render(theme: &JetstreamThemeProvider) -> JsEl {
     let secondary = resolve_color(theme, "semantic.color.text.secondary");

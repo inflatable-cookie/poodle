@@ -169,27 +169,27 @@
     align-items: flex-end;
     gap: 0.125rem;
     width: fit-content;
-    padding: 0.25rem var(--flint-space-control-x);
-    border: 0.0625rem solid var(--flint-color-border-default);
-    border-radius: var(--flint-radius-control);
-    background: var(--flint-color-background-surface);
-    font-family: var(--flint-typography-code-family);
+    padding: 0.25rem var(--poodle-space-control-x);
+    border: 0.0625rem solid var(--poodle-color-border-default);
+    border-radius: var(--poodle-radius-control);
+    background: var(--poodle-color-background-surface);
+    font-family: var(--poodle-typography-code-family);
     transition:
-      border-color var(--flint-motion-duration-interaction) var(--flint-motion-easing-standard),
-      box-shadow var(--flint-motion-duration-interaction) var(--flint-motion-easing-standard);
+      border-color var(--poodle-motion-duration-interaction) var(--poodle-motion-easing-standard),
+      box-shadow var(--poodle-motion-duration-interaction) var(--poodle-motion-easing-standard);
   }
 
   .duration-input:focus-within {
-    border-color: var(--flint-color-accent-focusRing);
-    box-shadow: 0 0 0 var(--flint-border-width-focus) color-mix(in srgb, var(--flint-color-accent-focusRing) 28%, transparent);
+    border-color: var(--poodle-color-accent-focusRing);
+    box-shadow: 0 0 0 var(--poodle-border-width-focus) color-mix(in srgb, var(--poodle-color-accent-focusRing) 28%, transparent);
   }
 
   .duration-input[data-disabled="true"] {
-    opacity: var(--flint-state-opacity-disabled);
+    opacity: var(--poodle-state-opacity-disabled);
   }
 
   .duration-input[data-invalid="true"] {
-    border-color: var(--flint-color-status-danger);
+    border-color: var(--poodle-color-status-danger);
   }
 
   .duration-input__segment {
@@ -202,12 +202,12 @@
   }
 
   .duration-input__segment:has(.duration-input__field:focus) {
-    background: color-mix(in srgb, var(--flint-color-accent-base) 12%, transparent);
+    background: color-mix(in srgb, var(--poodle-color-accent-base) 12%, transparent);
   }
 
   .duration-input__label {
     font-size: 0.5625rem;
-    color: var(--flint-color-text-secondary);
+    color: var(--poodle-color-text-secondary);
     text-transform: uppercase;
     letter-spacing: 0.05em;
     line-height: 1;
@@ -220,9 +220,9 @@
     padding: 0;
     border: 0;
     background: transparent;
-    color: var(--flint-color-text-primary);
-    font-family: var(--flint-typography-code-family);
-    font-size: var(--flint-typography-body-size);
+    color: var(--poodle-color-text-primary);
+    font-family: var(--poodle-typography-code-family);
+    font-size: var(--poodle-typography-body-size);
     font-variant-numeric: tabular-nums;
     text-align: center;
     line-height: 1;
@@ -230,8 +230,8 @@
   }
 
   .duration-input__separator {
-    color: var(--flint-color-text-secondary);
-    font-size: var(--flint-typography-body-size);
+    color: var(--poodle-color-text-secondary);
+    font-size: var(--poodle-typography-body-size);
     font-weight: 600;
     line-height: 1;
     user-select: none;

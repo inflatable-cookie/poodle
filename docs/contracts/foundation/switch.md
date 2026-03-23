@@ -134,8 +134,8 @@ Updated: 2026-03-15
 |----------|-------|
 | `display` | `inline-flex` |
 | `align-items` | `center` |
-| `gap` | `var(--flint-space-inline-sm)` |
-| `color` | `var(--flint-color-text-primary)` |
+| `gap` | `var(--poodle-space-inline-sm)` |
+| `color` | `var(--poodle-color-text-primary)` |
 | `cursor` | `pointer` |
 
 ### Root disabled `[data-disabled="true"]`
@@ -143,7 +143,7 @@ Updated: 2026-03-15
 | Property | Value |
 |----------|-------|
 | `cursor` | `not-allowed` |
-| `opacity` | `var(--flint-state-opacity-disabled)` |
+| `opacity` | `var(--poodle-state-opacity-disabled)` |
 
 ### Root readOnly `[data-read-only="true"]`
 
@@ -168,24 +168,24 @@ Updated: 2026-03-15
 | `width` | `2.125rem` |
 | `height` | `1.25rem` |
 | `padding` | `0.125rem` |
-| `border` | `0.0625rem solid var(--flint-color-border-default)` |
+| `border` | `0.0625rem solid var(--poodle-color-border-default)` |
 | `border-radius` | `999px` |
-| `background` | `color-mix(in srgb, var(--flint-color-background-surface) 86%, transparent)` |
+| `background` | `color-mix(in srgb, var(--poodle-color-background-surface) 86%, transparent)` |
 | `box-shadow` | `inset 0 0.0625rem 0 color-mix(in srgb, white 8%, transparent)` |
-| `transition` | `background, border-color, box-shadow` at `var(--flint-motion-duration-interaction)` with `var(--flint-motion-easing-standard)` |
+| `transition` | `background, border-color, box-shadow` at `var(--poodle-motion-duration-interaction)` with `var(--poodle-motion-easing-standard)` |
 
 ### Track checked `:checked + .switch__track`
 
 | Property | Value |
 |----------|-------|
-| `border-color` | `color-mix(in srgb, var(--flint-color-accent-base) 58%, var(--flint-color-border-default))` |
-| `background` | `color-mix(in srgb, var(--flint-color-accent-base) 24%, var(--flint-color-background-surface))` |
+| `border-color` | `color-mix(in srgb, var(--poodle-color-accent-base) 58%, var(--poodle-color-border-default))` |
+| `background` | `color-mix(in srgb, var(--poodle-color-accent-base) 24%, var(--poodle-color-background-surface))` |
 
 ### Track focus `:focus-visible + .switch__track`
 
 | Property | Value |
 |----------|-------|
-| `outline` | `var(--flint-border-width-focus) solid var(--flint-color-accent-focusRing)` |
+| `outline` | `var(--poodle-border-width-focus) solid var(--poodle-color-accent-focusRing)` |
 | `outline-offset` | `0.125rem` |
 
 ### Thumb `.switch__thumb`
@@ -195,26 +195,26 @@ Updated: 2026-03-15
 | `width` | `0.875rem` |
 | `height` | `0.875rem` |
 | `border-radius` | `999px` |
-| `background` | `var(--flint-color-text-primary)` |
+| `background` | `var(--poodle-color-text-primary)` |
 | `box-shadow` | `0 0.125rem 0.5rem color-mix(in srgb, black 18%, transparent)` |
 | `transform` | `translateX(0)` |
-| `transition` | `transform, background` at `var(--flint-motion-duration-interaction)` with `var(--flint-motion-easing-standard)` |
+| `transition` | `transform, background` at `var(--poodle-motion-duration-interaction)` with `var(--poodle-motion-easing-standard)` |
 
 ### Thumb checked `:checked + .switch__track .switch__thumb`
 
 | Property | Value |
 |----------|-------|
-| `background` | `var(--flint-color-accent-base)` |
+| `background` | `var(--poodle-color-accent-base)` |
 | `transform` | `translateX(0.875rem)` |
 
 ### Label `.switch__label`
 
 | Property | Value |
 |----------|-------|
-| `font-family` | `var(--flint-typography-label-family)` |
-| `font-size` | `var(--flint-typography-label-size)` |
-| `font-weight` | `var(--flint-typography-label-weight)` |
-| `line-height` | `var(--flint-typography-label-lineHeight)` |
+| `font-family` | `var(--poodle-typography-label-family)` |
+| `font-size` | `var(--poodle-typography-label-size)` |
+| `font-weight` | `var(--poodle-typography-label-weight)` |
+| `line-height` | `var(--poodle-typography-label-lineHeight)` |
 
 ## 9. Svelte Notes
 
@@ -234,7 +234,7 @@ Updated: 2026-03-15
 
 ## 10. GPUI Notes
 
-- expected crate/module surface: `flint_gpui::primitives::switch`
+- expected crate/module surface: `poodle_gpui::primitives::switch`
 - GPUI implementation must expose switch role (not generic button or checkbox)
   with checked state through the native accessibility tree
 - keyboard toggle via Space and Enter must be explicitly handled

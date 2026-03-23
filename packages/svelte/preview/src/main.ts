@@ -1,12 +1,12 @@
-import "@flint/svelte-tokens/styles.css";
-import "../../../tokens/artifacts/css/flint-theme-light.css";
-import "../../../tokens/artifacts/css/flint-theme-dark.css";
-import "../../../tokens/artifacts/css/flint-theme-loophole-studio.css";
-import "../../../tokens/artifacts/css/flint-density-comfortable.css";
-import "../../../tokens/artifacts/css/flint-density-compact.css";
-import "../../../tokens/artifacts/css/flint-control-size-sm.css";
-import "../../../tokens/artifacts/css/flint-control-size-md.css";
-import "../../../tokens/artifacts/css/flint-control-size-lg.css";
+import "@poodle/svelte-tokens/styles.css";
+import "../../../tokens/artifacts/css/poodle-theme-light.css";
+import "../../../tokens/artifacts/css/poodle-theme-dark.css";
+import "../../../tokens/artifacts/css/poodle-theme-loophole-studio.css";
+import "../../../tokens/artifacts/css/poodle-density-comfortable.css";
+import "../../../tokens/artifacts/css/poodle-density-compact.css";
+import "../../../tokens/artifacts/css/poodle-control-size-sm.css";
+import "../../../tokens/artifacts/css/poodle-control-size-md.css";
+import "../../../tokens/artifacts/css/poodle-control-size-lg.css";
 import "./app.css";
 
 import { mount } from "svelte";

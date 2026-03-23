@@ -145,16 +145,16 @@ type ActiveSort = {
 
 | Property | Value |
 |----------|-------|
-| `opacity` | `var(--flint-state-opacity-disabled)` |
+| `opacity` | `var(--poodle-state-opacity-disabled)` |
 
 ### Label
 
 | Property | Value |
 |----------|-------|
-| `font-family` | `var(--flint-typography-label-family)` |
+| `font-family` | `var(--poodle-typography-label-family)` |
 | `font-size` | `0.75rem` |
-| `font-weight` | `var(--flint-typography-label-weight)` |
-| `color` | `var(--flint-color-text-secondary)` |
+| `font-weight` | `var(--poodle-typography-label-weight)` |
+| `color` | `var(--poodle-color-text-secondary)` |
 | `text-transform` | `uppercase` |
 | `letter-spacing` | `0.05em` |
 
@@ -175,42 +175,42 @@ type ActiveSort = {
 | `gap` | `0.25rem` |
 | `height` | `1.75rem` |
 | `padding` | `0 0.5rem` |
-| `border` | `0.0625rem solid var(--flint-color-border-default)` |
-| `border-radius` | `var(--flint-radius-control)` |
-| `background` | `var(--flint-color-background-surface)` |
-| `color` | `var(--flint-color-text-primary)` |
+| `border` | `0.0625rem solid var(--poodle-color-border-default)` |
+| `border-radius` | `var(--poodle-radius-control)` |
+| `background` | `var(--poodle-color-background-surface)` |
+| `color` | `var(--poodle-color-text-primary)` |
 | `cursor` | `pointer` |
-| `font-family` | `var(--flint-typography-label-family)` |
+| `font-family` | `var(--poodle-typography-label-family)` |
 | `font-size` | `0.75rem` |
-| `font-weight` | `var(--flint-typography-label-weight)` |
+| `font-weight` | `var(--poodle-typography-label-weight)` |
 | `transition` | `background, border-color` at `motion-duration-interaction motion-easing-standard` |
 
 ### Field button hover
 
 | Property | Value |
 |----------|-------|
-| `background` | `color-mix(in srgb, var(--flint-color-background-surface) 84%, var(--flint-color-background-elevated))` |
+| `background` | `color-mix(in srgb, var(--poodle-color-background-surface) 84%, var(--poodle-color-background-elevated))` |
 
 ### Field button active (sorted)
 
 | Property | Value |
 |----------|-------|
-| `border-color` | `var(--flint-color-accent-base)` |
-| `background` | `color-mix(in srgb, var(--flint-color-accent-base) 12%, var(--flint-color-background-surface))` |
-| `color` | `var(--flint-color-accent-base)` |
+| `border-color` | `var(--poodle-color-accent-base)` |
+| `background` | `color-mix(in srgb, var(--poodle-color-accent-base) 12%, var(--poodle-color-background-surface))` |
+| `color` | `var(--poodle-color-accent-base)` |
 
 ### Field button disabled
 
 | Property | Value |
 |----------|-------|
 | `cursor` | `not-allowed` |
-| `opacity` | `var(--flint-state-opacity-disabled)` |
+| `opacity` | `var(--poodle-state-opacity-disabled)` |
 
 ### Field button focus
 
 | Property | Value |
 |----------|-------|
-| `outline` | `var(--flint-border-width-focus) solid var(--flint-color-accent-focusRing)` |
+| `outline` | `var(--poodle-border-width-focus) solid var(--poodle-color-accent-focusRing)` |
 | `outline-offset` | `0.0625rem` |
 
 ### Arrow
@@ -238,16 +238,16 @@ type ActiveSort = {
 | `height` | `1.5rem` |
 | `padding` | `0` |
 | `border` | `0` |
-| `border-radius` | `var(--flint-radius-control)` |
+| `border-radius` | `var(--poodle-radius-control)` |
 | `background` | `transparent` |
-| `color` | `var(--flint-color-text-secondary)` |
+| `color` | `var(--poodle-color-text-secondary)` |
 | `cursor` | `pointer` |
 
 ### Reset button hover
 
 | Property | Value |
 |----------|-------|
-| `color` | `var(--flint-color-text-primary)` |
+| `color` | `var(--poodle-color-text-primary)` |
 
 ### Reset icon
 
@@ -267,9 +267,9 @@ type ActiveSort = {
 
 ## 10. GPUI Notes
 
-- expected crate/module surface: `flint_gpui::components::order_by`
+- expected crate/module surface: `poodle_gpui::components::order_by`
 - Spec struct: `OrderBySpec` in primitives crate
-- Component struct: `FlintOrderBy` in components crate
+- Component struct: `PoodleOrderBy` in components crate
 - Toggle cycle logic is pure function: `(current, clicked) → new ActiveSort|null`
 - Arrow rotation may use GPUI transform or pre-rotated SVG paths
 - Roving tabindex pattern maps to GPUI focus management

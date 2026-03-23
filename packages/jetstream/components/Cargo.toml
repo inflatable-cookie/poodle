@@ -1,20 +1,20 @@
 [package]
-name = "flint-jetstream-components"
+name = "poodle-jetstream-components"
 version = "0.0.0"
 edition = "2021"
-description = "Flint component implementations for Jetstream — token-resolved UI components using the JsEl fluent builder."
+description = "Poodle component implementations for Jetstream — token-resolved UI components using the JsEl fluent builder."
 
 [dependencies]
-flint-adapter = { path = "../../contracts/adapter" }
-flint-composites = { path = "../../contracts/composites" }
-flint-primitives = { path = "../../contracts/primitives" }
-flint-tokens = { path = "../../contracts/tokens" }
-flint-jetstream = { path = "../adapter" }
+poodle-adapter = { path = "../../contracts/adapter" }
+poodle-composites = { path = "../../contracts/composites" }
+poodle-primitives = { path = "../../contracts/primitives" }
+poodle-tokens = { path = "../../contracts/tokens" }
+poodle-jetstream = { path = "../adapter" }
 jetstream-runtime = { path = "../../../../jetstream/crates/jetstream-runtime" }
 glam = "0.29"
 taffy = "0.9"
 
-[package.metadata.flint]
+[package.metadata.poodle]
 public-intent = true
 channel = "preview"
 stability = "pre-release"

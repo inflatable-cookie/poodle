@@ -153,35 +153,35 @@ None.
 
 | Part | Token | Purpose |
 |------|-------|---------|
-| Root (disabled) | `--flint-state-opacity-disabled` | disabled opacity |
-| StaticItem | `--flint-radius-control` | item border-radius |
-| StaticItem | `--flint-color-background-surface` | item background |
-| RemoveButton | `--flint-color-text-secondary` | default icon color |
-| RemoveButton (hover) | `--flint-color-status-danger` | hover icon color |
-| RemoveButton (transition) | `--flint-motion-duration-interaction` | color transition duration |
-| RemoveButton (transition) | `--flint-motion-easing-standard` | color transition easing |
-| Input | `--flint-size-control-height` | input height |
-| Input | `--flint-space-control-x` | input horizontal padding |
-| Input | `--flint-color-border-default` | input border color |
-| Input | `--flint-radius-control` | input border-radius |
-| Input | `--flint-color-background-surface` | input background |
-| Input | `--flint-color-text-primary` | input text color |
-| Input | `--flint-typography-body-family` | input font family |
-| Input | `--flint-typography-body-size` | input font size |
-| Input (focus) | `--flint-color-accent-focusRing` | focus border and shadow color |
-| Input (focus) | `--flint-border-width-focus` | focus shadow width |
-| Input (placeholder) | `--flint-color-text-secondary` | placeholder text color |
-| AddButton | `--flint-size-control-height` | button height |
-| AddButton | `--flint-color-border-default` | button border color |
-| AddButton | `--flint-radius-control` | button border-radius |
-| AddButton | `--flint-color-background-surface` | button background |
-| AddButton | `--flint-color-text-primary` | button text color |
-| AddButton | `--flint-typography-label-family` | button font family |
-| AddButton | `--flint-typography-label-size` | button font size |
-| AddButton | `--flint-typography-label-weight` | button font weight |
-| AddButton (hover) | `--flint-color-background-surface` / `--flint-color-background-elevated` | hover background (84% mix) |
-| AddButton (disabled) | `--flint-state-opacity-disabled` | disabled opacity |
-| Counter | `--flint-color-text-secondary` | counter text color |
+| Root (disabled) | `--poodle-state-opacity-disabled` | disabled opacity |
+| StaticItem | `--poodle-radius-control` | item border-radius |
+| StaticItem | `--poodle-color-background-surface` | item background |
+| RemoveButton | `--poodle-color-text-secondary` | default icon color |
+| RemoveButton (hover) | `--poodle-color-status-danger` | hover icon color |
+| RemoveButton (transition) | `--poodle-motion-duration-interaction` | color transition duration |
+| RemoveButton (transition) | `--poodle-motion-easing-standard` | color transition easing |
+| Input | `--poodle-size-control-height` | input height |
+| Input | `--poodle-space-control-x` | input horizontal padding |
+| Input | `--poodle-color-border-default` | input border color |
+| Input | `--poodle-radius-control` | input border-radius |
+| Input | `--poodle-color-background-surface` | input background |
+| Input | `--poodle-color-text-primary` | input text color |
+| Input | `--poodle-typography-body-family` | input font family |
+| Input | `--poodle-typography-body-size` | input font size |
+| Input (focus) | `--poodle-color-accent-focusRing` | focus border and shadow color |
+| Input (focus) | `--poodle-border-width-focus` | focus shadow width |
+| Input (placeholder) | `--poodle-color-text-secondary` | placeholder text color |
+| AddButton | `--poodle-size-control-height` | button height |
+| AddButton | `--poodle-color-border-default` | button border color |
+| AddButton | `--poodle-radius-control` | button border-radius |
+| AddButton | `--poodle-color-background-surface` | button background |
+| AddButton | `--poodle-color-text-primary` | button text color |
+| AddButton | `--poodle-typography-label-family` | button font family |
+| AddButton | `--poodle-typography-label-size` | button font size |
+| AddButton | `--poodle-typography-label-weight` | button font weight |
+| AddButton (hover) | `--poodle-color-background-surface` / `--poodle-color-background-elevated` | hover background (84% mix) |
+| AddButton (disabled) | `--poodle-state-opacity-disabled` | disabled opacity |
+| Counter | `--poodle-color-text-secondary` | counter text color |
 
 ## 9. Svelte Notes
 
@@ -193,7 +193,7 @@ None.
 
 ## 10. GPUI Notes
 
-- Expected crate/module surface: `flint_gpui::composites::editable_list`
+- Expected crate/module surface: `poodle_gpui::composites::editable_list`
 - Reordering behavior may need a simplified drag-and-drop or move-up/move-down
   button approach
 - Text input and add button compose from primitives

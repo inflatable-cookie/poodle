@@ -70,6 +70,6 @@ FieldSet does not change keyboard behavior for its children.
 
 | Part | Token | Purpose |
 |------|-------|---------|
-| `legend` | `--flint-color-text-secondary` | Muted grouping label color |
-| `legend` | `--flint-typography-label-family` | Grouping label family |
-| `fields` | Flint space scale | Grid gap between grouped fields |
+| `legend` | `--poodle-color-text-secondary` | Muted grouping label color |
+| `legend` | `--poodle-typography-label-family` | Grouping label family |
+| `fields` | Poodle space scale | Grid gap between grouped fields |

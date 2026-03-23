@@ -1,10 +1,10 @@
 //! Card specimen — cards with different variants and layouts.
 
 use jetstream_runtime::ui_element::*;
-use flint_jetstream::JetstreamThemeProvider;
-use flint_jetstream_components::card::js_card;
-use flint_jetstream_components::theme_ext::*;
-use flint_primitives::{CardLayout, CardSpec, CardVariant};
+use poodle_jetstream::JetstreamThemeProvider;
+use poodle_jetstream_components::card::js_card;
+use poodle_jetstream_components::theme_ext::*;
+use poodle_primitives::{CardLayout, CardSpec, CardVariant};
 
 pub fn render(theme: &JetstreamThemeProvider) -> JsEl {
     let secondary = resolve_color(theme, "semantic.color.text.secondary");

@@ -7,8 +7,8 @@
 
 use gpui::prelude::FluentBuilder;
 use gpui::*;
-use flint_gpui::GpuiThemeProvider;
-use flint_primitives::{ComboboxOption, ComboboxSpec};
+use poodle_gpui::GpuiThemeProvider;
+use poodle_primitives::{ComboboxOption, ComboboxSpec};
 
 use crate::theme_ext::{color_mix, resolve_color, resolve_opacity, resolve_px, resolve_radius};
 
@@ -152,9 +152,9 @@ impl IntoElement for Combobox {
         let show_placeholder = display_text.is_empty();
 
         let id_str = if let Some(ref suffix) = self.id_suffix {
-            format!("flint-combobox-{}", suffix)
+            format!("poodle-combobox-{}", suffix)
         } else {
-            "flint-combobox".to_string()
+            "poodle-combobox".to_string()
         };
 
         // ── Input field ─────────────────────────────────────────────
@@ -301,7 +301,7 @@ impl IntoElement for Combobox {
             let filtered = spec.filtered_options();
 
             let mut list = div()
-                .id("flint-combobox-list")
+                .id("poodle-combobox-list")
                 .w_full()
                 .mt(px(6.0)) // Contract: top calc(100% + 0.375rem)
                 .rounded(list_radius)
@@ -345,7 +345,7 @@ impl IntoElement for Combobox {
                         .map(|v| v == option.value)
                         .unwrap_or(false);
                     let is_option_disabled = option.is_disabled;
-                    let option_id = SharedString::from(format!("flint-combobox-opt-{}", idx));
+                    let option_id = SharedString::from(format!("poodle-combobox-opt-{}", idx));
 
                     // Contract: option padding uses resolved tokens
                     let mut option_el = div()

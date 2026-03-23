@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { EditableLabel, Eyebrow } from "@flint/svelte-primitives";
+  import { EditableLabel, Eyebrow } from "@poodle/svelte-primitives";
 
   let title = "My project title";
   let emptyValue = "";

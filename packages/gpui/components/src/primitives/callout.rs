@@ -1,8 +1,8 @@
 //! Callout — real GPUI component backed by CallOutSpec (contract: callout).
 
 use gpui::*;
-use flint_gpui::GpuiThemeProvider;
-use flint_primitives::{CallOutSpec, IconSize, IconSpec, StatusTone};
+use poodle_gpui::GpuiThemeProvider;
+use poodle_primitives::{CallOutSpec, IconSize, IconSpec, StatusTone};
 
 use super::icon::Icon;
 use crate::theme_ext::{color_mix, resolve_color, resolve_px, resolve_radius};
@@ -151,7 +151,7 @@ impl IntoElement for Callout {
 
         // Dismiss button — Svelte: 1.75rem (28px) square, rounded control radius
         if self.is_dismissible {
-            let dismiss_id = SharedString::from("flint-callout-dismiss");
+            let dismiss_id = SharedString::from("poodle-callout-dismiss");
             let mut dismiss_btn = div()
                 .id(dismiss_id)
                 .flex_shrink_0()

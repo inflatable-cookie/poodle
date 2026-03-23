@@ -8,8 +8,8 @@ Updated: 2026-03-11
 
 Document Bits UI's primitives, extension limits, and API patterns to inform:
 - Svelte substrate policy (g01.005)
-- What Bits can accelerate vs. what Flint must own
-- How Bits-backed components remain Flint-contract-compliant
+- What Bits can accelerate vs. what Poodle must own
+- How Bits-backed components remain Poodle-contract-compliant
 
 ---
 
@@ -256,16 +256,16 @@ Recommended pattern for design systems:
 
 ### Token Integration Strategy
 
-Bits UI components accept standard `class` props, making Flint token integration straightforward:
+Bits UI components accept standard `class` props, making Poodle token integration straightforward:
 
 ```svelte
 <script>
   import { Button } from "bits-ui";
-  import { tokens } from "@flint/tokens/svelte";
+  import { tokens } from "@poodle/tokens/svelte";
 </script>
 
 <Button.Root 
-  class="bg-[var(--flint-color-background-primary)] text-[var(--flint-color-text-primary)]"
+  class="bg-[var(--poodle-color-background-primary)] text-[var(--poodle-color-text-primary)]"
 >
   Click me
 </Button.Root>
@@ -309,7 +309,7 @@ Bits UI is fully SSR-compatible with SvelteKit:
 A: 40+ primitives covering: Accordion, Dialog, Dropdown Menu, Popover, Tooltip, Tabs, Calendar, Date Picker, Select, Slider, Switch, Checkbox, Radio Group, Table, Command, Navigation Menu, Menubar, Context Menu, Pagination, PIN Input, and more.
 
 **Q: What primitives are missing?**
-A: Based on Flint's architecture (001-flint-system-shape.md), Bits covers most Layer 1 primitives. Missing or limited:
+A: Based on Poodle's architecture (001-poodle-system-shape.md), Bits covers most Layer 1 primitives. Missing or limited:
 - Layout primitives (Box, Stack, Grid) - Bits doesn't provide these
 - Advanced workstation components (dock, split panel) - out of scope for Bits
 - Some density/control-size variants may need custom handling
@@ -319,12 +319,12 @@ A: Based on Flint's architecture (001-flint-system-shape.md), Bits covers most L
 **Q: How extensible are Bits components?**
 A: Highly extensible for styling and composition. Limited for core behavior changes (by design).
 
-**Q: Can Bits primitives be wrapped while preserving Flint semantics?**
+**Q: Can Bits primitives be wrapped while preserving Poodle semantics?**
 A: Yes. Wrapper components can:
-- Apply Flint token-based styling
-- Add Flint-specific props (variant, size mapped to Flint tokens)
+- Apply Poodle token-based styling
+- Add Poodle-specific props (variant, size mapped to Poodle tokens)
 - Maintain Bits accessibility and behavior
-- Document as Flint components
+- Document as Poodle components
 
 ### API Patterns
 
@@ -336,8 +336,8 @@ A: All complex components use compound pattern (Dialog.Root, Dialog.Trigger, etc
 
 ### Token Integration
 
-**Q: How can Bits components consume Flint tokens?**
-A: Via standard `class` props with CSS custom properties or Tailwind classes that reference Flint tokens.
+**Q: How can Bits components consume Poodle tokens?**
+A: Via standard `class` props with CSS custom properties or Tailwind classes that reference Poodle tokens.
 
 **Q: What styling hooks does Bits expose?**
 A: `class` props on all components, `data-*` attributes for state-based styling, `child` snippet for complete render control.
@@ -351,19 +351,19 @@ A: Actively maintained by Hunter Johnston. Version 1.0 released for Svelte 5. Us
 A: v1.0 is stable. Breaking changes from v0 (Melt UI era) have settled. Svelte 5 runes-based API is the future.
 
 **Q: What is the migration path if Bits changes?**
-A: Since Flint wraps Bits components (not exposes them directly), internal Bits changes can be absorbed in wrapper updates without affecting Flint's public API.
+A: Since Poodle wraps Bits components (not exposes them directly), internal Bits changes can be absorbed in wrapper updates without affecting Poodle's public API.
 
 ---
 
-## Implications for Flint
+## Implications for Poodle
 
 ### Bits Integration Policy
 
 **Recommended Approach:**
 
 1. **Bits is an implementation detail**
-   - Flint components wrap Bits primitives
-   - Flint defines the public contract
+   - Poodle components wrap Bits primitives
+   - Poodle defines the public contract
    - Bits can be swapped later if needed
 
 2. **What Bits provides**
@@ -372,13 +372,13 @@ A: Since Flint wraps Bits components (not exposes them directly), internal Bits 
    - Event handling
    - Portal/overlay management
 
-3. **What Flint adds**
+3. **What Poodle adds**
    - Token-based styling system
    - Semantic variant/size props mapped to tokens
    - Component-specific styling
-   - Flint-specific documentation
+   - Poodle-specific documentation
 
-### What Flint Must Own
+### What Poodle Must Own
 
 - Component contract (props, behavior, events)
 - Token application (how tokens map to component parts)
@@ -400,17 +400,17 @@ A: Since Flint wraps Bits components (not exposes them directly), internal Bits 
 ### Wrapper Pattern Example
 
 ```svelte
-<!-- FlintButton.svelte - Flint's public Button -->
+<!-- PoodleButton.svelte - Poodle's public Button -->
 <script lang="ts">
   import { Button as BitsButton } from "bits-ui";
   import type { ButtonProps } from "./Button.contract";
   
   let { variant = "default", size = "md", ...rest }: ButtonProps = $props();
   
-  // Map Flint variant/size to token-based classes
+  // Map Poodle variant/size to token-based classes
   const variantClasses = {
-    default: "bg-[var(--flint-color-background-primary)]",
-    primary: "bg-[var(--flint-color-accent)]",
+    default: "bg-[var(--poodle-color-background-primary)]",
+    primary: "bg-[var(--poodle-color-accent)]",
     // ...
   };
 </script>

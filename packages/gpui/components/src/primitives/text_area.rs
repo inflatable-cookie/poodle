@@ -1,9 +1,9 @@
 //! TextArea — real GPUI component backed by TextAreaSpec.
 
 use gpui::*;
-use flint_adapter::ThemeProvider;
-use flint_gpui::GpuiThemeProvider;
-use flint_primitives::{TextAreaSpec, ValidationState};
+use poodle_adapter::ThemeProvider;
+use poodle_gpui::GpuiThemeProvider;
+use poodle_primitives::{TextAreaSpec, ValidationState};
 
 use crate::theme_ext::{resolve_color, resolve_opacity, resolve_px, resolve_radius};
 
@@ -110,9 +110,9 @@ impl IntoElement for TextArea {
         let focus_ring = resolve_color(theme, "semantic.color.accent.focusRing");
 
         let id_str = if let Some(ref suffix) = self.id_suffix {
-            format!("flint-textarea-{}", suffix)
+            format!("poodle-textarea-{}", suffix)
         } else {
-            "flint-textarea".to_string()
+            "poodle-textarea".to_string()
         };
 
         let mut el = div()

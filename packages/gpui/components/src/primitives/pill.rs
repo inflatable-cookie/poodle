@@ -1,8 +1,8 @@
 //! Pill — real GPUI component backed by PillSpec.
 
 use gpui::*;
-use flint_gpui::GpuiThemeProvider;
-use flint_primitives::{
+use poodle_gpui::GpuiThemeProvider;
+use poodle_primitives::{
     IconSize, IconSpec, PillAppearance, PillFont, PillSize, PillSpec, PillTone,
 };
 
@@ -121,7 +121,7 @@ impl IntoElement for Pill {
         };
 
         let mut el = div()
-            .id(SharedString::from("flint-pill"))
+            .id(SharedString::from("poodle-pill"))
             .focusable()
             .min_h(min_h)
             .px(pad_x)
@@ -167,7 +167,7 @@ impl IntoElement for Pill {
 
         if spec.is_removable {
             let icon_muted = resolve_color(theme, "semantic.color.icon.muted");
-            let remove_id = SharedString::from("flint-pill-remove");
+            let remove_id = SharedString::from("poodle-pill-remove");
             let mut remove_btn = div()
                 .id(remove_id)
                 .cursor_pointer()

@@ -1,10 +1,10 @@
 //! CommandPalette specimen — command palettes with actions.
 
 use jetstream_runtime::ui_element::*;
-use flint_jetstream::JetstreamThemeProvider;
-use flint_jetstream_components::command_palette::js_command_palette;
-use flint_jetstream_components::theme_ext::*;
-use flint_composites::{CommandActionItem, CommandPaletteSpec};
+use poodle_jetstream::JetstreamThemeProvider;
+use poodle_jetstream_components::command_palette::js_command_palette;
+use poodle_jetstream_components::theme_ext::*;
+use poodle_composites::{CommandActionItem, CommandPaletteSpec};
 
 pub fn render(theme: &JetstreamThemeProvider) -> JsEl {
     let secondary = resolve_color(theme, "semantic.color.text.secondary");

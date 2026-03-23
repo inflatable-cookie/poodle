@@ -4,36 +4,36 @@
   "updated": "2026-03-14",
   "description": "Multi-renderer parity validation report — maps Svelte components to Rust specs and adapter readiness",
   "contract_crates": {
-    "flint-tokens": {
+    "poodle-tokens": {
       "path": "packages/contracts/tokens",
       "modules": ["semantic", "primitives", "themes", "density", "metadata", "typed"],
       "typed_module": true
     },
-    "flint-primitives": {
+    "poodle-primitives": {
       "path": "packages/contracts/primitives",
       "spec_count": 64
     },
-    "flint-composites": {
+    "poodle-composites": {
       "path": "packages/contracts/composites",
       "spec_count": 41
     },
-    "flint-workstation": {
+    "poodle-workstation": {
       "path": "packages/contracts/workstation",
       "spec_count": 13
     },
-    "flint-layout": {
+    "poodle-layout": {
       "path": "packages/contracts/layout",
       "types": ["LayoutDirection", "LayoutSizing", "LayoutEdges", "LayoutSpacing", "MainAxisAlignment", "CrossAxisAlignment", "LayoutAlignment", "LayoutOverflow", "LayoutIntent"]
     },
-    "flint-events": {
+    "poodle-events": {
       "path": "packages/contracts/events",
       "types": ["SemanticEvent", "EventValue", "DragPhase", "EventModifiers", "NavigateDirection", "ComponentEventProfile"]
     },
-    "flint-style": {
+    "poodle-style": {
       "path": "packages/contracts/style",
       "types": ["StyleDescriptor", "FontFamily", "TypographyDescriptor", "BorderDescriptor", "CornerRadii", "CursorHint"]
     },
-    "flint-adapter": {
+    "poodle-adapter": {
       "path": "packages/contracts/adapter",
       "traits": ["ThemeProvider", "EventSink", "RenderTarget", "RenderComponent", "AdapterManifest"]
     }
@@ -42,12 +42,12 @@
     "gpui": {
       "generation": "g07",
       "status": "planned",
-      "crate_name": "flint-gpui"
+      "crate_name": "poodle-gpui"
     },
     "jetstream": {
       "generation": "g08",
       "status": "planned",
-      "crate_name": "flint-jetstream",
+      "crate_name": "poodle-jetstream",
       "constraint_document": "docs/roadmaps/g06/013-jetstream-rendering-constraint-document.md"
     }
   },

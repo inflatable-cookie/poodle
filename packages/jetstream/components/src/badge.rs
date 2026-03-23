@@ -7,8 +7,8 @@
 
 use jetstream_runtime::game_ui::Color;
 use jetstream_runtime::ui_element::{self, JsEl};
-use flint_jetstream::JetstreamThemeProvider;
-use flint_primitives::{BadgeSpec, BadgeVariant};
+use poodle_jetstream::JetstreamThemeProvider;
+use poodle_primitives::{BadgeSpec, BadgeVariant};
 
 use crate::theme_ext::resolve_color;
 
@@ -76,7 +76,7 @@ mod tests {
     use super::*;
 
     fn theme() -> JetstreamThemeProvider {
-        JetstreamThemeProvider::from_theme(&flint_tokens::themes::DARK)
+        JetstreamThemeProvider::from_theme(&poodle_tokens::themes::DARK)
     }
 
     #[test]

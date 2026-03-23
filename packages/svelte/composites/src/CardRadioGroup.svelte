@@ -1,7 +1,7 @@
 <script lang="ts">
   import { createEventDispatcher } from "svelte";
 
-  import { Card } from "@flint/svelte-primitives";
+  import { Card } from "@poodle/svelte-primitives";
 
   import type { CardRadioItem } from "./types";
 
@@ -122,13 +122,13 @@
   }
 
   .card-radio-group__option:focus-visible :global(.card) {
-    outline: var(--flint-border-width-focus) solid var(--flint-color-accent-focusRing);
+    outline: var(--poodle-border-width-focus) solid var(--poodle-color-accent-focusRing);
     outline-offset: 0.125rem;
   }
 
   .card-radio-group__option[aria-disabled="true"] {
     cursor: not-allowed;
-    opacity: var(--flint-state-opacity-disabled);
+    opacity: var(--poodle-state-opacity-disabled);
   }
 
   .card-radio-group__header {
@@ -144,36 +144,36 @@
     width: 1.125rem;
     height: 1.125rem;
     flex-shrink: 0;
-    border: 0.125rem solid var(--flint-color-border-default);
+    border: 0.125rem solid var(--poodle-color-border-default);
     border-radius: 999px;
     background: transparent;
     transition:
-      border-color var(--flint-motion-duration-interaction) var(--flint-motion-easing-standard),
-      background var(--flint-motion-duration-interaction) var(--flint-motion-easing-standard);
+      border-color var(--poodle-motion-duration-interaction) var(--poodle-motion-easing-standard),
+      background var(--poodle-motion-duration-interaction) var(--poodle-motion-easing-standard);
   }
 
   .card-radio-group__indicator[data-checked="true"] {
-    border-color: var(--flint-color-accent-base);
-    background: var(--flint-color-accent-base);
+    border-color: var(--poodle-color-accent-base);
+    background: var(--poodle-color-accent-base);
   }
 
   .card-radio-group__dot {
     width: 0.375rem;
     height: 0.375rem;
     border-radius: 999px;
-    background: var(--flint-color-text-inverse);
+    background: var(--poodle-color-text-inverse);
   }
 
   .card-radio-group__title {
     font-size: 0.9375rem;
     font-weight: 600;
-    color: var(--flint-color-text-primary);
+    color: var(--poodle-color-text-primary);
   }
 
   .card-radio-group__description {
     margin: 0;
     font-size: 0.8125rem;
     line-height: 1.5;
-    color: var(--flint-color-text-secondary);
+    color: var(--poodle-color-text-secondary);
   }
 </style>

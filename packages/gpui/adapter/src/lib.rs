@@ -1,10 +1,10 @@
-//! GPUI rendering adapter for Flint.
+//! GPUI rendering adapter for Poodle.
 //!
-//! This crate implements the renderer adapter traits from `flint-adapter` for
+//! This crate implements the renderer adapter traits from `poodle-adapter` for
 //! GPUI, Zed's native UI framework. It provides:
 //!
 //! - `GpuiThemeProvider`: Resolves token paths to typed values using GPUI's
-//!   theme system (backed by `flint-tokens::typed` constants).
+//!   theme system (backed by `poodle-tokens::typed` constants).
 //! - `GpuiTarget`: The render target type for GPUI output.
 //! - `GpuiAdapter`: The main adapter struct implementing `AdapterManifest`.
 //! - Style mapping utilities that convert `StyleDescriptor` → GPUI-native
@@ -13,13 +13,13 @@
 //! ## Architecture
 //!
 //! ```text
-//! Shared Contract Layer (flint-primitives, flint-composites, flint-workstation)
+//! Shared Contract Layer (poodle-primitives, poodle-composites, poodle-workstation)
 //!     │
 //!     ▼
-//! flint-adapter traits (ThemeProvider, RenderComponent, AdapterManifest)
+//! poodle-adapter traits (ThemeProvider, RenderComponent, AdapterManifest)
 //!     │
 //!     ▼
-//! flint-gpui (this crate) — GPUI-specific implementations
+//! poodle-gpui (this crate) — GPUI-specific implementations
 //!     │
 //!     ▼
 //! GPUI native elements (Element, Style, events)
@@ -46,8 +46,8 @@ pub use style_map::{
 };
 pub use theme::GpuiThemeProvider;
 
-use flint_adapter::{AdapterManifest, RenderTarget};
-pub use flint_primitives::FieldRelationships;
+use poodle_adapter::{AdapterManifest, RenderTarget};
+pub use poodle_primitives::FieldRelationships;
 
 /// Opaque handle to a rendered GPUI element.
 ///
@@ -78,7 +78,7 @@ impl RenderTarget for GpuiTarget {
 
 /// The main GPUI rendering adapter.
 ///
-/// Implements `AdapterManifest` to declare which Flint component specs
+/// Implements `AdapterManifest` to declare which Poodle component specs
 /// this adapter supports. Individual `RenderComponent<Spec>` implementations
 /// will be added in g07.002–009 as each component category is built out.
 pub struct GpuiAdapter {
@@ -264,7 +264,7 @@ impl AdapterManifest for GpuiAdapter {
 
 #[cfg(test)]
 mod tests {
-    use flint_adapter::ThemeProvider;
+    use poodle_adapter::ThemeProvider;
 
     use super::*;
 

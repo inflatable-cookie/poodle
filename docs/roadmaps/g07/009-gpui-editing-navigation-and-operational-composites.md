@@ -7,7 +7,7 @@ Updated: 2026-03-14
 
 Implement `RenderComponent` for the 24 editing, navigation, list interaction,
 and operational composite specs in the GPUI adapter. This completes composite
-coverage for all 41 specs in `flint-composites`.
+coverage for all 41 specs in `poodle-composites`.
 
 ## Deliverables
 
@@ -43,7 +43,7 @@ coverage for all 41 specs in `flint-composites`.
 ### Test coverage
 
 - 24 tests verifying spec_type propagation through render pipeline
-- CardRadioGroupSpec tested with ChoiceOption from flint-primitives
+- CardRadioGroupSpec tested with ChoiceOption from poodle-primitives
 
 ### Module registration
 

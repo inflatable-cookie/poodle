@@ -3,7 +3,7 @@
 Status: active
 Updated: 2026-03-23
 
-Foundation contracts define the lowest reusable surface in Flint.
+Foundation contracts define the lowest reusable surface in Poodle.
 
 ## Current Contracts
 

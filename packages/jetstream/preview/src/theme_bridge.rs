@@ -1,10 +1,10 @@
-//! Theme bridge — resolves Flint semantic tokens to Vec4 colors in linear space.
+//! Theme bridge — resolves Poodle semantic tokens to Vec4 colors in linear space.
 //!
 //! Used by main.rs for the draw theme and clear color. Component code
-//! uses `flint_jetstream_components::theme_ext` instead.
+//! uses `poodle_jetstream_components::theme_ext` instead.
 
 use glam::Vec4;
-use flint_adapter::ThemeProvider;
+use poodle_adapter::ThemeProvider;
 
 /// Convert a single sRGB component to linear light.
 fn srgb_to_linear(c: f32) -> f32 {
@@ -15,7 +15,7 @@ fn srgb_to_linear(c: f32) -> f32 {
     }
 }
 
-/// Resolve a Flint semantic token path to a Vec4 color in **linear** space.
+/// Resolve a Poodle semantic token path to a Vec4 color in **linear** space.
 pub fn resolve_vec4(theme: &dyn ThemeProvider, token: &str) -> Vec4 {
     let c = theme.resolve_color(token);
     Vec4::new(

@@ -51,12 +51,12 @@ Updated: 2026-03-15
 
 | State | Trigger | Expected Result |
 |-------|---------|-----------------|
-| neutral | `status="neutral"` (default) | dot uses `--flint-color-text-secondary` |
-| info | `status="info"` | dot uses `--flint-color-accent-base` |
-| success | `status="success"` | dot uses `--flint-color-status-success` |
-| warning | `status="warning"` | dot uses `--flint-color-status-warning` |
-| danger | `status="danger"` | dot uses `--flint-color-status-danger` |
-| pending | `status="pending"` | dot uses `--flint-color-accent-base` with pulse animation |
+| neutral | `status="neutral"` (default) | dot uses `--poodle-color-text-secondary` |
+| info | `status="info"` | dot uses `--poodle-color-accent-base` |
+| success | `status="success"` | dot uses `--poodle-color-status-success` |
+| warning | `status="warning"` | dot uses `--poodle-color-status-warning` |
+| danger | `status="danger"` | dot uses `--poodle-color-status-danger` |
+| pending | `status="pending"` | dot uses `--poodle-color-accent-base` with pulse animation |
 
 ### Component States
 
@@ -112,25 +112,25 @@ No internal state. Status is fully parent-controlled.
 
 | Property | Value |
 |----------|-------|
-| `--flint-status-color` | `var(--flint-color-text-secondary)` (default, overridden per status) |
+| `--poodle-status-color` | `var(--poodle-color-text-secondary)` (default, overridden per status) |
 | `display` | `inline-flex` |
 | `align-items` | `center` |
 | `gap` | `0.4375rem` |
-| `color` | `var(--flint-color-text-primary)` |
+| `color` | `var(--poodle-color-text-primary)` |
 | `min-width` | `0` |
 
 ### Root — Status Color Overrides via `data-status`
 
-| Selector | `--flint-status-color` Value |
+| Selector | `--poodle-status-color` Value |
 |----------|---------------------------|
-| `[data-status="info"]` | `var(--flint-color-accent-base)` |
-| `[data-status="success"]` | `var(--flint-color-status-success)` |
-| `[data-status="warning"]` | `var(--flint-color-status-warning)` |
-| `[data-status="danger"]` | `var(--flint-color-status-danger)` |
-| `[data-status="pending"]` | `var(--flint-color-accent-base)` |
+| `[data-status="info"]` | `var(--poodle-color-accent-base)` |
+| `[data-status="success"]` | `var(--poodle-color-status-success)` |
+| `[data-status="warning"]` | `var(--poodle-color-status-warning)` |
+| `[data-status="danger"]` | `var(--poodle-color-status-danger)` |
+| `[data-status="pending"]` | `var(--poodle-color-accent-base)` |
 
-Note: `neutral` uses the default `--flint-status-color` value of
-`var(--flint-color-text-secondary)` and does not need a data-status override.
+Note: `neutral` uses the default `--poodle-status-color` value of
+`var(--poodle-color-text-secondary)` and does not need a data-status override.
 
 ### Dot `.status-indicator__dot`
 
@@ -140,8 +140,8 @@ Note: `neutral` uses the default `--flint-status-color` value of
 | `width` | `0.5625rem` |
 | `height` | `0.5625rem` |
 | `border-radius` | `999px` |
-| `background` | `var(--flint-status-color)` |
-| `box-shadow` | `0 0 0 0.125rem color-mix(in srgb, var(--flint-status-color) 18%, transparent)` |
+| `background` | `var(--poodle-status-color)` |
+| `box-shadow` | `0 0 0 0.125rem color-mix(in srgb, var(--poodle-status-color) 18%, transparent)` |
 
 ### Dot — Pending Animation
 
@@ -165,7 +165,7 @@ When `status="pending"`, the dot receives:
 | Property | Value |
 |----------|-------|
 | `min-width` | `0` |
-| `font-family` | `var(--flint-typography-label-family)` |
+| `font-family` | `var(--poodle-typography-label-family)` |
 | `font-size` | `0.75rem` |
 | `font-weight` | `600` |
 | `line-height` | `1.3` |
@@ -174,17 +174,17 @@ When `status="pending"`, the dot receives:
 
 | Token | Role |
 |-------|------|
-| `--flint-color-text-secondary` | neutral dot color (default) |
-| `--flint-color-text-primary` | label text color |
-| `--flint-color-accent-base` | info and pending dot color |
-| `--flint-color-status-success` | success dot color |
-| `--flint-color-status-warning` | warning dot color |
-| `--flint-color-status-danger` | danger dot color |
-| `--flint-typography-label-family` | label font family |
+| `--poodle-color-text-secondary` | neutral dot color (default) |
+| `--poodle-color-text-primary` | label text color |
+| `--poodle-color-accent-base` | info and pending dot color |
+| `--poodle-color-status-success` | success dot color |
+| `--poodle-color-status-warning` | warning dot color |
+| `--poodle-color-status-danger` | danger dot color |
+| `--poodle-typography-label-family` | label font family |
 
 ## 9. Svelte Notes
 
-- Status color is driven by a CSS custom property `--flint-status-color` set on
+- Status color is driven by a CSS custom property `--poodle-status-color` set on
   the root, then consumed by the dot's `background` and `box-shadow`
 - Data attribute `data-status` on root controls the color override via CSS
   selectors
@@ -192,7 +192,7 @@ When `status="pending"`, the dot receives:
 
 ## 10. GPUI Notes
 
-- Expected crate/module surface: `flint_gpui::primitives::status_indicator`
+- Expected crate/module surface: `poodle_gpui::primitives::status_indicator`
 - GPUI implementation must ensure a text or accessible-label path exists so the
   status remains perceivable to assistive technology
 - Pending animation pulse is optional in GPUI if native animation support is

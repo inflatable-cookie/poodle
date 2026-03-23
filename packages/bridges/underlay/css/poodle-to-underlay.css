@@ -1,0 +1,34 @@
+@import "../../../tokens/artifacts/css/poodle-tokens.css";
+@import "../../../tokens/artifacts/css/poodle-theme-light.css";
+@import "../../../tokens/artifacts/css/poodle-theme-dark.css";
+@import "../../../tokens/artifacts/css/poodle-theme-loophole-studio.css";
+@import "../../../tokens/artifacts/css/poodle-density-compact.css";
+@import "../../../tokens/artifacts/css/poodle-density-comfortable.css";
+@import "../../../tokens/artifacts/css/poodle-control-size-sm.css";
+@import "../../../tokens/artifacts/css/poodle-control-size-md.css";
+@import "../../../tokens/artifacts/css/poodle-control-size-lg.css";
+
+/*
+ * Bridge-local alias layer for Underlay-owned variable names.
+ * This file may rename variables for Underlay consumption, but it must not
+ * become the canonical source of token meaning.
+ */
+:root {
+  --underlay-color-canvas: var(--poodle-semantic-color-background-canvas);
+  --underlay-color-surface: var(--poodle-semantic-color-background-surface);
+  --underlay-color-panel: var(--poodle-semantic-color-background-panel);
+  --underlay-color-text-primary: var(--poodle-semantic-color-text-primary);
+  --underlay-color-text-secondary: var(--poodle-semantic-color-text-secondary);
+  --underlay-color-border-default: var(--poodle-semantic-color-border-default);
+  --underlay-color-accent: var(--poodle-semantic-color-accent-base);
+  --underlay-space-panel-x: var(--poodle-semantic-space-panel-x);
+  --underlay-space-panel-y: var(--poodle-semantic-space-panel-y);
+  --underlay-size-control-height: var(--poodle-semantic-size-control-height);
+  --underlay-size-panel-header: var(--poodle-semantic-size-panel-header);
+  --underlay-radius-control: var(--poodle-semantic-radius-control);
+  --underlay-radius-surface: var(--poodle-semantic-radius-surface);
+  --underlay-elevation-surface: var(--poodle-semantic-elevation-surface);
+  --underlay-elevation-overlay: var(--poodle-semantic-elevation-overlay);
+  --underlay-motion-interaction: var(--poodle-semantic-motion-duration-interaction);
+  --underlay-motion-overlay: var(--poodle-semantic-motion-duration-overlay);
+}

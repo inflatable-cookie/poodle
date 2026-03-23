@@ -158,21 +158,21 @@ None. EmbedPreview is a pure display component.
 
 | Part | Token | Purpose |
 |------|-------|---------|
-| Root | `--flint-radius-surface` | container border-radius (fallback 0.5rem) |
-| Container | `--flint-color-background-panel` | container background (fallback #1a1a1a) |
-| Loading/Error/Empty | `--flint-color-background-panel` | state container background |
-| Loading/Error/Empty | `--flint-radius-surface` | state container border-radius |
-| LoadingText | `--flint-color-text-secondary` | loading text color (fallback #999) |
-| ErrorIcon | `--flint-color-text-danger` | error icon color (fallback #ef4444) |
-| ErrorText | `--flint-color-text-secondary` | error message color (fallback #999) |
-| EmptyIcon | `--flint-color-text-tertiary` | empty icon color (fallback #666) |
-| EmptyText | `--flint-color-text-secondary` | empty message color (fallback #999) |
-| Fallback | `--flint-color-background-panel` | fallback container background |
-| FallbackLink | `--flint-color-accent-default` | link color (fallback #6366f1) |
+| Root | `--poodle-radius-surface` | container border-radius (fallback 0.5rem) |
+| Container | `--poodle-color-background-panel` | container background (fallback #1a1a1a) |
+| Loading/Error/Empty | `--poodle-color-background-panel` | state container background |
+| Loading/Error/Empty | `--poodle-radius-surface` | state container border-radius |
+| LoadingText | `--poodle-color-text-secondary` | loading text color (fallback #999) |
+| ErrorIcon | `--poodle-color-text-danger` | error icon color (fallback #ef4444) |
+| ErrorText | `--poodle-color-text-secondary` | error message color (fallback #999) |
+| EmptyIcon | `--poodle-color-text-tertiary` | empty icon color (fallback #666) |
+| EmptyText | `--poodle-color-text-secondary` | empty message color (fallback #999) |
+| Fallback | `--poodle-color-background-panel` | fallback container background |
+| FallbackLink | `--poodle-color-accent-default` | link color (fallback #6366f1) |
 
 ## 9. Svelte Notes
 
-- Uses `Skeleton` from `@flint/svelte-primitives` for the loading state
+- Uses `Skeleton` from `@poodle/svelte-primitives` for the loading state
 - Provider-specific embed URL generation:
   - YouTube: `https://www.youtube-nocookie.com/embed/{id}` (privacy-enhanced)
   - Vimeo: `https://player.vimeo.com/video/{id}`
@@ -183,7 +183,7 @@ None. EmbedPreview is a pure display component.
 
 ## 10. GPUI Notes
 
-- Expected crate/module surface: `flint_gpui::composites::embed_preview`
+- Expected crate/module surface: `poodle_gpui::composites::embed_preview`
 - Iframe rendering is web-specific; GPUI may need a WebView or placeholder approach
 - Loading and error states can be implemented with GPUI primitives
 

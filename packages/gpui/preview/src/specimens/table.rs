@@ -1,7 +1,7 @@
 use gpui::*;
-use flint_primitives::{TableSpec, TableColumn, TableRow, ColumnAlign, EyebrowSpec};
-use flint_gpui_components::{Table, Eyebrow};
-use flint_gpui::GpuiThemeProvider;
+use poodle_primitives::{TableSpec, TableColumn, TableRow, ColumnAlign, EyebrowSpec};
+use poodle_gpui_components::{Table, Eyebrow};
+use poodle_gpui::GpuiThemeProvider;
 
 pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
     let columns = vec![

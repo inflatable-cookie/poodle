@@ -1,7 +1,7 @@
 {
   "generation": "g04.002",
   "themeRuntime": {
-    "tokenSource": "flint-tokens",
+    "tokenSource": "poodle-tokens",
     "themeIds": [
       "light",
       "dark",

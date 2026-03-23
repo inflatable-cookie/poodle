@@ -84,11 +84,11 @@
   .nav-card {
     display: flex;
     align-items: center;
-    gap: var(--flint-space-inline-md);
-    padding: var(--flint-space-panel-y) var(--flint-space-panel-x);
-    border: 0.0625rem solid color-mix(in srgb, var(--flint-color-border-subtle) 32%, transparent);
-    border-radius: var(--flint-radius-surface);
-    background: var(--flint-color-background-surface);
+    gap: var(--poodle-space-inline-md);
+    padding: var(--poodle-space-panel-y) var(--poodle-space-panel-x);
+    border: 0.0625rem solid color-mix(in srgb, var(--poodle-color-border-subtle) 32%, transparent);
+    border-radius: var(--poodle-radius-surface);
+    background: var(--poodle-color-background-surface);
     color: inherit;
     cursor: pointer;
     text-decoration: none;
@@ -96,24 +96,24 @@
     font: inherit;
     width: 100%;
     transition:
-      background var(--flint-motion-duration-interaction) var(--flint-motion-easing-standard),
-      border-color var(--flint-motion-duration-interaction) var(--flint-motion-easing-standard),
-      box-shadow var(--flint-motion-duration-interaction) var(--flint-motion-easing-standard);
+      background var(--poodle-motion-duration-interaction) var(--poodle-motion-easing-standard),
+      border-color var(--poodle-motion-duration-interaction) var(--poodle-motion-easing-standard),
+      box-shadow var(--poodle-motion-duration-interaction) var(--poodle-motion-easing-standard);
   }
 
   .nav-card:hover:not(:disabled):not([data-disabled="true"]) {
-    border-color: color-mix(in srgb, var(--flint-color-accent-base) 28%, var(--flint-color-border-subtle));
-    background: color-mix(in srgb, var(--flint-color-background-elevated) 52%, var(--flint-color-background-surface));
+    border-color: color-mix(in srgb, var(--poodle-color-accent-base) 28%, var(--poodle-color-border-subtle));
+    background: color-mix(in srgb, var(--poodle-color-background-elevated) 52%, var(--poodle-color-background-surface));
   }
 
   .nav-card:focus-visible {
-    outline: var(--flint-border-width-focus) solid var(--flint-color-accent-focusRing);
+    outline: var(--poodle-border-width-focus) solid var(--poodle-color-accent-focusRing);
     outline-offset: 0.0625rem;
   }
 
   .nav-card[data-disabled="true"] {
     cursor: not-allowed;
-    opacity: var(--flint-state-opacity-disabled);
+    opacity: var(--poodle-state-opacity-disabled);
   }
 
   .nav-card__icon {
@@ -123,9 +123,9 @@
     flex-shrink: 0;
     width: 2rem;
     height: 2rem;
-    border-radius: var(--flint-radius-control);
-    background: color-mix(in srgb, var(--flint-color-accent-base) 12%, transparent);
-    color: var(--flint-color-accent-base);
+    border-radius: var(--poodle-radius-control);
+    background: color-mix(in srgb, var(--poodle-color-accent-base) 12%, transparent);
+    color: var(--poodle-color-accent-base);
     font-size: 1rem;
   }
 
@@ -140,11 +140,11 @@
   .nav-card__title {
     display: flex;
     align-items: center;
-    gap: var(--flint-space-inline-sm);
-    font-family: var(--flint-typography-label-family);
-    font-size: var(--flint-typography-label-size);
+    gap: var(--poodle-space-inline-sm);
+    font-family: var(--poodle-typography-label-family);
+    font-size: var(--poodle-typography-label-size);
     font-weight: 600;
-    color: var(--flint-color-text-primary);
+    color: var(--poodle-color-text-primary);
   }
 
   .nav-card__badge {
@@ -152,8 +152,8 @@
     align-items: center;
     padding: 0.0625rem 0.375rem;
     border-radius: 999px;
-    background: color-mix(in srgb, var(--flint-color-accent-base) 16%, transparent);
-    color: var(--flint-color-accent-base);
+    background: color-mix(in srgb, var(--poodle-color-accent-base) 16%, transparent);
+    color: var(--poodle-color-accent-base);
     font-size: 0.625rem;
     font-weight: 600;
     text-transform: uppercase;
@@ -162,7 +162,7 @@
 
   .nav-card__description {
     font-size: 0.8125rem;
-    color: var(--flint-color-text-secondary);
+    color: var(--poodle-color-text-secondary);
     line-height: 1.4;
   }
 
@@ -170,9 +170,9 @@
     flex-shrink: 0;
     width: 1rem;
     height: 1rem;
-    color: var(--flint-color-text-secondary);
+    color: var(--poodle-color-text-secondary);
     opacity: 0;
-    transition: opacity var(--flint-motion-duration-interaction) var(--flint-motion-easing-standard);
+    transition: opacity var(--poodle-motion-duration-interaction) var(--poodle-motion-easing-standard);
   }
 
   .nav-card:hover .nav-card__arrow {

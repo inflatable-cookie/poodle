@@ -86,8 +86,8 @@ type MenuItem = {
 | State | Trigger | Expected Result |
 |-------|---------|-----------------|
 | default | resting | variant-specific fill, border, text |
-| hover (primary) | pointer enters primary half | `background: var(--flint-split-fill-hover)` |
-| hover (toggle) | pointer enters toggle half | `background: var(--flint-split-fill-hover)` |
+| hover (primary) | pointer enters primary half | `background: var(--poodle-split-fill-hover)` |
+| hover (toggle) | pointer enters toggle half | `background: var(--poodle-split-fill-hover)` |
 | active | press on either half | `background` darkened further |
 | focus | keyboard focus on either half | standard focus ring |
 | menu open | toggle clicked or keyboard opens | menu panel visible below root |
@@ -151,18 +151,18 @@ type MenuItem = {
 
 | Var | Secondary (default) | Primary | Ghost |
 |-----|---------------------|---------|-------|
-| `--flint-split-fill` | `var(--flint-color-background-surface)` | `var(--flint-color-accent-base)` | `color-mix(in srgb, var(--flint-color-background-surface) 42%, transparent)` |
-| `--flint-split-fill-hover` | `color-mix(in srgb, var(--flint-split-fill) 84%, var(--flint-color-background-elevated))` | same formula | same formula |
-| `--flint-split-border` | `var(--flint-color-border-default)` | `color-mix(in srgb, var(--flint-color-accent-base) 84%, black)` | `color-mix(in srgb, var(--flint-color-border-subtle) 72%, transparent)` |
-| `--flint-split-text` | `var(--flint-color-text-primary)` | `var(--flint-color-text-inverse)` | `var(--flint-color-text-primary)` |
+| `--poodle-split-fill` | `var(--poodle-color-background-surface)` | `var(--poodle-color-accent-base)` | `color-mix(in srgb, var(--poodle-color-background-surface) 42%, transparent)` |
+| `--poodle-split-fill-hover` | `color-mix(in srgb, var(--poodle-split-fill) 84%, var(--poodle-color-background-elevated))` | same formula | same formula |
+| `--poodle-split-border` | `var(--poodle-color-border-default)` | `color-mix(in srgb, var(--poodle-color-accent-base) 84%, black)` | `color-mix(in srgb, var(--poodle-color-border-subtle) 72%, transparent)` |
+| `--poodle-split-text` | `var(--poodle-color-text-primary)` | `var(--poodle-color-text-inverse)` | `var(--poodle-color-text-primary)` |
 
 ### Tone: danger
 
-| Selector | `--flint-split-fill` | `--flint-split-border` | `--flint-split-text` | `--flint-split-shadow` |
+| Selector | `--poodle-split-fill` | `--poodle-split-border` | `--poodle-split-text` | `--poodle-split-shadow` |
 |----------|--------------------|----------------------|--------------------|----------------------|
-| `[data-tone="danger"]` (secondary base) | `color-mix(in srgb, var(--flint-color-status-danger) 16%, var(--flint-color-background-surface))` | `color-mix(in srgb, var(--flint-color-status-danger) 46%, var(--flint-color-border-default))` | `var(--flint-color-text-primary)` | default |
-| `[data-variant="primary"][data-tone="danger"]` | `var(--flint-color-status-danger)` | `color-mix(in srgb, var(--flint-color-status-danger) 84%, black)` | `var(--flint-color-text-inverse)` | `inset 0 0.0625rem 0 color-mix(white 14%, transparent), 0 0.375rem 1.125rem color-mix(black 18%, transparent)` |
-| `[data-variant="ghost"][data-tone="danger"]` | `transparent` | `transparent` | `var(--flint-color-status-danger)` | `none` |
+| `[data-tone="danger"]` (secondary base) | `color-mix(in srgb, var(--poodle-color-status-danger) 16%, var(--poodle-color-background-surface))` | `color-mix(in srgb, var(--poodle-color-status-danger) 46%, var(--poodle-color-border-default))` | `var(--poodle-color-text-primary)` | default |
+| `[data-variant="primary"][data-tone="danger"]` | `var(--poodle-color-status-danger)` | `color-mix(in srgb, var(--poodle-color-status-danger) 84%, black)` | `var(--poodle-color-text-inverse)` | `inset 0 0.0625rem 0 color-mix(white 14%, transparent), 0 0.375rem 1.125rem color-mix(black 18%, transparent)` |
+| `[data-variant="ghost"][data-tone="danger"]` | `transparent` | `transparent` | `var(--poodle-color-status-danger)` | `none` |
 
 ### Root
 
@@ -172,7 +172,7 @@ type MenuItem = {
 | `display` | `inline-flex` |
 | `align-items` | `stretch` |
 | `width` | `fit-content` |
-| `border-radius` | `var(--flint-treatment-interactive-radius, var(--flint-radius-control))` |
+| `border-radius` | `var(--poodle-treatment-interactive-radius, var(--poodle-radius-control))` |
 
 ### Primary and Toggle (shared)
 
@@ -181,14 +181,14 @@ type MenuItem = {
 | `display` | `inline-flex` |
 | `align-items` | `center` |
 | `justify-content` | `center` |
-| `height` | `var(--flint-size-control-height)` |
-| `border` | `0.0625rem solid var(--flint-split-border)` |
-| `background` | `var(--flint-split-fill)` |
-| `color` | `var(--flint-split-text)` |
+| `height` | `var(--poodle-size-control-height)` |
+| `border` | `0.0625rem solid var(--poodle-split-border)` |
+| `background` | `var(--poodle-split-fill)` |
+| `color` | `var(--poodle-split-text)` |
 | `cursor` | `pointer` |
-| `font-family` | `var(--flint-typography-label-family)` |
-| `font-size` | `var(--flint-typography-label-size)` |
-| `font-weight` | `var(--flint-typography-label-weight)` |
+| `font-family` | `var(--poodle-typography-label-family)` |
+| `font-size` | `var(--poodle-typography-label-size)` |
+| `font-weight` | `var(--poodle-typography-label-weight)` |
 | `letter-spacing` | `0.01em` |
 | `line-height` | `1` |
 | `transition` | `background, border-color` at `motion-duration-interaction motion-easing-standard` |
@@ -197,19 +197,19 @@ type MenuItem = {
 
 | Size | height | font-size |
 |------|--------|-----------|
-| `sm` | `calc(var(--flint-size-control-height) - 0.375rem)` | `0.75rem` |
-| `md` | `var(--flint-size-control-height)` | `var(--flint-typography-label-size)` |
-| `lg` | `calc(var(--flint-size-control-height) + 0.375rem)` | `0.875rem` |
+| `sm` | `calc(var(--poodle-size-control-height) - 0.375rem)` | `0.75rem` |
+| `md` | `var(--poodle-size-control-height)` | `var(--poodle-typography-label-size)` |
+| `lg` | `calc(var(--poodle-size-control-height) + 0.375rem)` | `0.875rem` |
 
 ### Primary half
 
 | Property | Value |
 |----------|-------|
-| `gap` | `var(--flint-space-inline-sm)` |
+| `gap` | `var(--poodle-space-inline-sm)` |
 | `min-width` | `4rem` |
-| `padding` | `0 var(--flint-space-control-x)` |
+| `padding` | `0 var(--poodle-space-control-x)` |
 | `border-right` | `0` |
-| `border-radius` | `var(--flint-treatment-interactive-radius, var(--flint-radius-control)) 0 0 var(--flint-treatment-interactive-radius, var(--flint-radius-control))` |
+| `border-radius` | `var(--poodle-treatment-interactive-radius, var(--poodle-radius-control)) 0 0 var(--poodle-treatment-interactive-radius, var(--poodle-radius-control))` |
 
 ### Toggle half
 
@@ -218,14 +218,14 @@ type MenuItem = {
 | `width` | `2rem` |
 | `padding` | `0` |
 | `border-left` | `0` |
-| `border-radius` | `0 var(--flint-treatment-interactive-radius, var(--flint-radius-control)) var(--flint-treatment-interactive-radius, var(--flint-radius-control)) 0` |
+| `border-radius` | `0 var(--poodle-treatment-interactive-radius, var(--poodle-radius-control)) var(--poodle-treatment-interactive-radius, var(--poodle-radius-control)) 0` |
 
 ### Divider
 
 | Property | Value |
 |----------|-------|
 | `width` | `0.0625rem` |
-| `background` | `color-mix(in srgb, var(--flint-split-text) 22%, transparent)` |
+| `background` | `color-mix(in srgb, var(--poodle-split-text) 22%, transparent)` |
 | `align-self` | `center` |
 | `height` | `60%` |
 
@@ -251,13 +251,13 @@ type MenuItem = {
 
 | Property | Value |
 |----------|-------|
-| `background` | `var(--flint-split-fill-hover)` |
+| `background` | `var(--poodle-split-fill-hover)` |
 
 ### Focus
 
 | Property | Value |
 |----------|-------|
-| `outline` | `var(--flint-border-width-focus) solid var(--flint-color-accent-focusRing)` |
+| `outline` | `var(--poodle-border-width-focus) solid var(--poodle-color-accent-focusRing)` |
 | `outline-offset` | `0.125rem` |
 
 ### Disabled
@@ -265,7 +265,7 @@ type MenuItem = {
 | Property | Value |
 |----------|-------|
 | `cursor` | `not-allowed` |
-| `opacity` | `var(--flint-state-opacity-disabled)` |
+| `opacity` | `var(--poodle-state-opacity-disabled)` |
 
 ### Menu
 
@@ -274,13 +274,13 @@ type MenuItem = {
 | `position` | `absolute` |
 | `top` | `calc(100% + 0.375rem)` |
 | `left` | `0` |
-| `z-index` | `var(--flint-z-index-overlay-menu)` |
+| `z-index` | `var(--poodle-z-index-overlay-menu)` |
 | `min-width` | `12rem` |
 | `padding` | `0.25rem` |
-| `border` | `0.0625rem solid color-mix(in srgb, var(--flint-color-border-default) 72%, transparent)` |
-| `border-radius` | `var(--flint-radius-surface)` |
-| `background` | `color-mix(in srgb, var(--flint-color-background-elevated) 98%, var(--flint-color-background-panel))` |
-| `box-shadow` | `var(--flint-elevation-overlay)` |
+| `border` | `0.0625rem solid color-mix(in srgb, var(--poodle-color-border-default) 72%, transparent)` |
+| `border-radius` | `var(--poodle-radius-surface)` |
+| `background` | `color-mix(in srgb, var(--poodle-color-background-elevated) 98%, var(--poodle-color-background-panel))` |
+| `box-shadow` | `var(--poodle-elevation-overlay)` |
 
 ### Item
 
@@ -292,19 +292,19 @@ type MenuItem = {
 | `min-height` | `2rem` |
 | `padding` | `0.375rem 0.5rem` |
 | `border` | `0` |
-| `border-radius` | `calc(var(--flint-radius-control) - 0.125rem)` |
+| `border-radius` | `calc(var(--poodle-radius-control) - 0.125rem)` |
 | `background` | `transparent` |
-| `color` | `var(--flint-color-text-primary)` |
+| `color` | `var(--poodle-color-text-primary)` |
 | `cursor` | `pointer` |
 | `font` | `inherit` |
-| `font-size` | `var(--flint-typography-label-size)` |
+| `font-size` | `var(--poodle-typography-label-size)` |
 | `text-align` | `left` |
 
 ### Item hover / focus-visible
 
 | Property | Value |
 |----------|-------|
-| `background` | `color-mix(in srgb, var(--flint-color-accent-base) 16%, transparent)` |
+| `background` | `color-mix(in srgb, var(--poodle-color-accent-base) 16%, transparent)` |
 | `outline` | `none` |
 
 ### Separator (menu)
@@ -314,11 +314,11 @@ type MenuItem = {
 | `width` | `100%` |
 | `height` | `0.0625rem` |
 | `margin` | `0.25rem 0` |
-| `background` | `color-mix(in srgb, var(--flint-color-border-subtle) 72%, transparent)` |
+| `background` | `color-mix(in srgb, var(--poodle-color-border-subtle) 72%, transparent)` |
 
 ## 9. Svelte Notes
 
-- Uses CSS custom properties (`--flint-split-fill`, etc.) for the variant system
+- Uses CSS custom properties (`--poodle-split-fill`, etc.) for the variant system
 - `data-variant`, `data-tone`, `data-size`, `data-open` data attributes on root
 - Menu state managed via internal `$state(false)` boolean
 - Click-outside handler closes menu
@@ -327,9 +327,9 @@ type MenuItem = {
 
 ## 10. GPUI Notes
 
-- expected crate/module surface: `flint_gpui::components::split_button`
+- expected crate/module surface: `poodle_gpui::components::split_button`
 - Spec struct: `SplitButtonSpec` in primitives crate
-- Component struct: `FlintSplitButton` in components crate
+- Component struct: `PoodleSplitButton` in components crate
 - Menu positioning: GPUI must calculate absolute position relative to root
 - Variant CSS var system maps to Rust enum with computed color values
 - Divider height percentage (60%) must be calculated from actual control height

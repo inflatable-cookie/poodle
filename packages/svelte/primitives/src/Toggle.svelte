@@ -49,42 +49,42 @@
 
 <style>
   .toggle {
-    --flint-toggle-fill: var(
-      --flint-treatment-interactive-fill,
-      color-mix(in srgb, var(--flint-color-background-surface) 86%, transparent)
+    --poodle-toggle-fill: var(
+      --poodle-treatment-interactive-fill,
+      color-mix(in srgb, var(--poodle-color-background-surface) 86%, transparent)
     );
-    --flint-toggle-border: var(
-      --flint-treatment-interactive-border,
-      color-mix(in srgb, var(--flint-color-border-subtle) 78%, transparent)
+    --poodle-toggle-border: var(
+      --poodle-treatment-interactive-border,
+      color-mix(in srgb, var(--poodle-color-border-subtle) 78%, transparent)
     );
-    --flint-toggle-text: var(--flint-color-text-primary);
+    --poodle-toggle-text: var(--poodle-color-text-primary);
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    gap: var(--flint-space-inline-sm);
+    gap: var(--poodle-space-inline-sm);
     min-width: 2.25rem;
-    height: var(--flint-size-control-height);
-    padding: 0 var(--flint-space-control-x);
-    border: 0.0625rem solid var(--flint-toggle-border);
-    border-radius: var(--flint-treatment-interactive-radius, var(--flint-radius-control));
-    background: var(--flint-toggle-fill);
-    box-shadow: var(--flint-treatment-interactive-shadow, none);
-    color: var(--flint-toggle-text);
+    height: var(--poodle-size-control-height);
+    padding: 0 var(--poodle-space-control-x);
+    border: 0.0625rem solid var(--poodle-toggle-border);
+    border-radius: var(--poodle-treatment-interactive-radius, var(--poodle-radius-control));
+    background: var(--poodle-toggle-fill);
+    box-shadow: var(--poodle-treatment-interactive-shadow, none);
+    color: var(--poodle-toggle-text);
     cursor: pointer;
-    font-family: var(--flint-typography-label-family);
+    font-family: var(--poodle-typography-label-family);
     font-size: 0.75rem;
     font-weight: 600;
     line-height: 1;
   }
 
   .toggle[data-size="sm"] {
-    height: calc(var(--flint-size-control-height) - 0.375rem);
-    padding: 0 calc(var(--flint-space-control-x) - 0.125rem);
+    height: calc(var(--poodle-size-control-height) - 0.375rem);
+    padding: 0 calc(var(--poodle-space-control-x) - 0.125rem);
   }
 
   .toggle[data-size="lg"] {
-    height: calc(var(--flint-size-control-height) + 0.375rem);
-    padding: 0 calc(var(--flint-space-control-x) + 0.125rem);
+    height: calc(var(--poodle-size-control-height) + 0.375rem);
+    padding: 0 calc(var(--poodle-space-control-x) + 0.125rem);
   }
 
   .toggle[data-layout="stack"],
@@ -103,39 +103,39 @@
   }
 
   .toggle[data-variant="primary"] {
-    --flint-toggle-fill: color-mix(in srgb, var(--flint-color-accent-base) 18%, var(--flint-color-background-surface));
-    --flint-toggle-border: color-mix(in srgb, var(--flint-color-accent-base) 38%, var(--flint-color-border-default));
+    --poodle-toggle-fill: color-mix(in srgb, var(--poodle-color-accent-base) 18%, var(--poodle-color-background-surface));
+    --poodle-toggle-border: color-mix(in srgb, var(--poodle-color-accent-base) 38%, var(--poodle-color-border-default));
   }
 
   .toggle[data-variant="secondary"] {
-    --flint-toggle-fill: var(--flint-color-background-surface);
-    --flint-toggle-border: var(--flint-color-border-default);
+    --poodle-toggle-fill: var(--poodle-color-background-surface);
+    --poodle-toggle-border: var(--poodle-color-border-default);
   }
 
   .toggle[data-pressed="true"] {
     background:
       linear-gradient(
-        color-mix(in srgb, var(--flint-color-accent-base) 82%, transparent),
-        color-mix(in srgb, var(--flint-color-accent-base) 82%, transparent)
+        color-mix(in srgb, var(--poodle-color-accent-base) 82%, transparent),
+        color-mix(in srgb, var(--poodle-color-accent-base) 82%, transparent)
       ),
       var(
-        --flint-treatment-interactive-fill,
-        var(--flint-color-accent-base)
+        --poodle-treatment-interactive-fill,
+        var(--poodle-color-accent-base)
       );
     border-color: var(
-      --flint-treatment-interactive-border-active,
-      color-mix(in srgb, var(--flint-color-accent-base) 78%, black)
+      --poodle-treatment-interactive-border-active,
+      color-mix(in srgb, var(--poodle-color-accent-base) 78%, black)
     );
-    color: var(--flint-color-text-inverse);
+    color: var(--poodle-color-text-inverse);
   }
 
   .toggle:focus-visible {
-    outline: var(--flint-border-width-focus) solid var(--flint-color-accent-focusRing);
+    outline: var(--poodle-border-width-focus) solid var(--poodle-color-accent-focusRing);
     outline-offset: 0.125rem;
   }
 
   .toggle:disabled {
     cursor: not-allowed;
-    opacity: var(--flint-state-opacity-disabled);
+    opacity: var(--poodle-state-opacity-disabled);
   }
 </style>

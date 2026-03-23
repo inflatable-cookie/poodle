@@ -1,8 +1,8 @@
 //! EditableLabel — Jetstream click-to-edit label backed by EditableLabelSpec.
 
 use jetstream_runtime::ui_element::{self, JsEl};
-use flint_jetstream::JetstreamThemeProvider;
-use flint_primitives::EditableLabelSpec;
+use poodle_jetstream::JetstreamThemeProvider;
+use poodle_primitives::EditableLabelSpec;
 
 use crate::theme_ext::resolve_color;
 

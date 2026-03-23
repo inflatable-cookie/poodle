@@ -52,8 +52,8 @@ pub const WORKSTATION_EXPORTS: &[&str] = &[
 
 #[cfg(test)]
 mod tests {
-    use flint_primitives::OverlayPlacement;
-    use flint_tokens::semantic;
+    use poodle_primitives::OverlayPlacement;
+    use poodle_tokens::semantic;
 
     use super::{
         parse_workspace_layout_snapshot, serialize_workspace_layout_snapshot,
@@ -68,7 +68,7 @@ mod tests {
     #[test]
     fn app_and_project_headers_preserve_shell_identity_state() {
         let app = AppHeaderSpec::new()
-            .with_title("Flint")
+            .with_title("Poodle")
             .with_drag_region(true)
             .with_primary_action_count(2)
             .with_utility_item_count(1);

@@ -1,9 +1,9 @@
 //! SplitView — real GPUI component backed by SplitViewSpec.
 
 use gpui::*;
-use flint_gpui::GpuiThemeProvider;
-use flint_composites::{SplitOrientation, SplitViewSpec};
-use flint_primitives::{IconSize, IconSpec};
+use poodle_gpui::GpuiThemeProvider;
+use poodle_composites::{SplitOrientation, SplitViewSpec};
+use poodle_primitives::{IconSize, IconSpec};
 
 use crate::primitives::Icon;
 use crate::theme_ext::resolve_color;

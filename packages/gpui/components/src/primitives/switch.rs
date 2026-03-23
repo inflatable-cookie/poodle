@@ -1,8 +1,8 @@
 //! Switch — real GPUI component backed by SwitchSpec.
 
 use gpui::*;
-use flint_gpui::GpuiThemeProvider;
-use flint_primitives::SwitchSpec;
+use poodle_gpui::GpuiThemeProvider;
+use poodle_primitives::SwitchSpec;
 
 use crate::theme_ext::{color_mix, resolve_color, resolve_opacity, resolve_px};
 
@@ -76,10 +76,10 @@ impl IntoElement for Switch {
         let is_interactive = !spec.is_disabled && !spec.is_read_only;
 
         let id_str = if let Some(ref suffix) = self.id_suffix {
-            format!("flint-switch-{}", suffix)
+            format!("poodle-switch-{}", suffix)
         } else {
             format!(
-                "flint-switch-{}",
+                "poodle-switch-{}",
                 spec.label.as_deref().unwrap_or("anon")
             )
         };

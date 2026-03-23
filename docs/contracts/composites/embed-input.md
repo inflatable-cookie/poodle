@@ -142,13 +142,13 @@ None.
 |------|-------|---------|
 | TextArea | (delegates to TextArea) | all TextArea tokens |
 | ProviderPill | (delegates to Pill) | Pill tone="success", size="xs" tokens |
-| Error | `--flint-color-text-danger` | error text color (fallback #ef4444) |
-| SuccessText | `--flint-color-text-success` | success text color (fallback #22c55e) |
+| Error | `--poodle-color-text-danger` | error text color (fallback #ef4444) |
+| SuccessText | `--poodle-color-text-success` | success text color (fallback #22c55e) |
 
 ## 9. Svelte Notes
 
 - Uses `createEventDispatcher` for `parse` and `change` events
-- Composes `TextArea` and `Pill` from `@flint/svelte-primitives`
+- Composes `TextArea` and `Pill` from `@poodle/svelte-primitives`
 - Provider detection logic is internal:
   - YouTube: regex match on `youtube.com/watch?v=`, `youtube.com/embed/`, `youtu.be/`
   - Vimeo: regex match on `vimeo.com/{id}`
@@ -160,8 +160,8 @@ None.
 
 ## 10. GPUI Notes
 
-- Expected crate/module surface: `flint_gpui::composites::embed_input`
-- Provider detection logic should be shared via `flint-primitives` or a shared utility crate
+- Expected crate/module surface: `poodle_gpui::composites::embed_input`
+- Provider detection logic should be shared via `poodle-primitives` or a shared utility crate
 - TextArea and Pill composed from GPUI primitives
 
 ## 11. Parity Checklist

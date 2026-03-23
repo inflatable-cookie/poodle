@@ -41,20 +41,20 @@
 <style>
   .detail-shell {
     display: grid;
-    gap: var(--flint-space-stack-lg);
+    gap: var(--poodle-space-stack-lg);
   }
 
   .detail-shell__body,
   .detail-shell__state {
     display: grid;
-    gap: var(--flint-space-stack-lg);
+    gap: var(--poodle-space-stack-lg);
   }
 
   .detail-shell__state {
-    padding: calc(var(--flint-space-panel-y) * 2) calc(var(--flint-space-panel-x) * 1.5);
+    padding: calc(var(--poodle-space-panel-y) * 2) calc(var(--poodle-space-panel-x) * 1.5);
     border: 0.0625rem solid transparent;
-    border-radius: var(--flint-radius-surface);
-    background: color-mix(in srgb, var(--flint-color-background-panel) 96%, var(--flint-color-background-elevated));
+    border-radius: var(--poodle-radius-surface);
+    background: color-mix(in srgb, var(--poodle-color-background-panel) 96%, var(--poodle-color-background-elevated));
   }
 
   .detail-shell__state strong,
@@ -63,8 +63,8 @@
   }
 
   .detail-shell__state p {
-    color: var(--flint-color-text-secondary);
-    font-size: var(--flint-typography-body-size);
-    line-height: var(--flint-typography-body-lineHeight);
+    color: var(--poodle-color-text-secondary);
+    font-size: var(--poodle-typography-body-size);
+    line-height: var(--poodle-typography-body-lineHeight);
   }
 </style>

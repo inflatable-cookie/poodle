@@ -415,7 +415,7 @@ as cross-cutting fixes before or during the per-component pass:
 | Category | Gaps |
 |----------|------|
 | Tokens | No color-mix blending for fills. Radius resolves `radius.control` not `radius-surface`. No shadow/elevation rendering at all |
-| Structural | No `--flint-surface` context propagation (surface-elevation pattern unimplemented) |
+| Structural | No `--poodle-surface` context propagation (surface-elevation pattern unimplemented) |
 
 ### card
 
@@ -601,7 +601,7 @@ as cross-cutting fixes before or during the per-component pass:
 | Category | Gaps |
 |----------|------|
 | Anatomy | Root is flex-col not `position: relative`. Trigger has no role/tabindex/aria. Surface has no role. Placement rules not implemented |
-| Tokens | Radius/padding hardcoded. Min/max-width missing. Border wrong opacity. Shadow wrong. No `--flint-surface` equivalent |
+| Tokens | Radius/padding hardcoded. Min/max-width missing. Border wrong opacity. Shadow wrong. No `--poodle-surface` equivalent |
 | States | No outside-click. No Escape. No focus entry/restoration. No trigger focus ring |
 | A11y | No `role="dialog"` on surface. No `aria-expanded`/`aria-controls` on trigger |
 

@@ -18,7 +18,7 @@
     valueChange: { value: string };
   }>();
 
-  const generatedName = `flint-segmented-control-${++nextSegmentedControlId}`;
+  const generatedName = `poodle-segmented-control-${++nextSegmentedControlId}`;
   let uncontrolledValue = defaultValue;
 
   $: isControlled = value !== null;
@@ -59,15 +59,15 @@
     gap: 0.125rem;
     padding: 0.125rem;
     border: 0.0625rem solid var(
-      --flint-treatment-interactive-border,
-      color-mix(in srgb, var(--flint-color-border-subtle) 84%, transparent)
+      --poodle-treatment-interactive-border,
+      color-mix(in srgb, var(--poodle-color-border-subtle) 84%, transparent)
     );
-    border-radius: var(--flint-treatment-interactive-radius, var(--flint-radius-control));
+    border-radius: var(--poodle-treatment-interactive-radius, var(--poodle-radius-control));
     background: var(
-      --flint-treatment-interactive-fill,
-      color-mix(in srgb, var(--flint-surface) 93%, var(--flint-color-text-primary))
+      --poodle-treatment-interactive-fill,
+      color-mix(in srgb, var(--poodle-surface) 93%, var(--poodle-color-text-primary))
     );
-    box-shadow: var(--flint-treatment-interactive-shadow, none);
+    box-shadow: var(--poodle-treatment-interactive-shadow, none);
   }
 
   .segmented-control__segment {
@@ -86,37 +86,37 @@
   .segmented-control__label {
     display: block;
     min-width: 0;
-    min-height: calc(var(--flint-size-control-height) - 0.25rem);
+    min-height: calc(var(--poodle-size-control-height) - 0.25rem);
     padding: 0 0.75rem;
-    border-radius: calc(var(--flint-treatment-interactive-radius, var(--flint-radius-control)) - 0.125rem);
-    color: var(--flint-color-text-secondary);
-    font-family: var(--flint-typography-label-family);
+    border-radius: calc(var(--poodle-treatment-interactive-radius, var(--poodle-radius-control)) - 0.125rem);
+    color: var(--poodle-color-text-secondary);
+    font-family: var(--poodle-typography-label-family);
     font-size: 0.75rem;
     font-weight: 600;
-    line-height: calc(var(--flint-size-control-height) - 0.25rem);
+    line-height: calc(var(--poodle-size-control-height) - 0.25rem);
     text-align: center;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
     transition:
-      background var(--flint-motion-duration-interaction) var(--flint-motion-easing-standard),
-      color var(--flint-motion-duration-interaction) var(--flint-motion-easing-standard),
-      box-shadow var(--flint-motion-duration-interaction) var(--flint-motion-easing-standard);
+      background var(--poodle-motion-duration-interaction) var(--poodle-motion-easing-standard),
+      color var(--poodle-motion-duration-interaction) var(--poodle-motion-easing-standard),
+      box-shadow var(--poodle-motion-duration-interaction) var(--poodle-motion-easing-standard);
   }
 
   .segmented-control__segment[data-selected="true"] .segmented-control__label {
-    background: var(--flint-color-accent-base);
-    color: var(--flint-color-text-inverse);
+    background: var(--poodle-color-accent-base);
+    color: var(--poodle-color-text-inverse);
     box-shadow: inset 0 0.0625rem 0 color-mix(in srgb, white 12%, transparent);
   }
 
   .segmented-control__control:focus-visible + .segmented-control__label {
-    outline: var(--flint-border-width-focus) solid var(--flint-color-accent-focusRing);
+    outline: var(--poodle-border-width-focus) solid var(--poodle-color-accent-focusRing);
     outline-offset: 0.125rem;
   }
 
   .segmented-control__control:disabled + .segmented-control__label {
-    opacity: var(--flint-state-opacity-disabled);
+    opacity: var(--poodle-state-opacity-disabled);
     cursor: not-allowed;
   }
 </style>

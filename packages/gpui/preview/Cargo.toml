@@ -1,11 +1,11 @@
 [package]
-name = "flint-gpui-preview"
+name = "poodle-gpui-preview"
 version = "0.0.0"
 edition = "2021"
-description = "Native macOS preview application for the Flint design system, rendered via GPUI."
+description = "Native macOS preview application for the Poodle design system, rendered via GPUI."
 
 [[bin]]
-name = "flint-preview"
+name = "poodle-preview"
 path = "src/main.rs"
 
 [dependencies]
@@ -14,18 +14,18 @@ path = "src/main.rs"
 # conflicts, switch to git: gpui = { git = "https://github.com/zed-industries/zed" }
 gpui = "0.2.2"
 
-# Flint adapter + contracts + real components
-flint-gpui = { path = "../adapter" }
-flint-gpui-components = { path = "../components" }
-flint-adapter = { path = "../../contracts/adapter" }
-flint-primitives = { path = "../../contracts/primitives" }
-flint-composites = { path = "../../contracts/composites" }
-flint-workstation = { path = "../../contracts/workstation" }
-flint-style = { path = "../../contracts/style" }
-flint-tokens = { path = "../../contracts/tokens" }
+# Poodle adapter + contracts + real components
+poodle-gpui = { path = "../adapter" }
+poodle-gpui-components = { path = "../components" }
+poodle-adapter = { path = "../../contracts/adapter" }
+poodle-primitives = { path = "../../contracts/primitives" }
+poodle-composites = { path = "../../contracts/composites" }
+poodle-workstation = { path = "../../contracts/workstation" }
+poodle-style = { path = "../../contracts/style" }
+poodle-tokens = { path = "../../contracts/tokens" }
 anyhow = "1"
 
-[package.metadata.flint]
+[package.metadata.poodle]
 public-intent = true
 channel = "preview"
 stability = "pre-release"

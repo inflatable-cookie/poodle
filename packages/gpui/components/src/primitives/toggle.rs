@@ -3,8 +3,8 @@
 //! Contract: `docs/contracts/foundation/toggle.md`
 
 use gpui::*;
-use flint_gpui::GpuiThemeProvider;
-use flint_primitives::{ButtonVariant, ControlSize, ToggleLayout, ToggleSpec};
+use poodle_gpui::GpuiThemeProvider;
+use poodle_primitives::{ButtonVariant, ControlSize, ToggleLayout, ToggleSpec};
 
 use crate::theme_ext::{color_mix, color_mix_black, resolve_color, resolve_opacity, resolve_px, resolve_radius};
 
@@ -94,7 +94,7 @@ impl IntoElement for Toggle {
 
         // ── Build ─────────────────────────────────────────────────
         let label_text = spec.label.clone().unwrap_or_default();
-        let id = SharedString::from(format!("flint-toggle-{}", label_text));
+        let id = SharedString::from(format!("poodle-toggle-{}", label_text));
 
         let mut el = div()
             .id(id)

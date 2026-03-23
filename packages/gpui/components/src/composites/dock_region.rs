@@ -1,8 +1,8 @@
 //! DockRegion — real GPUI component backed by DockRegionSpec.
 
 use gpui::*;
-use flint_gpui::GpuiThemeProvider;
-use flint_composites::{DockEdge, DockRegionSpec, DockTabsPlacement, PanelTabItem};
+use poodle_gpui::GpuiThemeProvider;
+use poodle_composites::{DockEdge, DockRegionSpec, DockTabsPlacement, PanelTabItem};
 
 use crate::theme_ext::resolve_color;
 
@@ -34,7 +34,7 @@ impl DockRegion {
         Self {
             spec,
             theme: theme.clone(),
-            id_prefix: "flint-dock".to_string(),
+            id_prefix: "poodle-dock".to_string(),
             content: None,
             on_tab_change: None,
             on_collapse_toggle: None,

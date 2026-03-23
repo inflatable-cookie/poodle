@@ -1,8 +1,8 @@
 //! CardRadioGroup — selectable card group backed by CardRadioGroupSpec.
 
 use gpui::*;
-use flint_gpui::GpuiThemeProvider;
-use flint_composites::CardRadioGroupSpec;
+use poodle_gpui::GpuiThemeProvider;
+use poodle_composites::CardRadioGroupSpec;
 use crate::theme_ext::{color_mix, resolve_color, resolve_px, resolve_radius, resolve_opacity};
 
 pub struct CardRadioGroup {
@@ -104,7 +104,7 @@ impl IntoElement for CardRadioGroup {
                 );
             }
 
-            let card_id = SharedString::from(format!("flint-card-radio-{}", idx));
+            let card_id = SharedString::from(format!("poodle-card-radio-{}", idx));
             let mut card = div()
                 .id(card_id)
                 .focusable()

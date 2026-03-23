@@ -1,6 +1,6 @@
 use gpui::*;
-use flint_gpui::GpuiThemeProvider;
-use flint_primitives::{CardLayout, CardSpec, CardVariant};
+use poodle_gpui::GpuiThemeProvider;
+use poodle_primitives::{CardLayout, CardSpec, CardVariant};
 use crate::theme_ext::{color_mix, resolve_color, resolve_opacity, resolve_px, resolve_radius};
 
 pub struct Card {
@@ -22,7 +22,7 @@ impl Card {
         Self {
             spec: CardSpec::new(),
             theme: theme.clone(),
-            id_prefix: "flint-card".to_string(),
+            id_prefix: "poodle-card".to_string(),
             header: None,
             body: None,
             footer: None,
@@ -33,7 +33,7 @@ impl Card {
         Self {
             spec,
             theme: theme.clone(),
-            id_prefix: "flint-card".to_string(),
+            id_prefix: "poodle-card".to_string(),
             header: None,
             body: None,
             footer: None,

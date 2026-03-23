@@ -14,7 +14,7 @@ recovery patterns.
 
 ## Package Rule
 
-The `g04.007` tranche introduces `flint-gpui-composites` with:
+The `g04.007` tranche introduces `poodle-gpui-composites` with:
 
 - `FormShellSpec`
 - `ValidationSummarySpec`

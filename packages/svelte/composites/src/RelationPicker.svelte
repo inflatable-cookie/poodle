@@ -1,7 +1,7 @@
 <script lang="ts">
   import { createEventDispatcher } from "svelte";
 
-  import { Button, Checkbox, FormActions, Icon, SearchField } from "@flint/svelte-primitives";
+  import { Button, Checkbox, FormActions, Icon, SearchField } from "@poodle/svelte-primitives";
 
   import PickerShell from "./PickerShell.svelte";
   import SelectionSummary from "./SelectionSummary.svelte";
@@ -448,7 +448,7 @@
     display: flex;
     align-items: center;
     gap: 0.25rem;
-    padding-bottom: var(--flint-space-stack-sm);
+    padding-bottom: var(--poodle-space-stack-sm);
   }
 
   .drill-breadcrumbs__back {
@@ -459,19 +459,19 @@
     height: 1.5rem;
     padding: 0;
     border: none;
-    border-radius: var(--flint-radius-sm, 0.25rem);
+    border-radius: var(--poodle-radius-sm, 0.25rem);
     background: transparent;
-    color: var(--flint-color-text-secondary);
+    color: var(--poodle-color-text-secondary);
     cursor: pointer;
   }
 
   .drill-breadcrumbs__back:hover {
-    background: var(--flint-color-surface-hover, rgba(148, 163, 184, 0.12));
-    color: var(--flint-color-text-primary);
+    background: var(--poodle-color-surface-hover, rgba(148, 163, 184, 0.12));
+    color: var(--poodle-color-text-primary);
   }
 
   .drill-breadcrumbs__sep {
-    color: var(--flint-color-text-secondary);
+    color: var(--poodle-color-text-secondary);
     font-size: 0.6875rem;
     opacity: 0.6;
   }
@@ -479,9 +479,9 @@
   .drill-breadcrumbs__item {
     padding: 0.125rem 0.375rem;
     border: none;
-    border-radius: var(--flint-radius-sm, 0.25rem);
+    border-radius: var(--poodle-radius-sm, 0.25rem);
     background: transparent;
-    color: var(--flint-color-accent-base);
+    color: var(--poodle-color-accent-base);
     font-size: 0.75rem;
     font-weight: 500;
     cursor: pointer;
@@ -492,7 +492,7 @@
   }
 
   .drill-breadcrumbs__item:hover {
-    background: var(--flint-color-surface-hover, rgba(148, 163, 184, 0.12));
+    background: var(--poodle-color-surface-hover, rgba(148, 163, 184, 0.12));
   }
 
   .drill-level-label {
@@ -500,7 +500,7 @@
     font-weight: 600;
     text-transform: uppercase;
     letter-spacing: 0.08em;
-    color: var(--flint-color-text-secondary);
+    color: var(--poodle-color-text-secondary);
     padding-bottom: 0.25rem;
   }
 
@@ -521,13 +521,13 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
-    gap: var(--flint-space-inline-md);
+    gap: var(--poodle-space-inline-md);
     width: 100%;
     padding: 0.5rem 0.625rem;
     border: none;
-    border-radius: var(--flint-radius-control);
+    border-radius: var(--poodle-radius-control);
     background: transparent;
-    color: var(--flint-color-text-primary);
+    color: var(--poodle-color-text-primary);
     cursor: pointer;
     text-align: left;
     font: inherit;
@@ -535,11 +535,11 @@
   }
 
   .drill-list__button:hover {
-    background: color-mix(in srgb, var(--flint-color-background-surface) 60%, transparent);
+    background: color-mix(in srgb, var(--poodle-color-background-surface) 60%, transparent);
   }
 
   .drill-list__button:focus-visible {
-    outline: var(--flint-border-width-focus) solid var(--flint-color-accent-focusRing);
+    outline: var(--poodle-border-width-focus) solid var(--poodle-color-accent-focusRing);
     outline-offset: -0.0625rem;
   }
 
@@ -557,7 +557,7 @@
   }
 
   .drill-list__copy small {
-    color: var(--flint-color-text-secondary);
+    color: var(--poodle-color-text-secondary);
     font-size: 0.75rem;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -569,7 +569,7 @@
     align-items: center;
     gap: 0.25rem;
     flex-shrink: 0;
-    color: var(--flint-color-text-secondary);
+    color: var(--poodle-color-text-secondary);
   }
 
   .drill-list__count {
@@ -580,14 +580,14 @@
   .drill-list__empty {
     padding: 1.25rem;
     text-align: center;
-    color: var(--flint-color-text-secondary);
+    color: var(--poodle-color-text-secondary);
     font-size: 0.8125rem;
   }
 
   /* Existing flat picker styles */
   .relation-picker__list {
     display: grid;
-    gap: var(--flint-space-stack-sm);
+    gap: var(--poodle-space-stack-sm);
     margin: 0;
     padding: 0;
     list-style: none;
@@ -597,18 +597,18 @@
     display: grid;
     grid-template-columns: auto minmax(0, 1fr) auto;
     align-items: center;
-    gap: var(--flint-space-inline-md);
-    padding: var(--flint-space-panel-y) var(--flint-space-panel-x);
-    border: 0.0625rem solid var(--flint-color-border-subtle);
-    border-radius: var(--flint-radius-surface);
-    background: color-mix(in srgb, var(--flint-color-background-surface) 86%, transparent);
-    color: var(--flint-color-text-primary);
-    font-size: var(--flint-typography-label-size, 0.75rem);
+    gap: var(--poodle-space-inline-md);
+    padding: var(--poodle-space-panel-y) var(--poodle-space-panel-x);
+    border: 0.0625rem solid var(--poodle-color-border-subtle);
+    border-radius: var(--poodle-radius-surface);
+    background: color-mix(in srgb, var(--poodle-color-background-surface) 86%, transparent);
+    color: var(--poodle-color-text-primary);
+    font-size: var(--poodle-typography-label-size, 0.75rem);
   }
 
   .relation-picker__item[data-selected="true"] {
-    border-color: color-mix(in srgb, var(--flint-color-accent-base) 60%, transparent);
-    background: color-mix(in srgb, var(--flint-color-accent-base) 10%, transparent);
+    border-color: color-mix(in srgb, var(--poodle-color-accent-base) 60%, transparent);
+    background: color-mix(in srgb, var(--poodle-color-accent-base) 10%, transparent);
   }
 
   .relation-picker__item-button {
@@ -638,21 +638,21 @@
 
   .relation-picker__item-copy small,
   .relation-picker__footer-note {
-    color: var(--flint-color-text-secondary);
+    color: var(--poodle-color-text-secondary);
     font-size: 0.8125rem;
     line-height: 1.5;
   }
 
   .relation-picker__item-button:focus-visible {
-    outline: var(--flint-border-width-focus) solid var(--flint-color-accent-focusRing);
+    outline: var(--poodle-border-width-focus) solid var(--poodle-color-accent-focusRing);
     outline-offset: 0.125rem;
-    border-radius: var(--flint-radius-control);
+    border-radius: var(--poodle-radius-control);
   }
 
   .relation-picker__footer-actions {
     display: flex;
     flex-wrap: wrap;
-    gap: var(--flint-space-inline-sm);
+    gap: var(--poodle-space-inline-sm);
     justify-content: flex-end;
   }
 </style>

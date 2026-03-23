@@ -1,6 +1,6 @@
 use gpui::*;
-use flint_primitives::{CollapseDirection, CollapseToggleSpec, EyebrowSpec};
-use flint_gpui_components::{CollapseToggle, Eyebrow};
+use poodle_primitives::{CollapseDirection, CollapseToggleSpec, EyebrowSpec};
+use poodle_gpui_components::{CollapseToggle, Eyebrow};
 use crate::app_state::AppState;
 use crate::PreviewRoot;
 

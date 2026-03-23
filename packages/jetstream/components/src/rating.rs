@@ -1,8 +1,8 @@
 //! Rating — Jetstream star rating backed by RatingSpec.
 
 use jetstream_runtime::ui_element::{self, JsEl};
-use flint_jetstream::JetstreamThemeProvider;
-use flint_primitives::RatingSpec;
+use poodle_jetstream::JetstreamThemeProvider;
+use poodle_primitives::RatingSpec;
 
 use crate::theme_ext::{resolve_color, resolve_opacity};
 

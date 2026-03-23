@@ -5,8 +5,8 @@
 use std::time::Duration;
 
 use gpui::*;
-use flint_gpui::GpuiThemeProvider;
-use flint_primitives::ProgressSpec;
+use poodle_gpui::GpuiThemeProvider;
+use poodle_primitives::ProgressSpec;
 
 use crate::theme_ext::{color_mix, resolve_color};
 

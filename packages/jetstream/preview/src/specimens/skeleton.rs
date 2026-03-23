@@ -1,10 +1,10 @@
 //! Skeleton specimen — placeholder loading elements.
 
 use jetstream_runtime::ui_element::*;
-use flint_jetstream::JetstreamThemeProvider;
-use flint_jetstream_components::skeleton::js_skeleton;
-use flint_jetstream_components::theme_ext::*;
-use flint_primitives::SkeletonSpec;
+use poodle_jetstream::JetstreamThemeProvider;
+use poodle_jetstream_components::skeleton::js_skeleton;
+use poodle_jetstream_components::theme_ext::*;
+use poodle_primitives::SkeletonSpec;
 
 pub fn render(theme: &JetstreamThemeProvider) -> JsEl {
     let secondary = resolve_color(theme, "semantic.color.text.secondary");

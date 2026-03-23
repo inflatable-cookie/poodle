@@ -177,11 +177,11 @@ type OverlayPlacement = "top" | "bottom" | "left" | "right"
 
 | Property | Value |
 |----------|-------|
-| `--flint-icon-button-fill` | `transparent` |
-| `--flint-icon-button-fill-hover` | `color-mix(in srgb, var(--flint-icon-button-fill) 76%, var(--flint-color-background-elevated))` |
-| `--flint-icon-button-fill-active` | `color-mix(in srgb, var(--flint-icon-button-fill) 64%, var(--flint-color-background-elevated))` |
-| `--flint-icon-button-border` | `transparent` |
-| `--flint-icon-button-text` | `var(--flint-color-text-primary)` |
+| `--poodle-icon-button-fill` | `transparent` |
+| `--poodle-icon-button-fill-hover` | `color-mix(in srgb, var(--poodle-icon-button-fill) 76%, var(--poodle-color-background-elevated))` |
+| `--poodle-icon-button-fill-active` | `color-mix(in srgb, var(--poodle-icon-button-fill) 64%, var(--poodle-color-background-elevated))` |
+| `--poodle-icon-button-border` | `transparent` |
+| `--poodle-icon-button-text` | `var(--poodle-color-text-primary)` |
 
 ### Root `.icon-button` (base)
 
@@ -190,88 +190,88 @@ type OverlayPlacement = "top" | "bottom" | "left" | "right"
 | `display` | `inline-flex` |
 | `align-items` | `center` |
 | `justify-content` | `center` |
-| `width` | `var(--flint-size-control-height)` |
-| `height` | `var(--flint-size-control-height)` |
+| `width` | `var(--poodle-size-control-height)` |
+| `height` | `var(--poodle-size-control-height)` |
 | `padding` | `0` |
-| `border` | `0.0625rem solid var(--flint-icon-button-border)` |
-| `border-radius` | `var(--flint-treatment-interactive-radius, var(--flint-radius-control))` |
-| `background` | `var(--flint-icon-button-fill)` |
+| `border` | `0.0625rem solid var(--poodle-icon-button-border)` |
+| `border-radius` | `var(--poodle-treatment-interactive-radius, var(--poodle-radius-control))` |
+| `background` | `var(--poodle-icon-button-fill)` |
 | `box-shadow` | `none` (ghost default); `inset 0 0.0625rem 0 color-mix(in srgb, white 8%, transparent)` (primary/secondary) |
-| `color` | `var(--flint-icon-button-text)` |
+| `color` | `var(--poodle-icon-button-text)` |
 | `cursor` | `pointer` |
-| `transition` | `background, border-color, box-shadow, transform` at `var(--flint-motion-duration-interaction) var(--flint-motion-easing-standard)` |
+| `transition` | `background, border-color, box-shadow, transform` at `var(--poodle-motion-duration-interaction) var(--poodle-motion-easing-standard)` |
 
 ### Root — Size `sm`
 
 | Property | Value |
 |----------|-------|
-| `width` | `calc(var(--flint-size-control-height) - 0.375rem)` |
-| `height` | `calc(var(--flint-size-control-height) - 0.375rem)` |
+| `width` | `calc(var(--poodle-size-control-height) - 0.375rem)` |
+| `height` | `calc(var(--poodle-size-control-height) - 0.375rem)` |
 
 ### Root — Size `lg`
 
 | Property | Value |
 |----------|-------|
-| `width` | `calc(var(--flint-size-control-height) + 0.375rem)` |
-| `height` | `calc(var(--flint-size-control-height) + 0.375rem)` |
+| `width` | `calc(var(--poodle-size-control-height) + 0.375rem)` |
+| `height` | `calc(var(--poodle-size-control-height) + 0.375rem)` |
 
 ### Root — Variant `primary`
 
 | Property | Value |
 |----------|-------|
-| `--flint-icon-button-fill` | `var(--flint-color-accent-base)` |
-| `--flint-icon-button-border` | `color-mix(in srgb, var(--flint-color-accent-base) 84%, black)` |
-| `--flint-icon-button-text` | `var(--flint-color-text-inverse)` |
+| `--poodle-icon-button-fill` | `var(--poodle-color-accent-base)` |
+| `--poodle-icon-button-border` | `color-mix(in srgb, var(--poodle-color-accent-base) 84%, black)` |
+| `--poodle-icon-button-text` | `var(--poodle-color-text-inverse)` |
 
 ### Root — Variant `secondary`
 
 | Property | Value |
 |----------|-------|
-| `--flint-icon-button-fill` | `var(--flint-color-background-surface)` |
-| `--flint-icon-button-border` | `var(--flint-color-border-default)` |
+| `--poodle-icon-button-fill` | `var(--poodle-color-background-surface)` |
+| `--poodle-icon-button-border` | `var(--poodle-color-border-default)` |
 
 ### Tone: danger
 
-| Selector | `--flint-icon-button-fill` | `--flint-icon-button-border` | `--flint-icon-button-text` |
+| Selector | `--poodle-icon-button-fill` | `--poodle-icon-button-border` | `--poodle-icon-button-text` |
 |----------|--------------------------|----------------------------|--------------------------|
-| `[data-tone="danger"]` (ghost base) | `color-mix(in srgb, var(--flint-color-status-danger) 16%, var(--flint-color-background-surface))` | `color-mix(in srgb, var(--flint-color-status-danger) 46%, var(--flint-color-border-default))` | `var(--flint-color-text-primary)` |
-| `[data-variant="primary"][data-tone="danger"]` | `var(--flint-color-status-danger)` | `color-mix(in srgb, var(--flint-color-status-danger) 84%, black)` | `var(--flint-color-text-inverse)` |
-| `[data-variant="ghost"][data-tone="danger"]` | `transparent` | `transparent` | `var(--flint-color-status-danger)` |
+| `[data-tone="danger"]` (ghost base) | `color-mix(in srgb, var(--poodle-color-status-danger) 16%, var(--poodle-color-background-surface))` | `color-mix(in srgb, var(--poodle-color-status-danger) 46%, var(--poodle-color-border-default))` | `var(--poodle-color-text-primary)` |
+| `[data-variant="primary"][data-tone="danger"]` | `var(--poodle-color-status-danger)` | `color-mix(in srgb, var(--poodle-color-status-danger) 84%, black)` | `var(--poodle-color-text-inverse)` |
+| `[data-variant="ghost"][data-tone="danger"]` | `transparent` | `transparent` | `var(--poodle-color-status-danger)` |
 
 ### Ghost danger hover
 
 | Selector | Property | Value |
 |----------|----------|-------|
-| `.icon-button[data-variant="ghost"][data-tone="danger"]:hover:not(:disabled)` | `--flint-icon-button-border` | `color-mix(in srgb, var(--flint-color-status-danger) 46%, var(--flint-color-border-default))` |
-| `.icon-button[data-variant="ghost"][data-tone="danger"]:hover:not(:disabled)` | `background` | `color-mix(in srgb, var(--flint-color-status-danger) 10%, transparent)` |
+| `.icon-button[data-variant="ghost"][data-tone="danger"]:hover:not(:disabled)` | `--poodle-icon-button-border` | `color-mix(in srgb, var(--poodle-color-status-danger) 46%, var(--poodle-color-border-default))` |
+| `.icon-button[data-variant="ghost"][data-tone="danger"]:hover:not(:disabled)` | `background` | `color-mix(in srgb, var(--poodle-color-status-danger) 10%, transparent)` |
 
 ### Root — Pressed (`isPressed=true`)
 
 | Property | Value |
 |----------|-------|
-| `background` | `color-mix(in srgb, var(--flint-color-accent-base) 20%, var(--flint-icon-button-fill))` |
-| `border-color` | `color-mix(in srgb, var(--flint-color-accent-base) 56%, var(--flint-icon-button-border))` |
-| `box-shadow` | `inset 0 0.0625rem 0 color-mix(in srgb, white 12%, transparent), inset 0 0 0 0.0625rem color-mix(in srgb, var(--flint-color-accent-base) 18%, transparent)` |
+| `background` | `color-mix(in srgb, var(--poodle-color-accent-base) 20%, var(--poodle-icon-button-fill))` |
+| `border-color` | `color-mix(in srgb, var(--poodle-color-accent-base) 56%, var(--poodle-icon-button-border))` |
+| `box-shadow` | `inset 0 0.0625rem 0 color-mix(in srgb, white 12%, transparent), inset 0 0 0 0.0625rem color-mix(in srgb, var(--poodle-color-accent-base) 18%, transparent)` |
 
 ### Root — Hover (`:hover`)
 
 | Property | Value |
 |----------|-------|
-| `background` | `var(--flint-icon-button-fill-hover)` |
-| `border-color` | `color-mix(in srgb, var(--flint-icon-button-border) 74%, var(--flint-color-text-primary))` |
+| `background` | `var(--poodle-icon-button-fill-hover)` |
+| `border-color` | `color-mix(in srgb, var(--poodle-icon-button-border) 74%, var(--poodle-color-text-primary))` |
 
 ### Root — Active (`:active`)
 
 | Property | Value |
 |----------|-------|
-| `background` | `var(--flint-icon-button-fill-active)` |
+| `background` | `var(--poodle-icon-button-fill-active)` |
 | `transform` | `translateY(0.03125rem)` |
 
 ### Root — Focus Visible (`:focus-visible`)
 
 | Property | Value |
 |----------|-------|
-| `outline` | `var(--flint-border-width-focus) solid var(--flint-color-accent-focusRing)` |
+| `outline` | `var(--poodle-border-width-focus) solid var(--poodle-color-accent-focusRing)` |
 | `outline-offset` | `0.125rem` |
 
 ### Root — Disabled (`:disabled`)
@@ -279,7 +279,7 @@ type OverlayPlacement = "top" | "bottom" | "left" | "right"
 | Property | Value |
 |----------|-------|
 | `cursor` | `not-allowed` |
-| `opacity` | `var(--flint-state-opacity-disabled)` |
+| `opacity` | `var(--poodle-state-opacity-disabled)` |
 
 ### Glyph `.icon-button__glyph`
 
@@ -290,7 +290,7 @@ type OverlayPlacement = "top" | "bottom" | "left" | "right"
 | `justify-content` | `center` |
 | `width` | `45%` |
 | `height` | `45%` |
-| `font-family` | `var(--flint-typography-code-family)` |
+| `font-family` | `var(--poodle-typography-code-family)` |
 | `font-size` | `0.875rem` |
 | `line-height` | `1` |
 
@@ -332,8 +332,8 @@ to   { transform: rotate(360deg); }
   duplicating transition declarations
 - `data-variant`, `data-tone`, and `data-size` attributes on root for CSS targeting
 - Icon glyph is `aria-hidden` as the accessible name comes from `ariaLabel`
-- border-radius uses `--flint-treatment-interactive-radius` with
-  fallback to `--flint-radius-control`
+- border-radius uses `--poodle-treatment-interactive-radius` with
+  fallback to `--poodle-radius-control`
 - Built-in tooltip renders as a `<span role="tooltip">` with auto-generated
   `id`, linked to the button via `aria-describedby`
 - Tooltip displays `tooltip` prop text when provided, otherwise falls back
@@ -345,9 +345,9 @@ to   { transform: rotate(360deg); }
 
 ## 10. GPUI Notes
 
-- expected crate/module surface: `flint_gpui::components::icon_button`
+- expected crate/module surface: `poodle_gpui::components::icon_button`
 - Spec struct: `IconButtonSpec` in primitives crate holds variant + size + icon
-- Component struct: `FlintIconButton` in components crate renders via `IntoElement`
+- Component struct: `PoodleIconButton` in components crate renders via `IntoElement`
 - GPUI must not rely on tooltip text as the only accessible name
 - Custom property pattern for fill/border/hover/active can be flattened in
   GPUI to direct computed values per variant

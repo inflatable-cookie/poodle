@@ -1,16 +1,16 @@
 use gpui::*;
-use flint_adapter::ThemeProvider;
-use flint_gpui::GpuiThemeProvider;
-use flint_primitives::{CodeSpec, EyebrowSpec};
-use flint_gpui_components::{Code, Eyebrow};
+use poodle_adapter::ThemeProvider;
+use poodle_gpui::GpuiThemeProvider;
+use poodle_primitives::{CodeSpec, EyebrowSpec};
+use poodle_gpui_components::{Code, Eyebrow};
 use crate::style_bridge::color_to_hsla;
 
 pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
     let text_primary = theme.resolve_color("semantic.color.text.primary");
 
-    let ts_source = "import { Button } from \"@flint/svelte-primitives\";\n\nfunction handleClick(event: MouseEvent): void {\n  console.log(\"Button clicked\", event);\n}";
+    let ts_source = "import { Button } from \"@poodle/svelte-primitives\";\n\nfunction handleClick(event: MouseEvent): void {\n  console.log(\"Button clicked\", event);\n}";
 
-    let css_source = ".button {\n  display: inline-flex;\n  align-items: center;\n  border-radius: var(--flint-radius-control);\n  background: var(--flint-color-accent-base);\n}";
+    let css_source = ".button {\n  display: inline-flex;\n  align-items: center;\n  border-radius: var(--poodle-radius-control);\n  background: var(--poodle-color-accent-base);\n}";
 
     div().flex().flex_col().gap(px(24.0))
         // --- Block with language label ---

@@ -1,6 +1,6 @@
 <script lang="ts">
-  import { ToastStack, type ToastItem } from "@flint/svelte-composites";
-  import { Eyebrow, Button } from "@flint/svelte-primitives";
+  import { ToastStack, type ToastItem } from "@poodle/svelte-composites";
+  import { Eyebrow, Button } from "@poodle/svelte-primitives";
 
   let nextId = 4;
   let items: ToastItem[] = [

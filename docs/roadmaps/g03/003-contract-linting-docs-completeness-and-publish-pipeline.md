@@ -1,10 +1,10 @@
 # g03.003 Contract Linting, Docs Completeness, And Publish Pipeline
 
 Status: completed
-Owner: Flint Core
+Owner: Poodle Core
 Updated: 2026-03-12
 Depends on: g02.016
-Primary repos: `flint`
+Primary repos: `poodle`
 
 ## Goals
 

@@ -34,7 +34,7 @@
     monthChange: { month: string };
   }>();
 
-  const gridId = `flint-calendar-grid-${++nextCalendarId}`;
+  const gridId = `poodle-calendar-grid-${++nextCalendarId}`;
   let uncontrolledValue = defaultValue;
   let uncontrolledMonth = monthAnchorIso(visibleMonth ?? defaultValue ?? todayIsoDate());
   let focusIso = defaultValue ?? todayIsoDate();
@@ -213,7 +213,7 @@
   }
 
   .calendar__month {
-    font-family: var(--flint-typography-label-family);
+    font-family: var(--poodle-typography-label-family);
     font-size: 0.8125rem;
     font-weight: 600;
     letter-spacing: 0.02em;
@@ -226,16 +226,16 @@
     justify-content: center;
     width: 2rem;
     height: 2rem;
-    border: 0.0625rem solid var(--flint-color-border-default);
-    border-radius: var(--flint-radius-control);
-    background: var(--flint-color-background-surface);
-    color: var(--flint-color-text-primary);
+    border: 0.0625rem solid var(--poodle-color-border-default);
+    border-radius: var(--poodle-radius-control);
+    background: var(--poodle-color-background-surface);
+    color: var(--poodle-color-text-primary);
     cursor: pointer;
     font: inherit;
   }
 
   .calendar__nav:hover:not(:disabled) {
-    background: color-mix(in srgb, var(--flint-color-background-surface) 82%, var(--flint-color-background-elevated));
+    background: color-mix(in srgb, var(--poodle-color-background-surface) 82%, var(--poodle-color-background-elevated));
   }
 
   .calendar__weekdays {
@@ -243,8 +243,8 @@
   }
 
   .calendar__weekday {
-    color: var(--flint-color-text-secondary);
-    font-family: var(--flint-typography-label-family);
+    color: var(--poodle-color-text-secondary);
+    font-family: var(--poodle-typography-label-family);
     font-size: 0.6875rem;
     font-weight: 600;
     letter-spacing: 0.04em;
@@ -272,49 +272,49 @@
     min-height: 2.25rem;
     padding: 0.25rem;
     border: 0.0625rem solid transparent;
-    border-radius: var(--flint-radius-control);
+    border-radius: var(--poodle-radius-control);
     background: transparent;
-    color: var(--flint-color-text-primary);
+    color: var(--poodle-color-text-primary);
     cursor: pointer;
-    font-family: var(--flint-typography-label-family);
+    font-family: var(--poodle-typography-label-family);
     font-size: 0.75rem;
     font-weight: 500;
   }
 
   .calendar__day[data-current-month="false"] {
-    color: var(--flint-color-text-secondary);
+    color: var(--poodle-color-text-secondary);
     opacity: 0.72;
   }
 
   .calendar__day[data-today="true"] {
-    border-color: color-mix(in srgb, var(--flint-color-accent-base) 44%, var(--flint-color-border-default));
+    border-color: color-mix(in srgb, var(--poodle-color-accent-base) 44%, var(--poodle-color-border-default));
   }
 
   .calendar__day[data-selected="true"] {
-    background: var(--flint-color-accent-base);
-    color: var(--flint-color-text-inverse);
+    background: var(--poodle-color-accent-base);
+    color: var(--poodle-color-text-inverse);
   }
 
   .calendar__day:hover:not(:disabled),
   .calendar__day:focus-visible {
-    border-color: color-mix(in srgb, var(--flint-color-accent-base) 46%, var(--flint-color-border-default));
-    background: color-mix(in srgb, var(--flint-color-accent-base) 14%, transparent);
+    border-color: color-mix(in srgb, var(--poodle-color-accent-base) 46%, var(--poodle-color-border-default));
+    background: color-mix(in srgb, var(--poodle-color-accent-base) 14%, transparent);
     outline: none;
   }
 
   .calendar__day[data-selected="true"]:hover:not(:disabled),
   .calendar__day[data-selected="true"]:focus-visible {
-    background: color-mix(in srgb, var(--flint-color-accent-base) 88%, white 8%);
+    background: color-mix(in srgb, var(--poodle-color-accent-base) 88%, white 8%);
   }
 
   .calendar__nav:focus-visible {
-    outline: var(--flint-border-width-focus) solid var(--flint-color-accent-focusRing);
+    outline: var(--poodle-border-width-focus) solid var(--poodle-color-accent-focusRing);
     outline-offset: 0.125rem;
   }
 
   .calendar__nav:disabled,
   .calendar__day:disabled {
     cursor: not-allowed;
-    opacity: var(--flint-state-opacity-disabled);
+    opacity: var(--poodle-state-opacity-disabled);
   }
 </style>

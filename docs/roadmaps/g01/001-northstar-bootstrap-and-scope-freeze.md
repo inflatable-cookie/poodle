@@ -1,13 +1,13 @@
 # g01.001 Northstar Bootstrap And Scope Freeze
 
 Status: completed
-Owner: Flint Core
+Owner: Poodle Core
 Updated: 2026-03-11
-Primary repos: `flint`
+Primary repos: `poodle`
 
 ## Context
 
-Flint is a new repo with no established implementation surface. It needs a clear
+Poodle is a new repo with no established implementation surface. It needs a clear
 execution and documentation baseline before tokens, components, or downstream
 bridges are allowed to proliferate.
 
@@ -15,7 +15,7 @@ bridges are allowed to proliferate.
 
 Without a deliberate bootstrap tranche, the repo will drift into framework-
 specific decisions, partial package creation, and undocumented assumptions
-about what belongs in Flint versus Underlay or downstream app repos.
+about what belongs in Poodle versus Underlay or downstream app repos.
 
 ## Goals
 
@@ -23,7 +23,7 @@ about what belongs in Flint versus Underlay or downstream app repos.
 - [ ] freeze the project scope and non-goals
 - [ ] freeze the package-boundary model at a high level
 - [ ] define the planning standard for future generations and milestones
-- [ ] define what belongs inside Flint versus downstream extension repos
+- [ ] define what belongs inside Poodle versus downstream extension repos
 
 ## Non-Goals
 

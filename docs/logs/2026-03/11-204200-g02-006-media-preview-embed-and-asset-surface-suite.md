@@ -2,7 +2,7 @@
 
 Status: completed
 Date: 2026-03-11
-Owner: Flint Core
+Owner: Poodle Core
 
 ## Summary
 
@@ -20,7 +20,7 @@ Owner: Flint Core
 
 ## Notes
 
-- this tranche deliberately freezes framing, identity, and fallback posture without pretending Flint owns playback engines or embed-runtime selection
+- this tranche deliberately freezes framing, identity, and fallback posture without pretending Poodle owns playback engines or embed-runtime selection
 - accessibility focus remains on textual identity, explicit state, and recovery affordances surviving renderer failure
 
 ## Next Task

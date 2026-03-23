@@ -1,12 +1,12 @@
 use gpui::*;
-use flint_adapter::ThemeProvider;
-use flint_composites::{
+use poodle_adapter::ThemeProvider;
+use poodle_composites::{
     EmptyStateSpec, EmptyStateVariant, RemediationAction,
     MetricTileSpec,
     Toast, ToastTone, ToastStackSpec,
 };
-use flint_primitives::{ButtonVariant, EyebrowSpec};
-use flint_gpui_components::{EmptyState, MetricTile, ToastStack, Eyebrow};
+use poodle_primitives::{ButtonVariant, EyebrowSpec};
+use poodle_gpui_components::{EmptyState, MetricTile, ToastStack, Eyebrow};
 use crate::app_state::AppState;
 use crate::style_bridge::color_to_hsla;
 use crate::PreviewRoot;

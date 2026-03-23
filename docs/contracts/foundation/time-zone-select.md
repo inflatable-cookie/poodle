@@ -131,26 +131,26 @@ TimeZoneOption: { value: string; label: string; isDisabled?: boolean }
 | `display` | `grid` |
 | `grid-template-columns` | `minmax(0, 1fr) auto` |
 | `align-items` | `center` |
-| `gap` | `var(--flint-space-inline-sm)` |
-| `min-height` | `var(--flint-size-control-height)` |
-| `padding` | `0 var(--flint-space-control-x)` |
-| `border` | `0.0625rem solid var(--flint-color-border-default)` |
-| `border-radius` | `var(--flint-radius-control)` |
-| `background` | `var(--flint-color-background-surface)` |
+| `gap` | `var(--poodle-space-inline-sm)` |
+| `min-height` | `var(--poodle-size-control-height)` |
+| `padding` | `0 var(--poodle-space-control-x)` |
+| `border` | `0.0625rem solid var(--poodle-color-border-default)` |
+| `border-radius` | `var(--poodle-radius-control)` |
+| `background` | `var(--poodle-color-background-surface)` |
 | `transition` | `border-color, box-shadow, background` |
 
 ### Shell — focus-within
 
 | Property | Value |
 |----------|-------|
-| `border-color` | `var(--flint-color-accent-focusRing)` |
-| `box-shadow` | `0 0 0 var(--flint-border-width-focus) color-mix(in srgb, var(--flint-color-accent-focusRing) 28%, transparent)` |
+| `border-color` | `var(--poodle-color-accent-focusRing)` |
+| `box-shadow` | `0 0 0 var(--poodle-border-width-focus) color-mix(in srgb, var(--poodle-color-accent-focusRing) 28%, transparent)` |
 
 ### Shell — disabled
 
 | Property | Value |
 |----------|-------|
-| `opacity` | `var(--flint-state-opacity-disabled)` |
+| `opacity` | `var(--poodle-state-opacity-disabled)` |
 
 ### Control `.time-zone-select__control`
 
@@ -158,14 +158,14 @@ TimeZoneOption: { value: string; label: string; isDisabled?: boolean }
 |----------|-------|
 | `min-width` | `0` |
 | `width` | `100%` |
-| `height` | `calc(var(--flint-size-control-height) - (var(--flint-border-width-default) * 2))` |
+| `height` | `calc(var(--poodle-size-control-height) - (var(--poodle-border-width-default) * 2))` |
 | `padding` | `0` |
 | `border` | `0` |
 | `background` | `transparent` |
-| `color` | `var(--flint-color-text-primary)` |
-| `font-family` | `var(--flint-typography-body-family)` |
-| `font-size` | `var(--flint-typography-body-size)` |
-| `line-height` | `var(--flint-typography-body-lineHeight)` |
+| `color` | `var(--poodle-color-text-primary)` |
+| `font-family` | `var(--poodle-typography-body-family)` |
+| `font-size` | `var(--poodle-typography-body-size)` |
+| `line-height` | `var(--poodle-typography-body-lineHeight)` |
 | `outline` | `0` |
 | `appearance` | `none` |
 
@@ -173,14 +173,14 @@ TimeZoneOption: { value: string; label: string; isDisabled?: boolean }
 
 | Property | Value |
 |----------|-------|
-| `color` | `var(--flint-color-text-secondary)` |
+| `color` | `var(--poodle-color-text-secondary)` |
 
 ### Indicator `.time-zone-select__indicator`
 
 | Property | Value |
 |----------|-------|
-| `color` | `var(--flint-color-icon-muted)` |
-| `font-family` | `var(--flint-typography-code-family)` |
+| `color` | `var(--poodle-color-icon-muted)` |
+| `font-family` | `var(--poodle-typography-code-family)` |
 | `font-size` | `0.75rem` |
 | `line-height` | `1` |
 | `pointer-events` | `none` |
@@ -196,7 +196,7 @@ TimeZoneOption: { value: string; label: string; isDisabled?: boolean }
 
 ## 10. GPUI Notes
 
-- expected crate/module surface: `flint_gpui::primitives::time_zone_select`
+- expected crate/module surface: `poodle_gpui::primitives::time_zone_select`
 - Spec struct: `TimeZoneSelectSpec` in primitives crate
 - GPUI must model the select as a trigger that opens a platform-appropriate option list
 - Must expose selected value, expanded state, and option list through native accessibility tree

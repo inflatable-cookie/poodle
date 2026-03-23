@@ -4,12 +4,12 @@
     Eyebrow,
     ToggleGroup,
     type ToggleGroupOption,
-  } from "@flint/svelte-primitives";
+  } from "@poodle/svelte-primitives";
   import {
     themes,
     densityModes,
     controlSizes,
-  } from "@flint/svelte-tokens";
+  } from "@poodle/svelte-tokens";
 
   export let theme: string;
   export let density: string;
@@ -111,8 +111,8 @@
     align-items: flex-start;
     gap: 1.25rem 2rem;
     padding: 0.75rem 1rem;
-    border-bottom: 0.0625rem solid var(--flint-color-border-subtle);
-    background: var(--flint-color-background-panel);
+    border-bottom: 0.0625rem solid var(--poodle-color-border-subtle);
+    background: var(--poodle-color-background-panel);
   }
 
   .display-controls__group {

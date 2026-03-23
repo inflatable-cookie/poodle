@@ -1,8 +1,8 @@
 //! SelectionSummary — real GPUI component backed by SelectionSummarySpec.
 
 use gpui::*;
-use flint_gpui::GpuiThemeProvider;
-use flint_composites::{RemediationAction, SelectionSummaryItem, SelectionSummarySpec};
+use poodle_gpui::GpuiThemeProvider;
+use poodle_composites::{RemediationAction, SelectionSummaryItem, SelectionSummarySpec};
 
 use crate::theme_ext::{resolve_color, resolve_px};
 

@@ -1,8 +1,8 @@
 use gpui::*;
 use gpui::prelude::FluentBuilder;
-use flint_adapter::ThemeProvider;
-use flint_primitives::{SelectSpec, ChoiceOption, EyebrowSpec};
-use flint_gpui_components::{Select, Eyebrow};
+use poodle_adapter::ThemeProvider;
+use poodle_primitives::{SelectSpec, ChoiceOption, EyebrowSpec};
+use poodle_gpui_components::{Select, Eyebrow};
 use crate::app_state::AppState;
 use crate::style_bridge::color_to_hsla;
 use crate::PreviewRoot;

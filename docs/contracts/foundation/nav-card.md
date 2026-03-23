@@ -124,9 +124,9 @@ Updated: 2026-03-15
 | `align-items` | `center` |
 | `gap` | `0.75rem` |
 | `padding` | `0.875rem 1rem` |
-| `border` | `0.0625rem solid color-mix(in srgb, var(--flint-color-border-subtle) 32%, transparent)` |
-| `border-radius` | `var(--flint-radius-surface)` |
-| `background` | `var(--flint-color-background-surface)` |
+| `border` | `0.0625rem solid color-mix(in srgb, var(--poodle-color-border-subtle) 32%, transparent)` |
+| `border-radius` | `var(--poodle-radius-surface)` |
+| `background` | `var(--poodle-color-background-surface)` |
 | `color` | `inherit` |
 | `cursor` | `pointer` |
 | `text-decoration` | `none` |
@@ -139,14 +139,14 @@ Updated: 2026-03-15
 
 | Property | Value |
 |----------|-------|
-| `border-color` | `color-mix(in srgb, var(--flint-color-accent-base) 28%, var(--flint-color-border-subtle))` |
-| `background` | `color-mix(in srgb, var(--flint-color-background-elevated) 52%, var(--flint-color-background-surface))` |
+| `border-color` | `color-mix(in srgb, var(--poodle-color-accent-base) 28%, var(--poodle-color-border-subtle))` |
+| `background` | `color-mix(in srgb, var(--poodle-color-background-elevated) 52%, var(--poodle-color-background-surface))` |
 
 ### Root focus
 
 | Property | Value |
 |----------|-------|
-| `outline` | `var(--flint-border-width-focus) solid var(--flint-color-accent-focusRing)` |
+| `outline` | `var(--poodle-border-width-focus) solid var(--poodle-color-accent-focusRing)` |
 | `outline-offset` | `0.0625rem` |
 
 ### Root disabled
@@ -154,7 +154,7 @@ Updated: 2026-03-15
 | Property | Value |
 |----------|-------|
 | `cursor` | `not-allowed` |
-| `opacity` | `var(--flint-state-opacity-disabled)` |
+| `opacity` | `var(--poodle-state-opacity-disabled)` |
 
 ### Icon slot
 
@@ -166,9 +166,9 @@ Updated: 2026-03-15
 | `flex-shrink` | `0` |
 | `width` | `2rem` |
 | `height` | `2rem` |
-| `border-radius` | `var(--flint-radius-control)` |
-| `background` | `color-mix(in srgb, var(--flint-color-accent-base) 12%, transparent)` |
-| `color` | `var(--flint-color-accent-base)` |
+| `border-radius` | `var(--poodle-radius-control)` |
+| `background` | `color-mix(in srgb, var(--poodle-color-accent-base) 12%, transparent)` |
+| `color` | `var(--poodle-color-accent-base)` |
 | `font-size` | `1rem` |
 
 ### Content
@@ -188,10 +188,10 @@ Updated: 2026-03-15
 | `display` | `flex` |
 | `align-items` | `center` |
 | `gap` | `0.375rem` |
-| `font-family` | `var(--flint-typography-label-family)` |
-| `font-size` | `var(--flint-typography-label-size)` |
+| `font-family` | `var(--poodle-typography-label-family)` |
+| `font-size` | `var(--poodle-typography-label-size)` |
 | `font-weight` | `600` |
-| `color` | `var(--flint-color-text-primary)` |
+| `color` | `var(--poodle-color-text-primary)` |
 
 ### Badge
 
@@ -201,8 +201,8 @@ Updated: 2026-03-15
 | `align-items` | `center` |
 | `padding` | `0.0625rem 0.375rem` |
 | `border-radius` | `999px` |
-| `background` | `color-mix(in srgb, var(--flint-color-accent-base) 16%, transparent)` |
-| `color` | `var(--flint-color-accent-base)` |
+| `background` | `color-mix(in srgb, var(--poodle-color-accent-base) 16%, transparent)` |
+| `color` | `var(--poodle-color-accent-base)` |
 | `font-size` | `0.625rem` |
 | `font-weight` | `600` |
 | `text-transform` | `uppercase` |
@@ -213,7 +213,7 @@ Updated: 2026-03-15
 | Property | Value |
 |----------|-------|
 | `font-size` | `0.8125rem` |
-| `color` | `var(--flint-color-text-secondary)` |
+| `color` | `var(--poodle-color-text-secondary)` |
 | `line-height` | `1.4` |
 
 ### Arrow
@@ -223,7 +223,7 @@ Updated: 2026-03-15
 | `flex-shrink` | `0` |
 | `width` | `1rem` |
 | `height` | `1rem` |
-| `color` | `var(--flint-color-text-secondary)` |
+| `color` | `var(--poodle-color-text-secondary)` |
 | `opacity` | `0` |
 | `transition` | `opacity` at `motion-duration-interaction motion-easing-standard` |
 
@@ -243,9 +243,9 @@ Updated: 2026-03-15
 
 ## 10. GPUI Notes
 
-- expected crate/module surface: `flint_gpui::components::nav_card`
+- expected crate/module surface: `poodle_gpui::components::nav_card`
 - Spec struct: `NavCardSpec` in primitives crate
-- Component struct: `FlintNavCard` in components crate
+- Component struct: `PoodleNavCard` in components crate
 - Link vs button rendering maps to different GPUI element types
 - Arrow opacity animation may use GPUI's animation system
 - Badge pill styling matches standalone Pill component patterns

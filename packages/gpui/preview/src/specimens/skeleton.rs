@@ -1,8 +1,8 @@
 use gpui::*;
-use flint_adapter::ThemeProvider;
-use flint_gpui::GpuiThemeProvider;
-use flint_primitives::{SkeletonSpec, EyebrowSpec};
-use flint_gpui_components::{Skeleton, Eyebrow};
+use poodle_adapter::ThemeProvider;
+use poodle_gpui::GpuiThemeProvider;
+use poodle_primitives::{SkeletonSpec, EyebrowSpec};
+use poodle_gpui_components::{Skeleton, Eyebrow};
 use crate::style_bridge::color_to_hsla;
 
 pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
@@ -143,7 +143,7 @@ fn list_item_preset(theme: &GpuiThemeProvider) -> Div {
 /// Table-row preset: 4 cells at 40%/60%/60%/20% widths
 fn table_row_preset(
     theme: &GpuiThemeProvider,
-    border: flint_tokens::typed::ColorValue,
+    border: poodle_tokens::typed::ColorValue,
 ) -> Div {
     div()
         .flex().flex_row().gap(px(12.0))
@@ -179,7 +179,7 @@ fn table_row_preset(
 /// Card preset: block header + 3 body lines + pill footer
 fn card_preset(
     theme: &GpuiThemeProvider,
-    border: flint_tokens::typed::ColorValue,
+    border: poodle_tokens::typed::ColorValue,
 ) -> Div {
     div()
         .flex().flex_col().gap(px(12.0))

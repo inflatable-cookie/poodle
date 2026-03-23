@@ -5,12 +5,12 @@ Updated: 2026-03-14
 
 ## Objective
 
-Define the traits that rendering adapters implement to map Flint component specs
+Define the traits that rendering adapters implement to map Poodle component specs
 and resolved styles to a target renderer's native element types.
 
 ## Deliverables
 
-New crate: `flint-adapter` at `packages/contracts/adapter/`
+New crate: `poodle-adapter` at `packages/contracts/adapter/`
 
 ### Traits
 
@@ -32,14 +32,14 @@ New crate: `flint-adapter` at `packages/contracts/adapter/`
 
 ### Dependencies
 
-- `flint-events` — `SemanticEvent` type for `EventSink`
-- `flint-style` — `StyleDescriptor` for `RenderComponent`
-- `flint-tokens` — `ColorValue` for `ThemeProvider`
-- `flint-layout` — transitive via `flint-style`
+- `poodle-events` — `SemanticEvent` type for `EventSink`
+- `poodle-style` — `StyleDescriptor` for `RenderComponent`
+- `poodle-tokens` — `ColorValue` for `ThemeProvider`
+- `poodle-layout` — transitive via `poodle-style`
 
 ## Verification
 
-- [x] `flint-adapter` crate compiles
+- [x] `poodle-adapter` crate compiles
 - [x] 3 tests pass with mock implementations of all traits
 - [x] `RenderComponent<Spec>` is generic over any spec type
 - [x] `AdapterManifest` supports intentional unsupported deltas

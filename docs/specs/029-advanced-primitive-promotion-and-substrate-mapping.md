@@ -8,23 +8,23 @@ Depends on: `005-product-composite-composition-and-information-architecture-rule
 
 The documented foundation baseline is now implemented in Svelte, but the wider
 headless substrate still exposes additional generalized primitives. This spec
-defines how those families should be promoted into Flint instead of either
+defines how those families should be promoted into Poodle instead of either
 stopping too early or copying the substrate catalogue uncritically.
 
 ## Promotion Rule
 
-Wider substrate primitives should become first-class Flint contracts only when
+Wider substrate primitives should become first-class Poodle contracts only when
 all of the following are true:
 
 - the surface is generalized enough for downstream apps beyond one product
-- the semantics fit cleanly into Flint's foundation layer rather than an existing
+- the semantics fit cleanly into Poodle's foundation layer rather than an existing
   composite or workstation layer
-- the public API can remain Flint-owned rather than mirroring substrate naming
+- the public API can remain Poodle-owned rather than mirroring substrate naming
 - parity expectations with GPUI can be stated concretely
 
 ## Non-Promotion Rule
 
-Not every substrate primitive should become a Flint foundation primitive.
+Not every substrate primitive should become a Poodle foundation primitive.
 
 In particular:
 
@@ -37,7 +37,7 @@ In particular:
 ## Current Expansion Tranche
 
 The first post-baseline advanced primitive tranche promotes these families into
-Flint foundation:
+Poodle foundation:
 
 - `Toggle`
 - `ToggleGroup`
@@ -52,7 +52,7 @@ ownership.
 
 ## Ownership Mapping Rule
 
-The wider substrate catalogue should currently map into Flint like this:
+The wider substrate catalogue should currently map into Poodle like this:
 
 ### Promote To Foundation
 
@@ -150,7 +150,7 @@ Good batches:
 Bad batches:
 
 - adding one advanced primitive only because a demo needs it
-- mirroring substrate names without a Flint ownership decision
+- mirroring substrate names without a Poodle ownership decision
 - splitting semantically linked families across many tiny implementation passes
 
 ## Current Risk

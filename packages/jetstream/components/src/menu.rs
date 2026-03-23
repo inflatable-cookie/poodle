@@ -1,8 +1,8 @@
 //! Menu — Jetstream vertical menu backed by MenuSpec.
 
 use jetstream_runtime::ui_element::{self, JsEl};
-use flint_jetstream::JetstreamThemeProvider;
-use flint_primitives::MenuSpec;
+use poodle_jetstream::JetstreamThemeProvider;
+use poodle_primitives::MenuSpec;
 
 use crate::theme_ext::{resolve_color, resolve_radius};
 

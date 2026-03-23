@@ -2,8 +2,8 @@
 
 use gpui::prelude::FluentBuilder;
 use gpui::*;
-use flint_gpui::GpuiThemeProvider;
-use flint_composites::{BrowseState, PickerShellSpec, PickerVariant, SelectionMode};
+use poodle_gpui::GpuiThemeProvider;
+use poodle_composites::{BrowseState, PickerShellSpec, PickerVariant, SelectionMode};
 
 use crate::theme_ext::{resolve_color, resolve_px, resolve_radius};
 

@@ -4,7 +4,7 @@
 //! using GPUI's svg() element at the correct token-resolved size.
 
 use gpui::*;
-use flint_primitives::{IconSize, IconSpec};
+use poodle_primitives::{IconSize, IconSpec};
 
 use crate::theme_ext::{resolve_color, resolve_px};
 
@@ -16,7 +16,7 @@ use crate::theme_ext::{resolve_color, resolve_px};
 /// ```
 pub struct Icon {
     spec: IconSpec,
-    theme: flint_gpui::GpuiThemeProvider,
+    theme: poodle_gpui::GpuiThemeProvider,
     /// Explicit color override. If None, uses theme's icon.primary color.
     color: Option<Hsla>,
 }
@@ -27,11 +27,11 @@ impl std::ops::Deref for Icon {
 }
 
 impl Icon {
-    pub fn new(name: impl Into<String>, theme: &flint_gpui::GpuiThemeProvider) -> Self {
+    pub fn new(name: impl Into<String>, theme: &poodle_gpui::GpuiThemeProvider) -> Self {
         Self { spec: IconSpec::new(name), theme: theme.clone(), color: None }
     }
 
-    pub fn from_spec(spec: IconSpec, theme: &flint_gpui::GpuiThemeProvider) -> Self {
+    pub fn from_spec(spec: IconSpec, theme: &poodle_gpui::GpuiThemeProvider) -> Self {
         Self {
             spec,
             theme: theme.clone(),
@@ -46,7 +46,7 @@ impl Icon {
 
 
     /// Create a small icon for use inside buttons.
-    pub fn button_icon(name: impl Into<String>, theme: &flint_gpui::GpuiThemeProvider) -> Self {
+    pub fn button_icon(name: impl Into<String>, theme: &poodle_gpui::GpuiThemeProvider) -> Self {
         Self::from_spec(IconSpec::new(name).with_size(IconSize::Sm), theme)
     }
 

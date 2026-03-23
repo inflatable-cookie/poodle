@@ -42,67 +42,67 @@
 
 <style>
   .card {
-    --flint-recipe-card-radius: var(--flint-treatment-surface-radius, var(--flint-radius-surface));
-    --flint-recipe-card-fill: color-mix(
+    --poodle-recipe-card-radius: var(--poodle-treatment-surface-radius, var(--poodle-radius-surface));
+    --poodle-recipe-card-fill: color-mix(
       in srgb,
-      var(--flint-color-background-panel) 98%,
-      var(--flint-color-background-elevated)
+      var(--poodle-color-background-panel) 98%,
+      var(--poodle-color-background-elevated)
     );
-    --flint-recipe-card-border: color-mix(
+    --poodle-recipe-card-border: color-mix(
       in srgb,
-      var(--flint-color-border-subtle) 18%,
+      var(--poodle-color-border-subtle) 18%,
       transparent
     );
-    --flint-recipe-card-shadow:
-      inset 0 0 0 0.0625rem color-mix(in srgb, var(--flint-color-border-subtle) 18%, transparent);
-    --flint-recipe-card-divider: color-mix(
+    --poodle-recipe-card-shadow:
+      inset 0 0 0 0.0625rem color-mix(in srgb, var(--poodle-color-border-subtle) 18%, transparent);
+    --poodle-recipe-card-divider: color-mix(
       in srgb,
-      var(--flint-color-border-subtle) 52%,
+      var(--poodle-color-border-subtle) 52%,
       transparent
     );
-    --flint-recipe-card-hover-fill: var(
-      --flint-treatment-surface-hover-fill,
-      color-mix(in srgb, var(--flint-color-background-elevated) 94%, var(--flint-color-background-panel))
+    --poodle-recipe-card-hover-fill: var(
+      --poodle-treatment-surface-hover-fill,
+      color-mix(in srgb, var(--poodle-color-background-elevated) 94%, var(--poodle-color-background-panel))
     );
-    --flint-recipe-card-hover-border: var(
-      --flint-treatment-surface-hover-border,
-      color-mix(in srgb, var(--flint-color-accent-base) 28%, var(--flint-color-border-subtle))
+    --poodle-recipe-card-hover-border: var(
+      --poodle-treatment-surface-hover-border,
+      color-mix(in srgb, var(--poodle-color-accent-base) 28%, var(--poodle-color-border-subtle))
     );
-    --flint-recipe-card-hover-shadow: var(--flint-treatment-surface-hover-shadow, var(--flint-recipe-card-shadow));
+    --poodle-recipe-card-hover-shadow: var(--poodle-treatment-surface-hover-shadow, var(--poodle-recipe-card-shadow));
     display: grid;
     align-content: start;
-    gap: var(--flint-space-stack-md);
-    padding: var(--flint-space-panel-x);
-    border: 0.0625rem solid var(--flint-recipe-card-border);
-    border-radius: var(--flint-recipe-card-radius);
+    gap: var(--poodle-space-stack-md);
+    padding: var(--poodle-space-panel-x);
+    border: 0.0625rem solid var(--poodle-recipe-card-border);
+    border-radius: var(--poodle-recipe-card-radius);
     background: var(
-      --flint-treatment-surface-fill,
-      color-mix(in srgb, var(--flint-surface) 88%, var(--flint-color-text-primary))
+      --poodle-treatment-surface-fill,
+      color-mix(in srgb, var(--poodle-surface) 88%, var(--poodle-color-text-primary))
     );
-    --flint-surface: var(--flint-treatment-surface-fill, var(--flint-recipe-card-fill));
-    box-shadow: var(--flint-treatment-surface-shadow, var(--flint-recipe-card-shadow));
+    --poodle-surface: var(--poodle-treatment-surface-fill, var(--poodle-recipe-card-fill));
+    box-shadow: var(--poodle-treatment-surface-shadow, var(--poodle-recipe-card-shadow));
   }
 
   .card[data-variant="outlined"] {
-    border-color: color-mix(in srgb, var(--flint-color-border-default) 76%, transparent);
+    border-color: color-mix(in srgb, var(--poodle-color-border-default) 76%, transparent);
   }
 
   .card[data-variant="elevated"] {
-    border-radius: var(--flint-treatment-surface-elevated-radius, var(--flint-recipe-card-radius));
+    border-radius: var(--poodle-treatment-surface-elevated-radius, var(--poodle-recipe-card-radius));
     border-color: color-mix(
       in srgb,
-      var(--flint-treatment-surface-elevated-border, var(--flint-color-border-default)) 82%,
-      var(--flint-color-border-default)
+      var(--poodle-treatment-surface-elevated-border, var(--poodle-color-border-default)) 82%,
+      var(--poodle-color-border-default)
     );
     background: var(
-      --flint-treatment-surface-elevated-fill,
-      color-mix(in srgb, var(--flint-color-background-elevated) 98%, var(--flint-color-background-panel))
+      --poodle-treatment-surface-elevated-fill,
+      color-mix(in srgb, var(--poodle-color-background-elevated) 98%, var(--poodle-color-background-panel))
     );
     box-shadow:
       0 1.125rem 2.5rem color-mix(in srgb, black 38%, transparent),
       0 0.375rem 0.875rem color-mix(in srgb, black 24%, transparent),
-      inset 0 0.0625rem 0 color-mix(in srgb, var(--flint-color-text-inverse) 10%, transparent),
-      0 0 0 0.0625rem color-mix(in srgb, var(--flint-color-border-default) 12%, transparent);
+      inset 0 0.0625rem 0 color-mix(in srgb, var(--poodle-color-text-inverse) 10%, transparent),
+      0 0 0 0.0625rem color-mix(in srgb, var(--poodle-color-border-default) 12%, transparent);
   }
 
   :global([data-theme="light"]) .card[data-variant="elevated"] {
@@ -110,14 +110,14 @@
       0 0.875rem 1.75rem rgba(49, 66, 85, 0.1),
       0 0.25rem 0.625rem rgba(49, 66, 85, 0.06),
       inset 0 0.0625rem 0 rgba(255, 255, 255, 0.72),
-      0 0 0 0.0625rem color-mix(in srgb, var(--flint-color-border-default) 10%, transparent);
+      0 0 0 0.0625rem color-mix(in srgb, var(--poodle-color-border-default) 10%, transparent);
   }
 
   .card[data-selected="true"] {
-    border-color: var(--flint-color-accent-base);
+    border-color: var(--poodle-color-accent-base);
     box-shadow:
-      0 0 0 0.0625rem var(--flint-color-accent-base),
-      inset 0 0 0 0.0625rem color-mix(in srgb, var(--flint-color-accent-base) 12%, transparent);
+      0 0 0 0.0625rem var(--poodle-color-accent-base),
+      inset 0 0 0 0.0625rem color-mix(in srgb, var(--poodle-color-accent-base) 12%, transparent);
   }
 
   .card[data-interactive="true"] {
@@ -125,16 +125,16 @@
   }
 
   .card[data-interactive="true"]:hover {
-    border-color: var(--flint-recipe-card-hover-border);
-    background: var(--flint-recipe-card-hover-fill);
-    box-shadow: var(--flint-recipe-card-hover-shadow);
+    border-color: var(--poodle-recipe-card-hover-border);
+    background: var(--poodle-recipe-card-hover-fill);
+    box-shadow: var(--poodle-recipe-card-hover-shadow);
   }
 
   .card[data-interactive="true"][data-selected="true"]:hover {
-    border-color: var(--flint-color-accent-base);
+    border-color: var(--poodle-color-accent-base);
     box-shadow:
-      0 0 0 0.0625rem var(--flint-color-accent-base),
-      inset 0 0 0 0.0625rem color-mix(in srgb, var(--flint-color-accent-base) 12%, transparent);
+      0 0 0 0.0625rem var(--poodle-color-accent-base),
+      inset 0 0 0 0.0625rem color-mix(in srgb, var(--poodle-color-accent-base) 12%, transparent);
   }
 
   .card[data-layout="horizontal"] {
@@ -148,17 +148,17 @@
   }
 
   .card[data-layout="compact"] {
-    padding: var(--flint-space-panel-y-sm, 0.5rem) var(--flint-space-panel-x-sm, 0.625rem);
-    gap: var(--flint-space-stack-sm);
+    padding: var(--poodle-space-panel-y-sm, 0.5rem) var(--poodle-space-panel-x-sm, 0.625rem);
+    gap: var(--poodle-space-stack-sm);
   }
 
   .card__media {
     overflow: hidden;
-    border-radius: calc(var(--flint-recipe-card-radius) - 0.1875rem);
+    border-radius: calc(var(--poodle-recipe-card-radius) - 0.1875rem);
   }
 
   .card__footer {
-    padding-top: var(--flint-space-stack-sm);
-    border-top: 0.0625rem solid var(--flint-treatment-surface-divider, var(--flint-recipe-card-divider));
+    padding-top: var(--poodle-space-stack-sm);
+    border-top: 0.0625rem solid var(--poodle-treatment-surface-divider, var(--poodle-recipe-card-divider));
   }
 </style>

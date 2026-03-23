@@ -2,8 +2,8 @@
 
 use gpui::prelude::FluentBuilder;
 use gpui::*;
-use flint_gpui::GpuiThemeProvider;
-use flint_composites::{EmptyStateSpec, EmptyStateVariant, RemediationAction};
+use poodle_gpui::GpuiThemeProvider;
+use poodle_composites::{EmptyStateSpec, EmptyStateVariant, RemediationAction};
 
 use crate::theme_ext::{resolve_color, resolve_px, resolve_radius};
 
@@ -120,7 +120,7 @@ impl IntoElement for EmptyState {
             let mut actions_row = div().flex().gap(inline_gap).items_center();
 
             for action in &spec.actions {
-                let is_primary = action.variant == flint_primitives::ButtonVariant::Primary;
+                let is_primary = action.variant == poodle_primitives::ButtonVariant::Primary;
                 let label = action.label.clone();
                 let action_id = SharedString::from(format!("empty-action-{}", action.id));
 

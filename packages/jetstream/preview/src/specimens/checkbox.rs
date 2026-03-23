@@ -1,10 +1,10 @@
 //! Checkbox specimen.
 
 use jetstream_runtime::ui_element::*;
-use flint_jetstream::JetstreamThemeProvider;
-use flint_jetstream_components::checkbox::js_checkbox;
-use flint_jetstream_components::theme_ext::*;
-use flint_primitives::CheckboxSpec;
+use poodle_jetstream::JetstreamThemeProvider;
+use poodle_jetstream_components::checkbox::js_checkbox;
+use poodle_jetstream_components::theme_ext::*;
+use poodle_primitives::CheckboxSpec;
 
 pub fn render(theme: &JetstreamThemeProvider) -> JsEl {
     let secondary = resolve_color(theme, "semantic.color.text.secondary");

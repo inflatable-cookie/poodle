@@ -87,12 +87,12 @@ definition across targets.
 
 ### CSS
 
-- `packages/tokens/artifacts/css/flint-tokens.css`
-- `packages/tokens/artifacts/css/flint-theme-light.css`
-- `packages/tokens/artifacts/css/flint-theme-dark.css`
-- `packages/tokens/artifacts/css/flint-theme-loophole-studio.css`
-- `packages/tokens/artifacts/css/flint-density-compact.css`
-- `packages/tokens/artifacts/css/flint-density-comfortable.css`
+- `packages/tokens/artifacts/css/poodle-tokens.css`
+- `packages/tokens/artifacts/css/poodle-theme-light.css`
+- `packages/tokens/artifacts/css/poodle-theme-dark.css`
+- `packages/tokens/artifacts/css/poodle-theme-loophole-studio.css`
+- `packages/tokens/artifacts/css/poodle-density-compact.css`
+- `packages/tokens/artifacts/css/poodle-density-comfortable.css`
 
 ### TypeScript
 

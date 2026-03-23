@@ -1,9 +1,9 @@
 use gpui::*;
-use flint_adapter::ThemeProvider;
-use flint_composites::ShellStatusBarSpec;
-use flint_gpui_components::{StatusBar, Eyebrow};
-use flint_primitives::{StatusIndicatorSpec, StatusTone, EyebrowSpec};
-use flint_gpui_components::StatusIndicator;
+use poodle_adapter::ThemeProvider;
+use poodle_composites::ShellStatusBarSpec;
+use poodle_gpui_components::{StatusBar, Eyebrow};
+use poodle_primitives::{StatusIndicatorSpec, StatusTone, EyebrowSpec};
+use poodle_gpui_components::StatusIndicator;
 use crate::app_state::AppState;
 use crate::style_bridge::color_to_hsla;
 use crate::PreviewRoot;

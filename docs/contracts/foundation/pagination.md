@@ -145,14 +145,14 @@ Updated: 2026-03-15
 | `align-items` | `center` |
 | `justify-content` | `center` |
 | `min-width` | `2.25rem` |
-| `height` | `calc(var(--flint-size-control-height) - 0.125rem)` |
+| `height` | `calc(var(--poodle-size-control-height) - 0.125rem)` |
 | `padding` | `0 0.75rem` |
-| `border` | `0.0625rem solid color-mix(in srgb, var(--flint-color-border-default) 78%, transparent)` |
-| `border-radius` | `var(--flint-radius-control)` |
-| `background` | `var(--flint-color-background-surface)` |
-| `color` | `var(--flint-color-text-primary)` |
+| `border` | `0.0625rem solid color-mix(in srgb, var(--poodle-color-border-default) 78%, transparent)` |
+| `border-radius` | `var(--poodle-radius-control)` |
+| `background` | `var(--poodle-color-background-surface)` |
+| `color` | `var(--poodle-color-text-primary)` |
 | `cursor` | `pointer` |
-| `font-family` | `var(--flint-typography-label-family)` |
+| `font-family` | `var(--poodle-typography-label-family)` |
 | `font-size` | `0.75rem` |
 | `font-weight` | `600` |
 | `line-height` | `1` |
@@ -161,14 +161,14 @@ Updated: 2026-03-15
 
 | Property | Value |
 |----------|-------|
-| `background` | `color-mix(in srgb, var(--flint-color-accent-base) 18%, transparent)` |
-| `border-color` | `color-mix(in srgb, var(--flint-color-accent-base) 42%, var(--flint-color-border-default))` |
+| `background` | `color-mix(in srgb, var(--poodle-color-accent-base) 18%, transparent)` |
+| `border-color` | `color-mix(in srgb, var(--poodle-color-accent-base) 42%, var(--poodle-color-border-default))` |
 
 ### Button — hover / focus (not disabled, not current)
 
 | Property | Value |
 |----------|-------|
-| `background` | `color-mix(in srgb, var(--flint-color-accent-base) 12%, transparent)` |
+| `background` | `color-mix(in srgb, var(--poodle-color-accent-base) 12%, transparent)` |
 | `outline` | `none` |
 
 ### Button — disabled
@@ -176,7 +176,7 @@ Updated: 2026-03-15
 | Property | Value |
 |----------|-------|
 | `cursor` | `not-allowed` |
-| `opacity` | `var(--flint-state-opacity-disabled)` |
+| `opacity` | `var(--poodle-state-opacity-disabled)` |
 
 ### Ellipsis `.pagination__ellipsis`
 
@@ -186,8 +186,8 @@ Updated: 2026-03-15
 | `align-items` | `center` |
 | `justify-content` | `center` |
 | `min-width` | `1.5rem` |
-| `color` | `var(--flint-color-text-secondary)` |
-| `font-family` | `var(--flint-typography-label-family)` |
+| `color` | `var(--poodle-color-text-secondary)` |
+| `font-family` | `var(--poodle-typography-label-family)` |
 | `font-size` | `0.75rem` |
 | `font-weight` | `600` |
 
@@ -201,7 +201,7 @@ Updated: 2026-03-15
 
 ## 10. GPUI Notes
 
-- expected crate/module surface: `flint_gpui::primitives::pagination`
+- expected crate/module surface: `poodle_gpui::primitives::pagination`
 - Spec struct: `PaginationSpec` in primitives crate
 - GPUI must expose nav landmark semantics and current-page state
 - Ellipsis truncation logic must match Svelte implementation for consistent page windows

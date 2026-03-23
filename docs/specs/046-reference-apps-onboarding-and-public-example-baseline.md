@@ -6,7 +6,7 @@ Depends on: `020-docs-site-example-and-component-discoverability-rules.md`, `039
 
 ## Purpose
 
-Freeze what Flint means by reference apps, adopter onboarding depth, and
+Freeze what Poodle means by reference apps, adopter onboarding depth, and
 public-facing examples during `g03`, without pretending the repo already ships
 full runnable starter repos or polished marketing documentation.
 
@@ -19,7 +19,7 @@ current proofs, packages, and preview examples rather than drifting into vague
 Reference apps in `g03` are reference shapes and onboarding lanes first, not a
 fleet of generated app templates.
 
-Flint should define how direct consumers, bridge-mediated consumers,
+Poodle should define how direct consumers, bridge-mediated consumers,
 workstation-oriented consumers, and evaluators should approach the system. It
 should not imply that every adoption lane already has a polished runnable
 example repository.
@@ -82,13 +82,13 @@ It records:
 
 ## Honesty Rule
 
-Flint may say:
+Poodle may say:
 
 - the repo has explicit reference shapes for major adoption lanes
 - onboarding paths are documented
 - the preview acts as a public example surface for evaluation
 
-Flint may not say:
+Poodle may not say:
 
 - every adoption lane has a finished runnable starter repo
 - preview examples are a substitute for contracts and package READMEs

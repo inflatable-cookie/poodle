@@ -6,8 +6,8 @@
 //! ALL dimensions from contract. ZERO hardcoded values.
 
 use jetstream_runtime::ui_element::{self, JsEl};
-use flint_jetstream::JetstreamThemeProvider;
-use flint_primitives::{AccordionItemSpec, AccordionSpec};
+use poodle_jetstream::JetstreamThemeProvider;
+use poodle_primitives::{AccordionItemSpec, AccordionSpec};
 
 use crate::theme_ext::{resolve_color, resolve_opacity, resolve_px, resolve_radius, tint};
 
@@ -29,7 +29,7 @@ use crate::theme_ext::{resolve_color, resolve_opacity, resolve_px, resolve_radiu
 /// Contract item dimensions:
 /// - padding: 0.875rem 1rem (14px 16px)
 /// - border: 0.0625rem (1px) solid color-mix(border-subtle 36%, transparent)
-/// - border-radius: var(--flint-radius-surface)
+/// - border-radius: var(--poodle-radius-surface)
 /// - background: color-mix(surface 50%, elevated)
 /// - box-shadow: inset 0 0.0625rem 0 color-mix(text-inverse 8%, transparent)
 pub fn js_accordion(spec: &AccordionSpec, theme: &JetstreamThemeProvider) -> JsEl {
@@ -135,10 +135,10 @@ fn render_item(
 #[cfg(test)]
 mod tests {
     use super::*;
-    use flint_primitives::AccordionSelectionValue;
+    use poodle_primitives::AccordionSelectionValue;
 
     fn theme() -> JetstreamThemeProvider {
-        JetstreamThemeProvider::from_theme(&flint_tokens::themes::DARK)
+        JetstreamThemeProvider::from_theme(&poodle_tokens::themes::DARK)
     }
 
     fn sample_items() -> Vec<AccordionItemSpec> {

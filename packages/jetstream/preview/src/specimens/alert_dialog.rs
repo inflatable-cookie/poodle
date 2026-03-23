@@ -1,10 +1,10 @@
 //! AlertDialog specimen — alert dialogs with different tones and content.
 
 use jetstream_runtime::ui_element::*;
-use flint_jetstream::JetstreamThemeProvider;
-use flint_jetstream_components::alert_dialog::js_alert_dialog;
-use flint_jetstream_components::theme_ext::*;
-use flint_primitives::{AlertDialogSpec, AlertDialogTone};
+use poodle_jetstream::JetstreamThemeProvider;
+use poodle_jetstream_components::alert_dialog::js_alert_dialog;
+use poodle_jetstream_components::theme_ext::*;
+use poodle_primitives::{AlertDialogSpec, AlertDialogTone};
 
 pub fn render(theme: &JetstreamThemeProvider) -> JsEl {
     let secondary = resolve_color(theme, "semantic.color.text.secondary");

@@ -3,12 +3,12 @@
 //! g08.005: TextInputSpec, TextAreaSpec, SearchFieldSpec, FieldSpec,
 //! NumberEntrySpec, PinInputSpec, EditableLabelSpec, TimeFieldSpec
 
-use flint_adapter::{RenderComponent, ThemeProvider};
-use flint_primitives::{
+use poodle_adapter::{RenderComponent, ThemeProvider};
+use poodle_primitives::{
     EditableLabelSpec, FieldSpec, NumberEntrySpec, PinInputSpec, SearchFieldSpec, TextAreaSpec,
     TextInputSpec, TimeFieldSpec,
 };
-use flint_style::StyleDescriptor;
+use poodle_style::StyleDescriptor;
 
 use crate::style_map::{map_style, JetstreamColor};
 use crate::{JetstreamAdapter, JetstreamNodeHandle, JetstreamTarget, WidgetKind};
@@ -192,9 +192,9 @@ impl RenderComponent<TimeFieldSpec> for JetstreamAdapter {
 
 #[cfg(test)]
 mod tests {
-    use flint_adapter::RenderComponent;
-    use flint_primitives::*;
-    use flint_style::StyleDescriptor;
+    use poodle_adapter::RenderComponent;
+    use poodle_primitives::*;
+    use poodle_style::StyleDescriptor;
     use crate::{JetstreamAdapter, WidgetKind, theme::JetstreamThemeProvider};
 
     fn a() -> JetstreamAdapter { JetstreamAdapter::new(JetstreamThemeProvider::default()) }

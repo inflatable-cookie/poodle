@@ -3,8 +3,8 @@
 //! Jetstream cannot animate, so skeletons render as static gray boxes.
 
 use jetstream_runtime::ui_element::{self, JsEl};
-use flint_jetstream::JetstreamThemeProvider;
-use flint_primitives::SkeletonSpec;
+use poodle_jetstream::JetstreamThemeProvider;
+use poodle_primitives::SkeletonSpec;
 
 use crate::theme_ext::{resolve_color, resolve_radius};
 

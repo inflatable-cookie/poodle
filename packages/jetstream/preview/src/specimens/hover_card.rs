@@ -1,10 +1,10 @@
 //! HoverCard specimen — hover cards with content.
 
 use jetstream_runtime::ui_element::*;
-use flint_jetstream::JetstreamThemeProvider;
-use flint_jetstream_components::hover_card::js_hover_card;
-use flint_jetstream_components::theme_ext::*;
-use flint_primitives::HoverCardSpec;
+use poodle_jetstream::JetstreamThemeProvider;
+use poodle_jetstream_components::hover_card::js_hover_card;
+use poodle_jetstream_components::theme_ext::*;
+use poodle_primitives::HoverCardSpec;
 
 pub fn render(theme: &JetstreamThemeProvider) -> JsEl {
     let secondary = resolve_color(theme, "semantic.color.text.secondary");

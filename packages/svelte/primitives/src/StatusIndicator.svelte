@@ -17,32 +17,32 @@
 
 <style>
   .status-indicator {
-    --flint-status-color: var(--flint-color-text-secondary);
+    --poodle-status-color: var(--poodle-color-text-secondary);
     display: inline-flex;
     align-items: center;
     gap: 0.4375rem;
-    color: var(--flint-color-text-primary);
+    color: var(--poodle-color-text-primary);
     min-width: 0;
   }
 
   .status-indicator[data-status="info"] {
-    --flint-status-color: var(--flint-color-accent-base);
+    --poodle-status-color: var(--poodle-color-accent-base);
   }
 
   .status-indicator[data-status="success"] {
-    --flint-status-color: var(--flint-color-status-success);
+    --poodle-status-color: var(--poodle-color-status-success);
   }
 
   .status-indicator[data-status="warning"] {
-    --flint-status-color: var(--flint-color-status-warning);
+    --poodle-status-color: var(--poodle-color-status-warning);
   }
 
   .status-indicator[data-status="danger"] {
-    --flint-status-color: var(--flint-color-status-danger);
+    --poodle-status-color: var(--poodle-color-status-danger);
   }
 
   .status-indicator[data-status="pending"] {
-    --flint-status-color: var(--flint-color-accent-base);
+    --poodle-status-color: var(--poodle-color-accent-base);
   }
 
   .status-indicator__dot {
@@ -50,8 +50,8 @@
     width: 0.5625rem;
     height: 0.5625rem;
     border-radius: 999px;
-    background: var(--flint-status-color);
-    box-shadow: 0 0 0 0.125rem color-mix(in srgb, var(--flint-status-color) 18%, transparent);
+    background: var(--poodle-status-color);
+    box-shadow: 0 0 0 0.125rem color-mix(in srgb, var(--poodle-status-color) 18%, transparent);
   }
 
   .status-indicator[data-status="pending"] .status-indicator__dot {
@@ -60,7 +60,7 @@
 
   .status-indicator__label {
     min-width: 0;
-    font-family: var(--flint-typography-label-family);
+    font-family: var(--poodle-typography-label-family);
     font-size: 0.75rem;
     font-weight: 600;
     line-height: 1.3;

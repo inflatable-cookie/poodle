@@ -2,8 +2,8 @@
 
 use gpui::prelude::FluentBuilder;
 use gpui::*;
-use flint_gpui::GpuiThemeProvider;
-use flint_composites::{MediaKind, MediaPreviewSpec, MediaState, RemediationAction};
+use poodle_gpui::GpuiThemeProvider;
+use poodle_composites::{MediaKind, MediaPreviewSpec, MediaState, RemediationAction};
 
 use crate::theme_ext::{resolve_color, resolve_px, resolve_radius};
 

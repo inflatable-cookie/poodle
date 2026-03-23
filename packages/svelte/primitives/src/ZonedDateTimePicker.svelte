@@ -33,7 +33,7 @@
     openChange: { open: boolean };
   }>();
 
-  const surfaceId = `flint-zoned-date-time-picker-surface-${++nextZonedDateTimePickerId}`;
+  const surfaceId = `poodle-zoned-date-time-picker-surface-${++nextZonedDateTimePickerId}`;
   let rootElement: HTMLDivElement | null = null;
   let uncontrolledValue = normalizeZonedDateTimeValue(defaultValue);
   let uncontrolledOpen = defaultOpen;
@@ -184,16 +184,16 @@
     align-items: center;
     justify-content: space-between;
     gap: 0.75rem;
-    min-height: var(--flint-size-control-height);
-    padding: 0 var(--flint-space-control-x);
-    border: 0.0625rem solid var(--flint-color-border-default);
-    border-radius: var(--flint-radius-control);
-    background: var(--flint-color-background-surface);
-    color: var(--flint-color-text-primary);
+    min-height: var(--poodle-size-control-height);
+    padding: 0 var(--poodle-space-control-x);
+    border: 0.0625rem solid var(--poodle-color-border-default);
+    border-radius: var(--poodle-radius-control);
+    background: var(--poodle-color-background-surface);
+    color: var(--poodle-color-text-primary);
     cursor: pointer;
-    font-family: var(--flint-typography-body-family);
-    font-size: var(--flint-typography-body-size);
-    line-height: var(--flint-typography-body-lineHeight);
+    font-family: var(--poodle-typography-body-family);
+    font-size: var(--poodle-typography-body-size);
+    line-height: var(--poodle-typography-body-lineHeight);
     text-align: left;
   }
 
@@ -202,11 +202,11 @@
   }
 
   .zoned-date-time-picker__value[data-placeholder="true"] {
-    color: var(--flint-color-text-secondary);
+    color: var(--poodle-color-text-secondary);
   }
 
   .zoned-date-time-picker__indicator {
-    color: var(--flint-color-text-secondary);
+    color: var(--poodle-color-text-secondary);
     font-size: 0.75rem;
   }
 
@@ -214,16 +214,16 @@
     position: absolute;
     top: calc(100% + 0.375rem);
     left: 0;
-    z-index: var(--flint-overlay-z-menu);
-    padding: var(--flint-space-panel-y) var(--flint-space-panel-x);
-    border: 0.0625rem solid color-mix(in srgb, var(--flint-color-border-default) 72%, transparent);
-    border-radius: var(--flint-radius-surface);
+    z-index: var(--poodle-overlay-z-menu);
+    padding: var(--poodle-space-panel-y) var(--poodle-space-panel-x);
+    border: 0.0625rem solid color-mix(in srgb, var(--poodle-color-border-default) 72%, transparent);
+    border-radius: var(--poodle-radius-surface);
     background: color-mix(
       in srgb,
-      var(--flint-color-background-elevated) 98%,
-      var(--flint-color-background-panel)
+      var(--poodle-color-background-elevated) 98%,
+      var(--poodle-color-background-panel)
     );
-    box-shadow: var(--flint-elevation-overlay);
+    box-shadow: var(--poodle-elevation-overlay);
   }
 
   .zoned-date-time-picker__body {
@@ -242,8 +242,8 @@
   }
 
   .zoned-date-time-picker__label {
-    color: var(--flint-color-text-secondary);
-    font-family: var(--flint-typography-label-family);
+    color: var(--poodle-color-text-secondary);
+    font-family: var(--poodle-typography-label-family);
     font-size: 0.6875rem;
     font-weight: 600;
     letter-spacing: 0.04em;
@@ -253,18 +253,18 @@
   .zoned-date-time-picker__trigger:hover:not(:disabled) {
     background: color-mix(
       in srgb,
-      var(--flint-color-background-surface) 86%,
-      var(--flint-color-background-elevated)
+      var(--poodle-color-background-surface) 86%,
+      var(--poodle-color-background-elevated)
     );
   }
 
   .zoned-date-time-picker__trigger:focus-visible {
-    outline: var(--flint-border-width-focus) solid var(--flint-color-accent-focusRing);
+    outline: var(--poodle-border-width-focus) solid var(--poodle-color-accent-focusRing);
     outline-offset: 0.125rem;
   }
 
   .zoned-date-time-picker__trigger:disabled {
     cursor: not-allowed;
-    opacity: var(--flint-state-opacity-disabled);
+    opacity: var(--poodle-state-opacity-disabled);
   }
 </style>

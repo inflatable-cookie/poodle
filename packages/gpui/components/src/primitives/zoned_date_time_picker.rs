@@ -1,8 +1,8 @@
 //! ZonedDateTimePicker — real GPUI component backed by ZonedDateTimePickerSpec.
 
 use gpui::*;
-use flint_gpui::GpuiThemeProvider;
-use flint_primitives::{IconSize, IconSpec, ZonedDateTimePickerSpec};
+use poodle_gpui::GpuiThemeProvider;
+use poodle_primitives::{IconSize, IconSpec, ZonedDateTimePickerSpec};
 
 use super::icon::Icon;
 use crate::theme_ext::{resolve_color, resolve_opacity, resolve_px, resolve_radius};
@@ -85,7 +85,7 @@ impl IntoElement for ZonedDateTimePicker {
         let focus_ring = resolve_color(theme, "semantic.color.accent.focusRing");
 
         let mut trigger = div()
-            .id(SharedString::from("flint-zoned-dt-picker"))
+            .id(SharedString::from("poodle-zoned-dt-picker"))
             .focusable()
             .h(control_height)
             .px(inline_padding)

@@ -26,14 +26,14 @@ All 15 milestones completed:
 
 | Crate | Path | Purpose |
 |-------|------|---------|
-| `flint-tokens` | `packages/contracts/tokens/` | Token constants + typed module |
-| `flint-primitives` | `packages/contracts/primitives/` | 64 primitive specs |
-| `flint-composites` | `packages/contracts/composites/` | 41 composite specs |
-| `flint-workstation` | `packages/contracts/workstation/` | 13 workstation specs |
-| `flint-layout` | `packages/contracts/layout/` | Layout intent types |
-| `flint-events` | `packages/contracts/events/` | Semantic event types |
-| `flint-style` | `packages/contracts/style/` | Style descriptor IR |
-| `flint-adapter` | `packages/contracts/adapter/` | Renderer adapter traits |
+| `poodle-tokens` | `packages/contracts/tokens/` | Token constants + typed module |
+| `poodle-primitives` | `packages/contracts/primitives/` | 64 primitive specs |
+| `poodle-composites` | `packages/contracts/composites/` | 41 composite specs |
+| `poodle-workstation` | `packages/contracts/workstation/` | 13 workstation specs |
+| `poodle-layout` | `packages/contracts/layout/` | Layout intent types |
+| `poodle-events` | `packages/contracts/events/` | Semantic event types |
+| `poodle-style` | `packages/contracts/style/` | Style descriptor IR |
+| `poodle-adapter` | `packages/contracts/adapter/` | Renderer adapter traits |
 
 ### Spec Coverage
 

@@ -1,7 +1,7 @@
 //! OrderBy — Jetstream sort control backed by OrderBySpec.
 use jetstream_runtime::ui_element::{self, JsEl};
-use flint_jetstream::JetstreamThemeProvider;
-use flint_primitives::OrderBySpec;
+use poodle_jetstream::JetstreamThemeProvider;
+use poodle_primitives::OrderBySpec;
 use crate::theme_ext::resolve_color;
 
 pub fn js_order_by(spec: &OrderBySpec, theme: &JetstreamThemeProvider) -> JsEl {

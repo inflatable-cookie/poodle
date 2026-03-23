@@ -1,10 +1,10 @@
 //! ContextMenu specimen — context menus with different item sets.
 
 use jetstream_runtime::ui_element::*;
-use flint_jetstream::JetstreamThemeProvider;
-use flint_jetstream_components::context_menu::js_context_menu;
-use flint_jetstream_components::theme_ext::*;
-use flint_primitives::{ContextMenuSpec, MenuEntry};
+use poodle_jetstream::JetstreamThemeProvider;
+use poodle_jetstream_components::context_menu::js_context_menu;
+use poodle_jetstream_components::theme_ext::*;
+use poodle_primitives::{ContextMenuSpec, MenuEntry};
 
 pub fn render(theme: &JetstreamThemeProvider) -> JsEl {
     let secondary = resolve_color(theme, "semantic.color.text.secondary");

@@ -170,35 +170,35 @@ CalendarWeekStart: "sunday" | "monday"
 | `align-items` | `center` |
 | `justify-content` | `space-between` |
 | `gap` | `0.75rem` |
-| `min-height` | `var(--flint-size-control-height)` |
-| `padding` | `0 var(--flint-space-control-x)` |
-| `border` | `0.0625rem solid var(--flint-color-border-default)` |
-| `border-radius` | `var(--flint-radius-control)` |
-| `background` | `var(--flint-color-background-surface)` |
-| `color` | `var(--flint-color-text-primary)` |
+| `min-height` | `var(--poodle-size-control-height)` |
+| `padding` | `0 var(--poodle-space-control-x)` |
+| `border` | `0.0625rem solid var(--poodle-color-border-default)` |
+| `border-radius` | `var(--poodle-radius-control)` |
+| `background` | `var(--poodle-color-background-surface)` |
+| `color` | `var(--poodle-color-text-primary)` |
 | `cursor` | `pointer` |
-| `font-family` | `var(--flint-typography-body-family)` |
-| `font-size` | `var(--flint-typography-body-size)` |
-| `line-height` | `var(--flint-typography-body-lineHeight)` |
+| `font-family` | `var(--poodle-typography-body-family)` |
+| `font-size` | `var(--poodle-typography-body-size)` |
+| `line-height` | `var(--poodle-typography-body-lineHeight)` |
 | `text-align` | `left` |
 
 ### Trigger — placeholder state (no value selected)
 
 | Property | Value |
 |----------|-------|
-| `color` | `var(--flint-color-text-secondary)` |
+| `color` | `var(--poodle-color-text-secondary)` |
 
 ### Trigger — hover
 
 | Property | Value |
 |----------|-------|
-| `background` | `color-mix(in srgb, var(--flint-color-background-surface) 86%, var(--flint-color-background-elevated))` |
+| `background` | `color-mix(in srgb, var(--poodle-color-background-surface) 86%, var(--poodle-color-background-elevated))` |
 
 ### Trigger — focus-visible
 
 | Property | Value |
 |----------|-------|
-| `outline` | `var(--flint-border-width-focus) solid var(--flint-color-accent-focusRing)` |
+| `outline` | `var(--poodle-border-width-focus) solid var(--poodle-color-accent-focusRing)` |
 | `outline-offset` | `0.125rem` |
 
 ### Trigger — disabled
@@ -206,13 +206,13 @@ CalendarWeekStart: "sunday" | "monday"
 | Property | Value |
 |----------|-------|
 | `cursor` | `not-allowed` |
-| `opacity` | `var(--flint-state-opacity-disabled)` |
+| `opacity` | `var(--poodle-state-opacity-disabled)` |
 
 ### Indicator `.date-picker__indicator`
 
 | Property | Value |
 |----------|-------|
-| `color` | `var(--flint-color-text-secondary)` |
+| `color` | `var(--poodle-color-text-secondary)` |
 | `font-size` | `0.75rem` |
 
 ### Surface `.date-picker__surface`
@@ -222,12 +222,12 @@ CalendarWeekStart: "sunday" | "monday"
 | `position` | `absolute` |
 | `top` | `calc(100% + 0.375rem)` |
 | `left` | `0` |
-| `z-index` | `var(--flint-overlay-z-menu)` |
-| `padding` | `var(--flint-space-panel-y) var(--flint-space-panel-x)` |
-| `border` | `0.0625rem solid color-mix(in srgb, var(--flint-color-border-default) 72%, transparent)` |
-| `border-radius` | `var(--flint-radius-surface)` |
-| `background` | `color-mix(in srgb, var(--flint-color-background-elevated) 98%, var(--flint-color-background-panel))` |
-| `box-shadow` | `var(--flint-elevation-overlay)` |
+| `z-index` | `var(--poodle-overlay-z-menu)` |
+| `padding` | `var(--poodle-space-panel-y) var(--poodle-space-panel-x)` |
+| `border` | `0.0625rem solid color-mix(in srgb, var(--poodle-color-border-default) 72%, transparent)` |
+| `border-radius` | `var(--poodle-radius-surface)` |
+| `background` | `color-mix(in srgb, var(--poodle-color-background-elevated) 98%, var(--poodle-color-background-panel))` |
+| `box-shadow` | `var(--poodle-elevation-overlay)` |
 
 ## 9. Svelte Notes
 
@@ -247,7 +247,7 @@ CalendarWeekStart: "sunday" | "monday"
 
 ## 10. GPUI Notes
 
-- expected crate/module surface: `flint_gpui::primitives::date_picker`
+- expected crate/module surface: `poodle_gpui::primitives::date_picker`
 - GPUI must model the trigger as a button with popup ownership semantics
 - The overlay must present as a dialog containing a Calendar grid
 - Focus management: opening must move focus into the calendar; closing must

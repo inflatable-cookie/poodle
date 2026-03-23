@@ -1,6 +1,6 @@
 use gpui::*;
-use flint_primitives::{TimeZoneSelectSpec, EyebrowSpec};
-use flint_gpui_components::{TimeZoneSelect, Eyebrow};
+use poodle_primitives::{TimeZoneSelectSpec, EyebrowSpec};
+use poodle_gpui_components::{TimeZoneSelect, Eyebrow};
 use crate::app_state::AppState;
 use crate::PreviewRoot;
 

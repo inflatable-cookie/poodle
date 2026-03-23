@@ -1,7 +1,7 @@
 # g08.007 Remaining Component Fixes (Batch 3)
 
 Status: complete
-Owner: Flint Core
+Owner: Poodle Core
 Depends on: g08.004
 
 ## Contract Check
@@ -15,7 +15,7 @@ has changed, update the implementation to match before proceeding.
 
 - [ ] Verify contract: `docs/contracts/foundation/time-field.md`
 - [ ] Resolve height, padding, radius from spec tokens
-- [ ] Replace clock emoji with `FlintIcon`
+- [ ] Replace clock emoji with `PoodleIcon`
 
 ### duration_input
 
@@ -31,7 +31,7 @@ has changed, update the implementation to match before proceeding.
 ### rating
 
 - [ ] Verify contract: `docs/contracts/foundation/rating.md`
-- [ ] Replace `"*"` text with `FlintIcon` star icons
+- [ ] Replace `"*"` text with `PoodleIcon` star icons
 - [ ] Resolve star size from spec token
 
 ### tooltip
@@ -65,5 +65,5 @@ has changed, update the implementation to match before proceeding.
 - [ ] All visual values resolve from tokens
 - [ ] `color_picker` renders actual colored swatches
 - [ ] `range_slider` renders positioned thumbs and filled range
-- [ ] All emoji/text placeholders replaced with `FlintIcon`
+- [ ] All emoji/text placeholders replaced with `PoodleIcon`
 - [ ] Components compile and render correctly

@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { DateTimePicker, Eyebrow } from "@flint/svelte-primitives";
+  import { DateTimePicker, Eyebrow } from "@poodle/svelte-primitives";
 </script>
 
 <div class="specimen">

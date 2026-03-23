@@ -3,8 +3,8 @@
 //! Contract: `docs/contracts/foundation/icon-button.md`
 
 use gpui::*;
-use flint_gpui::GpuiThemeProvider;
-use flint_primitives::{ButtonTone, ButtonVariant, ControlSize, IconButtonSpec, IconSize, IconSpec};
+use poodle_gpui::GpuiThemeProvider;
+use poodle_primitives::{ButtonTone, ButtonVariant, ControlSize, IconButtonSpec, IconSize, IconSpec};
 
 use super::icon::Icon;
 use crate::theme_ext::{color_mix, color_mix_black, resolve_color, resolve_opacity, resolve_px, resolve_radius};
@@ -110,9 +110,9 @@ impl IntoElement for IconButton {
 
         let icon_name = spec.icon.clone().unwrap_or_default();
         let id_str = if let Some(ref suffix) = self.id_suffix {
-            format!("flint-icon-btn-{}", suffix)
+            format!("poodle-icon-btn-{}", suffix)
         } else {
-            format!("flint-icon-btn-{}", icon_name)
+            format!("poodle-icon-btn-{}", icon_name)
         };
 
         // ── Build root ────────────────────────────────────────────

@@ -1,10 +1,10 @@
 //! Icon specimen — shows icons at different sizes and with color inheritance.
 
 use jetstream_runtime::ui_element::*;
-use flint_jetstream::JetstreamThemeProvider;
-use flint_jetstream_components::icon::js_icon;
-use flint_jetstream_components::theme_ext::*;
-use flint_primitives::{IconSize, IconSpec};
+use poodle_jetstream::JetstreamThemeProvider;
+use poodle_jetstream_components::icon::js_icon;
+use poodle_jetstream_components::theme_ext::*;
+use poodle_primitives::{IconSize, IconSpec};
 
 pub fn render(theme: &JetstreamThemeProvider) -> JsEl {
     let secondary = resolve_color(theme, "semantic.color.text.secondary");

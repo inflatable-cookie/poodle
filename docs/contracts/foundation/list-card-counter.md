@@ -107,8 +107,8 @@ No internal state. All visual states are derived from props.
 
 | Part | Token | Purpose |
 |------|-------|---------|
-| Root | `--flint-color-text-secondary` | default text and icon color |
-| Root (hover, linked) | `--flint-color-text-primary` | hover text and icon color for linked counters |
+| Root | `--poodle-color-text-secondary` | default text and icon color |
+| Root (hover, linked) | `--poodle-color-text-primary` | hover text and icon color for linked counters |
 
 ## 9. Svelte Notes
 
@@ -120,7 +120,7 @@ No internal state. All visual states are derived from props.
 
 ## 10. GPUI Notes
 
-- Expected crate/module surface: `flint_gpui::primitives::list_card_counter`
+- Expected crate/module surface: `poodle_gpui::primitives::list_card_counter`
 - Render as inline flex with icon and text child
 - Link behavior may need to be handled via click callback rather than href
 

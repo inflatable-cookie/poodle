@@ -1,8 +1,8 @@
 //! Eyebrow — real GPUI component backed by EyebrowSpec.
 
 use gpui::*;
-use flint_gpui::GpuiThemeProvider;
-use flint_primitives::EyebrowSpec;
+use poodle_gpui::GpuiThemeProvider;
+use poodle_primitives::EyebrowSpec;
 
 use crate::theme_ext::resolve_color;
 

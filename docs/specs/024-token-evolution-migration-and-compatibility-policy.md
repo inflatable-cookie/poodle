@@ -6,7 +6,7 @@ Depends on: `001-token-source-and-artifact-contract.md`, `008-parity-evidence-do
 
 ## Purpose
 
-Freeze how canonical Flint tokens may change over time so downstream consumers,
+Freeze how canonical Poodle tokens may change over time so downstream consumers,
 bridges, and parity work do not have to infer compatibility from naming
 coincidence or changelog tone.
 
@@ -164,7 +164,7 @@ A token may only be removed after all of the following are true:
 - a replacement or deletion rationale is documented
 - downstream review scope is named explicitly
 
-Flint should prefer alias-plus-deprecation sequences over abrupt removal wherever
+Poodle should prefer alias-plus-deprecation sequences over abrupt removal wherever
 that does not preserve misleading meaning.
 
 ## Evidence Rule

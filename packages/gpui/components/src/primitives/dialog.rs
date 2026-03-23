@@ -1,8 +1,8 @@
 //! Dialog — real GPUI component backed by DialogSpec.
 
 use gpui::*;
-use flint_gpui::GpuiThemeProvider;
-use flint_primitives::{DialogKind, DialogSpec};
+use poodle_gpui::GpuiThemeProvider;
+use poodle_primitives::{DialogKind, DialogSpec};
 
 use crate::theme_ext::{color_mix, resolve_color, resolve_px, resolve_radius};
 
@@ -97,7 +97,7 @@ impl IntoElement for Dialog {
         let stack_lg = resolve_px(theme, "semantic.space.stack.lg");
 
         let mut dialog = div()
-            .id("flint-dialog")
+            .id("poodle-dialog")
             .focusable()
             .px(panel_x)
             .py(panel_y)
@@ -182,7 +182,7 @@ impl IntoElement for Dialog {
 
         // Backdrop overlay — full-viewport scrim with centered dialog
         let mut backdrop = div()
-            .id("flint-dialog-backdrop")
+            .id("poodle-dialog-backdrop")
             .absolute()
             .inset_0()
             .bg(hsla(0.0, 0.0, 0.0, 0.5))

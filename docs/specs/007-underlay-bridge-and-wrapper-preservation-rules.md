@@ -6,8 +6,8 @@ Depends on: `001-token-source-and-artifact-contract.md`, `002-component-contract
 
 ## Purpose
 
-Freeze the baseline rules for Underlay adoption so Flint can be consumed
-internally by Underlay without turning Flint into the public API for Underlay
+Freeze the baseline rules for Underlay adoption so Poodle can be consumed
+internally by Underlay without turning Poodle into the public API for Underlay
 applications.
 
 ## Core Rule
@@ -21,7 +21,7 @@ The bridge exists to allow:
 - internal component reuse
 - and wrapper-backed migration
 
-without requiring app code to import Flint directly.
+without requiring app code to import Poodle directly.
 
 ## Token Ingestion Rule
 
@@ -36,19 +36,19 @@ source.
 
 This keeps:
 
-- token meaning canonical in Flint
+- token meaning canonical in Poodle
 - bridge mapping secondary
 - and runtime consumption aligned to emitted artifacts rather than internal
   build-only source files
 
 ## Token Mapping Rule
 
-Bridge token maps may rename Flint-emitted variables into Underlay-owned naming
+Bridge token maps may rename Poodle-emitted variables into Underlay-owned naming
 where needed.
 
 They must:
 
-- point back to canonical Flint semantic paths
+- point back to canonical Poodle semantic paths
 - remain traceable
 - and avoid becoming a second semantic taxonomy
 
@@ -65,7 +65,7 @@ Forbidden:
 
 ## Theme Translation Rule
 
-The bridge may translate Flint theme identities into Underlay-owned runtime theme
+The bridge may translate Poodle theme identities into Underlay-owned runtime theme
 registration shapes.
 
 It must preserve:
@@ -85,11 +85,11 @@ It may not create hand-authored duplicate canonical themes.
 
 ## Wrapper Preservation Rule
 
-When Underlay wraps Flint components internally:
+When Underlay wraps Poodle components internally:
 
 - the public Underlay component name remains Underlay-owned
 - the public Underlay prop contract remains Underlay-owned
-- migration from old Underlay implementation to Flint-backed internals must be
+- migration from old Underlay implementation to Poodle-backed internals must be
   bridge-owned, not app-owned
 
 Wrappers may adapt:
@@ -100,7 +100,7 @@ Wrappers may adapt:
 - class hooks
 - and theme application mechanics
 
-Wrappers may not expose raw Flint component contracts as the new default API for
+Wrappers may not expose raw Poodle component contracts as the new default API for
 Underlay apps.
 
 ## Zero-Leak Rule
@@ -109,22 +109,22 @@ The bridge baseline assumes a zero-leak goal for app consumers.
 
 That means application code should not need:
 
-- Flint package imports
-- Flint token variable names
-- Flint component names
-- Flint-specific prop names
-- or Flint-specific layout-layer terminology
+- Poodle package imports
+- Poodle token variable names
+- Poodle component names
+- Poodle-specific prop names
+- or Poodle-specific layout-layer terminology
 
 If a real adoption tranche requires a temporary leak, it must be documented as
 an approved delta and treated as migration debt.
 
 ## Ownership Rule
 
-### Flint Owns
+### Poodle Owns
 
 - canonical tokens
 - canonical component contracts
-- Flint Svelte implementations
+- Poodle Svelte implementations
 - bridge baseline structure
 
 ### Underlay Owns
@@ -143,7 +143,7 @@ an approved delta and treated as migration debt.
 
 ## Accessibility Rule
 
-Bridge wrappers must preserve Flint accessibility semantics when adapting APIs.
+Bridge wrappers must preserve Poodle accessibility semantics when adapting APIs.
 
 That includes:
 
@@ -163,7 +163,7 @@ The bridge baseline must explicitly acknowledge likely migration pressure:
 
 - token-name translation and CSS variable ordering
 - event and prop translation across wrapper boundaries
-- state ownership differences between Underlay components and Flint contracts
+- state ownership differences between Underlay components and Poodle contracts
 - theme registration shape
 - accessibility behavior hidden in old Underlay components
 
@@ -180,13 +180,13 @@ The initial bridge package should contain:
 - a TypeScript wrapper-preservation manifest or helper layer
 
 This proves the ownership model without prematurely implementing Underlay
-itself inside Flint.
+itself inside Poodle.
 
 ## Seed Evidence
 
 The first artifacts that explicitly exercise this baseline are:
 
-- `packages/bridges/underlay/css/flint-to-underlay.css`
+- `packages/bridges/underlay/css/poodle-to-underlay.css`
 - `packages/bridges/underlay/ts/token-map.ts`
 - `packages/bridges/underlay/ts/theme-map.ts`
 - `packages/bridges/underlay/ts/component-wrappers.ts`

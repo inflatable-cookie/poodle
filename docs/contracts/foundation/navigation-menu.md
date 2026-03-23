@@ -181,14 +181,14 @@ Updated: 2026-03-15
 | `display` | `inline-flex` |
 | `align-items` | `center` |
 | `gap` | `0.375rem` |
-| `min-height` | `calc(var(--flint-size-control-height) - 0.125rem)` |
+| `min-height` | `calc(var(--poodle-size-control-height) - 0.125rem)` |
 | `padding` | `0 0.875rem` |
-| `border` | `0.0625rem solid color-mix(in srgb, var(--flint-color-border-subtle) 72%, transparent)` |
-| `border-radius` | `var(--flint-radius-control)` |
-| `background` | `color-mix(in srgb, var(--flint-color-background-surface) 88%, transparent)` |
-| `color` | `var(--flint-color-text-primary)` |
+| `border` | `0.0625rem solid color-mix(in srgb, var(--poodle-color-border-subtle) 72%, transparent)` |
+| `border-radius` | `var(--poodle-radius-control)` |
+| `background` | `color-mix(in srgb, var(--poodle-color-background-surface) 88%, transparent)` |
+| `color` | `var(--poodle-color-text-primary)` |
 | `cursor` | `pointer` |
-| `font-family` | `var(--flint-typography-label-family)` |
+| `font-family` | `var(--poodle-typography-label-family)` |
 | `font-size` | `0.75rem` |
 | `font-weight` | `600` |
 | `line-height` | `1` |
@@ -197,14 +197,14 @@ Updated: 2026-03-15
 
 | Property | Value |
 |----------|-------|
-| `background` | `color-mix(in srgb, var(--flint-color-accent-base) 16%, transparent)` |
-| `border-color` | `color-mix(in srgb, var(--flint-color-accent-base) 42%, var(--flint-color-border-default))` |
+| `background` | `color-mix(in srgb, var(--poodle-color-accent-base) 16%, transparent)` |
+| `border-color` | `color-mix(in srgb, var(--poodle-color-accent-base) 42%, var(--poodle-color-border-default))` |
 
 ### Trigger — Hover / Focus
 
 | Property | Value |
 |----------|-------|
-| `background` | `color-mix(in srgb, var(--flint-color-accent-base) 12%, transparent)` |
+| `background` | `color-mix(in srgb, var(--poodle-color-accent-base) 12%, transparent)` |
 | `outline` | `none` |
 
 ### Trigger — Disabled
@@ -212,18 +212,18 @@ Updated: 2026-03-15
 | Property | Value |
 |----------|-------|
 | `cursor` | `not-allowed` |
-| `opacity` | `var(--flint-state-opacity-disabled)` |
+| `opacity` | `var(--poodle-state-opacity-disabled)` |
 
 ### Viewport `.navigation-menu__viewport`
 
 | Property | Value |
 |----------|-------|
 | `min-width` | `0` |
-| `padding` | `var(--flint-space-panel-y) var(--flint-space-panel-x)` |
-| `border` | `0.0625rem solid color-mix(in srgb, var(--flint-color-border-subtle) 74%, transparent)` |
-| `border-radius` | `var(--flint-radius-surface)` |
-| `background` | `color-mix(in srgb, var(--flint-color-background-panel) 96%, transparent)` |
-| `box-shadow` | `var(--flint-elevation-overlay)` |
+| `padding` | `var(--poodle-space-panel-y) var(--poodle-space-panel-x)` |
+| `border` | `0.0625rem solid color-mix(in srgb, var(--poodle-color-border-subtle) 74%, transparent)` |
+| `border-radius` | `var(--poodle-radius-surface)` |
+| `background` | `color-mix(in srgb, var(--poodle-color-background-panel) 96%, transparent)` |
+| `box-shadow` | `var(--poodle-elevation-overlay)` |
 
 ## 9. Svelte Notes
 
@@ -246,9 +246,9 @@ Updated: 2026-03-15
 
 ## 10. GPUI Notes
 
-- expected crate/module surface: `flint_gpui::components::navigation_menu`
+- expected crate/module surface: `poodle_gpui::components::navigation_menu`
 - Spec struct: `NavigationMenuSpec` in primitives crate holds item definitions
-- Component struct: `FlintNavigationMenu` in components crate renders via `IntoElement`
+- Component struct: `PoodleNavigationMenu` in components crate renders via `IntoElement`
 - GPUI must model this as a nav landmark with expandable disclosure triggers
 - The viewport is not an overlay in the Menu sense; it is an inline disclosed
   surface below the trigger strip

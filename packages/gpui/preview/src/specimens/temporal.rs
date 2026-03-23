@@ -1,8 +1,8 @@
 use gpui::*;
-use flint_adapter::ThemeProvider;
-use flint_gpui::GpuiThemeProvider;
-use flint_primitives::{TimeAgoSpec, DurationInputSpec, EyebrowSpec};
-use flint_gpui_components::{TimeAgo, DurationInput, Eyebrow};
+use poodle_adapter::ThemeProvider;
+use poodle_gpui::GpuiThemeProvider;
+use poodle_primitives::{TimeAgoSpec, DurationInputSpec, EyebrowSpec};
+use poodle_gpui_components::{TimeAgo, DurationInput, Eyebrow};
 use crate::style_bridge::color_to_hsla;
 
 pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
@@ -97,7 +97,7 @@ fn time_ago_row(
     label: &str,
     timestamp: &str,
     theme: &GpuiThemeProvider,
-    text_secondary: flint_tokens::typed::ColorValue,
+    text_secondary: poodle_tokens::typed::ColorValue,
 ) -> Div {
     div().flex().items_center().gap(px(8.0))
         .child(

@@ -1,9 +1,9 @@
 //! LogList — timestamped log entry list backed by LogListSpec.
 
 use gpui::*;
-use flint_gpui::GpuiThemeProvider;
-use flint_primitives::{IconSize, IconSpec};
-use flint_composites::LogListSpec;
+use poodle_gpui::GpuiThemeProvider;
+use poodle_primitives::{IconSize, IconSpec};
+use poodle_composites::LogListSpec;
 use crate::primitives::Icon;
 use crate::theme_ext::{resolve_color, resolve_px};
 

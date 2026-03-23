@@ -29,6 +29,6 @@ Primitive specs: 42 (existing) + 10 (new) = **52**
 
 ## Verification
 
-- [x] All 10 specs compile and are exported from `flint-primitives`
+- [x] All 10 specs compile and are exported from `poodle-primitives`
 - [x] All 29 existing tests continue to pass
 - [x] Reuses existing shared types (StatusTone, CheckState, Alignment, etc.)

@@ -2,7 +2,7 @@
 
 Status: completed
 Date: 2026-03-11
-Owner: Flint Core
+Owner: Poodle Core
 
 ## Summary
 
@@ -20,7 +20,7 @@ Owner: Flint Core
 
 ## Notes
 
-- this tranche freezes loading/remediation posture without pretending Flint owns retry policy, data fetching, or system notification integrations
+- this tranche freezes loading/remediation posture without pretending Poodle owns retry policy, data fetching, or system notification integrations
 - accessibility focus remains on explicit state meaning, adjacent recovery actions, and transient announcement without focus theft
 
 ## Next Task
