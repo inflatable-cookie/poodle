@@ -188,6 +188,12 @@ impl SpecimenState {
         toggles.insert("switch-dark-mode".to_string(), true);
         toggles.insert("switch-compact".to_string(), true);
         toggles.insert("checkbox-email".to_string(), true);
+        // Accordion defaults matching Svelte
+        toggles.insert("accordion-single-getting-started".to_string(), true);
+        toggles.insert("accordion-multi-design-tokens".to_string(), true);
+        toggles.insert("accordion-multi-keyboard-shortcuts".to_string(), true);
+        // IconButton pin default
+        toggles.insert("icon-btn-pinned".to_string(), true);
         Self {
             toggles,
             selections: HashMap::new(),
