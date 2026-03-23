@@ -6,7 +6,7 @@ Depends on: `002-component-contract-template-and-parity-rules.md`
 
 ## Purpose
 
-Freeze the baseline accessibility rules that all Pug components must satisfy
+Freeze the baseline accessibility rules that all Flint components must satisfy
 across Svelte and GPUI, with explicit attention to the fact that GPUI cannot
 rely on HTML semantics or ARIA alone.
 
@@ -42,7 +42,7 @@ Equivalent meaning includes:
 - focusability
 - relationship to controlled content
 
-If GPUI lacks a built-in equivalent for a required behavior, Pug must document
+If GPUI lacks a built-in equivalent for a required behavior, Flint must document
 and implement a native workaround rather than silently dropping the semantic.
 
 ## Focus Rule
@@ -128,7 +128,7 @@ exist as a fallback implementation path.
 
 ## Reduced Motion And Contrast Rule
 
-Pug must preserve the ability to support:
+Flint must preserve the ability to support:
 
 - reduced motion preferences
 - sufficient contrast

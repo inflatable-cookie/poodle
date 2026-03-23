@@ -1,8 +1,8 @@
 //! StatusBar — real GPUI component backed by StatusBarSpec (contract: status-bar).
 
 use gpui::*;
-use pug_gpui::GpuiThemeProvider;
-use pug_composites::ShellStatusBarSpec;
+use flint_gpui::GpuiThemeProvider;
+use flint_composites::ShellStatusBarSpec;
 
 use crate::theme_ext::resolve_color;
 

@@ -1,8 +1,8 @@
 //! DetailShell — real GPUI component backed by DetailShellSpec.
 
 use gpui::*;
-use pug_gpui::GpuiThemeProvider;
-use pug_composites::{DetailShellSpec, DetailState, ScrollOwner};
+use flint_gpui::GpuiThemeProvider;
+use flint_composites::{DetailShellSpec, DetailState, ScrollOwner};
 
 use crate::theme_ext::{resolve_color, resolve_px};
 

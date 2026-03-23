@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { Select, Eyebrow, type SelectOption, type SelectOptionGroup } from "@pug/svelte-primitives";
+  import { Select, Eyebrow, type SelectOption, type SelectOptionGroup } from "@flint/svelte-primitives";
 
   const fruitOptions: SelectOption[] = [
     { value: "apple", label: "Apple" },
@@ -106,7 +106,7 @@
 
   .specimen__value {
     font-size: 0.8125rem;
-    color: var(--pug-color-text-secondary);
+    color: var(--flint-color-text-secondary);
     margin: 0;
   }
 </style>

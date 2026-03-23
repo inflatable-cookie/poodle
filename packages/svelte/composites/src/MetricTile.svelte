@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { Icon } from "@pug/svelte-primitives";
+  import { Icon } from "@flint/svelte-primitives";
 
   export let label: string;
   export let value: string;
@@ -64,23 +64,23 @@
 <style>
   .state-tile {
     display: grid;
-    gap: var(--pug-space-inline-sm);
-    padding: var(--pug-space-panel-y) var(--pug-space-panel-x);
+    gap: var(--flint-space-inline-sm);
+    padding: var(--flint-space-panel-y) var(--flint-space-panel-x);
     border: 0.0625rem solid transparent;
-    border-radius: var(--pug-radius-surface);
-    background: color-mix(in srgb, var(--pug-color-background-surface) 60%, transparent);
+    border-radius: var(--flint-radius-surface);
+    background: color-mix(in srgb, var(--flint-color-background-surface) 60%, transparent);
   }
 
   .state-tile__label {
-    color: var(--pug-color-text-secondary);
-    font-family: var(--pug-typography-code-family);
+    color: var(--flint-color-text-secondary);
+    font-family: var(--flint-typography-code-family);
     font-size: 0.75rem;
   }
 
   .state-tile__body {
     display: flex;
     align-items: center;
-    gap: var(--pug-space-inline-md);
+    gap: var(--flint-space-inline-md);
   }
 
   .state-tile__value {
@@ -90,7 +90,7 @@
   .state-tile__sparkline {
     width: 4rem;
     height: 1.5rem;
-    color: var(--pug-color-text-tertiary);
+    color: var(--flint-color-text-tertiary);
     flex-shrink: 0;
   }
 
@@ -99,20 +99,20 @@
     align-items: center;
     gap: 0.25rem;
     font-size: 0.75rem;
-    font-family: var(--pug-typography-code-family);
-    color: var(--pug-color-text-secondary);
+    font-family: var(--flint-typography-code-family);
+    color: var(--flint-color-text-secondary);
   }
 
   .state-tile__trend[data-trend="up"] {
-    color: var(--pug-color-status-success, #22c55e);
+    color: var(--flint-color-status-success, #22c55e);
   }
 
   .state-tile__trend[data-trend="down"] {
-    color: var(--pug-color-status-danger, #ef4444);
+    color: var(--flint-color-status-danger, #ef4444);
   }
 
   .state-tile__trend[data-trend="flat"] {
-    color: var(--pug-color-text-tertiary);
+    color: var(--flint-color-text-tertiary);
   }
 
   .state-tile__trend-arrow {
@@ -121,6 +121,6 @@
   }
 
   :global([data-theme="light"]) .state-tile {
-    background: var(--pug-treatment-surface-fill);
+    background: var(--flint-treatment-surface-fill);
   }
 </style>

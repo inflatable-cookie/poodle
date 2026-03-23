@@ -1,7 +1,7 @@
 use gpui::*;
-use pug_adapter::ThemeProvider;
-use pug_primitives::{NumberEntrySpec, ValidationState, EyebrowSpec};
-use pug_gpui_components::{NumberEntry, Eyebrow};
+use flint_adapter::ThemeProvider;
+use flint_primitives::{NumberEntrySpec, ValidationState, EyebrowSpec};
+use flint_gpui_components::{NumberEntry, Eyebrow};
 use crate::app_state::AppState;
 use crate::style_bridge::color_to_hsla;
 use crate::PreviewRoot;

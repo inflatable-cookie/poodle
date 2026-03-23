@@ -1,10 +1,10 @@
 # g01.006 GPUI Substrate And Rust Token-Binding Baseline
 
 Status: completed
-Owner: Pug Core
+Owner: Flint Core
 Updated: 2026-03-11
 Depends on: g01.002, g01.004
-Primary repos: `pug`
+Primary repos: `flint`
 
 ## Research Inputs
 
@@ -13,7 +13,7 @@ Primary repos: `pug`
 
 ## Context
 
-Pug's second implementation target is GPUI. It needs the same semantic contract
+Flint's second implementation target is GPUI. It needs the same semantic contract
 as Svelte without being forced into browser-shaped abstractions.
 
 ## Goals

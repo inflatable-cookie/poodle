@@ -190,7 +190,7 @@ function parseNumberedHeadingSequence(markdown: string): number[] {
   return Array.from(markdown.matchAll(/^##\s+(\d+)\.\s+.+$/gm), (match) => Number(match[1]));
 }
 
-function parseCargoPugMetadata(source: string): {
+function parseCargoFlintMetadata(source: string): {
   name: string | null;
   publicIntent: boolean | null;
   channel: string | null;
@@ -366,7 +366,7 @@ function validateSveltePackageSurface(
 
 function validatePackageSurfaceCoverage(
   packagePath: string,
-  packageName: "@pug/svelte-primitives" | "@pug/svelte-composites" | "@pug/svelte-composites",
+  packageName: "@flint/svelte-primitives" | "@flint/svelte-composites" | "@flint/svelte-composites",
   errors: string[],
 ): void {
   const indexSource = fs.readFileSync(path.join(repoRoot, packagePath, "src", "index.ts"), "utf8");
@@ -764,7 +764,7 @@ function validateReleaseOperations(errors: string[]): void {
       const packageJsonPath = path.join(repoRoot, manifestEntry.path, "package.json");
       const packageJson = JSON.parse(fs.readFileSync(packageJsonPath, "utf8")) as {
         name?: string;
-        pugRelease?: {
+        flintRelease?: {
           publicIntent?: boolean;
           channel?: string;
           stability?: string;
@@ -772,23 +772,23 @@ function validateReleaseOperations(errors: string[]): void {
       };
 
       expect(packageJson.name === manifestEntry.name, `${packageJsonPath} name does not match release manifest.`, errors);
-      expect(Boolean(packageJson.pugRelease), `${packageJsonPath} is missing pugRelease metadata.`, errors);
+      expect(Boolean(packageJson.flintRelease), `${packageJsonPath} is missing flintRelease metadata.`, errors);
 
-      if (packageJson.pugRelease) {
+      if (packageJson.flintRelease) {
         expect(
-          packageJson.pugRelease.publicIntent === manifestEntry.publicIntent,
-          `${packageJsonPath} pugRelease.publicIntent does not match release manifest.`,
+          packageJson.flintRelease.publicIntent === manifestEntry.publicIntent,
+          `${packageJsonPath} flintRelease.publicIntent does not match release manifest.`,
           errors,
         );
         expect(
-          packageJson.pugRelease.channel === manifestEntry.channel,
-          `${packageJsonPath} pugRelease.channel does not match release manifest.`,
+          packageJson.flintRelease.channel === manifestEntry.channel,
+          `${packageJsonPath} flintRelease.channel does not match release manifest.`,
           errors,
         );
 
         if (manifestEntry.channel === "preview") {
           expect(
-            packageJson.pugRelease.stability === "pre-release",
+            packageJson.flintRelease.stability === "pre-release",
             `${packageJsonPath} preview packages must use stability "pre-release".`,
             errors,
           );
@@ -796,7 +796,7 @@ function validateReleaseOperations(errors: string[]): void {
       }
     } else if (manifestEntry.language === "rust") {
       const cargoPath = path.join(repoRoot, manifestEntry.path, "Cargo.toml");
-      const cargoMetadata = parseCargoPugMetadata(fs.readFileSync(cargoPath, "utf8"));
+      const cargoMetadata = parseCargoFlintMetadata(fs.readFileSync(cargoPath, "utf8"));
 
       expect(cargoMetadata.name === manifestEntry.name, `${cargoPath} package name does not match release manifest.`, errors);
       expect(
@@ -1358,8 +1358,8 @@ function validateGpuiPreviewBaseline(errors: string[]): { previewSectionCount: n
 
   expect(previewBaseline.generation === "g04.002", "packages/gpui/preview-app-baseline.json must target g04.002.", errors);
   expect(
-    previewBaseline.themeRuntime.tokenSource === "pug-gpui-tokens",
-    "packages/gpui/preview-app-baseline.json must use pug-gpui-tokens as token source.",
+    previewBaseline.themeRuntime.tokenSource === "flint-gpui-tokens",
+    "packages/gpui/preview-app-baseline.json must use flint-gpui-tokens as token source.",
     errors,
   );
   compareLists(
@@ -1457,13 +1457,13 @@ function validateGpuiStructuralBaseline(errors: string[]): { structuralExportCou
     errors,
   );
   expect(
-    structuralBaseline.crateName === "pug-gpui-primitives",
-    "packages/gpui/structural-primitives-baseline.json must target the pug-gpui-primitives crate.",
+    structuralBaseline.crateName === "flint-gpui-primitives",
+    "packages/gpui/structural-primitives-baseline.json must target the flint-gpui-primitives crate.",
     errors,
   );
   expect(
-    structuralBaseline.tokenSource === "pug-gpui-tokens",
-    "packages/gpui/structural-primitives-baseline.json must use pug-gpui-tokens as token source.",
+    structuralBaseline.tokenSource === "flint-gpui-tokens",
+    "packages/gpui/structural-primitives-baseline.json must use flint-gpui-tokens as token source.",
     errors,
   );
   compareLists(
@@ -1548,13 +1548,13 @@ function validateGpuiActionFieldBaseline(errors: string[]): { actionFieldExportC
     errors,
   );
   expect(
-    actionFieldBaseline.crateName === "pug-gpui-primitives",
-    "packages/gpui/action-field-primitives-baseline.json must target the pug-gpui-primitives crate.",
+    actionFieldBaseline.crateName === "flint-gpui-primitives",
+    "packages/gpui/action-field-primitives-baseline.json must target the flint-gpui-primitives crate.",
     errors,
   );
   expect(
-    actionFieldBaseline.tokenSource === "pug-gpui-tokens",
-    "packages/gpui/action-field-primitives-baseline.json must use pug-gpui-tokens as token source.",
+    actionFieldBaseline.tokenSource === "flint-gpui-tokens",
+    "packages/gpui/action-field-primitives-baseline.json must use flint-gpui-tokens as token source.",
     errors,
   );
   compareLists(
@@ -1654,13 +1654,13 @@ function validateGpuiSelectionFeedbackDateBaseline(errors: string[]): { selectio
     errors,
   );
   expect(
-    baseline.crateName === "pug-gpui-primitives",
-    "packages/gpui/selection-feedback-date-baseline.json must target the pug-gpui-primitives crate.",
+    baseline.crateName === "flint-gpui-primitives",
+    "packages/gpui/selection-feedback-date-baseline.json must target the flint-gpui-primitives crate.",
     errors,
   );
   expect(
-    baseline.tokenSource === "pug-gpui-tokens",
-    "packages/gpui/selection-feedback-date-baseline.json must use pug-gpui-tokens as token source.",
+    baseline.tokenSource === "flint-gpui-tokens",
+    "packages/gpui/selection-feedback-date-baseline.json must use flint-gpui-tokens as token source.",
     errors,
   );
   compareLists(
@@ -1747,13 +1747,13 @@ function validateGpuiOverlayNavigationMenuBaseline(errors: string[]): { overlayN
     errors,
   );
   expect(
-    baseline.crateName === "pug-gpui-primitives",
-    "packages/gpui/overlay-navigation-menu-baseline.json must target the pug-gpui-primitives crate.",
+    baseline.crateName === "flint-gpui-primitives",
+    "packages/gpui/overlay-navigation-menu-baseline.json must target the flint-gpui-primitives crate.",
     errors,
   );
   expect(
-    baseline.tokenSource === "pug-gpui-tokens",
-    "packages/gpui/overlay-navigation-menu-baseline.json must use pug-gpui-tokens as token source.",
+    baseline.tokenSource === "flint-gpui-tokens",
+    "packages/gpui/overlay-navigation-menu-baseline.json must use flint-gpui-tokens as token source.",
     errors,
   );
   compareLists(
@@ -1819,13 +1819,13 @@ function validateGpuiFormValidationRemediationBaseline(errors: string[]): { gpui
     errors,
   );
   expect(
-    baseline.crateName === "pug-gpui-composites",
-    "packages/gpui/form-validation-remediation-composites-baseline.json must target the pug-gpui-composites crate.",
+    baseline.crateName === "flint-gpui-composites",
+    "packages/gpui/form-validation-remediation-composites-baseline.json must target the flint-gpui-composites crate.",
     errors,
   );
   expect(
-    baseline.tokenSource === "pug-gpui-tokens",
-    "packages/gpui/form-validation-remediation-composites-baseline.json must use pug-gpui-tokens as token source.",
+    baseline.tokenSource === "flint-gpui-tokens",
+    "packages/gpui/form-validation-remediation-composites-baseline.json must use flint-gpui-tokens as token source.",
     errors,
   );
   compareLists(
@@ -1913,13 +1913,13 @@ function validateGpuiDataBrowseDetailPickerMediaBaseline(errors: string[]): { gp
     errors,
   );
   expect(
-    baseline.crateName === "pug-gpui-composites",
-    "packages/gpui/data-browse-detail-picker-media-baseline.json must target the pug-gpui-composites crate.",
+    baseline.crateName === "flint-gpui-composites",
+    "packages/gpui/data-browse-detail-picker-media-baseline.json must target the flint-gpui-composites crate.",
     errors,
   );
   expect(
-    baseline.tokenSource === "pug-gpui-tokens",
-    "packages/gpui/data-browse-detail-picker-media-baseline.json must use pug-gpui-tokens as token source.",
+    baseline.tokenSource === "flint-gpui-tokens",
+    "packages/gpui/data-browse-detail-picker-media-baseline.json must use flint-gpui-tokens as token source.",
     errors,
   );
   compareLists(
@@ -2013,13 +2013,13 @@ function validateGpuiWorkstationBaseline(errors: string[]): { gpuiWorkstationExp
     errors,
   );
   expect(
-    baseline.crateName === "pug-gpui-workstation",
-    "packages/gpui/workstation-shell-command-layout-baseline.json must target the pug-gpui-workstation crate.",
+    baseline.crateName === "flint-gpui-workstation",
+    "packages/gpui/workstation-shell-command-layout-baseline.json must target the flint-gpui-workstation crate.",
     errors,
   );
   expect(
-    baseline.tokenSource === "pug-gpui-tokens",
-    "packages/gpui/workstation-shell-command-layout-baseline.json must use pug-gpui-tokens as token source.",
+    baseline.tokenSource === "flint-gpui-tokens",
+    "packages/gpui/workstation-shell-command-layout-baseline.json must use flint-gpui-tokens as token source.",
     errors,
   );
   compareLists(
@@ -2196,7 +2196,7 @@ function validateGpuiNativeAccessibilityProof(errors: string[]): {
     [
       "primitives",
       {
-        crateName: "pug-gpui-primitives",
+        crateName: "flint-gpui-primitives",
         cratePath: "packages/gpui/primitives",
         exportNames: primitiveExportNames,
         contractIds: primitiveContractIds,
@@ -2205,7 +2205,7 @@ function validateGpuiNativeAccessibilityProof(errors: string[]): {
     [
       "composites",
       {
-        crateName: "pug-gpui-composites",
+        crateName: "flint-gpui-composites",
         cratePath: "packages/gpui/composites",
         exportNames: compositeExportNames,
         contractIds: compositeContractIds,
@@ -2214,7 +2214,7 @@ function validateGpuiNativeAccessibilityProof(errors: string[]): {
     [
       "workstation",
       {
-        crateName: "pug-gpui-workstation",
+        crateName: "flint-gpui-workstation",
         cratePath: "packages/gpui/workstation",
         exportNames: [...workstationBaseline.exportNames].sort(),
         contractIds: [...workstationBaseline.contractIds].sort(),
@@ -3149,10 +3149,10 @@ function validateSharedDemoAppContract(errors: string[]): {
 const errors: string[] = [];
 const componentContractCount = validateComponentContracts(errors);
 validateContractIndexes(errors);
-validateSveltePackageSurface("packages/svelte/primitives", "foundation", "@pug/svelte-primitives", errors);
-validateSveltePackageSurface("packages/svelte/composites", "composites", "@pug/svelte-composites", errors);
-validatePackageSurfaceCoverage("packages/svelte/primitives", "@pug/svelte-primitives", errors);
-validatePackageSurfaceCoverage("packages/svelte/composites", "@pug/svelte-composites", errors);
+validateSveltePackageSurface("packages/svelte/primitives", "foundation", "@flint/svelte-primitives", errors);
+validateSveltePackageSurface("packages/svelte/composites", "composites", "@flint/svelte-composites", errors);
+validatePackageSurfaceCoverage("packages/svelte/primitives", "@flint/svelte-primitives", errors);
+validatePackageSurfaceCoverage("packages/svelte/composites", "@flint/svelte-composites", errors);
 validateDocsCatalog(errors);
 validateParityCoverage(errors);
 validateAccessibilityAudit(errors);

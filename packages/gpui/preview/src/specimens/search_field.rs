@@ -1,8 +1,8 @@
 use gpui::*;
 use gpui::prelude::FluentBuilder;
-use pug_adapter::ThemeProvider;
-use pug_primitives::{SearchFieldSpec, EyebrowSpec};
-use pug_gpui_components::{SearchField, Eyebrow};
+use flint_adapter::ThemeProvider;
+use flint_primitives::{SearchFieldSpec, EyebrowSpec};
+use flint_gpui_components::{SearchField, Eyebrow};
 use crate::app_state::AppState;
 use crate::style_bridge::color_to_hsla;
 use crate::PreviewRoot;

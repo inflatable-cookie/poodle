@@ -21,7 +21,7 @@ Research DAW/pro-tool UI patterns for panels, docks, split views, and workspace 
 
 VS Code uses a **6-area layout model**:
 
-| Area | Description | Pug Equivalent |
+| Area | Description | Flint Equivalent |
 |------|-------------|----------------|
 | **Editor** | Main content area | Document/workspace surface |
 | **Primary Side Bar** | Explorer, Search, etc. | Left panel group |
@@ -168,9 +168,9 @@ SplitContainer
 
 ---
 
-## Recommendations for Pug
+## Recommendations for Flint
 
-### Pug's Workstation Layer Scope
+### Flint's Workstation Layer Scope
 
 **In Scope (Layer 3 - Workstation Shell):**
 - Panel surface/Shell components
@@ -241,7 +241,7 @@ Layer 3 - Workstation Shell
 
 ### Persistence Strategy
 
-**Pug Provides:**
+**Flint Provides:**
 - Layout structure types
 - Serialization format
 - Change events

@@ -1,9 +1,9 @@
 //! EmbedPreview — preview of embedded content backed by EmbedPreviewSpec.
 
 use gpui::*;
-use pug_gpui::GpuiThemeProvider;
-use pug_composites::EmbedPreviewSpec;
-use pug_primitives::{IconSize, IconSpec};
+use flint_gpui::GpuiThemeProvider;
+use flint_composites::EmbedPreviewSpec;
+use flint_primitives::{IconSize, IconSpec};
 use crate::primitives::Icon;
 use crate::theme_ext::{resolve_color, resolve_px, resolve_radius};
 

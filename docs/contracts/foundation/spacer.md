@@ -129,7 +129,7 @@ No internal state.
 
 ## 10. GPUI Notes
 
-- expected crate/module surface: `pug_gpui::components::spacer`
+- expected crate/module surface: `flint_gpui::components::spacer`
 - implemented as a weighted empty layout node using GPUI's flex model
 - `grow` maps to flex-grow weight
 - `minSize` maps to min-size constraint on the layout node

@@ -1,5 +1,5 @@
-use pug_primitives::CheckState;
-use pug_tokens::semantic;
+use flint_primitives::CheckState;
+use flint_tokens::semantic;
 
 use crate::types::{TableColumnSpec, TableRowSpec, TableSortDirection};
 

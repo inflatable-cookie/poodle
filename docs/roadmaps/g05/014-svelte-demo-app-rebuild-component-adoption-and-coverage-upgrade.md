@@ -1,10 +1,10 @@
 # g05.014 Svelte Demo-App Rebuild, Component Adoption, And Coverage Upgrade
 
 Status: completed
-Owner: Pug Core
+Owner: Flint Core
 Updated: 2026-03-13
 Depends on: g05.012, g05.013
-Primary repos: `pug`
+Primary repos: `flint`
 
 ## Goals
 

@@ -7,12 +7,12 @@
 //! In Jetstream, overlays map to ScreenStack entries (Dialog, Drawer, Popover)
 //! or to Panel containers with visibility toggling (Accordion, Tabs).
 
-use pug_adapter::{RenderComponent, ThemeProvider};
-use pug_primitives::{
+use flint_adapter::{RenderComponent, ThemeProvider};
+use flint_primitives::{
     AccordionSpec, CollapsibleSpec, ContextMenuSpec, DialogSpec, DrawerSpec, HoverCardSpec,
     MenuSpec, MenubarSpec, NavigationMenuSpec, PopoverSpec, TabStripSpec, TabsSpec, TooltipSpec,
 };
-use pug_style::StyleDescriptor;
+use flint_style::StyleDescriptor;
 
 use crate::style_map::map_style;
 use crate::{JetstreamAdapter, JetstreamNodeHandle, JetstreamTarget, WidgetKind};
@@ -123,9 +123,9 @@ impl RenderComponent<MenubarSpec> for JetstreamAdapter {
 
 #[cfg(test)]
 mod tests {
-    use pug_adapter::RenderComponent;
-    use pug_primitives::*;
-    use pug_style::StyleDescriptor;
+    use flint_adapter::RenderComponent;
+    use flint_primitives::*;
+    use flint_style::StyleDescriptor;
     use crate::{JetstreamAdapter, WidgetKind, theme::JetstreamThemeProvider};
 
     fn a() -> JetstreamAdapter { JetstreamAdapter::new(JetstreamThemeProvider::default()) }

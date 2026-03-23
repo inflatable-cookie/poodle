@@ -1,8 +1,8 @@
 //! Stack — Jetstream vertical stack layout backed by StackSpec.
 
 use jetstream_runtime::ui_element::{self, JsEl};
-use pug_jetstream::JetstreamThemeProvider;
-use pug_primitives::{Alignment, StackSpec};
+use flint_jetstream::JetstreamThemeProvider;
+use flint_primitives::{Alignment, StackSpec};
 
 use crate::theme_ext::resolve_px;
 

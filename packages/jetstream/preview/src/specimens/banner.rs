@@ -1,10 +1,10 @@
 //! Banner specimen — status banners with different tones.
 
 use jetstream_runtime::ui_element::*;
-use pug_jetstream::JetstreamThemeProvider;
-use pug_jetstream_components::banner::js_banner;
-use pug_jetstream_components::theme_ext::*;
-use pug_primitives::{BannerSpec, StatusTone};
+use flint_jetstream::JetstreamThemeProvider;
+use flint_jetstream_components::banner::js_banner;
+use flint_jetstream_components::theme_ext::*;
+use flint_primitives::{BannerSpec, StatusTone};
 
 pub fn render(theme: &JetstreamThemeProvider) -> JsEl {
     let secondary = resolve_color(theme, "semantic.color.text.secondary");

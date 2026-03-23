@@ -3,8 +3,8 @@
 use std::rc::Rc;
 
 use gpui::*;
-use pug_gpui::GpuiThemeProvider;
-use pug_composites::{Toast, ToastPosition, ToastStackSpec};
+use flint_gpui::GpuiThemeProvider;
+use flint_composites::{Toast, ToastPosition, ToastStackSpec};
 
 use crate::theme_ext::{resolve_color, resolve_px, resolve_radius};
 

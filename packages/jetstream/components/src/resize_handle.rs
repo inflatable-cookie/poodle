@@ -1,8 +1,8 @@
 //! ResizeHandle — Jetstream resize handle backed by ResizeHandleSpec.
 
 use jetstream_runtime::ui_element::{self, JsEl};
-use pug_jetstream::JetstreamThemeProvider;
-use pug_primitives::{Orientation, ResizeHandleSpec};
+use flint_jetstream::JetstreamThemeProvider;
+use flint_primitives::{Orientation, ResizeHandleSpec};
 
 use crate::theme_ext::resolve_color;
 

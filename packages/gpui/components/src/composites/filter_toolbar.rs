@@ -1,8 +1,8 @@
 //! FilterToolbar — real GPUI component backed by FilterToolbarSpec.
 
 use gpui::*;
-use pug_gpui::GpuiThemeProvider;
-use pug_composites::FilterToolbarSpec;
+use flint_gpui::GpuiThemeProvider;
+use flint_composites::FilterToolbarSpec;
 
 use crate::theme_ext::{resolve_color, resolve_px};
 

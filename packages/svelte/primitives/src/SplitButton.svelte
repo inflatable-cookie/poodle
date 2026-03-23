@@ -182,71 +182,71 @@
 
 <style>
   .split-button {
-    --pug-split-fill: var(
-      --pug-treatment-interactive-fill,
-      var(--pug-color-background-surface)
+    --flint-split-fill: var(
+      --flint-treatment-interactive-fill,
+      var(--flint-color-background-surface)
     );
-    --pug-split-fill-hover: color-mix(
+    --flint-split-fill-hover: color-mix(
       in srgb,
-      var(--pug-split-fill) 84%,
-      var(--pug-color-background-elevated)
+      var(--flint-split-fill) 84%,
+      var(--flint-color-background-elevated)
     );
-    --pug-split-border: var(
-      --pug-treatment-interactive-border,
-      var(--pug-color-border-default)
+    --flint-split-border: var(
+      --flint-treatment-interactive-border,
+      var(--flint-color-border-default)
     );
-    --pug-split-shadow: var(
-      --pug-treatment-interactive-shadow,
+    --flint-split-shadow: var(
+      --flint-treatment-interactive-shadow,
       none
     );
-    --pug-split-text: var(--pug-color-text-primary);
+    --flint-split-text: var(--flint-color-text-primary);
     position: relative;
     display: inline-flex;
     align-items: stretch;
     width: fit-content;
-    border-radius: var(--pug-treatment-interactive-radius, var(--pug-radius-control));
+    border-radius: var(--flint-treatment-interactive-radius, var(--flint-radius-control));
   }
 
   .split-button[data-variant="primary"] {
-    --pug-split-fill: var(
-      --pug-treatment-interactive-primary-fill,
-      var(--pug-color-accent-base)
+    --flint-split-fill: var(
+      --flint-treatment-interactive-primary-fill,
+      var(--flint-color-accent-base)
     );
-    --pug-split-border: var(
-      --pug-treatment-interactive-primary-border,
-      color-mix(in srgb, var(--pug-color-accent-base) 84%, black)
+    --flint-split-border: var(
+      --flint-treatment-interactive-primary-border,
+      color-mix(in srgb, var(--flint-color-accent-base) 84%, black)
     );
-    --pug-split-shadow: var(
-      --pug-treatment-interactive-primary-shadow,
+    --flint-split-shadow: var(
+      --flint-treatment-interactive-primary-shadow,
       none
     );
-    --pug-split-text: var(
-      --pug-treatment-interactive-primary-text,
-      var(--pug-color-text-inverse)
+    --flint-split-text: var(
+      --flint-treatment-interactive-primary-text,
+      var(--flint-color-text-inverse)
     );
   }
 
   .split-button[data-variant="ghost"] {
-    --pug-split-fill: color-mix(in srgb, var(--pug-color-background-surface) 42%, transparent);
-    --pug-split-border: color-mix(in srgb, var(--pug-color-border-subtle) 72%, transparent);
+    --flint-split-fill: color-mix(in srgb, var(--flint-color-background-surface) 42%, transparent);
+    --flint-split-border: color-mix(in srgb, var(--flint-color-border-subtle) 72%, transparent);
   }
 
   .split-button[data-tone="danger"] {
-    --pug-split-fill: color-mix(in srgb, var(--pug-color-status-danger) 16%, var(--pug-color-background-surface));
-    --pug-split-border: color-mix(in srgb, var(--pug-color-status-danger) 46%, var(--pug-color-border-default));
-    --pug-split-text: var(--pug-color-text-primary);
+    --flint-split-fill: color-mix(in srgb, var(--flint-color-status-danger) 16%, var(--flint-color-background-surface));
+    --flint-split-border: color-mix(in srgb, var(--flint-color-status-danger) 46%, var(--flint-color-border-default));
+    --flint-split-text: var(--flint-color-text-primary);
   }
 
   .split-button[data-variant="primary"][data-tone="danger"] {
-    --pug-split-fill: var(--pug-color-status-danger);
-    --pug-split-border: color-mix(in srgb, var(--pug-color-status-danger) 84%, black);
-    --pug-split-text: var(--pug-color-text-inverse);
+    --flint-split-fill: var(--flint-color-status-danger);
+    --flint-split-border: color-mix(in srgb, var(--flint-color-status-danger) 84%, black);
+    --flint-split-text: var(--flint-color-text-inverse);
   }
 
   .split-button[data-variant="ghost"][data-tone="danger"] {
-    --pug-split-fill: transparent;
-    --pug-split-border: transparent;
-    --pug-split-text: var(--pug-color-status-danger);
+    --flint-split-fill: transparent;
+    --flint-split-border: transparent;
+    --flint-split-text: var(--flint-color-status-danger);
   }
 
   .split-button__primary,
@@ -254,83 +254,83 @@
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    height: var(--pug-size-control-height);
-    border: 0.0625rem solid var(--pug-split-border);
-    background: var(--pug-split-fill);
-    box-shadow: var(--pug-split-shadow);
-    color: var(--pug-split-text);
+    height: var(--flint-size-control-height);
+    border: 0.0625rem solid var(--flint-split-border);
+    background: var(--flint-split-fill);
+    box-shadow: var(--flint-split-shadow);
+    color: var(--flint-split-text);
     cursor: pointer;
-    font-family: var(--pug-typography-label-family);
-    font-size: var(--pug-typography-label-size);
-    font-weight: var(--pug-typography-label-weight);
+    font-family: var(--flint-typography-label-family);
+    font-size: var(--flint-typography-label-size);
+    font-weight: var(--flint-typography-label-weight);
     letter-spacing: 0.01em;
     line-height: 1;
     transition:
-      background var(--pug-motion-duration-interaction) var(--pug-motion-easing-standard),
-      border-color var(--pug-motion-duration-interaction) var(--pug-motion-easing-standard),
-      box-shadow var(--pug-motion-duration-interaction) var(--pug-motion-easing-standard);
+      background var(--flint-motion-duration-interaction) var(--flint-motion-easing-standard),
+      border-color var(--flint-motion-duration-interaction) var(--flint-motion-easing-standard),
+      box-shadow var(--flint-motion-duration-interaction) var(--flint-motion-easing-standard);
   }
 
   .split-button[data-size="sm"] .split-button__primary,
   .split-button[data-size="sm"] .split-button__toggle {
-    height: calc(var(--pug-size-control-height) - 0.375rem);
+    height: calc(var(--flint-size-control-height) - 0.375rem);
     font-size: 0.75rem;
   }
 
   .split-button[data-size="lg"] .split-button__primary,
   .split-button[data-size="lg"] .split-button__toggle {
-    height: calc(var(--pug-size-control-height) + 0.375rem);
+    height: calc(var(--flint-size-control-height) + 0.375rem);
     font-size: 0.875rem;
   }
 
   .split-button__primary {
-    gap: var(--pug-space-inline-sm);
+    gap: var(--flint-space-inline-sm);
     min-width: 4rem;
-    padding: 0 var(--pug-space-control-x);
+    padding: 0 var(--flint-space-control-x);
     border-right: 0;
-    border-radius: var(--pug-treatment-interactive-radius, var(--pug-radius-control)) 0 0 var(--pug-treatment-interactive-radius, var(--pug-radius-control));
+    border-radius: var(--flint-treatment-interactive-radius, var(--flint-radius-control)) 0 0 var(--flint-treatment-interactive-radius, var(--flint-radius-control));
   }
 
   .split-button__primary:hover:not(:disabled) {
-    background: var(--pug-split-fill-hover);
+    background: var(--flint-split-fill-hover);
   }
 
   .split-button__primary:focus-visible {
-    outline: var(--pug-border-width-focus) solid var(--pug-color-accent-focusRing);
+    outline: var(--flint-border-width-focus) solid var(--flint-color-accent-focusRing);
     outline-offset: 0.125rem;
     z-index: 1;
   }
 
   .split-button__primary:disabled {
     cursor: not-allowed;
-    opacity: var(--pug-state-opacity-disabled);
+    opacity: var(--flint-state-opacity-disabled);
   }
 
   .split-button__toggle {
     width: 2rem;
     padding: 0;
     border-left: 0;
-    border-radius: 0 var(--pug-treatment-interactive-radius, var(--pug-radius-control)) var(--pug-treatment-interactive-radius, var(--pug-radius-control)) 0;
+    border-radius: 0 var(--flint-treatment-interactive-radius, var(--flint-radius-control)) var(--flint-treatment-interactive-radius, var(--flint-radius-control)) 0;
   }
 
   .split-button__toggle:hover:not(:disabled) {
-    background: var(--pug-split-fill-hover);
+    background: var(--flint-split-fill-hover);
   }
 
   .split-button__toggle:focus-visible {
-    outline: var(--pug-border-width-focus) solid var(--pug-color-accent-focusRing);
+    outline: var(--flint-border-width-focus) solid var(--flint-color-accent-focusRing);
     outline-offset: 0.125rem;
     z-index: 1;
   }
 
   .split-button__toggle:disabled {
     cursor: not-allowed;
-    opacity: var(--pug-state-opacity-disabled);
+    opacity: var(--flint-state-opacity-disabled);
   }
 
   .split-button__divider {
     width: 0.0625rem;
-    background: color-mix(in srgb, var(--pug-split-text) 22%, transparent);
+    background: color-mix(in srgb, var(--flint-split-text) 22%, transparent);
     align-self: center;
     height: 60%;
   }
@@ -364,52 +364,52 @@
     position: absolute;
     top: calc(100% + 0.375rem);
     left: 0;
-    z-index: var(--pug-overlay-z-menu);
+    z-index: var(--flint-overlay-z-menu);
     min-width: 12rem;
     padding: 0.25rem;
     border: 0.0625rem solid var(
-      --pug-treatment-surface-elevated-border,
-      color-mix(in srgb, var(--pug-color-border-default) 72%, transparent)
+      --flint-treatment-surface-elevated-border,
+      color-mix(in srgb, var(--flint-color-border-default) 72%, transparent)
     );
-    border-radius: var(--pug-treatment-surface-elevated-radius, var(--pug-radius-surface));
+    border-radius: var(--flint-treatment-surface-elevated-radius, var(--flint-radius-surface));
     background: var(
-      --pug-treatment-surface-elevated-fill,
-      color-mix(in srgb, var(--pug-color-background-elevated) 98%, var(--pug-color-background-panel))
+      --flint-treatment-surface-elevated-fill,
+      color-mix(in srgb, var(--flint-color-background-elevated) 98%, var(--flint-color-background-panel))
     );
-    box-shadow: var(--pug-treatment-surface-elevated-shadow, var(--pug-elevation-overlay));
+    box-shadow: var(--flint-treatment-surface-elevated-shadow, var(--flint-elevation-overlay));
   }
 
   .split-button__item {
     display: flex;
     align-items: center;
     width: 100%;
-    min-height: calc(var(--pug-size-control-height) - 0.25rem);
-    padding: var(--pug-space-control-y) var(--pug-space-control-x);
+    min-height: calc(var(--flint-size-control-height) - 0.25rem);
+    padding: var(--flint-space-control-y) var(--flint-space-control-x);
     border: 0;
-    border-radius: calc(var(--pug-radius-control) - 0.125rem);
+    border-radius: calc(var(--flint-radius-control) - 0.125rem);
     background: transparent;
-    color: var(--pug-color-text-primary);
+    color: var(--flint-color-text-primary);
     cursor: pointer;
     font: inherit;
-    font-size: var(--pug-typography-label-size);
+    font-size: var(--flint-typography-label-size);
     text-align: left;
   }
 
   .split-button__item:hover:not(:disabled),
   .split-button__item:focus-visible {
-    background: color-mix(in srgb, var(--pug-color-accent-base) 16%, transparent);
+    background: color-mix(in srgb, var(--flint-color-accent-base) 16%, transparent);
     outline: none;
   }
 
   .split-button__item:disabled {
     cursor: not-allowed;
-    opacity: var(--pug-state-opacity-disabled);
+    opacity: var(--flint-state-opacity-disabled);
   }
 
   .split-button__separator {
     width: 100%;
     height: 0.0625rem;
     margin: 0.25rem 0;
-    background: color-mix(in srgb, var(--pug-color-border-subtle) 72%, transparent);
+    background: color-mix(in srgb, var(--flint-color-border-subtle) 72%, transparent);
   }
 </style>

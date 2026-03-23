@@ -1,10 +1,10 @@
 //! MediaThumbnail specimen — compact media item thumbnail.
 
 use jetstream_runtime::ui_element::*;
-use pug_jetstream::JetstreamThemeProvider;
-use pug_jetstream_components::media_thumbnail::js_media_thumbnail;
-use pug_jetstream_components::theme_ext::*;
-use pug_composites::{MediaKind, MediaThumbnailSpec};
+use flint_jetstream::JetstreamThemeProvider;
+use flint_jetstream_components::media_thumbnail::js_media_thumbnail;
+use flint_jetstream_components::theme_ext::*;
+use flint_composites::{MediaKind, MediaThumbnailSpec};
 
 pub fn render(theme: &JetstreamThemeProvider) -> JsEl {
     let secondary = resolve_color(theme, "semantic.color.text.secondary");

@@ -34,24 +34,24 @@
 
 <style>
   .page-header {
-    --pug-recipe-page-header-padding-block-start: 0;
-    --pug-recipe-page-header-padding-inline: 0;
-    --pug-recipe-page-header-padding-block-end: calc(var(--pug-space-stack-md) + 0.125rem);
-    --pug-recipe-page-header-fill: transparent;
-    --pug-recipe-page-header-border: transparent;
-    --pug-recipe-page-header-shadow: none;
-    --pug-recipe-page-header-radius: var(--pug-radius-surface);
+    --flint-recipe-page-header-padding-block-start: 0;
+    --flint-recipe-page-header-padding-inline: 0;
+    --flint-recipe-page-header-padding-block-end: calc(var(--flint-space-stack-md) + 0.125rem);
+    --flint-recipe-page-header-fill: transparent;
+    --flint-recipe-page-header-border: transparent;
+    --flint-recipe-page-header-shadow: none;
+    --flint-recipe-page-header-radius: var(--flint-radius-surface);
     display: grid;
-    gap: var(--pug-space-stack-md);
+    gap: var(--flint-space-stack-md);
     align-items: end;
     padding:
-      var(--pug-recipe-page-header-padding-block-start)
-      var(--pug-recipe-page-header-padding-inline)
-      var(--pug-recipe-page-header-padding-block-end);
-    border: 0.0625rem solid var(--pug-recipe-page-header-border);
-    border-radius: var(--pug-recipe-page-header-radius);
-    background: var(--pug-recipe-page-header-fill);
-    box-shadow: var(--pug-recipe-page-header-shadow);
+      var(--flint-recipe-page-header-padding-block-start)
+      var(--flint-recipe-page-header-padding-inline)
+      var(--flint-recipe-page-header-padding-block-end);
+    border: 0.0625rem solid var(--flint-recipe-page-header-border);
+    border-radius: var(--flint-recipe-page-header-radius);
+    background: var(--flint-recipe-page-header-fill);
+    box-shadow: var(--flint-recipe-page-header-shadow);
   }
 
   .page-header[data-align="between"] {
@@ -60,12 +60,12 @@
 
   .page-header__content {
     display: grid;
-    gap: var(--pug-space-stack-md);
+    gap: var(--flint-space-stack-md);
   }
 
   .page-header__title-block {
     display: grid;
-    gap: var(--pug-space-inline-sm);
+    gap: var(--flint-space-inline-sm);
   }
 
   .page-header__title,
@@ -75,14 +75,14 @@
   }
 
   .page-header__title {
-    font-family: var(--pug-typography-heading-family);
+    font-family: var(--flint-typography-heading-family);
     font-size: 1.75rem;
     line-height: 1.1;
     font-weight: 700;
   }
 
   .page-header__eyebrow {
-    color: var(--pug-color-text-secondary);
+    color: var(--flint-color-text-secondary);
     font-size: 0.6875rem;
     font-weight: 600;
     letter-spacing: 0.12em;
@@ -90,15 +90,15 @@
   }
 
   .page-header__subtitle {
-    color: var(--pug-color-text-secondary);
-    font-size: var(--pug-typography-body-size);
-    line-height: var(--pug-typography-body-lineHeight);
+    color: var(--flint-color-text-secondary);
+    font-size: var(--flint-typography-body-size);
+    line-height: var(--flint-typography-body-lineHeight);
   }
 
   .page-header__actions {
     display: flex;
     flex-wrap: wrap;
-    gap: var(--pug-space-inline-md);
+    gap: var(--flint-space-inline-md);
     justify-content: flex-end;
     align-items: start;
   }

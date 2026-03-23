@@ -1,7 +1,7 @@
 <script lang="ts">
   import { createEventDispatcher } from "svelte";
 
-  import { Checkbox, Icon, Popover } from "@pug/svelte-primitives";
+  import { Checkbox, Icon, Popover } from "@flint/svelte-primitives";
 
   import type { TableColumn, TableRow, TableSortDirection } from "./types";
 
@@ -209,47 +209,47 @@
 <style>
   .data-table {
     overflow: auto;
-    border: 0.0625rem solid var(--pug-color-border-subtle);
-    border-radius: var(--pug-radius-surface);
-    background: var(--pug-color-background-panel);
+    border: 0.0625rem solid var(--flint-color-border-subtle);
+    border-radius: var(--flint-radius-surface);
+    background: var(--flint-color-background-panel);
   }
 
   .data-table__toolbar {
     display: flex;
     align-items: center;
     justify-content: flex-end;
-    gap: var(--pug-space-inline-md);
-    padding: var(--pug-space-control-y) var(--pug-space-panel-x);
-    border-bottom: 0.0625rem solid var(--pug-color-border-subtle);
-    background: color-mix(in srgb, var(--pug-color-background-elevated) 92%, transparent);
+    gap: var(--flint-space-inline-md);
+    padding: var(--flint-space-control-y) var(--flint-space-panel-x);
+    border-bottom: 0.0625rem solid var(--flint-color-border-subtle);
+    background: color-mix(in srgb, var(--flint-color-background-elevated) 92%, transparent);
   }
 
   .data-table__toolbar-btn {
     display: inline-flex;
     align-items: center;
-    gap: var(--pug-space-inline-sm);
-    padding: var(--pug-space-control-y) var(--pug-space-control-x);
-    border: 0.0625rem solid var(--pug-color-border-default);
-    border-radius: var(--pug-radius-control);
-    background: var(--pug-color-background-surface);
-    color: var(--pug-color-text-secondary);
+    gap: var(--flint-space-inline-sm);
+    padding: var(--flint-space-control-y) var(--flint-space-control-x);
+    border: 0.0625rem solid var(--flint-color-border-default);
+    border-radius: var(--flint-radius-control);
+    background: var(--flint-color-background-surface);
+    color: var(--flint-color-text-secondary);
     cursor: pointer;
     font: inherit;
-    font-size: var(--pug-typography-label-size);
+    font-size: var(--flint-typography-label-size);
     line-height: 1;
-    transition: background var(--pug-motion-duration-interaction) var(--pug-motion-easing-standard);
+    transition: background var(--flint-motion-duration-interaction) var(--flint-motion-easing-standard);
   }
 
   .data-table__toolbar-btn:hover {
-    background: color-mix(in srgb, var(--pug-color-background-elevated) 72%, transparent);
+    background: color-mix(in srgb, var(--flint-color-background-elevated) 72%, transparent);
   }
 
   .data-table__toolbar-btn:focus-visible {
-    outline: var(--pug-border-width-focus) solid var(--pug-color-accent-focusRing);
+    outline: var(--flint-border-width-focus) solid var(--flint-color-accent-focusRing);
     outline-offset: 0.125rem;
   }
 
-  .data-table__toolbar-btn :global(.pug-icon) {
+  .data-table__toolbar-btn :global(.flint-icon) {
     width: 0.875rem;
     height: 0.875rem;
   }
@@ -262,16 +262,16 @@
   .data-table__col-menu-item {
     display: flex;
     align-items: center;
-    gap: var(--pug-space-inline-md);
-    padding: var(--pug-space-control-y) var(--pug-space-control-x);
-    border-radius: calc(var(--pug-radius-control) - 0.125rem);
+    gap: var(--flint-space-inline-md);
+    padding: var(--flint-space-control-y) var(--flint-space-control-x);
+    border-radius: calc(var(--flint-radius-control) - 0.125rem);
     cursor: pointer;
-    font-size: var(--pug-typography-label-size);
-    color: var(--pug-color-text-primary);
+    font-size: var(--flint-typography-label-size);
+    color: var(--flint-color-text-primary);
   }
 
   .data-table__col-menu-item:hover {
-    background: color-mix(in srgb, var(--pug-color-accent-base) 12%, transparent);
+    background: color-mix(in srgb, var(--flint-color-accent-base) 12%, transparent);
   }
 
   table {
@@ -293,28 +293,28 @@
 
   th,
   td {
-    padding: var(--pug-space-panel-y) var(--pug-space-panel-x);
-    border-bottom: 0.0625rem solid var(--pug-color-border-subtle);
+    padding: var(--flint-space-panel-y) var(--flint-space-panel-x);
+    border-bottom: 0.0625rem solid var(--flint-color-border-subtle);
     text-align: left;
     vertical-align: middle;
-    font-size: var(--pug-typography-label-size);
+    font-size: var(--flint-typography-label-size);
   }
 
   thead th {
-    color: var(--pug-color-text-secondary);
-    font-family: var(--pug-typography-label-family);
-    font-size: var(--pug-typography-label-size);
-    font-weight: var(--pug-typography-label-weight);
-    line-height: var(--pug-typography-label-lineHeight);
-    background: color-mix(in srgb, var(--pug-color-background-elevated) 92%, transparent);
+    color: var(--flint-color-text-secondary);
+    font-family: var(--flint-typography-label-family);
+    font-size: var(--flint-typography-label-size);
+    font-weight: var(--flint-typography-label-weight);
+    line-height: var(--flint-typography-label-lineHeight);
+    background: color-mix(in srgb, var(--flint-color-background-elevated) 92%, transparent);
   }
 
   tbody tr.selected {
-    background: color-mix(in srgb, var(--pug-color-accent-base) 8%, transparent);
+    background: color-mix(in srgb, var(--flint-color-accent-base) 8%, transparent);
   }
 
   tbody tr:hover {
-    background: color-mix(in srgb, var(--pug-color-accent-base) 5%, transparent);
+    background: color-mix(in srgb, var(--flint-color-accent-base) 5%, transparent);
   }
 
   .data-table__selection {
@@ -325,8 +325,8 @@
   .data-table__actions button {
     display: inline-flex;
     align-items: center;
-    gap: var(--pug-space-inline-sm);
-    min-height: var(--pug-size-control-height);
+    gap: var(--flint-space-inline-sm);
+    min-height: var(--flint-size-control-height);
     padding: 0;
     border: 0;
     background: transparent;
@@ -337,9 +337,9 @@
 
   .data-table__sort:focus-visible,
   .data-table__actions button:focus-visible {
-    outline: var(--pug-border-width-focus) solid var(--pug-color-accent-focusRing);
+    outline: var(--flint-border-width-focus) solid var(--flint-color-accent-focusRing);
     outline-offset: 0.125rem;
-    border-radius: var(--pug-radius-control);
+    border-radius: var(--flint-radius-control);
   }
 
   .data-table__cell {
@@ -348,10 +348,10 @@
   }
 
   .data-table__cell small {
-    color: var(--pug-color-text-secondary);
-    font-family: var(--pug-typography-body-family);
-    font-size: var(--pug-typography-body-size);
-    line-height: var(--pug-typography-body-lineHeight);
+    color: var(--flint-color-text-secondary);
+    font-family: var(--flint-typography-body-family);
+    font-size: var(--flint-typography-body-size);
+    line-height: var(--flint-typography-body-lineHeight);
   }
 
   .end-align {
@@ -365,9 +365,9 @@
   }
 
   .data-table__empty {
-    color: var(--pug-color-text-secondary);
-    font-family: var(--pug-typography-body-family);
-    font-size: var(--pug-typography-body-size);
-    line-height: var(--pug-typography-body-lineHeight);
+    color: var(--flint-color-text-secondary);
+    font-family: var(--flint-typography-body-family);
+    font-size: var(--flint-typography-body-size);
+    line-height: var(--flint-typography-body-lineHeight);
   }
 </style>

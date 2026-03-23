@@ -52,19 +52,19 @@
   .breadcrumbs__list {
     display: flex;
     flex-wrap: wrap;
-    gap: var(--pug-space-inline-sm);
+    gap: var(--flint-space-inline-sm);
     margin: 0;
     padding: 0;
     list-style: none;
-    color: var(--pug-color-text-secondary);
-    font-size: var(--pug-typography-body-size);
-    line-height: var(--pug-typography-body-lineHeight);
+    color: var(--flint-color-text-secondary);
+    font-size: var(--flint-typography-body-size);
+    line-height: var(--flint-typography-body-lineHeight);
   }
 
   .breadcrumbs__item {
     display: inline-flex;
     align-items: center;
-    gap: var(--pug-space-inline-sm);
+    gap: var(--flint-space-inline-sm);
   }
 
   .breadcrumbs a,
@@ -84,6 +84,6 @@
   }
 
   .breadcrumbs [aria-current="page"] {
-    color: var(--pug-color-text-primary);
+    color: var(--flint-color-text-primary);
   }
 </style>

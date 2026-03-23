@@ -7,8 +7,8 @@
 //! rasterized on demand by the engine's IconCache and tinted by `text_color`.
 
 use jetstream_runtime::ui_element::{self, JsEl};
-use pug_jetstream::JetstreamThemeProvider;
-use pug_primitives::IconSpec;
+use flint_jetstream::JetstreamThemeProvider;
+use flint_primitives::IconSpec;
 
 use crate::theme_ext::resolve_px;
 

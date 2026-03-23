@@ -38,10 +38,10 @@
   <button
     type="button"
     class="collapsible__trigger"
-    id={`pug-collapsible-trigger-${collapsibleId}`}
+    id={`flint-collapsible-trigger-${collapsibleId}`}
     disabled={isDisabled}
     aria-expanded={isOpen ? "true" : "false"}
-    aria-controls={`pug-collapsible-content-${collapsibleId}`}
+    aria-controls={`flint-collapsible-content-${collapsibleId}`}
     aria-label={title ? undefined : ariaLabel ?? undefined}
     on:click={() => setOpen(!isOpen)}
   >
@@ -64,9 +64,9 @@
   {#if isOpen}
     <div
       class="collapsible__content"
-      id={`pug-collapsible-content-${collapsibleId}`}
+      id={`flint-collapsible-content-${collapsibleId}`}
       role="region"
-      aria-labelledby={`pug-collapsible-trigger-${collapsibleId}`}
+      aria-labelledby={`flint-collapsible-trigger-${collapsibleId}`}
       transition:slide={{ duration: 180 }}
     >
       <slot />
@@ -77,13 +77,13 @@
 <style>
   .collapsible {
     display: grid;
-    gap: var(--pug-space-stack-md);
+    gap: var(--flint-space-stack-md);
     min-width: 0;
-    padding: var(--pug-space-panel-y) var(--pug-space-panel-x);
-    border: 0.0625rem solid color-mix(in srgb, var(--pug-color-border-subtle) 42%, transparent);
-    border-radius: var(--pug-radius-surface);
-    background: color-mix(in srgb, var(--pug-surface) 88%, var(--pug-color-text-primary));
-    box-shadow: inset 0 0.0625rem 0 color-mix(in srgb, var(--pug-color-text-inverse) 8%, transparent);
+    padding: var(--flint-space-panel-y) var(--flint-space-panel-x);
+    border: 0.0625rem solid color-mix(in srgb, var(--flint-color-border-subtle) 42%, transparent);
+    border-radius: var(--flint-radius-surface);
+    background: color-mix(in srgb, var(--flint-surface) 88%, var(--flint-color-text-primary));
+    box-shadow: inset 0 0.0625rem 0 color-mix(in srgb, var(--flint-color-text-inverse) 8%, transparent);
   }
 
   .collapsible[data-open="false"] {
@@ -91,19 +91,19 @@
   }
 
   .collapsible[data-disabled="true"] {
-    opacity: var(--pug-state-opacity-disabled);
+    opacity: var(--flint-state-opacity-disabled);
   }
 
   .collapsible__trigger {
     display: grid;
     grid-template-columns: minmax(0, 1fr) auto;
     align-items: center;
-    gap: var(--pug-space-inline-md);
+    gap: var(--flint-space-inline-md);
     width: 100%;
     padding: 0;
     border: 0;
     background: transparent;
-    color: var(--pug-color-text-primary);
+    color: var(--flint-color-text-primary);
     cursor: pointer;
     text-align: left;
     font: inherit;
@@ -114,36 +114,36 @@
   }
 
   .collapsible__trigger:focus-visible {
-    outline: var(--pug-border-width-focus) solid var(--pug-color-accent-focusRing);
+    outline: var(--flint-border-width-focus) solid var(--flint-color-accent-focusRing);
     outline-offset: 0.125rem;
-    border-radius: calc(var(--pug-radius-control) - 0.125rem);
+    border-radius: calc(var(--flint-radius-control) - 0.125rem);
   }
 
   .collapsible__heading {
     display: grid;
-    gap: var(--pug-space-inline-sm);
+    gap: var(--flint-space-inline-sm);
     min-width: 0;
   }
 
   .collapsible__title {
-    font-family: var(--pug-typography-heading-family);
+    font-family: var(--flint-typography-heading-family);
     font-size: 1rem;
     font-weight: 700;
     line-height: 1.2;
   }
 
   .collapsible__description {
-    color: var(--pug-color-text-secondary);
+    color: var(--flint-color-text-secondary);
     font-size: 0.8125rem;
     line-height: 1.45;
   }
 
   .collapsible__indicator {
-    color: var(--pug-color-text-secondary);
-    font-family: var(--pug-typography-code-family);
+    color: var(--flint-color-text-secondary);
+    font-family: var(--flint-typography-code-family);
     font-size: 0.75rem;
     line-height: 1;
-    transition: transform var(--pug-motion-duration-interaction) var(--pug-motion-easing-standard);
+    transition: transform var(--flint-motion-duration-interaction) var(--flint-motion-easing-standard);
   }
 
   .collapsible[data-open="true"] .collapsible__indicator {

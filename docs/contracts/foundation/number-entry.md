@@ -141,38 +141,38 @@ Updated: 2026-03-15
 | `display` | `grid` |
 | `grid-template-columns` | `minmax(0, 1fr) auto` |
 | `align-items` | `stretch` |
-| `height` | `var(--pug-size-control-height)` |
+| `height` | `var(--flint-size-control-height)` |
 | `overflow` | `hidden` |
-| `border` | `0.0625rem solid var(--pug-color-border-default)` |
-| `border-radius` | `var(--pug-radius-control)` |
-| `background` | `var(--pug-color-background-surface)` |
+| `border` | `0.0625rem solid var(--flint-color-border-default)` |
+| `border-radius` | `var(--flint-radius-control)` |
+| `background` | `var(--flint-color-background-surface)` |
 
 ### Root — validation states
 
 | State | Property | Value |
 |-------|----------|-------|
-| `invalid` | `border-color` | `var(--pug-color-status-danger)` |
-| `valid` | `border-color` | `var(--pug-color-status-success)` |
-| `pending` | `border-color` | `var(--pug-color-accent-base)` |
+| `invalid` | `border-color` | `var(--flint-color-status-danger)` |
+| `valid` | `border-color` | `var(--flint-color-status-success)` |
+| `pending` | `border-color` | `var(--flint-color-accent-base)` |
 
 ### Root — focus-within
 
 | Property | Value |
 |----------|-------|
-| `box-shadow` | `0 0 0 var(--pug-border-width-focus) color-mix(in srgb, var(--pug-color-accent-focusRing) 28%, transparent)` |
+| `box-shadow` | `0 0 0 var(--flint-border-width-focus) color-mix(in srgb, var(--flint-color-accent-focusRing) 28%, transparent)` |
 
 ### Input Control `.number-entry__control`
 
 | Property | Value |
 |----------|-------|
 | `min-width` | `0` |
-| `padding` | `0 var(--pug-space-control-x)` |
+| `padding` | `0 var(--flint-space-control-x)` |
 | `border` | `0` |
 | `background` | `transparent` |
-| `color` | `var(--pug-color-text-primary)` |
-| `font-family` | `var(--pug-typography-body-family)` |
-| `font-size` | `var(--pug-typography-body-size)` |
-| `line-height` | `var(--pug-typography-body-lineHeight)` |
+| `color` | `var(--flint-color-text-primary)` |
+| `font-family` | `var(--flint-typography-body-family)` |
+| `font-size` | `var(--flint-typography-body-size)` |
+| `line-height` | `var(--flint-typography-body-lineHeight)` |
 | `outline` | `0` |
 
 ### Steppers Container `.number-entry__steppers`
@@ -190,9 +190,9 @@ Updated: 2026-03-15
 |----------|-------|
 | `width` | `1.25rem` |
 | `border` | `0` |
-| `border-radius` | `calc(var(--pug-radius-control) - 0.125rem)` |
-| `background` | `color-mix(in srgb, var(--pug-color-background-elevated) 88%, transparent)` |
-| `color` | `var(--pug-color-text-primary)` |
+| `border-radius` | `calc(var(--flint-radius-control) - 0.125rem)` |
+| `background` | `color-mix(in srgb, var(--flint-color-background-elevated) 88%, transparent)` |
+| `color` | `var(--flint-color-text-primary)` |
 | `cursor` | `pointer` |
 | `padding` | `0` |
 
@@ -201,7 +201,7 @@ Updated: 2026-03-15
 | Property | Value |
 |----------|-------|
 | `cursor` | `not-allowed` |
-| `opacity` | `var(--pug-state-opacity-disabled)` |
+| `opacity` | `var(--flint-state-opacity-disabled)` |
 
 ## 9. Svelte Notes
 
@@ -212,7 +212,7 @@ Updated: 2026-03-15
 
 ## 10. GPUI Notes
 
-- expected crate/module surface: `pug_gpui::primitives::number_entry`
+- expected crate/module surface: `flint_gpui::primitives::number_entry`
 - GPUI implementation must intentionally expose numeric value, bounds, step semantics, and focused-text shortcut suppression
 - Partial numeric editing states should preserve user input without emitting misleading committed values
 - Stepper buttons must remain reachable via pointer; keyboard ArrowUp/ArrowDown handle stepping without requiring steppers to be visible

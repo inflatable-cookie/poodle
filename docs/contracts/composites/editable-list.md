@@ -153,35 +153,35 @@ None.
 
 | Part | Token | Purpose |
 |------|-------|---------|
-| Root (disabled) | `--pug-state-opacity-disabled` | disabled opacity |
-| StaticItem | `--pug-radius-control` | item border-radius |
-| StaticItem | `--pug-color-background-surface` | item background |
-| RemoveButton | `--pug-color-text-secondary` | default icon color |
-| RemoveButton (hover) | `--pug-color-status-danger` | hover icon color |
-| RemoveButton (transition) | `--pug-motion-duration-interaction` | color transition duration |
-| RemoveButton (transition) | `--pug-motion-easing-standard` | color transition easing |
-| Input | `--pug-size-control-height` | input height |
-| Input | `--pug-space-control-x` | input horizontal padding |
-| Input | `--pug-color-border-default` | input border color |
-| Input | `--pug-radius-control` | input border-radius |
-| Input | `--pug-color-background-surface` | input background |
-| Input | `--pug-color-text-primary` | input text color |
-| Input | `--pug-typography-body-family` | input font family |
-| Input | `--pug-typography-body-size` | input font size |
-| Input (focus) | `--pug-color-accent-focusRing` | focus border and shadow color |
-| Input (focus) | `--pug-border-width-focus` | focus shadow width |
-| Input (placeholder) | `--pug-color-text-secondary` | placeholder text color |
-| AddButton | `--pug-size-control-height` | button height |
-| AddButton | `--pug-color-border-default` | button border color |
-| AddButton | `--pug-radius-control` | button border-radius |
-| AddButton | `--pug-color-background-surface` | button background |
-| AddButton | `--pug-color-text-primary` | button text color |
-| AddButton | `--pug-typography-label-family` | button font family |
-| AddButton | `--pug-typography-label-size` | button font size |
-| AddButton | `--pug-typography-label-weight` | button font weight |
-| AddButton (hover) | `--pug-color-background-surface` / `--pug-color-background-elevated` | hover background (84% mix) |
-| AddButton (disabled) | `--pug-state-opacity-disabled` | disabled opacity |
-| Counter | `--pug-color-text-secondary` | counter text color |
+| Root (disabled) | `--flint-state-opacity-disabled` | disabled opacity |
+| StaticItem | `--flint-radius-control` | item border-radius |
+| StaticItem | `--flint-color-background-surface` | item background |
+| RemoveButton | `--flint-color-text-secondary` | default icon color |
+| RemoveButton (hover) | `--flint-color-status-danger` | hover icon color |
+| RemoveButton (transition) | `--flint-motion-duration-interaction` | color transition duration |
+| RemoveButton (transition) | `--flint-motion-easing-standard` | color transition easing |
+| Input | `--flint-size-control-height` | input height |
+| Input | `--flint-space-control-x` | input horizontal padding |
+| Input | `--flint-color-border-default` | input border color |
+| Input | `--flint-radius-control` | input border-radius |
+| Input | `--flint-color-background-surface` | input background |
+| Input | `--flint-color-text-primary` | input text color |
+| Input | `--flint-typography-body-family` | input font family |
+| Input | `--flint-typography-body-size` | input font size |
+| Input (focus) | `--flint-color-accent-focusRing` | focus border and shadow color |
+| Input (focus) | `--flint-border-width-focus` | focus shadow width |
+| Input (placeholder) | `--flint-color-text-secondary` | placeholder text color |
+| AddButton | `--flint-size-control-height` | button height |
+| AddButton | `--flint-color-border-default` | button border color |
+| AddButton | `--flint-radius-control` | button border-radius |
+| AddButton | `--flint-color-background-surface` | button background |
+| AddButton | `--flint-color-text-primary` | button text color |
+| AddButton | `--flint-typography-label-family` | button font family |
+| AddButton | `--flint-typography-label-size` | button font size |
+| AddButton | `--flint-typography-label-weight` | button font weight |
+| AddButton (hover) | `--flint-color-background-surface` / `--flint-color-background-elevated` | hover background (84% mix) |
+| AddButton (disabled) | `--flint-state-opacity-disabled` | disabled opacity |
+| Counter | `--flint-color-text-secondary` | counter text color |
 
 ## 9. Svelte Notes
 
@@ -193,7 +193,7 @@ None.
 
 ## 10. GPUI Notes
 
-- Expected crate/module surface: `pug_gpui::composites::editable_list`
+- Expected crate/module surface: `flint_gpui::composites::editable_list`
 - Reordering behavior may need a simplified drag-and-drop or move-up/move-down
   button approach
 - Text input and add button compose from primitives

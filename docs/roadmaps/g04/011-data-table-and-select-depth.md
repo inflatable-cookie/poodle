@@ -1,10 +1,10 @@
 # g04.011 DataTable And Select Depth
 
 Status: planned
-Owner: Pug Core
+Owner: Flint Core
 Updated: 2026-03-14
 Depends on: g04.002 through g04.010
-Primary repos: `pug`
+Primary repos: `flint`
 
 ## Goals
 

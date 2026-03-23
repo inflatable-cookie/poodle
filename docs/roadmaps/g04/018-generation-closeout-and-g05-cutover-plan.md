@@ -1,10 +1,10 @@
 # g04.018 Generation Closeout And `g05` Cutover Plan
 
 Status: planned
-Owner: Pug Core
+Owner: Flint Core
 Updated: 2026-03-14
 Depends on: g04.017
-Primary repos: `pug`
+Primary repos: `flint`
 
 ## Goals
 

@@ -1,11 +1,11 @@
 use gpui::*;
 use gpui::prelude::FluentBuilder;
-use pug_adapter::ThemeProvider;
-use pug_primitives::{
+use flint_adapter::ThemeProvider;
+use flint_primitives::{
     ButtonSpec, ButtonVariant, ControlSize, EyebrowSpec, SeparatorSpec, SeparatorOrientation,
     RuleTone, ToolbarSpec,
 };
-use pug_gpui_components::{Button, Eyebrow, Separator, Toolbar};
+use flint_gpui_components::{Button, Eyebrow, Separator, Toolbar};
 use crate::app_state::AppState;
 use crate::style_bridge::color_to_hsla;
 use crate::PreviewRoot;

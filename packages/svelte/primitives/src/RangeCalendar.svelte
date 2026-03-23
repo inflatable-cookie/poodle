@@ -37,7 +37,7 @@
     monthChange: { month: string };
   }>();
 
-  const gridId = `pug-range-calendar-grid-${++nextRangeCalendarId}`;
+  const gridId = `flint-range-calendar-grid-${++nextRangeCalendarId}`;
   let uncontrolledValue = normalizeDateRange(defaultValue);
   let uncontrolledMonth = monthAnchorIso(visibleMonth ?? defaultValue.start ?? todayIsoDate());
   let focusIso = defaultValue.start ?? todayIsoDate();
@@ -238,7 +238,7 @@
   }
 
   .range-calendar__month {
-    font-family: var(--pug-typography-label-family);
+    font-family: var(--flint-typography-label-family);
     font-size: 0.8125rem;
     font-weight: 600;
     letter-spacing: 0.02em;
@@ -251,10 +251,10 @@
     justify-content: center;
     width: 2rem;
     height: 2rem;
-    border: 0.0625rem solid var(--pug-color-border-default);
-    border-radius: var(--pug-radius-control);
-    background: var(--pug-color-background-surface);
-    color: var(--pug-color-text-primary);
+    border: 0.0625rem solid var(--flint-color-border-default);
+    border-radius: var(--flint-radius-control);
+    background: var(--flint-color-background-surface);
+    color: var(--flint-color-text-primary);
     cursor: pointer;
     font: inherit;
   }
@@ -262,8 +262,8 @@
   .range-calendar__nav:hover:not(:disabled) {
     background: color-mix(
       in srgb,
-      var(--pug-color-background-surface) 82%,
-      var(--pug-color-background-elevated)
+      var(--flint-color-background-surface) 82%,
+      var(--flint-color-background-elevated)
     );
   }
 
@@ -272,8 +272,8 @@
   }
 
   .range-calendar__weekday {
-    color: var(--pug-color-text-secondary);
-    font-family: var(--pug-typography-label-family);
+    color: var(--flint-color-text-secondary);
+    font-family: var(--flint-typography-label-family);
     font-size: 0.6875rem;
     font-weight: 600;
     letter-spacing: 0.04em;
@@ -301,48 +301,48 @@
     min-height: 2.25rem;
     padding: 0.25rem;
     border: 0.0625rem solid transparent;
-    border-radius: var(--pug-radius-control);
+    border-radius: var(--flint-radius-control);
     background: transparent;
-    color: var(--pug-color-text-primary);
+    color: var(--flint-color-text-primary);
     cursor: pointer;
-    font-family: var(--pug-typography-label-family);
+    font-family: var(--flint-typography-label-family);
     font-size: 0.75rem;
     font-weight: 500;
   }
 
   .range-calendar__day[data-current-month="false"] {
-    color: var(--pug-color-text-secondary);
+    color: var(--flint-color-text-secondary);
     opacity: 0.72;
   }
 
   .range-calendar__day[data-today="true"] {
-    border-color: color-mix(in srgb, var(--pug-color-accent-base) 44%, var(--pug-color-border-default));
+    border-color: color-mix(in srgb, var(--flint-color-accent-base) 44%, var(--flint-color-border-default));
   }
 
   .range-calendar__day[data-in-range="true"] {
-    background: color-mix(in srgb, var(--pug-color-accent-base) 16%, transparent);
+    background: color-mix(in srgb, var(--flint-color-accent-base) 16%, transparent);
   }
 
   .range-calendar__day[data-range-start="true"],
   .range-calendar__day[data-range-end="true"] {
-    background: var(--pug-color-accent-base);
-    color: var(--pug-color-text-inverse);
+    background: var(--flint-color-accent-base);
+    color: var(--flint-color-text-inverse);
   }
 
   .range-calendar__day:hover:not(:disabled),
   .range-calendar__day:focus-visible {
-    border-color: color-mix(in srgb, var(--pug-color-accent-base) 46%, var(--pug-color-border-default));
+    border-color: color-mix(in srgb, var(--flint-color-accent-base) 46%, var(--flint-color-border-default));
     outline: none;
   }
 
   .range-calendar__nav:focus-visible {
-    outline: var(--pug-border-width-focus) solid var(--pug-color-accent-focusRing);
+    outline: var(--flint-border-width-focus) solid var(--flint-color-accent-focusRing);
     outline-offset: 0.125rem;
   }
 
   .range-calendar__nav:disabled,
   .range-calendar__day:disabled {
     cursor: not-allowed;
-    opacity: var(--pug-state-opacity-disabled);
+    opacity: var(--flint-state-opacity-disabled);
   }
 </style>

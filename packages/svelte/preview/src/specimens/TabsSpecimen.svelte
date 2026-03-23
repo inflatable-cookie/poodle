@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { Tabs, Eyebrow, type TabItem } from "@pug/svelte-primitives";
+  import { Tabs, Eyebrow, type TabItem } from "@flint/svelte-primitives";
 
   const basicTabs: TabItem[] = [
     { value: "overview", label: "Overview" },
@@ -178,12 +178,12 @@
   .specimen__group :global(p) {
     margin: 0;
     font-size: 0.875rem;
-    color: var(--pug-color-text-secondary);
+    color: var(--flint-color-text-secondary);
   }
 
   .specimen__frame {
-    border: 0.0625rem solid var(--pug-color-border-subtle);
-    border-radius: var(--pug-radius-surface);
+    border: 0.0625rem solid var(--flint-color-border-subtle);
+    border-radius: var(--flint-radius-surface);
     overflow: hidden;
   }
 
@@ -192,9 +192,9 @@
     align-items: center;
     justify-content: center;
     height: 6rem;
-    color: var(--pug-color-text-muted);
+    color: var(--flint-color-text-muted);
     font-size: 0.8125rem;
-    background: var(--pug-color-background-panel);
+    background: var(--flint-color-background-panel);
   }
 
   .specimen__surface-body--fill {
@@ -223,15 +223,15 @@
     min-height: 0;
     padding: 0;
     border: 0;
-    border-left: 0.0625rem solid var(--pug-color-border-subtle);
-    background: var(--pug-color-background-surface);
-    color: var(--pug-color-text-muted);
+    border-left: 0.0625rem solid var(--flint-color-border-subtle);
+    background: var(--flint-color-background-surface);
+    color: var(--flint-color-text-muted);
     cursor: pointer;
     font-size: 0.75rem;
   }
 
   .specimen__collapse-btn:hover {
-    background: var(--pug-color-surface-hover);
-    color: var(--pug-color-text-primary);
+    background: var(--flint-color-surface-hover);
+    color: var(--flint-color-text-primary);
   }
 </style>

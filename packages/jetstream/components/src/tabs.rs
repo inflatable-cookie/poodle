@@ -6,8 +6,8 @@
 //! Uses per-side border colors for the active tab indicator (bottom border).
 
 use jetstream_runtime::ui_element::{self, JsEl};
-use pug_jetstream::JetstreamThemeProvider;
-use pug_primitives::TabsSpec;
+use flint_jetstream::JetstreamThemeProvider;
+use flint_primitives::TabsSpec;
 
 use crate::theme_ext::{resolve_color, resolve_px};
 

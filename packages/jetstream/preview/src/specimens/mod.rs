@@ -91,8 +91,8 @@ pub mod toolbar;
 pub mod tooltip;
 
 use jetstream_runtime::ui_element::*;
-use pug_jetstream::JetstreamThemeProvider;
-use pug_jetstream_components::theme_ext::*;
+use flint_jetstream::JetstreamThemeProvider;
+use flint_jetstream_components::theme_ext::*;
 
 use crate::app_state::{AppState, Section};
 use crate::component_registry::{self, ComponentEntry};

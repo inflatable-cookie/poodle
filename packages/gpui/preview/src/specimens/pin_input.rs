@@ -1,7 +1,7 @@
 use gpui::*;
-use pug_adapter::ThemeProvider;
-use pug_primitives::{PinInputSpec, EyebrowSpec};
-use pug_gpui_components::{PinInput, Eyebrow};
+use flint_adapter::ThemeProvider;
+use flint_primitives::{PinInputSpec, EyebrowSpec};
+use flint_gpui_components::{PinInput, Eyebrow};
 use crate::app_state::AppState;
 use crate::style_bridge::color_to_hsla;
 use crate::PreviewRoot;

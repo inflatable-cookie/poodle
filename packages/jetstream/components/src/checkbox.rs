@@ -6,8 +6,8 @@
 //! ALL dimensions resolve from tokens. ZERO hardcoded pixel values.
 
 use jetstream_runtime::ui_element::{self, JsEl};
-use pug_jetstream::JetstreamThemeProvider;
-use pug_primitives::{CheckState, CheckboxSpec};
+use flint_jetstream::JetstreamThemeProvider;
+use flint_primitives::{CheckState, CheckboxSpec};
 
 use crate::theme_ext::{resolve_color, resolve_opacity, resolve_px};
 
@@ -27,7 +27,7 @@ use crate::theme_ext::{resolve_color, resolve_opacity, resolve_px};
 /// - Indicator border: 0.0625rem (1px) solid
 /// - Indicator border-radius: 0.3125rem (5px)
 /// - Mark: 0.875rem (14px) square
-/// - Gap (root): var(--pug-space-inline-sm) = 8px
+/// - Gap (root): var(--flint-space-inline-sm) = 8px
 /// - Label typography: label-family, label-size (13px), label-weight (500), label-lineHeight (16px)
 pub fn js_checkbox(spec: &CheckboxSpec, theme: &JetstreamThemeProvider) -> JsEl {
     // ── Token resolution ──
@@ -109,7 +109,7 @@ mod tests {
     use super::*;
 
     fn theme() -> JetstreamThemeProvider {
-        JetstreamThemeProvider::from_theme(&pug_tokens::themes::DARK)
+        JetstreamThemeProvider::from_theme(&flint_tokens::themes::DARK)
     }
 
     #[test]

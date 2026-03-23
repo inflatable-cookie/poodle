@@ -1,8 +1,8 @@
 {
   "generation": "g04.009",
-  "crateName": "pug-gpui-workstation",
+  "crateName": "flint-gpui-workstation",
   "cratePath": "packages/gpui/workstation",
-  "tokenSource": "pug-gpui-tokens",
+  "tokenSource": "flint-gpui-tokens",
   "contractIds": [
     "action-discovery-panel",
     "app-header",

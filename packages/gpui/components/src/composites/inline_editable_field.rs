@@ -2,9 +2,9 @@
 
 use gpui::prelude::FluentBuilder;
 use gpui::*;
-use pug_gpui::GpuiThemeProvider;
-use pug_primitives::{IconSize, IconSpec};
-use pug_composites::InlineEditableFieldSpec;
+use flint_gpui::GpuiThemeProvider;
+use flint_primitives::{IconSize, IconSpec};
+use flint_composites::InlineEditableFieldSpec;
 use crate::primitives::Icon;
 use crate::theme_ext::{resolve_color, resolve_opacity, resolve_radius};
 
@@ -45,7 +45,7 @@ impl IntoElement for InlineEditableField {
         if spec.is_editing {
             // Editing mode: bordered input-like field
             let mut el = div()
-                .id("pug-inline-edit")
+                .id("flint-inline-edit")
                 .focusable()
                 .border_1()
                 .border_color(border)
@@ -71,7 +71,7 @@ impl IntoElement for InlineEditableField {
             ).with_color(placeholder_color);
 
             let mut el = div()
-                .id("pug-inline-edit-display")
+                .id("flint-inline-edit-display")
                 .focusable()
                 .flex()
                 .items_center()

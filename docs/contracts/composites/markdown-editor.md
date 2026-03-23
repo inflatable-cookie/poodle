@@ -141,16 +141,16 @@ In split mode the textarea gets a right border (`border-subtle`) to visually sep
 
 | Property | Value |
 |----------|-------|
-| border | `0.0625rem solid var(--pug-color-border-default)` |
-| border-radius | `var(--pug-radius-surface)` |
-| background | `var(--pug-color-background-surface)` |
+| border | `0.0625rem solid var(--flint-color-border-default)` |
+| border-radius | `var(--flint-radius-surface)` |
+| background | `var(--flint-color-background-surface)` |
 | overflow | `hidden` |
 
 ### Root (Disabled)
 
 | Property | Value |
 |----------|-------|
-| opacity | `var(--pug-state-opacity-disabled)` |
+| opacity | `var(--flint-state-opacity-disabled)` |
 | pointer-events | `none` |
 
 ### Toolbar
@@ -162,8 +162,8 @@ In split mode the textarea gets a right border (`border-subtle`) to visually sep
 | justify-content | `space-between` |
 | gap | `0.5rem` |
 | padding | `0.375rem 0.5rem` |
-| border-bottom | `0.0625rem solid var(--pug-color-border-subtle)` |
-| background | `color-mix(in srgb, var(--pug-color-background-elevated) 72%, transparent)` |
+| border-bottom | `0.0625rem solid var(--flint-color-border-subtle)` |
+| background | `color-mix(in srgb, var(--flint-color-background-elevated) 72%, transparent)` |
 | flex-wrap | `wrap` |
 
 ### Tools Container
@@ -184,22 +184,22 @@ In split mode the textarea gets a right border (`border-subtle`) to visually sep
 | height | `1.75rem` |
 | padding | `0` |
 | border | `0` |
-| border-radius | `var(--pug-radius-control)` |
+| border-radius | `var(--flint-radius-control)` |
 | background | `transparent` |
-| color | `var(--pug-color-text-secondary)` |
-| font-family | `var(--pug-typography-code-family)` |
+| color | `var(--flint-color-text-secondary)` |
+| font-family | `var(--flint-typography-code-family)` |
 | font-size | `0.75rem` |
 | font-weight | `600` |
 | line-height | `1` |
-| transition | `background var(--pug-motion-duration-interaction) var(--pug-motion-easing-standard)` |
+| transition | `background var(--flint-motion-duration-interaction) var(--flint-motion-easing-standard)` |
 
 #### Tool Button States
 
 | State | Property | Value |
 |-------|----------|-------|
-| `:hover:not(:disabled)` | background | `color-mix(in srgb, var(--pug-color-accent-base) 12%, transparent)` |
-| `:hover:not(:disabled)` | color | `var(--pug-color-text-primary)` |
-| `:focus-visible` | outline | `var(--pug-border-width-focus) solid var(--pug-color-accent-focusRing)` |
+| `:hover:not(:disabled)` | background | `color-mix(in srgb, var(--flint-color-accent-base) 12%, transparent)` |
+| `:hover:not(:disabled)` | color | `var(--flint-color-text-primary)` |
+| `:focus-visible` | outline | `var(--flint-border-width-focus) solid var(--flint-color-accent-focusRing)` |
 | `:focus-visible` | outline-offset | `0.0625rem` |
 | `:disabled` | opacity | `0.4` |
 | `:disabled` | cursor | `default` |
@@ -210,8 +210,8 @@ In split mode the textarea gets a right border (`border-subtle`) to visually sep
 |----------|-------|
 | display | `flex` |
 | gap | `0.125rem` |
-| border | `0.0625rem solid var(--pug-color-border-default)` |
-| border-radius | `var(--pug-radius-control)` |
+| border | `0.0625rem solid var(--flint-color-border-default)` |
+| border-radius | `var(--flint-radius-control)` |
 | overflow | `hidden` |
 
 ### Mode Button
@@ -221,18 +221,18 @@ In split mode the textarea gets a right border (`border-subtle`) to visually sep
 | padding | `0.1875rem 0.5rem` |
 | border | `0` |
 | background | `transparent` |
-| color | `var(--pug-color-text-secondary)` |
+| color | `var(--flint-color-text-secondary)` |
 | font-size | `0.6875rem` |
 | line-height | `1` |
-| transition | `background var(--pug-motion-duration-interaction) var(--pug-motion-easing-standard)` |
+| transition | `background var(--flint-motion-duration-interaction) var(--flint-motion-easing-standard)` |
 
 #### Mode Button States
 
 | State | Property | Value |
 |-------|----------|-------|
-| `:hover` | background | `color-mix(in srgb, var(--pug-color-background-elevated) 72%, transparent)` |
-| `.active` | background | `color-mix(in srgb, var(--pug-color-accent-base) 16%, transparent)` |
-| `.active` | color | `var(--pug-color-text-primary)` |
+| `:hover` | background | `color-mix(in srgb, var(--flint-color-background-elevated) 72%, transparent)` |
+| `.active` | background | `color-mix(in srgb, var(--flint-color-accent-base) 16%, transparent)` |
+| `.active` | color | `var(--flint-color-text-primary)` |
 
 ### Body
 
@@ -245,7 +245,7 @@ In split mode the textarea gets a right border (`border-subtle`) to visually sep
 | Property | Value |
 |----------|-------|
 | gap | `0` |
-| textarea flex | `1`, right border `0.0625rem solid var(--pug-color-border-subtle)` |
+| textarea flex | `1`, right border `0.0625rem solid var(--flint-color-border-subtle)` |
 | preview flex | `1` |
 
 ### Textarea
@@ -257,13 +257,13 @@ In split mode the textarea gets a right border (`border-subtle`) to visually sep
 | padding | `0.75rem` |
 | border | `0` |
 | background | `transparent` |
-| color | `var(--pug-color-text-primary)` |
-| font-family | `var(--pug-typography-code-family)` |
+| color | `var(--flint-color-text-primary)` |
+| font-family | `var(--flint-typography-code-family)` |
 | font-size | `0.8125rem` |
 | line-height | `1.6` |
 | resize | `vertical` |
 | outline | `none` |
-| `::placeholder` color | `var(--pug-color-text-tertiary)` |
+| `::placeholder` color | `var(--flint-color-text-tertiary)` |
 
 ### Preview Pane
 
@@ -271,10 +271,10 @@ In split mode the textarea gets a right border (`border-subtle`) to visually sep
 |----------|-------|
 | flex | `1` |
 | padding | `0.75rem` |
-| font-family | `var(--pug-typography-body-family)` |
+| font-family | `var(--flint-typography-body-family)` |
 | font-size | `0.875rem` |
 | line-height | `1.6` |
-| color | `var(--pug-color-text-primary)` |
+| color | `var(--flint-color-text-primary)` |
 | overflow-y | `auto` |
 
 ### Preview Rendered Elements
@@ -293,28 +293,28 @@ In split mode the textarea gets a right border (`border-subtle`) to visually sep
 | `p` | margin | `0 0 0.5rem` |
 | `strong` | font-weight | `700` |
 | `code` | padding | `0.125rem 0.25rem` |
-| `code` | border-radius | `var(--pug-radius-control)` |
-| `code` | background | `color-mix(in srgb, var(--pug-color-background-elevated) 72%, transparent)` |
-| `code` | font-family | `var(--pug-typography-code-family)` |
+| `code` | border-radius | `var(--flint-radius-control)` |
+| `code` | background | `color-mix(in srgb, var(--flint-color-background-elevated) 72%, transparent)` |
+| `code` | font-family | `var(--flint-typography-code-family)` |
 | `code` | font-size | `0.8125rem` |
 | `blockquote` | margin | `0 0 0.5rem` |
 | `blockquote` | padding | `0.375rem 0.75rem` |
-| `blockquote` | border-left | `0.1875rem solid var(--pug-color-border-default)` |
-| `blockquote` | color | `var(--pug-color-text-secondary)` |
+| `blockquote` | border-left | `0.1875rem solid var(--flint-color-border-default)` |
+| `blockquote` | color | `var(--flint-color-text-secondary)` |
 | `li` | margin | `0 0 0.125rem` |
 | `li` | padding-left | `0.25rem` |
 | `li` | list-style | `disc inside` |
 | `hr` | border | `0` |
-| `hr` | border-top | `0.0625rem solid var(--pug-color-border-subtle)` |
+| `hr` | border-top | `0.0625rem solid var(--flint-color-border-subtle)` |
 | `hr` | margin | `0.75rem 0` |
-| `a` | color | `var(--pug-color-accent-default, #6366f1)` |
+| `a` | color | `var(--flint-color-accent-default, #6366f1)` |
 | `a` | text-decoration | `underline` |
 
 ### Preview Empty
 
 | Property | Value |
 |----------|-------|
-| color | `var(--pug-color-text-tertiary)` |
+| color | `var(--flint-color-text-tertiary)` |
 | font-style | `italic` |
 | margin | `0` |
 

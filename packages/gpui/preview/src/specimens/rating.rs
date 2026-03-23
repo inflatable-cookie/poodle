@@ -1,7 +1,7 @@
 use gpui::*;
-use pug_adapter::ThemeProvider;
-use pug_primitives::{EyebrowSpec, RatingSpec};
-use pug_gpui_components::{Eyebrow, Rating};
+use flint_adapter::ThemeProvider;
+use flint_primitives::{EyebrowSpec, RatingSpec};
+use flint_gpui_components::{Eyebrow, Rating};
 use crate::app_state::AppState;
 use crate::style_bridge::color_to_hsla;
 use crate::PreviewRoot;

@@ -1,6 +1,6 @@
 <script lang="ts">
-  import { VideoPlayer } from "@pug/svelte-composites";
-  import { Eyebrow } from "@pug/svelte-primitives";
+  import { VideoPlayer } from "@flint/svelte-composites";
+  import { Eyebrow } from "@flint/svelte-primitives";
 </script>
 
 <div class="specimen">

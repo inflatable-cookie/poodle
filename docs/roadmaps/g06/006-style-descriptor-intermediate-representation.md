@@ -11,7 +11,7 @@ translation.
 
 ## Deliverables
 
-New crate: `pug-style` at `packages/contracts/style/`
+New crate: `flint-style` at `packages/contracts/style/`
 
 ### Types
 
@@ -26,20 +26,20 @@ New crate: `pug-style` at `packages/contracts/style/`
 
 ### Design
 
-- Uses `ColorValue` and `ShadowValue` from `pug-tokens::typed` for numeric
+- Uses `ColorValue` and `ShadowValue` from `flint-tokens::typed` for numeric
   color/shadow values
-- Uses `LayoutIntent` from `pug-layout` for layout properties
+- Uses `LayoutIntent` from `flint-layout` for layout properties
 - All dimension values are resolved `f32` pixels
 - Builder pattern for construction
 - Query methods: `is_visible()`, `has_focus_ring()`
 
 ### Dependencies
 
-- `pug-tokens` — typed color and shadow values
-- `pug-layout` — layout intent types
+- `flint-tokens` — typed color and shadow values
+- `flint-layout` — layout intent types
 
 ## Verification
 
-- [x] `pug-style` crate compiles
+- [x] `flint-style` crate compiles
 - [x] 4 tests pass covering defaults, builder composition, visibility, typography
-- [x] Typed token re-export added to `pug-tokens` lib.rs
+- [x] Typed token re-export added to `flint-tokens` lib.rs

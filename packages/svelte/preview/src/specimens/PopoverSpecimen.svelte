@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { Popover, Button, Eyebrow } from "@pug/svelte-primitives";
+  import { Popover, Button, Eyebrow } from "@flint/svelte-primitives";
 </script>
 
 <div class="specimen">
@@ -51,6 +51,6 @@
   .popover-content p {
     margin: 0;
     font-size: 0.8125rem;
-    color: var(--pug-color-text-secondary);
+    color: var(--flint-color-text-secondary);
   }
 </style>

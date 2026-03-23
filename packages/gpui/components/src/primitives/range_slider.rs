@@ -1,9 +1,9 @@
 //! RangeSlider — real GPUI component backed by RangeSliderSpec.
 
 use gpui::*;
-use pug_adapter::ThemeProvider;
-use pug_gpui::GpuiThemeProvider;
-use pug_primitives::{Orientation, RangeSliderSpec};
+use flint_adapter::ThemeProvider;
+use flint_gpui::GpuiThemeProvider;
+use flint_primitives::{Orientation, RangeSliderSpec};
 
 use crate::theme_ext::{resolve_color, resolve_opacity, resolve_px};
 
@@ -145,7 +145,7 @@ impl IntoElement for RangeSlider {
         let focus_ring = resolve_color(theme, spec.focus_ring_color_token());
 
         let slider_id = SharedString::from(format!(
-            "pug-range-slider-{}",
+            "flint-range-slider-{}",
             RANGE_SLIDER_ID_COUNTER.fetch_add(1, std::sync::atomic::Ordering::Relaxed)
         ));
 

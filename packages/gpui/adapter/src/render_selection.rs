@@ -4,13 +4,13 @@
 //! RangeSlider, Progress, Badge, StatusIndicator, Meter, Rating, Skeleton,
 //! TriStateSwitch
 
-use pug_adapter::{RenderComponent, ThemeProvider};
-use pug_primitives::{
+use flint_adapter::{RenderComponent, ThemeProvider};
+use flint_primitives::{
     BadgeSpec, CheckboxSpec, MeterSpec, ProgressSpec, RadioGroupSpec, RangeSliderSpec, RatingSpec,
     SegmentedControlSpec, SelectSpec, SkeletonSpec, SliderSpec, StatusIndicatorSpec, SwitchSpec,
     TriStateSwitchSpec,
 };
-use pug_style::StyleDescriptor;
+use flint_style::StyleDescriptor;
 
 use crate::style_map::map_style;
 use crate::{GpuiAdapter, GpuiElementHandle, GpuiTarget};
@@ -166,9 +166,9 @@ impl RenderComponent<TriStateSwitchSpec> for GpuiAdapter {
 
 #[cfg(test)]
 mod tests {
-    use pug_adapter::RenderComponent;
-    use pug_primitives::*;
-    use pug_style::StyleDescriptor;
+    use flint_adapter::RenderComponent;
+    use flint_primitives::*;
+    use flint_style::StyleDescriptor;
     use crate::{GpuiAdapter, theme::GpuiThemeProvider};
 
     fn a() -> GpuiAdapter { GpuiAdapter::new(GpuiThemeProvider::default()) }

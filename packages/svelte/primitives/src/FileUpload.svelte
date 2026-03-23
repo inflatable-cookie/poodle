@@ -294,7 +294,7 @@
   .file-upload {
     display: flex;
     flex-direction: column;
-    gap: var(--pug-space-stack-sm, 0.5rem);
+    gap: var(--flint-space-stack-sm, 0.5rem);
   }
 
   .file-upload--disabled {
@@ -307,9 +307,9 @@
     align-items: center;
     justify-content: center;
     min-height: 8rem;
-    padding: var(--pug-space-panel-y, 1.5rem) var(--pug-space-panel-x, 1.5rem);
-    border: 0.125rem dashed var(--pug-color-border-default, #444);
-    border-radius: var(--pug-radius-surface, 0.5rem);
+    padding: var(--flint-space-panel-y, 1.5rem) var(--flint-space-panel-x, 1.5rem);
+    border: 0.125rem dashed var(--flint-color-border-default, #444);
+    border-radius: var(--flint-radius-surface, 0.5rem);
     background: transparent;
     cursor: pointer;
     transition: border-color 0.15s, background 0.15s;
@@ -317,14 +317,14 @@
 
   .file-upload__dropzone:hover,
   .file-upload__dropzone:focus-visible {
-    border-color: var(--pug-color-border-focus, #888);
-    background: color-mix(in srgb, var(--pug-color-background-panel, #1a1a1a) 50%, transparent);
+    border-color: var(--flint-color-border-focus, #888);
+    background: color-mix(in srgb, var(--flint-color-background-panel, #1a1a1a) 50%, transparent);
     outline: none;
   }
 
   .file-upload__dropzone--active {
-    border-color: var(--pug-color-accent-default, #6366f1);
-    background: color-mix(in srgb, var(--pug-color-accent-default, #6366f1) 8%, transparent);
+    border-color: var(--flint-color-accent-default, #6366f1);
+    background: color-mix(in srgb, var(--flint-color-accent-default, #6366f1) 8%, transparent);
   }
 
   .file-upload__input {
@@ -346,24 +346,24 @@
   .file-upload__icon {
     width: 2rem;
     height: 2rem;
-    color: var(--pug-color-text-secondary, #999);
+    color: var(--flint-color-text-secondary, #999);
   }
 
   .file-upload__label {
     margin: 0;
     font-size: 0.875rem;
-    color: var(--pug-color-text-secondary, #999);
+    color: var(--flint-color-text-secondary, #999);
   }
 
   .file-upload__browse {
-    color: var(--pug-color-accent-default, #6366f1);
+    color: var(--flint-color-accent-default, #6366f1);
     text-decoration: underline;
   }
 
   .file-upload__hint {
     margin: 0;
     font-size: 0.75rem;
-    color: var(--pug-color-text-tertiary, #666);
+    color: var(--flint-color-text-tertiary, #666);
   }
 
   .file-upload__list {
@@ -381,12 +381,12 @@
     align-items: center;
     gap: 0.5rem;
     padding: 0.375rem 0.5rem;
-    border-radius: var(--pug-radius-control, 0.375rem);
-    background: var(--pug-color-background-panel, #1a1a1a);
+    border-radius: var(--flint-radius-control, 0.375rem);
+    background: var(--flint-color-background-panel, #1a1a1a);
   }
 
   .file-upload__item--error {
-    background: color-mix(in srgb, var(--pug-color-text-danger, #ef4444) 10%, var(--pug-color-background-panel, #1a1a1a));
+    background: color-mix(in srgb, var(--flint-color-text-danger, #ef4444) 10%, var(--flint-color-background-panel, #1a1a1a));
   }
 
   .file-upload__preview {
@@ -408,7 +408,7 @@
   .file-upload__file-icon svg {
     width: 1.25rem;
     height: 1.25rem;
-    color: var(--pug-color-text-tertiary, #666);
+    color: var(--flint-color-text-tertiary, #666);
   }
 
   .file-upload__meta {
@@ -428,11 +428,11 @@
 
   .file-upload__size {
     font-size: 0.75rem;
-    color: var(--pug-color-text-secondary, #999);
+    color: var(--flint-color-text-secondary, #999);
   }
 
   .file-upload__error-text {
-    color: var(--pug-color-text-danger, #ef4444);
+    color: var(--flint-color-text-danger, #ef4444);
   }
 
   .file-upload__progress {
@@ -441,14 +441,14 @@
     left: 0;
     right: 0;
     height: 0.125rem;
-    border-radius: 0 0 var(--pug-radius-control, 0.375rem) var(--pug-radius-control, 0.375rem);
-    background: var(--pug-color-border-default, #444);
+    border-radius: 0 0 var(--flint-radius-control, 0.375rem) var(--flint-radius-control, 0.375rem);
+    background: var(--flint-color-border-default, #444);
     overflow: hidden;
   }
 
   .file-upload__progress-bar {
     height: 100%;
-    background: var(--pug-color-accent-default, #6366f1);
+    background: var(--flint-color-accent-default, #6366f1);
     transition: width 0.2s;
   }
 
@@ -463,13 +463,13 @@
     border: 0;
     border-radius: 0.25rem;
     background: transparent;
-    color: var(--pug-color-text-secondary, #999);
+    color: var(--flint-color-text-secondary, #999);
     cursor: pointer;
   }
 
   .file-upload__remove:hover {
-    background: var(--pug-color-background-elevated, #2a2a2a);
-    color: var(--pug-color-text-default, #eee);
+    background: var(--flint-color-background-elevated, #2a2a2a);
+    color: var(--flint-color-text-default, #eee);
   }
 
   .file-upload__remove svg {

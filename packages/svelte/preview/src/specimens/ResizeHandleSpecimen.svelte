@@ -1,6 +1,6 @@
 <script lang="ts">
-  import { Eyebrow } from "@pug/svelte-primitives";
-  import { ResizeHandle } from "@pug/svelte-primitives";
+  import { Eyebrow } from "@flint/svelte-primitives";
+  import { ResizeHandle } from "@flint/svelte-primitives";
 </script>
 
 <div class="specimen">
@@ -66,8 +66,8 @@
     display: flex;
     align-items: stretch;
     height: 6rem;
-    border: 0.0625rem solid var(--pug-color-border-subtle);
-    border-radius: var(--pug-radius-surface);
+    border: 0.0625rem solid var(--flint-color-border-subtle);
+    border-radius: var(--flint-radius-surface);
     overflow: hidden;
   }
 
@@ -75,8 +75,8 @@
     display: flex;
     flex-direction: column;
     height: 10rem;
-    border: 0.0625rem solid var(--pug-color-border-subtle);
-    border-radius: var(--pug-radius-surface);
+    border: 0.0625rem solid var(--flint-color-border-subtle);
+    border-radius: var(--flint-radius-surface);
     overflow: hidden;
   }
 
@@ -86,8 +86,8 @@
     align-items: center;
     justify-content: center;
     font-size: 0.8125rem;
-    color: var(--pug-color-text-secondary);
-    background: color-mix(in srgb, var(--pug-color-background-panel) 50%, transparent);
+    color: var(--flint-color-text-secondary);
+    background: color-mix(in srgb, var(--flint-color-background-panel) 50%, transparent);
   }
 
   .specimen__handle-wrapper--horizontal {

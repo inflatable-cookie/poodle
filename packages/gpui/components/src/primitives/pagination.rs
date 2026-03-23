@@ -6,8 +6,8 @@
 
 use gpui::prelude::FluentBuilder;
 use gpui::*;
-use pug_gpui::GpuiThemeProvider;
-use pug_primitives::{IconSize, IconSpec, PageItem, PaginationSpec};
+use flint_gpui::GpuiThemeProvider;
+use flint_primitives::{IconSize, IconSpec, PageItem, PaginationSpec};
 
 use super::icon::Icon;
 use crate::theme_ext::{color_mix, resolve_color, resolve_opacity, resolve_px, resolve_radius};
@@ -171,7 +171,7 @@ impl Pagination {
         let radius = self.radius;
         let button_height = self.button_height;
 
-        let page_id = SharedString::from(format!("pug-pg-page-{}", page));
+        let page_id = SharedString::from(format!("flint-pg-page-{}", page));
 
         let mut btn = div()
             .id(page_id)
@@ -249,7 +249,7 @@ impl IntoElement for Pagination {
 
         // Prev button
         let prev_page = if current_page > 1 { current_page - 1 } else { 1 };
-        root = root.child(self.render_nav_button("chevron-left", is_first, prev_page, "pug-pg-prev"));
+        root = root.child(self.render_nav_button("chevron-left", is_first, prev_page, "flint-pg-prev"));
 
         // Page buttons container
         let mut pages_container = div()
@@ -277,7 +277,7 @@ impl IntoElement for Pagination {
         } else {
             self.spec.total_pages
         };
-        root = root.child(self.render_nav_button("chevron-right", is_last, next_page, "pug-pg-next"));
+        root = root.child(self.render_nav_button("chevron-right", is_last, next_page, "flint-pg-next"));
 
         root.into_any_element()
     }

@@ -1,6 +1,6 @@
 <script lang="ts">
-  import { Toggle, Eyebrow, Icon } from "@pug/svelte-primitives";
-  import { bold as boldIcon, italic as italicIcon, pin, star } from "@pug/icons-lucide";
+  import { Toggle, Eyebrow, Icon } from "@flint/svelte-primitives";
+  import { bold as boldIcon, italic as italicIcon, pin, star } from "@flint/icons-lucide";
 
   let bold = false;
   let italic = false;
@@ -61,6 +61,6 @@
   .specimen__group p {
     margin: 0;
     font-size: 0.875rem;
-    color: var(--pug-color-text-secondary);
+    color: var(--flint-color-text-secondary);
   }
 </style>

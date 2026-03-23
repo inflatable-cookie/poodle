@@ -120,9 +120,9 @@ Updated: 2026-03-15
 | `align-items` | `center` |
 | `gap` | `0.25rem` |
 | `padding` | `0.25rem` |
-| `border` | `0.0625rem solid color-mix(in srgb, var(--pug-color-border-subtle) 78%, transparent)` |
-| `border-radius` | `var(--pug-radius-surface)` |
-| `background` | `color-mix(in srgb, var(--pug-color-background-panel) 94%, transparent)` |
+| `border` | `0.0625rem solid color-mix(in srgb, var(--flint-color-border-subtle) 78%, transparent)` |
+| `border-radius` | `var(--flint-radius-surface)` |
+| `background` | `color-mix(in srgb, var(--flint-color-background-panel) 94%, transparent)` |
 
 ### Root — vertical orientation
 
@@ -145,7 +145,7 @@ Updated: 2026-03-15
 
 ## 10. GPUI Notes
 
-- expected crate/module surface: `pug_gpui::primitives::toolbar`
+- expected crate/module surface: `flint_gpui::primitives::toolbar`
 - Spec struct: `ToolbarSpec` in primitives crate
 - GPUI must expose toolbar role with aria-orientation through accessibility tree
 - Roving focus must be implemented using GPUI focus management primitives

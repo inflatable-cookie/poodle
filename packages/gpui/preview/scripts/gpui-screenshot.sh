@@ -41,7 +41,7 @@ APP_PID=$!
 
 # Wait for window to appear (poll up to 5 seconds)
 for i in $(seq 1 50); do
-    if swift "$CAPTURE_SCRIPT" pug /dev/null 2>/dev/null; then
+    if swift "$CAPTURE_SCRIPT" flint /dev/null 2>/dev/null; then
         break
     fi
     sleep 0.1
@@ -51,7 +51,7 @@ done
 sleep 0.5
 
 # Capture
-swift "$CAPTURE_SCRIPT" pug "$OUTPUT" 2>&1
+swift "$CAPTURE_SCRIPT" flint "$OUTPUT" 2>&1
 
 # Kill the app
 kill "$APP_PID" 2>/dev/null

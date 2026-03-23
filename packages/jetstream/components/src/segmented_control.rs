@@ -1,8 +1,8 @@
 //! SegmentedControl — Jetstream segmented control backed by SegmentedControlSpec.
 
 use jetstream_runtime::ui_element::{self, JsEl};
-use pug_jetstream::JetstreamThemeProvider;
-use pug_primitives::SegmentedControlSpec;
+use flint_jetstream::JetstreamThemeProvider;
+use flint_primitives::SegmentedControlSpec;
 
 use crate::theme_ext::{resolve_color, resolve_opacity, resolve_radius};
 

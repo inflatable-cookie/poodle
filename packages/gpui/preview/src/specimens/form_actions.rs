@@ -1,8 +1,8 @@
 use gpui::*;
 use gpui::prelude::FluentBuilder;
-use pug_adapter::ThemeProvider;
-use pug_primitives::{ButtonSpec, ButtonTone, ButtonVariant, EyebrowSpec, FormActionAlign, FormActionsSpec};
-use pug_gpui_components::{Button, Eyebrow, FormActions};
+use flint_adapter::ThemeProvider;
+use flint_primitives::{ButtonSpec, ButtonTone, ButtonVariant, EyebrowSpec, FormActionAlign, FormActionsSpec};
+use flint_gpui_components::{Button, Eyebrow, FormActions};
 use crate::app_state::AppState;
 use crate::style_bridge::color_to_hsla;
 use crate::PreviewRoot;

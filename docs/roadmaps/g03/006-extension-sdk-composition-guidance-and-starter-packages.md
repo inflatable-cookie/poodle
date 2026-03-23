@@ -1,16 +1,16 @@
 # g03.006 Extension SDK, Composition Guidance, And Starter Packages
 
 Status: completed
-Owner: Pug Core
+Owner: Flint Core
 Updated: 2026-03-12
 Depends on: g03.001, g03.003
-Primary repos: `pug`
+Primary repos: `flint`
 
 ## Goals
 
 - [x] define extension-facing documentation and package posture
 - [x] define starter guidance for downstream consumers
-- [x] define how app-specific systems should compose from Pug safely
+- [x] define how app-specific systems should compose from Flint safely
 
 ## Execution Checklist
 

@@ -74,80 +74,80 @@
 
 <style>
   .text-area {
-    --pug-text-area-radius: var(--pug-treatment-interactive-subtle-radius, var(--pug-radius-control));
-    --pug-text-area-fill: var(
-      --pug-treatment-interactive-subtle-fill,
-      var(--pug-color-background-surface)
+    --flint-text-area-radius: var(--flint-treatment-interactive-subtle-radius, var(--flint-radius-control));
+    --flint-text-area-fill: var(
+      --flint-treatment-interactive-subtle-fill,
+      var(--flint-color-background-surface)
     );
-    --pug-text-area-fill-focus: var(
-      --pug-treatment-interactive-subtle-fill-focus,
-      var(--pug-text-area-fill)
+    --flint-text-area-fill-focus: var(
+      --flint-treatment-interactive-subtle-fill-focus,
+      var(--flint-text-area-fill)
     );
-    --pug-text-area-border: var(
-      --pug-treatment-interactive-subtle-border,
-      var(--pug-color-border-default)
+    --flint-text-area-border: var(
+      --flint-treatment-interactive-subtle-border,
+      var(--flint-color-border-default)
     );
-    --pug-text-area-border-focus: var(
-      --pug-treatment-interactive-subtle-border-focus,
-      var(--pug-color-accent-focusRing)
+    --flint-text-area-border-focus: var(
+      --flint-treatment-interactive-subtle-border-focus,
+      var(--flint-color-accent-focusRing)
     );
-    --pug-text-area-shadow: var(--pug-treatment-interactive-subtle-shadow, none);
-    --pug-text-area-shadow-focus: var(
-      --pug-treatment-interactive-subtle-shadow-focus,
-      0 0 0 var(--pug-border-width-focus)
-        color-mix(in srgb, var(--pug-color-accent-focusRing) 28%, transparent)
+    --flint-text-area-shadow: var(--flint-treatment-interactive-subtle-shadow, none);
+    --flint-text-area-shadow-focus: var(
+      --flint-treatment-interactive-subtle-shadow-focus,
+      0 0 0 var(--flint-border-width-focus)
+        color-mix(in srgb, var(--flint-color-accent-focusRing) 28%, transparent)
     );
     display: grid;
     min-height: 0;
-    border: 0.0625rem solid var(--pug-text-area-border);
-    border-radius: var(--pug-text-area-radius);
-    background: var(--pug-text-area-fill);
-    color: var(--pug-color-text-primary);
-    box-shadow: var(--pug-text-area-shadow);
+    border: 0.0625rem solid var(--flint-text-area-border);
+    border-radius: var(--flint-text-area-radius);
+    background: var(--flint-text-area-fill);
+    color: var(--flint-color-text-primary);
+    box-shadow: var(--flint-text-area-shadow);
     transition:
-      border-color var(--pug-motion-duration-interaction) var(--pug-motion-easing-standard),
-      box-shadow var(--pug-motion-duration-interaction) var(--pug-motion-easing-standard),
-      background var(--pug-motion-duration-interaction) var(--pug-motion-easing-standard);
+      border-color var(--flint-motion-duration-interaction) var(--flint-motion-easing-standard),
+      box-shadow var(--flint-motion-duration-interaction) var(--flint-motion-easing-standard),
+      background var(--flint-motion-duration-interaction) var(--flint-motion-easing-standard);
   }
 
   .text-area:focus-within {
-    border-color: var(--pug-text-area-border-focus);
-    background: var(--pug-text-area-fill-focus);
-    box-shadow: var(--pug-text-area-shadow-focus);
+    border-color: var(--flint-text-area-border-focus);
+    background: var(--flint-text-area-fill-focus);
+    box-shadow: var(--flint-text-area-shadow-focus);
   }
 
   .text-area[data-validation-state="invalid"] {
-    border-color: var(--pug-color-status-danger);
+    border-color: var(--flint-color-status-danger);
   }
 
   .text-area[data-validation-state="valid"] {
-    border-color: var(--pug-color-status-success);
+    border-color: var(--flint-color-status-success);
   }
 
   .text-area[data-validation-state="pending"] {
-    border-color: var(--pug-color-accent-base);
+    border-color: var(--flint-color-accent-base);
   }
 
   .text-area:has(.text-area__control:disabled) {
-    opacity: var(--pug-state-opacity-disabled);
+    opacity: var(--flint-state-opacity-disabled);
   }
 
   .text-area__control {
     min-width: 0;
     width: 100%;
     min-height: calc(1lh * 4);
-    padding: var(--pug-space-control-y) var(--pug-space-control-x);
+    padding: var(--flint-space-control-y) var(--flint-space-control-x);
     border: 0;
     resize: vertical;
     background: transparent;
     color: inherit;
-    font-family: var(--pug-typography-body-family);
-    font-size: var(--pug-typography-body-size);
-    line-height: var(--pug-typography-body-lineHeight);
+    font-family: var(--flint-typography-body-family);
+    font-size: var(--flint-typography-body-size);
+    line-height: var(--flint-typography-body-lineHeight);
     outline: 0;
   }
 
   .text-area__control::placeholder {
-    color: var(--pug-color-text-secondary);
+    color: var(--flint-color-text-secondary);
   }
 </style>

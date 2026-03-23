@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { Skeleton } from "@pug/svelte-primitives";
+  import { Skeleton } from "@flint/svelte-primitives";
 
   import type { ParsedEmbed } from "./types";
 
@@ -80,14 +80,14 @@
 
 <style>
   .embed-preview {
-    border-radius: var(--pug-radius-surface, 0.5rem);
+    border-radius: var(--flint-radius-surface, 0.5rem);
     overflow: hidden;
   }
 
   .embed-preview__container {
     position: relative;
     width: 100%;
-    background: var(--pug-color-background-panel, #1a1a1a);
+    background: var(--flint-color-background-panel, #1a1a1a);
   }
 
   .embed-preview__iframe {
@@ -114,40 +114,40 @@
     gap: 0.5rem;
     min-height: 8rem;
     padding: 1.5rem;
-    background: var(--pug-color-background-panel, #1a1a1a);
-    border-radius: var(--pug-radius-surface, 0.5rem);
+    background: var(--flint-color-background-panel, #1a1a1a);
+    border-radius: var(--flint-radius-surface, 0.5rem);
   }
 
   .embed-preview__error svg,
   .embed-preview__empty svg {
     width: 2rem;
     height: 2rem;
-    color: var(--pug-color-text-tertiary, #666);
+    color: var(--flint-color-text-tertiary, #666);
   }
 
   .embed-preview__loading-text {
     font-size: 0.8125rem;
-    color: var(--pug-color-text-secondary, #999);
+    color: var(--flint-color-text-secondary, #999);
   }
 
   .embed-preview__error span,
   .embed-preview__empty span {
     font-size: 0.8125rem;
-    color: var(--pug-color-text-secondary, #999);
+    color: var(--flint-color-text-secondary, #999);
   }
 
   .embed-preview__error svg {
-    color: var(--pug-color-text-danger, #ef4444);
+    color: var(--flint-color-text-danger, #ef4444);
   }
 
   .embed-preview__fallback {
     padding: 0.75rem 1rem;
-    background: var(--pug-color-background-panel, #1a1a1a);
-    border-radius: var(--pug-radius-surface, 0.5rem);
+    background: var(--flint-color-background-panel, #1a1a1a);
+    border-radius: var(--flint-radius-surface, 0.5rem);
   }
 
   .embed-preview__fallback a {
-    color: var(--pug-color-accent-default, #6366f1);
+    color: var(--flint-color-accent-default, #6366f1);
     font-size: 0.8125rem;
     word-break: break-all;
   }

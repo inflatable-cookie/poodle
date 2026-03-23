@@ -4,8 +4,8 @@
 //! current item in primary color, links in secondary.
 
 use gpui::*;
-use pug_gpui::GpuiThemeProvider;
-use pug_primitives::{BreadcrumbItem, BreadcrumbsSpec};
+use flint_gpui::GpuiThemeProvider;
+use flint_primitives::{BreadcrumbItem, BreadcrumbsSpec};
 
 use crate::theme_ext::{resolve_color, resolve_px};
 
@@ -118,7 +118,7 @@ impl IntoElement for Breadcrumbs {
                         .child(item.label.clone()),
                 );
             } else {
-                let crumb_id = SharedString::from(format!("pug-crumb-{}", i));
+                let crumb_id = SharedString::from(format!("flint-crumb-{}", i));
                 let mut item_el = div()
                     .id(crumb_id)
                     .text_color(text_color)

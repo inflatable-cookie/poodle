@@ -1,9 +1,9 @@
 use gpui::*;
-use pug_adapter::ThemeProvider;
-use pug_composites::AppHeaderSpec;
-use pug_gpui_components::{AppHeader, Button, IconButton, Eyebrow};
-use pug_primitives::{ButtonSpec, ButtonVariant, ControlSize, IconButtonSpec, EyebrowSpec};
-use pug_gpui::GpuiThemeProvider;
+use flint_adapter::ThemeProvider;
+use flint_composites::AppHeaderSpec;
+use flint_gpui_components::{AppHeader, Button, IconButton, Eyebrow};
+use flint_primitives::{ButtonSpec, ButtonVariant, ControlSize, IconButtonSpec, EyebrowSpec};
+use flint_gpui::GpuiThemeProvider;
 use crate::style_bridge::color_to_hsla;
 
 pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
@@ -17,7 +17,7 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
                 .child(
                     AppHeader::from_spec(
                         AppHeaderSpec::new()
-                            .with_title("Pug Studio")
+                            .with_title("Flint Studio")
                             .with_drag_region(true)
                             .with_aria_label("Application header"),
                         theme,

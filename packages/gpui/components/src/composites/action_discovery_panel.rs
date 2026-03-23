@@ -1,9 +1,9 @@
 //! ActionDiscoveryPanel — real GPUI component backed by ActionDiscoveryPanelSpec.
 
 use gpui::*;
-use pug_adapter::ThemeProvider;
-use pug_gpui::GpuiThemeProvider;
-use pug_composites::{ActionDiscoveryPanelSpec, ActionDiscoverySection, DiscoveryState};
+use flint_adapter::ThemeProvider;
+use flint_gpui::GpuiThemeProvider;
+use flint_composites::{ActionDiscoveryPanelSpec, ActionDiscoverySection, DiscoveryState};
 
 use crate::theme_ext::{resolve_color, resolve_opacity};
 
@@ -32,7 +32,7 @@ impl ActionDiscoveryPanel {
         Self {
             spec,
             theme: theme.clone(),
-            id_prefix: "pug-action-discovery".to_string(),
+            id_prefix: "flint-action-discovery".to_string(),
             on_select: None,
         }
     }

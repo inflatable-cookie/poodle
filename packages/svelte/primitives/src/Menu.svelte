@@ -183,25 +183,25 @@
   }
 
   .menu__trigger:focus-visible {
-    outline: var(--pug-border-width-focus) solid var(--pug-color-accent-focusRing);
+    outline: var(--flint-border-width-focus) solid var(--flint-color-accent-focusRing);
     outline-offset: 0.125rem;
   }
 
   .menu__overlay {
     position: absolute;
-    z-index: var(--pug-overlay-z-menu);
+    z-index: var(--flint-overlay-z-menu);
     min-width: 14rem;
     padding: 0.25rem;
     border: 0.0625rem solid var(
-      --pug-treatment-surface-elevated-border,
-      color-mix(in srgb, var(--pug-color-border-default) 72%, transparent)
+      --flint-treatment-surface-elevated-border,
+      color-mix(in srgb, var(--flint-color-border-default) 72%, transparent)
     );
-    border-radius: var(--pug-treatment-surface-elevated-radius, var(--pug-radius-surface));
+    border-radius: var(--flint-treatment-surface-elevated-radius, var(--flint-radius-surface));
     background: var(
-      --pug-treatment-surface-elevated-fill,
-      color-mix(in srgb, var(--pug-color-background-elevated) 98%, var(--pug-color-background-panel))
+      --flint-treatment-surface-elevated-fill,
+      color-mix(in srgb, var(--flint-color-background-elevated) 98%, var(--flint-color-background-panel))
     );
-    box-shadow: var(--pug-treatment-surface-elevated-shadow, var(--pug-elevation-overlay));
+    box-shadow: var(--flint-treatment-surface-elevated-shadow, var(--flint-elevation-overlay));
   }
 
   .menu__overlay[data-placement^="bottom"] {
@@ -224,32 +224,32 @@
     grid-template-columns: minmax(0, 1fr) auto;
     align-items: center;
     width: 100%;
-    min-height: calc(var(--pug-size-control-height) - 0.25rem);
-    padding: var(--pug-space-control-y) var(--pug-space-control-x);
+    min-height: calc(var(--flint-size-control-height) - 0.25rem);
+    padding: var(--flint-space-control-y) var(--flint-space-control-x);
     border: 0;
-    border-radius: calc(var(--pug-radius-control) - 0.125rem);
+    border-radius: calc(var(--flint-radius-control) - 0.125rem);
     background: transparent;
-    color: var(--pug-color-text-primary);
+    color: var(--flint-color-text-primary);
     cursor: pointer;
     font: inherit;
-    font-size: var(--pug-typography-body-size);
+    font-size: var(--flint-typography-body-size);
     text-align: left;
   }
 
   .menu__item:hover:not(:disabled),
   .menu__item:focus-visible {
-    background: color-mix(in srgb, var(--pug-color-accent-base) 16%, transparent);
+    background: color-mix(in srgb, var(--flint-color-accent-base) 16%, transparent);
     outline: none;
   }
 
   .menu__item:disabled {
     cursor: not-allowed;
-    opacity: var(--pug-state-opacity-disabled);
+    opacity: var(--flint-state-opacity-disabled);
   }
 
   .menu__meta {
-    color: var(--pug-color-text-secondary);
-    font-family: var(--pug-typography-code-family);
+    color: var(--flint-color-text-secondary);
+    font-family: var(--flint-typography-code-family);
     font-size: 0.6875rem;
   }
 
@@ -257,6 +257,6 @@
     width: 100%;
     height: 0.0625rem;
     margin: 0.25rem 0;
-    background: color-mix(in srgb, var(--pug-color-border-subtle) 72%, transparent);
+    background: color-mix(in srgb, var(--flint-color-border-subtle) 72%, transparent);
   }
 </style>

@@ -2,7 +2,7 @@
 
 Status: completed
 Date: 2026-03-11
-Owner: Pug Core
+Owner: Flint Core
 
 ## Summary
 
@@ -22,7 +22,7 @@ Owner: Pug Core
 
 ## Notes
 
-- this tranche intentionally freezes launcher posture, grouped discovery, and keyboard semantics without pretending Pug owns downstream command registries or ranking heuristics
+- this tranche intentionally freezes launcher posture, grouped discovery, and keyboard semantics without pretending Flint owns downstream command registries or ranking heuristics
 - the workstation package boundary is now explicit on the Svelte side instead of hiding shell-level behavior in generic composites
 
 ## Next Task

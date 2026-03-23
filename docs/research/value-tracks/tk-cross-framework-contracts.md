@@ -7,7 +7,7 @@ Priority: critical (blocks g01.004)
 
 ## Purpose
 
-Research how design systems define component contracts that work across multiple frameworks to inform Pug's:
+Research how design systems define component contracts that work across multiple frameworks to inform Flint's:
 - Component contract template (g01.004)
 - Documentation structure
 - Parity definition between Svelte and GPUI
@@ -38,7 +38,7 @@ Research how design systems define component contracts that work across multiple
    - Built on React Aria + Stately
    - Spectrum design system styling
 
-**Key Insight for Pug:**
+**Key Insight for Flint:**
 - Separate state/behavior from rendering
 - State layer can be shared (conceptually) across frameworks
 - Each framework implements rendering with native patterns
@@ -127,10 +127,10 @@ export function NumberInput() {
 }
 ```
 
-**Key Insight for Pug:**
+**Key Insight for Flint:**
 - State machines provide formal behavior specification
 - Framework adapters can be thin
-- Pug could define contracts that map to both Svelte and GPUI implementations
+- Flint could define contracts that map to both Svelte and GPUI implementations
 
 ### Contract Template Analysis
 
@@ -147,7 +147,7 @@ export function NumberInput() {
 | Styling API | Slots | Data attrs | CSS vars | - |
 | Framework Notes | Web only | Adapters | React only | Standard |
 
-**Pug-Specific Needs (not in precedent systems):**
+**Flint-Specific Needs (not in precedent systems):**
 - Cross-framework parity documentation
 - Platform-specific implementation notes
 - Delta documentation (what differs and why)
@@ -164,7 +164,7 @@ export function NumberInput() {
 - Framework adapters ensure idiomatic API in each framework
 - Rendering completely delegated (styling fully custom)
 
-**For Pug's Svelte + GPUI:**
+**For Flint's Svelte + GPUI:**
 
 Parity should be defined at these levels:
 
@@ -182,7 +182,7 @@ Parity should be defined at these levels:
 
 ---
 
-## Recommendations for Pug
+## Recommendations for Flint
 
 ### Contract Template Structure
 

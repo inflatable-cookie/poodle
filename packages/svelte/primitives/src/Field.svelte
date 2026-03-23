@@ -117,14 +117,14 @@
 <style>
   .field {
     display: grid;
-    gap: var(--pug-space-stack-sm);
+    gap: var(--flint-space-stack-sm);
   }
 
   .field__header {
     display: flex;
     align-items: baseline;
     justify-content: space-between;
-    gap: var(--pug-space-inline-md);
+    gap: var(--flint-space-inline-md);
   }
 
   .field__label,
@@ -135,38 +135,38 @@
   }
 
   .field__label {
-    color: var(--pug-color-text-primary);
-    font-family: var(--pug-typography-label-family);
-    font-size: var(--pug-typography-label-size);
-    font-weight: var(--pug-typography-label-weight);
-    line-height: var(--pug-typography-label-lineHeight);
+    color: var(--flint-color-text-primary);
+    font-family: var(--flint-typography-label-family);
+    font-size: var(--flint-typography-label-size);
+    font-weight: var(--flint-typography-label-weight);
+    line-height: var(--flint-typography-label-lineHeight);
   }
 
   .field__required {
-    color: var(--pug-color-status-danger);
+    color: var(--flint-color-status-danger);
   }
 
   .field__optional {
-    color: var(--pug-color-text-secondary);
-    font-family: var(--pug-typography-body-family);
+    color: var(--flint-color-text-secondary);
+    font-family: var(--flint-typography-body-family);
     font-size: 0.75rem;
-    line-height: var(--pug-typography-body-lineHeight);
+    line-height: var(--flint-typography-body-lineHeight);
   }
 
   .field__description,
   .field__message {
-    font-family: var(--pug-typography-body-family);
+    font-family: var(--flint-typography-body-family);
     font-size: 0.75rem;
-    line-height: var(--pug-typography-body-lineHeight);
+    line-height: var(--flint-typography-body-lineHeight);
   }
 
   .field__description,
   .field__message--pending {
-    color: var(--pug-color-text-secondary);
+    color: var(--flint-color-text-secondary);
   }
 
   .field__message--error {
-    color: var(--pug-color-status-danger);
+    color: var(--flint-color-status-danger);
   }
 
   /* ── Hint ── */
@@ -187,39 +187,39 @@
     height: 1rem;
     padding: 0;
     border: none;
-    border-radius: var(--pug-radius-pill);
-    background: color-mix(in srgb, var(--pug-color-text-secondary) 16%, transparent);
-    color: var(--pug-color-text-secondary);
+    border-radius: var(--flint-radius-pill);
+    background: color-mix(in srgb, var(--flint-color-text-secondary) 16%, transparent);
+    color: var(--flint-color-text-secondary);
     cursor: pointer;
-    transition: background var(--pug-motion-duration-interaction) var(--pug-motion-easing-standard);
+    transition: background var(--flint-motion-duration-interaction) var(--flint-motion-easing-standard);
   }
 
   .field__hint-trigger:hover {
-    background: color-mix(in srgb, var(--pug-color-text-secondary) 28%, transparent);
-    color: var(--pug-color-text-primary);
+    background: color-mix(in srgb, var(--flint-color-text-secondary) 28%, transparent);
+    color: var(--flint-color-text-primary);
   }
 
   .field__hint-trigger:focus-visible {
-    outline: var(--pug-border-width-focus) solid var(--pug-color-accent-focusRing);
+    outline: var(--flint-border-width-focus) solid var(--flint-color-accent-focusRing);
     outline-offset: 0.0625rem;
   }
 
   .field__hint-tooltip {
     position: absolute;
-    z-index: var(--pug-overlay-z-menu);
+    z-index: var(--flint-overlay-z-menu);
     bottom: calc(100% + 0.375rem);
     left: 50%;
     transform: translateX(-50%);
     max-width: 18rem;
     padding: 0.375rem 0.5rem;
-    border: 0.0625rem solid color-mix(in srgb, var(--pug-color-border-default) 72%, transparent);
-    border-radius: calc(var(--pug-radius-control) - 0.125rem);
-    background: color-mix(in srgb, var(--pug-color-background-elevated) 98%, var(--pug-color-background-panel));
-    box-shadow: var(--pug-elevation-overlay);
-    color: var(--pug-color-text-primary);
-    font-family: var(--pug-typography-body-family);
+    border: 0.0625rem solid color-mix(in srgb, var(--flint-color-border-default) 72%, transparent);
+    border-radius: calc(var(--flint-radius-control) - 0.125rem);
+    background: color-mix(in srgb, var(--flint-color-background-elevated) 98%, var(--flint-color-background-panel));
+    box-shadow: var(--flint-elevation-overlay);
+    color: var(--flint-color-text-primary);
+    font-family: var(--flint-typography-body-family);
     font-size: 0.6875rem;
-    font-weight: var(--pug-typography-body-weight);
+    font-weight: var(--flint-typography-body-weight);
     line-height: 1.4;
     white-space: normal;
     pointer-events: none;

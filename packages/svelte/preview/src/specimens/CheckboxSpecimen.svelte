@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { Checkbox, Eyebrow } from "@pug/svelte-primitives";
+  import { Checkbox, Eyebrow } from "@flint/svelte-primitives";
 
   let notifications = true;
   let marketing = false;

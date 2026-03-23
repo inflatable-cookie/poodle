@@ -3,8 +3,8 @@
 use std::time::Duration;
 
 use gpui::*;
-use pug_gpui::GpuiThemeProvider;
-use pug_primitives::SkeletonSpec;
+use flint_gpui::GpuiThemeProvider;
+use flint_primitives::SkeletonSpec;
 
 use crate::theme_ext::{resolve_color, resolve_radius};
 

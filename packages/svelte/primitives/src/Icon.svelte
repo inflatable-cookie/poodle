@@ -22,7 +22,7 @@
 </script>
 
 <svg
-  class="pug-icon"
+  class="flint-icon"
   data-size={size}
   xmlns="http://www.w3.org/2000/svg"
   width="24"
@@ -57,21 +57,21 @@
 </svg>
 
 <style>
-  .pug-icon {
+  .flint-icon {
     display: inline-block;
-    width: var(--pug-size-icon-md);
-    height: var(--pug-size-icon-md);
+    width: var(--flint-size-icon-md);
+    height: var(--flint-size-icon-md);
     vertical-align: middle;
     flex-shrink: 0;
   }
 
-  .pug-icon[data-size="sm"] {
-    width: var(--pug-size-icon-sm);
-    height: var(--pug-size-icon-sm);
+  .flint-icon[data-size="sm"] {
+    width: var(--flint-size-icon-sm);
+    height: var(--flint-size-icon-sm);
   }
 
-  .pug-icon[data-size="lg"] {
-    width: var(--pug-size-icon-lg);
-    height: var(--pug-size-icon-lg);
+  .flint-icon[data-size="lg"] {
+    width: var(--flint-size-icon-lg);
+    height: var(--flint-size-icon-lg);
   }
 </style>

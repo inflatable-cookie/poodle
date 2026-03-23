@@ -1,10 +1,10 @@
 //! DockRegion specimen — dockable panel region with tabs.
 
 use jetstream_runtime::ui_element::*;
-use pug_jetstream::JetstreamThemeProvider;
-use pug_jetstream_components::dock_region::js_dock_region;
-use pug_jetstream_components::theme_ext::*;
-use pug_composites::{DockEdge, DockRegionSpec, PanelTabItem};
+use flint_jetstream::JetstreamThemeProvider;
+use flint_jetstream_components::dock_region::js_dock_region;
+use flint_jetstream_components::theme_ext::*;
+use flint_composites::{DockEdge, DockRegionSpec, PanelTabItem};
 
 pub fn render(theme: &JetstreamThemeProvider) -> JsEl {
     let secondary = resolve_color(theme, "semantic.color.text.secondary");

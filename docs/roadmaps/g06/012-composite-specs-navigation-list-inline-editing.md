@@ -39,9 +39,9 @@ Composite specs: 28 (after 011) + 13 (new) = **41**
 
 | Crate | Specs |
 |-------|-------|
-| `pug-primitives` | 64 |
-| `pug-composites` | 41 |
-| `pug-workstation` | 13 |
+| `flint-primitives` | 64 |
+| `flint-composites` | 41 |
+| `flint-workstation` | 13 |
 | **Total** | **118** |
 
 Note: The target was 124 to match the full Svelte surface. The delta of 6
@@ -51,6 +51,6 @@ with DialogKind::AlertDialog, FormDialog → FormShellSpec + DialogSpec).
 
 ## Verification
 
-- [x] All 13 specs compile and are exported from `pug-composites`
+- [x] All 13 specs compile and are exported from `flint-composites`
 - [x] All 10 existing tests continue to pass
 - [x] `BreadcrumbItem` added to types.rs and re-exported

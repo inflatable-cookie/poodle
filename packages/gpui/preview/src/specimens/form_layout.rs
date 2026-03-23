@@ -1,6 +1,6 @@
 use gpui::*;
-use pug_primitives::{ButtonSpec, ButtonVariant, TextInputSpec, TextAreaSpec, CheckboxSpec, EyebrowSpec};
-use pug_gpui_components::{Button, TextInput, TextArea, Checkbox, FormLayout, Field, Eyebrow};
+use flint_primitives::{ButtonSpec, ButtonVariant, TextInputSpec, TextAreaSpec, CheckboxSpec, EyebrowSpec};
+use flint_gpui_components::{Button, TextInput, TextArea, Checkbox, FormLayout, Field, Eyebrow};
 use crate::app_state::AppState;
 use crate::PreviewRoot;
 

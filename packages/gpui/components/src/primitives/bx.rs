@@ -1,8 +1,8 @@
 //! Box — real GPUI component backed by BoxSpec.
 
 use gpui::*;
-use pug_gpui::GpuiThemeProvider;
-use pug_primitives::{BoxSpec, Dimension, Overflow, PaddingScale};
+use flint_gpui::GpuiThemeProvider;
+use flint_primitives::{BoxSpec, Dimension, Overflow, PaddingScale};
 
 use crate::theme_ext::resolve_px;
 
@@ -112,7 +112,7 @@ impl IntoElement for Box {
                 for child in self.children {
                     el = el.child(child);
                 }
-                return el.id("pug-box").overflow_y_scroll().into_any_element();
+                return el.id("flint-box").overflow_y_scroll().into_any_element();
             }
             Overflow::Visible => {}
         }

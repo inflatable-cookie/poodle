@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { Eyebrow, Grid, Stack, SearchField, Surface, Table, Tabs, type TabItem, type TableColumn, type TableRow } from "@pug/svelte-primitives";
+  import { Eyebrow, Grid, Stack, SearchField, Surface, Table, Tabs, type TabItem, type TableColumn, type TableRow } from "@flint/svelte-primitives";
 
   export let activePanelId: "token-summary-section" | "token-inspector" = "token-summary-section";
   export let keySemanticTokens: Array<{ path: string; value: string }> = [];
@@ -37,7 +37,7 @@
   </Stack>
 
   <Stack gap="md">
-    <span class="hint">@pug/svelte-tokens</span>
+    <span class="hint">@flint/svelte-tokens</span>
     <span class="path">packages/tokens/artifacts/css/</span>
     <span class="path">packages/tokens/artifacts/ts/</span>
   </Stack>
@@ -100,15 +100,15 @@
   .hint {
     padding: 0.25rem 0.625rem;
     border-radius: 999rem;
-    background: color-mix(in srgb, var(--pug-color-accent-base) 18%, transparent);
-    color: var(--pug-color-text-primary);
+    background: color-mix(in srgb, var(--flint-color-accent-base) 18%, transparent);
+    color: var(--flint-color-text-primary);
     font-size: 0.75rem;
     font-weight: 700;
   }
 
   .path {
-    color: var(--pug-color-text-secondary);
-    font-family: var(--pug-typography-code-family);
+    color: var(--flint-color-text-secondary);
+    font-family: var(--flint-typography-code-family);
     font-size: 0.75rem;
     min-width: 0;
     overflow: hidden;
@@ -126,12 +126,12 @@
     flex-shrink: 0;
     width: 1.25rem;
     height: 1.25rem;
-    border: 0.0625rem solid color-mix(in srgb, var(--pug-color-border-default) 60%, transparent);
-    border-radius: var(--pug-radius-control);
+    border: 0.0625rem solid color-mix(in srgb, var(--flint-color-border-default) 60%, transparent);
+    border-radius: var(--flint-radius-control);
   }
 
   .value {
-    font-family: var(--pug-typography-code-family);
+    font-family: var(--flint-typography-code-family);
     font-size: 0.8125rem;
   }
 
@@ -142,7 +142,7 @@
 
   .inspector-count {
     margin: 0;
-    color: var(--pug-color-text-secondary);
+    color: var(--flint-color-text-secondary);
     font-size: 0.8125rem;
   }
 </style>

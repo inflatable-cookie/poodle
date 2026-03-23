@@ -164,8 +164,8 @@ response to keyboard events.
 | Property | Value |
 |----------|-------|
 | `border-color` | `transparent` |
-| `background` | `color-mix(in srgb, var(--pug-color-accent-base) 18%, var(--pug-color-background-elevated))` |
-| `box-shadow` | `inset 0 0 0 0.0625rem color-mix(in srgb, var(--pug-color-accent-base) 22%, transparent)` |
+| `background` | `color-mix(in srgb, var(--flint-color-accent-base) 18%, var(--flint-color-background-elevated))` |
+| `box-shadow` | `inset 0 0 0 0.0625rem color-mix(in srgb, var(--flint-color-accent-base) 22%, transparent)` |
 
 #### `.action-discovery-panel__trailing`
 
@@ -185,30 +185,30 @@ response to keyboard events.
 | `justify-content` | `center` |
 | `min-height` | `1.5rem` |
 | `padding` | `0 0.5rem` |
-| `border-radius` | `var(--pug-radius-control)` |
-| `background` | `color-mix(in srgb, var(--pug-color-background-surface) 76%, transparent)` |
-| `color` | `var(--pug-color-text-secondary)` |
+| `border-radius` | `var(--flint-radius-control)` |
+| `background` | `color-mix(in srgb, var(--flint-color-background-surface) 76%, transparent)` |
+| `color` | `var(--flint-color-text-secondary)` |
 | `font-size` | `0.75rem` |
 
 #### `.action-discovery-panel__kbd` (Additional)
 
 | Property | Value |
 |----------|-------|
-| `font-family` | `var(--pug-typography-code-family)` |
+| `font-family` | `var(--flint-typography-code-family)` |
 
 #### `.action-discovery-panel__state`
 
 | Property | Value |
 |----------|-------|
 | `display` | `grid` |
-| `gap` | `var(--pug-space-stack-sm)` |
+| `gap` | `var(--flint-space-stack-sm)` |
 
 #### `.action-discovery-panel__skeletons`
 
 | Property | Value |
 |----------|-------|
 | `display` | `grid` |
-| `gap` | `var(--pug-space-stack-sm)` |
+| `gap` | `var(--flint-space-stack-sm)` |
 
 #### `.action-discovery-panel__skeleton-row`
 
@@ -216,10 +216,10 @@ response to keyboard events.
 |----------|-------|
 | `display` | `grid` |
 | `grid-template-columns` | `minmax(0, 1fr) auto` |
-| `gap` | `var(--pug-space-inline-md)` |
+| `gap` | `var(--flint-space-inline-md)` |
 | `padding` | `0.875rem` |
-| `border-radius` | `calc(var(--pug-radius-surface) - 0.125rem)` |
-| `background` | `color-mix(in srgb, var(--pug-color-background-surface) 72%, transparent)` |
+| `border-radius` | `calc(var(--flint-radius-surface) - 0.125rem)` |
+| `background` | `color-mix(in srgb, var(--flint-color-background-surface) 72%, transparent)` |
 
 ### Data Attributes Used for CSS Selectors
 

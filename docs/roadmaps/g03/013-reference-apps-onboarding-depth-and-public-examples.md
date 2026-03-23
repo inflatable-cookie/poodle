@@ -1,10 +1,10 @@
 # g03.013 Reference Apps, Onboarding Depth, And Public Examples
 
 Status: completed
-Owner: Pug Core
+Owner: Flint Core
 Updated: 2026-03-12
 Depends on: g03.003, g03.012
-Primary repos: `pug`
+Primary repos: `flint`
 
 ## Goals
 

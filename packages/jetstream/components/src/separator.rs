@@ -6,8 +6,8 @@
 //! ALL dimensions from contract. ZERO hardcoded values.
 
 use jetstream_runtime::ui_element::{self, JsEl};
-use pug_jetstream::JetstreamThemeProvider;
-use pug_primitives::{SeparatorOrientation, SeparatorSpec};
+use flint_jetstream::JetstreamThemeProvider;
+use flint_primitives::{SeparatorOrientation, SeparatorSpec};
 
 use crate::theme_ext::{resolve_color, tint};
 
@@ -29,11 +29,11 @@ pub fn js_separator(spec: &SeparatorSpec, theme: &JetstreamThemeProvider) -> JsE
     // - subtle: color-mix(border-subtle 72%, transparent)
     // - default: border-default full color
     let color = match spec.tone {
-        pug_primitives::RuleTone::Subtle => {
+        flint_primitives::RuleTone::Subtle => {
             let border_subtle = resolve_color(theme, "semantic.color.border.subtle");
             tint(border_subtle, 0.72) // color-mix with 72% opacity
         }
-        pug_primitives::RuleTone::Default => {
+        flint_primitives::RuleTone::Default => {
             resolve_color(theme, "semantic.color.border.default")
         }
     };
@@ -62,7 +62,7 @@ mod tests {
     use super::*;
 
     fn theme() -> JetstreamThemeProvider {
-        JetstreamThemeProvider::from_theme(&pug_tokens::themes::DARK)
+        JetstreamThemeProvider::from_theme(&flint_tokens::themes::DARK)
     }
 
     #[test]

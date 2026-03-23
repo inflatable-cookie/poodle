@@ -1,8 +1,8 @@
 //! RadioGroup — real GPUI component backed by RadioGroupSpec.
 
 use gpui::*;
-use pug_gpui::GpuiThemeProvider;
-use pug_primitives::{ChoiceOption, Orientation, RadioGroupSpec};
+use flint_gpui::GpuiThemeProvider;
+use flint_primitives::{ChoiceOption, Orientation, RadioGroupSpec};
 
 use crate::theme_ext::{resolve_color, resolve_opacity, resolve_px};
 
@@ -28,7 +28,7 @@ impl RadioGroup {
         Self {
             spec,
             theme: theme.clone(),
-            id_prefix: "pug-radio".to_string(),
+            id_prefix: "flint-radio".to_string(),
             on_change: None,
         }
     }

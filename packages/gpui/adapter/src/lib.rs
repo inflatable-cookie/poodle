@@ -1,10 +1,10 @@
-//! GPUI rendering adapter for Pug.
+//! GPUI rendering adapter for Flint.
 //!
-//! This crate implements the renderer adapter traits from `pug-adapter` for
+//! This crate implements the renderer adapter traits from `flint-adapter` for
 //! GPUI, Zed's native UI framework. It provides:
 //!
 //! - `GpuiThemeProvider`: Resolves token paths to typed values using GPUI's
-//!   theme system (backed by `pug-tokens::typed` constants).
+//!   theme system (backed by `flint-tokens::typed` constants).
 //! - `GpuiTarget`: The render target type for GPUI output.
 //! - `GpuiAdapter`: The main adapter struct implementing `AdapterManifest`.
 //! - Style mapping utilities that convert `StyleDescriptor` → GPUI-native
@@ -13,13 +13,13 @@
 //! ## Architecture
 //!
 //! ```text
-//! Shared Contract Layer (pug-primitives, pug-composites, pug-workstation)
+//! Shared Contract Layer (flint-primitives, flint-composites, flint-workstation)
 //!     │
 //!     ▼
-//! pug-adapter traits (ThemeProvider, RenderComponent, AdapterManifest)
+//! flint-adapter traits (ThemeProvider, RenderComponent, AdapterManifest)
 //!     │
 //!     ▼
-//! pug-gpui (this crate) — GPUI-specific implementations
+//! flint-gpui (this crate) — GPUI-specific implementations
 //!     │
 //!     ▼
 //! GPUI native elements (Element, Style, events)
@@ -46,7 +46,7 @@ pub use style_map::{
 };
 pub use theme::GpuiThemeProvider;
 
-use pug_adapter::{AdapterManifest, RenderTarget};
+use flint_adapter::{AdapterManifest, RenderTarget};
 
 /// Opaque handle to a rendered GPUI element.
 ///
@@ -77,7 +77,7 @@ impl RenderTarget for GpuiTarget {
 
 /// The main GPUI rendering adapter.
 ///
-/// Implements `AdapterManifest` to declare which Pug component specs
+/// Implements `AdapterManifest` to declare which Flint component specs
 /// this adapter supports. Individual `RenderComponent<Spec>` implementations
 /// will be added in g07.002–009 as each component category is built out.
 pub struct GpuiAdapter {
@@ -263,7 +263,7 @@ impl AdapterManifest for GpuiAdapter {
 
 #[cfg(test)]
 mod tests {
-    use pug_adapter::ThemeProvider;
+    use flint_adapter::ThemeProvider;
 
     use super::*;
 

@@ -1,4 +1,4 @@
-use pug_tokens::semantic;
+use flint_tokens::semantic;
 
 /// Tone / semantic color of a pill.
 #[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]

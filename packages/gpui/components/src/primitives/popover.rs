@@ -1,8 +1,8 @@
 //! Popover — real GPUI component backed by PopoverSpec.
 
 use gpui::*;
-use pug_gpui::GpuiThemeProvider;
-use pug_primitives::{OverlayPlacement, PopoverInitialFocus, PopoverSpec};
+use flint_gpui::GpuiThemeProvider;
+use flint_primitives::{OverlayPlacement, PopoverInitialFocus, PopoverSpec};
 
 use crate::theme_ext::{color_mix, resolve_color, resolve_px, resolve_radius};
 
@@ -97,7 +97,7 @@ impl IntoElement for Popover {
         if spec.current_open() {
             if let Some(content) = self.content {
                 let mut surface = div()
-                    .id("pug-popover-surface")
+                    .id("flint-popover-surface")
                     .focusable()
                     .rounded(radius)
                     .bg(surface_bg)

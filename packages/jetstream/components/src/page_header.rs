@@ -1,7 +1,7 @@
 //! PageHeader — Jetstream page header backed by PageHeaderSpec.
 use jetstream_runtime::ui_element::{self, JsEl};
-use pug_jetstream::JetstreamThemeProvider;
-use pug_composites::PageHeaderSpec;
+use flint_jetstream::JetstreamThemeProvider;
+use flint_composites::PageHeaderSpec;
 use crate::theme_ext::resolve_color;
 
 pub fn js_page_header(spec: &PageHeaderSpec, theme: &JetstreamThemeProvider) -> JsEl {

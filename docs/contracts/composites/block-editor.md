@@ -117,9 +117,9 @@ When the `block` slot is not provided, the component falls back to built-in rend
 
 | Property | Value |
 |----------|-------|
-| `border` | `0.0625rem solid var(--pug-color-border-default)` |
-| `border-radius` | `var(--pug-radius-surface)` |
-| `background` | `var(--pug-color-background-surface)` |
+| `border` | `0.0625rem solid var(--flint-color-border-default)` |
+| `border-radius` | `var(--flint-radius-surface)` |
+| `background` | `var(--flint-color-background-surface)` |
 | `padding` | `0.75rem` |
 | `display` | `flex` |
 | `flex-direction` | `column` |
@@ -129,7 +129,7 @@ When the `block` slot is not provided, the component falls back to built-in rend
 
 | Property | Value |
 |----------|-------|
-| `opacity` | `var(--pug-state-opacity-disabled)` |
+| `opacity` | `var(--flint-state-opacity-disabled)` |
 | `pointer-events` | `none` |
 
 #### `.block-editor__block`
@@ -139,21 +139,21 @@ When the `block` slot is not provided, the component falls back to built-in rend
 | `display` | `flex` |
 | `flex-direction` | `column` |
 | `border` | `none` |
-| `border-radius` | `var(--pug-radius-control)` |
-| `background` | `color-mix(in srgb, var(--pug-color-background-elevated) 42%, transparent)` |
-| `transition` | `background var(--pug-motion-duration-interaction) var(--pug-motion-easing-standard), box-shadow var(--pug-motion-duration-interaction) var(--pug-motion-easing-standard)` |
+| `border-radius` | `var(--flint-radius-control)` |
+| `background` | `color-mix(in srgb, var(--flint-color-background-elevated) 42%, transparent)` |
+| `transition` | `background var(--flint-motion-duration-interaction) var(--flint-motion-easing-standard), box-shadow var(--flint-motion-duration-interaction) var(--flint-motion-easing-standard)` |
 
 #### `.block-editor__block.active`
 
 | Property | Value |
 |----------|-------|
-| `background` | `color-mix(in srgb, var(--pug-color-background-elevated) 72%, transparent)` |
+| `background` | `color-mix(in srgb, var(--flint-color-background-elevated) 72%, transparent)` |
 
 #### `.block-editor__block.drag-over`
 
 | Property | Value |
 |----------|-------|
-| `box-shadow` | `0 0 0 0.125rem var(--pug-color-accent-base)` |
+| `box-shadow` | `0 0 0 0.125rem var(--flint-color-accent-base)` |
 
 #### `.block-editor__block.dragging`
 
@@ -171,7 +171,7 @@ When the `block` slot is not provided, the component falls back to built-in rend
 | `padding` | `0.25rem 0.375rem` |
 | `border-bottom` | `none` |
 | `background` | `transparent` |
-| `border-radius` | `var(--pug-radius-control) var(--pug-radius-control) 0 0` |
+| `border-radius` | `var(--flint-radius-control) var(--flint-radius-control) 0 0` |
 
 #### `.block-editor__toolbar-left`, `.block-editor__toolbar-right`
 
@@ -190,17 +190,17 @@ When the `block` slot is not provided, the component falls back to built-in rend
 | `justify-content` | `center` |
 | `width` | `1.25rem` |
 | `height` | `1.25rem` |
-| `color` | `var(--pug-color-text-tertiary)` |
+| `color` | `var(--flint-color-text-tertiary)` |
 | `cursor` | `grab` |
-| `border-radius` | `var(--pug-radius-control)` |
-| `transition` | `background var(--pug-motion-duration-interaction) var(--pug-motion-easing-standard)` |
+| `border-radius` | `var(--flint-radius-control)` |
+| `transition` | `background var(--flint-motion-duration-interaction) var(--flint-motion-easing-standard)` |
 
 #### `.block-editor__drag-grip:hover`
 
 | Property | Value |
 |----------|-------|
-| `background` | `color-mix(in srgb, var(--pug-color-accent-base) 12%, transparent)` |
-| `color` | `var(--pug-color-text-secondary)` |
+| `background` | `color-mix(in srgb, var(--flint-color-accent-base) 12%, transparent)` |
+| `color` | `var(--flint-color-text-secondary)` |
 
 #### `.block-editor__drag-grip:active`
 
@@ -219,20 +219,20 @@ When the `block` slot is not provided, the component falls back to built-in rend
 | `height` | `1.25rem` |
 | `padding` | `0` |
 | `border` | `0` |
-| `border-radius` | `var(--pug-radius-control)` |
+| `border-radius` | `var(--flint-radius-control)` |
 | `background` | `transparent` |
-| `color` | `var(--pug-color-text-tertiary)` |
+| `color` | `var(--flint-color-text-tertiary)` |
 | `cursor` | `pointer` |
 | `font-size` | `0.75rem` |
 | `line-height` | `1` |
-| `transition` | `background var(--pug-motion-duration-interaction) var(--pug-motion-easing-standard)` |
+| `transition` | `background var(--flint-motion-duration-interaction) var(--flint-motion-easing-standard)` |
 
 #### `.block-editor__tool-btn:hover`
 
 | Property | Value |
 |----------|-------|
-| `background` | `color-mix(in srgb, var(--pug-color-accent-base) 16%, transparent)` |
-| `color` | `var(--pug-color-text-primary)` |
+| `background` | `color-mix(in srgb, var(--flint-color-accent-base) 16%, transparent)` |
+| `color` | `var(--flint-color-text-primary)` |
 
 #### `.block-editor__tool-btn:disabled`
 
@@ -246,24 +246,24 @@ When the `block` slot is not provided, the component falls back to built-in rend
 | Property | Value |
 |----------|-------|
 | `background` | `transparent` |
-| `color` | `var(--pug-color-text-tertiary)` |
+| `color` | `var(--flint-color-text-tertiary)` |
 
 #### `.block-editor__remove-btn:hover:not(:disabled)`
 
 | Property | Value |
 |----------|-------|
-| `background` | `color-mix(in srgb, var(--pug-color-status-danger) 16%, transparent)` |
-| `color` | `var(--pug-color-status-danger)` |
+| `background` | `color-mix(in srgb, var(--flint-color-status-danger) 16%, transparent)` |
+| `color` | `var(--flint-color-status-danger)` |
 
 #### `.block-editor__type-select`
 
 | Property | Value |
 |----------|-------|
 | `padding` | `0.0625rem 0.25rem` |
-| `border` | `0.0625rem solid var(--pug-color-border-subtle)` |
-| `border-radius` | `var(--pug-radius-control)` |
+| `border` | `0.0625rem solid var(--flint-color-border-subtle)` |
+| `border-radius` | `var(--flint-radius-control)` |
 | `background` | `transparent` |
-| `color` | `var(--pug-color-text-secondary)` |
+| `color` | `var(--flint-color-text-secondary)` |
 | `font` | `inherit` |
 | `font-size` | `0.6875rem` |
 | `cursor` | `pointer` |
@@ -283,8 +283,8 @@ When the `block` slot is not provided, the component falls back to built-in rend
 | `padding` | `0.25rem 0.375rem` |
 | `border` | `0` |
 | `background` | `transparent` |
-| `color` | `var(--pug-color-text-primary)` |
-| `font-family` | `var(--pug-typography-body-family)` |
+| `color` | `var(--flint-color-text-primary)` |
+| `font-family` | `var(--flint-typography-body-family)` |
 | `font-size` | `0.875rem` |
 | `line-height` | `1.6` |
 | `outline` | `none` |
@@ -301,19 +301,19 @@ When the `block` slot is not provided, the component falls back to built-in rend
 
 | Property | Value |
 |----------|-------|
-| `font-family` | `var(--pug-typography-code-family)` |
+| `font-family` | `var(--flint-typography-code-family)` |
 | `font-size` | `0.8125rem` |
-| `background` | `color-mix(in srgb, var(--pug-color-background-elevated) 72%, transparent)` |
-| `border-radius` | `var(--pug-radius-control)` |
+| `background` | `color-mix(in srgb, var(--flint-color-background-elevated) 72%, transparent)` |
+| `border-radius` | `var(--flint-radius-control)` |
 | `padding` | `0.5rem` |
 
 #### `.block-editor__input--quote`
 
 | Property | Value |
 |----------|-------|
-| `border-left` | `0.1875rem solid var(--pug-color-border-default)` |
+| `border-left` | `0.1875rem solid var(--flint-color-border-default)` |
 | `padding-left` | `0.625rem` |
-| `color` | `var(--pug-color-text-secondary)` |
+| `color` | `var(--flint-color-text-secondary)` |
 | `font-style` | `italic` |
 
 #### `.block-editor__input--list`
@@ -327,15 +327,15 @@ When the `block` slot is not provided, the component falls back to built-in rend
 | Property | Value |
 |----------|-------|
 | `font-size` | `0.75rem` |
-| `color` | `var(--pug-color-text-secondary)` |
-| `font-family` | `var(--pug-typography-code-family)` |
+| `color` | `var(--flint-color-text-secondary)` |
+| `font-family` | `var(--flint-typography-code-family)` |
 
 #### `.block-editor__divider`
 
 | Property | Value |
 |----------|-------|
 | `border` | `0` |
-| `border-top` | `0.0625rem solid var(--pug-color-border-subtle)` |
+| `border-top` | `0.0625rem solid var(--flint-color-border-subtle)` |
 | `margin` | `0.5rem 0` |
 
 #### `.block-editor__image-block`
@@ -352,7 +352,7 @@ When the `block` slot is not provided, the component falls back to built-in rend
 |----------|-------|
 | `max-width` | `100%` |
 | `max-height` | `16rem` |
-| `border-radius` | `var(--pug-radius-control)` |
+| `border-radius` | `var(--flint-radius-control)` |
 | `object-fit` | `contain` |
 
 #### `.block-editor__add-overlay`
@@ -361,7 +361,7 @@ When the `block` slot is not provided, the component falls back to built-in rend
 |----------|-------|
 | `position` | `fixed` |
 | `inset` | `0` |
-| `z-index` | `var(--pug-overlay-z-menu, 100)` |
+| `z-index` | `var(--flint-overlay-z-menu, 100)` |
 
 #### `.block-editor__add-menu`
 
@@ -372,10 +372,10 @@ When the `block` slot is not provided, the component falls back to built-in rend
 | `grid-template-columns` | `repeat(auto-fill, minmax(6rem, 1fr))` |
 | `gap` | `0.25rem` |
 | `padding` | `0.5rem` |
-| `border` | `0.0625rem solid var(--pug-color-border-default)` |
-| `border-radius` | `var(--pug-radius-surface)` |
-| `background` | `var(--pug-color-background-elevated)` |
-| `box-shadow` | `var(--pug-elevation-overlay)` |
+| `border` | `0.0625rem solid var(--flint-color-border-default)` |
+| `border-radius` | `var(--flint-radius-surface)` |
+| `background` | `var(--flint-color-background-elevated)` |
+| `box-shadow` | `var(--flint-elevation-overlay)` |
 | `min-width` | `16rem` |
 
 #### `.block-editor__add-menu-item`
@@ -387,20 +387,20 @@ When the `block` slot is not provided, the component falls back to built-in rend
 | `gap` | `0.375rem` |
 | `padding` | `0.5rem` |
 | `border` | `0` |
-| `border-radius` | `var(--pug-radius-control)` |
+| `border-radius` | `var(--flint-radius-control)` |
 | `background` | `transparent` |
-| `color` | `var(--pug-color-text-primary)` |
+| `color` | `var(--flint-color-text-primary)` |
 | `cursor` | `pointer` |
 | `font` | `inherit` |
 | `font-size` | `0.8125rem` |
 | `text-align` | `left` |
-| `transition` | `background var(--pug-motion-duration-interaction) var(--pug-motion-easing-standard)` |
+| `transition` | `background var(--flint-motion-duration-interaction) var(--flint-motion-easing-standard)` |
 
 #### `.block-editor__add-menu-item:hover`
 
 | Property | Value |
 |----------|-------|
-| `background` | `color-mix(in srgb, var(--pug-color-accent-base) 12%, transparent)` |
+| `background` | `color-mix(in srgb, var(--flint-color-accent-base) 12%, transparent)` |
 
 #### `.block-editor__add-menu-icon`
 

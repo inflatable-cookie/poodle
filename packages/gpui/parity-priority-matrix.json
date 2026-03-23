@@ -11,7 +11,7 @@
         "token-inspector"
       ],
       "packageFocus": [
-        "pug-gpui-tokens",
+        "flint-gpui-tokens",
         "gpui-preview-app"
       ]
     },
@@ -24,7 +24,7 @@
         "notification-suite"
       ],
       "packageFocus": [
-        "pug-gpui-primitives"
+        "flint-gpui-primitives"
       ]
     },
     {
@@ -158,7 +158,7 @@
       "sideBySideReview": true,
       "reasons": [
         "The workstation shell is the most important shared Loophole-facing UI target above primitives and composites.",
-        "This is the strongest place to prove Pug can build the same UI in Svelte and GPUI."
+        "This is the strongest place to prove Flint can build the same UI in Svelte and GPUI."
       ]
     },
     {

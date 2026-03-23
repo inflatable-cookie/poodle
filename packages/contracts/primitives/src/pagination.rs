@@ -1,4 +1,4 @@
-use pug_tokens::semantic;
+use flint_tokens::semantic;
 
 #[derive(Debug, Clone, PartialEq)]
 pub enum PageItem {

@@ -78,21 +78,21 @@
   }
 
   .toggle-group__item {
-    min-height: calc(var(--pug-size-control-height) - 0.25rem);
+    min-height: calc(var(--flint-size-control-height) - 0.25rem);
     padding: 0 0.75rem;
     border: 0.0625rem solid var(
-      --pug-treatment-interactive-border,
-      color-mix(in srgb, var(--pug-color-border-subtle) 82%, transparent)
+      --flint-treatment-interactive-border,
+      color-mix(in srgb, var(--flint-color-border-subtle) 82%, transparent)
     );
-    border-radius: var(--pug-treatment-interactive-radius, var(--pug-radius-control));
+    border-radius: var(--flint-treatment-interactive-radius, var(--flint-radius-control));
     background: var(
-      --pug-treatment-interactive-fill,
-      color-mix(in srgb, var(--pug-surface) 93%, var(--pug-color-text-primary))
+      --flint-treatment-interactive-fill,
+      color-mix(in srgb, var(--flint-surface) 93%, var(--flint-color-text-primary))
     );
-    box-shadow: var(--pug-treatment-interactive-shadow, none);
-    color: var(--pug-color-text-primary);
+    box-shadow: var(--flint-treatment-interactive-shadow, none);
+    color: var(--flint-color-text-primary);
     cursor: pointer;
-    font-family: var(--pug-typography-label-family);
+    font-family: var(--flint-typography-label-family);
     font-size: 0.75rem;
     font-weight: 600;
     line-height: 1;
@@ -106,26 +106,26 @@
   .toggle-group__item.selected {
     background:
       linear-gradient(
-        color-mix(in srgb, var(--pug-color-accent-base) 22%, transparent),
-        color-mix(in srgb, var(--pug-color-accent-base) 22%, transparent)
+        color-mix(in srgb, var(--flint-color-accent-base) 22%, transparent),
+        color-mix(in srgb, var(--flint-color-accent-base) 22%, transparent)
       ),
       var(
-        --pug-treatment-interactive-fill,
-        color-mix(in srgb, var(--pug-surface) 93%, var(--pug-color-text-primary))
+        --flint-treatment-interactive-fill,
+        color-mix(in srgb, var(--flint-surface) 93%, var(--flint-color-text-primary))
       );
     border-color: var(
-      --pug-treatment-interactive-border-active,
-      color-mix(in srgb, var(--pug-color-accent-base) 42%, var(--pug-color-border-default))
+      --flint-treatment-interactive-border-active,
+      color-mix(in srgb, var(--flint-color-accent-base) 42%, var(--flint-color-border-default))
     );
   }
 
   .toggle-group__item:focus-visible {
-    outline: var(--pug-border-width-focus) solid var(--pug-color-accent-focusRing);
+    outline: var(--flint-border-width-focus) solid var(--flint-color-accent-focusRing);
     outline-offset: 0.125rem;
   }
 
   .toggle-group__item:disabled {
     cursor: not-allowed;
-    opacity: var(--pug-state-opacity-disabled);
+    opacity: var(--flint-state-opacity-disabled);
   }
 </style>

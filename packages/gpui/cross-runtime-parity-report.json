@@ -11,10 +11,10 @@
     "suiteId": "gpui-target-matrix",
     "status": "preview-backed",
     "coveredPackages": [
-      "pug-gpui-tokens",
-      "pug-gpui-primitives",
-      "pug-gpui-composites",
-      "pug-gpui-workstation"
+      "flint-gpui-tokens",
+      "flint-gpui-primitives",
+      "flint-gpui-composites",
+      "flint-gpui-workstation"
     ],
     "evidenceArtifacts": [
       "packages/gpui/tokens/multi-app-validation.json",

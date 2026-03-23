@@ -1,10 +1,10 @@
 # g02.016 Generation Closeout And g03 Cutover Plan
 
 Status: completed
-Owner: Pug Core
+Owner: Flint Core
 Updated: 2026-03-11
 Depends on: g02.015
-Primary repos: `pug`
+Primary repos: `flint`
 
 ## Goals
 

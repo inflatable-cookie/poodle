@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { Slider, Eyebrow } from "@pug/svelte-primitives";
+  import { Slider, Eyebrow } from "@flint/svelte-primitives";
 
   let volume = 65;
   let opacity = 100;
@@ -54,6 +54,6 @@
   .specimen__group p {
     margin: 0;
     font-size: 0.875rem;
-    color: var(--pug-color-text-secondary);
+    color: var(--flint-color-text-secondary);
   }
 </style>

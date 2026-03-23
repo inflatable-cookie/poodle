@@ -1,10 +1,10 @@
 //! Code specimen — code blocks with sample content.
 
 use jetstream_runtime::ui_element::*;
-use pug_jetstream::JetstreamThemeProvider;
-use pug_jetstream_components::code::js_code;
-use pug_jetstream_components::theme_ext::*;
-use pug_primitives::CodeSpec;
+use flint_jetstream::JetstreamThemeProvider;
+use flint_jetstream_components::code::js_code;
+use flint_jetstream_components::theme_ext::*;
+use flint_primitives::CodeSpec;
 
 pub fn render(theme: &JetstreamThemeProvider) -> JsEl {
     let secondary = resolve_color(theme, "semantic.color.text.secondary");

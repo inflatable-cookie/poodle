@@ -1,9 +1,9 @@
 {
-  "name": "@pug/svelte-composites",
+  "name": "@flint/svelte-composites",
   "version": "0.0.0",
   "private": true,
   "type": "module",
-  "description": "Pug Svelte composite component surface.",
+  "description": "Flint Svelte composite component surface.",
   "svelte": "./src/index.ts",
   "exports": {
     ".": "./src/index.ts",
@@ -13,21 +13,21 @@
     "src",
     "README.md"
   ],
-  "pugRelease": {
+  "flintRelease": {
     "publicIntent": true,
     "channel": "preview",
     "stability": "pre-release"
   },
   "peerDependencies": {
-    "@pug/svelte-tokens": "0.0.0",
-    "@pug/svelte-primitives": "0.0.0",
+    "@flint/svelte-tokens": "0.0.0",
+    "@flint/svelte-primitives": "0.0.0",
     "svelte": "^5.38.6"
   },
   "peerDependenciesMeta": {
-    "@pug/svelte-tokens": {
+    "@flint/svelte-tokens": {
       "optional": true
     },
-    "@pug/svelte-primitives": {
+    "@flint/svelte-primitives": {
       "optional": true
     }
   }

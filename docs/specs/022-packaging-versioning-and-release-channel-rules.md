@@ -6,7 +6,7 @@ Depends on: `021-public-package-api-stability-and-parity-debt-baseline.md`
 
 ## Purpose
 
-Freeze the packaging and release posture for the current Pug package set so the
+Freeze the packaging and release posture for the current Flint package set so the
 repo can distinguish public-intent packages from internal-only packages before
 downstream adoption starts.
 
@@ -65,20 +65,20 @@ The current release posture is:
 
 ### Preview Channel Public-Intent Packages
 
-- `@pug/svelte-tokens`
-- `@pug/svelte-primitives`
-- `@pug/svelte-composites`
-- `@pug/svelte-workstation`
-- `pug-gpui-tokens`
-- `pug-gpui-primitives`
-- `pug-gpui-composites`
-- `pug-gpui-workstation`
+- `@flint/svelte-tokens`
+- `@flint/svelte-primitives`
+- `@flint/svelte-composites`
+- `@flint/svelte-workstation`
+- `flint-gpui-tokens`
+- `flint-gpui-primitives`
+- `flint-gpui-composites`
+- `flint-gpui-workstation`
 
 ### Internal Packages
 
-- `@pug/tokens`
-- `@pug/bridge-underlay`
-- `@pug/svelte-preview`
+- `@flint/tokens`
+- `@flint/bridge-underlay`
+- `@flint/svelte-preview`
 
 ## Consumption Rule
 

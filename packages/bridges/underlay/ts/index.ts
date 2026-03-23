@@ -5,7 +5,7 @@ export {
   type UnderlayBridgeToken,
 } from "./token-map";
 export {
-  canonicalPugThemes,
+  canonicalFlintThemes,
   underlayControlSizeMap,
   underlayDensityModeMap,
   underlayThemeMap,

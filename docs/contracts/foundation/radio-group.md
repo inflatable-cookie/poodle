@@ -149,7 +149,7 @@ Updated: 2026-03-15
 | Property | Value |
 |----------|-------|
 | `display` | `grid` |
-| `gap` | `var(--pug-space-stack-sm)` |
+| `gap` | `var(--flint-space-stack-sm)` |
 
 ### Root horizontal `[data-orientation="horizontal"]`
 
@@ -157,7 +157,7 @@ Updated: 2026-03-15
 |----------|-------|
 | `grid-auto-flow` | `column` |
 | `grid-auto-columns` | `minmax(0, max-content)` |
-| `gap` | `var(--pug-space-inline-md)` |
+| `gap` | `var(--flint-space-inline-md)` |
 | `align-items` | `center` |
 
 ### Option `.radio-group__option`
@@ -167,9 +167,9 @@ Updated: 2026-03-15
 | `display` | `inline-grid` |
 | `grid-template-columns` | `auto minmax(0, 1fr)` |
 | `align-items` | `center` |
-| `gap` | `var(--pug-space-inline-sm)` |
+| `gap` | `var(--flint-space-inline-sm)` |
 | `min-width` | `0` |
-| `color` | `var(--pug-color-text-primary)` |
+| `color` | `var(--flint-color-text-primary)` |
 | `cursor` | `pointer` |
 
 ### Option disabled `[data-disabled="true"]`
@@ -177,7 +177,7 @@ Updated: 2026-03-15
 | Property | Value |
 |----------|-------|
 | `cursor` | `not-allowed` |
-| `opacity` | `var(--pug-state-opacity-disabled)` |
+| `opacity` | `var(--flint-state-opacity-disabled)` |
 
 ### Control `.radio-group__control`
 
@@ -196,22 +196,22 @@ Updated: 2026-03-15
 | `justify-content` | `center` |
 | `width` | `1.125rem` |
 | `height` | `1.125rem` |
-| `border` | `0.0625rem solid var(--pug-color-border-default)` |
+| `border` | `0.0625rem solid var(--flint-color-border-default)` |
 | `border-radius` | `999px` |
-| `background` | `var(--pug-color-background-surface)` |
-| `transition` | `border-color, box-shadow` at `var(--pug-motion-duration-interaction) var(--pug-motion-easing-standard)` |
+| `background` | `var(--flint-color-background-surface)` |
+| `transition` | `border-color, box-shadow` at `var(--flint-motion-duration-interaction) var(--flint-motion-easing-standard)` |
 
 ### Indicator checked `:checked + .radio-group__indicator`
 
 | Property | Value |
 |----------|-------|
-| `border-color` | `var(--pug-color-accent-base)` |
+| `border-color` | `var(--flint-color-accent-base)` |
 
 ### Indicator focus `:focus-visible + .radio-group__indicator`
 
 | Property | Value |
 |----------|-------|
-| `outline` | `var(--pug-border-width-focus) solid var(--pug-color-accent-focusRing)` |
+| `outline` | `var(--flint-border-width-focus) solid var(--flint-color-accent-focusRing)` |
 | `outline-offset` | `0.125rem` |
 
 ### Dot `.radio-group__dot`
@@ -222,23 +222,23 @@ Updated: 2026-03-15
 | `height` | `0.5rem` |
 | `border-radius` | `999px` |
 | `background` | `transparent` |
-| `transition` | `background` at `var(--pug-motion-duration-interaction) var(--pug-motion-easing-standard)` |
+| `transition` | `background` at `var(--flint-motion-duration-interaction) var(--flint-motion-easing-standard)` |
 
 ### Dot checked `:checked + .radio-group__indicator .radio-group__dot`
 
 | Property | Value |
 |----------|-------|
-| `background` | `var(--pug-color-accent-base)` |
+| `background` | `var(--flint-color-accent-base)` |
 
 ### Label `.radio-group__label`
 
 | Property | Value |
 |----------|-------|
 | `min-width` | `0` |
-| `font-family` | `var(--pug-typography-label-family)` |
-| `font-size` | `var(--pug-typography-label-size)` |
-| `font-weight` | `var(--pug-typography-label-weight)` |
-| `line-height` | `var(--pug-typography-label-lineHeight)` |
+| `font-family` | `var(--flint-typography-label-family)` |
+| `font-size` | `var(--flint-typography-label-size)` |
+| `font-weight` | `var(--flint-typography-label-weight)` |
+| `line-height` | `var(--flint-typography-label-lineHeight)` |
 
 ## 9. Svelte Notes
 
@@ -258,7 +258,7 @@ Updated: 2026-03-15
 
 ## 10. GPUI Notes
 
-- expected crate/module surface: `pug_gpui::primitives::radio_group`
+- expected crate/module surface: `flint_gpui::primitives::radio_group`
 - GPUI implementation must explicitly maintain one tabbable option (roving
   focus), directional selection movement, and native radiogroup accessibility
   semantics

@@ -1,7 +1,7 @@
 <script lang="ts">
   import { createEventDispatcher } from "svelte";
 
-  import { Icon } from "@pug/svelte-primitives";
+  import { Icon } from "@flint/svelte-primitives";
 
   export let items: Array<{ id: string; label: string }> = [];
   export let selectionMode: "single" | "multiple" = "multiple";
@@ -53,63 +53,63 @@
 <style>
   .selection-summary {
     display: grid;
-    gap: var(--pug-space-stack-sm);
-    padding: var(--pug-space-panel-y) var(--pug-space-panel-x);
+    gap: var(--flint-space-stack-sm);
+    padding: var(--flint-space-panel-y) var(--flint-space-panel-x);
     border: 0.0625rem solid transparent;
-    border-radius: var(--pug-radius-surface);
-    background: color-mix(in srgb, var(--pug-color-background-panel) 94%, transparent);
-    font-size: var(--pug-typography-label-size, 0.75rem);
+    border-radius: var(--flint-radius-surface);
+    background: color-mix(in srgb, var(--flint-color-background-panel) 94%, transparent);
+    font-size: var(--flint-typography-label-size, 0.75rem);
   }
 
   .selection-summary__header {
     display: flex;
     justify-content: space-between;
-    gap: var(--pug-space-inline-md);
+    gap: var(--flint-space-inline-md);
     align-items: center;
   }
 
   .selection-summary__header button,
   .selection-summary__chip {
     border: 0.0625rem solid transparent;
-    border-radius: var(--pug-radius-control);
-    background: color-mix(in srgb, var(--pug-color-background-surface) 76%, transparent);
-    color: var(--pug-color-text-primary);
+    border-radius: var(--flint-radius-control);
+    background: color-mix(in srgb, var(--flint-color-background-surface) 76%, transparent);
+    color: var(--flint-color-text-primary);
     cursor: pointer;
     font: inherit;
   }
 
   .selection-summary__header button {
-    min-height: var(--pug-size-control-height);
-    padding: 0 var(--pug-space-control-x);
+    min-height: var(--flint-size-control-height);
+    padding: 0 var(--flint-space-control-x);
   }
 
   .selection-summary__chips {
     display: flex;
     flex-wrap: wrap;
-    gap: var(--pug-space-inline-sm);
+    gap: var(--flint-space-inline-sm);
   }
 
   .selection-summary__chip {
     display: inline-flex;
-    gap: var(--pug-space-inline-md);
+    gap: var(--flint-space-inline-md);
     align-items: center;
-    min-height: calc(var(--pug-size-control-height) - 0.25rem);
+    min-height: calc(var(--flint-size-control-height) - 0.25rem);
     padding: 0 0.75rem;
   }
 
   .selection-summary__overflow {
-    color: var(--pug-color-text-secondary);
+    color: var(--flint-color-text-secondary);
     font-size: 0.8125rem;
     line-height: 2rem;
     padding: 0 0.625rem;
-    border-radius: var(--pug-radius-control);
-    background: color-mix(in srgb, var(--pug-color-background-surface) 58%, transparent);
+    border-radius: var(--flint-radius-control);
+    background: color-mix(in srgb, var(--flint-color-background-surface) 58%, transparent);
   }
 
   :global([data-theme="light"]) .selection-summary {
-    border-color: color-mix(in srgb, var(--pug-color-border-default) 14%, transparent);
+    border-color: color-mix(in srgb, var(--flint-color-border-default) 14%, transparent);
     box-shadow:
-      inset 0 0 0 0.0625rem color-mix(in srgb, var(--pug-color-border-subtle) 32%, transparent),
+      inset 0 0 0 0.0625rem color-mix(in srgb, var(--flint-color-border-subtle) 32%, transparent),
       0 0.375rem 1rem rgba(49, 66, 85, 0.03);
   }
 </style>

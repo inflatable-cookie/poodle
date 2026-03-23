@@ -1,6 +1,6 @@
 <script lang="ts">
-  import { TextInput, Field, Eyebrow } from "@pug/svelte-primitives";
-  import type { ValidationState } from "@pug/svelte-primitives";
+  import { TextInput, Field, Eyebrow } from "@flint/svelte-primitives";
+  import type { ValidationState } from "@flint/svelte-primitives";
 
   let name = "";
   let email = "invalid-email";

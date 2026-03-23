@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { NavigationMenu, Eyebrow, type NavigationMenuItem } from "@pug/svelte-primitives";
+  import { NavigationMenu, Eyebrow, type NavigationMenuItem } from "@flint/svelte-primitives";
 
   const items: NavigationMenuItem[] = [
     { value: "home", label: "Home" },
@@ -42,6 +42,6 @@
   p {
     margin: 0;
     font-size: 0.875rem;
-    color: var(--pug-color-text-secondary);
+    color: var(--flint-color-text-secondary);
   }
 </style>

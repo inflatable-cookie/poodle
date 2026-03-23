@@ -1,9 +1,9 @@
 {
-  "name": "@pug/svelte-preview",
+  "name": "@flint/svelte-preview",
   "private": true,
   "type": "module",
-  "description": "Internal preview and docs harness for Pug.",
-  "pugRelease": {
+  "description": "Internal preview and docs harness for Flint.",
+  "flintRelease": {
     "publicIntent": false,
     "channel": "internal",
     "stability": "internal-only"
@@ -16,11 +16,11 @@
     "accessibility:report": "bun scripts/build-accessibility-report.ts"
   },
   "dependencies": {
-    "@pug/icons-lucide": "workspace:*",
-    "@pug/svelte-composites": "workspace:*",
+    "@flint/icons-lucide": "workspace:*",
+    "@flint/svelte-composites": "workspace:*",
     "lucide-static": "^0.577.0",
-    "@pug/svelte-primitives": "workspace:*",
-    "@pug/svelte-tokens": "workspace:*",
+    "@flint/svelte-primitives": "workspace:*",
+    "@flint/svelte-tokens": "workspace:*",
     "svelte": "^5.38.6"
   },
   "devDependencies": {

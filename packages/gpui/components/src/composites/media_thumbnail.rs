@@ -1,8 +1,8 @@
 //! MediaThumbnail — real GPUI component backed by MediaThumbnailSpec.
 
 use gpui::*;
-use pug_gpui::GpuiThemeProvider;
-use pug_composites::{MediaThumbnailSpec, AspectRatio, MediaKind, MediaState};
+use flint_gpui::GpuiThemeProvider;
+use flint_composites::{MediaThumbnailSpec, AspectRatio, MediaKind, MediaState};
 
 use crate::theme_ext::resolve_color;
 

@@ -1,10 +1,10 @@
 # g01.002 Canonical Token Schema And Naming System
 
 Status: completed
-Owner: Pug Core
+Owner: Flint Core
 Updated: 2026-03-11
 Depends on: g01.001
-Primary repos: `pug`
+Primary repos: `flint`
 
 ## Research Inputs
 
@@ -14,18 +14,18 @@ Primary repos: `pug`
 
 ## Context
 
-Pug cannot promise parity across Svelte and GPUI unless both implementations
+Flint cannot promise parity across Svelte and GPUI unless both implementations
 consume one semantic token model.
 
 ## Problem
 
-If tokens are defined ad hoc per framework, Pug will immediately accumulate
+If tokens are defined ad hoc per framework, Flint will immediately accumulate
 drift in naming, theme logic, component states, density modes, and downstream
 integration posture.
 
 ## Goals
 
-- [ ] adopt one canonical DTCG token source format for Pug
+- [ ] adopt one canonical DTCG token source format for Flint
 - [ ] define the canonical token taxonomy
 - [ ] separate raw scales, semantic aliases, and mode/theme overlays
 - [ ] define naming rules that work across CSS, TypeScript, and Rust consumers

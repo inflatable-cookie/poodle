@@ -1,10 +1,10 @@
 //! SplitView specimen — two-pane split layout.
 
 use jetstream_runtime::ui_element::*;
-use pug_jetstream::JetstreamThemeProvider;
-use pug_jetstream_components::split_view::js_split_view;
-use pug_jetstream_components::theme_ext::*;
-use pug_composites::{SplitOrientation, SplitViewSpec};
+use flint_jetstream::JetstreamThemeProvider;
+use flint_jetstream_components::split_view::js_split_view;
+use flint_jetstream_components::theme_ext::*;
+use flint_composites::{SplitOrientation, SplitViewSpec};
 
 pub fn render(theme: &JetstreamThemeProvider) -> JsEl {
     let secondary = resolve_color(theme, "semantic.color.text.secondary");

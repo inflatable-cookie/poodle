@@ -1,5 +1,5 @@
-use pug_primitives::ValidationState;
-use pug_tokens::semantic;
+use flint_primitives::ValidationState;
+use flint_tokens::semantic;
 
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct InlineEditableFieldSpec {

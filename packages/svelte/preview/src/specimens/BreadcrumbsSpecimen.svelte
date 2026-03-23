@@ -1,18 +1,18 @@
 <script lang="ts">
-  import { Breadcrumbs, type BreadcrumbItem } from "@pug/svelte-primitives";
-  import { Eyebrow } from "@pug/svelte-primitives";
+  import { Breadcrumbs, type BreadcrumbItem } from "@flint/svelte-primitives";
+  import { Eyebrow } from "@flint/svelte-primitives";
 
   const basicItems: BreadcrumbItem[] = [
     { value: "home", label: "Home" },
     { value: "projects", label: "Projects" },
-    { value: "pug", label: "Pug", isCurrent: true },
+    { value: "flint", label: "Flint", isCurrent: true },
   ];
 
   const deepItems: BreadcrumbItem[] = [
     { value: "home", label: "Home" },
     { value: "workspace", label: "Workspace" },
     { value: "projects", label: "Projects" },
-    { value: "pug", label: "Pug Design System" },
+    { value: "flint", label: "Flint Design System" },
     { value: "primitives", label: "Primitives" },
     { value: "button", label: "Button", isCurrent: true },
   ];
@@ -59,6 +59,6 @@
   .specimen__group p {
     margin: 0;
     font-size: 0.8125rem;
-    color: var(--pug-color-text-secondary);
+    color: var(--flint-color-text-secondary);
   }
 </style>

@@ -46,7 +46,7 @@
   .catalogue-sidebar {
     width: 14rem;
     flex-shrink: 0;
-    border-right: 0.0625rem solid color-mix(in srgb, var(--pug-color-border-subtle) 60%, transparent);
+    border-right: 0.0625rem solid color-mix(in srgb, var(--flint-color-border-subtle) 60%, transparent);
     overflow-y: auto;
     padding: 0.75rem 0;
   }
@@ -61,22 +61,22 @@
     display: block;
     padding: 0.375rem 1rem;
     font-size: 0.8125rem;
-    color: var(--pug-color-text-secondary);
+    color: var(--flint-color-text-secondary);
     text-decoration: none;
     border-left: 0.125rem solid transparent;
     transition: color 0.1s, border-color 0.1s, background 0.1s;
   }
 
   .catalogue-sidebar__link:hover {
-    color: var(--pug-color-text-primary);
-    background: color-mix(in srgb, var(--pug-color-background-elevated) 50%, transparent);
+    color: var(--flint-color-text-primary);
+    background: color-mix(in srgb, var(--flint-color-background-elevated) 50%, transparent);
   }
 
   .catalogue-sidebar__link--active {
-    color: var(--pug-color-text-primary);
+    color: var(--flint-color-text-primary);
     font-weight: 600;
-    border-left-color: var(--pug-color-accent-base);
-    background: color-mix(in srgb, var(--pug-color-accent-base) 8%, transparent);
+    border-left-color: var(--flint-color-accent-base);
+    background: color-mix(in srgb, var(--flint-color-accent-base) 8%, transparent);
   }
 
   .catalogue-content {

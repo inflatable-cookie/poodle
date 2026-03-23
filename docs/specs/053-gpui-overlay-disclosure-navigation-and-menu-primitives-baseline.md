@@ -8,13 +8,13 @@ Depends on: `052-gpui-selection-feedback-and-date-time-primitives-baseline.md`
 
 Freeze the next GPUI primitive tranche that closes the remaining foundation
 gap before composite parity work. This baseline adds overlay, disclosure,
-navigation, and menu semantics to `pug-gpui-primitives` so later GPUI
+navigation, and menu semantics to `flint-gpui-primitives` so later GPUI
 composites and workstation shells inherit one explicit native posture instead
 of inventing their own dismissal, selection, or layered-surface models.
 
 ## Package Rule
 
-The `g04.006` tranche extends `pug-gpui-primitives` with:
+The `g04.006` tranche extends `flint-gpui-primitives` with:
 
 - `AccordionSpec`
 - `CollapsibleSpec`
@@ -93,7 +93,7 @@ one is rendered by a fully mounted native control implementation.
 ## Token Rule
 
 Overlay, disclosure, navigation, and menu primitives must continue resolving
-from `pug-gpui-tokens` for at least:
+from `flint-gpui-tokens` for at least:
 
 - elevated and overlay background roles
 - dialog and overlay elevation roles
@@ -104,7 +104,7 @@ from `pug-gpui-tokens` for at least:
 ## Native Delta Rule
 
 GPUI implementations should imitate the same UI as Svelte where the UI belongs
-to Pug, but this baseline keeps genuine native deltas explicit:
+to Flint, but this baseline keeps genuine native deltas explicit:
 
 - hover-triggered patterns must not assume browser hover behavior maps
   one-to-one to native pointer systems

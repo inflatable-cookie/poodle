@@ -1,15 +1,15 @@
 # g05.004 GPUI Action, Text-Entry, And Field Primitives
 
 Status: completed
-Owner: Pug Core
+Owner: Flint Core
 Updated: 2026-03-12
 Depends on: g05.001, g05.002, g05.003
-Primary repos: `pug`
+Primary repos: `flint`
 
 ## Goals
 
 - [x] implement the core GPUI action and text-entry primitives
-- [x] keep field semantics aligned with the existing Pug contracts rather than
+- [x] keep field semantics aligned with the existing Flint contracts rather than
   ad hoc native widget assumptions
 
 ## Execution Checklist

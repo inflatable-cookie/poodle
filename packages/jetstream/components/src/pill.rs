@@ -1,8 +1,8 @@
 //! Pill — Jetstream pill/chip component backed by PillSpec.
 
 use jetstream_runtime::ui_element::{self, JsEl};
-use pug_jetstream::JetstreamThemeProvider;
-use pug_primitives::PillSpec;
+use flint_jetstream::JetstreamThemeProvider;
+use flint_primitives::PillSpec;
 
 use crate::theme_ext::{resolve_color, resolve_opacity};
 

@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { Menu, Button, Eyebrow, type MenuItem } from "@pug/svelte-primitives";
+  import { Menu, Button, Eyebrow, type MenuItem } from "@flint/svelte-primitives";
 
   const fileItems: MenuItem[] = [
     { value: "new", label: "New file", shortcutLabel: "⌘N" },
@@ -55,6 +55,6 @@
   .specimen__group p {
     margin: 0;
     font-size: 0.875rem;
-    color: var(--pug-color-text-secondary);
+    color: var(--flint-color-text-secondary);
   }
 </style>

@@ -1,10 +1,10 @@
 //! Separator specimen.
 
 use jetstream_runtime::ui_element::*;
-use pug_jetstream::JetstreamThemeProvider;
-use pug_jetstream_components::separator::js_separator;
-use pug_jetstream_components::theme_ext::*;
-use pug_primitives::{RuleTone, SeparatorOrientation, SeparatorSpec};
+use flint_jetstream::JetstreamThemeProvider;
+use flint_jetstream_components::separator::js_separator;
+use flint_jetstream_components::theme_ext::*;
+use flint_primitives::{RuleTone, SeparatorOrientation, SeparatorSpec};
 
 pub fn render(theme: &JetstreamThemeProvider) -> JsEl {
     let secondary = resolve_color(theme, "semantic.color.text.secondary");

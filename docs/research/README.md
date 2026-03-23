@@ -3,7 +3,7 @@
 Status: active
 Updated: 2026-03-11
 
-Research is enabled because Pug will need comparative work across GPUI, Bits, Underlay, and downstream app needs before freezing implementation details.
+Research is enabled because Flint will need comparative work across GPUI, Bits, Underlay, and downstream app needs before freezing implementation details.
 
 ## Quick Start
 

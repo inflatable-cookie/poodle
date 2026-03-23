@@ -14,11 +14,11 @@ export function joinStyles(parts: Array<string | null | undefined | false>): str
 export function scaleToSpace(scale: SpaceScale): string {
   switch (scale) {
     case "sm":
-      return "var(--pug-space-inline-sm)";
+      return "var(--flint-space-inline-sm)";
     case "md":
-      return "var(--pug-space-panel-y)";
+      return "var(--flint-space-panel-y)";
     case "lg":
-      return "var(--pug-space-panel-x)";
+      return "var(--flint-space-panel-x)";
     default:
       return "0";
   }

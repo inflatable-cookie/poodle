@@ -1,9 +1,9 @@
 //! Slider — real GPUI component backed by SliderSpec.
 
 use gpui::*;
-use pug_adapter::ThemeProvider;
-use pug_gpui::GpuiThemeProvider;
-use pug_primitives::{Orientation, SliderSpec};
+use flint_adapter::ThemeProvider;
+use flint_gpui::GpuiThemeProvider;
+use flint_primitives::{Orientation, SliderSpec};
 
 use crate::theme_ext::{resolve_color, resolve_opacity, resolve_px};
 
@@ -138,7 +138,7 @@ impl IntoElement for Slider {
         let focus_ring = resolve_color(theme, spec.focus_ring_color_token());
 
         let slider_id: SharedString = self.id.unwrap_or_else(|| SharedString::from(format!(
-            "pug-slider-{}",
+            "flint-slider-{}",
             SLIDER_ID_COUNTER.fetch_add(1, std::sync::atomic::Ordering::Relaxed)
         )));
 

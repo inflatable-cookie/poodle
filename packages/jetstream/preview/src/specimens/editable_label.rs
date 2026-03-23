@@ -1,10 +1,10 @@
 //! EditableLabel specimen — editable labels in display mode.
 
 use jetstream_runtime::ui_element::*;
-use pug_jetstream::JetstreamThemeProvider;
-use pug_jetstream_components::editable_label::js_editable_label;
-use pug_jetstream_components::theme_ext::*;
-use pug_primitives::EditableLabelSpec;
+use flint_jetstream::JetstreamThemeProvider;
+use flint_jetstream_components::editable_label::js_editable_label;
+use flint_jetstream_components::theme_ext::*;
+use flint_primitives::EditableLabelSpec;
 
 pub fn render(theme: &JetstreamThemeProvider) -> JsEl {
     let secondary = resolve_color(theme, "semantic.color.text.secondary");

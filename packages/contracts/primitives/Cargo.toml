@@ -1,16 +1,16 @@
 [package]
-name = "pug-primitives"
+name = "flint-primitives"
 version = "0.0.0"
 edition = "2021"
-description = "Contract-backed primitive specs for Pug multi-renderer targets."
+description = "Contract-backed primitive specs for Flint multi-renderer targets."
 
 [lib]
 path = "src/lib.rs"
 
 [dependencies]
-pug-tokens = { path = "../tokens" }
+flint-tokens = { path = "../tokens" }
 
-[package.metadata.pug]
+[package.metadata.flint]
 public-intent = true
 channel = "preview"
 stability = "pre-release"

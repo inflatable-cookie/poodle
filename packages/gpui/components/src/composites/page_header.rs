@@ -1,8 +1,8 @@
 //! PageHeader — real GPUI component backed by PageHeaderSpec.
 
 use gpui::*;
-use pug_gpui::GpuiThemeProvider;
-use pug_composites::{PageHeaderAlign, PageHeaderSpec};
+use flint_gpui::GpuiThemeProvider;
+use flint_composites::{PageHeaderAlign, PageHeaderSpec};
 
 use crate::theme_ext::{resolve_color, resolve_px};
 

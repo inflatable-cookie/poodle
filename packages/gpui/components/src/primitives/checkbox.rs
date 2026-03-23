@@ -1,8 +1,8 @@
 //! Checkbox — real GPUI component backed by CheckboxSpec.
 
 use gpui::*;
-use pug_gpui::GpuiThemeProvider;
-use pug_primitives::{CheckState, CheckboxSpec};
+use flint_gpui::GpuiThemeProvider;
+use flint_primitives::{CheckState, CheckboxSpec};
 
 use crate::theme_ext::{resolve_color, resolve_opacity, resolve_px};
 
@@ -80,10 +80,10 @@ impl IntoElement for Checkbox {
         let is_interactive = spec.is_interactive();
 
         let id_str = if let Some(ref suffix) = self.id_suffix {
-            format!("pug-checkbox-{}", suffix)
+            format!("flint-checkbox-{}", suffix)
         } else {
             format!(
-                "pug-checkbox-{}",
+                "flint-checkbox-{}",
                 spec.label.as_deref().unwrap_or("anon")
             )
         };

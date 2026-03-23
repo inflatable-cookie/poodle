@@ -9,12 +9,12 @@ Depends on: `051-gpui-action-text-entry-and-field-primitives-baseline.md`
 Freeze the GPUI primitive tranche that closes the biggest remaining
 foundation-level Svelte-only gap. This baseline adds selection controls,
 compact feedback primitives, and the contract-backed date or time family to
-`pug-gpui-primitives` so later GPUI composites are not forced to invent their
+`flint-gpui-primitives` so later GPUI composites are not forced to invent their
 own value and range semantics.
 
 ## Package Rule
 
-The `g04.005` tranche extends `pug-gpui-primitives` with:
+The `g04.005` tranche extends `flint-gpui-primitives` with:
 
 - `CheckboxSpec`
 - `RadioGroupSpec`
@@ -87,7 +87,7 @@ one of them is rendered by a fully mounted native control implementation.
 ## Token Rule
 
 Selection, feedback, and date-time primitives must continue resolving from
-`pug-gpui-tokens` for at least:
+`flint-gpui-tokens` for at least:
 
 - accent and status color roles
 - control-size and surface roles
@@ -100,8 +100,8 @@ Selection, feedback, and date-time primitives must continue resolving from
 GPUI public date and time primitives must preserve the same contract-owned
 value posture as Svelte:
 
-- ISO date strings stay Pug-owned
-- local `HH:MM` time strings stay Pug-owned
+- ISO date strings stay Flint-owned
+- local `HH:MM` time strings stay Flint-owned
 - combined picker values stay object-based rather than timestamp-based
 - range pickers stay object-based rather than pair-of-native-date-object based
 

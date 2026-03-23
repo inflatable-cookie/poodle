@@ -1,10 +1,10 @@
 //! NavigationMenu specimen — horizontal nav menu with entries.
 
 use jetstream_runtime::ui_element::*;
-use pug_jetstream::JetstreamThemeProvider;
-use pug_jetstream_components::navigation_menu::js_navigation_menu;
-use pug_jetstream_components::theme_ext::*;
-use pug_primitives::{NavigationMenuEntry, NavigationMenuSpec};
+use flint_jetstream::JetstreamThemeProvider;
+use flint_jetstream_components::navigation_menu::js_navigation_menu;
+use flint_jetstream_components::theme_ext::*;
+use flint_primitives::{NavigationMenuEntry, NavigationMenuSpec};
 
 pub fn render(theme: &JetstreamThemeProvider) -> JsEl {
     let secondary = resolve_color(theme, "semantic.color.text.secondary");

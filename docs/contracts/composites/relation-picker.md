@@ -235,7 +235,7 @@ When `drillDown` is provided, the picker enters a hierarchical navigation mode:
 | display | `flex` |
 | align-items | `center` |
 | gap | `0.25rem` |
-| padding-bottom | `var(--pug-space-stack-sm)` |
+| padding-bottom | `var(--flint-space-stack-sm)` |
 
 ### Drill Breadcrumbs Back Button
 
@@ -248,17 +248,17 @@ When `drillDown` is provided, the picker enters a hierarchical navigation mode:
 | height | `1.5rem` |
 | padding | `0` |
 | border | `none` |
-| border-radius | `var(--pug-radius-sm, 0.25rem)` |
+| border-radius | `var(--flint-radius-sm, 0.25rem)` |
 | background | `transparent` |
-| color | `var(--pug-color-text-secondary)` |
-| `:hover` background | `var(--pug-color-surface-hover, rgba(148, 163, 184, 0.12))` |
-| `:hover` color | `var(--pug-color-text-primary)` |
+| color | `var(--flint-color-text-secondary)` |
+| `:hover` background | `var(--flint-color-surface-hover, rgba(148, 163, 184, 0.12))` |
+| `:hover` color | `var(--flint-color-text-primary)` |
 
 ### Drill Breadcrumbs Separator
 
 | Property | Value |
 |----------|-------|
-| color | `var(--pug-color-text-secondary)` |
+| color | `var(--flint-color-text-secondary)` |
 | font-size | `0.6875rem` |
 | opacity | `0.6` |
 
@@ -268,16 +268,16 @@ When `drillDown` is provided, the picker enters a hierarchical navigation mode:
 |----------|-------|
 | padding | `0.125rem 0.375rem` |
 | border | `none` |
-| border-radius | `var(--pug-radius-sm, 0.25rem)` |
+| border-radius | `var(--flint-radius-sm, 0.25rem)` |
 | background | `transparent` |
-| color | `var(--pug-color-accent-base)` |
+| color | `var(--flint-color-accent-base)` |
 | font-size | `0.75rem` |
 | font-weight | `500` |
 | white-space | `nowrap` |
 | overflow | `hidden` |
 | text-overflow | `ellipsis` |
 | max-width | `8rem` |
-| `:hover` background | `var(--pug-color-surface-hover, rgba(148, 163, 184, 0.12))` |
+| `:hover` background | `var(--flint-color-surface-hover, rgba(148, 163, 184, 0.12))` |
 
 ### Drill Level Label
 
@@ -287,7 +287,7 @@ When `drillDown` is provided, the picker enters a hierarchical navigation mode:
 | font-weight | `600` |
 | text-transform | `uppercase` |
 | letter-spacing | `0.08em` |
-| color | `var(--pug-color-text-secondary)` |
+| color | `var(--flint-color-text-secondary)` |
 | padding-bottom | `0.25rem` |
 
 ### Drill List
@@ -307,17 +307,17 @@ When `drillDown` is provided, the picker enters a hierarchical navigation mode:
 | display | `flex` |
 | align-items | `center` |
 | justify-content | `space-between` |
-| gap | `var(--pug-space-inline-md)` |
+| gap | `var(--flint-space-inline-md)` |
 | width | `100%` |
 | padding | `0.5rem 0.625rem` |
 | border | `none` |
-| border-radius | `var(--pug-radius-control)` |
+| border-radius | `var(--flint-radius-control)` |
 | background | `transparent` |
-| color | `var(--pug-color-text-primary)` |
+| color | `var(--flint-color-text-primary)` |
 | text-align | `left` |
 | font-size | `0.875rem` |
-| `:hover` background | `color-mix(in srgb, var(--pug-color-background-surface) 60%, transparent)` |
-| `:focus-visible` outline | `var(--pug-border-width-focus) solid var(--pug-color-accent-focusRing)` |
+| `:hover` background | `color-mix(in srgb, var(--flint-color-background-surface) 60%, transparent)` |
+| `:focus-visible` outline | `var(--flint-border-width-focus) solid var(--flint-color-accent-focusRing)` |
 | `:focus-visible` outline-offset | `-0.0625rem` |
 
 ### Drill List Copy
@@ -328,7 +328,7 @@ When `drillDown` is provided, the picker enters a hierarchical navigation mode:
 | gap | `0.125rem` |
 | strong font-weight | `500` |
 | strong overflow/text-overflow | `hidden` / `ellipsis` |
-| small color | `var(--pug-color-text-secondary)` |
+| small color | `var(--flint-color-text-secondary)` |
 | small font-size | `0.75rem` |
 
 ### Drill List Meta
@@ -339,7 +339,7 @@ When `drillDown` is provided, the picker enters a hierarchical navigation mode:
 | align-items | `center` |
 | gap | `0.25rem` |
 | flex-shrink | `0` |
-| color | `var(--pug-color-text-secondary)` |
+| color | `var(--flint-color-text-secondary)` |
 | count font-size | `0.6875rem` |
 | count opacity | `0.7` |
 
@@ -349,7 +349,7 @@ When `drillDown` is provided, the picker enters a hierarchical navigation mode:
 |----------|-------|
 | padding | `1.25rem` |
 | text-align | `center` |
-| color | `var(--pug-color-text-secondary)` |
+| color | `var(--flint-color-text-secondary)` |
 | font-size | `0.8125rem` |
 
 ### Candidate List
@@ -357,7 +357,7 @@ When `drillDown` is provided, the picker enters a hierarchical navigation mode:
 | Property | Value |
 |----------|-------|
 | display | `grid` |
-| gap | `var(--pug-space-stack-sm)` |
+| gap | `var(--flint-space-stack-sm)` |
 | margin | `0` |
 | padding | `0` |
 | list-style | `none` |
@@ -369,20 +369,20 @@ When `drillDown` is provided, the picker enters a hierarchical navigation mode:
 | display | `grid` |
 | grid-template-columns | `auto minmax(0, 1fr) auto` |
 | align-items | `center` |
-| gap | `var(--pug-space-inline-md)` |
-| padding | `var(--pug-space-panel-y) var(--pug-space-panel-x)` |
-| border | `0.0625rem solid var(--pug-color-border-subtle)` |
-| border-radius | `var(--pug-radius-surface)` |
-| background | `color-mix(in srgb, var(--pug-color-background-surface) 86%, transparent)` |
-| color | `var(--pug-color-text-primary)` |
-| font-size | `var(--pug-typography-label-size, 0.75rem)` |
+| gap | `var(--flint-space-inline-md)` |
+| padding | `var(--flint-space-panel-y) var(--flint-space-panel-x)` |
+| border | `0.0625rem solid var(--flint-color-border-subtle)` |
+| border-radius | `var(--flint-radius-surface)` |
+| background | `color-mix(in srgb, var(--flint-color-background-surface) 86%, transparent)` |
+| color | `var(--flint-color-text-primary)` |
+| font-size | `var(--flint-typography-label-size, 0.75rem)` |
 
 #### Candidate Item Selected (`[data-selected="true"]`)
 
 | Property | Value |
 |----------|-------|
-| border-color | `color-mix(in srgb, var(--pug-color-accent-base) 60%, transparent)` |
-| background | `color-mix(in srgb, var(--pug-color-accent-base) 10%, transparent)` |
+| border-color | `color-mix(in srgb, var(--flint-color-accent-base) 60%, transparent)` |
+| background | `color-mix(in srgb, var(--flint-color-accent-base) 10%, transparent)` |
 
 ### Candidate Item Button
 
@@ -394,9 +394,9 @@ When `drillDown` is provided, the picker enters a hierarchical navigation mode:
 | padding | `0` |
 | border | `0` |
 | background | `transparent` |
-| `:focus-visible` outline | `var(--pug-border-width-focus) solid var(--pug-color-accent-focusRing)` |
+| `:focus-visible` outline | `var(--flint-border-width-focus) solid var(--flint-color-accent-focusRing)` |
 | `:focus-visible` outline-offset | `0.125rem` |
-| `:focus-visible` border-radius | `var(--pug-radius-control)` |
+| `:focus-visible` border-radius | `var(--flint-radius-control)` |
 
 ### Candidate Copy
 
@@ -404,7 +404,7 @@ When `drillDown` is provided, the picker enters a hierarchical navigation mode:
 |----------|-------|
 | display | `grid` |
 | gap | `0.25rem` |
-| small color | `var(--pug-color-text-secondary)` |
+| small color | `var(--flint-color-text-secondary)` |
 | small font-size | `0.8125rem` |
 | small line-height | `1.5` |
 
@@ -413,7 +413,7 @@ When `drillDown` is provided, the picker enters a hierarchical navigation mode:
 | Property | Value |
 |----------|-------|
 | margin | `0` |
-| color | `var(--pug-color-text-secondary)` |
+| color | `var(--flint-color-text-secondary)` |
 | font-size | `0.8125rem` |
 | line-height | `1.5` |
 
@@ -423,7 +423,7 @@ When `drillDown` is provided, the picker enters a hierarchical navigation mode:
 |----------|-------|
 | display | `flex` |
 | flex-wrap | `wrap` |
-| gap | `var(--pug-space-inline-sm)` |
+| gap | `var(--flint-space-inline-sm)` |
 | justify-content | `flex-end` |
 
 ### Light Theme Overrides
@@ -440,7 +440,7 @@ None.
 
 ## 12. GPUI Notes
 
-- expected crate/module surface: `pug_gpui::composites::relation_picker`
+- expected crate/module surface: `flint_gpui::composites::relation_picker`
 - drill-down navigation must preserve breadcrumb and back semantics
 
 ## 13. Parity Checklist

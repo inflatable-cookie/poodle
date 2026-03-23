@@ -1,8 +1,8 @@
 //! Field — real GPUI component backed by FieldSpec.
 
 use gpui::*;
-use pug_gpui::GpuiThemeProvider;
-use pug_primitives::{FieldSpec, ValidationState};
+use flint_gpui::GpuiThemeProvider;
+use flint_primitives::{FieldSpec, ValidationState};
 
 use crate::theme_ext::resolve_color;
 

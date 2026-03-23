@@ -1,10 +1,10 @@
 # g02.004 Detail Display, Cards, Headers, And Navigation Suite
 
 Status: completed
-Owner: Pug Core
+Owner: Flint Core
 Updated: 2026-03-11
 Depends on: g01.014
-Primary repos: `pug`
+Primary repos: `flint`
 
 ## Goals
 

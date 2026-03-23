@@ -123,22 +123,22 @@ Updated: 2026-03-15
 
 | Property | Value |
 |----------|-------|
-| `--pug-toggle-fill` | `color-mix(in srgb, var(--pug-color-background-surface) 86%, transparent)` |
-| `--pug-toggle-border` | `color-mix(in srgb, var(--pug-color-border-subtle) 78%, transparent)` |
-| `--pug-toggle-text` | `var(--pug-color-text-primary)` |
+| `--flint-toggle-fill` | `color-mix(in srgb, var(--flint-color-background-surface) 86%, transparent)` |
+| `--flint-toggle-border` | `color-mix(in srgb, var(--flint-color-border-subtle) 78%, transparent)` |
+| `--flint-toggle-text` | `var(--flint-color-text-primary)` |
 | `display` | `inline-flex` |
 | `align-items` | `center` |
 | `justify-content` | `center` |
-| `gap` | `var(--pug-space-inline-sm)` |
+| `gap` | `var(--flint-space-inline-sm)` |
 | `min-width` | `2.25rem` |
-| `height` | `var(--pug-size-control-height)` |
-| `padding` | `0 var(--pug-space-control-x)` |
-| `border` | `0.0625rem solid var(--pug-toggle-border)` |
-| `border-radius` | `var(--pug-radius-control)` |
-| `background` | `var(--pug-toggle-fill)` |
-| `color` | `var(--pug-toggle-text)` |
+| `height` | `var(--flint-size-control-height)` |
+| `padding` | `0 var(--flint-space-control-x)` |
+| `border` | `0.0625rem solid var(--flint-toggle-border)` |
+| `border-radius` | `var(--flint-radius-control)` |
+| `background` | `var(--flint-toggle-fill)` |
+| `color` | `var(--flint-toggle-text)` |
 | `cursor` | `pointer` |
-| `font-family` | `var(--pug-typography-label-family)` |
+| `font-family` | `var(--flint-typography-label-family)` |
 | `font-size` | `0.75rem` |
 | `font-weight` | `600` |
 | `line-height` | `1` |
@@ -147,10 +147,10 @@ Updated: 2026-03-15
 
 | Size | Property | Value |
 |------|----------|-------|
-| `sm` (`[data-size="sm"]`) | `height` | `calc(var(--pug-size-control-height) - 0.375rem)` |
-| `sm` | `padding` | `0 calc(var(--pug-space-control-x) - 0.125rem)` |
-| `lg` (`[data-size="lg"]`) | `height` | `calc(var(--pug-size-control-height) + 0.375rem)` |
-| `lg` | `padding` | `0 calc(var(--pug-space-control-x) + 0.125rem)` |
+| `sm` (`[data-size="sm"]`) | `height` | `calc(var(--flint-size-control-height) - 0.375rem)` |
+| `sm` | `padding` | `0 calc(var(--flint-space-control-x) - 0.125rem)` |
+| `lg` (`[data-size="lg"]`) | `height` | `calc(var(--flint-size-control-height) + 0.375rem)` |
+| `lg` | `padding` | `0 calc(var(--flint-space-control-x) + 0.125rem)` |
 
 ### Stack layout (`[data-layout="stack"]`)
 
@@ -171,23 +171,23 @@ Updated: 2026-03-15
 
 | Var | Ghost (default) | Primary | Secondary |
 |-----|-----------------|---------|-----------|
-| `--pug-toggle-fill` | `color-mix(in srgb, background-surface 86%, transparent)` | `color-mix(in srgb, accent-base 18%, background-surface)` | `background-surface` |
-| `--pug-toggle-border` | `color-mix(in srgb, border-subtle 78%, transparent)` | `color-mix(in srgb, accent-base 38%, border-default)` | `border-default` |
-| `--pug-toggle-text` | `text-primary` | `text-primary` | `text-primary` |
+| `--flint-toggle-fill` | `color-mix(in srgb, background-surface 86%, transparent)` | `color-mix(in srgb, accent-base 18%, background-surface)` | `background-surface` |
+| `--flint-toggle-border` | `color-mix(in srgb, border-subtle 78%, transparent)` | `color-mix(in srgb, accent-base 38%, border-default)` | `border-default` |
+| `--flint-toggle-text` | `text-primary` | `text-primary` | `text-primary` |
 
 ### Pressed state (`[data-pressed="true"]`)
 
 | Property | Value |
 |----------|-------|
-| `background` | `var(--pug-color-accent-base)` |
-| `border-color` | `color-mix(in srgb, var(--pug-color-accent-base) 78%, black)` |
-| `color` | `var(--pug-color-text-inverse)` |
+| `background` | `var(--flint-color-accent-base)` |
+| `border-color` | `color-mix(in srgb, var(--flint-color-accent-base) 78%, black)` |
+| `color` | `var(--flint-color-text-inverse)` |
 
 ### Focus visible (`:focus-visible`)
 
 | Property | Value |
 |----------|-------|
-| `outline` | `var(--pug-border-width-focus) solid var(--pug-color-accent-focusRing)` |
+| `outline` | `var(--flint-border-width-focus) solid var(--flint-color-accent-focusRing)` |
 | `outline-offset` | `0.125rem` |
 
 ### Disabled (`:disabled`)
@@ -195,13 +195,13 @@ Updated: 2026-03-15
 | Property | Value |
 |----------|-------|
 | `cursor` | `not-allowed` |
-| `opacity` | `var(--pug-state-opacity-disabled)` |
+| `opacity` | `var(--flint-state-opacity-disabled)` |
 
 ## 9. Svelte Notes
 
 - Uses native `<button>` with `aria-pressed` attribute
-- CSS custom properties (`--pug-toggle-fill`, `--pug-toggle-border`,
-  `--pug-toggle-text`) drive the variant system
+- CSS custom properties (`--flint-toggle-fill`, `--flint-toggle-border`,
+  `--flint-toggle-text`) drive the variant system
 - Data attributes: `data-pressed`, `data-variant`, `data-size`, `data-layout`
 - Pressed state override uses direct property values, not custom property
   reassignment
@@ -209,7 +209,7 @@ Updated: 2026-03-15
 
 ## 10. GPUI Notes
 
-- expected crate/module surface: `pug_gpui::primitives::toggle`
+- expected crate/module surface: `flint_gpui::primitives::toggle`
 - GPUI must expose button role with `aria-pressed` semantics
 - The variant system maps to three fill/border/text color sets
 - Stack layout requires GPUI grid or flex-column equivalent

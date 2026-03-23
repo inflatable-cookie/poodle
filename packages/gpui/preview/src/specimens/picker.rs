@@ -1,11 +1,11 @@
 use gpui::*;
-use pug_adapter::ThemeProvider;
-use pug_composites::{
+use flint_adapter::ThemeProvider;
+use flint_composites::{
     PickerShellSpec, PickerVariant, BrowseState, SelectionMode,
     RelationPickerSpec, PickerItemSpec,
 };
-use pug_primitives::{TextInputSpec, OrderBySpec, SortField, ActiveSort, SortDirection, EyebrowSpec};
-use pug_gpui_components::{PickerShell, RelationPicker, TextInput, OrderBy, Eyebrow};
+use flint_primitives::{TextInputSpec, OrderBySpec, SortField, ActiveSort, SortDirection, EyebrowSpec};
+use flint_gpui_components::{PickerShell, RelationPicker, TextInput, OrderBy, Eyebrow};
 use crate::app_state::AppState;
 use crate::style_bridge::color_to_hsla;
 use crate::PreviewRoot;
@@ -171,9 +171,9 @@ pub(crate) fn render(state: &AppState, _cx: &mut Context<PreviewRoot>) -> Div {
 fn result_row(
     label: &str,
     meta: &str,
-    primary: pug_tokens::typed::ColorValue,
-    secondary: pug_tokens::typed::ColorValue,
-    hover: pug_tokens::typed::ColorValue,
+    primary: flint_tokens::typed::ColorValue,
+    secondary: flint_tokens::typed::ColorValue,
+    hover: flint_tokens::typed::ColorValue,
 ) -> Div {
     let mut row = div()
         .flex().items_center().justify_between()

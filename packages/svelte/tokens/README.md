@@ -1,17 +1,17 @@
-# Pug Svelte Tokens
+# Flint Svelte Tokens
 
-Public Svelte-facing token surface for emitted Pug token artifacts.
+Public Svelte-facing token surface for emitted Flint token artifacts.
 
 ## Public Surface
 
-- root import: `@pug/svelte-tokens`
-- runtime helpers: `@pug/svelte-tokens/runtime`
-- CSS helper exports: `@pug/svelte-tokens/css`
-- CSS asset export: `@pug/svelte-tokens/styles.css`
-- legacy-compatible CSS asset export: `@pug/svelte-tokens/css/pug-tokens.css`
-- generated themes: `@pug/svelte-tokens/themes`
-- generated metadata: `@pug/svelte-tokens/metadata`
-- relative-unit helpers: `@pug/svelte-tokens/units`
+- root import: `@flint/svelte-tokens`
+- runtime helpers: `@flint/svelte-tokens/runtime`
+- CSS helper exports: `@flint/svelte-tokens/css`
+- CSS asset export: `@flint/svelte-tokens/styles.css`
+- legacy-compatible CSS asset export: `@flint/svelte-tokens/css/flint-tokens.css`
+- generated themes: `@flint/svelte-tokens/themes`
+- generated metadata: `@flint/svelte-tokens/metadata`
+- relative-unit helpers: `@flint/svelte-tokens/units`
 
 ## Stability Notes
 

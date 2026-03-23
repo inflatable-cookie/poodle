@@ -1,8 +1,8 @@
 use gpui::*;
-use pug_primitives::{TooltipSpec, ButtonSpec, ButtonVariant, EyebrowSpec};
-use pug_gpui_components::{Tooltip, Button, Eyebrow};
-use pug_gpui::GpuiThemeProvider;
-use pug_primitives::OverlayPlacement;
+use flint_primitives::{TooltipSpec, ButtonSpec, ButtonVariant, EyebrowSpec};
+use flint_gpui_components::{Tooltip, Button, Eyebrow};
+use flint_gpui::GpuiThemeProvider;
+use flint_primitives::OverlayPlacement;
 
 pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
     // ── Default ──────────────────────────────────────────────────────

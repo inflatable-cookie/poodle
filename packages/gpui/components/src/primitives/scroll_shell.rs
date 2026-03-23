@@ -1,8 +1,8 @@
 //! ScrollShell — real GPUI component backed by ScrollShellSpec.
 
 use gpui::*;
-use pug_gpui::GpuiThemeProvider;
-use pug_primitives::{Direction, PaddingScale, ScrollShellSpec, SurfaceRole};
+use flint_gpui::GpuiThemeProvider;
+use flint_primitives::{Direction, PaddingScale, ScrollShellSpec, SurfaceRole};
 
 use crate::theme_ext::{resolve_color, resolve_px, resolve_radius};
 
@@ -63,7 +63,7 @@ impl IntoElement for ScrollShell {
 
         let id_str = spec.label.as_deref().unwrap_or("scroll-shell");
         let mut el = div()
-            .id(SharedString::from(format!("pug-{}", id_str)))
+            .id(SharedString::from(format!("flint-{}", id_str)))
             .rounded(surface_radius)
             .flex_1();
 

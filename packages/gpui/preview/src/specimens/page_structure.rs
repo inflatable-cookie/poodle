@@ -1,8 +1,8 @@
 use gpui::*;
-use pug_composites::{PageHeaderSpec, PageLoadingSpec, PaginationSummarySpec};
-use pug_gpui_components::{PageHeader, PageLoading, PaginationSummary, Button, Breadcrumbs, Eyebrow};
-use pug_primitives::{ButtonSpec, ButtonVariant, ControlSize, BreadcrumbItem, BreadcrumbsSpec, EyebrowSpec};
-use pug_gpui::GpuiThemeProvider;
+use flint_composites::{PageHeaderSpec, PageLoadingSpec, PaginationSummarySpec};
+use flint_gpui_components::{PageHeader, PageLoading, PaginationSummary, Button, Breadcrumbs, Eyebrow};
+use flint_primitives::{ButtonSpec, ButtonVariant, ControlSize, BreadcrumbItem, BreadcrumbsSpec, EyebrowSpec};
+use flint_gpui::GpuiThemeProvider;
 
 pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
 
@@ -128,7 +128,7 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
                         BreadcrumbsSpec::new(vec![
                             BreadcrumbItem::new("home", "Home"),
                             BreadcrumbItem::new("projects", "Projects"),
-                            BreadcrumbItem::new("pug", "Pug").with_is_current(true),
+                            BreadcrumbItem::new("flint", "Flint").with_is_current(true),
                         ]),
                         theme,
                     )
@@ -145,7 +145,7 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
                             BreadcrumbItem::new("home", "Home"),
                             BreadcrumbItem::new("workspace", "Workspace"),
                             BreadcrumbItem::new("projects", "Projects"),
-                            BreadcrumbItem::new("pug", "Pug Design System"),
+                            BreadcrumbItem::new("flint", "Flint Design System"),
                             BreadcrumbItem::new("primitives", "Primitives"),
                             BreadcrumbItem::new("button", "Button").with_is_current(true),
                         ]),
@@ -164,7 +164,7 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
                             BreadcrumbItem::new("home", "Home"),
                             BreadcrumbItem::new("workspace", "Workspace"),
                             BreadcrumbItem::new("projects", "Projects"),
-                            BreadcrumbItem::new("pug", "Pug Design System"),
+                            BreadcrumbItem::new("flint", "Flint Design System"),
                             BreadcrumbItem::new("primitives", "Primitives"),
                             BreadcrumbItem::new("button", "Button").with_is_current(true),
                         ])

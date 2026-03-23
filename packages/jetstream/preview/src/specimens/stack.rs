@@ -1,10 +1,10 @@
 //! Stack specimen — vertical stack layouts with different gaps and alignment.
 
 use jetstream_runtime::ui_element::*;
-use pug_jetstream::JetstreamThemeProvider;
-use pug_jetstream_components::stack::js_stack;
-use pug_jetstream_components::theme_ext::*;
-use pug_primitives::{Alignment, PaddingScale, StackSpec};
+use flint_jetstream::JetstreamThemeProvider;
+use flint_jetstream_components::stack::js_stack;
+use flint_jetstream_components::theme_ext::*;
+use flint_primitives::{Alignment, PaddingScale, StackSpec};
 
 pub fn render(theme: &JetstreamThemeProvider) -> JsEl {
     let secondary = resolve_color(theme, "semantic.color.text.secondary");

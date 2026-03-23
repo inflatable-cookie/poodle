@@ -6,16 +6,16 @@ Depends on: `005-product-composite-composition-and-information-architecture-rule
 
 ## Purpose
 
-Define the true primitive baseline for Pug instead of inferring it from a mix
+Define the true primitive baseline for Flint instead of inferring it from a mix
 of contracts, preview examples, and compound components. This baseline should
 be broad enough to cover the standard headless app surface most downstream
-products need while keeping Pug's ownership boundaries intact.
+products need while keeping Flint's ownership boundaries intact.
 
 ## Baseline Rule
 
-Pug's primitive baseline is the union of:
+Flint's primitive baseline is the union of:
 
-- Pug-owned structural primitives such as layout, surface, spacing, and scroll
+- Flint-owned structural primitives such as layout, surface, spacing, and scroll
   shells that Bits does not provide
 - Bits-aligned interaction primitives that represent the standard headless
   control surface most apps need
@@ -28,7 +28,7 @@ forms and preview tranches.
 
 Bits remains an implementation substrate, not the public contract.
 
-Pug still owns:
+Flint still owns:
 
 - component names and entry points
 - semantic prop naming
@@ -110,11 +110,11 @@ The generalized primitive baseline should explicitly include these families:
 
 ## Bits-Aligned Coverage Rule
 
-When Bits already provides a generalized headless primitive family, Pug should
+When Bits already provides a generalized headless primitive family, Flint should
 normally expose a corresponding contract-backed primitive unless one of the
 following is true:
 
-- the family is intentionally out of scope for Pug's product direction
+- the family is intentionally out of scope for Flint's product direction
 - the family belongs at a higher composite or workstation layer instead
 - parity requirements are not yet explicit enough to support a stable wrapper
 
@@ -123,7 +123,7 @@ not as an implicit decision.
 
 ## Current Svelte Packaging Baseline
 
-After the current tranche, `@pug/svelte-primitives` covers the full documented
+After the current tranche, `@flint/svelte-primitives` covers the full documented
 foundation contract set:
 
 - structural primitives: `Box`, `Stack`, `Inline`, `Grid`, `Spacer`,
@@ -141,7 +141,7 @@ The package now covers the current primitive baseline defined by the documented
 foundation contracts.
 
 The remaining gap is broader than that baseline: Bits exposes additional
-generalized primitives that Pug has not yet promoted into its own contract
+generalized primitives that Flint has not yet promoted into its own contract
 catalogue, including advanced inputs, date or calendar controls, table and
 pagination helpers, and toolbar or command-oriented primitives.
 
@@ -171,8 +171,8 @@ Compound components should compose it, not substitute for it.
 When a downstream app needs a generalized control family already covered by
 Bits, the expected direction is:
 
-1. define or confirm the Pug contract
-2. implement the Pug primitive wrapper
+1. define or confirm the Flint contract
+2. implement the Flint primitive wrapper
 3. compose it upward into composites or workstation shells
 
 Not:
@@ -191,6 +191,6 @@ Not:
 
 ## Next Task
 
-Decide whether to widen the Pug primitive contract catalogue beyond the current
+Decide whether to widen the Flint primitive contract catalogue beyond the current
 foundation baseline so more of the wider Bits surface becomes explicit rather
 than remaining implementation-only potential.

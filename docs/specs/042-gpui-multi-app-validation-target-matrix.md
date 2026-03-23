@@ -18,7 +18,7 @@ cannot currently prove.
 When runnable downstream GPUI apps are absent, multi-app validation must exist
 as an explicit target matrix plus an assumption inventory.
 
-Pug should not claim production-ready GPUI multi-app validation from token
+Flint should not claim production-ready GPUI multi-app validation from token
 artifacts or contract notes alone.
 
 ## Validation Target Rule
@@ -61,13 +61,13 @@ The matrix must explicitly challenge these assumption classes:
 
 ## Honesty Rule
 
-Pug may say:
+Flint may say:
 
 - a GPUI multi-app validation target matrix exists
 - hidden shared-layer assumptions are explicitly named
 - blockers to stronger GPUI claims are recorded
 
-Pug may not say:
+Flint may not say:
 
 - multiple GPUI apps are already adopted in production
 - GPUI component parity is proven by the current repo

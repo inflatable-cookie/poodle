@@ -1,4 +1,4 @@
-use pug_tokens::semantic;
+use flint_tokens::semantic;
 
 #[derive(Clone, Copy, Debug, Default, Eq, PartialEq)]
 pub enum PageHeaderAlign {

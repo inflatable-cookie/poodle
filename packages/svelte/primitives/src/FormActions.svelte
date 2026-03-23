@@ -12,9 +12,9 @@
   .form-actions {
     display: flex;
     flex-wrap: wrap;
-    gap: var(--pug-space-inline-md);
+    gap: var(--flint-space-inline-md);
     align-items: center;
-    padding-top: var(--pug-space-stack-sm);
+    padding-top: var(--flint-space-stack-sm);
   }
 
   .form-actions[data-align="start"] {

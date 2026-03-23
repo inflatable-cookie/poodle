@@ -35,7 +35,7 @@
     width: 100%;
     min-height: 0.5rem;
     border-radius: 999px;
-    background: color-mix(in srgb, var(--pug-surface) 96%, var(--pug-color-text-primary));
+    background: color-mix(in srgb, var(--flint-surface) 96%, var(--flint-color-text-primary));
   }
 
   .progress__indicator {
@@ -45,10 +45,10 @@
     border-radius: inherit;
     background: linear-gradient(
       90deg,
-      color-mix(in srgb, var(--pug-color-accent-base) 88%, white),
-      var(--pug-color-accent-base)
+      color-mix(in srgb, var(--flint-color-accent-base) 88%, white),
+      var(--flint-color-accent-base)
     );
-    transition: transform var(--pug-motion-duration-standard) var(--pug-motion-easing-standard);
+    transition: transform var(--flint-motion-duration-standard) var(--flint-motion-easing-standard);
   }
 
   .progress[data-indeterminate="true"] .progress__indicator {

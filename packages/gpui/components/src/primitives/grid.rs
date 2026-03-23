@@ -4,8 +4,8 @@
 //! using flex-wrap with equal-width children.
 
 use gpui::*;
-use pug_gpui::GpuiThemeProvider;
-use pug_primitives::{Dimension, GridSpec, PaddingScale};
+use flint_gpui::GpuiThemeProvider;
+use flint_primitives::{Dimension, GridSpec, PaddingScale};
 
 use crate::theme_ext::resolve_px;
 

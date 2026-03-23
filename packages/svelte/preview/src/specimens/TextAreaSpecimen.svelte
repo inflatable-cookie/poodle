@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { TextArea, Eyebrow } from "@pug/svelte-primitives";
+  import { TextArea, Eyebrow } from "@flint/svelte-primitives";
 
   let note = "";
 </script>
@@ -62,6 +62,6 @@
   .specimen__group p {
     margin: 0;
     font-size: 0.875rem;
-    color: var(--pug-color-text-secondary);
+    color: var(--flint-color-text-secondary);
   }
 </style>

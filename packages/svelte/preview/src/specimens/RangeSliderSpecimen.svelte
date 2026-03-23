@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { RangeSlider, Eyebrow } from "@pug/svelte-primitives";
+  import { RangeSlider, Eyebrow } from "@flint/svelte-primitives";
 
   let priceRange: [number, number] = [20, 80];
   let ageRange: [number, number] = [25, 45];
@@ -54,6 +54,6 @@
   .specimen__group p {
     margin: 0;
     font-size: 0.875rem;
-    color: var(--pug-color-text-secondary);
+    color: var(--flint-color-text-secondary);
   }
 </style>

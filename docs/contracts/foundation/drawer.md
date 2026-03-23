@@ -150,7 +150,7 @@ modal vs non-modal posture.
 |----------|-------|
 | `position` | `fixed` |
 | `inset` | `0` |
-| `z-index` | `var(--pug-overlay-z-dialog)` |
+| `z-index` | `var(--flint-overlay-z-dialog)` |
 | `display` | `flex` |
 | `pointer-events` | `none` |
 
@@ -171,7 +171,7 @@ modal vs non-modal posture.
 | `inset` | `0` |
 | `padding` | `0` |
 | `border` | `0` |
-| `background` | `var(--pug-color-background-overlay)` |
+| `background` | `var(--flint-color-background-overlay)` |
 | `pointer-events` | `auto` |
 | `cursor` | `default` |
 
@@ -185,12 +185,12 @@ modal vs non-modal posture.
 | `width` | `min(28rem, 100vw)` |
 | `height` | `100vh` |
 | `overflow` | `auto` |
-| `padding` | `var(--pug-space-panel-y) var(--pug-space-panel-x)` |
-| `border` | `0.0625rem solid color-mix(in srgb, var(--pug-color-border-default) 78%, transparent)` |
+| `padding` | `var(--flint-space-panel-y) var(--flint-space-panel-x)` |
+| `border` | `0.0625rem solid color-mix(in srgb, var(--flint-color-border-default) 78%, transparent)` |
 | `border-radius` | `0` |
-| `background` | `color-mix(in srgb, var(--pug-color-background-elevated) 98%, var(--pug-color-background-panel))` |
-| `--pug-surface` | `color-mix(in srgb, var(--pug-color-background-elevated) 98%, var(--pug-color-background-panel))` |
-| `box-shadow` | `var(--pug-elevation-dialog)` |
+| `background` | `color-mix(in srgb, var(--flint-color-background-elevated) 98%, var(--flint-color-background-panel))` |
+| `--flint-surface` | `color-mix(in srgb, var(--flint-color-background-elevated) 98%, var(--flint-color-background-panel))` |
+| `box-shadow` | `var(--flint-elevation-dialog)` |
 
 ### Surface — top/bottom edge override
 
@@ -207,13 +207,13 @@ modal vs non-modal posture.
 |----------|-------|
 | `display` | `grid` |
 | `gap` | `0.375rem` |
-| `margin-bottom` | `var(--pug-space-stack-md)` |
+| `margin-bottom` | `var(--flint-space-stack-md)` |
 
 ### Header title — .drawer__header strong
 
 | Property | Value |
 |----------|-------|
-| `font-family` | `var(--pug-typography-heading-family)` |
+| `font-family` | `var(--flint-typography-heading-family)` |
 | `font-size` | `1rem` |
 | `line-height` | `1.2` |
 
@@ -222,7 +222,7 @@ modal vs non-modal posture.
 | Property | Value |
 |----------|-------|
 | `margin` | `0` |
-| `color` | `var(--pug-color-text-secondary)` |
+| `color` | `var(--flint-color-text-secondary)` |
 
 ### Actions (.drawer__actions)
 
@@ -230,9 +230,9 @@ modal vs non-modal posture.
 |----------|-------|
 | `display` | `flex` |
 | `flex-wrap` | `wrap` |
-| `gap` | `var(--pug-space-inline-sm)` |
+| `gap` | `var(--flint-space-inline-sm)` |
 | `justify-content` | `flex-end` |
-| `margin-top` | `var(--pug-space-stack-md)` |
+| `margin-top` | `var(--flint-space-stack-md)` |
 
 ### Data Attributes
 
@@ -252,7 +252,7 @@ modal vs non-modal posture.
 
 ## 10. GPUI Notes
 
-- expected crate/module surface: `pug_gpui::primitives::drawer`
+- expected crate/module surface: `flint_gpui::primitives::drawer`
 - GPUI implementation must explicitly handle edge-anchored overlay stacking,
   modal-vs-non-modal focus rules, background inertness, and restoration
 - surface sizing must match: left/right use min(28rem, 100vw) x 100vh;

@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { FormActions, Button, Eyebrow } from "@pug/svelte-primitives";
+  import { FormActions, Button, Eyebrow } from "@flint/svelte-primitives";
 </script>
 
 <div class="specimen">

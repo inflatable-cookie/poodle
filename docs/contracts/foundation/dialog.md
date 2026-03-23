@@ -148,7 +148,7 @@ Updated: 2026-03-15
 |----------|-------|
 | `position` | `fixed` |
 | `inset` | `0` |
-| `z-index` | `var(--pug-overlay-z-dialog)` |
+| `z-index` | `var(--flint-overlay-z-dialog)` |
 | `display` | `grid` |
 | `place-items` | `center` |
 | `padding` | `2rem` |
@@ -161,7 +161,7 @@ Updated: 2026-03-15
 | `inset` | `0` |
 | `padding` | `0` |
 | `border` | `0` |
-| `background` | `var(--pug-color-background-overlay)` |
+| `background` | `var(--flint-color-background-overlay)` |
 | `cursor` | `default` |
 
 ### Surface `.dialog__surface`
@@ -173,12 +173,12 @@ Updated: 2026-03-15
 | `width` | `min(34rem, 100%)` |
 | `max-height` | `min(80vh, 42rem)` |
 | `overflow` | `auto` |
-| `padding` | `var(--pug-space-panel-y) var(--pug-space-panel-x)` |
-| `border` | `0.0625rem solid color-mix(in srgb, var(--pug-color-border-default) 78%, transparent)` |
-| `border-radius` | `var(--pug-radius-surface)` |
-| `background` | `color-mix(in srgb, var(--pug-color-background-elevated) 98%, var(--pug-color-background-panel))` |
-| `--pug-surface` | `color-mix(in srgb, var(--pug-color-background-elevated) 98%, var(--pug-color-background-panel))` |
-| `box-shadow` | `var(--pug-elevation-dialog)` |
+| `padding` | `var(--flint-space-panel-y) var(--flint-space-panel-x)` |
+| `border` | `0.0625rem solid color-mix(in srgb, var(--flint-color-border-default) 78%, transparent)` |
+| `border-radius` | `var(--flint-radius-surface)` |
+| `background` | `color-mix(in srgb, var(--flint-color-background-elevated) 98%, var(--flint-color-background-panel))` |
+| `--flint-surface` | `color-mix(in srgb, var(--flint-color-background-elevated) 98%, var(--flint-color-background-panel))` |
+| `box-shadow` | `var(--flint-elevation-dialog)` |
 
 ### Header `.dialog__header`
 
@@ -186,13 +186,13 @@ Updated: 2026-03-15
 |----------|-------|
 | `display` | `grid` |
 | `gap` | `0.375rem` |
-| `margin-bottom` | `var(--pug-space-stack-md)` |
+| `margin-bottom` | `var(--flint-space-stack-md)` |
 
 ### Header title (`.dialog__header strong`)
 
 | Property | Value |
 |----------|-------|
-| `font-family` | `var(--pug-typography-heading-family)` |
+| `font-family` | `var(--flint-typography-heading-family)` |
 | `font-size` | `1rem` |
 | `line-height` | `1.2` |
 
@@ -201,7 +201,7 @@ Updated: 2026-03-15
 | Property | Value |
 |----------|-------|
 | `margin` | `0` |
-| `color` | `var(--pug-color-text-secondary)` |
+| `color` | `var(--flint-color-text-secondary)` |
 
 ### Body `.dialog__body`
 
@@ -215,9 +215,9 @@ Updated: 2026-03-15
 |----------|-------|
 | `display` | `flex` |
 | `flex-wrap` | `wrap` |
-| `gap` | `var(--pug-space-inline-sm)` |
+| `gap` | `var(--flint-space-inline-sm)` |
 | `justify-content` | `flex-end` |
-| `margin-top` | `var(--pug-space-stack-lg)` |
+| `margin-top` | `var(--flint-space-stack-lg)` |
 
 ## 9. Svelte Notes
 
@@ -239,7 +239,7 @@ Updated: 2026-03-15
 
 ## 10. GPUI Notes
 
-- expected crate/module surface: `pug_gpui::primitives::dialog`
+- expected crate/module surface: `flint_gpui::primitives::dialog`
 - GPUI implementation must explicitly own modal stacking, focus trapping,
   background blocking, announcement, and restoration behavior
 - Dialog and alertdialog roles must be correctly exposed

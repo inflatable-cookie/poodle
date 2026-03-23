@@ -1,10 +1,10 @@
 # g05.013 Cross-Runtime Demo-App Contract, Section Model, And Parity Checklist
 
 Status: completed
-Owner: Pug Core
+Owner: Flint Core
 Updated: 2026-03-13
 Depends on: g05.011, g05.012
-Primary repos: `pug`
+Primary repos: `flint`
 
 ## Goals
 

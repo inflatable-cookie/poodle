@@ -1,7 +1,7 @@
 use gpui::*;
-use pug_composites::{ActionDiscoveryPanelSpec, ActionDiscoverySection, CommandActionItem, DiscoveryState};
-use pug_primitives::EyebrowSpec;
-use pug_gpui_components::{ActionDiscoveryPanel, Eyebrow};
+use flint_composites::{ActionDiscoveryPanelSpec, ActionDiscoverySection, CommandActionItem, DiscoveryState};
+use flint_primitives::EyebrowSpec;
+use flint_gpui_components::{ActionDiscoveryPanel, Eyebrow};
 use crate::app_state::AppState;
 use crate::PreviewRoot;
 

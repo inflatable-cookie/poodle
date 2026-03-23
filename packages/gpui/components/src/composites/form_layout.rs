@@ -4,7 +4,7 @@
 
 use gpui::prelude::FluentBuilder;
 use gpui::*;
-use pug_gpui::GpuiThemeProvider;
+use flint_gpui::GpuiThemeProvider;
 use crate::theme_ext::{color_mix, resolve_color, resolve_px, resolve_radius};
 
 pub struct FormLayout {

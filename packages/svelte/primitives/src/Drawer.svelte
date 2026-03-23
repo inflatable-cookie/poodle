@@ -162,7 +162,7 @@
   .drawer {
     position: fixed;
     inset: 0;
-    z-index: var(--pug-overlay-z-dialog);
+    z-index: var(--flint-overlay-z-dialog);
     display: flex;
     pointer-events: none;
   }
@@ -188,7 +188,7 @@
     inset: 0;
     padding: 0;
     border: 0;
-    background: var(--pug-color-background-overlay);
+    background: var(--flint-color-background-overlay);
     pointer-events: auto;
     cursor: default;
   }
@@ -200,21 +200,21 @@
     width: min(28rem, 100vw);
     height: 100vh;
     overflow: auto;
-    padding: var(--pug-space-panel-y) var(--pug-space-panel-x);
+    padding: var(--flint-space-panel-y) var(--flint-space-panel-x);
     border: 0.0625rem solid var(
-      --pug-treatment-surface-elevated-border,
-      color-mix(in srgb, var(--pug-color-border-default) 78%, transparent)
+      --flint-treatment-surface-elevated-border,
+      color-mix(in srgb, var(--flint-color-border-default) 78%, transparent)
     );
     border-radius: 0;
     background: var(
-      --pug-treatment-surface-elevated-fill,
-      color-mix(in srgb, var(--pug-color-background-elevated) 98%, var(--pug-color-background-panel))
+      --flint-treatment-surface-elevated-fill,
+      color-mix(in srgb, var(--flint-color-background-elevated) 98%, var(--flint-color-background-panel))
     );
-    --pug-surface: var(
-      --pug-treatment-surface-elevated-fill,
-      color-mix(in srgb, var(--pug-color-background-elevated) 98%, var(--pug-color-background-panel))
+    --flint-surface: var(
+      --flint-treatment-surface-elevated-fill,
+      color-mix(in srgb, var(--flint-color-background-elevated) 98%, var(--flint-color-background-panel))
     );
-    box-shadow: var(--pug-treatment-surface-elevated-shadow, var(--pug-elevation-dialog));
+    box-shadow: var(--flint-treatment-surface-elevated-shadow, var(--flint-elevation-dialog));
   }
 
   .drawer[data-edge="top"] .drawer__surface,
@@ -226,25 +226,25 @@
   .drawer__header {
     display: grid;
     gap: 0.375rem;
-    margin-bottom: var(--pug-space-stack-md);
+    margin-bottom: var(--flint-space-stack-md);
   }
 
   .drawer__header strong {
-    font-family: var(--pug-typography-heading-family);
+    font-family: var(--flint-typography-heading-family);
     font-size: 1rem;
     line-height: 1.2;
   }
 
   .drawer__header p {
     margin: 0;
-    color: var(--pug-color-text-secondary);
+    color: var(--flint-color-text-secondary);
   }
 
   .drawer__actions {
     display: flex;
     flex-wrap: wrap;
-    gap: var(--pug-space-inline-sm);
+    gap: var(--flint-space-inline-sm);
     justify-content: flex-end;
-    margin-top: var(--pug-space-stack-md);
+    margin-top: var(--flint-space-stack-md);
   }
 </style>

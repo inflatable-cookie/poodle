@@ -1,7 +1,7 @@
 use gpui::*;
-use pug_adapter::ThemeProvider;
-use pug_primitives::{RadioGroupSpec, ChoiceOption, Orientation, EyebrowSpec};
-use pug_gpui_components::{RadioGroup, Eyebrow};
+use flint_adapter::ThemeProvider;
+use flint_primitives::{RadioGroupSpec, ChoiceOption, Orientation, EyebrowSpec};
+use flint_gpui_components::{RadioGroup, Eyebrow};
 use crate::app_state::AppState;
 use crate::style_bridge::color_to_hsla;
 use crate::PreviewRoot;

@@ -7,8 +7,8 @@
 use std::time::Duration;
 
 use gpui::*;
-use pug_gpui::GpuiThemeProvider;
-use pug_primitives::{ButtonSpec, ButtonTone, ButtonVariant, ControlSize, IconSize, IconSpec};
+use flint_gpui::GpuiThemeProvider;
+use flint_primitives::{ButtonSpec, ButtonTone, ButtonVariant, ControlSize, IconSize, IconSpec};
 
 use super::icon::Icon;
 use crate::theme_ext::{color_mix, color_mix_black, resolve_color, resolve_opacity, resolve_px, resolve_radius};
@@ -175,9 +175,9 @@ impl IntoElement for Button {
         // ── Build element ID ─────────────────────────────────────
         let label_text = spec.label.clone().unwrap_or_default();
         let id_str = if let Some(ref suffix) = self.id_suffix {
-            format!("pug-btn-{}", suffix)
+            format!("flint-btn-{}", suffix)
         } else {
-            format!("pug-btn-{}", label_text)
+            format!("flint-btn-{}", label_text)
         };
 
         // ── Icon-only detection (contract §8 Icon-only) ──────────

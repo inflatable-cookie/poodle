@@ -5,8 +5,8 @@
 
 use jetstream_runtime::game_ui::Color;
 use jetstream_runtime::ui_element::{self, JsEl};
-use pug_jetstream::JetstreamThemeProvider;
-use pug_primitives::AlertDialogSpec;
+use flint_jetstream::JetstreamThemeProvider;
+use flint_primitives::AlertDialogSpec;
 
 use crate::theme_ext::{resolve_color, resolve_radius};
 

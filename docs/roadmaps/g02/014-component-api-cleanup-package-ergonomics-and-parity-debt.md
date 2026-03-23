@@ -1,10 +1,10 @@
 # g02.014 Component API Cleanup, Package Ergonomics, And Parity Debt
 
 Status: completed
-Owner: Pug Core
+Owner: Flint Core
 Updated: 2026-03-11
 Depends on: g02.008, g02.009, g02.010, g02.011, g02.012
-Primary repos: `pug`
+Primary repos: `flint`
 
 ## Goals
 

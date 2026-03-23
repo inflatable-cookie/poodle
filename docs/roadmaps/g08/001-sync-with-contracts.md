@@ -1,7 +1,7 @@
 # g08.001 Sync With Contracts: Verify Names, Props, And Token Methods
 
 Status: complete
-Owner: Pug Core
+Owner: Flint Core
 Depends on: —
 
 ## Why This Comes First
@@ -20,8 +20,8 @@ props have changed is wasted work.
   `form_shell`, `inline` (→ stack), `inline_remediation`, `panel_header`,
   `panel_surface`, `panel_tabs`, `project_header`, `remediation_banner`,
   `surface_tabs`, `validation_summary` (deferred), `workspace_shell`
-- [x] Rename `call_out` → `callout` (struct: `PugCallOut` → `PugCallout`)
-- [x] Rename `shell_status_bar` → `status_bar` (struct: `PugShellStatusBar` → `PugStatusBar`)
+- [x] Rename `call_out` → `callout` (struct: `FlintCallOut` → `FlintCallout`)
+- [x] Rename `shell_status_bar` → `status_bar` (struct: `FlintShellStatusBar` → `FlintStatusBar`)
 - [x] Update component registry: remove deleted entries, rename
   `AutonomousList` → `EditableList`, `StateTile` → `MetricTile`
 - [x] Update all specimen files referencing deleted/renamed components

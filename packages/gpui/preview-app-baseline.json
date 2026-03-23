@@ -1,7 +1,7 @@
 {
   "generation": "g04.002",
   "themeRuntime": {
-    "tokenSource": "pug-gpui-tokens",
+    "tokenSource": "flint-gpui-tokens",
     "themeIds": ["light", "dark", "loophole-studio"],
     "densityModes": ["compact", "comfortable"],
     "controlSizes": ["sm", "md", "lg"],

@@ -119,12 +119,12 @@ StyleRefinement::default()
    - Tokens are compiled into Rust code (Theme struct)
    - Style values are Rust types (not CSS values)
 
-3. **For Pug's Token Emission:**
-   - **Option A**: Generate Rust Theme struct from Pug tokens
+3. **For Flint's Token Emission:**
+   - **Option A**: Generate Rust Theme struct from Flint tokens
    - **Option B**: Generate constants/enums that GPUI theme can reference
    - **Option C**: Runtime token map (less idiomatic for GPUI)
 
-**Recommended Approach for Pug:**
+**Recommended Approach for Flint:**
 - Emit Rust code defining semantic color structs and constants
 - GPUI implementation constructs Theme from these
 - Keep raw scale tokens for documentation/reference
@@ -224,7 +224,7 @@ StyleRefinement::default()
 ### Token System (for g01.002, g01.003)
 
 **Q: How does GPUI handle design tokens?**
-A: Through a `Theme` struct with semantic color roles, not direct token consumption. Pug should emit Rust code defining these themes.
+A: Through a `Theme` struct with semantic color roles, not direct token consumption. Flint should emit Rust code defining these themes.
 
 **Q: Can GPUI consume external token definitions?**
 A: Not natively. Tokens must be compiled into Rust code. Runtime token loading is possible but not idiomatic.
@@ -253,26 +253,26 @@ A: Via `Popover`, `Modal` in gpui-component. No native overlay in core GPUI.
 
 ---
 
-## Implications for Pug
+## Implications for Flint
 
 ### Token Emission (g01.002, g01.003)
 
 **Recommended Strategy:**
-1. Define canonical Pug token schema (DTCG-based)
+1. Define canonical Flint token schema (DTCG-based)
 2. Emit Rust code (structs/constants) for GPUI
 3. GPUI implementation constructs Theme from emitted code
 4. Keep TypeScript types and CSS variables for Svelte side
 
 **Naming Conventions:**
-- CSS: `--pug-color-background-primary`
+- CSS: `--flint-color-background-primary`
 - TypeScript: `tokens.color.background.primary`
-- Rust: `pug::tokens::color::BACKGROUND_PRIMARY` or theme struct fields
+- Rust: `flint::tokens::color::BACKGROUND_PRIMARY` or theme struct fields
 
 ### GPUI Substrate (g01.006)
 
 **Key Policy Decisions:**
-1. Pug components use `IntoElement` pattern
-2. State via Pug-defined models (not ad hoc)
+1. Flint components use `IntoElement` pattern
+2. State via Flint-defined models (not ad hoc)
 3. Styling through GPUI's Tailwind-like API
 4. Theme integration via emitted Rust code
 

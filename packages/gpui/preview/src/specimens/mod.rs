@@ -110,8 +110,8 @@ mod status_bar;
 mod action_discovery;
 
 use gpui::*;
-use pug_adapter::ThemeProvider;
-use pug_gpui::GpuiThemeProvider;
+use flint_adapter::ThemeProvider;
+use flint_gpui::GpuiThemeProvider;
 use crate::style_bridge::color_to_hsla;
 use crate::app_state::AppState;
 use crate::PreviewRoot;

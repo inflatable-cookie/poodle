@@ -125,13 +125,13 @@ contract itself.
 
 ## Honesty Rule
 
-Pug may say:
+Flint may say:
 
 - the shared demo target is now explicit
 - Svelte and GPUI both have one contract-owned demo app to implement
 - screen-level parity review can now be organized around one stateful target
 
-Pug may not say:
+Flint may not say:
 
 - the contract is satisfied before the Svelte rebuild exists
 - the docs shell is the same thing as the demo app

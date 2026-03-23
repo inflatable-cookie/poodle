@@ -13,7 +13,7 @@ branding across component families without redefining token meaning.
 
 ## Three-Layer Architecture
 
-Pug styling operates in three layers, applied in order:
+Flint styling operates in three layers, applied in order:
 
 1. **Canonical semantic tokens** — typed, narrow values (color, spacing, radius).
    Never broadened to hold gradients, textures, or web-only effects.
@@ -21,7 +21,7 @@ Pug styling operates in three layers, applied in order:
    to component families. May include web-only effects like gradients and layered
    shadows.
 3. **App-owned wrappers and composites** — structural brand expression built by
-   composing Pug primitives.
+   composing Flint primitives.
 
 ## Treatment Roles
 
@@ -34,13 +34,13 @@ General interactive surfaces — secondary buttons, toggles, menu triggers.
 
 | Variable | Purpose |
 |---|---|
-| `--pug-treatment-interactive-radius` | Border radius |
-| `--pug-treatment-interactive-fill` | Resting background |
-| `--pug-treatment-interactive-fill-active` | Hover/active background |
-| `--pug-treatment-interactive-border` | Resting border color |
-| `--pug-treatment-interactive-border-active` | Hover/active border color |
-| `--pug-treatment-interactive-shadow` | Resting shadow |
-| `--pug-treatment-interactive-shadow-active` | Hover/active shadow |
+| `--flint-treatment-interactive-radius` | Border radius |
+| `--flint-treatment-interactive-fill` | Resting background |
+| `--flint-treatment-interactive-fill-active` | Hover/active background |
+| `--flint-treatment-interactive-border` | Resting border color |
+| `--flint-treatment-interactive-border-active` | Hover/active border color |
+| `--flint-treatment-interactive-shadow` | Resting shadow |
+| `--flint-treatment-interactive-shadow-active` | Hover/active shadow |
 
 ### `interactive-primary`
 
@@ -48,12 +48,12 @@ Primary action buttons and prominent call-to-action surfaces.
 
 | Variable | Purpose |
 |---|---|
-| `--pug-treatment-interactive-primary-radius` | Border radius |
-| `--pug-treatment-interactive-primary-fill` | Resting background |
-| `--pug-treatment-interactive-primary-fill-hover` | Hover background |
-| `--pug-treatment-interactive-primary-border` | Resting border color |
-| `--pug-treatment-interactive-primary-shadow` | Shadow |
-| `--pug-treatment-interactive-primary-text` | Text/icon color |
+| `--flint-treatment-interactive-primary-radius` | Border radius |
+| `--flint-treatment-interactive-primary-fill` | Resting background |
+| `--flint-treatment-interactive-primary-fill-hover` | Hover background |
+| `--flint-treatment-interactive-primary-border` | Resting border color |
+| `--flint-treatment-interactive-primary-shadow` | Shadow |
+| `--flint-treatment-interactive-primary-text` | Text/icon color |
 
 ### `interactive-subtle`
 
@@ -61,16 +61,16 @@ Text inputs, selects, search fields, text areas — controls with subtle chrome.
 
 | Variable | Purpose |
 |---|---|
-| `--pug-treatment-interactive-subtle-radius` | Border radius |
-| `--pug-treatment-interactive-subtle-fill` | Resting background |
-| `--pug-treatment-interactive-subtle-fill-hover` | Hover background |
-| `--pug-treatment-interactive-subtle-fill-focus` | Focus background |
-| `--pug-treatment-interactive-subtle-border` | Resting border |
-| `--pug-treatment-interactive-subtle-border-hover` | Hover border |
-| `--pug-treatment-interactive-subtle-border-focus` | Focus border |
-| `--pug-treatment-interactive-subtle-shadow` | Resting shadow |
-| `--pug-treatment-interactive-subtle-shadow-hover` | Hover shadow |
-| `--pug-treatment-interactive-subtle-shadow-focus` | Focus shadow |
+| `--flint-treatment-interactive-subtle-radius` | Border radius |
+| `--flint-treatment-interactive-subtle-fill` | Resting background |
+| `--flint-treatment-interactive-subtle-fill-hover` | Hover background |
+| `--flint-treatment-interactive-subtle-fill-focus` | Focus background |
+| `--flint-treatment-interactive-subtle-border` | Resting border |
+| `--flint-treatment-interactive-subtle-border-hover` | Hover border |
+| `--flint-treatment-interactive-subtle-border-focus` | Focus border |
+| `--flint-treatment-interactive-subtle-shadow` | Resting shadow |
+| `--flint-treatment-interactive-subtle-shadow-hover` | Hover shadow |
+| `--flint-treatment-interactive-subtle-shadow-focus` | Focus shadow |
 
 ### `surface`
 
@@ -78,15 +78,15 @@ Panel backgrounds, card frames, and container surfaces.
 
 | Variable | Purpose |
 |---|---|
-| `--pug-treatment-surface-radius` | Border radius |
-| `--pug-treatment-surface-fill` | Background |
-| `--pug-treatment-surface-border` | Border color |
-| `--pug-treatment-surface-shadow` | Shadow |
-| `--pug-treatment-surface-hover-fill` | Hover background |
-| `--pug-treatment-surface-hover-border` | Hover border |
-| `--pug-treatment-surface-hover-shadow` | Hover shadow |
-| `--pug-treatment-surface-header-fill` | Card/section header fill |
-| `--pug-treatment-surface-divider` | Internal divider color |
+| `--flint-treatment-surface-radius` | Border radius |
+| `--flint-treatment-surface-fill` | Background |
+| `--flint-treatment-surface-border` | Border color |
+| `--flint-treatment-surface-shadow` | Shadow |
+| `--flint-treatment-surface-hover-fill` | Hover background |
+| `--flint-treatment-surface-hover-border` | Hover border |
+| `--flint-treatment-surface-hover-shadow` | Hover shadow |
+| `--flint-treatment-surface-header-fill` | Card/section header fill |
+| `--flint-treatment-surface-divider` | Internal divider color |
 
 ### `surface-elevated`
 
@@ -94,15 +94,15 @@ Elevated surfaces — dialogs, drawers, popovers, elevated cards.
 
 | Variable | Purpose |
 |---|---|
-| `--pug-treatment-surface-elevated-radius` | Border radius |
-| `--pug-treatment-surface-elevated-fill` | Background |
-| `--pug-treatment-surface-elevated-border` | Border color |
-| `--pug-treatment-surface-elevated-shadow` | Shadow |
+| `--flint-treatment-surface-elevated-radius` | Border radius |
+| `--flint-treatment-surface-elevated-fill` | Background |
+| `--flint-treatment-surface-elevated-border` | Border color |
+| `--flint-treatment-surface-elevated-shadow` | Shadow |
 
 ### `focus-ring`
 
 Focus state treatment for keyboard navigation indicators. Currently handled
-through the existing `--pug-color-accent-focusRing` token rather than a
+through the existing `--flint-color-accent-focusRing` token rather than a
 separate treatment role. Reserved for future use if focus styling needs to
 diverge from accent color.
 
@@ -115,11 +115,11 @@ is used.
 ```css
 /* In a component's <style> block */
 .text-input {
-  --pug-text-input-fill: var(
-    --pug-treatment-interactive-subtle-fill,
-    var(--pug-color-background-surface)
+  --flint-text-input-fill: var(
+    --flint-treatment-interactive-subtle-fill,
+    var(--flint-color-background-surface)
   );
-  background: var(--pug-text-input-fill);
+  background: var(--flint-text-input-fill);
 }
 ```
 
@@ -149,15 +149,15 @@ All descendants inherit the treatment values through the CSS cascade.
 
 ```html
 <div class="app-shell" data-appearance-treatment="brand-raised">
-  <!-- All Pug components inside inherit treatment values -->
+  <!-- All Flint components inside inherit treatment values -->
 </div>
 ```
 
 ```css
 .app-shell[data-appearance-treatment="brand-raised"] {
-  --pug-treatment-interactive-fill: linear-gradient(...), var(--pug-color-background-elevated);
-  --pug-treatment-interactive-primary-fill: linear-gradient(...), var(--pug-color-accent-base);
-  --pug-treatment-surface-fill: linear-gradient(...), var(--pug-color-background-panel);
+  --flint-treatment-interactive-fill: linear-gradient(...), var(--flint-color-background-elevated);
+  --flint-treatment-interactive-primary-fill: linear-gradient(...), var(--flint-color-accent-base);
+  --flint-treatment-surface-fill: linear-gradient(...), var(--flint-color-background-panel);
   /* ... all other treatment variables */
 }
 ```
@@ -168,9 +168,9 @@ Treatments can also be scoped to a subtree for local branding:
 
 ```css
 .brand-proof-scope {
-  --pug-treatment-surface-fill: /* branded value */;
-  --pug-treatment-surface-border: /* branded value */;
-  --pug-treatment-interactive-primary-fill: /* branded value */;
+  --flint-treatment-surface-fill: /* branded value */;
+  --flint-treatment-surface-border: /* branded value */;
+  --flint-treatment-interactive-primary-fill: /* branded value */;
 }
 ```
 
@@ -187,15 +187,15 @@ will fall through to semantic token defaults.
 ```css
 [data-appearance-treatment="brand-glass"] {
   /* Interactive role */
-  --pug-treatment-interactive-fill: /* your value */;
-  --pug-treatment-interactive-border: /* your value */;
-  --pug-treatment-interactive-shadow: /* your value */;
+  --flint-treatment-interactive-fill: /* your value */;
+  --flint-treatment-interactive-border: /* your value */;
+  --flint-treatment-interactive-shadow: /* your value */;
   /* ... repeat for all roles and states */
 
   /* Surface role */
-  --pug-treatment-surface-fill: /* your value */;
-  --pug-treatment-surface-border: /* your value */;
-  --pug-treatment-surface-shadow: /* your value */;
+  --flint-treatment-surface-fill: /* your value */;
+  --flint-treatment-surface-border: /* your value */;
+  --flint-treatment-surface-shadow: /* your value */;
   /* ... */
 }
 ```
@@ -207,8 +207,8 @@ different on light versus dark backgrounds:
 
 ```css
 [data-appearance-treatment="brand-glass"][data-theme="light"] {
-  --pug-treatment-interactive-shadow: /* lighter shadow */;
-  --pug-treatment-surface-shadow: /* lighter shadow */;
+  --flint-treatment-interactive-shadow: /* lighter shadow */;
+  --flint-treatment-surface-shadow: /* lighter shadow */;
 }
 ```
 

@@ -149,16 +149,16 @@ type CardRadioItem = {
 | Part | Token | Purpose |
 |------|-------|---------|
 | Root | — | gap is hardcoded 0.75rem |
-| Option (focus) | `--pug-border-width-focus` | focus ring width |
-| Option (focus) | `--pug-color-accent-focusRing` | focus ring color |
-| Option (disabled) | `--pug-state-opacity-disabled` | disabled opacity |
-| Indicator (unchecked) | `--pug-color-border-default` | indicator border color |
-| Indicator (checked) | `--pug-color-accent-base` | indicator border and background |
-| Indicator (transition) | `--pug-motion-duration-interaction` | transition duration |
-| Indicator (transition) | `--pug-motion-easing-standard` | transition easing |
-| Dot | `--pug-color-text-inverse` | inner dot color (white on accent) |
-| Title | `--pug-color-text-primary` | title text color |
-| Description | `--pug-color-text-secondary` | description text color |
+| Option (focus) | `--flint-border-width-focus` | focus ring width |
+| Option (focus) | `--flint-color-accent-focusRing` | focus ring color |
+| Option (disabled) | `--flint-state-opacity-disabled` | disabled opacity |
+| Indicator (unchecked) | `--flint-color-border-default` | indicator border color |
+| Indicator (checked) | `--flint-color-accent-base` | indicator border and background |
+| Indicator (transition) | `--flint-motion-duration-interaction` | transition duration |
+| Indicator (transition) | `--flint-motion-easing-standard` | transition easing |
+| Dot | `--flint-color-text-inverse` | inner dot color (white on accent) |
+| Title | `--flint-color-text-primary` | title text color |
+| Description | `--flint-color-text-secondary` | description text color |
 
 ### Token Usage — Exact CSS Values
 
@@ -183,7 +183,7 @@ The `--columns` CSS variable is set inline from the `columns` prop (1, 2, 3, or 
 
 | Property | Value |
 |----------|-------|
-| `outline` | `var(--pug-border-width-focus) solid var(--pug-color-accent-focusRing)` |
+| `outline` | `var(--flint-border-width-focus) solid var(--flint-color-accent-focusRing)` |
 | `outline-offset` | `0.125rem` |
 
 #### `.card-radio-group__option[aria-disabled="true"]`
@@ -191,7 +191,7 @@ The `--columns` CSS variable is set inline from the `columns` prop (1, 2, 3, or 
 | Property | Value |
 |----------|-------|
 | `cursor` | `not-allowed` |
-| `opacity` | `var(--pug-state-opacity-disabled)` |
+| `opacity` | `var(--flint-state-opacity-disabled)` |
 
 #### `.card-radio-group__header`
 
@@ -211,17 +211,17 @@ The `--columns` CSS variable is set inline from the `columns` prop (1, 2, 3, or 
 | `width` | `1.125rem` |
 | `height` | `1.125rem` |
 | `flex-shrink` | `0` |
-| `border` | `0.125rem solid var(--pug-color-border-default)` |
+| `border` | `0.125rem solid var(--flint-color-border-default)` |
 | `border-radius` | `999px` |
 | `background` | `transparent` |
-| `transition` | `border-color var(--pug-motion-duration-interaction) var(--pug-motion-easing-standard), background var(--pug-motion-duration-interaction) var(--pug-motion-easing-standard)` |
+| `transition` | `border-color var(--flint-motion-duration-interaction) var(--flint-motion-easing-standard), background var(--flint-motion-duration-interaction) var(--flint-motion-easing-standard)` |
 
 #### `.card-radio-group__indicator[data-checked="true"]` (Checked)
 
 | Property | Value |
 |----------|-------|
-| `border-color` | `var(--pug-color-accent-base)` |
-| `background` | `var(--pug-color-accent-base)` |
+| `border-color` | `var(--flint-color-accent-base)` |
+| `background` | `var(--flint-color-accent-base)` |
 
 #### `.card-radio-group__dot`
 
@@ -230,7 +230,7 @@ The `--columns` CSS variable is set inline from the `columns` prop (1, 2, 3, or 
 | `width` | `0.375rem` |
 | `height` | `0.375rem` |
 | `border-radius` | `999px` |
-| `background` | `var(--pug-color-text-inverse)` |
+| `background` | `var(--flint-color-text-inverse)` |
 
 #### `.card-radio-group__title`
 
@@ -238,7 +238,7 @@ The `--columns` CSS variable is set inline from the `columns` prop (1, 2, 3, or 
 |----------|-------|
 | `font-size` | `0.9375rem` |
 | `font-weight` | `600` |
-| `color` | `var(--pug-color-text-primary)` |
+| `color` | `var(--flint-color-text-primary)` |
 
 #### `.card-radio-group__description`
 
@@ -247,7 +247,7 @@ The `--columns` CSS variable is set inline from the `columns` prop (1, 2, 3, or 
 | `margin` | `0` |
 | `font-size` | `0.8125rem` |
 | `line-height` | `1.5` |
-| `color` | `var(--pug-color-text-secondary)` |
+| `color` | `var(--flint-color-text-secondary)` |
 
 ### Data Attributes Used for CSS Selectors
 
@@ -261,7 +261,7 @@ The `--columns` CSS variable is set inline from the `columns` prop (1, 2, 3, or 
 ## 9. Svelte Notes
 
 - Uses `createEventDispatcher` for `change` event
-- Composes `Card` primitive from `@pug/svelte-primitives` with `isInteractive`
+- Composes `Card` primitive from `@flint/svelte-primitives` with `isInteractive`
   and `isSelected` props
 - Arrow key navigation uses `data-card-radio-index` attributes and
   `document.querySelector` for DOM focus management
@@ -269,7 +269,7 @@ The `--columns` CSS variable is set inline from the `columns` prop (1, 2, 3, or 
 
 ## 10. GPUI Notes
 
-- Expected crate/module surface: `pug_gpui::composites::card_radio_group`
+- Expected crate/module surface: `flint_gpui::composites::card_radio_group`
 - Render as a flex grid with Card children
 - Arrow key navigation needs custom key event handling
 

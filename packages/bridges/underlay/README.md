@@ -1,15 +1,15 @@
 # Underlay Bridge
 
 Underlay bridge scaffolding for token aliases, theme translation, and
-wrapper-preservation rules that ingest Pug artifacts without exposing Pug
+wrapper-preservation rules that ingest Flint artifacts without exposing Flint
 directly to Underlay app code.
 
 ## Current Purpose
 
-In `g03`, this package is the zero-leak adapter layer between Pug and
+In `g03`, this package is the zero-leak adapter layer between Flint and
 Underlay-owned public APIs.
 
-It exists to let Underlay adopt Pug internally while keeping:
+It exists to let Underlay adopt Flint internally while keeping:
 
 - Underlay-owned import paths
 - Underlay-owned component names
@@ -20,7 +20,7 @@ It is not:
 
 - a public app-facing UI kit
 - a second canonical token source
-- a place where Pug naming becomes the public Underlay contract
+- a place where Flint naming becomes the public Underlay contract
 
 ## Package Shape
 
@@ -29,7 +29,7 @@ packages/bridges/underlay/
   README.md
   package.json
   css/
-    pug-to-underlay.css
+    flint-to-underlay.css
   ts/
     index.ts
     token-map.ts
@@ -40,7 +40,7 @@ packages/bridges/underlay/
 
 ## Ownership Rule
 
-- Pug owns canonical token meaning and component contracts.
+- Flint owns canonical token meaning and component contracts.
 - The bridge owns alias maps and wrapper-preservation guidance.
 - Underlay owns app-facing APIs and rollout.
 
@@ -48,10 +48,10 @@ packages/bridges/underlay/
 
 Underlay apps should not need:
 
-- direct Pug imports
-- Pug token variable names
-- Pug component names
-- Pug-specific prop names
+- direct Flint imports
+- Flint token variable names
+- Flint component names
+- Flint-specific prop names
 
 ## Current Public Bridge Surface
 
@@ -63,7 +63,7 @@ The bridge currently exports:
 - `zero-leak-proof`
 
 These exports are bridge-owned adoption artifacts. They describe how Underlay
-may consume Pug, but they do not redefine Pug canonically.
+may consume Flint, but they do not redefine Flint canonically.
 
 ## Current Zero-Leak Proof
 
@@ -87,7 +87,7 @@ The current proof surfaces are:
 Each of these surfaces assumes:
 
 - app-facing imports stay Underlay-owned
-- Pug internals may sit underneath wrappers
+- Flint internals may sit underneath wrappers
 - bridge-local token aliases and theme maps remain internal implementation detail
 
 ## Remaining Adoption Friction

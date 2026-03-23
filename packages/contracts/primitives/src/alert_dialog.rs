@@ -1,4 +1,4 @@
-use pug_tokens::semantic;
+use flint_tokens::semantic;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
 pub enum AlertDialogTone {

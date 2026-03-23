@@ -22,7 +22,7 @@
     openChange: { open: boolean };
   }>();
 
-  const listboxId = `pug-combobox-listbox-${++nextComboboxId}`;
+  const listboxId = `flint-combobox-listbox-${++nextComboboxId}`;
   let rootElement: HTMLDivElement | null = null;
   let uncontrolledValue = defaultValue;
   let query = "";
@@ -163,35 +163,35 @@
   }
 
   .combobox__input {
-    min-height: var(--pug-size-control-height);
-    padding: 0 var(--pug-space-control-x);
+    min-height: var(--flint-size-control-height);
+    padding: 0 var(--flint-space-control-x);
     border: 0.0625rem solid var(
-      --pug-treatment-interactive-subtle-border,
-      var(--pug-color-border-default)
+      --flint-treatment-interactive-subtle-border,
+      var(--flint-color-border-default)
     );
-    border-radius: var(--pug-treatment-interactive-subtle-radius, var(--pug-radius-control));
-    background: var(--pug-treatment-interactive-subtle-fill, var(--pug-color-background-surface));
-    box-shadow: var(--pug-treatment-interactive-subtle-shadow, none);
-    color: var(--pug-color-text-primary);
-    font-family: var(--pug-typography-body-family);
-    font-size: var(--pug-typography-body-size);
-    line-height: var(--pug-typography-body-lineHeight);
+    border-radius: var(--flint-treatment-interactive-subtle-radius, var(--flint-radius-control));
+    background: var(--flint-treatment-interactive-subtle-fill, var(--flint-color-background-surface));
+    box-shadow: var(--flint-treatment-interactive-subtle-shadow, none);
+    color: var(--flint-color-text-primary);
+    font-family: var(--flint-typography-body-family);
+    font-size: var(--flint-typography-body-size);
+    line-height: var(--flint-typography-body-lineHeight);
     transition:
-      border-color var(--pug-motion-duration-interaction) var(--pug-motion-easing-standard),
-      box-shadow var(--pug-motion-duration-interaction) var(--pug-motion-easing-standard),
-      background var(--pug-motion-duration-interaction) var(--pug-motion-easing-standard);
+      border-color var(--flint-motion-duration-interaction) var(--flint-motion-easing-standard),
+      box-shadow var(--flint-motion-duration-interaction) var(--flint-motion-easing-standard),
+      background var(--flint-motion-duration-interaction) var(--flint-motion-easing-standard);
   }
 
   .combobox__input:focus-visible {
-    border-color: var(--pug-color-accent-focusRing);
+    border-color: var(--flint-color-accent-focusRing);
     background: var(
-      --pug-treatment-interactive-subtle-fill-focus,
-      var(--pug-color-background-surface)
+      --flint-treatment-interactive-subtle-fill-focus,
+      var(--flint-color-background-surface)
     );
     box-shadow: var(
-      --pug-treatment-interactive-subtle-shadow-focus,
-      0 0 0 var(--pug-border-width-focus)
-        color-mix(in srgb, var(--pug-color-accent-focusRing) 28%, transparent)
+      --flint-treatment-interactive-subtle-shadow-focus,
+      0 0 0 var(--flint-border-width-focus)
+        color-mix(in srgb, var(--flint-color-accent-focusRing) 28%, transparent)
     );
     outline: none;
   }
@@ -201,20 +201,20 @@
     top: calc(100% + 0.375rem);
     left: 0;
     right: 0;
-    z-index: var(--pug-overlay-z-menu);
+    z-index: var(--flint-overlay-z-menu);
     display: grid;
     gap: 0.125rem;
     padding: 0.25rem;
     border: 0.0625rem solid var(
-      --pug-treatment-surface-elevated-border,
-      color-mix(in srgb, var(--pug-color-border-default) 72%, transparent)
+      --flint-treatment-surface-elevated-border,
+      color-mix(in srgb, var(--flint-color-border-default) 72%, transparent)
     );
-    border-radius: var(--pug-treatment-surface-elevated-radius, var(--pug-radius-surface));
+    border-radius: var(--flint-treatment-surface-elevated-radius, var(--flint-radius-surface));
     background: var(
-      --pug-treatment-surface-elevated-fill,
-      color-mix(in srgb, var(--pug-color-background-elevated) 98%, var(--pug-color-background-panel))
+      --flint-treatment-surface-elevated-fill,
+      color-mix(in srgb, var(--flint-color-background-elevated) 98%, var(--flint-color-background-panel))
     );
-    box-shadow: var(--pug-treatment-surface-elevated-shadow, var(--pug-elevation-overlay));
+    box-shadow: var(--flint-treatment-surface-elevated-shadow, var(--flint-elevation-overlay));
   }
 
   .combobox__option {
@@ -223,9 +223,9 @@
     width: 100%;
     padding: 0.375rem 0.5rem;
     border: 0;
-    border-radius: calc(var(--pug-radius-control) - 0.125rem);
+    border-radius: calc(var(--flint-radius-control) - 0.125rem);
     background: transparent;
-    color: var(--pug-color-text-primary);
+    color: var(--flint-color-text-primary);
     cursor: pointer;
     font: inherit;
     text-align: left;
@@ -233,17 +233,17 @@
 
   .combobox__option[data-highlighted="true"],
   .combobox__option:hover:not(:disabled) {
-    background: color-mix(in srgb, var(--pug-color-accent-base) 16%, transparent);
+    background: color-mix(in srgb, var(--flint-color-accent-base) 16%, transparent);
   }
 
   .combobox__option:disabled {
     cursor: not-allowed;
-    opacity: var(--pug-state-opacity-disabled);
+    opacity: var(--flint-state-opacity-disabled);
   }
 
   .combobox__description,
   .combobox__empty {
-    color: var(--pug-color-text-secondary);
+    color: var(--flint-color-text-secondary);
     font-size: 0.6875rem;
     line-height: 1.35;
   }

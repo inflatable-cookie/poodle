@@ -1,8 +1,8 @@
 //! NavigationMenu — Jetstream nav menu backed by NavigationMenuSpec.
 
 use jetstream_runtime::ui_element::{self, JsEl};
-use pug_jetstream::JetstreamThemeProvider;
-use pug_primitives::NavigationMenuSpec;
+use flint_jetstream::JetstreamThemeProvider;
+use flint_primitives::NavigationMenuSpec;
 
 use crate::theme_ext::resolve_color;
 

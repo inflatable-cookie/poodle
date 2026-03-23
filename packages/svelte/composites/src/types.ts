@@ -1,9 +1,9 @@
-import type { IconProp } from "@pug/svelte-primitives/types";
+import type { IconProp } from "@flint/svelte-primitives/types";
 
 export type TableSortDirection = "asc" | "desc";
 export type BrowseState = "ready" | "empty" | "loading" | "error" | "no-results";
 export type MinColumnWidth = "sm" | "md" | "lg";
-export type { CardVariant } from "@pug/svelte-primitives";
+export type { CardVariant } from "@flint/svelte-primitives";
 export type PickerVariant = "inline" | "popover" | "modal";
 export type SelectionMode = "single" | "multiple";
 export type MediaState = "ready" | "loading" | "error" | "empty";
@@ -49,7 +49,7 @@ export type TableRow = {
   summary?: string | null;
 };
 
-export type { BulkAction } from "@pug/svelte-primitives";
+export type { BulkAction } from "@flint/svelte-primitives";
 
 export type BreadcrumbItem = {
   value: string;
@@ -123,7 +123,7 @@ export type ReorderableItem = {
   label: string;
 };
 
-export type { SortField, ActiveSort } from "@pug/svelte-primitives";
+export type { SortField, ActiveSort } from "@flint/svelte-primitives";
 
 export type DiscoveryState = "ready" | "loading" | "error" | "empty" | "no-results";
 

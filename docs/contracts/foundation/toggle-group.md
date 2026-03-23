@@ -136,14 +136,14 @@ Updated: 2026-03-15
 
 | Property | Value |
 |----------|-------|
-| `min-height` | `calc(var(--pug-size-control-height) - 0.25rem)` |
+| `min-height` | `calc(var(--flint-size-control-height) - 0.25rem)` |
 | `padding` | `0 0.75rem` |
-| `border` | `0.0625rem solid color-mix(in srgb, var(--pug-color-border-subtle) 82%, transparent)` |
-| `border-radius` | `var(--pug-radius-control)` |
-| `background` | `color-mix(in srgb, var(--pug-surface) 72%, var(--pug-color-background-elevated))` |
-| `color` | `var(--pug-color-text-primary)` |
+| `border` | `0.0625rem solid color-mix(in srgb, var(--flint-color-border-subtle) 82%, transparent)` |
+| `border-radius` | `var(--flint-radius-control)` |
+| `background` | `color-mix(in srgb, var(--flint-surface) 72%, var(--flint-color-background-elevated))` |
+| `color` | `var(--flint-color-text-primary)` |
 | `cursor` | `pointer` |
-| `font-family` | `var(--pug-typography-label-family)` |
+| `font-family` | `var(--flint-typography-label-family)` |
 | `font-size` | `0.75rem` |
 | `font-weight` | `600` |
 | `line-height` | `1` |
@@ -153,14 +153,14 @@ Updated: 2026-03-15
 
 | Property | Value |
 |----------|-------|
-| `background` | `color-mix(in srgb, var(--pug-color-accent-base) 22%, transparent)` |
-| `border-color` | `color-mix(in srgb, var(--pug-color-accent-base) 42%, var(--pug-color-border-default))` |
+| `background` | `color-mix(in srgb, var(--flint-color-accent-base) 22%, transparent)` |
+| `border-color` | `color-mix(in srgb, var(--flint-color-accent-base) 42%, var(--flint-color-border-default))` |
 
 ### Item — focus visible (`:focus-visible`)
 
 | Property | Value |
 |----------|-------|
-| `outline` | `var(--pug-border-width-focus) solid var(--pug-color-accent-focusRing)` |
+| `outline` | `var(--flint-border-width-focus) solid var(--flint-color-accent-focusRing)` |
 | `outline-offset` | `0.125rem` |
 
 ### Item — disabled (`:disabled`)
@@ -168,7 +168,7 @@ Updated: 2026-03-15
 | Property | Value |
 |----------|-------|
 | `cursor` | `not-allowed` |
-| `opacity` | `var(--pug-state-opacity-disabled)` |
+| `opacity` | `var(--flint-state-opacity-disabled)` |
 
 ## 9. Svelte Notes
 
@@ -183,7 +183,7 @@ Updated: 2026-03-15
 
 ## 10. GPUI Notes
 
-- expected crate/module surface: `pug_gpui::primitives::toggle_group`
+- expected crate/module surface: `flint_gpui::primitives::toggle_group`
 - GPUI must switch between radiogroup and group semantics based on selectionMode
 - Per-item checked/pressed state must be exposed in the accessibility tree
 - The accent-tinted selected state uses color-mix; GPUI must replicate the

@@ -103,7 +103,7 @@ visual output.
 
 ## 10. GPUI Notes
 
-- expected crate/module surface: `pug_gpui::components::icon_provider`
+- expected crate/module surface: `flint_gpui::components::icon_provider`
 - Context modeled as GPUI's context system or a shared `Arc<IconRegistry>`
 - No visual component; acts as a scope boundary for registry access
 - May be unnecessary in GPUI if registry is globally available

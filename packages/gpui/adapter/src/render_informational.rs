@@ -4,14 +4,14 @@
 //! TimeZoneSelect, ZonedDateTimePicker, SplitButton, DatePicker, Calendar,
 //! RangeCalendar, DateRangePicker, DateTimePicker, DateTimeRangePicker
 
-use pug_adapter::{RenderComponent, ThemeProvider};
-use pug_primitives::{
+use flint_adapter::{RenderComponent, ThemeProvider};
+use flint_primitives::{
     CalendarSpec, CodeSpec, ColorPickerSpec, DatePickerSpec, DateRangePickerSpec,
     DateTimePickerSpec, DateTimeRangePickerSpec, DurationInputSpec, EyebrowSpec, FileUploadSpec,
     PillSpec, RangeCalendarSpec, SplitButtonSpec, TimeAgoSpec, TimeZoneSelectSpec,
     ZonedDateTimePickerSpec,
 };
-use pug_style::StyleDescriptor;
+use flint_style::StyleDescriptor;
 
 use crate::style_map::map_style;
 use crate::{GpuiAdapter, GpuiElementHandle, GpuiTarget};
@@ -267,9 +267,9 @@ impl RenderComponent<DateTimeRangePickerSpec> for GpuiAdapter {
 
 #[cfg(test)]
 mod tests {
-    use pug_adapter::RenderComponent;
-    use pug_primitives::*;
-    use pug_style::StyleDescriptor;
+    use flint_adapter::RenderComponent;
+    use flint_primitives::*;
+    use flint_style::StyleDescriptor;
     use crate::{GpuiAdapter, theme::GpuiThemeProvider};
 
     fn a() -> GpuiAdapter { GpuiAdapter::new(GpuiThemeProvider::default()) }

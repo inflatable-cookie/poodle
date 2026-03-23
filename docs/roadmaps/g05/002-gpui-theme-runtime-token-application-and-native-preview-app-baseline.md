@@ -1,10 +1,10 @@
 # g05.002 GPUI Theme Runtime, Token Application, And Native Preview App Baseline
 
 Status: completed
-Owner: Pug Core
+Owner: Flint Core
 Updated: 2026-03-13
 Depends on: g05.001
-Primary repos: `pug`
+Primary repos: `flint`
 
 ## Goals
 

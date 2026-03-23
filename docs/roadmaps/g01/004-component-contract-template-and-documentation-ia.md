@@ -1,10 +1,10 @@
 # g01.004 Component Contract Template And Documentation IA
 
 Status: completed
-Owner: Pug Core
+Owner: Flint Core
 Updated: 2026-03-11
 Depends on: g01.001, g01.002
-Primary repos: `pug`
+Primary repos: `flint`
 
 ## Research Inputs
 
@@ -13,7 +13,7 @@ Primary repos: `pug`
 
 ## Context
 
-Pug's distinguishing promise is docs-first shared contracts. That means the
+Flint's distinguishing promise is docs-first shared contracts. That means the
 documentation system for components is not incidental; it is part of the
 product.
 

@@ -1,8 +1,8 @@
 use gpui::*;
-use pug_adapter::ThemeProvider;
-use pug_gpui::GpuiThemeProvider;
-use pug_primitives::{MeterSpec, EyebrowSpec};
-use pug_gpui_components::{Meter, Eyebrow};
+use flint_adapter::ThemeProvider;
+use flint_gpui::GpuiThemeProvider;
+use flint_primitives::{MeterSpec, EyebrowSpec};
+use flint_gpui_components::{Meter, Eyebrow};
 use crate::style_bridge::color_to_hsla;
 
 pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {

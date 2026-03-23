@@ -5,9 +5,9 @@ Updated: 2026-03-11
 
 ## Context
 
-`g02` begins once Pug has a credible token system, contract model, primitive
+`g02` begins once Flint has a credible token system, contract model, primitive
 suite, workstation-shell baseline, and first Underlay bridge posture. The next
-bottleneck is no longer whether Pug exists conceptually; it is whether Pug can
+bottleneck is no longer whether Flint exists conceptually; it is whether Flint can
 carry a richer catalogue, a usable docs/review surface, and a cleaner package
 shape before downstream repos start depending on it.
 

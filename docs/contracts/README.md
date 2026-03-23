@@ -3,7 +3,7 @@
 Status: active
 Updated: 2026-03-12
 
-Contracts are the docs-first source of truth for Pug components.
+Contracts are the docs-first source of truth for Flint components.
 
 Each component contract must describe one semantic component surface that both
 Svelte and GPUI implementations can satisfy against the same review checklist.

@@ -86,26 +86,26 @@
 
 <style>
   .button {
-    --pug-button-fill: var(
-      --pug-treatment-interactive-fill,
-      var(--pug-color-background-surface)
+    --flint-button-fill: var(
+      --flint-treatment-interactive-fill,
+      var(--flint-color-background-surface)
     );
-    --pug-button-fill-hover: var(
-      --pug-treatment-interactive-fill-active,
-      color-mix(in srgb, var(--pug-color-background-surface) 84%, var(--pug-color-background-elevated))
+    --flint-button-fill-hover: var(
+      --flint-treatment-interactive-fill-active,
+      color-mix(in srgb, var(--flint-color-background-surface) 84%, var(--flint-color-background-elevated))
     );
-    --pug-button-fill-active: color-mix(
+    --flint-button-fill-active: color-mix(
       in srgb,
-      var(--pug-color-background-surface) 72%,
-      var(--pug-color-background-elevated)
+      var(--flint-color-background-surface) 72%,
+      var(--flint-color-background-elevated)
     );
-    --pug-button-border: var(
-      --pug-treatment-interactive-border,
-      var(--pug-color-border-default)
+    --flint-button-border: var(
+      --flint-treatment-interactive-border,
+      var(--flint-color-border-default)
     );
-    --pug-button-text: var(--pug-color-text-primary);
-    --pug-button-shadow: var(
-      --pug-treatment-interactive-shadow,
+    --flint-button-text: var(--flint-color-text-primary);
+    --flint-button-shadow: var(
+      --flint-treatment-interactive-shadow,
       inset 0 0.0625rem 0 color-mix(in srgb, white 8%, transparent)
     );
     display: inline-flex;
@@ -113,159 +113,159 @@
     justify-content: center;
     gap: 0.375rem;
     min-width: 5rem;
-    height: var(--pug-size-control-height);
-    padding: 0 var(--pug-space-control-x);
-    border: 0.0625rem solid var(--pug-button-border);
-    border-radius: var(--pug-treatment-interactive-radius, var(--pug-radius-control));
-    background: var(--pug-button-fill);
-    box-shadow: var(--pug-button-shadow);
-    color: var(--pug-button-text);
+    height: var(--flint-size-control-height);
+    padding: 0 var(--flint-space-control-x);
+    border: 0.0625rem solid var(--flint-button-border);
+    border-radius: var(--flint-treatment-interactive-radius, var(--flint-radius-control));
+    background: var(--flint-button-fill);
+    box-shadow: var(--flint-button-shadow);
+    color: var(--flint-button-text);
     cursor: pointer;
-    font-family: var(--pug-typography-label-family);
-    font-size: var(--pug-typography-label-size);
-    font-weight: var(--pug-typography-label-weight);
+    font-family: var(--flint-typography-label-family);
+    font-size: var(--flint-typography-label-size);
+    font-weight: var(--flint-typography-label-weight);
     letter-spacing: 0.01em;
     line-height: 1;
     text-decoration: none;
     transition:
-      background var(--pug-motion-duration-interaction) var(--pug-motion-easing-standard),
-      border-color var(--pug-motion-duration-interaction) var(--pug-motion-easing-standard),
-      color var(--pug-motion-duration-interaction) var(--pug-motion-easing-standard),
-      box-shadow var(--pug-motion-duration-interaction) var(--pug-motion-easing-standard),
-      transform var(--pug-motion-duration-interaction) var(--pug-motion-easing-standard);
+      background var(--flint-motion-duration-interaction) var(--flint-motion-easing-standard),
+      border-color var(--flint-motion-duration-interaction) var(--flint-motion-easing-standard),
+      color var(--flint-motion-duration-interaction) var(--flint-motion-easing-standard),
+      box-shadow var(--flint-motion-duration-interaction) var(--flint-motion-easing-standard),
+      transform var(--flint-motion-duration-interaction) var(--flint-motion-easing-standard);
   }
 
   .button[data-size="sm"] {
     min-width: 4.25rem;
-    height: calc(var(--pug-size-control-height) - 0.375rem);
-    padding: 0 calc(var(--pug-space-control-x) - 0.125rem);
+    height: calc(var(--flint-size-control-height) - 0.375rem);
+    padding: 0 calc(var(--flint-space-control-x) - 0.125rem);
     font-size: 0.75rem;
   }
 
   .button[data-size="lg"] {
     min-width: 5.75rem;
-    height: calc(var(--pug-size-control-height) + 0.375rem);
-    padding: 0 calc(var(--pug-space-control-x) + 0.125rem);
+    height: calc(var(--flint-size-control-height) + 0.375rem);
+    padding: 0 calc(var(--flint-space-control-x) + 0.125rem);
     font-size: 0.875rem;
   }
 
   /* Icon padding adjustment: reduce padding on icon side by 0.125rem */
   .button[data-has-leading] {
-    padding-left: calc(var(--pug-space-control-x) - 0.125rem);
+    padding-left: calc(var(--flint-space-control-x) - 0.125rem);
   }
 
   .button[data-has-trailing] {
-    padding-right: calc(var(--pug-space-control-x) - 0.125rem);
+    padding-right: calc(var(--flint-space-control-x) - 0.125rem);
   }
 
   .button[data-has-leading][data-size="sm"] {
-    padding-left: calc(var(--pug-space-control-x) - 0.25rem);
+    padding-left: calc(var(--flint-space-control-x) - 0.25rem);
   }
 
   .button[data-has-trailing][data-size="sm"] {
-    padding-right: calc(var(--pug-space-control-x) - 0.25rem);
+    padding-right: calc(var(--flint-space-control-x) - 0.25rem);
   }
 
   .button[data-has-leading][data-size="lg"] {
-    padding-left: var(--pug-space-control-x);
+    padding-left: var(--flint-space-control-x);
   }
 
   .button[data-has-trailing][data-size="lg"] {
-    padding-right: var(--pug-space-control-x);
+    padding-right: var(--flint-space-control-x);
   }
 
   /* Icon-only: square, no min-width */
   .button[data-icon-only] {
     min-width: 0;
     padding: 0;
-    width: var(--pug-size-control-height);
+    width: var(--flint-size-control-height);
   }
 
   .button[data-icon-only][data-size="sm"] {
-    width: calc(var(--pug-size-control-height) - 0.375rem);
+    width: calc(var(--flint-size-control-height) - 0.375rem);
   }
 
   .button[data-icon-only][data-size="lg"] {
-    width: calc(var(--pug-size-control-height) + 0.375rem);
+    width: calc(var(--flint-size-control-height) + 0.375rem);
   }
 
   .button[data-variant="primary"] {
-    --pug-button-fill: var(
-      --pug-treatment-interactive-primary-fill,
-      var(--pug-color-accent-base)
+    --flint-button-fill: var(
+      --flint-treatment-interactive-primary-fill,
+      var(--flint-color-accent-base)
     );
-    --pug-button-fill-hover: var(
-      --pug-treatment-interactive-primary-fill-hover,
-      color-mix(in srgb, white 12%, var(--pug-color-accent-base))
+    --flint-button-fill-hover: var(
+      --flint-treatment-interactive-primary-fill-hover,
+      color-mix(in srgb, white 12%, var(--flint-color-accent-base))
     );
-    --pug-button-border: var(
-      --pug-treatment-interactive-primary-border,
-      color-mix(in srgb, var(--pug-color-accent-base) 84%, black)
+    --flint-button-border: var(
+      --flint-treatment-interactive-primary-border,
+      color-mix(in srgb, var(--flint-color-accent-base) 84%, black)
     );
-    --pug-button-text: var(
-      --pug-treatment-interactive-primary-text,
-      var(--pug-color-text-inverse)
+    --flint-button-text: var(
+      --flint-treatment-interactive-primary-text,
+      var(--flint-color-text-inverse)
     );
-    --pug-button-shadow: var(
-      --pug-treatment-interactive-primary-shadow,
+    --flint-button-shadow: var(
+      --flint-treatment-interactive-primary-shadow,
       inset 0 0.0625rem 0 color-mix(in srgb, white 14%, transparent),
       0 0.375rem 1.125rem color-mix(in srgb, black 18%, transparent)
     );
   }
 
   .button[data-variant="ghost"] {
-    --pug-button-fill: transparent;
-    --pug-button-border: transparent;
-    --pug-button-shadow: none;
+    --flint-button-fill: transparent;
+    --flint-button-border: transparent;
+    --flint-button-shadow: none;
   }
 
   .button[data-tone="danger"] {
-    --pug-button-fill: color-mix(in srgb, var(--pug-color-status-danger) 16%, var(--pug-color-background-surface));
-    --pug-button-border: color-mix(in srgb, var(--pug-color-status-danger) 46%, var(--pug-color-border-default));
-    --pug-button-text: var(--pug-color-text-primary);
+    --flint-button-fill: color-mix(in srgb, var(--flint-color-status-danger) 16%, var(--flint-color-background-surface));
+    --flint-button-border: color-mix(in srgb, var(--flint-color-status-danger) 46%, var(--flint-color-border-default));
+    --flint-button-text: var(--flint-color-text-primary);
   }
 
   .button[data-variant="primary"][data-tone="danger"] {
-    --pug-button-fill: var(--pug-color-status-danger);
-    --pug-button-border: color-mix(in srgb, var(--pug-color-status-danger) 84%, black);
-    --pug-button-text: var(--pug-color-text-inverse);
-    --pug-button-shadow:
+    --flint-button-fill: var(--flint-color-status-danger);
+    --flint-button-border: color-mix(in srgb, var(--flint-color-status-danger) 84%, black);
+    --flint-button-text: var(--flint-color-text-inverse);
+    --flint-button-shadow:
       inset 0 0.0625rem 0 color-mix(in srgb, white 14%, transparent),
       0 0.375rem 1.125rem color-mix(in srgb, black 18%, transparent);
   }
 
   .button[data-variant="ghost"][data-tone="danger"] {
-    --pug-button-fill: transparent;
-    --pug-button-border: transparent;
-    --pug-button-text: var(--pug-color-status-danger);
-    --pug-button-shadow: none;
+    --flint-button-fill: transparent;
+    --flint-button-border: transparent;
+    --flint-button-text: var(--flint-color-status-danger);
+    --flint-button-shadow: none;
   }
 
   .button:hover:not(:disabled) {
-    background: var(--pug-button-fill-hover);
+    background: var(--flint-button-fill-hover);
     border-color: var(
-      --pug-treatment-interactive-border-active,
-      color-mix(in srgb, var(--pug-button-border) 78%, var(--pug-color-text-primary))
+      --flint-treatment-interactive-border-active,
+      color-mix(in srgb, var(--flint-button-border) 78%, var(--flint-color-text-primary))
     );
     box-shadow: var(
-      --pug-treatment-interactive-shadow-active,
-      var(--pug-button-shadow)
+      --flint-treatment-interactive-shadow-active,
+      var(--flint-button-shadow)
     );
   }
 
   .button:active:not(:disabled) {
-    background: var(--pug-button-fill-active);
+    background: var(--flint-button-fill-active);
     transform: translateY(0.03125rem);
   }
 
   .button:focus-visible {
-    outline: var(--pug-border-width-focus) solid var(--pug-color-accent-focusRing);
+    outline: var(--flint-border-width-focus) solid var(--flint-color-accent-focusRing);
     outline-offset: 0.125rem;
   }
 
   .button:disabled {
     cursor: not-allowed;
-    opacity: var(--pug-state-opacity-disabled);
+    opacity: var(--flint-state-opacity-disabled);
   }
 
   .button__label {
@@ -277,9 +277,9 @@
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    width: var(--pug-size-icon-md);
-    height: var(--pug-size-icon-md);
-    font-family: var(--pug-typography-code-family);
+    width: var(--flint-size-icon-md);
+    height: var(--flint-size-icon-md);
+    font-family: var(--flint-typography-code-family);
     font-size: 0.875rem;
     line-height: 1;
   }
@@ -289,7 +289,7 @@
     align-items: center;
     justify-content: center;
     opacity: 0.5;
-    margin-left: calc(var(--pug-space-inline-sm) * -0.25);
+    margin-left: calc(var(--flint-space-inline-sm) * -0.25);
   }
 
   .button__spinner {

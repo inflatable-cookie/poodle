@@ -1,7 +1,7 @@
 # g11.004 Selection Batch
 
 Status: planned
-Owner: Pug Core
+Owner: Flint Core
 Depends on: contract audit
 
 ## Components

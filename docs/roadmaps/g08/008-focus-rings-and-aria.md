@@ -1,7 +1,7 @@
 # g08.008 Focus Rings And ARIA Attributes
 
 Status: complete (documented as known platform delta)
-Owner: Pug Core
+Owner: Flint Core
 Depends on: g08.005, g08.006, g08.007
 
 ## Contract Check

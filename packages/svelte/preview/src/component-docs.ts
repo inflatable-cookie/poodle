@@ -41,7 +41,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
       { name: "valueChange", payload: "{ value: string | string[] | null }", description: "Fires when the open panel(s) change." },
     ],
     usage: `<script lang="ts">
-  import { Accordion } from "@pug/svelte-primitives";
+  import { Accordion } from "@flint/svelte-primitives";
 
   const items = [
     { value: "one", title: "Section One", content: "Content for section one." },
@@ -72,7 +72,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
       { name: "openChange", payload: "{ open: boolean }", description: "Fires when the open state changes." },
     ],
     usage: `<script lang="ts">
-  import { AlertDialog } from "@pug/svelte-primitives";
+  import { AlertDialog } from "@flint/svelte-primitives";
 
   let open = false;
 </script>
@@ -95,7 +95,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
     slots: [],
     events: [],
     usage: `<script lang="ts">
-  import { AudioPlayer } from "@pug/svelte-composites";
+  import { AudioPlayer } from "@flint/svelte-composites";
 </script>
 
 <AudioPlayer src="/audio/podcast-episode.mp3" showSpeedControl />`,
@@ -115,7 +115,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
       { name: "change", payload: "{ blocks: EditorBlock[] }", description: "Fires when any block content changes." },
     ],
     usage: `<script lang="ts">
-  import { BlockEditor } from "@pug/svelte-composites";
+  import { BlockEditor } from "@flint/svelte-composites";
 
   let blocks = [{ type: "paragraph", content: "Start writing..." }];
 </script>
@@ -139,7 +139,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
     ],
     events: [],
     usage: `<script lang="ts">
-  import { Box } from "@pug/svelte-primitives";
+  import { Box } from "@flint/svelte-primitives";
 </script>
 
 <Box padding="md" width="100%">
@@ -158,7 +158,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
       { name: "navigate", payload: "{ value: string }", description: "Fires when a breadcrumb item is clicked." },
     ],
     usage: `<script lang="ts">
-  import { Breadcrumbs } from "@pug/svelte-primitives";
+  import { Breadcrumbs } from "@flint/svelte-primitives";
 
   const items = [
     { value: "home", label: "Home" },
@@ -182,7 +182,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
       { name: "clear", payload: "void", description: "Fires when the selection is cleared." },
     ],
     usage: `<script lang="ts">
-  import { BulkActionBar } from "@pug/svelte-primitives";
+  import { BulkActionBar } from "@flint/svelte-primitives";
 
   const actions = [
     { id: "delete", label: "Delete", tone: "danger" },
@@ -218,7 +218,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
       { name: "blur", payload: "FocusEvent", description: "Fires when the button loses focus." },
     ],
     usage: `<script lang="ts">
-  import { Button } from "@pug/svelte-primitives";
+  import { Button } from "@flint/svelte-primitives";
 </script>
 
 <Button variant="primary" tone="default" leadingIcon="plus" on:click={() => console.log("clicked")}>
@@ -242,7 +242,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
       { name: "monthChange", payload: "{ month: string }", description: "Fires when the visible month changes." },
     ],
     usage: `<script lang="ts">
-  import { Calendar } from "@pug/svelte-primitives";
+  import { Calendar } from "@flint/svelte-primitives";
 
   let selectedDate: string | null = null;
 </script>
@@ -269,7 +269,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
       { name: "dismiss", payload: "void", description: "Fires when the callout is dismissed." },
     ],
     usage: `<script lang="ts">
-  import { Callout } from "@pug/svelte-primitives";
+  import { Callout } from "@flint/svelte-primitives";
 </script>
 
 <Callout tone="warning" title="Unsaved changes" message="You have unsaved changes that will be lost." isDismissible />`,
@@ -292,7 +292,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
     ],
     events: [],
     usage: `<script lang="ts">
-  import { Card } from "@pug/svelte-primitives";
+  import { Card } from "@flint/svelte-primitives";
 </script>
 
 <Card variant="default" layout="vertical">
@@ -317,7 +317,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
       { name: "change", payload: "{ value: string }", description: "Fires when the selected card changes." },
     ],
     usage: `<script lang="ts">
-  import { CardRadioGroup } from "@pug/svelte-composites";
+  import { CardRadioGroup } from "@flint/svelte-composites";
 
   const items = [
     { value: "basic", label: "Basic", description: "For personal use" },
@@ -347,7 +347,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
       { name: "checkedChange", payload: "{ checked: boolean }", description: "Fires when the checked state changes." },
     ],
     usage: `<script lang="ts">
-  import { Checkbox } from "@pug/svelte-primitives";
+  import { Checkbox } from "@flint/svelte-primitives";
 
   let agreed = false;
 </script>
@@ -369,7 +369,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
     slots: [],
     events: [],
     usage: `<script lang="ts">
-  import { Code } from "@pug/svelte-primitives";
+  import { Code } from "@flint/svelte-primitives";
 
   const source = \`function greet(name: string) {
   return \\\`Hello, \\\${name}!\\\`;
@@ -391,7 +391,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
       { name: "toggle", payload: "{ isCollapsed: boolean }", description: "Fires when the collapsed state changes." },
     ],
     usage: `<script lang="ts">
-  import { CollapseToggle } from "@pug/svelte-primitives";
+  import { CollapseToggle } from "@flint/svelte-primitives";
 
   let collapsed = false;
 </script>
@@ -416,7 +416,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
       { name: "openChange", payload: "{ open: boolean }", description: "Fires when the open state changes." },
     ],
     usage: `<script lang="ts">
-  import { Collapsible } from "@pug/svelte-primitives";
+  import { Collapsible } from "@flint/svelte-primitives";
 </script>
 
 <Collapsible title="Advanced options" description="Configure additional settings">
@@ -442,7 +442,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
       { name: "openChange", payload: "{ open: boolean }", description: "Fires when the picker open state changes." },
     ],
     usage: `<script lang="ts">
-  import { ColorPicker } from "@pug/svelte-primitives";
+  import { ColorPicker } from "@flint/svelte-primitives";
 
   let color = "#6366f1";
   const swatches = ["#ef4444", "#f59e0b", "#10b981", "#3b82f6", "#8b5cf6"];
@@ -467,7 +467,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
       { name: "openChange", payload: "{ open: boolean }", description: "Fires when the dropdown open state changes." },
     ],
     usage: `<script lang="ts">
-  import { Combobox } from "@pug/svelte-primitives";
+  import { Combobox } from "@flint/svelte-primitives";
 
   const options = [
     { value: "us", label: "United States" },
@@ -498,7 +498,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
       { name: "activeChange", payload: "{ id: string | null }", description: "Fires when the active (highlighted) item changes." },
     ],
     usage: `<script lang="ts">
-  import { CommandPalette } from "@pug/svelte-composites";
+  import { CommandPalette } from "@flint/svelte-composites";
 
   let open = false;
   const items = [
@@ -528,7 +528,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
       { name: "cancel", payload: "void", description: "Fires when the action is cancelled." },
     ],
     usage: `<script lang="ts">
-  import { ConfirmAction } from "@pug/svelte-composites";
+  import { ConfirmAction } from "@flint/svelte-composites";
 </script>
 
 <ConfirmAction
@@ -556,7 +556,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
       { name: "action", payload: "{ value: string }", description: "Fires when a menu item is selected." },
     ],
     usage: `<script lang="ts">
-  import { ContextMenu } from "@pug/svelte-primitives";
+  import { ContextMenu } from "@flint/svelte-primitives";
 
   const items = [
     { value: "copy", label: "Copy" },
@@ -597,7 +597,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
       { name: "exportCsv", payload: "{ filename: string }", description: "Fires when CSV export is triggered." },
     ],
     usage: `<script lang="ts">
-  import { DataTable } from "@pug/svelte-composites";
+  import { DataTable } from "@flint/svelte-composites";
 
   const columns = [
     { id: "name", label: "Name", isSortable: true },
@@ -634,7 +634,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
       { name: "openChange", payload: "{ open: boolean }", description: "Fires when the calendar open state changes." },
     ],
     usage: `<script lang="ts">
-  import { DatePicker } from "@pug/svelte-primitives";
+  import { DatePicker } from "@flint/svelte-primitives";
 
   let date: string | null = null;
 </script>
@@ -662,7 +662,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
       { name: "openChange", payload: "{ open: boolean }", description: "Fires when the picker open state changes." },
     ],
     usage: `<script lang="ts">
-  import { DateRangePicker } from "@pug/svelte-primitives";
+  import { DateRangePicker } from "@flint/svelte-primitives";
 
   let range = { start: null, end: null };
 </script>
@@ -690,7 +690,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
       { name: "openChange", payload: "{ open: boolean }", description: "Fires when the picker open state changes." },
     ],
     usage: `<script lang="ts">
-  import { DateTimePicker } from "@pug/svelte-primitives";
+  import { DateTimePicker } from "@flint/svelte-primitives";
 
   let dateTime = { date: null, time: null };
 </script>
@@ -718,7 +718,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
       { name: "openChange", payload: "{ open: boolean }", description: "Fires when the picker open state changes." },
     ],
     usage: `<script lang="ts">
-  import { DateTimeRangePicker } from "@pug/svelte-primitives";
+  import { DateTimeRangePicker } from "@flint/svelte-primitives";
 
   let range = { start: { date: null, time: null }, end: { date: null, time: null } };
 </script>
@@ -738,7 +738,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
     ],
     events: [],
     usage: `<script lang="ts">
-  import { DetailRow } from "@pug/svelte-primitives";
+  import { DetailRow } from "@flint/svelte-primitives";
 </script>
 
 <DetailRow label="Email" value="alice@example.com" />
@@ -759,7 +759,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
     ],
     events: [],
     usage: `<script lang="ts">
-  import { DetailSection, DetailRow } from "@pug/svelte-composites";
+  import { DetailSection, DetailRow } from "@flint/svelte-composites";
 </script>
 
 <DetailSection title="Account Information" description="Basic account details">
@@ -784,7 +784,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
     ],
     events: [],
     usage: `<script lang="ts">
-  import { DetailShell, DetailSection } from "@pug/svelte-composites";
+  import { DetailShell, DetailSection } from "@flint/svelte-composites";
 </script>
 
 <DetailShell title="User Profile" state="ready">
@@ -814,7 +814,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
       { name: "requestClose", payload: "void", description: "Fires when a close is requested (Escape or backdrop click)." },
     ],
     usage: `<script lang="ts">
-  import { Dialog, Button } from "@pug/svelte-primitives";
+  import { Dialog, Button } from "@flint/svelte-primitives";
 
   let open = false;
 </script>
@@ -853,7 +853,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
       { name: "panelDrop", payload: "{ panel: PanelDragData; targetEdge: DockEdge }", description: "Fires when a panel is dropped onto this dock." },
     ],
     usage: `<script lang="ts">
-  import { DockRegion } from "@pug/svelte-composites";
+  import { DockRegion } from "@flint/svelte-composites";
 
   const items = [
     { id: "explorer", label: "Explorer", icon: "folder" },
@@ -893,7 +893,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
       { name: "requestClose", payload: "void", description: "Fires when a close is requested." },
     ],
     usage: `<script lang="ts">
-  import { Drawer, Button } from "@pug/svelte-primitives";
+  import { Drawer, Button } from "@flint/svelte-primitives";
 
   let open = false;
 </script>
@@ -927,7 +927,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
       { name: "change", payload: "{ hours: number; minutes: number; seconds: number; totalSeconds: number }", description: "Fires when the duration value changes." },
     ],
     usage: `<script lang="ts">
-  import { DurationInput } from "@pug/svelte-primitives";
+  import { DurationInput } from "@flint/svelte-primitives";
 
   let hours = 1;
   let minutes = 30;
@@ -959,7 +959,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
       { name: "cancel", payload: "void", description: "Fires when the edit is cancelled." },
     ],
     usage: `<script lang="ts">
-  import { EditableLabel } from "@pug/svelte-primitives";
+  import { EditableLabel } from "@flint/svelte-primitives";
 
   let name = "Untitled Document";
 </script>
@@ -982,7 +982,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
       { name: "change", payload: "{ items: ReorderableItem[] }", description: "Fires when the list items change." },
     ],
     usage: `<script lang="ts">
-  import { EditableList } from "@pug/svelte-composites";
+  import { EditableList } from "@flint/svelte-composites";
 
   let items = [
     { id: "1", label: "First item" },
@@ -1009,7 +1009,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
       { name: "change", payload: "{ value: string }", description: "Fires when the input value changes." },
     ],
     usage: `<script lang="ts">
-  import { EmbedInput } from "@pug/svelte-composites";
+  import { EmbedInput } from "@flint/svelte-composites";
 
   let url = "";
   let parsed = null;
@@ -1029,7 +1029,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
     slots: [],
     events: [],
     usage: `<script lang="ts">
-  import { EmbedPreview } from "@pug/svelte-composites";
+  import { EmbedPreview } from "@flint/svelte-composites";
 
   export let parsed;
 </script>
@@ -1049,8 +1049,8 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
     ],
     events: [],
     usage: `<script lang="ts">
-  import { EmptyState } from "@pug/svelte-composites";
-  import { Button } from "@pug/svelte-primitives";
+  import { EmptyState } from "@flint/svelte-composites";
+  import { Button } from "@flint/svelte-primitives";
 </script>
 
 <EmptyState title="No results found" message="Try adjusting your search or filters.">
@@ -1069,7 +1069,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
     ],
     events: [],
     usage: `<script lang="ts">
-  import { Eyebrow } from "@pug/svelte-primitives";
+  import { Eyebrow } from "@flint/svelte-primitives";
 </script>
 
 <Eyebrow>Featured</Eyebrow>`,
@@ -1094,7 +1094,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
     ],
     events: [],
     usage: `<script lang="ts">
-  import { Field } from "@pug/svelte-primitives";
+  import { Field } from "@flint/svelte-primitives";
 
   let email = "";
 </script>
@@ -1121,7 +1121,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
     ],
     events: [],
     usage: `<script lang="ts">
-  import { FieldSet, Field, TextInput } from "@pug/svelte-primitives";
+  import { FieldSet, Field, TextInput } from "@flint/svelte-primitives";
 </script>
 
 <FieldSet legend="Address" columns={2}>
@@ -1156,7 +1156,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
       { name: "remove", payload: "{ item: FileUploadItem }", description: "Fires when a file is removed." },
     ],
     usage: `<script lang="ts">
-  import { FileUpload } from "@pug/svelte-primitives";
+  import { FileUpload } from "@flint/svelte-primitives";
 
   let files = [];
 </script>
@@ -1181,8 +1181,8 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
     ],
     events: [],
     usage: `<script lang="ts">
-  import { FilterToolbar } from "@pug/svelte-composites";
-  import { Select } from "@pug/svelte-primitives";
+  import { FilterToolbar } from "@flint/svelte-composites";
+  import { Select } from "@flint/svelte-primitives";
 </script>
 
 <FilterToolbar ariaLabel="User filters" collapsible>
@@ -1199,8 +1199,8 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
     ],
     events: [],
     usage: `<script lang="ts">
-  import { FormActions } from "@pug/svelte-primitives";
-  import { Button } from "@pug/svelte-primitives";
+  import { FormActions } from "@flint/svelte-primitives";
+  import { Button } from "@flint/svelte-primitives";
 </script>
 
 <FormActions align="end">
@@ -1229,7 +1229,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
       { name: "openChange", payload: "{ open: boolean }", description: "Fires when the open state changes." },
     ],
     usage: `<script lang="ts">
-  import { FormDialog } from "@pug/svelte-composites";
+  import { FormDialog } from "@flint/svelte-composites";
 
   let open = false;
   let submitting = false;
@@ -1255,8 +1255,8 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
     ],
     events: [],
     usage: `<script lang="ts">
-  import { FormLayout } from "@pug/svelte-composites";
-  import { Field, Button } from "@pug/svelte-primitives";
+  import { FormLayout } from "@flint/svelte-composites";
+  import { Field, Button } from "@flint/svelte-primitives";
 </script>
 
 <FormLayout columns={2} description="Enter your details below.">
@@ -1286,7 +1286,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
     ],
     events: [],
     usage: `<script lang="ts">
-  import { Grid } from "@pug/svelte-primitives";
+  import { Grid } from "@flint/svelte-primitives";
 </script>
 
 <Grid columns="1fr 1fr 1fr" gap="lg" padding="md">
@@ -1313,7 +1313,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
       { name: "openChange", payload: "{ open: boolean }", description: "Fires when the open state changes." },
     ],
     usage: `<script lang="ts">
-  import { HoverCard } from "@pug/svelte-primitives";
+  import { HoverCard } from "@flint/svelte-primitives";
 </script>
 
 <HoverCard placement="top">
@@ -1329,17 +1329,17 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
 
   icon: {
     props: [
-      { name: "icon", type: "IconNodes | string | null", required: true, description: "The icon to display. Pass an IconNodes array (from @pug/icons-lucide or lucide-static) for tree-shaking, or a string name to resolve from an IconProvider set or the built-in internals." },
+      { name: "icon", type: "IconNodes | string | null", required: true, description: "The icon to display. Pass an IconNodes array (from @flint/icons-lucide or lucide-static) for tree-shaking, or a string name to resolve from an IconProvider set or the built-in internals." },
       { name: "name", type: "string | null", default: "null", description: "Deprecated. Use icon instead. Alias kept for internal convenience." },
       { name: "size", type: "ControlSize", default: '"md"', description: "Size of the icon." },
       { name: "ariaLabel", type: "string | null", default: "null", description: "Accessible label for the icon. When set, the SVG receives role=\"img\"; otherwise it is role=\"presentation\"." },
     ],
     slots: [],
     events: [],
-    usage: `<!-- Tree-shakeable: import individual icons from @pug/icons-lucide -->
+    usage: `<!-- Tree-shakeable: import individual icons from @flint/icons-lucide -->
 <script lang="ts">
-  import { Icon } from "@pug/svelte-primitives";
-  import { search, heart, star } from "@pug/icons-lucide";
+  import { Icon } from "@flint/svelte-primitives";
+  import { search, heart, star } from "@flint/icons-lucide";
 </script>
 
 <Icon icon={search} size="md" ariaLabel="Search" />
@@ -1351,7 +1351,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
 
 <!-- Bulk icon set via provider -->
 <script lang="ts">
-  import { Icon, IconProvider } from "@pug/svelte-primitives";
+  import { Icon, IconProvider } from "@flint/svelte-primitives";
   import iconNodes from "lucide-static/icon-nodes.json";
 </script>
 
@@ -1370,7 +1370,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
     ],
     events: [],
     usage: `<script lang="ts">
-  import { IconProvider, Icon } from "@pug/svelte-primitives";
+  import { IconProvider, Icon } from "@flint/svelte-primitives";
   import iconNodes from "lucide-static/icon-nodes.json";
 </script>
 
@@ -1406,8 +1406,8 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
       { name: "blur", payload: "FocusEvent", description: "Fires when the button loses focus." },
     ],
     usage: `<script lang="ts">
-  import { IconButton } from "@pug/svelte-primitives";
-  import { trash2, plus, settings } from "@pug/icons-lucide";
+  import { IconButton } from "@flint/svelte-primitives";
+  import { trash2, plus, settings } from "@flint/icons-lucide";
 </script>
 
 <!-- Direct import (tree-shakeable) -->
@@ -1443,7 +1443,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
       { name: "click", payload: "MouseEvent", description: "Fires when the card is clicked." },
     ],
     usage: `<script lang="ts">
-  import { ListCard } from "@pug/svelte-composites";
+  import { ListCard } from "@flint/svelte-composites";
 </script>
 
 <ListCard title="Alice Johnson" subtitle="Software Engineer" meta="Active" isInteractive>
@@ -1465,7 +1465,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
     slots: [],
     events: [],
     usage: `<script lang="ts">
-  import { LogList } from "@pug/svelte-composites";
+  import { LogList } from "@flint/svelte-composites";
 
   const entries = [
     { id: "1", level: "info", message: "Server started on port 3000", timestamp: Date.now() },
@@ -1491,7 +1491,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
       { name: "change", payload: "{ value: string }", description: "Fires when the markdown content changes." },
     ],
     usage: `<script lang="ts">
-  import { MarkdownEditor } from "@pug/svelte-composites";
+  import { MarkdownEditor } from "@flint/svelte-composites";
 
   let content = "# Hello World\n\nStart writing here...";
 </script>
@@ -1515,7 +1515,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
       { name: "openChange", payload: "{ open: boolean }", description: "Fires when the open state changes." },
     ],
     usage: `<script lang="ts">
-  import { MediaPicker } from "@pug/svelte-composites";
+  import { MediaPicker } from "@flint/svelte-composites";
 
   let open = false;
   const items = [
@@ -1550,7 +1550,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
     ],
     events: [],
     usage: `<script lang="ts">
-  import { MediaPreview } from "@pug/svelte-composites";
+  import { MediaPreview } from "@flint/svelte-composites";
 </script>
 
 <MediaPreview
@@ -1584,7 +1584,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
     ],
     events: [],
     usage: `<script lang="ts">
-  import { MediaThumbnail } from "@pug/svelte-composites";
+  import { MediaThumbnail } from "@flint/svelte-composites";
 </script>
 
 <MediaThumbnail kind="video" aspectRatio="landscape" badge="HD" meta="3:24">
@@ -1608,8 +1608,8 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
       { name: "action", payload: "{ value: string }", description: "Fires when a menu item is selected." },
     ],
     usage: `<script lang="ts">
-  import { Menu } from "@pug/svelte-primitives";
-  import { Button } from "@pug/svelte-primitives";
+  import { Menu } from "@flint/svelte-primitives";
+  import { Button } from "@flint/svelte-primitives";
 
   const items = [
     { value: "edit", label: "Edit" },
@@ -1639,7 +1639,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
       { name: "action", payload: "{ value: string }", description: "Fires when a menu action is selected." },
     ],
     usage: `<script lang="ts">
-  import { Menubar } from "@pug/svelte-primitives";
+  import { Menubar } from "@flint/svelte-primitives";
 
   const items = [
     { value: "file", label: "File", children: [
@@ -1669,7 +1669,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
     slots: [],
     events: [],
     usage: `<script lang="ts">
-  import { Meter } from "@pug/svelte-primitives";
+  import { Meter } from "@flint/svelte-primitives";
 </script>
 
 <Meter value={72} min={0} max={100} low={25} high={75} optimum={50} ariaLabel="Disk usage" />`,
@@ -1687,7 +1687,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
     slots: [],
     events: [],
     usage: `<script lang="ts">
-  import { MetricTile } from "@pug/svelte-composites";
+  import { MetricTile } from "@flint/svelte-composites";
 </script>
 
 <MetricTile label="Revenue" value="$48,200" trend="up" trendLabel="+12.5%" sparklineData={[20, 35, 28, 42, 48]} />`,
@@ -1709,7 +1709,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
       { name: "click", payload: "MouseEvent", description: "Fires when the card is clicked." },
     ],
     usage: `<script lang="ts">
-  import { NavCard } from "@pug/svelte-primitives";
+  import { NavCard } from "@flint/svelte-primitives";
 </script>
 
 <NavCard title="Dashboard" description="View your analytics" href="/dashboard" badge="New">
@@ -1731,7 +1731,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
       { name: "valueChange", payload: "{ value: string | null }", description: "Fires when the active menu value changes." },
     ],
     usage: `<script lang="ts">
-  import { NavigationMenu } from "@pug/svelte-primitives";
+  import { NavigationMenu } from "@flint/svelte-primitives";
 
   const items = [
     { value: "products", label: "Products" },
@@ -1771,7 +1771,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
       { name: "blur", payload: "FocusEvent", description: "Fires when the input loses focus." },
     ],
     usage: `<script lang="ts">
-  import { NumberEntry } from "@pug/svelte-primitives";
+  import { NumberEntry } from "@flint/svelte-primitives";
 
   let quantity: number | null = 1;
 </script>
@@ -1791,7 +1791,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
       { name: "change", payload: "{ sort: ActiveSort | null }", description: "Fires when the sort configuration changes." },
     ],
     usage: `<script lang="ts">
-  import { OrderBy } from "@pug/svelte-primitives";
+  import { OrderBy } from "@flint/svelte-primitives";
 
   const fields = [
     { value: "name", label: "Name" },
@@ -1817,8 +1817,8 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
     ],
     events: [],
     usage: `<script lang="ts">
-  import { PageHeader } from "@pug/svelte-composites";
-  import { Button } from "@pug/svelte-primitives";
+  import { PageHeader } from "@flint/svelte-composites";
+  import { Button } from "@flint/svelte-primitives";
 </script>
 
 <PageHeader title="All Products" eyebrow="Catalog" subtitle="Manage your product listings">
@@ -1842,7 +1842,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
       { name: "cancel", payload: "void", description: "Fires when the cancel button is clicked." },
     ],
     usage: `<script lang="ts">
-  import { PageLoading } from "@pug/svelte-composites";
+  import { PageLoading } from "@flint/svelte-composites";
 </script>
 
 <PageLoading isVisible message="Loading your data..." canCancel on:cancel={() => abortRequest()} />`,
@@ -1860,7 +1860,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
       { name: "pageChange", payload: "{ page: number }", description: "Fires when the current page changes." },
     ],
     usage: `<script lang="ts">
-  import { Pagination } from "@pug/svelte-primitives";
+  import { Pagination } from "@flint/svelte-primitives";
 
   let page = 1;
 </script>
@@ -1880,7 +1880,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
       { name: "pageChange", payload: "{ page: number }", description: "Fires when the page changes." },
     ],
     usage: `<script lang="ts">
-  import { PaginationSummary } from "@pug/svelte-primitives";
+  import { PaginationSummary } from "@flint/svelte-primitives";
 </script>
 
 <PaginationSummary currentPage={1} totalPages={10} totalItems={50} pageSize={5} />`,
@@ -1899,7 +1899,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
       { name: "reorder", payload: "{ items: string[] }", description: "Fires when tabs are reordered." },
     ],
     usage: `<script lang="ts">
-  import { PanelTabs } from "@pug/svelte-composites";
+  import { PanelTabs } from "@flint/svelte-composites";
 
   let activeTab = "explorer";
 
@@ -1936,7 +1936,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
     ],
     events: [],
     usage: `<script lang="ts">
-  import { PickerShell } from "@pug/svelte-composites";
+  import { PickerShell } from "@flint/svelte-composites";
 </script>
 
 <PickerShell title="Select Items" description="Browse and pick items" resultCount={42} selectionCount={3}>
@@ -1961,7 +1961,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
     ],
     events: [],
     usage: `<script lang="ts">
-  import { Pill } from "@pug/svelte-primitives";
+  import { Pill } from "@flint/svelte-primitives";
 </script>
 
 <Pill tone="success" appearance="solid">Active</Pill>
@@ -1983,7 +1983,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
       { name: "complete", payload: "{ value: string }", description: "Fires when all character fields are filled." },
     ],
     usage: `<script lang="ts">
-  import { PinInput } from "@pug/svelte-primitives";
+  import { PinInput } from "@flint/svelte-primitives";
 </script>
 
 <PinInput length={6} mask on:complete={(e) => verify(e.detail.value)} />`,
@@ -2007,7 +2007,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
       { name: "openChange", payload: "{ open: boolean }", description: "Fires when the open state changes." },
     ],
     usage: `<script lang="ts">
-  import { Popover, Button } from "@pug/svelte-primitives";
+  import { Popover, Button } from "@flint/svelte-primitives";
 </script>
 
 <Popover placement="bottom-start">
@@ -2029,7 +2029,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
     slots: [],
     events: [],
     usage: `<script lang="ts">
-  import { Progress } from "@pug/svelte-primitives";
+  import { Progress } from "@flint/svelte-primitives";
 </script>
 
 <Progress value={65} max={100} ariaLabel="Upload progress" />
@@ -2052,7 +2052,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
       { name: "valueChange", payload: "{ value: string }", description: "Fires when the selected value changes." },
     ],
     usage: `<script lang="ts">
-  import { RadioGroup } from "@pug/svelte-primitives";
+  import { RadioGroup } from "@flint/svelte-primitives";
 
   const options = [
     { value: "sm", label: "Small" },
@@ -2082,7 +2082,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
       { name: "monthChange", payload: "{ month: string }", description: "Fires when the visible month changes." },
     ],
     usage: `<script lang="ts">
-  import { RangeCalendar } from "@pug/svelte-primitives";
+  import { RangeCalendar } from "@flint/svelte-primitives";
 
   let range = { start: null, end: null };
 </script>
@@ -2108,7 +2108,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
       { name: "valueCommit", payload: "{ value: [number, number] }", description: "Fires when the range value is committed (drag end)." },
     ],
     usage: `<script lang="ts">
-  import { RangeSlider } from "@pug/svelte-primitives";
+  import { RangeSlider } from "@flint/svelte-primitives";
 
   let priceRange: [number, number] = [20, 80];
 </script>
@@ -2130,7 +2130,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
       { name: "valueChange", payload: "{ value: number | null }", description: "Fires when the rating value changes." },
     ],
     usage: `<script lang="ts">
-  import { Rating } from "@pug/svelte-primitives";
+  import { Rating } from "@flint/svelte-primitives";
 
   let stars: number | null = 3;
 </script>
@@ -2149,7 +2149,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
     ],
     events: [],
     usage: `<script lang="ts">
-  import { Region } from "@pug/svelte-primitives";
+  import { Region } from "@flint/svelte-primitives";
 </script>
 
 <Region label="Sidebar" color="blue" minHeight="200px" />`,
@@ -2181,7 +2181,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
       { name: "drillContext", payload: "{ context: DrillDownContext }", description: "Fires when a drill-down context changes." },
     ],
     usage: `<script lang="ts">
-  import { RelationPicker } from "@pug/svelte-composites";
+  import { RelationPicker } from "@flint/svelte-composites";
 
   const items = [
     { id: "1", label: "Alice" },
@@ -2208,7 +2208,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
       { name: "reorder", payload: "{ items: ReorderableItem[] }", description: "Fires when items are reordered." },
     ],
     usage: `<script lang="ts">
-  import { ReorderableList } from "@pug/svelte-composites";
+  import { ReorderableList } from "@flint/svelte-composites";
 
   let items = [
     { id: "1", label: "First" },
@@ -2237,7 +2237,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
       { name: "resizeStep", payload: "{ delta: number }", description: "Fires when resized via keyboard step." },
     ],
     usage: `<script lang="ts">
-  import { ResizeHandle } from "@pug/svelte-primitives";
+  import { ResizeHandle } from "@flint/svelte-primitives";
 </script>
 
 <ResizeHandle orientation="horizontal" ariaLabel="Resize sidebar" ariaValueNow={50} />`,
@@ -2258,7 +2258,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
       { name: "scroll", payload: "Event", description: "Fires when the container is scrolled." },
     ],
     usage: `<script lang="ts">
-  import { ScrollShell } from "@pug/svelte-primitives";
+  import { ScrollShell } from "@flint/svelte-primitives";
 </script>
 
 <ScrollShell direction="vertical" padding="md" style="max-height: 300px;">
@@ -2287,7 +2287,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
       { name: "cancel", payload: "void", description: "Fires when the search is cancelled." },
     ],
     usage: `<script lang="ts">
-  import { SearchField } from "@pug/svelte-primitives";
+  import { SearchField } from "@flint/svelte-primitives";
 
   let query = "";
 </script>
@@ -2309,7 +2309,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
       { name: "valueChange", payload: "{ value: string }", description: "Fires when the selected segment changes." },
     ],
     usage: `<script lang="ts">
-  import { SegmentedControl } from "@pug/svelte-primitives";
+  import { SegmentedControl } from "@flint/svelte-primitives";
 
   const options = [
     { value: "list", label: "List" },
@@ -2340,7 +2340,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
       { name: "valueChange", payload: "{ value: string }", description: "Fires when the selected value changes." },
     ],
     usage: `<script lang="ts">
-  import { Select } from "@pug/svelte-primitives";
+  import { Select } from "@flint/svelte-primitives";
 
   const options = [
     { value: "draft", label: "Draft" },
@@ -2364,7 +2364,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
       { name: "clear", payload: "void", description: "Fires when all items are cleared." },
     ],
     usage: `<script lang="ts">
-  import { SelectionSummary } from "@pug/svelte-composites";
+  import { SelectionSummary } from "@flint/svelte-composites";
 
   const items = [
     { id: "1", label: "Alice" },
@@ -2385,7 +2385,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
     slots: [],
     events: [],
     usage: `<script lang="ts">
-  import { Separator } from "@pug/svelte-primitives";
+  import { Separator } from "@flint/svelte-primitives";
 </script>
 
 <p>Section one content</p>
@@ -2405,7 +2405,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
     slots: [],
     events: [],
     usage: `<script lang="ts">
-  import { Skeleton } from "@pug/svelte-primitives";
+  import { Skeleton } from "@flint/svelte-primitives";
 </script>
 
 <Skeleton shape="circle" width="48px" height="48px" />
@@ -2429,7 +2429,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
       { name: "valueCommit", payload: "{ value: number }", description: "Fires when the slider value is committed (drag end)." },
     ],
     usage: `<script lang="ts">
-  import { Slider } from "@pug/svelte-primitives";
+  import { Slider } from "@flint/svelte-primitives";
 
   let volume = 50;
 </script>
@@ -2457,7 +2457,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
       { name: "change", payload: "{ value: string; isManual: boolean }", description: "Fires when the slug value changes." },
     ],
     usage: `<script lang="ts">
-  import { SlugField } from "@pug/svelte-composites";
+  import { SlugField } from "@flint/svelte-composites";
 
   let title = "My New Article";
   let slug = "";
@@ -2474,7 +2474,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
     slots: [],
     events: [],
     usage: `<script lang="ts">
-  import { Spacer } from "@pug/svelte-primitives";
+  import { Spacer } from "@flint/svelte-primitives";
 </script>
 
 <div style="display: flex;">
@@ -2503,7 +2503,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
       { name: "action", payload: "{ value: string }", description: "Fires when a dropdown menu item is selected." },
     ],
     usage: `<script lang="ts">
-  import { SplitButton } from "@pug/svelte-primitives";
+  import { SplitButton } from "@flint/svelte-primitives";
 
   const items = [
     { value: "save-draft", label: "Save as Draft" },
@@ -2540,7 +2540,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
       { name: "secondaryCollapsedChange", payload: "{ isCollapsed: boolean }", description: "Fires when the secondary pane collapse state changes." },
     ],
     usage: `<script lang="ts">
-  import { SplitView } from "@pug/svelte-composites";
+  import { SplitView } from "@flint/svelte-composites";
 </script>
 
 <SplitView orientation="horizontal" defaultRatio={0.3} showCollapsePrimary>
@@ -2569,7 +2569,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
     ],
     events: [],
     usage: `<script lang="ts">
-  import { Stack, Button } from "@pug/svelte-primitives";
+  import { Stack, Button } from "@flint/svelte-primitives";
 </script>
 
 <Stack direction="row" gap="sm" align="center">
@@ -2589,7 +2589,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
     ],
     events: [],
     usage: `<script lang="ts">
-  import { StatusBar } from "@pug/svelte-primitives";
+  import { StatusBar } from "@flint/svelte-primitives";
 </script>
 
 <StatusBar summary="3 items selected">
@@ -2609,7 +2609,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
     ],
     events: [],
     usage: `<script lang="ts">
-  import { StatusIndicator } from "@pug/svelte-primitives";
+  import { StatusIndicator } from "@flint/svelte-primitives";
 </script>
 
 <StatusIndicator status="success" label="Online" />
@@ -2631,7 +2631,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
     ],
     events: [],
     usage: `<script lang="ts">
-  import { Surface } from "@pug/svelte-primitives";
+  import { Surface } from "@flint/svelte-primitives";
 </script>
 
 <Surface tone="panel" border="subtle" padding="lg" isElevated>
@@ -2656,7 +2656,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
       { name: "checkedChange", payload: "{ checked: boolean }", description: "Fires when the checked state changes." },
     ],
     usage: `<script lang="ts">
-  import { Switch } from "@pug/svelte-primitives";
+  import { Switch } from "@flint/svelte-primitives";
 
   let notifications = true;
 </script>
@@ -2675,7 +2675,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
     slots: [],
     events: [],
     usage: `<script lang="ts">
-  import { Table } from "@pug/svelte-primitives";
+  import { Table } from "@flint/svelte-primitives";
 
   const columns = [
     { key: "name", label: "Name" },
@@ -2712,7 +2712,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
       { name: "close", payload: "{ value: string }", description: "Fires when a tab close button is clicked." },
     ],
     usage: `<script lang="ts">
-  import { Tabs } from "@pug/svelte-primitives";
+  import { Tabs } from "@flint/svelte-primitives";
 
   const items = [
     { value: "overview", label: "Overview" },
@@ -2754,7 +2754,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
       { name: "blur", payload: "FocusEvent", description: "Fires when the textarea loses focus." },
     ],
     usage: `<script lang="ts">
-  import { TextArea } from "@pug/svelte-primitives";
+  import { TextArea } from "@flint/svelte-primitives";
 
   let comment = "";
 </script>
@@ -2793,7 +2793,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
       { name: "blur", payload: "FocusEvent", description: "Fires when the input loses focus." },
     ],
     usage: `<script lang="ts">
-  import { TextInput } from "@pug/svelte-primitives";
+  import { TextInput } from "@flint/svelte-primitives";
 
   let email = "";
 </script>
@@ -2811,7 +2811,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
     slots: [],
     events: [],
     usage: `<script lang="ts">
-  import { TimeAgo } from "@pug/svelte-primitives";
+  import { TimeAgo } from "@flint/svelte-primitives";
 </script>
 
 <TimeAgo datetime={new Date("2026-03-20T12:00:00Z")} live />`,
@@ -2834,7 +2834,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
       { name: "valueChange", payload: "{ value: string | null }", description: "Fires when the time value changes." },
     ],
     usage: `<script lang="ts">
-  import { TimeField } from "@pug/svelte-primitives";
+  import { TimeField } from "@flint/svelte-primitives";
 
   let time = "09:00";
 </script>
@@ -2859,7 +2859,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
       { name: "valueChange", payload: "{ value: string }", description: "Fires when the selected time zone changes." },
     ],
     usage: `<script lang="ts">
-  import { TimeZoneSelect } from "@pug/svelte-primitives";
+  import { TimeZoneSelect } from "@flint/svelte-primitives";
 
   let tz = "America/New_York";
 </script>
@@ -2878,7 +2878,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
       { name: "action", payload: "{ id: string }", description: "Fires when a toast action button is clicked." },
     ],
     usage: `<script lang="ts">
-  import { ToastStack } from "@pug/svelte-composites";
+  import { ToastStack } from "@flint/svelte-composites";
 
   let toasts = [
     { id: "1", title: "Saved", description: "Your changes have been saved." },
@@ -2906,7 +2906,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
       { name: "pressedChange", payload: "{ pressed: boolean }", description: "Fires when the pressed state changes." },
     ],
     usage: `<script lang="ts">
-  import { Toggle } from "@pug/svelte-primitives";
+  import { Toggle } from "@flint/svelte-primitives";
 
   let bold = false;
 </script>
@@ -2930,7 +2930,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
       { name: "valueChange", payload: "{ value: string | string[] }", description: "Fires when the selected value(s) change." },
     ],
     usage: `<script lang="ts">
-  import { ToggleGroup } from "@pug/svelte-primitives";
+  import { ToggleGroup } from "@flint/svelte-primitives";
 
   const options = [
     { value: "left", label: "Left" },
@@ -2952,8 +2952,8 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
     ],
     events: [],
     usage: `<script lang="ts">
-  import { Toolbar } from "@pug/svelte-primitives";
-  import { Button } from "@pug/svelte-primitives";
+  import { Toolbar } from "@flint/svelte-primitives";
+  import { Button } from "@flint/svelte-primitives";
 </script>
 
 <Toolbar ariaLabel="Formatting">
@@ -2977,8 +2977,8 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
       { name: "openChange", payload: "{ open: boolean }", description: "Fires when the tooltip open state changes." },
     ],
     usage: `<script lang="ts">
-  import { Tooltip } from "@pug/svelte-primitives";
-  import { Button } from "@pug/svelte-primitives";
+  import { Tooltip } from "@flint/svelte-primitives";
+  import { Button } from "@flint/svelte-primitives";
 </script>
 
 <Tooltip content="Save your work" placement="top">
@@ -2998,7 +2998,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
       { name: "valueChange", payload: "{ value: TriStateValue }", description: "Fires when the tri-state value changes." },
     ],
     usage: `<script lang="ts">
-  import { TriStateSwitch } from "@pug/svelte-primitives";
+  import { TriStateSwitch } from "@flint/svelte-primitives";
 
   let filter = "default";
 </script>
@@ -3018,7 +3018,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
     slots: [],
     events: [],
     usage: `<script lang="ts">
-  import { VideoPlayer } from "@pug/svelte-composites";
+  import { VideoPlayer } from "@flint/svelte-composites";
 </script>
 
 <VideoPlayer src="/videos/intro.mp4" poster="/images/poster.jpg" showCaptions />`,
@@ -3045,7 +3045,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
       { name: "openChange", payload: "{ open: boolean }", description: "Fires when the picker open state changes." },
     ],
     usage: `<script lang="ts">
-  import { ZonedDateTimePicker } from "@pug/svelte-primitives";
+  import { ZonedDateTimePicker } from "@flint/svelte-primitives";
 
   let meeting = { date: null, time: null, timeZone: "America/New_York" };
 </script>
@@ -3066,7 +3066,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
       { name: "activeChange", payload: "{ id: string | null }", description: "Fires when the active item changes." },
     ],
     usage: `<script lang="ts">
-  import { ActionDiscoveryPanel } from "@pug/svelte-composites";
+  import { ActionDiscoveryPanel } from "@flint/svelte-composites";
 
   const items = [
     { id: "copy", label: "Copy", shortcut: "Cmd+C" },
@@ -3091,8 +3091,8 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
     ],
     events: [],
     usage: `<script lang="ts">
-  import { AppHeader } from "@pug/svelte-composites";
-  import { Button } from "@pug/svelte-primitives";
+  import { AppHeader } from "@flint/svelte-composites";
+  import { Button } from "@flint/svelte-primitives";
 </script>
 
 <AppHeader title="My App" subtitle="Dashboard">

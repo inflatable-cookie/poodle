@@ -1,9 +1,9 @@
 //! FormActions — real GPUI component backed by FormActionsSpec.
 
 use gpui::*;
-use pug_adapter::ThemeProvider;
-use pug_gpui::GpuiThemeProvider;
-use pug_primitives::{FormActionAlign, FormActionsSpec};
+use flint_adapter::ThemeProvider;
+use flint_gpui::GpuiThemeProvider;
+use flint_primitives::{FormActionAlign, FormActionsSpec};
 
 
 /// A real GPUI form actions bar backed by `FormActionsSpec`.

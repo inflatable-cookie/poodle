@@ -1,6 +1,6 @@
 <script lang="ts">
-  import { FileUpload, Eyebrow } from "@pug/svelte-primitives";
-  import type { FileUploadItem } from "@pug/svelte-primitives";
+  import { FileUpload, Eyebrow } from "@flint/svelte-primitives";
+  import type { FileUploadItem } from "@flint/svelte-primitives";
 
   let imageFiles: FileUploadItem[] = [];
   let docFiles: FileUploadItem[] = [];
@@ -58,7 +58,7 @@
 
   .error {
     margin: 0;
-    color: var(--pug-color-text-danger, #ef4444);
+    color: var(--flint-color-text-danger, #ef4444);
     font-size: 0.8125rem;
   }
 </style>

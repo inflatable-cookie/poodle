@@ -1,8 +1,8 @@
 //! ContextMenu — real GPUI component backed by ContextMenuSpec.
 
 use gpui::*;
-use pug_gpui::GpuiThemeProvider;
-use pug_primitives::{ContextMenuSpec, MenuSpec};
+use flint_gpui::GpuiThemeProvider;
+use flint_primitives::{ContextMenuSpec, MenuSpec};
 
 use super::menu::Menu;
 
@@ -36,7 +36,7 @@ impl ContextMenu {
         Self {
             spec,
             theme: theme.clone(),
-            id_prefix: "pug-ctx-menu".to_string(),
+            id_prefix: "flint-ctx-menu".to_string(),
             selected_value: None,
             trigger: None,
             on_select: None,

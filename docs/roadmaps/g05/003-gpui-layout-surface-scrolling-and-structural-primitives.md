@@ -1,10 +1,10 @@
 # g05.003 GPUI Layout, Surface, Scrolling, And Structural Primitives
 
 Status: completed
-Owner: Pug Core
+Owner: Flint Core
 Updated: 2026-03-12
 Depends on: g05.001, g05.002
-Primary repos: `pug`
+Primary repos: `flint`
 
 ## Goals
 
@@ -39,9 +39,9 @@ Primary repos: `pug`
   - `SurfaceSpec`
   - `SeparatorSpec`
   - `ScrollShellSpec`
-- bound the new crate to `pug-gpui-tokens` so spacing, surface, border, elevation, and focus treatment resolve from emitted tokens rather than local constants
+- bound the new crate to `flint-gpui-tokens` so spacing, surface, border, elevation, and focus treatment resolve from emitted tokens rather than local constants
 - added crate-level tests proving the initial structural token mappings and defaults
-- promoted `pug-gpui-primitives` into the repo release metadata and package-stability docs as a preview-channel public-intent Rust crate
+- promoted `flint-gpui-primitives` into the repo release metadata and package-stability docs as a preview-channel public-intent Rust crate
 - updated the GPUI token README so the GPUI package story no longer reads as token-only
 
 ## Next Task

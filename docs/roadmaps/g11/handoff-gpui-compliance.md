@@ -82,14 +82,14 @@ Most existing composites are in good shape. The 17 new composites are all minima
 3. Check the gap report entry for known issues
 4. Apply the fix pattern (focus ring, disabled cursor, correct tokens, correct sizes)
 5. For major rewrites, read the Svelte implementation as visual reference
-6. `cargo check -p pug-gpui-components` after each fix
+6. `cargo check -p flint-gpui-components` after each fix
 7. Commit per-batch or per-component with descriptive messages
 8. Update milestone file status when batch is done
 
 ## Compile Command
 
 ```bash
-cd /Users/betterthanclay/Dev/projects/pug/packages/gpui/preview && cargo check
+cd /Users/betterthanclay/Dev/projects/flint/packages/gpui/preview && cargo check
 ```
 
 This checks the full GPUI stack (components + preview).

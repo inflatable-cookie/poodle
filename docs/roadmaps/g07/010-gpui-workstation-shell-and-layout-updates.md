@@ -47,7 +47,7 @@ cargo check — clean compilation, no warnings
 
 ## Full Adapter Coverage
 
-With this milestone, the GPUI adapter covers all 118 Pug specs:
+With this milestone, the GPUI adapter covers all 118 Flint specs:
 - 64 primitive specs (g07.002–006)
 - 41 composite specs (g07.007–009)
 - 13 workstation specs (g07.010)

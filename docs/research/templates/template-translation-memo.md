@@ -24,7 +24,7 @@ This memo synthesizes findings from:
 
 ### [Decision Area 1]
 
-**Decision:** [What Pug will do]
+**Decision:** [What Flint will do]
 
 **Rationale:** [Why this choice was made]
 
@@ -32,7 +32,7 @@ This memo synthesizes findings from:
 
 ### [Decision Area 2]
 
-**Decision:** [What Pug will do]
+**Decision:** [What Flint will do]
 
 **Rationale:** [Why this choice was made]
 

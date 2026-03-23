@@ -6,8 +6,8 @@
 //! - Pill: rounded pill container with tinted active state
 
 use gpui::*;
-use pug_gpui::GpuiThemeProvider;
-use pug_primitives::{Orientation, TabActivationMode, TabDefinition, TabVariant, TabsSpec};
+use flint_gpui::GpuiThemeProvider;
+use flint_primitives::{Orientation, TabActivationMode, TabDefinition, TabVariant, TabsSpec};
 
 use crate::theme_ext::{resolve_color, resolve_opacity, resolve_px, resolve_radius};
 
@@ -35,7 +35,7 @@ impl Tabs {
         Self {
             spec,
             theme: theme.clone(),
-            id_prefix: "pug-tabs".to_string(),
+            id_prefix: "flint-tabs".to_string(),
             on_change: None,
             content: Vec::new(),
         }

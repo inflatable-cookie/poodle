@@ -1,10 +1,10 @@
 # g02.007 Loading, Empty, Error, Notification, And Remediation Depth
 
 Status: completed
-Owner: Pug Core
+Owner: Flint Core
 Updated: 2026-03-11
 Depends on: g02.001, g02.002, g02.003, g02.004, g02.005, g02.006
-Primary repos: `pug`
+Primary repos: `flint`
 
 ## Goals
 

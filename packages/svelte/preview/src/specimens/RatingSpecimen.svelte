@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { Rating, Eyebrow } from "@pug/svelte-primitives";
+  import { Rating, Eyebrow } from "@flint/svelte-primitives";
 
   let rating = 3;
 </script>
@@ -47,6 +47,6 @@
   .specimen__group p {
     margin: 0;
     font-size: 0.875rem;
-    color: var(--pug-color-text-secondary);
+    color: var(--flint-color-text-secondary);
   }
 </style>

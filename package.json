@@ -1,5 +1,5 @@
 {
-    "name": "pug",
+    "name": "flint",
     "private": true,
     "type": "module",
     "workspaces": [

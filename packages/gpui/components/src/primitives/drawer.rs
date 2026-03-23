@@ -1,8 +1,8 @@
 //! Drawer — real GPUI component backed by DrawerSpec.
 
 use gpui::*;
-use pug_gpui::GpuiThemeProvider;
-use pug_primitives::{DrawerEdge, DrawerSpec};
+use flint_gpui::GpuiThemeProvider;
+use flint_primitives::{DrawerEdge, DrawerSpec};
 
 use crate::theme_ext::{color_mix, resolve_color, resolve_px};
 
@@ -92,7 +92,7 @@ impl IntoElement for Drawer {
 
         // Contract: drawer radius = 0, min-width min(28rem, 100vw) ≈ 448px, shadow
         let mut drawer_panel = div()
-            .id("pug-drawer-panel")
+            .id("flint-drawer-panel")
             .focusable()
             .min_w(px(448.0))
             .h_full()
@@ -183,7 +183,7 @@ impl IntoElement for Drawer {
         if spec.is_modal {
             // Modal mode: main as base layer, backdrop overlay on top
             let mut backdrop = div()
-                .id("pug-drawer-backdrop")
+                .id("flint-drawer-backdrop")
                 .absolute()
                 .inset_0()
                 .bg(hsla(0.0, 0.0, 0.0, 0.5))

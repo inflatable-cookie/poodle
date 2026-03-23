@@ -146,17 +146,17 @@ No component-owned events beyond child control behavior and collapse toggle.
 | Property | Value |
 |----------|-------|
 | `display` | `grid` |
-| `gap` | `var(--pug-space-stack-sm)` |
-| `padding` | `var(--pug-space-panel-y) var(--pug-space-panel-x)` |
-| `border` | `0.0625rem solid var(--pug-color-border-subtle)` |
-| `border-radius` | `var(--pug-radius-surface)` |
-| `background` | `color-mix(in srgb, var(--pug-color-background-elevated) 92%, transparent)` |
+| `gap` | `var(--flint-space-stack-sm)` |
+| `padding` | `var(--flint-space-panel-y) var(--flint-space-panel-x)` |
+| `border` | `0.0625rem solid var(--flint-color-border-subtle)` |
+| `border-radius` | `var(--flint-radius-surface)` |
+| `background` | `color-mix(in srgb, var(--flint-color-background-elevated) 92%, transparent)` |
 
 #### `.filter-toolbar[data-sticky="true"]`
 
 | Property | Value |
 |----------|-------|
-| `box-shadow` | `var(--pug-elevation-surface)` |
+| `box-shadow` | `var(--flint-elevation-surface)` |
 
 #### `.filter-toolbar__header`
 
@@ -164,7 +164,7 @@ No component-owned events beyond child control behavior and collapse toggle.
 |----------|-------|
 | `display` | `flex` |
 | `align-items` | `center` |
-| `gap` | `var(--pug-space-inline-sm)` |
+| `gap` | `var(--flint-space-inline-sm)` |
 
 #### `.filter-toolbar[data-collapsed="true"] .filter-toolbar__header`
 
@@ -178,9 +178,9 @@ No component-owned events beyond child control behavior and collapse toggle.
 |----------|-------|
 | `margin` | `0` |
 | `flex` | `1` |
-| `color` | `var(--pug-color-text-secondary)` |
-| `font-size` | `var(--pug-typography-label-size, 0.75rem)` |
-| `line-height` | `var(--pug-typography-label-lineHeight, 1.4)` |
+| `color` | `var(--flint-color-text-secondary)` |
+| `font-size` | `var(--flint-typography-label-size, 0.75rem)` |
+| `line-height` | `var(--flint-typography-label-lineHeight, 1.4)` |
 
 #### `.filter-toolbar__actions`
 
@@ -188,7 +188,7 @@ No component-owned events beyond child control behavior and collapse toggle.
 |----------|-------|
 | `display` | `flex` |
 | `align-items` | `center` |
-| `gap` | `var(--pug-space-inline-xs, 0.25rem)` |
+| `gap` | `var(--flint-space-inline-xs, 0.25rem)` |
 | `margin-left` | `auto` |
 
 #### `.filter-toolbar__controls`
@@ -197,7 +197,7 @@ No component-owned events beyond child control behavior and collapse toggle.
 |----------|-------|
 | `display` | `grid` |
 | `grid-template-columns` | `repeat(var(--ft-columns, 4), minmax(var(--ft-min-width, 10rem), 1fr))` |
-| `gap` | `var(--pug-space-inline-sm)` |
+| `gap` | `var(--flint-space-inline-sm)` |
 | `align-items` | `end` |
 
 The `--ft-columns` and `--ft-min-width` CSS variables are set inline from the `columns` and `minItemWidth` props.
@@ -208,7 +208,7 @@ The `--ft-columns` and `--ft-min-width` CSS variables are set inline from the `c
 |----------|-------|
 | `display` | `flex` |
 | `flex-wrap` | `wrap` |
-| `gap` | `var(--pug-space-inline-sm)` |
+| `gap` | `var(--flint-space-inline-sm)` |
 | `align-items` | `center` |
 
 ### Responsive Breakpoint: `max-width: 960px`
@@ -243,7 +243,7 @@ The `--ft-columns` and `--ft-min-width` CSS variables are set inline from the `c
 
 ## 10. GPUI Notes
 
-- expected crate/module surface: `pug_gpui::composites::filter_toolbar`
+- expected crate/module surface: `flint_gpui::composites::filter_toolbar`
 - implementation-only details: GPUI may realize sticky behavior with native
   layout containers, but must preserve labeled-group semantics and control order
 

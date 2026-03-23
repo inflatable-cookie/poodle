@@ -1,8 +1,8 @@
 {
   "generation": "g04.006",
-  "crateName": "pug-gpui-primitives",
+  "crateName": "flint-gpui-primitives",
   "cratePath": "packages/gpui/primitives",
-  "tokenSource": "pug-gpui-tokens",
+  "tokenSource": "flint-gpui-tokens",
   "contractIds": [
     "accordion",
     "collapsible",

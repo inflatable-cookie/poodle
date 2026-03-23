@@ -6,13 +6,13 @@ Depends on: `023-svelte-visual-hierarchy-and-contrast-baseline.md`, `024-token-e
 
 ## Purpose
 
-Freeze how downstream consumers may restyle Pug components without redefining
-canonical token meaning or forcing Pug to expose its entire CSS surface as
+Freeze how downstream consumers may restyle Flint components without redefining
+canonical token meaning or forcing Flint to expose its entire CSS surface as
 foundational tokens.
 
 ## Core Rule
 
-Pug styling now operates in three layers:
+Flint styling now operates in three layers:
 
 - canonical semantic tokens
 - public appearance recipes and treatment roles
@@ -70,7 +70,7 @@ Examples of unacceptable recipe exposure:
 
 ## Treatment Role Rule
 
-Pug should prefer family-level treatment roles over per-component reinvention.
+Flint should prefer family-level treatment roles over per-component reinvention.
 
 The current seed treatment roles are:
 
@@ -124,7 +124,7 @@ Examples include:
 - branded hero actions
 - campaign-specific layouts
 
-These should compose Pug primitives and composites instead of forcing Pug core
+These should compose Flint primitives and composites instead of forcing Flint core
 to become a marketing-site kit.
 
 ## Safe Override Boundary
@@ -133,8 +133,8 @@ Downstream apps may:
 
 - scope recipe-variable overrides to a subtree
 - define reusable brand treatments
-- apply those treatments consistently across multiple Pug families
-- create app-owned branded wrappers above Pug primitives
+- apply those treatments consistently across multiple Flint families
+- create app-owned branded wrappers above Flint primitives
 
 Downstream apps must not:
 

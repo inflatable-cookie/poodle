@@ -2,7 +2,7 @@ import { aliases, tokens } from "../../../tokens/artifacts/ts/index";
 
 export type UnderlayBridgeToken = {
   underlayVar: string;
-  pugTokenPath: string;
+  flintTokenPath: string;
   cssVar: string;
   note?: string;
 };
@@ -12,59 +12,59 @@ export type UnderlayBridgeToken = {
 export const underlayTokenMap: UnderlayBridgeToken[] = [
   {
     underlayVar: "--underlay-color-canvas",
-    pugTokenPath: "semantic.color.background.canvas",
-    cssVar: "--pug-semantic-color-background-canvas",
+    flintTokenPath: "semantic.color.background.canvas",
+    cssVar: "--flint-semantic-color-background-canvas",
   },
   {
     underlayVar: "--underlay-color-surface",
-    pugTokenPath: "semantic.color.background.surface",
-    cssVar: "--pug-semantic-color-background-surface",
+    flintTokenPath: "semantic.color.background.surface",
+    cssVar: "--flint-semantic-color-background-surface",
   },
   {
     underlayVar: "--underlay-color-panel",
-    pugTokenPath: "semantic.color.background.panel",
-    cssVar: "--pug-semantic-color-background-panel",
+    flintTokenPath: "semantic.color.background.panel",
+    cssVar: "--flint-semantic-color-background-panel",
   },
   {
     underlayVar: "--underlay-color-text-primary",
-    pugTokenPath: "semantic.color.text.primary",
-    cssVar: "--pug-semantic-color-text-primary",
+    flintTokenPath: "semantic.color.text.primary",
+    cssVar: "--flint-semantic-color-text-primary",
   },
   {
     underlayVar: "--underlay-color-text-secondary",
-    pugTokenPath: "semantic.color.text.secondary",
-    cssVar: "--pug-semantic-color-text-secondary",
+    flintTokenPath: "semantic.color.text.secondary",
+    cssVar: "--flint-semantic-color-text-secondary",
   },
   {
     underlayVar: "--underlay-color-border-default",
-    pugTokenPath: "semantic.color.border.default",
-    cssVar: "--pug-semantic-color-border-default",
+    flintTokenPath: "semantic.color.border.default",
+    cssVar: "--flint-semantic-color-border-default",
   },
   {
     underlayVar: "--underlay-color-accent",
-    pugTokenPath: "semantic.color.accent.base",
-    cssVar: "--pug-semantic-color-accent-base",
-    note: "Bridge-local alias only. Canonical accent meaning still lives in Pug.",
+    flintTokenPath: "semantic.color.accent.base",
+    cssVar: "--flint-semantic-color-accent-base",
+    note: "Bridge-local alias only. Canonical accent meaning still lives in Flint.",
   },
   {
     underlayVar: "--underlay-space-panel-x",
-    pugTokenPath: "semantic.space.panel.x",
-    cssVar: "--pug-semantic-space-panel-x",
+    flintTokenPath: "semantic.space.panel.x",
+    cssVar: "--flint-semantic-space-panel-x",
   },
   {
     underlayVar: "--underlay-space-panel-y",
-    pugTokenPath: "semantic.space.panel.y",
-    cssVar: "--pug-semantic-space-panel-y",
+    flintTokenPath: "semantic.space.panel.y",
+    cssVar: "--flint-semantic-space-panel-y",
   },
   {
     underlayVar: "--underlay-size-control-height",
-    pugTokenPath: "semantic.size.control.height",
-    cssVar: "--pug-semantic-size-control-height",
+    flintTokenPath: "semantic.size.control.height",
+    cssVar: "--flint-semantic-size-control-height",
   },
   {
     underlayVar: "--underlay-size-panel-header",
-    pugTokenPath: "semantic.size.panel.header",
-    cssVar: "--pug-semantic-size-panel-header",
+    flintTokenPath: "semantic.size.panel.header",
+    cssVar: "--flint-semantic-size-panel-header",
   },
 ];
 

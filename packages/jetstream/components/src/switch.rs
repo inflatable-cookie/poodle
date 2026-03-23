@@ -7,8 +7,8 @@
 
 use jetstream_runtime::game_ui::Color;
 use jetstream_runtime::ui_element::{self, JsEl};
-use pug_jetstream::JetstreamThemeProvider;
-use pug_primitives::SwitchSpec;
+use flint_jetstream::JetstreamThemeProvider;
+use flint_primitives::SwitchSpec;
 
 use crate::theme_ext::{resolve_color, resolve_opacity, resolve_px};
 
@@ -29,7 +29,7 @@ use crate::theme_ext::{resolve_color, resolve_opacity, resolve_px};
 /// - Track border: 0.0625rem (1px) solid
 /// - Thumb: 0.875rem (14px) diameter
 /// - Thumb travel: 0.875rem (14px) translateX
-/// - Gap: var(--pug-space-inline-sm) = 8px
+/// - Gap: var(--flint-space-inline-sm) = 8px
 pub fn js_switch(spec: &SwitchSpec, theme: &JetstreamThemeProvider) -> JsEl {
     let is_checked = spec.current_checked();
 
@@ -116,7 +116,7 @@ mod tests {
     use super::*;
 
     fn theme() -> JetstreamThemeProvider {
-        JetstreamThemeProvider::from_theme(&pug_tokens::themes::DARK)
+        JetstreamThemeProvider::from_theme(&flint_tokens::themes::DARK)
     }
 
     #[test]

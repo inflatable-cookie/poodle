@@ -1,10 +1,10 @@
 //! Drawer specimen — slide-out drawer panels with content.
 
 use jetstream_runtime::ui_element::*;
-use pug_jetstream::JetstreamThemeProvider;
-use pug_jetstream_components::drawer::js_drawer;
-use pug_jetstream_components::theme_ext::*;
-use pug_primitives::DrawerSpec;
+use flint_jetstream::JetstreamThemeProvider;
+use flint_jetstream_components::drawer::js_drawer;
+use flint_jetstream_components::theme_ext::*;
+use flint_primitives::DrawerSpec;
 
 pub fn render(theme: &JetstreamThemeProvider) -> JsEl {
     let secondary = resolve_color(theme, "semantic.color.text.secondary");

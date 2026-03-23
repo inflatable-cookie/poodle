@@ -1,10 +1,10 @@
 # g05.010 GPUI Native Accessibility, Focus, Keyboard, And Assistive-Technology Proof
 
 Status: completed
-Owner: Pug Core
+Owner: Flint Core
 Updated: 2026-03-12
 Depends on: g05.003, g05.004, g05.005, g05.006, g05.007, g05.008, g05.009
-Primary repos: `pug`
+Primary repos: `flint`
 
 ## Goals
 

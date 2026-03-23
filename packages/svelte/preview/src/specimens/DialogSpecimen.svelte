@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { Dialog, Button, Eyebrow } from "@pug/svelte-primitives";
+  import { Dialog, Button, Eyebrow } from "@flint/svelte-primitives";
 
   let basicOpen = false;
   let alertOpen = false;
@@ -76,6 +76,6 @@
   .specimen__group p {
     margin: 0;
     font-size: 0.875rem;
-    color: var(--pug-color-text-secondary);
+    color: var(--flint-color-text-secondary);
   }
 </style>

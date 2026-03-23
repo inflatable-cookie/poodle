@@ -5,8 +5,8 @@
 //! Note: GPUI has no dashed border — we approximate with solid.
 
 use gpui::*;
-use pug_gpui::GpuiThemeProvider;
-use pug_primitives::{FileUploadSpec, IconSize, IconSpec};
+use flint_gpui::GpuiThemeProvider;
+use flint_primitives::{FileUploadSpec, IconSize, IconSpec};
 
 use super::icon::Icon;
 use crate::theme_ext::{resolve_color, resolve_opacity, resolve_px, resolve_radius};
@@ -78,9 +78,9 @@ impl IntoElement for FileUpload {
         };
 
         let id_str = if let Some(ref suffix) = self.id_suffix {
-            format!("pug-file-upload-{}", suffix)
+            format!("flint-file-upload-{}", suffix)
         } else {
-            "pug-file-upload".to_string()
+            "flint-file-upload".to_string()
         };
 
         // Contract: browse button with accent border

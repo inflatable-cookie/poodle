@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { Card, Eyebrow } from "@pug/svelte-primitives";
+  import { Card, Eyebrow } from "@flint/svelte-primitives";
 </script>
 
 <div class="specimen">
@@ -79,18 +79,18 @@
     font-size: 1rem;
     font-weight: 600;
     margin: 0;
-    color: var(--pug-color-text-primary);
+    color: var(--flint-color-text-primary);
   }
 
   .card-body {
     font-size: 0.875rem;
     margin: 0;
-    color: var(--pug-color-text-secondary);
+    color: var(--flint-color-text-secondary);
     line-height: 1.5;
   }
 
   .card-meta {
     font-size: 0.75rem;
-    color: var(--pug-color-text-secondary);
+    color: var(--flint-color-text-secondary);
   }
 </style>

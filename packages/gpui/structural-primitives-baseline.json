@@ -1,8 +1,8 @@
 {
   "generation": "g04.003",
-  "crateName": "pug-gpui-primitives",
+  "crateName": "flint-gpui-primitives",
   "cratePath": "packages/gpui/primitives",
-  "tokenSource": "pug-gpui-tokens",
+  "tokenSource": "flint-gpui-tokens",
   "contractIds": ["box", "grid", "scroll-shell", "separator", "stack", "surface"],
   "exportNames": ["BoxSpec", "GridSpec", "ScrollShellSpec", "SeparatorSpec", "StackSpec", "SurfaceSpec"],
   "knownDeltas": [

@@ -8,8 +8,8 @@
 
 use std::rc::Rc;
 use gpui::*;
-use pug_gpui::GpuiThemeProvider;
-use pug_primitives::{AccordionItemSpec, AccordionSelectionValue, AccordionSpec, IconSize, IconSpec};
+use flint_gpui::GpuiThemeProvider;
+use flint_primitives::{AccordionItemSpec, AccordionSelectionValue, AccordionSpec, IconSize, IconSpec};
 
 use super::icon::Icon;
 use crate::theme_ext::{color_mix, resolve_color, resolve_opacity, resolve_px, resolve_radius};
@@ -37,7 +37,7 @@ impl Accordion {
         Self {
             spec,
             theme: theme.clone(),
-            id_prefix: "pug-accordion".to_string(),
+            id_prefix: "flint-accordion".to_string(),
             on_toggle: None,
             content: Vec::new(),
         }

@@ -141,10 +141,10 @@
       "suiteId": "gpui-target-matrix",
       "status": "matrix-only",
       "coveredPackages": [
-        "pug-gpui-tokens",
-        "pug-gpui-primitives",
-        "pug-gpui-composites",
-        "pug-gpui-workstation"
+        "flint-gpui-tokens",
+        "flint-gpui-primitives",
+        "flint-gpui-composites",
+        "flint-gpui-workstation"
       ],
       "evidenceArtifacts": [
         "packages/gpui/tokens/multi-app-validation.json",
@@ -171,7 +171,7 @@
   "packageSurfaceCoverage": {
     "summary": [
       {
-        "packageName": "@pug/svelte-primitives",
+        "packageName": "@flint/svelte-primitives",
         "exportCount": 63,
         "componentCount": 63,
         "helperCount": 0,
@@ -179,7 +179,7 @@
         "contractOnlyCount": 0
       },
       {
-        "packageName": "@pug/svelte-composites",
+        "packageName": "@flint/svelte-composites",
         "exportCount": 20,
         "componentCount": 20,
         "helperCount": 0,
@@ -187,7 +187,7 @@
         "contractOnlyCount": 0
       },
       {
-        "packageName": "@pug/svelte-workstation",
+        "packageName": "@flint/svelte-workstation",
         "exportCount": 14,
         "componentCount": 12,
         "helperCount": 2,
@@ -197,7 +197,7 @@
     ],
     "exports": [
       {
-        "packageName": "@pug/svelte-composites",
+        "packageName": "@flint/svelte-composites",
         "exportName": "Breadcrumbs",
         "kind": "component",
         "status": "previewed",
@@ -210,7 +210,7 @@
         ]
       },
       {
-        "packageName": "@pug/svelte-composites",
+        "packageName": "@flint/svelte-composites",
         "exportName": "BulkActionBar",
         "kind": "component",
         "status": "previewed",
@@ -223,7 +223,7 @@
         ]
       },
       {
-        "packageName": "@pug/svelte-composites",
+        "packageName": "@flint/svelte-composites",
         "exportName": "Card",
         "kind": "component",
         "status": "previewed",
@@ -236,7 +236,7 @@
         ]
       },
       {
-        "packageName": "@pug/svelte-composites",
+        "packageName": "@flint/svelte-composites",
         "exportName": "DataTable",
         "kind": "component",
         "status": "previewed",
@@ -249,7 +249,7 @@
         ]
       },
       {
-        "packageName": "@pug/svelte-composites",
+        "packageName": "@flint/svelte-composites",
         "exportName": "DetailRow",
         "kind": "component",
         "status": "previewed",
@@ -262,7 +262,7 @@
         ]
       },
       {
-        "packageName": "@pug/svelte-composites",
+        "packageName": "@flint/svelte-composites",
         "exportName": "DetailSection",
         "kind": "component",
         "status": "previewed",
@@ -275,7 +275,7 @@
         ]
       },
       {
-        "packageName": "@pug/svelte-composites",
+        "packageName": "@flint/svelte-composites",
         "exportName": "DetailShell",
         "kind": "component",
         "status": "previewed",
@@ -288,7 +288,7 @@
         ]
       },
       {
-        "packageName": "@pug/svelte-composites",
+        "packageName": "@flint/svelte-composites",
         "exportName": "EmptyState",
         "kind": "component",
         "status": "previewed",
@@ -301,7 +301,7 @@
         ]
       },
       {
-        "packageName": "@pug/svelte-composites",
+        "packageName": "@flint/svelte-composites",
         "exportName": "FilterToolbar",
         "kind": "component",
         "status": "previewed",
@@ -314,7 +314,7 @@
         ]
       },
       {
-        "packageName": "@pug/svelte-composites",
+        "packageName": "@flint/svelte-composites",
         "exportName": "MediaPreview",
         "kind": "component",
         "status": "previewed",
@@ -327,7 +327,7 @@
         ]
       },
       {
-        "packageName": "@pug/svelte-composites",
+        "packageName": "@flint/svelte-composites",
         "exportName": "MediaThumbnail",
         "kind": "component",
         "status": "previewed",
@@ -340,7 +340,7 @@
         ]
       },
       {
-        "packageName": "@pug/svelte-composites",
+        "packageName": "@flint/svelte-composites",
         "exportName": "PageHeader",
         "kind": "component",
         "status": "previewed",
@@ -353,7 +353,7 @@
         ]
       },
       {
-        "packageName": "@pug/svelte-composites",
+        "packageName": "@flint/svelte-composites",
         "exportName": "PaginationSummary",
         "kind": "component",
         "status": "previewed",
@@ -366,7 +366,7 @@
         ]
       },
       {
-        "packageName": "@pug/svelte-composites",
+        "packageName": "@flint/svelte-composites",
         "exportName": "PickerShell",
         "kind": "component",
         "status": "previewed",
@@ -381,7 +381,7 @@
         ]
       },
       {
-        "packageName": "@pug/svelte-composites",
+        "packageName": "@flint/svelte-composites",
         "exportName": "RelationPicker",
         "kind": "component",
         "status": "previewed",
@@ -396,7 +396,7 @@
         ]
       },
       {
-        "packageName": "@pug/svelte-composites",
+        "packageName": "@flint/svelte-composites",
         "exportName": "SelectionSummary",
         "kind": "component",
         "status": "previewed",
@@ -411,7 +411,7 @@
         ]
       },
       {
-        "packageName": "@pug/svelte-composites",
+        "packageName": "@flint/svelte-composites",
         "exportName": "ToastStack",
         "kind": "component",
         "status": "previewed",
@@ -424,7 +424,7 @@
         ]
       },
       {
-        "packageName": "@pug/svelte-primitives",
+        "packageName": "@flint/svelte-primitives",
         "exportName": "Accordion",
         "kind": "component",
         "status": "previewed",
@@ -437,7 +437,7 @@
         ]
       },
       {
-        "packageName": "@pug/svelte-primitives",
+        "packageName": "@flint/svelte-primitives",
         "exportName": "Badge",
         "kind": "component",
         "status": "previewed",
@@ -450,7 +450,7 @@
         ]
       },
       {
-        "packageName": "@pug/svelte-primitives",
+        "packageName": "@flint/svelte-primitives",
         "exportName": "Banner",
         "kind": "component",
         "status": "previewed",
@@ -463,7 +463,7 @@
         ]
       },
       {
-        "packageName": "@pug/svelte-primitives",
+        "packageName": "@flint/svelte-primitives",
         "exportName": "Box",
         "kind": "component",
         "status": "previewed",
@@ -476,7 +476,7 @@
         ]
       },
       {
-        "packageName": "@pug/svelte-primitives",
+        "packageName": "@flint/svelte-primitives",
         "exportName": "Button",
         "kind": "component",
         "status": "previewed",
@@ -489,7 +489,7 @@
         ]
       },
       {
-        "packageName": "@pug/svelte-primitives",
+        "packageName": "@flint/svelte-primitives",
         "exportName": "Calendar",
         "kind": "component",
         "status": "previewed",
@@ -502,7 +502,7 @@
         ]
       },
       {
-        "packageName": "@pug/svelte-primitives",
+        "packageName": "@flint/svelte-primitives",
         "exportName": "Callout",
         "kind": "component",
         "status": "previewed",
@@ -515,7 +515,7 @@
         ]
       },
       {
-        "packageName": "@pug/svelte-primitives",
+        "packageName": "@flint/svelte-primitives",
         "exportName": "Checkbox",
         "kind": "component",
         "status": "previewed",
@@ -528,7 +528,7 @@
         ]
       },
       {
-        "packageName": "@pug/svelte-primitives",
+        "packageName": "@flint/svelte-primitives",
         "exportName": "Collapsible",
         "kind": "component",
         "status": "previewed",
@@ -541,7 +541,7 @@
         ]
       },
       {
-        "packageName": "@pug/svelte-primitives",
+        "packageName": "@flint/svelte-primitives",
         "exportName": "Combobox",
         "kind": "component",
         "status": "previewed",
@@ -554,7 +554,7 @@
         ]
       },
       {
-        "packageName": "@pug/svelte-primitives",
+        "packageName": "@flint/svelte-primitives",
         "exportName": "ContextMenu",
         "kind": "component",
         "status": "previewed",
@@ -567,7 +567,7 @@
         ]
       },
       {
-        "packageName": "@pug/svelte-primitives",
+        "packageName": "@flint/svelte-primitives",
         "exportName": "DatePicker",
         "kind": "component",
         "status": "previewed",
@@ -580,7 +580,7 @@
         ]
       },
       {
-        "packageName": "@pug/svelte-primitives",
+        "packageName": "@flint/svelte-primitives",
         "exportName": "DateRangePicker",
         "kind": "component",
         "status": "previewed",
@@ -593,7 +593,7 @@
         ]
       },
       {
-        "packageName": "@pug/svelte-primitives",
+        "packageName": "@flint/svelte-primitives",
         "exportName": "DateTimePicker",
         "kind": "component",
         "status": "previewed",
@@ -606,7 +606,7 @@
         ]
       },
       {
-        "packageName": "@pug/svelte-primitives",
+        "packageName": "@flint/svelte-primitives",
         "exportName": "DateTimeRangePicker",
         "kind": "component",
         "status": "previewed",
@@ -619,7 +619,7 @@
         ]
       },
       {
-        "packageName": "@pug/svelte-primitives",
+        "packageName": "@flint/svelte-primitives",
         "exportName": "Dialog",
         "kind": "component",
         "status": "previewed",
@@ -632,7 +632,7 @@
         ]
       },
       {
-        "packageName": "@pug/svelte-primitives",
+        "packageName": "@flint/svelte-primitives",
         "exportName": "Drawer",
         "kind": "component",
         "status": "previewed",
@@ -645,7 +645,7 @@
         ]
       },
       {
-        "packageName": "@pug/svelte-primitives",
+        "packageName": "@flint/svelte-primitives",
         "exportName": "EditableLabel",
         "kind": "component",
         "status": "previewed",
@@ -658,7 +658,7 @@
         ]
       },
       {
-        "packageName": "@pug/svelte-primitives",
+        "packageName": "@flint/svelte-primitives",
         "exportName": "Field",
         "kind": "component",
         "status": "previewed",
@@ -671,7 +671,7 @@
         ]
       },
       {
-        "packageName": "@pug/svelte-primitives",
+        "packageName": "@flint/svelte-primitives",
         "exportName": "FormActions",
         "kind": "component",
         "status": "previewed",
@@ -684,7 +684,7 @@
         ]
       },
       {
-        "packageName": "@pug/svelte-primitives",
+        "packageName": "@flint/svelte-primitives",
         "exportName": "Grid",
         "kind": "component",
         "status": "previewed",
@@ -697,7 +697,7 @@
         ]
       },
       {
-        "packageName": "@pug/svelte-primitives",
+        "packageName": "@flint/svelte-primitives",
         "exportName": "HoverCard",
         "kind": "component",
         "status": "previewed",
@@ -710,7 +710,7 @@
         ]
       },
       {
-        "packageName": "@pug/svelte-primitives",
+        "packageName": "@flint/svelte-primitives",
         "exportName": "IconButton",
         "kind": "component",
         "status": "previewed",
@@ -723,7 +723,7 @@
         ]
       },
       {
-        "packageName": "@pug/svelte-primitives",
+        "packageName": "@flint/svelte-primitives",
         "exportName": "Inline",
         "kind": "component",
         "status": "previewed",
@@ -736,7 +736,7 @@
         ]
       },
       {
-        "packageName": "@pug/svelte-primitives",
+        "packageName": "@flint/svelte-primitives",
         "exportName": "Menu",
         "kind": "component",
         "status": "previewed",
@@ -749,7 +749,7 @@
         ]
       },
       {
-        "packageName": "@pug/svelte-primitives",
+        "packageName": "@flint/svelte-primitives",
         "exportName": "Menubar",
         "kind": "component",
         "status": "previewed",
@@ -762,7 +762,7 @@
         ]
       },
       {
-        "packageName": "@pug/svelte-primitives",
+        "packageName": "@flint/svelte-primitives",
         "exportName": "Meter",
         "kind": "component",
         "status": "previewed",
@@ -775,7 +775,7 @@
         ]
       },
       {
-        "packageName": "@pug/svelte-primitives",
+        "packageName": "@flint/svelte-primitives",
         "exportName": "NavigationMenu",
         "kind": "component",
         "status": "previewed",
@@ -788,7 +788,7 @@
         ]
       },
       {
-        "packageName": "@pug/svelte-primitives",
+        "packageName": "@flint/svelte-primitives",
         "exportName": "NumberEntry",
         "kind": "component",
         "status": "previewed",
@@ -801,7 +801,7 @@
         ]
       },
       {
-        "packageName": "@pug/svelte-primitives",
+        "packageName": "@flint/svelte-primitives",
         "exportName": "Pagination",
         "kind": "component",
         "status": "previewed",
@@ -814,7 +814,7 @@
         ]
       },
       {
-        "packageName": "@pug/svelte-primitives",
+        "packageName": "@flint/svelte-primitives",
         "exportName": "Pill",
         "kind": "component",
         "status": "previewed",
@@ -827,7 +827,7 @@
         ]
       },
       {
-        "packageName": "@pug/svelte-primitives",
+        "packageName": "@flint/svelte-primitives",
         "exportName": "PinInput",
         "kind": "component",
         "status": "previewed",
@@ -840,7 +840,7 @@
         ]
       },
       {
-        "packageName": "@pug/svelte-primitives",
+        "packageName": "@flint/svelte-primitives",
         "exportName": "Popover",
         "kind": "component",
         "status": "previewed",
@@ -853,7 +853,7 @@
         ]
       },
       {
-        "packageName": "@pug/svelte-primitives",
+        "packageName": "@flint/svelte-primitives",
         "exportName": "Progress",
         "kind": "component",
         "status": "previewed",
@@ -866,7 +866,7 @@
         ]
       },
       {
-        "packageName": "@pug/svelte-primitives",
+        "packageName": "@flint/svelte-primitives",
         "exportName": "RadioGroup",
         "kind": "component",
         "status": "previewed",
@@ -879,7 +879,7 @@
         ]
       },
       {
-        "packageName": "@pug/svelte-primitives",
+        "packageName": "@flint/svelte-primitives",
         "exportName": "RangeCalendar",
         "kind": "component",
         "status": "previewed",
@@ -892,7 +892,7 @@
         ]
       },
       {
-        "packageName": "@pug/svelte-primitives",
+        "packageName": "@flint/svelte-primitives",
         "exportName": "RangeSlider",
         "kind": "component",
         "status": "previewed",
@@ -905,7 +905,7 @@
         ]
       },
       {
-        "packageName": "@pug/svelte-primitives",
+        "packageName": "@flint/svelte-primitives",
         "exportName": "Rating",
         "kind": "component",
         "status": "previewed",
@@ -918,7 +918,7 @@
         ]
       },
       {
-        "packageName": "@pug/svelte-primitives",
+        "packageName": "@flint/svelte-primitives",
         "exportName": "ScrollShell",
         "kind": "component",
         "status": "previewed",
@@ -931,7 +931,7 @@
         ]
       },
       {
-        "packageName": "@pug/svelte-primitives",
+        "packageName": "@flint/svelte-primitives",
         "exportName": "SearchField",
         "kind": "component",
         "status": "previewed",
@@ -944,7 +944,7 @@
         ]
       },
       {
-        "packageName": "@pug/svelte-primitives",
+        "packageName": "@flint/svelte-primitives",
         "exportName": "SegmentedControl",
         "kind": "component",
         "status": "previewed",
@@ -957,7 +957,7 @@
         ]
       },
       {
-        "packageName": "@pug/svelte-primitives",
+        "packageName": "@flint/svelte-primitives",
         "exportName": "Select",
         "kind": "component",
         "status": "previewed",
@@ -970,7 +970,7 @@
         ]
       },
       {
-        "packageName": "@pug/svelte-primitives",
+        "packageName": "@flint/svelte-primitives",
         "exportName": "Separator",
         "kind": "component",
         "status": "previewed",
@@ -983,7 +983,7 @@
         ]
       },
       {
-        "packageName": "@pug/svelte-primitives",
+        "packageName": "@flint/svelte-primitives",
         "exportName": "Skeleton",
         "kind": "component",
         "status": "previewed",
@@ -996,7 +996,7 @@
         ]
       },
       {
-        "packageName": "@pug/svelte-primitives",
+        "packageName": "@flint/svelte-primitives",
         "exportName": "Slider",
         "kind": "component",
         "status": "previewed",
@@ -1009,7 +1009,7 @@
         ]
       },
       {
-        "packageName": "@pug/svelte-primitives",
+        "packageName": "@flint/svelte-primitives",
         "exportName": "Spacer",
         "kind": "component",
         "status": "previewed",
@@ -1022,7 +1022,7 @@
         ]
       },
       {
-        "packageName": "@pug/svelte-primitives",
+        "packageName": "@flint/svelte-primitives",
         "exportName": "Stack",
         "kind": "component",
         "status": "previewed",
@@ -1035,7 +1035,7 @@
         ]
       },
       {
-        "packageName": "@pug/svelte-primitives",
+        "packageName": "@flint/svelte-primitives",
         "exportName": "StatusIndicator",
         "kind": "component",
         "status": "previewed",
@@ -1048,7 +1048,7 @@
         ]
       },
       {
-        "packageName": "@pug/svelte-primitives",
+        "packageName": "@flint/svelte-primitives",
         "exportName": "Surface",
         "kind": "component",
         "status": "previewed",
@@ -1061,7 +1061,7 @@
         ]
       },
       {
-        "packageName": "@pug/svelte-primitives",
+        "packageName": "@flint/svelte-primitives",
         "exportName": "Switch",
         "kind": "component",
         "status": "previewed",
@@ -1074,7 +1074,7 @@
         ]
       },
       {
-        "packageName": "@pug/svelte-primitives",
+        "packageName": "@flint/svelte-primitives",
         "exportName": "Table",
         "kind": "component",
         "status": "previewed",
@@ -1087,7 +1087,7 @@
         ]
       },
       {
-        "packageName": "@pug/svelte-primitives",
+        "packageName": "@flint/svelte-primitives",
         "exportName": "Tabs",
         "kind": "component",
         "status": "previewed",
@@ -1100,7 +1100,7 @@
         ]
       },
       {
-        "packageName": "@pug/svelte-primitives",
+        "packageName": "@flint/svelte-primitives",
         "exportName": "TabStrip",
         "kind": "component",
         "status": "previewed",
@@ -1113,7 +1113,7 @@
         ]
       },
       {
-        "packageName": "@pug/svelte-primitives",
+        "packageName": "@flint/svelte-primitives",
         "exportName": "TextArea",
         "kind": "component",
         "status": "previewed",
@@ -1126,7 +1126,7 @@
         ]
       },
       {
-        "packageName": "@pug/svelte-primitives",
+        "packageName": "@flint/svelte-primitives",
         "exportName": "TextInput",
         "kind": "component",
         "status": "previewed",
@@ -1139,7 +1139,7 @@
         ]
       },
       {
-        "packageName": "@pug/svelte-primitives",
+        "packageName": "@flint/svelte-primitives",
         "exportName": "TimeField",
         "kind": "component",
         "status": "previewed",
@@ -1152,7 +1152,7 @@
         ]
       },
       {
-        "packageName": "@pug/svelte-primitives",
+        "packageName": "@flint/svelte-primitives",
         "exportName": "TimeZoneSelect",
         "kind": "component",
         "status": "previewed",
@@ -1165,7 +1165,7 @@
         ]
       },
       {
-        "packageName": "@pug/svelte-primitives",
+        "packageName": "@flint/svelte-primitives",
         "exportName": "Toggle",
         "kind": "component",
         "status": "previewed",
@@ -1178,7 +1178,7 @@
         ]
       },
       {
-        "packageName": "@pug/svelte-primitives",
+        "packageName": "@flint/svelte-primitives",
         "exportName": "ToggleGroup",
         "kind": "component",
         "status": "previewed",
@@ -1191,7 +1191,7 @@
         ]
       },
       {
-        "packageName": "@pug/svelte-primitives",
+        "packageName": "@flint/svelte-primitives",
         "exportName": "Toolbar",
         "kind": "component",
         "status": "previewed",
@@ -1204,7 +1204,7 @@
         ]
       },
       {
-        "packageName": "@pug/svelte-primitives",
+        "packageName": "@flint/svelte-primitives",
         "exportName": "Tooltip",
         "kind": "component",
         "status": "previewed",
@@ -1217,7 +1217,7 @@
         ]
       },
       {
-        "packageName": "@pug/svelte-primitives",
+        "packageName": "@flint/svelte-primitives",
         "exportName": "TriStateSwitch",
         "kind": "component",
         "status": "previewed",
@@ -1230,7 +1230,7 @@
         ]
       },
       {
-        "packageName": "@pug/svelte-primitives",
+        "packageName": "@flint/svelte-primitives",
         "exportName": "ZonedDateTimePicker",
         "kind": "component",
         "status": "previewed",
@@ -1243,7 +1243,7 @@
         ]
       },
       {
-        "packageName": "@pug/svelte-workstation",
+        "packageName": "@flint/svelte-workstation",
         "exportName": "ActionDiscoveryPanel",
         "kind": "component",
         "status": "previewed",
@@ -1256,7 +1256,7 @@
         ]
       },
       {
-        "packageName": "@pug/svelte-workstation",
+        "packageName": "@flint/svelte-workstation",
         "exportName": "AppHeader",
         "kind": "component",
         "status": "previewed",
@@ -1269,7 +1269,7 @@
         ]
       },
       {
-        "packageName": "@pug/svelte-workstation",
+        "packageName": "@flint/svelte-workstation",
         "exportName": "CommandPalette",
         "kind": "component",
         "status": "previewed",
@@ -1282,7 +1282,7 @@
         ]
       },
       {
-        "packageName": "@pug/svelte-workstation",
+        "packageName": "@flint/svelte-workstation",
         "exportName": "DockRegion",
         "kind": "component",
         "status": "previewed",
@@ -1295,7 +1295,7 @@
         ]
       },
       {
-        "packageName": "@pug/svelte-workstation",
+        "packageName": "@flint/svelte-workstation",
         "exportName": "PanelHeader",
         "kind": "component",
         "status": "previewed",
@@ -1308,7 +1308,7 @@
         ]
       },
       {
-        "packageName": "@pug/svelte-workstation",
+        "packageName": "@flint/svelte-workstation",
         "exportName": "PanelSurface",
         "kind": "component",
         "status": "previewed",
@@ -1321,7 +1321,7 @@
         ]
       },
       {
-        "packageName": "@pug/svelte-workstation",
+        "packageName": "@flint/svelte-workstation",
         "exportName": "PanelTabs",
         "kind": "component",
         "status": "previewed",
@@ -1334,7 +1334,7 @@
         ]
       },
       {
-        "packageName": "@pug/svelte-workstation",
+        "packageName": "@flint/svelte-workstation",
         "exportName": "parseWorkspaceLayoutSnapshot",
         "kind": "helper",
         "status": "previewed",
@@ -1347,7 +1347,7 @@
         ]
       },
       {
-        "packageName": "@pug/svelte-workstation",
+        "packageName": "@flint/svelte-workstation",
         "exportName": "ProjectHeader",
         "kind": "component",
         "status": "previewed",
@@ -1360,7 +1360,7 @@
         ]
       },
       {
-        "packageName": "@pug/svelte-workstation",
+        "packageName": "@flint/svelte-workstation",
         "exportName": "serializeWorkspaceLayoutSnapshot",
         "kind": "helper",
         "status": "previewed",
@@ -1373,7 +1373,7 @@
         ]
       },
       {
-        "packageName": "@pug/svelte-workstation",
+        "packageName": "@flint/svelte-workstation",
         "exportName": "ShellStatusBar",
         "kind": "component",
         "status": "previewed",
@@ -1386,7 +1386,7 @@
         ]
       },
       {
-        "packageName": "@pug/svelte-workstation",
+        "packageName": "@flint/svelte-workstation",
         "exportName": "SplitView",
         "kind": "component",
         "status": "previewed",
@@ -1399,7 +1399,7 @@
         ]
       },
       {
-        "packageName": "@pug/svelte-workstation",
+        "packageName": "@flint/svelte-workstation",
         "exportName": "SurfaceTabs",
         "kind": "component",
         "status": "previewed",
@@ -1412,7 +1412,7 @@
         ]
       },
       {
-        "packageName": "@pug/svelte-workstation",
+        "packageName": "@flint/svelte-workstation",
         "exportName": "WorkspaceShell",
         "kind": "component",
         "status": "previewed",
@@ -1521,7 +1521,7 @@
       "sectionId": "form-suite",
       "title": "Form baseline and validation posture",
       "layer": "foundation",
-      "packageName": "@pug/svelte-primitives",
+      "packageName": "@flint/svelte-primitives",
       "contractRoot": "docs/contracts/foundation/",
       "summary": "Field wrappers, inputs, search, and action rows with validation and announcement posture.",
       "harnessCoverage": {
@@ -1593,7 +1593,7 @@
       "sectionId": "table-suite",
       "title": "Selection, sorting, and bulk actions",
       "layer": "composites",
-      "packageName": "@pug/svelte-composites",
+      "packageName": "@flint/svelte-composites",
       "contractRoot": "docs/contracts/composites/",
       "summary": "Structured rows with visible-scope selection, sort semantics, row actions, and pagination context.",
       "harnessCoverage": {
@@ -1641,7 +1641,7 @@
       "sectionId": "browse-suite",
       "title": "Lists, grids, filters, and search depth",
       "layer": "composites",
-      "packageName": "@pug/svelte-composites",
+      "packageName": "@flint/svelte-composites",
       "contractRoot": "docs/contracts/composites/",
       "summary": "Browse shells that separate ready, loading, empty, and no-results posture across list and grid views.",
       "harnessCoverage": {
@@ -1689,7 +1689,7 @@
       "sectionId": "detail-suite",
       "title": "Detail display, cards, headers, and navigation",
       "layer": "composites",
-      "packageName": "@pug/svelte-composites",
+      "packageName": "@flint/svelte-composites",
       "contractRoot": "docs/contracts/composites/",
       "summary": "Readonly detail surfaces with breadcrumb context, page headers, cards, and section hierarchy.",
       "harnessCoverage": {
@@ -1737,7 +1737,7 @@
       "sectionId": "picker-suite",
       "title": "Picker, relation, and selection workflows",
       "layer": "composites",
-      "packageName": "@pug/svelte-composites",
+      "packageName": "@flint/svelte-composites",
       "contractRoot": "docs/contracts/composites/",
       "summary": "Searchable attach-or-choose flows with selection summaries, commit/cancel rhythm, and keyboard traversal.",
       "harnessCoverage": {
@@ -1785,7 +1785,7 @@
       "sectionId": "media-suite",
       "title": "Preview framing, embeds, and fallback posture",
       "layer": "composites",
-      "packageName": "@pug/svelte-composites",
+      "packageName": "@flint/svelte-composites",
       "contractRoot": "docs/contracts/composites/",
       "summary": "Media surfaces that keep framing, metadata, and fallback meaning explicit without owning playback engines.",
       "harnessCoverage": {
@@ -1833,7 +1833,7 @@
       "sectionId": "notification-suite",
       "title": "Banners, toasts, skeletons, and remediation",
       "layer": "composites",
-      "packageName": "@pug/svelte-primitives + @pug/svelte-composites",
+      "packageName": "@flint/svelte-primitives + @flint/svelte-composites",
       "contractRoot": "docs/contracts/foundation/ + docs/contracts/composites/",
       "summary": "Persistent and transient state surfaces with loading, remediation, and announcement posture.",
       "harnessCoverage": {
@@ -1881,7 +1881,7 @@
       "sectionId": "command-suite",
       "title": "Palette search, grouped actions, and inline rediscovery",
       "layer": "workstation",
-      "packageName": "@pug/svelte-workstation",
+      "packageName": "@flint/svelte-workstation",
       "contractRoot": "docs/contracts/workstation/",
       "summary": "Modal and inline command discovery with grouped results, focus containment, and keyboard movement.",
       "harnessCoverage": {
@@ -1929,7 +1929,7 @@
       "sectionId": "workspace-suite",
       "title": "Headers, dock orchestration, and workspace shell posture",
       "layer": "workstation",
-      "packageName": "@pug/svelte-workstation",
+      "packageName": "@flint/svelte-workstation",
       "contractRoot": "docs/contracts/workstation/",
       "summary": "App and project headers, docks, tabs, split views, and host-owned layout snapshots.",
       "harnessCoverage": {
@@ -1977,7 +1977,7 @@
       "sectionId": "token-summary-section",
       "title": "Runtime-critical values",
       "layer": "tokens",
-      "packageName": "@pug/svelte-tokens",
+      "packageName": "@flint/svelte-tokens",
       "contractRoot": "packages/tokens/",
       "summary": "Live values pulled from the active emitted theme, density, and control-size overlays.",
       "harnessCoverage": {
@@ -2036,7 +2036,7 @@
       "sectionId": "token-inspector",
       "title": "Search the emitted token tree",
       "layer": "tokens",
-      "packageName": "@pug/svelte-tokens",
+      "packageName": "@flint/svelte-tokens",
       "contractRoot": "packages/tokens/artifacts/",
       "summary": "Searchable inspection of the emitted semantic token paths and their active computed values.",
       "harnessCoverage": {

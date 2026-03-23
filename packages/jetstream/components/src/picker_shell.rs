@@ -1,7 +1,7 @@
 //! PickerShell — Jetstream picker shell backed by PickerShellSpec.
 use jetstream_runtime::ui_element::{self, JsEl};
-use pug_jetstream::JetstreamThemeProvider;
-use pug_composites::PickerShellSpec;
+use flint_jetstream::JetstreamThemeProvider;
+use flint_composites::PickerShellSpec;
 use crate::theme_ext::{resolve_color, resolve_radius};
 
 pub fn js_picker_shell(spec: &PickerShellSpec, theme: &JetstreamThemeProvider, content: Option<JsEl>) -> JsEl {

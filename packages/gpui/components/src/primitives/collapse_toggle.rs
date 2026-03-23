@@ -5,8 +5,8 @@
 //! through CollapseToggleSpec + GpuiThemeProvider.
 
 use gpui::*;
-use pug_gpui::GpuiThemeProvider;
-use pug_primitives::{CollapseDirection, CollapseToggleSpec, IconSize, IconSpec};
+use flint_gpui::GpuiThemeProvider;
+use flint_primitives::{CollapseDirection, CollapseToggleSpec, IconSize, IconSpec};
 
 use super::icon::Icon;
 use crate::theme_ext::{resolve_color, resolve_opacity, resolve_px, resolve_radius};
@@ -80,9 +80,9 @@ impl IntoElement for CollapseToggle {
 
         // ── Build element ID ─────────────────────────────────────
         let id_str = if let Some(ref suffix) = self.id_suffix {
-            format!("pug-collapse-toggle-{}", suffix)
+            format!("flint-collapse-toggle-{}", suffix)
         } else {
-            format!("pug-collapse-toggle-{}", icon_name)
+            format!("flint-collapse-toggle-{}", icon_name)
         };
 
         // ── Compact square button sized to icon + small padding ──

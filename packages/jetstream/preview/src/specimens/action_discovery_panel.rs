@@ -1,10 +1,10 @@
 //! ActionDiscoveryPanel specimen — keyboard shortcut discovery panel.
 
 use jetstream_runtime::ui_element::*;
-use pug_jetstream::JetstreamThemeProvider;
-use pug_jetstream_components::action_discovery_panel::js_action_discovery_panel;
-use pug_jetstream_components::theme_ext::*;
-use pug_composites::{ActionDiscoveryPanelSpec, ActionDiscoverySection};
+use flint_jetstream::JetstreamThemeProvider;
+use flint_jetstream_components::action_discovery_panel::js_action_discovery_panel;
+use flint_jetstream_components::theme_ext::*;
+use flint_composites::{ActionDiscoveryPanelSpec, ActionDiscoverySection};
 
 pub fn render(theme: &JetstreamThemeProvider) -> JsEl {
     let secondary = resolve_color(theme, "semantic.color.text.secondary");

@@ -144,9 +144,9 @@ Updated: 2026-03-15
 | `width` | `2rem` |
 | `height` | `2rem` |
 | `border` | `0` |
-| `border-radius` | `var(--pug-radius-control)` |
+| `border-radius` | `var(--flint-radius-control)` |
 | `background` | `transparent` |
-| `color` | `color-mix(in srgb, var(--pug-color-text-secondary) 78%, transparent)` |
+| `color` | `color-mix(in srgb, var(--flint-color-text-secondary) 78%, transparent)` |
 | `cursor` | `pointer` |
 | `font` | `inherit` |
 
@@ -163,13 +163,13 @@ Updated: 2026-03-15
 
 | Property | Value |
 |----------|-------|
-| `color` | `color-mix(in srgb, var(--pug-color-accent-base) 84%, var(--pug-color-text-primary))` |
+| `color` | `color-mix(in srgb, var(--flint-color-accent-base) 84%, var(--flint-color-text-primary))` |
 
 ### Item hover/focus `.rating__item:hover:not(:disabled)`, `.rating__item:focus-visible`
 
 | Property | Value |
 |----------|-------|
-| `background` | `color-mix(in srgb, var(--pug-color-accent-base) 14%, transparent)` |
+| `background` | `color-mix(in srgb, var(--flint-color-accent-base) 14%, transparent)` |
 | `outline` | `none` |
 
 ### Item disabled `.rating__item:disabled`
@@ -177,7 +177,7 @@ Updated: 2026-03-15
 | Property | Value |
 |----------|-------|
 | `cursor` | `not-allowed` |
-| `opacity` | `var(--pug-state-opacity-disabled)` |
+| `opacity` | `var(--flint-state-opacity-disabled)` |
 
 ### Glyph `.rating__glyph`
 
@@ -205,7 +205,7 @@ Updated: 2026-03-15
 
 ## 10. GPUI Notes
 
-- expected crate/module surface: `pug_gpui::primitives::rating`
+- expected crate/module surface: `flint_gpui::primitives::rating`
 - glyph shape may differ from web star icon; the contract is ordinal selection,
   not glyph-specific branding
 - `color-mix` blending should be replicated using equivalent alpha-blended color
@@ -229,7 +229,7 @@ Updated: 2026-03-15
 - [ ] unfilled color matches 78% secondary text mix
 - [ ] filled color matches 84% accent / primary text mix
 - [ ] hover/focus background matches 14% accent mix
-- [ ] disabled opacity matches `--pug-state-opacity-disabled`
+- [ ] disabled opacity matches `--flint-state-opacity-disabled`
 
 ### Tier 3: Implementation Freedom
 

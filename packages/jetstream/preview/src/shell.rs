@@ -4,7 +4,7 @@
 //! ```text
 //! Root (Column, Grow)
 //! ├── TabBar (Row, h=44, surface bg, bottom border)
-//! │   ├── "Pug" title
+//! │   ├── "Flint" title
 //! │   └── Tab buttons...
 //! ├── ControlsBar (Row, h=56, surface bg, bottom border)
 //! │   ├── Theme group
@@ -19,9 +19,9 @@
 //! ```
 
 use jetstream_runtime::ui_element::*;
-use pug_jetstream::JetstreamThemeProvider;
+use flint_jetstream::JetstreamThemeProvider;
 use jetstream_runtime::game_ui::Color;
-use pug_jetstream_components::theme_ext::*;
+use flint_jetstream_components::theme_ext::*;
 
 use crate::app_state::*;
 use crate::component_registry;
@@ -58,7 +58,7 @@ fn build_tab_bar(
         .items_center()
         .bg(bg_surface).border_1().border_color(border)
         .child(
-            label("Pug").text_color(text_primary).text_size(14.0).pr(12.0).pl(4.0)
+            label("Flint").text_color(text_primary).text_size(14.0).pr(12.0).pl(4.0)
         );
 
     for &section in Section::ALL {

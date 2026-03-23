@@ -18,7 +18,7 @@
     openChange: { open: boolean };
   }>();
 
-  const hoverCardId = `pug-hover-card-${++nextHoverCardId}`;
+  const hoverCardId = `flint-hover-card-${++nextHoverCardId}`;
   let openTimer: ReturnType<typeof setTimeout> | null = null;
   let closeTimer: ReturnType<typeof setTimeout> | null = null;
   let uncontrolledOpen = defaultOpen;
@@ -184,29 +184,29 @@
   }
 
   .hover-card__trigger:focus-visible {
-    outline: var(--pug-border-width-focus) solid var(--pug-color-accent-focusRing);
+    outline: var(--flint-border-width-focus) solid var(--flint-color-accent-focusRing);
     outline-offset: 0.125rem;
   }
 
   .hover-card__surface {
     position: fixed;
-    z-index: var(--pug-overlay-z-menu);
+    z-index: var(--flint-overlay-z-menu);
     min-width: 14rem;
     max-width: min(22rem, 90vw);
-    padding: var(--pug-space-panel-y) var(--pug-space-panel-x);
+    padding: var(--flint-space-panel-y) var(--flint-space-panel-x);
     border: 0.0625rem solid var(
-      --pug-treatment-surface-elevated-border,
-      color-mix(in srgb, var(--pug-color-border-default) 72%, transparent)
+      --flint-treatment-surface-elevated-border,
+      color-mix(in srgb, var(--flint-color-border-default) 72%, transparent)
     );
-    border-radius: var(--pug-treatment-surface-elevated-radius, var(--pug-radius-surface));
+    border-radius: var(--flint-treatment-surface-elevated-radius, var(--flint-radius-surface));
     background: var(
-      --pug-treatment-surface-elevated-fill,
-      color-mix(in srgb, var(--pug-color-background-elevated) 98%, var(--pug-color-background-panel))
+      --flint-treatment-surface-elevated-fill,
+      color-mix(in srgb, var(--flint-color-background-elevated) 98%, var(--flint-color-background-panel))
     );
-    --pug-surface: var(
-      --pug-treatment-surface-elevated-fill,
-      color-mix(in srgb, var(--pug-color-background-elevated) 98%, var(--pug-color-background-panel))
+    --flint-surface: var(
+      --flint-treatment-surface-elevated-fill,
+      color-mix(in srgb, var(--flint-color-background-elevated) 98%, var(--flint-color-background-panel))
     );
-    box-shadow: var(--pug-treatment-surface-elevated-shadow, var(--pug-elevation-overlay));
+    box-shadow: var(--flint-treatment-surface-elevated-shadow, var(--flint-elevation-overlay));
   }
 </style>

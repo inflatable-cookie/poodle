@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { Accordion, Eyebrow, type AccordionItem } from "@pug/svelte-primitives";
+  import { Accordion, Eyebrow, type AccordionItem } from "@flint/svelte-primitives";
 
   const singleItems: AccordionItem[] = [
     { value: "getting-started", label: "Getting started" },
@@ -24,7 +24,7 @@
 
   const multiContent: Record<string, string> = {
     design:
-      "Components consume semantic tokens like --pug-color-text-primary and --pug-size-control-height rather than hard-coded values. Switching themes at runtime updates every component instantly without re-rendering.",
+      "Components consume semantic tokens like --flint-color-text-primary and --flint-size-control-height rather than hard-coded values. Switching themes at runtime updates every component instantly without re-rendering.",
     keyboard:
       "Arrow keys move focus between accordion headers. Enter or Space toggles the focused panel. Home and End jump to the first and last header respectively. Tab moves focus out of the accordion entirely.",
     "known-issues":
@@ -76,7 +76,7 @@
   .specimen__group p {
     margin: 0;
     font-size: 0.875rem;
-    color: var(--pug-color-text-secondary);
+    color: var(--flint-color-text-secondary);
     line-height: 1.5;
   }
 </style>

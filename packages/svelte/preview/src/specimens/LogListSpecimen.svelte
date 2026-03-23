@@ -1,7 +1,7 @@
 <script lang="ts">
-  import { LogList } from "@pug/svelte-composites";
-  import type { LogEntry } from "@pug/svelte-composites";
-  import { Eyebrow, Button } from "@pug/svelte-primitives";
+  import { LogList } from "@flint/svelte-composites";
+  import type { LogEntry } from "@flint/svelte-composites";
+  import { Eyebrow, Button } from "@flint/svelte-primitives";
 
   const now = Date.now();
 

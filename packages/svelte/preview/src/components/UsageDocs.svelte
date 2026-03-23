@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { Eyebrow, Separator } from "@pug/svelte-primitives";
+  import { Eyebrow, Separator } from "@flint/svelte-primitives";
   import type { ComponentDocs } from "../component-docs";
 
   export let docs: ComponentDocs;
@@ -115,19 +115,19 @@
   .usage-docs__heading {
     font-size: 1.125rem;
     font-weight: 600;
-    color: var(--pug-color-text-primary);
+    color: var(--flint-color-text-primary);
     margin: 0 0 1rem;
   }
 
   .usage-docs__code {
     padding: 0.75rem 1rem;
-    border-radius: var(--pug-radius-surface);
-    background: color-mix(in srgb, var(--pug-color-background-canvas) 90%, transparent);
-    border: 0.0625rem solid color-mix(in srgb, var(--pug-color-border-subtle) 50%, transparent);
+    border-radius: var(--flint-radius-surface);
+    background: color-mix(in srgb, var(--flint-color-background-canvas) 90%, transparent);
+    border: 0.0625rem solid color-mix(in srgb, var(--flint-color-border-subtle) 50%, transparent);
     font-family: "SF Mono", "Fira Code", monospace;
     font-size: 0.8125rem;
     line-height: 1.6;
-    color: var(--pug-color-text-primary);
+    color: var(--flint-color-text-primary);
     overflow-x: auto;
     margin: 0;
     white-space: pre;
@@ -147,9 +147,9 @@
   .usage-docs__table th {
     text-align: left;
     font-weight: 600;
-    color: var(--pug-color-text-secondary);
+    color: var(--flint-color-text-secondary);
     padding: 0.5rem 0.75rem;
-    border-bottom: 0.0625rem solid var(--pug-color-border-subtle);
+    border-bottom: 0.0625rem solid var(--flint-color-border-subtle);
     white-space: nowrap;
     font-size: 0.6875rem;
     text-transform: uppercase;
@@ -158,8 +158,8 @@
 
   .usage-docs__table td {
     padding: 0.5rem 0.75rem;
-    border-bottom: 0.0625rem solid color-mix(in srgb, var(--pug-color-border-subtle) 40%, transparent);
-    color: var(--pug-color-text-primary);
+    border-bottom: 0.0625rem solid color-mix(in srgb, var(--flint-color-border-subtle) 40%, transparent);
+    color: var(--flint-color-text-primary);
     vertical-align: top;
   }
 
@@ -171,11 +171,11 @@
     font-family: "SF Mono", "Fira Code", monospace;
     font-weight: 500;
     white-space: nowrap;
-    color: var(--pug-color-text-primary);
+    color: var(--flint-color-text-primary);
   }
 
   .usage-docs__required {
-    color: var(--pug-color-text-danger, #ef4444);
+    color: var(--flint-color-text-danger, #ef4444);
     margin-left: 0.125rem;
   }
 
@@ -185,12 +185,12 @@
     font-size: 0.75rem;
     padding: 0.0625rem 0.25rem;
     border-radius: 0.1875rem;
-    background: color-mix(in srgb, var(--pug-color-background-canvas) 80%, transparent);
-    color: var(--pug-color-text-secondary);
+    background: color-mix(in srgb, var(--flint-color-background-canvas) 80%, transparent);
+    color: var(--flint-color-text-secondary);
     white-space: nowrap;
   }
 
   .usage-docs__description {
-    color: var(--pug-color-text-secondary);
+    color: var(--flint-color-text-secondary);
   }
 </style>

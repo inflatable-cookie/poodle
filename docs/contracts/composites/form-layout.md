@@ -155,7 +155,7 @@ No component-owned events.
 |----------|-------|
 | `display` | `flex` |
 | `flex-direction` | `column` |
-| `gap` | `var(--pug-space-stack-lg)` |
+| `gap` | `var(--flint-space-stack-lg)` |
 | `container-type` | `inline-size` |
 
 #### `.form-layout__description`
@@ -163,19 +163,19 @@ No component-owned events.
 | Property | Value |
 |----------|-------|
 | `margin` | `0` |
-| `color` | `var(--pug-color-text-secondary)` |
-| `font-size` | `var(--pug-typography-body-size, 0.875rem)` |
-| `line-height` | `var(--pug-typography-body-lineHeight, 1.5)` |
+| `color` | `var(--flint-color-text-secondary)` |
+| `font-size` | `var(--flint-typography-body-size, 0.875rem)` |
+| `line-height` | `var(--flint-typography-body-lineHeight, 1.5)` |
 
 #### `.form-layout__field-errors`
 
 | Property | Value |
 |----------|-------|
-| `padding` | `var(--pug-space-panel-y, 0.75rem) var(--pug-space-panel-x, 1rem)` |
-| `border-radius` | `var(--pug-radius-surface, 0.5rem)` |
-| `background` | `color-mix(in srgb, var(--pug-color-status-danger) 8%, transparent)` |
-| `border` | `0.0625rem solid color-mix(in srgb, var(--pug-color-status-danger) 40%, transparent)` |
-| `font-size` | `var(--pug-typography-label-size, 0.75rem)` |
+| `padding` | `var(--flint-space-panel-y, 0.75rem) var(--flint-space-panel-x, 1rem)` |
+| `border-radius` | `var(--flint-radius-surface, 0.5rem)` |
+| `background` | `color-mix(in srgb, var(--flint-color-status-danger) 8%, transparent)` |
+| `border` | `0.0625rem solid color-mix(in srgb, var(--flint-color-status-danger) 40%, transparent)` |
+| `font-size` | `var(--flint-typography-label-size, 0.75rem)` |
 
 #### `.form-layout__field-errors p`
 
@@ -203,7 +203,7 @@ No component-owned events.
 |----------|-------|
 | `display` | `grid` |
 | `grid-template-columns` | `repeat(var(--fl-columns, 6), 1fr)` |
-| `gap` | `var(--pug-space-stack-lg) var(--pug-space-inline-md)` |
+| `gap` | `var(--flint-space-stack-lg) var(--flint-space-inline-md)` |
 
 The `--fl-columns` CSS variable is set inline from the `columns` prop.
 
@@ -237,7 +237,7 @@ Uses `container-type: inline-size` on the root element (not viewport media queri
 
 ## 10. GPUI Notes
 
-- expected crate/module surface: `pug_gpui::composites::form_layout`
+- expected crate/module surface: `flint_gpui::composites::form_layout`
 - grid layout maps to flex with wrap in GPUI
 - responsive collapsing may use different thresholds per platform
 

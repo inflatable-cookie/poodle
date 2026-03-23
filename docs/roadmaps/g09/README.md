@@ -5,15 +5,15 @@ Updated: 2026-03-21
 
 ## Context
 
-Pug currently has duplicated Rust crate infrastructure across its GPUI and
+Flint currently has duplicated Rust crate infrastructure across its GPUI and
 Jetstream targets. Component specs, token bindings, and shared types are
-maintained in parallel — `pug-primitives` (contracts) and `pug-gpui-primitives`
+maintained in parallel — `flint-primitives` (contracts) and `flint-gpui-primitives`
 (GPUI) contain diverged copies of the same specs. This makes every contract
 change a two-crate update, creates inconsistencies, and forces developers to
 import from three separate crates to use a single component.
 
-Jetstream already uses the contracts crates directly (`pug-primitives`,
-`pug-tokens`), proving the shared approach works. GPUI needs to follow suit.
+Jetstream already uses the contracts crates directly (`flint-primitives`,
+`flint-tokens`), proving the shared approach works. GPUI needs to follow suit.
 
 This generation eliminates all duplicated crates, establishes a single spec
 surface for both targets, and simplifies the developer experience to a single
@@ -25,32 +25,32 @@ import per component.
 
 | Contracts (shared) | GPUI (duplicate) | Divergence |
 |---------------------|-------------------|------------|
-| `pug-tokens` | `pug-gpui-tokens` | Same generated source, GPUI omits `typed` module |
-| `pug-primitives` (65 modules) | `pug-gpui-primitives` (77 modules) | GPUI has 12 extra modules, some specs add hardcoded px helpers |
-| `pug-composites` | `pug-gpui-composites` | Different module sets — 7 in GPUI only, 21 in contracts only |
-| `pug-workstation` | `pug-gpui-workstation` | Already migrated to composites in g08, workstation should be deleted |
+| `flint-tokens` | `flint-gpui-tokens` | Same generated source, GPUI omits `typed` module |
+| `flint-primitives` (65 modules) | `flint-gpui-primitives` (77 modules) | GPUI has 12 extra modules, some specs add hardcoded px helpers |
+| `flint-composites` | `flint-gpui-composites` | Different module sets — 7 in GPUI only, 21 in contracts only |
+| `flint-workstation` | `flint-gpui-workstation` | Already migrated to composites in g08, workstation should be deleted |
 
 ### Current developer experience (GPUI)
 
 ```rust
 // Three crate imports for one component
-use pug_gpui_primitives::{ButtonSpec, ButtonVariant, ControlSize};
-use pug_gpui_components::PugButton;
-use pug_gpui::GpuiThemeProvider;
+use flint_gpui_primitives::{ButtonSpec, ButtonVariant, ControlSize};
+use flint_gpui_components::FlintButton;
+use flint_gpui::GpuiThemeProvider;
 
 // Construct spec, then wrap in renderer
 let spec = ButtonSpec::new()
     .with_variant(ButtonVariant::Primary)
     .with_label("Save");
-let button = PugButton::new(spec, &theme);
+let button = FlintButton::new(spec, &theme);
 ```
 
 ### Current developer experience (Jetstream)
 
 ```rust
 // Two crate imports — already simpler
-use pug_primitives::{ButtonSpec, ButtonVariant};
-use pug_jetstream_components::js_button;
+use flint_primitives::{ButtonSpec, ButtonVariant};
+use flint_jetstream_components::js_button;
 
 let spec = ButtonSpec::new()
     .with_variant(ButtonVariant::Primary)
@@ -64,32 +64,32 @@ let el = js_button(&spec, &theme);
 
 ```
 contracts/
-  tokens/      → pug-tokens         (ONE token crate)
-  primitives/  → pug-primitives     (ONE spec crate for foundation components)
-  composites/  → pug-composites     (ONE spec crate for composite components)
-  adapter/     → pug-adapter        (ThemeProvider trait, shared Color type)
+  tokens/      → flint-tokens         (ONE token crate)
+  primitives/  → flint-primitives     (ONE spec crate for foundation components)
+  composites/  → flint-composites     (ONE spec crate for composite components)
+  adapter/     → flint-adapter        (ThemeProvider trait, shared Color type)
 
 gpui/
-  adapter/     → pug-gpui           (GpuiThemeProvider, color conversion)
-  components/  → pug-gpui-components (Button, Checkbox, etc. — no Pug prefix)
+  adapter/     → flint-gpui           (GpuiThemeProvider, color conversion)
+  components/  → flint-gpui-components (Button, Checkbox, etc. — no Flint prefix)
 
 jetstream/
-  adapter/     → pug-jetstream      (JetstreamThemeProvider, color conversion)
-  components/  → pug-jetstream-components (js_button, js_checkbox, etc.)
+  adapter/     → flint-jetstream      (JetstreamThemeProvider, color conversion)
+  components/  → flint-jetstream-components (js_button, js_checkbox, etc.)
 ```
 
 ### Deleted crates
 
-- `pug-gpui-tokens` — absorbed into `pug-tokens`
-- `pug-gpui-primitives` — absorbed into `pug-primitives`
-- `pug-gpui-composites` — absorbed into `pug-composites`
-- `pug-gpui-workstation` — deleted (already migrated in g08)
-- `pug-workstation` (contracts) — deleted if no longer referenced
+- `flint-gpui-tokens` — absorbed into `flint-tokens`
+- `flint-gpui-primitives` — absorbed into `flint-primitives`
+- `flint-gpui-composites` — absorbed into `flint-composites`
+- `flint-gpui-workstation` — deleted (already migrated in g08)
+- `flint-workstation` (contracts) — deleted if no longer referenced
 
 ### Target developer experience (GPUI)
 
 ```rust
-use pug_gpui_components::{Button, ButtonVariant, ControlSize};
+use flint_gpui_components::{Button, ButtonVariant, ControlSize};
 
 Button::new()
     .variant(ButtonVariant::Primary)
@@ -97,14 +97,14 @@ Button::new()
     .on_click(|e, w, cx| { ... })
 ```
 
-Single crate import. No spec construction. No Pug prefix (the crate name
+Single crate import. No spec construction. No Flint prefix (the crate name
 is the namespace). Props set directly on the component struct via builder
 methods. The spec exists internally but developers don't need to see it.
 
 ### Target developer experience (Jetstream)
 
 ```rust
-use pug_jetstream_components::{Button, ButtonVariant};
+use flint_jetstream_components::{Button, ButtonVariant};
 
 Button::new()
     .variant(ButtonVariant::Primary)
@@ -129,7 +129,7 @@ Same pattern, same types, different output.
 | 002 | Merge GPUI-only specs into contracts primitives | 001 | Foundation | Complete |
 | 003 | Merge composite specs | 002 | Foundation | Complete |
 | 004 | Delete duplicate GPUI crates and update imports | 003 | Migration | Complete |
-| 005 | Simplify component API (drop Pug prefix, re-export types) | 004 | API | Complete |
+| 005 | Simplify component API (drop Flint prefix, re-export types) | 004 | API | Complete |
 | 006 | Delete workstation crates | 004 | Cleanup | Complete |
 | 007 | Verify both targets compile and preview apps run | 005, 006 | Hardening | Complete |
 | 008 | Generation closeout | 007 | Closure | Complete |
@@ -151,19 +151,19 @@ Same pattern, same types, different output.
 
 ### 001 — Unify Token Crates
 
-Both `pug-tokens` and `pug-gpui-tokens` point at the same generated file
-(`tokens/artifacts/rust/mod.rs`). The only difference is `pug-tokens` exports
-a `typed` module that `pug-gpui-tokens` omits.
+Both `flint-tokens` and `flint-gpui-tokens` point at the same generated file
+(`tokens/artifacts/rust/mod.rs`). The only difference is `flint-tokens` exports
+a `typed` module that `flint-gpui-tokens` omits.
 
 **Actions:**
-- Add `typed` module export to `pug-tokens` if not already present
-- Update all GPUI crates to depend on `pug-tokens` instead of `pug-gpui-tokens`
+- Add `typed` module export to `flint-tokens` if not already present
+- Update all GPUI crates to depend on `flint-tokens` instead of `flint-gpui-tokens`
 - Delete `packages/gpui/tokens/`
 - Verify: `cargo check` for all GPUI crates
 
 ### 002 — Merge GPUI-Only Specs into Contracts Primitives
 
-12 spec modules exist in `pug-gpui-primitives` but not `pug-primitives`:
+12 spec modules exist in `flint-gpui-primitives` but not `flint-primitives`:
 `alert_dialog`, `breadcrumbs`, `bulk_action_bar`, `card`, `combobox`,
 `detail_row`, `icon`, `list_card`, `nav_card`, `order_by`, `pagination`,
 `table`.
@@ -172,13 +172,13 @@ Some GPUI specs also diverge from their contract counterparts (e.g. ButtonSpec
 adds `chevron`, `height_offset_px()`, `min_width_px()`).
 
 **Actions:**
-- Copy 12 missing modules into `pug-primitives`, updating token imports
-  from `pug_gpui_tokens` to `pug_tokens`
+- Copy 12 missing modules into `flint-primitives`, updating token imports
+  from `flint_gpui_tokens` to `flint_tokens`
 - For diverged specs: merge GPUI additions into the contracts version. Move
   hardcoded pixel helpers (like `height_offset_px()`) out of the spec and
   into the GPUI component renderer where they belong
 - Merge any extra types/enums from GPUI's `types.rs` into contracts `types.rs`
-- Verify: `cargo check` for `pug-primitives` and `pug-jetstream-components`
+- Verify: `cargo check` for `flint-primitives` and `flint-jetstream-components`
   (Jetstream must not break)
 
 ### 003 — Merge Composite Specs
@@ -190,48 +190,48 @@ adds `chevron`, `height_offset_px()`, `min_width_px()`).
 Shared types in GPUI composites `types.rs` also need merging.
 
 **Actions:**
-- Copy 7 missing modules into `pug-composites`
+- Copy 7 missing modules into `flint-composites`
 - Merge GPUI `types.rs` additions into contracts `types.rs`
-- Verify: `cargo check` for `pug-composites`
+- Verify: `cargo check` for `flint-composites`
 
 ### 004 — Delete Duplicate GPUI Crates and Update Imports
 
 With specs unified, the GPUI-specific spec crates are redundant.
 
 **Actions:**
-- Update `pug-gpui` (adapter) Cargo.toml: depend on `pug-primitives` +
-  `pug-composites` instead of `pug-gpui-primitives` + `pug-gpui-composites`
-- Update `pug-gpui-components` Cargo.toml: same
-- Update `pug-gpui-preview` Cargo.toml: same
-- Find-and-replace all `use pug_gpui_primitives::` → `use pug_primitives::`
-- Find-and-replace all `use pug_gpui_composites::` → `use pug_composites::`
-- Find-and-replace all `use pug_gpui_tokens::` → `use pug_tokens::`
+- Update `flint-gpui` (adapter) Cargo.toml: depend on `flint-primitives` +
+  `flint-composites` instead of `flint-gpui-primitives` + `flint-gpui-composites`
+- Update `flint-gpui-components` Cargo.toml: same
+- Update `flint-gpui-preview` Cargo.toml: same
+- Find-and-replace all `use flint_gpui_primitives::` → `use flint_primitives::`
+- Find-and-replace all `use flint_gpui_composites::` → `use flint_composites::`
+- Find-and-replace all `use flint_gpui_tokens::` → `use flint_tokens::`
 - Delete `packages/gpui/primitives/`
 - Delete `packages/gpui/composites/`
 - Verify: `cargo check` for all GPUI crates
 
 ### 005 — Simplify Component API
 
-Drop the `Pug` prefix from component structs and re-export common types
+Drop the `Flint` prefix from component structs and re-export common types
 so developers only need one import.
 
 **Actions:**
-- Rename `PugButton` → `Button`, `PugCheckbox` → `Checkbox`, etc. across
+- Rename `FlintButton` → `Button`, `FlintCheckbox` → `Checkbox`, etc. across
   all ~100 component files
-- Re-export commonly used types from `pug-gpui-components`:
+- Re-export commonly used types from `flint-gpui-components`:
   `ButtonVariant`, `ControlSize`, `ButtonTone`, `IconSize`, etc.
 - Update all specimen files in preview to use new names
 - Consider: should the component struct own its props directly (no separate
   spec construction), or take a spec? Decide and implement consistently.
-- Verify: `cargo check -p pug-gpui-preview`
+- Verify: `cargo check -p flint-gpui-preview`
 
 ### 006 — Delete Workstation Crates
 
-Both `pug-workstation` (contracts) and `pug-gpui-workstation` should be
+Both `flint-workstation` (contracts) and `flint-gpui-workstation` should be
 deleted. Their specs were migrated to composites in g08.
 
 **Actions:**
-- Verify no remaining imports of `pug_workstation` or `pug_gpui_workstation`
+- Verify no remaining imports of `flint_workstation` or `flint_gpui_workstation`
 - Delete `packages/contracts/workstation/`
 - Delete `packages/gpui/workstation/`
 - Verify: full `cargo check`
@@ -259,6 +259,6 @@ deleted. Their specs were migrated to composites in g08.
 |------|------------|
 | Spec divergence hides GPUI-specific features | Audit every diverged spec; move rendering logic to component, keep specs pure contract |
 | Jetstream breaks when primitives gains new modules | New modules are additive — Jetstream doesn't import what it doesn't use |
-| GPUI `typed` token module causes issues in Jetstream | Already exported by `pug-tokens` — Jetstream just doesn't use it |
-| Renaming 100 Pug* structs is error-prone | Mechanical find-and-replace, verify with cargo check |
+| GPUI `typed` token module causes issues in Jetstream | Already exported by `flint-tokens` — Jetstream just doesn't use it |
+| Renaming 100 Flint* structs is error-prone | Mechanical find-and-replace, verify with cargo check |
 | Preview apps break during migration | Each milestone ends with cargo check; no milestone ships broken |

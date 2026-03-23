@@ -6,7 +6,7 @@
   // A complete icon set mapping kebab-case names to SVG node arrays.
   // Any icon set in this format works — lucide-static/icon-nodes.json,
   // a Phosphor equivalent, or a custom set.
-  // String-based icon lookups (including Pug component chrome) resolve
+  // String-based icon lookups (including Flint component chrome) resolve
   // from this set first, then fall back to the built-in defaults.
   export let icons: IconSet;
 

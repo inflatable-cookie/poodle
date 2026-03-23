@@ -10,30 +10,30 @@
 </script>
 
 <div
-  class="pug-region"
+  class="flint-region"
   style:--region-color={color}
   style:min-height={minHeight}
   role="presentation"
 >
   {#if label}
-    <span class="pug-region__label">{label}</span>
+    <span class="flint-region__label">{label}</span>
   {/if}
 </div>
 
 <style>
-  .pug-region {
+  .flint-region {
     display: flex;
     align-items: center;
     justify-content: center;
-    border: 0.125rem dashed var(--region-color, var(--pug-color-border-default, #444));
-    border-radius: var(--pug-radius-surface, 0.375rem);
-    padding: var(--pug-space-inline-md, 0.75rem);
+    border: 0.125rem dashed var(--region-color, var(--flint-color-border-default, #444));
+    border-radius: var(--flint-radius-surface, 0.375rem);
+    padding: var(--flint-space-inline-md, 0.75rem);
   }
 
-  .pug-region__label {
-    color: var(--region-color, var(--pug-color-text-tertiary, #888));
-    font-family: var(--pug-typography-label-family, sans-serif);
-    font-size: var(--pug-typography-label-size, 0.75rem);
+  .flint-region__label {
+    color: var(--region-color, var(--flint-color-text-tertiary, #888));
+    font-family: var(--flint-typography-label-family, sans-serif);
+    font-size: var(--flint-typography-label-size, 0.75rem);
     font-weight: 600;
     text-transform: uppercase;
     letter-spacing: 0.05em;

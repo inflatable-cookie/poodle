@@ -7,8 +7,8 @@
 
 use jetstream_runtime::game_ui::Color;
 use jetstream_runtime::ui_element::{self, JsEl};
-use pug_jetstream::JetstreamThemeProvider;
-use pug_primitives::{CardLayout, CardSpec};
+use flint_jetstream::JetstreamThemeProvider;
+use flint_primitives::{CardLayout, CardSpec};
 
 use crate::theme_ext::{resolve_color, resolve_px, resolve_radius};
 

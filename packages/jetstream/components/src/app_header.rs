@@ -1,7 +1,7 @@
 //! AppHeader — Jetstream app header backed by AppHeaderSpec.
 use jetstream_runtime::ui_element::{self, JsEl};
-use pug_jetstream::JetstreamThemeProvider;
-use pug_composites::AppHeaderSpec;
+use flint_jetstream::JetstreamThemeProvider;
+use flint_composites::AppHeaderSpec;
 use crate::theme_ext::resolve_color;
 
 pub fn js_app_header(spec: &AppHeaderSpec, theme: &JetstreamThemeProvider) -> JsEl {

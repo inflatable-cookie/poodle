@@ -7,7 +7,7 @@ Target: g01.005
 
 ## Summary
 
-Pug's Svelte implementation will use Bits UI as an implementation substrate for headless primitives (accessibility, state management, event handling) while Pug maintains ownership of the public contract, token-based styling, and semantic component API. Bits UI is treated as an internal implementation detail, not a public dependency.
+Flint's Svelte implementation will use Bits UI as an implementation substrate for headless primitives (accessibility, state management, event handling) while Flint maintains ownership of the public contract, token-based styling, and semantic component API. Bits UI is treated as an internal implementation detail, not a public dependency.
 
 ---
 
@@ -25,7 +25,7 @@ Pug's Svelte implementation will use Bits UI as an implementation substrate for 
 
 ### 1. Bits UI as Implementation Substrate
 
-**Decision:** Pug will use Bits UI v1.0+ as the implementation substrate for Svelte components.
+**Decision:** Flint will use Bits UI v1.0+ as the implementation substrate for Svelte components.
 
 **Rationale:**
 - Bits provides 40+ high-quality headless primitives
@@ -45,26 +45,26 @@ Pug's Svelte implementation will use Bits UI as an implementation substrate for 
 - ✅ Form integration
 
 **Out of Scope for Bits:**
-- ❌ Layout primitives (Box, Stack, Grid) - Pug implements
-- ❌ Styling (tokens, variants) - Pug implements
-- ❌ Workstation components (dock, split) - Pug implements
+- ❌ Layout primitives (Box, Stack, Grid) - Flint implements
+- ❌ Styling (tokens, variants) - Flint implements
+- ❌ Workstation components (dock, split) - Flint implements
 
 ### 2. Wrapper Component Pattern
 
-**Decision:** Pug components will be wrappers around Bits primitives.
+**Decision:** Flint components will be wrappers around Bits primitives.
 
 **Pattern Structure:**
 ```
-Pug Component (public API)
+Flint Component (public API)
     ↓ wraps
 Bits UI Primitive (behavior/accessibility)
     ↓ applies
-Pug Tokens (styling)
+Flint Tokens (styling)
 ```
 
 **Example:**
 ```svelte
-<!-- PugButton.svelte -->
+<!-- FlintButton.svelte -->
 <script lang="ts">
   import { Button as BitsButton } from "bits-ui";
   import type { ButtonProps } from "./contract";
@@ -75,7 +75,7 @@ Pug Tokens (styling)
     ...rest 
   }: ButtonProps = $props();
   
-  // Pug defines variant/size mapping to tokens
+  // Flint defines variant/size mapping to tokens
   const classes = getTokenClasses({ variant, size, component: 'button' });
 </script>
 
@@ -85,16 +85,16 @@ Pug Tokens (styling)
 ```
 
 **Benefits:**
-- Pug owns public API contract
-- Bits can be swapped without changing Pug API
-- Token system fully controlled by Pug
-- Pug-specific documentation
+- Flint owns public API contract
+- Bits can be swapped without changing Flint API
+- Token system fully controlled by Flint
+- Flint-specific documentation
 
 ### 3. Public Contract Ownership
 
-**Decision:** Pug defines and owns the public component contract, not Bits.
+**Decision:** Flint defines and owns the public component contract, not Bits.
 
-**Pug Owns:**
+**Flint Owns:**
 - Component props interface (naming, types, defaults)
 - Semantic variants (primary, secondary, ghost)
 - Control sizes (sm, md, lg)
@@ -108,44 +108,44 @@ Pug Tokens (styling)
 - State management
 
 **Consequences:**
-- Pug props may differ from Bits props (intentionally)
-- Pug adds semantic layer on top of Bits primitives
-- Pug documentation doesn't reference Bits
+- Flint props may differ from Bits props (intentionally)
+- Flint adds semantic layer on top of Bits primitives
+- Flint documentation doesn't reference Bits
 
 ### 4. Token Integration Strategy
 
-**Decision:** Pug tokens applied via `class` props using CSS custom properties.
+**Decision:** Flint tokens applied via `class` props using CSS custom properties.
 
 **Approach:**
 ```svelte
 <BitsButton.Root 
-  class="bg-[var(--pug-color-background-primary)] 
-         text-[var(--pug-color-text-primary)]
-         hover:bg-[var(--pug-color-background-hover)]"
+  class="bg-[var(--flint-color-background-primary)] 
+         text-[var(--flint-color-text-primary)]
+         hover:bg-[var(--flint-color-background-hover)]"
 >
 ```
 
 **Alternative with Tailwind:**
 ```svelte
-<!-- tailwind.config.ts references Pug tokens -->
+<!-- tailwind.config.ts references Flint tokens -->
 <BitsButton.Root class="bg-background-primary text-text-primary">
 ```
 
 **Token Application:**
-- Pug components map semantic props to token classes
+- Flint components map semantic props to token classes
 - Data attributes (`data-state`, `data-highlighted`) for state-based styling
-- Pug provides `getTokenClasses()` utility for consistent mapping
+- Flint provides `getTokenClasses()` utility for consistent mapping
 
 ### 5. Compound Component Exposure
 
-**Decision:** Pug may expose compound component patterns where appropriate.
+**Decision:** Flint may expose compound component patterns where appropriate.
 
 **Options:**
 
 **Option A: Wrapped Compound (Recommended)**
 ```svelte
 <script>
-  import { Dialog } from "@pug/svelte";
+  import { Dialog } from "@flint/svelte";
 </script>
 
 <Dialog.Root>
@@ -155,7 +155,7 @@ Pug Tokens (styling)
   </Dialog.Content>
 </Dialog.Root>
 ```
-- Pug exports wrapped compound components
+- Flint exports wrapped compound components
 - Full control over each part's styling
 - Consistent with Bits/shadcn patterns
 
@@ -170,22 +170,22 @@ Pug Tokens (styling)
 
 ### 6. Extension Limits
 
-**Decision:** Document that Pug components are not directly extensible from Bits.
+**Decision:** Document that Flint components are not directly extensible from Bits.
 
 **Policy:**
-- Apps should use Pug components, not Bits directly
-- If Bits-level customization needed, use Bits directly (outside Pug)
-- Pug doesn't expose Bits types or internals
-- Pug component props are the extension point
+- Apps should use Flint components, not Bits directly
+- If Bits-level customization needed, use Bits directly (outside Flint)
+- Flint doesn't expose Bits types or internals
+- Flint component props are the extension point
 
 **Rationale:**
-- Maintains Pug's contract ownership
+- Maintains Flint's contract ownership
 - Prevents accidental coupling to Bits
-- Allows Pug to swap Bits in future if needed
+- Allows Flint to swap Bits in future if needed
 
 ### 7. Form Integration
 
-**Decision:** Pug form components use Bits form primitives with Pug styling.
+**Decision:** Flint form components use Bits form primitives with Flint styling.
 
 **Bits Form Primitives:**
 - Checkbox
@@ -196,21 +196,21 @@ Pug Tokens (styling)
 - Date Picker / Date Field
 - PIN Input
 
-**Pug Adds:**
+**Flint Adds:**
 - Field wrappers with labels, error messages
 - Validation state styling
 - Form layout components (FormRow, FormGroup)
-- Integration with Pug validation patterns
+- Integration with Flint validation patterns
 
 ### 8. Version and Maintenance Policy
 
 **Decision:** Bits UI updates absorbed internally; no breaking change exposure.
 
 **Policy:**
-- Pug specifies compatible Bits version in dependencies
-- Minor Bits updates: absorb in Pug patch release
-- Major Bits updates: evaluate impact, may require Pug major release
-- Pug's public API remains stable regardless of Bits changes
+- Flint specifies compatible Bits version in dependencies
+- Minor Bits updates: absorb in Flint patch release
+- Major Bits updates: evaluate impact, may require Flint major release
+- Flint's public API remains stable regardless of Bits changes
 
 **Current Recommendation:**
 - Target Bits UI v1.0.x (stable, Svelte 5)
@@ -225,7 +225,7 @@ Pug Tokens (styling)
 - [ ] Create wrapper component patterns in `svelte/src/components/`
 - [ ] Implement token-to-class mapping utility
 - [ ] Create first wrapped component (Button) as pattern example
-- [ ] Document "Pug owns the contract" rule in architecture
+- [ ] Document "Flint owns the contract" rule in architecture
 - [ ] Update g01.005 milestone as complete
 
 ---
@@ -240,13 +240,13 @@ Pug Tokens (styling)
 
 ## Appendix: Component Mapping
 
-| Pug Component | Bits Primitive | Notes |
+| Flint Component | Bits Primitive | Notes |
 |---------------|----------------|-------|
 | Button | Button | Direct wrapper |
 | Checkbox | Checkbox | + label wrapper |
 | Dialog | Dialog | Full compound |
 | DropdownMenu | DropdownMenu | Full compound |
-| Input | (implement) | Bits provides low-level, Pug adds styled input |
+| Input | (implement) | Bits provides low-level, Flint adds styled input |
 | Popover | Popover | Full compound |
 | RadioGroup | RadioGroup | + label wrapper |
 | Select | Select | Full compound |
@@ -254,17 +254,17 @@ Pug Tokens (styling)
 | Switch | Switch | + label wrapper |
 | Tabs | Tabs | Full compound |
 | Tooltip | Tooltip | Full compound |
-| Calendar | Calendar | Pug adds styling |
+| Calendar | Calendar | Flint adds styling |
 | DatePicker | DatePicker | Composed primitive |
-| Command | Command | Pug adds styling |
-| Table | Table | Pug adds token styling |
+| Command | Command | Flint adds styling |
+| Table | Table | Flint adds token styling |
 
 ---
 
 ## Appendix: Wrapper Template
 
 ```svelte
-<!-- Template for Pug component wrapping Bits -->
+<!-- Template for Flint component wrapping Bits -->
 <script lang="ts">
   import { Component as BitsComponent } from "bits-ui";
   import { cn } from "$lib/utils";

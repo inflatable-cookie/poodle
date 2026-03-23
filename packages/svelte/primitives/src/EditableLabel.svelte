@@ -116,62 +116,62 @@
   .editable-label__input {
     width: 100%;
     min-width: 0;
-    padding: var(--pug-space-control-y) var(--pug-space-control-x);
+    padding: var(--flint-space-control-y) var(--flint-space-control-x);
     border: 0.0625rem solid transparent;
-    border-radius: var(--pug-radius-control);
+    border-radius: var(--flint-radius-control);
     background: transparent;
-    color: var(--pug-color-text-primary);
-    font-family: var(--pug-typography-label-family);
-    font-size: var(--pug-typography-label-size);
-    font-weight: var(--pug-typography-label-weight);
-    line-height: var(--pug-typography-label-lineHeight);
+    color: var(--flint-color-text-primary);
+    font-family: var(--flint-typography-label-family);
+    font-size: var(--flint-typography-label-size);
+    font-weight: var(--flint-typography-label-weight);
+    line-height: var(--flint-typography-label-lineHeight);
     text-align: left;
   }
 
   .editable-label__display {
     display: inline-flex;
     align-items: center;
-    gap: var(--pug-space-inline-sm);
+    gap: var(--flint-space-inline-sm);
     cursor: text;
   }
 
   .editable-label__display:hover:not(:disabled),
   .editable-label__display:focus-visible {
-    border-color: color-mix(in srgb, var(--pug-color-border-default) 72%, transparent);
-    background: color-mix(in srgb, var(--pug-color-background-surface) 52%, transparent);
+    border-color: color-mix(in srgb, var(--flint-color-border-default) 72%, transparent);
+    background: color-mix(in srgb, var(--flint-color-background-surface) 52%, transparent);
     outline: none;
   }
 
   .editable-label__display:focus-visible {
-    outline: var(--pug-border-width-focus) solid var(--pug-color-accent-focusRing);
+    outline: var(--flint-border-width-focus) solid var(--flint-color-accent-focusRing);
     outline-offset: 0.0625rem;
   }
 
   .editable-label__input {
-    border-color: var(--pug-color-accent-focusRing);
-    background: var(--pug-color-background-surface);
+    border-color: var(--flint-color-accent-focusRing);
+    background: var(--flint-color-background-surface);
     outline: none;
     box-shadow:
-      0 0 0 var(--pug-border-width-focus)
-      color-mix(in srgb, var(--pug-color-accent-focusRing) 28%, transparent);
+      0 0 0 var(--flint-border-width-focus)
+      color-mix(in srgb, var(--flint-color-accent-focusRing) 28%, transparent);
   }
 
   .editable-label[data-disabled="true"] .editable-label__display {
     cursor: not-allowed;
-    opacity: var(--pug-state-opacity-disabled);
+    opacity: var(--flint-state-opacity-disabled);
   }
 
   .editable-label__display--empty .editable-label__text {
-    color: var(--pug-color-text-secondary);
+    color: var(--flint-color-text-secondary);
     font-style: italic;
   }
 
   .editable-label__icon {
     width: 0.75rem;
     height: 0.75rem;
-    color: var(--pug-color-text-secondary);
+    color: var(--flint-color-text-secondary);
     opacity: 0;
-    transition: opacity var(--pug-motion-duration-interaction, 0.15s) var(--pug-motion-easing-standard, ease);
+    transition: opacity var(--flint-motion-duration-interaction, 0.15s) var(--flint-motion-easing-standard, ease);
   }
 
   .editable-label__display:hover:not(:disabled) .editable-label__icon,
@@ -194,7 +194,7 @@
   }
 
   .editable-label[data-variant="flush"] .editable-label__input {
-    border-bottom: 0.0625rem solid var(--pug-color-accent-focusRing);
+    border-bottom: 0.0625rem solid var(--flint-color-accent-focusRing);
     box-shadow: none;
     background: transparent;
   }

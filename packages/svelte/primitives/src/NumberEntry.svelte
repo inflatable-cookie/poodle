@@ -158,40 +158,40 @@
     display: grid;
     grid-template-columns: minmax(0, 1fr) auto;
     align-items: stretch;
-    height: var(--pug-size-control-height);
-    border: 0.0625rem solid var(--pug-color-border-default);
-    border-radius: var(--pug-radius-control);
-    background: var(--pug-color-background-surface);
+    height: var(--flint-size-control-height);
+    border: 0.0625rem solid var(--flint-color-border-default);
+    border-radius: var(--flint-radius-control);
+    background: var(--flint-color-background-surface);
     overflow: hidden;
   }
 
   .number-entry[data-validation-state="invalid"] {
-    border-color: var(--pug-color-status-danger);
+    border-color: var(--flint-color-status-danger);
   }
 
   .number-entry[data-validation-state="valid"] {
-    border-color: var(--pug-color-status-success);
+    border-color: var(--flint-color-status-success);
   }
 
   .number-entry[data-validation-state="pending"] {
-    border-color: var(--pug-color-accent-base);
+    border-color: var(--flint-color-accent-base);
   }
 
   .number-entry:focus-within {
     box-shadow:
-      0 0 0 var(--pug-border-width-focus)
-      color-mix(in srgb, var(--pug-color-accent-focusRing) 28%, transparent);
+      0 0 0 var(--flint-border-width-focus)
+      color-mix(in srgb, var(--flint-color-accent-focusRing) 28%, transparent);
   }
 
   .number-entry__control {
     min-width: 0;
-    padding: 0 var(--pug-space-control-x);
+    padding: 0 var(--flint-space-control-x);
     border: 0;
     background: transparent;
-    color: var(--pug-color-text-primary);
-    font-family: var(--pug-typography-body-family);
-    font-size: var(--pug-typography-body-size);
-    line-height: var(--pug-typography-body-lineHeight);
+    color: var(--flint-color-text-primary);
+    font-family: var(--flint-typography-body-family);
+    font-size: var(--flint-typography-body-size);
+    line-height: var(--flint-typography-body-lineHeight);
     outline: 0;
   }
 
@@ -209,21 +209,21 @@
     width: 1.25rem;
     min-height: 0;
     border: 0;
-    border-radius: calc(var(--pug-radius-control) - 0.125rem);
-    background: color-mix(in srgb, var(--pug-color-background-elevated) 88%, transparent);
-    color: var(--pug-color-text-primary);
+    border-radius: calc(var(--flint-radius-control) - 0.125rem);
+    background: color-mix(in srgb, var(--flint-color-background-elevated) 88%, transparent);
+    color: var(--flint-color-text-primary);
     cursor: pointer;
     font-size: 0;
     padding: 0;
     overflow: hidden;
   }
 
-  .number-entry__steppers button :global(.pug-icon) {
+  .number-entry__steppers button :global(.flint-icon) {
     transform: scale(0.625);
   }
 
   .number-entry__steppers button:disabled {
     cursor: not-allowed;
-    opacity: var(--pug-state-opacity-disabled);
+    opacity: var(--flint-state-opacity-disabled);
   }
 </style>

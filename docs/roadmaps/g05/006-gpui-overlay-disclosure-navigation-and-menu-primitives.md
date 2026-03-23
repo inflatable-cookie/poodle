@@ -1,10 +1,10 @@
 # g05.006 GPUI Overlay, Disclosure, Navigation, And Menu Primitives
 
 Status: completed
-Owner: Pug Core
+Owner: Flint Core
 Updated: 2026-03-12
 Depends on: g05.001, g05.002, g05.003, g05.004, g05.005
-Primary repos: `pug`
+Primary repos: `flint`
 
 ## Goals
 

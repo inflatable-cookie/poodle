@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { AlertDialog, Button, Eyebrow } from "@pug/svelte-primitives";
+  import { AlertDialog, Button, Eyebrow } from "@flint/svelte-primitives";
 
   let dangerOpen: boolean | null = null;
   let warningOpen: boolean | null = null;
@@ -100,11 +100,11 @@
     gap: 0.125rem;
     padding: 0.5rem 0.75rem;
     border-radius: 0.375rem;
-    background: var(--pug-color-background-panel, #1a1a1a);
+    background: var(--flint-color-background-panel, #1a1a1a);
   }
 
   .user-card span {
-    color: var(--pug-color-text-secondary, #999);
+    color: var(--flint-color-text-secondary, #999);
     font-size: 0.8125rem;
   }
 

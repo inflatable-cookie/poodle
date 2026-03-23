@@ -4,8 +4,8 @@
 //! Cell: 2.25rem × 2.5rem, gap 0.375rem, code font 1rem.
 
 use gpui::*;
-use pug_gpui::GpuiThemeProvider;
-use pug_primitives::PinInputSpec;
+use flint_gpui::GpuiThemeProvider;
+use flint_primitives::PinInputSpec;
 
 use crate::theme_ext::{resolve_color, resolve_opacity, resolve_radius};
 
@@ -85,9 +85,9 @@ impl IntoElement for PinInput {
         let chars: Vec<char> = spec.value.chars().collect();
 
         let id_str = if let Some(ref suffix) = self.id_suffix {
-            format!("pug-pin-input-{}", suffix)
+            format!("flint-pin-input-{}", suffix)
         } else {
-            "pug-pin-input".to_string()
+            "flint-pin-input".to_string()
         };
 
         let mut row = div()

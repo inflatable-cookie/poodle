@@ -1,7 +1,7 @@
 //! ActionDiscoveryPanel — Jetstream keyboard shortcut panel backed by ActionDiscoveryPanelSpec.
 use jetstream_runtime::ui_element::{self, JsEl};
-use pug_jetstream::JetstreamThemeProvider;
-use pug_composites::ActionDiscoveryPanelSpec;
+use flint_jetstream::JetstreamThemeProvider;
+use flint_composites::ActionDiscoveryPanelSpec;
 use crate::theme_ext::resolve_color;
 
 pub fn js_action_discovery_panel(spec: &ActionDiscoveryPanelSpec, theme: &JetstreamThemeProvider) -> JsEl {

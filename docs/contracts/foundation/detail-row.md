@@ -114,11 +114,11 @@ Updated: 2026-03-15
 |----------|-------|
 | `display` | `grid` |
 | `grid-template-columns` | `11.25rem minmax(0, 1fr) auto` |
-| `gap` | `var(--pug-space-inline-md)` |
+| `gap` | `var(--flint-space-inline-md)` |
 | `align-items` | `center` |
 | `padding` | `0.75rem 0.875rem` |
-| `border-radius` | `calc(var(--pug-radius-surface) - 0.0625rem)` |
-| `background` | `color-mix(in srgb, var(--pug-surface) 93%, var(--pug-color-text-primary))` |
+| `border-radius` | `calc(var(--flint-radius-surface) - 0.0625rem)` |
+| `background` | `color-mix(in srgb, var(--flint-surface) 93%, var(--flint-color-text-primary))` |
 
 ### Label Block
 
@@ -132,17 +132,17 @@ Updated: 2026-03-15
 
 | Property | Value |
 |----------|-------|
-| `color` | `var(--pug-color-text-secondary)` |
-| `font-family` | `var(--pug-typography-label-family)` |
-| `font-size` | `var(--pug-typography-label-size)` |
-| `line-height` | `var(--pug-typography-label-lineHeight)` |
+| `color` | `var(--flint-color-text-secondary)` |
+| `font-family` | `var(--flint-typography-label-family)` |
+| `font-size` | `var(--flint-typography-label-size)` |
+| `line-height` | `var(--flint-typography-label-lineHeight)` |
 | `margin` | `0` |
 
 ### Description
 
 | Property | Value |
 |----------|-------|
-| `color` | `var(--pug-color-text-secondary)` |
+| `color` | `var(--flint-color-text-secondary)` |
 | `font-size` | `0.8125rem` |
 | `line-height` | `1.5` |
 | `margin` | `0` |
@@ -151,10 +151,10 @@ Updated: 2026-03-15
 
 | Property | Value |
 |----------|-------|
-| `color` | `var(--pug-color-text-primary)` |
-| `font-family` | `var(--pug-typography-body-family)` |
-| `font-size` | `var(--pug-typography-body-size)` |
-| `line-height` | `var(--pug-typography-body-lineHeight)` |
+| `color` | `var(--flint-color-text-primary)` |
+| `font-family` | `var(--flint-typography-body-family)` |
+| `font-size` | `var(--flint-typography-body-size)` |
+| `line-height` | `var(--flint-typography-body-lineHeight)` |
 | `min-width` | `0` |
 | `margin` | `0` |
 
@@ -181,9 +181,9 @@ Updated: 2026-03-15
 
 ## 10. GPUI Notes
 
-- expected crate/module surface: `pug_gpui::components::detail_row`
+- expected crate/module surface: `flint_gpui::components::detail_row`
 - Spec struct: `DetailRowSpec` in primitives crate
-- Component struct: `PugDetailRow` in components crate
+- Component struct: `FlintDetailRow` in components crate
 - Three-column grid maps to flex layout with fixed-width label column
 - Responsive breakpoint may use GPUI layout measurements
 - Text truncation uses GPUI's text ellipsis support
@@ -221,7 +221,7 @@ Updated: 2026-03-15
 
 | Label | Props / Config | Expected Visual |
 |-------|---------------|-----------------|
-| Name | `label="Name"`, `value="Pug Design System"` | Three-column grid row with label and value |
+| Name | `label="Name"`, `value="Flint Design System"` | Three-column grid row with label and value |
 | Version | `label="Version"`, `value="2.1.0"` | Three-column grid row with label and value |
 | License | `label="License"`, `value="MIT"` | Three-column grid row with label and value |
 

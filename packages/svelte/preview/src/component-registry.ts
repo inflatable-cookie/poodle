@@ -32,8 +32,8 @@ function entry(
   };
 }
 
-const P = "@pug/svelte-primitives";
-const C = "@pug/svelte-composites";
+const P = "@flint/svelte-primitives";
+const C = "@flint/svelte-composites";
 
 export const primitiveComponents: ComponentEntry[] = [
   entry("Accordion", "primitive", P, "Expandable disclosure panels with single or multiple selection.", true),
@@ -68,7 +68,7 @@ export const primitiveComponents: ComponentEntry[] = [
   entry("FormActions", "primitive", P, "Action row for form submit, cancel, and secondary actions.", true),
   entry("Grid", "primitive", P, "CSS Grid layout container.", true),
   entry("HoverCard", "primitive", P, "Rich preview card triggered by hover or focus.", true),
-  entry("Icon", "primitive", P, "SVG icon accepting direct node data or string names. Tree-shakeable via @pug/icons-lucide.", true),
+  entry("Icon", "primitive", P, "SVG icon accepting direct node data or string names. Tree-shakeable via @flint/icons-lucide.", true),
   entry("IconButton", "primitive", P, "Button variant displaying only an icon.", true),
   entry("IconProvider", "primitive", P, "Context provider that supplies a bulk icon set for string-based icon lookups.", true),
   entry("ListCard", "primitive", P, "Structured list item card with leading/trailing slots.", true),

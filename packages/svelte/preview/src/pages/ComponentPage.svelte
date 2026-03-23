@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { Eyebrow, Pill, Separator, Surface } from "@pug/svelte-primitives";
+  import { Eyebrow, Pill, Separator, Surface } from "@flint/svelte-primitives";
   import UsageDocs from "../components/UsageDocs.svelte";
   import type { ComponentEntry } from "../component-registry";
   import { componentDocsMap } from "../component-docs";
@@ -76,14 +76,14 @@
   .component-page__title {
     font-size: 2rem;
     font-weight: 700;
-    color: var(--pug-color-text-primary);
+    color: var(--flint-color-text-primary);
     margin: 0.25rem 0 0.75rem;
   }
 
   .component-page__description {
     font-size: 1rem;
     line-height: 1.6;
-    color: var(--pug-color-text-secondary);
+    color: var(--flint-color-text-secondary);
     margin: 0;
   }
 
@@ -94,16 +94,16 @@
   .component-page__section-title {
     font-size: 1.125rem;
     font-weight: 600;
-    color: var(--pug-color-text-primary);
+    color: var(--flint-color-text-primary);
     margin: 0 0 1rem;
   }
 
   .component-page__placeholder {
     padding: 2rem;
     text-align: center;
-    color: var(--pug-color-text-secondary);
-    border: 0.0625rem dashed color-mix(in srgb, var(--pug-color-border-subtle) 60%, transparent);
-    border-radius: var(--pug-radius-surface);
+    color: var(--flint-color-text-secondary);
+    border: 0.0625rem dashed color-mix(in srgb, var(--flint-color-border-subtle) 60%, transparent);
+    border-radius: var(--flint-radius-surface);
   }
 
   .component-page__placeholder p {
@@ -113,12 +113,12 @@
 
   .component-page__code {
     padding: 0.75rem 1rem;
-    border-radius: var(--pug-radius-surface);
-    background: color-mix(in srgb, var(--pug-color-background-canvas) 90%, transparent);
-    border: 0.0625rem solid color-mix(in srgb, var(--pug-color-border-subtle) 50%, transparent);
+    border-radius: var(--flint-radius-surface);
+    background: color-mix(in srgb, var(--flint-color-background-canvas) 90%, transparent);
+    border: 0.0625rem solid color-mix(in srgb, var(--flint-color-border-subtle) 50%, transparent);
     font-family: "SF Mono", "Fira Code", monospace;
     font-size: 0.8125rem;
-    color: var(--pug-color-text-primary);
+    color: var(--flint-color-text-primary);
     overflow-x: auto;
     margin: 0;
   }

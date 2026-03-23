@@ -1,11 +1,11 @@
 use gpui::*;
-use pug_adapter::ThemeProvider;
-use pug_gpui::GpuiThemeProvider;
-use pug_primitives::{
+use flint_adapter::ThemeProvider;
+use flint_gpui::GpuiThemeProvider;
+use flint_primitives::{
     Alignment, EyebrowSpec, LayoutJustify, PaddingScale, StackDirection, StackSpec,
     SurfaceBorder, SurfaceSpec, SurfaceTone,
 };
-use pug_gpui_components::{Eyebrow, Stack, Surface};
+use flint_gpui_components::{Eyebrow, Stack, Surface};
 use crate::style_bridge::color_to_hsla;
 
 pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {

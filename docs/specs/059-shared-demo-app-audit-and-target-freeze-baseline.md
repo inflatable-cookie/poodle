@@ -16,7 +16,7 @@ parity and downstream proof continue.
 The shared demo target must be explicit, coherent, and separable from the
 docs-shell.
 
-Pug may use the existing preview harness for docs, tokens, and audit
+Flint may use the existing preview harness for docs, tokens, and audit
 infrastructure, but the actual UI GPUI is supposed to match should not remain
 buried inside one monolithic preview page with docs-only utilities and broad
 section glue mixed together.
@@ -76,13 +76,13 @@ target instead of a partially covered shell plus contract-only leftovers.
 
 ## Honesty Rule
 
-Pug may say:
+Flint may say:
 
 - the current preview surface is useful as docs and audit infrastructure
 - the current demo target is not yet clean enough for strong cross-runtime demo parity
 - the target shape for the rebuilt demo is now explicit
 
-Pug may not say:
+Flint may not say:
 
 - the existing preview page is already the right GPUI parity target by default
 - broad section coverage alone proves the demo target is coherent

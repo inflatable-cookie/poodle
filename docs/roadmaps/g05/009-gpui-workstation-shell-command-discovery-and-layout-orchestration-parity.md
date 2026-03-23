@@ -1,10 +1,10 @@
 # g05.009 GPUI Workstation Shell, Command Discovery, And Layout Orchestration Parity
 
 Status: completed
-Owner: Pug Core
+Owner: Flint Core
 Updated: 2026-03-12
 Depends on: g05.003, g05.006, g05.008
-Primary repos: `pug`
+Primary repos: `flint`
 
 ## Goals
 

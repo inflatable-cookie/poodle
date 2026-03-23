@@ -10,7 +10,7 @@
   - `docs/contracts/foundation/search-field.md`
   - `docs/contracts/foundation/editable-label.md`
   - `docs/contracts/foundation/number-entry.md`
-- kept the contracts generic enough for Pug core while still reflecting the
+- kept the contracts generic enough for Flint core while still reflecting the
   first real downstream pressure from Aura and Spark:
   - search and browser query flows
   - inline rename/edit flows

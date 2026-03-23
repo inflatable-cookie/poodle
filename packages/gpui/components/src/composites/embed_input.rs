@@ -1,9 +1,9 @@
 //! EmbedInput — URL input for embedding external content backed by EmbedInputSpec.
 
 use gpui::*;
-use pug_gpui::GpuiThemeProvider;
-use pug_composites::EmbedInputSpec;
-use pug_primitives::ValidationState;
+use flint_gpui::GpuiThemeProvider;
+use flint_composites::EmbedInputSpec;
+use flint_primitives::ValidationState;
 use crate::theme_ext::{resolve_color, resolve_opacity, resolve_radius};
 
 pub struct EmbedInput {
@@ -49,7 +49,7 @@ impl IntoElement for EmbedInput {
 
         // Multi-line text area (min 3 rows ~72px) for URL / embed code
         let mut textarea = div()
-            .id("pug-embed-input")
+            .id("flint-embed-input")
             .focusable()
             .bg(fill)
             .border_1()

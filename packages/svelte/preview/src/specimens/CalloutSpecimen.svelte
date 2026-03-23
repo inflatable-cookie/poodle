@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { Callout, Eyebrow } from "@pug/svelte-primitives";
+  import { Callout, Eyebrow } from "@flint/svelte-primitives";
 </script>
 
 <div class="specimen">

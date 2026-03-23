@@ -1,10 +1,10 @@
 # g03.010 Accessibility Audit And Assistive-Technology Conformance
 
 Status: completed
-Owner: Pug Core
+Owner: Flint Core
 Updated: 2026-03-12
 Depends on: g03.002, g03.003, g03.004, g03.005
-Primary repos: `pug`
+Primary repos: `flint`
 
 ## Goals
 

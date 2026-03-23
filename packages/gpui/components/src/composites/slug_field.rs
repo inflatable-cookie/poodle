@@ -1,9 +1,9 @@
 //! SlugField — URL slug input backed by SlugFieldSpec.
 
 use gpui::*;
-use pug_gpui::GpuiThemeProvider;
-use pug_composites::SlugFieldSpec;
-use pug_primitives::{IconSize, IconSpec};
+use flint_gpui::GpuiThemeProvider;
+use flint_composites::SlugFieldSpec;
+use flint_primitives::{IconSize, IconSpec};
 use crate::primitives::Icon;
 use crate::theme_ext::{resolve_color, resolve_opacity, resolve_radius};
 
@@ -38,7 +38,7 @@ impl IntoElement for SlugField {
         let muted = resolve_color(theme, "semantic.color.text.secondary");
 
         let focus_ring = resolve_color(theme, "semantic.color.accent.focusRing");
-        let mut el = div().id("pug-slug-field").focusable().flex().flex_row().items_center()
+        let mut el = div().id("flint-slug-field").focusable().flex().flex_row().items_center()
             .bg(fill).border_1().border_color(border).rounded(radius)
             .h(px(36.0))
             .focus(move |s| s.border_color(focus_ring));

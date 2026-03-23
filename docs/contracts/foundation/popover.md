@@ -140,7 +140,7 @@ Open/closed state and placement state are required.
 
 | Var | Purpose |
 |-----|---------|
-| `--pug-popover-offset` | set from `offset` prop (default produces `0.5rem` equivalent at 8px) |
+| `--flint-popover-offset` | set from `offset` prop (default produces `0.5rem` equivalent at 8px) |
 
 ### Root (.popover) — base styles
 
@@ -159,7 +159,7 @@ Open/closed state and placement state are required.
 
 | Property | Value |
 |----------|-------|
-| `outline` | `var(--pug-border-width-focus) solid var(--pug-color-accent-focusRing)` |
+| `outline` | `var(--flint-border-width-focus) solid var(--flint-color-accent-focusRing)` |
 | `outline-offset` | `0.125rem` |
 
 ### Surface (.popover__surface)
@@ -167,24 +167,24 @@ Open/closed state and placement state are required.
 | Property | Value |
 |----------|-------|
 | `position` | `absolute` |
-| `z-index` | `var(--pug-overlay-z-menu)` |
+| `z-index` | `var(--flint-overlay-z-menu)` |
 | `min-width` | `14rem` |
 | `max-width` | `min(24rem, 90vw)` |
-| `padding` | `var(--pug-space-panel-y) var(--pug-space-panel-x)` |
-| `border` | `0.0625rem solid color-mix(in srgb, var(--pug-color-border-default) 72%, transparent)` |
-| `border-radius` | `var(--pug-radius-surface)` |
-| `background` | `color-mix(in srgb, var(--pug-color-background-elevated) 98%, var(--pug-color-background-panel))` |
-| `--pug-surface` | `color-mix(in srgb, var(--pug-color-background-elevated) 98%, var(--pug-color-background-panel))` |
-| `box-shadow` | `var(--pug-elevation-overlay)` |
+| `padding` | `var(--flint-space-panel-y) var(--flint-space-panel-x)` |
+| `border` | `0.0625rem solid color-mix(in srgb, var(--flint-color-border-default) 72%, transparent)` |
+| `border-radius` | `var(--flint-radius-surface)` |
+| `background` | `color-mix(in srgb, var(--flint-color-background-elevated) 98%, var(--flint-color-background-panel))` |
+| `--flint-surface` | `color-mix(in srgb, var(--flint-color-background-elevated) 98%, var(--flint-color-background-panel))` |
+| `box-shadow` | `var(--flint-elevation-overlay)` |
 
 ### Placement rules — position offsets by placement value
 
 | Placement prefix | Properties |
 |------------------|------------|
-| `bottom-*` | `top: calc(100% + var(--pug-popover-offset))`, `left: 0` |
-| `top-*` | `bottom: calc(100% + var(--pug-popover-offset))`, `left: 0` |
-| `right-*` | `top: 0`, `left: calc(100% + var(--pug-popover-offset))` |
-| `left-*` | `top: 0`, `right: calc(100% + var(--pug-popover-offset))` |
+| `bottom-*` | `top: calc(100% + var(--flint-popover-offset))`, `left: 0` |
+| `top-*` | `bottom: calc(100% + var(--flint-popover-offset))`, `left: 0` |
+| `right-*` | `top: 0`, `left: calc(100% + var(--flint-popover-offset))` |
+| `left-*` | `top: 0`, `right: calc(100% + var(--flint-popover-offset))` |
 
 ### Placement alignment — end modifier
 
@@ -204,13 +204,13 @@ Open/closed state and placement state are required.
   focus-restoration semantics
 - if the content traps focus, the component should likely be `Dialog` or
   `Drawer` instead
-- `--pug-popover-offset` CSS custom property is set from the `offset` prop,
+- `--flint-popover-offset` CSS custom property is set from the `offset` prop,
   enabling placement rules to reference it in `calc()` expressions
 - surface uses `position: absolute` relative to the root's `position: relative`
 
 ## 10. GPUI Notes
 
-- expected crate/module surface: `pug_gpui::primitives::popover`
+- expected crate/module surface: `flint_gpui::primitives::popover`
 - GPUI implementation must intentionally model anchored overlay behavior,
   outside-dismiss rules, and non-modal focus flow through native window or view
   constructs
@@ -236,7 +236,7 @@ Open/closed state and placement state are required.
 - [ ] box-shadow: elevation-overlay
 - [ ] padding: panel-y / panel-x
 - [ ] trigger focus ring matches (focus width, focusRing color, 0.125rem offset)
-- [ ] placement offset uses --pug-popover-offset custom property
+- [ ] placement offset uses --flint-popover-offset custom property
 
 ### Tier 3: Implementation Freedom
 
@@ -262,7 +262,7 @@ Open/closed state and placement state are required.
 
 | Label | Props / Config | Expected Visual |
 |-------|---------------|-----------------|
-| Top popover | `<Popover placement="top" ariaLabel="Help tip">` with a secondary Button trigger ("Show help") and paragraph content | Button trigger; clicking opens an elevated surface anchored above the trigger with descriptive text; offset matches --pug-popover-offset |
+| Top popover | `<Popover placement="top" ariaLabel="Help tip">` with a secondary Button trigger ("Show help") and paragraph content | Button trigger; clicking opens an elevated surface anchored above the trigger with descriptive text; offset matches --flint-popover-offset |
 
 ## 14. Approval And Adoption Notes
 

@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { SearchField, Eyebrow } from "@pug/svelte-primitives";
+  import { SearchField, Eyebrow } from "@flint/svelte-primitives";
 
   let query = "";
   let lastSubmit = "";
@@ -63,6 +63,6 @@
   .specimen__group p {
     margin: 0;
     font-size: 0.8125rem;
-    color: var(--pug-color-text-secondary);
+    color: var(--flint-color-text-secondary);
   }
 </style>

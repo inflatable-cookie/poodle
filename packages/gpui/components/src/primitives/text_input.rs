@@ -5,8 +5,8 @@
 //! require gpui's internal input handling.
 
 use gpui::*;
-use pug_gpui::GpuiThemeProvider;
-use pug_primitives::{IconSize, IconSpec, TextInputSpec, ValidationState};
+use flint_gpui::GpuiThemeProvider;
+use flint_primitives::{IconSize, IconSpec, TextInputSpec, ValidationState};
 
 use super::icon::Icon;
 use crate::theme_ext::{resolve_color, resolve_opacity, resolve_px, resolve_radius};
@@ -134,9 +134,9 @@ impl IntoElement for TextInput {
         let text_col = if is_empty { text_secondary } else { text_primary };
 
         let id_str = if let Some(ref suffix) = self.id_suffix {
-            format!("pug-input-{}", suffix)
+            format!("flint-input-{}", suffix)
         } else {
-            "pug-input".to_string()
+            "flint-input".to_string()
         };
 
         // Svelte: validation state border colors

@@ -1,7 +1,7 @@
 //! DockRegion — Jetstream dock region backed by DockRegionSpec.
 use jetstream_runtime::ui_element::{self, JsEl};
-use pug_jetstream::JetstreamThemeProvider;
-use pug_composites::DockRegionSpec;
+use flint_jetstream::JetstreamThemeProvider;
+use flint_composites::DockRegionSpec;
 use crate::theme_ext::resolve_color;
 
 pub fn js_dock_region(spec: &DockRegionSpec, theme: &JetstreamThemeProvider, content: Option<JsEl>) -> JsEl {

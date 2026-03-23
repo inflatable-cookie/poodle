@@ -1,7 +1,7 @@
 use gpui::*;
-use pug_adapter::ThemeProvider;
-use pug_primitives::{ToggleGroupOption, EyebrowSpec};
-use pug_gpui_components::{ToggleGroup, Eyebrow};
+use flint_adapter::ThemeProvider;
+use flint_primitives::{ToggleGroupOption, EyebrowSpec};
+use flint_gpui_components::{ToggleGroup, Eyebrow};
 use crate::app_state::AppState;
 use crate::PreviewRoot;
 
@@ -73,7 +73,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                 .child(
                     ToggleGroup::new(multi_options, theme)
                         .default_value(vec!["design".to_string(), "docs".to_string()])
-                        .selection_mode(pug_primitives::ToggleGroupSelectionMode::Multiple)
+                        .selection_mode(flint_primitives::ToggleGroupSelectionMode::Multiple)
                 )
         )
         .child(

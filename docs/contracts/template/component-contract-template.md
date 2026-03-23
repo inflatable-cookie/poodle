@@ -3,7 +3,7 @@
 Status: active
 Updated: 2026-03-11
 
-Use this template for every new Pug component before implementation begins.
+Use this template for every new Flint component before implementation begins.
 
 ## 1. Purpose
 

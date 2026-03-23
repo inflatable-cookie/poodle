@@ -1,10 +1,10 @@
 # g04.003 File Upload, Media Input, And Embed Patterns
 
 Status: planned
-Owner: Pug Core
+Owner: Flint Core
 Updated: 2026-03-14
 Depends on: g04.001
-Primary repos: `pug`
+Primary repos: `flint`
 
 ## Goals
 
@@ -19,16 +19,16 @@ Primary repos: `pug`
 
 - [ ] write contract for FileUpload: drop zone, file type accept list, size
   limits, multiple files, progress callback, preview thumbnails
-- [ ] implement FileUpload primitive in `@pug/svelte-primitives`
+- [ ] implement FileUpload primitive in `@flint/svelte-primitives`
 - [ ] write contract for MediaPicker: gallery view, search, filtering, selection
   mode, upload integration
-- [ ] implement MediaPicker composite in `@pug/svelte-composites`
+- [ ] implement MediaPicker composite in `@flint/svelte-composites`
 - [ ] write contract for EmbedInput: URL input, paste detection, provider
   resolution, preview generation
-- [ ] implement EmbedInput composite in `@pug/svelte-composites`
+- [ ] implement EmbedInput composite in `@flint/svelte-composites`
 - [ ] write contract for EmbedPreview: provider icon, title, description,
   thumbnail, link
-- [ ] implement EmbedPreview composite in `@pug/svelte-composites`
+- [ ] implement EmbedPreview composite in `@flint/svelte-composites`
 - [ ] create specimens for all four components
 - [ ] register in component-registry.ts and specimen registry
 

@@ -1,6 +1,6 @@
 <script lang="ts">
-  import { Eyebrow } from "@pug/svelte-primitives";
-  import { ActionDiscoveryPanel } from "@pug/svelte-composites";
+  import { Eyebrow } from "@flint/svelte-primitives";
+  import { ActionDiscoveryPanel } from "@flint/svelte-composites";
 </script>
 
 <div class="specimen">
@@ -60,8 +60,8 @@
   .specimen__frame {
     max-width: 32rem;
     max-height: 20rem;
-    border: 0.0625rem solid var(--pug-color-border-subtle);
-    border-radius: var(--pug-radius-surface);
+    border: 0.0625rem solid var(--flint-color-border-subtle);
+    border-radius: var(--flint-radius-surface);
     padding: 0.75rem;
     overflow: hidden;
   }

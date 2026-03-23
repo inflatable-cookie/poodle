@@ -1,6 +1,6 @@
 <script lang="ts">
-  import { PageLoading } from "@pug/svelte-composites";
-  import { Eyebrow, Button } from "@pug/svelte-primitives";
+  import { PageLoading } from "@flint/svelte-composites";
+  import { Eyebrow, Button } from "@flint/svelte-primitives";
 
   let showIndeterminate = false;
   let showDeterminate = false;
@@ -96,10 +96,10 @@
     right: 1rem;
     z-index: 10000;
     padding: 0.5rem 1rem;
-    border: 1px solid var(--pug-color-border-default);
-    border-radius: var(--pug-radius-control);
-    background: var(--pug-color-background-elevated);
-    color: var(--pug-color-text-primary);
+    border: 1px solid var(--flint-color-border-default);
+    border-radius: var(--flint-radius-control);
+    background: var(--flint-color-background-elevated);
+    color: var(--flint-color-text-primary);
     font: inherit;
     font-size: 0.75rem;
     cursor: pointer;

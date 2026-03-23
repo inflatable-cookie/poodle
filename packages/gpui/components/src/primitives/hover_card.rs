@@ -1,8 +1,8 @@
 //! HoverCard — real GPUI component backed by HoverCardSpec.
 
 use gpui::*;
-use pug_gpui::GpuiThemeProvider;
-use pug_primitives::{HoverCardSpec, OverlayPlacement};
+use flint_gpui::GpuiThemeProvider;
+use flint_primitives::{HoverCardSpec, OverlayPlacement};
 
 use crate::theme_ext::{color_mix, resolve_color, resolve_px, resolve_radius};
 
@@ -82,7 +82,7 @@ impl IntoElement for HoverCard {
         // Surface content (shown when open)
         if spec.is_open {
             let mut surface = div()
-                .id("pug-hover-card-surface")
+                .id("flint-hover-card-surface")
                 .focusable()
                 .px(inline_padding)
                 .py(px(10.0))

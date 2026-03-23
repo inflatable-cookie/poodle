@@ -1,11 +1,11 @@
 [package]
-name = "pug-gpui-preview"
+name = "flint-gpui-preview"
 version = "0.0.0"
 edition = "2021"
-description = "Native macOS preview application for the Pug design system, rendered via GPUI."
+description = "Native macOS preview application for the Flint design system, rendered via GPUI."
 
 [[bin]]
-name = "pug-preview"
+name = "flint-preview"
 path = "src/main.rs"
 
 [dependencies]
@@ -14,18 +14,18 @@ path = "src/main.rs"
 # conflicts, switch to git: gpui = { git = "https://github.com/zed-industries/zed" }
 gpui = "0.2.2"
 
-# Pug adapter + contracts + real components
-pug-gpui = { path = "../adapter" }
-pug-gpui-components = { path = "../components" }
-pug-adapter = { path = "../../contracts/adapter" }
-pug-primitives = { path = "../../contracts/primitives" }
-pug-composites = { path = "../../contracts/composites" }
-pug-workstation = { path = "../../contracts/workstation" }
-pug-style = { path = "../../contracts/style" }
-pug-tokens = { path = "../../contracts/tokens" }
+# Flint adapter + contracts + real components
+flint-gpui = { path = "../adapter" }
+flint-gpui-components = { path = "../components" }
+flint-adapter = { path = "../../contracts/adapter" }
+flint-primitives = { path = "../../contracts/primitives" }
+flint-composites = { path = "../../contracts/composites" }
+flint-workstation = { path = "../../contracts/workstation" }
+flint-style = { path = "../../contracts/style" }
+flint-tokens = { path = "../../contracts/tokens" }
 anyhow = "1"
 
-[package.metadata.pug]
+[package.metadata.flint]
 public-intent = true
 channel = "preview"
 stability = "pre-release"

@@ -1,10 +1,10 @@
 # g02.015 Packaging, Release, And Versioning Baseline
 
 Status: completed
-Owner: Pug Core
+Owner: Flint Core
 Updated: 2026-03-11
 Depends on: g02.012, g02.013, g02.014
-Primary repos: `pug`
+Primary repos: `flint`
 
 ## Goals
 

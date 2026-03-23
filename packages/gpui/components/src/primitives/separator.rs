@@ -1,8 +1,8 @@
 //! Separator — real GPUI component backed by SeparatorSpec.
 
 use gpui::*;
-use pug_gpui::GpuiThemeProvider;
-use pug_primitives::{RuleTone, SeparatorOrientation, SeparatorSpec};
+use flint_gpui::GpuiThemeProvider;
+use flint_primitives::{RuleTone, SeparatorOrientation, SeparatorSpec};
 
 use crate::theme_ext::resolve_color;
 

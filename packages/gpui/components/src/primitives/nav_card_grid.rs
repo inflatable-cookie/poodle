@@ -5,8 +5,8 @@
 //! of equal-width columns using nested flex containers.
 
 use gpui::*;
-use pug_gpui::GpuiThemeProvider;
-use pug_primitives::NavCardGridSpec;
+use flint_gpui::GpuiThemeProvider;
+use flint_primitives::NavCardGridSpec;
 
 use crate::theme_ext::resolve_px;
 

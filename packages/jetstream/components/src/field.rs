@@ -1,8 +1,8 @@
 //! Field — Jetstream form field wrapper backed by FieldSpec.
 
 use jetstream_runtime::ui_element::{self, JsEl};
-use pug_jetstream::JetstreamThemeProvider;
-use pug_primitives::{FieldSpec, ValidationState};
+use flint_jetstream::JetstreamThemeProvider;
+use flint_primitives::{FieldSpec, ValidationState};
 
 use crate::theme_ext::{resolve_color, resolve_px};
 

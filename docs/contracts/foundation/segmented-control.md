@@ -141,9 +141,9 @@ are required.
 | `grid-auto-columns` | `minmax(0, 1fr)` |
 | `gap` | `0.125rem` |
 | `padding` | `0.125rem` |
-| `border` | `0.0625rem solid color-mix(in srgb, var(--pug-color-border-subtle) 84%, transparent)` |
-| `border-radius` | `var(--pug-radius-control)` |
-| `background` | `color-mix(in srgb, var(--pug-surface) 93%, var(--pug-color-text-primary))` |
+| `border` | `0.0625rem solid color-mix(in srgb, var(--flint-color-border-subtle) 84%, transparent)` |
+| `border-radius` | `var(--flint-radius-control)` |
+| `background` | `color-mix(in srgb, var(--flint-surface) 93%, var(--flint-color-text-primary))` |
 
 ### Segment `.segmented-control__segment`
 
@@ -168,40 +168,40 @@ are required.
 |----------|-------|
 | `display` | `block` |
 | `min-width` | `0` |
-| `min-height` | `calc(var(--pug-size-control-height) - 0.25rem)` |
+| `min-height` | `calc(var(--flint-size-control-height) - 0.25rem)` |
 | `padding` | `0 0.75rem` |
-| `border-radius` | `calc(var(--pug-radius-control) - 0.125rem)` |
-| `color` | `var(--pug-color-text-secondary)` |
-| `font-family` | `var(--pug-typography-label-family)` |
+| `border-radius` | `calc(var(--flint-radius-control) - 0.125rem)` |
+| `color` | `var(--flint-color-text-secondary)` |
+| `font-family` | `var(--flint-typography-label-family)` |
 | `font-size` | `0.75rem` |
 | `font-weight` | `600` |
-| `line-height` | `calc(var(--pug-size-control-height) - 0.25rem)` |
+| `line-height` | `calc(var(--flint-size-control-height) - 0.25rem)` |
 | `text-align` | `center` |
 | `overflow` | `hidden` |
 | `text-overflow` | `ellipsis` |
 | `white-space` | `nowrap` |
-| `transition` | `background, color, box-shadow` at `var(--pug-motion-duration-interaction) var(--pug-motion-easing-standard)` |
+| `transition` | `background, color, box-shadow` at `var(--flint-motion-duration-interaction) var(--flint-motion-easing-standard)` |
 
 ### Label — selected state (`:checked + .segmented-control__label`)
 
 | Property | Value |
 |----------|-------|
-| `background` | `var(--pug-color-accent-base)` |
-| `color` | `var(--pug-color-text-inverse)` |
+| `background` | `var(--flint-color-accent-base)` |
+| `color` | `var(--flint-color-text-inverse)` |
 | `box-shadow` | `inset 0 0.0625rem 0 color-mix(in srgb, white 12%, transparent)` |
 
 ### Label — focus visible (`:focus-visible + .segmented-control__label`)
 
 | Property | Value |
 |----------|-------|
-| `outline` | `var(--pug-border-width-focus) solid var(--pug-color-accent-focusRing)` |
+| `outline` | `var(--flint-border-width-focus) solid var(--flint-color-accent-focusRing)` |
 | `outline-offset` | `0.125rem` |
 
 ### Label — disabled (`:disabled + .segmented-control__label`)
 
 | Property | Value |
 |----------|-------|
-| `opacity` | `var(--pug-state-opacity-disabled)` |
+| `opacity` | `var(--flint-state-opacity-disabled)` |
 | `cursor` | `not-allowed` |
 
 ## 9. Svelte Notes
@@ -212,11 +212,11 @@ are required.
 - `data-selected` attribute on segment for styling hooks
 - Label styling is driven by adjacent sibling selectors (`:checked +`,
   `:focus-visible +`, `:disabled +`)
-- Treatment token: uses `--pug-radius-control` directly
+- Treatment token: uses `--flint-radius-control` directly
 
 ## 10. GPUI Notes
 
-- expected crate/module surface: `pug_gpui::primitives::segmented_control`
+- expected crate/module surface: `flint_gpui::primitives::segmented_control`
 - GPUI implementation must intentionally preserve roving-focus and accessible
   exclusive-choice semantics rather than treating each segment as a free button
 - The hidden radio input pattern does not apply; GPUI must expose radiogroup

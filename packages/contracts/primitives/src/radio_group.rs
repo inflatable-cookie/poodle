@@ -1,4 +1,4 @@
-use pug_tokens::semantic;
+use flint_tokens::semantic;
 
 use crate::types::{ChoiceOption, Orientation};
 

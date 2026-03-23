@@ -1,8 +1,8 @@
 # CLAUDE.md
 
-## What Pug Is
+## What Flint Is
 
-Pug is a **production UI component library** intended to be consumed by real applications (Loophole, Underlay apps, and future projects). It is not a prototype, demo, or learning exercise.
+Flint is a **production UI component library** intended to be consumed by real applications (Loophole, Underlay apps, and future projects). It is not a prototype, demo, or learning exercise.
 
 The system has one contract surface (`docs/contracts/`) and multiple implementation targets:
 - **Svelte** (`packages/svelte/`) — web apps
@@ -63,7 +63,7 @@ The **Svelte implementation** (`packages/svelte/primitives/src/`) is the proof r
 - When implementing a Jetstream component:
   1. **Read the full contract** (`docs/contracts/foundation/<component>.md`) — every section
   2. Cross-reference the **Svelte implementation** for visual reference
-  3. Ensure `pug_primitives` Spec struct has every prop and token method the contract requires
+  3. Ensure `flint_primitives` Spec struct has every prop and token method the contract requires
   4. Implement `js_<component>()` in `packages/jetstream/components/src/` resolving ALL values from tokens
   5. Verify: zero hardcoded pixel values, all anatomy parts present, ARIA attributes applied
   6. Write the specimen in `packages/jetstream/preview/src/specimens/` showing all contract states
@@ -85,16 +85,16 @@ ComponentSpec (e.g. ButtonSpec)
 
 ### Key Crates
 
-- `pug-tokens` — semantic token definitions, themes (dark, light, loophole-studio)
-- `pug-primitives` — component spec structs (ButtonSpec, CheckboxSpec, etc.)
-- `pug-adapter` — `ThemeProvider` trait
-- `pug-jetstream` (adapter) — `JetstreamThemeProvider` for token resolution
-- `pug-jetstream-components` — Jetstream component implementations (`js_button`, `js_checkbox`, etc.)
+- `flint-tokens` — semantic token definitions, themes (dark, light, loophole-studio)
+- `flint-primitives` — component spec structs (ButtonSpec, CheckboxSpec, etc.)
+- `flint-adapter` — `ThemeProvider` trait
+- `flint-jetstream` (adapter) — `JetstreamThemeProvider` for token resolution
+- `flint-jetstream-components` — Jetstream component implementations (`js_button`, `js_checkbox`, etc.)
 - `jetstream-runtime::ui_element` — `JsEl` fluent builder, `div()`, `label()`, `button()`, `list()`
 
 ### Layout Mapping
 
-`LayoutIntent` → `pug_jetstream::map_layout()` → `taffy::Style`
+`LayoutIntent` → `flint_jetstream::map_layout()` → `taffy::Style`
 
 Key rules:
 - `LayoutSizing::Grow` on both axes → `flex_grow: 1` (fills remaining space)

@@ -1,7 +1,7 @@
 use gpui::*;
-use pug_adapter::ThemeProvider;
-use pug_primitives::{CalendarSpec, EyebrowSpec};
-use pug_gpui_components::{Calendar, Eyebrow};
+use flint_adapter::ThemeProvider;
+use flint_primitives::{CalendarSpec, EyebrowSpec};
+use flint_gpui_components::{Calendar, Eyebrow};
 use crate::app_state::AppState;
 use crate::style_bridge::color_to_hsla;
 use crate::PreviewRoot;

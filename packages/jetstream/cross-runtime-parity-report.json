@@ -19,7 +19,7 @@
     }
   },
   "previewApp": {
-    "crate": "pug-jetstream-preview",
+    "crate": "flint-jetstream-preview",
     "sections": ["Primitives", "Composites", "Demo", "Tokens"],
     "primitiveCount": 80,
     "compositeCount": 46,

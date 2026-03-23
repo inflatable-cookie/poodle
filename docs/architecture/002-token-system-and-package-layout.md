@@ -2,7 +2,7 @@
 
 Status: active
 Updated: 2026-03-11
-Depends on: `001-pug-system-shape.md`
+Depends on: `001-flint-system-shape.md`
 
 ## Purpose
 
@@ -11,7 +11,7 @@ layout and implementation plan, including a translatable theme system that can
 feed both browser/Svelte and GPUI consumers from one source.
 
 This document specifies the concrete package structure and build toolchain for
-the token system architecture defined in `001-pug-system-shape.md`.
+the token system architecture defined in `001-flint-system-shape.md`.
 
 ## Research Inputs
 
@@ -23,13 +23,13 @@ This note should stay aligned with:
 
 ## Working Repository Shape
 
-Pug should add the token system through a small number of explicit top-level
+Flint should add the token system through a small number of explicit top-level
 workspaces rather than through ad hoc framework folders.
 
 Recommended first layout:
 
 ```text
-pug/
+flint/
   docs/
   packages/
     tokens/
@@ -167,7 +167,7 @@ export default {
       transformGroup: 'css',
       buildPath: '../artifacts/css/',
       files: [{
-        destination: 'pug-tokens.css',
+        destination: 'flint-tokens.css',
         format: 'css/variables'
       }]
     },
@@ -200,11 +200,11 @@ Planned files:
 ```text
 packages/tokens/artifacts/
   css/
-    pug-tokens.css              # Base tokens as CSS custom properties
-    pug-theme-light.css         # Light theme overrides
-    pug-theme-dark.css          # Dark theme overrides
-    pug-density-compact.css     # Compact density overrides
-    pug-density-comfortable.css # Comfortable density overrides
+    flint-tokens.css              # Base tokens as CSS custom properties
+    flint-theme-light.css         # Light theme overrides
+    flint-theme-dark.css          # Dark theme overrides
+    flint-density-compact.css     # Compact density overrides
+    flint-density-comfortable.css # Comfortable density overrides
   ts/
     index.ts                    # Token object exports
     themes.ts                   # Theme object exports
@@ -220,17 +220,17 @@ packages/tokens/artifacts/
 
 **CSS Output Example:**
 ```css
-/* pug-tokens.css */
+/* flint-tokens.css */
 :root {
-  --pug-color-blue-500: #3b82f6;
-  --pug-color-background-primary: var(--pug-color-white);
-  --pug-color-text-primary: var(--pug-color-gray-900);
+  --flint-color-blue-500: #3b82f6;
+  --flint-color-background-primary: var(--flint-color-white);
+  --flint-color-text-primary: var(--flint-color-gray-900);
 }
 
-/* pug-theme-dark.css */
+/* flint-theme-dark.css */
 [data-theme="dark"] {
-  --pug-color-background-primary: var(--pug-color-gray-900);
-  --pug-color-text-primary: var(--pug-color-white);
+  --flint-color-background-primary: var(--flint-color-gray-900);
+  --flint-color-text-primary: var(--flint-color-white);
 }
 ```
 
@@ -298,11 +298,11 @@ packages/gpui/tokens/
 **GPUI Theme Integration:**
 ```rust
 // packages/gpui/tokens/src/theme_ext.rs
-use pug_tokens::semantic::color;
+use flint_tokens::semantic::color;
 use gpui::Theme;
 
 impl Theme {
-    pub fn pug_light() -> Self {
+    pub fn flint_light() -> Self {
         Self {
             background: color::BACKGROUND_PRIMARY,
             text: color::TEXT_PRIMARY,
@@ -362,7 +362,7 @@ git add packages/tokens/artifacts/
 
 ## Future Implementation Slot
 
-Pug should not build React or other additional targets now, but the package
+Flint should not build React or other additional targets now, but the package
 layout should leave room for them.
 
 If a future target becomes real, it should land under a dedicated package such
@@ -379,7 +379,7 @@ rather than creating a second canonical contract path.
 
 ## Underlay Bridge Layout
 
-Underlay integration should live behind a bridge layer that maps Pug semantics
+Underlay integration should live behind a bridge layer that maps Flint semantics
 into Underlay-owned conventions.
 
 Planned first files:
@@ -387,7 +387,7 @@ Planned first files:
 ```text
 packages/bridges/underlay/
   css/
-    pug-to-underlay.css     # CSS variable mapping
+    flint-to-underlay.css     # CSS variable mapping
   ts/
     token-map.ts            # Token name mapping
     theme-map.ts            # Theme value mapping
@@ -395,9 +395,9 @@ packages/bridges/underlay/
 ```
 
 This keeps the public Underlay API stable while still allowing Underlay to
-consume Pug tokens internally.
+consume Flint tokens internally.
 
-It also means an Underlay consumer should be able to ingest a Pug-authored
+It also means an Underlay consumer should be able to ingest a Flint-authored
 theme through Underlay-owned mapping without needing a separate hand-authored
 theme definition for the same brand or app.
 
@@ -444,7 +444,7 @@ The first implementation tranche only needs to prove:
 
 ## References
 
-- [001-pug-system-shape.md](./001-pug-system-shape.md) - Token system specification
+- [001-flint-system-shape.md](./001-flint-system-shape.md) - Token system specification
 - [../research/translation-memos/tm-token-system.md](../research/translation-memos/tm-token-system.md) - Token system research decisions
 - [W3C DTCG Specification](https://www.designtokens.org/tr/2025.10/) - Canonical token format
 - [Style Dictionary](https://styledictionary.com/) - Multi-platform emission tool

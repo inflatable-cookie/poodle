@@ -1,5 +1,5 @@
-use pug_primitives::OverlayPlacement;
-use pug_tokens::semantic;
+use flint_primitives::OverlayPlacement;
+use flint_tokens::semantic;
 
 use crate::types::{CommandActionItem, DiscoveryState};
 

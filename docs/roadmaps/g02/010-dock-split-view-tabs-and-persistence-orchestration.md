@@ -1,10 +1,10 @@
 # g02.010 Dock, Split-View, Tabs, And Persistence Orchestration
 
 Status: completed
-Owner: Pug Core
+Owner: Flint Core
 Updated: 2026-03-11
 Depends on: g02.009
-Primary repos: `pug`
+Primary repos: `flint`
 
 ## Goals
 

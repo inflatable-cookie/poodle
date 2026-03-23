@@ -26,5 +26,5 @@ Primitive specs: 52 (after 008) + 8 (new) = **60**
 
 ## Verification
 
-- [x] All 8 specs compile and are exported from `pug-primitives`
+- [x] All 8 specs compile and are exported from `flint-primitives`
 - [x] All 29 existing tests continue to pass

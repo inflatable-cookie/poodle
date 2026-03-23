@@ -5,7 +5,7 @@
 - reviewed the active `docs/research/` surface before making further planning
   changes so the architecture/spec/roadmap layer would not drift from the
   parallel research thread
-- aligned `docs/architecture/001-pug-system-shape.md` to the active research
+- aligned `docs/architecture/001-flint-system-shape.md` to the active research
   program by adding explicit research inputs and an implementation-gate rule
 - aligned `docs/architecture/002-token-system-and-package-layout.md` to the
   current token-system research by shifting the planned schema toward

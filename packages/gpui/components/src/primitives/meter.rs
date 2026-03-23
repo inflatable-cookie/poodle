@@ -1,8 +1,8 @@
 //! Meter — real GPUI component backed by MeterSpec.
 
 use gpui::*;
-use pug_gpui::GpuiThemeProvider;
-use pug_primitives::MeterSpec;
+use flint_gpui::GpuiThemeProvider;
+use flint_primitives::MeterSpec;
 
 use crate::theme_ext::{color_mix, resolve_color, resolve_radius};
 

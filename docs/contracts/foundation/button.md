@@ -140,17 +140,17 @@ Updated: 2026-03-15
 | `justify-content` | `center` |
 | `gap` | `0.375rem` (6px) |
 | `min-width` | `5rem` |
-| `height` | `var(--pug-size-control-height)` |
-| `padding` | `0 var(--pug-space-control-x)` |
-| `border` | `0.0625rem solid var(--pug-color-border-default)` |
-| `border-radius` | `var(--pug-treatment-interactive-radius, var(--pug-radius-control))` |
-| `background` | `var(--pug-color-background-surface)` |
+| `height` | `var(--flint-size-control-height)` |
+| `padding` | `0 var(--flint-space-control-x)` |
+| `border` | `0.0625rem solid var(--flint-color-border-default)` |
+| `border-radius` | `var(--flint-treatment-interactive-radius, var(--flint-radius-control))` |
+| `background` | `var(--flint-color-background-surface)` |
 | `box-shadow` | `inset 0 0.0625rem 0 color-mix(in srgb, white 8%, transparent)` |
-| `color` | `var(--pug-color-text-primary)` |
+| `color` | `var(--flint-color-text-primary)` |
 | `cursor` | `pointer` |
-| `font-family` | `var(--pug-typography-label-family)` |
-| `font-size` | `var(--pug-typography-label-size)` |
-| `font-weight` | `var(--pug-typography-label-weight)` |
+| `font-family` | `var(--flint-typography-label-family)` |
+| `font-size` | `var(--flint-typography-label-size)` |
+| `font-weight` | `var(--flint-typography-label-weight)` |
 | `letter-spacing` | `0.01em` |
 | `line-height` | `1` |
 | `text-decoration` | `none` |
@@ -160,16 +160,16 @@ Updated: 2026-03-15
 
 | Var | Secondary (default) | Primary | Ghost |
 |-----|---------------------|---------|-------|
-| `--pug-button-fill` | `background-surface` | `accent-base` | `transparent` |
-| `--pug-button-fill-hover` | `color-mix(fill 84%, background-elevated)` | same formula | same formula |
-| `--pug-button-fill-active` | `color-mix(fill 72%, background-elevated)` | same formula | same formula |
-| `--pug-button-border` | `border-default` | `color-mix(accent-base 84%, black)` | `transparent` |
-| `--pug-button-text` | `text-primary` | `text-inverse` | `text-primary` |
-| `--pug-button-shadow` | `inset 0 0.0625rem 0 color-mix(white 8%, transparent)` | `inset 0 0.0625rem 0 color-mix(white 14%, transparent), 0 0.375rem 1.125rem color-mix(black 18%, transparent)` | `none` |
+| `--flint-button-fill` | `background-surface` | `accent-base` | `transparent` |
+| `--flint-button-fill-hover` | `color-mix(fill 84%, background-elevated)` | same formula | same formula |
+| `--flint-button-fill-active` | `color-mix(fill 72%, background-elevated)` | same formula | same formula |
+| `--flint-button-border` | `border-default` | `color-mix(accent-base 84%, black)` | `transparent` |
+| `--flint-button-text` | `text-primary` | `text-inverse` | `text-primary` |
+| `--flint-button-shadow` | `inset 0 0.0625rem 0 color-mix(white 8%, transparent)` | `inset 0 0.0625rem 0 color-mix(white 14%, transparent), 0 0.375rem 1.125rem color-mix(black 18%, transparent)` | `none` |
 
 ### Tone: danger
 
-| Selector | `--pug-button-fill` | `--pug-button-border` | `--pug-button-text` | `--pug-button-shadow` |
+| Selector | `--flint-button-fill` | `--flint-button-border` | `--flint-button-text` | `--flint-button-shadow` |
 |----------|---------------------|-----------------------|---------------------|-----------------------|
 | `[data-tone="danger"]` (secondary base) | `color-mix(in srgb, status-danger 16%, background-surface)` | `color-mix(in srgb, status-danger 46%, border-default)` | `text-primary` | default |
 | `[data-variant="primary"][data-tone="danger"]` | `status-danger` | `color-mix(in srgb, status-danger 84%, black)` | `text-inverse` | `inset 0 0.0625rem 0 color-mix(white 14%, transparent), 0 0.375rem 1.125rem color-mix(black 18%, transparent)` |
@@ -208,21 +208,21 @@ Both adjustments apply independently.
 
 | Property | Value |
 |----------|-------|
-| `background` | `var(--pug-button-fill-hover)` |
-| `border-color` | `color-mix(in srgb, var(--pug-button-border) 78%, var(--pug-color-text-primary))` |
+| `background` | `var(--flint-button-fill-hover)` |
+| `border-color` | `color-mix(in srgb, var(--flint-button-border) 78%, var(--flint-color-text-primary))` |
 
 ### Active (not disabled)
 
 | Property | Value |
 |----------|-------|
-| `background` | `var(--pug-button-fill-active)` |
+| `background` | `var(--flint-button-fill-active)` |
 | `transform` | `translateY(0.03125rem)` |
 
 ### Focus
 
 | Property | Value |
 |----------|-------|
-| `outline` | `var(--pug-border-width-focus) solid var(--pug-color-accent-focusRing)` |
+| `outline` | `var(--flint-border-width-focus) solid var(--flint-color-accent-focusRing)` |
 | `outline-offset` | `0.125rem` |
 
 ### Disabled
@@ -230,7 +230,7 @@ Both adjustments apply independently.
 | Property | Value |
 |----------|-------|
 | `cursor` | `not-allowed` |
-| `opacity` | `var(--pug-state-opacity-disabled)` |
+| `opacity` | `var(--flint-state-opacity-disabled)` |
 
 ### Label
 
@@ -246,9 +246,9 @@ Both adjustments apply independently.
 | `display` | `inline-flex` |
 | `align-items` | `center` |
 | `justify-content` | `center` |
-| `width` | `var(--pug-size-icon-md)` |
-| `height` | `var(--pug-size-icon-md)` |
-| `font-family` | `var(--pug-typography-code-family)` |
+| `width` | `var(--flint-size-icon-md)` |
+| `height` | `var(--flint-size-icon-md)` |
+| `font-family` | `var(--flint-typography-code-family)` |
 | `font-size` | `0.875rem` |
 | `line-height` | `1` |
 
@@ -260,7 +260,7 @@ Both adjustments apply independently.
 | `align-items` | `center` |
 | `justify-content` | `center` |
 | `opacity` | `0.5` |
-| `margin-left` | `calc(var(--pug-space-inline-sm) * -0.25)` |
+| `margin-left` | `calc(var(--flint-space-inline-sm) * -0.25)` |
 
 ### Spinner
 
@@ -275,7 +275,7 @@ Both adjustments apply independently.
 
 ## 9. Svelte Notes
 
-- Uses CSS custom properties (`--pug-button-fill`, etc.) for the variant system
+- Uses CSS custom properties (`--flint-button-fill`, etc.) for the variant system
 - `data-variant`, `data-tone`, `data-size`, `data-icon-only`, `data-loading`, `data-has-leading`, `data-has-trailing` data attributes
 - `data-tone` only emits when tone is not `"default"` (omitted otherwise)
 - `data-loading` always emits (even as `"false"`)
@@ -283,14 +283,14 @@ Both adjustments apply independently.
 - `isUnavailable = isDisabled || isLoading` — both disable the native button
 - Icon component rendered at size="sm" for leadingIcon/trailingIcon props
 - Supports named slots `leading` and `trailing` for custom icon content
-- Treatment token: `--pug-treatment-interactive-radius` with fallback to `--pug-radius-control`
+- Treatment token: `--flint-treatment-interactive-radius` with fallback to `--flint-radius-control`
 - Chevron renders `chevron-down` icon from registry at size `sm`, positioned after all other content
 
 ## 10. GPUI Notes
 
-- expected crate/module surface: `pug_gpui::components::button`
+- expected crate/module surface: `flint_gpui::components::button`
 - Spec struct: `ButtonSpec` in primitives crate
-- Component struct: `PugButton` in components crate
+- Component struct: `FlintButton` in components crate
 - GPUI must replicate the hover/active color-mix chains
 - The treatment radius fallback can be modeled as: use treatment token if set, else radius-control
 - Active translateY(0.03125rem) — half a pixel press-down — may be omitted in GPUI (known delta)

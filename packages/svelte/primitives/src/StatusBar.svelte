@@ -25,11 +25,11 @@
     flex-wrap: wrap;
     align-items: center;
     justify-content: space-between;
-    gap: var(--pug-space-inline-md);
-    padding: var(--pug-space-panel-y) var(--pug-space-panel-x);
-    border-top: 0.0625rem solid var(--pug-color-border-subtle);
-    background: color-mix(in srgb, var(--pug-color-background-panel) 94%, transparent);
-    color: var(--pug-color-text-secondary);
+    gap: var(--flint-space-inline-md);
+    padding: var(--flint-space-panel-y) var(--flint-space-panel-x);
+    border-top: 0.0625rem solid var(--flint-color-border-subtle);
+    background: color-mix(in srgb, var(--flint-color-background-panel) 94%, transparent);
+    color: var(--flint-color-text-secondary);
     font-size: 0.8125rem;
     line-height: 1.5;
   }
@@ -39,6 +39,6 @@
     display: flex;
     flex-wrap: wrap;
     align-items: center;
-    gap: var(--pug-space-inline-sm);
+    gap: var(--flint-space-inline-sm);
   }
 </style>

@@ -92,10 +92,10 @@ Updated: 2026-03-15
 
 - Root: `<section>` element
 - Trigger: `<button type="button">` with `aria-expanded` and `aria-controls`
-- Trigger: `id="pug-collapsible-trigger-{collapsibleId}"`
+- Trigger: `id="flint-collapsible-trigger-{collapsibleId}"`
 - Trigger: `aria-label` from prop when no `title` is present
 - Content: `role="region"` with `aria-labelledby` pointing to trigger id
-- Content: `id="pug-collapsible-content-{collapsibleId}"`
+- Content: `id="flint-collapsible-content-{collapsibleId}"`
 - Module-level `nextCollapsibleId` counter provides unique id namespaces
 
 ### Keyboard
@@ -140,10 +140,10 @@ Updated: 2026-03-15
 | `gap` | `0.5rem` |
 | `min-width` | `0` |
 | `padding` | `0.875rem 1rem` |
-| `border` | `0.0625rem solid color-mix(in srgb, var(--pug-color-border-subtle) 42%, transparent)` |
-| `border-radius` | `var(--pug-radius-surface)` |
-| `background` | `color-mix(in srgb, var(--pug-surface) 88%, var(--pug-color-text-primary))` |
-| `box-shadow` | `inset 0 0.0625rem 0 color-mix(in srgb, var(--pug-color-text-inverse) 8%, transparent)` |
+| `border` | `0.0625rem solid color-mix(in srgb, var(--flint-color-border-subtle) 42%, transparent)` |
+| `border-radius` | `var(--flint-radius-surface)` |
+| `background` | `color-mix(in srgb, var(--flint-surface) 88%, var(--flint-color-text-primary))` |
+| `box-shadow` | `inset 0 0.0625rem 0 color-mix(in srgb, var(--flint-color-text-inverse) 8%, transparent)` |
 
 ### Root closed (`.collapsible[data-open="false"]`)
 
@@ -155,7 +155,7 @@ Updated: 2026-03-15
 
 | Property | Value |
 |----------|-------|
-| `opacity` | `var(--pug-state-opacity-disabled)` |
+| `opacity` | `var(--flint-state-opacity-disabled)` |
 
 ### Trigger `.collapsible__trigger`
 
@@ -169,7 +169,7 @@ Updated: 2026-03-15
 | `padding` | `0` |
 | `border` | `0` |
 | `background` | `transparent` |
-| `color` | `var(--pug-color-text-primary)` |
+| `color` | `var(--flint-color-text-primary)` |
 | `cursor` | `pointer` |
 | `text-align` | `left` |
 | `font` | `inherit` |
@@ -184,9 +184,9 @@ Updated: 2026-03-15
 
 | Property | Value |
 |----------|-------|
-| `outline` | `var(--pug-border-width-focus) solid var(--pug-color-accent-focusRing)` |
+| `outline` | `var(--flint-border-width-focus) solid var(--flint-color-accent-focusRing)` |
 | `outline-offset` | `0.125rem` |
-| `border-radius` | `calc(var(--pug-radius-control) - 0.125rem)` |
+| `border-radius` | `calc(var(--flint-radius-control) - 0.125rem)` |
 
 ### Heading `.collapsible__heading`
 
@@ -200,7 +200,7 @@ Updated: 2026-03-15
 
 | Property | Value |
 |----------|-------|
-| `font-family` | `var(--pug-typography-heading-family)` |
+| `font-family` | `var(--flint-typography-heading-family)` |
 | `font-size` | `1rem` |
 | `font-weight` | `700` |
 | `line-height` | `1.2` |
@@ -209,7 +209,7 @@ Updated: 2026-03-15
 
 | Property | Value |
 |----------|-------|
-| `color` | `var(--pug-color-text-secondary)` |
+| `color` | `var(--flint-color-text-secondary)` |
 | `font-size` | `0.8125rem` |
 | `line-height` | `1.45` |
 
@@ -217,11 +217,11 @@ Updated: 2026-03-15
 
 | Property | Value |
 |----------|-------|
-| `color` | `var(--pug-color-text-secondary)` |
-| `font-family` | `var(--pug-typography-code-family)` |
+| `color` | `var(--flint-color-text-secondary)` |
+| `font-family` | `var(--flint-typography-code-family)` |
 | `font-size` | `0.75rem` |
 | `line-height` | `1` |
-| `transition` | `transform var(--pug-motion-duration-interaction) var(--pug-motion-easing-standard)` |
+| `transition` | `transform var(--flint-motion-duration-interaction) var(--flint-motion-easing-standard)` |
 
 ### Indicator open (`.collapsible[data-open="true"] .collapsible__indicator`)
 
@@ -256,7 +256,7 @@ Updated: 2026-03-15
 
 ## 10. GPUI Notes
 
-- expected crate/module surface: `pug_gpui::primitives::collapsible`
+- expected crate/module surface: `flint_gpui::primitives::collapsible`
 - GPUI must expose button role with expanded state on trigger
 - Region association between trigger and content must be maintained
 - Disabled state must suppress interaction, show not-allowed cursor, and reduce

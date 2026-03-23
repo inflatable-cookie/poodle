@@ -3,7 +3,7 @@
 Status: active
 Updated: 2026-03-17
 
-Roadmaps hold executable milestone work for Pug.
+Roadmaps hold executable milestone work for Flint.
 
 ## Rules
 
@@ -54,7 +54,7 @@ Roadmaps hold executable milestone work for Pug.
 
 ## Planning Standard
 
-Pug should follow the same general planning posture used in the denser Chorus
+Flint should follow the same general planning posture used in the denser Chorus
 and Jetstream generations:
 
 - each generation should carry a substantive milestone run, not a handful of
@@ -64,7 +64,7 @@ and Jetstream generations:
 - foundations should land before depth, adoption, and hardening work
 - closeout milestones should be explicit instead of implied
 
-Pug has more limited scope than Loophole, so its generations can be somewhat
+Flint has more limited scope than Loophole, so its generations can be somewhat
 smaller than a 20-30 milestone tranche. They should still be dense enough to
 express a real program rather than three or four umbrella headings.
 

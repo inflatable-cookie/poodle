@@ -6,8 +6,8 @@ export default defineConfig({
   plugins: [svelte()],
   resolve: {
     alias: {
-      "@pug/svelte-primitives": fileURLToPath(new URL("../primitives/src/index.ts", import.meta.url)),
-      "@pug/svelte-composites": fileURLToPath(new URL("../composites/src/index.ts", import.meta.url)),
+      "@flint/svelte-primitives": fileURLToPath(new URL("../primitives/src/index.ts", import.meta.url)),
+      "@flint/svelte-composites": fileURLToPath(new URL("../composites/src/index.ts", import.meta.url)),
     },
   },
   server: {

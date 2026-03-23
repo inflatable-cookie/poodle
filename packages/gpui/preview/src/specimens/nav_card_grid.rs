@@ -1,7 +1,7 @@
 use gpui::*;
-use pug_primitives::{NavCardGridSpec, NavCardSpec, IconSpec, EyebrowSpec};
-use pug_gpui_components::{NavCardGrid, NavCard, Icon, Eyebrow};
-use pug_gpui::GpuiThemeProvider;
+use flint_primitives::{NavCardGridSpec, NavCardSpec, IconSpec, EyebrowSpec};
+use flint_gpui_components::{NavCardGrid, NavCard, Icon, Eyebrow};
+use flint_gpui::GpuiThemeProvider;
 
 pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
     div().flex().flex_col().gap(px(24.0))

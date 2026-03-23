@@ -19,7 +19,7 @@ Generation closeout must name both the stable surfaces earned during the
 generation and the carry-forward gaps that remain outside that generation's
 claims.
 
-Pug should not close a generation by collapsing all remaining work into a
+Flint should not close a generation by collapsing all remaining work into a
 generic "next time" bucket.
 
 ## Required Closeout Artifact
@@ -81,13 +81,13 @@ unless a new generation has concrete evidence for changing them.
 
 ## Honesty Rule
 
-Pug may say:
+Flint may say:
 
 - `g03` is complete
 - `g03` produced explicit hardening and adoption baselines
 - some important runtime and publishing gaps still remain for a later program
 
-Pug may not say:
+Flint may not say:
 
 - GPUI parity is complete
 - public docs publishing is complete

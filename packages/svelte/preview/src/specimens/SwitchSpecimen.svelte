@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { Switch, Eyebrow } from "@pug/svelte-primitives";
+  import { Switch, Eyebrow } from "@flint/svelte-primitives";
 
   let darkMode = true;
   let autoSave = false;

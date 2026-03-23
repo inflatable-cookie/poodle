@@ -1,8 +1,8 @@
 //! Box — Jetstream container component backed by BoxSpec.
 
 use jetstream_runtime::ui_element::{self, JsEl};
-use pug_jetstream::JetstreamThemeProvider;
-use pug_primitives::{BoxSpec, Overflow};
+use flint_jetstream::JetstreamThemeProvider;
+use flint_primitives::{BoxSpec, Overflow};
 
 use crate::theme_ext::resolve_px;
 

@@ -5,8 +5,8 @@
 //! hover accent 16%, disabled cursor not-allowed.
 
 use gpui::*;
-use pug_gpui::GpuiThemeProvider;
-use pug_primitives::{IconSize, IconSpec, MenuEntry, MenuItemKind, MenuSpec, OverlayPlacement};
+use flint_gpui::GpuiThemeProvider;
+use flint_primitives::{IconSize, IconSpec, MenuEntry, MenuItemKind, MenuSpec, OverlayPlacement};
 
 use super::icon::Icon;
 
@@ -36,7 +36,7 @@ impl Menu {
         Self {
             spec,
             theme: theme.clone(),
-            id_prefix: "pug-menu".to_string(),
+            id_prefix: "flint-menu".to_string(),
             selected_value: None,
             on_select: None,
             on_close: None,

@@ -1,9 +1,9 @@
 {
-  "name": "@pug/bridge-underlay",
+  "name": "@flint/bridge-underlay",
   "private": true,
   "type": "module",
   "description": "Internal Underlay bridge layer for token and wrapper mapping.",
-  "pugRelease": {
+  "flintRelease": {
     "publicIntent": false,
     "channel": "internal",
     "stability": "internal-bridge"

@@ -1,8 +1,8 @@
 //! Collapsible — Jetstream collapsible container backed by CollapsibleSpec.
 
 use jetstream_runtime::ui_element::{self, JsEl};
-use pug_jetstream::JetstreamThemeProvider;
-use pug_primitives::CollapsibleSpec;
+use flint_jetstream::JetstreamThemeProvider;
+use flint_primitives::CollapsibleSpec;
 
 use crate::theme_ext::{resolve_color, resolve_px};
 

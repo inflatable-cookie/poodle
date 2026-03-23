@@ -1,10 +1,10 @@
 //! NumberEntry specimen — number entries at default, min, max, and disabled states.
 
 use jetstream_runtime::ui_element::*;
-use pug_jetstream::JetstreamThemeProvider;
-use pug_jetstream_components::number_entry::js_number_entry;
-use pug_jetstream_components::theme_ext::*;
-use pug_primitives::NumberEntrySpec;
+use flint_jetstream::JetstreamThemeProvider;
+use flint_jetstream_components::number_entry::js_number_entry;
+use flint_jetstream_components::theme_ext::*;
+use flint_primitives::NumberEntrySpec;
 
 pub fn render(theme: &JetstreamThemeProvider) -> JsEl {
     let secondary = resolve_color(theme, "semantic.color.text.secondary");

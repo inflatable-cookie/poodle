@@ -5,7 +5,7 @@ Updated: 2026-03-14
 
 ## Objective
 
-Demonstrate downstream consumption of the `pug-gpui` crate by creating a
+Demonstrate downstream consumption of the `flint-gpui` crate by creating a
 reference application that validates the multi-app adoption pattern.
 
 ## Deliverables
@@ -16,7 +16,7 @@ Executable example that demonstrates:
 
 1. **Adapter creation** — `GpuiAdapter::new(GpuiThemeProvider::default())`
 2. **Token resolution** — `theme.resolve_color()`, `theme.resolve_space()`
-3. **Spec construction** — building specs from `pug-primitives`, `pug-composites`, `pug-workstation`
+3. **Spec construction** — building specs from `flint-primitives`, `flint-composites`, `flint-workstation`
 4. **Rendering** — calling `adapter.render(&spec, &style, theme)` to get element handles
 5. **Screen composition** — assembling multiple rendered components into screens
 6. **Demo app integration** — calling `demo_app::render_all_screens()` for full coverage

@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { ScrollShell, Surface, Eyebrow } from "@pug/svelte-primitives";
+  import { ScrollShell, Surface, Eyebrow } from "@flint/svelte-primitives";
 </script>
 
 <div class="specimen">
@@ -45,7 +45,7 @@
 
   .scroll-container {
     height: 10rem;
-    border: 1px solid var(--pug-color-border-default);
+    border: 1px solid var(--flint-color-border-default);
     border-radius: 4px;
   }
 

@@ -1,11 +1,11 @@
 <script lang="ts">
-  import { DetailRow, Eyebrow, Button } from "@pug/svelte-primitives";
+  import { DetailRow, Eyebrow, Button } from "@flint/svelte-primitives";
 </script>
 
 <div class="specimen">
   <div class="specimen__group">
     <Eyebrow>Basic label-value pairs</Eyebrow>
-    <DetailRow label="Name" value="Pug Design System" />
+    <DetailRow label="Name" value="Flint Design System" />
     <DetailRow label="Version" value="2.1.0" />
     <DetailRow label="License" value="MIT" />
   </div>
@@ -51,8 +51,8 @@
     display: inline-block;
     padding: 0.125rem 0.5rem;
     border-radius: 999px;
-    background: var(--pug-color-bg-success-subtle, #2d4a2d);
-    color: var(--pug-color-text-success, #8fbc8f);
+    background: var(--flint-color-bg-success-subtle, #2d4a2d);
+    color: var(--flint-color-text-success, #8fbc8f);
     font-size: 0.75rem;
     font-weight: 500;
   }

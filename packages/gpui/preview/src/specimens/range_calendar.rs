@@ -1,7 +1,7 @@
 use gpui::*;
-use pug_gpui::GpuiThemeProvider;
-use pug_primitives::{DateRangeValue, EyebrowSpec, RangeCalendarSpec};
-use pug_gpui_components::{Eyebrow, RangeCalendar};
+use flint_gpui::GpuiThemeProvider;
+use flint_primitives::{DateRangeValue, EyebrowSpec, RangeCalendarSpec};
+use flint_gpui_components::{Eyebrow, RangeCalendar};
 
 pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
     div().flex().flex_col().gap(px(24.0))

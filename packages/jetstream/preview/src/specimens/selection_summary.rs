@@ -1,10 +1,10 @@
 //! SelectionSummary specimen — summary of selected items.
 
 use jetstream_runtime::ui_element::*;
-use pug_jetstream::JetstreamThemeProvider;
-use pug_jetstream_components::selection_summary::js_selection_summary;
-use pug_jetstream_components::theme_ext::*;
-use pug_composites::{SelectionSummaryItem, SelectionSummarySpec};
+use flint_jetstream::JetstreamThemeProvider;
+use flint_jetstream_components::selection_summary::js_selection_summary;
+use flint_jetstream_components::theme_ext::*;
+use flint_composites::{SelectionSummaryItem, SelectionSummarySpec};
 
 pub fn render(theme: &JetstreamThemeProvider) -> JsEl {
     let secondary = resolve_color(theme, "semantic.color.text.secondary");

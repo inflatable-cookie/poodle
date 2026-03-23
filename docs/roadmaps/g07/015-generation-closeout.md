@@ -25,7 +25,7 @@ All 15 milestones completed:
 
 ## Deliverables
 
-### pug-gpui crate
+### flint-gpui crate
 
 | Metric | Value |
 |--------|-------|

@@ -1,8 +1,8 @@
 //! DatePicker — real GPUI component backed by DatePickerSpec.
 
 use gpui::*;
-use pug_gpui::GpuiThemeProvider;
-use pug_primitives::{CalendarWeekStart, DatePickerSpec, IconSize, IconSpec};
+use flint_gpui::GpuiThemeProvider;
+use flint_primitives::{CalendarWeekStart, DatePickerSpec, IconSize, IconSpec};
 
 use super::calendar::Calendar;
 use super::icon::Icon;
@@ -106,9 +106,9 @@ impl IntoElement for DatePicker {
         let is_disabled = spec.is_disabled;
 
         let id_str = if let Some(ref suffix) = self.id_suffix {
-            format!("pug-date-picker-{}", suffix)
+            format!("flint-date-picker-{}", suffix)
         } else {
-            "pug-date-picker".to_string()
+            "flint-date-picker".to_string()
         };
 
         // Trigger button
@@ -181,7 +181,7 @@ impl IntoElement for DatePicker {
 
         // Calendar dropdown when open
         if is_open {
-            let mut cal_spec = pug_primitives::CalendarSpec::new()
+            let mut cal_spec = flint_primitives::CalendarSpec::new()
                 .with_week_start(spec.week_starts_on.clone());
 
             if let Some(val) = spec.current_value() {

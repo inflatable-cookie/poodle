@@ -63,23 +63,23 @@
   .table-shell {
     min-width: 0;
     overflow-x: auto;
-    border: 0.0625rem solid color-mix(in srgb, var(--pug-color-border-subtle) 78%, transparent);
-    border-radius: var(--pug-radius-surface);
-    background: color-mix(in srgb, var(--pug-color-background-panel) 96%, transparent);
+    border: 0.0625rem solid color-mix(in srgb, var(--flint-color-border-subtle) 78%, transparent);
+    border-radius: var(--flint-radius-surface);
+    background: color-mix(in srgb, var(--flint-color-background-panel) 96%, transparent);
   }
 
   .table {
     width: 100%;
     border-collapse: collapse;
-    color: var(--pug-color-text-primary);
-    font-family: var(--pug-typography-body-family);
-    font-size: var(--pug-typography-body-size);
-    line-height: var(--pug-typography-body-lineHeight);
+    color: var(--flint-color-text-primary);
+    font-family: var(--flint-typography-body-family);
+    font-size: var(--flint-typography-body-size);
+    line-height: var(--flint-typography-body-lineHeight);
   }
 
   .table__caption {
-    padding: var(--pug-space-panel-y) var(--pug-space-panel-x) 0;
-    color: var(--pug-color-text-secondary);
+    padding: var(--flint-space-panel-y) var(--flint-space-panel-x) 0;
+    color: var(--flint-color-text-secondary);
     font-size: 0.75rem;
     text-align: left;
   }
@@ -87,20 +87,20 @@
   .table__header,
   .table__cell,
   .table__empty {
-    padding: var(--pug-space-control-y) var(--pug-space-panel-x);
-    border-bottom: 0.0625rem solid color-mix(in srgb, var(--pug-color-border-subtle) 72%, transparent);
+    padding: var(--flint-space-control-y) var(--flint-space-panel-x);
+    border-bottom: 0.0625rem solid color-mix(in srgb, var(--flint-color-border-subtle) 72%, transparent);
     text-align: left;
     vertical-align: middle;
   }
 
   .table__header {
-    color: var(--pug-color-text-secondary);
-    font-family: var(--pug-typography-label-family);
+    color: var(--flint-color-text-secondary);
+    font-family: var(--flint-typography-label-family);
     font-size: 0.6875rem;
     font-weight: 600;
     letter-spacing: 0.04em;
     text-transform: uppercase;
-    background: color-mix(in srgb, var(--pug-surface) 91%, var(--pug-color-text-primary));
+    background: color-mix(in srgb, var(--flint-surface) 91%, var(--flint-color-text-primary));
   }
 
   .table__cell--row-header {
@@ -119,6 +119,6 @@
   }
 
   .table__empty {
-    color: var(--pug-color-text-secondary);
+    color: var(--flint-color-text-secondary);
   }
 </style>

@@ -58,53 +58,53 @@
     flex-wrap: wrap;
     align-items: center;
     justify-content: space-between;
-    gap: var(--pug-space-inline-md);
-    padding: var(--pug-space-panel-y) var(--pug-space-panel-x);
-    border: 0.0625rem solid var(--pug-color-border-subtle);
-    border-radius: var(--pug-radius-surface);
-    --pug-recipe-bulk-fill: color-mix(in srgb, var(--pug-color-background-panel) 93%, var(--pug-color-text-primary));
-    background: var(--pug-recipe-bulk-fill);
-    --pug-surface: var(--pug-recipe-bulk-fill);
+    gap: var(--flint-space-inline-md);
+    padding: var(--flint-space-panel-y) var(--flint-space-panel-x);
+    border: 0.0625rem solid var(--flint-color-border-subtle);
+    border-radius: var(--flint-radius-surface);
+    --flint-recipe-bulk-fill: color-mix(in srgb, var(--flint-color-background-panel) 93%, var(--flint-color-text-primary));
+    background: var(--flint-recipe-bulk-fill);
+    --flint-surface: var(--flint-recipe-bulk-fill);
   }
 
   .bulk-action-bar__summary {
     display: flex;
     flex-wrap: wrap;
-    gap: var(--pug-space-inline-sm);
+    gap: var(--flint-space-inline-sm);
     align-items: baseline;
-    color: var(--pug-color-text-primary);
-    font-family: var(--pug-typography-body-family);
-    font-size: var(--pug-typography-body-size);
-    line-height: var(--pug-typography-body-lineHeight);
+    color: var(--flint-color-text-primary);
+    font-family: var(--flint-typography-body-family);
+    font-size: var(--flint-typography-body-size);
+    line-height: var(--flint-typography-body-lineHeight);
   }
 
   .bulk-action-bar__summary span {
-    color: var(--pug-color-text-secondary);
+    color: var(--flint-color-text-secondary);
   }
 
   .bulk-action-bar__actions {
     display: flex;
     flex-wrap: wrap;
-    gap: var(--pug-space-inline-sm);
+    gap: var(--flint-space-inline-sm);
   }
 
   .bulk-action-bar__button {
-    min-height: var(--pug-size-control-height);
-    padding: 0 var(--pug-space-control-x);
-    border: 0.0625rem solid var(--pug-color-border-default);
-    border-radius: var(--pug-radius-control);
-    background: var(--pug-color-background-surface);
-    color: var(--pug-color-text-primary);
+    min-height: var(--flint-size-control-height);
+    padding: 0 var(--flint-space-control-x);
+    border: 0.0625rem solid var(--flint-color-border-default);
+    border-radius: var(--flint-radius-control);
+    background: var(--flint-color-background-surface);
+    color: var(--flint-color-text-primary);
     cursor: pointer;
   }
 
   .bulk-action-bar__button[data-tone="danger"] {
-    border-color: color-mix(in srgb, var(--pug-color-status-danger) 65%, transparent);
-    color: var(--pug-color-status-danger);
+    border-color: color-mix(in srgb, var(--flint-color-status-danger) 65%, transparent);
+    color: var(--flint-color-status-danger);
   }
 
   .bulk-action-bar__button:focus-visible {
-    outline: var(--pug-border-width-focus) solid var(--pug-color-accent-focusRing);
+    outline: var(--flint-border-width-focus) solid var(--flint-color-accent-focusRing);
     outline-offset: 0.125rem;
   }
 </style>

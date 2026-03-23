@@ -1,4 +1,4 @@
-use pug_tokens::semantic;
+use flint_tokens::semantic;
 
 /// Color input mode for the picker.
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]

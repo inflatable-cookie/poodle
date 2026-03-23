@@ -1,6 +1,6 @@
 use gpui::*;
-use pug_primitives::{ZonedDateTimePickerSpec, EyebrowSpec};
-use pug_gpui_components::{ZonedDateTimePicker, Eyebrow};
+use flint_primitives::{ZonedDateTimePickerSpec, EyebrowSpec};
+use flint_gpui_components::{ZonedDateTimePicker, Eyebrow};
 use crate::app_state::AppState;
 use crate::PreviewRoot;
 

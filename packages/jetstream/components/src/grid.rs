@@ -5,8 +5,8 @@
 //! uniformly.
 
 use jetstream_runtime::ui_element::{self, JsEl};
-use pug_jetstream::JetstreamThemeProvider;
-use pug_primitives::GridSpec;
+use flint_jetstream::JetstreamThemeProvider;
+use flint_primitives::GridSpec;
 
 use crate::theme_ext::resolve_px;
 

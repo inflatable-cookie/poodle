@@ -1,9 +1,9 @@
 //! MarkdownEditor — markdown editing with preview backed by MarkdownEditorSpec.
 
 use gpui::*;
-use pug_gpui::GpuiThemeProvider;
-use pug_composites::MarkdownEditorSpec;
-use pug_primitives::{IconSize, IconSpec};
+use flint_gpui::GpuiThemeProvider;
+use flint_composites::MarkdownEditorSpec;
+use flint_primitives::{IconSize, IconSpec};
 use crate::primitives::Icon;
 use crate::theme_ext::{resolve_color, resolve_opacity, resolve_radius};
 
@@ -93,7 +93,7 @@ impl IntoElement for MarkdownEditor {
         // Helper: mode switcher button
         let mode_btn = |label: &'static str, is_active: bool, mode_val: &'static str,
                         handler: &Option<std::rc::Rc<dyn Fn(&str, &mut Window, &mut App)>>| -> Stateful<Div> {
-            let id = SharedString::from(format!("pug-md-mode-{}", mode_val));
+            let id = SharedString::from(format!("flint-md-mode-{}", mode_val));
             let mut btn = div()
                 .id(id)
                 .px(px(8.0)).py(px(2.0)).rounded(px(3.0))
@@ -152,7 +152,7 @@ impl IntoElement for MarkdownEditor {
         let content_area = if is_edit {
             // Editor pane
             let mut editor_pane = div()
-                .id("pug-md-editor-pane")
+                .id("flint-md-editor-pane")
                 .focusable()
                 .px(px(12.0)).py(px(8.0)).flex_grow().flex_basis(px(0.0))
                 .text_size(px(14.0)).text_color(color)
@@ -209,7 +209,7 @@ impl IntoElement for MarkdownEditor {
             };
             let preview_text_color = if self.spec.value.is_empty() { muted } else { text_color };
             let preview_pane = div()
-                .id("pug-md-preview-pane")
+                .id("flint-md-preview-pane")
                 .px(px(12.0)).py(px(8.0)).flex_grow().flex_basis(px(0.0))
                 .text_size(px(14.0)).text_color(preview_text_color)
                 .overflow_y_scroll()

@@ -45,9 +45,9 @@ of merely improving the old preview counts.
 
 As of this baseline, the parity artifact should reflect:
 
-- `@pug/svelte-primitives`: `63/63` directly previewed exports
-- `@pug/svelte-composites`: `20/20` directly previewed exports
-- `@pug/svelte-workstation`: `14/14` directly previewed exports
+- `@flint/svelte-primitives`: `63/63` directly previewed exports
+- `@flint/svelte-composites`: `20/20` directly previewed exports
+- `@flint/svelte-workstation`: `14/14` directly previewed exports
 
 These counts are evidence that the rebuilt demo is now a full public-surface
 comparison target rather than a mostly coherent workflow shell with remaining
@@ -67,13 +67,13 @@ is supposed to match.
 
 ## Honesty Rule
 
-Pug may say:
+Flint may say:
 
 - the Svelte demo target is rebuilt enough to be the primary GPUI reference
 - the demo now uses materially more of the public package surface directly
 - side-by-side GPUI review should now happen against this shell and screen model
 
-Pug may not say:
+Flint may not say:
 
 - the Svelte demo is finished forever
 - every public export is now meaningfully demonstrated

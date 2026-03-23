@@ -1,8 +1,8 @@
 //! TextArea — Jetstream multi-line text area backed by TextAreaSpec.
 
 use jetstream_runtime::ui_element::{self, JsEl};
-use pug_jetstream::JetstreamThemeProvider;
-use pug_primitives::TextAreaSpec;
+use flint_jetstream::JetstreamThemeProvider;
+use flint_primitives::TextAreaSpec;
 
 use crate::theme_ext::{resolve_color, resolve_radius};
 

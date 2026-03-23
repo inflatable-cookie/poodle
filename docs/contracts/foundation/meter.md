@@ -142,7 +142,7 @@ fill color in the current implementation.
 | `overflow` | `hidden` |
 | `min-height` | `0.5rem` |
 | `border-radius` | `999px` |
-| `background` | `color-mix(in srgb, var(--pug-surface) 96%, var(--pug-color-text-primary))` |
+| `background` | `color-mix(in srgb, var(--flint-surface) 96%, var(--flint-color-text-primary))` |
 
 ### Fill `.meter__fill`
 
@@ -151,7 +151,7 @@ fill color in the current implementation.
 | `display` | `block` |
 | `height` | `100%` |
 | `border-radius` | `inherit` |
-| `background` | `linear-gradient(90deg, color-mix(in srgb, var(--pug-color-status-success) 82%, white), var(--pug-color-status-success))` |
+| `background` | `linear-gradient(90deg, color-mix(in srgb, var(--flint-color-status-success) 82%, white), var(--flint-color-status-success))` |
 
 ### Fill — Inline Style
 
@@ -163,8 +163,8 @@ fill color in the current implementation.
 
 | Token | Role |
 |-------|------|
-| `--pug-color-background-surface` | track background (mixed at 88% opacity) |
-| `--pug-color-status-success` | fill gradient endpoint and base |
+| `--flint-color-background-surface` | track background (mixed at 88% opacity) |
+| `--flint-color-status-success` | fill gradient endpoint and base |
 
 ## 9. Svelte Notes
 
@@ -176,7 +176,7 @@ fill color in the current implementation.
 
 ## 10. GPUI Notes
 
-- Expected crate/module surface: `pug_gpui::primitives::meter`
+- Expected crate/module surface: `flint_gpui::primitives::meter`
 - GPUI must expose bounded-value meter semantics distinct from progress
   semantics through native accessibility APIs
 
@@ -190,8 +190,8 @@ fill color in the current implementation.
 
 ### Tier 2: Visual Parity
 
-- [ ] track background uses `--pug-color-background-surface` at 88% mix
-- [ ] fill gradient uses `--pug-color-status-success` at 82% mix with white
+- [ ] track background uses `--flint-color-background-surface` at 88% mix
+- [ ] fill gradient uses `--flint-color-status-success` at 82% mix with white
 - [ ] border-radius 999px pill shape matches
 - [ ] min-height of 0.5rem matches
 

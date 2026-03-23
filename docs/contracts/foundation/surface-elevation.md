@@ -2,19 +2,19 @@
 
 ## Purpose
 
-The contextual surface elevation system ensures components automatically contrast with whatever visual surface they're placed on. Without it, components using fixed background tokens (e.g. `--pug-color-background-surface`) lose contrast when placed inside Cards, Dialogs, or other elevated containers whose backgrounds are close to those fixed values.
+The contextual surface elevation system ensures components automatically contrast with whatever visual surface they're placed on. Without it, components using fixed background tokens (e.g. `--flint-color-background-surface`) lose contrast when placed inside Cards, Dialogs, or other elevated containers whose backgrounds are close to those fixed values.
 
-## Token: `--pug-surface`
+## Token: `--flint-surface`
 
 A single inheritable CSS custom property that tracks the current container's computed background color.
 
 ```css
 .app-shell {
-  --pug-surface: var(--pug-color-background-canvas);
+  --flint-surface: var(--flint-color-background-canvas);
 }
 ```
 
-**Important:** `--pug-surface` must be declared at or below the element where theme tokens are scoped (e.g. `.app-shell[data-theme]`), not on `:root`. Declaring it on `:root` causes `var(--pug-color-background-canvas)` to resolve before theme tokens are available, producing incorrect values when themes change.
+**Important:** `--flint-surface` must be declared at or below the element where theme tokens are scoped (e.g. `.app-shell[data-theme]`), not on `:root`. Declaring it on `:root` causes `var(--flint-color-background-canvas)` to resolve before theme tokens are available, producing incorrect values when themes change.
 
 Because CSS custom properties inherit through the DOM tree, all descendants automatically see the nearest ancestor's surface color.
 
@@ -30,37 +30,37 @@ The mixing formula always blends **toward `elevated`** (the lightest level), gua
 
 ## Surface Creators
 
-A **surface creator** is any component that establishes a new visual surface. It MUST set `--pug-surface` on its root element to match its own computed background.
+A **surface creator** is any component that establishes a new visual surface. It MUST set `--flint-surface` on its root element to match its own computed background.
 
 | Component | CSS target | Background value |
 |-----------|-----------|------------------|
-| Card | `.card` | `var(--pug-treatment-surface-fill, var(--pug-recipe-card-fill))` |
-| Dialog | `.dialog__surface` | `color-mix(in srgb, var(--pug-color-background-elevated) 98%, var(--pug-color-background-panel))` |
-| Drawer | `.drawer__surface` | `color-mix(in srgb, var(--pug-color-background-elevated) 98%, var(--pug-color-background-panel))` |
-| Popover | `.popover__surface` | `color-mix(in srgb, var(--pug-color-background-elevated) 98%, var(--pug-color-background-panel))` |
-| HoverCard | `.hover-card__surface` | `color-mix(in srgb, var(--pug-color-background-elevated) 98%, var(--pug-color-background-panel))` |
-| Callout | `.callout` | `var(--pug-callout-fill)` |
-| Surface | `.surface` | `var(--pug-surface-fill)` (varies by tone — panel, canvas, or elevated) |
+| Card | `.card` | `var(--flint-treatment-surface-fill, var(--flint-recipe-card-fill))` |
+| Dialog | `.dialog__surface` | `color-mix(in srgb, var(--flint-color-background-elevated) 98%, var(--flint-color-background-panel))` |
+| Drawer | `.drawer__surface` | `color-mix(in srgb, var(--flint-color-background-elevated) 98%, var(--flint-color-background-panel))` |
+| Popover | `.popover__surface` | `color-mix(in srgb, var(--flint-color-background-elevated) 98%, var(--flint-color-background-panel))` |
+| HoverCard | `.hover-card__surface` | `color-mix(in srgb, var(--flint-color-background-elevated) 98%, var(--flint-color-background-panel))` |
+| Callout | `.callout` | `var(--flint-callout-fill)` |
+| Surface | `.surface` | `var(--flint-surface-fill)` (varies by tone — panel, canvas, or elevated) |
 
-Any app-level container that creates a distinct background surface (e.g. a sidebar panel) should also set `--pug-surface`.
+Any app-level container that creates a distinct background surface (e.g. a sidebar panel) should also set `--flint-surface`.
 
 ### Implementation pattern
 
 ```css
 .my-surface {
   background: <computed-background>;
-  --pug-surface: <same-computed-background>;
+  --flint-surface: <same-computed-background>;
 }
 ```
 
-The `--pug-surface` value MUST exactly match the `background` value so child components see an accurate representation of the surface they're on.
+The `--flint-surface` value MUST exactly match the `background` value so child components see an accurate representation of the surface they're on.
 
 ## Surface Consumers
 
-A **surface consumer** is any component that needs to visually contrast with its container. Instead of using fixed background tokens, it derives its background from `--pug-surface` using `color-mix()`:
+A **surface consumer** is any component that needs to visually contrast with its container. Instead of using fixed background tokens, it derives its background from `--flint-surface` using `color-mix()`:
 
 ```css
-background: color-mix(in srgb, var(--pug-surface) <ratio>, var(--pug-color-text-primary));
+background: color-mix(in srgb, var(--flint-surface) <ratio>, var(--flint-color-text-primary));
 ```
 
 The mixing target is `text-primary`, not a background token. This is critical because:
@@ -83,7 +83,7 @@ Mixing toward `elevated` was tried and rejected: in dark mode, `elevated` is onl
 
 ```css
 .my-component {
-  background: color-mix(in srgb, var(--pug-surface) 93%, var(--pug-color-text-primary));
+  background: color-mix(in srgb, var(--flint-surface) 93%, var(--flint-color-text-primary));
 }
 ```
 
@@ -91,11 +91,11 @@ Mixing toward `elevated` was tried and rejected: in dark mode, `elevated` is onl
 
 The formula `color-mix(surface N%, text-primary)` is theme-adaptive by nature. `text-primary` is always at the opposite end of the luminance spectrum from the surface, so even small percentages (4–12%) produce 10–25 RGB units of contrast. This is sufficient for visual differentiation without overpowering the surface hierarchy.
 
-**Important:** Surface creators must NOT use `--pug-surface` in their own `background` or `--pug-surface` declaration on the same element — this creates a CSS circular reference and the browser invalidates both properties. Surface creators should use fixed token formulas for their fill, then set `--pug-surface` to that computed value.
+**Important:** Surface creators must NOT use `--flint-surface` in their own `background` or `--flint-surface` declaration on the same element — this creates a CSS circular reference and the browser invalidates both properties. Surface creators should use fixed token formulas for their fill, then set `--flint-surface` to that computed value.
 
 ## Nesting Behavior
 
-When surfaces nest (e.g. Card inside Card, Accordion inside Dialog), each level sets `--pug-surface` to its own background. Child consumers then derive from the innermost surface.
+When surfaces nest (e.g. Card inside Card, Accordion inside Dialog), each level sets `--flint-surface` to its own background. Child consumers then derive from the innermost surface.
 
 At deep nesting levels, shadow and border provide additional visual differentiation.
 
@@ -160,10 +160,10 @@ Jetstream follows the same conceptual pattern. Track the current surface color i
 ```typescript
 // Surface creator
 const surfaceColor = computeBackground();
-context.provide('pug-surface', surfaceColor);
+context.provide('flint-surface', surfaceColor);
 
 // Surface consumer
-const surface = context.consume('pug-surface') ?? theme.colors.backgroundCanvas;
+const surface = context.consume('flint-surface') ?? theme.colors.backgroundCanvas;
 const textPrimary = theme.colors.textPrimary;
 const bg = colorLerp(surface, textPrimary, 1.0 - ratio);
 ```

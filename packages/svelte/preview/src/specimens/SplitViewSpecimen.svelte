@@ -1,6 +1,6 @@
 <script lang="ts">
-  import { Eyebrow, Region } from "@pug/svelte-primitives";
-  import { SplitView } from "@pug/svelte-composites";
+  import { Eyebrow, Region } from "@flint/svelte-primitives";
+  import { SplitView } from "@flint/svelte-composites";
 </script>
 
 <div class="specimen">
@@ -137,8 +137,8 @@
 
   .specimen__frame {
     height: 10rem;
-    border: 0.0625rem solid var(--pug-color-border-subtle);
-    border-radius: var(--pug-radius-surface);
+    border: 0.0625rem solid var(--flint-color-border-subtle);
+    border-radius: var(--flint-radius-surface);
     overflow: visible;
   }
 
@@ -151,7 +151,7 @@
     height: 100%;
   }
 
-  .specimen__fill :global(.pug-region) {
+  .specimen__fill :global(.flint-region) {
     height: 100%;
     min-height: 0;
   }

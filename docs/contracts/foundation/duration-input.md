@@ -127,31 +127,31 @@ Updated: 2026-03-15
 | `align-items` | `flex-end` |
 | `gap` | `0.125rem` |
 | `width` | `fit-content` |
-| `padding` | `0.25rem var(--pug-space-control-x)` |
-| `border` | `0.0625rem solid var(--pug-color-border-default)` |
-| `border-radius` | `var(--pug-radius-control)` |
-| `background` | `var(--pug-color-background-surface)` |
-| `font-family` | `var(--pug-typography-code-family)` |
+| `padding` | `0.25rem var(--flint-space-control-x)` |
+| `border` | `0.0625rem solid var(--flint-color-border-default)` |
+| `border-radius` | `var(--flint-radius-control)` |
+| `background` | `var(--flint-color-background-surface)` |
+| `font-family` | `var(--flint-typography-code-family)` |
 | `transition` | `border-color, box-shadow` at `motion-duration-interaction motion-easing-standard` |
 
 ### Root focus-within
 
 | Property | Value |
 |----------|-------|
-| `border-color` | `var(--pug-color-accent-focusRing)` |
-| `box-shadow` | `0 0 0 var(--pug-border-width-focus) color-mix(in srgb, var(--pug-color-accent-focusRing) 28%, transparent)` |
+| `border-color` | `var(--flint-color-accent-focusRing)` |
+| `box-shadow` | `0 0 0 var(--flint-border-width-focus) color-mix(in srgb, var(--flint-color-accent-focusRing) 28%, transparent)` |
 
 ### Root disabled
 
 | Property | Value |
 |----------|-------|
-| `opacity` | `var(--pug-state-opacity-disabled)` |
+| `opacity` | `var(--flint-state-opacity-disabled)` |
 
 ### Root invalid
 
 | Property | Value |
 |----------|-------|
-| `border-color` | `var(--pug-color-status-danger)` |
+| `border-color` | `var(--flint-color-status-danger)` |
 
 ### Segment
 
@@ -169,7 +169,7 @@ Updated: 2026-03-15
 | Property | Value |
 |----------|-------|
 | `font-size` | `0.5625rem` |
-| `color` | `var(--pug-color-text-secondary)` |
+| `color` | `var(--flint-color-text-secondary)` |
 | `text-transform` | `uppercase` |
 | `letter-spacing` | `0.05em` |
 | `line-height` | `1` |
@@ -184,9 +184,9 @@ Updated: 2026-03-15
 | `padding` | `0` |
 | `border` | `0` |
 | `background` | `transparent` |
-| `color` | `var(--pug-color-text-primary)` |
-| `font-family` | `var(--pug-typography-code-family)` |
-| `font-size` | `var(--pug-typography-body-size)` |
+| `color` | `var(--flint-color-text-primary)` |
+| `font-family` | `var(--flint-typography-code-family)` |
+| `font-size` | `var(--flint-typography-body-size)` |
 | `font-variant-numeric` | `tabular-nums` |
 | `text-align` | `center` |
 | `line-height` | `1` |
@@ -196,14 +196,14 @@ Updated: 2026-03-15
 
 | Property | Value |
 |----------|-------|
-| `background` | `color-mix(in srgb, var(--pug-color-accent-base) 12%, transparent)` |
+| `background` | `color-mix(in srgb, var(--flint-color-accent-base) 12%, transparent)` |
 
 ### Separator
 
 | Property | Value |
 |----------|-------|
-| `color` | `var(--pug-color-text-secondary)` |
-| `font-size` | `var(--pug-typography-body-size)` |
+| `color` | `var(--flint-color-text-secondary)` |
+| `font-size` | `var(--flint-typography-body-size)` |
 | `font-weight` | `600` |
 | `line-height` | `1` |
 | `user-select` | `none` |
@@ -219,9 +219,9 @@ Updated: 2026-03-15
 
 ## 10. GPUI Notes
 
-- expected crate/module surface: `pug_gpui::components::duration_input`
+- expected crate/module surface: `flint_gpui::components::duration_input`
 - Spec struct: `DurationInputSpec` in primitives crate
-- Component struct: `PugDurationInput` in components crate
+- Component struct: `FlintDurationInput` in components crate
 - Segmented input fields may use GPUI's text input with custom formatting
 - Carry logic implemented as pure Rust function
 - `tabular-nums` font variant may need GPUI font feature support

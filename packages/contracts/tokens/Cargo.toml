@@ -1,13 +1,13 @@
 [package]
-name = "pug-tokens"
+name = "flint-tokens"
 version = "0.0.0"
 edition = "2021"
-description = "Generated Pug token bindings for multi-renderer consumers."
+description = "Generated Flint token bindings for multi-renderer consumers."
 
 [lib]
 path = "src/lib.rs"
 
-[package.metadata.pug]
+[package.metadata.flint]
 public-intent = true
 channel = "preview"
 stability = "pre-release"

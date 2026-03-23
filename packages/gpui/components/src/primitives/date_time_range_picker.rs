@@ -1,8 +1,8 @@
 //! DateTimeRangePicker — real GPUI component backed by DateTimeRangePickerSpec.
 
 use gpui::*;
-use pug_gpui::GpuiThemeProvider;
-use pug_primitives::{CalendarWeekStart, DateTimeRangePickerSpec, DateTimeRangeValue, IconSize, IconSpec};
+use flint_gpui::GpuiThemeProvider;
+use flint_primitives::{CalendarWeekStart, DateTimeRangePickerSpec, DateTimeRangeValue, IconSize, IconSpec};
 
 use super::icon::Icon;
 use crate::theme_ext::{color_mix, resolve_color, resolve_opacity, resolve_px, resolve_radius};
@@ -120,9 +120,9 @@ impl IntoElement for DateTimeRangePicker {
         let is_disabled = spec.is_disabled;
 
         let id_str = if let Some(ref suffix) = self.id_suffix {
-            format!("pug-datetime-range-picker-{}", suffix)
+            format!("flint-datetime-range-picker-{}", suffix)
         } else {
-            "pug-datetime-range-picker".to_string()
+            "flint-datetime-range-picker".to_string()
         };
 
         let mut trigger = div()

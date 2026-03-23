@@ -1,10 +1,10 @@
 //! EmptyState specimen — placeholder for empty content areas.
 
 use jetstream_runtime::ui_element::*;
-use pug_jetstream::JetstreamThemeProvider;
-use pug_jetstream_components::empty_state::js_empty_state;
-use pug_jetstream_components::theme_ext::*;
-use pug_composites::EmptyStateSpec;
+use flint_jetstream::JetstreamThemeProvider;
+use flint_jetstream_components::empty_state::js_empty_state;
+use flint_jetstream_components::theme_ext::*;
+use flint_composites::EmptyStateSpec;
 
 pub fn render(theme: &JetstreamThemeProvider) -> JsEl {
     let secondary = resolve_color(theme, "semantic.color.text.secondary");

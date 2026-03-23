@@ -1,7 +1,7 @@
 //! MediaPreview — Jetstream media preview backed by MediaPreviewSpec.
 use jetstream_runtime::ui_element::{self, JsEl};
-use pug_jetstream::JetstreamThemeProvider;
-use pug_composites::MediaPreviewSpec;
+use flint_jetstream::JetstreamThemeProvider;
+use flint_composites::MediaPreviewSpec;
 use crate::theme_ext::{resolve_color, resolve_radius};
 
 pub fn js_media_preview(spec: &MediaPreviewSpec, theme: &JetstreamThemeProvider) -> JsEl {

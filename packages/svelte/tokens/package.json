@@ -1,24 +1,24 @@
 {
-  "name": "@pug/svelte-tokens",
+  "name": "@flint/svelte-tokens",
   "version": "0.0.0",
   "private": true,
   "type": "module",
-  "description": "Pug Svelte token and theme helpers backed by generated artifacts.",
+  "description": "Flint Svelte token and theme helpers backed by generated artifacts.",
   "svelte": "./src/index.ts",
   "exports": {
     ".": "./src/index.ts",
     "./runtime": "./src/runtime.ts",
     "./css": "./src/css.ts",
-    "./styles.css": "./src/generated/css/pug-tokens.css",
-    "./css/pug-tokens.css": "./src/generated/css/pug-tokens.css",
-    "./theme-light.css": "./src/generated/css/pug-theme-light.css",
-    "./theme-dark.css": "./src/generated/css/pug-theme-dark.css",
-    "./theme-loophole-studio.css": "./src/generated/css/pug-theme-loophole-studio.css",
-    "./density-compact.css": "./src/generated/css/pug-density-compact.css",
-    "./density-comfortable.css": "./src/generated/css/pug-density-comfortable.css",
-    "./control-size-sm.css": "./src/generated/css/pug-control-size-sm.css",
-    "./control-size-md.css": "./src/generated/css/pug-control-size-md.css",
-    "./control-size-lg.css": "./src/generated/css/pug-control-size-lg.css",
+    "./styles.css": "./src/generated/css/flint-tokens.css",
+    "./css/flint-tokens.css": "./src/generated/css/flint-tokens.css",
+    "./theme-light.css": "./src/generated/css/flint-theme-light.css",
+    "./theme-dark.css": "./src/generated/css/flint-theme-dark.css",
+    "./theme-loophole-studio.css": "./src/generated/css/flint-theme-loophole-studio.css",
+    "./density-compact.css": "./src/generated/css/flint-density-compact.css",
+    "./density-comfortable.css": "./src/generated/css/flint-density-comfortable.css",
+    "./control-size-sm.css": "./src/generated/css/flint-control-size-sm.css",
+    "./control-size-md.css": "./src/generated/css/flint-control-size-md.css",
+    "./control-size-lg.css": "./src/generated/css/flint-control-size-lg.css",
     "./themes": "./src/themes.ts",
     "./metadata": "./src/metadata.ts",
     "./units": "./src/units.ts"
@@ -27,7 +27,7 @@
     "src",
     "README.md"
   ],
-  "pugRelease": {
+  "flintRelease": {
     "publicIntent": true,
     "channel": "preview",
     "stability": "pre-release"

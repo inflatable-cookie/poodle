@@ -1,15 +1,15 @@
 [package]
-name = "pug-jetstream-components"
+name = "flint-jetstream-components"
 version = "0.0.0"
 edition = "2021"
-description = "Pug component implementations for Jetstream — token-resolved UI components using the JsEl fluent builder."
+description = "Flint component implementations for Jetstream — token-resolved UI components using the JsEl fluent builder."
 
 [dependencies]
-pug-adapter = { path = "../../contracts/adapter" }
-pug-composites = { path = "../../contracts/composites" }
-pug-primitives = { path = "../../contracts/primitives" }
-pug-tokens = { path = "../../contracts/tokens" }
-pug-jetstream = { path = "../adapter" }
+flint-adapter = { path = "../../contracts/adapter" }
+flint-composites = { path = "../../contracts/composites" }
+flint-primitives = { path = "../../contracts/primitives" }
+flint-tokens = { path = "../../contracts/tokens" }
+flint-jetstream = { path = "../adapter" }
 jetstream-runtime = { path = "../../../../jetstream/crates/jetstream-runtime" }
 glam = "0.29"
 taffy = "0.9"

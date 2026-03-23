@@ -1,8 +1,8 @@
 //! Region — Jetstream semantic region backed by RegionSpec.
 
 use jetstream_runtime::ui_element::{self, JsEl};
-use pug_jetstream::JetstreamThemeProvider;
-use pug_primitives::RegionSpec;
+use flint_jetstream::JetstreamThemeProvider;
+use flint_primitives::RegionSpec;
 
 use crate::theme_ext::{resolve_color, resolve_px, resolve_radius};
 

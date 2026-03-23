@@ -5,12 +5,12 @@
       "label": "Direct Svelte consumer reference app",
       "format": "reference-app-shape",
       "status": "docs-backed",
-      "audience": "teams importing Pug packages directly",
+      "audience": "teams importing Flint packages directly",
       "packageEntryPoints": [
-        "@pug/svelte-tokens",
-        "@pug/svelte-primitives",
-        "@pug/svelte-composites",
-        "@pug/svelte-workstation"
+        "@flint/svelte-tokens",
+        "@flint/svelte-primitives",
+        "@flint/svelte-composites",
+        "@flint/svelte-workstation"
       ],
       "exampleSectionIds": [
         "catalog-hub",
@@ -38,9 +38,9 @@
       "label": "Underlay bridge-mediated reference app",
       "format": "reference-app-shape",
       "status": "proof-backed",
-      "audience": "teams preserving an existing app-local API while adopting Pug internally",
+      "audience": "teams preserving an existing app-local API while adopting Flint internally",
       "packageEntryPoints": [
-        "@pug/bridge-underlay"
+        "@flint/bridge-underlay"
       ],
       "exampleSectionIds": [
         "catalog-hub",
@@ -48,8 +48,8 @@
         "notification-suite"
       ],
       "onboardingSteps": [
-        "Adopt Pug only behind bridge-owned aliases and wrappers.",
-        "Keep app imports Pug-agnostic and route all compatibility translation through the bridge.",
+        "Adopt Flint only behind bridge-owned aliases and wrappers.",
+        "Keep app imports Flint-agnostic and route all compatibility translation through the bridge.",
         "Treat wrapper translation, host integration, and rollout pacing as downstream-owned concerns."
       ],
       "evidencePaths": [
@@ -68,10 +68,10 @@
       "status": "proof-backed",
       "audience": "teams adopting generic shell and dock surfaces while keeping domain widgets downstream-owned",
       "packageEntryPoints": [
-        "@pug/svelte-tokens",
-        "@pug/svelte-primitives",
-        "@pug/svelte-composites",
-        "@pug/svelte-workstation"
+        "@flint/svelte-tokens",
+        "@flint/svelte-primitives",
+        "@flint/svelte-composites",
+        "@flint/svelte-workstation"
       ],
       "exampleSectionIds": [
         "command-suite",
@@ -99,7 +99,7 @@
       "status": "preview-backed",
       "audience": "evaluators and adopters learning the system before direct integration",
       "packageEntryPoints": [
-        "@pug/svelte-preview"
+        "@flint/svelte-preview"
       ],
       "exampleSectionIds": [
         "catalog-hub",
@@ -164,7 +164,7 @@
       ],
       "primaryReferenceShapeId": "underlay-bridge-consumer",
       "nonGoals": [
-        "Do not expose Pug package names directly in downstream app imports.",
+        "Do not expose Flint package names directly in downstream app imports.",
         "Do not widen bridge aliases without concrete downstream pressure."
       ]
     },

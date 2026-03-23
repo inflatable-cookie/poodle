@@ -1,7 +1,7 @@
 # g08.009 Specimen Pages Aligned To Contract Definitions
 
 Status: complete
-Owner: Pug Core
+Owner: Flint Core
 Depends on: g08.002, g08.003, g08.008
 
 ## Contract Check
@@ -16,11 +16,11 @@ component quality fixes (005, 006, 007).
 - Component quality fixes (005–007) changed internal rendering (token
   resolution, color mixing, icon rendering) but did not change public APIs
   or specimen interfaces
-- Full `cargo check -p pug-gpui-preview` passes — all specimens compile
+- Full `cargo check -p flint-gpui-preview` passes — all specimens compile
   with the updated components
 
 ## Acceptance Criteria
 
 - [x] Every GPUI specimen page matches its contract specimen definitions
-- [x] Every specimen uses real Pug components with full token resolution
+- [x] Every specimen uses real Flint components with full token resolution
 - [x] All 78 specimens compile successfully

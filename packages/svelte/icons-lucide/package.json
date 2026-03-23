@@ -1,9 +1,9 @@
 {
-  "name": "@pug/icons-lucide",
+  "name": "@flint/icons-lucide",
   "version": "0.0.0",
   "private": true,
   "type": "module",
-  "description": "Tree-shakeable Lucide icon entries for the Pug icon system.",
+  "description": "Tree-shakeable Lucide icon entries for the Flint icon system.",
   "sideEffects": false,
   "exports": {
     ".": "./src/index.ts",
@@ -13,7 +13,7 @@
     "src",
     "README.md"
   ],
-  "pugRelease": {
+  "flintRelease": {
     "publicIntent": true,
     "channel": "preview",
     "stability": "pre-release"

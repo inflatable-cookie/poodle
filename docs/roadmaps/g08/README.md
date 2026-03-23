@@ -90,7 +90,7 @@ order-by, pagination, region, resize-handle, status-bar, table
   radius (6px), gap (8px) instead of resolving from spec tokens
 - **Focus rings**: Zero components implement focus rings
 - **ARIA**: Only 8 of 84 components reference ARIA in any form
-- **Icons**: `icon_button` renders icon names as raw text, not `PugIcon` SVG
+- **Icons**: `icon_button` renders icon names as raw text, not `FlintIcon` SVG
 
 ## Exit State
 
@@ -98,7 +98,7 @@ order-by, pagination, region, resize-handle, status-bar, table
 - Zero hardcoded pixel values in component rendering code
 - All interactive components have focus rings per contract
 - ARIA attributes applied per contract where GPUI supports them
-- All icon slots use `PugIcon` with real SVG rendering
+- All icon slots use `FlintIcon` with real SVG rendering
 - All 20 missing components implemented
 - Broken components (`color_picker`, `range_slider`) fully functional
 - Specimen pages match contract specimen definitions
@@ -175,7 +175,7 @@ Assumptions from previous sessions may be stale. Specifically:
 - Verify the component still exists in the contract (not renamed/removed)
 - Verify prop names and types match current contract
 - Verify token target names match current contract
-- Verify the spec struct in `pug-primitives`/`pug-composites` matches
+- Verify the spec struct in `flint-primitives`/`flint-composites` matches
 - If a contract has changed, update the GPUI implementation to match before
   proceeding with quality fixes
 
@@ -197,7 +197,7 @@ A component is production quality when ALL of the following are true:
 5. **Focus ring** present on interactive components (buttons, inputs, checkboxes,
    etc.) using the accent focus ring token
 6. **ARIA attributes** match contract requirements (role, aria-label, etc.)
-7. **Icons** render via `PugIcon` with real SVGs, not text/emoji placeholders
+7. **Icons** render via `FlintIcon` with real SVGs, not text/emoji placeholders
 8. **Anatomy** matches contract — all parts present, correct nesting
 9. **All props** from contract supported in the spec struct
 10. **Specimen** matches contract specimen definitions exactly

@@ -13,7 +13,7 @@ separator, and scrolling semantics component by component.
 
 ## Package Rule
 
-`pug-gpui-primitives` is now a preview-channel public-intent Rust crate.
+`flint-gpui-primitives` is now a preview-channel public-intent Rust crate.
 
 Its `g04.003` baseline owns:
 
@@ -25,7 +25,7 @@ Its `g04.003` baseline owns:
 - `ScrollShellSpec`
 
 These exports are the first contract-backed GPUI primitive surface after
-`pug-gpui-tokens`.
+`flint-gpui-tokens`.
 
 ## Contract Coverage Rule
 
@@ -58,7 +58,7 @@ Those deeper proofs belong to later `g04` milestones.
 ## Token Rule
 
 Structural GPUI primitives must resolve layout, surface, border, elevation, and
-focus-treatment semantics from `pug-gpui-tokens`, not from local Rust-only
+focus-treatment semantics from `flint-gpui-tokens`, not from local Rust-only
 constants.
 
 At minimum the baseline should freeze:
@@ -70,7 +70,7 @@ At minimum the baseline should freeze:
 
 ## Package Boundary Rule
 
-`pug-gpui-primitives` now sits between token bindings and later GPUI runtime
+`flint-gpui-primitives` now sits between token bindings and later GPUI runtime
 depth:
 
 - it is narrower than the future full GPUI primitive family

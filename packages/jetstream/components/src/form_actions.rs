@@ -1,8 +1,8 @@
 //! FormActions — Jetstream form action bar backed by FormActionsSpec.
 
 use jetstream_runtime::ui_element::{self, JsEl};
-use pug_jetstream::JetstreamThemeProvider;
-use pug_primitives::{FormActionAlign, FormActionsSpec};
+use flint_jetstream::JetstreamThemeProvider;
+use flint_primitives::{FormActionAlign, FormActionsSpec};
 
 use crate::theme_ext::resolve_px;
 

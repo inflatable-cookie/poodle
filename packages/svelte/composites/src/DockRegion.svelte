@@ -1,8 +1,8 @@
 <script lang="ts">
   import { createEventDispatcher, onDestroy, tick } from "svelte";
 
-  import { CollapseToggle, Tabs } from "@pug/svelte-primitives";
-  import type { TabItem } from "@pug/svelte-primitives";
+  import { CollapseToggle, Tabs } from "@flint/svelte-primitives";
+  import type { TabItem } from "@flint/svelte-primitives";
 
   import type {
     DockEdge,
@@ -23,7 +23,7 @@
   export let ariaLabel: string | null = null;
   export let canAcceptPanel: ((panelId: string, sourceEdge: DockEdge) => boolean) | null = null;
 
-  const PANEL_DRAG_TYPE = "application/x-pug-panel-drag";
+  const PANEL_DRAG_TYPE = "application/x-flint-panel-drag";
 
   const dispatch = createEventDispatcher<{
     valueChange: { value: string };
@@ -149,8 +149,8 @@
     if (!event.dataTransfer) return;
 
     // Find which tab is being dragged by examining the event target
-    // event.target is the .pug-tabs__item div (draggable element)
-    // The tab button (with id="pug-tab-{tabsId}-{item.value}") is a child
+    // event.target is the .flint-tabs__item div (draggable element)
+    // The tab button (with id="flint-tab-{tabsId}-{item.value}") is a child
     const target = event.target as HTMLElement;
     const tab = target.querySelector?.("[role='tab']") ?? target.closest?.("[role='tab']");
     if (!tab) return;
@@ -405,7 +405,7 @@
     min-height: 0;
     height: 100%;
     border: 0;
-    background: color-mix(in srgb, var(--pug-color-background-panel) 94%, transparent);
+    background: color-mix(in srgb, var(--flint-color-background-panel) 94%, transparent);
   }
 
   /* Emphasis variants */
@@ -415,7 +415,7 @@
   }
 
   .dock-region[data-emphasis="strong"] {
-    border-color: color-mix(in srgb, var(--pug-color-accent-base) 32%, var(--pug-color-border-subtle));
+    border-color: color-mix(in srgb, var(--flint-color-accent-base) 32%, var(--flint-color-border-subtle));
   }
 
   /* ── Static mode ── */
@@ -450,8 +450,8 @@
   }
 
   .dock-region__stack-item[data-drop-target] {
-    box-shadow: inset 0 0 0 0.125rem var(--pug-color-accent-base);
-    border-radius: var(--pug-radius-control);
+    box-shadow: inset 0 0 0 0.125rem var(--flint-color-accent-base);
+    border-radius: var(--flint-radius-control);
   }
 
   /* ── Flexible expanded ── */
@@ -463,9 +463,9 @@
   .dock-region__strip[data-orientation="horizontal"] {
     display: flex;
     align-items: center;
-    gap: var(--pug-space-inline-sm);
+    gap: var(--flint-space-inline-sm);
     padding-right: 0.5rem;
-    border-bottom: 0.0625rem solid var(--pug-color-border-subtle);
+    border-bottom: 0.0625rem solid var(--flint-color-border-subtle);
   }
 
   .dock-region__tabs {
@@ -473,22 +473,22 @@
     min-width: 0;
   }
 
-  .dock-region__strip[data-orientation="horizontal"] :global(.pug-tabs[data-variant="strip"] .pug-tabs__list) {
+  .dock-region__strip[data-orientation="horizontal"] :global(.flint-tabs[data-variant="strip"] .flint-tabs__list) {
     border-bottom: 0;
   }
 
   /* Compact mode: icon-only horizontal tabs when strip is too narrow */
-  .dock-region__strip[data-compact] :global(.pug-tabs__label),
-  .dock-region__strip[data-compact] :global(.pug-tabs__close) {
+  .dock-region__strip[data-compact] :global(.flint-tabs__label),
+  .dock-region__strip[data-compact] :global(.flint-tabs__close) {
     display: none;
   }
 
-  .dock-region__strip[data-compact] :global(.pug-tabs__tab) {
+  .dock-region__strip[data-compact] :global(.flint-tabs__tab) {
     padding: 0 0.5rem;
     justify-content: center;
   }
 
-  .dock-region__strip[data-compact] :global(.pug-tabs__list) {
+  .dock-region__strip[data-compact] :global(.flint-tabs__list) {
     overflow: visible;
   }
 
@@ -521,33 +521,33 @@
     align-items: stretch;
     gap: 0;
     padding: 0;
-    border-right: 0.0625rem solid var(--pug-color-border-subtle);
+    border-right: 0.0625rem solid var(--flint-color-border-subtle);
   }
 
-  .dock-region__strip[data-orientation="vertical"] :global(.pug-tabs) {
+  .dock-region__strip[data-orientation="vertical"] :global(.flint-tabs) {
     flex: 1 1 0;
     min-height: 0;
   }
 
   .dock-region__strip[data-orientation="vertical"] > :global(.collapse-toggle) {
     align-self: center;
-    padding: var(--pug-space-panel-y, 0.5rem) 0;
+    padding: var(--flint-space-panel-y, 0.5rem) 0;
   }
 
   /* Override Tabs grid so the list column stretches to fill the strip width.
      The default vertical Tabs uses `grid-template-columns: auto minmax(0,1fr)`
      which sizes the list to content. We need it to fill so the active item's
      accent border sits flush on the strip's right divider. */
-  .dock-region__strip[data-orientation="vertical"] :global(.pug-tabs) {
+  .dock-region__strip[data-orientation="vertical"] :global(.flint-tabs) {
     grid-template-columns: 1fr !important;
   }
 
-  .dock-region__strip[data-orientation="vertical"] :global(.pug-tabs__list) {
+  .dock-region__strip[data-orientation="vertical"] :global(.flint-tabs__list) {
     border-right: 0 !important;
   }
 
   /* Ensure items' accent border overlaps the strip's border-right */
-  .dock-region__strip[data-orientation="vertical"] :global(.pug-tabs__item) {
+  .dock-region__strip[data-orientation="vertical"] :global(.flint-tabs__item) {
     margin-right: -0.0625rem !important;
   }
 
@@ -562,7 +562,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    padding: var(--pug-space-panel-y, 0.5rem);
+    padding: var(--flint-space-panel-y, 0.5rem);
   }
 
   /* ── Drop zone overlay ── */
@@ -571,9 +571,9 @@
     position: absolute;
     inset: 0;
     z-index: 10;
-    border: 0.125rem dashed var(--pug-color-accent-base);
-    border-radius: var(--pug-radius-surface);
-    background: color-mix(in srgb, var(--pug-color-accent-base) 10%, transparent);
+    border: 0.125rem dashed var(--flint-color-accent-base);
+    border-radius: var(--flint-radius-surface);
+    background: color-mix(in srgb, var(--flint-color-accent-base) 10%, transparent);
     pointer-events: none;
   }
 </style>

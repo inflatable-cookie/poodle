@@ -1,15 +1,15 @@
 //! GPUI theme integration.
 //!
-//! Implements the `ThemeProvider` trait from `pug-adapter` by resolving
-//! semantic token paths to typed values using the `pug-tokens::typed` module.
+//! Implements the `ThemeProvider` trait from `flint-adapter` by resolving
+//! semantic token paths to typed values using the `flint-tokens::typed` module.
 //!
 //! The token paths passed to `resolve_*` methods are semantic path strings
 //! (e.g., `"semantic.color.accent.base"`, `"semantic.radius.control"`).
 //! The provider checks theme overrides first, then falls back to the
 //! typed constant defaults from the light theme baseline.
 
-use pug_adapter::ThemeProvider;
-use pug_tokens::typed::{self, ColorValue};
+use flint_adapter::ThemeProvider;
+use flint_tokens::typed::{self, ColorValue};
 
 /// GPUI theme provider backed by the typed token module.
 ///
@@ -47,7 +47,7 @@ impl GpuiThemeProvider {
     }
 
     /// Apply a theme definition's overrides.
-    pub fn with_theme(mut self, theme: &pug_tokens::themes::ThemeDefinition) -> Self {
+    pub fn with_theme(mut self, theme: &flint_tokens::themes::ThemeDefinition) -> Self {
         self.overrides = theme.overrides.to_vec();
         self.theme_name = theme.name.to_string();
         self
@@ -253,8 +253,8 @@ impl ThemeProvider for GpuiThemeProvider {
 
 #[cfg(test)]
 mod tests {
-    use pug_adapter::ThemeProvider;
-    use pug_tokens::semantic;
+    use flint_adapter::ThemeProvider;
+    use flint_tokens::semantic;
 
     use super::*;
 
@@ -271,7 +271,7 @@ mod tests {
 
     #[test]
     fn dark_theme_overrides_accent_color() {
-        let theme = GpuiThemeProvider::new().with_theme(&pug_tokens::themes::DARK);
+        let theme = GpuiThemeProvider::new().with_theme(&flint_tokens::themes::DARK);
         let color = theme.resolve_color(semantic::COLOR_ACCENT_BASE);
         // Dark theme: #f0b24d → approximately (0.941, 0.698, 0.302, 1.0)
         assert!((color.0 - 0.941).abs() < 0.01, "r={}", color.0);
@@ -337,7 +337,7 @@ mod tests {
 
     #[test]
     fn theme_switching_changes_colors() {
-        let dark = GpuiThemeProvider::new().with_theme(&pug_tokens::themes::DARK);
+        let dark = GpuiThemeProvider::new().with_theme(&flint_tokens::themes::DARK);
         let light = GpuiThemeProvider::default();
         let dark_accent = dark.resolve_color(semantic::COLOR_ACCENT_BASE);
         let light_accent = light.resolve_color(semantic::COLOR_ACCENT_BASE);

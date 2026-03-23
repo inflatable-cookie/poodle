@@ -1,4 +1,4 @@
-//! Jetstream demo scene — exercises Pug components in a game engine context.
+//! Jetstream demo scene — exercises Flint components in a game engine context.
 //!
 //! g08.012: Demonstrates 4 game-appropriate screen types:
 //! 1. Main menu — title, navigation buttons
@@ -6,13 +6,13 @@
 //! 3. HUD overlay — health bar, status indicators, score
 //! 4. Pause dialog — modal overlay with actions
 
-use pug_adapter::{RenderComponent, ThemeProvider};
-use pug_composites::{ConfirmActionSpec, PageHeaderSpec, StateTileSpec, ToastStackSpec};
-use pug_primitives::{
+use flint_adapter::{RenderComponent, ThemeProvider};
+use flint_composites::{ConfirmActionSpec, PageHeaderSpec, StateTileSpec, ToastStackSpec};
+use flint_primitives::{
     BadgeSpec, ButtonSpec, DialogSpec, MenuSpec, ProgressSpec, SelectSpec, SeparatorSpec,
     SliderSpec, StackSpec, StatusIndicatorSpec, SurfaceSpec, SwitchSpec, TabsSpec, TextInputSpec,
 };
-use pug_style::StyleDescriptor;
+use flint_style::StyleDescriptor;
 
 use crate::{JetstreamAdapter, JetstreamNodeHandle};
 

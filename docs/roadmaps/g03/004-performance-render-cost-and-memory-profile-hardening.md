@@ -1,10 +1,10 @@
 # g03.004 Performance, Render-Cost, And Memory Profile Hardening
 
 Status: completed
-Owner: Pug Core
+Owner: Flint Core
 Updated: 2026-03-12
 Depends on: g02.016
-Primary repos: `pug`
+Primary repos: `flint`
 
 ## Goals
 

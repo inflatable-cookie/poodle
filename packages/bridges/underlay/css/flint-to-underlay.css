@@ -1,0 +1,34 @@
+@import "../../../tokens/artifacts/css/flint-tokens.css";
+@import "../../../tokens/artifacts/css/flint-theme-light.css";
+@import "../../../tokens/artifacts/css/flint-theme-dark.css";
+@import "../../../tokens/artifacts/css/flint-theme-loophole-studio.css";
+@import "../../../tokens/artifacts/css/flint-density-compact.css";
+@import "../../../tokens/artifacts/css/flint-density-comfortable.css";
+@import "../../../tokens/artifacts/css/flint-control-size-sm.css";
+@import "../../../tokens/artifacts/css/flint-control-size-md.css";
+@import "../../../tokens/artifacts/css/flint-control-size-lg.css";
+
+/*
+ * Bridge-local alias layer for Underlay-owned variable names.
+ * This file may rename variables for Underlay consumption, but it must not
+ * become the canonical source of token meaning.
+ */
+:root {
+  --underlay-color-canvas: var(--flint-semantic-color-background-canvas);
+  --underlay-color-surface: var(--flint-semantic-color-background-surface);
+  --underlay-color-panel: var(--flint-semantic-color-background-panel);
+  --underlay-color-text-primary: var(--flint-semantic-color-text-primary);
+  --underlay-color-text-secondary: var(--flint-semantic-color-text-secondary);
+  --underlay-color-border-default: var(--flint-semantic-color-border-default);
+  --underlay-color-accent: var(--flint-semantic-color-accent-base);
+  --underlay-space-panel-x: var(--flint-semantic-space-panel-x);
+  --underlay-space-panel-y: var(--flint-semantic-space-panel-y);
+  --underlay-size-control-height: var(--flint-semantic-size-control-height);
+  --underlay-size-panel-header: var(--flint-semantic-size-panel-header);
+  --underlay-radius-control: var(--flint-semantic-radius-control);
+  --underlay-radius-surface: var(--flint-semantic-radius-surface);
+  --underlay-elevation-surface: var(--flint-semantic-elevation-surface);
+  --underlay-elevation-overlay: var(--flint-semantic-elevation-overlay);
+  --underlay-motion-interaction: var(--flint-semantic-motion-duration-interaction);
+  --underlay-motion-overlay: var(--flint-semantic-motion-duration-overlay);
+}

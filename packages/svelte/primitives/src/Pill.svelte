@@ -23,19 +23,19 @@
 
 <style>
   .pill {
-    --pug-pill-fill: color-mix(in srgb, var(--pug-color-background-surface) 90%, transparent);
-    --pug-pill-border: color-mix(in srgb, var(--pug-color-border-subtle) 82%, transparent);
-    --pug-pill-text: var(--pug-color-text-secondary);
+    --flint-pill-fill: color-mix(in srgb, var(--flint-color-background-surface) 90%, transparent);
+    --flint-pill-border: color-mix(in srgb, var(--flint-color-border-subtle) 82%, transparent);
+    --flint-pill-text: var(--flint-color-text-secondary);
     display: inline-flex;
     align-items: center;
     justify-content: center;
     min-height: 1.25rem;
     padding: 0.1875rem 0.5rem;
-    border: 0.0625rem solid var(--pug-pill-border);
+    border: 0.0625rem solid var(--flint-pill-border);
     border-radius: 999px;
-    background: var(--pug-pill-fill);
-    color: var(--pug-pill-text);
-    font-family: var(--pug-typography-label-family);
+    background: var(--flint-pill-fill);
+    color: var(--flint-pill-text);
+    font-family: var(--flint-typography-label-family);
     font-size: 0.6875rem;
     font-weight: 600;
     line-height: 1;
@@ -43,19 +43,19 @@
   }
 
   .pill[data-tone="success"] {
-    --pug-pill-fill: color-mix(in srgb, var(--pug-color-status-success) 14%, var(--pug-color-background-surface));
-    --pug-pill-border: color-mix(in srgb, var(--pug-color-status-success) 38%, var(--pug-color-border-subtle));
-    --pug-pill-text: var(--pug-color-text-primary);
+    --flint-pill-fill: color-mix(in srgb, var(--flint-color-status-success) 14%, var(--flint-color-background-surface));
+    --flint-pill-border: color-mix(in srgb, var(--flint-color-status-success) 38%, var(--flint-color-border-subtle));
+    --flint-pill-text: var(--flint-color-text-primary);
   }
 
   .pill[data-tone="danger"] {
-    --pug-pill-fill: color-mix(in srgb, var(--pug-color-status-danger) 14%, var(--pug-color-background-surface));
-    --pug-pill-border: color-mix(in srgb, var(--pug-color-status-danger) 38%, var(--pug-color-border-subtle));
-    --pug-pill-text: var(--pug-color-text-primary);
+    --flint-pill-fill: color-mix(in srgb, var(--flint-color-status-danger) 14%, var(--flint-color-background-surface));
+    --flint-pill-border: color-mix(in srgb, var(--flint-color-status-danger) 38%, var(--flint-color-border-subtle));
+    --flint-pill-text: var(--flint-color-text-primary);
   }
 
   .pill[data-appearance="subtle"] {
-    --pug-pill-fill: color-mix(in srgb, var(--pug-pill-fill) 50%, transparent);
+    --flint-pill-fill: color-mix(in srgb, var(--flint-pill-fill) 50%, transparent);
   }
 
   .pill[data-size="xxs"] {
@@ -71,22 +71,22 @@
   }
 
   .pill[data-font="mono"] {
-    font-family: var(--pug-typography-code-family);
+    font-family: var(--flint-typography-code-family);
     letter-spacing: 0.02em;
   }
 
   .pill[data-appearance="badge"] {
-    --pug-pill-fill: color-mix(in srgb, var(--pug-color-accent-base) 18%, transparent);
-    --pug-pill-border: transparent;
-    --pug-pill-text: var(--pug-color-text-primary);
+    --flint-pill-fill: color-mix(in srgb, var(--flint-color-accent-base) 18%, transparent);
+    --flint-pill-border: transparent;
+    --flint-pill-text: var(--flint-color-text-primary);
     font-weight: 700;
     letter-spacing: 0.04em;
     text-transform: uppercase;
   }
 
   .pill[data-appearance="badge"][data-tone="neutral"] {
-    --pug-pill-fill: color-mix(in srgb, var(--pug-surface) 96%, var(--pug-color-text-primary));
-    --pug-pill-text: var(--pug-color-text-secondary);
+    --flint-pill-fill: color-mix(in srgb, var(--flint-surface) 96%, var(--flint-color-text-primary));
+    --flint-pill-text: var(--flint-color-text-secondary);
   }
 
   .pill[data-muted="true"] {

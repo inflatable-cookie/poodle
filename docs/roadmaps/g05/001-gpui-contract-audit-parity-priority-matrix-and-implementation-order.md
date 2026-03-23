@@ -1,10 +1,10 @@
 # g05.001 GPUI Contract Audit, Parity Priority Matrix, And Implementation Order
 
 Status: completed
-Owner: Pug Core
+Owner: Flint Core
 Updated: 2026-03-13
 Depends on: g03.014
-Primary repos: `pug`
+Primary repos: `flint`
 
 ## Goals
 

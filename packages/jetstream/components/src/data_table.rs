@@ -1,7 +1,7 @@
 //! DataTable — Jetstream data table backed by DataTableSpec.
 use jetstream_runtime::ui_element::{self, JsEl};
-use pug_jetstream::JetstreamThemeProvider;
-use pug_composites::DataTableSpec;
+use flint_jetstream::JetstreamThemeProvider;
+use flint_composites::DataTableSpec;
 use crate::theme_ext::{resolve_color, resolve_radius};
 
 pub fn js_data_table(spec: &DataTableSpec, theme: &JetstreamThemeProvider) -> JsEl {

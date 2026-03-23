@@ -60,7 +60,7 @@
   },
   "packages": [
     {
-      "name": "@pug/tokens",
+      "name": "@flint/tokens",
       "channel": "internal",
       "publicIntent": false,
       "changeControl": "artifact-backed",
@@ -69,7 +69,7 @@
       "removalGate": "owner-directed-with-doc-update"
     },
     {
-      "name": "@pug/svelte-tokens",
+      "name": "@flint/svelte-tokens",
       "channel": "preview",
       "publicIntent": true,
       "changeControl": "artifact-backed",
@@ -78,7 +78,7 @@
       "removalGate": "successor-and-generation-delay"
     },
     {
-      "name": "@pug/svelte-primitives",
+      "name": "@flint/svelte-primitives",
       "channel": "preview",
       "publicIntent": true,
       "changeControl": "contract-backed",
@@ -87,7 +87,7 @@
       "removalGate": "successor-and-generation-delay"
     },
     {
-      "name": "@pug/svelte-composites",
+      "name": "@flint/svelte-composites",
       "channel": "preview",
       "publicIntent": true,
       "changeControl": "contract-backed",
@@ -96,7 +96,7 @@
       "removalGate": "successor-and-generation-delay"
     },
     {
-      "name": "@pug/svelte-workstation",
+      "name": "@flint/svelte-workstation",
       "channel": "preview",
       "publicIntent": true,
       "changeControl": "contract-backed",
@@ -105,7 +105,7 @@
       "removalGate": "successor-and-generation-delay"
     },
     {
-      "name": "pug-gpui-tokens",
+      "name": "flint-gpui-tokens",
       "channel": "preview",
       "publicIntent": true,
       "changeControl": "artifact-backed",
@@ -114,7 +114,7 @@
       "removalGate": "successor-and-generation-delay"
     },
     {
-      "name": "pug-gpui-primitives",
+      "name": "flint-gpui-primitives",
       "channel": "preview",
       "publicIntent": true,
       "changeControl": "contract-backed",
@@ -123,7 +123,7 @@
       "removalGate": "successor-and-generation-delay"
     },
     {
-      "name": "pug-gpui-composites",
+      "name": "flint-gpui-composites",
       "channel": "preview",
       "publicIntent": true,
       "changeControl": "contract-backed",
@@ -132,7 +132,7 @@
       "removalGate": "successor-and-generation-delay"
     },
     {
-      "name": "pug-gpui-workstation",
+      "name": "flint-gpui-workstation",
       "channel": "preview",
       "publicIntent": true,
       "changeControl": "contract-backed",
@@ -141,7 +141,7 @@
       "removalGate": "successor-and-generation-delay"
     },
     {
-      "name": "@pug/bridge-underlay",
+      "name": "@flint/bridge-underlay",
       "channel": "internal",
       "publicIntent": false,
       "changeControl": "proof-backed",
@@ -150,7 +150,7 @@
       "removalGate": "bridge-proof-preserving"
     },
     {
-      "name": "@pug/svelte-preview",
+      "name": "@flint/svelte-preview",
       "channel": "internal",
       "publicIntent": false,
       "changeControl": "tooling-owned",

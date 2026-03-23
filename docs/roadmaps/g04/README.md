@@ -13,7 +13,7 @@ downstream applications. GPUI native parity work follows in `g05` once the
 expanded Svelte component suite is established.
 
 An exhaustive audit of the Underlay component library identified approximately
-39 missing components, patterns, and feature gaps that Pug must address before
+39 missing components, patterns, and feature gaps that Flint must address before
 downstream projects can migrate away from Underlay without regressions. This
 generation organizes that work into sequenced milestones covering new component
 families, depth extensions to existing components, and specialized editing and
@@ -35,7 +35,7 @@ media surfaces.
 
 - all Underlay-parity components are implemented and documented
 - existing component feature gaps are resolved
-- downstream projects can adopt Pug as a full Underlay replacement for UI
+- downstream projects can adopt Flint as a full Underlay replacement for UI
   components
 - new component specimens are integrated into the preview catalogue
 - the block editor baseline is evaluated and scoped for follow-on work

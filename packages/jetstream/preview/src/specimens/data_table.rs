@@ -1,10 +1,10 @@
 //! DataTable specimen — tabular data display.
 
 use jetstream_runtime::ui_element::*;
-use pug_jetstream::JetstreamThemeProvider;
-use pug_jetstream_components::data_table::js_data_table;
-use pug_jetstream_components::theme_ext::*;
-use pug_composites::{DataTableSpec, TableColumnSpec, TableRowSpec};
+use flint_jetstream::JetstreamThemeProvider;
+use flint_jetstream_components::data_table::js_data_table;
+use flint_jetstream_components::theme_ext::*;
+use flint_composites::{DataTableSpec, TableColumnSpec, TableRowSpec};
 
 pub fn render(theme: &JetstreamThemeProvider) -> JsEl {
     let secondary = resolve_color(theme, "semantic.color.text.secondary");

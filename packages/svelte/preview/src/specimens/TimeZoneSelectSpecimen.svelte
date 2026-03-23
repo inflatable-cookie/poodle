@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { TimeZoneSelect, Eyebrow } from "@pug/svelte-primitives";
+  import { TimeZoneSelect, Eyebrow } from "@flint/svelte-primitives";
 
   let zone = "";
 </script>
@@ -44,6 +44,6 @@
   .specimen__group p {
     margin: 0;
     font-size: 0.875rem;
-    color: var(--pug-color-text-secondary);
+    color: var(--flint-color-text-secondary);
   }
 </style>

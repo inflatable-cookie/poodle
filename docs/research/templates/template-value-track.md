@@ -7,7 +7,7 @@ Priority: [critical | high | medium | low] (blocks or informs which milestones)
 
 ## Purpose
 
-Brief description of the domain being researched and what Pug decisions it informs.
+Brief description of the domain being researched and what Flint decisions it informs.
 
 ---
 
@@ -53,7 +53,7 @@ Brief description of the domain being researched and what Pug decisions it infor
 
 ---
 
-## Recommendations for Pug
+## Recommendations for Flint
 
 *(To be synthesized into translation memo)*
 

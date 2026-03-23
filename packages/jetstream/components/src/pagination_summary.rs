@@ -1,7 +1,7 @@
 //! PaginationSummary — Jetstream pagination summary backed by PaginationSummarySpec.
 use jetstream_runtime::ui_element::{self, JsEl};
-use pug_jetstream::JetstreamThemeProvider;
-use pug_composites::PaginationSummarySpec;
+use flint_jetstream::JetstreamThemeProvider;
+use flint_composites::PaginationSummarySpec;
 use crate::theme_ext::resolve_color;
 
 pub fn js_pagination_summary(spec: &PaginationSummarySpec, theme: &JetstreamThemeProvider) -> JsEl {

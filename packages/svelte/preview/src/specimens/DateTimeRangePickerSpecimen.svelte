@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { DateTimeRangePicker, Eyebrow } from "@pug/svelte-primitives";
+  import { DateTimeRangePicker, Eyebrow } from "@flint/svelte-primitives";
 </script>
 
 <div class="specimen">

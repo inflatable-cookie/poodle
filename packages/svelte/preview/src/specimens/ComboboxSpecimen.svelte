@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { Combobox, Eyebrow, type ComboboxOption } from "@pug/svelte-primitives";
+  import { Combobox, Eyebrow, type ComboboxOption } from "@flint/svelte-primitives";
 
   const frameworks: ComboboxOption[] = [
     { value: "svelte", label: "Svelte" },
@@ -62,6 +62,6 @@
   .specimen__group p {
     margin: 0;
     font-size: 0.875rem;
-    color: var(--pug-color-text-secondary);
+    color: var(--flint-color-text-secondary);
   }
 </style>

@@ -1,8 +1,8 @@
 //! Toolbar — real GPUI component backed by ToolbarSpec.
 
 use gpui::*;
-use pug_gpui::GpuiThemeProvider;
-use pug_primitives::{Alignment, ToolbarSpec};
+use flint_gpui::GpuiThemeProvider;
+use flint_primitives::{Alignment, ToolbarSpec};
 
 use crate::theme_ext::{color_mix, resolve_color, resolve_px};
 

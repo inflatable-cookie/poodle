@@ -1,10 +1,10 @@
 //! TimeAgo specimen — relative time labels.
 
 use jetstream_runtime::ui_element::*;
-use pug_jetstream::JetstreamThemeProvider;
-use pug_jetstream_components::time_ago::js_time_ago;
-use pug_jetstream_components::theme_ext::*;
-use pug_primitives::TimeAgoSpec;
+use flint_jetstream::JetstreamThemeProvider;
+use flint_jetstream_components::time_ago::js_time_ago;
+use flint_jetstream_components::theme_ext::*;
+use flint_primitives::TimeAgoSpec;
 
 pub fn render(theme: &JetstreamThemeProvider) -> JsEl {
     let secondary = resolve_color(theme, "semantic.color.text.secondary");

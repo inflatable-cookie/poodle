@@ -1,6 +1,6 @@
 use gpui::*;
-use pug_primitives::{DateTimeRangePickerSpec, DateTimeRangeValue, DateTimeValue, EyebrowSpec};
-use pug_gpui_components::{DateTimeRangePicker, Eyebrow};
+use flint_primitives::{DateTimeRangePickerSpec, DateTimeRangeValue, DateTimeValue, EyebrowSpec};
+use flint_gpui_components::{DateTimeRangePicker, Eyebrow};
 use crate::app_state::AppState;
 use crate::PreviewRoot;
 

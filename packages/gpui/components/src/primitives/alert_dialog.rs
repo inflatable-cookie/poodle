@@ -1,6 +1,6 @@
 use gpui::*;
-use pug_gpui::GpuiThemeProvider;
-use pug_primitives::{AlertDialogSpec, AlertDialogTone};
+use flint_gpui::GpuiThemeProvider;
+use flint_primitives::{AlertDialogSpec, AlertDialogTone};
 use crate::theme_ext::{resolve_color, resolve_px, resolve_radius};
 
 pub struct AlertDialog {

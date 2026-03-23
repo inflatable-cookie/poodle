@@ -6,8 +6,8 @@ Depends on: `008-parity-evidence-documented-delta-and-downstream-extension-rules
 
 ## Purpose
 
-Freeze what Pug means by an extension-facing SDK in `g03`, how downstream apps
-should compose safely from Pug without forking canonical meaning, and what a
+Freeze what Flint means by an extension-facing SDK in `g03`, how downstream apps
+should compose safely from Flint without forking canonical meaning, and what a
 starter package may promise before broader adoption milestones are complete.
 
 This baseline exists so Underlay-facing, Loophole-facing, or future app-facing
@@ -23,20 +23,20 @@ The current SDK surface is the combination of:
 
 - canonical tokens and emitted artifacts
 - contract-backed Svelte package APIs
-- bridge-owned adapters where direct Pug exposure would leak
+- bridge-owned adapters where direct Flint exposure would leak
 - public docs describing safe composition, branding, and extension boundaries
 
-Pug should not invent a second abstraction layer above its own contracts just
+Flint should not invent a second abstraction layer above its own contracts just
 to sound more “SDK-like”.
 
 ## Current Extension SDK Surface
 
 The current extension-facing surface is:
 
-- `@pug/svelte-tokens`
-- `@pug/svelte-primitives`
-- `@pug/svelte-composites`
-- `@pug/svelte-workstation`
+- `@flint/svelte-tokens`
+- `@flint/svelte-primitives`
+- `@flint/svelte-composites`
+- `@flint/svelte-workstation`
 - bridge-owned adapter packages such as `packages/bridges/underlay`
 - contract docs under `docs/contracts/`
 - normative specs under `docs/specs/`
@@ -47,7 +47,7 @@ starter scaffolds.
 
 ## Composition Rule
 
-Downstream apps should compose upward through the Pug layers:
+Downstream apps should compose upward through the Flint layers:
 
 1. semantic tokens and emitted artifacts
 2. foundation primitives
@@ -56,7 +56,7 @@ Downstream apps should compose upward through the Pug layers:
 5. app-owned wrappers, orchestration, and domain-specific workflows
 
 They should not skip directly from tokens to app-specific end-state surfaces if
-that bypasses established contracts that Pug already owns.
+that bypasses established contracts that Flint already owns.
 
 ## Wrapper And Adapter Rule
 
@@ -66,11 +66,11 @@ bridge-owned adapter.
 
 Use wrappers or adapters for:
 
-- preserving an existing app API while adopting Pug internals
+- preserving an existing app API while adopting Flint internals
 - host-specific command registration or persistence wiring
 - app-specific data loading, mutation, or synchronization policy
 - branding structures or workflow shells above the canonical component layers
-- Underlay aliasing that must keep Pug out of app-facing imports
+- Underlay aliasing that must keep Flint out of app-facing imports
 
 Do not use wrappers or adapters to:
 
@@ -80,7 +80,7 @@ Do not use wrappers or adapters to:
 
 ## Starter Package Rule
 
-A Pug starter package in `g03` is a reference composition baseline, not a
+A Flint starter package in `g03` is a reference composition baseline, not a
 product template.
 
 It may provide:
@@ -89,11 +89,11 @@ It may provide:
 - token import and theme-application examples
 - recommended wrapper structure for app-owned surfaces
 - example docs, preview, or contract references
-- bridge-entry examples where direct Pug exposure is not desired
+- bridge-entry examples where direct Flint exposure is not desired
 
 It must not imply:
 
-- that app-specific workflow components belong in Pug core
+- that app-specific workflow components belong in Flint core
 - that one starter shape is mandatory for every consumer
 - that web-only starter structures prove GPUI parity
 - that a starter can bypass the documented extension or bridge boundaries
@@ -104,21 +104,21 @@ The current allowed starter shapes are:
 
 ### Direct Svelte Consumer
 
-Use when the downstream app may import Pug directly.
+Use when the downstream app may import Flint directly.
 
 Expected shape:
 
-- app imports Pug tokens and Svelte packages directly
+- app imports Flint tokens and Svelte packages directly
 - app owns route structure, data loading, orchestration, and wrappers
 - app branding uses recipe variables or wrapper-level styling
 
 ### Bridge-Mediated Consumer
 
-Use when the downstream app should stay Pug-agnostic.
+Use when the downstream app should stay Flint-agnostic.
 
 Expected shape:
 
-- bridge package imports Pug and exposes app-local aliases
+- bridge package imports Flint and exposes app-local aliases
 - app imports only bridge-local APIs
 - bridge owns alias maps, wrapper preservation, and rollout guidance
 
@@ -128,7 +128,7 @@ Use when an app adopts workstation shell or dock surfaces.
 
 Expected shape:
 
-- app composes workstation surfaces from canonical Pug packages
+- app composes workstation surfaces from canonical Flint packages
 - app owns command registries, layout persistence, panel policy, and workflow
   semantics
 - app-specific DAW or domain widgets remain app-owned above the shared shell
@@ -138,7 +138,7 @@ Expected shape:
 Any extension-facing starter or wrapper guidance must point back to:
 
 - the canonical contract or package it composes
-- the bridge boundary if the app should stay Pug-agnostic
+- the bridge boundary if the app should stay Flint-agnostic
 - the public styling or recipe rules if it restyles the surface
 - the known-delta and parity policy if it diverges intentionally
 
@@ -149,8 +149,8 @@ This keeps starter examples from becoming shadow contracts.
 Before a starter or extension example should be treated as recommended, the repo
 should be able to answer:
 
-- which public Pug packages it consumes
-- whether the app imports Pug directly or through a bridge
+- which public Flint packages it consumes
+- whether the app imports Flint directly or through a bridge
 - which layer owns branding and wrapper structure
 - which layer owns host integration concerns
 - which parts are shared guidance versus app-specific example code

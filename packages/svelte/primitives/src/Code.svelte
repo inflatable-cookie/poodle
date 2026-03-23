@@ -78,9 +78,9 @@
     display: inline;
     padding: 0.125rem 0.375rem;
     border-radius: 0.25rem;
-    background: color-mix(in srgb, var(--pug-color-background-panel) 72%, var(--pug-color-background-elevated));
-    color: var(--pug-color-text-primary);
-    font-family: var(--pug-typography-code-family);
+    background: color-mix(in srgb, var(--flint-color-background-panel) 72%, var(--flint-color-background-elevated));
+    color: var(--flint-color-text-primary);
+    font-family: var(--flint-typography-code-family);
     font-size: 0.8125em;
     line-height: 1.5;
   }
@@ -88,9 +88,9 @@
   .code--block {
     display: flex;
     flex-direction: column;
-    border: 0.0625rem solid color-mix(in srgb, var(--pug-color-border-subtle) 42%, transparent);
-    border-radius: var(--pug-radius-surface);
-    background: color-mix(in srgb, var(--pug-color-background-panel) 92%, var(--pug-color-background-elevated));
+    border: 0.0625rem solid color-mix(in srgb, var(--flint-color-border-subtle) 42%, transparent);
+    border-radius: var(--flint-radius-surface);
+    background: color-mix(in srgb, var(--flint-color-background-panel) 92%, var(--flint-color-background-elevated));
     overflow: hidden;
   }
 
@@ -99,14 +99,14 @@
     align-items: center;
     justify-content: space-between;
     padding: 0.375rem 0.625rem;
-    border-bottom: 0.0625rem solid color-mix(in srgb, var(--pug-color-border-subtle) 32%, transparent);
+    border-bottom: 0.0625rem solid color-mix(in srgb, var(--flint-color-border-subtle) 32%, transparent);
   }
 
   .code__language {
-    font-family: var(--pug-typography-label-family);
+    font-family: var(--flint-typography-label-family);
     font-size: 0.6875rem;
-    font-weight: var(--pug-typography-label-weight);
-    color: var(--pug-color-text-secondary);
+    font-weight: var(--flint-typography-label-weight);
+    color: var(--flint-color-text-secondary);
     text-transform: uppercase;
     letter-spacing: 0.05em;
   }
@@ -126,17 +126,17 @@
     border: 0;
     border-radius: 0.25rem;
     background: transparent;
-    color: var(--pug-color-text-secondary);
+    color: var(--flint-color-text-secondary);
     cursor: pointer;
-    transition: color var(--pug-motion-duration-interaction) var(--pug-motion-easing-standard);
+    transition: color var(--flint-motion-duration-interaction) var(--flint-motion-easing-standard);
   }
 
   .code__copy:hover {
-    color: var(--pug-color-text-primary);
+    color: var(--flint-color-text-primary);
   }
 
   .code__copy:focus-visible {
-    outline: var(--pug-border-width-focus) solid var(--pug-color-accent-focusRing);
+    outline: var(--flint-border-width-focus) solid var(--flint-color-accent-focusRing);
   }
 
   .code__copy svg {
@@ -155,10 +155,10 @@
 
   .code__source {
     display: block;
-    font-family: var(--pug-typography-code-family);
+    font-family: var(--flint-typography-code-family);
     font-size: 0.8125rem;
     line-height: 1.4;
-    color: var(--pug-color-text-primary);
+    color: var(--flint-color-text-primary);
     tab-size: 2;
     white-space: pre;
   }
@@ -168,7 +168,7 @@
   }
 
   .code__line--highlighted {
-    background: color-mix(in srgb, var(--pug-color-accent-base) 12%, transparent);
+    background: color-mix(in srgb, var(--flint-color-accent-base) 12%, transparent);
     margin: 0 -1rem;
     padding: 0 1rem;
   }
@@ -177,7 +177,7 @@
     display: inline-block;
     width: 2.5rem;
     padding-right: 1rem;
-    color: var(--pug-color-text-secondary);
+    color: var(--flint-color-text-secondary);
     text-align: right;
     user-select: none;
     font-variant-numeric: tabular-nums;

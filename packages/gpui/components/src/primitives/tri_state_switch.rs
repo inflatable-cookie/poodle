@@ -3,8 +3,8 @@
 //! Renders as a 3-segment radiogroup: Excluded | Default | Included.
 
 use gpui::*;
-use pug_gpui::GpuiThemeProvider;
-use pug_primitives::{CheckState, TriStateSwitchSpec};
+use flint_gpui::GpuiThemeProvider;
+use flint_primitives::{CheckState, TriStateSwitchSpec};
 
 use crate::theme_ext::{resolve_color, resolve_opacity, resolve_px};
 
@@ -129,7 +129,7 @@ impl IntoElement for TriStateSwitch {
 
         // ── Container (pill-shaped segmented control) ──────────
 
-        let switch_id = SharedString::from("pug-tri-state-switch");
+        let switch_id = SharedString::from("flint-tri-state-switch");
 
         let mut container = div()
             .id(switch_id)

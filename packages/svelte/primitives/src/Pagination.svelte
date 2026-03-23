@@ -98,42 +98,42 @@
   .pagination {
     display: inline-flex;
     align-items: center;
-    gap: var(--pug-space-inline-sm);
+    gap: var(--flint-space-inline-sm);
     flex-wrap: wrap;
   }
 
   .pagination__pages {
     display: inline-flex;
     align-items: center;
-    gap: var(--pug-space-inline-sm);
+    gap: var(--flint-space-inline-sm);
   }
 
   .pagination__button {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    min-width: var(--pug-size-control-height);
-    height: calc(var(--pug-size-control-height) - 0.125rem);
-    padding: 0 var(--pug-space-control-x);
-    border: 0.0625rem solid color-mix(in srgb, var(--pug-color-border-default) 78%, transparent);
-    border-radius: var(--pug-radius-control);
-    background: var(--pug-color-background-surface);
-    color: var(--pug-color-text-primary);
+    min-width: var(--flint-size-control-height);
+    height: calc(var(--flint-size-control-height) - 0.125rem);
+    padding: 0 var(--flint-space-control-x);
+    border: 0.0625rem solid color-mix(in srgb, var(--flint-color-border-default) 78%, transparent);
+    border-radius: var(--flint-radius-control);
+    background: var(--flint-color-background-surface);
+    color: var(--flint-color-text-primary);
     cursor: pointer;
-    font-family: var(--pug-typography-label-family);
+    font-family: var(--flint-typography-label-family);
     font-size: 0.75rem;
     font-weight: 600;
     line-height: 1;
   }
 
   .pagination__button[data-current="true"] {
-    background: color-mix(in srgb, var(--pug-color-accent-base) 18%, transparent);
-    border-color: color-mix(in srgb, var(--pug-color-accent-base) 42%, var(--pug-color-border-default));
+    background: color-mix(in srgb, var(--flint-color-accent-base) 18%, transparent);
+    border-color: color-mix(in srgb, var(--flint-color-accent-base) 42%, var(--flint-color-border-default));
   }
 
   .pagination__button:hover:not(:disabled),
   .pagination__button:focus-visible {
-    background: color-mix(in srgb, var(--pug-color-accent-base) 12%, transparent);
+    background: color-mix(in srgb, var(--flint-color-accent-base) 12%, transparent);
     outline: none;
   }
 
@@ -142,14 +142,14 @@
     align-items: center;
     justify-content: center;
     min-width: 1.5rem;
-    color: var(--pug-color-text-secondary);
-    font-family: var(--pug-typography-label-family);
+    color: var(--flint-color-text-secondary);
+    font-family: var(--flint-typography-label-family);
     font-size: 0.75rem;
     font-weight: 600;
   }
 
   .pagination__button:disabled {
     cursor: not-allowed;
-    opacity: var(--pug-state-opacity-disabled);
+    opacity: var(--flint-state-opacity-disabled);
   }
 </style>

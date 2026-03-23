@@ -1,10 +1,10 @@
 # g03.012 Ecosystem Acceptance Suites And Long-Tail Regression Coverage
 
 Status: completed
-Owner: Pug Core
+Owner: Flint Core
 Updated: 2026-03-12
 Depends on: g03.002, g03.003, g03.004, g03.005, g03.006, g03.007, g03.008, g03.009, g03.010, g03.011
-Primary repos: `pug`
+Primary repos: `flint`
 
 ## Goals
 

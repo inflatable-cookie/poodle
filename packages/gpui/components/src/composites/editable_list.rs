@@ -2,8 +2,8 @@
 //! No contract spec exists — implemented from Svelte reference.
 
 use gpui::*;
-use pug_gpui::GpuiThemeProvider;
-use pug_primitives::{IconSize, IconSpec};
+use flint_gpui::GpuiThemeProvider;
+use flint_primitives::{IconSize, IconSpec};
 use super::super::primitives::Icon;
 use crate::theme_ext::{resolve_color, resolve_px, resolve_radius};
 

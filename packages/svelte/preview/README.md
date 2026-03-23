@@ -1,4 +1,4 @@
-# Pug Svelte Preview
+# Flint Svelte Preview
 
 Browser preview and first docs-site baseline for inspecting emitted token
 artifacts, package ownership, catalog coverage, theme overlays, density modes,
@@ -48,8 +48,8 @@ This writes:
 - `packages/svelte/preview/artifacts/parity-report.json`
 
 The parity artifact now also records which public exports from
-`@pug/svelte-primitives`, `@pug/svelte-composites`, and
-`@pug/svelte-workstation` are directly covered by preview sections versus still
+`@flint/svelte-primitives`, `@flint/svelte-composites`, and
+`@flint/svelte-workstation` are directly covered by preview sections versus still
 being contract-only, and it now includes a cross-runtime summary sourced from:
 
 - `packages/gpui/cross-runtime-parity-report.json`

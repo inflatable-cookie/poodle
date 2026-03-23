@@ -138,15 +138,15 @@ Updated: 2026-03-15
 |----------|-------|
 | `display` | `inline-flex` |
 | `align-items` | `center` |
-| `gap` | `var(--pug-space-inline-sm)` |
-| `color` | `var(--pug-color-text-primary)` |
+| `gap` | `var(--flint-space-inline-sm)` |
+| `color` | `var(--flint-color-text-primary)` |
 | `cursor` | `pointer` |
 
 ### Root disabled `[data-disabled="true"]`
 
 | Property | Value |
 |----------|-------|
-| `opacity` | `var(--pug-state-opacity-disabled)` |
+| `opacity` | `var(--flint-state-opacity-disabled)` |
 | `cursor` | `not-allowed` |
 
 ### Control `.checkbox__control`
@@ -166,30 +166,30 @@ Updated: 2026-03-15
 | `justify-content` | `center` |
 | `width` | `1.125rem` |
 | `height` | `1.125rem` |
-| `border` | `0.0625rem solid var(--pug-color-border-default)` |
+| `border` | `0.0625rem solid var(--flint-color-border-default)` |
 | `border-radius` | `0.3125rem` |
-| `background` | `var(--pug-color-background-surface)` |
-| `color` | `var(--pug-color-text-inverse)` |
+| `background` | `var(--flint-color-background-surface)` |
+| `color` | `var(--flint-color-text-inverse)` |
 
 ### Indicator checked `:checked + .checkbox__indicator`
 
 | Property | Value |
 |----------|-------|
-| `border-color` | `var(--pug-color-accent-base)` |
-| `background` | `var(--pug-color-accent-base)` |
+| `border-color` | `var(--flint-color-accent-base)` |
+| `background` | `var(--flint-color-accent-base)` |
 
 ### Indicator indeterminate `:indeterminate + .checkbox__indicator`
 
 | Property | Value |
 |----------|-------|
-| `border-color` | `var(--pug-color-accent-base)` |
-| `background` | `var(--pug-color-accent-base)` |
+| `border-color` | `var(--flint-color-accent-base)` |
+| `background` | `var(--flint-color-accent-base)` |
 
 ### Indicator focus `:focus-visible + .checkbox__indicator`
 
 | Property | Value |
 |----------|-------|
-| `outline` | `var(--pug-border-width-focus) solid var(--pug-color-accent-focusRing)` |
+| `outline` | `var(--flint-border-width-focus) solid var(--flint-color-accent-focusRing)` |
 | `outline-offset` | `0.125rem` |
 
 ### Mark `.checkbox__mark`
@@ -207,10 +207,10 @@ Updated: 2026-03-15
 
 | Property | Value |
 |----------|-------|
-| `font-family` | `var(--pug-typography-label-family)` |
-| `font-size` | `var(--pug-typography-label-size)` |
-| `font-weight` | `var(--pug-typography-label-weight)` |
-| `line-height` | `var(--pug-typography-label-lineHeight)` |
+| `font-family` | `var(--flint-typography-label-family)` |
+| `font-size` | `var(--flint-typography-label-size)` |
+| `font-weight` | `var(--flint-typography-label-weight)` |
+| `line-height` | `var(--flint-typography-label-lineHeight)` |
 
 ## 9. Svelte Notes
 
@@ -230,7 +230,7 @@ Updated: 2026-03-15
 
 ## 10. GPUI Notes
 
-- expected crate/module surface: `pug_gpui::primitives::checkbox`
+- expected crate/module surface: `flint_gpui::primitives::checkbox`
 - GPUI implementation must intentionally expose checkbox role, mixed/checked
   state, and accessible name through the native accessibility tree
 - indeterminate state must be accessible to assistive technology as

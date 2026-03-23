@@ -1,7 +1,7 @@
 # g08.011 Generation Closeout
 
 Status: complete
-Owner: Pug Core
+Owner: Flint Core
 Depends on: g08.010
 
 ## Milestone Verification
@@ -28,11 +28,11 @@ Depends on: g08.010
 - **96 components** with direct token resolution (resolve_color/resolve_px/etc.)
 - **4 components** exempt from direct resolution:
   - `spacer` — pure layout (flex_grow), no visual properties
-  - `search_field` — delegates entirely to PugTextInput
+  - `search_field` — delegates entirely to FlintTextInput
   - `context_menu` — wrapper component
-  - `toggle_group` — wrapper using PugToggle children
+  - `toggle_group` — wrapper using FlintToggle children
 - **78 specimen files** in `packages/gpui/preview/src/specimens/`
-- **0 compilation errors** — full `cargo check -p pug-gpui-preview` passes
+- **0 compilation errors** — full `cargo check -p flint-gpui-preview` passes
 
 ### Quality Fixes Applied (g08.005–007)
 
@@ -47,7 +47,7 @@ Depends on: g08.010
 Key improvements:
 - All hover/active states use `color_mix()` (sRGB interpolation) instead of
   opacity-based workarounds
-- All icon slots use `PugIcon` with SVG rendering (replaced emoji/text placeholders)
+- All icon slots use `FlintIcon` with SVG rendering (replaced emoji/text placeholders)
 - All disabled states use token-resolved opacity
 - All dimensions resolve from semantic tokens
 - Fixed `color_picker` swatch rendering (was discarding loop variable)

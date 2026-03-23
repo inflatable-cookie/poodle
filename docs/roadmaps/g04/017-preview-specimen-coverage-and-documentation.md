@@ -1,10 +1,10 @@
 # g04.017 Preview Specimen Coverage And Documentation
 
 Status: planned
-Owner: Pug Core
+Owner: Flint Core
 Updated: 2026-03-14
 Depends on: g04.002 through g04.016
-Primary repos: `pug`
+Primary repos: `flint`
 
 ## Goals
 

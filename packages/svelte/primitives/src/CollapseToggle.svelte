@@ -51,16 +51,16 @@
     justify-content: center;
     padding: 0.125rem;
     border: 0;
-    border-radius: var(--pug-radius-sm, 0.25rem);
+    border-radius: var(--flint-radius-sm, 0.25rem);
     background: transparent;
-    color: var(--pug-color-text-muted);
+    color: var(--flint-color-text-muted);
     cursor: pointer;
     line-height: 1;
   }
 
   .collapse-toggle:hover {
-    background: var(--pug-color-surface-hover);
-    color: var(--pug-color-text-default);
+    background: var(--flint-color-surface-hover);
+    color: var(--flint-color-text-default);
   }
 
   .collapse-toggle:disabled {
@@ -69,7 +69,7 @@
   }
 
   .collapse-toggle:focus-visible {
-    outline: var(--pug-border-width-focus) solid var(--pug-color-accent-focusRing);
+    outline: var(--flint-border-width-focus) solid var(--flint-color-accent-focusRing);
     outline-offset: 0.0625rem;
   }
 </style>

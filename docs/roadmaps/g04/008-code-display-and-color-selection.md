@@ -1,10 +1,10 @@
 # g04.008 Code Display And Color Selection
 
 Status: planned
-Owner: Pug Core
+Owner: Flint Core
 Updated: 2026-03-14
 Depends on: g04.001
-Primary repos: `pug`
+Primary repos: `flint`
 
 ## Goals
 
@@ -18,10 +18,10 @@ Primary repos: `pug`
   highlighting, copy button, max-height with scroll, inline vs block mode
 - [ ] evaluate syntax highlighting approach (static CSS classes vs runtime
   highlighter)
-- [ ] implement Code primitive in `@pug/svelte-primitives`
+- [ ] implement Code primitive in `@flint/svelte-primitives`
 - [ ] write contract for ColorPicker: hex/rgb/hsl input, swatch palette,
   eyedropper (where supported), alpha channel, format toggle
-- [ ] implement ColorPicker primitive in `@pug/svelte-primitives`
+- [ ] implement ColorPicker primitive in `@flint/svelte-primitives`
 - [ ] create specimens for Code and ColorPicker
 - [ ] register in component-registry.ts and specimen registry
 

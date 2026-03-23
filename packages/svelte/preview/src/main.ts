@@ -1,12 +1,12 @@
-import "@pug/svelte-tokens/styles.css";
-import "../../../tokens/artifacts/css/pug-theme-light.css";
-import "../../../tokens/artifacts/css/pug-theme-dark.css";
-import "../../../tokens/artifacts/css/pug-theme-loophole-studio.css";
-import "../../../tokens/artifacts/css/pug-density-comfortable.css";
-import "../../../tokens/artifacts/css/pug-density-compact.css";
-import "../../../tokens/artifacts/css/pug-control-size-sm.css";
-import "../../../tokens/artifacts/css/pug-control-size-md.css";
-import "../../../tokens/artifacts/css/pug-control-size-lg.css";
+import "@flint/svelte-tokens/styles.css";
+import "../../../tokens/artifacts/css/flint-theme-light.css";
+import "../../../tokens/artifacts/css/flint-theme-dark.css";
+import "../../../tokens/artifacts/css/flint-theme-loophole-studio.css";
+import "../../../tokens/artifacts/css/flint-density-comfortable.css";
+import "../../../tokens/artifacts/css/flint-density-compact.css";
+import "../../../tokens/artifacts/css/flint-control-size-sm.css";
+import "../../../tokens/artifacts/css/flint-control-size-md.css";
+import "../../../tokens/artifacts/css/flint-control-size-lg.css";
 import "./app.css";
 
 import { mount } from "svelte";

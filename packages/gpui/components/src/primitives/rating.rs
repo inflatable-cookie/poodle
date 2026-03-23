@@ -3,8 +3,8 @@
 use std::rc::Rc;
 
 use gpui::*;
-use pug_gpui::GpuiThemeProvider;
-use pug_primitives::{IconSize, IconSpec, RatingSpec};
+use flint_gpui::GpuiThemeProvider;
+use flint_primitives::{IconSize, IconSpec, RatingSpec};
 
 use super::icon::Icon;
 use crate::theme_ext::{resolve_color, resolve_opacity};
@@ -81,7 +81,7 @@ impl IntoElement for Rating {
                 .with_color(color);
 
             if is_interactive {
-                let star_id = SharedString::from(format!("pug-rating-star-{}", i));
+                let star_id = SharedString::from(format!("flint-rating-star-{}", i));
                 let hover_color = active_color;
 
                 // Contract: touch target 2rem (32px) per star

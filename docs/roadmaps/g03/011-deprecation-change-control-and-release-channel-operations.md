@@ -1,10 +1,10 @@
 # g03.011 Deprecation, Change Control, And Release-Channel Operations
 
 Status: completed
-Owner: Pug Core
+Owner: Flint Core
 Updated: 2026-03-12
 Depends on: g03.001, g03.003, g03.006
-Primary repos: `pug`
+Primary repos: `flint`
 
 ## Goals
 

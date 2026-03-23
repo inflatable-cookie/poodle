@@ -1,4 +1,4 @@
-use pug_tokens::semantic;
+use flint_tokens::semantic;
 
 /// Direction the collapse toggle points when in the "collapsed" position.
 ///

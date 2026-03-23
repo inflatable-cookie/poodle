@@ -1,5 +1,5 @@
-use pug_primitives::StatusTone;
-use pug_tokens::semantic;
+use flint_primitives::StatusTone;
+use flint_tokens::semantic;
 
 use crate::types::RemediationAction;
 

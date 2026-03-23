@@ -6,8 +6,8 @@
 //! ALL dimensions from contract. ZERO hardcoded values.
 
 use jetstream_runtime::ui_element::{self, JsEl};
-use pug_jetstream::JetstreamThemeProvider;
-use pug_primitives::ProgressSpec;
+use flint_jetstream::JetstreamThemeProvider;
+use flint_primitives::ProgressSpec;
 
 use crate::theme_ext::{resolve_color, tint};
 
@@ -74,7 +74,7 @@ mod tests {
     use super::*;
 
     fn theme() -> JetstreamThemeProvider {
-        JetstreamThemeProvider::from_theme(&pug_tokens::themes::DARK)
+        JetstreamThemeProvider::from_theme(&flint_tokens::themes::DARK)
     }
 
     #[test]

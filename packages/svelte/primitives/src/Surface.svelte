@@ -12,7 +12,7 @@
 
   function surfacePadding(scale: SpaceScale): string {
     switch (scale) {
-      case "sm": return "var(--pug-space-panel-y)";
+      case "sm": return "var(--flint-space-panel-y)";
       case "md": return "1rem";
       case "lg": return "1.5rem";
       default: return "0";
@@ -36,41 +36,41 @@
 
 <style>
   .surface {
-    --pug-surface-fill: var(
-      --pug-treatment-surface-fill,
-      color-mix(in srgb, var(--pug-color-background-surface) 96%, transparent)
+    --flint-surface-fill: var(
+      --flint-treatment-surface-fill,
+      color-mix(in srgb, var(--flint-color-background-surface) 96%, transparent)
     );
-    --pug-surface: var(--pug-surface-fill);
-    --pug-surface-border: var(
-      --pug-treatment-surface-border,
-      color-mix(in srgb, var(--pug-color-border-subtle) 74%, transparent)
+    --flint-surface: var(--flint-surface-fill);
+    --flint-surface-border: var(
+      --flint-treatment-surface-border,
+      color-mix(in srgb, var(--flint-color-border-subtle) 74%, transparent)
     );
-    --pug-surface-shadow: var(--pug-treatment-surface-shadow, none);
+    --flint-surface-shadow: var(--flint-treatment-surface-shadow, none);
     min-width: 0;
     min-height: 0;
-    border: 0.0625rem solid var(--pug-surface-border);
-    border-radius: var(--pug-treatment-surface-radius, var(--pug-radius-surface));
-    background: var(--pug-surface-fill);
-    box-shadow: var(--pug-surface-shadow);
+    border: 0.0625rem solid var(--flint-surface-border);
+    border-radius: var(--flint-treatment-surface-radius, var(--flint-radius-surface));
+    background: var(--flint-surface-fill);
+    box-shadow: var(--flint-surface-shadow);
   }
 
   .surface[data-tone="canvas"] {
-    --pug-surface-fill: color-mix(in srgb, var(--pug-color-background-canvas) 98%, transparent);
+    --flint-surface-fill: color-mix(in srgb, var(--flint-color-background-canvas) 98%, transparent);
   }
 
   .surface[data-tone="elevated"],
   .surface[data-elevated="true"] {
-    --pug-surface-fill: var(
-      --pug-treatment-surface-elevated-fill,
-      color-mix(in srgb, var(--pug-color-background-elevated) 96%, var(--pug-color-background-panel))
+    --flint-surface-fill: var(
+      --flint-treatment-surface-elevated-fill,
+      color-mix(in srgb, var(--flint-color-background-elevated) 96%, var(--flint-color-background-panel))
     );
-    --pug-surface-border: var(
-      --pug-treatment-surface-elevated-border,
-      color-mix(in srgb, var(--pug-color-border-subtle) 74%, transparent)
+    --flint-surface-border: var(
+      --flint-treatment-surface-elevated-border,
+      color-mix(in srgb, var(--flint-color-border-subtle) 74%, transparent)
     );
-    --pug-surface-shadow: var(
-      --pug-treatment-surface-elevated-shadow,
-      var(--pug-elevation-surface)
+    --flint-surface-shadow: var(
+      --flint-treatment-surface-elevated-shadow,
+      var(--flint-elevation-surface)
     );
   }
 
@@ -79,6 +79,6 @@
   }
 
   .surface[data-border="default"] {
-    --pug-surface-border: var(--pug-color-border-default);
+    --flint-surface-border: var(--flint-color-border-default);
   }
 </style>

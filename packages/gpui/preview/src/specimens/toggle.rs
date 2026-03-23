@@ -1,8 +1,8 @@
 use gpui::*;
-use pug_adapter::ThemeProvider;
-use pug_primitives::EyebrowSpec;
-use pug_gpui_components::toggle::Toggle;
-use pug_gpui_components::Eyebrow;
+use flint_adapter::ThemeProvider;
+use flint_primitives::EyebrowSpec;
+use flint_gpui_components::toggle::Toggle;
+use flint_gpui_components::Eyebrow;
 use crate::app_state::AppState;
 use crate::PreviewRoot;
 

@@ -139,7 +139,7 @@ No component-specific tokens; ConfirmAction is purely compositional.
 ## 9. Svelte Notes
 
 - Uses `createEventDispatcher` for `confirm` and `cancel` events
-- Composes `AlertDialog` and `Button` from `@pug/svelte-primitives`
+- Composes `AlertDialog` and `Button` from `@flint/svelte-primitives`
 - `open` is passed to AlertDialog as `open || null` (falsy → null for
   uncontrolled initial state)
 - Handles `openChange` from AlertDialog to sync internal open state
@@ -147,7 +147,7 @@ No component-specific tokens; ConfirmAction is purely compositional.
 
 ## 10. GPUI Notes
 
-- Expected crate/module surface: `pug_gpui::composites::confirm_action`
+- Expected crate/module surface: `flint_gpui::composites::confirm_action`
 - Compose AlertDialog and Button primitives
 - Internal open state managed by the composite
 

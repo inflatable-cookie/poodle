@@ -3,8 +3,8 @@
 //! g08.009–010: Form/validation, data/browse, editing, media, navigation,
 //! and operational composites — full parity with GPUI adapter.
 
-use pug_adapter::{RenderComponent, ThemeProvider};
-use pug_composites::{
+use flint_adapter::{RenderComponent, ThemeProvider};
+use flint_composites::{
     AudioPlayerSpec, AutonomousListSpec, BlockEditorSpec, CardRadioGroupSpec,
     ConfirmActionSpec, DataTableSpec, DetailSectionSpec, DetailShellSpec, EmbedInputSpec,
     EmbedPreviewSpec, EmptyStateSpec, FilterToolbarSpec, FormShellSpec,
@@ -15,10 +15,10 @@ use pug_composites::{
     ReorderableListSpec, SelectionSummarySpec, SlugFieldSpec, StateTileSpec, ToastStackSpec,
     ValidationSummarySpec, VideoPlayerSpec,
 };
-use pug_primitives::{
+use flint_primitives::{
     BreadcrumbsSpec, ListCardSpec, NavCardGridSpec, NavCardSpec, OrderBySpec,
 };
-use pug_style::StyleDescriptor;
+use flint_style::StyleDescriptor;
 
 use crate::style_map::map_style;
 use crate::{JetstreamAdapter, JetstreamNodeHandle, JetstreamTarget, WidgetKind};
@@ -335,9 +335,9 @@ impl RenderComponent<RelationPickerSpec> for JetstreamAdapter {
 
 #[cfg(test)]
 mod tests {
-    use pug_adapter::RenderComponent;
-    use pug_composites::*;
-    use pug_style::StyleDescriptor;
+    use flint_adapter::RenderComponent;
+    use flint_composites::*;
+    use flint_style::StyleDescriptor;
     use crate::{JetstreamAdapter, WidgetKind, theme::JetstreamThemeProvider};
 
     fn a() -> JetstreamAdapter { JetstreamAdapter::new(JetstreamThemeProvider::default()) }
@@ -373,8 +373,8 @@ mod tests {
     #[test] fn audio_player() { assert_eq!(a().render(&AudioPlayerSpec::new("audio.mp3"), &s(), &t()).spec_type, "AudioPlayerSpec"); }
     #[test] fn video_player() { assert_eq!(a().render(&VideoPlayerSpec::new("video.mp4"), &s(), &t()).spec_type, "VideoPlayerSpec"); }
     #[test] fn media_picker() { assert_eq!(a().render(&MediaPickerSpec::new("Pick"), &s(), &t()).spec_type, "MediaPickerSpec"); }
-    #[test] fn media_thumbnail() { assert_eq!(a().render(&MediaThumbnailSpec::new(pug_composites::MediaKind::Image), &s(), &t()).widget_kind, WidgetKind::Image); }
-    #[test] fn media_preview() { assert_eq!(a().render(&MediaPreviewSpec::new(pug_composites::MediaKind::Image, "Preview"), &s(), &t()).spec_type, "MediaPreviewSpec"); }
+    #[test] fn media_thumbnail() { assert_eq!(a().render(&MediaThumbnailSpec::new(flint_composites::MediaKind::Image), &s(), &t()).widget_kind, WidgetKind::Image); }
+    #[test] fn media_preview() { assert_eq!(a().render(&MediaPreviewSpec::new(flint_composites::MediaKind::Image, "Preview"), &s(), &t()).spec_type, "MediaPreviewSpec"); }
     #[test] fn markdown_editor() { assert_eq!(a().render(&MarkdownEditorSpec::new(), &s(), &t()).spec_type, "MarkdownEditorSpec"); }
     #[test] fn block_editor() { assert_eq!(a().render(&BlockEditorSpec::new(), &s(), &t()).spec_type, "BlockEditorSpec"); }
     #[test] fn embed_input() { assert_eq!(a().render(&EmbedInputSpec::new(), &s(), &t()).spec_type, "EmbedInputSpec"); }

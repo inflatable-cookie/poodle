@@ -1,8 +1,8 @@
 //! RadioGroup — Jetstream radio group backed by RadioGroupSpec.
 
 use jetstream_runtime::ui_element::{self, JsEl};
-use pug_jetstream::JetstreamThemeProvider;
-use pug_primitives::{Orientation, RadioGroupSpec};
+use flint_jetstream::JetstreamThemeProvider;
+use flint_primitives::{Orientation, RadioGroupSpec};
 
 use crate::theme_ext::{resolve_color, resolve_opacity, resolve_px};
 

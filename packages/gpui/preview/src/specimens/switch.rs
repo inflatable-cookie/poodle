@@ -1,7 +1,7 @@
 use gpui::*;
-use pug_adapter::ThemeProvider;
-use pug_primitives::{SwitchSpec, EyebrowSpec};
-use pug_gpui_components::{Switch, Eyebrow};
+use flint_adapter::ThemeProvider;
+use flint_primitives::{SwitchSpec, EyebrowSpec};
+use flint_gpui_components::{Switch, Eyebrow};
 use crate::app_state::AppState;
 use crate::PreviewRoot;
 

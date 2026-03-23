@@ -1,11 +1,11 @@
 //! NavCardGrid specimen — responsive grid of navigation cards.
 
 use jetstream_runtime::ui_element::*;
-use pug_jetstream::JetstreamThemeProvider;
-use pug_jetstream_components::nav_card::js_nav_card;
-use pug_jetstream_components::nav_card_grid::js_nav_card_grid;
-use pug_jetstream_components::theme_ext::*;
-use pug_primitives::{NavCardGridSpec, NavCardSpec};
+use flint_jetstream::JetstreamThemeProvider;
+use flint_jetstream_components::nav_card::js_nav_card;
+use flint_jetstream_components::nav_card_grid::js_nav_card_grid;
+use flint_jetstream_components::theme_ext::*;
+use flint_primitives::{NavCardGridSpec, NavCardSpec};
 
 pub fn render(theme: &JetstreamThemeProvider) -> JsEl {
     let secondary = resolve_color(theme, "semantic.color.text.secondary");

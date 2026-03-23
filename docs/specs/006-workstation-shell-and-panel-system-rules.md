@@ -6,7 +6,7 @@ Depends on: `002-component-contract-template-and-parity-rules.md`, `003-accessib
 
 ## Purpose
 
-Freeze the baseline rules for workstation-shell contracts so Pug can support
+Freeze the baseline rules for workstation-shell contracts so Flint can support
 desktop and pro-tool applications without turning the shared layer into
 Loophole-specific workspace logic.
 

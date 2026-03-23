@@ -1,10 +1,10 @@
 //! CommandPalette specimen — command palettes with actions.
 
 use jetstream_runtime::ui_element::*;
-use pug_jetstream::JetstreamThemeProvider;
-use pug_jetstream_components::command_palette::js_command_palette;
-use pug_jetstream_components::theme_ext::*;
-use pug_composites::{CommandActionItem, CommandPaletteSpec};
+use flint_jetstream::JetstreamThemeProvider;
+use flint_jetstream_components::command_palette::js_command_palette;
+use flint_jetstream_components::theme_ext::*;
+use flint_composites::{CommandActionItem, CommandPaletteSpec};
 
 pub fn render(theme: &JetstreamThemeProvider) -> JsEl {
     let secondary = resolve_color(theme, "semantic.color.text.secondary");

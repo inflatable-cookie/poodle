@@ -17,7 +17,7 @@ export type IconNodeElement = [string, Record<string, string>];
  * @example
  * ```svelte
  * <script>
- *   import { Icon } from "@pug/svelte-primitives";
+ *   import { Icon } from "@flint/svelte-primitives";
  *   import iconNodes from "lucide-static/icon-nodes.json";
  * </script>
  *
@@ -33,7 +33,7 @@ export type IconSet = Record<string, IconNodes>;
 // Context (for providing / overriding icon sets)
 // ---------------------------------------------------------------------------
 
-const PUG_ICON_SET = Symbol("pug-icon-set");
+const PUG_ICON_SET = Symbol("flint-icon-set");
 
 /** @internal Set an icon set via Svelte context. Used by `IconProvider`. */
 export function setIconSet(icons: IconSet): void {
@@ -50,7 +50,7 @@ export function getIconSet(): IconSet | null {
 // ---------------------------------------------------------------------------
 
 /**
- * Icons used internally by Pug component chrome. This set is intentionally
+ * Icons used internally by Flint component chrome. This set is intentionally
  * minimal — it covers only the icons referenced by primitives and composites
  * (Select chevrons, Callout dismiss, Breadcrumb separators, etc.) so that
  * the framework works without any user-supplied icons.

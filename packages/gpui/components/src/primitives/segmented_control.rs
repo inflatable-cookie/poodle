@@ -1,8 +1,8 @@
 //! SegmentedControl — real GPUI component backed by SegmentedControlSpec.
 
 use gpui::*;
-use pug_gpui::GpuiThemeProvider;
-use pug_primitives::{ChoiceOption, SegmentedControlSpec};
+use flint_gpui::GpuiThemeProvider;
+use flint_primitives::{ChoiceOption, SegmentedControlSpec};
 
 use crate::theme_ext::{color_mix, resolve_color, resolve_opacity, resolve_px, resolve_radius};
 
@@ -28,7 +28,7 @@ impl SegmentedControl {
         Self {
             spec,
             theme: theme.clone(),
-            id_prefix: "pug-seg".to_string(),
+            id_prefix: "flint-seg".to_string(),
             on_change: None,
         }
     }

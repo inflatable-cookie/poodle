@@ -1,10 +1,10 @@
 # g04.007 List Interaction, Reordering, And Sort Controls
 
 Status: planned
-Owner: Pug Core
+Owner: Flint Core
 Updated: 2026-03-14
 Depends on: g04.001
-Primary repos: `pug`
+Primary repos: `flint`
 
 ## Goals
 
@@ -17,13 +17,13 @@ Primary repos: `pug`
 
 - [ ] write contract for ReorderableList: items array, drag handles, drop
   indicators, onReorder callback, keyboard reorder support
-- [ ] implement ReorderableList composite in `@pug/svelte-composites`
+- [ ] implement ReorderableList composite in `@flint/svelte-composites`
 - [ ] write contract for AutonomousList: items with add/remove/reorder, inline
   editing, empty state, max items
-- [ ] implement AutonomousList composite in `@pug/svelte-composites`
+- [ ] implement AutonomousList composite in `@flint/svelte-composites`
 - [ ] write contract for OrderBy: sort fields, active sort, direction toggle,
   multi-sort, reset
-- [ ] implement OrderBy composite in `@pug/svelte-composites`
+- [ ] implement OrderBy composite in `@flint/svelte-composites`
 - [ ] create specimens for all three components
 - [ ] register in component-registry.ts and specimen registry
 

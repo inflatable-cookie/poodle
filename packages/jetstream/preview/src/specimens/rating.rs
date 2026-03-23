@@ -1,10 +1,10 @@
 //! Rating specimen — ratings at different values and disabled state.
 
 use jetstream_runtime::ui_element::*;
-use pug_jetstream::JetstreamThemeProvider;
-use pug_jetstream_components::rating::js_rating;
-use pug_jetstream_components::theme_ext::*;
-use pug_primitives::RatingSpec;
+use flint_jetstream::JetstreamThemeProvider;
+use flint_jetstream_components::rating::js_rating;
+use flint_jetstream_components::theme_ext::*;
+use flint_primitives::RatingSpec;
 
 pub fn render(theme: &JetstreamThemeProvider) -> JsEl {
     let secondary = resolve_color(theme, "semantic.color.text.secondary");

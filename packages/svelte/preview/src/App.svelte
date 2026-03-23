@@ -5,12 +5,12 @@
     themes,
     densityModes,
     controlSizes,
-  } from "@pug/svelte-tokens";
+  } from "@flint/svelte-tokens";
   import {
     Pill,
     Tabs,
     type TabItem,
-  } from "@pug/svelte-primitives";
+  } from "@flint/svelte-primitives";
   import { onMount } from "svelte";
 
   import DisplayControls from "./components/DisplayControls.svelte";
@@ -123,7 +123,7 @@
 </script>
 
 <svelte:head>
-  <title>Pug Docs Preview</title>
+  <title>Flint Docs Preview</title>
 </svelte:head>
 
 <svelte:window
@@ -134,7 +134,7 @@
 <div class="app-shell" data-appearance-treatment={appearanceTreatment} bind:this={appShell}>
   <header class="app-top-bar">
     <div class="app-top-bar__title">
-      <strong>Pug</strong>
+      <strong>Flint</strong>
     </div>
     <Tabs
       value={activeSection}
@@ -192,15 +192,15 @@
     align-items: center;
     gap: 1rem;
     padding: 0.5rem 1rem;
-    border-bottom: 0.0625rem solid var(--pug-color-border-subtle);
-    background: var(--pug-color-background-elevated);
+    border-bottom: 0.0625rem solid var(--flint-color-border-subtle);
+    background: var(--flint-color-background-elevated);
     flex-shrink: 0;
   }
 
   .app-top-bar__title strong {
     font-size: 1rem;
     font-weight: 700;
-    color: var(--pug-color-text-primary);
+    color: var(--flint-color-text-primary);
     white-space: nowrap;
   }
 

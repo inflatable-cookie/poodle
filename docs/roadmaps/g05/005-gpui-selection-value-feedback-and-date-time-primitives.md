@@ -1,10 +1,10 @@
 # g05.005 GPUI Selection, Value, Feedback, And Date-Time Primitives
 
 Status: completed
-Owner: Pug Core
+Owner: Flint Core
 Updated: 2026-03-12
 Depends on: g05.001, g05.002, g05.003, g05.004
-Primary repos: `pug`
+Primary repos: `flint`
 
 ## Goals
 

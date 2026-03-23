@@ -137,10 +137,10 @@ Updated: 2026-03-15
 
 | Var | Default Value | Focus Value |
 |-----|---------------|-------------|
-| `--pug-text-area-radius` | `var(--pug-treatment-interactive-subtle-radius, var(--pug-radius-control))` | — |
-| `--pug-text-area-fill` | `var(--pug-treatment-interactive-subtle-fill, var(--pug-color-background-surface))` | `var(--pug-text-area-fill-focus)` |
-| `--pug-text-area-border` | `var(--pug-treatment-interactive-subtle-border, var(--pug-color-border-default))` | `var(--pug-text-area-border-focus)` |
-| `--pug-text-area-shadow` | (none by default) | `var(--pug-text-area-shadow-focus)` fallback `0 0 0 var(--pug-border-width-focus) color-mix(in srgb, var(--pug-color-accent-focusRing) 28%, transparent)` |
+| `--flint-text-area-radius` | `var(--flint-treatment-interactive-subtle-radius, var(--flint-radius-control))` | — |
+| `--flint-text-area-fill` | `var(--flint-treatment-interactive-subtle-fill, var(--flint-color-background-surface))` | `var(--flint-text-area-fill-focus)` |
+| `--flint-text-area-border` | `var(--flint-treatment-interactive-subtle-border, var(--flint-color-border-default))` | `var(--flint-text-area-border-focus)` |
+| `--flint-text-area-shadow` | (none by default) | `var(--flint-text-area-shadow-focus)` fallback `0 0 0 var(--flint-border-width-focus) color-mix(in srgb, var(--flint-color-accent-focusRing) 28%, transparent)` |
 
 ### Root `.text-area`
 
@@ -148,34 +148,34 @@ Updated: 2026-03-15
 |----------|-------|
 | `display` | `grid` |
 | `min-height` | `0` |
-| `border` | `0.0625rem solid var(--pug-text-area-border)` |
-| `border-radius` | `var(--pug-text-area-radius)` |
-| `background` | `var(--pug-text-area-fill)` |
-| `color` | `var(--pug-color-text-primary)` |
-| `box-shadow` | `var(--pug-text-area-shadow)` |
-| `transition` | `border-color, box-shadow, background` all at `var(--pug-motion-duration-interaction) var(--pug-motion-easing-standard)` |
+| `border` | `0.0625rem solid var(--flint-text-area-border)` |
+| `border-radius` | `var(--flint-text-area-radius)` |
+| `background` | `var(--flint-text-area-fill)` |
+| `color` | `var(--flint-color-text-primary)` |
+| `box-shadow` | `var(--flint-text-area-shadow)` |
+| `transition` | `border-color, box-shadow, background` all at `var(--flint-motion-duration-interaction) var(--flint-motion-easing-standard)` |
 
 ### Root focus-within
 
 | Property | Value |
 |----------|-------|
-| `border-color` | `var(--pug-text-area-border-focus)` |
-| `background` | `var(--pug-text-area-fill-focus)` |
-| `box-shadow` | `var(--pug-text-area-shadow-focus)` fallback `0 0 0 var(--pug-border-width-focus) color-mix(in srgb, var(--pug-color-accent-focusRing) 28%, transparent)` |
+| `border-color` | `var(--flint-text-area-border-focus)` |
+| `background` | `var(--flint-text-area-fill-focus)` |
+| `box-shadow` | `var(--flint-text-area-shadow-focus)` fallback `0 0 0 var(--flint-border-width-focus) color-mix(in srgb, var(--flint-color-accent-focusRing) 28%, transparent)` |
 
 ### Root validation states
 
 | State | `border-color` |
 |-------|----------------|
-| `invalid` | `var(--pug-color-status-danger)` |
-| `valid` | `var(--pug-color-status-success)` |
-| `pending` | `var(--pug-color-accent-base)` |
+| `invalid` | `var(--flint-color-status-danger)` |
+| `valid` | `var(--flint-color-status-success)` |
+| `pending` | `var(--flint-color-accent-base)` |
 
 ### Root disabled (`:has(:disabled)`)
 
 | Property | Value |
 |----------|-------|
-| `opacity` | `var(--pug-state-opacity-disabled)` |
+| `opacity` | `var(--flint-state-opacity-disabled)` |
 
 ### Text Area Control `.text-area__control`
 
@@ -184,27 +184,27 @@ Updated: 2026-03-15
 | `min-width` | `0` |
 | `width` | `100%` |
 | `min-height` | `calc(1lh * 4)` (based on rows prop, default 4) |
-| `padding` | `var(--pug-space-control-y) var(--pug-space-control-x)` |
+| `padding` | `var(--flint-space-control-y) var(--flint-space-control-x)` |
 | `border` | `0` |
 | `resize` | `vertical` |
 | `background` | `transparent` |
 | `color` | `inherit` |
-| `font-family` | `var(--pug-typography-body-family)` |
-| `font-size` | `var(--pug-typography-body-size)` |
-| `line-height` | `var(--pug-typography-body-lineHeight)` |
+| `font-family` | `var(--flint-typography-body-family)` |
+| `font-size` | `var(--flint-typography-body-size)` |
+| `line-height` | `var(--flint-typography-body-lineHeight)` |
 | `outline` | `0` |
 
 ### Text Area Control `::placeholder`
 
 | Property | Value |
 |----------|-------|
-| `color` | `var(--pug-color-text-secondary)` |
+| `color` | `var(--flint-color-text-secondary)` |
 
 ## 9. Svelte Notes
 
 - Uses native `<textarea>` element inside a styled `<div>` wrapper with grid
   layout
-- CSS custom properties (`--pug-text-area-*`) enable treatment-level theming;
+- CSS custom properties (`--flint-text-area-*`) enable treatment-level theming;
   same treatment token chain as TextInput but with `text-area` prefix
 - `data-validation-state` data attribute drives validation border-color via CSS
   attribute selectors
@@ -220,7 +220,7 @@ Updated: 2026-03-15
 
 ## 10. GPUI Notes
 
-- expected crate/module surface: `pug_gpui::primitives::text_area`
+- expected crate/module surface: `flint_gpui::primitives::text_area`
 - GPUI implementation must intentionally support multiline caret movement,
   selection, vertical scrolling, IME composition, and text-focused shortcut
   suppression

@@ -1,10 +1,10 @@
 # g02.005 Picker, Relation, And Selection Workflow Suite
 
 Status: completed
-Owner: Pug Core
+Owner: Flint Core
 Updated: 2026-03-11
 Depends on: g02.001, g02.003, g02.004
-Primary repos: `pug`
+Primary repos: `flint`
 
 ## Goals
 

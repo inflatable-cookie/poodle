@@ -4,8 +4,8 @@
 //! Uses overlay() for the tooltip panel. Triggered by on_pointer_enter/leave.
 
 use jetstream_runtime::ui_element::{self, JsEl};
-use pug_jetstream::JetstreamThemeProvider;
-use pug_primitives::TooltipSpec;
+use flint_jetstream::JetstreamThemeProvider;
+use flint_primitives::TooltipSpec;
 
 use crate::theme_ext::{resolve_color, resolve_radius};
 

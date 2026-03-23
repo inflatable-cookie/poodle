@@ -1,7 +1,7 @@
 # g08.002 Implement Missing Components Batch 1 (Foundation Primitives)
 
 Status: complete
-Owner: Pug Core
+Owner: Flint Core
 Depends on: g08.001
 
 ## Contract Check
@@ -22,9 +22,9 @@ resolution, focus rings, and ARIA from the start.
 
 - [ ] Read contract: `docs/contracts/foundation/alert-dialog.md`
 - [ ] Read Svelte: `packages/svelte/primitives/src/AlertDialog.svelte`
-- [ ] Create spec struct in `pug-gpui-primitives`
-- [ ] Implement component in `pug-gpui-components`
-- [ ] Write specimen in `pug-gpui-preview`
+- [ ] Create spec struct in `flint-gpui-primitives`
+- [ ] Implement component in `flint-gpui-components`
+- [ ] Write specimen in `flint-gpui-preview`
 - [ ] Pass 10-point quality checklist
 
 ### breadcrumbs
@@ -138,4 +138,4 @@ resolution, focus rings, and ARIA from the start.
 - [ ] All 16 pass the 10-point quality checklist (see README)
 - [ ] All 16 have specimen pages in the preview app
 - [ ] Zero hardcoded px values in any new component
-- [ ] Clean compile with `cargo check -p pug-gpui-preview`
+- [ ] Clean compile with `cargo check -p flint-gpui-preview`

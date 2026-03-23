@@ -1,11 +1,11 @@
 //! Toolbar specimen — action bars with different alignments.
 
 use jetstream_runtime::ui_element::*;
-use pug_jetstream::JetstreamThemeProvider;
-use pug_jetstream_components::button::js_button;
-use pug_jetstream_components::toolbar::js_toolbar;
-use pug_jetstream_components::theme_ext::*;
-use pug_primitives::{Alignment, ButtonSpec, ButtonVariant, ToolbarSpec};
+use flint_jetstream::JetstreamThemeProvider;
+use flint_jetstream_components::button::js_button;
+use flint_jetstream_components::toolbar::js_toolbar;
+use flint_jetstream_components::theme_ext::*;
+use flint_primitives::{Alignment, ButtonSpec, ButtonVariant, ToolbarSpec};
 
 pub fn render(theme: &JetstreamThemeProvider) -> JsEl {
     let secondary = resolve_color(theme, "semantic.color.text.secondary");

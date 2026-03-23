@@ -1,11 +1,11 @@
-# 001 Pug Vision
+# 001 Flint Vision
 
 Status: active
 Updated: 2026-03-11
 
 ## Purpose
 
-Pug is a generalized UI system for teams that need the same documented
+Flint is a generalized UI system for teams that need the same documented
 component contract implemented in both Svelte and GPUI first, while keeping the
 door open for additional implementations later.
 
@@ -16,13 +16,13 @@ that:
 - Svelte apps can adopt them,
 - future targets such as React or other desktop UI kits can adopt them without
   forcing a redesign of the core contract,
-- Underlay can consume them internally without leaking Pug into app code,
+- Underlay can consume them internally without leaking Flint into app code,
 - app-specific systems such as Loophole's DAW widgets can build above them
   instead of re-inventing lower-level UI contracts.
 
 ## Core Promise
 
-Every Pug component should be:
+Every Flint component should be:
 
 - documented before or alongside implementation,
 - defined by one contract,
@@ -34,7 +34,7 @@ Every Pug component should be:
   changing the semantic contract model,
 - explicit about intentional platform deltas.
 
-## What Pug Must Own
+## What Flint Must Own
 
 - semantic design tokens
 - semantic theme definitions that are portable across framework runtimes
@@ -46,7 +46,7 @@ Every Pug component should be:
 - reusable workstation-shell composites
 - documentation, parity rules, and implementation guidance for both stacks
 
-## What Pug Must Not Own
+## What Flint Must Not Own
 
 - Loophole-specific DAW widgets such as transport, timeline, mixer, automation,
   or plugin panels as first-class core components
@@ -59,20 +59,20 @@ Every Pug component should be:
 
 ### Underlay
 
-Underlay should be able to consume Pug tokens and components through
+Underlay should be able to consume Flint tokens and components through
 Underlay-owned bridges and wrappers. Underlay apps should not need to import or
-reason about Pug directly.
+reason about Flint directly.
 
 ### Loophole
 
-Loophole-specific components should be built from Pug tokens and Pug
+Loophole-specific components should be built from Flint tokens and Flint
 sub-components, but they should live in Loophole-owned packages or repos rather
-than inside Pug core.
+than inside Flint core.
 
 ### Svelte
 
 Bits Svelte can remain a useful implementation substrate where it improves
-quality or speed, but Pug must define its own contract, docs, and token model.
+quality or speed, but Flint must define its own contract, docs, and token model.
 
 ### GPUI
 
@@ -81,7 +81,7 @@ denominator translation of the web implementation.
 
 ## Success Criteria
 
-Pug is successful when:
+Flint is successful when:
 
 - the same tokens exist in CSS, TypeScript, and Rust-friendly forms
 - one semantic theme definition can be emitted for both browser/Svelte and
@@ -90,21 +90,21 @@ Pug is successful when:
 - Svelte and GPUI implementations can be compared against one parity checklist
 - future implementations can be added later without rewriting token or contract
   meaning
-- Underlay can adopt Pug internally without breaking existing app APIs
+- Underlay can adopt Flint internally without breaking existing app APIs
 - Loophole can build higher-order DAW widgets without needing to redefine
   buttons, panels, tabs, menus, forms, or layout semantics
 
 ## Failure Modes To Avoid
 
-- turning Pug into a Loophole-only repo
-- turning Pug into a web-only component library
-- turning Pug into a docs-only catalogue without implementation discipline
+- turning Flint into a Loophole-only repo
+- turning Flint into a web-only component library
+- turning Flint into a docs-only catalogue without implementation discipline
 - forcing downstream teams to hand-translate the same theme into CSS and Rust
   separately
 - baking Svelte-specific or GPUI-specific assumptions into the canonical token
   and contract layers
 - treating Bits or any other dependency as the contract source of truth
-- requiring downstream apps to learn Pug-specific abstractions they should not
+- requiring downstream apps to learn Flint-specific abstractions they should not
   need
 
 ## Next Task

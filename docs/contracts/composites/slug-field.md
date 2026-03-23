@@ -131,7 +131,7 @@ Composes `Field` and `TextInput` from primitives. The `TextInput` `prefix` prop 
 | Property | Value |
 |----------|-------|
 | display | `grid` |
-| gap | `var(--pug-space-stack-sm)` |
+| gap | `var(--flint-space-stack-sm)` |
 
 ### Row
 
@@ -148,25 +148,25 @@ Composes `Field` and `TextInput` from primitives. The `TextInput` `prefix` prop 
 |----------|-------|
 | display | `inline-flex` |
 | align-items | `center` |
-| height | `var(--pug-size-control-height)` |
+| height | `var(--flint-size-control-height)` |
 | padding | `0 0.625rem` |
-| border | `0.0625rem solid var(--pug-color-border-default)` |
-| border-radius | `var(--pug-radius-control)` |
-| background | `var(--pug-color-background-surface)` |
-| color | `var(--pug-color-text-secondary)` |
-| font-family | `var(--pug-typography-label-family)` |
+| border | `0.0625rem solid var(--flint-color-border-default)` |
+| border-radius | `var(--flint-radius-control)` |
+| background | `var(--flint-color-background-surface)` |
+| color | `var(--flint-color-text-secondary)` |
+| font-family | `var(--flint-typography-label-family)` |
 | font-size | `0.75rem` |
-| font-weight | `var(--pug-typography-label-weight)` |
+| font-weight | `var(--flint-typography-label-weight)` |
 | white-space | `nowrap` |
-| transition | `background var(--pug-motion-duration-interaction) var(--pug-motion-easing-standard), border-color var(--pug-motion-duration-interaction) var(--pug-motion-easing-standard)` |
+| transition | `background var(--flint-motion-duration-interaction) var(--flint-motion-easing-standard), border-color var(--flint-motion-duration-interaction) var(--flint-motion-easing-standard)` |
 
 #### Reset Button States
 
 | State | Property | Value |
 |-------|----------|-------|
-| `:hover` | background | `color-mix(in srgb, var(--pug-color-background-surface) 84%, var(--pug-color-background-elevated))` |
-| `:hover` | border-color | `color-mix(in srgb, var(--pug-color-border-default) 78%, var(--pug-color-text-primary))` |
-| `:focus-visible` | outline | `var(--pug-border-width-focus) solid var(--pug-color-accent-focusRing)` |
+| `:hover` | background | `color-mix(in srgb, var(--flint-color-background-surface) 84%, var(--flint-color-background-elevated))` |
+| `:hover` | border-color | `color-mix(in srgb, var(--flint-color-border-default) 78%, var(--flint-color-text-primary))` |
+| `:focus-visible` | outline | `var(--flint-border-width-focus) solid var(--flint-color-accent-focusRing)` |
 | `:focus-visible` | outline-offset | `0.125rem` |
 
 ### Hint
@@ -175,17 +175,17 @@ Composes `Field` and `TextInput` from primitives. The `TextInput` `prefix` prop 
 |----------|-------|
 | margin | `0` |
 | font-size | `0.75rem` |
-| color | `var(--pug-color-text-secondary)` |
+| color | `var(--flint-color-text-secondary)` |
 
 ### Hint Code
 
 | Property | Value |
 |----------|-------|
-| font-family | `var(--pug-typography-code-family)` |
+| font-family | `var(--flint-typography-code-family)` |
 | font-size | `0.6875rem` |
 | padding | `0.0625rem 0.25rem` |
 | border-radius | `0.1875rem` |
-| background | `color-mix(in srgb, var(--pug-color-background-panel) 72%, var(--pug-color-background-elevated))` |
+| background | `color-mix(in srgb, var(--flint-color-background-panel) 72%, var(--flint-color-background-elevated))` |
 
 ### Light Theme Overrides
 

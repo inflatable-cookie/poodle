@@ -1,8 +1,8 @@
 export type UnderlayWrapperPolicy = {
   underlayExport: string;
   publicOwner: "underlay";
-  mayUsePugInternals: boolean;
-  appImportsPugDirectly: false;
+  mayUseFlintInternals: boolean;
+  appImportsFlintDirectly: false;
   migrationPressurePoints: string[];
   notes: string;
 };
@@ -13,34 +13,34 @@ export const underlayWrapperPolicies: UnderlayWrapperPolicy[] = [
   {
     underlayExport: "Button",
     publicOwner: "underlay",
-    mayUsePugInternals: true,
-    appImportsPugDirectly: false,
+    mayUseFlintInternals: true,
+    appImportsFlintDirectly: false,
     migrationPressurePoints: [
       "variant and size translation",
       "focus-ring parity",
       "event-name compatibility",
     ],
     notes:
-      "Underlay may wrap Pug's button family internally, but apps should keep importing Underlay Button.",
+      "Underlay may wrap Flint's button family internally, but apps should keep importing Underlay Button.",
   },
   {
     underlayExport: "SearchField",
     publicOwner: "underlay",
-    mayUsePugInternals: true,
-    appImportsPugDirectly: false,
+    mayUseFlintInternals: true,
+    appImportsFlintDirectly: false,
     migrationPressurePoints: [
       "query prop naming",
       "submit/cancel behavior",
       "result-shell composition remains Underlay-owned",
     ],
     notes:
-      "Underlay may reuse Pug SearchField internals while preserving Underlay search APIs and surrounding browse workflows.",
+      "Underlay may reuse Flint SearchField internals while preserving Underlay search APIs and surrounding browse workflows.",
   },
   {
     underlayExport: "Panel",
     publicOwner: "underlay",
-    mayUsePugInternals: true,
-    appImportsPugDirectly: false,
+    mayUseFlintInternals: true,
+    appImportsFlintDirectly: false,
     migrationPressurePoints: [
       "header slot translation",
       "panel identity naming",
@@ -52,8 +52,8 @@ export const underlayWrapperPolicies: UnderlayWrapperPolicy[] = [
 ];
 
 export const underlayZeroLeakRules = [
-  "Underlay apps do not import Pug packages directly.",
-  "Underlay apps do not depend on Pug component names.",
-  "Underlay apps do not depend on Pug token variable names.",
+  "Underlay apps do not import Flint packages directly.",
+  "Underlay apps do not depend on Flint component names.",
+  "Underlay apps do not depend on Flint token variable names.",
   "Wrapper layers preserve accessibility, focus, and keyboard semantics.",
 ] as const;

@@ -1,10 +1,10 @@
 //! Surface specimen — themed containers at different tones and borders.
 
 use jetstream_runtime::ui_element::*;
-use pug_jetstream::JetstreamThemeProvider;
-use pug_jetstream_components::surface::js_surface;
-use pug_jetstream_components::theme_ext::*;
-use pug_primitives::{SurfaceBorder, SurfaceSpec, SurfaceTone};
+use flint_jetstream::JetstreamThemeProvider;
+use flint_jetstream_components::surface::js_surface;
+use flint_jetstream_components::theme_ext::*;
+use flint_primitives::{SurfaceBorder, SurfaceSpec, SurfaceTone};
 
 pub fn render(theme: &JetstreamThemeProvider) -> JsEl {
     let secondary = resolve_color(theme, "semantic.color.text.secondary");

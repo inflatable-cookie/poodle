@@ -1,13 +1,13 @@
 [package]
-name = "pug-events"
+name = "flint-events"
 version = "0.0.0"
 edition = "2021"
-description = "Renderer-agnostic semantic event types for Pug multi-renderer targets."
+description = "Renderer-agnostic semantic event types for Flint multi-renderer targets."
 
 [lib]
 path = "src/lib.rs"
 
-[package.metadata.pug]
+[package.metadata.flint]
 public-intent = true
 channel = "preview"
 stability = "pre-release"

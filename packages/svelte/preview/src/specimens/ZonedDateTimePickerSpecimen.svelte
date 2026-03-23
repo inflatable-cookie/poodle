@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { ZonedDateTimePicker, Eyebrow } from "@pug/svelte-primitives";
+  import { ZonedDateTimePicker, Eyebrow } from "@flint/svelte-primitives";
 </script>
 
 <div class="specimen">

@@ -11,21 +11,21 @@ make the DAW-extension boundary explicit before later app-adoption work widens.
 
 ## Core Rule
 
-Loophole may consume Pug directly as a downstream foundation consumer, but it
+Loophole may consume Flint directly as a downstream foundation consumer, but it
 must do so by building upward from canonical tokens, primitives, composites,
 and workstation shells.
 
 Loophole-specific DAW widgets remain Loophole-owned even when they sit on top
-of Pug foundations.
+of Flint foundations.
 
 ## Adoption Rule
 
 The current allowed Loophole adoption layers are:
 
-- `@pug/svelte-tokens`
-- `@pug/svelte-primitives`
-- `@pug/svelte-composites`
-- `@pug/svelte-workstation`
+- `@flint/svelte-tokens`
+- `@flint/svelte-primitives`
+- `@flint/svelte-composites`
+- `@flint/svelte-workstation`
 
 These packages are sufficient for a first foundation adoption proof when the
 downstream app still owns:
@@ -38,9 +38,9 @@ downstream app still owns:
 
 ## DAW Boundary Rule
 
-Pug may own generic workstation shell and panel-system surfaces.
+Flint may own generic workstation shell and panel-system surfaces.
 
-Pug may not own Loophole-specific DAW surfaces such as:
+Flint may not own Loophole-specific DAW surfaces such as:
 
 - transport bars
 - timelines
@@ -51,7 +51,7 @@ Pug may not own Loophole-specific DAW surfaces such as:
 - session rulers
 - meter-bridge or console-specific widgets
 
-Those remain downstream-owned even when they compose Pug buttons, tabs, panel
+Those remain downstream-owned even when they compose Flint buttons, tabs, panel
 surfaces, split views, and command discovery.
 
 ## Proof Artifact Rule
@@ -59,7 +59,7 @@ surfaces, split views, and command discovery.
 The Loophole foundation adoption proof must exist as a machine-readable
 artifact that records:
 
-- the allowed Pug package surface
+- the allowed Flint package surface
 - the currently approved workstation exports
 - the DAW surfaces that remain downstream-owned
 - the current boundary rules
@@ -96,16 +96,16 @@ The current adoption proof must still record:
 
 ## Honesty Rule
 
-Pug may say:
+Flint may say:
 
-- Loophole can adopt Pug foundations directly
+- Loophole can adopt Flint foundations directly
 - the DAW-extension boundary is explicit
 - the shared workstation layer is suitable as generic shell foundation
 
-Pug may not say:
+Flint may not say:
 
 - Loophole production adoption is complete
-- DAW widgets now belong in Pug core
+- DAW widgets now belong in Flint core
 - workstation-shell parity alone proves all Loophole runtime concerns are solved
 
 ## Seed Baseline

@@ -1,6 +1,6 @@
 {
   "$schema": "https://www.designtokens.org/TR/2025.10/format/",
-  "name": "@pug/tokens",
+  "name": "@flint/tokens",
   "version": "0.0.0",
   "canonicalFormat": "W3C DTCG 2025.10",
   "artifactBaseline": "Style Dictionary 4.x target shapes with bootstrap local emission script",
@@ -34,12 +34,12 @@
   ],
   "artifactTargets": {
     "css": [
-      "packages/tokens/artifacts/css/pug-tokens.css",
-      "packages/tokens/artifacts/css/pug-theme-light.css",
-      "packages/tokens/artifacts/css/pug-theme-dark.css",
-      "packages/tokens/artifacts/css/pug-theme-loophole-studio.css",
-      "packages/tokens/artifacts/css/pug-density-compact.css",
-      "packages/tokens/artifacts/css/pug-density-comfortable.css"
+      "packages/tokens/artifacts/css/flint-tokens.css",
+      "packages/tokens/artifacts/css/flint-theme-light.css",
+      "packages/tokens/artifacts/css/flint-theme-dark.css",
+      "packages/tokens/artifacts/css/flint-theme-loophole-studio.css",
+      "packages/tokens/artifacts/css/flint-density-compact.css",
+      "packages/tokens/artifacts/css/flint-density-comfortable.css"
     ],
     "ts": [
       "packages/tokens/artifacts/ts/index.ts",

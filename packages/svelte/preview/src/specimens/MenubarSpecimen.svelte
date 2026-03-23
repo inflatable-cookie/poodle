@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { Menubar, Eyebrow, type MenubarItem } from "@pug/svelte-primitives";
+  import { Menubar, Eyebrow, type MenubarItem } from "@flint/svelte-primitives";
 
   const items: MenubarItem[] = [
     {
@@ -66,6 +66,6 @@
   .specimen__group p {
     margin: 0;
     font-size: 0.875rem;
-    color: var(--pug-color-text-secondary);
+    color: var(--flint-color-text-secondary);
   }
 </style>

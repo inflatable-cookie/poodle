@@ -1,7 +1,7 @@
 use gpui::*;
-use pug_adapter::ThemeProvider;
-use pug_primitives::{SegmentedControlSpec, ChoiceOption, EyebrowSpec};
-use pug_gpui_components::{SegmentedControl, Eyebrow};
+use flint_adapter::ThemeProvider;
+use flint_primitives::{SegmentedControlSpec, ChoiceOption, EyebrowSpec};
+use flint_gpui_components::{SegmentedControl, Eyebrow};
 use crate::app_state::AppState;
 use crate::style_bridge::color_to_hsla;
 use crate::PreviewRoot;

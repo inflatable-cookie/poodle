@@ -39,7 +39,7 @@ Expand ListCard to support richer item patterns needed by Underlay projects: med
 
 ### 2. ListCard.svelte — CSS
 
-- Leading: `data-leading-shape="rounded-square"` sets `border-radius: var(--pug-radius-control)`
+- Leading: `data-leading-shape="rounded-square"` sets `border-radius: var(--flint-radius-control)`
 - Header row: `display: flex; align-items: baseline; gap: 0.375rem`
 - Badges: `flex-shrink: 0; display: flex; gap: 0.25rem`
 - Footer: `display: flex; align-items: center; gap: 0.5rem`

@@ -8,12 +8,12 @@ Depends on: `050-gpui-structural-primitives-baseline.md`
 
 Freeze the GPUI primitive tranche that unblocks form, remediation, and
 shell-level input work. This baseline defines the first action, field-wrapper,
-and text-entry primitive semantics in `pug-gpui-primitives` so later GPUI
+and text-entry primitive semantics in `flint-gpui-primitives` so later GPUI
 composites build on the same button, field, and text-entry meaning as Svelte.
 
 ## Package Rule
 
-The `g04.004` tranche extends `pug-gpui-primitives` with:
+The `g04.004` tranche extends `flint-gpui-primitives` with:
 
 - `ButtonSpec`
 - `IconButtonSpec`
@@ -70,7 +70,7 @@ of them is rendered by a fully mounted GPUI control implementation.
 
 ## Token Rule
 
-Action, field, and text-entry primitives must resolve from `pug-gpui-tokens`
+Action, field, and text-entry primitives must resolve from `flint-gpui-tokens`
 for at least:
 
 - control size, min width, and icon size

@@ -71,7 +71,7 @@ Research Svelte headless UI patterns and component library architectures to info
 
 ---
 
-## Implications for Pug
+## Implications for Flint
 
 *(To be synthesized)*
 

@@ -44,13 +44,13 @@
     display: inline-flex;
     align-items: center;
     gap: 0.25rem;
-    color: var(--pug-color-text-secondary);
+    color: var(--flint-color-text-secondary);
     font-size: 0.75rem;
     font-variant-numeric: tabular-nums;
     text-decoration: none;
   }
 
   a.list-card-counter:hover {
-    color: var(--pug-color-text-primary);
+    color: var(--flint-color-text-primary);
   }
 </style>

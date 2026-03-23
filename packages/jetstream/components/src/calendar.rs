@@ -1,8 +1,8 @@
 //! Calendar — Jetstream calendar grid backed by CalendarSpec.
 
 use jetstream_runtime::ui_element::{self, JsEl};
-use pug_jetstream::JetstreamThemeProvider;
-use pug_primitives::CalendarSpec;
+use flint_jetstream::JetstreamThemeProvider;
+use flint_primitives::CalendarSpec;
 
 use crate::theme_ext::resolve_color;
 

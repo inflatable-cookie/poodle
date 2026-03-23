@@ -1,9 +1,9 @@
 <script lang="ts">
   import { createEventDispatcher } from "svelte";
 
-  import { TextInput, Field } from "@pug/svelte-primitives";
+  import { TextInput, Field } from "@flint/svelte-primitives";
 
-  import type { ValidationState } from "@pug/svelte-primitives";
+  import type { ValidationState } from "@flint/svelte-primitives";
 
   export let id: string;
   export let label = "Slug";
@@ -104,7 +104,7 @@
 <style>
   .slug-field {
     display: grid;
-    gap: var(--pug-space-stack-sm);
+    gap: var(--flint-space-stack-sm);
   }
 
   .slug-field__row {
@@ -120,43 +120,43 @@
   .slug-field__reset {
     display: inline-flex;
     align-items: center;
-    height: var(--pug-size-control-height);
+    height: var(--flint-size-control-height);
     padding: 0 0.625rem;
-    border: 0.0625rem solid var(--pug-color-border-default);
-    border-radius: var(--pug-radius-control);
-    background: var(--pug-color-background-surface);
-    color: var(--pug-color-text-secondary);
+    border: 0.0625rem solid var(--flint-color-border-default);
+    border-radius: var(--flint-radius-control);
+    background: var(--flint-color-background-surface);
+    color: var(--flint-color-text-secondary);
     cursor: pointer;
-    font-family: var(--pug-typography-label-family);
+    font-family: var(--flint-typography-label-family);
     font-size: 0.75rem;
-    font-weight: var(--pug-typography-label-weight);
+    font-weight: var(--flint-typography-label-weight);
     white-space: nowrap;
     transition:
-      background var(--pug-motion-duration-interaction) var(--pug-motion-easing-standard),
-      border-color var(--pug-motion-duration-interaction) var(--pug-motion-easing-standard);
+      background var(--flint-motion-duration-interaction) var(--flint-motion-easing-standard),
+      border-color var(--flint-motion-duration-interaction) var(--flint-motion-easing-standard);
   }
 
   .slug-field__reset:hover {
-    background: color-mix(in srgb, var(--pug-color-background-surface) 84%, var(--pug-color-background-elevated));
-    border-color: color-mix(in srgb, var(--pug-color-border-default) 78%, var(--pug-color-text-primary));
+    background: color-mix(in srgb, var(--flint-color-background-surface) 84%, var(--flint-color-background-elevated));
+    border-color: color-mix(in srgb, var(--flint-color-border-default) 78%, var(--flint-color-text-primary));
   }
 
   .slug-field__reset:focus-visible {
-    outline: var(--pug-border-width-focus) solid var(--pug-color-accent-focusRing);
+    outline: var(--flint-border-width-focus) solid var(--flint-color-accent-focusRing);
     outline-offset: 0.125rem;
   }
 
   .slug-field__hint {
     margin: 0;
     font-size: 0.75rem;
-    color: var(--pug-color-text-secondary);
+    color: var(--flint-color-text-secondary);
   }
 
   .slug-field__hint code {
-    font-family: var(--pug-typography-code-family);
+    font-family: var(--flint-typography-code-family);
     font-size: 0.6875rem;
     padding: 0.0625rem 0.25rem;
     border-radius: 0.1875rem;
-    background: color-mix(in srgb, var(--pug-color-background-panel) 72%, var(--pug-color-background-elevated));
+    background: color-mix(in srgb, var(--flint-color-background-panel) 72%, var(--flint-color-background-elevated));
   }
 </style>

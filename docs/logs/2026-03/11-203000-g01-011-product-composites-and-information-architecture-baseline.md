@@ -28,7 +28,7 @@
 
 - Aura's settings sections and generated settings surfaces reinforced the need
   for generic `DetailRow`, `DetailSection`, `DetailShell`, and `PageHeader`
-  contracts rather than app-specific settings widgets in Pug core
+  contracts rather than app-specific settings widgets in Flint core
 - Aura's command and browse surfaces reinforced the need for a reusable
   `FilterToolbar` plus `ListShell` and `GridShell` framing that keeps result
   logic app-owned
@@ -55,7 +55,7 @@
 ## Remaining
 
 - execute `g01.012` for workstation-shell composites and panel-system baseline
-- keep product composites and workstation shell contracts separate so Pug does
+- keep product composites and workstation shell contracts separate so Flint does
   not drift back toward app-specific DAW surfaces
 
 ## Next Task

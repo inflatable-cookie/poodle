@@ -1,20 +1,20 @@
 # g09.005 Simplify Component API
 
 Status: complete
-Owner: Pug Core
+Owner: Flint Core
 Depends on: g09.004
 
 ## Context
 
-GPUI components previously used a `Pug` prefix (`PugButton`, `PugCheckbox`)
+GPUI components previously used a `Flint` prefix (`FlintButton`, `FlintCheckbox`)
 and required constructing a separate `ButtonSpec` before passing it to the
 component. The API should be a single builder chain from one import.
 
 ## Completed Actions
 
-### Drop Pug prefix (done in g08)
+### Drop Flint prefix (done in g08)
 
-- [x] Renamed all component structs: `PugButton` → `Button`, etc.
+- [x] Renamed all component structs: `FlintButton` → `Button`, etc.
 - [x] Updated `lib.rs` exports
 - [x] Updated all specimen files
 
@@ -29,7 +29,7 @@ component. The API should be a single builder chain from one import.
 ### Re-export common types
 
 - [x] `ButtonVariant`, `ButtonTone`, `ControlSize`, `IconSize`, `IconSpec`,
-      `StatusTone`, `ValidationState` re-exported from `pug-gpui-components`
+      `StatusTone`, `ValidationState` re-exported from `flint-gpui-components`
 
 ### Subdirectory organization
 
@@ -38,19 +38,19 @@ component. The API should be a single builder chain from one import.
 
 ### Verify
 
-- [x] `cargo check -p pug-gpui-preview` — clean
-- [x] `cargo test -p pug-primitives` — 32/32 pass
-- [x] `cargo test -p pug-composites` — 9/9 pass
+- [x] `cargo check -p flint-gpui-preview` — clean
+- [x] `cargo test -p flint-primitives` — 32/32 pass
+- [x] `cargo test -p flint-composites` — 9/9 pass
 - [x] Jetstream components compile clean
 
 ## API Shape
 
 Before:
 ```rust
-use pug_gpui_primitives::{ButtonSpec, ButtonVariant};
-use pug_gpui_components::PugButton;
+use flint_gpui_primitives::{ButtonSpec, ButtonVariant};
+use flint_gpui_components::FlintButton;
 
-PugButton::new(
+FlintButton::new(
     ButtonSpec::new().with_variant(ButtonVariant::Primary).with_label("Save"),
     &theme,
 ).on_click(handler)
@@ -58,7 +58,7 @@ PugButton::new(
 
 After:
 ```rust
-use pug_gpui_components::{Button, ButtonVariant};
+use flint_gpui_components::{Button, ButtonVariant};
 
 Button::new(&theme)
     .variant(ButtonVariant::Primary)

@@ -1,4 +1,4 @@
-import "@pug/svelte-tokens/styles.css";
+import "@flint/svelte-tokens/styles.css";
 import App from "./App.svelte";
 
 new App({

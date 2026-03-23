@@ -64,10 +64,10 @@
         <button
           type="button"
           class="accordion__trigger"
-          id={`pug-accordion-trigger-${accordionId}-${item.value}`}
+          id={`flint-accordion-trigger-${accordionId}-${item.value}`}
           disabled={item.isDisabled === true}
           aria-expanded={openValues.includes(item.value) ? "true" : "false"}
-          aria-controls={`pug-accordion-panel-${accordionId}-${item.value}`}
+          aria-controls={`flint-accordion-panel-${accordionId}-${item.value}`}
           on:click={() => toggle(item.value)}
         >
           <span class="accordion__summary">
@@ -83,9 +83,9 @@
       {#if openValues.includes(item.value)}
         <div
           class="accordion__panel"
-          id={`pug-accordion-panel-${accordionId}-${item.value}`}
+          id={`flint-accordion-panel-${accordionId}-${item.value}`}
           role="region"
-          aria-labelledby={`pug-accordion-trigger-${accordionId}-${item.value}`}
+          aria-labelledby={`flint-accordion-trigger-${accordionId}-${item.value}`}
           transition:slide={{ duration: 180 }}
         >
           <slot item={item} isOpen={true} />
@@ -98,19 +98,19 @@
 <style>
   .accordion {
     display: grid;
-    gap: var(--pug-space-stack-md);
+    gap: var(--flint-space-stack-md);
     min-width: 0;
   }
 
   .accordion__item {
     display: grid;
-    gap: var(--pug-space-stack-md);
+    gap: var(--flint-space-stack-md);
     min-width: 0;
-    padding: var(--pug-space-panel-y) var(--pug-space-panel-x);
-    border: 0.0625rem solid color-mix(in srgb, var(--pug-color-border-subtle) 36%, transparent);
-    border-radius: var(--pug-radius-surface);
-    background: color-mix(in srgb, var(--pug-surface) 93%, var(--pug-color-text-primary));
-    box-shadow: inset 0 0.0625rem 0 color-mix(in srgb, var(--pug-color-text-inverse) 8%, transparent);
+    padding: var(--flint-space-panel-y) var(--flint-space-panel-x);
+    border: 0.0625rem solid color-mix(in srgb, var(--flint-color-border-subtle) 36%, transparent);
+    border-radius: var(--flint-radius-surface);
+    background: color-mix(in srgb, var(--flint-surface) 93%, var(--flint-color-text-primary));
+    box-shadow: inset 0 0.0625rem 0 color-mix(in srgb, var(--flint-color-text-inverse) 8%, transparent);
   }
 
   .accordion__heading {
@@ -121,12 +121,12 @@
     display: grid;
     grid-template-columns: minmax(0, 1fr) auto;
     align-items: center;
-    gap: var(--pug-space-inline-md);
+    gap: var(--flint-space-inline-md);
     width: 100%;
     padding: 0;
     border: 0;
     background: transparent;
-    color: var(--pug-color-text-primary);
+    color: var(--flint-color-text-primary);
     cursor: pointer;
     text-align: left;
     font: inherit;
@@ -134,40 +134,40 @@
 
   .accordion__trigger:disabled {
     cursor: not-allowed;
-    opacity: var(--pug-state-opacity-disabled);
+    opacity: var(--flint-state-opacity-disabled);
   }
 
   .accordion__trigger:focus-visible {
-    outline: var(--pug-border-width-focus) solid var(--pug-color-accent-focusRing);
+    outline: var(--flint-border-width-focus) solid var(--flint-color-accent-focusRing);
     outline-offset: 0.125rem;
-    border-radius: calc(var(--pug-radius-control) - 0.125rem);
+    border-radius: calc(var(--flint-radius-control) - 0.125rem);
   }
 
   .accordion__summary {
     display: grid;
-    gap: var(--pug-space-inline-sm);
+    gap: var(--flint-space-inline-sm);
     min-width: 0;
   }
 
   .accordion__title {
-    font-family: var(--pug-typography-heading-family);
+    font-family: var(--flint-typography-heading-family);
     font-size: 1rem;
     font-weight: 700;
     line-height: 1.2;
   }
 
   .accordion__description {
-    color: var(--pug-color-text-secondary);
+    color: var(--flint-color-text-secondary);
     font-size: 0.8125rem;
     line-height: 1.45;
   }
 
   .accordion__indicator {
-    color: var(--pug-color-text-secondary);
-    font-family: var(--pug-typography-code-family);
+    color: var(--flint-color-text-secondary);
+    font-family: var(--flint-typography-code-family);
     font-size: 0.75rem;
     line-height: 1;
-    transition: transform var(--pug-motion-duration-interaction) var(--pug-motion-easing-standard);
+    transition: transform var(--flint-motion-duration-interaction) var(--flint-motion-easing-standard);
   }
 
   .accordion__item[data-open="true"] .accordion__indicator {

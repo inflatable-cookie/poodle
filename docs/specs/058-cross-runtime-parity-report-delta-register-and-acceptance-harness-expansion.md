@@ -24,7 +24,7 @@ explicit statement of:
 Cross-runtime parity evidence must be machine-readable, section aligned, and
 honest about both intentional deltas and remaining manual review.
 
-Pug should no longer talk about GPUI parity only through Svelte preview routes
+Flint should no longer talk about GPUI parity only through Svelte preview routes
 or only through crate-level GPUI baselines. The current generation needs one
 artifact that joins those surfaces together.
 
@@ -129,7 +129,7 @@ should therefore carry a summary view of:
 
 ## Honesty Rule
 
-Pug may say:
+Flint may say:
 
 - cross-runtime parity posture is explicit
 - some sections are direct-parity targets while others are native-adaptation
@@ -137,7 +137,7 @@ Pug may say:
 - some deltas are intentionally allowed or scheduled for revisit
 - the GPUI acceptance suite now includes component and parity evidence
 
-Pug may not say:
+Flint may not say:
 
 - GPUI parity is complete because the Svelte preview has stable routes
 - GPUI parity is complete because spec-level crates exist

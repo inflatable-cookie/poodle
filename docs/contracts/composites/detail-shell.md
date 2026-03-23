@@ -105,10 +105,10 @@ state value.
 
 ## 9. Layout
 
-- Root: grid with `gap: --pug-space-stack-lg`
-- Body and state regions: grid with `gap: --pug-space-stack-lg`
+- Root: grid with `gap: --flint-space-stack-lg`
+- Body and state regions: grid with `gap: --flint-space-stack-lg`
 - State region: padded with doubled panel spacing, subtle background,
-  `border-radius: --pug-radius-surface`
+  `border-radius: --flint-radius-surface`
 
 ## 10. Token Usage
 

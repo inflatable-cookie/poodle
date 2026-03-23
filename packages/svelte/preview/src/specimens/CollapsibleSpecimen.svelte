@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { Collapsible, Eyebrow } from "@pug/svelte-primitives";
+  import { Collapsible, Eyebrow } from "@flint/svelte-primitives";
 </script>
 
 <div class="specimen">
@@ -45,6 +45,6 @@
   .specimen__group p {
     margin: 0;
     font-size: 0.875rem;
-    color: var(--pug-color-text-secondary);
+    color: var(--flint-color-text-secondary);
   }
 </style>

@@ -1,14 +1,14 @@
 # g02.001 Forms And Validation System Depth
 
 Status: completed
-Owner: Pug Core
+Owner: Flint Core
 Updated: 2026-03-11
 Depends on: g01.014
-Primary repos: `pug`
+Primary repos: `flint`
 
 ## Context
 
-With the primitive layer in place, Pug needs a cohesive form system rather than
+With the primitive layer in place, Flint needs a cohesive form system rather than
 isolated inputs.
 
 ## Goals

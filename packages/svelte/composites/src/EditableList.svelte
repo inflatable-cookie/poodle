@@ -133,7 +133,7 @@
   }
 
   .autonomous-list[data-disabled="true"] {
-    opacity: var(--pug-state-opacity-disabled);
+    opacity: var(--flint-state-opacity-disabled);
   }
 
   .autonomous-list__static {
@@ -149,8 +149,8 @@
     display: flex;
     align-items: center;
     padding: 0.5rem 0.625rem;
-    border-radius: var(--pug-radius-control);
-    background: var(--pug-color-background-surface);
+    border-radius: var(--flint-radius-control);
+    background: var(--flint-color-background-surface);
   }
 
   .autonomous-list__item-row {
@@ -179,13 +179,13 @@
     border: 0;
     border-radius: 0.25rem;
     background: transparent;
-    color: var(--pug-color-text-secondary);
+    color: var(--flint-color-text-secondary);
     cursor: pointer;
-    transition: color var(--pug-motion-duration-interaction) var(--pug-motion-easing-standard);
+    transition: color var(--flint-motion-duration-interaction) var(--flint-motion-easing-standard);
   }
 
   .autonomous-list__remove:hover:not(:disabled) {
-    color: var(--pug-color-status-danger);
+    color: var(--flint-color-status-danger);
   }
 
   .autonomous-list__remove svg {
@@ -201,57 +201,57 @@
   .autonomous-list__input {
     flex: 1;
     min-width: 0;
-    height: var(--pug-size-control-height);
-    padding: 0 var(--pug-space-control-x);
-    border: 0.0625rem solid var(--pug-color-border-default);
-    border-radius: var(--pug-radius-control);
-    background: var(--pug-color-background-surface);
-    color: var(--pug-color-text-primary);
-    font-family: var(--pug-typography-body-family);
-    font-size: var(--pug-typography-body-size);
+    height: var(--flint-size-control-height);
+    padding: 0 var(--flint-space-control-x);
+    border: 0.0625rem solid var(--flint-color-border-default);
+    border-radius: var(--flint-radius-control);
+    background: var(--flint-color-background-surface);
+    color: var(--flint-color-text-primary);
+    font-family: var(--flint-typography-body-family);
+    font-size: var(--flint-typography-body-size);
     outline: none;
   }
 
   .autonomous-list__input:focus {
-    border-color: var(--pug-color-accent-focusRing);
-    box-shadow: 0 0 0 var(--pug-border-width-focus)
-      color-mix(in srgb, var(--pug-color-accent-focusRing) 28%, transparent);
+    border-color: var(--flint-color-accent-focusRing);
+    box-shadow: 0 0 0 var(--flint-border-width-focus)
+      color-mix(in srgb, var(--flint-color-accent-focusRing) 28%, transparent);
   }
 
   .autonomous-list__input::placeholder {
-    color: var(--pug-color-text-secondary);
+    color: var(--flint-color-text-secondary);
   }
 
   .autonomous-list__add-btn {
     display: inline-flex;
     align-items: center;
-    height: var(--pug-size-control-height);
+    height: var(--flint-size-control-height);
     padding: 0 0.75rem;
-    border: 0.0625rem solid var(--pug-color-border-default);
-    border-radius: var(--pug-radius-control);
-    background: var(--pug-color-background-surface);
-    color: var(--pug-color-text-primary);
+    border: 0.0625rem solid var(--flint-color-border-default);
+    border-radius: var(--flint-radius-control);
+    background: var(--flint-color-background-surface);
+    color: var(--flint-color-text-primary);
     cursor: pointer;
-    font-family: var(--pug-typography-label-family);
-    font-size: var(--pug-typography-label-size);
-    font-weight: var(--pug-typography-label-weight);
+    font-family: var(--flint-typography-label-family);
+    font-size: var(--flint-typography-label-size);
+    font-weight: var(--flint-typography-label-weight);
     transition:
-      background var(--pug-motion-duration-interaction) var(--pug-motion-easing-standard),
-      border-color var(--pug-motion-duration-interaction) var(--pug-motion-easing-standard);
+      background var(--flint-motion-duration-interaction) var(--flint-motion-easing-standard),
+      border-color var(--flint-motion-duration-interaction) var(--flint-motion-easing-standard);
   }
 
   .autonomous-list__add-btn:hover:not(:disabled) {
-    background: color-mix(in srgb, var(--pug-color-background-surface) 84%, var(--pug-color-background-elevated));
+    background: color-mix(in srgb, var(--flint-color-background-surface) 84%, var(--flint-color-background-elevated));
   }
 
   .autonomous-list__add-btn:disabled {
     cursor: not-allowed;
-    opacity: var(--pug-state-opacity-disabled);
+    opacity: var(--flint-state-opacity-disabled);
   }
 
   .autonomous-list__count {
     font-size: 0.6875rem;
-    color: var(--pug-color-text-secondary);
+    color: var(--flint-color-text-secondary);
     font-variant-numeric: tabular-nums;
     align-self: flex-end;
   }

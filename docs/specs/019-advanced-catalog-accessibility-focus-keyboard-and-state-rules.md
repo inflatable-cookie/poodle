@@ -6,7 +6,7 @@ Depends on: `003-accessibility-and-assistive-technology-baseline.md`, `009-form-
 
 ## Purpose
 
-Freeze the next hardening rules across the advanced Pug catalogue so richer
+Freeze the next hardening rules across the advanced Flint catalogue so richer
 composites and workstation shells share one explicit posture for focus,
 keyboard movement, and dynamic state semantics.
 

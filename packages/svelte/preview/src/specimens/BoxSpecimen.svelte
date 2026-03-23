@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { Box, Eyebrow } from "@pug/svelte-primitives";
+  import { Box, Eyebrow } from "@flint/svelte-primitives";
 </script>
 
 <div class="specimen">
@@ -48,7 +48,7 @@
   }
 
   .demo-outline {
-    border: 1px dashed var(--pug-color-border-default);
+    border: 1px dashed var(--flint-color-border-default);
     border-radius: 4px;
   }
 </style>

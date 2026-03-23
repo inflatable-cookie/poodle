@@ -132,9 +132,9 @@ TableRow: { id: string; cells: Record<string, string> }
 |----------|-------|
 | `min-width` | `0` |
 | `overflow-x` | `auto` |
-| `border` | `0.0625rem solid color-mix(in srgb, var(--pug-color-border-subtle) 78%, transparent)` |
-| `border-radius` | `var(--pug-radius-surface)` |
-| `background` | `color-mix(in srgb, var(--pug-color-background-panel) 96%, transparent)` |
+| `border` | `0.0625rem solid color-mix(in srgb, var(--flint-color-border-subtle) 78%, transparent)` |
+| `border-radius` | `var(--flint-radius-surface)` |
+| `background` | `color-mix(in srgb, var(--flint-color-background-panel) 96%, transparent)` |
 
 ### Table `.table`
 
@@ -142,17 +142,17 @@ TableRow: { id: string; cells: Record<string, string> }
 |----------|-------|
 | `width` | `100%` |
 | `border-collapse` | `collapse` |
-| `color` | `var(--pug-color-text-primary)` |
-| `font-family` | `var(--pug-typography-body-family)` |
-| `font-size` | `var(--pug-typography-body-size)` |
-| `line-height` | `var(--pug-typography-body-lineHeight)` |
+| `color` | `var(--flint-color-text-primary)` |
+| `font-family` | `var(--flint-typography-body-family)` |
+| `font-size` | `var(--flint-typography-body-size)` |
+| `line-height` | `var(--flint-typography-body-lineHeight)` |
 
 ### Caption `.table__caption`
 
 | Property | Value |
 |----------|-------|
-| `padding` | `var(--pug-space-panel-y) var(--pug-space-panel-x) 0` |
-| `color` | `var(--pug-color-text-secondary)` |
+| `padding` | `var(--flint-space-panel-y) var(--flint-space-panel-x) 0` |
+| `color` | `var(--flint-color-text-secondary)` |
 | `font-size` | `0.75rem` |
 | `text-align` | `left` |
 
@@ -161,23 +161,23 @@ TableRow: { id: string; cells: Record<string, string> }
 | Property | Value |
 |----------|-------|
 | `padding` | `0.6875rem 0.875rem` |
-| `border-bottom` | `0.0625rem solid color-mix(in srgb, var(--pug-color-border-subtle) 72%, transparent)` |
+| `border-bottom` | `0.0625rem solid color-mix(in srgb, var(--flint-color-border-subtle) 72%, transparent)` |
 | `text-align` | `left` |
 | `vertical-align` | `middle` |
-| `color` | `var(--pug-color-text-secondary)` |
-| `font-family` | `var(--pug-typography-label-family)` |
+| `color` | `var(--flint-color-text-secondary)` |
+| `font-family` | `var(--flint-typography-label-family)` |
 | `font-size` | `0.6875rem` |
 | `font-weight` | `600` |
 | `letter-spacing` | `0.04em` |
 | `text-transform` | `uppercase` |
-| `background` | `color-mix(in srgb, var(--pug-surface) 60%, var(--pug-color-background-elevated))` |
+| `background` | `color-mix(in srgb, var(--flint-surface) 60%, var(--flint-color-background-elevated))` |
 
 ### Cell `.table__cell`
 
 | Property | Value |
 |----------|-------|
 | `padding` | `0.6875rem 0.875rem` |
-| `border-bottom` | `0.0625rem solid color-mix(in srgb, var(--pug-color-border-subtle) 72%, transparent)` |
+| `border-bottom` | `0.0625rem solid color-mix(in srgb, var(--flint-color-border-subtle) 72%, transparent)` |
 | `text-align` | `left` |
 | `vertical-align` | `middle` |
 
@@ -204,7 +204,7 @@ TableRow: { id: string; cells: Record<string, string> }
 | Property | Value |
 |----------|-------|
 | `padding` | `0.6875rem 0.875rem` |
-| `color` | `var(--pug-color-text-secondary)` |
+| `color` | `var(--flint-color-text-secondary)` |
 | `text-align` | `left` |
 | `vertical-align` | `middle` |
 
@@ -218,7 +218,7 @@ TableRow: { id: string; cells: Record<string, string> }
 
 ## 10. GPUI Notes
 
-- expected crate/module surface: `pug_gpui::primitives::table`
+- expected crate/module surface: `flint_gpui::primitives::table`
 - Spec struct: `TableSpec` in primitives crate
 - GPUI must expose table, row, column-header, and cell semantics through accessibility tree
 - Row header posture must be preserved in accessibility output

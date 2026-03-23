@@ -143,7 +143,7 @@ Standalone component. Items can be customized via the `item` slot.
 
 | Property | Value |
 |----------|-------|
-| opacity | `var(--pug-state-opacity-disabled)` |
+| opacity | `var(--flint-state-opacity-disabled)` |
 | pointer-events | `none` |
 
 ### Item
@@ -155,21 +155,21 @@ Standalone component. Items can be customized via the `item` slot.
 | gap | `0.5rem` |
 | padding | `0.5rem 0.625rem` |
 | border | `0.0625rem solid transparent` |
-| border-radius | `var(--pug-radius-control)` |
-| background | `var(--pug-color-background-surface)` |
+| border-radius | `var(--flint-radius-control)` |
+| background | `var(--flint-color-background-surface)` |
 | cursor | `grab` |
-| transition | `background var(--pug-motion-duration-interaction) var(--pug-motion-easing-standard), border-color var(--pug-motion-duration-interaction) var(--pug-motion-easing-standard)` |
+| transition | `background var(--flint-motion-duration-interaction) var(--flint-motion-easing-standard), border-color var(--flint-motion-duration-interaction) var(--flint-motion-easing-standard)` |
 
 #### Item States
 
 | State | Property | Value |
 |-------|----------|-------|
-| `:hover` | background | `color-mix(in srgb, var(--pug-color-background-elevated) 52%, var(--pug-color-background-surface))` |
-| `:focus-visible` | outline | `var(--pug-border-width-focus) solid var(--pug-color-accent-focusRing)` |
+| `:hover` | background | `color-mix(in srgb, var(--flint-color-background-elevated) 52%, var(--flint-color-background-surface))` |
+| `:focus-visible` | outline | `var(--flint-border-width-focus) solid var(--flint-color-accent-focusRing)` |
 | `:focus-visible` | outline-offset | `-0.0625rem` |
 | `--dragging` | opacity | `0.4` |
-| `--drop-target` | border-color | `var(--pug-color-accent-base)` |
-| `--drop-target` | background | `color-mix(in srgb, var(--pug-color-accent-base) 8%, var(--pug-color-background-surface))` |
+| `--drop-target` | border-color | `var(--flint-color-accent-base)` |
+| `--drop-target` | background | `color-mix(in srgb, var(--flint-color-accent-base) 8%, var(--flint-color-background-surface))` |
 
 ### Handle
 
@@ -181,7 +181,7 @@ Standalone component. Items can be customized via the `item` slot.
 | flex-shrink | `0` |
 | width | `1rem` |
 | height | `1rem` |
-| color | `var(--pug-color-text-secondary)` |
+| color | `var(--flint-color-text-secondary)` |
 | cursor | `grab` |
 | SVG icon | 6-dot grip pattern (circles at cx=5/11, cy=4/8/12, r=1.25) |
 
@@ -191,9 +191,9 @@ Standalone component. Items can be customized via the `item` slot.
 |----------|-------|
 | flex | `1` |
 | min-width | `0` |
-| font-family | `var(--pug-typography-body-family)` |
-| font-size | `var(--pug-typography-body-size)` |
-| color | `var(--pug-color-text-primary)` |
+| font-family | `var(--flint-typography-body-family)` |
+| font-size | `var(--flint-typography-body-size)` |
+| color | `var(--flint-color-text-primary)` |
 
 ### Light Theme Overrides
 

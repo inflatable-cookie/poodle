@@ -1,10 +1,10 @@
 //! Collapsible specimen — collapsible sections in open and closed states.
 
 use jetstream_runtime::ui_element::*;
-use pug_jetstream::JetstreamThemeProvider;
-use pug_jetstream_components::collapsible::js_collapsible;
-use pug_jetstream_components::theme_ext::*;
-use pug_primitives::CollapsibleSpec;
+use flint_jetstream::JetstreamThemeProvider;
+use flint_jetstream_components::collapsible::js_collapsible;
+use flint_jetstream_components::theme_ext::*;
+use flint_primitives::CollapsibleSpec;
 
 pub fn render(theme: &JetstreamThemeProvider) -> JsEl {
     let secondary = resolve_color(theme, "semantic.color.text.secondary");

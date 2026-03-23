@@ -1,12 +1,12 @@
-//! Resolved style descriptor intermediate representation for Pug.
+//! Resolved style descriptor intermediate representation for Flint.
 //!
 //! A `StyleDescriptor` captures the visual properties of a component instance
 //! after token resolution but before renderer-specific translation. Both GPUI
 //! and Jetstream adapters can use it as rendering input, eliminating duplicate
 //! token resolution logic.
 
-use pug_layout::LayoutIntent;
-use pug_tokens::typed::{ColorValue, ShadowValue};
+use flint_layout::LayoutIntent;
+use flint_tokens::typed::{ColorValue, ShadowValue};
 
 /// Font family category for typography resolution.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
@@ -226,7 +226,7 @@ impl StyleDescriptor {
 
 #[cfg(test)]
 mod tests {
-    use pug_layout::{LayoutDirection, LayoutIntent, LayoutSizing};
+    use flint_layout::{LayoutDirection, LayoutIntent, LayoutSizing};
 
     use super::*;
 

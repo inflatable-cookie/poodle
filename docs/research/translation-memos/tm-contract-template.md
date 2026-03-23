@@ -7,7 +7,7 @@ Target: g01.004
 
 ## Summary
 
-Pug will use a contract-first approach with standardized documentation templates. Contracts will define semantic behavior, accessibility, and parity requirements that both Svelte and GPUI implementations must satisfy. Each contract includes explicit parity checklists and documented deltas.
+Flint will use a contract-first approach with standardized documentation templates. Contracts will define semantic behavior, accessibility, and parity requirements that both Svelte and GPUI implementations must satisfy. Each contract includes explicit parity checklists and documented deltas.
 
 ---
 
@@ -25,7 +25,7 @@ Pug will use a contract-first approach with standardized documentation templates
 
 ### 1. Contract-First Development
 
-**Decision:** All Pug components must have an approved contract document before implementation begins.
+**Decision:** All Flint components must have an approved contract document before implementation begins.
 
 **Rationale:**
 - Ensures both Svelte and GPUI implement same semantics
@@ -102,7 +102,7 @@ Pug will use a contract-first approach with standardized documentation templates
 - Never make accessibility optional when required
 
 **Rationale:**
-- Consistency across Pug component suite
+- Consistency across Flint component suite
 - React Aria patterns proven in production
 - Clear semantics for both Svelte and GPUI
 
@@ -267,7 +267,7 @@ stateDiagram-v2
 
 **Rationale:**
 - React Aria prioritizes accessibility
-- Pug's goal includes "same accessibility guarantees"
+- Flint's goal includes "same accessibility guarantees"
 - Legal/regulatory requirements increasingly strict
 
 **Implications:**
@@ -326,7 +326,7 @@ stateDiagram-v2
 ### Svelte
 
 - Uses `bits-ui` Button primitive
-- Adds Pug-specific styling via CSS custom properties
+- Adds Flint-specific styling via CSS custom properties
 - Transition on background-color for hover state
 
 ### GPUI

@@ -1,7 +1,7 @@
 # g11.007 Layout Batch
 
 Status: planned
-Owner: Pug Core
+Owner: Flint Core
 Depends on: contract audit
 
 ## Components

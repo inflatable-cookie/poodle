@@ -1,6 +1,6 @@
-# Pug Svelte Primitives
+# Flint Svelte Primitives
 
-Contract-backed Svelte primitive surface for the first generalized Pug baseline.
+Contract-backed Svelte primitive surface for the first generalized Flint baseline.
 
 ## Public Surface
 
@@ -67,8 +67,8 @@ Contract-backed Svelte primitive surface for the first generalized Pug baseline.
 - `Tooltip`
 - `TriStateSwitch`
 - `ZonedDateTimePicker`
-- root import: `@pug/svelte-primitives`
-- type-only import: `@pug/svelte-primitives/types`
+- root import: `@flint/svelte-primitives`
+- type-only import: `@flint/svelte-primitives/types`
 
 ## Purpose
 
@@ -100,7 +100,7 @@ Contract-backed Svelte primitive surface for the first generalized Pug baseline.
   persistent navigation disclosure from persistent command-menu ownership
 - promote only the low-level data surfaces that are truly foundation-safe while
   keeping command discovery and richer table behavior above foundation
-- keep the public API contract-owned by Pug even where Bits-aligned headless
+- keep the public API contract-owned by Flint even where Bits-aligned headless
   primitives remain the expected Svelte-side substrate
 - give the preview app and downstream adopters a reusable primitive package
   instead of relying on inline demo controls or composite-only entry points

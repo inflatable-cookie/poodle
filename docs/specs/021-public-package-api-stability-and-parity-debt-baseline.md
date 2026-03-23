@@ -7,7 +7,7 @@ Depends on: `002-component-contract-template-and-parity-rules.md`, `008-parity-e
 ## Purpose
 
 Freeze the package-surface baseline that must exist before downstream repos are
-allowed to depend on Pug directly. This spec defines what counts as a public
+allowed to depend on Flint directly. This spec defines what counts as a public
 package entry point, what remains internal, and which current parity gaps still
 block adoption.
 
@@ -16,21 +16,21 @@ block adoption.
 Only these package entry points count as intentionally public in the current
 baseline:
 
-- `@pug/svelte-tokens`
-- `@pug/svelte-tokens/runtime`
-- `@pug/svelte-tokens/css`
-- `@pug/svelte-tokens/themes`
-- `@pug/svelte-tokens/metadata`
-- `@pug/svelte-primitives`
-- `@pug/svelte-primitives/types`
-- `@pug/svelte-composites`
-- `@pug/svelte-composites/types`
-- `@pug/svelte-workstation`
-- `@pug/svelte-workstation/types`
-- `pug-gpui-tokens`
-- `pug-gpui-primitives`
-- `pug-gpui-composites`
-- `pug-gpui-workstation`
+- `@flint/svelte-tokens`
+- `@flint/svelte-tokens/runtime`
+- `@flint/svelte-tokens/css`
+- `@flint/svelte-tokens/themes`
+- `@flint/svelte-tokens/metadata`
+- `@flint/svelte-primitives`
+- `@flint/svelte-primitives/types`
+- `@flint/svelte-composites`
+- `@flint/svelte-composites/types`
+- `@flint/svelte-workstation`
+- `@flint/svelte-workstation/types`
+- `flint-gpui-tokens`
+- `flint-gpui-primitives`
+- `flint-gpui-composites`
+- `flint-gpui-workstation`
 
 Everything else in `packages/` should be treated as internal until a later
 milestone explicitly promotes it.
@@ -59,7 +59,7 @@ Package ergonomics must preserve ownership boundaries:
 - Svelte packages expose reusable component and type entry points
 - preview code remains a consumer, not a hidden source of public API truth
 - GPUI token bindings do not imply GPUI component parity
-- Underlay bridge code does not become a public API surrogate for Pug packages
+- Underlay bridge code does not become a public API surrogate for Flint packages
 
 ## Current Stability Posture
 
@@ -117,7 +117,7 @@ as the surface grows.
 
 - the preview/docs surface is now usable, but it is still not a substitute for release policy
 - adoption sequencing remains blocked until package ergonomics and parity debt are both explicit
-- downstream repos should not import Pug beyond internal experimentation until `g02.015` packaging rules exist
+- downstream repos should not import Flint beyond internal experimentation until `g02.015` packaging rules exist
 
 ## Adoption Gate Rule
 

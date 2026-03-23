@@ -1,11 +1,11 @@
 //! FormActions specimen — form action bars.
 
 use jetstream_runtime::ui_element::*;
-use pug_jetstream::JetstreamThemeProvider;
-use pug_jetstream_components::button::js_button;
-use pug_jetstream_components::form_actions::js_form_actions;
-use pug_jetstream_components::theme_ext::*;
-use pug_primitives::{ButtonSpec, ButtonVariant, FormActionAlign, FormActionsSpec};
+use flint_jetstream::JetstreamThemeProvider;
+use flint_jetstream_components::button::js_button;
+use flint_jetstream_components::form_actions::js_form_actions;
+use flint_jetstream_components::theme_ext::*;
+use flint_primitives::{ButtonSpec, ButtonVariant, FormActionAlign, FormActionsSpec};
 
 pub fn render(theme: &JetstreamThemeProvider) -> JsEl {
     let secondary = resolve_color(theme, "semantic.color.text.secondary");

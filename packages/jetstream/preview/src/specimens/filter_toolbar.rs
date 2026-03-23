@@ -1,10 +1,10 @@
 //! FilterToolbar specimen — search and filter controls bar.
 
 use jetstream_runtime::ui_element::*;
-use pug_jetstream::JetstreamThemeProvider;
-use pug_jetstream_components::filter_toolbar::js_filter_toolbar;
-use pug_jetstream_components::theme_ext::*;
-use pug_composites::FilterToolbarSpec;
+use flint_jetstream::JetstreamThemeProvider;
+use flint_jetstream_components::filter_toolbar::js_filter_toolbar;
+use flint_jetstream_components::theme_ext::*;
+use flint_composites::FilterToolbarSpec;
 
 pub fn render(theme: &JetstreamThemeProvider) -> JsEl {
     let secondary = resolve_color(theme, "semantic.color.text.secondary");

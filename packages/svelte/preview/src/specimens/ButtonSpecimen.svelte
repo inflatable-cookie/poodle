@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { Button, Eyebrow } from "@pug/svelte-primitives";
+  import { Button, Eyebrow } from "@flint/svelte-primitives";
 
   let clickLog = "No button clicked yet.";
 
@@ -88,10 +88,10 @@
 
   .specimen__log {
     font-size: 0.8125rem;
-    color: var(--pug-color-text-secondary);
+    color: var(--flint-color-text-secondary);
     margin: 0;
     padding: 0.5rem 0.75rem;
-    background: color-mix(in srgb, var(--pug-color-background-canvas) 80%, transparent);
-    border-radius: var(--pug-radius-control);
+    background: color-mix(in srgb, var(--flint-color-background-canvas) 80%, transparent);
+    border-radius: var(--flint-radius-control);
   }
 </style>

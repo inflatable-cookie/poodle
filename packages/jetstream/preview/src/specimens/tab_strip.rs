@@ -1,10 +1,10 @@
 //! TabStrip specimen — standalone tab bar with selected states.
 
 use jetstream_runtime::ui_element::*;
-use pug_jetstream::JetstreamThemeProvider;
-use pug_jetstream_components::tab_strip::js_tab_strip;
-use pug_jetstream_components::theme_ext::*;
-use pug_primitives::{TabStripItem, TabStripSpec};
+use flint_jetstream::JetstreamThemeProvider;
+use flint_jetstream_components::tab_strip::js_tab_strip;
+use flint_jetstream_components::theme_ext::*;
+use flint_primitives::{TabStripItem, TabStripSpec};
 
 pub fn render(theme: &JetstreamThemeProvider) -> JsEl {
     let secondary = resolve_color(theme, "semantic.color.text.secondary");

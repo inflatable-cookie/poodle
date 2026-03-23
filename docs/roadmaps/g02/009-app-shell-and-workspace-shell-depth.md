@@ -1,10 +1,10 @@
 # g02.009 App-Shell And Workspace-Shell Depth
 
 Status: completed
-Owner: Pug Core
+Owner: Flint Core
 Updated: 2026-03-11
 Depends on: g01.012, g02.004
-Primary repos: `pug`
+Primary repos: `flint`
 
 ## Goals
 

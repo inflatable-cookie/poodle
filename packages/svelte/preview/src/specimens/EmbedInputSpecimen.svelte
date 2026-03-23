@@ -1,7 +1,7 @@
 <script lang="ts">
-  import { EmbedInput } from "@pug/svelte-composites";
-  import { Eyebrow, Field } from "@pug/svelte-primitives";
-  import type { ParsedEmbed } from "@pug/svelte-composites";
+  import { EmbedInput } from "@flint/svelte-composites";
+  import { Eyebrow, Field } from "@flint/svelte-primitives";
+  import type { ParsedEmbed } from "@flint/svelte-composites";
 
   let parsed: ParsedEmbed | null = null;
   let value = "";
@@ -72,26 +72,26 @@
   .providers {
     width: 100%;
     border-collapse: collapse;
-    font-size: var(--pug-typography-label-size, 0.75rem);
+    font-size: var(--flint-typography-label-size, 0.75rem);
   }
 
   .providers th,
   .providers td {
     padding: 0.375rem 0.625rem;
-    border-bottom: 0.0625rem solid var(--pug-color-border-subtle);
+    border-bottom: 0.0625rem solid var(--flint-color-border-subtle);
     text-align: left;
   }
 
   .providers th {
-    color: var(--pug-color-text-secondary);
+    color: var(--flint-color-text-secondary);
     font-weight: 600;
   }
 
   .providers code {
     padding: 0.0625rem 0.25rem;
     border-radius: 0.1875rem;
-    background: var(--pug-color-background-panel, #1a1a1a);
-    font-family: var(--pug-typography-mono-family, monospace);
+    background: var(--flint-color-background-panel, #1a1a1a);
+    font-family: var(--flint-typography-mono-family, monospace);
     font-size: 0.6875rem;
   }
 
@@ -99,8 +99,8 @@
     margin: 0;
     padding: 0.5rem 0.75rem;
     border-radius: 0.375rem;
-    background: var(--pug-color-background-panel, #1a1a1a);
-    font-family: var(--pug-typography-mono-family, monospace);
+    background: var(--flint-color-background-panel, #1a1a1a);
+    font-family: var(--flint-typography-mono-family, monospace);
     font-size: 0.75rem;
     white-space: pre-wrap;
   }

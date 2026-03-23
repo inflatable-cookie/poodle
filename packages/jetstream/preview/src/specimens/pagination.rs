@@ -1,10 +1,10 @@
 //! Pagination specimen — page navigation in different states.
 
 use jetstream_runtime::ui_element::*;
-use pug_jetstream::JetstreamThemeProvider;
-use pug_jetstream_components::pagination_comp::js_pagination;
-use pug_jetstream_components::theme_ext::*;
-use pug_primitives::PaginationSpec;
+use flint_jetstream::JetstreamThemeProvider;
+use flint_jetstream_components::pagination_comp::js_pagination;
+use flint_jetstream_components::theme_ext::*;
+use flint_primitives::PaginationSpec;
 
 pub fn render(theme: &JetstreamThemeProvider) -> JsEl {
     let secondary = resolve_color(theme, "semantic.color.text.secondary");

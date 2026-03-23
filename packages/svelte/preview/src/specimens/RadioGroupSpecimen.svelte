@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { RadioGroup, Eyebrow, type RadioGroupOption } from "@pug/svelte-primitives";
+  import { RadioGroup, Eyebrow, type RadioGroupOption } from "@flint/svelte-primitives";
 
   const planOptions: RadioGroupOption[] = [
     { value: "free", label: "Free" },
@@ -69,6 +69,6 @@
   .specimen__group p {
     margin: 0;
     font-size: 0.875rem;
-    color: var(--pug-color-text-secondary);
+    color: var(--flint-color-text-secondary);
   }
 </style>

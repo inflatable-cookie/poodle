@@ -88,50 +88,50 @@
 
 <style>
   .callout {
-    --pug-callout-fill: color-mix(in srgb, var(--pug-color-background-panel) 94%, transparent);
-    --pug-callout-border: color-mix(in srgb, var(--pug-color-border-subtle) 88%, transparent);
+    --flint-callout-fill: color-mix(in srgb, var(--flint-color-background-panel) 94%, transparent);
+    --flint-callout-border: color-mix(in srgb, var(--flint-color-border-subtle) 88%, transparent);
     display: grid;
     grid-template-columns: minmax(0, 1fr) auto auto;
     align-items: center;
-    gap: var(--pug-space-inline-md);
-    padding: var(--pug-space-panel-y) var(--pug-space-panel-x);
-    border: 0.0625rem solid var(--pug-callout-border);
-    border-radius: var(--pug-radius-surface);
-    background: var(--pug-callout-fill);
-    --pug-surface: var(--pug-callout-fill);
-    color: var(--pug-color-text-primary);
+    gap: var(--flint-space-inline-md);
+    padding: var(--flint-space-panel-y) var(--flint-space-panel-x);
+    border: 0.0625rem solid var(--flint-callout-border);
+    border-radius: var(--flint-radius-surface);
+    background: var(--flint-callout-fill);
+    --flint-surface: var(--flint-callout-fill);
+    color: var(--flint-color-text-primary);
   }
 
   .callout[data-tone="info"] {
-    --pug-callout-fill: color-mix(in srgb, var(--pug-color-status-info, #3b82f6) 10%, var(--pug-color-background-panel));
-    --pug-callout-border: color-mix(in srgb, var(--pug-color-status-info, #3b82f6) 34%, var(--pug-color-border-default));
+    --flint-callout-fill: color-mix(in srgb, var(--flint-color-status-info, #3b82f6) 10%, var(--flint-color-background-panel));
+    --flint-callout-border: color-mix(in srgb, var(--flint-color-status-info, #3b82f6) 34%, var(--flint-color-border-default));
   }
 
   .callout[data-tone="success"] {
-    --pug-callout-fill: color-mix(in srgb, var(--pug-color-status-success) 10%, var(--pug-color-background-panel));
-    --pug-callout-border: color-mix(in srgb, var(--pug-color-status-success) 34%, var(--pug-color-border-default));
+    --flint-callout-fill: color-mix(in srgb, var(--flint-color-status-success) 10%, var(--flint-color-background-panel));
+    --flint-callout-border: color-mix(in srgb, var(--flint-color-status-success) 34%, var(--flint-color-border-default));
   }
 
   .callout[data-tone="warning"] {
-    --pug-callout-fill: color-mix(in srgb, var(--pug-color-status-warning) 10%, var(--pug-color-background-panel));
-    --pug-callout-border: color-mix(in srgb, var(--pug-color-status-warning) 34%, var(--pug-color-border-default));
+    --flint-callout-fill: color-mix(in srgb, var(--flint-color-status-warning) 10%, var(--flint-color-background-panel));
+    --flint-callout-border: color-mix(in srgb, var(--flint-color-status-warning) 34%, var(--flint-color-border-default));
   }
 
   .callout[data-tone="danger"] {
-    --pug-callout-fill: color-mix(in srgb, var(--pug-color-status-danger) 10%, var(--pug-color-background-panel));
-    --pug-callout-border: color-mix(in srgb, var(--pug-color-status-danger) 34%, var(--pug-color-border-default));
+    --flint-callout-fill: color-mix(in srgb, var(--flint-color-status-danger) 10%, var(--flint-color-background-panel));
+    --flint-callout-border: color-mix(in srgb, var(--flint-color-status-danger) 34%, var(--flint-color-border-default));
   }
 
   .callout[data-tone="pending"] {
-    --pug-callout-fill: color-mix(in srgb, var(--pug-color-accent-base) 8%, var(--pug-color-background-panel));
-    --pug-callout-border: color-mix(in srgb, var(--pug-color-accent-base) 26%, var(--pug-color-border-default));
+    --flint-callout-fill: color-mix(in srgb, var(--flint-color-accent-base) 8%, var(--flint-color-background-panel));
+    --flint-callout-border: color-mix(in srgb, var(--flint-color-accent-base) 26%, var(--flint-color-border-default));
   }
 
   .callout__body {
     display: grid;
     grid-template-columns: auto minmax(0, 1fr);
     align-self: start;
-    gap: var(--pug-space-inline-md);
+    gap: var(--flint-space-inline-md);
     min-width: 0;
   }
 
@@ -142,8 +142,8 @@
     width: 1.375rem;
     height: 1.375rem;
     border-radius: 999px;
-    background: color-mix(in srgb, var(--pug-color-background-surface) 78%, transparent);
-    font-family: var(--pug-typography-code-family);
+    background: color-mix(in srgb, var(--flint-color-background-surface) 78%, transparent);
+    font-family: var(--flint-typography-code-family);
     font-size: 0.75rem;
     font-weight: 700;
     line-height: 1;
@@ -151,27 +151,27 @@
 
   .callout__content {
     display: grid;
-    gap: var(--pug-space-inline-sm);
+    gap: var(--flint-space-inline-sm);
     min-width: 0;
   }
 
   .callout__content :global(p) {
     margin: 0;
-    color: var(--pug-color-text-secondary);
+    color: var(--flint-color-text-secondary);
     font-size: 0.8125rem;
     line-height: 1.5;
   }
 
   .callout__content strong {
-    font-family: var(--pug-typography-label-family);
-    font-size: var(--pug-typography-label-size);
-    line-height: var(--pug-typography-label-lineHeight);
+    font-family: var(--flint-typography-label-family);
+    font-size: var(--flint-typography-label-size);
+    line-height: var(--flint-typography-label-lineHeight);
   }
 
   .callout__actions {
     display: flex;
     flex-wrap: wrap;
-    gap: var(--pug-space-inline-sm);
+    gap: var(--flint-space-inline-sm);
     align-items: center;
     justify-content: flex-end;
   }
@@ -180,18 +180,18 @@
     width: 1.75rem;
     height: 1.75rem;
     min-height: 0;
-    margin-right: calc(-0.5 * var(--pug-space-panel-x));
+    margin-right: calc(-0.5 * var(--flint-space-panel-x));
     padding: 0;
     border: 0;
-    border-radius: calc(var(--pug-radius-control) - 0.0625rem);
+    border-radius: calc(var(--flint-radius-control) - 0.0625rem);
     background: transparent;
-    color: var(--pug-color-text-secondary);
+    color: var(--flint-color-text-secondary);
     cursor: pointer;
     font: inherit;
   }
 
   .callout__dismiss:focus-visible {
-    outline: var(--pug-border-width-focus) solid var(--pug-color-accent-focusRing);
+    outline: var(--flint-border-width-focus) solid var(--flint-color-accent-focusRing);
     outline-offset: 0.125rem;
   }
 

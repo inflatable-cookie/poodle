@@ -1,10 +1,10 @@
 //! StatusIndicator specimen.
 
 use jetstream_runtime::ui_element::*;
-use pug_jetstream::JetstreamThemeProvider;
-use pug_jetstream_components::status_indicator::js_status_indicator;
-use pug_jetstream_components::theme_ext::*;
-use pug_primitives::{StatusIndicatorSpec, StatusTone};
+use flint_jetstream::JetstreamThemeProvider;
+use flint_jetstream_components::status_indicator::js_status_indicator;
+use flint_jetstream_components::theme_ext::*;
+use flint_primitives::{StatusIndicatorSpec, StatusTone};
 
 pub fn render(theme: &JetstreamThemeProvider) -> JsEl {
     let secondary = resolve_color(theme, "semantic.color.text.secondary");

@@ -1,8 +1,8 @@
 use gpui::*;
-use pug_adapter::ThemeProvider;
-use pug_gpui::GpuiThemeProvider;
-use pug_primitives::{HoverCardSpec, OverlayPlacement, EyebrowSpec};
-use pug_gpui_components::{HoverCard, Eyebrow};
+use flint_adapter::ThemeProvider;
+use flint_gpui::GpuiThemeProvider;
+use flint_primitives::{HoverCardSpec, OverlayPlacement, EyebrowSpec};
+use flint_gpui_components::{HoverCard, Eyebrow};
 use crate::style_bridge::color_to_hsla;
 
 pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
@@ -48,7 +48,7 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
                                             div()
                                                 .text_xs()
                                                 .text_color(color_to_hsla(text_secondary))
-                                                .child("Design systems engineer working on Pug. Loves component architecture and accessibility.".to_string())
+                                                .child("Design systems engineer working on Flint. Loves component architecture and accessibility.".to_string())
                                         )
                                 )
                         )
@@ -65,7 +65,7 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
                             div()
                                 .text_sm()
                                 .text_color(color_to_hsla(accent))
-                                .child("pug/svelte-primitives".to_string())
+                                .child("flint/svelte-primitives".to_string())
                         )
                         // Open hover card content
                         .child(
@@ -83,7 +83,7 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
                                             div()
                                                 .text_xs()
                                                 .text_color(color_to_hsla(text_secondary))
-                                                .child("Core primitive components for the Pug design system. 64 components, 94% coverage.".to_string())
+                                                .child("Core primitive components for the Flint design system. 64 components, 94% coverage.".to_string())
                                         )
                                 )
                         )

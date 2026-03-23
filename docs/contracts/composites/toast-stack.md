@@ -95,26 +95,26 @@ No internal state. Toast list is externally managed.
 
 ### Tone Colors
 
-Each toast uses a CSS custom property `--pug-toast-tone` set per tone:
+Each toast uses a CSS custom property `--flint-toast-tone` set per tone:
 
 | Tone | Token | Fallback |
 |------|-------|----------|
-| `info` | `--pug-color-status-info` | `#3b82f6` (blue) |
-| `success` | `--pug-color-status-success` | -- |
-| `warning` | `--pug-color-status-warning` | -- |
-| `danger` | `--pug-color-status-danger` | -- |
+| `info` | `--flint-color-status-info` | `#3b82f6` (blue) |
+| `success` | `--flint-color-status-success` | -- |
+| `warning` | `--flint-color-status-warning` | -- |
+| `danger` | `--flint-color-status-danger` | -- |
 
 The tone color is used for:
 - **Left accent bar**: 3px wide, `::before` pseudo-element, `inset: 0 auto 0 0`,
   color at 82% mix with 6% white
-- **Border**: 1px solid, tone at 34% mixed with `--pug-color-border-default`
+- **Border**: 1px solid, tone at 34% mixed with `--flint-color-border-default`
 - **Background gradient**: left edge has 12% tone blended into elevated background,
   fading to 98% elevated background at 18% gradient stop
 
 ### Elevation
 
-- toasts use `--pug-elevation-overlay` box shadow
-- background uses `--pug-color-background-elevated` at 96% alpha mix
+- toasts use `--flint-elevation-overlay` box shadow
+- background uses `--flint-color-background-elevated` at 96% alpha mix
 
 ## 7. Accessibility
 
@@ -147,10 +147,10 @@ The tone color is used for:
 
 ### Sizing
 
-- stack gap: `--pug-space-stack-sm`
-- toast padding: `--pug-space-panel-x` (with extra 1.5rem on right for dismiss button)
-- toast internal gap: `--pug-space-stack-sm`
-- toast border-radius: `calc(--pug-radius-surface - 0.125rem)`
+- stack gap: `--flint-space-stack-sm`
+- toast padding: `--flint-space-panel-x` (with extra 1.5rem on right for dismiss button)
+- toast internal gap: `--flint-space-stack-sm`
+- toast border-radius: `calc(--flint-radius-surface - 0.125rem)`
 - dismiss button: 1.25rem x 1.25rem, positioned top-right (0.375rem inset)
 - accent bar width: 0.1875rem (3px)
 
@@ -174,21 +174,21 @@ The tone color is used for:
 | Property | Value |
 |----------|-------|
 | display | `grid` |
-| gap | `var(--pug-space-stack-sm)` |
+| gap | `var(--flint-space-stack-sm)` |
 
 ### Toast
 
 | Property | Value |
 |----------|-------|
-| `--pug-toast-tone` | (set per tone, see below) |
+| `--flint-toast-tone` | (set per tone, see below) |
 | display | `grid` |
-| gap | `var(--pug-space-stack-sm)` |
-| padding | `var(--pug-space-panel-x)` |
-| padding-right | `calc(var(--pug-space-panel-x) + 1.5rem)` |
-| border | `0.0625rem solid color-mix(in srgb, var(--pug-toast-tone) 34%, var(--pug-color-border-default))` |
-| border-radius | `calc(var(--pug-radius-surface) - 0.125rem)` |
-| background | `linear-gradient(90deg, color-mix(in srgb, var(--pug-toast-tone) 12%, transparent), color-mix(in srgb, var(--pug-color-background-elevated) 98%, transparent) 18%), color-mix(in srgb, var(--pug-color-background-elevated) 96%, transparent)` |
-| box-shadow | `var(--pug-elevation-overlay)` |
+| gap | `var(--flint-space-stack-sm)` |
+| padding | `var(--flint-space-panel-x)` |
+| padding-right | `calc(var(--flint-space-panel-x) + 1.5rem)` |
+| border | `0.0625rem solid color-mix(in srgb, var(--flint-toast-tone) 34%, var(--flint-color-border-default))` |
+| border-radius | `calc(var(--flint-radius-surface) - 0.125rem)` |
+| background | `linear-gradient(90deg, color-mix(in srgb, var(--flint-toast-tone) 12%, transparent), color-mix(in srgb, var(--flint-color-background-elevated) 98%, transparent) 18%), color-mix(in srgb, var(--flint-color-background-elevated) 96%, transparent)` |
+| box-shadow | `var(--flint-elevation-overlay)` |
 | position | `relative` |
 | overflow | `hidden` |
 
@@ -200,16 +200,16 @@ The tone color is used for:
 | position | `absolute` |
 | inset | `0 auto 0 0` |
 | width | `0.1875rem` |
-| background | `color-mix(in srgb, var(--pug-toast-tone) 82%, white 6%)` |
+| background | `color-mix(in srgb, var(--flint-toast-tone) 82%, white 6%)` |
 
 ### Tone Custom Property Values
 
-| `data-tone` | `--pug-toast-tone` |
+| `data-tone` | `--flint-toast-tone` |
 |-------------|-------------------|
-| `info` (default) | `var(--pug-color-status-info, #3b82f6)` |
-| `success` | `var(--pug-color-status-success)` |
-| `warning` | `var(--pug-color-status-warning)` |
-| `danger` | `var(--pug-color-status-danger)` |
+| `info` (default) | `var(--flint-color-status-info, #3b82f6)` |
+| `success` | `var(--flint-color-status-success)` |
+| `warning` | `var(--flint-color-status-warning)` |
+| `danger` | `var(--flint-color-status-danger)` |
 
 ### Dismiss Button
 
@@ -225,16 +225,16 @@ The tone color is used for:
 | height | `1.25rem` |
 | padding | `0` |
 | border | `none` |
-| border-radius | `var(--pug-radius-sm, 0.25rem)` |
+| border-radius | `var(--flint-radius-sm, 0.25rem)` |
 | background | `transparent` |
-| color | `var(--pug-color-text-secondary)` |
+| color | `var(--flint-color-text-secondary)` |
 
 #### Dismiss Button Hover
 
 | Property | Value |
 |----------|-------|
-| color | `var(--pug-color-text-primary)` |
-| background | `color-mix(in srgb, var(--pug-color-background-surface) 60%, transparent)` |
+| color | `var(--flint-color-text-primary)` |
+| background | `color-mix(in srgb, var(--flint-color-background-surface) 60%, transparent)` |
 
 ### Copy Container
 
@@ -248,7 +248,7 @@ The tone color is used for:
 
 | Property | Value |
 |----------|-------|
-| color | `var(--pug-color-text-secondary)` |
+| color | `var(--flint-color-text-secondary)` |
 | font-size | `0.8125rem` |
 | line-height | `1.5` |
 
@@ -274,7 +274,7 @@ None.
 
 ## 11. GPUI Notes
 
-- expected crate/module surface: `pug_gpui::composites::toast_stack`
+- expected crate/module surface: `flint_gpui::composites::toast_stack`
 - tone-based accent bar may use platform-specific drawing
 - assertive announcement for danger tone must be preserved
 

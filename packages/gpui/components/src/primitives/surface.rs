@@ -1,9 +1,9 @@
 //! Surface — real GPUI component backed by SurfaceSpec.
 
 use gpui::*;
-use pug_adapter::ThemeProvider;
-use pug_gpui::GpuiThemeProvider;
-use pug_primitives::{PaddingScale, SurfaceBorder, SurfaceRole, SurfaceSpec, SurfaceTone};
+use flint_adapter::ThemeProvider;
+use flint_gpui::GpuiThemeProvider;
+use flint_primitives::{PaddingScale, SurfaceBorder, SurfaceRole, SurfaceSpec, SurfaceTone};
 
 use crate::theme_ext::{color_mix, resolve_color, resolve_radius};
 

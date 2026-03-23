@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { FormLayout } from "@pug/svelte-composites";
+  import { FormLayout } from "@flint/svelte-composites";
   import {
     Eyebrow,
     Field,
@@ -9,7 +9,7 @@
     Checkbox,
     Button,
     type SelectOption,
-  } from "@pug/svelte-primitives";
+  } from "@flint/svelte-primitives";
 
   const roleOptions: SelectOption[] = [
     { value: "", label: "Select a role…" },

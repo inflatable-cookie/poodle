@@ -1,17 +1,17 @@
 [package]
-name = "pug-composites"
+name = "flint-composites"
 version = "0.0.0"
 edition = "2021"
-description = "Contract-backed composite specs for Pug multi-renderer targets."
+description = "Contract-backed composite specs for Flint multi-renderer targets."
 
 [lib]
 path = "src/lib.rs"
 
 [dependencies]
-pug-primitives = { path = "../primitives" }
-pug-tokens = { path = "../tokens" }
+flint-primitives = { path = "../primitives" }
+flint-tokens = { path = "../tokens" }
 
-[package.metadata.pug]
+[package.metadata.flint]
 public-intent = true
 channel = "preview"
 stability = "pre-release"

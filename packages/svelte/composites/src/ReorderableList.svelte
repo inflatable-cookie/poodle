@@ -126,7 +126,7 @@
   }
 
   .reorderable-list[data-disabled="true"] {
-    opacity: var(--pug-state-opacity-disabled);
+    opacity: var(--flint-state-opacity-disabled);
     pointer-events: none;
   }
 
@@ -136,20 +136,20 @@
     gap: 0.5rem;
     padding: 0.5rem 0.625rem;
     border: 0.0625rem solid transparent;
-    border-radius: var(--pug-radius-control);
-    background: var(--pug-color-background-surface);
+    border-radius: var(--flint-radius-control);
+    background: var(--flint-color-background-surface);
     cursor: grab;
     transition:
-      background var(--pug-motion-duration-interaction) var(--pug-motion-easing-standard),
-      border-color var(--pug-motion-duration-interaction) var(--pug-motion-easing-standard);
+      background var(--flint-motion-duration-interaction) var(--flint-motion-easing-standard),
+      border-color var(--flint-motion-duration-interaction) var(--flint-motion-easing-standard);
   }
 
   .reorderable-list__item:hover {
-    background: color-mix(in srgb, var(--pug-color-background-elevated) 52%, var(--pug-color-background-surface));
+    background: color-mix(in srgb, var(--flint-color-background-elevated) 52%, var(--flint-color-background-surface));
   }
 
   .reorderable-list__item:focus-visible {
-    outline: var(--pug-border-width-focus) solid var(--pug-color-accent-focusRing);
+    outline: var(--flint-border-width-focus) solid var(--flint-color-accent-focusRing);
     outline-offset: -0.0625rem;
   }
 
@@ -158,8 +158,8 @@
   }
 
   .reorderable-list__item--drop-target {
-    border-color: var(--pug-color-accent-base);
-    background: color-mix(in srgb, var(--pug-color-accent-base) 8%, var(--pug-color-background-surface));
+    border-color: var(--flint-color-accent-base);
+    background: color-mix(in srgb, var(--flint-color-accent-base) 8%, var(--flint-color-background-surface));
   }
 
   .reorderable-list__handle {
@@ -169,7 +169,7 @@
     flex-shrink: 0;
     width: 1rem;
     height: 1rem;
-    color: var(--pug-color-text-secondary);
+    color: var(--flint-color-text-secondary);
     cursor: grab;
   }
 
@@ -181,8 +181,8 @@
   .reorderable-list__content {
     flex: 1;
     min-width: 0;
-    font-family: var(--pug-typography-body-family);
-    font-size: var(--pug-typography-body-size);
-    color: var(--pug-color-text-primary);
+    font-family: var(--flint-typography-body-family);
+    font-size: var(--flint-typography-body-size);
+    color: var(--flint-color-text-primary);
   }
 </style>

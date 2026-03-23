@@ -2,7 +2,7 @@
 
 Status: completed
 Date: 2026-03-11
-Owner: Pug Core
+Owner: Flint Core
 
 ## Summary
 
@@ -20,7 +20,7 @@ Owner: Pug Core
 
 ## Notes
 
-- this tranche freezes loading/remediation posture without pretending Pug owns retry policy, data fetching, or system notification integrations
+- this tranche freezes loading/remediation posture without pretending Flint owns retry policy, data fetching, or system notification integrations
 - accessibility focus remains on explicit state meaning, adjacent recovery actions, and transient announcement without focus theft
 
 ## Next Task

@@ -226,7 +226,7 @@ pub const OVERLAY_NAVIGATION_EXPORTS: &[&str] = &[
 
 #[cfg(test)]
 mod tests {
-    use pug_tokens::semantic;
+    use flint_tokens::semantic;
 
     use super::{
         AccordionItemSpec, AccordionSelectionValue, AccordionSpec, BadgeSpec, BadgeVariant,

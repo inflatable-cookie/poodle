@@ -31,17 +31,17 @@ region (root)
 | `display`       | `flex`                                                     |
 | `align-items`   | `center`                                                   |
 | `justify-content` | `center`                                                 |
-| `border`        | `0.125rem dashed var(--region-color, var(--pug-color-border-default))` |
-| `border-radius` | `var(--pug-radius-surface)`                                |
-| `padding`       | `var(--pug-space-inline-md)`                               |
+| `border`        | `0.125rem dashed var(--region-color, var(--flint-color-border-default))` |
+| `border-radius` | `var(--flint-radius-surface)`                                |
+| `padding`       | `var(--flint-space-inline-md)`                               |
 
 ### Label
 
 | Property          | Token / Value                                             |
 |-------------------|-----------------------------------------------------------|
-| `color`           | `var(--region-color, var(--pug-color-text-tertiary))`     |
-| `font-family`     | `var(--pug-typography-label-family)`                      |
-| `font-size`       | `var(--pug-typography-label-size)`                        |
+| `color`           | `var(--region-color, var(--flint-color-text-tertiary))`     |
+| `font-family`     | `var(--flint-typography-label-family)`                      |
+| `font-size`       | `var(--flint-typography-label-size)`                        |
 | `font-weight`     | `600`                                                     |
 | `text-transform`  | `uppercase`                                               |
 | `letter-spacing`  | `0.05em`                                                  |

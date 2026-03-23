@@ -1,10 +1,10 @@
 # g03.014 Generation Closeout And Next-Program Cutover
 
 Status: completed
-Owner: Pug Core
+Owner: Flint Core
 Updated: 2026-03-12
 Depends on: g03.012, g03.013
-Primary repos: `pug`
+Primary repos: `flint`
 
 ## Goals
 

@@ -1,16 +1,16 @@
-# Pug Svelte Developer Guide
+# Flint Svelte Developer Guide
 
-End-to-end implementation guide for building applications with the Pug design system's Svelte packages.
+End-to-end implementation guide for building applications with the Flint design system's Svelte packages.
 
 ## Quick Start
 
 ### 1. Install packages
 
 ```bash
-bun add @pug/svelte-tokens @pug/svelte-primitives @pug/svelte-composites @pug/icons-lucide
+bun add @flint/svelte-tokens @flint/svelte-primitives @flint/svelte-composites @flint/icons-lucide
 ```
 
-`@pug/svelte-tokens` provides the CSS custom properties and theme helpers, `@pug/svelte-primitives` provides the foundational UI components, `@pug/svelte-composites` provides higher-level compositions, and `@pug/icons-lucide` provides tree-shakeable icon imports.
+`@flint/svelte-tokens` provides the CSS custom properties and theme helpers, `@flint/svelte-primitives` provides the foundational UI components, `@flint/svelte-composites` provides higher-level compositions, and `@flint/icons-lucide` provides tree-shakeable icon imports.
 
 ### 2. Import the token stylesheet
 
@@ -18,25 +18,25 @@ In your app's entry point (e.g. `+layout.svelte` or `App.svelte`), import the to
 
 ```svelte
 <script>
-  import "@pug/svelte-tokens/styles.css";
+  import "@flint/svelte-tokens/styles.css";
 </script>
 ```
 
 If you prefer the legacy CSS subpath, that remains available too:
 
 ```css
-@import "@pug/svelte-tokens/css/pug-tokens.css";
+@import "@flint/svelte-tokens/css/flint-tokens.css";
 ```
 
-This loads the full set of CSS custom properties (`--pug-*`) that all components resolve their visual properties from.
+This loads the full set of CSS custom properties (`--flint-*`) that all components resolve their visual properties from.
 
 ### 3. Set theme attributes
 
-Pug themes are activated via `data-*` attributes on a parent element. Use the runtime helper or set them manually:
+Flint themes are activated via `data-*` attributes on a parent element. Use the runtime helper or set them manually:
 
 ```svelte
 <script>
-  import { applyThemeAttributes } from "@pug/svelte-tokens/runtime";
+  import { applyThemeAttributes } from "@flint/svelte-tokens/runtime";
   import { onMount } from "svelte";
 
   let shell;
@@ -67,8 +67,8 @@ Or simply apply the data attributes in your HTML:
 
 ```svelte
 <script>
-  import { Button, TextInput, Field, Select } from "@pug/svelte-primitives";
-  import { search } from "@pug/icons-lucide";
+  import { Button, TextInput, Field, Select } from "@flint/svelte-primitives";
+  import { search } from "@flint/icons-lucide";
 </script>
 
 <Button variant="primary" on:click={() => console.log("clicked")}>
@@ -85,130 +85,130 @@ Or simply apply the data attributes in your HTML:
 ## Package Architecture
 
 ```
-@pug/svelte-tokens       — CSS custom properties, theme/density/size helpers
-@pug/svelte-primitives    — 83 foundational UI components
-@pug/svelte-composites    — 34 higher-level compositions built on primitives
-@pug/icons-lucide         — 1700+ tree-shakeable Lucide icon exports
+@flint/svelte-tokens       — CSS custom properties, theme/density/size helpers
+@flint/svelte-primitives    — 83 foundational UI components
+@flint/svelte-composites    — 34 higher-level compositions built on primitives
+@flint/icons-lucide         — 1700+ tree-shakeable Lucide icon exports
 ```
 
 ### Dependency graph
 
 ```
-@pug/svelte-tokens
+@flint/svelte-tokens
     ↑
-@pug/svelte-primitives (depends on tokens)
+@flint/svelte-primitives (depends on tokens)
     ↑
-@pug/svelte-composites (depends on primitives, tokens)
+@flint/svelte-composites (depends on primitives, tokens)
 
-@pug/icons-lucide (standalone — no dependency on other Pug packages)
+@flint/icons-lucide (standalone — no dependency on other Flint packages)
 ```
 
 ### Import entry points
 
 | Package | Import | Purpose |
 |---------|--------|---------|
-| `@pug/svelte-primitives` | Default | All components |
-| `@pug/svelte-primitives/types` | Type-only | TypeScript types |
-| `@pug/svelte-composites` | Default | All composites |
-| `@pug/svelte-composites/types` | Type-only | TypeScript types |
-| `@pug/svelte-tokens` | Default | Token values and metadata |
-| `@pug/svelte-tokens/runtime` | `applyThemeAttributes()` | Theme attribute helper |
-| `@pug/svelte-tokens/themes` | `themes`, `densityModes`, `controlSizes` | Theme definitions |
-| `@pug/icons-lucide` | Named exports | Individual icon data |
+| `@flint/svelte-primitives` | Default | All components |
+| `@flint/svelte-primitives/types` | Type-only | TypeScript types |
+| `@flint/svelte-composites` | Default | All composites |
+| `@flint/svelte-composites/types` | Type-only | TypeScript types |
+| `@flint/svelte-tokens` | Default | Token values and metadata |
+| `@flint/svelte-tokens/runtime` | `applyThemeAttributes()` | Theme attribute helper |
+| `@flint/svelte-tokens/themes` | `themes`, `densityModes`, `controlSizes` | Theme definitions |
+| `@flint/icons-lucide` | Named exports | Individual icon data |
 
 ---
 
 ## Design Token System
 
-Every visual property in Pug resolves from CSS custom properties. Components never hardcode colors, spacing, radii, or typography — they reference `--pug-*` tokens.
+Every visual property in Flint resolves from CSS custom properties. Components never hardcode colors, spacing, radii, or typography — they reference `--flint-*` tokens.
 
 ### Token hierarchy
 
 ```
 Primitive tokens (raw values)
-  --pug-color-neutral-900: #131a22
-  --pug-space-4: 1rem
-  --pug-radius-md: 0.375rem
+  --flint-color-neutral-900: #131a22
+  --flint-space-4: 1rem
+  --flint-radius-md: 0.375rem
 
     ↓ resolved into
 
 Semantic tokens (contextual purpose)
-  --pug-color-text-primary: var(--pug-color-neutral-900)
-  --pug-space-stack-md: 0.75rem
-  --pug-radius-control: 0.375rem
+  --flint-color-text-primary: var(--flint-color-neutral-900)
+  --flint-space-stack-md: 0.75rem
+  --flint-radius-control: 0.375rem
 
     ↓ optionally overridden by
 
 Treatment tokens (interactive-state styling)
-  --pug-treatment-interactive-fill
-  --pug-treatment-interactive-border
-  --pug-treatment-interactive-radius
+  --flint-treatment-interactive-fill
+  --flint-treatment-interactive-border
+  --flint-treatment-interactive-radius
 ```
 
 ### Key semantic tokens
 
 **Colors:**
 ```css
---pug-color-background-canvas      /* page background */
---pug-color-background-surface     /* card/input backgrounds */
---pug-color-background-panel       /* sidebar/panel backgrounds */
---pug-color-background-elevated    /* floating/elevated surfaces */
---pug-color-background-overlay     /* scrim behind modals */
---pug-color-text-primary           /* main text */
---pug-color-text-secondary         /* muted/helper text */
---pug-color-text-inverse           /* text on primary fills */
---pug-color-border-subtle          /* light dividers */
---pug-color-border-default         /* standard borders */
---pug-color-border-strong          /* emphasis borders */
---pug-color-accent-base            /* primary accent (buttons, links) */
---pug-color-accent-hover           /* accent hover state */
---pug-color-accent-focusRing       /* focus ring color */
---pug-color-status-success         /* success state */
---pug-color-status-warning         /* warning state */
---pug-color-status-danger          /* error/danger state */
---pug-color-icon-primary           /* icon default color */
---pug-color-icon-muted             /* icon muted color */
+--flint-color-background-canvas      /* page background */
+--flint-color-background-surface     /* card/input backgrounds */
+--flint-color-background-panel       /* sidebar/panel backgrounds */
+--flint-color-background-elevated    /* floating/elevated surfaces */
+--flint-color-background-overlay     /* scrim behind modals */
+--flint-color-text-primary           /* main text */
+--flint-color-text-secondary         /* muted/helper text */
+--flint-color-text-inverse           /* text on primary fills */
+--flint-color-border-subtle          /* light dividers */
+--flint-color-border-default         /* standard borders */
+--flint-color-border-strong          /* emphasis borders */
+--flint-color-accent-base            /* primary accent (buttons, links) */
+--flint-color-accent-hover           /* accent hover state */
+--flint-color-accent-focusRing       /* focus ring color */
+--flint-color-status-success         /* success state */
+--flint-color-status-warning         /* warning state */
+--flint-color-status-danger          /* error/danger state */
+--flint-color-icon-primary           /* icon default color */
+--flint-color-icon-muted             /* icon muted color */
 ```
 
 **Spacing:**
 ```css
---pug-space-stack-sm: 0.5rem       /* vertical gaps (small) */
---pug-space-stack-md: 0.75rem      /* vertical gaps (medium) */
---pug-space-stack-lg: 1.25rem      /* vertical gaps (large) */
---pug-space-inline-sm: 0.5rem      /* horizontal gaps (small) */
---pug-space-inline-md: 0.75rem     /* horizontal gaps (medium) */
---pug-space-inline-lg: 1rem        /* horizontal gaps (large) */
---pug-space-control-x: 0.75rem     /* control horizontal padding */
---pug-space-control-y: 0.5rem      /* control vertical padding */
---pug-space-panel-x: 1rem          /* panel horizontal padding */
---pug-space-panel-y: 0.75rem       /* panel vertical padding */
+--flint-space-stack-sm: 0.5rem       /* vertical gaps (small) */
+--flint-space-stack-md: 0.75rem      /* vertical gaps (medium) */
+--flint-space-stack-lg: 1.25rem      /* vertical gaps (large) */
+--flint-space-inline-sm: 0.5rem      /* horizontal gaps (small) */
+--flint-space-inline-md: 0.75rem     /* horizontal gaps (medium) */
+--flint-space-inline-lg: 1rem        /* horizontal gaps (large) */
+--flint-space-control-x: 0.75rem     /* control horizontal padding */
+--flint-space-control-y: 0.5rem      /* control vertical padding */
+--flint-space-panel-x: 1rem          /* panel horizontal padding */
+--flint-space-panel-y: 0.75rem       /* panel vertical padding */
 ```
 
 **Sizing:**
 ```css
---pug-size-control-height: 2.25rem /* default control height */
---pug-size-icon-sm: 0.75rem
---pug-size-icon-md: 1rem
---pug-size-icon-lg: 1.25rem
+--flint-size-control-height: 2.25rem /* default control height */
+--flint-size-icon-sm: 0.75rem
+--flint-size-icon-md: 1rem
+--flint-size-icon-lg: 1.25rem
 ```
 
 **Typography:**
 ```css
---pug-typography-body-family / -size / -lineHeight / -weight
---pug-typography-label-family / -size / -lineHeight / -weight
---pug-typography-heading-family / -size / -lineHeight / -weight
---pug-typography-code-family / -size / -lineHeight / -weight
+--flint-typography-body-family / -size / -lineHeight / -weight
+--flint-typography-label-family / -size / -lineHeight / -weight
+--flint-typography-heading-family / -size / -lineHeight / -weight
+--flint-typography-code-family / -size / -lineHeight / -weight
 ```
 
 **Radius, elevation, motion:**
 ```css
---pug-radius-control: 0.375rem
---pug-radius-surface: 0.625rem
---pug-radius-pill: 999rem
---pug-elevation-surface / -overlay / -dialog
---pug-motion-duration-interaction: 180ms
---pug-motion-easing-standard: cubic-bezier(0.2, 0, 0, 1)
---pug-state-opacity-disabled: 0.48
+--flint-radius-control: 0.375rem
+--flint-radius-surface: 0.625rem
+--flint-radius-pill: 999rem
+--flint-elevation-surface / -overlay / -dialog
+--flint-motion-duration-interaction: 180ms
+--flint-motion-easing-standard: cubic-bezier(0.2, 0, 0, 1)
+--flint-state-opacity-disabled: 0.48
 ```
 
 ### Themes
@@ -362,16 +362,16 @@ Components use named slots for flexible composition:
 
 ## Icons
 
-Pug uses a layered icon system with three consumption patterns.
+Flint uses a layered icon system with three consumption patterns.
 
 ### Pattern 1: Direct import (tree-shakeable)
 
-Import individual icons from `@pug/icons-lucide`. Only icons you use end up in the bundle:
+Import individual icons from `@flint/icons-lucide`. Only icons you use end up in the bundle:
 
 ```svelte
 <script>
-  import { Icon } from "@pug/svelte-primitives";
-  import { search, heart, settings, trash2 } from "@pug/icons-lucide";
+  import { Icon } from "@flint/svelte-primitives";
+  import { search, heart, settings, trash2 } from "@flint/icons-lucide";
 </script>
 
 <Icon icon={search} size="md" />
@@ -407,7 +407,7 @@ For scenarios where you need the full icon catalogue available by name (e.g., CM
 
 ```svelte
 <script>
-  import { Icon, IconProvider } from "@pug/svelte-primitives";
+  import { Icon, IconProvider } from "@flint/svelte-primitives";
   import iconNodes from "lucide-static/icon-nodes.json";
 </script>
 
@@ -429,8 +429,8 @@ Components that accept icons use the `IconProp` type (`IconNodes | string`):
 
 ```svelte
 <script>
-  import { Button, IconButton } from "@pug/svelte-primitives";
-  import { save, trash2, plus } from "@pug/icons-lucide";
+  import { Button, IconButton } from "@flint/svelte-primitives";
+  import { save, trash2, plus } from "@flint/icons-lucide";
 </script>
 
 <Button variant="primary" leadingIcon={save}>Save</Button>
@@ -463,7 +463,7 @@ The `Field` component handles labels, descriptions, hints, validation messages, 
 
 ```svelte
 <script>
-  import { Field, TextInput, Select, Checkbox } from "@pug/svelte-primitives";
+  import { Field, TextInput, Select, Checkbox } from "@flint/svelte-primitives";
 
   let name = "";
   let role = "";
@@ -554,8 +554,8 @@ For multi-field forms, use `FormLayout` from composites:
 
 ```svelte
 <script>
-  import { FormLayout } from "@pug/svelte-composites";
-  import { Field, TextInput, Select, Button } from "@pug/svelte-primitives";
+  import { FormLayout } from "@flint/svelte-composites";
+  import { Field, TextInput, Select, Button } from "@flint/svelte-primitives";
 </script>
 
 <FormLayout columns={2}>
@@ -584,7 +584,7 @@ Use `FieldSet` to group related fields with a semantic `<fieldset>` and `<legend
 
 ```svelte
 <script>
-  import { FieldSet, Field, TextInput, Select } from "@pug/svelte-primitives";
+  import { FieldSet, Field, TextInput, Select } from "@flint/svelte-primitives";
 </script>
 
 <FieldSet legend="Contact Information">
@@ -621,7 +621,7 @@ Flex container with direction and gap control:
 
 ```svelte
 <script>
-  import { Stack, Button } from "@pug/svelte-primitives";
+  import { Stack, Button } from "@flint/svelte-primitives";
 </script>
 
 <Stack direction="vertical" gap="md">
@@ -642,7 +642,7 @@ CSS Grid layout container:
 
 ```svelte
 <script>
-  import { Grid, Surface } from "@pug/svelte-primitives";
+  import { Grid, Surface } from "@flint/svelte-primitives";
 </script>
 
 <Grid columns={3} gap="md">
@@ -678,7 +678,7 @@ Flex-aware spacer element that pushes siblings apart.
 
 ```svelte
 <script>
-  import { Dialog, Button } from "@pug/svelte-primitives";
+  import { Dialog, Button } from "@flint/svelte-primitives";
   let open = false;
 </script>
 
@@ -734,8 +734,8 @@ Positioned floating content anchored to a trigger:
 
 ```svelte
 <script>
-  import { Table } from "@pug/svelte-primitives";
-  import type { TableColumn, TableRow } from "@pug/svelte-primitives";
+  import { Table } from "@flint/svelte-primitives";
+  import type { TableColumn, TableRow } from "@flint/svelte-primitives";
 
   const columns: TableColumn[] = [
     { id: "name", label: "Name", isRowHeader: true },
@@ -758,8 +758,8 @@ Full-featured data table with sorting, column visibility, bulk actions, and expo
 
 ```svelte
 <script>
-  import { DataTable } from "@pug/svelte-composites";
-  import type { TableColumn, TableRow } from "@pug/svelte-composites";
+  import { DataTable } from "@flint/svelte-composites";
+  import type { TableColumn, TableRow } from "@flint/svelte-composites";
 </script>
 
 <DataTable
@@ -776,8 +776,8 @@ Full-featured data table with sorting, column visibility, bulk actions, and expo
 
 ```svelte
 <script>
-  import { Tabs } from "@pug/svelte-primitives";
-  import type { TabItem } from "@pug/svelte-primitives";
+  import { Tabs } from "@flint/svelte-primitives";
+  import type { TabItem } from "@flint/svelte-primitives";
 
   const tabs: TabItem[] = [
     { value: "general", label: "General" },
@@ -806,8 +806,8 @@ Tab variants: `"underline"` | `"card"` | `"pill"` | `"strip"`
 
 ```svelte
 <script>
-  import { Breadcrumbs } from "@pug/svelte-primitives";
-  import type { BreadcrumbItem } from "@pug/svelte-primitives";
+  import { Breadcrumbs } from "@flint/svelte-primitives";
+  import type { BreadcrumbItem } from "@flint/svelte-primitives";
 
   const items: BreadcrumbItem[] = [
     { value: "home", label: "Home", href: "/" },
@@ -823,7 +823,7 @@ Tab variants: `"underline"` | `"card"` | `"pill"` | `"strip"`
 
 ```svelte
 <script>
-  import { Pagination } from "@pug/svelte-primitives";
+  import { Pagination } from "@flint/svelte-primitives";
   let page = 1;
 </script>
 
@@ -838,8 +838,8 @@ Tab variants: `"underline"` | `"card"` | `"pill"` | `"strip"`
 
 ```svelte
 <script>
-  import { Menu, Button } from "@pug/svelte-primitives";
-  import type { MenuItem } from "@pug/svelte-primitives";
+  import { Menu, Button } from "@flint/svelte-primitives";
+  import type { MenuItem } from "@flint/svelte-primitives";
 
   const items: MenuItem[] = [
     { value: "edit", label: "Edit", shortcutLabel: "⌘E" },
@@ -862,7 +862,7 @@ Tab variants: `"underline"` | `"card"` | `"pill"` | `"strip"`
 
 ```svelte
 <script>
-  import { Callout } from "@pug/svelte-primitives";
+  import { Callout } from "@flint/svelte-primitives";
 </script>
 
 <Callout tone="info">This is an informational message.</Callout>
@@ -889,8 +889,8 @@ Tab variants: `"underline"` | `"card"` | `"pill"` | `"strip"`
 
 ```svelte
 <script>
-  import { ToastStack } from "@pug/svelte-composites";
-  import type { ToastItem } from "@pug/svelte-composites";
+  import { ToastStack } from "@flint/svelte-composites";
+  import type { ToastItem } from "@flint/svelte-composites";
 
   let toasts: ToastItem[] = [];
 
@@ -1024,8 +1024,8 @@ Searchable select with type-ahead:
 
 ```svelte
 <script>
-  import { PageHeader, DetailShell, DetailSection, DetailRow } from "@pug/svelte-composites";
-  import { Breadcrumbs } from "@pug/svelte-primitives";
+  import { PageHeader, DetailShell, DetailSection, DetailRow } from "@flint/svelte-composites";
+  import { Breadcrumbs } from "@flint/svelte-primitives";
 </script>
 
 <PageHeader title="User Details">
@@ -1057,8 +1057,8 @@ Searchable select with type-ahead:
 
 ```svelte
 <script>
-  import { CommandPalette } from "@pug/svelte-composites";
-  import type { CommandActionItem } from "@pug/svelte-composites";
+  import { CommandPalette } from "@flint/svelte-composites";
+  import type { CommandActionItem } from "@flint/svelte-composites";
 
   let open = false;
   const actions: CommandActionItem[] = [
@@ -1092,7 +1092,7 @@ import type {
   DateRangeValue,
   DateTimeValue,
   OverlayPlacement,
-} from "@pug/svelte-primitives";
+} from "@flint/svelte-primitives";
 
 // Composite types
 import type {
@@ -1103,10 +1103,10 @@ import type {
   WorkspaceLayoutSnapshot,
   DockEdge,
   PanelTabItem,
-} from "@pug/svelte-composites";
+} from "@flint/svelte-composites";
 
 // Icon types
-import type { IconNodes, IconNodeElement, IconSet } from "@pug/svelte-primitives";
+import type { IconNodes, IconNodeElement, IconSet } from "@flint/svelte-primitives";
 ```
 
 ### Key type definitions
@@ -1154,11 +1154,11 @@ interface MenuItem {
 
 ```svelte
 <script>
-  import { Surface, Stack } from "@pug/svelte-primitives";
+  import { Surface, Stack } from "@flint/svelte-primitives";
 </script>
 
 <div data-theme="dark" data-density="compact">
-  <Surface tone="canvas" style="min-height: 100vh; padding: var(--pug-space-panel-y) var(--pug-space-panel-x)">
+  <Surface tone="canvas" style="min-height: 100vh; padding: var(--flint-space-panel-y) var(--flint-space-panel-x)">
     <Stack gap="lg">
       <!-- page content -->
     </Stack>
@@ -1170,8 +1170,8 @@ interface MenuItem {
 
 ```svelte
 <script>
-  import { Field, TextInput, Select, Button, Stack } from "@pug/svelte-primitives";
-  import { FormLayout } from "@pug/svelte-composites";
+  import { Field, TextInput, Select, Button, Stack } from "@flint/svelte-primitives";
+  import { FormLayout } from "@flint/svelte-composites";
 
   let name = "";
   let email = "";
@@ -1223,8 +1223,8 @@ interface MenuItem {
 
 ```svelte
 <script>
-  import { Toolbar, IconButton, Separator } from "@pug/svelte-primitives";
-  import { bold, italic, underline, link, image } from "@pug/icons-lucide";
+  import { Toolbar, IconButton, Separator } from "@flint/svelte-primitives";
+  import { bold, italic, underline, link, image } from "@flint/icons-lucide";
 </script>
 
 <Toolbar>
@@ -1241,7 +1241,7 @@ interface MenuItem {
 
 ```svelte
 <script>
-  import { AlertDialog, Button } from "@pug/svelte-primitives";
+  import { AlertDialog, Button } from "@flint/svelte-primitives";
   let showConfirm = false;
 </script>
 

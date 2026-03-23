@@ -1,4 +1,4 @@
-import { controlSizes, densityModes, themes } from "@pug/svelte-tokens";
+import { controlSizes, densityModes, themes } from "@flint/svelte-tokens";
 import { docsSections } from "./catalog";
 
 export type ThemeName = keyof typeof themes;
@@ -39,8 +39,8 @@ export type SectionParityTarget = {
 };
 
 export type PublicSveltePackageName =
-  | "@pug/svelte-primitives"
-  | "@pug/svelte-composites";
+  | "@flint/svelte-primitives"
+  | "@flint/svelte-composites";
 
 export type PackageSurfaceCoverageStatus = "previewed" | "contract-only";
 
@@ -422,7 +422,7 @@ export const previewHarnessBoundary = {
 
 const packageSurfaceCoverageGroups: PackageSurfaceCoverageGroup[] = [
   {
-    packageName: "@pug/svelte-primitives",
+    packageName: "@flint/svelte-primitives",
     kind: "component",
     status: "previewed",
     sectionIds: ["form-suite"],
@@ -441,7 +441,7 @@ const packageSurfaceCoverageGroups: PackageSurfaceCoverageGroup[] = [
     ],
   },
   {
-    packageName: "@pug/svelte-primitives",
+    packageName: "@flint/svelte-primitives",
     kind: "component",
     status: "previewed",
     sectionIds: ["notification-suite"],
@@ -449,7 +449,7 @@ const packageSurfaceCoverageGroups: PackageSurfaceCoverageGroup[] = [
     exportNames: ["Callout", "Menu", "Skeleton", "StatusIndicator", "Tabs", "Toolbar"],
   },
   {
-    packageName: "@pug/svelte-primitives",
+    packageName: "@flint/svelte-primitives",
     kind: "component",
     status: "previewed",
     sectionIds: ["catalog-hub"],
@@ -457,7 +457,7 @@ const packageSurfaceCoverageGroups: PackageSurfaceCoverageGroup[] = [
     exportNames: ["Accordion", "Button", "Checkbox", "Collapsible", "Pill", "Select", "Toggle", "ToggleGroup"],
   },
   {
-    packageName: "@pug/svelte-primitives",
+    packageName: "@flint/svelte-primitives",
     kind: "component",
     status: "previewed",
     sectionIds: ["catalog-hub"],
@@ -465,7 +465,7 @@ const packageSurfaceCoverageGroups: PackageSurfaceCoverageGroup[] = [
     exportNames: ["Drawer", "Popover", "SegmentedControl", "Table"],
   },
   {
-    packageName: "@pug/svelte-primitives",
+    packageName: "@flint/svelte-primitives",
     kind: "component",
     status: "previewed",
     sectionIds: ["catalog-hub"],
@@ -508,7 +508,7 @@ const packageSurfaceCoverageGroups: PackageSurfaceCoverageGroup[] = [
     ],
   },
   {
-    packageName: "@pug/svelte-composites",
+    packageName: "@flint/svelte-composites",
     kind: "component",
     status: "previewed",
     sectionIds: ["table-suite"],
@@ -516,7 +516,7 @@ const packageSurfaceCoverageGroups: PackageSurfaceCoverageGroup[] = [
     exportNames: ["BulkActionBar", "DataTable", "FilterToolbar", "PaginationSummary"],
   },
   {
-    packageName: "@pug/svelte-composites",
+    packageName: "@flint/svelte-composites",
     kind: "component",
     status: "previewed",
     sectionIds: ["browse-suite"],
@@ -524,7 +524,7 @@ const packageSurfaceCoverageGroups: PackageSurfaceCoverageGroup[] = [
     exportNames: ["EmptyState"],
   },
   {
-    packageName: "@pug/svelte-composites",
+    packageName: "@flint/svelte-composites",
     kind: "component",
     status: "previewed",
     sectionIds: ["detail-suite"],
@@ -532,7 +532,7 @@ const packageSurfaceCoverageGroups: PackageSurfaceCoverageGroup[] = [
     exportNames: ["Breadcrumbs", "Card", "DetailRow", "DetailSection", "DetailShell", "PageHeader"],
   },
   {
-    packageName: "@pug/svelte-composites",
+    packageName: "@flint/svelte-composites",
     kind: "component",
     status: "previewed",
     sectionIds: ["picker-suite", "detail-suite"],
@@ -540,7 +540,7 @@ const packageSurfaceCoverageGroups: PackageSurfaceCoverageGroup[] = [
     exportNames: ["PickerShell", "RelationPicker", "SelectionSummary"],
   },
   {
-    packageName: "@pug/svelte-composites",
+    packageName: "@flint/svelte-composites",
     kind: "component",
     status: "previewed",
     sectionIds: ["media-suite"],
@@ -548,7 +548,7 @@ const packageSurfaceCoverageGroups: PackageSurfaceCoverageGroup[] = [
     exportNames: ["MediaPreview", "MediaThumbnail"],
   },
   {
-    packageName: "@pug/svelte-composites",
+    packageName: "@flint/svelte-composites",
     kind: "component",
     status: "previewed",
     sectionIds: ["notification-suite"],
@@ -556,7 +556,7 @@ const packageSurfaceCoverageGroups: PackageSurfaceCoverageGroup[] = [
     exportNames: ["ToastStack"],
   },
   {
-    packageName: "@pug/svelte-composites",
+    packageName: "@flint/svelte-composites",
     kind: "component",
     status: "previewed",
     sectionIds: ["command-suite"],
@@ -564,7 +564,7 @@ const packageSurfaceCoverageGroups: PackageSurfaceCoverageGroup[] = [
     exportNames: ["ActionDiscoveryPanel", "CommandPalette"],
   },
   {
-    packageName: "@pug/svelte-composites",
+    packageName: "@flint/svelte-composites",
     kind: "component",
     status: "previewed",
     sectionIds: ["command-suite"],
@@ -572,7 +572,7 @@ const packageSurfaceCoverageGroups: PackageSurfaceCoverageGroup[] = [
     exportNames: ["PanelHeader"],
   },
   {
-    packageName: "@pug/svelte-composites",
+    packageName: "@flint/svelte-composites",
     kind: "component",
     status: "previewed",
     sectionIds: ["workspace-suite"],
@@ -586,7 +586,7 @@ const packageSurfaceCoverageGroups: PackageSurfaceCoverageGroup[] = [
     ],
   },
   {
-    packageName: "@pug/svelte-composites",
+    packageName: "@flint/svelte-composites",
     kind: "helper",
     status: "previewed",
     sectionIds: ["workspace-suite"],

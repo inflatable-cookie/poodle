@@ -1,10 +1,10 @@
 //! AppHeader specimen — application header bar.
 
 use jetstream_runtime::ui_element::*;
-use pug_jetstream::JetstreamThemeProvider;
-use pug_jetstream_components::app_header::js_app_header;
-use pug_jetstream_components::theme_ext::*;
-use pug_composites::AppHeaderSpec;
+use flint_jetstream::JetstreamThemeProvider;
+use flint_jetstream_components::app_header::js_app_header;
+use flint_jetstream_components::theme_ext::*;
+use flint_composites::AppHeaderSpec;
 
 pub fn render(theme: &JetstreamThemeProvider) -> JsEl {
     let secondary = resolve_color(theme, "semantic.color.text.secondary");

@@ -3,7 +3,7 @@
 Status: active
 Updated: 2026-03-12
 
-Foundation contracts define the lowest reusable surface in Pug.
+Foundation contracts define the lowest reusable surface in Flint.
 
 ## Current Contracts
 

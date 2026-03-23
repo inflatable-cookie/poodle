@@ -1,10 +1,10 @@
 //! PaginationSummary specimen — page range display text.
 
 use jetstream_runtime::ui_element::*;
-use pug_jetstream::JetstreamThemeProvider;
-use pug_jetstream_components::pagination_summary::js_pagination_summary;
-use pug_jetstream_components::theme_ext::*;
-use pug_composites::PaginationSummarySpec;
+use flint_jetstream::JetstreamThemeProvider;
+use flint_jetstream_components::pagination_summary::js_pagination_summary;
+use flint_jetstream_components::theme_ext::*;
+use flint_composites::PaginationSummarySpec;
 
 pub fn render(theme: &JetstreamThemeProvider) -> JsEl {
     let secondary = resolve_color(theme, "semantic.color.text.secondary");

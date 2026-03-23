@@ -17,7 +17,7 @@
     openChange: { open: boolean };
   }>();
 
-  const tooltipId = `pug-tooltip-${++nextTooltipId}`;
+  const tooltipId = `flint-tooltip-${++nextTooltipId}`;
   let timer: ReturnType<typeof setTimeout> | null = null;
   let uncontrolledOpen = defaultOpen;
 
@@ -92,29 +92,29 @@
   }
 
   .tooltip__trigger:focus-visible {
-    outline: var(--pug-border-width-focus) solid var(--pug-color-accent-focusRing);
+    outline: var(--flint-border-width-focus) solid var(--flint-color-accent-focusRing);
     outline-offset: 0.125rem;
   }
 
   .tooltip__bubble {
     position: absolute;
-    z-index: var(--pug-overlay-z-menu);
+    z-index: var(--flint-overlay-z-menu);
     max-width: 16rem;
     padding: 0.375rem 0.5rem;
     border: 0.0625rem solid var(
-      --pug-treatment-surface-elevated-border,
-      color-mix(in srgb, var(--pug-color-border-default) 72%, transparent)
+      --flint-treatment-surface-elevated-border,
+      color-mix(in srgb, var(--flint-color-border-default) 72%, transparent)
     );
     border-radius: var(
-      --pug-treatment-surface-elevated-radius,
-      calc(var(--pug-radius-control) - 0.125rem)
+      --flint-treatment-surface-elevated-radius,
+      calc(var(--flint-radius-control) - 0.125rem)
     );
     background: var(
-      --pug-treatment-surface-elevated-fill,
-      color-mix(in srgb, var(--pug-color-background-elevated) 98%, var(--pug-color-background-panel))
+      --flint-treatment-surface-elevated-fill,
+      color-mix(in srgb, var(--flint-color-background-elevated) 98%, var(--flint-color-background-panel))
     );
-    box-shadow: var(--pug-treatment-surface-elevated-shadow, var(--pug-elevation-overlay));
-    color: var(--pug-color-text-primary);
+    box-shadow: var(--flint-treatment-surface-elevated-shadow, var(--flint-elevation-overlay));
+    color: var(--flint-color-text-primary);
     font-size: 0.6875rem;
     line-height: 1.35;
     white-space: nowrap;

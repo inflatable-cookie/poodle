@@ -1,7 +1,7 @@
 # g11.011 Composites Batch
 
 Status: planned
-Owner: Pug Core
+Owner: Flint Core
 Depends on: contract audit
 
 ## Components
@@ -25,23 +25,23 @@ breadcrumbs, list_card, nav_card, nav_card_grid, order_by, pagination_summary
 
 - [ ] `editable_list` — contract exists (`editable-list.md`) but **no Rust spec**.
       GPUI has `editable_list.rs` implemented without a spec struct. Need to
-      create `EditableListSpec` in `pug-composites`.
+      create `EditableListSpec` in `flint-composites`.
 - [ ] `form_dialog` — contract exists (`form-dialog.md`) but **no Rust spec**.
       GPUI has `form_dialog.rs` implemented without a spec struct. Need to
-      create `FormDialogSpec` in `pug-composites`.
+      create `FormDialogSpec` in `flint-composites`.
 - [ ] `form_layout` — contract exists (`form-layout.md`) but **no Rust spec**.
       GPUI has `form_layout.rs` implemented without a spec struct. Need to
-      create `FormLayoutSpec` in `pug-composites`.
+      create `FormLayoutSpec` in `flint-composites`.
 - [ ] `inline_editable_field` — GPUI component exists in composites, Rust spec
       `InlineEditableFieldSpec` exists, but **no contract markdown**
       `inline-editable-field.md` in composites dir. Verify it exists or create it.
 - [ ] `pagination_summary` — contract is in `foundation/` but Rust spec is in
-      `pug-composites`. GPUI has it in `primitives/`. Align: either move the
-      Rust spec to `pug-primitives` or reclassify.
+      `flint-composites`. GPUI has it in `primitives/`. Align: either move the
+      Rust spec to `flint-primitives` or reclassify.
 
 ### Orphaned Rust specs (no contract, no Svelte)
 
-These Rust spec files in `pug-composites` have no corresponding contract
+These Rust spec files in `flint-composites` have no corresponding contract
 markdown and may be deprecated. Verify and remove if so:
 
 - [ ] `autonomous_list.rs` — no contract

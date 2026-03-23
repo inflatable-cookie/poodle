@@ -109,20 +109,20 @@
     width: 2rem;
     height: 2rem;
     border: 0;
-    border-radius: var(--pug-radius-control);
+    border-radius: var(--flint-radius-control);
     background: transparent;
-    color: color-mix(in srgb, var(--pug-color-text-secondary) 78%, transparent);
+    color: color-mix(in srgb, var(--flint-color-text-secondary) 78%, transparent);
     cursor: pointer;
     font: inherit;
   }
 
   .rating__item[data-filled="true"] {
-    color: color-mix(in srgb, var(--pug-color-accent-base) 84%, var(--pug-color-text-primary));
+    color: color-mix(in srgb, var(--flint-color-accent-base) 84%, var(--flint-color-text-primary));
   }
 
   .rating__item:hover:not(:disabled),
   .rating__item:focus-visible {
-    background: color-mix(in srgb, var(--pug-color-accent-base) 14%, transparent);
+    background: color-mix(in srgb, var(--flint-color-accent-base) 14%, transparent);
     outline: none;
   }
 
@@ -133,6 +133,6 @@
 
   .rating__item:disabled {
     cursor: not-allowed;
-    opacity: var(--pug-state-opacity-disabled);
+    opacity: var(--flint-state-opacity-disabled);
   }
 </style>

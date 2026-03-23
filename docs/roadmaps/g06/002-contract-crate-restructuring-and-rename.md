@@ -15,16 +15,16 @@ renderer-neutral naming, and relocate them from `packages/gpui/` to
 
 | Old Crate | New Crate | Old Path | New Path |
 |-----------|-----------|----------|----------|
-| `pug-gpui-tokens` | `pug-tokens` | `packages/gpui/tokens/` | `packages/contracts/tokens/` |
-| `pug-gpui-primitives` | `pug-primitives` | `packages/gpui/primitives/` | `packages/contracts/primitives/` |
-| `pug-gpui-composites` | `pug-composites` | `packages/gpui/composites/` | `packages/contracts/composites/` |
-| `pug-gpui-workstation` | `pug-workstation` | `packages/gpui/workstation/` | `packages/contracts/workstation/` |
+| `flint-gpui-tokens` | `flint-tokens` | `packages/gpui/tokens/` | `packages/contracts/tokens/` |
+| `flint-gpui-primitives` | `flint-primitives` | `packages/gpui/primitives/` | `packages/contracts/primitives/` |
+| `flint-gpui-composites` | `flint-composites` | `packages/gpui/composites/` | `packages/contracts/composites/` |
+| `flint-gpui-workstation` | `flint-workstation` | `packages/gpui/workstation/` | `packages/contracts/workstation/` |
 
 ### Import Updates
 
-All `use pug_gpui_tokens::` → `use pug_tokens::`
-All `use pug_gpui_primitives::` → `use pug_primitives::`
-All `use pug_gpui_composites::` → `use pug_composites::`
+All `use flint_gpui_tokens::` → `use flint_tokens::`
+All `use flint_gpui_primitives::` → `use flint_primitives::`
+All `use flint_gpui_composites::` → `use flint_composites::`
 
 Updated across 77 source files spanning all four crates.
 
@@ -46,9 +46,9 @@ remains valid — the depth from `packages/contracts/tokens/src/` to
 
 ## Verification
 
-- [x] `pug-tokens` — `cargo check` passes
-- [x] `pug-primitives` — `cargo check` passes, 29 tests pass
-- [x] `pug-composites` — `cargo check` passes, 10 tests pass
-- [x] `pug-workstation` — `cargo check` passes, 6 tests pass
-- [x] Zero references to `pug_gpui_*` remain in contracts source
+- [x] `flint-tokens` — `cargo check` passes
+- [x] `flint-primitives` — `cargo check` passes, 29 tests pass
+- [x] `flint-composites` — `cargo check` passes, 10 tests pass
+- [x] `flint-workstation` — `cargo check` passes, 6 tests pass
+- [x] Zero references to `flint_gpui_*` remain in contracts source
 - [x] Old `packages/gpui/` retained for validation artifacts and baselines

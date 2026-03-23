@@ -12,7 +12,7 @@ What is being studied in this dossier (specific component, application, pattern)
 
 ## Context
 
-Background on why this specimen is relevant to Pug.
+Background on why this specimen is relevant to Flint.
 
 ---
 
@@ -36,13 +36,13 @@ What are the inputs/outputs?
 
 What patterns does this demonstrate?
 What works well?
-What would Pug do differently?
+What would Flint do differently?
 
 ---
 
-## Lessons for Pug
+## Lessons for Flint
 
-Specific takeaways applicable to Pug's design.
+Specific takeaways applicable to Flint's design.
 
 ---
 

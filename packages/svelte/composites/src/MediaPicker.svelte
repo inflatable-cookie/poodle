@@ -1,9 +1,9 @@
 <script lang="ts">
   import { createEventDispatcher } from "svelte";
 
-  import { Dialog, Button, TextInput, FileUpload, Tabs } from "@pug/svelte-primitives";
+  import { Dialog, Button, TextInput, FileUpload, Tabs } from "@flint/svelte-primitives";
 
-  import type { FileUploadItem, TabItem } from "@pug/svelte-primitives";
+  import type { FileUploadItem, TabItem } from "@flint/svelte-primitives";
   import type { MediaPickerItem } from "./types";
 
   export let open: boolean | null = null;
@@ -119,7 +119,7 @@
   .media-picker {
     display: flex;
     flex-direction: column;
-    gap: var(--pug-space-stack-sm, 0.5rem);
+    gap: var(--flint-space-stack-sm, 0.5rem);
     min-height: 20rem;
   }
 
@@ -142,7 +142,7 @@
     gap: 0.25rem;
     padding: 0.375rem;
     border: 0.0625rem solid transparent;
-    border-radius: var(--pug-radius-control, 0.375rem);
+    border-radius: var(--flint-radius-control, 0.375rem);
     background: transparent;
     color: inherit;
     cursor: pointer;
@@ -151,8 +151,8 @@
 
   .media-picker__item:hover,
   .media-picker__item:focus-visible {
-    border-color: var(--pug-color-border-focus, #888);
-    background: var(--pug-color-background-panel, #1a1a1a);
+    border-color: var(--flint-color-border-focus, #888);
+    background: var(--flint-color-background-panel, #1a1a1a);
     outline: none;
   }
 
@@ -167,18 +167,18 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    background: var(--pug-color-background-panel, #1a1a1a);
+    background: var(--flint-color-background-panel, #1a1a1a);
   }
 
   .media-picker__thumb--placeholder svg {
     width: 1.5rem;
     height: 1.5rem;
-    color: var(--pug-color-text-tertiary, #666);
+    color: var(--flint-color-text-tertiary, #666);
   }
 
   .media-picker__label {
     font-size: 0.6875rem;
-    color: var(--pug-color-text-secondary, #999);
+    color: var(--flint-color-text-secondary, #999);
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -194,7 +194,7 @@
 
   .media-picker__empty p {
     margin: 0;
-    color: var(--pug-color-text-secondary, #999);
+    color: var(--flint-color-text-secondary, #999);
     font-size: 0.875rem;
   }
 

@@ -6,7 +6,7 @@ Depends on: `043-accessibility-audit-and-cross-runtime-delta-handling-baseline.m
 
 ## Purpose
 
-Freeze the first honest GPUI accessibility-proof posture now that Pug has real
+Freeze the first honest GPUI accessibility-proof posture now that Flint has real
 primitive, composite, and workstation crates instead of only a token surface
 and browser-side accessibility audit.
 
@@ -109,13 +109,13 @@ or `hybrid` instead of overclaimed.
 
 ## Assistive-Technology Honesty Rule
 
-Pug may say:
+Flint may say:
 
 - accessible naming and state exposure are explicit in the current GPUI API
 - crate tests cover part of the current native accessibility posture
 - mounted native assistive-technology proof remains manual for many sections
 
-Pug may not say:
+Flint may not say:
 
 - the presence of GPUI crates alone proves final assistive-technology
   conformance

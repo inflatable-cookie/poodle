@@ -1,10 +1,10 @@
 use gpui::*;
-use pug_composites::{
+use flint_composites::{
     MediaPreviewSpec, MediaThumbnailSpec, AspectRatio, MediaKind, MediaState,
     AudioPlayerSpec, VideoPlayerSpec, MediaPickerSpec,
 };
-use pug_primitives::EyebrowSpec;
-use pug_gpui_components::{
+use flint_primitives::EyebrowSpec;
+use flint_gpui_components::{
     MediaPreview, MediaThumbnail, AudioPlayer, VideoPlayer,
     MediaPicker, MediaPickerItem, Eyebrow,
 };

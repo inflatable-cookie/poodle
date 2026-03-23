@@ -10,7 +10,7 @@ subscription model and Jetstream's `UiEvent` enum.
 
 ## Deliverables
 
-New crate: `pug-events` at `packages/contracts/events/`
+New crate: `flint-events` at `packages/contracts/events/`
 
 ### Semantic Event Variants
 
@@ -39,5 +39,5 @@ New crate: `pug-events` at `packages/contracts/events/`
 
 ## Verification
 
-- [x] `pug-events` crate compiles with zero dependencies
+- [x] `flint-events` crate compiles with zero dependencies
 - [x] 5 tests pass covering event payloads, value variants, modifiers, drag phases, profiles

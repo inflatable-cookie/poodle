@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { pxToRem } from "@pug/svelte-tokens";
+  import { pxToRem } from "@flint/svelte-tokens";
   import type { SkeletonShape, SkeletonPreset } from "./types";
 
   export let shape: SkeletonShape = "line";
@@ -18,16 +18,16 @@
 {#if preset === "table-row"}
   <div class="skeleton-preset skeleton-preset--table-row" data-animated={isAnimated} aria-hidden="true">
     {#each { length: 4 } as _, i}
-      <span class="skeleton skeleton--cell" style="--pug-skeleton-width: {i === 0 ? '40%' : i === 3 ? '20%' : '60%'}"></span>
+      <span class="skeleton skeleton--cell" style="--flint-skeleton-width: {i === 0 ? '40%' : i === 3 ? '20%' : '60%'}"></span>
     {/each}
   </div>
 {:else if preset === "card"}
   <div class="skeleton-preset skeleton-preset--card" data-animated={isAnimated} aria-hidden="true">
     <span class="skeleton skeleton--block-header"></span>
     <div class="skeleton-preset__card-body">
-      <span class="skeleton skeleton--line" style="--pug-skeleton-width: 80%"></span>
-      <span class="skeleton skeleton--line" style="--pug-skeleton-width: 100%"></span>
-      <span class="skeleton skeleton--line" style="--pug-skeleton-width: 60%"></span>
+      <span class="skeleton skeleton--line" style="--flint-skeleton-width: 80%"></span>
+      <span class="skeleton skeleton--line" style="--flint-skeleton-width: 100%"></span>
+      <span class="skeleton skeleton--line" style="--flint-skeleton-width: 60%"></span>
     </div>
     <div class="skeleton-preset__card-footer">
       <span class="skeleton skeleton--pill"></span>
@@ -38,8 +38,8 @@
   <div class="skeleton-preset skeleton-preset--list-item" data-animated={isAnimated} aria-hidden="true">
     <span class="skeleton skeleton--avatar"></span>
     <div class="skeleton-preset__list-text">
-      <span class="skeleton skeleton--line" style="--pug-skeleton-width: 60%"></span>
-      <span class="skeleton skeleton--line-sm" style="--pug-skeleton-width: 40%"></span>
+      <span class="skeleton skeleton--line" style="--flint-skeleton-width: 60%"></span>
+      <span class="skeleton skeleton--line-sm" style="--flint-skeleton-width: 40%"></span>
     </div>
   </div>
 {:else if preset === "detail-section"}
@@ -55,14 +55,14 @@
 {:else if preset === "avatar-line"}
   <div class="skeleton-preset skeleton-preset--avatar-line" data-animated={isAnimated} aria-hidden="true">
     <span class="skeleton skeleton--avatar"></span>
-    <span class="skeleton skeleton--line" style="--pug-skeleton-width: 10rem"></span>
+    <span class="skeleton skeleton--line" style="--flint-skeleton-width: 10rem"></span>
   </div>
 {:else}
   <span
     class="skeleton"
     data-shape={shape}
     data-animated={isAnimated}
-    style={`--pug-skeleton-width: ${resolvedWidth}; --pug-skeleton-height: ${resolvedHeight};`}
+    style={`--flint-skeleton-width: ${resolvedWidth}; --flint-skeleton-height: ${resolvedHeight};`}
     aria-hidden="true"
   ></span>
 {/if}
@@ -70,15 +70,15 @@
 <style>
   .skeleton {
     display: block;
-    width: var(--pug-skeleton-width, 100%);
-    height: var(--pug-skeleton-height, 0.875rem);
-    border-radius: var(--pug-radius-control);
+    width: var(--flint-skeleton-width, 100%);
+    height: var(--flint-skeleton-height, 0.875rem);
+    border-radius: var(--flint-radius-control);
     background:
       linear-gradient(
         90deg,
-        color-mix(in srgb, var(--pug-color-background-elevated) 88%, transparent) 0%,
-        color-mix(in srgb, var(--pug-color-background-surface) 92%, white) 48%,
-        color-mix(in srgb, var(--pug-color-background-elevated) 88%, transparent) 100%
+        color-mix(in srgb, var(--flint-color-background-elevated) 88%, transparent) 0%,
+        color-mix(in srgb, var(--flint-color-background-surface) 92%, white) 48%,
+        color-mix(in srgb, var(--flint-color-background-elevated) 88%, transparent) 100%
       );
     background-size: 220% 100%;
   }
@@ -88,7 +88,7 @@
   }
 
   .skeleton[data-shape="block"] {
-    border-radius: calc(var(--pug-radius-surface) - 0.25rem);
+    border-radius: calc(var(--flint-radius-surface) - 0.25rem);
   }
 
   .skeleton[data-animated="true"],
@@ -119,7 +119,7 @@
     flex-direction: row;
     gap: 0.75rem;
     padding: 0.625rem 0;
-    border-bottom: 1px solid color-mix(in srgb, var(--pug-color-border-subtle) 42%, transparent);
+    border-bottom: 1px solid color-mix(in srgb, var(--flint-color-border-subtle) 42%, transparent);
   }
 
   .skeleton--cell {
@@ -132,13 +132,13 @@
   .skeleton-preset--card {
     gap: 0.75rem;
     padding: 1rem;
-    border: 1px solid color-mix(in srgb, var(--pug-color-border-default) 42%, transparent);
-    border-radius: var(--pug-radius-surface);
+    border: 1px solid color-mix(in srgb, var(--flint-color-border-default) 42%, transparent);
+    border-radius: var(--flint-radius-surface);
   }
 
   .skeleton--block-header {
     height: 6rem;
-    border-radius: calc(var(--pug-radius-surface) - 0.375rem);
+    border-radius: calc(var(--flint-radius-surface) - 0.375rem);
   }
 
   .skeleton-preset__card-body {

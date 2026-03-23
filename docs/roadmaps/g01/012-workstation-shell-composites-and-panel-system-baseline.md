@@ -1,14 +1,14 @@
 # g01.012 Workstation-Shell Composites And Panel System Baseline
 
 Status: completed
-Owner: Pug Core
+Owner: Flint Core
 Updated: 2026-03-11
 Depends on: g01.007, g01.008, g01.009, g01.010
-Primary repos: `pug`
+Primary repos: `flint`
 
 ## Context
 
-Pug is expected to support desktop/workstation applications beyond simple web
+Flint is expected to support desktop/workstation applications beyond simple web
 product UIs. That requires an explicit shell layer.
 
 ## Goals
@@ -27,7 +27,7 @@ product UIs. That requires an explicit shell layer.
 - [x] define the workstation-shell component families in scope
 - [x] define panel, tab, and dock interactions at the contract level
 - [x] define layout persistence and shell-state expectations at a high level
-- [x] document where app-specific workstation widgets begin and Pug ends
+- [x] document where app-specific workstation widgets begin and Flint ends
 
 ## Acceptance Criteria
 

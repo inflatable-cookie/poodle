@@ -1,4 +1,4 @@
-# Translation Memo: Pug Token System
+# Translation Memo: Flint Token System
 
 Status: draft
 Created: 2026-03-11
@@ -7,7 +7,7 @@ Target: g01.002, g01.003
 
 ## Summary
 
-Pug will adopt the W3C Design Tokens Community Group (DTCG) format as the canonical token specification. Tokens will be organized in a three-layer hierarchy (primitives → semantic → component) and emitted to CSS/TypeScript for Svelte and Rust code for GPUI using Style Dictionary 4.0 with custom transforms.
+Flint will adopt the W3C Design Tokens Community Group (DTCG) format as the canonical token specification. Tokens will be organized in a three-layer hierarchy (primitives → semantic → component) and emitted to CSS/TypeScript for Svelte and Rust code for GPUI using Style Dictionary 4.0 with custom transforms.
 
 ---
 
@@ -26,7 +26,7 @@ Pug will adopt the W3C Design Tokens Community Group (DTCG) format as the canoni
 
 ### 1. Canonical Format: W3C DTCG
 
-**Decision:** Pug's source of truth for tokens will be W3C DTCG format (version 2025.10 or later).
+**Decision:** Flint's source of truth for tokens will be W3C DTCG format (version 2025.10 or later).
 
 **Rationale:**
 - Industry standard with broad tool support (Figma, Tokens Studio, Style Dictionary)
@@ -35,7 +35,7 @@ Pug will adopt the W3C Design Tokens Community Group (DTCG) format as the canoni
 - Adopted by major design systems (Adobe, Salesforce, IBM, GitHub, Shopify)
 
 **Implications:**
-- Design tools can export directly to Pug's format
+- Design tools can export directly to Flint's format
 - Token files are JSON with `$type`, `$value`, `$description` properties
 - Token aliases use `{path.to.token}` syntax
 
@@ -77,8 +77,8 @@ tokens/
 
 | Layer | Token Path | CSS Output | TS Output | Rust Output |
 |-------|------------|------------|-----------|-------------|
-| Primitive | `primitives.color.blue.500` | `--pug-blue-500` | `primitives.color.blue[500]` | `pug::primitives::color::BLUE_500` |
-| Semantic | `semantic.color.background.primary` | `--pug-color-background-primary` | `tokens.color.background.primary` | `pug::semantic::color::BACKGROUND_PRIMARY` |
+| Primitive | `primitives.color.blue.500` | `--flint-blue-500` | `primitives.color.blue[500]` | `flint::primitives::color::BLUE_500` |
+| Semantic | `semantic.color.background.primary` | `--flint-color-background-primary` | `tokens.color.background.primary` | `flint::semantic::color::BACKGROUND_PRIMARY` |
 
 **Rationale:**
 - Consistent source identifiers across platforms
@@ -168,16 +168,16 @@ impl Default for Theme {
 ```css
 /* tokens.css */
 :root {
-  --pug-color-background-primary: #ffffff;
-  --pug-color-background-secondary: #f5f5f5;
-  --pug-color-text-primary: #1a1a1a;
+  --flint-color-background-primary: #ffffff;
+  --flint-color-background-secondary: #f5f5f5;
+  --flint-color-text-primary: #1a1a1a;
   /* ... */
 }
 
 [data-theme="dark"] {
-  --pug-color-background-primary: #1a1a1a;
-  --pug-color-background-secondary: #2a2a2a;
-  --pug-color-text-primary: #ffffff;
+  --flint-color-background-primary: #1a1a1a;
+  --flint-color-background-secondary: #2a2a2a;
+  --flint-color-text-primary: #ffffff;
   /* ... */
 }
 ```
@@ -187,11 +187,11 @@ impl Default for Theme {
 export const tokens = {
   color: {
     background: {
-      primary: 'var(--pug-color-background-primary)',
-      secondary: 'var(--pug-color-background-secondary)',
+      primary: 'var(--flint-color-background-primary)',
+      secondary: 'var(--flint-color-background-secondary)',
     },
     text: {
-      primary: 'var(--pug-color-text-primary)',
+      primary: 'var(--flint-color-text-primary)',
     },
   },
 } as const;
@@ -252,7 +252,7 @@ export type TokenPath =
 - [ ] Define initial primitive token set (color, spacing, typography)
 - [ ] Define semantic token set for first components
 - [ ] Add token build step to CI
-- [ ] Update architecture/001-pug-system-shape.md with token rules
+- [ ] Update architecture/001-flint-system-shape.md with token rules
 - [ ] Document token contribution guidelines
 
 ---

@@ -92,13 +92,13 @@ At minimum, it should allow:
 
 ## Honesty Rule
 
-Pug may say:
+Flint may say:
 
 - GPUI has a native preview-app baseline
 - emitted tokens and themes are being applied in a native review surface
 - side-by-side comparison begins with wave-0 sections
 
-Pug may not say:
+Flint may not say:
 
 - the GPUI preview app proves full GPUI component parity
 - native preview shell existence implies all later component layers are solved

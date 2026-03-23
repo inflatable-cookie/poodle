@@ -1,7 +1,7 @@
 <script lang="ts">
-  import { Code, Eyebrow } from "@pug/svelte-primitives";
+  import { Code, Eyebrow } from "@flint/svelte-primitives";
 
-  const tsExample = `import { Button } from "@pug/svelte-primitives";
+  const tsExample = `import { Button } from "@flint/svelte-primitives";
 
 function handleClick(event: MouseEvent): void {
   console.log("Button clicked", event);
@@ -10,8 +10,8 @@ function handleClick(event: MouseEvent): void {
   const cssExample = `.button {
   display: inline-flex;
   align-items: center;
-  border-radius: var(--pug-radius-control);
-  background: var(--pug-color-accent-base);
+  border-radius: var(--flint-radius-control);
+  background: var(--flint-color-accent-base);
 }`;
 </script>
 
@@ -45,5 +45,5 @@ function handleClick(event: MouseEvent): void {
 <style>
   .specimen { display: flex; flex-direction: column; gap: 1.5rem; }
   .specimen__group { display: flex; flex-direction: column; gap: 0.5rem; }
-  p { margin: 0; color: var(--pug-color-text-primary); }
+  p { margin: 0; color: var(--flint-color-text-primary); }
 </style>

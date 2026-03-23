@@ -1,7 +1,7 @@
 //! MetricTile — Jetstream metric tile backed by MetricTileSpec.
 use jetstream_runtime::ui_element::{self, JsEl};
-use pug_jetstream::JetstreamThemeProvider;
-use pug_composites::MetricTileSpec;
+use flint_jetstream::JetstreamThemeProvider;
+use flint_composites::MetricTileSpec;
 use crate::theme_ext::{resolve_color, resolve_px, resolve_radius};
 
 pub fn js_metric_tile(spec: &MetricTileSpec, theme: &JetstreamThemeProvider) -> JsEl {

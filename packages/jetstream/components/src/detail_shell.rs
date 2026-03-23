@@ -1,7 +1,7 @@
 //! DetailShell — Jetstream detail page shell backed by DetailShellSpec.
 use jetstream_runtime::ui_element::{self, JsEl};
-use pug_jetstream::JetstreamThemeProvider;
-use pug_composites::DetailShellSpec;
+use flint_jetstream::JetstreamThemeProvider;
+use flint_composites::DetailShellSpec;
 use crate::theme_ext::{resolve_color, resolve_px};
 
 pub fn js_detail_shell(spec: &DetailShellSpec, theme: &JetstreamThemeProvider, header: Option<JsEl>, content: Option<JsEl>) -> JsEl {

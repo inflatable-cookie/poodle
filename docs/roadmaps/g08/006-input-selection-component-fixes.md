@@ -1,7 +1,7 @@
 # g08.006 Input And Selection Component Fixes (Batch 2)
 
 Status: complete
-Owner: Pug Core
+Owner: Flint Core
 Depends on: g08.004
 
 ## Contract Check

@@ -67,13 +67,13 @@
   .checkbox {
     display: inline-flex;
     align-items: center;
-    gap: var(--pug-space-inline-sm);
-    color: var(--pug-color-text-primary);
+    gap: var(--flint-space-inline-sm);
+    color: var(--flint-color-text-primary);
     cursor: pointer;
   }
 
   .checkbox[data-disabled="true"] {
-    opacity: var(--pug-state-opacity-disabled);
+    opacity: var(--flint-state-opacity-disabled);
     cursor: not-allowed;
   }
 
@@ -87,22 +87,22 @@
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    width: calc(var(--pug-size-icon-default) + 0.125rem);
-    height: calc(var(--pug-size-icon-default) + 0.125rem);
-    border: 0.0625rem solid var(--pug-color-border-default);
+    width: calc(var(--flint-size-icon-default) + 0.125rem);
+    height: calc(var(--flint-size-icon-default) + 0.125rem);
+    border: 0.0625rem solid var(--flint-color-border-default);
     border-radius: 0.3125rem;
-    background: var(--pug-color-background-surface);
-    color: var(--pug-color-text-inverse);
+    background: var(--flint-color-background-surface);
+    color: var(--flint-color-text-inverse);
   }
 
   .checkbox__control:checked + .checkbox__indicator,
   .checkbox__control:indeterminate + .checkbox__indicator {
-    border-color: var(--pug-color-accent-base);
-    background: var(--pug-color-accent-base);
+    border-color: var(--flint-color-accent-base);
+    background: var(--flint-color-accent-base);
   }
 
   .checkbox__control:focus-visible + .checkbox__indicator {
-    outline: var(--pug-border-width-focus) solid var(--pug-color-accent-focusRing);
+    outline: var(--flint-border-width-focus) solid var(--flint-color-accent-focusRing);
     outline-offset: 0.125rem;
   }
 
@@ -110,15 +110,15 @@
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    width: calc(var(--pug-size-icon-default) - 0.125rem);
-    height: calc(var(--pug-size-icon-default) - 0.125rem);
+    width: calc(var(--flint-size-icon-default) - 0.125rem);
+    height: calc(var(--flint-size-icon-default) - 0.125rem);
     line-height: 1;
   }
 
   .checkbox__label {
-    font-family: var(--pug-typography-label-family);
-    font-size: var(--pug-typography-label-size);
-    font-weight: var(--pug-typography-label-weight);
-    line-height: var(--pug-typography-label-lineHeight);
+    font-family: var(--flint-typography-label-family);
+    font-size: var(--flint-typography-label-size);
+    font-weight: var(--flint-typography-label-weight);
+    line-height: var(--flint-typography-label-lineHeight);
   }
 </style>

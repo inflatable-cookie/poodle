@@ -122,127 +122,127 @@
 
 <style>
   .text-input {
-    --pug-text-input-radius: var(--pug-treatment-interactive-subtle-radius, var(--pug-radius-control));
-    --pug-text-input-fill: var(
-      --pug-treatment-interactive-subtle-fill,
-      var(--pug-color-background-surface)
+    --flint-text-input-radius: var(--flint-treatment-interactive-subtle-radius, var(--flint-radius-control));
+    --flint-text-input-fill: var(
+      --flint-treatment-interactive-subtle-fill,
+      var(--flint-color-background-surface)
     );
-    --pug-text-input-fill-focus: var(
-      --pug-treatment-interactive-subtle-fill-focus,
-      var(--pug-text-input-fill)
+    --flint-text-input-fill-focus: var(
+      --flint-treatment-interactive-subtle-fill-focus,
+      var(--flint-text-input-fill)
     );
-    --pug-text-input-border: var(
-      --pug-treatment-interactive-subtle-border,
-      var(--pug-color-border-default)
+    --flint-text-input-border: var(
+      --flint-treatment-interactive-subtle-border,
+      var(--flint-color-border-default)
     );
-    --pug-text-input-border-focus: var(
-      --pug-treatment-interactive-subtle-border-focus,
-      var(--pug-color-accent-focusRing)
+    --flint-text-input-border-focus: var(
+      --flint-treatment-interactive-subtle-border-focus,
+      var(--flint-color-accent-focusRing)
     );
-    --pug-text-input-shadow: var(--pug-treatment-interactive-subtle-shadow, none);
-    --pug-text-input-shadow-focus: var(
-      --pug-treatment-interactive-subtle-shadow-focus,
-      0 0 0 var(--pug-border-width-focus)
-        color-mix(in srgb, var(--pug-color-accent-focusRing) 28%, transparent)
+    --flint-text-input-shadow: var(--flint-treatment-interactive-subtle-shadow, none);
+    --flint-text-input-shadow-focus: var(
+      --flint-treatment-interactive-subtle-shadow-focus,
+      0 0 0 var(--flint-border-width-focus)
+        color-mix(in srgb, var(--flint-color-accent-focusRing) 28%, transparent)
     );
     display: flex;
     align-items: center;
-    gap: var(--pug-space-inline-sm);
-    min-height: var(--pug-size-control-height);
-    padding: 0 var(--pug-space-control-x);
-    border: 0.0625rem solid var(--pug-text-input-border);
-    border-radius: var(--pug-text-input-radius);
-    background: var(--pug-text-input-fill);
-    color: var(--pug-color-text-primary);
-    box-shadow: var(--pug-text-input-shadow);
+    gap: var(--flint-space-inline-sm);
+    min-height: var(--flint-size-control-height);
+    padding: 0 var(--flint-space-control-x);
+    border: 0.0625rem solid var(--flint-text-input-border);
+    border-radius: var(--flint-text-input-radius);
+    background: var(--flint-text-input-fill);
+    color: var(--flint-color-text-primary);
+    box-shadow: var(--flint-text-input-shadow);
     transition:
-      border-color var(--pug-motion-duration-interaction) var(--pug-motion-easing-standard),
-      box-shadow var(--pug-motion-duration-interaction) var(--pug-motion-easing-standard),
-      background var(--pug-motion-duration-interaction) var(--pug-motion-easing-standard);
+      border-color var(--flint-motion-duration-interaction) var(--flint-motion-easing-standard),
+      box-shadow var(--flint-motion-duration-interaction) var(--flint-motion-easing-standard),
+      background var(--flint-motion-duration-interaction) var(--flint-motion-easing-standard);
   }
 
   .text-input:focus-within {
-    border-color: var(--pug-text-input-border-focus);
-    background: var(--pug-text-input-fill-focus);
-    box-shadow: var(--pug-text-input-shadow-focus);
+    border-color: var(--flint-text-input-border-focus);
+    background: var(--flint-text-input-fill-focus);
+    box-shadow: var(--flint-text-input-shadow-focus);
   }
 
   .text-input[data-validation-state="invalid"] {
-    border-color: var(--pug-color-status-danger);
+    border-color: var(--flint-color-status-danger);
   }
 
   .text-input[data-validation-state="valid"] {
-    border-color: var(--pug-color-status-success);
+    border-color: var(--flint-color-status-success);
   }
 
   .text-input[data-validation-state="pending"] {
-    border-color: var(--pug-color-accent-base);
+    border-color: var(--flint-color-accent-base);
   }
 
   .text-input:has(.text-input__control:disabled) {
-    opacity: var(--pug-state-opacity-disabled);
+    opacity: var(--flint-state-opacity-disabled);
   }
 
   .text-input__control {
     flex: 1;
     min-width: 0;
     width: 100%;
-    height: calc(var(--pug-size-control-height) - (var(--pug-border-width-default) * 2));
+    height: calc(var(--flint-size-control-height) - (var(--flint-border-width-default) * 2));
     padding: 0;
     border: 0;
     background: transparent;
     color: inherit;
-    font-family: var(--pug-typography-body-family);
-    font-size: var(--pug-typography-body-size);
-    line-height: var(--pug-typography-body-lineHeight);
+    font-family: var(--flint-typography-body-family);
+    font-size: var(--flint-typography-body-size);
+    line-height: var(--flint-typography-body-lineHeight);
     outline: 0;
   }
 
   .text-input__control::placeholder {
-    color: var(--pug-color-text-secondary);
+    color: var(--flint-color-text-secondary);
   }
 
   .text-input__affordance {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    color: var(--pug-color-icon-muted);
-    font-family: var(--pug-typography-code-family);
-    font-size: var(--pug-icon-size-default);
+    color: var(--flint-color-icon-muted);
+    font-family: var(--flint-typography-code-family);
+    font-size: var(--flint-icon-size-default);
   }
 
   .text-input__affix {
     display: inline-flex;
     align-items: center;
-    color: var(--pug-color-text-secondary);
-    font-family: var(--pug-typography-body-family);
-    font-size: var(--pug-typography-body-size);
+    color: var(--flint-color-text-secondary);
+    font-family: var(--flint-typography-body-family);
+    font-size: var(--flint-typography-body-size);
     white-space: nowrap;
     user-select: none;
   }
 
   .text-input__affix--prefix {
-    padding-right: var(--pug-space-inline-sm);
-    border-right: 0.0625rem solid color-mix(in srgb, var(--pug-color-border-subtle) 52%, transparent);
-    margin-right: var(--pug-space-inline-sm);
+    padding-right: var(--flint-space-inline-sm);
+    border-right: 0.0625rem solid color-mix(in srgb, var(--flint-color-border-subtle) 52%, transparent);
+    margin-right: var(--flint-space-inline-sm);
   }
 
   .text-input__affix--suffix {
-    padding-left: var(--pug-space-inline-sm);
-    border-left: 0.0625rem solid color-mix(in srgb, var(--pug-color-border-subtle) 52%, transparent);
-    margin-left: var(--pug-space-inline-sm);
+    padding-left: var(--flint-space-inline-sm);
+    border-left: 0.0625rem solid color-mix(in srgb, var(--flint-color-border-subtle) 52%, transparent);
+    margin-left: var(--flint-space-inline-sm);
   }
 
   .text-input__char-count {
     display: inline-flex;
     align-items: center;
-    color: var(--pug-color-text-secondary);
-    font-family: var(--pug-typography-code-family);
+    color: var(--flint-color-text-secondary);
+    font-family: var(--flint-typography-code-family);
     font-size: 0.6875rem;
     white-space: nowrap;
   }
 
   .text-input__char-count--over {
-    color: var(--pug-color-status-danger);
+    color: var(--flint-color-status-danger);
   }
 </style>

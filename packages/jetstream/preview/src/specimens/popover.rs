@@ -1,10 +1,10 @@
 //! Popover specimen — popover panels with different content.
 
 use jetstream_runtime::ui_element::*;
-use pug_jetstream::JetstreamThemeProvider;
-use pug_jetstream_components::popover::js_popover;
-use pug_jetstream_components::theme_ext::*;
-use pug_primitives::PopoverSpec;
+use flint_jetstream::JetstreamThemeProvider;
+use flint_jetstream_components::popover::js_popover;
+use flint_jetstream_components::theme_ext::*;
+use flint_primitives::PopoverSpec;
 
 pub fn render(theme: &JetstreamThemeProvider) -> JsEl {
     let secondary = resolve_color(theme, "semantic.color.text.secondary");

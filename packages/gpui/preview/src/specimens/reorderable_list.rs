@@ -1,9 +1,9 @@
 use gpui::*;
-use pug_adapter::ThemeProvider;
-use pug_primitives::EyebrowSpec;
-use pug_composites::ReorderableListSpec;
-use pug_gpui_components::{ReorderableList, Eyebrow};
-use pug_gpui::GpuiThemeProvider;
+use flint_adapter::ThemeProvider;
+use flint_primitives::EyebrowSpec;
+use flint_composites::ReorderableListSpec;
+use flint_gpui_components::{ReorderableList, Eyebrow};
+use flint_gpui::GpuiThemeProvider;
 use crate::style_bridge::color_to_hsla;
 
 pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
@@ -53,8 +53,8 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
 
 fn list_item(
     label: &str,
-    text_color: pug_tokens::typed::ColorValue,
-    border_color: pug_tokens::typed::ColorValue,
+    text_color: flint_tokens::typed::ColorValue,
+    border_color: flint_tokens::typed::ColorValue,
 ) -> Div {
     div()
         .flex()

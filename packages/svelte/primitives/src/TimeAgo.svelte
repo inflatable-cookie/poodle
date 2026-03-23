@@ -88,9 +88,9 @@
 
 <style>
   .time-ago {
-    color: var(--pug-color-text-secondary);
-    font-family: var(--pug-typography-body-family);
-    font-size: var(--pug-typography-body-size);
+    color: var(--flint-color-text-secondary);
+    font-family: var(--flint-typography-body-family);
+    font-size: var(--flint-typography-body-size);
     font-variant-numeric: tabular-nums;
     cursor: default;
   }

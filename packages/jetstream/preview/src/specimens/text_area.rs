@@ -1,10 +1,10 @@
 //! TextArea specimen — text areas with default, value, and disabled states.
 
 use jetstream_runtime::ui_element::*;
-use pug_jetstream::JetstreamThemeProvider;
-use pug_jetstream_components::text_area::js_text_area;
-use pug_jetstream_components::theme_ext::*;
-use pug_primitives::TextAreaSpec;
+use flint_jetstream::JetstreamThemeProvider;
+use flint_jetstream_components::text_area::js_text_area;
+use flint_jetstream_components::theme_ext::*;
+use flint_primitives::TextAreaSpec;
 
 pub fn render(theme: &JetstreamThemeProvider) -> JsEl {
     let secondary = resolve_color(theme, "semantic.color.text.secondary");

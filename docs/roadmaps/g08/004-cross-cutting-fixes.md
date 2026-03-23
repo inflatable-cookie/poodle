@@ -1,7 +1,7 @@
 # g08.004 Cross-Cutting Fixes: Disabled Opacity, Hover Colors, Geometry Tokens
 
 Status: complete
-Owner: Pug Core
+Owner: Flint Core
 Depends on: g08.001
 
 ## Contract Check

@@ -1,17 +1,17 @@
 [package]
-name = "pug-style"
+name = "flint-style"
 version = "0.0.0"
 edition = "2021"
-description = "Resolved style descriptor IR for Pug multi-renderer targets."
+description = "Resolved style descriptor IR for Flint multi-renderer targets."
 
 [lib]
 path = "src/lib.rs"
 
 [dependencies]
-pug-tokens = { path = "../tokens" }
-pug-layout = { path = "../layout" }
+flint-tokens = { path = "../tokens" }
+flint-layout = { path = "../layout" }
 
-[package.metadata.pug]
+[package.metadata.flint]
 public-intent = true
 channel = "preview"
 stability = "pre-release"

@@ -1,5 +1,5 @@
-use pug_primitives::PaddingScale;
-use pug_tokens::semantic;
+use flint_primitives::PaddingScale;
+use flint_tokens::semantic;
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub enum PanelBodyPadding {

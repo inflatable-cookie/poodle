@@ -1,10 +1,10 @@
 //! Menu specimen — vertical menus with different item sets.
 
 use jetstream_runtime::ui_element::*;
-use pug_jetstream::JetstreamThemeProvider;
-use pug_jetstream_components::menu::js_menu;
-use pug_jetstream_components::theme_ext::*;
-use pug_primitives::{MenuEntry, MenuSpec};
+use flint_jetstream::JetstreamThemeProvider;
+use flint_jetstream_components::menu::js_menu;
+use flint_jetstream_components::theme_ext::*;
+use flint_primitives::{MenuEntry, MenuSpec};
 
 pub fn render(theme: &JetstreamThemeProvider) -> JsEl {
     let secondary = resolve_color(theme, "semantic.color.text.secondary");

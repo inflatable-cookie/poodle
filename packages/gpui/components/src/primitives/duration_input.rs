@@ -4,8 +4,8 @@
 //! focus-within border change. No hover on root.
 
 use gpui::*;
-use pug_gpui::GpuiThemeProvider;
-use pug_primitives::{DurationInputSpec, ValidationState};
+use flint_gpui::GpuiThemeProvider;
+use flint_primitives::{DurationInputSpec, ValidationState};
 
 use crate::theme_ext::{resolve_color, resolve_opacity, resolve_px, resolve_radius};
 
@@ -135,9 +135,9 @@ impl IntoElement for DurationInput {
         }
 
         let id_str = if let Some(ref suffix) = self.id_suffix {
-            format!("pug-duration-input-{}", suffix)
+            format!("flint-duration-input-{}", suffix)
         } else {
-            "pug-duration-input".to_string()
+            "flint-duration-input".to_string()
         };
 
         // Contract: padding 0.25rem control-x, border, radius, surface bg

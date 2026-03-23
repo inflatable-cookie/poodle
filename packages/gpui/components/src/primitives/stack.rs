@@ -3,8 +3,8 @@
 //! Contract: `docs/contracts/foundation/stack.md`
 
 use gpui::*;
-use pug_gpui::GpuiThemeProvider;
-use pug_primitives::{Alignment, LayoutJustify, PaddingScale, StackDirection, StackSpec};
+use flint_gpui::GpuiThemeProvider;
+use flint_primitives::{Alignment, LayoutJustify, PaddingScale, StackDirection, StackSpec};
 
 use crate::theme_ext::resolve_px;
 

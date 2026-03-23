@@ -183,7 +183,7 @@ CalendarWeekStart: "sunday" | "monday"
 
 | Property | Value |
 |----------|-------|
-| `font-family` | `var(--pug-typography-label-family)` |
+| `font-family` | `var(--flint-typography-label-family)` |
 | `font-size` | `0.8125rem` |
 | `font-weight` | `600` |
 | `letter-spacing` | `0.02em` |
@@ -198,10 +198,10 @@ CalendarWeekStart: "sunday" | "monday"
 | `justify-content` | `center` |
 | `width` | `2rem` |
 | `height` | `2rem` |
-| `border` | `0.0625rem solid var(--pug-color-border-default)` |
-| `border-radius` | `var(--pug-radius-control)` |
-| `background` | `var(--pug-color-background-surface)` |
-| `color` | `var(--pug-color-text-primary)` |
+| `border` | `0.0625rem solid var(--flint-color-border-default)` |
+| `border-radius` | `var(--flint-radius-control)` |
+| `background` | `var(--flint-color-background-surface)` |
+| `color` | `var(--flint-color-text-primary)` |
 | `cursor` | `pointer` |
 | `font` | `inherit` |
 
@@ -209,13 +209,13 @@ CalendarWeekStart: "sunday" | "monday"
 
 | Property | Value |
 |----------|-------|
-| `background` | `color-mix(in srgb, var(--pug-color-background-surface) 82%, var(--pug-color-background-elevated))` |
+| `background` | `color-mix(in srgb, var(--flint-color-background-surface) 82%, var(--flint-color-background-elevated))` |
 
 ### Nav Button — focus-visible
 
 | Property | Value |
 |----------|-------|
-| `outline` | `var(--pug-border-width-focus) solid var(--pug-color-accent-focusRing)` |
+| `outline` | `var(--flint-border-width-focus) solid var(--flint-color-accent-focusRing)` |
 | `outline-offset` | `0.125rem` |
 
 ### Weekday Row `.calendar__weekdays`
@@ -231,8 +231,8 @@ CalendarWeekStart: "sunday" | "monday"
 
 | Property | Value |
 |----------|-------|
-| `color` | `var(--pug-color-text-secondary)` |
-| `font-family` | `var(--pug-typography-label-family)` |
+| `color` | `var(--flint-color-text-secondary)` |
+| `font-family` | `var(--flint-typography-label-family)` |
 | `font-size` | `0.6875rem` |
 | `font-weight` | `600` |
 | `letter-spacing` | `0.04em` |
@@ -270,11 +270,11 @@ CalendarWeekStart: "sunday" | "monday"
 | `min-height` | `2.25rem` |
 | `padding` | `0.25rem` |
 | `border` | `0.0625rem solid transparent` |
-| `border-radius` | `var(--pug-radius-control)` |
+| `border-radius` | `var(--flint-radius-control)` |
 | `background` | `transparent` |
-| `color` | `var(--pug-color-text-primary)` |
+| `color` | `var(--flint-color-text-primary)` |
 | `cursor` | `pointer` |
-| `font-family` | `var(--pug-typography-label-family)` |
+| `font-family` | `var(--flint-typography-label-family)` |
 | `font-size` | `0.75rem` |
 | `font-weight` | `500` |
 
@@ -282,49 +282,49 @@ CalendarWeekStart: "sunday" | "monday"
 
 | Property | Value |
 |----------|-------|
-| `color` | `var(--pug-color-text-secondary)` |
+| `color` | `var(--flint-color-text-secondary)` |
 | `opacity` | `0.72` |
 
 ### Day Button — today
 
 | Property | Value |
 |----------|-------|
-| `border-color` | `color-mix(in srgb, var(--pug-color-accent-base) 44%, var(--pug-color-border-default))` |
+| `border-color` | `color-mix(in srgb, var(--flint-color-accent-base) 44%, var(--flint-color-border-default))` |
 
 ### Day Button — selected
 
 | Property | Value |
 |----------|-------|
-| `background` | `var(--pug-color-accent-base)` |
-| `color` | `var(--pug-color-text-inverse)` |
+| `background` | `var(--flint-color-accent-base)` |
+| `color` | `var(--flint-color-text-inverse)` |
 
 ### Day Button — hover / focus-visible
 
 | Property | Value |
 |----------|-------|
-| `border-color` | `color-mix(in srgb, var(--pug-color-accent-base) 46%, var(--pug-color-border-default))` |
-| `background` | `color-mix(in srgb, var(--pug-color-accent-base) 14%, transparent)` |
+| `border-color` | `color-mix(in srgb, var(--flint-color-accent-base) 46%, var(--flint-color-border-default))` |
+| `background` | `color-mix(in srgb, var(--flint-color-accent-base) 14%, transparent)` |
 | `outline` | `none` |
 
 ### Day Button — selected hover
 
 | Property | Value |
 |----------|-------|
-| `background` | `color-mix(in srgb, var(--pug-color-accent-base) 88%, white 8%)` |
+| `background` | `color-mix(in srgb, var(--flint-color-accent-base) 88%, white 8%)` |
 
 ### Nav Button — disabled (`.calendar__nav:disabled`)
 
 | Property | Value |
 |----------|-------|
 | `cursor` | `not-allowed` |
-| `opacity` | `var(--pug-state-opacity-disabled)` |
+| `opacity` | `var(--flint-state-opacity-disabled)` |
 
 ### Day Button — disabled (`.calendar__day:disabled`)
 
 | Property | Value |
 |----------|-------|
 | `cursor` | `not-allowed` |
-| `opacity` | `var(--pug-state-opacity-disabled)` |
+| `opacity` | `var(--flint-state-opacity-disabled)` |
 
 ## 9. Svelte Notes
 
@@ -342,7 +342,7 @@ CalendarWeekStart: "sunday" | "monday"
 
 ## 10. GPUI Notes
 
-- expected crate/module surface: `pug_gpui::primitives::calendar`
+- expected crate/module surface: `flint_gpui::primitives::calendar`
 - GPUI must model the grid as a 7-column structure with row and cell semantics
 - Each day must be an interactive element exposing selected state and date label
 - Month label must announce changes through the accessibility tree

@@ -119,13 +119,13 @@ No internal state.
 | Property | Condition | Value |
 |----------|-----------|-------|
 | `gap` | `gap="none"` | `0` |
-| `gap` | `gap="sm"` | `var(--pug-space-inline-sm)` |
-| `gap` | `gap="md"` | `var(--pug-space-panel-y)` |
-| `gap` | `gap="lg"` | `var(--pug-space-panel-x)` |
+| `gap` | `gap="sm"` | `var(--flint-space-inline-sm)` |
+| `gap` | `gap="md"` | `var(--flint-space-panel-y)` |
+| `gap` | `gap="lg"` | `var(--flint-space-panel-x)` |
 | `padding` | `padding="none"` | `0` |
-| `padding` | `padding="sm"` | `var(--pug-space-inline-sm)` |
-| `padding` | `padding="md"` | `var(--pug-space-panel-y)` |
-| `padding` | `padding="lg"` | `var(--pug-space-panel-x)` |
+| `padding` | `padding="sm"` | `var(--flint-space-inline-sm)` |
+| `padding` | `padding="md"` | `var(--flint-space-panel-y)` |
+| `padding` | `padding="lg"` | `var(--flint-space-panel-x)` |
 | `align-items` | `align="start"` | `flex-start` |
 | `align-items` | `align="end"` | `flex-end` |
 | `align-items` | `align="center"` | `center` |
@@ -142,9 +142,9 @@ No internal state.
 | Scale | Resolved Value |
 |-------|---------------|
 | `"none"` | `0` |
-| `"sm"` | `var(--pug-space-inline-sm)` |
-| `"md"` | `var(--pug-space-panel-y)` |
-| `"lg"` | `var(--pug-space-panel-x)` |
+| `"sm"` | `var(--flint-space-inline-sm)` |
+| `"md"` | `var(--flint-space-panel-y)` |
+| `"lg"` | `var(--flint-space-panel-x)` |
 
 ### LayoutAlign Value Map
 
@@ -167,7 +167,7 @@ No internal state.
 
 ## 10. GPUI Notes
 
-- Expected crate/module surface: `pug_gpui::components::stack`
+- Expected crate/module surface: `flint_gpui::components::stack`
 - Implemented with GPUI-native vertical flex layout
 - SpaceScale mapping must use the same design token values
 - LayoutAlign mapping must produce equivalent cross-axis alignment

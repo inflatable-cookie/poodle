@@ -1,4 +1,4 @@
-use pug_tokens::semantic;
+use flint_tokens::semantic;
 
 /// Tone for a toast notification.
 #[derive(Clone, Copy, Debug, Default, Eq, PartialEq)]

@@ -5,7 +5,7 @@ Updated: 2026-03-14
 
 ## Context
 
-`g05` established the GPUI-native foundation for Pug: contract audit, theme
+`g05` established the GPUI-native foundation for Flint: contract audit, theme
 runtime, spec crates for primitives, composites, and workstation layers,
 accessibility proof, cross-runtime parity evidence, and demo-app alignment. This
 work landed the renderer-agnostic spec types and token consumption layer that
@@ -21,7 +21,7 @@ backends) before building out renderer-specific implementations.
 
 - `g04` Svelte component surface is complete (Underlay parity, ~25 new
   components, significant feature extensions)
-- GPUI had no implementation presence in Pug prior to this generation
+- GPUI had no implementation presence in Flint prior to this generation
 
 ## Exit State
 

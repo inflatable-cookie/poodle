@@ -1,10 +1,10 @@
 //! PinInput specimen — pin inputs empty, partial, full, and masked.
 
 use jetstream_runtime::ui_element::*;
-use pug_jetstream::JetstreamThemeProvider;
-use pug_jetstream_components::pin_input::js_pin_input;
-use pug_jetstream_components::theme_ext::*;
-use pug_primitives::PinInputSpec;
+use flint_jetstream::JetstreamThemeProvider;
+use flint_jetstream_components::pin_input::js_pin_input;
+use flint_jetstream_components::theme_ext::*;
+use flint_primitives::PinInputSpec;
 
 pub fn render(theme: &JetstreamThemeProvider) -> JsEl {
     let secondary = resolve_color(theme, "semantic.color.text.secondary");

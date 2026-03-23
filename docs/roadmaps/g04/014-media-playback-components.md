@@ -1,10 +1,10 @@
 # g04.014 Media Playback Components
 
 Status: planned
-Owner: Pug Core
+Owner: Flint Core
 Updated: 2026-03-14
 Depends on: g04.001
-Primary repos: `pug`
+Primary repos: `flint`
 
 ## Goals
 
@@ -17,10 +17,10 @@ Primary repos: `pug`
 
 - [ ] write contract for AudioPlayer: src, play/pause, seek bar, volume,
   duration display, playback speed, waveform visualization (optional)
-- [ ] implement AudioPlayer composite in `@pug/svelte-composites`
+- [ ] implement AudioPlayer composite in `@flint/svelte-composites`
 - [ ] write contract for VideoPlayer: src, play/pause, seek bar, volume,
   fullscreen, aspect ratio, poster image, captions/subtitles
-- [ ] implement VideoPlayer composite in `@pug/svelte-composites`
+- [ ] implement VideoPlayer composite in `@flint/svelte-composites`
 - [ ] create specimens for AudioPlayer and VideoPlayer
 - [ ] register in component-registry.ts and specimen registry
 
@@ -32,7 +32,7 @@ Primary repos: `pug`
 - [ ] VideoPlayer renders video with overlay controls
 - [ ] VideoPlayer supports fullscreen toggle
 - [ ] VideoPlayer displays poster image before playback
-- [ ] both components use Pug tokens for consistent styling
+- [ ] both components use Flint tokens for consistent styling
 - [ ] both components pass build and render in the preview catalogue
 
 ## Next Task

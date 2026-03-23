@@ -25,11 +25,11 @@ Published at `docs/specs/multi-renderer-parity-validation.json`.
 
 | Crate | Status | Verification |
 |-------|--------|-------------|
-| `pug-tokens` | Typed module added | Colors, spaces, shadows, durations all parse correctly |
-| `pug-layout` | Complete | All layout properties map to both targets |
-| `pug-events` | Complete | All semantic events map to both targets |
-| `pug-style` | Complete | StyleDescriptor covers all visual properties |
-| `pug-adapter` | Complete | All trait definitions published |
+| `flint-tokens` | Typed module added | Colors, spaces, shadows, durations all parse correctly |
+| `flint-layout` | Complete | All layout properties map to both targets |
+| `flint-events` | Complete | All semantic events map to both targets |
+| `flint-style` | Complete | StyleDescriptor covers all visual properties |
+| `flint-adapter` | Complete | All trait definitions published |
 
 ### Known Deltas (Intentional)
 

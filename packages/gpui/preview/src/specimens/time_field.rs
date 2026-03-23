@@ -1,8 +1,8 @@
 use gpui::*;
 use gpui::prelude::FluentBuilder;
-use pug_adapter::ThemeProvider;
-use pug_primitives::{TimeFieldSpec, EyebrowSpec};
-use pug_gpui_components::{TimeField, Eyebrow};
+use flint_adapter::ThemeProvider;
+use flint_primitives::{TimeFieldSpec, EyebrowSpec};
+use flint_gpui_components::{TimeField, Eyebrow};
 use crate::app_state::AppState;
 use crate::style_bridge::color_to_hsla;
 use crate::PreviewRoot;

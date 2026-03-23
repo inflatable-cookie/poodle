@@ -7,7 +7,7 @@ Depends on: `025-parity-automation-and-harness-boundary.md`, `040-underlay-bridg
 ## Purpose
 
 Freeze what counts as honest ecosystem acceptance in `g03` and make long-tail
-regression coverage explicit before Pug starts talking more seriously about
+regression coverage explicit before Flint starts talking more seriously about
 reference apps or wider public-facing examples.
 
 The current repo does not yet contain a fleet of runnable downstream apps or
@@ -20,7 +20,7 @@ boundaries and named regression classes rather than wishful language.
 Ecosystem acceptance must be defined as a bounded matrix of representative
 consumer suites plus named long-tail regression classes.
 
-Pug should not claim broad ecosystem readiness from preview build success,
+Flint should not claim broad ecosystem readiness from preview build success,
 token publication posture, or one downstream proof in isolation.
 
 ## Required Acceptance Suites
@@ -80,7 +80,7 @@ production readiness.
 
 ## Readiness Gate Rule
 
-Pug may only speak in stronger ecosystem-readiness terms when the readiness
+Flint may only speak in stronger ecosystem-readiness terms when the readiness
 gate remains explicit and aligned with the current proofs.
 
 The current gate requires:
@@ -93,13 +93,13 @@ The current gate requires:
 
 ## Honesty Rule
 
-Pug may say:
+Flint may say:
 
 - the ecosystem acceptance matrix is explicit
 - representative suites and regression classes are named
 - some suites are proof-backed while others are still baseline or matrix-only
 
-Pug may not say:
+Flint may not say:
 
 - broad ecosystem readiness is proven by one downstream proof alone
 - GPUI ecosystem acceptance is complete without runnable native component

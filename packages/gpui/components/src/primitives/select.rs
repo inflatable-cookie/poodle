@@ -1,8 +1,8 @@
 //! Select — real GPUI component backed by SelectSpec.
 
 use gpui::*;
-use pug_gpui::GpuiThemeProvider;
-use pug_primitives::{ChoiceOption, IconSize, IconSpec, SelectSpec};
+use flint_gpui::GpuiThemeProvider;
+use flint_primitives::{ChoiceOption, IconSize, IconSpec, SelectSpec};
 
 use super::icon::Icon;
 use crate::theme_ext::{color_mix, resolve_color, resolve_opacity, resolve_px, resolve_radius};
@@ -102,9 +102,9 @@ impl IntoElement for Select {
         let is_disabled = spec.is_disabled;
 
         let id_str = if let Some(ref suffix) = self.id_suffix {
-            format!("pug-select-{}", suffix)
+            format!("flint-select-{}", suffix)
         } else {
-            "pug-select".to_string()
+            "flint-select".to_string()
         };
 
         let focus_ring = resolve_color(theme, "semantic.color.accent.focusRing");
@@ -237,7 +237,7 @@ impl IntoElement for Select {
             let option_selected = color_mix(accent, elevated_bg, 0.10);
 
             let mut list = div()
-                .id("pug-select-list")
+                .id("flint-select-list")
                 .rounded(control_radius)
                 .bg(elevated_bg)
                 .border_1()
@@ -267,7 +267,7 @@ impl IntoElement for Select {
                 let is_opt_disabled = option.is_disabled;
 
                 let item_id = SharedString::from(format!(
-                    "pug-select-opt-{}",
+                    "flint-select-opt-{}",
                     option.value
                 ));
 

@@ -1,4 +1,4 @@
-use pug_tokens::semantic;
+use flint_tokens::semantic;
 
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct SlugFieldSpec {

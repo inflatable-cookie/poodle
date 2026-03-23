@@ -1,8 +1,8 @@
 //! MetricTile — real GPUI component backed by MetricTileSpec.
 
 use gpui::*;
-use pug_gpui::GpuiThemeProvider;
-use pug_composites::MetricTileSpec;
+use flint_gpui::GpuiThemeProvider;
+use flint_composites::MetricTileSpec;
 
 use crate::theme_ext::{resolve_color, resolve_px, resolve_radius};
 

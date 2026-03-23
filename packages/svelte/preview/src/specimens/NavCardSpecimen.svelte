@@ -1,6 +1,6 @@
 <script lang="ts">
-  import { Eyebrow, Icon, NavCard, NavCardGrid } from "@pug/svelte-primitives";
-  import { house, layers, slidersHorizontal, fileText } from "@pug/icons-lucide";
+  import { Eyebrow, Icon, NavCard, NavCardGrid } from "@flint/svelte-primitives";
+  import { house, layers, slidersHorizontal, fileText } from "@flint/icons-lucide";
 
   let lastClick = "";
 </script>

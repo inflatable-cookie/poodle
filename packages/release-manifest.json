@@ -8,7 +8,7 @@
   },
   "packages": [
     {
-      "name": "@pug/tokens",
+      "name": "@flint/tokens",
       "path": "packages/tokens",
       "kind": "source-of-truth",
       "language": "typescript",
@@ -16,7 +16,7 @@
       "channel": "internal"
     },
     {
-      "name": "@pug/svelte-tokens",
+      "name": "@flint/svelte-tokens",
       "path": "packages/svelte/tokens",
       "kind": "runtime-package",
       "language": "typescript",
@@ -24,7 +24,7 @@
       "channel": "preview"
     },
     {
-      "name": "@pug/svelte-primitives",
+      "name": "@flint/svelte-primitives",
       "path": "packages/svelte/primitives",
       "kind": "runtime-package",
       "language": "typescript",
@@ -32,7 +32,7 @@
       "channel": "preview"
     },
     {
-      "name": "@pug/svelte-composites",
+      "name": "@flint/svelte-composites",
       "path": "packages/svelte/composites",
       "kind": "runtime-package",
       "language": "typescript",
@@ -40,7 +40,7 @@
       "channel": "preview"
     },
     {
-      "name": "@pug/svelte-workstation",
+      "name": "@flint/svelte-workstation",
       "path": "packages/svelte/workstation",
       "kind": "runtime-package",
       "language": "typescript",
@@ -48,7 +48,7 @@
       "channel": "preview"
     },
     {
-      "name": "pug-gpui-tokens",
+      "name": "flint-gpui-tokens",
       "path": "packages/gpui/tokens",
       "kind": "runtime-package",
       "language": "rust",
@@ -56,7 +56,7 @@
       "channel": "preview"
     },
     {
-      "name": "pug-gpui-primitives",
+      "name": "flint-gpui-primitives",
       "path": "packages/gpui/primitives",
       "kind": "runtime-package",
       "language": "rust",
@@ -64,7 +64,7 @@
       "channel": "preview"
     },
     {
-      "name": "pug-gpui-composites",
+      "name": "flint-gpui-composites",
       "path": "packages/gpui/composites",
       "kind": "runtime-package",
       "language": "rust",
@@ -72,7 +72,7 @@
       "channel": "preview"
     },
     {
-      "name": "pug-gpui-workstation",
+      "name": "flint-gpui-workstation",
       "path": "packages/gpui/workstation",
       "kind": "runtime-package",
       "language": "rust",
@@ -80,7 +80,7 @@
       "channel": "preview"
     },
     {
-      "name": "@pug/bridge-underlay",
+      "name": "@flint/bridge-underlay",
       "path": "packages/bridges/underlay",
       "kind": "bridge",
       "language": "typescript",
@@ -88,7 +88,7 @@
       "channel": "internal"
     },
     {
-      "name": "@pug/svelte-preview",
+      "name": "@flint/svelte-preview",
       "path": "packages/svelte/preview",
       "kind": "tooling",
       "language": "typescript",

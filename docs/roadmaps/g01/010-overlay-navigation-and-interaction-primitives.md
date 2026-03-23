@@ -1,10 +1,10 @@
 # g01.010 Overlay, Navigation, And Interaction Primitives
 
 Status: completed
-Owner: Pug Core
+Owner: Flint Core
 Updated: 2026-03-11
 Depends on: g01.003, g01.004, g01.005, g01.006, g01.007
-Primary repos: `pug`
+Primary repos: `flint`
 
 ## Context
 

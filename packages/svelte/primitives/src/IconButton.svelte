@@ -27,7 +27,7 @@
     blur: FocusEvent;
   }>();
 
-  const tooltipId = `pug-icon-tooltip-${++nextTooltipId}`;
+  const tooltipId = `flint-icon-tooltip-${++nextTooltipId}`;
   let tooltipOpen = false;
   let timer: ReturnType<typeof setTimeout> | null = null;
 
@@ -105,132 +105,132 @@
   }
 
   .icon-button {
-    --pug-icon-button-fill: transparent;
-    --pug-icon-button-fill-hover: color-mix(
+    --flint-icon-button-fill: transparent;
+    --flint-icon-button-fill-hover: color-mix(
       in srgb,
-      var(--pug-icon-button-fill) 76%,
-      var(--pug-color-background-elevated)
+      var(--flint-icon-button-fill) 76%,
+      var(--flint-color-background-elevated)
     );
-    --pug-icon-button-fill-active: color-mix(
+    --flint-icon-button-fill-active: color-mix(
       in srgb,
-      var(--pug-icon-button-fill) 64%,
-      var(--pug-color-background-elevated)
+      var(--flint-icon-button-fill) 64%,
+      var(--flint-color-background-elevated)
     );
-    --pug-icon-button-border: transparent;
-    --pug-icon-button-shadow: none;
-    --pug-icon-button-text: var(--pug-color-text-primary);
+    --flint-icon-button-border: transparent;
+    --flint-icon-button-shadow: none;
+    --flint-icon-button-text: var(--flint-color-text-primary);
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    width: var(--pug-size-control-height);
-    height: var(--pug-size-control-height);
+    width: var(--flint-size-control-height);
+    height: var(--flint-size-control-height);
     padding: 0;
-    border: 0.0625rem solid var(--pug-icon-button-border);
-    border-radius: var(--pug-treatment-interactive-radius, var(--pug-radius-control));
-    background: var(--pug-icon-button-fill);
-    box-shadow: var(--pug-icon-button-shadow);
-    color: var(--pug-icon-button-text);
+    border: 0.0625rem solid var(--flint-icon-button-border);
+    border-radius: var(--flint-treatment-interactive-radius, var(--flint-radius-control));
+    background: var(--flint-icon-button-fill);
+    box-shadow: var(--flint-icon-button-shadow);
+    color: var(--flint-icon-button-text);
     cursor: pointer;
     transition:
-      background var(--pug-motion-duration-interaction) var(--pug-motion-easing-standard),
-      border-color var(--pug-motion-duration-interaction) var(--pug-motion-easing-standard),
-      box-shadow var(--pug-motion-duration-interaction) var(--pug-motion-easing-standard),
-      transform var(--pug-motion-duration-interaction) var(--pug-motion-easing-standard);
+      background var(--flint-motion-duration-interaction) var(--flint-motion-easing-standard),
+      border-color var(--flint-motion-duration-interaction) var(--flint-motion-easing-standard),
+      box-shadow var(--flint-motion-duration-interaction) var(--flint-motion-easing-standard),
+      transform var(--flint-motion-duration-interaction) var(--flint-motion-easing-standard);
   }
 
   .icon-button[data-size="sm"] {
-    width: calc(var(--pug-size-control-height) - 0.375rem);
-    height: calc(var(--pug-size-control-height) - 0.375rem);
+    width: calc(var(--flint-size-control-height) - 0.375rem);
+    height: calc(var(--flint-size-control-height) - 0.375rem);
   }
 
   .icon-button[data-size="lg"] {
-    width: calc(var(--pug-size-control-height) + 0.375rem);
-    height: calc(var(--pug-size-control-height) + 0.375rem);
+    width: calc(var(--flint-size-control-height) + 0.375rem);
+    height: calc(var(--flint-size-control-height) + 0.375rem);
   }
 
   .icon-button[data-variant="primary"] {
-    --pug-icon-button-fill: var(
-      --pug-treatment-interactive-primary-fill,
-      var(--pug-color-accent-base)
+    --flint-icon-button-fill: var(
+      --flint-treatment-interactive-primary-fill,
+      var(--flint-color-accent-base)
     );
-    --pug-icon-button-border: var(
-      --pug-treatment-interactive-primary-border,
-      color-mix(in srgb, var(--pug-color-accent-base) 84%, black)
+    --flint-icon-button-border: var(
+      --flint-treatment-interactive-primary-border,
+      color-mix(in srgb, var(--flint-color-accent-base) 84%, black)
     );
-    --pug-icon-button-text: var(
-      --pug-treatment-interactive-primary-text,
-      var(--pug-color-text-inverse)
+    --flint-icon-button-text: var(
+      --flint-treatment-interactive-primary-text,
+      var(--flint-color-text-inverse)
     );
-    --pug-icon-button-shadow: var(
-      --pug-treatment-interactive-primary-shadow,
+    --flint-icon-button-shadow: var(
+      --flint-treatment-interactive-primary-shadow,
       inset 0 0.0625rem 0 color-mix(in srgb, white 8%, transparent)
     );
   }
 
   .icon-button[data-variant="secondary"] {
-    --pug-icon-button-fill: var(
-      --pug-treatment-interactive-fill,
-      var(--pug-color-background-surface)
+    --flint-icon-button-fill: var(
+      --flint-treatment-interactive-fill,
+      var(--flint-color-background-surface)
     );
-    --pug-icon-button-border: var(
-      --pug-treatment-interactive-border,
-      var(--pug-color-border-default)
+    --flint-icon-button-border: var(
+      --flint-treatment-interactive-border,
+      var(--flint-color-border-default)
     );
-    --pug-icon-button-shadow: var(
-      --pug-treatment-interactive-shadow,
+    --flint-icon-button-shadow: var(
+      --flint-treatment-interactive-shadow,
       inset 0 0.0625rem 0 color-mix(in srgb, white 8%, transparent)
     );
   }
 
   .icon-button[data-tone="danger"] {
-    --pug-icon-button-fill: color-mix(in srgb, var(--pug-color-status-danger) 16%, var(--pug-color-background-surface));
-    --pug-icon-button-border: color-mix(in srgb, var(--pug-color-status-danger) 46%, var(--pug-color-border-default));
+    --flint-icon-button-fill: color-mix(in srgb, var(--flint-color-status-danger) 16%, var(--flint-color-background-surface));
+    --flint-icon-button-border: color-mix(in srgb, var(--flint-color-status-danger) 46%, var(--flint-color-border-default));
   }
 
   .icon-button[data-variant="primary"][data-tone="danger"] {
-    --pug-icon-button-fill: var(--pug-color-status-danger);
-    --pug-icon-button-border: color-mix(in srgb, var(--pug-color-status-danger) 84%, black);
-    --pug-icon-button-text: var(--pug-color-text-inverse);
+    --flint-icon-button-fill: var(--flint-color-status-danger);
+    --flint-icon-button-border: color-mix(in srgb, var(--flint-color-status-danger) 84%, black);
+    --flint-icon-button-text: var(--flint-color-text-inverse);
   }
 
   .icon-button[data-variant="ghost"][data-tone="danger"] {
-    --pug-icon-button-fill: transparent;
-    --pug-icon-button-border: transparent;
-    --pug-icon-button-text: var(--pug-color-status-danger);
+    --flint-icon-button-fill: transparent;
+    --flint-icon-button-border: transparent;
+    --flint-icon-button-text: var(--flint-color-status-danger);
   }
 
   .icon-button[data-variant="ghost"][data-tone="danger"]:hover:not(:disabled) {
-    --pug-icon-button-border: color-mix(in srgb, var(--pug-color-status-danger) 46%, var(--pug-color-border-default));
-    background: color-mix(in srgb, var(--pug-color-status-danger) 10%, transparent);
+    --flint-icon-button-border: color-mix(in srgb, var(--flint-color-status-danger) 46%, var(--flint-color-border-default));
+    background: color-mix(in srgb, var(--flint-color-status-danger) 10%, transparent);
   }
 
   .icon-button[data-pressed="true"] {
-    background: color-mix(in srgb, var(--pug-color-accent-base) 20%, var(--pug-icon-button-fill));
-    border-color: color-mix(in srgb, var(--pug-color-accent-base) 56%, var(--pug-icon-button-border));
+    background: color-mix(in srgb, var(--flint-color-accent-base) 20%, var(--flint-icon-button-fill));
+    border-color: color-mix(in srgb, var(--flint-color-accent-base) 56%, var(--flint-icon-button-border));
     box-shadow:
       inset 0 0.0625rem 0 color-mix(in srgb, white 12%, transparent),
-      inset 0 0 0 0.0625rem color-mix(in srgb, var(--pug-color-accent-base) 18%, transparent);
+      inset 0 0 0 0.0625rem color-mix(in srgb, var(--flint-color-accent-base) 18%, transparent);
   }
 
   .icon-button:hover:not(:disabled) {
-    background: var(--pug-icon-button-fill-hover);
-    border-color: color-mix(in srgb, var(--pug-icon-button-border) 74%, var(--pug-color-text-primary));
-    box-shadow: var(--pug-treatment-interactive-shadow-active, var(--pug-icon-button-shadow));
+    background: var(--flint-icon-button-fill-hover);
+    border-color: color-mix(in srgb, var(--flint-icon-button-border) 74%, var(--flint-color-text-primary));
+    box-shadow: var(--flint-treatment-interactive-shadow-active, var(--flint-icon-button-shadow));
   }
 
   .icon-button:active:not(:disabled) {
-    background: var(--pug-icon-button-fill-active);
+    background: var(--flint-icon-button-fill-active);
     transform: translateY(0.03125rem);
   }
 
   .icon-button:focus-visible {
-    outline: var(--pug-border-width-focus) solid var(--pug-color-accent-focusRing);
+    outline: var(--flint-border-width-focus) solid var(--flint-color-accent-focusRing);
     outline-offset: 0.125rem;
   }
 
   .icon-button:disabled {
     cursor: not-allowed;
-    opacity: var(--pug-state-opacity-disabled);
+    opacity: var(--flint-state-opacity-disabled);
   }
 
   .icon-button__glyph,
@@ -240,7 +240,7 @@
     justify-content: center;
     width: 45%;
     height: 45%;
-    font-family: var(--pug-typography-code-family);
+    font-family: var(--flint-typography-code-family);
     font-size: 0.875rem;
     line-height: 1;
   }
@@ -267,14 +267,14 @@
 
   .icon-button__tooltip {
     position: absolute;
-    z-index: var(--pug-overlay-z-menu);
+    z-index: var(--flint-overlay-z-menu);
     max-width: 16rem;
     padding: 0.375rem 0.5rem;
-    border: 0.0625rem solid color-mix(in srgb, var(--pug-color-border-default) 72%, transparent);
-    border-radius: calc(var(--pug-radius-control) - 0.125rem);
-    background: color-mix(in srgb, var(--pug-color-background-elevated) 98%, var(--pug-color-background-panel));
-    box-shadow: var(--pug-elevation-overlay);
-    color: var(--pug-color-text-primary);
+    border: 0.0625rem solid color-mix(in srgb, var(--flint-color-border-default) 72%, transparent);
+    border-radius: calc(var(--flint-radius-control) - 0.125rem);
+    background: color-mix(in srgb, var(--flint-color-background-elevated) 98%, var(--flint-color-background-panel));
+    box-shadow: var(--flint-elevation-overlay);
+    color: var(--flint-color-text-primary);
     font-size: 0.6875rem;
     line-height: 1.35;
     white-space: nowrap;

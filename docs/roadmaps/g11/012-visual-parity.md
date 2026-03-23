@@ -1,7 +1,7 @@
 # g11.012 Visual Parity Verification
 
 Status: planned
-Owner: Pug Core
+Owner: Flint Core
 Depends on: g11.003–011
 
 ## Actions

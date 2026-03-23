@@ -1,8 +1,8 @@
 {
   "generation": "g04.007",
-  "crateName": "pug-gpui-composites",
+  "crateName": "flint-gpui-composites",
   "cratePath": "packages/gpui/composites",
-  "tokenSource": "pug-gpui-tokens",
+  "tokenSource": "flint-gpui-tokens",
   "contractIds": [
     "field",
     "form-actions",

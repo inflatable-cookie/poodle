@@ -2,7 +2,7 @@
 
 ## Changed
 
-- added the first real `packages/` workspace surface to Pug with:
+- added the first real `packages/` workspace surface to Flint with:
   - `packages/tokens/` for schema, scripts, and generated artifacts
   - `packages/svelte/tokens/` as the first browser/Svelte consumer stub
   - `packages/gpui/tokens/` as the first Rust/GPUI consumer stub
@@ -16,7 +16,7 @@
 - tuned `loophole-studio` toward the real downstream shell surfaces seen in
   Aura and Spark first: dark workstation canvases, panel chrome, elevated
   surfaces, readable neutral text, and accent/focus roles that map cleanly to
-  shell primitives without baking DAW-specific widgets into Pug core
+  shell primitives without baking DAW-specific widgets into Flint core
 - added a bootstrap artifact emitter at
   `packages/tokens/scripts/build-tokens.ts`
 - generated initial CSS, TypeScript, and Rust artifacts under

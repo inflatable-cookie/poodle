@@ -33,11 +33,11 @@
   .detail-row {
     display: grid;
     grid-template-columns: 11.25rem minmax(0, 1fr) auto;
-    gap: var(--pug-space-inline-md);
+    gap: var(--flint-space-inline-md);
     align-items: center;
-    padding: var(--pug-space-panel-y) var(--pug-space-panel-x);
-    border-radius: calc(var(--pug-radius-surface) - 0.0625rem);
-    background: color-mix(in srgb, var(--pug-surface) 93%, var(--pug-color-text-primary));
+    padding: var(--flint-space-panel-y) var(--flint-space-panel-x);
+    border-radius: calc(var(--flint-radius-surface) - 0.0625rem);
+    background: color-mix(in srgb, var(--flint-surface) 93%, var(--flint-color-text-primary));
   }
 
   .detail-row__label,
@@ -48,28 +48,28 @@
 
   .detail-row__label-block {
     display: grid;
-    gap: var(--pug-space-inline-sm);
+    gap: var(--flint-space-inline-sm);
     min-width: 0;
   }
 
   .detail-row__label {
-    color: var(--pug-color-text-secondary);
-    font-family: var(--pug-typography-label-family);
-    font-size: var(--pug-typography-label-size);
-    line-height: var(--pug-typography-label-lineHeight);
+    color: var(--flint-color-text-secondary);
+    font-family: var(--flint-typography-label-family);
+    font-size: var(--flint-typography-label-size);
+    line-height: var(--flint-typography-label-lineHeight);
   }
 
   .detail-row__description {
-    color: var(--pug-color-text-secondary);
+    color: var(--flint-color-text-secondary);
     font-size: 0.8125rem;
     line-height: 1.5;
   }
 
   .detail-row__value {
-    color: var(--pug-color-text-primary);
-    font-family: var(--pug-typography-body-family);
-    font-size: var(--pug-typography-body-size);
-    line-height: var(--pug-typography-body-lineHeight);
+    color: var(--flint-color-text-primary);
+    font-family: var(--flint-typography-body-family);
+    font-size: var(--flint-typography-body-size);
+    line-height: var(--flint-typography-body-lineHeight);
     min-width: 0;
   }
 

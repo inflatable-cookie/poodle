@@ -3,12 +3,12 @@
 Status: active
 Updated: 2026-03-11
 
-Vision defines what Pug is for, what it is not for, and what success looks
+Vision defines what Flint is for, what it is not for, and what success looks
 like across the ecosystem.
 
 ## Active Vision
 
-- `001-pug-vision.md`
+- `001-flint-vision.md`
 
 ## Next Task
 

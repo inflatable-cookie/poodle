@@ -1,6 +1,6 @@
 <script lang="ts">
-  import { PickerShell } from "@pug/svelte-composites";
-  import { Eyebrow, Surface } from "@pug/svelte-primitives";
+  import { PickerShell } from "@flint/svelte-composites";
+  import { Eyebrow, Surface } from "@flint/svelte-primitives";
 </script>
 
 <div class="specimen">

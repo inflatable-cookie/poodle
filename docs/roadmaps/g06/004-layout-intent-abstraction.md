@@ -10,7 +10,7 @@ map losslessly to their native layout systems.
 
 ## Deliverables
 
-New crate: `pug-layout` at `packages/contracts/layout/`
+New crate: `flint-layout` at `packages/contracts/layout/`
 
 ### Types
 
@@ -38,6 +38,6 @@ New crate: `pug-layout` at `packages/contracts/layout/`
 
 ## Verification
 
-- [x] `pug-layout` crate compiles
+- [x] `flint-layout` crate compiles
 - [x] 4 tests pass covering defaults, builder, edges, and constrained sizing
 - [x] All types map cleanly to both GPUI and Jetstream layout models

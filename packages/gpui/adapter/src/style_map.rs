@@ -7,15 +7,15 @@
 //! For now they are standalone structs that mirror GPUI's styling API, allowing
 //! the mapping logic to be tested and compiled without a GPUI runtime dependency.
 
-use pug_layout::{
+use flint_layout::{
     CrossAxisAlignment, LayoutDirection, LayoutEdges, LayoutIntent, LayoutOverflow,
     LayoutSizing, MainAxisAlignment,
 };
-use pug_style::{
+use flint_style::{
     BorderDescriptor, CornerRadii, CursorHint, FontFamily, StyleDescriptor,
     TypographyDescriptor,
 };
-use pug_tokens::typed::{ColorValue, ShadowValue};
+use flint_tokens::typed::{ColorValue, ShadowValue};
 
 /// GPUI-compatible RGBA color (mirrors `gpui::Rgba` / `gpui::Hsla`).
 #[derive(Debug, Clone, Copy, PartialEq)]
@@ -387,9 +387,9 @@ pub fn map_style(desc: &StyleDescriptor) -> GpuiStyle {
 
 #[cfg(test)]
 mod tests {
-    use pug_layout::{LayoutDirection, LayoutEdges, LayoutIntent, LayoutSizing, MainAxisAlignment, CrossAxisAlignment};
-    use pug_style::{CursorHint, StyleDescriptor, TypographyDescriptor, FontFamily, CornerRadii};
-    use pug_tokens::typed::ColorValue;
+    use flint_layout::{LayoutDirection, LayoutEdges, LayoutIntent, LayoutSizing, MainAxisAlignment, CrossAxisAlignment};
+    use flint_style::{CursorHint, StyleDescriptor, TypographyDescriptor, FontFamily, CornerRadii};
+    use flint_tokens::typed::ColorValue;
 
     use super::*;
 

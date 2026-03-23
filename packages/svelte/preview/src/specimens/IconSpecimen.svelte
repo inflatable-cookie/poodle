@@ -1,8 +1,8 @@
 <script lang="ts">
-  import { Icon, IconProvider, Eyebrow } from "@pug/svelte-primitives";
-  import type { IconSet } from "@pug/svelte-primitives";
+  import { Icon, IconProvider, Eyebrow } from "@flint/svelte-primitives";
+  import type { IconSet } from "@flint/svelte-primitives";
   import iconNodes from "lucide-static/icon-nodes.json";
-  import { heart, settings, zap, circleCheck, info, triangleAlert, star, search, pencil } from "@pug/icons-lucide";
+  import { heart, settings, zap, circleCheck, info, triangleAlert, star, search, pencil } from "@flint/icons-lucide";
 
   const allIconNames = Object.keys(iconNodes as IconSet).sort();
 
@@ -32,7 +32,7 @@
   <div class="specimen__group">
     <Eyebrow>Direct import — tree-shakeable</Eyebrow>
     <p class="hint">
-      Import individual icons from <code>@pug/icons-lucide</code>.
+      Import individual icons from <code>@flint/icons-lucide</code>.
       Only the icons you use are included in the bundle.
     </p>
     <div class="size-row">
@@ -56,7 +56,7 @@
       </div>
     </div>
     <div class="code-hint">
-      <code>import {"{"} star, heart, settings {"}"} from "@pug/icons-lucide";</code>
+      <code>import {"{"} star, heart, settings {"}"} from "@flint/icons-lucide";</code>
       <br />
       <code>&lt;Icon icon={"{star}"} size="md" /&gt;</code>
     </div>
@@ -68,16 +68,16 @@
       Icons inherit <code>currentColor</code> from their parent element.
     </p>
     <div class="color-row">
-      <span class="color-demo" style="color: var(--pug-color-icon-primary)">
+      <span class="color-demo" style="color: var(--flint-color-icon-primary)">
         <Icon icon={circleCheck} /> Primary
       </span>
-      <span class="color-demo" style="color: var(--pug-color-icon-muted)">
+      <span class="color-demo" style="color: var(--flint-color-icon-muted)">
         <Icon icon={info} /> Muted
       </span>
-      <span class="color-demo" style="color: var(--pug-color-accent-base)">
+      <span class="color-demo" style="color: var(--flint-color-accent-base)">
         <Icon icon={zap} /> Accent
       </span>
-      <span class="color-demo" style="color: var(--pug-color-status-danger)">
+      <span class="color-demo" style="color: var(--flint-color-status-danger)">
         <Icon icon={triangleAlert} /> Danger
       </span>
     </div>
@@ -169,27 +169,27 @@
 
   .hint {
     font-size: 0.75rem;
-    color: var(--pug-color-text-secondary);
+    color: var(--flint-color-text-secondary);
     line-height: 1.5;
     margin: 0;
   }
 
   .hint code {
-    font-family: var(--pug-typography-code-family);
+    font-family: var(--flint-typography-code-family);
     font-size: 0.6875rem;
     padding: 0.0625rem 0.25rem;
     border-radius: 0.1875rem;
-    background: color-mix(in srgb, var(--pug-color-background-surface) 64%, transparent);
+    background: color-mix(in srgb, var(--flint-color-background-surface) 64%, transparent);
   }
 
   .code-hint {
-    font-family: var(--pug-typography-code-family);
+    font-family: var(--flint-typography-code-family);
     font-size: 0.6875rem;
-    color: var(--pug-color-text-muted);
+    color: var(--flint-color-text-muted);
     line-height: 1.6;
     padding: 0.5rem 0.75rem;
-    border-radius: var(--pug-radius-control);
-    background: color-mix(in srgb, var(--pug-color-background-surface) 48%, transparent);
+    border-radius: var(--flint-radius-control);
+    background: color-mix(in srgb, var(--flint-color-background-surface) 48%, transparent);
   }
 
   .code-hint code {
@@ -210,8 +210,8 @@
 
   .size-label {
     font-size: 0.6875rem;
-    font-family: var(--pug-typography-code-family);
-    color: var(--pug-color-text-muted);
+    font-family: var(--flint-typography-code-family);
+    color: var(--flint-color-text-muted);
     min-width: 1.5rem;
   }
 
@@ -246,25 +246,25 @@
     gap: 0.25rem;
     padding: 0.625rem 0.25rem;
     border: none;
-    border-radius: var(--pug-radius-control);
+    border-radius: var(--flint-radius-control);
     background: transparent;
-    color: var(--pug-color-text-primary);
+    color: var(--flint-color-text-primary);
     cursor: pointer;
     transition: background 0.15s;
   }
 
   .icon-cell:hover {
-    background: color-mix(in srgb, var(--pug-color-background-surface) 64%, transparent);
+    background: color-mix(in srgb, var(--flint-color-background-surface) 64%, transparent);
   }
 
   .icon-cell.copied {
-    background: color-mix(in srgb, var(--pug-color-accent-base) 18%, transparent);
+    background: color-mix(in srgb, var(--flint-color-accent-base) 18%, transparent);
   }
 
   .icon-name {
     font-size: 0.5625rem;
-    font-family: var(--pug-typography-code-family);
-    color: var(--pug-color-text-muted);
+    font-family: var(--flint-typography-code-family);
+    color: var(--flint-color-text-muted);
     text-align: center;
     word-break: break-all;
     line-height: 1.3;

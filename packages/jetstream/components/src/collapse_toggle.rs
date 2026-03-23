@@ -1,8 +1,8 @@
 //! CollapseToggle — Jetstream collapse toggle backed by CollapseToggleSpec.
 
 use jetstream_runtime::ui_element::{self, JsEl};
-use pug_jetstream::JetstreamThemeProvider;
-use pug_primitives::CollapseToggleSpec;
+use flint_jetstream::JetstreamThemeProvider;
+use flint_primitives::CollapseToggleSpec;
 
 use crate::theme_ext::{resolve_color, resolve_opacity, resolve_px, resolve_radius};
 

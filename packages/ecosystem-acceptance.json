@@ -3,16 +3,16 @@
     {
       "id": "preview-docs-harness",
       "label": "Svelte preview docs harness",
-      "consumerShape": "browser review surface for direct Pug evaluation",
+      "consumerShape": "browser review surface for direct Flint evaluation",
       "runtime": "browser",
       "adoptionModel": "internal acceptance harness",
       "status": "baseline",
       "coveredPackages": [
-        "@pug/svelte-tokens",
-        "@pug/svelte-primitives",
-        "@pug/svelte-composites",
-        "@pug/svelte-workstation",
-        "@pug/svelte-preview"
+        "@flint/svelte-tokens",
+        "@flint/svelte-primitives",
+        "@flint/svelte-composites",
+        "@flint/svelte-workstation",
+        "@flint/svelte-preview"
       ],
       "evidenceArtifacts": [
         "packages/svelte/preview/artifacts/parity-report.json",
@@ -45,10 +45,10 @@
       "adoptionModel": "bridge-mediated",
       "status": "proof-backed",
       "coveredPackages": [
-        "@pug/bridge-underlay",
-        "@pug/svelte-tokens",
-        "@pug/svelte-primitives",
-        "@pug/svelte-composites"
+        "@flint/bridge-underlay",
+        "@flint/svelte-tokens",
+        "@flint/svelte-primitives",
+        "@flint/svelte-composites"
       ],
       "evidenceArtifacts": [
         "packages/bridges/underlay/ts/zero-leak-proof.ts",
@@ -77,10 +77,10 @@
       "adoptionModel": "direct package consumption",
       "status": "proof-backed",
       "coveredPackages": [
-        "@pug/svelte-tokens",
-        "@pug/svelte-primitives",
-        "@pug/svelte-composites",
-        "@pug/svelte-workstation"
+        "@flint/svelte-tokens",
+        "@flint/svelte-primitives",
+        "@flint/svelte-composites",
+        "@flint/svelte-workstation"
       ],
       "evidenceArtifacts": [
         "packages/svelte/workstation/loophole-foundation-proof.json",
@@ -98,7 +98,7 @@
         "bun run docs:build"
       ],
       "blockers": [
-        "DAW-specific widgets and runtime behavior remain downstream-owned and therefore outside Pug acceptance proof."
+        "DAW-specific widgets and runtime behavior remain downstream-owned and therefore outside Flint acceptance proof."
       ]
     },
     {
@@ -109,10 +109,10 @@
       "adoptionModel": "matrix-only",
       "status": "matrix-only",
       "coveredPackages": [
-        "pug-gpui-tokens",
-        "pug-gpui-primitives",
-        "pug-gpui-composites",
-        "pug-gpui-workstation"
+        "flint-gpui-tokens",
+        "flint-gpui-primitives",
+        "flint-gpui-composites",
+        "flint-gpui-workstation"
       ],
       "evidenceArtifacts": [
         "packages/gpui/tokens/multi-app-validation.json",

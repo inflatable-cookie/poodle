@@ -1,24 +1,24 @@
 [package]
-name = "pug-jetstream-preview"
+name = "flint-jetstream-preview"
 version = "0.0.0"
 edition = "2024"
-description = "Jetstream preview application for the Pug design system — showcases all Pug components rendered via the Jetstream game engine."
+description = "Jetstream preview application for the Flint design system — showcases all Flint components rendered via the Jetstream game engine."
 
 [[bin]]
-name = "pug-jetstream-preview"
+name = "flint-jetstream-preview"
 path = "src/main.rs"
 
 [dependencies]
-# Pug adapter + contracts + components
-pug-jetstream = { path = "../adapter" }
-pug-jetstream-components = { path = "../components" }
-pug-adapter = { path = "../../contracts/adapter" }
-pug-primitives = { path = "../../contracts/primitives" }
-pug-composites = { path = "../../contracts/composites" }
-pug-workstation = { path = "../../contracts/workstation" }
-pug-layout = { path = "../../contracts/layout" }
-pug-style = { path = "../../contracts/style" }
-pug-tokens = { path = "../../contracts/tokens" }
+# Flint adapter + contracts + components
+flint-jetstream = { path = "../adapter" }
+flint-jetstream-components = { path = "../components" }
+flint-adapter = { path = "../../contracts/adapter" }
+flint-primitives = { path = "../../contracts/primitives" }
+flint-composites = { path = "../../contracts/composites" }
+flint-workstation = { path = "../../contracts/workstation" }
+flint-layout = { path = "../../contracts/layout" }
+flint-style = { path = "../../contracts/style" }
+flint-tokens = { path = "../../contracts/tokens" }
 
 # Jetstream runtime (cross-repo path)
 jetstream-runtime = { path = "../../../../jetstream/crates/jetstream-runtime" }
@@ -34,7 +34,7 @@ image = { version = "0.25", default-features = false, features = ["png"] }
 env_logger = "0.11"
 log = "0.4"
 
-[package.metadata.pug]
+[package.metadata.flint]
 public-intent = true
 channel = "preview"
 stability = "pre-release"

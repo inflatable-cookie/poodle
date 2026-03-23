@@ -30,5 +30,5 @@ Composite specs: 16 (existing) + 12 (new) = **28**
 
 ## Verification
 
-- [x] All 12 specs compile and are exported from `pug-composites`
+- [x] All 12 specs compile and are exported from `flint-composites`
 - [x] All 10 existing tests continue to pass

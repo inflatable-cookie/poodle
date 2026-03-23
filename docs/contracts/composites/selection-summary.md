@@ -101,8 +101,8 @@ No internal state. Visible items and overflow count are derived from props.
 ### Sizing
 
 - fills available width
-- gap between header and chips: `--pug-space-stack-sm`
-- chips container uses flex-wrap with gap `--pug-space-inline-sm`
+- gap between header and chips: `--flint-space-stack-sm`
+- chips container uses flex-wrap with gap `--flint-space-inline-sm`
 - chip min-height: 2rem
 - chip inline padding: 0.75rem
 - chip internal gap: 0.5rem
@@ -118,23 +118,23 @@ No internal state. Visible items and overflow count are derived from props.
 
 | Part | Token | Purpose |
 |------|-------|---------|
-| Root | `--pug-color-background-panel` | container background (94% alpha mix) |
-| Root | `--pug-radius-surface` | corner radius |
-| Root | `--pug-typography-label-size` | base font size (fallback 0.75rem) |
-| Root | `--pug-space-panel-y` / `--pug-space-panel-x` | container padding |
-| Header | `--pug-space-inline-md` | gap between label and clear button |
-| ClearButton | `--pug-color-background-surface` | button background (76% alpha mix) |
-| ClearButton | `--pug-radius-control` | button radius |
-| ClearButton | `--pug-size-control-height` | button min-height |
-| ClearButton | `--pug-space-control-x` | button horizontal padding |
-| Chip | `--pug-color-background-surface` | chip background (76% alpha mix) |
-| Chip | `--pug-radius-control` | chip radius |
-| Chip | `--pug-color-text-primary` | chip text color |
-| Overflow | `--pug-color-text-secondary` | overflow text color |
-| Overflow | `--pug-color-background-surface` | overflow background (58% alpha mix) |
-| Overflow | `--pug-radius-control` | overflow radius |
-| Root (light) | `--pug-color-border-default` | light theme outer border (14% alpha mix) |
-| Root (light) | `--pug-color-border-subtle` | light theme inset shadow border |
+| Root | `--flint-color-background-panel` | container background (94% alpha mix) |
+| Root | `--flint-radius-surface` | corner radius |
+| Root | `--flint-typography-label-size` | base font size (fallback 0.75rem) |
+| Root | `--flint-space-panel-y` / `--flint-space-panel-x` | container padding |
+| Header | `--flint-space-inline-md` | gap between label and clear button |
+| ClearButton | `--flint-color-background-surface` | button background (76% alpha mix) |
+| ClearButton | `--flint-radius-control` | button radius |
+| ClearButton | `--flint-size-control-height` | button min-height |
+| ClearButton | `--flint-space-control-x` | button horizontal padding |
+| Chip | `--flint-color-background-surface` | chip background (76% alpha mix) |
+| Chip | `--flint-radius-control` | chip radius |
+| Chip | `--flint-color-text-primary` | chip text color |
+| Overflow | `--flint-color-text-secondary` | overflow text color |
+| Overflow | `--flint-color-background-surface` | overflow background (58% alpha mix) |
+| Overflow | `--flint-radius-control` | overflow radius |
+| Root (light) | `--flint-color-border-default` | light theme outer border (14% alpha mix) |
+| Root (light) | `--flint-color-border-subtle` | light theme inset shadow border |
 
 ### Token Usage — Exact CSS Values
 
@@ -143,12 +143,12 @@ No internal state. Visible items and overflow count are derived from props.
 | Property | Value |
 |----------|-------|
 | `display` | `grid` |
-| `gap` | `var(--pug-space-stack-sm)` |
-| `padding` | `var(--pug-space-panel-y) var(--pug-space-panel-x)` |
+| `gap` | `var(--flint-space-stack-sm)` |
+| `padding` | `var(--flint-space-panel-y) var(--flint-space-panel-x)` |
 | `border` | `0.0625rem solid transparent` |
-| `border-radius` | `var(--pug-radius-surface)` |
-| `background` | `color-mix(in srgb, var(--pug-color-background-panel) 94%, transparent)` |
-| `font-size` | `var(--pug-typography-label-size, 0.75rem)` |
+| `border-radius` | `var(--flint-radius-surface)` |
+| `background` | `color-mix(in srgb, var(--flint-color-background-panel) 94%, transparent)` |
+| `font-size` | `var(--flint-typography-label-size, 0.75rem)` |
 
 #### `.selection-summary__header`
 
@@ -156,7 +156,7 @@ No internal state. Visible items and overflow count are derived from props.
 |----------|-------|
 | `display` | `flex` |
 | `justify-content` | `space-between` |
-| `gap` | `var(--pug-space-inline-md)` |
+| `gap` | `var(--flint-space-inline-md)` |
 | `align-items` | `center` |
 
 #### `.selection-summary__header button`, `.selection-summary__chip` (Shared)
@@ -164,9 +164,9 @@ No internal state. Visible items and overflow count are derived from props.
 | Property | Value |
 |----------|-------|
 | `border` | `0.0625rem solid transparent` |
-| `border-radius` | `var(--pug-radius-control)` |
-| `background` | `color-mix(in srgb, var(--pug-color-background-surface) 76%, transparent)` |
-| `color` | `var(--pug-color-text-primary)` |
+| `border-radius` | `var(--flint-radius-control)` |
+| `background` | `color-mix(in srgb, var(--flint-color-background-surface) 76%, transparent)` |
+| `color` | `var(--flint-color-text-primary)` |
 | `cursor` | `pointer` |
 | `font` | `inherit` |
 
@@ -174,8 +174,8 @@ No internal state. Visible items and overflow count are derived from props.
 
 | Property | Value |
 |----------|-------|
-| `min-height` | `var(--pug-size-control-height)` |
-| `padding` | `0 var(--pug-space-control-x)` |
+| `min-height` | `var(--flint-size-control-height)` |
+| `padding` | `0 var(--flint-space-control-x)` |
 
 #### `.selection-summary__chips`
 
@@ -183,7 +183,7 @@ No internal state. Visible items and overflow count are derived from props.
 |----------|-------|
 | `display` | `flex` |
 | `flex-wrap` | `wrap` |
-| `gap` | `var(--pug-space-inline-sm)` |
+| `gap` | `var(--flint-space-inline-sm)` |
 
 #### `.selection-summary__chip`
 
@@ -199,19 +199,19 @@ No internal state. Visible items and overflow count are derived from props.
 
 | Property | Value |
 |----------|-------|
-| `color` | `var(--pug-color-text-secondary)` |
+| `color` | `var(--flint-color-text-secondary)` |
 | `font-size` | `0.8125rem` |
 | `line-height` | `2rem` |
 | `padding` | `0 0.625rem` |
-| `border-radius` | `var(--pug-radius-control)` |
-| `background` | `color-mix(in srgb, var(--pug-color-background-surface) 58%, transparent)` |
+| `border-radius` | `var(--flint-radius-control)` |
+| `background` | `color-mix(in srgb, var(--flint-color-background-surface) 58%, transparent)` |
 
 ### Light Theme Override: `:global([data-theme="light"]) .selection-summary`
 
 | Property | Value |
 |----------|-------|
-| `border-color` | `color-mix(in srgb, var(--pug-color-border-default) 14%, transparent)` |
-| `box-shadow` | `inset 0 0 0 0.0625rem color-mix(in srgb, var(--pug-color-border-subtle) 32%, transparent), 0 0.375rem 1rem rgba(49, 66, 85, 0.03)` |
+| `border-color` | `color-mix(in srgb, var(--flint-color-border-default) 14%, transparent)` |
+| `box-shadow` | `inset 0 0 0 0.0625rem color-mix(in srgb, var(--flint-color-border-subtle) 32%, transparent), 0 0.375rem 1rem rgba(49, 66, 85, 0.03)` |
 
 ### Data Attributes Used for CSS Selectors
 
@@ -228,7 +228,7 @@ No internal state. Visible items and overflow count are derived from props.
 
 ## 10. GPUI Notes
 
-- expected crate/module surface: `pug_gpui::composites::selection_summary`
+- expected crate/module surface: `flint_gpui::composites::selection_summary`
 - render as section with header row and chip container
 
 ## 11. Parity Checklist

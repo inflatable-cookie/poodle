@@ -155,8 +155,8 @@ to the composed Dialog and Button components.
 
 ## 10. GPUI Notes
 
-- expected crate/module surface: `pug_gpui::components::alert_dialog`
-- Composes `PugDialog` with `DialogKind::AlertDialog`
+- expected crate/module surface: `flint_gpui::components::alert_dialog`
+- Composes `FlintDialog` with `DialogKind::AlertDialog`
 - Working state modeled as internal `bool` field
 - Confirm and cancel are callback props
 - Tone enum maps to button variant selection

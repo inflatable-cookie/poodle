@@ -18,7 +18,7 @@
     valueChange: { value: string };
   }>();
 
-  const generatedName = `pug-segmented-control-${++nextSegmentedControlId}`;
+  const generatedName = `flint-segmented-control-${++nextSegmentedControlId}`;
   let uncontrolledValue = defaultValue;
 
   $: isControlled = value !== null;
@@ -59,15 +59,15 @@
     gap: 0.125rem;
     padding: 0.125rem;
     border: 0.0625rem solid var(
-      --pug-treatment-interactive-border,
-      color-mix(in srgb, var(--pug-color-border-subtle) 84%, transparent)
+      --flint-treatment-interactive-border,
+      color-mix(in srgb, var(--flint-color-border-subtle) 84%, transparent)
     );
-    border-radius: var(--pug-treatment-interactive-radius, var(--pug-radius-control));
+    border-radius: var(--flint-treatment-interactive-radius, var(--flint-radius-control));
     background: var(
-      --pug-treatment-interactive-fill,
-      color-mix(in srgb, var(--pug-surface) 93%, var(--pug-color-text-primary))
+      --flint-treatment-interactive-fill,
+      color-mix(in srgb, var(--flint-surface) 93%, var(--flint-color-text-primary))
     );
-    box-shadow: var(--pug-treatment-interactive-shadow, none);
+    box-shadow: var(--flint-treatment-interactive-shadow, none);
   }
 
   .segmented-control__segment {
@@ -86,37 +86,37 @@
   .segmented-control__label {
     display: block;
     min-width: 0;
-    min-height: calc(var(--pug-size-control-height) - 0.25rem);
+    min-height: calc(var(--flint-size-control-height) - 0.25rem);
     padding: 0 0.75rem;
-    border-radius: calc(var(--pug-treatment-interactive-radius, var(--pug-radius-control)) - 0.125rem);
-    color: var(--pug-color-text-secondary);
-    font-family: var(--pug-typography-label-family);
+    border-radius: calc(var(--flint-treatment-interactive-radius, var(--flint-radius-control)) - 0.125rem);
+    color: var(--flint-color-text-secondary);
+    font-family: var(--flint-typography-label-family);
     font-size: 0.75rem;
     font-weight: 600;
-    line-height: calc(var(--pug-size-control-height) - 0.25rem);
+    line-height: calc(var(--flint-size-control-height) - 0.25rem);
     text-align: center;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
     transition:
-      background var(--pug-motion-duration-interaction) var(--pug-motion-easing-standard),
-      color var(--pug-motion-duration-interaction) var(--pug-motion-easing-standard),
-      box-shadow var(--pug-motion-duration-interaction) var(--pug-motion-easing-standard);
+      background var(--flint-motion-duration-interaction) var(--flint-motion-easing-standard),
+      color var(--flint-motion-duration-interaction) var(--flint-motion-easing-standard),
+      box-shadow var(--flint-motion-duration-interaction) var(--flint-motion-easing-standard);
   }
 
   .segmented-control__segment[data-selected="true"] .segmented-control__label {
-    background: var(--pug-color-accent-base);
-    color: var(--pug-color-text-inverse);
+    background: var(--flint-color-accent-base);
+    color: var(--flint-color-text-inverse);
     box-shadow: inset 0 0.0625rem 0 color-mix(in srgb, white 12%, transparent);
   }
 
   .segmented-control__control:focus-visible + .segmented-control__label {
-    outline: var(--pug-border-width-focus) solid var(--pug-color-accent-focusRing);
+    outline: var(--flint-border-width-focus) solid var(--flint-color-accent-focusRing);
     outline-offset: 0.125rem;
   }
 
   .segmented-control__control:disabled + .segmented-control__label {
-    opacity: var(--pug-state-opacity-disabled);
+    opacity: var(--flint-state-opacity-disabled);
     cursor: not-allowed;
   }
 </style>

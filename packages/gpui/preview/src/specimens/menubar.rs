@@ -1,7 +1,7 @@
 use gpui::*;
-use pug_adapter::ThemeProvider;
-use pug_primitives::{MenubarSpec, MenubarEntry, MenuEntry, MenuItemKind, EyebrowSpec};
-use pug_gpui_components::{Menubar, Eyebrow};
+use flint_adapter::ThemeProvider;
+use flint_primitives::{MenubarSpec, MenubarEntry, MenuEntry, MenuItemKind, EyebrowSpec};
+use flint_gpui_components::{Menubar, Eyebrow};
 use crate::app_state::AppState;
 use crate::style_bridge::color_to_hsla;
 use crate::PreviewRoot;

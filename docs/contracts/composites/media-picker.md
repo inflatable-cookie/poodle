@@ -152,7 +152,7 @@ Composed from `Dialog`, `Tabs`, `TextInput`, and `FileUpload` primitives.
 
 ## 9. Svelte Notes
 
-- Composes `Dialog`, `Button`, `TextInput`, `FileUpload`, and `Tabs` from `@pug/svelte-primitives`
+- Composes `Dialog`, `Button`, `TextInput`, `FileUpload`, and `Tabs` from `@flint/svelte-primitives`
 - `filteredItems` reactive statement filters by label case-insensitively
 - Selecting an item dispatches both `select` and `openChange(false)` to auto-close
 - `activeTab` is internal state toggling between `"browse"` and `"upload"`

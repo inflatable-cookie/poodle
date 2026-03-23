@@ -124,8 +124,8 @@ No component-owned events beyond child action behavior.
 | Property | Value |
 |----------|-------|
 | `display` | `grid` |
-| `gap` | `calc(var(--pug-space-stack-md) + 0.125rem)` |
-| `padding-top` | `calc(var(--pug-space-stack-md) + 0.125rem)` |
+| `gap` | `calc(var(--flint-space-stack-md) + 0.125rem)` |
+| `padding-top` | `calc(var(--flint-space-stack-md) + 0.125rem)` |
 
 #### `.detail-section[data-separated="true"]`
 
@@ -140,7 +140,7 @@ No component-owned events beyond child action behavior.
 | `display` | `flex` |
 | `flex-wrap` | `wrap` |
 | `justify-content` | `space-between` |
-| `gap` | `var(--pug-space-inline-md)` |
+| `gap` | `var(--flint-space-inline-md)` |
 | `align-items` | `start` |
 
 #### `.detail-section__title-block`
@@ -160,7 +160,7 @@ No component-owned events beyond child action behavior.
 
 | Property | Value |
 |----------|-------|
-| `font-family` | `var(--pug-typography-heading-family)` |
+| `font-family` | `var(--flint-typography-heading-family)` |
 | `font-size` | `1.125rem` |
 | `line-height` | `1.2` |
 
@@ -168,16 +168,16 @@ No component-owned events beyond child action behavior.
 
 | Property | Value |
 |----------|-------|
-| `color` | `var(--pug-color-text-secondary)` |
-| `font-size` | `var(--pug-typography-body-size)` |
-| `line-height` | `var(--pug-typography-body-lineHeight)` |
+| `color` | `var(--flint-color-text-secondary)` |
+| `font-size` | `var(--flint-typography-body-size)` |
+| `line-height` | `var(--flint-typography-body-lineHeight)` |
 
 #### `.detail-section__body`
 
 | Property | Value |
 |----------|-------|
 | `display` | `grid` |
-| `gap` | `var(--pug-space-stack-sm)` |
+| `gap` | `var(--flint-space-stack-sm)` |
 
 ### Data Attributes Used for CSS Selectors
 
@@ -188,12 +188,12 @@ No component-owned events beyond child action behavior.
 ## 9. Svelte Notes
 
 - expected substrate: `Stack`, `Inline`, `Separator`, and heading semantics
-- wrapper strategy: section slots stay Pug-owned; action and body children are
+- wrapper strategy: section slots stay Flint-owned; action and body children are
   composed rather than hard-coded
 
 ## 10. GPUI Notes
 
-- expected crate/module surface: `pug_gpui::composites::detail_section`
+- expected crate/module surface: `flint_gpui::composites::detail_section`
 - implementation-only details: GPUI may use grouped layout views and named
   subtrees instead of HTML sections, but addressable-section semantics remain
   required

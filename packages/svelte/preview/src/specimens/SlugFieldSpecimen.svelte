@@ -1,6 +1,6 @@
 <script lang="ts">
-  import { SlugField } from "@pug/svelte-composites";
-  import { Eyebrow, TextInput, Field } from "@pug/svelte-primitives";
+  import { SlugField } from "@flint/svelte-composites";
+  import { Eyebrow, TextInput, Field } from "@flint/svelte-primitives";
 
   let articleTitle = "My New Blog Post";
   let slug = "";
@@ -62,14 +62,14 @@
   .result {
     margin: 0;
     font-size: 0.8125rem;
-    color: var(--pug-color-text-secondary);
+    color: var(--flint-color-text-secondary);
   }
 
   .result code {
-    font-family: var(--pug-typography-code-family);
+    font-family: var(--flint-typography-code-family);
     font-size: 0.75rem;
     padding: 0.0625rem 0.25rem;
     border-radius: 0.1875rem;
-    background: color-mix(in srgb, var(--pug-color-background-panel) 72%, var(--pug-color-background-elevated));
+    background: color-mix(in srgb, var(--flint-color-background-panel) 72%, var(--flint-color-background-elevated));
   }
 </style>

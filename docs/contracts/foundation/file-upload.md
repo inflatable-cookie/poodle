@@ -176,7 +176,7 @@ interface FileUploadItem {
 |----------|-------|
 | `display` | `flex` |
 | `flex-direction` | `column` |
-| `gap` | `var(--pug-space-stack-sm, 0.5rem)` |
+| `gap` | `var(--flint-space-stack-sm, 0.5rem)` |
 
 ### Root Disabled `.file-upload--disabled`
 
@@ -193,9 +193,9 @@ interface FileUploadItem {
 | `align-items` | `center` |
 | `justify-content` | `center` |
 | `min-height` | `8rem` |
-| `padding` | `var(--pug-space-panel-y, 1.5rem) var(--pug-space-panel-x, 1.5rem)` |
-| `border` | `0.125rem dashed var(--pug-color-border-default, #444)` |
-| `border-radius` | `var(--pug-radius-surface, 0.5rem)` |
+| `padding` | `var(--flint-space-panel-y, 1.5rem) var(--flint-space-panel-x, 1.5rem)` |
+| `border` | `0.125rem dashed var(--flint-color-border-default, #444)` |
+| `border-radius` | `var(--flint-radius-surface, 0.5rem)` |
 | `background` | `transparent` |
 | `cursor` | `pointer` |
 | `transition` | `border-color 0.15s, background 0.15s` |
@@ -204,16 +204,16 @@ interface FileUploadItem {
 
 | Property | Value |
 |----------|-------|
-| `border-color` | `var(--pug-color-border-focus, #888)` |
-| `background` | `color-mix(in srgb, var(--pug-color-background-panel, #1a1a1a) 50%, transparent)` |
+| `border-color` | `var(--flint-color-border-focus, #888)` |
+| `background` | `color-mix(in srgb, var(--flint-color-background-panel, #1a1a1a) 50%, transparent)` |
 | `outline` | `none` |
 
 ### Dropzone Active `.file-upload__dropzone--active`
 
 | Property | Value |
 |----------|-------|
-| `border-color` | `var(--pug-color-accent-default, #6366f1)` |
-| `background` | `color-mix(in srgb, var(--pug-color-accent-default, #6366f1) 8%, transparent)` |
+| `border-color` | `var(--flint-color-accent-default, #6366f1)` |
+| `background` | `color-mix(in srgb, var(--flint-color-accent-default, #6366f1) 8%, transparent)` |
 
 ### Hidden Input `.file-upload__input`
 
@@ -241,7 +241,7 @@ interface FileUploadItem {
 |----------|-------|
 | `width` | `2rem` |
 | `height` | `2rem` |
-| `color` | `var(--pug-color-text-secondary, #999)` |
+| `color` | `var(--flint-color-text-secondary, #999)` |
 
 ### Label `.file-upload__label`
 
@@ -249,13 +249,13 @@ interface FileUploadItem {
 |----------|-------|
 | `margin` | `0` |
 | `font-size` | `0.875rem` |
-| `color` | `var(--pug-color-text-secondary, #999)` |
+| `color` | `var(--flint-color-text-secondary, #999)` |
 
 ### Browse `.file-upload__browse`
 
 | Property | Value |
 |----------|-------|
-| `color` | `var(--pug-color-accent-default, #6366f1)` |
+| `color` | `var(--flint-color-accent-default, #6366f1)` |
 | `text-decoration` | `underline` |
 
 ### Hint `.file-upload__hint`
@@ -264,7 +264,7 @@ interface FileUploadItem {
 |----------|-------|
 | `margin` | `0` |
 | `font-size` | `0.75rem` |
-| `color` | `var(--pug-color-text-tertiary, #666)` |
+| `color` | `var(--flint-color-text-tertiary, #666)` |
 
 ### File List `.file-upload__list`
 
@@ -286,14 +286,14 @@ interface FileUploadItem {
 | `align-items` | `center` |
 | `gap` | `0.5rem` |
 | `padding` | `0.375rem 0.5rem` |
-| `border-radius` | `var(--pug-radius-control, 0.375rem)` |
-| `background` | `var(--pug-color-background-panel, #1a1a1a)` |
+| `border-radius` | `var(--flint-radius-control, 0.375rem)` |
+| `background` | `var(--flint-color-background-panel, #1a1a1a)` |
 
 ### File Item Error `.file-upload__item--error`
 
 | Property | Value |
 |----------|-------|
-| `background` | `color-mix(in srgb, var(--pug-color-text-danger, #ef4444) 10%, var(--pug-color-background-panel, #1a1a1a))` |
+| `background` | `color-mix(in srgb, var(--flint-color-text-danger, #ef4444) 10%, var(--flint-color-background-panel, #1a1a1a))` |
 
 ### Preview `.file-upload__preview`
 
@@ -321,7 +321,7 @@ interface FileUploadItem {
 |----------|-------|
 | `width` | `1.25rem` |
 | `height` | `1.25rem` |
-| `color` | `var(--pug-color-text-tertiary, #666)` |
+| `color` | `var(--flint-color-text-tertiary, #666)` |
 
 ### Meta `.file-upload__meta`
 
@@ -347,13 +347,13 @@ interface FileUploadItem {
 | Property | Value |
 |----------|-------|
 | `font-size` | `0.75rem` |
-| `color` | `var(--pug-color-text-secondary, #999)` |
+| `color` | `var(--flint-color-text-secondary, #999)` |
 
 ### Error Text `.file-upload__error-text`
 
 | Property | Value |
 |----------|-------|
-| `color` | `var(--pug-color-text-danger, #ef4444)` |
+| `color` | `var(--flint-color-text-danger, #ef4444)` |
 
 ### Progress `.file-upload__progress`
 
@@ -364,8 +364,8 @@ interface FileUploadItem {
 | `left` | `0` |
 | `right` | `0` |
 | `height` | `0.125rem` |
-| `border-radius` | `0 0 var(--pug-radius-control, 0.375rem) var(--pug-radius-control, 0.375rem)` |
-| `background` | `var(--pug-color-border-default, #444)` |
+| `border-radius` | `0 0 var(--flint-radius-control, 0.375rem) var(--flint-radius-control, 0.375rem)` |
+| `background` | `var(--flint-color-border-default, #444)` |
 | `overflow` | `hidden` |
 
 ### Progress Bar `.file-upload__progress-bar`
@@ -373,7 +373,7 @@ interface FileUploadItem {
 | Property | Value |
 |----------|-------|
 | `height` | `100%` |
-| `background` | `var(--pug-color-accent-default, #6366f1)` |
+| `background` | `var(--flint-color-accent-default, #6366f1)` |
 | `transition` | `width 0.2s` |
 
 ### Remove Button `.file-upload__remove` (default)
@@ -390,15 +390,15 @@ interface FileUploadItem {
 | `border` | `0` |
 | `border-radius` | `0.25rem` |
 | `background` | `transparent` |
-| `color` | `var(--pug-color-text-secondary, #999)` |
+| `color` | `var(--flint-color-text-secondary, #999)` |
 | `cursor` | `pointer` |
 
 ### Remove Button Hover `.file-upload__remove:hover`
 
 | Property | Value |
 |----------|-------|
-| `background` | `var(--pug-color-background-elevated, #2a2a2a)` |
-| `color` | `var(--pug-color-text-default, #eee)` |
+| `background` | `var(--flint-color-background-elevated, #2a2a2a)` |
+| `color` | `var(--flint-color-text-default, #eee)` |
 
 ### Remove Button SVG `.file-upload__remove svg`
 
@@ -425,7 +425,7 @@ interface FileUploadItem {
 
 ## 10. GPUI Notes
 
-- expected crate/module surface: `pug_gpui::primitives::file_upload`
+- expected crate/module surface: `flint_gpui::primitives::file_upload`
 - Drag-and-drop: GPUI must integrate with platform drag-and-drop APIs for file
   drops
 - File picker: GPUI must open a native file dialog on click/keyboard activation

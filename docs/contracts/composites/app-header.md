@@ -89,10 +89,10 @@ No component-owned events. Child action behavior is host-owned.
 ### Default (>45rem)
 
 - Three-column grid: `minmax(0, 1fr) auto auto`
-- Gap: `--pug-space-inline-md`
+- Gap: `--flint-space-inline-md`
 - Min-height: `2.75rem`
-- Padding: `0.375rem --pug-space-panel-x`
-- Border-bottom: `0.0625rem solid --pug-color-border-subtle`
+- Padding: `0.375rem --flint-space-panel-x`
+- Border-bottom: `0.0625rem solid --flint-color-border-subtle`
 
 ### Responsive (<=45rem)
 
@@ -122,12 +122,12 @@ No component-owned events. Child action behavior is host-owned.
 |----------|-------|
 | `display` | `grid` |
 | `grid-template-columns` | `minmax(0, 1fr) auto auto` |
-| `gap` | `var(--pug-space-inline-md)` |
+| `gap` | `var(--flint-space-inline-md)` |
 | `align-items` | `center` |
 | `min-height` | `2.75rem` |
-| `padding` | `0.375rem var(--pug-space-panel-x)` |
-| `border-bottom` | `0.0625rem solid var(--pug-color-border-subtle)` |
-| `background` | `color-mix(in srgb, var(--pug-color-background-panel) 94%, transparent)` |
+| `padding` | `0.375rem var(--flint-space-panel-x)` |
+| `border-bottom` | `0.0625rem solid var(--flint-color-border-subtle)` |
+| `background` | `color-mix(in srgb, var(--flint-color-background-panel) 94%, transparent)` |
 | `overflow` | `visible` |
 
 #### `.app-header__identity`, `.app-header__actions`, `.app-header__utility` (Shared)
@@ -136,7 +136,7 @@ No component-owned events. Child action behavior is host-owned.
 |----------|-------|
 | `display` | `flex` |
 | `align-items` | `center` |
-| `gap` | `var(--pug-space-inline-sm)` |
+| `gap` | `var(--flint-space-inline-sm)` |
 | `min-width` | `0` |
 
 #### `.app-header__title-group`
@@ -145,7 +145,7 @@ No component-owned events. Child action behavior is host-owned.
 |----------|-------|
 | `display` | `flex` |
 | `align-items` | `baseline` |
-| `gap` | `var(--pug-space-inline-sm)` |
+| `gap` | `var(--flint-space-inline-sm)` |
 | `min-width` | `0` |
 
 #### `.app-header__identity strong` (Title)
@@ -160,7 +160,7 @@ No component-owned events. Child action behavior is host-owned.
 
 | Property | Value |
 |----------|-------|
-| `color` | `var(--pug-color-text-secondary)` |
+| `color` | `var(--flint-color-text-secondary)` |
 | `font-size` | `0.75rem` |
 | `line-height` | `1.2` |
 | `white-space` | `nowrap` |
@@ -199,7 +199,7 @@ No component-owned events. Child action behavior is host-owned.
 
 | Label | Props / Config | Expected Visual |
 |-------|---------------|-----------------|
-| Full app window header | `title="Pug Studio"`, actions slot with inline Menubar (File, Edit, View, Help menus with shortcuts), utility slot with 3 ghost IconButtons (search, bell, settings) | Full-width header with app title, integrated menubar, and trailing utility icons; simulated app body area below |
+| Full app window header | `title="Flint Studio"`, actions slot with inline Menubar (File, Edit, View, Help menus with shortcuts), utility slot with 3 ghost IconButtons (search, bell, settings) | Full-width header with app title, integrated menubar, and trailing utility icons; simulated app body area below |
 
 ### With Title, Actions, And Utility
 
@@ -211,10 +211,10 @@ No component-owned events. Child action behavior is host-owned.
 
 | Label | Props / Config | Expected Visual |
 |-------|---------------|-----------------|
-| Title only | `title="Pug Workstation"` | Minimal header displaying only the app title, no actions or utility controls |
+| Title only | `title="Flint Workstation"` | Minimal header displaying only the app title, no actions or utility controls |
 
 ### Custom Identity Slot
 
 | Label | Props / Config | Expected Visual |
 |-------|---------------|-----------------|
-| Custom identity slot | identity slot with custom logo badge ("P") and bold "Pug Studio" text, utility slot with bell and user ghost IconButtons | Header with custom branded identity region replacing default title, trailing utility icons |
+| Custom identity slot | identity slot with custom logo badge ("P") and bold "Flint Studio" text, utility slot with bell and user ghost IconButtons | Header with custom branded identity region replacing default title, trailing utility icons |

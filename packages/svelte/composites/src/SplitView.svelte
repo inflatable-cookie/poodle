@@ -1,10 +1,10 @@
 <script lang="ts">
   import { createEventDispatcher, onDestroy } from "svelte";
 
-  import { CollapseToggle } from "@pug/svelte-primitives";
-  import type { CollapseDirection } from "@pug/svelte-primitives";
-  import { ResizeHandle } from "@pug/svelte-primitives";
-  import type { SplitOrientation } from "@pug/svelte-primitives";
+  import { CollapseToggle } from "@flint/svelte-primitives";
+  import type { CollapseDirection } from "@flint/svelte-primitives";
+  import { ResizeHandle } from "@flint/svelte-primitives";
+  import type { SplitOrientation } from "@flint/svelte-primitives";
 
   export let orientation: SplitOrientation = "horizontal";
   export let ratio = 0.5;

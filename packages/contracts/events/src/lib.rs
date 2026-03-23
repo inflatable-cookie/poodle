@@ -1,4 +1,4 @@
-//! Renderer-agnostic semantic event types for Pug.
+//! Renderer-agnostic semantic event types for Flint.
 //!
 //! These events describe component interactions in terms of user intent rather
 //! than low-level input. Rendering adapters map from their native event systems:
@@ -6,7 +6,7 @@
 //! - **GPUI**: Mouse/keyboard event subscriptions → semantic events
 //! - **Jetstream**: `UiEvent` enum (Clicked, ValueChanged, etc.) → semantic events
 
-/// A semantic event emitted by a Pug component.
+/// A semantic event emitted by a Flint component.
 ///
 /// Each variant describes a meaningful interaction that both rendering targets
 /// can produce from their native event systems.

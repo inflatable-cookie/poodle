@@ -86,15 +86,15 @@ Updated: 2026-03-17
 | Property | Value |
 |----------|-------|
 | `padding` | `0.125rem` |
-| `border-radius` | `var(--pug-radius-sm, 0.25rem)` |
-| `color` | `var(--pug-color-text-muted)` |
+| `border-radius` | `var(--flint-radius-sm, 0.25rem)` |
+| `color` | `var(--flint-color-text-muted)` |
 
 ### Toggle Button — hover
 
 | Property | Value |
 |----------|-------|
-| `background` | `var(--pug-color-surface-hover)` |
-| `color` | `var(--pug-color-text-default)` |
+| `background` | `var(--flint-color-surface-hover)` |
+| `color` | `var(--flint-color-text-default)` |
 
 ### Toggle Button — disabled
 

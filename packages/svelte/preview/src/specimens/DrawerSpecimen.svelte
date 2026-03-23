@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { Drawer, Button, Eyebrow } from "@pug/svelte-primitives";
+  import { Drawer, Button, Eyebrow } from "@flint/svelte-primitives";
 
   let rightOpen = false;
   let leftOpen = false;
@@ -53,6 +53,6 @@
   p {
     margin: 0;
     font-size: 0.875rem;
-    color: var(--pug-color-text-secondary);
+    color: var(--flint-color-text-secondary);
   }
 </style>

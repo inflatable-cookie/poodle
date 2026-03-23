@@ -115,9 +115,9 @@ No internal state.
 | Property | Condition | Value |
 |----------|-----------|-------|
 | `padding` | `padding="none"` | `0` |
-| `padding` | `padding="sm"` | `var(--pug-space-inline-sm)` |
-| `padding` | `padding="md"` | `var(--pug-space-panel-y)` |
-| `padding` | `padding="lg"` | `var(--pug-space-panel-x)` |
+| `padding` | `padding="sm"` | `var(--flint-space-inline-sm)` |
+| `padding` | `padding="md"` | `var(--flint-space-panel-y)` |
+| `padding` | `padding="lg"` | `var(--flint-space-panel-x)` |
 | `overflow` | always | direct prop value (`visible`, `hidden`, `auto`, `scroll`) |
 | `width` | when set | direct prop value |
 | `height` | when set | direct prop value |
@@ -129,9 +129,9 @@ No internal state.
 | Scale | Resolved Value |
 |-------|---------------|
 | `"none"` | `0` |
-| `"sm"` | `var(--pug-space-inline-sm)` |
-| `"md"` | `var(--pug-space-panel-y)` |
-| `"lg"` | `var(--pug-space-panel-x)` |
+| `"sm"` | `var(--flint-space-inline-sm)` |
+| `"md"` | `var(--flint-space-panel-y)` |
+| `"lg"` | `var(--flint-space-panel-x)` |
 
 ## 9. Svelte Notes
 
@@ -143,7 +143,7 @@ No internal state.
 
 ## 10. GPUI Notes
 
-- Expected crate/module surface: `pug_gpui::components::box_container`
+- Expected crate/module surface: `flint_gpui::components::box_container`
 - Implemented as a neutral GPUI container element
 - SpaceScale mapping must use the same design token values
 - When `asRole` is set, GPUI must map it into the native accessibility tree

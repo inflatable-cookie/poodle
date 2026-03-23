@@ -1,5 +1,5 @@
 {
-  "name": "@pug/install-smoke",
+  "name": "@flint/install-smoke",
   "private": true,
   "type": "module",
   "scripts": {
@@ -7,9 +7,9 @@
     "build": "vite build"
   },
   "dependencies": {
-    "@pug/svelte-composites": "file:../composites",
-    "@pug/svelte-primitives": "file:../primitives",
-    "@pug/svelte-tokens": "file:../tokens",
+    "@flint/svelte-composites": "file:../composites",
+    "@flint/svelte-primitives": "file:../primitives",
+    "@flint/svelte-tokens": "file:../tokens",
     "svelte": "^5.38.6"
   },
   "devDependencies": {

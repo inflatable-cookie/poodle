@@ -1,8 +1,8 @@
 //! DetailSection — real GPUI component backed by DetailSectionSpec.
 
 use gpui::*;
-use pug_gpui::GpuiThemeProvider;
-use pug_composites::DetailSectionSpec;
+use flint_gpui::GpuiThemeProvider;
+use flint_composites::DetailSectionSpec;
 
 use crate::theme_ext::{resolve_color, resolve_px};
 

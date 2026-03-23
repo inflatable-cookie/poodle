@@ -1,5 +1,5 @@
 [catalog]
-alias = "pug"
+alias = "flint"
 
 [bootstrap]
 setup = ["bootstrap:deps"]
@@ -20,14 +20,14 @@ start = "preview:dev"
 "svelte:preview" = [{ task = "svelte:run"}]
 
 # GPUI native preview (macOS)
-"gpui:build" = "cargo build -p pug-gpui-preview --manifest-path packages/gpui/preview/Cargo.toml"
-"gpui:run" = "cargo run -p pug-gpui-preview --manifest-path packages/gpui/preview/Cargo.toml"
-"gpui:test" = "cargo test -p pug-gpui --manifest-path packages/gpui/adapter/Cargo.toml"
+"gpui:build" = "cargo build -p flint-gpui-preview --manifest-path packages/gpui/preview/Cargo.toml"
+"gpui:run" = "cargo run -p flint-gpui-preview --manifest-path packages/gpui/preview/Cargo.toml"
+"gpui:test" = "cargo test -p flint-gpui --manifest-path packages/gpui/adapter/Cargo.toml"
 "gpui:preview" = [{ task = "gpui:run" }]
 
 # Jetstream native preview (game engine)
-"jetstream:build" = "cargo build -p pug-jetstream-preview --manifest-path packages/jetstream/preview/Cargo.toml"
-"jetstream:run" = "cargo run -p pug-jetstream-preview --manifest-path packages/jetstream/preview/Cargo.toml"
+"jetstream:build" = "cargo build -p flint-jetstream-preview --manifest-path packages/jetstream/preview/Cargo.toml"
+"jetstream:run" = "cargo run -p flint-jetstream-preview --manifest-path packages/jetstream/preview/Cargo.toml"
 "jetstream:test" = "cd packages/jetstream/adapter && cargo test"
 "jetstream:preview" = [{ task = "jetstream:run" }]
 
@@ -40,8 +40,8 @@ start = "preview:dev"
 
 # Documentation
 "docs:lint" = "bun run --cwd packages/svelte/preview docs:lint"
-"docs:dev" = [{ task = "preview:dev" }]
-"docs:build" = [{ task = "preview:build" }]
+"docs:dev" = [{ task = "svelte:run" }]
+"docs:build" = [{ task = "svelte:build" }]
 "docs:check" = [
   { task = "docs:lint" },
   { task = "report:parity" },

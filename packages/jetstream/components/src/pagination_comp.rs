@@ -1,8 +1,8 @@
 //! Pagination — Jetstream pagination backed by PaginationSpec.
 
 use jetstream_runtime::ui_element::{self, JsEl};
-use pug_jetstream::JetstreamThemeProvider;
-use pug_primitives::PaginationSpec;
+use flint_jetstream::JetstreamThemeProvider;
+use flint_primitives::PaginationSpec;
 
 use crate::theme_ext::resolve_color;
 

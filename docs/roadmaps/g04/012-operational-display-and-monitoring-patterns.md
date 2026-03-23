@@ -1,10 +1,10 @@
 # g04.012 Operational Display And Monitoring Patterns
 
 Status: planned
-Owner: Pug Core
+Owner: Flint Core
 Updated: 2026-03-14
 Depends on: g04.002 through g04.010
-Primary repos: `pug`
+Primary repos: `flint`
 
 ## Goals
 
@@ -15,7 +15,7 @@ Primary repos: `pug`
 
 - [ ] write contract for LogList: entries with timestamp/level/message, level
   filtering, auto-scroll, search, max entries with virtualization
-- [ ] implement LogList composite in `@pug/svelte-composites`
+- [ ] implement LogList composite in `@flint/svelte-composites`
 - [ ] amend StateTile contract: add `trend` prop (up/down/flat), `trendLabel`,
   optional sparkline data array
 - [ ] implement StateTile trend indicator (directional arrow + percentage)

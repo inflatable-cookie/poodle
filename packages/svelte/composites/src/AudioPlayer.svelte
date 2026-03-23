@@ -183,9 +183,9 @@
     align-items: center;
     gap: 0.5rem;
     padding: 0.5rem 0.75rem;
-    border: 0.0625rem solid var(--pug-color-border-default);
-    border-radius: var(--pug-radius-surface);
-    background: var(--pug-color-background-surface);
+    border: 0.0625rem solid var(--flint-color-border-default);
+    border-radius: var(--flint-radius-surface);
+    background: var(--flint-color-background-surface);
   }
 
   .audio-player__play,
@@ -199,20 +199,20 @@
     border: 0;
     border-radius: 999rem;
     background: transparent;
-    color: var(--pug-color-text-primary);
+    color: var(--flint-color-text-primary);
     cursor: pointer;
     flex-shrink: 0;
-    transition: background var(--pug-motion-duration-interaction) var(--pug-motion-easing-standard);
+    transition: background var(--flint-motion-duration-interaction) var(--flint-motion-easing-standard);
   }
 
   .audio-player__play:hover,
   .audio-player__mute:hover {
-    background: color-mix(in srgb, var(--pug-color-accent-base) 12%, transparent);
+    background: color-mix(in srgb, var(--flint-color-accent-base) 12%, transparent);
   }
 
   .audio-player__play:focus-visible,
   .audio-player__mute:focus-visible {
-    outline: var(--pug-border-width-focus) solid var(--pug-color-accent-focusRing);
+    outline: var(--flint-border-width-focus) solid var(--flint-color-accent-focusRing);
     outline-offset: 0.0625rem;
   }
 
@@ -223,9 +223,9 @@
   }
 
   .audio-player__time {
-    font-family: var(--pug-typography-code-family);
+    font-family: var(--flint-typography-code-family);
     font-size: 0.6875rem;
-    color: var(--pug-color-text-secondary);
+    color: var(--flint-color-text-secondary);
     flex-shrink: 0;
     min-width: 2.5rem;
     text-align: center;
@@ -254,26 +254,26 @@
   .audio-player__seek::-webkit-slider-runnable-track {
     height: 0.25rem;
     border-radius: 0.125rem;
-    background: var(--pug-color-text-primary);
+    background: var(--flint-color-text-primary);
   }
 
   .audio-player__seek::-moz-range-track {
     height: 0.25rem;
     border-radius: 0.125rem;
-    background: var(--pug-color-text-primary);
+    background: var(--flint-color-text-primary);
   }
 
   /* Volume track */
   .audio-player__volume::-webkit-slider-runnable-track {
     height: 0.25rem;
     border-radius: 0.125rem;
-    background: var(--pug-color-accent-base);
+    background: var(--flint-color-accent-base);
   }
 
   .audio-player__volume::-moz-range-track {
     height: 0.25rem;
     border-radius: 0.125rem;
-    background: var(--pug-color-accent-base);
+    background: var(--flint-color-accent-base);
   }
 
   /* Thumb */
@@ -284,7 +284,7 @@
     height: 0.625rem;
     border-radius: 50%;
     border: none;
-    background: var(--pug-color-text-primary);
+    background: var(--flint-color-text-primary);
     margin-top: -0.1875rem;
   }
 
@@ -294,18 +294,18 @@
     height: 0.625rem;
     border-radius: 50%;
     border: none;
-    background: var(--pug-color-text-primary);
+    background: var(--flint-color-text-primary);
   }
 
   .audio-player__speed {
     padding: 0.125rem 0.25rem;
-    border: 0.0625rem solid var(--pug-color-border-default);
-    border-radius: var(--pug-radius-control);
+    border: 0.0625rem solid var(--flint-color-border-default);
+    border-radius: var(--flint-radius-control);
     background: transparent;
-    color: var(--pug-color-text-secondary);
+    color: var(--flint-color-text-secondary);
     font: inherit;
     font-size: 0.6875rem;
-    font-family: var(--pug-typography-code-family);
+    font-family: var(--flint-typography-code-family);
     cursor: pointer;
     appearance: none;
     flex-shrink: 0;

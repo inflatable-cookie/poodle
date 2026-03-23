@@ -98,7 +98,7 @@
       "sectionId": "form-suite",
       "title": "Form baseline and validation posture",
       "layer": "foundation",
-      "packageName": "@pug/svelte-primitives",
+      "packageName": "@flint/svelte-primitives",
       "contractRoot": "docs/contracts/foundation/",
       "summary": "Field wrappers, inputs, search, and action rows with validation and announcement posture.",
       "auditAreas": {
@@ -167,7 +167,7 @@
       "sectionId": "table-suite",
       "title": "Selection, sorting, and bulk actions",
       "layer": "composites",
-      "packageName": "@pug/svelte-composites",
+      "packageName": "@flint/svelte-composites",
       "contractRoot": "docs/contracts/composites/",
       "summary": "Structured rows with visible-scope selection, sort semantics, row actions, and pagination context.",
       "auditAreas": {
@@ -224,7 +224,7 @@
       "sectionId": "browse-suite",
       "title": "Lists, grids, filters, and search depth",
       "layer": "composites",
-      "packageName": "@pug/svelte-composites",
+      "packageName": "@flint/svelte-composites",
       "contractRoot": "docs/contracts/composites/",
       "summary": "Browse shells that separate ready, loading, empty, and no-results posture across list and grid views.",
       "auditAreas": {
@@ -281,7 +281,7 @@
       "sectionId": "detail-suite",
       "title": "Detail display, cards, headers, and navigation",
       "layer": "composites",
-      "packageName": "@pug/svelte-composites",
+      "packageName": "@flint/svelte-composites",
       "contractRoot": "docs/contracts/composites/",
       "summary": "Readonly detail surfaces with breadcrumb context, page headers, cards, and section hierarchy.",
       "auditAreas": {
@@ -338,7 +338,7 @@
       "sectionId": "picker-suite",
       "title": "Picker, relation, and selection workflows",
       "layer": "composites",
-      "packageName": "@pug/svelte-composites",
+      "packageName": "@flint/svelte-composites",
       "contractRoot": "docs/contracts/composites/",
       "summary": "Searchable attach-or-choose flows with selection summaries, commit/cancel rhythm, and keyboard traversal.",
       "auditAreas": {
@@ -407,7 +407,7 @@
       "sectionId": "media-suite",
       "title": "Preview framing, embeds, and fallback posture",
       "layer": "composites",
-      "packageName": "@pug/svelte-composites",
+      "packageName": "@flint/svelte-composites",
       "contractRoot": "docs/contracts/composites/",
       "summary": "Media surfaces that keep framing, metadata, and fallback meaning explicit without owning playback engines.",
       "auditAreas": {
@@ -464,7 +464,7 @@
       "sectionId": "notification-suite",
       "title": "Banners, toasts, skeletons, and remediation",
       "layer": "composites",
-      "packageName": "@pug/svelte-primitives + @pug/svelte-composites",
+      "packageName": "@flint/svelte-primitives + @flint/svelte-composites",
       "contractRoot": "docs/contracts/foundation/ + docs/contracts/composites/",
       "summary": "Persistent and transient state surfaces with loading, remediation, and announcement posture.",
       "auditAreas": {
@@ -521,7 +521,7 @@
       "sectionId": "command-suite",
       "title": "Palette search, grouped actions, and inline rediscovery",
       "layer": "workstation",
-      "packageName": "@pug/svelte-workstation",
+      "packageName": "@flint/svelte-workstation",
       "contractRoot": "docs/contracts/workstation/",
       "summary": "Modal and inline command discovery with grouped results, focus containment, and keyboard movement.",
       "auditAreas": {
@@ -578,7 +578,7 @@
       "sectionId": "workspace-suite",
       "title": "Headers, dock orchestration, and workspace shell posture",
       "layer": "workstation",
-      "packageName": "@pug/svelte-workstation",
+      "packageName": "@flint/svelte-workstation",
       "contractRoot": "docs/contracts/workstation/",
       "summary": "App and project headers, docks, tabs, split views, and host-owned layout snapshots.",
       "auditAreas": {
@@ -635,7 +635,7 @@
       "sectionId": "token-summary-section",
       "title": "Runtime-critical values",
       "layer": "tokens",
-      "packageName": "@pug/svelte-tokens",
+      "packageName": "@flint/svelte-tokens",
       "contractRoot": "packages/tokens/",
       "summary": "Live values pulled from the active emitted theme, density, and control-size overlays.",
       "auditAreas": {
@@ -688,7 +688,7 @@
       "sectionId": "token-inspector",
       "title": "Search the emitted token tree",
       "layer": "tokens",
-      "packageName": "@pug/svelte-tokens",
+      "packageName": "@flint/svelte-tokens",
       "contractRoot": "packages/tokens/artifacts/",
       "summary": "Searchable inspection of the emitted semantic token paths and their active computed values.",
       "auditAreas": {

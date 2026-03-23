@@ -15,7 +15,7 @@
   "layerProof": [
     {
       "id": "primitives",
-      "crateName": "pug-gpui-primitives",
+      "crateName": "flint-gpui-primitives",
       "cratePath": "packages/gpui/primitives",
       "contractIds": [
         "accordion",
@@ -121,7 +121,7 @@
     },
     {
       "id": "composites",
-      "crateName": "pug-gpui-composites",
+      "crateName": "flint-gpui-composites",
       "cratePath": "packages/gpui/composites",
       "contractIds": [
         "banner",
@@ -172,7 +172,7 @@
     },
     {
       "id": "workstation",
-      "crateName": "pug-gpui-workstation",
+      "crateName": "flint-gpui-workstation",
       "cratePath": "packages/gpui/workstation",
       "contractIds": [
         "action-discovery-panel",

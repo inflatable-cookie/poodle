@@ -1,6 +1,6 @@
 <script lang="ts">
-  import { FilterToolbar } from "@pug/svelte-composites";
-  import { Eyebrow, Select, SearchField, Button, IconButton, type SelectOption } from "@pug/svelte-primitives";
+  import { FilterToolbar } from "@flint/svelte-composites";
+  import { Eyebrow, Select, SearchField, Button, IconButton, type SelectOption } from "@flint/svelte-primitives";
 
   const statusOptions: SelectOption[] = [
     { value: "all", label: "All statuses" },

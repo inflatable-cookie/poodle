@@ -17,13 +17,13 @@
 
 <style>
   .separator {
-    --pug-separator-color: color-mix(in srgb, var(--pug-color-border-subtle) 72%, transparent);
+    --flint-separator-color: color-mix(in srgb, var(--flint-color-border-subtle) 72%, transparent);
     flex: 0 0 auto;
-    background: var(--pug-separator-color);
+    background: var(--flint-separator-color);
   }
 
   .separator[data-tone="default"] {
-    --pug-separator-color: var(--pug-color-border-default);
+    --flint-separator-color: var(--flint-color-border-default);
   }
 
   .separator[data-orientation="horizontal"] {

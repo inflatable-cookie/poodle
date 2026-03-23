@@ -86,28 +86,28 @@
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    width: var(--pug-icon-size-default);
-    height: var(--pug-icon-size-default);
+    width: var(--flint-icon-size-default);
+    height: var(--flint-icon-size-default);
     padding: 0;
     border: 0;
     background: transparent;
-    color: var(--pug-color-icon-muted);
+    color: var(--flint-color-icon-muted);
     cursor: pointer;
     border-radius: calc(
-      var(--pug-treatment-interactive-subtle-radius, var(--pug-radius-control)) - 0.0625rem
+      var(--flint-treatment-interactive-subtle-radius, var(--flint-radius-control)) - 0.0625rem
     );
   }
 
   .search-field__clear:hover {
     background: var(
-      --pug-treatment-interactive-subtle-fill-hover,
-      color-mix(in srgb, var(--pug-color-background-surface) 84%, transparent)
+      --flint-treatment-interactive-subtle-fill-hover,
+      color-mix(in srgb, var(--flint-color-background-surface) 84%, transparent)
     );
-    color: var(--pug-color-text-primary);
+    color: var(--flint-color-text-primary);
   }
 
   .search-field__clear:focus-visible {
-    outline: var(--pug-border-width-focus) solid var(--pug-color-accent-focusRing);
+    outline: var(--flint-border-width-focus) solid var(--flint-color-accent-focusRing);
     outline-offset: 0.125rem;
   }
 </style>

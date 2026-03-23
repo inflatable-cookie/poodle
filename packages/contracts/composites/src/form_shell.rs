@@ -1,5 +1,5 @@
-use pug_primitives::{FormActionAlign, StatusTone, ValidationState};
-use pug_tokens::semantic;
+use flint_primitives::{FormActionAlign, StatusTone, ValidationState};
+use flint_tokens::semantic;
 
 use crate::types::{FormActionLayout, FormFieldState, FormSectionSpec, FormStatusSummary};
 

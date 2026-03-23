@@ -1,8 +1,8 @@
 <script lang="ts">
-  import { Eyebrow, Surface } from "@pug/svelte-primitives";
-  import { DockRegion } from "@pug/svelte-composites";
-  import type { PanelTabItem, DockEdge } from "@pug/svelte-composites";
-  import { folder, code, list as listIcon, terminal } from "@pug/icons-lucide";
+  import { Eyebrow, Surface } from "@flint/svelte-primitives";
+  import { DockRegion } from "@flint/svelte-composites";
+  import type { PanelTabItem, DockEdge } from "@flint/svelte-composites";
+  import { folder, code, list as listIcon, terminal } from "@flint/icons-lucide";
 
   // ── Static dock state ──────────────────────────────────────────────
 
@@ -307,8 +307,8 @@
 
   .specimen__frame {
     height: 16rem;
-    border: 0.0625rem solid var(--pug-color-border-subtle);
-    border-radius: var(--pug-radius-surface);
+    border: 0.0625rem solid var(--flint-color-border-subtle);
+    border-radius: var(--flint-radius-surface);
     overflow: hidden;
   }
 
@@ -358,20 +358,20 @@
     align-items: center;
     justify-content: center;
     font-size: 0.75rem;
-    color: var(--pug-color-text-secondary);
+    color: var(--flint-color-text-secondary);
   }
 
   .specimen__panel-content {
     padding: 0.75rem;
     font-size: 0.8125rem;
-    color: var(--pug-color-text-secondary);
+    color: var(--flint-color-text-secondary);
     line-height: 1.5;
   }
 
   .specimen__panel-content strong {
     display: block;
     margin-bottom: 0.25rem;
-    color: var(--pug-color-text-primary);
+    color: var(--flint-color-text-primary);
     text-transform: capitalize;
   }
 
@@ -386,8 +386,8 @@
     padding: 0.5rem 0.75rem;
     font-size: 0.75rem;
     font-weight: 600;
-    color: var(--pug-color-text-secondary);
-    border-right: 0.0625rem solid var(--pug-color-border-subtle);
+    color: var(--flint-color-text-secondary);
+    border-right: 0.0625rem solid var(--flint-color-border-subtle);
   }
 
   .specimen__static-panel:last-child {

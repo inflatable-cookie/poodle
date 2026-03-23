@@ -1,10 +1,10 @@
 //! Callout specimen — status callouts with different tones.
 
 use jetstream_runtime::ui_element::*;
-use pug_jetstream::JetstreamThemeProvider;
-use pug_jetstream_components::callout::js_callout;
-use pug_jetstream_components::theme_ext::*;
-use pug_primitives::{CallOutSpec, StatusTone};
+use flint_jetstream::JetstreamThemeProvider;
+use flint_jetstream_components::callout::js_callout;
+use flint_jetstream_components::theme_ext::*;
+use flint_primitives::{CallOutSpec, StatusTone};
 
 pub fn render(theme: &JetstreamThemeProvider) -> JsEl {
     let secondary = resolve_color(theme, "semantic.color.text.secondary");

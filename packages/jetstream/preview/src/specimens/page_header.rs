@@ -1,10 +1,10 @@
 //! PageHeader specimen — page-level title and subtitle header.
 
 use jetstream_runtime::ui_element::*;
-use pug_jetstream::JetstreamThemeProvider;
-use pug_jetstream_components::page_header::js_page_header;
-use pug_jetstream_components::theme_ext::*;
-use pug_composites::PageHeaderSpec;
+use flint_jetstream::JetstreamThemeProvider;
+use flint_jetstream_components::page_header::js_page_header;
+use flint_jetstream_components::theme_ext::*;
+use flint_composites::PageHeaderSpec;
 
 pub fn render(theme: &JetstreamThemeProvider) -> JsEl {
     let secondary = resolve_color(theme, "semantic.color.text.secondary");

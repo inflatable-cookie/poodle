@@ -1,10 +1,10 @@
 //! OrderBy specimen — sort control with active/inactive fields.
 
 use jetstream_runtime::ui_element::*;
-use pug_jetstream::JetstreamThemeProvider;
-use pug_jetstream_components::order_by::js_order_by;
-use pug_jetstream_components::theme_ext::*;
-use pug_primitives::{ActiveSort, OrderBySpec, SortDirection, SortField};
+use flint_jetstream::JetstreamThemeProvider;
+use flint_jetstream_components::order_by::js_order_by;
+use flint_jetstream_components::theme_ext::*;
+use flint_primitives::{ActiveSort, OrderBySpec, SortDirection, SortField};
 
 pub fn render(theme: &JetstreamThemeProvider) -> JsEl {
     let secondary = resolve_color(theme, "semantic.color.text.secondary");

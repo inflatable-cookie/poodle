@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { StatusIndicator, Eyebrow } from "@pug/svelte-primitives";
+  import { StatusIndicator, Eyebrow } from "@flint/svelte-primitives";
 </script>
 
 <div class="specimen">

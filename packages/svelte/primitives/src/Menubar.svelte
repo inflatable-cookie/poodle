@@ -140,7 +140,7 @@
           role="menuitem"
           aria-haspopup="menu"
           aria-expanded={currentValue === item.value ? "true" : "false"}
-          aria-controls={currentValue === item.value ? `pug-menubar-menu-${menubarId}-${item.value}` : undefined}
+          aria-controls={currentValue === item.value ? `flint-menubar-menu-${menubarId}-${item.value}` : undefined}
           on:focus={() => (focusIndex = index)}
           on:click={() => setValue(currentValue === item.value ? null : item.value)}
           on:keydown={(event) => {
@@ -180,7 +180,7 @@
 
         {#if currentValue === item.value}
           <div
-            id={`pug-menubar-menu-${menubarId}-${item.value}`}
+            id={`flint-menubar-menu-${menubarId}-${item.value}`}
             class="menubar__overlay"
             role="menu"
             aria-label={item.label}
@@ -271,9 +271,9 @@
     display: inline-flex;
     gap: 0.125rem;
     padding: 0.1875rem;
-    border: 0.0625rem solid color-mix(in srgb, var(--pug-color-border-subtle) 72%, transparent);
-    border-radius: var(--pug-radius-surface);
-    background: color-mix(in srgb, var(--pug-color-background-panel) 96%, transparent);
+    border: 0.0625rem solid color-mix(in srgb, var(--flint-color-border-subtle) 72%, transparent);
+    border-radius: var(--flint-radius-surface);
+    background: color-mix(in srgb, var(--flint-color-background-panel) 96%, transparent);
   }
 
   .menubar__group {
@@ -284,23 +284,23 @@
   .menubar__trigger {
     display: inline-flex;
     align-items: center;
-    min-height: calc(var(--pug-size-control-height) - 0.25rem);
-    padding: 0 var(--pug-space-control-x);
+    min-height: calc(var(--flint-size-control-height) - 0.25rem);
+    padding: 0 var(--flint-space-control-x);
     border: 0;
-    border-radius: var(--pug-radius-control);
+    border-radius: var(--flint-radius-control);
     background: transparent;
-    color: var(--pug-color-text-primary);
+    color: var(--flint-color-text-primary);
     cursor: pointer;
-    font-family: var(--pug-typography-label-family);
-    font-size: var(--pug-typography-label-size);
-    font-weight: var(--pug-typography-label-weight);
+    font-family: var(--flint-typography-label-family);
+    font-size: var(--flint-typography-label-size);
+    font-weight: var(--flint-typography-label-weight);
     line-height: 1;
   }
 
   .menubar__trigger[data-open="true"],
   .menubar__trigger:hover:not(:disabled),
   .menubar__trigger:focus-visible {
-    background: color-mix(in srgb, var(--pug-color-accent-base) 14%, transparent);
+    background: color-mix(in srgb, var(--flint-color-accent-base) 14%, transparent);
     outline: none;
   }
 
@@ -308,19 +308,19 @@
     position: absolute;
     top: calc(100% + 0.25rem);
     left: 0;
-    z-index: var(--pug-overlay-z-menu);
+    z-index: var(--flint-overlay-z-menu);
     min-width: 12rem;
     padding: 0.25rem;
     border: 0.0625rem solid var(
-      --pug-treatment-surface-elevated-border,
-      color-mix(in srgb, var(--pug-color-border-default) 72%, transparent)
+      --flint-treatment-surface-elevated-border,
+      color-mix(in srgb, var(--flint-color-border-default) 72%, transparent)
     );
-    border-radius: var(--pug-treatment-surface-elevated-radius, var(--pug-radius-surface));
+    border-radius: var(--flint-treatment-surface-elevated-radius, var(--flint-radius-surface));
     background: var(
-      --pug-treatment-surface-elevated-fill,
-      color-mix(in srgb, var(--pug-color-background-elevated) 98%, var(--pug-color-background-panel))
+      --flint-treatment-surface-elevated-fill,
+      color-mix(in srgb, var(--flint-color-background-elevated) 98%, var(--flint-color-background-panel))
     );
-    box-shadow: var(--pug-treatment-surface-elevated-shadow, var(--pug-elevation-overlay));
+    box-shadow: var(--flint-treatment-surface-elevated-shadow, var(--flint-elevation-overlay));
   }
 
   .menubar__item {
@@ -328,27 +328,27 @@
     grid-template-columns: minmax(0, 1fr) auto;
     align-items: center;
     width: 100%;
-    min-height: calc(var(--pug-size-control-height) - 0.25rem);
-    padding: var(--pug-space-control-y) var(--pug-space-control-x);
+    min-height: calc(var(--flint-size-control-height) - 0.25rem);
+    padding: var(--flint-space-control-y) var(--flint-space-control-x);
     border: 0;
-    border-radius: calc(var(--pug-radius-control) - 0.125rem);
+    border-radius: calc(var(--flint-radius-control) - 0.125rem);
     background: transparent;
-    color: var(--pug-color-text-primary);
+    color: var(--flint-color-text-primary);
     cursor: pointer;
     font: inherit;
-    font-size: var(--pug-typography-body-size);
+    font-size: var(--flint-typography-body-size);
     text-align: left;
   }
 
   .menubar__item:hover:not(:disabled),
   .menubar__item:focus-visible {
-    background: color-mix(in srgb, var(--pug-color-accent-base) 16%, transparent);
+    background: color-mix(in srgb, var(--flint-color-accent-base) 16%, transparent);
     outline: none;
   }
 
   .menubar__meta {
-    color: var(--pug-color-text-secondary);
-    font-family: var(--pug-typography-code-family);
+    color: var(--flint-color-text-secondary);
+    font-family: var(--flint-typography-code-family);
     font-size: 0.6875rem;
   }
 
@@ -356,12 +356,12 @@
     width: 100%;
     height: 0.0625rem;
     margin: 0.25rem 0;
-    background: color-mix(in srgb, var(--pug-color-border-subtle) 72%, transparent);
+    background: color-mix(in srgb, var(--flint-color-border-subtle) 72%, transparent);
   }
 
   .menubar__trigger:disabled,
   .menubar__item:disabled {
     cursor: not-allowed;
-    opacity: var(--pug-state-opacity-disabled);
+    opacity: var(--flint-state-opacity-disabled);
   }
 </style>

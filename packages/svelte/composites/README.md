@@ -1,6 +1,6 @@
-# Pug Svelte Composites
+# Flint Svelte Composites
 
-First Svelte composite implementation surface for contract-backed Pug browse
+First Svelte composite implementation surface for contract-backed Flint browse
 and data components.
 
 ## Public Surface
@@ -22,8 +22,8 @@ and data components.
 - `MediaPreview`
 - `EmptyState`
 - `ToastStack`
-- root import: `@pug/svelte-composites`
-- type-only import: `@pug/svelte-composites/types`
+- root import: `@flint/svelte-composites`
+- type-only import: `@flint/svelte-composites/types`
 
 ## Stability Notes
 

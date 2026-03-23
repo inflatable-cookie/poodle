@@ -1,7 +1,7 @@
 //! SelectionSummary — Jetstream selection summary backed by SelectionSummarySpec.
 use jetstream_runtime::ui_element::{self, JsEl};
-use pug_jetstream::JetstreamThemeProvider;
-use pug_composites::SelectionSummarySpec;
+use flint_jetstream::JetstreamThemeProvider;
+use flint_composites::SelectionSummarySpec;
 use crate::theme_ext::resolve_color;
 
 pub fn js_selection_summary(spec: &SelectionSummarySpec, theme: &JetstreamThemeProvider) -> JsEl {

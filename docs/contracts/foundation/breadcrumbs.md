@@ -115,20 +115,20 @@ State table is sufficient.
 | `display` | `flex` |
 | `flex-wrap` | `wrap` |
 | `align-items` | `center` |
-| `gap` | `var(--pug-space-inline-sm)` |
-| `font-size` | `var(--pug-typography-body-size)` |
+| `gap` | `var(--flint-space-inline-sm)` |
+| `font-size` | `var(--flint-typography-body-size)` |
 
 ### Path Item (link)
 
 | Property | Value |
 |----------|-------|
-| `color` | `var(--pug-color-text-secondary)` |
+| `color` | `var(--flint-color-text-secondary)` |
 
 ### Current Item
 
 | Property | Value |
 |----------|-------|
-| `color` | `var(--pug-color-text-primary)` |
+| `color` | `var(--flint-color-text-primary)` |
 
 ### Separator
 
@@ -144,7 +144,7 @@ State table is sufficient.
 
 ## 10. GPUI Notes
 
-- expected crate/module surface: `pug_gpui::composites::breadcrumbs`
+- expected crate/module surface: `flint_gpui::composites::breadcrumbs`
 - implementation-only details: GPUI may render separators and overflow using
   native layout and menu surfaces, but path semantics and current location still
   need explicit mapping
@@ -181,7 +181,7 @@ A three-item breadcrumb trail with navigation callback:
 
 | Label | Props/Config | Expected Visual |
 |-------|-------------|-----------------|
-| Basic | items: Home > Projects > Pug (current) | trail with link-style intermediate items and non-link current item; navigation callback reports clicked value |
+| Basic | items: Home > Projects > Flint (current) | trail with link-style intermediate items and non-link current item; navigation callback reports clicked value |
 
 ### Deep path
 
@@ -189,7 +189,7 @@ A six-item breadcrumb trail with no truncation:
 
 | Label | Props/Config | Expected Visual |
 |-------|-------------|-----------------|
-| Deep path | items: Home > Workspace > Projects > Pug Design System > Primitives > Button (current) | full trail visible with all intermediate links and current-page terminus |
+| Deep path | items: Home > Workspace > Projects > Flint Design System > Primitives > Button (current) | full trail visible with all intermediate links and current-page terminus |
 
 ### Collapsed (max 3 visible)
 

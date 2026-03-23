@@ -1,8 +1,8 @@
 //! BulkActionBar — Jetstream bulk action bar backed by BulkActionBarSpec.
 
 use jetstream_runtime::ui_element::{self, JsEl};
-use pug_jetstream::JetstreamThemeProvider;
-use pug_primitives::BulkActionBarSpec;
+use flint_jetstream::JetstreamThemeProvider;
+use flint_primitives::BulkActionBarSpec;
 
 use crate::theme_ext::resolve_color;
 

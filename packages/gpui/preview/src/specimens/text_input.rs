@@ -1,6 +1,6 @@
 use gpui::*;
-use pug_primitives::{FieldSpec, TextInputSpec, ValidationState, EyebrowSpec};
-use pug_gpui_components::{Field, TextInput, Eyebrow};
+use flint_primitives::{FieldSpec, TextInputSpec, ValidationState, EyebrowSpec};
+use flint_gpui_components::{Field, TextInput, Eyebrow};
 use crate::app_state::AppState;
 use crate::PreviewRoot;
 

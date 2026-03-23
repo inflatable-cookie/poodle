@@ -1,10 +1,10 @@
 # g04.006 Temporal Display And Duration Input
 
 Status: planned
-Owner: Pug Core
+Owner: Flint Core
 Updated: 2026-03-14
 Depends on: g04.001
-Primary repos: `pug`
+Primary repos: `flint`
 
 ## Goals
 
@@ -17,10 +17,10 @@ Primary repos: `pug`
 - [ ] write contract for TimeAgo: datetime prop, live-update interval, tooltip
   with absolute time, locale support, thresholds for switching from "seconds
   ago" to "minutes ago" etc.
-- [ ] implement TimeAgo primitive in `@pug/svelte-primitives`
+- [ ] implement TimeAgo primitive in `@flint/svelte-primitives`
 - [ ] write contract for DurationInput: hours/minutes/seconds segments,
   min/max constraints, step increments, format display
-- [ ] implement DurationInput primitive in `@pug/svelte-primitives`
+- [ ] implement DurationInput primitive in `@flint/svelte-primitives`
 - [ ] create specimens for TimeAgo and DurationInput
 - [ ] register in component-registry.ts and specimen registry
 

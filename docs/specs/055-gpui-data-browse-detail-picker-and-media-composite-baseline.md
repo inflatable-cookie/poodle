@@ -13,7 +13,7 @@ compose the same UI families as Svelte against one contract-owned catalogue.
 
 ## Package Rule
 
-The `g04.008` tranche extends `pug-gpui-composites` with:
+The `g04.008` tranche extends `flint-gpui-composites` with:
 
 - `DataTableSpec`
 - `DetailShellSpec`

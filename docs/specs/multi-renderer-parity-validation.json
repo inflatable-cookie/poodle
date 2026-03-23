@@ -4,36 +4,36 @@
   "updated": "2026-03-14",
   "description": "Multi-renderer parity validation report — maps Svelte components to Rust specs and adapter readiness",
   "contract_crates": {
-    "pug-tokens": {
+    "flint-tokens": {
       "path": "packages/contracts/tokens",
       "modules": ["semantic", "primitives", "themes", "density", "metadata", "typed"],
       "typed_module": true
     },
-    "pug-primitives": {
+    "flint-primitives": {
       "path": "packages/contracts/primitives",
       "spec_count": 64
     },
-    "pug-composites": {
+    "flint-composites": {
       "path": "packages/contracts/composites",
       "spec_count": 41
     },
-    "pug-workstation": {
+    "flint-workstation": {
       "path": "packages/contracts/workstation",
       "spec_count": 13
     },
-    "pug-layout": {
+    "flint-layout": {
       "path": "packages/contracts/layout",
       "types": ["LayoutDirection", "LayoutSizing", "LayoutEdges", "LayoutSpacing", "MainAxisAlignment", "CrossAxisAlignment", "LayoutAlignment", "LayoutOverflow", "LayoutIntent"]
     },
-    "pug-events": {
+    "flint-events": {
       "path": "packages/contracts/events",
       "types": ["SemanticEvent", "EventValue", "DragPhase", "EventModifiers", "NavigateDirection", "ComponentEventProfile"]
     },
-    "pug-style": {
+    "flint-style": {
       "path": "packages/contracts/style",
       "types": ["StyleDescriptor", "FontFamily", "TypographyDescriptor", "BorderDescriptor", "CornerRadii", "CursorHint"]
     },
-    "pug-adapter": {
+    "flint-adapter": {
       "path": "packages/contracts/adapter",
       "traits": ["ThemeProvider", "EventSink", "RenderTarget", "RenderComponent", "AdapterManifest"]
     }
@@ -42,12 +42,12 @@
     "gpui": {
       "generation": "g07",
       "status": "planned",
-      "crate_name": "pug-gpui"
+      "crate_name": "flint-gpui"
     },
     "jetstream": {
       "generation": "g08",
       "status": "planned",
-      "crate_name": "pug-jetstream",
+      "crate_name": "flint-jetstream",
       "constraint_document": "docs/roadmaps/g06/013-jetstream-rendering-constraint-document.md"
     }
   },

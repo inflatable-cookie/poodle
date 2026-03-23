@@ -1,6 +1,6 @@
 <script lang="ts">
-  import { DetailShell, DetailSection, PageHeader } from "@pug/svelte-composites";
-  import { Button, Pill, DetailRow, Eyebrow, Region, Separator, Surface } from "@pug/svelte-primitives";
+  import { DetailShell, DetailSection, PageHeader } from "@flint/svelte-composites";
+  import { Button, Pill, DetailRow, Eyebrow, Region, Separator, Surface } from "@flint/svelte-primitives";
 </script>
 
 <div class="specimen">
@@ -23,7 +23,7 @@
     <div class="specimen__demo">
       <DetailShell ariaLabel="Project detail view">
         <svelte:fragment slot="header">
-          <PageHeader title="Pug Design System" eyebrow="Project" subtitle="A comprehensive component library.">
+          <PageHeader title="Flint Design System" eyebrow="Project" subtitle="A comprehensive component library.">
             <svelte:fragment slot="actions">
               <Pill appearance="badge" tone="success">Active</Pill>
               <Button variant="secondary" size="sm">Edit</Button>
@@ -33,7 +33,7 @@
         <DetailSection title="General">
           <DetailRow label="Owner" value="Clay" />
           <DetailRow label="Created" value="March 2025" />
-          <DetailRow label="Repository" value="github.com/pug-ui/pug" />
+          <DetailRow label="Repository" value="github.com/flint-ui/flint" />
         </DetailSection>
         <Separator />
         <DetailSection title="Configuration">

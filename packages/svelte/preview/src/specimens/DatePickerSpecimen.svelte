@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { DatePicker, Eyebrow } from "@pug/svelte-primitives";
+  import { DatePicker, Eyebrow } from "@flint/svelte-primitives";
 
   let selected = "";
 </script>
@@ -44,6 +44,6 @@
   .specimen__group p {
     margin: 0;
     font-size: 0.875rem;
-    color: var(--pug-color-text-secondary);
+    color: var(--flint-color-text-secondary);
   }
 </style>

@@ -125,7 +125,7 @@ internal state.
 | `width` | `100%` |
 | `min-height` | `0.5rem` |
 | `border-radius` | `999px` |
-| `background` | `color-mix(in srgb, var(--pug-surface) 96%, var(--pug-color-text-primary))` |
+| `background` | `color-mix(in srgb, var(--flint-surface) 96%, var(--flint-color-text-primary))` |
 
 ### Indicator `.progress__indicator`
 
@@ -135,8 +135,8 @@ internal state.
 | `inset` | `0` |
 | `transform-origin` | `left center` |
 | `border-radius` | `inherit` |
-| `background` | `linear-gradient(90deg, color-mix(in srgb, var(--pug-color-accent-base) 88%, white), var(--pug-color-accent-base))` |
-| `transition` | `transform var(--pug-motion-duration-standard) var(--pug-motion-easing-standard)` |
+| `background` | `linear-gradient(90deg, color-mix(in srgb, var(--flint-color-accent-base) 88%, white), var(--flint-color-accent-base))` |
+| `transition` | `transform var(--flint-motion-duration-standard) var(--flint-motion-easing-standard)` |
 
 ### Indicator — Determinate State
 
@@ -164,10 +164,10 @@ internal state.
 
 | Token | Role |
 |-------|------|
-| `--pug-color-background-surface` | track background (mixed at 92% opacity) |
-| `--pug-color-accent-base` | indicator gradient endpoint and base |
-| `--pug-motion-duration-standard` | determinate transition duration |
-| `--pug-motion-easing-standard` | determinate transition easing |
+| `--flint-color-background-surface` | track background (mixed at 92% opacity) |
+| `--flint-color-accent-base` | indicator gradient endpoint and base |
+| `--flint-motion-duration-standard` | determinate transition duration |
+| `--flint-motion-easing-standard` | determinate transition easing |
 
 ## 9. Svelte Notes
 
@@ -179,7 +179,7 @@ internal state.
 
 ## 10. GPUI Notes
 
-- Expected crate/module surface: `pug_gpui::primitives::progress`
+- Expected crate/module surface: `flint_gpui::primitives::progress`
 - GPUI implementation must intentionally expose determinate value and
   indeterminate progress semantics rather than presenting only a visual bar
 
@@ -193,8 +193,8 @@ internal state.
 
 ### Tier 2: Visual Parity
 
-- [ ] track background uses `--pug-color-background-surface` at 92% mix
-- [ ] indicator gradient uses `--pug-color-accent-base` at 88% mix with white
+- [ ] track background uses `--flint-color-background-surface` at 92% mix
+- [ ] indicator gradient uses `--flint-color-accent-base` at 88% mix with white
 - [ ] indicator border-radius inherits from track (999px pill)
 - [ ] min-height of 0.5rem matches
 

@@ -1,7 +1,7 @@
 <script lang="ts">
   import { createEventDispatcher } from "svelte";
 
-  import { Dialog, Button } from "@pug/svelte-primitives";
+  import { Dialog, Button } from "@flint/svelte-primitives";
 
   import FormLayout from "./FormLayout.svelte";
 

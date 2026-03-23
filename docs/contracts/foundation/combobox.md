@@ -154,21 +154,21 @@ ComboboxOption: {
 
 | Property | Value |
 |----------|-------|
-| `min-height` | `var(--pug-size-control-height)` |
-| `padding` | `0 var(--pug-space-control-x)` |
-| `border` | `0.0625rem solid var(--pug-color-border-default)` |
-| `border-radius` | `var(--pug-radius-control)` |
-| `background` | `var(--pug-color-background-surface)` |
-| `color` | `var(--pug-color-text-primary)` |
-| `font-family` | `var(--pug-typography-body-family)` |
-| `font-size` | `var(--pug-typography-body-size)` |
-| `line-height` | `var(--pug-typography-body-lineHeight)` |
+| `min-height` | `var(--flint-size-control-height)` |
+| `padding` | `0 var(--flint-space-control-x)` |
+| `border` | `0.0625rem solid var(--flint-color-border-default)` |
+| `border-radius` | `var(--flint-radius-control)` |
+| `background` | `var(--flint-color-background-surface)` |
+| `color` | `var(--flint-color-text-primary)` |
+| `font-family` | `var(--flint-typography-body-family)` |
+| `font-size` | `var(--flint-typography-body-size)` |
+| `line-height` | `var(--flint-typography-body-lineHeight)` |
 
 ### Input — focus-visible
 
 | Property | Value |
 |----------|-------|
-| `outline` | `var(--pug-border-width-focus) solid var(--pug-color-accent-focusRing)` |
+| `outline` | `var(--flint-border-width-focus) solid var(--flint-color-accent-focusRing)` |
 | `outline-offset` | `0.125rem` |
 
 ### List `.combobox__list`
@@ -179,14 +179,14 @@ ComboboxOption: {
 | `top` | `calc(100% + 0.375rem)` |
 | `left` | `0` |
 | `right` | `0` |
-| `z-index` | `var(--pug-overlay-z-menu)` |
+| `z-index` | `var(--flint-overlay-z-menu)` |
 | `display` | `grid` |
 | `gap` | `0.125rem` |
 | `padding` | `0.25rem` |
-| `border` | `0.0625rem solid color-mix(in srgb, var(--pug-color-border-default) 72%, transparent)` |
-| `border-radius` | `var(--pug-radius-surface)` |
-| `background` | `color-mix(in srgb, var(--pug-color-background-elevated) 98%, var(--pug-color-background-panel))` |
-| `box-shadow` | `var(--pug-elevation-overlay)` |
+| `border` | `0.0625rem solid color-mix(in srgb, var(--flint-color-border-default) 72%, transparent)` |
+| `border-radius` | `var(--flint-radius-surface)` |
+| `background` | `color-mix(in srgb, var(--flint-color-background-elevated) 98%, var(--flint-color-background-panel))` |
+| `box-shadow` | `var(--flint-elevation-overlay)` |
 
 ### Option `.combobox__option`
 
@@ -197,9 +197,9 @@ ComboboxOption: {
 | `width` | `100%` |
 | `padding` | `0.375rem 0.5rem` |
 | `border` | `0` |
-| `border-radius` | `calc(var(--pug-radius-control) - 0.125rem)` |
+| `border-radius` | `calc(var(--flint-radius-control) - 0.125rem)` |
 | `background` | `transparent` |
-| `color` | `var(--pug-color-text-primary)` |
+| `color` | `var(--flint-color-text-primary)` |
 | `cursor` | `pointer` |
 | `font` | `inherit` |
 | `text-align` | `left` |
@@ -208,20 +208,20 @@ ComboboxOption: {
 
 | Property | Value |
 |----------|-------|
-| `background` | `color-mix(in srgb, var(--pug-color-accent-base) 16%, transparent)` |
+| `background` | `color-mix(in srgb, var(--flint-color-accent-base) 16%, transparent)` |
 
 ### Option — disabled
 
 | Property | Value |
 |----------|-------|
 | `cursor` | `not-allowed` |
-| `opacity` | `var(--pug-state-opacity-disabled)` |
+| `opacity` | `var(--flint-state-opacity-disabled)` |
 
 ### Description `.combobox__description`
 
 | Property | Value |
 |----------|-------|
-| `color` | `var(--pug-color-text-secondary)` |
+| `color` | `var(--flint-color-text-secondary)` |
 | `font-size` | `0.6875rem` |
 | `line-height` | `1.35` |
 
@@ -230,7 +230,7 @@ ComboboxOption: {
 | Property | Value |
 |----------|-------|
 | `padding` | `0.5rem` |
-| `color` | `var(--pug-color-text-secondary)` |
+| `color` | `var(--flint-color-text-secondary)` |
 | `font-size` | `0.6875rem` |
 | `line-height` | `1.35` |
 
@@ -245,7 +245,7 @@ ComboboxOption: {
 
 ## 10. GPUI Notes
 
-- expected crate/module surface: `pug_gpui::primitives::combobox`
+- expected crate/module surface: `flint_gpui::primitives::combobox`
 - GPUI must implement the combobox pattern with input, overlay list, and option highlighting
 - Must expose combobox role, expanded state, active-descendant, and option list through native accessibility APIs
 - List overlay positioning: anchor below input with gap; may need overflow/clipping awareness

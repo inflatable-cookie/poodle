@@ -7,7 +7,7 @@ Priority: critical (blocks g01.002, g01.003)
 
 ## Purpose
 
-Research design token taxonomy patterns, standards, and tooling to inform Pug's:
+Research design token taxonomy patterns, standards, and tooling to inform Flint's:
 - Canonical token schema (g01.002)
 - Artifact emission for CSS/TypeScript/Rust (g01.003)
 - Naming conventions across platforms
@@ -114,13 +114,13 @@ Research design token taxonomy patterns, standards, and tooling to inform Pug's:
 **Web (CSS):**
 ```css
 :root {
-  --pug-color-background-primary: #ffffff;
-  --pug-color-text-primary: #1a1a1a;
+  --flint-color-background-primary: #ffffff;
+  --flint-color-text-primary: #1a1a1a;
 }
 
 [data-theme="dark"] {
-  --pug-color-background-primary: #1a1a1a;
-  --pug-color-text-primary: #ffffff;
+  --flint-color-background-primary: #1a1a1a;
+  --flint-color-text-primary: #ffffff;
 }
 ```
 
@@ -129,11 +129,11 @@ Research design token taxonomy patterns, standards, and tooling to inform Pug's:
 export const tokens = {
   color: {
     background: {
-      primary: 'var(--pug-color-background-primary)',
-      secondary: 'var(--pug-color-background-secondary)',
+      primary: 'var(--flint-color-background-primary)',
+      secondary: 'var(--flint-color-background-secondary)',
     },
     text: {
-      primary: 'var(--pug-color-text-primary)',
+      primary: 'var(--flint-color-text-primary)',
     },
   },
 } as const;
@@ -170,7 +170,7 @@ pub struct BackgroundColors {
 - GPUI handles DPI/scale separately
 - No native CSS custom property equivalent
 
-**Recommended Pug Strategy:**
+**Recommended Flint Strategy:**
 - Define modes in DTCG: `light`, `dark`, `density` (compact/default/comfortable)
 - Emit separate CSS files or CSS layers for each theme
 - Emit Rust code for each theme variant
@@ -178,11 +178,11 @@ pub struct BackgroundColors {
 
 ---
 
-## Recommendations for Pug
+## Recommendations for Flint
 
 ### Token Taxonomy
 
-**Pug Token Hierarchy:**
+**Flint Token Hierarchy:**
 ```
 tokens/
 ├── primitives/
@@ -204,9 +204,9 @@ tokens/
 | Platform | Token Path | Output Name |
 |----------|------------|-------------|
 | Source | `semantic.color.background.primary` | - |
-| CSS | - | `--pug-color-background-primary` |
+| CSS | - | `--flint-color-background-primary` |
 | TypeScript | `tokens.color.background.primary` | camelCase |
-| Rust | `pug::semantic::color::BACKGROUND_PRIMARY` | SCREAMING_SNAKE_CASE |
+| Rust | `flint::semantic::color::BACKGROUND_PRIMARY` | SCREAMING_SNAKE_CASE |
 
 ### Emission Strategy
 
@@ -225,7 +225,7 @@ tokens/
 **Adopt W3C DTCG as canonical format because:**
 1. Industry standard (Adobe, Figma, Sketch, Tokens Studio support)
 2. Interoperability with design tools
-3. Pug can accept DTCG tokens from external sources
+3. Flint can accept DTCG tokens from external sources
 4. Future-proof specification
 
 ---

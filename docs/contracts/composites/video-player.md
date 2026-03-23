@@ -138,7 +138,7 @@ No custom events dispatched. All interaction is internal (play/pause/seek/volume
 
 ### Composition
 
-Standalone component. Does not compose other Pug primitives.
+Standalone component. Does not compose other Flint primitives.
 
 ## 8. Token Usage And Precise CSS
 
@@ -151,7 +151,7 @@ Most colors use hardcoded `rgba(255,255,255,...)` values intentionally.
 |----------|-------|
 | position | `relative` |
 | overflow | `hidden` |
-| border-radius | `var(--pug-radius-surface)` |
+| border-radius | `var(--flint-radius-surface)` |
 | background | `#000` |
 | cursor | `pointer` |
 | aspect-ratio | set via inline style from `aspectRatio` prop |
@@ -214,7 +214,7 @@ Most colors use hardcoded `rgba(255,255,255,...)` values intentionally.
 | Property | Value |
 |----------|-------|
 | height | `100%` |
-| background | `var(--pug-color-accent-base, #6366f1)` |
+| background | `var(--flint-color-accent-base, #6366f1)` |
 | border-radius | `999rem` |
 | transition | `width 0.1s linear` |
 
@@ -257,7 +257,7 @@ Most colors use hardcoded `rgba(255,255,255,...)` values intentionally.
 | height | `1.75rem` |
 | padding | `0` |
 | border | `0` |
-| border-radius | `var(--pug-radius-control)` |
+| border-radius | `var(--flint-radius-control)` |
 | background | `transparent` |
 | color | `rgba(255, 255, 255, 0.9)` |
 | transition | `background 0.15s ease` |
@@ -276,7 +276,7 @@ Most colors use hardcoded `rgba(255,255,255,...)` values intentionally.
 
 | Property | Value |
 |----------|-------|
-| font-family | `var(--pug-typography-code-family)` |
+| font-family | `var(--flint-typography-code-family)` |
 | font-size | `0.6875rem` |
 | color | `rgba(255, 255, 255, 0.8)` |
 | white-space | `nowrap` |

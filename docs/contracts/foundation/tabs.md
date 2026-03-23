@@ -17,15 +17,15 @@ Updated: 2026-03-15
 ## 2. Anatomy
 
 ```text
-[Root .pug-tabs]
-  ├── [List .pug-tabs__list]  role="tablist"
-  │     ├── [Item .pug-tabs__item]...
-  │     │     ├── [Tab .pug-tabs__tab]  role="tab"  <button>
+[Root .flint-tabs]
+  ├── [List .flint-tabs__list]  role="tablist"
+  │     ├── [Item .flint-tabs__item]...
+  │     │     ├── [Tab .flint-tabs__tab]  role="tab"  <button>
   │     │     │     ├── [Icon] (optional, Icon component size="sm")
-  │     │     │     └── [Label .pug-tabs__label]  <span>
-  │     │     └── [Close .pug-tabs__close] (optional, when isClosable)
-  │     └── [Actions .pug-tabs__actions] (optional slot)
-  └── [Panel .pug-tabs__panel]  role="tabpanel" (optional, when slot content exists)
+  │     │     │     └── [Label .flint-tabs__label]  <span>
+  │     │     └── [Close .flint-tabs__close] (optional, when isClosable)
+  │     └── [Actions .flint-tabs__actions] (optional slot)
+  └── [Panel .flint-tabs__panel]  role="tabpanel" (optional, when slot content exists)
 ```
 
 | Part | Required | Description | Token Targets |
@@ -151,7 +151,7 @@ Updated: 2026-03-15
 | Property | Value |
 |----------|-------|
 | `display` | `grid` |
-| `gap` | `var(--pug-space-stack-md)` |
+| `gap` | `var(--flint-space-stack-md)` |
 | `min-width` | `0` |
 
 ### Root (vertical orientation)
@@ -175,7 +175,7 @@ Updated: 2026-03-15
 | Property | Value |
 |----------|-------|
 | `padding-bottom` | `0.25rem` |
-| `border-bottom` | `0.0625rem solid color-mix(in srgb, var(--pug-color-border-subtle) 82%, transparent)` |
+| `border-bottom` | `0.0625rem solid color-mix(in srgb, var(--flint-color-border-subtle) 82%, transparent)` |
 
 ### List — Underline vertical
 
@@ -185,7 +185,7 @@ Updated: 2026-03-15
 | `padding-bottom` | `0` |
 | `padding-right` | `0.5rem` |
 | `border-bottom` | `0` |
-| `border-right` | `0.0625rem solid color-mix(in srgb, var(--pug-color-border-subtle) 82%, transparent)` |
+| `border-right` | `0.0625rem solid color-mix(in srgb, var(--flint-color-border-subtle) 82%, transparent)` |
 
 ### List — Card + Pill + Strip
 
@@ -207,7 +207,7 @@ Updated: 2026-03-15
 |----------|-------|
 | `width` | `fit-content` |
 | `padding` | `0.1875rem` |
-| `border` | `0.125rem solid color-mix(in srgb, var(--pug-color-border-subtle) 68%, transparent)` |
+| `border` | `0.125rem solid color-mix(in srgb, var(--flint-color-border-subtle) 68%, transparent)` |
 | `border-radius` | `999px` |
 | `gap` | `0.125rem` |
 
@@ -216,16 +216,16 @@ Updated: 2026-03-15
 | Property | Value |
 |----------|-------|
 | `gap` | `0` |
-| `border` | `0.0625rem solid color-mix(in srgb, var(--pug-color-border-subtle) 68%, transparent)` |
-| `border-radius` | `var(--pug-radius-control)` |
-| `background` | `color-mix(in srgb, var(--pug-color-background-surface) 92%, transparent)` |
+| `border` | `0.0625rem solid color-mix(in srgb, var(--flint-color-border-subtle) 68%, transparent)` |
+| `border-radius` | `var(--flint-radius-control)` |
+| `background` | `color-mix(in srgb, var(--flint-color-background-surface) 92%, transparent)` |
 
 ### Item — Card variant (selected)
 
 | Property | Value |
 |----------|-------|
-| `border-color` | `color-mix(in srgb, var(--pug-color-accent-base) 32%, var(--pug-color-border-subtle))` |
-| `background` | `color-mix(in srgb, var(--pug-color-accent-base) 14%, var(--pug-color-background-surface))` |
+| `border-color` | `color-mix(in srgb, var(--flint-color-accent-base) 32%, var(--flint-color-border-subtle))` |
+| `background` | `color-mix(in srgb, var(--flint-color-accent-base) 14%, var(--flint-color-background-surface))` |
 
 ### Tab button (all variants)
 
@@ -233,14 +233,14 @@ Updated: 2026-03-15
 |----------|-------|
 | `display` | `inline-flex` |
 | `align-items` | `center` |
-| `gap` | `var(--pug-space-inline-sm)` |
-| `min-height` | `calc(var(--pug-size-control-height) - 0.25rem)` |
+| `gap` | `var(--flint-space-inline-sm)` |
+| `min-height` | `calc(var(--flint-size-control-height) - 0.25rem)` |
 | `padding` | `0 0.75rem` |
 | `border` | `0` |
 | `background` | `transparent` |
-| `color` | `var(--pug-color-text-secondary)` |
+| `color` | `var(--flint-color-text-secondary)` |
 | `cursor` | `pointer` |
-| `font-family` | `var(--pug-typography-label-family)` |
+| `font-family` | `var(--flint-typography-label-family)` |
 | `font-size` | `0.75rem` |
 | `font-weight` | `600` |
 | `line-height` | `1` |
@@ -250,27 +250,27 @@ Updated: 2026-03-15
 
 | Property | Value |
 |----------|-------|
-| `border-radius` | `var(--pug-radius-control)` |
+| `border-radius` | `var(--flint-radius-control)` |
 
 ### Tab — Underline variant (selected)
 
 | Property | Value |
 |----------|-------|
-| `background` | `color-mix(in srgb, var(--pug-color-accent-base) 18%, transparent)` |
-| `color` | `var(--pug-color-text-primary)` |
+| `background` | `color-mix(in srgb, var(--flint-color-accent-base) 18%, transparent)` |
+| `color` | `var(--flint-color-text-primary)` |
 
 ### Tab — Card variant
 
 | Property | Value |
 |----------|-------|
 | `padding` | `0 0.5rem` |
-| `color` | `var(--pug-color-text-primary)` |
+| `color` | `var(--flint-color-text-primary)` |
 
 ### Tab — Pill variant
 
 | Property | Value |
 |----------|-------|
-| `min-height` | `calc(var(--pug-size-control-height) - 0.5rem)` |
+| `min-height` | `calc(var(--flint-size-control-height) - 0.5rem)` |
 | `padding` | `0 0.625rem` |
 | `border-radius` | `999px` |
 
@@ -278,8 +278,8 @@ Updated: 2026-03-15
 
 | Property | Value |
 |----------|-------|
-| `background` | `color-mix(in srgb, var(--pug-color-accent-base) 18%, transparent)` |
-| `color` | `var(--pug-color-text-primary)` |
+| `background` | `color-mix(in srgb, var(--flint-color-accent-base) 18%, transparent)` |
+| `color` | `var(--flint-color-text-primary)` |
 
 ### List — Strip variant
 
@@ -287,9 +287,9 @@ Updated: 2026-03-15
 |----------|-------|
 | `display` | `flex` |
 | `gap` | `0` |
-| `padding` | `0 var(--pug-space-panel-x, 0.75rem)` |
-| `border-bottom` | `0.0625rem solid var(--pug-color-border-subtle)` |
-| `background` | `color-mix(in srgb, var(--pug-color-background-panel) 92%, transparent)` |
+| `padding` | `0 var(--flint-space-panel-x, 0.75rem)` |
+| `border-bottom` | `0.0625rem solid var(--flint-color-border-subtle)` |
+| `background` | `color-mix(in srgb, var(--flint-color-background-panel) 92%, transparent)` |
 
 ### Item — Strip variant
 
@@ -302,13 +302,13 @@ Updated: 2026-03-15
 
 | Property | Value |
 |----------|-------|
-| `border-bottom-color` | `var(--pug-color-accent-base)` |
+| `border-bottom-color` | `var(--flint-color-accent-base)` |
 
 ### Item — Strip variant (hover)
 
 | Property | Value |
 |----------|-------|
-| `background` | `color-mix(in srgb, var(--pug-color-surface-hover) 50%, transparent)` |
+| `background` | `color-mix(in srgb, var(--flint-color-surface-hover) 50%, transparent)` |
 
 ### Tab — Strip variant
 
@@ -322,7 +322,7 @@ Updated: 2026-03-15
 
 | Property | Value |
 |----------|-------|
-| `color` | `var(--pug-color-text-primary)` |
+| `color` | `var(--flint-color-text-primary)` |
 
 ### List — Strip vertical
 
@@ -331,7 +331,7 @@ Updated: 2026-03-15
 | `padding` | `0` |
 | `overflow` | `visible` |
 | `border-bottom` | `0` |
-| `border-right` | `0.0625rem solid var(--pug-color-border-subtle)` |
+| `border-right` | `0.0625rem solid var(--flint-color-border-subtle)` |
 
 ### Item — Strip vertical
 
@@ -346,7 +346,7 @@ Updated: 2026-03-15
 
 | Property | Value |
 |----------|-------|
-| `border-right-color` | `var(--pug-color-accent-base)` |
+| `border-right-color` | `var(--flint-color-accent-base)` |
 
 ### Item — Strip vertical (first-child)
 
@@ -373,14 +373,14 @@ Updated: 2026-03-15
 
 | Property | Value |
 |----------|-------|
-| `.pug-tabs__label` `display` | `none` |
-| `.pug-tabs__close` `display` | `none` |
+| `.flint-tabs__label` `display` | `none` |
+| `.flint-tabs__close` `display` | `none` |
 
 ### Tab — Focus
 
 | Property | Value |
 |----------|-------|
-| `outline` | `var(--pug-border-width-focus) solid var(--pug-color-accent-focusRing)` |
+| `outline` | `var(--flint-border-width-focus) solid var(--flint-color-accent-focusRing)` |
 | `outline-offset` | `0.125rem` |
 
 ### Tab — Disabled
@@ -388,7 +388,7 @@ Updated: 2026-03-15
 | Property | Value |
 |----------|-------|
 | `cursor` | `not-allowed` |
-| `opacity` | `var(--pug-state-opacity-disabled)` |
+| `opacity` | `var(--flint-state-opacity-disabled)` |
 
 ### Label
 
@@ -409,9 +409,9 @@ Updated: 2026-03-15
 | `min-height` | `0` |
 | `padding` | `0` |
 | `border` | `0` |
-| `border-radius` | `calc(var(--pug-radius-control) - 0.125rem)` |
+| `border-radius` | `calc(var(--flint-radius-control) - 0.125rem)` |
 | `background` | `transparent` |
-| `color` | `var(--pug-color-text-secondary)` |
+| `color` | `var(--flint-color-text-secondary)` |
 | `cursor` | `pointer` |
 | `margin-right` | `0.25rem` |
 
@@ -419,14 +419,14 @@ Updated: 2026-03-15
 
 | Property | Value |
 |----------|-------|
-| `background` | `color-mix(in srgb, var(--pug-color-background-surface) 84%, transparent)` |
-| `color` | `var(--pug-color-text-primary)` |
+| `background` | `color-mix(in srgb, var(--flint-color-background-surface) 84%, transparent)` |
+| `color` | `var(--flint-color-text-primary)` |
 
 ### Close button — Focus
 
 | Property | Value |
 |----------|-------|
-| `outline` | `var(--pug-border-width-focus) solid var(--pug-color-accent-focusRing)` |
+| `outline` | `var(--flint-border-width-focus) solid var(--flint-color-accent-focusRing)` |
 | `outline-offset` | `0.125rem` |
 
 ### Actions slot
@@ -442,10 +442,10 @@ Updated: 2026-03-15
 | Property | Value |
 |----------|-------|
 | `min-width` | `0` |
-| `padding` | `var(--pug-space-panel-y) var(--pug-space-panel-x)` |
-| `border` | `0.0625rem solid color-mix(in srgb, var(--pug-color-border-subtle) 74%, transparent)` |
-| `border-radius` | `var(--pug-radius-surface)` |
-| `background` | `color-mix(in srgb, var(--pug-color-background-panel) 96%, transparent)` |
+| `padding` | `var(--flint-space-panel-y) var(--flint-space-panel-x)` |
+| `border` | `0.0625rem solid color-mix(in srgb, var(--flint-color-border-subtle) 74%, transparent)` |
+| `border-radius` | `var(--flint-radius-surface)` |
+| `background` | `color-mix(in srgb, var(--flint-color-background-panel) 96%, transparent)` |
 
 ### Drag-and-drop states
 
@@ -453,8 +453,8 @@ Updated: 2026-03-15
 |-------|----------|-------|
 | draggable item | `cursor` | `grab` |
 | drag source | `opacity` | `0.4` |
-| drop target | `box-shadow` | `inset 0 0 0 0.125rem var(--pug-color-accent-base)` |
-| drop target | `border-radius` | `var(--pug-radius-control)` |
+| drop target | `box-shadow` | `inset 0 0 0 0.125rem var(--flint-color-accent-base)` |
+| drop target | `border-radius` | `var(--flint-radius-control)` |
 
 ## 9. Svelte Notes
 
@@ -468,9 +468,9 @@ Updated: 2026-03-15
 
 ## 10. GPUI Notes
 
-- expected crate/module surface: `pug_gpui::components::tabs`
+- expected crate/module surface: `flint_gpui::components::tabs`
 - Spec struct: `TabsSpec` in primitives crate holds tab definitions + variant
-- Component struct: `PugTabs` in components crate renders via `IntoElement`
+- Component struct: `FlintTabs` in components crate renders via `IntoElement`
 - Opacity multipliers centralized in spec: `pill_border_opacity() -> 0.68`, `pill_active_bg_opacity() -> 0.18`
 - GPUI must model `color-mix` as `token.opacity(token.a * multiplier)` since GPUI has no CSS color-mix
 - Underline border opacity: 82% → `0.82` multiplier on border-subtle

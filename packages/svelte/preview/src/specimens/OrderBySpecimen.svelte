@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { Eyebrow, OrderBy, type ActiveSort, type SortField } from "@pug/svelte-primitives";
+  import { Eyebrow, OrderBy, type ActiveSort, type SortField } from "@flint/svelte-primitives";
 
   let activeSort: ActiveSort | null = null;
 
