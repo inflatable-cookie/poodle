@@ -65,6 +65,8 @@ impl IntoElement for Surface {
         // Contract: surface bg = color-mix(resolved-bg 96%, panel)
         let bg = color_mix(bg_raw, panel, 0.96);
 
+        let border_subtle = resolve_color(theme, "semantic.color.border.subtle");
+
         let mut el = div().rounded(surface_radius).bg(bg);
 
         // Border
@@ -73,7 +75,17 @@ impl IntoElement for Surface {
             el = el.border_1().border_color(border_color);
         }
 
-        // Shadow for elevated surfaces — Contract: elevation-surface shadow
+        // Svelte: inset shadow on non-elevated surfaces (0.0625rem border-subtle @ 18%)
+        if !spec.is_elevated && spec.tone != SurfaceTone::Elevated {
+            el = el.shadow(vec![gpui::BoxShadow {
+                color: Hsla { a: border_subtle.a * 0.18, ..border_subtle },
+                offset: point(px(0.0), px(0.0)),
+                blur_radius: px(0.0),
+                spread_radius: px(1.0),
+            }]);
+        }
+
+        // Shadow for elevated surfaces — elevation-surface shadow
         if spec.is_elevated || spec.tone == SurfaceTone::Elevated {
             el = el.shadow(vec![
                 gpui::BoxShadow {

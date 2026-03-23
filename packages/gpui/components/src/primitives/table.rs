@@ -29,7 +29,7 @@ impl Table {
         let spec = TableSpec::new();
         let shell_fill_raw = resolve_color(theme, spec.shell_fill_token());
         let shell_border_raw = resolve_color(theme, spec.shell_border_token());
-        let header_fill_raw = resolve_color(theme, spec.header_fill_token());
+        let _header_fill_raw = resolve_color(theme, spec.header_fill_token());
         let header_border_raw = resolve_color(theme, spec.header_border_token());
         let cell_border_raw = resolve_color(theme, spec.cell_border_token());
 
@@ -45,9 +45,10 @@ impl Table {
         // Contract: 78% shell border
         let shell_border = color_mix(shell_border_raw, transparent, 0.22);
 
-        // Contract: 60% surface mix with elevated for header
+        // Svelte: header bg = color-mix(surface 91%, text-primary)
         let surface = resolve_color(theme, "semantic.color.background.surface");
-        let header_fill = color_mix(header_fill_raw, surface, 0.40);
+        let text_primary = resolve_color(theme, "semantic.color.text.primary");
+        let header_fill = color_mix(surface, text_primary, 0.91);
 
         // Contract: 72% header border
         let header_border = color_mix(header_border_raw, transparent, 0.28);
@@ -73,7 +74,7 @@ impl Table {
     pub fn from_spec(spec: TableSpec, theme: &GpuiThemeProvider) -> Self {
         let shell_fill_raw = resolve_color(theme, spec.shell_fill_token());
         let shell_border_raw = resolve_color(theme, spec.shell_border_token());
-        let header_fill_raw = resolve_color(theme, spec.header_fill_token());
+        let _header_fill_raw = resolve_color(theme, spec.header_fill_token());
         let header_border_raw = resolve_color(theme, spec.header_border_token());
         let cell_border_raw = resolve_color(theme, spec.cell_border_token());
 
@@ -89,9 +90,10 @@ impl Table {
         // Contract: 78% shell border
         let shell_border = color_mix(shell_border_raw, transparent, 0.22);
 
-        // Contract: 60% surface mix with elevated for header
+        // Svelte: header bg = color-mix(surface 91%, text-primary)
         let surface = resolve_color(theme, "semantic.color.background.surface");
-        let header_fill = color_mix(header_fill_raw, surface, 0.40);
+        let text_primary = resolve_color(theme, "semantic.color.text.primary");
+        let header_fill = color_mix(surface, text_primary, 0.91);
 
         // Contract: 72% header border
         let header_border = color_mix(header_border_raw, transparent, 0.28);

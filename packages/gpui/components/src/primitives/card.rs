@@ -96,8 +96,8 @@ impl IntoElement for Card {
 
         let border_subtle = resolve_color(theme, "semantic.color.border.subtle");
         let panel = resolve_color(theme, "semantic.color.background.panel");
-        // Contract: footer divider 72% border-subtle
-        let footer_divider = color_mix(border_subtle, panel, 0.72);
+        // Svelte: footer divider 52% border-subtle
+        let footer_divider = color_mix(border_subtle, panel, 0.52);
 
         let is_horizontal = matches!(spec.layout, CardLayout::Horizontal);
         let card_id = SharedString::from(self.id_prefix.clone());
@@ -120,9 +120,15 @@ impl IntoElement for Card {
             el = el.flex().flex_col();
         }
 
-        // Border
-        if let Some(border) = selected_border_color {
-            el = el.border_2().border_color(border);
+        // Border — Svelte uses 1px border + box-shadow ring for selected state
+        if let Some(sel_border) = selected_border_color {
+            el = el.border_1().border_color(sel_border)
+                .shadow(vec![gpui::BoxShadow {
+                    color: sel_border,
+                    offset: point(px(0.0), px(0.0)),
+                    blur_radius: px(0.0),
+                    spread_radius: px(1.0),
+                }]);
         } else if let Some(border) = border_color {
             el = el.border_1().border_color(border);
         }
