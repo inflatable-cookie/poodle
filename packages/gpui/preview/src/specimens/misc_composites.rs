@@ -17,10 +17,12 @@ use pug_gpui_components::{
     EditableList, Button,
 };
 use pug_primitives::{ButtonSpec, ButtonVariant, StatusTone};
-use pug_gpui::GpuiThemeProvider;
+use crate::app_state::AppState;
 use crate::style_bridge::color_to_hsla;
+use crate::PreviewRoot;
 
-pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
+pub(crate) fn render(state: &AppState, _cx: &mut Context<PreviewRoot>) -> Div {
+    let theme = &state.theme;
     let text_secondary = theme.resolve_color("semantic.color.text.secondary");
 
     div().flex().flex_col().gap(px(24.0)).max_w(px(560.0))

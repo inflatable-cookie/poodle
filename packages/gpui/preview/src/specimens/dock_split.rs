@@ -5,11 +5,17 @@ use pug_composites::{
     SplitViewSpec, SplitOrientation,
 };
 use pug_gpui_components::{DockRegion, SplitView};
-use pug_gpui::GpuiThemeProvider;
+use crate::app_state::AppState;
 use crate::style_bridge::color_to_hsla;
+use crate::PreviewRoot;
 
-pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
+pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
+    let theme = &state.theme;
     let text_secondary = theme.resolve_color("semantic.color.text.secondary");
+
+    let active_tab = state.specimens.text.get("dock-active-tab")
+        .cloned()
+        .unwrap_or_else(|| "explorer".to_string());
 
     // --- Flexible dock -- expanded (left edge) ---
     let flex_expanded_spec = DockRegionSpec::new(
@@ -20,7 +26,7 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
             PanelTabItem::new("source-control", "Source Control").with_icon("git-branch"),
         ],
     )
-    .with_value("explorer");
+    .with_value(&active_tab);
 
     // --- Flexible dock -- collapsed icon-strip (left edge) ---
     let flex_collapsed_spec = DockRegionSpec::new(
@@ -33,6 +39,20 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
     )
     .with_collapsed(true);
 
+    // --- Right edge dock ---
+    let right_tab = state.specimens.text.get("dock-right-tab")
+        .cloned()
+        .unwrap_or_else(|| "outline".to_string());
+
+    let flex_right_spec = DockRegionSpec::new(
+        DockEdge::Right,
+        vec![
+            PanelTabItem::new("outline", "Outline").with_icon("list"),
+            PanelTabItem::new("properties", "Properties").with_icon("settings"),
+        ],
+    )
+    .with_value(&right_tab);
+
     // --- Horizontal split ---
     let h_split_spec = SplitViewSpec::new(SplitOrientation::Horizontal)
         .with_default_ratio(0.5);
@@ -41,16 +61,32 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
     let v_split_spec = SplitViewSpec::new(SplitOrientation::Vertical)
         .with_default_ratio(0.5);
 
+    // Content for the active tab
+    let tab_content = match active_tab.as_str() {
+        "explorer" => "Explorer: src/\n  main.rs\n  lib.rs\n  utils/\n    mod.rs",
+        "search" => "Search results for \"component\"...",
+        "source-control" => "2 files changed\n  M src/main.rs\n  A src/utils/mod.rs",
+        _ => "Panel content",
+    };
+
     div().flex().flex_col().gap(px(16.0))
         // --- Flexible dock -- expanded (left edge) ---
         .child(section_label("FLEXIBLE DOCK -- EXPANDED (LEFT EDGE)", text_secondary))
         .child(
-            div().h(px(140.0)).flex().child(
-                div().w(px(180.0)).h_full().child(
+            div().h(px(160.0)).flex().child(
+                div().w(px(220.0)).h_full().child(
                     DockRegion::from_spec(flex_expanded_spec, theme)
+                        .on_tab_change(cx.listener(|this, tab_id: &str, _w, cx| {
+                            this.state.specimens.text.insert("dock-active-tab".to_string(), tab_id.to_string());
+                            cx.notify();
+                        }))
                         .with_content(
                             div().p(px(8.0))
-                                .child(div().text_xs().text_color(color_to_hsla(text_secondary)).child("Explorer panel content"))
+                                .child(
+                                    div().text_xs().text_color(color_to_hsla(text_secondary))
+                                        .whitespace_nowrap()
+                                        .child(tab_content.to_string())
+                                )
                         )
                 )
             )
@@ -61,6 +97,26 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
             div().h(px(100.0)).flex().child(
                 DockRegion::from_spec(flex_collapsed_spec, theme)
                     .with_content(div())
+            )
+        )
+        // --- Right edge dock ---
+        .child(section_label("FLEXIBLE DOCK -- RIGHT EDGE", text_secondary))
+        .child(
+            div().h(px(120.0)).flex().justify_end().child(
+                div().w(px(200.0)).h_full().child(
+                    DockRegion::from_spec(flex_right_spec, theme)
+                        .on_tab_change(cx.listener(|this, tab_id: &str, _w, cx| {
+                            this.state.specimens.text.insert("dock-right-tab".to_string(), tab_id.to_string());
+                            cx.notify();
+                        }))
+                        .with_content(
+                            div().p(px(8.0))
+                                .child(
+                                    div().text_xs().text_color(color_to_hsla(text_secondary))
+                                        .child(format!("Active: {}", right_tab))
+                                )
+                        )
+                )
             )
         )
         // --- Horizontal split ---

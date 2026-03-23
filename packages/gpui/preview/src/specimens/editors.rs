@@ -2,24 +2,47 @@ use gpui::*;
 use pug_adapter::ThemeProvider;
 use pug_composites::{MarkdownEditorSpec, BlockEditorSpec};
 use pug_gpui_components::{MarkdownEditor, BlockEditor};
-use pug_gpui::GpuiThemeProvider;
+use crate::app_state::AppState;
 use crate::style_bridge::color_to_hsla;
+use crate::PreviewRoot;
 
-pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
+pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
+    let theme = &state.theme;
     let text_secondary = theme.resolve_color("semantic.color.text.secondary");
     let text_primary = theme.resolve_color("semantic.color.text.primary");
 
+    // Interactive markdown editor state
+    let md_mode = state.specimens.text.get("editor-md-mode")
+        .cloned()
+        .unwrap_or_else(|| "split".to_string());
+    let md_value = state.specimens.text.get("editor-md-value")
+        .cloned()
+        .unwrap_or_else(|| "# Hello World\n\nThis is a **markdown** editor with _split_ view mode.\n\n- Item one\n- Item two\n- Item three".to_string());
+
     div().flex().flex_col().gap(px(24.0))
-        // --- Markdown Editor: Split view ---
-        .child(section_label("MARKDOWN EDITOR: SPLIT VIEW", text_secondary))
+        // --- Markdown Editor: Interactive (split) ---
+        .child(section_label("MARKDOWN EDITOR: INTERACTIVE", text_secondary))
         .child(
             MarkdownEditor::from_spec(
                 MarkdownEditorSpec::new()
-                    .with_value("# Hello World\n\nThis is a **markdown** editor with _split_ view mode.\n\n- Item one\n- Item two\n- Item three")
-                    .with_mode("split"),
+                    .with_value(&md_value)
+                    .with_mode(&md_mode),
                 theme,
             )
+            .on_change(cx.listener(|this, val: &str, _w, cx| {
+                this.state.specimens.text.insert("editor-md-value".to_string(), val.to_string());
+                cx.notify();
+            }))
+            .on_mode_change(cx.listener(|this, mode: &str, _w, cx| {
+                this.state.specimens.text.insert("editor-md-mode".to_string(), mode.to_string());
+                cx.notify();
+            }))
         )
+        .child(
+            div().text_xs().text_color(color_to_hsla(text_secondary))
+                .child(format!("Mode: {} | Length: {} chars", md_mode, md_value.len()))
+        )
+
         // --- Markdown Editor: Edit only ---
         .child(section_label("MARKDOWN EDITOR: EDIT ONLY", text_secondary))
         .child(
@@ -31,6 +54,7 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
                 theme,
             )
         )
+
         // --- Markdown Editor: Preview only ---
         .child(section_label("MARKDOWN EDITOR: PREVIEW ONLY", text_secondary))
         .child(
@@ -42,6 +66,7 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
                 theme,
             )
         )
+
         // --- Markdown Editor: Disabled ---
         .child(section_label("MARKDOWN EDITOR: DISABLED", text_secondary))
         .child(
@@ -53,6 +78,7 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
                 theme,
             )
         )
+
         // --- Block Editor: Default blocks ---
         .child(section_label("BLOCK EDITOR: DEFAULT BLOCKS", text_secondary))
         .child(
@@ -85,6 +111,7 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
                         .child("fn main() {\n    println!(\"Hello, world!\");\n}")
                 )
         )
+
         // --- Block Editor: Custom blocks ---
         .child(section_label("BLOCK EDITOR: CUSTOM BLOCKS", text_secondary))
         .child(

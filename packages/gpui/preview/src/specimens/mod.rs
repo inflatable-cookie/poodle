@@ -263,14 +263,14 @@ pub fn render_single_specimen(
         "nav-card" | "card" | "card-radio-group" => specimen_card("Cards", theme, cards::render(state, cx)),
         "picker-shell" | "relation-picker" | "selection-summary" | "order-by" => specimen_card("PickerShell", theme, picker::render(state, cx)),
         "page-header" | "breadcrumbs" | "page-loading" | "pagination-summary" => specimen_card("Page Structure", theme, page_structure::render(theme)),
-        "metric-tile" | "state-tile" | "empty-state" | "toast-stack" => specimen_card("State Display", theme, state_display::render(theme)),
+        "metric-tile" | "state-tile" | "empty-state" | "toast-stack" => specimen_card("State Display", theme, state_display::render(state, cx)),
         "confirm-action" | "form-dialog" | "filter-toolbar" | "bulk-action-bar" | "slug-field"
         | "inline-editable-field" | "log-list" | "editable-list" | "autonomous-list" | "embed-input"
-        | "embed-preview" => specimen_card("Misc", theme, misc_composites::render(theme)),
+        | "embed-preview" => specimen_card("Misc", theme, misc_composites::render(state, cx)),
         "audio-player" | "video-player" | "media-picker" | "media-preview" | "media-thumbnail" => {
             specimen_card("Media", theme, media::render(state, cx))
         }
-        "markdown-editor" | "block-editor" => specimen_card("Editors", theme, editors::render(theme)),
+        "markdown-editor" | "block-editor" => specimen_card("Editors", theme, editors::render(state, cx)),
 
         // ── Layout Helpers ─────────────────────────────────────
         "collapse-toggle" => specimen_card("CollapseToggle", theme, collapse_toggle::render(state, cx)),
@@ -280,7 +280,7 @@ pub fn render_single_specimen(
 
         // ── App Shell ───────────────────────────────────────────
         "command-palette" => specimen_card("CommandPalette", theme, command_palette::render(state, cx)),
-        "dock-region" | "split-view" => specimen_card("Dock + SplitView", theme, dock_split::render(theme)),
+        "dock-region" | "split-view" => specimen_card("Dock + SplitView", theme, dock_split::render(state, cx)),
         "status-bar" => specimen_card("StatusBar", theme, status_bar::render(state, cx)),
         "action-discovery-panel" => specimen_card("ActionDiscovery", theme, action_discovery::render(state, cx)),
 
