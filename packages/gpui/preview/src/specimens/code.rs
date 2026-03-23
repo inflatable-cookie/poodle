@@ -1,12 +1,11 @@
 use gpui::*;
 use pug_adapter::ThemeProvider;
 use pug_gpui::GpuiThemeProvider;
-use pug_primitives::CodeSpec;
-use pug_gpui_components::Code;
+use pug_primitives::{CodeSpec, EyebrowSpec};
+use pug_gpui_components::{Code, Eyebrow};
 use crate::style_bridge::color_to_hsla;
 
 pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
-    let text_secondary = theme.resolve_color("semantic.color.text.secondary");
     let text_primary = theme.resolve_color("semantic.color.text.primary");
 
     let ts_source = "import { Button } from \"@pug/svelte-primitives\";\n\nfunction handleClick(event: MouseEvent): void {\n  console.log(\"Button clicked\", event);\n}";
@@ -16,8 +15,8 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
     div().flex().flex_col().gap(px(24.0))
         // --- Block with language label ---
         .child(
-            div().flex().flex_col().gap(px(8.0))
-                .child(section_label("BLOCK WITH LANGUAGE LABEL", text_secondary))
+            div().flex().flex_col().gap(px(10.0))
+                .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Block with language label"), theme))
                 .child(Code::from_spec(
                     CodeSpec::new()
                         .with_content(ts_source)
@@ -27,8 +26,8 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
         )
         // --- With line numbers and highlight ---
         .child(
-            div().flex().flex_col().gap(px(8.0))
-                .child(section_label("WITH LINE NUMBERS AND HIGHLIGHT", text_secondary))
+            div().flex().flex_col().gap(px(10.0))
+                .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("With line numbers and highlight"), theme))
                 .child(Code::from_spec(
                     CodeSpec::new()
                         .with_content(ts_source)
@@ -40,8 +39,8 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
         )
         // --- CSS with max height ---
         .child(
-            div().flex().flex_col().gap(px(8.0))
-                .child(section_label("CSS WITH MAX HEIGHT", text_secondary))
+            div().flex().flex_col().gap(px(10.0))
+                .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("CSS with max height"), theme))
                 .child(Code::from_spec(
                     CodeSpec::new()
                         .with_content(css_source)
@@ -52,8 +51,8 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
         )
         // --- Inline code ---
         .child(
-            div().flex().flex_col().gap(px(8.0))
-                .child(section_label("INLINE CODE", text_secondary))
+            div().flex().flex_col().gap(px(10.0))
+                .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Inline code"), theme))
                 .child(
                     div().flex().flex_row().flex_wrap().gap(px(4.0)).items_center()
                         .text_sm().text_color(color_to_hsla(text_primary))
@@ -69,8 +68,8 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
         )
         // --- No copy button ---
         .child(
-            div().flex().flex_col().gap(px(8.0))
-                .child(section_label("NO COPY BUTTON", text_secondary))
+            div().flex().flex_col().gap(px(10.0))
+                .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("No copy button"), theme))
                 .child(Code::from_spec(
                     CodeSpec::new()
                         .with_content("echo 'hello world'")
@@ -79,13 +78,4 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
                     theme,
                 ))
         )
-}
-
-fn section_label(label: &str, color: pug_tokens::typed::ColorValue) -> Div {
-    div()
-        .text_xs()
-        .font_weight(FontWeight::SEMIBOLD)
-        .text_color(crate::style_bridge::color_to_hsla(color))
-        .child(label.to_string())
-        .mb(px(2.0))
 }

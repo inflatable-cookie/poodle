@@ -1,8 +1,8 @@
 use gpui::*;
 use gpui::prelude::FluentBuilder;
 use pug_adapter::ThemeProvider;
-use pug_primitives::TextAreaSpec;
-use pug_gpui_components::TextArea;
+use pug_primitives::{TextAreaSpec, EyebrowSpec};
+use pug_gpui_components::{TextArea, Eyebrow};
 use crate::app_state::AppState;
 use crate::style_bridge::color_to_hsla;
 use crate::PreviewRoot;
@@ -18,79 +18,82 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
 
     div().flex().flex_col().gap(px(24.0)).max_w(px(384.0))
         // --- Default ---
-        .child(section_label("DEFAULT", text_secondary))
         .child(
-            div().flex().flex_col().gap(px(4.0))
+            div().flex().flex_col().gap(px(10.0))
+                .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Default"), theme))
+                .child(
+                    div().flex().flex_col().gap(px(4.0))
+                        .child(
+                            TextArea::from_spec(
+                                TextAreaSpec::new()
+                                    .with_placeholder("Write a note\u{2026}")
+                                    .with_value(&default_value)
+                                    .with_aria_label("Note"),
+                                theme,
+                            )
+                            .with_id("ta-default")
+                            .on_change(cx.listener(|this, val: &str, _w, cx| {
+                                this.state.specimens.text.insert("textarea-default".to_string(), val.to_string());
+                                cx.notify();
+                            }))
+                        )
+                        .when(!default_value.is_empty(), |d| {
+                            d.child(
+                                div().text_sm()
+                                    .text_color(color_to_hsla(text_secondary))
+                                    .child(format!("{} characters", default_value.len()))
+                            )
+                        })
+                )
+        )
+        // --- With initial value ---
+        .child(
+            div().flex().flex_col().gap(px(10.0))
+                .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("With initial value"), theme))
                 .child(
                     TextArea::from_spec(
                         TextAreaSpec::new()
-                            .with_placeholder("Write a note\u{2026}")
-                            .with_value(&default_value)
-                            .with_aria_label("Note"),
+                            .with_value(&bio_value)
+                            .with_rows(3)
+                            .with_aria_label("Biography"),
                         theme,
                     )
-                    .with_id("ta-default")
+                    .with_id("ta-initial")
                     .on_change(cx.listener(|this, val: &str, _w, cx| {
-                        this.state.specimens.text.insert("textarea-default".to_string(), val.to_string());
+                        this.state.specimens.text.insert("textarea-bio".to_string(), val.to_string());
                         cx.notify();
                     }))
                 )
-                .when(!default_value.is_empty(), |d| {
-                    d.child(
-                        div().text_sm()
-                            .text_color(color_to_hsla(text_secondary))
-                            .child(format!("{} characters", default_value.len()))
-                    )
-                })
-        )
-        // --- With initial value ---
-        .child(section_label("WITH INITIAL VALUE", text_secondary))
-        .child(
-            TextArea::from_spec(
-                TextAreaSpec::new()
-                    .with_value(&bio_value)
-                    .with_rows(3)
-                    .with_aria_label("Biography"),
-                theme,
-            )
-            .with_id("ta-initial")
-            .on_change(cx.listener(|this, val: &str, _w, cx| {
-                this.state.specimens.text.insert("textarea-bio".to_string(), val.to_string());
-                cx.notify();
-            }))
         )
         // --- Read-only ---
-        .child(section_label("READ-ONLY", text_secondary))
         .child(
-            TextArea::from_spec(
-                TextAreaSpec::new()
-                    .with_default_value("This content cannot be modified by the user.")
-                    .with_rows(2)
-                    .with_read_only(true)
-                    .with_aria_label("Read-only textarea"),
-                theme,
-            )
-            .with_id("ta-readonly")
+            div().flex().flex_col().gap(px(10.0))
+                .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Read-only"), theme))
+                .child(
+                    TextArea::from_spec(
+                        TextAreaSpec::new()
+                            .with_default_value("This content cannot be modified by the user.")
+                            .with_rows(2)
+                            .with_read_only(true)
+                            .with_aria_label("Read-only textarea"),
+                        theme,
+                    )
+                    .with_id("ta-readonly")
+                )
         )
         // --- Disabled ---
-        .child(section_label("DISABLED", text_secondary))
         .child(
-            TextArea::from_spec(
-                TextAreaSpec::new()
-                    .with_placeholder("Disabled")
-                    .with_disabled(true)
-                    .with_aria_label("Disabled textarea"),
-                theme,
-            )
-            .with_id("ta-disabled")
+            div().flex().flex_col().gap(px(10.0))
+                .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Disabled"), theme))
+                .child(
+                    TextArea::from_spec(
+                        TextAreaSpec::new()
+                            .with_placeholder("Disabled")
+                            .with_disabled(true)
+                            .with_aria_label("Disabled textarea"),
+                        theme,
+                    )
+                    .with_id("ta-disabled")
+                )
         )
-}
-
-fn section_label(label: &str, color: pug_tokens::typed::ColorValue) -> Div {
-    div()
-        .text_xs()
-        .font_weight(FontWeight::SEMIBOLD)
-        .text_color(color_to_hsla(color))
-        .child(label.to_string())
-        .mb(px(2.0))
 }

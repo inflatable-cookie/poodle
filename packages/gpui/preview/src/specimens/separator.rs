@@ -1,18 +1,18 @@
 use gpui::*;
 use pug_adapter::ThemeProvider;
 use pug_gpui::GpuiThemeProvider;
-use pug_primitives::{SeparatorSpec, SeparatorOrientation, RuleTone};
-use pug_gpui_components::Separator;
+use pug_primitives::{SeparatorSpec, SeparatorOrientation, EyebrowSpec};
+use pug_gpui_components::{Separator, Eyebrow};
 use crate::style_bridge::color_to_hsla;
 
 pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
     let text_secondary = theme.resolve_color("semantic.color.text.secondary");
 
-    div().flex().flex_col().gap(px(16.0))
+    div().flex().flex_col().gap(px(24.0))
         // --- Horizontal (default) ---
-        .child(section_label("HORIZONTAL (DEFAULT)", text_secondary))
         .child(
-            div().flex().flex_col().gap(px(8.0))
+            div().flex().flex_col().gap(px(10.0))
+                .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Horizontal (default)"), theme))
                 .child(
                     div().text_sm().text_color(color_to_hsla(text_secondary))
                         .child("Content above".to_string()),
@@ -21,93 +21,43 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
                 .child(
                     div().text_sm().text_color(color_to_hsla(text_secondary))
                         .child("Content below".to_string()),
-                ),
-        )
-        // --- Subtle tone ---
-        .child(section_label("SUBTLE TONE", text_secondary))
-        .child(
-            div().flex().flex_col().gap(px(8.0))
-                .child(
-                    div().text_sm().text_color(color_to_hsla(text_secondary))
-                        .child("Above subtle separator".to_string()),
                 )
-                .child(Separator::from_spec(
-                    SeparatorSpec::new().with_tone(RuleTone::Subtle),
-                    theme,
-                ))
-                .child(
-                    div().text_sm().text_color(color_to_hsla(text_secondary))
-                        .child("Below subtle separator".to_string()),
-                ),
         )
         // --- Vertical ---
-        .child(section_label("VERTICAL", text_secondary))
         .child(
-            div().flex().items_center().gap(px(12.0)).h(px(32.0))
+            div().flex().flex_col().gap(px(10.0))
+                .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Vertical"), theme))
                 .child(
-                    div().text_sm().text_color(color_to_hsla(text_secondary))
-                        .child("Left".to_string()),
+                    div().flex().items_center().gap(px(12.0)).h(px(32.0))
+                        .child(
+                            div().text_sm().text_color(color_to_hsla(text_secondary))
+                                .child("Left".to_string()),
+                        )
+                        .child(Separator::from_spec(
+                            SeparatorSpec::new().with_orientation(SeparatorOrientation::Vertical),
+                            theme,
+                        ))
+                        .child(
+                            div().text_sm().text_color(color_to_hsla(text_secondary))
+                                .child("Center".to_string()),
+                        )
+                        .child(Separator::from_spec(
+                            SeparatorSpec::new().with_orientation(SeparatorOrientation::Vertical),
+                            theme,
+                        ))
+                        .child(
+                            div().text_sm().text_color(color_to_hsla(text_secondary))
+                                .child("Right".to_string()),
+                        )
                 )
-                .child(Separator::from_spec(
-                    SeparatorSpec::new().with_orientation(SeparatorOrientation::Vertical),
-                    theme,
-                ))
-                .child(
-                    div().text_sm().text_color(color_to_hsla(text_secondary))
-                        .child("Center".to_string()),
-                )
-                .child(Separator::from_spec(
-                    SeparatorSpec::new().with_orientation(SeparatorOrientation::Vertical),
-                    theme,
-                ))
-                .child(
-                    div().text_sm().text_color(color_to_hsla(text_secondary))
-                        .child("Right".to_string()),
-                ),
         )
         // --- Decorative ---
-        .child(section_label("DECORATIVE", text_secondary))
-        .child(Separator::from_spec(
-            SeparatorSpec::new().with_decorative(true),
-            theme,
-        ))
-        // --- In a list context ---
-        .child(section_label("IN A LIST CONTEXT", text_secondary))
         .child(
-            div().flex().flex_col()
-                .child(list_item("Profile settings", text_secondary))
+            div().flex().flex_col().gap(px(10.0))
+                .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Decorative"), theme))
                 .child(Separator::from_spec(
-                    SeparatorSpec::new().with_tone(RuleTone::Subtle),
+                    SeparatorSpec::new().with_decorative(true),
                     theme,
                 ))
-                .child(list_item("Notification preferences", text_secondary))
-                .child(Separator::from_spec(
-                    SeparatorSpec::new().with_tone(RuleTone::Subtle),
-                    theme,
-                ))
-                .child(list_item("Security & privacy", text_secondary))
-                .child(Separator::from_spec(
-                    SeparatorSpec::new().with_tone(RuleTone::Subtle),
-                    theme,
-                ))
-                .child(list_item("Billing & plans", text_secondary))
         )
-}
-
-fn list_item(label: &str, color: pug_tokens::typed::ColorValue) -> Div {
-    div()
-        .py(px(8.0))
-        .px(px(4.0))
-        .text_sm()
-        .text_color(color_to_hsla(color))
-        .child(label.to_string())
-}
-
-fn section_label(label: &str, color: pug_tokens::typed::ColorValue) -> Div {
-    div()
-        .text_xs()
-        .font_weight(FontWeight::SEMIBOLD)
-        .text_color(crate::style_bridge::color_to_hsla(color))
-        .child(label.to_string())
-        .mb(px(2.0))
 }

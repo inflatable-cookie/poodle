@@ -1,22 +1,20 @@
 use gpui::*;
 use pug_adapter::ThemeProvider;
 use pug_gpui::GpuiThemeProvider;
-use pug_primitives::SkeletonSpec;
-use pug_gpui_components::Skeleton;
+use pug_primitives::{SkeletonSpec, EyebrowSpec};
+use pug_gpui_components::{Skeleton, Eyebrow};
 use crate::style_bridge::color_to_hsla;
 
 pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
-    let text_secondary = theme.resolve_color("semantic.color.text.secondary");
     let border = theme.resolve_color("semantic.color.border.default");
 
     div().flex().flex_col().gap(px(24.0))
         // --- Basic shapes ---
         .child(
-            div().flex().flex_col().gap(px(12.0))
-                .child(section_label("Basic shapes", text_secondary))
+            div().flex().flex_col().gap(px(10.0))
+                .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Basic shapes"), theme))
                 .child(
                     div().flex().flex_row().flex_wrap().gap(px(12.0)).items_center()
-                        // Line shape: 12rem wide
                         .child(Skeleton::from_spec(
                             SkeletonSpec::new()
                                 .with_shape("line")
@@ -24,7 +22,6 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
                                 .with_height("14.0"),
                             theme,
                         ))
-                        // Circle shape: 2.5rem diameter
                         .child(Skeleton::from_spec(
                             SkeletonSpec::new()
                                 .with_shape("circle")
@@ -32,7 +29,6 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
                                 .with_height("40.0"),
                             theme,
                         ))
-                        // Block shape: 8rem x 3rem
                         .child(Skeleton::from_spec(
                             SkeletonSpec::new()
                                 .with_shape("block")
@@ -44,11 +40,10 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
         )
         // --- Preset: avatar-line ---
         .child(
-            div().flex().flex_col().gap(px(12.0))
-                .child(section_label("Preset: avatar-line", text_secondary))
+            div().flex().flex_col().gap(px(10.0))
+                .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Preset: avatar-line"), theme))
                 .child(
                     div().flex().flex_row().items_center().gap(px(12.0))
-                        // Avatar circle 2.25rem
                         .child(Skeleton::from_spec(
                             SkeletonSpec::new()
                                 .with_shape("circle")
@@ -56,7 +51,6 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
                                 .with_height("36.0"),
                             theme,
                         ))
-                        // Line 10rem
                         .child(Skeleton::from_spec(
                             SkeletonSpec::new()
                                 .with_shape("line")
@@ -68,24 +62,24 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
         )
         // --- Preset: list-item (x3) ---
         .child(
-            div().flex().flex_col().gap(px(0.0))
-                .child(section_label("Preset: list-item (\u{00d7}3)", text_secondary))
+            div().flex().flex_col().gap(px(10.0))
+                .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Preset: list-item (\u{00d7}3)"), theme))
                 .child(list_item_preset(theme))
                 .child(list_item_preset(theme))
                 .child(list_item_preset(theme))
         )
         // --- Preset: table-row (x3) ---
         .child(
-            div().flex().flex_col().gap(px(0.0))
-                .child(section_label("Preset: table-row (\u{00d7}3)", text_secondary))
+            div().flex().flex_col().gap(px(10.0))
+                .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Preset: table-row (\u{00d7}3)"), theme))
                 .child(table_row_preset(theme, border))
                 .child(table_row_preset(theme, border))
                 .child(table_row_preset(theme, border))
         )
         // --- Preset: card ---
         .child(
-            div().flex().flex_col().gap(px(12.0))
-                .child(section_label("Preset: card", text_secondary))
+            div().flex().flex_col().gap(px(10.0))
+                .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Preset: card"), theme))
                 .child(
                     div().flex().flex_row().gap(px(16.0))
                         .child(card_preset(theme, border))
@@ -94,14 +88,14 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
         )
         // --- Preset: detail-section ---
         .child(
-            div().flex().flex_col().gap(px(12.0))
-                .child(section_label("Preset: detail-section", text_secondary))
+            div().flex().flex_col().gap(px(10.0))
+                .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Preset: detail-section"), theme))
                 .child(detail_section_preset(theme, 4))
         )
         // --- Static (no animation) ---
         .child(
-            div().flex().flex_col().gap(px(12.0))
-                .child(section_label("Static (no animation)", text_secondary))
+            div().flex().flex_col().gap(px(10.0))
+                .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Static (no animation)"), theme))
                 .child(Skeleton::from_spec(
                     SkeletonSpec::new()
                         .with_shape("line")
@@ -116,7 +110,6 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
 /// List-item preset: avatar circle + primary line (60%) + secondary line (40%)
 fn list_item_preset(theme: &GpuiThemeProvider) -> Div {
     div().flex().flex_row().items_center().gap(px(12.0)).py(px(8.0))
-        // Avatar 2.25rem circle
         .child(
             div().flex_shrink_0().child(Skeleton::from_spec(
                 SkeletonSpec::new()
@@ -126,7 +119,6 @@ fn list_item_preset(theme: &GpuiThemeProvider) -> Div {
                 theme,
             ))
         )
-        // Text lines
         .child(
             div().flex().flex_col().gap(px(6.0)).flex_1().min_w(px(0.0))
                 .child(
@@ -196,14 +188,12 @@ fn card_preset(
         .border_color(color_to_hsla(border).opacity(0.42))
         .rounded(px(6.0))
         .flex_1()
-        // Block header 6rem
         .child(Skeleton::from_spec(
             SkeletonSpec::new()
                 .with_shape("block")
                 .with_height("96.0"),
             theme,
         ))
-        // Body lines: 80%, 100%, 60%
         .child(
             div().flex().flex_col().gap(px(6.0))
                 .child(
@@ -223,7 +213,6 @@ fn card_preset(
                     ))
                 )
         )
-        // Footer: pill elements
         .child(
             div().flex().flex_row().gap(px(8.0)).pt(px(4.0))
                 .child(Skeleton::from_spec(
@@ -247,7 +236,6 @@ fn card_preset(
 fn detail_section_preset(theme: &GpuiThemeProvider, lines: usize) -> Div {
     let mut el = div().flex().flex_col().gap(px(10.0));
 
-    // Heading: 8rem wide, 1rem tall
     el = el.child(
         div().mb(px(4.0)).child(Skeleton::from_spec(
             SkeletonSpec::new()
@@ -258,7 +246,6 @@ fn detail_section_preset(theme: &GpuiThemeProvider, lines: usize) -> Div {
         ))
     );
 
-    // Detail rows: label (6rem) + value (flexible, max 14rem)
     for _ in 0..lines {
         el = el.child(
             div().flex().flex_row().gap(px(16.0)).items_center()
@@ -283,13 +270,4 @@ fn detail_section_preset(theme: &GpuiThemeProvider, lines: usize) -> Div {
     }
 
     el
-}
-
-fn section_label(label: &str, color: pug_tokens::typed::ColorValue) -> Div {
-    div()
-        .text_xs()
-        .font_weight(FontWeight::SEMIBOLD)
-        .text_color(crate::style_bridge::color_to_hsla(color))
-        .child(label.to_string())
-        .mb(px(2.0))
 }

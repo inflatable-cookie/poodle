@@ -1,7 +1,7 @@
 use gpui::*;
 use pug_adapter::ThemeProvider;
-use pug_primitives::CollapsibleSpec;
-use pug_gpui_components::Collapsible;
+use pug_primitives::{CollapsibleSpec, EyebrowSpec};
+use pug_gpui_components::{Collapsible, Eyebrow};
 use crate::app_state::AppState;
 use crate::style_bridge::color_to_hsla;
 use crate::PreviewRoot;
@@ -11,8 +11,6 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
     let text_secondary = theme.resolve_color("semantic.color.text.secondary");
 
     // ── Group: Default (closed) ──────────────────────────────────────
-    // Contract: title="Project settings", description="Configure build options and deploy targets."
-    // Collapsed by default, showing title + description in trigger, chevron down, content hidden.
     let closed_spec = CollapsibleSpec::new()
         .with_title("Project settings")
         .with_description("Configure build options and deploy targets.");
@@ -47,9 +45,6 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
         );
 
     // ── Group: Default open ──────────────────────────────────────────
-    // Contract: title="Advanced options", defaultOpen
-    // Expanded showing title, chevron rotated 180deg, content visible with 0.5rem gap.
-    // Toggle key starts false (not toggled), so invert: open = !toggled
     let open_toggled = state.specimens.is_on("collapsible-open-toggled");
     let open_spec = CollapsibleSpec::new()
         .with_title("Advanced options")
@@ -78,8 +73,6 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
         );
 
     // ── Group: Disabled ──────────────────────────────────────────────
-    // Contract: title="Locked section", description="Requires admin access.", isDisabled
-    // Collapsed with reduced opacity, cursor not-allowed, clicking does not toggle.
     let disabled_spec = CollapsibleSpec::new()
         .with_title("Locked section")
         .with_description("Requires admin access.")
@@ -92,22 +85,23 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                 .child("This content is hidden behind a disabled collapsible.".to_string())
         );
 
-    div().flex().flex_col().gap(px(16.0))
-        .child(section_label("DEFAULT (CLOSED)", text_secondary))
-        .child(closed_collapsible)
-
-        .child(section_label("DEFAULT OPEN", text_secondary))
-        .child(open_collapsible)
-
-        .child(section_label("DISABLED", text_secondary))
-        .child(disabled_collapsible)
-}
-
-fn section_label(label: &str, color: pug_tokens::typed::ColorValue) -> Div {
-    div()
-        .text_xs()
-        .font_weight(FontWeight::SEMIBOLD)
-        .text_color(color_to_hsla(color))
-        .child(label.to_string())
-        .mb(px(2.0))
+    div().flex().flex_col().gap(px(24.0))
+        // --- Default (closed) ---
+        .child(
+            div().flex().flex_col().gap(px(10.0))
+                .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Default (closed)"), theme))
+                .child(closed_collapsible)
+        )
+        // --- Default open ---
+        .child(
+            div().flex().flex_col().gap(px(10.0))
+                .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Default open"), theme))
+                .child(open_collapsible)
+        )
+        // --- Disabled ---
+        .child(
+            div().flex().flex_col().gap(px(10.0))
+                .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Disabled"), theme))
+                .child(disabled_collapsible)
+        )
 }

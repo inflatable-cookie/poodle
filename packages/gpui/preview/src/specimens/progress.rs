@@ -1,57 +1,33 @@
 use gpui::*;
-use pug_adapter::ThemeProvider;
 use pug_gpui::GpuiThemeProvider;
-use pug_primitives::ProgressSpec;
-use pug_gpui_components::Progress;
-use crate::style_bridge::color_to_hsla;
+use pug_primitives::{ProgressSpec, EyebrowSpec};
+use pug_gpui_components::{Progress, Eyebrow};
 
 pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
-    let text_secondary = theme.resolve_color("semantic.color.text.secondary");
-    let text_tertiary = theme.resolve_color("semantic.color.text.secondary");
-
-    div().flex().flex_col().gap(px(16.0))
+    div().flex().flex_col().gap(px(24.0))
         // --- Determinate ---
-        .child(section_label("DETERMINATE", text_secondary))
         .child(
-            div().flex().flex_col().gap(px(16.0))
-                .child(progress_item("Empty", ProgressSpec::new().with_value(0.0), theme, text_tertiary))
-                .child(progress_item("35%", ProgressSpec::new().with_value(35.0), theme, text_tertiary))
-                .child(progress_item("72%", ProgressSpec::new().with_value(72.0), theme, text_tertiary))
-                .child(progress_item("Complete", ProgressSpec::new().with_value(100.0), theme, text_tertiary))
+            div().flex().flex_col().gap(px(10.0))
+                .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Determinate"), theme))
+                .child(Progress::from_spec(ProgressSpec::new().with_value(0.0), theme))
+                .child(Progress::from_spec(ProgressSpec::new().with_value(35.0), theme))
+                .child(Progress::from_spec(ProgressSpec::new().with_value(72.0), theme))
+                .child(Progress::from_spec(ProgressSpec::new().with_value(100.0), theme))
         )
         // --- Indeterminate ---
-        .child(section_label("INDETERMINATE", text_secondary))
         .child(
-            progress_item("Loading", ProgressSpec::new().with_indeterminate(true), theme, text_tertiary)
+            div().flex().flex_col().gap(px(10.0))
+                .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Indeterminate"), theme))
+                .child(Progress::from_spec(ProgressSpec::new().with_indeterminate(true), theme))
         )
-        // --- Custom Max ---
-        .child(section_label("CUSTOM MAX", text_secondary))
-        .child({
-            let mut spec = ProgressSpec::new().with_value(3.0);
-            spec.max = 5.0;
-            progress_item("Steps", spec, theme, text_tertiary)
-        })
-}
-
-fn progress_item(
-    label: &str,
-    spec: ProgressSpec,
-    theme: &GpuiThemeProvider,
-    label_color: pug_tokens::typed::ColorValue,
-) -> Div {
-    div().flex().flex_col().gap(px(4.0))
+        // --- Custom max ---
         .child(
-            div().text_xs().text_color(color_to_hsla(label_color))
-                .child(label.to_string())
+            div().flex().flex_col().gap(px(10.0))
+                .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Custom max"), theme))
+                .child(Progress::from_spec({
+                    let mut spec = ProgressSpec::new().with_value(3.0);
+                    spec.max = 5.0;
+                    spec
+                }, theme))
         )
-        .child(Progress::from_spec(spec, theme))
-}
-
-fn section_label(label: &str, color: pug_tokens::typed::ColorValue) -> Div {
-    div()
-        .text_xs()
-        .font_weight(FontWeight::SEMIBOLD)
-        .text_color(color_to_hsla(color))
-        .child(label.to_string())
-        .mb(px(2.0))
 }

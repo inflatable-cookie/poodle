@@ -13,11 +13,7 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
         // --- Section label ---
         .child(
             div().flex().flex_col().gap(px(4.0))
-                .child(section_label("SECTION LABEL", text_secondary))
-                .child(Eyebrow::from_spec(
-                    EyebrowSpec::new().with_content("Section label"),
-                    theme,
-                ))
+                .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Section label"), theme))
                 .child(
                     div().text_sm().text_color(color_to_hsla(text_secondary))
                         .child("Eyebrow renders small uppercase text used for categorizing content above headings.".to_string())
@@ -26,11 +22,7 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
         // --- Primitive category ---
         .child(
             div().flex().flex_col().gap(px(4.0))
-                .child(section_label("PRIMITIVE", text_secondary))
-                .child(Eyebrow::from_spec(
-                    EyebrowSpec::new().with_content("Primitive"),
-                    theme,
-                ))
+                .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Primitive"), theme))
                 .child(
                     div().text_xl().font_weight(FontWeight::SEMIBOLD)
                         .text_color(color_to_hsla(text_primary))
@@ -44,11 +36,7 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
         // --- Composite category ---
         .child(
             div().flex().flex_col().gap(px(4.0))
-                .child(section_label("COMPOSITE", text_secondary))
-                .child(Eyebrow::from_spec(
-                    EyebrowSpec::new().with_content("Composite"),
-                    theme,
-                ))
+                .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Composite"), theme))
                 .child(
                     div().text_xl().font_weight(FontWeight::SEMIBOLD)
                         .text_color(color_to_hsla(text_primary))
@@ -59,13 +47,4 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
                         .child("Feature-rich table with sorting, selection, and pagination.".to_string())
                 )
         )
-}
-
-fn section_label(label: &str, color: pug_tokens::typed::ColorValue) -> Div {
-    div()
-        .text_xs()
-        .font_weight(FontWeight::SEMIBOLD)
-        .text_color(crate::style_bridge::color_to_hsla(color))
-        .child(label.to_string())
-        .mb(px(2.0))
 }
