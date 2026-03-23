@@ -5,7 +5,7 @@ use pug_gpui::GpuiThemeProvider;
 use pug_primitives::{CallOutSpec, IconSize, IconSpec, StatusTone};
 
 use super::icon::Icon;
-use crate::theme_ext::{resolve_color, resolve_px, resolve_radius};
+use crate::theme_ext::{color_mix, resolve_color, resolve_px, resolve_radius};
 
 /// A real GPUI call-out component backed by `CallOutSpec`.
 pub struct Callout {
@@ -68,13 +68,16 @@ impl IntoElement for Callout {
         let panel_x = resolve_px(theme, "semantic.space.panel.x");
         let panel_y = resolve_px(theme, "semantic.space.panel.y");
 
-        let fill = resolve_color(theme, spec.fill_token());
-        let border = resolve_color(theme, spec.border_token());
+        let tone_color = resolve_color(theme, spec.fill_token());
+        let border_color = resolve_color(theme, spec.border_token());
+        let surface_bg = resolve_color(theme, "semantic.color.background.surface");
         let text_primary = resolve_color(theme, "semantic.color.text.primary");
         let text_secondary = resolve_color(theme, "semantic.color.text.secondary");
         let radius = resolve_radius(theme, "semantic.radius.surface");
+        let control_radius = resolve_radius(theme, "semantic.radius.control");
+        let inline_md = resolve_px(theme, "semantic.space.inline.md");
 
-        // Contract: tone icon name
+        // Tone icon name
         let icon_name = match spec.tone {
             StatusTone::Info => "info",
             StatusTone::Success => "check-circle",
@@ -83,36 +86,47 @@ impl IntoElement for Callout {
             _ => "info",
         };
 
-        // Contract: full border, tone-colored bg at 10% opacity, grid layout with icon
+        // Svelte: bg = color-mix(tone 34%, surface), border = color-mix(tone 34%, transparent)
+        let bg = color_mix(tone_color, surface_bg, 0.34);
+        let border = Hsla { a: border_color.a * 0.34, ..border_color };
+
         let mut el = div()
             .w_full()
             .px(panel_x)
             .py(panel_y)
             .rounded(radius)
-            .bg(fill.opacity(0.1))
+            .bg(bg)
             .border_1()
             .border_color(border)
             .flex()
-            .gap(px(12.0)); // 0.75rem gap between icon and content
+            .gap(inline_md);
 
-        // Icon column — Contract: tone-colored status icon
+        // Icon column — Svelte: circular bg container 1.375rem (22px), surface at 78% opacity
+        let icon_container_size = px(22.0);
+        let icon_bg = Hsla { a: surface_bg.a * 0.78, ..surface_bg };
         el = el.child(
             div()
                 .flex_shrink_0()
-                .pt(px(2.0))
+                .w(icon_container_size)
+                .h(icon_container_size)
+                .rounded(px(999.0))
+                .bg(icon_bg)
+                .flex()
+                .items_center()
+                .justify_center()
                 .child(
                     Icon::from_spec(
                         IconSpec::new(icon_name).with_size(IconSize::Sm),
                         theme,
                     )
-                    .with_color(border),
+                    .with_color(tone_color),
                 ),
         );
 
         // Content column
         let mut content_col = div().flex().flex_col().gap(px(4.0)).flex_1().min_w(px(0.0));
 
-        // Contract: title font 0.875rem (14px), weight 600
+        // Title: label family/size/weight
         if let Some(ref title) = spec.title {
             content_col = content_col.child(
                 div()
@@ -123,11 +137,11 @@ impl IntoElement for Callout {
             );
         }
 
-        // Contract: content font 0.875rem (14px)
+        // Content: Svelte uses 0.8125rem (13px)
         if let Some(ref content) = spec.content {
             content_col = content_col.child(
                 div()
-                    .text_size(px(14.0))
+                    .text_size(px(13.0))
                     .text_color(text_secondary)
                     .child(content.clone()),
             );
@@ -135,14 +149,22 @@ impl IntoElement for Callout {
 
         el = el.child(content_col);
 
-        // Dismiss button column — shown when dismissible
+        // Dismiss button — Svelte: 1.75rem (28px) square, rounded control radius
         if self.is_dismissible {
             let dismiss_id = SharedString::from("pug-callout-dismiss");
             let mut dismiss_btn = div()
                 .id(dismiss_id)
                 .flex_shrink_0()
+                .w(px(28.0))
+                .h(px(28.0))
+                .rounded(control_radius)
+                .flex()
+                .items_center()
+                .justify_center()
                 .cursor_pointer()
-                .pt(px(2.0))
+                .mt(px(-4.0))
+                .mr(px(-4.0))
+                .hover(|s| s.bg(hsla(0.0, 0.0, 0.5, 0.08)))
                 .child(
                     Icon::from_spec(
                         IconSpec::new("x").with_size(IconSize::Sm),

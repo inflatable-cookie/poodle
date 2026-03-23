@@ -80,8 +80,8 @@ impl IntoElement for Tooltip {
             if let Some(ref content) = spec.content {
                 wrapper = wrapper.child(
                     div()
-                        .px(px(8.0))  // 0.5rem
-                        .py(px(4.0))  // 0.25rem
+                        .px(px(6.0))  // Svelte: 0.375rem
+                        .py(px(6.0))  // Svelte: 0.5rem (symmetric)
                         .rounded(tooltip_radius)
                         .bg(fill)
                         .border_1()
@@ -95,10 +95,10 @@ impl IntoElement for Tooltip {
                                 spread_radius: px(0.0),
                             },
                         ])
-                        // Contract: font 0.75rem (12px), max-width 20rem (320px)
-                        .text_size(px(12.0))
+                        // Svelte: font 0.6875rem (11px), max-width 16rem (256px)
+                        .text_size(px(11.0))
                         .text_color(text_primary)
-                        .max_w(px(320.0))
+                        .max_w(px(256.0))
                         .child(content.clone()),
                 );
             }

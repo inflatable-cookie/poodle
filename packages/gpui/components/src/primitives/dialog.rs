@@ -94,6 +94,8 @@ impl IntoElement for Dialog {
         let border = color_mix(border_raw, panel, 0.72);
         let bg = color_mix(surface_bg, panel, 0.98);
 
+        let stack_lg = resolve_px(theme, "semantic.space.stack.lg");
+
         let mut dialog = div()
             .id("pug-dialog")
             .focusable()
@@ -103,7 +105,7 @@ impl IntoElement for Dialog {
             .bg(bg)
             .border_1()
             .border_color(border)
-            // Contract: elevation-dialog shadow
+            // Svelte: elevation-dialog shadow
             .shadow(vec![
                 gpui::BoxShadow {
                     color: hsla(0.0, 0.0, 0.0, 0.12),
@@ -120,24 +122,25 @@ impl IntoElement for Dialog {
             ])
             .flex()
             .flex_col()
-            // Contract: min-width 24rem (384px), max-width 32rem (512px)
-            .min_w(px(384.0))
-            .max_w(px(512.0))
-            // Contract: header gap 0.5rem (8px)
-            .gap(px(8.0));
+            // Svelte: width min(34rem, 100%) = 544px
+            .w(px(544.0))
+            .max_w_full()
+            // Svelte: gap 0.375rem (6px)
+            .gap(px(6.0))
+            .occlude();
 
-        // Contract: title font 1.125rem (18px), weight 600
+        // Svelte: title font 1rem (16px), weight 600
         if let Some(ref title) = spec.title {
             dialog = dialog.child(
                 div()
-                    .text_size(px(18.0))
+                    .text_size(px(16.0))
                     .font_weight(FontWeight::SEMIBOLD)
                     .text_color(text_primary)
                     .child(title.clone()),
             );
         }
 
-        // Contract: description font 0.875rem (14px)
+        // Description: 0.875rem (14px)
         if let Some(ref description) = spec.description {
             dialog = dialog.child(
                 div()
@@ -152,7 +155,7 @@ impl IntoElement for Dialog {
             dialog = dialog.child(content);
         }
 
-        // Actions slot — Contract: flex-wrap, justify-end
+        // Actions slot — Svelte: margin-top stack-lg, flex-wrap, justify-end
         if let Some(actions) = self.actions {
             dialog = dialog.child(
                 div()
@@ -160,7 +163,7 @@ impl IntoElement for Dialog {
                     .flex_wrap()
                     .gap(actions_gap)
                     .justify_end()
-                    .pt(px(8.0)) // Visual separation from content
+                    .mt(stack_lg)
                     .child(actions),
             );
         }

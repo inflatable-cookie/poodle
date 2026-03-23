@@ -120,8 +120,8 @@ impl IntoElement for Popover {
                         ])
                     .px(panel_x)
                     .py(panel_y)
-                    // Contract: min-width 12rem (192px), max-width 24rem (384px)
-                    .min_w(px(192.0))
+                    // Svelte: min-width 14rem (224px), max-width min(24rem, 90vw)
+                    .min_w(px(224.0))
                     .max_w(px(384.0))
                     .child(content);
 

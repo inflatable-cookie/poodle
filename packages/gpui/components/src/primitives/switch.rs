@@ -84,18 +84,21 @@ impl IntoElement for Switch {
             )
         };
 
-        // Contract: track = 2.125rem (34px) wide x 1.25rem (20px) tall
-        let track_w = px(34.0);
-        let track_h = px(20.0);
-        let track_radius = px(10.0); // half of height = pill
-        let track_padding = px(2.0); // 0.125rem
+        // Svelte: track = calc(icon-default * 2 + 0.125rem) wide × calc(icon-default + 0.25rem) tall
+        // With icon-default = 16px: track = 34px × 20px (matches). But Svelte actually
+        // uses icon-default which is 1rem (16px) → 34px × 20px
+        // Thumb = calc(icon-default - 0.125rem) = 14px
+        let icon_default = resolve_px(theme, "semantic.size.icon.default");
+        let track_w = icon_default * 2.0 + px(2.0); // 34px
+        let track_h = icon_default + px(4.0);        // 20px
+        let track_radius = track_h / 2.0;            // pill
+        let track_padding = px(2.0);                  // 0.125rem
 
-        // Contract: thumb = 0.875rem (14px) diameter
-        let thumb_size = px(14.0);
-        let thumb_radius = px(7.0); // half = circle
+        let thumb_size = icon_default - px(2.0);     // 14px
+        let thumb_radius = thumb_size / 2.0;          // circle
 
-        // Contract: thumb travel = translateX(0.875rem) = 14px
-        let knob_offset = if is_checked { px(14.0) + track_padding } else { track_padding };
+        // Thumb travel = thumb_size distance
+        let knob_offset = if is_checked { thumb_size + track_padding } else { track_padding };
         let focus_ring = resolve_color(theme, "semantic.color.accent.focusRing");
 
         // Contract: checked track = accent-base 24% + surface background
@@ -140,18 +143,12 @@ impl IntoElement for Switch {
                     .h(thumb_size)
                     .rounded(thumb_radius)
                     .bg(knob_color)
-                    // Contract: thumb shadow = 0 1px 2px rgba(0,0,0,0.2), 0 0 1px rgba(0,0,0,0.1)
+                    // Svelte: 0 0.125rem 0.5rem color-mix(black 18%, transparent)
                     .shadow(vec![
                         gpui::BoxShadow {
-                            color: hsla(0.0, 0.0, 0.0, 0.2),
-                            offset: point(px(0.0), px(1.0)),
-                            blur_radius: px(2.0),
-                            spread_radius: px(0.0),
-                        },
-                        gpui::BoxShadow {
-                            color: hsla(0.0, 0.0, 0.0, 0.1),
-                            offset: point(px(0.0), px(0.0)),
-                            blur_radius: px(1.0),
+                            color: hsla(0.0, 0.0, 0.0, 0.18),
+                            offset: point(px(0.0), px(2.0)),
+                            blur_radius: px(8.0),
                             spread_radius: px(0.0),
                         },
                     ])

@@ -71,10 +71,11 @@ impl IntoElement for Collapsible {
         let focus_ring = resolve_color(theme, "semantic.color.accent.focusRing");
         let panel_pad = resolve_px(theme, "semantic.space.panel.x");
 
-        // Contract: border = color-mix(border-color, panel-bg, 0.72) for subtle border
-        let root_border = color_mix(border_color, panel_bg, 0.72);
-        // Contract: bg = color-mix(panel-bg, transparent-black, 0.96)
-        let root_bg = color_mix(panel_bg, gpui::transparent_black(), 0.96);
+        // Svelte: border = color-mix(border-subtle 42%, transparent)
+        let root_border = Hsla { a: border_color.a * 0.42, ..border_color };
+        // Svelte: bg = color-mix(surface 88%, text-primary)
+        let surface_bg = resolve_color(theme, "semantic.color.background.surface");
+        let root_bg = color_mix(surface_bg, text_primary, 0.88);
 
         let id_str = if let Some(ref suffix) = self.id_suffix {
             format!("pug-collapsible-{}", suffix)
@@ -109,7 +110,7 @@ impl IntoElement for Collapsible {
             title_block = title_block.child(
                 div()
                     .text_color(text_primary)
-                    .text_size(px(14.0)) // contract: heading 0.875rem = 14px
+                    .text_size(px(16.0)) // Svelte: 1rem = 16px
                     .font_weight(FontWeight::BOLD)
                     .line_height(relative(1.2))
                     .child(title_text.clone())
