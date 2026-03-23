@@ -2,8 +2,12 @@ use gpui::*;
 use pug_adapter::ThemeProvider;
 use pug_composites::{
     MediaPreviewSpec, MediaThumbnailSpec, AspectRatio, MediaKind, MediaState,
+    AudioPlayerSpec, VideoPlayerSpec, MediaPickerSpec,
 };
-use pug_gpui_components::{MediaPreview, MediaThumbnail};
+use pug_gpui_components::{
+    MediaPreview, MediaThumbnail, AudioPlayer, VideoPlayer,
+    MediaPicker, MediaPickerItem,
+};
 use crate::app_state::AppState;
 use crate::style_bridge::color_to_hsla;
 use crate::PreviewRoot;
@@ -116,6 +120,76 @@ pub(crate) fn render(state: &AppState, _cx: &mut Context<PreviewRoot>) -> Div {
                     .with_aspect_ratio(AspectRatio::Square),
                 theme,
             )
+        )
+
+        // ── AudioPlayer ──
+
+        // --- Basic audio player ---
+        .child(section_label("AUDIO PLAYER: BASIC", text_secondary))
+        .child(
+            AudioPlayer::from_spec(
+                AudioPlayerSpec::new("https://interactive-examples.mdn.mozilla.net/media/cc0-audio/t-rex-roar.mp3")
+                    .with_duration(2.0),
+                theme,
+            )
+        )
+
+        // --- Audio with speed control ---
+        .child(section_label("AUDIO PLAYER: WITH SPEED CONTROL", text_secondary))
+        .child(
+            AudioPlayer::from_spec(
+                AudioPlayerSpec::new("https://interactive-examples.mdn.mozilla.net/media/cc0-audio/t-rex-roar.mp3")
+                    .with_duration(2.0)
+                    .with_show_speed_control(true),
+                theme,
+            )
+        )
+
+        // ── VideoPlayer ──
+
+        // --- Basic video player ---
+        .child(section_label("VIDEO PLAYER: BASIC", text_secondary))
+        .child(
+            div().max_w(px(480.0)).child(
+                VideoPlayer::from_spec(
+                    VideoPlayerSpec::new("https://interactive-examples.mdn.mozilla.net/media/cc0-videos/flower.mp4")
+                        .with_duration(6.0),
+                    theme,
+                )
+            )
+        )
+
+        // --- Video with custom aspect ratio ---
+        .child(section_label("VIDEO PLAYER: LANDSCAPE ASPECT RATIO", text_secondary))
+        .child(
+            div().max_w(px(400.0)).child(
+                VideoPlayer::from_spec(
+                    VideoPlayerSpec::new("https://interactive-examples.mdn.mozilla.net/media/cc0-videos/flower.mp4")
+                        .with_aspect_ratio(AspectRatio::Landscape)
+                        .with_duration(6.0),
+                    theme,
+                )
+            )
+        )
+
+        // ── MediaPicker ──
+
+        // --- Media picker (open) ---
+        .child(section_label("MEDIA PICKER (BROWSE TAB)", text_secondary))
+        .child(
+            MediaPicker::from_spec(
+                MediaPickerSpec::new("Select media")
+                    .with_open(true),
+                theme,
+            )
+            .with_thumbnails(vec![
+                MediaPickerItem { id: "img-1".to_string(), label: "Banner image".to_string(), is_selected: false },
+                MediaPickerItem { id: "img-2".to_string(), label: "Profile photo".to_string(), is_selected: true },
+                MediaPickerItem { id: "img-3".to_string(), label: "Icon set".to_string(), is_selected: false },
+                MediaPickerItem { id: "doc-1".to_string(), label: "Readme.pdf".to_string(), is_selected: false },
+                MediaPickerItem { id: "vid-1".to_string(), label: "Demo video".to_string(), is_selected: false },
+                MediaPickerItem { id: "img-4".to_string(), label: "Screenshot".to_string(), is_selected: false },
+            ])
         )
 }
 
