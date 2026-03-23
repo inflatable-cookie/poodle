@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-03-23T18:27:29.542Z",
+  "generatedAt": "2026-03-23T18:35:56.810Z",
   "artifact": "packages/svelte/preview/artifacts/parity-report.json",
   "previewBasePath": "/",
   "automatedBoundary": [
@@ -32,12 +32,12 @@
   "crossRuntime": {
     "generation": "g09.018",
     "summary": {
-      "sectionCount": 13,
-      "directParityCount": 9,
+      "sectionCount": 9,
+      "directParityCount": 5,
       "nativeAdaptationCount": 4,
       "deferredCount": 0,
-      "sideBySideSectionCount": 12,
-      "manualGpuiProofCount": 0,
+      "sideBySideSectionCount": 8,
+      "manualGpuiProofCount": 9,
       "blockedGpuiProofCount": 0,
       "componentExports": 96,
       "primitiveSpecs": 64,
@@ -146,20 +146,20 @@
     ],
     "acceptanceHarness": {
       "suiteId": "gpui-target-matrix",
-      "status": "preview-backed",
+      "status": "matrix-only",
       "coveredPackages": [
-        "flint-gpui-tokens",
-        "flint-gpui-primitives",
-        "flint-gpui-composites",
-        "flint-gpui-workstation"
+        "flint-primitives",
+        "flint-composites",
+        "flint-workstation",
+        "flint-gpui",
+        "flint-gpui-components",
+        "flint-gpui-preview"
       ],
       "evidenceArtifacts": [
-        "packages/gpui/tokens/multi-app-validation.json",
         "packages/gpui/cross-runtime-parity-report.json",
         "packages/gpui/native-accessibility-proof.json",
-        "packages/svelte/preview/artifacts/parity-report.json",
-        "packages/svelte/preview/artifacts/accessibility-report.json",
-        "packages/gpui/tokens/README.md",
+        "packages/gpui/preview-app-baseline.json",
+        "packages/gpui/preview/Cargo.toml",
         "docs/specs/042-gpui-multi-app-validation-target-matrix.md"
       ],
       "requiredChecks": [
@@ -169,6 +169,8 @@
         "bun run docs:build"
       ],
       "blockers": [
+        "The repo still lacks a mounted GPUI preview app with route-level acceptance coverage comparable to the Svelte preview surface.",
+        "This suite is still artifact-backed rather than runnable downstream production proof.",
         "Downstream GPUI adoption remains future work, so this suite should still be read as validation pressure rather than deployment readiness."
       ]
     }

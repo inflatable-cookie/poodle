@@ -1,10 +1,24 @@
 {
   "generation": "g04.003",
-  "crateName": "flint-gpui-primitives",
-  "cratePath": "packages/gpui/primitives",
-  "tokenSource": "flint-gpui-tokens",
-  "contractIds": ["box", "grid", "scroll-shell", "separator", "stack", "surface"],
-  "exportNames": ["BoxSpec", "GridSpec", "ScrollShellSpec", "SeparatorSpec", "StackSpec", "SurfaceSpec"],
+  "crateName": "flint-gpui",
+  "cratePath": "packages/gpui/adapter",
+  "tokenSource": "flint-tokens",
+  "contractIds": [
+    "box",
+    "grid",
+    "scroll-shell",
+    "separator",
+    "stack",
+    "surface"
+  ],
+  "exportNames": [
+    "BoxSpec",
+    "GridSpec",
+    "ScrollShellSpec",
+    "SeparatorSpec",
+    "StackSpec",
+    "SurfaceSpec"
+  ],
   "knownDeltas": [
     "The crate currently exposes contract-backed structural specifications and token resolution helpers rather than mounted GPUI widgets.",
     "Semantic-role and scroll ownership intent are explicit in the API, but native accessibility-tree and viewport-node plumbing remain later runtime work.",

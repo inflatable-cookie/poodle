@@ -15,8 +15,8 @@
   "layerProof": [
     {
       "id": "primitives",
-      "crateName": "flint-gpui-primitives",
-      "cratePath": "packages/gpui/primitives",
+      "crateName": "flint-gpui",
+      "cratePath": "packages/gpui/adapter",
       "contractIds": [
         "accordion",
         "badge",
@@ -121,8 +121,8 @@
     },
     {
       "id": "composites",
-      "crateName": "flint-gpui-composites",
-      "cratePath": "packages/gpui/composites",
+      "crateName": "flint-gpui",
+      "cratePath": "packages/gpui/adapter",
       "contractIds": [
         "banner",
         "callout",
@@ -172,8 +172,8 @@
     },
     {
       "id": "workstation",
-      "crateName": "flint-gpui-workstation",
-      "cratePath": "packages/gpui/workstation",
+      "crateName": "flint-gpui",
+      "cratePath": "packages/gpui/adapter",
       "contractIds": [
         "action-discovery-panel",
         "app-header",

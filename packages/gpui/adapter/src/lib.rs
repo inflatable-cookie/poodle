@@ -47,6 +47,7 @@ pub use style_map::{
 pub use theme::GpuiThemeProvider;
 
 use flint_adapter::{AdapterManifest, RenderTarget};
+pub use flint_primitives::FieldRelationships;
 
 /// Opaque handle to a rendered GPUI element.
 ///

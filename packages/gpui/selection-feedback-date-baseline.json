@@ -1,8 +1,8 @@
 {
   "generation": "g04.005",
-  "crateName": "flint-gpui-primitives",
-  "cratePath": "packages/gpui/primitives",
-  "tokenSource": "flint-gpui-tokens",
+  "crateName": "flint-gpui",
+  "cratePath": "packages/gpui/adapter",
+  "tokenSource": "flint-tokens",
   "contractIds": [
     "badge",
     "calendar",

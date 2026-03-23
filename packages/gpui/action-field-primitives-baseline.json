@@ -1,9 +1,17 @@
 {
   "generation": "g04.004",
-  "crateName": "flint-gpui-primitives",
-  "cratePath": "packages/gpui/primitives",
-  "tokenSource": "flint-gpui-tokens",
-  "contractIds": ["button", "field", "form-actions", "icon-button", "search-field", "text-area", "text-input"],
+  "crateName": "flint-gpui",
+  "cratePath": "packages/gpui/adapter",
+  "tokenSource": "flint-tokens",
+  "contractIds": [
+    "button",
+    "field",
+    "form-actions",
+    "icon-button",
+    "search-field",
+    "text-area",
+    "text-input"
+  ],
   "exportNames": [
     "ButtonSpec",
     "FieldRelationships",

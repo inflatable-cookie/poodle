@@ -59,22 +59,9 @@ const sharedDemoAppAuditPath = path.join(repoRoot, "packages", "shared-demo-app-
 const sharedDemoAppContractPath = path.join(repoRoot, "packages", "shared-demo-app-contract.json");
 const workstationContractsPath = path.join(contractsDir, "workstation");
 const hasWorkstationContracts = fs.existsSync(workstationContractsPath);
-const gpuiPrimitivesCratePath = path.join(repoRoot, "packages", "gpui", "primitives");
-const hasGpuiPrimitivesCrate = fs.existsSync(gpuiPrimitivesCratePath);
-const gpuiCompositesCratePath = path.join(repoRoot, "packages", "gpui", "composites");
-const hasGpuiCompositesCrate = fs.existsSync(gpuiCompositesCratePath);
-const gpuiWorkstationCratePath = path.join(repoRoot, "packages", "gpui", "workstation");
-const hasGpuiWorkstationCrate = fs.existsSync(gpuiWorkstationCratePath);
-
-function isRetiredSurfacePath(relativePath: string): boolean {
-  return [
-    "packages/svelte/workstation",
-    "packages/gpui/tokens",
-    "packages/gpui/primitives",
-    "packages/gpui/composites",
-    "packages/gpui/workstation",
-  ].some((prefix) => relativePath === prefix || relativePath.startsWith(`${prefix}/`));
-}
+const gpuiAdapterCrateName = "flint-gpui";
+const gpuiAdapterCratePath = "packages/gpui/adapter";
+const gpuiTokenSource = "flint-tokens";
 
 function collectMarkdownFiles(directory: string): string[] {
   return fs
@@ -779,9 +766,6 @@ function validateReleaseOperations(errors: string[]): void {
 
     if (manifestEntry.language === "typescript") {
       const packageJsonPath = path.join(repoRoot, manifestEntry.path, "package.json");
-      if (!fs.existsSync(packageJsonPath) && isRetiredSurfacePath(manifestEntry.path)) {
-        continue;
-      }
       const packageJson = JSON.parse(fs.readFileSync(packageJsonPath, "utf8")) as {
         name?: string;
         flintRelease?: {
@@ -816,9 +800,6 @@ function validateReleaseOperations(errors: string[]): void {
       }
     } else if (manifestEntry.language === "rust") {
       const cargoPath = path.join(repoRoot, manifestEntry.path, "Cargo.toml");
-      if (!fs.existsSync(cargoPath) && isRetiredSurfacePath(manifestEntry.path)) {
-        continue;
-      }
       const cargoMetadata = parseCargoFlintMetadata(fs.readFileSync(cargoPath, "utf8"));
 
       expect(cargoMetadata.name === manifestEntry.name, `${cargoPath} package name does not match release manifest.`, errors);
@@ -942,9 +923,6 @@ function validateEcosystemAcceptance(errors: string[]): { suiteCount: number; re
     }
 
     for (const artifactPath of suite.evidenceArtifacts) {
-      if (isRetiredSurfacePath(artifactPath)) {
-        continue;
-      }
       expect(
         fs.existsSync(path.join(repoRoot, artifactPath)),
         `Ecosystem acceptance suite "${suite.id}" references missing evidence artifact "${artifactPath}".`,
@@ -994,9 +972,6 @@ function validateEcosystemAcceptance(errors: string[]): { suiteCount: number; re
     );
 
     for (const evidencePath of regressionClass.primaryEvidence) {
-      if (isRetiredSurfacePath(evidencePath)) {
-        continue;
-      }
       expect(
         fs.existsSync(path.join(repoRoot, evidencePath)),
         `Regression class "${regressionClass.id}" references missing evidence path "${evidencePath}".`,
@@ -1387,8 +1362,8 @@ function validateGpuiPreviewBaseline(errors: string[]): { previewSectionCount: n
 
   expect(previewBaseline.generation === "g04.002", "packages/gpui/preview-app-baseline.json must target g04.002.", errors);
   expect(
-    previewBaseline.themeRuntime.tokenSource === "flint-gpui-tokens",
-    "packages/gpui/preview-app-baseline.json must use flint-gpui-tokens as token source.",
+    previewBaseline.themeRuntime.tokenSource === gpuiTokenSource,
+    "packages/gpui/preview-app-baseline.json must use flint-tokens as token source.",
     errors,
   );
   compareLists(
@@ -1459,12 +1434,6 @@ function validateGpuiPreviewBaseline(errors: string[]): { previewSectionCount: n
 }
 
 function validateGpuiStructuralBaseline(errors: string[]): { structuralExportCount: number } {
-  if (!hasGpuiPrimitivesCrate) {
-    return {
-      structuralExportCount: 0,
-    };
-  }
-
   const structuralBaseline = JSON.parse(fs.readFileSync(gpuiStructuralBaselinePath, "utf8")) as {
     generation: string;
     crateName: string;
@@ -1492,13 +1461,13 @@ function validateGpuiStructuralBaseline(errors: string[]): { structuralExportCou
     errors,
   );
   expect(
-    structuralBaseline.crateName === "flint-gpui-primitives",
-    "packages/gpui/structural-primitives-baseline.json must target the flint-gpui-primitives crate.",
+    structuralBaseline.crateName === gpuiAdapterCrateName,
+    "packages/gpui/structural-primitives-baseline.json must target the flint-gpui adapter crate.",
     errors,
   );
   expect(
-    structuralBaseline.tokenSource === "flint-gpui-tokens",
-    "packages/gpui/structural-primitives-baseline.json must use flint-gpui-tokens as token source.",
+    structuralBaseline.tokenSource === gpuiTokenSource,
+    "packages/gpui/structural-primitives-baseline.json must use flint-tokens as token source.",
     errors,
   );
   compareLists(
@@ -1545,12 +1514,6 @@ function validateGpuiStructuralBaseline(errors: string[]): { structuralExportCou
 }
 
 function validateGpuiActionFieldBaseline(errors: string[]): { actionFieldExportCount: number } {
-  if (!hasGpuiPrimitivesCrate) {
-    return {
-      actionFieldExportCount: 0,
-    };
-  }
-
   const actionFieldBaseline = JSON.parse(fs.readFileSync(gpuiActionFieldBaselinePath, "utf8")) as {
     generation: string;
     crateName: string;
@@ -1589,13 +1552,13 @@ function validateGpuiActionFieldBaseline(errors: string[]): { actionFieldExportC
     errors,
   );
   expect(
-    actionFieldBaseline.crateName === "flint-gpui-primitives",
-    "packages/gpui/action-field-primitives-baseline.json must target the flint-gpui-primitives crate.",
+    actionFieldBaseline.crateName === gpuiAdapterCrateName,
+    "packages/gpui/action-field-primitives-baseline.json must target the flint-gpui adapter crate.",
     errors,
   );
   expect(
-    actionFieldBaseline.tokenSource === "flint-gpui-tokens",
-    "packages/gpui/action-field-primitives-baseline.json must use flint-gpui-tokens as token source.",
+    actionFieldBaseline.tokenSource === gpuiTokenSource,
+    "packages/gpui/action-field-primitives-baseline.json must use flint-tokens as token source.",
     errors,
   );
   compareLists(
@@ -1629,7 +1592,7 @@ function validateGpuiActionFieldBaseline(errors: string[]): { actionFieldExportC
   for (const exportName of actionFieldBaseline.exportNames) {
     expect(
       libSource.includes(exportName),
-      `packages/gpui/primitives/src/lib.rs must expose GPUI action/field export "${exportName}".`,
+      `packages/gpui/adapter/src/lib.rs must expose GPUI action/field export "${exportName}".`,
       errors,
     );
   }
@@ -1640,12 +1603,6 @@ function validateGpuiActionFieldBaseline(errors: string[]): { actionFieldExportC
 }
 
 function validateGpuiSelectionFeedbackDateBaseline(errors: string[]): { selectionFeedbackDateExportCount: number } {
-  if (!hasGpuiPrimitivesCrate) {
-    return {
-      selectionFeedbackDateExportCount: 0,
-    };
-  }
-
   const baseline = JSON.parse(fs.readFileSync(gpuiSelectionFeedbackDateBaselinePath, "utf8")) as {
     generation: string;
     crateName: string;
@@ -1701,13 +1658,13 @@ function validateGpuiSelectionFeedbackDateBaseline(errors: string[]): { selectio
     errors,
   );
   expect(
-    baseline.crateName === "flint-gpui-primitives",
-    "packages/gpui/selection-feedback-date-baseline.json must target the flint-gpui-primitives crate.",
+    baseline.crateName === gpuiAdapterCrateName,
+    "packages/gpui/selection-feedback-date-baseline.json must target the flint-gpui adapter crate.",
     errors,
   );
   expect(
-    baseline.tokenSource === "flint-gpui-tokens",
-    "packages/gpui/selection-feedback-date-baseline.json must use flint-gpui-tokens as token source.",
+    baseline.tokenSource === gpuiTokenSource,
+    "packages/gpui/selection-feedback-date-baseline.json must use flint-tokens as token source.",
     errors,
   );
   compareLists(
@@ -1736,7 +1693,7 @@ function validateGpuiSelectionFeedbackDateBaseline(errors: string[]): { selectio
   for (const exportName of baseline.exportNames) {
     expect(
       libSource.includes(exportName),
-      `packages/gpui/primitives/src/lib.rs must expose GPUI selection/feedback/date export "${exportName}".`,
+      `packages/gpui/adapter/src/lib.rs must expose GPUI selection/feedback/date export "${exportName}".`,
       errors,
     );
   }
@@ -1747,12 +1704,6 @@ function validateGpuiSelectionFeedbackDateBaseline(errors: string[]): { selectio
 }
 
 function validateGpuiOverlayNavigationMenuBaseline(errors: string[]): { overlayNavigationMenuExportCount: number } {
-  if (!hasGpuiPrimitivesCrate) {
-    return {
-      overlayNavigationMenuExportCount: 0,
-    };
-  }
-
   const baseline = JSON.parse(fs.readFileSync(gpuiOverlayNavigationMenuBaselinePath, "utf8")) as {
     generation: string;
     crateName: string;
@@ -1800,13 +1751,13 @@ function validateGpuiOverlayNavigationMenuBaseline(errors: string[]): { overlayN
     errors,
   );
   expect(
-    baseline.crateName === "flint-gpui-primitives",
-    "packages/gpui/overlay-navigation-menu-baseline.json must target the flint-gpui-primitives crate.",
+    baseline.crateName === gpuiAdapterCrateName,
+    "packages/gpui/overlay-navigation-menu-baseline.json must target the flint-gpui adapter crate.",
     errors,
   );
   expect(
-    baseline.tokenSource === "flint-gpui-tokens",
-    "packages/gpui/overlay-navigation-menu-baseline.json must use flint-gpui-tokens as token source.",
+    baseline.tokenSource === gpuiTokenSource,
+    "packages/gpui/overlay-navigation-menu-baseline.json must use flint-tokens as token source.",
     errors,
   );
   compareLists(
@@ -1835,7 +1786,7 @@ function validateGpuiOverlayNavigationMenuBaseline(errors: string[]): { overlayN
   for (const exportName of baseline.exportNames) {
     expect(
       libSource.includes(exportName),
-      `packages/gpui/primitives/src/lib.rs must expose GPUI overlay/navigation export "${exportName}".`,
+      `packages/gpui/adapter/src/lib.rs must expose GPUI overlay/navigation export "${exportName}".`,
       errors,
     );
   }
@@ -1846,12 +1797,6 @@ function validateGpuiOverlayNavigationMenuBaseline(errors: string[]): { overlayN
 }
 
 function validateGpuiFormValidationRemediationBaseline(errors: string[]): { gpuiCompositeExportCount: number } {
-  if (!hasGpuiCompositesCrate) {
-    return {
-      gpuiCompositeExportCount: 0,
-    };
-  }
-
   const baseline = JSON.parse(fs.readFileSync(gpuiFormValidationRemediationBaselinePath, "utf8")) as {
     generation: string;
     crateName: string;
@@ -1878,13 +1823,13 @@ function validateGpuiFormValidationRemediationBaseline(errors: string[]): { gpui
     errors,
   );
   expect(
-    baseline.crateName === "flint-gpui-composites",
-    "packages/gpui/form-validation-remediation-composites-baseline.json must target the flint-gpui-composites crate.",
+    baseline.crateName === gpuiAdapterCrateName,
+    "packages/gpui/form-validation-remediation-composites-baseline.json must target the flint-gpui adapter crate.",
     errors,
   );
   expect(
-    baseline.tokenSource === "flint-gpui-tokens",
-    "packages/gpui/form-validation-remediation-composites-baseline.json must use flint-gpui-tokens as token source.",
+    baseline.tokenSource === gpuiTokenSource,
+    "packages/gpui/form-validation-remediation-composites-baseline.json must use flint-tokens as token source.",
     errors,
   );
   compareLists(
@@ -1918,7 +1863,7 @@ function validateGpuiFormValidationRemediationBaseline(errors: string[]): { gpui
   for (const exportName of baseline.exportNames) {
     expect(
       libSource.includes(exportName),
-      `packages/gpui/composites/src/lib.rs must expose GPUI composite export "${exportName}".`,
+      `packages/gpui/adapter/src/lib.rs must expose GPUI composite export "${exportName}".`,
       errors,
     );
   }
@@ -1929,12 +1874,6 @@ function validateGpuiFormValidationRemediationBaseline(errors: string[]): { gpui
 }
 
 function validateGpuiDataBrowseDetailPickerMediaBaseline(errors: string[]): { gpuiDataCompositeExportCount: number } {
-  if (!hasGpuiCompositesCrate) {
-    return {
-      gpuiDataCompositeExportCount: 0,
-    };
-  }
-
   const baseline = JSON.parse(fs.readFileSync(gpuiDataBrowseDetailPickerMediaBaselinePath, "utf8")) as {
     generation: string;
     crateName: string;
@@ -1978,13 +1917,13 @@ function validateGpuiDataBrowseDetailPickerMediaBaseline(errors: string[]): { gp
     errors,
   );
   expect(
-    baseline.crateName === "flint-gpui-composites",
-    "packages/gpui/data-browse-detail-picker-media-baseline.json must target the flint-gpui-composites crate.",
+    baseline.crateName === gpuiAdapterCrateName,
+    "packages/gpui/data-browse-detail-picker-media-baseline.json must target the flint-gpui adapter crate.",
     errors,
   );
   expect(
-    baseline.tokenSource === "flint-gpui-tokens",
-    "packages/gpui/data-browse-detail-picker-media-baseline.json must use flint-gpui-tokens as token source.",
+    baseline.tokenSource === gpuiTokenSource,
+    "packages/gpui/data-browse-detail-picker-media-baseline.json must use flint-tokens as token source.",
     errors,
   );
   compareLists(
@@ -2018,7 +1957,7 @@ function validateGpuiDataBrowseDetailPickerMediaBaseline(errors: string[]): { gp
   for (const exportName of baseline.exportNames) {
     expect(
       libSource.includes(exportName),
-      `packages/gpui/composites/src/lib.rs must expose GPUI data/browse composite export "${exportName}".`,
+      `packages/gpui/adapter/src/lib.rs must expose GPUI data/browse composite export "${exportName}".`,
       errors,
     );
   }
@@ -2029,12 +1968,6 @@ function validateGpuiDataBrowseDetailPickerMediaBaseline(errors: string[]): { gp
 }
 
 function validateGpuiWorkstationBaseline(errors: string[]): { gpuiWorkstationExportCount: number } {
-  if (!hasGpuiWorkstationCrate) {
-    return {
-      gpuiWorkstationExportCount: 0,
-    };
-  }
-
   const baseline = JSON.parse(fs.readFileSync(gpuiWorkstationBaselinePath, "utf8")) as {
     generation: string;
     crateName: string;
@@ -2084,13 +2017,13 @@ function validateGpuiWorkstationBaseline(errors: string[]): { gpuiWorkstationExp
     errors,
   );
   expect(
-    baseline.crateName === "flint-gpui-workstation",
-    "packages/gpui/workstation-shell-command-layout-baseline.json must target the flint-gpui-workstation crate.",
+    baseline.crateName === gpuiAdapterCrateName,
+    "packages/gpui/workstation-shell-command-layout-baseline.json must target the flint-gpui adapter crate.",
     errors,
   );
   expect(
-    baseline.tokenSource === "flint-gpui-tokens",
-    "packages/gpui/workstation-shell-command-layout-baseline.json must use flint-gpui-tokens as token source.",
+    baseline.tokenSource === gpuiTokenSource,
+    "packages/gpui/workstation-shell-command-layout-baseline.json must use flint-tokens as token source.",
     errors,
   );
   compareLists(
@@ -2124,7 +2057,7 @@ function validateGpuiWorkstationBaseline(errors: string[]): { gpuiWorkstationExp
   for (const exportName of baseline.exportNames) {
     expect(
       libSource.includes(exportName),
-      `packages/gpui/workstation/src/lib.rs must expose GPUI workstation export "${exportName}".`,
+      `packages/gpui/adapter/src/lib.rs must expose GPUI workstation export "${exportName}".`,
       errors,
     );
   }
@@ -2138,13 +2071,6 @@ function validateGpuiNativeAccessibilityProof(errors: string[]): {
   gpuiAccessibilityLayerCount: number;
   gpuiAccessibilitySectionCount: number;
 } {
-  if (!hasGpuiPrimitivesCrate || !hasGpuiCompositesCrate) {
-    return {
-      gpuiAccessibilityLayerCount: 0,
-      gpuiAccessibilitySectionCount: 0,
-    };
-  }
-
   const proof = JSON.parse(fs.readFileSync(gpuiNativeAccessibilityProofPath, "utf8")) as {
     generation: string;
     comparisonSource: string;
@@ -2189,9 +2115,7 @@ function validateGpuiNativeAccessibilityProof(errors: string[]): {
     "table-suite",
     "workspace-suite",
   ];
-  const expectedLayerIds = hasGpuiWorkstationCrate
-    ? ["composites", "primitives", "workstation"]
-    : ["composites", "primitives"];
+  const expectedLayerIds = ["composites", "primitives", "workstation"];
   const allowedStatuses = new Set(["explicit", "hybrid", "manual"]);
   const primitiveExportNames = [
     ...JSON.parse(fs.readFileSync(gpuiStructuralBaselinePath, "utf8")).exportNames,
@@ -2213,12 +2137,10 @@ function validateGpuiNativeAccessibilityProof(errors: string[]): {
     ...JSON.parse(fs.readFileSync(gpuiFormValidationRemediationBaselinePath, "utf8")).contractIds,
     ...JSON.parse(fs.readFileSync(gpuiDataBrowseDetailPickerMediaBaselinePath, "utf8")).contractIds,
   ].sort();
-  const workstationBaseline = hasGpuiWorkstationCrate
-    ? (JSON.parse(fs.readFileSync(gpuiWorkstationBaselinePath, "utf8")) as {
-        exportNames: string[];
-        contractIds: string[];
-      })
-    : { exportNames: [], contractIds: [] };
+  const workstationBaseline = JSON.parse(fs.readFileSync(gpuiWorkstationBaselinePath, "utf8")) as {
+    exportNames: string[];
+    contractIds: string[];
+  };
   const sectionTargets = new Map(
     accessibilityAuditTargets
       .filter((target) => target.auditAreas.gpui !== "not-applicable")
@@ -2278,8 +2200,8 @@ function validateGpuiNativeAccessibilityProof(errors: string[]): {
     [
       "primitives",
       {
-        crateName: "flint-gpui-primitives",
-        cratePath: "packages/gpui/primitives",
+        crateName: gpuiAdapterCrateName,
+        cratePath: gpuiAdapterCratePath,
         exportNames: primitiveExportNames,
         contractIds: primitiveContractIds,
       },
@@ -2287,22 +2209,22 @@ function validateGpuiNativeAccessibilityProof(errors: string[]): {
     [
       "composites",
       {
-        crateName: "flint-gpui-composites",
-        cratePath: "packages/gpui/composites",
+        crateName: gpuiAdapterCrateName,
+        cratePath: gpuiAdapterCratePath,
         exportNames: compositeExportNames,
         contractIds: compositeContractIds,
       },
     ],
-  ]);
-
-  if (hasGpuiWorkstationCrate) {
-    expectedLayerData.set("workstation", {
-      crateName: "flint-gpui-workstation",
-      cratePath: "packages/gpui/workstation",
+    [
+      "workstation",
+      {
+        crateName: gpuiAdapterCrateName,
+        cratePath: gpuiAdapterCratePath,
       exportNames: [...workstationBaseline.exportNames].sort(),
       contractIds: [...workstationBaseline.contractIds].sort(),
-    });
-  }
+      },
+    ],
+  ]);
 
   for (const layer of proof.layerProof) {
     const expected = expectedLayerData.get(layer.id);
@@ -2436,13 +2358,6 @@ function validateGpuiCrossRuntimeParityReport(errors: string[]): {
   gpuiCrossRuntimeSectionCount: number;
   gpuiCrossRuntimeDeltaCount: number;
 } {
-  if (!hasGpuiPrimitivesCrate || !hasGpuiCompositesCrate) {
-    return {
-      gpuiCrossRuntimeSectionCount: 0,
-      gpuiCrossRuntimeDeltaCount: 0,
-    };
-  }
-
   const report = JSON.parse(fs.readFileSync(gpuiCrossRuntimeParityReportPath, "utf8")) as {
     generation: string;
     comparisonArtifacts: string[];
@@ -2535,8 +2450,8 @@ function validateGpuiCrossRuntimeParityReport(errors: string[]): {
   const deltaIds = new Set(report.deltaRegister.map((entry) => entry.id));
 
   expect(
-    report.generation === "g04.011",
-    "packages/gpui/cross-runtime-parity-report.json must target g04.011.",
+    report.generation === "g09.018",
+    "packages/gpui/cross-runtime-parity-report.json must target g09.018.",
     errors,
   );
   expect(
@@ -2843,8 +2758,8 @@ function validateSharedDemoAppAudit(errors: string[]): {
   const targetSectionSet = new Set(audit.sourceSurface.sharedTargetSectionIds);
 
   expect(
-    audit.generation === "g04.012",
-    "packages/shared-demo-app-audit.json must target g04.012.",
+    audit.generation === "g09.018",
+    "packages/shared-demo-app-audit.json must target g09.018.",
     errors,
   );
   expect(

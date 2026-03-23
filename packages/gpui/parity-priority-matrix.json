@@ -11,8 +11,8 @@
         "token-inspector"
       ],
       "packageFocus": [
-        "flint-gpui-tokens",
-        "gpui-preview-app"
+        "flint-tokens",
+        "flint-gpui-preview"
       ]
     },
     {
@@ -24,7 +24,8 @@
         "notification-suite"
       ],
       "packageFocus": [
-        "flint-gpui-primitives"
+        "flint-gpui",
+        "flint-gpui-components"
       ]
     },
     {
@@ -39,7 +40,8 @@
         "media-suite"
       ],
       "packageFocus": [
-        "gpui-composites"
+        "flint-gpui",
+        "flint-gpui-components"
       ]
     },
     {
@@ -51,7 +53,9 @@
         "workspace-suite"
       ],
       "packageFocus": [
-        "gpui-workstation"
+        "flint-gpui",
+        "flint-gpui-components",
+        "flint-gpui-preview"
       ]
     }
   ],

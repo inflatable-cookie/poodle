@@ -1,8 +1,8 @@
 {
   "generation": "g04.008",
-  "crateName": "flint-gpui-composites",
-  "cratePath": "packages/gpui/composites",
-  "tokenSource": "flint-gpui-tokens",
+  "crateName": "flint-gpui",
+  "cratePath": "packages/gpui/adapter",
+  "tokenSource": "flint-tokens",
   "contractIds": [
     "data-table",
     "detail-shell",

@@ -1,10 +1,21 @@
 {
   "generation": "g04.002",
   "themeRuntime": {
-    "tokenSource": "flint-gpui-tokens",
-    "themeIds": ["light", "dark", "loophole-studio"],
-    "densityModes": ["compact", "comfortable"],
-    "controlSizes": ["sm", "md", "lg"],
+    "tokenSource": "flint-tokens",
+    "themeIds": [
+      "light",
+      "dark",
+      "loophole-studio"
+    ],
+    "densityModes": [
+      "compact",
+      "comfortable"
+    ],
+    "controlSizes": [
+      "sm",
+      "md",
+      "lg"
+    ],
     "applicationRules": [
       "Apply the active semantic theme before rendering the current review section.",
       "Treat density and control size as first-class review dimensions, not browser-only options.",
@@ -12,8 +23,17 @@
     ]
   },
   "previewApp": {
-    "sectionIds": ["catalog-hub", "token-summary-section", "token-inspector"],
-    "requiredControls": ["section", "theme", "density", "controlSize"],
+    "sectionIds": [
+      "catalog-hub",
+      "token-summary-section",
+      "token-inspector"
+    ],
+    "requiredControls": [
+      "section",
+      "theme",
+      "density",
+      "controlSize"
+    ],
     "shellAreas": [
       "section navigation",
       "review metadata bar",

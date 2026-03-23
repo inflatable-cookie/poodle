@@ -1,5 +1,5 @@
 {
-  "generation": "g04.012",
+  "generation": "g09.018",
   "sourceSurface": {
     "entryPath": "packages/svelte/preview/src/App.svelte",
     "stylePath": "packages/svelte/preview/src/app.css",
@@ -27,22 +27,15 @@
     "packages": [
       {
         "packageName": "@flint/svelte-primitives",
-        "exportCount": 63,
-        "previewedCount": 63,
+        "exportCount": 84,
+        "previewedCount": 84,
         "contractOnlyCount": 0,
         "priorityMissingExports": []
       },
       {
         "packageName": "@flint/svelte-composites",
-        "exportCount": 20,
-        "previewedCount": 20,
-        "contractOnlyCount": 0,
-        "priorityMissingExports": []
-      },
-      {
-        "packageName": "@flint/svelte-workstation",
-        "exportCount": 14,
-        "previewedCount": 14,
+        "exportCount": 47,
+        "previewedCount": 47,
         "contractOnlyCount": 0,
         "priorityMissingExports": []
       }
