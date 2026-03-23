@@ -96,46 +96,10 @@
       "removalGate": "successor-and-generation-delay"
     },
     {
-      "name": "@flint/svelte-workstation",
-      "channel": "preview",
-      "publicIntent": true,
-      "changeControl": "contract-backed",
-      "requiresReleaseNotes": true,
-      "requiresDeprecationRecord": true,
-      "removalGate": "successor-and-generation-delay"
-    },
-    {
-      "name": "flint-gpui-tokens",
+      "name": "@flint/icons-lucide",
       "channel": "preview",
       "publicIntent": true,
       "changeControl": "artifact-backed",
-      "requiresReleaseNotes": true,
-      "requiresDeprecationRecord": true,
-      "removalGate": "successor-and-generation-delay"
-    },
-    {
-      "name": "flint-gpui-primitives",
-      "channel": "preview",
-      "publicIntent": true,
-      "changeControl": "contract-backed",
-      "requiresReleaseNotes": true,
-      "requiresDeprecationRecord": true,
-      "removalGate": "successor-and-generation-delay"
-    },
-    {
-      "name": "flint-gpui-composites",
-      "channel": "preview",
-      "publicIntent": true,
-      "changeControl": "contract-backed",
-      "requiresReleaseNotes": true,
-      "requiresDeprecationRecord": true,
-      "removalGate": "successor-and-generation-delay"
-    },
-    {
-      "name": "flint-gpui-workstation",
-      "channel": "preview",
-      "publicIntent": true,
-      "changeControl": "contract-backed",
       "requiresReleaseNotes": true,
       "requiresDeprecationRecord": true,
       "removalGate": "successor-and-generation-delay"
@@ -157,6 +121,132 @@
       "requiresReleaseNotes": false,
       "requiresDeprecationRecord": false,
       "removalGate": "owner-directed-with-doc-update"
+    },
+    {
+      "name": "flint-adapter",
+      "channel": "preview",
+      "publicIntent": true,
+      "changeControl": "contract-backed",
+      "requiresReleaseNotes": true,
+      "requiresDeprecationRecord": true,
+      "removalGate": "successor-and-generation-delay"
+    },
+    {
+      "name": "flint-composites",
+      "channel": "preview",
+      "publicIntent": true,
+      "changeControl": "contract-backed",
+      "requiresReleaseNotes": true,
+      "requiresDeprecationRecord": true,
+      "removalGate": "successor-and-generation-delay"
+    },
+    {
+      "name": "flint-events",
+      "channel": "preview",
+      "publicIntent": true,
+      "changeControl": "contract-backed",
+      "requiresReleaseNotes": true,
+      "requiresDeprecationRecord": true,
+      "removalGate": "successor-and-generation-delay"
+    },
+    {
+      "name": "flint-layout",
+      "channel": "preview",
+      "publicIntent": true,
+      "changeControl": "contract-backed",
+      "requiresReleaseNotes": true,
+      "requiresDeprecationRecord": true,
+      "removalGate": "successor-and-generation-delay"
+    },
+    {
+      "name": "flint-primitives",
+      "channel": "preview",
+      "publicIntent": true,
+      "changeControl": "contract-backed",
+      "requiresReleaseNotes": true,
+      "requiresDeprecationRecord": true,
+      "removalGate": "successor-and-generation-delay"
+    },
+    {
+      "name": "flint-style",
+      "channel": "preview",
+      "publicIntent": true,
+      "changeControl": "contract-backed",
+      "requiresReleaseNotes": true,
+      "requiresDeprecationRecord": true,
+      "removalGate": "successor-and-generation-delay"
+    },
+    {
+      "name": "flint-tokens",
+      "channel": "preview",
+      "publicIntent": true,
+      "changeControl": "artifact-backed",
+      "requiresReleaseNotes": true,
+      "requiresDeprecationRecord": true,
+      "removalGate": "successor-and-generation-delay"
+    },
+    {
+      "name": "flint-workstation",
+      "channel": "preview",
+      "publicIntent": true,
+      "changeControl": "contract-backed",
+      "requiresReleaseNotes": true,
+      "requiresDeprecationRecord": true,
+      "removalGate": "successor-and-generation-delay"
+    },
+    {
+      "name": "flint-gpui",
+      "channel": "preview",
+      "publicIntent": true,
+      "changeControl": "adapter-backed",
+      "requiresReleaseNotes": true,
+      "requiresDeprecationRecord": true,
+      "removalGate": "successor-and-generation-delay"
+    },
+    {
+      "name": "flint-gpui-components",
+      "channel": "preview",
+      "publicIntent": true,
+      "changeControl": "runtime-backed",
+      "requiresReleaseNotes": true,
+      "requiresDeprecationRecord": true,
+      "removalGate": "successor-and-generation-delay"
+    },
+    {
+      "name": "flint-gpui-preview",
+      "channel": "preview",
+      "publicIntent": true,
+      "changeControl": "tooling-owned",
+      "requiresReleaseNotes": true,
+      "requiresDeprecationRecord": true,
+      "removalGate": "successor-and-generation-delay"
+    },
+    {
+      "name": "flint-jetstream",
+      "channel": "preview",
+      "publicIntent": true,
+      "changeControl": "adapter-backed",
+      "requiresReleaseNotes": true,
+      "requiresDeprecationRecord": true,
+      "removalGate": "successor-and-generation-delay"
+    },
+    {
+      "name": "flint-jetstream-components",
+      "channel": "preview",
+      "publicIntent": true,
+      "changeControl": "runtime-backed",
+      "requiresReleaseNotes": true,
+      "requiresDeprecationRecord": true,
+      "removalGate": "successor-and-generation-delay"
+    },
+    {
+      "name": "flint-jetstream-preview",
+      "channel": "preview",
+      "publicIntent": true,
+      "changeControl": "tooling-owned",
+      "requiresReleaseNotes": true,
+      "requiresDeprecationRecord": true,
+      "removalGate": "successor-and-generation-delay"
     }
   ]
 }

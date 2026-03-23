@@ -1,85 +1,73 @@
 # Region
 
-A presentational placeholder block that designates an area where content could exist but currently doesn't. Uses a dashed border and centered label to communicate layout structure without actual content. Useful in documentation, wireframes, layout specimens, and empty states within shells.
+Status: active
+Updated: 2026-03-23
 
-## Anatomy
+- Component name: `Region`
+- Layer: `foundation`
 
-```
+## 1. Purpose
+
+Region is a presentational placeholder block that designates an area where
+content could exist but currently does not. It is useful in documentation,
+wireframes, layout specimens, and empty shell states where structure matters
+more than the final payload.
+
+## 2. Anatomy
+
+```text
 region (root)
 └── label (text)
 ```
 
-| Part    | Element | Notes                             |
-|---------|---------|-----------------------------------|
-| `root`  | `div`   | Dashed-border container           |
-| `label` | `span`  | Centered uppercase label text     |
+| Part | Required | Description | Token Targets |
+|------|----------|-------------|---------------|
+| `root` | yes | Dashed placeholder container | border, radius, padding |
+| `label` | yes | Centered uppercase placeholder copy | label color, label typography |
 
-## Props
+## 3. Props And Inputs
 
-| Prop        | Type     | Default | Description                                           |
-|-------------|----------|---------|-------------------------------------------------------|
-| `label`     | `string` | `""`    | Text displayed centered in the region                 |
-| `color`     | `string \| null` | `null` | Custom CSS color for border and label text   |
-| `minHeight` | `string` | `"4rem"` | Minimum height of the region                        |
+| Prop | Type | Default | Required | Notes |
+|------|------|---------|----------|-------|
+| `label` | `string` | `""` | no | Placeholder copy shown in the centre of the region |
+| `color` | `string \| null` | `null` | no | Optional custom border and label color via `--region-color` |
+| `minHeight` | `string` | `"4rem"` | no | Minimum height for the placeholder region |
 
-## Token Targets
+## 4. States
 
-### Root
+| State | Trigger | Expected Result |
+|-------|---------|-----------------|
+| default | no custom color | Dashed border and muted text use Flint semantic tokens |
+| custom-color | `color` set | Border and label both adopt the supplied custom color |
 
-| Property        | Token / Value                                              |
-|-----------------|------------------------------------------------------------|
-| `display`       | `flex`                                                     |
-| `align-items`   | `center`                                                   |
-| `justify-content` | `center`                                                 |
-| `border`        | `0.125rem dashed var(--region-color, var(--flint-color-border-default))` |
-| `border-radius` | `var(--flint-radius-surface)`                                |
-| `padding`       | `var(--flint-space-inline-md)`                               |
+## 5. Accessibility
 
-### Label
+### Semantics
 
-| Property          | Token / Value                                             |
-|-------------------|-----------------------------------------------------------|
-| `color`           | `var(--region-color, var(--flint-color-text-tertiary))`     |
-| `font-family`     | `var(--flint-typography-label-family)`                      |
-| `font-size`       | `var(--flint-typography-label-size)`                        |
-| `font-weight`     | `600`                                                     |
-| `text-transform`  | `uppercase`                                               |
-| `letter-spacing`  | `0.05em`                                                  |
-| `user-select`     | `none`                                                    |
+- Role: `presentation`
+- Required attributes: none
+- Optional attributes: none
+- Labeling rules: the visible label is for sighted layout review only
 
-## Custom Color
+### Keyboard
 
-When the `color` prop is set, it applies to both the dashed border and the label text via a `--region-color` CSS custom property. This allows different regions to be visually distinguished in layout diagrams.
+Region is non-interactive and should not be keyboard-focusable.
 
-## Specimen Definitions
+### Focus And Announcement
 
-### Group: Default
+- focus entry: not applicable
+- focus exit: not applicable
+- live-region or announcement behavior: none
+- GPUI-native accessibility mapping notes: preserve decorative-only behavior in
+  native renderers
 
-| Label | Props / Config | Expected Visual |
-|-------|---------------|-----------------|
-| Default | `label="Content area"` | Single region with dashed border, default border color, centered uppercase "CONTENT AREA" label, default 4rem min-height |
+## 6. Token Usage
 
-### Group: Custom colors
-
-| Label | Props / Config | Expected Visual |
-|-------|---------------|-----------------|
-| Header | `label="Header"`, `color="#5b9bd5"`, `minHeight="3rem"` | Blue dashed border and blue label text, 3rem min-height |
-| Sidebar | `label="Sidebar"`, `color="#70ad47"`, `minHeight="6rem"` | Green dashed border and green label text, 6rem min-height |
-| Main content | `label="Main content"`, `color="#ed7d31"`, `minHeight="8rem"` | Orange dashed border and orange label text, 8rem min-height |
-| Footer | `label="Footer"`, `color="#a855f7"`, `minHeight="3rem"` | Purple dashed border and purple label text, 3rem min-height |
-
-### Group: Layout composition
-
-| Label | Props / Config | Expected Visual |
-|-------|---------------|-----------------|
-| Nav | `label="Nav"`, `color="#5b9bd5"`, `minHeight="100%"` | Blue region filling left column of a two-column grid layout |
-| Toolbar | `label="Toolbar"`, `color="#70ad47"`, `minHeight="2.5rem"` | Green region at top of right column, 2.5rem tall |
-| Content | `label="Content"`, `color="#ed7d31"`, `minHeight="10rem"` | Orange region filling remaining space in right column |
-
-## Accessibility
-
-| Attribute | Value          |
-|-----------|----------------|
-| `role`    | `presentation` |
-
-The Region is purely decorative and conveys no semantic meaning to assistive technology.
+| Part | Token | Purpose |
+|------|-------|---------|
+| `root` | `--flint-color-border-default` | Default dashed outline color |
+| `root` | `--flint-radius-surface` | Shared surface rounding |
+| `root` | `--flint-space-inline-md` | Interior spacing |
+| `label` | `--flint-color-text-tertiary` | Muted placeholder label color |
+| `label` | `--flint-typography-label-family` | Label family |
+| `label` | `--flint-typography-label-size` | Label size |

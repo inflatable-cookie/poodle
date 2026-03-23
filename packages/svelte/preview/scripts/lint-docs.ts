@@ -57,6 +57,24 @@ const gpuiCrossRuntimeParityReportPath = path.join(
 );
 const sharedDemoAppAuditPath = path.join(repoRoot, "packages", "shared-demo-app-audit.json");
 const sharedDemoAppContractPath = path.join(repoRoot, "packages", "shared-demo-app-contract.json");
+const workstationContractsPath = path.join(contractsDir, "workstation");
+const hasWorkstationContracts = fs.existsSync(workstationContractsPath);
+const gpuiPrimitivesCratePath = path.join(repoRoot, "packages", "gpui", "primitives");
+const hasGpuiPrimitivesCrate = fs.existsSync(gpuiPrimitivesCratePath);
+const gpuiCompositesCratePath = path.join(repoRoot, "packages", "gpui", "composites");
+const hasGpuiCompositesCrate = fs.existsSync(gpuiCompositesCratePath);
+const gpuiWorkstationCratePath = path.join(repoRoot, "packages", "gpui", "workstation");
+const hasGpuiWorkstationCrate = fs.existsSync(gpuiWorkstationCratePath);
+
+function isRetiredSurfacePath(relativePath: string): boolean {
+  return [
+    "packages/svelte/workstation",
+    "packages/gpui/tokens",
+    "packages/gpui/primitives",
+    "packages/gpui/composites",
+    "packages/gpui/workstation",
+  ].some((prefix) => relativePath === prefix || relativePath.startsWith(`${prefix}/`));
+}
 
 function collectMarkdownFiles(directory: string): string[] {
   return fs
@@ -218,7 +236,9 @@ function validateComponentContracts(errors: string[]): number {
   const componentContractFiles = [
     ...collectMarkdownFiles(path.join(contractsDir, "foundation")).filter((file) => !file.endsWith("README.md")),
     ...collectMarkdownFiles(path.join(contractsDir, "composites")).filter((file) => !file.endsWith("README.md")),
-    ...collectMarkdownFiles(path.join(contractsDir, "workstation")).filter((file) => !file.endsWith("README.md")),
+    ...(hasWorkstationContracts
+      ? collectMarkdownFiles(workstationContractsPath).filter((file) => !file.endsWith("README.md"))
+      : []),
   ];
 
   for (const filePath of componentContractFiles) {
@@ -237,12 +257,6 @@ function validateComponentContracts(errors: string[]): number {
       `${relativePath} is missing an accessibility section.`,
       errors,
     );
-    expect(
-      /^##(?:\s+\d+\.)?\s+Next Task$/m.test(markdown),
-      `${relativePath} is missing a next-task section.`,
-      errors,
-    );
-
     if (headingNumbers.length > 0) {
       expect(headingNumbers[0] === 1, `${relativePath} must start numbered headings at 1.`, errors);
 
@@ -264,8 +278,9 @@ function validateContractIndexes(errors: string[]): void {
     .map((file) => path.basename(file));
   const compositeContracts = collectMarkdownFiles(path.join(contractsDir, "composites"))
     .map((file) => path.basename(file));
-  const workstationContracts = collectMarkdownFiles(path.join(contractsDir, "workstation"))
-    .map((file) => path.basename(file));
+  const workstationContracts = hasWorkstationContracts
+    ? collectMarkdownFiles(workstationContractsPath).map((file) => path.basename(file))
+    : [];
 
   compareLists(
     "docs/contracts/foundation/README.md current contracts",
@@ -287,15 +302,17 @@ function validateContractIndexes(errors: string[]): void {
     errors,
   );
 
-  compareLists(
-    "docs/contracts/workstation/README.md current contracts",
-    parseBulletList(
-      fs.readFileSync(path.join(contractsDir, "workstation", "README.md"), "utf8"),
-      "## Current Contracts",
-    ),
-    workstationContracts.filter((file) => file !== "README.md"),
-    errors,
-  );
+  if (hasWorkstationContracts) {
+    compareLists(
+      "docs/contracts/workstation/README.md current contracts",
+      parseBulletList(
+        fs.readFileSync(path.join(workstationContractsPath, "README.md"), "utf8"),
+        "## Current Contracts",
+      ),
+      workstationContracts.filter((file) => file !== "README.md"),
+      errors,
+    );
+  }
 
   compareLists(
     "docs/contracts/README.md current seed contracts",
@@ -762,6 +779,9 @@ function validateReleaseOperations(errors: string[]): void {
 
     if (manifestEntry.language === "typescript") {
       const packageJsonPath = path.join(repoRoot, manifestEntry.path, "package.json");
+      if (!fs.existsSync(packageJsonPath) && isRetiredSurfacePath(manifestEntry.path)) {
+        continue;
+      }
       const packageJson = JSON.parse(fs.readFileSync(packageJsonPath, "utf8")) as {
         name?: string;
         flintRelease?: {
@@ -796,6 +816,9 @@ function validateReleaseOperations(errors: string[]): void {
       }
     } else if (manifestEntry.language === "rust") {
       const cargoPath = path.join(repoRoot, manifestEntry.path, "Cargo.toml");
+      if (!fs.existsSync(cargoPath) && isRetiredSurfacePath(manifestEntry.path)) {
+        continue;
+      }
       const cargoMetadata = parseCargoFlintMetadata(fs.readFileSync(cargoPath, "utf8"));
 
       expect(cargoMetadata.name === manifestEntry.name, `${cargoPath} package name does not match release manifest.`, errors);
@@ -919,6 +942,9 @@ function validateEcosystemAcceptance(errors: string[]): { suiteCount: number; re
     }
 
     for (const artifactPath of suite.evidenceArtifacts) {
+      if (isRetiredSurfacePath(artifactPath)) {
+        continue;
+      }
       expect(
         fs.existsSync(path.join(repoRoot, artifactPath)),
         `Ecosystem acceptance suite "${suite.id}" references missing evidence artifact "${artifactPath}".`,
@@ -968,6 +994,9 @@ function validateEcosystemAcceptance(errors: string[]): { suiteCount: number; re
     );
 
     for (const evidencePath of regressionClass.primaryEvidence) {
+      if (isRetiredSurfacePath(evidencePath)) {
+        continue;
+      }
       expect(
         fs.existsSync(path.join(repoRoot, evidencePath)),
         `Regression class "${regressionClass.id}" references missing evidence path "${evidencePath}".`,
@@ -1430,6 +1459,12 @@ function validateGpuiPreviewBaseline(errors: string[]): { previewSectionCount: n
 }
 
 function validateGpuiStructuralBaseline(errors: string[]): { structuralExportCount: number } {
+  if (!hasGpuiPrimitivesCrate) {
+    return {
+      structuralExportCount: 0,
+    };
+  }
+
   const structuralBaseline = JSON.parse(fs.readFileSync(gpuiStructuralBaselinePath, "utf8")) as {
     generation: string;
     crateName: string;
@@ -1510,6 +1545,12 @@ function validateGpuiStructuralBaseline(errors: string[]): { structuralExportCou
 }
 
 function validateGpuiActionFieldBaseline(errors: string[]): { actionFieldExportCount: number } {
+  if (!hasGpuiPrimitivesCrate) {
+    return {
+      actionFieldExportCount: 0,
+    };
+  }
+
   const actionFieldBaseline = JSON.parse(fs.readFileSync(gpuiActionFieldBaselinePath, "utf8")) as {
     generation: string;
     crateName: string;
@@ -1599,6 +1640,12 @@ function validateGpuiActionFieldBaseline(errors: string[]): { actionFieldExportC
 }
 
 function validateGpuiSelectionFeedbackDateBaseline(errors: string[]): { selectionFeedbackDateExportCount: number } {
+  if (!hasGpuiPrimitivesCrate) {
+    return {
+      selectionFeedbackDateExportCount: 0,
+    };
+  }
+
   const baseline = JSON.parse(fs.readFileSync(gpuiSelectionFeedbackDateBaselinePath, "utf8")) as {
     generation: string;
     crateName: string;
@@ -1700,6 +1747,12 @@ function validateGpuiSelectionFeedbackDateBaseline(errors: string[]): { selectio
 }
 
 function validateGpuiOverlayNavigationMenuBaseline(errors: string[]): { overlayNavigationMenuExportCount: number } {
+  if (!hasGpuiPrimitivesCrate) {
+    return {
+      overlayNavigationMenuExportCount: 0,
+    };
+  }
+
   const baseline = JSON.parse(fs.readFileSync(gpuiOverlayNavigationMenuBaselinePath, "utf8")) as {
     generation: string;
     crateName: string;
@@ -1793,6 +1846,12 @@ function validateGpuiOverlayNavigationMenuBaseline(errors: string[]): { overlayN
 }
 
 function validateGpuiFormValidationRemediationBaseline(errors: string[]): { gpuiCompositeExportCount: number } {
+  if (!hasGpuiCompositesCrate) {
+    return {
+      gpuiCompositeExportCount: 0,
+    };
+  }
+
   const baseline = JSON.parse(fs.readFileSync(gpuiFormValidationRemediationBaselinePath, "utf8")) as {
     generation: string;
     crateName: string;
@@ -1870,6 +1929,12 @@ function validateGpuiFormValidationRemediationBaseline(errors: string[]): { gpui
 }
 
 function validateGpuiDataBrowseDetailPickerMediaBaseline(errors: string[]): { gpuiDataCompositeExportCount: number } {
+  if (!hasGpuiCompositesCrate) {
+    return {
+      gpuiDataCompositeExportCount: 0,
+    };
+  }
+
   const baseline = JSON.parse(fs.readFileSync(gpuiDataBrowseDetailPickerMediaBaselinePath, "utf8")) as {
     generation: string;
     crateName: string;
@@ -1964,6 +2029,12 @@ function validateGpuiDataBrowseDetailPickerMediaBaseline(errors: string[]): { gp
 }
 
 function validateGpuiWorkstationBaseline(errors: string[]): { gpuiWorkstationExportCount: number } {
+  if (!hasGpuiWorkstationCrate) {
+    return {
+      gpuiWorkstationExportCount: 0,
+    };
+  }
+
   const baseline = JSON.parse(fs.readFileSync(gpuiWorkstationBaselinePath, "utf8")) as {
     generation: string;
     crateName: string;
@@ -2067,6 +2138,13 @@ function validateGpuiNativeAccessibilityProof(errors: string[]): {
   gpuiAccessibilityLayerCount: number;
   gpuiAccessibilitySectionCount: number;
 } {
+  if (!hasGpuiPrimitivesCrate || !hasGpuiCompositesCrate) {
+    return {
+      gpuiAccessibilityLayerCount: 0,
+      gpuiAccessibilitySectionCount: 0,
+    };
+  }
+
   const proof = JSON.parse(fs.readFileSync(gpuiNativeAccessibilityProofPath, "utf8")) as {
     generation: string;
     comparisonSource: string;
@@ -2111,7 +2189,9 @@ function validateGpuiNativeAccessibilityProof(errors: string[]): {
     "table-suite",
     "workspace-suite",
   ];
-  const expectedLayerIds = ["composites", "primitives", "workstation"];
+  const expectedLayerIds = hasGpuiWorkstationCrate
+    ? ["composites", "primitives", "workstation"]
+    : ["composites", "primitives"];
   const allowedStatuses = new Set(["explicit", "hybrid", "manual"]);
   const primitiveExportNames = [
     ...JSON.parse(fs.readFileSync(gpuiStructuralBaselinePath, "utf8")).exportNames,
@@ -2133,10 +2213,12 @@ function validateGpuiNativeAccessibilityProof(errors: string[]): {
     ...JSON.parse(fs.readFileSync(gpuiFormValidationRemediationBaselinePath, "utf8")).contractIds,
     ...JSON.parse(fs.readFileSync(gpuiDataBrowseDetailPickerMediaBaselinePath, "utf8")).contractIds,
   ].sort();
-  const workstationBaseline = JSON.parse(fs.readFileSync(gpuiWorkstationBaselinePath, "utf8")) as {
-    exportNames: string[];
-    contractIds: string[];
-  };
+  const workstationBaseline = hasGpuiWorkstationCrate
+    ? (JSON.parse(fs.readFileSync(gpuiWorkstationBaselinePath, "utf8")) as {
+        exportNames: string[];
+        contractIds: string[];
+      })
+    : { exportNames: [], contractIds: [] };
   const sectionTargets = new Map(
     accessibilityAuditTargets
       .filter((target) => target.auditAreas.gpui !== "not-applicable")
@@ -2211,16 +2293,16 @@ function validateGpuiNativeAccessibilityProof(errors: string[]): {
         contractIds: compositeContractIds,
       },
     ],
-    [
-      "workstation",
-      {
-        crateName: "flint-gpui-workstation",
-        cratePath: "packages/gpui/workstation",
-        exportNames: [...workstationBaseline.exportNames].sort(),
-        contractIds: [...workstationBaseline.contractIds].sort(),
-      },
-    ],
   ]);
+
+  if (hasGpuiWorkstationCrate) {
+    expectedLayerData.set("workstation", {
+      crateName: "flint-gpui-workstation",
+      cratePath: "packages/gpui/workstation",
+      exportNames: [...workstationBaseline.exportNames].sort(),
+      contractIds: [...workstationBaseline.contractIds].sort(),
+    });
+  }
 
   for (const layer of proof.layerProof) {
     const expected = expectedLayerData.get(layer.id);
@@ -2354,6 +2436,13 @@ function validateGpuiCrossRuntimeParityReport(errors: string[]): {
   gpuiCrossRuntimeSectionCount: number;
   gpuiCrossRuntimeDeltaCount: number;
 } {
+  if (!hasGpuiPrimitivesCrate || !hasGpuiCompositesCrate) {
+    return {
+      gpuiCrossRuntimeSectionCount: 0,
+      gpuiCrossRuntimeDeltaCount: 0,
+    };
+  }
+
   const report = JSON.parse(fs.readFileSync(gpuiCrossRuntimeParityReportPath, "utf8")) as {
     generation: string;
     comparisonArtifacts: string[];

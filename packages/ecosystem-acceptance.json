@@ -11,7 +11,7 @@
         "@flint/svelte-tokens",
         "@flint/svelte-primitives",
         "@flint/svelte-composites",
-        "@flint/svelte-workstation",
+        "@flint/icons-lucide",
         "@flint/svelte-preview"
       ],
       "evidenceArtifacts": [
@@ -72,7 +72,7 @@
     {
       "id": "loophole-foundation-adoption",
       "label": "Loophole foundation adoption",
-      "consumerShape": "direct downstream Svelte adoption on top of generic workstation foundations",
+      "consumerShape": "direct downstream Svelte adoption on top of Flint primitives and composites",
       "runtime": "web or desktop shell",
       "adoptionModel": "direct package consumption",
       "status": "proof-backed",
@@ -80,11 +80,11 @@
         "@flint/svelte-tokens",
         "@flint/svelte-primitives",
         "@flint/svelte-composites",
-        "@flint/svelte-workstation"
+        "@flint/icons-lucide"
       ],
       "evidenceArtifacts": [
-        "packages/svelte/workstation/loophole-foundation-proof.json",
-        "packages/svelte/workstation/README.md",
+        "packages/svelte/primitives/README.md",
+        "packages/svelte/composites/README.md",
         "docs/specs/041-loophole-foundation-adoption-and-daw-extension-boundary.md"
       ],
       "regressionClasses": [
@@ -109,18 +109,18 @@
       "adoptionModel": "matrix-only",
       "status": "matrix-only",
       "coveredPackages": [
-        "flint-gpui-tokens",
-        "flint-gpui-primitives",
-        "flint-gpui-composites",
-        "flint-gpui-workstation"
+        "flint-primitives",
+        "flint-composites",
+        "flint-workstation",
+        "flint-gpui",
+        "flint-gpui-components",
+        "flint-gpui-preview"
       ],
       "evidenceArtifacts": [
-        "packages/gpui/tokens/multi-app-validation.json",
         "packages/gpui/cross-runtime-parity-report.json",
         "packages/gpui/native-accessibility-proof.json",
-        "packages/svelte/preview/artifacts/parity-report.json",
-        "packages/svelte/preview/artifacts/accessibility-report.json",
-        "packages/gpui/tokens/README.md",
+        "packages/gpui/preview-app-baseline.json",
+        "packages/gpui/preview/Cargo.toml",
         "docs/specs/042-gpui-multi-app-validation-target-matrix.md"
       ],
       "regressionClasses": [
@@ -138,8 +138,8 @@
         "bun run docs:build"
       ],
       "blockers": [
-        "The repo still lacks a mounted GPUI preview app and native acceptance routes comparable to the Svelte preview surface.",
-        "This suite now carries real GPUI package and parity evidence, but it is still artifact-backed rather than runnable downstream production proof.",
+        "The repo still lacks a mounted GPUI preview app with route-level acceptance coverage comparable to the Svelte preview surface.",
+        "This suite is still artifact-backed rather than runnable downstream production proof.",
         "Downstream GPUI adoption remains future work, so this suite should still be read as validation pressure rather than deployment readiness."
       ]
     }
@@ -161,9 +161,10 @@
       "scope": "public package exports, contract inventories, and README alignment",
       "primaryEvidence": [
         "docs/contracts/",
+        "packages/contracts/",
         "packages/svelte/primitives/",
         "packages/svelte/composites/",
-        "packages/svelte/workstation/"
+        "packages/svelte/icons-lucide/"
       ]
     },
     {
@@ -192,8 +193,8 @@
       "scope": "bridge boundaries, extension ownership, and app-specific surface isolation",
       "primaryEvidence": [
         "packages/bridges/underlay/ts/zero-leak-proof.ts",
-        "packages/svelte/workstation/loophole-foundation-proof.json",
-        "docs/specs/039-extension-sdk-composition-guidance-and-starter-package-baseline.md"
+        "docs/specs/039-extension-sdk-composition-guidance-and-starter-package-baseline.md",
+        "docs/specs/041-loophole-foundation-adoption-and-daw-extension-boundary.md"
       ]
     },
     {
@@ -211,9 +212,9 @@
       "label": "Runtime-specific GPUI assumptions",
       "scope": "native app validation pressure, GPUI-specific blockers, and non-browser evidence gaps",
       "primaryEvidence": [
-        "packages/gpui/tokens/multi-app-validation.json",
         "packages/gpui/cross-runtime-parity-report.json",
         "packages/gpui/native-accessibility-proof.json",
+        "packages/gpui/preview-app-baseline.json",
         "docs/specs/042-gpui-multi-app-validation-target-matrix.md"
       ]
     }

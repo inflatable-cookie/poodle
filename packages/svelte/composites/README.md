@@ -5,23 +5,53 @@ and data components.
 
 ## Public Surface
 
-- `Card`
-- `PageHeader`
+- `ActionDiscoveryPanel`
+- `AppHeader`
+- `AudioPlayer`
 - `Breadcrumbs`
-- `DetailShell`
-- `DetailSection`
-- `DetailRow`
-- `DataTable`
+- `BlockEditor`
 - `BulkActionBar`
-- `PaginationSummary`
+- `Card`
+- `CardRadioGroup`
+- `CommandPalette`
+- `ConfirmAction`
+- `DataTable`
+- `DetailRow`
+- `DetailSection`
+- `DetailShell`
+- `DockRegion`
+- `EditableList`
+- `EmbedInput`
+- `EmbedPreview`
+- `EmptyState`
 - `FilterToolbar`
-- `SelectionSummary`
+- `FormDialog`
+- `FormLayout`
+- `ListCard`
+- `LogList`
+- `MarkdownEditor`
+- `MediaPicker`
+- `MediaPreview`
+- `MediaThumbnail`
+- `MetricTile`
+- `NavCard`
+- `NavCardGrid`
+- `OrderBy`
+- `PageHeader`
+- `PageLoading`
+- `PaginationSummary`
 - `PickerShell`
 - `RelationPicker`
-- `MediaThumbnail`
-- `MediaPreview`
-- `EmptyState`
+- `ResizeHandle`
+- `ReorderableList`
+- `SelectionSummary`
+- `SlugField`
+- `SplitView`
+- `StatusBar`
 - `ToastStack`
+- `VideoPlayer`
+- `parseWorkspaceLayoutSnapshot`
+- `serializeWorkspaceLayoutSnapshot`
 - root import: `@flint/svelte-composites`
 - type-only import: `@flint/svelte-composites/types`
 
@@ -36,6 +66,6 @@ and data components.
 
 ## Next Task
 
-Use this package surface while following the direct-consumer and workstation
+Use this package surface while following the direct-consumer and shell-oriented
 onboarding lanes, keeping workflow orchestration host-owned and treating these
 composites as reusable shells rather than app templates.

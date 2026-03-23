@@ -5,40 +5,58 @@ Contract-backed Svelte primitive surface for the first generalized Flint baselin
 ## Public Surface
 
 - `Accordion`
-- `Banner`
-- `Badge`
+- `AlertDialog`
 - `Box`
+- `Breadcrumbs`
+- `BulkActionBar`
 - `Button`
 - `Callout`
 - `Calendar`
+- `Card`
 - `Checkbox`
+- `Code`
 - `Combobox`
+- `CollapseToggle`
 - `Collapsible`
+- `ColorPicker`
 - `ContextMenu`
 - `DatePicker`
 - `DateRangePicker`
 - `DateTimePicker`
 - `DateTimeRangePicker`
+- `DetailRow`
 - `Dialog`
 - `Drawer`
+- `DurationInput`
 - `EditableLabel`
+- `Eyebrow`
 - `Field`
+- `FieldSet`
+- `FileUpload`
 - `TextInput`
 - `TextArea`
 - `TimeField`
+- `TimeAgo`
 - `TimeZoneSelect`
 - `SearchField`
 - `FormActions`
 - `Grid`
 - `HoverCard`
+- `Icon`
 - `IconButton`
-- `Inline`
+- `IconProvider`
+- `ListCard`
+- `ListCardCounter`
 - `Meter`
 - `Menubar`
 - `Menu`
+- `NavCard`
+- `NavCardGrid`
 - `NavigationMenu`
 - `NumberEntry`
+- `OrderBy`
 - `Pagination`
+- `PaginationSummary`
 - `Pill`
 - `PinInput`
 - `Popover`
@@ -47,6 +65,8 @@ Contract-backed Svelte primitive surface for the first generalized Flint baselin
 - `Rating`
 - `RangeCalendar`
 - `RangeSlider`
+- `Region`
+- `ResizeHandle`
 - `ScrollShell`
 - `SegmentedControl`
 - `Select`
@@ -54,13 +74,14 @@ Contract-backed Svelte primitive surface for the first generalized Flint baselin
 - `Skeleton`
 - `Slider`
 - `Spacer`
+- `SplitButton`
 - `Stack`
+- `StatusBar`
 - `StatusIndicator`
 - `Surface`
 - `Switch`
 - `Table`
 - `Tabs`
-- `TabStrip`
 - `Toggle`
 - `ToggleGroup`
 - `Toolbar`
@@ -78,7 +99,7 @@ Contract-backed Svelte primitive surface for the first generalized Flint baselin
   built on rather than leaving composition to ad hoc container CSS
 - ship the documented overlay, menu, and navigation primitives so the
   foundation layer is complete enough to stop hiding missing primitives behind
-  composites or workstation shells
+  composites
 - add disclosure primitives that are especially useful in more web-oriented
   docs, settings, and marketing-adjacent surfaces without pushing them into
   higher layers by accident

@@ -13,3 +13,8 @@ flint-jetstream = { path = "../adapter" }
 jetstream-runtime = { path = "../../../../jetstream/crates/jetstream-runtime" }
 glam = "0.29"
 taffy = "0.9"
+
+[package.metadata.flint]
+public-intent = true
+channel = "preview"
+stability = "pre-release"

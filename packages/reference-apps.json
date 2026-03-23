@@ -10,7 +10,7 @@
         "@flint/svelte-tokens",
         "@flint/svelte-primitives",
         "@flint/svelte-composites",
-        "@flint/svelte-workstation"
+        "@flint/icons-lucide"
       ],
       "exampleSectionIds": [
         "catalog-hub",
@@ -20,14 +20,14 @@
       ],
       "onboardingSteps": [
         "Read the package and extension-SDK baselines before wiring imports.",
-        "Start from tokens, then primitives, then composites, then workstation shell only where needed.",
+        "Start from tokens, then primitives, then composites, and add icon packages only where they clarify the UI contract.",
         "Keep app-specific workflows, persistence, and orchestration outside the shared packages."
       ],
       "evidencePaths": [
         "docs/specs/039-extension-sdk-composition-guidance-and-starter-package-baseline.md",
         "packages/svelte/primitives/README.md",
         "packages/svelte/composites/README.md",
-        "packages/svelte/workstation/README.md"
+        "packages/svelte/icons-lucide/package.json"
       ],
       "blockers": [
         "This is a composition baseline, not a generated app template or proof of GPUI parity."
@@ -71,7 +71,7 @@
         "@flint/svelte-tokens",
         "@flint/svelte-primitives",
         "@flint/svelte-composites",
-        "@flint/svelte-workstation"
+        "@flint/icons-lucide"
       ],
       "exampleSectionIds": [
         "command-suite",
@@ -84,8 +84,8 @@
         "Treat GPUI workstation parity as an explicit adoption blocker, not an implied capability."
       ],
       "evidencePaths": [
-        "packages/svelte/workstation/loophole-foundation-proof.json",
-        "packages/svelte/workstation/README.md",
+        "packages/svelte/primitives/README.md",
+        "packages/svelte/composites/README.md",
         "docs/specs/041-loophole-foundation-adoption-and-daw-extension-boundary.md"
       ],
       "blockers": [
@@ -147,7 +147,7 @@
         "docs/specs/039-extension-sdk-composition-guidance-and-starter-package-baseline.md",
         "packages/svelte/primitives/README.md",
         "packages/svelte/composites/README.md",
-        "packages/svelte/workstation/README.md"
+        "packages/svelte/icons-lucide/package.json"
       ],
       "primaryReferenceShapeId": "direct-svelte-consumer",
       "nonGoals": [
@@ -172,7 +172,7 @@
       "id": "workstation-adoption",
       "label": "Workstation foundation adoption",
       "startPaths": [
-        "packages/svelte/workstation/README.md",
+        "packages/svelte/composites/README.md",
         "docs/specs/041-loophole-foundation-adoption-and-daw-extension-boundary.md"
       ],
       "primaryReferenceShapeId": "workstation-foundation-consumer",

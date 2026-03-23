@@ -15,3 +15,8 @@ flint-style = { path = "../../contracts/style" }
 flint-tokens = { path = "../../contracts/tokens" }
 taffy = "0.9"
 glam = "0.29"
+
+[package.metadata.flint]
+public-intent = true
+channel = "preview"
+stability = "pre-release"

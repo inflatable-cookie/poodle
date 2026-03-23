@@ -25,7 +25,7 @@
         "packages/tokens/schema/",
         "packages/tokens/artifacts/",
         "packages/svelte/tokens/",
-        "packages/gpui/tokens/"
+        "packages/contracts/tokens/"
       ]
     },
     {
@@ -34,7 +34,6 @@
       "evidencePaths": [
         "packages/svelte/primitives/",
         "packages/svelte/composites/",
-        "packages/svelte/workstation/",
         "docs/contracts/"
       ]
     },
@@ -54,7 +53,8 @@
       "label": "Underlay, Loophole, and extension-boundary proofs",
       "evidencePaths": [
         "packages/bridges/underlay/ts/zero-leak-proof.ts",
-        "packages/svelte/workstation/loophole-foundation-proof.json",
+        "packages/svelte/primitives/README.md",
+        "packages/svelte/composites/README.md",
         "docs/specs/039-extension-sdk-composition-guidance-and-starter-package-baseline.md",
         "docs/specs/040-underlay-bridge-zero-leak-adoption-proof-baseline.md",
         "docs/specs/041-loophole-foundation-adoption-and-daw-extension-boundary.md"

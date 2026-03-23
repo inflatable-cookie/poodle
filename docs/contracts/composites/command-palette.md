@@ -288,7 +288,7 @@ Uses `CommandActionItem` and `DiscoveryState` from `ActionDiscoveryPanel`.
   events which are mapped to palette events
 - ActionDiscoveryPanel is bound with `activeId` for two-way active tracking
 
-## 10. Specimen Definitions
+## 11. Specimen Definitions
 
 ### Command Palette
 

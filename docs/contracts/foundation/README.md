@@ -1,74 +1,98 @@
 # Foundation Contracts
 
 Status: active
-Updated: 2026-03-12
+Updated: 2026-03-23
 
 Foundation contracts define the lowest reusable surface in Flint.
 
 ## Current Contracts
 
 - `accordion.md`
+- `alert-dialog.md`
 - `box.md`
-- `stack.md`
-- `inline.md`
-- `grid.md`
-- `table.md`
-- `spacer.md`
-- `surface.md`
-- `separator.md`
-- `scroll-shell.md`
-- `calendar.md`
-- `range-calendar.md`
+- `breadcrumbs.md`
+- `bulk-action-bar.md`
 - `button.md`
-- `toggle.md`
-- `toggle-group.md`
-- `toolbar.md`
-- `icon-button.md`
+- `calendar.md`
+- `callout.md`
+- `card.md`
 - `checkbox.md`
-- `radio-group.md`
-- `switch.md`
-- `tri-state-switch.md`
-- `segmented-control.md`
-- `select.md`
-- `slider.md`
-- `range-slider.md`
-- `tabs.md`
-- `tab-strip.md`
-- `navigation-menu.md`
-- `menubar.md`
-- `menu.md`
-- `context-menu.md`
-- `hover-card.md`
-- `tooltip.md`
-- `popover.md`
-- `dialog.md`
-- `drawer.md`
-- `combobox.md`
+- `code.md`
+- `collapse-toggle.md`
 - `collapsible.md`
+- `color-picker.md`
+- `combobox.md`
+- `context-menu.md`
 - `date-picker.md`
 - `date-range-picker.md`
-- `time-field.md`
-- `time-zone-select.md`
 - `date-time-picker.md`
 - `date-time-range-picker.md`
-- `zoned-date-time-picker.md`
-- `text-input.md`
-- `field.md`
-- `form-actions.md`
-- `text-area.md`
-- `search-field.md`
+- `detail-row.md`
+- `dialog.md`
+- `drawer.md`
+- `duration-input.md`
 - `editable-label.md`
-- `number-entry.md`
-- `pin-input.md`
-- `pagination.md`
-- `progress.md`
+- `eyebrow.md`
+- `field.md`
+- `field-set.md`
+- `file-upload.md`
+- `form-actions.md`
+- `grid.md`
+- `hover-card.md`
+- `icon-button.md`
+- `icon-provider.md`
+- `icon.md`
+- `list-card-counter.md`
+- `list-card.md`
+- `menu.md`
+- `menubar.md`
 - `meter.md`
-- `rating.md`
-- `skeleton.md`
-- `badge.md`
+- `nav-card-grid.md`
+- `nav-card.md`
+- `navigation-menu.md`
+- `number-entry.md`
+- `order-by.md`
+- `pagination-summary.md`
+- `pagination.md`
 - `pill.md`
-- `callout.md`
+- `pin-input.md`
+- `popover.md`
+- `progress.md`
+- `radio-group.md`
+- `range-calendar.md`
+- `range-slider.md`
+- `rating.md`
+- `region.md`
+- `resize-handle.md`
+- `scroll-shell.md`
+- `search-field.md`
+- `segmented-control.md`
+- `select.md`
+- `separator.md`
+- `skeleton.md`
+- `slider.md`
+- `spacer.md`
+- `split-button.md`
+- `stack.md`
+- `status-bar.md`
 - `status-indicator.md`
+- `surface-elevation.md`
+- `surface.md`
+- `switch.md`
+- `tab-strip.md`
+- `table.md`
+- `tabs.md`
+- `text-area.md`
+- `text-input.md`
+- `time-ago.md`
+- `time-field.md`
+- `time-zone-select.md`
+- `toggle-group.md`
+- `toggle.md`
+- `toolbar.md`
+- `tooltip.md`
+- `tri-state-switch.md`
+- `zoned-date-time-picker.md`
 
 ## Accessibility Rule
 
@@ -77,13 +101,12 @@ they are mostly structural. In particular:
 
 - non-interactive layout primitives should stay accessibility-neutral by
   default
-- semantic surfaces should opt into region/landmark semantics explicitly
+- semantic surfaces should opt into region or landmark semantics explicitly
 - scroll containers must define keyboard reachability and focus behavior
 - GPUI implementations must preserve equivalent semantics through native
   accessibility APIs where ARIA is not available
 
 ## Next Task
 
-Use this expanded foundation surface while deciding which wider substrate
-families still deserve promotion into first-class contracts, with disclosure
-now explicit and deeper integration ownership still open.
+Keep this index aligned with the actual contract files whenever primitives are
+added, promoted, or renamed so docs lint stays authoritative.

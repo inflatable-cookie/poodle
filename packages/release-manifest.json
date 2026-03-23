@@ -40,42 +40,10 @@
       "channel": "preview"
     },
     {
-      "name": "@flint/svelte-workstation",
-      "path": "packages/svelte/workstation",
+      "name": "@flint/icons-lucide",
+      "path": "packages/svelte/icons-lucide",
       "kind": "runtime-package",
       "language": "typescript",
-      "publicIntent": true,
-      "channel": "preview"
-    },
-    {
-      "name": "flint-gpui-tokens",
-      "path": "packages/gpui/tokens",
-      "kind": "runtime-package",
-      "language": "rust",
-      "publicIntent": true,
-      "channel": "preview"
-    },
-    {
-      "name": "flint-gpui-primitives",
-      "path": "packages/gpui/primitives",
-      "kind": "runtime-package",
-      "language": "rust",
-      "publicIntent": true,
-      "channel": "preview"
-    },
-    {
-      "name": "flint-gpui-composites",
-      "path": "packages/gpui/composites",
-      "kind": "runtime-package",
-      "language": "rust",
-      "publicIntent": true,
-      "channel": "preview"
-    },
-    {
-      "name": "flint-gpui-workstation",
-      "path": "packages/gpui/workstation",
-      "kind": "runtime-package",
-      "language": "rust",
       "publicIntent": true,
       "channel": "preview"
     },
@@ -94,6 +62,118 @@
       "language": "typescript",
       "publicIntent": false,
       "channel": "internal"
+    },
+    {
+      "name": "flint-adapter",
+      "path": "packages/contracts/adapter",
+      "kind": "contract-crate",
+      "language": "rust",
+      "publicIntent": true,
+      "channel": "preview"
+    },
+    {
+      "name": "flint-composites",
+      "path": "packages/contracts/composites",
+      "kind": "contract-crate",
+      "language": "rust",
+      "publicIntent": true,
+      "channel": "preview"
+    },
+    {
+      "name": "flint-events",
+      "path": "packages/contracts/events",
+      "kind": "contract-crate",
+      "language": "rust",
+      "publicIntent": true,
+      "channel": "preview"
+    },
+    {
+      "name": "flint-layout",
+      "path": "packages/contracts/layout",
+      "kind": "contract-crate",
+      "language": "rust",
+      "publicIntent": true,
+      "channel": "preview"
+    },
+    {
+      "name": "flint-primitives",
+      "path": "packages/contracts/primitives",
+      "kind": "contract-crate",
+      "language": "rust",
+      "publicIntent": true,
+      "channel": "preview"
+    },
+    {
+      "name": "flint-style",
+      "path": "packages/contracts/style",
+      "kind": "contract-crate",
+      "language": "rust",
+      "publicIntent": true,
+      "channel": "preview"
+    },
+    {
+      "name": "flint-tokens",
+      "path": "packages/contracts/tokens",
+      "kind": "contract-crate",
+      "language": "rust",
+      "publicIntent": true,
+      "channel": "preview"
+    },
+    {
+      "name": "flint-workstation",
+      "path": "packages/contracts/workstation",
+      "kind": "contract-crate",
+      "language": "rust",
+      "publicIntent": true,
+      "channel": "preview"
+    },
+    {
+      "name": "flint-gpui",
+      "path": "packages/gpui/adapter",
+      "kind": "renderer-adapter",
+      "language": "rust",
+      "publicIntent": true,
+      "channel": "preview"
+    },
+    {
+      "name": "flint-gpui-components",
+      "path": "packages/gpui/components",
+      "kind": "renderer-components",
+      "language": "rust",
+      "publicIntent": true,
+      "channel": "preview"
+    },
+    {
+      "name": "flint-gpui-preview",
+      "path": "packages/gpui/preview",
+      "kind": "native-preview",
+      "language": "rust",
+      "publicIntent": true,
+      "channel": "preview"
+    },
+    {
+      "name": "flint-jetstream",
+      "path": "packages/jetstream/adapter",
+      "kind": "renderer-adapter",
+      "language": "rust",
+      "publicIntent": true,
+      "channel": "preview"
+    },
+    {
+      "name": "flint-jetstream-components",
+      "path": "packages/jetstream/components",
+      "kind": "renderer-components",
+      "language": "rust",
+      "publicIntent": true,
+      "channel": "preview"
+    },
+    {
+      "name": "flint-jetstream-preview",
+      "path": "packages/jetstream/preview",
+      "kind": "native-preview",
+      "language": "rust",
+      "publicIntent": true,
+      "channel": "preview"
     }
   ]
 }

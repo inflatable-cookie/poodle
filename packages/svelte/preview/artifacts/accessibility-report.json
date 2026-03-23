@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-03-13T21:06:13.706Z",
+  "generatedAt": "2026-03-23T18:27:29.573Z",
   "artifact": "packages/svelte/preview/artifacts/accessibility-report.json",
   "previewBasePath": "/",
   "automatedBoundary": [
@@ -520,9 +520,9 @@
     {
       "sectionId": "command-suite",
       "title": "Palette search, grouped actions, and inline rediscovery",
-      "layer": "workstation",
-      "packageName": "@flint/svelte-workstation",
-      "contractRoot": "docs/contracts/workstation/",
+      "layer": "composites",
+      "packageName": "@flint/svelte-composites",
+      "contractRoot": "docs/contracts/composites/",
       "summary": "Modal and inline command discovery with grouped results, focus containment, and keyboard movement.",
       "auditAreas": {
         "semantics": "hybrid",
@@ -577,9 +577,9 @@
     {
       "sectionId": "workspace-suite",
       "title": "Headers, dock orchestration, and workspace shell posture",
-      "layer": "workstation",
-      "packageName": "@flint/svelte-workstation",
-      "contractRoot": "docs/contracts/workstation/",
+      "layer": "composites",
+      "packageName": "@flint/svelte-composites",
+      "contractRoot": "docs/contracts/composites/",
       "summary": "App and project headers, docks, tabs, split views, and host-owned layout snapshots.",
       "auditAreas": {
         "semantics": "hybrid",

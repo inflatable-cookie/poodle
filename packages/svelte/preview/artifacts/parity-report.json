@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-03-13T21:06:13.673Z",
+  "generatedAt": "2026-03-23T18:27:29.542Z",
   "artifact": "packages/svelte/preview/artifacts/parity-report.json",
   "previewBasePath": "/",
   "automatedBoundary": [
@@ -30,15 +30,22 @@
     }
   },
   "crossRuntime": {
-    "generation": "g04.011",
+    "generation": "g09.018",
     "summary": {
-      "sectionCount": 9,
-      "directParityCount": 5,
+      "sectionCount": 13,
+      "directParityCount": 9,
       "nativeAdaptationCount": 4,
       "deferredCount": 0,
-      "sideBySideSectionCount": 8,
-      "manualGpuiProofCount": 9,
-      "blockedGpuiProofCount": 0
+      "sideBySideSectionCount": 12,
+      "manualGpuiProofCount": 0,
+      "blockedGpuiProofCount": 0,
+      "componentExports": 96,
+      "primitiveSpecs": 64,
+      "compositeSpecs": 17,
+      "workstationSpecs": 15,
+      "specimenFiles": 73,
+      "registryEntries": 113,
+      "cratesBuildClean": true
     },
     "sideBySideSections": [
       {
@@ -139,7 +146,7 @@
     ],
     "acceptanceHarness": {
       "suiteId": "gpui-target-matrix",
-      "status": "matrix-only",
+      "status": "preview-backed",
       "coveredPackages": [
         "flint-gpui-tokens",
         "flint-gpui-primitives",
@@ -162,8 +169,6 @@
         "bun run docs:build"
       ],
       "blockers": [
-        "The repo still lacks a mounted GPUI preview app and native acceptance routes comparable to the Svelte preview surface.",
-        "This suite now carries real GPUI package and parity evidence, but it is still artifact-backed rather than runnable downstream production proof.",
         "Downstream GPUI adoption remains future work, so this suite should still be read as validation pressure rather than deployment readiness."
       ]
     }
@@ -172,67 +177,158 @@
     "summary": [
       {
         "packageName": "@flint/svelte-primitives",
-        "exportCount": 63,
-        "componentCount": 63,
+        "exportCount": 84,
+        "componentCount": 84,
         "helperCount": 0,
-        "previewedCount": 63,
+        "previewedCount": 84,
         "contractOnlyCount": 0
       },
       {
         "packageName": "@flint/svelte-composites",
-        "exportCount": 20,
-        "componentCount": 20,
-        "helperCount": 0,
-        "previewedCount": 20,
+        "exportCount": 47,
+        "componentCount": 34,
+        "helperCount": 13,
+        "previewedCount": 47,
         "contractOnlyCount": 0
       },
       {
-        "packageName": "@flint/svelte-workstation",
-        "exportCount": 14,
-        "componentCount": 12,
-        "helperCount": 2,
-        "previewedCount": 14,
+        "packageName": "@flint/svelte-composites",
+        "exportCount": 47,
+        "componentCount": 34,
+        "helperCount": 13,
+        "previewedCount": 47,
         "contractOnlyCount": 0
       }
     ],
     "exports": [
       {
         "packageName": "@flint/svelte-composites",
-        "exportName": "Breadcrumbs",
+        "exportName": "ActionDiscoveryPanel",
         "kind": "component",
         "status": "previewed",
-        "note": "Detail suite exercises readonly hierarchy, navigation, and card summaries.",
+        "note": "Grouped action list and command palette for keyboard-driven command discovery.",
         "sectionIds": [
-          "detail-suite"
+          "command-suite"
         ],
         "sectionTitles": [
-          "Detail display, cards, headers, and navigation"
+          "Palette search, grouped actions, and inline rediscovery"
+        ]
+      },
+      {
+        "packageName": "@flint/svelte-composites",
+        "exportName": "AppHeader",
+        "kind": "component",
+        "status": "previewed",
+        "note": "Workspace suite exercises shell hierarchy, docking, split layout, and header posture.",
+        "sectionIds": [
+          "workspace-suite"
+        ],
+        "sectionTitles": [
+          "Headers, dock orchestration, and workspace shell posture"
+        ]
+      },
+      {
+        "packageName": "@flint/svelte-composites",
+        "exportName": "AudioPlayer",
+        "kind": "component",
+        "status": "previewed",
+        "note": "The catalogue covers the remaining composite exports outside the main suite-specific groupings.",
+        "sectionIds": [
+          "catalog-hub"
+        ],
+        "sectionTitles": [
+          "Catalog hub"
+        ]
+      },
+      {
+        "packageName": "@flint/svelte-composites",
+        "exportName": "BlockEditor",
+        "kind": "component",
+        "status": "previewed",
+        "note": "The catalogue covers the remaining composite exports outside the main suite-specific groupings.",
+        "sectionIds": [
+          "catalog-hub"
+        ],
+        "sectionTitles": [
+          "Catalog hub"
+        ]
+      },
+      {
+        "packageName": "@flint/svelte-composites",
+        "exportName": "Breadcrumbs",
+        "kind": "helper",
+        "status": "previewed",
+        "note": "Composite package helper re-exports remain reviewable through the catalogue and suite surfaces.",
+        "sectionIds": [
+          "catalog-hub"
+        ],
+        "sectionTitles": [
+          "Catalog hub"
         ]
       },
       {
         "packageName": "@flint/svelte-composites",
         "exportName": "BulkActionBar",
-        "kind": "component",
+        "kind": "helper",
         "status": "previewed",
-        "note": "Table suite exercises structured data, selection, and pagination posture.",
+        "note": "Composite package helper re-exports remain reviewable through the catalogue and suite surfaces.",
         "sectionIds": [
-          "table-suite"
+          "catalog-hub"
         ],
         "sectionTitles": [
-          "Selection, sorting, and bulk actions"
+          "Catalog hub"
         ]
       },
       {
         "packageName": "@flint/svelte-composites",
         "exportName": "Card",
-        "kind": "component",
+        "kind": "helper",
         "status": "previewed",
-        "note": "Detail suite exercises readonly hierarchy, navigation, and card summaries.",
+        "note": "Composite package helper re-exports remain reviewable through the catalogue and suite surfaces.",
         "sectionIds": [
-          "detail-suite"
+          "catalog-hub"
         ],
         "sectionTitles": [
-          "Detail display, cards, headers, and navigation"
+          "Catalog hub"
+        ]
+      },
+      {
+        "packageName": "@flint/svelte-composites",
+        "exportName": "CardRadioGroup",
+        "kind": "component",
+        "status": "previewed",
+        "note": "The catalogue covers the remaining composite exports outside the main suite-specific groupings.",
+        "sectionIds": [
+          "catalog-hub"
+        ],
+        "sectionTitles": [
+          "Catalog hub"
+        ]
+      },
+      {
+        "packageName": "@flint/svelte-composites",
+        "exportName": "CommandPalette",
+        "kind": "component",
+        "status": "previewed",
+        "note": "Grouped action list and command palette for keyboard-driven command discovery.",
+        "sectionIds": [
+          "command-suite"
+        ],
+        "sectionTitles": [
+          "Palette search, grouped actions, and inline rediscovery"
+        ]
+      },
+      {
+        "packageName": "@flint/svelte-composites",
+        "exportName": "ConfirmAction",
+        "kind": "component",
+        "status": "previewed",
+        "note": "The catalogue covers the remaining composite exports outside the main suite-specific groupings.",
+        "sectionIds": [
+          "catalog-hub"
+        ],
+        "sectionTitles": [
+          "Catalog hub"
         ]
       },
       {
@@ -251,14 +347,14 @@
       {
         "packageName": "@flint/svelte-composites",
         "exportName": "DetailRow",
-        "kind": "component",
+        "kind": "helper",
         "status": "previewed",
-        "note": "Detail suite exercises readonly hierarchy, navigation, and card summaries.",
+        "note": "Composite package helper re-exports remain reviewable through the catalogue and suite surfaces.",
         "sectionIds": [
-          "detail-suite"
+          "catalog-hub"
         ],
         "sectionTitles": [
-          "Detail display, cards, headers, and navigation"
+          "Catalog hub"
         ]
       },
       {
@@ -266,7 +362,7 @@
         "exportName": "DetailSection",
         "kind": "component",
         "status": "previewed",
-        "note": "Detail suite exercises readonly hierarchy, navigation, and card summaries.",
+        "note": "Detail suite exercises readonly hierarchy, navigation, and card-summary composite posture.",
         "sectionIds": [
           "detail-suite"
         ],
@@ -279,12 +375,64 @@
         "exportName": "DetailShell",
         "kind": "component",
         "status": "previewed",
-        "note": "Detail suite exercises readonly hierarchy, navigation, and card summaries.",
+        "note": "Detail suite exercises readonly hierarchy, navigation, and card-summary composite posture.",
         "sectionIds": [
           "detail-suite"
         ],
         "sectionTitles": [
           "Detail display, cards, headers, and navigation"
+        ]
+      },
+      {
+        "packageName": "@flint/svelte-composites",
+        "exportName": "DockRegion",
+        "kind": "component",
+        "status": "previewed",
+        "note": "Workspace suite exercises shell hierarchy, docking, split layout, and header posture.",
+        "sectionIds": [
+          "workspace-suite"
+        ],
+        "sectionTitles": [
+          "Headers, dock orchestration, and workspace shell posture"
+        ]
+      },
+      {
+        "packageName": "@flint/svelte-composites",
+        "exportName": "EditableList",
+        "kind": "component",
+        "status": "previewed",
+        "note": "The catalogue covers the remaining composite exports outside the main suite-specific groupings.",
+        "sectionIds": [
+          "catalog-hub"
+        ],
+        "sectionTitles": [
+          "Catalog hub"
+        ]
+      },
+      {
+        "packageName": "@flint/svelte-composites",
+        "exportName": "EmbedInput",
+        "kind": "component",
+        "status": "previewed",
+        "note": "The catalogue covers the remaining composite exports outside the main suite-specific groupings.",
+        "sectionIds": [
+          "catalog-hub"
+        ],
+        "sectionTitles": [
+          "Catalog hub"
+        ]
+      },
+      {
+        "packageName": "@flint/svelte-composites",
+        "exportName": "EmbedPreview",
+        "kind": "component",
+        "status": "previewed",
+        "note": "The catalogue covers the remaining composite exports outside the main suite-specific groupings.",
+        "sectionIds": [
+          "catalog-hub"
+        ],
+        "sectionTitles": [
+          "Catalog hub"
         ]
       },
       {
@@ -315,6 +463,84 @@
       },
       {
         "packageName": "@flint/svelte-composites",
+        "exportName": "FormDialog",
+        "kind": "component",
+        "status": "previewed",
+        "note": "The catalogue covers the remaining composite exports outside the main suite-specific groupings.",
+        "sectionIds": [
+          "catalog-hub"
+        ],
+        "sectionTitles": [
+          "Catalog hub"
+        ]
+      },
+      {
+        "packageName": "@flint/svelte-composites",
+        "exportName": "FormLayout",
+        "kind": "component",
+        "status": "previewed",
+        "note": "The catalogue covers the remaining composite exports outside the main suite-specific groupings.",
+        "sectionIds": [
+          "catalog-hub"
+        ],
+        "sectionTitles": [
+          "Catalog hub"
+        ]
+      },
+      {
+        "packageName": "@flint/svelte-composites",
+        "exportName": "ListCard",
+        "kind": "helper",
+        "status": "previewed",
+        "note": "Composite package helper re-exports remain reviewable through the catalogue and suite surfaces.",
+        "sectionIds": [
+          "catalog-hub"
+        ],
+        "sectionTitles": [
+          "Catalog hub"
+        ]
+      },
+      {
+        "packageName": "@flint/svelte-composites",
+        "exportName": "LogList",
+        "kind": "component",
+        "status": "previewed",
+        "note": "The catalogue covers the remaining composite exports outside the main suite-specific groupings.",
+        "sectionIds": [
+          "catalog-hub"
+        ],
+        "sectionTitles": [
+          "Catalog hub"
+        ]
+      },
+      {
+        "packageName": "@flint/svelte-composites",
+        "exportName": "MarkdownEditor",
+        "kind": "component",
+        "status": "previewed",
+        "note": "The catalogue covers the remaining composite exports outside the main suite-specific groupings.",
+        "sectionIds": [
+          "catalog-hub"
+        ],
+        "sectionTitles": [
+          "Catalog hub"
+        ]
+      },
+      {
+        "packageName": "@flint/svelte-composites",
+        "exportName": "MediaPicker",
+        "kind": "component",
+        "status": "previewed",
+        "note": "The catalogue covers the remaining composite exports outside the main suite-specific groupings.",
+        "sectionIds": [
+          "catalog-hub"
+        ],
+        "sectionTitles": [
+          "Catalog hub"
+        ]
+      },
+      {
+        "packageName": "@flint/svelte-composites",
         "exportName": "MediaPreview",
         "kind": "component",
         "status": "previewed",
@@ -341,10 +567,62 @@
       },
       {
         "packageName": "@flint/svelte-composites",
+        "exportName": "MetricTile",
+        "kind": "component",
+        "status": "previewed",
+        "note": "The catalogue covers the remaining composite exports outside the main suite-specific groupings.",
+        "sectionIds": [
+          "catalog-hub"
+        ],
+        "sectionTitles": [
+          "Catalog hub"
+        ]
+      },
+      {
+        "packageName": "@flint/svelte-composites",
+        "exportName": "NavCard",
+        "kind": "helper",
+        "status": "previewed",
+        "note": "Composite package helper re-exports remain reviewable through the catalogue and suite surfaces.",
+        "sectionIds": [
+          "catalog-hub"
+        ],
+        "sectionTitles": [
+          "Catalog hub"
+        ]
+      },
+      {
+        "packageName": "@flint/svelte-composites",
+        "exportName": "NavCardGrid",
+        "kind": "helper",
+        "status": "previewed",
+        "note": "Composite package helper re-exports remain reviewable through the catalogue and suite surfaces.",
+        "sectionIds": [
+          "catalog-hub"
+        ],
+        "sectionTitles": [
+          "Catalog hub"
+        ]
+      },
+      {
+        "packageName": "@flint/svelte-composites",
+        "exportName": "OrderBy",
+        "kind": "helper",
+        "status": "previewed",
+        "note": "Composite package helper re-exports remain reviewable through the catalogue and suite surfaces.",
+        "sectionIds": [
+          "catalog-hub"
+        ],
+        "sectionTitles": [
+          "Catalog hub"
+        ]
+      },
+      {
+        "packageName": "@flint/svelte-composites",
         "exportName": "PageHeader",
         "kind": "component",
         "status": "previewed",
-        "note": "Detail suite exercises readonly hierarchy, navigation, and card summaries.",
+        "note": "Detail suite exercises readonly hierarchy, navigation, and card-summary composite posture.",
         "sectionIds": [
           "detail-suite"
         ],
@@ -354,15 +632,41 @@
       },
       {
         "packageName": "@flint/svelte-composites",
-        "exportName": "PaginationSummary",
+        "exportName": "PageLoading",
         "kind": "component",
         "status": "previewed",
-        "note": "Table suite exercises structured data, selection, and pagination posture.",
+        "note": "The catalogue covers the remaining composite exports outside the main suite-specific groupings.",
         "sectionIds": [
-          "table-suite"
+          "catalog-hub"
         ],
         "sectionTitles": [
-          "Selection, sorting, and bulk actions"
+          "Catalog hub"
+        ]
+      },
+      {
+        "packageName": "@flint/svelte-composites",
+        "exportName": "PaginationSummary",
+        "kind": "helper",
+        "status": "previewed",
+        "note": "Composite package helper re-exports remain reviewable through the catalogue and suite surfaces.",
+        "sectionIds": [
+          "catalog-hub"
+        ],
+        "sectionTitles": [
+          "Catalog hub"
+        ]
+      },
+      {
+        "packageName": "@flint/svelte-composites",
+        "exportName": "parseWorkspaceLayoutSnapshot",
+        "kind": "helper",
+        "status": "previewed",
+        "note": "Workspace suite exercises public layout snapshot round-tripping through the shell state review surface.",
+        "sectionIds": [
+          "workspace-suite"
+        ],
+        "sectionTitles": [
+          "Headers, dock orchestration, and workspace shell posture"
         ]
       },
       {
@@ -397,6 +701,32 @@
       },
       {
         "packageName": "@flint/svelte-composites",
+        "exportName": "ReorderableList",
+        "kind": "component",
+        "status": "previewed",
+        "note": "The catalogue covers the remaining composite exports outside the main suite-specific groupings.",
+        "sectionIds": [
+          "catalog-hub"
+        ],
+        "sectionTitles": [
+          "Catalog hub"
+        ]
+      },
+      {
+        "packageName": "@flint/svelte-composites",
+        "exportName": "ResizeHandle",
+        "kind": "helper",
+        "status": "previewed",
+        "note": "Composite package helper re-exports remain reviewable through the catalogue and suite surfaces.",
+        "sectionIds": [
+          "catalog-hub"
+        ],
+        "sectionTitles": [
+          "Catalog hub"
+        ]
+      },
+      {
+        "packageName": "@flint/svelte-composites",
         "exportName": "SelectionSummary",
         "kind": "component",
         "status": "previewed",
@@ -408,6 +738,58 @@
         "sectionTitles": [
           "Picker, relation, and selection workflows",
           "Detail display, cards, headers, and navigation"
+        ]
+      },
+      {
+        "packageName": "@flint/svelte-composites",
+        "exportName": "serializeWorkspaceLayoutSnapshot",
+        "kind": "helper",
+        "status": "previewed",
+        "note": "Workspace suite exercises public layout snapshot round-tripping through the shell state review surface.",
+        "sectionIds": [
+          "workspace-suite"
+        ],
+        "sectionTitles": [
+          "Headers, dock orchestration, and workspace shell posture"
+        ]
+      },
+      {
+        "packageName": "@flint/svelte-composites",
+        "exportName": "SlugField",
+        "kind": "component",
+        "status": "previewed",
+        "note": "The catalogue covers the remaining composite exports outside the main suite-specific groupings.",
+        "sectionIds": [
+          "catalog-hub"
+        ],
+        "sectionTitles": [
+          "Catalog hub"
+        ]
+      },
+      {
+        "packageName": "@flint/svelte-composites",
+        "exportName": "SplitView",
+        "kind": "component",
+        "status": "previewed",
+        "note": "Workspace suite exercises shell hierarchy, docking, split layout, and header posture.",
+        "sectionIds": [
+          "workspace-suite"
+        ],
+        "sectionTitles": [
+          "Headers, dock orchestration, and workspace shell posture"
+        ]
+      },
+      {
+        "packageName": "@flint/svelte-composites",
+        "exportName": "StatusBar",
+        "kind": "helper",
+        "status": "previewed",
+        "note": "Composite package helper re-exports remain reviewable through the catalogue and suite surfaces.",
+        "sectionIds": [
+          "catalog-hub"
+        ],
+        "sectionTitles": [
+          "Catalog hub"
         ]
       },
       {
@@ -424,11 +806,24 @@
         ]
       },
       {
+        "packageName": "@flint/svelte-composites",
+        "exportName": "VideoPlayer",
+        "kind": "component",
+        "status": "previewed",
+        "note": "The catalogue covers the remaining composite exports outside the main suite-specific groupings.",
+        "sectionIds": [
+          "catalog-hub"
+        ],
+        "sectionTitles": [
+          "Catalog hub"
+        ]
+      },
+      {
         "packageName": "@flint/svelte-primitives",
         "exportName": "Accordion",
         "kind": "component",
         "status": "previewed",
-        "note": "The docs shell and shared demo navigation exercise foundational disclosure, control, and chip primitives directly instead of custom shell-only controls.",
+        "note": "Foundational disclosure, control, and chip primitives exercised directly in catalogue specimens.",
         "sectionIds": [
           "catalog-hub"
         ],
@@ -438,28 +833,15 @@
       },
       {
         "packageName": "@flint/svelte-primitives",
-        "exportName": "Badge",
+        "exportName": "AlertDialog",
         "kind": "component",
         "status": "previewed",
-        "note": "The rebuilt shared demo now includes a dedicated primitive coverage deck so every public primitive export is directly reviewable from the parity target shell.",
+        "note": "Every public primitive export is directly reviewable from the catalogue.",
         "sectionIds": [
           "catalog-hub"
         ],
         "sectionTitles": [
           "Catalog hub"
-        ]
-      },
-      {
-        "packageName": "@flint/svelte-primitives",
-        "exportName": "Banner",
-        "kind": "component",
-        "status": "previewed",
-        "note": "The rebuilt shell now exercises shared feedback, menu, and toolbar primitives through the notification-facing shared demo route.",
-        "sectionIds": [
-          "notification-suite"
-        ],
-        "sectionTitles": [
-          "Banners, toasts, skeletons, and remediation"
         ]
       },
       {
@@ -467,7 +849,33 @@
         "exportName": "Box",
         "kind": "component",
         "status": "previewed",
-        "note": "The rebuilt shared demo now includes a dedicated primitive coverage deck so every public primitive export is directly reviewable from the parity target shell.",
+        "note": "Every public primitive export is directly reviewable from the catalogue.",
+        "sectionIds": [
+          "catalog-hub"
+        ],
+        "sectionTitles": [
+          "Catalog hub"
+        ]
+      },
+      {
+        "packageName": "@flint/svelte-primitives",
+        "exportName": "Breadcrumbs",
+        "kind": "component",
+        "status": "previewed",
+        "note": "Every public primitive export is directly reviewable from the catalogue.",
+        "sectionIds": [
+          "catalog-hub"
+        ],
+        "sectionTitles": [
+          "Catalog hub"
+        ]
+      },
+      {
+        "packageName": "@flint/svelte-primitives",
+        "exportName": "BulkActionBar",
+        "kind": "component",
+        "status": "previewed",
+        "note": "Every public primitive export is directly reviewable from the catalogue.",
         "sectionIds": [
           "catalog-hub"
         ],
@@ -480,7 +888,7 @@
         "exportName": "Button",
         "kind": "component",
         "status": "previewed",
-        "note": "The docs shell and shared demo navigation exercise foundational disclosure, control, and chip primitives directly instead of custom shell-only controls.",
+        "note": "Foundational disclosure, control, and chip primitives exercised directly in catalogue specimens.",
         "sectionIds": [
           "catalog-hub"
         ],
@@ -493,7 +901,7 @@
         "exportName": "Calendar",
         "kind": "component",
         "status": "previewed",
-        "note": "The rebuilt shared demo now includes a dedicated primitive coverage deck so every public primitive export is directly reviewable from the parity target shell.",
+        "note": "Every public primitive export is directly reviewable from the catalogue.",
         "sectionIds": [
           "catalog-hub"
         ],
@@ -516,10 +924,49 @@
       },
       {
         "packageName": "@flint/svelte-primitives",
+        "exportName": "Card",
+        "kind": "component",
+        "status": "previewed",
+        "note": "Every public primitive export is directly reviewable from the catalogue.",
+        "sectionIds": [
+          "catalog-hub"
+        ],
+        "sectionTitles": [
+          "Catalog hub"
+        ]
+      },
+      {
+        "packageName": "@flint/svelte-primitives",
         "exportName": "Checkbox",
         "kind": "component",
         "status": "previewed",
-        "note": "The docs shell and shared demo navigation exercise foundational disclosure, control, and chip primitives directly instead of custom shell-only controls.",
+        "note": "Foundational disclosure, control, and chip primitives exercised directly in catalogue specimens.",
+        "sectionIds": [
+          "catalog-hub"
+        ],
+        "sectionTitles": [
+          "Catalog hub"
+        ]
+      },
+      {
+        "packageName": "@flint/svelte-primitives",
+        "exportName": "Code",
+        "kind": "component",
+        "status": "previewed",
+        "note": "Every public primitive export is directly reviewable from the catalogue.",
+        "sectionIds": [
+          "catalog-hub"
+        ],
+        "sectionTitles": [
+          "Catalog hub"
+        ]
+      },
+      {
+        "packageName": "@flint/svelte-primitives",
+        "exportName": "CollapseToggle",
+        "kind": "component",
+        "status": "previewed",
+        "note": "Every public primitive export is directly reviewable from the catalogue.",
         "sectionIds": [
           "catalog-hub"
         ],
@@ -532,7 +979,20 @@
         "exportName": "Collapsible",
         "kind": "component",
         "status": "previewed",
-        "note": "The docs shell and shared demo navigation exercise foundational disclosure, control, and chip primitives directly instead of custom shell-only controls.",
+        "note": "Foundational disclosure, control, and chip primitives exercised directly in catalogue specimens.",
+        "sectionIds": [
+          "catalog-hub"
+        ],
+        "sectionTitles": [
+          "Catalog hub"
+        ]
+      },
+      {
+        "packageName": "@flint/svelte-primitives",
+        "exportName": "ColorPicker",
+        "kind": "component",
+        "status": "previewed",
+        "note": "Every public primitive export is directly reviewable from the catalogue.",
         "sectionIds": [
           "catalog-hub"
         ],
@@ -545,7 +1005,7 @@
         "exportName": "Combobox",
         "kind": "component",
         "status": "previewed",
-        "note": "The rebuilt shared demo now includes a dedicated primitive coverage deck so every public primitive export is directly reviewable from the parity target shell.",
+        "note": "Every public primitive export is directly reviewable from the catalogue.",
         "sectionIds": [
           "catalog-hub"
         ],
@@ -558,7 +1018,7 @@
         "exportName": "ContextMenu",
         "kind": "component",
         "status": "previewed",
-        "note": "The rebuilt shared demo now includes a dedicated primitive coverage deck so every public primitive export is directly reviewable from the parity target shell.",
+        "note": "Every public primitive export is directly reviewable from the catalogue.",
         "sectionIds": [
           "catalog-hub"
         ],
@@ -584,7 +1044,7 @@
         "exportName": "DateRangePicker",
         "kind": "component",
         "status": "previewed",
-        "note": "The rebuilt shared demo now includes a dedicated primitive coverage deck so every public primitive export is directly reviewable from the parity target shell.",
+        "note": "Every public primitive export is directly reviewable from the catalogue.",
         "sectionIds": [
           "catalog-hub"
         ],
@@ -597,7 +1057,7 @@
         "exportName": "DateTimePicker",
         "kind": "component",
         "status": "previewed",
-        "note": "The rebuilt shared demo now includes a dedicated primitive coverage deck so every public primitive export is directly reviewable from the parity target shell.",
+        "note": "Every public primitive export is directly reviewable from the catalogue.",
         "sectionIds": [
           "catalog-hub"
         ],
@@ -610,7 +1070,20 @@
         "exportName": "DateTimeRangePicker",
         "kind": "component",
         "status": "previewed",
-        "note": "The rebuilt shared demo now includes a dedicated primitive coverage deck so every public primitive export is directly reviewable from the parity target shell.",
+        "note": "Every public primitive export is directly reviewable from the catalogue.",
+        "sectionIds": [
+          "catalog-hub"
+        ],
+        "sectionTitles": [
+          "Catalog hub"
+        ]
+      },
+      {
+        "packageName": "@flint/svelte-primitives",
+        "exportName": "DetailRow",
+        "kind": "component",
+        "status": "previewed",
+        "note": "Every public primitive export is directly reviewable from the catalogue.",
         "sectionIds": [
           "catalog-hub"
         ],
@@ -636,7 +1109,20 @@
         "exportName": "Drawer",
         "kind": "component",
         "status": "previewed",
-        "note": "The shared demo target now visibly adopts additional workflow and overlay primitives even when no single legacy docs section owns them cleanly.",
+        "note": "Additional workflow and overlay primitives previewed in catalogue specimens.",
+        "sectionIds": [
+          "catalog-hub"
+        ],
+        "sectionTitles": [
+          "Catalog hub"
+        ]
+      },
+      {
+        "packageName": "@flint/svelte-primitives",
+        "exportName": "DurationInput",
+        "kind": "component",
+        "status": "previewed",
+        "note": "Every public primitive export is directly reviewable from the catalogue.",
         "sectionIds": [
           "catalog-hub"
         ],
@@ -649,7 +1135,20 @@
         "exportName": "EditableLabel",
         "kind": "component",
         "status": "previewed",
-        "note": "The rebuilt shared demo now includes a dedicated primitive coverage deck so every public primitive export is directly reviewable from the parity target shell.",
+        "note": "Every public primitive export is directly reviewable from the catalogue.",
+        "sectionIds": [
+          "catalog-hub"
+        ],
+        "sectionTitles": [
+          "Catalog hub"
+        ]
+      },
+      {
+        "packageName": "@flint/svelte-primitives",
+        "exportName": "Eyebrow",
+        "kind": "component",
+        "status": "previewed",
+        "note": "Every public primitive export is directly reviewable from the catalogue.",
         "sectionIds": [
           "catalog-hub"
         ],
@@ -672,6 +1171,32 @@
       },
       {
         "packageName": "@flint/svelte-primitives",
+        "exportName": "FieldSet",
+        "kind": "component",
+        "status": "previewed",
+        "note": "Every public primitive export is directly reviewable from the catalogue.",
+        "sectionIds": [
+          "catalog-hub"
+        ],
+        "sectionTitles": [
+          "Catalog hub"
+        ]
+      },
+      {
+        "packageName": "@flint/svelte-primitives",
+        "exportName": "FileUpload",
+        "kind": "component",
+        "status": "previewed",
+        "note": "Every public primitive export is directly reviewable from the catalogue.",
+        "sectionIds": [
+          "catalog-hub"
+        ],
+        "sectionTitles": [
+          "Catalog hub"
+        ]
+      },
+      {
+        "packageName": "@flint/svelte-primitives",
         "exportName": "FormActions",
         "kind": "component",
         "status": "previewed",
@@ -688,7 +1213,7 @@
         "exportName": "Grid",
         "kind": "component",
         "status": "previewed",
-        "note": "The rebuilt shared demo now includes a dedicated primitive coverage deck so every public primitive export is directly reviewable from the parity target shell.",
+        "note": "Every public primitive export is directly reviewable from the catalogue.",
         "sectionIds": [
           "catalog-hub"
         ],
@@ -701,7 +1226,20 @@
         "exportName": "HoverCard",
         "kind": "component",
         "status": "previewed",
-        "note": "The rebuilt shared demo now includes a dedicated primitive coverage deck so every public primitive export is directly reviewable from the parity target shell.",
+        "note": "Every public primitive export is directly reviewable from the catalogue.",
+        "sectionIds": [
+          "catalog-hub"
+        ],
+        "sectionTitles": [
+          "Catalog hub"
+        ]
+      },
+      {
+        "packageName": "@flint/svelte-primitives",
+        "exportName": "Icon",
+        "kind": "component",
+        "status": "previewed",
+        "note": "Every public primitive export is directly reviewable from the catalogue.",
         "sectionIds": [
           "catalog-hub"
         ],
@@ -714,7 +1252,7 @@
         "exportName": "IconButton",
         "kind": "component",
         "status": "previewed",
-        "note": "The rebuilt shared demo now includes a dedicated primitive coverage deck so every public primitive export is directly reviewable from the parity target shell.",
+        "note": "Every public primitive export is directly reviewable from the catalogue.",
         "sectionIds": [
           "catalog-hub"
         ],
@@ -724,10 +1262,36 @@
       },
       {
         "packageName": "@flint/svelte-primitives",
-        "exportName": "Inline",
+        "exportName": "IconProvider",
         "kind": "component",
         "status": "previewed",
-        "note": "The rebuilt shared demo now includes a dedicated primitive coverage deck so every public primitive export is directly reviewable from the parity target shell.",
+        "note": "Every public primitive export is directly reviewable from the catalogue.",
+        "sectionIds": [
+          "catalog-hub"
+        ],
+        "sectionTitles": [
+          "Catalog hub"
+        ]
+      },
+      {
+        "packageName": "@flint/svelte-primitives",
+        "exportName": "ListCard",
+        "kind": "component",
+        "status": "previewed",
+        "note": "Every public primitive export is directly reviewable from the catalogue.",
+        "sectionIds": [
+          "catalog-hub"
+        ],
+        "sectionTitles": [
+          "Catalog hub"
+        ]
+      },
+      {
+        "packageName": "@flint/svelte-primitives",
+        "exportName": "ListCardCounter",
+        "kind": "component",
+        "status": "previewed",
+        "note": "Every public primitive export is directly reviewable from the catalogue.",
         "sectionIds": [
           "catalog-hub"
         ],
@@ -740,7 +1304,7 @@
         "exportName": "Menu",
         "kind": "component",
         "status": "previewed",
-        "note": "The rebuilt shell now exercises shared feedback, menu, and toolbar primitives through the notification-facing shared demo route.",
+        "note": "Feedback, menu, and toolbar primitives exercised through notification-facing specimens.",
         "sectionIds": [
           "notification-suite"
         ],
@@ -753,7 +1317,7 @@
         "exportName": "Menubar",
         "kind": "component",
         "status": "previewed",
-        "note": "The rebuilt shared demo now includes a dedicated primitive coverage deck so every public primitive export is directly reviewable from the parity target shell.",
+        "note": "Every public primitive export is directly reviewable from the catalogue.",
         "sectionIds": [
           "catalog-hub"
         ],
@@ -766,7 +1330,33 @@
         "exportName": "Meter",
         "kind": "component",
         "status": "previewed",
-        "note": "The rebuilt shared demo now includes a dedicated primitive coverage deck so every public primitive export is directly reviewable from the parity target shell.",
+        "note": "Every public primitive export is directly reviewable from the catalogue.",
+        "sectionIds": [
+          "catalog-hub"
+        ],
+        "sectionTitles": [
+          "Catalog hub"
+        ]
+      },
+      {
+        "packageName": "@flint/svelte-primitives",
+        "exportName": "NavCard",
+        "kind": "component",
+        "status": "previewed",
+        "note": "Every public primitive export is directly reviewable from the catalogue.",
+        "sectionIds": [
+          "catalog-hub"
+        ],
+        "sectionTitles": [
+          "Catalog hub"
+        ]
+      },
+      {
+        "packageName": "@flint/svelte-primitives",
+        "exportName": "NavCardGrid",
+        "kind": "component",
+        "status": "previewed",
+        "note": "Every public primitive export is directly reviewable from the catalogue.",
         "sectionIds": [
           "catalog-hub"
         ],
@@ -779,7 +1369,7 @@
         "exportName": "NavigationMenu",
         "kind": "component",
         "status": "previewed",
-        "note": "The rebuilt shared demo now includes a dedicated primitive coverage deck so every public primitive export is directly reviewable from the parity target shell.",
+        "note": "Every public primitive export is directly reviewable from the catalogue.",
         "sectionIds": [
           "catalog-hub"
         ],
@@ -792,7 +1382,20 @@
         "exportName": "NumberEntry",
         "kind": "component",
         "status": "previewed",
-        "note": "The rebuilt shared demo now includes a dedicated primitive coverage deck so every public primitive export is directly reviewable from the parity target shell.",
+        "note": "Every public primitive export is directly reviewable from the catalogue.",
+        "sectionIds": [
+          "catalog-hub"
+        ],
+        "sectionTitles": [
+          "Catalog hub"
+        ]
+      },
+      {
+        "packageName": "@flint/svelte-primitives",
+        "exportName": "OrderBy",
+        "kind": "component",
+        "status": "previewed",
+        "note": "Every public primitive export is directly reviewable from the catalogue.",
         "sectionIds": [
           "catalog-hub"
         ],
@@ -805,7 +1408,20 @@
         "exportName": "Pagination",
         "kind": "component",
         "status": "previewed",
-        "note": "The rebuilt shared demo now includes a dedicated primitive coverage deck so every public primitive export is directly reviewable from the parity target shell.",
+        "note": "Every public primitive export is directly reviewable from the catalogue.",
+        "sectionIds": [
+          "catalog-hub"
+        ],
+        "sectionTitles": [
+          "Catalog hub"
+        ]
+      },
+      {
+        "packageName": "@flint/svelte-primitives",
+        "exportName": "PaginationSummary",
+        "kind": "component",
+        "status": "previewed",
+        "note": "Every public primitive export is directly reviewable from the catalogue.",
         "sectionIds": [
           "catalog-hub"
         ],
@@ -818,7 +1434,7 @@
         "exportName": "Pill",
         "kind": "component",
         "status": "previewed",
-        "note": "The docs shell and shared demo navigation exercise foundational disclosure, control, and chip primitives directly instead of custom shell-only controls.",
+        "note": "Foundational disclosure, control, and chip primitives exercised directly in catalogue specimens.",
         "sectionIds": [
           "catalog-hub"
         ],
@@ -831,7 +1447,7 @@
         "exportName": "PinInput",
         "kind": "component",
         "status": "previewed",
-        "note": "The rebuilt shared demo now includes a dedicated primitive coverage deck so every public primitive export is directly reviewable from the parity target shell.",
+        "note": "Every public primitive export is directly reviewable from the catalogue.",
         "sectionIds": [
           "catalog-hub"
         ],
@@ -844,7 +1460,7 @@
         "exportName": "Popover",
         "kind": "component",
         "status": "previewed",
-        "note": "The shared demo target now visibly adopts additional workflow and overlay primitives even when no single legacy docs section owns them cleanly.",
+        "note": "Additional workflow and overlay primitives previewed in catalogue specimens.",
         "sectionIds": [
           "catalog-hub"
         ],
@@ -857,7 +1473,7 @@
         "exportName": "Progress",
         "kind": "component",
         "status": "previewed",
-        "note": "The rebuilt shared demo now includes a dedicated primitive coverage deck so every public primitive export is directly reviewable from the parity target shell.",
+        "note": "Every public primitive export is directly reviewable from the catalogue.",
         "sectionIds": [
           "catalog-hub"
         ],
@@ -883,7 +1499,7 @@
         "exportName": "RangeCalendar",
         "kind": "component",
         "status": "previewed",
-        "note": "The rebuilt shared demo now includes a dedicated primitive coverage deck so every public primitive export is directly reviewable from the parity target shell.",
+        "note": "Every public primitive export is directly reviewable from the catalogue.",
         "sectionIds": [
           "catalog-hub"
         ],
@@ -896,7 +1512,7 @@
         "exportName": "RangeSlider",
         "kind": "component",
         "status": "previewed",
-        "note": "The rebuilt shared demo now includes a dedicated primitive coverage deck so every public primitive export is directly reviewable from the parity target shell.",
+        "note": "Every public primitive export is directly reviewable from the catalogue.",
         "sectionIds": [
           "catalog-hub"
         ],
@@ -909,7 +1525,33 @@
         "exportName": "Rating",
         "kind": "component",
         "status": "previewed",
-        "note": "The rebuilt shared demo now includes a dedicated primitive coverage deck so every public primitive export is directly reviewable from the parity target shell.",
+        "note": "Every public primitive export is directly reviewable from the catalogue.",
+        "sectionIds": [
+          "catalog-hub"
+        ],
+        "sectionTitles": [
+          "Catalog hub"
+        ]
+      },
+      {
+        "packageName": "@flint/svelte-primitives",
+        "exportName": "Region",
+        "kind": "component",
+        "status": "previewed",
+        "note": "Every public primitive export is directly reviewable from the catalogue.",
+        "sectionIds": [
+          "catalog-hub"
+        ],
+        "sectionTitles": [
+          "Catalog hub"
+        ]
+      },
+      {
+        "packageName": "@flint/svelte-primitives",
+        "exportName": "ResizeHandle",
+        "kind": "component",
+        "status": "previewed",
+        "note": "Every public primitive export is directly reviewable from the catalogue.",
         "sectionIds": [
           "catalog-hub"
         ],
@@ -922,7 +1564,7 @@
         "exportName": "ScrollShell",
         "kind": "component",
         "status": "previewed",
-        "note": "The rebuilt shared demo now includes a dedicated primitive coverage deck so every public primitive export is directly reviewable from the parity target shell.",
+        "note": "Every public primitive export is directly reviewable from the catalogue.",
         "sectionIds": [
           "catalog-hub"
         ],
@@ -948,7 +1590,7 @@
         "exportName": "SegmentedControl",
         "kind": "component",
         "status": "previewed",
-        "note": "The shared demo target now visibly adopts additional workflow and overlay primitives even when no single legacy docs section owns them cleanly.",
+        "note": "Additional workflow and overlay primitives previewed in catalogue specimens.",
         "sectionIds": [
           "catalog-hub"
         ],
@@ -961,7 +1603,7 @@
         "exportName": "Select",
         "kind": "component",
         "status": "previewed",
-        "note": "The docs shell and shared demo navigation exercise foundational disclosure, control, and chip primitives directly instead of custom shell-only controls.",
+        "note": "Foundational disclosure, control, and chip primitives exercised directly in catalogue specimens.",
         "sectionIds": [
           "catalog-hub"
         ],
@@ -974,7 +1616,7 @@
         "exportName": "Separator",
         "kind": "component",
         "status": "previewed",
-        "note": "The rebuilt shared demo now includes a dedicated primitive coverage deck so every public primitive export is directly reviewable from the parity target shell.",
+        "note": "Every public primitive export is directly reviewable from the catalogue.",
         "sectionIds": [
           "catalog-hub"
         ],
@@ -987,7 +1629,7 @@
         "exportName": "Skeleton",
         "kind": "component",
         "status": "previewed",
-        "note": "The rebuilt shell now exercises shared feedback, menu, and toolbar primitives through the notification-facing shared demo route.",
+        "note": "Feedback, menu, and toolbar primitives exercised through notification-facing specimens.",
         "sectionIds": [
           "notification-suite"
         ],
@@ -1000,7 +1642,7 @@
         "exportName": "Slider",
         "kind": "component",
         "status": "previewed",
-        "note": "The rebuilt shared demo now includes a dedicated primitive coverage deck so every public primitive export is directly reviewable from the parity target shell.",
+        "note": "Every public primitive export is directly reviewable from the catalogue.",
         "sectionIds": [
           "catalog-hub"
         ],
@@ -1013,7 +1655,20 @@
         "exportName": "Spacer",
         "kind": "component",
         "status": "previewed",
-        "note": "The rebuilt shared demo now includes a dedicated primitive coverage deck so every public primitive export is directly reviewable from the parity target shell.",
+        "note": "Every public primitive export is directly reviewable from the catalogue.",
+        "sectionIds": [
+          "catalog-hub"
+        ],
+        "sectionTitles": [
+          "Catalog hub"
+        ]
+      },
+      {
+        "packageName": "@flint/svelte-primitives",
+        "exportName": "SplitButton",
+        "kind": "component",
+        "status": "previewed",
+        "note": "Every public primitive export is directly reviewable from the catalogue.",
         "sectionIds": [
           "catalog-hub"
         ],
@@ -1026,7 +1681,20 @@
         "exportName": "Stack",
         "kind": "component",
         "status": "previewed",
-        "note": "The rebuilt shared demo now includes a dedicated primitive coverage deck so every public primitive export is directly reviewable from the parity target shell.",
+        "note": "Every public primitive export is directly reviewable from the catalogue.",
+        "sectionIds": [
+          "catalog-hub"
+        ],
+        "sectionTitles": [
+          "Catalog hub"
+        ]
+      },
+      {
+        "packageName": "@flint/svelte-primitives",
+        "exportName": "StatusBar",
+        "kind": "component",
+        "status": "previewed",
+        "note": "Every public primitive export is directly reviewable from the catalogue.",
         "sectionIds": [
           "catalog-hub"
         ],
@@ -1039,7 +1707,7 @@
         "exportName": "StatusIndicator",
         "kind": "component",
         "status": "previewed",
-        "note": "The rebuilt shell now exercises shared feedback, menu, and toolbar primitives through the notification-facing shared demo route.",
+        "note": "Feedback, menu, and toolbar primitives exercised through notification-facing specimens.",
         "sectionIds": [
           "notification-suite"
         ],
@@ -1052,7 +1720,7 @@
         "exportName": "Surface",
         "kind": "component",
         "status": "previewed",
-        "note": "The rebuilt shared demo now includes a dedicated primitive coverage deck so every public primitive export is directly reviewable from the parity target shell.",
+        "note": "Every public primitive export is directly reviewable from the catalogue.",
         "sectionIds": [
           "catalog-hub"
         ],
@@ -1078,7 +1746,7 @@
         "exportName": "Table",
         "kind": "component",
         "status": "previewed",
-        "note": "The shared demo target now visibly adopts additional workflow and overlay primitives even when no single legacy docs section owns them cleanly.",
+        "note": "Additional workflow and overlay primitives previewed in catalogue specimens.",
         "sectionIds": [
           "catalog-hub"
         ],
@@ -1091,25 +1759,12 @@
         "exportName": "Tabs",
         "kind": "component",
         "status": "previewed",
-        "note": "The rebuilt shell now exercises shared feedback, menu, and toolbar primitives through the notification-facing shared demo route.",
+        "note": "Feedback, menu, and toolbar primitives exercised through notification-facing specimens.",
         "sectionIds": [
           "notification-suite"
         ],
         "sectionTitles": [
           "Banners, toasts, skeletons, and remediation"
-        ]
-      },
-      {
-        "packageName": "@flint/svelte-primitives",
-        "exportName": "TabStrip",
-        "kind": "component",
-        "status": "previewed",
-        "note": "The rebuilt shared demo now includes a dedicated primitive coverage deck so every public primitive export is directly reviewable from the parity target shell.",
-        "sectionIds": [
-          "catalog-hub"
-        ],
-        "sectionTitles": [
-          "Catalog hub"
         ]
       },
       {
@@ -1140,10 +1795,23 @@
       },
       {
         "packageName": "@flint/svelte-primitives",
+        "exportName": "TimeAgo",
+        "kind": "component",
+        "status": "previewed",
+        "note": "Every public primitive export is directly reviewable from the catalogue.",
+        "sectionIds": [
+          "catalog-hub"
+        ],
+        "sectionTitles": [
+          "Catalog hub"
+        ]
+      },
+      {
+        "packageName": "@flint/svelte-primitives",
         "exportName": "TimeField",
         "kind": "component",
         "status": "previewed",
-        "note": "The rebuilt shared demo now includes a dedicated primitive coverage deck so every public primitive export is directly reviewable from the parity target shell.",
+        "note": "Every public primitive export is directly reviewable from the catalogue.",
         "sectionIds": [
           "catalog-hub"
         ],
@@ -1156,7 +1824,7 @@
         "exportName": "TimeZoneSelect",
         "kind": "component",
         "status": "previewed",
-        "note": "The rebuilt shared demo now includes a dedicated primitive coverage deck so every public primitive export is directly reviewable from the parity target shell.",
+        "note": "Every public primitive export is directly reviewable from the catalogue.",
         "sectionIds": [
           "catalog-hub"
         ],
@@ -1169,7 +1837,7 @@
         "exportName": "Toggle",
         "kind": "component",
         "status": "previewed",
-        "note": "The docs shell and shared demo navigation exercise foundational disclosure, control, and chip primitives directly instead of custom shell-only controls.",
+        "note": "Foundational disclosure, control, and chip primitives exercised directly in catalogue specimens.",
         "sectionIds": [
           "catalog-hub"
         ],
@@ -1182,7 +1850,7 @@
         "exportName": "ToggleGroup",
         "kind": "component",
         "status": "previewed",
-        "note": "The docs shell and shared demo navigation exercise foundational disclosure, control, and chip primitives directly instead of custom shell-only controls.",
+        "note": "Foundational disclosure, control, and chip primitives exercised directly in catalogue specimens.",
         "sectionIds": [
           "catalog-hub"
         ],
@@ -1195,7 +1863,7 @@
         "exportName": "Toolbar",
         "kind": "component",
         "status": "previewed",
-        "note": "The rebuilt shell now exercises shared feedback, menu, and toolbar primitives through the notification-facing shared demo route.",
+        "note": "Feedback, menu, and toolbar primitives exercised through notification-facing specimens.",
         "sectionIds": [
           "notification-suite"
         ],
@@ -1208,7 +1876,7 @@
         "exportName": "Tooltip",
         "kind": "component",
         "status": "previewed",
-        "note": "The rebuilt shared demo now includes a dedicated primitive coverage deck so every public primitive export is directly reviewable from the parity target shell.",
+        "note": "Every public primitive export is directly reviewable from the catalogue.",
         "sectionIds": [
           "catalog-hub"
         ],
@@ -1221,7 +1889,7 @@
         "exportName": "TriStateSwitch",
         "kind": "component",
         "status": "previewed",
-        "note": "The rebuilt shared demo now includes a dedicated primitive coverage deck so every public primitive export is directly reviewable from the parity target shell.",
+        "note": "Every public primitive export is directly reviewable from the catalogue.",
         "sectionIds": [
           "catalog-hub"
         ],
@@ -1234,194 +1902,12 @@
         "exportName": "ZonedDateTimePicker",
         "kind": "component",
         "status": "previewed",
-        "note": "The rebuilt shared demo now includes a dedicated primitive coverage deck so every public primitive export is directly reviewable from the parity target shell.",
+        "note": "Every public primitive export is directly reviewable from the catalogue.",
         "sectionIds": [
           "catalog-hub"
         ],
         "sectionTitles": [
           "Catalog hub"
-        ]
-      },
-      {
-        "packageName": "@flint/svelte-workstation",
-        "exportName": "ActionDiscoveryPanel",
-        "kind": "component",
-        "status": "previewed",
-        "note": "Command and workspace screen exercises modal launch, inline discovery, and panel-level workstation chrome.",
-        "sectionIds": [
-          "command-suite"
-        ],
-        "sectionTitles": [
-          "Palette search, grouped actions, and inline rediscovery"
-        ]
-      },
-      {
-        "packageName": "@flint/svelte-workstation",
-        "exportName": "AppHeader",
-        "kind": "component",
-        "status": "previewed",
-        "note": "Workspace suite exercises shell hierarchy, docking, and panel-surface posture.",
-        "sectionIds": [
-          "workspace-suite"
-        ],
-        "sectionTitles": [
-          "Headers, dock orchestration, and workspace shell posture"
-        ]
-      },
-      {
-        "packageName": "@flint/svelte-workstation",
-        "exportName": "CommandPalette",
-        "kind": "component",
-        "status": "previewed",
-        "note": "Command and workspace screen exercises modal launch, inline discovery, and panel-level workstation chrome.",
-        "sectionIds": [
-          "command-suite"
-        ],
-        "sectionTitles": [
-          "Palette search, grouped actions, and inline rediscovery"
-        ]
-      },
-      {
-        "packageName": "@flint/svelte-workstation",
-        "exportName": "DockRegion",
-        "kind": "component",
-        "status": "previewed",
-        "note": "Workspace suite exercises shell hierarchy, docking, and panel-surface posture.",
-        "sectionIds": [
-          "workspace-suite"
-        ],
-        "sectionTitles": [
-          "Headers, dock orchestration, and workspace shell posture"
-        ]
-      },
-      {
-        "packageName": "@flint/svelte-workstation",
-        "exportName": "PanelHeader",
-        "kind": "component",
-        "status": "previewed",
-        "note": "Command and workspace screen exercises modal launch, inline discovery, and panel-level workstation chrome.",
-        "sectionIds": [
-          "command-suite"
-        ],
-        "sectionTitles": [
-          "Palette search, grouped actions, and inline rediscovery"
-        ]
-      },
-      {
-        "packageName": "@flint/svelte-workstation",
-        "exportName": "PanelSurface",
-        "kind": "component",
-        "status": "previewed",
-        "note": "Workspace suite exercises shell hierarchy, docking, and panel-surface posture.",
-        "sectionIds": [
-          "workspace-suite"
-        ],
-        "sectionTitles": [
-          "Headers, dock orchestration, and workspace shell posture"
-        ]
-      },
-      {
-        "packageName": "@flint/svelte-workstation",
-        "exportName": "PanelTabs",
-        "kind": "component",
-        "status": "previewed",
-        "note": "Command and workspace screen exercises modal launch, inline discovery, and panel-level workstation chrome.",
-        "sectionIds": [
-          "command-suite"
-        ],
-        "sectionTitles": [
-          "Palette search, grouped actions, and inline rediscovery"
-        ]
-      },
-      {
-        "packageName": "@flint/svelte-workstation",
-        "exportName": "parseWorkspaceLayoutSnapshot",
-        "kind": "helper",
-        "status": "previewed",
-        "note": "Workspace suite exercises public layout snapshot round-tripping through the shell state review surface.",
-        "sectionIds": [
-          "workspace-suite"
-        ],
-        "sectionTitles": [
-          "Headers, dock orchestration, and workspace shell posture"
-        ]
-      },
-      {
-        "packageName": "@flint/svelte-workstation",
-        "exportName": "ProjectHeader",
-        "kind": "component",
-        "status": "previewed",
-        "note": "Workspace suite exercises shell hierarchy, docking, and panel-surface posture.",
-        "sectionIds": [
-          "workspace-suite"
-        ],
-        "sectionTitles": [
-          "Headers, dock orchestration, and workspace shell posture"
-        ]
-      },
-      {
-        "packageName": "@flint/svelte-workstation",
-        "exportName": "serializeWorkspaceLayoutSnapshot",
-        "kind": "helper",
-        "status": "previewed",
-        "note": "Workspace suite exercises public layout snapshot round-tripping through the shell state review surface.",
-        "sectionIds": [
-          "workspace-suite"
-        ],
-        "sectionTitles": [
-          "Headers, dock orchestration, and workspace shell posture"
-        ]
-      },
-      {
-        "packageName": "@flint/svelte-workstation",
-        "exportName": "ShellStatusBar",
-        "kind": "component",
-        "status": "previewed",
-        "note": "Workspace suite exercises shell hierarchy, docking, and panel-surface posture.",
-        "sectionIds": [
-          "workspace-suite"
-        ],
-        "sectionTitles": [
-          "Headers, dock orchestration, and workspace shell posture"
-        ]
-      },
-      {
-        "packageName": "@flint/svelte-workstation",
-        "exportName": "SplitView",
-        "kind": "component",
-        "status": "previewed",
-        "note": "Workspace suite exercises shell hierarchy, docking, and panel-surface posture.",
-        "sectionIds": [
-          "workspace-suite"
-        ],
-        "sectionTitles": [
-          "Headers, dock orchestration, and workspace shell posture"
-        ]
-      },
-      {
-        "packageName": "@flint/svelte-workstation",
-        "exportName": "SurfaceTabs",
-        "kind": "component",
-        "status": "previewed",
-        "note": "Workspace suite exercises shell hierarchy, docking, and panel-surface posture.",
-        "sectionIds": [
-          "workspace-suite"
-        ],
-        "sectionTitles": [
-          "Headers, dock orchestration, and workspace shell posture"
-        ]
-      },
-      {
-        "packageName": "@flint/svelte-workstation",
-        "exportName": "WorkspaceShell",
-        "kind": "component",
-        "status": "previewed",
-        "note": "Workspace suite exercises shell hierarchy, docking, and panel-surface posture.",
-        "sectionIds": [
-          "workspace-suite"
-        ],
-        "sectionTitles": [
-          "Headers, dock orchestration, and workspace shell posture"
         ]
       }
     ]
@@ -1460,7 +1946,7 @@
     },
     {
       "id": "workstation",
-      "title": "Workstation shells",
+      "title": "Command and workspace composites",
       "sectionCount": 2,
       "sectionIds": [
         "command-suite",
@@ -1880,9 +2366,9 @@
     {
       "sectionId": "command-suite",
       "title": "Palette search, grouped actions, and inline rediscovery",
-      "layer": "workstation",
-      "packageName": "@flint/svelte-workstation",
-      "contractRoot": "docs/contracts/workstation/",
+      "layer": "composites",
+      "packageName": "@flint/svelte-composites",
+      "contractRoot": "docs/contracts/composites/",
       "summary": "Modal and inline command discovery with grouped results, focus containment, and keyboard movement.",
       "harnessCoverage": {
         "contract": "automated",
@@ -1928,9 +2414,9 @@
     {
       "sectionId": "workspace-suite",
       "title": "Headers, dock orchestration, and workspace shell posture",
-      "layer": "workstation",
-      "packageName": "@flint/svelte-workstation",
-      "contractRoot": "docs/contracts/workstation/",
+      "layer": "composites",
+      "packageName": "@flint/svelte-composites",
+      "contractRoot": "docs/contracts/composites/",
       "summary": "App and project headers, docks, tabs, split views, and host-owned layout snapshots.",
       "harnessCoverage": {
         "contract": "automated",
