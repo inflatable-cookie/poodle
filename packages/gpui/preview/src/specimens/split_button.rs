@@ -1,6 +1,6 @@
 use gpui::*;
 use pug_adapter::ThemeProvider;
-use pug_primitives::{ButtonVariant, SplitButtonSpec};
+use pug_primitives::{ButtonVariant, ButtonTone, SplitButtonSpec, SplitMenuItem};
 use pug_gpui_components::SplitButton;
 use crate::app_state::AppState;
 use crate::style_bridge::color_to_hsla;
@@ -20,7 +20,13 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
             SplitButton::from_spec(
                 SplitButtonSpec::new()
                     .with_variant(ButtonVariant::Primary)
-                    .with_label("Save"),
+                    .with_label("Save")
+                    .with_items(vec![
+                        SplitMenuItem::action("save", "Save"),
+                        SplitMenuItem::action("save-as", "Save as..."),
+                        SplitMenuItem::Separator,
+                        SplitMenuItem::action("save-all", "Save all"),
+                    ]),
                 theme,
             )
             .on_click(cx.listener(|this, _e: &ClickEvent, _w, cx| {
@@ -44,7 +50,12 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
             SplitButton::from_spec(
                 SplitButtonSpec::new()
                     .with_variant(ButtonVariant::Secondary)
-                    .with_label("Export"),
+                    .with_label("Export")
+                    .with_items(vec![
+                        SplitMenuItem::action("csv", "Export as CSV"),
+                        SplitMenuItem::action("json", "Export as JSON"),
+                        SplitMenuItem::action("xlsx", "Export as Excel"),
+                    ]),
                 theme,
             )
             .on_click(cx.listener(|this, _e: &ClickEvent, _w, cx| {
@@ -68,7 +79,12 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
             SplitButton::from_spec(
                 SplitButtonSpec::new()
                     .with_variant(ButtonVariant::Secondary)
-                    .with_label("Delete"),
+                    .with_tone(ButtonTone::Danger)
+                    .with_label("Delete")
+                    .with_items(vec![
+                        SplitMenuItem::action("delete", "Delete selected"),
+                        SplitMenuItem::action("delete-all", "Delete all"),
+                    ]),
                 theme,
             )
             .on_click(cx.listener(|this, _e: &ClickEvent, _w, cx| {
@@ -86,7 +102,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                 SplitButtonSpec::new()
                     .with_variant(ButtonVariant::Primary)
                     .with_label("Saving...")
-                    .with_disabled(true),
+                    .with_loading(true),
                 theme,
             )
         )

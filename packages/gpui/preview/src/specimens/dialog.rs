@@ -1,7 +1,7 @@
 use gpui::*;
 use pug_adapter::ThemeProvider;
-use pug_primitives::{ButtonSpec, ButtonTone, ButtonVariant, DialogKind, DialogSpec};
-use pug_gpui_components::{Button, Dialog};
+use pug_primitives::{ButtonSpec, ButtonTone, ButtonVariant, DialogKind, DialogSpec, AlertDialogSpec, AlertDialogTone};
+use pug_gpui_components::{Button, Dialog, AlertDialog};
 use crate::app_state::AppState;
 use crate::style_bridge::color_to_hsla;
 use crate::PreviewRoot;
@@ -176,6 +176,33 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
 
             col
         })
+
+        // --- AlertDialog: Danger tone ---
+        .child(section_label("ALERT DIALOG: DANGER TONE", text_secondary))
+        .child(
+            AlertDialog::from_spec(
+                AlertDialogSpec::new("Delete this item?")
+                    .with_description("This action cannot be undone. The item and all associated data will be permanently removed.")
+                    .with_confirm_label("Delete")
+                    .with_cancel_label("Keep it"),
+                theme,
+            )
+            .open(true)
+        )
+
+        // --- AlertDialog: Warning tone ---
+        .child(section_label("ALERT DIALOG: WARNING TONE", text_secondary))
+        .child(
+            AlertDialog::from_spec(
+                AlertDialogSpec::new("Reset all settings?")
+                    .with_description("Your customized settings will be restored to their default values.")
+                    .with_tone(AlertDialogTone::Warning)
+                    .with_confirm_label("Reset")
+                    .with_cancel_label("Cancel"),
+                theme,
+            )
+            .open(true)
+        )
 }
 
 fn section_label(label: &str, color: pug_tokens::typed::ColorValue) -> Div {
