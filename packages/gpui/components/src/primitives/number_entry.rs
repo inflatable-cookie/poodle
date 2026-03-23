@@ -5,8 +5,9 @@
 
 use gpui::*;
 use pug_gpui::GpuiThemeProvider;
-use pug_primitives::{NumberEntrySpec, ValidationState};
+use pug_primitives::{IconSize, IconSpec, NumberEntrySpec, ValidationState};
 
+use super::icon::Icon;
 use crate::theme_ext::{color_mix, resolve_color, resolve_opacity, resolve_px, resolve_radius};
 
 /// A real GPUI numeric input component with +/- stepper buttons backed by `NumberEntrySpec`.
@@ -118,7 +119,7 @@ impl IntoElement for NumberEntry {
         let on_dec_rc: Option<std::rc::Rc<dyn Fn(&ClickEvent, &mut Window, &mut App)>> =
             self.on_decrement.map(|h| std::rc::Rc::from(h));
 
-        // Increment button (top)
+        // Increment button (top) — Svelte uses Icon component
         let mut inc_btn = div()
             .id("pug-number-entry-inc")
             .w(stepper_width)
@@ -128,10 +129,15 @@ impl IntoElement for NumberEntry {
             .justify_center()
             .rounded(stepper_inner_radius)
             .bg(stepper_bg)
-            .text_size(px(12.0))
-            .text_color(text_secondary)
             .cursor_pointer()
-            .child("+");
+            .hover(move |s| s.bg(elevated))
+            .child(
+                Icon::from_spec(
+                    IconSpec::new("chevron-up").with_size(IconSize::Sm),
+                    theme,
+                )
+                .with_color(text_secondary),
+            );
 
         if !spec.is_disabled {
             if let Some(ref handler) = on_inc_rc {
@@ -142,7 +148,7 @@ impl IntoElement for NumberEntry {
             }
         }
 
-        // Decrement button (bottom)
+        // Decrement button (bottom) — Svelte uses Icon component
         let mut dec_btn = div()
             .id("pug-number-entry-dec")
             .w(stepper_width)
@@ -152,10 +158,15 @@ impl IntoElement for NumberEntry {
             .justify_center()
             .rounded(stepper_inner_radius)
             .bg(stepper_bg)
-            .text_size(px(12.0))
-            .text_color(text_secondary)
             .cursor_pointer()
-            .child("\u{2212}");
+            .hover(move |s| s.bg(elevated))
+            .child(
+                Icon::from_spec(
+                    IconSpec::new("chevron-down").with_size(IconSize::Sm),
+                    theme,
+                )
+                .with_color(text_secondary),
+            );
 
         if !spec.is_disabled {
             if let Some(ref handler) = on_dec_rc {
@@ -187,6 +198,14 @@ impl IntoElement for NumberEntry {
             .text_color(text_primary)
             .child(display_value);
 
+        // Svelte: validation state border colors
+        let effective_border = match spec.validation_state {
+            ValidationState::Invalid => resolve_color(theme, "semantic.color.status.danger"),
+            ValidationState::Valid => resolve_color(theme, "semantic.color.status.success"),
+            ValidationState::Pending => resolve_color(theme, "semantic.color.accent.base"),
+            _ => border,
+        };
+
         // Root: grid-like layout with input on left, steppers on right
         let mut wrapper = div()
             .id(SharedString::from(id_str))
@@ -195,12 +214,20 @@ impl IntoElement for NumberEntry {
             .rounded(control_radius)
             .bg(surface_bg)
             .border_1()
-            .border_color(border)
+            .border_color(effective_border)
             .flex()
             .items_center()
             .overflow_hidden()
-            // Contract: focus-within = border switches to focus ring color
-            .focus(move |s| s.border_color(focus_ring))
+            // Svelte: focus-within = border + shadow ring
+            .focus(move |s| s
+                .border_color(focus_ring)
+                .shadow(vec![gpui::BoxShadow {
+                    color: Hsla { a: focus_ring.a * 0.28, ..focus_ring },
+                    offset: point(px(0.0), px(0.0)),
+                    blur_radius: px(0.0),
+                    spread_radius: px(2.0),
+                }])
+            )
             .child(value_display)
             .child(steppers);
 
