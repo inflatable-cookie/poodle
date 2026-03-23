@@ -9,34 +9,25 @@ use crate::PreviewRoot;
 pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
     let theme = &state.theme;
     let text_secondary = theme.resolve_color("semantic.color.text.secondary");
+    let text_primary = theme.resolve_color("semantic.color.text.primary");
 
     let swatches = vec![
         "#ef4444".to_string(), "#f97316".to_string(), "#eab308".to_string(),
-        "#22c55e".to_string(), "#06b6d4".to_string(), "#3b82f6".to_string(),
-        "#6366f1".to_string(), "#a855f7".to_string(), "#ec4899".to_string(),
-        "#f43f5e".to_string(), "#14b8a6".to_string(), "#8b5cf6".to_string(),
+        "#22c55e".to_string(), "#3b82f6".to_string(), "#6366f1".to_string(),
+        "#8b5cf6".to_string(), "#ec4899".to_string(),
     ];
 
-    // --- Interactive picker ---
-    let interactive_open = state.specimens.is_on("color-picker-interactive-open");
-    let interactive_value = state.specimens.text.get("color-picker-interactive-value")
+    // --- Basic picker ---
+    let basic_open = state.specimens.is_on("color-picker-basic-open");
+    let basic_value = state.specimens.text.get("color-picker-basic-value")
         .cloned()
         .unwrap_or_else(|| "#6366f1".to_string());
 
-    let interactive_spec = ColorPickerSpec::new()
-        .with_value(&interactive_value)
-        .with_open(interactive_open)
-        .with_swatches(swatches.clone());
-
-    // --- Default open picker ---
-    let open_value = state.specimens.text.get("color-picker-open-value")
+    // --- With swatches ---
+    let swatches_open = state.specimens.is_on("color-picker-swatches-open");
+    let swatches_value = state.specimens.text.get("color-picker-swatches-value")
         .cloned()
-        .unwrap_or_else(|| "#22c55e".to_string());
-
-    let open_spec = ColorPickerSpec::new()
-        .with_value(&open_value)
-        .with_open(true)
-        .with_swatches(swatches.clone());
+        .unwrap_or_else(|| "#6366f1".to_string());
 
     // --- With alpha ---
     let alpha_open = state.specimens.is_on("color-picker-alpha-open");
@@ -44,60 +35,115 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
         .cloned()
         .unwrap_or_else(|| "#3b82f6".to_string());
 
-    let alpha_spec = ColorPickerSpec::new()
-        .with_value(&alpha_value)
-        .with_open(alpha_open)
-        .with_show_alpha(true);
-
-    // --- Disabled ---
-    let disabled_spec = ColorPickerSpec::new()
-        .with_value("#22c55e")
-        .with_disabled(true);
+    // --- Default open ---
+    let open_value = state.specimens.text.get("color-picker-open-value")
+        .cloned()
+        .unwrap_or_else(|| "#22c55e".to_string());
 
     div().flex().flex_col().gap(px(16.0)).max_w(px(420.0))
-        // --- Interactive picker ---
-        .child(section_label("INTERACTIVE PICKER", text_secondary))
+        // --- Basic picker ---
+        .child(section_label("BASIC PICKER", text_secondary))
         .child(
-            ColorPicker::from_spec(interactive_spec, theme)
-                .with_id("interactive")
-                .on_toggle(cx.listener(|this, _open: &bool, _w, cx| {
-                    this.state.specimens.toggle("color-picker-interactive-open");
-                    cx.notify();
-                }))
-                .on_change(cx.listener(|this, val: &str, _w, cx| {
-                    this.state.specimens.text.insert("color-picker-interactive-value".to_string(), val.to_string());
-                    cx.notify();
-                }))
+            div().flex().flex_col().gap(px(4.0))
+                .child(
+                    ColorPicker::from_spec(
+                        ColorPickerSpec::new()
+                            .with_value(&basic_value)
+                            .with_open(basic_open),
+                        theme,
+                    )
+                    .with_id("basic")
+                    .on_toggle(cx.listener(|this, _open: &bool, _w, cx| {
+                        this.state.specimens.toggle("color-picker-basic-open");
+                        cx.notify();
+                    }))
+                    .on_change(cx.listener(|this, val: &str, _w, cx| {
+                        this.state.specimens.text.insert("color-picker-basic-value".to_string(), val.to_string());
+                        cx.notify();
+                    }))
+                )
+                .child(
+                    div().text_xs().text_color(color_to_hsla(text_secondary))
+                        .child(format!("Selected: {}", basic_value))
+                )
         )
-        // --- Default open with swatches ---
-        .child(section_label("DEFAULT OPEN WITH SWATCHES", text_secondary))
+
+        // --- With swatches ---
+        .child(section_label("WITH SWATCHES", text_secondary))
         .child(
-            ColorPicker::from_spec(open_spec, theme)
-                .with_id("open")
-                .on_change(cx.listener(|this, val: &str, _w, cx| {
-                    this.state.specimens.text.insert("color-picker-open-value".to_string(), val.to_string());
-                    cx.notify();
-                }))
+            ColorPicker::from_spec(
+                ColorPickerSpec::new()
+                    .with_value(&swatches_value)
+                    .with_open(swatches_open)
+                    .with_swatches(swatches.clone()),
+                theme,
+            )
+            .with_id("swatches")
+            .on_toggle(cx.listener(|this, _open: &bool, _w, cx| {
+                this.state.specimens.toggle("color-picker-swatches-open");
+                cx.notify();
+            }))
+            .on_change(cx.listener(|this, val: &str, _w, cx| {
+                this.state.specimens.text.insert("color-picker-swatches-value".to_string(), val.to_string());
+                cx.notify();
+            }))
         )
+
         // --- With alpha ---
         .child(section_label("WITH ALPHA", text_secondary))
         .child(
-            ColorPicker::from_spec(alpha_spec, theme)
-                .with_id("alpha")
-                .on_toggle(cx.listener(|this, _open: &bool, _w, cx| {
-                    this.state.specimens.toggle("color-picker-alpha-open");
-                    cx.notify();
-                }))
-                .on_change(cx.listener(|this, val: &str, _w, cx| {
-                    this.state.specimens.text.insert("color-picker-alpha-value".to_string(), val.to_string());
-                    cx.notify();
-                }))
+            div().flex().flex_col().gap(px(4.0))
+                .child(
+                    ColorPicker::from_spec(
+                        ColorPickerSpec::new()
+                            .with_value(&alpha_value)
+                            .with_open(alpha_open)
+                            .with_show_alpha(true),
+                        theme,
+                    )
+                    .with_id("alpha")
+                    .on_toggle(cx.listener(|this, _open: &bool, _w, cx| {
+                        this.state.specimens.toggle("color-picker-alpha-open");
+                        cx.notify();
+                    }))
+                    .on_change(cx.listener(|this, val: &str, _w, cx| {
+                        this.state.specimens.text.insert("color-picker-alpha-value".to_string(), val.to_string());
+                        cx.notify();
+                    }))
+                )
+                .child(
+                    div().text_xs().text_color(color_to_hsla(text_secondary))
+                        .child(format!("Selected: {}", alpha_value))
+                )
         )
+
+        // --- Default open ---
+        .child(section_label("DEFAULT OPEN", text_secondary))
+        .child(
+            ColorPicker::from_spec(
+                ColorPickerSpec::new()
+                    .with_value(&open_value)
+                    .with_open(true)
+                    .with_swatches(swatches.clone()),
+                theme,
+            )
+            .with_id("open")
+            .on_change(cx.listener(|this, val: &str, _w, cx| {
+                this.state.specimens.text.insert("color-picker-open-value".to_string(), val.to_string());
+                cx.notify();
+            }))
+        )
+
         // --- Disabled ---
         .child(section_label("DISABLED", text_secondary))
         .child(
-            ColorPicker::from_spec(disabled_spec, theme)
-                .with_id("disabled")
+            ColorPicker::from_spec(
+                ColorPickerSpec::new()
+                    .with_value("#22c55e")
+                    .with_disabled(true),
+                theme,
+            )
+            .with_id("disabled")
         )
 }
 
