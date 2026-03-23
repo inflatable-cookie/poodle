@@ -14,9 +14,9 @@ use pug_gpui_components::{
     PaginationSummary, SelectionSummary,
     ConfirmAction, SlugField, EmbedInput, EmbedPreview,
     LogList, LogEntry, LogLevel, FilterToolbar, InlineEditableField,
-    EditableList, Button, BulkActionBar,
+    EditableList, Button, BulkActionBar, FormDialog, Field, TextInput,
 };
-use pug_primitives::{ButtonSpec, ButtonVariant, StatusTone, BulkActionBarSpec, BulkAction, BulkActionTone};
+use pug_primitives::{ButtonSpec, ButtonVariant, StatusTone, BulkActionBarSpec, BulkAction, BulkActionTone, TextInputSpec};
 use crate::app_state::AppState;
 use crate::style_bridge::color_to_hsla;
 use crate::PreviewRoot;
@@ -26,6 +26,70 @@ pub(crate) fn render(state: &AppState, _cx: &mut Context<PreviewRoot>) -> Div {
     let text_secondary = theme.resolve_color("semantic.color.text.secondary");
 
     div().flex().flex_col().gap(px(24.0)).max_w(px(560.0))
+        // ── FormDialog ────────────────────────────────────────
+        .child(section_label("FORM DIALOG: BASIC", text_secondary))
+        .child(
+            FormDialog::new(theme)
+                .title("Add new user")
+                .description("Invite a user to this workspace.")
+                .submit_label("Add user")
+                .cancel_label("Cancel")
+                .with_child(
+                    Field::new("fd-name", "Full name", theme)
+                        .with_control(
+                            TextInput::from_spec(
+                                TextInputSpec::new().with_placeholder("Enter name"),
+                                theme,
+                            ).with_id("fd-name")
+                        )
+                )
+                .with_child(
+                    Field::new("fd-role", "Role", theme)
+                        .with_control(
+                            TextInput::from_spec(
+                                TextInputSpec::new().with_placeholder("Select role"),
+                                theme,
+                            ).with_id("fd-role")
+                        )
+                )
+        )
+
+        // ── FormDialog: With error ---
+        .child(section_label("FORM DIALOG: WITH ERROR", text_secondary))
+        .child(
+            FormDialog::new(theme)
+                .title("Create account")
+                .submit_label("Create")
+                .error_message("A user with this email already exists.")
+                .with_child(
+                    Field::new("fd-email", "Email", theme)
+                        .with_control(
+                            TextInput::from_spec(
+                                TextInputSpec::new().with_value("existing@example.com"),
+                                theme,
+                            ).with_id("fd-email")
+                        )
+                )
+        )
+
+        // ── FormDialog: Submitting ---
+        .child(section_label("FORM DIALOG: SUBMITTING STATE", text_secondary))
+        .child(
+            FormDialog::new(theme)
+                .title("Add new user")
+                .submit_label("Add user")
+                .submitting(true)
+                .with_child(
+                    Field::new("fd-name-sub", "Full name", theme)
+                        .with_control(
+                            TextInput::from_spec(
+                                TextInputSpec::new().with_value("Clay Tercek"),
+                                theme,
+                            ).with_id("fd-name-sub")
+                        )
+                )
+        )
+
         // ── ConfirmAction ───────────────────────────────────────
         .child(section_label("CONFIRM ACTION", text_secondary))
         .child(

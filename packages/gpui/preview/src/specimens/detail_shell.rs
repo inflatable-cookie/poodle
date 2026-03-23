@@ -1,7 +1,7 @@
 use gpui::*;
 use pug_adapter::ThemeProvider;
-use pug_composites::{DetailShellSpec, DetailState};
-use pug_gpui_components::{DetailShell, DetailRow, Button};
+use pug_composites::{DetailShellSpec, DetailState, DetailSectionSpec};
+use pug_gpui_components::{DetailShell, DetailRow, DetailSection, Button};
 use pug_primitives::{DetailRowSpec, ButtonSpec, ButtonVariant, ControlSize};
 use pug_gpui::GpuiThemeProvider;
 use crate::style_bridge::color_to_hsla;
@@ -124,6 +124,75 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
                             .font_weight(FontWeight::MEDIUM)
                             .child("Active".to_string())
                     )
+            )
+        )
+
+        // --- DetailSection: With title and rows ---
+        .child(section_label("DETAIL SECTION: WITH TITLE AND ROWS", text_secondary))
+        .child(
+            DetailSection::from_spec(
+                DetailSectionSpec::new()
+                    .with_title("Project details")
+                    .with_description("Core metadata for this project."),
+                theme,
+            )
+            .with_body(
+                div().flex().flex_col()
+                    .child(DetailRow::from_spec(DetailRowSpec::new("Name").with_value("Pug Design System"), theme))
+                    .child(DetailRow::from_spec(DetailRowSpec::new("Owner").with_value("Clay + Aura"), theme))
+                    .child(DetailRow::from_spec(DetailRowSpec::new("Created").with_value("March 2025"), theme))
+                    .child(DetailRow::from_spec(DetailRowSpec::new("Status").with_value("Active"), theme))
+            )
+        )
+
+        // --- DetailSection: With actions ---
+        .child(section_label("DETAIL SECTION: WITH ACTIONS", text_secondary))
+        .child(
+            DetailSection::from_spec(
+                DetailSectionSpec::new()
+                    .with_title("Billing"),
+                theme,
+            )
+            .with_actions(
+                Button::from_spec(
+                    ButtonSpec::new()
+                        .with_variant(ButtonVariant::Secondary)
+                        .with_size(ControlSize::Sm)
+                        .with_label("Edit"),
+                    theme,
+                ).with_id("ds-edit")
+            )
+            .with_body(
+                div().flex().flex_col()
+                    .child(DetailRow::from_spec(DetailRowSpec::new("Plan").with_value("Pro"), theme))
+                    .child(DetailRow::from_spec(DetailRowSpec::new("Billing cycle").with_value("Monthly"), theme))
+                    .child(DetailRow::from_spec(DetailRowSpec::new("Next invoice").with_value("April 1, 2026"), theme))
+            )
+        )
+
+        // --- DetailSection: With descriptions ---
+        .child(section_label("DETAIL SECTION: WITH DESCRIPTIONS", text_secondary))
+        .child(
+            DetailSection::from_spec(
+                DetailSectionSpec::new()
+                    .with_title("Configuration"),
+                theme,
+            )
+            .with_body(
+                div().flex().flex_col()
+                    .child(DetailRow::from_spec(
+                        DetailRowSpec::new("API endpoint")
+                            .with_value("https://api.example.com/v2")
+                            .with_description("The base URL for all API requests.")
+                            .with_truncate_value(true),
+                        theme,
+                    ))
+                    .child(DetailRow::from_spec(
+                        DetailRowSpec::new("Rate limit")
+                            .with_value("1,000 req/min")
+                            .with_description("Maximum requests per minute."),
+                        theme,
+                    ))
             )
         )
 
