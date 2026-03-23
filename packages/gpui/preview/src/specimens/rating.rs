@@ -42,6 +42,15 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                     theme,
                 ))
         )
+        // --- Clearable ---
+        .child(
+            div().flex().flex_col().gap(px(10.0))
+                .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Clearable"), theme))
+                .child(Rating::from_spec(
+                    RatingSpec::new().with_value(2.0),
+                    theme,
+                ))
+        )
         // --- Disabled ---
         .child(
             div().flex().flex_col().gap(px(10.0))
