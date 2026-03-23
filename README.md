@@ -30,10 +30,10 @@ Key package groups:
 
 Start with these:
 
-1. [docs/vision/001-poodle-vision.md](/Users/betterthanclay/Dev/projects/poodle/docs/vision/001-poodle-vision.md)
-2. [docs/architecture/001-poodle-system-shape.md](/Users/betterthanclay/Dev/projects/poodle/docs/architecture/001-poodle-system-shape.md)
-3. [docs/roadmaps/README.md](/Users/betterthanclay/Dev/projects/poodle/docs/roadmaps/README.md)
-4. [docs/specs/README.md](/Users/betterthanclay/Dev/projects/poodle/docs/specs/README.md)
+1. [docs/vision/001-poodle-vision.md](docs/vision/001-poodle-vision.md)
+2. [docs/architecture/001-poodle-system-shape.md](docs/architecture/001-poodle-system-shape.md)
+3. [docs/roadmaps/README.md](docs/roadmaps/README.md)
+4. [docs/specs/README.md](docs/specs/README.md)
 
 ## Local Workflow
 
