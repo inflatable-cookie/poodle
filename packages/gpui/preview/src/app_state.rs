@@ -212,10 +212,12 @@ impl SpecimenState {
         self.toggles.get(key).copied().unwrap_or(false)
     }
 
+    #[allow(dead_code)]
     pub fn selected(&self, key: &str) -> usize {
         self.selections.get(key).copied().unwrap_or(0)
     }
 
+    #[allow(dead_code)]
     pub fn select(&mut self, key: &str, idx: usize) {
         self.selections.insert(key.to_string(), idx);
     }
@@ -245,6 +247,7 @@ pub struct AppState {
     pub active_composite: Option<usize>,
     pub active_shell: Option<usize>,
     pub active_demo_screen: DemoScreen,
+    #[allow(dead_code)]
     pub debug_clicks: u32,
     pub specimens: SpecimenState,
 }

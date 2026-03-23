@@ -33,7 +33,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
         .with_value(&underline_value)
         .with_aria_label("Section tabs");
 
-    let panel_text = match underline_value.as_str() {
+    let _panel_text = match underline_value.as_str() {
         "overview" => "Overview content — this is the landing page with a summary of all features.",
         "features" => "Features content — explore the full feature set and capabilities.",
         "pricing" => "Pricing content — compare plans and find the right fit for your team.",

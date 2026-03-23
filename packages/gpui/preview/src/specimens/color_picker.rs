@@ -9,7 +9,6 @@ use crate::PreviewRoot;
 pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
     let theme = &state.theme;
     let text_secondary = theme.resolve_color("semantic.color.text.secondary");
-    let text_primary = theme.resolve_color("semantic.color.text.primary");
 
     let swatches = vec![
         "#ef4444".to_string(), "#f97316".to_string(), "#eab308".to_string(),
