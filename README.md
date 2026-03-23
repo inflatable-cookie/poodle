@@ -1,60 +1,67 @@
 # Poodle
 
-Poodle is a generalized UI system for teams that need the same documented
-component contract implemented in both Svelte and GPUI.
+Poodle is a multi-renderer design system with one shared contract surface and multiple runtime implementations.
+The repo currently ships and validates:
 
-It is intended to serve:
+- shared Rust contract crates for tokens, layout, style, primitives, composites, and workstation surfaces
+- a Svelte package set and browser preview surface
+- a GPUI native adapter, component library, and preview app
+- a Jetstream adapter, component library, and preview app
+- an Underlay bridge for host adoption without leaking Poodle-specific APIs into app code
 
-- desktop/workstation apps such as Loophole through shared tokens, primitives,
-  and reusable shell components
-- Underlay-based web apps through internal token and component adoption without
-  leaking Poodle into app code
+## Repo Shape
 
-## Documentation System
+Key package groups:
 
-Poodle uses a Northstar-shaped documentation surface under `docs/`.
+- `packages/contracts/*`
+  shared renderer-agnostic crates such as `poodle-primitives`, `poodle-composites`, and `poodle-tokens`
+- `packages/svelte/*`
+  published web packages such as `@poodle/svelte-primitives`, `@poodle/svelte-composites`, `@poodle/svelte-tokens`, and the docs or preview app
+- `packages/gpui/*`
+  native GPUI adapter, renderable components, and preview app
+- `packages/jetstream/*`
+  Jetstream adapter, renderable components, and preview app
+- `packages/bridges/underlay`
+  token and wrapper bridge for Underlay-hosted apps
+- `packages/tokens`
+  canonical token schema and artifact generation pipeline
 
-Start here:
+## Canonical Docs
 
-1. `docs/vision/001-poodle-vision.md`
-2. `docs/architecture/001-poodle-system-shape.md`
-3. `docs/roadmaps/README.md`
-4. `docs/roadmaps/g04/README.md`
+Start with these:
 
-## Current Direction
+1. [docs/vision/001-poodle-vision.md](/Users/betterthanclay/Dev/projects/poodle/docs/vision/001-poodle-vision.md)
+2. [docs/architecture/001-poodle-system-shape.md](/Users/betterthanclay/Dev/projects/poodle/docs/architecture/001-poodle-system-shape.md)
+3. [docs/roadmaps/README.md](/Users/betterthanclay/Dev/projects/poodle/docs/roadmaps/README.md)
+4. [docs/specs/README.md](/Users/betterthanclay/Dev/projects/poodle/docs/specs/README.md)
 
-Poodle is planned as:
+## Local Workflow
 
-- one semantic token system
-- one docs-first component contract surface
-- one Svelte implementation
-- one GPUI implementation
-- one Underlay bridge
-- one explicit extension boundary for app-specific systems such as Loophole's
-  DAW widgets
-
-## Local Preview
-
-The repo now includes a browser inspection surface at
-`packages/svelte/preview`.
-
-Run:
+Install dependencies and generate token artifacts:
 
 ```sh
 bun install
-bun run tokens:build
-bun run docs:dev
+bun packages/tokens/scripts/build-tokens.ts
 ```
 
-Then open `http://localhost:4173`.
+Common repo tasks:
 
-The docs surface now includes theme inspection, form and composite baselines,
-command discovery, workstation shell depth, dock regions, split views, surface
-tabs, token provenance, family navigation, and a host-owned layout snapshot
-readout.
+```sh
+effigy health
+bun run --cwd packages/svelte/preview dev
+cargo run -p poodle-gpui-preview --manifest-path packages/gpui/preview/Cargo.toml
+cargo run -p poodle-jetstream-preview --manifest-path packages/jetstream/preview/Cargo.toml
+```
+
+The default validation pass is `effigy health`.
+That runs docs lint, parity and accessibility artifact generation, and the Svelte production build.
+
+## Naming
+
+The repository root is `/Users/betterthanclay/Dev/projects/poodle`.
+Current package and crate namespaces use `poodle` and `@poodle/*`.
+Historical `pug` and `flint` references should be treated as migration leftovers unless they appear in explicit rename handoff docs.
 
 ## Next Task
 
-Open `docs/roadmaps/g04/015-gpui-demo-app-parity-implementation-and-side-by-side-review.md`
-and implement the same shared demo app in GPUI against the rebuilt Svelte
-target, with side-by-side review as the primary parity check.
+Do one broad downstream dependency sweep so consuming repos move from `flint` to `poodle` in package scopes, crate imports, Git remotes, and local path references.
