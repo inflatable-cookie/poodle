@@ -4,8 +4,8 @@ use pug_composites::{
     PickerShellSpec, PickerVariant, BrowseState, SelectionMode,
     RelationPickerSpec, PickerItemSpec,
 };
-use pug_gpui_components::{PickerShell, RelationPicker, TextInput};
-use pug_primitives::TextInputSpec;
+use pug_gpui_components::{PickerShell, RelationPicker, TextInput, OrderBy};
+use pug_primitives::{TextInputSpec, OrderBySpec, SortField, ActiveSort, SortDirection};
 use crate::app_state::AppState;
 use crate::style_bridge::color_to_hsla;
 use crate::PreviewRoot;
@@ -93,6 +93,43 @@ pub(crate) fn render(state: &AppState, _cx: &mut Context<PreviewRoot>) -> Div {
                     .child(result_row("Button", "Selected", text_primary, text_secondary))
                     .child(result_row("Dialog", "Selected", text_primary, text_secondary))
                     .child(result_row("Table", "", text_primary, text_secondary))
+            )
+        )
+
+        // --- OrderBy: Sort controls ---
+        .child(section_label("ORDER BY: SORT CONTROLS", text_secondary))
+        .child(
+            div().flex().flex_col().gap(px(8.0))
+                .child(
+                    OrderBy::from_spec(
+                        OrderBySpec::new()
+                            .with_fields(vec![
+                                SortField::new("name", "Name"),
+                                SortField::new("date", "Date"),
+                                SortField::new("size", "Size"),
+                                SortField::new("type", "Type").with_disabled(true),
+                            ])
+                            .with_active_sort(ActiveSort::new("name", SortDirection::Asc)),
+                        theme,
+                    )
+                )
+                .child(
+                    div().text_xs().text_color(color_to_hsla(text_secondary))
+                        .child("Sorted by: name (ascending)")
+                )
+        )
+
+        // --- OrderBy: Disabled ---
+        .child(section_label("ORDER BY: DISABLED", text_secondary))
+        .child(
+            OrderBy::from_spec(
+                OrderBySpec::new()
+                    .with_fields(vec![
+                        SortField::new("name", "Name"),
+                        SortField::new("date", "Date"),
+                    ])
+                    .with_disabled(true),
+                theme,
             )
         )
 

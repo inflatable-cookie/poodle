@@ -14,9 +14,9 @@ use pug_gpui_components::{
     PaginationSummary, SelectionSummary,
     ConfirmAction, SlugField, EmbedInput, EmbedPreview,
     LogList, LogEntry, LogLevel, FilterToolbar, InlineEditableField,
-    EditableList, Button,
+    EditableList, Button, BulkActionBar,
 };
-use pug_primitives::{ButtonSpec, ButtonVariant, StatusTone};
+use pug_primitives::{ButtonSpec, ButtonVariant, StatusTone, BulkActionBarSpec, BulkAction, BulkActionTone};
 use crate::app_state::AppState;
 use crate::style_bridge::color_to_hsla;
 use crate::PreviewRoot;
@@ -213,6 +213,36 @@ pub(crate) fn render(state: &AppState, _cx: &mut Context<PreviewRoot>) -> Div {
                 .child(
                     PaginationSummary::from_spec(
                         PaginationSummarySpec::new(5, 20, 1000),
+                        theme,
+                    )
+                )
+        )
+
+        // ── BulkActionBar ──────────────────────────────────────
+        .child(section_label("BULK ACTION BAR", text_secondary))
+        .child(
+            div().flex().flex_col().gap(px(8.0))
+                .child(
+                    BulkActionBar::from_spec(
+                        BulkActionBarSpec::new()
+                            .with_selection_count(5)
+                            .with_total_count(42)
+                            .with_actions(vec![
+                                BulkAction::new("export", "Export"),
+                                BulkAction::new("archive", "Archive"),
+                                BulkAction::new("delete", "Delete").with_tone(BulkActionTone::Danger),
+                            ]),
+                        theme,
+                    )
+                )
+                .child(
+                    BulkActionBar::from_spec(
+                        BulkActionBarSpec::new()
+                            .with_selection_count(1)
+                            .with_actions(vec![
+                                BulkAction::new("export", "Export"),
+                                BulkAction::new("archive", "Archive"),
+                            ]),
                         theme,
                     )
                 )
