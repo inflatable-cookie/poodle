@@ -142,8 +142,16 @@ impl IntoElement for Checkbox {
             .flex()
             .items_center()
             .gap(inline_gap)
-            // Focus ring on indicator via parent focus
-            .focus(move |s| s.border_color(focus_ring_color));
+            // Svelte: focus-visible outline with offset — approximate with border + shadow ring
+            .focus(move |s| s
+                .border_color(focus_ring_color)
+                .shadow(vec![gpui::BoxShadow {
+                    color: Hsla { a: focus_ring_color.a * 0.28, ..focus_ring_color },
+                    offset: point(px(0.0), px(0.0)),
+                    blur_radius: px(0.0),
+                    spread_radius: px(2.0),
+                }])
+            );
 
         if is_interactive {
             row = row.cursor_pointer();

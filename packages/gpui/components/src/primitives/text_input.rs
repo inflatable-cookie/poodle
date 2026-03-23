@@ -139,6 +139,14 @@ impl IntoElement for TextInput {
             "pug-input".to_string()
         };
 
+        // Svelte: validation state border colors
+        let effective_border = match spec.validation_state {
+            ValidationState::Invalid => resolve_color(theme, "semantic.color.status.danger"),
+            ValidationState::Valid => resolve_color(theme, "semantic.color.status.success"),
+            ValidationState::Pending => resolve_color(theme, "semantic.color.accent.base"),
+            _ => border,
+        };
+
         let mut el = div()
             .id(SharedString::from(id_str))
             .focusable()
@@ -147,14 +155,22 @@ impl IntoElement for TextInput {
             .rounded(control_radius)
             .bg(surface_bg)
             .border_1()
-            .border_color(border)
+            .border_color(effective_border)
             .flex()
             .items_center()
             .gap(inline_gap)
             .text_size(px(14.0))
             .text_color(text_primary)
-            // Contract: focus-within = border switches to focus ring color
-            .focus(move |s| s.border_color(focus_ring));
+            // Svelte: focus-within changes border + adds shadow ring at 28% opacity
+            .focus(move |s| s
+                .border_color(focus_ring)
+                .shadow(vec![gpui::BoxShadow {
+                    color: Hsla { a: focus_ring.a * 0.28, ..focus_ring },
+                    offset: point(px(0.0), px(0.0)),
+                    blur_radius: px(0.0),
+                    spread_radius: px(2.0),
+                }])
+            );
 
         if spec.is_disabled {
             el = el.opacity(disabled_opacity).cursor(CursorStyle::OperationNotAllowed);
