@@ -1,9 +1,8 @@
 use gpui::*;
 use pug_adapter::ThemeProvider;
 use pug_composites::AppHeaderSpec;
-use pug_gpui_components::{AppHeader, Button};
-use pug_primitives::{ButtonSpec, ButtonVariant, ControlSize, IconSpec, IconSize};
-use pug_gpui_components::Icon;
+use pug_gpui_components::{AppHeader, Button, IconButton};
+use pug_primitives::{ButtonSpec, ButtonVariant, ControlSize, IconButtonSpec};
 use pug_gpui::GpuiThemeProvider;
 use crate::style_bridge::color_to_hsla;
 
@@ -63,9 +62,9 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
             )
             .with_utility_items(
                 div().flex().items_center().gap(px(4.0))
-                    .child(icon_btn("search", theme))
-                    .child(icon_btn("bell", theme))
-                    .child(icon_btn("settings", theme))
+                    .child(IconButton::from_spec(IconButtonSpec::new().with_icon("search").with_size(ControlSize::Sm), theme).with_id("ah-search"))
+                    .child(IconButton::from_spec(IconButtonSpec::new().with_icon("bell").with_size(ControlSize::Sm), theme).with_id("ah-bell"))
+                    .child(IconButton::from_spec(IconButtonSpec::new().with_icon("settings").with_size(ControlSize::Sm), theme).with_id("ah-settings"))
             )
         )
 
@@ -100,7 +99,7 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
             )
             .with_utility_items(
                 div().flex().items_center()
-                    .child(icon_btn("settings", theme))
+                    .child(IconButton::from_spec(IconButtonSpec::new().with_icon("settings").with_size(ControlSize::Sm), theme).with_id("ah-settings2"))
             )
         )
 
@@ -136,24 +135,9 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
             )
             .with_utility_items(
                 div().flex().items_center().gap(px(4.0))
-                    .child(icon_btn("bell", theme))
-                    .child(icon_btn("user", theme))
+                    .child(IconButton::from_spec(IconButtonSpec::new().with_icon("bell").with_size(ControlSize::Sm), theme).with_id("ah-bell2"))
+                    .child(IconButton::from_spec(IconButtonSpec::new().with_icon("user").with_size(ControlSize::Sm), theme).with_id("ah-user"))
             )
-        )
-}
-
-fn icon_btn(name: &str, theme: &GpuiThemeProvider) -> Div {
-    let muted = theme.resolve_color("semantic.color.text.secondary");
-    div()
-        .flex().items_center().justify_center()
-        .w(px(28.0)).h(px(28.0)).rounded(px(4.0))
-        .cursor(CursorStyle::PointingHand)
-        .hover(|s| s.bg(hsla(0.0, 0.0, 0.5, 0.08)))
-        .child(
-            Icon::from_spec(
-                IconSpec::new(name).with_size(IconSize::Sm),
-                theme,
-            ).with_color(color_to_hsla(muted))
         )
 }
 
