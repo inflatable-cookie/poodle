@@ -36,6 +36,7 @@ mod checkbox;
 mod radio_group;
 mod switch;
 mod select;
+mod combobox;
 mod segmented_control;
 mod toggle_group;
 mod slider;
@@ -49,6 +50,8 @@ mod date_range_picker;
 mod time_field;
 mod date_time_picker;
 mod date_time_range_picker;
+mod time_zone_select;
+mod zoned_date_time_picker;
 
 // ── Feedback ──────────────────────────────────────────────
 mod progress;
@@ -79,14 +82,25 @@ mod menubar;
 
 // ── Composites ────────────────────────────────────────────
 mod data_table;
+mod table;
 mod detail_shell;
 mod cards;
+mod list_card;
 mod picker;
 mod page_structure;
+mod pagination;
 mod state_display;
 mod misc_composites;
+mod form_layout;
+mod reorderable_list;
 mod media;
 mod editors;
+
+// ── Layout Helpers ───────────────────────────────────────
+mod collapse_toggle;
+mod region;
+mod resize_handle;
+mod nav_card_grid;
 
 // ── App Shell ─────────────────────────────────────────────
 mod command_palette;
@@ -196,6 +210,7 @@ pub fn render_single_specimen(
         "radio-group" => specimen_card("RadioGroup", theme, radio_group::render(state, cx)),
         "switch" | "tri-state-switch" => specimen_card("Switch", theme, switch::render(state, cx)),
         "select" => specimen_card("Select", theme, select::render(state, cx)),
+        "combobox" => specimen_card("Combobox", theme, combobox::render(state, cx)),
         "segmented-control" => specimen_card("SegmentedControl", theme, segmented_control::render(state, cx)),
         "slider" => specimen_card("Slider", theme, slider::render(state, cx)),
         "range-slider" => specimen_card("RangeSlider", theme, range_slider::render(theme)),
@@ -207,6 +222,8 @@ pub fn render_single_specimen(
         "date-range-picker" => specimen_card("DateRangePicker", theme, date_range_picker::render(state, cx)),
         "date-time-picker" => specimen_card("DateTimePicker", theme, date_time_picker::render(state, cx)),
         "date-time-range-picker" => specimen_card("DateTimeRangePicker", theme, date_time_range_picker::render(state, cx)),
+        "time-zone-select" => specimen_card("TimeZoneSelect", theme, time_zone_select::render(state, cx)),
+        "zoned-date-time-picker" => specimen_card("ZonedDateTimePicker", theme, zoned_date_time_picker::render(state, cx)),
 
         // ── Feedback ────────────────────────────────────────────
         "progress" => specimen_card("Progress", theme, progress::render(theme)),
@@ -236,9 +253,14 @@ pub fn render_single_specimen(
         "menubar" => specimen_card("Menubar", theme, menubar::render(state, cx)),
 
         // ── Composites ──────────────────────────────────────────
+        "table" => specimen_card("Table", theme, table::render(theme)),
         "data-table" => specimen_card("DataTable", theme, data_table::render(state, cx)),
+        "list-card" => specimen_card("ListCard", theme, list_card::render(state, cx)),
+        "pagination" => specimen_card("Pagination", theme, pagination::render(theme)),
+        "form-layout" => specimen_card("FormLayout", theme, form_layout::render(state, cx)),
+        "reorderable-list" => specimen_card("ReorderableList", theme, reorderable_list::render(theme)),
         "detail-shell" | "detail-row" | "detail-section" => specimen_card("DetailShell", theme, detail_shell::render(theme)),
-        "nav-card" | "nav-card-grid" | "card" | "card-radio-group" => specimen_card("Cards", theme, cards::render(state, cx)),
+        "nav-card" | "card" | "card-radio-group" => specimen_card("Cards", theme, cards::render(state, cx)),
         "picker-shell" | "relation-picker" | "selection-summary" | "order-by" => specimen_card("PickerShell", theme, picker::render(state, cx)),
         "page-header" | "breadcrumbs" | "page-loading" | "pagination-summary" => specimen_card("Page Structure", theme, page_structure::render(theme)),
         "metric-tile" | "state-tile" | "empty-state" | "toast-stack" => specimen_card("State Display", theme, state_display::render(theme)),
@@ -249,6 +271,12 @@ pub fn render_single_specimen(
             specimen_card("Media", theme, media::render(state, cx))
         }
         "markdown-editor" | "block-editor" => specimen_card("Editors", theme, editors::render(theme)),
+
+        // ── Layout Helpers ─────────────────────────────────────
+        "collapse-toggle" => specimen_card("CollapseToggle", theme, collapse_toggle::render(state, cx)),
+        "region" => specimen_card("Region", theme, region::render(theme)),
+        "resize-handle" => specimen_card("ResizeHandle", theme, resize_handle::render(theme)),
+        "nav-card-grid" => specimen_card("NavCardGrid", theme, nav_card_grid::render(theme)),
 
         // ── App Shell ───────────────────────────────────────────
         "command-palette" => specimen_card("CommandPalette", theme, command_palette::render(state, cx)),

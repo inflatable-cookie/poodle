@@ -16,7 +16,7 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
         .child(
             div()
                 .flex()
-                .items_stretch()
+                .items_start()
                 .h(px(96.0))
                 .border_1()
                 .border_color(color_to_hsla(border_subtle))
@@ -56,7 +56,7 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
         .child(
             div()
                 .flex()
-                .items_stretch()
+                .items_start()
                 .h(px(96.0))
                 .border_1()
                 .border_color(color_to_hsla(border_subtle))
