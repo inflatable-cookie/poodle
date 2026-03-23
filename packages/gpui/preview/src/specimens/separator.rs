@@ -23,6 +23,23 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
                         .child("Content below".to_string()),
                 ),
         )
+        // --- Subtle tone ---
+        .child(section_label("SUBTLE TONE", text_secondary))
+        .child(
+            div().flex().flex_col().gap(px(8.0))
+                .child(
+                    div().text_sm().text_color(color_to_hsla(text_secondary))
+                        .child("Above subtle separator".to_string()),
+                )
+                .child(Separator::from_spec(
+                    SeparatorSpec::new().with_tone(RuleTone::Subtle),
+                    theme,
+                ))
+                .child(
+                    div().text_sm().text_color(color_to_hsla(text_secondary))
+                        .child("Below subtle separator".to_string()),
+                ),
+        )
         // --- Vertical ---
         .child(section_label("VERTICAL", text_secondary))
         .child(
@@ -54,6 +71,36 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
             SeparatorSpec::new().with_decorative(true),
             theme,
         ))
+        // --- In a list context ---
+        .child(section_label("IN A LIST CONTEXT", text_secondary))
+        .child(
+            div().flex().flex_col()
+                .child(list_item("Profile settings", text_secondary))
+                .child(Separator::from_spec(
+                    SeparatorSpec::new().with_tone(RuleTone::Subtle),
+                    theme,
+                ))
+                .child(list_item("Notification preferences", text_secondary))
+                .child(Separator::from_spec(
+                    SeparatorSpec::new().with_tone(RuleTone::Subtle),
+                    theme,
+                ))
+                .child(list_item("Security & privacy", text_secondary))
+                .child(Separator::from_spec(
+                    SeparatorSpec::new().with_tone(RuleTone::Subtle),
+                    theme,
+                ))
+                .child(list_item("Billing & plans", text_secondary))
+        )
+}
+
+fn list_item(label: &str, color: pug_tokens::typed::ColorValue) -> Div {
+    div()
+        .py(px(8.0))
+        .px(px(4.0))
+        .text_sm()
+        .text_color(color_to_hsla(color))
+        .child(label.to_string())
 }
 
 fn section_label(label: &str, color: pug_tokens::typed::ColorValue) -> Div {

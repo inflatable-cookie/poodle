@@ -1,6 +1,6 @@
 use gpui::*;
 use pug_adapter::ThemeProvider;
-use pug_primitives::{TableSpec, TableColumn, TableRow};
+use pug_primitives::{TableSpec, TableColumn, TableRow, ColumnAlign};
 use pug_gpui_components::Table;
 use pug_gpui::GpuiThemeProvider;
 
@@ -8,7 +8,7 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
     let text_secondary = theme.resolve_color("semantic.color.text.secondary");
 
     let columns = vec![
-        TableColumn::new("name", "Name"),
+        TableColumn::new("name", "Name").with_row_header(true),
         TableColumn::new("type", "Type"),
         TableColumn::new("status", "Status"),
         TableColumn::new("updated", "Updated"),
@@ -39,6 +39,47 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
             ("status".to_string(), "Draft".to_string()),
             ("updated".to_string(), "Today".to_string()),
         ]),
+        TableRow::new("5", vec![
+            ("name".to_string(), "Select".to_string()),
+            ("type".to_string(), "Primitive".to_string()),
+            ("status".to_string(), "Stable".to_string()),
+            ("updated".to_string(), "5 days ago".to_string()),
+        ]),
+    ];
+
+    // Numeric table with right-aligned columns
+    let num_columns = vec![
+        TableColumn::new("endpoint", "Endpoint").with_row_header(true),
+        TableColumn::new("requests", "Requests").with_align(ColumnAlign::End),
+        TableColumn::new("avg_ms", "Avg (ms)").with_align(ColumnAlign::End),
+        TableColumn::new("p99_ms", "P99 (ms)").with_align(ColumnAlign::End),
+    ];
+
+    let num_rows = vec![
+        TableRow::new("1", vec![
+            ("endpoint".to_string(), "/api/users".to_string()),
+            ("requests".to_string(), "14,230".to_string()),
+            ("avg_ms".to_string(), "42".to_string()),
+            ("p99_ms".to_string(), "187".to_string()),
+        ]),
+        TableRow::new("2", vec![
+            ("endpoint".to_string(), "/api/projects".to_string()),
+            ("requests".to_string(), "8,912".to_string()),
+            ("avg_ms".to_string(), "68".to_string()),
+            ("p99_ms".to_string(), "312".to_string()),
+        ]),
+        TableRow::new("3", vec![
+            ("endpoint".to_string(), "/api/auth".to_string()),
+            ("requests".to_string(), "3,456".to_string()),
+            ("avg_ms".to_string(), "23".to_string()),
+            ("p99_ms".to_string(), "95".to_string()),
+        ]),
+        TableRow::new("4", vec![
+            ("endpoint".to_string(), "/api/search".to_string()),
+            ("requests".to_string(), "1,087".to_string()),
+            ("avg_ms".to_string(), "156".to_string()),
+            ("p99_ms".to_string(), "890".to_string()),
+        ]),
     ];
 
     div().flex().flex_col().gap(px(24.0))
@@ -62,6 +103,18 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
                     .with_rows(rows)
                     .with_caption("Components in the design system")
                     .with_aria_label("Components table"),
+                theme,
+            )
+        )
+        // --- Right-aligned numeric data ---
+        .child(section_label("RIGHT-ALIGNED NUMERIC DATA", text_secondary))
+        .child(
+            Table::from_spec(
+                TableSpec::new()
+                    .with_columns(num_columns)
+                    .with_rows(num_rows)
+                    .with_caption("API endpoint performance metrics")
+                    .with_aria_label("Performance metrics"),
                 theme,
             )
         )

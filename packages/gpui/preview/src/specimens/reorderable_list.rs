@@ -11,8 +11,8 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
     let border = theme.resolve_color("semantic.color.border.subtle");
 
     div().flex().flex_col().gap(px(24.0)).max_w(px(400.0))
-        // --- Default ---
-        .child(section_label("DEFAULT", text_secondary))
+        // --- Drag to reorder ---
+        .child(section_label("DRAG TO REORDER (OR ALT+ARROW KEYS)", text_secondary))
         .child(
             ReorderableList::from_spec(ReorderableListSpec::new(), theme)
                 .with_child(list_item("Design tokens", text_primary, border))
@@ -28,6 +28,17 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
                 .with_child(list_item("First", text_primary, border))
                 .with_child(list_item("Second", text_primary, border))
                 .with_child(list_item("Third", text_primary, border))
+        )
+        // --- Disabled ---
+        .child(section_label("DISABLED", text_secondary))
+        .child(
+            ReorderableList::from_spec(
+                ReorderableListSpec::new().with_disabled(true),
+                theme,
+            )
+                .with_child(list_item("Locked item A", text_primary, border))
+                .with_child(list_item("Locked item B", text_primary, border))
+                .with_child(list_item("Locked item C", text_primary, border))
         )
 }
 
