@@ -118,6 +118,35 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
                 theme,
             )
         )
+        // --- Minimal key-value ---
+        .child(section_label("MINIMAL KEY-VALUE", text_secondary))
+        .child({
+            let kv_columns = vec![
+                TableColumn::new("key", "Property").with_row_header(true),
+                TableColumn::new("value", "Value"),
+            ];
+            let kv_rows = vec![
+                TableRow::new("1", vec![
+                    ("key".to_string(), "Version".to_string()),
+                    ("value".to_string(), "2.4.1".to_string()),
+                ]),
+                TableRow::new("2", vec![
+                    ("key".to_string(), "License".to_string()),
+                    ("value".to_string(), "MIT".to_string()),
+                ]),
+                TableRow::new("3", vec![
+                    ("key".to_string(), "Bundle size".to_string()),
+                    ("value".to_string(), "12.3 kB".to_string()),
+                ]),
+            ];
+            Table::from_spec(
+                TableSpec::new()
+                    .with_columns(kv_columns)
+                    .with_rows(kv_rows)
+                    .with_aria_label("Package info"),
+                theme,
+            )
+        })
         // --- Empty ---
         .child(section_label("EMPTY TABLE", text_secondary))
         .child(
