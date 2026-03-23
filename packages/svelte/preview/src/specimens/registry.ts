@@ -37,6 +37,7 @@ import EmbedPreviewSpecimen from "./EmbedPreviewSpecimen.svelte";
 import EmptyStateSpecimen from "./EmptyStateSpecimen.svelte";
 import EyebrowSpecimen from "./EyebrowSpecimen.svelte";
 import FieldSpecimen from "./FieldSpecimen.svelte";
+import FieldSetSpecimen from "./FieldSetSpecimen.svelte";
 import FileUploadSpecimen from "./FileUploadSpecimen.svelte";
 import FilterToolbarSpecimen from "./FilterToolbarSpecimen.svelte";
 import FormActionsSpecimen from "./FormActionsSpecimen.svelte";
@@ -160,6 +161,7 @@ export const specimenMap: Record<string, typeof SvelteComponent<any>> = {
   "empty-state": EmptyStateSpecimen,
   eyebrow: EyebrowSpecimen,
   field: FieldSpecimen,
+  "field-set": FieldSetSpecimen,
   "file-upload": FileUploadSpecimen,
   "filter-toolbar": FilterToolbarSpecimen,
   "form-actions": FormActionsSpecimen,

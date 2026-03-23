@@ -78,48 +78,35 @@ The Underlay `FormError` is a 17-line component with no behavior beyond conditio
 
 **Migration guidance:** Replace `<FormError message={error} />` with `<Callout tone="danger">{error}</Callout>` or use `FormLayout`'s `error` prop. If neither fits, a single `<p>` with Pug token-styled color is sufficient — this is not a component-level concern.
 
-### 3. FieldSet / FieldSetGrid — `stay_outside_pug`
+### 3. FieldSet — `belongs_in_pug` (revised)
 
-**What they do in Underlay:**
+**What it does in Underlay:** A `<fieldset>` wrapper with optional `legend` (styled as a small uppercase eyebrow), a `full` prop for grid-column spanning, and an inner grid container for child fields.
 
-- `FieldSet`: A `<fieldset>` wrapper with optional `legend` (styled as a small uppercase eyebrow), a `full` prop for grid-column spanning, and an inner grid container for child fields.
-- `FieldSetGrid`: A responsive multi-column grid container with progressive column breakpoints via container queries, `columns` prop (1–6 or "auto"), and `full` prop for spanning.
+**Analysis (revised):**
 
-**Analysis:**
+Initial review recommended composition over `Eyebrow` + `Grid`. On reconsideration, `FieldSet` earns its place as a named primitive:
 
-- `FieldSet` is semantically a `<fieldset>` with a legend — this is a valid accessibility pattern for grouping related fields. However:
-  - The legend styling is identical to the existing Pug `Eyebrow` component (small, uppercase, muted, letter-spaced).
-  - The inner layout is a single-column grid with a gap — this is just `Grid` or `Stack`.
-  - The `full` prop (`grid-column: 1 / -1`) is already supported by `Field`'s `span="full"` prop and works with any CSS grid child.
+- **Semantic HTML** — `<fieldset>` + `<legend>` is an actual accessibility contract. Screen readers announce the group label. Composition over `Eyebrow` + `Grid` doesn't give you that — developers would need to remember `<fieldset>` every time.
+- **Recurring pattern** — virtually every form with more than a few fields groups them. Every developer writes the same boilerplate without this.
+- **Declarative vocabulary** — `<FieldSet legend="Address" columns={2}>` reads instantly. The manual alternative is noisy and easy to get subtly wrong.
+- **Passes the eligibility rubric** — domain-neutral, stable contract, cross-app, no product nouns, pure UI structure + accessibility.
 
-- `FieldSetGrid` is a responsive CSS Grid layout with container-query breakpoints. However:
-  - Pug `Grid` already provides grid layout with `columns`, `gap`, and `padding`.
-  - Pug `FormLayout` already provides responsive multi-column form layout with breakpoints.
-  - The container-query responsive behavior in `FieldSetGrid` is useful but is **layout composition**, not a field-level or form-level design-system contract.
-  - The breakpoint logic is tightly coupled to Underlay's specific responsive thresholds (400px, 600px).
+**Decision: Add to Pug as a standalone primitive.**
 
-- The grouped-field question: Is there a real "field group" contract that Pug is missing?
-  - **No.** The semantic `<fieldset>` + `<legend>` pattern is just:
-    ```svelte
-    <fieldset>
-      <Eyebrow>{legend}</Eyebrow>
-      <Grid columns="repeat(2, 1fr)" gap="md">
-        <Field ...> ... </Field>
-        <Field ...> ... </Field>
-      </Grid>
-    </fieldset>
-    ```
-  - This is **composition over existing Pug primitives**, not a contract gap.
-  - A `FieldGroup` contract would need to carry real grouped-field semantics (coordinated validation, group-level error state, fieldset-level disabled state) to justify its existence as a standalone Pug contract. The Underlay `FieldSet` does not carry any of these — it is purely visual grouping with a legend.
+Contract shape:
 
-**Decision: Stay outside Pug. Composition over existing primitives.**
+```
+legend: string | null = null        — group label rendered as <legend>
+columns: number = 1                 — grid columns for child fields
+gap: SpaceScale = "md"              — gap between children
+span: number | "full" | null = null — column span in parent grid
+```
 
-Migration path:
-- Replace `<FieldSet legend="Personal Info">` with `<fieldset><Eyebrow>Personal Info</Eyebrow><Grid ...>` using Pug primitives
-- Replace `<FieldSetGrid columns={2}>` with `<Grid columns="repeat(2, 1fr)" gap="md">` or `<FormLayout columns={2}>`
-- The `full` prop maps to `style="grid-column: 1 / -1"` or `Field`'s `span="full"`
+### 4. FieldSetGrid — `stay_outside_pug`
 
-**Unresolved risk:** If future adoption reveals that coordinated group-level validation (all fields in a group sharing a validation state, group-level error message, group-level disabled state) is a real cross-app need, a `FieldGroup` contract could be opened. The current Underlay surfaces do not demonstrate this need — they are purely visual.
+**What it does in Underlay:** A responsive multi-column grid container with container-query breakpoints, `columns` prop (1–6 or "auto"), and `full` prop for spanning.
+
+**Decision: Stay outside Pug.** The responsive container-query breakpoint logic is tightly coupled to Underlay's specific thresholds (400px, 600px). The new `FieldSet` with its `columns` prop covers the static multi-column case. Apps that need progressive responsive collapse should compose `FieldSet` with their own container-query CSS or use `FormLayout`.
 
 ---
 
@@ -129,21 +116,17 @@ Migration path:
 |---------|----------|-----------|
 | `FieldHint` | `fold_into_existing_field` | Add `hint` prop to `Field`. Progressive-disclosure help is a standard field feature. |
 | `FormError` | Already covered | Maps to `FormLayout` `error` prop or `Callout` with `tone="danger"`. No new surface needed. |
-| `FieldSet` | `stay_outside_pug` | Visual grouping with a legend is composition over `Eyebrow` + `Grid`. No grouped-field contract gap. |
-| `FieldSetGrid` | `stay_outside_pug` | Responsive grid layout is composition over `Grid` or `FormLayout`. No contract gap. |
+| `FieldSet` | `belongs_in_pug` (revised) | Semantic `<fieldset>` + `<legend>` is an accessibility contract. Recurring pattern, declarative vocabulary. Added as a standalone primitive. |
+| `FieldSetGrid` | `stay_outside_pug` | Responsive container-query breakpoints are Underlay-specific. `FieldSet` + `FormLayout` cover the static case. |
 
 ## Pug Implementation Work
 
-**One item:** Add `hint` prop to `Field.svelte`.
+**Two items:**
 
-This is a small, backward-compatible addition. The implementation should:
+1. **Add `hint` prop to `Field.svelte`** — progressive-disclosure help via info-icon tooltip.
+2. **Add `FieldSet.svelte` primitive** — semantic `<fieldset>` + `<legend>` with grid layout.
 
-1. Add `hint: string | null = null` prop
-2. Render an inline info-icon trigger next to the label when `hint` is set
-3. Display the hint in a `Tooltip` (preferred for short text) positioned above the trigger
-4. Use the built-in `info` icon at label-adjacent scale
-5. Update the component-docs entry for `Field`
-6. Update the `FieldSpecimen` to demonstrate the hint
+Both are small, backward-compatible additions. Both have been implemented, with specimens, docs, and guide updates.
 
 ## Underlay Inventory Update
 

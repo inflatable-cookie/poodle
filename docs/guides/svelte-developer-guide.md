@@ -578,6 +578,39 @@ For multi-field forms, use `FormLayout` from composites:
 
 `FormLayout` provides responsive grid layout (6-col desktop → 2-col tablet → 1-col mobile) and renders form-level error/success messages via `error` and `success` props.
 
+### FieldSet (semantic grouping)
+
+Use `FieldSet` to group related fields with a semantic `<fieldset>` and `<legend>`. Screen readers announce the legend as the group name:
+
+```svelte
+<script>
+  import { FieldSet, Field, TextInput, Select } from "@pug/svelte-primitives";
+</script>
+
+<FieldSet legend="Contact Information">
+  <Field id="name" label="Full Name" isRequired>
+    <TextInput id="name" />
+  </Field>
+  <Field id="email" label="Email" isRequired>
+    <TextInput id="email" type="email" />
+  </Field>
+</FieldSet>
+
+<FieldSet legend="Address" columns={2}>
+  <Field id="street" label="Street" span="full">
+    <TextInput id="street" />
+  </Field>
+  <Field id="city" label="City">
+    <TextInput id="city" />
+  </Field>
+  <Field id="state" label="State">
+    <Select id="state" options={stateOptions} />
+  </Field>
+</FieldSet>
+```
+
+Props: `legend` (group label), `columns` (grid columns, default 1), `gap` (`SpaceScale`, default "md"), `span` (column span in parent grid). The legend is styled as an uppercase eyebrow. Child `Field` components can use `span="full"` to span all columns.
+
 ---
 
 ## Layout Components

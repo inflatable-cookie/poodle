@@ -1109,6 +1109,34 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
 </Field>`,
   },
 
+  "field-set": {
+    props: [
+      { name: "legend", type: "string | null", default: "null", description: "Group label rendered as a <legend> element. Styled as an uppercase eyebrow. Screen readers announce this as the group name." },
+      { name: "columns", type: "number", default: "1", description: "Number of grid columns for the child fields." },
+      { name: "gap", type: "SpaceScale", default: '"md"', description: "Gap between child fields." },
+      { name: "span", type: 'number | "full" | null', default: "null", description: "Column span within a parent form grid layout." },
+    ],
+    slots: [
+      { name: "default", description: "Child Field components and other form content." },
+    ],
+    events: [],
+    usage: `<script lang="ts">
+  import { FieldSet, Field, TextInput } from "@pug/svelte-primitives";
+</script>
+
+<FieldSet legend="Address" columns={2}>
+  <Field id="street" label="Street" span="full">
+    <TextInput id="street" />
+  </Field>
+  <Field id="city" label="City">
+    <TextInput id="city" />
+  </Field>
+  <Field id="zip" label="ZIP Code">
+    <TextInput id="zip" />
+  </Field>
+</FieldSet>`,
+  },
+
   "file-upload": {
     props: [
       { name: "accept", type: "string | null", default: "null", description: "Accepted file types (e.g. 'image/*,.pdf')." },

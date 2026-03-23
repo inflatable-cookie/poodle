@@ -25,6 +25,7 @@ export { default as DurationInput } from "./DurationInput.svelte";
 export { default as EditableLabel } from "./EditableLabel.svelte";
 export { default as Eyebrow } from "./Eyebrow.svelte";
 export { default as Field } from "./Field.svelte";
+export { default as FieldSet } from "./FieldSet.svelte";
 export { default as FileUpload } from "./FileUpload.svelte";
 export { default as FormActions } from "./FormActions.svelte";
 export { default as Grid } from "./Grid.svelte";
