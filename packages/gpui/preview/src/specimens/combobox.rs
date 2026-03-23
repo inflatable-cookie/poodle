@@ -20,18 +20,19 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
         ComboboxOption::new("preact", "Preact"),
     ];
 
-    let country_options = vec![
-        ComboboxOption::new("us", "United States"),
-        ComboboxOption::new("uk", "United Kingdom"),
-        ComboboxOption::new("ca", "Canada"),
-        ComboboxOption::new("au", "Australia"),
-        ComboboxOption::new("de", "Germany"),
-        ComboboxOption::new("fr", "France"),
-        ComboboxOption::new("jp", "Japan"),
+    let db_options = vec![
+        ComboboxOption::new("postgres", "PostgreSQL")
+            .with_description("Advanced open-source relational database"),
+        ComboboxOption::new("mongo", "MongoDB")
+            .with_description("Document-oriented NoSQL database"),
+        ComboboxOption::new("redis", "Redis")
+            .with_description("In-memory key-value data store"),
+        ComboboxOption::new("sqlite", "SQLite")
+            .with_description("Lightweight embedded SQL engine"),
     ];
 
     let selected_framework = state.specimens.text.get("combobox-framework").cloned();
-    let selected_country = state.specimens.text.get("combobox-country").cloned();
+    let selected_db = state.specimens.text.get("combobox-db").cloned();
 
     div().flex().flex_col().gap(px(16.0)).max_w(px(320.0))
         // --- Default ---
@@ -62,30 +63,33 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                     )
                 })
         )
-        // --- With default value ---
-        .child(section_label("WITH DEFAULT VALUE", text_secondary))
+        // --- With descriptions ---
+        .child(section_label("WITH DESCRIPTIONS", text_secondary))
         .child(
             div().flex().flex_col().gap(px(4.0))
                 .child({
-                    let val = selected_country.as_deref().unwrap_or("us");
-                    let spec = ComboboxSpec::new()
-                        .with_options(country_options)
-                        .with_value(val)
-                        .with_placeholder("Select a country…");
+                    let mut spec = ComboboxSpec::new()
+                        .with_options(db_options)
+                        .with_placeholder("Select a database…");
+                    if let Some(ref val) = selected_db {
+                        spec = spec.with_value(val);
+                    }
                     Combobox::from_spec(spec, theme)
-                        .with_id("country")
+                        .with_id("database")
                         .on_change(cx.listener(|this, val: &str, _w, cx| {
                             this.state.specimens.text.insert(
-                                "combobox-country".to_string(),
+                                "combobox-db".to_string(),
                                 val.to_string(),
                             );
                             cx.notify();
                         }))
                 })
-                .child(
-                    div().text_sm().text_color(color_to_hsla(text_secondary))
-                        .child(format!("Selected: {}", selected_country.as_deref().unwrap_or("us")))
-                )
+                .when(selected_db.is_some(), |d| {
+                    d.child(
+                        div().text_sm().text_color(color_to_hsla(text_secondary))
+                            .child(format!("Selected: {}", selected_db.as_deref().unwrap_or("")))
+                    )
+                })
         )
         // --- Disabled ---
         .child(section_label("DISABLED", text_secondary))
