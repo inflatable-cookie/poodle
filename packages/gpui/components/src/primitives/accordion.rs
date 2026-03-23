@@ -20,6 +20,7 @@ pub struct Accordion {
     theme: GpuiThemeProvider,
     id_prefix: String,
     on_toggle: Option<Rc<dyn Fn(&str, &mut Window, &mut App) + 'static>>,
+    content: Vec<(String, AnyElement)>,
 }
 
 impl std::ops::Deref for Accordion {
@@ -29,7 +30,7 @@ impl std::ops::Deref for Accordion {
 
 impl Accordion {
     pub fn new(theme: &GpuiThemeProvider) -> Self {
-        Self { spec: AccordionSpec::default(), theme: theme.clone(), id_prefix: String::new(), on_toggle: None }
+        Self { spec: AccordionSpec::default(), theme: theme.clone(), id_prefix: String::new(), on_toggle: None, content: Vec::new() }
     }
 
     pub fn from_spec(spec: AccordionSpec, theme: &GpuiThemeProvider) -> Self {
@@ -38,6 +39,7 @@ impl Accordion {
             theme: theme.clone(),
             id_prefix: "pug-accordion".to_string(),
             on_toggle: None,
+            content: Vec::new(),
         }
     }
 
@@ -49,6 +51,11 @@ impl Accordion {
     pub fn collapsible(mut self, v: bool) -> Self { self.spec.is_collapsible = v; self }
     pub fn aria_label(mut self, v: impl Into<String>) -> Self { self.spec.aria_label = Some(v.into()); self }
 
+    /// Add content for a specific item value, shown when that item is expanded.
+    pub fn with_content(mut self, value: impl Into<String>, content: impl IntoElement) -> Self {
+        self.content.push((value.into(), content.into_any_element()));
+        self
+    }
 
     pub fn with_id(mut self, prefix: impl Into<String>) -> Self {
         self.id_prefix = prefix.into();
@@ -90,6 +97,12 @@ impl IntoElement for Accordion {
         let _inset_highlight = Hsla { a: text_inverse.a * 0.08, ..text_inverse };
 
         let expanded = self.spec.expanded_values();
+
+        // Build content map from the content vec
+        let mut content_map: std::collections::HashMap<String, AnyElement> = std::collections::HashMap::new();
+        for (key, el) in self.content {
+            content_map.insert(key, el);
+        }
 
         // Outer container: grid with gap between items
         let mut col = div().flex().flex_col().gap(stack_md);
@@ -195,9 +208,14 @@ impl IntoElement for Accordion {
 
             item_card = item_card.child(trigger);
 
-            // Panel content (when expanded) — slot content goes here
-            // Currently we don't have slot-based content, so panel is empty
-            // The description is shown in the trigger per Svelte's layout
+            // Panel content (when expanded)
+            if is_open {
+                if let Some(panel_content) = content_map.remove(&item.value) {
+                    item_card = item_card.child(
+                        div().min_w(px(0.0)).child(panel_content)
+                    );
+                }
+            }
 
             col = col.child(item_card);
         }

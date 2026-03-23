@@ -1,57 +1,64 @@
 use gpui::*;
-use pug_adapter::ThemeProvider;
-use pug_primitives::CheckboxSpec;
-use pug_gpui_components::Checkbox;
+use pug_primitives::{CheckboxSpec, EyebrowSpec};
+use pug_gpui_components::{Checkbox, Eyebrow};
 use crate::app_state::AppState;
-use crate::style_bridge::color_to_hsla;
 use crate::PreviewRoot;
 
 pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
     let theme = &state.theme;
-    let text_secondary = theme.resolve_color("semantic.color.text.secondary");
 
-    div().flex().flex_col().gap(px(16.0))
+    div().flex().flex_col().gap(px(24.0))
         // --- Default ---
-        .child(section_label("DEFAULT", text_secondary))
-        .child({
-            let items: &[(&str, &str)] = &[
-                ("checkbox-email", "Enable email notifications"),
-                ("checkbox-marketing", "Subscribe to marketing emails"),
-                ("checkbox-terms", "I agree to the terms and conditions"),
-            ];
-            let mut col = div().flex().flex_col().gap(px(12.0));
-            for &(key, label) in items {
-                let checked = state.specimens.is_on(key);
-                let key_owned = key.to_string();
-                col = col.child(
-                    Checkbox::from_spec(
-                        CheckboxSpec::new()
-                            .with_checked(checked)
-                            .with_label(label),
-                        theme,
-                    )
-                    .with_id(key)
-                    .on_change(cx.listener(move |this, _checked: &bool, _w, cx| {
-                        this.state.specimens.toggle(&key_owned);
-                        cx.notify();
-                    }))
-                );
-            }
-            col
-        })
-        // --- States ---
-        .child(section_label("STATES", text_secondary))
         .child(
-            div().flex().flex_col().gap(px(12.0))
+            div().flex().flex_col().gap(px(10.0))
+                .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Default"), theme))
+                .child({
+                    let items: &[(&str, &str, bool)] = &[
+                        ("checkbox-email", "Enable email notifications", true),
+                        ("checkbox-marketing", "Subscribe to marketing emails", false),
+                        ("checkbox-terms", "I agree to the terms and conditions", false),
+                    ];
+                    let mut col = div().flex().flex_col().gap(px(10.0));
+                    for &(key, label, default) in items {
+                        let init_key = format!("{key}__init");
+                        let checked = if !state.specimens.is_on(&init_key) {
+                            default
+                        } else {
+                            state.specimens.is_on(key)
+                        };
+                        let key_owned = key.to_string();
+                        let init_key_owned = init_key.clone();
+                        col = col.child(
+                            Checkbox::from_spec(
+                                CheckboxSpec::new()
+                                    .with_checked(checked)
+                                    .with_label(label),
+                                theme,
+                            )
+                            .with_id(key)
+                            .on_change(cx.listener(move |this, _checked: &bool, _w, cx| {
+                                if !this.state.specimens.is_on(&init_key_owned) {
+                                    this.state.specimens.toggle(&init_key_owned);
+                                }
+                                this.state.specimens.toggle(&key_owned);
+                                cx.notify();
+                            }))
+                        );
+                    }
+                    col
+                })
+        )
+        // --- States ---
+        .child(
+            div().flex().flex_col().gap(px(10.0))
+                .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("States"), theme))
                 .child(
                     Checkbox::from_spec(
                         CheckboxSpec::new()
-                            .with_checked(false)
                             .with_disabled(true)
                             .with_label("Disabled unchecked"),
                         theme,
-                    )
-                    .with_id("cb-disabled-unchecked")
+                    ).with_id("cb-disabled-unchecked")
                 )
                 .child(
                     Checkbox::from_spec(
@@ -60,8 +67,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                             .with_disabled(true)
                             .with_label("Disabled checked"),
                         theme,
-                    )
-                    .with_id("cb-disabled-checked")
+                    ).with_id("cb-disabled-checked")
                 )
                 .child(
                     Checkbox::from_spec(
@@ -69,27 +75,16 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                             .with_mixed(true)
                             .with_label("Mixed / indeterminate"),
                         theme,
-                    )
-                    .with_id("cb-mixed")
+                    ).with_id("cb-mixed")
                 )
                 .child(
                     Checkbox::from_spec(
                         CheckboxSpec::new()
                             .with_checked(true)
-                            .with_disabled(true)
+                            .with_read_only(true)
                             .with_label("Read-only checked"),
                         theme,
-                    )
-                    .with_id("cb-readonly-checked")
+                    ).with_id("cb-readonly-checked")
                 )
         )
-}
-
-fn section_label(label: &str, color: pug_tokens::typed::ColorValue) -> Div {
-    div()
-        .text_xs()
-        .font_weight(FontWeight::SEMIBOLD)
-        .text_color(color_to_hsla(color))
-        .child(label.to_string())
-        .mb(px(2.0))
 }
