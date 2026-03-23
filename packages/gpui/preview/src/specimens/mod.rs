@@ -182,7 +182,7 @@ pub fn render_single_specimen(
         "surface" => specimen_card("Surface", theme, surface::render(theme)),
         "separator" => specimen_card("Separator", theme, separator::render(theme)),
         "scroll-shell" => specimen_card("ScrollShell", theme, scroll_shell::render(theme)),
-        "callout" => specimen_card("Callout", theme, callout::render(theme)),
+        "callout" => specimen_card("Callout", theme, callout::render(state, cx)),
         "spacer" => specimen_card("Spacer", theme, spacer::render(theme)),
 
         // ── Foundation ──────────────────────────────────────────

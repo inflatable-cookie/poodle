@@ -1,11 +1,17 @@
 use gpui::*;
 use pug_adapter::ThemeProvider;
-use pug_gpui::GpuiThemeProvider;
 use pug_primitives::{CallOutSpec, StatusTone};
 use pug_gpui_components::Callout;
+use crate::app_state::AppState;
+use crate::style_bridge::color_to_hsla;
+use crate::PreviewRoot;
 
-pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
+pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
+    let theme = &state.theme;
     let text_secondary = theme.resolve_color("semantic.color.text.secondary");
+
+    let dismissed_info = state.specimens.is_on("callout-dismissed-info");
+    let dismissed_warning = state.specimens.is_on("callout-dismissed-warning");
 
     div().flex().flex_col().gap(px(16.0))
         // --- Tones ---
@@ -48,28 +54,49 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
                     theme,
                 ))
         )
-        // --- Message prop ---
-        .child(section_label("MESSAGE PROP", text_secondary))
-        .child(
-            Callout::from_spec(
-                CallOutSpec::new()
-                    .with_tone(StatusTone::Info)
-                    .with_title("Information")
-                    .with_content("This is an informational callout using the message prop instead of slot content."),
-                theme,
-            )
-        )
+
         // --- Dismissible ---
         .child(section_label("DISMISSIBLE", text_secondary))
         .child(
-            Callout::from_spec(
-                CallOutSpec::new()
-                    .with_tone(StatusTone::Info)
-                    .with_title("Dismissible callout")
-                    .with_content("This callout can be dismissed by the user."),
-                theme,
-            )
+            div().flex().flex_col().gap(px(8.0))
+                .child(if !dismissed_info {
+                    Callout::from_spec(
+                        CallOutSpec::new()
+                            .with_tone(StatusTone::Info)
+                            .with_title("Dismissible info")
+                            .with_content("Click the dismiss button to hide this callout."),
+                        theme,
+                    )
+                    .on_dismiss(cx.listener(|this, _e: &ClickEvent, _w, cx| {
+                        this.state.specimens.toggles.insert("callout-dismissed-info".to_string(), true);
+                        cx.notify();
+                    }))
+                    .into_any_element()
+                } else {
+                    div().text_xs().text_color(color_to_hsla(text_secondary))
+                        .child("Info callout dismissed.")
+                        .into_any_element()
+                })
+                .child(if !dismissed_warning {
+                    Callout::from_spec(
+                        CallOutSpec::new()
+                            .with_tone(StatusTone::Warning)
+                            .with_title("Dismissible warning")
+                            .with_content("This warning can also be dismissed."),
+                        theme,
+                    )
+                    .on_dismiss(cx.listener(|this, _e: &ClickEvent, _w, cx| {
+                        this.state.specimens.toggles.insert("callout-dismissed-warning".to_string(), true);
+                        cx.notify();
+                    }))
+                    .into_any_element()
+                } else {
+                    div().text_xs().text_color(color_to_hsla(text_secondary))
+                        .child("Warning callout dismissed.")
+                        .into_any_element()
+                })
         )
+
         // --- Without title ---
         .child(section_label("WITHOUT TITLE", text_secondary))
         .child(
@@ -80,13 +107,25 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
                 theme,
             )
         )
+
+        // --- Pending tone ---
+        .child(section_label("PENDING", text_secondary))
+        .child(
+            Callout::from_spec(
+                CallOutSpec::new()
+                    .with_tone(StatusTone::Pending)
+                    .with_title("In progress")
+                    .with_content("Your deployment is being processed. This may take a few minutes."),
+                theme,
+            )
+        )
 }
 
 fn section_label(label: &str, color: pug_tokens::typed::ColorValue) -> Div {
     div()
         .text_xs()
         .font_weight(FontWeight::SEMIBOLD)
-        .text_color(crate::style_bridge::color_to_hsla(color))
+        .text_color(color_to_hsla(color))
         .child(label.to_string())
         .mb(px(2.0))
 }
