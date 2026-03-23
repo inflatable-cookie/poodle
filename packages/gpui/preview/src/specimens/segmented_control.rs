@@ -3,6 +3,7 @@ use pug_adapter::ThemeProvider;
 use pug_primitives::{SegmentedControlSpec, ChoiceOption};
 use pug_gpui_components::SegmentedControl;
 use crate::app_state::AppState;
+use crate::style_bridge::color_to_hsla;
 use crate::PreviewRoot;
 
 pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
@@ -16,16 +17,13 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
         ChoiceOption::new("table", "Table"),
     ];
 
-    let selected = state.specimens.selected("segmented");
-    let selected_value = match selected {
-        0 => "grid",
-        1 => "list",
-        2 => "table",
-        _ => "grid",
-    };
+    let selected_value = state.specimens.text.get("segmented-value")
+        .map(|s| s.as_str())
+        .unwrap_or("grid")
+        .to_string();
 
     let default_spec = SegmentedControlSpec::new(view_options.clone())
-        .with_default_value(selected_value);
+        .with_default_value(&selected_value);
 
     // --- With disabled option: All / Active / Archived / Draft (disabled), defaultValue="all" ---
     let status_options: Vec<ChoiceOption> = vec![
@@ -52,15 +50,14 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                     SegmentedControl::from_spec(default_spec, theme)
                         .with_id("seg-default")
                         .on_change(cx.listener(|this, value: &str, _w, cx| {
-                            let idx = match value {
-                                "grid" => 0,
-                                "list" => 1,
-                                "table" => 2,
-                                _ => 0,
-                            };
-                            this.state.specimens.select("segmented", idx);
+                            this.state.specimens.text.insert("segmented-value".to_string(), value.to_string());
                             cx.notify();
                         }))
+                )
+                .child(
+                    div().text_sm()
+                        .text_color(color_to_hsla(text_secondary))
+                        .child(format!("Selected: {}", selected_value))
                 )
         )
         // --- With disabled option ---

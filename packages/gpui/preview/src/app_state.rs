@@ -183,8 +183,13 @@ pub struct SpecimenState {
 
 impl SpecimenState {
     pub fn new() -> Self {
+        // Initialize default toggle values matching Svelte specimen defaults
+        let mut toggles = HashMap::new();
+        toggles.insert("switch-dark-mode".to_string(), true);
+        toggles.insert("switch-compact".to_string(), true);
+        toggles.insert("checkbox-email".to_string(), true);
         Self {
-            toggles: HashMap::new(),
+            toggles,
             selections: HashMap::new(),
             counters: HashMap::new(),
             text: HashMap::new(),

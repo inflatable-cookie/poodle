@@ -1,4 +1,5 @@
 use gpui::*;
+use gpui::prelude::FluentBuilder;
 use pug_adapter::ThemeProvider;
 use pug_primitives::{
     ButtonSpec, ButtonVariant, ControlSize, SeparatorSpec, SeparatorOrientation,
@@ -9,9 +10,12 @@ use crate::app_state::AppState;
 use crate::style_bridge::color_to_hsla;
 use crate::PreviewRoot;
 
-pub(crate) fn render(state: &AppState, _cx: &mut Context<PreviewRoot>) -> Div {
+pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
     let theme = &state.theme;
     let text_secondary = theme.resolve_color("semantic.color.text.secondary");
+    let last_action = state.specimens.text.get("toolbar-last")
+        .cloned()
+        .unwrap_or_default();
 
     div().flex().flex_col().gap(px(16.0))
         // --- Horizontal (default) ---
@@ -31,6 +35,10 @@ pub(crate) fn render(state: &AppState, _cx: &mut Context<PreviewRoot>) -> Div {
                     theme,
                 )
                 .with_id("toolbar-bold")
+                .on_click(cx.listener(|this, _e: &ClickEvent, _w, cx| {
+                    this.state.specimens.text.insert("toolbar-last".to_string(), "Bold".to_string());
+                    cx.notify();
+                }))
             )
             .child(
                 Button::from_spec(
@@ -41,6 +49,10 @@ pub(crate) fn render(state: &AppState, _cx: &mut Context<PreviewRoot>) -> Div {
                     theme,
                 )
                 .with_id("toolbar-italic")
+                .on_click(cx.listener(|this, _e: &ClickEvent, _w, cx| {
+                    this.state.specimens.text.insert("toolbar-last".to_string(), "Italic".to_string());
+                    cx.notify();
+                }))
             )
             .child(
                 Button::from_spec(
@@ -136,8 +148,19 @@ pub(crate) fn render(state: &AppState, _cx: &mut Context<PreviewRoot>) -> Div {
                     theme,
                 )
                 .with_id("toolbar-publish")
+                .on_click(cx.listener(|this, _e: &ClickEvent, _w, cx| {
+                    this.state.specimens.text.insert("toolbar-last".to_string(), "Publish".to_string());
+                    cx.notify();
+                }))
             )
         )
+        // --- Last action feedback ---
+        .when(!last_action.is_empty(), |d| {
+            d.child(
+                div().text_sm().text_color(color_to_hsla(text_secondary))
+                    .child(format!("Last action: {}", last_action))
+            )
+        })
 }
 
 fn section_label(label: &str, color: pug_tokens::typed::ColorValue) -> Div {

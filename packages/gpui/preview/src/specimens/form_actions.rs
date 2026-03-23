@@ -1,4 +1,5 @@
 use gpui::*;
+use gpui::prelude::FluentBuilder;
 use pug_adapter::ThemeProvider;
 use pug_primitives::{ButtonSpec, ButtonTone, ButtonVariant, FormActionAlign, FormActionsSpec};
 use pug_gpui_components::{Button, FormActions};
@@ -6,9 +7,12 @@ use crate::app_state::AppState;
 use crate::style_bridge::color_to_hsla;
 use crate::PreviewRoot;
 
-pub(crate) fn render(state: &AppState, _cx: &mut Context<PreviewRoot>) -> Div {
+pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
     let theme = &state.theme;
     let text_secondary = theme.resolve_color("semantic.color.text.secondary");
+    let last_action = state.specimens.text.get("form-action-last")
+        .cloned()
+        .unwrap_or_default();
 
     div().flex().flex_col().gap(px(24.0))
         // --- End-aligned (default) ---
@@ -23,6 +27,10 @@ pub(crate) fn render(state: &AppState, _cx: &mut Context<PreviewRoot>) -> Div {
                         theme,
                     )
                     .with_id("fa-cancel-end")
+                    .on_click(cx.listener(|this, _e: &ClickEvent, _w, cx| {
+                        this.state.specimens.text.insert("form-action-last".to_string(), "Cancel".to_string());
+                        cx.notify();
+                    }))
                 )
                 .with_action(
                     Button::from_spec(
@@ -32,6 +40,10 @@ pub(crate) fn render(state: &AppState, _cx: &mut Context<PreviewRoot>) -> Div {
                         theme,
                     )
                     .with_id("fa-save-end")
+                    .on_click(cx.listener(|this, _e: &ClickEvent, _w, cx| {
+                        this.state.specimens.text.insert("form-action-last".to_string(), "Save changes".to_string());
+                        cx.notify();
+                    }))
                 )
         )
         // --- Start-aligned ---
@@ -85,8 +97,19 @@ pub(crate) fn render(state: &AppState, _cx: &mut Context<PreviewRoot>) -> Div {
                         theme,
                     )
                     .with_id("fa-save-between")
+                    .on_click(cx.listener(|this, _e: &ClickEvent, _w, cx| {
+                        this.state.specimens.text.insert("form-action-last".to_string(), "Save".to_string());
+                        cx.notify();
+                    }))
                 )
         )
+        // --- Last action feedback ---
+        .when(!last_action.is_empty(), |d| {
+            d.child(
+                div().text_sm().text_color(color_to_hsla(text_secondary))
+                    .child(format!("Last action: {}", last_action))
+            )
+        })
 }
 
 fn section_label(label: &str, color: pug_tokens::typed::ColorValue) -> Div {

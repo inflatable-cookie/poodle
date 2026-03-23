@@ -1,4 +1,5 @@
 use gpui::*;
+use gpui::prelude::FluentBuilder;
 use pug_adapter::ThemeProvider;
 use pug_primitives::{SelectSpec, ChoiceOption};
 use pug_gpui_components::Select;
@@ -70,6 +71,13 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                             cx.notify();
                         }))
                 )
+                .when(default_value.is_some(), |d| {
+                    d.child(
+                        div().text_sm()
+                            .text_color(color_to_hsla(text_secondary))
+                            .child(format!("Selected: {}", default_value.as_deref().unwrap_or("")))
+                    )
+                })
         })
         // --- Grouped options ---
         .child(section_label("GROUPED OPTIONS", text_secondary))
@@ -95,6 +103,13 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                             cx.notify();
                         }))
                 )
+                .when(grouped_value.is_some(), |d| {
+                    d.child(
+                        div().text_sm()
+                            .text_color(color_to_hsla(text_secondary))
+                            .child(format!("Selected: {}", grouped_value.as_deref().unwrap_or("")))
+                    )
+                })
         })
         // --- Disabled ---
         .child(section_label("DISABLED", text_secondary))
