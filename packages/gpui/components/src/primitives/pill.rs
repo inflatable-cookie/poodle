@@ -136,11 +136,15 @@ impl IntoElement for Pill {
             .flex()
             .items_center()
             .justify_center()
-            .gap(inline_gap)
-            .child(spec.label.clone());
+            .gap(inline_gap);
 
-        // Badge: uppercase text
-        // NOTE: GPUI doesn't have text-transform; we rely on the label being passed uppercase
+        // Badge: auto-uppercase the label (Svelte uses CSS text-transform)
+        let display_label = if spec.appearance == PillAppearance::Badge {
+            spec.label.to_uppercase()
+        } else {
+            spec.label.clone()
+        };
+        el = el.child(display_label);
 
         el = el.focus(move |s| s.border_color(focus_ring));
 
