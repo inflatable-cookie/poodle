@@ -1079,7 +1079,8 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
     props: [
       { name: "id", type: "string", required: true, description: "Unique identifier for the field, used to connect label and input." },
       { name: "label", type: "string", required: true, description: "Label text for the field." },
-      { name: "description", type: "string | null", default: "null", description: "Help text shown below the label." },
+      { name: "description", type: "string | null", default: "null", description: "Help text shown below the label (always visible)." },
+      { name: "hint", type: "string | null", default: "null", description: "Progressive-disclosure help text shown in a tooltip when the user hovers/focuses the info icon next to the label." },
       { name: "error", type: "string | null", default: "null", description: "Error message displayed when validation fails." },
       { name: "pendingMessage", type: "string | null", default: "null", description: "Message shown while validation is pending." },
       { name: "validationState", type: "ValidationState", default: '"none"', description: "Current validation state of the field." },
@@ -1100,6 +1101,11 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
 
 <Field id="email" label="Email address" description="We'll never share your email." isRequired>
   <input id="email" type="email" bind:value={email} />
+</Field>
+
+<!-- With progressive-disclosure hint -->
+<Field id="slug" label="URL Slug" hint="A URL-friendly identifier. Lowercase letters, numbers, and hyphens only.">
+  <input id="slug" type="text" />
 </Field>`,
   },
 

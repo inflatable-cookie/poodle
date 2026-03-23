@@ -37,6 +37,20 @@
       <TextInput id="field-phone" placeholder="+1 (555) 000-0000" ariaLabel="Phone number" />
     </Field>
   </div>
+
+  <div class="specimen__group">
+    <Eyebrow>With hint (progressive disclosure)</Eyebrow>
+    <Field label="URL Slug" hint="A URL-friendly identifier used in page addresses. Lowercase letters, numbers, and hyphens only." id="field-slug">
+      <TextInput id="field-slug" placeholder="my-page-slug" ariaLabel="URL Slug" />
+    </Field>
+  </div>
+
+  <div class="specimen__group">
+    <Eyebrow>Hint + description + required</Eyebrow>
+    <Field label="API Key" description="Your personal API key for authentication." hint="Keep this key secret. Rotate it periodically for security." isRequired id="field-api">
+      <TextInput id="field-api" placeholder="sk_live_..." ariaLabel="API Key" />
+    </Field>
+  </div>
 </div>
 
 <style>

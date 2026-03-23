@@ -459,7 +459,7 @@ Icons inherit `currentColor` from their parent, so they automatically match text
 
 ### Field + control pattern
 
-The `Field` component handles labels, descriptions, validation messages, and accessibility bindings. Wrap any form control in a `Field`:
+The `Field` component handles labels, descriptions, hints, validation messages, and accessibility bindings. Wrap any form control in a `Field`:
 
 ```svelte
 <script>
@@ -503,10 +503,32 @@ The `Field` component:
 - Renders the `<label>` associated with the control via `for={id}`
 - Shows required indicator (`*`) when `isRequired` is true
 - Shows "Optional" label when not required (configurable via `optionalLabel`)
-- Shows description text below the label
+- Shows description text below the label (always visible)
+- Shows a `hint` tooltip via an info icon next to the label (progressive disclosure for longer help text)
 - Shows error or pending messages based on `validationState`
 - Provides `describedBy` to child controls via slot props for ARIA binding
 - Supports grid layout via `span` and `gridArea` props
+
+### Hints vs descriptions
+
+Use `description` for always-visible help text that users need to see. Use `hint` for supplemental guidance that can be revealed on demand:
+
+```svelte
+<!-- Always-visible help -->
+<Field id="pw" label="Password" description="Must be at least 8 characters." isRequired>
+  <TextInput id="pw" type="password" />
+</Field>
+
+<!-- Progressive-disclosure hint -->
+<Field id="slug" label="URL Slug" hint="Lowercase letters, numbers, and hyphens only.">
+  <TextInput id="slug" />
+</Field>
+
+<!-- Both together -->
+<Field id="key" label="API Key" description="Your personal key." hint="Rotate periodically for security." isRequired>
+  <TextInput id="key" />
+</Field>
+```
 
 ### Validation states
 
