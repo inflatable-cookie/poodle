@@ -2,7 +2,8 @@ use gpui::*;
 use gpui::prelude::FluentBuilder;
 use pug_adapter::ThemeProvider;
 use pug_composites::{CommandPaletteSpec, CommandActionItem};
-use pug_gpui_components::CommandPalette;
+use pug_primitives::EyebrowSpec;
+use pug_gpui_components::{CommandPalette, Eyebrow};
 use crate::app_state::AppState;
 use crate::style_bridge::color_to_hsla;
 use crate::PreviewRoot;
@@ -46,27 +47,30 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
         spec = spec.with_query(&query);
     }
 
-    div().flex().flex_col().gap(px(16.0))
-        .child(section_label("COMMAND PALETTE", text_secondary))
+    div().flex().flex_col().gap(px(24.0))
         .child(
-            div().w(px(480.0)).child(
-                CommandPalette::from_spec(spec, theme)
-                    .with_id("cmd-palette")
-                    .on_select(cx.listener(|this, val: &str, _w, cx| {
-                        this.state.specimens.text.insert(
-                            "cmd-palette-executed".to_string(),
-                            val.to_string(),
-                        );
-                        cx.notify();
-                    }))
-                    .on_query_change(cx.listener(|this, val: &str, _w, cx| {
-                        this.state.specimens.text.insert(
-                            "cmd-palette-query".to_string(),
-                            val.to_string(),
-                        );
-                        cx.notify();
-                    }))
-            )
+            div().flex().flex_col().gap(px(10.0))
+                .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Command Palette"), theme))
+                .child(
+                    div().w(px(480.0)).child(
+                        CommandPalette::from_spec(spec, theme)
+                            .with_id("cmd-palette")
+                            .on_select(cx.listener(|this, val: &str, _w, cx| {
+                                this.state.specimens.text.insert(
+                                    "cmd-palette-executed".to_string(),
+                                    val.to_string(),
+                                );
+                                cx.notify();
+                            }))
+                            .on_query_change(cx.listener(|this, val: &str, _w, cx| {
+                                this.state.specimens.text.insert(
+                                    "cmd-palette-query".to_string(),
+                                    val.to_string(),
+                                );
+                                cx.notify();
+                            }))
+                    )
+                )
         )
         .when(last_executed.is_some(), |d| {
             d.child(
@@ -74,13 +78,4 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                     .child(format!("Last executed: {}", last_executed.as_deref().unwrap_or("")))
             )
         })
-}
-
-fn section_label(label: &str, color: pug_tokens::typed::ColorValue) -> Div {
-    div()
-        .text_xs()
-        .font_weight(FontWeight::SEMIBOLD)
-        .text_color(color_to_hsla(color))
-        .child(label.to_string())
-        .mb(px(2.0))
 }

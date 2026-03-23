@@ -5,8 +5,8 @@ use pug_composites::{
     MetricTileSpec,
     Toast, ToastTone, ToastStackSpec,
 };
-use pug_gpui_components::{EmptyState, MetricTile, ToastStack};
-use pug_primitives::ButtonVariant;
+use pug_primitives::{ButtonVariant, EyebrowSpec};
+use pug_gpui_components::{EmptyState, MetricTile, ToastStack, Eyebrow};
 use crate::app_state::AppState;
 use crate::style_bridge::color_to_hsla;
 use crate::PreviewRoot;
@@ -33,108 +33,114 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
     let last_action = state.specimens.text.get("toast-last-action").cloned();
 
     div().flex().flex_col().gap(px(24.0))
-        // ── MetricTile ──────────────────────────────────────────
-        .child(section_label("METRIC TILES", text_secondary))
+        // -- MetricTile --
         .child(
-            div().flex().gap(px(12.0)).flex_wrap()
-                .child(MetricTile::from_spec(
-                    MetricTileSpec::new("Total Users", "12,847"),
-                    theme,
-                ))
-                .child(MetricTile::from_spec(
-                    MetricTileSpec::new("Active Sessions", "342"),
-                    theme,
-                ))
-                .child(MetricTile::from_spec(
-                    MetricTileSpec::new("Conversion Rate", "3.2%"),
-                    theme,
-                ))
-                .child(MetricTile::from_spec(
-                    MetricTileSpec::new("Revenue", "$48,290"),
-                    theme,
-                ))
-        )
-
-        // ── EmptyState: Neutral ─────────────────────────────────
-        .child(section_label("EMPTY STATE: NEUTRAL", text_secondary))
-        .child(
-            EmptyState::from_spec(
-                EmptyStateSpec::new("No projects yet")
-                    .with_message("Create your first project to get started.")
-                    .with_actions(vec![
-                        RemediationAction::new("create", "Create project")
-                            .with_variant(ButtonVariant::Primary),
-                    ]),
-                theme,
-            )
-        )
-
-        // ── EmptyState: Search ──────────────────────────────────
-        .child(section_label("EMPTY STATE: SEARCH", text_secondary))
-        .child(
-            EmptyState::from_spec(
-                EmptyStateSpec::new("No results found")
-                    .with_variant(EmptyStateVariant::Search)
-                    .with_message("Try adjusting your search terms or clearing filters.")
-                    .with_actions(vec![
-                        RemediationAction::new("clear", "Clear filters"),
-                    ]),
-                theme,
-            )
-        )
-
-        // ── EmptyState: First Run ───────────────────────────────
-        .child(section_label("EMPTY STATE: FIRST RUN", text_secondary))
-        .child(
-            EmptyState::from_spec(
-                EmptyStateSpec::new("Welcome to your workspace")
-                    .with_variant(EmptyStateVariant::FirstRun)
-                    .with_message("This is where your team's components will appear once you start building."),
-                theme,
-            )
-        )
-
-        // ── ToastStack ──────────────────────────────────────────
-        .child(section_label("TOAST STACK (INTERACTIVE)", text_secondary))
-        .child(
-            div().relative().h(px(220.0)).w_full()
-                .overflow_hidden()
-                .border_1()
-                .border_color(color_to_hsla(theme.resolve_color("semantic.color.border.subtle")))
-                .rounded(px(6.0))
+            div().flex().flex_col().gap(px(10.0))
+                .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Basic tiles"), theme))
                 .child(
-                    ToastStack::from_spec(
-                        ToastStackSpec::new()
-                            .with_toasts(toasts),
-                        theme,
-                    )
-                    .on_dismiss(cx.listener(|this, id: &str, _w, cx| {
-                        this.state.specimens.toggles.insert(
-                            format!("toast-dismissed-{}", id),
-                            true,
-                        );
-                        cx.notify();
-                    }))
-                    .on_action(cx.listener(|this, id: &str, _w, cx| {
-                        this.state.specimens.text.insert(
-                            "toast-last-action".to_string(),
-                            format!("Action on toast: {}", id),
-                        );
-                        cx.notify();
-                    }))
+                    div().flex().gap(px(12.0)).flex_wrap()
+                        .child(MetricTile::from_spec(
+                            MetricTileSpec::new("Total Users", "12,847"),
+                            theme,
+                        ))
+                        .child(MetricTile::from_spec(
+                            MetricTileSpec::new("Active Sessions", "342"),
+                            theme,
+                        ))
+                        .child(MetricTile::from_spec(
+                            MetricTileSpec::new("Conversion Rate", "3.2%"),
+                            theme,
+                        ))
+                        .child(MetricTile::from_spec(
+                            MetricTileSpec::new("Revenue", "$48,290"),
+                            theme,
+                        ))
                 )
         )
-        .child(
-            div().text_xs().text_color(color_to_hsla(text_secondary))
-                .child(last_action.unwrap_or_else(|| "Click dismiss (x) or action buttons on toasts".to_string()))
-        )
-}
 
-fn section_label(label: &str, color: pug_tokens::typed::ColorValue) -> Div {
-    div()
-        .text_xs()
-        .font_weight(FontWeight::SEMIBOLD)
-        .text_color(color_to_hsla(color))
-        .child(label.to_string())
-        .mb(px(2.0))
+        // -- EmptyState: Neutral --
+        .child(
+            div().flex().flex_col().gap(px(10.0))
+                .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Neutral"), theme))
+                .child(
+                    EmptyState::from_spec(
+                        EmptyStateSpec::new("No projects yet")
+                            .with_message("Create your first project to get started.")
+                            .with_actions(vec![
+                                RemediationAction::new("create", "Create project")
+                                    .with_variant(ButtonVariant::Primary),
+                            ]),
+                        theme,
+                    )
+                )
+        )
+
+        // -- EmptyState: Search --
+        .child(
+            div().flex().flex_col().gap(px(10.0))
+                .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Search"), theme))
+                .child(
+                    EmptyState::from_spec(
+                        EmptyStateSpec::new("No results found")
+                            .with_variant(EmptyStateVariant::Search)
+                            .with_message("Try adjusting your search terms or clearing filters.")
+                            .with_actions(vec![
+                                RemediationAction::new("clear", "Clear filters"),
+                            ]),
+                        theme,
+                    )
+                )
+        )
+
+        // -- EmptyState: First Run --
+        .child(
+            div().flex().flex_col().gap(px(10.0))
+                .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("First run"), theme))
+                .child(
+                    EmptyState::from_spec(
+                        EmptyStateSpec::new("Welcome to your workspace")
+                            .with_variant(EmptyStateVariant::FirstRun)
+                            .with_message("This is where your team's components will appear once you start building."),
+                        theme,
+                    )
+                )
+        )
+
+        // -- ToastStack --
+        .child(
+            div().flex().flex_col().gap(px(10.0))
+                .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Interactive stack"), theme))
+                .child(
+                    div().relative().h(px(220.0)).w_full()
+                        .overflow_hidden()
+                        .border_1()
+                        .border_color(color_to_hsla(theme.resolve_color("semantic.color.border.subtle")))
+                        .rounded(px(6.0))
+                        .child(
+                            ToastStack::from_spec(
+                                ToastStackSpec::new()
+                                    .with_toasts(toasts),
+                                theme,
+                            )
+                            .on_dismiss(cx.listener(|this, id: &str, _w, cx| {
+                                this.state.specimens.toggles.insert(
+                                    format!("toast-dismissed-{}", id),
+                                    true,
+                                );
+                                cx.notify();
+                            }))
+                            .on_action(cx.listener(|this, id: &str, _w, cx| {
+                                this.state.specimens.text.insert(
+                                    "toast-last-action".to_string(),
+                                    format!("Action on toast: {}", id),
+                                );
+                                cx.notify();
+                            }))
+                        )
+                )
+                .child(
+                    div().text_xs().text_color(color_to_hsla(text_secondary))
+                        .child(last_action.unwrap_or_else(|| "Click dismiss (x) or action buttons on toasts".to_string()))
+                )
+        )
 }

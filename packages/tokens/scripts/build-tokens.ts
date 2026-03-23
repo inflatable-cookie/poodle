@@ -70,6 +70,7 @@ const scriptDir = path.dirname(fileURLToPath(import.meta.url));
 const tokensDir = path.resolve(scriptDir, "..");
 const schemaDir = path.join(tokensDir, "schema");
 const artifactDir = path.join(tokensDir, "artifacts");
+const svelteTokensGeneratedDir = path.resolve(tokensDir, "../svelte/tokens/src/generated");
 
 function readJson<T>(filePath: string): T {
   return JSON.parse(fs.readFileSync(filePath, "utf8")) as T;
@@ -224,6 +225,25 @@ function writeFile(relativePath: string, contents: string): void {
   const filePath = path.join(artifactDir, relativePath);
   fs.mkdirSync(path.dirname(filePath), { recursive: true });
   fs.writeFileSync(filePath, contents);
+}
+
+function copyDir(sourceDir: string, destinationDir: string): void {
+  fs.mkdirSync(destinationDir, { recursive: true });
+  for (const entry of fs.readdirSync(sourceDir, { withFileTypes: true })) {
+    const sourcePath = path.join(sourceDir, entry.name);
+    const destinationPath = path.join(destinationDir, entry.name);
+    if (entry.isDirectory()) {
+      copyDir(sourcePath, destinationPath);
+      continue;
+    }
+    fs.copyFileSync(sourcePath, destinationPath);
+  }
+}
+
+function syncSvelteTokenArtifacts(): void {
+  fs.rmSync(svelteTokensGeneratedDir, { recursive: true, force: true });
+  copyDir(path.join(artifactDir, "ts"), path.join(svelteTokensGeneratedDir, "ts"));
+  copyDir(path.join(artifactDir, "css"), path.join(svelteTokensGeneratedDir, "css"));
 }
 
 function buildCssBlock(selector: string, entries: ResolvedTokenEntry[]): string {
@@ -438,6 +458,8 @@ export const aliases = ${JSON.stringify(aliasesMetadata, null, 2)} as const;
 export const deprecations = ${JSON.stringify(deprecationsMetadata, null, 2)} as const;
 `,
 );
+
+syncSvelteTokenArtifacts();
 
 // --- Typed token parsing for multi-renderer consumers ---
 

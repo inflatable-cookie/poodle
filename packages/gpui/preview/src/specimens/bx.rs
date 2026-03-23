@@ -1,8 +1,8 @@
 use gpui::*;
 use pug_adapter::ThemeProvider;
 use pug_gpui::GpuiThemeProvider;
-use pug_primitives::{BoxSpec, Overflow, PaddingScale};
-use pug_gpui_components::Box;
+use pug_primitives::{BoxSpec, EyebrowSpec, Overflow, PaddingScale};
+use pug_gpui_components::{Box, Eyebrow};
 use crate::style_bridge::color_to_hsla;
 
 pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
@@ -20,8 +20,8 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
     div().flex().flex_col().gap(px(24.0))
         // --- Default (no padding) ---
         .child(
-            div().flex().flex_col().gap(px(8.0))
-                .child(section_label("Default (no padding)", text_secondary))
+            div().flex().flex_col().gap(px(10.0))
+                .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Default (no padding)"), theme))
                 .child(demo_outline(
                     Box::from_spec(BoxSpec::new(), theme)
                         .with_child(
@@ -33,8 +33,8 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
         )
         // --- With padding ---
         .child(
-            div().flex().flex_col().gap(px(8.0))
-                .child(section_label("With padding", text_secondary))
+            div().flex().flex_col().gap(px(10.0))
+                .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("With padding"), theme))
                 .child(demo_outline(
                     Box::from_spec(BoxSpec::new().with_padding(PaddingScale::Lg), theme)
                         .with_child(
@@ -46,8 +46,8 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
         )
         // --- Fixed dimensions ---
         .child(
-            div().flex().flex_col().gap(px(8.0))
-                .child(section_label("Fixed dimensions", text_secondary))
+            div().flex().flex_col().gap(px(10.0))
+                .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Fixed dimensions"), theme))
                 .child(demo_outline(
                     div().w(px(192.0)).h(px(96.0)).child(
                         Box::from_spec(BoxSpec::new().with_padding(PaddingScale::Md), theme)
@@ -60,8 +60,8 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
         )
         // --- Overflow hidden ---
         .child(
-            div().flex().flex_col().gap(px(8.0))
-                .child(section_label("Overflow hidden", text_secondary))
+            div().flex().flex_col().gap(px(10.0))
+                .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Overflow hidden"), theme))
                 .child(demo_outline(
                     div().w(px(160.0)).h(px(48.0)).overflow_hidden().child(
                         Box::from_spec(
@@ -77,13 +77,4 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
                     ).into_any_element(),
                 ))
         )
-}
-
-fn section_label(label: &str, color: pug_tokens::typed::ColorValue) -> Div {
-    div()
-        .text_xs()
-        .font_weight(FontWeight::SEMIBOLD)
-        .text_color(crate::style_bridge::color_to_hsla(color))
-        .child(label.to_string())
-        .mb(px(2.0))
 }

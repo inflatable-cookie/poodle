@@ -1,7 +1,7 @@
 use gpui::*;
 use pug_adapter::ThemeProvider;
-use pug_primitives::{ButtonVariant, ButtonTone, SplitButtonSpec, SplitMenuItem};
-use pug_gpui_components::SplitButton;
+use pug_primitives::{ButtonVariant, ButtonTone, SplitButtonSpec, SplitMenuItem, EyebrowSpec};
+use pug_gpui_components::{SplitButton, Eyebrow};
 use crate::app_state::AppState;
 use crate::style_bridge::color_to_hsla;
 use crate::PreviewRoot;
@@ -13,123 +13,132 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
         .cloned()
         .unwrap_or_else(|| String::from("(none)"));
 
-    div().flex().flex_col().gap(px(16.0))
+    div().flex().flex_col().gap(px(24.0))
         // --- Primary variant ---
-        .child(section_label("PRIMARY VARIANT", text_secondary))
         .child(
-            SplitButton::from_spec(
-                SplitButtonSpec::new()
-                    .with_variant(ButtonVariant::Primary)
-                    .with_label("Save")
-                    .with_items(vec![
-                        SplitMenuItem::action("save", "Save"),
-                        SplitMenuItem::action("save-as", "Save as..."),
-                        SplitMenuItem::Separator,
-                        SplitMenuItem::action("save-all", "Save all"),
-                    ]),
-                theme,
-            )
-            .on_click(cx.listener(|this, _e: &ClickEvent, _w, cx| {
-                this.state.specimens.text.insert(
-                    "split-btn-action".to_string(),
-                    "click: Save".to_string(),
-                );
-                cx.notify();
-            }))
-            .on_dropdown(cx.listener(|this, _e: &ClickEvent, _w, cx| {
-                this.state.specimens.text.insert(
-                    "split-btn-action".to_string(),
-                    "dropdown: toggle".to_string(),
-                );
-                cx.notify();
-            }))
+            div().flex().flex_col().gap(px(10.0))
+                .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Primary variant"), theme))
+                .child(
+                    SplitButton::from_spec(
+                        SplitButtonSpec::new()
+                            .with_variant(ButtonVariant::Primary)
+                            .with_label("Save")
+                            .with_items(vec![
+                                SplitMenuItem::action("save-draft", "Save as draft"),
+                                SplitMenuItem::action("save-template", "Save as template"),
+                                SplitMenuItem::Separator,
+                                SplitMenuItem::action("discard", "Discard changes"),
+                            ]),
+                        theme,
+                    )
+                    .on_click(cx.listener(|this, _e: &ClickEvent, _w, cx| {
+                        this.state.specimens.text.insert(
+                            "split-btn-action".to_string(),
+                            "click: Save".to_string(),
+                        );
+                        cx.notify();
+                    }))
+                    .on_dropdown(cx.listener(|this, _e: &ClickEvent, _w, cx| {
+                        this.state.specimens.text.insert(
+                            "split-btn-action".to_string(),
+                            "dropdown: toggle".to_string(),
+                        );
+                        cx.notify();
+                    }))
+                )
         )
         // --- Secondary variant ---
-        .child(section_label("SECONDARY VARIANT", text_secondary))
         .child(
-            SplitButton::from_spec(
-                SplitButtonSpec::new()
-                    .with_variant(ButtonVariant::Secondary)
-                    .with_label("Export")
-                    .with_items(vec![
-                        SplitMenuItem::action("csv", "Export as CSV"),
-                        SplitMenuItem::action("json", "Export as JSON"),
-                        SplitMenuItem::action("xlsx", "Export as Excel"),
-                    ]),
-                theme,
-            )
-            .on_click(cx.listener(|this, _e: &ClickEvent, _w, cx| {
-                this.state.specimens.text.insert(
-                    "split-btn-action".to_string(),
-                    "click: Export".to_string(),
-                );
-                cx.notify();
-            }))
-            .on_dropdown(cx.listener(|this, _e: &ClickEvent, _w, cx| {
-                this.state.specimens.text.insert(
-                    "split-btn-action".to_string(),
-                    "dropdown: toggle".to_string(),
-                );
-                cx.notify();
-            }))
+            div().flex().flex_col().gap(px(10.0))
+                .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Secondary variant"), theme))
+                .child(
+                    SplitButton::from_spec(
+                        SplitButtonSpec::new()
+                            .with_variant(ButtonVariant::Secondary)
+                            .with_label("Export")
+                            .with_items(vec![
+                                SplitMenuItem::action("csv", "Export as CSV"),
+                                SplitMenuItem::action("json", "Export as JSON"),
+                                SplitMenuItem::action("pdf", "Export as PDF"),
+                            ]),
+                        theme,
+                    )
+                    .on_click(cx.listener(|this, _e: &ClickEvent, _w, cx| {
+                        this.state.specimens.text.insert(
+                            "split-btn-action".to_string(),
+                            "click: Export".to_string(),
+                        );
+                        cx.notify();
+                    }))
+                    .on_dropdown(cx.listener(|this, _e: &ClickEvent, _w, cx| {
+                        this.state.specimens.text.insert(
+                            "split-btn-action".to_string(),
+                            "dropdown: toggle".to_string(),
+                        );
+                        cx.notify();
+                    }))
+                )
         )
         // --- Danger tone ---
-        .child(section_label("DANGER TONE", text_secondary))
         .child(
-            SplitButton::from_spec(
-                SplitButtonSpec::new()
-                    .with_variant(ButtonVariant::Secondary)
-                    .with_tone(ButtonTone::Danger)
-                    .with_label("Delete")
-                    .with_items(vec![
-                        SplitMenuItem::action("delete", "Delete selected"),
-                        SplitMenuItem::action("delete-all", "Delete all"),
-                    ]),
-                theme,
-            )
-            .on_click(cx.listener(|this, _e: &ClickEvent, _w, cx| {
-                this.state.specimens.text.insert(
-                    "split-btn-action".to_string(),
-                    "click: Delete".to_string(),
-                );
-                cx.notify();
-            }))
+            div().flex().flex_col().gap(px(10.0))
+                .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Danger tone"), theme))
+                .child(
+                    SplitButton::from_spec(
+                        SplitButtonSpec::new()
+                            .with_variant(ButtonVariant::Secondary)
+                            .with_tone(ButtonTone::Danger)
+                            .with_label("Delete")
+                            .with_items(vec![
+                                SplitMenuItem::action("delete-selected", "Delete selected"),
+                                SplitMenuItem::action("delete-all", "Delete all"),
+                            ]),
+                        theme,
+                    )
+                    .on_click(cx.listener(|this, _e: &ClickEvent, _w, cx| {
+                        this.state.specimens.text.insert(
+                            "split-btn-action".to_string(),
+                            "click: Delete".to_string(),
+                        );
+                        cx.notify();
+                    }))
+                )
         )
         // --- Loading state ---
-        .child(section_label("LOADING STATE", text_secondary))
         .child(
-            SplitButton::from_spec(
-                SplitButtonSpec::new()
-                    .with_variant(ButtonVariant::Primary)
-                    .with_label("Saving...")
-                    .with_loading(true),
-                theme,
-            )
+            div().flex().flex_col().gap(px(10.0))
+                .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Loading state"), theme))
+                .child(
+                    SplitButton::from_spec(
+                        SplitButtonSpec::new()
+                            .with_variant(ButtonVariant::Primary)
+                            .with_label("Saving...")
+                            .with_loading(true),
+                        theme,
+                    )
+                )
         )
         // --- Disabled ---
-        .child(section_label("DISABLED", text_secondary))
         .child(
-            SplitButton::from_spec(
-                SplitButtonSpec::new()
-                    .with_variant(ButtonVariant::Secondary)
-                    .with_label("Save")
-                    .with_disabled(true),
-                theme,
-            )
+            div().flex().flex_col().gap(px(10.0))
+                .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Disabled"), theme))
+                .child(
+                    SplitButton::from_spec(
+                        SplitButtonSpec::new()
+                            .with_variant(ButtonVariant::Secondary)
+                            .with_label("Save")
+                            .with_disabled(true),
+                        theme,
+                    )
+                )
         )
         // --- Last action ---
-        .child(section_label("LAST ACTION", text_secondary))
         .child(
-            div().text_xs().text_color(color_to_hsla(text_secondary))
-                .child(format!("Last action: {}", last_action))
+            div().flex().flex_col().gap(px(10.0))
+                .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Last action"), theme))
+                .child(
+                    div().text_xs().text_color(color_to_hsla(text_secondary))
+                        .child(format!("Last action: {}", last_action))
+                )
         )
-}
-
-fn section_label(label: &str, color: pug_tokens::typed::ColorValue) -> Div {
-    div()
-        .text_xs()
-        .font_weight(FontWeight::SEMIBOLD)
-        .text_color(color_to_hsla(color))
-        .child(label.to_string())
-        .mb(px(2.0))
 }

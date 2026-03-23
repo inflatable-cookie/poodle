@@ -1,7 +1,7 @@
 use gpui::*;
 use pug_adapter::ThemeProvider;
-use pug_primitives::{SegmentedControlSpec, ChoiceOption};
-use pug_gpui_components::SegmentedControl;
+use pug_primitives::{SegmentedControlSpec, ChoiceOption, EyebrowSpec};
+use pug_gpui_components::{SegmentedControl, Eyebrow};
 use crate::app_state::AppState;
 use crate::style_bridge::color_to_hsla;
 use crate::PreviewRoot;
@@ -44,8 +44,8 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
     div().flex().flex_col().gap(px(24.0))
         // --- Default ---
         .child(
-            div().flex().flex_col().gap(px(8.0))
-                .child(section_label("DEFAULT", text_secondary))
+            div().flex().flex_col().gap(px(10.0))
+                .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Default"), theme))
                 .child(
                     SegmentedControl::from_spec(default_spec, theme)
                         .with_id("seg-default")
@@ -62,8 +62,8 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
         )
         // --- With disabled option ---
         .child(
-            div().flex().flex_col().gap(px(8.0))
-                .child(section_label("WITH DISABLED OPTION", text_secondary))
+            div().flex().flex_col().gap(px(10.0))
+                .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("With disabled option"), theme))
                 .child(
                     SegmentedControl::from_spec(disabled_opt_spec, theme)
                         .with_id("seg-disabled-opt")
@@ -71,20 +71,11 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
         )
         // --- Fully disabled ---
         .child(
-            div().flex().flex_col().gap(px(8.0))
-                .child(section_label("FULLY DISABLED", text_secondary))
+            div().flex().flex_col().gap(px(10.0))
+                .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Fully disabled"), theme))
                 .child(
                     SegmentedControl::from_spec(fully_disabled_spec, theme)
                         .with_id("seg-fully-disabled")
                 )
         )
-}
-
-fn section_label(label: &str, color: pug_tokens::typed::ColorValue) -> Div {
-    div()
-        .text_xs()
-        .font_weight(FontWeight::SEMIBOLD)
-        .text_color(crate::style_bridge::color_to_hsla(color))
-        .child(label.to_string())
-        .mb(px(2.0))
 }

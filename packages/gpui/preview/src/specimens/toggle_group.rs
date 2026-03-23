@@ -1,13 +1,12 @@
 use gpui::*;
 use pug_adapter::ThemeProvider;
-use pug_gpui_components::ToggleGroup;
-use pug_primitives::ToggleGroupOption;
+use pug_primitives::{ToggleGroupOption, EyebrowSpec};
+use pug_gpui_components::{ToggleGroup, Eyebrow};
 use crate::app_state::AppState;
 use crate::PreviewRoot;
 
 pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
     let theme = &state.theme;
-    let text_secondary = theme.resolve_color("semantic.color.text.secondary");
 
     let single_value = state.specimens.text.get("toggle-group-single").cloned()
         .unwrap_or_else(|| "grid".to_string());
@@ -45,8 +44,8 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
 
     div().flex().flex_col().gap(px(24.0))
         .child(
-            div().flex().flex_col().gap(px(8.0))
-                .child(section_label("SINGLE SELECTION", text_secondary))
+            div().flex().flex_col().gap(px(10.0))
+                .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Single selection"), theme))
                 .child(
                     ToggleGroup::new(single_options, theme)
                         .default_value(vec![single_value])
@@ -57,8 +56,8 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                 )
         )
         .child(
-            div().flex().flex_col().gap(px(8.0))
-                .child(section_label("FOUR OPTIONS", text_secondary))
+            div().flex().flex_col().gap(px(10.0))
+                .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Four options"), theme))
                 .child(
                     ToggleGroup::new(four_options, theme)
                         .default_value(vec![four_value])
@@ -69,8 +68,8 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                 )
         )
         .child(
-            div().flex().flex_col().gap(px(8.0))
-                .child(section_label("MULTIPLE SELECTION", text_secondary))
+            div().flex().flex_col().gap(px(10.0))
+                .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Multiple selection"), theme))
                 .child(
                     ToggleGroup::new(multi_options, theme)
                         .default_value(vec!["design".to_string(), "docs".to_string()])
@@ -78,21 +77,12 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                 )
         )
         .child(
-            div().flex().flex_col().gap(px(8.0))
-                .child(section_label("DISABLED", text_secondary))
+            div().flex().flex_col().gap(px(10.0))
+                .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Disabled"), theme))
                 .child(
                     ToggleGroup::new(disabled_options, theme)
                         .default_value(vec!["list".to_string()])
                         .disabled(true)
                 )
         )
-}
-
-fn section_label(label: &str, color: pug_tokens::typed::ColorValue) -> Div {
-    div()
-        .text_xs()
-        .font_weight(FontWeight::SEMIBOLD)
-        .text_color(crate::style_bridge::color_to_hsla(color))
-        .child(label.to_string())
-        .mb(px(2.0))
 }

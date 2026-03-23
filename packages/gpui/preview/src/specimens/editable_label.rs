@@ -1,7 +1,7 @@
 use gpui::*;
 use pug_adapter::ThemeProvider;
-use pug_primitives::EditableLabelSpec;
-use pug_gpui_components::EditableLabel;
+use pug_primitives::{EditableLabelSpec, EyebrowSpec};
+use pug_gpui_components::{EditableLabel, Eyebrow};
 use crate::app_state::AppState;
 use crate::style_bridge::color_to_hsla;
 use crate::PreviewRoot;
@@ -20,115 +20,139 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
 
     let last_event = state.specimens.text.get("editable-label-event").cloned();
 
-    div().flex().flex_col().gap(px(16.0))
-        // --- Double-click To Edit (Default) ---
-        .child(section_label("DOUBLE-CLICK TO EDIT (DEFAULT)", text_secondary))
+    div().flex().flex_col().gap(px(24.0))
+        // --- Double-click to edit (default) ---
         .child(
-            EditableLabel::from_spec(
-                EditableLabelSpec::new()
-                    .with_value(&label_value)
-                    .with_editing(label_editing),
-                theme,
-            )
-            .with_id("default")
-            .on_change(cx.listener(|this, val: &str, _w, cx| {
-                this.state.specimens.text.insert("editable-label-value".to_string(), val.to_string());
-                cx.notify();
-            }))
-            .on_commit(cx.listener(|this, val: &str, _w, cx| {
-                this.state.specimens.text.insert("editable-label-value".to_string(), val.to_string());
-                this.state.specimens.toggles.insert("editable-label-editing".to_string(), false);
-                this.state.specimens.text.insert(
-                    "editable-label-event".to_string(),
-                    format!("Committed: \"{}\"", val),
-                );
-                cx.notify();
-            }))
+            div().flex().flex_col().gap(px(10.0))
+                .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Double-click to edit (default)"), theme))
+                .child(
+                    EditableLabel::from_spec(
+                        EditableLabelSpec::new()
+                            .with_value(&label_value)
+                            .with_editing(label_editing),
+                        theme,
+                    )
+                    .with_id("default")
+                    .on_change(cx.listener(|this, val: &str, _w, cx| {
+                        this.state.specimens.text.insert("editable-label-value".to_string(), val.to_string());
+                        cx.notify();
+                    }))
+                    .on_commit(cx.listener(|this, val: &str, _w, cx| {
+                        this.state.specimens.text.insert("editable-label-value".to_string(), val.to_string());
+                        this.state.specimens.toggles.insert("editable-label-editing".to_string(), false);
+                        this.state.specimens.text.insert(
+                            "editable-label-event".to_string(),
+                            format!("Committed: \"{}\"", val),
+                        );
+                        cx.notify();
+                    }))
+                )
         )
 
         // --- Click to edit with icon ---
-        .child(section_label("CLICK TO EDIT WITH ICON", text_secondary))
         .child(
-            EditableLabel::from_spec(
-                EditableLabelSpec::new()
-                    .with_value(&rename_value)
-                    .with_editing(rename_editing),
-                theme,
-            )
-            .with_id("with-icon")
-            .on_change(cx.listener(|this, val: &str, _w, cx| {
-                this.state.specimens.text.insert("editable-label-rename".to_string(), val.to_string());
-                cx.notify();
-            }))
-            .on_commit(cx.listener(|this, val: &str, _w, cx| {
-                this.state.specimens.text.insert("editable-label-rename".to_string(), val.to_string());
-                this.state.specimens.toggles.insert("editable-label-rename-editing".to_string(), false);
-                this.state.specimens.text.insert(
-                    "editable-label-event".to_string(),
-                    format!("Committed: \"{}\"", val),
-                );
-                cx.notify();
-            }))
+            div().flex().flex_col().gap(px(10.0))
+                .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Click to edit with icon"), theme))
+                .child(
+                    EditableLabel::from_spec(
+                        EditableLabelSpec::new()
+                            .with_value(&rename_value)
+                            .with_editing(rename_editing),
+                        theme,
+                    )
+                    .with_id("with-icon")
+                    .on_change(cx.listener(|this, val: &str, _w, cx| {
+                        this.state.specimens.text.insert("editable-label-rename".to_string(), val.to_string());
+                        cx.notify();
+                    }))
+                    .on_commit(cx.listener(|this, val: &str, _w, cx| {
+                        this.state.specimens.text.insert("editable-label-rename".to_string(), val.to_string());
+                        this.state.specimens.toggles.insert("editable-label-rename-editing".to_string(), false);
+                        this.state.specimens.text.insert(
+                            "editable-label-event".to_string(),
+                            format!("Committed: \"{}\"", val),
+                        );
+                        cx.notify();
+                    }))
+                )
         )
 
-        // --- Empty state (placeholder) ---
-        .child(section_label("EMPTY STATE (PLACEHOLDER)", text_secondary))
+        // --- Empty state ---
         .child(
-            EditableLabel::from_spec(
-                EditableLabelSpec::new()
-                    .with_placeholder("Add a description…"),
-                theme,
-            )
-            .with_id("empty")
-            .on_commit(cx.listener(|this, val: &str, _w, cx| {
-                this.state.specimens.text.insert(
-                    "editable-label-event".to_string(),
-                    format!("Committed empty-state: \"{}\"", val),
-                );
-                cx.notify();
-            }))
+            div().flex().flex_col().gap(px(10.0))
+                .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Empty state"), theme))
+                .child(
+                    EditableLabel::from_spec(
+                        EditableLabelSpec::new()
+                            .with_placeholder("Add a description\u{2026}"),
+                        theme,
+                    )
+                    .with_id("empty")
+                    .on_commit(cx.listener(|this, val: &str, _w, cx| {
+                        this.state.specimens.text.insert(
+                            "editable-label-event".to_string(),
+                            format!("Committed empty-state: \"{}\"", val),
+                        );
+                        cx.notify();
+                    }))
+                )
         )
 
-        // --- Pre-filled editing ---
-        .child(section_label("PRE-FILLED (EDITING MODE)", text_secondary))
+        // --- Flush variant ---
         .child(
-            EditableLabel::from_spec(
-                EditableLabelSpec::new()
-                    .with_value("Currently editing this label")
-                    .with_editing(true),
-                theme,
-            )
-            .with_id("prefilled")
+            div().flex().flex_col().gap(px(10.0))
+                .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Flush variant"), theme))
+                .child(
+                    EditableLabel::from_spec(
+                        EditableLabelSpec::new()
+                            .with_value("Currently editing this label")
+                            .with_editing(true),
+                        theme,
+                    )
+                    .with_id("prefilled")
+                )
+        )
+
+        // --- With max length ---
+        .child(
+            div().flex().flex_col().gap(px(10.0))
+                .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("With max length"), theme))
+                .child(
+                    EditableLabel::from_spec(
+                        EditableLabelSpec::new()
+                            .with_value("Locked label")
+                            .with_disabled(true),
+                        theme,
+                    )
+                    .with_id("disabled")
+                )
         )
 
         // --- Disabled ---
-        .child(section_label("DISABLED", text_secondary))
         .child(
-            EditableLabel::from_spec(
-                EditableLabelSpec::new()
-                    .with_value("Locked label")
-                    .with_disabled(true),
-                theme,
-            )
-            .with_id("disabled")
+            div().flex().flex_col().gap(px(10.0))
+                .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Disabled"), theme))
+                .child(
+                    EditableLabel::from_spec(
+                        EditableLabelSpec::new()
+                            .with_value("Locked label")
+                            .with_disabled(true),
+                        theme,
+                    )
+                    .with_id("disabled2")
+                )
         )
 
         // --- Last event ---
-        .child(section_label("LAST EVENT", text_secondary))
         .child(
-            div().text_xs().text_color(color_to_hsla(text_secondary))
-                .child(match last_event {
-                    Some(ref evt) => evt.clone(),
-                    None => "No events yet — edit a label above.".to_string(),
-                })
+            div().flex().flex_col().gap(px(10.0))
+                .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Last event"), theme))
+                .child(
+                    div().text_xs().text_color(color_to_hsla(text_secondary))
+                        .child(match last_event {
+                            Some(ref evt) => evt.clone(),
+                            None => "No events yet \u{2014} edit a label above.".to_string(),
+                        })
+                )
         )
-}
-
-fn section_label(label: &str, color: pug_tokens::typed::ColorValue) -> Div {
-    div()
-        .text_xs()
-        .font_weight(FontWeight::SEMIBOLD)
-        .text_color(color_to_hsla(color))
-        .child(label.to_string())
-        .mb(px(2.0))
 }

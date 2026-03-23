@@ -7,13 +7,17 @@ Public Svelte-facing token surface for emitted Pug token artifacts.
 - root import: `@pug/svelte-tokens`
 - runtime helpers: `@pug/svelte-tokens/runtime`
 - CSS helper exports: `@pug/svelte-tokens/css`
+- CSS asset export: `@pug/svelte-tokens/styles.css`
+- legacy-compatible CSS asset export: `@pug/svelte-tokens/css/pug-tokens.css`
 - generated themes: `@pug/svelte-tokens/themes`
 - generated metadata: `@pug/svelte-tokens/metadata`
 - relative-unit helpers: `@pug/svelte-tokens/units`
 
 ## Stability Notes
 
-- token values come from generated artifacts under `packages/tokens/artifacts/`
+- token values are generated from `packages/tokens/artifacts/` and mirrored into
+  this package's `src/generated/` surface so sibling repos can install it
+  directly without workspace-only path assumptions
 - runtime helpers may set dataset attributes, but token naming remains owned by
   the canonical artifact set rather than ad hoc Svelte convenience APIs
 - this package is the strongest current public candidate in the JS layer, but

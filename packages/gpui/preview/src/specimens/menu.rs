@@ -1,8 +1,8 @@
 use gpui::*;
 use gpui::prelude::FluentBuilder;
 use pug_adapter::ThemeProvider;
-use pug_primitives::{MenuSpec, MenuEntry, MenuItemKind};
-use pug_gpui_components::Menu;
+use pug_primitives::{MenuSpec, MenuEntry, MenuItemKind, EyebrowSpec};
+use pug_gpui_components::{Menu, Eyebrow};
 use crate::app_state::AppState;
 use crate::style_bridge::color_to_hsla;
 use crate::PreviewRoot;
@@ -16,12 +16,12 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
 
     // --- With shortcuts ---
     let file_items = vec![
-        MenuEntry::new("new", "New file").with_shortcut_label("⌘N"),
-        MenuEntry::new("open", "Open…").with_shortcut_label("⌘O"),
-        MenuEntry::new("save", "Save").with_shortcut_label("⌘S"),
+        MenuEntry::new("new", "New file").with_shortcut_label("\u{2318}N"),
+        MenuEntry::new("open", "Open\u{2026}").with_shortcut_label("\u{2318}O"),
+        MenuEntry::new("save", "Save").with_shortcut_label("\u{2318}S"),
         MenuEntry::new("sep1", "").with_kind(MenuItemKind::Separator),
         MenuEntry::new("export", "Export as PDF"),
-        MenuEntry::new("print", "Print…").with_shortcut_label("⌘P").with_disabled(true),
+        MenuEntry::new("print", "Print\u{2026}").with_shortcut_label("\u{2318}P").with_disabled(true),
     ];
 
     let file_spec = MenuSpec::new(file_items)
@@ -40,44 +40,50 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
             .with_kind(MenuItemKind::Checkbox)
             .with_checked(notifications),
         MenuEntry::new("sep1", "").with_kind(MenuItemKind::Separator),
-        MenuEntry::new("settings", "Settings…"),
+        MenuEntry::new("settings", "Settings\u{2026}"),
     ];
 
     let settings_spec = MenuSpec::new(settings_items)
         .with_default_open(true)
         .with_aria_label("Settings menu");
 
-    div().flex().flex_col().gap(px(16.0))
+    div().flex().flex_col().gap(px(24.0))
         // With shortcuts
-        .child(section_label("WITH SHORTCUTS", text_secondary))
         .child(
-            Menu::from_spec(file_spec, theme)
-                .with_id("specimen-menu-shortcuts")
-                .on_select(cx.listener(|this, val: &str, _w, cx| {
-                    this.state.specimens.text.insert(
-                        "menu-last-action".to_string(),
-                        format!("Selected: {}", val),
-                    );
-                    cx.notify();
-                }))
+            div().flex().flex_col().gap(px(10.0))
+                .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("With shortcuts"), theme))
+                .child(
+                    Menu::from_spec(file_spec, theme)
+                        .with_id("specimen-menu-shortcuts")
+                        .on_select(cx.listener(|this, val: &str, _w, cx| {
+                            this.state.specimens.text.insert(
+                                "menu-last-action".to_string(),
+                                format!("Selected: {}", val),
+                            );
+                            cx.notify();
+                        }))
+                )
         )
         // With checkboxes
-        .child(section_label("WITH CHECKBOXES", text_secondary))
         .child(
-            Menu::from_spec(settings_spec, theme)
-                .with_id("specimen-menu-checkboxes")
-                .on_select(cx.listener(|this, val: &str, _w, cx| {
-                    match val {
-                        "theme" => { this.state.specimens.toggle("menu-dark-mode"); },
-                        "notifications" => { this.state.specimens.toggle("menu-notifications"); },
-                        _ => {}
-                    }
-                    this.state.specimens.text.insert(
-                        "menu-last-action".to_string(),
-                        format!("Selected: {}", val),
-                    );
-                    cx.notify();
-                }))
+            div().flex().flex_col().gap(px(10.0))
+                .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("With checkboxes"), theme))
+                .child(
+                    Menu::from_spec(settings_spec, theme)
+                        .with_id("specimen-menu-checkboxes")
+                        .on_select(cx.listener(|this, val: &str, _w, cx| {
+                            match val {
+                                "theme" => { this.state.specimens.toggle("menu-dark-mode"); },
+                                "notifications" => { this.state.specimens.toggle("menu-notifications"); },
+                                _ => {}
+                            }
+                            this.state.specimens.text.insert(
+                                "menu-last-action".to_string(),
+                                format!("Selected: {}", val),
+                            );
+                            cx.notify();
+                        }))
+                )
         )
         // --- Last action feedback ---
         .when(!last_action.is_empty(), |d| {
@@ -86,13 +92,4 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                     .child(last_action)
             )
         })
-}
-
-fn section_label(label: &str, color: pug_tokens::typed::ColorValue) -> Div {
-    div()
-        .text_xs()
-        .font_weight(FontWeight::SEMIBOLD)
-        .text_color(color_to_hsla(color))
-        .child(label.to_string())
-        .mb(px(2.0))
 }

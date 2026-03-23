@@ -1,51 +1,47 @@
 use gpui::*;
-use pug_adapter::ThemeProvider;
+use pug_primitives::{FileUploadSpec, EyebrowSpec};
+use pug_gpui_components::{FileUpload, Eyebrow};
 use pug_gpui::GpuiThemeProvider;
-use pug_primitives::FileUploadSpec;
-use pug_gpui_components::FileUpload;
-use crate::style_bridge::color_to_hsla;
 
 pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
-    let text_secondary = theme.resolve_color("semantic.color.text.secondary");
-
-    div().flex().flex_col().gap(px(16.0)).max_w(px(400.0))
-        // --- Image Upload With Preview ---
-        .child(section_label("IMAGE UPLOAD WITH PREVIEW", text_secondary))
+    div().flex().flex_col().gap(px(24.0)).max_w(px(400.0))
+        // --- Image upload with preview ---
         .child(
-            FileUpload::from_spec(
-                FileUploadSpec::new()
-                    .with_accept("image/*")
-                    .with_multiple(true)
-                    .with_max_size(5 * 1024 * 1024),
-                theme,
-            )
+            div().flex().flex_col().gap(px(10.0))
+                .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Image upload with preview"), theme))
+                .child(
+                    FileUpload::from_spec(
+                        FileUploadSpec::new()
+                            .with_accept("image/*")
+                            .with_multiple(true)
+                            .with_max_size(5 * 1024 * 1024),
+                        theme,
+                    )
+                )
         )
-        // --- Document Upload (Single File) ---
-        .child(section_label("DOCUMENT UPLOAD (SINGLE FILE)", text_secondary))
+        // --- Document upload (single file) ---
         .child(
-            FileUpload::from_spec(
-                FileUploadSpec::new()
-                    .with_accept(".pdf,.doc,.docx,.txt")
-                    .with_max_size(10 * 1024 * 1024),
-                theme,
-            )
+            div().flex().flex_col().gap(px(10.0))
+                .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Document upload (single file)"), theme))
+                .child(
+                    FileUpload::from_spec(
+                        FileUploadSpec::new()
+                            .with_accept(".pdf,.doc,.docx,.txt")
+                            .with_max_size(10 * 1024 * 1024),
+                        theme,
+                    )
+                )
         )
         // --- Disabled ---
-        .child(section_label("DISABLED", text_secondary))
         .child(
-            FileUpload::from_spec(
-                FileUploadSpec::new()
-                    .with_disabled(true),
-                theme,
-            )
+            div().flex().flex_col().gap(px(10.0))
+                .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Disabled"), theme))
+                .child(
+                    FileUpload::from_spec(
+                        FileUploadSpec::new()
+                            .with_disabled(true),
+                        theme,
+                    )
+                )
         )
-}
-
-fn section_label(label: &str, color: pug_tokens::typed::ColorValue) -> Div {
-    div()
-        .text_xs()
-        .font_weight(FontWeight::SEMIBOLD)
-        .text_color(color_to_hsla(color))
-        .child(label.to_string())
-        .mb(px(2.0))
 }

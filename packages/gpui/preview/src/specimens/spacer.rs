@@ -1,8 +1,8 @@
 use gpui::*;
 use pug_adapter::ThemeProvider;
 use pug_gpui::GpuiThemeProvider;
-use pug_primitives::{PaddingScale, SurfaceBorder, SurfaceSpec, SurfaceTone};
-use pug_gpui_components::{Spacer, Surface};
+use pug_primitives::{EyebrowSpec, PaddingScale, SurfaceBorder, SurfaceSpec, SurfaceTone};
+use pug_gpui_components::{Eyebrow, Spacer, Surface};
 use crate::style_bridge::color_to_hsla;
 
 pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
@@ -23,8 +23,8 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
     div().flex().flex_col().gap(px(24.0))
         // --- Push items apart ---
         .child(
-            div().flex().flex_col().gap(px(8.0))
-                .child(section_label("Push items apart", text_secondary))
+            div().flex().flex_col().gap(px(10.0))
+                .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Push items apart"), theme))
                 .child(
                     div().flex().items_center().gap(px(8.0))
                         .child(surface_item("Logo"))
@@ -34,8 +34,8 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
         )
         // --- Between three items ---
         .child(
-            div().flex().flex_col().gap(px(8.0))
-                .child(section_label("Between three items", text_secondary))
+            div().flex().flex_col().gap(px(10.0))
+                .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Between three items"), theme))
                 .child(
                     div().flex().items_center().gap(px(8.0))
                         .child(surface_item("Left"))
@@ -45,13 +45,4 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
                         .child(surface_item("Right"))
                 )
         )
-}
-
-fn section_label(label: &str, color: pug_tokens::typed::ColorValue) -> Div {
-    div()
-        .text_xs()
-        .font_weight(FontWeight::SEMIBOLD)
-        .text_color(crate::style_bridge::color_to_hsla(color))
-        .child(label.to_string())
-        .mb(px(2.0))
 }

@@ -1,1 +1,1 @@
-export { aliases, deprecations, manifest } from "../../../tokens/artifacts/ts/metadata";
+export { aliases, deprecations, manifest } from "./generated/ts/metadata";

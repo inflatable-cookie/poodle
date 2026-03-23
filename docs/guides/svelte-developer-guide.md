@@ -10,7 +10,7 @@ End-to-end implementation guide for building applications with the Pug design sy
 bun add @pug/svelte-tokens @pug/svelte-primitives @pug/svelte-composites @pug/icons-lucide
 ```
 
-All packages are workspace-internal. `@pug/svelte-tokens` provides the CSS custom properties and theme helpers, `@pug/svelte-primitives` provides the foundational UI components, `@pug/svelte-composites` provides higher-level compositions, and `@pug/icons-lucide` provides tree-shakeable icon imports.
+`@pug/svelte-tokens` provides the CSS custom properties and theme helpers, `@pug/svelte-primitives` provides the foundational UI components, `@pug/svelte-composites` provides higher-level compositions, and `@pug/icons-lucide` provides tree-shakeable icon imports.
 
 ### 2. Import the token stylesheet
 
@@ -18,14 +18,14 @@ In your app's entry point (e.g. `+layout.svelte` or `App.svelte`), import the to
 
 ```svelte
 <script>
-  import "@pug/svelte-tokens/css/pug-tokens.css";
+  import "@pug/svelte-tokens/styles.css";
 </script>
 ```
 
-Or import the generated CSS files directly in your Vite config or global stylesheet:
+If you prefer the legacy CSS subpath, that remains available too:
 
 ```css
-@import "@pug/svelte-tokens/../../tokens/artifacts/css/pug-tokens.css";
+@import "@pug/svelte-tokens/css/pug-tokens.css";
 ```
 
 This loads the full set of CSS custom properties (`--pug-*`) that all components resolve their visual properties from.

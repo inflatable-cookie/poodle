@@ -1,1 +1,1 @@
-export { controlSizes, densityModes, themes } from "../../../tokens/artifacts/ts/themes";
+export { controlSizes, densityModes, themes } from "./generated/ts/themes";

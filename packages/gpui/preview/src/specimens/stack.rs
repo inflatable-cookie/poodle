@@ -1,8 +1,11 @@
 use gpui::*;
 use pug_adapter::ThemeProvider;
 use pug_gpui::GpuiThemeProvider;
-use pug_primitives::{Alignment, PaddingScale, StackSpec, SurfaceBorder, SurfaceSpec, SurfaceTone};
-use pug_gpui_components::{Stack, Surface};
+use pug_primitives::{
+    Alignment, EyebrowSpec, LayoutJustify, PaddingScale, StackDirection, StackSpec,
+    SurfaceBorder, SurfaceSpec, SurfaceTone,
+};
+use pug_gpui_components::{Eyebrow, Stack, Surface};
 use crate::style_bridge::color_to_hsla;
 
 pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
@@ -21,10 +24,10 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
     };
 
     div().flex().flex_col().gap(px(24.0))
-        // --- Default (md gap) ---
+        // --- Column (default) ---
         .child(
-            div().flex().flex_col().gap(px(8.0))
-                .child(section_label("Default (md gap)", text_secondary))
+            div().flex().flex_col().gap(px(10.0))
+                .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Column (default)"), theme))
                 .child(
                     Stack::from_spec(StackSpec::new().with_gap(PaddingScale::Md), theme)
                         .with_child(surface_item("First item"))
@@ -32,10 +35,10 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
                         .with_child(surface_item("Third item"))
                 )
         )
-        // --- Large gap with center alignment ---
+        // --- Column — large gap, center aligned ---
         .child(
-            div().flex().flex_col().gap(px(8.0))
-                .child(section_label("Large gap with center alignment", text_secondary))
+            div().flex().flex_col().gap(px(10.0))
+                .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Column \u{2014} large gap, center aligned"), theme))
                 .child(
                     Stack::from_spec(
                         StackSpec::new()
@@ -47,25 +50,55 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
                     .with_child(surface_item("Centered B"))
                 )
         )
-        // --- Small gap, compact ---
+        // --- Row ---
         .child(
-            div().flex().flex_col().gap(px(8.0))
-                .child(section_label("Small gap, compact", text_secondary))
+            div().flex().flex_col().gap(px(10.0))
+                .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Row"), theme))
                 .child(
-                    Stack::from_spec(StackSpec::new().with_gap(PaddingScale::Sm), theme)
-                        .with_child(surface_item("Line 1"))
-                        .with_child(surface_item("Line 2"))
-                        .with_child(surface_item("Line 3"))
-                        .with_child(surface_item("Line 4"))
+                    Stack::from_spec(
+                        StackSpec::new()
+                            .with_direction(StackDirection::Row)
+                            .with_gap(PaddingScale::Md),
+                        theme,
+                    )
+                    .with_child(surface_item("Item A"))
+                    .with_child(surface_item("Taller item B with more text"))
+                    .with_child(surface_item("Item C"))
                 )
         )
-}
-
-fn section_label(label: &str, color: pug_tokens::typed::ColorValue) -> Div {
-    div()
-        .text_xs()
-        .font_weight(FontWeight::SEMIBOLD)
-        .text_color(crate::style_bridge::color_to_hsla(color))
-        .child(label.to_string())
-        .mb(px(2.0))
+        // --- Row — justify: between ---
+        .child(
+            div().flex().flex_col().gap(px(10.0))
+                .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Row \u{2014} justify: between"), theme))
+                .child(
+                    Stack::from_spec(
+                        StackSpec::new()
+                            .with_direction(StackDirection::Row)
+                            .with_gap(PaddingScale::Md)
+                            .with_justify(LayoutJustify::SpaceBetween),
+                        theme,
+                    )
+                    .with_child(surface_item("Left"))
+                    .with_child(surface_item("Center"))
+                    .with_child(surface_item("Right"))
+                )
+        )
+        // --- Row — wrapping ---
+        .child(
+            div().flex().flex_col().gap(px(10.0))
+                .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Row \u{2014} wrapping"), theme))
+                .child({
+                    let mut stack = Stack::from_spec(
+                        StackSpec::new()
+                            .with_direction(StackDirection::Row)
+                            .with_gap(PaddingScale::Sm)
+                            .with_wrap(true),
+                        theme,
+                    );
+                    for i in 1..=8 {
+                        stack = stack.with_child(surface_item(&format!("Tag {}", i)));
+                    }
+                    stack
+                })
+        )
 }

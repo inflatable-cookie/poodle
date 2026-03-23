@@ -1,12 +1,9 @@
 use gpui::*;
-use pug_adapter::ThemeProvider;
-use pug_primitives::{TableSpec, TableColumn, TableRow, ColumnAlign};
-use pug_gpui_components::Table;
+use pug_primitives::{TableSpec, TableColumn, TableRow, ColumnAlign, EyebrowSpec};
+use pug_gpui_components::{Table, Eyebrow};
 use pug_gpui::GpuiThemeProvider;
 
 pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
-    let text_secondary = theme.resolve_color("semantic.color.text.secondary");
-
     let columns = vec![
         TableColumn::new("name", "Name").with_row_header(true),
         TableColumn::new("type", "Type"),
@@ -83,88 +80,94 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
     ];
 
     div().flex().flex_col().gap(px(24.0))
-        // --- Default ---
-        .child(section_label("DEFAULT", text_secondary))
+        // --- Standard table ---
         .child(
-            Table::from_spec(
-                TableSpec::new()
-                    .with_columns(columns.clone())
-                    .with_rows(rows.clone())
-                    .with_aria_label("Component registry"),
-                theme,
-            )
+            div().flex().flex_col().gap(px(10.0))
+                .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Standard table"), theme))
+                .child(
+                    Table::from_spec(
+                        TableSpec::new()
+                            .with_columns(columns.clone())
+                            .with_rows(rows.clone())
+                            .with_aria_label("Component registry"),
+                        theme,
+                    )
+                )
         )
         // --- With caption ---
-        .child(section_label("WITH CAPTION", text_secondary))
         .child(
-            Table::from_spec(
-                TableSpec::new()
-                    .with_columns(columns.clone())
-                    .with_rows(rows)
-                    .with_caption("Components in the design system")
-                    .with_aria_label("Components table"),
-                theme,
-            )
+            div().flex().flex_col().gap(px(10.0))
+                .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("With caption"), theme))
+                .child(
+                    Table::from_spec(
+                        TableSpec::new()
+                            .with_columns(columns.clone())
+                            .with_rows(rows)
+                            .with_caption("Components in the design system")
+                            .with_aria_label("Components table"),
+                        theme,
+                    )
+                )
         )
         // --- Right-aligned numeric data ---
-        .child(section_label("RIGHT-ALIGNED NUMERIC DATA", text_secondary))
         .child(
-            Table::from_spec(
-                TableSpec::new()
-                    .with_columns(num_columns)
-                    .with_rows(num_rows)
-                    .with_caption("API endpoint performance metrics")
-                    .with_aria_label("Performance metrics"),
-                theme,
-            )
+            div().flex().flex_col().gap(px(10.0))
+                .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Minimal key-value"), theme))
+                .child(
+                    Table::from_spec(
+                        TableSpec::new()
+                            .with_columns(num_columns)
+                            .with_rows(num_rows)
+                            .with_caption("API endpoint performance metrics")
+                            .with_aria_label("Performance metrics"),
+                        theme,
+                    )
+                )
         )
         // --- Minimal key-value ---
-        .child(section_label("MINIMAL KEY-VALUE", text_secondary))
-        .child({
-            let kv_columns = vec![
-                TableColumn::new("key", "Property").with_row_header(true),
-                TableColumn::new("value", "Value"),
-            ];
-            let kv_rows = vec![
-                TableRow::new("1", vec![
-                    ("key".to_string(), "Version".to_string()),
-                    ("value".to_string(), "2.4.1".to_string()),
-                ]),
-                TableRow::new("2", vec![
-                    ("key".to_string(), "License".to_string()),
-                    ("value".to_string(), "MIT".to_string()),
-                ]),
-                TableRow::new("3", vec![
-                    ("key".to_string(), "Bundle size".to_string()),
-                    ("value".to_string(), "12.3 kB".to_string()),
-                ]),
-            ];
-            Table::from_spec(
-                TableSpec::new()
-                    .with_columns(kv_columns)
-                    .with_rows(kv_rows)
-                    .with_aria_label("Package info"),
-                theme,
-            )
-        })
-        // --- Empty ---
-        .child(section_label("EMPTY TABLE", text_secondary))
         .child(
-            Table::from_spec(
-                TableSpec::new()
-                    .with_columns(columns)
-                    .with_empty_message("No components found")
-                    .with_aria_label("Empty table"),
-                theme,
-            )
+            div().flex().flex_col().gap(px(10.0))
+                .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Empty state"), theme))
+                .child({
+                    let kv_columns = vec![
+                        TableColumn::new("key", "Property").with_row_header(true),
+                        TableColumn::new("value", "Value"),
+                    ];
+                    let kv_rows = vec![
+                        TableRow::new("1", vec![
+                            ("key".to_string(), "Version".to_string()),
+                            ("value".to_string(), "2.4.1".to_string()),
+                        ]),
+                        TableRow::new("2", vec![
+                            ("key".to_string(), "License".to_string()),
+                            ("value".to_string(), "MIT".to_string()),
+                        ]),
+                        TableRow::new("3", vec![
+                            ("key".to_string(), "Bundle size".to_string()),
+                            ("value".to_string(), "12.3 kB".to_string()),
+                        ]),
+                    ];
+                    Table::from_spec(
+                        TableSpec::new()
+                            .with_columns(kv_columns)
+                            .with_rows(kv_rows)
+                            .with_aria_label("Package info"),
+                        theme,
+                    )
+                })
         )
-}
-
-fn section_label(label: &str, color: pug_tokens::typed::ColorValue) -> Div {
-    div()
-        .text_xs()
-        .font_weight(FontWeight::SEMIBOLD)
-        .text_color(crate::style_bridge::color_to_hsla(color))
-        .child(label.to_string())
-        .mb(px(2.0))
+        // --- Empty ---
+        .child(
+            div().flex().flex_col().gap(px(10.0))
+                .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Empty table"), theme))
+                .child(
+                    Table::from_spec(
+                        TableSpec::new()
+                            .with_columns(columns)
+                            .with_empty_message("No components found")
+                            .with_aria_label("Empty table"),
+                        theme,
+                    )
+                )
+        )
 }

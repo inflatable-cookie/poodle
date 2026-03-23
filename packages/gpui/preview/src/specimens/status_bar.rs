@@ -1,8 +1,8 @@
 use gpui::*;
 use pug_adapter::ThemeProvider;
 use pug_composites::ShellStatusBarSpec;
-use pug_gpui_components::StatusBar;
-use pug_primitives::{StatusIndicatorSpec, StatusTone};
+use pug_gpui_components::{StatusBar, Eyebrow};
+use pug_primitives::{StatusIndicatorSpec, StatusTone, EyebrowSpec};
 use pug_gpui_components::StatusIndicator;
 use crate::app_state::AppState;
 use crate::style_bridge::color_to_hsla;
@@ -26,38 +26,35 @@ pub(crate) fn render(state: &AppState, _cx: &mut Context<PreviewRoot>) -> Div {
         div().text_xs().text_color(color_to_hsla(text_secondary)).child(text.to_string())
     };
 
-    div().flex().flex_col().gap(px(16.0))
+    div().flex().flex_col().gap(px(24.0))
         // --- Default with leading/trailing ---
-        .child(section_label("DEFAULT", text_secondary))
         .child(
-            StatusBar::from_spec(status_spec, theme)
-                .with_leading_items(
-                    div().flex().items_center().gap(px(8.0))
-                        .child(StatusIndicator::from_spec(branch_indicator, theme))
-                        .child(StatusIndicator::from_spec(error_indicator, theme))
-                )
-                .with_trailing_items(
-                    div().flex().items_center().gap(px(8.0))
-                        .child(meta_item("Ln 42, Col 18"))
-                        .child(meta_item("UTF-8"))
-                        .child(meta_item("TypeScript"))
+            div().flex().flex_col().gap(px(10.0))
+                .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Default"), theme))
+                .child(
+                    StatusBar::from_spec(status_spec, theme)
+                        .with_leading_items(
+                            div().flex().items_center().gap(px(8.0))
+                                .child(StatusIndicator::from_spec(branch_indicator, theme))
+                                .child(StatusIndicator::from_spec(error_indicator, theme))
+                        )
+                        .with_trailing_items(
+                            div().flex().items_center().gap(px(8.0))
+                                .child(meta_item("Ln 42, Col 18"))
+                                .child(meta_item("UTF-8"))
+                                .child(meta_item("TypeScript"))
+                        )
                 )
         )
         // --- Summary only ---
-        .child(section_label("SUMMARY ONLY", text_secondary))
         .child(
-            StatusBar::from_spec(
-                ShellStatusBarSpec::new().with_summary("3 items selected"),
-                theme,
-            )
+            div().flex().flex_col().gap(px(10.0))
+                .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Summary only"), theme))
+                .child(
+                    StatusBar::from_spec(
+                        ShellStatusBarSpec::new().with_summary("3 items selected"),
+                        theme,
+                    )
+                )
         )
-}
-
-fn section_label(label: &str, color: pug_tokens::typed::ColorValue) -> Div {
-    div()
-        .text_xs()
-        .font_weight(FontWeight::SEMIBOLD)
-        .text_color(color_to_hsla(color))
-        .child(label.to_string())
-        .mb(px(2.0))
 }

@@ -1,8 +1,8 @@
 use gpui::*;
 use pug_adapter::ThemeProvider;
 use pug_gpui::GpuiThemeProvider;
-use pug_primitives::{GridSpec, PaddingScale, SurfaceBorder, SurfaceSpec, SurfaceTone};
-use pug_gpui_components::{Grid, Surface};
+use pug_primitives::{EyebrowSpec, GridSpec, PaddingScale, SurfaceBorder, SurfaceSpec, SurfaceTone};
+use pug_gpui_components::{Eyebrow, Grid, Surface};
 use crate::style_bridge::color_to_hsla;
 
 pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
@@ -35,8 +35,8 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
     div().flex().flex_col().gap(px(24.0))
         // --- Three columns ---
         .child(
-            div().flex().flex_col().gap(px(8.0))
-                .child(section_label("Three columns", text_secondary))
+            div().flex().flex_col().gap(px(10.0))
+                .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Three columns"), theme))
                 .child(
                     Grid::from_spec(
                         GridSpec::new()
@@ -51,8 +51,8 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
         )
         // --- Mixed column widths ---
         .child(
-            div().flex().flex_col().gap(px(8.0))
-                .child(section_label("Mixed column widths", text_secondary))
+            div().flex().flex_col().gap(px(10.0))
+                .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Mixed column widths"), theme))
                 .child(
                     Grid::from_spec(
                         GridSpec::new()
@@ -66,8 +66,8 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
         )
         // --- Auto-fit responsive ---
         .child(
-            div().flex().flex_col().gap(px(8.0))
-                .child(section_label("Auto-fit responsive", text_secondary))
+            div().flex().flex_col().gap(px(10.0))
+                .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Auto-fit responsive"), theme))
                 .child(
                     Grid::from_spec(
                         GridSpec::new()
@@ -82,13 +82,4 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
                     .with_child(surface_sm("E"))
                 )
         )
-}
-
-fn section_label(label: &str, color: pug_tokens::typed::ColorValue) -> Div {
-    div()
-        .text_xs()
-        .font_weight(FontWeight::SEMIBOLD)
-        .text_color(crate::style_bridge::color_to_hsla(color))
-        .child(label.to_string())
-        .mb(px(2.0))
 }

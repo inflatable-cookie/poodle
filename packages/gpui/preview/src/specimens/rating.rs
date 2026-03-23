@@ -1,14 +1,13 @@
 use gpui::*;
 use pug_adapter::ThemeProvider;
-use pug_primitives::RatingSpec;
-use pug_gpui_components::Rating;
+use pug_primitives::{EyebrowSpec, RatingSpec};
+use pug_gpui_components::{Eyebrow, Rating};
 use crate::app_state::AppState;
 use crate::style_bridge::color_to_hsla;
 use crate::PreviewRoot;
 
 pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
     let theme = &state.theme;
-    let text_secondary = theme.resolve_color("semantic.color.text.secondary");
     let text_primary = theme.resolve_color("semantic.color.text.primary");
 
     let interactive_rating = state.specimens.selections.get("rating-interactive")
@@ -16,10 +15,10 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
         .unwrap_or(3);
 
     div().flex().flex_col().gap(px(24.0))
-        // --- Interactive ---
+        // --- Default (5 stars) ---
         .child(
-            div().flex().flex_col().gap(px(8.0))
-                .child(section_label("INTERACTIVE (CLICK TO RATE)", text_secondary))
+            div().flex().flex_col().gap(px(10.0))
+                .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Default (5 stars)"), theme))
                 .child(Rating::from_spec(
                     RatingSpec::new().with_value(interactive_rating as f64),
                     theme,
@@ -36,8 +35,8 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
         )
         // --- 10-star scale ---
         .child(
-            div().flex().flex_col().gap(px(8.0))
-                .child(section_label("10-STAR SCALE", text_secondary))
+            div().flex().flex_col().gap(px(10.0))
+                .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("10-star scale"), theme))
                 .child(Rating::from_spec(
                     RatingSpec::new().with_value(7.0).with_max(10),
                     theme,
@@ -45,20 +44,11 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
         )
         // --- Disabled ---
         .child(
-            div().flex().flex_col().gap(px(8.0))
-                .child(section_label("DISABLED", text_secondary))
+            div().flex().flex_col().gap(px(10.0))
+                .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Disabled"), theme))
                 .child(Rating::from_spec(
                     RatingSpec::new().with_value(2.0).with_disabled(true),
                     theme,
                 ))
         )
-}
-
-fn section_label(label: &str, color: pug_tokens::typed::ColorValue) -> Div {
-    div()
-        .text_xs()
-        .font_weight(FontWeight::SEMIBOLD)
-        .text_color(crate::style_bridge::color_to_hsla(color))
-        .child(label.to_string())
-        .mb(px(2.0))
 }

@@ -1,14 +1,12 @@
 use gpui::*;
-use pug_adapter::ThemeProvider;
 use pug_composites::{ActionDiscoveryPanelSpec, ActionDiscoverySection, CommandActionItem, DiscoveryState};
-use pug_gpui_components::ActionDiscoveryPanel;
+use pug_primitives::EyebrowSpec;
+use pug_gpui_components::{ActionDiscoveryPanel, Eyebrow};
 use crate::app_state::AppState;
-use crate::style_bridge::color_to_hsla;
 use crate::PreviewRoot;
 
 pub(crate) fn render(state: &AppState, _cx: &mut Context<PreviewRoot>) -> Div {
     let theme = &state.theme;
-    let text_secondary = theme.resolve_color("semantic.color.text.secondary");
 
     // --- Grouped actions ---
     let grouped_sections = vec![
@@ -70,29 +68,29 @@ pub(crate) fn render(state: &AppState, _cx: &mut Context<PreviewRoot>) -> Div {
     let empty_spec = ActionDiscoveryPanelSpec::new(vec![])
         .with_state(DiscoveryState::Empty);
 
-    div().flex().flex_col().gap(px(16.0))
-        .child(section_label("GROUPED ACTIONS", text_secondary))
+    div().flex().flex_col().gap(px(24.0))
         .child(
-            ActionDiscoveryPanel::from_spec(grouped_spec, theme)
-                .with_id("action-disc-grouped")
+            div().flex().flex_col().gap(px(10.0))
+                .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Grouped actions"), theme))
+                .child(
+                    ActionDiscoveryPanel::from_spec(grouped_spec, theme)
+                        .with_id("action-disc-grouped")
+                )
         )
-        .child(section_label("WITH DESCRIPTIONS AND BADGES", text_secondary))
         .child(
-            ActionDiscoveryPanel::from_spec(desc_spec, theme)
-                .with_id("action-disc-desc")
+            div().flex().flex_col().gap(px(10.0))
+                .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("With descriptions and badges"), theme))
+                .child(
+                    ActionDiscoveryPanel::from_spec(desc_spec, theme)
+                        .with_id("action-disc-desc")
+                )
         )
-        .child(section_label("EMPTY STATE", text_secondary))
         .child(
-            ActionDiscoveryPanel::from_spec(empty_spec, theme)
-                .with_id("action-disc-empty")
+            div().flex().flex_col().gap(px(10.0))
+                .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Empty state"), theme))
+                .child(
+                    ActionDiscoveryPanel::from_spec(empty_spec, theme)
+                        .with_id("action-disc-empty")
+                )
         )
-}
-
-fn section_label(label: &str, color: pug_tokens::typed::ColorValue) -> Div {
-    div()
-        .text_xs()
-        .font_weight(FontWeight::SEMIBOLD)
-        .text_color(color_to_hsla(color))
-        .child(label.to_string())
-        .mb(px(2.0))
 }

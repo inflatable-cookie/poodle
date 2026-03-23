@@ -1,14 +1,13 @@
 use gpui::*;
 use pug_adapter::ThemeProvider;
-use pug_primitives::{NumberEntrySpec, ValidationState};
-use pug_gpui_components::NumberEntry;
+use pug_primitives::{NumberEntrySpec, ValidationState, EyebrowSpec};
+use pug_gpui_components::{NumberEntry, Eyebrow};
 use crate::app_state::AppState;
 use crate::style_bridge::color_to_hsla;
 use crate::PreviewRoot;
 
 pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
     let theme = &state.theme;
-    let text_secondary = theme.resolve_color("semantic.color.text.secondary");
     let text_primary = theme.resolve_color("semantic.color.text.primary");
 
     // Track quantity value (stored as string, parsed to f64)
@@ -20,93 +19,96 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
         .unwrap_or_else(|| "29.99".to_string());
     let price: f64 = price_str.parse().unwrap_or(29.99);
 
-    div().flex().flex_col().gap(px(16.0)).max_w(px(320.0))
-        // --- Interactive ---
-        .child(section_label("INTERACTIVE (CLICK +/- OR USE ARROW KEYS)", text_secondary))
+    div().flex().flex_col().gap(px(24.0)).max_w(px(320.0))
+        // --- Default ---
         .child(
-            NumberEntry::from_spec(
-                NumberEntrySpec::new(quantity)
-                    .with_min(0.0)
-                    .with_max(100.0)
-                    .with_aria_label("Quantity"),
-                theme,
-            )
-            .on_increment(cx.listener(move |this, _e: &ClickEvent, _w, cx| {
-                let cur: f64 = this.state.specimens.text.get("number-entry-quantity")
-                    .and_then(|s| s.parse().ok())
-                    .unwrap_or(1.0);
-                let new_val = (cur + 1.0).min(100.0);
-                this.state.specimens.text.insert("number-entry-quantity".to_string(), format!("{}", new_val));
-                cx.notify();
-            }))
-            .on_decrement(cx.listener(move |this, _e: &ClickEvent, _w, cx| {
-                let cur: f64 = this.state.specimens.text.get("number-entry-quantity")
-                    .and_then(|s| s.parse().ok())
-                    .unwrap_or(1.0);
-                let new_val = (cur - 1.0).max(0.0);
-                this.state.specimens.text.insert("number-entry-quantity".to_string(), format!("{}", new_val));
-                cx.notify();
-            }))
+            div().flex().flex_col().gap(px(10.0))
+                .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Default"), theme))
+                .child(
+                    NumberEntry::from_spec(
+                        NumberEntrySpec::new(quantity)
+                            .with_min(0.0)
+                            .with_max(100.0)
+                            .with_aria_label("Quantity"),
+                        theme,
+                    )
+                    .on_increment(cx.listener(move |this, _e: &ClickEvent, _w, cx| {
+                        let cur: f64 = this.state.specimens.text.get("number-entry-quantity")
+                            .and_then(|s| s.parse().ok())
+                            .unwrap_or(1.0);
+                        let new_val = (cur + 1.0).min(100.0);
+                        this.state.specimens.text.insert("number-entry-quantity".to_string(), format!("{}", new_val));
+                        cx.notify();
+                    }))
+                    .on_decrement(cx.listener(move |this, _e: &ClickEvent, _w, cx| {
+                        let cur: f64 = this.state.specimens.text.get("number-entry-quantity")
+                            .and_then(|s| s.parse().ok())
+                            .unwrap_or(1.0);
+                        let new_val = (cur - 1.0).max(0.0);
+                        this.state.specimens.text.insert("number-entry-quantity".to_string(), format!("{}", new_val));
+                        cx.notify();
+                    }))
+                )
+                .child(
+                    div()
+                        .text_size(px(12.0))
+                        .text_color(color_to_hsla(text_primary))
+                        .child(format!("Quantity: {}", quantity))
+                )
         )
+        // --- With steppers ---
         .child(
-            div()
-                .text_size(px(12.0))
-                .text_color(color_to_hsla(text_primary))
-                .child(format!("Quantity: {}", quantity))
-        )
-        // --- With Steppers (price) ---
-        .child(section_label("WITH STEP 0.01", text_secondary))
-        .child(
-            NumberEntry::from_spec(
-                NumberEntrySpec::new(price)
-                    .with_min(0.0)
-                    .with_step(0.01)
-                    .with_aria_label("Price"),
-                theme,
-            )
-            .on_increment(cx.listener(move |this, _e: &ClickEvent, _w, cx| {
-                let cur: f64 = this.state.specimens.text.get("number-entry-price")
-                    .and_then(|s| s.parse().ok())
-                    .unwrap_or(29.99);
-                let new_val = ((cur + 0.01) * 100.0).round() / 100.0;
-                this.state.specimens.text.insert("number-entry-price".to_string(), format!("{:.2}", new_val));
-                cx.notify();
-            }))
-            .on_decrement(cx.listener(move |this, _e: &ClickEvent, _w, cx| {
-                let cur: f64 = this.state.specimens.text.get("number-entry-price")
-                    .and_then(|s| s.parse().ok())
-                    .unwrap_or(29.99);
-                let new_val = ((cur - 0.01) * 100.0).round() / 100.0;
-                this.state.specimens.text.insert("number-entry-price".to_string(), format!("{:.2}", new_val.max(0.0)));
-                cx.notify();
-            }))
+            div().flex().flex_col().gap(px(10.0))
+                .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("With steppers"), theme))
+                .child(
+                    NumberEntry::from_spec(
+                        NumberEntrySpec::new(price)
+                            .with_min(0.0)
+                            .with_step(0.01)
+                            .with_aria_label("Price"),
+                        theme,
+                    )
+                    .on_increment(cx.listener(move |this, _e: &ClickEvent, _w, cx| {
+                        let cur: f64 = this.state.specimens.text.get("number-entry-price")
+                            .and_then(|s| s.parse().ok())
+                            .unwrap_or(29.99);
+                        let new_val = ((cur + 0.01) * 100.0).round() / 100.0;
+                        this.state.specimens.text.insert("number-entry-price".to_string(), format!("{:.2}", new_val));
+                        cx.notify();
+                    }))
+                    .on_decrement(cx.listener(move |this, _e: &ClickEvent, _w, cx| {
+                        let cur: f64 = this.state.specimens.text.get("number-entry-price")
+                            .and_then(|s| s.parse().ok())
+                            .unwrap_or(29.99);
+                        let new_val = ((cur - 0.01) * 100.0).round() / 100.0;
+                        this.state.specimens.text.insert("number-entry-price".to_string(), format!("{:.2}", new_val.max(0.0)));
+                        cx.notify();
+                    }))
+                )
         )
         // --- Disabled ---
-        .child(section_label("DISABLED", text_secondary))
         .child(
-            NumberEntry::from_spec(
-                NumberEntrySpec::new(42.0)
-                    .with_disabled(true),
-                theme,
-            )
+            div().flex().flex_col().gap(px(10.0))
+                .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Disabled"), theme))
+                .child(
+                    NumberEntry::from_spec(
+                        NumberEntrySpec::new(42.0)
+                            .with_disabled(true),
+                        theme,
+                    )
+                )
         )
         // --- Invalid ---
-        .child(section_label("INVALID", text_secondary))
         .child(
-            NumberEntry::from_spec(
-                NumberEntrySpec::new(-5.0)
-                    .with_min(0.0)
-                    .with_validation_state(ValidationState::Invalid),
-                theme,
-            )
+            div().flex().flex_col().gap(px(10.0))
+                .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Invalid"), theme))
+                .child(
+                    NumberEntry::from_spec(
+                        NumberEntrySpec::new(-5.0)
+                            .with_min(0.0)
+                            .with_validation_state(ValidationState::Invalid),
+                        theme,
+                    )
+                )
         )
-}
-
-fn section_label(label: &str, color: pug_tokens::typed::ColorValue) -> Div {
-    div()
-        .text_xs()
-        .font_weight(FontWeight::SEMIBOLD)
-        .text_color(color_to_hsla(color))
-        .child(label.to_string())
-        .mb(px(2.0))
 }

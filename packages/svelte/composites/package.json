@@ -18,9 +18,17 @@
     "channel": "preview",
     "stability": "pre-release"
   },
-  "dependencies": {
-    "@pug/svelte-tokens": "workspace:*",
-    "@pug/svelte-primitives": "workspace:*",
+  "peerDependencies": {
+    "@pug/svelte-tokens": "0.0.0",
+    "@pug/svelte-primitives": "0.0.0",
     "svelte": "^5.38.6"
+  },
+  "peerDependenciesMeta": {
+    "@pug/svelte-tokens": {
+      "optional": true
+    },
+    "@pug/svelte-primitives": {
+      "optional": true
+    }
   }
 }

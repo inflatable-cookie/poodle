@@ -2,7 +2,8 @@ use gpui::*;
 use gpui::prelude::FluentBuilder;
 use pug_adapter::ThemeProvider;
 use pug_composites::{DataTableSpec, TableColumnSpec, TableRowSpec, TableSortDirection};
-use pug_gpui_components::DataTable;
+use pug_primitives::EyebrowSpec;
+use pug_gpui_components::{DataTable, Eyebrow};
 use crate::app_state::AppState;
 use crate::style_bridge::color_to_hsla;
 use crate::PreviewRoot;
@@ -83,43 +84,46 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
         TableColumnSpec::new("status", "Status"),
     ];
 
-    div().flex().flex_col().gap(px(16.0))
+    div().flex().flex_col().gap(px(24.0))
         // --- With sorting, column visibility, and export ---
-        .child(section_label("WITH SORTING, COLUMN VISIBILITY, AND EXPORT", text_secondary))
         .child(
-            DataTable::from_spec(
-                DataTableSpec::new(columns, rows)
-                    .with_selected_row_ids(selected_ids)
-                    .with_sort(&sort_col, sort_dir)
-                    .with_row_action_label("Open"),
-                theme,
-            )
-            .on_sort(cx.listener(|this, col_id: &str, _w, cx| {
-                let current_col = this.state.specimens.text.get("dt-sort-col")
-                    .cloned()
-                    .unwrap_or_else(|| "name".to_string());
-                let current_dir = this.state.specimens.text.get("dt-sort-dir")
-                    .cloned()
-                    .unwrap_or_else(|| "asc".to_string());
+            div().flex().flex_col().gap(px(10.0))
+                .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("With sorting, column visibility, and export"), theme))
+                .child(
+                    DataTable::from_spec(
+                        DataTableSpec::new(columns, rows)
+                            .with_selected_row_ids(selected_ids)
+                            .with_sort(&sort_col, sort_dir)
+                            .with_row_action_label("Open"),
+                        theme,
+                    )
+                    .on_sort(cx.listener(|this, col_id: &str, _w, cx| {
+                        let current_col = this.state.specimens.text.get("dt-sort-col")
+                            .cloned()
+                            .unwrap_or_else(|| "name".to_string());
+                        let current_dir = this.state.specimens.text.get("dt-sort-dir")
+                            .cloned()
+                            .unwrap_or_else(|| "asc".to_string());
 
-                if col_id == current_col {
-                    // Toggle direction
-                    let new_dir = if current_dir == "asc" { "desc" } else { "asc" };
-                    this.state.specimens.text.insert("dt-sort-dir".to_string(), new_dir.to_string());
-                } else {
-                    this.state.specimens.text.insert("dt-sort-col".to_string(), col_id.to_string());
-                    this.state.specimens.text.insert("dt-sort-dir".to_string(), "asc".to_string());
-                }
-                cx.notify();
-            }))
-            .on_row_click(cx.listener(|this, row_id: &str, _w, cx| {
-                this.state.specimens.toggle(&format!("dt-row-{}", row_id));
-                this.state.specimens.text.insert(
-                    "dt-last-action".to_string(),
-                    format!("Clicked row {}", row_id),
-                );
-                cx.notify();
-            }))
+                        if col_id == current_col {
+                            // Toggle direction
+                            let new_dir = if current_dir == "asc" { "desc" } else { "asc" };
+                            this.state.specimens.text.insert("dt-sort-dir".to_string(), new_dir.to_string());
+                        } else {
+                            this.state.specimens.text.insert("dt-sort-col".to_string(), col_id.to_string());
+                            this.state.specimens.text.insert("dt-sort-dir".to_string(), "asc".to_string());
+                        }
+                        cx.notify();
+                    }))
+                    .on_row_click(cx.listener(|this, row_id: &str, _w, cx| {
+                        this.state.specimens.toggle(&format!("dt-row-{}", row_id));
+                        this.state.specimens.text.insert(
+                            "dt-last-action".to_string(),
+                            format!("Clicked row {}", row_id),
+                        );
+                        cx.notify();
+                    }))
+                )
         )
         // Status line
         .when(!last_action.is_empty(), |d| {
@@ -134,21 +138,15 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
         )
 
         // --- Empty state ---
-        .child(section_label("EMPTY STATE", text_secondary))
         .child(
-            DataTable::from_spec(
-                DataTableSpec::new(empty_columns, vec![])
-                    .with_empty_message("No team members match the current filters."),
-                theme,
-            )
+            div().flex().flex_col().gap(px(10.0))
+                .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Empty state"), theme))
+                .child(
+                    DataTable::from_spec(
+                        DataTableSpec::new(empty_columns, vec![])
+                            .with_empty_message("No team members match the current filters."),
+                        theme,
+                    )
+                )
         )
-}
-
-fn section_label(label: &str, color: pug_tokens::typed::ColorValue) -> Div {
-    div()
-        .text_xs()
-        .font_weight(FontWeight::SEMIBOLD)
-        .text_color(color_to_hsla(color))
-        .child(label.to_string())
-        .mb(px(2.0))
 }

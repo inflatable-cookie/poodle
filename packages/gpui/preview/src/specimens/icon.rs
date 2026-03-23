@@ -1,8 +1,8 @@
 use gpui::*;
 use pug_adapter::ThemeProvider;
 use pug_gpui::GpuiThemeProvider;
-use pug_primitives::{IconSize, IconSpec};
-use pug_gpui_components::Icon;
+use pug_primitives::{IconSize, IconSpec, EyebrowSpec};
+use pug_gpui_components::{Icon, Eyebrow};
 use crate::style_bridge::color_to_hsla;
 
 /// A curated set of icon names to display in the gallery.
@@ -38,24 +38,31 @@ const SPECIMEN_ICONS: &[&str] = &[
 const SIZE_ICONS: &[&str] = &["star", "heart", "settings", "search"];
 
 pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
-    let text_secondary = theme.resolve_color("semantic.color.text.secondary");
-
-    div().flex().flex_col().gap(px(16.0))
+    div().flex().flex_col().gap(px(24.0))
         // --- Sizes ---
-        .child(section_label("SIZES", text_secondary))
-        .child(render_sizes_section(theme))
+        .child(
+            div().flex().flex_col().gap(px(10.0))
+                .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Direct import \u{2014} tree-shakeable"), theme))
+                .child(render_sizes_section(theme))
+        )
         // --- Color Inheritance ---
-        .child(section_label("COLOR INHERITANCE", text_secondary))
-        .child(render_color_inheritance_section(theme))
+        .child(
+            div().flex().flex_col().gap(px(10.0))
+                .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Color inheritance"), theme))
+                .child(render_color_inheritance_section(theme))
+        )
         // --- Accessibility ---
-        .child(section_label("ACCESSIBILITY", text_secondary))
-        .child(render_accessibility_section(theme))
+        .child(
+            div().flex().flex_col().gap(px(10.0))
+                .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Accessibility"), theme))
+                .child(render_accessibility_section(theme))
+        )
         // --- All Icons ---
-        .child(section_label(
-            &format!("ALL ICONS ({})", SPECIMEN_ICONS.len()),
-            text_secondary,
-        ))
-        .child(render_icon_gallery(theme))
+        .child(
+            div().flex().flex_col().gap(px(10.0))
+                .child(Eyebrow::from_spec(EyebrowSpec::new().with_content(&format!("All icons ({})", SPECIMEN_ICONS.len())), theme))
+                .child(render_icon_gallery(theme))
+        )
 }
 
 fn render_sizes_section(theme: &GpuiThemeProvider) -> Div {
@@ -144,7 +151,7 @@ fn render_accessibility_section(theme: &GpuiThemeProvider) -> Div {
                 )
                 .child(
                     div().text_xs().text_color(color_to_hsla(text_secondary))
-                        .child("With aria-label=\"Search\" — announced by screen readers")
+                        .child("With aria-label=\"Search\" \u{2014} announced by screen readers")
                 )
         )
         .child(
@@ -158,7 +165,7 @@ fn render_accessibility_section(theme: &GpuiThemeProvider) -> Div {
                 )
                 .child(
                     div().text_xs().text_color(color_to_hsla(text_secondary))
-                        .child("Without aria-label — hidden from assistive technology")
+                        .child("Without aria-label \u{2014} hidden from assistive technology")
                 )
         )
 }
@@ -198,13 +205,4 @@ fn render_icon_gallery(theme: &GpuiThemeProvider) -> Div {
     }
 
     gallery
-}
-
-fn section_label(label: &str, color: pug_tokens::typed::ColorValue) -> Div {
-    div()
-        .text_xs()
-        .font_weight(FontWeight::SEMIBOLD)
-        .text_color(color_to_hsla(color))
-        .child(label.to_string())
-        .mb(px(2.0))
 }

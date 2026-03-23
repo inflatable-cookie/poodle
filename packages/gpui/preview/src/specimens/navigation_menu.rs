@@ -1,7 +1,7 @@
 use gpui::*;
 use pug_adapter::ThemeProvider;
-use pug_primitives::{NavigationMenuSpec, NavigationMenuEntry};
-use pug_gpui_components::NavigationMenu;
+use pug_primitives::{NavigationMenuSpec, NavigationMenuEntry, EyebrowSpec};
+use pug_gpui_components::{NavigationMenu, Eyebrow};
 use crate::app_state::AppState;
 use crate::style_bridge::color_to_hsla;
 use crate::PreviewRoot;
@@ -26,32 +26,26 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
         .with_value(active_value.clone())
         .with_aria_label("Main navigation");
 
-    div().flex().flex_col().gap(px(16.0))
-        .child(section_label("HORIZONTAL NAVIGATION", text_secondary))
+    div().flex().flex_col().gap(px(24.0))
         .child(
-            NavigationMenu::from_spec(spec, theme)
-                .with_id("specimen-nav")
-                .on_change(cx.listener(|this, val: &str, _w, cx| {
-                    this.state.specimens.text.insert(
-                        "navmenu-active".to_string(),
-                        val.to_string(),
-                    );
-                    cx.notify();
-                }))
+            div().flex().flex_col().gap(px(10.0))
+                .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Horizontal navigation"), theme))
+                .child(
+                    NavigationMenu::from_spec(spec, theme)
+                        .with_id("specimen-nav")
+                        .on_change(cx.listener(|this, val: &str, _w, cx| {
+                            this.state.specimens.text.insert(
+                                "navmenu-active".to_string(),
+                                val.to_string(),
+                            );
+                            cx.notify();
+                        }))
+                )
+                .child(
+                    div()
+                        .text_sm()
+                        .text_color(color_to_hsla(text_secondary))
+                        .child(format!("Active section: {}", active_value))
+                )
         )
-        .child(
-            div()
-                .text_sm()
-                .text_color(color_to_hsla(text_secondary))
-                .child(format!("Active section: {}", active_value))
-        )
-}
-
-fn section_label(label: &str, color: pug_tokens::typed::ColorValue) -> Div {
-    div()
-        .text_xs()
-        .font_weight(FontWeight::SEMIBOLD)
-        .text_color(color_to_hsla(color))
-        .child(label.to_string())
-        .mb(px(2.0))
 }

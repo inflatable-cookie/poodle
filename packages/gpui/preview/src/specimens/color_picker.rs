@@ -1,7 +1,7 @@
 use gpui::*;
 use pug_adapter::ThemeProvider;
-use pug_primitives::{ColorPickerSpec, ColorInputMode};
-use pug_gpui_components::ColorPicker;
+use pug_primitives::{ColorPickerSpec, ColorInputMode, EyebrowSpec};
+use pug_gpui_components::{ColorPicker, Eyebrow};
 use crate::app_state::AppState;
 use crate::style_bridge::color_to_hsla;
 use crate::PreviewRoot;
@@ -39,131 +39,140 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
         .cloned()
         .unwrap_or_else(|| "#22c55e".to_string());
 
-    div().flex().flex_col().gap(px(16.0)).max_w(px(420.0))
+    div().flex().flex_col().gap(px(24.0)).max_w(px(420.0))
         // --- Basic picker ---
-        .child(section_label("BASIC PICKER", text_secondary))
         .child(
-            div().flex().flex_col().gap(px(4.0))
+            div().flex().flex_col().gap(px(10.0))
+                .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Basic picker"), theme))
                 .child(
-                    ColorPicker::from_spec(
-                        ColorPickerSpec::new()
-                            .with_value(&basic_value)
-                            .with_open(basic_open),
-                        theme,
-                    )
-                    .with_id("basic")
-                    .on_toggle(cx.listener(|this, _open: &bool, _w, cx| {
-                        this.state.specimens.toggle("color-picker-basic-open");
-                        cx.notify();
-                    }))
-                    .on_change(cx.listener(|this, val: &str, _w, cx| {
-                        this.state.specimens.text.insert("color-picker-basic-value".to_string(), val.to_string());
-                        cx.notify();
-                    }))
-                )
-                .child(
-                    div().text_xs().text_color(color_to_hsla(text_secondary))
-                        .child(format!("Selected: {}", basic_value))
+                    div().flex().flex_col().gap(px(4.0))
+                        .child(
+                            ColorPicker::from_spec(
+                                ColorPickerSpec::new()
+                                    .with_value(&basic_value)
+                                    .with_open(basic_open),
+                                theme,
+                            )
+                            .with_id("basic")
+                            .on_toggle(cx.listener(|this, _open: &bool, _w, cx| {
+                                this.state.specimens.toggle("color-picker-basic-open");
+                                cx.notify();
+                            }))
+                            .on_change(cx.listener(|this, val: &str, _w, cx| {
+                                this.state.specimens.text.insert("color-picker-basic-value".to_string(), val.to_string());
+                                cx.notify();
+                            }))
+                        )
+                        .child(
+                            div().text_xs().text_color(color_to_hsla(text_secondary))
+                                .child(format!("Selected: {}", basic_value))
+                        )
                 )
         )
 
         // --- With swatches ---
-        .child(section_label("WITH SWATCHES", text_secondary))
         .child(
-            ColorPicker::from_spec(
-                ColorPickerSpec::new()
-                    .with_value(&swatches_value)
-                    .with_open(swatches_open)
-                    .with_swatches(swatches.clone()),
-                theme,
-            )
-            .with_id("swatches")
-            .on_toggle(cx.listener(|this, _open: &bool, _w, cx| {
-                this.state.specimens.toggle("color-picker-swatches-open");
-                cx.notify();
-            }))
-            .on_change(cx.listener(|this, val: &str, _w, cx| {
-                this.state.specimens.text.insert("color-picker-swatches-value".to_string(), val.to_string());
-                cx.notify();
-            }))
-        )
-
-        // --- With alpha ---
-        .child(section_label("WITH ALPHA", text_secondary))
-        .child(
-            div().flex().flex_col().gap(px(4.0))
+            div().flex().flex_col().gap(px(10.0))
+                .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("With swatches"), theme))
                 .child(
                     ColorPicker::from_spec(
                         ColorPickerSpec::new()
-                            .with_value(&alpha_value)
-                            .with_open(alpha_open)
-                            .with_show_alpha(true),
+                            .with_value(&swatches_value)
+                            .with_open(swatches_open)
+                            .with_swatches(swatches.clone()),
                         theme,
                     )
-                    .with_id("alpha")
+                    .with_id("swatches")
                     .on_toggle(cx.listener(|this, _open: &bool, _w, cx| {
-                        this.state.specimens.toggle("color-picker-alpha-open");
+                        this.state.specimens.toggle("color-picker-swatches-open");
                         cx.notify();
                     }))
                     .on_change(cx.listener(|this, val: &str, _w, cx| {
-                        this.state.specimens.text.insert("color-picker-alpha-value".to_string(), val.to_string());
+                        this.state.specimens.text.insert("color-picker-swatches-value".to_string(), val.to_string());
                         cx.notify();
                     }))
                 )
+        )
+
+        // --- With alpha ---
+        .child(
+            div().flex().flex_col().gap(px(10.0))
+                .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("With alpha"), theme))
                 .child(
-                    div().text_xs().text_color(color_to_hsla(text_secondary))
-                        .child(format!("Selected: {}", alpha_value))
+                    div().flex().flex_col().gap(px(4.0))
+                        .child(
+                            ColorPicker::from_spec(
+                                ColorPickerSpec::new()
+                                    .with_value(&alpha_value)
+                                    .with_open(alpha_open)
+                                    .with_show_alpha(true),
+                                theme,
+                            )
+                            .with_id("alpha")
+                            .on_toggle(cx.listener(|this, _open: &bool, _w, cx| {
+                                this.state.specimens.toggle("color-picker-alpha-open");
+                                cx.notify();
+                            }))
+                            .on_change(cx.listener(|this, val: &str, _w, cx| {
+                                this.state.specimens.text.insert("color-picker-alpha-value".to_string(), val.to_string());
+                                cx.notify();
+                            }))
+                        )
+                        .child(
+                            div().text_xs().text_color(color_to_hsla(text_secondary))
+                                .child(format!("Selected: {}", alpha_value))
+                        )
                 )
         )
 
         // --- Default open, RGB mode ---
-        .child(section_label("DEFAULT OPEN, RGB MODE", text_secondary))
         .child(
-            ColorPicker::from_spec(
-                ColorPickerSpec::new()
-                    .with_value(&open_value)
-                    .with_open(true)
-                    .with_default_mode(ColorInputMode::Rgb),
-                theme,
-            )
-            .with_id("open")
-            .on_change(cx.listener(|this, val: &str, _w, cx| {
-                this.state.specimens.text.insert("color-picker-open-value".to_string(), val.to_string());
-                cx.notify();
-            }))
+            div().flex().flex_col().gap(px(10.0))
+                .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Default open, RGB mode"), theme))
+                .child(
+                    ColorPicker::from_spec(
+                        ColorPickerSpec::new()
+                            .with_value(&open_value)
+                            .with_open(true)
+                            .with_default_mode(ColorInputMode::Rgb),
+                        theme,
+                    )
+                    .with_id("open")
+                    .on_change(cx.listener(|this, val: &str, _w, cx| {
+                        this.state.specimens.text.insert("color-picker-open-value".to_string(), val.to_string());
+                        cx.notify();
+                    }))
+                )
         )
 
         // --- Preview only (no input) ---
-        .child(section_label("PREVIEW ONLY (NO INPUT)", text_secondary))
         .child(
-            ColorPicker::from_spec(
-                ColorPickerSpec::new()
-                    .with_value(&basic_value)
-                    .with_show_input(false)
-                    .with_open(true),
-                theme,
-            )
-            .with_id("preview")
+            div().flex().flex_col().gap(px(10.0))
+                .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Preview only (no input)"), theme))
+                .child(
+                    ColorPicker::from_spec(
+                        ColorPickerSpec::new()
+                            .with_value(&basic_value)
+                            .with_show_input(false)
+                            .with_open(true),
+                        theme,
+                    )
+                    .with_id("preview")
+                )
         )
 
         // --- Disabled ---
-        .child(section_label("DISABLED", text_secondary))
         .child(
-            ColorPicker::from_spec(
-                ColorPickerSpec::new()
-                    .with_value("#22c55e")
-                    .with_disabled(true),
-                theme,
-            )
-            .with_id("disabled")
+            div().flex().flex_col().gap(px(10.0))
+                .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Disabled"), theme))
+                .child(
+                    ColorPicker::from_spec(
+                        ColorPickerSpec::new()
+                            .with_value("#22c55e")
+                            .with_disabled(true),
+                        theme,
+                    )
+                    .with_id("disabled")
+                )
         )
-}
-
-fn section_label(label: &str, color: pug_tokens::typed::ColorValue) -> Div {
-    div()
-        .text_xs()
-        .font_weight(FontWeight::SEMIBOLD)
-        .text_color(color_to_hsla(color))
-        .child(label.to_string())
-        .mb(px(2.0))
 }

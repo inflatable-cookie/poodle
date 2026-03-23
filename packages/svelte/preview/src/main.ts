@@ -1,4 +1,4 @@
-import "../../../tokens/artifacts/css/pug-tokens.css";
+import "@pug/svelte-tokens/styles.css";
 import "../../../tokens/artifacts/css/pug-theme-light.css";
 import "../../../tokens/artifacts/css/pug-theme-dark.css";
 import "../../../tokens/artifacts/css/pug-theme-loophole-studio.css";

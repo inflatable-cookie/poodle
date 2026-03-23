@@ -1,8 +1,8 @@
 use gpui::*;
 use gpui::prelude::FluentBuilder;
 use pug_adapter::ThemeProvider;
-use pug_primitives::{TabsSpec, TabDefinition, TabVariant, TabStripSpec, TabStripItem, Orientation};
-use pug_gpui_components::{Tabs, TabStrip};
+use pug_primitives::{TabsSpec, TabDefinition, TabVariant, TabStripSpec, TabStripItem, Orientation, EyebrowSpec};
+use pug_gpui_components::{Tabs, TabStrip, Eyebrow};
 use crate::app_state::AppState;
 use crate::style_bridge::color_to_hsla;
 use crate::PreviewRoot;
@@ -13,9 +13,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
     let border = theme.resolve_color("semantic.color.border.default");
     let bg_surface = theme.resolve_color("semantic.color.background.surface");
 
-    // ═══════════════════════════════════════════════════════════════════
     // 1. UNDERLINE VARIANT (DEFAULT, WITH PANEL)
-    // ═══════════════════════════════════════════════════════════════════
     let underline_tabs = vec![
         TabDefinition::new("overview", "Overview"),
         TabDefinition::new("features", "Features"),
@@ -32,13 +30,6 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
         .with_variant(TabVariant::Underline)
         .with_value(&underline_value)
         .with_aria_label("Section tabs");
-
-    let _panel_text = match underline_value.as_str() {
-        "overview" => "Overview content — this is the landing page with a summary of all features.",
-        "features" => "Features content — explore the full feature set and capabilities.",
-        "pricing" => "Pricing content — compare plans and find the right fit for your team.",
-        _ => "",
-    };
 
     let underline_component = Tabs::from_spec(underline_spec, theme)
         .with_id("specimen-underline")
@@ -62,9 +53,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                 .child("Pricing content — compare plans and find the right fit for your team.".to_string()),
         );
 
-    // ═══════════════════════════════════════════════════════════════════
     // 2. CARD VARIANT (CLOSABLE, REORDERABLE)
-    // ═══════════════════════════════════════════════════════════════════
     let card_tabs = vec![
         TabDefinition::new("index.ts", "index.ts"),
         TabDefinition::new("App.svelte", "App.svelte"),
@@ -89,9 +78,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
             cx.notify();
         }));
 
-    // ═══════════════════════════════════════════════════════════════════
     // 3. PILL VARIANT (WITH ICONS)
-    // ═══════════════════════════════════════════════════════════════════
     let pill_tabs = vec![
         TabDefinition::new("home", "Home"),
         TabDefinition::new("settings", "Settings"),
@@ -115,9 +102,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
             cx.notify();
         }));
 
-    // ═══════════════════════════════════════════════════════════════════
     // 4. UNDERLINE WITH ICONS (NO PANEL)
-    // ═══════════════════════════════════════════════════════════════════
     let underline_icon_tabs = vec![
         TabDefinition::new("home", "Home"),
         TabDefinition::new("settings", "Settings"),
@@ -141,9 +126,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
             cx.notify();
         }));
 
-    // ═══════════════════════════════════════════════════════════════════
     // 5. STRIP VARIANT (HORIZONTAL, CLOSABLE, REORDERABLE)
-    // ═══════════════════════════════════════════════════════════════════
     let strip_items = vec![
         TabStripItem::new("main.rs", "main.rs").with_closable(true),
         TabStripItem::new("lib.rs", "lib.rs").with_closable(true),
@@ -179,9 +162,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
             cx.notify();
         }));
 
-    // ═══════════════════════════════════════════════════════════════════
     // 6. STRIP VARIANT (VERTICAL)
-    // ═══════════════════════════════════════════════════════════════════
     let vertical_items = vec![
         TabStripItem::new("files", "Files"),
         TabStripItem::new("search", "Search"),
@@ -206,9 +187,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
             cx.notify();
         }));
 
-    // ═══════════════════════════════════════════════════════════════════
     // 7. COLLAPSE TOGGLE
-    // ═══════════════════════════════════════════════════════════════════
     let panel_collapsed = state.specimens.is_on("tabs-panel-collapsed");
 
     let collapse_items = vec![
@@ -241,44 +220,56 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
             cx.notify();
         }));
 
-    // ═══════════════════════════════════════════════════════════════════
     // ASSEMBLE
-    // ═══════════════════════════════════════════════════════════════════
     div().flex().flex_col().gap(px(24.0))
         // 1. Underline variant (default, with panel)
-        .child(section_label("UNDERLINE VARIANT (DEFAULT, WITH PANEL)", text_secondary))
-        .child(underline_component)
+        .child(
+            div().flex().flex_col().gap(px(10.0))
+                .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Underline variant (default, with panel)"), theme))
+                .child(underline_component)
+        )
 
         // 2. Card variant (closable, reorderable)
-        .child(section_label("CARD VARIANT", text_secondary))
-        .child(card_component)
+        .child(
+            div().flex().flex_col().gap(px(10.0))
+                .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Card variant (closable, reorderable)"), theme))
+                .child(card_component)
+        )
 
         // 3. Pill variant
-        .child(section_label("PILL VARIANT", text_secondary))
-        .child(pill_component)
+        .child(
+            div().flex().flex_col().gap(px(10.0))
+                .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Pill variant (with icons)"), theme))
+                .child(pill_component)
+        )
 
         // 4. Underline with icons (no panel)
-        .child(section_label("UNDERLINE WITH ICONS (NO PANEL)", text_secondary))
-        .child(underline_icon_component)
+        .child(
+            div().flex().flex_col().gap(px(10.0))
+                .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Underline (with icons, no panel)"), theme))
+                .child(underline_icon_component)
+        )
 
         // 5. Strip variant (horizontal, closable, reorderable)
-        .child(section_label("STRIP VARIANT (CLOSABLE, REORDERABLE)", text_secondary))
         .child(
-            // Frame container simulating an editor panel
-            div()
-                .rounded(px(6.0))
-                .border_1()
-                .border_color(color_to_hsla(border))
-                .overflow_hidden()
-                .child(strip_component)
+            div().flex().flex_col().gap(px(10.0))
+                .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Strip variant (full-width bar with icons, closable, reorderable)"), theme))
                 .child(
                     div()
-                        .p(px(16.0))
-                        .bg(color_to_hsla(bg_surface))
-                        .min_h(px(48.0))
-                        .text_sm()
-                        .text_color(color_to_hsla(text_secondary))
-                        .child("Surface content area")
+                        .rounded(px(6.0))
+                        .border_1()
+                        .border_color(color_to_hsla(border))
+                        .overflow_hidden()
+                        .child(strip_component)
+                        .child(
+                            div()
+                                .p(px(16.0))
+                                .bg(color_to_hsla(bg_surface))
+                                .min_h(px(48.0))
+                                .text_sm()
+                                .text_color(color_to_hsla(text_secondary))
+                                .child("Surface content area")
+                        )
                 )
         )
         .when(!last_strip_closed.is_empty(), |d| {
@@ -295,99 +286,96 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
         })
 
         // 6. Strip variant (vertical)
-        .child(section_label("STRIP VARIANT (VERTICAL)", text_secondary))
         .child(
-            div()
-                .flex()
-                .rounded(px(6.0))
-                .border_1()
-                .border_color(color_to_hsla(border))
-                .overflow_hidden()
-                .h(px(160.0))
-                .child(vertical_component)
-                .child(
-                    div()
-                        .flex_1()
-                        .p(px(16.0))
-                        .bg(color_to_hsla(bg_surface))
-                        .text_sm()
-                        .text_color(color_to_hsla(text_secondary))
-                        .child(format!("Active: {}", vertical_value))
-                )
-        )
-
-        // 7. Collapse toggle
-        .child(section_label("COLLAPSE TOGGLE", text_secondary))
-        .child(
-            div().flex().flex_col().gap(px(8.0))
+            div().flex().flex_col().gap(px(10.0))
+                .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Strip variant — vertical (icon-only, collapsed panel)"), theme))
                 .child(
                     div()
                         .flex()
-                        .gap(px(8.0))
-                        .items_center()
-                        .child(
-                            div()
-                                .id("collapse-toggle-btn")
-                                .px(px(8.0))
-                                .py(px(4.0))
-                                .rounded(px(4.0))
-                                .border_1()
-                                .border_color(color_to_hsla(border))
-                                .text_xs()
-                                .cursor_pointer()
-                                .text_color(color_to_hsla(text_secondary))
-                                .child(if panel_collapsed { "Expand" } else { "Collapse" })
-                                .on_click(cx.listener(|this, _e: &ClickEvent, _w, cx| {
-                                    this.state.specimens.toggle("tabs-panel-collapsed");
-                                    cx.notify();
-                                }))
-                        )
-                        .child(
-                            div().text_xs().text_color(color_to_hsla(text_secondary))
-                                .child(if panel_collapsed { "Vertical (collapsed)" } else { "Horizontal (expanded)" })
-                        )
-                )
-                .child(
-                    div()
                         .rounded(px(6.0))
                         .border_1()
                         .border_color(color_to_hsla(border))
                         .overflow_hidden()
-                        .when(panel_collapsed, |d| {
-                            d.flex().h(px(120.0))
-                        })
-                        .child(collapse_component)
-                        .when(!panel_collapsed, |d| {
-                            d.child(
-                                div()
-                                    .p(px(16.0))
-                                    .bg(color_to_hsla(bg_surface))
-                                    .min_h(px(48.0))
-                                    .text_sm()
-                                    .text_color(color_to_hsla(text_secondary))
-                                    .child(format!("Panel: {}", collapse_value))
-                            )
-                        })
-                        .when(panel_collapsed, |d| {
-                            d.child(
-                                div()
-                                    .flex_1()
-                                    .p(px(16.0))
-                                    .bg(color_to_hsla(bg_surface))
-                                    .text_sm()
-                                    .text_color(color_to_hsla(text_secondary))
-                                    .child(format!("Panel: {}", collapse_value))
-                            )
-                        })
+                        .h(px(160.0))
+                        .child(vertical_component)
+                        .child(
+                            div()
+                                .flex_1()
+                                .p(px(16.0))
+                                .bg(color_to_hsla(bg_surface))
+                                .text_sm()
+                                .text_color(color_to_hsla(text_secondary))
+                                .child(format!("Active: {}", vertical_value))
+                        )
                 )
         )
-}
 
-fn section_label(label: &str, color: pug_tokens::typed::ColorValue) -> Div {
-    div()
-        .text_xs()
-        .font_weight(FontWeight::SEMIBOLD)
-        .text_color(color_to_hsla(color))
-        .child(label.to_string())
-        .mb(px(2.0))
+        // 7. Collapse toggle
+        .child(
+            div().flex().flex_col().gap(px(10.0))
+                .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Strip variant — collapse toggle (click to toggle orientation)"), theme))
+                .child(
+                    div().flex().flex_col().gap(px(8.0))
+                        .child(
+                            div()
+                                .flex()
+                                .gap(px(8.0))
+                                .items_center()
+                                .child(
+                                    div()
+                                        .id("collapse-toggle-btn")
+                                        .px(px(8.0))
+                                        .py(px(4.0))
+                                        .rounded(px(4.0))
+                                        .border_1()
+                                        .border_color(color_to_hsla(border))
+                                        .text_xs()
+                                        .cursor_pointer()
+                                        .text_color(color_to_hsla(text_secondary))
+                                        .child(if panel_collapsed { "Expand" } else { "Collapse" })
+                                        .on_click(cx.listener(|this, _e: &ClickEvent, _w, cx| {
+                                            this.state.specimens.toggle("tabs-panel-collapsed");
+                                            cx.notify();
+                                        }))
+                                )
+                                .child(
+                                    div().text_xs().text_color(color_to_hsla(text_secondary))
+                                        .child(if panel_collapsed { "Vertical (collapsed)" } else { "Horizontal (expanded)" })
+                                )
+                        )
+                        .child(
+                            div()
+                                .rounded(px(6.0))
+                                .border_1()
+                                .border_color(color_to_hsla(border))
+                                .overflow_hidden()
+                                .when(panel_collapsed, |d| {
+                                    d.flex().h(px(120.0))
+                                })
+                                .child(collapse_component)
+                                .when(!panel_collapsed, |d| {
+                                    d.child(
+                                        div()
+                                            .p(px(16.0))
+                                            .bg(color_to_hsla(bg_surface))
+                                            .min_h(px(48.0))
+                                            .text_sm()
+                                            .text_color(color_to_hsla(text_secondary))
+                                            .child(format!("Panel: {}", collapse_value))
+                                    )
+                                })
+                                .when(panel_collapsed, |d| {
+                                    d.child(
+                                        div()
+                                            .flex_1()
+                                            .p(px(16.0))
+                                            .bg(color_to_hsla(bg_surface))
+                                            .text_sm()
+                                            .text_color(color_to_hsla(text_secondary))
+                                            .child(format!("Panel: {}", collapse_value))
+                                    )
+                                })
+                        )
+                )
+        )
 }
