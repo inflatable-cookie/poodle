@@ -1,8 +1,8 @@
 use gpui::*;
 use pug_adapter::ThemeProvider;
 use pug_composites::{PageHeaderSpec, PageLoadingSpec, PaginationSummarySpec};
-use pug_gpui_components::{PageHeader, PageLoading, PaginationSummary, Button};
-use pug_primitives::{ButtonSpec, ButtonVariant, ControlSize};
+use pug_gpui_components::{PageHeader, PageLoading, PaginationSummary, Button, Breadcrumbs};
+use pug_primitives::{ButtonSpec, ButtonVariant, ControlSize, BreadcrumbItem, BreadcrumbsSpec};
 use pug_gpui::GpuiThemeProvider;
 use crate::style_bridge::color_to_hsla;
 
@@ -99,6 +99,52 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
                     .with_max(100.0)
                     .with_message("Importing data...")
                     .with_can_cancel(true),
+                theme,
+            )
+        )
+
+        // --- Breadcrumbs: Basic ---
+        .child(section_label("BREADCRUMBS: BASIC", text_secondary))
+        .child(
+            Breadcrumbs::from_spec(
+                BreadcrumbsSpec::new(vec![
+                    BreadcrumbItem::new("home", "Home"),
+                    BreadcrumbItem::new("projects", "Projects"),
+                    BreadcrumbItem::new("pug", "Pug").with_is_current(true),
+                ]),
+                theme,
+            )
+        )
+
+        // --- Breadcrumbs: Deep path ---
+        .child(section_label("BREADCRUMBS: DEEP PATH", text_secondary))
+        .child(
+            Breadcrumbs::from_spec(
+                BreadcrumbsSpec::new(vec![
+                    BreadcrumbItem::new("home", "Home"),
+                    BreadcrumbItem::new("workspace", "Workspace"),
+                    BreadcrumbItem::new("projects", "Projects"),
+                    BreadcrumbItem::new("pug", "Pug Design System"),
+                    BreadcrumbItem::new("primitives", "Primitives"),
+                    BreadcrumbItem::new("button", "Button").with_is_current(true),
+                ]),
+                theme,
+            )
+        )
+
+        // --- Breadcrumbs: Collapsed (max 3 visible) ---
+        .child(section_label("BREADCRUMBS: COLLAPSED (MAX 3 VISIBLE)", text_secondary))
+        .child(
+            Breadcrumbs::from_spec(
+                BreadcrumbsSpec::new(vec![
+                    BreadcrumbItem::new("home", "Home"),
+                    BreadcrumbItem::new("workspace", "Workspace"),
+                    BreadcrumbItem::new("projects", "Projects"),
+                    BreadcrumbItem::new("pug", "Pug Design System"),
+                    BreadcrumbItem::new("primitives", "Primitives"),
+                    BreadcrumbItem::new("button", "Button").with_is_current(true),
+                ])
+                .with_max_visible_items(3),
                 theme,
             )
         )

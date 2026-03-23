@@ -1,7 +1,8 @@
 use gpui::*;
 use pug_adapter::ThemeProvider;
 use pug_composites::{DetailShellSpec, DetailState};
-use pug_gpui_components::DetailShell;
+use pug_gpui_components::{DetailShell, DetailRow, Button};
+use pug_primitives::{DetailRowSpec, ButtonSpec, ButtonVariant, ControlSize};
 use pug_gpui::GpuiThemeProvider;
 use crate::style_bridge::color_to_hsla;
 
@@ -57,6 +58,75 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
                 )
             )
         )
+        // --- DetailRow: Basic label-value pairs ---
+        .child(section_label("DETAIL ROW: BASIC LABEL-VALUE PAIRS", text_secondary))
+        .child(
+            div().flex().flex_col()
+                .child(DetailRow::from_spec(
+                    DetailRowSpec::new("Name").with_value("Pug Design System"),
+                    theme,
+                ))
+                .child(DetailRow::from_spec(
+                    DetailRowSpec::new("Version").with_value("2.1.0"),
+                    theme,
+                ))
+                .child(DetailRow::from_spec(
+                    DetailRowSpec::new("License").with_value("MIT"),
+                    theme,
+                ))
+        )
+
+        // --- DetailRow: With description ---
+        .child(section_label("DETAIL ROW: WITH DESCRIPTION", text_secondary))
+        .child(
+            DetailRow::from_spec(
+                DetailRowSpec::new("API endpoint")
+                    .with_value("https://api.example.com/v2")
+                    .with_description("Base URL for all API requests.")
+                    .with_truncate_value(true),
+                theme,
+            )
+        )
+
+        // --- DetailRow: With action slot ---
+        .child(section_label("DETAIL ROW: WITH ACTION", text_secondary))
+        .child(
+            DetailRow::from_spec(
+                DetailRowSpec::new("Email").with_value("clay@example.com"),
+                theme,
+            )
+            .with_action(
+                Button::from_spec(
+                    ButtonSpec::new()
+                        .with_variant(ButtonVariant::Secondary)
+                        .with_size(ControlSize::Sm)
+                        .with_label("Change"),
+                    theme,
+                ).with_id("dr-change")
+            )
+        )
+
+        // --- DetailRow: With custom value content ---
+        .child(section_label("DETAIL ROW: WITH VALUE CONTENT", text_secondary))
+        .child(
+            DetailRow::from_spec(
+                DetailRowSpec::new("Status"),
+                theme,
+            )
+            .with_value_content(
+                div()
+                    .px(px(8.0)).py(px(2.0))
+                    .rounded(px(999.0))
+                    .bg(hsla(0.35, 0.5, 0.2, 0.3))
+                    .child(
+                        div().text_xs()
+                            .text_color(hsla(0.35, 0.6, 0.6, 1.0))
+                            .font_weight(FontWeight::MEDIUM)
+                            .child("Active".to_string())
+                    )
+            )
+        )
+
         // --- Loading state ---
         .child(section_label("LOADING STATE", text_secondary))
         .child(

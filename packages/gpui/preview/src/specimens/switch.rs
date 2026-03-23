@@ -1,7 +1,7 @@
 use gpui::*;
 use pug_adapter::ThemeProvider;
-use pug_primitives::SwitchSpec;
-use pug_gpui_components::Switch;
+use pug_primitives::{SwitchSpec, CheckState, TriStateSwitchSpec};
+use pug_gpui_components::{Switch, TriStateSwitch};
 use crate::app_state::AppState;
 use crate::style_bridge::color_to_hsla;
 use crate::PreviewRoot;
@@ -67,6 +67,68 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
 
             col
         })
+
+        // --- Tri-state switch ---
+        .child(section_label("TRI-STATE SWITCH", text_secondary))
+        .child({
+            let filter_val = state.specimens.text.get("tri-state-filter")
+                .cloned()
+                .unwrap_or_else(|| "default".to_string());
+            let check_state = match filter_val.as_str() {
+                "excluded" => CheckState::Unchecked,
+                "included" => CheckState::Checked,
+                _ => CheckState::Mixed,
+            };
+            div().flex().flex_col().gap(px(8.0))
+                .child(
+                    TriStateSwitch::from_spec(
+                        TriStateSwitchSpec::new()
+                            .with_state(check_state)
+                            .with_label("Filter mode"),
+                        theme,
+                    )
+                    .on_click(cx.listener(|this, _e: &ClickEvent, _w, cx| {
+                        let current = this.state.specimens.text.get("tri-state-filter")
+                            .cloned()
+                            .unwrap_or_else(|| "default".to_string());
+                        let next = match current.as_str() {
+                            "excluded" => "default",
+                            "default" => "included",
+                            "included" => "excluded",
+                            _ => "default",
+                        };
+                        this.state.specimens.text.insert("tri-state-filter".to_string(), next.to_string());
+                        cx.notify();
+                    }))
+                )
+                .child(
+                    div().text_xs().text_color(color_to_hsla(text_secondary))
+                        .child(format!("Value: {}", filter_val))
+                )
+        })
+
+        // --- Tri-state: Custom labels ---
+        .child(section_label("TRI-STATE: CUSTOM LABELS", text_secondary))
+        .child(
+            TriStateSwitch::from_spec(
+                TriStateSwitchSpec::new()
+                    .with_state(CheckState::Mixed)
+                    .with_label("Visibility filter"),
+                theme,
+            )
+        )
+
+        // --- Tri-state: Disabled ---
+        .child(section_label("TRI-STATE: DISABLED", text_secondary))
+        .child(
+            TriStateSwitch::from_spec(
+                TriStateSwitchSpec::new()
+                    .with_state(CheckState::Checked)
+                    .with_disabled(true)
+                    .with_label("Disabled switch"),
+                theme,
+            )
+        )
 }
 
 fn section_label(label: &str, color: pug_tokens::typed::ColorValue) -> Div {
