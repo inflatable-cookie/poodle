@@ -204,9 +204,9 @@ pub fn render_single_specimen(
         "calendar" => specimen_card("Calendar", theme, calendar::render(state, cx)),
         "range-calendar" => specimen_card("RangeCalendar", theme, range_calendar::render(theme)),
         "date-picker" => specimen_card("DatePicker", theme, date_picker::render(state, cx)),
-        "date-range-picker" => specimen_card("DateRangePicker", theme, date_range_picker::render(theme)),
-        "date-time-picker" => specimen_card("DateTimePicker", theme, date_time_picker::render(theme)),
-        "date-time-range-picker" => specimen_card("DateTimeRangePicker", theme, date_time_range_picker::render(theme)),
+        "date-range-picker" => specimen_card("DateRangePicker", theme, date_range_picker::render(state, cx)),
+        "date-time-picker" => specimen_card("DateTimePicker", theme, date_time_picker::render(state, cx)),
+        "date-time-range-picker" => specimen_card("DateTimeRangePicker", theme, date_time_range_picker::render(state, cx)),
 
         // ── Feedback ────────────────────────────────────────────
         "progress" => specimen_card("Progress", theme, progress::render(theme)),

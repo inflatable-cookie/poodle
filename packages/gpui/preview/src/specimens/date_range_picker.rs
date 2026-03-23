@@ -1,20 +1,31 @@
 use gpui::*;
 use pug_adapter::ThemeProvider;
-use pug_gpui::GpuiThemeProvider;
 use pug_primitives::{DateRangePickerSpec, DateRangeValue};
 use pug_gpui_components::DateRangePicker;
+use crate::app_state::AppState;
 use crate::style_bridge::color_to_hsla;
+use crate::PreviewRoot;
 
-pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
+pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
+    let theme = &state.theme;
     let text_secondary = theme.resolve_color("semantic.color.text.secondary");
+
+    let default_open = state.specimens.is_on("date-range-picker-default-open");
+    let prefilled_open = state.specimens.is_on("date-range-picker-prefilled-open");
 
     div().flex().flex_col().gap(px(16.0))
         // --- Default ---
         .child(section_label("DEFAULT", text_secondary))
         .child({
-            let mut spec = DateRangePickerSpec::new();
+            let mut spec = DateRangePickerSpec::new()
+                .with_open(default_open);
             spec.aria_label = Some("Select date range".to_string());
-            DateRangePicker::from_spec(spec, theme).with_id("default")
+            DateRangePicker::from_spec(spec, theme)
+                .with_id("default")
+                .on_toggle(cx.listener(|this, _open: &bool, _w, cx| {
+                    this.state.specimens.toggle("date-range-picker-default-open");
+                    cx.notify();
+                }))
         })
         // --- With default range ---
         .child(section_label("WITH DEFAULT RANGE", text_secondary))
@@ -24,9 +35,15 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
                 Some("2026-03-14".to_string()),
             );
             let mut spec = DateRangePickerSpec::new()
-                .with_default_value(range);
+                .with_default_value(range)
+                .with_open(prefilled_open);
             spec.aria_label = Some("Pre-filled range".to_string());
-            DateRangePicker::from_spec(spec, theme).with_id("with-range")
+            DateRangePicker::from_spec(spec, theme)
+                .with_id("with-range")
+                .on_toggle(cx.listener(|this, _open: &bool, _w, cx| {
+                    this.state.specimens.toggle("date-range-picker-prefilled-open");
+                    cx.notify();
+                }))
         })
         // --- Disabled ---
         .child(section_label("DISABLED", text_secondary))
