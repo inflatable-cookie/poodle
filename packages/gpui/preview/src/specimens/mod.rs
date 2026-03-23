@@ -186,7 +186,7 @@ pub fn render_single_specimen(
         "number-entry" => specimen_card("NumberEntry", theme, number_entry::render(state, cx)),
         "pin-input" => specimen_card("PinInput", theme, pin_input::render(state, cx)),
         "toolbar" => specimen_card("Toolbar", theme, toolbar::render(state, cx)),
-        "time-field" => specimen_card("TimeField", theme, time_field::render(theme)),
+        "time-field" => specimen_card("TimeField", theme, time_field::render(state, cx)),
         "editable-label" => specimen_card("EditableLabel", theme, editable_label::render(state, cx)),
         "toggle" => specimen_card("Toggle", theme, toggle::render(state, cx)),
         "toggle-group" => specimen_card("ToggleGroup", theme, toggle_group::render(state, cx)),

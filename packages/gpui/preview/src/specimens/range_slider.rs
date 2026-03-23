@@ -12,23 +12,37 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
         // --- Default ---
         .child(section_label("DEFAULT", text_secondary))
         .child(
-            RangeSlider::from_spec(
-                RangeSliderSpec::new(20.0, 80.0)
-                    .with_bounds(0.0, 100.0)
-                    .with_aria_label("Price range"),
-                theme,
-            )
+            div().flex().flex_col().gap(px(4.0))
+                .child(
+                    RangeSlider::from_spec(
+                        RangeSliderSpec::new(20.0, 80.0)
+                            .with_bounds(0.0, 100.0)
+                            .with_aria_label("Price range"),
+                        theme,
+                    )
+                )
+                .child(
+                    div().text_sm().text_color(color_to_hsla(text_secondary))
+                        .child("Range: 20 – 80".to_string())
+                )
         )
         // --- With Step ---
         .child(section_label("WITH STEP", text_secondary))
         .child(
-            RangeSlider::from_spec(
-                RangeSliderSpec::new(25.0, 45.0)
-                    .with_bounds(18.0, 65.0)
-                    .with_step(5.0)
-                    .with_aria_label("Age range"),
-                theme,
-            )
+            div().flex().flex_col().gap(px(4.0))
+                .child(
+                    RangeSlider::from_spec(
+                        RangeSliderSpec::new(25.0, 45.0)
+                            .with_bounds(18.0, 65.0)
+                            .with_step(5.0)
+                            .with_aria_label("Age range"),
+                        theme,
+                    )
+                )
+                .child(
+                    div().text_sm().text_color(color_to_hsla(text_secondary))
+                        .child("Range: 25 – 45".to_string())
+                )
         )
         // --- Disabled ---
         .child(section_label("DISABLED", text_secondary))
