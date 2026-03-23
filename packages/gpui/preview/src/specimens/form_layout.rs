@@ -1,8 +1,7 @@
 use gpui::*;
 use pug_adapter::ThemeProvider;
 use pug_primitives::{ButtonSpec, ButtonVariant, TextInputSpec, TextAreaSpec, CheckboxSpec};
-use pug_gpui_components::{Button, TextInput, TextArea, Checkbox, FormLayout, Select};
-use pug_primitives::SelectSpec;
+use pug_gpui_components::{Button, TextInput, TextArea, Checkbox, FormLayout};
 use crate::app_state::AppState;
 use crate::style_bridge::color_to_hsla;
 use crate::PreviewRoot;

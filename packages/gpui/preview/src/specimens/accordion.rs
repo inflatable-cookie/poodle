@@ -3,7 +3,6 @@ use pug_adapter::ThemeProvider;
 use pug_primitives::{AccordionSpec, AccordionItemSpec, AccordionSelectionValue};
 use pug_gpui_components::Accordion;
 use crate::app_state::AppState;
-use crate::style_bridge::color_to_hsla;
 use crate::PreviewRoot;
 
 pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {

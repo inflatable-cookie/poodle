@@ -243,7 +243,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                         Icon::from_spec(
                             IconSpec::new("palette").with_size(IconSize::Md),
                             theme,
-                        ).with_color(hsla(0.0, 0.0, 1.0, 1.0))
+                        ).with_color(gpui::white())
                     )
                 )
                 .child(
@@ -260,7 +260,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                         Icon::from_spec(
                             IconSpec::new("type").with_size(IconSize::Md),
                             theme,
-                        ).with_color(hsla(0.0, 0.0, 1.0, 1.0))
+                        ).with_color(gpui::white())
                     )
                 )
                 .child(
@@ -277,7 +277,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                         Icon::from_spec(
                             IconSpec::new("ruler").with_size(IconSize::Md),
                             theme,
-                        ).with_color(hsla(0.0, 0.0, 1.0, 1.0))
+                        ).with_color(gpui::white())
                     )
                 )
         )

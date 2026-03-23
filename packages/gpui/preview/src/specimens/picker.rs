@@ -14,6 +14,7 @@ pub(crate) fn render(state: &AppState, _cx: &mut Context<PreviewRoot>) -> Div {
     let theme = &state.theme;
     let text_secondary = theme.resolve_color("semantic.color.text.secondary");
     let text_primary = theme.resolve_color("semantic.color.text.primary");
+    let hover_bg = theme.resolve_color("semantic.color.background.hover");
 
     let items = vec![
         PickerItemSpec::new("btn", "Button"),
@@ -43,11 +44,11 @@ pub(crate) fn render(state: &AppState, _cx: &mut Context<PreviewRoot>) -> Div {
             )
             .with_results(
                 div().flex().flex_col()
-                    .child(result_row("Button", "Primitive", text_primary, text_secondary))
-                    .child(result_row("Checkbox", "Primitive", text_primary, text_secondary))
-                    .child(result_row("Select", "Primitive", text_primary, text_secondary))
-                    .child(result_row("Dialog", "Overlay", text_primary, text_secondary))
-                    .child(result_row("Table", "Composite", text_primary, text_secondary))
+                    .child(result_row("Button", "Primitive", text_primary, text_secondary, hover_bg))
+                    .child(result_row("Checkbox", "Primitive", text_primary, text_secondary, hover_bg))
+                    .child(result_row("Select", "Primitive", text_primary, text_secondary, hover_bg))
+                    .child(result_row("Dialog", "Overlay", text_primary, text_secondary, hover_bg))
+                    .child(result_row("Table", "Composite", text_primary, text_secondary, hover_bg))
             )
         )
 
@@ -90,9 +91,9 @@ pub(crate) fn render(state: &AppState, _cx: &mut Context<PreviewRoot>) -> Div {
             )
             .with_results(
                 div().flex().flex_col()
-                    .child(result_row("Button", "Selected", text_primary, text_secondary))
-                    .child(result_row("Dialog", "Selected", text_primary, text_secondary))
-                    .child(result_row("Table", "", text_primary, text_secondary))
+                    .child(result_row("Button", "Selected", text_primary, text_secondary, hover_bg))
+                    .child(result_row("Dialog", "Selected", text_primary, text_secondary, hover_bg))
+                    .child(result_row("Table", "", text_primary, text_secondary, hover_bg))
             )
         )
 
@@ -151,11 +152,12 @@ fn result_row(
     meta: &str,
     primary: pug_tokens::typed::ColorValue,
     secondary: pug_tokens::typed::ColorValue,
+    hover: pug_tokens::typed::ColorValue,
 ) -> Div {
     let mut row = div()
         .flex().items_center().justify_between()
         .px(px(12.0)).py(px(8.0))
-        .hover(|s| s.bg(hsla(0.0, 0.0, 0.5, 0.06)))
+        .hover(|s| s.bg(color_to_hsla(hover)))
         .cursor(CursorStyle::PointingHand)
         .child(
             div().text_sm().text_color(color_to_hsla(primary))

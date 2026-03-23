@@ -10,6 +10,7 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
     let text_secondary = theme.resolve_color("semantic.color.text.secondary");
     let accent = theme.resolve_color("semantic.color.accent.base");
     let border = theme.resolve_color("semantic.color.border.subtle");
+    let success = theme.resolve_color("semantic.color.status.success");
 
     div().flex().flex_col().gap(px(16.0))
         // --- Layout structure ---
@@ -135,10 +136,10 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
                 div()
                     .px(px(8.0)).py(px(2.0))
                     .rounded(px(999.0))
-                    .bg(hsla(0.35, 0.5, 0.2, 0.3))
+                    .bg(color_to_hsla(success).opacity(0.15))
                     .child(
                         div().text_xs()
-                            .text_color(hsla(0.35, 0.6, 0.6, 1.0))
+                            .text_color(color_to_hsla(success))
                             .font_weight(FontWeight::MEDIUM)
                             .child("Active".to_string())
                     )

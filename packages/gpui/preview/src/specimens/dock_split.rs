@@ -12,6 +12,7 @@ use crate::PreviewRoot;
 pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
     let theme = &state.theme;
     let text_secondary = theme.resolve_color("semantic.color.text.secondary");
+    let hover_bg = theme.resolve_color("semantic.color.background.hover");
 
     let active_tab = state.specimens.text.get("dock-active-tab")
         .cloned()
@@ -215,7 +216,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                         .text_color(color_to_hsla(text_secondary))
                         .rounded(px(4.0))
                         .cursor(CursorStyle::PointingHand)
-                        .hover(|s| s.bg(hsla(0.0, 0.0, 0.5, 0.08)))
+                        .hover(|s| s.bg(color_to_hsla(hover_bg)))
                         .child(if toggle_collapsed { "Expand ▸" } else { "Collapse ◂" })
                         .on_click(cx.listener(|this, _e: &ClickEvent, _w, cx| {
                             this.state.specimens.toggle("dock-toggle-collapsed");
@@ -275,7 +276,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                             .text_color(color_to_hsla(text_secondary))
                             .rounded(px(4.0))
                             .cursor(CursorStyle::PointingHand)
-                            .hover(|s| s.bg(hsla(0.0, 0.0, 0.5, 0.08)))
+                            .hover(|s| s.bg(color_to_hsla(hover_bg)))
                             .child(if bottom_collapsed { "Show panel ▴" } else { "Hide panel ▾" })
                             .on_click(cx.listener(|this, _e: &ClickEvent, _w, cx| {
                                 this.state.specimens.toggle("dock-bottom-collapsed");

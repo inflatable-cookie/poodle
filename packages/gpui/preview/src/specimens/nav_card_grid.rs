@@ -3,7 +3,6 @@ use pug_adapter::ThemeProvider;
 use pug_gpui::GpuiThemeProvider;
 use pug_primitives::{NavCardGridSpec, NavCardSpec, IconSpec};
 use pug_gpui_components::{NavCardGrid, NavCard, Icon};
-use crate::style_bridge::color_to_hsla;
 
 pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
     let text_secondary = theme.resolve_color("semantic.color.text.secondary");

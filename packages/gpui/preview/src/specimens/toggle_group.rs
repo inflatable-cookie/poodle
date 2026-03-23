@@ -3,7 +3,6 @@ use pug_adapter::ThemeProvider;
 use pug_gpui_components::ToggleGroup;
 use pug_primitives::ToggleGroupOption;
 use crate::app_state::AppState;
-use crate::style_bridge::color_to_hsla;
 use crate::PreviewRoot;
 
 pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
