@@ -13,7 +13,7 @@ use crate::theme_ext::{resolve_color, resolve_opacity};
 pub struct Rating {
     spec: RatingSpec,
     theme: GpuiThemeProvider,
-    on_change: Option<Box<dyn Fn(usize, &ClickEvent, &mut Window, &mut App) + 'static>>,
+    on_change: Option<Box<dyn Fn(&usize, &mut Window, &mut App) + 'static>>,
 }
 
 impl std::ops::Deref for Rating {
@@ -42,7 +42,7 @@ impl Rating {
 
     pub fn on_change(
         mut self,
-        handler: impl Fn(usize, &ClickEvent, &mut Window, &mut App) + 'static,
+        handler: impl Fn(&usize, &mut Window, &mut App) + 'static,
     ) -> Self {
         self.on_change = Some(Box::new(handler));
         self
@@ -64,7 +64,7 @@ impl IntoElement for Rating {
         let is_interactive = !spec.is_readonly && !spec.is_disabled;
 
         // Wrap the callback in Rc so it can be shared across per-star click handlers.
-        let handler: Option<Rc<dyn Fn(usize, &ClickEvent, &mut Window, &mut App)>> =
+        let handler: Option<Rc<dyn Fn(&usize, &mut Window, &mut App)>> =
             self.on_change.map(|h| Rc::from(h));
 
         // Contract: gap 0.125rem (2px)
@@ -101,7 +101,7 @@ impl IntoElement for Rating {
                     let cb_click = cb.clone();
                     let star_value = (i + 1) as usize; // 1-based rating value
                     star_wrapper = star_wrapper
-                        .on_click(move |event, window, cx| cb_click(star_value, event, window, cx));
+                        .on_click(move |_event, window, cx| cb_click(&star_value, window, cx));
 
                     // Arrow key navigation: Left decreases, Right increases
                     let cb_key = cb.clone();
@@ -117,7 +117,7 @@ impl IntoElement for Rating {
                                 None
                             };
                             if let Some(v) = new_val {
-                                cb_key(v, &ClickEvent::default(), window, cx);
+                                cb_key(&v, window, cx);
                             }
                         });
                 }

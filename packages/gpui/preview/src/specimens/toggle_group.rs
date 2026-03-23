@@ -1,20 +1,28 @@
 use gpui::*;
 use pug_adapter::ThemeProvider;
-use pug_gpui::GpuiThemeProvider;
 use pug_gpui_components::ToggleGroup;
 use pug_primitives::ToggleGroupOption;
+use crate::app_state::AppState;
+use crate::style_bridge::color_to_hsla;
+use crate::PreviewRoot;
 
-pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
+pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
+    let theme = &state.theme;
     let text_secondary = theme.resolve_color("semantic.color.text.secondary");
 
-    // --- Single selection: Grid (selected) / List / Board ---
+    let single_value = state.specimens.text.get("toggle-group-single").cloned()
+        .unwrap_or_else(|| "grid".to_string());
+    let four_value = state.specimens.text.get("toggle-group-four").cloned()
+        .unwrap_or_else(|| "left".to_string());
+
+    // --- Single selection: Grid / List / Board ---
     let single_options = vec![
         ToggleGroupOption::new("grid", "Grid"),
         ToggleGroupOption::new("list", "List"),
         ToggleGroupOption::new("board", "Board"),
     ];
 
-    // --- Four options: Left (selected) / Center / Right / Justify ---
+    // --- Four options: Left / Center / Right / Justify ---
     let four_options = vec![
         ToggleGroupOption::new("left", "Left"),
         ToggleGroupOption::new("center", "Center"),
@@ -22,7 +30,7 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
         ToggleGroupOption::new("justify", "Justify"),
     ];
 
-    // --- Multiple selection: Design + Docs selected ---
+    // --- Multiple selection ---
     let multi_options = vec![
         ToggleGroupOption::new("design", "Design"),
         ToggleGroupOption::new("engineering", "Engineering"),
@@ -40,12 +48,26 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
         .child(
             div().flex().flex_col().gap(px(8.0))
                 .child(section_label("SINGLE SELECTION", text_secondary))
-                .child(ToggleGroup::new(single_options, theme).default_value(vec!["grid".to_string()]))
+                .child(
+                    ToggleGroup::new(single_options, theme)
+                        .default_value(vec![single_value])
+                        .on_change(cx.listener(|this, val: &str, _w, cx| {
+                            this.state.specimens.text.insert("toggle-group-single".to_string(), val.to_string());
+                            cx.notify();
+                        }))
+                )
         )
         .child(
             div().flex().flex_col().gap(px(8.0))
                 .child(section_label("FOUR OPTIONS", text_secondary))
-                .child(ToggleGroup::new(four_options, theme).default_value(vec!["left".to_string()]))
+                .child(
+                    ToggleGroup::new(four_options, theme)
+                        .default_value(vec![four_value])
+                        .on_change(cx.listener(|this, val: &str, _w, cx| {
+                            this.state.specimens.text.insert("toggle-group-four".to_string(), val.to_string());
+                            cx.notify();
+                        }))
+                )
         )
         .child(
             div().flex().flex_col().gap(px(8.0))

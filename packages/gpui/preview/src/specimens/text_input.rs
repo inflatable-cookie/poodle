@@ -6,9 +6,15 @@ use crate::app_state::AppState;
 use crate::style_bridge::color_to_hsla;
 use crate::PreviewRoot;
 
-pub(crate) fn render(state: &AppState, _cx: &mut Context<PreviewRoot>) -> Div {
+pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
     let theme = &state.theme;
     let text_secondary = theme.resolve_color("semantic.color.text.secondary");
+
+    // Track typed values
+    let name_value = state.specimens.text.get("text-input-name").cloned()
+        .unwrap_or_default();
+    let email_value = state.specimens.text.get("text-input-email").cloned()
+        .unwrap_or_default();
 
     div().flex().flex_col().gap(px(24.0))
         // --- Default ---
@@ -23,9 +29,14 @@ pub(crate) fn render(state: &AppState, _cx: &mut Context<PreviewRoot>) -> Div {
                 TextInput::from_spec(
                     TextInputSpec::new()
                         .with_id("name-field")
-                        .with_placeholder("Jane Doe"),
+                        .with_placeholder("Jane Doe")
+                        .with_value(&name_value),
                     theme,
                 )
+                .on_change(cx.listener(|this, val: &str, _w, cx| {
+                    this.state.specimens.text.insert("text-input-name".to_string(), val.to_string());
+                    cx.notify();
+                }))
             )
         )
         // --- With validation ---
@@ -42,9 +53,14 @@ pub(crate) fn render(state: &AppState, _cx: &mut Context<PreviewRoot>) -> Div {
                     TextInputSpec::new()
                         .with_id("email-field")
                         .with_placeholder("you@example.com")
+                        .with_value(&email_value)
                         .with_validation_state(ValidationState::Invalid),
                     theme,
                 )
+                .on_change(cx.listener(|this, val: &str, _w, cx| {
+                    this.state.specimens.text.insert("text-input-email".to_string(), val.to_string());
+                    cx.notify();
+                }))
             )
         )
         // --- Disabled ---

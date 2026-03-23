@@ -6,12 +6,11 @@ use crate::app_state::AppState;
 use crate::style_bridge::color_to_hsla;
 use crate::PreviewRoot;
 
-pub(crate) fn render(state: &AppState, _cx: &mut Context<PreviewRoot>) -> Div {
+pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
     let theme = &state.theme;
     let text_secondary = theme.resolve_color("semantic.color.text.secondary");
 
     // ── Underline variant (default, with panel) ──────────────────────
-    // Contract: Overview (active), Features, Pricing, FAQ (disabled)
     let underline_tabs = vec![
         TabDefinition::new("overview", "Overview"),
         TabDefinition::new("features", "Features"),
@@ -19,43 +18,41 @@ pub(crate) fn render(state: &AppState, _cx: &mut Context<PreviewRoot>) -> Div {
         TabDefinition::new("faq", "FAQ").with_disabled(true),
     ];
 
-    let selected_underline = state.specimens.selected("tabs-underline");
-    let underline_value = match selected_underline {
-        0 => "overview",
-        1 => "features",
-        2 => "pricing",
-        _ => "overview",
-    };
+    let underline_value = state.specimens.text.get("tabs-underline-value")
+        .map(|s| s.as_str())
+        .unwrap_or("overview")
+        .to_string();
 
     let underline_spec = TabsSpec::new(underline_tabs)
         .with_variant(TabVariant::Underline)
-        .with_value(underline_value)
+        .with_value(&underline_value)
         .with_aria_label("Section tabs");
 
     let mut underline_component = Tabs::from_spec(underline_spec, theme)
-        .with_id("specimen-underline");
+        .with_id("specimen-underline")
+        .on_change(cx.listener(|this, val: &str, _w, cx| {
+            this.state.specimens.text.insert("tabs-underline-value".to_string(), val.to_string());
+            cx.notify();
+        }));
 
     underline_component = underline_component
         .with_content(
             "overview".to_string(),
-            div().text_xs().text_color(color_to_hsla(text_secondary))
-                .child("Overview content goes here.".to_string()),
+            div().p(px(12.0)).text_size(px(14.0)).text_color(color_to_hsla(text_secondary))
+                .child("Overview content — this is the landing page with a summary of all features.".to_string()),
         )
         .with_content(
             "features".to_string(),
-            div().text_xs().text_color(color_to_hsla(text_secondary))
-                .child("Features content goes here.".to_string()),
+            div().p(px(12.0)).text_size(px(14.0)).text_color(color_to_hsla(text_secondary))
+                .child("Features content — explore the full feature set and capabilities.".to_string()),
         )
         .with_content(
             "pricing".to_string(),
-            div().text_xs().text_color(color_to_hsla(text_secondary))
-                .child("Pricing content goes here.".to_string()),
+            div().p(px(12.0)).text_size(px(14.0)).text_color(color_to_hsla(text_secondary))
+                .child("Pricing content — compare plans and find the right fit for your team.".to_string()),
         );
 
-    // ── Card variant (closable, reorderable) ─────────────────────────
-    // Contract: index.ts (active), App.svelte (closable), utils.ts (closable), types.ts (closable)
-    // Note: TabDefinition does not yet support is_closable or is_reorderable.
-    // Rendering with available props only.
+    // ── Card variant ─────────────────────────────────────────────────
     let card_tabs = vec![
         TabDefinition::new("index.ts", "index.ts"),
         TabDefinition::new("App.svelte", "App.svelte"),
@@ -63,70 +60,86 @@ pub(crate) fn render(state: &AppState, _cx: &mut Context<PreviewRoot>) -> Div {
         TabDefinition::new("types.ts", "types.ts"),
     ];
 
+    let card_value = state.specimens.text.get("tabs-card-value")
+        .map(|s| s.as_str())
+        .unwrap_or("index.ts")
+        .to_string();
+
     let card_spec = TabsSpec::new(card_tabs)
         .with_variant(TabVariant::Card)
-        .with_value("index.ts")
+        .with_value(&card_value)
         .with_aria_label("Open files");
 
     let card_component = Tabs::from_spec(card_spec, theme)
-        .with_id("specimen-card");
+        .with_id("specimen-card")
+        .on_change(cx.listener(|this, val: &str, _w, cx| {
+            this.state.specimens.text.insert("tabs-card-value".to_string(), val.to_string());
+            cx.notify();
+        }));
 
-    // ── Pill variant (with icons) ────────────────────────────────────
-    // Contract: Home (house icon, active), Settings (settings icon), Users (users icon)
-    // Note: TabDefinition does not yet support icon.
-    // Rendering with labels only.
+    // ── Pill variant ─────────────────────────────────────────────────
     let pill_tabs = vec![
         TabDefinition::new("home", "Home"),
         TabDefinition::new("settings", "Settings"),
         TabDefinition::new("users", "Users"),
     ];
 
+    let pill_value = state.specimens.text.get("tabs-pill-value")
+        .map(|s| s.as_str())
+        .unwrap_or("home")
+        .to_string();
+
     let pill_spec = TabsSpec::new(pill_tabs)
         .with_variant(TabVariant::Pill)
-        .with_value("home")
+        .with_value(&pill_value)
         .with_aria_label("Navigation");
 
     let pill_component = Tabs::from_spec(pill_spec, theme)
-        .with_id("specimen-pill");
+        .with_id("specimen-pill")
+        .on_change(cx.listener(|this, val: &str, _w, cx| {
+            this.state.specimens.text.insert("tabs-pill-value".to_string(), val.to_string());
+            cx.notify();
+        }));
 
-    // ── Underline (with icons, no panel) ─────────────────────────────
-    // Contract: Home (house icon, active), Settings (settings icon), Users (users icon)
-    // Note: TabDefinition does not yet support icon.
-    // Rendering with labels only, no panel content.
+    // ── Underline (no panel) ─────────────────────────────────────────
     let underline_icon_tabs = vec![
         TabDefinition::new("home", "Home"),
         TabDefinition::new("settings", "Settings"),
         TabDefinition::new("users", "Users"),
     ];
 
+    let underline_icon_value = state.specimens.text.get("tabs-underline-icon-value")
+        .map(|s| s.as_str())
+        .unwrap_or("home")
+        .to_string();
+
     let underline_icon_spec = TabsSpec::new(underline_icon_tabs)
         .with_variant(TabVariant::Underline)
-        .with_value("home")
+        .with_value(&underline_icon_value)
         .with_aria_label("Icon tabs");
 
     let underline_icon_component = Tabs::from_spec(underline_icon_spec, theme)
-        .with_id("specimen-underline-icons");
-
-    // ── Strip variant specimens omitted ──────────────────────────────
-    // Contract defines strip variant and vertical strip specimens, but
-    // TabVariant does not yet include Strip. These specimens will be
-    // added when the Strip variant is implemented.
+        .with_id("specimen-underline-icons")
+        .on_change(cx.listener(|this, val: &str, _w, cx| {
+            this.state.specimens.text.insert("tabs-underline-icon-value".to_string(), val.to_string());
+            cx.notify();
+        }));
 
     div().flex().flex_col().gap(px(16.0))
         // Underline variant (default, with panel)
         .child(section_label("UNDERLINE VARIANT (DEFAULT, WITH PANEL)", text_secondary))
         .child(underline_component)
 
-        // Card variant (closable, reorderable)
-        .child(section_label("CARD VARIANT (CLOSABLE, REORDERABLE)", text_secondary))
+        // Card variant
+        .child(section_label("CARD VARIANT", text_secondary))
         .child(card_component)
 
-        // Pill variant (with icons)
-        .child(section_label("PILL VARIANT (WITH ICONS)", text_secondary))
+        // Pill variant
+        .child(section_label("PILL VARIANT", text_secondary))
         .child(pill_component)
 
-        // Underline (with icons, no panel)
-        .child(section_label("UNDERLINE (WITH ICONS, NO PANEL)", text_secondary))
+        // Underline (no panel)
+        .child(section_label("UNDERLINE (NO PANEL)", text_secondary))
         .child(underline_icon_component)
 }
 

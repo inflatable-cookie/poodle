@@ -183,13 +183,13 @@ pub fn render_single_specimen(
         "search-field" => specimen_card("SearchField", theme, search_field::render(state, cx)),
         "field" => specimen_card("Field", theme, field::render(state, cx)),
         "form-actions" => specimen_card("FormActions", theme, form_actions::render(state, cx)),
-        "number-entry" => specimen_card("NumberEntry", theme, number_entry::render(theme)),
-        "pin-input" => specimen_card("PinInput", theme, pin_input::render(theme)),
+        "number-entry" => specimen_card("NumberEntry", theme, number_entry::render(state, cx)),
+        "pin-input" => specimen_card("PinInput", theme, pin_input::render(state, cx)),
         "toolbar" => specimen_card("Toolbar", theme, toolbar::render(state, cx)),
         "time-field" => specimen_card("TimeField", theme, time_field::render(theme)),
-        "editable-label" => specimen_card("EditableLabel", theme, editable_label::render(theme)),
+        "editable-label" => specimen_card("EditableLabel", theme, editable_label::render(state, cx)),
         "toggle" => specimen_card("Toggle", theme, toggle::render(state, cx)),
-        "toggle-group" => specimen_card("ToggleGroup", theme, toggle_group::render(theme)),
+        "toggle-group" => specimen_card("ToggleGroup", theme, toggle_group::render(state, cx)),
 
         // ── Selection ───────────────────────────────────────────
         "checkbox" => specimen_card("Checkbox", theme, checkbox::render(state, cx)),
@@ -201,9 +201,9 @@ pub fn render_single_specimen(
         "range-slider" => specimen_card("RangeSlider", theme, range_slider::render(theme)),
 
         // ── Date/Time ───────────────────────────────────────────
-        "calendar" => specimen_card("Calendar", theme, calendar::render(theme)),
+        "calendar" => specimen_card("Calendar", theme, calendar::render(state, cx)),
         "range-calendar" => specimen_card("RangeCalendar", theme, range_calendar::render(theme)),
-        "date-picker" => specimen_card("DatePicker", theme, date_picker::render(theme)),
+        "date-picker" => specimen_card("DatePicker", theme, date_picker::render(state, cx)),
         "date-range-picker" => specimen_card("DateRangePicker", theme, date_range_picker::render(theme)),
         "date-time-picker" => specimen_card("DateTimePicker", theme, date_time_picker::render(theme)),
         "date-time-range-picker" => specimen_card("DateTimeRangePicker", theme, date_time_range_picker::render(theme)),
@@ -213,12 +213,12 @@ pub fn render_single_specimen(
         "pill" => specimen_card("Pill", theme, pill::render(theme)),
         "status-indicator" => specimen_card("StatusIndicator", theme, status_indicator::render(theme)),
         "meter" => specimen_card("Meter", theme, meter::render(theme)),
-        "rating" => specimen_card("Rating", theme, rating::render(theme)),
+        "rating" => specimen_card("Rating", theme, rating::render(state, cx)),
         "skeleton" => specimen_card("Skeleton", theme, skeleton::render(theme)),
         "eyebrow" => specimen_card("Eyebrow", theme, eyebrow::render(theme)),
         "time-ago" | "duration-input" => specimen_card("TimeAgo + DurationInput", theme, temporal::render(theme)),
         "code" => specimen_card("Code", theme, code::render(theme)),
-        "color-picker" => specimen_card("ColorPicker", theme, color_picker::render(theme)),
+        "color-picker" => specimen_card("ColorPicker", theme, color_picker::render(state, cx)),
         "file-upload" => specimen_card("FileUpload", theme, file_upload::render(theme)),
 
         // ── Overlay ─────────────────────────────────────────────
@@ -230,10 +230,10 @@ pub fn render_single_specimen(
         "hover-card" => specimen_card("HoverCard", theme, hover_card::render(theme)),
         "tooltip" => specimen_card("Tooltip", theme, tooltip::render(theme)),
         "menu" => specimen_card("Menu", theme, menu::render(state, cx)),
-        "context-menu" => specimen_card("ContextMenu", theme, context_menu::render(theme)),
+        "context-menu" => specimen_card("ContextMenu", theme, context_menu::render(state, cx)),
         "tabs" => specimen_card("Tabs", theme, tabs::render(state, cx)),
         "navigation-menu" => specimen_card("NavigationMenu", theme, navigation_menu::render(state, cx)),
-        "menubar" => specimen_card("Menubar", theme, menubar::render(theme)),
+        "menubar" => specimen_card("Menubar", theme, menubar::render(state, cx)),
 
         // ── Composites ──────────────────────────────────────────
         "data-table" => specimen_card("DataTable", theme, data_table::render(state, cx)),

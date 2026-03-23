@@ -41,15 +41,20 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
     ];
 
     let default_open = state.specimens.is_on("select-default-open");
+    let default_value = state.specimens.text.get("select-default-value").cloned();
     let grouped_open = state.specimens.is_on("select-grouped-open");
+    let grouped_value = state.specimens.text.get("select-grouped-value").cloned();
 
     div().flex().flex_col().gap(px(16.0))
         // --- Default (flat options) ---
         .child(section_label("DEFAULT (FLAT OPTIONS)", text_secondary))
         .child({
-            let spec = SelectSpec::new(fruit_options)
+            let mut spec = SelectSpec::new(fruit_options)
                 .with_placeholder("Choose a fruit")
                 .with_open(default_open);
+            if let Some(ref val) = default_value {
+                spec = spec.with_value(val.as_str());
+            }
 
             div().flex().flex_col().gap(px(4.0)).max_w(px(320.0))
                 .child(
@@ -59,14 +64,22 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                             this.state.specimens.toggle("select-default-open");
                             cx.notify();
                         }))
+                        .on_change(cx.listener(|this, val: &str, _w, cx| {
+                            this.state.specimens.text.insert("select-default-value".to_string(), val.to_string());
+                            this.state.specimens.toggles.insert("select-default-open".to_string(), false);
+                            cx.notify();
+                        }))
                 )
         })
         // --- Grouped options ---
         .child(section_label("GROUPED OPTIONS", text_secondary))
         .child({
-            let spec = SelectSpec::new(grouped_options)
+            let mut spec = SelectSpec::new(grouped_options)
                 .with_placeholder("Choose an item")
                 .with_open(grouped_open);
+            if let Some(ref val) = grouped_value {
+                spec = spec.with_value(val.as_str());
+            }
 
             div().flex().flex_col().gap(px(4.0)).max_w(px(320.0))
                 .child(
@@ -74,6 +87,11 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                         .with_id("select-grouped")
                         .on_toggle(cx.listener(|this, _open: &bool, _w, cx| {
                             this.state.specimens.toggle("select-grouped-open");
+                            cx.notify();
+                        }))
+                        .on_change(cx.listener(|this, val: &str, _w, cx| {
+                            this.state.specimens.text.insert("select-grouped-value".to_string(), val.to_string());
+                            this.state.specimens.toggles.insert("select-grouped-open".to_string(), false);
                             cx.notify();
                         }))
                 )

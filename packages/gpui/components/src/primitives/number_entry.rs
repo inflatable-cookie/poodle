@@ -14,9 +14,9 @@ pub struct NumberEntry {
     spec: NumberEntrySpec,
     theme: GpuiThemeProvider,
     id_suffix: Option<String>,
-    on_increment: Option<Box<dyn Fn(&mut Window, &mut App) + 'static>>,
-    on_decrement: Option<Box<dyn Fn(&mut Window, &mut App) + 'static>>,
-    on_change: Option<Box<dyn Fn(f64, &mut Window, &mut App) + 'static>>,
+    on_increment: Option<Box<dyn Fn(&ClickEvent, &mut Window, &mut App) + 'static>>,
+    on_decrement: Option<Box<dyn Fn(&ClickEvent, &mut Window, &mut App) + 'static>>,
+    on_change: Option<Box<dyn Fn(&f64, &mut Window, &mut App) + 'static>>,
 }
 
 impl std::ops::Deref for NumberEntry {
@@ -56,7 +56,7 @@ impl NumberEntry {
 
     pub fn on_increment(
         mut self,
-        handler: impl Fn(&mut Window, &mut App) + 'static,
+        handler: impl Fn(&ClickEvent, &mut Window, &mut App) + 'static,
     ) -> Self {
         self.on_increment = Some(Box::new(handler));
         self
@@ -64,7 +64,7 @@ impl NumberEntry {
 
     pub fn on_decrement(
         mut self,
-        handler: impl Fn(&mut Window, &mut App) + 'static,
+        handler: impl Fn(&ClickEvent, &mut Window, &mut App) + 'static,
     ) -> Self {
         self.on_decrement = Some(Box::new(handler));
         self
@@ -73,7 +73,7 @@ impl NumberEntry {
     /// Called when the value changes (from stepper or direct editing).
     pub fn on_change(
         mut self,
-        handler: impl Fn(f64, &mut Window, &mut App) + 'static,
+        handler: impl Fn(&f64, &mut Window, &mut App) + 'static,
     ) -> Self {
         self.on_change = Some(Box::new(handler));
         self
@@ -113,9 +113,9 @@ impl IntoElement for NumberEntry {
         };
 
         // Wrap callbacks in Rc for sharing across stepper clicks + keyboard handler
-        let on_inc_rc: Option<std::rc::Rc<dyn Fn(&mut Window, &mut App)>> =
+        let on_inc_rc: Option<std::rc::Rc<dyn Fn(&ClickEvent, &mut Window, &mut App)>> =
             self.on_increment.map(|h| std::rc::Rc::from(h));
-        let on_dec_rc: Option<std::rc::Rc<dyn Fn(&mut Window, &mut App)>> =
+        let on_dec_rc: Option<std::rc::Rc<dyn Fn(&ClickEvent, &mut Window, &mut App)>> =
             self.on_decrement.map(|h| std::rc::Rc::from(h));
 
         // Increment button (top)
@@ -136,8 +136,8 @@ impl IntoElement for NumberEntry {
         if !spec.is_disabled {
             if let Some(ref handler) = on_inc_rc {
                 let handler = handler.clone();
-                inc_btn = inc_btn.on_click(move |_event, window, cx| {
-                    handler(window, cx);
+                inc_btn = inc_btn.on_click(move |event, window, cx| {
+                    handler(event, window, cx);
                 });
             }
         }
@@ -160,8 +160,8 @@ impl IntoElement for NumberEntry {
         if !spec.is_disabled {
             if let Some(ref handler) = on_dec_rc {
                 let handler = handler.clone();
-                dec_btn = dec_btn.on_click(move |_event, window, cx| {
-                    handler(window, cx);
+                dec_btn = dec_btn.on_click(move |event, window, cx| {
+                    handler(event, window, cx);
                 });
             }
         }
@@ -209,15 +209,16 @@ impl IntoElement for NumberEntry {
             let key_inc = on_inc_rc.clone();
             let key_dec = on_dec_rc.clone();
             wrapper = wrapper.on_key_down(move |event: &KeyDownEvent, window, cx| {
+                let click = ClickEvent::default();
                 match event.keystroke.key.as_str() {
                     "up" => {
                         if let Some(ref handler) = key_inc {
-                            handler(window, cx);
+                            handler(&click, window, cx);
                         }
                     }
                     "down" => {
                         if let Some(ref handler) = key_dec {
-                            handler(window, cx);
+                            handler(&click, window, cx);
                         }
                     }
                     _ => {}

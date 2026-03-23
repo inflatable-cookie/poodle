@@ -2,15 +2,17 @@ use gpui::*;
 use pug_adapter::ThemeProvider;
 use pug_primitives::{ContextMenuSpec, MenuEntry, MenuItemKind};
 use pug_gpui_components::ContextMenu;
-use pug_gpui::GpuiThemeProvider;
+use crate::app_state::AppState;
 use crate::style_bridge::color_to_hsla;
+use crate::PreviewRoot;
 
-pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
+pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
+    let theme = &state.theme;
     let text_secondary = theme.resolve_color("semantic.color.text.secondary");
-    let border = theme.resolve_color("semantic.color.border.default");
+    let text_primary = theme.resolve_color("semantic.color.text.primary");
 
-    // Contract: Right-click target area with items:
-    // Cut (⌘X), Copy (⌘C), Paste (⌘V), separator, Select all (⌘A), separator, Delete (disabled)
+    let last_action = state.specimens.text.get("context-menu-action").cloned();
+
     let items = vec![
         MenuEntry::new("cut", "Cut").with_shortcut_label("⌘X"),
         MenuEntry::new("copy", "Copy").with_shortcut_label("⌘C"),
@@ -25,28 +27,20 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
         .with_default_open(true);
 
     div().flex().flex_col().gap(px(16.0))
-        .child(section_label("RIGHT-CLICK THE AREA BELOW", text_secondary))
-        // Dashed-border target area
-        .child(
-            div()
-                .h(px(128.0))
-                .flex()
-                .items_center()
-                .justify_center()
-                .rounded(px(4.0))
-                .border_1()
-                .border_color(color_to_hsla(border))
-                .child(
-                    div()
-                        .text_sm()
-                        .text_color(color_to_hsla(text_secondary))
-                        .child("Right-click here to open context menu".to_string())
-                )
-        )
-        // Show the context menu open below the target area
+        .child(section_label("CONTEXT MENU (SHOWN INLINE)", text_secondary))
         .child(
             ContextMenu::from_spec(spec, theme)
                 .with_id("specimen-context-menu")
+                .on_select(cx.listener(|this, val: &str, _w, cx| {
+                    this.state.specimens.text.insert("context-menu-action".to_string(), val.to_string());
+                    cx.notify();
+                }))
+        )
+        .child(
+            div()
+                .text_size(px(12.0))
+                .text_color(color_to_hsla(text_primary))
+                .child(format!("Last action: {}", last_action.as_deref().unwrap_or("(none)")))
         )
 }
 
