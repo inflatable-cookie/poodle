@@ -1,5 +1,6 @@
 //! BulkActionBar — real GPUI component backed by BulkActionBarSpec.
 
+use std::rc::Rc;
 use gpui::*;
 use pug_gpui::GpuiThemeProvider;
 use pug_primitives::{BulkAction, BulkActionBarSpec, BulkActionTone};
@@ -10,7 +11,7 @@ use crate::theme_ext::{color_mix, resolve_color, resolve_px, resolve_radius};
 pub struct BulkActionBar {
     spec: BulkActionBarSpec,
     theme: GpuiThemeProvider,
-    on_action: Option<Box<dyn Fn(&str, &mut Window, &mut App) + 'static>>,
+    on_action: Option<Rc<dyn Fn(&str, &mut Window, &mut App) + 'static>>,
 }
 
 impl std::ops::Deref for BulkActionBar {
@@ -36,12 +37,11 @@ impl BulkActionBar {
     pub fn total_count(mut self, v: usize) -> Self { self.spec.total_count = Some(v); self }
     pub fn actions(mut self, v: Vec<BulkAction>) -> Self { self.spec.actions = v; self }
 
-
     pub fn on_action(
         mut self,
         handler: impl Fn(&str, &mut Window, &mut App) + 'static,
     ) -> Self {
-        self.on_action = Some(Box::new(handler));
+        self.on_action = Some(Rc::new(handler));
         self
     }
 }
@@ -71,6 +71,7 @@ impl IntoElement for BulkActionBar {
         let pad_y = resolve_px(theme, spec.padding_y_token());
         let control_height = resolve_px(theme, "semantic.size.control-height");
         let control_pad_x = resolve_px(theme, "semantic.space.control.x");
+        let elevated = resolve_color(theme, "semantic.color.background.elevated");
 
         // Danger button border: 65% danger mixed with default border
         let danger_border = color_mix(danger_border_raw, button_border, 0.65);
@@ -114,8 +115,12 @@ impl IntoElement for BulkActionBar {
                 let is_danger = action.tone == BulkActionTone::Danger;
                 let btn_border = if is_danger { danger_border } else { button_border };
                 let btn_text = if is_danger { danger_text } else { text_color };
+                let btn_id = SharedString::from(format!("bulk-action-{}", action.id));
+
+                let hover_fill = color_mix(button_fill, elevated, 0.84);
 
                 let mut btn = div()
+                    .id(btn_id)
                     .h(control_height)
                     .px(control_pad_x)
                     .flex()
@@ -126,18 +131,18 @@ impl IntoElement for BulkActionBar {
                     .border_1()
                     .border_color(btn_border)
                     .cursor_pointer()
-                    .child(
-                        div()
-                            .text_size(px(14.0))
-                            .text_color(btn_text)
-                            .child(action.label.clone()),
-                    );
+                    .hover(move |s| s.bg(hover_fill))
+                    .text_size(px(13.0))
+                    .font_weight(FontWeight::MEDIUM)
+                    .text_color(btn_text)
+                    .child(action.label.clone());
 
                 if let Some(ref handler) = self.on_action {
+                    let handler = handler.clone();
                     let action_id = action.id.clone();
-                    // We cannot move handler out since it's behind a ref, so we skip
-                    // the on_click binding here — the caller re-attaches at the bar level.
-                    let _ = action_id;
+                    btn = btn.on_click(move |_event, window, cx| {
+                        handler(&action_id, window, cx);
+                    });
                 }
 
                 row = row.child(btn);

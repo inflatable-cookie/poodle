@@ -258,9 +258,8 @@ impl Tabs {
 
     fn render_pill(&self) -> Div {
         let theme = &self.theme;
-        let list_gap = resolve_px(theme, self.spec.list_gap_token());
-        let control_y = resolve_px(theme, "semantic.space.control.y");
         let control_x = resolve_px(theme, "semantic.space.control.x");
+        let control_height = resolve_px(theme, "semantic.size.control-height");
         let disabled_opacity = resolve_opacity(theme, self.spec.disabled_opacity_token());
         let accent = resolve_color(theme, self.spec.indicator_token());
         let border_subtle = resolve_color(theme, self.spec.list_border_token());
@@ -271,20 +270,23 @@ impl Tabs {
 
         let current_value = self.spec.current_value().map(|s| s.to_string());
 
-        // Container border: border-subtle with 68% opacity mix
+        // Container border: border-subtle with 68% opacity
         let container_border = border_subtle.opacity(border_subtle.a * self.spec.pill_border_opacity());
 
-        // Outer pill container
+        // Svelte: padding 0.1875rem (3px), gap 0.125rem (2px), border 2px
         let mut tabs = div()
             .flex()
             .items_center()
-            .gap(list_gap)
+            .gap(px(2.0))
             .rounded(pill_radius)
             .border_2()
             .border_color(container_border)
-            .p(list_gap);
+            .p(px(3.0));
 
         let tab_values: Vec<String> = self.spec.tabs.iter().map(|t| t.value.clone()).collect();
+
+        // Svelte: min-height: calc(control-height - 0.5rem)
+        let tab_height = control_height - px(8.0);
 
         for (idx, tab_def) in self.spec.tabs.iter().enumerate() {
             let is_active = current_value.as_deref() == Some(&tab_def.value);
@@ -294,7 +296,9 @@ impl Tabs {
             let mut tab = div()
                 .id(tab_id)
                 .px(control_x)
-                .py(control_y)
+                .h(tab_height)
+                .flex()
+                .items_center()
                 .rounded(pill_radius)
                 .text_size(px(13.0))
                 .font_weight(FontWeight::SEMIBOLD);

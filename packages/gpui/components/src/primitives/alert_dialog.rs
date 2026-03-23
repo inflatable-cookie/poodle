@@ -1,4 +1,3 @@
-use gpui::prelude::FluentBuilder;
 use gpui::*;
 use pug_gpui::GpuiThemeProvider;
 use pug_primitives::{AlertDialogSpec, AlertDialogTone};
@@ -32,30 +31,16 @@ impl std::ops::Deref for AlertDialog {
 impl AlertDialog {
     pub fn new(theme: &GpuiThemeProvider) -> Self {
         let spec = AlertDialogSpec::default();
-        Self {
-            backdrop_fill: resolve_color(theme, spec.backdrop_fill_token()),
-            dialog_fill: resolve_color(theme, spec.dialog_fill_token()),
-            dialog_radius: resolve_radius(theme, spec.dialog_radius_token()),
-            button_radius: resolve_radius(theme, spec.button_radius_token()),
-            title_color: resolve_color(theme, spec.title_color_token()),
-            description_color: resolve_color(theme, spec.description_color_token()),
-            confirm_fill: resolve_color(theme, spec.confirm_fill_token()),
-            confirm_text_color: resolve_color(theme, spec.confirm_text_color_token()),
-            cancel_text_color: resolve_color(theme, spec.cancel_text_color_token()),
-            content_gap: resolve_px(theme, spec.content_gap_token()),
-            actions_gap: resolve_px(theme, spec.actions_gap_token()),
-            padding_x: resolve_px(theme, spec.padding_x_token()),
-            padding_y: resolve_px(theme, spec.padding_y_token()),
-            border_color: resolve_color(theme, spec.border_token()),
-            on_confirm: None,
-            on_cancel: None,
-            spec,
-        }
+        Self::build(spec, theme)
     }
 
     pub fn from_spec(spec: AlertDialogSpec, theme: &GpuiThemeProvider) -> Self {
+        Self::build(spec, theme)
+    }
+
+    fn build(spec: AlertDialogSpec, theme: &GpuiThemeProvider) -> Self {
         Self {
-            backdrop_fill: resolve_color(theme, spec.backdrop_fill_token()),
+            backdrop_fill: hsla(0.0, 0.0, 0.0, 0.5),
             dialog_fill: resolve_color(theme, spec.dialog_fill_token()),
             dialog_radius: resolve_radius(theme, spec.dialog_radius_token()),
             button_radius: resolve_radius(theme, spec.button_radius_token()),
@@ -83,7 +68,6 @@ impl AlertDialog {
     pub fn confirm_label(mut self, v: impl Into<String>) -> Self { self.spec.confirm_label = v.into(); self }
     pub fn cancel_label(mut self, v: impl Into<String>) -> Self { self.spec.cancel_label = v.into(); self }
     pub fn aria_label(mut self, v: impl Into<String>) -> Self { self.spec.aria_label = Some(v.into()); self }
-
 
     pub fn on_confirm(mut self, handler: impl Fn(&mut Window, &mut App) + 'static) -> Self {
         self.on_confirm = Some(Box::new(handler));
@@ -113,6 +97,7 @@ impl IntoElement for AlertDialog {
             .gap(px(4.0))
             .child(
                 div()
+                    .text_size(px(16.0))
                     .text_color(self.title_color)
                     .font_weight(FontWeight::SEMIBOLD)
                     .child(self.spec.title.clone()),
@@ -120,174 +105,86 @@ impl IntoElement for AlertDialog {
         if let Some(ref desc) = self.spec.description {
             header = header.child(
                 div()
+                    .text_size(px(14.0))
                     .text_color(self.description_color)
                     .child(desc.clone()),
             );
         }
 
         // Cancel button
-        let mut cancel_btn = div()
+        let cancel_btn = div()
             .id("alert-dialog-cancel")
             .cursor_pointer()
-            .px(self.padding_x)
+            .px(px(12.0))
             .py(px(6.0))
             .rounded(self.button_radius)
+            .text_size(px(14.0))
+            .font_weight(FontWeight::MEDIUM)
             .text_color(self.cancel_text_color)
             .hover(|s| s.bg(hsla(0.0, 0.0, 0.5, 0.1)))
             .child(self.spec.cancel_label.clone());
-        if let Some(handler) = self.on_cancel {
-            let handler = std::rc::Rc::new(handler);
-            let esc_handler = handler.clone();
-            cancel_btn = cancel_btn.on_click(move |_, window, app| {
-                handler(window, app);
-            });
 
-            // Confirm button
-            let mut confirm_btn = div()
-                .id("alert-dialog-confirm")
-                .cursor_pointer()
-                .px(self.padding_x)
-                .py(px(6.0))
-                .rounded(self.button_radius)
-                .bg(self.confirm_fill)
-                .text_color(self.confirm_text_color)
-                .hover(|s| s.opacity(0.9))
-                .child(self.spec.confirm_label.clone());
-            if let Some(handler) = self.on_confirm {
-                confirm_btn = confirm_btn.on_click(move |_, window, app| {
-                    handler(window, app);
-                });
-            }
+        // Confirm button
+        let confirm_btn = div()
+            .id("alert-dialog-confirm")
+            .cursor_pointer()
+            .px(px(12.0))
+            .py(px(6.0))
+            .rounded(self.button_radius)
+            .text_size(px(14.0))
+            .font_weight(FontWeight::MEDIUM)
+            .bg(self.confirm_fill)
+            .text_color(self.confirm_text_color)
+            .hover(|s| s.opacity(0.9))
+            .child(self.spec.confirm_label.clone());
 
-            let actions = div()
-                .flex()
-                .flex_row()
-                .justify_end()
-                .gap(self.actions_gap)
-                .child(cancel_btn)
-                .child(confirm_btn);
+        let actions = div()
+            .flex()
+            .flex_row()
+            .justify_end()
+            .gap(self.actions_gap)
+            .child(cancel_btn)
+            .child(confirm_btn);
 
-            // Dialog card
-            let mut dialog_card = div()
-                .id("alert-dialog")
-                .focusable()
-                .flex()
-                .flex_col()
-                .bg(self.dialog_fill)
-                .rounded(self.dialog_radius)
-                .border_1()
-                .border_color(self.border_color)
-                .shadow(vec![
-                    gpui::BoxShadow {
-                        color: hsla(0.0, 0.0, 0.0, 0.12),
-                        offset: point(px(0.0), px(8.0)),
-                        blur_radius: px(24.0),
-                        spread_radius: px(0.0),
-                    },
-                    gpui::BoxShadow {
-                        color: hsla(0.0, 0.0, 0.0, 0.08),
-                        offset: point(px(0.0), px(2.0)),
-                        blur_radius: px(8.0),
-                        spread_radius: px(0.0),
-                    },
-                ])
-                .px(self.padding_x)
-                .py(self.padding_y)
-                .gap(self.content_gap)
-                .max_w(px(480.0))
-                .min_w(px(320.0))
-                .occlude()
-                .child(header)
-                .child(actions);
+        // Dialog card — constrained width, not full-width
+        let dialog_card = div()
+            .id("alert-dialog")
+            .focusable()
+            .flex()
+            .flex_col()
+            .w(px(420.0))
+            .bg(self.dialog_fill)
+            .rounded(self.dialog_radius)
+            .border_1()
+            .border_color(self.border_color)
+            .shadow(vec![
+                gpui::BoxShadow {
+                    color: hsla(0.0, 0.0, 0.0, 0.12),
+                    offset: point(px(0.0), px(8.0)),
+                    blur_radius: px(24.0),
+                    spread_radius: px(0.0),
+                },
+                gpui::BoxShadow {
+                    color: hsla(0.0, 0.0, 0.0, 0.08),
+                    offset: point(px(0.0), px(2.0)),
+                    blur_radius: px(8.0),
+                    spread_radius: px(0.0),
+                },
+            ])
+            .px(self.padding_x)
+            .py(self.padding_y)
+            .gap(self.content_gap)
+            .occlude()
+            .child(header)
+            .child(actions);
 
-            // Escape key to cancel
-            dialog_card = dialog_card.on_key_down(move |event: &KeyDownEvent, window, cx| {
-                if event.keystroke.key == "escape" {
-                    esc_handler(window, cx);
-                }
-            });
-
-            // Backdrop
-            div()
-                .id("alert-dialog-backdrop")
-                .absolute()
-                .inset_0()
-                .flex()
-                .items_center()
-                .justify_center()
-                .bg(self.backdrop_fill)
-                .occlude()
-                .child(dialog_card)
-                .into_any_element()
-        } else {
-            // No cancel handler — build without Escape wiring
-            let mut confirm_btn = div()
-                .id("alert-dialog-confirm")
-                .cursor_pointer()
-                .px(self.padding_x)
-                .py(px(6.0))
-                .rounded(self.button_radius)
-                .bg(self.confirm_fill)
-                .text_color(self.confirm_text_color)
-                .hover(|s| s.opacity(0.9))
-                .child(self.spec.confirm_label.clone());
-            if let Some(handler) = self.on_confirm {
-                confirm_btn = confirm_btn.on_click(move |_, window, app| {
-                    handler(window, app);
-                });
-            }
-
-            let actions = div()
-                .flex()
-                .flex_row()
-                .justify_end()
-                .gap(self.actions_gap)
-                .child(cancel_btn)
-                .child(confirm_btn);
-
-            let dialog_card = div()
-                .id("alert-dialog")
-                .focusable()
-                .flex()
-                .flex_col()
-                .bg(self.dialog_fill)
-                .rounded(self.dialog_radius)
-                .border_1()
-                .border_color(self.border_color)
-                .shadow(vec![
-                    gpui::BoxShadow {
-                        color: hsla(0.0, 0.0, 0.0, 0.12),
-                        offset: point(px(0.0), px(8.0)),
-                        blur_radius: px(24.0),
-                        spread_radius: px(0.0),
-                    },
-                    gpui::BoxShadow {
-                        color: hsla(0.0, 0.0, 0.0, 0.08),
-                        offset: point(px(0.0), px(2.0)),
-                        blur_radius: px(8.0),
-                        spread_radius: px(0.0),
-                    },
-                ])
-                .px(self.padding_x)
-                .py(self.padding_y)
-                .gap(self.content_gap)
-                .max_w(px(480.0))
-                .min_w(px(320.0))
-                .occlude()
-                .child(header)
-                .child(actions);
-
-            div()
-                .id("alert-dialog-backdrop")
-                .absolute()
-                .inset_0()
-                .flex()
-                .items_center()
-                .justify_center()
-                .bg(self.backdrop_fill)
-                .occlude()
-                .child(dialog_card)
-                .into_any_element()
-        }
+        // Render as inline positioned element (not absolute overlay)
+        // The specimen page handles its own layout
+        div()
+            .flex()
+            .items_center()
+            .justify_center()
+            .child(dialog_card)
+            .into_any_element()
     }
 }

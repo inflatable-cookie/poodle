@@ -215,6 +215,10 @@ impl IntoElement for Calendar {
 
         // Build the calendar container
         // Contract: padding 0.75rem (12px), radius-surface, gap 0.25rem (4px)
+        // Contract: calendar is a compact inline widget, not full-width
+        // 7 cells * 36px + 6 gaps * 2px + 24px padding = 288px
+        let calendar_width = px(288.0);
+
         let mut cal = div()
             .id(SharedString::from(id_str))
             .focusable()
@@ -222,6 +226,7 @@ impl IntoElement for Calendar {
             .flex_col()
             .gap(px(4.0))
             .p(px(12.0))
+            .w(calendar_width)
             .rounded(surface_radius)
             .bg(surface_bg)
             .border_1()
