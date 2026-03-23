@@ -103,6 +103,7 @@ mod resize_handle;
 mod nav_card_grid;
 
 // ── App Shell ─────────────────────────────────────────────
+mod app_header;
 mod command_palette;
 mod dock_split;
 mod status_bar;
@@ -279,6 +280,7 @@ pub fn render_single_specimen(
         "nav-card-grid" => specimen_card("NavCardGrid", theme, nav_card_grid::render(theme)),
 
         // ── App Shell ───────────────────────────────────────────
+        "app-header" => specimen_card("AppHeader", theme, app_header::render(theme)),
         "command-palette" => specimen_card("CommandPalette", theme, command_palette::render(state, cx)),
         "dock-region" | "split-view" => specimen_card("Dock + SplitView", theme, dock_split::render(state, cx)),
         "status-bar" => specimen_card("StatusBar", theme, status_bar::render(state, cx)),
