@@ -1,11 +1,14 @@
 use pug_tokens::semantic;
 
-#[derive(Clone, Debug, Eq, PartialEq)]
+#[derive(Clone, Debug, PartialEq)]
 pub struct CodeSpec {
     pub content: String,
     pub language: Option<String>,
     pub show_line_numbers: bool,
     pub is_copyable: bool,
+    pub highlight_lines: Vec<usize>,
+    pub max_height: Option<f64>,
+    pub is_inline: bool,
 }
 
 impl Default for CodeSpec {
@@ -15,6 +18,9 @@ impl Default for CodeSpec {
             language: None,
             show_line_numbers: false,
             is_copyable: true,
+            highlight_lines: Vec::new(),
+            max_height: None,
+            is_inline: false,
         }
     }
 }
@@ -41,6 +47,21 @@ impl CodeSpec {
 
     pub fn with_copyable(mut self, is_copyable: bool) -> Self {
         self.is_copyable = is_copyable;
+        self
+    }
+
+    pub fn with_highlight_lines(mut self, lines: Vec<usize>) -> Self {
+        self.highlight_lines = lines;
+        self
+    }
+
+    pub fn with_max_height(mut self, max_height: f64) -> Self {
+        self.max_height = Some(max_height);
+        self
+    }
+
+    pub fn with_inline(mut self, is_inline: bool) -> Self {
+        self.is_inline = is_inline;
         self
     }
 

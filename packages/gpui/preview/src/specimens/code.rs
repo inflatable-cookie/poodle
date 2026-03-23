@@ -33,7 +33,8 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
                     CodeSpec::new()
                         .with_content(ts_source)
                         .with_language("ts")
-                        .with_show_line_numbers(true),
+                        .with_show_line_numbers(true)
+                        .with_highlight_lines(vec![3, 4]),
                     theme,
                 ))
         )
@@ -44,7 +45,8 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
                 .child(Code::from_spec(
                     CodeSpec::new()
                         .with_content(css_source)
-                        .with_language("css"),
+                        .with_language("css")
+                        .with_max_height(96.0),
                     theme,
                 ))
         )
@@ -57,7 +59,9 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
                         .text_sm().text_color(color_to_hsla(text_primary))
                         .child("Use ".to_string())
                         .child(Code::from_spec(
-                            CodeSpec::new().with_content("npm install"),
+                            CodeSpec::new()
+                                .with_content("npm install")
+                                .with_inline(true),
                             theme,
                         ))
                         .child(" to install dependencies.".to_string())
@@ -70,7 +74,8 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
                 .child(Code::from_spec(
                     CodeSpec::new()
                         .with_content("echo 'hello world'")
-                        .with_language("bash"),
+                        .with_language("bash")
+                        .with_copyable(false),
                     theme,
                 ))
         )

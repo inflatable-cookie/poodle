@@ -13,9 +13,6 @@ pub(crate) fn render(state: &AppState, _cx: &mut Context<PreviewRoot>) -> Div {
     let text_secondary = theme.resolve_color("semantic.color.text.secondary");
 
     // --- Default ---
-    // summary="Ready", leading: "main" branch indicator + "0 errors" status
-    // trailing: "Ln 42, Col 18", "UTF-8", "TypeScript"
-
     let mut branch_indicator = StatusIndicatorSpec::new().with_status(StatusTone::Info);
     branch_indicator.label = Some("main".to_string());
 
@@ -30,6 +27,7 @@ pub(crate) fn render(state: &AppState, _cx: &mut Context<PreviewRoot>) -> Div {
     };
 
     div().flex().flex_col().gap(px(16.0))
+        // --- Default with leading/trailing ---
         .child(section_label("DEFAULT", text_secondary))
         .child(
             StatusBar::from_spec(status_spec, theme)
@@ -44,6 +42,14 @@ pub(crate) fn render(state: &AppState, _cx: &mut Context<PreviewRoot>) -> Div {
                         .child(meta_item("UTF-8"))
                         .child(meta_item("TypeScript"))
                 )
+        )
+        // --- Summary only ---
+        .child(section_label("SUMMARY ONLY", text_secondary))
+        .child(
+            StatusBar::from_spec(
+                ShellStatusBarSpec::new().with_summary("3 items selected"),
+                theme,
+            )
         )
 }
 

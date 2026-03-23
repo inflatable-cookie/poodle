@@ -1,4 +1,5 @@
 use gpui::*;
+use gpui::prelude::FluentBuilder;
 use pug_adapter::ThemeProvider;
 use pug_composites::{CommandPaletteSpec, CommandActionItem};
 use pug_gpui_components::CommandPalette;
@@ -6,7 +7,7 @@ use crate::app_state::AppState;
 use crate::style_bridge::color_to_hsla;
 use crate::PreviewRoot;
 
-pub(crate) fn render(state: &AppState, _cx: &mut Context<PreviewRoot>) -> Div {
+pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
     let theme = &state.theme;
     let text_secondary = theme.resolve_color("semantic.color.text.secondary");
 
@@ -34,7 +35,16 @@ pub(crate) fn render(state: &AppState, _cx: &mut Context<PreviewRoot>) -> Div {
             .with_shortcut("\u{2318}B"),
     ];
 
-    let spec = CommandPaletteSpec::new(actions);
+    let query = state.specimens.text.get("cmd-palette-query")
+        .cloned()
+        .unwrap_or_default();
+    let last_executed = state.specimens.text.get("cmd-palette-executed")
+        .cloned();
+
+    let mut spec = CommandPaletteSpec::new(actions);
+    if !query.is_empty() {
+        spec = spec.with_query(&query);
+    }
 
     div().flex().flex_col().gap(px(16.0))
         .child(section_label("COMMAND PALETTE", text_secondary))
@@ -42,8 +52,28 @@ pub(crate) fn render(state: &AppState, _cx: &mut Context<PreviewRoot>) -> Div {
             div().w(px(480.0)).child(
                 CommandPalette::from_spec(spec, theme)
                     .with_id("cmd-palette")
+                    .on_select(cx.listener(|this, val: &str, _w, cx| {
+                        this.state.specimens.text.insert(
+                            "cmd-palette-executed".to_string(),
+                            val.to_string(),
+                        );
+                        cx.notify();
+                    }))
+                    .on_query_change(cx.listener(|this, val: &str, _w, cx| {
+                        this.state.specimens.text.insert(
+                            "cmd-palette-query".to_string(),
+                            val.to_string(),
+                        );
+                        cx.notify();
+                    }))
             )
         )
+        .when(last_executed.is_some(), |d| {
+            d.child(
+                div().text_sm().text_color(color_to_hsla(text_secondary))
+                    .child(format!("Last executed: {}", last_executed.as_deref().unwrap_or("")))
+            )
+        })
 }
 
 fn section_label(label: &str, color: pug_tokens::typed::ColorValue) -> Div {

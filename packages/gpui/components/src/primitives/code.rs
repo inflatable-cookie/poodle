@@ -11,8 +11,6 @@ use crate::theme_ext::{resolve_color, resolve_px, resolve_radius};
 pub struct Code {
     spec: CodeSpec,
     theme: GpuiThemeProvider,
-    is_inline: bool,
-    max_height_px: Option<f32>,
 }
 
 impl std::ops::Deref for Code {
@@ -22,15 +20,13 @@ impl std::ops::Deref for Code {
 
 impl Code {
     pub fn new(theme: &GpuiThemeProvider) -> Self {
-        Self { spec: CodeSpec::new(), theme: theme.clone(), is_inline: false, max_height_px: None }
+        Self { spec: CodeSpec::new(), theme: theme.clone() }
     }
 
     pub fn from_spec(spec: CodeSpec, theme: &GpuiThemeProvider) -> Self {
         Self {
             spec,
             theme: theme.clone(),
-            is_inline: false,
-            max_height_px: None,
         }
     }
 
@@ -39,11 +35,9 @@ impl Code {
     pub fn language(mut self, v: impl Into<String>) -> Self { self.spec.language = Some(v.into()); self }
     pub fn show_line_numbers(mut self, v: bool) -> Self { self.spec.show_line_numbers = v; self }
     pub fn copyable(mut self, v: bool) -> Self { self.spec.is_copyable = v; self }
-
-    // ── Local builders ────────────────────────────────────────
-    pub fn inline(mut self, v: bool) -> Self { self.is_inline = v; self }
-    pub fn max_height(mut self, v: f32) -> Self { self.max_height_px = Some(v); self }
-
+    pub fn highlight_lines(mut self, v: Vec<usize>) -> Self { self.spec.highlight_lines = v; self }
+    pub fn max_height(mut self, v: f64) -> Self { self.spec.max_height = Some(v); self }
+    pub fn inline(mut self, v: bool) -> Self { self.spec.is_inline = v; self }
 }
 
 impl IntoElement for Code {
@@ -57,7 +51,7 @@ impl IntoElement for Code {
         let text_color = resolve_color(theme, spec.text_color_token());
 
         // ── Inline mode: minimal span-like rendering ──────────
-        if self.is_inline {
+        if spec.is_inline {
             return div()
                 .px(px(4.0))
                 .py(px(1.0))
@@ -76,7 +70,6 @@ impl IntoElement for Code {
 
         let border = resolve_color(theme, spec.border_token());
         let text_secondary = resolve_color(theme, "semantic.color.text.secondary");
-        // Contract: radius-surface, not radius-control
         let radius = resolve_radius(theme, "semantic.radius.surface");
 
         let mut el = div()
@@ -85,7 +78,6 @@ impl IntoElement for Code {
             .border_1()
             .border_color(border)
             .text_color(text_color)
-            // Contract: font 0.8125rem (13px), code family
             .text_size(px(13.0))
             .overflow_hidden()
             .flex()
@@ -99,7 +91,7 @@ impl IntoElement for Code {
                 .items_center()
                 .justify_between()
                 .px(panel_x)
-                .py(px(6.0)) // 0.375rem
+                .py(px(6.0))
                 .border_b_1()
                 .border_color(border);
 
@@ -107,7 +99,7 @@ impl IntoElement for Code {
             if let Some(ref lang) = spec.language {
                 toolbar = toolbar.child(
                     div()
-                        .text_size(px(11.0)) // 0.6875rem
+                        .text_size(px(11.0))
                         .text_color(text_secondary)
                         .font_weight(FontWeight::SEMIBOLD)
                         .child(lang.to_uppercase()),
@@ -116,7 +108,7 @@ impl IntoElement for Code {
                 toolbar = toolbar.child(div()); // spacer
             }
 
-            // Copy button placeholder
+            // Copy button
             if spec.is_copyable {
                 toolbar = toolbar.child(
                     div()
@@ -140,29 +132,43 @@ impl IntoElement for Code {
         // Code content area
         let mut code_area = div().id("pug-code-area").px(panel_x).py(panel_y);
 
-        // Apply max_height constraint (default 320px per contract)
-        let mh = self.max_height_px.unwrap_or(320.0);
-        code_area = code_area.max_h(px(mh)).overflow_y_scroll();
+        // Apply max_height constraint
+        if let Some(mh) = spec.max_height {
+            code_area = code_area.max_h(px(mh as f32)).overflow_y_scroll();
+        } else {
+            code_area = code_area.max_h(px(320.0)).overflow_y_scroll();
+        }
 
-        // Content with optional line numbers
-        if spec.show_line_numbers {
+        // Highlight line background color
+        let highlight_bg = resolve_color(theme, "semantic.color.accent.base").opacity(0.1);
+
+        // Content with optional line numbers and highlight
+        if spec.show_line_numbers || !spec.highlight_lines.is_empty() {
             let lines: Vec<&str> = spec.content.lines().collect();
             let mut content_col = div().flex().flex_col();
 
             for (i, line) in lines.iter().enumerate() {
-                let line_number = format!("{:>3} ", i + 1);
+                let line_num_1based = i + 1;
+                let is_highlighted = spec.highlight_lines.contains(&line_num_1based);
                 let line_text = line.to_string();
-                content_col = content_col.child(
-                    div()
-                        .flex()
-                        .gap(inline_gap)
-                        .child(
-                            div()
-                                .text_color(text_color.opacity(0.4))
-                                .child(line_number),
-                        )
-                        .child(div().child(line_text)),
-                );
+
+                let mut row = div().flex().gap(inline_gap);
+
+                if is_highlighted {
+                    row = row.bg(highlight_bg);
+                }
+
+                if spec.show_line_numbers {
+                    let line_number = format!("{:>3} ", line_num_1based);
+                    row = row.child(
+                        div()
+                            .text_color(text_color.opacity(0.4))
+                            .child(line_number),
+                    );
+                }
+
+                row = row.child(div().child(line_text));
+                content_col = content_col.child(row);
             }
 
             code_area = code_area.child(content_col);
