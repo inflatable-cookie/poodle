@@ -1,84 +1,139 @@
 use gpui::*;
 use pug_adapter::ThemeProvider;
 use pug_gpui::GpuiThemeProvider;
-use pug_primitives::{NavCardGridSpec, SurfaceSpec, SurfaceTone, SurfaceBorder, PaddingScale};
-use pug_gpui_components::{NavCardGrid, Surface};
+use pug_primitives::{NavCardGridSpec, NavCardSpec, IconSpec};
+use pug_gpui_components::{NavCardGrid, NavCard, Icon};
 use crate::style_bridge::color_to_hsla;
 
 pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
-    let text_primary = theme.resolve_color("semantic.color.text.primary");
     let text_secondary = theme.resolve_color("semantic.color.text.secondary");
 
-    let nav_card = |title: &str, description: &str| {
-        Surface::from_spec(
-            SurfaceSpec::new()
-                .with_tone(SurfaceTone::Panel)
-                .with_border(SurfaceBorder::Subtle)
-                .with_padding(PaddingScale::Md),
-            theme,
-        )
-        .with_content(
-            div().flex().flex_col().gap(px(4.0))
-                .child(
-                    div().text_sm().font_weight(FontWeight::SEMIBOLD)
-                        .text_color(color_to_hsla(text_primary))
-                        .child(title.to_string()),
-                )
-                .child(
-                    div().text_xs().text_color(color_to_hsla(text_secondary))
-                        .child(description.to_string()),
-                ),
-        )
-    };
-
     div().flex().flex_col().gap(px(24.0))
-        // --- 2 columns (default) ---
-        .child(section_label("2 COLUMNS (DEFAULT)", text_secondary))
+        // --- Navigation card grid (2 columns) ---
+        .child(section_label("NAVIGATION CARD GRID (2 COLUMNS)", text_secondary))
         .child(
             NavCardGrid::from_spec(NavCardGridSpec::new(), theme)
-                .with_child(nav_card("Getting Started", "Learn the basics of the platform"))
-                .with_child(nav_card("Components", "Browse the component library"))
-                .with_child(nav_card("Tokens", "Design token reference"))
-                .with_child(nav_card("API Reference", "Complete API documentation"))
+                .with_child(
+                    NavCard::from_spec(
+                        NavCardSpec::new().with_title("Getting Started")
+                            .with_description("Learn the basics of the component library."),
+                        theme,
+                    )
+                    .with_icon(Icon::from_spec(IconSpec::new("home"), theme))
+                )
+                .with_child(
+                    NavCard::from_spec(
+                        NavCardSpec::new().with_title("Components")
+                            .with_description("Browse all available components.")
+                            .with_badge("New"),
+                        theme,
+                    )
+                    .with_icon(Icon::from_spec(IconSpec::new("layers"), theme))
+                )
+                .with_child(
+                    NavCard::from_spec(
+                        NavCardSpec::new().with_title("Tokens")
+                            .with_description("Design tokens and theming system."),
+                        theme,
+                    )
+                    .with_icon(Icon::from_spec(IconSpec::new("sliders-horizontal"), theme))
+                )
+                .with_child(
+                    NavCard::from_spec(
+                        NavCardSpec::new().with_title("API Reference")
+                            .with_description("Complete component API documentation.")
+                            .with_disabled(true),
+                        theme,
+                    )
+                    .with_icon(Icon::from_spec(IconSpec::new("file-text"), theme))
+                )
         )
+
         // --- 3 columns ---
         .child(section_label("3 COLUMNS", text_secondary))
         .child(
             NavCardGrid::from_spec(NavCardGridSpec::new().with_columns(3), theme)
-                .with_child(nav_card("Overview", "System overview"))
-                .with_child(nav_card("Installation", "Setup guide"))
-                .with_child(nav_card("Configuration", "Config options"))
-                .with_child(nav_card("Themes", "Theme customization"))
-                .with_child(nav_card("Plugins", "Extend functionality"))
-                .with_child(nav_card("FAQ", "Common questions"))
+                .with_child(
+                    NavCard::from_spec(
+                        NavCardSpec::new().with_title("Overview").with_description("System overview"),
+                        theme,
+                    )
+                )
+                .with_child(
+                    NavCard::from_spec(
+                        NavCardSpec::new().with_title("Installation").with_description("Setup guide"),
+                        theme,
+                    )
+                )
+                .with_child(
+                    NavCard::from_spec(
+                        NavCardSpec::new().with_title("Configuration").with_description("Config options"),
+                        theme,
+                    )
+                )
+                .with_child(
+                    NavCard::from_spec(
+                        NavCardSpec::new().with_title("Themes").with_description("Theme customization"),
+                        theme,
+                    )
+                )
+                .with_child(
+                    NavCard::from_spec(
+                        NavCardSpec::new().with_title("Plugins").with_description("Extend functionality"),
+                        theme,
+                    )
+                )
+                .with_child(
+                    NavCard::from_spec(
+                        NavCardSpec::new().with_title("FAQ").with_description("Common questions"),
+                        theme,
+                    )
+                )
         )
-        // --- 1 column ---
-        .child(section_label("1 COLUMN", text_secondary))
+
+        // --- Single card (as link) ---
+        .child(section_label("SINGLE CARD (AS LINK)", text_secondary))
         .child(
-            NavCardGrid::from_spec(NavCardGridSpec::new().with_columns(1), theme)
-                .with_child(nav_card("Dashboard", "View your project dashboard"))
-                .with_child(nav_card("Settings", "Configure preferences"))
+            NavCard::from_spec(
+                NavCardSpec::new().with_title("View Documentation")
+                    .with_description("Open the full documentation site.")
+                    .with_href("#"),
+                theme,
+            )
         )
+
         // --- 4 columns ---
         .child(section_label("4 COLUMNS", text_secondary))
         .child(
             NavCardGrid::from_spec(NavCardGridSpec::new().with_columns(4), theme)
-                .with_child(nav_card("Home", "Return home"))
-                .with_child(nav_card("Search", "Find content"))
-                .with_child(nav_card("Recent", "Recent items"))
-                .with_child(nav_card("Favorites", "Saved items"))
-        )
-        // --- With aria-label ---
-        .child(section_label("WITH ARIA-LABEL", text_secondary))
-        .child(
-            NavCardGrid::from_spec(
-                NavCardGridSpec::new()
-                    .with_columns(2)
-                    .with_aria_label("Documentation navigation"),
-                theme,
-            )
-            .with_child(nav_card("Guides", "Step-by-step tutorials"))
-            .with_child(nav_card("Examples", "Code examples and demos"))
+                .with_child(
+                    NavCard::from_spec(
+                        NavCardSpec::new().with_title("Home").with_description("Return home"),
+                        theme,
+                    )
+                    .with_icon(Icon::from_spec(IconSpec::new("home"), theme))
+                )
+                .with_child(
+                    NavCard::from_spec(
+                        NavCardSpec::new().with_title("Search").with_description("Find content"),
+                        theme,
+                    )
+                    .with_icon(Icon::from_spec(IconSpec::new("search"), theme))
+                )
+                .with_child(
+                    NavCard::from_spec(
+                        NavCardSpec::new().with_title("Recent").with_description("Recent items"),
+                        theme,
+                    )
+                    .with_icon(Icon::from_spec(IconSpec::new("clock"), theme))
+                )
+                .with_child(
+                    NavCard::from_spec(
+                        NavCardSpec::new().with_title("Favorites").with_description("Saved items"),
+                        theme,
+                    )
+                    .with_icon(Icon::from_spec(IconSpec::new("star"), theme))
+                )
         )
 }
 
