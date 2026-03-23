@@ -1,6 +1,6 @@
 # Poodle Docs
 
-Poodle uses a Northstar-shaped documentation system inside `docs/`.
+Poodle uses a docs-first structure under `docs/` so product intent, architecture, contracts, specs, and execution history stay aligned.
 
 ## Core Sections
 
@@ -9,7 +9,7 @@ Poodle uses a Northstar-shaped documentation system inside `docs/`.
 - `roadmaps/`
 - `logs/`
 
-## Add-On Sections In Use
+## Supporting Sections
 
 - `contracts/`
 - `research/`
@@ -20,36 +20,35 @@ Poodle uses a Northstar-shaped documentation system inside `docs/`.
 1. Read `vision/001-poodle-vision.md`.
 2. Read `architecture/001-poodle-system-shape.md`.
 3. Read `roadmaps/README.md`.
-4. Read the current generation under `roadmaps/g04/`.
+4. Read `roadmaps/generation-index.md`.
+5. Use `specs/README.md` and `contracts/README.md` when implementing or reviewing component work.
 
-## Local Inspection Surface
+## Current Working Posture
 
-For a runnable browser surface while the larger docs-site program remains in
-`g02.012`, use `packages/svelte/preview`.
+- `vision/` defines long-range product intent and ecosystem boundaries
+- `architecture/` defines package ownership, layering, and renderer boundaries
+- `roadmaps/` holds executable milestone work and generation sequencing
+- `specs/` holds normative repo-wide rules and artifact baselines
+- `contracts/` holds per-component source-of-truth semantics and anatomy
+- `logs/` records completed batches and evidence
+- `research/` captures external comparison work before architectural decisions harden
 
-From the repo root:
+## Local Inspection
+
+For the browser preview surface:
 
 ```sh
 bun install
-bun run tokens:build
-bun run docs:dev
+bun packages/tokens/scripts/build-tokens.ts
+bun run --cwd packages/svelte/preview dev
 ```
 
-The docs surface now covers theme inspection, tokens, advanced composites,
-workstation shell depth, dock and split orchestration, discoverability
-metadata, and serialized layout inspection.
+For the default repo validation pass:
 
-## Working Rule
-
-- use `vision/` for long-range intent
-- use `architecture/` for package boundaries, layering, and contract rules
-- use `roadmaps/` for executable milestone work
-- use `contracts/` for per-component source-of-truth semantics
-- use `logs/` for completed batches and decision evidence
-- use `research/` when external systems must be compared before architecture is frozen
+```sh
+effigy health
+```
 
 ## Next Task
 
-Open `docs/roadmaps/g04/015-gpui-demo-app-parity-implementation-and-side-by-side-review.md`
-and implement the GPUI shared demo app against the rebuilt Svelte target so
-cross-runtime review moves onto one explicit shell and screen model.
+Keep the docs landing pages aligned with the real execution state, starting with `roadmaps/README.md`, `generation-index.md`, and any generation README that still overstates progress or points at superseded work.
