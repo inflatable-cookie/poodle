@@ -1,6 +1,6 @@
 use gpui::*;
 use pug_adapter::ThemeProvider;
-use pug_primitives::ColorPickerSpec;
+use pug_primitives::{ColorPickerSpec, ColorInputMode};
 use pug_gpui_components::ColorPicker;
 use crate::app_state::AppState;
 use crate::style_bridge::color_to_hsla;
@@ -116,14 +116,14 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                 )
         )
 
-        // --- Default open ---
-        .child(section_label("DEFAULT OPEN", text_secondary))
+        // --- Default open, RGB mode ---
+        .child(section_label("DEFAULT OPEN, RGB MODE", text_secondary))
         .child(
             ColorPicker::from_spec(
                 ColorPickerSpec::new()
                     .with_value(&open_value)
                     .with_open(true)
-                    .with_swatches(swatches.clone()),
+                    .with_default_mode(ColorInputMode::Rgb),
                 theme,
             )
             .with_id("open")
@@ -131,6 +131,19 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                 this.state.specimens.text.insert("color-picker-open-value".to_string(), val.to_string());
                 cx.notify();
             }))
+        )
+
+        // --- Preview only (no input) ---
+        .child(section_label("PREVIEW ONLY (NO INPUT)", text_secondary))
+        .child(
+            ColorPicker::from_spec(
+                ColorPickerSpec::new()
+                    .with_value(&basic_value)
+                    .with_show_input(false)
+                    .with_open(true),
+                theme,
+            )
+            .with_id("preview")
         )
 
         // --- Disabled ---

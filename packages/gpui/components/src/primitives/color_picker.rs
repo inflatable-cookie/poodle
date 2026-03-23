@@ -233,59 +233,77 @@ impl IntoElement for ColorPicker {
             }
 
             // Hex input display — Contract: code font, editable
-            let hex_id = SharedString::from(format!(
-                "{}-hex",
-                if let Some(ref suffix) = self.id_suffix {
-                    format!("pug-color-picker-{}", suffix)
-                } else {
-                    "pug-color-picker".to_string()
-                },
-            ));
+            // Only render when show_input is true (default)
+            if spec.show_input {
+                let mode_label = match spec.default_mode {
+                    pug_primitives::ColorInputMode::Hex => "HEX",
+                    pug_primitives::ColorInputMode::Rgb => "RGB",
+                    pug_primitives::ColorInputMode::Hsl => "HSL",
+                };
 
-            let mut hex_input = div()
-                .id(hex_id)
-                .focusable()
-                .w_full()
-                .h(px(28.0))
-                .px(px(8.0))
-                .rounded(px(4.0))
-                .bg(resolve_color(theme, "semantic.color.background.surface"))
-                .border_1()
-                .border_color(border)
-                .flex()
-                .items_center()
-                .text_size(px(12.0))
-                .text_color(text_primary)
-                .focus(move |s| s.border_color(focus_ring))
-                .child(current.clone());
+                // Mode label
+                overlay = overlay.child(
+                    div()
+                        .text_size(px(10.0))
+                        .font_weight(FontWeight::SEMIBOLD)
+                        .text_color(text_secondary)
+                        .child(mode_label.to_string())
+                );
 
-            // Keyboard editing: type hex chars, backspace to delete
-            if let Some(ref on_change) = self.on_change {
-                let change_handler = on_change.clone();
-                let current_hex = current.clone();
-                hex_input = hex_input.on_key_down(move |event: &KeyDownEvent, window, cx| {
-                    let key = event.keystroke.key.as_str();
-                    if key == "backspace" {
-                        let mut chars: Vec<char> = current_hex.chars().collect();
-                        if chars.len() > 1 { // keep at least "#"
-                            chars.pop();
-                            let new_val: String = chars.into_iter().collect();
-                            change_handler(&new_val, window, cx);
+                let hex_id = SharedString::from(format!(
+                    "{}-hex",
+                    if let Some(ref suffix) = self.id_suffix {
+                        format!("pug-color-picker-{}", suffix)
+                    } else {
+                        "pug-color-picker".to_string()
+                    },
+                ));
+
+                let mut hex_input = div()
+                    .id(hex_id)
+                    .focusable()
+                    .w_full()
+                    .h(px(28.0))
+                    .px(px(8.0))
+                    .rounded(px(4.0))
+                    .bg(resolve_color(theme, "semantic.color.background.surface"))
+                    .border_1()
+                    .border_color(border)
+                    .flex()
+                    .items_center()
+                    .text_size(px(12.0))
+                    .text_color(text_primary)
+                    .focus(move |s| s.border_color(focus_ring))
+                    .child(current.clone());
+
+                // Keyboard editing: type hex chars, backspace to delete
+                if let Some(ref on_change) = self.on_change {
+                    let change_handler = on_change.clone();
+                    let current_hex = current.clone();
+                    hex_input = hex_input.on_key_down(move |event: &KeyDownEvent, window, cx| {
+                        let key = event.keystroke.key.as_str();
+                        if key == "backspace" {
+                            let mut chars: Vec<char> = current_hex.chars().collect();
+                            if chars.len() > 1 { // keep at least "#"
+                                chars.pop();
+                                let new_val: String = chars.into_iter().collect();
+                                change_handler(&new_val, window, cx);
+                            }
+                        } else if key.len() == 1
+                            && !event.keystroke.modifiers.platform
+                            && !event.keystroke.modifiers.control
+                        {
+                            let ch = key.chars().next().unwrap();
+                            if ch.is_ascii_hexdigit() && current_hex.len() < 7 {
+                                let new_val = format!("{}{}", current_hex, ch);
+                                change_handler(&new_val, window, cx);
+                            }
                         }
-                    } else if key.len() == 1
-                        && !event.keystroke.modifiers.platform
-                        && !event.keystroke.modifiers.control
-                    {
-                        let ch = key.chars().next().unwrap();
-                        if ch.is_ascii_hexdigit() && current_hex.len() < 7 {
-                            let new_val = format!("{}{}", current_hex, ch);
-                            change_handler(&new_val, window, cx);
-                        }
-                    }
-                });
+                    });
+                }
+
+                overlay = overlay.child(hex_input);
             }
-
-            overlay = overlay.child(hex_input);
 
             wrapper = wrapper.child(overlay);
         }

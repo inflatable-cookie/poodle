@@ -95,7 +95,7 @@ pub use checkbox::CheckboxSpec;
 pub use code::CodeSpec;
 pub use collapse_toggle::{CollapseDirection, CollapseToggleSpec};
 pub use collapsible::CollapsibleSpec;
-pub use color_picker::ColorPickerSpec;
+pub use color_picker::{ColorPickerSpec, ColorInputMode};
 pub use combobox::{ComboboxOption, ComboboxSpec};
 pub use context_menu::ContextMenuSpec;
 pub use date_picker::DatePickerSpec;

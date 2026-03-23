@@ -1,5 +1,19 @@
 use pug_tokens::semantic;
 
+/// Color input mode for the picker.
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub enum ColorInputMode {
+    Hex,
+    Rgb,
+    Hsl,
+}
+
+impl Default for ColorInputMode {
+    fn default() -> Self {
+        Self::Hex
+    }
+}
+
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct ColorPickerSpec {
     pub value: Option<String>,
@@ -8,6 +22,8 @@ pub struct ColorPickerSpec {
     pub is_open: bool,
     pub is_disabled: bool,
     pub show_alpha: bool,
+    pub show_input: bool,
+    pub default_mode: ColorInputMode,
 }
 
 impl Default for ColorPickerSpec {
@@ -19,6 +35,8 @@ impl Default for ColorPickerSpec {
             is_open: false,
             is_disabled: false,
             show_alpha: false,
+            show_input: true,
+            default_mode: ColorInputMode::Hex,
         }
     }
 }
@@ -55,6 +73,16 @@ impl ColorPickerSpec {
 
     pub fn with_show_alpha(mut self, show_alpha: bool) -> Self {
         self.show_alpha = show_alpha;
+        self
+    }
+
+    pub fn with_show_input(mut self, show_input: bool) -> Self {
+        self.show_input = show_input;
+        self
+    }
+
+    pub fn with_default_mode(mut self, mode: ColorInputMode) -> Self {
+        self.default_mode = mode;
         self
     }
 
