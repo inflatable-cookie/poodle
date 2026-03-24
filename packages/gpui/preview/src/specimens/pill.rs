@@ -25,7 +25,8 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
                 .child(
                     div().flex().flex_wrap().gap(px(8.0)).items_center()
                         .child(Pill::from_spec(PillSpec::new().with_label("Small").with_size(PillSize::Sm), theme))
-                        .child(Pill::from_spec(PillSpec::new().with_label("Medium"), theme))
+                        .child(Pill::from_spec(PillSpec::new().with_label("Medium").with_size(PillSize::Md), theme))
+                        .child(Pill::from_spec(PillSpec::new().with_label("Large").with_size(PillSize::Lg), theme))
                 )
         )
         // --- Code font ---

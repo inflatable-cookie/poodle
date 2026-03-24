@@ -23,10 +23,10 @@ pub enum PillAppearance {
 /// Size of a pill.
 #[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
 pub enum PillSize {
-    Xxs,
-    #[default]
-    Xs,
     Sm,
+    #[default]
+    Md,
+    Lg,
 }
 
 /// Font family of a pill.

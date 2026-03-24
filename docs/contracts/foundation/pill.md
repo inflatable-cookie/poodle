@@ -1,7 +1,7 @@
 # Pill
 
 Status: detailed contract
-Updated: 2026-03-15
+Updated: 2026-03-24
 
 ## 1. Purpose
 
@@ -30,8 +30,8 @@ Updated: 2026-03-15
 | Prop | Type | Default | Required | Notes |
 |------|------|---------|----------|-------|
 | `tone` | `"neutral" \| "success" \| "danger"` | `"neutral"` | no | semantic tone controlling fill/border/text color |
-| `appearance` | `"solid" \| "subtle"` | `"solid"` | no | fill opacity variant |
-| `size` | `"xxs" \| "xs" \| "sm"` | `"xs"` | no | compact scale |
+| `appearance` | `"solid" \| "subtle" \| "badge"` | `"solid"` | no | fill opacity variant |
+| `size` | `"sm" \| "md" \| "lg"` | `"md"` | no | compact scale from smallest to largest |
 | `font` | `"normal" \| "mono"` | `"normal"` | no | content font variant |
 | `isMuted` | `boolean` | `false` | no | visual de-emphasis via reduced opacity |
 | `ariaLabel` | `string \| null` | `null` | no | optional explicit accessible name |
@@ -100,7 +100,7 @@ No internal state.
 
 ## 8. Token Usage
 
-### Root `.pill` (default / neutral / xs)
+### Root `.pill` (default / neutral / md)
 
 | Property | Value |
 |----------|-------|
@@ -159,7 +159,7 @@ No internal state.
 | `text-transform` | `uppercase` |
 | `font-weight` | `700` |
 
-### Size: xxs `.pill[data-size="xxs"]`
+### Size: sm `.pill[data-size="sm"]`
 
 | Property | Value |
 |----------|-------|
@@ -167,7 +167,7 @@ No internal state.
 | `padding` | `0.125rem 0.375rem` |
 | `font-size` | `0.625rem` |
 
-### Size: sm `.pill[data-size="sm"]`
+### Size: lg `.pill[data-size="lg"]`
 
 | Property | Value |
 |----------|-------|
@@ -213,7 +213,7 @@ No internal state.
 
 ### Tier 2: Visual Parity
 
-- [ ] all three sizes produce correct min-height, padding, and font-size
+- [ ] `sm`, `md`, and `lg` sizes produce correct min-height, padding, and font-size
 - [ ] mono font variant uses code family with correct letter-spacing
 - [ ] subtle appearance halves fill opacity
 - [ ] muted state applies 0.72 opacity
@@ -249,9 +249,9 @@ Three pills in a horizontal row with 8px gap:
 
 | Content | Size |
 |---------|------|
-| XXS | xxs |
-| XS | xs |
-| SM | sm |
+| Small | sm |
+| Medium | md |
+| Large | lg |
 
 ### Code font
 
