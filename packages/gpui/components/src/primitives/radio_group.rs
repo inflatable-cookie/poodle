@@ -74,7 +74,12 @@ impl IntoElement for RadioGroup {
         let option_gap = resolve_px(theme, "semantic.space.inline.sm");
 
         let disabled_opacity = resolve_opacity(theme, "semantic.state.opacity.disabled");
-        let accent = resolve_color(theme, "semantic.color.accent.base");
+        let accent = if let Some(ref hex) = spec.selected_color {
+            crate::theme_ext::parse_hex_color(hex)
+                .unwrap_or_else(|| resolve_color(theme, "semantic.color.accent.base"))
+        } else {
+            resolve_color(theme, "semantic.color.accent.base")
+        };
         let border = resolve_color(theme, "semantic.color.border.default");
         let text_primary = resolve_color(theme, "semantic.color.text.primary");
         let surface_bg = resolve_color(theme, "semantic.color.background.surface");

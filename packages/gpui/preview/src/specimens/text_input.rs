@@ -18,15 +18,18 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
     } else {
         ValidationState::Invalid
     };
+    let workspace_value = state.specimens.text.get("text-input-workspace").cloned()
+        .unwrap_or_else(|| "acme-admin".to_string());
 
-    div().flex().flex_col().gap(px(24.0)).max_w(px(384.0)) // 24rem
+    div().flex().flex_col().gap(px(24.0)).max_w(px(384.0)) // 24rem = Svelte specimen max-width
         // --- Default ---
         .child(
-            div().flex().flex_col().gap(px(10.0))
+            div().flex().flex_col().gap(px(8.0)) // 0.5rem
                 .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Default"), theme))
                 .child(
                     Field::from_spec(
-                        FieldSpec::new("name-field", "Name"),
+                        FieldSpec::new("name-field", "Name")
+                            .with_description("Enter your full name."),
                         theme,
                     )
                     .with_control(
@@ -46,11 +49,12 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
         )
         // --- With validation ---
         .child(
-            div().flex().flex_col().gap(px(10.0))
+            div().flex().flex_col().gap(px(8.0))
                 .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("With validation"), theme))
                 .child(
                     Field::from_spec({
                             let mut field = FieldSpec::new("email-field", "Email")
+                                .with_description("A valid email address is required.")
                                 .with_validation_state(validation_state);
                             if !email_is_valid {
                                 field = field.with_error("Please enter a valid email address.");
@@ -75,9 +79,36 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                     )
                 )
         )
+        // --- Pending validation ---
+        .child(
+            div().flex().flex_col().gap(px(8.0))
+                .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Pending validation"), theme))
+                .child(
+                    Field::from_spec(
+                        FieldSpec::new("workspace-field", "Workspace")
+                            .with_description("Check whether the workspace handle is available.")
+                            .with_validation_state(ValidationState::Pending)
+                            .with_pending_message("Checking availability..."),
+                        theme,
+                    )
+                    .with_control(
+                        TextInput::from_spec(
+                            TextInputSpec::new()
+                                .with_id("workspace-field")
+                                .with_value(&workspace_value)
+                                .with_validation_state(ValidationState::Pending),
+                            theme,
+                        )
+                        .on_change(cx.listener(|this, val: &str, _w, cx| {
+                            this.state.specimens.text.insert("text-input-workspace".to_string(), val.to_string());
+                            cx.notify();
+                        }))
+                    )
+                )
+        )
         // --- Disabled ---
         .child(
-            div().flex().flex_col().gap(px(10.0))
+            div().flex().flex_col().gap(px(8.0))
                 .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Disabled"), theme))
                 .child(
                     Field::from_spec(

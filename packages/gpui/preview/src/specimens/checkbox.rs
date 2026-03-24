@@ -87,4 +87,27 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                     ).with_id("cb-readonly-checked")
                 )
         )
+        // --- Custom selected color ---
+        .child(
+            div().flex().flex_col().gap(px(10.0))
+                .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Custom selected color"), theme))
+                .child(
+                    Checkbox::from_spec(
+                        CheckboxSpec::new()
+                            .with_checked(true)
+                            .with_label("Billable feature")
+                            .with_selected_color("#22c55e"),
+                        theme,
+                    ).with_id("cb-custom-green")
+                )
+                .child(
+                    Checkbox::from_spec(
+                        CheckboxSpec::new()
+                            .with_checked(true)
+                            .with_label("Requires moderation")
+                            .with_selected_color("#f59e0b"),
+                        theme,
+                    ).with_id("cb-custom-amber")
+                )
+        )
 }

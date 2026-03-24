@@ -74,4 +74,28 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                     col
                 })
         )
+        // --- Custom colors ---
+        .child(
+            div().flex().flex_col().gap(px(10.0))
+                .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Custom colors"), theme))
+                .child({
+                    let mut col = div().flex().flex_col().gap(px(10.0));
+
+                    let mut spec = SwitchSpec::new()
+                        .with_checked(true)
+                        .with_on_color("#22c55e")
+                        .with_off_color("#cbd5e1");
+                    spec.label = Some("Billing alerts".to_string());
+                    col = col.child(Switch::from_spec(spec, theme).with_id("sw-custom-green"));
+
+                    let mut spec = SwitchSpec::new()
+                        .with_checked(false)
+                        .with_on_color("#f59e0b")
+                        .with_off_color("#94a3b8");
+                    spec.label = Some("Quiet mode".to_string());
+                    col = col.child(Switch::from_spec(spec, theme).with_id("sw-custom-amber"));
+
+                    col
+                })
+        )
 }

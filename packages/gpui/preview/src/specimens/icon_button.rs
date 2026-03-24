@@ -185,6 +185,41 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                         )
                 )
         )
+        // --- String name (built-in internals) ---
+        .child(
+            div().flex().flex_col().gap(px(10.0))
+                .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("String name (built-in internals)"), theme))
+                .child(
+                    div().flex().gap(px(8.0))
+                        .child(
+                            IconButton::from_spec(
+                                IconButtonSpec::new()
+                                    .with_variant(ButtonVariant::Secondary)
+                                    .with_icon("plus")
+                                    .with_aria_label("Add"),
+                                theme,
+                            ).with_id("str-plus")
+                        )
+                        .child(
+                            IconButton::from_spec(
+                                IconButtonSpec::new()
+                                    .with_variant(ButtonVariant::Secondary)
+                                    .with_icon("search")
+                                    .with_aria_label("Search"),
+                                theme,
+                            ).with_id("str-search")
+                        )
+                        .child(
+                            IconButton::from_spec(
+                                IconButtonSpec::new()
+                                    .with_variant(ButtonVariant::Ghost)
+                                    .with_icon("x")
+                                    .with_aria_label("Close"),
+                                theme,
+                            ).with_id("str-close")
+                        )
+                )
+        )
         // --- Click feedback ---
         .when(!last_clicked.is_empty(), |d| {
             d.child(

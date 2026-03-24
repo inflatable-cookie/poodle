@@ -90,4 +90,26 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                         .with_id("radio-disabled")
                 })
         )
+        // --- Custom selected color ---
+        .child(
+            div().flex().flex_col().gap(px(10.0))
+                .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Custom selected color"), theme))
+                .child(
+                    RadioGroup::from_spec(
+                        RadioGroupSpec::new(vec![
+                            ChoiceOption::new("free", "Free"),
+                            ChoiceOption::new("pro", "Pro"),
+                            ChoiceOption::new("enterprise", "Enterprise"),
+                        ])
+                            .with_value(plan_value.clone())
+                            .with_selected_color("#22c55e"),
+                        theme,
+                    )
+                    .with_id("radio-custom-color")
+                    .on_change(cx.listener(|this, value: &str, _w, cx| {
+                        this.state.specimens.text.insert("radio-plan".to_string(), value.to_string());
+                        cx.notify();
+                    }))
+                )
+        )
 }

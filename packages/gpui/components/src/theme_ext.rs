@@ -61,3 +61,29 @@ pub fn color_mix_black(color: Hsla, ratio: f32) -> Hsla {
     };
     mixed.into()
 }
+
+/// Parse a CSS hex color string (#rrggbb or #rgb) to Hsla.
+pub fn parse_hex_color(hex: &str) -> Option<Hsla> {
+    let hex = hex.strip_prefix('#').unwrap_or(hex);
+    let (r, g, b) = match hex.len() {
+        6 => (
+            u8::from_str_radix(&hex[0..2], 16).ok()?,
+            u8::from_str_radix(&hex[2..4], 16).ok()?,
+            u8::from_str_radix(&hex[4..6], 16).ok()?,
+        ),
+        3 => {
+            let r = u8::from_str_radix(&hex[0..1], 16).ok()?;
+            let g = u8::from_str_radix(&hex[1..2], 16).ok()?;
+            let b = u8::from_str_radix(&hex[2..3], 16).ok()?;
+            (r * 17, g * 17, b * 17)
+        }
+        _ => return None,
+    };
+    let rgba = gpui::Rgba {
+        r: r as f32 / 255.0,
+        g: g as f32 / 255.0,
+        b: b as f32 / 255.0,
+        a: 1.0,
+    };
+    Some(rgba.into())
+}

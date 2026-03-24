@@ -11,6 +11,8 @@ pub struct RadioGroupSpec {
     pub is_disabled: bool,
     pub aria_label: Option<String>,
     pub description_id: Option<String>,
+    /// Custom color override for the selected radio indicator (CSS hex string).
+    pub selected_color: Option<String>,
 }
 
 impl Default for RadioGroupSpec {
@@ -23,6 +25,7 @@ impl Default for RadioGroupSpec {
             is_disabled: false,
             aria_label: None,
             description_id: None,
+            selected_color: None,
         }
     }
 }
@@ -47,6 +50,11 @@ impl RadioGroupSpec {
 
     pub fn with_orientation(mut self, orientation: Orientation) -> Self {
         self.orientation = orientation;
+        self
+    }
+
+    pub fn with_selected_color(mut self, color: impl Into<String>) -> Self {
+        self.selected_color = Some(color.into());
         self
     }
 

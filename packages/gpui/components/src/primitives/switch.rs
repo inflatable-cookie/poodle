@@ -102,10 +102,21 @@ impl IntoElement for Switch {
         let focus_ring = resolve_color(theme, "semantic.color.accent.focusRing");
 
         // Svelte: off-track = text-primary 18% + surface, on-track = accent 24% + surface
+        // Custom colors override the track fill entirely
         let track_bg = if is_checked {
-            color_mix(accent, surface_bg, 0.24)
+            if let Some(ref hex) = spec.on_color {
+                crate::theme_ext::parse_hex_color(hex)
+                    .unwrap_or_else(|| color_mix(accent, surface_bg, 0.24))
+            } else {
+                color_mix(accent, surface_bg, 0.24)
+            }
         } else {
-            color_mix(text_primary, surface_bg, 0.18)
+            if let Some(ref hex) = spec.off_color {
+                crate::theme_ext::parse_hex_color(hex)
+                    .unwrap_or_else(|| color_mix(text_primary, surface_bg, 0.18))
+            } else {
+                color_mix(text_primary, surface_bg, 0.18)
+            }
         };
 
         // Contract: checked track border = accent-base 58% + border-default

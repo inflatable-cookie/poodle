@@ -12,6 +12,8 @@ pub struct CheckboxSpec {
     pub label: Option<String>,
     pub aria_label: Option<String>,
     pub description_id: Option<String>,
+    /// Custom color override for the checked/mixed indicator (CSS hex string).
+    pub selected_color: Option<String>,
 }
 
 impl Default for CheckboxSpec {
@@ -25,6 +27,7 @@ impl Default for CheckboxSpec {
             label: None,
             aria_label: None,
             description_id: None,
+            selected_color: None,
         }
     }
 }
@@ -71,6 +74,11 @@ impl CheckboxSpec {
 
     pub fn with_description_id(mut self, description_id: impl Into<String>) -> Self {
         self.description_id = Some(description_id.into());
+        self
+    }
+
+    pub fn with_selected_color(mut self, color: impl Into<String>) -> Self {
+        self.selected_color = Some(color.into());
         self
     }
 

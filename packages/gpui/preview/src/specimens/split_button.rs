@@ -132,6 +132,79 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                     )
                 )
         )
+        // --- Submit semantics ---
+        .child(
+            div().flex().flex_col().gap(px(10.0))
+                .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Submit semantics"), theme))
+                .child(
+                    SplitButton::from_spec(
+                        SplitButtonSpec::new()
+                            .with_variant(ButtonVariant::Primary)
+                            .with_label("Save changes")
+                            .with_items(vec![
+                                SplitMenuItem::action("save", "Save changes"),
+                                SplitMenuItem::action("save-close", "Save & close"),
+                            ]),
+                        theme,
+                    )
+                    .on_click(cx.listener(|this, _e: &ClickEvent, _w, cx| {
+                        this.state.specimens.text.insert(
+                            "split-btn-action".to_string(),
+                            "submit: Save changes".to_string(),
+                        );
+                        cx.notify();
+                    }))
+                    .on_dropdown(cx.listener(|this, _e: &ClickEvent, _w, cx| {
+                        this.state.specimens.text.insert(
+                            "split-btn-action".to_string(),
+                            "dropdown: toggle".to_string(),
+                        );
+                        cx.notify();
+                    }))
+                )
+        )
+        // --- Constrained scroll container ---
+        .child(
+            div().flex().flex_col().gap(px(10.0))
+                .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Constrained scroll container"), theme))
+                .child(
+                    div()
+                        .max_h(px(120.0))
+                        .overflow_hidden()
+                        .rounded(px(8.0))
+                        .border_1()
+                        .border_color(color_to_hsla(theme.resolve_color("semantic.color.border.subtle")))
+                        .p(px(12.0))
+                        .child(div().h(px(60.0))) // spacer
+                        .child(
+                            SplitButton::from_spec(
+                                SplitButtonSpec::new()
+                                    .with_variant(ButtonVariant::Secondary)
+                                    .with_label("Queue actions")
+                                    .with_items(vec![
+                                        SplitMenuItem::action("queue-retry", "Retry failed"),
+                                        SplitMenuItem::action("queue-clear", "Clear queue"),
+                                        SplitMenuItem::action("queue-export", "Export log"),
+                                    ]),
+                                theme,
+                            )
+                            .on_click(cx.listener(|this, _e: &ClickEvent, _w, cx| {
+                                this.state.specimens.text.insert(
+                                    "split-btn-action".to_string(),
+                                    "click: Queue actions".to_string(),
+                                );
+                                cx.notify();
+                            }))
+                            .on_dropdown(cx.listener(|this, _e: &ClickEvent, _w, cx| {
+                                this.state.specimens.text.insert(
+                                    "split-btn-action".to_string(),
+                                    "dropdown: toggle".to_string(),
+                                );
+                                cx.notify();
+                            }))
+                        )
+                )
+        )
         // --- Last action ---
         .child(
             div().flex().flex_col().gap(px(10.0))

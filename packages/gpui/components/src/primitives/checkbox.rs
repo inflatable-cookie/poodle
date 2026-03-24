@@ -68,7 +68,12 @@ impl IntoElement for Checkbox {
         let focus_ring_color = resolve_color(theme, "semantic.color.accent.focusRing");
 
         let disabled_opacity = resolve_opacity(theme, "semantic.state.opacity.disabled");
-        let accent = resolve_color(theme, spec.indicator_fill_token());
+        let accent = if let Some(ref hex) = spec.selected_color {
+            crate::theme_ext::parse_hex_color(hex)
+                .unwrap_or_else(|| resolve_color(theme, spec.indicator_fill_token()))
+        } else {
+            resolve_color(theme, spec.indicator_fill_token())
+        };
         let border = resolve_color(theme, "semantic.color.border.default");
         let text_primary = resolve_color(theme, "semantic.color.text.primary");
         let text_inverse = resolve_color(theme, "semantic.color.text.inverse");
