@@ -705,6 +705,7 @@ struct CliArgs {
     density: Option<Density>,
     control_size: Option<ControlSize>,
     treatment: Option<AppearanceTreatment>,
+    screenshot: Option<String>,
 }
 
 fn parse_cli_args() -> CliArgs {
@@ -715,6 +716,7 @@ fn parse_cli_args() -> CliArgs {
     let mut density = None;
     let mut control_size = None;
     let mut treatment = None;
+    let mut screenshot = None;
 
     let mut i = 1;
     while i < args.len() {
@@ -781,12 +783,18 @@ fn parse_cli_args() -> CliArgs {
                     i += 1;
                 }
             }
+            "--screenshot" => {
+                if let Some(val) = args.get(i + 1) {
+                    screenshot = Some(val.clone());
+                    i += 1;
+                }
+            }
             _ => {}
         }
         i += 1;
     }
 
-    CliArgs { section, component, theme, density, control_size, treatment }
+    CliArgs { section, component, theme, density, control_size, treatment, screenshot }
 }
 
 fn main() {
@@ -874,6 +882,60 @@ fn main() {
             },
         )
         .unwrap();
-        cx.activate(true);
+
+        // Screenshot mode: spawn a background thread that waits for render,
+        // captures the window by PID (without stealing focus), saves, and exits.
+        if let Some(ref output_path) = cli.screenshot {
+            let path = output_path.clone();
+            std::thread::spawn(move || {
+                // Wait for initial render
+                std::thread::sleep(std::time::Duration::from_millis(1500));
+
+                // Find our own window by PID
+                let pid = std::process::id();
+                let find_wid = std::process::Command::new("swift")
+                    .arg("-e")
+                    .arg(format!(
+                        concat!(
+                            "import CoreGraphics\n",
+                            "let wl = CGWindowListCopyWindowInfo(.optionAll, kCGNullWindowID) as! [[String: Any]]\n",
+                            "var best = 0; var bestArea = 0\n",
+                            "for w in wl {{\n",
+                            "  let p = w[\"kCGWindowOwnerPID\"] as? Int ?? 0\n",
+                            "  if p == {} {{\n",
+                            "    let b = w[\"kCGWindowBounds\"] as? [String: Any] ?? [:]\n",
+                            "    let h = b[\"Height\"] as? Int ?? 0\n",
+                            "    let w2 = b[\"Width\"] as? Int ?? 0\n",
+                            "    if h * w2 > bestArea {{ bestArea = h * w2; best = w[\"kCGWindowNumber\"] as? Int ?? 0 }}\n",
+                            "  }}\n",
+                            "}}\n",
+                            "print(best)",
+                        ),
+                        pid
+                    ))
+                    .output();
+
+                if let Ok(output) = find_wid {
+                    let wid_str = String::from_utf8_lossy(&output.stdout).trim().to_string();
+                    if !wid_str.is_empty() && wid_str != "0" {
+                        let result = std::process::Command::new("screencapture")
+                            .args(["-x", "-l", &wid_str, &path])
+                            .status();
+                        match result {
+                            Ok(s) if s.success() => eprintln!("Screenshot saved: {}", path),
+                            Ok(s) => eprintln!("screencapture failed with status: {}", s),
+                            Err(e) => eprintln!("screencapture error: {}", e),
+                        }
+                    } else {
+                        eprintln!("Could not find window (PID {})", pid);
+                    }
+                }
+
+                // Exit the process
+                std::process::exit(0);
+            });
+        } else {
+            cx.activate(true);
+        }
     });
 }
