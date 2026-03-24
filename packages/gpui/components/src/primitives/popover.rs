@@ -4,7 +4,7 @@ use gpui::*;
 use poodle_gpui::GpuiThemeProvider;
 use poodle_primitives::{OverlayPlacement, PopoverInitialFocus, PopoverSpec};
 
-use crate::theme_ext::{color_mix, resolve_color, resolve_px, resolve_radius};
+use crate::theme_ext::{resolve_color, resolve_px, resolve_radius};
 
 /// A real GPUI popover component backed by `PopoverSpec`.
 ///
@@ -74,17 +74,15 @@ impl IntoElement for Popover {
         let theme = &self.theme;
         let spec = &self.spec;
 
-        let surface_raw = resolve_color(theme, spec.surface_fill_token());
-        let panel = resolve_color(theme, "semantic.color.background.panel");
-        let border_raw = resolve_color(theme, "semantic.color.border.default");
+        let elevated_bg = resolve_color(theme, "semantic.color.background.elevated");
+        let border_default = resolve_color(theme, "semantic.color.border.default");
         let panel_x = resolve_px(theme, "semantic.space.panel.x");
         let panel_y = resolve_px(theme, "semantic.space.panel.y");
-        // Contract: radius-surface
         let radius = resolve_radius(theme, "semantic.radius.surface");
 
-        // Contract: bg 98% surface, border 72% border-default
-        let surface_bg = color_mix(surface_raw, panel, 0.98);
-        let border = color_mix(border_raw, panel, 0.72);
+        // Matches Svelte treatment-surface-elevated values
+        let surface_bg = Hsla { a: elevated_bg.a * 0.94, ..elevated_bg };
+        let border = Hsla { a: border_default.a * 0.22, ..border_default };
 
         let mut wrapper = div().flex().flex_col().gap(px(spec.offset as f32));
 

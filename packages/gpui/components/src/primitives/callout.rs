@@ -69,7 +69,6 @@ impl IntoElement for Callout {
         let panel_y = resolve_px(theme, "semantic.space.panel.y");
 
         let tone_color = resolve_color(theme, spec.fill_token());
-        let border_color = resolve_color(theme, spec.border_token());
         let surface_bg = resolve_color(theme, "semantic.color.background.surface");
         let text_primary = resolve_color(theme, "semantic.color.text.primary");
         let text_secondary = resolve_color(theme, "semantic.color.text.secondary");
@@ -86,9 +85,26 @@ impl IntoElement for Callout {
             _ => "info",
         };
 
-        // Svelte: bg = color-mix(tone 34%, surface), border = color-mix(tone 34%, transparent)
-        let bg = color_mix(tone_color, surface_bg, 0.34);
-        let border = Hsla { a: border_color.a * 0.34, ..border_color };
+        let panel_bg = resolve_color(theme, "semantic.color.background.panel");
+        let border_default = resolve_color(theme, "semantic.color.border.default");
+        let border_subtle = resolve_color(theme, "semantic.color.border.subtle");
+
+        // Matches Svelte Callout.svelte:
+        //   Neutral fill: color-mix(panel 94%, transparent)
+        //   Toned fill: color-mix(tone 10%, panel)
+        //   Neutral border: color-mix(border-subtle 88%, transparent)
+        //   Toned border: color-mix(tone 34%, border-default)
+        let is_neutral = matches!(spec.tone, StatusTone::Neutral);
+        let bg = if is_neutral {
+            Hsla { a: panel_bg.a * 0.94, ..panel_bg }
+        } else {
+            color_mix(tone_color, panel_bg, 0.10)
+        };
+        let border = if is_neutral {
+            Hsla { a: border_subtle.a * 0.88, ..border_subtle }
+        } else {
+            color_mix(tone_color, border_default, 0.34)
+        };
 
         let mut el = div()
             .w_full()

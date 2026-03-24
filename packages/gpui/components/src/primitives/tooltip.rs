@@ -4,7 +4,7 @@ use gpui::*;
 use poodle_gpui::GpuiThemeProvider;
 use poodle_primitives::{OverlayPlacement, TooltipSpec};
 
-use crate::theme_ext::{color_mix, resolve_color, resolve_px, resolve_radius};
+use crate::theme_ext::{resolve_color, resolve_px, resolve_radius};
 
 /// A real GPUI tooltip component backed by `TooltipSpec`.
 ///
@@ -57,16 +57,15 @@ impl IntoElement for Tooltip {
         let theme = &self.theme;
         let spec = &self.spec;
 
-        let fill = resolve_color(theme, spec.fill_token());
-        let panel = resolve_color(theme, "semantic.color.background.panel");
-        // Contract: text color = text-primary (tooltip uses dark elevated bg)
+        let elevated_bg = resolve_color(theme, "semantic.color.background.elevated");
+        let border_default = resolve_color(theme, "semantic.color.border.default");
         let text_primary = resolve_color(theme, "semantic.color.text.primary");
-        let border_raw = resolve_color(theme, "semantic.color.border.default");
         let stack_gap = resolve_px(theme, "semantic.space.stack.sm");
-        // Contract: radius-sm (smaller than control)
         let tooltip_radius = resolve_radius(theme, "semantic.radius.control") - px(2.0);
-        // Contract: border = 72% border-default
-        let tooltip_border = color_mix(border_raw, panel, 0.72);
+
+        // Matches Svelte treatment-surface-elevated values
+        let fill = Hsla { a: elevated_bg.a * 0.94, ..elevated_bg };
+        let tooltip_border = Hsla { a: border_default.a * 0.22, ..border_default };
 
         let mut wrapper = div().flex().flex_col().gap(stack_gap);
 

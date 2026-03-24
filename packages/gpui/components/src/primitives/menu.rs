@@ -83,21 +83,20 @@ impl IntoElement for Menu {
         // Contract: item radius = control - 0.125rem
         let item_radius = control_radius - px(2.0);
 
-        let elevated = resolve_color(theme, self.spec.surface_fill_token());
-        let panel = resolve_color(theme, "semantic.color.background.panel");
-        // Contract: 98% elevated, 2% panel
-        let surface_bg = color_mix(elevated, panel, 0.98);
-        let border_raw = resolve_color(theme, self.spec.overlay_border_token());
-        // Contract: 72% border-default
-        let border = color_mix(border_raw, panel, 0.72);
+        let elevated_bg = resolve_color(theme, "semantic.color.background.elevated");
+        let border_default = resolve_color(theme, "semantic.color.border.default");
+        let border_subtle = resolve_color(theme, "semantic.color.border.subtle");
+
+        // Matches Svelte treatment-surface-elevated values
+        let surface_bg = Hsla { a: elevated_bg.a * 0.94, ..elevated_bg };
+        let border = Hsla { a: border_default.a * 0.22, ..border_default };
         let text_primary = resolve_color(theme, self.spec.item_text_token());
         let text_secondary = resolve_color(theme, "semantic.color.text.secondary");
         let accent = resolve_color(theme, self.spec.item_highlight_token());
-        // Contract: 16% accent for hover
-        let item_hover = color_mix(accent, panel, 0.16);
-        let separator_raw = resolve_color(theme, self.spec.separator_color_token());
-        // Contract: 72% border-subtle
-        let separator_color = color_mix(separator_raw, panel, 0.72);
+        // Item hover: accent at 16% mixed into elevated
+        let item_hover = color_mix(accent, elevated_bg, 0.16);
+        // Separator: border-subtle at 48% (treatment-surface-divider)
+        let separator_color = Hsla { a: border_subtle.a * 0.48, ..border_subtle };
         let disabled_opacity = resolve_opacity(theme, self.spec.disabled_opacity_token());
         let focus_ring = resolve_color(theme, "semantic.color.accent.focusRing");
 

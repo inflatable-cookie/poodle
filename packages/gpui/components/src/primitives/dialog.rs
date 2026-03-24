@@ -4,7 +4,7 @@ use gpui::*;
 use poodle_gpui::GpuiThemeProvider;
 use poodle_primitives::{DialogKind, DialogSpec};
 
-use crate::theme_ext::{color_mix, resolve_color, resolve_px, resolve_radius};
+use crate::theme_ext::{resolve_color, resolve_px, resolve_radius};
 
 /// A real GPUI dialog component backed by `DialogSpec`.
 ///
@@ -82,17 +82,17 @@ impl IntoElement for Dialog {
         let panel_x = resolve_px(theme, "semantic.space.panel.x");
         let panel_y = resolve_px(theme, "semantic.space.panel.y");
 
-        let surface_bg = resolve_color(theme, spec.surface_fill_token());
-        let panel = resolve_color(theme, "semantic.color.background.panel");
-        let border_raw = resolve_color(theme, "semantic.color.border.default");
+        let elevated_bg = resolve_color(theme, "semantic.color.background.elevated");
+        let border_default = resolve_color(theme, "semantic.color.border.default");
         let text_primary = resolve_color(theme, "semantic.color.text.primary");
         let text_secondary = resolve_color(theme, "semantic.color.text.secondary");
-        // Contract: radius-surface
         let radius = resolve_radius(theme, "semantic.radius.surface");
 
-        // Contract: border 72% border-default, bg 98% elevated
-        let border = color_mix(border_raw, panel, 0.72);
-        let bg = color_mix(surface_bg, panel, 0.98);
+        // Matches Svelte treatment-surface-elevated values:
+        //   fill: color-mix(elevated 94%, transparent)
+        //   border: color-mix(border-default 22%, transparent)
+        let bg = Hsla { a: elevated_bg.a * 0.94, ..elevated_bg };
+        let border = Hsla { a: border_default.a * 0.22, ..border_default };
 
         let stack_lg = resolve_px(theme, "semantic.space.stack.lg");
 
