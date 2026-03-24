@@ -95,7 +95,9 @@ impl IntoElement for TextArea {
         let border_default = resolve_color(theme, spec.border_token());
         // Svelte treatment-interactive-subtle: fill 82%, border 72%
         let surface_bg = Hsla { a: surface_raw.a * 0.82, ..surface_raw };
+        let hover_bg = Hsla { a: surface_raw.a * 0.88, ..surface_raw };
         let border = Hsla { a: border_default.a * 0.72, ..border_default };
+        let hover_border = Hsla { a: border_default.a * 0.92, ..border_default };
         let text_primary = resolve_color(theme, spec.text_color_token());
         let text_secondary = resolve_color(theme, spec.placeholder_color_token());
         let disabled_opacity = resolve_opacity(theme, spec.disabled_opacity_token());
@@ -143,7 +145,7 @@ impl IntoElement for TextArea {
             .text_size(body_size)
             .line_height(line_height_val)
             .text_color(text_col)
-            // Contract: focus-within = border + background + shadow ring at 28% opacity
+            .hover(move |s| s.bg(hover_bg).border_color(hover_border))
             .focus(move |s| s
                 .border_color(focus_ring)
                 .bg(focus_bg)

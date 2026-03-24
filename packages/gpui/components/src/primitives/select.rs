@@ -95,6 +95,7 @@ impl IntoElement for Select {
         let surface_bg = Hsla { a: surface_raw.a * 0.82, ..surface_raw };
         let border = Hsla { a: border_default.a * 0.72, ..border_default };
         let hover_bg = Hsla { a: surface_raw.a * 0.88, ..surface_raw };
+        let hover_border = Hsla { a: border_default.a * 0.92, ..border_default };
         // Elevated treatment for dropdown overlay
         let elevated_bg = Hsla { a: elevated_raw.a * 0.94, ..elevated_raw };
         let overlay_border = Hsla { a: border_default.a * 0.22, ..border_default };
@@ -137,7 +138,7 @@ impl IntoElement for Select {
         } else {
             trigger = trigger
                 .cursor_pointer()
-                .hover(move |s| s.bg(hover_bg));
+                .hover(move |s| s.bg(hover_bg).border_color(hover_border));
         }
 
         let text_col = if is_placeholder {

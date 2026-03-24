@@ -95,7 +95,9 @@ impl IntoElement for Combobox {
         let input_border_raw = resolve_color(theme, spec.input_border_token());
         // Svelte treatment-interactive-subtle: fill 82%, border 72%
         let input_fill = Hsla { a: input_fill_raw.a * 0.82, ..input_fill_raw };
+        let input_hover_fill = Hsla { a: input_fill_raw.a * 0.88, ..input_fill_raw };
         let input_border = Hsla { a: input_border_raw.a * 0.72, ..input_border_raw };
+        let input_hover_border = Hsla { a: input_border_raw.a * 0.92, ..input_border_raw };
         let input_text = resolve_color(theme, spec.input_text_token());
         let input_placeholder = resolve_color(theme, spec.input_placeholder_token());
         let input_radius = resolve_radius(theme, spec.input_radius_token());
@@ -192,7 +194,7 @@ impl IntoElement for Combobox {
                 .bg(input_fill)
                 .border_1()
                 .border_color(input_border)
-                // Contract: focus ring on input with shadow
+                .hover(move |s| s.bg(input_hover_fill).border_color(input_hover_border))
                 .focus(move |s| s
                     .border_color(focus_ring)
                     .shadow(vec![gpui::BoxShadow {

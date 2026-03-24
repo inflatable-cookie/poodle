@@ -131,7 +131,9 @@ impl IntoElement for TextInput {
         //   fill: surface 82%, fill-hover: surface 88%
         //   border: border-default 72%, border-hover: border-default 92%
         let surface_bg = Hsla { a: surface_raw.a * 0.82, ..surface_raw };
+        let hover_bg = Hsla { a: surface_raw.a * 0.88, ..surface_raw };
         let border = Hsla { a: border_default.a * 0.72, ..border_default };
+        let hover_border = Hsla { a: border_default.a * 0.92, ..border_default };
         let text_primary = resolve_color(theme, spec.text_color_token());
         let text_secondary = resolve_color(theme, spec.placeholder_color_token());
         let focus_ring = resolve_color(theme, spec.focus_ring_color_token());
@@ -288,6 +290,7 @@ impl IntoElement for TextInput {
             .text_size(body_size)
             .line_height(body_line_height)
             .text_color(text_primary)
+            .hover(move |s| s.bg(hover_bg).border_color(hover_border))
             .focus(move |s| s
                 .border_color(focus_ring)
                 .bg(focus_bg)
