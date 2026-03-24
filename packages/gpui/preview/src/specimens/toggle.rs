@@ -1,12 +1,15 @@
 use gpui::*;
-use poodle_primitives::EyebrowSpec;
+use poodle_adapter::ThemeProvider;
+use poodle_primitives::{ButtonVariant, EyebrowSpec};
 use poodle_gpui_components::toggle::Toggle;
 use poodle_gpui_components::Eyebrow;
 use crate::app_state::AppState;
+use crate::style_bridge::color_to_hsla;
 use crate::PreviewRoot;
 
 pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
     let theme = &state.theme;
+    let text_secondary = theme.resolve_color("semantic.color.text.secondary");
 
     let bold_pressed = state.specimens.is_on("toggle-bold");
     let italic_pressed = state.specimens.is_on("toggle-italic");
@@ -37,6 +40,10 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                                 }))
                         )
                 )
+                .child(
+                    div().text_sm().text_color(color_to_hsla(text_secondary))
+                        .child(format!("Bold: {}, Italic: {}", bold_pressed, italic_pressed))
+                )
         )
         // --- Primary variant ---
         .child(
@@ -44,6 +51,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                 .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Primary variant"), theme))
                 .child(
                     Toggle::new(theme).label("Pinned")
+                        .variant(ButtonVariant::Primary)
                         .pressed(pinned_pressed)
                         .on_click(cx.listener(|this, _e: &ClickEvent, _w, cx| {
                             this.state.specimens.toggle("toggle-pinned-off");
@@ -57,6 +65,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                 .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Secondary variant"), theme))
                 .child(
                     Toggle::new(theme).label("Favorite")
+                        .variant(ButtonVariant::Secondary)
                         .pressed(favorite_pressed)
                         .on_click(cx.listener(|this, _e: &ClickEvent, _w, cx| {
                             this.state.specimens.toggle("toggle-favorite");

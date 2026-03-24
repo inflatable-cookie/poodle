@@ -8,7 +8,7 @@ use crate::PreviewRoot;
 
 pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
     let theme = &state.theme;
-    let text_primary = theme.resolve_color("semantic.color.text.primary");
+    let text_secondary = theme.resolve_color("semantic.color.text.secondary");
 
     // Track quantity value (stored as string, parsed to f64)
     let quantity_str = state.specimens.text.get("number-entry-quantity").cloned()
@@ -50,9 +50,8 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                     }))
                 )
                 .child(
-                    div()
-                        .text_size(px(12.0))
-                        .text_color(color_to_hsla(text_primary))
+                    div().text_sm()
+                        .text_color(color_to_hsla(text_secondary))
                         .child(format!("Quantity: {}", quantity))
                 )
         )
@@ -84,6 +83,11 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                         this.state.specimens.text.insert("number-entry-price".to_string(), format!("{:.2}", new_val.max(0.0)));
                         cx.notify();
                     }))
+                )
+                .child(
+                    div().text_sm()
+                        .text_color(color_to_hsla(text_secondary))
+                        .child(format!("Price: ${:.2}", price))
                 )
         )
         // --- Disabled ---

@@ -1,16 +1,31 @@
 use gpui::*;
+use poodle_adapter::ThemeProvider;
 use poodle_primitives::{CollapseDirection, CollapseToggleSpec, EyebrowSpec};
 use poodle_gpui_components::{CollapseToggle, Eyebrow};
 use crate::app_state::AppState;
+use crate::style_bridge::color_to_hsla;
 use crate::PreviewRoot;
 
 pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
     let theme = &state.theme;
+    let text_secondary = theme.resolve_color("semantic.color.text.secondary");
+    let label_color = color_to_hsla(text_secondary);
 
     let left_collapsed = state.specimens.is_on("ct-left-collapsed");
     let right_collapsed = state.specimens.is_on("ct-right-collapsed");
     let up_collapsed = state.specimens.is_on("ct-up-collapsed");
     let down_collapsed = state.specimens.is_on("ct-down-collapsed");
+
+    // Helper: labeled toggle with direction name + state
+    let labeled = |toggle: CollapseToggle, name: &str, collapsed: bool| -> Div {
+        let state_str = if collapsed { "(collapsed)" } else { "(expanded)" };
+        div().flex().items_center().gap(px(6.0))
+            .child(toggle)
+            .child(
+                div().text_size(px(12.0)).text_color(label_color)
+                    .child(format!("{} {}", name, state_str))
+            )
+    };
 
     div().flex().flex_col().gap(px(24.0))
         // --- Directions (interactive, all directions) ---
@@ -18,8 +33,8 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
             div().flex().flex_col().gap(px(8.0))
                 .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Directions"), theme))
                 .child(
-                    div().flex().gap(px(8.0)).items_center()
-                        .child(
+                    div().flex().gap(px(24.0)).items_center().flex_wrap()
+                        .child(labeled(
                             CollapseToggle::from_spec(
                                 CollapseToggleSpec::new()
                                     .with_direction(CollapseDirection::Left)
@@ -30,9 +45,10 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                             .on_toggle(cx.listener(|this, _e: &ClickEvent, _w, cx| {
                                 this.state.specimens.toggle("ct-left-collapsed");
                                 cx.notify();
-                            }))
-                        )
-                        .child(
+                            })),
+                            "Left", left_collapsed,
+                        ))
+                        .child(labeled(
                             CollapseToggle::from_spec(
                                 CollapseToggleSpec::new()
                                     .with_direction(CollapseDirection::Right)
@@ -43,9 +59,10 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                             .on_toggle(cx.listener(|this, _e: &ClickEvent, _w, cx| {
                                 this.state.specimens.toggle("ct-right-collapsed");
                                 cx.notify();
-                            }))
-                        )
-                        .child(
+                            })),
+                            "Right", right_collapsed,
+                        ))
+                        .child(labeled(
                             CollapseToggle::from_spec(
                                 CollapseToggleSpec::new()
                                     .with_direction(CollapseDirection::Up)
@@ -56,9 +73,10 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                             .on_toggle(cx.listener(|this, _e: &ClickEvent, _w, cx| {
                                 this.state.specimens.toggle("ct-up-collapsed");
                                 cx.notify();
-                            }))
-                        )
-                        .child(
+                            })),
+                            "Up", up_collapsed,
+                        ))
+                        .child(labeled(
                             CollapseToggle::from_spec(
                                 CollapseToggleSpec::new()
                                     .with_direction(CollapseDirection::Down)
@@ -69,8 +87,9 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                             .on_toggle(cx.listener(|this, _e: &ClickEvent, _w, cx| {
                                 this.state.specimens.toggle("ct-down-collapsed");
                                 cx.notify();
-                            }))
-                        )
+                            })),
+                            "Down", down_collapsed,
+                        ))
                 )
         )
         // --- Disabled ---
@@ -78,7 +97,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
             div().flex().flex_col().gap(px(8.0))
                 .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Disabled"), theme))
                 .child(
-                    div().flex().gap(px(8.0)).items_center()
+                    div().flex().gap(px(24.0)).items_center()
                         .child(
                             CollapseToggle::from_spec(
                                 CollapseToggleSpec::new()

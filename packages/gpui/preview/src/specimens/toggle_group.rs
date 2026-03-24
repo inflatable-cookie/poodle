@@ -1,11 +1,14 @@
 use gpui::*;
+use poodle_adapter::ThemeProvider;
 use poodle_primitives::{ToggleGroupOption, EyebrowSpec};
 use poodle_gpui_components::{ToggleGroup, Eyebrow};
 use crate::app_state::AppState;
+use crate::style_bridge::color_to_hsla;
 use crate::PreviewRoot;
 
 pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
     let theme = &state.theme;
+    let text_secondary = theme.resolve_color("semantic.color.text.secondary");
 
     let single_value = state.specimens.text.get("toggle-group-single").cloned()
         .unwrap_or_else(|| "grid".to_string());
@@ -47,11 +50,15 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                 .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Single selection"), theme))
                 .child(
                     ToggleGroup::new(single_options, theme)
-                        .default_value(vec![single_value])
+                        .default_value(vec![single_value.clone()])
                         .on_change(cx.listener(|this, val: &str, _w, cx| {
                             this.state.specimens.text.insert("toggle-group-single".to_string(), val.to_string());
                             cx.notify();
                         }))
+                )
+                .child(
+                    div().text_sm().text_color(color_to_hsla(text_secondary))
+                        .child(format!("View: {}", single_value))
                 )
         )
         .child(
@@ -73,6 +80,10 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                     ToggleGroup::new(multi_options, theme)
                         .default_value(vec!["design".to_string(), "docs".to_string()])
                         .selection_mode(poodle_primitives::ToggleGroupSelectionMode::Multiple)
+                )
+                .child(
+                    div().text_sm().text_color(color_to_hsla(text_secondary))
+                        .child("Selected: design, docs")
                 )
         )
         .child(
