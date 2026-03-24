@@ -142,8 +142,8 @@ impl IntoElement for Button {
                 (fill, border, base_text)
             }
             (ButtonVariant::Primary, _) => {
-                // Primary border: color-mix(accent-base 84%, black)
-                let darkened_border = color_mix_black(base_fill, 0.84);
+                // Svelte treatment-interactive-primary-border: accent-base 86% + black
+                let darkened_border = color_mix_black(base_fill, 0.86);
                 (base_fill, darkened_border, base_text)
             }
             _ => (base_fill, base_border, base_text),

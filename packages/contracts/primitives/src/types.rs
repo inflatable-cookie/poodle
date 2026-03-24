@@ -647,6 +647,7 @@ pub struct TabDefinition {
     pub value: String,
     pub label: String,
     pub is_disabled: bool,
+    pub is_closable: bool,
 }
 
 impl TabDefinition {
@@ -655,11 +656,17 @@ impl TabDefinition {
             value: value.into(),
             label: label.into(),
             is_disabled: false,
+            is_closable: false,
         }
     }
 
     pub fn with_disabled(mut self, is_disabled: bool) -> Self {
         self.is_disabled = is_disabled;
+        self
+    }
+
+    pub fn with_closable(mut self, is_closable: bool) -> Self {
+        self.is_closable = is_closable;
         self
     }
 }

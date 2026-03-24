@@ -56,9 +56,9 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
     // 2. CARD VARIANT (CLOSABLE, REORDERABLE)
     let card_tabs = vec![
         TabDefinition::new("index.ts", "index.ts"),
-        TabDefinition::new("App.svelte", "App.svelte"),
-        TabDefinition::new("utils.ts", "utils.ts"),
-        TabDefinition::new("types.ts", "types.ts"),
+        TabDefinition::new("App.svelte", "App.svelte").with_closable(true),
+        TabDefinition::new("utils.ts", "utils.ts").with_closable(true),
+        TabDefinition::new("types.ts", "types.ts").with_closable(true),
     ];
 
     let card_value = state.specimens.text.get("tabs-card-value")

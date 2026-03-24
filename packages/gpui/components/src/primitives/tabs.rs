@@ -249,7 +249,23 @@ impl Tabs {
                 }
             }
 
-            tab = tab.child(tab_def.label.clone());
+            // Closable tab: label + close button in a flex row
+            if tab_def.is_closable {
+                let icon_muted = resolve_color(&self.theme, "semantic.color.icon.muted");
+                tab = tab
+                    .flex()
+                    .items_center()
+                    .gap(px(6.0))
+                    .child(tab_def.label.clone())
+                    .child(
+                        div()
+                            .text_size(px(11.0))
+                            .text_color(icon_muted)
+                            .child("×"),
+                    );
+            } else {
+                tab = tab.child(tab_def.label.clone());
+            }
             tab_row = tab_row.child(tab);
         }
 
