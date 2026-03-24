@@ -57,36 +57,54 @@ impl IntoElement for Surface {
 
         // Contract: use radius.surface, not radius.control
         let surface_radius = resolve_radius(theme, spec.radius_token());
-
-        let bg_raw = resolve_color(theme, spec.resolved_background_token());
-        let panel = resolve_color(theme, "semantic.color.background.panel");
         let padding = spec.resolved_padding();
 
-        // Contract: surface bg = color-mix(resolved-bg 96%, panel)
-        let bg = color_mix(bg_raw, panel, 0.96);
+        let is_elevated = spec.is_elevated || spec.tone == SurfaceTone::Elevated;
 
+        // Colors from token system
+        let panel = resolve_color(theme, "semantic.color.background.panel");
+        let elevated_bg = resolve_color(theme, "semantic.color.background.elevated");
         let border_subtle = resolve_color(theme, "semantic.color.border.subtle");
+
+        // ── Background ──────────────────────────────────────────
+        // Matches Svelte app.css treatment values:
+        //   non-elevated: color-mix(panel 96%, elevated)
+        //   elevated: color-mix(elevated 94%, transparent)
+        let bg = if is_elevated {
+            Hsla { a: elevated_bg.a * 0.94, ..elevated_bg }
+        } else {
+            color_mix(panel, elevated_bg, 0.96)
+        };
 
         let mut el = div().rounded(surface_radius).bg(bg);
 
-        // Border
+        // ── Border ──────────────────────────────────────────────
+        // Matches Svelte app.css treatment values:
+        //   non-elevated subtle: color-mix(border-subtle 30%, transparent)
+        //   elevated subtle: color-mix(border-default 22%, transparent)
+        //   default: border-default full
+        //   none: transparent
         if let Some(border_token) = spec.resolved_border_color() {
             let border_color = resolve_color(theme, border_token);
-            el = el.border_1().border_color(border_color);
+            let final_border = match spec.border {
+                SurfaceBorder::Subtle => {
+                    if is_elevated {
+                        let border_default = resolve_color(theme, "semantic.color.border.default");
+                        Hsla { a: border_default.a * 0.22, ..border_default }
+                    } else {
+                        Hsla { a: border_color.a * 0.30, ..border_color }
+                    }
+                }
+                _ => border_color,
+            };
+            el = el.border_1().border_color(final_border);
         }
 
-        // Svelte: inset shadow on non-elevated surfaces (0.0625rem border-subtle @ 18%)
-        if !spec.is_elevated && spec.tone != SurfaceTone::Elevated {
-            el = el.shadow(vec![gpui::BoxShadow {
-                color: Hsla { a: border_subtle.a * 0.18, ..border_subtle },
-                offset: point(px(0.0), px(0.0)),
-                blur_radius: px(0.0),
-                spread_radius: px(1.0),
-            }]);
-        }
-
-        // Shadow for elevated surfaces — elevation-surface shadow
-        if spec.is_elevated || spec.tone == SurfaceTone::Elevated {
+        // ── Shadow ──────────────────────────────────────────────
+        // Matches Svelte app.css treatment values:
+        //   non-elevated: inset 0 0 0 1px border-subtle at 18%
+        //   elevated: elevation-surface token shadow
+        if is_elevated {
             el = el.shadow(vec![
                 gpui::BoxShadow {
                     color: hsla(0.0, 0.0, 0.0, 0.08),
@@ -101,6 +119,14 @@ impl IntoElement for Surface {
                     spread_radius: px(0.0),
                 },
             ]);
+        } else {
+            // Inset shadow ring: 1px border-subtle at 18%
+            el = el.shadow(vec![gpui::BoxShadow {
+                color: Hsla { a: border_subtle.a * 0.18, ..border_subtle },
+                offset: point(px(0.0), px(0.0)),
+                blur_radius: px(0.0),
+                spread_radius: px(1.0),
+            }]);
         }
 
         // Padding

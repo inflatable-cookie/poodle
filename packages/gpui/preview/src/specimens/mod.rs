@@ -123,8 +123,17 @@ pub fn specimen_card(
     content: impl IntoElement,
 ) -> Div {
     let elevated_bg = theme.resolve_color("semantic.color.background.elevated");
-    let border = theme.resolve_color("semantic.color.border.default");
+    let border_default = theme.resolve_color("semantic.color.border.default");
     let text_secondary = theme.resolve_color("semantic.color.text.secondary");
+
+    // Match Svelte app.css .panel treatment:
+    //   fill: color-mix(elevated 94%, transparent)
+    //   border: color-mix(border-default 22%, transparent)
+    //   shadow: elevation-surface
+    let bg = color_to_hsla(elevated_bg);
+    let bg = Hsla { a: bg.a * 0.94, ..bg };
+    let border = color_to_hsla(border_default);
+    let border = Hsla { a: border.a * 0.22, ..border };
 
     div()
         .flex()
@@ -132,9 +141,23 @@ pub fn specimen_card(
         .gap(px(8.0))
         .p(px(12.0))
         .rounded(px(6.0))
-        .bg(color_to_hsla(elevated_bg))
+        .bg(bg)
         .border_1()
-        .border_color(color_to_hsla(border))
+        .border_color(border)
+        .shadow(vec![
+            gpui::BoxShadow {
+                color: hsla(0.0, 0.0, 0.0, 0.08),
+                offset: point(px(0.0), px(2.0)),
+                blur_radius: px(8.0),
+                spread_radius: px(0.0),
+            },
+            gpui::BoxShadow {
+                color: hsla(0.0, 0.0, 0.0, 0.04),
+                offset: point(px(0.0), px(1.0)),
+                blur_radius: px(2.0),
+                spread_radius: px(0.0),
+            },
+        ])
         .child(
             div()
                 .text_xs()
