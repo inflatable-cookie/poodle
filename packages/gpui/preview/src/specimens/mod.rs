@@ -288,7 +288,7 @@ pub fn render_single_specimen(
         "picker-shell" | "relation-picker" | "selection-summary" | "order-by" => specimen_card("PickerShell", theme, picker::render(state, cx)),
         "page-header" | "breadcrumbs" | "page-loading" | "pagination-summary" => specimen_card("Page Structure", theme, page_structure::render(theme)),
         "metric-tile" | "state-tile" | "empty-state" | "toast-stack" => specimen_card("State Display", theme, state_display::render(state, cx)),
-        "confirm-action" | "form-dialog" | "filter-toolbar" | "bulk-action-bar" | "slug-field"
+        "confirm-action" | "form-dialog" | "filter-toolbar" | "bulk-action-bar"
         | "inline-editable-field" | "log-list" | "editable-list" | "autonomous-list" | "embed-input"
         | "embed-preview" => specimen_card("Misc", theme, misc_composites::render(state, cx)),
         "audio-player" | "video-player" | "media-picker" | "media-preview" | "media-thumbnail" => {

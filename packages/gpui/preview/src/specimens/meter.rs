@@ -11,7 +11,7 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
     div().flex().flex_col().gap(px(24.0)).max_w(px(320.0))
         // --- Default (50%) ---
         .child(
-            div().flex().flex_col().gap(px(10.0))
+            div().flex().flex_col().gap(px(8.0))
                 .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Default (50%)"), theme))
                 .child(Meter::from_spec(
                     MeterSpec::new()
@@ -23,7 +23,7 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
         )
         // --- With thresholds ---
         .child(
-            div().flex().flex_col().gap(px(10.0))
+            div().flex().flex_col().gap(px(8.0))
                 .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("With thresholds"), theme))
                 .child(Meter::from_spec(
                     MeterSpec::new()
@@ -42,7 +42,7 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
         )
         // --- Low value (optimal range) ---
         .child(
-            div().flex().flex_col().gap(px(10.0))
+            div().flex().flex_col().gap(px(8.0))
                 .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Low value (optimal range)"), theme))
                 .child(Meter::from_spec(
                     MeterSpec::new()
@@ -61,7 +61,7 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
         )
         // --- Custom range (0-500) ---
         .child(
-            div().flex().flex_col().gap(px(10.0))
+            div().flex().flex_col().gap(px(8.0))
                 .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Custom range (0\u{2013}500)"), theme))
                 .child(Meter::from_spec(
                     MeterSpec::new()

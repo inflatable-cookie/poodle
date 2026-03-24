@@ -17,7 +17,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
     div().flex().flex_col().gap(px(24.0))
         // --- End-aligned (default) ---
         .child(
-            div().flex().flex_col().gap(px(10.0))
+            div().flex().flex_col().gap(px(8.0))
                 .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("End-aligned (default)"), theme))
                 .child(
                     FormActions::from_spec(FormActionsSpec::new(), theme)
@@ -51,7 +51,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
         )
         // --- Start-aligned ---
         .child(
-            div().flex().flex_col().gap(px(10.0))
+            div().flex().flex_col().gap(px(8.0))
                 .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Start-aligned"), theme))
                 .child(
                     FormActions::from_spec(
@@ -80,7 +80,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
         )
         // --- Space between ---
         .child(
-            div().flex().flex_col().gap(px(10.0))
+            div().flex().flex_col().gap(px(8.0))
                 .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Space between"), theme))
                 .child(
                     FormActions::from_spec(

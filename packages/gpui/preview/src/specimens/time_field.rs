@@ -21,7 +21,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
     div().flex().flex_col().gap(px(24.0)).max_w(px(384.0))
         // --- Default ---
         .child(
-            div().flex().flex_col().gap(px(10.0))
+            div().flex().flex_col().gap(px(8.0))
                 .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Default"), theme))
                 .child(
                     div().flex().flex_col().gap(px(4.0))
@@ -48,7 +48,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
         )
         // --- With default value ---
         .child(
-            div().flex().flex_col().gap(px(10.0))
+            div().flex().flex_col().gap(px(8.0))
                 .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("With default value"), theme))
                 .child(
                     div().flex().flex_col().gap(px(4.0))
@@ -71,7 +71,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
         )
         // --- With min/max constraints ---
         .child(
-            div().flex().flex_col().gap(px(10.0))
+            div().flex().flex_col().gap(px(8.0))
                 .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("With min/max constraints"), theme))
                 .child({
                     let mut spec = TimeFieldSpec::new()
@@ -84,7 +84,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
         )
         // --- Disabled ---
         .child(
-            div().flex().flex_col().gap(px(10.0))
+            div().flex().flex_col().gap(px(8.0))
                 .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Disabled"), theme))
                 .child({
                     let mut spec = TimeFieldSpec::new()

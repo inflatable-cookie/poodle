@@ -28,7 +28,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
 
     div().flex().flex_col().gap(px(24.0))
         .child(
-            div().flex().flex_col().gap(px(10.0))
+            div().flex().flex_col().gap(px(8.0))
                 .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Horizontal navigation"), theme))
                 .child(
                     NavigationMenu::from_spec(spec, theme)

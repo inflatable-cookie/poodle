@@ -19,7 +19,7 @@ pub(crate) fn render(state: &AppState, _cx: &mut Context<PreviewRoot>) -> Div {
 
         // --- Image preview ---
         .child(
-            div().flex().flex_col().gap(px(10.0))
+            div().flex().flex_col().gap(px(8.0))
                 .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Media preview: image preview"), theme))
                 .child(
                     MediaPreview::from_spec(
@@ -36,7 +36,7 @@ pub(crate) fn render(state: &AppState, _cx: &mut Context<PreviewRoot>) -> Div {
         )
         // --- Video preview ---
         .child(
-            div().flex().flex_col().gap(px(10.0))
+            div().flex().flex_col().gap(px(8.0))
                 .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Media preview: video preview"), theme))
                 .child(
                     MediaPreview::from_spec(
@@ -51,7 +51,7 @@ pub(crate) fn render(state: &AppState, _cx: &mut Context<PreviewRoot>) -> Div {
         )
         // --- Error state ---
         .child(
-            div().flex().flex_col().gap(px(10.0))
+            div().flex().flex_col().gap(px(8.0))
                 .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Media preview: error state"), theme))
                 .child(
                     MediaPreview::from_spec(
@@ -66,7 +66,7 @@ pub(crate) fn render(state: &AppState, _cx: &mut Context<PreviewRoot>) -> Div {
 
         // --- Image thumbnails ---
         .child(
-            div().flex().flex_col().gap(px(10.0))
+            div().flex().flex_col().gap(px(8.0))
                 .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Image thumbnails"), theme))
                 .child(
                     div().flex().gap(px(8.0)).flex_wrap()
@@ -102,7 +102,7 @@ pub(crate) fn render(state: &AppState, _cx: &mut Context<PreviewRoot>) -> Div {
         )
         // --- Compact presentation ---
         .child(
-            div().flex().flex_col().gap(px(10.0))
+            div().flex().flex_col().gap(px(8.0))
                 .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Compact presentation"), theme))
                 .child(
                     div().flex().gap(px(8.0)).flex_wrap()
@@ -126,7 +126,7 @@ pub(crate) fn render(state: &AppState, _cx: &mut Context<PreviewRoot>) -> Div {
         )
         // --- Loading state ---
         .child(
-            div().flex().flex_col().gap(px(10.0))
+            div().flex().flex_col().gap(px(8.0))
                 .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Loading state"), theme))
                 .child(
                     MediaThumbnail::from_spec(
@@ -142,7 +142,7 @@ pub(crate) fn render(state: &AppState, _cx: &mut Context<PreviewRoot>) -> Div {
 
         // --- Basic audio player ---
         .child(
-            div().flex().flex_col().gap(px(10.0))
+            div().flex().flex_col().gap(px(8.0))
                 .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Audio player: basic"), theme))
                 .child(
                     AudioPlayer::from_spec(
@@ -155,7 +155,7 @@ pub(crate) fn render(state: &AppState, _cx: &mut Context<PreviewRoot>) -> Div {
 
         // --- Audio with speed control ---
         .child(
-            div().flex().flex_col().gap(px(10.0))
+            div().flex().flex_col().gap(px(8.0))
                 .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Audio player: with speed control"), theme))
                 .child(
                     AudioPlayer::from_spec(
@@ -171,7 +171,7 @@ pub(crate) fn render(state: &AppState, _cx: &mut Context<PreviewRoot>) -> Div {
 
         // --- Basic video player ---
         .child(
-            div().flex().flex_col().gap(px(10.0))
+            div().flex().flex_col().gap(px(8.0))
                 .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Video player: basic"), theme))
                 .child(
                     div().max_w(px(480.0)).child(
@@ -186,7 +186,7 @@ pub(crate) fn render(state: &AppState, _cx: &mut Context<PreviewRoot>) -> Div {
 
         // --- Video with custom aspect ratio ---
         .child(
-            div().flex().flex_col().gap(px(10.0))
+            div().flex().flex_col().gap(px(8.0))
                 .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Video player: landscape aspect ratio"), theme))
                 .child(
                     div().max_w(px(400.0)).child(
@@ -204,7 +204,7 @@ pub(crate) fn render(state: &AppState, _cx: &mut Context<PreviewRoot>) -> Div {
 
         // --- Media picker (open) ---
         .child(
-            div().flex().flex_col().gap(px(10.0))
+            div().flex().flex_col().gap(px(8.0))
                 .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Media picker (browse tab)"), theme))
                 .child(
                     MediaPicker::from_spec(

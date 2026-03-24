@@ -7,7 +7,7 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
     div().flex().flex_col().gap(px(24.0))
         // --- Navigation card grid (2 columns) ---
         .child(
-            div().flex().flex_col().gap(px(10.0))
+            div().flex().flex_col().gap(px(8.0))
                 .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Navigation card grid (2 columns)"), theme))
                 .child(
                     NavCardGrid::from_spec(NavCardGridSpec::new(), theme)
@@ -50,7 +50,7 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
 
         // --- 3 columns ---
         .child(
-            div().flex().flex_col().gap(px(10.0))
+            div().flex().flex_col().gap(px(8.0))
                 .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("3 columns"), theme))
                 .child(
                     NavCardGrid::from_spec(NavCardGridSpec::new().with_columns(3), theme)
@@ -95,7 +95,7 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
 
         // --- Single card (as link) ---
         .child(
-            div().flex().flex_col().gap(px(10.0))
+            div().flex().flex_col().gap(px(8.0))
                 .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Single card (as link)"), theme))
                 .child(
                     NavCard::from_spec(
@@ -109,7 +109,7 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
 
         // --- 4 columns ---
         .child(
-            div().flex().flex_col().gap(px(10.0))
+            div().flex().flex_col().gap(px(8.0))
                 .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("4 columns"), theme))
                 .child(
                     NavCardGrid::from_spec(NavCardGridSpec::new().with_columns(4), theme)

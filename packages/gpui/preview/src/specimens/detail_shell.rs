@@ -14,7 +14,7 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
     div().flex().flex_col().gap(px(24.0))
         // --- Layout structure ---
         .child(
-            div().flex().flex_col().gap(px(10.0))
+            div().flex().flex_col().gap(px(8.0))
                 .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Layout structure"), theme))
                 .child(
                     div().h(px(180.0)).child(
@@ -36,7 +36,7 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
         )
         // --- Multi-section layout with header ---
         .child(
-            div().flex().flex_col().gap(px(10.0))
+            div().flex().flex_col().gap(px(8.0))
                 .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Multi-section layout with header"), theme))
                 .child(
                     div().h(px(220.0)).child(
@@ -46,7 +46,7 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
                             theme,
                         )
                         .with_content(
-                            div().flex().flex_col().gap(px(10.0))
+                            div().flex().flex_col().gap(px(8.0))
                                 .child(
                                     DetailSection::from_spec(
                                         DetailSectionSpec::new().with_title("General"),
@@ -84,7 +84,7 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
         )
         // --- DetailRow: Basic label-value pairs ---
         .child(
-            div().flex().flex_col().gap(px(10.0))
+            div().flex().flex_col().gap(px(8.0))
                 .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Detail row: basic label-value pairs"), theme))
                 .child(
                     div().flex().flex_col()
@@ -105,7 +105,7 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
 
         // --- DetailRow: With description ---
         .child(
-            div().flex().flex_col().gap(px(10.0))
+            div().flex().flex_col().gap(px(8.0))
                 .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Detail row: with description"), theme))
                 .child(
                     DetailRow::from_spec(
@@ -120,7 +120,7 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
 
         // --- DetailRow: With action slot ---
         .child(
-            div().flex().flex_col().gap(px(10.0))
+            div().flex().flex_col().gap(px(8.0))
                 .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Detail row: with action"), theme))
                 .child(
                     DetailRow::from_spec(
@@ -141,7 +141,7 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
 
         // --- DetailRow: With custom value content ---
         .child(
-            div().flex().flex_col().gap(px(10.0))
+            div().flex().flex_col().gap(px(8.0))
                 .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Detail row: with value content"), theme))
                 .child(
                     DetailRow::from_spec(
@@ -165,7 +165,7 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
 
         // --- DetailSection: With title and rows ---
         .child(
-            div().flex().flex_col().gap(px(10.0))
+            div().flex().flex_col().gap(px(8.0))
                 .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Detail section: with title and rows"), theme))
                 .child(
                     DetailSection::from_spec(
@@ -186,7 +186,7 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
 
         // --- DetailSection: With actions ---
         .child(
-            div().flex().flex_col().gap(px(10.0))
+            div().flex().flex_col().gap(px(8.0))
                 .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Detail section: with actions"), theme))
                 .child(
                     DetailSection::from_spec(
@@ -214,7 +214,7 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
 
         // --- DetailSection: With descriptions ---
         .child(
-            div().flex().flex_col().gap(px(10.0))
+            div().flex().flex_col().gap(px(8.0))
                 .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Detail section: with descriptions"), theme))
                 .child(
                     DetailSection::from_spec(
@@ -243,7 +243,7 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
 
         // --- Loading state ---
         .child(
-            div().flex().flex_col().gap(px(10.0))
+            div().flex().flex_col().gap(px(8.0))
                 .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Loading state"), theme))
                 .child(
                     div().h(px(100.0)).child(
@@ -258,7 +258,7 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
         )
         // --- Error state ---
         .child(
-            div().flex().flex_col().gap(px(10.0))
+            div().flex().flex_col().gap(px(8.0))
                 .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Error state"), theme))
                 .child(
                     div().h(px(100.0)).child(

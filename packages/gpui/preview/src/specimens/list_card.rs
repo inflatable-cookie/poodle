@@ -21,7 +21,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
     div().flex().flex_col().gap(px(24.0)).max_w(px(440.0))
         // -- Interactive list cards --
         .child(
-            div().flex().flex_col().gap(px(10.0))
+            div().flex().flex_col().gap(px(8.0))
                 .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Interactive list cards"), theme))
                 .child(
                     div().flex().flex_col().gap(px(6.0))
@@ -99,7 +99,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
 
         // -- Rounded-square leading --
         .child(
-            div().flex().flex_col().gap(px(10.0))
+            div().flex().flex_col().gap(px(8.0))
                 .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Rounded-square leading (thumbnails)"), theme))
                 .child(
                     div().flex().flex_col().gap(px(6.0))
@@ -138,7 +138,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
 
         // -- With badges --
         .child(
-            div().flex().flex_col().gap(px(10.0))
+            div().flex().flex_col().gap(px(8.0))
                 .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("With badges"), theme))
                 .child(
                     div().flex().flex_col().gap(px(6.0))
@@ -192,7 +192,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
 
         // -- With footer counters --
         .child(
-            div().flex().flex_col().gap(px(10.0))
+            div().flex().flex_col().gap(px(8.0))
                 .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("With footer counters"), theme))
                 .child(
                     div().flex().flex_col().gap(px(6.0))
@@ -240,7 +240,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
 
         // -- Solid fill with accent colors --
         .child(
-            div().flex().flex_col().gap(px(10.0))
+            div().flex().flex_col().gap(px(8.0))
                 .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Solid fill with accent colors"), theme))
                 .child(
                     div().flex().flex_col().gap(px(6.0))
@@ -300,7 +300,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
 
         // -- With context menu --
         .child(
-            div().flex().flex_col().gap(px(10.0))
+            div().flex().flex_col().gap(px(8.0))
                 .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("With context menu"), theme))
                 .child(
                     ContextMenu::from_spec(
@@ -342,7 +342,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
 
         // -- Not live (draft state) --
         .child(
-            div().flex().flex_col().gap(px(10.0))
+            div().flex().flex_col().gap(px(8.0))
                 .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Not live (dashed border, interactive)"), theme))
                 .child(
                     div().flex().flex_col().gap(px(6.0))
@@ -390,7 +390,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
 
         // -- Corner sash badges --
         .child(
-            div().flex().flex_col().gap(px(10.0))
+            div().flex().flex_col().gap(px(8.0))
                 .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Corner sash badges"), theme))
                 .child(
                     div().flex().flex_col().gap(px(6.0))
@@ -473,7 +473,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
 
         // -- Static list card --
         .child(
-            div().flex().flex_col().gap(px(10.0))
+            div().flex().flex_col().gap(px(8.0))
                 .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Static list card"), theme))
                 .child(
                     ListCard::from_spec(
@@ -494,7 +494,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
 
         // -- Last clicked indicator --
         .child(
-            div().flex().flex_col().gap(px(10.0))
+            div().flex().flex_col().gap(px(8.0))
                 .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Last click"), theme))
                 .child(
                     div().flex().items_center().gap(px(6.0))

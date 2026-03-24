@@ -224,35 +224,35 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
     div().flex().flex_col().gap(px(24.0))
         // 1. Underline variant (default, with panel)
         .child(
-            div().flex().flex_col().gap(px(10.0))
+            div().flex().flex_col().gap(px(8.0))
                 .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Underline variant (default, with panel)"), theme))
                 .child(underline_component)
         )
 
         // 2. Card variant (closable, reorderable)
         .child(
-            div().flex().flex_col().gap(px(10.0))
+            div().flex().flex_col().gap(px(8.0))
                 .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Card variant (closable, reorderable)"), theme))
                 .child(card_component)
         )
 
         // 3. Pill variant
         .child(
-            div().flex().flex_col().gap(px(10.0))
+            div().flex().flex_col().gap(px(8.0))
                 .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Pill variant (with icons)"), theme))
                 .child(pill_component)
         )
 
         // 4. Underline with icons (no panel)
         .child(
-            div().flex().flex_col().gap(px(10.0))
+            div().flex().flex_col().gap(px(8.0))
                 .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Underline (with icons, no panel)"), theme))
                 .child(underline_icon_component)
         )
 
         // 5. Strip variant (horizontal, closable, reorderable)
         .child(
-            div().flex().flex_col().gap(px(10.0))
+            div().flex().flex_col().gap(px(8.0))
                 .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Strip variant (full-width bar with icons, closable, reorderable)"), theme))
                 .child(
                     div()
@@ -287,7 +287,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
 
         // 6. Strip variant (vertical)
         .child(
-            div().flex().flex_col().gap(px(10.0))
+            div().flex().flex_col().gap(px(8.0))
                 .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Strip variant — vertical (icon-only, collapsed panel)"), theme))
                 .child(
                     div()
@@ -312,7 +312,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
 
         // 7. Collapse toggle
         .child(
-            div().flex().flex_col().gap(px(10.0))
+            div().flex().flex_col().gap(px(8.0))
                 .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Strip variant — collapse toggle (click to toggle orientation)"), theme))
                 .child(
                     div().flex().flex_col().gap(px(8.0))

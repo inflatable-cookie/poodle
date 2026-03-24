@@ -22,7 +22,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
     div().flex().flex_col().gap(px(24.0))
         // --- Markdown Editor: Interactive ---
         .child(
-            div().flex().flex_col().gap(px(10.0))
+            div().flex().flex_col().gap(px(8.0))
                 .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Markdown editor: Interactive"), theme))
                 .child(
                     MarkdownEditor::from_spec(
@@ -47,7 +47,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
         )
         // --- Markdown Editor: Edit only ---
         .child(
-            div().flex().flex_col().gap(px(10.0))
+            div().flex().flex_col().gap(px(8.0))
                 .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Markdown editor: Edit only"), theme))
                 .child(
                     MarkdownEditor::from_spec(
@@ -61,7 +61,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
         )
         // --- Markdown Editor: Preview only ---
         .child(
-            div().flex().flex_col().gap(px(10.0))
+            div().flex().flex_col().gap(px(8.0))
                 .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Markdown editor: Preview only"), theme))
                 .child(
                     MarkdownEditor::from_spec(
@@ -75,7 +75,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
         )
         // --- Markdown Editor: Disabled ---
         .child(
-            div().flex().flex_col().gap(px(10.0))
+            div().flex().flex_col().gap(px(8.0))
                 .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Markdown editor: Disabled"), theme))
                 .child(
                     MarkdownEditor::from_spec(
@@ -89,7 +89,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
         )
         // --- Block Editor: Default blocks ---
         .child(
-            div().flex().flex_col().gap(px(10.0))
+            div().flex().flex_col().gap(px(8.0))
                 .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Block editor: Default blocks"), theme))
                 .child(
                     BlockEditor::from_spec(BlockEditorSpec::new(), theme)
@@ -124,7 +124,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
         )
         // --- Block Editor: Custom blocks ---
         .child(
-            div().flex().flex_col().gap(px(10.0))
+            div().flex().flex_col().gap(px(8.0))
                 .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Block editor: Custom blocks"), theme))
                 .child(
                     BlockEditor::from_spec(BlockEditorSpec::new(), theme)

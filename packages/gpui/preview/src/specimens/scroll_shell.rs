@@ -28,7 +28,7 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
     div().flex().flex_col().gap(px(24.0))
         // --- Vertical scroll ---
         .child(
-            div().flex().flex_col().gap(px(10.0))
+            div().flex().flex_col().gap(px(8.0))
                 .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Vertical scroll"), theme))
                 .child(
                     div().h(px(160.0)).child(
@@ -55,7 +55,7 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
         )
         // --- Horizontal scroll ---
         .child(
-            div().flex().flex_col().gap(px(10.0))
+            div().flex().flex_col().gap(px(8.0))
                 .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Horizontal scroll"), theme))
                 .child(
                     div().h(px(40.0)).child(

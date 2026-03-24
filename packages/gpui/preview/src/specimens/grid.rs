@@ -35,7 +35,7 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
     div().flex().flex_col().gap(px(24.0))
         // --- Three columns ---
         .child(
-            div().flex().flex_col().gap(px(10.0))
+            div().flex().flex_col().gap(px(8.0))
                 .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Three columns"), theme))
                 .child(
                     Grid::from_spec(
@@ -51,7 +51,7 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
         )
         // --- Mixed column widths ---
         .child(
-            div().flex().flex_col().gap(px(10.0))
+            div().flex().flex_col().gap(px(8.0))
                 .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Mixed column widths"), theme))
                 .child(
                     Grid::from_spec(
@@ -66,7 +66,7 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
         )
         // --- Auto-fit responsive ---
         .child(
-            div().flex().flex_col().gap(px(10.0))
+            div().flex().flex_col().gap(px(8.0))
                 .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Auto-fit responsive"), theme))
                 .child(
                     Grid::from_spec(

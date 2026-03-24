@@ -77,7 +77,7 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
     div().flex().flex_col().gap(px(24.0))
         // Default
         .child(
-            div().flex().flex_col().gap(px(10.0))
+            div().flex().flex_col().gap(px(8.0))
                 .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Default"), theme))
                 .child(
                     div().flex().flex_wrap().gap(px(12.0)).items_center()
@@ -86,7 +86,7 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
         )
         // Placements
         .child(
-            div().flex().flex_col().gap(px(10.0))
+            div().flex().flex_col().gap(px(8.0))
                 .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Placements"), theme))
                 .child(
                     div().flex().flex_wrap().gap(px(12.0)).items_center()

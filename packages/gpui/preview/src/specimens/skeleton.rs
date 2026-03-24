@@ -11,7 +11,7 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
     div().flex().flex_col().gap(px(24.0))
         // --- Basic shapes ---
         .child(
-            div().flex().flex_col().gap(px(10.0))
+            div().flex().flex_col().gap(px(8.0))
                 .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Basic shapes"), theme))
                 .child(
                     div().flex().flex_row().flex_wrap().gap(px(12.0)).items_center()
@@ -40,7 +40,7 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
         )
         // --- Preset: avatar-line ---
         .child(
-            div().flex().flex_col().gap(px(10.0))
+            div().flex().flex_col().gap(px(8.0))
                 .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Preset: avatar-line"), theme))
                 .child(
                     div().flex().flex_row().items_center().gap(px(12.0))
@@ -62,7 +62,7 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
         )
         // --- Preset: list-item (x3) ---
         .child(
-            div().flex().flex_col().gap(px(10.0))
+            div().flex().flex_col().gap(px(8.0))
                 .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Preset: list-item (\u{00d7}3)"), theme))
                 .child(list_item_preset(theme))
                 .child(list_item_preset(theme))
@@ -70,7 +70,7 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
         )
         // --- Preset: table-row (x3) ---
         .child(
-            div().flex().flex_col().gap(px(10.0))
+            div().flex().flex_col().gap(px(8.0))
                 .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Preset: table-row (\u{00d7}3)"), theme))
                 .child(table_row_preset(theme, border))
                 .child(table_row_preset(theme, border))
@@ -78,7 +78,7 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
         )
         // --- Preset: card ---
         .child(
-            div().flex().flex_col().gap(px(10.0))
+            div().flex().flex_col().gap(px(8.0))
                 .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Preset: card"), theme))
                 .child(
                     div().flex().flex_row().gap(px(16.0))
@@ -88,13 +88,13 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
         )
         // --- Preset: detail-section ---
         .child(
-            div().flex().flex_col().gap(px(10.0))
+            div().flex().flex_col().gap(px(8.0))
                 .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Preset: detail-section"), theme))
                 .child(detail_section_preset(theme, 4))
         )
         // --- Static (no animation) ---
         .child(
-            div().flex().flex_col().gap(px(10.0))
+            div().flex().flex_col().gap(px(8.0))
                 .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Static (no animation)"), theme))
                 .child(Skeleton::from_spec(
                     SkeletonSpec::new()
@@ -234,7 +234,7 @@ fn card_preset(
 
 /// Detail-section preset: heading + N label-value rows
 fn detail_section_preset(theme: &GpuiThemeProvider, lines: usize) -> Div {
-    let mut el = div().flex().flex_col().gap(px(10.0));
+    let mut el = div().flex().flex_col().gap(px(8.0));
 
     el = el.child(
         div().mb(px(4.0)).child(Skeleton::from_spec(

@@ -21,7 +21,7 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
     div().flex().flex_col().gap(px(24.0))
         // Default (top placement)
         .child(
-            div().flex().flex_col().gap(px(10.0))
+            div().flex().flex_col().gap(px(8.0))
                 .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Default (top placement)"), theme))
                 .child(
                     div().flex().flex_col().items_start().gap(px(8.0))
@@ -56,7 +56,7 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
         )
         // Bottom placement
         .child(
-            div().flex().flex_col().gap(px(10.0))
+            div().flex().flex_col().gap(px(8.0))
                 .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Bottom placement"), theme))
                 .child(
                     div().flex().flex_col().items_start().gap(px(8.0))

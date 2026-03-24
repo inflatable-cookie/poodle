@@ -70,7 +70,7 @@ pub(crate) fn render(state: &AppState, _cx: &mut Context<PreviewRoot>) -> Div {
 
     div().flex().flex_col().gap(px(24.0))
         .child(
-            div().flex().flex_col().gap(px(10.0))
+            div().flex().flex_col().gap(px(8.0))
                 .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Grouped actions"), theme))
                 .child(
                     ActionDiscoveryPanel::from_spec(grouped_spec, theme)
@@ -78,7 +78,7 @@ pub(crate) fn render(state: &AppState, _cx: &mut Context<PreviewRoot>) -> Div {
                 )
         )
         .child(
-            div().flex().flex_col().gap(px(10.0))
+            div().flex().flex_col().gap(px(8.0))
                 .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("With descriptions and badges"), theme))
                 .child(
                     ActionDiscoveryPanel::from_spec(desc_spec, theme)
@@ -86,7 +86,7 @@ pub(crate) fn render(state: &AppState, _cx: &mut Context<PreviewRoot>) -> Div {
                 )
         )
         .child(
-            div().flex().flex_col().gap(px(10.0))
+            div().flex().flex_col().gap(px(8.0))
                 .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Empty state"), theme))
                 .child(
                     ActionDiscoveryPanel::from_spec(empty_spec, theme)

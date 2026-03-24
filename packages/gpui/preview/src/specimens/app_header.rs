@@ -12,7 +12,7 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
     div().flex().flex_col().gap(px(24.0))
         // --- Full app header ---
         .child(
-            div().flex().flex_col().gap(px(10.0))
+            div().flex().flex_col().gap(px(8.0))
                 .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Full app window header (title + menubar + utility)"), theme))
                 .child(
                     AppHeader::from_spec(
@@ -72,7 +72,7 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
 
         // --- Simple with actions ---
         .child(
-            div().flex().flex_col().gap(px(10.0))
+            div().flex().flex_col().gap(px(8.0))
                 .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("With title, actions, and utility"), theme))
                 .child(
                     AppHeader::from_spec(
@@ -110,7 +110,7 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
 
         // --- Title only ---
         .child(
-            div().flex().flex_col().gap(px(10.0))
+            div().flex().flex_col().gap(px(8.0))
                 .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Title only"), theme))
                 .child(
                     AppHeader::from_spec(
@@ -123,7 +123,7 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
 
         // --- Custom identity (leading slot) ---
         .child(
-            div().flex().flex_col().gap(px(10.0))
+            div().flex().flex_col().gap(px(8.0))
                 .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Custom identity slot"), theme))
                 .child(
                     AppHeader::from_spec(

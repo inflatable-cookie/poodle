@@ -127,7 +127,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
     div().flex().flex_col().gap(px(24.0))
         // --- Static dock -- horizontal (top edge) ---
         .child(
-            div().flex().flex_col().gap(px(10.0))
+            div().flex().flex_col().gap(px(8.0))
                 .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Static dock \u{2014} horizontal (top edge)"), theme))
                 .child(
                     div().h(px(100.0)).child(
@@ -145,7 +145,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
 
         // --- Static dock -- vertical (left edge) ---
         .child(
-            div().flex().flex_col().gap(px(10.0))
+            div().flex().flex_col().gap(px(8.0))
                 .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Static dock \u{2014} vertical (left edge)"), theme))
                 .child(
                     div().h(px(120.0)).flex().child(
@@ -165,7 +165,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
 
         // --- Flexible dock -- expanded (left edge) ---
         .child(
-            div().flex().flex_col().gap(px(10.0))
+            div().flex().flex_col().gap(px(8.0))
                 .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Flexible dock \u{2014} expanded (left edge)"), theme))
                 .child(
                     div().h(px(160.0)).flex().child(
@@ -190,7 +190,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
 
         // --- Flexible dock -- collapsed icon-strip (left edge) ---
         .child(
-            div().flex().flex_col().gap(px(10.0))
+            div().flex().flex_col().gap(px(8.0))
                 .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Flexible dock \u{2014} collapsed icon-strip (left edge)"), theme))
                 .child(
                     div().h(px(100.0)).flex().child(
@@ -202,7 +202,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
 
         // --- Interactive collapse toggle ---
         .child(
-            div().flex().flex_col().gap(px(10.0))
+            div().flex().flex_col().gap(px(8.0))
                 .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Interactive collapse toggle (click to toggle)"), theme))
                 .child(
                     div().h(px(if toggle_collapsed { 60.0 } else { 160.0 })).flex().child(
@@ -244,7 +244,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
 
         // --- Right edge dock ---
         .child(
-            div().flex().flex_col().gap(px(10.0))
+            div().flex().flex_col().gap(px(8.0))
                 .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Flexible dock \u{2014} right edge"), theme))
                 .child(
                     div().h(px(120.0)).flex().justify_end().child(
@@ -268,7 +268,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
 
         // --- Bottom edge dock ---
         .child(
-            div().flex().flex_col().gap(px(10.0))
+            div().flex().flex_col().gap(px(8.0))
                 .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Bottom edge dock (click to toggle)"), theme))
                 .child(
                     div().flex().flex_col()
@@ -310,7 +310,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
 
         // --- Horizontal split ---
         .child(
-            div().flex().flex_col().gap(px(10.0))
+            div().flex().flex_col().gap(px(8.0))
                 .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Horizontal split"), theme))
                 .child(
                     div().h(px(100.0)).child(
@@ -329,7 +329,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
 
         // --- Vertical split ---
         .child(
-            div().flex().flex_col().gap(px(10.0))
+            div().flex().flex_col().gap(px(8.0))
                 .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Vertical split"), theme))
                 .child(
                     div().h(px(120.0)).child(

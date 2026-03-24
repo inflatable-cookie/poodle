@@ -11,7 +11,7 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
     div().flex().flex_col().gap(px(24.0))
         // --- Panel tone (default) ---
         .child(
-            div().flex().flex_col().gap(px(10.0))
+            div().flex().flex_col().gap(px(8.0))
                 .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Panel tone (default)"), theme))
                 .child(
                     Surface::from_spec(
@@ -29,7 +29,7 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
         )
         // --- Canvas tone ---
         .child(
-            div().flex().flex_col().gap(px(10.0))
+            div().flex().flex_col().gap(px(8.0))
                 .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Canvas tone"), theme))
                 .child(
                     Surface::from_spec(
@@ -47,7 +47,7 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
         )
         // --- Elevated tone ---
         .child(
-            div().flex().flex_col().gap(px(10.0))
+            div().flex().flex_col().gap(px(8.0))
                 .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Elevated tone"), theme))
                 .child(
                     Surface::from_spec(
@@ -66,7 +66,7 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
         )
         // --- No border ---
         .child(
-            div().flex().flex_col().gap(px(10.0))
+            div().flex().flex_col().gap(px(8.0))
                 .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("No border"), theme))
                 .child(
                     Surface::from_spec(

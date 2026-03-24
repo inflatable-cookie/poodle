@@ -41,25 +41,25 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
     div().flex().flex_col().gap(px(24.0))
         // --- Sizes ---
         .child(
-            div().flex().flex_col().gap(px(10.0))
+            div().flex().flex_col().gap(px(8.0))
                 .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Direct import \u{2014} tree-shakeable"), theme))
                 .child(render_sizes_section(theme))
         )
         // --- Color Inheritance ---
         .child(
-            div().flex().flex_col().gap(px(10.0))
+            div().flex().flex_col().gap(px(8.0))
                 .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Color inheritance"), theme))
                 .child(render_color_inheritance_section(theme))
         )
         // --- Accessibility ---
         .child(
-            div().flex().flex_col().gap(px(10.0))
+            div().flex().flex_col().gap(px(8.0))
                 .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Accessibility"), theme))
                 .child(render_accessibility_section(theme))
         )
         // --- All Icons ---
         .child(
-            div().flex().flex_col().gap(px(10.0))
+            div().flex().flex_col().gap(px(8.0))
                 .child(Eyebrow::from_spec(EyebrowSpec::new().with_content(&format!("All icons ({})", SPECIMEN_ICONS.len())), theme))
                 .child(render_icon_gallery(theme))
         )

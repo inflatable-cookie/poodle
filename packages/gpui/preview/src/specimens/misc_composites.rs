@@ -3,7 +3,6 @@ use poodle_composites::{
     PaginationSummarySpec,
     SelectionSummarySpec, SelectionSummaryItem, RemediationAction,
     ConfirmActionSpec,
-    SlugFieldSpec,
     EmbedInputSpec, EmbedPreviewSpec,
     LogListSpec,
     FilterToolbarSpec,
@@ -11,7 +10,7 @@ use poodle_composites::{
 };
 use poodle_gpui_components::{
     PaginationSummary, SelectionSummary,
-    ConfirmAction, SlugField, EmbedInput, EmbedPreview,
+    ConfirmAction, EmbedInput, EmbedPreview,
     LogList, LogEntry, LogLevel, FilterToolbar, InlineEditableField,
     EditableList, Button, BulkActionBar, FormDialog, Field, TextInput, Eyebrow,
 };
@@ -25,7 +24,7 @@ pub(crate) fn render(state: &AppState, _cx: &mut Context<PreviewRoot>) -> Div {
     div().flex().flex_col().gap(px(24.0)).max_w(px(560.0))
         // -- FormDialog --
         .child(
-            div().flex().flex_col().gap(px(10.0))
+            div().flex().flex_col().gap(px(8.0))
                 .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Form dialog: basic"), theme))
                 .child(
                     FormDialog::new(theme)
@@ -56,7 +55,7 @@ pub(crate) fn render(state: &AppState, _cx: &mut Context<PreviewRoot>) -> Div {
 
         // -- FormDialog: With error --
         .child(
-            div().flex().flex_col().gap(px(10.0))
+            div().flex().flex_col().gap(px(8.0))
                 .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Form dialog: with error"), theme))
                 .child(
                     FormDialog::new(theme)
@@ -77,7 +76,7 @@ pub(crate) fn render(state: &AppState, _cx: &mut Context<PreviewRoot>) -> Div {
 
         // -- FormDialog: Submitting --
         .child(
-            div().flex().flex_col().gap(px(10.0))
+            div().flex().flex_col().gap(px(8.0))
                 .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Form dialog: submitting state"), theme))
                 .child(
                     FormDialog::new(theme)
@@ -98,7 +97,7 @@ pub(crate) fn render(state: &AppState, _cx: &mut Context<PreviewRoot>) -> Div {
 
         // -- ConfirmAction --
         .child(
-            div().flex().flex_col().gap(px(10.0))
+            div().flex().flex_col().gap(px(8.0))
                 .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Confirm action"), theme))
                 .child(
                     ConfirmAction::from_spec(
@@ -118,33 +117,9 @@ pub(crate) fn render(state: &AppState, _cx: &mut Context<PreviewRoot>) -> Div {
                 )
         )
 
-        // -- SlugField --
-        .child(
-            div().flex().flex_col().gap(px(10.0))
-                .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Slug field"), theme))
-                .child(
-                    div().flex().flex_col().gap(px(8.0))
-                        .child(
-                            SlugField::from_spec(
-                                SlugFieldSpec::new("hello-world")
-                                    .with_prefix("/blog/"),
-                                theme,
-                            )
-                        )
-                        .child(
-                            SlugField::from_spec(
-                                SlugFieldSpec::new("my-project")
-                                    .with_prefix("/projects/")
-                                    .with_locked(true),
-                                theme,
-                            )
-                        )
-                )
-        )
-
         // -- InlineEditableField --
         .child(
-            div().flex().flex_col().gap(px(10.0))
+            div().flex().flex_col().gap(px(8.0))
                 .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Inline editable field"), theme))
                 .child(
                     div().flex().flex_col().gap(px(8.0))
@@ -173,7 +148,7 @@ pub(crate) fn render(state: &AppState, _cx: &mut Context<PreviewRoot>) -> Div {
 
         // -- EmbedInput --
         .child(
-            div().flex().flex_col().gap(px(10.0))
+            div().flex().flex_col().gap(px(8.0))
                 .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Embed input"), theme))
                 .child(
                     div().flex().flex_col().gap(px(8.0))
@@ -196,7 +171,7 @@ pub(crate) fn render(state: &AppState, _cx: &mut Context<PreviewRoot>) -> Div {
 
         // -- EmbedPreview --
         .child(
-            div().flex().flex_col().gap(px(10.0))
+            div().flex().flex_col().gap(px(8.0))
                 .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Embed preview"), theme))
                 .child(
                     div().flex().flex_col().gap(px(8.0))
@@ -221,7 +196,7 @@ pub(crate) fn render(state: &AppState, _cx: &mut Context<PreviewRoot>) -> Div {
 
         // -- FilterToolbar --
         .child(
-            div().flex().flex_col().gap(px(10.0))
+            div().flex().flex_col().gap(px(8.0))
                 .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Filter toolbar"), theme))
                 .child(
                     div().flex().flex_col().gap(px(8.0))
@@ -247,7 +222,7 @@ pub(crate) fn render(state: &AppState, _cx: &mut Context<PreviewRoot>) -> Div {
 
         // -- LogList --
         .child(
-            div().flex().flex_col().gap(px(10.0))
+            div().flex().flex_col().gap(px(8.0))
                 .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Log list"), theme))
                 .child(
                     LogList::from_spec(
@@ -268,7 +243,7 @@ pub(crate) fn render(state: &AppState, _cx: &mut Context<PreviewRoot>) -> Div {
 
         // -- EditableList --
         .child(
-            div().flex().flex_col().gap(px(10.0))
+            div().flex().flex_col().gap(px(8.0))
                 .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Editable list"), theme))
                 .child(
                     div().flex().flex_col().gap(px(8.0))
@@ -296,7 +271,7 @@ pub(crate) fn render(state: &AppState, _cx: &mut Context<PreviewRoot>) -> Div {
 
         // -- PaginationSummary --
         .child(
-            div().flex().flex_col().gap(px(10.0))
+            div().flex().flex_col().gap(px(8.0))
                 .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Pagination summary"), theme))
                 .child(
                     div().flex().flex_col().gap(px(8.0))
@@ -317,7 +292,7 @@ pub(crate) fn render(state: &AppState, _cx: &mut Context<PreviewRoot>) -> Div {
 
         // -- BulkActionBar --
         .child(
-            div().flex().flex_col().gap(px(10.0))
+            div().flex().flex_col().gap(px(8.0))
                 .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Bulk action bar"), theme))
                 .child(
                     div().flex().flex_col().gap(px(8.0))
@@ -350,7 +325,7 @@ pub(crate) fn render(state: &AppState, _cx: &mut Context<PreviewRoot>) -> Div {
 
         // -- SelectionSummary --
         .child(
-            div().flex().flex_col().gap(px(10.0))
+            div().flex().flex_col().gap(px(8.0))
                 .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Selection summary"), theme))
                 .child(
                     div().flex().flex_col().gap(px(8.0))

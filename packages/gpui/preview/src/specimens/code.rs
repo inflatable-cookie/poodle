@@ -15,7 +15,7 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
     div().flex().flex_col().gap(px(24.0))
         // --- Block with language label ---
         .child(
-            div().flex().flex_col().gap(px(10.0))
+            div().flex().flex_col().gap(px(8.0))
                 .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Block with language label"), theme))
                 .child(Code::from_spec(
                     CodeSpec::new()
@@ -26,7 +26,7 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
         )
         // --- With line numbers and highlight ---
         .child(
-            div().flex().flex_col().gap(px(10.0))
+            div().flex().flex_col().gap(px(8.0))
                 .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("With line numbers and highlight"), theme))
                 .child(Code::from_spec(
                     CodeSpec::new()
@@ -39,7 +39,7 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
         )
         // --- CSS with max height ---
         .child(
-            div().flex().flex_col().gap(px(10.0))
+            div().flex().flex_col().gap(px(8.0))
                 .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("CSS with max height"), theme))
                 .child(Code::from_spec(
                     CodeSpec::new()
@@ -51,7 +51,7 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
         )
         // --- Inline code ---
         .child(
-            div().flex().flex_col().gap(px(10.0))
+            div().flex().flex_col().gap(px(8.0))
                 .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Inline code"), theme))
                 .child(
                     div().flex().flex_row().flex_wrap().gap(px(4.0)).items_center()
@@ -68,7 +68,7 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
         )
         // --- No copy button ---
         .child(
-            div().flex().flex_col().gap(px(10.0))
+            div().flex().flex_col().gap(px(8.0))
                 .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("No copy button"), theme))
                 .child(Code::from_spec(
                     CodeSpec::new()

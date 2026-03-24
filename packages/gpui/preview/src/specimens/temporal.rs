@@ -11,7 +11,7 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
     div().flex().flex_col().gap(px(24.0)).max_w(px(384.0))
         // -- TimeAgo --
         .child(
-            div().flex().flex_col().gap(px(10.0))
+            div().flex().flex_col().gap(px(8.0))
                 .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Time ago: recent timestamps"), theme))
                 .child(
                     div().flex().flex_col().gap(px(8.0))
@@ -21,14 +21,14 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
                 )
         )
         .child(
-            div().flex().flex_col().gap(px(10.0))
+            div().flex().flex_col().gap(px(8.0))
                 .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Time ago: future"), theme))
                 .child(
                     time_ago_row("in 5 minutes", "2026-03-23T11:05:00Z", theme, text_secondary)
                 )
         )
         .child(
-            div().flex().flex_col().gap(px(10.0))
+            div().flex().flex_col().gap(px(8.0))
                 .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Time ago: static (no live update)"), theme))
                 .child(
                     div().flex().items_center().gap(px(8.0))
@@ -49,7 +49,7 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
 
         // -- DurationInput --
         .child(
-            div().flex().flex_col().gap(px(10.0))
+            div().flex().flex_col().gap(px(8.0))
                 .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Duration input: full (H:M:S)"), theme))
                 .child(
                     div().flex().flex_col().gap(px(4.0))
@@ -68,7 +68,7 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
                 )
         )
         .child(
-            div().flex().flex_col().gap(px(10.0))
+            div().flex().flex_col().gap(px(8.0))
                 .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Duration input: hours and minutes only"), theme))
                 .child(
                     DurationInput::from_spec(
@@ -80,7 +80,7 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
                 )
         )
         .child(
-            div().flex().flex_col().gap(px(10.0))
+            div().flex().flex_col().gap(px(8.0))
                 .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Duration input: disabled"), theme))
                 .child(
                     DurationInput::from_spec(

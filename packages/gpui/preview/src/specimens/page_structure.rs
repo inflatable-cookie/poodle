@@ -9,7 +9,7 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
     div().flex().flex_col().gap(px(24.0))
         // --- PageHeader: Basic ---
         .child(
-            div().flex().flex_col().gap(px(10.0))
+            div().flex().flex_col().gap(px(8.0))
                 .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Basic"), theme))
                 .child(
                     PageHeader::from_spec(
@@ -22,7 +22,7 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
 
         // --- PageHeader: With eyebrow and actions ---
         .child(
-            div().flex().flex_col().gap(px(10.0))
+            div().flex().flex_col().gap(px(8.0))
                 .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("With eyebrow and actions"), theme))
                 .child(
                     PageHeader::from_spec(
@@ -57,7 +57,7 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
 
         // --- PageHeader: Title only ---
         .child(
-            div().flex().flex_col().gap(px(10.0))
+            div().flex().flex_col().gap(px(8.0))
                 .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Title only"), theme))
                 .child(
                     PageHeader::from_spec(
@@ -69,7 +69,7 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
 
         // --- PageHeader: With breadcrumbs ---
         .child(
-            div().flex().flex_col().gap(px(10.0))
+            div().flex().flex_col().gap(px(8.0))
                 .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("With breadcrumbs"), theme))
                 .child(
                     PageHeader::from_spec(
@@ -92,7 +92,7 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
 
         // --- PageLoading: Indeterminate ---
         .child(
-            div().flex().flex_col().gap(px(10.0))
+            div().flex().flex_col().gap(px(8.0))
                 .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Page loading: indeterminate"), theme))
                 .child(
                     PageLoading::from_spec(
@@ -105,7 +105,7 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
 
         // --- PageLoading: Determinate ---
         .child(
-            div().flex().flex_col().gap(px(10.0))
+            div().flex().flex_col().gap(px(8.0))
                 .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Page loading: determinate (60%)"), theme))
                 .child(
                     PageLoading::from_spec(
@@ -121,7 +121,7 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
 
         // --- Breadcrumbs: Basic ---
         .child(
-            div().flex().flex_col().gap(px(10.0))
+            div().flex().flex_col().gap(px(8.0))
                 .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Breadcrumbs: basic"), theme))
                 .child(
                     Breadcrumbs::from_spec(
@@ -137,7 +137,7 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
 
         // --- Breadcrumbs: Deep path ---
         .child(
-            div().flex().flex_col().gap(px(10.0))
+            div().flex().flex_col().gap(px(8.0))
                 .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Breadcrumbs: deep path"), theme))
                 .child(
                     Breadcrumbs::from_spec(
@@ -156,7 +156,7 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
 
         // --- Breadcrumbs: Collapsed (max 3 visible) ---
         .child(
-            div().flex().flex_col().gap(px(10.0))
+            div().flex().flex_col().gap(px(8.0))
                 .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Breadcrumbs: collapsed (max 3 visible)"), theme))
                 .child(
                     Breadcrumbs::from_spec(
@@ -176,7 +176,7 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
 
         // --- PaginationSummary ---
         .child(
-            div().flex().flex_col().gap(px(10.0))
+            div().flex().flex_col().gap(px(8.0))
                 .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Pagination summary"), theme))
                 .child(
                     div().flex().flex_col().gap(px(8.0))
