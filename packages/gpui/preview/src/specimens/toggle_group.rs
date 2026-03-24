@@ -1,5 +1,4 @@
 use gpui::*;
-use poodle_adapter::ThemeProvider;
 use poodle_primitives::{ToggleGroupOption, EyebrowSpec};
 use poodle_gpui_components::{ToggleGroup, Eyebrow};
 use crate::app_state::AppState;

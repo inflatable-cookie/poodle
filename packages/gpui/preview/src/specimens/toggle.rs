@@ -1,5 +1,4 @@
 use gpui::*;
-use poodle_adapter::ThemeProvider;
 use poodle_primitives::EyebrowSpec;
 use poodle_gpui_components::toggle::Toggle;
 use poodle_gpui_components::Eyebrow;

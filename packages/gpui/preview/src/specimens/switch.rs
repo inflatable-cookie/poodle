@@ -1,5 +1,4 @@
 use gpui::*;
-use poodle_adapter::ThemeProvider;
 use poodle_primitives::{SwitchSpec, EyebrowSpec};
 use poodle_gpui_components::{Switch, Eyebrow};
 use crate::app_state::AppState;
