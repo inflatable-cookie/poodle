@@ -93,6 +93,7 @@ impl IntoElement for PinInput {
         let mut row = div()
             .id(SharedString::from(id_str))
             .focusable()
+            .w_full()
             .flex()
             .gap(cell_gap)
             // Contract: focus ring on root group

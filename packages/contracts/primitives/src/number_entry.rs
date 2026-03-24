@@ -96,4 +96,24 @@ impl NumberEntrySpec {
     pub fn stepper_fill_token(&self) -> &'static str {
         semantic::COLOR_BACKGROUND_ELEVATED
     }
+
+    pub fn stepper_icon_color_token(&self) -> &'static str {
+        semantic::COLOR_TEXT_PRIMARY
+    }
+
+    pub fn body_size_token(&self) -> &'static str {
+        semantic::TYPOGRAPHY_BODY_SIZE
+    }
+
+    pub fn body_line_height_token(&self) -> &'static str {
+        semantic::TYPOGRAPHY_BODY_LINE_HEIGHT
+    }
+
+    pub fn control_height_token(&self) -> &'static str {
+        semantic::SIZE_CONTROL_HEIGHT
+    }
+
+    pub fn horizontal_padding_token(&self) -> &'static str {
+        semantic::SPACE_CONTROL_X
+    }
 }

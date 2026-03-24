@@ -66,25 +66,38 @@ impl IntoElement for Field {
 
         let mut col = div().flex().flex_col().gap(px(4.0));
 
-        // Label row
-        let mut label_row = div().flex().items_center().gap(px(4.0));
-        label_row = label_row.child(
-            div()
-                .text_size(px(14.0))
-                .text_color(text_primary)
-                .child(spec.label.clone()),
-        );
+        // Label row — Svelte: flex, align-items: baseline, justify-content: space-between
+        let mut label_el = div()
+            .text_size(px(14.0))
+            .font_weight(FontWeight::MEDIUM) // label weight = 500
+            .text_color(text_primary)
+            .child(spec.label.clone());
 
         if spec.is_required {
-            label_row = label_row.child(
-                div().text_size(px(14.0)).text_color(error_color).child("*"),
+            label_el = label_el.child(
+                div()
+                    .ml(px(2.0))
+                    .text_size(px(14.0))
+                    .text_color(error_color)
+                    .child("*"),
             );
-        } else if spec.shows_optional_label() {
+        }
+
+        let mut label_row = div()
+            .flex()
+            .items_center()
+            .justify_between()
+            .gap(px(8.0)); // space-inline-md
+
+        label_row = label_row.child(label_el);
+
+        if !spec.is_required && spec.shows_optional_label() {
             if let Some(ref opt_label) = spec.optional_label {
                 label_row = label_row.child(
                     div()
                         .text_size(px(12.0))
                         .text_color(description_color)
+                        .flex_shrink_0()
                         .child(opt_label.clone()),
                 );
             }

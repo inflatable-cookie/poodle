@@ -556,12 +556,6 @@ impl PreviewRoot {
                             .w_full()
                             .bg(color_to_hsla(border_subtle)),
                     )
-                    .child(
-                        div()
-                            .text_xs()
-                            .text_color(color_to_hsla(text_secondary))
-                            .child("Specimen preview — rendered through poodle-gpui adapter"),
-                    )
                     .child(self.render_component_specimen(comp.slug, cx)),
             );
         } else {

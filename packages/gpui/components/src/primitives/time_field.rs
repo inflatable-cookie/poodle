@@ -69,6 +69,7 @@ impl IntoElement for TimeField {
         let control_height = resolve_px(theme, "semantic.size.control.height");
         let control_padding_x = resolve_px(theme, "semantic.space.control.x");
         let control_radius = resolve_radius(theme, spec.radius_token());
+        let body_size = resolve_px(theme, spec.body_size_token());
 
         let surface_bg = resolve_color(theme, spec.fill_token());
         let border = resolve_color(theme, spec.border_token());
@@ -96,6 +97,7 @@ impl IntoElement for TimeField {
         let mut field = div()
             .id(SharedString::from(id_str))
             .focusable()
+            .w_full()
             .min_h(control_height) // Contract: min-height, not fixed height
             .px(control_padding_x)
             .rounded(control_radius)
@@ -104,10 +106,18 @@ impl IntoElement for TimeField {
             .border_color(border)
             .flex()
             .items_center()
-            .text_size(px(14.0))
+            .text_size(body_size)
             .text_color(text_primary)
-            // Contract: focus = outline/border change to focus ring
-            .focus(move |s| s.border_color(focus_ring));
+            // Contract: focus = border + shadow ring at 28% opacity
+            .focus(move |s| s
+                .border_color(focus_ring)
+                .shadow(vec![gpui::BoxShadow {
+                    color: Hsla { a: focus_ring.a * 0.28, ..focus_ring },
+                    offset: point(px(0.0), px(0.0)),
+                    blur_radius: px(0.0),
+                    spread_radius: px(2.0),
+                }])
+            );
 
         if spec.is_disabled {
             field = field

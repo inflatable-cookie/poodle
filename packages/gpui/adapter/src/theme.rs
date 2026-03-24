@@ -186,6 +186,15 @@ impl GpuiThemeProvider {
             "semantic.size.icon.lg" => typed::semantic::SIZE_ICON_LG.as_f32(),
             "semantic.size.panel.header" => typed::semantic::SIZE_PANEL_HEADER.as_f32(),
             "semantic.icon.size.default" => typed::semantic::ICON_SIZE_DEFAULT.as_f32(),
+            // Typography sizes
+            "semantic.typography.body.size" => typed::semantic::TYPOGRAPHY_BODY_SIZE.as_f32(),
+            "semantic.typography.body.lineHeight" => typed::semantic::TYPOGRAPHY_BODY_LINE_HEIGHT.as_f32(),
+            "semantic.typography.label.size" => typed::semantic::TYPOGRAPHY_LABEL_SIZE.as_f32(),
+            "semantic.typography.label.lineHeight" => typed::semantic::TYPOGRAPHY_LABEL_LINE_HEIGHT.as_f32(),
+            "semantic.typography.heading.size" => typed::semantic::TYPOGRAPHY_HEADING_SIZE.as_f32(),
+            "semantic.typography.heading.lineHeight" => typed::semantic::TYPOGRAPHY_HEADING_LINE_HEIGHT.as_f32(),
+            "semantic.typography.code.size" => typed::semantic::TYPOGRAPHY_CODE_SIZE.as_f32(),
+            "semantic.typography.code.lineHeight" => typed::semantic::TYPOGRAPHY_CODE_LINE_HEIGHT.as_f32(),
             // Direct dimension parsing for inline values
             _ => Self::parse_dimension(token).unwrap_or(0.0),
         }

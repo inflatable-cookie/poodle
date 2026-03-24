@@ -88,7 +88,7 @@ impl IntoElement for Switch {
         // With icon-default = 16px: track = 34px × 20px (matches). But Svelte actually
         // uses icon-default which is 1rem (16px) → 34px × 20px
         // Thumb = calc(icon-default - 0.125rem) = 14px
-        let icon_default = resolve_px(theme, "semantic.size.icon.default");
+        let icon_default = resolve_px(theme, "semantic.size.icon.md");
         let track_w = icon_default * 2.0 + px(2.0); // 34px
         let track_h = icon_default + px(4.0);        // 20px
         let track_radius = track_h / 2.0;            // pill

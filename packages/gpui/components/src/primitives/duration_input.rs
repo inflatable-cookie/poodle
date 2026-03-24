@@ -63,6 +63,7 @@ impl IntoElement for DurationInput {
 
         let control_padding_x = resolve_px(theme, "semantic.space.control.x");
         let control_radius = resolve_radius(theme, spec.radius_token());
+        let body_size = resolve_px(theme, spec.body_size_token());
 
         let border = resolve_color(theme, spec.border_token());
         let surface_bg = resolve_color(theme, spec.fill_token());
@@ -95,7 +96,7 @@ impl IntoElement for DurationInput {
                 // Separator colon — contract: body-size, weight 600, line-height 1
                 segments = segments.child(
                     div()
-                        .text_size(px(14.0))
+                        .text_size(body_size)
                         .line_height(px(14.0))
                         .text_color(text_secondary)
                         .font_weight(FontWeight::SEMIBOLD)
@@ -125,7 +126,7 @@ impl IntoElement for DurationInput {
                     div()
                         .w(px(28.0)) // 1.75rem
                         .text_center()
-                        .text_size(px(14.0))
+                        .text_size(body_size)
                         .line_height(px(14.0))
                         .text_color(text_primary)
                         .child(part.to_string()),
@@ -144,6 +145,7 @@ impl IntoElement for DurationInput {
         let mut wrapper = div()
             .id(SharedString::from(id_str))
             .focusable()
+            .w_full()
             .py(px(4.0)) // 0.25rem
             .px(control_padding_x)
             .rounded(control_radius)
@@ -152,8 +154,16 @@ impl IntoElement for DurationInput {
             .border_color(border)
             .flex()
             .items_center()
-            // Contract: focus-within = border switches to focus ring color
-            .focus(move |s| s.border_color(focus_ring))
+            // Contract: focus-within = border + shadow ring at 28% opacity
+            .focus(move |s| s
+                .border_color(focus_ring)
+                .shadow(vec![gpui::BoxShadow {
+                    color: Hsla { a: focus_ring.a * 0.28, ..focus_ring },
+                    offset: point(px(0.0), px(0.0)),
+                    blur_radius: px(0.0),
+                    spread_radius: px(2.0),
+                }])
+            )
             .child(segments);
 
         // ArrowUp/ArrowDown to increment/decrement total seconds

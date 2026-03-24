@@ -98,6 +98,7 @@ impl IntoElement for Combobox {
         let input_radius = resolve_radius(theme, spec.input_radius_token());
         let input_height = resolve_px(theme, spec.input_height_token());
         let input_padding_x = resolve_px(theme, "semantic.space.control.x");
+        let body_size = resolve_px(theme, spec.body_size_token());
         let focus_ring = resolve_color(theme, spec.focus_ring_color_token());
         let disabled_opacity = resolve_opacity(theme, spec.disabled_opacity_token());
 
@@ -161,7 +162,7 @@ impl IntoElement for Combobox {
         let input_el = {
             let text_el = if show_placeholder {
                 div()
-                    .text_size(px(14.0))
+                    .text_size(body_size)
                     .text_color(input_placeholder)
                     .child(
                         spec.placeholder
@@ -170,7 +171,7 @@ impl IntoElement for Combobox {
                     )
             } else {
                 div()
-                    .text_size(px(14.0))
+                    .text_size(body_size)
                     .text_color(input_text)
                     .child(display_text)
             };
@@ -188,8 +189,16 @@ impl IntoElement for Combobox {
                 .bg(input_fill)
                 .border_1()
                 .border_color(input_border)
-                // Contract: focus ring on input
-                .focus(move |s| s.border_color(focus_ring))
+                // Contract: focus ring on input with shadow
+                .focus(move |s| s
+                    .border_color(focus_ring)
+                    .shadow(vec![gpui::BoxShadow {
+                        color: Hsla { a: focus_ring.a * 0.28, ..focus_ring },
+                        offset: point(px(0.0), px(0.0)),
+                        blur_radius: px(0.0),
+                        spread_radius: px(2.0),
+                    }])
+                )
                 .when(!is_disabled, |el| el.cursor_pointer())
                 .child(text_el.flex_grow().min_w_0().overflow_x_hidden().text_ellipsis());
 
@@ -334,7 +343,7 @@ impl IntoElement for Combobox {
                 list = list.child(
                     div()
                         .p(px(8.0)) // Contract: padding 0.5rem
-                        .text_size(px(14.0)) // Contract: body text size
+                        .text_size(body_size) // Contract: body text size
                         .text_color(empty_text)
                         .child("No results"),
                 );
@@ -383,7 +392,7 @@ impl IntoElement for Combobox {
 
                     option_el = option_el.child(
                         div()
-                            .text_size(px(14.0))
+                            .text_size(body_size)
                             .text_color(option_text)
                             .child(option.label.clone()),
                     );

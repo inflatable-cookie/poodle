@@ -19,15 +19,14 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
         ValidationState::Invalid
     };
 
-    div().flex().flex_col().gap(px(24.0))
+    div().flex().flex_col().gap(px(24.0)).max_w(px(384.0)) // 24rem
         // --- Default ---
         .child(
             div().flex().flex_col().gap(px(10.0))
                 .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Default"), theme))
                 .child(
                     Field::from_spec(
-                        FieldSpec::new("name-field", "Name")
-                            .with_description("Enter your full name."),
+                        FieldSpec::new("name-field", "Name"),
                         theme,
                     )
                     .with_control(

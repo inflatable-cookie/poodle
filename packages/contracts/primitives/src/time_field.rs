@@ -82,4 +82,12 @@ impl TimeFieldSpec {
     pub fn disabled_opacity_token(&self) -> &'static str {
         semantic::STATE_OPACITY_DISABLED
     }
+
+    pub fn body_size_token(&self) -> &'static str {
+        semantic::TYPOGRAPHY_BODY_SIZE
+    }
+
+    pub fn body_line_height_token(&self) -> &'static str {
+        semantic::TYPOGRAPHY_BODY_LINE_HEIGHT
+    }
 }

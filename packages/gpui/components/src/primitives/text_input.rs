@@ -9,7 +9,7 @@ use poodle_gpui::GpuiThemeProvider;
 use poodle_primitives::{IconSize, IconSpec, TextInputSpec, ValidationState};
 
 use super::icon::Icon;
-use crate::theme_ext::{resolve_color, resolve_opacity, resolve_px, resolve_radius};
+use crate::theme_ext::{color_mix, resolve_color, resolve_opacity, resolve_px, resolve_radius};
 
 /// A real GPUI text input component backed by `TextInputSpec`.
 pub struct TextInput {
@@ -60,6 +60,10 @@ impl TextInput {
     pub fn error_message_id(mut self, v: impl Into<String>) -> Self { self.spec.error_message_id = Some(v.into()); self }
     pub fn leading_icon(mut self, v: impl Into<String>) -> Self { self.spec.leading_icon = Some(v.into()); self }
     pub fn trailing_icon(mut self, v: impl Into<String>) -> Self { self.spec.trailing_icon = Some(v.into()); self }
+    pub fn prefix(mut self, v: impl Into<String>) -> Self { self.spec.prefix = Some(v.into()); self }
+    pub fn suffix(mut self, v: impl Into<String>) -> Self { self.spec.suffix = Some(v.into()); self }
+    pub fn max_length(mut self, v: usize) -> Self { self.spec.max_length = Some(v); self }
+    pub fn show_char_count(mut self, v: bool) -> Self { self.spec.show_char_count = v; self }
     pub fn submit_enabled(mut self, v: bool) -> Self { self.spec.submit_enabled = v; self }
     pub fn cancel_enabled(mut self, v: bool) -> Self { self.spec.cancel_enabled = v; self }
 
@@ -112,17 +116,21 @@ impl IntoElement for TextInput {
         let theme = &self.theme;
         let spec = &self.spec;
 
-        let control_height = resolve_px(theme, "semantic.size.control.height");
-        let inline_padding = resolve_px(theme, "semantic.space.control.x");
-        let inline_gap = resolve_px(theme, "semantic.space.inline.sm");
-        let control_radius = resolve_radius(theme, "semantic.radius.control");
+        // ── Token resolution ──────────────────────────────────
+        let control_height = resolve_px(theme, spec.control_height_token());
+        let inline_padding = resolve_px(theme, spec.horizontal_padding_token());
+        let inline_gap = resolve_px(theme, spec.inline_gap_token());
+        let control_radius = resolve_radius(theme, spec.radius_token());
+        let body_size = resolve_px(theme, spec.body_size_token());
+        let body_line_height = resolve_px(theme, spec.body_line_height_token());
 
-        let disabled_opacity = resolve_opacity(theme, "semantic.state.opacity.disabled");
+        let disabled_opacity = resolve_opacity(theme, spec.disabled_opacity_token());
         let border = resolve_color(theme, spec.border_token());
         let surface_bg = resolve_color(theme, spec.fill_token());
         let text_primary = resolve_color(theme, spec.text_color_token());
         let text_secondary = resolve_color(theme, spec.placeholder_color_token());
         let focus_ring = resolve_color(theme, spec.focus_ring_color_token());
+        let icon_color = resolve_color(theme, spec.icon_color_token());
 
         let value = spec.current_value();
         let is_empty = value.is_empty();
@@ -139,7 +147,7 @@ impl IntoElement for TextInput {
             "poodle-input".to_string()
         };
 
-        // Svelte: validation state border colors
+        // Contract: validation state border colors
         let effective_border = match spec.validation_state {
             ValidationState::Invalid => resolve_color(theme, "semantic.color.status.danger"),
             ValidationState::Valid => resolve_color(theme, "semantic.color.status.success"),
@@ -147,69 +155,125 @@ impl IntoElement for TextInput {
             _ => border,
         };
 
+        let focus_bg = surface_bg;
+
+        // ── Build inner content row ──────────────────────────
+        let mut inner = div()
+            .flex()
+            .items_center()
+            .gap(inline_gap)
+            .size_full();
+
+        // Prefix affix
+        if let Some(ref prefix_text) = spec.prefix {
+            let affix_color = resolve_color(theme, spec.affix_color_token());
+            let separator_base = resolve_color(theme, spec.affix_separator_color_token());
+            let separator_color = color_mix(separator_base, gpui::Hsla::transparent_black(), 0.52);
+            inner = inner.child(
+                div()
+                    .flex().items_center()
+                    .pr(inline_gap).mr(inline_gap)
+                    .border_r_1().border_color(separator_color)
+                    .text_color(affix_color)
+                    .whitespace_nowrap()
+                    .child(prefix_text.clone()),
+            );
+        }
+
+        // Leading icon
+        if let Some(ref icon) = spec.leading_icon {
+            inner = inner.child(
+                Icon::from_spec(IconSpec::new(icon).with_size(IconSize::Sm), theme)
+                    .with_color(icon_color),
+            );
+        }
+
+        // Value / placeholder text
+        inner = inner.child(
+            div()
+                .flex_1()
+                .overflow_x_hidden()
+                .whitespace_nowrap()
+                .text_ellipsis()
+                .text_color(text_col)
+                .child(SharedString::from(display_text)),
+        );
+
+        // Character count
+        if spec.show_char_count {
+            let char_len = value.len();
+            let is_over = spec.max_length.map_or(false, |max| char_len > max);
+            let count_color = if is_over {
+                resolve_color(theme, spec.char_count_over_color_token())
+            } else {
+                resolve_color(theme, spec.char_count_color_token())
+            };
+            let count_text = if let Some(max) = spec.max_length {
+                format!("{}/{}", char_len, max)
+            } else {
+                format!("{}", char_len)
+            };
+            inner = inner.child(
+                div().text_color(count_color).text_size(px(11.0))
+                    .whitespace_nowrap().child(count_text),
+            );
+        }
+
+        // Trailing icon
+        if let Some(ref icon) = spec.trailing_icon {
+            inner = inner.child(
+                Icon::from_spec(IconSpec::new(icon).with_size(IconSize::Sm), theme)
+                    .with_color(icon_color),
+            );
+        }
+
+        // Suffix affix
+        if let Some(ref suffix_text) = spec.suffix {
+            let affix_color = resolve_color(theme, spec.affix_color_token());
+            let separator_base = resolve_color(theme, spec.affix_separator_color_token());
+            let separator_color = color_mix(separator_base, gpui::Hsla::transparent_black(), 0.52);
+            inner = inner.child(
+                div()
+                    .flex().items_center()
+                    .pl(inline_gap).ml(inline_gap)
+                    .border_l_1().border_color(separator_color)
+                    .text_color(affix_color)
+                    .whitespace_nowrap()
+                    .child(suffix_text.clone()),
+            );
+        }
+
+        // ── Outer container ──────────────────────────────────
         let mut el = div()
             .id(SharedString::from(id_str))
             .focusable()
-            .min_h(control_height) // contract: min-height, not fixed height
+            .w_full()
+            .h(control_height)
             .px(inline_padding)
             .rounded(control_radius)
             .bg(surface_bg)
             .border_1()
             .border_color(effective_border)
-            .flex()
-            .items_center()
-            .gap(inline_gap)
-            .text_size(px(14.0))
+            .text_size(body_size)
+            .line_height(body_line_height)
             .text_color(text_primary)
-            // Svelte: focus-within changes border + adds shadow ring at 28% opacity
             .focus(move |s| s
                 .border_color(focus_ring)
+                .bg(focus_bg)
                 .shadow(vec![gpui::BoxShadow {
                     color: Hsla { a: focus_ring.a * 0.28, ..focus_ring },
                     offset: point(px(0.0), px(0.0)),
                     blur_radius: px(0.0),
                     spread_radius: px(2.0),
                 }])
-            );
+            )
+            .child(inner);
 
         if spec.is_disabled {
             el = el.opacity(disabled_opacity).cursor(CursorStyle::OperationNotAllowed);
         }
 
-        // Leading icon — render via Icon
-        if let Some(ref icon) = spec.leading_icon {
-            el = el.child(
-                Icon::from_spec(
-                    IconSpec::new(icon).with_size(IconSize::Sm),
-                    theme,
-                )
-                .with_color(text_secondary),
-            );
-        }
-
-        // Value / placeholder
-        el = el.child(
-            div()
-                .flex_1()
-                .text_color(text_col)
-                .overflow_x_hidden()
-                .text_ellipsis()
-                .whitespace_nowrap()
-                .child(display_text),
-        );
-
-        // Trailing icon — render via Icon
-        if let Some(ref icon) = spec.trailing_icon {
-            el = el.child(
-                Icon::from_spec(
-                    IconSpec::new(icon).with_size(IconSize::Sm),
-                    theme,
-                )
-                .with_color(text_secondary),
-            );
-        }
-
-        // Keyboard handlers for text editing
+        // ── Keyboard handlers ─────────────────────────────────
         if !spec.is_disabled && !spec.is_read_only {
             let current_value = value.to_string();
             let on_change = self.on_change.clone();
@@ -236,7 +300,6 @@ impl IntoElement for TextInput {
                         }
                     }
                 } else if key.len() == 1 && !event.keystroke.modifiers.platform && !event.keystroke.modifiers.control {
-                    // Single printable character
                     if let Some(ref handler) = on_change {
                         let new_val = format!("{}{}", current_value, key);
                         handler(&new_val, window, cx);

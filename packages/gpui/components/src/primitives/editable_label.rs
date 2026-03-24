@@ -9,7 +9,7 @@ use gpui::*;
 use poodle_gpui::GpuiThemeProvider;
 use poodle_primitives::EditableLabelSpec;
 
-use crate::theme_ext::{color_mix, resolve_color, resolve_opacity, resolve_radius};
+use crate::theme_ext::{color_mix, resolve_color, resolve_opacity, resolve_px, resolve_radius};
 
 /// A real GPUI editable label component backed by `EditableLabelSpec`.
 pub struct EditableLabel {
@@ -81,6 +81,7 @@ impl IntoElement for EditableLabel {
         let border_color = resolve_color(theme, spec.edit_border_token());
         let focus_ring = resolve_color(theme, spec.focus_ring_color_token());
         let control_radius = resolve_radius(theme, spec.radius_token());
+        let body_size = resolve_px(theme, spec.body_size_token());
         let disabled_opacity = resolve_opacity(theme, spec.disabled_opacity_token());
 
         // Contract: hover hint border in display mode
@@ -108,10 +109,11 @@ impl IntoElement for EditableLabel {
         let mut el = div()
             .id(SharedString::from(id_str))
             .focusable()
+            .w_full()
             .px(px(8.0))  // 0.5rem
             .py(px(6.0))  // 0.375rem
             .rounded(control_radius)
-            .text_size(px(14.0))
+            .text_size(body_size)
             .text_color(text_col)
             .border_1()
             .child(display_text);
@@ -121,7 +123,15 @@ impl IntoElement for EditableLabel {
             el = el
                 .border_color(border_color)
                 .bg(surface_bg)
-                .focus(move |s| s.border_color(focus_ring));
+                .focus(move |s| s
+                    .border_color(focus_ring)
+                    .shadow(vec![gpui::BoxShadow {
+                        color: Hsla { a: focus_ring.a * 0.28, ..focus_ring },
+                        offset: point(px(0.0), px(0.0)),
+                        blur_radius: px(0.0),
+                        spread_radius: px(2.0),
+                    }])
+                );
         } else {
             // Contract: display mode — transparent border, hover hint
             el = el
@@ -130,7 +140,15 @@ impl IntoElement for EditableLabel {
                     el.cursor_pointer()
                         .hover(move |s| s.border_color(hover_border).bg(hover_bg))
                 })
-                .focus(move |s| s.border_color(focus_ring));
+                .focus(move |s| s
+                    .border_color(focus_ring)
+                    .shadow(vec![gpui::BoxShadow {
+                        color: Hsla { a: focus_ring.a * 0.28, ..focus_ring },
+                        offset: point(px(0.0), px(0.0)),
+                        blur_radius: px(0.0),
+                        spread_radius: px(2.0),
+                    }])
+                );
         }
 
         if spec.is_disabled {

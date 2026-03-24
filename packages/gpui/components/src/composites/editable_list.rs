@@ -62,7 +62,7 @@ impl IntoElement for EditableList {
         let focus_ring = resolve_color(theme, "semantic.color.accent.focusRing");
 
         let gap = resolve_px(theme, "semantic.space.stack.sm");
-        let item_gap = resolve_px(theme, "semantic.space.stack.xs");
+        let item_gap = px(4.0);
         let control_px = resolve_px(theme, "semantic.space.control.x");
         let control_height = resolve_px(theme, "semantic.size.control.height");
         let radius = resolve_radius(theme, "semantic.radius.control");

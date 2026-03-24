@@ -69,7 +69,7 @@ impl IntoElement for BulkActionBar {
         let gap = resolve_px(theme, spec.gap_token());
         let pad_x = resolve_px(theme, spec.padding_x_token());
         let pad_y = resolve_px(theme, spec.padding_y_token());
-        let control_height = resolve_px(theme, "semantic.size.control-height");
+        let control_height = resolve_px(theme, "semantic.size.control.height");
         let control_pad_x = resolve_px(theme, "semantic.space.control.x");
         let elevated = resolve_color(theme, "semantic.color.background.elevated");
 

@@ -17,6 +17,10 @@ pub struct TextInputSpec {
     pub aria_label: Option<String>,
     pub description_id: Option<String>,
     pub error_message_id: Option<String>,
+    pub prefix: Option<String>,
+    pub suffix: Option<String>,
+    pub max_length: Option<usize>,
+    pub show_char_count: bool,
     pub leading_icon: Option<String>,
     pub trailing_icon: Option<String>,
     pub submit_enabled: bool,
@@ -39,6 +43,10 @@ impl Default for TextInputSpec {
             aria_label: None,
             description_id: None,
             error_message_id: None,
+            prefix: None,
+            suffix: None,
+            max_length: None,
+            show_char_count: false,
             leading_icon: None,
             trailing_icon: None,
             submit_enabled: false,
@@ -114,6 +122,26 @@ impl TextInputSpec {
 
     pub fn with_error_message_id(mut self, error_message_id: impl Into<String>) -> Self {
         self.error_message_id = Some(error_message_id.into());
+        self
+    }
+
+    pub fn with_prefix(mut self, prefix: impl Into<String>) -> Self {
+        self.prefix = Some(prefix.into());
+        self
+    }
+
+    pub fn with_suffix(mut self, suffix: impl Into<String>) -> Self {
+        self.suffix = Some(suffix.into());
+        self
+    }
+
+    pub fn with_max_length(mut self, max_length: usize) -> Self {
+        self.max_length = Some(max_length);
+        self
+    }
+
+    pub fn with_show_char_count(mut self, show: bool) -> Self {
+        self.show_char_count = show;
         self
     }
 
@@ -214,5 +242,41 @@ impl TextInputSpec {
 
     pub fn disabled_opacity_token(&self) -> &'static str {
         semantic::STATE_OPACITY_DISABLED
+    }
+
+    pub fn inline_gap_token(&self) -> &'static str {
+        semantic::SPACE_INLINE_SM
+    }
+
+    pub fn icon_color_token(&self) -> &'static str {
+        semantic::COLOR_ICON_MUTED
+    }
+
+    pub fn affix_color_token(&self) -> &'static str {
+        semantic::COLOR_TEXT_SECONDARY
+    }
+
+    pub fn affix_separator_color_token(&self) -> &'static str {
+        semantic::COLOR_BORDER_SUBTLE
+    }
+
+    pub fn body_size_token(&self) -> &'static str {
+        semantic::TYPOGRAPHY_BODY_SIZE
+    }
+
+    pub fn body_line_height_token(&self) -> &'static str {
+        semantic::TYPOGRAPHY_BODY_LINE_HEIGHT
+    }
+
+    pub fn char_count_color_token(&self) -> &'static str {
+        semantic::COLOR_TEXT_SECONDARY
+    }
+
+    pub fn char_count_over_color_token(&self) -> &'static str {
+        semantic::COLOR_STATUS_DANGER
+    }
+
+    pub fn focus_fill_token(&self) -> &'static str {
+        semantic::COLOR_BACKGROUND_SURFACE
     }
 }

@@ -2,12 +2,13 @@
   import type { ControlSize } from "./types";
   import type { IconNodes } from "./icon-registry";
 
-  import { resolveIconNodes, getIconSet } from "./icon-registry";
+  import { resolveIconNodes, lazyResolveIcon, getIconSet } from "./icon-registry";
 
   /**
    * The icon to display. Accepts:
-   * - An `IconNodes` array (e.g. from `lucide-static/icon-nodes.json`)
-   * - A string name resolved from the `IconProvider` icon set or built-in internals
+   * - An `IconNodes` array (e.g. from `@poodle/icons-lucide` or `lucide-static/icon-nodes.json`)
+   * - A string name resolved from the `IconProvider` icon set, or lazily
+   *   auto-imported from `@poodle/icons-lucide`
    */
   export let icon: IconNodes | string | null = null;
   /** @deprecated Use `icon` instead. Alias kept for internal convenience. */
@@ -18,7 +19,17 @@
   const iconSet = getIconSet();
 
   $: resolvedIcon = icon ?? name;
+
+  // Sync resolution: check IconProvider context and lazy cache
   $: nodes = resolveIconNodes(resolvedIcon, iconSet);
+
+  // If sync returned empty for a string name, kick off lazy import
+  $: if (nodes.length === 0 && typeof resolvedIcon === "string" && resolvedIcon) {
+    lazyResolveIcon(resolvedIcon, () => {
+      // Re-trigger reactivity by re-resolving
+      nodes = resolveIconNodes(resolvedIcon, iconSet);
+    });
+  }
 </script>
 
 <svg

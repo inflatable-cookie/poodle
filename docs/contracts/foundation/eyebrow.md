@@ -21,7 +21,7 @@ Updated: 2026-03-15
 
 | Part | Element | Required | Description |
 |------|---------|----------|-------------|
-| Root | `<p>` | yes | paragraph element with uppercase label styling |
+| Root | `<span>` | yes | inline element with uppercase label styling |
 | Text content | slot | yes | short label text via default slot |
 
 ## 3. Props And Inputs
@@ -58,7 +58,7 @@ No internal state.
 
 ### Semantics
 
-- Role: paragraph text (`<p>`)
+- Role: inline text (`<span>`)
 - Required attributes: none
 - Optional attributes: `aria-label` when visible text is abbreviated
 - Labeling rules: purely decorative typography; not focusable
@@ -106,7 +106,7 @@ No internal state.
 
 - Renders as a simple styled `<p>` element with a default slot
 - No wrapper overhead; the root element is the `<p>` itself
-- `margin: 0` resets browser default paragraph margins
+- `margin: 0` resets browser default margins
 
 ## 10. GPUI Notes
 
@@ -120,7 +120,7 @@ No internal state.
 ### Tier 1: Strict Parity
 
 - [ ] non-interactive text semantics match
-- [ ] renders as paragraph-level element
+- [ ] renders as inline-level element (`<span>`)
 
 ### Tier 2: Visual Parity
 

@@ -198,4 +198,12 @@ impl ComboboxSpec {
     pub fn focus_ring_color_token(&self) -> &'static str {
         semantic::COLOR_ACCENT_FOCUS_RING
     }
+
+    pub fn body_size_token(&self) -> &'static str {
+        semantic::TYPOGRAPHY_BODY_SIZE
+    }
+
+    pub fn body_line_height_token(&self) -> &'static str {
+        semantic::TYPOGRAPHY_BODY_LINE_HEIGHT
+    }
 }

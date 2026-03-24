@@ -38,7 +38,7 @@ impl IntoElement for EmbedPreview {
         let danger_color = resolve_color(theme, "semantic.color.status.danger");
         let success_color = resolve_color(theme, "semantic.color.status.success");
         let subtle_bg = resolve_color(theme, "semantic.color.background.subtle");
-        let gap = resolve_px(theme, "semantic.spacing.element");
+        let gap = resolve_px(theme, "semantic.space.inline.sm");
 
         // Surface container with border and radius
         let mut el = div()

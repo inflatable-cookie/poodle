@@ -80,4 +80,10 @@ impl PinInputSpec {
     pub fn disabled_opacity_token(&self) -> &'static str {
         semantic::STATE_OPACITY_DISABLED
     }
+
+    pub fn code_font_size_token(&self) -> &'static str {
+        // Contract specifies 1rem (16px) for pin cells, not the code typography size (13px)
+        // Using body size as 1rem equivalent
+        semantic::TYPOGRAPHY_BODY_SIZE
+    }
 }

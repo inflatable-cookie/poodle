@@ -20,7 +20,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
 
     let last_event = state.specimens.text.get("editable-label-event").cloned();
 
-    div().flex().flex_col().gap(px(24.0))
+    div().flex().flex_col().gap(px(24.0)).max_w(px(384.0))
         // --- Double-click to edit (default) ---
         .child(
             div().flex().flex_col().gap(px(10.0))

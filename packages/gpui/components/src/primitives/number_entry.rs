@@ -88,14 +88,15 @@ impl IntoElement for NumberEntry {
         let theme = &self.theme;
         let spec = &self.spec;
 
-        let control_height = resolve_px(theme, "semantic.size.control.height");
-        let control_padding_x = resolve_px(theme, "semantic.space.control.x");
+        let control_height = resolve_px(theme, spec.control_height_token());
+        let control_padding_x = resolve_px(theme, spec.horizontal_padding_token());
         let control_radius = resolve_radius(theme, spec.radius_token());
+        let body_size = resolve_px(theme, spec.body_size_token());
+        let body_line_height = resolve_px(theme, spec.body_line_height_token());
 
         let border = resolve_color(theme, spec.border_token());
         let surface_bg = resolve_color(theme, spec.fill_token());
         let text_primary = resolve_color(theme, spec.text_color_token());
-        let text_secondary = resolve_color(theme, "semantic.color.text.secondary");
         let elevated = resolve_color(theme, spec.stepper_fill_token());
         let disabled_opacity = resolve_opacity(theme, spec.disabled_opacity_token());
         let focus_ring = resolve_color(theme, spec.focus_ring_color_token());
@@ -103,9 +104,9 @@ impl IntoElement for NumberEntry {
         let stepper_bg = color_mix(elevated, surface_bg, 0.88);
         let display_value = format!("{}", spec.clamped_value());
 
-        // Contract: stepper width 1.25rem, radius = control - 0.125rem
-        let stepper_width = px(20.0); // 1.25rem
-        let stepper_inner_radius = resolve_radius(theme, spec.radius_token()) - px(2.0);
+        // Contract: stepper width 1.25rem (20px), radius = control - 0.125rem (2px)
+        let stepper_width = px(20.0);
+        let stepper_inner_radius = control_radius - px(2.0);
 
         let id_str = if let Some(ref suffix) = self.id_suffix {
             format!("poodle-number-entry-{}", suffix)
@@ -136,7 +137,7 @@ impl IntoElement for NumberEntry {
                     IconSpec::new("chevron-up").with_size(IconSize::Sm),
                     theme,
                 )
-                .with_color(text_secondary),
+                .with_color(text_primary),
             );
 
         if !spec.is_disabled {
@@ -165,7 +166,7 @@ impl IntoElement for NumberEntry {
                     IconSpec::new("chevron-down").with_size(IconSize::Sm),
                     theme,
                 )
-                .with_color(text_secondary),
+                .with_color(text_primary),
             );
 
         if !spec.is_disabled {
@@ -177,14 +178,12 @@ impl IntoElement for NumberEntry {
             }
         }
 
-        // Vertical stepper column
+        // Vertical stepper column — contract: gap 0, padding 0.0625rem (1px)
         let steppers = div()
             .flex()
             .flex_col()
-            .gap(px(1.0))
             .h_full()
-            .py(px(2.0))
-            .pr(px(2.0))
+            .p(px(1.0))
             .child(inc_btn)
             .child(dec_btn);
 
@@ -194,7 +193,8 @@ impl IntoElement for NumberEntry {
             .px(control_padding_x)
             .flex()
             .items_center()
-            .text_size(px(14.0))
+            .text_size(body_size)
+            .line_height(body_line_height)
             .text_color(text_primary)
             .child(display_value);
 
@@ -210,6 +210,7 @@ impl IntoElement for NumberEntry {
         let mut wrapper = div()
             .id(SharedString::from(id_str))
             .focusable()
+            .w_full()
             .min_h(control_height)
             .rounded(control_radius)
             .bg(surface_bg)

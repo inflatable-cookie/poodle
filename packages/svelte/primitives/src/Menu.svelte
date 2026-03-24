@@ -69,6 +69,20 @@
     setOpen(false);
   }
 
+  function handleTriggerClick(event: MouseEvent): void {
+    event.preventDefault();
+    event.stopPropagation();
+    setOpen(!isOpen);
+  }
+
+  function handleTriggerKeydown(event: KeyboardEvent): void {
+    if (event.key === "Enter" || event.key === " " || event.key === "ArrowDown") {
+      event.preventDefault();
+      event.stopPropagation();
+      setOpen(true);
+    }
+  }
+
   onMount(() => {
     function handlePointerDown(event: MouseEvent): void {
       if (!isOpen || !rootElement) {
@@ -103,13 +117,8 @@
     role="button"
     tabindex="0"
     aria-expanded={isOpen ? "true" : "false"}
-    on:click={() => setOpen(!isOpen)}
-    on:keydown={(event) => {
-      if (event.key === "Enter" || event.key === " " || event.key === "ArrowDown") {
-        event.preventDefault();
-        setOpen(true);
-      }
-    }}
+    on:click={handleTriggerClick}
+    on:keydown={handleTriggerKeydown}
   >
     <slot name="trigger" />
   </div>

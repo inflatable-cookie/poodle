@@ -6,7 +6,10 @@
   "description": "Poodle Svelte token and theme helpers backed by generated artifacts.",
   "svelte": "./src/index.ts",
   "exports": {
-    ".": "./src/index.ts",
+    ".": {
+      "svelte": "./src/index.ts",
+      "default": "./src/index.ts"
+    },
     "./runtime": "./src/runtime.ts",
     "./css": "./src/css.ts",
     "./styles.css": "./src/generated/css/poodle-tokens.css",

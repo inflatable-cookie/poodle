@@ -6,7 +6,10 @@
   "description": "Poodle Svelte primitive component surface.",
   "svelte": "./src/index.ts",
   "exports": {
-    ".": "./src/index.ts",
+    ".": {
+      "svelte": "./src/index.ts",
+      "default": "./src/index.ts"
+    },
     "./types": "./src/types.ts"
   },
   "files": [
@@ -20,10 +23,14 @@
   },
   "peerDependencies": {
     "@poodle/svelte-tokens": "0.0.0",
+    "@poodle/icons-lucide": "0.0.0",
     "svelte": "^5.38.6"
   },
   "peerDependenciesMeta": {
     "@poodle/svelte-tokens": {
+      "optional": true
+    },
+    "@poodle/icons-lucide": {
       "optional": true
     }
   }

@@ -2,9 +2,9 @@
   export let ariaLabel: string | null = null;
 </script>
 
-<p class="eyebrow" aria-label={ariaLabel ?? undefined}>
+<span class="eyebrow" aria-label={ariaLabel ?? undefined}>
   <slot />
-</p>
+</span>
 
 <style>
   .eyebrow {

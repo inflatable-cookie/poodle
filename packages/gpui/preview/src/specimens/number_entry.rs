@@ -19,7 +19,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
         .unwrap_or_else(|| "29.99".to_string());
     let price: f64 = price_str.parse().unwrap_or(29.99);
 
-    div().flex().flex_col().gap(px(24.0)).max_w(px(320.0))
+    div().flex().flex_col().gap(px(24.0)).max_w(px(384.0))
         // --- Default ---
         .child(
             div().flex().flex_col().gap(px(10.0))

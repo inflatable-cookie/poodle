@@ -259,7 +259,7 @@ impl Tabs {
     fn render_pill(&self) -> Div {
         let theme = &self.theme;
         let control_x = resolve_px(theme, "semantic.space.control.x");
-        let control_height = resolve_px(theme, "semantic.size.control-height");
+        let control_height = resolve_px(theme, "semantic.size.control.height");
         let disabled_opacity = resolve_opacity(theme, self.spec.disabled_opacity_token());
         let accent = resolve_color(theme, self.spec.indicator_token());
         let border_subtle = resolve_color(theme, self.spec.list_border_token());

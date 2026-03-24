@@ -8,7 +8,7 @@ use crate::style_bridge::color_to_hsla;
 pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
     let text_secondary = theme.resolve_color("semantic.color.text.secondary");
 
-    div().flex().flex_col().gap(px(24.0))
+    div().flex().flex_col().gap(px(24.0)).max_w(px(384.0))
         // -- TimeAgo --
         .child(
             div().flex().flex_col().gap(px(10.0))

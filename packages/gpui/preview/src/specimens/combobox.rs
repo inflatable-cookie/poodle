@@ -34,7 +34,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
     let selected_framework = state.specimens.text.get("combobox-framework").cloned();
     let selected_db = state.specimens.text.get("combobox-db").cloned();
 
-    div().flex().flex_col().gap(px(24.0)).max_w(px(320.0))
+    div().flex().flex_col().gap(px(24.0)).max_w(px(384.0))
         // --- Default ---
         .child(
             div().flex().flex_col().gap(px(10.0))

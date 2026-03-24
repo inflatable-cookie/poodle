@@ -83,19 +83,20 @@ impl IntoElement for TextArea {
         let theme = &self.theme;
         let spec = &self.spec;
 
-        let control_padding_x = resolve_px(theme, "semantic.space.control.x");
-        let control_padding_y = resolve_px(theme, "semantic.space.control.y");
-        let control_radius = resolve_radius(theme, "semantic.radius.control");
-        // Line height from typography token
-        let line_height_f = theme.resolve_space("semantic.typography.body.lineHeight");
-        let line_height = px(line_height_f);
+        // ── Token resolution ──────────────────────────────────
+        let control_padding_x = resolve_px(theme, spec.horizontal_padding_token());
+        let control_padding_y = resolve_px(theme, spec.vertical_padding_token());
+        let control_radius = resolve_radius(theme, spec.radius_token());
+        let body_size = resolve_px(theme, spec.body_size_token());
+        let line_height_val = resolve_px(theme, spec.body_line_height_token());
+        let line_height_f = theme.resolve_space(spec.body_line_height_token());
 
         let surface_bg = resolve_color(theme, spec.fill_token());
         let border = resolve_color(theme, spec.border_token());
-        let text_primary = resolve_color(theme, "semantic.color.text.primary");
-        let text_secondary = resolve_color(theme, "semantic.color.text.secondary");
-        let elevated = resolve_color(theme, "semantic.color.background.elevated");
-        let disabled_opacity = resolve_opacity(theme, "semantic.state.opacity.disabled");
+        let text_primary = resolve_color(theme, spec.text_color_token());
+        let text_secondary = resolve_color(theme, spec.placeholder_color_token());
+        let disabled_opacity = resolve_opacity(theme, spec.disabled_opacity_token());
+        let focus_ring = resolve_color(theme, spec.focus_ring_color_token());
 
         let value = spec.current_value();
         let is_empty = value.is_empty();
@@ -106,8 +107,16 @@ impl IntoElement for TextArea {
         };
         let text_col = if is_empty { text_secondary } else { text_primary };
 
-        let row_height_f = spec.rows as f32 * line_height_f;
-        let focus_ring = resolve_color(theme, "semantic.color.accent.focusRing");
+        // Contract: min-height = rows × line-height
+        let row_height = spec.rows as f32 * line_height_f;
+
+        // Contract: validation state border colors
+        let effective_border = match spec.validation_state {
+            ValidationState::Invalid => resolve_color(theme, "semantic.color.status.danger"),
+            ValidationState::Valid => resolve_color(theme, "semantic.color.status.success"),
+            ValidationState::Pending => resolve_color(theme, "semantic.color.accent.base"),
+            _ => border,
+        };
 
         let id_str = if let Some(ref suffix) = self.id_suffix {
             format!("poodle-textarea-{}", suffix)
@@ -115,20 +124,33 @@ impl IntoElement for TextArea {
             "poodle-textarea".to_string()
         };
 
+        let focus_bg = surface_bg;
+
         let mut el = div()
             .id(SharedString::from(id_str))
             .focusable()
-            .min_h(px(row_height_f))
+            .w_full()
+            .min_h(px(row_height))
             .px(control_padding_x)
             .py(control_padding_y)
             .rounded(control_radius)
             .bg(surface_bg)
             .border_1()
-            .border_color(border)
-            .text_size(px(14.0))
+            .border_color(effective_border)
+            .text_size(body_size)
+            .line_height(line_height_val)
             .text_color(text_col)
-            // Contract: focus-within = border switches to focus ring
-            .focus(move |s| s.border_color(focus_ring))
+            // Contract: focus-within = border + background + shadow ring at 28% opacity
+            .focus(move |s| s
+                .border_color(focus_ring)
+                .bg(focus_bg)
+                .shadow(vec![gpui::BoxShadow {
+                    color: Hsla { a: focus_ring.a * 0.28, ..focus_ring },
+                    offset: point(px(0.0), px(0.0)),
+                    blur_radius: px(0.0),
+                    spread_radius: px(2.0),
+                }])
+            )
             .child(display_text);
 
         if spec.is_disabled {

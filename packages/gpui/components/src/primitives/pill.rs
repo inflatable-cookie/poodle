@@ -7,7 +7,7 @@ use poodle_primitives::{
 };
 
 use super::icon::Icon;
-use crate::theme_ext::{resolve_color, resolve_opacity, resolve_px, resolve_radius};
+use crate::theme_ext::{resolve_color, resolve_opacity, resolve_radius};
 
 /// A real GPUI pill component backed by `PillSpec`.
 pub struct Pill {
@@ -70,47 +70,71 @@ impl IntoElement for Pill {
         };
 
         // ── Colors ───────────────────────────────────────────────
-        let surface_bg = resolve_color(theme, spec.fill_token());
+        // Matches Svelte Pill.svelte exactly:
+        //   - Neutral: 90% surface fill, 82% border-subtle border
+        //   - Success/Danger: 14% tone-tinted fill, 38% tone-tinted border
+        //   - Info/Warning: neutral fill and border (no Svelte overrides)
+        //   - Badge: accent-base at 18% fill (except neutral badge: desaturated)
+        //   - Badge border: always transparent
+        let surface_bg = resolve_color(theme, "semantic.color.background.surface");
         let text_color = resolve_color(theme, spec.text_color_token());
         let tone_color = resolve_color(theme, spec.tone_color_token());
+        let accent_base = resolve_color(theme, "semantic.color.accent.base");
+        let border_subtle = resolve_color(theme, "semantic.color.border.subtle");
+        let text_secondary = resolve_color(theme, "semantic.color.text.secondary");
 
-        // Compute tinted background: for toned pills, mix tone into surface
-        let bg = match spec.tone {
-            PillTone::Neutral => {
-                if spec.appearance == PillAppearance::Badge {
-                    // Neutral badge: slightly tinted surface
-                    surface_bg.blend(surface_bg.opacity(0.96))
-                } else {
-                    surface_bg.blend(surface_bg.opacity(0.9))
+        let bg = match spec.appearance {
+            PillAppearance::Badge => {
+                match spec.tone {
+                    // Neutral badge: desaturated surface (96% surface + 4% text-primary)
+                    PillTone::Neutral => {
+                        let text_primary = resolve_color(theme, "semantic.color.text.primary");
+                        surface_bg.blend(text_primary.opacity(0.04))
+                    }
+                    // All other badges: accent-base at 18%
+                    _ => accent_base.opacity(0.18),
                 }
             }
             _ => {
-                if spec.appearance == PillAppearance::Badge {
-                    // Badge: stronger tone tint
-                    surface_bg.blend(tone_color.opacity(0.18))
-                } else {
-                    // Solid/Subtle: light tone tint
-                    surface_bg.blend(tone_color.opacity(0.14))
+                match spec.tone {
+                    // Success/Danger: 14% tone tint into surface
+                    PillTone::Success | PillTone::Danger => {
+                        surface_bg.blend(tone_color.opacity(0.14))
+                    }
+                    // Neutral/Info/Warning: 90% surface (Svelte has no overrides for info/warning)
+                    _ => surface_bg.opacity(0.9),
                 }
             }
         };
 
-        // Border: tone-tinted for non-neutral, subtle for neutral
-        let border_subtle = resolve_color(theme, "semantic.color.border.subtle");
-        let border = match spec.tone {
-            PillTone::Neutral => border_subtle.opacity(0.82),
+        // Border: only success and danger get tone-colored borders in Svelte
+        let border = match spec.appearance {
+            PillAppearance::Badge => gpui::transparent_black(),
             _ => {
-                if spec.appearance == PillAppearance::Badge {
-                    gpui::transparent_black()
-                } else {
-                    border_subtle.blend(tone_color.opacity(0.38))
+                match spec.tone {
+                    PillTone::Success | PillTone::Danger => {
+                        border_subtle.blend(tone_color.opacity(0.38))
+                    }
+                    // Neutral/Info/Warning: plain border-subtle at 82%
+                    _ => border_subtle.opacity(0.82),
                 }
             }
+        };
+
+        // Text color: badges use primary for toned, secondary for neutral
+        let text_color = match spec.appearance {
+            PillAppearance::Badge => {
+                match spec.tone {
+                    PillTone::Neutral => text_secondary,
+                    _ => resolve_color(theme, "semantic.color.text.primary"),
+                }
+            }
+            _ => text_color,
         };
 
         let radius = resolve_radius(theme, "semantic.radius.pill");
         let disabled_opacity = resolve_opacity(theme, "semantic.state.opacity.disabled");
-        let inline_gap = resolve_px(theme, "semantic.space.inline.xs");
+        let inline_gap = px(4.0);
         let focus_ring = resolve_color(theme, spec.focus_ring_color_token());
 
         // ── Font weight ──────────────────────────────────────────

@@ -65,7 +65,7 @@ impl IntoElement for RadioGroup {
         let spec = &self.spec;
 
         // Svelte: indicator = calc(icon-default + 0.125rem) ≈ 18px, dot = calc(icon-default * 0.5) = 8px
-        let icon_default = resolve_px(theme, "semantic.size.icon.default");
+        let icon_default = resolve_px(theme, "semantic.size.icon.md");
         let indicator_size = icon_default + px(2.0);
         let dot_size = icon_default * 0.5;
 
@@ -165,7 +165,7 @@ impl IntoElement for RadioGroup {
                 div()
                     .text_size(px(14.0))
                     .text_color(text_primary)
-                    .min_w(px(0.0))
+                    .whitespace_nowrap()
                     .child(option.label.clone())
             );
 

@@ -18,7 +18,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
         .cloned()
         .unwrap_or_else(|| "14:30".to_string());
 
-    div().flex().flex_col().gap(px(24.0)).max_w(px(320.0))
+    div().flex().flex_col().gap(px(24.0)).max_w(px(384.0))
         // --- Default ---
         .child(
             div().flex().flex_col().gap(px(10.0))

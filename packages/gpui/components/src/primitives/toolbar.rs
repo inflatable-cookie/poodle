@@ -54,7 +54,7 @@ impl IntoElement for Toolbar {
         let border_raw = resolve_color(theme, "semantic.color.border.default");
         let panel = resolve_color(theme, "semantic.color.background.panel");
         let gap = resolve_px(theme, spec.gap_token());
-        let padding = resolve_px(theme, "semantic.space.inline.xs");
+        let padding = px(4.0);
 
         // Contract: border color-mix 78% border-default over panel
         let border = color_mix(border_raw, panel, 0.78);

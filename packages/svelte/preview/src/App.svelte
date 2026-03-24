@@ -9,8 +9,10 @@
   import {
     Pill,
     Tabs,
+    IconProvider,
     type TabItem,
   } from "@poodle/svelte-primitives";
+  import iconNodes from "lucide-static/icon-nodes.json";
   import { onMount } from "svelte";
 
   import DisplayControls from "./components/DisplayControls.svelte";
@@ -168,15 +170,17 @@
   />
 
   <main class="app-main">
-    {#if activeSection === "primitives"}
-      <PrimitivesSection activeComponent={route.component} />
-    {:else if activeSection === "composites"}
-      <CompositesSection activeComponent={route.component} />
-    {:else if activeSection === "tokens"}
-      <TokensSection {liveTokenValues} />
-    {:else if activeSection === "treatments"}
-      <TreatmentsSection />
-    {/if}
+    <IconProvider icons={iconNodes}>
+      {#if activeSection === "primitives"}
+        <PrimitivesSection activeComponent={route.component} />
+      {:else if activeSection === "composites"}
+        <CompositesSection activeComponent={route.component} />
+      {:else if activeSection === "tokens"}
+        <TokensSection {liveTokenValues} />
+      {:else if activeSection === "treatments"}
+        <TreatmentsSection />
+      {/if}
+    </IconProvider>
   </main>
 </div>
 

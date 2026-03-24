@@ -17,7 +17,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
         .unwrap_or_default();
     let completed = state.specimens.is_on("pin-input-complete");
 
-    div().flex().flex_col().gap(px(24.0))
+    div().flex().flex_col().gap(px(24.0)).max_w(px(384.0))
         // --- 6-digit code ---
         .child(
             div().flex().flex_col().gap(px(10.0))

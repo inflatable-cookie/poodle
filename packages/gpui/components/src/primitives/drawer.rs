@@ -118,12 +118,8 @@ impl IntoElement for Drawer {
                 },
             ]);
 
-        // Contract: border on side facing main area only
-        if is_left {
-            drawer_panel = drawer_panel.border_r_1().border_color(border);
-        } else {
-            drawer_panel = drawer_panel.border_l_1().border_color(border);
-        }
+        // Contract: all-around border (0.0625rem solid border-default 78%)
+        drawer_panel = drawer_panel.border_1().border_color(border);
 
         // Contract: title font 1rem (16px), weight 600
         if let Some(ref title) = spec.title {
