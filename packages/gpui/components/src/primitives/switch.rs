@@ -101,11 +101,11 @@ impl IntoElement for Switch {
         let knob_offset = if is_checked { thumb_size + track_padding } else { track_padding };
         let focus_ring = resolve_color(theme, "semantic.color.accent.focusRing");
 
-        // Contract: checked track = accent-base 24% + surface background
+        // Svelte: off-track = text-primary 18% + surface, on-track = accent 24% + surface
         let track_bg = if is_checked {
             color_mix(accent, surface_bg, 0.24)
         } else {
-            color_mix(surface_bg, gpui::transparent_black(), 0.86)
+            color_mix(text_primary, surface_bg, 0.18)
         };
 
         // Contract: checked track border = accent-base 58% + border-default

@@ -219,6 +219,32 @@ impl IntoElement for TextInput {
             );
         }
 
+        // Validation indicator (circle-check, circle-x, or spinner)
+        match spec.validation_state {
+            ValidationState::Valid => {
+                let success_color = resolve_color(theme, "semantic.color.status.success");
+                inner = inner.child(
+                    Icon::from_spec(IconSpec::new("circle-check").with_size(IconSize::Sm), theme)
+                        .with_color(success_color),
+                );
+            }
+            ValidationState::Invalid => {
+                let danger_color = resolve_color(theme, "semantic.color.status.danger");
+                inner = inner.child(
+                    Icon::from_spec(IconSpec::new("circle-x").with_size(IconSize::Sm), theme)
+                        .with_color(danger_color),
+                );
+            }
+            ValidationState::Pending => {
+                let accent_color = resolve_color(theme, "semantic.color.accent.base");
+                inner = inner.child(
+                    Icon::from_spec(IconSpec::new("loader").with_size(IconSize::Sm), theme)
+                        .with_color(accent_color),
+                );
+            }
+            _ => {}
+        }
+
         // Trailing icon
         if let Some(ref icon) = spec.trailing_icon {
             inner = inner.child(
