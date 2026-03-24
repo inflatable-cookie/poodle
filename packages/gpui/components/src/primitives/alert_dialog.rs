@@ -5,7 +5,7 @@ use crate::theme_ext::{resolve_color, resolve_px, resolve_radius};
 
 pub struct AlertDialog {
     spec: AlertDialogSpec,
-    backdrop_fill: Hsla,
+    _backdrop_fill: Hsla,
     dialog_fill: Hsla,
     dialog_radius: Pixels,
     button_radius: Pixels,
@@ -40,7 +40,7 @@ impl AlertDialog {
 
     fn build(spec: AlertDialogSpec, theme: &GpuiThemeProvider) -> Self {
         Self {
-            backdrop_fill: hsla(0.0, 0.0, 0.0, 0.5),
+            _backdrop_fill: hsla(0.0, 0.0, 0.0, 0.5),
             dialog_fill: resolve_color(theme, spec.dialog_fill_token()),
             dialog_radius: resolve_radius(theme, spec.dialog_radius_token()),
             button_radius: resolve_radius(theme, spec.button_radius_token()),

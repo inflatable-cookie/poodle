@@ -35,7 +35,7 @@ impl IntoElement for EmbedPreview {
         let radius = resolve_radius(theme, "semantic.radius.surface");
         let title_color = resolve_color(theme, "semantic.color.text.primary");
         let desc_color = resolve_color(theme, "semantic.color.text.secondary");
-        let danger_color = resolve_color(theme, "semantic.color.status.danger");
+        let _danger_color = resolve_color(theme, "semantic.color.status.danger");
         let success_color = resolve_color(theme, "semantic.color.status.success");
         let subtle_bg = resolve_color(theme, "semantic.color.background.subtle");
         let gap = resolve_px(theme, "semantic.space.inline.sm");

@@ -54,12 +54,12 @@ impl IntoElement for EditableList {
         let text_color = resolve_color(theme, "semantic.color.text.primary");
         let muted_color = resolve_color(theme, "semantic.color.text.muted");
         let secondary_color = resolve_color(theme, "semantic.color.text.secondary");
-        let accent = resolve_color(theme, "semantic.color.accent.base");
+        let _accent = resolve_color(theme, "semantic.color.accent.base");
         let border_color = resolve_color(theme, "semantic.color.border.default");
         let surface_bg = resolve_color(theme, "semantic.color.surface.default");
         let hover_bg = resolve_color(theme, "semantic.color.surface.raised");
-        let danger_color = resolve_color(theme, "semantic.color.status.danger");
-        let focus_ring = resolve_color(theme, "semantic.color.accent.focusRing");
+        let _danger_color = resolve_color(theme, "semantic.color.status.danger");
+        let _focus_ring = resolve_color(theme, "semantic.color.accent.focusRing");
 
         let gap = resolve_px(theme, "semantic.space.stack.sm");
         let item_gap = px(4.0);

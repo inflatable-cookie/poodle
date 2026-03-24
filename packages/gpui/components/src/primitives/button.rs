@@ -130,7 +130,7 @@ impl IntoElement for Button {
         // ── Compute variant-specific colors ──────────────────────
 
         // Danger×secondary needs color-mix blends (contract §8 Tone: danger)
-        let (mut fill, mut border_color, mut text_color) = match (spec.variant, spec.tone) {
+        let (fill, border_color, text_color) = match (spec.variant, spec.tone) {
             (ButtonVariant::Secondary, ButtonTone::Danger) => {
                 // fill: color-mix(status-danger 16%, background-surface)
                 let danger = resolve_color(theme, "semantic.color.status.danger");
@@ -150,7 +150,7 @@ impl IntoElement for Button {
         };
 
         // Ghost: transparent fill and border (contract §8 CSS Custom Properties)
-        let (mut fill, mut border_color) = if is_ghost {
+        let (fill, border_color) = if is_ghost {
             (gpui::transparent_black(), gpui::transparent_black())
         } else {
             (fill, border_color)

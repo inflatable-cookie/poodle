@@ -3,7 +3,7 @@
 use gpui::*;
 use poodle_gpui::GpuiThemeProvider;
 use poodle_composites::CardRadioGroupSpec;
-use crate::theme_ext::{color_mix, resolve_color, resolve_px, resolve_radius, resolve_opacity};
+use crate::theme_ext::{color_mix, resolve_color, resolve_radius, resolve_opacity};
 
 pub struct CardRadioGroup {
     spec: CardRadioGroupSpec,

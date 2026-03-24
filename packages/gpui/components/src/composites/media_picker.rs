@@ -166,7 +166,7 @@ impl IntoElement for MediaPicker {
         // ── Tab header (Browse / Upload) ─────────────────────────
         let browse_active = self.active_tab == MediaPickerTab::Browse;
 
-        let tab_item = |label: &str, is_active: bool| -> Div {
+        let tab_item = |_label: &str, is_active: bool| -> Div {
             let base = div()
                 .px(px(16.0))
                 .py(px(8.0))

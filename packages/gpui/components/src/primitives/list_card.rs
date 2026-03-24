@@ -22,7 +22,7 @@ pub struct ListCard {
     leading: Option<AnyElement>,
     footer: Option<AnyElement>,
     trailing: Option<AnyElement>,
-    icon_color: Hsla,
+    _icon_color: Hsla,
     on_click: Option<Box<dyn Fn(&ClickEvent, &mut Window, &mut App) + 'static>>,
 }
 
@@ -40,7 +40,7 @@ impl ListCard {
             leading: None,
             footer: None,
             trailing: None,
-            icon_color: gpui::white(),
+            _icon_color: gpui::white(),
             on_click: None,
         }
     }
@@ -52,7 +52,7 @@ impl ListCard {
             leading: None,
             footer: None,
             trailing: None,
-            icon_color: gpui::white(),
+            _icon_color: gpui::white(),
             on_click: None,
         }
     }

@@ -2,7 +2,6 @@
 //! callout-style error/success banners.
 //! Uses semantic spacing tokens for consistent layout.
 
-use gpui::prelude::FluentBuilder;
 use gpui::*;
 use poodle_gpui::GpuiThemeProvider;
 use crate::theme_ext::{color_mix, resolve_color, resolve_px, resolve_radius};

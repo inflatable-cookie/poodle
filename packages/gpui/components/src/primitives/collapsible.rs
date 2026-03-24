@@ -66,7 +66,7 @@ impl IntoElement for Collapsible {
         let text_primary = resolve_color(theme, "semantic.color.text.primary");
         let text_secondary = resolve_color(theme, "semantic.color.text.secondary");
         let border_color = resolve_color(theme, "semantic.color.border.subtle");
-        let panel_bg = resolve_color(theme, "semantic.color.background.panel");
+        let _panel_bg = resolve_color(theme, "semantic.color.background.panel");
         let radius = resolve_radius(theme, "semantic.radius.surface");
         let focus_ring = resolve_color(theme, "semantic.color.accent.focusRing");
         let panel_pad = resolve_px(theme, "semantic.space.panel.x");

@@ -81,7 +81,7 @@ impl IntoElement for PickerShell {
         let text_secondary = resolve_color(theme, "semantic.color.text.secondary");
         let border = resolve_color(theme, "semantic.color.border.subtle");
         let bg = resolve_color(theme, "semantic.color.background.elevated");
-        let accent = resolve_color(theme, "semantic.color.accent.base");
+        let _accent = resolve_color(theme, "semantic.color.accent.base");
 
         let mut shell = div()
             .flex()

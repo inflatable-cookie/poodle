@@ -131,7 +131,7 @@ impl IntoElement for Table {
     fn into_element(self) -> Self::Element {
         let cell_pad_v = px(11.0);
         let cell_pad_h = px(14.0);
-        let column_count = self.spec.columns.len();
+        let _column_count = self.spec.columns.len();
 
         let mut root = div()
             .flex()

@@ -215,7 +215,7 @@ impl IntoElement for DataTable {
                 if let Some(ref handler) = on_row_click {
                     let handler = handler.clone();
                     let row_id = row.id.clone();
-                    data_row = data_row.on_click(move |event, window, cx| {
+                    data_row = data_row.on_click(move |_event, window, cx| {
                         handler(&row_id, window, cx);
                     });
                 }
@@ -259,7 +259,7 @@ impl IntoElement for DataTable {
                         let handler = handler.clone();
                         let row_id = row.id.clone();
                         action_btn = action_btn
-                            .on_click(move |event, window, cx| {
+                            .on_click(move |_event, window, cx| {
                                 handler(&row_id, window, cx);
                             });
                     }

@@ -124,7 +124,7 @@ impl IntoElement for EmptyState {
                 let label = action.label.clone();
                 let action_id = SharedString::from(format!("empty-action-{}", action.id));
 
-                let mut btn = div()
+                let btn = div()
                     .id(action_id)
                     .cursor_pointer()
                     .px(px(16.0))

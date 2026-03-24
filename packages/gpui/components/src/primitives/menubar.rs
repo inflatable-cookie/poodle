@@ -83,7 +83,7 @@ impl IntoElement for Menubar {
         let control_radius = resolve_radius(theme, "semantic.radius.control");
         let disabled_opacity = resolve_opacity(theme, self.spec.disabled_opacity_token());
         let focus_ring = resolve_color(theme, "semantic.color.accent.focusRing");
-        let gap = theme.resolve_space(self.spec.trigger_gap_token());
+        let _gap = theme.resolve_space(self.spec.trigger_gap_token());
 
         // Contract: list border 72% border-subtle, bg 96% panel
         let list_border = color_mix(border_subtle, panel, 0.72);

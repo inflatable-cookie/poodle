@@ -76,7 +76,7 @@ impl IntoElement for Grid {
         let theme = &self.theme;
         let spec = &self.spec;
         let padding = spec.resolved_padding();
-        let col_count = self.column_count();
+        let _col_count = self.column_count();
 
         let mut el = div().flex().flex_wrap();
 

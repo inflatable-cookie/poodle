@@ -56,7 +56,7 @@ impl IntoElement for FormDialog {
     fn into_element(self) -> Self::Element {
         let theme = &self.theme;
         let title_color = resolve_color(theme, "semantic.color.text.primary");
-        let muted_color = resolve_color(theme, "semantic.color.text.muted");
+        let _muted_color = resolve_color(theme, "semantic.color.text.muted");
         let accent = resolve_color(theme, "semantic.color.accent.base");
         let panel_bg = resolve_color(theme, "semantic.color.background.panel");
         let control_radius = resolve_radius(theme, "semantic.radius.control");

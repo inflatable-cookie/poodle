@@ -86,7 +86,7 @@ impl IntoElement for DockRegion {
 
         let strip_fill = resolve_color(theme, spec.strip_fill_token());
         let border = resolve_color(theme, "semantic.color.border.default");
-        let text_primary = resolve_color(theme, "semantic.color.text.primary");
+        let _text_primary = resolve_color(theme, "semantic.color.text.primary");
         let text_secondary = resolve_color(theme, "semantic.color.text.secondary");
         let accent = resolve_color(theme, "semantic.color.accent.base");
         let hover_bg = resolve_color(theme, "semantic.color.background.elevated");

@@ -178,7 +178,7 @@ impl IntoElement for Select {
             let click_toggle = on_toggle_rc.clone();
             let key_toggle = on_toggle_rc.clone();
             let key_change = on_change_rc.clone();
-            let key_close = on_toggle_rc.clone();
+            let _key_close = on_toggle_rc.clone();
             let nav_values = selectable_values.clone();
             let current_sel = current_value.clone();
             let next_open = !is_open;
