@@ -91,8 +91,11 @@ impl IntoElement for Combobox {
         let spec = &self.spec;
 
         // ── Resolve input tokens ────────────────────────────────────
-        let input_fill = resolve_color(theme, spec.input_fill_token());
-        let input_border = resolve_color(theme, spec.input_border_token());
+        let input_fill_raw = resolve_color(theme, spec.input_fill_token());
+        let input_border_raw = resolve_color(theme, spec.input_border_token());
+        // Svelte treatment-interactive-subtle: fill 82%, border 72%
+        let input_fill = Hsla { a: input_fill_raw.a * 0.82, ..input_fill_raw };
+        let input_border = Hsla { a: input_border_raw.a * 0.72, ..input_border_raw };
         let input_text = resolve_color(theme, spec.input_text_token());
         let input_placeholder = resolve_color(theme, spec.input_placeholder_token());
         let input_radius = resolve_radius(theme, spec.input_radius_token());
@@ -102,16 +105,16 @@ impl IntoElement for Combobox {
         let focus_ring = resolve_color(theme, spec.focus_ring_color_token());
         let disabled_opacity = resolve_opacity(theme, spec.disabled_opacity_token());
 
-        // ── Resolve list tokens ─────────────────────────────────────
-        let elevated = resolve_color(theme, spec.list_fill_token());
-        let panel = resolve_color(theme, "semantic.color.background.panel");
-        let list_fill = color_mix(elevated, panel, 0.98);
-        let list_border_raw = resolve_color(theme, spec.list_border_token());
-        let list_border = color_mix(list_border_raw, panel, 0.72);
+        // ── Resolve list tokens (elevated treatment) ──────────────────
+        let elevated_raw = resolve_color(theme, spec.list_fill_token());
+        let border_default = resolve_color(theme, "semantic.color.border.default");
+        // Svelte treatment-surface-elevated: fill 94%, border 22%
+        let list_fill = Hsla { a: elevated_raw.a * 0.94, ..elevated_raw };
+        let list_border = Hsla { a: border_default.a * 0.22, ..border_default };
         let list_radius = resolve_radius(theme, spec.list_radius_token());
         let option_text = resolve_color(theme, spec.option_text_token());
         let accent = resolve_color(theme, spec.option_highlight_token());
-        let option_highlight = color_mix(accent, panel, 0.16);
+        let option_highlight = color_mix(accent, elevated_raw, 0.16);
         let option_desc_color = resolve_color(theme, spec.option_description_token());
         let empty_text = resolve_color(theme, spec.empty_text_token());
 

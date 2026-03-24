@@ -91,8 +91,11 @@ impl IntoElement for TextArea {
         let line_height_val = resolve_px(theme, spec.body_line_height_token());
         let line_height_f = theme.resolve_space(spec.body_line_height_token());
 
-        let surface_bg = resolve_color(theme, spec.fill_token());
-        let border = resolve_color(theme, spec.border_token());
+        let surface_raw = resolve_color(theme, spec.fill_token());
+        let border_default = resolve_color(theme, spec.border_token());
+        // Svelte treatment-interactive-subtle: fill 82%, border 72%
+        let surface_bg = Hsla { a: surface_raw.a * 0.82, ..surface_raw };
+        let border = Hsla { a: border_default.a * 0.72, ..border_default };
         let text_primary = resolve_color(theme, spec.text_color_token());
         let text_secondary = resolve_color(theme, spec.placeholder_color_token());
         let disabled_opacity = resolve_opacity(theme, spec.disabled_opacity_token());

@@ -84,15 +84,20 @@ impl IntoElement for Select {
         let stack_gap = resolve_px(theme, "semantic.space.stack.sm");
 
         let disabled_opacity = resolve_opacity(theme, "semantic.state.opacity.disabled");
-        let border = resolve_color(theme, "semantic.color.border.default");
-        let surface_bg = resolve_color(theme, "semantic.color.background.surface");
-        let elevated_bg = resolve_color(theme, spec.overlay_fill_token());
+        let border_default = resolve_color(theme, "semantic.color.border.default");
+        let surface_raw = resolve_color(theme, "semantic.color.background.surface");
+        let elevated_raw = resolve_color(theme, "semantic.color.background.elevated");
         let text_primary = resolve_color(theme, "semantic.color.text.primary");
         let text_secondary = resolve_color(theme, "semantic.color.text.secondary");
         let accent = resolve_color(theme, "semantic.color.accent.base");
 
-        // Contract: hover = color-mix(fill 84%, elevated)
-        let hover_bg = color_mix(surface_bg, elevated_bg, 0.84);
+        // Svelte treatment-interactive-subtle values for trigger
+        let surface_bg = Hsla { a: surface_raw.a * 0.82, ..surface_raw };
+        let border = Hsla { a: border_default.a * 0.72, ..border_default };
+        let hover_bg = Hsla { a: surface_raw.a * 0.88, ..surface_raw };
+        // Elevated treatment for dropdown overlay
+        let elevated_bg = Hsla { a: elevated_raw.a * 0.94, ..elevated_raw };
+        let overlay_border = Hsla { a: border_default.a * 0.22, ..border_default };
 
         let trigger_text = spec.trigger_text().unwrap_or(
             spec.placeholder.as_deref().unwrap_or("Select..."),
@@ -241,7 +246,7 @@ impl IntoElement for Select {
                 .rounded(control_radius)
                 .bg(elevated_bg)
                 .border_1()
-                .border_color(border)
+                .border_color(overlay_border)
                 // Contract: elevation-popover shadow
                 .shadow(vec![
                     gpui::BoxShadow {

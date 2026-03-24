@@ -125,8 +125,13 @@ impl IntoElement for TextInput {
         let body_line_height = resolve_px(theme, spec.body_line_height_token());
 
         let disabled_opacity = resolve_opacity(theme, spec.disabled_opacity_token());
-        let border = resolve_color(theme, spec.border_token());
-        let surface_bg = resolve_color(theme, spec.fill_token());
+        let border_default = resolve_color(theme, spec.border_token());
+        let surface_raw = resolve_color(theme, spec.fill_token());
+        // Svelte treatment-interactive-subtle values:
+        //   fill: surface 82%, fill-hover: surface 88%
+        //   border: border-default 72%, border-hover: border-default 92%
+        let surface_bg = Hsla { a: surface_raw.a * 0.82, ..surface_raw };
+        let border = Hsla { a: border_default.a * 0.72, ..border_default };
         let text_primary = resolve_color(theme, spec.text_color_token());
         let text_secondary = resolve_color(theme, spec.placeholder_color_token());
         let focus_ring = resolve_color(theme, spec.focus_ring_color_token());
