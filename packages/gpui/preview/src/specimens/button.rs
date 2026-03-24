@@ -252,6 +252,40 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                         )
                 )
         )
+        // --- Form overrides ---
+        .child(
+            div().flex().flex_col().gap(px(8.0))
+                .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Form overrides"), theme))
+                .child(
+                    div().flex().gap(px(8.0))
+                        .child(
+                            Button::from_spec(
+                                ButtonSpec::new()
+                                    .with_variant(ButtonVariant::Secondary)
+                                    .with_label("Save"),
+                                theme,
+                            )
+                            .with_id("form-save")
+                            .on_click(cx.listener(|this, _e: &ClickEvent, _w, cx| {
+                                this.state.specimens.text.insert("btn-last".to_string(), "Save (submit)".to_string());
+                                cx.notify();
+                            }))
+                        )
+                        .child(
+                            Button::from_spec(
+                                ButtonSpec::new()
+                                    .with_variant(ButtonVariant::Primary)
+                                    .with_label("Publish"),
+                                theme,
+                            )
+                            .with_id("form-publish")
+                            .on_click(cx.listener(|this, _e: &ClickEvent, _w, cx| {
+                                this.state.specimens.text.insert("btn-last".to_string(), "Publish (formaction)".to_string());
+                                cx.notify();
+                            }))
+                        )
+                )
+        )
         // --- Click counter ---
         .child(
             div().flex().flex_col().gap(px(2.0))
