@@ -96,8 +96,11 @@ mod list_card;
 mod metric_tile_specimen;
 mod page_header_specimen;
 mod page_loading_specimen;
+mod order_by_specimen;
 mod pagination_summary_specimen;
-mod picker;
+mod picker_shell_specimen;
+mod relation_picker_specimen;
+mod selection_summary_specimen;
 mod pagination;
 mod state_display;
 mod time_ago_specimen;
@@ -305,7 +308,10 @@ pub fn render_single_specimen(
         "card" => specimen_card("Card", theme, card_specimen::render(theme)),
         "card-radio-group" => specimen_card("CardRadioGroup", theme, card_radio_group_specimen::render(state, cx)),
         "nav-card" => specimen_card("NavCard", theme, nav_card_grid::render(theme)),
-        "picker-shell" | "relation-picker" | "selection-summary" | "order-by" => specimen_card("PickerShell", theme, picker::render(state, cx)),
+        "picker-shell" => specimen_card("PickerShell", theme, picker_shell_specimen::render(theme)),
+        "relation-picker" => specimen_card("RelationPicker", theme, relation_picker_specimen::render(theme)),
+        "selection-summary" => specimen_card("SelectionSummary", theme, selection_summary_specimen::render(theme)),
+        "order-by" => specimen_card("OrderBy", theme, order_by_specimen::render(theme)),
         "page-header" => specimen_card("PageHeader", theme, page_header_specimen::render(theme)),
         "breadcrumbs" => specimen_card("Breadcrumbs", theme, breadcrumbs_specimen::render(theme)),
         "page-loading" => specimen_card("PageLoading", theme, page_loading_specimen::render(theme)),

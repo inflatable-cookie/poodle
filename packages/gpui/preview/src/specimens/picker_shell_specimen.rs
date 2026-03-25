@@ -1,28 +1,15 @@
 use gpui::*;
 use poodle_adapter::ThemeProvider;
-use poodle_composites::{
-    PickerShellSpec, PickerVariant, BrowseState, SelectionMode,
-    RelationPickerSpec, PickerItemSpec,
-};
-use poodle_primitives::{TextInputSpec, OrderBySpec, SortField, ActiveSort, SortDirection, EyebrowSpec};
-use poodle_gpui_components::{PickerShell, RelationPicker, TextInput, OrderBy, Eyebrow};
-use crate::app_state::AppState;
+use poodle_composites::{PickerShellSpec, PickerVariant, BrowseState, SelectionMode};
+use poodle_primitives::{TextInputSpec, EyebrowSpec};
+use poodle_gpui_components::{PickerShell, TextInput, Eyebrow};
+use poodle_gpui::GpuiThemeProvider;
 use crate::style_bridge::color_to_hsla;
-use crate::PreviewRoot;
 
-pub(crate) fn render(state: &AppState, _cx: &mut Context<PreviewRoot>) -> Div {
-    let theme = &state.theme;
+pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
     let text_secondary = theme.resolve_color("semantic.color.text.secondary");
     let text_primary = theme.resolve_color("semantic.color.text.primary");
     let hover_bg = theme.resolve_color("semantic.color.background.hover");
-
-    let items = vec![
-        PickerItemSpec::new("btn", "Button"),
-        PickerItemSpec::new("chk", "Checkbox"),
-        PickerItemSpec::new("sel", "Select"),
-        PickerItemSpec::new("dlg", "Dialog"),
-        PickerItemSpec::new("tbl", "Table"),
-    ];
 
     div().flex().flex_col().gap(px(24.0))
         // --- Inline variant (ready) ---
@@ -54,11 +41,10 @@ pub(crate) fn render(state: &AppState, _cx: &mut Context<PreviewRoot>) -> Div {
                     )
                 )
         )
-
         // --- Loading state ---
         .child(
             div().flex().flex_col().gap(px(8.0))
-                .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Picker shell: loading"), theme))
+                .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Loading"), theme))
                 .child(
                     PickerShell::from_spec(
                         PickerShellSpec::new("Select an item")
@@ -69,7 +55,6 @@ pub(crate) fn render(state: &AppState, _cx: &mut Context<PreviewRoot>) -> Div {
                     .with_results(div())
                 )
         )
-
         // --- No results ---
         .child(
             div().flex().flex_col().gap(px(8.0))
@@ -85,8 +70,7 @@ pub(crate) fn render(state: &AppState, _cx: &mut Context<PreviewRoot>) -> Div {
                     .with_results(div())
                 )
         )
-
-        // --- Multi-select with selection count ---
+        // --- Multiple selection ---
         .child(
             div().flex().flex_col().gap(px(8.0))
                 .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Multiple selection"), theme))
@@ -108,69 +92,10 @@ pub(crate) fn render(state: &AppState, _cx: &mut Context<PreviewRoot>) -> Div {
                     )
                 )
         )
-
-        // --- OrderBy: Sort controls ---
-        .child(
-            div().flex().flex_col().gap(px(8.0))
-                .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Order by: sort controls"), theme))
-                .child(
-                    div().flex().flex_col().gap(px(8.0))
-                        .child(
-                            OrderBy::from_spec(
-                                OrderBySpec::new()
-                                    .with_fields(vec![
-                                        SortField::new("name", "Name"),
-                                        SortField::new("date", "Date"),
-                                        SortField::new("size", "Size"),
-                                        SortField::new("type", "Type").with_disabled(true),
-                                    ])
-                                    .with_active_sort(ActiveSort::new("name", SortDirection::Asc)),
-                                theme,
-                            )
-                        )
-                        .child(
-                            div().text_xs().text_color(color_to_hsla(text_secondary))
-                                .child("Sorted by: name (ascending)")
-                        )
-                )
-        )
-
-        // --- OrderBy: Disabled ---
-        .child(
-            div().flex().flex_col().gap(px(8.0))
-                .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Order by: disabled"), theme))
-                .child(
-                    OrderBy::from_spec(
-                        OrderBySpec::new()
-                            .with_fields(vec![
-                                SortField::new("name", "Name"),
-                                SortField::new("date", "Date"),
-                            ])
-                            .with_disabled(true),
-                        theme,
-                    )
-                )
-        )
-
-        // --- RelationPicker ---
-        .child(
-            div().flex().flex_col().gap(px(8.0))
-                .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Relation picker"), theme))
-                .child(
-                    RelationPicker::from_spec(
-                        RelationPickerSpec::new(items)
-                            .with_selected_ids(vec!["btn".to_string(), "dlg".to_string()])
-                            .with_selection_mode(SelectionMode::Multiple)
-                            .with_state(BrowseState::Ready),
-                        theme,
-                    )
-                )
-        )
 }
 
 fn result_row(
-    label: &str,
-    meta: &str,
+    label: &str, meta: &str,
     primary: poodle_tokens::typed::ColorValue,
     secondary: poodle_tokens::typed::ColorValue,
     hover: poodle_tokens::typed::ColorValue,
@@ -180,15 +105,9 @@ fn result_row(
         .px(px(12.0)).py(px(8.0))
         .hover(|s| s.bg(color_to_hsla(hover)))
         .cursor(CursorStyle::PointingHand)
-        .child(
-            div().text_sm().text_color(color_to_hsla(primary))
-                .child(label.to_string())
-        );
+        .child(div().text_sm().text_color(color_to_hsla(primary)).child(label.to_string()));
     if !meta.is_empty() {
-        row = row.child(
-            div().text_xs().text_color(color_to_hsla(secondary))
-                .child(meta.to_string())
-        );
+        row = row.child(div().text_xs().text_color(color_to_hsla(secondary)).child(meta.to_string()));
     }
     row
 }
