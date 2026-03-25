@@ -101,11 +101,13 @@ mod picker;
 mod pagination;
 mod state_display;
 mod time_ago_specimen;
+mod block_editor_specimen;
+mod markdown_editor_specimen;
 mod misc_composites;
+mod split_view_specimen;
 mod form_layout;
 mod reorderable_list;
 mod media;
-mod editors;
 
 // ── Layout Helpers ───────────────────────────────────────
 mod collapse_toggle;
@@ -317,7 +319,8 @@ pub fn render_single_specimen(
         "audio-player" | "video-player" | "media-picker" | "media-preview" | "media-thumbnail" => {
             specimen_card("Media", theme, media::render(state, cx))
         }
-        "markdown-editor" | "block-editor" => specimen_card("Editors", theme, editors::render(state, cx)),
+        "markdown-editor" => specimen_card("MarkdownEditor", theme, markdown_editor_specimen::render(state, cx)),
+        "block-editor" => specimen_card("BlockEditor", theme, block_editor_specimen::render(theme)),
 
         // ── Layout Helpers ─────────────────────────────────────
         "collapse-toggle" => specimen_card("CollapseToggle", theme, collapse_toggle::render(state, cx)),
@@ -328,7 +331,8 @@ pub fn render_single_specimen(
         // ── App Shell ───────────────────────────────────────────
         "app-header" => specimen_card("AppHeader", theme, app_header::render(theme)),
         "command-palette" => specimen_card("CommandPalette", theme, command_palette::render(state, cx)),
-        "dock-region" | "split-view" => specimen_card("Dock + SplitView", theme, dock_split::render(state, cx)),
+        "dock-region" => specimen_card("DockRegion", theme, dock_split::render(state, cx)),
+        "split-view" => specimen_card("SplitView", theme, split_view_specimen::render(theme)),
         "status-bar" => specimen_card("StatusBar", theme, status_bar::render(state, cx)),
         "action-discovery-panel" => specimen_card("ActionDiscovery", theme, action_discovery::render(state, cx)),
 
