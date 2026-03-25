@@ -138,7 +138,7 @@ impl IntoElement for Select {
         } else {
             trigger = trigger
                 .cursor_pointer()
-                .hover(move |s| s.bg(hover_bg).border_color(hover_border));
+                .hover(move |s| s.bg(hover_bg).border_color(hover_border).shadow(vec![gpui::BoxShadow { color: hsla(0.0, 0.0, 1.0, 0.10), offset: point(px(0.0), px(1.0)), blur_radius: px(0.0), spread_radius: px(0.0) }]));
         }
 
         let text_col = if is_placeholder {

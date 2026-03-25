@@ -194,7 +194,7 @@ impl IntoElement for Combobox {
                 .bg(input_fill)
                 .border_1()
                 .border_color(input_border)
-                .hover(move |s| s.bg(input_hover_fill).border_color(input_hover_border))
+                .hover(move |s| s.bg(input_hover_fill).border_color(input_hover_border).shadow(vec![gpui::BoxShadow { color: hsla(0.0, 0.0, 1.0, 0.10), offset: point(px(0.0), px(1.0)), blur_radius: px(0.0), spread_radius: px(0.0) }]))
                 .focus(move |s| s
                     .border_color(focus_ring)
                     .shadow(vec![gpui::BoxShadow {

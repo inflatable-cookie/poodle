@@ -223,7 +223,7 @@ impl IntoElement for Button {
         } else {
             el = el
                 .cursor_pointer()
-                .hover(move |s| s.bg(hover_fill).border_color(hover_border))
+                .hover(move |s| s.bg(hover_fill).border_color(hover_border).shadow(vec![gpui::BoxShadow { color: hsla(0.0, 0.0, 1.0, 0.10), offset: point(px(0.0), px(1.0)), blur_radius: px(0.0), spread_radius: px(0.0) }]))
                 // Contract: active press effect — use relative positioning to avoid layout shift
                 .active(move |s| s.bg(active_fill));
         }

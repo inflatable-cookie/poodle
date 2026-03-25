@@ -145,7 +145,7 @@ impl IntoElement for TextArea {
             .text_size(body_size)
             .line_height(line_height_val)
             .text_color(text_col)
-            .hover(move |s| s.bg(hover_bg).border_color(hover_border))
+            .hover(move |s| s.bg(hover_bg).border_color(hover_border).shadow(vec![gpui::BoxShadow { color: hsla(0.0, 0.0, 1.0, 0.10), offset: point(px(0.0), px(1.0)), blur_radius: px(0.0), spread_radius: px(0.0) }]))
             .focus(move |s| s
                 .border_color(focus_ring)
                 .bg(focus_bg)
