@@ -62,7 +62,6 @@ mod rating;
 mod skeleton;
 mod pill;
 mod eyebrow;
-mod temporal;
 mod code;
 mod color_picker;
 mod file_upload;
@@ -91,6 +90,7 @@ mod detail_row_specimen;
 mod detail_section_specimen;
 mod detail_shell;
 mod breadcrumbs_specimen;
+mod duration_input_specimen;
 mod empty_state_specimen;
 mod list_card;
 mod metric_tile_specimen;
@@ -100,6 +100,7 @@ mod pagination_summary_specimen;
 mod picker;
 mod pagination;
 mod state_display;
+mod time_ago_specimen;
 mod misc_composites;
 mod form_layout;
 mod reorderable_list;
@@ -268,7 +269,8 @@ pub fn render_single_specimen(
         "rating" => specimen_card("Rating", theme, rating::render(state, cx)),
         "skeleton" => specimen_card("Skeleton", theme, skeleton::render(theme)),
         "eyebrow" => specimen_card("Eyebrow", theme, eyebrow::render(theme)),
-        "time-ago" | "duration-input" => specimen_card("TimeAgo + DurationInput", theme, temporal::render(theme)),
+        "time-ago" => specimen_card("TimeAgo", theme, time_ago_specimen::render(theme)),
+        "duration-input" => specimen_card("DurationInput", theme, duration_input_specimen::render(theme)),
         "code" => specimen_card("Code", theme, code::render(theme)),
         "color-picker" => specimen_card("ColorPicker", theme, color_picker::render(state, cx)),
         "file-upload" => specimen_card("FileUpload", theme, file_upload::render(theme)),
