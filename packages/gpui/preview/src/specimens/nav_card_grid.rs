@@ -48,51 +48,6 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
                 )
         )
 
-        // --- 3 columns ---
-        .child(
-            div().flex().flex_col().gap(px(8.0))
-                .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("3 columns"), theme))
-                .child(
-                    NavCardGrid::from_spec(NavCardGridSpec::new().with_columns(3), theme)
-                        .with_child(
-                            NavCard::from_spec(
-                                NavCardSpec::new().with_title("Overview").with_description("System overview"),
-                                theme,
-                            )
-                        )
-                        .with_child(
-                            NavCard::from_spec(
-                                NavCardSpec::new().with_title("Installation").with_description("Setup guide"),
-                                theme,
-                            )
-                        )
-                        .with_child(
-                            NavCard::from_spec(
-                                NavCardSpec::new().with_title("Configuration").with_description("Config options"),
-                                theme,
-                            )
-                        )
-                        .with_child(
-                            NavCard::from_spec(
-                                NavCardSpec::new().with_title("Themes").with_description("Theme customization"),
-                                theme,
-                            )
-                        )
-                        .with_child(
-                            NavCard::from_spec(
-                                NavCardSpec::new().with_title("Plugins").with_description("Extend functionality"),
-                                theme,
-                            )
-                        )
-                        .with_child(
-                            NavCard::from_spec(
-                                NavCardSpec::new().with_title("FAQ").with_description("Common questions"),
-                                theme,
-                            )
-                        )
-                )
-        )
-
         // --- Single card (as link) ---
         .child(
             div().flex().flex_col().gap(px(8.0))
@@ -104,43 +59,6 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
                             .with_href("#"),
                         theme,
                     )
-                )
-        )
-
-        // --- 4 columns ---
-        .child(
-            div().flex().flex_col().gap(px(8.0))
-                .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("4 columns"), theme))
-                .child(
-                    NavCardGrid::from_spec(NavCardGridSpec::new().with_columns(4), theme)
-                        .with_child(
-                            NavCard::from_spec(
-                                NavCardSpec::new().with_title("Home").with_description("Return home"),
-                                theme,
-                            )
-                            .with_icon(Icon::from_spec(IconSpec::new("home"), theme))
-                        )
-                        .with_child(
-                            NavCard::from_spec(
-                                NavCardSpec::new().with_title("Search").with_description("Find content"),
-                                theme,
-                            )
-                            .with_icon(Icon::from_spec(IconSpec::new("search"), theme))
-                        )
-                        .with_child(
-                            NavCard::from_spec(
-                                NavCardSpec::new().with_title("Recent").with_description("Recent items"),
-                                theme,
-                            )
-                            .with_icon(Icon::from_spec(IconSpec::new("clock"), theme))
-                        )
-                        .with_child(
-                            NavCard::from_spec(
-                                NavCardSpec::new().with_title("Favorites").with_description("Saved items"),
-                                theme,
-                            )
-                            .with_icon(Icon::from_spec(IconSpec::new("star"), theme))
-                        )
                 )
         )
 }
