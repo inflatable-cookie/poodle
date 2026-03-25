@@ -78,8 +78,10 @@ impl Tabs {
         let disabled_opacity = resolve_opacity(theme, self.spec.disabled_opacity_token());
         let accent = resolve_color(theme, self.spec.indicator_token());
         let border = resolve_color(theme, self.spec.list_border_token());
+        let text_primary = resolve_color(theme, "semantic.color.text.primary");
         let text_secondary = resolve_color(theme, "semantic.color.text.secondary");
         let elevated = resolve_color(theme, "semantic.color.background.elevated");
+        let radius = resolve_radius(theme, "semantic.radius.control");
         let focus_ring = resolve_color(theme, self.spec.focus_ring_color_token());
 
         let hover_bg = elevated;
@@ -106,8 +108,12 @@ impl Tabs {
                 .text_size(px(13.0)).font_weight(FontWeight::SEMIBOLD);
 
             if is_active {
+                // Svelte: pill-shaped highlight with accent 18% bg, text-primary color
+                let active_bg = Hsla { a: accent.a * 0.18, ..accent };
                 tab = tab
-                    .text_color(accent)
+                    .text_color(text_primary)
+                    .bg(active_bg)
+                    .rounded(radius)
                     .border_b_2()
                     .border_color(accent);
             } else {
@@ -169,6 +175,7 @@ impl Tabs {
         let border = resolve_color(theme, self.spec.list_border_token());
         let text_secondary = resolve_color(theme, "semantic.color.text.secondary");
         let surface_bg = resolve_color(theme, "semantic.color.background.surface");
+        let text_primary = resolve_color(theme, "semantic.color.text.primary");
         let elevated = resolve_color(theme, "semantic.color.background.elevated");
         let radius = resolve_radius(theme, "semantic.radius.control");
         let focus_ring = resolve_color(theme, self.spec.focus_ring_color_token());
@@ -193,19 +200,27 @@ impl Tabs {
                 .py(control_y)
                 .text_size(px(13.0)).font_weight(FontWeight::SEMIBOLD)
                 .border_1()
-                .rounded_t(radius);
+                .rounded(radius);
+
+            // Svelte: default = surface 92% fill, border-subtle 68% border
+            // Selected = accent 32% + border-subtle border, text-primary color
+            let card_default_bg = Hsla { a: surface_bg.a * 0.92, ..surface_bg };
+            let card_default_border = Hsla { a: border.a * 0.68, ..border };
+            let card_selected_border = {
+                use crate::theme_ext::color_mix;
+                color_mix(accent, border, 0.32)
+            };
 
             if is_active {
                 tab = tab
-                    .text_color(accent)
-                    .bg(surface_bg)
-                    .border_color(border)
-                    .border_b_0(); // blend with content below
+                    .text_color(text_primary)
+                    .bg(card_default_bg)
+                    .border_color(card_selected_border);
             } else {
                 tab = tab
                     .text_color(text_secondary)
-                    .bg(gpui::transparent_black())
-                    .border_color(gpui::transparent_black());
+                    .bg(card_default_bg)
+                    .border_color(card_default_border);
             }
 
             tab = tab.focus(move |s| s.border_color(focus_ring).shadow(crate::theme_ext::focus_ring_shadow(focus_ring)));
