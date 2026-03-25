@@ -85,10 +85,11 @@ mod menubar;
 // ── Composites ────────────────────────────────────────────
 mod data_table;
 mod table;
+mod card_radio_group_specimen;
+mod card_specimen;
 mod detail_row_specimen;
 mod detail_section_specimen;
 mod detail_shell;
-mod cards;
 mod list_card;
 mod picker;
 mod page_structure;
@@ -292,7 +293,9 @@ pub fn render_single_specimen(
         "detail-shell" => specimen_card("DetailShell", theme, detail_shell::render(theme)),
         "detail-row" => specimen_card("DetailRow", theme, detail_row_specimen::render(theme)),
         "detail-section" => specimen_card("DetailSection", theme, detail_section_specimen::render(theme)),
-        "nav-card" | "card" | "card-radio-group" => specimen_card("Cards", theme, cards::render(state, cx)),
+        "card" => specimen_card("Card", theme, card_specimen::render(theme)),
+        "card-radio-group" => specimen_card("CardRadioGroup", theme, card_radio_group_specimen::render(state, cx)),
+        "nav-card" => specimen_card("NavCard", theme, nav_card_grid::render(theme)),
         "picker-shell" | "relation-picker" | "selection-summary" | "order-by" => specimen_card("PickerShell", theme, picker::render(state, cx)),
         "page-header" | "breadcrumbs" | "page-loading" | "pagination-summary" => specimen_card("Page Structure", theme, page_structure::render(theme)),
         "metric-tile" | "state-tile" | "empty-state" | "toast-stack" => specimen_card("State Display", theme, state_display::render(state, cx)),
