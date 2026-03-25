@@ -134,7 +134,7 @@ impl IntoElement for SplitButton {
                 .cursor_pointer()
                 .hover(move |s| s.bg(hover_fill).border_color(hover_border))
                 .active(move |s| s.bg(active_fill))
-                .focus(move |s| s.border_color(focus_ring));
+                .focus(move |s| s.border_color(focus_ring).shadow(crate::theme_ext::focus_ring_shadow(focus_ring)));
         }
 
         if !label_text.is_empty() {
@@ -160,7 +160,7 @@ impl IntoElement for SplitButton {
             toggle = toggle
                 .cursor_pointer()
                 .hover(move |s| s.bg(hover_fill))
-                .focus(move |s| s.border_color(focus_ring));
+                .focus(move |s| s.border_color(focus_ring).shadow(crate::theme_ext::focus_ring_shadow(focus_ring)));
         }
 
         toggle = toggle.child(

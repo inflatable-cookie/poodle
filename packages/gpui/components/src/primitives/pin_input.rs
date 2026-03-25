@@ -97,7 +97,7 @@ impl IntoElement for PinInput {
             .flex()
             .gap(cell_gap)
             // Contract: focus ring on root group
-            .focus(move |s| s.border_color(focus_ring));
+            .focus(move |s| s.border_color(focus_ring).shadow(crate::theme_ext::focus_ring_shadow(focus_ring)));
 
         for i in 0..spec.length {
             let ch = chars.get(i).copied();

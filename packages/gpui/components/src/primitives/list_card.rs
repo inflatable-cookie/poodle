@@ -251,7 +251,7 @@ impl IntoElement for ListCard {
             root = root.child(sash);
         }
 
-        root = root.focus(move |s| s.border_color(focus_ring_color));
+        root = root.focus(move |s| s.border_color(focus_ring_color).shadow(crate::theme_ext::focus_ring_shadow(focus_ring_color)));
 
         // ── Interactive hover state ─────────────────────────────────
         if is_interactive {

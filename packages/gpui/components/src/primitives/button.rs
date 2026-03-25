@@ -212,7 +212,7 @@ impl IntoElement for Button {
         // GPUI has no CSS outline equivalent. We approximate with border-color
         // change on focus. Known delta: no outline-offset separation.
         let focus_ring_color = resolve_color(theme, spec.focus_ring_color_token());
-        el = el.focus(move |s| s.border_color(focus_ring_color));
+        el = el.focus(move |s| s.border_color(focus_ring_color).shadow(crate::theme_ext::focus_ring_shadow(focus_ring_color)));
 
         // ── Interactive states ────────────────────────────────────
         let icon_color = text_color;

@@ -114,7 +114,7 @@ impl Tabs {
                 tab = tab.text_color(text_secondary);
             }
 
-            tab = tab.focus(move |s| s.border_color(focus_ring));
+            tab = tab.focus(move |s| s.border_color(focus_ring).shadow(crate::theme_ext::focus_ring_shadow(focus_ring)));
 
             if is_disabled {
                 tab = tab
@@ -208,7 +208,7 @@ impl Tabs {
                     .border_color(gpui::transparent_black());
             }
 
-            tab = tab.focus(move |s| s.border_color(focus_ring));
+            tab = tab.focus(move |s| s.border_color(focus_ring).shadow(crate::theme_ext::focus_ring_shadow(focus_ring)));
 
             if is_disabled {
                 tab = tab
@@ -328,7 +328,7 @@ impl Tabs {
                 tab = tab.text_color(text_secondary);
             }
 
-            tab = tab.focus(move |s| s.border_color(focus_ring));
+            tab = tab.focus(move |s| s.border_color(focus_ring).shadow(crate::theme_ext::focus_ring_shadow(focus_ring)));
 
             if is_disabled {
                 tab = tab

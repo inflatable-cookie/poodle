@@ -123,7 +123,7 @@ impl IntoElement for ColorPicker {
             .border_color(border)
             .cursor_pointer()
             // Contract: focus ring on trigger
-            .focus(move |s| s.border_color(focus_ring));
+            .focus(move |s| s.border_color(focus_ring).shadow(crate::theme_ext::focus_ring_shadow(focus_ring)));
 
         if spec.is_disabled {
             trigger = trigger

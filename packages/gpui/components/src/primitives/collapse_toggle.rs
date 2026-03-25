@@ -106,7 +106,7 @@ impl IntoElement for CollapseToggle {
 
         // Focus ring
         let focus_ring = resolve_color(theme, spec.focus_ring_color_token());
-        el = el.focus(move |s| s.border_color(focus_ring));
+        el = el.focus(move |s| s.border_color(focus_ring).shadow(crate::theme_ext::focus_ring_shadow(focus_ring)));
 
         // ── Interactive states ───────────────────────────────────
         if is_disabled {

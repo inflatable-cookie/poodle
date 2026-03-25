@@ -128,7 +128,7 @@ impl IntoElement for Menubar {
                 .font_weight(FontWeight::SEMIBOLD)
                 .text_color(text_primary);
 
-            trigger = trigger.focus(move |s| s.border_color(focus_ring));
+            trigger = trigger.focus(move |s| s.border_color(focus_ring).shadow(crate::theme_ext::focus_ring_shadow(focus_ring)));
 
             if is_active {
                 trigger = trigger.bg(trigger_hover);

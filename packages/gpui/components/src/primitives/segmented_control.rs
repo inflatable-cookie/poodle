@@ -124,7 +124,7 @@ impl IntoElement for SegmentedControl {
                 .whitespace_nowrap()
                 .overflow_x_hidden()
                 .text_ellipsis()
-                .focus(move |s| s.border_color(focus_ring));
+                .focus(move |s| s.border_color(focus_ring).shadow(crate::theme_ext::focus_ring_shadow(focus_ring)));
 
             if is_selected {
                 // Contract: selected segment with inset shadow

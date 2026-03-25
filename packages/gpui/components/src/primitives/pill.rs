@@ -170,7 +170,7 @@ impl IntoElement for Pill {
         };
         el = el.child(display_label);
 
-        el = el.focus(move |s| s.border_color(focus_ring));
+        el = el.focus(move |s| s.border_color(focus_ring).shadow(crate::theme_ext::focus_ring_shadow(focus_ring)));
 
         // Muted: reduced opacity
         if spec.is_muted {

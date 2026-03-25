@@ -214,7 +214,7 @@ impl IntoElement for RangeCalendar {
             .border_color(border);
 
         let focus_ring = resolve_color(theme, "semantic.color.accent.focusRing");
-        cal = cal.focus(move |s| s.border_color(focus_ring));
+        cal = cal.focus(move |s| s.border_color(focus_ring).shadow(crate::theme_ext::focus_ring_shadow(focus_ring)));
 
         if spec.is_disabled {
             cal = cal

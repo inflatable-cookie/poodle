@@ -122,7 +122,7 @@ impl IntoElement for DateRangePicker {
 
         // Focus ring
         let focus_ring = resolve_color(theme, "semantic.color.accent.focusRing");
-        trigger = trigger.focus(move |s| s.border_color(focus_ring));
+        trigger = trigger.focus(move |s| s.border_color(focus_ring).shadow(crate::theme_ext::focus_ring_shadow(focus_ring)));
 
         if is_disabled {
             trigger = trigger

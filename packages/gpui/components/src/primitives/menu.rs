@@ -168,7 +168,7 @@ impl IntoElement for Menu {
                 .items_center()
                 .justify_between();
 
-            row = row.focus(move |s| s.border_color(focus_ring));
+            row = row.focus(move |s| s.border_color(focus_ring).shadow(crate::theme_ext::focus_ring_shadow(focus_ring)));
 
             // Keyboard: Enter/Space to select, Escape to close, ArrowUp/ArrowDown to navigate
             if !is_disabled {

@@ -82,7 +82,7 @@ impl IntoElement for ScrollShell {
 
         // Focus ring for focusable shells
         if spec.is_focusable {
-            el = el.focusable().focus(move |s| s.border_color(focus_ring));
+            el = el.focusable().focus(move |s| s.border_color(focus_ring).shadow(crate::theme_ext::focus_ring_shadow(focus_ring)));
         }
 
         // Padding

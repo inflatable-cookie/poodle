@@ -131,7 +131,7 @@ impl IntoElement for Select {
             .justify_between()
             .gap(inline_gap)
             .text_size(px(14.0))
-            .focus(move |s| s.border_color(focus_ring));
+            .focus(move |s| s.border_color(focus_ring).shadow(crate::theme_ext::focus_ring_shadow(focus_ring)));
 
         if is_disabled {
             trigger = trigger.opacity(disabled_opacity).cursor(CursorStyle::OperationNotAllowed);

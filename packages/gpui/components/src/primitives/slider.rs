@@ -159,7 +159,7 @@ impl IntoElement for Slider {
             .child(track)
             .child(labels);
 
-        wrapper = wrapper.focus(move |s| s.border_color(focus_ring));
+        wrapper = wrapper.focus(move |s| s.border_color(focus_ring).shadow(crate::theme_ext::focus_ring_shadow(focus_ring)));
 
         if is_disabled {
             wrapper = wrapper

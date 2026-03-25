@@ -123,7 +123,7 @@ impl IntoElement for Accordion {
                 .gap(px(8.0))
                 .cursor_pointer();
 
-            trigger = trigger.focus(move |s| s.border_color(focus_ring));
+            trigger = trigger.focus(move |s| s.border_color(focus_ring).shadow(crate::theme_ext::focus_ring_shadow(focus_ring)));
 
             if is_disabled {
                 trigger = trigger

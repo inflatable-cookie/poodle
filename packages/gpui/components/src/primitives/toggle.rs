@@ -110,7 +110,7 @@ impl IntoElement for Toggle {
             .font_weight(FontWeight::SEMIBOLD)
             .line_height(relative(1.0))
             .flex().items_center().justify_center()
-            .focus(move |s| s.border_color(focus_ring));
+            .focus(move |s| s.border_color(focus_ring).shadow(crate::theme_ext::focus_ring_shadow(focus_ring)));
 
         // Stack layout = full width
         if spec.layout == ToggleLayout::Stack {

@@ -168,7 +168,7 @@ impl IntoElement for OrderBy {
 
             {
                 let focus_ring_color = self.focus_ring_color;
-                btn = btn.focus(move |s| s.border_color(focus_ring_color));
+                btn = btn.focus(move |s| s.border_color(focus_ring_color).shadow(crate::theme_ext::focus_ring_shadow(focus_ring_color)));
             }
 
             if field_disabled {

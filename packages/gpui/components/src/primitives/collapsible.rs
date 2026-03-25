@@ -102,7 +102,7 @@ impl IntoElement for Collapsible {
             .flex().items_center()
             .gap(px(12.0)) // 0.75rem
             .w_full()
-            .focus(move |s| s.border_color(focus_ring));
+            .focus(move |s| s.border_color(focus_ring).shadow(crate::theme_ext::focus_ring_shadow(focus_ring)));
 
         // Title block (1fr)
         let mut title_block = div().flex().flex_col().flex_1().min_w(px(0.0));

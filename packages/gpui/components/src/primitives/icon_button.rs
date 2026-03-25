@@ -152,7 +152,7 @@ impl IntoElement for IconButton {
         }
 
         // ── Focus ring ────────────────────────────────────────────
-        el = el.focus(move |s| s.border_color(focus_ring_color));
+        el = el.focus(move |s| s.border_color(focus_ring_color).shadow(crate::theme_ext::focus_ring_shadow(focus_ring_color)));
 
         // ── Interactive states ────────────────────────────────────
         if is_unavailable {

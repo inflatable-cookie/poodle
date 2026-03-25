@@ -102,7 +102,7 @@ impl IntoElement for TimeZoneSelect {
                 ).with_color(text_secondary),
             );
 
-        trigger = trigger.focus(move |s| s.border_color(focus_ring));
+        trigger = trigger.focus(move |s| s.border_color(focus_ring).shadow(crate::theme_ext::focus_ring_shadow(focus_ring)));
 
         if spec.is_disabled {
             trigger = trigger

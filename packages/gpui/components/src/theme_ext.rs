@@ -62,6 +62,17 @@ pub fn color_mix_black(color: Hsla, ratio: f32) -> Hsla {
     mixed.into()
 }
 
+/// Build the standard Svelte focus ring shadow: 0 0 0 2px focusRing@28%.
+/// Use with `.focus(move |s| s.border_color(fr).shadow(focus_ring_shadow(fr)))`.
+pub fn focus_ring_shadow(focus_ring_color: Hsla) -> Vec<gpui::BoxShadow> {
+    vec![gpui::BoxShadow {
+        color: Hsla { a: focus_ring_color.a * 0.28, ..focus_ring_color },
+        offset: gpui::point(gpui::px(0.0), gpui::px(0.0)),
+        blur_radius: gpui::px(0.0),
+        spread_radius: gpui::px(2.0),
+    }]
+}
+
 /// Parse a CSS hex color string (#rrggbb or #rgb) to Hsla.
 pub fn parse_hex_color(hex: &str) -> Option<Hsla> {
     let hex = hex.strip_prefix('#').unwrap_or(hex);

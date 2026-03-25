@@ -185,7 +185,7 @@ impl IntoElement for NavCard {
             .child(content)
             .child(arrow);
 
-        root = root.focus(move |s| s.border_color(focus_ring_color));
+        root = root.focus(move |s| s.border_color(focus_ring_color).shadow(crate::theme_ext::focus_ring_shadow(focus_ring_color)));
 
         if is_disabled {
             root = root
