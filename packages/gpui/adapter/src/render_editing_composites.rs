@@ -2,17 +2,17 @@
 //! and operational composites.
 //!
 //! g07.009: AudioPlayer, VideoPlayer, MediaPicker, MarkdownEditor, BlockEditor,
-//! EmbedInput, EmbedPreview, AutonomousList, ReorderableList,
-//! Breadcrumbs, CardRadioGroup, InlineEditableField, ListCard, NavCard,
-//! NavCardGrid, OrderBy, PageHeader, SlugField, LogList, PageLoading,
+//! EmbedInput, EmbedPreview, ReorderableList,
+//! Breadcrumbs, CardRadioGroup, ListCard, NavCard,
+//! NavCardGrid, OrderBy, PageHeader, LogList, PageLoading,
 //! StateTile, ToastStack, EmptyState
 
 use poodle_adapter::{RenderComponent, ThemeProvider};
 use poodle_composites::{
-    AudioPlayerSpec, AutonomousListSpec, BlockEditorSpec, CardRadioGroupSpec,
-    EmbedInputSpec, EmbedPreviewSpec, EmptyStateSpec, InlineEditableFieldSpec,
+    AudioPlayerSpec, BlockEditorSpec, CardRadioGroupSpec,
+    EmbedInputSpec, EmbedPreviewSpec, EmptyStateSpec,
     LogListSpec, MarkdownEditorSpec, MediaPickerSpec,
-    PageHeaderSpec, PageLoadingSpec, ReorderableListSpec, SlugFieldSpec,
+    PageHeaderSpec, PageLoadingSpec, ReorderableListSpec,
     StateTileSpec, ToastStackSpec, VideoPlayerSpec,
 };
 use poodle_primitives::{
@@ -79,14 +79,6 @@ impl RenderComponent<EmbedPreviewSpec> for GpuiAdapter {
     }
 }
 
-impl RenderComponent<AutonomousListSpec> for GpuiAdapter {
-    type Target = GpuiTarget;
-    fn render(&self, _spec: &AutonomousListSpec, style: &StyleDescriptor, _theme: &dyn ThemeProvider) -> GpuiElementHandle {
-        let _s = map_style(style);
-        GpuiElementHandle::new("autonomous-list", "AutonomousListSpec")
-    }
-}
-
 impl RenderComponent<ReorderableListSpec> for GpuiAdapter {
     type Target = GpuiTarget;
     fn render(&self, _spec: &ReorderableListSpec, style: &StyleDescriptor, _theme: &dyn ThemeProvider) -> GpuiElementHandle {
@@ -108,14 +100,6 @@ impl RenderComponent<CardRadioGroupSpec> for GpuiAdapter {
     fn render(&self, _spec: &CardRadioGroupSpec, style: &StyleDescriptor, _theme: &dyn ThemeProvider) -> GpuiElementHandle {
         let _s = map_style(style);
         GpuiElementHandle::new("card-radio-group", "CardRadioGroupSpec")
-    }
-}
-
-impl RenderComponent<InlineEditableFieldSpec> for GpuiAdapter {
-    type Target = GpuiTarget;
-    fn render(&self, _spec: &InlineEditableFieldSpec, style: &StyleDescriptor, _theme: &dyn ThemeProvider) -> GpuiElementHandle {
-        let _s = map_style(style);
-        GpuiElementHandle::new("inline-editable-field", "InlineEditableFieldSpec")
     }
 }
 
@@ -167,14 +151,6 @@ impl RenderComponent<PageLoadingSpec> for GpuiAdapter {
     }
 }
 
-impl RenderComponent<SlugFieldSpec> for GpuiAdapter {
-    type Target = GpuiTarget;
-    fn render(&self, _spec: &SlugFieldSpec, style: &StyleDescriptor, _theme: &dyn ThemeProvider) -> GpuiElementHandle {
-        let _s = map_style(style);
-        GpuiElementHandle::new("slug-field", "SlugFieldSpec")
-    }
-}
-
 impl RenderComponent<LogListSpec> for GpuiAdapter {
     type Target = GpuiTarget;
     fn render(&self, _spec: &LogListSpec, style: &StyleDescriptor, _theme: &dyn ThemeProvider) -> GpuiElementHandle {
@@ -211,7 +187,7 @@ impl RenderComponent<EmptyStateSpec> for GpuiAdapter {
 mod tests {
     use poodle_adapter::RenderComponent;
     use poodle_composites::*;
-    use poodle_primitives::ChoiceOption;
+    use poodle_primitives::{BreadcrumbsSpec, ChoiceOption, ListCardSpec, NavCardGridSpec, NavCardSpec, OrderBySpec};
     use poodle_style::StyleDescriptor;
     use crate::{GpuiAdapter, theme::GpuiThemeProvider};
 
@@ -226,18 +202,15 @@ mod tests {
     #[test] fn block_editor() { assert_eq!(a().render(&BlockEditorSpec::new(), &s(), &t()).spec_type, "BlockEditorSpec"); }
     #[test] fn embed_input() { assert_eq!(a().render(&EmbedInputSpec::new(), &s(), &t()).spec_type, "EmbedInputSpec"); }
     #[test] fn embed_preview() { assert_eq!(a().render(&EmbedPreviewSpec::new(), &s(), &t()).spec_type, "EmbedPreviewSpec"); }
-    #[test] fn autonomous_list() { assert_eq!(a().render(&AutonomousListSpec::new(), &s(), &t()).spec_type, "AutonomousListSpec"); }
     #[test] fn reorderable_list() { assert_eq!(a().render(&ReorderableListSpec::new(), &s(), &t()).spec_type, "ReorderableListSpec"); }
     #[test] fn breadcrumbs() { assert_eq!(a().render(&BreadcrumbsSpec::new(vec![]), &s(), &t()).spec_type, "BreadcrumbsSpec"); }
     #[test] fn card_radio_group() { assert_eq!(a().render(&CardRadioGroupSpec::new(vec![ChoiceOption::new("a", "A")]), &s(), &t()).spec_type, "CardRadioGroupSpec"); }
-    #[test] fn inline_editable_field() { assert_eq!(a().render(&InlineEditableFieldSpec::new("val"), &s(), &t()).spec_type, "InlineEditableFieldSpec"); }
-    #[test] fn list_card() { assert_eq!(a().render(&ListCardSpec::new("Card"), &s(), &t()).spec_type, "ListCardSpec"); }
-    #[test] fn nav_card() { assert_eq!(a().render(&NavCardSpec::new("Nav"), &s(), &t()).spec_type, "NavCardSpec"); }
-    #[test] fn nav_card_grid() { assert_eq!(a().render(&NavCardGridSpec::new(3), &s(), &t()).spec_type, "NavCardGridSpec"); }
-    #[test] fn order_by() { assert_eq!(a().render(&OrderBySpec::new(vec![String::from("name")]), &s(), &t()).spec_type, "OrderBySpec"); }
+    #[test] fn list_card() { assert_eq!(a().render(&ListCardSpec::new(), &s(), &t()).spec_type, "ListCardSpec"); }
+    #[test] fn nav_card() { assert_eq!(a().render(&NavCardSpec::new(), &s(), &t()).spec_type, "NavCardSpec"); }
+    #[test] fn nav_card_grid() { assert_eq!(a().render(&NavCardGridSpec::new(), &s(), &t()).spec_type, "NavCardGridSpec"); }
+    #[test] fn order_by() { assert_eq!(a().render(&OrderBySpec::new(), &s(), &t()).spec_type, "OrderBySpec"); }
     #[test] fn page_header() { assert_eq!(a().render(&PageHeaderSpec::new("Title"), &s(), &t()).spec_type, "PageHeaderSpec"); }
     #[test] fn page_loading() { assert_eq!(a().render(&PageLoadingSpec::new(), &s(), &t()).spec_type, "PageLoadingSpec"); }
-    #[test] fn slug_field() { assert_eq!(a().render(&SlugFieldSpec::new("my-slug"), &s(), &t()).spec_type, "SlugFieldSpec"); }
     #[test] fn log_list() { assert_eq!(a().render(&LogListSpec::new(), &s(), &t()).spec_type, "LogListSpec"); }
     #[test] fn state_tile() { assert_eq!(a().render(&StateTileSpec::new("CPU", "42%"), &s(), &t()).spec_type, "StateTileSpec"); }
     #[test] fn toast_stack() { assert_eq!(a().render(&ToastStackSpec::new(), &s(), &t()).spec_type, "ToastStackSpec"); }

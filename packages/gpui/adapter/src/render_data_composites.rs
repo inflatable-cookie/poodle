@@ -108,7 +108,7 @@ mod tests {
 
     #[test] fn data_table() { assert_eq!(a().render(&DataTableSpec::new(vec![], vec![]), &s(), &t()).spec_type, "DataTableSpec"); }
     #[test] fn detail_shell() { assert_eq!(a().render(&DetailShellSpec::new(), &s(), &t()).spec_type, "DetailShellSpec"); }
-    #[test] fn detail_section() { assert_eq!(a().render(&DetailSectionSpec::new("Section"), &s(), &t()).spec_type, "DetailSectionSpec"); }
+    #[test] fn detail_section() { assert_eq!(a().render(&DetailSectionSpec::new(), &s(), &t()).spec_type, "DetailSectionSpec"); }
     #[test] fn filter_toolbar() { assert_eq!(a().render(&FilterToolbarSpec::new(), &s(), &t()).spec_type, "FilterToolbarSpec"); }
     #[test] fn picker_shell() { assert_eq!(a().render(&PickerShellSpec::new("Pick"), &s(), &t()).spec_type, "PickerShellSpec"); }
     #[test] fn relation_picker() { assert_eq!(a().render(&RelationPickerSpec::new(vec![]), &s(), &t()).spec_type, "RelationPickerSpec"); }

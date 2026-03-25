@@ -101,7 +101,6 @@ pub static COMPOSITES: &[ComponentEntry] = &[
     ComponentEntry { slug: "empty-state", display_name: "EmptyState", description: "Placeholder for empty views." },
     ComponentEntry { slug: "filter-toolbar", display_name: "FilterToolbar", description: "Filter controls toolbar." },
     ComponentEntry { slug: "form-dialog", display_name: "FormDialog", description: "Modal dialog with form." },
-    ComponentEntry { slug: "inline-editable-field", display_name: "InlineEditableField", description: "Click-to-edit text field." },
     ComponentEntry { slug: "log-list", display_name: "LogList", description: "Timestamped log viewer." },
     ComponentEntry { slug: "markdown-editor", display_name: "MarkdownEditor", description: "Markdown authoring with preview." },
     ComponentEntry { slug: "media-picker", display_name: "MediaPicker", description: "Media asset selection dialog." },

@@ -114,7 +114,6 @@ mod embed_preview_specimen;
 mod field_set_specimen;
 mod filter_toolbar_specimen;
 mod form_dialog_specimen;
-mod inline_editable_field_specimen;
 mod log_list_specimen;
 mod markdown_editor_specimen;
 mod media_picker_specimen;
@@ -337,12 +336,12 @@ pub fn render_single_specimen(
         "form-dialog" => specimen_card("FormDialog", theme, form_dialog_specimen::render(theme)),
         "filter-toolbar" => specimen_card("FilterToolbar", theme, filter_toolbar_specimen::render(theme)),
         "bulk-action-bar" => specimen_card("BulkActionBar", theme, bulk_action_bar_specimen::render(theme)),
-        "inline-editable-field" => specimen_card("InlineEditableField", theme, inline_editable_field_specimen::render(theme)),
+        // inline-editable-field was merged into EditableLabel
         "log-list" => specimen_card("LogList", theme, log_list_specimen::render(theme)),
         "editable-list" => specimen_card("EditableList", theme, editable_list_specimen::render(theme)),
         "embed-input" => specimen_card("EmbedInput", theme, embed_input_specimen::render(theme)),
         "embed-preview" => specimen_card("EmbedPreview", theme, embed_preview_specimen::render(theme)),
-        "autonomous-list" => specimen_card("AutonomousList", theme, div()), // stub
+        // autonomous-list was renamed to editable-list
         "audio-player" => specimen_card("AudioPlayer", theme, audio_player_specimen::render(theme)),
         "video-player" => specimen_card("VideoPlayer", theme, video_player_specimen::render(theme)),
         "media-picker" => specimen_card("MediaPicker", theme, media_picker_specimen::render(theme)),
