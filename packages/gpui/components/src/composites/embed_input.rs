@@ -1,10 +1,12 @@
 //! EmbedInput — URL input for embedding external content backed by EmbedInputSpec.
 
+use gpui::prelude::FluentBuilder;
 use gpui::*;
 use poodle_gpui::GpuiThemeProvider;
 use poodle_composites::EmbedInputSpec;
-use poodle_primitives::ValidationState;
-use crate::theme_ext::{resolve_color, resolve_opacity, resolve_radius};
+use poodle_primitives::{PillSize, PillSpec, PillTone};
+use crate::primitives::Pill;
+use crate::theme_ext::{resolve_color, resolve_opacity, resolve_px, resolve_radius};
 
 pub struct EmbedInput {
     spec: EmbedInputSpec,
@@ -36,9 +38,8 @@ impl IntoElement for EmbedInput {
         let text_color = resolve_color(theme, "semantic.color.text.primary");
         let placeholder_color = resolve_color(theme, "semantic.color.text.secondary");
         let focus_ring = resolve_color(theme, "semantic.color.accent.focusRing");
-        let danger_color = resolve_color(theme, "semantic.color.status.danger");
-        let success_color = resolve_color(theme, "semantic.color.status.success");
-        let warning_color = resolve_color(theme, "semantic.color.status.warning");
+        let status_color = resolve_color(theme, spec.status_text_color_token());
+        let body_size = resolve_px(theme, "semantic.typography.body.size");
 
         let display = if spec.value.is_empty() {
             spec.placeholder.as_deref().unwrap_or("Paste URL or embed code...")
@@ -46,6 +47,7 @@ impl IntoElement for EmbedInput {
             &spec.value
         };
         let color = if spec.value.is_empty() { placeholder_color } else { text_color };
+        let (parsed, error) = spec.resolved_parse_state();
 
         // Multi-line text area (min 3 rows ~72px) for URL / embed code
         let mut textarea = div()
@@ -63,7 +65,7 @@ impl IntoElement for EmbedInput {
             .flex_col()
             .items_start()
             .overflow_hidden()
-            .text_size(px(14.0))
+            .text_size(body_size)
             .line_height(relative(1.5))
             .text_color(color)
             .focus(move |s| s.border_color(focus_ring))
@@ -75,33 +77,9 @@ impl IntoElement for EmbedInput {
                 .cursor_not_allowed();
         }
 
-        // Status area below the textarea: error (red), success (green), pending (warning), or provider info
-        let (status_color, status_text) = if spec.is_loading {
-            (placeholder_color, Some("Resolving...".to_string()))
-        } else {
-            match spec.validation_state {
-                ValidationState::Invalid => {
-                    (danger_color, Some("Invalid URL or embed code".to_string()))
-                }
-                ValidationState::Valid => {
-                    (success_color, Some("Valid embed".to_string()))
-                }
-                ValidationState::Pending => {
-                    (warning_color, Some("Validating...".to_string()))
-                }
-                ValidationState::None => (placeholder_color, None),
-            }
-        };
-
         let mut wrapper = div().flex().flex_col().gap(px(4.0)).w_full().child(textarea);
 
-        if let Some(text) = status_text {
-            let status_indicator = match spec.validation_state {
-                ValidationState::Invalid => "\u{2022} ",
-                ValidationState::Valid => "\u{2713} ",
-                ValidationState::Pending => "\u{2022} ",
-                _ => "",
-            };
+        if error.is_some() || parsed.is_some() {
             let status_area = div()
                 .min_h(px(20.0))
                 .px(px(4.0))
@@ -110,7 +88,20 @@ impl IntoElement for EmbedInput {
                 .gap(px(4.0))
                 .text_size(px(12.0))
                 .text_color(status_color)
-                .child(format!("{}{}", status_indicator, text));
+                .when(parsed.is_some(), |el| {
+                    el.child(
+                        Pill::from_spec(
+                            PillSpec::new()
+                                .with_label(parsed.clone().unwrap().provider)
+                                .with_tone(PillTone::Success)
+                                .with_size(PillSize::Sm),
+                            theme,
+                        ),
+                    )
+                })
+                .when(error.is_some() || parsed.is_some(), |el| {
+                    el.child(error.clone().unwrap_or_else(|| String::from("Embed detected")))
+                });
             wrapper = wrapper.child(status_area);
         }
 

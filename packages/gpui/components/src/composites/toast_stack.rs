@@ -67,6 +67,7 @@ impl IntoElement for ToastStack {
         let spec = &self.spec;
 
         let gap = resolve_px(theme, spec.gap_token());
+        let body_size = resolve_px(theme, "semantic.typography.body.size");
         let padding = resolve_px(theme, spec.padding_token());
         let fill = resolve_color(theme, spec.fill_token());
         let border_color = resolve_color(theme, spec.border_token());
@@ -113,7 +114,7 @@ impl IntoElement for ToastStack {
                 .flex_grow()
                 .child(
                     div()
-                        .text_size(px(14.0))
+                        .text_size(body_size)
                         .font_weight(FontWeight::SEMIBOLD)
                         .text_color(title_color)
                         .child(toast.title.clone()),
@@ -157,7 +158,7 @@ impl IntoElement for ToastStack {
             let mut dismiss_btn = div()
                 .id(dismiss_element_id)
                 .cursor_pointer()
-                .text_size(px(14.0))
+                .text_size(body_size)
                 .text_color(dismiss_color)
                 .pl(px(8.0))
                 .child("\u{00d7}"); // multiplication sign as close icon

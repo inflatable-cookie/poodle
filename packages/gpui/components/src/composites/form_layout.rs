@@ -54,6 +54,7 @@ fn callout_banner(
     let radius = resolve_radius(theme, "semantic.radius.control");
     let inline_pad = resolve_px(theme, "semantic.space.inline.md");
     let stack_pad = resolve_px(theme, "semantic.space.stack.sm");
+    let body_size = resolve_px(theme, "semantic.typography.body.size");
 
     // Tone-colored background: 12% tone over panel
     let callout_bg = color_mix(tone_color, panel_bg, 0.12);
@@ -68,7 +69,7 @@ fn callout_banner(
         .bg(callout_bg)
         .border_1()
         .border_color(callout_border)
-        .text_size(px(14.0))
+        .text_size(body_size)
         .text_color(tone_color)
         .child(message.to_string())
 }
@@ -84,6 +85,8 @@ impl IntoElement for FormLayout {
         let row_gap = resolve_px(theme, "semantic.space.stack.md");
         let column_gap = resolve_px(theme, "semantic.space.inline.md");
         let section_gap = resolve_px(theme, "semantic.space.stack.lg");
+        let body_size = resolve_px(theme, "semantic.typography.body.size");
+        let heading_size = resolve_px(theme, "semantic.typography.heading.size");
 
         let mut el = div().flex().flex_col().gap(section_gap).w_full();
 
@@ -91,7 +94,7 @@ impl IntoElement for FormLayout {
         if let Some(ref title) = self.title {
             el = el.child(
                 div()
-                    .text_size(px(16.0))
+                    .text_size(heading_size)
                     .font_weight(FontWeight::SEMIBOLD)
                     .text_color(text_primary)
                     .child(title.clone()),
@@ -102,7 +105,7 @@ impl IntoElement for FormLayout {
         if let Some(ref desc) = self.description {
             el = el.child(
                 div()
-                    .text_size(px(14.0))
+                    .text_size(body_size)
                     .text_color(text_secondary)
                     .child(desc.clone()),
             );

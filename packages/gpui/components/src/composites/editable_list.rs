@@ -62,6 +62,8 @@ impl IntoElement for EditableList {
         let _focus_ring = resolve_color(theme, "semantic.color.accent.focusRing");
 
         let gap = resolve_px(theme, "semantic.space.stack.sm");
+        let body_size = resolve_px(theme, "semantic.typography.body.size");
+        let label_size = resolve_px(theme, "semantic.typography.label.size");
         let item_gap = px(4.0);
         let control_px = resolve_px(theme, "semantic.space.control.x");
         let control_height = resolve_px(theme, "semantic.size.control.height");
@@ -84,7 +86,7 @@ impl IntoElement for EditableList {
             if let Some(ref title) = self.title {
                 header = header.child(
                     div()
-                        .text_size(px(14.0))
+                        .text_size(body_size)
                         .font_weight(FontWeight::BOLD)
                         .text_color(text_color)
                         .child(title.clone()),
@@ -172,7 +174,7 @@ impl IntoElement for EditableList {
         // String items
         for item_text in &self.items {
             let label = div()
-                .text_size(px(14.0))
+                .text_size(body_size)
                 .text_color(text_color)
                 .overflow_hidden()
                 .text_ellipsis()
@@ -209,7 +211,7 @@ impl IntoElement for EditableList {
                 .bg(surface_bg)
                 .child(
                     div()
-                        .text_size(px(14.0))
+                        .text_size(body_size)
                         .text_color(secondary_color)
                         .child(self.placeholder.clone()),
                 );
@@ -237,7 +239,7 @@ impl IntoElement for EditableList {
                 .child(plus_icon)
                 .child(
                     div()
-                        .text_size(px(13.0))
+                        .text_size(label_size)
                         .font_weight(FontWeight::MEDIUM)
                         .text_color(text_color)
                         .child(self.add_label.clone()),

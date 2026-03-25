@@ -78,6 +78,7 @@ impl IntoElement for CommandPalette {
         let spec = &self.spec;
 
         let inline_padding = resolve_px(theme, "semantic.space.inline.md");
+        let body_size = resolve_px(theme, "semantic.typography.body.size");
 
         let results_bg = resolve_color(theme, spec.results_fill_token());
         let border = resolve_color(theme, "semantic.color.border.default");
@@ -125,7 +126,7 @@ impl IntoElement for CommandPalette {
             .child(
                 div()
                     .flex_1()
-                    .text_size(px(14.0))
+                    .text_size(body_size)
                     .text_color(text_primary)
                     .when(spec.query.is_empty(), |el| {
                         el.text_color(text_muted).child("Type a command\u{2026}")
@@ -142,7 +143,7 @@ impl IntoElement for CommandPalette {
                 palette = palette.child(
                     div()
                         .p(px(16.0))
-                        .text_size(px(14.0))
+                        .text_size(body_size)
                         .text_color(text_secondary)
                         .child("Searching\u{2026}"),
                 );
@@ -152,7 +153,7 @@ impl IntoElement for CommandPalette {
                 palette = palette.child(
                     div()
                         .p(px(16.0))
-                        .text_size(px(14.0))
+                        .text_size(body_size)
                         .text_color(resolve_color(theme, "semantic.color.status.danger"))
                         .child("Error loading commands"),
                 );
@@ -162,7 +163,7 @@ impl IntoElement for CommandPalette {
                 palette = palette.child(
                     div()
                         .p(px(16.0))
-                        .text_size(px(14.0))
+                        .text_size(body_size)
                         .text_color(text_secondary)
                         .child("No matching commands"),
                 );
@@ -214,7 +215,7 @@ impl IntoElement for CommandPalette {
                 .py(px(6.0))
                 .mx(px(4.0))
                 .rounded(px(4.0))
-                .text_size(px(14.0));
+                .text_size(body_size);
 
             if is_active {
                 row = row.bg(accent.opacity(0.10)).text_color(accent);

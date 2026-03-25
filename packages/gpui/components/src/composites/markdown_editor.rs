@@ -5,7 +5,7 @@ use poodle_gpui::GpuiThemeProvider;
 use poodle_composites::MarkdownEditorSpec;
 use poodle_primitives::{IconSize, IconSpec};
 use crate::primitives::Icon;
-use crate::theme_ext::{resolve_color, resolve_opacity, resolve_radius};
+use crate::theme_ext::{resolve_color, resolve_opacity, resolve_px, resolve_radius};
 
 pub struct MarkdownEditor {
     spec: MarkdownEditorSpec,
@@ -49,6 +49,7 @@ impl IntoElement for MarkdownEditor {
         let muted = resolve_color(&self.theme, "semantic.color.text.secondary");
         let hover_bg = resolve_color(&self.theme, "semantic.color.bg.hover");
         let active_bg = resolve_color(&self.theme, "semantic.color.bg.active");
+        let body_size = resolve_px(&self.theme, "semantic.typography.body.size");
 
         let display = if self.spec.value.is_empty() { self.spec.placeholder.as_deref().unwrap_or("Type here...") } else { &self.spec.value };
         let color = if self.spec.value.is_empty() { muted } else { text_color };
@@ -155,7 +156,7 @@ impl IntoElement for MarkdownEditor {
                 .id("poodle-md-editor-pane")
                 .focusable()
                 .px(px(12.0)).py(px(8.0)).flex_grow().flex_basis(px(0.0))
-                .text_size(px(14.0)).text_color(color)
+                .text_size(body_size).text_color(color)
                 .overflow_y_scroll()
                 .child(display.to_string());
 
@@ -211,7 +212,7 @@ impl IntoElement for MarkdownEditor {
             let preview_pane = div()
                 .id("poodle-md-preview-pane")
                 .px(px(12.0)).py(px(8.0)).flex_grow().flex_basis(px(0.0))
-                .text_size(px(14.0)).text_color(preview_text_color)
+                .text_size(body_size).text_color(preview_text_color)
                 .overflow_y_scroll()
                 .child(preview_content);
             content_area.child(preview_pane)

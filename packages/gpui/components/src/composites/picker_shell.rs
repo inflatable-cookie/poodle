@@ -4,7 +4,9 @@ use gpui::prelude::FluentBuilder;
 use gpui::*;
 use poodle_gpui::GpuiThemeProvider;
 use poodle_composites::{BrowseState, PickerShellSpec, PickerVariant, SelectionMode};
+use poodle_primitives::{SpinnerSize, SpinnerSpec, SpinnerTone, SpinnerVariant};
 
+use crate::primitives::Spinner;
 use crate::theme_ext::{resolve_color, resolve_px, resolve_radius};
 
 /// A real GPUI picker shell component backed by `PickerShellSpec`.
@@ -75,6 +77,7 @@ impl IntoElement for PickerShell {
         let spec = &self.spec;
 
         let inline_padding = resolve_px(theme, "semantic.space.inline.md");
+        let body_size = resolve_px(theme, "semantic.typography.body.size");
         let control_radius = resolve_radius(theme, "semantic.radius.control");
         let footer_gap = resolve_px(theme, spec.footer_gap_token());
         let text_primary = resolve_color(theme, "semantic.color.text.primary");
@@ -121,7 +124,7 @@ impl IntoElement for PickerShell {
 
         header = header.child(
             div()
-                .text_size(px(14.0))
+                .text_size(body_size)
                 .font_weight(FontWeight::SEMIBOLD)
                 .text_color(text_primary)
                 .child(spec.title.clone()),
@@ -156,12 +159,23 @@ impl IntoElement for PickerShell {
             BrowseState::Loading => div()
                 .w_full()
                 .flex()
+                .flex_col()
                 .items_center()
                 .justify_center()
+                .gap(px(8.0))
                 .py(px(24.0))
                 .child(
+                    Spinner::from_spec(
+                        SpinnerSpec::new()
+                            .with_variant(SpinnerVariant::Grid)
+                            .with_size(SpinnerSize::Md)
+                            .with_tone(SpinnerTone::Accent),
+                        theme,
+                    ),
+                )
+                .child(
                     div()
-                        .text_size(px(14.0))
+                        .text_size(body_size)
                         .text_color(text_secondary)
                         .child("Searching\u{2026}"),
                 ),
@@ -173,7 +187,7 @@ impl IntoElement for PickerShell {
                 .py(px(24.0))
                 .child(
                     div()
-                        .text_size(px(14.0))
+                        .text_size(body_size)
                         .text_color(resolve_color(theme, "semantic.color.status.danger"))
                         .child("Search failed."),
                 ),
@@ -185,7 +199,7 @@ impl IntoElement for PickerShell {
                 .py(px(24.0))
                 .child(
                     div()
-                        .text_size(px(14.0))
+                        .text_size(body_size)
                         .text_color(text_secondary)
                         .child("No results found."),
                 ),

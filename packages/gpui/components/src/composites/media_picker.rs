@@ -7,7 +7,7 @@ use poodle_gpui::GpuiThemeProvider;
 use poodle_primitives::{IconSize, IconSpec};
 use poodle_composites::MediaPickerSpec;
 use crate::primitives::Icon;
-use crate::theme_ext::{resolve_color, resolve_radius};
+use crate::theme_ext::{resolve_color, resolve_px, resolve_radius};
 
 /// Which tab is active in the media picker.
 #[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
@@ -111,6 +111,7 @@ impl IntoElement for MediaPicker {
         let text_primary = resolve_color(theme, "semantic.color.text.primary");
         let text_secondary = resolve_color(theme, "semantic.color.text.secondary");
         let accent = resolve_color(theme, "semantic.color.accent.base");
+        let label_size = resolve_px(theme, "semantic.typography.label.size");
 
         // ── Dialog wrapper ───────────────────────────────────────
         let mut dialog = div()
@@ -170,7 +171,7 @@ impl IntoElement for MediaPicker {
             let base = div()
                 .px(px(16.0))
                 .py(px(8.0))
-                .text_size(px(13.0))
+                .text_size(label_size)
                 .font_weight(FontWeight::MEDIUM)
                 .cursor_pointer();
             if is_active {
@@ -258,7 +259,7 @@ impl IntoElement for MediaPicker {
             .child(
                 div()
                     .flex_grow()
-                    .text_size(px(13.0))
+                    .text_size(label_size)
                     .text_color(text_secondary)
                     .child("Search media\u{2026}"),
             );
@@ -291,7 +292,7 @@ impl IntoElement for MediaPicker {
                 div()
                     .w_full()
                     .py(px(24.0))
-                    .text_size(px(13.0))
+                    .text_size(label_size)
                     .text_color(text_secondary)
                     .text_center()
                     .child("No media items"),
@@ -380,7 +381,7 @@ impl IntoElement for MediaPicker {
                     .rounded(px(6.0))
                     .bg(accent)
                     .text_color(gpui::white())
-                    .text_size(px(13.0))
+                    .text_size(label_size)
                     .font_weight(FontWeight::MEDIUM)
                     .cursor_pointer()
                     .child("Confirm");

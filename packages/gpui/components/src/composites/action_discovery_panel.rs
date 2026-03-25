@@ -4,8 +4,10 @@ use gpui::*;
 use poodle_adapter::ThemeProvider;
 use poodle_gpui::GpuiThemeProvider;
 use poodle_composites::{ActionDiscoveryPanelSpec, ActionDiscoverySection, DiscoveryState};
+use poodle_primitives::SkeletonSpec;
 
-use crate::theme_ext::{resolve_color, resolve_opacity};
+use crate::primitives::Skeleton;
+use crate::theme_ext::{resolve_color, resolve_opacity, resolve_px};
 
 /// A real GPUI action discovery panel backed by `ActionDiscoveryPanelSpec`.
 ///
@@ -71,6 +73,7 @@ impl IntoElement for ActionDiscoveryPanel {
         let disabled_opacity = resolve_opacity(theme, "semantic.state.opacity.disabled");
         let hover_bg = resolve_color(theme, "semantic.color.background.elevated");
         let focus_ring = resolve_color(theme, "semantic.color.accent.focusRing");
+        let body_size = resolve_px(theme, "semantic.typography.body.size");
         let gap = theme.resolve_space(spec.gap_token());
 
         let mut panel = div()
@@ -81,12 +84,45 @@ impl IntoElement for ActionDiscoveryPanel {
 
         match spec.state {
             DiscoveryState::Loading => {
+                let mut skeletons = div().flex().flex_col().gap(px(8.0));
+                for _ in 0..5 {
+                    skeletons = skeletons.child(
+                        div()
+                            .flex()
+                            .items_center()
+                            .justify_between()
+                            .gap(px(12.0))
+                            .p(px(14.0))
+                            .rounded(px(6.0))
+                            .bg(resolve_color(theme, "semantic.color.background.surface").opacity(0.72))
+                            .child(
+                                div()
+                                    .flex_grow()
+                                    .child(
+                                        Skeleton::from_spec(
+                                            SkeletonSpec::new().with_width("160").with_animated(true),
+                                            theme,
+                                        ),
+                                    ),
+                            )
+                            .child(
+                                div()
+                                    .flex_none()
+                                    .child(
+                                        Skeleton::from_spec(
+                                            SkeletonSpec::new().with_width("56").with_animated(true),
+                                            theme,
+                                        ),
+                                    ),
+                            ),
+                    );
+                }
                 panel = panel.child(
                     div()
-                        .p(px(16.0))
-                        .text_size(px(14.0))
-                        .text_color(text_secondary)
-                        .child("Loading actions\u{2026}"),
+                        .flex()
+                        .flex_col()
+                        .gap(px(8.0))
+                        .child(skeletons),
                 );
                 return panel.into_any_element();
             }
@@ -94,7 +130,7 @@ impl IntoElement for ActionDiscoveryPanel {
                 panel = panel.child(
                     div()
                         .p(px(16.0))
-                        .text_size(px(14.0))
+                        .text_size(body_size)
                         .text_color(resolve_color(theme, "semantic.color.status.danger"))
                         .child("Failed to load actions"),
                 );
@@ -108,7 +144,7 @@ impl IntoElement for ActionDiscoveryPanel {
                 panel = panel.child(
                     div()
                         .p(px(16.0))
-                        .text_size(px(14.0))
+                        .text_size(body_size)
                         .text_color(text_secondary)
                         .child(msg.to_string()),
                 );
@@ -156,7 +192,7 @@ impl IntoElement for ActionDiscoveryPanel {
                     .px(px(8.0))
                     .py(px(6.0))
                     .rounded(px(4.0))
-                    .text_size(px(14.0))
+                    .text_size(body_size)
                     .text_color(text_primary);
 
                 row = row.focus(move |s| s.border_color(focus_ring).shadow(crate::theme_ext::focus_ring_shadow(focus_ring)));

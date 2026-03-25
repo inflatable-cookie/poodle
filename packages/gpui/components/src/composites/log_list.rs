@@ -87,6 +87,7 @@ impl IntoElement for LogList {
     fn into_element(self) -> Self::Element {
         let theme = &self.theme;
         let fill = resolve_color(theme, self.spec.fill_token());
+        let label_size = resolve_px(theme, "semantic.typography.label.size");
         let gap = resolve_px(theme, self.spec.entry_gap_token());
         let border_color = resolve_color(theme, "semantic.color.border.subtle");
         let text_primary = resolve_color(theme, "semantic.color.text.primary");
@@ -186,7 +187,7 @@ impl IntoElement for LogList {
             rows = rows.child(
                 div()
                     .py(px(16.0))
-                    .text_size(px(13.0))
+                    .text_size(label_size)
                     .text_color(text_secondary)
                     .text_center()
                     .child("No log entries"),
@@ -214,7 +215,7 @@ impl IntoElement for LogList {
 
             let message = div()
                 .flex_grow()
-                .text_size(px(13.0))
+                .text_size(label_size)
                 .text_color(text_primary)
                 .child(entry.message.clone());
 

@@ -76,6 +76,7 @@ impl IntoElement for DataTable {
         let spec = &self.spec;
 
         let inline_padding = resolve_px(theme, "semantic.space.inline.md");
+        let body_size = resolve_px(theme, "semantic.typography.body.size");
 
         let header_bg = resolve_color(theme, spec.header_fill_token());
         let border_color = resolve_color(theme, "semantic.color.border.subtle");
@@ -185,7 +186,7 @@ impl IntoElement for DataTable {
                     .w_full()
                     .px(inline_padding)
                     .py(px(24.0))
-                    .text_size(px(14.0))
+                    .text_size(body_size)
                     .text_color(text_secondary)
                     .text_center()
                     .child(String::from(empty_msg)),
@@ -232,7 +233,7 @@ impl IntoElement for DataTable {
                         .flex_1()
                         .px(inline_padding)
                         .py(px(12.0))
-                        .text_size(px(14.0))
+                        .text_size(body_size)
                         .text_color(text_primary)
                         .when(col.align_end, |el| el.text_right())
                         .child(cell_value);

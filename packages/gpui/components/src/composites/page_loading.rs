@@ -3,9 +3,9 @@
 use gpui::*;
 use poodle_gpui::GpuiThemeProvider;
 use poodle_composites::PageLoadingSpec;
-use poodle_primitives::{IconSize, IconSpec};
-use crate::primitives::Icon;
-use crate::theme_ext::{resolve_color, resolve_radius};
+use poodle_primitives::{SpinnerSize, SpinnerSpec, SpinnerTone, SpinnerVariant};
+use crate::primitives::Spinner;
+use crate::theme_ext::{resolve_color, resolve_px, resolve_radius};
 
 pub struct PageLoading {
     spec: PageLoadingSpec,
@@ -39,6 +39,8 @@ impl IntoElement for PageLoading {
         let backdrop = resolve_color(theme, self.spec.backdrop_fill_token());
         let accent = resolve_color(theme, self.spec.progress_fill_token());
         let text_color = resolve_color(theme, "semantic.color.text.primary");
+        let body_size = resolve_px(theme, "semantic.typography.body.size");
+        let label_size = resolve_px(theme, "semantic.typography.label.size");
         let surface_bg = resolve_color(theme, "semantic.color.background.surface");
         let border = resolve_color(theme, "semantic.color.border.default");
         let radius = resolve_radius(theme, "semantic.radius.surface");
@@ -68,13 +70,19 @@ impl IntoElement for PageLoading {
 
         // Spinner
         card = card.child(
-            Icon::from_spec(IconSpec::new("loader").with_size(IconSize::Md), theme)
-                .with_color(accent),
+            Spinner::from_spec(
+                SpinnerSpec::new()
+                    .with_variant(SpinnerVariant::Ring)
+                    .with_size(SpinnerSize::Lg)
+                    .with_tone(SpinnerTone::Accent),
+                theme,
+            )
+            .with_color(accent),
         );
 
         // Message
         if let Some(ref msg) = self.spec.message {
-            card = card.child(div().text_size(px(14.0)).text_color(text_color).child(msg.clone()));
+            card = card.child(div().text_size(body_size).text_color(text_color).child(msg.clone()));
         }
 
         // Cancel button
@@ -85,7 +93,7 @@ impl IntoElement for PageLoading {
             card = card.child(
                 div()
                     .id("poodle-page-loading-cancel")
-                    .text_size(px(13.0))
+                    .text_size(label_size)
                     .text_color(muted)
                     .cursor_pointer()
                     .px(px(12.0)).py(px(6.0))

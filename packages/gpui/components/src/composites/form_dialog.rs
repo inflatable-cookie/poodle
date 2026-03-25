@@ -61,10 +61,11 @@ impl IntoElement for FormDialog {
         let panel_bg = resolve_color(theme, "semantic.color.background.panel");
         let control_radius = resolve_radius(theme, "semantic.radius.control");
         let actions_gap = resolve_px(theme, "semantic.space.inline.sm");
+        let body_size = resolve_px(theme, "semantic.typography.body.size");
 
         // Cancel button — text-style action
         let cancel_btn = div()
-            .text_size(px(14.0))
+            .text_size(body_size)
             .text_color(title_color)
             .cursor_pointer()
             .px(px(12.0))
@@ -84,7 +85,7 @@ impl IntoElement for FormDialog {
         };
 
         let mut submit_btn = div()
-            .text_size(px(14.0))
+            .text_size(body_size)
             .text_color(gpui::white())
             .bg(submit_bg)
             .rounded(control_radius)
@@ -102,7 +103,7 @@ impl IntoElement for FormDialog {
                     .items_center()
                     .child(
                         div()
-                            .text_size(px(14.0))
+                            .text_size(body_size)
                             .text_color(color_mix(gpui::white(), accent, 0.8))
                             .child("Submitting\u{2026}"),
                     ),

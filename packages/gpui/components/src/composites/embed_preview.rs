@@ -35,10 +35,11 @@ impl IntoElement for EmbedPreview {
         let radius = resolve_radius(theme, "semantic.radius.surface");
         let title_color = resolve_color(theme, "semantic.color.text.primary");
         let desc_color = resolve_color(theme, "semantic.color.text.secondary");
-        let _danger_color = resolve_color(theme, "semantic.color.status.danger");
+        let danger_color = resolve_color(theme, "semantic.color.status.danger");
         let success_color = resolve_color(theme, "semantic.color.status.success");
         let subtle_bg = resolve_color(theme, "semantic.color.background.subtle");
         let gap = resolve_px(theme, "semantic.space.inline.sm");
+        let label_size = resolve_px(theme, "semantic.typography.label.size");
 
         // Surface container with border and radius
         let mut el = div()
@@ -84,14 +85,7 @@ impl IntoElement for EmbedPreview {
             return el.into_any_element();
         }
 
-        // Determine if we have any content
-        let has_content = self.spec.title.is_some()
-            || self.spec.description.is_some()
-            || self.spec.provider.is_some()
-            || self.spec.thumbnail_url.is_some();
-
-        // Empty state: placeholder text
-        if !has_content {
+        if let Some(ref error) = self.spec.error {
             el = el.child(
                 div()
                     .py(px(16.0))
@@ -101,57 +95,88 @@ impl IntoElement for EmbedPreview {
                     .justify_center()
                     .gap(px(6.0))
                     .child(
-                        div()
-                            .text_size(px(13.0))
-                            .text_color(desc_color)
-                            .child("No embed to preview"),
+                        Icon::from_spec(IconSpec::new("alert-circle").with_size(IconSize::Lg), theme)
+                            .with_color(danger_color),
                     )
                     .child(
                         div()
                             .text_size(px(12.0))
                             .text_color(desc_color)
-                            .child("Paste a URL above to see a preview"),
+                            .child(error.clone()),
                     ),
             );
             return el.into_any_element();
         }
 
-        // Success / loaded state
-
-        // Iframe placeholder area when a thumbnail URL is available
-        if self.spec.thumbnail_url.is_some() {
-            // Play icon overlay for video previews
-            let play_overlay = div()
-                .flex().items_center().justify_center()
-                .w(px(48.0)).h(px(48.0))
-                .rounded(px(24.0))
-                .bg(hsla(0.0, 0.0, 0.0, 0.6))
-                .child(
-                    Icon::from_spec(
-                        IconSpec::new("play").with_size(IconSize::Md),
-                        theme,
-                    ).with_color(gpui::white())
-                );
-
+        if self.spec.parsed.is_none() {
             el = el.child(
                 div()
-                    .w_full()
-                    // 16:9 aspect ratio approximation (56.25% of width)
-                    .min_h(px(200.0))
-                    .rounded(radius)
-                    .bg(subtle_bg)
-                    .border_1()
-                    .border_color(border)
+                    .py(px(16.0))
                     .flex()
+                    .flex_col()
                     .items_center()
                     .justify_center()
-                    .overflow_hidden()
-                    .child(play_overlay),
+                    .gap(px(6.0))
+                    .child(
+                        Icon::from_spec(IconSpec::new("monitor-play").with_size(IconSize::Lg), theme)
+                            .with_color(desc_color.opacity(0.7)),
+                    )
+                    .child(
+                        div()
+                            .text_size(px(12.0))
+                            .text_color(desc_color)
+                            .child(self.spec.empty_message.clone()),
+                    ),
             );
+            return el.into_any_element();
         }
 
-        // Provider badge
-        if let Some(ref provider) = self.spec.provider {
+        let parsed = self.spec.parsed.as_ref().unwrap();
+        let embed_url = self.spec.embed_url();
+        let provider_label = parsed.provider.clone();
+
+        if let Some(embed_url) = embed_url {
+            let preview_label = if parsed.provider == "youtube" || parsed.provider == "vimeo" {
+                "Platform preview placeholder"
+            } else {
+                "External embed placeholder"
+            };
+
+            let media_frame = div()
+                .w_full()
+                .min_h(if self.spec.effective_aspect_ratio().is_some() { px(200.0) } else { px(160.0) })
+                .rounded(radius)
+                .bg(subtle_bg)
+                .border_1()
+                .border_color(border)
+                .flex()
+                .flex_col()
+                .items_center()
+                .justify_center()
+                .gap(px(8.0))
+                .px(px(16.0))
+                .py(px(20.0))
+                .child(
+                    Icon::from_spec(
+                        IconSpec::new("monitor-play").with_size(IconSize::Lg),
+                        theme,
+                    )
+                    .with_color(success_color),
+                )
+                .child(
+                    div()
+                        .text_size(label_size)
+                        .font_weight(FontWeight::MEDIUM)
+                        .text_color(title_color)
+                        .child(preview_label),
+                )
+                .child(
+                    div()
+                        .text_size(px(12.0))
+                        .text_color(desc_color)
+                        .child(embed_url),
+                );
+
             el = el.child(
                 div()
                     .flex()
@@ -173,32 +198,48 @@ impl IntoElement for EmbedPreview {
                             .rounded(px(4.0))
                             .px(px(6.0))
                             .py(px(2.0))
-                            .child(provider.clone()),
+                            .child(provider_label),
+                    ),
+            ).child(media_frame);
+            return el.into_any_element();
+        }
+
+        if self.spec.has_raw_embed() {
+            el = el.child(
+                div()
+                    .w_full()
+                    .rounded(radius)
+                    .bg(subtle_bg)
+                    .border_1()
+                    .border_color(border)
+                    .px(px(16.0))
+                    .py(px(12.0))
+                    .flex()
+                    .flex_col()
+                    .gap(px(6.0))
+                    .child(
+                        div()
+                            .text_size(label_size)
+                            .font_weight(FontWeight::MEDIUM)
+                            .text_color(title_color)
+                            .child("Raw embed code"),
+                    )
+                    .child(
+                        div()
+                            .text_size(px(12.0))
+                            .text_color(desc_color)
+                            .child(parsed.original_embed.clone().unwrap_or_default()),
                     ),
             );
+            return el.into_any_element();
         }
 
-        // Title
-        if let Some(ref title) = self.spec.title {
-            el = el.child(
-                div()
-                    .text_size(px(14.0))
-                    .text_color(title_color)
-                    .font_weight(FontWeight::MEDIUM)
-                    .child(title.clone()),
-            );
-        }
-
-        // Description
-        if let Some(ref desc) = self.spec.description {
-            el = el.child(
-                div()
-                    .text_size(px(12.0))
-                    .line_height(relative(1.4))
-                    .text_color(desc_color)
-                    .child(desc.clone()),
-            );
-        }
+        el = el.child(
+            div()
+                .text_size(px(12.0))
+                .text_color(success_color)
+                .child(parsed.original_url.clone().unwrap_or_else(|| parsed.id.clone())),
+        );
 
         el.into_any_element()
     }

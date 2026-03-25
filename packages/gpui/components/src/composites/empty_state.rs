@@ -66,6 +66,8 @@ impl IntoElement for EmptyState {
         let spec = &self.spec;
 
         let inline_gap = resolve_px(theme, "semantic.space.inline.sm");
+        let body_size = resolve_px(theme, "semantic.typography.body.size");
+        let heading_size = resolve_px(theme, "semantic.typography.heading.size");
         let control_radius = resolve_radius(theme, "semantic.radius.control");
         let gap = resolve_px(theme, spec.layout_gap_token());
         let text_primary = resolve_color(theme, "semantic.color.text.primary");
@@ -96,7 +98,7 @@ impl IntoElement for EmptyState {
         // Title
         container = container.child(
             div()
-                .text_size(px(16.0))
+                .text_size(heading_size)
                 .font_weight(FontWeight::SEMIBOLD)
                 .text_color(text_primary)
                 .text_center()
@@ -107,7 +109,7 @@ impl IntoElement for EmptyState {
         if let Some(ref message) = spec.message {
             container = container.child(
                 div()
-                    .text_size(px(14.0))
+                    .text_size(body_size)
                     .text_color(text_secondary)
                     .text_center()
                     .max_w(px(400.0))
@@ -130,7 +132,7 @@ impl IntoElement for EmptyState {
                     .px(px(16.0))
                     .py(px(8.0))
                     .rounded(control_radius)
-                    .text_size(px(14.0))
+                    .text_size(body_size)
                     .font_weight(FontWeight::MEDIUM)
                     .when(is_primary, |el| {
                         el.bg(accent).text_color(gpui::white())

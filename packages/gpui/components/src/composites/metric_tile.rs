@@ -51,6 +51,7 @@ impl IntoElement for MetricTile {
         let value_color = resolve_color(theme, spec.value_color_token());
         let padding = resolve_px(theme, spec.padding_token());
         let gap = resolve_px(theme, spec.gap_token());
+        let heading_size = resolve_px(theme, "semantic.typography.heading.size");
 
         div()
             .flex()
@@ -69,7 +70,7 @@ impl IntoElement for MetricTile {
             )
             .child(
                 div()
-                    .text_size(px(16.0))
+                    .text_size(heading_size)
                     .font_weight(FontWeight::BOLD)
                     .line_height(relative(1.2))
                     .text_color(value_color)

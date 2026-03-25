@@ -1,10 +1,13 @@
 //! MediaThumbnail — real GPUI component backed by MediaThumbnailSpec.
 
+use gpui::prelude::FluentBuilder;
 use gpui::*;
 use poodle_gpui::GpuiThemeProvider;
 use poodle_composites::{MediaThumbnailSpec, AspectRatio, MediaKind, MediaState};
+use poodle_primitives::{SpinnerSize, SpinnerSpec, SpinnerTone, SpinnerVariant};
 
-use crate::theme_ext::resolve_color;
+use crate::primitives::Spinner;
+use crate::theme_ext::{resolve_color, resolve_px};
 
 /// A real GPUI media thumbnail component backed by `MediaThumbnailSpec`.
 ///
@@ -41,6 +44,8 @@ impl MediaThumbnail {
     pub fn title(mut self, v: impl Into<String>) -> Self { self.spec.title = Some(v.into()); self }
     pub fn meta(mut self, v: impl Into<String>) -> Self { self.spec.meta = Some(v.into()); self }
     pub fn badge_label(mut self, v: impl Into<String>) -> Self { self.spec.badge_label = Some(v.into()); self }
+    pub fn state_title(mut self, v: impl Into<String>) -> Self { self.spec.state_title = Some(v.into()); self }
+    pub fn state_message(mut self, v: impl Into<String>) -> Self { self.spec.state_message = Some(v.into()); self }
     pub fn show_caption(mut self, v: bool) -> Self { self.spec.show_caption = v; self }
 
 
@@ -62,6 +67,7 @@ impl IntoElement for MediaThumbnail {
         let text_secondary = resolve_color(theme, "semantic.color.text.secondary");
         let border = resolve_color(theme, "semantic.color.border.subtle");
         let accent = resolve_color(theme, "semantic.color.accent.base");
+        let body_size = resolve_px(theme, "semantic.typography.body.size");
 
         // Aspect ratio sizing
         let (frame_w, frame_h) = match spec.aspect_ratio {
@@ -100,30 +106,42 @@ impl IntoElement for MediaThumbnail {
                 MediaKind::Document => "Document",
                 MediaKind::Embed => "Embed",
             };
-            let state_label = match spec.state {
-                MediaState::Loading => "Loading\u{2026}",
-                MediaState::Error => "Error",
-                MediaState::Empty => "Empty",
-                MediaState::Ready => "",
-            };
-
             frame = frame.child(
                 div()
                     .flex()
                     .flex_col()
                     .items_center()
                     .gap(px(4.0))
+                    .when(spec.state == MediaState::Loading, |el| {
+                        el.child(
+                            Spinner::from_spec(
+                                SpinnerSpec::new()
+                                    .with_variant(SpinnerVariant::Grid)
+                                    .with_size(if spec.show_caption { SpinnerSize::Md } else { SpinnerSize::Sm })
+                                    .with_tone(SpinnerTone::Accent),
+                                theme,
+                            ),
+                        )
+                    })
                     .child(
                         div()
-                            .text_size(px(14.0))
-                            .text_color(text_secondary)
-                            .child(format!("[{}]", kind_label)),
+                            .text_size(body_size)
+                            .text_color(text_primary)
+                            .child(spec.resolved_state_title().to_string()),
                     )
+                    .when(spec.resolved_state_message().is_some(), |el| {
+                        el.child(
+                            div()
+                                .text_size(px(12.0))
+                                .text_color(text_secondary.opacity(0.85))
+                                .child(spec.resolved_state_message().unwrap().to_string()),
+                        )
+                    })
                     .child(
                         div()
-                            .text_size(px(12.0))
+                            .text_size(px(11.0))
                             .text_color(text_secondary.opacity(0.7))
-                            .child(String::from(state_label)),
+                            .child(format!("[{}]", kind_label)),
                     ),
             );
         } else if let Some(image) = self.image_content {
@@ -156,7 +174,7 @@ impl IntoElement for MediaThumbnail {
             if let Some(ref title) = spec.title {
                 caption = caption.child(
                     div()
-                        .text_size(px(14.0))
+                        .text_size(body_size)
                         .font_weight(FontWeight::MEDIUM)
                         .text_color(text_primary)
                         .overflow_x_hidden()

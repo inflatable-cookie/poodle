@@ -63,6 +63,8 @@ impl IntoElement for PageHeader {
         let spec = &self.spec;
 
         let gap = resolve_px(theme, spec.gap_token());
+        let body_size = resolve_px(theme, "semantic.typography.body.size");
+        let heading_size = resolve_px(theme, "semantic.typography.heading.size");
         let header_gap = resolve_px(theme, spec.header_gap_token());
         let padding_y = resolve_px(theme, spec.padding_y_token());
 
@@ -110,7 +112,7 @@ impl IntoElement for PageHeader {
 
         title_block = title_block.child(
             div()
-                .text_size(px(16.0))
+                .text_size(heading_size)
                 .font_weight(FontWeight::BOLD)
                 .text_color(title_color)
                 .child(spec.title.clone()),
@@ -119,7 +121,7 @@ impl IntoElement for PageHeader {
         if let Some(ref subtitle) = spec.subtitle {
             title_block = title_block.child(
                 div()
-                    .text_size(px(14.0))
+                    .text_size(body_size)
                     .text_color(subtitle_color)
                     .child(subtitle.clone()),
             );

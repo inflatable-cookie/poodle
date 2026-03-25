@@ -72,6 +72,7 @@ impl IntoElement for FilterToolbar {
         let spec = &self.spec;
 
         let inline_padding = resolve_px(theme, "semantic.space.inline.md");
+        let body_size = resolve_px(theme, "semantic.typography.body.size");
         let gap = resolve_px(theme, spec.gap_token());
         let text_primary = resolve_color(theme, "semantic.color.text.primary");
         let text_secondary = resolve_color(theme, "semantic.color.text.secondary");
@@ -99,7 +100,7 @@ impl IntoElement for FilterToolbar {
             if !query.is_empty() {
                 toolbar = toolbar.child(
                     div()
-                        .text_size(px(14.0))
+                        .text_size(body_size)
                         .text_color(text_primary)
                         .child(format!("\u{1F50D} {}", query)),
                 );

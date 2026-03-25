@@ -3,7 +3,7 @@
 use gpui::*;
 use poodle_gpui::GpuiThemeProvider;
 use poodle_composites::CardRadioGroupSpec;
-use crate::theme_ext::{color_mix, resolve_color, resolve_radius, resolve_opacity};
+use crate::theme_ext::{color_mix, resolve_color, resolve_px, resolve_radius, resolve_opacity};
 
 pub struct CardRadioGroup {
     spec: CardRadioGroupSpec,
@@ -42,6 +42,7 @@ impl IntoElement for CardRadioGroup {
         let text_secondary = resolve_color(theme, "semantic.color.text.secondary");
         let accent = resolve_color(theme, "semantic.color.accent.base");
         let focus_ring = resolve_color(theme, "semantic.color.accent.focusRing");
+        let body_size = resolve_px(theme, "semantic.typography.body.size");
         let selected = spec.value.as_deref().or(spec.default_value.as_deref());
 
         // Selected card: accent-tinted background (color-mix accent 12%)
@@ -89,7 +90,7 @@ impl IntoElement for CardRadioGroup {
                 .gap(px(2.0))
                 .child(
                     div()
-                        .text_size(px(14.0))
+                        .text_size(body_size)
                         .text_color(text_color)
                         .child(option.label.clone()),
                 );

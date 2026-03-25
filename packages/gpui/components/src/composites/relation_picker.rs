@@ -5,9 +5,9 @@ use gpui::prelude::FluentBuilder;
 use gpui::*;
 use poodle_gpui::GpuiThemeProvider;
 use poodle_composites::{BrowseState, PickerItemSpec, PickerVariant, RelationPickerSpec, SelectionMode};
-use poodle_primitives::{IconSize, IconSpec};
+use poodle_primitives::{IconSize, IconSpec, SpinnerSize, SpinnerSpec, SpinnerTone, SpinnerVariant};
 
-use crate::primitives::Icon;
+use crate::primitives::{Icon, Spinner};
 use crate::theme_ext::{resolve_color, resolve_px, resolve_radius};
 
 /// A real GPUI relation picker component backed by `RelationPickerSpec`.
@@ -79,6 +79,7 @@ impl IntoElement for RelationPicker {
 
         let inline_padding = resolve_px(theme, "semantic.space.inline.md");
         let inline_gap = resolve_px(theme, "semantic.space.inline.sm");
+        let body_size = resolve_px(theme, "semantic.typography.body.size");
         let control_radius = resolve_radius(theme, "semantic.radius.control");
 
         let text_primary = resolve_color(theme, "semantic.color.text.primary");
@@ -165,7 +166,7 @@ impl IntoElement for RelationPicker {
                     .py(px(8.0))
                     .border_b_1()
                     .border_color(border)
-                    .text_size(px(14.0))
+                    .text_size(body_size)
                     .text_color(text_primary)
                     .child(format!("Search: {}", spec.query)),
             );
@@ -178,12 +179,23 @@ impl IntoElement for RelationPicker {
                     div()
                         .w_full()
                         .flex()
+                        .flex_col()
                         .items_center()
                         .justify_center()
+                        .gap(px(8.0))
                         .py(px(24.0))
                         .child(
+                            Spinner::from_spec(
+                                SpinnerSpec::new()
+                                    .with_variant(SpinnerVariant::Grid)
+                                    .with_size(SpinnerSize::Sm)
+                                    .with_tone(SpinnerTone::Accent),
+                                theme,
+                            ),
+                        )
+                        .child(
                             div()
-                                .text_size(px(14.0))
+                                .text_size(body_size)
                                 .text_color(text_secondary)
                                 .child("Loading\u{2026}"),
                         ),
@@ -199,7 +211,7 @@ impl IntoElement for RelationPicker {
                         .py(px(24.0))
                         .child(
                             div()
-                                .text_size(px(14.0))
+                                .text_size(body_size)
                                 .text_color(resolve_color(theme, "semantic.color.status.danger"))
                                 .child("Failed to load items."),
                         ),
@@ -215,7 +227,7 @@ impl IntoElement for RelationPicker {
                         .py(px(24.0))
                         .child(
                             div()
-                                .text_size(px(14.0))
+                                .text_size(body_size)
                                 .text_color(text_secondary)
                                 .child("No items found."),
                         ),
@@ -256,7 +268,7 @@ impl IntoElement for RelationPicker {
                     let check = if is_selected { "\u{2713}" } else { "\u{25CB}" };
                     item_el = item_el.child(
                         div()
-                            .text_size(px(14.0))
+                            .text_size(body_size)
                             .text_color(if is_selected { accent } else { text_secondary })
                             .child(check),
                     );
@@ -266,7 +278,7 @@ impl IntoElement for RelationPicker {
 
                     item_content = item_content.child(
                         div()
-                            .text_size(px(14.0))
+                            .text_size(body_size)
                             .text_color(text_primary)
                             .child(item.label.clone()),
                     );

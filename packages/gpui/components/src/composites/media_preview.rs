@@ -3,8 +3,9 @@
 use gpui::prelude::FluentBuilder;
 use gpui::*;
 use poodle_gpui::GpuiThemeProvider;
-use poodle_composites::{MediaKind, MediaPreviewSpec, MediaState, RemediationAction};
+use poodle_composites::{MediaKind, MediaPreviewSpec, MediaState, MediaThumbnailSpec, RemediationAction};
 
+use crate::composites::MediaThumbnail;
 use crate::theme_ext::{resolve_color, resolve_px, resolve_radius};
 
 /// A real GPUI media preview component backed by `MediaPreviewSpec`.
@@ -25,7 +26,12 @@ impl std::ops::Deref for MediaPreview {
 
 impl MediaPreview {
     pub fn new(kind: MediaKind, title: impl Into<String>, theme: &GpuiThemeProvider) -> Self {
-        Self { spec: MediaPreviewSpec::new(kind, title), theme: theme.clone(), media_content: None, on_action: None }
+        Self {
+            spec: MediaPreviewSpec::new(kind, title),
+            theme: theme.clone(),
+            media_content: None,
+            on_action: None,
+        }
     }
 
     pub fn from_spec(spec: MediaPreviewSpec, theme: &GpuiThemeProvider) -> Self {
@@ -44,6 +50,11 @@ impl MediaPreview {
     pub fn description(mut self, v: impl Into<String>) -> Self { self.spec.description = Some(v.into()); self }
     pub fn metadata(mut self, v: Vec<String>) -> Self { self.spec.metadata = v; self }
     pub fn footer_actions(mut self, v: Vec<RemediationAction>) -> Self { self.spec.footer_actions = v; self }
+    pub fn aspect_ratio(mut self, v: poodle_composites::AspectRatio) -> Self { self.spec.aspect_ratio = v; self }
+    pub fn badge(mut self, v: impl Into<String>) -> Self { self.spec.badge = Some(v.into()); self }
+    pub fn thumbnail_meta(mut self, v: impl Into<String>) -> Self { self.spec.thumbnail_meta = Some(v.into()); self }
+    pub fn state_title(mut self, v: impl Into<String>) -> Self { self.spec.state_title = Some(v.into()); self }
+    pub fn state_message(mut self, v: impl Into<String>) -> Self { self.spec.state_message = Some(v.into()); self }
 
 
     pub fn with_media_content(mut self, content: impl IntoElement) -> Self {
@@ -69,9 +80,10 @@ impl IntoElement for MediaPreview {
 
         let inline_padding = resolve_px(theme, "semantic.space.inline.md");
         let inline_gap = resolve_px(theme, "semantic.space.inline.sm");
+        let body_size = resolve_px(theme, "semantic.typography.body.size");
+        let heading_size = resolve_px(theme, "semantic.typography.heading.size");
         let control_radius = resolve_radius(theme, "semantic.radius.control");
 
-        let frame_bg = resolve_color(theme, spec.frame_fill_token());
         let text_primary = resolve_color(theme, "semantic.color.text.primary");
         let text_secondary = resolve_color(theme, "semantic.color.text.secondary");
         let border = resolve_color(theme, "semantic.color.border.subtle");
@@ -88,52 +100,31 @@ impl IntoElement for MediaPreview {
             .overflow_hidden();
 
         // Media viewport
-        let mut viewport = div()
-            .w_full()
-            .min_h(px(200.0))
-            .flex()
-            .items_center()
-            .justify_center()
-            .bg(frame_bg);
+        let mut thumbnail = MediaThumbnail::from_spec(
+            MediaThumbnailSpec::new(spec.kind)
+                .with_state(spec.state)
+                .with_aspect_ratio(spec.aspect_ratio)
+                .with_show_caption(false),
+            theme,
+        );
 
-        if spec.shows_fallback_copy() {
-            let fallback_msg = match spec.state {
-                MediaState::Loading => "Loading media\u{2026}",
-                MediaState::Error => "Failed to load media.",
-                MediaState::Empty => "No media available.",
-                MediaState::Ready => "",
-            };
-            let kind_label = match spec.kind {
-                MediaKind::Image => "Image",
-                MediaKind::Audio => "Audio",
-                MediaKind::Video => "Video",
-                MediaKind::Document => "Document",
-                MediaKind::Embed => "Embed",
-            };
-            viewport = viewport.child(
-                div()
-                    .flex()
-                    .flex_col()
-                    .items_center()
-                    .gap(px(4.0))
-                    .child(
-                        div()
-                            .text_size(px(14.0))
-                            .text_color(text_secondary)
-                            .child(format!("[{}]", kind_label)),
-                    )
-                    .child(
-                        div()
-                            .text_size(px(12.0))
-                            .text_color(text_secondary)
-                            .child(String::from(fallback_msg)),
-                    ),
-            );
-        } else if let Some(media) = self.media_content {
-            viewport = viewport.child(media);
+        if let Some(ref state_title) = spec.state_title {
+            thumbnail = thumbnail.state_title(state_title);
         }
 
-        container = container.child(viewport);
+        if let Some(ref state_message) = spec.state_message {
+            thumbnail = thumbnail.state_message(state_message);
+        }
+
+        if let Some(ref badge) = spec.badge {
+            thumbnail = thumbnail.badge_label(badge);
+        }
+
+        if let Some(media) = self.media_content {
+            thumbnail = thumbnail.with_image(media);
+        }
+
+        container = container.child(thumbnail);
 
         // Info section
         let mut info = div()
@@ -147,7 +138,7 @@ impl IntoElement for MediaPreview {
         // Title
         info = info.child(
             div()
-                .text_size(px(16.0))
+                .text_size(heading_size)
                 .font_weight(FontWeight::SEMIBOLD)
                 .text_color(text_primary)
                 .child(spec.title.clone()),
@@ -157,20 +148,28 @@ impl IntoElement for MediaPreview {
         if let Some(ref description) = spec.description {
             info = info.child(
                 div()
-                    .text_size(px(14.0))
+                    .text_size(body_size)
                     .text_color(text_secondary)
                     .child(description.clone()),
             );
         }
 
         // Metadata row
-        if !spec.metadata.is_empty() {
+        if spec.thumbnail_meta.is_some() || !spec.metadata.is_empty() {
             let mut meta_row = div()
                 .flex()
                 .items_center()
                 .gap(inline_gap);
 
-            for (i, meta) in spec.metadata.iter().enumerate() {
+            let metadata_items = self
+                .spec
+                .thumbnail_meta
+                .iter()
+                .cloned()
+                .chain(spec.metadata.iter().cloned())
+                .collect::<Vec<_>>();
+
+            for (i, meta) in metadata_items.iter().enumerate() {
                 if i > 0 {
                     meta_row = meta_row.child(
                         div()

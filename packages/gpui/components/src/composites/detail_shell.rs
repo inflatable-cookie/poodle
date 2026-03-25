@@ -3,7 +3,9 @@
 use gpui::*;
 use poodle_gpui::GpuiThemeProvider;
 use poodle_composites::{DetailShellSpec, DetailState, ScrollOwner};
+use poodle_primitives::{SpinnerSize, SpinnerSpec, SpinnerTone, SpinnerVariant};
 
+use crate::primitives::Spinner;
 use crate::theme_ext::{resolve_color, resolve_px};
 
 /// A real GPUI detail shell component backed by `DetailShellSpec`.
@@ -62,6 +64,8 @@ impl IntoElement for DetailShell {
         let spec = &self.spec;
 
         let inline_gap = resolve_px(theme, "semantic.space.inline.sm");
+        let body_size = resolve_px(theme, "semantic.typography.body.size");
+        let heading_size = resolve_px(theme, "semantic.typography.heading.size");
 
         let body_bg = resolve_color(theme, spec.body_fill_token());
         let text_primary = resolve_color(theme, "semantic.color.text.primary");
@@ -90,7 +94,7 @@ impl IntoElement for DetailShell {
         if let Some(ref title) = spec.title {
             header = header.child(
                 div()
-                    .text_size(px(16.0))
+                    .text_size(heading_size)
                     .font_weight(FontWeight::SEMIBOLD)
                     .text_color(text_primary)
                     .child(title.clone()),
@@ -120,12 +124,23 @@ impl IntoElement for DetailShell {
                 .w_full()
                 .flex_grow()
                 .flex()
+                .flex_col()
                 .items_center()
                 .justify_center()
+                .gap(px(8.0))
                 .py(px(32.0))
                 .child(
+                    Spinner::from_spec(
+                        SpinnerSpec::new()
+                            .with_variant(SpinnerVariant::Grid)
+                            .with_size(SpinnerSize::Md)
+                            .with_tone(SpinnerTone::Accent),
+                        theme,
+                    ),
+                )
+                .child(
                     div()
-                        .text_size(px(14.0))
+                        .text_size(body_size)
                         .text_color(text_secondary)
                         .child("Loading\u{2026}"),
                 ),
@@ -138,7 +153,7 @@ impl IntoElement for DetailShell {
                 .py(px(32.0))
                 .child(
                     div()
-                        .text_size(px(14.0))
+                        .text_size(body_size)
                         .text_color(resolve_color(theme, "semantic.color.status.danger"))
                         .child("An error occurred loading this content."),
                 ),
@@ -151,7 +166,7 @@ impl IntoElement for DetailShell {
                 .py(px(32.0))
                 .child(
                     div()
-                        .text_size(px(14.0))
+                        .text_size(body_size)
                         .text_color(text_secondary)
                         .child("No content available."),
                 ),
