@@ -35,6 +35,7 @@ mod toggle;
 mod checkbox;
 mod radio_group;
 mod switch;
+mod tri_state_switch;
 mod select;
 mod combobox;
 mod segmented_control;
@@ -69,6 +70,7 @@ mod file_upload;
 // ── Overlay ───────────────────────────────────────────────
 mod accordion;
 mod collapsible;
+mod alert_dialog;
 mod dialog;
 mod drawer;
 mod popover;
@@ -232,7 +234,8 @@ pub fn render_single_specimen(
         // ── Selection ───────────────────────────────────────────
         "checkbox" => specimen_card("Checkbox", theme, checkbox::render(state, cx)),
         "radio-group" => specimen_card("RadioGroup", theme, radio_group::render(state, cx)),
-        "switch" | "tri-state-switch" => specimen_card("Switch", theme, switch::render(state, cx)),
+        "switch" => specimen_card("Switch", theme, switch::render(state, cx)),
+        "tri-state-switch" => specimen_card("TriStateSwitch", theme, tri_state_switch::render(state, cx)),
         "select" => specimen_card("Select", theme, select::render(state, cx)),
         "combobox" => specimen_card("Combobox", theme, combobox::render(state, cx)),
         "segmented-control" => specimen_card("SegmentedControl", theme, segmented_control::render(state, cx)),
@@ -265,7 +268,8 @@ pub fn render_single_specimen(
         // ── Overlay ─────────────────────────────────────────────
         "accordion" => specimen_card("Accordion", theme, accordion::render(state, cx)),
         "collapsible" => specimen_card("Collapsible", theme, collapsible::render(state, cx)),
-        "dialog" | "alert-dialog" => specimen_card("Dialog", theme, dialog::render(state, cx)),
+        "dialog" => specimen_card("Dialog", theme, dialog::render(state, cx)),
+        "alert-dialog" => specimen_card("AlertDialog", theme, alert_dialog::render(state, cx)),
         "drawer" => specimen_card("Drawer", theme, drawer::render(state, cx)),
         "popover" => specimen_card("Popover", theme, popover::render(state, cx)),
         "hover-card" => specimen_card("HoverCard", theme, hover_card::render(theme)),

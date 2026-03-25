@@ -1,6 +1,6 @@
 use gpui::*;
-use poodle_primitives::{ButtonSpec, ButtonTone, ButtonVariant, DialogKind, DialogSpec, AlertDialogSpec, AlertDialogTone, EyebrowSpec};
-use poodle_gpui_components::{Button, Dialog, AlertDialog, Eyebrow};
+use poodle_primitives::{ButtonSpec, ButtonTone, ButtonVariant, DialogKind, DialogSpec, EyebrowSpec};
+use poodle_gpui_components::{Button, Dialog, Eyebrow};
 use crate::app_state::AppState;
 use crate::PreviewRoot;
 
@@ -179,36 +179,5 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
 
                     col
                 })
-        )
-        // --- AlertDialog: Danger tone ---
-        .child(
-            div().flex().flex_col().gap(px(8.0))
-                .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Alert dialog: danger tone"), theme))
-                .child(
-                    AlertDialog::from_spec(
-                        AlertDialogSpec::new("Delete this item?")
-                            .with_description("This action cannot be undone. The item and all associated data will be permanently removed.")
-                            .with_confirm_label("Delete")
-                            .with_cancel_label("Keep it"),
-                        theme,
-                    )
-                    .open(true)
-                )
-        )
-        // --- AlertDialog: Warning tone ---
-        .child(
-            div().flex().flex_col().gap(px(8.0))
-                .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Alert dialog: warning tone"), theme))
-                .child(
-                    AlertDialog::from_spec(
-                        AlertDialogSpec::new("Reset all settings?")
-                            .with_description("Your customized settings will be restored to their default values.")
-                            .with_tone(AlertDialogTone::Warning)
-                            .with_confirm_label("Reset")
-                            .with_cancel_label("Cancel"),
-                        theme,
-                    )
-                    .open(true)
-                )
         )
 }
