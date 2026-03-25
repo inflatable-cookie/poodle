@@ -1,7 +1,7 @@
 # Contracts
 
 Status: active
-Updated: 2026-03-23
+Updated: 2026-03-24
 
 Contracts are the docs-first source of truth for Poodle components.
 
@@ -108,7 +108,6 @@ above it in downstream repos such as Loophole.
 - `foundation/surface-elevation.md`
 - `foundation/surface.md`
 - `foundation/switch.md`
-- `foundation/tab-strip.md`
 - `foundation/table.md`
 - `foundation/tabs.md`
 - `foundation/text-area.md`
@@ -141,6 +140,7 @@ above it in downstream repos such as Loophole.
 - `composites/filter-toolbar.md`
 - `composites/form-dialog.md`
 - `composites/form-layout.md`
+- `composites/list-container.md`
 - `composites/log-list.md`
 - `composites/markdown-editor.md`
 - `composites/media-picker.md`
@@ -153,7 +153,6 @@ above it in downstream repos such as Loophole.
 - `composites/relation-picker.md`
 - `composites/reorderable-list.md`
 - `composites/selection-summary.md`
-- `composites/slug-field.md`
 - `composites/split-view.md`
 - `composites/toast-stack.md`
 - `composites/video-player.md`

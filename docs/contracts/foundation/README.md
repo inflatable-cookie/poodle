@@ -79,7 +79,6 @@ Foundation contracts define the lowest reusable surface in Poodle.
 - `surface-elevation.md`
 - `surface.md`
 - `switch.md`
-- `tab-strip.md`
 - `table.md`
 - `tabs.md`
 - `text-area.md`
