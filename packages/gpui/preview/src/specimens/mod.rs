@@ -111,6 +111,7 @@ mod confirm_action_specimen;
 mod editable_list_specimen;
 mod embed_input_specimen;
 mod embed_preview_specimen;
+mod field_set_specimen;
 mod filter_toolbar_specimen;
 mod form_dialog_specimen;
 mod inline_editable_field_specimen;
@@ -248,6 +249,7 @@ pub fn render_single_specimen(
         "text-area" => specimen_card("TextArea", theme, text_area::render(state, cx)),
         "search-field" => specimen_card("SearchField", theme, search_field::render(state, cx)),
         "field" => specimen_card("Field", theme, field::render(state, cx)),
+        "field-set" => specimen_card("FieldSet", theme, field_set_specimen::render(theme)),
         "form-actions" => specimen_card("FormActions", theme, form_actions::render(state, cx)),
         "number-entry" => specimen_card("NumberEntry", theme, number_entry::render(state, cx)),
         "pin-input" => specimen_card("PinInput", theme, pin_input::render(state, cx)),
