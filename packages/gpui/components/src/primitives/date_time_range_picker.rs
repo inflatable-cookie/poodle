@@ -95,6 +95,8 @@ impl IntoElement for DateTimeRangePicker {
         let icon_muted = resolve_color(theme, "semantic.color.icon.muted");
         let accent = resolve_color(theme, "semantic.color.accent.base");
         let disabled_opacity = resolve_opacity(theme, "semantic.state.opacity.disabled");
+        let body_size = resolve_px(theme, "semantic.typography.body.size");
+        let label_size = resolve_px(theme, "semantic.typography.label.size");
         let hover_bg = color_mix(surface_bg, elevated_bg, 0.84);
 
         let value = spec.current_value();
@@ -138,7 +140,7 @@ impl IntoElement for DateTimeRangePicker {
             .items_center()
             .justify_between()
             .gap(inline_gap)
-            .text_size(px(14.0))
+            .text_size(body_size)
             .min_w(px(288.0)); // Contract: min-width 18rem
 
         // Focus ring
@@ -248,7 +250,7 @@ impl IntoElement for DateTimeRangePicker {
                 .gap(inner_gap)
                 .child(
                     div()
-                        .text_size(px(14.0))
+                        .text_size(body_size)
                         .font_weight(FontWeight::SEMIBOLD)
                         .text_color(text_primary)
                         .child("Select date range"),
@@ -274,7 +276,7 @@ impl IntoElement for DateTimeRangePicker {
                     .gap(px(4.0))
                     .child(
                         div()
-                            .text_size(px(13.0))
+                            .text_size(label_size)
                             .text_color(text_secondary)
                             .child(label.to_string()),
                     )
@@ -288,7 +290,7 @@ impl IntoElement for DateTimeRangePicker {
                             .border_color(border)
                             .flex()
                             .items_center()
-                            .text_size(px(13.0))
+                            .text_size(label_size)
                             .text_color(text_primary)
                             .child(time_val.to_string()),
                     )

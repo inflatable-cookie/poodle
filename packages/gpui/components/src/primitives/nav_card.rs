@@ -1,7 +1,7 @@
 use gpui::*;
 use poodle_gpui::GpuiThemeProvider;
 use poodle_primitives::NavCardSpec;
-use crate::theme_ext::{resolve_color, resolve_opacity, resolve_radius};
+use crate::theme_ext::{resolve_color, resolve_opacity, resolve_px, resolve_radius};
 
 pub struct NavCard {
     spec: NavCardSpec,
@@ -19,6 +19,8 @@ pub struct NavCard {
     arrow_color: Hsla,
     disabled_opacity: f32,
     focus_ring_color: Hsla,
+    body_size: Pixels,
+    label_size: Pixels,
     icon: Option<AnyElement>,
     on_click: Option<Box<dyn Fn(&mut Window, &mut App) + 'static>>,
 }
@@ -65,6 +67,8 @@ impl NavCard {
             arrow_color,
             disabled_opacity,
             focus_ring_color,
+            body_size: resolve_px(theme, "semantic.typography.body.size"),
+            label_size: resolve_px(theme, "semantic.typography.label.size"),
             icon: None,
             on_click: None,
         }
@@ -126,7 +130,7 @@ impl IntoElement for NavCard {
             .gap(px(8.0))
             .child(
                 div()
-                    .text_size(px(14.0))
+                    .text_size(self.body_size)
                     .font_weight(FontWeight::BOLD)
                     .text_color(title_color)
                     .child(self.spec.title.clone()),
@@ -152,7 +156,7 @@ impl IntoElement for NavCard {
         if let Some(desc) = &self.spec.description {
             content = content.child(
                 div()
-                    .text_size(px(13.0))
+                    .text_size(self.label_size)
                     .text_color(description_color)
                     .child(desc.clone()),
             );
@@ -160,7 +164,7 @@ impl IntoElement for NavCard {
 
         // Arrow indicator
         let arrow = div()
-            .text_size(px(14.0))
+            .text_size(self.body_size)
             .text_color(arrow_color)
             .flex_shrink_0()
             .opacity(0.0)

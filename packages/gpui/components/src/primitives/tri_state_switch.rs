@@ -83,7 +83,7 @@ impl IntoElement for TriStateSwitch {
         let segment_min_w = px(72.0);
         let segment_h = control_height - px(4.0);
         let segment_radius = segment_h / 2.0;
-        let label_size = px(14.0);
+        let label_size = resolve_px(theme, "semantic.typography.body.size");
         let track_w = segment_min_w * 3.0 + track_padding * 2.0;
         let track_radius = control_height / 2.0;
 
@@ -269,7 +269,7 @@ impl IntoElement for TriStateSwitch {
         if let Some(ref label) = spec.label {
             el = el.child(
                 div()
-                    .text_size(px(14.0))
+                    .text_size(label_size)
                     .text_color(text_primary)
                     .child(label.clone()),
             );

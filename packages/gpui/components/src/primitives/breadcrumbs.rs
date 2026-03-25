@@ -16,6 +16,7 @@ pub struct Breadcrumbs {
     separator_color: Hsla,
     hover_color: Hsla,
     gap: Pixels,
+    body_size: Pixels,
     on_navigate: Option<std::rc::Rc<dyn Fn(&str, &mut Window, &mut App)>>,
 }
 
@@ -35,6 +36,7 @@ impl Breadcrumbs {
         let separator_color = resolve_color(theme, spec.separator_color_token());
         let hover_color = resolve_color(theme, spec.hover_color_token());
         let gap = resolve_px(theme, spec.gap_token());
+        let body_size = resolve_px(theme, "semantic.typography.body.size");
 
         Self {
             spec,
@@ -43,6 +45,7 @@ impl Breadcrumbs {
             separator_color,
             hover_color,
             gap,
+            body_size,
             on_navigate: None,
         }
     }
@@ -93,7 +96,7 @@ impl IntoElement for Breadcrumbs {
             .flex_wrap()
             .items_center()
             .gap(gap)
-            .text_size(px(14.0)); // 0.875rem — body size per contract
+            .text_size(self.body_size); // body size per contract
 
         let on_navigate = self.on_navigate;
 

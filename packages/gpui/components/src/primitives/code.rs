@@ -47,6 +47,7 @@ impl IntoElement for Code {
         let theme = &self.theme;
         let spec = &self.spec;
 
+        let label_size = resolve_px(theme, "semantic.typography.label.size");
         let fill = resolve_color(theme, spec.fill_token());
         let text_color = resolve_color(theme, spec.text_color_token());
 
@@ -57,7 +58,7 @@ impl IntoElement for Code {
                 .py(px(1.0))
                 .rounded(px(3.0))
                 .bg(fill.opacity(0.6))
-                .text_size(px(13.0))
+                .text_size(label_size)
                 .text_color(text_color)
                 .child(spec.content.clone())
                 .into_any_element();
@@ -78,7 +79,7 @@ impl IntoElement for Code {
             .border_1()
             .border_color(border)
             .text_color(text_color)
-            .text_size(px(13.0))
+            .text_size(label_size)
             .overflow_hidden()
             .flex()
             .flex_col();

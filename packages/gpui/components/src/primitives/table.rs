@@ -2,7 +2,7 @@ use gpui::*;
 use poodle_gpui::GpuiThemeProvider;
 use poodle_primitives::{ColumnAlign, TableColumn, TableRow, TableSpec};
 
-use crate::theme_ext::{color_mix, resolve_color, resolve_radius};
+use crate::theme_ext::{color_mix, resolve_color, resolve_px, resolve_radius};
 
 pub struct Table {
     spec: TableSpec,
@@ -17,6 +17,7 @@ pub struct Table {
     cell_border: Hsla,
     caption_text: Hsla,
     empty_text: Hsla,
+    label_size: Pixels,
 }
 
 impl std::ops::Deref for Table {
@@ -67,6 +68,7 @@ impl Table {
             cell_border,
             caption_text: resolve_color(theme, spec.caption_text_token()),
             empty_text: resolve_color(theme, spec.empty_text_token()),
+            label_size: resolve_px(theme, "semantic.typography.label.size"),
             spec,
         }
     }
@@ -112,6 +114,7 @@ impl Table {
             cell_border,
             caption_text: resolve_color(theme, spec.caption_text_token()),
             empty_text: resolve_color(theme, spec.empty_text_token()),
+            label_size: resolve_px(theme, "semantic.typography.label.size"),
             spec,
         }
     }
@@ -197,7 +200,7 @@ impl IntoElement for Table {
                     .py(px(32.0))
                     .px(cell_pad_h)
                     .text_color(self.empty_text)
-                    .text_size(px(13.0))
+                    .text_size(self.label_size)
                     .line_height(relative(1.4))
                     .child(self.spec.empty_message.clone()),
             );
@@ -220,7 +223,7 @@ impl IntoElement for Table {
                         .px(cell_pad_h)
                         .py(cell_pad_v)
                         .text_color(self.cell_text)
-                        .text_size(px(13.0))
+                        .text_size(self.label_size)
                         .line_height(relative(1.4));
 
                     if col.align == ColumnAlign::End {

@@ -72,6 +72,8 @@ impl IntoElement for BulkActionBar {
         let control_height = resolve_px(theme, "semantic.size.control.height");
         let control_pad_x = resolve_px(theme, "semantic.space.control.x");
         let elevated = resolve_color(theme, "semantic.color.background.elevated");
+        let body_size = resolve_px(theme, "semantic.typography.body.size");
+        let label_size = resolve_px(theme, "semantic.typography.label.size");
 
         // Danger button border: 65% danger mixed with default border
         let danger_border = color_mix(danger_border_raw, button_border, 0.65);
@@ -82,7 +84,7 @@ impl IntoElement for BulkActionBar {
             let count_text = format!("{}", spec.selection_count);
             row = row.child(
                 div()
-                    .text_size(px(14.0))
+                    .text_size(body_size)
                     .font_weight(FontWeight::SEMIBOLD)
                     .text_color(text_color)
                     .child(count_text),
@@ -91,7 +93,7 @@ impl IntoElement for BulkActionBar {
                 Some(total) => {
                     row = row.child(
                         div()
-                            .text_size(px(14.0))
+                            .text_size(body_size)
                             .text_color(total_text_color)
                             .child(format!("of {} selected", total)),
                     );
@@ -99,7 +101,7 @@ impl IntoElement for BulkActionBar {
                 None => {
                     row = row.child(
                         div()
-                            .text_size(px(14.0))
+                            .text_size(body_size)
                             .text_color(text_color)
                             .child("selected".to_string()),
                     );
@@ -132,7 +134,7 @@ impl IntoElement for BulkActionBar {
                     .border_color(btn_border)
                     .cursor_pointer()
                     .hover(move |s| s.bg(hover_fill))
-                    .text_size(px(13.0))
+                    .text_size(label_size)
                     .font_weight(FontWeight::MEDIUM)
                     .text_color(btn_text)
                     .child(action.label.clone());

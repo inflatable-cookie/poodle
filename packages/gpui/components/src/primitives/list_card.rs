@@ -4,7 +4,7 @@ use gpui::*;
 use poodle_gpui::GpuiThemeProvider;
 use poodle_primitives::{LeadingFill, LeadingShape, ListCardSpec};
 
-use crate::theme_ext::{color_mix, resolve_color, resolve_opacity, resolve_radius};
+use crate::theme_ext::{color_mix, resolve_color, resolve_opacity, resolve_px, resolve_radius};
 
 fn parse_hex_to_hsla(hex: &str) -> Option<Hsla> {
     let hex = hex.trim_start_matches('#');
@@ -111,6 +111,7 @@ impl IntoElement for ListCard {
         let disabled_opacity = resolve_opacity(theme, spec.disabled_opacity_token());
         let focus_ring_color = resolve_color(theme, spec.focus_ring_color_token());
 
+        let body_size = resolve_px(theme, "semantic.typography.body.size");
         let accent = resolve_color(theme, spec.leading_tint_bg_token());
         let leading_tint_bg = color_mix(accent, panel, 0.12);
         let leading_solid_bg = resolve_color(theme, spec.leading_solid_bg_token());
@@ -158,7 +159,7 @@ impl IntoElement for ListCard {
 
             col = col.child(
                 div()
-                    .text_size(px(14.0))
+                    .text_size(body_size)
                     .font_weight(FontWeight::SEMIBOLD)
                     .text_color(title_color)
                     .overflow_x_hidden()

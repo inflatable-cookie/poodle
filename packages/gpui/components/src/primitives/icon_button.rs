@@ -4,9 +4,10 @@
 
 use gpui::*;
 use poodle_gpui::GpuiThemeProvider;
-use poodle_primitives::{ButtonTone, ButtonVariant, ControlSize, IconButtonSpec, IconSize, IconSpec};
+use poodle_primitives::{ButtonTone, ButtonVariant, ControlSize, IconButtonSpec, IconSize, IconSpec, SpinnerSize, SpinnerSpec, SpinnerTone, SpinnerVariant};
 
 use super::icon::Icon;
+use super::spinner::Spinner;
 use crate::theme_ext::{color_mix, color_mix_black, resolve_color, resolve_opacity, resolve_px, resolve_radius};
 
 /// A real GPUI icon button component backed by `IconButtonSpec`.
@@ -168,8 +169,11 @@ impl IntoElement for IconButton {
         // ── Icon / spinner ────────────────────────────────────────
         if spec.is_loading {
             el = el.child(
-                Icon::from_spec(
-                    IconSpec::new("loader").with_size(IconSize::Sm),
+                Spinner::from_spec(
+                    SpinnerSpec::new()
+                        .with_variant(SpinnerVariant::Ring)
+                        .with_size(SpinnerSize::Sm)
+                        .with_tone(SpinnerTone::Current),
                     theme,
                 )
                 .with_color(text_color),

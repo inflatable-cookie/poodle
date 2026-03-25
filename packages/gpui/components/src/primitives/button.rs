@@ -4,13 +4,12 @@
 //! resolving all tokens through ButtonSpec + GpuiThemeProvider, and matching the
 //! Svelte implementation's visual output.
 
-use std::time::Duration;
-
 use gpui::*;
 use poodle_gpui::GpuiThemeProvider;
-use poodle_primitives::{ButtonSpec, ButtonTone, ButtonVariant, ControlSize, IconSize, IconSpec};
+use poodle_primitives::{ButtonSpec, ButtonTone, ButtonVariant, ControlSize, IconSize, IconSpec, SpinnerSize, SpinnerSpec, SpinnerTone, SpinnerVariant};
 
 use super::icon::Icon;
+use super::spinner::Spinner;
 use crate::theme_ext::{color_mix, color_mix_black, resolve_color, resolve_opacity, resolve_px, resolve_radius};
 
 /// A real GPUI button component backed by `ButtonSpec`.
@@ -232,23 +231,15 @@ impl IntoElement for Button {
         // Contract: 0.75rem (12px) border spinner, rotating 360° in 0.8s.
         // We use a custom spinner SVG with GPUI's animation API to rotate it.
         if spec.is_loading {
-            let spinner_size = px(12.0); // 0.75rem
             el = el.child(
-                svg()
-                    .path(SharedString::from("assets/icons/spinner.svg"))
-                    .size(spinner_size)
-                    .flex_shrink_0()
-                    .text_color(icon_color)
-                    .with_animation(
-                        "button-spinner",
-                        Animation::new(Duration::from_millis(800))
-                            .repeat(),
-                        |svg, delta| {
-                            svg.with_transformation(
-                                Transformation::rotate(gpui::radians(delta * std::f32::consts::TAU))
-                            )
-                        },
-                    ),
+                Spinner::from_spec(
+                    SpinnerSpec::new()
+                        .with_variant(SpinnerVariant::Ring)
+                        .with_size(SpinnerSize::Sm)
+                        .with_tone(SpinnerTone::Current),
+                    theme,
+                )
+                .with_color(icon_color),
             );
         }
 

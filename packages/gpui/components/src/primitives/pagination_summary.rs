@@ -62,6 +62,7 @@ impl IntoElement for PaginationSummary {
 
         let gap = resolve_px(theme, spec.summary_gap_token());
         let text_secondary = resolve_color(theme, "semantic.color.text.secondary");
+        let body_size = resolve_px(theme, "semantic.typography.body.size");
         let _text_primary = resolve_color(theme, "semantic.color.text.primary");
 
         let start = spec.start_index();
@@ -87,7 +88,7 @@ impl IntoElement for PaginationSummary {
         // Summary label
         container = container.child(
             div()
-                .text_size(px(14.0))
+                .text_size(body_size)
                 .text_color(text_secondary)
                 .child(summary_text),
         );

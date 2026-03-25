@@ -5,7 +5,7 @@ use poodle_gpui::GpuiThemeProvider;
 use poodle_primitives::{CalendarSpec, CalendarWeekStart, IconSize, IconSpec};
 
 use super::icon::Icon;
-use crate::theme_ext::{color_mix, resolve_color, resolve_opacity, resolve_radius};
+use crate::theme_ext::{color_mix, resolve_color, resolve_opacity, resolve_px, resolve_radius};
 
 /// Weekday header labels (Sunday-first; rotated at render time based on spec).
 const WEEKDAYS_SUN: [&str; 7] = ["Su", "Mo", "Tu", "We", "Th", "Fr", "Sa"];
@@ -157,6 +157,7 @@ impl IntoElement for Calendar {
         let border = resolve_color(theme, "semantic.color.border.default");
         let icon_muted = resolve_color(theme, "semantic.color.icon.muted");
         let disabled_opacity = resolve_opacity(theme, "semantic.state.opacity.disabled");
+        let body_size = resolve_px(theme, "semantic.typography.body.size");
 
         // Contract: hover = color-mix(accent 8%, surface)
         let hover_bg = color_mix(accent, surface_bg, 0.08);
@@ -315,7 +316,7 @@ impl IntoElement for Calendar {
                 div()
                     .flex_1()
                     .text_center()
-                    .text_size(px(14.0))
+                    .text_size(body_size)
                     .font_weight(FontWeight::SEMIBOLD)
                     .text_color(text_primary)
                     .child(month_label),
@@ -434,7 +435,7 @@ impl IntoElement for Calendar {
                             .items_center()
                             .justify_center()
                             .rounded(control_radius)
-                            .text_size(px(14.0))
+                            .text_size(body_size)
                             .text_color(text_secondary.opacity(0.4))
                             .child(format!("{}", outside_day)),
                     );
@@ -449,7 +450,7 @@ impl IntoElement for Calendar {
                             .items_center()
                             .justify_center()
                             .rounded(control_radius)
-                            .text_size(px(14.0))
+                            .text_size(body_size)
                             .text_color(text_secondary.opacity(0.4))
                             .child(format!("{}", outside_day)),
                     );
@@ -468,7 +469,7 @@ impl IntoElement for Calendar {
                         .items_center()
                         .justify_center()
                         .rounded(control_radius)
-                        .text_size(px(14.0));
+                        .text_size(body_size);
 
                     if is_selected {
                         cell = cell

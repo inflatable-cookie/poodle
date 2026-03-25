@@ -18,6 +18,7 @@ pub struct OrderBy {
     focus_ring_color: Hsla,
     gap: Pixels,
     reset_color: Hsla,
+    body_size: Pixels,
     on_sort: Option<Box<dyn Fn(&str, &SortDirection, &mut Window, &mut App) + 'static>>,
     on_reset: Option<Box<dyn Fn(&mut Window, &mut App) + 'static>>,
 }
@@ -62,6 +63,7 @@ impl OrderBy {
             focus_ring_color,
             gap,
             reset_color,
+            body_size: resolve_px(theme, "semantic.typography.body.size"),
             on_sort: None,
             on_reset: None,
         }
@@ -219,7 +221,7 @@ impl IntoElement for OrderBy {
                 .w(px(28.0))
                 .h(px(28.0))
                 .rounded(self.radius)
-                .text_size(px(14.0))
+                .text_size(self.body_size)
                 .text_color(reset_color)
                 .cursor_pointer()
                 .hover(|style| style.bg(self.field_hover_fill))

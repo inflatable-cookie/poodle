@@ -77,6 +77,7 @@ impl IntoElement for SplitButton {
         let text_primary = resolve_color(theme, "semantic.color.text.primary");
         let radius = resolve_radius(theme, spec.radius_token());
         let focus_ring = resolve_color(theme, "semantic.color.accent.focusRing");
+        let body_size = resolve_px(theme, "semantic.typography.body.size");
 
         // Size
         let base_height = resolve_px(theme, spec.control_height_token());
@@ -218,7 +219,7 @@ impl IntoElement for SplitButton {
                     SplitMenuItem::Action { label, is_disabled, .. } => {
                         let mut item_el = div()
                             .px(px(8.0)).py(px(6.0))
-                            .text_size(px(14.0)).text_color(item_text)
+                            .text_size(body_size).text_color(item_text)
                             .rounded(px(4.0));
                         if !is_disabled {
                             let accent = resolve_color(theme, "semantic.color.accent.base");

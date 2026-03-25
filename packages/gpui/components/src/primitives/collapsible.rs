@@ -63,6 +63,8 @@ impl IntoElement for Collapsible {
         let spec = &self.spec;
         let is_open = spec.current_open();
 
+        let heading_size = resolve_px(theme, "semantic.typography.heading.size");
+        let label_size = resolve_px(theme, "semantic.typography.label.size");
         let text_primary = resolve_color(theme, "semantic.color.text.primary");
         let text_secondary = resolve_color(theme, "semantic.color.text.secondary");
         let border_color = resolve_color(theme, "semantic.color.border.subtle");
@@ -110,7 +112,7 @@ impl IntoElement for Collapsible {
             title_block = title_block.child(
                 div()
                     .text_color(text_primary)
-                    .text_size(px(16.0)) // Svelte: 1rem = 16px
+                    .text_size(heading_size)
                     .font_weight(FontWeight::BOLD)
                     .line_height(relative(1.2))
                     .child(title_text.clone())
@@ -120,7 +122,7 @@ impl IntoElement for Collapsible {
             title_block = title_block.child(
                 div()
                     .text_color(text_secondary)
-                    .text_size(px(13.0))
+                    .text_size(label_size)
                     .child(desc.clone())
             );
         }

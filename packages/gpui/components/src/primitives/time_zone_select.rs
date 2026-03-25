@@ -65,6 +65,7 @@ impl IntoElement for TimeZoneSelect {
         let text_secondary = resolve_color(theme, "semantic.color.text.secondary");
         let elevated_bg = resolve_color(theme, spec.overlay_fill_token());
         let disabled_opacity = resolve_opacity(theme, "semantic.state.opacity.disabled");
+        let body_size = resolve_px(theme, "semantic.typography.body.size");
 
         let trigger_text = spec
             .trigger_text()
@@ -93,7 +94,7 @@ impl IntoElement for TimeZoneSelect {
             .items_center()
             .justify_between()
             .gap(inline_gap)
-            .text_size(px(14.0))
+            .text_size(body_size)
             .child(div().text_color(text_col).child(trigger_text))
             .child(
                 Icon::from_spec(
@@ -171,7 +172,7 @@ impl IntoElement for TimeZoneSelect {
                     },
                 ])
                 .py(px(4.0))
-                .text_size(px(14.0))
+                .text_size(body_size)
                 .text_color(text_primary);
 
             for tz in timezones {

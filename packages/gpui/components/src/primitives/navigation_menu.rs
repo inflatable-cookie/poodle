@@ -79,6 +79,7 @@ impl IntoElement for NavigationMenu {
         let border_subtle = resolve_color(theme, "semantic.color.border.subtle");
         let border_default = resolve_color(theme, "semantic.color.border.default");
         let disabled_opacity = resolve_opacity(theme, self.spec.disabled_opacity_token());
+        let body_size = resolve_px(theme, "semantic.typography.body.size");
         let focus_ring = resolve_color(theme, "semantic.color.accent.focusRing");
 
         // Contract: trigger bg 88% surface, border 72% border-subtle
@@ -198,7 +199,7 @@ impl IntoElement for NavigationMenu {
                                     spread_radius: px(0.0),
                                 },
                             ])
-                            .text_size(px(14.0))
+                            .text_size(body_size)
                             .text_color(text_secondary)
                             .child(desc.clone()),
                     );

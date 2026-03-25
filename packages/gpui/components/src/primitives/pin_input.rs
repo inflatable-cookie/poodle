@@ -7,7 +7,7 @@ use gpui::*;
 use poodle_gpui::GpuiThemeProvider;
 use poodle_primitives::PinInputSpec;
 
-use crate::theme_ext::{resolve_color, resolve_opacity, resolve_radius};
+use crate::theme_ext::{resolve_color, resolve_opacity, resolve_px, resolve_radius};
 
 /// A real GPUI pin/OTP input component with fixed-length digit cells backed by `PinInputSpec`.
 pub struct PinInput {
@@ -81,6 +81,7 @@ impl IntoElement for PinInput {
         let text_primary = resolve_color(theme, spec.text_color_token());
         let focus_ring = resolve_color(theme, spec.focus_ring_color_token());
         let disabled_opacity = resolve_opacity(theme, spec.disabled_opacity_token());
+        let heading_size = resolve_px(theme, "semantic.typography.heading.size");
 
         let chars: Vec<char> = spec.value.chars().collect();
 
@@ -118,7 +119,7 @@ impl IntoElement for PinInput {
                 .items_center()
                 .justify_center()
                 // Contract: code font family, 1rem size
-                .text_size(px(16.0))
+                .text_size(heading_size)
                 .text_color(text_primary)
                 .child(display);
 

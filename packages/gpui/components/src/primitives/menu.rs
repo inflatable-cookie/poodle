@@ -10,7 +10,7 @@ use poodle_primitives::{IconSize, IconSpec, MenuEntry, MenuItemKind, MenuSpec, O
 
 use super::icon::Icon;
 
-use crate::theme_ext::{color_mix, resolve_color, resolve_opacity, resolve_radius};
+use crate::theme_ext::{color_mix, resolve_color, resolve_opacity, resolve_px, resolve_radius};
 
 /// A real GPUI menu component backed by `MenuSpec`.
 pub struct Menu {
@@ -99,6 +99,7 @@ impl IntoElement for Menu {
         let separator_color = Hsla { a: border_subtle.a * 0.48, ..border_subtle };
         let disabled_opacity = resolve_opacity(theme, self.spec.disabled_opacity_token());
         let focus_ring = resolve_color(theme, "semantic.color.accent.focusRing");
+        let body_size = resolve_px(theme, "semantic.typography.body.size");
 
         // Contract: min-width 14rem, padding 0.25rem
         let mut menu = div()
@@ -163,7 +164,7 @@ impl IntoElement for Menu {
                 .py(px(6.0)) // 0.375rem
                 .rounded(item_radius)
                 // Contract: font 0.875rem
-                .text_size(px(14.0))
+                .text_size(body_size)
                 .flex()
                 .items_center()
                 .justify_between();

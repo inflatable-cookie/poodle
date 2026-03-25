@@ -19,6 +19,8 @@ pub struct AlertDialog {
     padding_x: Pixels,
     padding_y: Pixels,
     border_color: Hsla,
+    body_size: Pixels,
+    heading_size: Pixels,
     on_confirm: Option<Box<dyn Fn(&mut Window, &mut App)>>,
     on_cancel: Option<Box<dyn Fn(&mut Window, &mut App)>>,
 }
@@ -54,6 +56,8 @@ impl AlertDialog {
             padding_x: resolve_px(theme, spec.padding_x_token()),
             padding_y: resolve_px(theme, spec.padding_y_token()),
             border_color: resolve_color(theme, spec.border_token()),
+            body_size: resolve_px(theme, "semantic.typography.body.size"),
+            heading_size: resolve_px(theme, "semantic.typography.heading.size"),
             on_confirm: None,
             on_cancel: None,
             spec,
@@ -97,7 +101,7 @@ impl IntoElement for AlertDialog {
             .gap(px(4.0))
             .child(
                 div()
-                    .text_size(px(16.0))
+                    .text_size(self.heading_size)
                     .text_color(self.title_color)
                     .font_weight(FontWeight::SEMIBOLD)
                     .child(self.spec.title.clone()),
@@ -105,7 +109,7 @@ impl IntoElement for AlertDialog {
         if let Some(ref desc) = self.spec.description {
             header = header.child(
                 div()
-                    .text_size(px(14.0))
+                    .text_size(self.body_size)
                     .text_color(self.description_color)
                     .child(desc.clone()),
             );
@@ -118,7 +122,7 @@ impl IntoElement for AlertDialog {
             .px(px(12.0))
             .py(px(6.0))
             .rounded(self.button_radius)
-            .text_size(px(14.0))
+            .text_size(self.body_size)
             .font_weight(FontWeight::MEDIUM)
             .text_color(self.cancel_text_color)
             .hover(|s| s.bg(hsla(0.0, 0.0, 0.5, 0.1)))
@@ -131,7 +135,7 @@ impl IntoElement for AlertDialog {
             .px(px(12.0))
             .py(px(6.0))
             .rounded(self.button_radius)
-            .text_size(px(14.0))
+            .text_size(self.body_size)
             .font_weight(FontWeight::MEDIUM)
             .bg(self.confirm_fill)
             .text_color(self.confirm_text_color)

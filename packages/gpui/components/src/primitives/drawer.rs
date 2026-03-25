@@ -83,6 +83,8 @@ impl IntoElement for Drawer {
         let border_default = resolve_color(theme, "semantic.color.border.default");
         let text_primary = resolve_color(theme, "semantic.color.text.primary");
         let text_secondary = resolve_color(theme, "semantic.color.text.secondary");
+        let body_size = resolve_px(theme, "semantic.typography.body.size");
+        let heading_size = resolve_px(theme, "semantic.typography.heading.size");
 
         // Matches Svelte treatment-surface-elevated values:
         //   fill: color-mix(elevated 94%, transparent)
@@ -127,7 +129,7 @@ impl IntoElement for Drawer {
         if let Some(ref title) = spec.title {
             drawer_panel = drawer_panel.child(
                 div()
-                    .text_size(px(16.0))
+                    .text_size(heading_size)
                     .font_weight(FontWeight::SEMIBOLD)
                     .text_color(text_primary)
                     .child(title.clone()),
@@ -138,7 +140,7 @@ impl IntoElement for Drawer {
         if let Some(ref description) = spec.description {
             drawer_panel = drawer_panel.child(
                 div()
-                    .text_size(px(14.0))
+                    .text_size(body_size)
                     .text_color(text_secondary)
                     .child(description.clone()),
             );

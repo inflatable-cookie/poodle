@@ -83,6 +83,8 @@ impl IntoElement for DateTimePicker {
         let icon_muted = resolve_color(theme, "semantic.color.icon.muted");
         let accent = resolve_color(theme, "semantic.color.accent.base");
         let disabled_opacity = resolve_opacity(theme, "semantic.state.opacity.disabled");
+        let body_size = resolve_px(theme, "semantic.typography.body.size");
+        let label_size = resolve_px(theme, "semantic.typography.label.size");
         let hover_bg = color_mix(surface_bg, elevated_bg, 0.84);
 
         let value = spec.current_value();
@@ -118,7 +120,7 @@ impl IntoElement for DateTimePicker {
             .items_center()
             .justify_between()
             .gap(inline_gap)
-            .text_size(px(14.0));
+            .text_size(body_size);
 
         // Focus ring
         let focus_ring = resolve_color(theme, "semantic.color.accent.focusRing");
@@ -227,7 +229,7 @@ impl IntoElement for DateTimePicker {
                 .gap(inner_gap)
                 .child(
                     div()
-                        .text_size(px(14.0))
+                        .text_size(body_size)
                         .font_weight(FontWeight::SEMIBOLD)
                         .text_color(text_primary)
                         .child("Select date"),
@@ -250,7 +252,7 @@ impl IntoElement for DateTimePicker {
                 .justify_between()
                 .child(
                     div()
-                        .text_size(px(13.0))
+                        .text_size(label_size)
                         .text_color(text_secondary)
                         .child("Time"),
                 )
@@ -264,7 +266,7 @@ impl IntoElement for DateTimePicker {
                         .border_color(border)
                         .flex()
                         .items_center()
-                        .text_size(px(13.0))
+                        .text_size(label_size)
                         .text_color(text_primary)
                         .child(time_display.to_string()),
                 );

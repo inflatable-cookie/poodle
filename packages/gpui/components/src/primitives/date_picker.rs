@@ -94,6 +94,7 @@ impl IntoElement for DatePicker {
         let icon_muted = resolve_color(theme, "semantic.color.icon.muted");
         let accent = resolve_color(theme, "semantic.color.accent.base");
         let disabled_opacity = resolve_opacity(theme, "semantic.state.opacity.disabled");
+        let body_size = resolve_px(theme, "semantic.typography.body.size");
         // Contract: hover = color-mix(surface 84%, elevated)
         let hover_bg = color_mix(surface_bg, elevated_bg, 0.84);
 
@@ -125,7 +126,7 @@ impl IntoElement for DatePicker {
             .items_center()
             .justify_between()
             .gap(inline_gap)
-            .text_size(px(14.0));
+            .text_size(body_size);
 
         // Focus ring
         let focus_ring = resolve_color(theme, "semantic.color.accent.focusRing");

@@ -6,9 +6,10 @@
 
 use gpui::*;
 use poodle_gpui::GpuiThemeProvider;
-use poodle_primitives::{IconSize, IconSpec, TextInputSpec, ValidationState};
+use poodle_primitives::{IconSize, IconSpec, SpinnerSize, SpinnerSpec, SpinnerTone, SpinnerVariant, TextInputSpec, ValidationState};
 
 use super::icon::Icon;
+use super::spinner::Spinner;
 use crate::theme_ext::{color_mix, resolve_color, resolve_opacity, resolve_px, resolve_radius};
 
 /// A real GPUI text input component backed by `TextInputSpec`.
@@ -245,8 +246,14 @@ impl IntoElement for TextInput {
             ValidationState::Pending => {
                 let accent_color = resolve_color(theme, "semantic.color.accent.base");
                 inner = inner.child(
-                    Icon::from_spec(IconSpec::new("loader").with_size(IconSize::Sm), theme)
-                        .with_color(accent_color),
+                    Spinner::from_spec(
+                        SpinnerSpec::new()
+                            .with_variant(SpinnerVariant::Ring)
+                            .with_size(SpinnerSize::Sm)
+                            .with_tone(SpinnerTone::Accent),
+                        theme,
+                    )
+                    .with_color(accent_color),
                 );
             }
             _ => {}

@@ -70,6 +70,7 @@ impl IntoElement for FileUpload {
         let accent = resolve_color(theme, "semantic.color.accent.base");
         let focus_border = resolve_color(theme, spec.focus_border_token());
         let disabled_opacity = resolve_opacity(theme, spec.disabled_opacity_token());
+        let body_size = resolve_px(theme, "semantic.typography.body.size");
 
         let label = if spec.is_dragging {
             "Drop files here"
@@ -90,7 +91,7 @@ impl IntoElement for FileUpload {
             .rounded(control_radius)
             .border_1()
             .border_color(accent)
-            .text_size(px(14.0))
+            .text_size(body_size)
             .text_color(accent)
             .cursor_pointer()
             .child("Browse");
@@ -136,7 +137,7 @@ impl IntoElement for FileUpload {
             .child(upload_icon)
             .child(
                 div()
-                    .text_size(px(14.0))
+                    .text_size(body_size)
                     .text_color(text_color)
                     .child(label),
             )

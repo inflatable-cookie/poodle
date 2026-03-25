@@ -66,6 +66,7 @@ impl IntoElement for ZonedDateTimePicker {
         let elevated_bg = resolve_color(theme, spec.overlay_fill_token());
         let icon_muted = resolve_color(theme, "semantic.color.icon.muted");
         let disabled_opacity = resolve_opacity(theme, "semantic.state.opacity.disabled");
+        let body_size = resolve_px(theme, "semantic.typography.body.size");
 
         let display_value = spec
             .value
@@ -96,7 +97,7 @@ impl IntoElement for ZonedDateTimePicker {
             .flex()
             .items_center()
             .gap(inline_gap)
-            .text_size(px(14.0))
+            .text_size(body_size)
             .child(div().flex_1().text_color(text_col).child(display_value.to_string()));
 
         if !tz_display.is_empty() {
@@ -182,7 +183,7 @@ impl IntoElement for ZonedDateTimePicker {
                 .gap(px(8.0))
                 .child(
                     div()
-                        .text_size(px(14.0))
+                        .text_size(body_size)
                         .font_weight(FontWeight::SEMIBOLD)
                         .text_color(text_primary)
                         .child("Select date"),
@@ -204,7 +205,7 @@ impl IntoElement for ZonedDateTimePicker {
                 )
                 .child(
                     div()
-                        .text_size(px(14.0))
+                        .text_size(body_size)
                         .text_color(text_primary)
                         .child(time_display.to_string()),
                 );
@@ -223,7 +224,7 @@ impl IntoElement for ZonedDateTimePicker {
                 )
                 .child(
                     div()
-                        .text_size(px(14.0))
+                        .text_size(body_size)
                         .text_color(if tz_has_value { text_primary } else { text_secondary })
                         .child(tz_overlay_display.to_string()),
                 );
