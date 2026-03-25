@@ -90,7 +90,9 @@ mod card_specimen;
 mod detail_row_specimen;
 mod detail_section_specimen;
 mod detail_shell;
+mod empty_state_specimen;
 mod list_card;
+mod metric_tile_specimen;
 mod picker;
 mod page_structure;
 mod pagination;
@@ -298,7 +300,9 @@ pub fn render_single_specimen(
         "nav-card" => specimen_card("NavCard", theme, nav_card_grid::render(theme)),
         "picker-shell" | "relation-picker" | "selection-summary" | "order-by" => specimen_card("PickerShell", theme, picker::render(state, cx)),
         "page-header" | "breadcrumbs" | "page-loading" | "pagination-summary" => specimen_card("Page Structure", theme, page_structure::render(theme)),
-        "metric-tile" | "state-tile" | "empty-state" | "toast-stack" => specimen_card("State Display", theme, state_display::render(state, cx)),
+        "metric-tile" | "state-tile" => specimen_card("MetricTile", theme, metric_tile_specimen::render(theme)),
+        "empty-state" => specimen_card("EmptyState", theme, empty_state_specimen::render(theme)),
+        "toast-stack" => specimen_card("ToastStack", theme, state_display::render(state, cx)),
         "confirm-action" | "form-dialog" | "filter-toolbar" | "bulk-action-bar"
         | "inline-editable-field" | "log-list" | "editable-list" | "autonomous-list" | "embed-input"
         | "embed-preview" => specimen_card("Misc", theme, misc_composites::render(state, cx)),
