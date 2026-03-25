@@ -37,6 +37,7 @@ impl Toggle {
     pub fn disabled(mut self, v: bool) -> Self { self.spec.is_disabled = v; self }
     pub fn aria_label(mut self, v: impl Into<String>) -> Self { self.spec.aria_label = Some(v.into()); self }
     pub fn label(mut self, v: impl Into<String>) -> Self { self.spec.label = Some(v.into()); self }
+    pub fn icon(mut self, v: impl Into<String>) -> Self { self.spec.icon = Some(v.into()); self }
 
     // ── GPUI-specific ─────────────────────────────────────────
     pub fn on_click(mut self, handler: impl Fn(&ClickEvent, &mut Window, &mut App) + 'static) -> Self {
@@ -132,6 +133,26 @@ impl IntoElement for Toggle {
                             key_handler(&ClickEvent::default(), window, cx);
                         }
                     });
+            }
+        }
+
+        // Icon (rendered before label if both present)
+        if let Some(ref icon_name) = spec.icon {
+            use super::icon::Icon;
+            use poodle_primitives::{IconSize, IconSpec};
+            let icon_size = match spec.size {
+                ControlSize::Sm => IconSize::Sm,
+                _ => IconSize::Sm,
+            };
+            el = el.child(
+                Icon::from_spec(
+                    IconSpec::new(icon_name).with_size(icon_size),
+                    theme,
+                ).with_color(text_color)
+            );
+            // Add gap between icon and label
+            if !label_text.is_empty() {
+                el = el.gap(px(4.0));
             }
         }
 

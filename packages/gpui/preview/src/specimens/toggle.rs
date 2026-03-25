@@ -24,16 +24,18 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                 .child(
                     div().flex().gap(px(4.0))
                         .child(
-                            Toggle::new(theme).label("Bold")
+                            Toggle::new(theme).icon("bold")
                                 .pressed(bold_pressed)
+                                .aria_label("Bold")
                                 .on_click(cx.listener(|this, _e: &ClickEvent, _w, cx| {
                                     this.state.specimens.toggle("toggle-bold");
                                     cx.notify();
                                 }))
                         )
                         .child(
-                            Toggle::new(theme).label("Italic")
+                            Toggle::new(theme).icon("italic")
                                 .pressed(italic_pressed)
+                                .aria_label("Italic")
                                 .on_click(cx.listener(|this, _e: &ClickEvent, _w, cx| {
                                     this.state.specimens.toggle("toggle-italic");
                                     cx.notify();
@@ -50,7 +52,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
             div().flex().flex_col().gap(px(8.0))
                 .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Primary variant"), theme))
                 .child(
-                    Toggle::new(theme).label("Pinned")
+                    Toggle::new(theme).icon("pin").label("Pinned")
                         .variant(ButtonVariant::Primary)
                         .pressed(pinned_pressed)
                         .on_click(cx.listener(|this, _e: &ClickEvent, _w, cx| {
@@ -64,7 +66,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
             div().flex().flex_col().gap(px(8.0))
                 .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Secondary variant"), theme))
                 .child(
-                    Toggle::new(theme).label("Favorite")
+                    Toggle::new(theme).icon("star").label("Favorite")
                         .variant(ButtonVariant::Secondary)
                         .pressed(favorite_pressed)
                         .on_click(cx.listener(|this, _e: &ClickEvent, _w, cx| {

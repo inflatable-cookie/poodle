@@ -18,6 +18,8 @@ pub struct ToggleSpec {
     pub is_disabled: bool,
     pub aria_label: Option<String>,
     pub label: Option<String>,
+    /// Icon name (e.g. "bold", "italic", "pin") rendered before label.
+    pub icon: Option<String>,
 }
 
 impl Default for ToggleSpec {
@@ -31,6 +33,7 @@ impl Default for ToggleSpec {
             is_disabled: false,
             aria_label: None,
             label: None,
+            icon: None,
         }
     }
 }
@@ -48,6 +51,7 @@ impl ToggleSpec {
     pub fn with_disabled(mut self, is_disabled: bool) -> Self { self.is_disabled = is_disabled; self }
     pub fn with_aria_label(mut self, label: impl Into<String>) -> Self { self.aria_label = Some(label.into()); self }
     pub fn with_label(mut self, label: impl Into<String>) -> Self { self.label = Some(label.into()); self }
+    pub fn with_icon(mut self, icon: impl Into<String>) -> Self { self.icon = Some(icon.into()); self }
 
     pub fn current_pressed(&self) -> bool {
         self.is_pressed.unwrap_or(self.default_pressed)
