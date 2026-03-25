@@ -199,13 +199,22 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
       { name: "tone", type: "ButtonTone", default: '"default"', description: "Color tone of the button." },
       { name: "size", type: "ControlSize", default: '"md"', description: "Size of the button." },
       { name: "type", type: 'HTMLButtonElement["type"]', default: '"button"', description: "HTML button type attribute." },
+      { name: "form", type: "string | null", default: "null", description: "External form id to associate with." },
+      { name: "formaction", type: "string | null", default: "null", description: "Per-button form action override." },
+      { name: "formenctype", type: '"application/x-www-form-urlencoded" | "multipart/form-data" | "text/plain" | null', default: "null", description: "Per-button form encoding override." },
+      { name: "formmethod", type: '"get" | "post" | "dialog" | null', default: "null", description: "Per-button form method override." },
+      { name: "formnovalidate", type: "boolean", default: "false", description: "Skips validation for this submit action." },
+      { name: "formtarget", type: '"_self" | "_blank" | "_parent" | "_top" | string | null', default: "null", description: "Per-button form target override." },
       { name: "isDisabled", type: "boolean", default: "false", description: "Whether the button is disabled." },
       { name: "isLoading", type: "boolean", default: "false", description: "Whether the button shows a loading spinner." },
       { name: "leadingIcon", type: "string | null", default: "null", description: "Icon name displayed before the label." },
       { name: "trailingIcon", type: "string | null", default: "null", description: "Icon name displayed after the label." },
       { name: "chevron", type: "boolean", default: "false", description: "Whether to show a dropdown chevron." },
       { name: "ariaLabel", type: "string | null", default: "null", description: "Accessible label for the button." },
+      { name: "ariaExpanded", type: "boolean | null", default: "null", description: "Disclosure state for expandable triggers." },
       { name: "describedBy", type: "string | null", default: "null", description: "ID of the element describing this button." },
+      { name: "className", type: "string", default: '""', description: "Additional CSS class name." },
+      { name: "style", type: "string | null", default: "null", description: "Inline style passthrough for dynamic sizing or CSS variables." },
     ],
     slots: [
       { name: "default", description: "Button label content." },
@@ -341,6 +350,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
       { name: "label", type: "string | null", default: "null", description: "Label text displayed next to the checkbox." },
       { name: "ariaLabel", type: "string | null", default: "null", description: "Accessible label when no visible label is used." },
       { name: "describedBy", type: "string | null", default: "null", description: "ID of the element describing this checkbox." },
+      { name: "selectedColor", type: "string | null", default: "null", description: "Optional selected-state color override used for the checked and mixed indicator fill/border." },
     ],
     slots: [],
     events: [
@@ -352,7 +362,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
   let agreed = false;
 </script>
 
-<Checkbox label="I agree to the terms" bind:isChecked={agreed} />`,
+<Checkbox label="I agree to the terms" bind:isChecked={agreed} selectedColor="#22c55e" />`,
   },
 
   code: {
@@ -1085,7 +1095,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
       { name: "pendingMessage", type: "string | null", default: "null", description: "Message shown while validation is pending." },
       { name: "validationState", type: "ValidationState", default: '"none"', description: "Current validation state of the field." },
       { name: "isRequired", type: "boolean", default: "false", description: "Whether the field is required." },
-      { name: "optionalLabel", type: "string | null", default: '"Optional"', description: "Label shown for optional fields." },
+      { name: "optionalLabel", type: "string | null", default: "null", description: "Opt-in label shown for optional fields." },
       { name: "span", type: 'number | "full" | null', default: "null", description: "Column span within a form layout grid." },
       { name: "gridArea", type: "string | null", default: "null", description: "CSS grid-area for custom grid placement." },
     ],
@@ -1848,6 +1858,72 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
 <PageLoading isVisible message="Loading your data..." canCancel on:cancel={() => abortRequest()} />`,
   },
 
+  "list-container": {
+    props: [
+      { name: "title", type: "string", required: true, description: "Primary list title." },
+      { name: "subtitle", type: "string | null", default: "null", description: "Optional supporting text shown under the title." },
+      { name: "eyebrow", type: "string | null", default: "null", description: "Eyebrow label rendered above the title." },
+      { name: "ariaLabel", type: "string | null", default: "null", description: "Accessible label for the list region." },
+      { name: "state", type: '"ready" | "loading" | "error" | "empty"', default: '"ready"', description: "Current list state." },
+      { name: "loadingMessage", type: "string | null", default: '"Loading items..."', description: "Fallback loading message when no loading slot is provided." },
+      { name: "errorTitle", type: "string | null", default: '"Unable to load list"', description: "Fallback error title when no error slot is provided." },
+      { name: "errorMessage", type: "string | null", default: "null", description: "Fallback error message when no error slot is provided." },
+      { name: "emptyTitle", type: "string | null", default: '"Nothing here yet"', description: "Fallback empty-state title when no empty slot is provided." },
+      { name: "emptyMessage", type: "string | null", default: "null", description: "Fallback empty-state message when no empty slot is provided." },
+      { name: "emptyVariant", type: '"neutral" | "search" | "firstRun"', default: '"neutral"', description: "Fallback empty-state visual treatment." },
+      { name: "currentPage", type: "number", default: "1", description: "Current page number for built-in pagination." },
+      { name: "totalPages", type: "number", default: "1", description: "Total page count for built-in pagination." },
+      { name: "totalItems", type: "number | null", default: "null", description: "Total item count for the built-in pagination summary." },
+      { name: "pageSize", type: "number | null", default: "null", description: "Items per page for the built-in pagination summary." },
+      { name: "siblingCount", type: "number", default: "1", description: "Visible sibling pages around the current page." },
+      { name: "paginationAriaLabel", type: "string | null", default: "null", description: "Accessible label for the built-in pagination nav." },
+      { name: "showPagination", type: "boolean", default: "true", description: "Whether the built-in pagination footer is shown when multiple pages exist." },
+      { name: "showPaginationSummary", type: "boolean", default: "true", description: "Whether the built-in pagination summary is shown alongside pagination controls." },
+    ],
+    slots: [
+      { name: "breadcrumbs", description: "Optional breadcrumbs rendered in the header." },
+      { name: "actions", description: "Header actions rendered next to the title block." },
+      { name: "filters", description: "Filter controls rendered between the header and content." },
+      { name: "batch", description: "Batch-action strip rendered above the main content." },
+      { name: "default", description: "Primary list content." },
+      { name: "pagination", description: "Optional override for the full pagination footer." },
+      { name: "loading", description: "Optional override for the loading state." },
+      { name: "error", description: "Optional override for the error state." },
+      { name: "empty", description: "Optional override for the empty state." },
+    ],
+    events: [
+      { name: "pageChange", payload: "{ page: number }", description: "Fires when the built-in pagination or pagination summary changes page." },
+    ],
+    usage: `<script lang="ts">
+  import { ListContainer } from "@poodle/svelte-composites";
+  import { Button, Field, SearchField, Select } from "@poodle/svelte-primitives";
+
+  let page = 1;
+</script>
+
+<ListContainer
+  title="Workflow incidents"
+  subtitle="Monitor, filter, and page through operational events."
+  currentPage={page}
+  totalPages={12}
+  totalItems={120}
+  pageSize={10}
+  on:pageChange={(event) => (page = event.detail.page)}
+>
+  <svelte:fragment slot="actions">
+    <Button>Add incident</Button>
+  </svelte:fragment>
+
+  <svelte:fragment slot="filters">
+    <Field label="Search">
+      <SearchField placeholder="Search incidents" />
+    </Field>
+  </svelte:fragment>
+
+  <div>Your list content goes here.</div>
+</ListContainer>`,
+  },
+
   pagination: {
     props: [
       { name: "currentPage", type: "number", default: "1", description: "Currently active page number." },
@@ -1884,33 +1960,6 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
 </script>
 
 <PaginationSummary currentPage={1} totalPages={10} totalItems={50} pageSize={5} />`,
-  },
-
-  "panel-tabs": {
-    props: [
-      { name: "items", type: "PanelTabItem[]", default: "[]", description: "Array of panel tab items." },
-      { name: "value", type: "string | null", default: "null", description: "Currently active tab value." },
-      { name: "ariaLabel", type: "string | null", default: "null", description: "Accessible label for the panel tab bar." },
-    ],
-    slots: [],
-    events: [
-      { name: "valueChange", payload: "{ value: string }", description: "Fires when the active tab changes." },
-      { name: "close", payload: "{ value: string }", description: "Fires when a tab close button is clicked." },
-      { name: "reorder", payload: "{ items: string[] }", description: "Fires when tabs are reordered." },
-    ],
-    usage: `<script lang="ts">
-  import { PanelTabs } from "@poodle/svelte-composites";
-
-  let activeTab = "explorer";
-
-  const items = [
-    { value: "explorer", label: "Explorer", icon: "folder" },
-    { value: "search", label: "Search", icon: "search" },
-    { value: "git", label: "Source Control", icon: "git-branch" },
-  ];
-</script>
-
-<PanelTabs {items} value={activeTab} on:valueChange={(e) => (activeTab = e.detail.value)} />`,
   },
 
   "picker-shell": {
@@ -1951,7 +2000,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
     props: [
       { name: "tone", type: "PillTone", default: '"neutral"', description: "Color tone of the pill." },
       { name: "appearance", type: "PillAppearance", default: '"solid"', description: "Visual appearance variant." },
-      { name: "size", type: "PillSize", default: '"xs"', description: "Size of the pill." },
+      { name: "size", type: "PillSize", default: '"md"', description: "Size of the pill." },
       { name: "font", type: "PillFont", default: '"normal"', description: "Font style of the pill label." },
       { name: "isMuted", type: "boolean", default: "false", description: "Whether the pill uses muted styling." },
       { name: "ariaLabel", type: "string | null", default: "null", description: "Accessible label for the pill." },
@@ -2046,6 +2095,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
       { name: "ariaLabel", type: "string | null", default: "null", description: "Accessible label for the radio group." },
       { name: "describedBy", type: "string | null", default: "null", description: "ID of the element describing this group." },
       { name: "name", type: "string | undefined", default: "undefined", description: "Form field name." },
+      { name: "selectedColor", type: "string | null", default: "null", description: "Optional selected-state color override used for the selected indicator border and dot." },
     ],
     slots: [],
     events: [
@@ -2063,7 +2113,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
   let size = "md";
 </script>
 
-<RadioGroup {options} bind:value={size} orientation="vertical" />`,
+<RadioGroup {options} bind:value={size} orientation="vertical" selectedColor="#22c55e" />`,
   },
 
   "range-calendar": {
@@ -2437,35 +2487,6 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
 <Slider bind:value={volume} min={0} max={100} ariaLabel="Volume" />`,
   },
 
-  "slug-field": {
-    props: [
-      { name: "id", type: "string", required: true, description: "HTML id attribute for the input." },
-      { name: "label", type: "string", default: '"Slug"', description: "Label text for the field." },
-      { name: "source", type: "string", default: '""', description: "Source text to auto-generate the slug from." },
-      { name: "value", type: "string", default: '""', description: "Current slug value." },
-      { name: "placeholder", type: "string", default: '"auto-generated-slug"', description: "Placeholder text when empty." },
-      { name: "isManualOverride", type: "boolean", default: "false", description: "Whether the user has manually overridden the auto-generated slug." },
-      { name: "isDisabled", type: "boolean", default: "false", description: "Whether the field is disabled." },
-      { name: "validationState", type: "ValidationState", default: '"none"', description: "Validation state of the field." },
-      { name: "error", type: "string | null", default: "null", description: "Error message text." },
-      { name: "description", type: "string | null", default: '"URL-safe identifier auto-generated from the title."', description: "Help text below the field." },
-      { name: "maxLength", type: "number | null", default: "null", description: "Maximum character length." },
-      { name: "prefix", type: "string | null", default: "null", description: "URL prefix displayed before the slug." },
-    ],
-    slots: [],
-    events: [
-      { name: "change", payload: "{ value: string; isManual: boolean }", description: "Fires when the slug value changes." },
-    ],
-    usage: `<script lang="ts">
-  import { SlugField } from "@poodle/svelte-composites";
-
-  let title = "My New Article";
-  let slug = "";
-</script>
-
-<SlugField id="slug" source={title} bind:value={slug} prefix="/blog/" />`,
-  },
-
   spacer: {
     props: [
       { name: "grow", type: "number", default: "1", description: "Flex grow factor." },
@@ -2489,6 +2510,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
       { name: "variant", type: "ButtonVariant", default: '"secondary"', description: "Visual variant of the button." },
       { name: "tone", type: "ButtonTone", default: '"default"', description: "Color tone of the button." },
       { name: "size", type: "ControlSize", default: '"md"', description: "Size of the button." },
+      { name: "type", type: '"button" | "submit" | "reset"', default: '"button"', description: "Native button type for the primary action half." },
       { name: "items", type: "MenuItem[]", default: "[]", description: "Array of menu items for the dropdown." },
       { name: "isDisabled", type: "boolean", default: "false", description: "Whether the button is disabled." },
       { name: "isLoading", type: "boolean", default: "false", description: "Whether the button shows a loading spinner." },
@@ -2511,7 +2533,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
   ];
 </script>
 
-<SplitButton variant="primary" {items} on:click={() => publish()} on:action={(e) => handleAction(e.detail.value)}>
+<SplitButton type="submit" variant="primary" {items} on:click={() => publish()} on:action={(e) => handleAction(e.detail.value)}>
   Publish
 </SplitButton>`,
   },
@@ -2650,6 +2672,8 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
       { name: "ariaLabel", type: "string | null", default: "null", description: "Accessible label when no visible label is used." },
       { name: "describedBy", type: "string | null", default: "null", description: "ID of the element describing this switch." },
       { name: "name", type: "string | undefined", default: "undefined", description: "Form field name." },
+      { name: "offColor", type: "string | null", default: "null", description: "Optional off-state accent override used for the thumb and muted track tint." },
+      { name: "onColor", type: "string | null", default: "null", description: "Optional on-state accent override used for the thumb and active track tint." },
     ],
     slots: [],
     events: [
@@ -2661,7 +2685,12 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
   let notifications = true;
 </script>
 
-<Switch label="Enable notifications" bind:isChecked={notifications} />`,
+<Switch
+  label="Enable notifications"
+  bind:isChecked={notifications}
+  onColor="#22c55e"
+  offColor="#cbd5e1"
+/>`,
   },
 
   table: {
@@ -2741,7 +2770,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
       { name: "name", type: "string | undefined", default: "undefined", description: "Form field name." },
       { name: "isDisabled", type: "boolean", default: "false", description: "Whether the textarea is disabled." },
       { name: "isReadOnly", type: "boolean", default: "false", description: "Whether the textarea is read-only." },
-      { name: "validationState", type: "ValidationState", default: '"none"', description: "Current validation state." },
+      { name: "validationState", type: "ValidationState", default: '"none"', description: "Current validation state; pending shows a spinner, invalid shows a red cross, and valid shows a green tick." },
       { name: "ariaLabel", type: "string | null", default: "null", description: "Accessible label for the textarea." },
       { name: "describedBy", type: "string | null", default: "null", description: "ID of the element describing this textarea." },
     ],
@@ -2992,6 +3021,9 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
       { name: "options", type: "Record<TriStateValue, string>", default: '{ excluded: "Exclude", default: "Default", included: "Include" }', description: "Labels for each state." },
       { name: "isDisabled", type: "boolean", default: "false", description: "Whether the switch is disabled." },
       { name: "ariaLabel", type: "string", required: true, description: "Accessible label for the switch." },
+      { name: "excludedColor", type: "string | null", default: "null", description: "Optional color override for the selected excluded state." },
+      { name: "defaultColor", type: "string | null", default: "null", description: "Optional color override for the selected default state." },
+      { name: "includedColor", type: "string | null", default: "null", description: "Optional color override for the selected included state." },
     ],
     slots: [],
     events: [
@@ -3003,7 +3035,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
   let filter = "default";
 </script>
 
-<TriStateSwitch bind:value={filter} ariaLabel="Include archived items" />`,
+<TriStateSwitch bind:value={filter} ariaLabel="Include archived items" excludedColor="#ef4444" includedColor="#22c55e" />`,
   },
 
   "video-player": {
