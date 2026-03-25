@@ -1,7 +1,7 @@
 use gpui::prelude::FluentBuilder;
 use gpui::*;
 use poodle_gpui::GpuiThemeProvider;
-use poodle_primitives::DetailRowSpec;
+use poodle_primitives::{DetailRowLayout, DetailRowSpec};
 
 use crate::theme_ext::{resolve_color, resolve_px, resolve_radius};
 
@@ -77,11 +77,11 @@ impl IntoElement for DetailRow {
     type Element = AnyElement;
 
     fn into_element(self) -> Self::Element {
-        let label_block = div()
+        let is_stacked = self.spec.layout == DetailRowLayout::Stacked;
+
+        let mut label_el = div()
             .flex()
             .flex_col()
-            .w(px(180.0))
-            .flex_shrink_0()
             .child(
                 div()
                     .text_color(self.label_color)
@@ -95,31 +95,41 @@ impl IntoElement for DetailRow {
                 )
             });
 
+        // Inline layout: fixed label width; stacked: full width
+        if !is_stacked {
+            label_el = label_el.w(px(180.0)).flex_shrink_0();
+        }
+
         let value_block = if let Some(content) = self.value_content {
             div().flex_1().child(content)
         } else if let Some(ref value) = self.spec.value {
-            let value_el = div()
+            div()
                 .flex_1()
                 .text_color(self.value_color)
                 .when(self.spec.truncate_value, |el| {
                     el.overflow_x_hidden().text_ellipsis()
                 })
-                .child(value.clone());
-            value_el
+                .child(value.clone())
         } else {
             div().flex_1()
         };
 
-        div()
+        let mut row = div()
             .flex()
-            .flex_row()
-            .items_center()
             .gap(self.gap)
             .bg(self.background)
             .rounded(self.radius)
             .px(self.padding_x)
-            .py(self.padding_y)
-            .child(label_block)
+            .py(self.padding_y);
+
+        if is_stacked {
+            row = row.flex_col();
+        } else {
+            row = row.flex_row().items_center();
+        }
+
+        row
+            .child(label_el)
             .child(value_block)
             .when_some(self.action, |el, action| el.child(action))
             .into_any_element()

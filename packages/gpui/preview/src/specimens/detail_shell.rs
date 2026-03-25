@@ -2,7 +2,7 @@ use gpui::*;
 use poodle_adapter::ThemeProvider;
 use poodle_composites::{DetailShellSpec, DetailState, DetailSectionSpec};
 use poodle_gpui_components::{DetailShell, DetailRow, DetailSection, Button, Eyebrow};
-use poodle_primitives::{DetailRowSpec, ButtonSpec, ButtonVariant, ControlSize, EyebrowSpec};
+use poodle_primitives::{DetailRowLayout, DetailRowSpec, ButtonSpec, ButtonVariant, ControlSize, EyebrowSpec};
 use poodle_gpui::GpuiThemeProvider;
 use crate::style_bridge::color_to_hsla;
 
@@ -159,6 +159,21 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
                                     .font_weight(FontWeight::MEDIUM)
                                     .child("Active".to_string())
                             )
+                    )
+                )
+        )
+
+        // --- DetailRow: Stacked layout ---
+        .child(
+            div().flex().flex_col().gap(px(8.0))
+                .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Detail row: stacked layout"), theme))
+                .child(
+                    DetailRow::from_spec(
+                        DetailRowSpec::new("Arrangement")
+                            .with_value("2CF8B3D0-F592-4D87-8F9F-74D6B42E0E7D:main:external:0:0:3440:1440:1000|37D8832A...")
+                            .with_truncate_value(true)
+                            .with_layout(DetailRowLayout::Stacked),
+                        theme,
                     )
                 )
         )
