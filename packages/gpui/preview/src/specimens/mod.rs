@@ -106,11 +106,19 @@ mod state_display;
 mod time_ago_specimen;
 mod audio_player_specimen;
 mod block_editor_specimen;
+mod bulk_action_bar_specimen;
+mod confirm_action_specimen;
+mod editable_list_specimen;
+mod embed_input_specimen;
+mod embed_preview_specimen;
+mod filter_toolbar_specimen;
+mod form_dialog_specimen;
+mod inline_editable_field_specimen;
+mod log_list_specimen;
 mod markdown_editor_specimen;
 mod media_picker_specimen;
 mod media_preview_specimen;
 mod media_thumbnail_specimen;
-mod misc_composites;
 mod split_view_specimen;
 mod video_player_specimen;
 mod form_layout;
@@ -323,9 +331,16 @@ pub fn render_single_specimen(
         "metric-tile" | "state-tile" => specimen_card("MetricTile", theme, metric_tile_specimen::render(theme)),
         "empty-state" => specimen_card("EmptyState", theme, empty_state_specimen::render(theme)),
         "toast-stack" => specimen_card("ToastStack", theme, state_display::render(state, cx)),
-        "confirm-action" | "form-dialog" | "filter-toolbar" | "bulk-action-bar"
-        | "inline-editable-field" | "log-list" | "editable-list" | "autonomous-list" | "embed-input"
-        | "embed-preview" => specimen_card("Misc", theme, misc_composites::render(state, cx)),
+        "confirm-action" => specimen_card("ConfirmAction", theme, confirm_action_specimen::render(theme)),
+        "form-dialog" => specimen_card("FormDialog", theme, form_dialog_specimen::render(theme)),
+        "filter-toolbar" => specimen_card("FilterToolbar", theme, filter_toolbar_specimen::render(theme)),
+        "bulk-action-bar" => specimen_card("BulkActionBar", theme, bulk_action_bar_specimen::render(theme)),
+        "inline-editable-field" => specimen_card("InlineEditableField", theme, inline_editable_field_specimen::render(theme)),
+        "log-list" => specimen_card("LogList", theme, log_list_specimen::render(theme)),
+        "editable-list" => specimen_card("EditableList", theme, editable_list_specimen::render(theme)),
+        "embed-input" => specimen_card("EmbedInput", theme, embed_input_specimen::render(theme)),
+        "embed-preview" => specimen_card("EmbedPreview", theme, embed_preview_specimen::render(theme)),
+        "autonomous-list" => specimen_card("AutonomousList", theme, div()), // stub
         "audio-player" => specimen_card("AudioPlayer", theme, audio_player_specimen::render(theme)),
         "video-player" => specimen_card("VideoPlayer", theme, video_player_specimen::render(theme)),
         "media-picker" => specimen_card("MediaPicker", theme, media_picker_specimen::render(theme)),
