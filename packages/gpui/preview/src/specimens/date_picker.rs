@@ -17,7 +17,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
     let prefilled_selected = state.specimens.text.get("date-picker-prefilled-value").cloned()
         .unwrap_or_else(|| "2026-03-14".to_string());
 
-    div().flex().flex_col().gap(px(24.0))
+    div().flex().flex_col().gap(px(24.0)).max_w(px(256.0)) // 16rem
         // --- Default ---
         .child(
             div().flex().flex_col().gap(px(8.0))

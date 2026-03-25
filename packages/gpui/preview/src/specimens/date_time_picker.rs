@@ -10,7 +10,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
     let default_open = state.specimens.is_on("date-time-picker-default-open");
     let prefilled_open = state.specimens.is_on("date-time-picker-prefilled-open");
 
-    div().flex().flex_col().gap(px(24.0))
+    div().flex().flex_col().gap(px(24.0)).max_w(px(320.0)) // 20rem
         // --- Default ---
         .child(
             div().flex().flex_col().gap(px(8.0))

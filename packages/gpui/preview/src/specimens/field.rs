@@ -7,7 +7,7 @@ use crate::PreviewRoot;
 pub(crate) fn render(state: &AppState, _cx: &mut Context<PreviewRoot>) -> Div {
     let theme = &state.theme;
 
-    div().flex().flex_col().gap(px(24.0))
+    div().flex().flex_col().gap(px(24.0)).max_w(px(384.0)) // 24rem
         // --- Default with description ---
         .child(
             div().flex().flex_col().gap(px(8.0))
