@@ -79,10 +79,10 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                     )
                 )
         )
-        // --- Pending validation ---
+        // --- Async validation ---
         .child(
             div().flex().flex_col().gap(px(8.0))
-                .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Pending validation"), theme))
+                .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Async validation"), theme))
                 .child(
                     Field::from_spec(
                         FieldSpec::new("workspace-field", "Workspace")

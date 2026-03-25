@@ -107,6 +107,13 @@ impl IntoElement for Pill {
             }
         };
 
+        // Subtle appearance: reduce fill to 50% opacity (Svelte: color-mix 50%, transparent)
+        let bg = if spec.appearance == PillAppearance::Subtle {
+            Hsla { a: bg.a * 0.5, ..bg }
+        } else {
+            bg
+        };
+
         // Border: only success and danger get tone-colored borders in Svelte
         let border = match spec.appearance {
             PillAppearance::Badge => gpui::transparent_black(),
@@ -172,15 +179,9 @@ impl IntoElement for Pill {
 
         el = el.focus(move |s| s.border_color(focus_ring).shadow(crate::theme_ext::focus_ring_shadow(focus_ring)));
 
-        // Muted: reduced opacity
+        // Muted: reduced opacity (Svelte: opacity 0.72)
         if spec.is_muted {
             el = el.opacity(0.72);
-        }
-
-        // Subtle appearance: reduced opacity
-        if spec.appearance == PillAppearance::Subtle {
-            let base_opacity = if spec.is_muted { 0.72 } else { 1.0 };
-            el = el.opacity(base_opacity * 0.85);
         }
 
         if spec.is_disabled {
