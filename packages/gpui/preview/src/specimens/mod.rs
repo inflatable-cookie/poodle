@@ -90,11 +90,14 @@ mod card_specimen;
 mod detail_row_specimen;
 mod detail_section_specimen;
 mod detail_shell;
+mod breadcrumbs_specimen;
 mod empty_state_specimen;
 mod list_card;
 mod metric_tile_specimen;
+mod page_header_specimen;
+mod page_loading_specimen;
+mod pagination_summary_specimen;
 mod picker;
-mod page_structure;
 mod pagination;
 mod state_display;
 mod misc_composites;
@@ -299,7 +302,10 @@ pub fn render_single_specimen(
         "card-radio-group" => specimen_card("CardRadioGroup", theme, card_radio_group_specimen::render(state, cx)),
         "nav-card" => specimen_card("NavCard", theme, nav_card_grid::render(theme)),
         "picker-shell" | "relation-picker" | "selection-summary" | "order-by" => specimen_card("PickerShell", theme, picker::render(state, cx)),
-        "page-header" | "breadcrumbs" | "page-loading" | "pagination-summary" => specimen_card("Page Structure", theme, page_structure::render(theme)),
+        "page-header" => specimen_card("PageHeader", theme, page_header_specimen::render(theme)),
+        "breadcrumbs" => specimen_card("Breadcrumbs", theme, breadcrumbs_specimen::render(theme)),
+        "page-loading" => specimen_card("PageLoading", theme, page_loading_specimen::render(theme)),
+        "pagination-summary" => specimen_card("PaginationSummary", theme, pagination_summary_specimen::render(theme)),
         "metric-tile" | "state-tile" => specimen_card("MetricTile", theme, metric_tile_specimen::render(theme)),
         "empty-state" => specimen_card("EmptyState", theme, empty_state_specimen::render(theme)),
         "toast-stack" => specimen_card("ToastStack", theme, state_display::render(state, cx)),
