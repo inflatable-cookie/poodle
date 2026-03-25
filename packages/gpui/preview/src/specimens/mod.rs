@@ -85,6 +85,8 @@ mod menubar;
 // ── Composites ────────────────────────────────────────────
 mod data_table;
 mod table;
+mod detail_row_specimen;
+mod detail_section_specimen;
 mod detail_shell;
 mod cards;
 mod list_card;
@@ -287,7 +289,9 @@ pub fn render_single_specimen(
         "pagination" => specimen_card("Pagination", theme, pagination::render(theme)),
         "form-layout" => specimen_card("FormLayout", theme, form_layout::render(state, cx)),
         "reorderable-list" => specimen_card("ReorderableList", theme, reorderable_list::render(theme)),
-        "detail-shell" | "detail-row" | "detail-section" => specimen_card("DetailShell", theme, detail_shell::render(theme)),
+        "detail-shell" => specimen_card("DetailShell", theme, detail_shell::render(theme)),
+        "detail-row" => specimen_card("DetailRow", theme, detail_row_specimen::render(theme)),
+        "detail-section" => specimen_card("DetailSection", theme, detail_section_specimen::render(theme)),
         "nav-card" | "card" | "card-radio-group" => specimen_card("Cards", theme, cards::render(state, cx)),
         "picker-shell" | "relation-picker" | "selection-summary" | "order-by" => specimen_card("PickerShell", theme, picker::render(state, cx)),
         "page-header" | "breadcrumbs" | "page-loading" | "pagination-summary" => specimen_card("Page Structure", theme, page_structure::render(theme)),
