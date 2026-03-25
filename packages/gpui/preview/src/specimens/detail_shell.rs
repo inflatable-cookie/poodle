@@ -256,6 +256,36 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
                 )
         )
 
+        // --- DetailSection: Two-column details ---
+        .child(
+            div().flex().flex_col().gap(px(8.0))
+                .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Detail section: two-column details"), theme))
+                .child(
+                    DetailSection::from_spec(
+                        DetailSectionSpec::new()
+                            .with_title("Runtime summary")
+                            .with_description("Compact layout for denser metadata surfaces.")
+                            .with_columns(2),
+                        theme,
+                    )
+                    .with_body(
+                        div().flex().flex_wrap().gap(px(4.0))
+                            .child(div().w(px(192.0)).child(
+                                DetailRow::from_spec(DetailRowSpec::new("Route").with_value("local-brokered").with_layout(DetailRowLayout::Stacked), theme)
+                            ))
+                            .child(div().w(px(192.0)).child(
+                                DetailRow::from_spec(DetailRowSpec::new("Posture").with_value("aura-local-brokered").with_layout(DetailRowLayout::Stacked), theme)
+                            ))
+                            .child(div().w(px(192.0)).child(
+                                DetailRow::from_spec(DetailRowSpec::new("Authority").with_value("local").with_layout(DetailRowLayout::Stacked), theme)
+                            ))
+                            .child(div().w(px(192.0)).child(
+                                DetailRow::from_spec(DetailRowSpec::new("Displays").with_value("2").with_layout(DetailRowLayout::Stacked), theme)
+                            ))
+                    )
+                )
+        )
+
         // --- Loading state ---
         .child(
             div().flex().flex_col().gap(px(8.0))

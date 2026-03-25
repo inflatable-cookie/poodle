@@ -6,6 +6,8 @@ pub struct DetailSectionSpec {
     pub description: Option<String>,
     pub is_separated: bool,
     pub aria_label: Option<String>,
+    /// Number of columns for the detail rows (default 1).
+    pub columns: u8,
 }
 
 impl Default for DetailSectionSpec {
@@ -15,6 +17,7 @@ impl Default for DetailSectionSpec {
             description: None,
             is_separated: true,
             aria_label: None,
+            columns: 1,
         }
     }
 }
@@ -41,6 +44,11 @@ impl DetailSectionSpec {
 
     pub fn with_aria_label(mut self, aria_label: impl Into<String>) -> Self {
         self.aria_label = Some(aria_label.into());
+        self
+    }
+
+    pub fn with_columns(mut self, columns: u8) -> Self {
+        self.columns = columns;
         self
     }
 

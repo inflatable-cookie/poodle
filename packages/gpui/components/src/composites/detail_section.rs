@@ -128,10 +128,17 @@ impl IntoElement for DetailSection {
         }
 
         // Body: children slot for detail rows
+        // When columns > 1, use flex-wrap layout for grid approximation
         if let Some(body) = self.body_slot {
-            section = section.child(
-                div().w_full().flex().flex_col().gap(body_gap).child(body),
-            );
+            if self.spec.columns > 1 {
+                section = section.child(
+                    div().w_full().flex().flex_wrap().gap(body_gap).child(body),
+                );
+            } else {
+                section = section.child(
+                    div().w_full().flex().flex_col().gap(body_gap).child(body),
+                );
+            }
         }
 
         section.into_any_element()
