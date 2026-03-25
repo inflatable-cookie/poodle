@@ -85,6 +85,7 @@ impl Tabs {
         let focus_ring = resolve_color(theme, self.spec.focus_ring_color_token());
 
         let hover_bg = elevated;
+        let label_size = resolve_px(theme, "semantic.typography.label.size");
 
         let current_value = self.spec.current_value().map(|s| s.to_string());
 
@@ -105,7 +106,7 @@ impl Tabs {
                 .focusable()
                 .px(inline_padding)
                 .py(control_y)
-                .text_size(px(13.0)).font_weight(FontWeight::SEMIBOLD);
+                .text_size(label_size).font_weight(FontWeight::SEMIBOLD);
 
             if is_active {
                 // Svelte: pill-shaped highlight with accent 18% bg, text-primary color
@@ -179,6 +180,7 @@ impl Tabs {
         let elevated = resolve_color(theme, "semantic.color.background.elevated");
         let radius = resolve_radius(theme, "semantic.radius.control");
         let focus_ring = resolve_color(theme, self.spec.focus_ring_color_token());
+        let label_size = resolve_px(theme, "semantic.typography.label.size");
 
         let current_value = self.spec.current_value().map(|s| s.to_string());
 
@@ -198,7 +200,7 @@ impl Tabs {
                 .id(tab_id)
                 .px(inline_padding)
                 .py(control_y)
-                .text_size(px(13.0)).font_weight(FontWeight::SEMIBOLD)
+                .text_size(label_size).font_weight(FontWeight::SEMIBOLD)
                 .border_1()
                 .rounded(radius);
 
@@ -298,6 +300,7 @@ impl Tabs {
         let text_secondary = resolve_color(theme, "semantic.color.text.secondary");
         let pill_radius = resolve_radius(theme, "semantic.radius.pill");
         let focus_ring = resolve_color(theme, self.spec.focus_ring_color_token());
+        let label_size = resolve_px(theme, "semantic.typography.label.size");
 
         let current_value = self.spec.current_value().map(|s| s.to_string());
 
@@ -331,7 +334,7 @@ impl Tabs {
                 .flex()
                 .items_center()
                 .rounded(pill_radius)
-                .text_size(px(13.0))
+                .text_size(label_size)
                 .font_weight(FontWeight::SEMIBOLD);
 
             if is_active {

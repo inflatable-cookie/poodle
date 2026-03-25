@@ -71,6 +71,7 @@ impl IntoElement for Switch {
         let border = resolve_color(theme, "semantic.color.border.default");
         let surface_bg = resolve_color(theme, "semantic.color.background.surface");
         let text_primary = resolve_color(theme, "semantic.color.text.primary");
+        let body_size = resolve_px(theme, "semantic.typography.body.size");
 
         let is_checked = spec.current_checked();
         let is_interactive = !spec.is_disabled && !spec.is_read_only;
@@ -190,7 +191,7 @@ impl IntoElement for Switch {
         if let Some(ref label) = spec.label {
             row = row.child(
                 div()
-                    .text_size(px(14.0))
+                    .text_size(body_size)
                     .text_color(text_primary)
                     .child(label.clone()),
             );

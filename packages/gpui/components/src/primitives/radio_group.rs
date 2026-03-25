@@ -84,6 +84,7 @@ impl IntoElement for RadioGroup {
         let text_primary = resolve_color(theme, "semantic.color.text.primary");
         let surface_bg = resolve_color(theme, "semantic.color.background.surface");
         let focus_ring = resolve_color(theme, "semantic.color.accent.focusRing");
+        let body_size = resolve_px(theme, "semantic.typography.body.size");
 
         let current_value = spec.current_value().map(|s| s.to_string());
 
@@ -168,7 +169,7 @@ impl IntoElement for RadioGroup {
             // Label with contract typography
             row = row.child(
                 div()
-                    .text_size(px(14.0))
+                    .text_size(body_size)
                     .text_color(text_primary)
                     .whitespace_nowrap()
                     .child(option.label.clone())

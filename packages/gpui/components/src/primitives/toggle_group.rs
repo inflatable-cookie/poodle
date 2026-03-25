@@ -57,6 +57,7 @@ impl IntoElement for ToggleGroup {
         let border_default = resolve_color(theme, "semantic.color.border.default");
         let text_primary = resolve_color(theme, "semantic.color.text.primary");
         let focus_ring = resolve_color(theme, spec.focus_ring_color_token());
+        let label_size = resolve_px(theme, "semantic.typography.label.size");
 
         // Contract: selected = accent 22% tinted bg, accent 42% border
         let selected_fill = color_mix(accent, surface, 0.22);
@@ -91,7 +92,7 @@ impl IntoElement for ToggleGroup {
                 .bg(fill)
                 .border_1().border_color(border_color)
                 .text_color(text_color)
-                .text_size(px(13.0))
+                .text_size(label_size)
                 .font_weight(FontWeight::SEMIBOLD)
                 .flex().items_center().justify_center()
                 .focus(move |s| s.border_color(focus_ring).shadow(crate::theme_ext::focus_ring_shadow(focus_ring)));

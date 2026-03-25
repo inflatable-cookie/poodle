@@ -90,6 +90,7 @@ impl IntoElement for Select {
         let text_primary = resolve_color(theme, "semantic.color.text.primary");
         let text_secondary = resolve_color(theme, "semantic.color.text.secondary");
         let accent = resolve_color(theme, "semantic.color.accent.base");
+        let body_size = resolve_px(theme, "semantic.typography.body.size");
 
         // Svelte treatment-interactive-subtle values for trigger
         let surface_bg = Hsla { a: surface_raw.a * 0.82, ..surface_raw };
@@ -130,7 +131,7 @@ impl IntoElement for Select {
             .items_center()
             .justify_between()
             .gap(inline_gap)
-            .text_size(px(14.0))
+            .text_size(body_size)
             .focus(move |s| s.border_color(focus_ring).shadow(crate::theme_ext::focus_ring_shadow(focus_ring)));
 
         if is_disabled {
@@ -281,7 +282,7 @@ impl IntoElement for Select {
                     .id(item_id)
                     .px(inline_padding)
                     .py(stack_gap)
-                    .text_size(px(14.0))
+                    .text_size(body_size)
                     .text_color(text_primary);
 
                 if is_selected {

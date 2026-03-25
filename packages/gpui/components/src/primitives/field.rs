@@ -4,7 +4,7 @@ use gpui::*;
 use poodle_gpui::GpuiThemeProvider;
 use poodle_primitives::{FieldSpec, ValidationState};
 
-use crate::theme_ext::resolve_color;
+use crate::theme_ext::{resolve_color, resolve_px};
 
 /// A real GPUI field wrapper component backed by `FieldSpec`.
 ///
@@ -63,12 +63,13 @@ impl IntoElement for Field {
         let text_primary = resolve_color(theme, "semantic.color.text.primary");
         let description_color = resolve_color(theme, spec.description_color_token());
         let error_color = resolve_color(theme, spec.error_color_token());
+        let body_size = resolve_px(theme, "semantic.typography.body.size");
 
         let mut col = div().flex().flex_col().gap(px(4.0));
 
         // Label row — Svelte: flex, align-items: baseline, justify-content: space-between
         let mut label_el = div()
-            .text_size(px(14.0))
+            .text_size(body_size)
             .font_weight(FontWeight::MEDIUM) // label weight = 500
             .text_color(text_primary)
             .child(spec.label.clone());
@@ -77,7 +78,7 @@ impl IntoElement for Field {
             label_el = label_el.child(
                 div()
                     .ml(px(2.0))
-                    .text_size(px(14.0))
+                    .text_size(body_size)
                     .text_color(error_color)
                     .child("*"),
             );

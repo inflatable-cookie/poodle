@@ -62,6 +62,7 @@ impl IntoElement for Checkbox {
 
         // Contract: gap = space-inline-sm
         let inline_gap = resolve_px(theme, "semantic.space.inline.sm");
+        let body_size = resolve_px(theme, "semantic.typography.body.size");
         // Contract: indicator = 1.125rem (18px), radius = 0.3125rem (5px)
         let indicator_size = px(18.0); // contract: 1.125rem fixed
         let indicator_radius = px(5.0); // contract: 0.3125rem fixed
@@ -171,7 +172,7 @@ impl IntoElement for Checkbox {
         if let Some(ref label) = spec.label {
             row = row.child(
                 div()
-                    .text_size(px(14.0))
+                    .text_size(body_size)
                     .text_color(text_primary)
                     .child(label.clone()),
             );

@@ -88,6 +88,8 @@ impl IntoElement for Accordion {
         let panel_pad_x = resolve_px(theme, "semantic.space.panel.x");
         let panel_pad_y = resolve_px(theme, "semantic.space.panel.y");
         let stack_md = resolve_px(theme, "semantic.space.stack.md");
+        let heading_size = resolve_px(theme, "semantic.typography.heading.size");
+        let label_size = resolve_px(theme, "semantic.typography.label.size");
 
         // Item background: color-mix(surface 93%, text-primary)
         let item_bg = color_mix(surface_bg, text_primary, 0.93);
@@ -137,7 +139,7 @@ impl IntoElement for Accordion {
             // Title: bold, 16px, 1.2 line-height
             summary = summary.child(
                 div()
-                    .text_size(px(16.0))
+                    .text_size(heading_size)
                     .font_weight(FontWeight::BOLD)
                     .line_height(relative(1.2))
                     .text_color(text_primary)
@@ -148,7 +150,7 @@ impl IntoElement for Accordion {
             if let Some(ref desc) = item.description {
                 summary = summary.child(
                     div()
-                        .text_size(px(13.0))
+                        .text_size(label_size)
                         .line_height(relative(1.45))
                         .text_color(text_secondary)
                         .child(desc.clone()),

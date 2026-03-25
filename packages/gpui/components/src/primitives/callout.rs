@@ -75,6 +75,8 @@ impl IntoElement for Callout {
         let radius = resolve_radius(theme, "semantic.radius.surface");
         let control_radius = resolve_radius(theme, "semantic.radius.control");
         let inline_md = resolve_px(theme, "semantic.space.inline.md");
+        let body_size = resolve_px(theme, "semantic.typography.body.size");
+        let label_size = resolve_px(theme, "semantic.typography.label.size");
 
         // Tone icon name
         let icon_name = match spec.tone {
@@ -146,7 +148,7 @@ impl IntoElement for Callout {
         if let Some(ref title) = spec.title {
             content_col = content_col.child(
                 div()
-                    .text_size(px(14.0))
+                    .text_size(body_size)
                     .font_weight(FontWeight::SEMIBOLD)
                     .text_color(text_primary)
                     .child(title.clone()),
@@ -157,7 +159,7 @@ impl IntoElement for Callout {
         if let Some(ref content) = spec.content {
             content_col = content_col.child(
                 div()
-                    .text_size(px(13.0))
+                    .text_size(label_size)
                     .text_color(text_secondary)
                     .child(content.clone()),
             );

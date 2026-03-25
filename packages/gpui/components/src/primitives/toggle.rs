@@ -61,8 +61,10 @@ impl IntoElement for Toggle {
         };
         let height = base_height + px(size_offset);
         let pad_x = resolve_px(theme, "semantic.space.control.x");
-        let font_size: f32 = match spec.size {
-            ControlSize::Sm => 12.0, ControlSize::Md => 13.0, ControlSize::Lg => 14.0,
+        let label_size = resolve_px(theme, "semantic.typography.label.size");
+        let body_size = resolve_px(theme, "semantic.typography.body.size");
+        let font_size = match spec.size {
+            ControlSize::Sm => label_size - px(1.0), ControlSize::Md => label_size, ControlSize::Lg => body_size,
         };
         let radius = resolve_radius(theme, spec.radius_token());
         let focus_ring = resolve_color(theme, spec.focus_ring_color_token());
@@ -107,7 +109,7 @@ impl IntoElement for Toggle {
             .bg(fill)
             .border_1().border_color(border_color)
             .text_color(text_color)
-            .text_size(px(font_size))
+            .text_size(font_size)
             .font_weight(FontWeight::SEMIBOLD)
             .line_height(relative(1.0))
             .flex().items_center().justify_center()
