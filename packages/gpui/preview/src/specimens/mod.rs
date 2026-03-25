@@ -104,13 +104,17 @@ mod selection_summary_specimen;
 mod pagination;
 mod state_display;
 mod time_ago_specimen;
+mod audio_player_specimen;
 mod block_editor_specimen;
 mod markdown_editor_specimen;
+mod media_picker_specimen;
+mod media_preview_specimen;
+mod media_thumbnail_specimen;
 mod misc_composites;
 mod split_view_specimen;
+mod video_player_specimen;
 mod form_layout;
 mod reorderable_list;
-mod media;
 
 // ── Layout Helpers ───────────────────────────────────────
 mod collapse_toggle;
@@ -322,9 +326,11 @@ pub fn render_single_specimen(
         "confirm-action" | "form-dialog" | "filter-toolbar" | "bulk-action-bar"
         | "inline-editable-field" | "log-list" | "editable-list" | "autonomous-list" | "embed-input"
         | "embed-preview" => specimen_card("Misc", theme, misc_composites::render(state, cx)),
-        "audio-player" | "video-player" | "media-picker" | "media-preview" | "media-thumbnail" => {
-            specimen_card("Media", theme, media::render(state, cx))
-        }
+        "audio-player" => specimen_card("AudioPlayer", theme, audio_player_specimen::render(theme)),
+        "video-player" => specimen_card("VideoPlayer", theme, video_player_specimen::render(theme)),
+        "media-picker" => specimen_card("MediaPicker", theme, media_picker_specimen::render(theme)),
+        "media-preview" => specimen_card("MediaPreview", theme, media_preview_specimen::render(theme)),
+        "media-thumbnail" => specimen_card("MediaThumbnail", theme, media_thumbnail_specimen::render(theme)),
         "markdown-editor" => specimen_card("MarkdownEditor", theme, markdown_editor_specimen::render(state, cx)),
         "block-editor" => specimen_card("BlockEditor", theme, block_editor_specimen::render(theme)),
 
