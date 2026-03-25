@@ -21,34 +21,34 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
 
     let rows = vec![
         TableRowSpec::new("1", vec![
-            ("name".into(), "Alice Johnson".into()),
+            ("name".into(), "Alice Chen".into()),
             ("email".into(), "alice@example.com".into()),
-            ("role".into(), "Admin".into()),
+            ("role".into(), "Engineer".into()),
             ("status".into(), "Active".into()),
         ]),
         TableRowSpec::new("2", vec![
-            ("name".into(), "Bob Smith".into()),
+            ("name".into(), "Bob Martinez".into()),
             ("email".into(), "bob@example.com".into()),
-            ("role".into(), "Editor".into()),
+            ("role".into(), "Designer".into()),
             ("status".into(), "Active".into()),
         ]),
         TableRowSpec::new("3", vec![
-            ("name".into(), "Carol Davis".into()),
+            ("name".into(), "Carol Patel".into()),
             ("email".into(), "carol@example.com".into()),
-            ("role".into(), "Viewer".into()),
-            ("status".into(), "Invited".into()),
+            ("role".into(), "PM".into()),
+            ("status".into(), "On leave".into()),
         ]),
         TableRowSpec::new("4", vec![
-            ("name".into(), "Dan Lee".into()),
+            ("name".into(), "Dan Okoro".into()),
             ("email".into(), "dan@example.com".into()),
-            ("role".into(), "Editor".into()),
+            ("role".into(), "Engineer".into()),
             ("status".into(), "Active".into()),
         ]),
         TableRowSpec::new("5", vec![
-            ("name".into(), "Eve Martinez".into()),
+            ("name".into(), "Eve Nakamura".into()),
             ("email".into(), "eve@example.com".into()),
-            ("role".into(), "Admin".into()),
-            ("status".into(), "Inactive".into()),
+            ("role".into(), "Designer".into()),
+            ("status".into(), "Active".into()),
         ]),
     ];
 

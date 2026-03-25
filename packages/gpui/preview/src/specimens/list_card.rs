@@ -28,9 +28,9 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                         .child(
                             ListCard::from_spec(
                                 ListCardSpec::new()
-                                    .with_title("Project Alpha")
-                                    .with_subtitle("Last updated 2 hours ago")
-                                    .with_meta("12 items")
+                                    .with_title("design-system-v2.figma")
+                                    .with_subtitle("Updated by Clay \u{00b7} 2h ago")
+                                    .with_meta("14.2 MB")
                                     .with_interactive(true),
                                 theme,
                             )
@@ -43,7 +43,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                             .on_click(cx.listener(|this, _e: &ClickEvent, _w, cx| {
                                 this.state.specimens.text.insert(
                                     "list-card-clicked".to_string(),
-                                    "Project Alpha".to_string(),
+                                    "design-system-v2.figma".to_string(),
                                 );
                                 cx.notify();
                             }))
@@ -51,9 +51,9 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                         .child(
                             ListCard::from_spec(
                                 ListCardSpec::new()
-                                    .with_title("Project Beta")
-                                    .with_subtitle("Last updated yesterday")
-                                    .with_meta("3 items")
+                                    .with_title("component-specs.pdf")
+                                    .with_subtitle("Shared with team \u{00b7} Yesterday")
+                                    .with_meta("2.8 MB")
                                     .with_interactive(true),
                                 theme,
                             )
@@ -66,7 +66,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                             .on_click(cx.listener(|this, _e: &ClickEvent, _w, cx| {
                                 this.state.specimens.text.insert(
                                     "list-card-clicked".to_string(),
-                                    "Project Beta".to_string(),
+                                    "component-specs.pdf".to_string(),
                                 );
                                 cx.notify();
                             }))
@@ -74,10 +74,10 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                         .child(
                             ListCard::from_spec(
                                 ListCardSpec::new()
-                                    .with_title("Project Gamma")
-                                    .with_subtitle("Created last week")
-                                    .with_meta("28 items")
-                                    .with_interactive(true),
+                                    .with_title("brand-assets.zip")
+                                    .with_subtitle("Archived")
+                                    .with_meta("48 MB")
+                                    .with_disabled(true),
                                 theme,
                             )
                             .with_leading(
@@ -89,7 +89,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                             .on_click(cx.listener(|this, _e: &ClickEvent, _w, cx| {
                                 this.state.specimens.text.insert(
                                     "list-card-clicked".to_string(),
-                                    "Project Gamma".to_string(),
+                                    "brand-assets.zip".to_string(),
                                 );
                                 cx.notify();
                             }))
@@ -106,9 +106,11 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                         .child(
                             ListCard::from_spec(
                                 ListCardSpec::new()
-                                    .with_title("Design System")
-                                    .with_subtitle("Component library")
-                                    .with_leading_shape(LeadingShape::RoundedSquare),
+                                    .with_title("hero-banner.png")
+                                    .with_subtitle("Uploaded by Jamie \u{00b7} 4h ago")
+                                    .with_meta("3.1 MB")
+                                    .with_leading_shape(LeadingShape::RoundedSquare)
+                                    .with_interactive(true),
                                 theme,
                             )
                             .with_leading(
@@ -121,9 +123,11 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                         .child(
                             ListCard::from_spec(
                                 ListCardSpec::new()
-                                    .with_title("Photo Album")
-                                    .with_subtitle("48 photos")
-                                    .with_leading_shape(LeadingShape::RoundedSquare),
+                                    .with_title("onboarding-flow.mp4")
+                                    .with_subtitle("Screen recording \u{00b7} Today")
+                                    .with_meta("128 MB")
+                                    .with_leading_shape(LeadingShape::RoundedSquare)
+                                    .with_interactive(true),
                                 theme,
                             )
                             .with_leading(
