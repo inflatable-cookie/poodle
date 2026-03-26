@@ -325,6 +325,7 @@ impl PreviewRoot {
                     }
                     "treatment" => {
                         this.state.appearance_treatment = AppearanceTreatment::ALL[i];
+                        this.state.theme.brand_raised = this.state.appearance_treatment == AppearanceTreatment::BrandRaised;
                     }
                     _ => {}
                 }
@@ -856,6 +857,7 @@ fn main() {
                     }
                     if let Some(t) = cli.treatment {
                         root.state.appearance_treatment = t;
+                        root.state.theme.brand_raised = t == AppearanceTreatment::BrandRaised;
                     }
 
                     // Apply CLI overrides — navigation

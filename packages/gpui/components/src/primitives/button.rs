@@ -187,9 +187,29 @@ impl IntoElement for Button {
             .id(SharedString::from(id_str))
             .focusable()
             .h(height)
-            .rounded(radius)
-            .bg(fill)
-            .border_1()
+            .rounded(radius);
+
+        // Brand-raised treatment: use gradient fills and elevated shadows
+        if theme.brand_raised && !is_ghost && !is_disabled {
+            use crate::theme_ext::{
+                brand_raised_primary_fill, brand_raised_interactive_fill,
+                brand_raised_primary_shadow, brand_raised_interactive_shadow,
+            };
+            match spec.variant {
+                ButtonVariant::Primary => {
+                    el = el.bg(brand_raised_primary_fill(fill))
+                        .shadow(brand_raised_primary_shadow());
+                }
+                _ => {
+                    el = el.bg(brand_raised_interactive_fill(fill))
+                        .shadow(brand_raised_interactive_shadow());
+                }
+            }
+        } else {
+            el = el.bg(fill);
+        }
+
+        el = el.border_1()
             .border_color(border_color)
             .text_color(text_color)
             .flex()

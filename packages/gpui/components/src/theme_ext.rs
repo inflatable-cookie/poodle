@@ -98,3 +98,108 @@ pub fn parse_hex_color(hex: &str) -> Option<Hsla> {
     };
     Some(rgba.into())
 }
+
+// ── Brand-raised gradient helpers ────────────────────────────────
+
+/// Blend a color with white at the given ratio (0.0–1.0).
+/// `blend_white(color, 0.24)` = 24% white + 76% color.
+fn blend_white(color: Hsla, white_ratio: f32) -> Hsla {
+    let rgba: gpui::Rgba = color.into();
+    let blended = gpui::Rgba {
+        r: rgba.r + (1.0 - rgba.r) * white_ratio,
+        g: rgba.g + (1.0 - rgba.g) * white_ratio,
+        b: rgba.b + (1.0 - rgba.b) * white_ratio,
+        a: rgba.a,
+    };
+    blended.into()
+}
+
+/// Create a brand-raised gradient fill for primary buttons.
+///
+/// CSS: `linear-gradient(180deg, white/24%, white/0%), accent-base`
+/// Hover: `linear-gradient(180deg, white/30%, white/6%), white/6% + accent-base`
+pub fn brand_raised_primary_fill(accent: Hsla) -> gpui::Background {
+    let top = blend_white(accent, 0.24);
+    let bottom = accent;
+    gpui::linear_gradient(180.0, top, bottom)
+}
+
+/// Brand-raised hover gradient for primary buttons.
+pub fn brand_raised_primary_fill_hover(accent: Hsla) -> gpui::Background {
+    let base = blend_white(accent, 0.06); // white 6% + accent
+    let top = blend_white(base, 0.30);
+    let bottom = blend_white(base, 0.06);
+    gpui::linear_gradient(180.0, top, bottom)
+}
+
+/// Brand-raised gradient for secondary/ghost buttons and surfaces.
+///
+/// CSS: `linear-gradient(180deg, white/18%, white/2%), elevated/92% + surface`
+pub fn brand_raised_interactive_fill(base_color: Hsla) -> gpui::Background {
+    let top = blend_white(base_color, 0.18);
+    let bottom = blend_white(base_color, 0.02);
+    gpui::linear_gradient(180.0, top, bottom)
+}
+
+/// Brand-raised gradient for subtle input controls.
+///
+/// CSS: `linear-gradient(180deg, white/10%, white/0%), surface/84%`
+pub fn brand_raised_subtle_fill(base_color: Hsla) -> gpui::Background {
+    let top = blend_white(base_color, 0.10);
+    let bottom = base_color;
+    gpui::linear_gradient(180.0, top, bottom)
+}
+
+/// Brand-raised hover gradient for subtle input controls.
+pub fn brand_raised_subtle_fill_hover(base_color: Hsla) -> gpui::Background {
+    let top = blend_white(base_color, 0.16);
+    let bottom = blend_white(base_color, 0.02);
+    gpui::linear_gradient(180.0, top, bottom)
+}
+
+/// Brand-raised gradient for surface/card/panel containers.
+///
+/// CSS: `linear-gradient(180deg, white/14%, white/2%), panel/92% + elevated`
+pub fn brand_raised_surface_fill(base_color: Hsla) -> gpui::Background {
+    let top = blend_white(base_color, 0.14);
+    let bottom = blend_white(base_color, 0.02);
+    gpui::linear_gradient(180.0, top, bottom)
+}
+
+/// Brand-raised shadow for interactive elements.
+/// `inset 0 1px 0 white/10%, 0 2px 6px rgba(9,13,18,0.1)`
+pub fn brand_raised_interactive_shadow() -> Vec<gpui::BoxShadow> {
+    vec![
+        gpui::BoxShadow {
+            color: gpui::hsla(0.0, 0.0, 1.0, 0.10),
+            offset: gpui::point(gpui::px(0.0), gpui::px(-1.0)), // inset top = negative Y
+            blur_radius: gpui::px(0.0),
+            spread_radius: gpui::px(0.0),
+        },
+        gpui::BoxShadow {
+            color: gpui::hsla(0.6, 0.32, 0.05, 0.10),
+            offset: gpui::point(gpui::px(0.0), gpui::px(2.0)),
+            blur_radius: gpui::px(6.0),
+            spread_radius: gpui::px(0.0),
+        },
+    ]
+}
+
+/// Brand-raised shadow for primary buttons.
+/// `inset 0 1px 0 white/22%, 0 8px 18px rgba(9,13,18,0.2)`
+pub fn brand_raised_primary_shadow() -> Vec<gpui::BoxShadow> {
+    vec![
+        gpui::BoxShadow {
+            color: gpui::hsla(0.0, 0.0, 1.0, 0.22),
+            offset: gpui::point(gpui::px(0.0), gpui::px(-1.0)),
+            blur_radius: gpui::px(0.0),
+            spread_radius: gpui::px(0.0),
+        },
+        gpui::BoxShadow {
+            color: gpui::hsla(0.6, 0.32, 0.05, 0.20),
+            offset: gpui::point(gpui::px(0.0), gpui::px(8.0)),
+            blur_radius: gpui::px(18.0),
+            spread_radius: gpui::px(0.0),
+        },
+    ]
+}

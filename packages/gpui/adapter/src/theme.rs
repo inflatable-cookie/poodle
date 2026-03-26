@@ -24,6 +24,9 @@ pub struct GpuiThemeProvider {
     overrides: Vec<(&'static str, &'static str)>,
     /// Active theme name.
     pub theme_name: String,
+    /// Whether the brand-raised appearance treatment is active.
+    /// When true, components should use gradient fills and elevated shadows.
+    pub brand_raised: bool,
 }
 
 impl Default for GpuiThemeProvider {
@@ -32,6 +35,7 @@ impl Default for GpuiThemeProvider {
             scale_factor: 1.0,
             overrides: Vec::new(),
             theme_name: "default".to_string(),
+            brand_raised: false,
         }
     }
 }
