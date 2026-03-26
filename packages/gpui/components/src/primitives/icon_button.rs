@@ -82,9 +82,11 @@ impl IntoElement for IconButton {
         // ── Size adjustments (contract: sm -0.375rem, lg +0.375rem) ──
         let base_height = resolve_px(theme, spec.control_height_token());
         let size_offset: f32 = match spec.size {
+            ControlSize::Xs => -10.0,
             ControlSize::Sm => -6.0,
             ControlSize::Md => 0.0,
             ControlSize::Lg => 6.0,
+            ControlSize::Xl => 10.0,
         };
         let control_size = base_height + px(size_offset);
 

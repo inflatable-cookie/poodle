@@ -24,9 +24,11 @@ impl IconSize {
 impl From<ControlSize> for IconSize {
     fn from(size: ControlSize) -> Self {
         match size {
+            ControlSize::Xs => IconSize::Sm,
             ControlSize::Sm => IconSize::Sm,
             ControlSize::Md => IconSize::Md,
             ControlSize::Lg => IconSize::Lg,
+            ControlSize::Xl => IconSize::Lg,
         }
     }
 }

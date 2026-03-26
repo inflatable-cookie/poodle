@@ -766,9 +766,11 @@ fn parse_cli_args() -> CliArgs {
             "--size" => {
                 if let Some(val) = args.get(i + 1) {
                     control_size = match val.as_str() {
+                        "xs" => Some(ControlSize::Xs),
                         "sm" => Some(ControlSize::Sm),
                         "md" => Some(ControlSize::Md),
                         "lg" => Some(ControlSize::Lg),
+                        "xl" => Some(ControlSize::Xl),
                         _ => None,
                     };
                     i += 1;

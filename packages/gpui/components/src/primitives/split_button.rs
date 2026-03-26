@@ -82,12 +82,12 @@ impl IntoElement for SplitButton {
         // Size
         let base_height = resolve_px(theme, spec.control_height_token());
         let size_offset: f32 = match spec.size {
-            ControlSize::Sm => -6.0, ControlSize::Md => 0.0, ControlSize::Lg => 6.0,
+            ControlSize::Xs => -10.0, ControlSize::Sm => -6.0, ControlSize::Md => 0.0, ControlSize::Lg => 6.0, ControlSize::Xl => 10.0,
         };
         let height = base_height + px(size_offset);
         let pad_x = resolve_px(theme, "semantic.space.control.x");
         let font_size: f32 = match spec.size {
-            ControlSize::Sm => 12.0, ControlSize::Md => 13.0, ControlSize::Lg => 14.0,
+            ControlSize::Xs => 11.0, ControlSize::Sm => 12.0, ControlSize::Md => 13.0, ControlSize::Lg => 14.0, ControlSize::Xl => 15.0,
         };
 
         // Variant fills

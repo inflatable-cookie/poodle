@@ -90,28 +90,36 @@ impl IntoElement for Button {
         // ── Size-aware layout values (contract §7, §8) ──────────
         let base_height = resolve_px(theme, spec.control_height_token());
         let height_offset: f32 = match spec.size {
+            ControlSize::Xs => -10.0,
             ControlSize::Sm => -6.0,
             ControlSize::Md => 0.0,
             ControlSize::Lg => 6.0,
+            ControlSize::Xl => 10.0,
         };
         let height = base_height + px(height_offset);
         let min_width: f32 = match spec.size {
+            ControlSize::Xs => 56.0,
             ControlSize::Sm => 68.0,
             ControlSize::Md => 80.0,
             ControlSize::Lg => 92.0,
+            ControlSize::Xl => 104.0,
         };
         let min_width = px(min_width);
         let base_pad_x = resolve_px(theme, spec.horizontal_padding_token());
         let pad_x_offset: f32 = match spec.size {
+            ControlSize::Xs => -4.0,
             ControlSize::Sm => -2.0,
             ControlSize::Md => 0.0,
             ControlSize::Lg => 2.0,
+            ControlSize::Xl => 4.0,
         };
         let pad_x = base_pad_x + px(pad_x_offset);
         let font_size: f32 = match spec.size {
+            ControlSize::Xs => 11.0,
             ControlSize::Sm => 12.0,
             ControlSize::Md => 13.0,
             ControlSize::Lg => 14.0,
+            ControlSize::Xl => 15.0,
         };
         let font_size = px(font_size);
         let gap = px(6.0); // contract: 0.375rem = 6px

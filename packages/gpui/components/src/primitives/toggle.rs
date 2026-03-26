@@ -57,14 +57,14 @@ impl IntoElement for Toggle {
         // ── Size ──────────────────────────────────────────────────
         let base_height = resolve_px(theme, spec.control_height_token());
         let size_offset: f32 = match spec.size {
-            ControlSize::Sm => -6.0, ControlSize::Md => 0.0, ControlSize::Lg => 6.0,
+            ControlSize::Xs => -10.0, ControlSize::Sm => -6.0, ControlSize::Md => 0.0, ControlSize::Lg => 6.0, ControlSize::Xl => 10.0,
         };
         let height = base_height + px(size_offset);
         let pad_x = resolve_px(theme, "semantic.space.control.x");
         let label_size = resolve_px(theme, "semantic.typography.label.size");
         let body_size = resolve_px(theme, "semantic.typography.body.size");
         let font_size = match spec.size {
-            ControlSize::Sm => label_size - px(1.0), ControlSize::Md => label_size, ControlSize::Lg => body_size,
+            ControlSize::Xs => label_size - px(2.0), ControlSize::Sm => label_size - px(1.0), ControlSize::Md => label_size, ControlSize::Lg => body_size, ControlSize::Xl => body_size + px(1.0),
         };
         let radius = resolve_radius(theme, spec.radius_token());
         let focus_ring = resolve_color(theme, spec.focus_ring_color_token());
@@ -162,7 +162,7 @@ impl IntoElement for Toggle {
             use super::icon::Icon;
             use poodle_primitives::{IconSize, IconSpec};
             let icon_size = match spec.size {
-                ControlSize::Sm => IconSize::Sm,
+                ControlSize::Xs | ControlSize::Sm => IconSize::Sm,
                 _ => IconSize::Sm,
             };
             el = el.child(

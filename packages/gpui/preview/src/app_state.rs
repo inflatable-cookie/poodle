@@ -99,20 +99,24 @@ impl Density {
 /// Control size.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum ControlSize {
+    Xs,
     Sm,
     Md,
     Lg,
+    Xl,
 }
 
 impl ControlSize {
-    /// Order matches Svelte preview: lg, md, sm.
-    pub const ALL: &[ControlSize] = &[ControlSize::Lg, ControlSize::Md, ControlSize::Sm];
+    /// Order matches Svelte preview: xl, lg, md, sm, xs.
+    pub const ALL: &[ControlSize] = &[ControlSize::Xl, ControlSize::Lg, ControlSize::Md, ControlSize::Sm, ControlSize::Xs];
 
     pub fn label(self) -> &'static str {
         match self {
+            ControlSize::Xs => "xs",
             ControlSize::Sm => "sm",
             ControlSize::Md => "md",
             ControlSize::Lg => "lg",
+            ControlSize::Xl => "xl",
         }
     }
 }

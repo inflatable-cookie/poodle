@@ -115,9 +115,11 @@ pub enum Overflow {
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub enum ControlSize {
+    Xs,
     Sm,
     Md,
     Lg,
+    Xl,
 }
 
 impl ControlSize {
@@ -131,9 +133,11 @@ impl ControlSize {
 
     pub fn icon_size_token(self) -> &'static str {
         match self {
+            Self::Xs => semantic::SIZE_ICON_XS,
             Self::Sm => semantic::SIZE_ICON_SM,
             Self::Md => semantic::SIZE_ICON_MD,
             Self::Lg => semantic::SIZE_ICON_LG,
+            Self::Xl => semantic::SIZE_ICON_XL,
         }
     }
 }

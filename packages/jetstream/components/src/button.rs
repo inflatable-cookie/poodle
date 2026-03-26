@@ -65,23 +65,29 @@ pub fn js_button(spec: &ButtonSpec, theme: &JetstreamThemeProvider) -> JsEl {
     // ── Sizing per ControlSize (contract: sm = height-6, md = height, lg = height+6) ──
     let base_height = resolve_px(theme, spec.control_height_token());
     let height = match spec.size {
+        ControlSize::Xs => base_height - 10.0,
         ControlSize::Sm => base_height - 6.0,
         ControlSize::Md => base_height,
         ControlSize::Lg => base_height + 6.0,
+        ControlSize::Xl => base_height + 10.0,
     };
 
     let base_min_width = resolve_px(theme, spec.control_min_width_token());
     let min_width = match spec.size {
+        ControlSize::Xs => (base_min_width - 24.0).max(0.0), // 56px
         ControlSize::Sm => (base_min_width - 12.0).max(0.0), // 68px vs 80px
         ControlSize::Md => base_min_width,                     // 80px
         ControlSize::Lg => base_min_width + 12.0,              // 92px
+        ControlSize::Xl => base_min_width + 24.0,              // 104px
     };
 
     let base_pad_x = resolve_px(theme, spec.horizontal_padding_token());
     let pad_x = match spec.size {
+        ControlSize::Xs => base_pad_x - 4.0,
         ControlSize::Sm => base_pad_x - 2.0,
         ControlSize::Md => base_pad_x,
         ControlSize::Lg => base_pad_x + 2.0,
+        ControlSize::Xl => base_pad_x + 4.0,
     };
 
     // Padding adjustments when icons present (contract: reduce by 2px on icon side)
@@ -93,9 +99,11 @@ pub fn js_button(spec: &ButtonSpec, theme: &JetstreamThemeProvider) -> JsEl {
 
     // Font size per size (contract: sm=12px, md=label-size, lg=14px)
     let label_size = match spec.size {
+        ControlSize::Xs => 11.0,
         ControlSize::Sm => 12.0,
         ControlSize::Md => resolve_px(theme, "semantic.typography.label.size"),
         ControlSize::Lg => 14.0,
+        ControlSize::Xl => 15.0,
     };
 
     let icon_size = resolve_px(theme, spec.icon_size_token());
