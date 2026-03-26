@@ -315,6 +315,7 @@ no icon slot override is provided.
 ## 9. Svelte Notes
 
 - `data-size` attribute on root reflects the resolved size
+- `data-density` — resolved density value (`compact`, `default`, or `comfortable`)
 - Root element is a `<section>` with optional `aria-label`, `role`, and `aria-live`
 - Icon slot allows overriding the default tone-based indicator
 - Default indicator is rendered based on tone mapping when no icon slot content

@@ -38,6 +38,7 @@ Updated: 2026-03-15
 | `step` | `number` | `60` | no | step increment in seconds |
 | `size` | `"xs" \| "sm" \| "md" \| "lg" \| "xl"` | `null` | no | explicit control size override; when null, resolves from inherited presentation |
 | `sizeRole` | `"chrome" \| "control" \| "prominent"` | `"control"` | no | semantic size offset from inherited presentation |
+| `density` | `ControlDensity \| null` | `null` | no | explicit density override for spacing |
 | `disabled` | `boolean` | `false` | no | disables editing and interaction |
 | `ariaLabel` | `string \| null` | `null` | no | required when no external label exists |
 | `describedBy` | `string \| null` | `null` | no | aria-describedby target |
@@ -166,6 +167,7 @@ Updated: 2026-03-15
 - Browser-native time picker UI is allowed; Poodle does not override it
 - Treatment tokens may be added for themed styling with fallbacks
 - `data-size` data attribute on the input reflects the resolved size
+- `data-density` — resolved density value (`compact`, `default`, or `comfortable`)
 
 ## 10. GPUI Notes
 

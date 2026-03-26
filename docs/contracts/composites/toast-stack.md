@@ -48,6 +48,7 @@ Updated: 2026-03-22
 | `items` | `ToastItem[]` | `[]` | no | toast items to display |
 | `size` | `"xs" \| "sm" \| "md" \| "lg" \| "xl"` | `null` | no | explicit control size override; when null, resolves from inherited presentation |
 | `sizeRole` | `"chrome" \| "control" \| "prominent"` | `"chrome"` | no | semantic size offset from inherited presentation |
+| `density` | `ControlDensity \| null` | `null` | no | explicit density override for spacing |
 | `ariaLabel` | `string` | `"Notifications"` | no | accessible name for the stack section |
 
 ### Types
@@ -272,6 +273,7 @@ Size is propagated to child Button primitives and affects toast typography. Spec
 ## 10. Svelte Notes
 
 - `data-size` attribute on stack reflects the resolved size
+- `data-density` — resolved density value (`compact`, `default`, or `comfortable`)
 - uses `createEventDispatcher` for `dismiss` and `action` events
 - uses `Button` primitive (variant="secondary", size="sm") for action buttons
 - uses `Icon` primitive (name="x", size="sm") for dismiss button

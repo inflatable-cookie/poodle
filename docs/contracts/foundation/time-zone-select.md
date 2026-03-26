@@ -43,6 +43,7 @@ Updated: 2026-03-15
 | `options` | `TimeZoneOption[]` | `defaultTimeZoneOptions()` | no | timezone option list |
 | `size` | `"xs" \| "sm" \| "md" \| "lg" \| "xl"` | `null` | no | explicit control size override; when null, resolves from inherited presentation |
 | `sizeRole` | `"chrome" \| "control" \| "prominent"` | `"control"` | no | semantic size offset from inherited presentation |
+| `density` | `ControlDensity \| null` | `null` | no | explicit density override for spacing |
 | `disabled` | `boolean` | `false` | no | disables the select |
 | `ariaLabel` | `string \| null` | `null` | no | required when no visible label exists |
 | `describedBy` | `string \| null` | `null` | no | aria-describedby target |
@@ -213,6 +214,7 @@ TimeZoneOption: { value: string; label: string; disabled?: boolean }
 - `defaultTimeZoneOptions()` utility provides a reasonable IANA timezone list as fallback
 - Transition applies to border-color, box-shadow, and background for smooth focus treatment
 - `data-size` data attribute on shell reflects the resolved size
+- `data-density` — resolved density value (`compact`, `default`, or `comfortable`)
 
 ## 10. GPUI Notes
 

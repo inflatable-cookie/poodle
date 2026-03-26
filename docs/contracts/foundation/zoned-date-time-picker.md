@@ -65,6 +65,7 @@ Updated: 2026-03-15
 | `timeZoneOptions` | `TimeZoneOption[]` | `[]` | no | curated list of timezone options; empty uses internal defaults |
 | `size` | `"xs" \| "sm" \| "md" \| "lg" \| "xl"` | `null` | no | explicit control size override; when null, resolves from inherited presentation |
 | `sizeRole` | `"chrome" \| "control" \| "prominent"` | `"control"` | no | semantic size offset from inherited presentation |
+| `density` | `ControlDensity \| null` | `null` | no | explicit density override for spacing |
 | `disabled` | `boolean` | `false` | no | disables the trigger |
 | `ariaLabel` | `string \| null` | `null` | no | required when no visible label exists |
 
@@ -303,6 +304,7 @@ TimeZoneOption: {
   if empty, implementation may source a default timezone list internally
 - Partial values are allowed during editing
 - `data-size` data attribute on root reflects the resolved size
+- `data-density` — resolved density value (`compact`, `default`, or `comfortable`)
 
 ## 10. GPUI Notes
 

@@ -299,6 +299,7 @@ DateTimeRangeValue: {
   timestamp normalization into the public contract
 - Value display formats the range using `locale` prop for localized strings
 - `data-size` data attribute on root reflects the resolved size
+- `data-density` — resolved density value (`compact`, `default`, or `comfortable`)
 
 ## 10. GPUI Notes
 
