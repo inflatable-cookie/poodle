@@ -82,12 +82,12 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
         // --- With body content ---
         .child(
             div().flex().flex_col().gap(px(8.0))
-                .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("With body content"), theme))
+                .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Async confirm callback"), theme))
                 .child(
                     Button::from_spec(
                         ButtonSpec::new()
                             .with_tone(ButtonTone::Danger)
-                            .with_label("Remove user"),
+                            .with_label("Archive project"),
                         theme,
                     )
                     .with_id("alert-body-trigger")
@@ -99,9 +99,9 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                 .when(body_open, |el| {
                     el.child(
                         AlertDialog::from_spec(
-                            AlertDialogSpec::new("Remove this user?")
-                                .with_description("The following user will lose access to this workspace.")
-                                .with_confirm_label("Remove"),
+                            AlertDialogSpec::new("Archive this project?")
+                                .with_description("The project will be hidden from active lists but can still be restored later.")
+                                .with_confirm_label("Archive"),
                             theme,
                         )
                         .open(true)
