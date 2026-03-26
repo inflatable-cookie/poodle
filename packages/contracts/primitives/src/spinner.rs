@@ -8,9 +8,11 @@ pub enum SpinnerVariant {
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub enum SpinnerSize {
+    Xs,
     Sm,
     Md,
     Lg,
+    Xl,
 }
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
@@ -66,9 +68,11 @@ impl SpinnerSpec {
 
     pub fn size_px(&self) -> f32 {
         match self.size {
+            SpinnerSize::Xs => 10.0,
             SpinnerSize::Sm => 12.0,
             SpinnerSize::Md => 16.0,
             SpinnerSize::Lg => 24.0,
+            SpinnerSize::Xl => 32.0,
         }
     }
 

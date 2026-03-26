@@ -22,9 +22,11 @@ pub(crate) fn render(state: &AppState, _cx: &mut Context<PreviewRoot>) -> Div {
                 .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Ring"), theme))
                 .child(
                     div().flex().items_center().gap(px(16.0))
+                        .child(Spinner::from_spec(SpinnerSpec::new().with_size(SpinnerSize::Xs), theme))
                         .child(Spinner::from_spec(SpinnerSpec::new().with_size(SpinnerSize::Sm), theme))
                         .child(Spinner::from_spec(SpinnerSpec::new().with_size(SpinnerSize::Md), theme))
                         .child(Spinner::from_spec(SpinnerSpec::new().with_size(SpinnerSize::Lg), theme))
+                        .child(Spinner::from_spec(SpinnerSpec::new().with_size(SpinnerSize::Xl), theme))
                 )
         )
         // --- CLI grid ---

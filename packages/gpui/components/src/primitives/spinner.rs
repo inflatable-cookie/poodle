@@ -73,9 +73,11 @@ impl IntoElement for Spinner {
             }
             SpinnerVariant::Grid => {
                 let (cell_size, gap) = match spec.size {
+                    SpinnerSize::Xs => (px(2.0), px(1.0)),
                     SpinnerSize::Sm => (px(2.5), px(1.25)),
                     SpinnerSize::Md => (px(3.25), px(1.5)),
                     SpinnerSize::Lg => (px(4.5), px(2.0)),
+                    SpinnerSize::Xl => (px(6.0), px(2.5)),
                 };
 
                 let mut col = div().flex().flex_col().gap(gap);
