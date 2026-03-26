@@ -1,7 +1,18 @@
 <script lang="ts">
   import { createEventDispatcher, onDestroy, tick } from "svelte";
 
-  import { Icon, SearchField } from "@poodle/svelte-primitives";
+  import {
+    Icon,
+    SearchField,
+    UiPresentationProvider,
+    getUiPresentation,
+    resolveSemanticControlSize,
+  } from "@poodle/svelte-primitives";
+  import type {
+    ControlDensity,
+    ControlSize,
+    SemanticControlSizeRole,
+  } from "@poodle/svelte-primitives";
 
   import ActionDiscoveryPanel from "./ActionDiscoveryPanel.svelte";
 
@@ -15,6 +26,9 @@
   export let state: DiscoveryState = "ready";
   export let ariaLabel: string | null = null;
   export let invocationHint: string | null = null;
+  export let size: ControlSize | null = null;
+  export let sizeRole: SemanticControlSizeRole = "control";
+  export let density: ControlDensity | null = null;
 
   const dispatch = createEventDispatcher<{
     queryChange: { value: string };
@@ -29,8 +43,12 @@
   let previousHtmlOverflow = "";
   let previousBodyOverflow = "";
   let panel: ActionDiscoveryPanel;
+  const uiPresentation = getUiPresentation();
   const queryInputId = "command-palette-query";
   const statusId = "command-palette-status";
+
+  $: resolvedSize = size ?? resolveSemanticControlSize(uiPresentation?.sizeScale ?? "md", sizeRole);
+  $: resolvedDensity = density ?? uiPresentation?.density ?? "default";
 
   $: enabledItems = items.filter((item) => !item.disabled);
   $: if (open && !wasOpen) {
@@ -155,65 +173,71 @@
 {#if open}
   <!-- svelte-ignore a11y-click-events-have-key-events a11y-no-static-element-interactions -->
   <div class="command-palette__overlay" aria-hidden="true" on:click={close}></div>
-  <div
-    class="command-palette"
-    role="dialog"
-    aria-modal="true"
-    aria-label={ariaLabel ?? title}
-    aria-describedby={description ? "command-palette-description" : undefined}
-  >
-    <div class="command-palette__header">
-      <div>
-        <h3>{title}</h3>
-        {#if description}
-          <p id="command-palette-description">{description}</p>
-        {/if}
+  <UiPresentationProvider sizeScale={resolvedSize} density={resolvedDensity}>
+    <div
+      class="command-palette"
+      role="dialog"
+      aria-modal="true"
+      aria-label={ariaLabel ?? title}
+      aria-describedby={description ? "command-palette-description" : undefined}
+      data-size={resolvedSize}
+      data-density={resolvedDensity}
+    >
+      <div class="command-palette__header">
+        <div>
+          <h3>{title}</h3>
+          {#if description}
+            <p id="command-palette-description">{description}</p>
+          {/if}
+        </div>
+        <div class="command-palette__meta">
+          {#if invocationHint}
+            <span class="command-palette__hint">{invocationHint}</span>
+          {/if}
+          <button type="button" class="command-palette__close" aria-label="Close command palette" on:click={close}>
+            <Icon name="x" />
+          </button>
+        </div>
       </div>
-      <div class="command-palette__meta">
-        {#if invocationHint}
-          <span class="command-palette__hint">{invocationHint}</span>
-        {/if}
-        <button type="button" class="command-palette__close" aria-label="Close command palette" on:click={close}>
-          <Icon name="x" />
-        </button>
-      </div>
-    </div>
 
-    <div class="command-palette__query">
-      <SearchField
-        id={queryInputId}
-        value={query}
-        ariaLabel="Search commands"
-        describedBy={statusId}
-        placeholder="Search commands, panels, and actions"
-        on:valueChange={(event) => dispatch("queryChange", event.detail)}
-        on:clear={() => dispatch("queryChange", { value: "" })}
-        on:cancel={close}
-        on:submit={() => {
-          if (activeId) {
-            dispatch("commandSelect", { id: activeId });
-          }
+      <div class="command-palette__query">
+        <SearchField
+          id={queryInputId}
+          value={query}
+          ariaLabel="Search commands"
+          describedBy={statusId}
+          placeholder="Search commands, panels, and actions"
+          on:valueChange={(event) => dispatch("queryChange", event.detail)}
+          on:clear={() => dispatch("queryChange", { value: "" })}
+          on:cancel={close}
+          on:submit={() => {
+            if (activeId) {
+              dispatch("commandSelect", { id: activeId });
+            }
+          }}
+        />
+      </div>
+
+      <p id={statusId} class="command-palette__status" role="status" aria-live="polite" aria-atomic="true">
+        {paletteStatus}
+      </p>
+
+      <ActionDiscoveryPanel
+        bind:this={panel}
+        {items}
+        {state}
+        bind:activeId
+        ariaLabel="Command results"
+        size={resolvedSize}
+        density={resolvedDensity}
+        on:itemSelect={(e) => dispatch("commandSelect", e.detail)}
+        on:activeChange={(e) => {
+          activeId = e.detail.id;
+          dispatch("activeChange", e.detail);
         }}
       />
     </div>
-
-    <p id={statusId} class="command-palette__status" role="status" aria-live="polite" aria-atomic="true">
-      {paletteStatus}
-    </p>
-
-    <ActionDiscoveryPanel
-      bind:this={panel}
-      {items}
-      {state}
-      bind:activeId
-      ariaLabel="Command results"
-      on:itemSelect={(e) => dispatch("commandSelect", e.detail)}
-      on:activeChange={(e) => {
-        activeId = e.detail.id;
-        dispatch("activeChange", e.detail);
-      }}
-    />
-  </div>
+  </UiPresentationProvider>
 {/if}
 
 <style>
@@ -226,6 +250,9 @@
   }
 
   .command-palette {
+    --poodle-command-palette-hint-height: 1.5rem;
+    --poodle-command-palette-hint-x: 0.5rem;
+    --poodle-command-palette-close-size: 1.75rem;
     position: fixed;
     top: 50%;
     left: 50%;
@@ -244,6 +271,29 @@
     overscroll-behavior: contain;
     transform: translate(-50%, -50%);
     z-index: 41;
+  }
+
+  .command-palette[data-size="xs"] {
+    --poodle-command-palette-hint-height: 1.25rem;
+    --poodle-command-palette-hint-x: 0.375rem;
+    --poodle-command-palette-close-size: 1.5rem;
+  }
+
+  .command-palette[data-size="sm"] {
+    --poodle-command-palette-hint-height: 1.5rem;
+    --poodle-command-palette-close-size: 1.75rem;
+  }
+
+  .command-palette[data-size="lg"] {
+    --poodle-command-palette-hint-height: 1.75rem;
+    --poodle-command-palette-hint-x: 0.625rem;
+    --poodle-command-palette-close-size: 2rem;
+  }
+
+  .command-palette[data-size="xl"] {
+    --poodle-command-palette-hint-height: 2rem;
+    --poodle-command-palette-hint-x: 0.75rem;
+    --poodle-command-palette-close-size: 2.25rem;
   }
 
   .command-palette__header {
@@ -279,21 +329,21 @@
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    min-height: 1.5rem;
-    padding: 0 0.5rem;
+    min-height: var(--poodle-command-palette-hint-height);
+    padding: 0 var(--poodle-command-palette-hint-x);
     border-radius: var(--poodle-radius-control);
     background: color-mix(in srgb, var(--poodle-color-background-surface) 76%, transparent);
     color: var(--poodle-color-text-secondary);
     font-family: var(--poodle-typography-code-family);
-    font-size: 0.75rem;
+    font-size: var(--poodle-typography-label-size);
   }
 
   .command-palette__close {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    width: 1.75rem;
-    height: 1.75rem;
+    width: var(--poodle-command-palette-close-size);
+    height: var(--poodle-command-palette-close-size);
     padding: 0;
     border: 0;
     border-radius: calc(var(--poodle-radius-control) - 0.0625rem);

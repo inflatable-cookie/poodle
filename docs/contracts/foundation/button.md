@@ -1,7 +1,7 @@
 # Button
 
 Status: detailed contract
-Updated: 2026-03-25
+Updated: 2026-03-26
 
 ## 1. Purpose
 
@@ -132,9 +132,11 @@ Updated: 2026-03-25
 
 ### Sizing
 
-- Default: `height: control-height`, `min-width: 5rem`, `padding: 0 space-control-x`
+- Extra-small: `height: control-height - 0.5rem`, `min-width: 3.75rem`, `padding: 0 (space-control-x - 0.125rem)`, `font-size: 0.6875rem`
 - Small: `height: control-height - 0.375rem`, `min-width: 4.25rem`, `padding: 0 (space-control-x - 0.125rem)`, `font-size: 0.75rem`
+- Default: `height: control-height`, `min-width: 5rem`, `padding: 0 space-control-x`
 - Large: `height: control-height + 0.375rem`, `min-width: 5.75rem`, `padding: 0 (space-control-x + 0.125rem)`, `font-size: 0.875rem`
+- Extra-large: `height: control-height + 0.5rem`, `min-width: 6.5rem`, `padding: 0 (space-control-x + 0.1875rem)`, `font-size: 0.9375rem`
 - Icon-only: `min-width: 0`, `padding: 0`, `width: control-height` (adjusted for size)
 - Icon padding adjustment: when a leading or trailing icon is present, the padding on that icon's side is reduced by `0.125rem` (2px). This subtly tightens the icon side to balance visual weight against the label side. Applies independently to each side.
 
@@ -194,9 +196,11 @@ Updated: 2026-03-25
 
 | Size | height | min-width | padding | font-size |
 |------|--------|-----------|---------|-----------|
+| `xs` | `calc(control-height - 0.5rem)` | `3.75rem` | `0 calc(space-control-x - 0.125rem)` | `0.6875rem` |
 | `sm` | `calc(control-height - 0.375rem)` | `4.25rem` | `0 calc(space-control-x - 0.125rem)` | `0.75rem` |
 | `md` | `control-height` | `5rem` | `0 space-control-x` | `typography-label-size` |
 | `lg` | `calc(control-height + 0.375rem)` | `5.75rem` | `0 calc(space-control-x + 0.125rem)` | `0.875rem` |
+| `xl` | `calc(control-height + 0.5rem)` | `6.5rem` | `0 calc(space-control-x + 0.1875rem)` | `0.9375rem` |
 
 ### Icon padding adjustments
 
@@ -215,9 +219,11 @@ Both adjustments apply independently.
 
 | Size | width | min-width | padding |
 |------|-------|-----------|---------|
+| `xs` | `calc(control-height - 0.5rem)` | `0` | `0` |
 | `md` | `control-height` | `0` | `0` |
 | `sm` | `calc(control-height - 0.375rem)` | `0` | `0` |
 | `lg` | `calc(control-height + 0.375rem)` | `0` | `0` |
+| `xl` | `calc(control-height + 0.5rem)` | `0` | `0` |
 
 ### Hover (not disabled)
 
@@ -291,7 +297,7 @@ Loading spinner uses the shared [`Spinner`](./spinner.md) contract with
 - `data-loading` always emits (even as `"false"`)
 - `data-has-leading` and `data-has-trailing` emit presence-only (value is truthy or attribute is omitted)
 - `isUnavailable = disabled || loading` — both disable the native button
-- Icon component rendered at size="sm" for leadingIcon/trailingIcon props
+- Icon and spinner supporting visuals resolve through the shared supporting-size mapping rather than a fixed absolute size
 - Supports named slots `leading` and `trailing` for custom icon content
 - Treatment token: `--poodle-treatment-interactive-radius` with fallback to `--poodle-radius-control`
 - Chevron renders `chevron-down` icon from registry at size `sm`, positioned after all other content
@@ -319,7 +325,7 @@ Loading spinner uses the shared [`Spinner`](./spinner.md) contract with
 ### Tier 2: Visual Parity
 
 - [ ] all three variant color schemes plus danger tone combinations match exactly
-- [ ] all three sizes match (height, min-width, padding, font-size)
+- [ ] all five sizes match (height, min-width, padding, font-size)
 - [ ] icon-only square sizing matches
 - [ ] hover border-color mix matches (78% with text-primary)
 - [ ] hover/active background formulas match

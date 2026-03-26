@@ -1,7 +1,12 @@
 <script lang="ts">
   import { createEventDispatcher, onDestroy } from "svelte";
 
-  import type { FileUploadItem } from "./types";
+  import { getUiPresentation, resolveSemanticControlSize } from "./presentation";
+
+  import type { ControlSize, FileUploadItem, SemanticControlSizeRole } from "./types";
+
+  export let size: ControlSize | null = null;
+  export let sizeRole: SemanticControlSizeRole = "control";
   import {
     DEFAULT_COMPRESSION,
     compressImage,
@@ -29,12 +34,16 @@
     | undefined = undefined;
   export let onRemove: ((item: FileUploadItem) => void) | undefined = undefined;
 
+  const uiPresentation = getUiPresentation();
+
   const dispatch = createEventDispatcher<{
     change: { files: FileUploadItem[] };
     upload: { files: File[] };
     error: { file: File; message: string };
     remove: { item: FileUploadItem };
   }>();
+
+  $: resolvedSize = size ?? resolveSemanticControlSize(uiPresentation?.sizeScale ?? "md", sizeRole);
 
   let inputElement: HTMLInputElement | null = null;
   let dragActive = false;
@@ -215,7 +224,7 @@
   });
 </script>
 
-<div class="file-upload" class:file-upload--disabled={disabled}>
+<div class="file-upload" class:file-upload--disabled={disabled} data-size={resolvedSize}>
   <div
     class="file-upload__dropzone"
     class:file-upload__dropzone--active={dragActive}

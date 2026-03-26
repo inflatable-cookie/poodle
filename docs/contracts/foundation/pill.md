@@ -1,7 +1,7 @@
 # Pill
 
 Status: detailed contract
-Updated: 2026-03-24
+Updated: 2026-03-26
 
 ## 1. Purpose
 
@@ -52,6 +52,11 @@ Updated: 2026-03-24
 | danger | `tone="danger"` | red-tinted fill and border, primary text |
 | subtle | `appearance="subtle"` | 50% transparent fill overlay |
 | muted | `muted=true` | reduced opacity (0.72) |
+| xs | `size="xs"` | smallest metadata chip sizing |
+| sm | `size="sm"` | compact metadata chip sizing |
+| md | inherited default or `size="md"` | default metadata chip sizing |
+| lg | `size="lg"` | emphasized metadata chip sizing |
+| xl | `size="xl"` | largest metadata chip sizing |
 
 ### Component States
 
@@ -168,6 +173,14 @@ No internal state.
 | `padding` | `0.125rem 0.375rem` |
 | `font-size` | `0.625rem` |
 
+### Size: xs `.pill[data-size="xs"]`
+
+| Property | Value |
+|----------|-------|
+| `min-height` | `0.875rem` |
+| `padding` | `0.0625rem 0.3125rem` |
+| `font-size` | `0.5625rem` |
+
 ### Size: lg `.pill[data-size="lg"]`
 
 | Property | Value |
@@ -175,6 +188,14 @@ No internal state.
 | `min-height` | `1.375rem` |
 | `padding` | `0.25rem 0.625rem` |
 | `font-size` | `0.75rem` |
+
+### Size: xl `.pill[data-size="xl"]`
+
+| Property | Value |
+|----------|-------|
+| `min-height` | `1.5rem` |
+| `padding` | `0.3125rem 0.75rem` |
+| `font-size` | `0.8125rem` |
 
 ### Font: mono `.pill[data-font="mono"]`
 
@@ -214,7 +235,7 @@ No internal state.
 
 ### Tier 2: Visual Parity
 
-- [ ] `sm`, `md`, and `lg` sizes produce correct min-height, padding, and font-size
+- [ ] `xs | sm | md | lg | xl` sizes produce correct min-height, padding, and font-size
 - [ ] mono font variant uses code family with correct letter-spacing
 - [ ] subtle appearance halves fill opacity
 - [ ] muted state applies 0.72 opacity
@@ -236,7 +257,7 @@ All preview apps must render the following specimens identically.
 
 ### Tones
 
-Three pills in a horizontal row with 8px gap:
+Five pills in a horizontal row with 8px gap:
 
 | Content | Tone |
 |---------|------|
@@ -246,17 +267,19 @@ Three pills in a horizontal row with 8px gap:
 
 ### Sizes
 
-Three pills in a horizontal row with 8px gap:
+Five pills in a horizontal row with 8px gap:
 
 | Content | Size |
 |---------|------|
+| Extra small | xs |
 | Small | sm |
 | Medium | md |
 | Large | lg |
+| Extra large | xl |
 
 ### Code font
 
-Three pills with `font: "mono"` in a horizontal row:
+Five pills with `font: "mono"` in a horizontal row:
 
 | Content | Tone | Font |
 |---------|------|------|

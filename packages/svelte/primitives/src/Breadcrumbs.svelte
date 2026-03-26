@@ -2,17 +2,23 @@
   import { createEventDispatcher } from "svelte";
 
   import Icon from "./Icon.svelte";
+  import { getUiPresentation, resolveSemanticControlSize } from "./presentation";
 
-  import type { BreadcrumbItem } from "./types";
+  import type { BreadcrumbItem, ControlSize, SemanticControlSizeRole } from "./types";
 
   export let items: BreadcrumbItem[] = [];
   export let ariaLabel = "Breadcrumb";
   export let maxVisibleItems: number | null = null;
+  export let sizeRole: SemanticControlSizeRole = "chrome";
+  export let size: ControlSize | null = null;
 
   const dispatch = createEventDispatcher<{
     navigate: { value: string };
   }>();
 
+  const uiPresentation = getUiPresentation();
+
+  $: resolvedSize = size ?? resolveSemanticControlSize(uiPresentation?.sizeScale ?? "md", sizeRole);
   $: visibleItems =
     maxVisibleItems !== null && items.length > maxVisibleItems
       ? [items[0], { value: "__ellipsis__", label: "…", current: false }, ...items.slice(items.length - (maxVisibleItems - 1))]
@@ -27,7 +33,7 @@
   }
 </script>
 
-<nav class="breadcrumbs" aria-label={ariaLabel}>
+<nav class="breadcrumbs" aria-label={ariaLabel} data-size={resolvedSize}>
   <ol class="breadcrumbs__list">
     {#each visibleItems as item, index}
       <li class="breadcrumbs__item">

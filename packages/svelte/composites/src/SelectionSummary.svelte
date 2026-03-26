@@ -1,22 +1,28 @@
 <script lang="ts">
   import { createEventDispatcher } from "svelte";
 
-  import { Icon } from "@poodle/svelte-primitives";
+  import { Icon, getUiPresentation, resolveSemanticControlSize } from "@poodle/svelte-primitives";
+  import type { ControlSize, SemanticControlSizeRole } from "@poodle/svelte-primitives";
 
   export let items: Array<{ id: string; label: string }> = [];
   export let selectionMode: "single" | "multiple" = "multiple";
   export let maxVisibleItems = 4;
+  export let size: ControlSize | null = null;
+  export let sizeRole: SemanticControlSizeRole = "control";
 
   const dispatch = createEventDispatcher<{
     remove: { id: string };
     clear: void;
   }>();
 
+  const uiPresentation = getUiPresentation();
+
+  $: resolvedSize = size ?? resolveSemanticControlSize(uiPresentation?.sizeScale ?? "md", sizeRole);
   $: visibleItems = items.slice(0, maxVisibleItems);
   $: overflowCount = Math.max(0, items.length - visibleItems.length);
 </script>
 
-<section class="selection-summary" aria-label="Current selection">
+<section class="selection-summary" aria-label="Current selection" data-size={resolvedSize}>
   <div class="selection-summary__header">
     <strong>
       {#if selectionMode === "single"}

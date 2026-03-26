@@ -1,12 +1,17 @@
 <script lang="ts">
   import { onMount, onDestroy } from "svelte";
 
+  import { getUiPresentation, resolveSemanticControlSize } from "@poodle/svelte-primitives";
+  import type { ControlSize, SemanticControlSizeRole } from "@poodle/svelte-primitives";
+
   export let src: string;
   export let poster: string | null = null;
   export let aspectRatio: number = 16 / 9;
   export let ariaLabel = "Video player";
   export let showCaptions = false;
   export let captionsSrc: string | null = null;
+  export let size: ControlSize | null = null;
+  export let sizeRole: SemanticControlSizeRole = "control";
 
   let videoEl: HTMLVideoElement | null = null;
   let wrapperEl: HTMLDivElement | null = null;
@@ -20,6 +25,9 @@
   let controlsTimeout: ReturnType<typeof setTimeout> | null = null;
   let animFrame: number | null = null;
 
+  const uiPresentation = getUiPresentation();
+
+  $: resolvedSize = size ?? resolveSemanticControlSize(uiPresentation?.sizeScale ?? "md", sizeRole);
   $: formattedCurrent = formatTime(currentTime);
   $: formattedDuration = formatTime(duration);
   $: progress = duration > 0 ? (currentTime / duration) * 100 : 0;
@@ -140,6 +148,7 @@
   on:keydown={handleWrapperKeydown}
   aria-label={ariaLabel}
   aria-pressed={isPlaying}
+  data-size={resolvedSize}
 >
   <!-- svelte-ignore a11y-media-has-caption -->
   <video

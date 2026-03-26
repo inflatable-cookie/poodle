@@ -1,7 +1,7 @@
 # BlockEditor
 
 Status: seed contract
-Updated: 2026-03-19
+Updated: 2026-03-26
 
 ## 1. Purpose
 
@@ -38,6 +38,9 @@ Updated: 2026-03-19
 | `blockTypes` | `BlockTypeDefinition[]` | Built-in types (paragraph, heading, code, quote, list, image, divider) | Defines available block types for the type selector and add menu |
 | `disabled` | `boolean` | `false` | Disables all editing controls |
 | `ariaLabel` | `string` | `"Block editor"` | Accessible label for the root container |
+| `size` | `ControlSize \| null` | `null` | Explicit semantic size override for toolbar chrome and nested controls |
+| `sizeRole` | `SemanticControlSizeRole` | `"control"` | Semantic role used to resolve inherited size scale |
+| `density` | `ControlDensity \| null` | `null` | Explicit density override for shell, toolbar, content, and add-menu spacing |
 
 ## 4. Types
 
@@ -88,8 +91,8 @@ When the `block` slot is not provided, the component falls back to built-in rend
 ### Container
 - Background: `background-surface`
 - Border: `1px solid border-default`, `radius-surface`
-- Padding: `0.75rem`
-- Layout: flex column, `0.5rem` gap between blocks
+- Padding: density-aware panel padding
+- Layout: flex column with density-aware gap between blocks
 
 ### Block
 - Background: `background-elevated` at 42% opacity (active: 72%)
@@ -99,16 +102,16 @@ When the `block` slot is not provided, the component falls back to built-in rend
 - Dragging: 40% opacity
 
 ### Toolbar
-- Flex row, space-between, `0.25rem 0.375rem` padding
+- Flex row, space-between, density-aware padding
 - Transparent background, no border
-- Buttons: `1.25rem` square, `text-tertiary`, hover shows accent background
+- Buttons and drag grip: semantic control boxes tied to `xs | sm | md | lg | xl`
 - Remove button: hover shows `status-danger` background and text
-- Type select: `0.6875rem` font, subtle border, transparent background
+- Type select: semantic label sizing, subtle border, transparent background
 - Drag grip: `grip-vertical` icon, `grab` cursor, `text-tertiary`
 
 ### Add Menu
 - Centered fixed overlay
-- Grid of block type options with icon + label
+- Grid of block type options with icon + label; density-aware padding and semantic label sizing
 - `background-elevated`, `border-default`, `elevation-overlay` shadow
 
 ### Token Usage — Exact CSS Values

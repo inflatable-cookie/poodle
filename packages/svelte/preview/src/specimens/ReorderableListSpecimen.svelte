@@ -1,6 +1,6 @@
 <script lang="ts">
   import { ReorderableList } from "@poodle/svelte-composites";
-  import { Eyebrow } from "@poodle/svelte-primitives";
+  import { Eyebrow, UiPresentationProvider } from "@poodle/svelte-primitives";
   import type { ReorderableItem } from "@poodle/svelte-composites";
 
   let items: ReorderableItem[] = [
@@ -11,6 +11,11 @@
     { id: "5", label: "Fifth item" },
   ];
   let lastReorder = "";
+  let compactItems: ReorderableItem[] = [
+    { id: "c1", label: "Kick" },
+    { id: "c2", label: "Snare" },
+    { id: "c3", label: "Bass" },
+  ];
 </script>
 
 <div class="specimen">
@@ -37,10 +42,21 @@
       <p>{lastReorder}</p>
     </div>
   {/if}
+
+  <div class="specimen__group">
+    <Eyebrow>Semantic presentation</Eyebrow>
+    <UiPresentationProvider density="compact" sizeScale="sm">
+      <div class="specimen__stack">
+        <ReorderableList bind:items={compactItems} ariaLabel="Compact reorderable items" />
+        <ReorderableList items={compactItems} ariaLabel="Prominent reorderable items" sizeRole="prominent" />
+      </div>
+    </UiPresentationProvider>
+  </div>
 </div>
 
 <style>
   .specimen { display: flex; flex-direction: column; gap: 1.5rem; }
   .specimen__group { display: flex; flex-direction: column; gap: 0.5rem; }
+  .specimen__stack { display: grid; gap: 0.75rem; }
   p { margin: 0; font-size: 0.8125rem; }
 </style>

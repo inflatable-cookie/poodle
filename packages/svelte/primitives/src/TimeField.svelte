@@ -1,5 +1,8 @@
 <script lang="ts">
   import { createEventDispatcher } from "svelte";
+  import { getUiPresentation, resolveSemanticControlSize } from "./presentation";
+
+  import type { ControlSize, SemanticControlSizeRole } from "./types";
 
   export let id: string | null = null;
   export let value: string | null = null;
@@ -10,13 +13,17 @@
   export let disabled = false;
   export let ariaLabel: string | null = null;
   export let describedBy: string | null = null;
+  export let size: ControlSize | null = null;
+  export let sizeRole: SemanticControlSizeRole = "control";
 
   const dispatch = createEventDispatcher<{
     valueChange: { value: string | null };
   }>();
+  const uiPresentation = getUiPresentation();
 
   let uncontrolledValue = defaultValue;
 
+  $: resolvedSize = size ?? resolveSemanticControlSize(uiPresentation?.sizeScale ?? "md", sizeRole);
   $: currentValue = value ?? uncontrolledValue ?? "";
 
   function handleInput(event: Event): void {
@@ -33,6 +40,7 @@
 <input
   id={id ?? undefined}
   class="time-field"
+  data-size={resolvedSize}
   type="time"
   value={currentValue}
   {min}

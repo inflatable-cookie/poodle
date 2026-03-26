@@ -1,7 +1,7 @@
 # MediaBrowsePanel
 
 Status: seed contract
-Updated: 2026-03-25
+Updated: 2026-03-26
 
 ## 1. Purpose
 
@@ -35,6 +35,9 @@ Updated: 2026-03-25
 | `hasMore` | `boolean` | `false` | no | Whether to show the load-more action |
 | `emptyMessage` | `string` | `"No media found"` | no | Empty-state message |
 | `loadMoreLabel` | `string` | `"Load more"` | no | Label for the load-more button |
+| `size` | `ControlSize \| null` | `null` | no | explicit semantic size override for browse card geometry and load-more action |
+| `sizeRole` | `SemanticControlSizeRole` | `"control"` | no | semantic role used to resolve inherited size scale |
+| `density` | `ControlDensity \| null` | `null` | no | explicit density override for card and grid spacing |
 
 ### Types
 
@@ -77,6 +80,7 @@ type MediaPickerItem = {
 - Uses `MediaThumbnail` for the media shell
 - Keeps fetching and cursor ownership outside the component
 - Works as the browse surface inside richer selectors like Underlay `MediaPicker`
+- Grid density and browse-card padding now respond to semantic presentation context rather than fixed rem-only spacing
 
 ## 8. Adoption Notes
 
@@ -84,4 +88,3 @@ Use `MediaBrowsePanel` when the host already owns item loading and pagination bu
 needs a consistent media-library browse presentation. Do not move duplicate
 checks, upload handshake orchestration, or modal workflow state into this
 component.
-

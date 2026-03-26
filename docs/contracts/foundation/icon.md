@@ -1,7 +1,7 @@
 # Icon
 
 Status: detailed contract
-Updated: 2026-03-15
+Updated: 2026-03-26
 
 ## 1. Purpose
 
@@ -82,9 +82,11 @@ Updated: 2026-03-15
 
 ### Sizing
 
+- xs: `0.625rem` square
 - sm: `var(--poodle-size-icon-sm)` square
 - md: `var(--poodle-size-icon-md)` square
 - lg: `var(--poodle-size-icon-lg)` square
+- xl: `1.5rem` square
 
 ### Composition
 
@@ -129,12 +131,26 @@ Updated: 2026-03-15
 | `width` | `var(--poodle-size-icon-md)` |
 | `height` | `var(--poodle-size-icon-md)` |
 
+### Size xs
+
+| Property | Value |
+|----------|-------|
+| `width` | `0.625rem` |
+| `height` | `0.625rem` |
+
 ### Size lg
 
 | Property | Value |
 |----------|-------|
 | `width` | `var(--poodle-size-icon-lg)` |
 | `height` | `var(--poodle-size-icon-lg)` |
+
+### Size xl
+
+| Property | Value |
+|----------|-------|
+| `width` | `1.5rem` |
+| `height` | `1.5rem` |
 
 ## 9. Svelte Notes
 
@@ -183,13 +199,15 @@ All preview apps must render the following specimens identically.
 
 ### Sizes
 
-Three rows showing the same three icons at different sizes:
+Five rows showing the same three icons at different sizes:
 
 | Size | Icons |
 |------|-------|
+| xs | star, heart, settings |
 | sm | star, heart, settings |
 | md | star, heart, settings |
 | lg | star, heart, settings |
+| xl | star, heart, settings |
 
 ### Color inheritance
 

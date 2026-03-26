@@ -1,7 +1,7 @@
 # EditableList
 
 Status: seed contract
-Updated: 2026-03-22
+Updated: 2026-03-26
 
 ## 1. Purpose
 
@@ -63,6 +63,9 @@ Updated: 2026-03-22
 | `disabled` | `boolean` | `false` | no | disables all interactions |
 | `ariaLabel` | `string` | `"List"` | no | accessible label for the list region |
 | `reorderable` | `boolean` | `true` | no | enables drag-and-drop reordering via ReorderableList |
+| `size` | `ControlSize \| null` | `null` | no | explicit semantic size override for list rows and add controls |
+| `sizeRole` | `SemanticControlSizeRole` | `"control"` | no | semantic role used to resolve inherited size scale |
+| `density` | `ControlDensity \| null` | `null` | no | explicit density override for row and add-control spacing |
 
 ### Types
 
@@ -132,16 +135,16 @@ None.
 
 ### Sizing
 
-- Root: flex column, gap `0.5rem` (8px)
-- Static list: flex column, gap `0.125rem` (2px)
-- Static item: padding `0.5rem 0.625rem`, border-radius from token
+- Root: flex column with semantic density-driven gap
+- Static list: flex column with semantic density-driven gap
+- Static item: density-aware row padding, border-radius from token
 - Item text: `flex: 1`, `min-width: 0`, text-overflow ellipsis
-- Remove button: `1.25rem` square, `0.25rem` border-radius
+- Remove button: semantic size-driven square control, `0.25rem` border-radius
 - Remove icon SVG: `0.75rem` square
-- Add row: flex, gap `0.375rem` (6px)
+- Add row: flex with density-aware gap
 - Input: `flex: 1`, height from control-height token, horizontal padding from control-x token
-- Add button: height from control-height token, padding `0 0.75rem`
-- Counter: font-size `0.6875rem`, aligned to flex-end
+- Add button: height from control-height token, semantic horizontal padding
+- Counter: semantic label size, aligned to flex-end
 
 ### Composition
 

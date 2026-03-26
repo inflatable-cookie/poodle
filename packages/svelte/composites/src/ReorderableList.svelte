@@ -1,11 +1,25 @@
 <script lang="ts">
   import { createEventDispatcher } from "svelte";
+  import {
+    UiPresentationProvider,
+    getUiPresentation,
+    resolveSemanticControlSize,
+  } from "@poodle/svelte-primitives";
+
+  import type {
+    ControlDensity,
+    ControlSize,
+    SemanticControlSizeRole,
+  } from "@poodle/svelte-primitives";
 
   import type { ReorderableItem } from "./types";
 
   export let items: ReorderableItem[] = [];
   export let ariaLabel = "Reorderable list";
   export let disabled = false;
+  export let size: ControlSize | null = null;
+  export let sizeRole: SemanticControlSizeRole = "control";
+  export let density: ControlDensity | null = null;
 
   const dispatch = createEventDispatcher<{
     reorder: { items: ReorderableItem[] };
@@ -13,6 +27,10 @@
 
   let draggingIndex: number | null = null;
   let dropTargetIndex: number | null = null;
+  const uiPresentation = getUiPresentation();
+
+  $: resolvedSize = size ?? resolveSemanticControlSize(uiPresentation?.sizeScale ?? "md", sizeRole);
+  $: resolvedDensity = density ?? uiPresentation?.density ?? "default";
 
   function moveItem(fromIndex: number, toIndex: number): void {
     if (fromIndex === toIndex || fromIndex < 0 || toIndex < 0) return;
@@ -79,50 +97,95 @@
   }
 </script>
 
-<ul class="reorderable-list" role="listbox" aria-label={ariaLabel} data-disabled={disabled}>
-  {#each items as item, index (item.id)}
-    <li
-      class="reorderable-list__item"
-      class:reorderable-list__item--dragging={draggingIndex === index}
-      class:reorderable-list__item--drop-target={dropTargetIndex === index && draggingIndex !== index}
-      role="option"
-      tabindex={disabled ? -1 : 0}
-      aria-selected="false"
-      data-reorder-index={index}
-      draggable={!disabled}
-      on:dragstart={(e) => handleDragStart(e, index)}
-      on:dragover={(e) => handleDragOver(e, index)}
-      on:drop={(e) => handleDrop(e, index)}
-      on:dragend={handleDragEnd}
-      on:keydown={(e) => handleKeydown(e, index)}
-    >
-      <span class="reorderable-list__handle" aria-hidden="true">
-        <svg viewBox="0 0 16 16" fill="currentColor">
-          <circle cx="5" cy="4" r="1.25" />
-          <circle cx="11" cy="4" r="1.25" />
-          <circle cx="5" cy="8" r="1.25" />
-          <circle cx="11" cy="8" r="1.25" />
-          <circle cx="5" cy="12" r="1.25" />
-          <circle cx="11" cy="12" r="1.25" />
-        </svg>
-      </span>
-      <span class="reorderable-list__content">
-        <slot name="item" {item} {index}>
-          {item.label}
-        </slot>
-      </span>
-    </li>
-  {/each}
-</ul>
+<UiPresentationProvider sizeScale={resolvedSize} density={resolvedDensity}>
+  <ul
+    class="reorderable-list"
+    role="listbox"
+    aria-label={ariaLabel}
+    data-disabled={disabled}
+    data-size={resolvedSize}
+    data-density={resolvedDensity}
+  >
+    {#each items as item, index (item.id)}
+      <li
+        class="reorderable-list__item"
+        class:reorderable-list__item--dragging={draggingIndex === index}
+        class:reorderable-list__item--drop-target={dropTargetIndex === index && draggingIndex !== index}
+        role="option"
+        tabindex={disabled ? -1 : 0}
+        aria-selected="false"
+        data-reorder-index={index}
+        draggable={!disabled}
+        on:dragstart={(e) => handleDragStart(e, index)}
+        on:dragover={(e) => handleDragOver(e, index)}
+        on:drop={(e) => handleDrop(e, index)}
+        on:dragend={handleDragEnd}
+        on:keydown={(e) => handleKeydown(e, index)}
+      >
+        <span class="reorderable-list__handle" aria-hidden="true">
+          <svg viewBox="0 0 16 16" fill="currentColor">
+            <circle cx="5" cy="4" r="1.25" />
+            <circle cx="11" cy="4" r="1.25" />
+            <circle cx="5" cy="8" r="1.25" />
+            <circle cx="11" cy="8" r="1.25" />
+            <circle cx="5" cy="12" r="1.25" />
+            <circle cx="11" cy="12" r="1.25" />
+          </svg>
+        </span>
+        <span class="reorderable-list__content">
+          <slot name="item" {item} {index}>
+            {item.label}
+          </slot>
+        </span>
+      </li>
+    {/each}
+  </ul>
+</UiPresentationProvider>
 
 <style>
   .reorderable-list {
+    --poodle-reorderable-list-gap: 0.125rem;
+    --poodle-reorderable-list-item-gap: 0.5rem;
+    --poodle-reorderable-list-item-x: 0.625rem;
+    --poodle-reorderable-list-item-y: 0.5rem;
+    --poodle-reorderable-list-handle-size: 1rem;
     list-style: none;
     margin: 0;
     padding: 0;
     display: flex;
     flex-direction: column;
-    gap: 0.125rem;
+    gap: var(--poodle-reorderable-list-gap);
+  }
+
+  .reorderable-list[data-size="xs"] {
+    --poodle-reorderable-list-handle-size: 0.875rem;
+    --poodle-reorderable-list-item-x: 0.5rem;
+  }
+
+  .reorderable-list[data-size="sm"] {
+    --poodle-reorderable-list-handle-size: 1rem;
+  }
+
+  .reorderable-list[data-size="lg"] {
+    --poodle-reorderable-list-handle-size: 1.125rem;
+    --poodle-reorderable-list-item-x: 0.75rem;
+  }
+
+  .reorderable-list[data-size="xl"] {
+    --poodle-reorderable-list-handle-size: 1.25rem;
+    --poodle-reorderable-list-item-x: 0.875rem;
+  }
+
+  .reorderable-list[data-density="compact"] {
+    --poodle-reorderable-list-gap: 0.0625rem;
+    --poodle-reorderable-list-item-gap: 0.375rem;
+    --poodle-reorderable-list-item-y: 0.375rem;
+  }
+
+  .reorderable-list[data-density="comfortable"] {
+    --poodle-reorderable-list-gap: 0.1875rem;
+    --poodle-reorderable-list-item-gap: 0.625rem;
+    --poodle-reorderable-list-item-y: 0.625rem;
   }
 
   .reorderable-list[data-disabled="true"] {
@@ -133,8 +196,8 @@
   .reorderable-list__item {
     display: flex;
     align-items: center;
-    gap: 0.5rem;
-    padding: 0.5rem 0.625rem;
+    gap: var(--poodle-reorderable-list-item-gap);
+    padding: var(--poodle-reorderable-list-item-y) var(--poodle-reorderable-list-item-x);
     border: 0.0625rem solid transparent;
     border-radius: var(--poodle-radius-control);
     background: var(--poodle-color-background-surface);
@@ -167,8 +230,8 @@
     align-items: center;
     justify-content: center;
     flex-shrink: 0;
-    width: 1rem;
-    height: 1rem;
+    width: var(--poodle-reorderable-list-handle-size);
+    height: var(--poodle-reorderable-list-handle-size);
     color: var(--poodle-color-text-secondary);
     cursor: grab;
   }

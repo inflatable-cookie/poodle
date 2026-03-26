@@ -330,6 +330,16 @@
           aria-controls={hasPanel ? `poodle-tabpanel-${tabsId}-${item.value}` : undefined}
           on:focus={() => { focusIndex = index; if (isVertical) scheduleTooltip(index); }}
           on:blur={() => hasTooltips && dismissTooltip()}
+          on:pointerdown={(event) => {
+            if (
+              reorderable &&
+              event.button === 0 &&
+              item.disabled !== true &&
+              currentValue !== item.value
+            ) {
+              setValue(item.value);
+            }
+          }}
           on:click={() => setValue(item.value)}
           on:keydown={(event) => {
             if (event.key === "Escape" && hasTooltips) dismissTooltip();

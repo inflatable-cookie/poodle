@@ -1,6 +1,6 @@
 <script lang="ts">
   import { RelationPicker, type PickerItem, type DrillDownConfig, type DrillDownItem } from "@poodle/svelte-composites";
-  import { Eyebrow } from "@poodle/svelte-primitives";
+  import { Eyebrow, UiPresentationProvider } from "@poodle/svelte-primitives";
 
   const items: PickerItem[] = [
     { id: "btn", label: "Button", description: "Primary interactive control", meta: "Primitive" },
@@ -85,6 +85,7 @@
   };
 
   let drillSelected: string[] = [];
+  let compactSelected: string[] = ["btn"];
 </script>
 
 <div class="specimen">
@@ -125,6 +126,30 @@
       <p>Selected: <strong>{drillSelected.join(", ")}</strong></p>
     {/if}
   </div>
+
+  <div class="specimen__group">
+    <Eyebrow>Semantic presentation</Eyebrow>
+    <UiPresentationProvider density="compact" sizeScale="sm">
+      <div class="specimen__stack">
+        <RelationPicker
+          title="Compact picker"
+          description="Inherited density and size should tighten breadcrumb and drill-list geometry."
+          {items}
+          selectedIds={compactSelected}
+          selectionMode="multiple"
+          on:selectionChange={(e) => (compactSelected = e.detail.selectedIds)}
+        />
+        <RelationPicker
+          title="Prominent actions"
+          description="Prominent size role should lift confirm/cancel and nested controls above the compact workspace baseline."
+          {items}
+          selectedIds={compactSelected}
+          selectionMode="multiple"
+          sizeRole="prominent"
+        />
+      </div>
+    </UiPresentationProvider>
+  </div>
 </div>
 
 <style>
@@ -138,6 +163,11 @@
     display: flex;
     flex-direction: column;
     gap: 0.5rem;
+  }
+
+  .specimen__stack {
+    display: grid;
+    gap: 0.75rem;
   }
 
   p {

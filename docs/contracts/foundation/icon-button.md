@@ -1,7 +1,7 @@
 # IconButton
 
 Status: detailed contract
-Updated: 2026-03-25
+Updated: 2026-03-26
 
 ## 1. Purpose
 
@@ -160,9 +160,12 @@ type OverlayPlacement = "top" | "bottom" | "left" | "right"
 
 - Square surface sized from shared control-height token
 - Icon remains centered regardless of loading state
+- Size xs: width/height reduced by `0.25rem` from md
 - Size sm: width/height reduced by 0.375rem from md
+- Size md: width/height equal to `control-height`
 - Size lg: width/height increased by 0.375rem from md
-- Three size steps adjust width and height symmetrically
+- Size xl: width/height increased by `0.5rem` from md
+- Five size steps adjust width and height symmetrically
 
 ### Composition
 
@@ -207,12 +210,26 @@ type OverlayPlacement = "top" | "bottom" | "left" | "right"
 | `width` | `calc(var(--poodle-size-control-height) - 0.375rem)` |
 | `height` | `calc(var(--poodle-size-control-height) - 0.375rem)` |
 
+### Root — Size `xs`
+
+| Property | Value |
+|----------|-------|
+| `width` | `calc(var(--poodle-size-control-height) - 0.25rem)` |
+| `height` | `calc(var(--poodle-size-control-height) - 0.25rem)` |
+
 ### Root — Size `lg`
 
 | Property | Value |
 |----------|-------|
 | `width` | `calc(var(--poodle-size-control-height) + 0.375rem)` |
 | `height` | `calc(var(--poodle-size-control-height) + 0.375rem)` |
+
+### Root — Size `xl`
+
+| Property | Value |
+|----------|-------|
+| `width` | `calc(var(--poodle-size-control-height) + 0.5rem)` |
+| `height` | `calc(var(--poodle-size-control-height) + 0.5rem)` |
 
 ### Root — Variant `primary`
 
@@ -446,3 +463,4 @@ Four icon button states:
 - future follow-up: split `ToggleIconButton` only if parity review shows it
   deserves its own contract; coordinate with toolbar roving-focus work;
   badge overlay, icon-button group
+- Glyph icon and loading spinner both resolve through the shared supporting-size mapping rather than a fixed absolute icon size

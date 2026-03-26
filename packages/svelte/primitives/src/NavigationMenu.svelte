@@ -6,24 +6,30 @@
   import { createEventDispatcher, onMount } from "svelte";
 
   import { findNextEnabledIndex, firstEnabledIndex } from "./internal";
+  import { getUiPresentation, resolveSemanticControlSize } from "./presentation";
 
-  import type { NavigationMenuItem } from "./types";
+  import type { ControlSize, NavigationMenuItem, SemanticControlSizeRole } from "./types";
 
   export let value: string | null = null;
   export let defaultValue: string | null = null;
   export let items: NavigationMenuItem[] = [];
   export let ariaLabel: string | null = null;
+  export let sizeRole: SemanticControlSizeRole = "chrome";
+  export let size: ControlSize | null = null;
 
   const dispatch = createEventDispatcher<{
     valueChange: { value: string | null };
   }>();
 
   const menuId = ++nextNavigationMenuId;
+  const uiPresentation = getUiPresentation();
+
   let rootElement: HTMLDivElement | null = null;
   let triggerElements: Array<HTMLButtonElement | null> = [];
   let uncontrolledValue = defaultValue;
   let focusIndex = 0;
 
+  $: resolvedSize = size ?? resolveSemanticControlSize(uiPresentation?.sizeScale ?? "md", sizeRole);
   $: currentValue = value ?? uncontrolledValue;
   $: currentItem = items.find((item) => item.value === currentValue) ?? null;
   $: selectedIndex = items.findIndex((item) => item.value === currentValue);
@@ -114,7 +120,7 @@
   });
 </script>
 
-<div class="navigation-menu" bind:this={rootElement}>
+<div class="navigation-menu" bind:this={rootElement} data-size={resolvedSize}>
   <nav
     class="navigation-menu__list"
     aria-label={ariaLabel ?? undefined}

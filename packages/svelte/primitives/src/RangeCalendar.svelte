@@ -21,8 +21,9 @@
     parseIsoDate,
     todayIsoDate,
   } from "./date";
+  import { getUiPresentation, resolveSemanticControlSize } from "./presentation";
 
-  import type { CalendarWeekStart, DateRangeValue } from "./types";
+  import type { CalendarWeekStart, ControlSize, DateRangeValue, SemanticControlSizeRole } from "./types";
 
   export let value: DateRangeValue | null = null;
   export let defaultValue: DateRangeValue = { start: null, end: null };
@@ -31,6 +32,8 @@
   export let locale = "en-US";
   export let disabled = false;
   export let ariaLabel: string | null = null;
+  export let size: ControlSize | null = null;
+  export let sizeRole: SemanticControlSizeRole = "control";
 
   const dispatch = createEventDispatcher<{
     valueChange: { value: DateRangeValue };
@@ -38,11 +41,13 @@
   }>();
 
   const gridId = `poodle-range-calendar-grid-${++nextRangeCalendarId}`;
+  const uiPresentation = getUiPresentation();
   let uncontrolledValue = normalizeDateRange(defaultValue);
   let uncontrolledMonth = monthAnchorIso(visibleMonth ?? defaultValue.start ?? todayIsoDate());
   let focusIso = defaultValue.start ?? todayIsoDate();
   let dayElements: Record<string, HTMLButtonElement | undefined> = {};
 
+  $: resolvedSize = size ?? resolveSemanticControlSize(uiPresentation?.sizeScale ?? "md", sizeRole);
   $: currentValue = normalizeDateRange(value ?? uncontrolledValue);
   $: currentMonth = monthAnchorIso(visibleMonth ?? uncontrolledMonth);
   $: weeks = buildCalendarWeeks(currentMonth, weekStartsOn);
@@ -148,7 +153,7 @@
   }
 </script>
 
-<div class="range-calendar" aria-label={ariaLabel ?? undefined}>
+<div class="range-calendar" data-size={resolvedSize} aria-label={ariaLabel ?? undefined}>
   <div class="range-calendar__header">
     <button
       type="button"

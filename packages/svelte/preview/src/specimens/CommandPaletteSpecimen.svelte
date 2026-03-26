@@ -1,8 +1,9 @@
 <script lang="ts">
-  import { Eyebrow, Button } from "@poodle/svelte-primitives";
+  import { Eyebrow, Button, UiPresentationProvider } from "@poodle/svelte-primitives";
   import { CommandPalette } from "@poodle/svelte-composites";
 
   let open = false;
+  let compactOpen = false;
 </script>
 
 <div class="specimen">
@@ -25,6 +26,31 @@
       ]}
     />
   </div>
+
+  <div class="specimen__group">
+    <Eyebrow>Semantic presentation</Eyebrow>
+    <UiPresentationProvider density="compact" sizeScale="sm">
+      <div class="specimen__stack">
+        <Button on:click={() => (compactOpen = true)}>Open compact palette</Button>
+        <CommandPalette
+          open={compactOpen}
+          on:openChange={(e) => (compactOpen = e.detail.open)}
+          items={[
+            { id: "save", title: "Save", shortcut: "Ctrl+S", group: "File" },
+            { id: "open", title: "Open File", shortcut: "Ctrl+O", group: "File" },
+          ]}
+          invocationHint="Cmd+K"
+        />
+        <CommandPalette
+          open={false}
+          items={[
+            { id: "save", title: "Save", shortcut: "Ctrl+S", group: "File" },
+          ]}
+          sizeRole="prominent"
+        />
+      </div>
+    </UiPresentationProvider>
+  </div>
 </div>
 
 <style>
@@ -44,5 +70,10 @@
     font-size: 0.8125rem;
     color: var(--poodle-color-text-secondary);
     margin: 0;
+  }
+
+  .specimen__stack {
+    display: grid;
+    gap: 0.75rem;
   }
 </style>

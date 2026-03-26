@@ -1,7 +1,21 @@
 <script lang="ts">
   import { createEventDispatcher } from "svelte";
 
-  import { Button, Checkbox, FormActions, Icon, SearchField } from "@poodle/svelte-primitives";
+  import {
+    Button,
+    Checkbox,
+    FormActions,
+    Icon,
+    SearchField,
+    UiPresentationProvider,
+    getUiPresentation,
+    resolveSemanticControlSize,
+  } from "@poodle/svelte-primitives";
+  import type {
+    ControlDensity,
+    ControlSize,
+    SemanticControlSizeRole,
+  } from "@poodle/svelte-primitives";
 
   import PickerShell from "./PickerShell.svelte";
   import SelectionSummary from "./SelectionSummary.svelte";
@@ -27,6 +41,9 @@
   export let confirmLabel = "Confirm selection";
   export let cancelLabel = "Cancel";
   export let drillDown: DrillDownConfig | null = null;
+  export let size: ControlSize | null = null;
+  export let sizeRole: SemanticControlSizeRole = "control";
+  export let density: ControlDensity | null = null;
 
   const dispatch = createEventDispatcher<{
     queryChange: { value: string };
@@ -37,6 +54,10 @@
   }>();
   const statusId = "relation-picker-status";
   let candidateButtons: Array<HTMLButtonElement | null> = [];
+  const uiPresentation = getUiPresentation();
+
+  $: resolvedSize = size ?? resolveSemanticControlSize(uiPresentation?.sizeScale ?? "md", sizeRole);
+  $: resolvedDensity = density ?? uiPresentation?.density ?? "default";
 
   // Drill-down state
   let drillDepth = 0;
@@ -236,213 +257,261 @@
   }
 </script>
 
-<PickerShell
-  {title}
-  {description}
-  {variant}
-  state={isDrilling ? (drillLoading ? "loading" : "ready") : state}
-  {ariaLabel}
-  resultCount={isDrilling ? drillItems.length : filteredItems.length}
-  selectionCount={selectedIds.length}
-  statusText={isDrilling ? `${drillItems.length} item${drillItems.length === 1 ? "" : "s"}` : pickerStatusText}
-  statusId={statusId}
-  stateTitle={isDrilling ? "Loading" : (state === "loading" ? "Loading candidates" : state === "error" ? "Picker unavailable" : state === "empty" ? "No candidates available" : "No matching candidates")}
-  stateMessage={isDrilling ? "Loading items..." : (state === "loading" ? "Picker results are loading while selection state stays host-owned." : state === "error" ? "Error handling remains host-owned, but the picker preserves its structure." : state === "empty" ? "This relation has no available candidates yet." : "Try widening the search query or clearing selection filters.")}
->
-  <div slot="toolbar">
-    {#if isDrilling}
-      {#if drillBreadcrumbs.length > 0}
-        <div class="drill-breadcrumbs">
-          <button
-            type="button"
-            class="drill-breadcrumbs__back"
-            on:click={drillBack}
-            aria-label="Go back"
-          >
-            <Icon name="chevron-left" />
-          </button>
-          {#each drillBreadcrumbs as crumb, i}
-            {#if i > 0}
-              <span class="drill-breadcrumbs__sep">/</span>
-            {/if}
-            <button
-              type="button"
-              class="drill-breadcrumbs__item"
-              on:click={() => drillNavigateTo(crumb.depth)}
-            >
-              {crumb.label}
-            </button>
-          {/each}
-        </div>
-      {/if}
-      <div class="drill-level-label">{currentLevel?.label}</div>
-      <SearchField
-        id="drill-search"
-        value={drillSearchQuery}
-        ariaLabel="Search {currentLevel?.label ?? 'items'}"
-        placeholder={currentLevel?.searchPlaceholder ?? `Search ${currentLevel?.label?.toLowerCase() ?? 'items'}...`}
-        on:valueChange={(e) => { drillSearchQuery = e.detail.value; }}
-        on:clear={() => { drillSearchQuery = ""; }}
-        on:keydown={handleDrillSearchKeydown}
-      />
-    {:else}
-      {#if drillDown && drillBreadcrumbs.length > 0}
-        <div class="drill-breadcrumbs">
-          <button
-            type="button"
-            class="drill-breadcrumbs__back"
-            on:click={drillBack}
-            aria-label="Go back"
-          >
-            <Icon name="chevron-left" />
-          </button>
-          {#each drillBreadcrumbs as crumb, i}
-            {#if i > 0}
-              <span class="drill-breadcrumbs__sep">/</span>
-            {/if}
-            <button
-              type="button"
-              class="drill-breadcrumbs__item"
-              on:click={() => drillNavigateTo(crumb.depth)}
-            >
-              {crumb.label}
-            </button>
-          {/each}
-        </div>
-      {/if}
-      <SearchField
-        id="relation-picker-search"
-        value={query}
-        ariaLabel="Search picker results"
-        describedBy={statusId}
-        on:valueChange={(event) => { query = event.detail.value; dispatch("queryChange", event.detail); }}
-        on:clear={() => { query = ""; dispatch("queryChange", { value: "" }); }}
-      />
-    {/if}
-  </div>
-
-  {#if !isDrilling}
-    <SelectionSummary
-      slot="selection"
-      items={selectedItems}
-      {selectionMode}
-      on:remove={(event) => setSelection(selectedIds.filter((id) => id !== event.detail.id))}
-      on:clear={() => setSelection([])}
-    />
-  {/if}
-
-  <slot name="state" slot="state" />
-
-  {#if isDrilling}
-    <ul class="drill-list" aria-label="{currentLevel?.label ?? 'Items'}">
-      {#each drillItems as item (item.id)}
-        <li class="drill-list__item">
-          <button
-            type="button"
-            class="drill-list__button"
-            on:click={() => drillSelect(item)}
-          >
-            <span class="drill-list__copy">
-              <strong>{item.label}</strong>
-              {#if item.description}
-                <small>{item.description}</small>
-              {/if}
-            </span>
-            <span class="drill-list__meta">
-              {#if item.count !== undefined}
-                <span class="drill-list__count">{item.count}</span>
-              {/if}
-              <Icon name="chevron-right" />
-            </span>
-          </button>
-        </li>
-      {/each}
-      {#if drillItems.length === 0 && !drillLoading}
-        <li class="drill-list__empty">No items found</li>
-      {/if}
-    </ul>
-  {:else}
-    <ul class="relation-picker__list" aria-label="Available candidates">
-      {#each filteredItems as item, index}
-        <li
-          class="relation-picker__item"
-          data-selected={selectedIds.includes(item.id)}
-        >
-          {#if selectionMode === "multiple"}
-            <Checkbox
-              ariaLabel={`Select ${item.label}`}
-              checked={selectedIds.includes(item.id)}
-              on:checkedChange={() => toggleItem(item.id)}
-            />
-            <button
-              bind:this={candidateButtons[index]}
-              type="button"
-              class="relation-picker__item-button"
-              aria-pressed={selectedIds.includes(item.id)}
-              aria-describedby={item.description || item.meta ? `relation-picker-item-${item.id}` : undefined}
-              on:click={() => toggleItem(item.id)}
-              on:keydown={(event) => handleCandidateKeydown(event, index)}
-            >
-              <span class="relation-picker__item-copy">
-                <strong>{item.label}</strong>
-                {#if item.description || item.meta}
-                  <small id={`relation-picker-item-${item.id}`}>
-                    {item.description ?? ""}
-                    {#if item.description && item.meta}
-                      {" · "}
-                    {/if}
-                    {item.meta ?? ""}
-                  </small>
+<UiPresentationProvider sizeScale={resolvedSize} density={resolvedDensity}>
+  <div class="relation-picker" data-size={resolvedSize} data-density={resolvedDensity}>
+    <PickerShell
+      {title}
+      {description}
+      {variant}
+      state={isDrilling ? (drillLoading ? "loading" : "ready") : state}
+      {ariaLabel}
+      resultCount={isDrilling ? drillItems.length : filteredItems.length}
+      selectionCount={selectedIds.length}
+      statusText={isDrilling ? `${drillItems.length} item${drillItems.length === 1 ? "" : "s"}` : pickerStatusText}
+      statusId={statusId}
+      stateTitle={isDrilling ? "Loading" : (state === "loading" ? "Loading candidates" : state === "error" ? "Picker unavailable" : state === "empty" ? "No candidates available" : "No matching candidates")}
+      stateMessage={isDrilling ? "Loading items..." : (state === "loading" ? "Picker results are loading while selection state stays host-owned." : state === "error" ? "Error handling remains host-owned, but the picker preserves its structure." : state === "empty" ? "This relation has no available candidates yet." : "Try widening the search query or clearing selection filters.")}
+    >
+      <div slot="toolbar">
+        {#if isDrilling}
+          {#if drillBreadcrumbs.length > 0}
+            <div class="drill-breadcrumbs">
+              <button
+                type="button"
+                class="drill-breadcrumbs__back"
+                on:click={drillBack}
+                aria-label="Go back"
+              >
+                <Icon name="chevron-left" />
+              </button>
+              {#each drillBreadcrumbs as crumb, i}
+                {#if i > 0}
+                  <span class="drill-breadcrumbs__sep">/</span>
                 {/if}
-              </span>
-            </button>
-          {:else}
-            <button
-              bind:this={candidateButtons[index]}
-              type="button"
-              class="relation-picker__item-button"
-              aria-pressed={selectedIds.includes(item.id)}
-              aria-describedby={item.description || item.meta ? `relation-picker-item-${item.id}` : undefined}
-              on:click={() => toggleItem(item.id)}
-              on:keydown={(event) => handleCandidateKeydown(event, index)}
-            >
-              <span class="relation-picker__item-copy">
-                <strong>{item.label}</strong>
-                {#if item.description || item.meta}
-                  <small id={`relation-picker-item-${item.id}`}>
-                    {item.description ?? ""}
-                    {#if item.description && item.meta}
-                      {" · "}
-                    {/if}
-                    {item.meta ?? ""}
-                  </small>
-                {/if}
-              </span>
-            </button>
+                <button
+                  type="button"
+                  class="drill-breadcrumbs__item"
+                  on:click={() => drillNavigateTo(crumb.depth)}
+                >
+                  {crumb.label}
+                </button>
+              {/each}
+            </div>
           {/if}
-        </li>
-      {/each}
-    </ul>
-  {/if}
-
-  <div slot="footer">
-    <FormActions align="between">
-      <p class="relation-picker__footer-note">
-        {selectionMode === "single" ? "Single-choice selection keeps the picker confirmable without inline radio-group chrome." : "Multi-selection stays explicit through selection summary and confirm/cancel actions."}
-      </p>
-      <div class="relation-picker__footer-actions">
-        <Button variant="ghost" on:click={() => dispatch("cancel")}>
-          {cancelLabel}
-        </Button>
-        <Button variant="primary" on:click={() => dispatch("confirm", { selectedIds })}>
-          {confirmLabel}
-        </Button>
+          <div class="drill-level-label">{currentLevel?.label}</div>
+          <SearchField
+            id="drill-search"
+            value={drillSearchQuery}
+            ariaLabel={`Search ${currentLevel?.label ?? "items"}`}
+            placeholder={currentLevel?.searchPlaceholder ?? `Search ${currentLevel?.label?.toLowerCase() ?? 'items'}...`}
+            on:valueChange={(e) => { drillSearchQuery = e.detail.value; }}
+            on:clear={() => { drillSearchQuery = ""; }}
+            on:keydown={handleDrillSearchKeydown}
+          />
+        {:else}
+          {#if drillDown && drillBreadcrumbs.length > 0}
+            <div class="drill-breadcrumbs">
+              <button
+                type="button"
+                class="drill-breadcrumbs__back"
+                on:click={drillBack}
+                aria-label="Go back"
+              >
+                <Icon name="chevron-left" />
+              </button>
+              {#each drillBreadcrumbs as crumb, i}
+                {#if i > 0}
+                  <span class="drill-breadcrumbs__sep">/</span>
+                {/if}
+                <button
+                  type="button"
+                  class="drill-breadcrumbs__item"
+                  on:click={() => drillNavigateTo(crumb.depth)}
+                >
+                  {crumb.label}
+                </button>
+              {/each}
+            </div>
+          {/if}
+          <SearchField
+            id="relation-picker-search"
+            value={query}
+            ariaLabel="Search picker results"
+            describedBy={statusId}
+            on:valueChange={(event) => { query = event.detail.value; dispatch("queryChange", event.detail); }}
+            on:clear={() => { query = ""; dispatch("queryChange", { value: "" }); }}
+          />
+        {/if}
       </div>
-    </FormActions>
+
+      {#if !isDrilling}
+        <SelectionSummary
+          slot="selection"
+          items={selectedItems}
+          {selectionMode}
+          on:remove={(event) => setSelection(selectedIds.filter((id) => id !== event.detail.id))}
+          on:clear={() => setSelection([])}
+        />
+      {/if}
+
+      <slot name="state" slot="state" />
+
+      {#if isDrilling}
+        <ul class="drill-list" aria-label={currentLevel?.label ?? "Items"}>
+          {#each drillItems as item (item.id)}
+            <li class="drill-list__item">
+              <button
+                type="button"
+                class="drill-list__button"
+                on:click={() => drillSelect(item)}
+              >
+                <span class="drill-list__copy">
+                  <strong>{item.label}</strong>
+                  {#if item.description}
+                    <small>{item.description}</small>
+                  {/if}
+                </span>
+                <span class="drill-list__meta">
+                  {#if item.count !== undefined}
+                    <span class="drill-list__count">{item.count}</span>
+                  {/if}
+                  <Icon name="chevron-right" />
+                </span>
+              </button>
+            </li>
+          {/each}
+          {#if drillItems.length === 0 && !drillLoading}
+            <li class="drill-list__empty">No items found</li>
+          {/if}
+        </ul>
+      {:else}
+        <ul class="relation-picker__list" aria-label="Available candidates">
+          {#each filteredItems as item, index}
+            <li
+              class="relation-picker__item"
+              data-selected={selectedIds.includes(item.id)}
+            >
+              {#if selectionMode === "multiple"}
+                <Checkbox
+                  ariaLabel={`Select ${item.label}`}
+                  checked={selectedIds.includes(item.id)}
+                  on:checkedChange={() => toggleItem(item.id)}
+                />
+                <button
+                  bind:this={candidateButtons[index]}
+                  type="button"
+                  class="relation-picker__item-button"
+                  aria-pressed={selectedIds.includes(item.id)}
+                  aria-describedby={item.description || item.meta ? `relation-picker-item-${item.id}` : undefined}
+                  on:click={() => toggleItem(item.id)}
+                  on:keydown={(event) => handleCandidateKeydown(event, index)}
+                >
+                  <span class="relation-picker__item-copy">
+                    <strong>{item.label}</strong>
+                    {#if item.description || item.meta}
+                      <small id={`relation-picker-item-${item.id}`}>
+                        {item.description ?? ""}
+                        {#if item.description && item.meta}
+                          {" · "}
+                        {/if}
+                        {item.meta ?? ""}
+                      </small>
+                    {/if}
+                  </span>
+                </button>
+              {:else}
+                <button
+                  bind:this={candidateButtons[index]}
+                  type="button"
+                  class="relation-picker__item-button"
+                  aria-pressed={selectedIds.includes(item.id)}
+                  aria-describedby={item.description || item.meta ? `relation-picker-item-${item.id}` : undefined}
+                  on:click={() => toggleItem(item.id)}
+                  on:keydown={(event) => handleCandidateKeydown(event, index)}
+                >
+                  <span class="relation-picker__item-copy">
+                    <strong>{item.label}</strong>
+                    {#if item.description || item.meta}
+                      <small id={`relation-picker-item-${item.id}`}>
+                        {item.description ?? ""}
+                        {#if item.description && item.meta}
+                          {" · "}
+                        {/if}
+                        {item.meta ?? ""}
+                      </small>
+                    {/if}
+                  </span>
+                </button>
+              {/if}
+            </li>
+          {/each}
+        </ul>
+      {/if}
+
+      <div slot="footer">
+        <FormActions align="between">
+          <p class="relation-picker__footer-note">
+            {selectionMode === "single" ? "Single-choice selection keeps the picker confirmable without inline radio-group chrome." : "Multi-selection stays explicit through selection summary and confirm/cancel actions."}
+          </p>
+          <div class="relation-picker__footer-actions">
+            <Button variant="ghost" size={resolvedSize} on:click={() => dispatch("cancel")}>
+              {cancelLabel}
+            </Button>
+            <Button variant="primary" size={resolvedSize} on:click={() => dispatch("confirm", { selectedIds })}>
+              {confirmLabel}
+            </Button>
+          </div>
+        </FormActions>
+      </div>
+    </PickerShell>
   </div>
-</PickerShell>
+</UiPresentationProvider>
 
 <style>
+  .relation-picker {
+    --poodle-relation-picker-breadcrumb-control: 1.5rem;
+    --poodle-relation-picker-breadcrumb-x: 0.375rem;
+    --poodle-relation-picker-list-x: 0.625rem;
+    --poodle-relation-picker-list-y: 0.5rem;
+    --poodle-relation-picker-list-gap: 0.125rem;
+  }
+
+  .relation-picker[data-size="xs"] {
+    --poodle-relation-picker-breadcrumb-control: 1.25rem;
+    --poodle-relation-picker-breadcrumb-x: 0.25rem;
+    --poodle-relation-picker-list-x: 0.5rem;
+  }
+
+  .relation-picker[data-size="sm"] {
+    --poodle-relation-picker-breadcrumb-control: 1.5rem;
+  }
+
+  .relation-picker[data-size="md"] {
+    --poodle-relation-picker-breadcrumb-control: 1.75rem;
+  }
+
+  .relation-picker[data-size="lg"] {
+    --poodle-relation-picker-breadcrumb-control: 2rem;
+    --poodle-relation-picker-breadcrumb-x: 0.5rem;
+    --poodle-relation-picker-list-x: 0.75rem;
+  }
+
+  .relation-picker[data-size="xl"] {
+    --poodle-relation-picker-breadcrumb-control: 2.25rem;
+    --poodle-relation-picker-breadcrumb-x: 0.625rem;
+    --poodle-relation-picker-list-x: 0.875rem;
+  }
+
+  .relation-picker[data-density="compact"] {
+    --poodle-relation-picker-list-y: 0.375rem;
+    --poodle-relation-picker-list-gap: 0.0625rem;
+  }
+
+  .relation-picker[data-density="comfortable"] {
+    --poodle-relation-picker-list-y: 0.625rem;
+    --poodle-relation-picker-list-gap: 0.1875rem;
+  }
+
   /* Drill-down breadcrumbs */
   .drill-breadcrumbs {
     display: flex;
@@ -455,8 +524,8 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 1.5rem;
-    height: 1.5rem;
+    width: var(--poodle-relation-picker-breadcrumb-control);
+    height: var(--poodle-relation-picker-breadcrumb-control);
     padding: 0;
     border: none;
     border-radius: var(--poodle-radius-sm, 0.25rem);
@@ -477,12 +546,13 @@
   }
 
   .drill-breadcrumbs__item {
-    padding: 0.125rem 0.375rem;
+    min-height: calc(var(--poodle-relation-picker-breadcrumb-control) - 0.25rem);
+    padding: 0.125rem var(--poodle-relation-picker-breadcrumb-x);
     border: none;
     border-radius: var(--poodle-radius-sm, 0.25rem);
     background: transparent;
     color: var(--poodle-color-accent-base);
-    font-size: 0.75rem;
+    font-size: var(--poodle-typography-label-size);
     font-weight: 500;
     cursor: pointer;
     white-space: nowrap;
@@ -496,7 +566,7 @@
   }
 
   .drill-level-label {
-    font-size: 0.6875rem;
+    font-size: var(--poodle-typography-label-size);
     font-weight: 600;
     text-transform: uppercase;
     letter-spacing: 0.08em;
@@ -507,7 +577,7 @@
   /* Drill-down list */
   .drill-list {
     display: grid;
-    gap: 0.125rem;
+    gap: var(--poodle-relation-picker-list-gap);
     margin: 0;
     padding: 0;
     list-style: none;
@@ -523,7 +593,7 @@
     justify-content: space-between;
     gap: var(--poodle-space-inline-md);
     width: 100%;
-    padding: 0.5rem 0.625rem;
+    padding: var(--poodle-relation-picker-list-y) var(--poodle-relation-picker-list-x);
     border: none;
     border-radius: var(--poodle-radius-control);
     background: transparent;
@@ -531,7 +601,7 @@
     cursor: pointer;
     text-align: left;
     font: inherit;
-    font-size: 0.875rem;
+    font-size: var(--poodle-typography-body-size);
   }
 
   .drill-list__button:hover {
@@ -558,7 +628,7 @@
 
   .drill-list__copy small {
     color: var(--poodle-color-text-secondary);
-    font-size: 0.75rem;
+    font-size: var(--poodle-typography-label-size);
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
@@ -573,12 +643,12 @@
   }
 
   .drill-list__count {
-    font-size: 0.6875rem;
+    font-size: var(--poodle-typography-label-size);
     opacity: 0.7;
   }
 
   .drill-list__empty {
-    padding: 1.25rem;
+    padding: calc(var(--poodle-relation-picker-list-y) * 2.5);
     text-align: center;
     color: var(--poodle-color-text-secondary);
     font-size: 0.8125rem;

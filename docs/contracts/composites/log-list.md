@@ -1,7 +1,7 @@
 # LogList
 
 Status: seed contract
-Updated: 2026-03-22
+Updated: 2026-03-26
 
 ## 1. Purpose
 
@@ -57,6 +57,9 @@ Updated: 2026-03-22
 | `filterLevel` | `LogLevel \| null` | `null` | no | Active level filter; `null` shows all |
 | `filterText` | `string` | `""` | no | Text search filter for messages |
 | `ariaLabel` | `string` | `"Log output"` | no | Accessible label for the log region |
+| `size` | `ControlSize \| null` | `null` | no | Explicit semantic size override for toolbar controls |
+| `sizeRole` | `SemanticControlSizeRole` | `"control"` | no | Semantic role used to resolve inherited size scale |
+| `density` | `ControlDensity \| null` | `null` | no | Explicit density override for toolbar, entry, and floating action spacing |
 
 ### Types
 
@@ -130,15 +133,15 @@ None. The component is display-only; entries are provided externally.
 ### Sizing
 
 - Root: flex column, border `0.0625rem solid border-subtle`, `radius-surface`, overflow hidden, position relative
-- Toolbar: flex row, wrapping, gap `0.5rem`, padding `0.375rem 0.5rem`, border-bottom
-- Filter button: padding `0.1875rem 0.5rem`, font-size `0.6875rem`, monospace, `radius-control`
-- Search input: flex 1, min-width `8rem`, padding `0.1875rem 0.5rem`, font-size `0.6875rem`, monospace
+- Toolbar: flex row, wrapping, with density-aware padding and gap
+- Filter button: semantic control height, semantic label sizing, monospace, `radius-control`
+- Search input: flex 1, min-width `8rem`, semantic control height, semantic label sizing, monospace
 - Scroll container: max-height `20rem`, overflow-y auto, font-size `0.75rem`, line-height `1.6`
-- Entry: flex row, gap `0.625rem`, padding `0.125rem 0.5rem`, border-bottom subtle
+- Entry: flex row with density-aware padding and gap, border-bottom subtle
 - Timestamp: flex-shrink 0, nowrap
 - Level badge: flex-shrink 0, width `3rem`, right-aligned, font-weight 600
 - Message: flex 1, min-width 0, word-break
-- Scroll button: absolute positioned, bottom `0.5rem`, centered, pill shape, shadow
+- Scroll button: absolute positioned, bottom `0.5rem`, centered, pill shape, shadow, and semantic label sizing
 
 ### Composition
 

@@ -1,15 +1,24 @@
 <script lang="ts">
   import { createEventDispatcher } from "svelte";
 
+  import { getUiPresentation, resolveSemanticControlSize } from "./presentation";
+
+  import type { ControlSize, SemanticControlSizeRole } from "./types";
+
   export let currentPage = 1;
   export let totalPages = 1;
   export let siblingCount = 1;
   export let ariaLabel: string | null = null;
+  export let sizeRole: SemanticControlSizeRole = "control";
+  export let size: ControlSize | null = null;
 
   const dispatch = createEventDispatcher<{
     pageChange: { page: number };
   }>();
 
+  const uiPresentation = getUiPresentation();
+
+  $: resolvedSize = size ?? resolveSemanticControlSize(uiPresentation?.sizeScale ?? "md", sizeRole);
   $: safeTotalPages = Math.max(1, totalPages);
   $: safeCurrentPage = Math.min(Math.max(1, currentPage), safeTotalPages);
   $: visiblePages = buildVisiblePages(safeCurrentPage, safeTotalPages, siblingCount);
@@ -53,7 +62,7 @@
   }
 </script>
 
-<nav class="pagination" aria-label={ariaLabel ?? "Pagination"}>
+<nav class="pagination" aria-label={ariaLabel ?? "Pagination"} data-size={resolvedSize}>
   <button
     type="button"
     class="pagination__button"

@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { Eyebrow } from "@poodle/svelte-primitives";
+  import { Eyebrow, UiPresentationProvider } from "@poodle/svelte-primitives";
   import { MediaBrowsePanel, type MediaPickerItem } from "@poodle/svelte-composites";
 
   let loading = false;
@@ -44,6 +44,16 @@
     />
     <p>Last action: <strong>{lastAction}</strong></p>
   </div>
+
+  <div class="specimen__group">
+    <Eyebrow>Semantic presentation</Eyebrow>
+    <UiPresentationProvider density="compact" sizeScale="sm">
+      <div class="specimen__stack">
+        <MediaBrowsePanel {items} hasMore />
+        <MediaBrowsePanel {items} hasMore sizeRole="prominent" />
+      </div>
+    </UiPresentationProvider>
+  </div>
 </div>
 
 <style>
@@ -60,6 +70,11 @@
     flex-wrap: wrap;
   }
 
+  .specimen__stack {
+    display: grid;
+    gap: 0.75rem;
+  }
+
   .specimen__actions button {
     padding: 0.375rem 0.625rem;
   }
@@ -68,4 +83,3 @@
     margin: 0;
   }
 </style>
-

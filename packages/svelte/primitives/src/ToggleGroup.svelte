@@ -1,11 +1,20 @@
 <script lang="ts">
   import { createEventDispatcher } from "svelte";
+  import { getUiPresentation, resolveSemanticControlSize } from "./presentation";
 
-  import type { ToggleGroupOption } from "./types";
+  import type {
+    ControlDensity,
+    ControlSize,
+    SemanticControlSizeRole,
+    ToggleGroupOption,
+  } from "./types";
 
   export let value: string | string[] | null = null;
   export let defaultValue: string | string[] | null = null;
   export let options: ToggleGroupOption[] = [];
+  export let size: ControlSize | null = null;
+  export let sizeRole: SemanticControlSizeRole = "control";
+  export let density: ControlDensity | null = null;
   export let selectionMode: "single" | "multiple" = "single";
   export let disabled = false;
   export let ariaLabel: string | null = null;
@@ -15,9 +24,12 @@
   }>();
 
   let uncontrolledValue = defaultValue ?? (selectionMode === "multiple" ? [] : null);
+  const uiPresentation = getUiPresentation();
 
   $: controlled = value !== null;
   $: currentValue = controlled ? value : uncontrolledValue;
+  $: resolvedSize = size ?? resolveSemanticControlSize(uiPresentation?.sizeScale ?? "md", sizeRole);
+  $: resolvedDensity = density ?? uiPresentation?.density ?? "default";
 
   function isSelected(optionValue: string): boolean {
     if (selectionMode === "multiple") {
@@ -49,6 +61,8 @@
 
 <div
   class="toggle-group"
+  data-size={resolvedSize}
+  data-density={resolvedDensity}
   role={selectionMode === "multiple" ? "group" : "radiogroup"}
   aria-label={ariaLabel ?? undefined}
 >
@@ -72,14 +86,52 @@
 
 <style>
   .toggle-group {
+    --poodle-toggle-group-height: var(--poodle-size-control-height);
+    --poodle-toggle-group-x: var(--poodle-space-control-x);
+    --poodle-toggle-group-gap: 0.25rem;
     display: inline-flex;
     flex-wrap: wrap;
-    gap: 0.25rem;
+    gap: var(--poodle-toggle-group-gap);
+  }
+
+  .toggle-group[data-size="xs"] {
+    --poodle-toggle-group-height: 1.5rem;
+  }
+
+  .toggle-group[data-size="sm"] {
+    --poodle-toggle-group-height: 1.75rem;
+  }
+
+  .toggle-group[data-size="md"] {
+    --poodle-toggle-group-height: 2.25rem;
+  }
+
+  .toggle-group[data-size="lg"] {
+    --poodle-toggle-group-height: 2.75rem;
+  }
+
+  .toggle-group[data-size="xl"] {
+    --poodle-toggle-group-height: 3.25rem;
+  }
+
+  .toggle-group[data-density="compact"] {
+    --poodle-toggle-group-x: 0.5rem;
+    --poodle-toggle-group-gap: 0.1875rem;
+  }
+
+  .toggle-group[data-density="default"] {
+    --poodle-toggle-group-x: 0.75rem;
+    --poodle-toggle-group-gap: 0.25rem;
+  }
+
+  .toggle-group[data-density="comfortable"] {
+    --poodle-toggle-group-x: 1rem;
+    --poodle-toggle-group-gap: 0.375rem;
   }
 
   .toggle-group__item {
-    min-height: calc(var(--poodle-size-control-height) - 0.25rem);
-    padding: 0 0.75rem;
+    min-height: calc(var(--poodle-toggle-group-height) - 0.25rem);
+    padding: 0 var(--poodle-toggle-group-x);
     border: 0.0625rem solid var(
       --poodle-treatment-interactive-border,
       color-mix(in srgb, var(--poodle-color-border-subtle) 82%, transparent)
@@ -93,7 +145,7 @@
     color: var(--poodle-color-text-primary);
     cursor: pointer;
     font-family: var(--poodle-typography-label-family);
-    font-size: 0.75rem;
+    font-size: var(--poodle-typography-label-size);
     font-weight: 600;
     line-height: 1;
     transition:

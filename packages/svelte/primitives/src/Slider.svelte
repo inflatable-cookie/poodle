@@ -2,8 +2,12 @@
   import { createEventDispatcher } from "svelte";
 
   import { clamp, joinStyles, snapToStep } from "./internal";
+  import { getUiPresentation, resolveSemanticControlSize } from "./presentation";
 
-  import type { Orientation } from "./types";
+  import type { ControlSize, Orientation, SemanticControlSizeRole } from "./types";
+
+  export let size: ControlSize | null = null;
+  export let sizeRole: SemanticControlSizeRole = "control";
 
   export let value = 0;
   export let min = 0;
@@ -14,11 +18,14 @@
   export let ariaLabel: string | null = null;
   export let valueText: string | null = null;
 
+  const uiPresentation = getUiPresentation();
+
   const dispatch = createEventDispatcher<{
     valueChange: { value: number };
     valueCommit: { value: number };
   }>();
 
+  $: resolvedSize = size ?? resolveSemanticControlSize(uiPresentation?.sizeScale ?? "md", sizeRole);
   $: safeMax = max <= min ? min + 1 : max;
   $: safeValue = clamp(snapToStep(value, min, step), min, safeMax);
   $: percentage = ((safeValue - min) / (safeMax - min)) * 100;
@@ -29,7 +36,7 @@
   }
 </script>
 
-<div class="slider" data-orientation={orientation} data-disabled={disabled} style={sliderStyle}>
+<div class="slider" data-orientation={orientation} data-disabled={disabled} style={sliderStyle} data-size={resolvedSize}>
   <span class="slider__track" aria-hidden="true">
     <span class="slider__fill"></span>
   </span>

@@ -6,13 +6,16 @@
   import { createEventDispatcher, onMount, tick } from "svelte";
 
   import { findNextEnabledIndex, firstEnabledIndex, menuNavigableItems } from "./internal";
+  import { getUiPresentation, resolveSemanticControlSize } from "./presentation";
 
-  import type { MenubarItem, MenuItem } from "./types";
+  import type { ControlSize, MenubarItem, MenuItem, SemanticControlSizeRole } from "./types";
 
   export let value: string | null = null;
   export let defaultValue: string | null = null;
   export let items: MenubarItem[] = [];
   export let ariaLabel: string | null = null;
+  export let sizeRole: SemanticControlSizeRole = "chrome";
+  export let size: ControlSize | null = null;
 
   const dispatch = createEventDispatcher<{
     valueChange: { value: string | null };
@@ -20,6 +23,8 @@
   }>();
 
   const menubarId = ++nextMenubarId;
+  const uiPresentation = getUiPresentation();
+
   let rootElement: HTMLDivElement | null = null;
   let triggerElements: Array<HTMLButtonElement | null> = [];
   let menuItemElements: Array<HTMLButtonElement | null> = [];
@@ -28,6 +33,7 @@
   let highlightIndex = 0;
   let lastOpenValue: string | null = null;
 
+  $: resolvedSize = size ?? resolveSemanticControlSize(uiPresentation?.sizeScale ?? "md", sizeRole);
   $: currentValue = value ?? uncontrolledValue;
   $: currentMenu = items.find((item) => item.value === currentValue) ?? null;
   $: actionableItems = menuNavigableItems(currentMenu?.items ?? []);
@@ -127,7 +133,7 @@
   });
 </script>
 
-<div bind:this={rootElement} class="menubar">
+<div bind:this={rootElement} class="menubar" data-size={resolvedSize}>
   <div class="menubar__list" role="menubar" aria-label={ariaLabel ?? undefined}>
     {#each items as item, index (item.value)}
       <div class="menubar__group">

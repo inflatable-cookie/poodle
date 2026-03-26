@@ -1,20 +1,27 @@
 <script lang="ts">
   import { createEventDispatcher } from "svelte";
 
-  import { Button, Icon } from "@poodle/svelte-primitives";
+  import { Button, Icon, getUiPresentation, resolveSemanticControlSize } from "@poodle/svelte-primitives";
+  import type { ControlSize, SemanticControlSizeRole } from "@poodle/svelte-primitives";
 
   import type { ToastItem } from "./types";
 
   export let items: ToastItem[] = [];
   export let ariaLabel = "Notifications";
+  export let size: ControlSize | null = null;
+  export let sizeRole: SemanticControlSizeRole = "chrome";
 
   const dispatch = createEventDispatcher<{
     dismiss: { id: string };
     action: { id: string };
   }>();
+
+  const uiPresentation = getUiPresentation();
+
+  $: resolvedSize = size ?? resolveSemanticControlSize(uiPresentation?.sizeScale ?? "md", sizeRole);
 </script>
 
-<section class="toast-stack" aria-label={ariaLabel} aria-live="polite" aria-atomic="false" role="list">
+<section class="toast-stack" aria-label={ariaLabel} aria-live="polite" aria-atomic="false" role="list" data-size={resolvedSize}>
   {#each items as item (item.id)}
     <article
       class="toast"

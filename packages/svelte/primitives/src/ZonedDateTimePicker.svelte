@@ -14,8 +14,9 @@
     normalizeZonedDateTimeValue,
     todayIsoDate,
   } from "./date";
+  import { getUiPresentation, resolveSemanticControlSize } from "./presentation";
 
-  import type { CalendarWeekStart, TimeZoneOption, ZonedDateTimeValue } from "./types";
+  import type { CalendarWeekStart, ControlSize, SemanticControlSizeRole, TimeZoneOption, ZonedDateTimeValue } from "./types";
 
   export let value: ZonedDateTimeValue | null = null;
   export let defaultValue: ZonedDateTimeValue = { date: null, time: null, timeZone: null };
@@ -27,6 +28,8 @@
   export let timeZoneOptions: TimeZoneOption[] = [];
   export let disabled = false;
   export let ariaLabel: string | null = null;
+  export let size: ControlSize | null = null;
+  export let sizeRole: SemanticControlSizeRole = "control";
 
   const dispatch = createEventDispatcher<{
     valueChange: { value: ZonedDateTimeValue };
@@ -34,11 +37,13 @@
   }>();
 
   const surfaceId = `poodle-zoned-date-time-picker-surface-${++nextZonedDateTimePickerId}`;
+  const uiPresentation = getUiPresentation();
   let rootElement: HTMLDivElement | null = null;
   let uncontrolledValue = normalizeZonedDateTimeValue(defaultValue);
   let uncontrolledOpen = defaultOpen;
   let visibleMonth = monthAnchorIso(defaultValue.date ?? todayIsoDate());
 
+  $: resolvedSize = size ?? resolveSemanticControlSize(uiPresentation?.sizeScale ?? "md", sizeRole);
   $: currentValue = normalizeZonedDateTimeValue(value ?? uncontrolledValue);
   $: isOpen = open ?? uncontrolledOpen;
   $: if (currentValue.date) {
@@ -100,7 +105,7 @@
   });
 </script>
 
-<div bind:this={rootElement} class="zoned-date-time-picker" data-open={isOpen}>
+<div bind:this={rootElement} class="zoned-date-time-picker" data-size={resolvedSize} data-open={isOpen}>
   <button
     type="button"
     class="zoned-date-time-picker__trigger"

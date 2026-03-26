@@ -1,7 +1,7 @@
 # Spinner
 
 Status: detailed contract
-Updated: 2026-03-25
+Updated: 2026-03-26
 
 ## 1. Purpose
 
@@ -101,13 +101,17 @@ No internal state. Animation is continuous while the component is mounted.
 
 - Root is `inline-flex`
 - Ring sizes:
+  - `xs`: `0.625rem`
   - `sm`: `0.75rem`
   - `md`: `1rem`
   - `lg`: `1.5rem`
+  - `xl`: `1.875rem`
 - Grid sizes:
+  - `xs`: `0.375rem` wide, `0.5625rem` tall
   - `sm`: `0.4375rem` wide, `0.6875rem` tall
   - `md`: `0.5625rem` wide, `0.9375rem` tall
   - `lg`: `0.75rem` wide, `1.25rem` tall
+  - `xl`: `0.9375rem` wide, `1.5625rem` tall
 
 ### Composition
 
@@ -181,6 +185,7 @@ No internal state. Animation is continuous while the component is mounted.
 - [ ] size scaling matches across runtimes
 - [ ] accent/current/muted tone mapping matches
 - [ ] decorative vs announced semantics match
+- [ ] `xs | sm | md | lg | xl` size steps match in both ring and grid variants
 
 ## Next Task
 

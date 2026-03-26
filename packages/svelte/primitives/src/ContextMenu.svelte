@@ -2,19 +2,24 @@
   import { createEventDispatcher, onMount, tick } from "svelte";
 
   import { menuNavigableItems } from "./internal";
+  import { getUiPresentation, resolveSemanticControlSize } from "./presentation";
 
-  import type { MenuItem } from "./types";
+  import type { ControlSize, MenuItem, SemanticControlSizeRole } from "./types";
 
   export let items: MenuItem[] = [];
   export let open: boolean | null = null;
   export let defaultOpen = false;
   export let anchorPoint: { x: number; y: number } | null = null;
   export let ariaLabel: string | null = null;
+  export let sizeRole: SemanticControlSizeRole = "chrome";
+  export let size: ControlSize | null = null;
 
   const dispatch = createEventDispatcher<{
     openChange: { open: boolean };
     action: { value: string };
   }>();
+
+  const uiPresentation = getUiPresentation();
 
   let rootElement: HTMLDivElement | null = null;
   let overlayElement: HTMLDivElement | null = null;
@@ -25,6 +30,7 @@
 
   let adjustedPosition: { left: string; top: string } | null = null;
 
+  $: resolvedSize = size ?? resolveSemanticControlSize(uiPresentation?.sizeScale ?? "md", sizeRole);
   $: isControlled = open !== null;
   $: isOpen = isControlled ? open === true : uncontrolledOpen;
   $: currentAnchorPoint = anchorPoint ?? uncontrolledAnchorPoint;
@@ -127,6 +133,7 @@
 <div
   class="context-menu"
   bind:this={rootElement}
+  data-size={resolvedSize}
   role="button"
   tabindex="0"
   aria-haspopup="menu"

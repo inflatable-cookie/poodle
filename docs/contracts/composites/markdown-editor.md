@@ -1,7 +1,7 @@
 # MarkdownEditor
 
 Status: seed contract
-Updated: 2026-03-22
+Updated: 2026-03-26
 
 ## 1. Purpose
 
@@ -57,6 +57,9 @@ Updated: 2026-03-22
 | `ariaLabel` | `string` | `"Markdown editor"` | no | Accessible label for the textarea |
 | `minHeight` | `string` | `"12rem"` | no | CSS min-height for the textarea |
 | `mode` | `"edit" \| "preview" \| "split"` | `"edit"` | no | Active view mode |
+| `size` | `ControlSize \| null` | `null` | no | Explicit semantic size override for toolbar and mode controls |
+| `sizeRole` | `SemanticControlSizeRole` | `"control"` | no | Semantic role used to resolve inherited size scale |
+| `density` | `ControlDensity \| null` | `null` | no | Explicit density override for toolbar and pane spacing |
 
 ### Slots
 
@@ -118,12 +121,12 @@ None.
 ### Sizing
 
 - Root: full width of container, border `0.0625rem solid border-default`, `radius-surface`
-- Toolbar: flex row, space-between, padding `0.375rem 0.5rem`, wraps on narrow widths
-- Tool button: `1.75rem x 1.75rem`, `radius-control`
-- Mode button: padding `0.1875rem 0.5rem`, font-size `0.6875rem`
+- Toolbar: flex row, space-between, wraps on narrow widths, and tightens/opens with semantic density
+- Tool button: semantic control box tied to `xs | sm | md | lg | xl` rather than a fixed `1.75rem`
+- Mode button: uses semantic label sizing and density-aware horizontal padding
 - Body: flex row; in split mode, textarea and preview each `flex: 1`
-- Textarea: padding `0.75rem`, min-height from prop, resize vertical
-- Preview: padding `0.75rem`, overflow-y auto
+- Textarea: density-aware pane padding, min-height from prop, resize vertical
+- Preview: density-aware pane padding, overflow-y auto
 
 ### Composition
 
@@ -136,6 +139,8 @@ In split mode the textarea gets a right border (`border-subtle`) to visually sep
 | Attribute | Element | Values |
 |-----------|---------|--------|
 | `data-mode` | body `<div>` | `"edit"`, `"preview"`, `"split"` |
+| `data-size` | root `<div>` | `"xs"`, `"sm"`, `"md"`, `"lg"`, `"xl"` |
+| `data-density` | root `<div>` | `"compact"`, `"default"`, `"comfortable"` |
 
 ### Root
 

@@ -13,8 +13,9 @@
     normalizeDateTimeValue,
     todayIsoDate,
   } from "./date";
+  import { getUiPresentation, resolveSemanticControlSize } from "./presentation";
 
-  import type { CalendarWeekStart, DateTimeValue } from "./types";
+  import type { CalendarWeekStart, ControlSize, DateTimeValue, SemanticControlSizeRole } from "./types";
 
   export let value: DateTimeValue | null = null;
   export let defaultValue: DateTimeValue = { date: null, time: null };
@@ -25,6 +26,8 @@
   export let locale = "en-US";
   export let disabled = false;
   export let ariaLabel: string | null = null;
+  export let size: ControlSize | null = null;
+  export let sizeRole: SemanticControlSizeRole = "control";
 
   const dispatch = createEventDispatcher<{
     valueChange: { value: DateTimeValue };
@@ -32,11 +35,13 @@
   }>();
 
   const surfaceId = `poodle-date-time-picker-surface-${++nextDateTimePickerId}`;
+  const uiPresentation = getUiPresentation();
   let rootElement: HTMLDivElement | null = null;
   let uncontrolledValue = normalizeDateTimeValue(defaultValue);
   let uncontrolledOpen = defaultOpen;
   let visibleMonth = monthAnchorIso(defaultValue.date ?? todayIsoDate());
 
+  $: resolvedSize = size ?? resolveSemanticControlSize(uiPresentation?.sizeScale ?? "md", sizeRole);
   $: currentValue = normalizeDateTimeValue(value ?? uncontrolledValue);
   $: isOpen = open ?? uncontrolledOpen;
   $: if (currentValue.date) {
@@ -96,7 +101,7 @@
   });
 </script>
 
-<div bind:this={rootElement} class="date-time-picker" data-open={isOpen}>
+<div bind:this={rootElement} class="date-time-picker" data-size={resolvedSize} data-open={isOpen}>
   <button
     type="button"
     class="date-time-picker__trigger"

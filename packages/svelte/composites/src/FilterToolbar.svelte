@@ -1,5 +1,6 @@
 <script lang="ts">
-  import { Icon, CollapseToggle } from "@poodle/svelte-primitives";
+  import { Icon, CollapseToggle, getUiPresentation, resolveSemanticControlSize } from "@poodle/svelte-primitives";
+  import type { ControlSize, SemanticControlSizeRole } from "@poodle/svelte-primitives";
 
   export let ariaLabel = "Filters";
   export let summaryText: string | null = null;
@@ -8,6 +9,12 @@
   export let columns = 4;
   export let minItemWidth = "10rem";
   export let sticky = false;
+  export let size: ControlSize | null = null;
+  export let sizeRole: SemanticControlSizeRole = "chrome";
+
+  const uiPresentation = getUiPresentation();
+
+  $: resolvedSize = size ?? resolveSemanticControlSize(uiPresentation?.sizeScale ?? "md", sizeRole);
 
   function handleHeaderClick(e: MouseEvent) {
     if (!collapsible || !collapsed) return;
@@ -21,6 +28,7 @@
   class="filter-toolbar"
   data-sticky={sticky}
   data-collapsed={collapsible && collapsed}
+  data-size={resolvedSize}
   role="toolbar"
   aria-label={ariaLabel}
 >

@@ -1,7 +1,7 @@
 # ActionDiscoveryPanel
 
 Status: contract
-Updated: 2026-03-25
+Updated: 2026-03-26
 
 ## 1. Purpose
 
@@ -73,6 +73,9 @@ type DiscoveryState = "ready" | "loading" | "error" | "empty" | "no-results";
 | `state` | `DiscoveryState` | `"ready"` | no | controls which region renders |
 | `activeId` | `string \| null` | `null` | no | currently highlighted item id; two-way bindable |
 | `ariaLabel` | `string` | `"Actions"` | no | accessible label for the listbox root |
+| `size` | `ControlSize \| null` | `null` | no | explicit semantic size override for badge and shortcut chips |
+| `sizeRole` | `SemanticControlSizeRole` | `"control"` | no | semantic role used to resolve inherited size scale |
+| `density` | `ControlDensity \| null` | `null` | no | explicit density override for group, list, and skeleton spacing |
 
 ## 5. Events
 
@@ -126,9 +129,9 @@ response to keyboard events.
 
 - Items grouped by `item.group` field; default group name is `"Commands"`
 - Active item receives accent-tinted background with inset box-shadow
-- Badge and shortcut (kbd) rendered in trailing slot with pill styling
+- Badge and shortcut (kbd) rendered in trailing slot with semantic chip sizing
 - Shortcut uses monospace (`code-family`) typography
-- Skeleton rows during loading: two Skeleton elements per row (48% and 20% width)
+- Skeleton rows during loading: two Skeleton elements per row (48% and 20% width), with density-aware padding
 - Loading remains a Skeleton-based placeholder treatment rather than Spinner, because the panel is reserving result-list layout rather than indicating compact inline activity
 
 ### Token Usage — Exact CSS Values

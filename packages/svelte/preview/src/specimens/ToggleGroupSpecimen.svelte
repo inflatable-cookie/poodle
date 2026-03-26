@@ -1,5 +1,10 @@
 <script lang="ts">
-  import { ToggleGroup, Eyebrow, type ToggleGroupOption } from "@poodle/svelte-primitives";
+  import {
+    ToggleGroup,
+    Eyebrow,
+    UiPresentationProvider,
+    type ToggleGroupOption,
+  } from "@poodle/svelte-primitives";
 
   const viewOptions: ToggleGroupOption[] = [
     { value: "grid", label: "Grid" },
@@ -60,6 +65,17 @@
   </div>
 
   <div class="specimen__group">
+    <Eyebrow>Semantic role offsets</Eyebrow>
+    <UiPresentationProvider density="compact" sizeScale="sm">
+      <div class="specimen__row">
+        <ToggleGroup options={viewOptions} defaultValue="grid" sizeRole="chrome" ariaLabel="Chrome-sized group" />
+        <ToggleGroup options={viewOptions} defaultValue="list" ariaLabel="Control-sized group" />
+        <ToggleGroup options={viewOptions} defaultValue="board" sizeRole="prominent" ariaLabel="Prominent group" />
+      </div>
+    </UiPresentationProvider>
+  </div>
+
+  <div class="specimen__group">
     <Eyebrow>Disabled</Eyebrow>
     <ToggleGroup
       options={viewOptions}
@@ -87,5 +103,12 @@
     margin: 0;
     font-size: 0.875rem;
     color: var(--poodle-color-text-secondary);
+  }
+
+  .specimen__row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    align-items: center;
   }
 </style>

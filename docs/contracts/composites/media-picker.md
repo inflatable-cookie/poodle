@@ -1,7 +1,7 @@
 # MediaPicker
 
 Status: seed contract
-Updated: 2026-03-22
+Updated: 2026-03-26
 
 ## 1. Purpose
 
@@ -53,6 +53,9 @@ Updated: 2026-03-22
 | `maxFileSize` | `number` | `25 * 1024 * 1024` (25 MB) | no | Maximum upload file size in bytes |
 | `title` | `string` | `"Select media"` | no | Dialog title |
 | `emptyMessage` | `string` | `"No media items found."` | no | Message when browse grid is empty |
+| `size` | `ControlSize \| null` | `null` | no | explicit semantic size override for tabs, search field, and grid item geometry |
+| `sizeRole` | `SemanticControlSizeRole` | `"control"` | no | semantic role used to resolve inherited size scale |
+| `density` | `ControlDensity \| null` | `null` | no | explicit density override for browse grid spacing and item padding |
 
 ### Types
 
@@ -128,10 +131,10 @@ None.
 ### Sizing
 
 - Root: flex column, `gap: space-stack-sm`, `min-height: 20rem`
-- Grid: CSS auto-fill grid, `minmax(5.5rem, 1fr)` columns, `0.375rem` gap, `max-height: 20rem` with overflow scroll
-- Item: flex column, centered, padding `0.375rem`, border `0.0625rem solid transparent`, `radius-control`
-- Thumbnail: `4.5rem x 4.5rem`, `0.25rem` radius, `object-fit: cover`
-- Label: `0.6875rem` font-size, truncated with ellipsis
+- Grid: CSS auto-fill grid with semantic size-driven minimum column width and density-aware gap
+- Item: flex column, centered, density-aware padding, border `0.0625rem solid transparent`, `radius-control`
+- Thumbnail: semantic size-driven square thumbnail rather than a fixed `4.5rem`
+- Label: semantic label size, truncated with ellipsis
 
 ### Composition
 

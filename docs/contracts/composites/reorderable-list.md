@@ -1,7 +1,7 @@
 # ReorderableList
 
 Status: seed contract
-Updated: 2026-03-22
+Updated: 2026-03-26
 
 ## 1. Purpose
 
@@ -36,6 +36,9 @@ Updated: 2026-03-22
 | `items` | `ReorderableItem[]` | `[]` | no | List items (two-way bindable) |
 | `ariaLabel` | `string` | `"Reorderable list"` | no | Accessible label for the list |
 | `disabled` | `boolean` | `false` | no | Disables drag, keyboard reorder, and interaction |
+| `size` | `ControlSize \| null` | `null` | no | explicit semantic size override for row and handle geometry |
+| `sizeRole` | `SemanticControlSizeRole` | `"control"` | no | semantic role used to resolve inherited size scale |
+| `density` | `ControlDensity \| null` | `null` | no | explicit density override for row padding and list spacing |
 
 ### Types
 
@@ -110,9 +113,9 @@ After keyboard reorder, focus follows the moved item to its new position.
 
 ### Sizing
 
-- Root: flex column, gap `0.125rem`, no list styling, no margin/padding
-- Item: flex row, centered, gap `0.5rem`, padding `0.5rem 0.625rem`, border `0.0625rem solid transparent`, `radius-control`
-- Handle: `1rem x 1rem`, flex-shrink 0
+- Root: flex column with semantic density-driven gap, no list styling, no margin/padding
+- Item: flex row, centered, semantic density-driven gap and padding, border `0.0625rem solid transparent`, `radius-control`
+- Handle: semantic size-driven square grip, flex-shrink 0
 - Content: flex 1, min-width 0
 
 ### Composition

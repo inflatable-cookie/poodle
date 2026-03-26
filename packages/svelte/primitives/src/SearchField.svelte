@@ -3,7 +3,7 @@
 
   import Icon from "./Icon.svelte";
   import TextInput from "./TextInput.svelte";
-  import type { ValidationState } from "./types";
+  import type { ControlSize, SemanticControlSizeRole, ValidationState } from "./types";
 
   export let id: string;
   export let value: string | null = null;
@@ -16,6 +16,8 @@
   export let debounce: number | null = null;
   export let showClearButton = true;
   export let validationState: ValidationState = "none";
+  export let size: ControlSize | null = null;
+  export let sizeRole: SemanticControlSizeRole = "control";
 
   const dispatch = createEventDispatcher<{
     valueChange: { value: string };
@@ -63,6 +65,8 @@
   {readOnly}
   {debounce}
   {validationState}
+  {size}
+  {sizeRole}
   on:valueChange={handleValueChange}
   on:submit={(event) => dispatch("submit", event.detail)}
   on:cancel={() => dispatch("cancel")}

@@ -2,6 +2,8 @@
   import { createEventDispatcher } from "svelte";
 
   import Icon from "./Icon.svelte";
+  import { getUiPresentation, resolveSemanticControlSize } from "./presentation";
+  import type { ControlSize, SemanticControlSizeRole } from "./types";
 
   export let id: string | undefined = undefined;
   export let checked = false;
@@ -13,6 +15,8 @@
   export let ariaLabel: string | null = null;
   export let describedBy: string | null = null;
   export let selectedColor: string | null = null;
+  export let size: ControlSize | null = null;
+  export let sizeRole: SemanticControlSizeRole = "control";
 
   const dispatch = createEventDispatcher<{
     checkedChange: { checked: boolean };
@@ -20,8 +24,10 @@
 
   let input: HTMLInputElement | null = null;
   let uncontrolledChecked = defaultChecked;
+  const uiPresentation = getUiPresentation();
 
   $: currentChecked = checked ?? uncontrolledChecked;
+  $: resolvedSize = size ?? resolveSemanticControlSize(uiPresentation?.sizeScale ?? "md", sizeRole);
   $: checkboxStyles = selectedColor ? `--poodle-checkbox-selected-color: ${selectedColor}` : undefined;
   $: if (input) {
     input.indeterminate = mixed;
@@ -40,7 +46,7 @@
   }
 </script>
 
-<label class="checkbox" data-disabled={disabled} style={checkboxStyles}>
+<label class="checkbox" data-disabled={disabled} data-size={resolvedSize} style={checkboxStyles}>
   <input
     bind:this={input}
     {id}
@@ -123,5 +129,46 @@
     font-size: var(--poodle-typography-label-size);
     font-weight: var(--poodle-typography-label-weight);
     line-height: var(--poodle-typography-label-lineHeight);
+  }
+
+  /* Size variants */
+  .checkbox[data-size="xs"] .checkbox__indicator {
+    width: calc(var(--poodle-size-icon-default) - 0.125rem);
+    height: calc(var(--poodle-size-icon-default) - 0.125rem);
+  }
+
+  .checkbox[data-size="xs"] .checkbox__mark {
+    width: calc(var(--poodle-size-icon-default) - 0.375rem);
+    height: calc(var(--poodle-size-icon-default) - 0.375rem);
+  }
+
+  .checkbox[data-size="sm"] .checkbox__indicator {
+    width: var(--poodle-size-icon-default);
+    height: var(--poodle-size-icon-default);
+  }
+
+  .checkbox[data-size="sm"] .checkbox__mark {
+    width: calc(var(--poodle-size-icon-default) - 0.25rem);
+    height: calc(var(--poodle-size-icon-default) - 0.25rem);
+  }
+
+  .checkbox[data-size="lg"] .checkbox__indicator {
+    width: calc(var(--poodle-size-icon-default) + 0.375rem);
+    height: calc(var(--poodle-size-icon-default) + 0.375rem);
+  }
+
+  .checkbox[data-size="lg"] .checkbox__mark {
+    width: var(--poodle-size-icon-default);
+    height: var(--poodle-size-icon-default);
+  }
+
+  .checkbox[data-size="xl"] .checkbox__indicator {
+    width: calc(var(--poodle-size-icon-default) + 0.625rem);
+    height: calc(var(--poodle-size-icon-default) + 0.625rem);
+  }
+
+  .checkbox[data-size="xl"] .checkbox__mark {
+    width: calc(var(--poodle-size-icon-default) + 0.125rem);
+    height: calc(var(--poodle-size-icon-default) + 0.125rem);
   }
 </style>

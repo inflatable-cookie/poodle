@@ -3,8 +3,12 @@
 
   import Icon from "./Icon.svelte";
   import { clamp, formatNumber, snapToStep } from "./internal";
+  import { getUiPresentation, resolveSemanticControlSize } from "./presentation";
 
-  import type { ValidationState } from "./types";
+  import type { ControlSize, SemanticControlSizeRole, ValidationState } from "./types";
+
+  export let size: ControlSize | null = null;
+  export let sizeRole: SemanticControlSizeRole = "control";
 
   export let id: string;
   export let value: number | null = null;
@@ -22,6 +26,8 @@
   export let ariaLabel: string | null = null;
   export let describedBy: string | null = null;
 
+  const uiPresentation = getUiPresentation();
+
   const dispatch = createEventDispatcher<{
     valueChange: { value: number | null };
     submit: { value: number | null };
@@ -35,6 +41,7 @@
   let draftValue = formatNumber(defaultValue, precision);
   let isEditing = false;
 
+  $: resolvedSize = size ?? resolveSemanticControlSize(uiPresentation?.sizeScale ?? "md", sizeRole);
   $: isControlled = value !== null;
   $: currentValue = isControlled ? value : uncontrolledValue;
   $: if (!isEditing) {
@@ -103,7 +110,7 @@
   }
 </script>
 
-<div class="number-entry" data-validation-state={validationState}>
+<div class="number-entry" data-validation-state={validationState} data-size={resolvedSize}>
   <input
     {id}
     {name}

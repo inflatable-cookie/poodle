@@ -4,9 +4,12 @@
 
   import Icon from "./Icon.svelte";
   import Spinner from "./Spinner.svelte";
+  import { getUiPresentation, resolveSemanticControlSize } from "./presentation";
   import type {
+    ControlSize,
     InputValidationStatus,
     InputValidator,
+    SemanticControlSizeRole,
     ValidationResult,
     ValidationState,
   } from "./types";
@@ -56,6 +59,8 @@
   export let suffix: string | null = null;
   export let maxLength: number | null = null;
   export let showCharCount = false;
+  export let size: ControlSize | null = null;
+  export let sizeRole: SemanticControlSizeRole = "control";
 
   const dispatch = createEventDispatcher<{
     valueChange: { value: string };
@@ -67,6 +72,7 @@
     blur: FocusEvent;
   }>();
 
+  const uiPresentation = getUiPresentation();
   let uncontrolledValue = defaultValue;
   let liveValue = value ?? defaultValue;
   let debounceTimer: ReturnType<typeof setTimeout> | null = null;
@@ -104,6 +110,7 @@
   $: charCount = currentValue.length;
   $: charCountText = maxLength ? `${charCount}/${maxLength}` : `${charCount}`;
   $: isOverLimit = maxLength !== null && charCount > maxLength;
+  $: resolvedSize = size ?? resolveSemanticControlSize(uiPresentation?.sizeScale ?? "md", sizeRole);
   $: showValidationIndicator = showValidationStatus && effectiveValidationState !== "none";
   $: validationIcon =
     effectiveValidationState === "valid"
@@ -255,7 +262,7 @@
   }
 </script>
 
-<div class="text-input" data-validation-state={effectiveValidationState}>
+<div class="text-input" data-validation-state={effectiveValidationState} data-size={resolvedSize}>
   {#if prefix}
     <span class="text-input__affix text-input__affix--prefix">{prefix}</span>
   {/if}

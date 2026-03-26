@@ -1,6 +1,12 @@
 <script lang="ts">
   import { createEventDispatcher } from "svelte";
 
+  import { getUiPresentation, resolveSemanticControlSize } from "./presentation";
+
+  import type { ControlSize, SemanticControlSizeRole } from "./types";
+
+  export let size: ControlSize | null = null;
+  export let sizeRole: SemanticControlSizeRole = "control";
   export let hours = 0;
   export let minutes = 0;
   export let seconds = 0;
@@ -11,10 +17,13 @@
   export let disabled = false;
   export let ariaLabel = "Duration";
 
+  const uiPresentation = getUiPresentation();
+
   const dispatch = createEventDispatcher<{
     change: { hours: number; minutes: number; seconds: number; totalSeconds: number };
   }>();
 
+  $: resolvedSize = size ?? resolveSemanticControlSize(uiPresentation?.sizeScale ?? "md", sizeRole);
   $: totalSeconds = hours * 3600 + minutes * 60 + seconds;
   $: isUnderMin = totalSeconds < minTotalSeconds;
   $: isOverMax = maxTotalSeconds !== null && totalSeconds > maxTotalSeconds;
@@ -107,6 +116,7 @@
   aria-label={ariaLabel}
   data-disabled={disabled}
   data-invalid={isUnderMin || isOverMax}
+  data-size={resolvedSize}
 >
   <div class="duration-input__segment">
     <label class="duration-input__label" for="dur-hours">h</label>

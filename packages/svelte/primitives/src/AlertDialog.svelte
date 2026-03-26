@@ -3,8 +3,9 @@
 
   import Button from "./Button.svelte";
   import Dialog from "./Dialog.svelte";
+  import { getUiPresentation, resolveSemanticControlSize } from "./presentation";
 
-  import type { AlertDialogTone } from "./types";
+  import type { AlertDialogTone, ControlSize, SemanticControlSizeRole } from "./types";
 
   export let open: boolean | null = null;
   export let title: string;
@@ -16,12 +17,16 @@
   export let workingLabel = "Working…";
   export let onConfirm: (() => void | Promise<void>) | null = null;
   export let onCancel: (() => void) | null = null;
+  export let size: ControlSize | null = null;
+  export let sizeRole: SemanticControlSizeRole = "control";
 
   const dispatch = createEventDispatcher<{
     confirm: void;
     cancel: void;
     openChange: { open: boolean };
   }>();
+
+  const uiPresentation = getUiPresentation();
 
   let working = false;
 
@@ -71,9 +76,11 @@
     }
   }
 
+  $: resolvedSize = size ?? resolveSemanticControlSize(uiPresentation?.sizeScale ?? "md", sizeRole);
   $: confirmTone = tone === "danger" ? "danger" as const : "default" as const;
 </script>
 
+<div data-size={resolvedSize}>
 <Dialog
   {open}
   {title}
@@ -105,3 +112,4 @@
     </Button>
   </svelte:fragment>
 </Dialog>
+</div>

@@ -6,8 +6,9 @@
   import { createEventDispatcher, onMount } from "svelte";
 
   import { firstEnabledIndex } from "./internal";
+  import { getUiPresentation, resolveSemanticControlSize } from "./presentation";
 
-  import type { ComboboxOption } from "./types";
+  import type { ComboboxOption, ControlSize, SemanticControlSizeRole } from "./types";
 
   export let value: string | null = null;
   export let defaultValue: string | null = null;
@@ -15,6 +16,8 @@
   export let placeholder: string | null = null;
   export let disabled = false;
   export let ariaLabel: string | null = null;
+  export let size: ControlSize | null = null;
+  export let sizeRole: SemanticControlSizeRole = "control";
 
   const dispatch = createEventDispatcher<{
     valueChange: { value: string };
@@ -23,6 +26,7 @@
   }>();
 
   const listboxId = `poodle-combobox-listbox-${++nextComboboxId}`;
+  const uiPresentation = getUiPresentation();
   let rootElement: HTMLDivElement | null = null;
   let uncontrolledValue = defaultValue;
   let query = "";
@@ -31,6 +35,7 @@
 
   $: controlled = value !== null;
   $: currentValue = controlled ? value : uncontrolledValue;
+  $: resolvedSize = size ?? resolveSemanticControlSize(uiPresentation?.sizeScale ?? "md", sizeRole);
   $: selectedOption = options.find((option) => option.value === currentValue) ?? null;
   $: filteredOptions = options.filter((option) =>
     option.label.toLowerCase().includes(query.toLowerCase())
@@ -84,6 +89,7 @@
   bind:this={rootElement}
   class="combobox"
   data-open={open}
+  data-size={resolvedSize}
   role="combobox"
   aria-label={ariaLabel ?? undefined}
   aria-expanded={open ? "true" : "false"}

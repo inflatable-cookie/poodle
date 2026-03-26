@@ -2,8 +2,9 @@
   import { createEventDispatcher } from "svelte";
 
   import { defaultTimeZoneOptions } from "./date";
+  import { getUiPresentation, resolveSemanticControlSize } from "./presentation";
 
-  import type { TimeZoneOption } from "./types";
+  import type { ControlSize, SemanticControlSizeRole, TimeZoneOption } from "./types";
 
   export let id: string | undefined = undefined;
   export let value: string | null = null;
@@ -14,13 +15,17 @@
   export let ariaLabel: string | null = null;
   export let describedBy: string | null = null;
   export let name: string | undefined = undefined;
+  export let size: ControlSize | null = null;
+  export let sizeRole: SemanticControlSizeRole = "control";
 
   const dispatch = createEventDispatcher<{
     valueChange: { value: string };
   }>();
+  const uiPresentation = getUiPresentation();
 
   let uncontrolledValue = defaultValue;
 
+  $: resolvedSize = size ?? resolveSemanticControlSize(uiPresentation?.sizeScale ?? "md", sizeRole);
   $: availableOptions = options.length > 0 ? options : defaultTimeZoneOptions();
   $: isControlled = value !== null;
   $: currentValue = (isControlled ? value : uncontrolledValue) ?? "";
@@ -37,7 +42,7 @@
   }
 </script>
 
-<div class="time-zone-select" data-placeholder={!hasSelection}>
+<div class="time-zone-select" data-size={resolvedSize} data-placeholder={!hasSelection}>
   <select
     {id}
     {name}

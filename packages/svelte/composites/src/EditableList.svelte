@@ -1,5 +1,16 @@
 <script lang="ts">
   import { createEventDispatcher } from "svelte";
+  import {
+    UiPresentationProvider,
+    getUiPresentation,
+    resolveSemanticControlSize,
+  } from "@poodle/svelte-primitives";
+
+  import type {
+    ControlDensity,
+    ControlSize,
+    SemanticControlSizeRole,
+  } from "@poodle/svelte-primitives";
 
   import ReorderableList from "./ReorderableList.svelte";
 
@@ -12,12 +23,19 @@
   export let disabled = false;
   export let ariaLabel = "List";
   export let reorderable = true;
+  export let size: ControlSize | null = null;
+  export let sizeRole: SemanticControlSizeRole = "control";
+  export let density: ControlDensity | null = null;
 
   const dispatch = createEventDispatcher<{
     change: { items: ReorderableItem[] };
   }>();
 
   let newItemText = "";
+  const uiPresentation = getUiPresentation();
+
+  $: resolvedSize = size ?? resolveSemanticControlSize(uiPresentation?.sizeScale ?? "md", sizeRole);
+  $: resolvedDensity = density ?? uiPresentation?.density ?? "default";
 
   $: canAdd = !disabled && (maxItems === null || items.length < maxItems);
 
@@ -54,82 +72,139 @@
   }
 </script>
 
-<div class="autonomous-list" data-disabled={disabled}>
-  {#if items.length > 0}
-    {#if reorderable}
-      <ReorderableList {items} {ariaLabel} {disabled} on:reorder={handleReorder}>
-        <svelte:fragment slot="item" let:item let:index>
-          <span class="autonomous-list__item-row">
-            <span class="autonomous-list__item-text">{item.label}</span>
-            <button
-              type="button"
-              class="autonomous-list__remove"
-              disabled={disabled}
-              aria-label="Remove {item.label}"
-              on:click|stopPropagation={() => removeItem(item.id)}
-            >
-              <svg viewBox="0 0 16 16" fill="none" aria-hidden="true">
-                <path d="M4 4l8 8M12 4l-8 8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" />
-              </svg>
-            </button>
-          </span>
-        </svelte:fragment>
-      </ReorderableList>
-    {:else}
-      <ul class="autonomous-list__static" role="list" aria-label={ariaLabel}>
-        {#each items as item (item.id)}
-          <li class="autonomous-list__static-item">
-            <span class="autonomous-list__item-text">{item.label}</span>
-            <button
-              type="button"
-              class="autonomous-list__remove"
-              disabled={disabled}
-              aria-label="Remove {item.label}"
-              on:click={() => removeItem(item.id)}
-            >
-              <svg viewBox="0 0 16 16" fill="none" aria-hidden="true">
-                <path d="M4 4l8 8M12 4l-8 8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" />
-              </svg>
-            </button>
-          </li>
-        {/each}
-      </ul>
+<UiPresentationProvider sizeScale={resolvedSize} density={resolvedDensity}>
+  <div
+    class="autonomous-list"
+    data-disabled={disabled}
+    data-size={resolvedSize}
+    data-density={resolvedDensity}
+  >
+    {#if items.length > 0}
+      {#if reorderable}
+        <ReorderableList
+          {items}
+          {ariaLabel}
+          {disabled}
+          size={resolvedSize}
+          density={resolvedDensity}
+          on:reorder={handleReorder}
+        >
+          <svelte:fragment slot="item" let:item let:index>
+            <span class="autonomous-list__item-row">
+              <span class="autonomous-list__item-text">{item.label}</span>
+              <button
+                type="button"
+                class="autonomous-list__remove"
+                disabled={disabled}
+                aria-label={`Remove ${item.label}`}
+                on:click|stopPropagation={() => removeItem(item.id)}
+              >
+                <svg viewBox="0 0 16 16" fill="none" aria-hidden="true">
+                  <path d="M4 4l8 8M12 4l-8 8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" />
+                </svg>
+              </button>
+            </span>
+          </svelte:fragment>
+        </ReorderableList>
+      {:else}
+        <ul class="autonomous-list__static" role="list" aria-label={ariaLabel}>
+          {#each items as item (item.id)}
+            <li class="autonomous-list__static-item">
+              <span class="autonomous-list__item-text">{item.label}</span>
+              <button
+                type="button"
+                class="autonomous-list__remove"
+                disabled={disabled}
+                aria-label={`Remove ${item.label}`}
+                on:click={() => removeItem(item.id)}
+              >
+                <svg viewBox="0 0 16 16" fill="none" aria-hidden="true">
+                  <path d="M4 4l8 8M12 4l-8 8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" />
+                </svg>
+              </button>
+            </li>
+          {/each}
+        </ul>
+      {/if}
     {/if}
-  {/if}
 
-  {#if canAdd}
-    <div class="autonomous-list__add">
-      <input
-        type="text"
-        class="autonomous-list__input"
-        bind:value={newItemText}
-        {placeholder}
-        disabled={disabled}
-        on:keydown={handleKeydown}
-      />
-      <button
-        type="button"
-        class="autonomous-list__add-btn"
-        disabled={!newItemText.trim() || !canAdd}
-        on:click={addItem}
-      >
-        {addLabel}
-      </button>
-    </div>
-  {/if}
+    {#if canAdd}
+      <div class="autonomous-list__add">
+        <input
+          type="text"
+          class="autonomous-list__input"
+          bind:value={newItemText}
+          {placeholder}
+          disabled={disabled}
+          on:keydown={handleKeydown}
+        />
+        <button
+          type="button"
+          class="autonomous-list__add-btn"
+          disabled={!newItemText.trim() || !canAdd}
+          on:click={addItem}
+        >
+          {addLabel}
+        </button>
+      </div>
+    {/if}
 
-  {#if maxItems !== null}
-    <span class="autonomous-list__count">
-      {items.length}/{maxItems}
-    </span>
-  {/if}
-</div>
+    {#if maxItems !== null}
+      <span class="autonomous-list__count">
+        {items.length}/{maxItems}
+      </span>
+    {/if}
+  </div>
+</UiPresentationProvider>
 
 <style>
   .autonomous-list {
+    --poodle-autonomous-list-gap: 0.5rem;
+    --poodle-autonomous-list-static-gap: 0.125rem;
+    --poodle-autonomous-list-item-y: 0.5rem;
+    --poodle-autonomous-list-item-x: 0.625rem;
+    --poodle-autonomous-list-remove-size: 1.25rem;
+    --poodle-autonomous-list-add-gap: 0.375rem;
+    --poodle-autonomous-list-add-x: 0.75rem;
     display: flex;
     flex-direction: column;
-    gap: 0.5rem;
+    gap: var(--poodle-autonomous-list-gap);
+  }
+
+  .autonomous-list[data-size="xs"] {
+    --poodle-autonomous-list-remove-size: 1rem;
+    --poodle-autonomous-list-item-x: 0.5rem;
+    --poodle-autonomous-list-add-x: 0.625rem;
+  }
+
+  .autonomous-list[data-size="sm"] {
+    --poodle-autonomous-list-remove-size: 1.125rem;
+  }
+
+  .autonomous-list[data-size="lg"] {
+    --poodle-autonomous-list-remove-size: 1.375rem;
+    --poodle-autonomous-list-item-x: 0.75rem;
+    --poodle-autonomous-list-add-x: 0.875rem;
+  }
+
+  .autonomous-list[data-size="xl"] {
+    --poodle-autonomous-list-remove-size: 1.5rem;
+    --poodle-autonomous-list-item-x: 0.875rem;
+    --poodle-autonomous-list-add-x: 1rem;
+  }
+
+  .autonomous-list[data-density="compact"] {
+    --poodle-autonomous-list-gap: 0.375rem;
+    --poodle-autonomous-list-static-gap: 0.0625rem;
+    --poodle-autonomous-list-item-y: 0.375rem;
+    --poodle-autonomous-list-add-gap: 0.25rem;
+  }
+
+  .autonomous-list[data-density="comfortable"] {
+    --poodle-autonomous-list-gap: 0.625rem;
+    --poodle-autonomous-list-static-gap: 0.1875rem;
+    --poodle-autonomous-list-item-y: 0.625rem;
+    --poodle-autonomous-list-add-gap: 0.5rem;
   }
 
   .autonomous-list[data-disabled="true"] {
@@ -142,13 +217,13 @@
     padding: 0;
     display: flex;
     flex-direction: column;
-    gap: 0.125rem;
+    gap: var(--poodle-autonomous-list-static-gap);
   }
 
   .autonomous-list__static-item {
     display: flex;
     align-items: center;
-    padding: 0.5rem 0.625rem;
+    padding: var(--poodle-autonomous-list-item-y) var(--poodle-autonomous-list-item-x);
     border-radius: var(--poodle-radius-control);
     background: var(--poodle-color-background-surface);
   }
@@ -173,8 +248,8 @@
     align-items: center;
     justify-content: center;
     flex-shrink: 0;
-    width: 1.25rem;
-    height: 1.25rem;
+    width: var(--poodle-autonomous-list-remove-size);
+    height: var(--poodle-autonomous-list-remove-size);
     padding: 0;
     border: 0;
     border-radius: 0.25rem;
@@ -195,7 +270,7 @@
 
   .autonomous-list__add {
     display: flex;
-    gap: 0.375rem;
+    gap: var(--poodle-autonomous-list-add-gap);
   }
 
   .autonomous-list__input {
@@ -226,7 +301,7 @@
     display: inline-flex;
     align-items: center;
     height: var(--poodle-size-control-height);
-    padding: 0 0.75rem;
+    padding: 0 var(--poodle-autonomous-list-add-x);
     border: 0.0625rem solid var(--poodle-color-border-default);
     border-radius: var(--poodle-radius-control);
     background: var(--poodle-color-background-surface);
@@ -250,7 +325,7 @@
   }
 
   .autonomous-list__count {
-    font-size: 0.6875rem;
+    font-size: var(--poodle-typography-label-size);
     color: var(--poodle-color-text-secondary);
     font-variant-numeric: tabular-nums;
     align-self: flex-end;

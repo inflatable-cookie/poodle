@@ -4,8 +4,14 @@
 
 <script lang="ts">
   import { createEventDispatcher } from "svelte";
+  import { getUiPresentation, resolveSemanticControlSize } from "./presentation";
 
-  import type { TriStateValue } from "./types";
+  import type {
+    ControlDensity,
+    ControlSize,
+    SemanticControlSizeRole,
+    TriStateValue,
+  } from "./types";
 
   export let value: TriStateValue = "default";
   export let options: Record<TriStateValue, string> = {
@@ -13,6 +19,9 @@
     default: "Default",
     included: "Include",
   };
+  export let size: ControlSize | null = null;
+  export let sizeRole: SemanticControlSizeRole = "control";
+  export let density: ControlDensity | null = null;
   export let disabled = false;
   export let ariaLabel: string;
   export let excludedColor: string | null = null;
@@ -26,8 +35,11 @@
   const orderedValues: TriStateValue[] = ["excluded", "default", "included"];
   const instanceId = ++triStateSwitchInstanceCount;
   const groupName = `poodle-tri-state-switch-${instanceId}`;
+  const uiPresentation = getUiPresentation();
 
   $: selectedIndex = Math.max(0, orderedValues.indexOf(value));
+  $: resolvedSize = size ?? resolveSemanticControlSize(uiPresentation?.sizeScale ?? "md", sizeRole);
+  $: resolvedDensity = density ?? uiPresentation?.density ?? "default";
   $: triStateStyles = [
     excludedColor ? `--poodle-tri-state-excluded-color: ${excludedColor}` : "",
     defaultColor ? `--poodle-tri-state-default-color: ${defaultColor}` : "",
@@ -51,6 +63,8 @@
   aria-label={ariaLabel}
   aria-disabled={disabled ? "true" : undefined}
   data-state={value}
+  data-size={resolvedSize}
+  data-density={resolvedDensity}
   data-disabled={disabled}
   style={triStateStyles}
 >
@@ -84,17 +98,61 @@
     --poodle-tri-state-excluded-track: color-mix(in srgb, var(--poodle-tri-state-excluded-color) 18%, var(--poodle-color-background-surface));
     --poodle-tri-state-default-track: color-mix(in srgb, var(--poodle-tri-state-default-color) 10%, var(--poodle-color-background-surface));
     --poodle-tri-state-included-track: color-mix(in srgb, var(--poodle-tri-state-included-color) 18%, var(--poodle-color-background-surface));
+    --poodle-tri-state-height: var(--poodle-size-control-height);
+    --poodle-tri-state-x: var(--poodle-space-control-x);
+    --poodle-tri-state-track-inset: 0.125rem;
+    --poodle-tri-state-min-width: 4.5rem;
     position: relative;
     display: inline-grid;
     width: max-content;
     grid-template-columns: repeat(3, minmax(0, 1fr));
     align-items: stretch;
-    padding: 0.125rem;
+    padding: var(--poodle-tri-state-track-inset);
     border: 0.0625rem solid var(--poodle-color-border-default);
     border-radius: 999px;
     background: color-mix(in srgb, var(--poodle-color-text-primary) 18%, var(--poodle-color-background-surface));
     color: var(--poodle-color-text-primary);
     isolation: isolate;
+  }
+
+  .tri-state-switch[data-size="xs"] {
+    --poodle-tri-state-height: 1.5rem;
+    --poodle-tri-state-min-width: 3.75rem;
+  }
+
+  .tri-state-switch[data-size="sm"] {
+    --poodle-tri-state-height: 1.75rem;
+    --poodle-tri-state-min-width: 4rem;
+  }
+
+  .tri-state-switch[data-size="md"] {
+    --poodle-tri-state-height: 2.25rem;
+    --poodle-tri-state-min-width: 4.5rem;
+  }
+
+  .tri-state-switch[data-size="lg"] {
+    --poodle-tri-state-height: 2.75rem;
+    --poodle-tri-state-min-width: 5.25rem;
+  }
+
+  .tri-state-switch[data-size="xl"] {
+    --poodle-tri-state-height: 3.25rem;
+    --poodle-tri-state-min-width: 6rem;
+  }
+
+  .tri-state-switch[data-density="compact"] {
+    --poodle-tri-state-x: 0.5rem;
+    --poodle-tri-state-track-inset: 0.0625rem;
+  }
+
+  .tri-state-switch[data-density="default"] {
+    --poodle-tri-state-x: 0.75rem;
+    --poodle-tri-state-track-inset: 0.125rem;
+  }
+
+  .tri-state-switch[data-density="comfortable"] {
+    --poodle-tri-state-x: 1rem;
+    --poodle-tri-state-track-inset: 0.1875rem;
   }
 
   .tri-state-switch[data-disabled="true"] {
@@ -103,10 +161,10 @@
 
   .tri-state-switch__selection {
     position: absolute;
-    top: 0.125rem;
-    bottom: 0.125rem;
-    left: 0.125rem;
-    width: calc((100% - 0.25rem) / 3);
+    top: var(--poodle-tri-state-track-inset);
+    bottom: var(--poodle-tri-state-track-inset);
+    left: var(--poodle-tri-state-track-inset);
+    width: calc((100% - (var(--poodle-tri-state-track-inset) * 2)) / 3);
     border: 0.0625rem solid transparent;
     border-radius: 999px;
     box-shadow:
@@ -156,9 +214,9 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    min-height: calc(var(--poodle-size-control-height) - 0.25rem);
-    min-width: 4.5rem;
-    padding: 0 0.875rem;
+    min-height: calc(var(--poodle-tri-state-height) - (var(--poodle-tri-state-track-inset) * 2));
+    min-width: var(--poodle-tri-state-min-width);
+    padding: 0 var(--poodle-tri-state-x);
     border-radius: 999px;
     color: var(--poodle-color-text-secondary);
     font-family: var(--poodle-typography-label-family);

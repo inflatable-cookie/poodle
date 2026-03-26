@@ -1,7 +1,17 @@
 <script lang="ts">
   import { createEventDispatcher, tick } from "svelte";
 
-  import { Icon } from "@poodle/svelte-primitives";
+  import {
+    Icon,
+    UiPresentationProvider,
+    getUiPresentation,
+    resolveSemanticControlSize,
+  } from "@poodle/svelte-primitives";
+  import type {
+    ControlDensity,
+    ControlSize,
+    SemanticControlSizeRole,
+  } from "@poodle/svelte-primitives";
 
   export let value = "";
   export let placeholder = "Write markdown...";
@@ -9,12 +19,19 @@
   export let ariaLabel = "Markdown editor";
   export let minHeight = "12rem";
   export let mode: "edit" | "preview" | "split" = "edit";
+  export let size: ControlSize | null = null;
+  export let sizeRole: SemanticControlSizeRole = "control";
+  export let density: ControlDensity | null = null;
 
   const dispatch = createEventDispatcher<{
     change: { value: string };
   }>();
 
   let textareaEl: HTMLTextAreaElement | null = null;
+  const uiPresentation = getUiPresentation();
+
+  $: resolvedSize = size ?? resolveSemanticControlSize(uiPresentation?.sizeScale ?? "md", sizeRole);
+  $: resolvedDensity = density ?? uiPresentation?.density ?? "default";
 
   function insertMarkdown(before: string, after = ""): void {
     if (!textareaEl || disabled) return;
@@ -99,77 +116,133 @@
   ];
 </script>
 
-<div class="md-editor" class:md-editor--disabled={disabled}>
-  <div class="md-editor__toolbar">
-    <div class="md-editor__tools">
-      {#each toolbarActions as tool}
+<UiPresentationProvider sizeScale={resolvedSize} density={resolvedDensity}>
+  <div
+    class="md-editor"
+    class:md-editor--disabled={disabled}
+    data-size={resolvedSize}
+    data-density={resolvedDensity}
+  >
+    <div class="md-editor__toolbar">
+      <div class="md-editor__tools">
+        {#each toolbarActions as tool}
+          <button
+            type="button"
+            class="md-editor__tool-btn"
+            title={tool.label}
+            aria-label={tool.label}
+            disabled={disabled || mode === "preview"}
+            on:click={tool.action}
+          >
+            <Icon icon={tool.icon} />
+          </button>
+        {/each}
+      </div>
+
+      <div class="md-editor__modes">
         <button
           type="button"
-          class="md-editor__tool-btn"
-          title={tool.label}
-          aria-label={tool.label}
-          disabled={disabled || mode === "preview"}
-          on:click={tool.action}
-        >
-          <Icon icon={tool.icon} />
-        </button>
-      {/each}
-    </div>
-
-    <div class="md-editor__modes">
-      <button
-        type="button"
-        class="md-editor__mode-btn"
-        class:active={mode === "edit"}
-        on:click={() => (mode = "edit")}
-      >Edit</button>
-      <button
-        type="button"
-        class="md-editor__mode-btn"
-        class:active={mode === "split"}
-        on:click={() => (mode = "split")}
-      >Split</button>
-      <button
-        type="button"
-        class="md-editor__mode-btn"
-        class:active={mode === "preview"}
-        on:click={() => (mode = "preview")}
-      >Preview</button>
-    </div>
-  </div>
-
-  <div class="md-editor__body" data-mode={mode}>
-    {#if mode !== "preview"}
-      <textarea
-        bind:this={textareaEl}
-        class="md-editor__textarea"
-        {placeholder}
-        disabled={disabled}
-        aria-label={ariaLabel}
-        style="min-height: {minHeight}"
-        on:input={handleInput}
-        value={value}
-      ></textarea>
-    {/if}
-
-    {#if mode !== "edit"}
-      <div class="md-editor__preview" aria-label="Preview">
-        {#if value.trim()}
-          {@html renderMarkdown(value)}
-        {:else}
-          <p class="md-editor__preview-empty">Nothing to preview</p>
-        {/if}
+          class="md-editor__mode-btn"
+          class:active={mode === "edit"}
+          on:click={() => (mode = "edit")}
+        >Edit</button>
+        <button
+          type="button"
+          class="md-editor__mode-btn"
+          class:active={mode === "split"}
+          on:click={() => (mode = "split")}
+        >Split</button>
+        <button
+          type="button"
+          class="md-editor__mode-btn"
+          class:active={mode === "preview"}
+          on:click={() => (mode = "preview")}
+        >Preview</button>
       </div>
-    {/if}
+    </div>
+
+    <div class="md-editor__body" data-mode={mode}>
+      {#if mode !== "preview"}
+        <textarea
+          bind:this={textareaEl}
+          class="md-editor__textarea"
+          {placeholder}
+          disabled={disabled}
+          aria-label={ariaLabel}
+          style="min-height: {minHeight}"
+          on:input={handleInput}
+          value={value}
+        ></textarea>
+      {/if}
+
+      {#if mode !== "edit"}
+        <div class="md-editor__preview" aria-label="Preview">
+          {#if value.trim()}
+            {@html renderMarkdown(value)}
+          {:else}
+            <p class="md-editor__preview-empty">Nothing to preview</p>
+          {/if}
+        </div>
+      {/if}
+    </div>
   </div>
-</div>
+</UiPresentationProvider>
 
 <style>
   .md-editor {
+    --poodle-md-editor-toolbar-y: 0.375rem;
+    --poodle-md-editor-toolbar-x: 0.5rem;
+    --poodle-md-editor-tool-gap: 0.125rem;
+    --poodle-md-editor-tool-size: 1.75rem;
+    --poodle-md-editor-mode-y: 0.1875rem;
+    --poodle-md-editor-mode-x: 0.5rem;
+    --poodle-md-editor-pane-x: 0.75rem;
+    --poodle-md-editor-pane-y: 0.75rem;
     border: 0.0625rem solid var(--poodle-color-border-default);
     border-radius: var(--poodle-radius-surface);
     background: var(--poodle-color-background-surface);
     overflow: hidden;
+  }
+
+  .md-editor[data-size="xs"] {
+    --poodle-md-editor-tool-size: 1.5rem;
+    --poodle-md-editor-mode-x: 0.375rem;
+  }
+
+  .md-editor[data-size="sm"] {
+    --poodle-md-editor-tool-size: 1.75rem;
+  }
+
+  .md-editor[data-size="md"] {
+    --poodle-md-editor-tool-size: 2rem;
+  }
+
+  .md-editor[data-size="lg"] {
+    --poodle-md-editor-tool-size: 2.25rem;
+    --poodle-md-editor-mode-x: 0.625rem;
+  }
+
+  .md-editor[data-size="xl"] {
+    --poodle-md-editor-tool-size: 2.5rem;
+    --poodle-md-editor-mode-x: 0.75rem;
+  }
+
+  .md-editor[data-density="compact"] {
+    --poodle-md-editor-toolbar-y: 0.25rem;
+    --poodle-md-editor-toolbar-x: 0.375rem;
+    --poodle-md-editor-tool-gap: 0.0625rem;
+    --poodle-md-editor-mode-y: 0.125rem;
+    --poodle-md-editor-pane-x: 0.625rem;
+    --poodle-md-editor-pane-y: 0.625rem;
+  }
+
+  .md-editor[data-density="comfortable"] {
+    --poodle-md-editor-toolbar-y: 0.5rem;
+    --poodle-md-editor-toolbar-x: 0.625rem;
+    --poodle-md-editor-tool-gap: 0.1875rem;
+    --poodle-md-editor-mode-y: 0.25rem;
+    --poodle-md-editor-pane-x: 0.875rem;
+    --poodle-md-editor-pane-y: 0.875rem;
   }
 
   .md-editor--disabled {
@@ -182,7 +255,7 @@
     align-items: center;
     justify-content: space-between;
     gap: 0.5rem;
-    padding: 0.375rem 0.5rem;
+    padding: var(--poodle-md-editor-toolbar-y) var(--poodle-md-editor-toolbar-x);
     border-bottom: 0.0625rem solid var(--poodle-color-border-subtle);
     background: color-mix(in srgb, var(--poodle-color-background-elevated) 72%, transparent);
     flex-wrap: wrap;
@@ -190,15 +263,15 @@
 
   .md-editor__tools {
     display: flex;
-    gap: 0.125rem;
+    gap: var(--poodle-md-editor-tool-gap);
   }
 
   .md-editor__tool-btn {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    width: 1.75rem;
-    height: 1.75rem;
+    width: var(--poodle-md-editor-tool-size);
+    height: var(--poodle-md-editor-tool-size);
     padding: 0;
     border: 0;
     border-radius: var(--poodle-radius-control);
@@ -229,20 +302,21 @@
 
   .md-editor__modes {
     display: flex;
-    gap: 0.125rem;
+    gap: var(--poodle-md-editor-tool-gap);
     border: 0.0625rem solid var(--poodle-color-border-default);
     border-radius: var(--poodle-radius-control);
     overflow: hidden;
   }
 
   .md-editor__mode-btn {
-    padding: 0.1875rem 0.5rem;
+    min-height: calc(var(--poodle-md-editor-tool-size) - (var(--poodle-md-editor-toolbar-y) * 0.5));
+    padding: var(--poodle-md-editor-mode-y) var(--poodle-md-editor-mode-x);
     border: 0;
     background: transparent;
     color: var(--poodle-color-text-secondary);
     cursor: pointer;
     font: inherit;
-    font-size: 0.6875rem;
+    font-size: var(--poodle-typography-label-size);
     line-height: 1;
     transition: background var(--poodle-motion-duration-interaction) var(--poodle-motion-easing-standard);
   }
@@ -276,7 +350,7 @@
   .md-editor__textarea {
     flex: 1;
     width: 100%;
-    padding: 0.75rem;
+    padding: var(--poodle-md-editor-pane-y) var(--poodle-md-editor-pane-x);
     border: 0;
     background: transparent;
     color: var(--poodle-color-text-primary);
@@ -293,7 +367,7 @@
 
   .md-editor__preview {
     flex: 1;
-    padding: 0.75rem;
+    padding: var(--poodle-md-editor-pane-y) var(--poodle-md-editor-pane-x);
     font-family: var(--poodle-typography-body-family);
     font-size: 0.875rem;
     line-height: 1.6;

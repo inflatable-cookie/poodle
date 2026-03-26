@@ -18,7 +18,12 @@
     isValidHex,
     normalizeHex,
   } from "./color-utils";
-  import type { ColorInputMode } from "./types";
+  import { getUiPresentation, resolveSemanticControlSize } from "./presentation";
+
+  import type { ColorInputMode, ControlSize, SemanticControlSizeRole } from "./types";
+
+  export let size: ControlSize | null = null;
+  export let sizeRole: SemanticControlSizeRole = "control";
 
   export let value = "#6366f1";
   export let swatches: string[] = [];
@@ -29,6 +34,8 @@
   export let open: boolean | null = null;
   export let defaultOpen = false;
   export let defaultMode: ColorInputMode = "hex";
+
+  const uiPresentation = getUiPresentation();
 
   const dispatch = createEventDispatcher<{
     change: { value: string };
@@ -60,6 +67,7 @@
   // Initialise from prop
   syncFromHex(value);
 
+  $: resolvedSize = size ?? resolveSemanticControlSize(uiPresentation?.sizeScale ?? "md", sizeRole);
   $: isOpen = open ?? uncontrolledOpen;
 
   // Keep internal state in sync when value prop changes externally
@@ -306,6 +314,7 @@
   class="color-picker"
   aria-label={ariaLabel}
   data-disabled={disabled || undefined}
+  data-size={resolvedSize}
   bind:this={rootElement}
 >
   <!-- Trigger row -->

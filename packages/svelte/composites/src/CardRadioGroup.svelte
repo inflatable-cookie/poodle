@@ -1,7 +1,8 @@
 <script lang="ts">
   import { createEventDispatcher } from "svelte";
 
-  import { Card } from "@poodle/svelte-primitives";
+  import { Card, getUiPresentation, resolveSemanticControlSize } from "@poodle/svelte-primitives";
+  import type { ControlSize, SemanticControlSizeRole } from "@poodle/svelte-primitives";
 
   import type { CardRadioItem } from "./types";
 
@@ -10,10 +11,16 @@
   export let columns: 1 | 2 | 3 | 4 = 2;
   export let ariaLabel: string | null = null;
   export let disabled = false;
+  export let size: ControlSize | null = null;
+  export let sizeRole: SemanticControlSizeRole = "control";
 
   const dispatch = createEventDispatcher<{
     change: { value: string };
   }>();
+
+  const uiPresentation = getUiPresentation();
+
+  $: resolvedSize = size ?? resolveSemanticControlSize(uiPresentation?.sizeScale ?? "md", sizeRole);
 
   function select(itemValue: string): void {
     if (disabled) return;
@@ -58,6 +65,7 @@
   role="radiogroup"
   aria-label={ariaLabel ?? undefined}
   style="--columns: {columns}"
+  data-size={resolvedSize}
 >
   {#each items as item, index (item.value)}
     {@const isChecked = value === item.value}

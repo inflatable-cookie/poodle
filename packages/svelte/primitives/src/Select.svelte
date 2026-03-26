@@ -2,7 +2,8 @@
   import { createEventDispatcher } from "svelte";
 
   import Icon from "./Icon.svelte";
-  import type { SelectOption, SelectOptionGroup, SelectItems } from "./types";
+  import { getUiPresentation, resolveSemanticControlSize } from "./presentation";
+  import type { ControlSize, SemanticControlSizeRole, SelectOption, SelectOptionGroup, SelectItems } from "./types";
 
   export let id: string | undefined = undefined;
   export let value: string | null = null;
@@ -13,13 +14,17 @@
   export let ariaLabel: string | null = null;
   export let describedBy: string | null = null;
   export let name: string | undefined = undefined;
+  export let size: ControlSize | null = null;
+  export let sizeRole: SemanticControlSizeRole = "control";
 
   const dispatch = createEventDispatcher<{
     valueChange: { value: string };
   }>();
 
+  const uiPresentation = getUiPresentation();
   let uncontrolledValue = defaultValue;
 
+  $: resolvedSize = size ?? resolveSemanticControlSize(uiPresentation?.sizeScale ?? "md", sizeRole);
   $: isControlled = value !== null;
   $: currentValue = (isControlled ? value : uncontrolledValue) ?? "";
   $: hasSelection = currentValue !== "";
@@ -36,7 +41,7 @@
   }
 </script>
 
-<div class="select" data-placeholder={!hasSelection}>
+<div class="select" data-placeholder={!hasSelection} data-size={resolvedSize}>
   <select
     {id}
     {name}

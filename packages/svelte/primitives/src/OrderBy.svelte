@@ -1,16 +1,24 @@
 <script lang="ts">
   import { createEventDispatcher } from "svelte";
 
-  import type { SortField, ActiveSort } from "./types";
+  import { getUiPresentation, resolveSemanticControlSize } from "./presentation";
+
+  import type { ActiveSort, ControlSize, SemanticControlSizeRole, SortField } from "./types";
 
   export let fields: SortField[] = [];
   export let activeSort: ActiveSort | null = null;
   export let ariaLabel = "Sort by";
   export let disabled = false;
+  export let sizeRole: SemanticControlSizeRole = "control";
+  export let size: ControlSize | null = null;
 
   const dispatch = createEventDispatcher<{
     change: { sort: ActiveSort | null };
   }>();
+
+  const uiPresentation = getUiPresentation();
+
+  $: resolvedSize = size ?? resolveSemanticControlSize(uiPresentation?.sizeScale ?? "md", sizeRole);
 
   function toggleSort(field: SortField): void {
     if (disabled || field.disabled) return;
@@ -34,7 +42,7 @@
   }
 </script>
 
-<div class="order-by" role="toolbar" aria-label={ariaLabel} data-disabled={disabled}>
+<div class="order-by" role="toolbar" aria-label={ariaLabel} data-disabled={disabled} data-size={resolvedSize}>
   <span class="order-by__label">Sort by</span>
   <div class="order-by__fields">
     {#each fields as field (field.value)}

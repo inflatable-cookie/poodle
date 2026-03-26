@@ -376,7 +376,7 @@ Components use named slots for flexible composition:
 <Button variant="secondary">
   <Icon icon={download} slot="leading" />
   Download Report
-  <Pill slot="trailing" tone="success" size="xxs">New</Pill>
+  <Pill slot="trailing" tone="success" size="xs">New</Pill>
 </Button>
 
 <!-- Field: default slot receives accessibility bindings -->
@@ -1170,7 +1170,9 @@ import type { IconNodes, IconNodeElement, IconSet } from "@poodle/svelte-primiti
 ### Key type definitions
 
 ```typescript
-type ControlSize = "sm" | "md" | "lg";
+type ControlSize = "xs" | "sm" | "md" | "lg" | "xl";
+type ControlDensity = "compact" | "default" | "comfortable";
+type SemanticControlSizeRole = "chrome" | "control" | "prominent";
 type ButtonVariant = "primary" | "secondary" | "ghost";
 type ButtonTone = "default" | "danger";
 type ValidationState = "none" | "invalid" | "valid" | "pending";

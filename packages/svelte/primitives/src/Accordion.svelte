@@ -7,7 +7,8 @@
   import { slide } from "svelte/transition";
 
   import Icon from "./Icon.svelte";
-  import type { AccordionItem } from "./types";
+  import { getUiPresentation, resolveSemanticControlSize } from "./presentation";
+  import type { AccordionItem, ControlSize, SemanticControlSizeRole } from "./types";
 
   export let items: AccordionItem[] = [];
   export let value: string | string[] | null = null;
@@ -15,14 +16,18 @@
   export let selectionMode: "single" | "multiple" = "single";
   export let collapsible = true;
   export let ariaLabel: string | null = null;
+  export let size: ControlSize | null = null;
+  export let sizeRole: SemanticControlSizeRole = "control";
 
   const dispatch = createEventDispatcher<{
     valueChange: { value: string | string[] | null };
   }>();
 
+  const uiPresentation = getUiPresentation();
   const accordionId = ++nextAccordionId;
   let uncontrolledValue = defaultValue ?? (selectionMode === "multiple" ? [] : null);
 
+  $: resolvedSize = size ?? resolveSemanticControlSize(uiPresentation?.sizeScale ?? "md", sizeRole);
   $: isControlled = value !== null;
   $: currentValue = isControlled ? value : uncontrolledValue;
   $: openValues = Array.isArray(currentValue)
@@ -57,6 +62,7 @@
   class="accordion"
   role={selectionMode === "multiple" ? "group" : undefined}
   aria-label={ariaLabel ?? undefined}
+  data-size={resolvedSize}
 >
   {#each items as item (item.value)}
     <section class="accordion__item" data-open={openValues.includes(item.value)}>

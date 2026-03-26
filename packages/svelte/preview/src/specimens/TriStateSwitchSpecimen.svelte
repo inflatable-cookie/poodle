@@ -1,7 +1,13 @@
 <script lang="ts">
-  import { TriStateSwitch, Eyebrow, type TriStateValue } from "@poodle/svelte-primitives";
+  import {
+    TriStateSwitch,
+    Eyebrow,
+    UiPresentationProvider,
+    type TriStateValue,
+  } from "@poodle/svelte-primitives";
 
   let filter: TriStateValue = "default";
+  const controlSizes = ["xs", "sm", "md", "lg", "xl"] as const;
 </script>
 
 <div class="specimen">
@@ -21,6 +27,26 @@
       options={{ excluded: "Hide", default: "All", included: "Show" }}
       ariaLabel="Visibility filter"
     />
+  </div>
+
+  <div class="specimen__group">
+    <Eyebrow>Semantic sizes</Eyebrow>
+    <div class="specimen__row">
+      {#each controlSizes as size}
+        <TriStateSwitch value="default" {size} ariaLabel={`Tri-state switch at ${size}`} />
+      {/each}
+    </div>
+  </div>
+
+  <div class="specimen__group">
+    <Eyebrow>Chrome vs prominent role offset</Eyebrow>
+    <UiPresentationProvider density="compact" sizeScale="sm">
+      <div class="specimen__row">
+        <TriStateSwitch value="excluded" sizeRole="chrome" ariaLabel="Compact chrome switch" />
+        <TriStateSwitch value="included" sizeRole="control" ariaLabel="Compact control switch" />
+        <TriStateSwitch value="default" sizeRole="prominent" ariaLabel="Compact prominent switch" />
+      </div>
+    </UiPresentationProvider>
   </div>
 
   <div class="specimen__group">
@@ -58,5 +84,12 @@
     margin: 0;
     font-size: 0.875rem;
     color: var(--poodle-color-text-secondary);
+  }
+
+  .specimen__row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    align-items: center;
   }
 </style>

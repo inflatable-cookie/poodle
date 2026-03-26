@@ -1,7 +1,7 @@
 # RelationPicker
 
 Status: seed contract
-Updated: 2026-03-22
+Updated: 2026-03-26
 
 ## 1. Purpose
 
@@ -64,6 +64,9 @@ Updated: 2026-03-22
 | `confirmLabel` | `string` | `"Confirm selection"` | no | text for confirm button |
 | `cancelLabel` | `string` | `"Cancel"` | no | text for cancel button |
 | `drillDown` | `DrillDownConfig \| null` | `null` | no | drill-down navigation config |
+| `size` | `ControlSize \| null` | `null` | no | explicit semantic size override for picker actions and drill-down controls |
+| `sizeRole` | `SemanticControlSizeRole` | `"control"` | no | semantic role used to resolve inherited size scale |
+| `density` | `ControlDensity \| null` | `null` | no | explicit density override for breadcrumbs and drill-list spacing |
 
 ### Types
 
@@ -211,6 +214,8 @@ When `drillDown` is provided, the picker enters a hierarchical navigation mode:
 - inherits layout from PickerShell
 - candidate items use grid layout with checkbox + content + meta columns
 - drill items use flex layout with content + meta/chevron
+- breadcrumb and drill-list controls respond to semantic `size` / `sizeRole`
+- drill-list row padding tightens or opens with `compact | default | comfortable` density
 - breadcrumb items have max-width 8rem with text ellipsis
 
 ### Composition
@@ -227,6 +232,8 @@ When `drillDown` is provided, the picker enters a hierarchical navigation mode:
 | Attribute | Element | Values |
 |-----------|---------|--------|
 | `data-selected` | candidate item `<li>` | `"true"`, `"false"` |
+| `data-size` | wrapper `<div>` | `"xs"`, `"sm"`, `"md"`, `"lg"`, `"xl"` |
+| `data-density` | wrapper `<div>` | `"compact"`, `"default"`, `"comfortable"` |
 
 ### Drill Breadcrumbs
 

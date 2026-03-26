@@ -1,9 +1,18 @@
 <script lang="ts">
   import { onMount, onDestroy } from "svelte";
+  import { getUiPresentation, resolveSemanticControlSize } from "@poodle/svelte-primitives";
+  import type {
+    ControlDensity,
+    ControlSize,
+    SemanticControlSizeRole,
+  } from "@poodle/svelte-primitives";
 
   export let src: string;
   export let ariaLabel = "Audio player";
   export let showSpeedControl = false;
+  export let size: ControlSize | null = null;
+  export let sizeRole: SemanticControlSizeRole = "control";
+  export let density: ControlDensity | null = null;
 
   let audioEl: HTMLAudioElement | null = null;
   let isPlaying = false;
@@ -13,11 +22,14 @@
   let playbackRate = 1;
   let isMuted = false;
   let animFrame: number | null = null;
+  const uiPresentation = getUiPresentation();
 
   const speedOptions = [0.5, 0.75, 1, 1.25, 1.5, 2];
 
   $: formattedCurrent = formatTime(currentTime);
   $: formattedDuration = formatTime(duration);
+  $: resolvedSize = size ?? resolveSemanticControlSize(uiPresentation?.sizeScale ?? "md", sizeRole);
+  $: resolvedDensity = density ?? uiPresentation?.density ?? "default";
 
   function formatTime(sec: number): string {
     const m = Math.floor(sec / 60);
@@ -97,7 +109,7 @@
   });
 </script>
 
-<div class="audio-player" aria-label={ariaLabel}>
+<div class="audio-player" aria-label={ariaLabel} data-size={resolvedSize} data-density={resolvedDensity}>
   <audio bind:this={audioEl} {src} preload="metadata"></audio>
 
   <button
@@ -179,13 +191,63 @@
 
 <style>
   .audio-player {
+    --poodle-audio-player-gap: 0.5rem;
+    --poodle-audio-player-pad-y: 0.5rem;
+    --poodle-audio-player-pad-x: 0.75rem;
+    --poodle-audio-player-button-size: 2rem;
+    --poodle-audio-player-icon-size: 1rem;
+    --poodle-audio-player-time-width: 2.5rem;
+    --poodle-audio-player-volume-width: 4rem;
+    --poodle-audio-player-speed-x: 0.25rem;
+    --poodle-audio-player-speed-y: 0.125rem;
     display: flex;
     align-items: center;
-    gap: 0.5rem;
-    padding: 0.5rem 0.75rem;
+    gap: var(--poodle-audio-player-gap);
+    padding: var(--poodle-audio-player-pad-y) var(--poodle-audio-player-pad-x);
     border: 0.0625rem solid var(--poodle-color-border-default);
     border-radius: var(--poodle-radius-surface);
     background: var(--poodle-color-background-surface);
+  }
+
+  .audio-player[data-size="xs"] {
+    --poodle-audio-player-button-size: 1.5rem;
+    --poodle-audio-player-icon-size: 0.875rem;
+    --poodle-audio-player-time-width: 2rem;
+    --poodle-audio-player-volume-width: 3rem;
+  }
+
+  .audio-player[data-size="sm"] {
+    --poodle-audio-player-button-size: 1.75rem;
+  }
+
+  .audio-player[data-size="lg"] {
+    --poodle-audio-player-button-size: 2.25rem;
+    --poodle-audio-player-icon-size: 1.125rem;
+    --poodle-audio-player-time-width: 2.75rem;
+    --poodle-audio-player-volume-width: 4.5rem;
+    --poodle-audio-player-speed-x: 0.375rem;
+  }
+
+  .audio-player[data-size="xl"] {
+    --poodle-audio-player-button-size: 2.5rem;
+    --poodle-audio-player-icon-size: 1.25rem;
+    --poodle-audio-player-time-width: 3rem;
+    --poodle-audio-player-volume-width: 5rem;
+    --poodle-audio-player-speed-x: 0.5rem;
+  }
+
+  .audio-player[data-density="compact"] {
+    --poodle-audio-player-gap: 0.375rem;
+    --poodle-audio-player-pad-y: 0.375rem;
+    --poodle-audio-player-pad-x: 0.5rem;
+    --poodle-audio-player-speed-y: 0.0625rem;
+  }
+
+  .audio-player[data-density="comfortable"] {
+    --poodle-audio-player-gap: 0.625rem;
+    --poodle-audio-player-pad-y: 0.625rem;
+    --poodle-audio-player-pad-x: 0.875rem;
+    --poodle-audio-player-speed-y: 0.1875rem;
   }
 
   .audio-player__play,
@@ -193,8 +255,8 @@
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    width: 2rem;
-    height: 2rem;
+    width: var(--poodle-audio-player-button-size);
+    height: var(--poodle-audio-player-button-size);
     padding: 0;
     border: 0;
     border-radius: 999rem;
@@ -218,16 +280,16 @@
 
   .audio-player__play svg,
   .audio-player__mute svg {
-    width: 1rem;
-    height: 1rem;
+    width: var(--poodle-audio-player-icon-size);
+    height: var(--poodle-audio-player-icon-size);
   }
 
   .audio-player__time {
     font-family: var(--poodle-typography-code-family);
-    font-size: 0.6875rem;
+    font-size: var(--poodle-typography-label-size);
     color: var(--poodle-color-text-secondary);
     flex-shrink: 0;
-    min-width: 2.5rem;
+    min-width: var(--poodle-audio-player-time-width);
     text-align: center;
   }
 
@@ -246,7 +308,7 @@
   }
 
   .audio-player__volume {
-    width: 4rem;
+    width: var(--poodle-audio-player-volume-width);
     flex-shrink: 0;
   }
 
@@ -298,13 +360,14 @@
   }
 
   .audio-player__speed {
-    padding: 0.125rem 0.25rem;
+    min-height: var(--poodle-size-control-height);
+    padding: var(--poodle-audio-player-speed-y) var(--poodle-audio-player-speed-x);
     border: 0.0625rem solid var(--poodle-color-border-default);
     border-radius: var(--poodle-radius-control);
     background: transparent;
     color: var(--poodle-color-text-secondary);
     font: inherit;
-    font-size: 0.6875rem;
+    font-size: var(--poodle-typography-label-size);
     font-family: var(--poodle-typography-code-family);
     cursor: pointer;
     appearance: none;

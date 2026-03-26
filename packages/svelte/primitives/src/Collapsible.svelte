@@ -7,6 +7,9 @@
   import { slide } from "svelte/transition";
 
   import Icon from "./Icon.svelte";
+  import { getUiPresentation, resolveSemanticControlSize } from "./presentation";
+
+  import type { ControlSize, SemanticControlSizeRole } from "./types";
 
   export let open: boolean | null = null;
   export let defaultOpen = false;
@@ -14,14 +17,18 @@
   export let description: string | null = null;
   export let disabled = false;
   export let ariaLabel: string | null = null;
+  export let size: ControlSize | null = null;
+  export let sizeRole: SemanticControlSizeRole = "control";
 
   const dispatch = createEventDispatcher<{
     openChange: { open: boolean };
   }>();
 
+  const uiPresentation = getUiPresentation();
   const collapsibleId = ++nextCollapsibleId;
   let uncontrolledOpen = defaultOpen;
 
+  $: resolvedSize = size ?? resolveSemanticControlSize(uiPresentation?.sizeScale ?? "md", sizeRole);
   $: isControlled = open !== null;
   $: isOpen = isControlled ? open === true : uncontrolledOpen;
 
@@ -34,7 +41,7 @@
   }
 </script>
 
-<section class="collapsible" data-open={isOpen} data-disabled={disabled}>
+<section class="collapsible" data-open={isOpen} data-disabled={disabled} data-size={resolvedSize}>
   <button
     type="button"
     class="collapsible__trigger"

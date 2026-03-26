@@ -3,8 +3,9 @@
 
   import { getFocusableElements } from "./internal";
   import IconButton from "./IconButton.svelte";
+  import { getUiPresentation, resolveSemanticControlSize } from "./presentation";
 
-  import type { DialogKind } from "./types";
+  import type { ControlSize, DialogKind, SemanticControlSizeRole } from "./types";
 
   export let open: boolean | null = null;
   export let defaultOpen = false;
@@ -18,11 +19,15 @@
   export let overlayClassName = "";
   export let showCloseButton = false;
   export let closeLabel = "Close dialog";
+  export let size: ControlSize | null = null;
+  export let sizeRole: SemanticControlSizeRole = "control";
 
   const dispatch = createEventDispatcher<{
     openChange: { open: boolean };
     requestClose: void;
   }>();
+
+  const uiPresentation = getUiPresentation();
 
   let surfaceElement: HTMLDivElement | null = null;
   let uncontrolledOpen = defaultOpen;
@@ -30,6 +35,7 @@
   let bodyOverflow: string | null = null;
   let previousOpen = false;
 
+  $: resolvedSize = size ?? resolveSemanticControlSize(uiPresentation?.sizeScale ?? "md", sizeRole);
   $: isControlled = open !== null;
   $: isOpen = isControlled ? open === true : uncontrolledOpen;
   $: if (isOpen && !previousOpen) {
@@ -114,7 +120,7 @@
 </script>
 
 {#if isOpen}
-  <div class="dialog">
+  <div class="dialog" data-size={resolvedSize}>
     <button
       type="button"
       class={`dialog__backdrop ${overlayClassName}`}

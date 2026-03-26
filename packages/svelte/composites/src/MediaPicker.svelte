@@ -1,9 +1,23 @@
 <script lang="ts">
   import { createEventDispatcher } from "svelte";
 
-  import { Dialog, Button, TextInput, FileUpload, Tabs } from "@poodle/svelte-primitives";
+  import {
+    Dialog,
+    FileUpload,
+    Tabs,
+    TextInput,
+    UiPresentationProvider,
+    getUiPresentation,
+    resolveSemanticControlSize,
+  } from "@poodle/svelte-primitives";
 
-  import type { FileUploadItem, TabItem } from "@poodle/svelte-primitives";
+  import type {
+    ControlDensity,
+    ControlSize,
+    FileUploadItem,
+    SemanticControlSizeRole,
+    TabItem,
+  } from "@poodle/svelte-primitives";
   import type { MediaPickerItem } from "./types";
 
   export let open: boolean | null = null;
@@ -12,6 +26,9 @@
   export let maxFileSize: number = 25 * 1024 * 1024;
   export let title = "Select media";
   export let emptyMessage = "No media items found.";
+  export let size: ControlSize | null = null;
+  export let sizeRole: SemanticControlSizeRole = "control";
+  export let density: ControlDensity | null = null;
 
   const dispatch = createEventDispatcher<{
     select: { item: MediaPickerItem };
@@ -22,6 +39,10 @@
   let activeTab = "browse";
   let searchQuery = "";
   let uploadFiles: FileUploadItem[] = [];
+  const uiPresentation = getUiPresentation();
+
+  $: resolvedSize = size ?? resolveSemanticControlSize(uiPresentation?.sizeScale ?? "md", sizeRole);
+  $: resolvedDensity = density ?? uiPresentation?.density ?? "default";
 
   const tabItems: TabItem[] = [
     { value: "browse", label: "Browse" },
@@ -55,82 +76,122 @@
   kind="dialog"
   on:openChange={handleOpenChange}
 >
-  <div class="media-picker">
-    <Tabs
-      items={tabItems}
-      value={activeTab}
-      on:valueChange={(e) => (activeTab = e.detail.value)}
-    />
+  <UiPresentationProvider sizeScale={resolvedSize} density={resolvedDensity}>
+    <div class="media-picker" data-size={resolvedSize} data-density={resolvedDensity}>
+      <Tabs
+        items={tabItems}
+        value={activeTab}
+        on:valueChange={(e) => (activeTab = e.detail.value)}
+      />
 
-    {#if activeTab === "browse"}
-      <div class="media-picker__search">
-        <TextInput
-          id="media-picker-search"
-          bind:value={searchQuery}
-          placeholder="Search media..."
-        />
-      </div>
-
-      {#if filteredItems.length === 0}
-        <div class="media-picker__empty">
-          <p>{emptyMessage}</p>
+      {#if activeTab === "browse"}
+        <div class="media-picker__search">
+          <TextInput
+            id="media-picker-search"
+            bind:value={searchQuery}
+            placeholder="Search media..."
+          />
         </div>
+
+        {#if filteredItems.length === 0}
+          <div class="media-picker__empty">
+            <p>{emptyMessage}</p>
+          </div>
+        {:else}
+          <div class="media-picker__grid" role="listbox" aria-label="Media items">
+            {#each filteredItems as item (item.id)}
+              <button
+                type="button"
+                class="media-picker__item"
+                role="option"
+                aria-selected="false"
+                on:click={() => handleSelect(item)}
+              >
+                {#if item.thumbnailUrl}
+                  <img class="media-picker__thumb" src={item.thumbnailUrl} alt="" />
+                {:else}
+                  <div class="media-picker__thumb media-picker__thumb--placeholder">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                      <rect x="3" y="3" width="18" height="18" rx="2" />
+                      <circle cx="8.5" cy="8.5" r="1.5" />
+                      <path d="M21 15l-5-5L5 21" />
+                    </svg>
+                  </div>
+                {/if}
+                <span class="media-picker__label">{item.label}</span>
+              </button>
+            {/each}
+          </div>
+        {/if}
       {:else}
-        <div class="media-picker__grid" role="listbox" aria-label="Media items">
-          {#each filteredItems as item (item.id)}
-            <button
-              type="button"
-              class="media-picker__item"
-              role="option"
-              aria-selected="false"
-              on:click={() => handleSelect(item)}
-            >
-              {#if item.thumbnailUrl}
-                <img class="media-picker__thumb" src={item.thumbnailUrl} alt="" />
-              {:else}
-                <div class="media-picker__thumb media-picker__thumb--placeholder">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-                    <rect x="3" y="3" width="18" height="18" rx="2" />
-                    <circle cx="8.5" cy="8.5" r="1.5" />
-                    <path d="M21 15l-5-5L5 21" />
-                  </svg>
-                </div>
-              {/if}
-              <span class="media-picker__label">{item.label}</span>
-            </button>
-          {/each}
+        <div class="media-picker__upload">
+          <FileUpload
+            {accept}
+            maxSize={maxFileSize}
+            multiple
+            files={uploadFiles}
+            on:change={handleUploadChange}
+          />
         </div>
       {/if}
-    {:else}
-      <div class="media-picker__upload">
-        <FileUpload
-          {accept}
-          maxSize={maxFileSize}
-          multiple
-          files={uploadFiles}
-          on:change={handleUploadChange}
-        />
-      </div>
-    {/if}
-  </div>
+    </div>
+  </UiPresentationProvider>
 </Dialog>
 
 <style>
   .media-picker {
+    --poodle-media-picker-stack-gap: var(--poodle-space-stack-sm, 0.5rem);
+    --poodle-media-picker-search-offset: 0.25rem;
+    --poodle-media-picker-grid-gap: 0.375rem;
+    --poodle-media-picker-item-pad: 0.375rem;
+    --poodle-media-picker-thumb-size: 4.5rem;
+    --poodle-media-picker-grid-min: 5.5rem;
     display: flex;
     flex-direction: column;
-    gap: var(--poodle-space-stack-sm, 0.5rem);
+    gap: var(--poodle-media-picker-stack-gap);
     min-height: 20rem;
   }
 
+  .media-picker[data-size="xs"] {
+    --poodle-media-picker-thumb-size: 3.5rem;
+    --poodle-media-picker-grid-min: 4.75rem;
+  }
+
+  .media-picker[data-size="sm"] {
+    --poodle-media-picker-thumb-size: 4.25rem;
+    --poodle-media-picker-grid-min: 5.25rem;
+  }
+
+  .media-picker[data-size="lg"] {
+    --poodle-media-picker-thumb-size: 5rem;
+    --poodle-media-picker-grid-min: 6rem;
+  }
+
+  .media-picker[data-size="xl"] {
+    --poodle-media-picker-thumb-size: 5.5rem;
+    --poodle-media-picker-grid-min: 6.5rem;
+  }
+
+  .media-picker[data-density="compact"] {
+    --poodle-media-picker-search-offset: 0.125rem;
+    --poodle-media-picker-grid-gap: 0.25rem;
+    --poodle-media-picker-item-pad: 0.25rem;
+  }
+
+  .media-picker[data-density="comfortable"] {
+    --poodle-media-picker-search-offset: 0.375rem;
+    --poodle-media-picker-grid-gap: 0.5rem;
+    --poodle-media-picker-item-pad: 0.5rem;
+  }
+
   .media-picker__search {
-    margin-top: 0.25rem;
+    margin-top: var(--poodle-media-picker-search-offset);
   }
 
   .media-picker__grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(5.5rem, 1fr));
-    gap: 0.375rem;
+    grid-template-columns: repeat(auto-fill, minmax(var(--poodle-media-picker-grid-min), 1fr));
+    gap: var(--poodle-media-picker-grid-gap);
     max-height: 20rem;
     overflow-y: auto;
   }
@@ -140,7 +201,7 @@
     flex-direction: column;
     align-items: center;
     gap: 0.25rem;
-    padding: 0.375rem;
+    padding: var(--poodle-media-picker-item-pad);
     border: 0.0625rem solid transparent;
     border-radius: var(--poodle-radius-control, 0.375rem);
     background: transparent;
@@ -157,8 +218,8 @@
   }
 
   .media-picker__thumb {
-    width: 4.5rem;
-    height: 4.5rem;
+    width: var(--poodle-media-picker-thumb-size);
+    height: var(--poodle-media-picker-thumb-size);
     border-radius: 0.25rem;
     object-fit: cover;
   }
@@ -177,7 +238,7 @@
   }
 
   .media-picker__label {
-    font-size: 0.6875rem;
+    font-size: var(--poodle-typography-label-size);
     color: var(--poodle-color-text-secondary, #999);
     white-space: nowrap;
     overflow: hidden;
@@ -199,6 +260,6 @@
   }
 
   .media-picker__upload {
-    margin-top: 0.25rem;
+    margin-top: var(--poodle-media-picker-search-offset);
   }
 </style>

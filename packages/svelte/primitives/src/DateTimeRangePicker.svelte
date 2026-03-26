@@ -14,8 +14,9 @@
     normalizeDateRange,
     todayIsoDate,
   } from "./date";
+  import { getUiPresentation, resolveSemanticControlSize } from "./presentation";
 
-  import type { CalendarWeekStart, DateTimeRangeValue } from "./types";
+  import type { CalendarWeekStart, ControlSize, DateTimeRangeValue, SemanticControlSizeRole } from "./types";
 
   export let value: DateTimeRangeValue | null = null;
   export let defaultValue: DateTimeRangeValue = {
@@ -29,6 +30,8 @@
   export let locale = "en-US";
   export let disabled = false;
   export let ariaLabel: string | null = null;
+  export let size: ControlSize | null = null;
+  export let sizeRole: SemanticControlSizeRole = "control";
 
   const dispatch = createEventDispatcher<{
     valueChange: { value: DateTimeRangeValue };
@@ -36,11 +39,13 @@
   }>();
 
   const surfaceId = `poodle-date-time-range-picker-surface-${++nextDateTimeRangePickerId}`;
+  const uiPresentation = getUiPresentation();
   let rootElement: HTMLDivElement | null = null;
   let uncontrolledValue = normalizeDateTimeRangeValue(defaultValue);
   let uncontrolledOpen = defaultOpen;
   let visibleMonth = monthAnchorIso(defaultValue.start.date ?? todayIsoDate());
 
+  $: resolvedSize = size ?? resolveSemanticControlSize(uiPresentation?.sizeScale ?? "md", sizeRole);
   $: currentValue = normalizeDateTimeRangeValue(value ?? uncontrolledValue);
   $: currentRange = normalizeDateRange({
     start: currentValue.start.date,
@@ -102,7 +107,7 @@
   });
 </script>
 
-<div bind:this={rootElement} class="date-time-range-picker" data-open={isOpen}>
+<div bind:this={rootElement} class="date-time-range-picker" data-size={resolvedSize} data-open={isOpen}>
   <button
     type="button"
     class="date-time-range-picker__trigger"

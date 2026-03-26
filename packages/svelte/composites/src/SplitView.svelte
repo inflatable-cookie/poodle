@@ -1,8 +1,8 @@
 <script lang="ts">
   import { createEventDispatcher, onDestroy } from "svelte";
 
-  import { CollapseToggle } from "@poodle/svelte-primitives";
-  import type { CollapseDirection } from "@poodle/svelte-primitives";
+  import { CollapseToggle, getUiPresentation, resolveSemanticControlSize } from "@poodle/svelte-primitives";
+  import type { CollapseDirection, ControlSize, SemanticControlSizeRole } from "@poodle/svelte-primitives";
   import { ResizeHandle } from "@poodle/svelte-primitives";
   import type { SplitOrientation } from "@poodle/svelte-primitives";
 
@@ -19,6 +19,8 @@
   export let showCollapseSecondary = false;
   export let ariaLabel: string | null = null;
   export let disabled = false;
+  export let size: ControlSize | null = null;
+  export let sizeRole: SemanticControlSizeRole = "chrome";
 
   const dispatch = createEventDispatcher<{
     ratioChange: { ratio: number };
@@ -26,11 +28,15 @@
     secondaryCollapsedChange: { isCollapsed: boolean };
   }>();
 
+  const uiPresentation = getUiPresentation();
+
   let container: HTMLDivElement | null = null;
   let uncontrolledRatio = defaultRatio;
   let dragMousePos = 0;
 
   // ── Derived ──────────────────────────────────────────────────────
+
+  $: resolvedSize = size ?? resolveSemanticControlSize(uiPresentation?.sizeScale ?? "md", sizeRole);
 
   $: currentRatio = Math.min(0.95, Math.max(0.05, ratio ?? uncontrolledRatio));
 
@@ -156,6 +162,7 @@
   data-orientation={orientation}
   data-primary-collapsed={primaryCollapsed || undefined}
   data-secondary-collapsed={secondaryCollapsed || undefined}
+  data-size={resolvedSize}
   aria-label={ariaLabel ?? "Split view"}
   bind:this={container}
 >

@@ -1,7 +1,8 @@
 <script lang="ts">
   import { createEventDispatcher } from "svelte";
 
-  import type { ValidationState } from "./types";
+  import { getUiPresentation, resolveSemanticControlSize } from "./presentation";
+  import type { ControlSize, SemanticControlSizeRole, ValidationState } from "./types";
 
   export let id: string;
   export let value: string | null = null;
@@ -14,6 +15,8 @@
   export let validationState: ValidationState = "none";
   export let ariaLabel: string | null = null;
   export let describedBy: string | null = null;
+  export let size: ControlSize | null = null;
+  export let sizeRole: SemanticControlSizeRole = "control";
 
   const dispatch = createEventDispatcher<{
     valueChange: { value: string };
@@ -23,8 +26,10 @@
     blur: FocusEvent;
   }>();
 
+  const uiPresentation = getUiPresentation();
   let uncontrolledValue = defaultValue;
 
+  $: resolvedSize = size ?? resolveSemanticControlSize(uiPresentation?.sizeScale ?? "md", sizeRole);
   $: isControlled = value !== null;
   $: currentValue = isControlled ? value ?? "" : uncontrolledValue;
   $: ariaInvalid = validationState === "invalid" ? true : undefined;
@@ -51,7 +56,7 @@
   }
 </script>
 
-<div class="text-area" data-validation-state={validationState}>
+<div class="text-area" data-validation-state={validationState} data-size={resolvedSize}>
   <textarea
     {id}
     {name}

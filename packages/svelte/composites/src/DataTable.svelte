@@ -1,7 +1,8 @@
 <script lang="ts">
   import { createEventDispatcher } from "svelte";
 
-  import { Checkbox, Icon, Popover } from "@poodle/svelte-primitives";
+  import { Checkbox, Icon, Popover, getUiPresentation, resolveSemanticControlSize } from "@poodle/svelte-primitives";
+  import type { ControlSize, SemanticControlSizeRole } from "@poodle/svelte-primitives";
 
   import type { TableColumn, TableRow, TableSortDirection } from "./types";
 
@@ -18,6 +19,8 @@
   export let showColumnVisibility = false;
   export let showExport = false;
   export let exportFilename = "export.csv";
+  export let size: ControlSize | null = null;
+  export let sizeRole: SemanticControlSizeRole = "control";
 
   const dispatch = createEventDispatcher<{
     sortChange: { columnId: string; direction: TableSortDirection };
@@ -28,6 +31,9 @@
     exportCsv: { filename: string };
   }>();
 
+  const uiPresentation = getUiPresentation();
+
+  $: resolvedSize = size ?? resolveSemanticControlSize(uiPresentation?.sizeScale ?? "md", sizeRole);
 
   $: visibleColumns = columns.filter((c) => !hiddenColumnIds.includes(c.id));
   $: hideableColumns = columns.filter((c) => c.hideable !== false);
@@ -80,7 +86,7 @@
   }
 </script>
 
-<div class="data-table">
+<div class="data-table" data-size={resolvedSize}>
   {#if showColumnVisibility || showExport}
     <div class="data-table__toolbar">
       {#if showExport}

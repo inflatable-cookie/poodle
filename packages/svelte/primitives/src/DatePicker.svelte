@@ -7,8 +7,9 @@
 
   import Calendar from "./Calendar.svelte";
   import { formatDateLabel, monthAnchorIso, todayIsoDate } from "./date";
+  import { getUiPresentation, resolveSemanticControlSize } from "./presentation";
 
-  import type { CalendarWeekStart } from "./types";
+  import type { CalendarWeekStart, ControlSize, SemanticControlSizeRole } from "./types";
 
   export let value: string | null = null;
   export let defaultValue: string | null = null;
@@ -19,6 +20,8 @@
   export let locale = "en-US";
   export let disabled = false;
   export let ariaLabel: string | null = null;
+  export let size: ControlSize | null = null;
+  export let sizeRole: SemanticControlSizeRole = "control";
 
   const dispatch = createEventDispatcher<{
     valueChange: { value: string };
@@ -26,11 +29,13 @@
   }>();
 
   const surfaceId = `poodle-date-picker-surface-${++nextDatePickerId}`;
+  const uiPresentation = getUiPresentation();
   let rootElement: HTMLDivElement | null = null;
   let uncontrolledValue = defaultValue;
   let uncontrolledOpen = defaultOpen;
   let visibleMonth = monthAnchorIso(defaultValue ?? todayIsoDate());
 
+  $: resolvedSize = size ?? resolveSemanticControlSize(uiPresentation?.sizeScale ?? "md", sizeRole);
   $: currentValue = value ?? uncontrolledValue;
   $: isOpen = open ?? uncontrolledOpen;
   $: if (currentValue) {
@@ -84,7 +89,7 @@
   });
 </script>
 
-<div bind:this={rootElement} class="date-picker" data-open={isOpen}>
+<div bind:this={rootElement} class="date-picker" data-size={resolvedSize} data-open={isOpen}>
   <button
     type="button"
     class="date-picker__trigger"

@@ -1,12 +1,20 @@
 <script lang="ts">
   import { createEventDispatcher } from "svelte";
 
+  import { getUiPresentation, resolveSemanticControlSize } from "./presentation";
+
+  import type { ControlSize, SemanticControlSizeRole } from "./types";
+
+  export let size: ControlSize | null = null;
+  export let sizeRole: SemanticControlSizeRole = "control";
   export let value: string | null = null;
   export let defaultValue = "";
   export let length = 6;
   export let disabled = false;
   export let ariaLabel: string | null = null;
   export let mask = false;
+
+  const uiPresentation = getUiPresentation();
 
   const dispatch = createEventDispatcher<{
     valueChange: { value: string };
@@ -16,6 +24,7 @@
   let uncontrolledValue = defaultValue;
   let inputs: Array<HTMLInputElement | null> = [];
 
+  $: resolvedSize = size ?? resolveSemanticControlSize(uiPresentation?.sizeScale ?? "md", sizeRole);
   $: controlled = value !== null;
   $: currentValue = controlled ? value ?? "" : uncontrolledValue;
   $: digits = Array.from({ length }, (_, index) => currentValue[index] ?? "");
@@ -41,7 +50,7 @@
   }
 </script>
 
-<div class="pin-input" role="group" aria-label={ariaLabel ?? undefined}>
+<div class="pin-input" role="group" aria-label={ariaLabel ?? undefined} data-size={resolvedSize}>
   {#each digits as digit, index}
     <input
       bind:this={inputs[index]}

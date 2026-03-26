@@ -1,7 +1,7 @@
 # Toggle
 
 Status: detailed contract
-Updated: 2026-03-15
+Updated: 2026-03-26
 
 ## 1. Purpose
 
@@ -107,9 +107,11 @@ Updated: 2026-03-15
 
 ### Sizing
 
-- Default (inline): `height: control-height`, `padding: 0 space-control-x`
+- Extra-small (inline): `height: control-height - 0.5rem`, `padding: 0 (space-control-x - 0.1875rem)`
 - Small: `height: control-height - 0.375rem`, `padding: 0 (space-control-x - 0.125rem)`
+- Default (inline): `height: control-height`, `padding: 0 space-control-x`
 - Large: `height: control-height + 0.375rem`, `padding: 0 (space-control-x + 0.125rem)`
+- Extra-large (inline): `height: control-height + 0.5rem`, `padding: 0 (space-control-x + 0.1875rem)`
 - Stack layout: full-width, auto-height, no explicit padding
 
 ### Composition
@@ -148,10 +150,14 @@ Updated: 2026-03-15
 
 | Size | Property | Value |
 |------|----------|-------|
+| `xs` (`[data-size="xs"]`) | `height` | `calc(var(--poodle-size-control-height) - 0.5rem)` |
+| `xs` | `padding` | `0 calc(var(--poodle-space-control-x) - 0.1875rem)` |
 | `sm` (`[data-size="sm"]`) | `height` | `calc(var(--poodle-size-control-height) - 0.375rem)` |
 | `sm` | `padding` | `0 calc(var(--poodle-space-control-x) - 0.125rem)` |
 | `lg` (`[data-size="lg"]`) | `height` | `calc(var(--poodle-size-control-height) + 0.375rem)` |
 | `lg` | `padding` | `0 calc(var(--poodle-space-control-x) + 0.125rem)` |
+| `xl` (`[data-size="xl"]`) | `height` | `calc(var(--poodle-size-control-height) + 0.5rem)` |
+| `xl` | `padding` | `0 calc(var(--poodle-space-control-x) + 0.1875rem)` |
 
 ### Stack layout (`[data-layout="stack"]`)
 
@@ -230,7 +236,7 @@ Updated: 2026-03-15
 ### Tier 2: Visual Parity
 
 - [ ] all three variant color schemes match
-- [ ] all three sizes match (height, padding)
+- [ ] all five sizes match (height, padding)
 - [ ] pressed state accent background and inverse text match
 - [ ] pressed state border-color mix matches (78% with black)
 - [ ] focus ring appearance matches

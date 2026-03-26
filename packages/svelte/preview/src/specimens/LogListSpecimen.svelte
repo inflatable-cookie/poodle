@@ -1,7 +1,7 @@
 <script lang="ts">
   import { LogList } from "@poodle/svelte-composites";
   import type { LogEntry } from "@poodle/svelte-composites";
-  import { Eyebrow, Button } from "@poodle/svelte-primitives";
+  import { Eyebrow, Button, UiPresentationProvider } from "@poodle/svelte-primitives";
 
   const now = Date.now();
 
@@ -42,6 +42,16 @@
       <Button variant="secondary" on:click={addEntry}>Add log entry</Button>
     </div>
   </div>
+
+  <div class="specimen__group">
+    <Eyebrow>Semantic presentation</Eyebrow>
+    <UiPresentationProvider density="compact" sizeScale="sm">
+      <div class="specimen__stack">
+        <LogList {entries} ariaLabel="Compact application logs" />
+        <LogList {entries} ariaLabel="Prominent application logs" sizeRole="prominent" />
+      </div>
+    </UiPresentationProvider>
+  </div>
 </div>
 
 <style>
@@ -60,5 +70,10 @@
   .specimen__actions {
     display: flex;
     gap: 0.5rem;
+  }
+
+  .specimen__stack {
+    display: grid;
+    gap: 0.75rem;
   }
 </style>

@@ -2,18 +2,24 @@
   import { createEventDispatcher } from "svelte";
 
   import Icon from "./Icon.svelte";
+  import { getUiPresentation, resolveSemanticControlSize } from "./presentation";
 
-  import type { CollapseDirection } from "./types";
+  import type { CollapseDirection, ControlSize, SemanticControlSizeRole } from "./types";
 
   export let collapsed = false;
   export let direction: CollapseDirection = "left";
   export let disabled = false;
   export let ariaLabel: string | null = null;
+  export let size: ControlSize | null = null;
+  export let sizeRole: SemanticControlSizeRole = "chrome";
 
   const dispatch = createEventDispatcher<{
     toggle: { isCollapsed: boolean };
   }>();
 
+  const uiPresentation = getUiPresentation();
+
+  $: resolvedSize = size ?? resolveSemanticControlSize(uiPresentation?.sizeScale ?? "md", sizeRole);
   $: expandDirection = (
     { left: "right", right: "left", up: "down", down: "up" } as const
   )[direction];
@@ -36,6 +42,7 @@
   class="collapse-toggle"
   data-collapsed={collapsed || undefined}
   data-direction={direction}
+  data-size={resolvedSize}
   disabled={disabled}
   aria-expanded={!collapsed}
   aria-label={label}

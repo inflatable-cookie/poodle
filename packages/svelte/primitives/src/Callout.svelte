@@ -2,8 +2,9 @@
   import { createEventDispatcher } from "svelte";
 
   import Icon from "./Icon.svelte";
+  import { getUiPresentation, resolveSemanticControlSize } from "./presentation";
   import Spinner from "./Spinner.svelte";
-  import type { StatusTone } from "./types";
+  import type { ControlSize, SemanticControlSizeRole, StatusTone } from "./types";
 
   type CalloutAnnounceMode = "none" | "polite" | "assertive";
 
@@ -14,10 +15,14 @@
   export let announceMode: CalloutAnnounceMode = "none";
   export let dismissible = false;
   export let dismissLabel = "Dismiss message";
+  export let size: ControlSize | null = null;
+  export let sizeRole: SemanticControlSizeRole = "control";
 
   const dispatch = createEventDispatcher<{
     dismiss: void;
   }>();
+
+  const uiPresentation = getUiPresentation();
 
   const toneIcon: Record<string, string> = {
     success: "check",
@@ -27,6 +32,7 @@
     neutral: "info",
   };
 
+  $: resolvedSize = size ?? resolveSemanticControlSize(uiPresentation?.sizeScale ?? "md", sizeRole);
   $: role =
     announceMode === "assertive"
       ? "alert"
@@ -44,6 +50,7 @@
 <section
   class="callout"
   data-tone={tone}
+  data-size={resolvedSize}
   aria-label={ariaLabel ?? undefined}
   role={role}
   aria-live={ariaLive}

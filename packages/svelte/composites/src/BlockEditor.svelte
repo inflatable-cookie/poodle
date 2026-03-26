@@ -1,7 +1,17 @@
 <script lang="ts">
   import { createEventDispatcher, tick } from "svelte";
 
-  import { Icon } from "@poodle/svelte-primitives";
+  import {
+    Icon,
+    UiPresentationProvider,
+    getUiPresentation,
+    resolveSemanticControlSize,
+  } from "@poodle/svelte-primitives";
+  import type {
+    ControlDensity,
+    ControlSize,
+    SemanticControlSizeRole,
+  } from "@poodle/svelte-primitives";
 
   import type { EditorBlock, BlockType, BlockTypeDefinition } from "./types";
 
@@ -17,6 +27,9 @@
   ];
   export let disabled = false;
   export let ariaLabel = "Block editor";
+  export let size: ControlSize | null = null;
+  export let sizeRole: SemanticControlSizeRole = "control";
+  export let density: ControlDensity | null = null;
 
   const dispatch = createEventDispatcher<{
     change: { blocks: EditorBlock[] };
@@ -29,6 +42,10 @@
   let addMenuStyle = "";
   let dragSourceIndex: number | null = null;
   let dragOverIndex: number | null = null;
+  const uiPresentation = getUiPresentation();
+
+  $: resolvedSize = size ?? resolveSemanticControlSize(uiPresentation?.sizeScale ?? "md", sizeRole);
+  $: resolvedDensity = density ?? uiPresentation?.density ?? "default";
 
   function emitChange(): void {
     dispatch("change", { blocks: [...blocks] });
@@ -127,189 +144,262 @@
   }
 </script>
 
-<div class="block-editor" class:block-editor--disabled={disabled} aria-label={ariaLabel}>
-  {#each blocks as block, index (block.id)}
-    <!-- svelte-ignore a11y-no-noninteractive-element-interactions -->
-    <div
-      class="block-editor__block"
-      class:active={activeBlockId === block.id}
-      class:drag-over={dragOverIndex === index}
-      class:dragging={dragSourceIndex === index}
-      data-type={block.type}
-      on:focusin={() => (activeBlockId = block.id)}
-      on:dragover={(e) => handleDragOver(e, index)}
-      on:dragleave={handleDragLeave}
-      on:drop={(e) => handleDrop(e, index)}
-      role="group"
-      aria-label="{block.type} block"
-    >
-      <div class="block-editor__toolbar">
-        <div class="block-editor__toolbar-left">
-          <!-- svelte-ignore a11y-no-static-element-interactions -->
-          <span
-            class="block-editor__drag-grip"
-            draggable="true"
-            on:dragstart={(e) => handleDragStart(e, index)}
-            on:dragend={handleDragEnd}
-            title="Drag to reorder"
-            aria-hidden="true"
-          ><Icon name="grip-vertical" /></span>
+<UiPresentationProvider sizeScale={resolvedSize} density={resolvedDensity}>
+  <div
+    class="block-editor"
+    class:block-editor--disabled={disabled}
+    data-size={resolvedSize}
+    data-density={resolvedDensity}
+    aria-label={ariaLabel}
+  >
+    {#each blocks as block, index (block.id)}
+      <!-- svelte-ignore a11y-no-noninteractive-element-interactions -->
+      <div
+        class="block-editor__block"
+        class:active={activeBlockId === block.id}
+        class:drag-over={dragOverIndex === index}
+        class:dragging={dragSourceIndex === index}
+        data-type={block.type}
+        on:focusin={() => (activeBlockId = block.id)}
+        on:dragover={(e) => handleDragOver(e, index)}
+        on:dragleave={handleDragLeave}
+        on:drop={(e) => handleDrop(e, index)}
+        role="group"
+        aria-label={`${block.type} block`}
+      >
+        <div class="block-editor__toolbar">
+          <div class="block-editor__toolbar-left">
+            <!-- svelte-ignore a11y-no-static-element-interactions -->
+            <span
+              class="block-editor__drag-grip"
+              draggable="true"
+              on:dragstart={(e) => handleDragStart(e, index)}
+              on:dragend={handleDragEnd}
+              title="Drag to reorder"
+              aria-hidden="true"
+            ><Icon name="grip-vertical" /></span>
 
-          <select
-            class="block-editor__type-select"
-            value={block.type}
-            disabled={disabled}
-            on:change={(e) => changeType(index, (e.currentTarget as HTMLSelectElement).value)}
-            aria-label="Block type"
-          >
-            {#each blockTypes as bt}
-              <option value={bt.type}>{bt.label}</option>
-            {/each}
-          </select>
-        </div>
+            <select
+              class="block-editor__type-select"
+              value={block.type}
+              disabled={disabled}
+              on:change={(e) => changeType(index, (e.currentTarget as HTMLSelectElement).value)}
+              aria-label="Block type"
+            >
+              {#each blockTypes as bt}
+                <option value={bt.type}>{bt.label}</option>
+              {/each}
+            </select>
+          </div>
 
-        <div class="block-editor__toolbar-right">
-          <button
-            type="button"
-            class="block-editor__tool-btn"
-            disabled={disabled || index === 0}
-            on:click|stopPropagation={() => moveBlock(index, -1)}
-            aria-label="Move up"
-          ><Icon name="arrow-up" /></button>
-          <button
-            type="button"
-            class="block-editor__tool-btn"
-            disabled={disabled || index === blocks.length - 1}
-            on:click|stopPropagation={() => moveBlock(index, 1)}
-            aria-label="Move down"
-          ><Icon name="arrow-down" /></button>
-          <button
-            type="button"
-            class="block-editor__tool-btn block-editor__add-btn"
-            title="Add block below"
-            aria-label="Add block after this one"
-            disabled={disabled}
-            on:click|stopPropagation={(e) => openAddMenu(e, index)}
-          ><Icon name="plus" /></button>
-          {#if blocks.length > 1}
+          <div class="block-editor__toolbar-right">
             <button
               type="button"
-              class="block-editor__tool-btn block-editor__remove-btn"
+              class="block-editor__tool-btn"
+              disabled={disabled || index === 0}
+              on:click|stopPropagation={() => moveBlock(index, -1)}
+              aria-label="Move up"
+            ><Icon name="arrow-up" /></button>
+            <button
+              type="button"
+              class="block-editor__tool-btn"
+              disabled={disabled || index === blocks.length - 1}
+              on:click|stopPropagation={() => moveBlock(index, 1)}
+              aria-label="Move down"
+            ><Icon name="arrow-down" /></button>
+            <button
+              type="button"
+              class="block-editor__tool-btn block-editor__add-btn"
+              title="Add block below"
+              aria-label="Add block after this one"
               disabled={disabled}
-              on:click|stopPropagation={() => removeBlock(index)}
-              aria-label="Remove block"
-            ><Icon name="x" /></button>
-          {/if}
+              on:click|stopPropagation={(e) => openAddMenu(e, index)}
+            ><Icon name="plus" /></button>
+            {#if blocks.length > 1}
+              <button
+                type="button"
+                class="block-editor__tool-btn block-editor__remove-btn"
+                disabled={disabled}
+                on:click|stopPropagation={() => removeBlock(index)}
+                aria-label="Remove block"
+              ><Icon name="x" /></button>
+            {/if}
+          </div>
         </div>
-      </div>
 
-      <div class="block-editor__content">
-        <slot
-          name="block"
-          {block}
-          {index}
-          disabled={disabled}
-          update={(updates: Partial<EditorBlock>) => updateBlock(index, updates)}
-        >
-          <!-- Default rendering for built-in types -->
-          {#if block.type === "divider"}
-            <hr class="block-editor__divider" />
-          {:else if block.type === "heading"}
-            <input
-              type="text"
-              class="block-editor__input block-editor__input--heading"
-              placeholder="Heading..."
-              disabled={disabled}
-              value={block.content}
-              on:input={(e) => updateBlock(index, { content: (e.currentTarget as HTMLInputElement).value })}
-            />
-          {:else if block.type === "code"}
-            <textarea
-              class="block-editor__input block-editor__input--code"
-              placeholder="Code..."
-              disabled={disabled}
-              value={block.content}
-              on:input={(e) => updateBlock(index, { content: (e.currentTarget as HTMLTextAreaElement).value })}
-              rows="3"
-            ></textarea>
-          {:else if block.type === "image"}
-            <div class="block-editor__image-block">
+        <div class="block-editor__content">
+          <slot
+            name="block"
+            {block}
+            {index}
+            disabled={disabled}
+            update={(updates: Partial<EditorBlock>) => updateBlock(index, updates)}
+          >
+            {#if block.type === "divider"}
+              <hr class="block-editor__divider" />
+            {:else if block.type === "heading"}
               <input
                 type="text"
-                class="block-editor__input block-editor__input--image-url"
-                placeholder="Image URL..."
+                class="block-editor__input block-editor__input--heading"
+                placeholder="Heading..."
                 disabled={disabled}
                 value={block.content}
                 on:input={(e) => updateBlock(index, { content: (e.currentTarget as HTMLInputElement).value })}
               />
-              {#if block.content}
-                <div class="block-editor__image-preview">
-                  <img src={block.content} alt="Block preview" />
-                </div>
-              {/if}
-            </div>
-          {:else if block.type === "quote"}
-            <textarea
-              class="block-editor__input block-editor__input--quote"
-              placeholder="Quote..."
-              disabled={disabled}
-              value={block.content}
-              on:input={(e) => updateBlock(index, { content: (e.currentTarget as HTMLTextAreaElement).value })}
-              rows="2"
-            ></textarea>
-          {:else if block.type === "list"}
-            <textarea
-              class="block-editor__input block-editor__input--list"
-              placeholder="List items (one per line)..."
-              disabled={disabled}
-              value={block.content}
-              on:input={(e) => updateBlock(index, { content: (e.currentTarget as HTMLTextAreaElement).value })}
-              rows="3"
-            ></textarea>
-          {:else}
-            <textarea
-              class="block-editor__input"
-              placeholder="Type something..."
-              disabled={disabled}
-              value={block.content}
-              on:input={(e) => updateBlock(index, { content: (e.currentTarget as HTMLTextAreaElement).value })}
-              rows="1"
-            ></textarea>
-          {/if}
-        </slot>
+            {:else if block.type === "code"}
+              <textarea
+                class="block-editor__input block-editor__input--code"
+                placeholder="Code..."
+                disabled={disabled}
+                value={block.content}
+                on:input={(e) => updateBlock(index, { content: (e.currentTarget as HTMLTextAreaElement).value })}
+                rows="3"
+              ></textarea>
+            {:else if block.type === "image"}
+              <div class="block-editor__image-block">
+                <input
+                  type="text"
+                  class="block-editor__input block-editor__input--image-url"
+                  placeholder="Image URL..."
+                  disabled={disabled}
+                  value={block.content}
+                  on:input={(e) => updateBlock(index, { content: (e.currentTarget as HTMLInputElement).value })}
+                />
+                {#if block.content}
+                  <div class="block-editor__image-preview">
+                    <img src={block.content} alt="Block preview" />
+                  </div>
+                {/if}
+              </div>
+            {:else if block.type === "quote"}
+              <textarea
+                class="block-editor__input block-editor__input--quote"
+                placeholder="Quote..."
+                disabled={disabled}
+                value={block.content}
+                on:input={(e) => updateBlock(index, { content: (e.currentTarget as HTMLTextAreaElement).value })}
+                rows="2"
+              ></textarea>
+            {:else if block.type === "list"}
+              <textarea
+                class="block-editor__input block-editor__input--list"
+                placeholder="List items (one per line)..."
+                disabled={disabled}
+                value={block.content}
+                on:input={(e) => updateBlock(index, { content: (e.currentTarget as HTMLTextAreaElement).value })}
+                rows="3"
+              ></textarea>
+            {:else}
+              <textarea
+                class="block-editor__input"
+                placeholder="Type something..."
+                disabled={disabled}
+                value={block.content}
+                on:input={(e) => updateBlock(index, { content: (e.currentTarget as HTMLTextAreaElement).value })}
+                rows="1"
+              ></textarea>
+            {/if}
+          </slot>
+        </div>
       </div>
-    </div>
-  {/each}
+    {/each}
 
-  {#if showAddMenu}
-    <!-- svelte-ignore a11y-click-events-have-key-events a11y-no-static-element-interactions -->
-    <div class="block-editor__add-overlay" on:click={() => (showAddMenu = false)}>
+    {#if showAddMenu}
       <!-- svelte-ignore a11y-click-events-have-key-events a11y-no-static-element-interactions -->
-      <div class="block-editor__add-menu" style={addMenuStyle} on:click|stopPropagation>
-        {#each blockTypes as bt}
-          <button
-            type="button"
-            class="block-editor__add-menu-item"
-            on:click={() => addBlock(bt.type, addMenuIndex)}
-          >
-            <span class="block-editor__add-menu-icon"><Icon icon={bt.icon} /></span>
-            <span>{bt.label}</span>
-          </button>
-        {/each}
+      <div class="block-editor__add-overlay" on:click={() => (showAddMenu = false)}>
+        <!-- svelte-ignore a11y-click-events-have-key-events a11y-no-static-element-interactions -->
+        <div class="block-editor__add-menu" style={addMenuStyle} on:click|stopPropagation>
+          {#each blockTypes as bt}
+            <button
+              type="button"
+              class="block-editor__add-menu-item"
+              on:click={() => addBlock(bt.type, addMenuIndex)}
+            >
+              <span class="block-editor__add-menu-icon"><Icon icon={bt.icon} /></span>
+              <span>{bt.label}</span>
+            </button>
+          {/each}
+        </div>
       </div>
-    </div>
-  {/if}
-</div>
+    {/if}
+  </div>
+</UiPresentationProvider>
 
 <style>
   .block-editor {
+    --poodle-block-editor-shell-x: 0.75rem;
+    --poodle-block-editor-shell-y: 0.75rem;
+    --poodle-block-editor-stack-gap: 0.5rem;
+    --poodle-block-editor-toolbar-y: 0.25rem;
+    --poodle-block-editor-toolbar-x: 0.375rem;
+    --poodle-block-editor-toolbar-gap: 0.125rem;
+    --poodle-block-editor-control-size: 1.5rem;
+    --poodle-block-editor-content-x: 0.5rem;
+    --poodle-block-editor-content-y: 0.375rem;
+    --poodle-block-editor-input-x: 0.375rem;
+    --poodle-block-editor-input-y: 0.25rem;
+    --poodle-block-editor-menu-gap: 0.25rem;
+    --poodle-block-editor-menu-pad: 0.5rem;
+    --poodle-block-editor-menu-item-pad: 0.5rem;
+    --poodle-block-editor-menu-min-width: 16rem;
     border: 0.0625rem solid var(--poodle-color-border-default);
     border-radius: var(--poodle-radius-surface);
     background: var(--poodle-color-background-surface);
-    padding: 0.75rem;
+    padding: var(--poodle-block-editor-shell-y) var(--poodle-block-editor-shell-x);
     display: flex;
     flex-direction: column;
-    gap: 0.5rem;
+    gap: var(--poodle-block-editor-stack-gap);
+  }
+
+  .block-editor[data-size="xs"] {
+    --poodle-block-editor-control-size: 1.25rem;
+    --poodle-block-editor-menu-min-width: 13rem;
+  }
+
+  .block-editor[data-size="sm"] {
+    --poodle-block-editor-control-size: 1.5rem;
+  }
+
+  .block-editor[data-size="md"] {
+    --poodle-block-editor-control-size: 1.75rem;
+  }
+
+  .block-editor[data-size="lg"] {
+    --poodle-block-editor-control-size: 2rem;
+    --poodle-block-editor-menu-min-width: 18rem;
+  }
+
+  .block-editor[data-size="xl"] {
+    --poodle-block-editor-control-size: 2.25rem;
+    --poodle-block-editor-menu-min-width: 20rem;
+  }
+
+  .block-editor[data-density="compact"] {
+    --poodle-block-editor-shell-x: 0.625rem;
+    --poodle-block-editor-shell-y: 0.625rem;
+    --poodle-block-editor-stack-gap: 0.375rem;
+    --poodle-block-editor-toolbar-y: 0.1875rem;
+    --poodle-block-editor-toolbar-x: 0.25rem;
+    --poodle-block-editor-content-x: 0.375rem;
+    --poodle-block-editor-content-y: 0.25rem;
+    --poodle-block-editor-input-x: 0.25rem;
+    --poodle-block-editor-input-y: 0.1875rem;
+    --poodle-block-editor-menu-pad: 0.375rem;
+    --poodle-block-editor-menu-item-pad: 0.375rem;
+  }
+
+  .block-editor[data-density="comfortable"] {
+    --poodle-block-editor-shell-x: 1rem;
+    --poodle-block-editor-shell-y: 1rem;
+    --poodle-block-editor-stack-gap: 0.625rem;
+    --poodle-block-editor-toolbar-y: 0.3125rem;
+    --poodle-block-editor-toolbar-x: 0.5rem;
+    --poodle-block-editor-content-x: 0.625rem;
+    --poodle-block-editor-content-y: 0.5rem;
+    --poodle-block-editor-input-x: 0.5rem;
+    --poodle-block-editor-input-y: 0.3125rem;
+    --poodle-block-editor-menu-pad: 0.625rem;
+    --poodle-block-editor-menu-item-pad: 0.625rem;
   }
 
   .block-editor--disabled {
@@ -344,7 +434,7 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 0.25rem 0.375rem;
+    padding: var(--poodle-block-editor-toolbar-y) var(--poodle-block-editor-toolbar-x);
     border-bottom: none;
     background: transparent;
     border-radius: var(--poodle-radius-control) var(--poodle-radius-control) 0 0;
@@ -354,15 +444,15 @@
   .block-editor__toolbar-right {
     display: flex;
     align-items: center;
-    gap: 0.125rem;
+    gap: var(--poodle-block-editor-toolbar-gap);
   }
 
   .block-editor__drag-grip {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    width: 1.25rem;
-    height: 1.25rem;
+    width: var(--poodle-block-editor-control-size);
+    height: var(--poodle-block-editor-control-size);
     color: var(--poodle-color-text-tertiary);
     cursor: grab;
     border-radius: var(--poodle-radius-control);
@@ -382,8 +472,8 @@
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    width: 1.25rem;
-    height: 1.25rem;
+    width: var(--poodle-block-editor-control-size);
+    height: var(--poodle-block-editor-control-size);
     padding: 0;
     border: 0;
     border-radius: var(--poodle-radius-control);
@@ -416,25 +506,26 @@
   }
 
   .block-editor__type-select {
-    padding: 0.0625rem 0.25rem;
+    min-height: var(--poodle-block-editor-control-size);
+    padding: 0.0625rem var(--poodle-block-editor-input-x);
     border: 0.0625rem solid var(--poodle-color-border-subtle);
     border-radius: var(--poodle-radius-control);
     background: transparent;
     color: var(--poodle-color-text-secondary);
     font: inherit;
-    font-size: 0.6875rem;
+    font-size: var(--poodle-typography-label-size);
     cursor: pointer;
   }
 
   .block-editor__content {
-    padding: 0.375rem 0.5rem;
+    padding: var(--poodle-block-editor-content-y) var(--poodle-block-editor-content-x);
     min-height: 1.5rem;
   }
 
   /* Default block input styles — available when using built-in rendering */
   .block-editor__input {
     width: 100%;
-    padding: 0.25rem 0.375rem;
+    padding: var(--poodle-block-editor-input-y) var(--poodle-block-editor-input-x);
     border: 0;
     background: transparent;
     color: var(--poodle-color-text-primary);
@@ -455,18 +546,18 @@
     font-size: 0.8125rem;
     background: color-mix(in srgb, var(--poodle-color-background-elevated) 72%, transparent);
     border-radius: var(--poodle-radius-control);
-    padding: 0.5rem;
+    padding: calc(var(--poodle-block-editor-input-y) * 2) calc(var(--poodle-block-editor-input-x) * 1.5);
   }
 
   .block-editor__input--quote {
     border-left: 0.1875rem solid var(--poodle-color-border-default);
-    padding-left: 0.625rem;
+    padding-left: calc(var(--poodle-block-editor-input-x) + 0.25rem);
     color: var(--poodle-color-text-secondary);
     font-style: italic;
   }
 
   .block-editor__input--list {
-    padding-left: 1rem;
+    padding-left: calc(var(--poodle-block-editor-input-x) + 0.625rem);
   }
 
   .block-editor__input--image-url {
@@ -484,7 +575,7 @@
   .block-editor__image-block {
     display: flex;
     flex-direction: column;
-    gap: 0.375rem;
+    gap: var(--poodle-block-editor-content-y);
   }
 
   .block-editor__image-preview img {
@@ -504,27 +595,27 @@
     position: fixed;
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(6rem, 1fr));
-    gap: 0.25rem;
-    padding: 0.5rem;
+    gap: var(--poodle-block-editor-menu-gap);
+    padding: var(--poodle-block-editor-menu-pad);
     border: 0.0625rem solid var(--poodle-color-border-default);
     border-radius: var(--poodle-radius-surface);
     background: var(--poodle-color-background-elevated);
     box-shadow: var(--poodle-elevation-overlay);
-    min-width: 16rem;
+    min-width: var(--poodle-block-editor-menu-min-width);
   }
 
   .block-editor__add-menu-item {
     display: flex;
     align-items: center;
-    gap: 0.375rem;
-    padding: 0.5rem;
+    gap: var(--poodle-block-editor-content-y);
+    padding: var(--poodle-block-editor-menu-item-pad);
     border: 0;
     border-radius: var(--poodle-radius-control);
     background: transparent;
     color: var(--poodle-color-text-primary);
     cursor: pointer;
     font: inherit;
-    font-size: 0.8125rem;
+    font-size: var(--poodle-typography-label-size);
     text-align: left;
     transition: background var(--poodle-motion-duration-interaction) var(--poodle-motion-easing-standard);
   }
@@ -535,7 +626,7 @@
 
   .block-editor__add-menu-icon {
     font-size: 0.875rem;
-    width: 1.25rem;
+    width: var(--poodle-block-editor-control-size);
     text-align: center;
   }
 </style>

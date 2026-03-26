@@ -58,7 +58,7 @@
               <span class="path">{token.path}</span>
               <span class="value-row">
                 {#if isColorToken(token.path)}
-                  <span class="swatch" style="background: {token.value};" />
+                  <span class="swatch" style="background: {token.value};"></span>
                 {/if}
                 <strong class="value">{token.value}</strong>
               </span>

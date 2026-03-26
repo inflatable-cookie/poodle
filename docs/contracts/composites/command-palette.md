@@ -1,7 +1,7 @@
 # CommandPalette
 
 Status: contract
-Updated: 2026-03-25
+Updated: 2026-03-26
 
 ## 1. Purpose
 
@@ -59,6 +59,9 @@ Uses `CommandActionItem` and `DiscoveryState` from `ActionDiscoveryPanel`.
 | `state` | `DiscoveryState` | `"ready"` | no | controls panel posture |
 | `ariaLabel` | `string \| null` | `null` | no | accessible label for dialog; falls back to `title` |
 | `invocationHint` | `string \| null` | `null` | no | keyboard shortcut hint displayed in header (e.g. "Cmd+K") |
+| `size` | `ControlSize \| null` | `null` | no | explicit semantic size override for header chips, close control, and nested search/results chrome |
+| `sizeRole` | `SemanticControlSizeRole` | `"control"` | no | semantic role used to resolve inherited size scale |
+| `density` | `ControlDensity \| null` | `null` | no | explicit density override for the palette shell and nested result spacing |
 
 ## 5. Events
 
@@ -116,6 +119,7 @@ Uses `CommandActionItem` and `DiscoveryState` from `ActionDiscoveryPanel`.
 - Width: `min(45rem, calc(100vw - 2rem))`
 - Max-height: `min(78vh, 52.5rem)`
 - Grid rows: `auto auto auto minmax(0, 1fr)`
+- Hint pill and close button now respond to semantic size rather than fixed compact geometry
 - Responsive (<=45rem): width adjusts, header goes single-column, reduced padding
 
 ## 9. Token Usage — Exact CSS Values

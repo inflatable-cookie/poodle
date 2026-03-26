@@ -1,7 +1,12 @@
 <script lang="ts">
   import { createEventDispatcher, tick } from "svelte";
 
-  import type { EditableLabelActivationMode } from "./types";
+  import { getUiPresentation, resolveSemanticControlSize } from "./presentation";
+
+  import type { ControlSize, EditableLabelActivationMode, SemanticControlSizeRole } from "./types";
+
+  export let size: ControlSize | null = null;
+  export let sizeRole: SemanticControlSizeRole = "control";
 
   export let value: string;
   export let ariaLabel = "Edit label";
@@ -14,6 +19,8 @@
   export let maxLength: number | null = null;
   export let showEditIcon = false;
 
+  const uiPresentation = getUiPresentation();
+
   const dispatch = createEventDispatcher<{
     editStart: void;
     commit: { value: string; previousValue: string };
@@ -24,6 +31,7 @@
   let draftValue = value;
   let inputElement: HTMLInputElement | null = null;
 
+  $: resolvedSize = size ?? resolveSemanticControlSize(uiPresentation?.sizeScale ?? "md", sizeRole);
   $: if (!isEditing) {
     draftValue = value;
   }
@@ -64,6 +72,7 @@
   data-editing={isEditing}
   data-disabled={disabled}
   data-variant={variant}
+  data-size={resolvedSize}
 >
   {#if isEditing}
     <input

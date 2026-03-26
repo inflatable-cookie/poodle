@@ -2,19 +2,27 @@
   import { createEventDispatcher } from "svelte";
 
   import IconButton from "./IconButton.svelte";
-  import type { BulkAction } from "./types";
+  import { getUiPresentation, resolveSemanticControlSize } from "./presentation";
+
+  import type { BulkAction, ControlSize, SemanticControlSizeRole } from "./types";
 
   export let selectionCount = 0;
   export let totalCount: number | null = null;
   export let actions: BulkAction[] = [];
+  export let sizeRole: SemanticControlSizeRole = "control";
+  export let size: ControlSize | null = null;
 
   const dispatch = createEventDispatcher<{
     action: { id: string };
     clear: void;
   }>();
+
+  const uiPresentation = getUiPresentation();
+
+  $: resolvedSize = size ?? resolveSemanticControlSize(uiPresentation?.sizeScale ?? "md", sizeRole);
 </script>
 
-<div class="bulk-action-bar" role="region" aria-label="Bulk actions">
+<div class="bulk-action-bar" role="region" aria-label="Bulk actions" data-size={resolvedSize}>
   <div class="bulk-action-bar__summary">
     <strong>{selectionCount} selected</strong>
     {#if totalCount !== null}

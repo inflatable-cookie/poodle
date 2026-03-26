@@ -7,8 +7,9 @@
 
   import RangeCalendar from "./RangeCalendar.svelte";
   import { formatDateLabel, monthAnchorIso, normalizeDateRange, todayIsoDate } from "./date";
+  import { getUiPresentation, resolveSemanticControlSize } from "./presentation";
 
-  import type { CalendarWeekStart, DateRangeValue } from "./types";
+  import type { CalendarWeekStart, ControlSize, DateRangeValue, SemanticControlSizeRole } from "./types";
 
   export let value: DateRangeValue | null = null;
   export let defaultValue: DateRangeValue = { start: null, end: null };
@@ -19,6 +20,8 @@
   export let locale = "en-US";
   export let disabled = false;
   export let ariaLabel: string | null = null;
+  export let size: ControlSize | null = null;
+  export let sizeRole: SemanticControlSizeRole = "control";
 
   const dispatch = createEventDispatcher<{
     valueChange: { value: DateRangeValue };
@@ -26,11 +29,13 @@
   }>();
 
   const surfaceId = `poodle-date-range-picker-surface-${++nextDateRangePickerId}`;
+  const uiPresentation = getUiPresentation();
   let rootElement: HTMLDivElement | null = null;
   let uncontrolledValue = normalizeDateRange(defaultValue);
   let uncontrolledOpen = defaultOpen;
   let visibleMonth = monthAnchorIso(defaultValue.start ?? todayIsoDate());
 
+  $: resolvedSize = size ?? resolveSemanticControlSize(uiPresentation?.sizeScale ?? "md", sizeRole);
   $: currentValue = normalizeDateRange(value ?? uncontrolledValue);
   $: isOpen = open ?? uncontrolledOpen;
   $: if (currentValue.start) {
@@ -96,7 +101,7 @@
   });
 </script>
 
-<div bind:this={rootElement} class="date-range-picker" data-open={isOpen}>
+<div bind:this={rootElement} class="date-range-picker" data-size={resolvedSize} data-open={isOpen}>
   <button
     type="button"
     class="date-range-picker__trigger"

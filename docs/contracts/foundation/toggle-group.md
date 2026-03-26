@@ -12,7 +12,8 @@ Updated: 2026-03-15
 - Summary: a grouped toggle surface for single-select or multi-select utility
   actions, presented as a wrapping set of pill-shaped items
 - In scope: single and multiple selection modes, grouped labeling, disabled
-  items, disabled group, accent-tinted selected state
+  items, disabled group, accent-tinted selected state, semantic size roles,
+  density-aware spacing, and explicit `xs | sm | md | lg | xl` size overrides
 - Out of scope: tab-panel navigation (see Tabs), segmented shell chrome (see
   SegmentedControl), standalone pressed-state buttons (see Toggle)
 
@@ -37,6 +38,9 @@ Updated: 2026-03-15
 | `value` | `string \| string[] \| null` | `null` | no | controlled selected value(s) |
 | `defaultValue` | `string \| string[] \| null` | `null` | no | uncontrolled initial value(s) |
 | `options` | `ToggleGroupOption[]` | none | yes | item list |
+| `size` | `"xs" \| "sm" \| "md" \| "lg" \| "xl" \| null` | `null` | no | explicit control size override |
+| `sizeRole` | `"chrome" \| "control" \| "prominent"` | `"control"` | no | semantic size offset from inherited presentation |
+| `density` | `"compact" \| "default" \| "comfortable" \| null` | `null` | no | explicit density override for gap and item padding |
 | `selectionMode` | `"single" \| "multiple"` | `"single"` | no | selection behavior |
 | `disabled` | `boolean` | `false` | no | disables whole group |
 | `ariaLabel` | `string \| null` | `null` | no | required when no visible label exists |
@@ -113,7 +117,8 @@ Updated: 2026-03-15
 
 ### Sizing
 
-- Items use compact pill-shaped sizing with shared control-height minus padding
+- Items use pill-shaped sizing with semantic size resolution and density-aware
+  horizontal padding
 - Group wraps when items exceed container width
 
 ### Composition
@@ -130,14 +135,17 @@ Updated: 2026-03-15
 |----------|-------|
 | `display` | `inline-flex` |
 | `flex-wrap` | `wrap` |
-| `gap` | `0.25rem` |
+| `gap` | `var(--poodle-toggle-group-gap)` |
+| `--poodle-toggle-group-height` | resolved from semantic size |
+| `--poodle-toggle-group-x` | resolved from density |
+| `--poodle-toggle-group-gap` | resolved from density |
 
 ### Item `.toggle-group__item`
 
 | Property | Value |
 |----------|-------|
-| `min-height` | `calc(var(--poodle-size-control-height) - 0.25rem)` |
-| `padding` | `0 0.75rem` |
+| `min-height` | `calc(var(--poodle-toggle-group-height) - 0.25rem)` |
+| `padding` | `0 var(--poodle-toggle-group-x)` |
 | `border` | `0.0625rem solid color-mix(in srgb, var(--poodle-color-border-subtle) 82%, transparent)` |
 | `border-radius` | `var(--poodle-radius-control)` |
 | `background` | `color-mix(in srgb, var(--poodle-surface) 72%, var(--poodle-color-background-elevated))` |

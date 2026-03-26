@@ -1,7 +1,7 @@
 <script lang="ts">
   import { BlockEditor } from "@poodle/svelte-composites";
   import type { EditorBlock, BlockTypeDefinition } from "@poodle/svelte-composites";
-  import { Eyebrow } from "@poodle/svelte-primitives";
+  import { Eyebrow, UiPresentationProvider } from "@poodle/svelte-primitives";
 
   let blocks: EditorBlock[] = [
     { id: "1", type: "heading", content: "Welcome to the Block Editor" },
@@ -33,6 +33,11 @@
   function handleCustomChange(event: CustomEvent<{ blocks: EditorBlock[] }>): void {
     customBlocks = event.detail.blocks;
   }
+
+  let compactBlocks: EditorBlock[] = [
+    { id: "s1", type: "heading", content: "Compact editor" },
+    { id: "s2", type: "paragraph", content: "This specimen shows semantic sizing rather than the old fixed micro-toolbar geometry." },
+  ];
 </script>
 
 <div class="specimen">
@@ -80,6 +85,16 @@
     </BlockEditor>
     <p class="specimen__count">{customBlocks.length} blocks</p>
   </div>
+
+  <div class="specimen__group">
+    <Eyebrow>Semantic presentation</Eyebrow>
+    <UiPresentationProvider density="compact" sizeScale="sm">
+      <div class="specimen__stack">
+        <BlockEditor blocks={compactBlocks} on:change={(event) => (compactBlocks = event.detail.blocks)} />
+        <BlockEditor blocks={compactBlocks} sizeRole="prominent" />
+      </div>
+    </UiPresentationProvider>
+  </div>
 </div>
 
 <style>
@@ -99,6 +114,11 @@
     margin: 0;
     font-size: 0.75rem;
     color: var(--poodle-color-text-tertiary);
+  }
+
+  .specimen__stack {
+    display: grid;
+    gap: 0.75rem;
   }
 
   .custom-callout {

@@ -2,25 +2,31 @@
   import { createEventDispatcher, onMount, tick } from "svelte";
 
   import { menuNavigableItems } from "./internal";
+  import { getUiPresentation, resolveSemanticControlSize } from "./presentation";
 
-  import type { MenuItem, OverlayPlacement } from "./types";
+  import type { ControlSize, MenuItem, OverlayPlacement, SemanticControlSizeRole } from "./types";
 
   export let items: MenuItem[] = [];
   export let open: boolean | null = null;
   export let defaultOpen = false;
   export let placement: OverlayPlacement = "bottom-start";
   export let ariaLabel: string | null = null;
+  export let sizeRole: SemanticControlSizeRole = "chrome";
+  export let size: ControlSize | null = null;
 
   const dispatch = createEventDispatcher<{
     openChange: { open: boolean };
     action: { value: string };
   }>();
 
+  const uiPresentation = getUiPresentation();
+
   let rootElement: HTMLDivElement | null = null;
   let itemElements: Array<HTMLButtonElement | null> = [];
   let uncontrolledOpen = defaultOpen;
   let highlightIndex = 0;
 
+  $: resolvedSize = size ?? resolveSemanticControlSize(uiPresentation?.sizeScale ?? "md", sizeRole);
   $: isControlled = open !== null;
   $: isOpen = isControlled ? open === true : uncontrolledOpen;
   $: actionableItems = menuNavigableItems(items);
@@ -111,7 +117,7 @@
   });
 </script>
 
-<div class="menu" bind:this={rootElement}>
+<div class="menu" bind:this={rootElement} data-size={resolvedSize}>
   <div
     class="menu__trigger"
     role="button"

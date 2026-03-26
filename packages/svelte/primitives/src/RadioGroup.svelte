@@ -5,7 +5,8 @@
 <script lang="ts">
   import { createEventDispatcher } from "svelte";
 
-  import type { Orientation, RadioGroupOption } from "./types";
+  import { getUiPresentation, resolveSemanticControlSize } from "./presentation";
+  import type { ControlSize, Orientation, RadioGroupOption, SemanticControlSizeRole } from "./types";
 
   export let value: string | null = null;
   export let defaultValue: string | null = null;
@@ -16,16 +17,20 @@
   export let describedBy: string | null = null;
   export let name: string | undefined = undefined;
   export let selectedColor: string | null = null;
+  export let size: ControlSize | null = null;
+  export let sizeRole: SemanticControlSizeRole = "control";
 
   const dispatch = createEventDispatcher<{
     valueChange: { value: string };
   }>();
 
   const generatedName = `poodle-radio-group-${++nextRadioGroupId}`;
+  const uiPresentation = getUiPresentation();
   let uncontrolledValue = defaultValue;
 
   $: isControlled = value !== null;
   $: currentValue = isControlled ? value : uncontrolledValue;
+  $: resolvedSize = size ?? resolveSemanticControlSize(uiPresentation?.sizeScale ?? "md", sizeRole);
   $: radioGroupStyles = selectedColor ? `--poodle-radio-selected-color: ${selectedColor}` : undefined;
 
   function handleChange(nextValue: string): void {
@@ -41,6 +46,7 @@
   class="radio-group"
   data-orientation={orientation}
   data-disabled={disabled}
+  data-size={resolvedSize}
   role="radiogroup"
   aria-label={ariaLabel ?? undefined}
   aria-describedby={describedBy ?? undefined}
@@ -141,5 +147,46 @@
     font-size: var(--poodle-typography-label-size);
     font-weight: var(--poodle-typography-label-weight);
     line-height: var(--poodle-typography-label-lineHeight);
+  }
+
+  /* Size variants */
+  .radio-group[data-size="xs"] .radio-group__indicator {
+    width: calc(var(--poodle-size-icon-default) - 0.125rem);
+    height: calc(var(--poodle-size-icon-default) - 0.125rem);
+  }
+
+  .radio-group[data-size="xs"] .radio-group__dot {
+    width: calc(var(--poodle-size-icon-default) * 0.4);
+    height: calc(var(--poodle-size-icon-default) * 0.4);
+  }
+
+  .radio-group[data-size="sm"] .radio-group__indicator {
+    width: var(--poodle-size-icon-default);
+    height: var(--poodle-size-icon-default);
+  }
+
+  .radio-group[data-size="sm"] .radio-group__dot {
+    width: calc(var(--poodle-size-icon-default) * 0.45);
+    height: calc(var(--poodle-size-icon-default) * 0.45);
+  }
+
+  .radio-group[data-size="lg"] .radio-group__indicator {
+    width: calc(var(--poodle-size-icon-default) + 0.375rem);
+    height: calc(var(--poodle-size-icon-default) + 0.375rem);
+  }
+
+  .radio-group[data-size="lg"] .radio-group__dot {
+    width: calc(var(--poodle-size-icon-default) * 0.55);
+    height: calc(var(--poodle-size-icon-default) * 0.55);
+  }
+
+  .radio-group[data-size="xl"] .radio-group__indicator {
+    width: calc(var(--poodle-size-icon-default) + 0.625rem);
+    height: calc(var(--poodle-size-icon-default) + 0.625rem);
+  }
+
+  .radio-group[data-size="xl"] .radio-group__dot {
+    width: calc(var(--poodle-size-icon-default) * 0.6);
+    height: calc(var(--poodle-size-icon-default) * 0.6);
   }
 </style>

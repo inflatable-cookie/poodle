@@ -331,13 +331,13 @@
           {sizeRole}
           density={density}
           items={tabItems}
-        value={activeItem?.value ?? ""}
-        reorderable={true}
-        ariaLabel={ariaLabel ?? `${edge} dock panels`}
-        on:valueChange={handleValueChange}
-        on:reorder={handleReorder}
-        on:close={handleClose}
-      />
+          value={activeItem?.value ?? ""}
+          reorderable={true}
+          ariaLabel={ariaLabel ?? `${edge} dock panels`}
+          on:valueChange={handleValueChange}
+          on:reorder={handleReorder}
+          on:close={handleClose}
+        />
     </div>
 
   {:else if showIconStrip}

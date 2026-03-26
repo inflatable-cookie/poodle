@@ -12,7 +12,8 @@ Updated: 2026-03-24
   per-state semantic coloring
 - In scope: three distinct states with fixed order (excluded, default,
   included), directional movement, labeled state options, customizable labels,
-  semantic color coding per state
+  semantic color coding per state, semantic size roles, density-aware spacing,
+  and explicit `xs | sm | md | lg | xl` size overrides
 - Out of scope: binary on/off toggles (see Switch), arbitrary multi-option
   segmentation (see SegmentedControl), free-form multi-select (see ToggleGroup)
 
@@ -42,6 +43,9 @@ Updated: 2026-03-24
 |------|------|---------|----------|-------|
 | `value` | `TriStateValue` | `"default"` | no | controlled ternary state |
 | `options` | `Record<TriStateValue, string>` | `{ excluded: "Exclude", default: "Default", included: "Include" }` | no | labels for each state |
+| `size` | `"xs" \| "sm" \| "md" \| "lg" \| "xl" \| null` | `null` | no | explicit control size override |
+| `sizeRole` | `"chrome" \| "control" \| "prominent"` | `"control"` | no | semantic size offset from inherited presentation |
+| `density` | `"compact" \| "default" \| "comfortable" \| null` | `null` | no | explicit density override for track inset and segment padding |
 | `disabled` | `boolean` | `false` | no | disables interaction |
 | `ariaLabel` | `string` | none | yes | names the ternary control (required) |
 | `excludedColor` | `string \| null` | `null` | no | optional color override for the selected excluded state |
@@ -120,7 +124,8 @@ required. Exactly one of three states is always selected.
 
 - Root uses CSS inline-grid with equal-width columns for all three states
 - The active capsule spans one-third of the track and moves horizontally
-- Labels share a stable common height derived from control-height token
+- Labels share a stable common height derived from the resolved semantic size
+- Track inset and segment padding respond to density
 - State labels are short and should remain untruncated
 
 ### Composition
@@ -141,7 +146,7 @@ required. Exactly one of three states is always selected.
 | `width` | `max-content` |
 | `grid-template-columns` | `repeat(3, minmax(0, 1fr))` |
 | `align-items` | `stretch` |
-| `padding` | `0.125rem` |
+| `padding` | `var(--poodle-tri-state-track-inset)` |
 | `border` | `0.0625rem solid var(--poodle-color-border-default)` |
 | `border-radius` | `999px` |
 | `background` | `color-mix(in srgb, var(--poodle-color-text-primary) 18%, var(--poodle-color-background-surface))` |
@@ -152,16 +157,20 @@ required. Exactly one of three states is always selected.
 | `--poodle-tri-state-excluded-track` | `color-mix(in srgb, var(--poodle-tri-state-excluded-color) 18%, var(--poodle-color-background-surface))` |
 | `--poodle-tri-state-default-track` | `color-mix(in srgb, var(--poodle-tri-state-default-color) 10%, var(--poodle-color-background-surface))` |
 | `--poodle-tri-state-included-track` | `color-mix(in srgb, var(--poodle-tri-state-included-color) 18%, var(--poodle-color-background-surface))` |
+| `--poodle-tri-state-height` | resolved from semantic size |
+| `--poodle-tri-state-x` | resolved from density |
+| `--poodle-tri-state-track-inset` | resolved from density |
+| `--poodle-tri-state-min-width` | resolved from semantic size |
 
 ### Selection `.tri-state-switch__selection`
 
 | Property | Value |
 |----------|-------|
 | `position` | `absolute` |
-| `top` | `0.125rem` |
-| `bottom` | `0.125rem` |
-| `left` | `0.125rem` |
-| `width` | `calc((100% - 0.25rem) / 3)` |
+| `top` | `var(--poodle-tri-state-track-inset)` |
+| `bottom` | `var(--poodle-tri-state-track-inset)` |
+| `left` | `var(--poodle-tri-state-track-inset)` |
+| `width` | `calc((100% - (var(--poodle-tri-state-track-inset) * 2)) / 3)` |
 | `border` | `0.0625rem solid transparent` |
 | `border-radius` | `999px` |
 | `box-shadow` | `inset 0 0.0625rem 0 color-mix(in srgb, white 8%, transparent), 0 0.125rem 0.5rem color-mix(in srgb, black 18%, transparent)` |
@@ -190,9 +199,9 @@ required. Exactly one of three states is always selected.
 | `display` | `flex` |
 | `align-items` | `center` |
 | `justify-content` | `center` |
-| `min-height` | `calc(var(--poodle-size-control-height) - 0.25rem)` |
-| `min-width` | `4.5rem` |
-| `padding` | `0 0.875rem` |
+| `min-height` | `calc(var(--poodle-tri-state-height) - (var(--poodle-tri-state-track-inset) * 2))` |
+| `min-width` | `var(--poodle-tri-state-min-width)` |
+| `padding` | `0 var(--poodle-tri-state-x)` |
 | `border-radius` | `999px` |
 | `color` | `var(--poodle-color-text-secondary)` |
 | `font-family` | `var(--poodle-typography-label-family)` |

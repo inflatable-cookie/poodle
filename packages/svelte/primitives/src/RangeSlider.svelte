@@ -2,8 +2,12 @@
   import { createEventDispatcher } from "svelte";
 
   import { clamp, joinStyles, snapToStep } from "./internal";
+  import { getUiPresentation, resolveSemanticControlSize } from "./presentation";
 
-  import type { Orientation } from "./types";
+  import type { ControlSize, Orientation, SemanticControlSizeRole } from "./types";
+
+  export let size: ControlSize | null = null;
+  export let sizeRole: SemanticControlSizeRole = "control";
 
   export let value: [number, number] = [0, 100];
   export let min = 0;
@@ -15,11 +19,14 @@
   export let lowerValueText: string | null = null;
   export let upperValueText: string | null = null;
 
+  const uiPresentation = getUiPresentation();
+
   const dispatch = createEventDispatcher<{
     valueChange: { value: [number, number] };
     valueCommit: { value: [number, number] };
   }>();
 
+  $: resolvedSize = size ?? resolveSemanticControlSize(uiPresentation?.sizeScale ?? "md", sizeRole);
   $: safeMax = max <= min ? min + 1 : max;
   $: lowerValue = clamp(Math.min(value[0], value[1]), min, safeMax);
   $: upperValue = clamp(Math.max(value[0], value[1]), min, safeMax);
@@ -41,7 +48,7 @@
   }
 </script>
 
-<div class="range-slider" data-orientation={orientation} data-disabled={disabled} style={rangeStyle}>
+<div class="range-slider" data-orientation={orientation} data-disabled={disabled} style={rangeStyle} data-size={resolvedSize}>
   <span class="range-slider__track" aria-hidden="true">
     <span class="range-slider__fill"></span>
   </span>

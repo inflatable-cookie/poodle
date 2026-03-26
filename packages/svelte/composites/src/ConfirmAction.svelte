@@ -1,9 +1,9 @@
 <script lang="ts">
   import { createEventDispatcher } from "svelte";
 
-  import { AlertDialog, Button } from "@poodle/svelte-primitives";
+  import { AlertDialog, Button, getUiPresentation, resolveSemanticControlSize } from "@poodle/svelte-primitives";
 
-  import type { AlertDialogTone } from "@poodle/svelte-primitives";
+  import type { AlertDialogTone, ControlSize, SemanticControlSizeRole } from "@poodle/svelte-primitives";
 
   export let title: string;
   export let description: string | null = null;
@@ -11,14 +11,19 @@
   export let triggerLabel = "Delete";
   export let confirmLabel = "Confirm";
   export let cancelLabel = "Cancel";
+  export let size: ControlSize | null = null;
+  export let sizeRole: SemanticControlSizeRole = "control";
 
   const dispatch = createEventDispatcher<{
     confirm: void;
     cancel: void;
   }>();
 
+  const uiPresentation = getUiPresentation();
+
   let open: boolean = false;
 
+  $: resolvedSize = size ?? resolveSemanticControlSize(uiPresentation?.sizeScale ?? "md", sizeRole);
   $: triggerTone = tone === "danger" ? "danger" as const : "default" as const;
 
   function handleTrigger(): void {
@@ -43,6 +48,7 @@
 {#if $$slots.trigger}
   <span
     class="confirm-action__trigger"
+    data-size={resolvedSize}
     role="presentation"
     on:click={handleTrigger}
     on:keydown={(e) => {

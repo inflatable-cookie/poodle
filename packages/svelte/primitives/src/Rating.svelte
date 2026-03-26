@@ -2,13 +2,20 @@
   import { createEventDispatcher } from "svelte";
 
   import Icon from "./Icon.svelte";
+  import { getUiPresentation, resolveSemanticControlSize } from "./presentation";
 
+  import type { ControlSize, SemanticControlSizeRole } from "./types";
+
+  export let size: ControlSize | null = null;
+  export let sizeRole: SemanticControlSizeRole = "control";
   export let value: number | null = null;
   export let defaultValue: number | null = null;
   export let max = 5;
   export let allowClear = false;
   export let disabled = false;
   export let ariaLabel: string | null = null;
+
+  const uiPresentation = getUiPresentation();
 
   const dispatch = createEventDispatcher<{
     valueChange: { value: number | null };
@@ -18,6 +25,7 @@
   let uncontrolledValue = defaultValue;
   let focusIndex = (defaultValue ?? 1) - 1;
 
+  $: resolvedSize = size ?? resolveSemanticControlSize(uiPresentation?.sizeScale ?? "md", sizeRole);
   $: currentValue = value ?? uncontrolledValue;
   $: itemCount = Math.max(1, Math.floor(max));
   $: if (currentValue !== null) {
@@ -49,7 +57,7 @@
   }
 </script>
 
-<div class="rating" role="radiogroup" aria-label={ariaLabel ?? undefined}>
+<div class="rating" role="radiogroup" aria-label={ariaLabel ?? undefined} data-size={resolvedSize}>
   {#each Array.from({ length: itemCount }, (_, index) => index) as index}
     <button
       bind:this={itemElements[index]}

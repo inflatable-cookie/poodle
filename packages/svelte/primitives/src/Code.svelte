@@ -1,4 +1,8 @@
 <script lang="ts">
+  import { getUiPresentation, resolveSemanticControlSize } from "./presentation";
+
+  import type { ControlSize, SemanticControlSizeRole } from "./types";
+
   export let source = "";
   export let language: string | null = null;
   export let showLineNumbers = false;
@@ -7,9 +11,14 @@
   export let maxHeight: string | null = null;
   export let inline = false;
   export let ariaLabel: string | null = null;
+  export let sizeRole: SemanticControlSizeRole = "chrome";
+  export let size: ControlSize | null = null;
+
+  const uiPresentation = getUiPresentation();
 
   let copied = false;
 
+  $: resolvedSize = size ?? resolveSemanticControlSize(uiPresentation?.sizeScale ?? "md", sizeRole);
   $: lines = source.split("\n");
   $: highlightSet = new Set(highlightLines);
 
@@ -25,7 +34,7 @@
 </script>
 
 {#if inline}
-  <code class="code code--inline" aria-label={ariaLabel ?? undefined} data-language={language}>
+  <code class="code code--inline" aria-label={ariaLabel ?? undefined} data-language={language} data-size={resolvedSize}>
     {source}
   </code>
 {:else}
@@ -33,6 +42,7 @@
     class="code code--block"
     aria-label={ariaLabel ?? `Code block${language ? ` (${language})` : ""}`}
     data-language={language}
+    data-size={resolvedSize}
     style={maxHeight ? `max-height: ${maxHeight}` : undefined}
   >
     {#if language || showCopyButton}

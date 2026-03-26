@@ -1,7 +1,7 @@
 # AudioPlayer
 
 Status: seed contract
-Updated: 2026-03-19
+Updated: 2026-03-26
 
 ## 1. Purpose
 
@@ -39,25 +39,28 @@ Updated: 2026-03-19
 | `src` | `string` | (required) | Audio source URL |
 | `ariaLabel` | `string` | `"Audio player"` | Accessible label for the root container |
 | `showSpeedControl` | `boolean` | `false` | Show playback speed selector |
+| `size` | `ControlSize \| null` | `null` | Explicit semantic size override for transport controls |
+| `sizeRole` | `SemanticControlSizeRole` | `"control"` | Semantic role used to resolve inherited size scale |
+| `density` | `ControlDensity \| null` | `null` | Explicit density override for shell spacing |
 
 ## 4. Visual Rules
 
 ### Container
 - Background: `background-surface`
 - Border: `1px solid border-default`, `radius-surface`
-- Padding: `0.5rem 0.75rem`
-- Layout: flex row, `0.5rem` gap, vertically centered
+- Padding: density-aware shell padding
+- Layout: flex row, density-aware gap, vertically centered
 
 ### Play / Mute Buttons
-- Size: `2rem × 2rem`, icon `1rem × 1rem`
+- Size: semantic control boxes tied to `xs | sm | md | lg | xl`; icon scales with control size
 - Background: transparent; hover: `accent-base` at 12% opacity
 - Color: `text-primary`
 - Focus: `border-width-focus` solid `accent-focusRing`, offset `0.0625rem`
 
 ### Time Labels
-- Font: `typography-code-family`, `0.6875rem`
+- Font: `typography-code-family`, semantic label size
 - Color: `text-secondary`
-- Min-width: `2.5rem`, centered
+- Min-width: semantic size-driven width, centered
 
 ### Seek Slider
 - Track: `0.25rem` tall, `0.125rem` radius, color `text-primary`
@@ -70,7 +73,7 @@ Updated: 2026-03-19
 ### Speed Select
 - Border: `1px solid border-default`, `radius-control`
 - Background: transparent
-- Font: `typography-code-family`, `0.6875rem`
+- Font: `typography-code-family`, semantic label size
 - Color: `text-secondary`
 
 ## 5. Accessibility

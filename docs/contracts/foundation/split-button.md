@@ -352,7 +352,7 @@ Primary-half loading uses the shared [`Spinner`](./spinner.md) primitive with
 ### Tier 2: Visual Parity
 
 - [ ] all three variant color schemes plus danger tone combinations match exactly
-- [ ] all three sizes match (height, font-size)
+- [ ] all five sizes match (height, font-size)
 - [ ] divider appearance matches (22% text opacity, 60% height)
 - [ ] menu panel appearance matches (border, radius, background, shadow)
 - [ ] item hover state matches (16% accent-base)
