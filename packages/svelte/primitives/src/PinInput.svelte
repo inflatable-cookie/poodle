@@ -110,4 +110,10 @@
   .pin-input__cell:disabled {
     opacity: var(--poodle-state-opacity-disabled);
   }
+
+  /* Size variants */
+  .pin-input[data-size="xs"] .pin-input__cell { width: calc(var(--poodle-size-control-height) - 0.5rem); height: calc(var(--poodle-size-control-height) - 0.25rem); font-size: 0.8125rem; }
+  .pin-input[data-size="sm"] .pin-input__cell { width: calc(var(--poodle-size-control-height) - 0.25rem); height: var(--poodle-size-control-height); font-size: 0.875rem; }
+  .pin-input[data-size="lg"] .pin-input__cell { width: calc(var(--poodle-size-control-height) + 0.25rem); height: calc(var(--poodle-size-control-height) + 0.5rem); font-size: 1.125rem; }
+  .pin-input[data-size="xl"] .pin-input__cell { width: calc(var(--poodle-size-control-height) + 0.5rem); height: calc(var(--poodle-size-control-height) + 0.75rem); font-size: 1.25rem; }
 </style>

@@ -1,6 +1,8 @@
 <script lang="ts">
   import { Switch, Eyebrow } from "@poodle/svelte-primitives";
 
+  const controlSizes = ["xs", "sm", "md", "lg", "xl"] as const;
+
   let darkMode = true;
   let autoSave = false;
   let compactView = true;
@@ -24,6 +26,15 @@
       checked={compactView}
       on:checkedChange={(e) => (compactView = e.detail.checked)}
     />
+  </div>
+
+  <div class="specimen__group">
+    <Eyebrow>Sizes</Eyebrow>
+    <div class="specimen__row">
+      {#each controlSizes as size}
+        <Switch label="Enabled" {size} />
+      {/each}
+    </div>
   </div>
 
   <div class="specimen__group">
@@ -61,5 +72,12 @@
     display: flex;
     flex-direction: column;
     gap: 0.625rem;
+  }
+
+  .specimen__row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.75rem;
   }
 </style>

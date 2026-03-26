@@ -1,6 +1,8 @@
 <script lang="ts">
   import { Checkbox, Eyebrow } from "@poodle/svelte-primitives";
 
+  const controlSizes = ["xs", "sm", "md", "lg", "xl"] as const;
+
   let notifications = true;
   let marketing = false;
   let terms = false;
@@ -24,6 +26,15 @@
       checked={terms}
       on:checkedChange={(e) => (terms = e.detail.checked)}
     />
+  </div>
+
+  <div class="specimen__group">
+    <Eyebrow>Sizes</Eyebrow>
+    <div class="specimen__row">
+      {#each controlSizes as size}
+        <Checkbox label="Accept terms" {size} />
+      {/each}
+    </div>
   </div>
 
   <div class="specimen__group">
@@ -52,5 +63,12 @@
     display: flex;
     flex-direction: column;
     gap: 0.625rem;
+  }
+
+  .specimen__row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.75rem;
   }
 </style>

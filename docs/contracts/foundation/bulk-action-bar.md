@@ -42,6 +42,8 @@ Updated: 2026-03-15
 |------|------|---------|----------|-------|
 | `selectionCount` | `number` | `0` | no | number of selected items |
 | `totalCount` | `number \| null` | `null` | no | total item count for "of N" display |
+| `size` | `"xs" \| "sm" \| "md" \| "lg" \| "xl"` | `null` | no | explicit control size override; when null, resolves from inherited presentation |
+| `sizeRole` | `"chrome" \| "control" \| "prominent"` | `"control"` | no | semantic size offset from inherited presentation |
 | `actions` | `BulkAction[]` | — | yes | available bulk action definitions |
 
 ### BulkAction Type
@@ -181,8 +183,19 @@ type BulkAction = {
 | `outline` | `var(--poodle-border-width-focus) solid var(--poodle-color-accent-focusRing)` |
 | `outline-offset` | `0.125rem` |
 
+### Size adjustments
+
+| Size | button min-height | button font-size |
+|------|------------------|-----------------|
+| `xs` | `calc(control-height - 0.5rem)` | `0.6875rem` |
+| `sm` | `calc(control-height - 0.375rem)` | `0.75rem` |
+| `md` | `control-height` | `typography-label-size` |
+| `lg` | `calc(control-height + 0.375rem)` | `0.875rem` |
+| `xl` | `calc(control-height + 0.5rem)` | `0.9375rem` |
+
 ## 9. Svelte Notes
 
+- `data-size` attribute on root reflects the resolved size
 - Bar typically conditionally rendered when `selectionCount > 0`
 - `data-tone` attribute on danger action buttons
 - Summary text uses template: `"{selectionCount} selected"` with optional
@@ -211,6 +224,7 @@ type BulkAction = {
 
 ### Tier 2: Visual Parity
 
+- [ ] all five sizes visually match per size table
 - [ ] accent-tinted background matches (10% accent-base)
 - [ ] padding and gap match
 - [ ] border and border-radius match

@@ -370,4 +370,47 @@
     cursor: not-allowed;
     opacity: var(--poodle-state-opacity-disabled);
   }
+
+  /* Size variants */
+  .menubar[data-size="xs"] .menubar__trigger {
+    min-height: calc(var(--poodle-size-control-height) - 0.75rem);
+    padding: 0 calc(var(--poodle-space-control-x) - 0.125rem);
+    font-size: 0.6875rem;
+  }
+
+  .menubar[data-size="xs"] .menubar__item {
+    min-height: calc(var(--poodle-size-control-height) - 0.75rem);
+    font-size: 0.75rem;
+  }
+
+  .menubar[data-size="sm"] .menubar__trigger {
+    min-height: calc(var(--poodle-size-control-height) - 0.625rem);
+    padding: 0 calc(var(--poodle-space-control-x) - 0.0625rem);
+  }
+
+  .menubar[data-size="sm"] .menubar__item {
+    min-height: calc(var(--poodle-size-control-height) - 0.625rem);
+  }
+
+  .menubar[data-size="lg"] .menubar__trigger {
+    min-height: calc(var(--poodle-size-control-height) + 0.125rem);
+    padding: 0 calc(var(--poodle-space-control-x) + 0.125rem);
+    font-size: 0.875rem;
+  }
+
+  .menubar[data-size="lg"] .menubar__item {
+    min-height: calc(var(--poodle-size-control-height) + 0.125rem);
+    font-size: 0.9375rem;
+  }
+
+  .menubar[data-size="xl"] .menubar__trigger {
+    min-height: calc(var(--poodle-size-control-height) + 0.25rem);
+    padding: 0 calc(var(--poodle-space-control-x) + 0.1875rem);
+    font-size: 0.9375rem;
+  }
+
+  .menubar[data-size="xl"] .menubar__item {
+    min-height: calc(var(--poodle-size-control-height) + 0.25rem);
+    font-size: 1rem;
+  }
 </style>

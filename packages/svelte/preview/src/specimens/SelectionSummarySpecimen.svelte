@@ -2,6 +2,8 @@
   import { SelectionSummary } from "@poodle/svelte-composites";
   import { Eyebrow } from "@poodle/svelte-primitives";
 
+  const controlSizes = ["xs", "sm", "md", "lg", "xl"] as const;
+
   let items = [
     { id: "1", label: "Button" },
     { id: "2", label: "Card" },
@@ -25,6 +27,18 @@
   <div class="specimen__group">
     <Eyebrow>Single item</Eyebrow>
     <SelectionSummary items={[{ id: "1", label: "Primary button" }]} selectionMode="single" />
+  </div>
+
+  <div class="specimen__group">
+    <Eyebrow>Sizes</Eyebrow>
+    <div class="specimen__stack">
+      {#each controlSizes as size}
+        <SelectionSummary
+          items={[{ id: "1", label: "Button" }, { id: "2", label: "Card" }, { id: "3", label: "Dialog" }]}
+          {size}
+        />
+      {/each}
+    </div>
   </div>
 
   <div class="specimen__group">
@@ -54,5 +68,11 @@
     display: flex;
     flex-direction: column;
     gap: 0.5rem;
+  }
+
+  .specimen__stack {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
   }
 </style>

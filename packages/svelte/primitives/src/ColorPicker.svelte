@@ -892,4 +892,45 @@
     border-color: var(--poodle-color-text-primary);
     box-shadow: 0 0 0 0.0625rem var(--poodle-color-background-surface);
   }
+
+  /* Size variants */
+  .color-picker[data-size="xs"] .color-picker__trigger {
+    width: 1.75rem;
+    height: 1.75rem;
+  }
+
+  .color-picker[data-size="xs"] .color-picker__input {
+    height: 1.75rem;
+    font-size: 0.6875rem;
+  }
+
+  .color-picker[data-size="sm"] .color-picker__trigger {
+    width: 2rem;
+    height: 2rem;
+  }
+
+  .color-picker[data-size="sm"] .color-picker__input {
+    height: 2rem;
+    font-size: 0.75rem;
+  }
+
+  .color-picker[data-size="lg"] .color-picker__trigger {
+    width: 2.5rem;
+    height: 2.5rem;
+  }
+
+  .color-picker[data-size="lg"] .color-picker__input {
+    height: 2.5rem;
+    font-size: 0.875rem;
+  }
+
+  .color-picker[data-size="xl"] .color-picker__trigger {
+    width: 2.75rem;
+    height: 2.75rem;
+  }
+
+  .color-picker[data-size="xl"] .color-picker__input {
+    height: 2.75rem;
+    font-size: 0.9375rem;
+  }
 </style>

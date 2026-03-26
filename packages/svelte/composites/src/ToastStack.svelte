@@ -144,4 +144,80 @@
     display: flex;
     justify-content: flex-start;
   }
+
+  /* ── Size variants ──────────────────────────────────────────── */
+
+  .toast-stack[data-size="xs"] .toast {
+    padding: 0.375rem 0.5rem;
+    padding-right: calc(0.5rem + 1.25rem);
+  }
+
+  .toast-stack[data-size="xs"] .toast__dismiss {
+    width: 1rem;
+    height: 1rem;
+    top: 0.25rem;
+    right: 0.25rem;
+  }
+
+  .toast-stack[data-size="xs"] .toast__copy p {
+    font-size: 0.6875rem;
+  }
+
+  .toast-stack[data-size="xs"] .toast__copy strong {
+    font-size: 0.71875rem;
+  }
+
+  .toast-stack[data-size="sm"] .toast {
+    padding: 0.5rem 0.625rem;
+    padding-right: calc(0.625rem + 1.375rem);
+  }
+
+  .toast-stack[data-size="sm"] .toast__dismiss {
+    width: 1.125rem;
+    height: 1.125rem;
+  }
+
+  .toast-stack[data-size="sm"] .toast__copy p {
+    font-size: 0.75rem;
+  }
+
+  .toast-stack[data-size="lg"] .toast {
+    padding: 0.75rem 0.875rem;
+    padding-right: calc(0.875rem + 1.75rem);
+  }
+
+  .toast-stack[data-size="lg"] .toast__dismiss {
+    width: 1.5rem;
+    height: 1.5rem;
+    top: 0.5rem;
+    right: 0.5rem;
+  }
+
+  .toast-stack[data-size="lg"] .toast__copy p {
+    font-size: 0.875rem;
+  }
+
+  .toast-stack[data-size="lg"] .toast__copy strong {
+    font-size: 0.9375rem;
+  }
+
+  .toast-stack[data-size="xl"] .toast {
+    padding: 0.875rem 1rem;
+    padding-right: calc(1rem + 2rem);
+  }
+
+  .toast-stack[data-size="xl"] .toast__dismiss {
+    width: 1.75rem;
+    height: 1.75rem;
+    top: 0.5rem;
+    right: 0.5rem;
+  }
+
+  .toast-stack[data-size="xl"] .toast__copy p {
+    font-size: 0.9375rem;
+  }
+
+  .toast-stack[data-size="xl"] .toast__copy strong {
+    font-size: 1rem;
+  }
 </style>

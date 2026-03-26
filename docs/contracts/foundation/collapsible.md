@@ -50,6 +50,8 @@ Updated: 2026-03-15
 | `title` | `string \| null` | `null` | no | visible heading text |
 | `description` | `string \| null` | `null` | no | visible supporting description |
 | `disabled` | `boolean` | `false` | no | suppresses interaction |
+| `size` | `"xs" \| "sm" \| "md" \| "lg" \| "xl"` | `null` | no | explicit control size override; when null, resolves from inherited presentation |
+| `sizeRole` | `"chrome" \| "control" \| "prominent"` | `"control"` | no | semantic size offset from inherited presentation |
 | `ariaLabel` | `string \| null` | `null` | no | accessible label when no title present |
 
 ### Slots
@@ -237,8 +239,19 @@ Updated: 2026-03-15
 | `padding-top` | `0.125rem` |
 | `transition` | `slide` — height animates from/to 0 over 180ms on mount/unmount |
 
+### Size adjustments
+
+| Size | title font-size | description font-size |
+|------|----------------|----------------------|
+| `xs` | `0.8125rem` | `0.6875rem` |
+| `sm` | `0.875rem` | `0.75rem` |
+| `md` | `1rem` | `0.8125rem` |
+| `lg` | `1.125rem` | `0.875rem` |
+| `xl` | `1.25rem` | `0.9375rem` |
+
 ## 9. Svelte Notes
 
+- `data-size` attribute on root reflects the resolved size
 - Uses `<Icon name="chevron-down" size="sm" />` for the indicator
 - Module-level `nextCollapsibleId` counter (incremented per instance) generates
   unique ARIA id pairs for trigger/content association
@@ -280,6 +293,7 @@ Updated: 2026-03-15
 
 ### Tier 2: Visual Parity
 
+- [ ] all five sizes visually match per size table
 - [ ] root border color-mix (42% border-subtle) matches
 - [ ] root background color-mix (88% elevated, surface) matches
 - [ ] root inset box-shadow (8% text-inverse) matches

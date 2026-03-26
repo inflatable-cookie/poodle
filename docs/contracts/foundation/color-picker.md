@@ -74,6 +74,8 @@ Updated: 2026-03-16
 | `open` | `boolean \| null` | `null` | no | controlled open state; `null` means uncontrolled |
 | `defaultOpen` | `boolean` | `false` | no | initial open state when uncontrolled |
 | `defaultMode` | `ColorInputMode` | `"hex"` | no | initial input mode (hex/rgb/hsl) |
+| `size` | `"xs" \| "sm" \| "md" \| "lg" \| "xl"` | `null` | no | explicit control size override; when null, resolves from inherited presentation |
+| `sizeRole` | `"chrome" \| "control" \| "prominent"` | `"control"` | no | semantic size offset from inherited presentation |
 
 ### Controlled And Uncontrolled
 
@@ -323,6 +325,16 @@ Updated: 2026-03-16
 | `border-color` | `var(--poodle-color-text-primary)` |
 | `box-shadow` | `0 0 0 0.0625rem var(--poodle-color-background-surface)` |
 
+### Size adjustments
+
+| Size | trigger width/height | input height | input font-size |
+|------|----------------------|--------------|-----------------|
+| `xs` | `1.75rem` | `1.75rem` | `0.6875rem` |
+| `sm` | `2rem` | `2rem` | `0.75rem` |
+| `md` | `2.25rem` | `2.25rem` | _(base)_ |
+| `lg` | `2.5rem` | `2.5rem` | `0.875rem` |
+| `xl` | `2.75rem` | `2.75rem` | `0.9375rem` |
+
 ## 9. Svelte Notes
 
 - Internal color model uses HSV (not HSL) for the gradient pad, as it maps
@@ -339,6 +351,7 @@ Updated: 2026-03-16
   rgbToHsl, hslToRgb, rgbToHsv, hsvToRgb, hexToHsv, hsvToHex, etc.
 - `min-height: 0` is applied to gradient thumb, slider wrappers, trigger,
   text inputs, and swatches to override the global button/input min-height reset
+- `data-size` attribute on root reflects the resolved size for CSS variant styling
 
 ## 10. GPUI Notes
 
@@ -372,6 +385,7 @@ Updated: 2026-03-16
 
 ### Tier 2: Visual Parity
 
+- [ ] all five sizes visually match (height, padding, font-size per size table)
 - [ ] root inline-flex without max-width matches
 - [ ] trigger 2.25rem square matches
 - [ ] surface width 24rem matches

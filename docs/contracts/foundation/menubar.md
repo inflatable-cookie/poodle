@@ -50,6 +50,8 @@ Updated: 2026-03-15
 | `value` | `string \| null` | `null` | no | controlled open menu value; null = uncontrolled |
 | `defaultValue` | `string \| null` | `null` | no | uncontrolled initial open menu |
 | `items` | `MenubarItem[]` | — | yes | top-level menu definitions with nested items |
+| `size` | `"xs" \| "sm" \| "md" \| "lg" \| "xl"` | `null` | no | explicit control size override; when null, resolves from inherited presentation |
+| `sizeRole` | `"chrome" \| "control" \| "prominent"` | `"chrome"` | no | semantic size offset from inherited presentation |
 | `ariaLabel` | `string \| null` | `null` | no | accessible label for the menubar |
 
 ### Type Definitions
@@ -302,8 +304,19 @@ MenuItem: {
 | `margin` | `0.25rem 0` |
 | `background` | `color-mix(in srgb, var(--poodle-color-border-subtle) 72%, transparent)` |
 
+### Size adjustments
+
+| Size | trigger min-height | trigger padding | trigger font-size | item min-height | item padding | item font-size |
+|------|-------------------|----------------|-------------------|----------------|--------------|----------------|
+| `xs` | `1.5rem` | `0 0.5rem` | `0.625rem` | `1.5rem` | `0.25rem 0.375rem` | `0.75rem` |
+| `sm` | `1.75rem` | `0 0.625rem` | `0.6875rem` | `1.75rem` | `0.3125rem 0.4375rem` | `0.8125rem` |
+| `md` | `2rem` | `0 0.75rem` | `0.75rem` | `2rem` | `0.375rem 0.5rem` | `0.875rem` |
+| `lg` | `2.25rem` | `0 0.875rem` | `0.8125rem` | `2.25rem` | `0.4375rem 0.5625rem` | `0.9375rem` |
+| `xl` | `2.5rem` | `0 1rem` | `0.875rem` | `2.5rem` | `0.5rem 0.625rem` | `1rem` |
+
 ## 9. Svelte Notes
 
+- `data-size` attribute on root reflects the resolved size
 - Module-level `nextMenubarId` counter for unique IDs across instances
 - Controlled/uncontrolled value via internal `uncontrolledValue` state
 - `focusIndex` tracks roving tabindex across triggers
@@ -362,6 +375,7 @@ MenuItem: {
 
 ### Tier 2: Visual Parity
 
+- [ ] all five sizes visually match per size table
 - [ ] list border uses border-subtle 72%, radius-surface, panel background 96%
 - [ ] list padding 0.1875rem and gap 0.125rem match
 - [ ] trigger uses label-family, 0.75rem, weight 600

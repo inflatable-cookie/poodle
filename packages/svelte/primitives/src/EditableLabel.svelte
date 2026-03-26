@@ -207,4 +207,28 @@
     box-shadow: none;
     background: transparent;
   }
+
+  /* Size variants */
+  .editable-label[data-size="xs"] .editable-label__display,
+  .editable-label[data-size="xs"] .editable-label__input {
+    padding: calc(var(--poodle-space-control-y) - 0.125rem) calc(var(--poodle-space-control-x) - 0.125rem);
+    font-size: 0.75rem;
+  }
+
+  .editable-label[data-size="sm"] .editable-label__display,
+  .editable-label[data-size="sm"] .editable-label__input {
+    padding: calc(var(--poodle-space-control-y) - 0.0625rem) calc(var(--poodle-space-control-x) - 0.0625rem);
+  }
+
+  .editable-label[data-size="lg"] .editable-label__display,
+  .editable-label[data-size="lg"] .editable-label__input {
+    padding: calc(var(--poodle-space-control-y) + 0.0625rem) calc(var(--poodle-space-control-x) + 0.125rem);
+    font-size: 0.9375rem;
+  }
+
+  .editable-label[data-size="xl"] .editable-label__display,
+  .editable-label[data-size="xl"] .editable-label__input {
+    padding: calc(var(--poodle-space-control-y) + 0.125rem) calc(var(--poodle-space-control-x) + 0.1875rem);
+    font-size: 1rem;
+  }
 </style>

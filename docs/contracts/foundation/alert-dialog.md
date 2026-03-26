@@ -47,6 +47,8 @@ Updated: 2026-03-26
 | `ariaLabel` | `string \| null` | `null` | no | optional explicit accessible name |
 | `workingLabel` | `string` | `"Working…"` | no | label shown while confirm work is in flight |
 | `onConfirm` | `(() => void \| Promise<void>) \| null` | `null` | no | callback invoked by the built-in confirm button; awaited when it returns a Promise |
+| `size` | `"xs" \| "sm" \| "md" \| "lg" \| "xl"` | `null` | no | explicit control size override; when null, resolves from inherited presentation |
+| `sizeRole` | `"chrome" \| "control" \| "prominent"` | `"control"` | no | semantic size offset from inherited presentation |
 | `onCancel` | `(() => void) \| null` | `null` | no | callback invoked by built-in cancel and dismissal paths |
 
 ### Slots
@@ -153,8 +155,13 @@ to the composed Dialog and Button components.
 | `dismissOnBackdrop` | `false` while working, `true` otherwise |
 | `showCloseButton` | `false` while working, `true` otherwise |
 
+### Size adjustments
+
+Size is delegated to the composed Dialog and Button components. The `size` and `sizeRole` props are passed through to Dialog.
+
 ## 9. Svelte Notes
 
+- `data-size` passed through to composed Dialog
 - Composes `Dialog` component directly; does not replicate Dialog internals
 - `working` state is internal and suppresses both dismiss routes and button reuse
 - Confirm handler awaits `onConfirm` when provided, otherwise dispatches `confirm`
@@ -181,6 +188,7 @@ to the composed Dialog and Button components.
 
 ### Tier 2: Visual Parity
 
+- [ ] all five sizes visually match per size table
 - [ ] cancel button is ghost variant
 - [ ] confirm button matches tone-to-variant mapping
 - [ ] Dialog visual presentation matches

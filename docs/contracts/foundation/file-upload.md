@@ -76,6 +76,8 @@ Updated: 2026-03-15
 | `validate` | `(file: File) => string \| null` | `undefined` | no | app-owned custom validation callback |
 | `compress` | `boolean` | `false` | no | compress raster images before they are added |
 | `compressionOptions` | `ImageCompressionOptions` | `DEFAULT_COMPRESSION` | no | image compression settings |
+| `size` | `"xs" \| "sm" \| "md" \| "lg" \| "xl"` | `null` | no | explicit control size override; when null, resolves from inherited presentation |
+| `sizeRole` | `"chrome" \| "control" \| "prominent"` | `"control"` | no | semantic size offset from inherited presentation |
 
 ### Public Methods
 
@@ -419,6 +421,16 @@ interface ImageCompressionOptions {
 | `width` | `0.875rem` |
 | `height` | `0.875rem` |
 
+### Size adjustments
+
+| Size | dropzone min-height | dropzone padding | icon size | label font-size | hint font-size |
+|------|---------------------|------------------|-----------|-----------------|----------------|
+| `xs` | `5rem` | `0.75rem` | `1.5rem` | `0.75rem` | `0.6875rem` |
+| `sm` | `6rem` | `1rem` | _(base)_ | _(base)_ | _(base)_ |
+| `md` | `8rem` | `1.5rem` | `2rem` | `0.875rem` | `0.75rem` |
+| `lg` | `10rem` | _(base)_ | _(base)_ | `0.9375rem` | _(base)_ |
+| `xl` | `12rem` | _(base)_ | `2.5rem` | `1rem` | _(base)_ |
+
 ## 9. Svelte Notes
 
 - Hidden `<input type="file">` is triggered programmatically via
@@ -434,6 +446,7 @@ interface ImageCompressionOptions {
 - `setError(id, message)` sets `item.status = "error"` and `item.error`
 - `clear()` revokes all preview URLs and empties the file list
 - File size formatting: bytes, KB, MB display
+- `data-size` attribute on root reflects the resolved size for CSS variant styling
 
 ## 10. GPUI Notes
 
@@ -465,6 +478,7 @@ interface ImageCompressionOptions {
 
 ### Tier 2: Visual Parity
 
+- [ ] all five sizes visually match (height, padding, font-size per size table)
 - [ ] dropzone min-height 8rem matches
 - [ ] dropzone dashed border 0.125rem matches
 - [ ] dropzone active accent border and 8% tint matches

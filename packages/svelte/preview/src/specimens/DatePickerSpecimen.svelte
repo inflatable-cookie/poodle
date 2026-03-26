@@ -1,6 +1,8 @@
 <script lang="ts">
   import { DatePicker, Eyebrow } from "@poodle/svelte-primitives";
 
+  const controlSizes = ["xs", "sm", "md", "lg", "xl"] as const;
+
   let selected = "";
 </script>
 
@@ -14,6 +16,15 @@
     {#if selected}
       <p>Selected: <strong>{selected}</strong></p>
     {/if}
+  </div>
+
+  <div class="specimen__group">
+    <Eyebrow>Sizes</Eyebrow>
+    <div class="specimen__stack">
+      {#each controlSizes as size}
+        <DatePicker {size} ariaLabel={size} />
+      {/each}
+    </div>
   </div>
 
   <div class="specimen__group">
@@ -36,6 +47,12 @@
   }
 
   .specimen__group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .specimen__stack {
     display: flex;
     flex-direction: column;
     gap: 0.5rem;

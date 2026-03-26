@@ -161,4 +161,10 @@
     cursor: not-allowed;
     opacity: var(--poodle-state-opacity-disabled);
   }
+
+  /* Size variants */
+  .pagination[data-size="xs"] .pagination__button { min-width: calc(var(--poodle-size-control-height) - 0.625rem); height: calc(var(--poodle-size-control-height) - 0.625rem); font-size: 0.6875rem; }
+  .pagination[data-size="sm"] .pagination__button { min-width: calc(var(--poodle-size-control-height) - 0.375rem); height: calc(var(--poodle-size-control-height) - 0.375rem); }
+  .pagination[data-size="lg"] .pagination__button { min-width: calc(var(--poodle-size-control-height) + 0.125rem); height: calc(var(--poodle-size-control-height) + 0.125rem); font-size: 0.875rem; }
+  .pagination[data-size="xl"] .pagination__button { min-width: calc(var(--poodle-size-control-height) + 0.375rem); height: calc(var(--poodle-size-control-height) + 0.375rem); font-size: 0.9375rem; }
 </style>

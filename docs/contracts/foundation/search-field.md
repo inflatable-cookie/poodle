@@ -47,6 +47,8 @@ Updated: 2026-03-15
 | `debounce` | `number \| null` | `null` | no | delays `valueChange` while typing |
 | `showClearButton` | `boolean` | `true` | no | whether clear button appears when value is non-empty |
 | `validationState` | `"none" \| "invalid" \| "valid" \| "pending"` | `"none"` | no | visual and assistive validation state |
+| `size` | `"xs" \| "sm" \| "md" \| "lg" \| "xl"` | `null` | no | explicit control size override; when null, resolves from inherited presentation |
+| `sizeRole` | `"chrome" \| "control" \| "prominent"` | `"control"` | no | semantic size offset from inherited presentation |
 
 ### Controlled And Uncontrolled
 
@@ -169,6 +171,12 @@ Section 8 for the full root, focus, validation, and disabled token tables.
 | `outline` | `var(--poodle-border-width-focus) solid var(--poodle-color-accent-focusRing)` |
 | `outline-offset` | `0.125rem` |
 
+### Size adjustments
+
+SearchField delegates `size` and `sizeRole` to the wrapped TextInput. No
+additional size-specific CSS rules exist on SearchField itself; all min-height,
+padding, and font-size scaling is inherited from the TextInput size adjustments.
+
 ## 9. Svelte Notes
 
 - Composes TextInput with `type="search"` rather than building a parallel
@@ -181,6 +189,7 @@ Section 8 for the full root, focus, validation, and disabled token tables.
 - Clear button visibility is conditional on value being non-empty AND
   `showClearButton` being true
 - Clear action both fires the `clear` event and resets the value to empty string
+- Emits `data-size` on root element reflecting the resolved size (via TextInput)
 
 ## 10. GPUI Notes
 
@@ -213,6 +222,7 @@ Section 8 for the full root, focus, validation, and disabled token tables.
 - [ ] clear button border-radius matches (treatment-radius - 0.0625rem)
 - [ ] focus ring on clear button matches
 - [ ] all TextInput visual parity items apply
+- [ ] all five sizes visually match (delegates to TextInput size adjustments)
 
 ### Tier 3: Implementation Freedom
 

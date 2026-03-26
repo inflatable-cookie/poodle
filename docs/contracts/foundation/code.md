@@ -68,6 +68,8 @@ Updated: 2026-03-15
 | `showCopyButton` | `boolean` | `true` | no | show copy-to-clipboard button |
 | `maxHeight` | `string \| null` | `null` | no | max-height for block container (inline style) |
 | `inline` | `boolean` | `false` | no | render as inline `<code>` element |
+| `size` | `"xs" \| "sm" \| "md" \| "lg" \| "xl"` | `null` | no | explicit control size override; when null, resolves from inherited presentation |
+| `sizeRole` | `"chrome" \| "control" \| "prominent"` | `"chrome"` | no | semantic size offset from inherited presentation |
 | `ariaLabel` | `string \| null` | `null` | no | accessible label for the code block |
 
 ### Controlled And Uncontrolled
@@ -277,8 +279,19 @@ Displays check icon when `copied` is true, copy icon otherwise.
 | `user-select` | `none` |
 | `font-variant-numeric` | `tabular-nums` |
 
+### Size adjustments
+
+| Size | source font-size | inline font-size |
+|------|-----------------|-----------------|
+| `xs` | `0.6875rem` | `0.6875em` |
+| `sm` | `0.75rem` | `0.75em` |
+| `md` | `0.8125rem` | `0.8125em` |
+| `lg` | `0.875rem` | `0.875em` |
+| `xl` | `0.9375rem` | `0.9375em` |
+
 ## 9. Svelte Notes
 
+- `data-size` attribute on root reflects the resolved size
 - Inline mode renders a single `<code>` element with class `code code--inline`
 - Block mode renders a `<div>` wrapper with `<pre><code>` inside
 - Toolbar rendered conditionally when `language` or `showCopyButton` is truthy
@@ -313,6 +326,7 @@ Displays check icon when `copied` is true, copy icon otherwise.
 
 ### Tier 2: Visual Parity
 
+- [ ] all five sizes visually match per size table
 - [ ] inline padding 0.125rem 0.375rem matches
 - [ ] inline border-radius 0.25rem matches
 - [ ] inline background color-mix (panel 72%, elevated) matches

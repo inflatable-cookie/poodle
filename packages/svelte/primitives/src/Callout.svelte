@@ -213,4 +213,62 @@
       justify-content: flex-start;
     }
   }
+
+  /* Size variants */
+  .callout[data-size="xs"] .callout__icon {
+    width: 1.125rem;
+    height: 1.125rem;
+    font-size: 0.625rem;
+  }
+
+  .callout[data-size="xs"] .callout__content strong {
+    font-size: 0.75rem;
+  }
+
+  .callout[data-size="xs"] .callout__content :global(p) {
+    font-size: 0.6875rem;
+  }
+
+  .callout[data-size="xs"] .callout__dismiss {
+    width: 1.375rem;
+    height: 1.375rem;
+  }
+
+  .callout[data-size="sm"] .callout__icon {
+    width: 1.25rem;
+    height: 1.25rem;
+  }
+
+  .callout[data-size="sm"] .callout__content :global(p) {
+    font-size: 0.75rem;
+  }
+
+  .callout[data-size="lg"] .callout__icon {
+    width: 1.5rem;
+    height: 1.5rem;
+    font-size: 0.8125rem;
+  }
+
+  .callout[data-size="lg"] .callout__content :global(p) {
+    font-size: 0.875rem;
+  }
+
+  .callout[data-size="xl"] .callout__icon {
+    width: 1.625rem;
+    height: 1.625rem;
+    font-size: 0.875rem;
+  }
+
+  .callout[data-size="xl"] .callout__content strong {
+    font-size: 0.9375rem;
+  }
+
+  .callout[data-size="xl"] .callout__content :global(p) {
+    font-size: 0.9375rem;
+  }
+
+  .callout[data-size="xl"] .callout__dismiss {
+    width: 2rem;
+    height: 2rem;
+  }
 </style>

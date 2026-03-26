@@ -255,4 +255,25 @@
     justify-content: flex-end;
     margin-top: var(--poodle-space-stack-lg);
   }
+
+  /* Size variants */
+  .dialog[data-size="xs"] .dialog__header strong {
+    font-size: 0.8125rem;
+  }
+
+  .dialog[data-size="xs"] .dialog__header p {
+    font-size: 0.75rem;
+  }
+
+  .dialog[data-size="sm"] .dialog__header strong {
+    font-size: 0.875rem;
+  }
+
+  .dialog[data-size="lg"] .dialog__header strong {
+    font-size: 1.0625rem;
+  }
+
+  .dialog[data-size="xl"] .dialog__header strong {
+    font-size: 1.125rem;
+  }
 </style>

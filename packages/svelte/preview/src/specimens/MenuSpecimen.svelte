@@ -17,6 +17,8 @@
     { value: "settings", label: "Settings…" },
   ];
 
+  const controlSizes = ["xs", "sm", "md", "lg", "xl"] as const;
+
   let lastAction = "";
 </script>
 
@@ -29,6 +31,17 @@
     {#if lastAction}
       <p>Last action: <strong>{lastAction}</strong></p>
     {/if}
+  </div>
+
+  <div class="specimen__group">
+    <Eyebrow>Sizes</Eyebrow>
+    <div class="specimen__row">
+      {#each controlSizes as size}
+        <Menu items={fileItems} ariaLabel={size + " menu"} {size}>
+          <Button variant="secondary" slot="trigger">{size.toUpperCase()}</Button>
+        </Menu>
+      {/each}
+    </div>
   </div>
 
   <div class="specimen__group">
@@ -49,6 +62,13 @@
   .specimen__group {
     display: flex;
     flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .specimen__row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
     gap: 0.5rem;
   }
 

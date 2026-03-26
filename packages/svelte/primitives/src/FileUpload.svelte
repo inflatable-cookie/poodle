@@ -502,4 +502,49 @@
     width: 0.875rem;
     height: 0.875rem;
   }
+
+  /* Size variants */
+  .file-upload[data-size="xs"] .file-upload__dropzone {
+    min-height: 5rem;
+    padding: 0.75rem;
+  }
+
+  .file-upload[data-size="xs"] .file-upload__icon {
+    width: 1.5rem;
+    height: 1.5rem;
+  }
+
+  .file-upload[data-size="xs"] .file-upload__label {
+    font-size: 0.75rem;
+  }
+
+  .file-upload[data-size="xs"] .file-upload__hint {
+    font-size: 0.6875rem;
+  }
+
+  .file-upload[data-size="sm"] .file-upload__dropzone {
+    min-height: 6rem;
+    padding: 1rem;
+  }
+
+  .file-upload[data-size="lg"] .file-upload__dropzone {
+    min-height: 10rem;
+  }
+
+  .file-upload[data-size="lg"] .file-upload__label {
+    font-size: 0.9375rem;
+  }
+
+  .file-upload[data-size="xl"] .file-upload__dropzone {
+    min-height: 12rem;
+  }
+
+  .file-upload[data-size="xl"] .file-upload__icon {
+    width: 2.5rem;
+    height: 2.5rem;
+  }
+
+  .file-upload[data-size="xl"] .file-upload__label {
+    font-size: 1rem;
+  }
 </style>

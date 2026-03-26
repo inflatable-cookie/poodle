@@ -39,6 +39,8 @@ Updated: 2026-03-11
 | `items` | `Array<{ value: string; label: string; href?: string; current?: boolean }>` | none | yes | hierarchy items |
 | `ariaLabel` | `string` | `"Breadcrumb"` | no | navigation label |
 | `maxVisibleItems` | `number \| null` | `null` | no | optional truncation threshold |
+| `size` | `"xs" \| "sm" \| "md" \| "lg" \| "xl"` | `null` | no | explicit control size override; when null, resolves from inherited presentation |
+| `sizeRole` | `"chrome" \| "control" \| "prominent"` | `"chrome"` | no | semantic size offset from inherited presentation |
 | `on:navigate` | — | — | no | Svelte event: `dispatch("navigate", { value: item.value })` |
 
 ### Controlled And Uncontrolled
@@ -136,8 +138,19 @@ State table is sufficient.
 |----------|-------|
 | `opacity` | `0.4` |
 
+### Size adjustments
+
+| Size | font-size |
+|------|-----------|
+| `xs` | `0.75rem` |
+| `sm` | `0.8125rem` |
+| `md` | `var(--poodle-typography-body-size)` |
+| `lg` | `0.9375rem` |
+| `xl` | `1rem` |
+
 ## 9. Svelte Notes
 
+- `data-size` attribute on root reflects the resolved size
 - expected substrate: semantic nav/list structure with links or buttons
 - wrapper strategy: truncation mechanics stay internal as long as current-item
   semantics remain intact
@@ -159,6 +172,7 @@ State table is sufficient.
 
 ### Tier 2: Visual Parity
 
+- [ ] all five sizes visually match per size table
 - [ ] hierarchy emphasis and separator treatment use comparable token roles
 
 ### Tier 3: Implementation Freedom

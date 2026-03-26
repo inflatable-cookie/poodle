@@ -35,6 +35,8 @@
     },
   ];
 
+  const controlSizes = ["xs", "sm", "md", "lg", "xl"] as const;
+
   let selectedFruit: string | null = null;
   let selectedGrouped: string | null = null;
 </script>
@@ -69,6 +71,21 @@
       {#if selectedGrouped}
         <p class="specimen__value">Selected: {selectedGrouped}</p>
       {/if}
+    </div>
+  </div>
+
+  <div class="specimen__group">
+    <Eyebrow>Sizes</Eyebrow>
+    <div class="specimen__stack">
+      {#each controlSizes as size}
+        <Select
+          id={"select-size-" + size}
+          options={fruitOptions}
+          placeholder={size.toUpperCase()}
+          ariaLabel={"Fruit at " + size}
+          {size}
+        />
+      {/each}
     </div>
   </div>
 
@@ -108,5 +125,11 @@
     font-size: 0.8125rem;
     color: var(--poodle-color-text-secondary);
     margin: 0;
+  }
+
+  .specimen__stack {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
   }
 </style>

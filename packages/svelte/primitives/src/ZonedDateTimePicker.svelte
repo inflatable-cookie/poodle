@@ -272,4 +272,28 @@
     cursor: not-allowed;
     opacity: var(--poodle-state-opacity-disabled);
   }
+
+  /* Size variants */
+  .zoned-date-time-picker[data-size="xs"] .zoned-date-time-picker__trigger {
+    min-height: calc(var(--poodle-size-control-height) - 0.5rem);
+    padding: 0 calc(var(--poodle-space-control-x) - 0.125rem);
+    font-size: 0.75rem;
+  }
+
+  .zoned-date-time-picker[data-size="sm"] .zoned-date-time-picker__trigger {
+    min-height: calc(var(--poodle-size-control-height) - 0.375rem);
+    padding: 0 calc(var(--poodle-space-control-x) - 0.0625rem);
+  }
+
+  .zoned-date-time-picker[data-size="lg"] .zoned-date-time-picker__trigger {
+    min-height: calc(var(--poodle-size-control-height) + 0.375rem);
+    padding: 0 calc(var(--poodle-space-control-x) + 0.125rem);
+    font-size: 0.9375rem;
+  }
+
+  .zoned-date-time-picker[data-size="xl"] .zoned-date-time-picker__trigger {
+    min-height: calc(var(--poodle-size-control-height) + 0.5rem);
+    padding: 0 calc(var(--poodle-space-control-x) + 0.1875rem);
+    font-size: 1rem;
+  }
 </style>

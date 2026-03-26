@@ -118,4 +118,87 @@
       inset 0 0 0 0.0625rem color-mix(in srgb, var(--poodle-color-border-subtle) 32%, transparent),
       0 0.375rem 1rem rgba(49, 66, 85, 0.03);
   }
+
+  /* ── Size variants ──────────────────────────────────────────── */
+
+  .selection-summary[data-size="xs"] {
+    font-size: 0.6875rem;
+  }
+
+  .selection-summary[data-size="xs"] .selection-summary__header button {
+    min-height: 1.25rem;
+    padding: 0 0.375rem;
+  }
+
+  .selection-summary[data-size="xs"] .selection-summary__chip {
+    min-height: 1rem;
+    padding: 0 0.5rem;
+    font-size: 0.6875rem;
+  }
+
+  .selection-summary[data-size="xs"] .selection-summary__overflow {
+    font-size: 0.6875rem;
+    line-height: 1.5rem;
+    padding: 0 0.375rem;
+  }
+
+  .selection-summary[data-size="sm"] {
+    font-size: 0.71875rem;
+  }
+
+  .selection-summary[data-size="sm"] .selection-summary__header button {
+    min-height: 1.375rem;
+  }
+
+  .selection-summary[data-size="sm"] .selection-summary__chip {
+    min-height: 1.125rem;
+    font-size: 0.71875rem;
+  }
+
+  .selection-summary[data-size="sm"] .selection-summary__overflow {
+    font-size: 0.71875rem;
+    line-height: 1.625rem;
+  }
+
+  .selection-summary[data-size="lg"] {
+    font-size: 0.8125rem;
+  }
+
+  .selection-summary[data-size="lg"] .selection-summary__header button {
+    min-height: 2.125rem;
+    padding: 0 0.875rem;
+  }
+
+  .selection-summary[data-size="lg"] .selection-summary__chip {
+    min-height: 1.75rem;
+    padding: 0 0.875rem;
+    font-size: 0.8125rem;
+  }
+
+  .selection-summary[data-size="lg"] .selection-summary__overflow {
+    font-size: 0.875rem;
+    line-height: 2.25rem;
+    padding: 0 0.75rem;
+  }
+
+  .selection-summary[data-size="xl"] {
+    font-size: 0.875rem;
+  }
+
+  .selection-summary[data-size="xl"] .selection-summary__header button {
+    min-height: 2.25rem;
+    padding: 0 1rem;
+  }
+
+  .selection-summary[data-size="xl"] .selection-summary__chip {
+    min-height: 2rem;
+    padding: 0 1rem;
+    font-size: 0.875rem;
+  }
+
+  .selection-summary[data-size="xl"] .selection-summary__overflow {
+    font-size: 0.9375rem;
+    line-height: 2.5rem;
+    padding: 0 0.875rem;
+  }
 </style>

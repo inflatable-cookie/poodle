@@ -192,4 +192,37 @@
     user-select: none;
     font-variant-numeric: tabular-nums;
   }
+
+  /* Size variants */
+  .code[data-size="xs"] .code__source {
+    font-size: 0.6875rem;
+  }
+
+  .code--inline[data-size="xs"] {
+    font-size: 0.6875em;
+  }
+
+  .code[data-size="sm"] .code__source {
+    font-size: 0.75rem;
+  }
+
+  .code--inline[data-size="sm"] {
+    font-size: 0.75em;
+  }
+
+  .code[data-size="lg"] .code__source {
+    font-size: 0.875rem;
+  }
+
+  .code--inline[data-size="lg"] {
+    font-size: 0.875em;
+  }
+
+  .code[data-size="xl"] .code__source {
+    font-size: 0.9375rem;
+  }
+
+  .code--inline[data-size="xl"] {
+    font-size: 0.9375em;
+  }
 </style>

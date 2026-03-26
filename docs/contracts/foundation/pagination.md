@@ -44,6 +44,8 @@ Updated: 2026-03-15
 | `currentPage` | `number` | `1` | no | active page (1-based) |
 | `totalPages` | `number` | `1` | no | total number of pages |
 | `siblingCount` | `number` | `1` | no | pages shown on each side of current |
+| `size` | `"xs" \| "sm" \| "md" \| "lg" \| "xl"` | `null` | no | explicit control size override; when null, resolves from inherited presentation |
+| `sizeRole` | `"chrome" \| "control" \| "prominent"` | `"control"` | no | semantic size offset from inherited presentation |
 | `ariaLabel` | `string \| null` | `null` | no | accessible name for nav element |
 
 ### Controlled And Uncontrolled
@@ -191,8 +193,19 @@ Updated: 2026-03-15
 | `font-size` | `0.75rem` |
 | `font-weight` | `600` |
 
+### Size adjustments
+
+| Size | button height | button min-width | button padding | button font-size |
+|------|--------------|-----------------|----------------|-----------------|
+| `xs` | `calc(control-height - 0.625rem)` | `1.75rem` | `0 0.5rem` | `0.625rem` |
+| `sm` | `calc(control-height - 0.375rem)` | `2rem` | `0 0.625rem` | `0.6875rem` |
+| `md` | `calc(control-height - 0.125rem)` | `2.25rem` | `0 0.75rem` | `0.75rem` |
+| `lg` | `calc(control-height + 0.125rem)` | `2.5rem` | `0 0.875rem` | `0.8125rem` |
+| `xl` | `calc(control-height + 0.375rem)` | `2.75rem` | `0 1rem` | `0.875rem` |
+
 ## 9. Svelte Notes
 
+- `data-size` attribute on root reflects the resolved size
 - Uses `<nav>` with `<button>` elements for page controls
 - Ellipsis rendered as decorative `<span>` with `aria-hidden="true"`
 - Page window computation uses siblingCount to determine visible range with ellipsis insertion
@@ -221,6 +234,7 @@ Updated: 2026-03-15
 
 ### Tier 2: Visual Parity
 
+- [ ] all five sizes visually match per size table
 - [ ] button sizing (min-width 2.25rem, height calc) matches
 - [ ] button typography (label-family, 0.75rem, 600) matches
 - [ ] current-page accent background (18% mix) matches

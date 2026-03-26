@@ -1,6 +1,8 @@
 <script lang="ts">
   import { DurationInput, Eyebrow } from "@poodle/svelte-primitives";
 
+  const controlSizes = ["xs", "sm", "md", "lg", "xl"] as const;
+
   let hours = 1;
   let minutes = 30;
   let seconds = 0;
@@ -17,6 +19,15 @@
       on:change={(e) => (lastChange = `${e.detail.totalSeconds}s total`)}
     />
     <p>Total: {hours}h {minutes}m {seconds}s</p>
+  </div>
+
+  <div class="specimen__group">
+    <Eyebrow>Sizes</Eyebrow>
+    <div class="specimen__stack">
+      {#each controlSizes as size}
+        <DurationInput hours={1} minutes={30} seconds={0} {size} />
+      {/each}
+    </div>
   </div>
 
   <div class="specimen__group">
@@ -48,6 +59,12 @@
     display: flex;
     flex-direction: column;
     gap: 0.5rem;
+  }
+
+  .specimen__stack {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
   }
 
   p { margin: 0; }

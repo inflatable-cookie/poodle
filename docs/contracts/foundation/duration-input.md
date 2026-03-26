@@ -54,6 +54,8 @@ Updated: 2026-03-15
 | `maxTotalSeconds` | `number \| null` | `null` | no | maximum total duration in seconds |
 | `disabled` | `boolean` | `false` | no | disables all fields |
 | `ariaLabel` | `string` | `"Duration"` | no | accessible name for the group |
+| `size` | `"xs" \| "sm" \| "md" \| "lg" \| "xl"` | `null` | no | explicit control size override; when null, resolves from inherited presentation |
+| `sizeRole` | `"chrome" \| "control" \| "prominent"` | `"control"` | no | semantic size offset from inherited presentation |
 
 ### Controlled And Uncontrolled
 
@@ -208,6 +210,16 @@ Updated: 2026-03-15
 | `line-height` | `1` |
 | `user-select` | `none` |
 
+### Size adjustments
+
+| Size | root padding | field width | field font-size | label font-size |
+|------|-------------|-------------|-----------------|-----------------|
+| `xs` | `0.125rem calc(space-control-x - 0.125rem)` | `1.5rem` | `0.75rem` | `0.5rem` |
+| `sm` | `0.1875rem calc(space-control-x - 0.0625rem)` | _(base)_ | _(base)_ | _(base)_ |
+| `md` | `0.25rem space-control-x` | `1.75rem` | `typography-body-size` | `0.5625rem` |
+| `lg` | `0.3125rem calc(space-control-x + 0.125rem)` | `2rem` | `0.9375rem` | _(base)_ |
+| `xl` | `0.375rem calc(space-control-x + 0.1875rem)` | `2.25rem` | `1rem` | _(base)_ |
+
 ## 9. Svelte Notes
 
 - Each field uses `inputmode="numeric"` and `pattern="[0-9]*"` for mobile keyboards
@@ -216,6 +228,7 @@ Updated: 2026-03-15
 - Values clamped to `maxHours` for hours, 0-59 for minutes/seconds
 - Total seconds validated against `minTotalSeconds` and `maxTotalSeconds`
 - `data-invalid` attribute set when out of bounds
+- `data-size` attribute on root reflects the resolved size for CSS variant styling
 
 ## 10. GPUI Notes
 
@@ -239,6 +252,7 @@ Updated: 2026-03-15
 
 ### Tier 2: Visual Parity
 
+- [ ] all five sizes visually match (height, padding, font-size per size table)
 - [ ] root border, radius, background match
 - [ ] focus-within accent border and shadow match
 - [ ] field focus background highlight matches

@@ -1,6 +1,8 @@
 <script lang="ts">
   import { TimeZoneSelect, Eyebrow } from "@poodle/svelte-primitives";
 
+  const controlSizes = ["xs", "sm", "md", "lg", "xl"] as const;
+
   let zone = "";
 </script>
 
@@ -14,6 +16,15 @@
     {#if zone}
       <p>Selected: <strong>{zone}</strong></p>
     {/if}
+  </div>
+
+  <div class="specimen__group">
+    <Eyebrow>Sizes</Eyebrow>
+    <div class="specimen__stack">
+      {#each controlSizes as size}
+        <TimeZoneSelect {size} ariaLabel={size} />
+      {/each}
+    </div>
   </div>
 
   <div class="specimen__group">
@@ -36,6 +47,12 @@
   }
 
   .specimen__group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .specimen__stack {
     display: flex;
     flex-direction: column;
     gap: 0.5rem;

@@ -1,6 +1,8 @@
 <script lang="ts">
   import { Eyebrow, CollapseToggle } from "@poodle/svelte-primitives";
 
+  const controlSizes = ["xs", "sm", "md", "lg", "xl"] as const;
+
   let collapsedLeft = false;
   let collapsedRight = false;
   let collapsedUp = false;
@@ -43,6 +45,15 @@
         />
         <span>Down {collapsedDown ? "(collapsed)" : "(expanded)"}</span>
       </div>
+    </div>
+  </div>
+
+  <div class="specimen__group">
+    <Eyebrow>Sizes</Eyebrow>
+    <div class="specimen__row">
+      {#each controlSizes as size}
+        <CollapseToggle direction="left" {size} />
+      {/each}
     </div>
   </div>
 

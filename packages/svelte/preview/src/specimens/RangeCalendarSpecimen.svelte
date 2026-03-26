@@ -1,6 +1,8 @@
 <script lang="ts">
   import { RangeCalendar, Eyebrow } from "@poodle/svelte-primitives";
 
+  const controlSizes = ["xs", "sm", "md", "lg", "xl"] as const;
+
   let range = { start: "", end: "" };
 </script>
 
@@ -14,6 +16,15 @@
     {#if range.start}
       <p>{range.start} → {range.end || "…"}</p>
     {/if}
+  </div>
+
+  <div class="specimen__group">
+    <Eyebrow>Sizes</Eyebrow>
+    <div class="specimen__stack">
+      {#each controlSizes as size}
+        <RangeCalendar {size} ariaLabel={size + " range calendar"} />
+      {/each}
+    </div>
   </div>
 
   <div class="specimen__group">
@@ -38,6 +49,12 @@
   }
 
   .specimen__group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .specimen__stack {
     display: flex;
     flex-direction: column;
     gap: 0.5rem;

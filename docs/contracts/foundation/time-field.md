@@ -36,6 +36,8 @@ Updated: 2026-03-15
 | `min` | `string \| null` | `null` | no | earliest allowed time |
 | `max` | `string \| null` | `null` | no | latest allowed time |
 | `step` | `number` | `60` | no | step increment in seconds |
+| `size` | `"xs" \| "sm" \| "md" \| "lg" \| "xl"` | `null` | no | explicit control size override; when null, resolves from inherited presentation |
+| `sizeRole` | `"chrome" \| "control" \| "prominent"` | `"control"` | no | semantic size offset from inherited presentation |
 | `disabled` | `boolean` | `false` | no | disables editing and interaction |
 | `ariaLabel` | `string \| null` | `null` | no | required when no external label exists |
 | `describedBy` | `string \| null` | `null` | no | aria-describedby target |
@@ -139,6 +141,23 @@ Updated: 2026-03-15
 | `cursor` | `not-allowed` |
 | `opacity` | `var(--poodle-state-opacity-disabled)` |
 
+### Size adjustments
+
+| Size | Property | Value |
+|------|----------|-------|
+| `xs` (`[data-size="xs"]`) | `min-height` | `calc(var(--poodle-size-control-height) - 0.5rem)` |
+| `xs` | `padding` | `0 calc(var(--poodle-space-control-x) - 0.125rem)` |
+| `xs` | `font-size` | `0.6875rem` |
+| `sm` (`[data-size="sm"]`) | `min-height` | `calc(var(--poodle-size-control-height) - 0.375rem)` |
+| `sm` | `padding` | `0 calc(var(--poodle-space-control-x) - 0.125rem)` |
+| `sm` | `font-size` | `0.75rem` |
+| `lg` (`[data-size="lg"]`) | `min-height` | `calc(var(--poodle-size-control-height) + 0.375rem)` |
+| `lg` | `padding` | `0 calc(var(--poodle-space-control-x) + 0.125rem)` |
+| `lg` | `font-size` | `0.875rem` |
+| `xl` (`[data-size="xl"]`) | `min-height` | `calc(var(--poodle-size-control-height) + 0.5rem)` |
+| `xl` | `padding` | `0 calc(var(--poodle-space-control-x) + 0.1875rem)` |
+| `xl` | `font-size` | `0.9375rem` |
+
 ## 9. Svelte Notes
 
 - Uses native `<input type="time">` for platform accessibility and time-entry UX
@@ -146,6 +165,7 @@ Updated: 2026-03-15
 - Public value uses local time strings in HH:MM or HH:MM:SS form
 - Browser-native time picker UI is allowed; Poodle does not override it
 - Treatment tokens may be added for themed styling with fallbacks
+- `data-size` data attribute on the input reflects the resolved size
 
 ## 10. GPUI Notes
 
@@ -174,6 +194,7 @@ Updated: 2026-03-15
 - [ ] typography (body-family, body-size, body-lineHeight) matches
 - [ ] focus ring (border-width-focus, accent-focusRing, 0.125rem offset) matches
 - [ ] disabled opacity matches
+- [ ] all five sizes visually match (height, padding, font-size per size table)
 
 ### Tier 3: Implementation Freedom
 

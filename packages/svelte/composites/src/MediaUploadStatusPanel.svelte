@@ -118,4 +118,42 @@
     background: var(--poodle-color-accent-default);
     transition: width 0.1s ease-out;
   }
+
+  /* ── Size variants ──────────────────────────────────────────── */
+
+  .media-upload-status-panel[data-size="xs"] {
+    font-size: 0.6875rem;
+  }
+
+  .media-upload-status-panel[data-size="xs"] .media-upload-status-panel__progress {
+    height: 0.25rem;
+    width: min(11rem, 100%);
+  }
+
+  .media-upload-status-panel[data-size="sm"] {
+    font-size: 0.75rem;
+  }
+
+  .media-upload-status-panel[data-size="sm"] .media-upload-status-panel__progress {
+    height: 0.3125rem;
+    width: min(12.5rem, 100%);
+  }
+
+  .media-upload-status-panel[data-size="lg"] {
+    font-size: 0.875rem;
+  }
+
+  .media-upload-status-panel[data-size="lg"] .media-upload-status-panel__progress {
+    height: 0.4375rem;
+    width: min(15.5rem, 100%);
+  }
+
+  .media-upload-status-panel[data-size="xl"] {
+    font-size: 0.9375rem;
+  }
+
+  .media-upload-status-panel[data-size="xl"] .media-upload-status-panel__progress {
+    height: 0.5rem;
+    width: min(17rem, 100%);
+  }
 </style>

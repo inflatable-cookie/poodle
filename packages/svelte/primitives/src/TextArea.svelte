@@ -155,4 +155,24 @@
   .text-area__control::placeholder {
     color: var(--poodle-color-text-secondary);
   }
+
+  /* Size variants */
+  .text-area[data-size="xs"] .text-area__control {
+    padding: calc(var(--poodle-space-control-y) - 0.125rem) calc(var(--poodle-space-control-x) - 0.125rem);
+    font-size: 0.75rem;
+  }
+
+  .text-area[data-size="sm"] .text-area__control {
+    padding: calc(var(--poodle-space-control-y) - 0.0625rem) calc(var(--poodle-space-control-x) - 0.0625rem);
+  }
+
+  .text-area[data-size="lg"] .text-area__control {
+    padding: calc(var(--poodle-space-control-y) + 0.0625rem) calc(var(--poodle-space-control-x) + 0.125rem);
+    font-size: 0.9375rem;
+  }
+
+  .text-area[data-size="xl"] .text-area__control {
+    padding: calc(var(--poodle-space-control-y) + 0.125rem) calc(var(--poodle-space-control-x) + 0.1875rem);
+    font-size: 1rem;
+  }
 </style>

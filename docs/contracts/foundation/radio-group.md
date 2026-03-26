@@ -51,6 +51,8 @@ Updated: 2026-03-24
 | `describedBy` | `string \| null` | `null` | no | aria-describedby target id |
 | `name` | `string \| undefined` | `undefined` | no | shared form name for all radio inputs; auto-generated via module-level counter when not provided |
 | `selectedColor` | `string \| null` | `null` | no | optional selected-state color override used for the selected indicator border and dot |
+| `size` | `"xs" \| "sm" \| "md" \| "lg" \| "xl"` | `null` | no | explicit control size override; when null, resolves from inherited presentation |
+| `sizeRole` | `"chrome" \| "control" \| "prominent"` | `"control"` | no | semantic size offset from inherited presentation |
 
 ### RadioGroupOption Type
 
@@ -245,6 +247,16 @@ Updated: 2026-03-24
 | `font-weight` | `var(--poodle-typography-label-weight)` |
 | `line-height` | `var(--poodle-typography-label-lineHeight)` |
 
+### Size adjustments
+
+| Size | indicator | dot |
+|------|-----------|-----|
+| `xs` | `calc(icon-default - 0.125rem)` | `calc(icon-default * 0.4)` |
+| `sm` | `icon-default` | `calc(icon-default * 0.45)` |
+| `md` | `1.125rem` | `0.5rem` |
+| `lg` | `calc(icon-default + 0.375rem)` | `calc(icon-default * 0.55)` |
+| `xl` | `calc(icon-default + 0.625rem)` | `calc(icon-default * 0.6)` |
+
 ## 9. Svelte Notes
 
 - Uses hidden native `<input type="radio">` elements for form semantics and
@@ -260,6 +272,7 @@ Updated: 2026-03-24
 - `data-disabled` attribute on each option drives per-option disabled styling
 - Native radio group keyboard behavior (arrow keys move selection) is inherited
   from the browser
+- Emits `data-size` on root element reflecting the resolved size
 
 ## 10. GPUI Notes
 
@@ -293,6 +306,7 @@ Updated: 2026-03-24
 - [ ] disabled opacity uses state-opacity-disabled
 - [ ] vertical gap uses space-stack-sm
 - [ ] horizontal gap uses space-inline-md
+- [ ] all five sizes visually match (indicator and dot per size table)
 
 ### Tier 3: Implementation Freedom
 

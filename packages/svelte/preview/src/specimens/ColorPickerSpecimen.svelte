@@ -1,6 +1,8 @@
 <script lang="ts">
   import { ColorPicker, Eyebrow } from "@poodle/svelte-primitives";
 
+  const controlSizes = ["xs", "sm", "md", "lg", "xl"] as const;
+
   let color = "#6366f1";
   let alphaColor = "#3b82f6";
 
@@ -15,6 +17,15 @@
     <Eyebrow>Basic picker</Eyebrow>
     <ColorPicker bind:value={color} />
     <p>Selected: <strong>{color}</strong></p>
+  </div>
+
+  <div class="specimen__group">
+    <Eyebrow>Sizes</Eyebrow>
+    <div class="specimen__row">
+      {#each controlSizes as size}
+        <ColorPicker value="#6366f1" {size} />
+      {/each}
+    </div>
   </div>
 
   <div class="specimen__group">
@@ -50,5 +61,6 @@
 <style>
   .specimen { display: flex; flex-direction: column; gap: 1.5rem; }
   .specimen__group { display: flex; flex-direction: column; gap: 0.5rem; }
+  .specimen__row { display: flex; flex-wrap: wrap; align-items: center; gap: 0.75rem; }
   p { margin: 0; }
 </style>

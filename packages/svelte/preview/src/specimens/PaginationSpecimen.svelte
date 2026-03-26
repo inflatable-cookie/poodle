@@ -1,6 +1,8 @@
 <script lang="ts">
   import { Pagination, Eyebrow } from "@poodle/svelte-primitives";
 
+  const controlSizes = ["xs", "sm", "md", "lg", "xl"] as const;
+
   let page1 = 1;
   let page2 = 5;
 </script>
@@ -15,6 +17,15 @@
       on:pageChange={(e) => (page1 = e.detail.page)}
     />
     <p>Page <strong>{page1}</strong> of 10</p>
+  </div>
+
+  <div class="specimen__group">
+    <Eyebrow>Sizes</Eyebrow>
+    <div class="specimen__stack">
+      {#each controlSizes as size}
+        <Pagination currentPage={1} totalPages={10} ariaLabel={size + " pagination"} {size} />
+      {/each}
+    </div>
   </div>
 
   <div class="specimen__group">
@@ -43,6 +54,12 @@
   }
 
   .specimen__group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .specimen__stack {
     display: flex;
     flex-direction: column;
     gap: 0.5rem;

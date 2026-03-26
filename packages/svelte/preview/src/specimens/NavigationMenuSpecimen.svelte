@@ -9,6 +9,8 @@
     { value: "changelog", label: "Changelog", disabled: true },
   ];
 
+  const controlSizes = ["xs", "sm", "md", "lg", "xl"] as const;
+
   let active = "components";
 </script>
 
@@ -24,6 +26,15 @@
       <p>Active section: <strong>{active}</strong></p>
     </NavigationMenu>
   </div>
+
+  <div class="specimen__group">
+    <Eyebrow>Sizes</Eyebrow>
+    <div class="specimen__stack">
+      {#each controlSizes as size}
+        <NavigationMenu {items} value="components" ariaLabel={size + " navigation"} {size} />
+      {/each}
+    </div>
+  </div>
 </div>
 
 <style>
@@ -34,6 +45,12 @@
   }
 
   .specimen__group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .specimen__stack {
     display: flex;
     flex-direction: column;
     gap: 0.5rem;

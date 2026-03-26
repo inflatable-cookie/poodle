@@ -42,6 +42,8 @@ Updated: 2026-03-15
 | `allowClear` | `boolean` | `false` | no | whether clicking the current value deselects it |
 | `disabled` | `boolean` | `false` | no | disables all items |
 | `ariaLabel` | `string \| null` | `null` | no | accessible group label |
+| `size` | `"xs" \| "sm" \| "md" \| "lg" \| "xl"` | `null` | no | explicit control size override; when null, resolves from inherited presentation |
+| `sizeRole` | `"chrome" \| "control" \| "prominent"` | `"control"` | no | semantic size offset from inherited presentation |
 
 ### Controlled And Uncontrolled
 
@@ -193,6 +195,16 @@ Updated: 2026-03-15
 | `name` | `"star"` |
 | `size` | `"sm"` |
 
+### Size adjustments
+
+| Size | item width/height | glyph font-size |
+|------|-------------------|-----------------|
+| `xs` | `calc(icon-default + 0.375rem)` | `0.75rem` |
+| `sm` | `calc(icon-default + 0.5rem)` | `0.875rem` |
+| `md` | `2rem` | `1rem` |
+| `lg` | `calc(icon-default + 1rem)` | `1.125rem` |
+| `xl` | `calc(icon-default + 1.25rem)` | `1.25rem` |
+
 ## 9. Svelte Notes
 
 - Uses the `Icon` component internally for star glyphs
@@ -202,6 +214,7 @@ Updated: 2026-03-15
   selected value and applied via `data-filled` attribute
 - Supports both controlled and uncontrolled patterns with `value` /
   `defaultValue` props
+- `data-size` attribute on root reflects the resolved size for CSS variant styling
 
 ## 10. GPUI Notes
 
@@ -224,6 +237,7 @@ Updated: 2026-03-15
 
 ### Tier 2: Visual Parity
 
+- [ ] all five sizes visually match (height, padding, font-size per size table)
 - [ ] 2rem x 2rem item touch targets
 - [ ] 0.125rem gap between items
 - [ ] unfilled color matches 78% secondary text mix

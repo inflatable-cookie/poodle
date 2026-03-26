@@ -1,8 +1,11 @@
 <script lang="ts">
   import { Drawer, Button, Eyebrow } from "@poodle/svelte-primitives";
 
+  const controlSizes = ["xs", "sm", "md", "lg", "xl"] as const;
+
   let rightOpen = false;
   let leftOpen = false;
+  let sizeOpenMap: Record<string, boolean> = {};
 </script>
 
 <div class="specimen">
@@ -21,6 +24,28 @@
         <Button on:click={() => (rightOpen = false)}>Save</Button>
       </svelte:fragment>
     </Drawer>
+  </div>
+
+  <div class="specimen__group">
+    <Eyebrow>Sizes</Eyebrow>
+    <div class="specimen__row">
+      {#each controlSizes as size}
+        <Button variant="secondary" {size} on:click={() => (sizeOpenMap[size] = true)}>{size}</Button>
+        <Drawer
+          open={sizeOpenMap[size] ?? false}
+          {size}
+          title="Drawer at {size}"
+          description="Header and action chrome scale with the size prop."
+          on:openChange={(e) => (sizeOpenMap[size] = e.detail.open)}
+        >
+          <p>Content at <strong>{size}</strong> size.</p>
+          <svelte:fragment slot="actions">
+            <Button variant="secondary" {size} on:click={() => (sizeOpenMap[size] = false)}>Cancel</Button>
+            <Button {size} on:click={() => (sizeOpenMap[size] = false)}>Save</Button>
+          </svelte:fragment>
+        </Drawer>
+      {/each}
+    </div>
   </div>
 
   <div class="specimen__group">
@@ -48,6 +73,13 @@
     display: flex;
     flex-direction: column;
     gap: 0.5rem;
+  }
+
+  .specimen__row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    align-items: center;
   }
 
   p {

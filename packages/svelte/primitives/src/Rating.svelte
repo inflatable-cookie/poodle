@@ -143,4 +143,14 @@
     cursor: not-allowed;
     opacity: var(--poodle-state-opacity-disabled);
   }
+
+  /* Size variants */
+  .rating[data-size="xs"] .rating__item { width: calc(var(--poodle-size-icon-default) + 0.375rem); height: calc(var(--poodle-size-icon-default) + 0.375rem); }
+  .rating[data-size="xs"] .rating__glyph { font-size: 0.75rem; }
+  .rating[data-size="sm"] .rating__item { width: calc(var(--poodle-size-icon-default) + 0.5rem); height: calc(var(--poodle-size-icon-default) + 0.5rem); }
+  .rating[data-size="sm"] .rating__glyph { font-size: 0.875rem; }
+  .rating[data-size="lg"] .rating__item { width: calc(var(--poodle-size-icon-default) + 1rem); height: calc(var(--poodle-size-icon-default) + 1rem); }
+  .rating[data-size="lg"] .rating__glyph { font-size: 1.125rem; }
+  .rating[data-size="xl"] .rating__item { width: calc(var(--poodle-size-icon-default) + 1.25rem); height: calc(var(--poodle-size-icon-default) + 1.25rem); }
+  .rating[data-size="xl"] .rating__glyph { font-size: 1.25rem; }
 </style>

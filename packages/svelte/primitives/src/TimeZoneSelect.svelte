@@ -121,4 +121,44 @@
     line-height: 1;
     pointer-events: none;
   }
+
+  /* Size variants */
+  .time-zone-select[data-size="xs"] {
+    min-height: calc(var(--poodle-size-control-height) - 0.5rem);
+    padding: 0 calc(var(--poodle-space-control-x) - 0.125rem);
+  }
+
+  .time-zone-select[data-size="xs"] .time-zone-select__control {
+    height: calc(var(--poodle-size-control-height) - 0.5rem - (var(--poodle-border-width-default) * 2));
+    font-size: 0.75rem;
+  }
+
+  .time-zone-select[data-size="sm"] {
+    min-height: calc(var(--poodle-size-control-height) - 0.375rem);
+    padding: 0 calc(var(--poodle-space-control-x) - 0.0625rem);
+  }
+
+  .time-zone-select[data-size="sm"] .time-zone-select__control {
+    height: calc(var(--poodle-size-control-height) - 0.375rem - (var(--poodle-border-width-default) * 2));
+  }
+
+  .time-zone-select[data-size="lg"] {
+    min-height: calc(var(--poodle-size-control-height) + 0.375rem);
+    padding: 0 calc(var(--poodle-space-control-x) + 0.125rem);
+  }
+
+  .time-zone-select[data-size="lg"] .time-zone-select__control {
+    height: calc(var(--poodle-size-control-height) + 0.375rem - (var(--poodle-border-width-default) * 2));
+    font-size: 0.9375rem;
+  }
+
+  .time-zone-select[data-size="xl"] {
+    min-height: calc(var(--poodle-size-control-height) + 0.5rem);
+    padding: 0 calc(var(--poodle-space-control-x) + 0.1875rem);
+  }
+
+  .time-zone-select[data-size="xl"] .time-zone-select__control {
+    height: calc(var(--poodle-size-control-height) + 0.5rem - (var(--poodle-border-width-default) * 2));
+    font-size: 1rem;
+  }
 </style>

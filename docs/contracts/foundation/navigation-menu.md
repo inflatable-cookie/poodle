@@ -44,6 +44,8 @@ Updated: 2026-03-15
 | `value` | `string \| null` | `null` | no | controlled active item value; null = uncontrolled |
 | `defaultValue` | `string \| null` | `null` | no | uncontrolled initial active item |
 | `items` | `NavigationMenuItem[]` | — | yes | navigation item definitions |
+| `size` | `"xs" \| "sm" \| "md" \| "lg" \| "xl"` | `null` | no | explicit control size override; when null, resolves from inherited presentation |
+| `sizeRole` | `"chrome" \| "control" \| "prominent"` | `"chrome"` | no | semantic size offset from inherited presentation |
 | `ariaLabel` | `string \| null` | `null` | no | accessible label for the nav element |
 
 ### NavigationMenuItem Type
@@ -225,8 +227,19 @@ Updated: 2026-03-15
 | `background` | `color-mix(in srgb, var(--poodle-color-background-panel) 96%, transparent)` |
 | `box-shadow` | `var(--poodle-elevation-overlay)` |
 
+### Size adjustments
+
+| Size | trigger min-height | trigger padding | trigger font-size |
+|------|-------------------|----------------|-------------------|
+| `xs` | `calc(var(--poodle-size-control-height) - 0.625rem)` | `0 0.625rem` | `0.625rem` |
+| `sm` | `calc(var(--poodle-size-control-height) - 0.375rem)` | `0 0.75rem` | `0.6875rem` |
+| `md` | `calc(var(--poodle-size-control-height) - 0.125rem)` | `0 0.875rem` | `0.75rem` |
+| `lg` | `calc(var(--poodle-size-control-height) + 0.125rem)` | `0 1rem` | `0.8125rem` |
+| `xl` | `calc(var(--poodle-size-control-height) + 0.375rem)` | `0 1.125rem` | `0.875rem` |
+
 ## 9. Svelte Notes
 
+- `data-size` attribute on root reflects the resolved size
 - Module-level `nextNavigationMenuId` counter for unique IDs across instances
 - Controlled/uncontrolled value via internal `uncontrolledValue` state
 - `focusIndex` tracks roving tabindex across triggers
@@ -281,6 +294,7 @@ Updated: 2026-03-15
 
 ### Tier 2: Visual Parity
 
+- [ ] all five sizes visually match per size table
 - [ ] root uses grid with 0.5rem gap
 - [ ] list uses inline-flex wrap with 0.25rem gap
 - [ ] trigger uses label-family, 0.75rem, weight 600

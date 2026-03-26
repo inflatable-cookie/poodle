@@ -376,4 +376,101 @@
     font-size: var(--poodle-typography-body-size);
     line-height: var(--poodle-typography-body-lineHeight);
   }
+
+  /* ── Size variants ──────────────────────────────────────────── */
+
+  .data-table[data-size="xs"] .data-table__toolbar-btn {
+    font-size: 0.6875rem;
+    padding: 0.1875rem 0.375rem;
+  }
+
+  .data-table[data-size="xs"] .data-table__toolbar-btn :global(.poodle-icon) {
+    width: 0.75rem;
+    height: 0.75rem;
+  }
+
+  .data-table[data-size="xs"] th,
+  .data-table[data-size="xs"] td {
+    padding: 0.25rem 0.5rem;
+    font-size: 0.6875rem;
+  }
+
+  .data-table[data-size="xs"] .data-table__sort,
+  .data-table[data-size="xs"] .data-table__actions button {
+    min-height: 1.25rem;
+  }
+
+  .data-table[data-size="xs"] .data-table__selection {
+    width: 2.5rem;
+  }
+
+  .data-table[data-size="sm"] .data-table__toolbar-btn {
+    font-size: 0.71875rem;
+    padding: 0.25rem 0.4375rem;
+  }
+
+  .data-table[data-size="sm"] th,
+  .data-table[data-size="sm"] td {
+    padding: 0.3125rem 0.625rem;
+    font-size: 0.71875rem;
+  }
+
+  .data-table[data-size="sm"] .data-table__sort,
+  .data-table[data-size="sm"] .data-table__actions button {
+    min-height: 1.375rem;
+  }
+
+  .data-table[data-size="sm"] .data-table__selection {
+    width: 2.75rem;
+  }
+
+  .data-table[data-size="lg"] .data-table__toolbar-btn {
+    font-size: 0.8125rem;
+    padding: 0.375rem 0.625rem;
+  }
+
+  .data-table[data-size="lg"] .data-table__toolbar-btn :global(.poodle-icon) {
+    width: 1rem;
+    height: 1rem;
+  }
+
+  .data-table[data-size="lg"] th,
+  .data-table[data-size="lg"] td {
+    padding: 0.5rem 0.875rem;
+    font-size: 0.8125rem;
+  }
+
+  .data-table[data-size="lg"] .data-table__sort,
+  .data-table[data-size="lg"] .data-table__actions button {
+    min-height: 2.125rem;
+  }
+
+  .data-table[data-size="lg"] .data-table__selection {
+    width: 3.625rem;
+  }
+
+  .data-table[data-size="xl"] .data-table__toolbar-btn {
+    font-size: 0.875rem;
+    padding: 0.4375rem 0.75rem;
+  }
+
+  .data-table[data-size="xl"] .data-table__toolbar-btn :global(.poodle-icon) {
+    width: 1.125rem;
+    height: 1.125rem;
+  }
+
+  .data-table[data-size="xl"] th,
+  .data-table[data-size="xl"] td {
+    padding: 0.625rem 1rem;
+    font-size: 0.875rem;
+  }
+
+  .data-table[data-size="xl"] .data-table__sort,
+  .data-table[data-size="xl"] .data-table__actions button {
+    min-height: 2.25rem;
+  }
+
+  .data-table[data-size="xl"] .data-table__selection {
+    width: 4rem;
+  }
 </style>

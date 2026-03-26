@@ -49,6 +49,8 @@ Updated: 2026-03-15
 | `ariaLabel` | `string \| null` | `null` | no | required when no visible label exists |
 | `describedBy` | `string \| null` | `null` | no | aria-describedby target |
 | `name` | `string \| undefined` | `undefined` | no | form field name |
+| `size` | `"xs" \| "sm" \| "md" \| "lg" \| "xl"` | `null` | no | explicit control size override; when null, resolves from inherited presentation |
+| `sizeRole` | `"chrome" \| "control" \| "prominent"` | `"control"` | no | semantic size offset from inherited presentation |
 
 ### Type Definitions
 
@@ -204,6 +206,16 @@ SelectItems: SelectOption[] | SelectOptionGroup[]
 | `font-weight` | `normal` |
 | `color` | `var(--poodle-color-text-primary)` |
 
+### Size adjustments
+
+| Size | min-height | padding | control height | font-size |
+|------|------------|---------|----------------|-----------|
+| `xs` | `calc(control-height - 0.5rem)` | `0 calc(space-control-x - 0.125rem)` | `calc(control-height - 0.5rem - border * 2)` | `0.75rem` |
+| `sm` | `calc(control-height - 0.375rem)` | `0 calc(space-control-x - 0.0625rem)` | `calc(control-height - 0.375rem - border * 2)` | `typography-body-size` |
+| `md` | `control-height` | `0 space-control-x` | `calc(control-height - border * 2)` | `typography-body-size` |
+| `lg` | `calc(control-height + 0.375rem)` | `0 calc(space-control-x + 0.125rem)` | `calc(control-height + 0.375rem - border * 2)` | `0.9375rem` |
+| `xl` | `calc(control-height + 0.5rem)` | `0 calc(space-control-x + 0.1875rem)` | `calc(control-height + 0.5rem - border * 2)` | `1rem` |
+
 ## 9. Svelte Notes
 
 - Uses a native `<select>` element for full platform accessibility without a custom overlay
@@ -212,6 +224,7 @@ SelectItems: SelectOption[] | SelectOptionGroup[]
 - Treatment tokens (`--poodle-treatment-interactive-subtle-*`) provide themed styling with fallbacks to base tokens
 - Placeholder rendered as a disabled `<option>` with `selected` when no value is set
 - Option groups rendered as native `<optgroup>` elements
+- Emits `data-size` on root element reflecting the resolved size
 
 ## 10. GPUI Notes
 
@@ -240,6 +253,7 @@ SelectItems: SelectOption[] | SelectOptionGroup[]
 - [ ] indicator color (icon-muted) matches
 - [ ] disabled opacity matches
 - [ ] optgroup font-weight (600) and color (text-secondary) match
+- [ ] all five sizes visually match (height, padding, font-size per size table)
 
 ### Tier 3: Implementation Freedom
 

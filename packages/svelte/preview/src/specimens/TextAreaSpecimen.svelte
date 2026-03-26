@@ -1,6 +1,8 @@
 <script lang="ts">
   import { TextArea, Eyebrow } from "@poodle/svelte-primitives";
 
+  const controlSizes = ["xs", "sm", "md", "lg", "xl"] as const;
+
   let note = "";
 </script>
 
@@ -16,6 +18,15 @@
     {#if note}
       <p>{note.length} characters</p>
     {/if}
+  </div>
+
+  <div class="specimen__group">
+    <Eyebrow>Sizes</Eyebrow>
+    <div class="specimen__stack">
+      {#each controlSizes as size}
+        <TextArea id={"size-" + size} placeholder={size.toUpperCase()} rows={2} {size} />
+      {/each}
+    </div>
   </div>
 
   <div class="specimen__group">
@@ -57,6 +68,12 @@
     display: flex;
     flex-direction: column;
     gap: 0.5rem;
+  }
+
+  .specimen__stack {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
   }
 
   .specimen__group p {

@@ -3,6 +3,8 @@
   import type { TableColumn, TableRow } from "@poodle/svelte-composites";
   import { Eyebrow } from "@poodle/svelte-primitives";
 
+  const controlSizes = ["xs", "sm", "md", "lg", "xl"] as const;
+
   const columns: TableColumn[] = [
     { id: "name", label: "Name", sortable: true, hideable: false },
     { id: "email", label: "Email", sortable: true, hideable: true },
@@ -84,6 +86,20 @@
   </div>
 
   <div class="specimen__group">
+    <Eyebrow>Sizes</Eyebrow>
+    <div class="specimen__stack">
+      {#each controlSizes as size}
+        <DataTable
+          {columns}
+          {rows}
+          {size}
+          ariaLabel="Data table at {size}"
+        />
+      {/each}
+    </div>
+  </div>
+
+  <div class="specimen__group">
     <Eyebrow>Empty state</Eyebrow>
     <DataTable
       {columns}
@@ -105,6 +121,12 @@
     display: flex;
     flex-direction: column;
     gap: 0.5rem;
+  }
+
+  .specimen__stack {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
   }
 
   .last-action,

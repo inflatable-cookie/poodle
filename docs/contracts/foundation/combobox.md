@@ -48,6 +48,8 @@ Updated: 2026-03-15
 | `placeholder` | `string \| null` | `null` | no | hint text when input is empty |
 | `disabled` | `boolean` | `false` | no | disables the input and suppresses opening |
 | `ariaLabel` | `string \| null` | `null` | no | required when no visible label exists |
+| `size` | `"xs" \| "sm" \| "md" \| "lg" \| "xl"` | `null` | no | explicit control size override; when null, resolves from inherited presentation |
+| `sizeRole` | `"chrome" \| "control" \| "prominent"` | `"control"` | no | semantic size offset from inherited presentation |
 
 ### Type Definitions
 
@@ -234,6 +236,16 @@ ComboboxOption: {
 | `font-size` | `0.6875rem` |
 | `line-height` | `1.35` |
 
+### Size adjustments
+
+| Size | input min-height | input padding | font-size |
+|------|------------------|---------------|-----------|
+| `xs` | `calc(control-height - 0.5rem)` | `0 calc(space-control-x - 0.125rem)` | `0.75rem` |
+| `sm` | `calc(control-height - 0.375rem)` | `0 calc(space-control-x - 0.0625rem)` | `typography-body-size` |
+| `md` | `control-height` | `0 space-control-x` | `typography-body-size` |
+| `lg` | `calc(control-height + 0.375rem)` | `0 calc(space-control-x + 0.125rem)` | `0.9375rem` |
+| `xl` | `calc(control-height + 0.5rem)` | `0 calc(space-control-x + 0.1875rem)` | `1rem` |
+
 ## 9. Svelte Notes
 
 - Module-level `nextComboboxId` counter generates unique ids for each instance to wire ARIA relationships (`aria-controls`, `aria-activedescendant`)
@@ -242,6 +254,7 @@ ComboboxOption: {
 - When a value is selected, the input text is set to the selected option's label
 - Disabled options are rendered but not selectable or highlightable
 - Options are rendered as `<button>` elements with `role="option"` for click handling
+- Emits `data-size` on root element reflecting the resolved size
 
 ## 10. GPUI Notes
 
@@ -276,6 +289,7 @@ ComboboxOption: {
 - [ ] option padding (0.375rem 0.5rem) and inner border-radius match
 - [ ] description/empty font-size (0.6875rem) and color (text-secondary) match
 - [ ] disabled option opacity matches
+- [ ] all five sizes visually match (input height, padding, font-size per size table)
 
 ### Tier 3: Implementation Freedom
 

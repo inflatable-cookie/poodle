@@ -257,4 +257,28 @@
   .combobox__empty {
     padding: 0.5rem;
   }
+
+  /* Size variants */
+  .combobox[data-size="xs"] .combobox__input {
+    min-height: calc(var(--poodle-size-control-height) - 0.5rem);
+    padding: 0 calc(var(--poodle-space-control-x) - 0.125rem);
+    font-size: 0.75rem;
+  }
+
+  .combobox[data-size="sm"] .combobox__input {
+    min-height: calc(var(--poodle-size-control-height) - 0.375rem);
+    padding: 0 calc(var(--poodle-space-control-x) - 0.0625rem);
+  }
+
+  .combobox[data-size="lg"] .combobox__input {
+    min-height: calc(var(--poodle-size-control-height) + 0.375rem);
+    padding: 0 calc(var(--poodle-space-control-x) + 0.125rem);
+    font-size: 0.9375rem;
+  }
+
+  .combobox[data-size="xl"] .combobox__input {
+    min-height: calc(var(--poodle-size-control-height) + 0.5rem);
+    padding: 0 calc(var(--poodle-space-control-x) + 0.1875rem);
+    font-size: 1rem;
+  }
 </style>

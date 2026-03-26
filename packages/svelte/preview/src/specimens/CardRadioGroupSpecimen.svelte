@@ -3,6 +3,8 @@
   import { Eyebrow } from "@poodle/svelte-primitives";
   import type { CardRadioItem } from "@poodle/svelte-composites";
 
+  const controlSizes = ["xs", "sm", "md", "lg", "xl"] as const;
+
   let planValue: string | null = "pro";
   let sizeValue: string | null = null;
 
@@ -48,6 +50,21 @@
   </div>
 
   <div class="specimen__group">
+    <Eyebrow>Sizes</Eyebrow>
+    <div class="specimen__stack">
+      {#each controlSizes as size}
+        <CardRadioGroup
+          items={sizeItems}
+          value="md"
+          columns={3}
+          {size}
+          ariaLabel="Card radio group at {size}"
+        />
+      {/each}
+    </div>
+  </div>
+
+  <div class="specimen__group">
     <Eyebrow>Disabled group</Eyebrow>
     <CardRadioGroup
       items={sizeItems}
@@ -70,6 +87,12 @@
     display: flex;
     flex-direction: column;
     gap: 0.5rem;
+  }
+
+  .specimen__stack {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
   }
 
   p { margin: 0; }

@@ -350,4 +350,56 @@
     cursor: not-allowed;
     opacity: var(--poodle-state-opacity-disabled);
   }
+
+  /* Size variants */
+  .range-calendar[data-size="xs"] .range-calendar__nav {
+    width: 1.5rem;
+    height: 1.5rem;
+  }
+
+  .range-calendar[data-size="xs"] .range-calendar__day {
+    min-height: 1.75rem;
+    font-size: 0.6875rem;
+  }
+
+  .range-calendar[data-size="xs"] .range-calendar__month {
+    font-size: 0.6875rem;
+  }
+
+  .range-calendar[data-size="sm"] .range-calendar__nav {
+    width: 1.75rem;
+    height: 1.75rem;
+  }
+
+  .range-calendar[data-size="sm"] .range-calendar__day {
+    min-height: 2rem;
+  }
+
+  .range-calendar[data-size="lg"] .range-calendar__nav {
+    width: 2.25rem;
+    height: 2.25rem;
+  }
+
+  .range-calendar[data-size="lg"] .range-calendar__day {
+    min-height: 2.5rem;
+    font-size: 0.8125rem;
+  }
+
+  .range-calendar[data-size="lg"] .range-calendar__month {
+    font-size: 0.875rem;
+  }
+
+  .range-calendar[data-size="xl"] .range-calendar__nav {
+    width: 2.5rem;
+    height: 2.5rem;
+  }
+
+  .range-calendar[data-size="xl"] .range-calendar__day {
+    min-height: 2.75rem;
+    font-size: 0.875rem;
+  }
+
+  .range-calendar[data-size="xl"] .range-calendar__month {
+    font-size: 0.9375rem;
+  }
 </style>

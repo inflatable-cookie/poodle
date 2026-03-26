@@ -56,6 +56,8 @@ Updated: 2026-03-15
 | `defaultValue` | `string \| string[] \| null` | `null` | no | uncontrolled initial expanded value(s) |
 | `selectionMode` | `"single" \| "multiple"` | `"single"` | no | single or multiple expansion |
 | `collapsible` | `boolean` | `true` | no | whether all items can be collapsed in single mode |
+| `size` | `"xs" \| "sm" \| "md" \| "lg" \| "xl"` | `null` | no | explicit control size override; when null, resolves from inherited presentation |
+| `sizeRole` | `"chrome" \| "control" \| "prominent"` | `"control"` | no | semantic size offset from inherited presentation |
 | `ariaLabel` | `string \| null` | `null` | no | accessible label for the root container |
 
 ### AccordionItem Interface
@@ -256,8 +258,19 @@ Updated: 2026-03-15
 | `min-width` | `0` |
 | `transition` | `slide` — height animates from/to 0 over 180ms on mount/unmount |
 
+### Size adjustments
+
+| Size | title font-size | description font-size |
+|------|----------------|----------------------|
+| `xs` | `0.8125rem` | `0.6875rem` |
+| `sm` | `0.875rem` | `0.75rem` |
+| `md` | `1rem` | `0.8125rem` |
+| `lg` | `1.125rem` | `0.875rem` |
+| `xl` | `1.25rem` | `0.9375rem` |
+
 ## 9. Svelte Notes
 
+- `data-size` attribute on root reflects the resolved size
 - Uses `<Icon name="chevron-down" size="sm" />` for the indicator
 - Module-level `nextAccordionId` counter (incremented per instance) generates
   unique ARIA id pairs for trigger/panel association
@@ -297,6 +310,7 @@ Updated: 2026-03-15
 
 ### Tier 2: Visual Parity
 
+- [ ] all five sizes visually match per size table
 - [ ] item border color-mix (36% border-subtle) matches
 - [ ] item background color-mix (84% elevated, surface) matches
 - [ ] item inset box-shadow (8% text-inverse) matches

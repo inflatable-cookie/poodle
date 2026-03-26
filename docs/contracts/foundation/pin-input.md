@@ -38,6 +38,8 @@ Updated: 2026-03-15
 | `disabled` | `boolean` | `false` | no | disables all cells |
 | `ariaLabel` | `string \| null` | `null` | no | accessible name for the group |
 | `mask` | `boolean` | `false` | no | when true, cells use `type="password"` to obscure input |
+| `size` | `"xs" \| "sm" \| "md" \| "lg" \| "xl"` | `null` | no | explicit control size override; when null, resolves from inherited presentation |
+| `sizeRole` | `"chrome" \| "control" \| "prominent"` | `"control"` | no | semantic size offset from inherited presentation |
 
 ### Controlled And Uncontrolled
 
@@ -151,6 +153,16 @@ Updated: 2026-03-15
 |----------|-------|
 | `opacity` | `var(--poodle-state-opacity-disabled)` |
 
+### Size adjustments
+
+| Size | cell width | cell height | cell font-size |
+|------|------------|-------------|----------------|
+| `xs` | `calc(control-height - 0.5rem)` | `calc(control-height - 0.25rem)` | `0.8125rem` |
+| `sm` | `calc(control-height - 0.25rem)` | `control-height` | `0.875rem` |
+| `md` | `2.25rem` | `2.5rem` | `1rem` |
+| `lg` | `calc(control-height + 0.25rem)` | `calc(control-height + 0.5rem)` | `1.125rem` |
+| `xl` | `calc(control-height + 0.5rem)` | `calc(control-height + 0.75rem)` | `1.25rem` |
+
 ## 9. Svelte Notes
 
 - Renders `length` individual `<input>` elements, each accepting a single character
@@ -159,6 +171,7 @@ Updated: 2026-03-15
 - Backspace logic: if current cell is empty, move focus to previous cell and clear it
 - `mask` prop toggles `type` between `"text"` and `"password"` on all cells
 - Paste handling: distributes pasted string across cells starting from the focused cell
+- `data-size` attribute on root reflects the resolved size for CSS variant styling
 
 ## 10. GPUI Notes
 
@@ -181,6 +194,7 @@ Updated: 2026-03-15
 
 ### Tier 2: Visual Parity
 
+- [ ] all five sizes visually match (height, padding, font-size per size table)
 - [ ] cell width (2.25rem) and height (2.5rem) match
 - [ ] gap between cells (0.375rem) matches
 - [ ] code-family font on cells matches

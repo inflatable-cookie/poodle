@@ -58,6 +58,8 @@ Updated: 2026-03-26
 | `contentClassName` | `string` | `""` | no | additional class name added to the dialog surface |
 | `overlayClassName` | `string` | `""` | no | additional class name added to the backdrop button |
 | `showCloseButton` | `boolean` | `false` | no | whether to render the built-in close button |
+| `size` | `"xs" \| "sm" \| "md" \| "lg" \| "xl"` | `null` | no | explicit control size override; when null, resolves from inherited presentation |
+| `sizeRole` | `"chrome" \| "control" \| "prominent"` | `"control"` | no | semantic size offset from inherited presentation |
 | `closeLabel` | `string` | `"Close dialog"` | no | accessible label for the close button |
 
 ### Slots
@@ -235,8 +237,19 @@ Updated: 2026-03-26
 | `justify-content` | `flex-end` |
 | `margin-top` | `var(--poodle-space-stack-lg)` |
 
+### Size adjustments
+
+| Size | header title font-size |
+|------|----------------------|
+| `xs` | `0.8125rem` |
+| `sm` | `0.875rem` |
+| `md` | `1rem` |
+| `lg` | `1.125rem` |
+| `xl` | `1.25rem` |
+
 ## 9. Svelte Notes
 
+- `data-size` attribute on surface reflects the resolved size
 - No `<dialog>` element used; modal behavior implemented with fixed overlay,
   manual focus trap, and body scroll lock
 - Backdrop is a `<button>` element (not a div) for click handling
@@ -280,6 +293,7 @@ Updated: 2026-03-26
 
 ### Tier 2: Visual Parity
 
+- [ ] all five sizes visually match per size table
 - [ ] backdrop overlay color matches (background-overlay)
 - [ ] surface border color-mix (78% border-default) matches
 - [ ] surface background color-mix (98% elevated, panel) matches

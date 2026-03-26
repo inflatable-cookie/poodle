@@ -488,4 +488,43 @@
     color: var(--poodle-color-status-danger);
   }
 
+  /* Size variants */
+  .text-input[data-size="xs"] {
+    min-height: calc(var(--poodle-size-control-height) - 0.5rem);
+    padding: 0 calc(var(--poodle-space-control-x) - 0.125rem);
+  }
+
+  .text-input[data-size="xs"] .text-input__control {
+    height: calc(var(--poodle-size-control-height) - 0.5rem - (var(--poodle-border-width-default) * 2));
+    font-size: 0.75rem;
+  }
+
+  .text-input[data-size="sm"] {
+    min-height: calc(var(--poodle-size-control-height) - 0.375rem);
+    padding: 0 calc(var(--poodle-space-control-x) - 0.0625rem);
+  }
+
+  .text-input[data-size="sm"] .text-input__control {
+    height: calc(var(--poodle-size-control-height) - 0.375rem - (var(--poodle-border-width-default) * 2));
+  }
+
+  .text-input[data-size="lg"] {
+    min-height: calc(var(--poodle-size-control-height) + 0.375rem);
+    padding: 0 calc(var(--poodle-space-control-x) + 0.125rem);
+  }
+
+  .text-input[data-size="lg"] .text-input__control {
+    height: calc(var(--poodle-size-control-height) + 0.375rem - (var(--poodle-border-width-default) * 2));
+    font-size: 0.9375rem;
+  }
+
+  .text-input[data-size="xl"] {
+    min-height: calc(var(--poodle-size-control-height) + 0.5rem);
+    padding: 0 calc(var(--poodle-space-control-x) + 0.1875rem);
+  }
+
+  .text-input[data-size="xl"] .text-input__control {
+    height: calc(var(--poodle-size-control-height) + 0.5rem - (var(--poodle-border-width-default) * 2));
+    font-size: 1rem;
+  }
 </style>

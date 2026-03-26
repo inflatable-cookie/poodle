@@ -63,6 +63,8 @@ Updated: 2026-03-15
 | `placeholder` | `string` | `"Select date and time range"` | no | shown when no value selected |
 | `weekStartsOn` | `"sunday" \| "monday"` | `"monday"` | no | first day of the week |
 | `locale` | `string` | `"en-US"` | no | locale for date formatting |
+| `size` | `"xs" \| "sm" \| "md" \| "lg" \| "xl"` | `null` | no | explicit control size override; when null, resolves from inherited presentation |
+| `sizeRole` | `"chrome" \| "control" \| "prominent"` | `"control"` | no | semantic size offset from inherited presentation |
 | `disabled` | `boolean` | `false` | no | disables the trigger |
 | `ariaLabel` | `string \| null` | `null` | no | required when no visible label exists |
 
@@ -265,6 +267,23 @@ DateTimeRangeValue: {
 | `letter-spacing` | `0.04em` |
 | `text-transform` | `uppercase` |
 
+### Size adjustments
+
+| Size | Property | Value |
+|------|----------|-------|
+| `xs` (`[data-size="xs"]`) | `min-height` | `calc(var(--poodle-size-control-height) - 0.5rem)` |
+| `xs` | `padding` | `0 calc(var(--poodle-space-control-x) - 0.125rem)` |
+| `xs` | `font-size` | `0.6875rem` |
+| `sm` (`[data-size="sm"]`) | `min-height` | `calc(var(--poodle-size-control-height) - 0.375rem)` |
+| `sm` | `padding` | `0 calc(var(--poodle-space-control-x) - 0.125rem)` |
+| `sm` | `font-size` | `0.75rem` |
+| `lg` (`[data-size="lg"]`) | `min-height` | `calc(var(--poodle-size-control-height) + 0.375rem)` |
+| `lg` | `padding` | `0 calc(var(--poodle-space-control-x) + 0.125rem)` |
+| `lg` | `font-size` | `0.875rem` |
+| `xl` (`[data-size="xl"]`) | `min-height` | `calc(var(--poodle-size-control-height) + 0.5rem)` |
+| `xl` | `padding` | `0 calc(var(--poodle-space-control-x) + 0.1875rem)` |
+| `xl` | `font-size` | `0.9375rem` |
+
 ## 9. Svelte Notes
 
 - Module-level `nextDateTimeRangePickerId` counter generates unique ids for each
@@ -278,6 +297,7 @@ DateTimeRangeValue: {
 - Partial values are allowed during editing without forcing timezone or
   timestamp normalization into the public contract
 - Value display formats the range using `locale` prop for localized strings
+- `data-size` data attribute on root reflects the resolved size
 
 ## 10. GPUI Notes
 
@@ -323,6 +343,7 @@ DateTimeRangeValue: {
 - [ ] time section gap (0.375rem) matches
 - [ ] time label typography matches (label-family, 0.6875rem, 600, 0.04em, uppercase)
 - [ ] disabled opacity uses state-opacity-disabled token
+- [ ] all five sizes visually match (height, padding, font-size per size table)
 
 ### Tier 3: Implementation Freedom
 

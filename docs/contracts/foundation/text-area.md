@@ -44,6 +44,8 @@ Updated: 2026-03-15
 | `validationState` | `"none" \| "invalid" \| "valid" \| "pending"` | `"none"` | no | visual and assistive validation state |
 | `ariaLabel` | `string \| null` | `null` | no | required when no external label exists |
 | `describedBy` | `string \| null` | `null` | no | aria-describedby target |
+| `size` | `"xs" \| "sm" \| "md" \| "lg" \| "xl"` | `null` | no | explicit control size override; when null, resolves from inherited presentation |
+| `sizeRole` | `"chrome" \| "control" \| "prominent"` | `"control"` | no | semantic size offset from inherited presentation |
 
 ### Controlled And Uncontrolled
 
@@ -200,6 +202,18 @@ Updated: 2026-03-15
 |----------|-------|
 | `color` | `var(--poodle-color-text-secondary)` |
 
+### Size adjustments
+
+Height is not adjusted (determined by `rows`). Only padding and font-size scale.
+
+| Size | padding | font-size |
+|------|---------|-----------|
+| `xs` | `calc(space-control-y - 0.125rem) calc(space-control-x - 0.125rem)` | `0.75rem` |
+| `sm` | `calc(space-control-y - 0.0625rem) calc(space-control-x - 0.0625rem)` | `typography-body-size` |
+| `md` | `space-control-y space-control-x` | `typography-body-size` |
+| `lg` | `calc(space-control-y + 0.0625rem) calc(space-control-x + 0.125rem)` | `0.9375rem` |
+| `xl` | `calc(space-control-y + 0.125rem) calc(space-control-x + 0.1875rem)` | `1rem` |
+
 ## 9. Svelte Notes
 
 - Uses native `<textarea>` element inside a styled `<div>` wrapper with grid
@@ -217,6 +231,7 @@ Updated: 2026-03-15
 - `rows` prop sets the initial `min-height` via `calc(1lh * rows)`
 - Root uses `display: grid` instead of flex (unlike TextInput) because the
   textarea is the sole child and grid enables clean sizing
+- Emits `data-size` on root element reflecting the resolved size
 
 ## 10. GPUI Notes
 
@@ -251,6 +266,7 @@ Updated: 2026-03-15
 - [ ] disabled opacity matches (state-opacity-disabled)
 - [ ] typography matches (body family, size, line-height)
 - [ ] resize: vertical behavior present in both runtimes
+- [ ] all five sizes visually match (padding, font-size per size table)
 
 ### Tier 3: Implementation Freedom
 

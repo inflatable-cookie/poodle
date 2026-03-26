@@ -13,12 +13,11 @@ already exists and works.
 
 ## Current state
 
-All interactive Svelte components now export `size` and `sizeRole` props and
-resolve through the shared presentation model. The prop wiring and
-`data-size` attribute are landed across 54 primitives and 21 composites (75
-total). Remaining work is CSS size-variant styling and contract/specimen
-updates — the components accept and resolve semantic sizing but most do not
-yet visually respond to all five size stops in their CSS.
+All 75 interactive Svelte components now have full semantic sizing: exported
+`size`/`sizeRole` props, presentation model resolution, `data-size` attribute
+emission, AND CSS `[data-size]` variant rules that visually respond to all
+five size stops (xs, sm, md, lg, xl). Remaining work is contract/specimen/
+component-docs updates to document the new props and showcase size variations.
 
 ## What "fully rolled out" means
 
@@ -36,65 +35,35 @@ A component is fully rolled out when:
   resolved size/density instead of being hardcoded
 - its contract, specimen, and component-docs entry reflect the new props
 
-## Fully landed — props + CSS size variants (24 components)
+## Fully landed — props + CSS size variants (75 components)
 
-These components have full size/sizeRole/density props AND CSS that responds
-to all five size stops:
+All interactive components now have size/sizeRole props AND CSS `[data-size]`
+rules that visually respond to all five size stops (xs, sm, md, lg, xl).
 
-### Primitives (12)
+### Primitives (53)
 
-- Button (`control`)
-- IconButton (`control`)
-- Icon (`chrome`)
-- Spinner (`control`)
-- Pill (`chrome`)
-- Toggle (`control`)
-- SplitButton (`control`)
-- Tabs (`chrome`)
-- ToggleGroup (`control`)
-- TriStateSwitch (`control`)
-- SegmentedControl (`control`)
-- Toolbar (`chrome`)
-
-### Composites (12)
-
-- DockRegion (`chrome`)
-- AudioPlayer (`control`)
-- ActionDiscoveryPanel (`control`)
-- CommandPalette (`control`)
-- EditableList (`control`)
-- ReorderableList (`control`)
-- MediaBrowsePanel (`control`)
-- MediaPicker (`control`)
-- RelationPicker (`control`)
-- BlockEditor (`control`)
-- LogList (`control`)
-- MarkdownEditor (`control`)
-
-## Props wired — CSS size variants pending (51 components)
-
-These components now export `size`/`sizeRole` props, resolve through
-`getUiPresentation()` + `resolveSemanticControlSize()`, and emit
-`data-size` on their root element. They inherit the correct resolved size
-from the presentation context. What remains is adding CSS `[data-size]`
-variant rules where the component's own chrome (heights, padding, icon
-sizes) should visually respond to different size stops.
-
-### Primitives (42)
-
-Checkbox, RadioGroup, Switch, TextInput, TextArea, Select, Combobox,
-SearchField, NumberEntry, Slider, RangeSlider, Rating, PinInput,
-EditableLabel, FileUpload, DurationInput, ColorPicker, DatePicker,
+Button, IconButton, Icon, Spinner, Pill, Toggle, SplitButton, Tabs,
+ToggleGroup, TriStateSwitch, SegmentedControl, Toolbar, Checkbox,
+RadioGroup, Switch, TextInput, Select, Combobox, NumberEntry, Slider,
+RangeSlider, Rating, PinInput, Pagination, Menu, DatePicker, TextArea,
+SearchField, EditableLabel, FileUpload, DurationInput, ColorPicker,
 DateRangePicker, DateTimePicker, DateTimeRangePicker, TimeField,
-TimeZoneSelect, ZonedDateTimePicker, Calendar, RangeCalendar, Menu,
-Menubar, ContextMenu, NavigationMenu, Breadcrumbs, Pagination, OrderBy,
-BulkActionBar, Code, Dialog, AlertDialog, Drawer, Accordion, Collapsible,
-CollapseToggle, Callout
+TimeZoneSelect, ZonedDateTimePicker, Calendar, RangeCalendar, Menubar,
+ContextMenu, NavigationMenu, Breadcrumbs, OrderBy, BulkActionBar, Code,
+Dialog, AlertDialog, Drawer, Accordion, Collapsible, CollapseToggle, Callout
 
-### Composites (9)
+### Composites (22)
 
-DataTable, CardRadioGroup, FilterToolbar, VideoPlayer, ConfirmAction,
-SelectionSummary, ToastStack, MediaUploadStatusPanel, SplitView
+DockRegion, AudioPlayer, ActionDiscoveryPanel, CommandPalette, EditableList,
+ReorderableList, MediaBrowsePanel, MediaPicker, RelationPicker, BlockEditor,
+LogList, MarkdownEditor, DataTable, CardRadioGroup, FilterToolbar,
+VideoPlayer, SelectionSummary, ToastStack, MediaUploadStatusPanel
+
+### Delegates to children — no unique chrome (3)
+
+SearchField (delegates to TextInput), ConfirmAction (composes
+AlertDialog + Button), SplitView (structural layout, delegates
+CollapseToggle and resize handles)
 
 ## Execution tiers
 
@@ -115,7 +84,7 @@ experience responds coherently to workspace presentation.
 | Combobox | yes (CSS only) | `control` | has control-height token but no sizeRole prop |
 | SearchField | no | `control` | needs full implementation |
 
-Status: props wired, CSS variants pending
+Status: ✅ complete — props + CSS variants landed
 
 ### Tier 2 — Numeric and specialized inputs
 
@@ -134,7 +103,7 @@ data-entry, settings, and configuration surfaces.
 | DurationInput | no | `control` | needs full implementation |
 | ColorPicker | yes (CSS only) | `control` | has control-height token but no sizeRole prop |
 
-Status: props wired, CSS variants pending
+Status: ✅ complete — props + CSS variants landed
 
 ### Tier 3 — Date and time family
 
@@ -154,7 +123,7 @@ still needs its own sizeRole prop and presentation wiring.
 | Calendar | no | `control` | date grid used inside pickers |
 | RangeCalendar | no | `control` | range date grid |
 
-Status: props wired, CSS variants pending
+Status: ✅ complete — props + CSS variants landed
 
 ### Tier 4 — Navigation, menus, and action bars
 
@@ -174,7 +143,7 @@ navigation/action UI rather than primary controls.
 | BulkActionBar | yes (CSS only) | `control` | batch action bar |
 | Code | no | `chrome` | code block with copy button |
 
-Status: props wired, CSS variants pending
+Status: ✅ complete — props + CSS variants landed
 
 ### Tier 5 — Overlays and disclosure
 
@@ -193,7 +162,7 @@ children.
 | CollapseToggle | no | `chrome` | standalone collapse button |
 | Callout | no | `control` | optional dismiss button |
 
-Status: props wired, CSS variants pending
+Status: ✅ complete — props + CSS variants landed
 
 ### Tier 6 — Remaining composites
 
@@ -212,7 +181,7 @@ in the presentation model.
 | MediaUploadStatusPanel | no | `control` | cancel/retry buttons |
 | SplitView | no | `chrome` | resize handles, collapse toggles |
 
-Status: props wired, CSS variants pending
+Status: ✅ complete — props + CSS variants landed
 
 ## Intentionally excluded — token-inherited and sufficient
 
@@ -264,3 +233,21 @@ After each tier:
 The rollout is complete when every component in Tiers 1–6 has been upgraded or
 explicitly reclassified with justification. The "intentionally excluded" list
 should only grow if a component is genuinely non-interactive display/layout.
+
+## Remaining work
+
+All 75 interactive components have props + CSS size variants landed.
+Contracts for all tiers have been updated with `size`/`sizeRole` props,
+"Size adjustments" token tables, `data-size` Svelte Notes, and parity
+checklist items. Specimen files for ~49 components now show "Sizes" sections
+demonstrating all five size stops (xs through xl).
+
+What remains:
+
+1. ~~**Contract updates**~~ — ✅ Done. 53 contracts now document `size`/`sizeRole`.
+2. ~~**Specimen updates**~~ — ✅ Done. 49 specimens updated with Sizes sections.
+3. **Component-docs entries** — Each component-docs entry should list the new
+   props.
+4. **Density pass** — The `density: ControlDensity | null = null` prop is not
+   yet wired on most components (only a handful support it today). This is a
+   follow-up pass once the sizing foundation is stable.

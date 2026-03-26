@@ -41,6 +41,8 @@ Updated: 2026-03-15
 | `defaultValue` | `string \| null` | `null` | no | uncontrolled initial timezone |
 | `placeholder` | `string \| null` | `"Select time zone"` | no | shown when no value selected |
 | `options` | `TimeZoneOption[]` | `defaultTimeZoneOptions()` | no | timezone option list |
+| `size` | `"xs" \| "sm" \| "md" \| "lg" \| "xl"` | `null` | no | explicit control size override; when null, resolves from inherited presentation |
+| `sizeRole` | `"chrome" \| "control" \| "prominent"` | `"control"` | no | semantic size offset from inherited presentation |
 | `disabled` | `boolean` | `false` | no | disables the select |
 | `ariaLabel` | `string \| null` | `null` | no | required when no visible label exists |
 | `describedBy` | `string \| null` | `null` | no | aria-describedby target |
@@ -185,6 +187,23 @@ TimeZoneOption: { value: string; label: string; disabled?: boolean }
 | `line-height` | `1` |
 | `pointer-events` | `none` |
 
+### Size adjustments
+
+| Size | Property | Value |
+|------|----------|-------|
+| `xs` (`[data-size="xs"]`) | `min-height` | `calc(var(--poodle-size-control-height) - 0.5rem)` |
+| `xs` | `padding` | `0 calc(var(--poodle-space-control-x) - 0.125rem)` |
+| `xs` | `font-size` | `0.6875rem` |
+| `sm` (`[data-size="sm"]`) | `min-height` | `calc(var(--poodle-size-control-height) - 0.375rem)` |
+| `sm` | `padding` | `0 calc(var(--poodle-space-control-x) - 0.125rem)` |
+| `sm` | `font-size` | `0.75rem` |
+| `lg` (`[data-size="lg"]`) | `min-height` | `calc(var(--poodle-size-control-height) + 0.375rem)` |
+| `lg` | `padding` | `0 calc(var(--poodle-space-control-x) + 0.125rem)` |
+| `lg` | `font-size` | `0.875rem` |
+| `xl` (`[data-size="xl"]`) | `min-height` | `calc(var(--poodle-size-control-height) + 0.5rem)` |
+| `xl` | `padding` | `0 calc(var(--poodle-space-control-x) + 0.1875rem)` |
+| `xl` | `font-size` | `0.9375rem` |
+
 ## 9. Svelte Notes
 
 - Uses a native `<select>` element for full platform accessibility
@@ -193,6 +212,7 @@ TimeZoneOption: { value: string; label: string; disabled?: boolean }
 - Placeholder rendered as a disabled `<option>` with `selected` when no value is set
 - `defaultTimeZoneOptions()` utility provides a reasonable IANA timezone list as fallback
 - Transition applies to border-color, box-shadow, and background for smooth focus treatment
+- `data-size` data attribute on shell reflects the resolved size
 
 ## 10. GPUI Notes
 
@@ -223,6 +243,7 @@ TimeZoneOption: { value: string; label: string; disabled?: boolean }
 - [ ] indicator color (icon-muted) and font (code-family, 0.75rem) match
 - [ ] disabled opacity matches
 - [ ] control typography (body-family, body-size, body-lineHeight) matches
+- [ ] all five sizes visually match (height, padding, font-size per size table)
 
 ### Tier 3: Implementation Freedom
 

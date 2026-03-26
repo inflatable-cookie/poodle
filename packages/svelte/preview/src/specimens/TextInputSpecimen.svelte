@@ -2,6 +2,8 @@
   import { TextInput, Field, Eyebrow } from "@poodle/svelte-primitives";
   import type { InputValidationStatus, ValidationState } from "@poodle/svelte-primitives";
 
+  const controlSizes = ["xs", "sm", "md", "lg", "xl"] as const;
+
   let name = "";
   let email = "invalid-email";
   let validationState: ValidationState = "invalid";
@@ -33,6 +35,15 @@
         on:valueChange={(event) => (name = event.detail.value)}
       />
     </Field>
+  </div>
+
+  <div class="specimen__group">
+    <Eyebrow>Sizes</Eyebrow>
+    <div class="specimen__stack">
+      {#each controlSizes as size}
+        <TextInput id={"size-" + size} placeholder={size.toUpperCase()} {size} />
+      {/each}
+    </div>
   </div>
 
   <div class="specimen__group">
@@ -108,5 +119,11 @@
     display: flex;
     flex-direction: column;
     gap: 0.5rem;
+  }
+
+  .specimen__stack {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
   }
 </style>

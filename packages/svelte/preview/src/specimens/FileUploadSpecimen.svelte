@@ -2,6 +2,8 @@
   import { DEFAULT_COMPRESSION, FileUpload, Eyebrow } from "@poodle/svelte-primitives";
   import type { FileUploadItem } from "@poodle/svelte-primitives";
 
+  const controlSizes = ["xs", "sm", "md", "lg", "xl"] as const;
+
   let imageFiles: FileUploadItem[] = [];
   let docFiles: FileUploadItem[] = [];
   let compressedFiles: FileUploadItem[] = [];
@@ -45,6 +47,15 @@
   </div>
 
   <div class="specimen__group">
+    <Eyebrow>Sizes</Eyebrow>
+    <div class="specimen__stack">
+      {#each controlSizes as size}
+        <FileUpload accept="image/*" {size} />
+      {/each}
+    </div>
+  </div>
+
+  <div class="specimen__group">
     <Eyebrow>Disabled</Eyebrow>
     <FileUpload disabled />
   </div>
@@ -68,6 +79,12 @@
     display: flex;
     flex-direction: column;
     gap: 0.5rem;
+  }
+
+  .specimen__stack {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
   }
 
   .error {

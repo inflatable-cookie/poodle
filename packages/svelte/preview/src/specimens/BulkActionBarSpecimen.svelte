@@ -7,6 +7,8 @@
     { id: "delete", label: "Delete", icon: "trash-2", tone: "danger" },
   ];
 
+  const controlSizes = ["xs", "sm", "md", "lg", "xl"] as const;
+
   let lastAction = "";
 </script>
 
@@ -25,6 +27,15 @@
   </div>
 
   <div class="specimen__group">
+    <Eyebrow>Sizes</Eyebrow>
+    <div class="specimen__stack">
+      {#each controlSizes as size}
+        <BulkActionBar selectionCount={5} {actions} {size} />
+      {/each}
+    </div>
+  </div>
+
+  <div class="specimen__group">
     <Eyebrow>Single item selected</Eyebrow>
     <BulkActionBar selectionCount={1} actions={actions.slice(0, 2)} />
   </div>
@@ -38,6 +49,12 @@
   }
 
   .specimen__group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .specimen__stack {
     display: flex;
     flex-direction: column;
     gap: 0.5rem;

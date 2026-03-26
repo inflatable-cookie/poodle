@@ -1,6 +1,8 @@
 <script lang="ts">
   import { EditableLabel, Eyebrow } from "@poodle/svelte-primitives";
 
+  const controlSizes = ["xs", "sm", "md", "lg", "xl"] as const;
+
   let title = "My project title";
   let emptyValue = "";
   let flushValue = "Inline heading";
@@ -16,6 +18,15 @@
       on:commit={(e) => (lastEvent = `Committed: "${e.detail.value}" (was: "${e.detail.previousValue}")`)}
       on:cancel={() => (lastEvent = "Edit cancelled")}
     />
+  </div>
+
+  <div class="specimen__group">
+    <Eyebrow>Sizes</Eyebrow>
+    <div class="specimen__stack">
+      {#each controlSizes as size}
+        <EditableLabel value={size.toUpperCase()} ariaLabel={"Label at " + size} {size} />
+      {/each}
+    </div>
   </div>
 
   <div class="specimen__group">
@@ -90,6 +101,12 @@
     display: flex;
     flex-direction: column;
     gap: 0.5rem;
+  }
+
+  .specimen__stack {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
   }
 
   p { margin: 0; }

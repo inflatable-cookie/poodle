@@ -2,6 +2,8 @@
   import { FilterToolbar } from "@poodle/svelte-composites";
   import { Eyebrow, Select, SearchField, Button, IconButton, type SelectOption } from "@poodle/svelte-primitives";
 
+  const controlSizes = ["xs", "sm", "md", "lg", "xl"] as const;
+
   const statusOptions: SelectOption[] = [
     { value: "all", label: "All statuses" },
     { value: "active", label: "Active" },
@@ -35,6 +37,18 @@
       <Select id="filter-type" options={typeOptions} defaultValue="all" ariaLabel="Type" />
       <Select id="filter-owner" options={ownerOptions} defaultValue="all" ariaLabel="Owner" />
     </FilterToolbar>
+  </div>
+
+  <div class="specimen__group">
+    <Eyebrow>Sizes</Eyebrow>
+    <div class="specimen__stack">
+      {#each controlSizes as size}
+        <FilterToolbar summaryText="Toolbar at {size}" {size} ariaLabel="Filter toolbar at {size}">
+          <SearchField id="size-search-{size}" placeholder="Search…" ariaLabel="Search" />
+          <Select id="size-status-{size}" options={statusOptions} defaultValue="all" ariaLabel="Status" />
+        </FilterToolbar>
+      {/each}
+    </div>
   </div>
 
   <div class="specimen__group">
@@ -94,5 +108,11 @@
     display: flex;
     flex-direction: column;
     gap: 0.5rem;
+  }
+
+  .specimen__stack {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
   }
 </style>

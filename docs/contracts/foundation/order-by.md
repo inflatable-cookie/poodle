@@ -46,6 +46,8 @@ Updated: 2026-03-15
 | `fields` | `SortField[]` | — | yes | available sort fields |
 | `activeSort` | `ActiveSort \| null` | `null` | no | current sort state |
 | `ariaLabel` | `string` | `"Sort by"` | no | accessible name for toolbar |
+| `size` | `"xs" \| "sm" \| "md" \| "lg" \| "xl"` | `null` | no | explicit control size override; when null, resolves from inherited presentation |
+| `sizeRole` | `"chrome" \| "control" \| "prominent"` | `"control"` | no | semantic size offset from inherited presentation |
 | `disabled` | `boolean` | `false` | no | disables all field buttons |
 
 ### SortField Type
@@ -256,8 +258,19 @@ type ActiveSort = {
 | `width` | `0.75rem` |
 | `height` | `0.75rem` |
 
+### Size adjustments
+
+| Size | field height | field padding | field font-size |
+|------|-------------|--------------|----------------|
+| `xs` | `1.25rem` | `0 0.375rem` | `0.625rem` |
+| `sm` | `1.5rem` | `0 0.4375rem` | `0.6875rem` |
+| `md` | `1.75rem` | `0 0.5rem` | `0.75rem` |
+| `lg` | `2rem` | `0 0.5625rem` | `0.8125rem` |
+| `xl` | `2.25rem` | `0 0.625rem` | `0.875rem` |
+
 ## 9. Svelte Notes
 
+- `data-size` attribute on root reflects the resolved size
 - Toggle cycle: clicking inactive field sets asc; clicking active asc field
   sets desc; clicking active desc field clears sort (null)
 - `.order-by__field--active` CSS class on active field button (not `data-active` attribute), `data-direction` attribute for direction
@@ -287,6 +300,7 @@ type ActiveSort = {
 
 ### Tier 2: Visual Parity
 
+- [ ] all five sizes visually match per size table
 - [ ] field button dimensions match (1.75rem height, 0.5rem padding)
 - [ ] active field accent styling matches
 - [ ] arrow rotation matches (180deg for desc)

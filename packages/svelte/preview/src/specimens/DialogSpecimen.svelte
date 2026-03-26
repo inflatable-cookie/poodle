@@ -1,10 +1,13 @@
 <script lang="ts">
   import { Dialog, Button, Eyebrow } from "@poodle/svelte-primitives";
 
+  const controlSizes = ["xs", "sm", "md", "lg", "xl"] as const;
+
   let basicOpen = false;
   let alertOpen = false;
   let noBackdropOpen = false;
   let closeButtonOpen = false;
+  let sizeOpenMap: Record<string, boolean> = {};
 </script>
 
 <div class="specimen">
@@ -60,6 +63,28 @@
   </div>
 
   <div class="specimen__group">
+    <Eyebrow>Sizes</Eyebrow>
+    <div class="specimen__row">
+      {#each controlSizes as size}
+        <Button variant="secondary" {size} on:click={() => (sizeOpenMap[size] = true)}>{size}</Button>
+        <Dialog
+          open={sizeOpenMap[size] ?? false}
+          {size}
+          title="Dialog at {size}"
+          description="Header text and action chrome scale with the size prop."
+          on:openChange={(e) => (sizeOpenMap[size] = e.detail.open)}
+        >
+          <p>Body content at the <strong>{size}</strong> size.</p>
+          <svelte:fragment slot="actions">
+            <Button variant="ghost" {size} on:click={() => (sizeOpenMap[size] = false)}>Cancel</Button>
+            <Button {size} on:click={() => (sizeOpenMap[size] = false)}>Confirm</Button>
+          </svelte:fragment>
+        </Dialog>
+      {/each}
+    </div>
+  </div>
+
+  <div class="specimen__group">
     <Eyebrow>Custom chrome with close button</Eyebrow>
     <Button variant="secondary" on:click={() => (closeButtonOpen = true)}>Open styled dialog</Button>
     <Dialog
@@ -98,6 +123,13 @@
     margin: 0;
     font-size: 0.875rem;
     color: var(--poodle-color-text-secondary);
+  }
+
+  .specimen__row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    align-items: center;
   }
 
   :global(.dialog--specimen) {

@@ -37,6 +37,8 @@
     },
   ];
 
+  const controlSizes = ["xs", "sm", "md", "lg", "xl"] as const;
+
   let lastAction = "";
 </script>
 
@@ -48,6 +50,15 @@
       <p>Last action: <strong>{lastAction}</strong></p>
     {/if}
   </div>
+
+  <div class="specimen__group">
+    <Eyebrow>Sizes</Eyebrow>
+    <div class="specimen__stack">
+      {#each controlSizes as size}
+        <Menubar {items} ariaLabel={size + " menu bar"} {size} />
+      {/each}
+    </div>
+  </div>
 </div>
 
 <style>
@@ -58,6 +69,12 @@
   }
 
   .specimen__group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .specimen__stack {
     display: flex;
     flex-direction: column;
     gap: 0.5rem;

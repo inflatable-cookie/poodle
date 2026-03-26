@@ -79,4 +79,17 @@
     outline: var(--poodle-border-width-focus) solid var(--poodle-color-accent-focusRing);
     outline-offset: 0.0625rem;
   }
+
+  /* Size variants */
+  .collapse-toggle[data-size="xs"] {
+    padding: 0.0625rem;
+  }
+
+  .collapse-toggle[data-size="lg"] {
+    padding: 0.1875rem;
+  }
+
+  .collapse-toggle[data-size="xl"] {
+    padding: 0.25rem;
+  }
 </style>

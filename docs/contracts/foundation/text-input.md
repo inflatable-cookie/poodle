@@ -75,6 +75,8 @@ Updated: 2026-03-25
 | `suffix` | `string \| null` | `null` | no | static text after input (e.g. "kg") |
 | `maxLength` | `number \| null` | `null` | no | maximum character count |
 | `showCharCount` | `boolean` | `false` | no | display live character counter |
+| `size` | `"xs" \| "sm" \| "md" \| "lg" \| "xl"` | `null` | no | explicit control size override; when null, resolves from inherited presentation |
+| `sizeRole` | `"chrome" \| "control" \| "prominent"` | `"control"` | no | semantic size offset from inherited presentation |
 
 ### Controlled And Uncontrolled
 
@@ -337,6 +339,16 @@ indicator slot.
 |----------|-------|
 | `color` | `var(--poodle-color-status-danger)` |
 
+### Size adjustments
+
+| Size | min-height | padding | font-size |
+|------|------------|---------|-----------|
+| `xs` | `calc(control-height - 0.5rem)` | `0 calc(space-control-x - 0.125rem)` | `0.75rem` |
+| `sm` | `calc(control-height - 0.375rem)` | `0 calc(space-control-x - 0.0625rem)` | `typography-body-size` |
+| `md` | `control-height` | `0 space-control-x` | `typography-body-size` |
+| `lg` | `calc(control-height + 0.375rem)` | `0 calc(space-control-x + 0.125rem)` | `0.9375rem` |
+| `xl` | `calc(control-height + 0.5rem)` | `0 calc(space-control-x + 0.1875rem)` | `1rem` |
+
 ## 9. Svelte Notes
 
 - Uses native `<input>` element inside a styled `<div>` wrapper
@@ -356,6 +368,7 @@ indicator slot.
 - Character count renders `{currentLength}/{maxLength}` when both
   `showCharCount` and `maxLength` are set, or `{currentLength}` when only
   `showCharCount` is set
+- Emits `data-size` on root element reflecting the resolved size
 
 ## 10. GPUI Notes
 
@@ -392,6 +405,7 @@ indicator slot.
 - [ ] character count typography matches (code family, 0.6875rem)
 - [ ] character count over-limit color matches (status-danger)
 - [ ] disabled opacity matches (state-opacity-disabled)
+- [ ] all five sizes visually match (height, padding, font-size per size table)
 
 ### Tier 3: Implementation Freedom
 

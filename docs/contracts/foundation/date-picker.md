@@ -49,6 +49,8 @@ Updated: 2026-03-15
 | `placeholder` | `string` | `"Select date"` | no | text shown when no date is selected |
 | `weekStartsOn` | `CalendarWeekStart` | `"monday"` | no | passed through to composed Calendar |
 | `locale` | `string` | `"en-US"` | no | passed through to composed Calendar |
+| `size` | `"xs" \| "sm" \| "md" \| "lg" \| "xl"` | `null` | no | explicit control size override; when null, resolves from inherited presentation |
+| `sizeRole` | `"chrome" \| "control" \| "prominent"` | `"control"` | no | semantic size offset from inherited presentation |
 | `disabled` | `boolean` | `false` | no | disables the trigger and prevents opening |
 | `ariaLabel` | `string \| null` | `null` | no | accessible name for the trigger |
 
@@ -229,6 +231,23 @@ CalendarWeekStart: "sunday" | "monday"
 | `background` | `color-mix(in srgb, var(--poodle-color-background-elevated) 98%, var(--poodle-color-background-panel))` |
 | `box-shadow` | `var(--poodle-elevation-overlay)` |
 
+### Size adjustments
+
+| Size | Property | Value |
+|------|----------|-------|
+| `xs` (`[data-size="xs"]`) | `min-height` | `calc(var(--poodle-size-control-height) - 0.5rem)` |
+| `xs` | `padding` | `0 calc(var(--poodle-space-control-x) - 0.125rem)` |
+| `xs` | `font-size` | `0.6875rem` |
+| `sm` (`[data-size="sm"]`) | `min-height` | `calc(var(--poodle-size-control-height) - 0.375rem)` |
+| `sm` | `padding` | `0 calc(var(--poodle-space-control-x) - 0.125rem)` |
+| `sm` | `font-size` | `0.75rem` |
+| `lg` (`[data-size="lg"]`) | `min-height` | `calc(var(--poodle-size-control-height) + 0.375rem)` |
+| `lg` | `padding` | `0 calc(var(--poodle-space-control-x) + 0.125rem)` |
+| `lg` | `font-size` | `0.875rem` |
+| `xl` (`[data-size="xl"]`) | `min-height` | `calc(var(--poodle-size-control-height) + 0.5rem)` |
+| `xl` | `padding` | `0 calc(var(--poodle-space-control-x) + 0.1875rem)` |
+| `xl` | `font-size` | `0.9375rem` |
+
 ## 9. Svelte Notes
 
 - Public value uses ISO `YYYY-MM-DD` strings rather than browser `Date`
@@ -244,6 +263,7 @@ CalendarWeekStart: "sunday" | "monday"
 - When a date is selected in the Calendar, the picker auto-closes
 - Surface uses `color-mix` for border and background blending
 - Trigger displays the formatted selected date or the placeholder text
+- `data-size` data attribute on root reflects the resolved size
 
 ## 10. GPUI Notes
 
@@ -291,6 +311,7 @@ CalendarWeekStart: "sunday" | "monday"
 - [ ] surface radius (radius-surface) matches
 - [ ] surface z-index (overlay-z-menu) matches
 - [ ] disabled opacity (state-opacity-disabled) matches
+- [ ] all five sizes visually match (height, padding, font-size per size table)
 
 ### Tier 3: Implementation Freedom
 

@@ -74,4 +74,28 @@
     cursor: not-allowed;
     opacity: var(--poodle-state-opacity-disabled);
   }
+
+  /* Size variants */
+  .time-field[data-size="xs"] {
+    min-height: calc(var(--poodle-size-control-height) - 0.5rem);
+    padding: 0 calc(var(--poodle-space-control-x) - 0.125rem);
+    font-size: 0.75rem;
+  }
+
+  .time-field[data-size="sm"] {
+    min-height: calc(var(--poodle-size-control-height) - 0.375rem);
+    padding: 0 calc(var(--poodle-space-control-x) - 0.0625rem);
+  }
+
+  .time-field[data-size="lg"] {
+    min-height: calc(var(--poodle-size-control-height) + 0.375rem);
+    padding: 0 calc(var(--poodle-space-control-x) + 0.125rem);
+    font-size: 0.9375rem;
+  }
+
+  .time-field[data-size="xl"] {
+    min-height: calc(var(--poodle-size-control-height) + 0.5rem);
+    padding: 0 calc(var(--poodle-space-control-x) + 0.1875rem);
+    font-size: 1rem;
+  }
 </style>

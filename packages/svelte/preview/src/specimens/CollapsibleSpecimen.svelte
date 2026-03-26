@@ -1,5 +1,7 @@
 <script lang="ts">
   import { Collapsible, Eyebrow } from "@poodle/svelte-primitives";
+
+  const controlSizes = ["xs", "sm", "md", "lg", "xl"] as const;
 </script>
 
 <div class="specimen">
@@ -19,6 +21,17 @@
       <p>Retry count: 3</p>
       <p>Timeout: 30s</p>
     </Collapsible>
+  </div>
+
+  <div class="specimen__group">
+    <Eyebrow>Sizes</Eyebrow>
+    <div class="specimen__stack">
+      {#each controlSizes as size}
+        <Collapsible title="Collapsible at {size}" {size}>
+          <p>Content at <strong>{size}</strong> size.</p>
+        </Collapsible>
+      {/each}
+    </div>
   </div>
 
   <div class="specimen__group">
@@ -46,5 +59,11 @@
     margin: 0;
     font-size: 0.875rem;
     color: var(--poodle-color-text-secondary);
+  }
+
+  .specimen__stack {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
   }
 </style>

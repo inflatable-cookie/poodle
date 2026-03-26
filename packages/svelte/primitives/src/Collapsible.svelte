@@ -161,4 +161,37 @@
     min-width: 0;
     padding-top: 0.125rem;
   }
+
+  /* Size variants */
+  .collapsible[data-size="xs"] .collapsible__title {
+    font-size: 0.8125rem;
+  }
+
+  .collapsible[data-size="xs"] .collapsible__description {
+    font-size: 0.6875rem;
+  }
+
+  .collapsible[data-size="sm"] .collapsible__title {
+    font-size: 0.875rem;
+  }
+
+  .collapsible[data-size="sm"] .collapsible__description {
+    font-size: 0.75rem;
+  }
+
+  .collapsible[data-size="lg"] .collapsible__title {
+    font-size: 1.0625rem;
+  }
+
+  .collapsible[data-size="lg"] .collapsible__description {
+    font-size: 0.875rem;
+  }
+
+  .collapsible[data-size="xl"] .collapsible__title {
+    font-size: 1.125rem;
+  }
+
+  .collapsible[data-size="xl"] .collapsible__description {
+    font-size: 0.9375rem;
+  }
 </style>

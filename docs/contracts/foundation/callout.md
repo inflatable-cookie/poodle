@@ -51,6 +51,8 @@ Updated: 2026-03-25
 | `ariaLabel` | `string \| null` | `null` | no | optional accessible label for the callout region |
 | `announceMode` | `CalloutAnnounceMode` | `"none"` | no | ARIA live-region behavior |
 | `dismissible` | `boolean` | `false` | no | shows dismiss button |
+| `size` | `"xs" \| "sm" \| "md" \| "lg" \| "xl"` | `null` | no | explicit control size override; when null, resolves from inherited presentation |
+| `sizeRole` | `"chrome" \| "control" \| "prominent"` | `"control"` | no | semantic size offset from inherited presentation |
 | `dismissLabel` | `string` | `"Dismiss message"` | no | accessible label for dismiss button |
 
 ### CalloutAnnounceMode
@@ -299,8 +301,19 @@ no icon slot override is provided.
 | `outline` | `var(--poodle-border-width-focus) solid var(--poodle-color-accent-focusRing)` |
 | `outline-offset` | `0.125rem` |
 
+### Size adjustments
+
+| Size | icon badge size | title font-size | message font-size | dismiss button size |
+|------|----------------|----------------|-------------------|-------------------|
+| `xs` | `1rem` | `0.6875rem` | `0.6875rem` | `1.25rem` |
+| `sm` | `1.1875rem` | `0.75rem` | `0.75rem` | `1.5rem` |
+| `md` | `1.375rem` | `typography-label-size` | `0.8125rem` | `1.75rem` |
+| `lg` | `1.5625rem` | `0.9375rem` | `0.875rem` | `2rem` |
+| `xl` | `1.75rem` | `1rem` | `0.9375rem` | `2.25rem` |
+
 ## 9. Svelte Notes
 
+- `data-size` attribute on root reflects the resolved size
 - Root element is a `<section>` with optional `aria-label`, `role`, and `aria-live`
 - Icon slot allows overriding the default tone-based indicator
 - Default indicator is rendered based on tone mapping when no icon slot content
@@ -341,6 +354,7 @@ no icon slot override is provided.
 
 ### Tier 2: Visual Parity
 
+- [ ] all five sizes visually match per size table
 - [ ] root 3-column grid layout matches (1fr auto auto)
 - [ ] neutral tone uses custom property defaults (94% panel, 88% border)
 - [ ] info/success/warning/danger tones use 10%/34% color-mix pattern

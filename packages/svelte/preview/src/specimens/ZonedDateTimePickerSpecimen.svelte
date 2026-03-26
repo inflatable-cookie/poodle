@@ -1,11 +1,22 @@
 <script lang="ts">
   import { ZonedDateTimePicker, Eyebrow } from "@poodle/svelte-primitives";
+
+  const controlSizes = ["xs", "sm", "md", "lg", "xl"] as const;
 </script>
 
 <div class="specimen">
   <div class="specimen__group">
     <Eyebrow>Default</Eyebrow>
     <ZonedDateTimePicker ariaLabel="Select date, time, and zone" />
+  </div>
+
+  <div class="specimen__group">
+    <Eyebrow>Sizes</Eyebrow>
+    <div class="specimen__stack">
+      {#each controlSizes as size}
+        <ZonedDateTimePicker {size} ariaLabel={size} />
+      {/each}
+    </div>
   </div>
 
   <div class="specimen__group">
@@ -31,6 +42,12 @@
   }
 
   .specimen__group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .specimen__stack {
     display: flex;
     flex-direction: column;
     gap: 0.5rem;

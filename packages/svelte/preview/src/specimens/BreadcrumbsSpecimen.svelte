@@ -17,6 +17,8 @@
     { value: "button", label: "Button", current: true },
   ];
 
+  const controlSizes = ["xs", "sm", "md", "lg", "xl"] as const;
+
   let lastNav = "";
 </script>
 
@@ -30,6 +32,15 @@
     {#if lastNav}
       <p>Navigated to: <strong>{lastNav}</strong></p>
     {/if}
+  </div>
+
+  <div class="specimen__group">
+    <Eyebrow>Sizes</Eyebrow>
+    <div class="specimen__stack">
+      {#each controlSizes as size}
+        <Breadcrumbs items={basicItems} {size} />
+      {/each}
+    </div>
   </div>
 
   <div class="specimen__group">
@@ -51,6 +62,12 @@
   }
 
   .specimen__group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .specimen__stack {
     display: flex;
     flex-direction: column;
     gap: 0.5rem;

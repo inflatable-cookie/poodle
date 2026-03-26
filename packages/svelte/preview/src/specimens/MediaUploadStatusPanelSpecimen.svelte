@@ -3,6 +3,8 @@
   import { MediaUploadStatusPanel } from "@poodle/svelte-composites";
   import type { MediaUploadWorkflowStep } from "@poodle/svelte-composites";
 
+  const controlSizes = ["xs", "sm", "md", "lg", "xl"] as const;
+
   let uploadStep: MediaUploadWorkflowStep = "checking";
   let lastAction = "None";
 </script>
@@ -30,6 +32,19 @@
     />
     <p>Last action: <strong>{lastAction}</strong></p>
   </div>
+
+  <div class="specimen__group">
+    <Eyebrow>Sizes</Eyebrow>
+    <div class="specimen__stack">
+      {#each controlSizes as size}
+        <MediaUploadStatusPanel
+          uploadStep="uploading"
+          uploadProgress={62}
+          {size}
+        />
+      {/each}
+    </div>
+  </div>
 </div>
 
 <style>
@@ -38,6 +53,12 @@
     display: flex;
     flex-direction: column;
     gap: 0.75rem;
+  }
+
+  .specimen__stack {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
   }
 
   .specimen__actions {

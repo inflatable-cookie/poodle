@@ -56,6 +56,8 @@ Updated: 2026-03-15
 | `visibleMonth` | `string \| null` | `null` | no | controlled visible month (ISO `YYYY-MM`) |
 | `weekStartsOn` | `CalendarWeekStart` | `"monday"` | no | first day of the week |
 | `locale` | `string` | `"en-US"` | no | locale for month and weekday formatting |
+| `size` | `"xs" \| "sm" \| "md" \| "lg" \| "xl"` | `null` | no | explicit control size override; when null, resolves from inherited presentation |
+| `sizeRole` | `"chrome" \| "control" \| "prominent"` | `"control"` | no | semantic size offset from inherited presentation |
 | `disabled` | `boolean` | `false` | no | disables all interaction |
 | `ariaLabel` | `string \| null` | `null` | no | accessible name for the grid |
 
@@ -326,6 +328,27 @@ CalendarWeekStart: "sunday" | "monday"
 | `cursor` | `not-allowed` |
 | `opacity` | `var(--poodle-state-opacity-disabled)` |
 
+### Size adjustments
+
+| Size | Part | Property | Value |
+|------|------|----------|-------|
+| `xs` (`[data-size="xs"]`) | Nav Button | `width` / `height` | `1.5rem` |
+| `xs` | Day Button | `min-height` | `1.75rem` |
+| `xs` | Day Button | `font-size` | `0.6875rem` |
+| `xs` | Month Label | `font-size` | `0.6875rem` |
+| `sm` (`[data-size="sm"]`) | Nav Button | `width` / `height` | `1.75rem` |
+| `sm` | Day Button | `min-height` | `2rem` |
+| `sm` | Day Button | `font-size` | `0.6875rem` |
+| `sm` | Month Label | `font-size` | `0.75rem` |
+| `lg` (`[data-size="lg"]`) | Nav Button | `width` / `height` | `2.25rem` |
+| `lg` | Day Button | `min-height` | `2.5rem` |
+| `lg` | Day Button | `font-size` | `0.8125rem` |
+| `lg` | Month Label | `font-size` | `0.875rem` |
+| `xl` (`[data-size="xl"]`) | Nav Button | `width` / `height` | `2.5rem` |
+| `xl` | Day Button | `min-height` | `2.75rem` |
+| `xl` | Day Button | `font-size` | `0.875rem` |
+| `xl` | Month Label | `font-size` | `0.9375rem` |
+
 ## 9. Svelte Notes
 
 - Public value uses ISO `YYYY-MM-DD` strings rather than browser `Date`
@@ -339,6 +362,7 @@ CalendarWeekStart: "sunday" | "monday"
 - Day buttons outside the visible month are rendered but visually muted
 - `color-mix` formulas are used for intermediate visual states (today border,
   hover tint, selected hover tint)
+- `data-size` data attribute on root reflects the resolved size
 
 ## 10. GPUI Notes
 
@@ -383,6 +407,7 @@ CalendarWeekStart: "sunday" | "monday"
 - [ ] outside-month opacity (0.72) matches
 - [ ] disabled opacity (state-opacity-disabled) matches
 - [ ] focus ring on nav buttons (border-width-focus, focusRing, 0.125rem offset) matches
+- [ ] all five sizes visually match (nav button, day cell, month label per size table)
 
 ### Tier 3: Implementation Freedom
 

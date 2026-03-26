@@ -1,6 +1,8 @@
 <script lang="ts">
   import { Eyebrow, OrderBy, type ActiveSort, type SortField } from "@poodle/svelte-primitives";
 
+  const controlSizes = ["xs", "sm", "md", "lg", "xl"] as const;
+
   let activeSort: ActiveSort | null = null;
 
   const fields: SortField[] = [
@@ -27,6 +29,15 @@
   </div>
 
   <div class="specimen__group">
+    <Eyebrow>Sizes</Eyebrow>
+    <div class="specimen__stack">
+      {#each controlSizes as size}
+        <OrderBy fields={fields} {size} />
+      {/each}
+    </div>
+  </div>
+
+  <div class="specimen__group">
     <Eyebrow>Disabled</Eyebrow>
     <OrderBy
       fields={[{ value: "name", label: "Name" }, { value: "date", label: "Date" }]}
@@ -38,5 +49,6 @@
 <style>
   .specimen { display: flex; flex-direction: column; gap: 1.5rem; }
   .specimen__group { display: flex; flex-direction: column; gap: 0.5rem; }
+  .specimen__stack { display: flex; flex-direction: column; gap: 0.5rem; }
   p { margin: 0; }
 </style>

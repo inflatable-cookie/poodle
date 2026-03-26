@@ -1,5 +1,7 @@
 <script lang="ts">
   import { Callout, Eyebrow } from "@poodle/svelte-primitives";
+
+  const controlSizes = ["xs", "sm", "md", "lg", "xl"] as const;
 </script>
 
 <div class="specimen">
@@ -20,6 +22,17 @@
     <Callout tone="danger" title="Error">
       Unable to connect to the database. Check your credentials and try again.
     </Callout>
+  </div>
+
+  <div class="specimen__group">
+    <Eyebrow>Sizes</Eyebrow>
+    <div class="specimen__stack">
+      {#each controlSizes as size}
+        <Callout tone="info" title="Callout at {size}" {size}>
+          Text and icon chrome scale with the size prop.
+        </Callout>
+      {/each}
+    </div>
   </div>
 
   <div class="specimen__group">
@@ -56,5 +69,11 @@
     display: flex;
     flex-direction: column;
     gap: 0.75rem;
+  }
+
+  .specimen__stack {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
   }
 </style>

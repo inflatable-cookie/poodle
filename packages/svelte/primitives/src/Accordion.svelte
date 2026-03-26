@@ -183,4 +183,37 @@
   .accordion__panel {
     min-width: 0;
   }
+
+  /* Size variants */
+  .accordion[data-size="xs"] .accordion__title {
+    font-size: 0.8125rem;
+  }
+
+  .accordion[data-size="xs"] .accordion__description {
+    font-size: 0.6875rem;
+  }
+
+  .accordion[data-size="sm"] .accordion__title {
+    font-size: 0.875rem;
+  }
+
+  .accordion[data-size="sm"] .accordion__description {
+    font-size: 0.75rem;
+  }
+
+  .accordion[data-size="lg"] .accordion__title {
+    font-size: 1.0625rem;
+  }
+
+  .accordion[data-size="lg"] .accordion__description {
+    font-size: 0.875rem;
+  }
+
+  .accordion[data-size="xl"] .accordion__title {
+    font-size: 1.125rem;
+  }
+
+  .accordion[data-size="xl"] .accordion__description {
+    font-size: 0.9375rem;
+  }
 </style>

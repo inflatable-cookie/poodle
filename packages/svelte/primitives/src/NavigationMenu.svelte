@@ -210,4 +210,28 @@
     background: color-mix(in srgb, var(--poodle-color-background-panel) 96%, transparent);
     box-shadow: var(--poodle-elevation-overlay);
   }
+
+  /* Size variants */
+  .navigation-menu[data-size="xs"] .navigation-menu__trigger {
+    min-height: calc(var(--poodle-size-control-height) - 0.625rem);
+    padding: 0 calc(var(--poodle-space-control-x) - 0.125rem);
+    font-size: 0.6875rem;
+  }
+
+  .navigation-menu[data-size="sm"] .navigation-menu__trigger {
+    min-height: calc(var(--poodle-size-control-height) - 0.5rem);
+    padding: 0 calc(var(--poodle-space-control-x) - 0.0625rem);
+  }
+
+  .navigation-menu[data-size="lg"] .navigation-menu__trigger {
+    min-height: calc(var(--poodle-size-control-height) + 0.25rem);
+    padding: 0 calc(var(--poodle-space-control-x) + 0.125rem);
+    font-size: 0.8125rem;
+  }
+
+  .navigation-menu[data-size="xl"] .navigation-menu__trigger {
+    min-height: calc(var(--poodle-size-control-height) + 0.375rem);
+    padding: 0 calc(var(--poodle-space-control-x) + 0.1875rem);
+    font-size: 0.875rem;
+  }
 </style>

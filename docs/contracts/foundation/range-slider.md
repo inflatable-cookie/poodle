@@ -49,6 +49,8 @@ Updated: 2026-03-15
 | `ariaLabel` | `string \| null` | `null` | no | base accessible name for the control |
 | `lowerValueText` | `string \| null` | `null` | no | human-readable text for lower thumb (aria-valuetext) |
 | `upperValueText` | `string \| null` | `null` | no | human-readable text for upper thumb (aria-valuetext) |
+| `size` | `"xs" \| "sm" \| "md" \| "lg" \| "xl"` | `null` | no | explicit control size override; when null, resolves from inherited presentation |
+| `sizeRole` | `"chrome" \| "control" \| "prominent"` | `"control"` | no | semantic size offset from inherited presentation |
 
 ### Controlled And Uncontrolled
 
@@ -297,6 +299,16 @@ Updated: 2026-03-15
 | `height` | `0.375rem` |
 | `background` | `transparent` |
 
+### Size adjustments
+
+| Size | min-height | thumb diameter | thumb margin-top |
+|------|------------|----------------|------------------|
+| `xs` | `1.25rem` | `0.75rem` | `-0.1875rem` |
+| `sm` | `1.375rem` | `0.875rem` | `-0.25rem` |
+| `md` | `1.5rem` | `1rem` | `-0.3125rem` |
+| `lg` | _(base)_ | `1.125rem` | `-0.375rem` |
+| `xl` | _(base)_ | `1.25rem` | `-0.4375rem` |
+
 ## 9. Svelte Notes
 
 - Uses two overlapping native `<input type="range">` elements, both absolutely
@@ -312,8 +324,8 @@ Updated: 2026-03-15
   has its min clamped to the lower value, preserving the lower<=upper invariant
 - `valueChange` fires on the `input` event (live during drag); `valueCommit`
   fires on the `change` event (on release)
-- `data-orientation` and `data-disabled` attributes on root drive layout and
-  state styling
+- `data-orientation`, `data-disabled`, and `data-size` attributes on root drive
+  layout and state styling
 - Per-thumb aria-label is constructed by appending "minimum"/"maximum" to the
   base ariaLabel prop, or defaults to "Minimum value"/"Maximum value"
 
@@ -343,6 +355,7 @@ Updated: 2026-03-15
 
 ### Tier 2: Visual Parity
 
+- [ ] all five sizes visually match (height, padding, font-size per size table)
 - [ ] track thickness (0.375rem) and border-radius (999px) match
 - [ ] thumb sizing (1rem diameter) matches
 - [ ] thumb border, background (elevated), and box-shadow match

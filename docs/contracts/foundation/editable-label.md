@@ -52,6 +52,8 @@ Updated: 2026-03-21
 | `placeholder` | `string \| null` | `null` | no | input placeholder during editing |
 | `maxLength` | `number \| null` | `null` | no | maximum input length |
 | `showEditIcon` | `boolean` | `false` | no | show pencil icon on hover/focus |
+| `size` | `"xs" \| "sm" \| "md" \| "lg" \| "xl"` | `null` | no | explicit control size override; when null, resolves from inherited presentation |
+| `sizeRole` | `"chrome" \| "control" \| "prominent"` | `"control"` | no | semantic size offset from inherited presentation |
 
 ### Controlled And Uncontrolled
 
@@ -254,6 +256,16 @@ Updated: 2026-03-21
 | Input `border-bottom` | `0.0625rem solid var(--poodle-color-accent-focusRing)` |
 | Input `box-shadow` | `none` |
 
+### Size adjustments
+
+| Size | padding | font-size |
+|------|---------|-----------|
+| `xs` | `calc(space-control-y - 0.125rem) calc(space-control-x - 0.125rem)` | `0.75rem` |
+| `sm` | `calc(space-control-y - 0.0625rem) calc(space-control-x - 0.0625rem)` | _(base)_ |
+| `md` | `0.375rem 0.5rem` | _(base)_ |
+| `lg` | `calc(space-control-y + 0.0625rem) calc(space-control-x + 0.125rem)` | `0.9375rem` |
+| `xl` | `calc(space-control-y + 0.125rem) calc(space-control-x + 0.1875rem)` | `1rem` |
+
 ## 9. Svelte Notes
 
 - Display rendered as a `<button>` element for keyboard reachability in view mode
@@ -268,6 +280,7 @@ Updated: 2026-03-21
 - `activationMode="enterOrSpace"`: `click`, `Enter`, or `Space` on display enters edit mode
 - `activationMode="programmatic"`: no built-in activation gesture; parent must control entry
 - Replaces former `InlineEditableField` composite (merged)
+- `data-size` attribute on root reflects the resolved size for CSS variant styling
 
 ## 10. GPUI Notes
 
@@ -291,6 +304,7 @@ Updated: 2026-03-21
 
 ### Tier 2: Visual Parity
 
+- [ ] all five sizes visually match (height, padding, font-size per size table)
 - [ ] display and input share same padding (0.375rem 0.5rem) and typography
 - [ ] hover/focus border and background match
 - [ ] editing border-color (accent-focusRing) matches

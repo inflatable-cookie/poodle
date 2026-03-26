@@ -182,4 +182,32 @@
     width: 0.75rem;
     height: 0.75rem;
   }
+
+  /* Size variants */
+  .order-by[data-size="xs"] .order-by__field {
+    height: 1.375rem;
+    padding: 0 0.375rem;
+    font-size: 0.6875rem;
+  }
+
+  .order-by[data-size="xs"] .order-by__label {
+    font-size: 0.625rem;
+  }
+
+  .order-by[data-size="sm"] .order-by__field {
+    height: 1.5rem;
+    padding: 0 0.4375rem;
+  }
+
+  .order-by[data-size="lg"] .order-by__field {
+    height: 2rem;
+    padding: 0 0.625rem;
+    font-size: 0.8125rem;
+  }
+
+  .order-by[data-size="xl"] .order-by__field {
+    height: 2.25rem;
+    padding: 0 0.75rem;
+    font-size: 0.875rem;
+  }
 </style>

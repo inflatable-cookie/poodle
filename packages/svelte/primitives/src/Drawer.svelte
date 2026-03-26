@@ -253,4 +253,25 @@
     justify-content: flex-end;
     margin-top: var(--poodle-space-stack-md);
   }
+
+  /* Size variants */
+  .drawer[data-size="xs"] .drawer__header strong {
+    font-size: 0.8125rem;
+  }
+
+  .drawer[data-size="xs"] .drawer__header p {
+    font-size: 0.75rem;
+  }
+
+  .drawer[data-size="sm"] .drawer__header strong {
+    font-size: 0.875rem;
+  }
+
+  .drawer[data-size="lg"] .drawer__header strong {
+    font-size: 1.0625rem;
+  }
+
+  .drawer[data-size="xl"] .drawer__header strong {
+    font-size: 1.125rem;
+  }
 </style>

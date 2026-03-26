@@ -1,6 +1,9 @@
 <script lang="ts">
   import { AlertDialog, Button, Eyebrow } from "@poodle/svelte-primitives";
 
+  const controlSizes = ["xs", "sm", "md", "lg", "xl"] as const;
+  let sizeOpenMap: Record<string, boolean | null> = {};
+
   let dangerOpen: boolean | null = null;
   let warningOpen: boolean | null = null;
   let asyncOpen: boolean | null = null;
@@ -73,6 +76,26 @@
     </AlertDialog>
   </div>
 
+  <div class="specimen__group">
+    <Eyebrow>Sizes</Eyebrow>
+    <div class="specimen__row">
+      {#each controlSizes as size}
+        <Button variant="secondary" {size} on:click={() => (sizeOpenMap[size] = true)}>{size}</Button>
+        <AlertDialog
+          open={sizeOpenMap[size] ?? null}
+          {size}
+          title="Alert at {size}"
+          description="Header and action chrome scale with the size prop."
+          confirmLabel="Confirm"
+          cancelLabel="Cancel"
+          on:confirm={() => (sizeOpenMap[size] = false)}
+          on:cancel={() => (sizeOpenMap[size] = false)}
+          on:openChange={(e) => (sizeOpenMap[size] = e.detail.open ? true : null)}
+        />
+      {/each}
+    </div>
+  </div>
+
   {#if lastAction}
     <div class="specimen__group">
       <Eyebrow>Last action</Eyebrow>
@@ -92,6 +115,13 @@
     display: flex;
     flex-direction: column;
     gap: 0.5rem;
+  }
+
+  .specimen__row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    align-items: center;
   }
 
   .user-card {

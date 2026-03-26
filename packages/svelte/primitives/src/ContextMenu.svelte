@@ -282,4 +282,25 @@
     margin: 0.25rem 0;
     background: color-mix(in srgb, var(--poodle-color-border-subtle) 72%, transparent);
   }
+
+  /* Size variants */
+  .context-menu[data-size="xs"] .context-menu__item {
+    min-height: calc(var(--poodle-size-control-height) - 0.75rem);
+    padding: calc(var(--poodle-space-control-y) - 0.0625rem) calc(var(--poodle-space-control-x) - 0.125rem);
+    font-size: 0.75rem;
+  }
+
+  .context-menu[data-size="sm"] .context-menu__item {
+    min-height: calc(var(--poodle-size-control-height) - 0.625rem);
+  }
+
+  .context-menu[data-size="lg"] .context-menu__item {
+    min-height: calc(var(--poodle-size-control-height) + 0.125rem);
+    font-size: 0.9375rem;
+  }
+
+  .context-menu[data-size="xl"] .context-menu__item {
+    min-height: calc(var(--poodle-size-control-height) + 0.25rem);
+    font-size: 1rem;
+  }
 </style>

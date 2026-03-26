@@ -229,4 +229,33 @@
     cursor: not-allowed;
     opacity: var(--poodle-state-opacity-disabled);
   }
+
+  /* Size variants */
+  .number-entry[data-size="xs"] {
+    height: calc(var(--poodle-size-control-height) - 0.5rem);
+  }
+
+  .number-entry[data-size="xs"] .number-entry__control {
+    font-size: 0.75rem;
+  }
+
+  .number-entry[data-size="sm"] {
+    height: calc(var(--poodle-size-control-height) - 0.375rem);
+  }
+
+  .number-entry[data-size="lg"] {
+    height: calc(var(--poodle-size-control-height) + 0.375rem);
+  }
+
+  .number-entry[data-size="lg"] .number-entry__control {
+    font-size: 0.9375rem;
+  }
+
+  .number-entry[data-size="xl"] {
+    height: calc(var(--poodle-size-control-height) + 0.5rem);
+  }
+
+  .number-entry[data-size="xl"] .number-entry__control {
+    font-size: 1rem;
+  }
 </style>

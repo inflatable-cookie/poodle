@@ -36,6 +36,8 @@ Updated: 2026-03-17
 | `collapsed` | `boolean` | `false` | no | current state |
 | `direction` | `"left" \| "right" \| "up" \| "down"` | `"left"` | no | collapse direction |
 | `disabled` | `boolean` | `false` | no | suppresses interaction |
+| `size` | `"xs" \| "sm" \| "md" \| "lg" \| "xl"` | `null` | no | explicit control size override; when null, resolves from inherited presentation |
+| `sizeRole` | `"chrome" \| "control" \| "prominent"` | `"chrome"` | no | semantic size offset from inherited presentation |
 | `ariaLabel` | `string \| null` | `null` | no | accessible label (defaults to "Collapse"/"Expand") |
 
 ## 4. States
@@ -108,8 +110,19 @@ Updated: 2026-03-17
 |----------|-------|
 | `outline-offset` | `0.0625rem` |
 
+### Size adjustments
+
+| Size | padding |
+|------|---------|
+| `xs` | `0.0625rem` |
+| `sm` | `0.09375rem` |
+| `md` | `0.125rem` |
+| `lg` | `0.1875rem` |
+| `xl` | `0.25rem` |
+
 ## 9. Svelte Notes
 
+- `data-size` attribute on root reflects the resolved size
 - thin wrapper around IconButton with collapse-specific defaults
 - icon rotates based on direction and collapsed state
 
@@ -127,6 +140,7 @@ Updated: 2026-03-17
 
 ### Tier 2: Visual Parity
 
+- [ ] all five sizes visually match per size table
 - [ ] icon direction and rotation match
 
 ### Tier 3: Implementation Freedom

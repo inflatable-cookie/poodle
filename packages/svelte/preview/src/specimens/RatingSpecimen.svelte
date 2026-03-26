@@ -1,6 +1,8 @@
 <script lang="ts">
   import { Rating, Eyebrow } from "@poodle/svelte-primitives";
 
+  const controlSizes = ["xs", "sm", "md", "lg", "xl"] as const;
+
   let rating = 3;
 </script>
 
@@ -13,6 +15,15 @@
       on:valueChange={(e) => { if (e.detail.value != null) rating = e.detail.value; }}
     />
     <p>Rating: <strong>{rating} / 5</strong></p>
+  </div>
+
+  <div class="specimen__group">
+    <Eyebrow>Sizes</Eyebrow>
+    <div class="specimen__row">
+      {#each controlSizes as size}
+        <Rating value={3} ariaLabel={"Rating at " + size} {size} />
+      {/each}
+    </div>
   </div>
 
   <div class="specimen__group">
@@ -48,5 +59,12 @@
     margin: 0;
     font-size: 0.875rem;
     color: var(--poodle-color-text-secondary);
+  }
+
+  .specimen__row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.75rem;
   }
 </style>

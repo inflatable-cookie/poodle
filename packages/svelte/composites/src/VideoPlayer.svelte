@@ -397,4 +397,108 @@
     color: rgba(255, 255, 255, 0.8);
     white-space: nowrap;
   }
+
+  /* ── Size variants ──────────────────────────────────────────── */
+
+  .video-player[data-size="xs"] .video-player__btn {
+    width: 1.25rem;
+    height: 1.25rem;
+  }
+
+  .video-player[data-size="xs"] .video-player__btn svg {
+    width: 0.75rem;
+    height: 0.75rem;
+  }
+
+  .video-player[data-size="xs"] .video-player__bar-left,
+  .video-player[data-size="xs"] .video-player__bar-right {
+    gap: 0.25rem;
+  }
+
+  .video-player[data-size="xs"] .video-player__volume {
+    width: 2.5rem;
+  }
+
+  .video-player[data-size="xs"] .video-player__time {
+    font-size: 0.5625rem;
+  }
+
+  .video-player[data-size="xs"] .video-player__big-play {
+    width: 3rem;
+    height: 3rem;
+  }
+
+  .video-player[data-size="sm"] .video-player__btn {
+    width: 1.5rem;
+    height: 1.5rem;
+  }
+
+  .video-player[data-size="sm"] .video-player__volume {
+    width: 3rem;
+  }
+
+  .video-player[data-size="sm"] .video-player__time {
+    font-size: 0.625rem;
+  }
+
+  .video-player[data-size="sm"] .video-player__big-play {
+    width: 3.5rem;
+    height: 3.5rem;
+  }
+
+  .video-player[data-size="lg"] .video-player__btn {
+    width: 2.125rem;
+    height: 2.125rem;
+  }
+
+  .video-player[data-size="lg"] .video-player__btn svg {
+    width: 1rem;
+    height: 1rem;
+  }
+
+  .video-player[data-size="lg"] .video-player__bar-left,
+  .video-player[data-size="lg"] .video-player__bar-right {
+    gap: 0.5rem;
+  }
+
+  .video-player[data-size="lg"] .video-player__volume {
+    width: 4rem;
+  }
+
+  .video-player[data-size="lg"] .video-player__time {
+    font-size: 0.75rem;
+  }
+
+  .video-player[data-size="lg"] .video-player__big-play {
+    width: 4.5rem;
+    height: 4.5rem;
+  }
+
+  .video-player[data-size="xl"] .video-player__btn {
+    width: 2.25rem;
+    height: 2.25rem;
+  }
+
+  .video-player[data-size="xl"] .video-player__btn svg {
+    width: 1.125rem;
+    height: 1.125rem;
+  }
+
+  .video-player[data-size="xl"] .video-player__bar-left,
+  .video-player[data-size="xl"] .video-player__bar-right {
+    gap: 0.5rem;
+  }
+
+  .video-player[data-size="xl"] .video-player__volume {
+    width: 4.5rem;
+  }
+
+  .video-player[data-size="xl"] .video-player__time {
+    font-size: 0.8125rem;
+  }
+
+  .video-player[data-size="xl"] .video-player__big-play {
+    width: 5rem;
+    height: 5rem;
+  }
 </style>

@@ -1,6 +1,8 @@
 <script lang="ts">
   import { TimeField, Eyebrow } from "@poodle/svelte-primitives";
 
+  const controlSizes = ["xs", "sm", "md", "lg", "xl"] as const;
+
   let time = "";
 </script>
 
@@ -15,6 +17,15 @@
     {#if time}
       <p>Selected: <strong>{time}</strong></p>
     {/if}
+  </div>
+
+  <div class="specimen__group">
+    <Eyebrow>Sizes</Eyebrow>
+    <div class="specimen__row">
+      {#each controlSizes as size}
+        <TimeField id={"size-" + size} ariaLabel={size} {size} />
+      {/each}
+    </div>
   </div>
 
   <div class="specimen__group">
@@ -44,6 +55,13 @@
   .specimen__group {
     display: flex;
     flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .specimen__row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
     gap: 0.5rem;
   }
 

@@ -51,6 +51,8 @@ Updated: 2026-03-15
 | `showSteppers` | `boolean` | `false` | no | shows increment/decrement stepper buttons |
 | `ariaLabel` | `string \| null` | `null` | no | required when no external label exists |
 | `describedBy` | `string \| null` | `null` | no | aria-describedby target |
+| `size` | `"xs" \| "sm" \| "md" \| "lg" \| "xl"` | `null` | no | explicit control size override; when null, resolves from inherited presentation |
+| `sizeRole` | `"chrome" \| "control" \| "prominent"` | `"control"` | no | semantic size offset from inherited presentation |
 
 ### Controlled And Uncontrolled
 
@@ -203,12 +205,23 @@ Updated: 2026-03-15
 | `cursor` | `not-allowed` |
 | `opacity` | `var(--poodle-state-opacity-disabled)` |
 
+### Size adjustments
+
+| Size | height | font-size (control) |
+|------|--------|---------------------|
+| `xs` | `calc(control-height - 0.5rem)` | `0.75rem` |
+| `sm` | `calc(control-height - 0.375rem)` | _(base)_ |
+| `md` | `control-height` | _(base)_ |
+| `lg` | `calc(control-height + 0.375rem)` | `0.9375rem` |
+| `xl` | `calc(control-height + 0.5rem)` | `1rem` |
+
 ## 9. Svelte Notes
 
 - Uses `<input type="text" inputmode="decimal">` instead of `type="number"` to avoid browser-native spinner conflicts and gain full control over step/clamp behavior
 - Browser-native number spinners are not rendered; custom steppers replace them when `showSteppers` is enabled
 - Blur handler performs clamp-to-bounds and snap-to-step logic before emitting final value
 - Precision prop controls decimal formatting on blur commit
+- `data-size` attribute on root reflects the resolved size for CSS variant styling
 
 ## 10. GPUI Notes
 
@@ -230,6 +243,7 @@ Updated: 2026-03-15
 
 ### Tier 2: Visual Parity
 
+- [ ] all five sizes visually match (height, padding, font-size per size table)
 - [ ] field sizing uses the same control-height token
 - [ ] stepper button sizing and border-radius match
 - [ ] stepper background color-mix formula matches

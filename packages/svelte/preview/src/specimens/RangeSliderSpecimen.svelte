@@ -1,6 +1,8 @@
 <script lang="ts">
   import { RangeSlider, Eyebrow } from "@poodle/svelte-primitives";
 
+  const controlSizes = ["xs", "sm", "md", "lg", "xl"] as const;
+
   let priceRange: [number, number] = [20, 80];
   let ageRange: [number, number] = [25, 45];
 </script>
@@ -32,6 +34,15 @@
   </div>
 
   <div class="specimen__group">
+    <Eyebrow>Sizes</Eyebrow>
+    <div class="specimen__stack">
+      {#each controlSizes as size}
+        <RangeSlider value={[25, 75]} min={0} max={100} ariaLabel={"Range at " + size} {size} />
+      {/each}
+    </div>
+  </div>
+
+  <div class="specimen__group">
     <Eyebrow>Disabled</Eyebrow>
     <RangeSlider value={[30, 70]} min={0} max={100} disabled ariaLabel="Disabled range" />
   </div>
@@ -55,5 +66,11 @@
     margin: 0;
     font-size: 0.875rem;
     color: var(--poodle-color-text-secondary);
+  }
+
+  .specimen__stack {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
   }
 </style>

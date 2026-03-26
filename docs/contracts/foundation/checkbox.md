@@ -49,6 +49,8 @@ Updated: 2026-03-24
 | `ariaLabel` | `string \| null` | `null` | no | accessible name; required when no visible label exists |
 | `describedBy` | `string \| null` | `null` | no | aria-describedby target id |
 | `selectedColor` | `string \| null` | `null` | no | optional selected-state color override used for the checked and mixed indicator fill/border |
+| `size` | `"xs" \| "sm" \| "md" \| "lg" \| "xl"` | `null` | no | explicit control size override; when null, resolves from inherited presentation |
+| `sizeRole` | `"chrome" \| "control" \| "prominent"` | `"control"` | no | semantic size offset from inherited presentation |
 
 ### Controlled And Uncontrolled
 
@@ -217,6 +219,16 @@ Updated: 2026-03-24
 | `font-weight` | `var(--poodle-typography-label-weight)` |
 | `line-height` | `var(--poodle-typography-label-lineHeight)` |
 
+### Size adjustments
+
+| Size | indicator | mark |
+|------|-----------|------|
+| `xs` | `calc(icon-default - 0.125rem)` | `calc(icon-default - 0.375rem)` |
+| `sm` | `icon-default` | `calc(icon-default - 0.25rem)` |
+| `md` | `1.125rem` | `0.875rem` |
+| `lg` | `calc(icon-default + 0.375rem)` | `icon-default` |
+| `xl` | `calc(icon-default + 0.625rem)` | `calc(icon-default + 0.125rem)` |
+
 ## 9. Svelte Notes
 
 - Uses a hidden native `<input type="checkbox">` for form semantics and
@@ -232,6 +244,7 @@ Updated: 2026-03-24
 - Adjacent sibling CSS selectors (`:checked +`, `:indeterminate +`,
   `:focus-visible +`) connect the hidden input state to the visible indicator
 - `data-disabled` attribute on root drives disabled styling
+- Emits `data-size` on root element reflecting the resolved size
 
 ## 10. GPUI Notes
 
@@ -264,6 +277,7 @@ Updated: 2026-03-24
 - [ ] label typography uses label token family
 - [ ] disabled opacity uses state-opacity-disabled
 - [ ] gap between indicator and label uses space-inline-sm
+- [ ] all five sizes visually match (indicator and mark per size table)
 
 ### Tier 3: Implementation Freedom
 

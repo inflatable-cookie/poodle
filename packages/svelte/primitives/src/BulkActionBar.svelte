@@ -115,4 +115,28 @@
     outline: var(--poodle-border-width-focus) solid var(--poodle-color-accent-focusRing);
     outline-offset: 0.125rem;
   }
+
+  /* Size variants */
+  .bulk-action-bar[data-size="xs"] .bulk-action-bar__button {
+    min-height: calc(var(--poodle-size-control-height) - 0.5rem);
+    font-size: 0.75rem;
+  }
+
+  .bulk-action-bar[data-size="xs"] .bulk-action-bar__summary {
+    font-size: 0.75rem;
+  }
+
+  .bulk-action-bar[data-size="sm"] .bulk-action-bar__button {
+    min-height: calc(var(--poodle-size-control-height) - 0.375rem);
+  }
+
+  .bulk-action-bar[data-size="lg"] .bulk-action-bar__button {
+    min-height: calc(var(--poodle-size-control-height) + 0.375rem);
+    font-size: 0.9375rem;
+  }
+
+  .bulk-action-bar[data-size="xl"] .bulk-action-bar__button {
+    min-height: calc(var(--poodle-size-control-height) + 0.5rem);
+    font-size: 1rem;
+  }
 </style>

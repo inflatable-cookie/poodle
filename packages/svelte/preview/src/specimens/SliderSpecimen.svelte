@@ -1,6 +1,8 @@
 <script lang="ts">
   import { Slider, Eyebrow } from "@poodle/svelte-primitives";
 
+  const controlSizes = ["xs", "sm", "md", "lg", "xl"] as const;
+
   let volume = 65;
   let opacity = 100;
 </script>
@@ -32,6 +34,15 @@
   </div>
 
   <div class="specimen__group">
+    <Eyebrow>Sizes</Eyebrow>
+    <div class="specimen__stack">
+      {#each controlSizes as size}
+        <Slider value={50} min={0} max={100} ariaLabel={"Slider at " + size} {size} />
+      {/each}
+    </div>
+  </div>
+
+  <div class="specimen__group">
     <Eyebrow>Disabled</Eyebrow>
     <Slider value={40} min={0} max={100} ariaLabel="Disabled slider" disabled />
   </div>
@@ -55,5 +66,11 @@
     margin: 0;
     font-size: 0.875rem;
     color: var(--poodle-color-text-secondary);
+  }
+
+  .specimen__stack {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
   }
 </style>

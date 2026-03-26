@@ -46,6 +46,8 @@ Updated: 2026-03-22
 | Prop | Type | Default | Required | Notes |
 |------|------|---------|----------|-------|
 | `items` | `ToastItem[]` | `[]` | no | toast items to display |
+| `size` | `"xs" \| "sm" \| "md" \| "lg" \| "xl"` | `null` | no | explicit control size override; when null, resolves from inherited presentation |
+| `sizeRole` | `"chrome" \| "control" \| "prominent"` | `"chrome"` | no | semantic size offset from inherited presentation |
 | `ariaLabel` | `string` | `"Notifications"` | no | accessible name for the stack section |
 
 ### Types
@@ -263,8 +265,13 @@ The tone color is used for:
 
 None.
 
+### Size adjustments
+
+Size is propagated to child Button primitives and affects toast typography. Specific size tables are deferred to implementation.
+
 ## 10. Svelte Notes
 
+- `data-size` attribute on stack reflects the resolved size
 - uses `createEventDispatcher` for `dismiss` and `action` events
 - uses `Button` primitive (variant="secondary", size="sm") for action buttons
 - uses `Icon` primitive (name="x", size="sm") for dismiss button
@@ -290,6 +297,7 @@ None.
 
 ### Tier 2: Visual Parity
 
+- [ ] all five sizes visually match per size table
 - [ ] left accent bar rendering matches
 - [ ] tone color treatment matches (border, gradient, accent)
 - [ ] elevation and background treatment match

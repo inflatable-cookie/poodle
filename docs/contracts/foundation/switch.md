@@ -50,6 +50,8 @@ Updated: 2026-03-24
 | `name` | `string \| undefined` | `undefined` | no | form submission name |
 | `offColor` | `string \| null` | `null` | no | optional off-state accent override used for the thumb and muted track tint |
 | `onColor` | `string \| null` | `null` | no | optional on-state accent override used for the thumb and active track tint |
+| `size` | `"xs" \| "sm" \| "md" \| "lg" \| "xl"` | `null` | no | explicit control size override; when null, resolves from inherited presentation |
+| `sizeRole` | `"chrome" \| "control" \| "prominent"` | `"control"` | no | semantic size offset from inherited presentation |
 
 ### Controlled And Uncontrolled
 
@@ -229,6 +231,16 @@ Updated: 2026-03-24
 | `font-weight` | `var(--poodle-typography-label-weight)` |
 | `line-height` | `var(--poodle-typography-label-lineHeight)` |
 
+### Size adjustments
+
+| Size | track width | track height | track padding | thumb size | thumb travel |
+|------|-------------|--------------|---------------|------------|--------------|
+| `xs` | `calc(icon-default * 1.75)` | `calc(icon-default * 0.875)` | `0.0625rem` | `calc(icon-default * 0.75 - 0.125rem)` | `calc(icon-default * 0.875)` |
+| `sm` | `calc(icon-default * 1.875)` | `calc(icon-default + 0.125rem)` | `0.09375rem` | `calc(icon-default - 0.1875rem)` | `calc(icon-default - 0.0625rem)` |
+| `md` | `2.125rem` | `1.25rem` | `0.125rem` | `0.875rem` | `0.875rem` |
+| `lg` | `calc(icon-default * 2.25 + 0.25rem)` | `calc(icon-default + 0.5rem)` | `0.1875rem` | `icon-default` | `calc(icon-default + 0.0625rem)` |
+| `xl` | `calc(icon-default * 2.5 + 0.375rem)` | `calc(icon-default + 0.75rem)` | `0.25rem` | `calc(icon-default + 0.125rem)` | `calc(icon-default + 0.125rem)` |
+
 ## 9. Svelte Notes
 
 - Uses a hidden native `<input type="checkbox" role="switch">` for accessibility
@@ -244,6 +256,7 @@ Updated: 2026-03-24
 - `color-mix` formulas create the semi-transparent track background and accent
   tints for the checked state
 - Thumb `translateX(0.875rem)` slides the thumb from the off to on position
+- Emits `data-size` on root element reflecting the resolved size
 
 ## 10. GPUI Notes
 
@@ -280,6 +293,7 @@ Updated: 2026-03-24
 - [ ] label typography uses label token family
 - [ ] disabled opacity uses state-opacity-disabled
 - [ ] gap between track and label uses space-inline-sm
+- [ ] all five sizes visually match (track, thumb, and travel per size table)
 
 ### Tier 3: Implementation Freedom
 

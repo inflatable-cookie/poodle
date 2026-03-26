@@ -14,6 +14,8 @@
     { value: "xl", label: "Extra large" },
   ];
 
+  const controlSizes = ["xs", "sm", "md", "lg", "xl"] as const;
+
   let selectedPlan = "pro";
   let selectedSize = "md";
 </script>
@@ -40,6 +42,20 @@
       on:valueChange={(e) => (selectedSize = e.detail.value)}
     />
     <p>Selected: <strong>{selectedSize}</strong></p>
+  </div>
+
+  <div class="specimen__group">
+    <Eyebrow>Sizes</Eyebrow>
+    <div class="specimen__stack">
+      {#each controlSizes as size}
+        <RadioGroup
+          options={planOptions}
+          defaultValue="pro"
+          ariaLabel={"Plan at " + size}
+          {size}
+        />
+      {/each}
+    </div>
   </div>
 
   <div class="specimen__group">
@@ -76,5 +92,11 @@
     margin: 0;
     font-size: 0.875rem;
     color: var(--poodle-color-text-secondary);
+  }
+
+  .specimen__stack {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
   }
 </style>

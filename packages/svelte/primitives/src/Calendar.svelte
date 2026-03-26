@@ -322,4 +322,56 @@
     cursor: not-allowed;
     opacity: var(--poodle-state-opacity-disabled);
   }
+
+  /* Size variants */
+  .calendar[data-size="xs"] .calendar__nav {
+    width: 1.5rem;
+    height: 1.5rem;
+  }
+
+  .calendar[data-size="xs"] .calendar__day {
+    min-height: 1.75rem;
+    font-size: 0.6875rem;
+  }
+
+  .calendar[data-size="xs"] .calendar__month {
+    font-size: 0.6875rem;
+  }
+
+  .calendar[data-size="sm"] .calendar__nav {
+    width: 1.75rem;
+    height: 1.75rem;
+  }
+
+  .calendar[data-size="sm"] .calendar__day {
+    min-height: 2rem;
+  }
+
+  .calendar[data-size="lg"] .calendar__nav {
+    width: 2.25rem;
+    height: 2.25rem;
+  }
+
+  .calendar[data-size="lg"] .calendar__day {
+    min-height: 2.5rem;
+    font-size: 0.8125rem;
+  }
+
+  .calendar[data-size="lg"] .calendar__month {
+    font-size: 0.875rem;
+  }
+
+  .calendar[data-size="xl"] .calendar__nav {
+    width: 2.5rem;
+    height: 2.5rem;
+  }
+
+  .calendar[data-size="xl"] .calendar__day {
+    min-height: 2.75rem;
+    font-size: 0.875rem;
+  }
+
+  .calendar[data-size="xl"] .calendar__month {
+    font-size: 0.9375rem;
+  }
 </style>

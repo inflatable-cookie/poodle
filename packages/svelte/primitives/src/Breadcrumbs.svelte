@@ -92,4 +92,21 @@
   .breadcrumbs [aria-current="page"] {
     color: var(--poodle-color-text-primary);
   }
+
+  /* Size variants */
+  .breadcrumbs[data-size="xs"] .breadcrumbs__list {
+    font-size: 0.75rem;
+  }
+
+  .breadcrumbs[data-size="sm"] .breadcrumbs__list {
+    font-size: 0.8125rem;
+  }
+
+  .breadcrumbs[data-size="lg"] .breadcrumbs__list {
+    font-size: 0.9375rem;
+  }
+
+  .breadcrumbs[data-size="xl"] .breadcrumbs__list {
+    font-size: 1rem;
+  }
 </style>

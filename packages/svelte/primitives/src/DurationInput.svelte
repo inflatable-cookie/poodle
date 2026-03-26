@@ -246,4 +246,40 @@
     line-height: 1;
     user-select: none;
   }
+
+  /* Size variants */
+  .duration-input[data-size="xs"] {
+    padding: 0.125rem calc(var(--poodle-space-control-x) - 0.125rem);
+  }
+
+  .duration-input[data-size="xs"] .duration-input__field {
+    width: 1.5rem;
+    font-size: 0.75rem;
+  }
+
+  .duration-input[data-size="xs"] .duration-input__label {
+    font-size: 0.5rem;
+  }
+
+  .duration-input[data-size="sm"] {
+    padding: 0.1875rem calc(var(--poodle-space-control-x) - 0.0625rem);
+  }
+
+  .duration-input[data-size="lg"] {
+    padding: 0.3125rem calc(var(--poodle-space-control-x) + 0.125rem);
+  }
+
+  .duration-input[data-size="lg"] .duration-input__field {
+    width: 2rem;
+    font-size: 0.9375rem;
+  }
+
+  .duration-input[data-size="xl"] {
+    padding: 0.375rem calc(var(--poodle-space-control-x) + 0.1875rem);
+  }
+
+  .duration-input[data-size="xl"] .duration-input__field {
+    width: 2.25rem;
+    font-size: 1rem;
+  }
 </style>

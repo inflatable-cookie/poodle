@@ -44,6 +44,8 @@ Updated: 2026-03-15
 | `open` | `boolean \| null` | `null` | no | controlled open state; null = uncontrolled |
 | `defaultOpen` | `boolean` | `false` | no | uncontrolled initial state |
 | `anchorPoint` | `{ x: number; y: number } \| null` | `null` | no | pointer-based anchor position (clientX/clientY) |
+| `size` | `"xs" \| "sm" \| "md" \| "lg" \| "xl"` | `null` | no | explicit control size override; when null, resolves from inherited presentation |
+| `sizeRole` | `"chrome" \| "control" \| "prominent"` | `"chrome"` | no | semantic size offset from inherited presentation |
 | `ariaLabel` | `string \| null` | `null` | no | optional menu label |
 
 ### Type Definitions
@@ -231,8 +233,19 @@ index are required.
 | `margin` | `0.25rem 0` |
 | `background` | `color-mix(in srgb, var(--poodle-color-border-subtle) 72%, transparent)` |
 
+### Size adjustments
+
+| Size | item min-height | item padding | item font-size |
+|------|----------------|--------------|----------------|
+| `xs` | `1.5rem` | `0.25rem 0.375rem` | `0.75rem` |
+| `sm` | `1.75rem` | `0.3125rem 0.4375rem` | `0.8125rem` |
+| `md` | `2rem` | `0.375rem 0.5rem` | `0.875rem` |
+| `lg` | `2.25rem` | `0.4375rem 0.5625rem` | `0.9375rem` |
+| `xl` | `2.5rem` | `0.5rem 0.625rem` | `1rem` |
+
 ## 9. Svelte Notes
 
+- `data-size` attribute on root reflects the resolved size
 - Should reuse core menu item rendering and keyboard navigation patterns from
   `Menu`, while sourcing position from the contextmenu event or focused target
   geometry
@@ -273,6 +286,7 @@ index are required.
 
 ### Tier 2: Visual Parity
 
+- [ ] all five sizes visually match per size table
 - [ ] overlay uses fixed positioning at anchor point
 - [ ] overlay uses elevation-overlay, radius-surface, border 72% opacity
 - [ ] overlay background uses color-mix elevated 98% with panel

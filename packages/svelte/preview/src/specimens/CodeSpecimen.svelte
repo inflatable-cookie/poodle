@@ -1,6 +1,8 @@
 <script lang="ts">
   import { Code, Eyebrow } from "@poodle/svelte-primitives";
 
+  const controlSizes = ["xs", "sm", "md", "lg", "xl"] as const;
+
   const tsExample = `import { Button } from "@poodle/svelte-primitives";
 
 function handleClick(event: MouseEvent): void {
@@ -19,6 +21,15 @@ function handleClick(event: MouseEvent): void {
   <div class="specimen__group">
     <Eyebrow>Block with language label</Eyebrow>
     <Code source={tsExample} language="typescript" />
+  </div>
+
+  <div class="specimen__group">
+    <Eyebrow>Sizes</Eyebrow>
+    <div class="specimen__stack">
+      {#each controlSizes as size}
+        <Code source="const x = 1;" {size} />
+      {/each}
+    </div>
   </div>
 
   <div class="specimen__group">
@@ -45,5 +56,6 @@ function handleClick(event: MouseEvent): void {
 <style>
   .specimen { display: flex; flex-direction: column; gap: 1.5rem; }
   .specimen__group { display: flex; flex-direction: column; gap: 0.5rem; }
+  .specimen__stack { display: flex; flex-direction: column; gap: 0.5rem; }
   p { margin: 0; color: var(--poodle-color-text-primary); }
 </style>

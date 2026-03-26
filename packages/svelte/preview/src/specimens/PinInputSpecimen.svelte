@@ -1,6 +1,8 @@
 <script lang="ts">
   import { PinInput, Eyebrow } from "@poodle/svelte-primitives";
 
+  const controlSizes = ["xs", "sm", "md", "lg", "xl"] as const;
+
   let code = "";
   let completed = false;
 </script>
@@ -17,6 +19,15 @@
     {#if completed}
       <p>Code entered: <strong>{code}</strong></p>
     {/if}
+  </div>
+
+  <div class="specimen__group">
+    <Eyebrow>Sizes</Eyebrow>
+    <div class="specimen__stack">
+      {#each controlSizes as size}
+        <PinInput length={4} ariaLabel={"PIN at " + size} {size} />
+      {/each}
+    </div>
   </div>
 
   <div class="specimen__group">
@@ -47,5 +58,11 @@
     margin: 0;
     font-size: 0.875rem;
     color: var(--poodle-color-text-secondary);
+  }
+
+  .specimen__stack {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
   }
 </style>
