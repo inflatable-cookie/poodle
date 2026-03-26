@@ -120,14 +120,37 @@ impl IntoElement for IconButton {
         // Contract: pressed = double inset shadow
         let pressed_border = color_mix(border_color, text_primary, 0.74);
 
+        let is_ghost = matches!(spec.variant, ButtonVariant::Ghost);
+        let current_fill = if is_pressed { pressed_fill } else { fill };
+
         let mut el = div()
             .id(SharedString::from(id_str))
             .focusable()
             .w(control_size)
             .h(control_size)
-            .rounded(radius)
-            .bg(if is_pressed { pressed_fill } else { fill })
-            .text_color(text_color)
+            .rounded(radius);
+
+        // Brand-raised treatment: gradient fills and elevated shadows
+        if theme.brand_raised && !is_ghost && !is_unavailable && !is_pressed {
+            use crate::theme_ext::{
+                brand_raised_primary_fill, brand_raised_interactive_fill,
+                brand_raised_primary_shadow, brand_raised_interactive_shadow,
+            };
+            match spec.variant {
+                ButtonVariant::Primary => {
+                    el = el.bg(brand_raised_primary_fill(current_fill))
+                        .shadow(brand_raised_primary_shadow());
+                }
+                _ => {
+                    el = el.bg(brand_raised_interactive_fill(current_fill))
+                        .shadow(brand_raised_interactive_shadow());
+                }
+            }
+        } else {
+            el = el.bg(current_fill);
+        }
+
+        el = el.text_color(text_color)
             .border_1()
             .border_color(if is_pressed { pressed_border } else { border_color })
             .flex()

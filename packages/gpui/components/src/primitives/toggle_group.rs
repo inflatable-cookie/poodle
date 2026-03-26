@@ -88,9 +88,22 @@ impl IntoElement for ToggleGroup {
                 .focusable()
                 .px(px(12.0))
                 .py(px(4.0))
-                .rounded(radius)
-                .bg(fill)
-                .border_1().border_color(border_color)
+                .rounded(radius);
+
+            // Brand-raised treatment: gradient fills for selected items
+            if theme.brand_raised && !item_disabled && is_selected {
+                use crate::theme_ext::{brand_raised_primary_fill, brand_raised_primary_shadow};
+                item = item.bg(brand_raised_primary_fill(fill))
+                    .shadow(brand_raised_primary_shadow());
+            } else if theme.brand_raised && !item_disabled && !is_selected {
+                use crate::theme_ext::{brand_raised_interactive_fill, brand_raised_interactive_shadow};
+                item = item.bg(brand_raised_interactive_fill(fill))
+                    .shadow(brand_raised_interactive_shadow());
+            } else {
+                item = item.bg(fill);
+            }
+
+            item = item.border_1().border_color(border_color)
                 .text_color(text_color)
                 .text_size(label_size)
                 .font_weight(FontWeight::SEMIBOLD)

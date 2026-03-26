@@ -111,12 +111,22 @@ impl Tabs {
             if is_active {
                 // Svelte: pill-shaped highlight with accent 18% bg, text-primary color
                 let active_bg = Hsla { a: accent.a * 0.18, ..accent };
-                tab = tab
-                    .text_color(text_primary)
-                    .bg(active_bg)
-                    .rounded(radius)
-                    .border_b_2()
-                    .border_color(accent);
+                // Brand-raised treatment: gradient fill for active underline tab
+                if theme.brand_raised && !is_disabled {
+                    tab = tab
+                        .text_color(text_primary)
+                        .bg(crate::theme_ext::brand_raised_interactive_fill(active_bg))
+                        .rounded(radius)
+                        .border_b_2()
+                        .border_color(accent);
+                } else {
+                    tab = tab
+                        .text_color(text_primary)
+                        .bg(active_bg)
+                        .rounded(radius)
+                        .border_b_2()
+                        .border_color(accent);
+                }
             } else {
                 tab = tab.text_color(text_secondary);
             }
@@ -214,10 +224,18 @@ impl Tabs {
             };
 
             if is_active {
-                tab = tab
-                    .text_color(text_primary)
-                    .bg(card_default_bg)
-                    .border_color(card_selected_border);
+                // Brand-raised treatment: gradient fill for active card tab
+                if theme.brand_raised && !is_disabled {
+                    tab = tab
+                        .text_color(text_primary)
+                        .bg(crate::theme_ext::brand_raised_interactive_fill(card_default_bg))
+                        .border_color(card_selected_border);
+                } else {
+                    tab = tab
+                        .text_color(text_primary)
+                        .bg(card_default_bg)
+                        .border_color(card_selected_border);
+                }
             } else {
                 tab = tab
                     .text_color(text_secondary)
@@ -339,9 +357,16 @@ impl Tabs {
 
             if is_active {
                 let active_bg = accent.opacity(self.spec.pill_active_bg_opacity());
-                tab = tab
-                    .bg(active_bg)
-                    .text_color(text_primary);
+                // Brand-raised treatment: gradient fill for active pill tab
+                if theme.brand_raised && !is_disabled {
+                    tab = tab
+                        .bg(crate::theme_ext::brand_raised_interactive_fill(active_bg))
+                        .text_color(text_primary);
+                } else {
+                    tab = tab
+                        .bg(active_bg)
+                        .text_color(text_primary);
+                }
             } else {
                 tab = tab.text_color(text_secondary);
             }

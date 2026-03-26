@@ -205,8 +205,14 @@ impl IntoElement for Accordion {
                 .py(panel_pad_y)
                 .border_1()
                 .border_color(item_border)
-                .rounded(surface_radius)
-                .bg(item_bg);
+                .rounded(surface_radius);
+
+            // Brand-raised treatment: gradient fill for accordion item card
+            if theme.brand_raised {
+                item_card = item_card.bg(crate::theme_ext::brand_raised_surface_fill(item_bg));
+            } else {
+                item_card = item_card.bg(item_bg);
+            }
 
             item_card = item_card.child(trigger);
 

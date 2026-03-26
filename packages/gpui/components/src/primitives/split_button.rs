@@ -115,14 +115,36 @@ impl IntoElement for SplitButton {
         // ── Primary half ──────────────────────────────────────────
         let label_text = spec.label.clone().unwrap_or_default();
 
+        let is_ghost = matches!(spec.variant, ButtonVariant::Ghost);
+
         let mut primary = div()
             .id("poodle-split-primary")
             .focusable()
             .h(height)
             .min_w(px(64.0))
-            .px(pad_x)
-            .bg(fill)
-            .border_1().border_color(border_color)
+            .px(pad_x);
+
+        // Brand-raised treatment for primary half
+        if theme.brand_raised && !is_ghost && !is_unavailable {
+            use crate::theme_ext::{
+                brand_raised_primary_fill, brand_raised_interactive_fill,
+                brand_raised_primary_shadow, brand_raised_interactive_shadow,
+            };
+            match spec.variant {
+                ButtonVariant::Primary => {
+                    primary = primary.bg(brand_raised_primary_fill(fill))
+                        .shadow(brand_raised_primary_shadow());
+                }
+                _ => {
+                    primary = primary.bg(brand_raised_interactive_fill(fill))
+                        .shadow(brand_raised_interactive_shadow());
+                }
+            }
+        } else {
+            primary = primary.bg(fill);
+        }
+
+        primary = primary.border_1().border_color(border_color)
             .rounded_l(radius)
             .text_color(text_color)
             .text_size(px(font_size))
@@ -150,9 +172,29 @@ impl IntoElement for SplitButton {
             .id("poodle-split-toggle")
             .focusable()
             .h(height)
-            .w(px(32.0))
-            .bg(fill)
-            .border_1().border_color(border_color)
+            .w(px(32.0));
+
+        // Brand-raised treatment for toggle half
+        if theme.brand_raised && !is_ghost && !is_unavailable {
+            use crate::theme_ext::{
+                brand_raised_primary_fill, brand_raised_interactive_fill,
+                brand_raised_primary_shadow, brand_raised_interactive_shadow,
+            };
+            match spec.variant {
+                ButtonVariant::Primary => {
+                    toggle = toggle.bg(brand_raised_primary_fill(fill))
+                        .shadow(brand_raised_primary_shadow());
+                }
+                _ => {
+                    toggle = toggle.bg(brand_raised_interactive_fill(fill))
+                        .shadow(brand_raised_interactive_shadow());
+                }
+            }
+        } else {
+            toggle = toggle.bg(fill);
+        }
+
+        toggle = toggle.border_1().border_color(border_color)
             .rounded_r(radius)
             .text_color(text_color)
             .flex().items_center().justify_center();

@@ -128,15 +128,22 @@ impl IntoElement for SegmentedControl {
 
             if is_selected {
                 // Contract: selected segment with inset shadow
-                seg = seg.bg(accent).text_color(text_inverse).rounded(inner_radius)
-                    .shadow(vec![
-                        gpui::BoxShadow {
-                            color: hsla(0.0, 0.0, 0.0, 0.12),
-                            offset: point(px(0.0), px(1.0)),
-                            blur_radius: px(2.0),
-                            spread_radius: px(0.0),
-                        },
-                    ]);
+                // Brand-raised treatment: gradient fill for selected segment
+                if theme.brand_raised && !is_disabled && !is_opt_disabled {
+                    use crate::theme_ext::{brand_raised_primary_fill, brand_raised_primary_shadow};
+                    seg = seg.bg(brand_raised_primary_fill(accent)).text_color(text_inverse).rounded(inner_radius)
+                        .shadow(brand_raised_primary_shadow());
+                } else {
+                    seg = seg.bg(accent).text_color(text_inverse).rounded(inner_radius)
+                        .shadow(vec![
+                            gpui::BoxShadow {
+                                color: hsla(0.0, 0.0, 0.0, 0.12),
+                                offset: point(px(0.0), px(1.0)),
+                                blur_radius: px(2.0),
+                                spread_radius: px(0.0),
+                            },
+                        ]);
+                }
             } else {
                 // Contract: unselected text = text-secondary
                 seg = seg.text_color(text_secondary);

@@ -99,15 +99,34 @@ impl IntoElement for Toggle {
         let label_text = spec.label.clone().unwrap_or_default();
         let id = SharedString::from(format!("poodle-toggle-{}", label_text));
 
+        let is_ghost = !is_pressed && matches!(spec.variant, ButtonVariant::Ghost);
+
         let mut el = div()
             .id(id)
             .focusable()
             .h(height)
             .min_w(px(36.0)) // contract: 2.25rem
             .px(pad_x)
-            .rounded(radius)
-            .bg(fill)
-            .border_1().border_color(border_color)
+            .rounded(radius);
+
+        // Brand-raised treatment: gradient fills and elevated shadows
+        if theme.brand_raised && !is_ghost && !spec.is_disabled {
+            use crate::theme_ext::{
+                brand_raised_primary_fill, brand_raised_interactive_fill,
+                brand_raised_primary_shadow, brand_raised_interactive_shadow,
+            };
+            if is_pressed || matches!(spec.variant, ButtonVariant::Primary) {
+                el = el.bg(brand_raised_primary_fill(fill))
+                    .shadow(brand_raised_primary_shadow());
+            } else {
+                el = el.bg(brand_raised_interactive_fill(fill))
+                    .shadow(brand_raised_interactive_shadow());
+            }
+        } else {
+            el = el.bg(fill);
+        }
+
+        el = el.border_1().border_color(border_color)
             .text_color(text_color)
             .text_size(font_size)
             .font_weight(FontWeight::SEMIBOLD)

@@ -21,6 +21,7 @@ pub struct AlertDialog {
     border_color: Hsla,
     body_size: Pixels,
     heading_size: Pixels,
+    brand_raised: bool,
     on_confirm: Option<Box<dyn Fn(&mut Window, &mut App)>>,
     on_cancel: Option<Box<dyn Fn(&mut Window, &mut App)>>,
 }
@@ -58,6 +59,7 @@ impl AlertDialog {
             border_color: resolve_color(theme, spec.border_token()),
             body_size: resolve_px(theme, "semantic.typography.body.size"),
             heading_size: resolve_px(theme, "semantic.typography.heading.size"),
+            brand_raised: theme.brand_raised,
             on_confirm: None,
             on_cancel: None,
             spec,
@@ -129,15 +131,26 @@ impl IntoElement for AlertDialog {
             .child(self.spec.cancel_label.clone());
 
         // Confirm button
-        let confirm_btn = div()
+        let mut confirm_btn = div()
             .id("alert-dialog-confirm")
             .cursor_pointer()
             .px(px(12.0))
             .py(px(6.0))
             .rounded(self.button_radius)
             .text_size(self.body_size)
-            .font_weight(FontWeight::MEDIUM)
-            .bg(self.confirm_fill)
+            .font_weight(FontWeight::MEDIUM);
+
+        // Brand-raised treatment: gradient fill for confirm button
+        if self.brand_raised {
+            use crate::theme_ext::{brand_raised_primary_fill, brand_raised_primary_shadow};
+            confirm_btn = confirm_btn
+                .bg(brand_raised_primary_fill(self.confirm_fill))
+                .shadow(brand_raised_primary_shadow());
+        } else {
+            confirm_btn = confirm_btn.bg(self.confirm_fill);
+        }
+
+        let confirm_btn = confirm_btn
             .text_color(self.confirm_text_color)
             .hover(|s| s.opacity(0.9))
             .child(self.spec.confirm_label.clone());
@@ -151,13 +164,21 @@ impl IntoElement for AlertDialog {
             .child(confirm_btn);
 
         // Dialog card — constrained width, not full-width
-        let dialog_card = div()
+        let mut dialog_card = div()
             .id("alert-dialog")
             .focusable()
             .flex()
             .flex_col()
-            .w(px(420.0))
-            .bg(self.dialog_fill)
+            .w(px(420.0));
+
+        // Brand-raised treatment: gradient fill for dialog surface
+        if self.brand_raised {
+            dialog_card = dialog_card.bg(crate::theme_ext::brand_raised_surface_fill(self.dialog_fill));
+        } else {
+            dialog_card = dialog_card.bg(self.dialog_fill);
+        }
+
+        let dialog_card = dialog_card
             .rounded(self.dialog_radius)
             .border_1()
             .border_color(self.border_color)
