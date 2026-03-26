@@ -45,6 +45,20 @@
   </div>
 
   <div class="specimen__group">
+    <Eyebrow>Densities</Eyebrow>
+    <div class="specimen__stack">
+      {#each ["compact", "default", "comfortable"] as density}
+        <div class="specimen__row">
+          <span class="specimen__label">{density}</span>
+          <Menu items={fileItems} ariaLabel="{density} menu" {density}>
+            <Button variant="secondary" slot="trigger">{density}</Button>
+          </Menu>
+        </div>
+      {/each}
+    </div>
+  </div>
+
+  <div class="specimen__group">
     <Eyebrow>With checkboxes</Eyebrow>
     <Menu items={settingsItems} ariaLabel="Settings menu">
       <Button variant="secondary" slot="trigger">Settings</Button>
@@ -70,6 +84,19 @@
     flex-wrap: wrap;
     align-items: center;
     gap: 0.5rem;
+  }
+
+  .specimen__stack {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .specimen__label {
+    font-size: 0.75rem;
+    font-family: var(--poodle-typography-code-family);
+    color: var(--poodle-color-text-muted);
+    min-width: 6rem;
   }
 
   .specimen__group p {

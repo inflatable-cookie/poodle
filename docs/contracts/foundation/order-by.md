@@ -48,6 +48,7 @@ Updated: 2026-03-15
 | `ariaLabel` | `string` | `"Sort by"` | no | accessible name for toolbar |
 | `size` | `"xs" \| "sm" \| "md" \| "lg" \| "xl"` | `null` | no | explicit control size override; when null, resolves from inherited presentation |
 | `sizeRole` | `"chrome" \| "control" \| "prominent"` | `"control"` | no | semantic size offset from inherited presentation |
+| `density` | `ControlDensity \| null` | `null` | no | explicit density override for spacing |
 | `disabled` | `boolean` | `false` | no | disables all field buttons |
 
 ### SortField Type
@@ -271,6 +272,7 @@ type ActiveSort = {
 ## 9. Svelte Notes
 
 - `data-size` attribute on root reflects the resolved size
+- `data-density` — resolved density value (`compact`, `default`, or `comfortable`)
 - Toggle cycle: clicking inactive field sets asc; clicking active asc field
   sets desc; clicking active desc field clears sort (null)
 - `.order-by__field--active` CSS class on active field button (not `data-active` attribute), `data-direction` attribute for direction

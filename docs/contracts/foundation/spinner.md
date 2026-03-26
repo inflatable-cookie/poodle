@@ -38,6 +38,7 @@ Updated: 2026-03-26
 | `variant` | `"ring" \| "grid"` | `"ring"` | no | selects loader visual |
 | `size` | `"xs" \| "sm" \| "md" \| "lg" \| "xl"` | `null` | no | explicit size override |
 | `sizeRole` | `"chrome" \| "control" \| "prominent"` | `"control"` | no | semantic size offset from inherited presentation |
+| `density` | `ControlDensity \| null` | `null` | no | explicit density override for spacing |
 | `tone` | `"current" \| "accent" \| "muted"` | `"current"` | no | color source for the indicator |
 | `ariaLabel` | `string \| null` | `null` | no | optional announced loading label; decorative when omitted |
 
@@ -168,6 +169,7 @@ No internal state. Animation is continuous while the component is mounted.
   motion and sizing contract matches
 - The grid variant should use six cells in a two-column, three-row layout with
   a snake-ordered opacity sequence that revisits the middle pair before reset
+- `data-density` — resolved density value (`compact`, `default`, or `comfortable`)
 
 ## 10. GPUI Notes
 

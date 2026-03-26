@@ -33,6 +33,18 @@ function handleClick(event: MouseEvent): void {
   </div>
 
   <div class="specimen__group">
+    <Eyebrow>Densities</Eyebrow>
+    <div class="specimen__stack">
+      {#each ["compact", "default", "comfortable"] as density}
+        <div class="specimen__row">
+          <span class="specimen__label">{density}</span>
+          <Code source="const x = 1;" {density} />
+        </div>
+      {/each}
+    </div>
+  </div>
+
+  <div class="specimen__group">
     <Eyebrow>With line numbers and highlight</Eyebrow>
     <Code source={tsExample} language="ts" showLineNumbers highlightLines={[3, 4]} />
   </div>
@@ -57,5 +69,7 @@ function handleClick(event: MouseEvent): void {
   .specimen { display: flex; flex-direction: column; gap: 1.5rem; }
   .specimen__group { display: flex; flex-direction: column; gap: 0.5rem; }
   .specimen__stack { display: flex; flex-direction: column; gap: 0.5rem; }
+  .specimen__row { display: flex; align-items: center; gap: 0.5rem; }
+  .specimen__label { font-size: 0.75rem; font-family: var(--poodle-typography-code-family); color: var(--poodle-color-text-muted); min-width: 6rem; }
   p { margin: 0; color: var(--poodle-color-text-primary); }
 </style>

@@ -30,6 +30,18 @@
   </div>
 
   <div class="specimen__group">
+    <Eyebrow>Densities</Eyebrow>
+    <div class="specimen__stack">
+      {#each ["compact", "default", "comfortable"] as density}
+        <div class="specimen__row">
+          <span class="specimen__label">{density}</span>
+          <EditableLabel id={"density-" + density} value="Edit me" {density} />
+        </div>
+      {/each}
+    </div>
+  </div>
+
+  <div class="specimen__group">
     <Eyebrow>Click to edit with icon</Eyebrow>
     <EditableLabel
       bind:value={title}
@@ -107,6 +119,19 @@
     display: flex;
     flex-direction: column;
     gap: 0.75rem;
+  }
+
+  .specimen__row {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .specimen__label {
+    font-size: 0.75rem;
+    font-family: var(--poodle-typography-code-family);
+    color: var(--poodle-color-text-muted);
+    min-width: 6rem;
   }
 
   p { margin: 0; }

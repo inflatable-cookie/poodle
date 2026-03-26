@@ -44,6 +44,7 @@ Updated: 2026-03-15
 | `totalCount` | `number \| null` | `null` | no | total item count for "of N" display |
 | `size` | `"xs" \| "sm" \| "md" \| "lg" \| "xl"` | `null` | no | explicit control size override; when null, resolves from inherited presentation |
 | `sizeRole` | `"chrome" \| "control" \| "prominent"` | `"control"` | no | semantic size offset from inherited presentation |
+| `density` | `ControlDensity \| null` | `null` | no | explicit density override for spacing |
 | `actions` | `BulkAction[]` | — | yes | available bulk action definitions |
 
 ### BulkAction Type
@@ -196,6 +197,7 @@ type BulkAction = {
 ## 9. Svelte Notes
 
 - `data-size` attribute on root reflects the resolved size
+- `data-density` — resolved density value (`compact`, `default`, or `comfortable`)
 - Bar typically conditionally rendered when `selectionCount > 0`
 - `data-tone` attribute on danger action buttons
 - Summary text uses template: `"{selectionCount} selected"` with optional

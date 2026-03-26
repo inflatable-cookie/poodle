@@ -51,6 +51,18 @@
   </div>
 
   <div class="specimen__group">
+    <Eyebrow>Densities</Eyebrow>
+    <div class="specimen__stack">
+      {#each ["compact", "default", "comfortable"] as density}
+        <div class="specimen__row">
+          <span class="specimen__label">{density}</span>
+          <Combobox options={frameworks} placeholder="Choose a framework…" ariaLabel={"Framework at " + density + " density"} {density} />
+        </div>
+      {/each}
+    </div>
+  </div>
+
+  <div class="specimen__group">
     <Eyebrow>Disabled</Eyebrow>
     <Combobox options={frameworks} placeholder="Disabled" ariaLabel="Disabled combobox" disabled />
   </div>
@@ -80,5 +92,19 @@
     display: flex;
     flex-direction: column;
     gap: 0.75rem;
+  }
+
+  .specimen__row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .specimen__label {
+    font-size: 0.75rem;
+    font-family: var(--poodle-typography-code-family);
+    color: var(--poodle-color-text-muted);
+    min-width: 6rem;
   }
 </style>

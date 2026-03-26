@@ -6,6 +6,7 @@
   let rightOpen = false;
   let leftOpen = false;
   let sizeOpenMap: Record<string, boolean> = {};
+  let densityOpenMap: Record<string, boolean> = {};
 </script>
 
 <div class="specimen">
@@ -42,6 +43,28 @@
           <svelte:fragment slot="actions">
             <Button variant="secondary" {size} on:click={() => (sizeOpenMap[size] = false)}>Cancel</Button>
             <Button {size} on:click={() => (sizeOpenMap[size] = false)}>Save</Button>
+          </svelte:fragment>
+        </Drawer>
+      {/each}
+    </div>
+  </div>
+
+  <div class="specimen__group">
+    <Eyebrow>Densities</Eyebrow>
+    <div class="specimen__row">
+      {#each ["compact", "default", "comfortable"] as density}
+        <Button variant="secondary" on:click={() => (densityOpenMap[density] = true)}>{density}</Button>
+        <Drawer
+          open={densityOpenMap[density] ?? false}
+          {density}
+          title="Drawer at {density} density"
+          description="Internal spacing adjusts with the density prop."
+          on:openChange={(e) => (densityOpenMap[density] = e.detail.open)}
+        >
+          <p>Content at <strong>{density}</strong> density.</p>
+          <svelte:fragment slot="actions">
+            <Button variant="secondary" on:click={() => (densityOpenMap[density] = false)}>Cancel</Button>
+            <Button on:click={() => (densityOpenMap[density] = false)}>Save</Button>
           </svelte:fragment>
         </Drawer>
       {/each}

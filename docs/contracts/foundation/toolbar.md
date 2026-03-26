@@ -33,6 +33,7 @@ Updated: 2026-03-15
 |------|------|---------|----------|-------|
 | `orientation` | `"horizontal" \| "vertical"` | `"horizontal"` | no | layout direction and keyboard axis |
 | `ariaLabel` | `string \| null` | `null` | no | accessible name when no visible title exists |
+| `density` | `ControlDensity \| null` | `null` | no | explicit density override for spacing |
 
 ### Slots
 
@@ -133,6 +134,7 @@ Updated: 2026-03-15
 
 ## 9. Svelte Notes
 
+- `data-density` — resolved density value (`compact`, `default`, or `comfortable`)
 - Root rendered as `<div role="toolbar">` with `tabindex="0"`
 - `aria-orientation` attribute set from `orientation` prop
 - Roving focus implemented via `getFocusableElements()` utility to discover

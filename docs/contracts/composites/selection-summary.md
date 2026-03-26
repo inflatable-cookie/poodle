@@ -47,6 +47,7 @@ Updated: 2026-03-22
 | `items` | `Array<{ id: string; label: string }>` | `[]` | no | selected items to display |
 | `selectionMode` | `"single" \| "multiple"` | `"multiple"` | no | controls header label text |
 | `maxVisibleItems` | `number` | `4` | no | max chips shown before overflow |
+| `density` | `ControlDensity \| null` | `null` | no | explicit density override for spacing |
 
 ### Controlled And Uncontrolled
 
@@ -221,6 +222,7 @@ No internal state. Visible items and overflow count are derived from props.
 
 ## 9. Svelte Notes
 
+- `data-density` — resolved density value (`compact`, `default`, or `comfortable`)
 - uses `createEventDispatcher` for `remove` and `clear` events
 - `visibleItems` and `overflowCount` derived reactively from `items` and `maxVisibleItems`
 - uses `Icon` primitive for the remove (x) icon with `size="sm"`

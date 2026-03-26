@@ -36,6 +36,17 @@
   </div>
 
   <div class="specimen__group">
+    <Eyebrow>Densities</Eyebrow>
+    <div class="specimen__stack">
+      {#each ["compact", "default", "comfortable"] as density}
+        <Callout tone="info" title="Callout at {density} density" {density}>
+          Internal spacing adjusts with the density prop.
+        </Callout>
+      {/each}
+    </div>
+  </div>
+
+  <div class="specimen__group">
     <Eyebrow>Message prop</Eyebrow>
     <Callout tone="info" title="Information" message="This is an informational callout using the message prop instead of slot content." />
   </div>

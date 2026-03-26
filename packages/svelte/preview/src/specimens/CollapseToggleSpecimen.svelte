@@ -58,6 +58,18 @@
   </div>
 
   <div class="specimen__group">
+    <Eyebrow>Densities</Eyebrow>
+    <div class="specimen__row">
+      {#each ["compact", "default", "comfortable"] as density}
+        <div class="specimen__labeled">
+          <CollapseToggle direction="left" {density} />
+          <span>{density}</span>
+        </div>
+      {/each}
+    </div>
+  </div>
+
+  <div class="specimen__group">
     <Eyebrow>Disabled</Eyebrow>
     <div class="specimen__row">
       <CollapseToggle direction="left" disabled />

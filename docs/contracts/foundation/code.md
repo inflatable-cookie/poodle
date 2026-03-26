@@ -70,6 +70,7 @@ Updated: 2026-03-15
 | `inline` | `boolean` | `false` | no | render as inline `<code>` element |
 | `size` | `"xs" \| "sm" \| "md" \| "lg" \| "xl"` | `null` | no | explicit control size override; when null, resolves from inherited presentation |
 | `sizeRole` | `"chrome" \| "control" \| "prominent"` | `"chrome"` | no | semantic size offset from inherited presentation |
+| `density` | `ControlDensity \| null` | `null` | no | explicit density override for spacing |
 | `ariaLabel` | `string \| null` | `null` | no | accessible label for the code block |
 
 ### Controlled And Uncontrolled
@@ -292,6 +293,7 @@ Displays check icon when `copied` is true, copy icon otherwise.
 ## 9. Svelte Notes
 
 - `data-size` attribute on root reflects the resolved size
+- `data-density` — resolved density value (`compact`, `default`, or `comfortable`)
 - Inline mode renders a single `<code>` element with class `code code--inline`
 - Block mode renders a `<div>` wrapper with `<pre><code>` inside
 - Toolbar rendered conditionally when `language` or `showCopyButton` is truthy

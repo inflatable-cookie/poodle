@@ -66,6 +66,23 @@
   </div>
 
   <div class="specimen__group">
+    <Eyebrow>Densities</Eyebrow>
+    <div class="specimen__stack">
+      {#each ["compact", "default", "comfortable"] as density}
+        <Accordion
+          items={singleItems}
+          selectionMode="single"
+          {density}
+          ariaLabel="Accordion at {density} density"
+          let:item
+        >
+          <p>{singleContent[item.value]}</p>
+        </Accordion>
+      {/each}
+    </div>
+  </div>
+
+  <div class="specimen__group">
     <Eyebrow>Multiple selection</Eyebrow>
     <Accordion
       items={multiItems}

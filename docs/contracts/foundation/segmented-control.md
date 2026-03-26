@@ -44,6 +44,7 @@ Updated: 2026-03-15
 | `disabled` | `boolean` | `false` | no | disables whole control |
 | `ariaLabel` | `string \| null` | `null` | no | required when no visible label exists |
 | `name` | `string \| undefined` | auto-generated | no | radio group name attribute |
+| `density` | `ControlDensity \| null` | `null` | no | explicit density override for spacing |
 
 ### SegmentedControlOption
 
@@ -206,6 +207,7 @@ are required.
 
 ## 9. Svelte Notes
 
+- `data-density` — resolved density value (`compact`, `default`, or `comfortable`)
 - Uses native `<input type="radio">` elements hidden with `opacity: 0` for
   built-in radiogroup keyboard behavior
 - Module-level `let nextSegmentedControlId = 0` generates unique group names

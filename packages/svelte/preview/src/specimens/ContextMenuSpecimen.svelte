@@ -41,6 +41,18 @@
       {/each}
     </div>
   </div>
+  <div class="specimen__group">
+    <Eyebrow>Densities</Eyebrow>
+    <div class="specimen__row">
+      {#each ["compact", "default", "comfortable"] as density}
+        <ContextMenu {items} {density}>
+          <div class="target-area target-area--small">
+            <p>{density}</p>
+          </div>
+        </ContextMenu>
+      {/each}
+    </div>
+  </div>
 </div>
 
 <style>

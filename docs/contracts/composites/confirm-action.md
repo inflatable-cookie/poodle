@@ -48,6 +48,7 @@ Updated: 2026-03-22
 | `triggerLabel` | `string` | `"Delete"` | no | label for the default trigger Button (ignored when trigger slot is used) |
 | `confirmLabel` | `string` | `"Confirm"` | no | label for the AlertDialog confirm button |
 | `cancelLabel` | `string` | `"Cancel"` | no | label for the AlertDialog cancel button |
+| `density` | `ControlDensity \| null` | `null` | no | explicit density override for spacing |
 
 ### Types
 
@@ -138,6 +139,7 @@ No component-specific tokens; ConfirmAction is purely compositional.
 
 ## 9. Svelte Notes
 
+- `data-density` — resolved density value (`compact`, `default`, or `comfortable`)
 - Uses `createEventDispatcher` for `confirm` and `cancel` events
 - Composes `AlertDialog` and `Button` from `@poodle/svelte-primitives`
 - `open` is passed to AlertDialog as `open || null` (falsy → null for

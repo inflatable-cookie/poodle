@@ -35,6 +35,18 @@
   </div>
 
   <div class="specimen__group">
+    <Eyebrow>Densities</Eyebrow>
+    <div class="specimen__stack">
+      {#each ["compact", "default", "comfortable"] as density}
+        <div class="toggle-row">
+          <span class="specimen__label">{density}</span>
+          <Toggle {density} ariaLabel={"Toggle at " + density}>Option</Toggle>
+        </div>
+      {/each}
+    </div>
+  </div>
+
+  <div class="specimen__group">
     <Eyebrow>Disabled</Eyebrow>
     <Toggle defaultPressed disabled ariaLabel="Disabled toggle">Locked</Toggle>
   </div>
@@ -56,6 +68,20 @@
   .toggle-row {
     display: flex;
     gap: 0.25rem;
+    align-items: center;
+  }
+
+  .specimen__stack {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+
+  .specimen__label {
+    font-size: 0.75rem;
+    font-family: var(--poodle-typography-code-family);
+    color: var(--poodle-color-text-muted);
+    min-width: 6rem;
   }
 
   .specimen__group p {

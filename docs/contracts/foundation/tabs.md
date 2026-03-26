@@ -56,6 +56,7 @@ Updated: 2026-03-15
 | `ariaLabel` | `string \| null` | `null` | no | accessible name for the tablist |
 | `showTooltips` | `boolean` | `false` | no | shows tooltips on tab hover |
 | `historyKey` | `string \| null` | `null` | no | syncs the active tab to a URL query param with replaceState |
+| `density` | `ControlDensity \| null` | `null` | no | explicit density override for spacing |
 
 ### TabItem Type
 
@@ -463,6 +464,7 @@ Updated: 2026-03-15
 
 ## 9. Svelte Notes
 
+- `data-density` — resolved density value (`compact`, `default`, or `comfortable`)
 - Uses `data-variant`, `data-orientation`, `data-selected` data attributes for styling
 - Roving focus via manual tabindex management and `bind:this` on tab buttons
 - Uncontrolled mode: internal `uncontrolledValue` state, controlled mode: `value` prop passthrough

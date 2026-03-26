@@ -33,6 +33,7 @@ Updated: 2026-03-26
 | `appearance` | `"solid" \| "subtle" \| "badge"` | `"solid"` | no | fill opacity variant |
 | `size` | `"xs" \| "sm" \| "md" \| "lg" \| "xl"` | `null` | no | explicit pill size override |
 | `sizeRole` | `"chrome" \| "control" \| "prominent"` | `"chrome"` | no | semantic size offset from inherited presentation |
+| `density` | `ControlDensity \| null` | `null` | no | explicit density override for spacing |
 | `font` | `"normal" \| "mono"` | `"normal"` | no | content font variant |
 | `muted` | `boolean` | `false` | no | visual de-emphasis via reduced opacity |
 | `ariaLabel` | `string \| null` | `null` | no | optional explicit accessible name |
@@ -218,6 +219,7 @@ No internal state.
 - Component custom properties (`--poodle-pill-fill`, `--poodle-pill-border`,
   `--poodle-pill-text`) are set on the root element and consumed by the same
   element's CSS, enabling tone overrides without class proliferation
+- `data-density` — resolved density value (`compact`, `default`, or `comfortable`)
 
 ## 10. GPUI Notes
 

@@ -1,6 +1,6 @@
 # Svelte Semantic Sizing and Density — Full Rollout
 
-Status: active
+Status: complete
 Updated: 2026-03-26
 Depends on: landed presentation model in `packages/svelte/primitives/src/presentation.ts`
 
@@ -236,20 +236,27 @@ should only grow if a component is genuinely non-interactive display/layout.
 
 ## Remaining work
 
-All 75 interactive components have props + CSS size variants landed.
-Contracts for all tiers have been updated with `size`/`sizeRole` props,
-"Size adjustments" token tables, `data-size` Svelte Notes, and parity
-checklist items. Specimen files for ~49 components now show "Sizes" sections
-demonstrating all five size stops (xs through xl).
+✅ **All work complete.** The semantic sizing and density rollout is fully landed.
 
-What remains:
+Summary of completed phases:
 
-1. ~~**Contract updates**~~ — ✅ Done. 53 contracts now document `size`/`sizeRole`.
-2. ~~**Specimen updates**~~ — ✅ Done. 49 specimens updated with Sizes sections.
-3. ~~**Component-docs entries**~~ — ✅ Done. All 35 remaining entries now list
-   `size`/`sizeRole` props (52 total entries have them, including 17 previously done).
-4. ~~**Density pass**~~ — ✅ Done. All 75 interactive components now export
-   `density: ControlDensity | null = null`, resolve via presentation context,
-   emit `data-density`, and have CSS `[data-density]` variant rules for
-   compact/comfortable spacing adjustments. Remaining: contract and specimen
-   updates to document density (similar to the sizing documentation pass).
+1. ~~**Size props + CSS variants**~~ — ✅ All 75 interactive components have
+   `size`/`sizeRole` props, presentation resolution, `data-size` emission,
+   and CSS `[data-size]` rules for all five size stops (xs–xl).
+2. ~~**Size contract updates**~~ — ✅ 53 contracts document `size`/`sizeRole`
+   props, size adjustment token tables, `data-size` Svelte Notes, and parity
+   checklist items.
+3. ~~**Size specimen updates**~~ — ✅ 49 specimens show "Sizes" sections
+   demonstrating all five size stops.
+4. ~~**Size component-docs entries**~~ — ✅ All 73 interactive component-docs
+   entries list `size`/`sizeRole` props.
+5. ~~**Density props + CSS variants**~~ — ✅ All 75 interactive components
+   export `density: ControlDensity | null = null`, resolve via presentation
+   context, emit `data-density`, and have CSS `[data-density]` rules for
+   compact/comfortable spacing adjustments.
+6. ~~**Density contract updates**~~ — ✅ ~57 contracts document the `density`
+   prop and `data-density` attribute.
+7. ~~**Density specimen updates**~~ — ✅ ~49 specimens show "Densities"
+   sections demonstrating compact, default, and comfortable.
+8. ~~**Density component-docs entries**~~ — ✅ All 73 interactive
+   component-docs entries list the `density` prop.

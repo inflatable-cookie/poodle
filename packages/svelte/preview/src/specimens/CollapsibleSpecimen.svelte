@@ -35,6 +35,17 @@
   </div>
 
   <div class="specimen__group">
+    <Eyebrow>Densities</Eyebrow>
+    <div class="specimen__stack">
+      {#each ["compact", "default", "comfortable"] as density}
+        <Collapsible title="Collapsible at {density} density" {density}>
+          <p>Content at <strong>{density}</strong> density.</p>
+        </Collapsible>
+      {/each}
+    </div>
+  </div>
+
+  <div class="specimen__group">
     <Eyebrow>Disabled</Eyebrow>
     <Collapsible title="Locked section" description="Requires admin access." disabled>
       <p>This content is hidden behind a disabled collapsible.</p>

@@ -49,6 +49,7 @@ Updated: 2026-03-21
 | `columns` | `number` | `4` | no | number of grid columns at full width |
 | `minItemWidth` | `string` | `"10rem"` | no | minimum width per grid item |
 | `sticky` | `boolean` | `false` | no | sticky positioning when host supports it |
+| `density` | `ControlDensity \| null` | `null` | no | explicit density override for spacing |
 
 ### Slots
 
@@ -236,6 +237,7 @@ The `--ft-columns` and `--ft-min-width` CSS variables are set inline from the `c
 
 ## 9. Svelte Notes
 
+- `data-density` — resolved density value (`compact`, `default`, or `comfortable`)
 - uses CollapseToggle primitive for collapse affordance
 - controls grid uses CSS custom properties (`--ft-columns`, `--ft-min-width`)
   driven by props

@@ -61,6 +61,7 @@ Updated: 2026-03-22
 | `ariaLabel` | `string` | `"Video player"` | no | Accessible label for the root container |
 | `showCaptions` | `boolean` | `false` | no | Enable captions track |
 | `captionsSrc` | `string \| null` | `null` | no | URL to captions/subtitles file |
+| `density` | `ControlDensity \| null` | `null` | no | explicit density override for spacing |
 
 ### Slots
 
@@ -287,6 +288,7 @@ None (video player uses hardcoded dark-on-black colors).
 
 ## 9. Svelte Notes
 
+- `data-density` — resolved density value (`compact`, `default`, or `comfortable`)
 - Uses `onMount` for video event listeners (`play`, `pause`, `ended`, `loadedmetadata`)
 - `requestAnimationFrame` loop updates `currentTime` during playback for smooth seek bar
 - Controls auto-hide via `setTimeout` (3s) reset on `mousemove`

@@ -34,6 +34,18 @@
   </div>
 
   <div class="specimen__group">
+    <Eyebrow>Densities</Eyebrow>
+    <div class="specimen__stack">
+      {#each ["compact", "default", "comfortable"] as density}
+        <div class="button-row">
+          <span class="specimen__label">{density}</span>
+          <IconButton icon={settings} ariaLabel="Settings" {density} variant="secondary" />
+        </div>
+      {/each}
+    </div>
+  </div>
+
+  <div class="specimen__group">
     <Eyebrow>States</Eyebrow>
     <div class="button-row">
       <IconButton icon={mapPin} ariaLabel="Pin" pressed={true} variant="secondary" />
@@ -69,5 +81,18 @@
     display: flex;
     gap: 0.5rem;
     align-items: center;
+  }
+
+  .specimen__stack {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+
+  .specimen__label {
+    font-size: 0.75rem;
+    font-family: var(--poodle-typography-code-family);
+    color: var(--poodle-color-text-muted);
+    min-width: 6rem;
   }
 </style>

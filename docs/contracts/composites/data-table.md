@@ -88,6 +88,7 @@ type TableSortDirection = "asc" | "desc";
 | `showColumnVisibility` | `boolean` | `false` | no | show column visibility toggle in toolbar |
 | `showExport` | `boolean` | `false` | no | show CSV export button in toolbar |
 | `exportFilename` | `string` | `"export.csv"` | no | filename for CSV download |
+| `density` | `ControlDensity \| null` | `null` | no | explicit density override for spacing |
 
 ## 5. Events
 

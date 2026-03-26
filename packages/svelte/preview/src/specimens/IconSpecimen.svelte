@@ -54,6 +54,20 @@
   </div>
 
   <div class="specimen__group">
+    <Eyebrow>Densities</Eyebrow>
+    <div class="density-stack">
+      {#each ["compact", "default", "comfortable"] as density}
+        <div class="density-row">
+          <span class="density-label">{density}</span>
+          <Icon icon={star} {density} />
+          <Icon icon={heart} {density} />
+          <Icon icon={settings} {density} />
+        </div>
+      {/each}
+    </div>
+  </div>
+
+  <div class="specimen__group">
     <Eyebrow>Color inheritance</Eyebrow>
     <p class="hint">
       Icons inherit <code>currentColor</code> from their parent element.
@@ -204,6 +218,25 @@
     font-family: var(--poodle-typography-code-family);
     color: var(--poodle-color-text-muted);
     min-width: 1.5rem;
+  }
+
+  .density-stack {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .density-row {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .density-label {
+    font-size: 0.75rem;
+    font-family: var(--poodle-typography-code-family);
+    color: var(--poodle-color-text-muted);
+    min-width: 6rem;
   }
 
   .color-row {

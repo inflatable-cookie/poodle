@@ -33,6 +33,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
       { name: "selectionMode", type: '"single" | "multiple"', default: '"single"', description: "Whether one or many panels can be open simultaneously." },
       { name: "collapsible", type: "boolean", default: "true", description: "Whether the open panel can be collapsed by clicking its trigger again." },
       { name: "ariaLabel", type: "string | null", default: "null", description: "Accessible label for the accordion region." },
+      { name: "density", type: "ControlDensity | null", default: "null", description: "Explicit density override. Supports compact, default, and comfortable." },
     ],
     slots: [
       { name: "default", description: "Custom panel content. Receives slot props: item, isOpen." },
@@ -55,6 +56,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
   "alert-dialog": {
     props: [
       { name: "size", type: "ControlSize | null", default: "null", description: "Explicit size override. Supports xs, sm, md, lg, and xl." },
+      { name: "density", type: "ControlDensity | null", default: "null", description: "Explicit density override. Supports compact, default, and comfortable." },
       { name: "sizeRole", type: '"chrome" | "control" | "prominent"', default: '"control"', description: "Semantic size offset relative to the inherited presentation scale." },
       { name: "open", type: "boolean | null", default: "null", description: "Controlled open state of the dialog." },
       { name: "title", type: "string", required: true, description: "Title displayed at the top of the alert dialog." },
@@ -161,6 +163,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
 
   breadcrumbs: {
     props: [
+      { name: "density", type: "ControlDensity | null", default: "null", description: "Explicit density override. Supports compact, default, and comfortable." },
       { name: "items", type: "BreadcrumbItem[]", default: "[]", description: "Array of breadcrumb navigation items." },
       { name: "ariaLabel", type: "string", default: '"Breadcrumb"', description: "Accessible label for the breadcrumb nav." },
       { name: "maxVisibleItems", type: "number | null", default: "null", description: "Maximum number of visible items before collapsing." },
@@ -187,6 +190,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
       { name: "selectionCount", type: "number", default: "0", description: "Number of currently selected items." },
       { name: "totalCount", type: "number | null", default: "null", description: "Total number of selectable items." },
       { name: "actions", type: "BulkAction[]", default: "[]", description: "Array of bulk action definitions." },
+      { name: "density", type: "ControlDensity | null", default: "null", description: "Explicit density override. Supports compact, default, and comfortable." },
     ],
     slots: [],
     events: [
@@ -211,6 +215,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
       { name: "tone", type: "ButtonTone", default: '"default"', description: "Color tone of the button." },
       { name: "size", type: "ControlSize | null", default: "null", description: "Explicit size override. Supports xs, sm, md, lg, and xl." },
       { name: "sizeRole", type: '"chrome" | "control" | "prominent"', default: '"control"', description: "Semantic size offset relative to the inherited presentation scale." },
+      { name: "density", type: "ControlDensity | null", default: "null", description: "Explicit density override. Supports compact, default, and comfortable." },
       { name: "type", type: 'HTMLButtonElement["type"]', default: '"button"', description: "HTML button type attribute." },
       { name: "form", type: "string | null", default: "null", description: "External form id to associate with." },
       { name: "formaction", type: "string | null", default: "null", description: "Per-button form action override." },
@@ -250,6 +255,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
 
   calendar: {
     props: [
+      { name: "density", type: "ControlDensity | null", default: "null", description: "Explicit density override. Supports compact, default, and comfortable." },
       { name: "value", type: "string | null", default: "null", description: "Controlled selected date in ISO format." },
       { name: "defaultValue", type: "string | null", default: "null", description: "Initial selected date for uncontrolled mode." },
       { name: "visibleMonth", type: "string | null", default: "null", description: "Controlled visible month in YYYY-MM format." },
@@ -274,6 +280,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
 
   callout: {
     props: [
+      { name: "density", type: "ControlDensity | null", default: "null", description: "Explicit density override. Supports compact, default, and comfortable." },
       { name: "tone", type: 'StatusTone | "neutral"', default: '"neutral"', description: "Visual tone indicating the callout severity." },
       { name: "title", type: "string | null", default: "null", description: "Title text for the callout." },
       { name: "message", type: "string | null", default: "null", description: "Body message text." },
@@ -328,6 +335,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
     props: [
       { name: "size", type: "ControlSize | null", default: "null", description: "Explicit size override. Supports xs, sm, md, lg, and xl." },
       { name: "sizeRole", type: '"chrome" | "control" | "prominent"', default: '"control"', description: "Semantic size offset relative to the inherited presentation scale." },
+      { name: "density", type: "ControlDensity | null", default: "null", description: "Explicit density override. Supports compact, default, and comfortable." },
       { name: "items", type: "CardRadioItem[]", default: "[]", description: "Array of card radio option items." },
       { name: "value", type: "string | null", default: "null", description: "Currently selected item value." },
       { name: "columns", type: "1 | 2 | 3 | 4", default: "2", description: "Number of columns in the grid layout." },
@@ -356,6 +364,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
 
   checkbox: {
     props: [
+      { name: "density", type: "ControlDensity | null", default: "null", description: "Explicit density override. Supports compact, default, and comfortable." },
       { name: "id", type: "string | undefined", default: "undefined", description: "HTML id attribute for the checkbox input." },
       { name: "checked", type: "boolean", default: "false", description: "Controlled checked state." },
       { name: "defaultChecked", type: "boolean", default: "false", description: "Initial checked state for uncontrolled mode." },
@@ -390,6 +399,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
       { name: "maxHeight", type: "string | null", default: "null", description: "Maximum height before scrolling." },
       { name: "inline", type: "boolean", default: "false", description: "Whether to render as an inline code element." },
       { name: "ariaLabel", type: "string | null", default: "null", description: "Accessible label for the code block." },
+      { name: "density", type: "ControlDensity | null", default: "null", description: "Explicit density override. Supports compact, default, and comfortable." },
     ],
     slots: [],
     events: [],
@@ -408,6 +418,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
     props: [
       { name: "size", type: "ControlSize | null", default: "null", description: "Explicit size override. Supports xs, sm, md, lg, and xl." },
       { name: "sizeRole", type: '"chrome" | "control" | "prominent"', default: '"chrome"', description: "Semantic size offset relative to the inherited presentation scale." },
+      { name: "density", type: "ControlDensity | null", default: "null", description: "Explicit density override. Supports compact, default, and comfortable." },
       { name: "collapsed", type: "boolean", default: "false", description: "Whether the target region is collapsed." },
       { name: "direction", type: "CollapseDirection", default: '"left"', description: "Direction the toggle chevron points when collapsed." },
       { name: "disabled", type: "boolean", default: "false", description: "Whether the toggle is disabled." },
@@ -434,6 +445,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
       { name: "description", type: "string | null", default: "null", description: "Description shown below the title." },
       { name: "disabled", type: "boolean", default: "false", description: "Whether the collapsible is disabled." },
       { name: "ariaLabel", type: "string | null", default: "null", description: "Accessible label for the collapsible region." },
+      { name: "density", type: "ControlDensity | null", default: "null", description: "Explicit density override. Supports compact, default, and comfortable." },
     ],
     slots: [
       { name: "trigger", description: "Custom trigger content. Receives slot props: isOpen." },
@@ -455,6 +467,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
     props: [
       { name: "size", type: "ControlSize | null", default: "null", description: "Explicit size override. Supports xs, sm, md, lg, and xl." },
       { name: "sizeRole", type: '"chrome" | "control" | "prominent"', default: '"control"', description: "Semantic size offset relative to the inherited presentation scale." },
+      { name: "density", type: "ControlDensity | null", default: "null", description: "Explicit density override. Supports compact, default, and comfortable." },
       { name: "value", type: "string", default: '"#6366f1"', description: "Current color value in hex format." },
       { name: "swatches", type: "string[]", default: "[]", description: "Preset color swatches to display." },
       { name: "showInput", type: "boolean", default: "true", description: "Whether to show the hex input field." },
@@ -482,6 +495,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
 
   combobox: {
     props: [
+      { name: "density", type: "ControlDensity | null", default: "null", description: "Explicit density override. Supports compact, default, and comfortable." },
       { name: "value", type: "string | null", default: "null", description: "Controlled selected value." },
       { name: "defaultValue", type: "string | null", default: "null", description: "Initial value for uncontrolled mode." },
       { name: "options", type: "ComboboxOption[]", default: "[]", description: "Array of selectable options." },
@@ -546,6 +560,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
     props: [
       { name: "size", type: "ControlSize | null", default: "null", description: "Explicit size override. Supports xs, sm, md, lg, and xl." },
       { name: "sizeRole", type: '"chrome" | "control" | "prominent"', default: '"control"', description: "Semantic size offset relative to the inherited presentation scale." },
+      { name: "density", type: "ControlDensity | null", default: "null", description: "Explicit density override. Supports compact, default, and comfortable." },
       { name: "title", type: "string", required: true, description: "Title of the confirmation dialog." },
       { name: "description", type: "string | null", default: "null", description: "Description text in the confirmation dialog." },
       { name: "tone", type: "AlertDialogTone", default: '"danger"', description: "Visual tone of the confirmation dialog." },
@@ -578,6 +593,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
     props: [
       { name: "size", type: "ControlSize | null", default: "null", description: "Explicit size override. Supports xs, sm, md, lg, and xl." },
       { name: "sizeRole", type: '"chrome" | "control" | "prominent"', default: '"chrome"', description: "Semantic size offset relative to the inherited presentation scale." },
+      { name: "density", type: "ControlDensity | null", default: "null", description: "Explicit density override. Supports compact, default, and comfortable." },
       { name: "items", type: "MenuItem[]", default: "[]", description: "Array of menu items to display." },
       { name: "open", type: "boolean | null", default: "null", description: "Controlled open state." },
       { name: "defaultOpen", type: "boolean", default: "false", description: "Initial open state for uncontrolled mode." },
@@ -611,6 +627,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
     props: [
       { name: "size", type: "ControlSize | null", default: "null", description: "Explicit size override. Supports xs, sm, md, lg, and xl." },
       { name: "sizeRole", type: '"chrome" | "control" | "prominent"', default: '"control"', description: "Semantic size offset relative to the inherited presentation scale." },
+      { name: "density", type: "ControlDensity | null", default: "null", description: "Explicit density override. Supports compact, default, and comfortable." },
       { name: "ariaLabel", type: "string", default: '"Data table"', description: "Accessible label for the table." },
       { name: "columns", type: "TableColumn[]", default: "[]", description: "Column definitions for the table." },
       { name: "rows", type: "TableRow[]", default: "[]", description: "Row data to display." },
@@ -656,6 +673,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
     props: [
       { name: "size", type: "ControlSize | null", default: "null", description: "Explicit size override. Supports xs, sm, md, lg, and xl." },
       { name: "sizeRole", type: '"chrome" | "control" | "prominent"', default: '"control"', description: "Semantic size offset relative to the inherited presentation scale." },
+      { name: "density", type: "ControlDensity | null", default: "null", description: "Explicit density override. Supports compact, default, and comfortable." },
       { name: "value", type: "string | null", default: "null", description: "Controlled selected date in ISO format." },
       { name: "defaultValue", type: "string | null", default: "null", description: "Initial date for uncontrolled mode." },
       { name: "open", type: "boolean | null", default: "null", description: "Controlled open state of the calendar popup." },
@@ -686,6 +704,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
     props: [
       { name: "size", type: "ControlSize | null", default: "null", description: "Explicit size override. Supports xs, sm, md, lg, and xl." },
       { name: "sizeRole", type: '"chrome" | "control" | "prominent"', default: '"control"', description: "Semantic size offset relative to the inherited presentation scale." },
+      { name: "density", type: "ControlDensity | null", default: "null", description: "Explicit density override. Supports compact, default, and comfortable." },
       { name: "value", type: "DateRangeValue | null", default: "null", description: "Controlled date range value." },
       { name: "defaultValue", type: "DateRangeValue", default: "{ start: null, end: null }", description: "Initial date range for uncontrolled mode." },
       { name: "open", type: "boolean | null", default: "null", description: "Controlled open state." },
@@ -716,6 +735,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
     props: [
       { name: "size", type: "ControlSize | null", default: "null", description: "Explicit size override. Supports xs, sm, md, lg, and xl." },
       { name: "sizeRole", type: '"chrome" | "control" | "prominent"', default: '"control"', description: "Semantic size offset relative to the inherited presentation scale." },
+      { name: "density", type: "ControlDensity | null", default: "null", description: "Explicit density override. Supports compact, default, and comfortable." },
       { name: "value", type: "DateTimeValue | null", default: "null", description: "Controlled date-time value." },
       { name: "defaultValue", type: "DateTimeValue", default: "{ date: null, time: null }", description: "Initial date-time for uncontrolled mode." },
       { name: "open", type: "boolean | null", default: "null", description: "Controlled open state." },
@@ -746,6 +766,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
     props: [
       { name: "size", type: "ControlSize | null", default: "null", description: "Explicit size override. Supports xs, sm, md, lg, and xl." },
       { name: "sizeRole", type: '"chrome" | "control" | "prominent"', default: '"control"', description: "Semantic size offset relative to the inherited presentation scale." },
+      { name: "density", type: "ControlDensity | null", default: "null", description: "Explicit density override. Supports compact, default, and comfortable." },
       { name: "value", type: "DateTimeRangeValue | null", default: "null", description: "Controlled date-time range value." },
       { name: "defaultValue", type: "DateTimeRangeValue", default: "{ start: { date: null, time: null }, end: { date: null, time: null } }", description: "Initial date-time range for uncontrolled mode." },
       { name: "open", type: "boolean | null", default: "null", description: "Controlled open state." },
@@ -890,6 +911,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
     props: [
       { name: "size", type: "ControlSize | null", default: "null", description: "Explicit size override. Supports xs, sm, md, lg, and xl." },
       { name: "sizeRole", type: '"chrome" | "control" | "prominent"', default: '"chrome"', description: "Semantic size offset relative to the inherited presentation scale." },
+      { name: "density", type: "ControlDensity | null", default: "null", description: "Explicit density override. Supports compact, default, and comfortable." },
       { name: "edge", type: "DockEdge", default: '"left"', description: "Which edge of the viewport the dock attaches to." },
       { name: "sizing", type: "DockSizing", default: '"flexible"', description: "Sizing behavior of the dock region." },
       { name: "collapsed", type: "boolean", default: "false", description: "Whether the dock is collapsed." },
@@ -970,6 +992,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
     props: [
       { name: "size", type: "ControlSize | null", default: "null", description: "Explicit size override. Supports xs, sm, md, lg, and xl." },
       { name: "sizeRole", type: '"chrome" | "control" | "prominent"', default: '"control"', description: "Semantic size offset relative to the inherited presentation scale." },
+      { name: "density", type: "ControlDensity | null", default: "null", description: "Explicit density override. Supports compact, default, and comfortable." },
       { name: "hours", type: "number", default: "0", description: "Hours value." },
       { name: "minutes", type: "number", default: "0", description: "Minutes value." },
       { name: "seconds", type: "number", default: "0", description: "Seconds value." },
@@ -1001,6 +1024,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
     props: [
       { name: "size", type: "ControlSize | null", default: "null", description: "Explicit size override. Supports xs, sm, md, lg, and xl." },
       { name: "sizeRole", type: '"chrome" | "control" | "prominent"', default: '"control"', description: "Semantic size offset relative to the inherited presentation scale." },
+      { name: "density", type: "ControlDensity | null", default: "null", description: "Explicit density override. Supports compact, default, and comfortable." },
       { name: "value", type: "string", required: true, description: "Current text value of the editable label." },
       { name: "ariaLabel", type: "string", default: '"Edit label"', description: "Accessible label for the editable input." },
       { name: "disabled", type: "boolean", default: "false", description: "Whether the label is disabled for editing." },
@@ -1206,6 +1230,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
     props: [
       { name: "size", type: "ControlSize | null", default: "null", description: "Explicit size override. Supports xs, sm, md, lg, and xl." },
       { name: "sizeRole", type: '"chrome" | "control" | "prominent"', default: '"control"', description: "Semantic size offset relative to the inherited presentation scale." },
+      { name: "density", type: "ControlDensity | null", default: "null", description: "Explicit density override. Supports compact, default, and comfortable." },
       { name: "accept", type: "string | null", default: "null", description: "Accepted file types (e.g. 'image/*,.pdf')." },
       { name: "maxSize", type: "number", default: "10485760", description: "Maximum file size in bytes (default 10 MB)." },
       { name: "multiple", type: "boolean", default: "false", description: "Whether multiple files can be uploaded." },
@@ -1243,6 +1268,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
     props: [
       { name: "size", type: "ControlSize | null", default: "null", description: "Explicit size override. Supports xs, sm, md, lg, and xl." },
       { name: "sizeRole", type: '"chrome" | "control" | "prominent"', default: '"chrome"', description: "Semantic size offset relative to the inherited presentation scale." },
+      { name: "density", type: "ControlDensity | null", default: "null", description: "Explicit density override. Supports compact, default, and comfortable." },
       { name: "ariaLabel", type: "string", default: '"Filters"', description: "Accessible label for the toolbar." },
       { name: "summaryText", type: "string | null", default: "null", description: "Summary text describing active filters." },
       { name: "collapsible", type: "boolean", default: "false", description: "Whether the toolbar can be collapsed." },
@@ -1410,6 +1436,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
       { name: "name", type: "string | null", default: "null", description: "Deprecated. Use icon instead. Alias kept for internal convenience." },
       { name: "size", type: "ControlSize | null", default: "null", description: "Explicit size override. Supports xs, sm, md, lg, and xl." },
       { name: "sizeRole", type: '"chrome" | "control" | "prominent"', default: '"chrome"', description: "Semantic size offset relative to the inherited presentation scale." },
+      { name: "density", type: "ControlDensity | null", default: "null", description: "Explicit density override. Supports compact, default, and comfortable." },
       { name: "ariaLabel", type: "string | null", default: "null", description: "Accessible label for the icon. When set, the SVG receives role=\"img\"; otherwise it is role=\"presentation\"." },
     ],
     slots: [],
@@ -1466,6 +1493,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
       { name: "tone", type: "ButtonTone", default: '"default"', description: "Color tone of the button." },
       { name: "size", type: "ControlSize | null", default: "null", description: "Explicit size override. Supports xs, sm, md, lg, and xl." },
       { name: "sizeRole", type: '"chrome" | "control" | "prominent"', default: '"control"', description: "Semantic size offset relative to the inherited presentation scale." },
+      { name: "density", type: "ControlDensity | null", default: "null", description: "Explicit density override. Supports compact, default, and comfortable." },
       { name: "icon", type: "IconProp", required: true, description: "The icon to display. Accepts an IconNodes array or a string name." },
       { name: "ariaLabel", type: "string", required: true, description: "Accessible label for the button (required since there is no text)." },
       { name: "tooltip", type: "string | null", default: "null", description: "Tooltip text shown on hover." },
@@ -1653,6 +1681,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
     props: [
       { name: "size", type: "ControlSize | null", default: "null", description: "Explicit size override. Supports xs, sm, md, lg, and xl." },
       { name: "sizeRole", type: '"chrome" | "control" | "prominent"', default: '"control"', description: "Semantic size offset relative to the inherited presentation scale." },
+      { name: "density", type: "ControlDensity | null", default: "null", description: "Explicit density override. Supports compact, default, and comfortable." },
       { name: "uploadStep", type: "MediaUploadWorkflowStep", default: '"checking"', description: "Current workflow posture for the upload state surface." },
       { name: "duplicateLabel", type: "string | null", default: "null", description: "Label for the duplicate media item." },
       { name: "uploadProgress", type: "number", default: "0", description: "Upload percentage shown during the uploading posture." },
@@ -1744,6 +1773,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
 
   menu: {
     props: [
+      { name: "density", type: "ControlDensity | null", default: "null", description: "Explicit density override. Supports compact, default, and comfortable." },
       { name: "items", type: "MenuItem[]", default: "[]", description: "Array of menu items to display." },
       { name: "open", type: "boolean | null", default: "null", description: "Controlled open state." },
       { name: "defaultOpen", type: "boolean", default: "false", description: "Initial open state for uncontrolled mode." },
@@ -1778,6 +1808,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
 
   menubar: {
     props: [
+      { name: "density", type: "ControlDensity | null", default: "null", description: "Explicit density override. Supports compact, default, and comfortable." },
       { name: "value", type: "string | null", default: "null", description: "Controlled active menu value." },
       { name: "defaultValue", type: "string | null", default: "null", description: "Initial active menu for uncontrolled mode." },
       { name: "items", type: "MenubarItem[]", default: "[]", description: "Array of top-level menubar items." },
@@ -1871,6 +1902,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
     props: [
       { name: "size", type: "ControlSize | null", default: "null", description: "Explicit size override. Supports xs, sm, md, lg, and xl." },
       { name: "sizeRole", type: '"chrome" | "control" | "prominent"', default: '"chrome"', description: "Semantic size offset relative to the inherited presentation scale." },
+      { name: "density", type: "ControlDensity | null", default: "null", description: "Explicit density override. Supports compact, default, and comfortable." },
       { name: "value", type: "string | null", default: "null", description: "Controlled active menu value." },
       { name: "defaultValue", type: "string | null", default: "null", description: "Initial active value for uncontrolled mode." },
       { name: "items", type: "NavigationMenuItem[]", default: "[]", description: "Array of navigation menu items." },
@@ -1899,6 +1931,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
     props: [
       { name: "size", type: "ControlSize | null", default: "null", description: "Explicit size override. Supports xs, sm, md, lg, and xl." },
       { name: "sizeRole", type: '"chrome" | "control" | "prominent"', default: '"control"', description: "Semantic size offset relative to the inherited presentation scale." },
+      { name: "density", type: "ControlDensity | null", default: "null", description: "Explicit density override. Supports compact, default, and comfortable." },
       { name: "id", type: "string", required: true, description: "HTML id attribute for the input." },
       { name: "value", type: "number | null", default: "null", description: "Controlled numeric value." },
       { name: "defaultValue", type: "number | null", default: "null", description: "Initial value for uncontrolled mode." },
@@ -1937,6 +1970,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
     props: [
       { name: "size", type: "ControlSize | null", default: "null", description: "Explicit size override. Supports xs, sm, md, lg, and xl." },
       { name: "sizeRole", type: '"chrome" | "control" | "prominent"', default: '"control"', description: "Semantic size offset relative to the inherited presentation scale." },
+      { name: "density", type: "ControlDensity | null", default: "null", description: "Explicit density override. Supports compact, default, and comfortable." },
       { name: "fields", type: "SortField[]", default: "[]", description: "Array of sortable field definitions." },
       { name: "activeSort", type: "ActiveSort | null", default: "null", description: "Currently active sort configuration." },
       { name: "ariaLabel", type: "string", default: '"Sort by"', description: "Accessible label for the sort control." },
@@ -2082,6 +2116,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
 
   pagination: {
     props: [
+      { name: "density", type: "ControlDensity | null", default: "null", description: "Explicit density override. Supports compact, default, and comfortable." },
       { name: "currentPage", type: "number", default: "1", description: "Currently active page number." },
       { name: "totalPages", type: "number", default: "1", description: "Total number of pages." },
       { name: "siblingCount", type: "number", default: "1", description: "Number of sibling pages shown around the current page." },
@@ -2160,6 +2195,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
       { name: "font", type: "PillFont", default: '"normal"', description: "Font style of the pill label." },
       { name: "muted", type: "boolean", default: "false", description: "Whether the pill uses muted styling." },
       { name: "ariaLabel", type: "string | null", default: "null", description: "Accessible label for the pill." },
+      { name: "density", type: "ControlDensity | null", default: "null", description: "Explicit density override. Supports compact, default, and comfortable." },
     ],
     slots: [
       { name: "default", description: "Pill label content." },
@@ -2177,6 +2213,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
     props: [
       { name: "size", type: "ControlSize | null", default: "null", description: "Explicit size override. Supports xs, sm, md, lg, and xl." },
       { name: "sizeRole", type: '"chrome" | "control" | "prominent"', default: '"control"', description: "Semantic size offset relative to the inherited presentation scale." },
+      { name: "density", type: "ControlDensity | null", default: "null", description: "Explicit density override. Supports compact, default, and comfortable." },
       { name: "value", type: "string | null", default: "null", description: "Controlled value of the pin input." },
       { name: "defaultValue", type: "string", default: '""', description: "Initial value for uncontrolled mode." },
       { name: "length", type: "number", default: "6", description: "Number of character fields." },
@@ -2247,6 +2284,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
     props: [
       { name: "size", type: "ControlSize | null", default: "null", description: "Explicit size override. Supports xs, sm, md, lg, and xl." },
       { name: "sizeRole", type: '"chrome" | "control" | "prominent"', default: '"control"', description: "Semantic size offset relative to the inherited presentation scale." },
+      { name: "density", type: "ControlDensity | null", default: "null", description: "Explicit density override. Supports compact, default, and comfortable." },
       { name: "value", type: "string | null", default: "null", description: "Controlled selected value." },
       { name: "defaultValue", type: "string | null", default: "null", description: "Initial value for uncontrolled mode." },
       { name: "options", type: "RadioGroupOption[]", default: "[]", description: "Array of radio option definitions." },
@@ -2280,6 +2318,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
     props: [
       { name: "size", type: "ControlSize | null", default: "null", description: "Explicit size override. Supports xs, sm, md, lg, and xl." },
       { name: "sizeRole", type: '"chrome" | "control" | "prominent"', default: '"control"', description: "Semantic size offset relative to the inherited presentation scale." },
+      { name: "density", type: "ControlDensity | null", default: "null", description: "Explicit density override. Supports compact, default, and comfortable." },
       { name: "value", type: "DateRangeValue | null", default: "null", description: "Controlled date range value." },
       { name: "defaultValue", type: "DateRangeValue", default: "{ start: null, end: null }", description: "Initial date range for uncontrolled mode." },
       { name: "visibleMonth", type: "string | null", default: "null", description: "Controlled visible month in YYYY-MM format." },
@@ -2306,6 +2345,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
     props: [
       { name: "size", type: "ControlSize | null", default: "null", description: "Explicit size override. Supports xs, sm, md, lg, and xl." },
       { name: "sizeRole", type: '"chrome" | "control" | "prominent"', default: '"control"', description: "Semantic size offset relative to the inherited presentation scale." },
+      { name: "density", type: "ControlDensity | null", default: "null", description: "Explicit density override. Supports compact, default, and comfortable." },
       { name: "value", type: "[number, number]", default: "[0, 100]", description: "Controlled range value as [min, max] tuple." },
       { name: "min", type: "number", default: "0", description: "Minimum allowed value." },
       { name: "max", type: "number", default: "100", description: "Maximum allowed value." },
@@ -2332,6 +2372,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
 
   rating: {
     props: [
+      { name: "density", type: "ControlDensity | null", default: "null", description: "Explicit density override. Supports compact, default, and comfortable." },
       { name: "value", type: "number | null", default: "null", description: "Controlled rating value." },
       { name: "defaultValue", type: "number | null", default: "null", description: "Initial value for uncontrolled mode." },
       { name: "max", type: "number", default: "5", description: "Maximum number of stars." },
@@ -2490,6 +2531,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
     props: [
       { name: "size", type: "ControlSize | null", default: "null", description: "Explicit size override. Supports xs, sm, md, lg, and xl." },
       { name: "sizeRole", type: '"chrome" | "control" | "prominent"', default: '"control"', description: "Semantic size offset relative to the inherited presentation scale." },
+      { name: "density", type: "ControlDensity | null", default: "null", description: "Explicit density override. Supports compact, default, and comfortable." },
       { name: "id", type: "string", required: true, description: "HTML id attribute for the input." },
       { name: "value", type: "string | null", default: "null", description: "Controlled search value." },
       { name: "defaultValue", type: "string", default: '""', description: "Initial value for uncontrolled mode." },
@@ -2522,6 +2564,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
     props: [
       { name: "size", type: "ControlSize | null", default: "null", description: "Explicit size override. Supports xs, sm, md, lg, and xl." },
       { name: "sizeRole", type: '"chrome" | "control" | "prominent"', default: '"control"', description: "Semantic size offset relative to the inherited presentation scale." },
+      { name: "density", type: "ControlDensity | null", default: "null", description: "Explicit density override. Supports compact, default, and comfortable." },
       { name: "value", type: "string | null", default: "null", description: "Controlled selected value." },
       { name: "defaultValue", type: "string | null", default: "null", description: "Initial value for uncontrolled mode." },
       { name: "options", type: "SegmentedControlOption[]", default: "[]", description: "Array of segment option definitions." },
@@ -2550,6 +2593,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
 
   select: {
     props: [
+      { name: "density", type: "ControlDensity | null", default: "null", description: "Explicit density override. Supports compact, default, and comfortable." },
       { name: "id", type: "string | undefined", default: "undefined", description: "HTML id attribute for the select." },
       { name: "value", type: "string | null", default: "null", description: "Controlled selected value." },
       { name: "defaultValue", type: "string | null", default: "null", description: "Initial value for uncontrolled mode." },
@@ -2579,6 +2623,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
 
   "selection-summary": {
     props: [
+      { name: "density", type: "ControlDensity | null", default: "null", description: "Explicit density override. Supports compact, default, and comfortable." },
       { name: "items", type: "Array<{ id: string; label: string }>", default: "[]", description: "Array of selected items to display." },
       { name: "selectionMode", type: '"single" | "multiple"', default: '"multiple"', description: "Selection mode." },
       { name: "maxVisibleItems", type: "number", default: "4", description: "Maximum number of items shown before truncation." },
@@ -2642,6 +2687,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
       { name: "variant", type: "SpinnerVariant", default: '"ring"', description: "Visual style of the spinner." },
       { name: "size", type: "SpinnerSize | null", default: "null", description: "Explicit size override. Supports xs, sm, md, lg, and xl." },
       { name: "sizeRole", type: '"chrome" | "control" | "prominent"', default: '"control"', description: "Semantic size offset relative to the inherited presentation scale." },
+      { name: "density", type: "ControlDensity | null", default: "null", description: "Explicit density override. Supports compact, default, and comfortable." },
       { name: "tone", type: "SpinnerTone", default: '"current"', description: "Color source for the spinner." },
       { name: "ariaLabel", type: "string | null", default: "null", description: "Optional announced loading label." },
     ],
@@ -2657,6 +2703,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
 
   slider: {
     props: [
+      { name: "density", type: "ControlDensity | null", default: "null", description: "Explicit density override. Supports compact, default, and comfortable." },
       { name: "value", type: "number", default: "0", description: "Current slider value." },
       { name: "min", type: "number", default: "0", description: "Minimum allowed value." },
       { name: "max", type: "number", default: "100", description: "Maximum allowed value." },
@@ -2704,6 +2751,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
       { name: "tone", type: "ButtonTone", default: '"default"', description: "Color tone of the button." },
       { name: "size", type: "ControlSize", default: '"md"', description: "Size of the button." },
       { name: "sizeRole", type: '"chrome" | "control" | "prominent"', default: '"control"', description: "Semantic size offset relative to the inherited presentation scale." },
+      { name: "density", type: "ControlDensity | null", default: "null", description: "Explicit density override. Supports compact, default, and comfortable." },
       { name: "type", type: '"button" | "submit" | "reset"', default: '"button"', description: "Native button type for the primary action half." },
       { name: "items", type: "MenuItem[]", default: "[]", description: "Array of menu items for the dropdown." },
       { name: "disabled", type: "boolean", default: "false", description: "Whether the button is disabled." },
@@ -2736,6 +2784,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
     props: [
       { name: "size", type: "ControlSize | null", default: "null", description: "Explicit size override. Supports xs, sm, md, lg, and xl." },
       { name: "sizeRole", type: '"chrome" | "control" | "prominent"', default: '"chrome"', description: "Semantic size offset relative to the inherited presentation scale." },
+      { name: "density", type: "ControlDensity | null", default: "null", description: "Explicit density override. Supports compact, default, and comfortable." },
       { name: "orientation", type: "SplitOrientation", default: '"horizontal"', description: "Orientation of the split layout." },
       { name: "ratio", type: "number", default: "0.5", description: "Controlled split ratio (0 to 1)." },
       { name: "defaultRatio", type: "number", default: "0.5", description: "Initial split ratio for uncontrolled mode." },
@@ -2859,6 +2908,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
 
   switch: {
     props: [
+      { name: "density", type: "ControlDensity | null", default: "null", description: "Explicit density override. Supports compact, default, and comfortable." },
       { name: "id", type: "string | undefined", default: "undefined", description: "HTML id attribute for the switch." },
       { name: "checked", type: "boolean | null", default: "null", description: "Controlled checked state." },
       { name: "defaultChecked", type: "boolean", default: "false", description: "Initial checked state for uncontrolled mode." },
@@ -2917,6 +2967,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
 
   tabs: {
     props: [
+      { name: "density", type: "ControlDensity | null", default: "null", description: "Explicit density override. Supports compact, default, and comfortable." },
       { name: "value", type: "string | null", default: "null", description: "Controlled active tab value." },
       { name: "defaultValue", type: "string | null", default: "null", description: "Initial active tab for uncontrolled mode." },
       { name: "items", type: "TabItem[]", default: "[]", description: "Array of tab items to render." },
@@ -2961,6 +3012,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
     props: [
       { name: "size", type: "ControlSize | null", default: "null", description: "Explicit size override. Supports xs, sm, md, lg, and xl." },
       { name: "sizeRole", type: '"chrome" | "control" | "prominent"', default: '"control"', description: "Semantic size offset relative to the inherited presentation scale." },
+      { name: "density", type: "ControlDensity | null", default: "null", description: "Explicit density override. Supports compact, default, and comfortable." },
       { name: "id", type: "string", required: true, description: "HTML id attribute for the textarea." },
       { name: "value", type: "string | null", default: "null", description: "Controlled value of the textarea." },
       { name: "defaultValue", type: "string", default: '""', description: "Initial value for uncontrolled mode." },
@@ -2994,6 +3046,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
     props: [
       { name: "size", type: "ControlSize | null", default: "null", description: "Explicit size override. Supports xs, sm, md, lg, and xl." },
       { name: "sizeRole", type: '"chrome" | "control" | "prominent"', default: '"control"', description: "Semantic size offset relative to the inherited presentation scale." },
+      { name: "density", type: "ControlDensity | null", default: "null", description: "Explicit density override. Supports compact, default, and comfortable." },
       { name: "id", type: "string", required: true, description: "HTML id attribute for the input." },
       { name: "value", type: "string | null", default: "null", description: "Controlled value of the input." },
       { name: "defaultValue", type: "string", default: '""', description: "Initial value for uncontrolled mode." },
@@ -3076,6 +3129,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
     props: [
       { name: "size", type: "ControlSize | null", default: "null", description: "Explicit size override. Supports xs, sm, md, lg, and xl." },
       { name: "sizeRole", type: '"chrome" | "control" | "prominent"', default: '"control"', description: "Semantic size offset relative to the inherited presentation scale." },
+      { name: "density", type: "ControlDensity | null", default: "null", description: "Explicit density override. Supports compact, default, and comfortable." },
       { name: "id", type: "string | null", default: "null", description: "HTML id attribute for the field." },
       { name: "value", type: "string | null", default: "null", description: "Controlled time value (e.g. \"14:30\")." },
       { name: "defaultValue", type: "string | null", default: "null", description: "Initial time value for uncontrolled mode." },
@@ -3103,6 +3157,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
     props: [
       { name: "size", type: "ControlSize | null", default: "null", description: "Explicit size override. Supports xs, sm, md, lg, and xl." },
       { name: "sizeRole", type: '"chrome" | "control" | "prominent"', default: '"control"', description: "Semantic size offset relative to the inherited presentation scale." },
+      { name: "density", type: "ControlDensity | null", default: "null", description: "Explicit density override. Supports compact, default, and comfortable." },
       { name: "id", type: "string | undefined", default: "undefined", description: "HTML id attribute for the select." },
       { name: "value", type: "string | null", default: "null", description: "Controlled selected time zone." },
       { name: "defaultValue", type: "string | null", default: "null", description: "Initial time zone for uncontrolled mode." },
@@ -3130,6 +3185,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
     props: [
       { name: "size", type: "ControlSize | null", default: "null", description: "Explicit size override. Supports xs, sm, md, lg, and xl." },
       { name: "sizeRole", type: '"chrome" | "control" | "prominent"', default: '"chrome"', description: "Semantic size offset relative to the inherited presentation scale." },
+      { name: "density", type: "ControlDensity | null", default: "null", description: "Explicit density override. Supports compact, default, and comfortable." },
       { name: "items", type: "ToastItem[]", default: "[]", description: "Array of toast notification items." },
       { name: "ariaLabel", type: "string", default: '"Notifications"', description: "Accessible label for the toast region." },
     ],
@@ -3155,6 +3211,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
       { name: "defaultPressed", type: "boolean", default: "false", description: "Initial pressed state for uncontrolled mode." },
       { name: "variant", type: "ToggleVariant", default: '"ghost"', description: "Visual style variant." },
       { name: "size", type: "ControlSize", default: '"md"', description: "Size of the toggle button." },
+      { name: "density", type: "ControlDensity | null", default: "null", description: "Explicit density override. Supports compact, default, and comfortable." },
       { name: "layout", type: '"inline" | "stack"', default: '"inline"', description: "Layout direction of icon and label." },
       { name: "disabled", type: "boolean", default: "false", description: "Whether the toggle is disabled." },
       { name: "ariaLabel", type: "string | null", default: "null", description: "Accessible label for the toggle." },
@@ -3208,6 +3265,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
 
   toolbar: {
     props: [
+      { name: "density", type: "ControlDensity | null", default: "null", description: "Explicit density override. Supports compact, default, and comfortable." },
       { name: "orientation", type: "Orientation", default: '"horizontal"', description: "Layout orientation of the toolbar." },
       { name: "ariaLabel", type: "string | null", default: "null", description: "Accessible label for the toolbar." },
     ],
@@ -3280,6 +3338,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
     props: [
       { name: "size", type: "ControlSize | null", default: "null", description: "Explicit size override. Supports xs, sm, md, lg, and xl." },
       { name: "sizeRole", type: '"chrome" | "control" | "prominent"', default: '"control"', description: "Semantic size offset relative to the inherited presentation scale." },
+      { name: "density", type: "ControlDensity | null", default: "null", description: "Explicit density override. Supports compact, default, and comfortable." },
       { name: "src", type: "string", required: true, description: "URL of the video file to play." },
       { name: "poster", type: "string | null", default: "null", description: "URL of the poster image shown before playback." },
       { name: "aspectRatio", type: "number", default: "16/9", description: "Aspect ratio of the video player." },
@@ -3300,6 +3359,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
     props: [
       { name: "size", type: "ControlSize | null", default: "null", description: "Explicit size override. Supports xs, sm, md, lg, and xl." },
       { name: "sizeRole", type: '"chrome" | "control" | "prominent"', default: '"control"', description: "Semantic size offset relative to the inherited presentation scale." },
+      { name: "density", type: "ControlDensity | null", default: "null", description: "Explicit density override. Supports compact, default, and comfortable." },
       { name: "value", type: "ZonedDateTimeValue | null", default: "null", description: "Controlled date/time/zone value." },
       { name: "defaultValue", type: "ZonedDateTimeValue", default: '{ date: null, time: null, timeZone: null }', description: "Initial value for uncontrolled mode." },
       { name: "open", type: "boolean | null", default: "null", description: "Controlled open state of the picker." },

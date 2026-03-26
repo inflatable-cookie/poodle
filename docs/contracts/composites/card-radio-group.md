@@ -55,6 +55,7 @@ Updated: 2026-03-22
 | `columns` | `1 \| 2 \| 3 \| 4` | `2` | no | number of grid columns |
 | `ariaLabel` | `string \| null` | `null` | no | accessible label for the radiogroup |
 | `disabled` | `boolean` | `false` | no | disables the entire group |
+| `density` | `ControlDensity \| null` | `null` | no | explicit density override for spacing |
 
 ### Types
 
@@ -260,6 +261,7 @@ The `--columns` CSS variable is set inline from the `columns` prop (1, 2, 3, or 
 
 ## 9. Svelte Notes
 
+- `data-density` — resolved density value (`compact`, `default`, or `comfortable`)
 - Uses `createEventDispatcher` for `change` event
 - Composes `Card` primitive from `@poodle/svelte-primitives` with `isInteractive`
   and `isSelected` props

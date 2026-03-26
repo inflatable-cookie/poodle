@@ -19,6 +19,7 @@ Updated: 2026-03-25
 | `duplicateLabel` | `string \| null` | `null` | no | Label for the duplicate media item |
 | `uploadProgress` | `number` | `0` | no | Percentage shown during upload |
 | `uploadError` | `string \| null` | `null` | no | Error message for the error state |
+| `density` | `ControlDensity \| null` | `null` | no | explicit density override for spacing |
 
 ### Types
 

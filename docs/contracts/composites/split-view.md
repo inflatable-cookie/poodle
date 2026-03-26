@@ -56,6 +56,7 @@ Updated: 2026-03-22
 | `showCollapseSecondary` | `boolean` | `false` | no | show collapse toggle for secondary pane |
 | `ariaLabel` | `string \| null` | `null` | no | accessible name (defaults to "Split view") |
 | `disabled` | `boolean` | `false` | no | disables resize and collapse interactions |
+| `density` | `ControlDensity \| null` | `null` | no | explicit density override for spacing |
 
 ### Slots
 
@@ -263,6 +264,7 @@ None.
 
 ## 11. Svelte Notes
 
+- `data-density` — resolved density value (`compact`, `default`, or `comfortable`)
 - uses `createEventDispatcher` for all events
 - `bind:this={container}` on root for computing raw ratio from mouse position
 - `rawRatio()` converts mouse position to ratio using container bounding rect
