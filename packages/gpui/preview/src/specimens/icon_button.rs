@@ -113,6 +113,16 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                             IconButton::from_spec(
                                 IconButtonSpec::new()
                                     .with_icon("star")
+                                    .with_size(ControlSize::Xs)
+                                    .with_aria_label("Star"),
+                                theme,
+                            )
+                            .with_id("size-xs")
+                        )
+                        .child(
+                            IconButton::from_spec(
+                                IconButtonSpec::new()
+                                    .with_icon("star")
                                     .with_size(ControlSize::Sm)
                                     .with_aria_label("Star"),
                                 theme,
@@ -138,6 +148,16 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                                 theme,
                             )
                             .with_id("size-lg")
+                        )
+                        .child(
+                            IconButton::from_spec(
+                                IconButtonSpec::new()
+                                    .with_icon("star")
+                                    .with_size(ControlSize::Xl)
+                                    .with_aria_label("Star"),
+                                theme,
+                            )
+                            .with_id("size-xl")
                         )
                 )
         )

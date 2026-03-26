@@ -186,6 +186,16 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                             Button::from_spec(
                                 ButtonSpec::new()
                                     .with_variant(ButtonVariant::Primary)
+                                    .with_size(ControlSize::Xs)
+                                    .with_label("Extra small"),
+                                theme,
+                            )
+                            .with_id("size-xs")
+                        )
+                        .child(
+                            Button::from_spec(
+                                ButtonSpec::new()
+                                    .with_variant(ButtonVariant::Primary)
                                     .with_size(ControlSize::Sm)
                                     .with_label("Small"),
                                 theme,
@@ -211,6 +221,16 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                                 theme,
                             )
                             .with_id("size-lg")
+                        )
+                        .child(
+                            Button::from_spec(
+                                ButtonSpec::new()
+                                    .with_variant(ButtonVariant::Primary)
+                                    .with_size(ControlSize::Xl)
+                                    .with_label("Extra large"),
+                                theme,
+                            )
+                            .with_id("size-xl")
                         )
                 )
         )
