@@ -64,9 +64,11 @@ impl IntoElement for Pill {
 
         // ── Size-dependent values ────────────────────────────────
         let (min_h, pad_x, pad_y, font_size) = match spec.size {
+            PillSize::Xs => (px(14.0), px(5.0), px(1.0), px(9.0)),
             PillSize::Sm => (px(16.0), px(6.0), px(2.0), px(10.0)),
             PillSize::Md => (px(20.0), px(8.0), px(3.0), px(11.0)),
             PillSize::Lg => (px(22.0), px(10.0), px(4.0), px(12.0)),
+            PillSize::Xl => (px(24.0), px(12.0), px(5.0), px(13.0)),
         };
 
         // ── Colors ───────────────────────────────────────────────

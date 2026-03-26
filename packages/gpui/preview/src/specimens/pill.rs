@@ -24,9 +24,11 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
                 .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Sizes"), theme))
                 .child(
                     div().flex().flex_wrap().gap(px(8.0)).items_center()
+                        .child(Pill::from_spec(PillSpec::new().with_label("Extra small").with_size(PillSize::Xs), theme))
                         .child(Pill::from_spec(PillSpec::new().with_label("Small").with_size(PillSize::Sm), theme))
                         .child(Pill::from_spec(PillSpec::new().with_label("Medium").with_size(PillSize::Md), theme))
                         .child(Pill::from_spec(PillSpec::new().with_label("Large").with_size(PillSize::Lg), theme))
+                        .child(Pill::from_spec(PillSpec::new().with_label("Extra large").with_size(PillSize::Xl), theme))
                 )
         )
         // --- Code font ---
