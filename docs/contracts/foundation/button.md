@@ -45,6 +45,7 @@ Updated: 2026-03-26
 | `tone` | `"default" \| "danger"` | `"default"` | no | intent modifier; composes with variant for danger×primary, danger×secondary, danger×ghost |
 | `size` | `"xs" \| "sm" \| "md" \| "lg" \| "xl"` | `null` | no | explicit control size override |
 | `sizeRole` | `"chrome" \| "control" \| "prominent"` | `"control"` | no | semantic size offset from inherited presentation |
+| `density` | `ControlDensity \| null` | `null` | no | explicit density override for spacing |
 | `type` | `"button" \| "submit" \| "reset"` | `"button"` | no | HTML button type |
 | `form` | `string \| null` | `null` | no | external form id to associate with |
 | `formaction` | `string \| null` | `null` | no | per-button form submission URL override |
@@ -292,7 +293,8 @@ Loading spinner uses the shared [`Spinner`](./spinner.md) contract with
 ## 9. Svelte Notes
 
 - Uses CSS custom properties (`--poodle-button-fill`, etc.) for the variant system
-- `data-variant`, `data-tone`, `data-size`, `data-icon-only`, `data-loading`, `data-has-leading`, `data-has-trailing` data attributes
+- `data-variant`, `data-tone`, `data-size`, `data-density`, `data-icon-only`, `data-loading`, `data-has-leading`, `data-has-trailing` data attributes
+- `data-density` — resolved density value (`compact`, `default`, or `comfortable`)
 - `data-tone` only emits when tone is not `"default"` (omitted otherwise)
 - `data-loading` always emits (even as `"false"`)
 - `data-has-leading` and `data-has-trailing` emit presence-only (value is truthy or attribute is omitted)
