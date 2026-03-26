@@ -35,12 +35,22 @@ pub(crate) fn render(state: &AppState, _cx: &mut Context<PreviewRoot>) -> Div {
                 .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("CLI grid"), theme))
                 .child(
                     div().flex().items_center().gap(px(16.0))
+                        // Svelte: xs=muted, sm=current, md=accent, lg=current, xl=current
+                        .child(
+                            Spinner::from_spec(
+                                SpinnerSpec::new()
+                                    .with_variant(SpinnerVariant::Grid)
+                                    .with_size(SpinnerSize::Xs)
+                                    .with_tone(SpinnerTone::Muted),
+                                theme,
+                            )
+                        )
                         .child(
                             Spinner::from_spec(
                                 SpinnerSpec::new()
                                     .with_variant(SpinnerVariant::Grid)
                                     .with_size(SpinnerSize::Sm)
-                                    .with_tone(SpinnerTone::Muted),
+                                    .with_tone(SpinnerTone::Current),
                                 theme,
                             )
                         )
@@ -57,7 +67,17 @@ pub(crate) fn render(state: &AppState, _cx: &mut Context<PreviewRoot>) -> Div {
                             Spinner::from_spec(
                                 SpinnerSpec::new()
                                     .with_variant(SpinnerVariant::Grid)
-                                    .with_size(SpinnerSize::Lg),
+                                    .with_size(SpinnerSize::Lg)
+                                    .with_tone(SpinnerTone::Current),
+                                theme,
+                            )
+                        )
+                        .child(
+                            Spinner::from_spec(
+                                SpinnerSpec::new()
+                                    .with_variant(SpinnerVariant::Grid)
+                                    .with_size(SpinnerSize::Xl)
+                                    .with_tone(SpinnerTone::Current),
                                 theme,
                             )
                         )
