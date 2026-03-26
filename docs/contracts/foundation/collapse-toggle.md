@@ -38,6 +38,7 @@ Updated: 2026-03-17
 | `disabled` | `boolean` | `false` | no | suppresses interaction |
 | `size` | `"xs" \| "sm" \| "md" \| "lg" \| "xl"` | `null` | no | explicit control size override; when null, resolves from inherited presentation |
 | `sizeRole` | `"chrome" \| "control" \| "prominent"` | `"chrome"` | no | semantic size offset from inherited presentation |
+| `density` | `ControlDensity \| null` | `null` | no | explicit density override for spacing |
 | `ariaLabel` | `string \| null` | `null` | no | accessible label (defaults to "Collapse"/"Expand") |
 
 ## 4. States
@@ -123,6 +124,7 @@ Updated: 2026-03-17
 ## 9. Svelte Notes
 
 - `data-size` attribute on root reflects the resolved size
+- `data-density` — resolved density value (`compact`, `default`, or `comfortable`)
 - thin wrapper around IconButton with collapse-specific defaults
 - icon rotates based on direction and collapsed state
 

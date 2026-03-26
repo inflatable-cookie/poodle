@@ -49,6 +49,7 @@ Updated: 2026-03-26
 | `onConfirm` | `(() => void \| Promise<void>) \| null` | `null` | no | callback invoked by the built-in confirm button; awaited when it returns a Promise |
 | `size` | `"xs" \| "sm" \| "md" \| "lg" \| "xl"` | `null` | no | explicit control size override; when null, resolves from inherited presentation |
 | `sizeRole` | `"chrome" \| "control" \| "prominent"` | `"control"` | no | semantic size offset from inherited presentation |
+| `density` | `ControlDensity \| null` | `null` | no | explicit density override for spacing |
 | `onCancel` | `(() => void) \| null` | `null` | no | callback invoked by built-in cancel and dismissal paths |
 
 ### Slots
@@ -162,6 +163,7 @@ Size is delegated to the composed Dialog and Button components. The `size` and `
 ## 9. Svelte Notes
 
 - `data-size` passed through to composed Dialog
+- `data-density` — resolved density value (`compact`, `default`, or `comfortable`)
 - Composes `Dialog` component directly; does not replicate Dialog internals
 - `working` state is internal and suppresses both dismiss routes and button reuse
 - Confirm handler awaits `onConfirm` when provided, otherwise dispatches `confirm`

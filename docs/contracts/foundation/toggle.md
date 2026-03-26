@@ -210,7 +210,8 @@ Updated: 2026-03-26
 - Uses native `<button>` with `aria-pressed` attribute
 - CSS custom properties (`--poodle-toggle-fill`, `--poodle-toggle-border`,
   `--poodle-toggle-text`) drive the variant system
-- Data attributes: `data-pressed`, `data-variant`, `data-size`, `data-layout`
+- Data attributes: `data-pressed`, `data-variant`, `data-size`, `data-density`, `data-layout`
+- `data-density` — resolved density value (`compact`, `default`, or `comfortable`)
 - Pressed state override uses direct property values, not custom property
   reassignment
 - Internal state managed when `isPressed` is `null` (uncontrolled mode)

@@ -52,6 +52,7 @@ Updated: 2026-03-15
 | `disabled` | `boolean` | `false` | no | suppresses interaction |
 | `size` | `"xs" \| "sm" \| "md" \| "lg" \| "xl"` | `null` | no | explicit control size override; when null, resolves from inherited presentation |
 | `sizeRole` | `"chrome" \| "control" \| "prominent"` | `"control"` | no | semantic size offset from inherited presentation |
+| `density` | `ControlDensity \| null` | `null` | no | explicit density override for spacing |
 | `ariaLabel` | `string \| null` | `null` | no | accessible label when no title present |
 
 ### Slots
@@ -252,6 +253,7 @@ Updated: 2026-03-15
 ## 9. Svelte Notes
 
 - `data-size` attribute on root reflects the resolved size
+- `data-density` — resolved density value (`compact`, `default`, or `comfortable`)
 - Uses `<Icon name="chevron-down" size="sm" />` for the indicator
 - Module-level `nextCollapsibleId` counter (incremented per instance) generates
   unique ARIA id pairs for trigger/content association

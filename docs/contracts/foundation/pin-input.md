@@ -40,6 +40,7 @@ Updated: 2026-03-15
 | `mask` | `boolean` | `false` | no | when true, cells use `type="password"` to obscure input |
 | `size` | `"xs" \| "sm" \| "md" \| "lg" \| "xl"` | `null` | no | explicit control size override; when null, resolves from inherited presentation |
 | `sizeRole` | `"chrome" \| "control" \| "prominent"` | `"control"` | no | semantic size offset from inherited presentation |
+| `density` | `ControlDensity \| null` | `null` | no | explicit density override for spacing |
 
 ### Controlled And Uncontrolled
 
@@ -172,6 +173,7 @@ Updated: 2026-03-15
 - `mask` prop toggles `type` between `"text"` and `"password"` on all cells
 - Paste handling: distributes pasted string across cells starting from the focused cell
 - `data-size` attribute on root reflects the resolved size for CSS variant styling
+- `data-density` — resolved density value (`compact`, `default`, or `comfortable`)
 
 ## 10. GPUI Notes
 

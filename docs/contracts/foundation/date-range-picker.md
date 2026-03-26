@@ -50,6 +50,7 @@ Updated: 2026-03-15
 | `locale` | `string` | `"en-US"` | no | locale for date formatting |
 | `size` | `"xs" \| "sm" \| "md" \| "lg" \| "xl"` | `null` | no | explicit control size override; when null, resolves from inherited presentation |
 | `sizeRole` | `"chrome" \| "control" \| "prominent"` | `"control"` | no | semantic size offset from inherited presentation |
+| `density` | `ControlDensity \| null` | `null` | no | explicit density override for spacing |
 | `disabled` | `boolean` | `false` | no | disables the trigger |
 | `ariaLabel` | `string \| null` | `null` | no | required when no visible label exists |
 
@@ -241,6 +242,7 @@ DateRangeValue: { start: string | null; end: string | null }
 - Value display formats the range using `locale` prop for localized date strings
 - Placeholder option rendered as `<span>` with secondary text color
 - `data-size` data attribute on root reflects the resolved size
+- `data-density` — resolved density value (`compact`, `default`, or `comfortable`)
 
 ## 10. GPUI Notes
 

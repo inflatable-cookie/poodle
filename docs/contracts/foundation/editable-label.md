@@ -54,6 +54,7 @@ Updated: 2026-03-21
 | `showEditIcon` | `boolean` | `false` | no | show pencil icon on hover/focus |
 | `size` | `"xs" \| "sm" \| "md" \| "lg" \| "xl"` | `null` | no | explicit control size override; when null, resolves from inherited presentation |
 | `sizeRole` | `"chrome" \| "control" \| "prominent"` | `"control"` | no | semantic size offset from inherited presentation |
+| `density` | `ControlDensity \| null` | `null` | no | explicit density override for spacing |
 
 ### Controlled And Uncontrolled
 
@@ -281,6 +282,7 @@ Updated: 2026-03-21
 - `activationMode="programmatic"`: no built-in activation gesture; parent must control entry
 - Replaces former `InlineEditableField` composite (merged)
 - `data-size` attribute on root reflects the resolved size for CSS variant styling
+- `data-density` — resolved density value (`compact`, `default`, or `comfortable`)
 
 ## 10. GPUI Notes
 

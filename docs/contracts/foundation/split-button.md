@@ -52,6 +52,7 @@ Updated: 2026-03-25
 | `tone` | `"default" \| "danger"` | `"default"` | no | intent modifier; composes with variant for danger×primary, danger×secondary, danger×ghost |
 | `size` | `"xs" \| "sm" \| "md" \| "lg" \| "xl"` | `null` | no | explicit control size override |
 | `sizeRole` | `"chrome" \| "control" \| "prominent"` | `"control"` | no | semantic size offset from inherited presentation |
+| `density` | `ControlDensity \| null` | `null` | no | explicit density override for spacing |
 | `type` | `"button" \| "submit" \| "reset"` | `"button"` | no | native button type for the primary action half |
 | `items` | `MenuItem[]` | — | yes | dropdown menu entries |
 | `disabled` | `boolean` | `false` | no | disables entire control |
@@ -323,7 +324,8 @@ Primary-half loading uses the shared [`Spinner`](./spinner.md) primitive with
 ## 9. Svelte Notes
 
 - Uses CSS custom properties (`--poodle-split-fill`, etc.) for the variant system
-- `data-variant`, `data-tone`, `data-size`, `data-open` data attributes on root
+- `data-variant`, `data-tone`, `data-size`, `data-density`, `data-open` data attributes on root
+- `data-density` — resolved density value (`compact`, `default`, or `comfortable`)
 - Menu state managed via internal `$state(false)` boolean
 - Click-outside handler closes menu
 - Menu measures the nearest scrollable boundary and flips upward when needed

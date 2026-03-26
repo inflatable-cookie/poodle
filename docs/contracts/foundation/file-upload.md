@@ -78,6 +78,7 @@ Updated: 2026-03-15
 | `compressionOptions` | `ImageCompressionOptions` | `DEFAULT_COMPRESSION` | no | image compression settings |
 | `size` | `"xs" \| "sm" \| "md" \| "lg" \| "xl"` | `null` | no | explicit control size override; when null, resolves from inherited presentation |
 | `sizeRole` | `"chrome" \| "control" \| "prominent"` | `"control"` | no | semantic size offset from inherited presentation |
+| `density` | `ControlDensity \| null` | `null` | no | explicit density override for spacing |
 
 ### Public Methods
 
@@ -447,6 +448,7 @@ interface ImageCompressionOptions {
 - `clear()` revokes all preview URLs and empties the file list
 - File size formatting: bytes, KB, MB display
 - `data-size` attribute on root reflects the resolved size for CSS variant styling
+- `data-density` — resolved density value (`compact`, `default`, or `comfortable`)
 
 ## 10. GPUI Notes
 
