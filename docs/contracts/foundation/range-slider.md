@@ -45,7 +45,7 @@ Updated: 2026-03-15
 | `max` | `number` | `100` | no | upper bound |
 | `step` | `number` | `1` | no | increment size |
 | `orientation` | `"horizontal" \| "vertical"` | `"horizontal"` | no | layout and interaction axis |
-| `isDisabled` | `boolean` | `false` | no | disables interaction, applies disabled opacity |
+| `disabled` | `boolean` | `false` | no | disables interaction, applies disabled opacity |
 | `ariaLabel` | `string \| null` | `null` | no | base accessible name for the control |
 | `lowerValueText` | `string \| null` | `null` | no | human-readable text for lower thumb (aria-valuetext) |
 | `upperValueText` | `string \| null` | `null` | no | human-readable text for upper thumb (aria-valuetext) |
@@ -74,7 +74,7 @@ Updated: 2026-03-15
 | focus-lower | lower thumb focused | focus ring on lower thumb |
 | focus-upper | upper thumb focused | focus ring on upper thumb |
 | active | a thumb is being dragged or keyboard-adjusted | active interaction state |
-| disabled | `isDisabled=true` | reduced opacity via disabled token |
+| disabled | `disabled=true` | reduced opacity via disabled token |
 
 ### Component States
 
@@ -103,7 +103,7 @@ Updated: 2026-03-15
 - `aria-valuetext`: from lowerValueText on lower input, upperValueText on upper
   input
 - `aria-orientation`: set to match orientation prop on both inputs
-- `disabled`: native disabled attribute when isDisabled on both inputs
+- `disabled`: native disabled attribute when disabled on both inputs
 - Labeling rules: each thumb must be individually focusable and distinguishable
   to assistive technology as lower or upper bound
 
@@ -388,7 +388,7 @@ Updated: 2026-03-15
 
 | Label | Props / Config | Expected Visual |
 |-------|---------------|-----------------|
-| Disabled | `value=[30, 70]`, `min=0`, `max=100`, `isDisabled=true`, `ariaLabel="Disabled range"` | Reduced opacity; thumbs non-interactive; fill visible between 30% and 70% |
+| Disabled | `value=[30, 70]`, `min=0`, `max=100`, `disabled=true`, `ariaLabel="Disabled range"` | Reduced opacity; thumbs non-interactive; fill visible between 30% and 70% |
 
 ## 14. Approval And Adoption Notes
 

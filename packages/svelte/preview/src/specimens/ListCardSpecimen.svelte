@@ -13,7 +13,7 @@
         title="design-system-v2.figma"
         subtitle="Updated by Clay · 2h ago"
         meta="14.2 MB"
-        isInteractive
+        interactive
         on:click={() => (lastClick = "design-system-v2.figma")}
       >
         <svelte:fragment slot="leading"><Icon icon={folder} /></svelte:fragment>
@@ -22,7 +22,7 @@
         title="component-specs.pdf"
         subtitle="Shared with team · Yesterday"
         meta="2.8 MB"
-        isInteractive
+        interactive
         on:click={() => (lastClick = "component-specs.pdf")}
       >
         <svelte:fragment slot="leading"><Icon name="file-text" /></svelte:fragment>
@@ -31,7 +31,7 @@
         title="brand-assets.zip"
         subtitle="Archived"
         meta="48 MB"
-        isDisabled
+        disabled
       >
         <svelte:fragment slot="leading"><Icon icon={layers} /></svelte:fragment>
       </ListCard>
@@ -46,7 +46,7 @@
         subtitle="Uploaded by Jamie · 4h ago"
         meta="3.1 MB"
         leadingShape="rounded-square"
-        isInteractive
+        interactive
         on:click={() => (lastClick = "hero-banner.png")}
       >
         <svelte:fragment slot="leading"><Icon name="image" /></svelte:fragment>
@@ -56,7 +56,7 @@
         subtitle="Screen recording · Today"
         meta="128 MB"
         leadingShape="rounded-square"
-        isInteractive
+        interactive
         on:click={() => (lastClick = "onboarding-flow.mp4")}
       >
         <svelte:fragment slot="leading"><Icon name="play" /></svelte:fragment>
@@ -71,24 +71,24 @@
         title="API integration guide"
         subtitle="Updated yesterday"
         meta="Draft"
-        isInteractive
+        interactive
         on:click={() => (lastClick = "API integration guide")}
       >
         <svelte:fragment slot="leading"><Icon name="file-text" /></svelte:fragment>
         <svelte:fragment slot="badges">
-          <Pill tone="accent" size="xs">New</Pill>
+          <Pill tone="accent" size="md">New</Pill>
         </svelte:fragment>
       </ListCard>
       <ListCard
         title="Q4 planning deck"
         subtitle="Shared with leadership"
-        isInteractive
+        interactive
         on:click={() => (lastClick = "Q4 planning deck")}
       >
         <svelte:fragment slot="leading"><Icon icon={layers} /></svelte:fragment>
         <svelte:fragment slot="badges">
           <Pill appearance="badge" tone="neutral">3</Pill>
-          <Pill tone="caution" size="xs">Review</Pill>
+          <Pill tone="caution" size="md">Review</Pill>
         </svelte:fragment>
       </ListCard>
     </div>
@@ -101,12 +101,12 @@
         title="Design system"
         subtitle="12 contributors"
         leadingShape="rounded-square"
-        isInteractive
+        interactive
         on:click={() => (lastClick = "Design system")}
       >
         <svelte:fragment slot="leading"><Icon icon={folder} /></svelte:fragment>
         <svelte:fragment slot="badges">
-          <Pill tone="positive" size="xs">Active</Pill>
+          <Pill tone="positive" size="md">Active</Pill>
         </svelte:fragment>
         <svelte:fragment slot="footer">
           <ListCardCounter icon="file-text" count={24} tooltip="24 documents" />
@@ -118,7 +118,7 @@
         title="Brand guidelines"
         subtitle="Last updated 2 weeks ago"
         leadingShape="rounded-square"
-        isInteractive
+        interactive
         on:click={() => (lastClick = "Brand guidelines")}
       >
         <svelte:fragment slot="leading"><Icon icon={folder} /></svelte:fragment>
@@ -139,7 +139,7 @@
         leadingShape="rounded-square"
         leadingFill="solid"
         accentColor="#6366f1"
-        isInteractive
+        interactive
         on:click={() => (lastClick = "Design tokens")}
       >
         <svelte:fragment slot="leading"><Icon icon={layers} /></svelte:fragment>
@@ -150,7 +150,7 @@
         leadingShape="rounded-square"
         leadingFill="solid"
         accentColor="#ec4899"
-        isInteractive
+        interactive
         on:click={() => (lastClick = "Components")}
       >
         <svelte:fragment slot="leading"><Icon icon={grid2x2} /></svelte:fragment>
@@ -161,7 +161,7 @@
         leadingShape="rounded-square"
         leadingFill="solid"
         accentColor="#14b8a6"
-        isInteractive
+        interactive
         on:click={() => (lastClick = "Documentation")}
       >
         <svelte:fragment slot="leading"><Icon name="file-text" /></svelte:fragment>
@@ -171,7 +171,7 @@
         subtitle="Uses theme accent"
         leadingShape="rounded-square"
         leadingFill="solid"
-        isInteractive
+        interactive
         on:click={() => (lastClick = "Default accent")}
       >
         <svelte:fragment slot="leading"><Icon icon={folder} /></svelte:fragment>
@@ -196,7 +196,7 @@
           title="Right-click for actions"
           subtitle="Context menu on the whole card"
           meta="12 KB"
-          isInteractive
+          interactive
           on:click={() => (lastClick = "Card clicked")}
         >
           <svelte:fragment slot="leading"><Icon name="file-text" /></svelte:fragment>
@@ -212,8 +212,8 @@
         title="Unpublished draft"
         subtitle="Created yesterday · not yet deployed"
         meta="Draft"
-        isInteractive
-        isNotLive
+        interactive
+        notLive
         on:click={() => (lastClick = "Unpublished draft")}
       >
         <svelte:fragment slot="leading"><Icon name="file-text" /></svelte:fragment>
@@ -221,13 +221,13 @@
       <ListCard
         title="Staging environment"
         subtitle="Pending approval"
-        isInteractive
-        isNotLive
+        interactive
+        notLive
         leadingShape="rounded-square"
       >
         <svelte:fragment slot="leading"><Icon icon={layers} /></svelte:fragment>
         <svelte:fragment slot="badges">
-          <Pill tone="caution" size="xs">Pending</Pill>
+          <Pill tone="caution" size="md">Pending</Pill>
         </svelte:fragment>
       </ListCard>
     </div>
@@ -240,7 +240,7 @@
         title="Free tier plan"
         subtitle="No credit card required"
         sash="Free"
-        isInteractive
+        interactive
         on:click={() => (lastClick = "Free tier plan")}
       >
         <svelte:fragment slot="leading"><Icon icon={layers} /></svelte:fragment>
@@ -253,7 +253,7 @@
         leadingShape="rounded-square"
         leadingFill="solid"
         accentColor="#6366f1"
-        isInteractive
+        interactive
         on:click={() => (lastClick = "Premium integration")}
       >
         <svelte:fragment slot="leading"><Icon icon={grid2x2} /></svelte:fragment>
@@ -263,7 +263,7 @@
         subtitle="Deprecated — migrate by Q2"
         sash="EOL"
         sashColor="#ef4444"
-        isInteractive
+        interactive
         on:click={() => (lastClick = "Legacy connector")}
       >
         <svelte:fragment slot="leading"><Icon name="file-text" /></svelte:fragment>

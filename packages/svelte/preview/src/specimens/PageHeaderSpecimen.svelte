@@ -10,6 +10,16 @@
   </div>
 
   <div class="specimen__group">
+    <Eyebrow>With back link</Eyebrow>
+    <PageHeader
+      title="Media Library"
+      subtitle="Browse, review, and manage uploaded files."
+      backHref="/dashboard"
+      backLabel="Back to dashboard"
+    />
+  </div>
+
+  <div class="specimen__group">
     <Eyebrow>With eyebrow and actions</Eyebrow>
     <PageHeader title="Button" eyebrow="Primitive" subtitle="Primary interactive control for triggering actions.">
       <svelte:fragment slot="actions">
@@ -17,6 +27,11 @@
         <Button size="sm">Edit</Button>
       </svelte:fragment>
     </PageHeader>
+  </div>
+
+  <div class="specimen__group">
+    <Eyebrow>With count</Eyebrow>
+    <PageHeader title="Users" count={128} backHref="/dashboard" backLabel="Back to dashboard" />
   </div>
 
   <div class="specimen__group">

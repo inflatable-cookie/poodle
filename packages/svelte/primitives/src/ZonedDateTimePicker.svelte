@@ -25,7 +25,7 @@
   export let weekStartsOn: CalendarWeekStart = "monday";
   export let locale = "en-US";
   export let timeZoneOptions: TimeZoneOption[] = [];
-  export let isDisabled = false;
+  export let disabled = false;
   export let ariaLabel: string | null = null;
 
   const dispatch = createEventDispatcher<{
@@ -104,7 +104,7 @@
   <button
     type="button"
     class="zoned-date-time-picker__trigger"
-    disabled={isDisabled}
+    disabled={disabled}
     aria-haspopup="dialog"
     aria-expanded={isOpen ? "true" : "false"}
     aria-controls={isOpen ? surfaceId : undefined}
@@ -133,7 +133,7 @@
           visibleMonth={visibleMonth}
           {weekStartsOn}
           {locale}
-          {isDisabled}
+          {disabled}
           ariaLabel={ariaLabel ?? "Date"}
           on:valueChange={(event) => commitValue({ ...currentValue, date: event.detail.value })}
           on:monthChange={(event) => (visibleMonth = event.detail.month)}
@@ -147,7 +147,7 @@
             <TimeField
               id={`${surfaceId}-time`}
               value={currentValue.time}
-              isDisabled={isDisabled}
+              disabled={disabled}
               ariaLabel={ariaLabel ? `${ariaLabel} time` : "Time"}
               on:valueChange={(event) => commitValue({ ...currentValue, time: event.detail.value })}
             />
@@ -161,7 +161,7 @@
               id={`${surfaceId}-timezone`}
               value={currentValue.timeZone}
               options={timeZoneOptions}
-              isDisabled={isDisabled}
+              disabled={disabled}
               ariaLabel={ariaLabel ? `${ariaLabel} time zone` : "Time zone"}
               on:valueChange={(event) => commitValue({ ...currentValue, timeZone: event.detail.value })}
             />

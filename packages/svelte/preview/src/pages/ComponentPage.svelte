@@ -14,7 +14,7 @@
   <header class="component-page__hero">
     <div class="component-page__hero-top">
       <Eyebrow>{entry.tier === "primitive" ? "Primitive" : "Composite"}</Eyebrow>
-      <Pill size="sm">{entry.packageName}</Pill>
+      <Pill size="lg">{entry.packageName}</Pill>
     </div>
     <h1 class="component-page__title">{entry.displayName}</h1>
     <p class="component-page__description">{entry.description}</p>

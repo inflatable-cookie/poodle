@@ -36,7 +36,7 @@ Updated: 2026-03-15
 | `tone` | `SurfaceTone: "panel" \| "canvas" \| "elevated"` | `"panel"` | no | semantic surface background tier |
 | `border` | `SurfaceBorder: "subtle" \| "default" \| "none"` | `"subtle"` | no | shell boundary emphasis level |
 | `padding` | `SpaceScale: "none" \| "sm" \| "md" \| "lg"` | `"md"` | no | interior spacing via scaleToSpace utility |
-| `isElevated` | `boolean` | `false` | no | applies elevated fill and shadow regardless of tone |
+| `elevated` | `boolean` | `false` | no | applies elevated fill and shadow regardless of tone |
 | `asRole` | `"region" \| "group" \| null` | `null` | no | semantic role opt-in |
 | `label` | `string \| null` | `null` | no | accessible label; required when asRole="region" and no visible heading |
 
@@ -58,7 +58,7 @@ Updated: 2026-03-15
 |-------|---------|-----------------|
 | panel (default) | `tone="panel"` | panel-tier background with subtle border |
 | canvas | `tone="canvas"` | canvas-tier background |
-| elevated | `tone="elevated"` or `isElevated=true` | elevated background, elevation shadow |
+| elevated | `tone="elevated"` or `elevated=true` | elevated background, elevation shadow |
 | border-none | `border="none"` | border becomes transparent |
 | border-default | `border="default"` | stronger border using default border color |
 | border-subtle | `border="subtle"` (default) | low-emphasis mixed border |
@@ -148,7 +148,7 @@ No internal state.
 | `--poodle-surface-fill` | `color-mix(in srgb, var(--poodle-color-background-elevated) 96%, var(--poodle-color-background-panel))` |
 | `--poodle-surface-shadow` | `var(--poodle-elevation-surface)` |
 
-### isElevated override — .surface[data-elevated="true"]
+### elevated override — .surface[data-elevated="true"]
 
 | Var | Value |
 |-----|-------|
@@ -185,7 +185,7 @@ utility, providing roomier defaults suited to container-level spacing.
 |-----------|--------|
 | `data-tone` | `tone` prop |
 | `data-border` | `border` prop |
-| `data-elevated` | `isElevated` prop (string "true"/"false") |
+| `data-elevated` | `elevated` prop (string "true"/"false") |
 
 ## 9. Svelte Notes
 
@@ -219,7 +219,7 @@ utility, providing roomier defaults suited to container-level spacing.
 
 - [ ] tone semantics (panel, canvas, elevated) produce matching backgrounds
 - [ ] border semantics (subtle, default, none) match
-- [ ] isElevated override applies elevated fill and shadow
+- [ ] elevated override applies elevated fill and shadow
 - [ ] region/group opt-in meaning matches
 - [ ] decorative surfaces remain accessibility-neutral
 
@@ -262,7 +262,7 @@ utility, providing roomier defaults suited to container-level spacing.
 
 | Label | Props / Config | Expected Visual |
 |-------|---------------|-----------------|
-| Elevated surface | `<Surface tone="elevated" padding="md" border="subtle" isElevated>` with text content | Elevated-tier background with elevation shadow, subtle border, and medium padding; visually lifted above surrounding content |
+| Elevated surface | `<Surface tone="elevated" padding="md" border="subtle" elevated>` with text content | Elevated-tier background with elevation shadow, subtle border, and medium padding; visually lifted above surrounding content |
 
 ### Group: No border
 

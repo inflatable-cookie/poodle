@@ -31,7 +31,7 @@
       id="search-disabled"
       value="locked query"
       ariaLabel="Disabled search"
-      isDisabled
+      disabled
     />
   </div>
 
@@ -41,7 +41,7 @@
       id="search-readonly"
       value="active filter"
       ariaLabel="Read-only search"
-      isReadOnly
+      readOnly
     />
   </div>
 </div>

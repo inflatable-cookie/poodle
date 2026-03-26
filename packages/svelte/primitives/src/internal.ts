@@ -102,7 +102,7 @@ export function getFocusableElements(root: HTMLElement | null): HTMLElement[] {
   ).filter((element) => !element.hasAttribute("hidden") && element.offsetParent !== null);
 }
 
-export function findNextEnabledIndex<T extends { isDisabled?: boolean }>(
+export function findNextEnabledIndex<T extends { disabled?: boolean; isDisabled?: boolean }>(
   items: T[],
   startIndex: number,
   direction: 1 | -1
@@ -118,7 +118,7 @@ export function findNextEnabledIndex<T extends { isDisabled?: boolean }>(
   for (let step = 0; step < count; step += 1) {
     index = (index + direction + count) % count;
 
-    if (!items[index]?.isDisabled) {
+    if (!items[index]?.disabled && !items[index]?.isDisabled) {
       return index;
     }
   }
@@ -126,8 +126,8 @@ export function findNextEnabledIndex<T extends { isDisabled?: boolean }>(
   return startIndex;
 }
 
-export function firstEnabledIndex<T extends { isDisabled?: boolean }>(items: T[]): number {
-  return items.findIndex((item) => !item.isDisabled);
+export function firstEnabledIndex<T extends { disabled?: boolean; isDisabled?: boolean }>(items: T[]): number {
+  return items.findIndex((item) => !item.disabled && !item.isDisabled);
 }
 
 export function menuNavigableItems(items: MenuItem[]): MenuItem[] {

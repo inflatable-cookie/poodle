@@ -11,7 +11,7 @@
     { value: "all", label: "All" },
     { value: "active", label: "Active" },
     { value: "archived", label: "Archived" },
-    { value: "draft", label: "Draft", isDisabled: true },
+    { value: "draft", label: "Draft", disabled: true },
   ];
 
   let view = "grid";
@@ -36,7 +36,7 @@
 
   <div class="specimen__group">
     <Eyebrow>Fully disabled</Eyebrow>
-    <SegmentedControl options={viewOptions} defaultValue="list" ariaLabel="Disabled control" isDisabled />
+    <SegmentedControl options={viewOptions} defaultValue="list" ariaLabel="Disabled control" disabled />
   </div>
 </div>
 

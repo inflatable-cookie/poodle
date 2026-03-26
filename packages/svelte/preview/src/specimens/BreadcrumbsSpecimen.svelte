@@ -5,7 +5,7 @@
   const basicItems: BreadcrumbItem[] = [
     { value: "home", label: "Home" },
     { value: "projects", label: "Projects" },
-    { value: "poodle", label: "Poodle", isCurrent: true },
+    { value: "poodle", label: "Poodle", current: true },
   ];
 
   const deepItems: BreadcrumbItem[] = [
@@ -14,7 +14,7 @@
     { value: "projects", label: "Projects" },
     { value: "poodle", label: "Poodle Design System" },
     { value: "primitives", label: "Primitives" },
-    { value: "button", label: "Button", isCurrent: true },
+    { value: "button", label: "Button", current: true },
   ];
 
   let lastNav = "";

@@ -69,7 +69,7 @@ Updated: 2026-03-16
 | `swatches` | `string[]` | `[]` | no | preset hex color values |
 | `showInput` | `boolean` | `true` | no | whether to show the inline hex text input |
 | `showAlpha` | `boolean` | `false` | no | whether to show alpha slider and alpha channel inputs |
-| `isDisabled` | `boolean` | `false` | no | disables all interaction |
+| `disabled` | `boolean` | `false` | no | disables all interaction |
 | `ariaLabel` | `string` | `"Color picker"` | no | accessible label for the root element |
 | `open` | `boolean \| null` | `null` | no | controlled open state; `null` means uncontrolled |
 | `defaultOpen` | `boolean` | `false` | no | initial open state when uncontrolled |
@@ -90,7 +90,7 @@ Updated: 2026-03-16
 |-------|---------|-----------------|
 | default | initial render (closed) | trigger shows value color, optional hex input |
 | open | click trigger or `defaultOpen` | surface popover appears below trigger |
-| disabled | `isDisabled=true` | reduced opacity, no pointer events |
+| disabled | `disabled=true` | reduced opacity, no pointer events |
 | gradient dragging | pointerdown on gradient pad | thumb tracks pointer, S/V update live |
 | swatch active | swatch matches current value | swatch has primary-colored border |
 | swatch hovered | pointer over swatch | swatch scales up |
@@ -360,7 +360,7 @@ Updated: 2026-03-16
 - [ ] `swatches` prop as array of hex strings matches
 - [ ] `showInput` conditional rendering matches
 - [ ] `showAlpha` conditional rendering matches
-- [ ] `isDisabled` opacity and pointer-events behavior matches
+- [ ] `disabled` opacity and pointer-events behavior matches
 - [ ] `open` / `defaultOpen` controlled/uncontrolled pattern matches
 - [ ] `defaultMode` initial input mode matches
 - [ ] `change` event payload `{ value: string }` matches
@@ -439,7 +439,7 @@ Updated: 2026-03-16
 
 | Label | Props / Config | Expected Visual |
 |-------|---------------|-----------------|
-| Disabled | `value="#22c55e"`, `isDisabled` | Color picker with reduced opacity, no pointer events |
+| Disabled | `value="#22c55e"`, `disabled` | Color picker with reduced opacity, no pointer events |
 
 ## 14. Approval And Adoption Notes
 

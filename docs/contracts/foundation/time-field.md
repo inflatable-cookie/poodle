@@ -36,7 +36,7 @@ Updated: 2026-03-15
 | `min` | `string \| null` | `null` | no | earliest allowed time |
 | `max` | `string \| null` | `null` | no | latest allowed time |
 | `step` | `number` | `60` | no | step increment in seconds |
-| `isDisabled` | `boolean` | `false` | no | disables editing and interaction |
+| `disabled` | `boolean` | `false` | no | disables editing and interaction |
 | `ariaLabel` | `string \| null` | `null` | no | required when no external label exists |
 | `describedBy` | `string \| null` | `null` | no | aria-describedby target |
 
@@ -55,7 +55,7 @@ Updated: 2026-03-15
 | empty | no value set | input shows platform placeholder |
 | populated | value is set | time value displayed |
 | focus | input receives focus | focus ring via outline |
-| disabled | `isDisabled=true` | reduced opacity, non-interactive |
+| disabled | `disabled=true` | reduced opacity, non-interactive |
 
 ### Component States
 
@@ -77,7 +77,7 @@ Updated: 2026-03-15
 - Role: native `<input type="time">` provides built-in accessibility
 - Required attributes: accessible name from external label or `ariaLabel`
 - Optional attributes: `aria-describedby` from `describedBy`
-- `disabled` attribute set when `isDisabled`
+- `disabled` attribute set when `disabled`
 - `min`, `max`, `step` attributes set on native input when provided
 
 ### Keyboard
@@ -211,7 +211,7 @@ Updated: 2026-03-15
 
 | Label | Props / Config | Expected Visual |
 |-------|---------------|-----------------|
-| Disabled | `defaultValue="12:00"`, `isDisabled` | Time input showing 12:00, reduced opacity, non-interactive |
+| Disabled | `defaultValue="12:00"`, `disabled` | Time input showing 12:00, reduced opacity, non-interactive |
 
 ## 14. Approval And Adoption Notes
 

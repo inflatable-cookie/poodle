@@ -4,14 +4,15 @@
   import Icon from "./Icon.svelte";
 
   export let id: string | undefined = undefined;
-  export let isChecked = false;
+  export let checked = false;
   export let defaultChecked = false;
-  export let isMixed = false;
-  export let isDisabled = false;
-  export let isReadOnly = false;
+  export let mixed = false;
+  export let disabled = false;
+  export let readOnly = false;
   export let label: string | null = null;
   export let ariaLabel: string | null = null;
   export let describedBy: string | null = null;
+  export let selectedColor: string | null = null;
 
   const dispatch = createEventDispatcher<{
     checkedChange: { checked: boolean };
@@ -20,15 +21,16 @@
   let input: HTMLInputElement | null = null;
   let uncontrolledChecked = defaultChecked;
 
-  $: currentChecked = isChecked ?? uncontrolledChecked;
+  $: currentChecked = checked ?? uncontrolledChecked;
+  $: checkboxStyles = selectedColor ? `--poodle-checkbox-selected-color: ${selectedColor}` : undefined;
   $: if (input) {
-    input.indeterminate = isMixed;
+    input.indeterminate = mixed;
   }
 
   function handleChange(event: Event): void {
     const nextChecked = (event.currentTarget as HTMLInputElement).checked;
 
-    if (isReadOnly) {
+    if (readOnly) {
       (event.currentTarget as HTMLInputElement).checked = currentChecked;
       return;
     }
@@ -38,21 +40,21 @@
   }
 </script>
 
-<label class="checkbox" data-disabled={isDisabled}>
+<label class="checkbox" data-disabled={disabled} style={checkboxStyles}>
   <input
     bind:this={input}
     {id}
     class="checkbox__control"
     type="checkbox"
     checked={currentChecked}
-    disabled={isDisabled}
+    disabled={disabled}
     aria-label={label ? undefined : ariaLabel ?? undefined}
     aria-describedby={describedBy ?? undefined}
-    aria-readonly={isReadOnly ? "true" : undefined}
+    aria-readonly={readOnly ? "true" : undefined}
     on:change={handleChange}
   />
   <span class="checkbox__indicator" aria-hidden="true">
-    {#if isMixed}
+    {#if mixed}
       <span class="checkbox__mark"><Icon name="minus" size="sm" /></span>
     {:else if currentChecked}
       <span class="checkbox__mark"><Icon name="check" size="sm" /></span>
@@ -65,6 +67,7 @@
 
 <style>
   .checkbox {
+    --poodle-checkbox-selected-color: var(--poodle-color-accent-base);
     display: inline-flex;
     align-items: center;
     gap: var(--poodle-space-inline-sm);
@@ -97,8 +100,8 @@
 
   .checkbox__control:checked + .checkbox__indicator,
   .checkbox__control:indeterminate + .checkbox__indicator {
-    border-color: var(--poodle-color-accent-base);
-    background: var(--poodle-color-accent-base);
+    border-color: var(--poodle-checkbox-selected-color);
+    background: var(--poodle-checkbox-selected-color);
   }
 
   .checkbox__control:focus-visible + .checkbox__indicator {

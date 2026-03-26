@@ -62,14 +62,14 @@
     <Button
       variant="ghost"
       on:click={handleCancel}
-      isDisabled={submitting}
+      disabled={submitting}
     >
       {cancelLabel}
     </Button>
     <Button
       variant="primary"
       on:click={handleSubmit}
-      isDisabled={submitting}
+      disabled={submitting}
     >
       {submitting ? "Submitting\u2026" : submitLabel}
     </Button>

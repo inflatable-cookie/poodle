@@ -48,7 +48,7 @@ Updated: 2026-03-15
 | `placeholder` | `string` | `"Select date range"` | no | shown when no range selected |
 | `weekStartsOn` | `"sunday" \| "monday"` | `"monday"` | no | first day of the week |
 | `locale` | `string` | `"en-US"` | no | locale for date formatting |
-| `isDisabled` | `boolean` | `false` | no | disables the trigger |
+| `disabled` | `boolean` | `false` | no | disables the trigger |
 | `ariaLabel` | `string \| null` | `null` | no | required when no visible label exists |
 
 ### Type Definitions
@@ -74,7 +74,7 @@ DateRangeValue: { start: string | null; end: string | null }
 | start selected | start date chosen, end pending | start date displayed, overlay remains open |
 | complete range | both start and end committed | formatted range displayed, overlay auto-closes |
 | open | trigger clicked or keyboard activated | surface appears below trigger |
-| disabled | `isDisabled=true` | reduced opacity, non-interactive, cursor: not-allowed |
+| disabled | `disabled=true` | reduced opacity, non-interactive, cursor: not-allowed |
 
 ### Component States
 
@@ -292,7 +292,7 @@ All preview apps must render the following specimens identically.
 
 | Label | Props/Config | Expected Visual |
 |-------|-------------|-----------------|
-| Disabled | `isDisabled=true`, `ariaLabel="Disabled range picker"` | Trigger button with default placeholder, reduced opacity, cursor not-allowed, non-interactive |
+| Disabled | `disabled=true`, `ariaLabel="Disabled range picker"` | Trigger button with default placeholder, reduced opacity, cursor not-allowed, non-interactive |
 
 ## 14. Approval And Adoption Notes
 

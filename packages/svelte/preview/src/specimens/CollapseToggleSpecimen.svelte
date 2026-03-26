@@ -14,7 +14,7 @@
       <div class="specimen__labeled">
         <CollapseToggle
           direction="left"
-          isCollapsed={collapsedLeft}
+          collapsed={collapsedLeft}
           on:toggle={(e) => (collapsedLeft = e.detail.isCollapsed)}
         />
         <span>Left {collapsedLeft ? "(collapsed)" : "(expanded)"}</span>
@@ -22,7 +22,7 @@
       <div class="specimen__labeled">
         <CollapseToggle
           direction="right"
-          isCollapsed={collapsedRight}
+          collapsed={collapsedRight}
           on:toggle={(e) => (collapsedRight = e.detail.isCollapsed)}
         />
         <span>Right {collapsedRight ? "(collapsed)" : "(expanded)"}</span>
@@ -30,7 +30,7 @@
       <div class="specimen__labeled">
         <CollapseToggle
           direction="up"
-          isCollapsed={collapsedUp}
+          collapsed={collapsedUp}
           on:toggle={(e) => (collapsedUp = e.detail.isCollapsed)}
         />
         <span>Up {collapsedUp ? "(collapsed)" : "(expanded)"}</span>
@@ -38,7 +38,7 @@
       <div class="specimen__labeled">
         <CollapseToggle
           direction="down"
-          isCollapsed={collapsedDown}
+          collapsed={collapsedDown}
           on:toggle={(e) => (collapsedDown = e.detail.isCollapsed)}
         />
         <span>Down {collapsedDown ? "(collapsed)" : "(expanded)"}</span>
@@ -49,8 +49,8 @@
   <div class="specimen__group">
     <Eyebrow>Disabled</Eyebrow>
     <div class="specimen__row">
-      <CollapseToggle direction="left" isDisabled />
-      <CollapseToggle direction="right" isDisabled />
+      <CollapseToggle direction="left" disabled />
+      <CollapseToggle direction="right" disabled />
     </div>
   </div>
 </div>

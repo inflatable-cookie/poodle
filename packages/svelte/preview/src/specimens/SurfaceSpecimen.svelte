@@ -19,7 +19,7 @@
 
   <div class="specimen__group">
     <Eyebrow>Elevated tone</Eyebrow>
-    <Surface tone="elevated" padding="md" border="subtle" isElevated>
+    <Surface tone="elevated" padding="md" border="subtle" elevated>
       <p>Elevated surface with shadow for overlays and cards.</p>
     </Surface>
   </div>

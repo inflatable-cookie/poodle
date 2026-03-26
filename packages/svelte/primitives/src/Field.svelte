@@ -9,8 +9,8 @@
   export let error: string | null = null;
   export let pendingMessage: string | null = null;
   export let validationState: ValidationState = "none";
-  export let isRequired = false;
-  export let optionalLabel: string | null = "Optional";
+  export let required = false;
+  export let optionalLabel: string | null = null;
   export let span: number | "full" | null = null;
   export let gridArea: string | null = null;
 
@@ -58,7 +58,7 @@
   <div class="field__header">
     <label class="field__label" for={id}>
       {label}
-      {#if isRequired}
+      {#if required}
         <span class="field__required" aria-hidden="true">*</span>
       {/if}
       {#if hint}
@@ -84,7 +84,7 @@
         </span>
       {/if}
     </label>
-    {#if !isRequired && optionalLabel}
+    {#if !required && optionalLabel}
       <span class="field__optional">{optionalLabel}</span>
     {/if}
   </div>

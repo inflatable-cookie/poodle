@@ -4,7 +4,7 @@
   export let value: string | null = null;
   export let defaultValue = "";
   export let length = 6;
-  export let isDisabled = false;
+  export let disabled = false;
   export let ariaLabel: string | null = null;
   export let mask = false;
 
@@ -51,7 +51,7 @@
       pattern="[0-9]*"
       maxlength="1"
       value={digit}
-      disabled={isDisabled}
+      disabled={disabled}
       aria-label={`Digit ${index + 1}`}
       on:input={(event) => updateValue(index, (event.currentTarget as HTMLInputElement).value)}
       on:keydown={(event) => {

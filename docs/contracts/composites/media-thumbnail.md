@@ -1,7 +1,7 @@
 # MediaThumbnail
 
 Status: contract
-Updated: 2026-03-22
+Updated: 2026-03-25
 
 ## 1. Purpose
 
@@ -58,7 +58,7 @@ type AspectRatio = "square" | "landscape" | "portrait" | "video";
 | Frame | yes | aspect-ratio constrained preview area |
 | Placeholder | no | fallback icon when no slot content and state is ready |
 | Play Indicator | no | play/music icon overlay for audio/video kinds |
-| State Display | yes (when not ready) | title and optional message for state |
+| State Display | yes (when not ready) | title, optional message, and loading spinner when applicable |
 | Badge | no | positioned overlay label (top-right) |
 | Caption | no | title and meta below frame (hidden in compact mode) |
 
@@ -92,7 +92,7 @@ No component-owned events.
 | State | Trigger | Expected Result |
 |-------|---------|-----------------|
 | ready | `state="ready"` | slot content or placeholder icon visible |
-| loading | `state="loading"` | state display with "Loading preview" title |
+| loading | `state="loading"` | state display with shared grid spinner and "Loading preview" title |
 | error | `state="error"` | state display with "Preview unavailable" title |
 | empty | `state="empty"` | state display with "No preview" title |
 
@@ -191,6 +191,11 @@ When `stateTitle` is null, the component uses these defaults:
 | background | `linear-gradient(180deg, transparent, color-mix(in srgb, var(--poodle-color-background-panel) 46%, transparent)), color-mix(in srgb, var(--poodle-color-background-surface) 78%, transparent)` |
 | width | `100%` |
 | height | `100%` |
+
+When `state="loading"`, the state display prepends the shared
+[`Spinner`](../foundation/spinner.md) primitive with `variant="grid"`,
+`tone="accent"`, and size `md` in default presentation or `sm` in compact
+presentation.
 
 #### State Display Compact
 
@@ -301,4 +306,4 @@ None.
 
 | Label | Props/Config | Expected Visual |
 |-------|-------------|-----------------|
-| Loading | `kind="image"`, `state="loading"`, `aspectRatio="square"` | square thumbnail frame showing loading indicator |
+| Loading | `kind="image"`, `state="loading"`, `aspectRatio="square"` | square thumbnail frame showing grid spinner, loading title, and optional message |

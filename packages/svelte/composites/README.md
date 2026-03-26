@@ -28,6 +28,7 @@ and data components.
 - `FormDialog`
 - `FormLayout`
 - `ListCard`
+- `ListContainer`
 - `LogList`
 - `MarkdownEditor`
 - `MediaPicker`
@@ -45,7 +46,6 @@ and data components.
 - `ResizeHandle`
 - `ReorderableList`
 - `SelectionSummary`
-- `SlugField`
 - `SplitView`
 - `StatusBar`
 - `ToastStack`

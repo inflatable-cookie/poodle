@@ -6,7 +6,7 @@
     { value: "components", label: "Components" },
     { value: "tokens", label: "Tokens" },
     { value: "guides", label: "Guides" },
-    { value: "changelog", label: "Changelog", isDisabled: true },
+    { value: "changelog", label: "Changelog", disabled: true },
   ];
 
   let active = "components";

@@ -41,7 +41,7 @@ Updated: 2026-03-15
 | `defaultValue` | `string \| null` | `null` | no | uncontrolled initial timezone |
 | `placeholder` | `string \| null` | `"Select time zone"` | no | shown when no value selected |
 | `options` | `TimeZoneOption[]` | `defaultTimeZoneOptions()` | no | timezone option list |
-| `isDisabled` | `boolean` | `false` | no | disables the select |
+| `disabled` | `boolean` | `false` | no | disables the select |
 | `ariaLabel` | `string \| null` | `null` | no | required when no visible label exists |
 | `describedBy` | `string \| null` | `null` | no | aria-describedby target |
 | `name` | `string \| undefined` | `undefined` | no | form field name |
@@ -49,7 +49,7 @@ Updated: 2026-03-15
 ### Type Definitions
 
 ```
-TimeZoneOption: { value: string; label: string; isDisabled?: boolean }
+TimeZoneOption: { value: string; label: string; disabled?: boolean }
 ```
 
 ### Controlled And Uncontrolled
@@ -67,7 +67,7 @@ TimeZoneOption: { value: string; label: string; isDisabled?: boolean }
 | placeholder | no value selected, placeholder prop set | placeholder text in secondary color |
 | selected | value matches an option | timezone label displayed in primary color |
 | focus-within | select receives focus | border-color and box-shadow change on shell |
-| disabled | `isDisabled=true` | reduced opacity on shell, non-interactive |
+| disabled | `disabled=true` | reduced opacity on shell, non-interactive |
 
 ### Component States
 
@@ -89,7 +89,7 @@ TimeZoneOption: { value: string; label: string; isDisabled?: boolean }
 - Role: native `<select>` element provides built-in accessibility
 - Required attributes: accessible name from external label or `ariaLabel`
 - Optional attributes: `aria-describedby` from `describedBy`
-- `disabled` attribute set on select when `isDisabled`
+- `disabled` attribute set on select when `disabled`
 - Labeling rules: placeholder text is not the accessible name
 
 ### Keyboard
@@ -256,7 +256,7 @@ TimeZoneOption: { value: string; label: string; isDisabled?: boolean }
 
 | Label | Props / Config | Expected Visual |
 |-------|---------------|-----------------|
-| Disabled | `isDisabled` | Time zone select with reduced opacity, non-interactive |
+| Disabled | `disabled` | Time zone select with reduced opacity, non-interactive |
 
 ## 14. Approval And Adoption Notes
 

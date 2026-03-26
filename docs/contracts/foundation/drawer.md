@@ -30,7 +30,7 @@ Updated: 2026-03-15
 | Part | Required | Description | Token Targets |
 |------|----------|-------------|---------------|
 | Root | yes | fixed overlay positioning host | overlay z-index, flex alignment |
-| Backdrop | no | modal background block (only when isModal) | overlay background color |
+| Backdrop | no | modal background block (only when modal) | overlay background color |
 | Surface | yes | edge-anchored container | surface background, border, elevation, padding |
 | Header | no | title and description region | typography, spacing |
 | Body | yes | primary content area (default slot) | caller-owned |
@@ -45,7 +45,7 @@ Updated: 2026-03-15
 | `open` | `boolean \| null` | `null` | no | controlled open state |
 | `defaultOpen` | `boolean` | `false` | no | uncontrolled initial state |
 | `edge` | `DrawerEdge: "left" \| "right" \| "top" \| "bottom"` | `"right"` | no | anchored edge |
-| `isModal` | `boolean` | `true` | no | whether background becomes inert |
+| `modal` | `boolean` | `true` | no | whether background becomes inert |
 | `title` | `string \| null` | `null` | no | visible title when present |
 | `description` | `string \| null` | `null` | no | visible supporting text |
 | `dismissOnEscape` | `boolean` | `true` | no | escape dismissal |
@@ -69,7 +69,7 @@ DrawerEdge: "left" | "right" | "top" | "bottom"
 
 - controlled: `open` plus `openChange` event
 - uncontrolled: `defaultOpen`
-- modality is governed by `isModal`
+- modality is governed by `modal`
 
 ## 4. States
 
@@ -79,8 +79,8 @@ DrawerEdge: "left" | "right" | "top" | "bottom"
 |-------|---------|-----------------|
 | closed | default | drawer hidden, pointer-events: none on root |
 | open | open state true | drawer visible, surface and backdrop become interactive |
-| modal | `isModal=true` | backdrop visible, focus trapped, body scroll locked |
-| non-modal | `isModal=false` | no backdrop, no focus trap, no scroll lock |
+| modal | `modal=true` | backdrop visible, focus trapped, body scroll locked |
+| non-modal | `modal=false` | no backdrop, no focus trap, no scroll lock |
 
 ### Component States
 
@@ -117,10 +117,10 @@ modal vs non-modal posture.
 
 - focus entry: opening may place focus inside the drawer or on the drawer
   surface depending on content
-- focus trap: required when `isModal=true`; disallowed when `isModal=false`
+- focus trap: required when `modal=true`; disallowed when `modal=false`
 - focus restoration: explicit close returns focus to the invoking control or
   reasonable fallback
-- body scroll lock: applied only when `isModal=true`
+- body scroll lock: applied only when `modal=true`
 - live-region behavior: none beyond dialog-like announcement of the drawer's
   title and content context
 - GPUI-native accessibility mapping notes: GPUI must preserve the difference
@@ -239,7 +239,7 @@ modal vs non-modal posture.
 | Attribute | Source |
 |-----------|--------|
 | `data-edge` | `edge` prop |
-| `data-modal` | `isModal` prop |
+| `data-modal` | `modal` prop |
 
 ## 9. Svelte Notes
 
@@ -264,7 +264,7 @@ modal vs non-modal posture.
 ### Tier 1: Strict Parity
 
 - [ ] drawer naming, description, and modality semantics match
-- [ ] focus trapping behavior matches based on `isModal`
+- [ ] focus trapping behavior matches based on `modal`
 - [ ] escape, backdrop, and restoration behavior match
 - [ ] body scroll lock applies only in modal posture
 

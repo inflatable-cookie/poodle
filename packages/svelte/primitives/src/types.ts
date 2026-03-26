@@ -3,11 +3,25 @@ import type { IconNodes } from "./icon-registry";
 export type IconProp = IconNodes | string;
 
 export type ValidationState = "none" | "invalid" | "valid" | "pending";
+export type InputValidationStatus = "idle" | "validating" | "valid" | "invalid";
+
+export type ValidationResult = {
+  valid: boolean;
+  message?: string;
+  suggestion?: string;
+};
+
+export type InputValidator = (
+  value: string,
+  context?: unknown,
+) => ValidationResult | Promise<ValidationResult>;
 
 export type CalendarWeekStart = "sunday" | "monday";
 export type CollapseDirection = "left" | "right" | "up" | "down";
 export type SpaceScale = "none" | "sm" | "md" | "lg";
-export type ControlSize = "sm" | "md" | "lg";
+export type ControlSize = "xs" | "sm" | "md" | "lg" | "xl";
+export type ControlDensity = "compact" | "default" | "comfortable";
+export type SemanticControlSizeRole = "chrome" | "control" | "prominent";
 export type ButtonVariant = "primary" | "secondary" | "ghost";
 export type ButtonTone = "default" | "danger";
 export type LayoutAlign = "start" | "center" | "end" | "stretch";
@@ -27,7 +41,7 @@ export type StatusTone =
 export type ToggleVariant = "primary" | "secondary" | "ghost";
 export type PillTone = "neutral" | "success" | "danger";
 export type PillAppearance = "solid" | "subtle" | "badge";
-export type PillSize = "xxs" | "xs" | "sm";
+export type PillSize = "sm" | "md" | "lg";
 export type PillFont = "normal" | "mono";
 export type Orientation = "vertical" | "horizontal";
 export type TabActivationMode = "automatic" | "manual";
@@ -63,34 +77,39 @@ export type SkeletonPreset =
   | "list-item"
   | "detail-section"
   | "avatar-line";
+export type SpinnerVariant = "ring" | "grid";
+export type SpinnerSize = "sm" | "md" | "lg";
+export type SpinnerTone = "current" | "accent" | "muted";
 
 export interface AccordionItem {
   value: string;
   label: string;
   description?: string;
-  isDisabled?: boolean;
+  disabled?: boolean;
 }
 
 export interface SegmentedControlOption {
   value: string;
   label: string;
   ariaLabel?: string;
-  isDisabled?: boolean;
+  disabled?: boolean;
 }
 
 export interface ToggleGroupOption {
   value: string;
   label: string;
   ariaLabel?: string;
-  isDisabled?: boolean;
+  disabled?: boolean;
 }
 
 export interface TabItem {
   value: string;
   label: string;
   icon?: IconProp;
-  isDisabled?: boolean;
-  isClosable?: boolean;
+  disabled?: boolean;
+  closable?: boolean;
+  count?: number;
+  separator?: boolean;
 }
 
 export type TabVariant = "underline" | "card" | "pill" | "strip";
@@ -103,7 +122,7 @@ export type TabStripItem = TabItem;
 export interface RadioGroupOption {
   value: string;
   label: string;
-  isDisabled?: boolean;
+  disabled?: boolean;
 }
 
 export interface SelectOption {
@@ -123,8 +142,8 @@ export type SelectItems = SelectOption[] | SelectOptionGroup[];
 export interface MenuItem {
   value: string;
   label: string;
-  isDisabled?: boolean;
-  isChecked?: boolean;
+  disabled?: boolean;
+  checked?: boolean;
   shortcutLabel?: string;
   kind?: "action" | "checkbox" | "radio" | "separator";
 }
@@ -132,21 +151,21 @@ export interface MenuItem {
 export interface NavigationMenuItem {
   value: string;
   label: string;
-  isDisabled?: boolean;
+  disabled?: boolean;
   description?: string;
 }
 
 export interface MenubarItem {
   value: string;
   label: string;
-  isDisabled?: boolean;
+  disabled?: boolean;
   items: MenuItem[];
 }
 
 export interface TimeZoneOption {
   value: string;
   label: string;
-  isDisabled?: boolean;
+  disabled?: boolean;
 }
 
 export interface TableColumn {
@@ -166,7 +185,7 @@ export interface ComboboxOption {
   value: string;
   label: string;
   description?: string;
-  isDisabled?: boolean;
+  disabled?: boolean;
 }
 
 export interface DateRangeValue {
@@ -191,6 +210,7 @@ export interface FileUploadItem {
   status: "pending" | "uploading" | "complete" | "error";
   error?: string;
   previewUrl?: string | null;
+  originalFile?: File;
 }
 
 export interface ZonedDateTimeValue {
@@ -211,7 +231,7 @@ export type BulkAction = {
 export type SortField = {
   value: string;
   label: string;
-  isDisabled?: boolean;
+  disabled?: boolean;
 };
 
 export type ActiveSort = {
@@ -225,5 +245,5 @@ export type BreadcrumbItem = {
   value: string;
   label: string;
   href?: string;
-  isCurrent?: boolean;
+  current?: boolean;
 };

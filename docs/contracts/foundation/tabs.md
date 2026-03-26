@@ -11,8 +11,9 @@ Updated: 2026-03-15
   active content panel
 - In scope: tablist semantics, tab activation, tab-panel relationship,
   orientation, automatic vs manual activation, three visual variants
-  (underline/card/pill/strip), reorderable tabs, closable tabs, actions slot
-- Out of scope: docking, overflow menus, tab persistence
+  (underline/card/pill/strip), reorderable tabs, closable tabs, tab counts,
+  optional visual separators, actions slot, lightweight URL query sync
+- Out of scope: docking, overflow menus
 
 ## 2. Anatomy
 
@@ -23,7 +24,7 @@ Updated: 2026-03-15
   │     │     ├── [Tab .poodle-tabs__tab]  role="tab"  <button>
   │     │     │     ├── [Icon] (optional, Icon component size="sm")
   │     │     │     └── [Label .poodle-tabs__label]  <span>
-  │     │     └── [Close .poodle-tabs__close] (optional, when isClosable)
+  │     │     └── [Close .poodle-tabs__close] (optional, when closable)
   │     └── [Actions .poodle-tabs__actions] (optional slot)
   └── [Panel .poodle-tabs__panel]  role="tabpanel" (optional, when slot content exists)
 ```
@@ -35,7 +36,7 @@ Updated: 2026-03-15
 | Item | yes | wrapper for tab + close button | variant-dependent border/bg |
 | Tab | yes | selectable button | text, background, focus ring |
 | Label | yes | text content | whitespace, min-width |
-| Close | no | close button (when isClosable) | icon color, hover bg |
+| Close | no | close button (when closable) | icon color, hover bg |
 | Actions | no | trailing slot | margin-left auto |
 | Panel | no | content region (when slot provided) | border, background, padding |
 
@@ -51,9 +52,10 @@ Updated: 2026-03-15
 | `variant` | `"underline" \| "card" \| "pill" \| "strip"` | `"underline"` | no | visual variant |
 | `orientation` | `"horizontal" \| "vertical"` | `"horizontal"` | no | navigation axis |
 | `activationMode` | `"automatic" \| "manual"` | `"automatic"` | no | whether focus changes selection |
-| `isReorderable` | `boolean` | `false` | no | enables drag-and-drop and keyboard reorder |
+| `reorderable` | `boolean` | `false` | no | enables drag-and-drop and keyboard reorder |
 | `ariaLabel` | `string \| null` | `null` | no | accessible name for the tablist |
 | `showTooltips` | `boolean` | `false` | no | shows tooltips on tab hover |
+| `historyKey` | `string \| null` | `null` | no | syncs the active tab to a URL query param with replaceState |
 
 ### TabItem Type
 
@@ -62,8 +64,10 @@ Updated: 2026-03-15
 | `value` | `string` | — | yes | unique identifier |
 | `label` | `string` | — | yes | visible text |
 | `icon` | `string \| null` | `null` | no | icon registry identifier, renders Icon size="sm" |
-| `isDisabled` | `boolean` | `false` | no | prevents activation |
-| `isClosable` | `boolean` | `false` | no | shows close button |
+| `disabled` | `boolean` | `false` | no | prevents activation |
+| `closable` | `boolean` | `false` | no | shows close button |
+| `count` | `number` | - | no | optional count badge rendered after the label |
+| `separator` | `boolean` | `false` | no | draws a visual separator before this tab |
 
 ### Controlled And Uncontrolled
 
@@ -71,6 +75,7 @@ Updated: 2026-03-15
 - uncontrolled: `defaultValue` — internal state tracks selection
 - fallback: first non-disabled tab is selected when neither value nor defaultValue is set
 - `activationMode` changes whether focus movement commits selection
+- `historyKey` mirrors the current tab into `?{historyKey}=...` and restores it on back/forward navigation
 
 ## 4. States
 
@@ -81,7 +86,7 @@ Updated: 2026-03-15
 | idle | non-selected tab | `color: text-secondary` |
 | selected | active value match | variant-specific bg + `color: text-primary` |
 | focus | keyboard focus | `outline: border-width-focus solid accent-focusRing`, `outline-offset: 0.125rem` |
-| disabled | `isDisabled=true` | `opacity: state-opacity-disabled`, `cursor: not-allowed` |
+| disabled | `disabled=true` | `opacity: state-opacity-disabled`, `cursor: not-allowed` |
 | drag-source | dragging this tab | `opacity: 0.4` |
 | drop-target | dragging over this tab | `box-shadow: inset 0 0 0 0.125rem accent-base`, `border-radius: radius-control` |
 
@@ -118,8 +123,8 @@ Updated: 2026-03-15
 | `Home` | moves focus to first enabled tab |
 | `End` | moves focus to last enabled tab |
 | `Enter` or `Space` | activates focused tab in manual mode |
-| `Alt+Arrow` | reorders tab (when isReorderable) |
-| `Delete` | closes tab (when isClosable) |
+| `Alt+Arrow` | reorders tab (when reorderable) |
+| `Delete` | closes tab (when closable) |
 | `Tab` | moves between the tablist and active panel |
 
 ### Focus And Announcement

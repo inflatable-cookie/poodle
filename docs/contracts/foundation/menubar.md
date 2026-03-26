@@ -59,15 +59,15 @@ MenubarItem: {
   value: string;
   label: string;
   items: MenuItem[];
-  isDisabled?: boolean;
+  disabled?: boolean;
 }
 
 MenuItem: {
   value: string;
   label: string;
   kind?: "action" | "checkbox" | "radio" | "separator";
-  isDisabled?: boolean;
-  isChecked?: boolean;
+  disabled?: boolean;
+  checked?: boolean;
   shortcutLabel?: string;
 }
 ```
@@ -91,9 +91,9 @@ MenuItem: {
 | menu open | value matches a trigger | that trigger shows open styling, overlay visible |
 | trigger hover | pointer over trigger while a menu is open | switches to that menu |
 | highlight | hover or keyboard focus on submenu item | item background highlight |
-| checked | item model marks `isChecked` | visible checked indicator |
-| disabled trigger | `isDisabled` on MenubarItem | trigger muted, non-interactive |
-| disabled item | `isDisabled` on MenuItem | item muted, reduced opacity |
+| checked | item model marks `checked` | visible checked indicator |
+| disabled trigger | `disabled` on MenubarItem | trigger muted, non-interactive |
+| disabled item | `disabled` on MenuItem | item muted, reduced opacity |
 
 ### Component States
 

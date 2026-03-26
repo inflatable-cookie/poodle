@@ -33,7 +33,7 @@
 
   <div class="specimen__group">
     <Eyebrow>Disabled</Eyebrow>
-    <RangeSlider value={[30, 70]} min={0} max={100} isDisabled ariaLabel="Disabled range" />
+    <RangeSlider value={[30, 70]} min={0} max={100} disabled ariaLabel="Disabled range" />
   </div>
 </div>
 

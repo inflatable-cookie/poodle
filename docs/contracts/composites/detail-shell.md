@@ -1,7 +1,7 @@
 # DetailShell
 
 Status: contract
-Updated: 2026-03-22
+Updated: 2026-03-25
 
 ## 1. Purpose
 
@@ -74,7 +74,7 @@ No component-owned events.
 |-------|---------|-----------------|
 | ready | `state="ready"` | body slot content visible |
 | empty | `state="empty"` | state region replaces body |
-| loading | `state="loading"` | state region replaces body |
+| loading | `state="loading"` | state region replaces body and shows shared grid spinner before loading copy |
 | error | `state="error"` | state region replaces body |
 
 The state region renders with `data-state` attribute reflecting the current
@@ -109,6 +109,8 @@ state value.
 - Body and state regions: grid with `gap: --poodle-space-stack-lg`
 - State region: padded with doubled panel spacing, subtle background,
   `border-radius: --poodle-radius-surface`
+- Loading fallback prepends the shared [`Spinner`](../foundation/spinner.md)
+  primitive with `variant="grid"`, `size="md"`, and `tone="accent"`
 
 ## 10. Token Usage
 
@@ -136,7 +138,7 @@ state value.
 
 | Label | Props/Config | Expected Visual |
 |-------|-------------|-----------------|
-| Loading state | `title="Loading"`, `state="loading"` | shell with loading/progress indicator replacing body content |
+| Loading state | `title="Loading"`, `state="loading"` | shell with grid spinner and loading copy replacing body content |
 
 ### Error State
 

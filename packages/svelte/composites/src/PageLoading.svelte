@@ -1,8 +1,8 @@
 <script lang="ts">
   import { createEventDispatcher } from "svelte";
-  import { Progress } from "@poodle/svelte-primitives";
+  import { Progress, Spinner } from "@poodle/svelte-primitives";
 
-  export let isVisible = true;
+  export let visible = true;
   export let value: number | null = null;
   export let max: number = 100;
   export let message: string | null = null;
@@ -14,7 +14,7 @@
   $: isIndeterminate = value === null;
 </script>
 
-{#if isVisible}
+{#if visible}
   <div
     class="page-loading"
     role="status"
@@ -23,24 +23,7 @@
   >
     <div class="page-loading__backdrop" aria-hidden="true"></div>
     <div class="page-loading__card">
-      <div class="page-loading__spinner" aria-hidden="true">
-        <svg viewBox="0 0 36 36" fill="none">
-          <circle
-            cx="18" cy="18" r="15"
-            stroke="currentColor"
-            stroke-width="2.5"
-            opacity="0.2"
-          />
-          <circle
-            class="page-loading__spinner-arc"
-            cx="18" cy="18" r="15"
-            stroke="currentColor"
-            stroke-width="2.5"
-            stroke-linecap="round"
-            stroke-dasharray="70 30"
-          />
-        </svg>
-      </div>
+      <Spinner className="page-loading__spinner" variant="ring" size="lg" tone="accent" />
 
       {#if !isIndeterminate}
         <div class="page-loading__progress">
@@ -95,28 +78,6 @@
     border-radius: var(--poodle-radius-surface);
     background: var(--poodle-color-background-elevated);
     box-shadow: var(--poodle-elevation-overlay);
-  }
-
-  .page-loading__spinner {
-    width: 2.5rem;
-    height: 2.5rem;
-    color: var(--poodle-color-accent-base);
-  }
-
-  .page-loading__spinner svg {
-    width: 100%;
-    height: 100%;
-  }
-
-  .page-loading__spinner-arc {
-    transform-origin: center;
-    animation: page-loading-spin 1s linear infinite;
-  }
-
-  @keyframes page-loading-spin {
-    to {
-      transform: rotate(360deg);
-    }
   }
 
   .page-loading__progress {

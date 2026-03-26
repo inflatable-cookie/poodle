@@ -32,7 +32,7 @@
   const queryInputId = "command-palette-query";
   const statusId = "command-palette-status";
 
-  $: enabledItems = items.filter((item) => !item.isDisabled);
+  $: enabledItems = items.filter((item) => !item.disabled);
   $: if (open && !wasOpen) {
     previousFocusedElement = document.activeElement instanceof HTMLElement ? document.activeElement : null;
     previousHtmlOverflow = document.documentElement.style.overflow;

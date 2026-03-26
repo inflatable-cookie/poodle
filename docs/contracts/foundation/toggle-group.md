@@ -38,7 +38,7 @@ Updated: 2026-03-15
 | `defaultValue` | `string \| string[] \| null` | `null` | no | uncontrolled initial value(s) |
 | `options` | `ToggleGroupOption[]` | none | yes | item list |
 | `selectionMode` | `"single" \| "multiple"` | `"single"` | no | selection behavior |
-| `isDisabled` | `boolean` | `false` | no | disables whole group |
+| `disabled` | `boolean` | `false` | no | disables whole group |
 | `ariaLabel` | `string \| null` | `null` | no | required when no visible label exists |
 
 ### ToggleGroupOption
@@ -47,7 +47,7 @@ Updated: 2026-03-15
 |-------|------|----------|-------|
 | `value` | `string` | yes | option value |
 | `label` | `string` | yes | visible label text |
-| `isDisabled` | `boolean` | no | disables individual item |
+| `disabled` | `boolean` | no | disables individual item |
 | `ariaLabel` | `string` | no | accessible name override |
 
 ### Controlled And Uncontrolled
@@ -66,8 +66,8 @@ Updated: 2026-03-15
 | unselected | default | neutral item styling |
 | selected | value matches item | accent-tinted background, accent-tinted border |
 | focus | keyboard focus on item | focus ring |
-| disabled (group) | `isDisabled=true` | all items muted, non-interactive |
-| disabled (item) | option `isDisabled=true` | individual item muted, non-interactive |
+| disabled (group) | `disabled=true` | all items muted, non-interactive |
+| disabled (item) | option `disabled=true` | individual item muted, non-interactive |
 
 ### Component States
 

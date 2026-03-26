@@ -42,7 +42,7 @@ Updated: 2026-03-15
 | `max` | `number` | `100` | no | upper bound |
 | `step` | `number` | `1` | no | increment size |
 | `orientation` | `"horizontal" \| "vertical"` | `"horizontal"` | no | layout and interaction axis |
-| `isDisabled` | `boolean` | `false` | no | disables interaction, applies disabled opacity |
+| `disabled` | `boolean` | `false` | no | disables interaction, applies disabled opacity |
 | `ariaLabel` | `string \| null` | `null` | no | accessible name; required when no visible label exists |
 | `valueText` | `string \| null` | `null` | no | human-readable value text for assistive technology (aria-valuetext) |
 
@@ -66,7 +66,7 @@ Updated: 2026-03-15
 | default | resting | thumb on track at current value position, fill shows completed range |
 | focus | thumb receives focus-visible | focus ring shadow on thumb |
 | active | thumb is being dragged or keyboard-adjusted | active interaction state |
-| disabled | `isDisabled=true` | reduced opacity via disabled token |
+| disabled | `disabled=true` | reduced opacity via disabled token |
 
 ### Component States
 
@@ -91,7 +91,7 @@ Updated: 2026-03-15
 - `aria-valuenow`: from value prop
 - `aria-valuetext`: from valueText prop when provided
 - `aria-orientation`: NOT currently set on the range input; orientation is conveyed via `data-orientation` on the root element only
-- `disabled`: native disabled attribute when isDisabled
+- `disabled`: native disabled attribute when disabled
 - Labeling rules: visible label or programmatic ariaLabel required
 
 ### Keyboard
@@ -376,7 +376,7 @@ One disabled slider:
 
 | Label | Min | Max | Value | Props |
 |-------|-----|-----|-------|-------|
-| Disabled | 0 | 100 | 40 | `isDisabled: true` |
+| Disabled | 0 | 100 | 40 | `disabled: true` |
 
 ## 14. Approval And Adoption Notes
 

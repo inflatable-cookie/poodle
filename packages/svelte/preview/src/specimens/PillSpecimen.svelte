@@ -19,6 +19,7 @@
     <div class="specimen__row">
       <Pill size="sm">Small</Pill>
       <Pill size="md">Medium</Pill>
+      <Pill size="lg">Large</Pill>
     </div>
   </div>
 
@@ -34,9 +35,9 @@
   <div class="specimen__group">
     <Eyebrow>Muted</Eyebrow>
     <div class="specimen__row">
-      <Pill isMuted>Muted neutral</Pill>
-      <Pill isMuted tone="success">Muted success</Pill>
-      <Pill isMuted tone="danger">Muted danger</Pill>
+      <Pill muted>Muted neutral</Pill>
+      <Pill muted tone="success">Muted success</Pill>
+      <Pill muted tone="danger">Muted danger</Pill>
     </div>
   </div>
 

@@ -47,7 +47,7 @@ Updated: 2026-03-15
 | `description` | `string \| null` | `null` | no | supplementary description |
 | `href` | `string \| null` | `null` | no | link destination; renders as `<a>` when provided |
 | `badge` | `string \| null` | `null` | no | inline badge text |
-| `isDisabled` | `boolean` | `false` | no | disables interaction |
+| `disabled` | `boolean` | `false` | no | disables interaction |
 | `ariaLabel` | `string \| null` | `null` | no | accessible name |
 
 ### Slots
@@ -69,7 +69,7 @@ Updated: 2026-03-15
 | default | resting | subtle border, surface background, arrow hidden |
 | hover | pointer enters | accent-tinted border, elevated background, arrow visible |
 | focus | keyboard focus | accent focus ring |
-| disabled | `isDisabled=true` | reduced opacity, not-allowed cursor |
+| disabled | `disabled=true` | reduced opacity, not-allowed cursor |
 
 ## 5. Events
 
@@ -291,7 +291,7 @@ Updated: 2026-03-15
 | Getting Started | `title`, `description`, icon slot (home), click handler | NavCard with icon, title, description, arrow hidden until hover |
 | Components | `title`, `description`, `badge="New"`, icon slot (layers), click handler | NavCard with icon, title, inline badge, description |
 | Tokens | `title`, `description`, icon slot (sliders-horizontal), click handler | NavCard with icon, title, description |
-| API Reference | `title`, `description`, `isDisabled`, icon slot (file-text) | Disabled NavCard at reduced opacity with not-allowed cursor |
+| API Reference | `title`, `description`, `disabled`, icon slot (file-text) | Disabled NavCard at reduced opacity with not-allowed cursor |
 
 Cards arranged in a 2-column NavCardGrid.
 

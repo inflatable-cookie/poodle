@@ -49,7 +49,7 @@ Updated: 2026-03-15
 | `defaultOpen` | `boolean` | `false` | no | uncontrolled initial open state |
 | `title` | `string \| null` | `null` | no | visible heading text |
 | `description` | `string \| null` | `null` | no | visible supporting description |
-| `isDisabled` | `boolean` | `false` | no | suppresses interaction |
+| `disabled` | `boolean` | `false` | no | suppresses interaction |
 | `ariaLabel` | `string \| null` | `null` | no | accessible label when no title present |
 
 ### Slots
@@ -72,7 +72,7 @@ Updated: 2026-03-15
 |-------|---------|-----------------|
 | closed | default | content hidden, indicator points down, gap collapses to 0 |
 | open | `open=true` or toggled | content visible, indicator rotated 180deg, gap active |
-| disabled | `isDisabled=true` | reduced opacity on root, cursor not-allowed on trigger |
+| disabled | `disabled=true` | reduced opacity on root, cursor not-allowed on trigger |
 | focus | keyboard focus on trigger | focus ring visible |
 
 ### Component States

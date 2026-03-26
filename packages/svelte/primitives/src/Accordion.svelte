@@ -13,7 +13,7 @@
   export let value: string | string[] | null = null;
   export let defaultValue: string | string[] | null = null;
   export let selectionMode: "single" | "multiple" = "single";
-  export let isCollapsible = true;
+  export let collapsible = true;
   export let ariaLabel: string | null = null;
 
   const dispatch = createEventDispatcher<{
@@ -40,7 +40,7 @@
         ? openValues.filter((valueItem) => valueItem !== itemValue)
         : [...openValues, itemValue];
     } else if (currentlyOpen) {
-      nextValue = isCollapsible ? null : itemValue;
+      nextValue = collapsible ? null : itemValue;
     } else {
       nextValue = itemValue;
     }
@@ -65,7 +65,7 @@
           type="button"
           class="accordion__trigger"
           id={`poodle-accordion-trigger-${accordionId}-${item.value}`}
-          disabled={item.isDisabled === true}
+          disabled={item.disabled === true}
           aria-expanded={openValues.includes(item.value) ? "true" : "false"}
           aria-controls={`poodle-accordion-panel-${accordionId}-${item.value}`}
           on:click={() => toggle(item.value)}

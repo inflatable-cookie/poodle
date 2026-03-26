@@ -5,9 +5,9 @@
 
   import type { CollapseDirection } from "./types";
 
-  export let isCollapsed = false;
+  export let collapsed = false;
   export let direction: CollapseDirection = "left";
-  export let isDisabled = false;
+  export let disabled = false;
   export let ariaLabel: string | null = null;
 
   const dispatch = createEventDispatcher<{
@@ -19,25 +19,25 @@
   )[direction];
 
   $: iconName = (() => {
-    const dir = isCollapsed ? expandDirection : direction;
+    const dir = collapsed ? expandDirection : direction;
     return `chevron-${dir}` as const;
   })();
 
-  $: label = ariaLabel ?? (isCollapsed ? "Expand" : "Collapse");
+  $: label = ariaLabel ?? (collapsed ? "Expand" : "Collapse");
 
   function handleClick(): void {
-    if (isDisabled) return;
-    dispatch("toggle", { isCollapsed: !isCollapsed });
+    if (disabled) return;
+    dispatch("toggle", { isCollapsed: !collapsed });
   }
 </script>
 
 <button
   type="button"
   class="collapse-toggle"
-  data-collapsed={isCollapsed || undefined}
+  data-collapsed={collapsed || undefined}
   data-direction={direction}
-  disabled={isDisabled}
-  aria-expanded={!isCollapsed}
+  disabled={disabled}
+  aria-expanded={!collapsed}
   aria-label={label}
   on:click={handleClick}
 >

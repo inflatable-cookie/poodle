@@ -147,7 +147,7 @@
         {#each catalogEntries as entry}
           <Toggle
             className="docs-section-card"
-            isPressed={false}
+            pressed={false}
             layout="stack"
             variant="ghost"
             ariaLabel={`Open ${entry.title}`}

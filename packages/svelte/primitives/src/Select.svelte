@@ -9,7 +9,7 @@
   export let defaultValue: string | null = null;
   export let placeholder: string | null = null;
   export let options: SelectItems = [];
-  export let isDisabled = false;
+  export let disabled = false;
   export let ariaLabel: string | null = null;
   export let describedBy: string | null = null;
   export let name: string | undefined = undefined;
@@ -42,7 +42,7 @@
     {name}
     class="select__control"
     value={currentValue}
-    disabled={isDisabled}
+    disabled={disabled}
     aria-label={ariaLabel ?? undefined}
     aria-describedby={describedBy ?? undefined}
     on:change={handleChange}

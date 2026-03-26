@@ -1,7 +1,7 @@
 <script lang="ts">
   export let value: number | null = null;
   export let max = 100;
-  export let isIndeterminate = false;
+  export let indeterminate = false;
   export let ariaLabel: string | null = null;
   export let valueText: string | null = null;
 
@@ -9,22 +9,22 @@
   $: safeValue = value === null ? null : Math.min(Math.max(value, 0), safeMax);
   $: percentage = safeValue === null ? 0 : safeValue / safeMax;
   $: computedValueText =
-    !isIndeterminate && safeValue !== null ? `${Math.round(percentage * 100)}%` : null;
+    !indeterminate && safeValue !== null ? `${Math.round(percentage * 100)}%` : null;
 </script>
 
 <div
   class="progress"
-  data-indeterminate={isIndeterminate}
+  data-indeterminate={indeterminate}
   role="progressbar"
   aria-label={ariaLabel ?? undefined}
-  aria-valuemin={isIndeterminate ? undefined : 0}
-  aria-valuemax={isIndeterminate ? undefined : safeMax}
-  aria-valuenow={isIndeterminate || safeValue === null ? undefined : safeValue}
+  aria-valuemin={indeterminate ? undefined : 0}
+  aria-valuemax={indeterminate ? undefined : safeMax}
+  aria-valuenow={indeterminate || safeValue === null ? undefined : safeValue}
   aria-valuetext={valueText ?? computedValueText ?? undefined}
 >
   <span
     class="progress__indicator"
-    style={isIndeterminate ? undefined : `transform: scaleX(${percentage});`}
+    style={indeterminate ? undefined : `transform: scaleX(${percentage});`}
   ></span>
 </div>
 

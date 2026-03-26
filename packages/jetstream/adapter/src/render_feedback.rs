@@ -1,6 +1,6 @@
 //! RenderComponent implementations for feedback, display, and informational primitives.
 //!
-//! g08.007: ProgressSpec, BadgeSpec, StatusIndicatorSpec, SkeletonSpec,
+//! g08.007: ProgressSpec, BadgeSpec, SpinnerSpec, StatusIndicatorSpec, SkeletonSpec,
 //! MeterSpec, RatingSpec, CodeSpec, EyebrowSpec, PillSpec, TimeAgoSpec,
 //! SplitButtonSpec, ColorPickerSpec, FileUploadSpec, DurationInputSpec,
 //! TimeZoneSelectSpec, ZonedDateTimePickerSpec, CalendarSpec, RangeCalendarSpec,
@@ -11,7 +11,7 @@ use poodle_primitives::{
     BadgeSpec, CalendarSpec, CodeSpec, ColorPickerSpec, DatePickerSpec, DateRangePickerSpec,
     DateTimePickerSpec, DateTimeRangePickerSpec, DurationInputSpec, EyebrowSpec, FileUploadSpec,
     MeterSpec, PillSpec, ProgressSpec, RangeCalendarSpec, RatingSpec, SkeletonSpec,
-    SplitButtonSpec, StatusIndicatorSpec, TimeAgoSpec, TimeZoneSelectSpec,
+    SpinnerSpec, SplitButtonSpec, StatusIndicatorSpec, TimeAgoSpec, TimeZoneSelectSpec,
     ZonedDateTimePickerSpec,
 };
 use poodle_style::StyleDescriptor;
@@ -44,6 +44,20 @@ impl RenderComponent<BadgeSpec> for JetstreamAdapter {
         mapped.visuals.background = Some(JetstreamColor::from(c));
 
         JetstreamNodeHandle::new("badge", "BadgeSpec", WidgetKind::Label, mapped)
+    }
+}
+
+impl RenderComponent<SpinnerSpec> for JetstreamAdapter {
+    type Target = JetstreamTarget;
+    fn render(&self, spec: &SpinnerSpec, style: &StyleDescriptor, theme: &dyn ThemeProvider) -> JetstreamNodeHandle {
+        let mut mapped = map_style(style);
+
+        if let Some(color_token) = spec.tone_color_token() {
+            let c = theme.resolve_color(color_token);
+            mapped.visuals.icon_color = Some(JetstreamColor::from(c));
+        }
+
+        JetstreamNodeHandle::new("spinner", "SpinnerSpec", WidgetKind::Panel, mapped)
     }
 }
 
@@ -409,6 +423,7 @@ mod tests {
 
     #[test] fn progress() { assert_eq!(a().render(&ProgressSpec::new(), &s(), &t()).widget_kind, WidgetKind::ProgressBar); }
     #[test] fn badge() { assert_eq!(a().render(&BadgeSpec::new(), &s(), &t()).widget_kind, WidgetKind::Label); }
+    #[test] fn spinner() { assert_eq!(a().render(&SpinnerSpec::new(), &s(), &t()).spec_type, "SpinnerSpec"); }
     #[test] fn status_indicator() { assert_eq!(a().render(&StatusIndicatorSpec::new(), &s(), &t()).widget_kind, WidgetKind::Panel); }
     #[test] fn skeleton() { assert_eq!(a().render(&SkeletonSpec::new(), &s(), &t()).spec_type, "SkeletonSpec"); }
     #[test] fn meter() { assert_eq!(a().render(&MeterSpec::new(), &s(), &t()).widget_kind, WidgetKind::ProgressBar); }

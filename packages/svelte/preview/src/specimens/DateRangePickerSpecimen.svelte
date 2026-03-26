@@ -26,7 +26,7 @@
 
   <div class="specimen__group">
     <Eyebrow>Disabled</Eyebrow>
-    <DateRangePicker isDisabled ariaLabel="Disabled range picker" />
+    <DateRangePicker disabled ariaLabel="Disabled range picker" />
   </div>
 </div>
 

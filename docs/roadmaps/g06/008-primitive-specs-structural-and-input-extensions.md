@@ -21,7 +21,7 @@ in the Svelte layer but lack Rust contract equivalents.
 | `PinInputSpec` | length, value, is_masked, is_disabled | border_token, focus_ring_color_token, is_complete() |
 | `RangeSliderSpec` | low, high, min, max, step, orientation | range_fill_token, track_fill_token, normalized_low/high() |
 | `ToolbarSpec` | alignment, has_separator | border_token, gap_token |
-| `TriStateSwitchSpec` | state (CheckState), label, is_disabled | track_fill_token, aria_checked() |
+| `TriStateSwitchSpec` | state (CheckState), label, per-state labels, per-state colors, is_disabled | track_fill_token, aria_checked() |
 
 ## Running Total
 

@@ -1,4 +1,6 @@
 <script lang="ts">
+  import { Spinner } from "@poodle/svelte-primitives";
+
   import type { BrowseState } from "./types";
 
   export let title: string | null = null;
@@ -29,6 +31,11 @@
       {#if $$slots.state}
         <slot name="state" />
       {:else}
+        {#if state === "loading"}
+          <span class="detail-shell__spinner" aria-hidden="true">
+            <Spinner variant="grid" size="md" tone="accent" />
+          </span>
+        {/if}
         <strong>{stateTitle ?? "Detail state"}</strong>
         {#if stateMessage}
           <p>{stateMessage}</p>
@@ -55,6 +62,12 @@
     border: 0.0625rem solid transparent;
     border-radius: var(--poodle-radius-surface);
     background: color-mix(in srgb, var(--poodle-color-background-panel) 96%, var(--poodle-color-background-elevated));
+  }
+
+  .detail-shell__spinner {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
   }
 
   .detail-shell__state strong,

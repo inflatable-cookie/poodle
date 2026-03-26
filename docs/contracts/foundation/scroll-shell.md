@@ -38,9 +38,9 @@ Updated: 2026-03-15
 |------|------|---------|----------|-------|
 | `direction` | `ScrollDirection: "vertical" \| "horizontal" \| "both"` | `"vertical"` | no | owned scroll axis |
 | `padding` | `"none" \| "sm" \| "md"` | `"none"` | no | viewport interior spacing via scaleToSpace utility |
-| `asRole` | `"region" \| "group" \| null` | `null` | no | semantic opt-in; defaults to "region" when isFocusable is true |
-| `label` | `string \| null` | `null` | no | accessible label; defaults to "Scrollable content" when isFocusable is true and no label provided |
-| `isFocusable` | `boolean` | `false` | no | adds viewport to tab order for keyboard scrolling |
+| `asRole` | `"region" \| "group" \| null` | `null` | no | semantic opt-in; defaults to "region" when focusable is true |
+| `label` | `string \| null` | `null` | no | accessible label; defaults to "Scrollable content" when focusable is true and no label provided |
+| `focusable` | `boolean` | `false` | no | adds viewport to tab order for keyboard scrolling |
 
 ### Slots
 
@@ -60,7 +60,7 @@ Updated: 2026-03-15
 | State | Trigger | Expected Result |
 |-------|---------|-----------------|
 | default | resting | neutral scrolling shell, content visible |
-| focus | `isFocusable=true` and viewport receives keyboard focus | visible focus ring on viewport |
+| focus | `focusable=true` and viewport receives keyboard focus | visible focus ring on viewport |
 | overflowed | content exceeds viewport on owned axis | native scrollbar appears, content scrollable |
 
 ### Component States
@@ -78,11 +78,11 @@ model in this baseline contract.
 
 ### Semantics
 
-- Role: none by default; defaults to `"region"` when `isFocusable=true`
+- Role: none by default; defaults to `"region"` when `focusable=true`
   (unless `asRole` explicitly overrides); `"region"` or `"group"` by explicit
   `asRole` opt-in
 - Required attributes:
-  - `aria-label` defaults to `"Scrollable content"` when `isFocusable=true`
+  - `aria-label` defaults to `"Scrollable content"` when `focusable=true`
     and no `label` prop provided
   - `aria-label` from `label` prop when provided
 - Optional attributes: `aria-describedby` for scroll instructions
@@ -93,7 +93,7 @@ model in this baseline contract.
 
 | Key | Behavior |
 |-----|----------|
-| `Tab` | reaches the viewport only when `isFocusable=true` |
+| `Tab` | reaches the viewport only when `focusable=true` |
 | `Arrow Up/Down` | scroll vertically when viewport is focused (direction includes vertical) |
 | `Arrow Left/Right` | scroll horizontally when viewport is focused (direction includes horizontal) |
 | `Page Up/Page Down` | scroll larger increments when viewport is focused |
@@ -101,7 +101,7 @@ model in this baseline contract.
 
 ### Focus And Announcement
 
-- focus entry: viewport enters tab order only when `isFocusable=true`
+- focus entry: viewport enters tab order only when `focusable=true`
   (tabindex=0)
 - focus exit: focus moves to children or out of the shell without trap behavior
 - live-region behavior: none by default
@@ -189,9 +189,9 @@ Applied when direction is `"horizontal"` or `"both"`:
 
 | Condition | Attributes |
 |-----------|------------|
-| `isFocusable=true` | `tabindex="0"` |
-| `isFocusable=true` (default role) | `role="region"` |
-| `isFocusable=true` (default label) | `aria-label="Scrollable content"` |
+| `focusable=true` | `tabindex="0"` |
+| `focusable=true` (default role) | `role="region"` |
+| `focusable=true` (default label) | `aria-label="Scrollable content"` |
 | `asRole` provided | `role="{asRole}"` (overrides default) |
 | `label` provided | `aria-label="{label}"` (overrides default) |
 
@@ -206,7 +206,7 @@ Applied when direction is `"horizontal"` or `"both"`:
   ensuring content does not collapse
 - padding is applied as inline style on the viewport via shared `scaleToSpace`
   utility
-- `isFocusable=true` adds `tabindex="0"` to viewport, and defaults role to
+- `focusable=true` adds `tabindex="0"` to viewport, and defaults role to
   `"region"` and aria-label to `"Scrollable content"` (both overridable via
   props)
 - `scroll` event is forwarded from the viewport element
@@ -232,7 +232,7 @@ Applied when direction is `"horizontal"` or `"both"`:
 ### Tier 1: Strict Parity
 
 - [ ] scroll-axis ownership matches (vertical, horizontal, both)
-- [ ] focusability rules match (isFocusable adds to tab order)
+- [ ] focusability rules match (focusable adds to tab order)
 - [ ] keyboard scrolling behavior matches when viewport is focused
 - [ ] named-region semantics match (default role/label when focusable)
 - [ ] scroll event forwarding matches

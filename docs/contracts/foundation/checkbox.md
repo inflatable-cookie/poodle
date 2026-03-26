@@ -1,7 +1,7 @@
 # Checkbox
 
 Status: detailed contract
-Updated: 2026-03-15
+Updated: 2026-03-24
 
 ## 1. Purpose
 
@@ -40,23 +40,26 @@ Updated: 2026-03-15
 | Prop | Type | Default | Required | Notes |
 |------|------|---------|----------|-------|
 | `id` | `string \| undefined` | `undefined` | no | element id for external label association |
-| `isChecked` | `boolean` | `false` | no | controlled checked state; when provided, component is controlled |
+| `checked` | `boolean` | `false` | no | controlled checked state; when provided, component is controlled |
 | `defaultChecked` | `boolean` | `false` | no | uncontrolled initial checked state |
-| `isMixed` | `boolean` | `false` | no | sets indeterminate visual and assistive state; controlled only |
-| `isDisabled` | `boolean` | `false` | no | disables interaction, applies disabled opacity |
-| `isReadOnly` | `boolean` | `false` | no | allows focus and reading but reverts any change attempt |
+| `mixed` | `boolean` | `false` | no | sets indeterminate visual and assistive state; controlled only |
+| `disabled` | `boolean` | `false` | no | disables interaction, applies disabled opacity |
+| `readOnly` | `boolean` | `false` | no | allows focus and reading but reverts any change attempt |
 | `label` | `string \| null` | `null` | no | visible label text |
 | `ariaLabel` | `string \| null` | `null` | no | accessible name; required when no visible label exists |
 | `describedBy` | `string \| null` | `null` | no | aria-describedby target id |
+| `selectedColor` | `string \| null` | `null` | no | optional selected-state color override used for the checked and mixed indicator fill/border |
 
 ### Controlled And Uncontrolled
 
-- controlled: `isChecked` plus `checkedChange` event handler
+- controlled: `checked` plus `checkedChange` event handler
 - uncontrolled: `defaultChecked` sets the initial state; component owns its own
   state thereafter
-- `isMixed` is controlled-only and sets the indeterminate property on the native
+- `mixed` is controlled-only and sets the indeterminate property on the native
   input via JavaScript; the next user toggle resolves the state to
   checked/unchecked
+- `selectedColor` maps to a local CSS custom property on the root label and
+  affects only the checked and mixed state visuals for that checkbox instance
 
 ## 4. States
 
@@ -65,11 +68,12 @@ Updated: 2026-03-15
 | State | Trigger | Expected Result |
 |-------|---------|-----------------|
 | unchecked | default | empty indicator with default border |
-| checked | `isChecked=true` or user toggle | check mark visible, indicator filled with accent |
-| mixed | `isMixed=true` | mixed glyph visible, indicator filled with accent |
+| checked | `checked=true` or user toggle | check mark visible, indicator filled with accent |
+| mixed | `mixed=true` | mixed glyph visible, indicator filled with accent |
+| custom selected color | `selectedColor` set while checked or mixed | checked/mixed indicator border and fill use the provided local selected color |
 | focus | native input receives focus-visible | focus ring outline on indicator |
-| disabled | `isDisabled=true` | reduced opacity, cursor not-allowed |
-| readOnly | `isReadOnly=true` | default cursor, change reverted on toggle attempt |
+| disabled | `disabled=true` | reduced opacity, cursor not-allowed |
+| readOnly | `readOnly=true` | default cursor, change reverted on toggle attempt |
 
 ### Component States
 
@@ -90,9 +94,9 @@ Updated: 2026-03-15
 - `id`: from prop, used for external `<label for>` association
 - `aria-label`: from ariaLabel prop; required when no visible label exists
 - `aria-describedby`: from describedBy prop
-- `aria-checked`: `"mixed"` when isMixed is true (set via indeterminate property)
-- `disabled`: native disabled attribute when isDisabled
-- `aria-readonly`: set when isReadOnly
+- `aria-checked`: `"mixed"` when `mixed` is true (set via indeterminate property)
+- `disabled`: native disabled attribute when `disabled`
+- `aria-readonly`: set when `readOnly`
 - Labeling rules: visible label or programmatic ariaLabel required; the root
   `<label>` element wraps the control so clicking the label toggles the checkbox
 
@@ -141,6 +145,7 @@ Updated: 2026-03-15
 | `gap` | `var(--poodle-space-inline-sm)` |
 | `color` | `var(--poodle-color-text-primary)` |
 | `cursor` | `pointer` |
+| `--poodle-checkbox-selected-color` | `var(--poodle-color-accent-base)` |
 
 ### Root disabled `[data-disabled="true"]`
 
@@ -175,15 +180,15 @@ Updated: 2026-03-15
 
 | Property | Value |
 |----------|-------|
-| `border-color` | `var(--poodle-color-accent-base)` |
-| `background` | `var(--poodle-color-accent-base)` |
+| `border-color` | `var(--poodle-checkbox-selected-color)` |
+| `background` | `var(--poodle-checkbox-selected-color)` |
 
 ### Indicator indeterminate `:indeterminate + .checkbox__indicator`
 
 | Property | Value |
 |----------|-------|
-| `border-color` | `var(--poodle-color-accent-base)` |
-| `background` | `var(--poodle-color-accent-base)` |
+| `border-color` | `var(--poodle-checkbox-selected-color)` |
+| `background` | `var(--poodle-checkbox-selected-color)` |
 
 ### Indicator focus `:focus-visible + .checkbox__indicator`
 
@@ -220,7 +225,7 @@ Updated: 2026-03-15
 - The root element is a `<label>` to associate the click target with the hidden
   input
 - `indeterminate` is a DOM property (not an attribute) and must be set via
-  JavaScript: `inputElement.indeterminate = isMixed`
+  JavaScript: `inputElement.indeterminate = mixed`
 - ReadOnly behavior: listen for the `change` event on the native input and
   immediately revert the checked state back to the controlled value, preventing
   the toggle from taking effect
@@ -292,10 +297,10 @@ Four state examples in a vertical stack with 12px gap:
 
 | Label | State | Props |
 |-------|-------|-------|
-| Disabled unchecked | unchecked | `isDisabled: true` |
-| Disabled checked | checked | `isDisabled: true` |
+| Disabled unchecked | unchecked | `disabled: true` |
+| Disabled checked | checked | `disabled: true` |
 | Mixed / indeterminate | mixed | `checked: "mixed"` |
-| Read-only checked | checked | `isReadOnly: true` |
+| Read-only checked | checked | `readOnly: true` |
 
 ## 14. Approval And Adoption Notes
 

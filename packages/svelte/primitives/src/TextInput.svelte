@@ -1,15 +1,43 @@
 <script lang="ts">
-  import { createEventDispatcher } from "svelte";
+  import { createEventDispatcher, onDestroy } from "svelte";
+  import type { HTMLInputAttributes } from "svelte/elements";
 
-  import type { ValidationState } from "./types";
+  import Icon from "./Icon.svelte";
+  import Spinner from "./Spinner.svelte";
+  import type {
+    InputValidationStatus,
+    InputValidator,
+    ValidationResult,
+    ValidationState,
+  } from "./types";
 
   export let id: string;
   export let value: string | null = null;
   export let defaultValue = "";
   export let placeholder: string | null = null;
   export let name: string | undefined = undefined;
-  export let isDisabled = false;
-  export let isReadOnly = false;
+  export let autocomplete: HTMLInputAttributes["autocomplete"] = undefined;
+  export let disabled = false;
+  export let readOnly = false;
+  export let required = false;
+  export let pattern: string | undefined = undefined;
+  export let spellcheck: HTMLInputAttributes["spellcheck"] = undefined;
+  export let autocapitalize: HTMLInputAttributes["autocapitalize"] = undefined;
+  export let enterKeyHint:
+    | "enter"
+    | "done"
+    | "go"
+    | "next"
+    | "previous"
+    | "search"
+    | "send"
+    | null = null;
+  export let debounce: number | null = null;
+  export let validate: InputValidator | undefined = undefined;
+  export let validationContext: unknown = undefined;
+  export let validationDebounce = 300;
+  export let validateOnBlur = true;
+  export let showValidationStatus = true;
   export let validationState: ValidationState = "none";
   export let ariaLabel: string | null = null;
   export let describedBy: string | null = null;
@@ -31,6 +59,7 @@
 
   const dispatch = createEventDispatcher<{
     valueChange: { value: string };
+    validationChange: { status: InputValidationStatus; valid: boolean; message: string };
     submit: { value: string };
     cancel: void;
     keydown: KeyboardEvent;
@@ -39,39 +68,194 @@
   }>();
 
   let uncontrolledValue = defaultValue;
+  let liveValue = value ?? defaultValue;
+  let debounceTimer: ReturnType<typeof setTimeout> | null = null;
+  let validationTimer: ReturnType<typeof setTimeout> | null = null;
+  let activeValidationKey: string | null = null;
+  let internalValidationStatus: InputValidationStatus = "idle";
+  let internalValidationMessage = "";
+  let lastValidatedValue = "";
+  let previousContextKey = serializeValidationContext(validationContext);
+  let previousValidationSnapshot = "";
+  let previousControlledValue = value;
 
   $: isControlled = value !== null;
-  $: currentValue = isControlled ? value ?? "" : uncontrolledValue;
-  $: ariaInvalid = validationState === "invalid" ? true : undefined;
-  $: ariaBusy = validationState === "pending" ? true : undefined;
+  $: if (isControlled) {
+    if (value !== previousControlledValue) {
+      previousControlledValue = value;
+      liveValue = value ?? "";
+    }
+  } else {
+    previousControlledValue = value;
+    liveValue = uncontrolledValue;
+  }
+  $: currentValue = liveValue;
+  $: effectiveValidationState = validate
+    ? internalValidationStatus === "validating"
+      ? "pending"
+      : internalValidationStatus === "valid"
+        ? "valid"
+        : internalValidationStatus === "invalid"
+          ? "invalid"
+          : validationState
+    : validationState;
+  $: ariaInvalid = effectiveValidationState === "invalid" ? true : undefined;
+  $: ariaBusy = effectiveValidationState === "pending" ? true : undefined;
   $: charCount = currentValue.length;
   $: charCountText = maxLength ? `${charCount}/${maxLength}` : `${charCount}`;
   $: isOverLimit = maxLength !== null && charCount > maxLength;
+  $: showValidationIndicator = showValidationStatus && effectiveValidationState !== "none";
+  $: validationIcon =
+    effectiveValidationState === "valid"
+      ? "circle-check"
+      : effectiveValidationState === "invalid"
+        ? "circle-x"
+        : null;
+  $: contextKey = serializeValidationContext(validationContext);
+
+  $: if (validate && liveValue !== lastValidatedValue) {
+    triggerValidation(liveValue, false);
+  }
+
+  $: if (validate && contextKey !== previousContextKey) {
+    previousContextKey = contextKey;
+    if (liveValue) {
+      triggerValidation(liveValue, false);
+    }
+  }
+
+  $: validationSnapshot = validate
+    ? `${internalValidationStatus}::${internalValidationMessage}`
+    : "";
+
+  $: if (validate && validationSnapshot !== previousValidationSnapshot) {
+    previousValidationSnapshot = validationSnapshot;
+    dispatch("validationChange", {
+      status: internalValidationStatus,
+      valid: internalValidationStatus === "valid" || internalValidationStatus === "idle",
+      message: internalValidationMessage,
+    });
+  }
+
+  onDestroy(() => {
+    if (debounceTimer) {
+      clearTimeout(debounceTimer);
+    }
+    if (validationTimer) {
+      clearTimeout(validationTimer);
+    }
+  });
+
+  function serializeValidationContext(context: unknown): string {
+    try {
+      return JSON.stringify(context ?? null);
+    } catch {
+      return "[unserializable-context]";
+    }
+  }
 
   function handleInput(event: Event): void {
     const nextValue = (event.currentTarget as HTMLInputElement).value;
+    liveValue = nextValue;
 
     if (!isControlled) {
       uncontrolledValue = nextValue;
     }
 
-    dispatch("valueChange", { value: nextValue });
+    if (debounce && debounce > 0) {
+      if (debounceTimer) clearTimeout(debounceTimer);
+      debounceTimer = setTimeout(() => {
+        dispatch("valueChange", { value: nextValue });
+      }, debounce);
+    } else {
+      dispatch("valueChange", { value: nextValue });
+    }
   }
 
   function handleKeydown(event: KeyboardEvent): void {
     dispatch("keydown", event);
 
     if (event.key === "Enter") {
-      dispatch("submit", { value: currentValue });
+      dispatch("submit", { value: liveValue });
     }
 
     if (event.key === "Escape") {
       dispatch("cancel");
     }
   }
+
+  function buildValidationKey(inputValue: string, context: unknown): string {
+    return JSON.stringify({ value: inputValue, context: serializeValidationContext(context) });
+  }
+
+  function clearValidationTimers(): void {
+    if (validationTimer) {
+      clearTimeout(validationTimer);
+      validationTimer = null;
+    }
+  }
+
+  $: if (!validate) {
+    clearValidationTimers();
+    activeValidationKey = null;
+    internalValidationStatus = "idle";
+    internalValidationMessage = "";
+    lastValidatedValue = "";
+  }
+
+  function triggerValidation(inputValue: string, immediate: boolean): void {
+    if (!validate) return;
+
+    clearValidationTimers();
+
+    if (!inputValue.trim()) {
+      activeValidationKey = null;
+      internalValidationStatus = "idle";
+      internalValidationMessage = "";
+      lastValidatedValue = "";
+      return;
+    }
+
+    const validationKey = buildValidationKey(inputValue, validationContext);
+    activeValidationKey = validationKey;
+    internalValidationStatus = "validating";
+    internalValidationMessage = "";
+
+    const runValidation = async (): Promise<void> => {
+      try {
+        const result = await validate?.(inputValue, validationContext);
+        if (activeValidationKey !== validationKey || inputValue !== liveValue) return;
+        internalValidationStatus = result?.valid ? "valid" : "invalid";
+        internalValidationMessage = result?.message ?? "";
+        lastValidatedValue = inputValue;
+        activeValidationKey = null;
+      } catch {
+        if (activeValidationKey !== validationKey || inputValue !== liveValue) return;
+        internalValidationStatus = "invalid";
+        internalValidationMessage = "Could not validate";
+        lastValidatedValue = inputValue;
+        activeValidationKey = null;
+      }
+    };
+
+    if (immediate) {
+      void runValidation();
+      return;
+    }
+
+    if (validationDebounce <= 0) {
+      void runValidation();
+      return;
+    }
+
+    validationTimer = setTimeout(() => {
+      validationTimer = null;
+      void runValidation();
+    }, validationDebounce);
+  }
 </script>
 
-<div class="text-input" data-validation-state={validationState}>
+<div class="text-input" data-validation-state={effectiveValidationState}>
   {#if prefix}
     <span class="text-input__affix text-input__affix--prefix">{prefix}</span>
   {/if}
@@ -90,9 +274,15 @@
     class="text-input__control"
     value={currentValue}
     {placeholder}
+    {autocomplete}
+    {required}
+    {pattern}
+    {spellcheck}
+    autocapitalize={autocapitalize ?? undefined}
+    enterkeyhint={enterKeyHint ?? undefined}
     maxlength={maxLength ?? undefined}
-    disabled={isDisabled}
-    readonly={isReadOnly}
+    disabled={disabled}
+    readonly={readOnly}
     aria-label={ariaLabel ?? undefined}
     aria-describedby={describedBy ?? undefined}
     aria-invalid={ariaInvalid}
@@ -100,12 +290,38 @@
     on:input={handleInput}
     on:keydown={handleKeydown}
     on:focus={(event) => dispatch("focus", event)}
-    on:blur={(event) => dispatch("blur", event)}
+    on:blur={(event) => {
+      if (debounceTimer) {
+        clearTimeout(debounceTimer);
+        debounceTimer = null;
+        dispatch("valueChange", { value: liveValue });
+      }
+      if (validate && validateOnBlur) {
+        triggerValidation(liveValue, true);
+      }
+      dispatch("blur", event);
+    }}
   />
 
   {#if $$slots.trailing}
     <span class="text-input__affordance text-input__affordance--trailing">
       <slot name="trailing" />
+    </span>
+  {/if}
+
+  {#if showValidationIndicator}
+    <span
+      class="text-input__validation-indicator"
+      class:text-input__validation-indicator--pending={effectiveValidationState === "pending"}
+      class:text-input__validation-indicator--valid={effectiveValidationState === "valid"}
+      class:text-input__validation-indicator--invalid={effectiveValidationState === "invalid"}
+      aria-hidden="true"
+    >
+      {#if effectiveValidationState === "pending"}
+        <Spinner variant="ring" size="sm" tone="current" />
+      {:else if validationIcon}
+        <Icon icon={validationIcon} size="sm" />
+      {/if}
     </span>
   {/if}
 
@@ -211,6 +427,25 @@
     font-size: var(--poodle-icon-size-default);
   }
 
+  .text-input__validation-indicator {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--poodle-color-icon-muted);
+  }
+
+  .text-input__validation-indicator--pending {
+    color: var(--poodle-color-accent-base);
+  }
+
+  .text-input__validation-indicator--valid {
+    color: var(--poodle-color-status-success);
+  }
+
+  .text-input__validation-indicator--invalid {
+    color: var(--poodle-color-status-danger);
+  }
+
   .text-input__affix {
     display: inline-flex;
     align-items: center;
@@ -245,4 +480,5 @@
   .text-input__char-count--over {
     color: var(--poodle-color-status-danger);
   }
+
 </style>

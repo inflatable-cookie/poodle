@@ -27,7 +27,7 @@
     <Eyebrow>Disabled</Eyebrow>
     <ReorderableList
       items={[{ id: "a", label: "Locked item A" }, { id: "b", label: "Locked item B" }]}
-      isDisabled
+      disabled
     />
   </div>
 

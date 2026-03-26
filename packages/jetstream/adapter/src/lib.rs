@@ -122,7 +122,7 @@ impl JetstreamAdapter {
     }
 }
 
-/// Primitive spec type names supported by the Jetstream adapter (63 — full parity).
+/// Primitive spec type names supported by the Jetstream adapter (64 — full parity).
 /// Note: AccordionItemSpec is a sub-spec of AccordionSpec, not independently rendered.
 #[allow(dead_code)]
 const SUPPORTED_PRIMITIVES: &[&str] = &[
@@ -138,7 +138,7 @@ const SUPPORTED_PRIMITIVES: &[&str] = &[
     "CheckboxSpec", "RadioGroupSpec", "SwitchSpec", "SelectSpec", "SliderSpec",
     "RangeSliderSpec", "SegmentedControlSpec", "TriStateSwitchSpec",
     // Feedback and display
-    "ProgressSpec", "BadgeSpec", "StatusIndicatorSpec", "SkeletonSpec", "MeterSpec",
+    "ProgressSpec", "BadgeSpec", "SpinnerSpec", "StatusIndicatorSpec", "SkeletonSpec", "MeterSpec",
     "RatingSpec",
     // Overlay
     "DialogSpec", "DrawerSpec", "PopoverSpec", "MenuSpec", "TooltipSpec", "TabsSpec",
@@ -169,7 +169,7 @@ const SUPPORTED_COMPOSITES: &[&str] = &[
     "ReorderableListSpec", "BreadcrumbsSpec", "CardRadioGroupSpec",
     "InlineEditableFieldSpec", "ListCardSpec", "NavCardSpec",
     "NavCardGridSpec", "OrderBySpec", "PageHeaderSpec", "PageLoadingSpec",
-    "SlugFieldSpec", "LogListSpec", "StateTileSpec", "ToastStackSpec",
+    "LogListSpec", "StateTileSpec", "ToastStackSpec",
 ];
 
 /// Workstation spec type names supported by the Jetstream adapter (13 — full parity).
@@ -226,7 +226,7 @@ mod tests {
     #[test]
     fn full_parity_component_counts() {
         assert_eq!(SUPPORTED_PRIMITIVES.len(), 63);
-        assert_eq!(SUPPORTED_COMPOSITES.len(), 38);
+        assert_eq!(SUPPORTED_COMPOSITES.len(), 37);
         assert_eq!(SUPPORTED_WORKSTATION.len(), 13);
     }
 }

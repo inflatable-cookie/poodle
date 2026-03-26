@@ -44,7 +44,7 @@ Updated: 2026-03-21
 |------|------|---------|----------|-------|
 | `value` | `string` | — | yes | current committed label |
 | `ariaLabel` | `string` | `"Edit label"` | no | accessible name for the edit affordance |
-| `isDisabled` | `boolean` | `false` | no | disables edit entry |
+| `disabled` | `boolean` | `false` | no | disables edit entry |
 | `activationMode` | `"doubleClick" \| "enterOrSpace" \| "programmatic"` | `"doubleClick"` | no | primary edit-entry pattern |
 | `selectOnFocus` | `boolean` | `true` | no | select all text when editing begins |
 | `variant` | `"default" \| "flush"` | `"default"` | no | default has padding/border; flush has no padding/border |
@@ -69,7 +69,7 @@ Updated: 2026-03-21
 | hover | pointer enters display label | subtle border and background hint (default variant) |
 | focus | display label focused via keyboard | focus ring (default variant) |
 | editing | edit mode entered | input replaces display with focus ring |
-| disabled | `isDisabled=true` | no edit activation, reduced opacity |
+| disabled | `disabled=true` | no edit activation, reduced opacity |
 | empty | value is empty, `emptyText` set | italic secondary-color placeholder text |
 
 ### Component States
@@ -160,7 +160,7 @@ Updated: 2026-03-21
 | Attribute | Value | Notes |
 |-----------|-------|-------|
 | `data-editing` | `{isEditing}` | reflects current editing state |
-| `data-disabled` | `{isDisabled}` | reflects disabled state |
+| `data-disabled` | `{disabled}` | reflects disabled state |
 | `data-variant` | `{variant}` | `"default"` or `"flush"` |
 
 ### Root `.editable-label`
@@ -281,7 +281,7 @@ Updated: 2026-03-21
 
 ### Tier 1: Strict Parity
 
-- [ ] value, activationMode, selectOnFocus, isDisabled mean the same thing
+- [ ] value, activationMode, selectOnFocus, disabled mean the same thing
 - [ ] commit/cancel/editStart events match (commit includes previousValue)
 - [ ] Enter commits, Escape cancels in edit mode
 - [ ] blur triggers commit (not cancel)
@@ -350,7 +350,7 @@ Updated: 2026-03-21
 
 | Label | Props / Config | Expected Visual |
 |-------|---------------|-----------------|
-| Disabled | `value="Read-only value"`, `isDisabled` | Static label with reduced opacity, no edit activation possible |
+| Disabled | `value="Read-only value"`, `disabled` | Static label with reduced opacity, no edit activation possible |
 
 ## 14. Approval And Adoption Notes
 

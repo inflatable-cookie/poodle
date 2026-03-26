@@ -41,7 +41,7 @@ Updated: 2026-03-15
 | `value` | `string \| null` | `null` | no | controlled selected value |
 | `defaultValue` | `string \| null` | `null` | no | uncontrolled initial value |
 | `options` | `SegmentedControlOption[]` | none | yes | segment list |
-| `isDisabled` | `boolean` | `false` | no | disables whole control |
+| `disabled` | `boolean` | `false` | no | disables whole control |
 | `ariaLabel` | `string \| null` | `null` | no | required when no visible label exists |
 | `name` | `string \| undefined` | auto-generated | no | radio group name attribute |
 
@@ -51,7 +51,7 @@ Updated: 2026-03-15
 |-------|------|----------|-------|
 | `value` | `string` | yes | option value |
 | `label` | `string` | yes | visible label text |
-| `isDisabled` | `boolean` | no | disables individual segment |
+| `disabled` | `boolean` | no | disables individual segment |
 | `ariaLabel` | `string` | no | accessible name override for abbreviated labels |
 
 ### Controlled And Uncontrolled
@@ -73,8 +73,8 @@ Updated: 2026-03-15
 | unselected | default | neutral segment styling with `text-secondary` color |
 | selected | value matches option | accent background, inverse text, inset highlight shadow |
 | focus | keyboard focus on hidden radio input | focus ring on corresponding label |
-| disabled (group) | `isDisabled=true` | all segments muted, non-interactive |
-| disabled (segment) | option `isDisabled=true` | individual segment muted, non-interactive |
+| disabled (group) | `disabled=true` | all segments muted, non-interactive |
+| disabled (segment) | option `disabled=true` | individual segment muted, non-interactive |
 
 ### Component States
 

@@ -1,14 +1,15 @@
 # Tri-State Switch
 
 Status: detailed contract
-Updated: 2026-03-15
+Updated: 2026-03-24
 
 ## 1. Purpose
 
 - Component name: `TriStateSwitch`
 - Layer: `foundation`
 - Summary: a ternary selection control for explicit exclude/default/include
-  style flows, presented as a three-segment track with semantic coloring
+  flows, presented as a shared pill track with a sliding active capsule and
+  per-state semantic coloring
 - In scope: three distinct states with fixed order (excluded, default,
   included), directional movement, labeled state options, customizable labels,
   semantic color coding per state
@@ -19,13 +20,19 @@ Updated: 2026-03-15
 
 ```text
 [Root .tri-state-switch]  <div role="radiogroup">
-  └── [Segment .tri-state-switch__segment...]  <button role="radio">
+  ├── [Selection .tri-state-switch__selection]  <span aria-hidden="true">
+  └── [Option .tri-state-switch__option]  <label>
+        ├── [Control .tri-state-switch__control]  <input type="radio">
+        └── [Segment .tri-state-switch__segment]  <span>
 ```
 
 | Part | Required | Description | Token Targets |
 |------|----------|-------------|---------------|
 | Root | yes | radiogroup host track | border, radius, background, padding |
-| Segment | yes | one of three mutually exclusive choices | background, color, border-radius, focus ring |
+| Selection | yes | sliding active capsule showing the chosen state | background, border, radius, shadow, motion |
+| Option | yes | label wrapper for one ternary state | cursor, positioning |
+| Control | yes | hidden native radio input | visually hidden, focus semantics |
+| Segment | yes | visible state label above the shared track | color, typography, focus ring |
 
 ## 3. Props And Inputs
 
@@ -35,8 +42,11 @@ Updated: 2026-03-15
 |------|------|---------|----------|-------|
 | `value` | `TriStateValue` | `"default"` | no | controlled ternary state |
 | `options` | `Record<TriStateValue, string>` | `{ excluded: "Exclude", default: "Default", included: "Include" }` | no | labels for each state |
-| `isDisabled` | `boolean` | `false` | no | disables interaction |
+| `disabled` | `boolean` | `false` | no | disables interaction |
 | `ariaLabel` | `string` | none | yes | names the ternary control (required) |
+| `excludedColor` | `string \| null` | `null` | no | optional color override for the selected excluded state |
+| `defaultColor` | `string \| null` | `null` | no | optional color override for the selected default state |
+| `includedColor` | `string \| null` | `null` | no | optional color override for the selected included state |
 
 ### TriStateValue
 
@@ -49,6 +59,8 @@ type TriStateValue = "excluded" | "default" | "included"
 - controlled by default in this contract; value is always provided
 - uncontrolled mode can be added later if needed, but semantics remain ternary
 - Fixed segment order: excluded, default, included (never reorderable)
+- per-state color overrides map to local CSS custom properties on the root and
+  affect only the selected segment backgrounds for that instance
 
 ## 4. States
 
@@ -56,17 +68,18 @@ type TriStateValue = "excluded" | "default" | "included"
 
 | State | Trigger | Expected Result |
 |-------|---------|-----------------|
-| excluded selected | `value="excluded"` | danger-tinted background, primary text, inset shadow |
-| default selected | `value="default"` | elevated-tinted background, primary text, inset shadow |
-| included selected | `value="included"` | success-tinted background, primary text, inset shadow |
-| unselected | not current value | transparent background, secondary text |
-| focus | keyboard focus on segment | focus ring |
-| disabled | `isDisabled=true` | all segments muted, non-interactive |
+| excluded selected | `value="excluded"` | active capsule moves left, danger-tinted fill and border, excluded label turns danger |
+| default selected | `value="default"` | active capsule moves center with neutral fill, default label uses primary text |
+| included selected | `value="included"` | active capsule moves right, success-tinted fill and border, included label turns success |
+| custom semantic colors | any state color override prop set | active capsule and selected label derive from the provided local semantic colors |
+| unselected | not current value | muted label text on the shared track background |
+| focus | keyboard focus on radio | focus ring on the visible segment label |
+| disabled | `disabled=true` | whole control muted, non-interactive |
 
 ### Component States
 
-Roving-focus via radiogroup keyboard behavior and single-selected-option state
-are required. Exactly one of three segments is always selected.
+Native radio-group keyboard behavior and single-selected-option state are
+required. Exactly one of three states is always selected.
 
 ## 5. Events
 
@@ -79,9 +92,9 @@ are required. Exactly one of three segments is always selected.
 ### Semantics
 
 - Role: `role="radiogroup"` on root element
-- Each segment: `role="radio"` with `aria-checked="true"` when selected
+- Each control: native `<input type="radio">` with the parent radiogroup
 - `aria-label` on root from prop (required)
-- Per-segment accessible name from the options labels
+- Per-state accessible name from the options labels
 - Labeling rules: symbol-only options must still expose meaningful accessible
   names such as excluded/default/included
 
@@ -89,14 +102,14 @@ are required. Exactly one of three segments is always selected.
 
 | Key | Behavior |
 |-----|----------|
-| `Arrow Left/Right` | moves selection/focus across segments |
-| `Space` | selects the focused segment |
-| `Tab` | enters or exits the control through one tabbable segment |
+| `Arrow Left/Right` | moves selection/focus across states |
+| `Space` | selects the focused state |
+| `Tab` | enters or exits the control through the checked radio |
 
 ### Focus And Announcement
 
-- focus entry: one segment participates in the tab sequence (roving focus)
-- focus exit: current segment remains selected and roving focus is preserved
+- focus entry: the checked radio participates in the tab sequence
+- focus exit: current state remains selected
 - live-region behavior: none; state changes announced through radio semantics
 - GPUI-native accessibility mapping notes: GPUI must expose exclusive-choice
   semantics and meaningful names for segments, not just their glyphs
@@ -105,9 +118,10 @@ are required. Exactly one of three segments is always selected.
 
 ### Sizing
 
-- Root uses CSS inline-grid with equal-width columns for all three segments
-- Three segments share a stable common height derived from control-height token
-- Segment labels are not truncated (short by design)
+- Root uses CSS inline-grid with equal-width columns for all three states
+- The active capsule spans one-third of the track and moves horizontally
+- Labels share a stable common height derived from control-height token
+- State labels are short and should remain untruncated
 
 ### Composition
 
@@ -122,55 +136,78 @@ are required. Exactly one of three segments is always selected.
 
 | Property | Value |
 |----------|-------|
+| `position` | `relative` |
 | `display` | `inline-grid` |
-| `grid-auto-flow` | `column` |
-| `gap` | `0.125rem` |
+| `width` | `max-content` |
+| `grid-template-columns` | `repeat(3, minmax(0, 1fr))` |
+| `align-items` | `stretch` |
 | `padding` | `0.125rem` |
-| `border` | `0.0625rem solid color-mix(in srgb, var(--poodle-color-border-subtle) 84%, transparent)` |
-| `border-radius` | `var(--poodle-radius-control)` |
-| `background` | `color-mix(in srgb, var(--poodle-color-background-surface) 82%, transparent)` |
+| `border` | `0.0625rem solid var(--poodle-color-border-default)` |
+| `border-radius` | `999px` |
+| `background` | `color-mix(in srgb, var(--poodle-color-text-primary) 18%, var(--poodle-color-background-surface))` |
+| `isolation` | `isolate` |
+| `--poodle-tri-state-excluded-color` | `var(--poodle-color-status-danger)` |
+| `--poodle-tri-state-default-color` | `var(--poodle-color-text-primary)` |
+| `--poodle-tri-state-included-color` | `var(--poodle-color-status-success)` |
+| `--poodle-tri-state-excluded-track` | `color-mix(in srgb, var(--poodle-tri-state-excluded-color) 18%, var(--poodle-color-background-surface))` |
+| `--poodle-tri-state-default-track` | `color-mix(in srgb, var(--poodle-tri-state-default-color) 10%, var(--poodle-color-background-surface))` |
+| `--poodle-tri-state-included-track` | `color-mix(in srgb, var(--poodle-tri-state-included-color) 18%, var(--poodle-color-background-surface))` |
+
+### Selection `.tri-state-switch__selection`
+
+| Property | Value |
+|----------|-------|
+| `position` | `absolute` |
+| `top` | `0.125rem` |
+| `bottom` | `0.125rem` |
+| `left` | `0.125rem` |
+| `width` | `calc((100% - 0.25rem) / 3)` |
+| `border` | `0.0625rem solid transparent` |
+| `border-radius` | `999px` |
+| `box-shadow` | `inset 0 0.0625rem 0 color-mix(in srgb, white 8%, transparent), 0 0.125rem 0.5rem color-mix(in srgb, black 18%, transparent)` |
+| `transform` | `translateX(calc(var(--poodle-tri-state-active-index) * 100%))` |
+| `transition` | `transform, background, border-color, box-shadow` at `var(--poodle-motion-duration-interaction) var(--poodle-motion-easing-standard)` |
+
+### Option `.tri-state-switch__option`
+
+| Property | Value |
+|----------|-------|
+| `position` | `relative` |
+| `cursor` | `pointer` |
+
+### Control `.tri-state-switch__control`
+
+| Property | Value |
+|----------|-------|
+| `position` | `absolute` |
+| `opacity` | `0` |
+| `pointer-events` | `none` |
 
 ### Segment `.tri-state-switch__segment`
 
 | Property | Value |
 |----------|-------|
+| `display` | `flex` |
+| `align-items` | `center` |
+| `justify-content` | `center` |
 | `min-height` | `calc(var(--poodle-size-control-height) - 0.25rem)` |
-| `padding` | `0 0.75rem` |
-| `border` | `0` |
-| `border-radius` | `calc(var(--poodle-radius-control) - 0.125rem)` |
-| `background` | `transparent` |
+| `min-width` | `4.5rem` |
+| `padding` | `0 0.875rem` |
+| `border-radius` | `999px` |
 | `color` | `var(--poodle-color-text-secondary)` |
-| `cursor` | `pointer` |
 | `font-family` | `var(--poodle-typography-label-family)` |
-| `font-size` | `0.75rem` |
-| `font-weight` | `600` |
-| `line-height` | `1` |
-| `transition` | `background, color, box-shadow` at `var(--poodle-motion-duration-interaction) var(--poodle-motion-easing-standard)` |
+| `font-size` | `var(--poodle-typography-label-size)` |
+| `font-weight` | `var(--poodle-typography-label-weight)` |
+| `line-height` | `var(--poodle-typography-label-lineHeight)` |
+| `transition` | `color, opacity` at `var(--poodle-motion-duration-interaction) var(--poodle-motion-easing-standard)` |
 
-### Segment — selected (shared across all states)
-
-| Property | Value |
-|----------|-------|
-| `color` | `var(--poodle-color-text-primary)` |
-| `box-shadow` | `inset 0 0.0625rem 0 color-mix(in srgb, white 12%, transparent)` |
-
-### Segment — excluded + selected
+### Selected label states
 
 | Property | Value |
 |----------|-------|
-| `background` | `color-mix(in srgb, var(--poodle-color-status-danger) 18%, var(--poodle-color-background-surface))` |
-
-### Segment — default + selected
-
-| Property | Value |
-|----------|-------|
-| `background` | `color-mix(in srgb, var(--poodle-color-background-elevated) 88%, var(--poodle-color-background-surface))` |
-
-### Segment — included + selected
-
-| Property | Value |
-|----------|-------|
-| `background` | `color-mix(in srgb, var(--poodle-color-status-success) 18%, var(--poodle-color-background-surface))` |
+| excluded | `color: var(--poodle-tri-state-excluded-color)` |
+| default | `color: var(--poodle-color-text-primary)` |
+| included | `color: var(--poodle-tri-state-included-color)` |
 
 ### Segment — focus visible (`:focus-visible`)
 
@@ -179,34 +216,39 @@ are required. Exactly one of three segments is always selected.
 | `outline` | `var(--poodle-border-width-focus) solid var(--poodle-color-accent-focusRing)` |
 | `outline-offset` | `0.125rem` |
 
-### Segment — disabled (`:disabled`)
+### Root — disabled (`[data-disabled="true"]`)
 
 | Property | Value |
 |----------|-------|
-| `cursor` | `not-allowed` |
 | `opacity` | `var(--poodle-state-opacity-disabled)` |
 
 ## 9. Svelte Notes
 
-- Uses native `<button>` elements with `role="radio"` and `aria-checked`
+- Uses native `<input type="radio">` elements inside labels for keyboard and
+  accessibility semantics
 - Root uses `role="radiogroup"` with `aria-label` from prop
-- Fixed segment order is enforced: excluded, default, included
-- `data-state` attribute on each segment for styling hooks
-- `data-selected` attribute on the currently selected segment
-- Note: keyboard navigation (arrow keys, Space) is not currently implemented; only click events change the selected segment
-- Semantic background coloring uses status-danger (excluded), background-elevated
-  (default), and status-success (included) via color-mix
+- Fixed state order is enforced: excluded, default, included
+- Hidden radios drive the visible state labels via adjacent-sibling selectors
+- A shared absolute-positioned selection capsule slides between the three states
+- Semantic coloring uses status-danger, text-primary, and status-success tokens
+  plus color-mix track fills
 - Transition uses motion-duration-interaction and motion-easing-standard tokens
 
 ## 10. GPUI Notes
 
 - expected crate/module surface: `poodle_gpui::primitives::tri_state_switch`
-- GPUI implementation must preserve symbolic-option accessible labeling and
-  exclusive-choice keyboard semantics
-- The three semantic background colors (danger, elevated, success) must be
-  replicated using GPUI's color-mix or equivalent blending
+- GPUI implementation must preserve named state labeling and exclusive-choice
+  keyboard semantics
+- The three semantic background colors (danger, neutral text-primary mix, and
+  success) must be replicated using GPUI's color-mix or equivalent blending
 - Fixed three-segment order must be enforced at the API level
-- Roving focus must be implemented explicitly (no native radio group available)
+- GPUI should remain shrink-wrapped to its content rather than stretching to
+  fill the parent row
+- GPUI should expose per-state focus targets and directional arrow-key movement
+  explicitly, since there is no native radio-group primitive underneath
+- GPUI contract and preview should expose the same per-state label and semantic
+  color override inputs as the Svelte implementation, even if the transport
+  shape differs from Svelte's `options` record
 
 ## 11. Parity Checklist
 
@@ -265,7 +307,7 @@ are required. Exactly one of three segments is always selected.
 
 | Label | Props / Config | Expected Visual |
 |-------|---------------|-----------------|
-| Disabled | `value="included"`, `isDisabled=true`, `ariaLabel="Disabled switch"` | "Include" segment selected with success-tinted background; all segments muted and non-interactive |
+| Disabled | `value="included"`, `disabled=true`, `ariaLabel="Disabled switch"` | "Include" segment selected with success-tinted background; all segments muted and non-interactive |
 
 ## 14. Approval And Adoption Notes
 

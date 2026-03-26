@@ -87,17 +87,17 @@
   <div class="display-controls__group display-controls__group--probes">
     <Eyebrow>State probes</Eyebrow>
     <Checkbox
-      isChecked={disabled}
+      checked={disabled}
       label="Disabled"
       on:checkedChange={(event) => onDisabledChange(event.detail.checked)}
     />
     <Checkbox
-      isChecked={invalid}
+      checked={invalid}
       label="Invalid"
       on:checkedChange={(event) => onInvalidChange(event.detail.checked)}
     />
     <Checkbox
-      isChecked={busy}
+      checked={busy}
       label="Busy"
       on:checkedChange={(event) => onBusyChange(event.detail.checked)}
     />

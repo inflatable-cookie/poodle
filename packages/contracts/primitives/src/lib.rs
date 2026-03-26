@@ -61,6 +61,7 @@ mod select;
 mod separator;
 mod skeleton;
 mod slider;
+mod spinner;
 mod split_button;
 mod stack;
 mod status_indicator;
@@ -145,6 +146,7 @@ pub use select::SelectSpec;
 pub use separator::SeparatorSpec;
 pub use skeleton::SkeletonSpec;
 pub use slider::SliderSpec;
+pub use spinner::{SpinnerSize, SpinnerSpec, SpinnerTone, SpinnerVariant};
 pub use split_button::{SplitButtonSpec, SplitMenuItem};
 pub use stack::{LayoutJustify, StackDirection, StackSpec};
 pub use status_indicator::StatusIndicatorSpec;
@@ -201,6 +203,7 @@ pub const SELECTION_FEEDBACK_DATE_EXPORTS: &[&str] = &[
     "SegmentedControlSpec",
     "SliderSpec",
     "ProgressSpec",
+    "SpinnerSpec",
     "BadgeSpec",
     "StatusIndicatorSpec",
     "CalendarSpec",

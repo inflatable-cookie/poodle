@@ -32,7 +32,7 @@ Check out [Poodle](https://example.com) for more.`;
 
   <div class="specimen__group">
     <Eyebrow>Disabled</Eyebrow>
-    <MarkdownEditor value="Read-only content" isDisabled />
+    <MarkdownEditor value="Read-only content" disabled />
   </div>
 </div>
 

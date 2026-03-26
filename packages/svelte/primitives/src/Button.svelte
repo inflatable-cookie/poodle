@@ -2,20 +2,41 @@
   import { createEventDispatcher } from "svelte";
 
   import Icon from "./Icon.svelte";
-  import type { ButtonTone, ButtonVariant, ControlSize, IconProp } from "./types";
+  import { getUiPresentation, resolveSemanticControlSize } from "./presentation";
+  import Spinner from "./Spinner.svelte";
+  import type {
+    ButtonTone,
+    ButtonVariant,
+    ControlSize,
+    IconProp,
+    SemanticControlSizeRole,
+  } from "./types";
 
   export let variant: ButtonVariant = "secondary";
   export let tone: ButtonTone = "default";
-  export let size: ControlSize = "md";
+  export let size: ControlSize | null = null;
+  export let sizeRole: SemanticControlSizeRole = "control";
   export let type: HTMLButtonElement["type"] = "button";
-  export let isDisabled = false;
-  export let isLoading = false;
+  export let form: string | null = null;
+  export let formaction: string | null = null;
+  export let formenctype:
+    | "application/x-www-form-urlencoded"
+    | "multipart/form-data"
+    | "text/plain"
+    | null = null;
+  export let formmethod: "get" | "post" | "dialog" | null = null;
+  export let formnovalidate = false;
+  export let formtarget: "_self" | "_blank" | "_parent" | "_top" | string | null = null;
+  export let disabled = false;
+  export let loading = false;
   export let leadingIcon: IconProp | null = null;
   export let trailingIcon: IconProp | null = null;
   export let chevron = false;
   export let ariaLabel: string | null = null;
+  export let ariaExpanded: boolean | null = null;
   export let describedBy: string | null = null;
   export let className = "";
+  export let style: string | null = null;
 
   const dispatch = createEventDispatcher<{
     click: MouseEvent;
@@ -23,32 +44,52 @@
     blur: FocusEvent;
   }>();
 
-  $: isUnavailable = isDisabled || isLoading;
+  const uiPresentation = getUiPresentation();
+
+  $: isUnavailable = disabled || loading;
   $: iconOnly = !$$slots.default;
-  $: hasLeading = $$slots.leading || leadingIcon || isLoading;
+  $: hasLeading = $$slots.leading || leadingIcon || loading;
   $: hasTrailing = $$slots.trailing || trailingIcon || chevron;
+  $: resolvedSize = size ?? resolveSemanticControlSize(uiPresentation?.sizeScale ?? "md", sizeRole);
+  $: resolvedIconSize =
+    resolvedSize === "xs" || resolvedSize === "sm"
+      ? "sm"
+      : resolvedSize === "xl"
+        ? "lg"
+        : resolvedSize;
 </script>
 
 <button
+  {...$$restProps}
   {type}
+  form={form ?? undefined}
+  formaction={formaction ?? undefined}
+  formenctype={formenctype ?? undefined}
+  formmethod={formmethod ?? undefined}
+  formnovalidate={formnovalidate || undefined}
+  formtarget={formtarget ?? undefined}
   class={`button ${className}`.trim()}
+  style={style ?? undefined}
   data-variant={variant}
   data-tone={tone !== "default" ? tone : undefined}
-  data-size={size}
+  data-size={resolvedSize}
   data-icon-only={iconOnly || undefined}
   data-has-leading={hasLeading || undefined}
   data-has-trailing={hasTrailing || undefined}
-  data-loading={isLoading}
+  data-loading={loading}
   disabled={isUnavailable}
   aria-label={ariaLabel ?? undefined}
+  aria-expanded={ariaExpanded === null ? undefined : ariaExpanded ? "true" : "false"}
   aria-describedby={describedBy ?? undefined}
-  aria-busy={isLoading ? "true" : undefined}
+  aria-busy={loading ? "true" : undefined}
   on:click={(event) => dispatch("click", event)}
   on:focus={(event) => dispatch("focus", event)}
   on:blur={(event) => dispatch("blur", event)}
 >
-  {#if isLoading}
-    <span class="button__spinner" aria-hidden="true"></span>
+  {#if loading}
+    <span class="button__spinner" aria-hidden="true">
+      <Spinner variant="ring" size="sm" tone="current" />
+    </span>
   {/if}
 
   {#if $$slots.leading || leadingIcon}
@@ -56,7 +97,7 @@
       {#if $$slots.leading}
         <slot name="leading" />
       {:else if leadingIcon}
-        <Icon icon={leadingIcon} size="sm" />
+        <Icon icon={leadingIcon} size={resolvedIconSize} />
       {/if}
     </span>
   {/if}
@@ -72,14 +113,14 @@
       {#if $$slots.trailing}
         <slot name="trailing" />
       {:else if trailingIcon}
-        <Icon icon={trailingIcon} size="sm" />
+        <Icon icon={trailingIcon} size={resolvedIconSize} />
       {/if}
     </span>
   {/if}
 
   {#if chevron}
     <span class="button__chevron" aria-hidden="true">
-      <Icon name="chevron-down" size="sm" />
+      <Icon name="chevron-down" size={resolvedIconSize} />
     </span>
   {/if}
 </button>
@@ -135,6 +176,13 @@
       transform var(--poodle-motion-duration-interaction) var(--poodle-motion-easing-standard);
   }
 
+  .button[data-size="xs"] {
+    min-width: 3.75rem;
+    height: calc(var(--poodle-size-control-height) - 0.5rem);
+    padding: 0 calc(var(--poodle-space-control-x) - 0.125rem);
+    font-size: 0.6875rem;
+  }
+
   .button[data-size="sm"] {
     min-width: 4.25rem;
     height: calc(var(--poodle-size-control-height) - 0.375rem);
@@ -149,6 +197,13 @@
     font-size: 0.875rem;
   }
 
+  .button[data-size="xl"] {
+    min-width: 6.5rem;
+    height: calc(var(--poodle-size-control-height) + 0.5rem);
+    padding: 0 calc(var(--poodle-space-control-x) + 0.1875rem);
+    font-size: 0.9375rem;
+  }
+
   /* Icon padding adjustment: reduce padding on icon side by 0.125rem */
   .button[data-has-leading] {
     padding-left: calc(var(--poodle-space-control-x) - 0.125rem);
@@ -156,6 +211,14 @@
 
   .button[data-has-trailing] {
     padding-right: calc(var(--poodle-space-control-x) - 0.125rem);
+  }
+
+  .button[data-has-leading][data-size="xs"] {
+    padding-left: calc(var(--poodle-space-control-x) - 0.1875rem);
+  }
+
+  .button[data-has-trailing][data-size="xs"] {
+    padding-right: calc(var(--poodle-space-control-x) - 0.1875rem);
   }
 
   .button[data-has-leading][data-size="sm"] {
@@ -174,11 +237,23 @@
     padding-right: var(--poodle-space-control-x);
   }
 
+  .button[data-has-leading][data-size="xl"] {
+    padding-left: calc(var(--poodle-space-control-x) + 0.0625rem);
+  }
+
+  .button[data-has-trailing][data-size="xl"] {
+    padding-right: calc(var(--poodle-space-control-x) + 0.0625rem);
+  }
+
   /* Icon-only: square, no min-width */
   .button[data-icon-only] {
     min-width: 0;
     padding: 0;
     width: var(--poodle-size-control-height);
+  }
+
+  .button[data-icon-only][data-size="xs"] {
+    width: calc(var(--poodle-size-control-height) - 0.5rem);
   }
 
   .button[data-icon-only][data-size="sm"] {
@@ -187,6 +262,10 @@
 
   .button[data-icon-only][data-size="lg"] {
     width: calc(var(--poodle-size-control-height) + 0.375rem);
+  }
+
+  .button[data-icon-only][data-size="xl"] {
+    width: calc(var(--poodle-size-control-height) + 0.5rem);
   }
 
   .button[data-variant="primary"] {
@@ -273,7 +352,8 @@
     white-space: nowrap;
   }
 
-  .button__icon {
+  .button__icon,
+  .button__spinner {
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -292,18 +372,8 @@
     margin-left: calc(var(--poodle-space-inline-sm) * -0.25);
   }
 
-  .button__spinner {
+  .button__spinner :global(.spinner) {
     width: 0.75rem;
     height: 0.75rem;
-    border: 0.125rem solid color-mix(in srgb, currentColor 24%, transparent);
-    border-top-color: currentColor;
-    border-radius: 999px;
-    animation: button-spinner 0.8s linear infinite;
-  }
-
-  @keyframes button-spinner {
-    to {
-      transform: rotate(360deg);
-    }
   }
 </style>

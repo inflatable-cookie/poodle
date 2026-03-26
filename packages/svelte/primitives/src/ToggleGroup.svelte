@@ -7,7 +7,7 @@
   export let defaultValue: string | string[] | null = null;
   export let options: ToggleGroupOption[] = [];
   export let selectionMode: "single" | "multiple" = "single";
-  export let isDisabled = false;
+  export let disabled = false;
   export let ariaLabel: string | null = null;
 
   const dispatch = createEventDispatcher<{
@@ -58,7 +58,7 @@
       class="toggle-group__item"
       class:selected={isSelected(option.value)}
       data-selected={isSelected(option.value) ? "true" : "false"}
-      disabled={isDisabled || option.isDisabled === true}
+      disabled={disabled || option.disabled === true}
       role={selectionMode === "multiple" ? "button" : "radio"}
       aria-label={option.ariaLabel ?? undefined}
       aria-pressed={selectionMode === "multiple" ? (isSelected(option.value) ? "true" : "false") : undefined}

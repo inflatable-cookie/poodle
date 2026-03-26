@@ -50,11 +50,11 @@ Updated: 2026-03-22
 
 | Prop | Type | Default | Required | Notes |
 |------|------|---------|----------|-------|
-| `items` | `CardRadioItem[]` | `[]` | no | array of options; each has `value`, `label`, optional `description`, optional `isDisabled` |
+| `items` | `CardRadioItem[]` | `[]` | no | array of options; each has `value`, `label`, optional `description`, optional `disabled` |
 | `value` | `string \| null` | `null` | no | currently selected value; bind for two-way |
 | `columns` | `1 \| 2 \| 3 \| 4` | `2` | no | number of grid columns |
 | `ariaLabel` | `string \| null` | `null` | no | accessible label for the radiogroup |
-| `isDisabled` | `boolean` | `false` | no | disables the entire group |
+| `disabled` | `boolean` | `false` | no | disables the entire group |
 
 ### Types
 
@@ -63,7 +63,7 @@ type CardRadioItem = {
   value: string;
   label: string;
   description?: string | null;
-  isDisabled?: boolean;
+  disabled?: boolean;
 };
 ```
 
@@ -86,8 +86,8 @@ type CardRadioItem = {
 |-------|---------|-----------------|
 | unchecked | item not selected | indicator shows border only, Card is not selected |
 | checked | item is selected | indicator fills with accent color and shows inner dot, Card shows selected state |
-| disabled (item) | `item.isDisabled` is true | option has `cursor: not-allowed`, reduced opacity, cannot be selected |
-| disabled (group) | `isDisabled` is true | all options disabled regardless of per-item isDisabled |
+| disabled (item) | `item.disabled` is true | option has `cursor: not-allowed`, reduced opacity, cannot be selected |
+| disabled (group) | `disabled` is true | all options disabled regardless of per-item `disabled` |
 | focus-visible | keyboard focus on option | Card shows focus ring outline |
 
 ### Component States
@@ -306,7 +306,7 @@ The `--columns` CSS variable is set inline from the `columns` prop (1, 2, 3, or 
 
 | Label | Props / Config | Expected Visual |
 |-------|---------------|-----------------|
-| Plan selection (2 columns) | four items (Free, Pro, Team, Enterprise); Enterprise is `isDisabled`; `value="pro"`, `columns={2}`, `ariaLabel="Select a plan"` | 2x2 grid with Pro checked, Enterprise dimmed and non-interactive |
+| Plan selection (2 columns) | four items (Free, Pro, Team, Enterprise); Enterprise is `disabled`; `value="pro"`, `columns={2}`, `ariaLabel="Select a plan"` | 2x2 grid with Pro checked, Enterprise dimmed and non-interactive |
 
 ### Instance Size (3 Columns)
 
@@ -318,7 +318,7 @@ The `--columns` CSS variable is set inline from the `columns` prop (1, 2, 3, or 
 
 | Label | Props / Config | Expected Visual |
 |-------|---------------|-----------------|
-| Disabled group | same three size items; `value="md"`, `columns={3}`, `isDisabled`, `ariaLabel="Disabled selection"` | 3-column grid with Medium checked, entire group dimmed and non-interactive |
+| Disabled group | same three size items; `value="md"`, `columns={3}`, `disabled`, `ariaLabel="Disabled selection"` | 3-column grid with Medium checked, entire group dimmed and non-interactive |
 
 ## 14. Approval And Adoption Notes
 

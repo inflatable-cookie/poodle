@@ -3,8 +3,9 @@
 </script>
 
 <script lang="ts">
-  import { createEventDispatcher, onDestroy } from "svelte";
+  import { createEventDispatcher, onDestroy, onMount, tick } from "svelte";
 
+  import { resolveOverlayPosition } from "./overlay-position";
   import type { OverlayPlacement } from "./types";
 
   export let content: string;
@@ -20,9 +21,16 @@
   const tooltipId = `poodle-tooltip-${++nextTooltipId}`;
   let timer: ReturnType<typeof setTimeout> | null = null;
   let uncontrolledOpen = defaultOpen;
+  let triggerElement: HTMLSpanElement | null = null;
+  let bubbleElement: HTMLSpanElement | null = null;
+  let resolvedPlacement: OverlayPlacement = placement;
+  let bubbleStyle = "";
 
   $: isControlled = open !== null;
   $: isOpen = isControlled ? open === true : uncontrolledOpen;
+  $: if (isOpen) {
+    void updateTooltipPosition();
+  }
 
   function setOpen(nextOpen: boolean): void {
     if (!isControlled) {
@@ -49,6 +57,43 @@
     setOpen(false);
   }
 
+  async function updateTooltipPosition(): Promise<void> {
+    if (!isOpen || !triggerElement) {
+      return;
+    }
+
+    await tick();
+
+    if (!bubbleElement) {
+      return;
+    }
+
+    const nextPosition = resolveOverlayPosition(
+      triggerElement.getBoundingClientRect(),
+      bubbleElement.getBoundingClientRect(),
+      placement,
+    );
+
+    resolvedPlacement = nextPosition.placement;
+    bubbleStyle = `top: ${nextPosition.top}px; left: ${nextPosition.left}px;`;
+  }
+
+  function handleViewportChange(): void {
+    if (isOpen) {
+      void updateTooltipPosition();
+    }
+  }
+
+  onMount(() => {
+    window.addEventListener("resize", handleViewportChange);
+    window.addEventListener("scroll", handleViewportChange, true);
+
+    return () => {
+      window.removeEventListener("resize", handleViewportChange);
+      window.removeEventListener("scroll", handleViewportChange, true);
+    };
+  });
+
   onDestroy(() => clearTimer());
 </script>
 
@@ -66,6 +111,7 @@
   }}
 >
   <span
+    bind:this={triggerElement}
     class="tooltip__trigger"
     role="button"
     tabindex="0"
@@ -75,7 +121,14 @@
   </span>
 
   {#if isOpen}
-    <span id={tooltipId} class="tooltip__bubble" data-placement={placement} role="tooltip">
+    <span
+      id={tooltipId}
+      bind:this={bubbleElement}
+      class="tooltip__bubble"
+      data-placement={resolvedPlacement}
+      style={bubbleStyle}
+      role="tooltip"
+    >
       {content}
     </span>
   {/if}
@@ -97,7 +150,7 @@
   }
 
   .tooltip__bubble {
-    position: absolute;
+    position: fixed;
     z-index: var(--poodle-overlay-z-menu);
     max-width: 16rem;
     padding: 0.375rem 0.5rem;
@@ -118,41 +171,5 @@
     font-size: 0.6875rem;
     line-height: 1.35;
     white-space: nowrap;
-  }
-
-  .tooltip__bubble[data-placement^="top"] {
-    bottom: calc(100% + 0.5rem);
-    left: 50%;
-    transform: translateX(-50%);
-  }
-
-  .tooltip__bubble[data-placement^="bottom"] {
-    top: calc(100% + 0.5rem);
-    left: 50%;
-    transform: translateX(-50%);
-  }
-
-  .tooltip__bubble[data-placement^="left"] {
-    top: 50%;
-    right: calc(100% + 0.5rem);
-    transform: translateY(-50%);
-  }
-
-  .tooltip__bubble[data-placement^="right"] {
-    top: 50%;
-    left: calc(100% + 0.5rem);
-    transform: translateY(-50%);
-  }
-
-  .tooltip__bubble[data-placement$="start"] {
-    left: 0;
-    right: auto;
-    transform: none;
-  }
-
-  .tooltip__bubble[data-placement$="end"] {
-    right: 0;
-    left: auto;
-    transform: none;
   }
 </style>

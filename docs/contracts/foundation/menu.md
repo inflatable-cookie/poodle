@@ -59,8 +59,8 @@ MenuItem: {
   value: string;
   label: string;
   kind?: "action" | "checkbox" | "radio" | "separator";
-  isDisabled?: boolean;
-  isChecked?: boolean;
+  disabled?: boolean;
+  checked?: boolean;
   shortcutLabel?: string;
 }
 
@@ -82,8 +82,8 @@ OverlayPlacement: "bottom-start" | "bottom-end" | "top-start" | "top-end"
 | closed | default | overlay hidden |
 | open | open state true | overlay visible below/above trigger |
 | highlight | hover or keyboard focus on item | item background highlight |
-| checked | item model marks `isChecked` | visible checked indicator |
-| disabled | item model marks `isDisabled` | muted non-interactive item, reduced opacity |
+| checked | item model marks `checked` | visible checked indicator |
+| disabled | item model marks `disabled` | muted non-interactive item, reduced opacity |
 
 ### Component States
 
@@ -104,7 +104,7 @@ Open/closed state and current highlighted item index are required.
 - Overlay: `role="menu"`, `aria-label` when provided
 - Items: `role="menuitem"` for action kind, `role="menuitemcheckbox"` for
   checkbox kind, `role="menuitemradio"` for radio kind
-- Checked items: `aria-checked` attribute reflecting `isChecked` state
+- Checked items: `aria-checked` attribute reflecting `checked` state
 - Disabled items: `aria-disabled="true"`
 - Shortcut labels: supplemental descriptive text within the item
 

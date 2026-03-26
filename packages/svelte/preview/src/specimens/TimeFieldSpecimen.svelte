@@ -29,7 +29,7 @@
 
   <div class="specimen__group">
     <Eyebrow>Disabled</Eyebrow>
-    <TimeField id="disabled-time" defaultValue="12:00" isDisabled ariaLabel="Disabled time" />
+    <TimeField id="disabled-time" defaultValue="12:00" disabled ariaLabel="Disabled time" />
   </div>
 </div>
 

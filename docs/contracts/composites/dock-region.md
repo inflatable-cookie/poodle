@@ -82,10 +82,10 @@ Updated: 2026-03-18
 |------|------|---------|----------|-------|
 | `edge` | `DockEdge` | `"left"` | no | dock placement: `"left" \| "right" \| "top" \| "bottom"` |
 | `sizing` | `DockSizing` | `"flexible"` | no | `"static"` for fixed stacked panels, `"flexible"` for tabbed/collapsible |
-| `isCollapsed` | `boolean` | `false` | no | collapse state (flexible mode only) |
+| `collapsed` | `boolean` | `false` | no | collapse state (flexible mode only) |
 | `collapsedPosture` | `DockCollapsedPosture` | `"icon-strip"` | no | `"hidden"` or `"icon-strip"` |
 | `emphasis` | `DockEmphasis` | `"standard"` | no | `"standard" \| "quiet" \| "strong"` |
-| `items` | `PanelTabItem[]` | `[]` | no | panel definitions with value, label, icon, isClosable |
+| `items` | `PanelTabItem[]` | `[]` | no | panel definitions with value, label, icon, closable |
 | `value` | `string \| null` | `null` | no | controlled active panel (flexible mode) |
 | `ariaLabel` | `string \| null` | `null` | no | region accessible label |
 | `canAcceptPanel` | `(panelId: string, sourceEdge: DockEdge) => boolean \| null` | `null` | no | cross-region drop validation |
@@ -97,7 +97,7 @@ type PanelTabItem = {
   value: string;
   label: string;
   icon?: string | null;
-  isClosable?: boolean;
+  closable?: boolean;
 };
 ```
 
@@ -107,7 +107,7 @@ modes render icon-only tabs.
 ### Controlled And Uncontrolled
 
 - Active panel (`value`) is typically controlled by the parent shell
-- Collapse state (`isCollapsed`) is externally owned via `collapsedChange` event
+- Collapse state (`collapsed`) is externally owned via `collapsedChange` event
 
 ## 4. States
 
@@ -115,10 +115,10 @@ modes render icon-only tabs.
 
 | State | Trigger | Expected Result |
 |-------|---------|-----------------|
-| expanded | `sizing="flexible"`, `isCollapsed=false` | horizontal strip tabs + body visible |
-| collapsed icon-strip (side) | `isCollapsed=true`, `collapsedPosture="icon-strip"`, left/right edge | vertical icon-only tabs + collapse toggle at top |
-| collapsed icon-strip (top/bottom) | `isCollapsed=true`, `collapsedPosture="icon-strip"`, top/bottom edge | horizontal icon-only tabs + collapse toggle, body hidden |
-| collapsed hidden | `isCollapsed=true`, `collapsedPosture="hidden"` | only collapse toggle visible |
+| expanded | `sizing="flexible"`, `collapsed=false` | horizontal strip tabs + body visible |
+| collapsed icon-strip (side) | `collapsed=true`, `collapsedPosture="icon-strip"`, left/right edge | vertical icon-only tabs + collapse toggle at top |
+| collapsed icon-strip (top/bottom) | `collapsed=true`, `collapsedPosture="icon-strip"`, top/bottom edge | horizontal icon-only tabs + collapse toggle, body hidden |
+| collapsed hidden | `collapsed=true`, `collapsedPosture="hidden"` | only collapse toggle visible |
 | static | `sizing="static"` | stacked panels, no tabs or collapse |
 | compact | auto-detected | horizontal tabs collapse to icon-only when strip overflows |
 | drag-over | cross-region drag enters | dashed accent border overlay |
@@ -520,25 +520,25 @@ type PanelDragData = {
 
 | Label | Props / Config | Expected Visual |
 |-------|---------------|-----------------|
-| Flexible dock -- expanded (left edge) | `edge="left"`, `sizing="flexible"`, 3 items with icons (Explorer, Search, Source Control), `isCollapsed=false`, controlled `value` | Left dock with horizontal tab strip showing icon+label tabs, active panel body below with content; tabs closable and switchable |
+| Flexible dock -- expanded (left edge) | `edge="left"`, `sizing="flexible"`, 3 items with icons (Explorer, Search, Source Control), `collapsed=false`, controlled `value` | Left dock with horizontal tab strip showing icon+label tabs, active panel body below with content; tabs closable and switchable |
 
 ### Flexible Dock -- Collapsed Icon-Strip (Left Edge)
 
 | Label | Props / Config | Expected Visual |
 |-------|---------------|-----------------|
-| Flexible dock -- collapsed icon-strip (left edge) | `edge="left"`, `sizing="flexible"`, 3 items with icons, `isCollapsed=true`, `collapsedPosture="icon-strip"` | Narrow vertical icon-only strip with collapse toggle; no panel body visible; tooltips on hover |
+| Flexible dock -- collapsed icon-strip (left edge) | `edge="left"`, `sizing="flexible"`, 3 items with icons, `collapsed=true`, `collapsedPosture="icon-strip"` | Narrow vertical icon-only strip with collapse toggle; no panel body visible; tooltips on hover |
 
 ### Interactive Collapse Toggle
 
 | Label | Props / Config | Expected Visual |
 |-------|---------------|-----------------|
-| Interactive collapse toggle | `edge="left"`, `sizing="flexible"`, 3 items with icons (Files, Outline, Debug), `isCollapsed` togglable, `collapsedPosture="icon-strip"`, collapse/expand events bound | Left dock with toggle between expanded (tab strip + body) and collapsed (icon-strip) states; main content area alongside |
+| Interactive collapse toggle | `edge="left"`, `sizing="flexible"`, 3 items with icons (Files, Outline, Debug), `collapsed` togglable, `collapsedPosture="icon-strip"`, collapse/expand events bound | Left dock with toggle between expanded (tab strip + body) and collapsed (icon-strip) states; main content area alongside |
 
 ### Bottom Edge Dock
 
 | Label | Props / Config | Expected Visual |
 |-------|---------------|-----------------|
-| Bottom edge dock | `edge="bottom"`, `sizing="flexible"`, 3 items with icons (Terminal, Output, Problems), `isCollapsed` togglable, `collapsedPosture="icon-strip"` | Bottom dock with horizontal tabs, panel body expands upward; editor area above; collapses to thin horizontal strip |
+| Bottom edge dock | `edge="bottom"`, `sizing="flexible"`, 3 items with icons (Terminal, Output, Problems), `collapsed` togglable, `collapsedPosture="icon-strip"` | Bottom dock with horizontal tabs, panel body expands upward; editor area above; collapses to thin horizontal strip |
 
 ### Cross-Region Drag-And-Drop
 

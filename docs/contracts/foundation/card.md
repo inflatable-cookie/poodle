@@ -41,9 +41,9 @@ Updated: 2026-03-15
 |------|------|---------|----------|-------|
 | `variant` | `"default" \| "outlined" \| "elevated"` | `"default"` | no | visual treatment |
 | `layout` | `"vertical" \| "horizontal" \| "compact"` | `"vertical"` | no | content arrangement |
-| `isInteractive` | `boolean` | `false` | no | enables hover/focus states and pointer cursor |
-| `isSelected` | `boolean` | `false` | no | accent border and shadow treatment |
-| `hasMedia` | `boolean` | `false` | no | enables media slot region |
+| `interactive` | `boolean` | `false` | no | enables hover/focus states and pointer cursor |
+| `selected` | `boolean` | `false` | no | accent border and shadow treatment |
+| `media` | `boolean` | `false` | no | enables media slot region |
 | `ariaLabel` | `string \| null` | `null` | no | accessible name when interactive |
 
 ### Slots
@@ -57,7 +57,7 @@ Updated: 2026-03-15
 
 ### Controlled And Uncontrolled
 
-- Display component; no internal state. `isInteractive` and `isSelected` are
+- Display component; no internal state. `interactive` and `selected` are
   externally controlled.
 
 ## 4. States
@@ -70,7 +70,7 @@ Updated: 2026-03-15
 | outlined | `variant="outlined"` | stronger border, same background |
 | elevated | `variant="elevated"` | elevated background, multi-layer box-shadow |
 | interactive hover | pointer enters (when interactive) | hover fill, hover border, hover shadow |
-| selected | `isSelected=true` | accent border color, accent inset shadow |
+| selected | `selected=true` | accent border color, accent inset shadow |
 | compact | `layout="compact"` | reduced padding and gap |
 
 ## 5. Events
@@ -221,7 +221,7 @@ Updated: 2026-03-15
 
 - `data-variant`, `data-layout`, `data-interactive`, `data-selected` data attributes
 - CSS custom properties set on root element style attribute
-- Media slot conditionally rendered when `hasMedia` is true
+- Media slot conditionally rendered when `media` is true
 - Footer slot conditionally rendered when footer slot has content
 - Interactive mode adds click handler and keyboard activation
 
@@ -238,7 +238,7 @@ Updated: 2026-03-15
 
 ### Tier 1: Strict Parity
 
-- [ ] variant, layout, isInteractive, isSelected props produce matching behavior
+- [ ] variant, layout, interactive, selected props produce matching behavior
 - [ ] interactive card is keyboard activatable
 - [ ] selected card shows accent border treatment
 - [ ] ARIA roles match (button when interactive)
@@ -302,7 +302,7 @@ One clickable card with hover state:
 
 | Title | Body | Variant | Props |
 |-------|------|---------|-------|
-| Learn more | "Click to explore documentation and guides." | default | `isInteractive: true` |
+| Learn more | "Click to explore documentation and guides." | default | `interactive: true` |
 
 ## 14. Approval And Adoption Notes
 

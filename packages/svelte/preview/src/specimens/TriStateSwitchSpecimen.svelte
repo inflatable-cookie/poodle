@@ -25,7 +25,19 @@
 
   <div class="specimen__group">
     <Eyebrow>Disabled</Eyebrow>
-    <TriStateSwitch value="included" isDisabled ariaLabel="Disabled switch" />
+    <TriStateSwitch value="included" disabled ariaLabel="Disabled switch" />
+  </div>
+
+  <div class="specimen__group">
+    <Eyebrow>Custom semantic colors</Eyebrow>
+    <TriStateSwitch
+      value={filter}
+      excludedColor="#ef4444"
+      defaultColor="#64748b"
+      includedColor="#22c55e"
+      ariaLabel="Filter mode with custom semantic colors"
+      on:valueChange={(e) => (filter = e.detail.value)}
+    />
   </div>
 </div>
 

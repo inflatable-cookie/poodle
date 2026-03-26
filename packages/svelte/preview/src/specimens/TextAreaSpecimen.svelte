@@ -34,14 +34,14 @@
       id="readonly"
       defaultValue="This content cannot be modified by the user."
       rows={2}
-      isReadOnly
+      readOnly
       ariaLabel="Read-only textarea"
     />
   </div>
 
   <div class="specimen__group">
     <Eyebrow>Disabled</Eyebrow>
-    <TextArea id="disabled" placeholder="Disabled" isDisabled ariaLabel="Disabled textarea" />
+    <TextArea id="disabled" placeholder="Disabled" disabled ariaLabel="Disabled textarea" />
   </div>
 </div>
 

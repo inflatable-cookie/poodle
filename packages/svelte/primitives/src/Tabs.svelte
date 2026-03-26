@@ -3,12 +3,20 @@
 </script>
 
 <script lang="ts">
-  import { createEventDispatcher, onDestroy, tick } from "svelte";
+  import { createEventDispatcher, onDestroy, onMount, tick } from "svelte";
 
   import Icon from "./Icon.svelte";
+  import Pill from "./Pill.svelte";
   import { findNextEnabledIndex, firstEnabledIndex } from "./internal";
 
-  import type { Orientation, TabActivationMode, TabItem, TabVariant } from "./types";
+  import type {
+    ControlDensity,
+    ControlSize,
+    Orientation,
+    TabActivationMode,
+    TabItem,
+    TabVariant,
+  } from "./types";
 
   export let value: string | null = null;
   export let defaultValue: string | null = null;
@@ -16,9 +24,12 @@
   export let variant: TabVariant = "underline";
   export let orientation: Orientation = "horizontal";
   export let activationMode: TabActivationMode = "automatic";
-  export let isReorderable = false;
+  export let size: ControlSize = "md";
+  export let density: ControlDensity = "default";
+  export let reorderable = false;
   export let ariaLabel: string | null = null;
   export let showTooltips = false;
+  export let historyKey: string | null = null;
 
   const dispatch = createEventDispatcher<{
     valueChange: { value: string };
@@ -32,6 +43,8 @@
   let focusIndex = 0;
   let renderedItems: TabItem[] = items;
   let prevItems = items;
+  let lastSyncedValue: string | null = null;
+  const isBrowser = typeof window !== "undefined";
 
   $: if (items !== prevItems) {
     prevItems = items;
@@ -82,6 +95,42 @@
     dispatch("valueChange", { value: nextValue });
   }
 
+  function replaceUrlTabParam(nextValue: string): void {
+    if (!isBrowser || !historyKey) return;
+    const url = new URL(window.location.href);
+    url.searchParams.set(historyKey, nextValue);
+    window.history.replaceState(window.history.state, "", url);
+  }
+
+  onMount(() => {
+    if (!isBrowser || !historyKey) return;
+
+    const urlValue = new URL(window.location.href).searchParams.get(historyKey);
+    if (urlValue) {
+      setValue(urlValue);
+      lastSyncedValue = urlValue;
+    } else if (currentValue) {
+      replaceUrlTabParam(currentValue);
+      lastSyncedValue = currentValue;
+    }
+
+    const handlePopState = () => {
+      const nextValue = new URL(window.location.href).searchParams.get(historyKey);
+      if (nextValue && nextValue !== currentValue) {
+        setValue(nextValue);
+        lastSyncedValue = nextValue;
+      }
+    };
+
+    window.addEventListener("popstate", handlePopState);
+    return () => window.removeEventListener("popstate", handlePopState);
+  });
+
+  $: if (isBrowser && historyKey && currentValue && currentValue !== lastSyncedValue) {
+    replaceUrlTabParam(currentValue);
+    lastSyncedValue = currentValue;
+  }
+
   function moveFocus(nextIndex: number): void {
     focusIndex = nextIndex;
     tabElements[nextIndex]?.focus();
@@ -114,7 +163,7 @@
   }
 
   function requestReorder(index: number, direction: -1 | 1): void {
-    if (!isReorderable) return;
+    if (!reorderable) return;
 
     const nextIndex = index + direction;
 
@@ -124,7 +173,7 @@
   }
 
   function handleDragStart(event: DragEvent, index: number): void {
-    if (!isReorderable) return;
+    if (!reorderable) return;
 
     dragSourceIndex = index;
     if (event.dataTransfer) {
@@ -170,7 +219,7 @@
       (horizontal && event.key === "ArrowRight") ||
       (!horizontal && event.key === "ArrowDown")
     ) {
-      if (isReorderable && event.altKey) {
+      if (reorderable && event.altKey) {
         event.preventDefault();
         requestReorder(index, 1);
       } else {
@@ -184,7 +233,7 @@
       (horizontal && event.key === "ArrowLeft") ||
       (!horizontal && event.key === "ArrowUp")
     ) {
-      if (isReorderable && event.altKey) {
+      if (reorderable && event.altKey) {
         event.preventDefault();
         requestReorder(index, -1);
       } else {
@@ -219,14 +268,20 @@
       return;
     }
 
-    if (event.key === "Delete" && renderedItems[index]?.isClosable) {
+    if (event.key === "Delete" && renderedItems[index]?.closable) {
       event.preventDefault();
       dispatch("close", { value: renderedItems[index].value });
     }
   }
 </script>
 
-<div class="poodle-tabs" data-variant={variant} data-orientation={orientation}>
+<div
+  class="poodle-tabs"
+  data-variant={variant}
+  data-orientation={orientation}
+  data-size={size}
+  data-density={density}
+>
   <div
     class="poodle-tabs__list"
     role="tablist"
@@ -240,7 +295,7 @@
         data-selected={currentValue === item.value}
         data-drag-source={dragSourceIndex === index || undefined}
         data-drop-target={dropTargetIndex === index && dropTargetIndex !== dragSourceIndex || undefined}
-        draggable={isReorderable && !item.isDisabled}
+        draggable={reorderable && !item.disabled}
         on:dragstart={(e) => handleDragStart(e, index)}
         on:dragover={(e) => handleDragOver(e, index)}
         on:dragleave={handleDragLeave}
@@ -249,11 +304,14 @@
         on:mouseenter={() => hasTooltips && scheduleTooltip(index)}
         on:mouseleave={() => hasTooltips && dismissTooltip()}
       >
+        {#if item.separator}
+          <span class="poodle-tabs__separator" aria-hidden="true"></span>
+        {/if}
         <button
           bind:this={tabElements[index]}
           type="button"
           class="poodle-tabs__tab"
-          disabled={item.isDisabled === true}
+          disabled={item.disabled === true}
           id={`poodle-tab-${tabsId}-${item.value}`}
           role="tab"
           tabindex={focusIndex === index ? 0 : -1}
@@ -271,9 +329,14 @@
             <Icon icon={item.icon} size="sm" />
           {/if}
           <span class="poodle-tabs__label">{item.label}</span>
+          {#if item.count !== undefined}
+            <Pill tone="neutral" appearance="badge" size="sm" muted ariaLabel={`${item.count}`}>
+              {item.count}
+            </Pill>
+          {/if}
         </button>
 
-        {#if item.isClosable}
+        {#if item.closable}
           <button
             type="button"
             class="poodle-tabs__close"
@@ -316,9 +379,35 @@
   /* ── Root ── */
 
   .poodle-tabs {
+    --poodle-tabs-control-height: var(--poodle-size-control-height);
+    --poodle-tabs-control-x: var(--poodle-space-control-x);
     display: grid;
     gap: var(--poodle-space-stack-md);
     min-width: 0;
+  }
+
+  .poodle-tabs[data-size="sm"] {
+    --poodle-tabs-control-height: 1.75rem;
+  }
+
+  .poodle-tabs[data-size="md"] {
+    --poodle-tabs-control-height: 2.25rem;
+  }
+
+  .poodle-tabs[data-size="lg"] {
+    --poodle-tabs-control-height: 2.75rem;
+  }
+
+  .poodle-tabs[data-density="compact"] {
+    --poodle-tabs-control-x: 0.5rem;
+  }
+
+  .poodle-tabs[data-density="default"] {
+    --poodle-tabs-control-x: 0.75rem;
+  }
+
+  .poodle-tabs[data-density="comfortable"] {
+    --poodle-tabs-control-x: 1rem;
   }
 
   .poodle-tabs[data-orientation="vertical"] {
@@ -384,6 +473,13 @@
     min-width: 0;
   }
 
+  .poodle-tabs__separator {
+    width: 0.0625rem;
+    align-self: stretch;
+    margin-right: var(--poodle-space-inline-sm);
+    background: color-mix(in srgb, var(--poodle-color-border-subtle) 72%, transparent);
+  }
+
   /* Card variant: bordered card items */
   .poodle-tabs[data-variant="card"] .poodle-tabs__item {
     gap: 0;
@@ -424,8 +520,8 @@
     display: inline-flex;
     align-items: center;
     gap: var(--poodle-space-inline-sm);
-    min-height: calc(var(--poodle-size-control-height) - 0.25rem);
-    padding: 0 var(--poodle-space-control-x);
+    min-height: calc(var(--poodle-tabs-control-height) - 0.25rem);
+    padding: 0 var(--poodle-tabs-control-x);
     border: 0;
     background: transparent;
     color: var(--poodle-color-text-secondary);
@@ -449,7 +545,7 @@
 
   /* Card variant: transparent tab inside card */
   .poodle-tabs[data-variant="card"] .poodle-tabs__tab {
-    padding: 0 var(--poodle-space-control-x);
+    padding: 0 var(--poodle-tabs-control-x);
     color: var(--poodle-color-text-primary);
   }
 
@@ -457,6 +553,20 @@
   .poodle-tabs[data-variant="strip"] .poodle-tabs__item {
     border-bottom: 0.125rem solid transparent;
     margin-bottom: -0.0625rem;
+  }
+
+  .poodle-tabs[data-variant="strip"] .poodle-tabs__separator {
+    margin-right: 0;
+    margin-left: var(--poodle-space-inline-sm);
+    margin-block: 0.375rem;
+  }
+
+  .poodle-tabs[data-orientation="vertical"] .poodle-tabs__separator {
+    width: auto;
+    height: 0.0625rem;
+    margin-right: 0;
+    margin-bottom: var(--poodle-space-inline-sm);
+    align-self: stretch;
   }
 
   .poodle-tabs[data-variant="strip"] .poodle-tabs__item[data-selected="true"] {
@@ -468,8 +578,8 @@
   }
 
   .poodle-tabs[data-variant="strip"] .poodle-tabs__tab {
-    min-height: var(--poodle-size-control-height);
-    padding: 0 var(--poodle-space-control-x);
+    min-height: var(--poodle-tabs-control-height);
+    padding: 0 var(--poodle-tabs-control-x);
     border-radius: 0;
   }
 
@@ -503,8 +613,8 @@
   .poodle-tabs[data-variant="strip"][data-orientation="vertical"] .poodle-tabs__tab {
     justify-content: center;
     min-height: 0;
-    min-width: var(--poodle-size-control-height);
-    padding: var(--poodle-space-control-x);
+    min-width: var(--poodle-tabs-control-height);
+    padding: var(--poodle-tabs-control-x);
   }
 
   .poodle-tabs[data-variant="strip"][data-orientation="vertical"] .poodle-tabs__item:first-child .poodle-tabs__tab {
@@ -534,8 +644,8 @@
   }
 
   .poodle-tabs[data-variant="pill"] .poodle-tabs__tab {
-    min-height: calc(var(--poodle-size-control-height) - 0.5rem);
-    padding: 0 var(--poodle-space-control-x);
+    min-height: calc(var(--poodle-tabs-control-height) - 0.5rem);
+    padding: 0 var(--poodle-tabs-control-x);
     border-radius: 999px;
   }
 

@@ -2,6 +2,7 @@
   import { Button, Eyebrow } from "@poodle/svelte-primitives";
 
   let clickLog = "No button clicked yet.";
+  let intent = "save";
 
   function log(label: string): void {
     clickLog = `Clicked: ${label}`;
@@ -57,10 +58,39 @@
   <div class="specimen__group">
     <Eyebrow>States</Eyebrow>
     <div class="specimen__row">
-      <Button variant="primary" isDisabled>Disabled</Button>
-      <Button variant="primary" isLoading>Loading</Button>
-      <Button variant="secondary" isDisabled>Disabled secondary</Button>
+      <Button variant="primary" disabled>Disabled</Button>
+      <Button variant="primary" loading>Loading</Button>
+      <Button variant="secondary" disabled>Disabled secondary</Button>
     </div>
+  </div>
+
+  <div class="specimen__group">
+    <Eyebrow>Form overrides</Eyebrow>
+    <form class="specimen__form" on:submit|preventDefault={() => log(`Submitted via ${intent}`)}>
+      <input type="hidden" name="intent" value={intent} />
+      <div class="specimen__row">
+        <Button
+          type="submit"
+          variant="secondary"
+          on:click={() => {
+            intent = "save";
+          }}
+        >
+          Save
+        </Button>
+        <Button
+          type="submit"
+          variant="primary"
+          formaction="/publish"
+          formnovalidate
+          on:click={() => {
+            intent = "publish";
+          }}
+        >
+          Publish
+        </Button>
+      </div>
+    </form>
   </div>
 
   <p class="specimen__log">{clickLog}</p>

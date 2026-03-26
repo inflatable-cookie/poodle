@@ -60,9 +60,9 @@ Updated: 2026-03-16
 | `leadingShape` | `"circle" \| "rounded-square"` | `"circle"` | no | shape of the leading slot container |
 | `leadingFill` | `"tint" \| "solid"` | `"tint"` | no | fill style — tint uses translucent accent, solid uses opaque accent with white icon |
 | `accentColor` | `string \| null` | `null` | no | custom CSS color for leading background and icon; overrides theme accent |
-| `isInteractive` | `boolean` | `false` | no | enables hover/focus/click behavior |
-| `isDisabled` | `boolean` | `false` | no | disables interaction |
-| `isNotLive` | `boolean` | `false` | no | dashed border, reduced opacity; still interactive unlike disabled |
+| `interactive` | `boolean` | `false` | no | enables hover/focus/click behavior |
+| `disabled` | `boolean` | `false` | no | disables interaction |
+| `notLive` | `boolean` | `false` | no | dashed border, reduced opacity; still interactive unlike disabled |
 | `sash` | `string \| null` | `null` | no | short label for a diagonal corner ribbon (top-left); keep to ~4 chars |
 | `sashColor` | `string \| null` | `null` | no | custom CSS color for the sash ribbon background; defaults to positive/green |
 | `ariaLabel` | `string \| null` | `null` | no | accessible name |
@@ -78,7 +78,7 @@ Updated: 2026-03-16
 
 ### Controlled And Uncontrolled
 
-- Display component; interaction state externally controlled via `isInteractive`.
+- Display component; interaction state externally controlled via `interactive`.
 
 ## 4. States
 
@@ -89,8 +89,8 @@ Updated: 2026-03-16
 | default | resting | subtle border, surface background |
 | hover | pointer enters (when interactive) | elevated background, stronger border |
 | focus | keyboard focus (when interactive) | accent focus ring |
-| disabled | `isDisabled=true` | reduced opacity, not-allowed cursor |
-| not-live | `isNotLive=true` | dashed border (2px), transparent background, greyscale filter, reduced opacity (0.72); still interactive, greyscale and opacity restore on hover |
+| disabled | `disabled=true` | reduced opacity, not-allowed cursor |
+| not-live | `notLive=true` | dashed border (2px), transparent background, greyscale filter, reduced opacity (0.72); still interactive, greyscale and opacity restore on hover |
 
 ## 5. Events
 
@@ -390,60 +390,60 @@ A small companion component for rendering icon + count pairs in the footer slot.
 
 | Label | Props / Config | Expected Visual |
 |-------|---------------|-----------------|
-| design-system-v2.figma | `title`, `subtitle`, `meta="14.2 MB"`, `isInteractive`, leading icon (folder) | Interactive card with circle leading icon, title, subtitle, and right-aligned meta |
-| component-specs.pdf | `title`, `subtitle`, `meta="2.8 MB"`, `isInteractive`, leading icon (file-text) | Interactive card with circle leading icon |
-| brand-assets.zip | `title`, `subtitle="Archived"`, `meta="48 MB"`, `isDisabled`, leading icon (layers) | Disabled card at reduced opacity with not-allowed cursor |
+| design-system-v2.figma | `title`, `subtitle`, `meta="14.2 MB"`, `interactive`, leading icon (folder) | Interactive card with circle leading icon, title, subtitle, and right-aligned meta |
+| component-specs.pdf | `title`, `subtitle`, `meta="2.8 MB"`, `interactive`, leading icon (file-text) | Interactive card with circle leading icon |
+| brand-assets.zip | `title`, `subtitle="Archived"`, `meta="48 MB"`, `disabled`, leading icon (layers) | Disabled card at reduced opacity with not-allowed cursor |
 
 ### Rounded-Square Leading (Thumbnails)
 
 | Label | Props / Config | Expected Visual |
 |-------|---------------|-----------------|
-| hero-banner.png | `title`, `subtitle`, `meta="3.1 MB"`, `leadingShape="rounded-square"`, `isInteractive` | Card with rounded-square leading container instead of circle |
-| onboarding-flow.mp4 | `title`, `subtitle`, `meta="128 MB"`, `leadingShape="rounded-square"`, `isInteractive` | Card with rounded-square leading container |
+| hero-banner.png | `title`, `subtitle`, `meta="3.1 MB"`, `leadingShape="rounded-square"`, `interactive` | Card with rounded-square leading container instead of circle |
+| onboarding-flow.mp4 | `title`, `subtitle`, `meta="128 MB"`, `leadingShape="rounded-square"`, `interactive` | Card with rounded-square leading container |
 
 ### With Badges
 
 | Label | Props / Config | Expected Visual |
 |-------|---------------|-----------------|
-| API integration guide | `title`, `subtitle`, `meta="Draft"`, `isInteractive`, badges slot with accent Pill "New" | Card with pill badge inline next to title |
-| Q4 planning deck | `title`, `subtitle`, `isInteractive`, badges slot with muted Badge "3" + caution Pill "Review" | Card with multiple badges inline next to title |
+| API integration guide | `title`, `subtitle`, `meta="Draft"`, `interactive`, badges slot with accent Pill "New" | Card with pill badge inline next to title |
+| Q4 planning deck | `title`, `subtitle`, `interactive`, badges slot with muted Badge "3" + caution Pill "Review" | Card with multiple badges inline next to title |
 
 ### With Footer Counters
 
 | Label | Props / Config | Expected Visual |
 |-------|---------------|-----------------|
-| Design system | `title`, `subtitle`, `leadingShape="rounded-square"`, `isInteractive`, badges slot with positive Pill "Active", footer with 3 ListCardCounters | Card with badge, and footer row showing icon+count pairs (24 docs, 8 images, 3 sub-folders) |
-| Brand guidelines | `title`, `subtitle`, `leadingShape="rounded-square"`, `isInteractive`, footer with 2 ListCardCounters | Card with footer row showing icon+count pairs (6 docs, 42 images) |
+| Design system | `title`, `subtitle`, `leadingShape="rounded-square"`, `interactive`, badges slot with positive Pill "Active", footer with 3 ListCardCounters | Card with badge, and footer row showing icon+count pairs (24 docs, 8 images, 3 sub-folders) |
+| Brand guidelines | `title`, `subtitle`, `leadingShape="rounded-square"`, `interactive`, footer with 2 ListCardCounters | Card with footer row showing icon+count pairs (6 docs, 42 images) |
 
 ### Solid Fill With Accent Colors
 
 | Label | Props / Config | Expected Visual |
 |-------|---------------|-----------------|
-| Design tokens | `leadingShape="rounded-square"`, `leadingFill="solid"`, `accentColor="#6366f1"`, `isInteractive` | Card with opaque indigo leading background and white icon |
-| Components | `leadingShape="rounded-square"`, `leadingFill="solid"`, `accentColor="#ec4899"`, `isInteractive` | Card with opaque pink leading background and white icon |
-| Documentation | `leadingShape="rounded-square"`, `leadingFill="solid"`, `accentColor="#14b8a6"`, `isInteractive` | Card with opaque teal leading background and white icon |
-| Default accent | `leadingShape="rounded-square"`, `leadingFill="solid"`, `isInteractive` (no accentColor) | Card with theme accent solid leading background |
+| Design tokens | `leadingShape="rounded-square"`, `leadingFill="solid"`, `accentColor="#6366f1"`, `interactive` | Card with opaque indigo leading background and white icon |
+| Components | `leadingShape="rounded-square"`, `leadingFill="solid"`, `accentColor="#ec4899"`, `interactive` | Card with opaque pink leading background and white icon |
+| Documentation | `leadingShape="rounded-square"`, `leadingFill="solid"`, `accentColor="#14b8a6"`, `interactive` | Card with opaque teal leading background and white icon |
+| Default accent | `leadingShape="rounded-square"`, `leadingFill="solid"`, `interactive` (no accentColor) | Card with theme accent solid leading background |
 
 ### With Context Menu
 
 | Label | Props / Config | Expected Visual |
 |-------|---------------|-----------------|
-| Right-click for actions | `isInteractive`, wrapped in ContextMenu with Open, Rename, Duplicate, separator, Delete items | Card that shows context menu on right-click |
+| Right-click for actions | `interactive`, wrapped in ContextMenu with Open, Rename, Duplicate, separator, Delete items | Card that shows context menu on right-click |
 
 ### Not Live (Dashed Border)
 
 | Label | Props / Config | Expected Visual |
 |-------|---------------|-----------------|
-| Unpublished draft | `isInteractive`, `isNotLive`, `meta="Draft"` | Card with dashed border, reduced opacity, greyscale filter; restores on hover |
-| Staging environment | `isInteractive`, `isNotLive`, `leadingShape="rounded-square"`, badges slot with caution Pill "Pending" | Not-live card with badge |
+| Unpublished draft | `interactive`, `notLive`, `meta="Draft"` | Card with dashed border, reduced opacity, greyscale filter; restores on hover |
+| Staging environment | `interactive`, `notLive`, `leadingShape="rounded-square"`, badges slot with caution Pill "Pending" | Not-live card with badge |
 
 ### Corner Sash Badges
 
 | Label | Props / Config | Expected Visual |
 |-------|---------------|-----------------|
-| Free tier plan | `sash="Free"`, `isInteractive` | Card with diagonal green ribbon in top-left corner |
-| Premium integration | `sash="New"`, `sashColor="#6366f1"`, `leadingFill="solid"`, `accentColor="#6366f1"`, `isInteractive` | Card with diagonal indigo ribbon |
-| Legacy connector | `sash="EOL"`, `sashColor="#ef4444"`, `isInteractive` | Card with diagonal red ribbon |
+| Free tier plan | `sash="Free"`, `interactive` | Card with diagonal green ribbon in top-left corner |
+| Premium integration | `sash="New"`, `sashColor="#6366f1"`, `leadingFill="solid"`, `accentColor="#6366f1"`, `interactive` | Card with diagonal indigo ribbon |
+| Legacy connector | `sash="EOL"`, `sashColor="#ef4444"`, `interactive` | Card with diagonal red ribbon |
 
 ### Static List Card
 

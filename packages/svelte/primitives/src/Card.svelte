@@ -3,9 +3,9 @@
 
   export let variant: CardVariant = "default";
   export let layout: "vertical" | "horizontal" | "compact" = "vertical";
-  export let isInteractive = false;
-  export let isSelected = false;
-  export let hasMedia = false;
+  export let interactive = false;
+  export let selected = false;
+  export let media = false;
   export let ariaLabel: string | null = null;
 </script>
 
@@ -13,12 +13,12 @@
   class="card"
   data-variant={variant}
   data-layout={layout}
-  data-interactive={isInteractive}
-  data-selected={isSelected}
+  data-interactive={interactive}
+  data-selected={selected}
   aria-label={ariaLabel ?? undefined}
 >
   {#if $$slots.media}
-    <div class="card__media" data-has-media={hasMedia}>
+    <div class="card__media" data-has-media={media}>
       <slot name="media" />
     </div>
   {/if}

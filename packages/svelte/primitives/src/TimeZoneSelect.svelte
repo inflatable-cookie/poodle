@@ -10,7 +10,7 @@
   export let defaultValue: string | null = null;
   export let placeholder: string | null = "Select time zone";
   export let options: TimeZoneOption[] = [];
-  export let isDisabled = false;
+  export let disabled = false;
   export let ariaLabel: string | null = null;
   export let describedBy: string | null = null;
   export let name: string | undefined = undefined;
@@ -43,7 +43,7 @@
     {name}
     class="time-zone-select__control"
     value={currentValue}
-    disabled={isDisabled}
+    disabled={disabled}
     aria-label={ariaLabel ?? undefined}
     aria-describedby={describedBy ?? undefined}
     on:change={handleChange}
@@ -53,7 +53,7 @@
     {/if}
 
     {#each availableOptions as option (option.value)}
-      <option value={option.value} disabled={option.isDisabled === true}>
+      <option value={option.value} disabled={option.disabled === true}>
         {option.label}
       </option>
     {/each}

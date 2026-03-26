@@ -40,7 +40,7 @@ Updated: 2026-03-22
 | root | `<div>` | Container with border, radius, surface background |
 | toolbar | `<div>` | Flex row, space-between, toolbar buttons and mode switcher |
 | tools | `<div>` | Flex row of formatting tool buttons |
-| tool-button | `<button>` | Icon button for each formatting action; disabled when `isDisabled` or in preview mode |
+| tool-button | `<button>` | Icon button for each formatting action; disabled when `disabled` or in preview mode |
 | mode-switcher | `<div>` | Segmented group of mode toggle buttons |
 | mode-button | `<button>` | Switches between edit, split, preview modes; active state highlighted |
 | body | `<div>` | Flex container holding textarea and/or preview pane |
@@ -53,7 +53,7 @@ Updated: 2026-03-22
 |------|------|---------|----------|-------|
 | `value` | `string` | `""` | no | Markdown content (two-way bindable) |
 | `placeholder` | `string` | `"Write markdown..."` | no | Placeholder text for the textarea |
-| `isDisabled` | `boolean` | `false` | no | Disables editing and toolbar actions |
+| `disabled` | `boolean` | `false` | no | Disables editing and toolbar actions |
 | `ariaLabel` | `string` | `"Markdown editor"` | no | Accessible label for the textarea |
 | `minHeight` | `string` | `"12rem"` | no | CSS min-height for the textarea |
 | `mode` | `"edit" \| "preview" \| "split"` | `"edit"` | no | Active view mode |
@@ -73,10 +73,10 @@ None.
 | State | Trigger | Visual Effect |
 |-------|---------|---------------|
 | default | -- | Normal appearance |
-| disabled | `isDisabled=true` | `disabled_opacity` on root, `pointer-events: none` |
+| disabled | `disabled=true` | `disabled_opacity` on root, `pointer-events: none` |
 | tool-hover | Mouse over tool button | Accent background at 12% opacity, text-primary color |
 | tool-focus | Focus-visible on tool button | Focus ring |
-| tool-disabled | `isDisabled` or `mode="preview"` | 40% opacity on tool button |
+| tool-disabled | `disabled` or `mode="preview"` | 40% opacity on tool button |
 | mode-active | Mode matches current mode | Accent background at 16% opacity, text-primary color |
 | mode-hover | Mouse over mode button | Elevated background |
 
@@ -368,7 +368,7 @@ None yet (single implementation).
 
 | Label | Props / Config | Expected Visual |
 |-------|---------------|-----------------|
-| Disabled | `value="Read-only content"`, `isDisabled=true` | Reduced opacity, no interaction |
+| Disabled | `value="Read-only content"`, `disabled=true` | Reduced opacity, no interaction |
 
 ## 14. Approval And Adoption Notes
 

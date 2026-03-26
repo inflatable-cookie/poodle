@@ -5,7 +5,7 @@
     { value: "overview", label: "Overview" },
     { value: "features", label: "Features" },
     { value: "pricing", label: "Pricing" },
-    { value: "faq", label: "FAQ", isDisabled: true },
+    { value: "faq", label: "FAQ", disabled: true },
   ];
 
   const iconTabs: TabItem[] = [
@@ -16,23 +16,29 @@
 
   const closableTabs: TabItem[] = [
     { value: "index.ts", label: "index.ts" },
-    { value: "App.svelte", label: "App.svelte", isClosable: true },
-    { value: "utils.ts", label: "utils.ts", isClosable: true },
-    { value: "types.ts", label: "types.ts", isClosable: true },
+    { value: "App.svelte", label: "App.svelte", closable: true },
+    { value: "utils.ts", label: "utils.ts", closable: true },
+    { value: "types.ts", label: "types.ts", closable: true },
   ];
 
   const stripTabs: TabItem[] = [
     { value: "editor", label: "Editor", icon: "code" },
     { value: "preview", label: "Preview", icon: "eye" },
-    { value: "terminal", label: "Terminal", icon: "terminal", isClosable: true },
-    { value: "output", label: "Output", icon: "file-text", isClosable: true },
+    { value: "terminal", label: "Terminal", icon: "terminal", closable: true },
+    { value: "output", label: "Output", icon: "file-text", closable: true },
   ];
 
   const panelTabs: TabItem[] = [
-    { value: "explorer", label: "Explorer", icon: "folder", isClosable: true },
-    { value: "search", label: "Search", icon: "search", isClosable: true },
-    { value: "git", label: "Source Control", icon: "layers", isClosable: true },
-    { value: "debug", label: "Debug", icon: "terminal", isClosable: true },
+    { value: "explorer", label: "Explorer", icon: "folder", closable: true },
+    { value: "search", label: "Search", icon: "search", closable: true },
+    { value: "git", label: "Source Control", icon: "layers", closable: true },
+    { value: "debug", label: "Debug", icon: "terminal", closable: true },
+  ];
+
+  const detailTabs: TabItem[] = [
+    { value: "details", label: "Details" },
+    { value: "usage", label: "Usage", count: 12, separator: true },
+    { value: "versions", label: "Versions", count: 3 },
   ];
 
   let lastClosed = "";
@@ -59,7 +65,7 @@
       items={closableTabs}
       variant="card"
       defaultValue="App.svelte"
-      isReorderable
+      reorderable
       ariaLabel="Open files"
       on:close={(e) => (lastClosed = e.detail.value)}
       on:reorder={(e) => (lastReorder = e.detail.items.join(", "))}
@@ -98,7 +104,7 @@
         items={stripTabs}
         variant="strip"
         defaultValue="editor"
-        isReorderable
+        reorderable
         ariaLabel="Workspace surfaces"
         on:close={(e) => (lastClosed = e.detail.value)}
         on:reorder={(e) => (lastReorder = e.detail.items.join(", "))}
@@ -135,7 +141,7 @@
             variant="strip"
             orientation="horizontal"
             defaultValue="explorer"
-            isReorderable
+            reorderable
             ariaLabel="Side panel tabs"
             on:close={(e) => (lastClosed = e.detail.value)}
           />
@@ -159,6 +165,20 @@
         {panelCollapsed ? "→" : "←"}
       </button>
     </div>
+  </div>
+
+  <div class="specimen__group">
+    <Eyebrow>Card variant with counts, separators, and URL sync</Eyebrow>
+    <Tabs
+      items={detailTabs}
+      variant="card"
+      defaultValue="details"
+      historyKey="tab"
+      ariaLabel="Detail sections"
+      let:activeValue
+    >
+      <p>Active tab: <strong>{activeValue}</strong></p>
+    </Tabs>
   </div>
 </div>
 

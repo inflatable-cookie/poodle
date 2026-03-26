@@ -67,7 +67,7 @@
     <EditableLabel
       value="Read-only value"
       ariaLabel="Read-only"
-      isDisabled
+      disabled
     />
   </div>
 

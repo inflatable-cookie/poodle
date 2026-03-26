@@ -11,26 +11,42 @@
     <Eyebrow>Default</Eyebrow>
     <Switch
       label="Dark mode"
-      isChecked={darkMode}
+      checked={darkMode}
       on:checkedChange={(e) => (darkMode = e.detail.checked)}
     />
     <Switch
       label="Auto-save drafts"
-      isChecked={autoSave}
+      checked={autoSave}
       on:checkedChange={(e) => (autoSave = e.detail.checked)}
     />
     <Switch
       label="Compact view"
-      isChecked={compactView}
+      checked={compactView}
       on:checkedChange={(e) => (compactView = e.detail.checked)}
     />
   </div>
 
   <div class="specimen__group">
     <Eyebrow>States</Eyebrow>
-    <Switch label="Disabled off" isDisabled />
-    <Switch label="Disabled on" isChecked={true} isDisabled />
-    <Switch label="Read-only on" isChecked={true} isReadOnly />
+    <Switch label="Disabled off" disabled />
+    <Switch label="Disabled on" checked={true} disabled />
+    <Switch label="Read-only on" checked={true} readOnly />
+  </div>
+
+  <div class="specimen__group">
+    <Eyebrow>Custom colors</Eyebrow>
+    <Switch
+      label="Billing alerts"
+      checked={true}
+      onColor="#22c55e"
+      offColor="#cbd5e1"
+    />
+    <Switch
+      label="Quiet mode"
+      checked={false}
+      onColor="#f59e0b"
+      offColor="#94a3b8"
+    />
   </div>
 </div>
 

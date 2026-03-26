@@ -1,9 +1,10 @@
 <script lang="ts">
-  import { FileUpload, Eyebrow } from "@poodle/svelte-primitives";
+  import { DEFAULT_COMPRESSION, FileUpload, Eyebrow } from "@poodle/svelte-primitives";
   import type { FileUploadItem } from "@poodle/svelte-primitives";
 
   let imageFiles: FileUploadItem[] = [];
   let docFiles: FileUploadItem[] = [];
+  let compressedFiles: FileUploadItem[] = [];
   let errorMsg = "";
 </script>
 
@@ -27,6 +28,19 @@
       maxSize={10 * 1024 * 1024}
       showPreview={false}
       bind:files={docFiles}
+    />
+  </div>
+
+  <div class="specimen__group">
+    <Eyebrow>Compressed image upload with custom validation</Eyebrow>
+    <FileUpload
+      accept="image/*"
+      multiple
+      compress
+      compressionOptions={{ ...DEFAULT_COMPRESSION, maxWidth: 1200, maxHeight: 800, quality: 0.8 }}
+      bind:files={compressedFiles}
+      validate={(file) => (file.name.includes(" ") ? "Filename cannot contain spaces" : null)}
+      on:error={(e) => (errorMsg = e.detail.message)}
     />
   </div>
 

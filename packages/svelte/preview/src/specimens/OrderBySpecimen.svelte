@@ -7,7 +7,7 @@
     { value: "name", label: "Name" },
     { value: "date", label: "Date" },
     { value: "size", label: "Size" },
-    { value: "type", label: "Type", isDisabled: true },
+    { value: "type", label: "Type", disabled: true },
   ];
 </script>
 
@@ -30,7 +30,7 @@
     <Eyebrow>Disabled</Eyebrow>
     <OrderBy
       fields={[{ value: "name", label: "Name" }, { value: "date", label: "Date" }]}
-      isDisabled
+      disabled
     />
   </div>
 </div>

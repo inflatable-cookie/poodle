@@ -24,7 +24,7 @@
   export let swatches: string[] = [];
   export let showInput = true;
   export let showAlpha = false;
-  export let isDisabled = false;
+  export let disabled = false;
   export let ariaLabel = "Color picker";
   export let open: boolean | null = null;
   export let defaultOpen = false;
@@ -121,7 +121,7 @@
   }
 
   function toggleOpen(): void {
-    if (isDisabled) return;
+    if (disabled) return;
     setOpen(!isOpen);
   }
 
@@ -139,7 +139,7 @@
   }
 
   function onGradientPointerDown(event: PointerEvent): void {
-    if (isDisabled) return;
+    if (disabled) return;
     event.preventDefault();
     dragging = true;
     (event.currentTarget as HTMLElement).setPointerCapture(event.pointerId);
@@ -271,7 +271,7 @@
 
   // ── Swatches ─────────────────────────────────────────────────
   function selectSwatch(hex: string): void {
-    if (isDisabled) return;
+    if (disabled) return;
     syncFromHex(hex);
     commitFromPinned();
   }
@@ -305,7 +305,7 @@
 <div
   class="color-picker"
   aria-label={ariaLabel}
-  data-disabled={isDisabled || undefined}
+  data-disabled={disabled || undefined}
   bind:this={rootElement}
 >
   <!-- Trigger row -->
@@ -317,7 +317,7 @@
       aria-haspopup="dialog"
       aria-expanded={isOpen}
       aria-controls={surfaceId}
-      disabled={isDisabled}
+      disabled={disabled}
       on:click={toggleOpen}
     >
       <span
@@ -332,7 +332,7 @@
         type="text"
         class="color-picker__input"
         value={triggerHexInput}
-        disabled={isDisabled}
+        disabled={disabled}
         maxlength="9"
         aria-label="Hex color value"
         on:input={onTriggerHexInput}

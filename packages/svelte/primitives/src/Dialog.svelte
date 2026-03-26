@@ -2,6 +2,7 @@
   import { createEventDispatcher, onMount, tick } from "svelte";
 
   import { getFocusableElements } from "./internal";
+  import IconButton from "./IconButton.svelte";
 
   import type { DialogKind } from "./types";
 
@@ -13,6 +14,10 @@
   export let dismissOnEscape = true;
   export let dismissOnBackdrop = true;
   export let ariaLabel: string | null = null;
+  export let contentClassName = "";
+  export let overlayClassName = "";
+  export let showCloseButton = false;
+  export let closeLabel = "Close dialog";
 
   const dispatch = createEventDispatcher<{
     openChange: { open: boolean };
@@ -112,7 +117,7 @@
   <div class="dialog">
     <button
       type="button"
-      class="dialog__backdrop"
+      class={`dialog__backdrop ${overlayClassName}`}
       aria-label="Dismiss dialog backdrop"
       on:click={() => {
         if (dismissOnBackdrop) {
@@ -122,13 +127,26 @@
     ></button>
     <div
       bind:this={surfaceElement}
-      class="dialog__surface"
+      class={`dialog__surface ${contentClassName}`}
       role={kind}
       tabindex="-1"
       aria-label={title ? undefined : ariaLabel ?? undefined}
       aria-modal="true"
       on:keydown={trapFocus}
     >
+      {#if showCloseButton}
+        <div class="dialog__close">
+          <IconButton
+            type="button"
+            icon="x"
+            ariaLabel={closeLabel}
+            variant="ghost"
+            size="sm"
+            on:click={requestClose}
+          />
+        </div>
+      {/if}
+
       {#if title || description}
         <div class="dialog__header">
           {#if title}
@@ -194,6 +212,13 @@
       color-mix(in srgb, var(--poodle-color-background-elevated) 98%, var(--poodle-color-background-panel))
     );
     box-shadow: var(--poodle-treatment-surface-elevated-shadow, var(--poodle-elevation-dialog));
+  }
+
+  .dialog__close {
+    position: absolute;
+    top: var(--poodle-space-inline-sm);
+    right: var(--poodle-space-inline-sm);
+    z-index: 1;
   }
 
   .dialog__header {

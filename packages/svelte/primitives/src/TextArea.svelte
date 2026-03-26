@@ -9,8 +9,8 @@
   export let placeholder: string | null = null;
   export let rows = 4;
   export let name: string | undefined = undefined;
-  export let isDisabled = false;
-  export let isReadOnly = false;
+  export let disabled = false;
+  export let readOnly = false;
   export let validationState: ValidationState = "none";
   export let ariaLabel: string | null = null;
   export let describedBy: string | null = null;
@@ -59,8 +59,8 @@
     value={currentValue}
     {placeholder}
     {rows}
-    disabled={isDisabled}
-    readonly={isReadOnly}
+    disabled={disabled}
+    readonly={readOnly}
     aria-label={ariaLabel ?? undefined}
     aria-describedby={describedBy ?? undefined}
     aria-invalid={ariaInvalid}

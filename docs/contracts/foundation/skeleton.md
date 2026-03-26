@@ -48,7 +48,7 @@ Updated: 2026-03-15
 | `width` | `string \| null` | `null` | no | custom width override |
 | `height` | `string \| null` | `null` | no | custom height override |
 | `lines` | `number` | `3` | no | line count for detail-section preset |
-| `isAnimated` | `boolean` | `true` | no | shimmer animation toggle |
+| `animated` | `boolean` | `true` | no | shimmer animation toggle |
 
 ### Controlled And Uncontrolled
 
@@ -60,8 +60,8 @@ Updated: 2026-03-15
 
 | State | Trigger | Expected Result |
 |-------|---------|-----------------|
-| animated | `isAnimated=true` (default) | shimmer gradient sweeps across placeholder |
-| static | `isAnimated=false` | fixed gradient placeholder with no motion |
+| animated | `animated=true` (default) | shimmer gradient sweeps across placeholder |
+| static | `animated=false` | fixed gradient placeholder with no motion |
 
 ### Component States
 
@@ -168,7 +168,7 @@ Preset containers also animate children via
 | `display` | `flex` |
 | `flex-direction` | `column` |
 
-All preset roots set `aria-hidden="true"` and `data-animated={isAnimated}`.
+All preset roots set `aria-hidden="true"` and `data-animated={animated}`.
 
 ### Preset: table-row `.skeleton-preset--table-row`
 
@@ -427,7 +427,7 @@ Composes: avatar (2.25rem circle, same as list-item avatar) + line (width
 
 | Label | Props / Config | Expected Visual |
 |-------|---------------|-----------------|
-| Static line | `<Skeleton shape="line" width="10rem" isAnimated={false} />` | Line placeholder (10rem wide) with gradient fill but no shimmer animation |
+| Static line | `<Skeleton shape="line" width="10rem" animated={false} />` | Line placeholder (10rem wide) with gradient fill but no shimmer animation |
 
 ## 14. Approval And Adoption Notes
 

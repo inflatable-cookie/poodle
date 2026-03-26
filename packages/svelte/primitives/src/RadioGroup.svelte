@@ -11,10 +11,11 @@
   export let defaultValue: string | null = null;
   export let options: RadioGroupOption[] = [];
   export let orientation: Orientation = "vertical";
-  export let isDisabled = false;
+  export let disabled = false;
   export let ariaLabel: string | null = null;
   export let describedBy: string | null = null;
   export let name: string | undefined = undefined;
+  export let selectedColor: string | null = null;
 
   const dispatch = createEventDispatcher<{
     valueChange: { value: string };
@@ -25,6 +26,7 @@
 
   $: isControlled = value !== null;
   $: currentValue = isControlled ? value : uncontrolledValue;
+  $: radioGroupStyles = selectedColor ? `--poodle-radio-selected-color: ${selectedColor}` : undefined;
 
   function handleChange(nextValue: string): void {
     if (!isControlled) {
@@ -38,20 +40,21 @@
 <div
   class="radio-group"
   data-orientation={orientation}
-  data-disabled={isDisabled}
+  data-disabled={disabled}
   role="radiogroup"
   aria-label={ariaLabel ?? undefined}
   aria-describedby={describedBy ?? undefined}
+  style={radioGroupStyles}
 >
   {#each options as option (option.value)}
-    <label class="radio-group__option" data-disabled={isDisabled || option.isDisabled === true}>
+    <label class="radio-group__option" data-disabled={disabled || option.disabled === true}>
       <input
         class="radio-group__control"
         type="radio"
         name={name ?? generatedName}
         value={option.value}
         checked={currentValue === option.value}
-        disabled={isDisabled || option.isDisabled === true}
+        disabled={disabled || option.disabled === true}
         on:change={() => handleChange(option.value)}
       />
       <span class="radio-group__indicator" aria-hidden="true">
@@ -64,6 +67,7 @@
 
 <style>
   .radio-group {
+    --poodle-radio-selected-color: var(--poodle-color-accent-base);
     display: grid;
     gap: var(--poodle-space-stack-sm);
   }
@@ -119,11 +123,11 @@
   }
 
   .radio-group__control:checked + .radio-group__indicator {
-    border-color: var(--poodle-color-accent-base);
+    border-color: var(--poodle-radio-selected-color);
   }
 
   .radio-group__control:checked + .radio-group__indicator .radio-group__dot {
-    background: var(--poodle-color-accent-base);
+    background: var(--poodle-radio-selected-color);
   }
 
   .radio-group__control:focus-visible + .radio-group__indicator {

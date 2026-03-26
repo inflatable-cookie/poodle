@@ -27,6 +27,13 @@ export { default as Eyebrow } from "./Eyebrow.svelte";
 export { default as Field } from "./Field.svelte";
 export { default as FieldSet } from "./FieldSet.svelte";
 export { default as FileUpload } from "./FileUpload.svelte";
+export {
+  DEFAULT_COMPRESSION,
+  compressImage,
+  formatFileSize,
+  type FileUploadValidationError,
+  type ImageCompressionOptions,
+} from "./file-upload";
 export { default as FormActions } from "./FormActions.svelte";
 export { default as Grid } from "./Grid.svelte";
 export { default as HoverCard } from "./HoverCard.svelte";
@@ -62,6 +69,7 @@ export { default as Separator } from "./Separator.svelte";
 export { default as SplitButton } from "./SplitButton.svelte";
 export { default as Skeleton } from "./Skeleton.svelte";
 export { default as Slider } from "./Slider.svelte";
+export { default as Spinner } from "./Spinner.svelte";
 export { default as Spacer } from "./Spacer.svelte";
 export { default as Stack } from "./Stack.svelte";
 export { default as StatusBar } from "./StatusBar.svelte";
@@ -93,6 +101,7 @@ export type {
   CalendarWeekStart,
   CollapseDirection,
   ComboboxOption,
+  ControlDensity,
   ControlSize,
   DateTimeValue,
   DateTimeRangeValue,
@@ -125,6 +134,9 @@ export type {
   SeparatorTone,
   SkeletonPreset,
   SkeletonShape,
+  SpinnerSize,
+  SpinnerTone,
+  SpinnerVariant,
   SpaceScale,
   StatusTone,
   SurfaceBorder,
@@ -140,6 +152,9 @@ export type {
   ToggleVariant,
   TriStateValue,
   ValidationState,
+  InputValidationStatus,
+  InputValidator,
+  ValidationResult,
   ActiveSort,
   BreadcrumbItem,
   BulkAction,

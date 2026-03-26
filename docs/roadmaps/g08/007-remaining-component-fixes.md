@@ -24,9 +24,9 @@ has changed, update the implementation to match before proceeding.
 
 ### tri_state_switch
 
-- [ ] Verify contract: `docs/contracts/foundation/tri-state-switch.md`
-- [ ] Resolve track/thumb dimensions from spec tokens
-- [ ] Correctly center thumb in mixed state
+- [x] Verify contract: `docs/contracts/foundation/tri-state-switch.md`
+- [x] Resolve track/thumb dimensions from spec tokens
+- [x] Correctly center thumb in mixed state
 
 ### rating
 

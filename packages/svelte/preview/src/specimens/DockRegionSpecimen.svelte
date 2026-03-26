@@ -33,9 +33,9 @@
   let flexCollapsed = false;
 
   const flexItems: PanelTabItem[] = [
-    { value: "explorer", label: "Explorer", icon: folder, isClosable: true },
-    { value: "search", label: "Search", icon: "search", isClosable: true },
-    { value: "git", label: "Source Control", icon: code, isClosable: false },
+    { value: "explorer", label: "Explorer", icon: folder, closable: true },
+    { value: "search", label: "Search", icon: "search", closable: true },
+    { value: "git", label: "Source Control", icon: code, closable: false },
   ];
 
   // ── Interactive collapse state ─────────────────────────────────────
@@ -44,9 +44,9 @@
   let interactiveActive = "files";
 
   const interactiveItems: PanelTabItem[] = [
-    { value: "files", label: "Files", icon: folder, isClosable: true },
-    { value: "outline", label: "Outline", icon: listIcon, isClosable: true },
-    { value: "debug", label: "Debug", icon: terminal, isClosable: false },
+    { value: "files", label: "Files", icon: folder, closable: true },
+    { value: "outline", label: "Outline", icon: listIcon, closable: true },
+    { value: "debug", label: "Debug", icon: terminal, closable: false },
   ];
 
   // ── Bottom dock state ───────────────────────────────────────────────
@@ -55,20 +55,20 @@
   let bottomActive = "terminal";
 
   const bottomItems: PanelTabItem[] = [
-    { value: "terminal", label: "Terminal", icon: terminal, isClosable: true },
-    { value: "output", label: "Output", icon: "file-text", isClosable: true },
-    { value: "problems", label: "Problems", icon: "alert-circle", isClosable: false },
+    { value: "terminal", label: "Terminal", icon: terminal, closable: true },
+    { value: "output", label: "Output", icon: "file-text", closable: true },
+    { value: "problems", label: "Problems", icon: "alert-circle", closable: false },
   ];
 
   // ── Cross-region drag-and-drop state ───────────────────────────────
 
   let leftItems: PanelTabItem[] = [
-    { value: "explorer", label: "Explorer", icon: folder, isClosable: true },
-    { value: "search", label: "Search", icon: "search", isClosable: true },
-    { value: "git", label: "Source Control", icon: code, isClosable: true },
+    { value: "explorer", label: "Explorer", icon: folder, closable: true },
+    { value: "search", label: "Search", icon: "search", closable: true },
+    { value: "git", label: "Source Control", icon: code, closable: true },
   ];
   let rightItems: PanelTabItem[] = [
-    { value: "outline", label: "Outline", icon: listIcon, isClosable: true },
+    { value: "outline", label: "Outline", icon: listIcon, closable: true },
   ];
   let leftActive = "explorer";
   let rightActive = "outline";
@@ -161,7 +161,7 @@
           sizing="flexible"
           items={flexItems}
           value={flexActivePanel}
-          isCollapsed={false}
+          collapsed={false}
           on:valueChange={(e) => (flexActivePanel = e.detail.value)}
         >
           <div class="specimen__panel-content">
@@ -183,7 +183,7 @@
           sizing="flexible"
           items={flexItems}
           value={flexActivePanel}
-          isCollapsed={true}
+          collapsed={true}
           collapsedPosture="icon-strip"
           on:valueChange={(e) => (flexActivePanel = e.detail.value)}
         />
@@ -201,7 +201,7 @@
           sizing="flexible"
           items={interactiveItems}
           value={interactiveActive}
-          isCollapsed={interactiveCollapsed}
+          collapsed={interactiveCollapsed}
           collapsedPosture="icon-strip"
           on:valueChange={(e) => (interactiveActive = e.detail.value)}
           on:collapsedChange={(e) => (interactiveCollapsed = e.detail.isCollapsed)}
@@ -231,7 +231,7 @@
           sizing="flexible"
           items={bottomItems}
           value={bottomActive}
-          isCollapsed={bottomCollapsed}
+          collapsed={bottomCollapsed}
           collapsedPosture="icon-strip"
           on:valueChange={(e) => (bottomActive = e.detail.value)}
           on:collapsedChange={(e) => (bottomCollapsed = e.detail.isCollapsed)}

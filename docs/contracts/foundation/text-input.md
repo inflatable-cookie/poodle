@@ -1,7 +1,7 @@
 # Text Input
 
 Status: detailed contract
-Updated: 2026-03-15
+Updated: 2026-03-25
 
 ## 1. Purpose
 
@@ -9,7 +9,7 @@ Updated: 2026-03-15
 - Layer: `foundation`
 - Summary: a single-line text entry control with explicit value, validation,
   focus, and submission semantics; supports prefix/suffix affixes, character
-  counting, and leading/trailing affordance slots
+  counting, built-in async validation status indicators, and leading/trailing affordance slots
 - In scope: plain text input, placeholder, prefix/suffix affixes, character
   count, validation state, submit/cancel behavior, controlled and uncontrolled
   value models
@@ -24,9 +24,10 @@ Updated: 2026-03-15
   ├── [Prefix .text-input__affix--prefix] (optional, when prefix prop set)
   ├── [Leading Affordance .text-input__affordance] (optional, via slot)
   ├── [Input Control .text-input__control]  <input>
-  ├── [Character Count .text-input__char-count] (optional, when showCharCount)
   ├── [Trailing Affordance .text-input__affordance] (optional, via slot)
-  └── [Suffix .text-input__affix--suffix] (optional, when suffix prop set)
+  ├── [Validation Indicator .text-input__validation-indicator] (optional, when validationState != "none")
+  ├── [Suffix .text-input__affix--suffix] (optional, when suffix prop set)
+  └── [Character Count .text-input__char-count] (optional, when showCharCount)
 ```
 
 | Part | Required | Description | Token Targets |
@@ -35,9 +36,10 @@ Updated: 2026-03-15
 | Prefix | no | non-editable text prefix with separator | text color, border, spacing |
 | Leading Affordance | no | icon or adornment before text | icon color, icon size |
 | Input Control | yes | native single-line text input element | typography, text color, caret |
-| Character Count | no | live char count, optionally with max | code typography, status color |
 | Trailing Affordance | no | icon or action after text | icon color, icon size |
+| Validation Indicator | no | pending shared spinner or valid/invalid status icon | status colors, icon size, motion |
 | Suffix | no | non-editable text suffix with separator | text color, border, spacing |
+| Character Count | no | live char count, optionally with max | code typography, status color |
 
 ## 3. Props And Inputs
 
@@ -50,8 +52,20 @@ Updated: 2026-03-15
 | `defaultValue` | `string` | `""` | no | uncontrolled initial value |
 | `placeholder` | `string \| null` | `null` | no | hint text when empty |
 | `name` | `string \| undefined` | `undefined` | no | form submission name |
-| `isDisabled` | `boolean` | `false` | no | disables editing and interaction |
-| `isReadOnly` | `boolean` | `false` | no | allows selection without editing |
+| `autocomplete` | `string \| undefined` | `undefined` | no | native autocomplete attribute |
+| `disabled` | `boolean` | `false` | no | disables editing and interaction |
+| `readOnly` | `boolean` | `false` | no | allows selection without editing |
+| `required` | `boolean` | `false` | no | native required attribute |
+| `pattern` | `string \| undefined` | `undefined` | no | native pattern attribute |
+| `spellcheck` | `boolean \| undefined` | `undefined` | no | native spellcheck attribute |
+| `autocapitalize` | `string \| undefined` | `undefined` | no | native autocapitalize attribute |
+| `enterKeyHint` | `"enter" \| "done" \| "go" \| "next" \| "previous" \| "search" \| "send" \| null` | `null` | no | native enterkeyhint attribute |
+| `debounce` | `number \| null` | `null` | no | delays `valueChange` while typing |
+| `validate` | `InputValidator \| undefined` | `undefined` | no | optional validator function for sync or async validation |
+| `validationContext` | `unknown` | `undefined` | no | app-owned context passed to `validate` |
+| `validationDebounce` | `number` | `300` | no | delay before validation runs while typing |
+| `validateOnBlur` | `boolean` | `true` | no | whether blur triggers immediate validation |
+| `showValidationStatus` | `boolean` | `true` | no | whether built-in validation status chrome is shown |
 | `validationState` | `"none" \| "invalid" \| "valid" \| "pending"` | `"none"` | no | visual and assistive validation state |
 | `ariaLabel` | `string \| null` | `null` | no | required when no external label exists |
 | `describedBy` | `string \| null` | `null` | no | aria-describedby target |
@@ -68,6 +82,19 @@ Updated: 2026-03-15
 - uncontrolled: `defaultValue` sets the initial value; component owns its own state
 - do not mix controlled and uncontrolled modes simultaneously
 
+### Validation
+
+- `validationState` remains available for caller-owned visual state
+- when `validate` is provided, `TextInput` owns validation timing and emits
+  `validationChange`
+- built-in validation maps:
+  - `idle` -> keep caller-provided `validationState`
+  - `validating` -> `pending`
+  - `valid` -> `valid`
+  - `invalid` -> `invalid`
+- `validationContext` is opaque and app-owned; use it when validation depends
+  on sibling field values or existing record identifiers
+
 ## 4. States
 
 ### Visual States
@@ -77,11 +104,14 @@ Updated: 2026-03-15
 | default | resting | neutral input chrome with default border and background |
 | hover | pointer enters root | no explicit hover style on root (delegated to focus) |
 | focus | focus-within on root | border-color switches to focus border, background to focus fill, box-shadow to focus shadow |
-| disabled | `isDisabled=true` | opacity reduced via `state-opacity-disabled`, interaction suppressed |
-| readOnly | `isReadOnly=true` | selectable but not editable, no visual change beyond native behavior |
+| disabled | `disabled=true` | opacity reduced via `state-opacity-disabled`, interaction suppressed |
+| readOnly | `readOnly=true` | selectable but not editable, no visual change beyond native behavior |
 | invalid | `validationState="invalid"` | border-color switches to `status-danger` |
 | valid | `validationState="valid"` | border-color switches to `status-success` |
 | pending | `validationState="pending"` | border-color switches to `accent-base` |
+| pending-indicator | `validationState="pending"` | trailing spinner shows in accent color |
+| valid-indicator | `validationState="valid"` | trailing tick icon shows in success color |
+| invalid-indicator | `validationState="invalid"` | trailing cross icon shows in danger color |
 | char-over | character count exceeds maxLength | char count text color switches to `status-danger` |
 
 ## 5. Events
@@ -89,6 +119,7 @@ Updated: 2026-03-15
 | Event | When It Fires | Payload | Notes |
 |-------|---------------|---------|-------|
 | `valueChange` | user edits value | `{ value: string }` | fires on each input change |
+| `validationChange` | built-in validation status changes | `{ status: "idle" \| "validating" \| "valid" \| "invalid"; valid: boolean; message: string }` | only fires when `validate` is provided |
 | `submit` | Enter key pressed | `{ value: string }` | fires current value |
 | `cancel` | Escape key pressed | `void` | fires with no payload |
 | `focus` | input receives focus | `FocusEvent` | native focus event passthrough |
@@ -103,8 +134,11 @@ Updated: 2026-03-15
 - `aria-label`: from ariaLabel prop; required when no external label exists
 - `aria-describedby`: from describedBy prop
 - `aria-invalid`: `"true"` when validationState is `"invalid"`
-- `readonly`: native readonly attribute set when isReadOnly (note: `aria-readonly` is NOT explicitly set; the native `readonly` attribute is used instead)
-- `disabled`: native disabled attribute when isDisabled
+- `readonly`: native readonly attribute set when readOnly (note: `aria-readonly` is NOT explicitly set; the native `readonly` attribute is used instead)
+- `disabled`: native disabled attribute when disabled
+- `required`: native required attribute when required
+- `pattern`: native pattern attribute when provided
+- `autocomplete`: native autocomplete attribute when provided
 - `maxlength`: from maxLength prop
 - `inputmode`: from inputMode prop
 - Prefix/suffix: decorative, not announced; `user-select: none`
@@ -131,6 +165,7 @@ Updated: 2026-03-15
   Field wrapper on blur
 - live-region behavior: validation announcement is parent-owned (Field), but the
   input must expose invalid state via `aria-invalid`
+- validation indicator is decorative chrome only and must remain `aria-hidden`
 - GPUI-native accessibility mapping notes: GPUI must expose role/control type,
   accessible name, value, readonly/disabled/invalid state, selection/caret
   behavior, and IME-safe text entry semantics through native accessibility APIs
@@ -234,6 +269,29 @@ Updated: 2026-03-15
 | `font-family` | `var(--poodle-typography-code-family)` |
 | `font-size` | `var(--poodle-icon-size-default)` |
 
+### Validation Indicator `.text-input__validation-indicator`
+
+| Property | Value |
+|----------|-------|
+| `display` | `inline-flex` |
+| `align-items` | `center` |
+| `justify-content` | `center` |
+| `color` | `var(--poodle-color-icon-muted)` |
+
+### Validation Indicator state colors
+
+| State | `color` |
+|-------|---------|
+| `pending` | `var(--poodle-color-accent-base)` |
+| `valid` | `var(--poodle-color-status-success)` |
+| `invalid` | `var(--poodle-color-status-danger)` |
+
+### Spinner
+
+Pending validation uses the shared [`Spinner`](./spinner.md) primitive with
+`variant="ring"`, `size="sm"`, and `tone="current"` inside the validation
+indicator slot.
+
 ### Affix `.text-input__affix`
 
 | Property | Value |
@@ -287,6 +345,8 @@ Updated: 2026-03-15
   to `--poodle-radius-control`
 - `data-validation-state` data attribute drives validation border-color via CSS
   attribute selectors
+- non-`none` validation states also render a built-in trailing indicator:
+  shared spinner for `pending`, `circle-check` for `valid`, `circle-x` for `invalid`
 - Controlled mode: when `value` prop is non-null, the input value is bound to
   it; `valueChange` must be handled to update
 - Uncontrolled mode: internal state initialized from `defaultValue`
@@ -326,6 +386,7 @@ Updated: 2026-03-15
 
 - [ ] control sizing (min-height, padding, gap) uses the same token roles
 - [ ] validation emphasis uses the same semantic color roles (danger, success, accent)
+- [ ] built-in validation indicator semantics match (spinner, success icon, danger icon)
 - [ ] focus treatment matches (border, background, box-shadow transitions)
 - [ ] affix separator border uses the same color-mix formula (border-subtle 52%)
 - [ ] character count typography matches (code family, 0.6875rem)
@@ -367,13 +428,21 @@ One text input showing validation:
 |-------|-------------|------------|-------|
 | Email | you@example.com | invalid when missing `@`, valid otherwise | shows error message "Please enter a valid email address" when invalid |
 
+### Pending validation
+
+One text input showing async validation in progress:
+
+| Label | Placeholder | Validation | Notes |
+|-------|-------------|------------|-------|
+| Workspace | acme-admin | pending | shows built-in trailing spinner and parent pending message |
+
 ### Disabled
 
 One disabled text input:
 
 | Label | Value | Props |
 |-------|-------|-------|
-| API key | sk-••••••••1234 | `isDisabled: true` |
+| API key | sk-••••••••1234 | `disabled: true` |
 
 ## 14. Approval And Adoption Notes
 

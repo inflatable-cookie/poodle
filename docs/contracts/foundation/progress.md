@@ -37,7 +37,7 @@ The root element doubles as the track. There is no separate track element.
 |------|------|---------|----------|-------|
 | `value` | `number \| null` | `null` | no | current progress value |
 | `max` | `number` | `100` | no | maximum range |
-| `isIndeterminate` | `boolean` | `false` | no | active progress with no fixed value |
+| `indeterminate` | `boolean` | `false` | no | active progress with no fixed value |
 | `ariaLabel` | `string \| null` | `null` | no | optional accessible name when context needs it |
 | `valueText` | `string \| null` | `null` | no | human-readable progress text (e.g. "3 of 10") |
 
@@ -59,8 +59,8 @@ The root element doubles as the track. There is no separate track element.
 
 | State | Trigger | Expected Result |
 |-------|---------|-----------------|
-| determinate | `value` present and `isIndeterminate=false` | indicator scaled to `scaleX(percentage)` |
-| indeterminate | `isIndeterminate=true` | indicator animates continuously across track |
+| determinate | `value` present and `indeterminate=false` | indicator scaled to `scaleX(percentage)` |
+| indeterminate | `indeterminate=true` | indicator animates continuously across track |
 | complete | `value >= max` | indicator fills entire track (`scaleX(1)`) |
 
 ### Component States
@@ -82,7 +82,7 @@ internal state.
 - Required attributes (determinate): `aria-valuemin="0"`, `aria-valuemax={safeMax}`, `aria-valuenow={safeValue}`
 - Required attributes (indeterminate): no aria-valuemin, aria-valuemax, or aria-valuenow (omitted entirely)
 - Optional attributes: `aria-label={ariaLabel}` when provided, `aria-valuetext={valueText}` when provided
-- Data attribute: `data-indeterminate` present on root when `isIndeterminate=true`
+- Data attribute: `data-indeterminate` present on root when `indeterminate=true`
 - Labeling rules: when progress meaning is unclear from surrounding text, an
   explicit `ariaLabel` is required
 

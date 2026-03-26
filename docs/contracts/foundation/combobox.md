@@ -46,7 +46,7 @@ Updated: 2026-03-15
 | `defaultValue` | `string \| null` | `null` | no | uncontrolled initial selected value |
 | `options` | `ComboboxOption[]` | — | yes | list of suggestion options |
 | `placeholder` | `string \| null` | `null` | no | hint text when input is empty |
-| `isDisabled` | `boolean` | `false` | no | disables the input and suppresses opening |
+| `disabled` | `boolean` | `false` | no | disables the input and suppresses opening |
 | `ariaLabel` | `string \| null` | `null` | no | required when no visible label exists |
 
 ### Type Definitions
@@ -56,7 +56,7 @@ ComboboxOption: {
   value: string;
   label: string;
   description?: string;
-  isDisabled?: boolean;
+  disabled?: boolean;
 }
 ```
 
@@ -76,7 +76,7 @@ ComboboxOption: {
 | open | focus on input or user begins typing | list appears below input with filtered options |
 | highlighted | keyboard navigation or hover | highlighted option has accent background mix |
 | selected | option committed | input shows selected label, list closes |
-| disabled | `isDisabled=true` | input non-interactive, list cannot open |
+| disabled | `disabled=true` | input non-interactive, list cannot open |
 | empty results | query matches no options | empty message shown in list |
 
 ### Component States
@@ -309,7 +309,7 @@ ComboboxOption: {
 
 | Label | Props / Config | Expected Visual |
 |-------|---------------|-----------------|
-| Disabled | `options=[Svelte, React, Vue, Angular, SolidJS, Lit]`, `placeholder="Disabled"`, `isDisabled` | Combobox input with reduced opacity, non-interactive, list cannot open |
+| Disabled | `options=[Svelte, React, Vue, Angular, SolidJS, Lit]`, `placeholder="Disabled"`, `disabled` | Combobox input with reduced opacity, non-interactive, list cannot open |
 
 ## 14. Approval And Adoption Notes
 

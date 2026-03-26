@@ -18,7 +18,7 @@
 
   <div class="specimen__group">
     <Eyebrow>Disabled</Eyebrow>
-    <DateTimePicker isDisabled ariaLabel="Disabled date time picker" />
+    <DateTimePicker disabled ariaLabel="Disabled date time picker" />
   </div>
 </div>
 

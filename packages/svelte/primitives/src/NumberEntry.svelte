@@ -15,8 +15,8 @@
   export let step = 1;
   export let precision: number | null = null;
   export let name: string | undefined = undefined;
-  export let isDisabled = false;
-  export let isReadOnly = false;
+  export let disabled = false;
+  export let readOnly = false;
   export let validationState: ValidationState = "none";
   export let showSteppers = false;
   export let ariaLabel: string | null = null;
@@ -112,8 +112,8 @@
     inputmode="decimal"
     value={draftValue}
     {placeholder}
-    disabled={isDisabled}
-    readonly={isReadOnly}
+    disabled={disabled}
+    readonly={readOnly}
     aria-label={ariaLabel ?? undefined}
     aria-describedby={describedBy ?? undefined}
     aria-invalid={ariaInvalid}
@@ -129,12 +129,12 @@
         dispatch("submit", { value: currentValue });
       }
 
-      if (event.key === "ArrowUp" && !isReadOnly) {
+      if (event.key === "ArrowUp" && !readOnly) {
         event.preventDefault();
         adjust(step, "increment");
       }
 
-      if (event.key === "ArrowDown" && !isReadOnly) {
+      if (event.key === "ArrowDown" && !readOnly) {
         event.preventDefault();
         adjust(-step, "decrement");
       }
@@ -143,10 +143,10 @@
 
   {#if showSteppers}
     <div class="number-entry__steppers">
-      <button type="button" disabled={isDisabled || isReadOnly} on:click={() => adjust(step, "increment")}>
+      <button type="button" disabled={disabled || readOnly} on:click={() => adjust(step, "increment")}>
         <Icon name="plus" size="sm" />
       </button>
-      <button type="button" disabled={isDisabled || isReadOnly} on:click={() => adjust(-step, "decrement")}>
+      <button type="button" disabled={disabled || readOnly} on:click={() => adjust(-step, "decrement")}>
         <Icon name="minus" size="sm" />
       </button>
     </div>

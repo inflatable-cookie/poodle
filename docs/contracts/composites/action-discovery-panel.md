@@ -1,7 +1,7 @@
 # ActionDiscoveryPanel
 
 Status: contract
-Updated: 2026-03-22
+Updated: 2026-03-25
 
 ## 1. Purpose
 
@@ -27,7 +27,7 @@ type CommandActionItem = {
   shortcut?: string | null;
   keywords?: string[];
   badge?: string | null;
-  isDisabled?: boolean;
+  disabled?: boolean;
 };
 ```
 
@@ -129,6 +129,7 @@ response to keyboard events.
 - Badge and shortcut (kbd) rendered in trailing slot with pill styling
 - Shortcut uses monospace (`code-family`) typography
 - Skeleton rows during loading: two Skeleton elements per row (48% and 20% width)
+- Loading remains a Skeleton-based placeholder treatment rather than Spinner, because the panel is reserving result-list layout rather than indicating compact inline activity
 
 ### Token Usage — Exact CSS Values
 
@@ -231,7 +232,8 @@ response to keyboard events.
 
 - Composes: `Eyebrow`, `ListCard`, `Skeleton`, `EmptyState`
 - Used by: `CommandPalette`
-- Items are filtered internally to derive `enabledItems` (items where `isDisabled` is falsy)
+- Items are filtered internally to derive `enabledItems` (items where `disabled` is falsy)
+- Loading contract: both runtimes should render 5 skeleton rows rather than plain loading text
 
 ## 11. Specimen Definitions
 

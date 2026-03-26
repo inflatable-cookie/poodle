@@ -46,7 +46,7 @@
 
   <div class="specimen__group">
     <Eyebrow>Static (no animation)</Eyebrow>
-    <Skeleton shape="line" width="10rem" isAnimated={false} />
+    <Skeleton shape="line" width="10rem" animated={false} />
   </div>
 </div>
 

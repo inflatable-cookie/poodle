@@ -4,10 +4,10 @@
   import { Eyebrow } from "@poodle/svelte-primitives";
 
   const columns: TableColumn[] = [
-    { id: "name", label: "Name", isSortable: true, isHideable: false },
-    { id: "email", label: "Email", isSortable: true, isHideable: true },
-    { id: "role", label: "Role", isSortable: true, isHideable: true },
-    { id: "status", label: "Status", isSortable: false, isHideable: true },
+    { id: "name", label: "Name", sortable: true, hideable: false },
+    { id: "email", label: "Email", sortable: true, hideable: true },
+    { id: "role", label: "Role", sortable: true, hideable: true },
+    { id: "status", label: "Status", sortable: false, hideable: true },
   ];
 
   const rows: TableRow[] = [

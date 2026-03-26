@@ -52,7 +52,7 @@ Updated: 2026-03-15
 | `maxHours` | `number` | `99` | no | maximum hours value |
 | `minTotalSeconds` | `number` | `0` | no | minimum total duration in seconds |
 | `maxTotalSeconds` | `number \| null` | `null` | no | maximum total duration in seconds |
-| `isDisabled` | `boolean` | `false` | no | disables all fields |
+| `disabled` | `boolean` | `false` | no | disables all fields |
 | `ariaLabel` | `string` | `"Duration"` | no | accessible name for the group |
 
 ### Controlled And Uncontrolled
@@ -69,7 +69,7 @@ Updated: 2026-03-15
 | default | resting | bordered container with segmented fields |
 | focus-within | any field focused | accent border and focus shadow |
 | segment-focus | individual field focused | segment background highlight (covers label + field) |
-| disabled | `isDisabled=true` | reduced opacity, fields not editable |
+| disabled | `disabled=true` | reduced opacity, fields not editable |
 | invalid | total out of min/max bounds | danger border color |
 
 ## 5. Events
@@ -277,7 +277,7 @@ Updated: 2026-03-15
 
 | Label | Props / Config | Expected Visual |
 |-------|---------------|-----------------|
-| Disabled | `hours={2}`, `minutes={15}`, `seconds={30}`, `isDisabled` | Three-segment duration input with reduced opacity, non-interactive |
+| Disabled | `hours={2}`, `minutes={15}`, `seconds={30}`, `disabled` | Three-segment duration input with reduced opacity, non-interactive |
 
 ## 14. Approval And Adoption Notes
 

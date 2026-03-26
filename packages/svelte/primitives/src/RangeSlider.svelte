@@ -10,7 +10,7 @@
   export let max = 100;
   export let step = 1;
   export let orientation: Orientation = "horizontal";
-  export let isDisabled = false;
+  export let disabled = false;
   export let ariaLabel: string | null = null;
   export let lowerValueText: string | null = null;
   export let upperValueText: string | null = null;
@@ -41,7 +41,7 @@
   }
 </script>
 
-<div class="range-slider" data-orientation={orientation} data-disabled={isDisabled} style={rangeStyle}>
+<div class="range-slider" data-orientation={orientation} data-disabled={disabled} style={rangeStyle}>
   <span class="range-slider__track" aria-hidden="true">
     <span class="range-slider__fill"></span>
   </span>
@@ -53,7 +53,7 @@
     max={safeMax}
     {step}
     value={lowerValue}
-    disabled={isDisabled}
+    disabled={disabled}
     aria-label={ariaLabel ? `${ariaLabel} minimum` : "Minimum value"}
     aria-valuetext={lowerValueText ?? undefined}
     on:input={(event) =>
@@ -73,7 +73,7 @@
     max={safeMax}
     {step}
     value={upperValue}
-    disabled={isDisabled}
+    disabled={disabled}
     aria-label={ariaLabel ? `${ariaLabel} maximum` : "Maximum value"}
     aria-valuetext={upperValueText ?? undefined}
     on:input={(event) =>

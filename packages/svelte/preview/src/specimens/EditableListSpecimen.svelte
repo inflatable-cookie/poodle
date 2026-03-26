@@ -35,7 +35,7 @@
     <Eyebrow>Non-reorderable</Eyebrow>
     <EditableList
       items={[{ id: "x", label: "Static item" }]}
-      isReorderable={false}
+      reorderable={false}
       ariaLabel="Static list"
       placeholder="Add item…"
     />

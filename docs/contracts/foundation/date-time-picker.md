@@ -56,7 +56,7 @@ Updated: 2026-03-15
 | `placeholder` | `string` | `"Select date and time"` | no | shown when no value selected |
 | `weekStartsOn` | `"sunday" \| "monday"` | `"monday"` | no | first day of the week |
 | `locale` | `string` | `"en-US"` | no | locale for date formatting |
-| `isDisabled` | `boolean` | `false` | no | disables the trigger |
+| `disabled` | `boolean` | `false` | no | disables the trigger |
 | `ariaLabel` | `string \| null` | `null` | no | required when no visible label exists |
 
 ### Type Definitions
@@ -82,7 +82,7 @@ DateTimeValue: { date: string | null; time: string | null }
 | partial value | date or time chosen but not both | partial value displayed, overlay remains open |
 | complete value | both date and time committed | formatted date-time displayed |
 | open | trigger clicked or keyboard activated | surface appears below trigger |
-| disabled | `isDisabled=true` | reduced opacity, non-interactive, cursor: not-allowed |
+| disabled | `disabled=true` | reduced opacity, non-interactive, cursor: not-allowed |
 
 ### Component States
 
@@ -331,7 +331,7 @@ All preview apps must render the following specimens identically.
 
 | Label | Props/Config | Expected Visual |
 |-------|-------------|-----------------|
-| Disabled | `isDisabled=true`, `ariaLabel="Disabled date time picker"` | Trigger button with default placeholder, reduced opacity, cursor not-allowed, non-interactive |
+| Disabled | `disabled=true`, `ariaLabel="Disabled date time picker"` | Trigger button with default placeholder, reduced opacity, cursor not-allowed, non-interactive |
 
 ## 14. Approval And Adoption Notes
 

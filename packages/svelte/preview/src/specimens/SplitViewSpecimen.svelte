@@ -107,7 +107,7 @@
     <div class="specimen__frame">
       <SplitView
         orientation="horizontal"
-        isDisabled
+        disabled
         showCollapsePrimary
         showCollapseSecondary
       >

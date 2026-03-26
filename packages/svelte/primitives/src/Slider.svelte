@@ -10,7 +10,7 @@
   export let max = 100;
   export let step = 1;
   export let orientation: Orientation = "horizontal";
-  export let isDisabled = false;
+  export let disabled = false;
   export let ariaLabel: string | null = null;
   export let valueText: string | null = null;
 
@@ -29,7 +29,7 @@
   }
 </script>
 
-<div class="slider" data-orientation={orientation} data-disabled={isDisabled} style={sliderStyle}>
+<div class="slider" data-orientation={orientation} data-disabled={disabled} style={sliderStyle}>
   <span class="slider__track" aria-hidden="true">
     <span class="slider__fill"></span>
   </span>
@@ -40,7 +40,7 @@
     max={safeMax}
     {step}
     value={safeValue}
-    disabled={isDisabled}
+    disabled={disabled}
     aria-label={ariaLabel ?? undefined}
     aria-valuetext={valueText ?? undefined}
     on:input={(event) =>

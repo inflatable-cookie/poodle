@@ -3,6 +3,7 @@
 
   import { CollapseToggle, Tabs } from "@poodle/svelte-primitives";
   import type { TabItem } from "@poodle/svelte-primitives";
+  import type { ControlDensity, ControlSize } from "@poodle/svelte-primitives";
 
   import type {
     DockEdge,
@@ -15,9 +16,11 @@
 
   export let edge: DockEdge = "left";
   export let sizing: DockSizing = "flexible";
-  export let isCollapsed = false;
+  export let collapsed = false;
   export let collapsedPosture: DockCollapsedPosture = "icon-strip";
   export let emphasis: DockEmphasis = "standard";
+  export let size: ControlSize = "md";
+  export let density: ControlDensity = "default";
   export let items: PanelTabItem[] = [];
   export let value: string | null = null;
   export let ariaLabel: string | null = null;
@@ -42,19 +45,19 @@
   )[edge];
 
   $: tabOrientation =
-    isCollapsed && collapsedPosture === "icon-strip" && isVerticalEdge ? "vertical" : "horizontal";
+    collapsed && collapsedPosture === "icon-strip" && isVerticalEdge ? "vertical" : "horizontal";
 
   $: tabItems = items.map<TabItem>((item) => ({
     value: item.value,
     label: item.label,
     icon: item.icon ?? undefined,
-    isClosable: item.isClosable,
+    closable: item.closable,
   }));
 
   $: isVerticalEdge = edge === "left" || edge === "right";
-  $: stackDirection = isVerticalEdge ? "row" : "column";
-  $: showIconStrip = isCollapsed && collapsedPosture === "icon-strip";
-  $: showHidden = isCollapsed && collapsedPosture === "hidden";
+  $: stackDirection = isVerticalEdge ? "column" : "row";
+  $: showIconStrip = collapsed && collapsedPosture === "icon-strip";
+  $: showHidden = collapsed && collapsedPosture === "hidden";
 
   // ── Compact mode (auto-collapse labels when too narrow) ─────────────
 
@@ -121,7 +124,7 @@
 
   function handleValueChange(event: CustomEvent<{ value: string }>): void {
     dispatch("valueChange", event.detail);
-    if (isCollapsed) {
+    if (collapsed) {
       dispatch("collapsedChange", { isCollapsed: false });
     }
   }
@@ -135,9 +138,9 @@
   }
 
   function handleCollapseToggle(): void {
-    dispatch("collapsedChange", { isCollapsed: !isCollapsed });
+    dispatch("collapsedChange", { isCollapsed: !collapsed });
 
-    if (!isCollapsed) {
+    if (!collapsed) {
       // Collapsing — focus will move to collapse toggle via DOM
       void tick();
     }
@@ -262,8 +265,8 @@
   data-edge={edge}
   data-sizing={sizing}
   data-emphasis={emphasis}
-  data-collapsed={isCollapsed || undefined}
-  data-collapsed-posture={isCollapsed ? collapsedPosture : undefined}
+  data-collapsed={collapsed || undefined}
+  data-collapsed-posture={collapsed ? collapsedPosture : undefined}
   aria-label={ariaLabel ?? `${edge} dock`}
   on:dragover={handleRegionDragOver}
   on:dragleave={handleRegionDragLeave}
@@ -300,7 +303,7 @@
     <!-- Flexible collapsed (hidden): just the collapse toggle -->
     <div class="dock-region__edge-toggle">
       <CollapseToggle
-        {isCollapsed}
+        collapsed={collapsed}
         direction={collapseDirection}
         ariaLabel={`Expand ${edge} dock`}
         on:toggle={handleCollapseToggle}
@@ -311,7 +314,7 @@
     <!-- Flexible collapsed (icon-strip) for left/right: collapse toggle + vertical tabs -->
     <div class="dock-region__strip" data-orientation="vertical">
       <CollapseToggle
-        {isCollapsed}
+        collapsed={collapsed}
         direction={collapseDirection}
         ariaLabel={`Expand ${edge} dock`}
         on:toggle={handleCollapseToggle}
@@ -319,9 +322,11 @@
       <Tabs
         variant="strip"
         orientation="vertical"
+        size={size}
+        density={density}
         items={tabItems}
         value={activeItem?.value ?? ""}
-        isReorderable={true}
+        reorderable={true}
         ariaLabel={ariaLabel ?? `${edge} dock panels`}
         on:valueChange={handleValueChange}
         on:reorder={handleReorder}
@@ -342,10 +347,12 @@
         <Tabs
           variant="strip"
           orientation="horizontal"
+          size={size}
+          density={density}
           showTooltips={isCompact}
           items={tabItems}
           value={activeItem?.value ?? ""}
-          isReorderable={true}
+          reorderable={true}
           ariaLabel={ariaLabel ?? `${edge} dock panels`}
           on:valueChange={handleValueChange}
           on:reorder={handleReorder}
@@ -353,7 +360,7 @@
         />
       </div>
       <CollapseToggle
-        {isCollapsed}
+        collapsed={collapsed}
         direction={collapseDirection}
         ariaLabel={`Expand ${edge} dock`}
         on:toggle={handleCollapseToggle}
@@ -373,10 +380,12 @@
         <Tabs
           variant="strip"
           orientation="horizontal"
+          size={size}
+          density={density}
           showTooltips={isCompact}
           items={tabItems}
           value={activeItem?.value ?? ""}
-          isReorderable={true}
+          reorderable={true}
           ariaLabel={ariaLabel ?? `${edge} dock panels`}
           on:valueChange={handleValueChange}
           on:reorder={handleReorder}
@@ -384,7 +393,7 @@
         />
       </div>
       <CollapseToggle
-        {isCollapsed}
+        collapsed={collapsed}
         direction={collapseDirection}
         ariaLabel={`Collapse ${edge} dock`}
         on:toggle={handleCollapseToggle}
@@ -549,6 +558,22 @@
   /* Ensure items' accent border overlaps the strip's border-right */
   .dock-region__strip[data-orientation="vertical"] :global(.poodle-tabs__item) {
     margin-right: -0.0625rem !important;
+  }
+
+  .dock-region[data-edge="right"] .dock-region__strip[data-orientation="vertical"] {
+    border-right: 0;
+    border-left: 0.0625rem solid var(--poodle-color-border-subtle);
+  }
+
+  .dock-region[data-edge="right"] .dock-region__strip[data-orientation="vertical"] :global(.poodle-tabs__item) {
+    border-right: 0;
+    border-left: 0.125rem solid transparent;
+    margin-right: 0 !important;
+    margin-left: -0.125rem !important;
+  }
+
+  .dock-region[data-edge="right"] .dock-region__strip[data-orientation="vertical"] :global(.poodle-tabs__item[data-selected="true"]) {
+    border-left-color: var(--poodle-color-accent-base);
   }
 
   /* ── Flexible collapsed (hidden) ── */

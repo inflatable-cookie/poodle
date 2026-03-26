@@ -10,7 +10,7 @@
     { value: "free", label: "Free", description: "Basic features for personal use. Up to 3 projects." },
     { value: "pro", label: "Pro", description: "Advanced features for professionals. Unlimited projects." },
     { value: "team", label: "Team", description: "Collaboration tools for teams. Shared workspace included." },
-    { value: "enterprise", label: "Enterprise", description: "Custom solutions for large organizations.", isDisabled: true },
+    { value: "enterprise", label: "Enterprise", description: "Custom solutions for large organizations.", disabled: true },
   ];
 
   const sizeItems: CardRadioItem[] = [
@@ -53,7 +53,7 @@
       items={sizeItems}
       value="md"
       columns={3}
-      isDisabled
+      disabled
       ariaLabel="Disabled selection"
     />
   </div>

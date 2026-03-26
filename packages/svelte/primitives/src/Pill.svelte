@@ -3,9 +3,9 @@
 
   export let tone: PillTone = "neutral";
   export let appearance: PillAppearance = "solid";
-  export let size: PillSize = "xs";
+  export let size: PillSize = "md";
   export let font: PillFont = "normal";
-  export let isMuted = false;
+  export let muted = false;
   export let ariaLabel: string | null = null;
 </script>
 
@@ -15,7 +15,7 @@
   data-appearance={appearance}
   data-size={size}
   data-font={font}
-  data-muted={isMuted}
+  data-muted={muted}
   aria-label={ariaLabel ?? undefined}
 >
   <slot />
@@ -58,13 +58,13 @@
     --poodle-pill-fill: color-mix(in srgb, var(--poodle-pill-fill) 50%, transparent);
   }
 
-  .pill[data-size="xxs"] {
+  .pill[data-size="sm"] {
     min-height: 1rem;
     padding: 0.125rem 0.375rem;
     font-size: 0.625rem;
   }
 
-  .pill[data-size="sm"] {
+  .pill[data-size="lg"] {
     min-height: 1.375rem;
     padding: 0.25rem 0.625rem;
     font-size: 0.75rem;

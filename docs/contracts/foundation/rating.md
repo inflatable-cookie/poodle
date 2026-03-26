@@ -40,7 +40,7 @@ Updated: 2026-03-15
 | `defaultValue` | `number \| null` | `null` | no | uncontrolled initial value |
 | `max` | `number` | `5` | no | total number of rating items |
 | `allowClear` | `boolean` | `false` | no | whether clicking the current value deselects it |
-| `isDisabled` | `boolean` | `false` | no | disables all items |
+| `disabled` | `boolean` | `false` | no | disables all items |
 | `ariaLabel` | `string \| null` | `null` | no | accessible group label |
 
 ### Controlled And Uncontrolled
@@ -60,7 +60,7 @@ Updated: 2026-03-15
 | empty | no value selected | all items show unfilled color |
 | selected | value is set | items up to and including value show filled color |
 | hover/focus | item hovered or focus-visible | highlighted background on target item |
-| disabled | `isDisabled=true` | all items show disabled opacity, cursor not-allowed |
+| disabled | `disabled=true` | all items show disabled opacity, cursor not-allowed |
 
 ### Component States
 
@@ -269,7 +269,7 @@ All preview apps must render the following specimens identically.
 
 | Label | Props/Config | Expected Visual |
 |-------|-------------|-----------------|
-| Disabled | `defaultValue=2`, `isDisabled=true`, `ariaLabel="Disabled rating"` | Row of 5 star items; first 2 filled; reduced opacity, cursor not-allowed, non-interactive |
+| Disabled | `defaultValue=2`, `disabled=true`, `ariaLabel="Disabled rating"` | Row of 5 star items; first 2 filled; reduced opacity, cursor not-allowed, non-interactive |
 
 ## 14. Approval And Adoption Notes
 

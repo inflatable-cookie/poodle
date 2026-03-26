@@ -1,7 +1,7 @@
 # Composite Contracts
 
 Status: active
-Updated: 2026-03-23
+Updated: 2026-03-24
 
 Composite contracts define reusable application- and product-style components
 built from foundation primitives without embedding app-specific workflow logic.
@@ -27,10 +27,13 @@ built from foundation primitives without embedding app-specific workflow logic.
 - `form-dialog.md`
 - `form-layout.md`
 - `log-list.md`
+- `list-container.md`
 - `markdown-editor.md`
+- `media-browse-panel.md`
 - `media-picker.md`
 - `media-preview.md`
 - `media-thumbnail.md`
+- `media-upload-status-panel.md`
 - `metric-tile.md`
 - `page-header.md`
 - `page-loading.md`
@@ -38,7 +41,6 @@ built from foundation primitives without embedding app-specific workflow logic.
 - `relation-picker.md`
 - `reorderable-list.md`
 - `selection-summary.md`
-- `slug-field.md`
 - `split-view.md`
 - `toast-stack.md`
 - `video-player.md`

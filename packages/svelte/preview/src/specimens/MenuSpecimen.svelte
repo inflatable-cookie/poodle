@@ -7,11 +7,11 @@
     { value: "save", label: "Save", shortcutLabel: "⌘S" },
     { value: "sep1", label: "", kind: "separator" },
     { value: "export", label: "Export as PDF" },
-    { value: "print", label: "Print…", shortcutLabel: "⌘P", isDisabled: true },
+    { value: "print", label: "Print…", shortcutLabel: "⌘P", disabled: true },
   ];
 
   const settingsItems: MenuItem[] = [
-    { value: "theme", label: "Dark mode", kind: "checkbox", isChecked: true },
+    { value: "theme", label: "Dark mode", kind: "checkbox", checked: true },
     { value: "notifications", label: "Notifications", kind: "checkbox" },
     { value: "sep1", label: "", kind: "separator" },
     { value: "settings", label: "Settings…" },

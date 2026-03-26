@@ -2,7 +2,7 @@
   import type { ControlSize } from "./types";
   import type { IconNodes } from "./icon-registry";
 
-  import { resolveIconNodes, lazyResolveIcon, getIconSet } from "./icon-registry";
+  import { resolveIconNodes, getIconSet } from "./icon-registry";
 
   /**
    * The icon to display. Accepts:
@@ -17,19 +17,10 @@
   export let ariaLabel: string | null = null;
 
   const iconSet = getIconSet();
+  let nodes: IconNodes = [];
 
   $: resolvedIcon = icon ?? name;
-
-  // Sync resolution: check IconProvider context and lazy cache
   $: nodes = resolveIconNodes(resolvedIcon, iconSet);
-
-  // If sync returned empty for a string name, kick off lazy import
-  $: if (nodes.length === 0 && typeof resolvedIcon === "string" && resolvedIcon) {
-    lazyResolveIcon(resolvedIcon, () => {
-      // Re-trigger reactivity by re-resolving
-      nodes = resolveIconNodes(resolvedIcon, iconSet);
-    });
-  }
 </script>
 
 <svg
@@ -76,6 +67,11 @@
     flex-shrink: 0;
   }
 
+  .poodle-icon[data-size="xs"] {
+    width: 0.625rem;
+    height: 0.625rem;
+  }
+
   .poodle-icon[data-size="sm"] {
     width: var(--poodle-size-icon-sm);
     height: var(--poodle-size-icon-sm);
@@ -84,5 +80,10 @@
   .poodle-icon[data-size="lg"] {
     width: var(--poodle-size-icon-lg);
     height: var(--poodle-size-icon-lg);
+  }
+
+  .poodle-icon[data-size="xl"] {
+    width: 1.5rem;
+    height: 1.5rem;
   }
 </style>

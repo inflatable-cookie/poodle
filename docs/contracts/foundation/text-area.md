@@ -39,8 +39,8 @@ Updated: 2026-03-15
 | `placeholder` | `string \| null` | `null` | no | hint text when empty |
 | `rows` | `number` | `4` | no | initial visible line count |
 | `name` | `string \| undefined` | `undefined` | no | form submission name |
-| `isDisabled` | `boolean` | `false` | no | disables editing and interaction |
-| `isReadOnly` | `boolean` | `false` | no | allows selection without editing |
+| `disabled` | `boolean` | `false` | no | disables editing and interaction |
+| `readOnly` | `boolean` | `false` | no | allows selection without editing |
 | `validationState` | `"none" \| "invalid" \| "valid" \| "pending"` | `"none"` | no | visual and assistive validation state |
 | `ariaLabel` | `string \| null` | `null` | no | required when no external label exists |
 | `describedBy` | `string \| null` | `null` | no | aria-describedby target |
@@ -59,8 +59,8 @@ Updated: 2026-03-15
 |-------|---------|-----------------|
 | default | resting | neutral multiline field chrome |
 | focus | focus-within on root | border-color switches to focus border, background to focus fill, box-shadow to focus shadow |
-| disabled | `isDisabled=true` | opacity reduced via `state-opacity-disabled`, interaction suppressed |
-| readOnly | `isReadOnly=true` | selectable but not editable |
+| disabled | `disabled=true` | opacity reduced via `state-opacity-disabled`, interaction suppressed |
+| readOnly | `readOnly=true` | selectable but not editable |
 | invalid | `validationState="invalid"` | border-color switches to `status-danger` |
 | valid | `validationState="valid"` | border-color switches to `status-success` |
 | pending | `validationState="pending"` | border-color switches to `accent-base` |
@@ -84,8 +84,8 @@ Updated: 2026-03-15
 - `aria-label`: from ariaLabel prop; required when no external label exists
 - `aria-describedby`: from describedBy prop
 - `aria-invalid`: `"true"` when validationState is `"invalid"`
-- `readonly`: native readonly attribute set when isReadOnly (note: `aria-readonly` is NOT explicitly set; the native `readonly` attribute is used instead)
-- `disabled`: native disabled attribute when isDisabled
+- `readonly`: native readonly attribute set when readOnly (note: `aria-readonly` is NOT explicitly set; the native `readonly` attribute is used instead)
+- `disabled`: native disabled attribute when disabled
 - `rows`: from rows prop, sets initial visible height
 - Labeling rules: placeholder text never counts as the accessible name
 
@@ -287,13 +287,13 @@ Updated: 2026-03-15
 
 | Label | Props / Config | Expected Visual |
 |-------|---------------|-----------------|
-| Read-only | `defaultValue="This content cannot be modified by the user."`, `rows={2}`, `isReadOnly` | Field displays text that can be selected but not edited |
+| Read-only | `defaultValue="This content cannot be modified by the user."`, `rows={2}`, `readOnly` | Field displays text that can be selected but not edited |
 
 ### Disabled
 
 | Label | Props / Config | Expected Visual |
 |-------|---------------|-----------------|
-| Disabled | `placeholder="Disabled"`, `isDisabled` | Field with reduced opacity, non-interactive |
+| Disabled | `placeholder="Disabled"`, `disabled` | Field with reduced opacity, non-interactive |
 
 ## 14. Approval And Adoption Notes
 

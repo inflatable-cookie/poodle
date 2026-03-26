@@ -13,6 +13,9 @@
   export let confirmLabel = "Confirm";
   export let cancelLabel = "Cancel";
   export let ariaLabel: string | null = null;
+  export let workingLabel = "Working…";
+  export let onConfirm: (() => void | Promise<void>) | null = null;
+  export let onCancel: (() => void) | null = null;
 
   const dispatch = createEventDispatcher<{
     confirm: void;
@@ -23,18 +26,34 @@
   let working = false;
 
   async function handleConfirm(): Promise<void> {
+    if (working) {
+      return;
+    }
+
     working = true;
 
     try {
-      dispatch("confirm");
+      if (onConfirm) {
+        await onConfirm();
+      } else {
+        dispatch("confirm");
+      }
+
+      setOpen(false);
+    } catch {
+      // Keep the dialog open so the caller can recover or retry.
     } finally {
       working = false;
-      setOpen(false);
     }
   }
 
   function handleCancel(): void {
-    dispatch("cancel");
+    if (onCancel) {
+      onCancel();
+    } else {
+      dispatch("cancel");
+    }
+
     setOpen(false);
   }
 
@@ -63,6 +82,7 @@
   {ariaLabel}
   dismissOnEscape={!working}
   dismissOnBackdrop={!working}
+  showCloseButton={!working}
   on:openChange={handleOpenChange}
 >
   <slot />
@@ -71,7 +91,7 @@
     <Button
       variant="ghost"
       on:click={handleCancel}
-      isDisabled={working}
+      disabled={working}
     >
       {cancelLabel}
     </Button>
@@ -79,9 +99,9 @@
       variant="primary"
       tone={confirmTone}
       on:click={handleConfirm}
-      isDisabled={working}
+      disabled={working}
     >
-      {working ? "Working\u2026" : confirmLabel}
+      {working ? workingLabel : confirmLabel}
     </Button>
   </svelte:fragment>
 </Dialog>

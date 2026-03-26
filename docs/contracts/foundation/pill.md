@@ -33,7 +33,7 @@ Updated: 2026-03-24
 | `appearance` | `"solid" \| "subtle" \| "badge"` | `"solid"` | no | fill opacity variant |
 | `size` | `"sm" \| "md" \| "lg"` | `"md"` | no | compact scale from smallest to largest |
 | `font` | `"normal" \| "mono"` | `"normal"` | no | content font variant |
-| `isMuted` | `boolean` | `false` | no | visual de-emphasis via reduced opacity |
+| `muted` | `boolean` | `false` | no | visual de-emphasis via reduced opacity |
 | `ariaLabel` | `string \| null` | `null` | no | optional explicit accessible name |
 
 ### Controlled And Uncontrolled
@@ -50,7 +50,7 @@ Updated: 2026-03-24
 | success | `tone="success"` | green-tinted fill and border, primary text |
 | danger | `tone="danger"` | red-tinted fill and border, primary text |
 | subtle | `appearance="subtle"` | 50% transparent fill overlay |
-| muted | `isMuted=true` | reduced opacity (0.72) |
+| muted | `muted=true` | reduced opacity (0.72) |
 
 ### Component States
 

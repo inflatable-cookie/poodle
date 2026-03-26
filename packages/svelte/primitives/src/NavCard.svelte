@@ -5,7 +5,7 @@
   export let description: string | null = null;
   export let href: string | null = null;
   export let badge: string | null = null;
-  export let isDisabled = false;
+  export let disabled = false;
   export let ariaLabel: string | null = null;
 
   const dispatch = createEventDispatcher<{
@@ -13,7 +13,7 @@
   }>();
 
   function handleClick(event: MouseEvent): void {
-    if (isDisabled) {
+    if (disabled) {
       event.preventDefault();
       return;
     }
@@ -21,12 +21,12 @@
   }
 </script>
 
-{#if href && !isDisabled}
+{#if href && !disabled}
   <a
     class="nav-card"
     {href}
     aria-label={ariaLabel ?? title}
-    data-disabled={isDisabled}
+    data-disabled={disabled}
     on:click={handleClick}
   >
     {#if $$slots.icon}
@@ -54,8 +54,8 @@
     type="button"
     class="nav-card"
     aria-label={ariaLabel ?? title}
-    disabled={isDisabled}
-    data-disabled={isDisabled}
+    disabled={disabled}
+    data-disabled={disabled}
     on:click={handleClick}
   >
     {#if $$slots.icon}

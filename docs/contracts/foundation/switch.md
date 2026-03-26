@@ -1,7 +1,7 @@
 # Switch
 
 Status: detailed contract
-Updated: 2026-03-15
+Updated: 2026-03-24
 
 ## 1. Purpose
 
@@ -40,20 +40,24 @@ Updated: 2026-03-15
 | Prop | Type | Default | Required | Notes |
 |------|------|---------|----------|-------|
 | `id` | `string \| undefined` | `undefined` | no | element id for external label association |
-| `isChecked` | `boolean \| null` | `null` | no | controlled on/off state; when non-null, component is controlled |
+| `checked` | `boolean \| null` | `null` | no | controlled on/off state; when non-null, component is controlled |
 | `defaultChecked` | `boolean` | `false` | no | uncontrolled initial state |
-| `isDisabled` | `boolean` | `false` | no | disables interaction, applies disabled opacity |
-| `isReadOnly` | `boolean` | `false` | no | allows focus and reading but reverts any change attempt |
+| `disabled` | `boolean` | `false` | no | disables interaction, applies disabled opacity |
+| `readOnly` | `boolean` | `false` | no | allows focus and reading but reverts any change attempt |
 | `label` | `string \| null` | `null` | no | visible label text |
 | `ariaLabel` | `string \| null` | `null` | no | accessible name; required when no visible label exists |
 | `describedBy` | `string \| null` | `null` | no | aria-describedby target id |
 | `name` | `string \| undefined` | `undefined` | no | form submission name |
+| `offColor` | `string \| null` | `null` | no | optional off-state accent override used for the thumb and muted track tint |
+| `onColor` | `string \| null` | `null` | no | optional on-state accent override used for the thumb and active track tint |
 
 ### Controlled And Uncontrolled
 
-- controlled: `isChecked` (non-null) plus `checkedChange` event handler
+- controlled: `checked` (non-null) plus `checkedChange` event handler
 - uncontrolled: `defaultChecked` sets the initial state; component owns its own
   state thereafter
+- visual overrides: `offColor` and `onColor` map to CSS custom properties on
+  the root label and affect only the local switch instance
 
 ## 4. States
 
@@ -62,10 +66,11 @@ Updated: 2026-03-15
 | State | Trigger | Expected Result |
 |-------|---------|-----------------|
 | off | default | thumb at left position, track has default border and muted background |
-| on | `isChecked=true` or user toggle | thumb slides right with accent color, track border and background shift to accent tints |
+| on | `checked=true` or user toggle | thumb slides right with accent color, track border and background shift to accent tints |
+| custom colors | `offColor` or `onColor` set | off/on track and thumb derive from the provided local override colors instead of theme defaults |
 | focus | native input receives focus-visible | focus ring outline on track |
-| disabled | `isDisabled=true` | reduced opacity, cursor not-allowed |
-| readOnly | `isReadOnly=true` | default cursor, change reverted on toggle attempt |
+| disabled | `disabled=true` | reduced opacity, cursor not-allowed |
+| readOnly | `readOnly=true` | default cursor, change reverted on toggle attempt |
 
 ### Component States
 
@@ -137,6 +142,14 @@ Updated: 2026-03-15
 | `gap` | `var(--poodle-space-inline-sm)` |
 | `color` | `var(--poodle-color-text-primary)` |
 | `cursor` | `pointer` |
+| `--poodle-switch-off-color` | `var(--poodle-color-text-primary)` |
+| `--poodle-switch-on-color` | `var(--poodle-color-accent-base)` |
+| `--poodle-switch-off-track` | `color-mix(in srgb, var(--poodle-switch-off-color) 18%, var(--poodle-color-background-surface))` |
+| `--poodle-switch-on-track` | `color-mix(in srgb, var(--poodle-switch-on-color) 24%, var(--poodle-color-background-surface))` |
+| `--poodle-switch-off-thumb` | `var(--poodle-switch-off-color)` |
+| `--poodle-switch-on-thumb` | `var(--poodle-switch-on-color)` |
+| `--poodle-switch-off-border` | `var(--poodle-color-border-default)` |
+| `--poodle-switch-on-border` | `color-mix(in srgb, var(--poodle-switch-on-thumb) 58%, var(--poodle-color-border-default))` |
 
 ### Root disabled `[data-disabled="true"]`
 
@@ -168,9 +181,9 @@ Updated: 2026-03-15
 | `width` | `2.125rem` |
 | `height` | `1.25rem` |
 | `padding` | `0.125rem` |
-| `border` | `0.0625rem solid var(--poodle-color-border-default)` |
+| `border` | `0.0625rem solid var(--poodle-switch-off-border)` |
 | `border-radius` | `999px` |
-| `background` | `color-mix(in srgb, var(--poodle-color-background-surface) 86%, transparent)` |
+| `background` | `var(--poodle-switch-off-track)` |
 | `box-shadow` | `inset 0 0.0625rem 0 color-mix(in srgb, white 8%, transparent)` |
 | `transition` | `background, border-color, box-shadow` at `var(--poodle-motion-duration-interaction)` with `var(--poodle-motion-easing-standard)` |
 
@@ -178,8 +191,8 @@ Updated: 2026-03-15
 
 | Property | Value |
 |----------|-------|
-| `border-color` | `color-mix(in srgb, var(--poodle-color-accent-base) 58%, var(--poodle-color-border-default))` |
-| `background` | `color-mix(in srgb, var(--poodle-color-accent-base) 24%, var(--poodle-color-background-surface))` |
+| `border-color` | `var(--poodle-switch-on-border)` |
+| `background` | `var(--poodle-switch-on-track)` |
 
 ### Track focus `:focus-visible + .switch__track`
 
@@ -195,7 +208,7 @@ Updated: 2026-03-15
 | `width` | `0.875rem` |
 | `height` | `0.875rem` |
 | `border-radius` | `999px` |
-| `background` | `var(--poodle-color-text-primary)` |
+| `background` | `var(--poodle-switch-off-thumb)` |
 | `box-shadow` | `0 0.125rem 0.5rem color-mix(in srgb, black 18%, transparent)` |
 | `transform` | `translateX(0)` |
 | `transition` | `transform, background` at `var(--poodle-motion-duration-interaction)` with `var(--poodle-motion-easing-standard)` |
@@ -204,7 +217,7 @@ Updated: 2026-03-15
 
 | Property | Value |
 |----------|-------|
-| `background` | `var(--poodle-color-accent-base)` |
+| `background` | `var(--poodle-switch-on-thumb)` |
 | `transform` | `translateX(0.875rem)` |
 
 ### Label `.switch__label`

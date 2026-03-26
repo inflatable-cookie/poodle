@@ -43,7 +43,7 @@
 
   <div class="specimen__group">
     <Eyebrow>Disabled</Eyebrow>
-    <ColorPicker value="#22c55e" isDisabled />
+    <ColorPicker value="#22c55e" disabled />
   </div>
 </div>
 

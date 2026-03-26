@@ -1,11 +1,17 @@
 <script lang="ts">
   export let title: string | null = null;
   export let description: string | null = null;
-  export let isSeparated = true;
+  export let separated = true;
   export let ariaLabel: string | null = null;
+  export let columns: 1 | 2 | 3 = 1;
 </script>
 
-<section class="detail-section" data-separated={isSeparated} aria-label={ariaLabel ?? undefined}>
+<section
+  class="detail-section"
+  data-separated={separated}
+  data-columns={columns}
+  aria-label={ariaLabel ?? undefined}
+>
   {#if title || description || $$slots.actions}
     <div class="detail-section__header">
       <div class="detail-section__title-block">
@@ -72,5 +78,20 @@
   .detail-section__body {
     display: grid;
     gap: var(--poodle-space-stack-sm);
+  }
+
+  .detail-section[data-columns="2"] .detail-section__body {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .detail-section[data-columns="3"] .detail-section__body {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  @media (max-width: 60rem) {
+    .detail-section[data-columns="2"] .detail-section__body,
+    .detail-section[data-columns="3"] .detail-section__body {
+      grid-template-columns: 1fr;
+    }
   }
 </style>

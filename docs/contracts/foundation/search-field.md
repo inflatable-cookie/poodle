@@ -42,8 +42,9 @@ Updated: 2026-03-15
 | `placeholder` | `string` | `"Search"` | no | query hint text |
 | `ariaLabel` | `string` | `"Search"` | no | accessible name fallback |
 | `describedBy` | `string \| null` | `null` | no | aria-describedby target |
-| `isDisabled` | `boolean` | `false` | no | disables query entry |
-| `isReadOnly` | `boolean` | `false` | no | keeps query selectable but not editable |
+| `disabled` | `boolean` | `false` | no | disables query entry |
+| `readOnly` | `boolean` | `false` | no | keeps query selectable but not editable |
+| `debounce` | `number \| null` | `null` | no | delays `valueChange` while typing |
 | `showClearButton` | `boolean` | `true` | no | whether clear button appears when value is non-empty |
 | `validationState` | `"none" \| "invalid" \| "valid" \| "pending"` | `"none"` | no | visual and assistive validation state |
 
@@ -62,8 +63,8 @@ Updated: 2026-03-15
 | empty | no query value | placeholder visible, search icon visible, clear button hidden |
 | populated | query value non-empty | clear button appears (when showClearButton is true) |
 | focus | input focused | visible focus treatment (inherited from TextInput) |
-| disabled | `isDisabled=true` | non-interactive field (inherited from TextInput) |
-| readOnly | `isReadOnly=true` | selectable but not editable |
+| disabled | `disabled=true` | non-interactive field (inherited from TextInput) |
+| readOnly | `readOnly=true` | selectable but not editable |
 | invalid | `validationState="invalid"` | error border emphasis |
 | valid | `validationState="valid"` | success border emphasis |
 | pending | `validationState="pending"` | accent border emphasis |
@@ -239,13 +240,13 @@ Section 8 for the full root, focus, validation, and disabled token tables.
 
 | Label | Props / Config | Expected Visual |
 |-------|---------------|-----------------|
-| Disabled | `value="locked query"`, `isDisabled` | Search field with pre-filled value, reduced opacity, non-interactive |
+| Disabled | `value="locked query"`, `disabled` | Search field with pre-filled value, reduced opacity, non-interactive |
 
 ### Read-only
 
 | Label | Props / Config | Expected Visual |
 |-------|---------------|-----------------|
-| Read-only | `value="active filter"`, `isReadOnly` | Search field with pre-filled value, selectable but not editable |
+| Read-only | `value="active filter"`, `readOnly` | Search field with pre-filled value, selectable but not editable |
 
 ## 14. Approval And Adoption Notes
 

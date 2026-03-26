@@ -49,7 +49,7 @@ Updated: 2026-03-15
 | `placeholder` | `string` | `"Select date"` | no | text shown when no date is selected |
 | `weekStartsOn` | `CalendarWeekStart` | `"monday"` | no | passed through to composed Calendar |
 | `locale` | `string` | `"en-US"` | no | passed through to composed Calendar |
-| `isDisabled` | `boolean` | `false` | no | disables the trigger and prevents opening |
+| `disabled` | `boolean` | `false` | no | disables the trigger and prevents opening |
 | `ariaLabel` | `string \| null` | `null` | no | accessible name for the trigger |
 
 ### Type Definitions
@@ -78,7 +78,7 @@ CalendarWeekStart: "sunday" | "monday"
 | hover | pointer enters trigger | background shifts via color-mix |
 | focus | trigger receives focus | focus ring outline |
 | open | trigger clicked or Enter/Space | surface appears below trigger, calendar rendered |
-| disabled | `isDisabled=true` | cursor not-allowed, reduced opacity |
+| disabled | `disabled=true` | cursor not-allowed, reduced opacity |
 
 ### Component States
 
@@ -114,7 +114,7 @@ CalendarWeekStart: "sunday" | "monday"
 - Trigger: `aria-controls` pointing to the surface element ID
 - Surface: `role="dialog"` on the overlay container
 - Trigger `aria-label`: from `ariaLabel` prop; required when no external label
-- `aria-disabled`: set on trigger when `isDisabled`
+- `aria-disabled`: set on trigger when `disabled`
 - Calendar within surface: inherits full Calendar accessibility contract
 
 ### Keyboard
@@ -328,7 +328,7 @@ All preview apps must render the following specimens identically.
 
 | Label | Props/Config | Expected Visual |
 |-------|-------------|-----------------|
-| Disabled | `placeholder="Disabled"`, `isDisabled=true`, `ariaLabel="Disabled date picker"` | Trigger button with "Disabled" placeholder, reduced opacity, cursor not-allowed, non-interactive |
+| Disabled | `placeholder="Disabled"`, `disabled=true`, `ariaLabel="Disabled date picker"` | Trigger button with "Disabled" placeholder, reduced opacity, cursor not-allowed, non-interactive |
 
 ## 14. Approval And Adoption Notes
 

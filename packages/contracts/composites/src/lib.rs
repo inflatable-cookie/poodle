@@ -78,6 +78,7 @@ pub use types::{
     FormFieldState, FormSectionSpec, FormStatusSummary, MediaKind, MediaState, MinColumnWidth,
     PanelTabItem, PickerItemSpec, PickerVariant, RemediationAction, ScrollOwner, SelectionMode,
     SelectionSummaryItem, SplitOrientation, TableColumnSpec, TableRowSpec, TableSortDirection,
+    ParsedEmbed,
     ValidationSummaryEntry,
 };
 pub use validation_summary::ValidationSummarySpec;
@@ -297,16 +298,28 @@ mod tests {
         let thumbnail = MediaThumbnailSpec::new(MediaKind::Image)
             .with_state(MediaState::Error)
             .with_aspect_ratio(AspectRatio::Video)
-            .with_title("Approval still");
+            .with_title("Approval still")
+            .with_state_title("Preview unavailable")
+            .with_state_message("This file cannot be previewed.");
         let preview = MediaPreviewSpec::new(MediaKind::Audio, "Stem waveform")
             .with_state(MediaState::Empty)
+            .with_aspect_ratio(AspectRatio::Landscape)
+            .with_badge("WIP")
+            .with_thumbnail_meta("Waveform")
+            .with_state_title("No preview")
+            .with_state_message("No audio render has been generated yet.")
             .with_metadata(vec![String::from("01:42"), String::from("WAV")])
             .with_footer_actions(vec![RemediationAction::new("open", "Open external")]);
+        let embed = EmbedInputSpec::new()
+            .with_value("https://www.youtube.com/watch?v=dQw4w9WgXcQ")
+            .with_detected_parse();
 
         assert_eq!(summary.selected_count(), 2);
         assert!(summary.has_clear_action());
         assert!(thumbnail.shows_fallback_copy());
         assert!(thumbnail.caption_visible());
+        assert_eq!(thumbnail.resolved_state_title(), "Preview unavailable");
+        assert_eq!(thumbnail.resolved_state_message(), Some("This file cannot be previewed."));
         assert_eq!(
             thumbnail.frame_fill_token(),
             semantic::COLOR_BACKGROUND_SURFACE
@@ -314,5 +327,54 @@ mod tests {
         assert_eq!(preview.metadata_count(), 2);
         assert!(preview.has_footer_actions());
         assert!(preview.shows_fallback_copy());
+        assert_eq!(preview.badge.as_deref(), Some("WIP"));
+        assert_eq!(embed.parsed.as_ref().map(|parsed| parsed.provider.as_str()), Some("youtube"));
+        assert_eq!(embed.error.as_deref(), None);
+    }
+
+    #[test]
+    fn parsed_embed_detection_matches_supported_patterns() {
+        let youtube_short = ParsedEmbed::detect("https://youtu.be/dQw4w9WgXcQ").unwrap();
+        let youtube = ParsedEmbed::detect("https://www.youtube.com/watch?v=dQw4w9WgXcQ").unwrap();
+        let vimeo = ParsedEmbed::detect("https://vimeo.com/123456").unwrap();
+        let iframe = ParsedEmbed::detect(r#"<iframe src="https://example.com/embed/1" width="640" height="480"></iframe>"#).unwrap();
+        let restricted = EmbedInputSpec::new()
+            .with_value("https://example.com/file.zip")
+            .with_providers(vec![String::from("youtube"), String::from("vimeo")])
+            .with_detected_parse();
+
+        assert_eq!(youtube_short.provider, "youtube");
+        assert_eq!(youtube_short.id, "dQw4w9WgXcQ");
+        assert_eq!(youtube.provider, "youtube");
+        assert_eq!(youtube.id, "dQw4w9WgXcQ");
+        assert_eq!(vimeo.provider, "vimeo");
+        assert_eq!(vimeo.id, "123456");
+        assert_eq!(iframe.provider, "generic");
+        assert_eq!(iframe.original_url.as_deref(), Some("https://example.com/embed/1"));
+        assert_eq!(iframe.width, Some(640));
+        assert_eq!(iframe.height, Some(480));
+        assert_eq!(restricted.parsed, None);
+        assert_eq!(restricted.error.as_deref(), Some("Provider \"generic\" is not allowed"));
+    }
+
+    #[test]
+    fn embed_preview_spec_uses_public_parse_surface() {
+        let youtube = EmbedPreviewSpec::new().with_parsed(
+            ParsedEmbed::new("youtube", "dQw4w9WgXcQ")
+                .with_original_url("https://youtube.com/watch?v=dQw4w9WgXcQ"),
+        );
+        let generic = EmbedPreviewSpec::new().with_parsed(
+            ParsedEmbed::new("generic", "https://example.com/demo")
+                .with_original_url("https://example.com/demo")
+                .with_original_embed("<iframe></iframe>"),
+        );
+        let auto = EmbedPreviewSpec::new().with_auto_aspect_ratio();
+
+        assert_eq!(
+            youtube.embed_url().as_deref(),
+            Some("https://www.youtube-nocookie.com/embed/dQw4w9WgXcQ")
+        );
+        assert!(generic.has_raw_embed());
+        assert_eq!(auto.effective_aspect_ratio(), None);
     }
 }

@@ -7,7 +7,7 @@
   export let min: string | null = null;
   export let max: string | null = null;
   export let step = 60;
-  export let isDisabled = false;
+  export let disabled = false;
   export let ariaLabel: string | null = null;
   export let describedBy: string | null = null;
 
@@ -38,7 +38,7 @@
   {min}
   {max}
   {step}
-  disabled={isDisabled}
+  disabled={disabled}
   aria-label={ariaLabel ?? undefined}
   aria-describedby={describedBy ?? undefined}
   on:input={handleInput}

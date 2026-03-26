@@ -27,7 +27,7 @@
   export let placeholder = "Select date and time range";
   export let weekStartsOn: CalendarWeekStart = "monday";
   export let locale = "en-US";
-  export let isDisabled = false;
+  export let disabled = false;
   export let ariaLabel: string | null = null;
 
   const dispatch = createEventDispatcher<{
@@ -106,7 +106,7 @@
   <button
     type="button"
     class="date-time-range-picker__trigger"
-    disabled={isDisabled}
+    disabled={disabled}
     aria-haspopup="dialog"
     aria-expanded={isOpen ? "true" : "false"}
     aria-controls={isOpen ? surfaceId : undefined}
@@ -135,7 +135,7 @@
           visibleMonth={visibleMonth}
           {weekStartsOn}
           {locale}
-          {isDisabled}
+          {disabled}
           ariaLabel={ariaLabel ?? placeholder}
           on:valueChange={(event) =>
             commitValue({
@@ -153,7 +153,7 @@
             <TimeField
               id={`${surfaceId}-start-time`}
               value={currentValue.start.time}
-              isDisabled={isDisabled}
+              disabled={disabled}
               ariaLabel={ariaLabel ? `${ariaLabel} start time` : "Start time"}
               on:valueChange={(event) =>
                 commitValue({
@@ -170,7 +170,7 @@
             <TimeField
               id={`${surfaceId}-end-time`}
               value={currentValue.end.time}
-              isDisabled={isDisabled}
+              disabled={disabled}
               ariaLabel={ariaLabel ? `${ariaLabel} end time` : "End time"}
               on:valueChange={(event) =>
                 commitValue({

@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-03-23T18:40:09.772Z",
+  "generatedAt": "2026-03-25T08:50:45.447Z",
   "artifact": "packages/svelte/preview/artifacts/parity-report.json",
   "previewBasePath": "/",
   "automatedBoundary": [
@@ -504,6 +504,19 @@
       },
       {
         "packageName": "@poodle/svelte-composites",
+        "exportName": "ListContainer",
+        "kind": "component",
+        "status": "previewed",
+        "note": "Browse suite exercises list, grid, and empty-state surface posture.",
+        "sectionIds": [
+          "browse-suite"
+        ],
+        "sectionTitles": [
+          "Lists, grids, filters, and search depth"
+        ]
+      },
+      {
+        "packageName": "@poodle/svelte-composites",
         "exportName": "LogList",
         "kind": "component",
         "status": "previewed",
@@ -753,19 +766,6 @@
         ],
         "sectionTitles": [
           "Headers, dock orchestration, and workspace shell posture"
-        ]
-      },
-      {
-        "packageName": "@poodle/svelte-composites",
-        "exportName": "SlugField",
-        "kind": "component",
-        "status": "previewed",
-        "note": "The catalogue covers the remaining composite exports outside the main suite-specific groupings.",
-        "sectionIds": [
-          "catalog-hub"
-        ],
-        "sectionTitles": [
-          "Catalog hub"
         ]
       },
       {

@@ -9,22 +9,22 @@
   export let value: string | null = null;
   export let columns: 1 | 2 | 3 | 4 = 2;
   export let ariaLabel: string | null = null;
-  export let isDisabled = false;
+  export let disabled = false;
 
   const dispatch = createEventDispatcher<{
     change: { value: string };
   }>();
 
   function select(itemValue: string): void {
-    if (isDisabled) return;
+    if (disabled) return;
     const item = items.find((i) => i.value === itemValue);
-    if (item?.isDisabled) return;
+    if (item?.disabled) return;
     value = itemValue;
     dispatch("change", { value: itemValue });
   }
 
   function handleKeydown(event: KeyboardEvent, index: number): void {
-    const enabledItems = items.filter((i) => !i.isDisabled);
+    const enabledItems = items.filter((i) => !i.disabled);
     const currentEnabledIndex = enabledItems.findIndex(
       (i) => i.value === items[index].value
     );
@@ -61,7 +61,7 @@
 >
   {#each items as item, index (item.value)}
     {@const isChecked = value === item.value}
-    {@const isItemDisabled = isDisabled || item.isDisabled === true}
+    {@const isItemDisabled = disabled || item.disabled === true}
     <div
       class="card-radio-group__option"
       role="radio"
@@ -73,8 +73,8 @@
       on:keydown={(e) => !isItemDisabled && handleKeydown(e, index)}
     >
       <Card
-        isInteractive={!isItemDisabled}
-        isSelected={isChecked}
+        interactive={!isItemDisabled}
+        selected={isChecked}
         ariaLabel={item.label}
       >
         <svelte:fragment slot="header">

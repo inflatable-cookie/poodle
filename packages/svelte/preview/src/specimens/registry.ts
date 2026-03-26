@@ -49,13 +49,16 @@ import IconSpecimen from "./IconSpecimen.svelte";
 import IconButtonSpecimen from "./IconButtonSpecimen.svelte";
 import IconProviderSpecimen from "./IconProviderSpecimen.svelte";
 import ListCardSpecimen from "./ListCardSpecimen.svelte";
+import ListContainerSpecimen from "./ListContainerSpecimen.svelte";
 import LogListSpecimen from "./LogListSpecimen.svelte";
 import NavCardSpecimen from "./NavCardSpecimen.svelte";
 import MarkdownEditorSpecimen from "./MarkdownEditorSpecimen.svelte";
+import MediaBrowsePanelSpecimen from "./MediaBrowsePanelSpecimen.svelte";
 import MediaPickerSpecimen from "./MediaPickerSpecimen.svelte";
 import OrderBySpecimen from "./OrderBySpecimen.svelte";
 import MediaPreviewSpecimen from "./MediaPreviewSpecimen.svelte";
 import MediaThumbnailSpecimen from "./MediaThumbnailSpecimen.svelte";
+import MediaUploadStatusPanelSpecimen from "./MediaUploadStatusPanelSpecimen.svelte";
 import MenuSpecimen from "./MenuSpecimen.svelte";
 import MenubarSpecimen from "./MenubarSpecimen.svelte";
 import MeterSpecimen from "./MeterSpecimen.svelte";
@@ -85,8 +88,8 @@ import SelectionSummarySpecimen from "./SelectionSummarySpecimen.svelte";
 import SeparatorSpecimen from "./SeparatorSpecimen.svelte";
 import SkeletonSpecimen from "./SkeletonSpecimen.svelte";
 import SliderSpecimen from "./SliderSpecimen.svelte";
+import SpinnerSpecimen from "./SpinnerSpecimen.svelte";
 import SpacerSpecimen from "./SpacerSpecimen.svelte";
-import SlugFieldSpecimen from "./SlugFieldSpecimen.svelte";
 import SplitButtonSpecimen from "./SplitButtonSpecimen.svelte";
 import StackSpecimen from "./StackSpecimen.svelte";
 import MetricTileSpecimen from "./MetricTileSpecimen.svelte";
@@ -173,11 +176,14 @@ export const specimenMap: Record<string, typeof SvelteComponent<any>> = {
   "icon-button": IconButtonSpecimen,
   "icon-provider": IconProviderSpecimen,
   "list-card": ListCardSpecimen,
+  "list-container": ListContainerSpecimen,
   "log-list": LogListSpecimen,
   "markdown-editor": MarkdownEditorSpecimen,
+  "media-browse-panel": MediaBrowsePanelSpecimen,
   "media-picker": MediaPickerSpecimen,
   "media-preview": MediaPreviewSpecimen,
   "media-thumbnail": MediaThumbnailSpecimen,
+  "media-upload-status-panel": MediaUploadStatusPanelSpecimen,
   menu: MenuSpecimen,
   menubar: MenubarSpecimen,
   meter: MeterSpecimen,
@@ -211,8 +217,8 @@ export const specimenMap: Record<string, typeof SvelteComponent<any>> = {
   separator: SeparatorSpecimen,
   skeleton: SkeletonSpecimen,
   slider: SliderSpecimen,
+  spinner: SpinnerSpecimen,
   spacer: SpacerSpecimen,
-  "slug-field": SlugFieldSpecimen,
   "split-button": SplitButtonSpecimen,
   stack: StackSpecimen,
   "metric-tile": MetricTileSpecimen,

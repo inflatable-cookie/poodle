@@ -64,7 +64,7 @@
     <ToggleGroup
       options={viewOptions}
       defaultValue="list"
-      isDisabled
+      disabled
       ariaLabel="Disabled toggle group"
     />
   </div>

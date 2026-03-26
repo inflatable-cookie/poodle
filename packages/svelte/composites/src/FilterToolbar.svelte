@@ -7,7 +7,7 @@
   export let collapsed = false;
   export let columns = 4;
   export let minItemWidth = "10rem";
-  export let isSticky = false;
+  export let sticky = false;
 
   function handleHeaderClick(e: MouseEvent) {
     if (!collapsible || !collapsed) return;
@@ -19,7 +19,7 @@
 
 <div
   class="filter-toolbar"
-  data-sticky={isSticky}
+  data-sticky={sticky}
   data-collapsed={collapsible && collapsed}
   role="toolbar"
   aria-label={ariaLabel}
@@ -33,7 +33,7 @@
       aria-label={summaryText ? `Show filters. ${summaryText}` : "Show filters"}
     >
       <CollapseToggle
-        isCollapsed={collapsed}
+        collapsed={collapsed}
         ariaLabel="Show filters"
         on:toggle={(e) => (collapsed = e.detail.isCollapsed)}
       />
@@ -52,7 +52,7 @@
     <div class="filter-toolbar__header">
       {#if collapsible}
         <CollapseToggle
-          isCollapsed={collapsed}
+          collapsed={collapsed}
           ariaLabel={collapsed ? "Show filters" : "Hide filters"}
           on:toggle={(e) => (collapsed = e.detail.isCollapsed)}
         />

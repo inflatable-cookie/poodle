@@ -35,7 +35,7 @@ Updated: 2026-03-22
 |------|------|---------|----------|-------|
 | `items` | `ReorderableItem[]` | `[]` | no | List items (two-way bindable) |
 | `ariaLabel` | `string` | `"Reorderable list"` | no | Accessible label for the list |
-| `isDisabled` | `boolean` | `false` | no | Disables drag, keyboard reorder, and interaction |
+| `disabled` | `boolean` | `false` | no | Disables drag, keyboard reorder, and interaction |
 
 ### Types
 
@@ -67,7 +67,7 @@ type ReorderableItem = {
 | focus | Focus-visible on item | Focus ring: `border-width-focus` solid `accent-focusRing` |
 | dragging | Item being dragged | 40% opacity on the dragged item |
 | drop-target | Dragging over another item | `accent-base` border color, accent-tinted background |
-| disabled | `isDisabled=true` | `state-opacity-disabled`, `pointer-events: none` |
+| disabled | `disabled=true` | `state-opacity-disabled`, `pointer-events: none` |
 
 ### Component States
 
@@ -239,7 +239,7 @@ None yet (single implementation).
 
 | Label | Props / Config | Expected Visual |
 |-------|---------------|-----------------|
-| Disabled | 2 items, `isDisabled=true` | Reduced opacity, no drag handles active, no interaction |
+| Disabled | 2 items, `disabled=true` | Reduced opacity, no drag handles active, no interaction |
 
 ## 14. Approval And Adoption Notes
 

@@ -40,7 +40,7 @@
       Show loading overlay
     </Button>
     <PageLoading
-      isVisible={showIndeterminate}
+      visible={showIndeterminate}
       message="Loading data..."
     />
   </div>
@@ -51,7 +51,7 @@
       Show progress overlay
     </Button>
     <PageLoading
-      isVisible={showDeterminate}
+      visible={showDeterminate}
       value={demoProgress}
       message="Uploading files... {demoProgress}%"
     />
@@ -63,7 +63,7 @@
       Show cancellable loading
     </Button>
     <PageLoading
-      isVisible={showWithCancel}
+      visible={showWithCancel}
       message="Processing request..."
       canCancel
       on:cancel={closeAll}

@@ -1,5 +1,5 @@
 use gpui::*;
-use poodle_composites::EmbedPreviewSpec;
+use poodle_composites::{EmbedPreviewSpec, ParsedEmbed};
 use poodle_gpui_components::{EmbedPreview, Eyebrow};
 use poodle_primitives::EyebrowSpec;
 use poodle_gpui::GpuiThemeProvider;
@@ -9,15 +9,26 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
         // -- Default --
         .child(
             div().flex().flex_col().gap(px(8.0))
-                .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Default"), theme))
+                .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Canonical states"), theme))
                 .child(
                     div().flex().flex_col().gap(px(8.0))
                         .child(
                             EmbedPreview::from_spec(
                                 EmbedPreviewSpec::new()
-                                    .with_title("Rick Astley - Never Gonna Give You Up")
-                                    .with_description("The official video for Rick Astley's classic 1987 hit.")
-                                    .with_provider("YouTube"),
+                                    .with_parsed(
+                                        ParsedEmbed::new("youtube", "dQw4w9WgXcQ")
+                                            .with_original_url("https://youtube.com/watch?v=dQw4w9WgXcQ"),
+                                    ),
+                                theme,
+                            )
+                        )
+                        .child(
+                            EmbedPreview::from_spec(
+                                EmbedPreviewSpec::new()
+                                    .with_parsed(
+                                        ParsedEmbed::new("vimeo", "76979871")
+                                            .with_original_url("https://vimeo.com/76979871"),
+                                    ),
                                 theme,
                             )
                         )
@@ -25,6 +36,31 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
                             EmbedPreview::from_spec(
                                 EmbedPreviewSpec::new()
                                     .with_loading(true),
+                                theme,
+                            )
+                        )
+                        .child(
+                            EmbedPreview::from_spec(
+                                EmbedPreviewSpec::new()
+                                    .with_error("Failed to load embed. The URL may be invalid or the provider is unavailable."),
+                                theme,
+                            )
+                        )
+                        .child(
+                            EmbedPreview::from_spec(
+                                EmbedPreviewSpec::new()
+                                    .with_empty_message("Paste a URL above to see a preview"),
+                                theme,
+                            )
+                        )
+                        .child(
+                            EmbedPreview::from_spec(
+                                EmbedPreviewSpec::new()
+                                    .with_parsed(
+                                        ParsedEmbed::new("generic", "https://example.com/embed/1")
+                                            .with_original_embed(r#"<iframe src=\"https://example.com/embed/1\"></iframe>"#)
+                                            .with_original_url("https://example.com/embed/1"),
+                                    ),
                                 theme,
                             )
                         )

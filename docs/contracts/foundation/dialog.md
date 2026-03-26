@@ -1,7 +1,7 @@
 # Dialog
 
 Status: detailed contract
-Updated: 2026-03-15
+Updated: 2026-03-26
 
 ## 1. Purpose
 
@@ -21,6 +21,7 @@ Updated: 2026-03-15
 [Wrapper .dialog]  <div> (fixed overlay, conditional render)
   ├── [Backdrop .dialog__backdrop]  <button aria-label="Dismiss dialog backdrop">
   └── [Surface .dialog__surface]  <div role={kind} aria-modal tabindex="-1">
+      ├── [Close Button .dialog__close]  <IconButton> (optional)
       ├── [Header .dialog__header]  <div> (optional, when title or description)
       │   ├── [Title]  <strong>
       │   └── [Description]  <p>
@@ -35,6 +36,7 @@ Updated: 2026-03-15
 | Wrapper | yes | fixed full-viewport overlay container | z-index, padding |
 | Backdrop | yes | background scrim and interaction block | overlay background, cursor |
 | Surface | yes | modal content container | border, radius, background, elevation, padding, max sizing |
+| Close Button | no | dismiss affordance in the top-right corner | position, z-index |
 | Header | no | title and description region | gap, margin, typography |
 | Body | yes | primary content area | min-width |
 | Actions | no | action button row | flex layout, gap, margin |
@@ -53,6 +55,10 @@ Updated: 2026-03-15
 | `dismissOnEscape` | `boolean` | `true` | no | whether Escape key dismisses the dialog |
 | `dismissOnBackdrop` | `boolean` | `true` | no | whether backdrop click dismisses the dialog |
 | `ariaLabel` | `string \| null` | `null` | no | required when no visible title exists |
+| `contentClassName` | `string` | `""` | no | additional class name added to the dialog surface |
+| `overlayClassName` | `string` | `""` | no | additional class name added to the backdrop button |
+| `showCloseButton` | `boolean` | `false` | no | whether to render the built-in close button |
+| `closeLabel` | `string` | `"Close dialog"` | no | accessible label for the close button |
 
 ### Slots
 
@@ -98,6 +104,7 @@ Updated: 2026-03-15
 - Surface: `aria-label` from prop when no `title` is present
 - Surface: `tabindex="-1"` for programmatic focus
 - Backdrop: `<button>` with `aria-label="Dismiss dialog backdrop"`
+- Close button: `IconButton` with `ariaLabel` from `closeLabel`
 
 ### Keyboard
 
@@ -180,6 +187,15 @@ Updated: 2026-03-15
 | `--poodle-surface` | `color-mix(in srgb, var(--poodle-color-background-elevated) 98%, var(--poodle-color-background-panel))` |
 | `box-shadow` | `var(--poodle-elevation-dialog)` |
 
+### Close Button `.dialog__close`
+
+| Property | Value |
+|----------|-------|
+| `position` | `absolute` |
+| `top` | `var(--poodle-space-inline-sm)` |
+| `right` | `var(--poodle-space-inline-sm)` |
+| `z-index` | `1` |
+
 ### Header `.dialog__header`
 
 | Property | Value |
@@ -233,6 +249,7 @@ Updated: 2026-03-15
   edges
 - Surface uses `bind:this` for DOM reference needed by focus trap
 - Entire dialog tree conditionally rendered with `{#if isOpen}` (mount/unmount)
+- Close button rendered only when `showCloseButton=true`
 - Header rendered only when `title` or `description` is provided
 - Actions wrapper rendered only when named `actions` slot is used
   (`$$slots.actions`)

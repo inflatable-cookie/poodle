@@ -8,7 +8,7 @@
   export let maxHours = 99;
   export let minTotalSeconds = 0;
   export let maxTotalSeconds: number | null = null;
-  export let isDisabled = false;
+  export let disabled = false;
   export let ariaLabel = "Duration";
 
   const dispatch = createEventDispatcher<{
@@ -62,7 +62,7 @@
     event: KeyboardEvent,
     segment: "hours" | "minutes" | "seconds"
   ): void {
-    if (isDisabled) return;
+    if (disabled) return;
 
     if (event.key === "ArrowUp") {
       event.preventDefault();
@@ -105,7 +105,7 @@
   class="duration-input"
   role="group"
   aria-label={ariaLabel}
-  data-disabled={isDisabled}
+  data-disabled={disabled}
   data-invalid={isUnderMin || isOverMax}
 >
   <div class="duration-input__segment">
@@ -116,7 +116,7 @@
       inputmode="numeric"
       class="duration-input__field"
       value={pad(hours)}
-      disabled={isDisabled}
+      disabled={disabled}
       aria-label="Hours"
       on:input={(e) => handleSegmentInput(e, "hours")}
       on:keydown={(e) => handleSegmentKeydown(e, "hours")}
@@ -134,7 +134,7 @@
       inputmode="numeric"
       class="duration-input__field"
       value={pad(minutes)}
-      disabled={isDisabled}
+      disabled={disabled}
       aria-label="Minutes"
       on:input={(e) => handleSegmentInput(e, "minutes")}
       on:keydown={(e) => handleSegmentKeydown(e, "minutes")}
@@ -153,7 +153,7 @@
         inputmode="numeric"
         class="duration-input__field"
         value={pad(seconds)}
-        disabled={isDisabled}
+        disabled={disabled}
         aria-label="Seconds"
         on:input={(e) => handleSegmentInput(e, "seconds")}
         on:keydown={(e) => handleSegmentKeydown(e, "seconds")}

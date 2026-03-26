@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { Icon } from "@poodle/svelte-primitives";
+  import { Icon, Spinner } from "@poodle/svelte-primitives";
 
   import type { AspectRatio, MediaKind, MediaState } from "./types";
 
@@ -51,6 +51,11 @@
       {/if}
     {:else}
       <div class="media-thumbnail__state">
+        {#if state === "loading"}
+          <span class="media-thumbnail__spinner" aria-hidden="true">
+            <Spinner variant="grid" size={presentation === "compact" ? "sm" : "md"} tone="accent" />
+          </span>
+        {/if}
         <strong>{resolvedStateTitle}</strong>
         {#if stateMessage && presentation !== "compact"}
           <p>{stateMessage}</p>
@@ -137,6 +142,12 @@
       color-mix(in srgb, var(--poodle-color-background-surface) 78%, transparent);
   }
 
+  .media-thumbnail__spinner {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+
   .media-thumbnail__state strong,
   .media-thumbnail__state p {
     margin: 0;
@@ -144,7 +155,9 @@
 
   .media-thumbnail[data-presentation="compact"] .media-thumbnail__state {
     align-content: center;
+    justify-items: center;
     padding: 0.875rem;
+    text-align: center;
   }
 
   .media-thumbnail[data-presentation="compact"] .media-thumbnail__state strong {

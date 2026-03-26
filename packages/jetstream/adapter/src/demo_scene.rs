@@ -10,7 +10,8 @@ use poodle_adapter::{RenderComponent, ThemeProvider};
 use poodle_composites::{ConfirmActionSpec, PageHeaderSpec, StateTileSpec, ToastStackSpec};
 use poodle_primitives::{
     BadgeSpec, ButtonSpec, DialogSpec, MenuSpec, ProgressSpec, SelectSpec, SeparatorSpec,
-    SliderSpec, StackSpec, StatusIndicatorSpec, SurfaceSpec, SwitchSpec, TabsSpec, TextInputSpec,
+    SliderSpec, SpinnerSpec, StackSpec, StatusIndicatorSpec, SurfaceSpec, SwitchSpec, TabsSpec,
+    TextInputSpec,
 };
 use poodle_style::StyleDescriptor;
 
@@ -91,6 +92,7 @@ fn render_hud(a: &JetstreamAdapter, t: &dyn ThemeProvider) -> DemoSceneScreen {
     screen.push(a.render(&SurfaceSpec::new(), &s, t));
     screen.push(a.render(&ProgressSpec::new(), &s, t));           // Health bar
     screen.push(a.render(&ProgressSpec::new(), &s, t));           // Energy bar
+    screen.push(a.render(&SpinnerSpec::new(), &s, t));            // Loading/status activity
     screen.push(a.render(&StatusIndicatorSpec::new(), &s, t));    // Status
     screen.push(a.render(&BadgeSpec::new(), &s, t));              // Level badge
     screen.push(a.render(&StateTileSpec::new("Score", "1250"), &s, t));
@@ -150,8 +152,9 @@ mod tests {
     fn hud_has_feedback_elements() {
         let scene = render_hud(&adapter(), adapter().theme());
         let has_progress = scene.nodes.iter().any(|n| n.spec_type == "ProgressSpec");
+        let has_spinner = scene.nodes.iter().any(|n| n.spec_type == "SpinnerSpec");
         let has_state_tile = scene.nodes.iter().any(|n| n.spec_type == "StateTileSpec");
-        assert!(has_progress && has_state_tile);
+        assert!(has_progress && has_spinner && has_state_tile);
     }
 
     #[test]

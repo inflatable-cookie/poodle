@@ -47,11 +47,16 @@
     "packages/svelte/primitives": {
       "name": "@poodle/svelte-primitives",
       "version": "0.0.0",
+      "devDependencies": {
+        "@poodle/icons-lucide": "workspace:*",
+      },
       "peerDependencies": {
+        "@poodle/icons-lucide": "0.0.0",
         "@poodle/svelte-tokens": "0.0.0",
         "svelte": "^5.38.6",
       },
       "optionalPeers": [
+        "@poodle/icons-lucide",
         "@poodle/svelte-tokens",
       ],
     },

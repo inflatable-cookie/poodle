@@ -1,4 +1,5 @@
 import { getContext, setContext } from "svelte";
+import * as lucideIcons from "@poodle/icons-lucide";
 
 // ---------------------------------------------------------------------------
 // Types
@@ -41,6 +42,7 @@ export function getIconSet(): IconSet | null {
 
 const aliases: Record<string, string> = {
   "alert-circle": "circle-alert",
+  "check-square": "square-check",
   "check-circle": "circle-check",
   "edit": "pencil",
   "filter": "list-filter",
@@ -48,16 +50,6 @@ const aliases: Record<string, string> = {
   "more-vertical": "ellipsis-vertical",
   "unlock": "lock-open",
 };
-
-// ---------------------------------------------------------------------------
-// Lazy icon cache
-// ---------------------------------------------------------------------------
-
-/** Cache of lazily-loaded icons. Once resolved, lookups are synchronous. */
-const lazyCache: IconSet = {};
-
-/** In-flight import promises, keyed by canonical kebab-case name. */
-const inflight: Record<string, Promise<IconNodes>> = {};
 
 /**
  * Convert kebab-case icon name to camelCase export name.
@@ -68,50 +60,22 @@ function kebabToCamel(name: string): string {
 }
 
 /**
- * Lazily import a single icon from `@poodle/icons-lucide`.
- * Returns cached data immediately if already loaded, otherwise kicks off
- * an async import and caches the result for future sync access.
+ * Resolve a single built-in icon from `@poodle/icons-lucide`.
+ *
+ * This remains a public helper for compatibility with existing primitive
+ * internals, but resolution is now synchronous so source-linked consumers do
+ * not rely on package-boundary async imports during rendering.
  */
 export function lazyResolveIcon(
   name: string,
   onLoaded?: () => void,
 ): IconNodeElement[] {
-  // Resolve aliases
   const canonical = aliases[name] ?? name;
-
-  // Already cached — return immediately
-  if (canonical in lazyCache) return lazyCache[canonical];
-
-  // Already in-flight — attach callback
-  if (canonical in inflight) {
-    if (onLoaded) {
-      inflight[canonical].then(onLoaded);
-    }
-    return [];
-  }
-
-  // Kick off dynamic import
   const exportName = kebabToCamel(canonical);
-  inflight[canonical] = import(`@poodle/icons-lucide`)
-    .then((mod) => {
-      const iconModule = mod as unknown as Record<string, IconNodes>;
-      const nodes: IconNodes = iconModule[exportName] ?? [];
-      lazyCache[canonical] = nodes;
-      // Also cache under the alias if used
-      if (name !== canonical) lazyCache[name] = nodes;
-      delete inflight[canonical];
-      if (onLoaded) onLoaded();
-      return nodes;
-    })
-    .catch(() => {
-      // Icon not found — cache empty to avoid re-fetching
-      lazyCache[canonical] = [];
-      delete inflight[canonical];
-      if (onLoaded) onLoaded();
-      return [] as IconNodes;
-    });
-
-  return [];
+  const iconModule = lucideIcons as unknown as Record<string, IconNodes>;
+  const nodes = iconModule[exportName] ?? [];
+  if (onLoaded) onLoaded();
+  return nodes;
 }
 
 // ---------------------------------------------------------------------------
@@ -123,8 +87,8 @@ export function lazyResolveIcon(
  *
  * - If `ref` is an `IconNodes` array (array of arrays), returns it directly.
  * - If `ref` is a string, checks the context icon set first, then the
- *   lazy cache of previously loaded icons.
- * - Returns an empty array if the icon is not yet loaded.
+ *   built-in Poodle icon set.
+ * - Returns an empty array if the icon is unknown.
  */
 export function resolveIconNodes(
   ref: IconNodes | string | null | undefined,
@@ -143,8 +107,5 @@ export function resolveIconNodes(
   // Also check under the original name (icon sets may use either form)
   if (iconSet && ref in iconSet) return iconSet[ref];
 
-  // Check lazy cache
-  if (canonical in lazyCache) return lazyCache[canonical];
-
-  return [];
+  return lazyResolveIcon(canonical);
 }

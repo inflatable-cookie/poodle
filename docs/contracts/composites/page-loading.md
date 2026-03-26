@@ -1,13 +1,13 @@
 # PageLoading
 
 Status: seed contract
-Updated: 2026-03-22
+Updated: 2026-03-25
 
 ## 1. Purpose
 
 - Component name: `PageLoading`
 - Layer: `composites`
-- Summary: a full-page modal loading overlay with animated spinner, optional progress bar, status message, and cancel button
+- Summary: a full-page modal loading overlay with shared spinner, optional progress bar, status message, and cancel button
 - In scope: indeterminate spinner, determinate progress bar, status message, cancel action, backdrop with blur, modal-level z-index
 - Out of scope: inline loading indicators, skeleton screens, progress toast notifications, retry logic
 
@@ -17,7 +17,7 @@ Updated: 2026-03-22
 [Root]  role="status", position: fixed, inset: 0
   ├── [Backdrop]  aria-hidden, semi-transparent blur overlay
   └── [Card]
-        ├── [Spinner]  aria-hidden, animated SVG
+        ├── [Spinner]  aria-hidden, shared `Spinner` primitive
         ├── [Progress]  (optional, when value is not null)
         │     └── Progress primitive
         ├── [Message]  (optional, when message is provided)
@@ -31,7 +31,7 @@ Updated: 2026-03-22
 | root | `<div>` | Fixed overlay, `role="status"`, `aria-live="polite"`, centered flex |
 | backdrop | `<div>` | Semi-transparent background with `backdrop-filter: blur(2px)` |
 | card | `<div>` | Elevated card centered in viewport |
-| spinner | `<div>` | Animated spinning SVG arc |
+| spinner | `Spinner` | Shared spinner primitive in large accent ring mode |
 | progress | `Progress` | Determinate progress bar (only shown when `value` is not null) |
 | message | `<p>` | Status text, centered |
 | cancel-button | `<button>` | Dismissal action |
@@ -40,7 +40,7 @@ Updated: 2026-03-22
 
 | Prop | Type | Default | Required | Notes |
 |------|------|---------|----------|-------|
-| `isVisible` | `boolean` | `true` | no | Controls whether the overlay is rendered |
+| `visible` | `boolean` | `true` | no | Controls whether the overlay is rendered |
 | `value` | `number \| null` | `null` | no | Progress value; `null` = indeterminate (spinner only) |
 | `max` | `number` | `100` | no | Maximum value for the progress bar |
 | `message` | `string \| null` | `null` | no | Status message text |
@@ -53,7 +53,7 @@ None.
 
 ### Controlled / Uncontrolled
 
-`isVisible` is controlled externally. `value` and `message` are controlled to reflect external loading state.
+`visible` is controlled externally. `value` and `message` are controlled to reflect external loading state.
 
 ## 4. States
 
@@ -61,7 +61,7 @@ None.
 
 | State | Trigger | Visual Effect |
 |-------|---------|---------------|
-| hidden | `isVisible=false` | Component not rendered |
+| hidden | `visible=false` | Component not rendered |
 | indeterminate | `value=null` | Spinning arc animation, no progress bar |
 | determinate | `value` is a number | Spinner shown plus progress bar |
 | with-message | `message` provided | Status text below spinner |
@@ -159,18 +159,8 @@ Uses the `Progress` primitive for determinate progress display.
 
 ### Spinner
 
-| Property | Value |
-|----------|-------|
-| width | `2.5rem` |
-| height | `2.5rem` |
-| color | `var(--poodle-color-accent-base)` |
-| SVG viewBox | `0 0 36 36` |
-| circle r | `15` |
-| stroke-width | `2.5` |
-| background circle opacity | `0.2` |
-| arc stroke-dasharray | `70 30` |
-| arc stroke-linecap | `round` |
-| animation | `page-loading-spin 1s linear infinite` (rotate 360deg) |
+Uses the shared [`Spinner`](../foundation/spinner.md) primitive with
+`variant="ring"`, `size="lg"`, and `tone="accent"`.
 
 ### Progress
 
@@ -214,29 +204,33 @@ None.
 
 ## 9. Svelte Notes
 
-- Conditionally renders entire component based on `isVisible`
-- Spinner uses CSS `@keyframes` animation rotating 360deg over 1s linear infinite
+- Conditionally renders entire component based on `visible`
+- Spinner composes the shared primitive rather than owning its own animation
 - Composes the `Progress` primitive for determinate mode
 - `isIndeterminate` reactive: `value === null`
 
 ## 10. GPUI Notes
 
-Not yet implemented.
+Implemented in GPUI with the same shared `Spinner` primitive and `Progress`
+composition.
 
 ## 11. Parity Checklist
 
 | Feature | Svelte | GPUI | Jetstream |
 |---------|--------|------|-----------|
-| Indeterminate spinner | Yes | -- | -- |
-| Determinate progress | Yes | -- | -- |
-| Status message | Yes | -- | -- |
-| Cancel button | Yes | -- | -- |
-| Backdrop blur | Yes | -- | -- |
-| Focus ring on cancel | Yes | -- | -- |
+| Indeterminate spinner | Yes | Yes | -- |
+| Determinate progress | Yes | Yes | -- |
+| Status message | Yes | Yes | -- |
+| Cancel button | Yes | Yes | -- |
+| Backdrop blur | Yes | Partial | -- |
+| Focus ring on cancel | Yes | Partial | -- |
 
 ## 12. Known Deltas
 
-None yet (single implementation).
+| Delta | Why Allowed | Approval Status | Follow-Up |
+|-------|-------------|-----------------|-----------|
+| GPUI backdrop blur differs from Svelte | GPUI backdrop effects do not map directly to CSS `backdrop-filter` | allowed | approximate the same modal separation if GPUI gains richer backdrop primitives |
+| GPUI cancel focus treatment differs from Svelte | GPUI focus styling uses component-level approximations rather than CSS outline + offset | allowed | tighten once a closer focus-ring primitive is available |
 
 ## 13. Specimen Definitions
 
@@ -244,19 +238,19 @@ None yet (single implementation).
 
 | Label | Props / Config | Expected Visual |
 |-------|---------------|-----------------|
-| Indeterminate | `isVisible` toggled by button, `message="Loading data..."` | Full-page overlay with spinning arc and message |
+| Indeterminate | `visible` toggled by button, `message="Loading data..."` | Full-page overlay with spinning arc and message |
 
 ### Determinate (With Progress Bar)
 
 | Label | Props / Config | Expected Visual |
 |-------|---------------|-----------------|
-| Determinate | `isVisible` toggled, `value` animates 0-100, `message="Uploading files... N%"` | Overlay with spinner, progress bar, and percentage message |
+| Determinate | `visible` toggled, `value` animates 0-100, `message="Uploading files... N%"` | Overlay with spinner, progress bar, and percentage message |
 
 ### With Cancel Button
 
 | Label | Props / Config | Expected Visual |
 |-------|---------------|-----------------|
-| Cancellable | `isVisible` toggled, `message="Processing request..."`, `canCancel=true` | Overlay with spinner, message, and cancel button; cancel dismisses |
+| Cancellable | `visible` toggled, `message="Processing request..."`, `canCancel=true` | Overlay with spinner, message, and cancel button; cancel dismisses |
 
 ## 14. Approval And Adoption Notes
 

@@ -10,7 +10,7 @@
   export let value: string | null = null;
   export let defaultValue: string | null = null;
   export let options: SegmentedControlOption[] = [];
-  export let isDisabled = false;
+  export let disabled = false;
   export let ariaLabel: string | null = null;
   export let name: string | undefined = undefined;
 
@@ -42,7 +42,7 @@
         name={name ?? generatedName}
         value={option.value}
         checked={currentValue === option.value}
-        disabled={isDisabled || option.isDisabled === true}
+        disabled={disabled || option.disabled === true}
         aria-label={option.ariaLabel ?? undefined}
         on:change={() => handleChange(option.value)}
       />

@@ -2,15 +2,17 @@
   import { createEventDispatcher, onMount, tick } from "svelte";
 
   import { menuNavigableItems } from "./internal";
+  import Spinner from "./Spinner.svelte";
 
   import type { ButtonTone, ButtonVariant, ControlSize, MenuItem } from "./types";
 
   export let variant: ButtonVariant = "secondary";
   export let tone: ButtonTone = "default";
   export let size: ControlSize = "md";
+  export let type: HTMLButtonElement["type"] = "button";
   export let items: MenuItem[] = [];
-  export let isDisabled = false;
-  export let isLoading = false;
+  export let disabled = false;
+  export let loading = false;
   export let ariaLabel: string | null = null;
   export let menuAriaLabel = "More actions";
 
@@ -20,14 +22,21 @@
   }>();
 
   let rootElement: HTMLDivElement | null = null;
+  let toggleElement: HTMLButtonElement | null = null;
+  let menuElement: HTMLDivElement | null = null;
   let itemElements: Array<HTMLButtonElement | null> = [];
   let menuOpen = false;
   let highlightIndex = 0;
+  let menuPlacement: "bottom-start" | "top-start" = "bottom-start";
+  let menuMaxHeight: string | null = null;
 
-  $: isUnavailable = isDisabled || isLoading;
+  $: isUnavailable = disabled || loading;
   $: actionableItems = menuNavigableItems(items);
   $: if (menuOpen) {
-    tick().then(() => itemElements[highlightIndex]?.focus());
+    tick().then(async () => {
+      syncMenuLayout();
+      itemElements[highlightIndex]?.focus();
+    });
   }
 
   function toggleMenu(): void {
@@ -39,6 +48,46 @@
   function closeMenu(): void {
     menuOpen = false;
     highlightIndex = 0;
+    menuPlacement = "bottom-start";
+    menuMaxHeight = null;
+  }
+
+  function getScrollContainer(element: HTMLElement | null): HTMLElement | null {
+    let current = element?.parentElement ?? null;
+
+    while (current) {
+      const style = getComputedStyle(current);
+      const overflowY = style.overflowY;
+      if (
+        (overflowY === "auto" || overflowY === "scroll" || overflowY === "overlay") &&
+        current.scrollHeight > current.clientHeight
+      ) {
+        return current;
+      }
+      current = current.parentElement;
+    }
+
+    return null;
+  }
+
+  function syncMenuLayout(): void {
+    if (!menuOpen || !rootElement || !menuElement) return;
+
+    const rootRect = rootElement.getBoundingClientRect();
+    const menuRect = menuElement.getBoundingClientRect();
+    const scrollContainer = getScrollContainer(rootElement);
+    const boundaryTop = scrollContainer?.getBoundingClientRect().top ?? 0;
+    const boundaryBottom =
+      scrollContainer?.getBoundingClientRect().bottom ?? window.innerHeight;
+    const gutter = 6;
+    const availableBelow = Math.max(0, boundaryBottom - rootRect.bottom - gutter);
+    const availableAbove = Math.max(0, rootRect.top - boundaryTop - gutter);
+    const shouldOpenUpward =
+      availableBelow < menuRect.height && availableAbove > availableBelow;
+    const availableSpace = shouldOpenUpward ? availableAbove : availableBelow;
+
+    menuPlacement = shouldOpenUpward ? "top-start" : "bottom-start";
+    menuMaxHeight = availableSpace > 0 ? `${Math.floor(availableSpace)}px` : null;
   }
 
   function moveHighlight(direction: 1 | -1): void {
@@ -48,7 +97,7 @@
     let nextIndex = highlightIndex;
     for (let step = 0; step < count; step += 1) {
       nextIndex = (nextIndex + direction + count) % count;
-      if (!actionableItems[nextIndex]?.isDisabled) {
+      if (!actionableItems[nextIndex]?.disabled) {
         highlightIndex = nextIndex;
         itemElements[nextIndex]?.focus();
         return;
@@ -57,7 +106,7 @@
   }
 
   function activateItem(item: MenuItem): void {
-    if (item.isDisabled || item.kind === "separator") return;
+    if (item.disabled || item.kind === "separator") return;
     dispatch("action", { value: item.value });
     closeMenu();
   }
@@ -74,30 +123,43 @@
       if (event.key === "Escape" && menuOpen) {
         event.preventDefault();
         closeMenu();
+        toggleElement?.focus();
+      }
+    }
+
+    function handleBoundaryChange(): void {
+      if (menuOpen) {
+        syncMenuLayout();
       }
     }
 
     document.addEventListener("mousedown", handlePointerDown);
     document.addEventListener("keydown", handleKeydown);
+    window.addEventListener("resize", handleBoundaryChange);
+    document.addEventListener("scroll", handleBoundaryChange, true);
 
     return () => {
       document.removeEventListener("mousedown", handlePointerDown);
       document.removeEventListener("keydown", handleKeydown);
+      window.removeEventListener("resize", handleBoundaryChange);
+      document.removeEventListener("scroll", handleBoundaryChange, true);
     };
   });
 </script>
 
 <div class="split-button" data-variant={variant} data-tone={tone !== "default" ? tone : undefined} data-size={size} bind:this={rootElement}>
   <button
-    type="button"
+    {type}
     class="split-button__primary"
     disabled={isUnavailable}
     aria-label={ariaLabel ?? undefined}
-    aria-busy={isLoading ? "true" : undefined}
+    aria-busy={loading ? "true" : undefined}
     on:click={(event) => dispatch("click", event)}
   >
-    {#if isLoading}
-      <span class="split-button__spinner" aria-hidden="true"></span>
+    {#if loading}
+      <span class="split-button__spinner" aria-hidden="true">
+        <Spinner variant="ring" size="sm" tone="current" />
+      </span>
     {/if}
     <span class="split-button__label">
       <slot />
@@ -109,6 +171,7 @@
   <button
     type="button"
     class="split-button__toggle"
+    bind:this={toggleElement}
     disabled={isUnavailable}
     aria-haspopup="true"
     aria-expanded={menuOpen ? "true" : "false"}
@@ -135,7 +198,14 @@
   </button>
 
   {#if menuOpen}
-    <div class="split-button__menu" role="menu" aria-label={menuAriaLabel}>
+    <div
+      bind:this={menuElement}
+      class="split-button__menu"
+      data-placement={menuPlacement}
+      role="menu"
+      aria-label={menuAriaLabel}
+      style:max-height={menuMaxHeight ?? undefined}
+    >
       {#each items as item (item.value)}
         {#if item.kind === "separator"}
           <div class="split-button__separator" role="separator"></div>
@@ -144,7 +214,7 @@
             bind:this={itemElements[actionableItems.findIndex((c) => c.value === item.value)]}
             type="button"
             class="split-button__item"
-            disabled={item.isDisabled === true}
+            disabled={item.disabled === true}
             role="menuitem"
             on:click={() => activateItem(item)}
             on:keydown={(event) => {
@@ -346,18 +416,9 @@
   }
 
   .split-button__spinner {
-    width: 0.75rem;
-    height: 0.75rem;
-    border: 0.125rem solid color-mix(in srgb, currentColor 24%, transparent);
-    border-top-color: currentColor;
-    border-radius: 999px;
-    animation: split-button-spinner 0.8s linear infinite;
-  }
-
-  @keyframes split-button-spinner {
-    to {
-      transform: rotate(360deg);
-    }
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
   }
 
   .split-button__menu {
@@ -377,6 +438,12 @@
       color-mix(in srgb, var(--poodle-color-background-elevated) 98%, var(--poodle-color-background-panel))
     );
     box-shadow: var(--poodle-treatment-surface-elevated-shadow, var(--poodle-elevation-overlay));
+    overflow-y: auto;
+  }
+
+  .split-button__menu[data-placement="top-start"] {
+    top: auto;
+    bottom: calc(100% + 0.375rem);
   }
 
   .split-button__item {

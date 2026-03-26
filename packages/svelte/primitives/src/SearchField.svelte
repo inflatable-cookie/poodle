@@ -11,8 +11,9 @@
   export let placeholder = "Search";
   export let ariaLabel = "Search";
   export let describedBy: string | null = null;
-  export let isDisabled = false;
-  export let isReadOnly = false;
+  export let disabled = false;
+  export let readOnly = false;
+  export let debounce: number | null = null;
   export let showClearButton = true;
   export let validationState: ValidationState = "none";
 
@@ -28,7 +29,7 @@
 
   $: isControlled = value !== null;
   $: currentValue = isControlled ? value ?? "" : uncontrolledValue;
-  $: canClear = showClearButton && !isDisabled && !isReadOnly && currentValue.length > 0;
+  $: canClear = showClearButton && !disabled && !readOnly && currentValue.length > 0;
 
   function handleValueChange(event: CustomEvent<{ value: string }>): void {
     const nextValue = event.detail.value;
@@ -58,8 +59,9 @@
   {placeholder}
   {ariaLabel}
   {describedBy}
-  {isDisabled}
-  {isReadOnly}
+  {disabled}
+  {readOnly}
+  {debounce}
   {validationState}
   on:valueChange={handleValueChange}
   on:submit={(event) => dispatch("submit", event.detail)}

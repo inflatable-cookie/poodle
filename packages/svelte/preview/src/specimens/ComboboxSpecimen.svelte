@@ -41,7 +41,7 @@
 
   <div class="specimen__group">
     <Eyebrow>Disabled</Eyebrow>
-    <Combobox options={frameworks} placeholder="Disabled" ariaLabel="Disabled combobox" isDisabled />
+    <Combobox options={frameworks} placeholder="Disabled" ariaLabel="Disabled combobox" disabled />
   </div>
 </div>
 

@@ -48,7 +48,7 @@ Updated: 2026-03-21
 | `collapsed` | `boolean` | `false` | no | current collapsed state (bindable) |
 | `columns` | `number` | `4` | no | number of grid columns at full width |
 | `minItemWidth` | `string` | `"10rem"` | no | minimum width per grid item |
-| `isSticky` | `boolean` | `false` | no | sticky positioning when host supports it |
+| `sticky` | `boolean` | `false` | no | sticky positioning when host supports it |
 
 ### Slots
 
@@ -73,7 +73,7 @@ Updated: 2026-03-21
 | collapsed | `collapsible=true`, `collapsed=true` | header only, controls hidden |
 | summarized | `summaryText` present | summary text in header row |
 | with-actions | actions slot populated | icon buttons right-aligned in header |
-| sticky | `isSticky=true` | sticky positioning with elevation |
+| sticky | `sticky=true` | sticky positioning with elevation |
 
 ### Component States
 

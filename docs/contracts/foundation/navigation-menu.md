@@ -53,7 +53,7 @@ Updated: 2026-03-15
 | `value` | `string` | — | yes | unique identifier |
 | `label` | `string` | — | yes | visible trigger text |
 | `icon` | `string \| null` | `null` | no | optional icon |
-| `isDisabled` | `boolean` | `false` | no | prevents activation |
+| `disabled` | `boolean` | `false` | no | prevents activation |
 
 ### Slot
 
@@ -82,7 +82,7 @@ Updated: 2026-03-15
 | item active | value matches a trigger | that trigger shows open styling, viewport visible with slot content |
 | trigger hover | pointer over trigger (when not disabled) | hover background treatment (accent 12%) |
 | trigger focus | keyboard focus on trigger | focus background treatment (accent 12%), outline: none |
-| disabled | `isDisabled` on NavigationMenuItem | trigger muted, non-interactive, reduced opacity |
+| disabled | `disabled` on NavigationMenuItem | trigger muted, non-interactive, reduced opacity |
 
 ### Component States
 
@@ -329,7 +329,7 @@ Updated: 2026-03-15
 | Components | `value="components"`, initially selected | Active trigger with accent background |
 | Tokens | `value="tokens"` | Default pill-style trigger |
 | Guides | `value="guides"` | Default pill-style trigger |
-| Changelog | `value="changelog"`, `isDisabled=true` | Disabled trigger at reduced opacity, not-allowed cursor |
+| Changelog | `value="changelog"`, `disabled=true` | Disabled trigger at reduced opacity, not-allowed cursor |
 
 ## 14. Approval And Adoption Notes
 

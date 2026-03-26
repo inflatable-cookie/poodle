@@ -1,7 +1,7 @@
 # Callout
 
 Status: detailed contract
-Updated: 2026-03-16
+Updated: 2026-03-25
 
 ## 1. Purpose
 
@@ -34,7 +34,7 @@ Updated: 2026-03-16
 |------|----------|-------------|---------------|
 | Root | yes | contextual message shell with 3-column grid | background, border, radius, padding, color |
 | Body | yes | icon + content container | grid layout, gap |
-| Icon | no | tone-specific glyph in a circular badge | background, radius, font, color |
+| Icon | no | tone-specific glyph or shared pending spinner in a circular badge | background, radius, font, color |
 | Content | yes | title, message, and body container | typography, text color, gap |
 | Actions | no | action buttons area | flex layout, gap |
 | Dismiss | no | close button | size, border-radius, color |
@@ -50,7 +50,7 @@ Updated: 2026-03-16
 | `message` | `string \| null` | `null` | no | body text rendered as `<p>` |
 | `ariaLabel` | `string \| null` | `null` | no | optional accessible label for the callout region |
 | `announceMode` | `CalloutAnnounceMode` | `"none"` | no | ARIA live-region behavior |
-| `isDismissible` | `boolean` | `false` | no | shows dismiss button |
+| `dismissible` | `boolean` | `false` | no | shows dismiss button |
 | `dismissLabel` | `string` | `"Dismiss message"` | no | accessible label for dismiss button |
 
 ### CalloutAnnounceMode
@@ -92,13 +92,13 @@ type CalloutTone = "neutral" | "info" | "success" | "warning" | "danger" | "pend
 
 ### Component States
 
-- dismissible: shows close button when `isDismissible` is true
+- dismissible: shows close button when `dismissible` is true
 
 ## 5. Events
 
 | Event | When It Fires | Payload | Notes |
 |-------|---------------|---------|-------|
-| `dismiss` | dismiss button clicked | `void` | only available when `isDismissible` is true |
+| `dismiss` | dismiss button clicked | `void` | only available when `dismissible` is true |
 
 ## 6. Accessibility
 
@@ -113,14 +113,14 @@ type CalloutTone = "neutral" | "info" | "success" | "warning" | "danger" | "pend
 
 ### Icon Mapping
 
-| Tone | Icon Name |
-|------|-----------|
-| `neutral` | `info` |
-| `info` | `info` |
-| `success` | `check` |
-| `warning` | `triangle-alert` |
-| `danger` | `circle-x` |
-| `pending` | `loader` |
+| Tone | Default Indicator |
+|------|-------------------|
+| `neutral` | `info` icon |
+| `info` | `info` icon |
+| `success` | `check` icon |
+| `warning` | `triangle-alert` icon |
+| `danger` | `circle-x` icon |
+| `pending` | shared `Spinner` primitive in `ring` + `sm` + `accent` configuration |
 
 ### Keyboard
 
@@ -237,6 +237,10 @@ type CalloutTone = "neutral" | "info" | "success" | "warning" | "danger" | "pend
 | `font-weight` | `700` |
 | `line-height` | `1` |
 
+Pending tone uses the shared [`Spinner`](./spinner.md) primitive with
+`variant="ring"`, `size="sm"`, and `tone="accent"` inside the icon badge when
+no icon slot override is provided.
+
 ### Content `.callout__content`
 
 | Property | Value |
@@ -298,9 +302,9 @@ type CalloutTone = "neutral" | "info" | "success" | "warning" | "danger" | "pend
 ## 9. Svelte Notes
 
 - Root element is a `<section>` with optional `aria-label`, `role`, and `aria-live`
-- Icon slot allows overriding the default tone-based icon
-- Default icon is rendered based on tone mapping when no icon slot content
-  is provided
+- Icon slot allows overriding the default tone-based indicator
+- Default indicator is rendered based on tone mapping when no icon slot content
+  is provided; pending uses the shared spinner primitive instead of a loader icon
 - `data-tone` attribute on root for CSS tone targeting
 - Custom properties `--poodle-callout-fill` and `--poodle-callout-border` are set
   per tone variant
@@ -331,7 +335,7 @@ type CalloutTone = "neutral" | "info" | "success" | "warning" | "danger" | "pend
 - [ ] dismissible state shows/hides close button
 - [ ] dismiss event fires on close button click
 - [ ] aria-label passthrough matches
-- [ ] icon mapping per tone matches
+- [ ] default indicator mapping per tone matches
 - [ ] icon slot override behavior matches
 - [ ] actions slot renders action buttons
 
@@ -377,6 +381,7 @@ Five callouts stacked vertically, one per tone with body content:
 | Success | `tone="success"`, `title="Success"`, body slot content | Success-tinted fill and border with check icon badge |
 | Warning | `tone="warning"`, `title="Warning"`, body slot content | Warning-tinted fill and border with triangle-alert icon badge |
 | Error | `tone="danger"`, `title="Error"`, body slot content | Danger-tinted fill and border with circle-x icon badge |
+| Pending | `tone="pending"`, `title="Pending"`, body slot content | Accent-tinted fill and border with shared ring spinner in the icon badge |
 
 ### Message prop
 
@@ -388,7 +393,7 @@ Five callouts stacked vertically, one per tone with body content:
 
 | Label | Props/Config | Expected Visual |
 |-------|-------------|-----------------|
-| Dismissible callout | `tone="info"`, `title="Dismissible callout"`, `message="This callout can be dismissed by the user."`, `isDismissible=true` | Info-tinted callout with a visible dismiss (close) button |
+| Dismissible callout | `tone="info"`, `title="Dismissible callout"`, `message="This callout can be dismissed by the user."`, `dismissible=true` | Info-tinted callout with a visible dismiss (close) button |
 
 ### Without title
 
@@ -403,6 +408,6 @@ Five callouts stacked vertically, one per tone with body content:
 - downstream adopters: contextual messaging in forms, inspectors, cards,
   settings sections, dialogs, command palettes
 - migration note: former Banner consumers should use Callout with
-  `announceMode`, `isDismissible`, and `actions` slot as needed
+  `announceMode`, `dismissible`, and `actions` slot as needed
 
 > **Surface elevation**: Callout is a surface creator — see [surface-elevation.md](./surface-elevation.md).

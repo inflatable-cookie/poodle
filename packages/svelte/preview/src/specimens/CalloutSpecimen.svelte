@@ -33,7 +33,7 @@
       tone="info"
       title="Dismissible callout"
       message="This callout can be dismissed by the user."
-      isDismissible
+      dismissible
     />
   </div>
 

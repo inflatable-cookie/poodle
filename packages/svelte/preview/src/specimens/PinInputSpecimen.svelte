@@ -26,7 +26,7 @@
 
   <div class="specimen__group">
     <Eyebrow>Disabled</Eyebrow>
-    <PinInput length={6} defaultValue="123" isDisabled ariaLabel="Disabled code" />
+    <PinInput length={6} defaultValue="123" disabled ariaLabel="Disabled code" />
   </div>
 </div>
 

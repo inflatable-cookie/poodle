@@ -8,7 +8,7 @@
     { value: "sep1", label: "", kind: "separator" },
     { value: "select-all", label: "Select all", shortcutLabel: "⌘A" },
     { value: "sep2", label: "", kind: "separator" },
-    { value: "delete", label: "Delete", isDisabled: true },
+    { value: "delete", label: "Delete", disabled: true },
   ];
 
   let lastAction = "";

@@ -23,8 +23,8 @@ type TableColumn = {
   id: string;
   label: string;
   align?: "start" | "end";
-  isSortable?: boolean;
-  isHideable?: boolean;
+  sortable?: boolean;
+  hideable?: boolean;
 };
 ```
 
@@ -58,7 +58,7 @@ type TableSortDirection = "asc" | "desc";
         ├── [Header Row]
         │     ├── [Select-All Cell]  Checkbox
         │     ├── [Column Header...]
-        │     │     └── [Sort Button]  (if isSortable)
+        │     │     └── [Sort Button]  (if sortable)
         │     └── [Actions Header]  (optional)
         └── [Body]
               └── [Row...]  aria-selected
@@ -143,9 +143,9 @@ the table:
 - **Export button**: icon (download) + "Export" label; triggers client-side CSV
   generation and download, then dispatches `exportCsv`
 - **Column visibility**: Popover (placement: bottom-end) with Checkbox list of
-  hideable columns (`isHideable !== false`); toggling dispatches
+  hideable columns (`hideable !== false`); toggling dispatches
   `columnVisibilityChange`
-- Only columns where `isHideable` is not explicitly `false` appear in the
+- Only columns where `hideable` is not explicitly `false` appear in the
   visibility menu
 - Hidden columns are excluded from both rendering and CSV export
 

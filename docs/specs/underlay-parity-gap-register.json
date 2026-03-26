@@ -57,7 +57,7 @@
       "contract": "new",
       "milestone": "g04.003",
       "sourcePattern": "Underlay MediaPicker asset selection",
-      "description": "Gallery-based asset browser with search, filtering, selection mode, and upload integration."
+      "description": "Poodle now covers the lightweight local selector plus reusable browse/status sub-surfaces; the callback-driven media-library workflow shell remains intentionally retained in Underlay."
     },
     {
       "id": "gap-006",
@@ -149,17 +149,6 @@
     },
     {
       "id": "gap-014",
-      "component": "SlugField",
-      "class": "new-component",
-      "priority": "medium",
-      "layer": "@poodle/svelte-composites",
-      "contract": "new",
-      "milestone": "g04.005",
-      "sourcePattern": "Underlay SlugField auto-generated URL slug",
-      "description": "Auto-generates URL-safe slug from bound source text with manual override and validation."
-    },
-    {
-      "id": "gap-015",
       "component": "Field",
       "class": "feature-extension",
       "priority": "medium",

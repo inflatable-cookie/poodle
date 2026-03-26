@@ -12,7 +12,7 @@
   export let defaultOpen = false;
   export let title: string | null = null;
   export let description: string | null = null;
-  export let isDisabled = false;
+  export let disabled = false;
   export let ariaLabel: string | null = null;
 
   const dispatch = createEventDispatcher<{
@@ -34,12 +34,12 @@
   }
 </script>
 
-<section class="collapsible" data-open={isOpen} data-disabled={isDisabled}>
+<section class="collapsible" data-open={isOpen} data-disabled={disabled}>
   <button
     type="button"
     class="collapsible__trigger"
     id={`poodle-collapsible-trigger-${collapsibleId}`}
-    disabled={isDisabled}
+    disabled={disabled}
     aria-expanded={isOpen ? "true" : "false"}
     aria-controls={`poodle-collapsible-content-${collapsibleId}`}
     aria-label={title ? undefined : ariaLabel ?? undefined}

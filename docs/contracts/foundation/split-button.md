@@ -1,7 +1,7 @@
 # SplitButton
 
 Status: detailed contract
-Updated: 2026-03-15
+Updated: 2026-03-25
 
 ## 1. Purpose
 
@@ -10,7 +10,9 @@ Updated: 2026-03-15
 - Summary: a compound action control that pairs a primary button with a dropdown
   menu toggle for secondary actions
 - In scope: variant and size parity with Button, dropdown menu with items and
-  separators, keyboard navigation, loading state, disabled state
+  separators, keyboard navigation, loading state, disabled state, submit/reset
+  semantics on the primary action half, and automatic vertical flipping within
+  the nearest scrollable boundary
 - Out of scope: nested submenus, icon-only split buttons, toggle/checkbox menu
   items
 
@@ -19,7 +21,7 @@ Updated: 2026-03-15
 ```text
 [Root .split-button]  <div>
   ├── [Primary .split-button__primary]  <button>
-  │   ├── [Spinner] (conditional, when isLoading)
+  │   ├── [Spinner] (conditional, when loading)
   │   └── [Label (default slot)]
   ├── [Divider .split-button__divider]  <span>
   ├── [Toggle .split-button__toggle]  <button>
@@ -49,9 +51,10 @@ Updated: 2026-03-15
 | `variant` | `"primary" \| "secondary" \| "ghost"` | `"secondary"` | no | appearance family |
 | `tone` | `"default" \| "danger"` | `"default"` | no | intent modifier; composes with variant for danger×primary, danger×secondary, danger×ghost |
 | `size` | `"sm" \| "md" \| "lg"` | `"md"` | no | control size |
+| `type` | `"button" \| "submit" \| "reset"` | `"button"` | no | native button type for the primary action half |
 | `items` | `MenuItem[]` | — | yes | dropdown menu entries |
-| `isDisabled` | `boolean` | `false` | no | disables entire control |
-| `isLoading` | `boolean` | `false` | no | shows spinner in primary half, disables control |
+| `disabled` | `boolean` | `false` | no | disables entire control |
+| `loading` | `boolean` | `false` | no | shows spinner in primary half, disables control |
 | `ariaLabel` | `string \| null` | `null` | no | accessible name for primary button |
 | `menuAriaLabel` | `string` | `"More actions"` | no | accessible name for toggle button |
 
@@ -61,7 +64,7 @@ Updated: 2026-03-15
 type MenuItem = {
   value: string;
   label: string;
-  isDisabled?: boolean;
+  disabled?: boolean;
   kind?: "action";
 } | {
   kind: "separator";
@@ -90,15 +93,15 @@ type MenuItem = {
 | hover (toggle) | pointer enters toggle half | `background: var(--poodle-split-fill-hover)` |
 | active | press on either half | `background` darkened further |
 | focus | keyboard focus on either half | standard focus ring |
-| menu open | toggle clicked or keyboard opens | menu panel visible below root |
-| disabled | `isDisabled=true` or `isLoading=true` | `opacity: state-opacity-disabled`, `cursor: not-allowed` |
-| loading | `isLoading=true` | spinner in primary half, control disabled |
+| menu open | toggle clicked or keyboard opens | menu panel visible below root by default, or above when lower space is constrained |
+| disabled | `disabled=true` or `loading=true` | `opacity: state-opacity-disabled`, `cursor: not-allowed` |
+| loading | `loading=true` | spinner in primary half, control disabled |
 
 ## 5. Events
 
 | Event | When It Fires | Payload | Notes |
 |-------|---------------|---------|-------|
-| `click` | primary button activated | `MouseEvent` | suppressed while disabled or loading |
+| `click` | primary button activated | `MouseEvent` | suppressed while disabled or loading; native form submission still occurs when `type="submit"` |
 | `action` | menu item selected | `{value: string}` | fires after menu closes |
 
 ## 6. Accessibility
@@ -106,7 +109,7 @@ type MenuItem = {
 ### Semantics
 
 - Root: no semantic role (presentational container)
-- Primary button: native `<button>`, `aria-label` from prop
+- Primary button: native `<button>`, `type` from prop, `aria-label` from prop
 - Toggle button: native `<button>`, `aria-label` from menuAriaLabel, `aria-haspopup="menu"`, `aria-expanded`
 - Menu: `role="menu"`
 - Items: `role="menuitem"`, `aria-disabled` when item disabled
@@ -116,7 +119,7 @@ type MenuItem = {
 
 | Key | Behavior |
 |-----|----------|
-| `Enter` / `Space` | activates focused button or menu item |
+| `Enter` / `Space` | activates focused button or menu item; primary action participates in native form submission when `type="submit"` |
 | `ArrowDown` | opens menu from toggle; moves focus to next item in menu |
 | `ArrowUp` | moves focus to previous item in menu |
 | `Home` | moves focus to first menu item |
@@ -137,7 +140,9 @@ type MenuItem = {
 - Root: `width: fit-content`, halves stretch vertically
 - Primary half: `min-width: 4rem`, `padding: 0 space-control-x`
 - Toggle half: `width: 2rem`, `padding: 0`
-- Menu: `min-width: 12rem`, positioned absolutely below root
+- Menu: `min-width: 12rem`, positioned absolutely below root by default, flips
+  above when the nearest scrollable ancestor or viewport has less space below
+  than above
 
 ### Composition
 
@@ -238,14 +243,9 @@ type MenuItem = {
 
 ### Spinner
 
-| Property | Value |
-|----------|-------|
-| `width` | `0.75rem` |
-| `height` | `0.75rem` |
-| `border` | `0.125rem solid color-mix(in srgb, currentColor 24%, transparent)` |
-| `border-top-color` | `currentColor` |
-| `border-radius` | `999px` |
-| `animation` | `rotate(360deg) 0.8s linear infinite` |
+Primary-half loading uses the shared [`Spinner`](./spinner.md) primitive with
+`variant="ring"`, `size="sm"`, and `tone="current"`, wrapped by
+`.split-button__spinner` for alignment.
 
 ### Hover (not disabled)
 
@@ -272,7 +272,8 @@ type MenuItem = {
 | Property | Value |
 |----------|-------|
 | `position` | `absolute` |
-| `top` | `calc(100% + 0.375rem)` |
+| `top` | `calc(100% + 0.375rem)` by default |
+| `bottom` | `calc(100% + 0.375rem)` when flipped upward |
 | `left` | `0` |
 | `z-index` | `var(--poodle-z-index-overlay-menu)` |
 | `min-width` | `12rem` |
@@ -281,6 +282,8 @@ type MenuItem = {
 | `border-radius` | `var(--poodle-radius-surface)` |
 | `background` | `color-mix(in srgb, var(--poodle-color-background-elevated) 98%, var(--poodle-color-background-panel))` |
 | `box-shadow` | `var(--poodle-elevation-overlay)` |
+| `overflow-y` | `auto` |
+| `max-height` | measured from available space inside the nearest scrollable boundary |
 
 ### Item
 
@@ -322,6 +325,7 @@ type MenuItem = {
 - `data-variant`, `data-tone`, `data-size`, `data-open` data attributes on root
 - Menu state managed via internal `$state(false)` boolean
 - Click-outside handler closes menu
+- Menu measures the nearest scrollable boundary and flips upward when needed
 - `MenuItem[]` prop drives menu rendering; separators rendered as dividers
 - Chevron rotates 180deg when menu is open via CSS transform
 
@@ -352,7 +356,7 @@ type MenuItem = {
 - [ ] menu panel appearance matches (border, radius, background, shadow)
 - [ ] item hover state matches (16% accent-base)
 - [ ] focus ring matches
-- [ ] spinner appearance matches
+- [ ] shared spinner sizing, tone, and alignment match
 
 ### Tier 3: Implementation Freedom
 
@@ -391,13 +395,13 @@ type MenuItem = {
 
 | Label | Props / Config | Expected Visual |
 |-------|---------------|-----------------|
-| Loading state | `variant="primary"`, `isLoading=true`, label "Saving..." | Spinner visible in primary half; entire control disabled and non-interactive |
+| Loading state | `variant="primary"`, `loading=true`, label "Saving..." | Spinner visible in primary half; entire control disabled and non-interactive |
 
 ### Group: Disabled
 
 | Label | Props / Config | Expected Visual |
 |-------|---------------|-----------------|
-| Disabled | `variant="secondary"`, `isDisabled=true`, label "Save" | Reduced opacity; cursor not-allowed; no interaction possible |
+| Disabled | `variant="secondary"`, `disabled=true`, label "Save" | Reduced opacity; cursor not-allowed; no interaction possible |
 
 ### Group: Last action
 

@@ -15,7 +15,7 @@
     { type: "image", label: "Image", icon: "image" },
     { type: "divider", label: "Divider", icon: "minus" },
   ];
-  export let isDisabled = false;
+  export let disabled = false;
   export let ariaLabel = "Block editor";
 
   const dispatch = createEventDispatcher<{
@@ -85,7 +85,7 @@
   }
 
   function handleDragStart(event: DragEvent, index: number): void {
-    if (isDisabled || !event.dataTransfer) return;
+    if (disabled || !event.dataTransfer) return;
     dragSourceIndex = index;
     event.dataTransfer.effectAllowed = "move";
     event.dataTransfer.setData("text/plain", String(index));
@@ -127,7 +127,7 @@
   }
 </script>
 
-<div class="block-editor" class:block-editor--disabled={isDisabled} aria-label={ariaLabel}>
+<div class="block-editor" class:block-editor--disabled={disabled} aria-label={ariaLabel}>
   {#each blocks as block, index (block.id)}
     <!-- svelte-ignore a11y-no-noninteractive-element-interactions -->
     <div
@@ -158,7 +158,7 @@
           <select
             class="block-editor__type-select"
             value={block.type}
-            disabled={isDisabled}
+            disabled={disabled}
             on:change={(e) => changeType(index, (e.currentTarget as HTMLSelectElement).value)}
             aria-label="Block type"
           >
@@ -172,14 +172,14 @@
           <button
             type="button"
             class="block-editor__tool-btn"
-            disabled={isDisabled || index === 0}
+            disabled={disabled || index === 0}
             on:click|stopPropagation={() => moveBlock(index, -1)}
             aria-label="Move up"
           ><Icon name="arrow-up" size="sm" /></button>
           <button
             type="button"
             class="block-editor__tool-btn"
-            disabled={isDisabled || index === blocks.length - 1}
+            disabled={disabled || index === blocks.length - 1}
             on:click|stopPropagation={() => moveBlock(index, 1)}
             aria-label="Move down"
           ><Icon name="arrow-down" size="sm" /></button>
@@ -188,14 +188,14 @@
             class="block-editor__tool-btn block-editor__add-btn"
             title="Add block below"
             aria-label="Add block after this one"
-            disabled={isDisabled}
+            disabled={disabled}
             on:click|stopPropagation={(e) => openAddMenu(e, index)}
           ><Icon name="plus" size="sm" /></button>
           {#if blocks.length > 1}
             <button
               type="button"
               class="block-editor__tool-btn block-editor__remove-btn"
-              disabled={isDisabled}
+              disabled={disabled}
               on:click|stopPropagation={() => removeBlock(index)}
               aria-label="Remove block"
             ><Icon name="x" size="sm" /></button>
@@ -208,7 +208,7 @@
           name="block"
           {block}
           {index}
-          {isDisabled}
+          disabled={disabled}
           update={(updates: Partial<EditorBlock>) => updateBlock(index, updates)}
         >
           <!-- Default rendering for built-in types -->
@@ -219,7 +219,7 @@
               type="text"
               class="block-editor__input block-editor__input--heading"
               placeholder="Heading..."
-              disabled={isDisabled}
+              disabled={disabled}
               value={block.content}
               on:input={(e) => updateBlock(index, { content: (e.currentTarget as HTMLInputElement).value })}
             />
@@ -227,7 +227,7 @@
             <textarea
               class="block-editor__input block-editor__input--code"
               placeholder="Code..."
-              disabled={isDisabled}
+              disabled={disabled}
               value={block.content}
               on:input={(e) => updateBlock(index, { content: (e.currentTarget as HTMLTextAreaElement).value })}
               rows="3"
@@ -238,7 +238,7 @@
                 type="text"
                 class="block-editor__input block-editor__input--image-url"
                 placeholder="Image URL..."
-                disabled={isDisabled}
+                disabled={disabled}
                 value={block.content}
                 on:input={(e) => updateBlock(index, { content: (e.currentTarget as HTMLInputElement).value })}
               />
@@ -252,7 +252,7 @@
             <textarea
               class="block-editor__input block-editor__input--quote"
               placeholder="Quote..."
-              disabled={isDisabled}
+              disabled={disabled}
               value={block.content}
               on:input={(e) => updateBlock(index, { content: (e.currentTarget as HTMLTextAreaElement).value })}
               rows="2"
@@ -261,7 +261,7 @@
             <textarea
               class="block-editor__input block-editor__input--list"
               placeholder="List items (one per line)..."
-              disabled={isDisabled}
+              disabled={disabled}
               value={block.content}
               on:input={(e) => updateBlock(index, { content: (e.currentTarget as HTMLTextAreaElement).value })}
               rows="3"
@@ -270,7 +270,7 @@
             <textarea
               class="block-editor__input"
               placeholder="Type something..."
-              disabled={isDisabled}
+              disabled={disabled}
               value={block.content}
               on:input={(e) => updateBlock(index, { content: (e.currentTarget as HTMLTextAreaElement).value })}
               rows="1"

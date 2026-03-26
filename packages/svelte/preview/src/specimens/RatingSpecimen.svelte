@@ -27,7 +27,7 @@
 
   <div class="specimen__group">
     <Eyebrow>Disabled</Eyebrow>
-    <Rating defaultValue={2} isDisabled ariaLabel="Disabled rating" />
+    <Rating defaultValue={2} disabled ariaLabel="Disabled rating" />
   </div>
 </div>
 

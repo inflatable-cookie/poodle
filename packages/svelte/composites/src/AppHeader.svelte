@@ -1,13 +1,13 @@
 <script lang="ts">
   export let title: string | null = null;
   export let subtitle: string | null = null;
-  export let isDragRegion = false;
+  export let dragRegion = false;
   export let ariaLabel: string | null = null;
 </script>
 
 <header
   class="app-header"
-  data-drag-region={isDragRegion}
+  data-drag-region={dragRegion}
   aria-label={ariaLabel ?? title ?? undefined}
 >
   <div class="app-header__identity">

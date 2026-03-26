@@ -6,7 +6,7 @@
   export let tone: SurfaceTone = "panel";
   export let border: SurfaceBorder = "subtle";
   export let padding: SpaceScale = "md";
-  export let isElevated = false;
+  export let elevated = false;
   export let asRole: "region" | "group" | null = null;
   export let label: string | null = null;
 
@@ -26,7 +26,7 @@
   class="surface"
   data-tone={tone}
   data-border={border}
-  data-elevated={isElevated}
+  data-elevated={elevated}
   role={asRole ?? undefined}
   aria-label={label ?? undefined}
   style={style}

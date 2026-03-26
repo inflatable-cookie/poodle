@@ -73,6 +73,9 @@ Updated: 2026-03-15
 | `showPreview` | `boolean` | `true` | no | show image thumbnails |
 | `disabled` | `boolean` | `false` | no | disables all interaction |
 | `files` | `FileUploadItem[]` | `[]` | no | bindable file list |
+| `validate` | `(file: File) => string \| null` | `undefined` | no | app-owned custom validation callback |
+| `compress` | `boolean` | `false` | no | compress raster images before they are added |
+| `compressionOptions` | `ImageCompressionOptions` | `DEFAULT_COMPRESSION` | no | image compression settings |
 
 ### Public Methods
 
@@ -92,6 +95,14 @@ interface FileUploadItem {
   status: "pending" | "uploading" | "complete" | "error";
   previewUrl: string | null;
   error?: string;
+  originalFile?: File;
+}
+
+interface ImageCompressionOptions {
+  maxWidth?: number;
+  maxHeight?: number;
+  quality?: number;
+  format?: "image/jpeg" | "image/png" | "image/webp";
 }
 ```
 
@@ -128,6 +139,7 @@ interface FileUploadItem {
 | Event | When It Fires | Payload | Notes |
 |-------|---------------|---------|-------|
 | `change` | files added or removed | `{ files: FileUploadItem[] }` | full file list |
+| `upload` | validated files added | `{ files: File[] }` | ready for app-owned upload orchestration |
 | `error` | file fails validation | `{ file: File, message: string }` | rejected file and reason |
 | `remove` | file removed from list | `{ item: FileUploadItem }` | removed item |
 

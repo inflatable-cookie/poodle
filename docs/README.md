@@ -12,6 +12,7 @@ Poodle uses a docs-first structure under `docs/` so product intent, architecture
 ## Supporting Sections
 
 - `contracts/`
+- `guides/`
 - `research/`
 - `specs/`
 
@@ -21,7 +22,7 @@ Poodle uses a docs-first structure under `docs/` so product intent, architecture
 2. Read `architecture/001-poodle-system-shape.md`.
 3. Read `roadmaps/README.md`.
 4. Read `roadmaps/generation-index.md`.
-5. Use `specs/README.md` and `contracts/README.md` when implementing or reviewing component work.
+5. Use `specs/README.md`, `contracts/README.md`, and `guides/README.md` when implementing or reviewing component work.
 
 ## Current Working Posture
 
@@ -30,6 +31,7 @@ Poodle uses a docs-first structure under `docs/` so product intent, architecture
 - `roadmaps/` holds executable milestone work and generation sequencing
 - `specs/` holds normative repo-wide rules and artifact baselines
 - `contracts/` holds per-component source-of-truth semantics and anatomy
+- `guides/` packages reusable implementation recipes for downstream developers
 - `logs/` records completed batches and evidence
 - `research/` captures external comparison work before architectural decisions harden
 

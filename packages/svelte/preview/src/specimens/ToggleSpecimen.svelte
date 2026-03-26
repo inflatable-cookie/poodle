@@ -11,12 +11,12 @@
     <Eyebrow>Ghost variant (default)</Eyebrow>
     <div class="toggle-row">
       <Toggle
-        isPressed={bold}
+        pressed={bold}
         ariaLabel="Bold"
         on:pressedChange={(e) => (bold = e.detail.pressed)}
       ><Icon icon={boldIcon} size="sm" /></Toggle>
       <Toggle
-        isPressed={italic}
+        pressed={italic}
         ariaLabel="Italic"
         on:pressedChange={(e) => (italic = e.detail.pressed)}
       ><Icon icon={italicIcon} size="sm" /></Toggle>
@@ -36,7 +36,7 @@
 
   <div class="specimen__group">
     <Eyebrow>Disabled</Eyebrow>
-    <Toggle defaultPressed isDisabled ariaLabel="Disabled toggle">Locked</Toggle>
+    <Toggle defaultPressed disabled ariaLabel="Disabled toggle">Locked</Toggle>
   </div>
 </div>
 

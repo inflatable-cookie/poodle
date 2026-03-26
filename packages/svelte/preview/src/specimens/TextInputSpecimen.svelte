@@ -1,16 +1,32 @@
 <script lang="ts">
   import { TextInput, Field, Eyebrow } from "@poodle/svelte-primitives";
-  import type { ValidationState } from "@poodle/svelte-primitives";
+  import type { InputValidationStatus, ValidationState } from "@poodle/svelte-primitives";
 
   let name = "";
   let email = "invalid-email";
   let validationState: ValidationState = "invalid";
+  let workspace = "acme-admin";
+  let workspaceStatus: InputValidationStatus = "idle";
+  let workspaceError: string | null = null;
+
+  async function validateWorkspace(value: string) {
+    await new Promise((resolve) => setTimeout(resolve, 250));
+
+    if (["admin", "settings", "support"].includes(value.trim().toLowerCase())) {
+      return {
+        valid: false,
+        message: "That workspace handle is reserved.",
+      };
+    }
+
+    return { valid: true };
+  }
 </script>
 
 <div class="specimen">
   <div class="specimen__group">
     <Eyebrow>Default</Eyebrow>
-    <Field id="name-field" label="Name" helpText="Enter your full name.">
+    <Field id="name-field" label="Name" description="Enter your full name.">
       <TextInput
         id="name-field"
         placeholder="Jane Doe"
@@ -24,9 +40,9 @@
     <Field
       id="email-field"
       label="Email"
-      helpText="A valid email address is required."
-      {validationState}
-      errorMessage="Please enter a valid email address."
+      description="A valid email address is required."
+      validationState={validationState}
+      error={validationState === "invalid" ? "Please enter a valid email address." : null}
     >
       <TextInput
         id="email-field"
@@ -41,12 +57,40 @@
   </div>
 
   <div class="specimen__group">
+    <Eyebrow>Async validation</Eyebrow>
+    <Field
+      id="workspace-field"
+      label="Workspace"
+      description="Check whether the workspace handle is available."
+      validationState={workspaceStatus === "validating" ? "pending" : workspaceStatus === "invalid" ? "invalid" : workspaceStatus === "valid" ? "valid" : "none"}
+      pendingMessage={workspaceStatus === "validating" ? "Checking availability..." : null}
+      error={workspaceStatus === "invalid" ? workspaceError : null}
+    >
+      <TextInput
+        id="workspace-field"
+        value={workspace}
+        autocomplete="off"
+        required
+        pattern="[a-z0-9-]+"
+        validate={validateWorkspace}
+        validationDebounce={250}
+        validationContext={{ reserved: true }}
+        on:valueChange={(event) => (workspace = event.detail.value)}
+        on:validationChange={(event) => {
+          workspaceStatus = event.detail.status;
+          workspaceError = event.detail.message || null;
+        }}
+      />
+    </Field>
+  </div>
+
+  <div class="specimen__group">
     <Eyebrow>Disabled</Eyebrow>
     <Field id="disabled-field" label="API key">
       <TextInput
         id="disabled-field"
         value="sk-xxxx-xxxx-xxxx"
-        isDisabled
+        disabled
       />
     </Field>
   </div>

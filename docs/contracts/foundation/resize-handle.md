@@ -34,7 +34,7 @@ Updated: 2026-03-17
 | Prop | Type | Default | Required | Notes |
 |------|------|---------|----------|-------|
 | `orientation` | `"horizontal" \| "vertical"` | `"horizontal"` | no | resize axis |
-| `isDisabled` | `boolean` | `false` | no | suppresses interaction |
+| `disabled` | `boolean` | `false` | no | suppresses interaction |
 | `ariaLabel` | `string \| null` | `null` | no | accessible label |
 | `ariaValueNow` | `number \| null` | `null` | no | current ratio for a11y |
 | `ariaValueMin` | `number` | `0` | no | minimum value for a11y |
@@ -54,7 +54,7 @@ Updated: 2026-03-17
 | idle | default | subtle separator line |
 | hover | pointer over hit target | highlighted affordance |
 | active | drag in progress | strong highlight, cursor change |
-| disabled | `isDisabled=true` | no interaction, muted visual |
+| disabled | `disabled=true` | no interaction, muted visual |
 
 ## 5. Events
 
@@ -160,13 +160,13 @@ Specimen reference: `ResizeHandleSpecimen.svelte`.
 
 | Label | Props / Config | Expected Visual |
 |-------|---------------|-----------------|
-| Disabled horizontal | `orientation="horizontal"`, `isDisabled`, `ariaLabel="Disabled resize"` | Muted visual, no interaction; handle between left and right panes |
+| Disabled horizontal | `orientation="horizontal"`, `disabled`, `ariaLabel="Disabled resize"` | Muted visual, no interaction; handle between left and right panes |
 
 ### Group: Disabled (vertical split)
 
 | Label | Props / Config | Expected Visual |
 |-------|---------------|-----------------|
-| Disabled vertical | `orientation="vertical"`, `isDisabled`, `ariaLabel="Disabled resize vertical"` | Muted visual, no interaction; handle between top and bottom panes |
+| Disabled vertical | `orientation="vertical"`, `disabled`, `ariaLabel="Disabled resize vertical"` | Muted visual, no interaction; handle between top and bottom panes |
 
 ## Next Task
 

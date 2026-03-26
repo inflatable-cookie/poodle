@@ -5,7 +5,7 @@
 
   export let value = "";
   export let placeholder = "Write markdown...";
-  export let isDisabled = false;
+  export let disabled = false;
   export let ariaLabel = "Markdown editor";
   export let minHeight = "12rem";
   export let mode: "edit" | "preview" | "split" = "edit";
@@ -17,7 +17,7 @@
   let textareaEl: HTMLTextAreaElement | null = null;
 
   function insertMarkdown(before: string, after = ""): void {
-    if (!textareaEl || isDisabled) return;
+    if (!textareaEl || disabled) return;
 
     const start = textareaEl.selectionStart;
     const end = textareaEl.selectionEnd;
@@ -37,7 +37,7 @@
   }
 
   function insertLine(prefix: string): void {
-    if (!textareaEl || isDisabled) return;
+    if (!textareaEl || disabled) return;
 
     const start = textareaEl.selectionStart;
     const lineStart = value.lastIndexOf("\n", start - 1) + 1;
@@ -99,7 +99,7 @@
   ];
 </script>
 
-<div class="md-editor" class:md-editor--disabled={isDisabled}>
+<div class="md-editor" class:md-editor--disabled={disabled}>
   <div class="md-editor__toolbar">
     <div class="md-editor__tools">
       {#each toolbarActions as tool}
@@ -108,7 +108,7 @@
           class="md-editor__tool-btn"
           title={tool.label}
           aria-label={tool.label}
-          disabled={isDisabled || mode === "preview"}
+          disabled={disabled || mode === "preview"}
           on:click={tool.action}
         >
           <Icon icon={tool.icon} size="sm" />
@@ -144,7 +144,7 @@
         bind:this={textareaEl}
         class="md-editor__textarea"
         {placeholder}
-        disabled={isDisabled}
+        disabled={disabled}
         aria-label={ariaLabel}
         style="min-height: {minHeight}"
         on:input={handleInput}

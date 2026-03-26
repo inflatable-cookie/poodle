@@ -45,7 +45,7 @@ Updated: 2026-03-15
 | `defaultValue` | `string \| null` | `null` | no | uncontrolled initial value |
 | `placeholder` | `string \| null` | `null` | no | shown when no value selected |
 | `options` | `SelectItems` | — | yes | array of `SelectOption` or `SelectOptionGroup` |
-| `isDisabled` | `boolean` | `false` | no | disables the select |
+| `disabled` | `boolean` | `false` | no | disables the select |
 | `ariaLabel` | `string \| null` | `null` | no | required when no visible label exists |
 | `describedBy` | `string \| null` | `null` | no | aria-describedby target |
 | `name` | `string \| undefined` | `undefined` | no | form field name |
@@ -72,7 +72,7 @@ SelectItems: SelectOption[] | SelectOptionGroup[]
 | placeholder | no value selected, placeholder prop set | placeholder text in secondary color, `data-placeholder="true"` |
 | selected | value matches an option | option label displayed in primary color |
 | focus | select receives focus | focus ring via border-color change, background shift, box-shadow |
-| disabled | `isDisabled=true` | reduced opacity on root, non-interactive |
+| disabled | `disabled=true` | reduced opacity on root, non-interactive |
 
 ### Component States
 
@@ -94,7 +94,7 @@ SelectItems: SelectOption[] | SelectOptionGroup[]
 - Role: native `<select>` element provides built-in accessibility
 - Required attributes: accessible name from external label or `ariaLabel`
 - Optional attributes: `aria-describedby` from `describedBy`
-- `disabled` attribute set on root select when `isDisabled`
+- `disabled` attribute set on root select when `disabled`
 - Disabled individual options use native `disabled` attribute on `<option>`
 - Labeling rules: placeholder text is not the accessible name
 
@@ -280,7 +280,7 @@ One disabled select with pre-selected value:
 
 | Placeholder | Options | Initial | Props |
 |-------------|---------|---------|-------|
-| Choose a fruit | Apple, Banana, Cherry | Banana | `isDisabled: true` |
+| Choose a fruit | Apple, Banana, Cherry | Banana | `disabled: true` |
 
 ## 14. Approval And Adoption Notes
 

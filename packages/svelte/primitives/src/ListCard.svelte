@@ -7,9 +7,9 @@
   export let leadingShape: "circle" | "rounded-square" = "circle";
   export let leadingFill: "tint" | "solid" = "tint";
   export let accentColor: string | null = null;
-  export let isInteractive = false;
-  export let isDisabled = false;
-  export let isNotLive = false;
+  export let interactive = false;
+  export let disabled = false;
+  export let notLive = false;
   export let sash: string | null = null;
   export let sashColor: string | null = null;
   export let ariaLabel: string | null = null;
@@ -22,22 +22,22 @@
 <!-- svelte-ignore a11y_no_noninteractive_tabindex -->
 <div
   class="list-card"
-  class:list-card--interactive={isInteractive}
-  data-disabled={isDisabled}
-  data-not-live={isNotLive}
+  class:list-card--interactive={interactive}
+  data-disabled={disabled}
+  data-not-live={notLive}
   data-leading-shape={leadingShape}
   data-leading-fill={leadingFill}
-  role={isInteractive ? "button" : undefined}
-  tabindex={isInteractive && !isDisabled ? 0 : -1}
+  role={interactive ? "button" : undefined}
+  tabindex={interactive && !disabled ? 0 : -1}
   aria-label={ariaLabel ?? title}
   class:list-card--has-sash={!!sash}
   style={[
     accentColor ? `--list-card-accent: ${accentColor}` : '',
     sashColor ? `--list-card-sash: ${sashColor}` : '',
   ].filter(Boolean).join('; ') || undefined}
-  on:click={(e) => isInteractive && !isDisabled && dispatch("click", e)}
+  on:click={(e) => interactive && !disabled && dispatch("click", e)}
   on:keydown={(e) => {
-    if (isInteractive && !isDisabled && (e.key === "Enter" || e.key === " ")) {
+    if (interactive && !disabled && (e.key === "Enter" || e.key === " ")) {
       e.preventDefault();
       dispatch("click", new MouseEvent("click"));
     }

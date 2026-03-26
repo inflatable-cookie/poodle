@@ -15,11 +15,11 @@
 
   $: visibleItems =
     maxVisibleItems !== null && items.length > maxVisibleItems
-      ? [items[0], { value: "__ellipsis__", label: "…", isCurrent: false }, ...items.slice(items.length - (maxVisibleItems - 1))]
+      ? [items[0], { value: "__ellipsis__", label: "…", current: false }, ...items.slice(items.length - (maxVisibleItems - 1))]
       : items;
 
   function handleNavigate(item: BreadcrumbItem): void {
-    if (item.isCurrent || item.value === "__ellipsis__") {
+    if (item.current || item.value === "__ellipsis__") {
       return;
     }
 
@@ -31,7 +31,7 @@
   <ol class="breadcrumbs__list">
     {#each visibleItems as item, index}
       <li class="breadcrumbs__item">
-        {#if item.isCurrent || index === visibleItems.length - 1}
+        {#if item.current || index === visibleItems.length - 1}
           <span aria-current="page">{item.label}</span>
         {:else if item.href}
           <a href={item.href}>{item.label}</a>

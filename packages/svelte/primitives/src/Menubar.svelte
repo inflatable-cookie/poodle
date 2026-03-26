@@ -81,7 +81,7 @@
     for (let step = 0; step < count; step += 1) {
       nextIndex = (nextIndex + direction + count) % count;
 
-      if (!actionableItems[nextIndex]?.isDisabled) {
+      if (!actionableItems[nextIndex]?.disabled) {
         highlightIndex = nextIndex;
         menuItemElements[nextIndex]?.focus();
         return;
@@ -90,7 +90,7 @@
   }
 
   function activateItem(item: MenuItem): void {
-    if (item.isDisabled || item.kind === "separator") {
+    if (item.disabled || item.kind === "separator") {
       return;
     }
 
@@ -136,7 +136,7 @@
           type="button"
           class="menubar__trigger"
           data-open={currentValue === item.value}
-          disabled={item.isDisabled === true}
+          disabled={item.disabled === true}
           role="menuitem"
           aria-haspopup="menu"
           aria-expanded={currentValue === item.value ? "true" : "false"}
@@ -193,9 +193,9 @@
                   bind:this={menuItemElements[actionableItems.findIndex((candidate) => candidate.value === menuItem.value)]}
                   type="button"
                   class="menubar__item"
-                  disabled={menuItem.isDisabled === true}
+                  disabled={menuItem.disabled === true}
                   role={menuItem.kind === "checkbox" || menuItem.kind === "radio" ? `menuitem${menuItem.kind}` : "menuitem"}
-                  aria-checked={menuItem.kind === "checkbox" || menuItem.kind === "radio" ? (menuItem.isChecked ? "true" : "false") : undefined}
+                  aria-checked={menuItem.kind === "checkbox" || menuItem.kind === "radio" ? (menuItem.checked ? "true" : "false") : undefined}
                   on:click={() => activateItem(menuItem)}
                   on:keydown={(event) => {
                     if (event.key === "ArrowDown") {
@@ -246,7 +246,7 @@
                 >
                   <span class="menubar__label">{menuItem.label}</span>
 
-                  {#if menuItem.isChecked}
+                  {#if menuItem.checked}
                     <span class="menubar__meta" aria-hidden="true">✓</span>
                   {:else if menuItem.shortcutLabel}
                     <span class="menubar__meta" aria-hidden="true">{menuItem.shortcutLabel}</span>

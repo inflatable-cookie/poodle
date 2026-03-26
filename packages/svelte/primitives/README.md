@@ -74,6 +74,7 @@ Contract-backed Svelte primitive surface for the first generalized Poodle baseli
 - `Skeleton`
 - `Slider`
 - `Spacer`
+- `Spinner`
 - `SplitButton`
 - `Stack`
 - `StatusBar`

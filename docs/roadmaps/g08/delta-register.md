@@ -115,6 +115,7 @@ a platform limitation or an intentional design choice.
 
 ### D-105: Tri-State Switch Track Colors
 - **Component**: tri_state_switch
-- **What differs**: Mixed state uses a lighter accent blend (12%) vs checked (24%).
-  Contract may not specify exact mixed state color.
-- **Severity**: Cosmetic
+- **What differs**: resolved in current tree. GPUI and Svelte now share the
+  shrink-wrapped sliding-track treatment, per-state focus movement, customizable
+  state labels, and per-state semantic color overrides.
+- **Severity**: closed pending normal regression coverage

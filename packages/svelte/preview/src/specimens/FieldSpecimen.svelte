@@ -12,7 +12,7 @@
 
   <div class="specimen__group">
     <Eyebrow>Required</Eyebrow>
-    <Field label="Email address" isRequired id="field-email">
+    <Field label="Email address" required id="field-email">
       <TextInput id="field-email" placeholder="you@example.com" ariaLabel="Email address" />
     </Field>
   </div>
@@ -47,7 +47,7 @@
 
   <div class="specimen__group">
     <Eyebrow>Hint + description + required</Eyebrow>
-    <Field label="API Key" description="Your personal API key for authentication." hint="Keep this key secret. Rotate it periodically for security." isRequired id="field-api">
+    <Field label="API Key" description="Your personal API key for authentication." hint="Keep this key secret. Rotate it periodically for security." required id="field-api">
       <TextInput id="field-api" placeholder="sk_live_..." ariaLabel="API Key" />
     </Field>
   </div>

@@ -9,9 +9,9 @@
   export let addLabel = "Add item";
   export let placeholder = "New item";
   export let maxItems: number | null = null;
-  export let isDisabled = false;
+  export let disabled = false;
   export let ariaLabel = "List";
-  export let isReorderable = true;
+  export let reorderable = true;
 
   const dispatch = createEventDispatcher<{
     change: { items: ReorderableItem[] };
@@ -19,7 +19,7 @@
 
   let newItemText = "";
 
-  $: canAdd = !isDisabled && (maxItems === null || items.length < maxItems);
+  $: canAdd = !disabled && (maxItems === null || items.length < maxItems);
 
   function addItem(): void {
     const label = newItemText.trim();
@@ -36,7 +36,7 @@
   }
 
   function removeItem(id: string): void {
-    if (isDisabled) return;
+    if (disabled) return;
     items = items.filter((i) => i.id !== id);
     dispatch("change", { items });
   }
@@ -54,17 +54,17 @@
   }
 </script>
 
-<div class="autonomous-list" data-disabled={isDisabled}>
+<div class="autonomous-list" data-disabled={disabled}>
   {#if items.length > 0}
-    {#if isReorderable}
-      <ReorderableList {items} {ariaLabel} {isDisabled} on:reorder={handleReorder}>
+    {#if reorderable}
+      <ReorderableList {items} {ariaLabel} {disabled} on:reorder={handleReorder}>
         <svelte:fragment slot="item" let:item let:index>
           <span class="autonomous-list__item-row">
             <span class="autonomous-list__item-text">{item.label}</span>
             <button
               type="button"
               class="autonomous-list__remove"
-              disabled={isDisabled}
+              disabled={disabled}
               aria-label="Remove {item.label}"
               on:click|stopPropagation={() => removeItem(item.id)}
             >
@@ -83,7 +83,7 @@
             <button
               type="button"
               class="autonomous-list__remove"
-              disabled={isDisabled}
+              disabled={disabled}
               aria-label="Remove {item.label}"
               on:click={() => removeItem(item.id)}
             >
@@ -104,7 +104,7 @@
         class="autonomous-list__input"
         bind:value={newItemText}
         {placeholder}
-        disabled={isDisabled}
+        disabled={disabled}
         on:keydown={handleKeydown}
       />
       <button

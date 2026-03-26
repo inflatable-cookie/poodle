@@ -32,6 +32,16 @@
       </svelte:fragment>
     </DetailRow>
   </div>
+
+  <div class="specimen__group">
+    <Eyebrow>Stacked layout</Eyebrow>
+    <DetailRow
+      label="Arrangement"
+      value="2CF8B3D0-F592-4D87-8F9F-74D6B42E0E7D:main:external:0:0:3440:1440:1000|37D8832A..."
+      truncateValue
+      layout="stacked"
+    />
+  </div>
 </div>
 
 <style>

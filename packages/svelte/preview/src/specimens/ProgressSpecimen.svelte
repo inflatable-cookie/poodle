@@ -13,7 +13,7 @@
 
   <div class="specimen__group">
     <Eyebrow>Indeterminate</Eyebrow>
-    <Progress isIndeterminate ariaLabel="Loading" />
+    <Progress indeterminate ariaLabel="Loading" />
   </div>
 
   <div class="specimen__group">

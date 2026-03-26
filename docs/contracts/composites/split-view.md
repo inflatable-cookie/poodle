@@ -50,12 +50,12 @@ Updated: 2026-03-22
 | `defaultRatio` | `number` | `0.5` | no | uncontrolled initial ratio |
 | `minPrimarySize` | `number \| null` | `null` | no | minimum primary pane size in px |
 | `minSecondarySize` | `number \| null` | `null` | no | minimum secondary pane size in px |
-| `isPrimaryCollapsed` | `boolean` | `false` | no | collapse state for primary pane |
-| `isSecondaryCollapsed` | `boolean` | `false` | no | collapse state for secondary pane |
+| `primaryCollapsed` | `boolean` | `false` | no | collapse state for primary pane |
+| `secondaryCollapsed` | `boolean` | `false` | no | collapse state for secondary pane |
 | `showCollapsePrimary` | `boolean` | `false` | no | show collapse toggle for primary pane |
 | `showCollapseSecondary` | `boolean` | `false` | no | show collapse toggle for secondary pane |
 | `ariaLabel` | `string \| null` | `null` | no | accessible name (defaults to "Split view") |
-| `isDisabled` | `boolean` | `false` | no | disables resize and collapse interactions |
+| `disabled` | `boolean` | `false` | no | disables resize and collapse interactions |
 
 ### Slots
 
@@ -68,7 +68,7 @@ Updated: 2026-03-22
 
 - controlled: `ratio` plus `ratioChange` event
 - uncontrolled: `defaultRatio` (internal state tracks ratio)
-- collapse states (`isPrimaryCollapsed`, `isSecondaryCollapsed`) are externally
+- collapse states (`primaryCollapsed`, `secondaryCollapsed`) are externally
   owned; changes dispatched via events
 
 ## 4. States
@@ -79,9 +79,9 @@ Updated: 2026-03-22
 |-------|---------|-----------------|
 | steady | default | both panes visible with divider between |
 | resizing | pointer or keyboard resize active | divider focus/emphasis visible |
-| primary-collapsed | `isPrimaryCollapsed=true` | primary pane hidden (`flex: 0 0 0`), secondary fills space |
-| secondary-collapsed | `isSecondaryCollapsed=true` | secondary pane hidden (`flex: 0 0 0`), primary fills space |
-| disabled | `isDisabled=true` | resize handle and collapse toggles non-interactive |
+| primary-collapsed | `primaryCollapsed=true` | primary pane hidden (`flex: 0 0 0`), secondary fills space |
+| secondary-collapsed | `secondaryCollapsed=true` | secondary pane hidden (`flex: 0 0 0`), primary fills space |
+| disabled | `disabled=true` | resize handle and collapse toggles non-interactive |
 
 ### Component States
 

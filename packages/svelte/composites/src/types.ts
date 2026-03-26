@@ -39,8 +39,8 @@ export type TableColumn = {
   id: string;
   label: string;
   align?: "start" | "end";
-  isSortable?: boolean;
-  isHideable?: boolean;
+  sortable?: boolean;
+  hideable?: boolean;
 };
 
 export type TableRow = {
@@ -55,7 +55,7 @@ export type BreadcrumbItem = {
   value: string;
   label: string;
   href?: string;
-  isCurrent?: boolean;
+  current?: boolean;
 };
 
 export type PickerItem = {
@@ -67,7 +67,7 @@ export type PickerItem = {
 
 export type DrillDownItem = PickerItem & {
   count?: number;
-  hasChildren?: boolean;
+  expandable?: boolean;
 };
 
 export type DrillDownContext = Record<string, string>;
@@ -100,7 +100,16 @@ export type MediaPickerItem = {
   thumbnailUrl?: string | null;
   mimeType?: string | null;
   kind?: MediaKind;
+  meta?: string | null;
 };
+
+export type MediaUploadWorkflowStep =
+  | "checking"
+  | "duplicate"
+  | "uploading"
+  | "finalising"
+  | "complete"
+  | "error";
 
 export type ParsedEmbed = {
   provider: string;
@@ -115,7 +124,7 @@ export type CardRadioItem = {
   value: string;
   label: string;
   description?: string | null;
-  isDisabled?: boolean;
+  disabled?: boolean;
 };
 
 export type ReorderableItem = {
@@ -135,7 +144,7 @@ export type CommandActionItem = {
   shortcut?: string | null;
   keywords?: string[];
   badge?: string | null;
-  isDisabled?: boolean;
+  disabled?: boolean;
 };
 
 export type ToastItem = {
@@ -164,7 +173,7 @@ export type PanelTabItem = {
   value: string;
   label: string;
   icon?: IconProp | null;
-  isClosable?: boolean;
+  closable?: boolean;
 };
 
 // --- Snapshot types ---

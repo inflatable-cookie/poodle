@@ -1,7 +1,7 @@
 # Button
 
 Status: detailed contract
-Updated: 2026-03-15
+Updated: 2026-03-25
 
 ## 1. Purpose
 
@@ -10,7 +10,7 @@ Updated: 2026-03-15
 - Summary: a general action trigger for commands, confirmations, and view-level
   affordances
 - In scope: text buttons, icon-leading buttons, icon-only buttons, loading and
-  disabled states, four visual variants, three sizes
+  disabled states, three visual variants, three sizes
 - Out of scope: transport controls, DAW-specific command widgets, toggle buttons
   (see Toggle)
 
@@ -18,7 +18,7 @@ Updated: 2026-03-15
 
 ```text
 [Root .button]  <button>
-  ├── [Spinner .button__spinner] (conditional, when isLoading)
+  ├── [Spinner .button__spinner] (conditional, when loading)
   ├── [Leading Icon .button__icon] (optional, via slot or leadingIcon prop)
   ├── [Label .button__label] (optional, via default slot)
   ├── [Trailing Icon .button__icon] (optional, via slot or trailingIcon prop)
@@ -28,7 +28,7 @@ Updated: 2026-03-15
 | Part | Required | Description | Token Targets |
 |------|----------|-------------|---------------|
 | Root | yes | clickable command surface | background, border, radius, shadow, focus ring |
-| Spinner | no | loading indicator (replaces interaction) | currentColor based |
+| Spinner | no | shared `Spinner` primitive in `ring` + `sm` + `current` configuration | spinner tokens via primitive contract |
 | Leading Icon | no | icon before label | icon size, icon color |
 | Label | no | text content | typography, text color |
 | Trailing Icon | no | icon after label | icon size, icon color |
@@ -40,18 +40,26 @@ Updated: 2026-03-15
 
 | Prop | Type | Default | Required | Notes |
 |------|------|---------|----------|-------|
-| `variant` | `"primary" \| "secondary" \| "ghost"` | `"secondary"` | no | appearance family |
+| `variant` | `"primary" \| "secondary" \| "ghost"` | `"secondary"` | no | visual treatment |
 | `tone` | `"default" \| "danger"` | `"default"` | no | intent modifier; composes with variant for danger×primary, danger×secondary, danger×ghost |
 | `size` | `"sm" \| "md" \| "lg"` | `"md"` | no | control size |
 | `type` | `"button" \| "submit" \| "reset"` | `"button"` | no | HTML button type |
-| `isDisabled` | `boolean` | `false` | no | suppresses activation |
-| `isLoading` | `boolean` | `false` | no | shows spinner, suppresses activation |
+| `form` | `string \| null` | `null` | no | external form id to associate with |
+| `formaction` | `string \| null` | `null` | no | per-button form submission URL override |
+| `formenctype` | `"application/x-www-form-urlencoded" \| "multipart/form-data" \| "text/plain" \| null` | `null` | no | per-button encoding override |
+| `formmethod` | `"get" \| "post" \| "dialog" \| null` | `null` | no | per-button form method override |
+| `formnovalidate` | `boolean` | `false` | no | skips form validation for this submit action |
+| `formtarget` | `"_self" \| "_blank" \| "_parent" \| "_top" \| string \| null` | `null` | no | per-button browsing context override |
+| `disabled` | `boolean` | `false` | no | suppresses activation |
+| `loading` | `boolean` | `false` | no | shows spinner, suppresses activation |
 | `leadingIcon` | `string \| null` | `null` | no | icon registry identifier |
 | `trailingIcon` | `string \| null` | `null` | no | icon registry identifier |
 | `chevron` | `boolean` | `false` | no | renders trailing disclosure chevron indicator |
 | `ariaLabel` | `string \| null` | `null` | no | required when no visible label |
+| `ariaExpanded` | `boolean \| null` | `null` | no | disclosure-state hint for menu and accordion triggers |
 | `describedBy` | `string \| null` | `null` | no | aria-describedby target |
 | `className` | `string` | `""` | no | additional CSS classes |
+| `style` | `string \| null` | `null` | no | inline style passthrough for dynamic sizing and CSS-variable overrides |
 
 ### Slots
 
@@ -75,8 +83,8 @@ Updated: 2026-03-15
 | hover | pointer enters (not disabled) | `background: button-fill-hover`, `border-color` mix with text-primary 78% |
 | active | press (not disabled) | `background: button-fill-active`, `transform: translateY(0.03125rem)` |
 | focus | keyboard focus | `outline: border-width-focus solid accent-focusRing`, `outline-offset: 0.125rem` |
-| disabled | `isDisabled=true` or `isLoading=true` | `opacity: state-opacity-disabled`, `cursor: not-allowed` |
-| loading | `isLoading=true` | spinner visible, button disabled |
+| disabled | `disabled=true` or `loading=true` | `opacity: state-opacity-disabled`, `cursor: not-allowed` |
+| loading | `loading=true` | spinner visible, button disabled |
 | icon-only | no default slot content | square button, no min-width |
 
 ## 5. Events
@@ -92,10 +100,15 @@ Updated: 2026-03-15
 ### Semantics
 
 - Role: native `<button>` element
+- Native attributes not modeled as explicit props, such as `role`, `aria-checked`,
+  `name`, and `value`, pass through via standard rest attributes
+- Native form override attrs: `form`, `formaction`, `formenctype`, `formmethod`, `formnovalidate`, and `formtarget` pass through directly when provided
 - `aria-label`: from prop (required for icon-only)
+- `aria-expanded`: set from `ariaExpanded` when the button acts as a disclosure trigger
 - `aria-describedby`: from describedBy prop
-- `aria-busy`: `"true"` when isLoading
-- `disabled`: set when isDisabled or isLoading (`isUnavailable`)
+- `style`: passes through directly to the native `<button>` when instance-level sizing or CSS-variable overrides are required
+- `aria-busy`: `"true"` when loading
+- `disabled`: set when disabled or loading (`isUnavailable`)
 - Icon spans: `aria-hidden="true"`
 
 ### Keyboard
@@ -264,14 +277,9 @@ Both adjustments apply independently.
 
 ### Spinner
 
-| Property | Value |
-|----------|-------|
-| `width` | `0.75rem` |
-| `height` | `0.75rem` |
-| `border` | `0.125rem solid color-mix(in srgb, currentColor 24%, transparent)` |
-| `border-top-color` | `currentColor` |
-| `border-radius` | `999px` |
-| `animation` | `rotate(360deg) 0.8s linear infinite` |
+Loading spinner uses the shared [`Spinner`](./spinner.md) contract with
+`variant="ring"`, `size="sm"`, and `tone="current"` inside the
+`.button__spinner` wrapper.
 
 ## 9. Svelte Notes
 
@@ -280,7 +288,7 @@ Both adjustments apply independently.
 - `data-tone` only emits when tone is not `"default"` (omitted otherwise)
 - `data-loading` always emits (even as `"false"`)
 - `data-has-leading` and `data-has-trailing` emit presence-only (value is truthy or attribute is omitted)
-- `isUnavailable = isDisabled || isLoading` — both disable the native button
+- `isUnavailable = disabled || loading` — both disable the native button
 - Icon component rendered at size="sm" for leadingIcon/trailingIcon props
 - Supports named slots `leading` and `trailing` for custom icon content
 - Treatment token: `--poodle-treatment-interactive-radius` with fallback to `--poodle-radius-control`
@@ -294,13 +302,13 @@ Both adjustments apply independently.
 - GPUI must replicate the hover/active color-mix chains
 - The treatment radius fallback can be modeled as: use treatment token if set, else radius-control
 - Active translateY(0.03125rem) — half a pixel press-down — may be omitted in GPUI (known delta)
-- Spinner animation: GPUI should use a rotating element or skip spinner for initial implementation
+- GPUI uses the shared `Spinner` primitive rather than a button-owned loader treatment
 
 ## 11. Parity Checklist
 
 ### Tier 1: Strict Parity
 
-- [ ] variant, size, isDisabled, isLoading mean the same thing
+- [ ] variant, size, disabled, loading mean the same thing
 - [ ] activation suppressed while disabled or loading
 - [ ] keyboard activation matches
 - [ ] icon-only accessible-name rule matches
@@ -333,7 +341,6 @@ Both adjustments apply independently.
 | Treatment radius fallback chain | CSS var fallback vs Rust conditional | allowed | same visual result |
 | box-shadow omitted in GPUI | GPUI lacks CSS box-shadow support | allowed | revisit if GPUI adds shadow primitives |
 | letter-spacing omitted in GPUI | GPUI text rendering has no letter-spacing API | allowed | minor visual impact |
-| Spinner uses loader icon in GPUI | GPUI cannot animate CSS border spinners | allowed | same semantic meaning, visual delta accepted |
 
 ## 13. Specimen Definitions
 
@@ -395,9 +402,9 @@ Three buttons in a horizontal row with 8px gap:
 
 | Label | Variant | Props |
 |-------|---------|-------|
-| Disabled | primary | `isDisabled: true` |
-| Loading | primary | `isLoading: true` |
-| Disabled secondary | secondary | `isDisabled: true` |
+| Disabled | primary | `disabled: true` |
+| Loading | primary | `loading: true` |
+| Disabled secondary | secondary | `disabled: true` |
 
 ### Click counter
 

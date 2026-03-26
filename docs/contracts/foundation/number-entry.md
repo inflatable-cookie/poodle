@@ -45,8 +45,8 @@ Updated: 2026-03-15
 | `step` | `number` | `1` | no | increment/decrement size |
 | `precision` | `number \| null` | `null` | no | decimal places for formatting; null means auto |
 | `name` | `string \| undefined` | `undefined` | no | form field name |
-| `isDisabled` | `boolean` | `false` | no | disables editing and steppers |
-| `isReadOnly` | `boolean` | `false` | no | allows selection without editing |
+| `disabled` | `boolean` | `false` | no | disables editing and steppers |
+| `readOnly` | `boolean` | `false` | no | allows selection without editing |
 | `validationState` | `"none" \| "invalid" \| "valid" \| "pending"` | `"none"` | no | visual and assistive validation state |
 | `showSteppers` | `boolean` | `false` | no | shows increment/decrement stepper buttons |
 | `ariaLabel` | `string \| null` | `null` | no | required when no external label exists |
@@ -69,8 +69,8 @@ Updated: 2026-03-15
 | invalid | `validationState="invalid"` | border-color changes to `status-danger` |
 | valid | `validationState="valid"` | border-color changes to `status-success` |
 | pending | `validationState="pending"` | border-color changes to `accent-base` |
-| disabled | `isDisabled=true` | non-interactive, stepper buttons show `cursor: not-allowed`, `opacity: state-opacity-disabled` |
-| readOnly | `isReadOnly=true` | selectable but not editable; stepper buttons also disabled |
+| disabled | `disabled=true` | non-interactive, stepper buttons show `cursor: not-allowed`, `opacity: state-opacity-disabled` |
+| readOnly | `readOnly=true` | selectable but not editable; stepper buttons also disabled |
 
 ### Component States
 
@@ -98,7 +98,7 @@ Updated: 2026-03-15
 
 - Role: uses `<input type="text" inputmode="decimal">` (not `type="number"` to avoid browser-native spinner conflicts)
 - Required attributes: accessible name from external label or `ariaLabel`
-- Optional attributes: `aria-describedby` from `describedBy`, `aria-invalid` when validationState is `"invalid"`, `aria-readonly` when `isReadOnly`, `aria-busy` when validationState is `"pending"`
+- Optional attributes: `aria-describedby` from `describedBy`, `aria-invalid` when validationState is `"invalid"`, `aria-readonly` when `readOnly`, `aria-busy` when validationState is `"pending"`
 - Labeling rules: placeholder text never counts as the accessible name
 
 ### Keyboard
@@ -267,7 +267,7 @@ Updated: 2026-03-15
 
 | Label | Props / Config | Expected Visual |
 |-------|---------------|-----------------|
-| Disabled | `value={42}`, `isDisabled` | Numeric field with reduced opacity, non-interactive |
+| Disabled | `value={42}`, `disabled` | Numeric field with reduced opacity, non-interactive |
 
 ### Invalid
 

@@ -31,7 +31,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
       { name: "value", type: "string | string[] | null", default: "null", description: "Controlled open panel value(s)." },
       { name: "defaultValue", type: "string | string[] | null", default: "null", description: "Initial open panel value(s) for uncontrolled mode." },
       { name: "selectionMode", type: '"single" | "multiple"', default: '"single"', description: "Whether one or many panels can be open simultaneously." },
-      { name: "isCollapsible", type: "boolean", default: "true", description: "Whether the open panel can be collapsed by clicking its trigger again." },
+      { name: "collapsible", type: "boolean", default: "true", description: "Whether the open panel can be collapsed by clicking its trigger again." },
       { name: "ariaLabel", type: "string | null", default: "null", description: "Accessible label for the accordion region." },
     ],
     slots: [
@@ -49,7 +49,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
   ];
 </script>
 
-<Accordion {items} selectionMode="single" isCollapsible />`,
+<Accordion {items} selectionMode="single" collapsible />`,
   },
 
   "alert-dialog": {
@@ -61,14 +61,16 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
       { name: "confirmLabel", type: "string", default: '"Confirm"', description: "Label for the confirm action button." },
       { name: "cancelLabel", type: "string", default: '"Cancel"', description: "Label for the cancel action button." },
       { name: "ariaLabel", type: "string | null", default: "null", description: "Accessible label for the dialog." },
+      { name: "workingLabel", type: "string", default: '"Working…"', description: "Label displayed while the built-in confirm flow is working." },
+      { name: "onConfirm", type: "(() => void | Promise<void>) | null", default: "null", description: "Optional built-in confirm callback. Promise results keep the dialog open and working until resolved." },
+      { name: "onCancel", type: "(() => void) | null", default: "null", description: "Optional built-in cancel callback used for cancel and dismiss paths." },
     ],
     slots: [
-      { name: "default", description: "Optional body content rendered between description and actions." },
-      { name: "actions", description: "Custom actions replacing the default confirm/cancel buttons." },
+      { name: "default", description: "Optional body content rendered between description and the built-in action row." },
     ],
     events: [
-      { name: "confirm", payload: "void", description: "Fires when the confirm button is clicked." },
-      { name: "cancel", payload: "void", description: "Fires when the cancel button is clicked." },
+      { name: "confirm", payload: "void", description: "Fires when the confirm button is clicked and no onConfirm callback is supplied." },
+      { name: "cancel", payload: "void", description: "Fires when the dialog is cancelled and no onCancel callback is supplied." },
       { name: "openChange", payload: "{ open: boolean }", description: "Fires when the open state changes." },
     ],
     usage: `<script lang="ts">
@@ -82,7 +84,9 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
   title="Delete item?"
   description="This action cannot be undone."
   tone="danger"
-  on:confirm={() => console.log("confirmed")}
+  onConfirm={async () => {
+    await deleteItem();
+  }}
 />`,
   },
 
@@ -105,11 +109,11 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
     props: [
       { name: "blocks", type: "EditorBlock[]", default: "[default block]", description: "Array of content blocks in the editor." },
       { name: "blockTypes", type: "BlockTypeDefinition[]", default: "[defaults]", description: "Available block type definitions." },
-      { name: "isDisabled", type: "boolean", default: "false", description: "Whether the editor is disabled." },
+      { name: "disabled", type: "boolean", default: "false", description: "Whether the editor is disabled." },
       { name: "ariaLabel", type: "string", default: '"Block editor"', description: "Accessible label for the editor region." },
     ],
     slots: [
-      { name: "block", description: "Custom block renderer. Receives slot props: block, index, isDisabled, update." },
+      { name: "block", description: "Custom block renderer. Receives slot props: block, index, disabled, update." },
     ],
     events: [
       { name: "change", payload: "{ blocks: EditorBlock[] }", description: "Fires when any block content changes." },
@@ -205,8 +209,8 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
       { name: "formmethod", type: '"get" | "post" | "dialog" | null', default: "null", description: "Per-button form method override." },
       { name: "formnovalidate", type: "boolean", default: "false", description: "Skips validation for this submit action." },
       { name: "formtarget", type: '"_self" | "_blank" | "_parent" | "_top" | string | null', default: "null", description: "Per-button form target override." },
-      { name: "isDisabled", type: "boolean", default: "false", description: "Whether the button is disabled." },
-      { name: "isLoading", type: "boolean", default: "false", description: "Whether the button shows a loading spinner." },
+      { name: "disabled", type: "boolean", default: "false", description: "Whether the button is disabled." },
+      { name: "loading", type: "boolean", default: "false", description: "Whether the button shows a loading spinner." },
       { name: "leadingIcon", type: "string | null", default: "null", description: "Icon name displayed before the label." },
       { name: "trailingIcon", type: "string | null", default: "null", description: "Icon name displayed after the label." },
       { name: "chevron", type: "boolean", default: "false", description: "Whether to show a dropdown chevron." },
@@ -242,7 +246,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
       { name: "visibleMonth", type: "string | null", default: "null", description: "Controlled visible month in YYYY-MM format." },
       { name: "weekStartsOn", type: "CalendarWeekStart", default: '"monday"', description: "Which day of the week the calendar starts on." },
       { name: "locale", type: "string", default: '"en-US"', description: "Locale for date formatting." },
-      { name: "isDisabled", type: "boolean", default: "false", description: "Whether the calendar is disabled." },
+      { name: "disabled", type: "boolean", default: "false", description: "Whether the calendar is disabled." },
       { name: "ariaLabel", type: "string | null", default: "null", description: "Accessible label for the calendar." },
     ],
     slots: [],
@@ -266,7 +270,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
       { name: "message", type: "string | null", default: "null", description: "Body message text." },
       { name: "ariaLabel", type: "string | null", default: "null", description: "Accessible label for the callout." },
       { name: "announceMode", type: '"none" | "polite" | "assertive"', default: '"none"', description: "ARIA live region announcement mode." },
-      { name: "isDismissible", type: "boolean", default: "false", description: "Whether the callout can be dismissed." },
+      { name: "dismissible", type: "boolean", default: "false", description: "Whether the callout can be dismissed." },
       { name: "dismissLabel", type: "string", default: '"Dismiss message"', description: "Accessible label for the dismiss button." },
     ],
     slots: [
@@ -281,16 +285,16 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
   import { Callout } from "@poodle/svelte-primitives";
 </script>
 
-<Callout tone="warning" title="Unsaved changes" message="You have unsaved changes that will be lost." isDismissible />`,
+<Callout tone="warning" title="Unsaved changes" message="You have unsaved changes that will be lost." dismissible />`,
   },
 
   card: {
     props: [
       { name: "variant", type: "CardVariant", default: '"default"', description: "Visual variant of the card." },
       { name: "layout", type: '"vertical" | "horizontal" | "compact"', default: '"vertical"', description: "Layout direction of card content." },
-      { name: "isInteractive", type: "boolean", default: "false", description: "Whether the card responds to hover and click." },
-      { name: "isSelected", type: "boolean", default: "false", description: "Whether the card is in a selected state." },
-      { name: "hasMedia", type: "boolean", default: "false", description: "Whether the card contains a media slot." },
+      { name: "interactive", type: "boolean", default: "false", description: "Whether the card responds to hover and click." },
+      { name: "selected", type: "boolean", default: "false", description: "Whether the card is in a selected state." },
+      { name: "media", type: "boolean", default: "false", description: "Whether the card contains a media slot." },
       { name: "ariaLabel", type: "string | null", default: "null", description: "Accessible label for the card." },
     ],
     slots: [
@@ -317,7 +321,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
       { name: "value", type: "string | null", default: "null", description: "Currently selected item value." },
       { name: "columns", type: "1 | 2 | 3 | 4", default: "2", description: "Number of columns in the grid layout." },
       { name: "ariaLabel", type: "string | null", default: "null", description: "Accessible label for the radio group." },
-      { name: "isDisabled", type: "boolean", default: "false", description: "Whether the entire group is disabled." },
+      { name: "disabled", type: "boolean", default: "false", description: "Whether the entire group is disabled." },
     ],
     slots: [
       { name: "card", description: "Custom card renderer. Receives slot props: item, checked, disabled." },
@@ -342,11 +346,11 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
   checkbox: {
     props: [
       { name: "id", type: "string | undefined", default: "undefined", description: "HTML id attribute for the checkbox input." },
-      { name: "isChecked", type: "boolean", default: "false", description: "Controlled checked state." },
+      { name: "checked", type: "boolean", default: "false", description: "Controlled checked state." },
       { name: "defaultChecked", type: "boolean", default: "false", description: "Initial checked state for uncontrolled mode." },
-      { name: "isMixed", type: "boolean", default: "false", description: "Whether the checkbox is in an indeterminate state." },
-      { name: "isDisabled", type: "boolean", default: "false", description: "Whether the checkbox is disabled." },
-      { name: "isReadOnly", type: "boolean", default: "false", description: "Whether the checkbox is read-only." },
+      { name: "mixed", type: "boolean", default: "false", description: "Whether the checkbox is in an indeterminate state." },
+      { name: "disabled", type: "boolean", default: "false", description: "Whether the checkbox is disabled." },
+      { name: "readOnly", type: "boolean", default: "false", description: "Whether the checkbox is read-only." },
       { name: "label", type: "string | null", default: "null", description: "Label text displayed next to the checkbox." },
       { name: "ariaLabel", type: "string | null", default: "null", description: "Accessible label when no visible label is used." },
       { name: "describedBy", type: "string | null", default: "null", description: "ID of the element describing this checkbox." },
@@ -362,7 +366,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
   let agreed = false;
 </script>
 
-<Checkbox label="I agree to the terms" bind:isChecked={agreed} selectedColor="#22c55e" />`,
+<Checkbox label="I agree to the terms" bind:checked={agreed} selectedColor="#22c55e" />`,
   },
 
   code: {
@@ -391,9 +395,9 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
 
   "collapse-toggle": {
     props: [
-      { name: "isCollapsed", type: "boolean", default: "false", description: "Whether the target region is collapsed." },
+      { name: "collapsed", type: "boolean", default: "false", description: "Whether the target region is collapsed." },
       { name: "direction", type: "CollapseDirection", default: '"left"', description: "Direction the toggle chevron points when collapsed." },
-      { name: "isDisabled", type: "boolean", default: "false", description: "Whether the toggle is disabled." },
+      { name: "disabled", type: "boolean", default: "false", description: "Whether the toggle is disabled." },
       { name: "ariaLabel", type: "string | null", default: "null", description: "Accessible label for the toggle button." },
     ],
     slots: [],
@@ -406,7 +410,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
   let collapsed = false;
 </script>
 
-<CollapseToggle bind:isCollapsed={collapsed} direction="left" ariaLabel="Toggle sidebar" />`,
+<CollapseToggle {collapsed} direction="left" ariaLabel="Toggle sidebar" on:toggle={(e) => (collapsed = e.detail.isCollapsed)} />`,
   },
 
   collapsible: {
@@ -415,7 +419,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
       { name: "defaultOpen", type: "boolean", default: "false", description: "Initial open state for uncontrolled mode." },
       { name: "title", type: "string | null", default: "null", description: "Title displayed in the trigger." },
       { name: "description", type: "string | null", default: "null", description: "Description shown below the title." },
-      { name: "isDisabled", type: "boolean", default: "false", description: "Whether the collapsible is disabled." },
+      { name: "disabled", type: "boolean", default: "false", description: "Whether the collapsible is disabled." },
       { name: "ariaLabel", type: "string | null", default: "null", description: "Accessible label for the collapsible region." },
     ],
     slots: [
@@ -440,7 +444,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
       { name: "swatches", type: "string[]", default: "[]", description: "Preset color swatches to display." },
       { name: "showInput", type: "boolean", default: "true", description: "Whether to show the hex input field." },
       { name: "showAlpha", type: "boolean", default: "false", description: "Whether to show the alpha channel slider." },
-      { name: "isDisabled", type: "boolean", default: "false", description: "Whether the picker is disabled." },
+      { name: "disabled", type: "boolean", default: "false", description: "Whether the picker is disabled." },
       { name: "ariaLabel", type: "string", default: '"Color picker"', description: "Accessible label for the color picker." },
       { name: "open", type: "boolean | null", default: "null", description: "Controlled open state of the picker popover." },
       { name: "defaultOpen", type: "boolean", default: "false", description: "Initial open state for uncontrolled mode." },
@@ -467,7 +471,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
       { name: "defaultValue", type: "string | null", default: "null", description: "Initial value for uncontrolled mode." },
       { name: "options", type: "ComboboxOption[]", default: "[]", description: "Array of selectable options." },
       { name: "placeholder", type: "string | null", default: "null", description: "Placeholder text when no value is selected." },
-      { name: "isDisabled", type: "boolean", default: "false", description: "Whether the combobox is disabled." },
+      { name: "disabled", type: "boolean", default: "false", description: "Whether the combobox is disabled." },
       { name: "ariaLabel", type: "string | null", default: "null", description: "Accessible label for the combobox." },
     ],
     slots: [],
@@ -610,7 +614,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
   import { DataTable } from "@poodle/svelte-composites";
 
   const columns = [
-    { id: "name", label: "Name", isSortable: true },
+    { id: "name", label: "Name", sortable: true },
     { id: "email", label: "Email" },
     { id: "role", label: "Role" },
   ];
@@ -633,7 +637,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
       { name: "placeholder", type: "string", default: '"Select date"', description: "Placeholder text when no date is selected." },
       { name: "weekStartsOn", type: "CalendarWeekStart", default: '"monday"', description: "Which day the calendar week starts on." },
       { name: "locale", type: "string", default: '"en-US"', description: "Locale for date formatting." },
-      { name: "isDisabled", type: "boolean", default: "false", description: "Whether the picker is disabled." },
+      { name: "disabled", type: "boolean", default: "false", description: "Whether the picker is disabled." },
       { name: "ariaLabel", type: "string | null", default: "null", description: "Accessible label for the date picker." },
     ],
     slots: [
@@ -661,7 +665,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
       { name: "placeholder", type: "string", default: '"Select date range"', description: "Placeholder text when no range is selected." },
       { name: "weekStartsOn", type: "CalendarWeekStart", default: '"monday"', description: "Which day the calendar week starts on." },
       { name: "locale", type: "string", default: '"en-US"', description: "Locale for date formatting." },
-      { name: "isDisabled", type: "boolean", default: "false", description: "Whether the picker is disabled." },
+      { name: "disabled", type: "boolean", default: "false", description: "Whether the picker is disabled." },
       { name: "ariaLabel", type: "string | null", default: "null", description: "Accessible label for the date range picker." },
     ],
     slots: [
@@ -689,7 +693,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
       { name: "placeholder", type: "string", default: '"Select date and time"', description: "Placeholder text when no value is selected." },
       { name: "weekStartsOn", type: "CalendarWeekStart", default: '"monday"', description: "Which day the calendar week starts on." },
       { name: "locale", type: "string", default: '"en-US"', description: "Locale for date formatting." },
-      { name: "isDisabled", type: "boolean", default: "false", description: "Whether the picker is disabled." },
+      { name: "disabled", type: "boolean", default: "false", description: "Whether the picker is disabled." },
       { name: "ariaLabel", type: "string | null", default: "null", description: "Accessible label for the date-time picker." },
     ],
     slots: [
@@ -717,7 +721,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
       { name: "placeholder", type: "string", default: '"Select date and time range"', description: "Placeholder text when no range is selected." },
       { name: "weekStartsOn", type: "CalendarWeekStart", default: '"monday"', description: "Which day the calendar week starts on." },
       { name: "locale", type: "string", default: '"en-US"', description: "Locale for date formatting." },
-      { name: "isDisabled", type: "boolean", default: "false", description: "Whether the picker is disabled." },
+      { name: "disabled", type: "boolean", default: "false", description: "Whether the picker is disabled." },
       { name: "ariaLabel", type: "string | null", default: "null", description: "Accessible label for the date-time range picker." },
     ],
     slots: [
@@ -760,7 +764,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
     props: [
       { name: "title", type: "string | null", default: "null", description: "Section title." },
       { name: "description", type: "string | null", default: "null", description: "Description shown below the title." },
-      { name: "isSeparated", type: "boolean", default: "true", description: "Whether a separator is shown above the section." },
+      { name: "separated", type: "boolean", default: "true", description: "Whether a separator is shown above the section." },
       { name: "ariaLabel", type: "string | null", default: "null", description: "Accessible label for the section region." },
     ],
     slots: [
@@ -814,6 +818,10 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
       { name: "dismissOnEscape", type: "boolean", default: "true", description: "Whether pressing Escape dismisses the dialog." },
       { name: "dismissOnBackdrop", type: "boolean", default: "true", description: "Whether clicking the backdrop dismisses the dialog." },
       { name: "ariaLabel", type: "string | null", default: "null", description: "Accessible label for the dialog." },
+      { name: "contentClassName", type: "string", default: '""', description: "Additional class name applied to the dialog surface." },
+      { name: "overlayClassName", type: "string", default: '""', description: "Additional class name applied to the backdrop button." },
+      { name: "showCloseButton", type: "boolean", default: "false", description: "Whether to render the built-in close button." },
+      { name: "closeLabel", type: "string", default: '"Close dialog"', description: "Accessible label for the built-in close button." },
     ],
     slots: [
       { name: "default", description: "Dialog body content." },
@@ -831,7 +839,13 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
 
 <Button on:click={() => (open = true)}>Open Dialog</Button>
 
-<Dialog bind:open title="Edit Settings" description="Update your preferences below.">
+<Dialog
+  bind:open
+  title="Edit Settings"
+  description="Update your preferences below."
+  showCloseButton
+  contentClassName="settings-dialog"
+>
   <p>Dialog content here.</p>
   <svelte:fragment slot="actions">
     <Button variant="secondary" on:click={() => (open = false)}>Cancel</Button>
@@ -844,7 +858,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
     props: [
       { name: "edge", type: "DockEdge", default: '"left"', description: "Which edge of the viewport the dock attaches to." },
       { name: "sizing", type: "DockSizing", default: '"flexible"', description: "Sizing behavior of the dock region." },
-      { name: "isCollapsed", type: "boolean", default: "false", description: "Whether the dock is collapsed." },
+      { name: "collapsed", type: "boolean", default: "false", description: "Whether the dock is collapsed." },
       { name: "collapsedPosture", type: "DockCollapsedPosture", default: '"icon-strip"', description: "Visual posture when collapsed." },
       { name: "emphasis", type: "DockEmphasis", default: '"standard"', description: "Visual emphasis level of the dock." },
       { name: "items", type: "PanelTabItem[]", default: "[]", description: "Array of panel tab items in the dock." },
@@ -887,7 +901,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
       { name: "open", type: "boolean | null", default: "null", description: "Controlled open state." },
       { name: "defaultOpen", type: "boolean", default: "false", description: "Initial open state for uncontrolled mode." },
       { name: "edge", type: "DrawerEdge", default: '"right"', description: "Which edge the drawer slides from." },
-      { name: "isModal", type: "boolean", default: "true", description: "Whether the drawer is modal with a backdrop." },
+      { name: "modal", type: "boolean", default: "true", description: "Whether the drawer is modal with a backdrop." },
       { name: "title", type: "string | null", default: "null", description: "Drawer title." },
       { name: "description", type: "string | null", default: "null", description: "Drawer description text." },
       { name: "dismissOnEscape", type: "boolean", default: "true", description: "Whether pressing Escape dismisses the drawer." },
@@ -927,7 +941,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
       { name: "maxHours", type: "number", default: "99", description: "Maximum allowed hours value." },
       { name: "minTotalSeconds", type: "number", default: "0", description: "Minimum total duration in seconds." },
       { name: "maxTotalSeconds", type: "number | null", default: "null", description: "Maximum total duration in seconds." },
-      { name: "isDisabled", type: "boolean", default: "false", description: "Whether the input is disabled." },
+      { name: "disabled", type: "boolean", default: "false", description: "Whether the input is disabled." },
       { name: "ariaLabel", type: "string", default: '"Duration"', description: "Accessible label for the duration input." },
     ],
     slots: [
@@ -951,7 +965,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
     props: [
       { name: "value", type: "string", required: true, description: "Current text value of the editable label." },
       { name: "ariaLabel", type: "string", default: '"Edit label"', description: "Accessible label for the editable input." },
-      { name: "isDisabled", type: "boolean", default: "false", description: "Whether the label is disabled for editing." },
+      { name: "disabled", type: "boolean", default: "false", description: "Whether the label is disabled for editing." },
       { name: "activationMode", type: "EditableLabelActivationMode", default: '"doubleClick"', description: "How to activate edit mode (doubleClick or click)." },
       { name: "selectOnFocus", type: "boolean", default: "true", description: "Whether to select all text when entering edit mode." },
       { name: "variant", type: '"default" | "flush"', default: '"default"', description: "Visual variant of the editable label." },
@@ -983,9 +997,9 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
       { name: "addLabel", type: "string", default: '"Add item"', description: "Label for the add button." },
       { name: "placeholder", type: "string", default: '"New item"', description: "Placeholder text for new item input." },
       { name: "maxItems", type: "number | null", default: "null", description: "Maximum number of items allowed." },
-      { name: "isDisabled", type: "boolean", default: "false", description: "Whether the list is disabled." },
+      { name: "disabled", type: "boolean", default: "false", description: "Whether the list is disabled." },
       { name: "ariaLabel", type: "string", default: '"List"', description: "Accessible label for the list." },
-      { name: "isReorderable", type: "boolean", default: "true", description: "Whether items can be reordered by dragging." },
+      { name: "reorderable", type: "boolean", default: "true", description: "Whether items can be reordered by dragging." },
     ],
     slots: [],
     events: [
@@ -1094,7 +1108,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
       { name: "error", type: "string | null", default: "null", description: "Error message displayed when validation fails." },
       { name: "pendingMessage", type: "string | null", default: "null", description: "Message shown while validation is pending." },
       { name: "validationState", type: "ValidationState", default: '"none"', description: "Current validation state of the field." },
-      { name: "isRequired", type: "boolean", default: "false", description: "Whether the field is required." },
+      { name: "required", type: "boolean", default: "false", description: "Whether the field is required." },
       { name: "optionalLabel", type: "string | null", default: "null", description: "Opt-in label shown for optional fields." },
       { name: "span", type: 'number | "full" | null', default: "null", description: "Column span within a form layout grid." },
       { name: "gridArea", type: "string | null", default: "null", description: "CSS grid-area for custom grid placement." },
@@ -1109,7 +1123,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
   let email = "";
 </script>
 
-<Field id="email" label="Email address" description="We'll never share your email." isRequired>
+<Field id="email" label="Email address" description="We'll never share your email." required>
   <input id="email" type="email" bind:value={email} />
 </Field>
 
@@ -1156,22 +1170,30 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
       { name: "showPreview", type: "boolean", default: "true", description: "Whether to show file previews." },
       { name: "disabled", type: "boolean", default: "false", description: "Whether the upload input is disabled." },
       { name: "files", type: "FileUploadItem[]", default: "[]", description: "Current array of uploaded file items." },
-    ],
-    slots: [
-      { name: "default", description: "Custom dropzone content." },
+      { name: "validate", type: "(file: File) => string | null", default: "undefined", description: "Optional custom file validation callback." },
+      { name: "compress", type: "boolean", default: "false", description: "Whether raster images should be compressed before upload." },
+      { name: "compressionOptions", type: "ImageCompressionOptions", default: "DEFAULT_COMPRESSION", description: "Compression settings for raster images." },
     ],
     events: [
       { name: "change", payload: "{ files: FileUploadItem[] }", description: "Fires when the file list changes." },
+      { name: "upload", payload: "{ files: File[] }", description: "Fires when new validated files are ready for app-owned upload work." },
       { name: "error", payload: "{ file: File; message: string }", description: "Fires when a file fails validation." },
       { name: "remove", payload: "{ item: FileUploadItem }", description: "Fires when a file is removed." },
     ],
     usage: `<script lang="ts">
-  import { FileUpload } from "@poodle/svelte-primitives";
+  import { DEFAULT_COMPRESSION, FileUpload } from "@poodle/svelte-primitives";
 
   let files = [];
 </script>
 
-<FileUpload accept="image/*,.pdf" multiple maxSize={5242880} bind:files />`,
+<FileUpload
+  accept="image/*,.pdf"
+  multiple
+  maxSize={5242880}
+  compress
+  compressionOptions={DEFAULT_COMPRESSION}
+  bind:files
+/>`,
   },
 
   "filter-toolbar": {
@@ -1182,7 +1204,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
       { name: "collapsed", type: "boolean", default: "false", description: "Whether the toolbar is currently collapsed." },
       { name: "columns", type: "number", default: "4", description: "Number of columns in the filter grid." },
       { name: "minItemWidth", type: "string", default: '"10rem"', description: "Minimum width of each filter item." },
-      { name: "isSticky", type: "boolean", default: "false", description: "Whether the toolbar sticks to the top on scroll." },
+      { name: "sticky", type: "boolean", default: "false", description: "Whether the toolbar sticks to the top on scroll." },
     ],
     slots: [
       { name: "actions", description: "Action buttons in the toolbar header." },
@@ -1270,10 +1292,10 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
 </script>
 
 <FormLayout columns={2} description="Enter your details below.">
-  <Field id="first" label="First Name" isRequired>
+  <Field id="first" label="First Name" required>
     <input id="first" type="text" />
   </Field>
-  <Field id="last" label="Last Name" isRequired>
+  <Field id="last" label="Last Name" required>
     <input id="last" type="text" />
   </Field>
   <svelte:fragment slot="actions">
@@ -1401,9 +1423,9 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
       { name: "ariaLabel", type: "string", required: true, description: "Accessible label for the button (required since there is no text)." },
       { name: "tooltip", type: "string | null", default: "null", description: "Tooltip text shown on hover." },
       { name: "tooltipPlacement", type: "OverlayPlacement", default: '"top"', description: "Placement of the tooltip." },
-      { name: "isDisabled", type: "boolean", default: "false", description: "Whether the button is disabled." },
-      { name: "isLoading", type: "boolean", default: "false", description: "Whether the button shows a loading indicator." },
-      { name: "isPressed", type: "boolean | null", default: "null", description: "Pressed state for toggle buttons." },
+      { name: "disabled", type: "boolean", default: "false", description: "Whether the button is disabled." },
+      { name: "loading", type: "boolean", default: "false", description: "Whether the button shows a loading indicator." },
+      { name: "pressed", type: "boolean | null", default: "null", description: "Pressed state for toggle buttons." },
       { name: "describedBy", type: "string | null", default: "null", description: "ID of an element that describes the button." },
       { name: "type", type: 'HTMLButtonElement["type"]', default: '"button"', description: "HTML button type attribute." },
     ],
@@ -1436,9 +1458,9 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
       { name: "leadingShape", type: '"circle" | "rounded-square"', default: '"circle"', description: "Shape of the leading visual element." },
       { name: "leadingFill", type: '"tint" | "solid"', default: '"tint"', description: "Fill style of the leading visual." },
       { name: "accentColor", type: "string | null", default: "null", description: "Accent color for the card." },
-      { name: "isInteractive", type: "boolean", default: "false", description: "Whether the card is clickable." },
-      { name: "isDisabled", type: "boolean", default: "false", description: "Whether the card is disabled." },
-      { name: "isNotLive", type: "boolean", default: "false", description: "Whether to show the card in a non-live state." },
+      { name: "interactive", type: "boolean", default: "false", description: "Whether the card is clickable." },
+      { name: "disabled", type: "boolean", default: "false", description: "Whether the card is disabled." },
+      { name: "notLive", type: "boolean", default: "false", description: "Whether to show the card in a non-live state." },
       { name: "sash", type: "string | null", default: "null", description: "Sash label text." },
       { name: "sashColor", type: "string | null", default: "null", description: "Color of the sash." },
       { name: "ariaLabel", type: "string | null", default: "null", description: "Accessible label for the card." },
@@ -1456,7 +1478,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
   import { ListCard } from "@poodle/svelte-composites";
 </script>
 
-<ListCard title="Alice Johnson" subtitle="Software Engineer" meta="Active" isInteractive>
+<ListCard title="Alice Johnson" subtitle="Software Engineer" meta="Active" interactive>
   <svelte:fragment slot="leading">
     <img src="/avatars/alice.jpg" alt="Alice" />
   </svelte:fragment>
@@ -1491,7 +1513,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
     props: [
       { name: "value", type: "string", default: '""', description: "Current markdown content." },
       { name: "placeholder", type: "string", default: '"Write markdown..."', description: "Placeholder text when empty." },
-      { name: "isDisabled", type: "boolean", default: "false", description: "Whether the editor is disabled." },
+      { name: "disabled", type: "boolean", default: "false", description: "Whether the editor is disabled." },
       { name: "ariaLabel", type: "string", default: '"Markdown editor"', description: "Accessible label for the editor." },
       { name: "minHeight", type: "string", default: '"12rem"', description: "Minimum height of the editor." },
       { name: "mode", type: '"edit" | "preview" | "split"', default: '"edit"', description: "Display mode of the editor." },
@@ -1535,6 +1557,63 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
 </script>
 
 <MediaPicker bind:open {items} accept="image/*" on:select={(e) => console.log(e.detail.item)} />`,
+  },
+
+  "media-browse-panel": {
+    props: [
+      { name: "loading", type: "boolean", default: "false", description: "Whether the browse panel is loading." },
+      { name: "error", type: "string | null", default: "null", description: "Error message shown instead of the grid." },
+      { name: "items", type: "MediaPickerItem[]", default: "[]", description: "Media items rendered in the browse grid." },
+      { name: "hasMore", type: "boolean", default: "false", description: "Whether to show the load-more action." },
+      { name: "emptyMessage", type: "string", default: '"No media found"', description: "Message shown when there are no items." },
+      { name: "loadMoreLabel", type: "string", default: '"Load more"', description: "Label used for the load-more button." },
+    ],
+    slots: [],
+    events: [
+      { name: "select", payload: "{ item: MediaPickerItem }", description: "Fires when a media item is selected." },
+      { name: "loadMore", payload: "void", description: "Fires when the load-more action is triggered." },
+    ],
+    usage: `<script lang="ts">
+  import { MediaBrowsePanel, type MediaPickerItem } from "@poodle/svelte-composites";
+
+  const items: MediaPickerItem[] = [
+    { id: "1", label: "Hero banner", kind: "image", meta: "Image" },
+    { id: "2", label: "Launch trailer", kind: "video", meta: "Video" },
+  ];
+</script>
+
+<MediaBrowsePanel
+  {items}
+  hasMore
+  on:select={(event) => console.log(event.detail.item)}
+  on:loadMore={() => console.log("load more")}
+/>`,
+  },
+
+  "media-upload-status-panel": {
+    props: [
+      { name: "uploadStep", type: "MediaUploadWorkflowStep", default: '"checking"', description: "Current workflow posture for the upload state surface." },
+      { name: "duplicateLabel", type: "string | null", default: "null", description: "Label for the duplicate media item." },
+      { name: "uploadProgress", type: "number", default: "0", description: "Upload percentage shown during the uploading posture." },
+      { name: "uploadError", type: "string | null", default: "null", description: "Error message shown during the error posture." },
+    ],
+    slots: [],
+    events: [
+      { name: "uploadAnyway", payload: "void", description: "Fires when the user chooses to upload a duplicate as new." },
+      { name: "selectDuplicate", payload: "void", description: "Fires when the user chooses the existing duplicate media item." },
+      { name: "clearUpload", payload: "void", description: "Fires when the user resets the upload flow." },
+      { name: "selectUploaded", payload: "void", description: "Fires when the user chooses the newly uploaded media item." },
+    ],
+    usage: `<script lang="ts">
+  import { MediaUploadStatusPanel } from "@poodle/svelte-composites";
+</script>
+
+<MediaUploadStatusPanel
+  uploadStep="duplicate"
+  duplicateLabel="hero-banner.jpg"
+  on:uploadAnyway={() => console.log("upload anyway")}
+  on:selectDuplicate={() => console.log("select duplicate")}
+/>`,
   },
 
   "media-preview": {
@@ -1709,7 +1788,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
       { name: "description", type: "string | null", default: "null", description: "Description text below the title." },
       { name: "href", type: "string | null", default: "null", description: "Link URL for the card navigation." },
       { name: "badge", type: "string | null", default: "null", description: "Badge label shown on the card." },
-      { name: "isDisabled", type: "boolean", default: "false", description: "Whether the card is disabled." },
+      { name: "disabled", type: "boolean", default: "false", description: "Whether the card is disabled." },
       { name: "ariaLabel", type: "string | null", default: "null", description: "Accessible label for the nav card." },
     ],
     slots: [
@@ -1764,8 +1843,8 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
       { name: "step", type: "number", default: "1", description: "Step increment for value changes." },
       { name: "precision", type: "number | null", default: "null", description: "Number of decimal places to display." },
       { name: "name", type: "string | undefined", default: "undefined", description: "Form field name." },
-      { name: "isDisabled", type: "boolean", default: "false", description: "Whether the input is disabled." },
-      { name: "isReadOnly", type: "boolean", default: "false", description: "Whether the input is read-only." },
+      { name: "disabled", type: "boolean", default: "false", description: "Whether the input is disabled." },
+      { name: "readOnly", type: "boolean", default: "false", description: "Whether the input is read-only." },
       { name: "validationState", type: "ValidationState", default: '"none"', description: "Validation state of the input." },
       { name: "showSteppers", type: "boolean", default: "false", description: "Whether to show increment/decrement stepper buttons." },
       { name: "ariaLabel", type: "string | null", default: "null", description: "Accessible label for the input." },
@@ -1794,7 +1873,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
       { name: "fields", type: "SortField[]", default: "[]", description: "Array of sortable field definitions." },
       { name: "activeSort", type: "ActiveSort | null", default: "null", description: "Currently active sort configuration." },
       { name: "ariaLabel", type: "string", default: '"Sort by"', description: "Accessible label for the sort control." },
-      { name: "isDisabled", type: "boolean", default: "false", description: "Whether the sort control is disabled." },
+      { name: "disabled", type: "boolean", default: "false", description: "Whether the sort control is disabled." },
     ],
     slots: [],
     events: [
@@ -1816,8 +1895,11 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
   "page-header": {
     props: [
       { name: "title", type: "string", required: true, description: "Primary page title." },
+      { name: "count", type: "number | null", default: "null", description: "Optional count badge rendered inline with the title." },
       { name: "subtitle", type: "string | null", default: "null", description: "Subtitle text below the title." },
       { name: "eyebrow", type: "string | null", default: "null", description: "Eyebrow label above the title." },
+      { name: "backHref", type: "string | null", default: "null", description: "Optional back-link URL rendered above the title block." },
+      { name: "backLabel", type: "string | null", default: "null", description: "Optional text for the back link; defaults to Back." },
       { name: "align", type: '"start" | "between"', default: '"between"', description: "Alignment of the header content and actions." },
       { name: "ariaLabel", type: "string | null", default: "null", description: "Accessible label for the header region." },
     ],
@@ -1831,7 +1913,14 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
   import { Button } from "@poodle/svelte-primitives";
 </script>
 
-<PageHeader title="All Products" eyebrow="Catalog" subtitle="Manage your product listings">
+<PageHeader
+  title="All Products"
+  count={42}
+  eyebrow="Catalog"
+  subtitle="Manage your product listings"
+  backHref="/dashboard"
+  backLabel="Back to dashboard"
+>
   <svelte:fragment slot="actions">
     <Button variant="primary" leadingIcon="plus">Add Product</Button>
   </svelte:fragment>
@@ -1840,7 +1929,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
 
   "page-loading": {
     props: [
-      { name: "isVisible", type: "boolean", default: "true", description: "Whether the loading overlay is visible." },
+      { name: "visible", type: "boolean", default: "true", description: "Whether the loading overlay is visible." },
       { name: "value", type: "number | null", default: "null", description: "Determinate progress value." },
       { name: "max", type: "number", default: "100", description: "Maximum progress value." },
       { name: "message", type: "string | null", default: "null", description: "Loading message displayed below the spinner." },
@@ -1855,7 +1944,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
   import { PageLoading } from "@poodle/svelte-composites";
 </script>
 
-<PageLoading isVisible message="Loading your data..." canCancel on:cancel={() => abortRequest()} />`,
+<PageLoading visible message="Loading your data..." canCancel on:cancel={() => abortRequest()} />`,
   },
 
   "list-container": {
@@ -2002,7 +2091,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
       { name: "appearance", type: "PillAppearance", default: '"solid"', description: "Visual appearance variant." },
       { name: "size", type: "PillSize", default: '"md"', description: "Size of the pill." },
       { name: "font", type: "PillFont", default: '"normal"', description: "Font style of the pill label." },
-      { name: "isMuted", type: "boolean", default: "false", description: "Whether the pill uses muted styling." },
+      { name: "muted", type: "boolean", default: "false", description: "Whether the pill uses muted styling." },
       { name: "ariaLabel", type: "string | null", default: "null", description: "Accessible label for the pill." },
     ],
     slots: [
@@ -2014,7 +2103,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
 </script>
 
 <Pill tone="success" appearance="solid">Active</Pill>
-<Pill tone="warning" appearance="solid" isMuted>Pending</Pill>`,
+<Pill tone="warning" appearance="solid" muted>Pending</Pill>`,
   },
 
   "pin-input": {
@@ -2022,7 +2111,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
       { name: "value", type: "string | null", default: "null", description: "Controlled value of the pin input." },
       { name: "defaultValue", type: "string", default: '""', description: "Initial value for uncontrolled mode." },
       { name: "length", type: "number", default: "6", description: "Number of character fields." },
-      { name: "isDisabled", type: "boolean", default: "false", description: "Whether the input is disabled." },
+      { name: "disabled", type: "boolean", default: "false", description: "Whether the input is disabled." },
       { name: "ariaLabel", type: "string | null", default: "null", description: "Accessible label for the pin input." },
       { name: "mask", type: "boolean", default: "false", description: "Whether to mask input characters." },
     ],
@@ -2091,7 +2180,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
       { name: "defaultValue", type: "string | null", default: "null", description: "Initial value for uncontrolled mode." },
       { name: "options", type: "RadioGroupOption[]", default: "[]", description: "Array of radio option definitions." },
       { name: "orientation", type: "Orientation", default: '"vertical"', description: "Layout orientation of the radio options." },
-      { name: "isDisabled", type: "boolean", default: "false", description: "Whether the group is disabled." },
+      { name: "disabled", type: "boolean", default: "false", description: "Whether the group is disabled." },
       { name: "ariaLabel", type: "string | null", default: "null", description: "Accessible label for the radio group." },
       { name: "describedBy", type: "string | null", default: "null", description: "ID of the element describing this group." },
       { name: "name", type: "string | undefined", default: "undefined", description: "Form field name." },
@@ -2123,7 +2212,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
       { name: "visibleMonth", type: "string | null", default: "null", description: "Controlled visible month in YYYY-MM format." },
       { name: "weekStartsOn", type: "CalendarWeekStart", default: '"monday"', description: "Which day the calendar week starts on." },
       { name: "locale", type: "string", default: '"en-US"', description: "Locale for date formatting." },
-      { name: "isDisabled", type: "boolean", default: "false", description: "Whether the calendar is disabled." },
+      { name: "disabled", type: "boolean", default: "false", description: "Whether the calendar is disabled." },
       { name: "ariaLabel", type: "string | null", default: "null", description: "Accessible label for the range calendar." },
     ],
     slots: [],
@@ -2147,7 +2236,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
       { name: "max", type: "number", default: "100", description: "Maximum allowed value." },
       { name: "step", type: "number", default: "1", description: "Step increment between values." },
       { name: "orientation", type: "Orientation", default: '"horizontal"', description: "Layout orientation of the slider." },
-      { name: "isDisabled", type: "boolean", default: "false", description: "Whether the slider is disabled." },
+      { name: "disabled", type: "boolean", default: "false", description: "Whether the slider is disabled." },
       { name: "ariaLabel", type: "string | null", default: "null", description: "Accessible label for the range slider." },
       { name: "lowerValueText", type: "string | null", default: "null", description: "Human-readable text for the lower thumb value." },
       { name: "upperValueText", type: "string | null", default: "null", description: "Human-readable text for the upper thumb value." },
@@ -2172,7 +2261,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
       { name: "defaultValue", type: "number | null", default: "null", description: "Initial value for uncontrolled mode." },
       { name: "max", type: "number", default: "5", description: "Maximum number of stars." },
       { name: "allowClear", type: "boolean", default: "false", description: "Whether clicking the current value clears the rating." },
-      { name: "isDisabled", type: "boolean", default: "false", description: "Whether the rating input is disabled." },
+      { name: "disabled", type: "boolean", default: "false", description: "Whether the rating input is disabled." },
       { name: "ariaLabel", type: "string | null", default: "null", description: "Accessible label for the rating." },
     ],
     slots: [],
@@ -2249,7 +2338,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
     props: [
       { name: "items", type: "ReorderableItem[]", default: "[]", description: "Array of reorderable items." },
       { name: "ariaLabel", type: "string", default: '"Reorderable list"', description: "Accessible label for the list." },
-      { name: "isDisabled", type: "boolean", default: "false", description: "Whether reordering is disabled." },
+      { name: "disabled", type: "boolean", default: "false", description: "Whether reordering is disabled." },
     ],
     slots: [
       { name: "item", description: "Custom item renderer. Receives slot props: item, index." },
@@ -2273,7 +2362,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
   "resize-handle": {
     props: [
       { name: "orientation", type: "SplitOrientation", default: '"horizontal"', description: "Orientation of the resize handle." },
-      { name: "isDisabled", type: "boolean", default: "false", description: "Whether the handle is disabled." },
+      { name: "disabled", type: "boolean", default: "false", description: "Whether the handle is disabled." },
       { name: "ariaLabel", type: "string | null", default: "null", description: "Accessible label for the resize handle." },
       { name: "ariaValueNow", type: "number | null", default: "null", description: "Current value for accessibility." },
       { name: "ariaValueMin", type: "number", default: "0", description: "Minimum value for accessibility." },
@@ -2299,7 +2388,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
       { name: "padding", type: "SpaceScale", default: '"none"', description: "Inner padding of the scroll area." },
       { name: "asRole", type: '"region" | "group" | null', default: "null", description: "Semantic ARIA role for the container." },
       { name: "label", type: "string | null", default: "null", description: "Accessible label for the scrollable region." },
-      { name: "isFocusable", type: "boolean", default: "false", description: "Whether the scroll region is keyboard-focusable." },
+      { name: "focusable", type: "boolean", default: "false", description: "Whether the scroll region is keyboard-focusable." },
     ],
     slots: [
       { name: "default", description: "Scrollable content." },
@@ -2324,8 +2413,9 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
       { name: "placeholder", type: "string", default: '"Search"', description: "Placeholder text." },
       { name: "ariaLabel", type: "string", default: '"Search"', description: "Accessible label for the search field." },
       { name: "describedBy", type: "string | null", default: "null", description: "ID of the element describing this field." },
-      { name: "isDisabled", type: "boolean", default: "false", description: "Whether the field is disabled." },
-      { name: "isReadOnly", type: "boolean", default: "false", description: "Whether the field is read-only." },
+      { name: "disabled", type: "boolean", default: "false", description: "Whether the field is disabled." },
+      { name: "readOnly", type: "boolean", default: "false", description: "Whether the field is read-only." },
+      { name: "debounce", type: "number | null", default: "null", description: "Delay valueChange emission while typing." },
       { name: "showClearButton", type: "boolean", default: "true", description: "Whether to show the clear button." },
       { name: "validationState", type: "ValidationState", default: '"none"', description: "Validation state of the field." },
     ],
@@ -2350,7 +2440,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
       { name: "value", type: "string | null", default: "null", description: "Controlled selected value." },
       { name: "defaultValue", type: "string | null", default: "null", description: "Initial value for uncontrolled mode." },
       { name: "options", type: "SegmentedControlOption[]", default: "[]", description: "Array of segment option definitions." },
-      { name: "isDisabled", type: "boolean", default: "false", description: "Whether the control is disabled." },
+      { name: "disabled", type: "boolean", default: "false", description: "Whether the control is disabled." },
       { name: "ariaLabel", type: "string | null", default: "null", description: "Accessible label for the segmented control." },
       { name: "name", type: "string | undefined", default: "undefined", description: "Form field name." },
     ],
@@ -2380,7 +2470,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
       { name: "defaultValue", type: "string | null", default: "null", description: "Initial value for uncontrolled mode." },
       { name: "placeholder", type: "string | null", default: "null", description: "Placeholder text when no option is selected." },
       { name: "options", type: "SelectItems", default: "[]", description: "Array of select options or option groups." },
-      { name: "isDisabled", type: "boolean", default: "false", description: "Whether the select is disabled." },
+      { name: "disabled", type: "boolean", default: "false", description: "Whether the select is disabled." },
       { name: "ariaLabel", type: "string | null", default: "null", description: "Accessible label for the select." },
       { name: "describedBy", type: "string | null", default: "null", description: "ID of the element describing this select." },
       { name: "name", type: "string | undefined", default: "undefined", description: "Form field name." },
@@ -2450,7 +2540,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
       { name: "width", type: "string | null", default: "null", description: "CSS width of the skeleton." },
       { name: "height", type: "string | null", default: "null", description: "CSS height of the skeleton." },
       { name: "lines", type: "number", default: "3", description: "Number of lines when shape is 'line'." },
-      { name: "isAnimated", type: "boolean", default: "true", description: "Whether the skeleton pulses with animation." },
+      { name: "animated", type: "boolean", default: "true", description: "Whether the skeleton pulses with animation." },
     ],
     slots: [],
     events: [],
@@ -2462,6 +2552,23 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
 <Skeleton shape="line" lines={3} />`,
   },
 
+  spinner: {
+    props: [
+      { name: "variant", type: "SpinnerVariant", default: '"ring"', description: "Visual style of the spinner." },
+      { name: "size", type: "SpinnerSize", default: '"md"', description: "Size scale for the spinner." },
+      { name: "tone", type: "SpinnerTone", default: '"current"', description: "Color source for the spinner." },
+      { name: "ariaLabel", type: "string | null", default: "null", description: "Optional announced loading label." },
+    ],
+    slots: [],
+    events: [],
+    usage: `<script lang="ts">
+  import { Spinner } from "@poodle/svelte-primitives";
+</script>
+
+<Spinner variant="ring" size="sm" tone="current" />
+<Spinner variant="grid" size="md" tone="accent" ariaLabel="Loading logs" />`,
+  },
+
   slider: {
     props: [
       { name: "value", type: "number", default: "0", description: "Current slider value." },
@@ -2469,7 +2576,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
       { name: "max", type: "number", default: "100", description: "Maximum allowed value." },
       { name: "step", type: "number", default: "1", description: "Step increment between values." },
       { name: "orientation", type: "Orientation", default: '"horizontal"', description: "Layout orientation of the slider." },
-      { name: "isDisabled", type: "boolean", default: "false", description: "Whether the slider is disabled." },
+      { name: "disabled", type: "boolean", default: "false", description: "Whether the slider is disabled." },
       { name: "ariaLabel", type: "string | null", default: "null", description: "Accessible label for the slider." },
       { name: "valueText", type: "string | null", default: "null", description: "Human-readable text for the current value." },
     ],
@@ -2512,8 +2619,8 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
       { name: "size", type: "ControlSize", default: '"md"', description: "Size of the button." },
       { name: "type", type: '"button" | "submit" | "reset"', default: '"button"', description: "Native button type for the primary action half." },
       { name: "items", type: "MenuItem[]", default: "[]", description: "Array of menu items for the dropdown." },
-      { name: "isDisabled", type: "boolean", default: "false", description: "Whether the button is disabled." },
-      { name: "isLoading", type: "boolean", default: "false", description: "Whether the button shows a loading spinner." },
+      { name: "disabled", type: "boolean", default: "false", description: "Whether the button is disabled." },
+      { name: "loading", type: "boolean", default: "false", description: "Whether the button shows a loading spinner." },
       { name: "ariaLabel", type: "string | null", default: "null", description: "Accessible label for the primary button." },
       { name: "menuAriaLabel", type: "string", default: '"More actions"', description: "Accessible label for the dropdown menu." },
     ],
@@ -2545,12 +2652,12 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
       { name: "defaultRatio", type: "number", default: "0.5", description: "Initial split ratio for uncontrolled mode." },
       { name: "minPrimarySize", type: "number | null", default: "null", description: "Minimum pixel size of the primary pane." },
       { name: "minSecondarySize", type: "number | null", default: "null", description: "Minimum pixel size of the secondary pane." },
-      { name: "isPrimaryCollapsed", type: "boolean", default: "false", description: "Whether the primary pane is collapsed." },
-      { name: "isSecondaryCollapsed", type: "boolean", default: "false", description: "Whether the secondary pane is collapsed." },
+      { name: "primaryCollapsed", type: "boolean", default: "false", description: "Whether the primary pane is collapsed." },
+      { name: "secondaryCollapsed", type: "boolean", default: "false", description: "Whether the secondary pane is collapsed." },
       { name: "showCollapsePrimary", type: "boolean", default: "false", description: "Whether to show the primary collapse toggle." },
       { name: "showCollapseSecondary", type: "boolean", default: "false", description: "Whether to show the secondary collapse toggle." },
       { name: "ariaLabel", type: "string | null", default: "null", description: "Accessible label for the split view." },
-      { name: "isDisabled", type: "boolean", default: "false", description: "Whether resizing is disabled." },
+      { name: "disabled", type: "boolean", default: "false", description: "Whether resizing is disabled." },
     ],
     slots: [
       { name: "primary", description: "Content for the primary (left or top) pane." },
@@ -2644,7 +2751,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
       { name: "tone", type: "SurfaceTone", default: '"panel"', description: "Background tone of the surface." },
       { name: "border", type: "SurfaceBorder", default: '"subtle"', description: "Border style of the surface." },
       { name: "padding", type: "SpaceScale", default: '"md"', description: "Inner padding of the surface." },
-      { name: "isElevated", type: "boolean", default: "false", description: "Whether the surface has a box-shadow elevation." },
+      { name: "elevated", type: "boolean", default: "false", description: "Whether the surface has a box-shadow elevation." },
       { name: "asRole", type: '"region" | "group" | null', default: "null", description: "Semantic ARIA role for the container." },
       { name: "label", type: "string | null", default: "null", description: "Accessible label for the surface." },
     ],
@@ -2656,7 +2763,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
   import { Surface } from "@poodle/svelte-primitives";
 </script>
 
-<Surface tone="panel" border="subtle" padding="lg" isElevated>
+<Surface tone="panel" border="subtle" padding="lg" elevated>
   <p>Content in an elevated panel surface.</p>
 </Surface>`,
   },
@@ -2664,10 +2771,10 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
   switch: {
     props: [
       { name: "id", type: "string | undefined", default: "undefined", description: "HTML id attribute for the switch." },
-      { name: "isChecked", type: "boolean | null", default: "null", description: "Controlled checked state." },
+      { name: "checked", type: "boolean | null", default: "null", description: "Controlled checked state." },
       { name: "defaultChecked", type: "boolean", default: "false", description: "Initial checked state for uncontrolled mode." },
-      { name: "isDisabled", type: "boolean", default: "false", description: "Whether the switch is disabled." },
-      { name: "isReadOnly", type: "boolean", default: "false", description: "Whether the switch is read-only." },
+      { name: "disabled", type: "boolean", default: "false", description: "Whether the switch is disabled." },
+      { name: "readOnly", type: "boolean", default: "false", description: "Whether the switch is read-only." },
       { name: "label", type: "string | null", default: "null", description: "Label text displayed next to the switch." },
       { name: "ariaLabel", type: "string | null", default: "null", description: "Accessible label when no visible label is used." },
       { name: "describedBy", type: "string | null", default: "null", description: "ID of the element describing this switch." },
@@ -2687,7 +2794,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
 
 <Switch
   label="Enable notifications"
-  bind:isChecked={notifications}
+  bind:checked={notifications}
   onColor="#22c55e"
   offColor="#cbd5e1"
 />`,
@@ -2727,9 +2834,10 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
       { name: "variant", type: "TabVariant", default: '"underline"', description: "Visual style variant of the tabs." },
       { name: "orientation", type: "Orientation", default: '"horizontal"', description: "Layout orientation of the tab list." },
       { name: "activationMode", type: "TabActivationMode", default: '"automatic"', description: "Whether tabs activate on focus or on click." },
-      { name: "isReorderable", type: "boolean", default: "false", description: "Whether tabs can be reordered via drag." },
+      { name: "reorderable", type: "boolean", default: "false", description: "Whether tabs can be reordered via drag." },
       { name: "ariaLabel", type: "string | null", default: "null", description: "Accessible label for the tab list." },
       { name: "showTooltips", type: "boolean", default: "false", description: "Whether to show tooltips on tab triggers." },
+      { name: "historyKey", type: "string | null", default: "null", description: "Optional URL query param key used to preserve the active tab in browser history." },
     ],
     slots: [
       { name: "default", description: "Tab panel content. Receives slot props: activeValue." },
@@ -2745,11 +2853,11 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
 
   const items = [
     { value: "overview", label: "Overview" },
-    { value: "settings", label: "Settings" },
+    { value: "settings", label: "Settings", count: 3, separator: true },
   ];
 </script>
 
-<Tabs {items} defaultValue="overview">
+<Tabs {items} defaultValue="overview" historyKey="tab">
   {#snippet default({ activeValue })}
     {#if activeValue === "overview"}
       <p>Overview content here.</p>
@@ -2768,8 +2876,8 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
       { name: "placeholder", type: "string | null", default: "null", description: "Placeholder text when empty." },
       { name: "rows", type: "number", default: "4", description: "Number of visible text rows." },
       { name: "name", type: "string | undefined", default: "undefined", description: "Form field name." },
-      { name: "isDisabled", type: "boolean", default: "false", description: "Whether the textarea is disabled." },
-      { name: "isReadOnly", type: "boolean", default: "false", description: "Whether the textarea is read-only." },
+      { name: "disabled", type: "boolean", default: "false", description: "Whether the textarea is disabled." },
+      { name: "readOnly", type: "boolean", default: "false", description: "Whether the textarea is read-only." },
       { name: "validationState", type: "ValidationState", default: '"none"', description: "Current validation state; pending shows a spinner, invalid shows a red cross, and valid shows a green tick." },
       { name: "ariaLabel", type: "string | null", default: "null", description: "Accessible label for the textarea." },
       { name: "describedBy", type: "string | null", default: "null", description: "ID of the element describing this textarea." },
@@ -2798,8 +2906,20 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
       { name: "defaultValue", type: "string", default: '""', description: "Initial value for uncontrolled mode." },
       { name: "placeholder", type: "string | null", default: "null", description: "Placeholder text when empty." },
       { name: "name", type: "string | undefined", default: "undefined", description: "Form field name." },
-      { name: "isDisabled", type: "boolean", default: "false", description: "Whether the input is disabled." },
-      { name: "isReadOnly", type: "boolean", default: "false", description: "Whether the input is read-only." },
+      { name: "autocomplete", type: "string | undefined", default: "undefined", description: "Native autocomplete attribute." },
+      { name: "disabled", type: "boolean", default: "false", description: "Whether the input is disabled." },
+      { name: "readOnly", type: "boolean", default: "false", description: "Whether the input is read-only." },
+      { name: "required", type: "boolean", default: "false", description: "Whether the native input is required." },
+      { name: "pattern", type: "string | undefined", default: "undefined", description: "Native input pattern attribute." },
+      { name: "spellcheck", type: "boolean | undefined", default: "undefined", description: "Native spellcheck attribute." },
+      { name: "autocapitalize", type: "string | undefined", default: "undefined", description: "Native autocapitalize attribute." },
+      { name: "enterKeyHint", type: '"enter" | "done" | "go" | "next" | "previous" | "search" | "send" | null', default: "null", description: "Native enterkeyhint attribute." },
+      { name: "debounce", type: "number | null", default: "null", description: "Delay valueChange emission while typing." },
+      { name: "validate", type: "InputValidator | undefined", default: "undefined", description: "App-owned validation function for sync or async checks." },
+      { name: "validationContext", type: "unknown", default: "undefined", description: "Opaque context passed to validate." },
+      { name: "validationDebounce", type: "number", default: "300", description: "Delay before validation runs while typing." },
+      { name: "validateOnBlur", type: "boolean", default: "true", description: "Whether blur triggers immediate validation." },
+      { name: "showValidationStatus", type: "boolean", default: "true", description: "Whether built-in validation status chrome is shown." },
       { name: "validationState", type: "ValidationState", default: '"none"', description: "Current validation state." },
       { name: "ariaLabel", type: "string | null", default: "null", description: "Accessible label for the input." },
       { name: "describedBy", type: "string | null", default: "null", description: "ID of the element describing this input." },
@@ -2816,6 +2936,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
     ],
     events: [
       { name: "valueChange", payload: "{ value: string }", description: "Fires when the input value changes." },
+      { name: "validationChange", payload: '{ status: InputValidationStatus; valid: boolean; message: string }', description: "Fires when built-in validation state changes." },
       { name: "submit", payload: "{ value: string }", description: "Fires on Enter key press." },
       { name: "cancel", payload: "void", description: "Fires when editing is cancelled." },
       { name: "focus", payload: "FocusEvent", description: "Fires when the input receives focus." },
@@ -2825,9 +2946,21 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
   import { TextInput } from "@poodle/svelte-primitives";
 
   let email = "";
+  async function validateEmail(value: string) {
+    return value.includes("@")
+      ? { valid: true }
+      : { valid: false, message: "Enter a valid email address." };
+  }
 </script>
 
-<TextInput id="email" bind:value={email} placeholder="you@example.com" type="email" />`,
+<TextInput
+  id="email"
+  bind:value={email}
+  placeholder="you@example.com"
+  type="email"
+  autocomplete="email"
+  validate={validateEmail}
+/>`,
   },
 
   "time-ago": {
@@ -2854,7 +2987,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
       { name: "min", type: "string | null", default: "null", description: "Minimum allowed time." },
       { name: "max", type: "string | null", default: "null", description: "Maximum allowed time." },
       { name: "step", type: "number", default: "60", description: "Step interval in seconds." },
-      { name: "isDisabled", type: "boolean", default: "false", description: "Whether the field is disabled." },
+      { name: "disabled", type: "boolean", default: "false", description: "Whether the field is disabled." },
       { name: "ariaLabel", type: "string | null", default: "null", description: "Accessible label for the time field." },
       { name: "describedBy", type: "string | null", default: "null", description: "ID of the element describing this field." },
     ],
@@ -2878,7 +3011,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
       { name: "defaultValue", type: "string | null", default: "null", description: "Initial time zone for uncontrolled mode." },
       { name: "placeholder", type: "string | null", default: '"Select time zone"', description: "Placeholder text when no value is selected." },
       { name: "options", type: "TimeZoneOption[]", default: "[]", description: "Available time zone options." },
-      { name: "isDisabled", type: "boolean", default: "false", description: "Whether the select is disabled." },
+      { name: "disabled", type: "boolean", default: "false", description: "Whether the select is disabled." },
       { name: "ariaLabel", type: "string | null", default: "null", description: "Accessible label for the select." },
       { name: "describedBy", type: "string | null", default: "null", description: "ID of the element describing this select." },
       { name: "name", type: "string | undefined", default: "undefined", description: "Form field name." },
@@ -2919,12 +3052,12 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
 
   toggle: {
     props: [
-      { name: "isPressed", type: "boolean | null", default: "null", description: "Controlled pressed state." },
+      { name: "pressed", type: "boolean | null", default: "null", description: "Controlled pressed state." },
       { name: "defaultPressed", type: "boolean", default: "false", description: "Initial pressed state for uncontrolled mode." },
       { name: "variant", type: "ToggleVariant", default: '"ghost"', description: "Visual style variant." },
       { name: "size", type: "ControlSize", default: '"md"', description: "Size of the toggle button." },
       { name: "layout", type: '"inline" | "stack"', default: '"inline"', description: "Layout direction of icon and label." },
-      { name: "isDisabled", type: "boolean", default: "false", description: "Whether the toggle is disabled." },
+      { name: "disabled", type: "boolean", default: "false", description: "Whether the toggle is disabled." },
       { name: "ariaLabel", type: "string | null", default: "null", description: "Accessible label for the toggle." },
       { name: "className", type: "string", default: '""', description: "Additional CSS class name." },
     ],
@@ -2940,7 +3073,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
   let bold = false;
 </script>
 
-<Toggle bind:isPressed={bold} ariaLabel="Bold">
+<Toggle bind:pressed={bold} ariaLabel="Bold">
   <strong>B</strong>
 </Toggle>`,
   },
@@ -2951,7 +3084,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
       { name: "defaultValue", type: "string | string[] | null", default: "null", description: "Initial selected value(s) for uncontrolled mode." },
       { name: "options", type: "ToggleGroupOption[]", default: "[]", description: "Array of toggle options." },
       { name: "selectionMode", type: '"single" | "multiple"', default: '"single"', description: "Whether one or many toggles can be active." },
-      { name: "isDisabled", type: "boolean", default: "false", description: "Whether the entire group is disabled." },
+      { name: "disabled", type: "boolean", default: "false", description: "Whether the entire group is disabled." },
       { name: "ariaLabel", type: "string | null", default: "null", description: "Accessible label for the toggle group." },
     ],
     slots: [],
@@ -3019,7 +3152,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
     props: [
       { name: "value", type: "TriStateValue", default: '"default"', description: "Current tri-state value." },
       { name: "options", type: "Record<TriStateValue, string>", default: '{ excluded: "Exclude", default: "Default", included: "Include" }', description: "Labels for each state." },
-      { name: "isDisabled", type: "boolean", default: "false", description: "Whether the switch is disabled." },
+      { name: "disabled", type: "boolean", default: "false", description: "Whether the switch is disabled." },
       { name: "ariaLabel", type: "string", required: true, description: "Accessible label for the switch." },
       { name: "excludedColor", type: "string | null", default: "null", description: "Optional color override for the selected excluded state." },
       { name: "defaultColor", type: "string | null", default: "null", description: "Optional color override for the selected default state." },
@@ -3066,7 +3199,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
       { name: "weekStartsOn", type: "CalendarWeekStart", default: '"monday"', description: "First day of the week in the calendar." },
       { name: "locale", type: "string", default: '"en-US"', description: "Locale for date formatting." },
       { name: "timeZoneOptions", type: "TimeZoneOption[]", default: "[]", description: "Available time zone options." },
-      { name: "isDisabled", type: "boolean", default: "false", description: "Whether the picker is disabled." },
+      { name: "disabled", type: "boolean", default: "false", description: "Whether the picker is disabled." },
       { name: "ariaLabel", type: "string | null", default: "null", description: "Accessible label for the picker." },
     ],
     slots: [
@@ -3113,7 +3246,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
     props: [
       { name: "title", type: "string | null", default: "null", description: "Primary title displayed in the header." },
       { name: "subtitle", type: "string | null", default: "null", description: "Secondary subtitle below the title." },
-      { name: "isDragRegion", type: "boolean", default: "false", description: "Whether the header acts as a window drag region." },
+      { name: "dragRegion", type: "boolean", default: "false", description: "Whether the header acts as a window drag region." },
       { name: "ariaLabel", type: "string | null", default: "null", description: "Accessible label for the header." },
     ],
     slots: [

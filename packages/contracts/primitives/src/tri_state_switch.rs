@@ -6,6 +6,12 @@ use crate::types::CheckState;
 pub struct TriStateSwitchSpec {
     pub state: CheckState,
     pub label: Option<String>,
+    pub excluded_label: Option<String>,
+    pub default_label: Option<String>,
+    pub included_label: Option<String>,
+    pub excluded_color: Option<String>,
+    pub default_color: Option<String>,
+    pub included_color: Option<String>,
     pub is_disabled: bool,
 }
 
@@ -14,6 +20,12 @@ impl Default for TriStateSwitchSpec {
         Self {
             state: CheckState::Unchecked,
             label: None,
+            excluded_label: None,
+            default_label: None,
+            included_label: None,
+            excluded_color: None,
+            default_color: None,
+            included_color: None,
             is_disabled: false,
         }
     }
@@ -34,9 +46,51 @@ impl TriStateSwitchSpec {
         self
     }
 
+    pub fn with_excluded_label(mut self, label: impl Into<String>) -> Self {
+        self.excluded_label = Some(label.into());
+        self
+    }
+
+    pub fn with_default_label(mut self, label: impl Into<String>) -> Self {
+        self.default_label = Some(label.into());
+        self
+    }
+
+    pub fn with_included_label(mut self, label: impl Into<String>) -> Self {
+        self.included_label = Some(label.into());
+        self
+    }
+
+    pub fn with_excluded_color(mut self, color: impl Into<String>) -> Self {
+        self.excluded_color = Some(color.into());
+        self
+    }
+
+    pub fn with_default_color(mut self, color: impl Into<String>) -> Self {
+        self.default_color = Some(color.into());
+        self
+    }
+
+    pub fn with_included_color(mut self, color: impl Into<String>) -> Self {
+        self.included_color = Some(color.into());
+        self
+    }
+
     pub fn with_disabled(mut self, is_disabled: bool) -> Self {
         self.is_disabled = is_disabled;
         self
+    }
+
+    pub fn excluded_label(&self) -> &str {
+        self.excluded_label.as_deref().unwrap_or("Exclude")
+    }
+
+    pub fn default_label(&self) -> &str {
+        self.default_label.as_deref().unwrap_or("Default")
+    }
+
+    pub fn included_label(&self) -> &str {
+        self.included_label.as_deref().unwrap_or("Include")
     }
 
     pub fn aria_checked(&self) -> &'static str {

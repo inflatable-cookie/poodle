@@ -20,7 +20,7 @@
   export let stateMessage: string | null = null;
 </script>
 
-<Card {variant} hasMedia={true} ariaLabel={ariaLabel ?? title}>
+<Card {variant} media={true} ariaLabel={ariaLabel ?? title}>
   <div slot="media">
     <MediaThumbnail
       {kind}

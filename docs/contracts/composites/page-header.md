@@ -9,8 +9,8 @@ Updated: 2026-03-11
 - Layer: `composites`
 - Summary: a standardized title and action region for product pages, panels, or
   detail surfaces
-- In scope: title, subtitle/supporting text, optional breadcrumbs region,
-  primary/secondary actions, status metadata
+- In scope: optional back link, title, subtitle/supporting text, optional
+  breadcrumbs region, primary/secondary actions, status metadata
 - Out of scope: app shell toolbars, global navigation, domain-specific command
   wiring
 
@@ -18,6 +18,7 @@ Updated: 2026-03-11
 
 ```text
 [Root Header]
+  ├── [Back Link] (optional)
   ├── [Breadcrumbs Region] (optional)
   ├── [Title Block]
   │     ├── [Eyebrow or Meta] (optional)
@@ -29,6 +30,7 @@ Updated: 2026-03-11
 | Part | Required | Description | Token Targets |
 |------|----------|-------------|---------------|
 | Root Header | yes | header container | spacing, separator |
+| Back Link | no | lightweight return link above the title block | typography, text color, hover treatment |
 | Breadcrumbs Region | no | pre-title navigation trail | typography, text color |
 | Title Block | yes | primary identity region | typography, spacing |
 | Actions | no | page-level action group | gap, alignment |
@@ -40,8 +42,11 @@ Updated: 2026-03-11
 | Prop | Type | Default | Required | Notes |
 |------|------|---------|----------|-------|
 | `title` | `string` | none | yes | primary heading text |
+| `count` | `number \| null` | `null` | no | optional count badge rendered inline with the title |
 | `subtitle` | `string \| null` | `null` | no | supporting copy |
 | `eyebrow` | `string \| null` | `null` | no | small meta label |
+| `backHref` | `string \| null` | `null` | no | optional back-link target rendered above breadcrumbs and title |
+| `backLabel` | `string \| null` | `null` | no | optional back-link text, defaults to `Back` when `backHref` is set |
 | `align` | `"start" \| "between"` | `"between"` | no | action alignment posture |
 | `ariaLabel` | `string \| null` | `null` | no | optional region label when header is independently addressable |
 
@@ -76,18 +81,20 @@ No component-owned events beyond child action behavior.
   context
 - Required attributes: heading semantics for the visible title
 - Optional attributes: region label when the header is independently navigable
-- Labeling rules: visible title should remain the primary accessible heading
+- Labeling rules: visible title should remain the primary accessible heading,
+  and back-link wording should stay short and destination-oriented
 
 ### Keyboard
 
 | Key | Behavior |
 |-----|----------|
-| `Tab` | reaches breadcrumb links and header actions in logical order |
+| `Tab` | reaches back link, breadcrumb links, and header actions in logical order |
 
 ### Focus And Announcement
 
 - focus entry: the header itself is not focusable by default
-- focus exit: action focus order should not break heading readability
+- focus exit: back link, breadcrumb links, and actions should not break heading
+  readability or invert expected reading order
 - live-region behavior: none
 - GPUI-native accessibility mapping notes: GPUI must preserve heading
   hierarchy and action grouping without flattening the title block into plain
@@ -106,8 +113,8 @@ No component-owned events beyond child action behavior.
   product panels
 - child expectations: breadcrumbs and action primitives are optional children
 - resizing rules: the title remains visually dominant over actions
-- composition rule: breadcrumbs, when present, remain above the title block and
-  do not collapse into the same semantic role as the page title
+- composition rule: back link and breadcrumbs, when present, remain above the
+  title block and do not collapse into the same semantic role as the page title
 
 ## 8. Token Usage And Precise CSS
 

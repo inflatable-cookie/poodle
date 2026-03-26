@@ -34,7 +34,7 @@
       <NavCard
         title="API Reference"
         description="Complete component API documentation."
-        isDisabled
+        disabled
       >
         <svelte:fragment slot="icon"><Icon icon={fileText} /></svelte:fragment>
       </NavCard>

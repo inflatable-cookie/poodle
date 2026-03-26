@@ -11,27 +11,33 @@
     <Eyebrow>Default</Eyebrow>
     <Checkbox
       label="Enable email notifications"
-      isChecked={notifications}
+      checked={notifications}
       on:checkedChange={(e) => (notifications = e.detail.checked)}
     />
     <Checkbox
       label="Subscribe to marketing emails"
-      isChecked={marketing}
+      checked={marketing}
       on:checkedChange={(e) => (marketing = e.detail.checked)}
     />
     <Checkbox
       label="I agree to the terms and conditions"
-      isChecked={terms}
+      checked={terms}
       on:checkedChange={(e) => (terms = e.detail.checked)}
     />
   </div>
 
   <div class="specimen__group">
     <Eyebrow>States</Eyebrow>
-    <Checkbox label="Disabled unchecked" isDisabled />
-    <Checkbox label="Disabled checked" isChecked={true} isDisabled />
-    <Checkbox label="Mixed / indeterminate" isMixed />
-    <Checkbox label="Read-only checked" isChecked={true} isReadOnly />
+    <Checkbox label="Disabled unchecked" disabled />
+    <Checkbox label="Disabled checked" checked={true} disabled />
+    <Checkbox label="Mixed / indeterminate" mixed />
+    <Checkbox label="Read-only checked" checked={true} readOnly />
+  </div>
+
+  <div class="specimen__group">
+    <Eyebrow>Custom selected color</Eyebrow>
+    <Checkbox label="Billable feature" checked={true} selectedColor="#22c55e" />
+    <Checkbox label="Requires moderation" checked={true} selectedColor="#f59e0b" />
   </div>
 </div>
 

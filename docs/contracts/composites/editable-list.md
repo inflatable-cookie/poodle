@@ -21,12 +21,12 @@ Updated: 2026-03-22
 ```text
 [Root .autonomous-list]  <div>
   ├── [ItemList]  (when items.length > 0)
-  │     ├── [ReorderableList]  (when isReorderable)
+  │     ├── [ReorderableList]  (when reorderable)
   │     │     └── [ItemRow .autonomous-list__item-row]  (repeated, via slot)
   │     │           ├── [ItemText .autonomous-list__item-text]  <span>
   │     │           └── [RemoveButton .autonomous-list__remove]  <button>
   │     │                 └── [RemoveIcon]  <svg> (x icon)
-  │     └── [StaticList .autonomous-list__static]  <ul> (when !isReorderable)
+  │     └── [StaticList .autonomous-list__static]  <ul> (when !reorderable)
   │           └── [StaticItem .autonomous-list__static-item]  <li> (repeated)
   │                 ├── [ItemText .autonomous-list__item-text]  <span>
   │                 └── [RemoveButton .autonomous-list__remove]  <button>
@@ -60,9 +60,9 @@ Updated: 2026-03-22
 | `addLabel` | `string` | `"Add item"` | no | label text for the add button |
 | `placeholder` | `string` | `"New item"` | no | placeholder text for the input |
 | `maxItems` | `number \| null` | `null` | no | maximum number of items; null means unlimited |
-| `isDisabled` | `boolean` | `false` | no | disables all interactions |
+| `disabled` | `boolean` | `false` | no | disables all interactions |
 | `ariaLabel` | `string` | `"List"` | no | accessible label for the list region |
-| `isReorderable` | `boolean` | `true` | no | enables drag-and-drop reordering via ReorderableList |
+| `reorderable` | `boolean` | `true` | no | enables drag-and-drop reordering via ReorderableList |
 
 ### Types
 
@@ -91,13 +91,13 @@ None.
 | empty | `items` is empty | no list shown, only add row (if canAdd) |
 | populated | `items` has entries | list shown with items, add row below if canAdd |
 | at-max | `items.length >= maxItems` | add row hidden; counter shows "N/N" |
-| disabled | `isDisabled` is true | entire component has reduced opacity; input, add button, and remove buttons are disabled |
+| disabled | `disabled` is true | entire component has reduced opacity; input, add button, and remove buttons are disabled |
 | add-disabled | input is empty or whitespace | add button is disabled |
 
 ### Component States
 
 - `newItemText` (internal string): current input value
-- `canAdd` (derived): `!isDisabled && (maxItems === null || items.length < maxItems)`
+- `canAdd` (derived): `!disabled && (maxItems === null || items.length < maxItems)`
 
 ## 5. Events
 
@@ -244,7 +244,7 @@ None.
 
 | Label | Props / Config | Expected Visual |
 |-------|---------------|-----------------|
-| Non-reorderable | one item ("Static item"), `isReorderable={false}`, `ariaLabel="Static list"`, `placeholder="Add item..."` | static list (no drag handles) with remove button and add row |
+| Non-reorderable | one item ("Static item"), `reorderable={false}`, `ariaLabel="Static list"`, `placeholder="Add item..."` | static list (no drag handles) with remove button and add row |
 
 ## 14. Approval And Adoption Notes
 

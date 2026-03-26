@@ -2,6 +2,15 @@
   import { createEventDispatcher, onDestroy } from "svelte";
 
   import type { FileUploadItem } from "./types";
+  import {
+    DEFAULT_COMPRESSION,
+    compressImage,
+    formatFileSize,
+    generateFileUploadId,
+    validateUploadFile,
+    type FileUploadValidationError,
+    type ImageCompressionOptions,
+  } from "./file-upload";
 
   export let accept: string | null = null;
   export let maxSize: number = 10 * 1024 * 1024;
@@ -10,48 +19,25 @@
   export let showPreview = true;
   export let disabled = false;
   export let files: FileUploadItem[] = [];
+  export let validate: ((file: File) => string | null) | undefined = undefined;
+  export let compress = false;
+  export let compressionOptions: ImageCompressionOptions = DEFAULT_COMPRESSION;
+  export let onChange: ((files: FileUploadItem[]) => void) | undefined = undefined;
+  export let onUpload: ((files: File[]) => void) | undefined = undefined;
+  export let onError:
+    | ((event: FileUploadValidationError) => void)
+    | undefined = undefined;
+  export let onRemove: ((item: FileUploadItem) => void) | undefined = undefined;
 
   const dispatch = createEventDispatcher<{
     change: { files: FileUploadItem[] };
+    upload: { files: File[] };
     error: { file: File; message: string };
     remove: { item: FileUploadItem };
   }>();
 
   let inputElement: HTMLInputElement | null = null;
   let dragActive = false;
-  let nextId = 1;
-
-  function generateId(): string {
-    return `file-${nextId++}`;
-  }
-
-  function validateFile(file: File): string | null {
-    if (file.size > maxSize) {
-      const sizeMB = (maxSize / (1024 * 1024)).toFixed(1);
-      return `File exceeds maximum size of ${sizeMB} MB`;
-    }
-
-    if (accept) {
-      const acceptedTypes = accept.split(",").map((t) => t.trim());
-      const matches = acceptedTypes.some((type) => {
-        if (type.startsWith(".")) {
-          return file.name.toLowerCase().endsWith(type.toLowerCase());
-        }
-
-        if (type.endsWith("/*")) {
-          return file.type.startsWith(type.replace("/*", "/"));
-        }
-
-        return file.type === type;
-      });
-
-      if (!matches) {
-        return `File type "${file.type || "unknown"}" is not accepted`;
-      }
-    }
-
-    return null;
-  }
 
   function createPreviewUrl(file: File): string | null {
     if (!showPreview || !file.type.startsWith("image/")) {
@@ -61,8 +47,9 @@
     return URL.createObjectURL(file);
   }
 
-  function addFiles(newFiles: FileList | File[]): void {
+  async function addFiles(newFiles: FileList | File[]): Promise<void> {
     const fileArray = Array.from(newFiles);
+    const filesToUpload: File[] = [];
 
     for (const file of fileArray) {
       if (!multiple && files.length >= 1) {
@@ -70,57 +57,96 @@
       }
 
       if (multiple && files.length >= maxFiles) {
-        dispatch("error", { file, message: `Maximum of ${maxFiles} files allowed` });
+        const message = `Maximum of ${maxFiles} files allowed`;
+        dispatch("error", { file, message });
+        onError?.({ file, message });
         break;
       }
 
-      const error = validateFile(file);
+      const error = validateUploadFile({
+        file,
+        maxSize,
+        accept: accept ?? "*",
+        validate,
+      });
 
       if (error) {
         dispatch("error", { file, message: error });
+        onError?.({ file, message: error });
         continue;
       }
 
+      let processedFile = file;
+      let originalFile: File | undefined;
+
+      if (compress && file.type.startsWith("image/")) {
+        const compressed = await compressImage(file, compressionOptions);
+        if (compressed !== file) {
+          originalFile = file;
+          processedFile = compressed;
+        }
+      }
+
       const item: FileUploadItem = {
-        file,
-        id: generateId(),
+        file: processedFile,
+        id: generateFileUploadId(),
         progress: 0,
         status: "pending",
-        previewUrl: createPreviewUrl(file),
+        previewUrl: createPreviewUrl(processedFile),
+        originalFile,
       };
 
       files = [...files, item];
+      filesToUpload.push(processedFile);
     }
 
     dispatch("change", { files });
+    onChange?.(files);
+
+    if (filesToUpload.length > 0) {
+      dispatch("upload", { files: filesToUpload });
+      onUpload?.(filesToUpload);
+    }
   }
 
   function removeFile(id: string): void {
     const item = files.find((f) => f.id === id);
 
-    if (item) {
-      if (item.previewUrl) {
-        URL.revokeObjectURL(item.previewUrl);
-      }
-
-      files = files.filter((f) => f.id !== id);
-      dispatch("remove", { item });
-      dispatch("change", { files });
+    if (!item) {
+      return;
     }
+
+    if (item.previewUrl) {
+      URL.revokeObjectURL(item.previewUrl);
+    }
+
+    files = files.filter((f) => f.id !== id);
+    dispatch("remove", { item });
+    dispatch("change", { files });
+    onRemove?.(item);
+    onChange?.(files);
   }
 
   export function updateProgress(id: string, progress: number): void {
     files = files.map((f) =>
       f.id === id
-        ? { ...f, progress: Math.min(100, Math.max(0, progress)), status: progress >= 100 ? "complete" : "uploading" as const }
+        ? {
+            ...f,
+            progress: Math.min(100, Math.max(0, progress)),
+            status: progress >= 100 ? "complete" : ("uploading" as const),
+          }
         : f,
     );
+    dispatch("change", { files });
+    onChange?.(files);
   }
 
   export function setError(id: string, message: string): void {
     files = files.map((f) =>
       f.id === id ? { ...f, status: "error" as const, error: message } : f,
     );
+    dispatch("change", { files });
+    onChange?.(files);
   }
 
   export function clear(): void {
@@ -132,6 +158,7 @@
 
     files = [];
     dispatch("change", { files });
+    onChange?.(files);
   }
 
   function handleDrop(event: DragEvent): void {
@@ -142,7 +169,7 @@
       return;
     }
 
-    addFiles(event.dataTransfer.files);
+    void addFiles(event.dataTransfer.files);
   }
 
   function handleDragOver(event: DragEvent): void {
@@ -161,7 +188,7 @@
     const target = event.target as HTMLInputElement;
 
     if (target.files?.length) {
-      addFiles(target.files);
+      void addFiles(target.files);
       target.value = "";
     }
   }
@@ -177,12 +204,6 @@
       event.preventDefault();
       inputElement?.click();
     }
-  }
-
-  function formatSize(bytes: number): string {
-    if (bytes < 1024) return `${bytes} B`;
-    if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
-    return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
   }
 
   onDestroy(() => {
@@ -233,7 +254,7 @@
         <p class="file-upload__hint">
           {#if accept}{accept}{/if}
           {#if accept && maxSize} · {/if}
-          {#if maxSize}Max {formatSize(maxSize)}{/if}
+          {#if maxSize}Max {formatFileSize(maxSize)}{/if}
         </p>
       {/if}
     </div>
@@ -257,7 +278,7 @@
           <div class="file-upload__meta">
             <span class="file-upload__name">{item.file.name}</span>
             <span class="file-upload__size">
-              {formatSize(item.file.size)}
+              {formatFileSize(item.file.size)}
               {#if item.status === "error" && item.error}
                 · <span class="file-upload__error-text">{item.error}</span>
               {:else if item.status === "uploading"}
@@ -349,8 +370,14 @@
     color: var(--poodle-color-text-secondary, #999);
   }
 
-  .file-upload__label {
+  .file-upload__label,
+  .file-upload__hint,
+  .file-upload__size,
+  .file-upload__error-text {
     margin: 0;
+  }
+
+  .file-upload__label {
     font-size: 0.875rem;
     color: var(--poodle-color-text-secondary, #999);
   }
@@ -360,39 +387,43 @@
     text-decoration: underline;
   }
 
-  .file-upload__hint {
-    margin: 0;
-    font-size: 0.75rem;
-    color: var(--poodle-color-text-tertiary, #666);
+  .file-upload__hint,
+  .file-upload__size {
+    font-size: 0.8125rem;
+    color: var(--poodle-color-text-tertiary, #777);
   }
 
   .file-upload__list {
+    list-style: none;
     display: flex;
     flex-direction: column;
-    gap: 0.25rem;
+    gap: 0.5rem;
     margin: 0;
     padding: 0;
-    list-style: none;
   }
 
   .file-upload__item {
-    position: relative;
-    display: flex;
+    display: grid;
+    grid-template-columns: auto 1fr auto;
     align-items: center;
-    gap: 0.5rem;
-    padding: 0.375rem 0.5rem;
-    border-radius: var(--poodle-radius-control, 0.375rem);
+    gap: 0.75rem;
+    padding: 0.75rem;
+    border-radius: var(--poodle-radius-surface, 0.5rem);
     background: var(--poodle-color-background-panel, #1a1a1a);
   }
 
   .file-upload__item--error {
-    background: color-mix(in srgb, var(--poodle-color-text-danger, #ef4444) 10%, var(--poodle-color-background-panel, #1a1a1a));
+    background: color-mix(in srgb, var(--poodle-color-danger-base, #ef4444) 10%, var(--poodle-color-background-panel, #1a1a1a));
+  }
+
+  .file-upload__preview,
+  .file-upload__file-icon {
+    width: 2rem;
+    height: 2rem;
+    border-radius: 0.375rem;
   }
 
   .file-upload__preview {
-    width: 2rem;
-    height: 2rem;
-    border-radius: 0.25rem;
     object-fit: cover;
   }
 
@@ -400,76 +431,62 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 2rem;
-    height: 2rem;
-    flex-shrink: 0;
-  }
-
-  .file-upload__file-icon svg {
-    width: 1.25rem;
-    height: 1.25rem;
-    color: var(--poodle-color-text-tertiary, #666);
+    background: color-mix(in srgb, var(--poodle-color-background-surface, #111) 82%, transparent);
+    color: var(--poodle-color-text-secondary, #999);
   }
 
   .file-upload__meta {
     display: flex;
     flex-direction: column;
-    gap: 0.0625rem;
-    flex: 1;
+    gap: 0.125rem;
     min-width: 0;
   }
 
   .file-upload__name {
-    font-size: 0.8125rem;
-    white-space: nowrap;
+    font-size: 0.875rem;
+    color: var(--poodle-color-text-primary, #f5f5f5);
     overflow: hidden;
     text-overflow: ellipsis;
-  }
-
-  .file-upload__size {
-    font-size: 0.75rem;
-    color: var(--poodle-color-text-secondary, #999);
+    white-space: nowrap;
   }
 
   .file-upload__error-text {
-    color: var(--poodle-color-text-danger, #ef4444);
+    color: var(--poodle-color-danger-base, #ef4444);
   }
 
   .file-upload__progress {
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    height: 0.125rem;
-    border-radius: 0 0 var(--poodle-radius-control, 0.375rem) var(--poodle-radius-control, 0.375rem);
-    background: var(--poodle-color-border-default, #444);
+    grid-column: 2;
+    height: 0.25rem;
+    border-radius: 999px;
     overflow: hidden;
+    background: color-mix(in srgb, var(--poodle-color-background-surface, #111) 82%, transparent);
   }
 
   .file-upload__progress-bar {
     height: 100%;
     background: var(--poodle-color-accent-default, #6366f1);
-    transition: width 0.2s;
+    transition: width 0.15s ease;
   }
 
   .file-upload__remove {
-    display: flex;
+    display: inline-flex;
     align-items: center;
     justify-content: center;
-    flex-shrink: 0;
-    width: 1.5rem;
-    height: 1.5rem;
+    width: 1.75rem;
+    height: 1.75rem;
     padding: 0;
-    border: 0;
-    border-radius: 0.25rem;
+    border: none;
+    border-radius: 999px;
     background: transparent;
     color: var(--poodle-color-text-secondary, #999);
     cursor: pointer;
   }
 
-  .file-upload__remove:hover {
-    background: var(--poodle-color-background-elevated, #2a2a2a);
-    color: var(--poodle-color-text-default, #eee);
+  .file-upload__remove:hover,
+  .file-upload__remove:focus-visible {
+    background: color-mix(in srgb, var(--poodle-color-background-surface, #111) 82%, transparent);
+    color: var(--poodle-color-text-primary, #f5f5f5);
+    outline: none;
   }
 
   .file-upload__remove svg {

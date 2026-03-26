@@ -29,7 +29,7 @@
   export let visibleMonth: string | null = null;
   export let weekStartsOn: CalendarWeekStart = "monday";
   export let locale = "en-US";
-  export let isDisabled = false;
+  export let disabled = false;
   export let ariaLabel: string | null = null;
 
   const dispatch = createEventDispatcher<{
@@ -74,7 +74,7 @@
   }
 
   function selectDate(iso: string): void {
-    if (isDisabled) {
+    if (disabled) {
       return;
     }
 
@@ -153,7 +153,7 @@
     <button
       type="button"
       class="range-calendar__nav"
-      disabled={isDisabled}
+      disabled={disabled}
       aria-label="Previous month"
       on:click={() => setMonth(monthAnchorIso(formatIsoDate(addMonths(parseIsoDate(currentMonth)!, -1))))}
     >
@@ -167,7 +167,7 @@
     <button
       type="button"
       class="range-calendar__nav"
-      disabled={isDisabled}
+      disabled={disabled}
       aria-label="Next month"
       on:click={() => setMonth(monthAnchorIso(formatIsoDate(addMonths(parseIsoDate(currentMonth)!, 1))))}
     >
@@ -201,7 +201,7 @@
               data-range-start={currentValue.start === day.iso}
               data-range-end={currentValue.end === day.iso}
               data-in-range={isIsoDateWithinRange(day.iso, currentValue)}
-              disabled={isDisabled}
+              disabled={disabled}
               aria-label={formatDateLabel(day.iso, locale)}
               tabindex={focusIso === day.iso ? 0 : -1}
               on:click={() => selectDate(day.iso)}

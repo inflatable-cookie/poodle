@@ -4,9 +4,10 @@
   export let value: string | null = null;
   export let truncateValue = false;
   export let ariaLabel: string | null = null;
+  export let layout: "inline" | "stacked" = "inline";
 </script>
 
-<div class="detail-row" aria-label={ariaLabel ?? undefined}>
+<div class="detail-row" data-layout={layout} aria-label={ariaLabel ?? undefined}>
   <div class="detail-row__label-block">
     <dt class="detail-row__label">{label}</dt>
     {#if description}
@@ -79,8 +80,27 @@
     white-space: nowrap;
   }
 
+  .detail-row[data-layout="stacked"] {
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: start;
+  }
+
+  .detail-row[data-layout="stacked"] .detail-row__label-block {
+    grid-column: 1 / -1;
+    gap: 0.25rem;
+  }
+
+  .detail-row[data-layout="stacked"] .detail-row__value {
+    font-size: 1rem;
+    font-weight: 600;
+  }
+
   @media (max-width: 45rem) {
     .detail-row {
+      grid-template-columns: 1fr;
+    }
+
+    .detail-row[data-layout="stacked"] {
       grid-template-columns: 1fr;
     }
   }

@@ -23,7 +23,7 @@
 
   <div class="specimen__group">
     <Eyebrow>Disabled</Eyebrow>
-    <TimeZoneSelect isDisabled ariaLabel="Disabled time zone" />
+    <TimeZoneSelect disabled ariaLabel="Disabled time zone" />
   </div>
 </div>
 

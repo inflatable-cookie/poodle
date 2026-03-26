@@ -20,7 +20,7 @@
 
   <div class="specimen__group">
     <Eyebrow>Disabled</Eyebrow>
-    <Calendar defaultValue="2026-03-01" isDisabled ariaLabel="Disabled calendar" />
+    <Calendar defaultValue="2026-03-01" disabled ariaLabel="Disabled calendar" />
   </div>
 </div>
 

@@ -26,7 +26,7 @@
 
   <div class="specimen__group">
     <Eyebrow>Disabled</Eyebrow>
-    <DurationInput hours={2} minutes={15} seconds={30} isDisabled />
+    <DurationInput hours={2} minutes={15} seconds={30} disabled />
   </div>
 
   {#if lastChange}

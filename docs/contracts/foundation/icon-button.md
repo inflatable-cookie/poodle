@@ -1,7 +1,7 @@
 # IconButton
 
 Status: detailed contract
-Updated: 2026-03-16
+Updated: 2026-03-25
 
 ## 1. Purpose
 
@@ -12,7 +12,7 @@ Updated: 2026-03-16
   loading, and disabled states
 - In scope: icon-only command triggers, ghost/primary/secondary/danger
   variants, sm/md/lg sizes, pressed/selected state when explicitly configured,
-  disabled/loading behavior with spinner animation, CSS custom property theming
+  disabled/loading behavior with shared spinner usage, CSS custom property theming
 - Out of scope: toolbar roving-focus behavior, menu-button or toggle-button
   composite semantics beyond explicit opt-in, text-bearing buttons (see Button)
 
@@ -31,7 +31,7 @@ Updated: 2026-03-16
 | Wrapper | yes | outer positioning container for button and tooltip | — |
 | Root | yes | compact action surface, square button | background, border, radius, focus ring, size |
 | Glyph | yes | visible icon character display; contains default slot for custom icon content | icon color, icon size, code font |
-| Spinner | no | animated loading indicator replacing glyph | border color, animation |
+| Spinner | no | shared `Spinner` primitive replacing glyph | spinner tokens via primitive contract |
 | Tooltip | no | built-in tooltip surface shown on hover/focus after 300ms delay | background, text color, radius, padding, placement |
 
 ## 3. Props And Inputs
@@ -45,9 +45,9 @@ Updated: 2026-03-16
 | `size` | `ControlSize` | `"md"` | no | shared control size |
 | `icon` | `string` | — | yes | icon glyph character or registry identifier |
 | `ariaLabel` | `string` | — | yes | required accessible name |
-| `isDisabled` | `boolean` | `false` | no | suppresses activation |
-| `isLoading` | `boolean` | `false` | no | shows spinner and suppresses activation |
-| `isPressed` | `boolean \| null` | `null` | no | optional pressed/toggled state; null omits aria-pressed |
+| `disabled` | `boolean` | `false` | no | suppresses activation |
+| `loading` | `boolean` | `false` | no | shows spinner and suppresses activation |
+| `pressed` | `boolean \| null` | `null` | no | optional pressed/toggled state; null omits aria-pressed |
 | `tooltip` | `string \| null` | `null` | no | override text for the built-in tooltip; defaults to `ariaLabel` when null |
 | `tooltipPlacement` | `OverlayPlacement` | `"top"` | no | positioning of the tooltip relative to the button |
 | `describedBy` | `string \| null` | `null` | no | aria-describedby reference |
@@ -79,12 +79,12 @@ type OverlayPlacement = "top" | "bottom" | "left" | "right"
 
 ### Derived State
 
-- `isUnavailable` = `isDisabled || isLoading` — disables click and sets cursor
+- `isUnavailable` = `disabled || loading` — disables click and sets cursor
 
 ### Controlled And Uncontrolled
 
 - Command-only by default
-- Optional controlled pressed state through `isPressed`; when `isPressed`
+- Optional controlled pressed state through `pressed`; when `pressed`
   is not null, `aria-pressed` is rendered
 
 ## 4. States
@@ -97,9 +97,9 @@ type OverlayPlacement = "top" | "bottom" | "left" | "right"
 | hover | pointer enters (when available) | elevated background, darkened border; tooltip appears after 300ms delay |
 | active | pointer or keyboard activation | further elevated background, slight downward translate |
 | focus | keyboard focus | focus ring; tooltip appears after 300ms delay |
-| pressed | `isPressed=true` | accent-tinted background and border, inset shadow |
-| disabled | `isDisabled=true` | muted opacity, not-allowed cursor |
-| loading | `isLoading=true` | spinner replaces glyph, activation suppressed, aria-busy |
+| pressed | `pressed=true` | accent-tinted background and border, inset shadow |
+| disabled | `disabled=true` | muted opacity, not-allowed cursor |
+| loading | `loading=true` | spinner replaces glyph, activation suppressed, aria-busy |
 
 ### Component States
 
@@ -121,13 +121,13 @@ type OverlayPlacement = "top" | "bottom" | "left" | "right"
 
 - Role: `button` (native)
 - Required attributes: `aria-label` from prop (required, always present)
-- `aria-busy="true"` when `isLoading=true`
-- `aria-pressed` when `isPressed !== null` (renders true or false)
+- `aria-busy="true"` when `loading=true`
+- `aria-pressed` when `pressed !== null` (renders true or false)
 - `aria-describedby` links to the built-in tooltip element (auto-generated id);
   when the tooltip is open, the tooltip id replaces any `describedBy` value (not combined)
 - The tooltip element uses `role="tooltip"` and is referenced by
   `aria-describedby` on the button
-- `disabled` attribute when `isDisabled=true` or `isLoading=true`
+- `disabled` attribute when `disabled=true` or `loading=true`
 - Labeling rules: visible icon alone is never treated as sufficient naming;
   `ariaLabel` is always required
 
@@ -245,7 +245,7 @@ type OverlayPlacement = "top" | "bottom" | "left" | "right"
 | `.icon-button[data-variant="ghost"][data-tone="danger"]:hover:not(:disabled)` | `--poodle-icon-button-border` | `color-mix(in srgb, var(--poodle-color-status-danger) 46%, var(--poodle-color-border-default))` |
 | `.icon-button[data-variant="ghost"][data-tone="danger"]:hover:not(:disabled)` | `background` | `color-mix(in srgb, var(--poodle-color-status-danger) 10%, transparent)` |
 
-### Root — Pressed (`isPressed=true`)
+### Root — Pressed (`pressed=true`)
 
 | Property | Value |
 |----------|-------|
@@ -299,32 +299,17 @@ with the button surface across all sizes.
 
 ### Spinner `.icon-button__spinner`
 
-| Property | Value |
-|----------|-------|
-| `display` | `inline-flex` |
-| `align-items` | `center` |
-| `justify-content` | `center` |
-| `width` | `45%` |
-| `height` | `45%` |
-| `border` | `0.125rem solid color-mix(in srgb, currentColor 24%, transparent)` |
-| `border-top-color` | `currentColor` |
-| `border-radius` | `999px` |
-| `animation` | `icon-button-spinner 0.8s linear infinite` |
-
-### Spinner keyframes `@keyframes icon-button-spinner`
-
-```
-from { transform: rotate(0deg); }
-to   { transform: rotate(360deg); }
-```
+The loading indicator is the shared [`Spinner`](./spinner.md) primitive with
+`variant="ring"`, `size="sm"`, and `tone="current"`, centered inside the
+button-owned wrapper.
 
 ## 9. Svelte Notes
 
 - Uses native `<button>` element with `type` from prop (default `"button"`)
 - `aria-label` always rendered from required prop
-- `aria-pressed` rendered only when `isPressed !== null`
-- `aria-busy` rendered when `isLoading=true`
-- `disabled` attribute set when `isDisabled` or `isLoading` is true
+- `aria-pressed` rendered only when `pressed !== null`
+- `aria-busy` rendered when `loading=true`
+- `disabled` attribute set when `disabled` or `loading` is true
   (`isUnavailable` derived state)
 - Glyph and spinner are mutually exclusive; spinner replaces glyph during
   loading
@@ -367,7 +352,7 @@ to   { transform: rotate(360deg); }
 ### Tier 1: Strict Parity
 
 - [ ] required accessible-name rule matches (ariaLabel always present)
-- [ ] aria-pressed semantics match when isPressed !== null
+- [ ] aria-pressed semantics match when pressed !== null
 - [ ] aria-busy semantics match when loading
 - [ ] disabled/loading suppression of click events matches
 - [ ] keyboard activation (Enter, Space) matches
@@ -390,7 +375,7 @@ to   { transform: rotate(360deg); }
 - [ ] focus ring appearance matches (border-width-focus, focusRing color, 0.125rem offset)
 - [ ] disabled opacity matches (state-opacity-disabled)
 - [ ] glyph sizing matches (icon-md, code-family, 0.875rem)
-- [ ] spinner border/animation matches (0.125rem, 24% currentColor, 0.8s linear)
+- [ ] shared spinner sizing, tone, and centering match
 - [ ] inset box-shadow on default state matches (white 8%)
 
 ### Tier 3: Implementation Freedom
@@ -449,9 +434,9 @@ Four icon button states:
 
 | Icon | State | Props | aria-label |
 |------|-------|-------|------------|
-| map-pin | pressed | `isPressed: true` | Pin |
-| ban | disabled | `isDisabled: true` | Block |
-| refresh-cw | loading | `isLoading: true` | Refresh |
+| map-pin | pressed | `pressed: true` | Pin |
+| ban | disabled | `disabled: true` | Block |
+| refresh-cw | loading | `loading: true` | Refresh |
 
 ## 14. Approval And Adoption Notes
 

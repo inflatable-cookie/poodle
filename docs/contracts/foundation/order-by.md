@@ -46,7 +46,7 @@ Updated: 2026-03-15
 | `fields` | `SortField[]` | — | yes | available sort fields |
 | `activeSort` | `ActiveSort \| null` | `null` | no | current sort state |
 | `ariaLabel` | `string` | `"Sort by"` | no | accessible name for toolbar |
-| `isDisabled` | `boolean` | `false` | no | disables all field buttons |
+| `disabled` | `boolean` | `false` | no | disables all field buttons |
 
 ### SortField Type
 
@@ -54,7 +54,7 @@ Updated: 2026-03-15
 type SortField = {
   value: string;
   label: string;
-  isDisabled?: boolean;
+  disabled?: boolean;
 };
 ```
 
@@ -82,8 +82,8 @@ type ActiveSort = {
 | field active (asc) | field matches activeSort with direction="asc" | accent border and fill, arrow pointing up |
 | field active (desc) | field matches activeSort with direction="desc" | accent border and fill, arrow rotated 180deg |
 | field hover | pointer enters field button | elevated background |
-| field disabled | field `isDisabled=true` | reduced opacity, not-allowed cursor |
-| all disabled | `isDisabled=true` | all buttons disabled, reduced opacity |
+| field disabled | field `disabled=true` | reduced opacity, not-allowed cursor |
+| all disabled | `disabled=true` | all buttons disabled, reduced opacity |
 | reset visible | activeSort is non-null | reset button appears |
 
 ## 5. Events
@@ -319,7 +319,7 @@ type ActiveSort = {
 
 | Label | Props / Config | Expected Visual |
 |-------|---------------|-----------------|
-| Disabled | `fields`: Name, Date; `isDisabled` | Toolbar at reduced opacity with all field buttons disabled |
+| Disabled | `fields`: Name, Date; `disabled` | Toolbar at reduced opacity with all field buttons disabled |
 
 ## 14. Approval And Adoption Notes
 

@@ -11,12 +11,14 @@
   export let defaultRatio = 0.5;
   export let minPrimarySize: number | null = null;
   export let minSecondarySize: number | null = null;
-  export let isPrimaryCollapsed = false;
-  export let isSecondaryCollapsed = false;
+  export let primarySize: number | null = null;
+  export let secondarySize: number | null = null;
+  export let primaryCollapsed = false;
+  export let secondaryCollapsed = false;
   export let showCollapsePrimary = false;
   export let showCollapseSecondary = false;
   export let ariaLabel: string | null = null;
-  export let isDisabled = false;
+  export let disabled = false;
 
   const dispatch = createEventDispatcher<{
     ratioChange: { ratio: number };
@@ -32,23 +34,29 @@
 
   $: currentRatio = Math.min(0.95, Math.max(0.05, ratio ?? uncontrolledRatio));
 
-  $: primaryFlex = isPrimaryCollapsed
+  $: primaryFlex = primaryCollapsed
     ? "0 0 0"
-    : isSecondaryCollapsed
+    : primarySize != null
+      ? `0 0 ${primarySize}px`
+    : secondarySize != null
+      ? "1 1 0"
+    : secondaryCollapsed
       ? "1 1 0"
       : `0 0 ${currentRatio * 100}%`;
 
-  $: secondaryFlex = isSecondaryCollapsed
+  $: secondaryFlex = secondaryCollapsed
     ? "0 0 0"
-    : isPrimaryCollapsed
+    : secondarySize != null
+      ? `0 0 ${secondarySize}px`
+    : primaryCollapsed || primarySize != null
       ? "1 1 0"
       : "1 1 0";
 
-  $: primaryMinStyle = minPrimarySize != null && !isPrimaryCollapsed
+  $: primaryMinStyle = minPrimarySize != null && !primaryCollapsed
     ? `min-${orientation === "horizontal" ? "width" : "height"}: ${minPrimarySize}px`
     : "";
 
-  $: secondaryMinStyle = minSecondarySize != null && !isSecondaryCollapsed
+  $: secondaryMinStyle = minSecondarySize != null && !secondaryCollapsed
     ? `min-${orientation === "horizontal" ? "width" : "height"}: ${minSecondarySize}px`
     : "";
 
@@ -80,14 +88,14 @@
     dragMousePos = e.detail.position;
 
     // Uncollapse on drag start from collapsed position
-    if (isPrimaryCollapsed) {
+    if (primaryCollapsed) {
       setRatio(0.05);
-      isPrimaryCollapsed = false;
+      primaryCollapsed = false;
       dispatch("primaryCollapsedChange", { isCollapsed: false });
     }
-    if (isSecondaryCollapsed) {
+    if (secondaryCollapsed) {
       setRatio(0.95);
-      isSecondaryCollapsed = false;
+      secondaryCollapsed = false;
       dispatch("secondaryCollapsedChange", { isCollapsed: false });
     }
   }
@@ -98,24 +106,24 @@
     const raw = rawRatio(dragMousePos);
 
     if (raw <= 0.02) {
-      if (!isPrimaryCollapsed) {
-        isPrimaryCollapsed = true;
+      if (!primaryCollapsed) {
+        primaryCollapsed = true;
         setRatio(0.5);
         dispatch("primaryCollapsedChange", { isCollapsed: true });
       }
     } else if (raw >= 0.98) {
-      if (!isSecondaryCollapsed) {
-        isSecondaryCollapsed = true;
+      if (!secondaryCollapsed) {
+        secondaryCollapsed = true;
         setRatio(0.5);
         dispatch("secondaryCollapsedChange", { isCollapsed: true });
       }
     } else {
-      if (isPrimaryCollapsed) {
-        isPrimaryCollapsed = false;
+      if (primaryCollapsed) {
+        primaryCollapsed = false;
         dispatch("primaryCollapsedChange", { isCollapsed: false });
       }
-      if (isSecondaryCollapsed) {
-        isSecondaryCollapsed = false;
+      if (secondaryCollapsed) {
+        secondaryCollapsed = false;
         dispatch("secondaryCollapsedChange", { isCollapsed: false });
       }
       setRatio(raw);
@@ -133,21 +141,21 @@
   // ── Collapse toggles ─────────────────────────────────────────────
 
   function toggleCollapsePrimary(e: CustomEvent<{ isCollapsed: boolean }>): void {
-    isPrimaryCollapsed = e.detail.isCollapsed;
-    dispatch("primaryCollapsedChange", { isCollapsed: isPrimaryCollapsed });
+    primaryCollapsed = e.detail.isCollapsed;
+    dispatch("primaryCollapsedChange", { isCollapsed: primaryCollapsed });
   }
 
   function toggleCollapseSecondary(e: CustomEvent<{ isCollapsed: boolean }>): void {
-    isSecondaryCollapsed = e.detail.isCollapsed;
-    dispatch("secondaryCollapsedChange", { isCollapsed: isSecondaryCollapsed });
+    secondaryCollapsed = e.detail.isCollapsed;
+    dispatch("secondaryCollapsedChange", { isCollapsed: secondaryCollapsed });
   }
 </script>
 
 <div
   class="split-view"
   data-orientation={orientation}
-  data-primary-collapsed={isPrimaryCollapsed || undefined}
-  data-secondary-collapsed={isSecondaryCollapsed || undefined}
+  data-primary-collapsed={primaryCollapsed || undefined}
+  data-secondary-collapsed={secondaryCollapsed || undefined}
   aria-label={ariaLabel ?? "Split view"}
   bind:this={container}
 >
@@ -155,7 +163,7 @@
     class="split-view__pane split-view__pane--primary"
     style="flex: {primaryFlex}; overflow: hidden; {primaryMinStyle}"
   >
-    {#if !isPrimaryCollapsed}
+    {#if !primaryCollapsed}
       <slot name="primary" />
     {/if}
   </div>
@@ -163,12 +171,12 @@
   <div
     class="split-view__divider"
     data-orientation={orientation}
-    data-disabled={isDisabled || undefined}
+    data-disabled={disabled || undefined}
     data-has-toggles={hasToggles || undefined}
   >
     <ResizeHandle
       {orientation}
-      {isDisabled}
+      disabled={disabled}
       ariaLabel="Resize"
       on:resizeStart={handleResizeStart}
       on:resizeMove={handleResizeMove}
@@ -177,21 +185,21 @@
 
     {#if hasToggles}
       <div class="split-view__toggles">
-        {#if showCollapsePrimary && !isSecondaryCollapsed}
+        {#if showCollapsePrimary && !secondaryCollapsed}
           <CollapseToggle
             direction={beforeDirection}
-            isCollapsed={isPrimaryCollapsed}
-            {isDisabled}
-            ariaLabel={isPrimaryCollapsed ? "Expand primary" : "Collapse primary"}
+            collapsed={primaryCollapsed}
+            disabled={disabled}
+            ariaLabel={primaryCollapsed ? "Expand primary" : "Collapse primary"}
             on:toggle={toggleCollapsePrimary}
           />
         {/if}
-        {#if showCollapseSecondary && !isPrimaryCollapsed}
+        {#if showCollapseSecondary && !primaryCollapsed}
           <CollapseToggle
             direction={afterDirection}
-            isCollapsed={isSecondaryCollapsed}
-            {isDisabled}
-            ariaLabel={isSecondaryCollapsed ? "Expand secondary" : "Collapse secondary"}
+            collapsed={secondaryCollapsed}
+            disabled={disabled}
+            ariaLabel={secondaryCollapsed ? "Expand secondary" : "Collapse secondary"}
             on:toggle={toggleCollapseSecondary}
           />
         {/if}
@@ -203,7 +211,7 @@
     class="split-view__pane split-view__pane--secondary"
     style="flex: {secondaryFlex}; overflow: hidden; {secondaryMinStyle}"
   >
-    {#if !isSecondaryCollapsed}
+    {#if !secondaryCollapsed}
       <slot name="secondary" />
     {/if}
   </div>

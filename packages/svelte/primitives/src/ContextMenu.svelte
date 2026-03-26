@@ -79,7 +79,7 @@
     for (let step = 0; step < count; step += 1) {
       nextIndex = (nextIndex + direction + count) % count;
 
-      if (!actionableItems[nextIndex]?.isDisabled) {
+      if (!actionableItems[nextIndex]?.disabled) {
         highlightIndex = nextIndex;
         itemElements[nextIndex]?.focus();
         return;
@@ -88,7 +88,7 @@
   }
 
   function activateItem(item: MenuItem): void {
-    if (item.isDisabled || item.kind === "separator") {
+    if (item.disabled || item.kind === "separator") {
       return;
     }
 
@@ -165,9 +165,9 @@
             bind:this={itemElements[actionableItems.findIndex((candidate) => candidate.value === item.value)]}
             type="button"
             class="context-menu__item"
-            disabled={item.isDisabled === true}
+            disabled={item.disabled === true}
             role={item.kind === "checkbox" || item.kind === "radio" ? `menuitem${item.kind}` : "menuitem"}
-            aria-checked={item.kind === "checkbox" || item.kind === "radio" ? (item.isChecked ? "true" : "false") : undefined}
+            aria-checked={item.kind === "checkbox" || item.kind === "radio" ? (item.checked ? "true" : "false") : undefined}
             on:click={() => activateItem(item)}
             on:keydown={(event) => {
               if (event.key === "ArrowDown") {
@@ -200,7 +200,7 @@
           >
             <span>{item.label}</span>
 
-            {#if item.isChecked}
+            {#if item.checked}
               <span class="context-menu__meta" aria-hidden="true">✓</span>
             {:else if item.shortcutLabel}
               <span class="context-menu__meta" aria-hidden="true">{item.shortcutLabel}</span>

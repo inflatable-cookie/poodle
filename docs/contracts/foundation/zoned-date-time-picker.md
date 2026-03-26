@@ -63,7 +63,7 @@ Updated: 2026-03-15
 | `weekStartsOn` | `"sunday" \| "monday"` | `"monday"` | no | first day of the week |
 | `locale` | `string` | `"en-US"` | no | locale for date formatting |
 | `timeZoneOptions` | `TimeZoneOption[]` | `[]` | no | curated list of timezone options; empty uses internal defaults |
-| `isDisabled` | `boolean` | `false` | no | disables the trigger |
+| `disabled` | `boolean` | `false` | no | disables the trigger |
 | `ariaLabel` | `string \| null` | `null` | no | required when no visible label exists |
 
 ### Type Definitions
@@ -98,7 +98,7 @@ TimeZoneOption: {
 | partial value | some fields filled but not all | partial value displayed, overlay remains open |
 | complete value | date, time, and timezone all committed | formatted zoned date-time displayed |
 | open | trigger clicked or keyboard activated | surface appears below trigger |
-| disabled | `isDisabled=true` | reduced opacity, non-interactive, cursor: not-allowed |
+| disabled | `disabled=true` | reduced opacity, non-interactive, cursor: not-allowed |
 
 ### Component States
 
@@ -366,7 +366,7 @@ All preview apps must render the following specimens identically.
 
 | Label | Props/Config | Expected Visual |
 |-------|-------------|-----------------|
-| Disabled | `isDisabled=true`, `ariaLabel="Disabled picker"` | Trigger button with default placeholder, reduced opacity, cursor not-allowed, non-interactive |
+| Disabled | `disabled=true`, `ariaLabel="Disabled picker"` | Trigger button with default placeholder, reduced opacity, cursor not-allowed, non-interactive |
 
 ## 14. Approval And Adoption Notes
 

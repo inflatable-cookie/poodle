@@ -33,6 +33,20 @@
       <DetailRow label="Rate limit" value="1,000 req/min" description="Maximum requests per minute." />
     </DetailSection>
   </div>
+
+  <div class="specimen__group">
+    <Eyebrow>Two-column details</Eyebrow>
+    <DetailSection
+      title="Runtime summary"
+      description="Compact layout for denser metadata surfaces."
+      columns={2}
+    >
+      <DetailRow label="Route" value="local-brokered" layout="stacked" />
+      <DetailRow label="Posture" value="aura-local-brokered" layout="stacked" />
+      <DetailRow label="Authority" value="local" layout="stacked" />
+      <DetailRow label="Displays" value="2" layout="stacked" />
+    </DetailSection>
+  </div>
 </div>
 
 <style>

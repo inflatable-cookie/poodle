@@ -1,16 +1,17 @@
 # AlertDialog
 
 Status: detailed contract
-Updated: 2026-03-15
+Updated: 2026-03-26
 
 ## 1. Purpose
 
 - Component name: `AlertDialog`
 - Layer: `foundation`
 - Summary: a focused confirmation overlay for destructive or irreversible actions
-  that composes Dialog with alertdialog semantics
+  that composes Dialog with alertdialog semantics and optional async callbacks
 - In scope: danger and warning tones, confirm/cancel action pair, working state
-  that prevents premature dismiss, alertdialog ARIA role
+  that prevents premature dismiss, alertdialog ARIA role, Promise-based
+  confirmation callbacks
 - Out of scope: multi-step wizards, informational dialogs, inline confirmations,
   non-modal alerts
 
@@ -44,6 +45,9 @@ Updated: 2026-03-15
 | `confirmLabel` | `string` | `"Confirm"` | no | label for confirm button |
 | `cancelLabel` | `string` | `"Cancel"` | no | label for cancel button |
 | `ariaLabel` | `string \| null` | `null` | no | optional explicit accessible name |
+| `workingLabel` | `string` | `"Working…"` | no | label shown while confirm work is in flight |
+| `onConfirm` | `(() => void \| Promise<void>) \| null` | `null` | no | callback invoked by the built-in confirm button; awaited when it returns a Promise |
+| `onCancel` | `(() => void) \| null` | `null` | no | callback invoked by built-in cancel and dismissal paths |
 
 ### Slots
 
@@ -55,6 +59,8 @@ Updated: 2026-03-15
 
 - `open` prop follows same controlled/uncontrolled pattern as Dialog
 - Internal `working` state is always internally managed
+- `onConfirm` / `onCancel` are the primary built-in action hooks; `confirm` / `cancel`
+  events remain available when callbacks are not supplied
 
 ## 4. States
 
@@ -72,8 +78,8 @@ Updated: 2026-03-15
 
 | Event | When It Fires | Payload | Notes |
 |-------|---------------|---------|-------|
-| `confirm` | confirm button clicked | `void` | fires immediately; working state is synchronous |
-| `cancel` | cancel button clicked or dialog dismissed | `void` | suppressed while working |
+| `confirm` | confirm button clicked without `onConfirm` | `void` | emitted only when caller is using events instead of callback props |
+| `cancel` | cancel button clicked or dialog dismissed without `onCancel` | `void` | suppressed while working; emitted only when callback prop is absent |
 | `openChange` | dialog open state changes | `{open: boolean}` | passthrough from Dialog |
 
 ## 6. Accessibility
@@ -102,6 +108,7 @@ Updated: 2026-03-15
 - focus entry: confirm button receives initial focus
 - focus exit: focus restores to previously focused element (via Dialog)
 - working state: escape and backdrop dismiss suppressed
+- failed async confirm: dialog stays open so caller can show errors or retry
 
 ## 7. Layout
 
@@ -144,14 +151,15 @@ to the composed Dialog and Button components.
 | `description` | from AlertDialog `description` prop |
 | `dismissOnEscape` | `false` while working, `true` otherwise |
 | `dismissOnBackdrop` | `false` while working, `true` otherwise |
+| `showCloseButton` | `false` while working, `true` otherwise |
 
 ## 9. Svelte Notes
 
 - Composes `Dialog` component directly; does not replicate Dialog internals
-- `working` state is a `let working = false` variable (Svelte 4 style)
-- Confirm handler sets `working = true`, dispatches `confirm`, caller resolves
-- `data-tone` attribute on root for testing hooks
-- Cancel button calls Dialog close and dispatches `cancel`
+- `working` state is internal and suppresses both dismiss routes and button reuse
+- Confirm handler awaits `onConfirm` when provided, otherwise dispatches `confirm`
+- Successful built-in confirm closes the dialog; thrown errors keep it open
+- Cancel button and external dismiss routes use `onCancel` when provided, otherwise dispatch `cancel`
 
 ## 10. GPUI Notes
 
@@ -166,8 +174,8 @@ to the composed Dialog and Button components.
 ### Tier 1: Strict Parity
 
 - [ ] tone prop maps to correct confirm button variant
-- [ ] working state suppresses escape and backdrop dismiss
-- [ ] confirm and cancel events fire correctly
+- [ ] working state suppresses escape, backdrop, and close-button dismiss
+- [ ] built-in callbacks and fallback events fire correctly
 - [ ] alertdialog role is set
 - [ ] focus trap is active
 
@@ -207,10 +215,11 @@ to the composed Dialog and Button components.
 | Label | Props / Config | Expected Visual |
 |-------|---------------|-----------------|
 | With body content | `tone="danger"` (default), `title="Remove this user?"`, `description="The following user will lose access..."`, `confirmLabel="Remove"`, default slot contains user card | Dialog with body content rendered between description and action buttons, showing user name and email in a styled card |
+| Async confirm callback | `tone="danger"`, `title="Archive this project?"`, `confirmLabel="Archive"`, `workingLabel="Archiving…"`, `onConfirm` returns a Promise | Dialog stays open while working, built-in buttons disable, confirm label swaps to working label, dialog closes after Promise resolves |
 
 ## 14. Approval And Adoption Notes
 
 - contract status: `detailed contract`
 - approvers: pending
 - downstream adopters: destructive action confirmations, settings changes, data deletion flows
-- future follow-up: async confirm pattern (Promise-based working resolution)
+- future follow-up: richer error-handling recipe examples for rejected async confirms

@@ -10,6 +10,8 @@ pub struct MediaThumbnailSpec {
     pub title: Option<String>,
     pub meta: Option<String>,
     pub badge_label: Option<String>,
+    pub state_title: Option<String>,
+    pub state_message: Option<String>,
     pub show_caption: bool,
 }
 
@@ -22,6 +24,8 @@ impl MediaThumbnailSpec {
             title: None,
             meta: None,
             badge_label: None,
+            state_title: None,
+            state_message: None,
             show_caption: true,
         }
     }
@@ -51,6 +55,16 @@ impl MediaThumbnailSpec {
         self
     }
 
+    pub fn with_state_title(mut self, state_title: impl Into<String>) -> Self {
+        self.state_title = Some(state_title.into());
+        self
+    }
+
+    pub fn with_state_message(mut self, state_message: impl Into<String>) -> Self {
+        self.state_message = Some(state_message.into());
+        self
+    }
+
     pub fn with_show_caption(mut self, show_caption: bool) -> Self {
         self.show_caption = show_caption;
         self
@@ -62,6 +76,22 @@ impl MediaThumbnailSpec {
 
     pub fn caption_visible(&self) -> bool {
         self.show_caption && self.title.is_some()
+    }
+
+    pub fn resolved_state_title(&self) -> &str {
+        if let Some(ref title) = self.state_title {
+            return title;
+        }
+
+        match self.state {
+            MediaState::Loading => "Loading preview",
+            MediaState::Error => "Preview unavailable",
+            MediaState::Empty | MediaState::Ready => "No preview",
+        }
+    }
+
+    pub fn resolved_state_message(&self) -> Option<&str> {
+        self.state_message.as_deref()
     }
 
     pub fn frame_fill_token(&self) -> &'static str {

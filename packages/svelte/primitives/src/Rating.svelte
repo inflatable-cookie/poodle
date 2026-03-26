@@ -7,7 +7,7 @@
   export let defaultValue: number | null = null;
   export let max = 5;
   export let allowClear = false;
-  export let isDisabled = false;
+  export let disabled = false;
   export let ariaLabel: string | null = null;
 
   const dispatch = createEventDispatcher<{
@@ -56,7 +56,7 @@
       type="button"
       class="rating__item"
       data-filled={currentValue !== null && currentValue >= index + 1}
-      disabled={isDisabled}
+      disabled={disabled}
       role="radio"
       aria-checked={currentValue === index + 1 ? "true" : "false"}
       aria-label={`${index + 1} of ${itemCount}`}

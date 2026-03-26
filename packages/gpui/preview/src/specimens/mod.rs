@@ -60,6 +60,7 @@ mod status_indicator;
 mod meter;
 mod rating;
 mod skeleton;
+mod spinner;
 mod pill;
 mod eyebrow;
 mod code;
@@ -286,6 +287,7 @@ pub fn render_single_specimen(
         "meter" => specimen_card("Meter", theme, meter::render(theme)),
         "rating" => specimen_card("Rating", theme, rating::render(state, cx)),
         "skeleton" => specimen_card("Skeleton", theme, skeleton::render(theme)),
+        "spinner" => specimen_card("Spinner", theme, spinner::render(state, cx)),
         "eyebrow" => specimen_card("Eyebrow", theme, eyebrow::render(theme)),
         "time-ago" => specimen_card("TimeAgo", theme, time_ago_specimen::render(theme)),
         "duration-input" => specimen_card("DurationInput", theme, duration_input_specimen::render(theme)),

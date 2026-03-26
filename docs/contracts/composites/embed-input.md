@@ -1,7 +1,7 @@
 # EmbedInput
 
 Status: seed contract
-Updated: 2026-03-22
+Updated: 2026-03-25
 
 ## 1. Purpose
 
@@ -65,6 +65,23 @@ type ParsedEmbed = {
 };
 ```
 
+### Supported Detection Rules
+
+Both runtimes are expected to resolve `parsed` using the same pattern set:
+
+| Input Pattern | Result |
+|---------------|--------|
+| `https://youtu.be/{id}` | `provider="youtube"`, `id={id}`, `originalUrl=input` |
+| `https://youtube.com/watch?v={id}` | `provider="youtube"`, `id={id}`, `originalUrl=input` |
+| `https://youtube.com/embed/{id}` | `provider="youtube"`, `id={id}`, `originalUrl=input` |
+| `https://vimeo.com/{digits}` | `provider="vimeo"`, `id={digits}`, `originalUrl=input` |
+| valid `http://` or `https://` URL | `provider="generic"`, `id=input`, `originalUrl=input` |
+| `<iframe ... src="...">` embed code | `provider="generic"`, `id=src or raw input`, `originalUrl=src when present`, `originalEmbed=input`, `width` / `height` parsed when numeric |
+
+Provider restriction runs after detection. If `providers` is non-empty and the
+detected provider is not listed, `parsed` resolves to `null` and `error`
+becomes `Provider "{provider}" is not allowed`.
+
 ### Slots
 
 None.
@@ -83,7 +100,7 @@ None.
 | State | Trigger | Expected Result |
 |-------|---------|-----------------|
 | empty | value is empty or whitespace | status area is empty |
-| parsing | value changed, debounce timer running | no visible indicator (silent debounce) |
+| parsing | value changed, debounce timer running | no dedicated loading surface or spinner; parsing remains silent until a parse result is available |
 | success | valid embed detected | Pill showing provider name + "Embed detected" text |
 | error | provider not allowed or external error | red error message text |
 
@@ -92,6 +109,8 @@ None.
 - `parseTimer` (internal): setTimeout handle for debounced parsing
 - `parsed` (bindable): result of last successful parse
 - `error` (bindable): current error message
+- GPUI may derive `parsed` / `error` from the current `value` via the shared
+  contract helper instead of relying on renderer-local parsing logic
 
 ## 5. Events
 
@@ -135,6 +154,9 @@ None.
 - Parent expectations: form fields (often wrapped in Field), embed editing UIs
 - Child expectations: TextArea primitive, Pill primitive
 - Resizing rules: fills parent width; TextArea height determined by rows prop
+- Loading guidance: `EmbedInput` does not use `Spinner`; provider parsing and
+  validation feedback stay in the compact status row rather than switching to a
+  loading-state shell
 
 ## 8. Token Usage
 
@@ -145,24 +167,24 @@ None.
 | Error | `--poodle-color-text-danger` | error text color (fallback #ef4444) |
 | SuccessText | `--poodle-color-text-success` | success text color (fallback #22c55e) |
 
-## 9. Svelte Notes
+## 9. Runtime Notes
+
+### Svelte
 
 - Uses `createEventDispatcher` for `parse` and `change` events
 - Composes `TextArea` and `Pill` from `@poodle/svelte-primitives`
-- Provider detection logic is internal:
-  - YouTube: regex match on `youtube.com/watch?v=`, `youtube.com/embed/`, `youtu.be/`
-  - Vimeo: regex match on `vimeo.com/{id}`
-  - Generic URL: `new URL()` parse succeeds
-  - Iframe: string starts with `<` and contains `iframe`, extracts `src` attribute
-- Provider restriction: if `providers` array is non-empty and detected provider
-  is not in the list, sets error and clears parsed
 - Debounce uses `setTimeout`/`clearTimeout` with configurable delay
+- Parsing is routed through the exported `resolveEmbedParseState` helper rather
+  than being embedded inline inside the component
 
-## 10. GPUI Notes
+### GPUI
 
 - Expected crate/module surface: `poodle_gpui::composites::embed_input`
-- Provider detection logic should be shared via `poodle-primitives` or a shared utility crate
-- TextArea and Pill composed from GPUI primitives
+- TextArea and Pill are composed from GPUI primitives
+- GPUI consumes the same public `parsed` / `error` contract as Svelte
+- The Rust composites contract also exposes a parser helper for deriving
+  `parsed` and provider-restriction `error` from `value` and `providers`
+  when hosts want contract-backed detection without re-implementing the rules
 
 ## 11. Parity Checklist
 
@@ -189,7 +211,7 @@ None.
 
 | Delta | Why Allowed | Approval Status | Follow-Up |
 |-------|-------------|-----------------|-----------|
-| none yet | n/a | pending | review during first implementation |
+| Svelte still owns its debounce/event loop while GPUI is render-only and may pre-resolve parse state before rendering | event ownership differs by runtime, but the visible `parsed` / `error` contract and supported detection rules are aligned | accepted for now | extract a shared TS utility or generator path if runtime-level parser implementation drift becomes costly |
 
 ## 13. Specimen Definitions
 
@@ -210,6 +232,12 @@ None.
 | Label | Props / Config | Expected Visual |
 |-------|---------------|-----------------|
 | Restricted providers | `providers={["youtube", "vimeo"]}`, `placeholder="Only YouTube and Vimeo allowed..."` | input that shows error for non-YouTube/Vimeo URLs |
+
+### Detection Matrix
+
+| Label | Props / Config | Expected Visual |
+|-------|---------------|-----------------|
+| Detection matrix | helper-driven examples covering YouTube short link, Vimeo link, iframe embed, and restricted generic URL | specimen shows the resolved `parsed` payload or provider restriction error for each canonical supported pattern |
 
 ## 14. Approval And Adoption Notes
 

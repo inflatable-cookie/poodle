@@ -45,13 +45,13 @@
   <div class="specimen__group">
     <Eyebrow>Custom block types with slot rendering</Eyebrow>
     <BlockEditor blocks={customBlocks} blockTypes={customTypes} on:change={handleCustomChange}>
-      <svelte:fragment slot="block" let:block let:isDisabled let:update>
+      <svelte:fragment slot="block" let:block let:disabled let:update>
         {#if block.type === "callout"}
           <div class="custom-callout">
             <textarea
               class="custom-callout__input"
               placeholder="Callout message..."
-              disabled={isDisabled}
+              disabled={disabled}
               value={block.content}
               on:input={(e) => update({ content: (e.currentTarget).value })}
               rows="2"
@@ -62,7 +62,7 @@
             type="url"
             class="custom-embed__input"
             placeholder="Paste URL..."
-            disabled={isDisabled}
+            disabled={disabled}
             value={block.content}
             on:input={(e) => update({ content: (e.currentTarget).value })}
           />
@@ -70,7 +70,7 @@
           <textarea
             class="custom-text__input"
             placeholder="Type something..."
-            disabled={isDisabled}
+            disabled={disabled}
             value={block.content}
             on:input={(e) => update({ content: (e.currentTarget).value })}
             rows="2"

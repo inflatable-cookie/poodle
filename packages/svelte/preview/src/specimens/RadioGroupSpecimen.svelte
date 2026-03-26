@@ -44,11 +44,17 @@
 
   <div class="specimen__group">
     <Eyebrow>Disabled</Eyebrow>
+    <RadioGroup options={planOptions} defaultValue="free" disabled ariaLabel="Disabled plan selector" />
+  </div>
+
+  <div class="specimen__group">
+    <Eyebrow>Custom selected color</Eyebrow>
     <RadioGroup
       options={planOptions}
-      defaultValue="free"
-      isDisabled
-      ariaLabel="Disabled plan selector"
+      value={selectedPlan}
+      selectedColor="#22c55e"
+      ariaLabel="Select plan with custom selected color"
+      on:valueChange={(e) => (selectedPlan = e.detail.value)}
     />
   </div>
 </div>

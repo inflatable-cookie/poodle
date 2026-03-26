@@ -23,7 +23,7 @@
 
   <div class="specimen__group">
     <Eyebrow>Disabled</Eyebrow>
-    <DatePicker placeholder="Disabled" isDisabled ariaLabel="Disabled date picker" />
+    <DatePicker placeholder="Disabled" disabled ariaLabel="Disabled date picker" />
   </div>
 </div>
 

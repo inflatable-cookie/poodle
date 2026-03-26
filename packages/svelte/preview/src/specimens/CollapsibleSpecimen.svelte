@@ -23,7 +23,7 @@
 
   <div class="specimen__group">
     <Eyebrow>Disabled</Eyebrow>
-    <Collapsible title="Locked section" description="Requires admin access." isDisabled>
+    <Collapsible title="Locked section" description="Requires admin access." disabled>
       <p>This content is hidden behind a disabled collapsible.</p>
     </Collapsible>
   </div>

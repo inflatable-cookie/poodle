@@ -36,7 +36,7 @@ Updated: 2026-03-19
 |------|------|---------|-------------|
 | `blocks` | `EditorBlock[]` | Single empty paragraph | Array of block data objects |
 | `blockTypes` | `BlockTypeDefinition[]` | Built-in types (paragraph, heading, code, quote, list, image, divider) | Defines available block types for the type selector and add menu |
-| `isDisabled` | `boolean` | `false` | Disables all editing controls |
+| `disabled` | `boolean` | `false` | Disables all editing controls |
 | `ariaLabel` | `string` | `"Block editor"` | Accessible label for the root container |
 
 ## 4. Types
@@ -78,7 +78,7 @@ Allows consumers to provide custom rendering for block content. Receives:
 |-----------|------|-------------|
 | `block` | `EditorBlock` | The current block data |
 | `index` | `number` | Block position in the array |
-| `isDisabled` | `boolean` | Whether editing is disabled |
+| `disabled` | `boolean` | Whether editing is disabled |
 | `update` | `(updates: Partial<EditorBlock>) => void` | Callback to update the block |
 
 When the `block` slot is not provided, the component falls back to built-in renderers for the default block types: paragraph (textarea), heading (text input), code (monospace textarea), quote (italic bordered textarea), list (textarea), image (URL input + preview), and divider (horizontal rule). Unrecognised types fall back to a plain textarea.

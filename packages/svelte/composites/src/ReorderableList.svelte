@@ -5,7 +5,7 @@
 
   export let items: ReorderableItem[] = [];
   export let ariaLabel = "Reorderable list";
-  export let isDisabled = false;
+  export let disabled = false;
 
   const dispatch = createEventDispatcher<{
     reorder: { items: ReorderableItem[] };
@@ -26,7 +26,7 @@
   }
 
   function handleDragStart(event: DragEvent, index: number): void {
-    if (isDisabled) return;
+    if (disabled) return;
     draggingIndex = index;
     if (event.dataTransfer) {
       event.dataTransfer.effectAllowed = "move";
@@ -35,7 +35,7 @@
   }
 
   function handleDragOver(event: DragEvent, index: number): void {
-    if (isDisabled || draggingIndex === null) return;
+    if (disabled || draggingIndex === null) return;
     event.preventDefault();
     dropTargetIndex = index;
   }
@@ -55,7 +55,7 @@
   }
 
   function handleKeydown(event: KeyboardEvent, index: number): void {
-    if (isDisabled) return;
+    if (disabled) return;
     if (event.altKey && event.key === "ArrowUp" && index > 0) {
       event.preventDefault();
       moveItem(index, index - 1);
@@ -79,17 +79,17 @@
   }
 </script>
 
-<ul class="reorderable-list" role="listbox" aria-label={ariaLabel} data-disabled={isDisabled}>
+<ul class="reorderable-list" role="listbox" aria-label={ariaLabel} data-disabled={disabled}>
   {#each items as item, index (item.id)}
     <li
       class="reorderable-list__item"
       class:reorderable-list__item--dragging={draggingIndex === index}
       class:reorderable-list__item--drop-target={dropTargetIndex === index && draggingIndex !== index}
       role="option"
-      tabindex={isDisabled ? -1 : 0}
+      tabindex={disabled ? -1 : 0}
       aria-selected="false"
       data-reorder-index={index}
-      draggable={!isDisabled}
+      draggable={!disabled}
       on:dragstart={(e) => handleDragStart(e, index)}
       on:dragover={(e) => handleDragOver(e, index)}
       on:drop={(e) => handleDrop(e, index)}

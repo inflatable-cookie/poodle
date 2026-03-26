@@ -1,7 +1,7 @@
 # EmbedPreview
 
 Status: seed contract
-Updated: 2026-03-22
+Updated: 2026-03-25
 
 ## 1. Purpose
 
@@ -170,22 +170,34 @@ None. EmbedPreview is a pure display component.
 | Fallback | `--poodle-color-background-panel` | fallback container background |
 | FallbackLink | `--poodle-color-accent-default` | link color (fallback #6366f1) |
 
-## 9. Svelte Notes
+## 9. Runtime Notes
+
+### Shared Rules
+
+- `embedUrl` is derived from `parsed` using these rules:
+  - YouTube: `https://www.youtube-nocookie.com/embed/{id}`
+  - Vimeo: `https://player.vimeo.com/video/{id}`
+  - default/generic: `parsed.originalUrl`
+- `effectiveAspectRatio` becomes `"auto"` only for provider-specific cases that
+  need intrinsic-height rendering; otherwise it uses the explicit `aspectRatio`
+  prop
+
+### Svelte
 
 - Uses `Skeleton` from `@poodle/svelte-primitives` for the loading state
-- Provider-specific embed URL generation:
-  - YouTube: `https://www.youtube-nocookie.com/embed/{id}` (privacy-enhanced)
-  - Vimeo: `https://player.vimeo.com/video/{id}`
-  - Default: `parsed.originalUrl`
 - Raw embed code rendered via `{@html parsed.originalEmbed}` — consumers must
   ensure embed code is trusted
 - Aspect ratio applied via inline `style` attribute
 
-## 10. GPUI Notes
+### GPUI
 
 - Expected crate/module surface: `poodle_gpui::composites::embed_preview`
-- Iframe rendering is web-specific; GPUI may need a WebView or placeholder approach
-- Loading and error states can be implemented with GPUI primitives
+- Consumes the same `parsed` / `aspectRatio` / `loading` / `error` /
+  `emptyMessage` contract as Svelte
+- Iframe rendering remains platform-specific; GPUI currently renders a
+  contract-aligned placeholder panel for derived `embedUrl` states rather than
+  embedding a live web view
+- Raw embed and fallback states still follow the same priority order as Svelte
 
 ## 11. Parity Checklist
 
@@ -211,7 +223,7 @@ None. EmbedPreview is a pure display component.
 
 | Delta | Why Allowed | Approval Status | Follow-Up |
 |-------|-------------|-----------------|-----------|
-| GPUI iframe support | GPUI may use WebView or placeholder instead of iframe | pending | investigate WebView integration |
+| GPUI live iframe/web view support | GPUI uses a placeholder panel for `embedUrl` states because it does not yet host a live embedded web surface | accepted for now | investigate WebView integration or an equivalent native embed surface without changing the public contract |
 
 ## 13. Specimen Definitions
 
@@ -244,6 +256,12 @@ None. EmbedPreview is a pure display component.
 | Label | Props / Config | Expected Visual |
 |-------|---------------|-----------------|
 | Empty state | `emptyMessage="Paste a URL above to see a preview"` | play icon with custom empty message |
+
+### Raw Embed
+
+| Label | Props / Config | Expected Visual |
+|-------|---------------|-----------------|
+| Raw embed | `parsed.originalEmbed` set, no provider-specific embed URL | raw embed container in Svelte, raw-embed placeholder/content block in GPUI |
 
 ## 14. Approval And Adoption Notes
 

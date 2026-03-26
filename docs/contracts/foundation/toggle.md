@@ -32,12 +32,12 @@ Updated: 2026-03-15
 
 | Prop | Type | Default | Required | Notes |
 |------|------|---------|----------|-------|
-| `isPressed` | `boolean \| null` | `null` | no | controlled pressed state; `null` = uncontrolled |
+| `pressed` | `boolean \| null` | `null` | no | controlled pressed state; `null` = uncontrolled |
 | `defaultPressed` | `boolean` | `false` | no | uncontrolled initial pressed state |
 | `variant` | `"ghost" \| "primary" \| "secondary"` | `"ghost"` | no | appearance family |
 | `size` | `"sm" \| "md" \| "lg"` | `"md"` | no | control size |
 | `layout` | `"inline" \| "stack"` | `"inline"` | no | inline button vs full-width stacked layout |
-| `isDisabled` | `boolean` | `false` | no | suppresses interaction |
+| `disabled` | `boolean` | `false` | no | suppresses interaction |
 | `ariaLabel` | `string \| null` | `null` | no | required when content is icon-only |
 | `className` | `string` | `""` | no | additional CSS classes |
 
@@ -49,7 +49,7 @@ Updated: 2026-03-15
 
 ### Controlled And Uncontrolled
 
-- controlled: `isPressed` (non-null) plus `pressedChange` event
+- controlled: `pressed` (non-null) plus `pressedChange` event
 - uncontrolled: `defaultPressed` with internal state management
 
 ## 4. States
@@ -61,7 +61,7 @@ Updated: 2026-03-15
 | default (unpressed) | resting | variant-specific fill, border, text |
 | pressed | `aria-pressed="true"` | accent background, accent border, inverse text |
 | focus | keyboard focus | focus ring |
-| disabled | `isDisabled=true` | muted, non-interactive |
+| disabled | `disabled=true` | muted, non-interactive |
 
 ### Component States
 
@@ -83,7 +83,7 @@ Updated: 2026-03-15
 - Element: native `<button>`
 - `aria-pressed`: `"true"` when pressed, `"false"` when not
 - `aria-label`: from prop (required for icon-only content)
-- `disabled`: set when `isDisabled=true`
+- `disabled`: set when `disabled=true`
 
 ### Keyboard
 

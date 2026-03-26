@@ -56,7 +56,7 @@ Updated: 2026-03-15
 | `visibleMonth` | `string \| null` | `null` | no | controlled visible month (ISO `YYYY-MM`) |
 | `weekStartsOn` | `CalendarWeekStart` | `"monday"` | no | first day of the week |
 | `locale` | `string` | `"en-US"` | no | locale for month and weekday formatting |
-| `isDisabled` | `boolean` | `false` | no | disables all interaction |
+| `disabled` | `boolean` | `false` | no | disables all interaction |
 | `ariaLabel` | `string \| null` | `null` | no | accessible name for the grid |
 
 ### Type Definitions
@@ -86,7 +86,7 @@ CalendarWeekStart: "sunday" | "monday"
 | selected | date matches selected value | accent background, inverse text |
 | selected hover | pointer enters selected day | slightly lightened accent background |
 | outside month | date belongs to adjacent month | secondary text color, reduced opacity |
-| disabled | `isDisabled=true` | cursor not-allowed, reduced opacity on root |
+| disabled | `disabled=true` | cursor not-allowed, reduced opacity on root |
 
 ### Component States
 
@@ -116,7 +116,7 @@ CalendarWeekStart: "sunday" | "monday"
 - `aria-label`: each day button has a formatted date label (e.g. "March 15, 2026")
 - `aria-live="polite"` on the month label to announce month changes
 - Grid `aria-label`: from `ariaLabel` prop
-- `aria-disabled`: set on root when `isDisabled`
+- `aria-disabled`: set on root when `disabled`
 
 ### Keyboard
 
@@ -419,7 +419,7 @@ All preview apps must render the following specimens identically.
 
 | Label | Props/Config | Expected Visual |
 |-------|-------------|-----------------|
-| Disabled | `defaultValue="2026-03-01"`, `isDisabled=true`, `ariaLabel="Disabled calendar"` | Month grid with March 1 selected, reduced opacity on root, cursor not-allowed, all interaction disabled |
+| Disabled | `defaultValue="2026-03-01"`, `disabled=true`, `ariaLabel="Disabled calendar"` | Month grid with March 1 selected, reduced opacity on root, cursor not-allowed, all interaction disabled |
 
 ## 14. Approval And Adoption Notes
 

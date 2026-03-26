@@ -9,7 +9,7 @@
   export let padding: Extract<SpaceScale, "none" | "sm" | "md"> = "none";
   export let asRole: "region" | "group" | null = null;
   export let label: string | null = null;
-  export let isFocusable = false;
+  export let focusable = false;
 
   const dispatch = createEventDispatcher<{
     scroll: Event;
@@ -29,10 +29,10 @@
   <!-- svelte-ignore a11y_no_noninteractive_tabindex -->
   <div
     class="scroll-shell__viewport"
-    tabindex={isFocusable ? 0 : undefined}
-    data-focusable={isFocusable}
-    role={asRole ?? (isFocusable ? "region" : undefined)}
-    aria-label={label ?? (isFocusable ? "Scrollable content" : undefined)}
+    tabindex={focusable ? 0 : undefined}
+    data-focusable={focusable}
+    role={asRole ?? (focusable ? "region" : undefined)}
+    aria-label={label ?? (focusable ? "Scrollable content" : undefined)}
     style={viewportStyle}
     on:scroll={(event) => dispatch("scroll", event)}
   >

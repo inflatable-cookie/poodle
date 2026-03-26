@@ -31,7 +31,7 @@
     <div class="specimen__row">
       <div class="specimen__pane">Left</div>
       <div class="specimen__handle-wrapper specimen__handle-wrapper--horizontal">
-        <ResizeHandle orientation="horizontal" isDisabled ariaLabel="Disabled resize" />
+        <ResizeHandle orientation="horizontal" disabled ariaLabel="Disabled resize" />
       </div>
       <div class="specimen__pane">Right</div>
     </div>
@@ -42,7 +42,7 @@
     <div class="specimen__col">
       <div class="specimen__pane">Top</div>
       <div class="specimen__handle-wrapper specimen__handle-wrapper--vertical">
-        <ResizeHandle orientation="vertical" isDisabled ariaLabel="Disabled resize vertical" />
+        <ResizeHandle orientation="vertical" disabled ariaLabel="Disabled resize vertical" />
       </div>
       <div class="specimen__pane">Bottom</div>
     </div>

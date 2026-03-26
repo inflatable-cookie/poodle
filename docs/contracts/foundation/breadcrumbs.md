@@ -36,7 +36,7 @@ Updated: 2026-03-11
 
 | Prop | Type | Default | Required | Notes |
 |------|------|---------|----------|-------|
-| `items` | `Array<{ value: string; label: string; href?: string; isCurrent?: boolean }>` | none | yes | hierarchy items |
+| `items` | `Array<{ value: string; label: string; href?: string; current?: boolean }>` | none | yes | hierarchy items |
 | `ariaLabel` | `string` | `"Breadcrumb"` | no | navigation label |
 | `maxVisibleItems` | `number \| null` | `null` | no | optional truncation threshold |
 | `on:navigate` | — | — | no | Svelte event: `dispatch("navigate", { value: item.value })` |
@@ -53,7 +53,7 @@ Updated: 2026-03-11
 | State | Trigger | Expected Result |
 |-------|---------|-----------------|
 | default | intermediate item | link-style item |
-| current | `isCurrent=true` or last item | non-link current page indicator |
+| current | `current=true` or last item | non-link current page indicator |
 | truncated | path exceeds threshold | overflow treatment visible |
 
 ### Component States

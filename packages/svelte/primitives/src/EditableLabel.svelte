@@ -5,7 +5,7 @@
 
   export let value: string;
   export let ariaLabel = "Edit label";
-  export let isDisabled = false;
+  export let disabled = false;
   export let activationMode: EditableLabelActivationMode = "doubleClick";
   export let selectOnFocus = true;
   export let variant: "default" | "flush" = "default";
@@ -32,7 +32,7 @@
   $: isEmpty = !value && !!emptyText;
 
   async function startEditing(): Promise<void> {
-    if (isDisabled || activationMode === "programmatic") return;
+    if (disabled || activationMode === "programmatic") return;
 
     draftValue = value;
     isEditing = true;
@@ -62,7 +62,7 @@
 <div
   class="editable-label"
   data-editing={isEditing}
-  data-disabled={isDisabled}
+  data-disabled={disabled}
   data-variant={variant}
 >
   {#if isEditing}
@@ -85,7 +85,7 @@
       type="button"
       class="editable-label__display"
       class:editable-label__display--empty={isEmpty}
-      disabled={isDisabled}
+      disabled={disabled}
       aria-label={ariaLabel}
       on:dblclick={() => { if (activationMode === "doubleClick") startEditing(); }}
       on:click={() => { if (activationMode === "enterOrSpace") startEditing(); }}

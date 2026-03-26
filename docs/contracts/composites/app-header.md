@@ -40,7 +40,7 @@ Updated: 2026-03-22
 |------|------|---------|----------|-------|
 | `title` | `string \| null` | `null` | no | visible app title; ignored when `identity` slot is provided |
 | `subtitle` | `string \| null` | `null` | no | secondary text shown alongside title in baseline alignment |
-| `isDragRegion` | `boolean` | `false` | no | enables native window drag posture via `data-drag-region` attribute |
+| `dragRegion` | `boolean` | `false` | no | enables native window drag posture via `data-drag-region` attribute |
 | `ariaLabel` | `string \| null` | `null` | no | accessible label for the header; falls back to `title` |
 
 ## 4. Slots
@@ -56,7 +56,7 @@ Updated: 2026-03-22
 | State | Trigger | Expected Result |
 |-------|---------|-----------------|
 | standard | default | steady shell header with three-column grid |
-| drag-region | `isDragRegion=true` | header supports window dragging where supported |
+| drag-region | `dragRegion=true` | header supports window dragging where supported |
 | collapsed | viewport <= 45rem | single-column layout; utility region left-aligned |
 
 ## 6. Events

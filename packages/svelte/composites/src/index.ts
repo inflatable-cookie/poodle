@@ -15,19 +15,23 @@ export { default as DockRegion } from "./DockRegion.svelte";
 export { default as DetailShell } from "./DetailShell.svelte";
 export { default as EmbedInput } from "./EmbedInput.svelte";
 export { default as EmbedPreview } from "./EmbedPreview.svelte";
+export { detectParsedEmbed, resolveEmbedParseState } from "./embed-input";
 export { default as EmptyState } from "./EmptyState.svelte";
 export { default as FilterToolbar } from "./FilterToolbar.svelte";
 export { default as FormDialog } from "./FormDialog.svelte";
 export { default as FormLayout } from "./FormLayout.svelte";
 export { ListCard } from "@poodle/svelte-primitives";
 export { default as LogList } from "./LogList.svelte";
+export { default as ListContainer } from "./ListContainer.svelte";
 export { default as MarkdownEditor } from "./MarkdownEditor.svelte";
 export { OrderBy } from "@poodle/svelte-primitives";
 export { default as PageLoading } from "./PageLoading.svelte";
 export { default as MediaPicker } from "./MediaPicker.svelte";
+export { default as MediaBrowsePanel } from "./MediaBrowsePanel.svelte";
 export { NavCard, NavCardGrid } from "@poodle/svelte-primitives";
 export { default as MediaPreview } from "./MediaPreview.svelte";
 export { default as MediaThumbnail } from "./MediaThumbnail.svelte";
+export { default as MediaUploadStatusPanel } from "./MediaUploadStatusPanel.svelte";
 export { PaginationSummary } from "@poodle/svelte-primitives";
 export type { BreadcrumbItem, SplitOrientation } from "@poodle/svelte-primitives";
 export { default as PageHeader } from "./PageHeader.svelte";
@@ -36,7 +40,6 @@ export { default as RelationPicker } from "./RelationPicker.svelte";
 export { ResizeHandle } from "@poodle/svelte-primitives";
 export { default as ReorderableList } from "./ReorderableList.svelte";
 export { default as SelectionSummary } from "./SelectionSummary.svelte";
-export { default as SlugField } from "./SlugField.svelte";
 export { default as SplitView } from "./SplitView.svelte";
 export { StatusBar } from "@poodle/svelte-primitives";
 export { default as MetricTile } from "./MetricTile.svelte";
@@ -75,6 +78,7 @@ export type {
   LogLevel,
   MediaKind,
   MediaPickerItem,
+  MediaUploadWorkflowStep,
   MediaState,
   PanelDragData,
   PanelTabItem,

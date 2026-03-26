@@ -1,7 +1,7 @@
 # PickerShell
 
 Status: seed contract
-Updated: 2026-03-22
+Updated: 2026-03-25
 
 ## 1. Purpose
 
@@ -111,7 +111,7 @@ Variant changes posture and layout emphasis. It does not change selection meanin
 |-------|---------|-----------------|
 | ready | `state="ready"` | body slot visible with candidate content |
 | empty | `state="empty"` | state area shown with empty message |
-| loading | `state="loading"` | state area shown with loading message |
+| loading | `state="loading"` | state area shown with shared grid spinner and loading message |
 | error | `state="error"` | state area shown with error message |
 | no-results | `state="no-results"` | state area shown with no-results message |
 
@@ -244,10 +244,15 @@ No internal state. PickerShell is a layout container.
 |----------|-------|
 | display | `grid` |
 | gap | `var(--poodle-space-stack-sm)` |
+| `justify-items` | `start` |
 | padding | `calc(var(--poodle-space-panel-y) * 1.5) var(--poodle-space-panel-x)` |
 | border | `0.0625rem solid var(--poodle-color-border-subtle)` |
 | border-radius | `var(--poodle-radius-surface)` |
 | background | `color-mix(in srgb, var(--poodle-color-background-surface) 86%, transparent)` |
+
+When `state="loading"` and no custom `state` slot is provided, the fallback
+state area prepends the shared [`Spinner`](../foundation/spinner.md) primitive
+with `variant="grid"`, `size="md"`, and `tone="accent"`.
 
 ### Light Theme Overrides
 

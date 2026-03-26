@@ -18,7 +18,7 @@
 
   let itemElements: Array<HTMLElement | null> = [];
 
-  $: enabledItems = items.filter((item) => !item.isDisabled);
+  $: enabledItems = items.filter((item) => !item.disabled);
   $: groupedItems = items.reduce<Record<string, CommandActionItem[]>>((acc, item) => {
     const group = item.group ?? "Commands";
     acc[group] ??= [];
@@ -104,8 +104,8 @@
               <ListCard
                 title={item.title}
                 subtitle={item.description}
-                isInteractive={!item.isDisabled}
-                isDisabled={item.isDisabled ?? false}
+                interactive={!item.disabled}
+                disabled={item.disabled ?? false}
                 ariaLabel={item.title}
                 on:click={() => dispatch("itemSelect", { id: item.id })}
                 on:mouseenter={() => setActive(item.id)}

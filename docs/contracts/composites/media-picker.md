@@ -188,3 +188,8 @@ None yet (single implementation).
 ## 14. Approval And Adoption Notes
 
 Use `MediaPicker` for selecting from an existing media library or uploading new files. The component assumes media items are provided as a flat array; server-side search and pagination should be handled by the consuming application, updating the `items` prop reactively.
+
+This is intentionally the lightweight local-selector posture. It is not the
+same contract as Underlay's retained callback-driven media-library workflow
+shell, which still owns paginated browse loading, duplicate checks, and upload
+handshake orchestration.

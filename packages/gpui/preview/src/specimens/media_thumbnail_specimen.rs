@@ -19,5 +19,12 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
                 .child(MediaThumbnail::from_spec(MediaThumbnailSpec::new(MediaKind::Audio).with_title("Interview.mp3").with_aspect_ratio(AspectRatio::Landscape), theme))))
         .child(div().flex().flex_col().gap(px(8.0))
             .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Loading state"), theme))
-            .child(MediaThumbnail::from_spec(MediaThumbnailSpec::new(MediaKind::Image).with_state(MediaState::Loading).with_aspect_ratio(AspectRatio::Square), theme)))
+            .child(MediaThumbnail::from_spec(
+                MediaThumbnailSpec::new(MediaKind::Image)
+                    .with_state(MediaState::Loading)
+                    .with_aspect_ratio(AspectRatio::Square)
+                    .with_state_title("Loading preview")
+                    .with_state_message("Preview data is still being prepared."),
+                theme,
+            )))
 }

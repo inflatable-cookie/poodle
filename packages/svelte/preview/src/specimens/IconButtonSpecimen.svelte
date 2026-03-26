@@ -34,9 +34,9 @@
   <div class="specimen__group">
     <Eyebrow>States</Eyebrow>
     <div class="button-row">
-      <IconButton icon={mapPin} ariaLabel="Pin" isPressed={true} variant="secondary" />
-      <IconButton icon={ban} ariaLabel="Disabled" isDisabled variant="secondary" />
-      <IconButton icon={refreshCw} ariaLabel="Loading" isLoading variant="secondary" />
+      <IconButton icon={mapPin} ariaLabel="Pin" pressed={true} variant="secondary" />
+      <IconButton icon={ban} ariaLabel="Disabled" disabled variant="secondary" />
+      <IconButton icon={refreshCw} ariaLabel="Loading" loading variant="secondary" />
     </div>
   </div>
 

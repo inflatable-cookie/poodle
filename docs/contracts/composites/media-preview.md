@@ -1,7 +1,7 @@
 # MediaPreview
 
 Status: contract
-Updated: 2026-03-22
+Updated: 2026-03-25
 
 ## 1. Purpose
 
@@ -88,8 +88,8 @@ type CardVariant = "default" | "elevated" | "outlined";
 | `badge` | `string \| null` | `null` | no | overlay badge on thumbnail |
 | `thumbnailMeta` | `string \| null` | `null` | no | extra metadata item prepended to meta list |
 | `kind` | `MediaKind` | `"image"` | no | media type passed to MediaThumbnail |
-| `state` | `MediaState` | `"ready"` | no | state posture passed to MediaThumbnail |
-| `aspectRatio` | `AspectRatio` | `"landscape"` | no | aspect ratio passed to MediaThumbnail |
+| `state` | `MediaState` | `"ready"` | no | state posture passed through to `MediaThumbnail` |
+| `aspectRatio` | `AspectRatio` | `"landscape"` | no | aspect ratio passed through to `MediaThumbnail` |
 | `variant` | `CardVariant` | `"default"` | no | card visual variant |
 | `ariaLabel` | `string \| null` | `null` | no | accessible label; falls back to `title` |
 | `stateTitle` | `string \| null` | `null` | no | heading for non-ready state in thumbnail |
@@ -108,14 +108,14 @@ No component-owned events.
 
 ## 7. States
 
-State is delegated to the `MediaThumbnail` component:
+State posture is delegated to the `MediaThumbnail` component in both runtimes:
 
 | State | Trigger | Expected Result |
 |-------|---------|-----------------|
 | ready | `state="ready"` | media slot or placeholder visible in frame |
-| loading | `state="loading"` | loading indicator in frame |
-| error | `state="error"` | error message in frame |
-| empty | `state="empty"` | empty message in frame |
+| loading | `state="loading"` | `MediaThumbnail` loading posture rendered in frame |
+| error | `state="error"` | `MediaThumbnail` error posture rendered in frame |
+| empty | `state="empty"` | `MediaThumbnail` empty posture rendered in frame |
 
 Card header and body always render regardless of media state.
 
@@ -200,6 +200,10 @@ Card header and body always render regardless of media state.
 - Composes: `Card` (from primitives), `MediaThumbnail`
 - MediaThumbnail is configured with `title={null}` and `meta={null}` since
   the preview handles its own header section
+- `badge`, `aspectRatio`, `state`, `stateTitle`, and `stateMessage` are
+  pass-through inputs to the nested `MediaThumbnail`
+- `thumbnailMeta` is prepended to the preview metadata list rather than
+  rendered inside the frame caption
 
 ## 11. Specimen Definitions
 

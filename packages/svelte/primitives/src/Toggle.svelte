@@ -3,12 +3,12 @@
 
   import type { ControlSize, ToggleVariant } from "./types";
 
-  export let isPressed: boolean | null = null;
+  export let pressed: boolean | null = null;
   export let defaultPressed = false;
   export let variant: ToggleVariant = "ghost";
   export let size: ControlSize = "md";
   export let layout: "inline" | "stack" = "inline";
-  export let isDisabled = false;
+  export let disabled = false;
   export let ariaLabel: string | null = null;
   export let className = "";
 
@@ -18,11 +18,11 @@
 
   let uncontrolledPressed = defaultPressed;
 
-  $: controlled = isPressed !== null;
-  $: pressed = controlled ? isPressed === true : uncontrolledPressed;
+  $: controlled = pressed !== null;
+  $: currentPressed = controlled ? pressed === true : uncontrolledPressed;
 
   function toggle(): void {
-    const nextPressed = !pressed;
+    const nextPressed = !currentPressed;
 
     if (!controlled) {
       uncontrolledPressed = nextPressed;
@@ -38,10 +38,10 @@
   data-variant={variant}
   data-size={size}
   data-layout={layout}
-  data-pressed={pressed}
-  disabled={isDisabled}
+  data-pressed={currentPressed}
+  disabled={disabled}
   aria-label={ariaLabel ?? undefined}
-  aria-pressed={pressed ? "true" : "false"}
+  aria-pressed={currentPressed ? "true" : "false"}
   on:click={toggle}
 >
   <slot />

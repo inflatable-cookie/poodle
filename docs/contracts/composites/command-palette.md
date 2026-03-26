@@ -1,7 +1,7 @@
 # CommandPalette
 
 Status: contract
-Updated: 2026-03-22
+Updated: 2026-03-25
 
 ## 1. Purpose
 
@@ -75,7 +75,7 @@ Uses `CommandActionItem` and `DiscoveryState` from `ActionDiscoveryPanel`.
 |-------|---------|-----------------|
 | closed | `open=false` | nothing rendered |
 | open/ready | `open=true`, `state="ready"` | dialog with query field and grouped results |
-| open/loading | `open=true`, `state="loading"` | dialog with skeleton loading in results area |
+| open/loading | `open=true`, `state="loading"` | dialog with query field and ActionDiscoveryPanel skeleton loading in results area |
 | open/error | `open=true`, `state="error"` | dialog with error empty state |
 | open/empty | `open=true`, `state="empty"` | dialog with empty state message |
 | open/no-results | `open=true`, `state="no-results"` | dialog with no-results empty state |
@@ -287,6 +287,8 @@ Uses `CommandActionItem` and `DiscoveryState` from `ActionDiscoveryPanel`.
 - The SearchField dispatches `valueChange`, `clear`, `cancel`, and `submit`
   events which are mapped to palette events
 - ActionDiscoveryPanel is bound with `activeId` for two-way active tracking
+- Loading treatment is delegated to `ActionDiscoveryPanel`, which remains
+  Skeleton-based rather than Spinner-based because it is preserving result-row structure
 
 ## 11. Specimen Definitions
 

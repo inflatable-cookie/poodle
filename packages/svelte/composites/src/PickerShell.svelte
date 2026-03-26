@@ -1,4 +1,6 @@
 <script lang="ts">
+  import { Spinner } from "@poodle/svelte-primitives";
+
   import type { BrowseState, PickerVariant } from "./types";
 
   export let title: string;
@@ -62,6 +64,11 @@
       {#if $$slots.state}
         <slot name="state" />
       {:else}
+        {#if state === "loading"}
+          <span class="picker-shell__spinner" aria-hidden="true">
+            <Spinner variant="grid" size="md" tone="accent" />
+          </span>
+        {/if}
         <strong>{stateTitle ?? "Picker state"}</strong>
         {#if stateMessage}
           <p>{stateMessage}</p>
@@ -137,10 +144,17 @@
   .picker-shell__state {
     display: grid;
     gap: var(--poodle-space-stack-sm);
+    justify-items: start;
     padding: calc(var(--poodle-space-panel-y) * 1.5) var(--poodle-space-panel-x);
     border: 0.0625rem solid var(--poodle-color-border-subtle);
     border-radius: var(--poodle-radius-surface);
     background: color-mix(in srgb, var(--poodle-color-background-surface) 86%, transparent);
+  }
+
+  .picker-shell__spinner {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
   }
 
   .picker-shell__state strong,

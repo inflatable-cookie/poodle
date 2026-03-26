@@ -36,7 +36,7 @@
 
   <div class="specimen__group">
     <Eyebrow>Disabled</Eyebrow>
-    <NumberEntry id="disabled-num" value={42} ariaLabel="Disabled" isDisabled />
+    <NumberEntry id="disabled-num" value={42} ariaLabel="Disabled" disabled />
   </div>
 
   <div class="specimen__group">

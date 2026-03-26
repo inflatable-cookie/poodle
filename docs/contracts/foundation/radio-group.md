@@ -1,7 +1,7 @@
 # Radio Group
 
 Status: detailed contract
-Updated: 2026-03-15
+Updated: 2026-03-24
 
 ## 1. Purpose
 
@@ -46,10 +46,11 @@ Updated: 2026-03-15
 | `defaultValue` | `string \| null` | `null` | no | uncontrolled initial value |
 | `options` | `RadioGroupOption[]` | none | yes | array of selectable options |
 | `orientation` | `"horizontal" \| "vertical"` | `"vertical"` | no | layout and navigation axis |
-| `isDisabled` | `boolean` | `false` | no | disables entire group |
+| `disabled` | `boolean` | `false` | no | disables entire group |
 | `ariaLabel` | `string \| null` | `null` | no | accessible name for the group; required when no visible group label exists |
 | `describedBy` | `string \| null` | `null` | no | aria-describedby target id |
 | `name` | `string \| undefined` | `undefined` | no | shared form name for all radio inputs; auto-generated via module-level counter when not provided |
+| `selectedColor` | `string \| null` | `null` | no | optional selected-state color override used for the selected indicator border and dot |
 
 ### RadioGroupOption Type
 
@@ -57,7 +58,7 @@ Updated: 2026-03-15
 |-------|------|----------|-------|
 | `value` | `string` | yes | unique value identifier |
 | `label` | `string` | yes | visible option label |
-| `isDisabled` | `boolean` | no | disables this specific option |
+| `disabled` | `boolean` | no | disables this specific option |
 
 ### Controlled And Uncontrolled
 
@@ -66,6 +67,8 @@ Updated: 2026-03-15
   state thereafter
 - a module-level `nextRadioGroupId` counter generates unique name attributes when
   the `name` prop is not provided, ensuring radio grouping without collisions
+- `selectedColor` maps to a local CSS custom property on the root group and
+  affects only the selected state visuals for that radio group instance
 
 ## 4. States
 
@@ -75,6 +78,7 @@ Updated: 2026-03-15
 |-------|---------|-----------------|
 | unselected | default option state | empty indicator with default border |
 | selected | option value equals current value | dot visible with accent color, indicator border accent |
+| custom selected color | `selectedColor` set while an option is selected | selected indicator border and dot use the provided local selected color |
 | focus | radio input receives focus-visible | focus ring outline on indicator |
 | disabled-group | `isDisabled=true` on group | all options muted with disabled opacity and cursor |
 | disabled-option | `isDisabled=true` on option | individual option muted with disabled opacity and cursor |
@@ -150,6 +154,7 @@ Updated: 2026-03-15
 |----------|-------|
 | `display` | `grid` |
 | `gap` | `var(--poodle-space-stack-sm)` |
+| `--poodle-radio-selected-color` | `var(--poodle-color-accent-base)` |
 
 ### Root horizontal `[data-orientation="horizontal"]`
 
@@ -205,7 +210,7 @@ Updated: 2026-03-15
 
 | Property | Value |
 |----------|-------|
-| `border-color` | `var(--poodle-color-accent-base)` |
+| `border-color` | `var(--poodle-radio-selected-color)` |
 
 ### Indicator focus `:focus-visible + .radio-group__indicator`
 
@@ -228,7 +233,7 @@ Updated: 2026-03-15
 
 | Property | Value |
 |----------|-------|
-| `background` | `var(--poodle-color-accent-base)` |
+| `background` | `var(--poodle-radio-selected-color)` |
 
 ### Label `.radio-group__label`
 

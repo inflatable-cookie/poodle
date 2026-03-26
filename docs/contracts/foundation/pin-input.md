@@ -35,7 +35,7 @@ Updated: 2026-03-15
 | `value` | `string \| null` | `null` | no | controlled string value (one char per cell) |
 | `defaultValue` | `string` | `""` | no | uncontrolled initial value |
 | `length` | `number` | `6` | no | number of cells to render |
-| `isDisabled` | `boolean` | `false` | no | disables all cells |
+| `disabled` | `boolean` | `false` | no | disables all cells |
 | `ariaLabel` | `string \| null` | `null` | no | accessible name for the group |
 | `mask` | `boolean` | `false` | no | when true, cells use `type="password"` to obscure input |
 
@@ -55,7 +55,7 @@ Updated: 2026-03-15
 | partially filled | some cells have values | filled cells show characters (or dots if masked) |
 | complete | all cells filled | all cells populated, complete event fires |
 | focus | cell receives focus | focus ring on the active cell |
-| disabled | `isDisabled=true` | all cells non-interactive, reduced opacity |
+| disabled | `disabled=true` | all cells non-interactive, reduced opacity |
 
 ### Component States
 
@@ -217,7 +217,7 @@ Updated: 2026-03-15
 
 | Label | Props / Config | Expected Visual |
 |-------|---------------|-----------------|
-| Disabled | `length={6}`, `defaultValue="123"`, `isDisabled` | Six cells with first three pre-filled, reduced opacity, non-interactive |
+| Disabled | `length={6}`, `defaultValue="123"`, `disabled` | Six cells with first three pre-filled, reduced opacity, non-interactive |
 
 ## 14. Approval And Adoption Notes
 

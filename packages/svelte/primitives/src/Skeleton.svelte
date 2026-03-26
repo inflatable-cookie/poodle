@@ -7,7 +7,7 @@
   export let width: string | null = null;
   export let height: string | null = null;
   export let lines: number = 3;
-  export let isAnimated = true;
+  export let animated = true;
 
   $: resolvedWidth =
     width ?? (shape === "circle" ? pxToRem(40) : shape === "block" ? "100%" : "100%");
@@ -16,13 +16,13 @@
 </script>
 
 {#if preset === "table-row"}
-  <div class="skeleton-preset skeleton-preset--table-row" data-animated={isAnimated} aria-hidden="true">
+  <div class="skeleton-preset skeleton-preset--table-row" data-animated={animated} aria-hidden="true">
     {#each { length: 4 } as _, i}
       <span class="skeleton skeleton--cell" style="--poodle-skeleton-width: {i === 0 ? '40%' : i === 3 ? '20%' : '60%'}"></span>
     {/each}
   </div>
 {:else if preset === "card"}
-  <div class="skeleton-preset skeleton-preset--card" data-animated={isAnimated} aria-hidden="true">
+  <div class="skeleton-preset skeleton-preset--card" data-animated={animated} aria-hidden="true">
     <span class="skeleton skeleton--block-header"></span>
     <div class="skeleton-preset__card-body">
       <span class="skeleton skeleton--line" style="--poodle-skeleton-width: 80%"></span>
@@ -35,7 +35,7 @@
     </div>
   </div>
 {:else if preset === "list-item"}
-  <div class="skeleton-preset skeleton-preset--list-item" data-animated={isAnimated} aria-hidden="true">
+  <div class="skeleton-preset skeleton-preset--list-item" data-animated={animated} aria-hidden="true">
     <span class="skeleton skeleton--avatar"></span>
     <div class="skeleton-preset__list-text">
       <span class="skeleton skeleton--line" style="--poodle-skeleton-width: 60%"></span>
@@ -43,7 +43,7 @@
     </div>
   </div>
 {:else if preset === "detail-section"}
-  <div class="skeleton-preset skeleton-preset--detail" data-animated={isAnimated} aria-hidden="true">
+  <div class="skeleton-preset skeleton-preset--detail" data-animated={animated} aria-hidden="true">
     <span class="skeleton skeleton--heading"></span>
     {#each { length: lines } as _}
       <div class="skeleton-preset__detail-row">
@@ -53,7 +53,7 @@
     {/each}
   </div>
 {:else if preset === "avatar-line"}
-  <div class="skeleton-preset skeleton-preset--avatar-line" data-animated={isAnimated} aria-hidden="true">
+  <div class="skeleton-preset skeleton-preset--avatar-line" data-animated={animated} aria-hidden="true">
     <span class="skeleton skeleton--avatar"></span>
     <span class="skeleton skeleton--line" style="--poodle-skeleton-width: 10rem"></span>
   </div>
@@ -61,7 +61,7 @@
   <span
     class="skeleton"
     data-shape={shape}
-    data-animated={isAnimated}
+    data-animated={animated}
     style={`--poodle-skeleton-width: ${resolvedWidth}; --poodle-skeleton-height: ${resolvedHeight};`}
     aria-hidden="true"
   ></span>

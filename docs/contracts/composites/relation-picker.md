@@ -77,7 +77,7 @@ type PickerItem = {
 
 type DrillDownItem = PickerItem & {
   count?: number;
-  hasChildren?: boolean;
+  expandable?: boolean;
 };
 
 type DrillDownContext = Record<string, string>;
@@ -121,7 +121,7 @@ type DrillDownConfig = {
 | drilling | `drillDown` configured, depth < levels.length | drill list shown with level items, breadcrumbs, back button |
 | drill-complete | all drill levels selected | final items loaded (via `finalItems` fn or flat `items`), candidate list shown with breadcrumbs |
 | empty | `state="empty"` | state area with empty message |
-| loading | `state="loading"` | state area with loading message |
+| loading | `state="loading"` | state area with compact `Spinner` (`grid`, accent) plus loading message |
 | error | `state="error"` | state area with error message |
 | no-results | `state="no-results"` | state area with no-results message |
 

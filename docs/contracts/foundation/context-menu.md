@@ -53,8 +53,8 @@ MenuItem: {
   value: string;
   label: string;
   kind?: "action" | "checkbox" | "radio" | "separator";
-  isDisabled?: boolean;
-  isChecked?: boolean;
+  disabled?: boolean;
+  checked?: boolean;
   shortcutLabel?: string;
 }
 ```
@@ -75,8 +75,8 @@ MenuItem: {
 | closed | default | overlay hidden |
 | open | open state true | overlay visible at invocation point |
 | highlight | hover or keyboard focus on item | item background highlight |
-| checked | item model marks `isChecked` | visible checked indicator |
-| disabled | item model marks `isDisabled` | muted non-interactive row, reduced opacity |
+| checked | item model marks `checked` | visible checked indicator |
+| disabled | item model marks `disabled` | muted non-interactive row, reduced opacity |
 
 ### Component States
 
@@ -97,7 +97,7 @@ index are required.
 - Overlay: `role="menu"`, `aria-label` when provided
 - Items: `role="menuitem"` for action kind, `role="menuitemcheckbox"` for
   checkbox kind, `role="menuitemradio"` for radio kind
-- Checked items: `aria-checked` attribute reflecting `isChecked` state
+- Checked items: `aria-checked` attribute reflecting `checked` state
 - Disabled items: `aria-disabled="true"`
 - Labeling rules: keyboard invocation must produce a meaningful focus and
   naming context even when no pointer coordinates exist

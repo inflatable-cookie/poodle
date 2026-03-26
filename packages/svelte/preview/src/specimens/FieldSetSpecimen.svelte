@@ -6,10 +6,10 @@
   <div class="specimen__group">
     <Eyebrow>Single column (default)</Eyebrow>
     <FieldSet legend="Contact Information">
-      <Field id="fs-name" label="Full Name" isRequired>
+      <Field id="fs-name" label="Full Name" required>
         <TextInput id="fs-name" placeholder="Jane Smith" ariaLabel="Full Name" />
       </Field>
-      <Field id="fs-email" label="Email" isRequired>
+      <Field id="fs-email" label="Email" required>
         <TextInput id="fs-email" type="email" placeholder="jane@example.com" ariaLabel="Email" />
       </Field>
       <Field id="fs-phone" label="Phone">
@@ -71,10 +71,10 @@
     <Eyebrow>Multiple groups in a form</Eyebrow>
     <div class="form-demo">
       <FieldSet legend="Personal" columns={2}>
-        <Field id="fs2-first" label="First Name" isRequired>
+        <Field id="fs2-first" label="First Name" required>
           <TextInput id="fs2-first" ariaLabel="First Name" />
         </Field>
-        <Field id="fs2-last" label="Last Name" isRequired>
+        <Field id="fs2-last" label="Last Name" required>
           <TextInput id="fs2-last" ariaLabel="Last Name" />
         </Field>
       </FieldSet>

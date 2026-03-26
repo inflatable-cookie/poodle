@@ -6,10 +6,9 @@
   let asyncOpen: boolean | null = null;
   let lastAction = "";
 
-  function simulateAsync(): void {
-    setTimeout(() => {
-      lastAction = "Async confirm completed";
-    }, 1500);
+  async function simulateAsync(): Promise<void> {
+    await new Promise((resolve) => setTimeout(resolve, 1500));
+    lastAction = "Async confirm completed";
   }
 </script>
 
@@ -52,23 +51,24 @@
   </div>
 
   <div class="specimen__group">
-    <Eyebrow>With body content</Eyebrow>
-    <Button tone="danger" on:click={() => (asyncOpen = true)}>Remove user</Button>
+    <Eyebrow>Async confirm callback</Eyebrow>
+    <Button tone="danger" on:click={() => (asyncOpen = true)}>Archive project</Button>
     <AlertDialog
       open={asyncOpen}
-      title="Remove this user?"
-      description="The following user will lose access to this workspace."
-      confirmLabel="Remove"
-      on:confirm={() => {
-        simulateAsync();
+      title="Archive this project?"
+      description="The project will be hidden from active lists but can still be restored later."
+      confirmLabel="Archive"
+      workingLabel="Archiving…"
+      onConfirm={async () => {
+        await simulateAsync();
         asyncOpen = false;
       }}
       on:cancel={() => (asyncOpen = false)}
       on:openChange={(e) => (asyncOpen = e.detail.open ? true : null)}
     >
       <div class="user-card">
-        <strong>Clay Tercek</strong>
-        <span>clay@example.com</span>
+        <strong>Roadmap Cleanup</strong>
+        <span>14 linked tasks will move to the archived view.</span>
       </div>
     </AlertDialog>
   </div>

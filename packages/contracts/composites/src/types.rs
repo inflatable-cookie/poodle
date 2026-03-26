@@ -218,6 +218,130 @@ pub enum MediaState {
     Empty,
 }
 
+#[derive(Clone, Debug, Eq, PartialEq)]
+pub struct ParsedEmbed {
+    pub provider: String,
+    pub id: String,
+    pub original_url: Option<String>,
+    pub original_embed: Option<String>,
+    pub width: Option<u32>,
+    pub height: Option<u32>,
+}
+
+impl ParsedEmbed {
+    pub fn new(provider: impl Into<String>, id: impl Into<String>) -> Self {
+        Self {
+            provider: provider.into(),
+            id: id.into(),
+            original_url: None,
+            original_embed: None,
+            width: None,
+            height: None,
+        }
+    }
+
+    pub fn with_original_url(mut self, original_url: impl Into<String>) -> Self {
+        self.original_url = Some(original_url.into());
+        self
+    }
+
+    pub fn with_original_embed(mut self, original_embed: impl Into<String>) -> Self {
+        self.original_embed = Some(original_embed.into());
+        self
+    }
+
+    pub fn with_dimensions(mut self, width: Option<u32>, height: Option<u32>) -> Self {
+        self.width = width;
+        self.height = height;
+        self
+    }
+
+    pub fn detect(input: &str) -> Option<Self> {
+        let trimmed = input.trim();
+        if trimmed.is_empty() {
+            return None;
+        }
+
+        if let Some(id) = extract_after(trimmed, "youtu.be/") {
+            return Some(Self::new("youtube", id).with_original_url(trimmed));
+        }
+
+        if let Some(id) = extract_after(trimmed, "youtube.com/watch?v=") {
+            return Some(Self::new("youtube", id).with_original_url(trimmed));
+        }
+
+        if let Some(id) = extract_after(trimmed, "youtube.com/embed/") {
+            return Some(Self::new("youtube", id).with_original_url(trimmed));
+        }
+
+        if let Some(id) = extract_digits_after(trimmed, "vimeo.com/") {
+            return Some(Self::new("vimeo", id).with_original_url(trimmed));
+        }
+
+        if trimmed.starts_with('<') && trimmed.contains("iframe") {
+            let src = extract_attribute(trimmed, "src");
+            let width = extract_attribute(trimmed, "width").and_then(|value| value.parse::<u32>().ok());
+            let height = extract_attribute(trimmed, "height").and_then(|value| value.parse::<u32>().ok());
+
+            return Some(
+                Self::new("generic", src.clone().unwrap_or_else(|| trimmed.to_string()))
+                    .with_dimensions(width, height)
+                    .with_original_embed(trimmed)
+                    .with_original_url_opt(src),
+            );
+        }
+
+        if is_probably_url(trimmed) {
+            return Some(Self::new("generic", trimmed).with_original_url(trimmed));
+        }
+
+        None
+    }
+
+    fn with_original_url_opt(mut self, original_url: Option<String>) -> Self {
+        self.original_url = original_url;
+        self
+    }
+}
+
+fn extract_after(input: &str, needle: &str) -> Option<String> {
+    let start = input.find(needle)? + needle.len();
+    let suffix = &input[start..];
+    let id: String = suffix
+        .chars()
+        .take_while(|ch| ch.is_ascii_alphanumeric() || *ch == '-' || *ch == '_')
+        .collect();
+
+    if id.is_empty() { None } else { Some(id) }
+}
+
+fn extract_digits_after(input: &str, needle: &str) -> Option<String> {
+    let start = input.find(needle)? + needle.len();
+    let suffix = &input[start..];
+    let id: String = suffix.chars().take_while(|ch| ch.is_ascii_digit()).collect();
+
+    if id.is_empty() { None } else { Some(id) }
+}
+
+fn extract_attribute(input: &str, attribute: &str) -> Option<String> {
+    for quote in ['"', '\''] {
+        let pattern = format!("{attribute}={quote}");
+        if let Some(start) = input.find(&pattern) {
+            let value_start = start + pattern.len();
+            let suffix = &input[value_start..];
+            if let Some(end) = suffix.find(quote) {
+                return Some(suffix[..end].to_string());
+            }
+        }
+    }
+
+    None
+}
+
+fn is_probably_url(input: &str) -> bool {
+    (input.starts_with("http://") || input.starts_with("https://")) && !input.contains(char::is_whitespace)
+}
+
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub enum MediaKind {
     Image,
@@ -486,4 +610,3 @@ impl PanelTabItem {
         self
     }
 }
-

@@ -47,7 +47,7 @@
 
   <div class="specimen__group">
     <Eyebrow>Interactive</Eyebrow>
-    <Card isInteractive ariaLabel="Clickable card">
+    <Card interactive ariaLabel="Clickable card">
       <svelte:fragment slot="header">
         <h3 class="card-title">Interactive card</h3>
       </svelte:fragment>

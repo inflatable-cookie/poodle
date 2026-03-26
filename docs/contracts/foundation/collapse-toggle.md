@@ -33,9 +33,9 @@ Updated: 2026-03-17
 
 | Prop | Type | Default | Required | Notes |
 |------|------|---------|----------|-------|
-| `isCollapsed` | `boolean` | `false` | no | current state |
+| `collapsed` | `boolean` | `false` | no | current state |
 | `direction` | `"left" \| "right" \| "up" \| "down"` | `"left"` | no | collapse direction |
-| `isDisabled` | `boolean` | `false` | no | suppresses interaction |
+| `disabled` | `boolean` | `false` | no | suppresses interaction |
 | `ariaLabel` | `string \| null` | `null` | no | accessible label (defaults to "Collapse"/"Expand") |
 
 ## 4. States
@@ -44,9 +44,9 @@ Updated: 2026-03-17
 
 | State | Trigger | Expected Result |
 |-------|---------|-----------------|
-| expanded | `isCollapsed=false` | icon points toward collapse direction |
-| collapsed | `isCollapsed=true` | icon points toward expand direction |
-| disabled | `isDisabled=true` | muted, non-interactive |
+| expanded | `collapsed=false` | icon points toward collapse direction |
+| collapsed | `collapsed=true` | icon points toward expand direction |
+| disabled | `disabled=true` | muted, non-interactive |
 
 ## 5. Events
 
@@ -139,17 +139,17 @@ Updated: 2026-03-17
 
 | Label | Props / Config | Expected Visual |
 |-------|---------------|-----------------|
-| Left | `direction="left"`, `isCollapsed=false` (toggleable) | Chevron pointing left when expanded; toggles on click; label shows "(collapsed)" or "(expanded)" |
-| Right | `direction="right"`, `isCollapsed=false` (toggleable) | Chevron pointing right when expanded; toggles on click; label shows state |
-| Up | `direction="up"`, `isCollapsed=false` (toggleable) | Chevron pointing up when expanded; toggles on click; label shows state |
-| Down | `direction="down"`, `isCollapsed=false` (toggleable) | Chevron pointing down when expanded; toggles on click; label shows state |
+| Left | `direction="left"`, `collapsed=false` (toggleable) | Chevron pointing left when expanded; toggles on click; label shows "(collapsed)" or "(expanded)" |
+| Right | `direction="right"`, `collapsed=false` (toggleable) | Chevron pointing right when expanded; toggles on click; label shows state |
+| Up | `direction="up"`, `collapsed=false` (toggleable) | Chevron pointing up when expanded; toggles on click; label shows state |
+| Down | `direction="down"`, `collapsed=false` (toggleable) | Chevron pointing down when expanded; toggles on click; label shows state |
 
 ### Group: Disabled
 
 | Label | Props / Config | Expected Visual |
 |-------|---------------|-----------------|
-| Disabled left | `direction="left"`, `isDisabled=true` | Muted toggle, non-interactive, left-pointing chevron |
-| Disabled right | `direction="right"`, `isDisabled=true` | Muted toggle, non-interactive, right-pointing chevron |
+| Disabled left | `direction="left"`, `disabled=true` | Muted toggle, non-interactive, left-pointing chevron |
+| Disabled right | `direction="right"`, `disabled=true` | Muted toggle, non-interactive, right-pointing chevron |
 
 ## 13. Known Deltas
 

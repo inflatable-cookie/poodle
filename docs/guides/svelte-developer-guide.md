@@ -2,6 +2,18 @@
 
 End-to-end implementation guide for building applications with the Poodle design system's Svelte packages.
 
+For recurring application patterns and migration-backed composition guidance,
+also use [Guides Index](./README.md), especially
+[Form Layout And Field Recipes](./001-form-layout-and-field-recipes.md) and
+[Action Pattern Recipes](./002-action-pattern-recipes.md),
+[List And Filter Recipes](./003-list-and-filter-recipes.md), and
+[Dialog And Detail Recipes](./004-dialog-and-detail-recipes.md), and
+[Async Validation Recipes](./005-async-validation-recipes.md), and
+[Form Validity Recipes](./006-form-validity-recipes.md), and
+[Slug Field Recipes](./007-slug-field-recipes.md), and
+[File Upload Recipes](./008-file-upload-recipes.md), and
+[Media Picker Workflow Recipes](./009-media-picker-workflow-recipes.md).
+
 ## Quick Start
 
 ### 1. Install packages
@@ -244,12 +256,12 @@ Three control sizes via `data-control-size`:
 
 All components follow consistent naming conventions:
 
-**State props** use `is` prefix:
+**State props** use plain names:
 ```svelte
-<TextInput isDisabled />
-<TextInput isReadOnly />
-<Button isLoading />
-<Checkbox isMixed />
+<TextInput disabled />
+<TextInput readOnly />
+<Button loading />
+<Checkbox mixed />
 ```
 
 **Value props** follow the controlled/uncontrolled pattern:
@@ -470,7 +482,7 @@ The `Field` component handles labels, descriptions, hints, validation messages, 
   let agreed = false;
 </script>
 
-<Field id="name" label="Full Name" isRequired>
+<Field id="name" label="Full Name" required>
   <TextInput
     id="name"
     value={name}
@@ -501,8 +513,8 @@ The `Field` component handles labels, descriptions, hints, validation messages, 
 
 The `Field` component:
 - Renders the `<label>` associated with the control via `for={id}`
-- Shows required indicator (`*`) when `isRequired` is true
-- Shows "Optional" label when not required (configurable via `optionalLabel`)
+- Shows required indicator (`*`) when `required` is true
+- Optional label is opt-in via `optionalLabel`
 - Shows description text below the label (always visible)
 - Shows a `hint` tooltip via an info icon next to the label (progressive disclosure for longer help text)
 - Shows error or pending messages based on `validationState`
@@ -515,7 +527,7 @@ Use `description` for always-visible help text that users need to see. Use `hint
 
 ```svelte
 <!-- Always-visible help -->
-<Field id="pw" label="Password" description="Must be at least 8 characters." isRequired>
+<Field id="pw" label="Password" description="Must be at least 8 characters." required>
   <TextInput id="pw" type="password" />
 </Field>
 
@@ -525,7 +537,7 @@ Use `description` for always-visible help text that users need to see. Use `hint
 </Field>
 
 <!-- Both together -->
-<Field id="key" label="API Key" description="Your personal key." hint="Rotate periodically for security." isRequired>
+<Field id="key" label="API Key" description="Your personal key." hint="Rotate periodically for security." required>
   <TextInput id="key" />
 </Field>
 ```
@@ -548,6 +560,9 @@ Use `description` for always-visible help text that users need to see. Use `hint
 
 `ValidationState` values: `"none"` | `"invalid"` | `"valid"` | `"pending"`
 
+For validator-driven checks, use
+[Async Validation Recipes](./005-async-validation-recipes.md).
+
 ### FormLayout (composite)
 
 For multi-field forms, use `FormLayout` from composites:
@@ -559,10 +574,10 @@ For multi-field forms, use `FormLayout` from composites:
 </script>
 
 <FormLayout columns={2}>
-  <Field id="first" label="First Name" isRequired>
+  <Field id="first" label="First Name" required>
     <TextInput id="first" />
   </Field>
-  <Field id="last" label="Last Name" isRequired>
+  <Field id="last" label="Last Name" required>
     <TextInput id="last" />
   </Field>
   <Field id="email" label="Email" span="full">
@@ -578,6 +593,13 @@ For multi-field forms, use `FormLayout` from composites:
 
 `FormLayout` provides responsive grid layout (6-col desktop → 2-col tablet → 1-col mobile) and renders form-level error/success messages via `error` and `success` props.
 
+Use `FormLayout` as the default field layout surface both at the top level of a
+form and inside `FieldSet` when a semantic group needs internal field layout.
+Reach for raw `Grid` only when the layout is no longer a normal form-field
+arrangement. See
+[Form Layout And Field Recipes](./001-form-layout-and-field-recipes.md) for the
+recommended composition rule.
+
 ### FieldSet (semantic grouping)
 
 Use `FieldSet` to group related fields with a semantic `<fieldset>` and `<legend>`. Screen readers announce the legend as the group name:
@@ -588,10 +610,10 @@ Use `FieldSet` to group related fields with a semantic `<fieldset>` and `<legend
 </script>
 
 <FieldSet legend="Contact Information">
-  <Field id="name" label="Full Name" isRequired>
+  <Field id="name" label="Full Name" required>
     <TextInput id="name" />
   </Field>
-  <Field id="email" label="Email" isRequired>
+  <Field id="email" label="Email" required>
     <TextInput id="email" type="email" />
   </Field>
 </FieldSet>
@@ -610,6 +632,10 @@ Use `FieldSet` to group related fields with a semantic `<fieldset>` and `<legend
 ```
 
 Props: `legend` (group label), `columns` (grid columns, default 1), `gap` (`SpaceScale`, default "md"), `span` (column span in parent grid). The legend is styled as an uppercase eyebrow. Child `Field` components can use `span="full"` to span all columns.
+
+When a `FieldSet` needs multiple arranged fields, place a `FormLayout` inside
+it rather than defaulting to raw `Grid`. See
+[Form Layout And Field Recipes](./001-form-layout-and-field-recipes.md).
 
 ---
 
@@ -812,7 +838,7 @@ Tab variants: `"underline"` | `"card"` | `"pill"` | `"strip"`
   const items: BreadcrumbItem[] = [
     { value: "home", label: "Home", href: "/" },
     { value: "users", label: "Users", href: "/users" },
-    { value: "alice", label: "Alice Johnson", isCurrent: true },
+    { value: "alice", label: "Alice Johnson", current: true },
   ];
 </script>
 
@@ -867,7 +893,7 @@ Tab variants: `"underline"` | `"card"` | `"pill"` | `"strip"`
 
 <Callout tone="info">This is an informational message.</Callout>
 <Callout tone="warning">Check your settings before continuing.</Callout>
-<Callout tone="danger" isDismissible>Something went wrong.</Callout>
+<Callout tone="danger" dismissible>Something went wrong.</Callout>
 <Callout tone="success">Changes saved successfully.</Callout>
 ```
 
@@ -1185,7 +1211,7 @@ interface MenuItem {
   <Field
     id="name"
     label="Name"
-    isRequired
+    required
     validationState={nameError ? "invalid" : "none"}
     error={nameError}
   >
@@ -1200,7 +1226,7 @@ interface MenuItem {
   <Field
     id="email"
     label="Email"
-    isRequired
+    required
     validationState={emailError ? "invalid" : "none"}
     error={emailError}
   >
@@ -1279,7 +1305,7 @@ interface MenuItem {
 
 **Data:** DataTable, FilterToolbar, SelectionSummary, PaginationSummary
 **Detail:** DetailShell, DetailSection, DetailRow
-**Forms:** FormLayout, FormDialog, ConfirmAction, SlugField, EmbedInput
+**Forms:** FormLayout, FormDialog, ConfirmAction, EmbedInput
 **Browse:** PageHeader, EmptyState, PageLoading
 **Media:** MediaThumbnail, MediaPreview, MediaPicker, AudioPlayer, VideoPlayer, EmbedPreview
 **Editor:** MarkdownEditor, BlockEditor, EditableList, ReorderableList

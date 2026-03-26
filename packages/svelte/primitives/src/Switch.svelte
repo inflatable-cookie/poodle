@@ -2,14 +2,16 @@
   import { createEventDispatcher } from "svelte";
 
   export let id: string | undefined = undefined;
-  export let isChecked: boolean | null = null;
+  export let checked: boolean | null = null;
   export let defaultChecked = false;
-  export let isDisabled = false;
-  export let isReadOnly = false;
+  export let disabled = false;
+  export let readOnly = false;
   export let label: string | null = null;
   export let ariaLabel: string | null = null;
   export let describedBy: string | null = null;
   export let name: string | undefined = undefined;
+  export let offColor: string | null = null;
+  export let onColor: string | null = null;
 
   const dispatch = createEventDispatcher<{
     checkedChange: { checked: boolean };
@@ -17,13 +19,17 @@
 
   let uncontrolledChecked = defaultChecked;
 
-  $: isControlled = isChecked !== null;
-  $: currentChecked = isControlled ? isChecked === true : uncontrolledChecked;
+  $: isControlled = checked !== null;
+  $: currentChecked = isControlled ? checked === true : uncontrolledChecked;
+  $: switchStyles = [
+    offColor ? `--poodle-switch-off-color: ${offColor}` : "",
+    onColor ? `--poodle-switch-on-color: ${onColor}` : "",
+  ].filter(Boolean).join("; ") || undefined;
 
   function handleChange(event: Event): void {
     const nextChecked = (event.currentTarget as HTMLInputElement).checked;
 
-    if (isReadOnly) {
+    if (readOnly) {
       (event.currentTarget as HTMLInputElement).checked = currentChecked;
       return;
     }
@@ -36,7 +42,7 @@
   }
 </script>
 
-<label class="switch" data-disabled={isDisabled} data-read-only={isReadOnly}>
+<label class="switch" data-disabled={disabled} data-read-only={readOnly} style={switchStyles}>
   <input
     {id}
     {name}
@@ -44,10 +50,10 @@
     type="checkbox"
     role="switch"
     checked={currentChecked}
-    disabled={isDisabled}
+    disabled={disabled}
     aria-label={label ? undefined : ariaLabel ?? undefined}
     aria-describedby={describedBy ?? undefined}
-    aria-readonly={isReadOnly ? "true" : undefined}
+    aria-readonly={readOnly ? "true" : undefined}
     on:change={handleChange}
   />
   <span class="switch__track" aria-hidden="true">
@@ -60,6 +66,14 @@
 
 <style>
   .switch {
+    --poodle-switch-off-color: var(--poodle-color-text-primary);
+    --poodle-switch-on-color: var(--poodle-color-accent-base);
+    --poodle-switch-off-track: color-mix(in srgb, var(--poodle-switch-off-color) 18%, var(--poodle-color-background-surface));
+    --poodle-switch-on-track: color-mix(in srgb, var(--poodle-switch-on-color) 24%, var(--poodle-color-background-surface));
+    --poodle-switch-off-thumb: var(--poodle-switch-off-color);
+    --poodle-switch-on-thumb: var(--poodle-switch-on-color);
+    --poodle-switch-off-border: var(--poodle-color-border-default);
+    --poodle-switch-on-border: color-mix(in srgb, var(--poodle-switch-on-thumb) 58%, var(--poodle-color-border-default));
     display: inline-flex;
     align-items: center;
     gap: var(--poodle-space-inline-sm);
@@ -88,9 +102,9 @@
     width: calc(var(--poodle-size-icon-default) * 2 + 0.125rem);
     height: calc(var(--poodle-size-icon-default) + 0.25rem);
     padding: 0.125rem;
-    border: 0.0625rem solid var(--poodle-color-border-default);
+    border: 0.0625rem solid var(--poodle-switch-off-border);
     border-radius: 999px;
-    background: color-mix(in srgb, var(--poodle-color-background-surface) 86%, transparent);
+    background: var(--poodle-switch-off-track);
     box-shadow: inset 0 0.0625rem 0 color-mix(in srgb, white 8%, transparent);
     transition:
       background var(--poodle-motion-duration-interaction) var(--poodle-motion-easing-standard),
@@ -102,7 +116,7 @@
     width: calc(var(--poodle-size-icon-default) - 0.125rem);
     height: calc(var(--poodle-size-icon-default) - 0.125rem);
     border-radius: 999px;
-    background: var(--poodle-color-text-primary);
+    background: var(--poodle-switch-off-thumb);
     box-shadow: 0 0.125rem 0.5rem color-mix(in srgb, black 18%, transparent);
     transform: translateX(0);
     transition:
@@ -111,12 +125,12 @@
   }
 
   .switch__control:checked + .switch__track {
-    border-color: color-mix(in srgb, var(--poodle-color-accent-base) 58%, var(--poodle-color-border-default));
-    background: color-mix(in srgb, var(--poodle-color-accent-base) 24%, var(--poodle-color-background-surface));
+    border-color: var(--poodle-switch-on-border);
+    background: var(--poodle-switch-on-track);
   }
 
   .switch__control:checked + .switch__track .switch__thumb {
-    background: var(--poodle-color-accent-base);
+    background: var(--poodle-switch-on-thumb);
     transform: translateX(calc(var(--poodle-size-icon-default) - 0.125rem));
   }
 

@@ -26,7 +26,7 @@
 
   <div class="specimen__group">
     <Eyebrow>Disabled</Eyebrow>
-    <RangeCalendar isDisabled ariaLabel="Disabled range calendar" />
+    <RangeCalendar disabled ariaLabel="Disabled range calendar" />
   </div>
 </div>
 

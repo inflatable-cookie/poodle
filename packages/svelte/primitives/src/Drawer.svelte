@@ -8,7 +8,7 @@
   export let open: boolean | null = null;
   export let defaultOpen = false;
   export let edge: DrawerEdge = "right";
-  export let isModal = true;
+  export let modal = true;
   export let title: string | null = null;
   export let description: string | null = null;
   export let dismissOnEscape = true;
@@ -35,7 +35,7 @@
       focusable[0]?.focus() ?? surfaceElement?.focus();
     });
 
-    if (typeof document !== "undefined" && isModal) {
+    if (typeof document !== "undefined" && modal) {
       bodyOverflow = document.body.style.overflow;
       document.body.style.overflow = "hidden";
     }
@@ -63,7 +63,7 @@
   }
 
   function trapFocus(event: KeyboardEvent): void {
-    if (!isModal || event.key !== "Tab" || !surfaceElement) {
+    if (!modal || event.key !== "Tab" || !surfaceElement) {
       return;
     }
 
@@ -110,8 +110,8 @@
 </script>
 
 {#if isOpen}
-  <div class="drawer" data-edge={edge} data-modal={isModal}>
-    {#if isModal}
+  <div class="drawer" data-edge={edge} data-modal={modal}>
+    {#if modal}
       <button
         type="button"
         class="drawer__backdrop"
@@ -129,7 +129,7 @@
       class="drawer__surface"
       role="dialog"
       tabindex="-1"
-      aria-modal={isModal ? "true" : undefined}
+      aria-modal={modal ? "true" : undefined}
       aria-label={title ? undefined : ariaLabel ?? undefined}
       on:keydown={trapFocus}
     >

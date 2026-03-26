@@ -13,7 +13,7 @@
   export let defaultValue: string | null = null;
   export let options: ComboboxOption[] = [];
   export let placeholder: string | null = null;
-  export let isDisabled = false;
+  export let disabled = false;
   export let ariaLabel: string | null = null;
 
   const dispatch = createEventDispatcher<{
@@ -48,7 +48,7 @@
   }
 
   function selectOption(option: ComboboxOption): void {
-    if (option.isDisabled) {
+    if (option.disabled) {
       return;
     }
 
@@ -94,7 +94,7 @@
     class="combobox__input"
     type="text"
     value={query}
-    disabled={isDisabled}
+    disabled={disabled}
     aria-autocomplete="list"
     {placeholder}
     on:focus={() => setOpen(true)}
@@ -138,7 +138,7 @@
             type="button"
             class="combobox__option"
             data-highlighted={highlightIndex === index}
-            disabled={option.isDisabled === true}
+            disabled={option.disabled === true}
             role="option"
             aria-selected={selectedOption?.value === option.value ? "true" : "false"}
             on:mouseenter={() => (highlightIndex = index)}

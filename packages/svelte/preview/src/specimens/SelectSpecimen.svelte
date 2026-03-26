@@ -78,7 +78,7 @@
       id="select-disabled"
       options={fruitOptions}
       value="banana"
-      isDisabled
+      disabled
       ariaLabel="Disabled fruit selection"
     />
   </div>

@@ -6,14 +6,14 @@
   export let fields: SortField[] = [];
   export let activeSort: ActiveSort | null = null;
   export let ariaLabel = "Sort by";
-  export let isDisabled = false;
+  export let disabled = false;
 
   const dispatch = createEventDispatcher<{
     change: { sort: ActiveSort | null };
   }>();
 
   function toggleSort(field: SortField): void {
-    if (isDisabled || field.isDisabled) return;
+    if (disabled || field.disabled) return;
 
     if (activeSort?.field === field.value) {
       if (activeSort.direction === "asc") {
@@ -34,7 +34,7 @@
   }
 </script>
 
-<div class="order-by" role="toolbar" aria-label={ariaLabel} data-disabled={isDisabled}>
+<div class="order-by" role="toolbar" aria-label={ariaLabel} data-disabled={disabled}>
   <span class="order-by__label">Sort by</span>
   <div class="order-by__fields">
     {#each fields as field (field.value)}
@@ -42,7 +42,7 @@
         type="button"
         class="order-by__field"
         class:order-by__field--active={activeSort?.field === field.value}
-        disabled={isDisabled || field.isDisabled === true}
+        disabled={disabled || field.disabled === true}
         aria-pressed={activeSort?.field === field.value ? "true" : "false"}
         on:click={() => toggleSort(field)}
       >

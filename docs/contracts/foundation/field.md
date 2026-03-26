@@ -1,7 +1,7 @@
 # Field
 
 Status: detailed contract
-Updated: 2026-03-15
+Updated: 2026-03-24
 
 ## 1. Purpose
 
@@ -55,8 +55,8 @@ Updated: 2026-03-15
 | `error` | `string \| null` | `null` | no | invalid-state error message |
 | `pendingMessage` | `string \| null` | `null` | no | pending-validation message |
 | `validationState` | `"none" \| "invalid" \| "valid" \| "pending"` | `"none"` | no | field-level validation posture |
-| `isRequired` | `boolean` | `false` | no | shows required marker and sets semantics |
-| `optionalLabel` | `string \| null` | `"Optional"` | no | explicit optional marker text; null hides the marker |
+| `required` | `boolean` | `false` | no | shows required marker and sets semantics |
+| `optionalLabel` | `string \| null` | `null` | no | explicit optional marker text; opt-in only, null hides the marker |
 | `span` | `number \| "full" \| null` | `null` | no | grid-column span for form layout |
 | `gridArea` | `string \| null` | `null` | no | grid-area for named grid placement |
 
@@ -85,8 +85,8 @@ Updated: 2026-03-15
 
 | State | Trigger | Expected Result |
 |-------|---------|-----------------|
-| default | no validation posture | label, optional marker (if not required), and description visible |
-| required | `isRequired=true` | required marker visible instead of optional marker |
+| default | no validation posture | label and description visible; no optional marker unless `optionalLabel` is provided |
+| required | `required=true` | required marker visible instead of optional marker |
 | invalid | `validationState="invalid"` and `error` set | error message visible below control; `describedBy` includes error id |
 | valid | `validationState="valid"` | no required success copy; child control may show success border |
 | pending | `validationState="pending"` and `pendingMessage` set | pending message visible below control; `describedBy` includes message id |
@@ -110,7 +110,7 @@ are owned by the slotted control.
 - Role: wrapper is structurally neutral (`<div>`), not a fieldset or group
 - Label: visible `<label>` element with `for` attribute pointing to the child
   control's `id`
-- Required: when `isRequired` is true, the required marker is decorative; the
+- Required: when `required` is true, the required marker is decorative; the
   child control should set `aria-required` or the native `required` attribute
 - Description relationship: `aria-describedby` on the child control includes
   the description id when description is present
@@ -243,7 +243,7 @@ are owned by the slotted control.
 
 - Label uses `<label for="{id}">` for native label-to-control association
 - Required marker renders an asterisk or similar indicator; optional marker
-  renders the `optionalLabel` text (default "Optional")
+  renders the `optionalLabel` text only when explicitly provided
 - Slot passes `describedBy`, `descriptionId`, `errorId`, `messageId`, and
   `validationState` as slot props so child controls can wire up accessibility
   relationships without knowing the Field's internal id scheme
@@ -313,7 +313,7 @@ are owned by the slotted control.
 
 | Label | Props / Config | Expected Visual |
 |-------|---------------|-----------------|
-| Required | `label="Email address"`, `isRequired`, child TextInput with placeholder | Field with label and required marker visible, no optional marker |
+| Required | `label="Email address"`, `required`, child TextInput with placeholder | Field with label and required marker visible, no optional marker |
 
 ### With Error
 
@@ -331,7 +331,7 @@ are owned by the slotted control.
 
 | Label | Props / Config | Expected Visual |
 |-------|---------------|-----------------|
-| Optional | `label="Phone number"`, `optionalLabel="optional"`, child TextInput with placeholder | Field with label and "optional" marker text in secondary color |
+| Optional | `label="Phone number"`, `optionalLabel="Optional"`, child TextInput with placeholder | Field with label and explicit optional marker text in secondary color |
 
 ## 14. Approval And Adoption Notes
 

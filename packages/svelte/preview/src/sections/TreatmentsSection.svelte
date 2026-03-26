@@ -153,7 +153,7 @@
             {#if role.components.length > 0}
               <div class="role-card__pills">
                 {#each role.components as comp}
-                  <Pill size="xxs" tone="neutral" appearance="subtle">{comp}</Pill>
+                  <Pill size="sm" tone="neutral" appearance="subtle">{comp}</Pill>
                 {/each}
               </div>
             {/if}

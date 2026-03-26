@@ -85,6 +85,7 @@ The generalized primitive baseline should explicitly include these families:
 ### 4. Feedback And Status
 
 - `Progress`
+- `Spinner`
 - `Skeleton`
 - `Badge`
 - `Pill`
@@ -134,7 +135,7 @@ foundation contract set:
 - selection and value primitives: `Checkbox`, `Switch`, `TriStateSwitch`,
   `RadioGroup`, `SegmentedControl`, `Select`, `Slider`, `RangeSlider`
 - feedback primitives: `Progress`, `Skeleton`, `Badge`, `Pill`, `Callout`,
-  `Banner`, `StatusIndicator`
+  `Banner`, `StatusIndicator`, `Spinner`
 - disclosure primitives: `Collapsible`, `Accordion`
 
 The package now covers the current primitive baseline defined by the documented

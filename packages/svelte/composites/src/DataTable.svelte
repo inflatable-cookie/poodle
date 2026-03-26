@@ -30,14 +30,14 @@
 
 
   $: visibleColumns = columns.filter((c) => !hiddenColumnIds.includes(c.id));
-  $: hideableColumns = columns.filter((c) => c.isHideable !== false);
+  $: hideableColumns = columns.filter((c) => c.hideable !== false);
   $: selectableRowCount = rows.length;
   $: selectionCount = rows.filter((row) => selectedRowIds.includes(row.id)).length;
   $: allRowsSelected = selectableRowCount > 0 && selectionCount === selectableRowCount;
   $: mixedSelection = selectionCount > 0 && !allRowsSelected;
 
   function requestSort(column: TableColumn): void {
-    if (!column.isSortable) {
+    if (!column.sortable) {
       return;
     }
 
@@ -106,7 +106,7 @@
               <label class="data-table__col-menu-item">
                 <Checkbox
                   ariaLabel={col.label}
-                  isChecked={!hiddenColumnIds.includes(col.id)}
+                  checked={!hiddenColumnIds.includes(col.id)}
                   on:checkedChange={() => toggleColumnVisibility(col.id)}
                 />
                 <span>{col.label}</span>
@@ -127,8 +127,8 @@
         <th class="data-table__selection">
           <Checkbox
             ariaLabel="Select all visible rows"
-            isChecked={allRowsSelected}
-            isMixed={mixedSelection}
+            checked={allRowsSelected}
+            mixed={mixedSelection}
             on:checkedChange={(event) => dispatch("toggleAll", { selected: event.detail.checked })}
           />
         </th>
@@ -136,9 +136,9 @@
           <th
             scope="col"
             class:end-align={column.align === "end"}
-            aria-sort={column.isSortable && sortColumnId === column.id ? (sortDirection === "asc" ? "ascending" : "descending") : column.isSortable ? "none" : undefined}
+            aria-sort={column.sortable && sortColumnId === column.id ? (sortDirection === "asc" ? "ascending" : "descending") : column.sortable ? "none" : undefined}
           >
-            {#if column.isSortable}
+            {#if column.sortable}
               <button
                 type="button"
                 class="data-table__sort"
@@ -173,7 +173,7 @@
             <td class="data-table__selection">
               <Checkbox
                 ariaLabel={`Select row ${row.cells[visibleColumns[0]?.id ?? "id"] ?? row.id}`}
-                isChecked={selectedRowIds.includes(row.id)}
+                checked={selectedRowIds.includes(row.id)}
                 on:checkedChange={(event) =>
                   dispatch("rowToggle", { rowId: row.id, selected: event.detail.checked })}
               />

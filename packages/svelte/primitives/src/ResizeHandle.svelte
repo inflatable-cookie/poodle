@@ -4,7 +4,7 @@
   import type { SplitOrientation } from "./types";
 
   export let orientation: SplitOrientation = "horizontal";
-  export let isDisabled = false;
+  export let disabled = false;
   export let ariaLabel: string | null = null;
   export let ariaValueNow: number | null = null;
   export let ariaValueMin = 0;
@@ -22,7 +22,7 @@
   let isListening = false;
 
   function handlePointerDown(event: MouseEvent): void {
-    if (isDisabled) return;
+    if (disabled) return;
     event.preventDefault();
     isDragging = true;
     lastPosition = orientation === "horizontal" ? event.clientX : event.clientY;
@@ -60,7 +60,7 @@
   }
 
   function handleKeydown(event: KeyboardEvent): void {
-    if (isDisabled) return;
+    if (disabled) return;
     const step = 8;
     const prevKey = orientation === "horizontal" ? "ArrowLeft" : "ArrowUp";
     const nextKey = orientation === "horizontal" ? "ArrowRight" : "ArrowDown";
@@ -89,7 +89,7 @@
 <div
   class="resize-handle"
   data-orientation={orientation}
-  data-disabled={isDisabled || undefined}
+  data-disabled={disabled || undefined}
   data-dragging={isDragging || undefined}
   role="separator"
   aria-orientation={orientation}
@@ -97,7 +97,7 @@
   aria-valuenow={ariaValueNow}
   aria-valuemin={ariaValueMin}
   aria-valuemax={ariaValueMax}
-  tabindex={isDisabled ? -1 : 0}
+  tabindex={disabled ? -1 : 0}
   on:mousedown={handlePointerDown}
   on:keydown={handleKeydown}
 >

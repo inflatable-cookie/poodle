@@ -41,7 +41,7 @@ Updated: 2026-03-11
 |------|------|---------|----------|-------|
 | `title` | `string \| null` | `null` | no | section heading |
 | `description` | `string \| null` | `null` | no | support text |
-| `isSeparated` | `boolean` | `true` | no | visual separation from surrounding sections |
+| `separated` | `boolean` | `true` | no | visual separation from surrounding sections |
 | `ariaLabel` | `string \| null` | `null` | no | optional label when no visible title exists |
 
 ### Controlled And Uncontrolled
@@ -58,7 +58,7 @@ Updated: 2026-03-11
 | simple | body only | compact grouped body |
 | titled | title present | heading-led section |
 | actionable | actions present | header split layout |
-| separated | `isSeparated=true` | divider or spacing separation |
+| separated | `separated=true` | divider or spacing separation |
 
 ### Component States
 

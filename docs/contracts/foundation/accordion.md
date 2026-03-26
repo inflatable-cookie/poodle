@@ -55,7 +55,7 @@ Updated: 2026-03-15
 | `value` | `string \| string[] \| null` | `null` | no | controlled expanded value(s); `null` = uncontrolled |
 | `defaultValue` | `string \| string[] \| null` | `null` | no | uncontrolled initial expanded value(s) |
 | `selectionMode` | `"single" \| "multiple"` | `"single"` | no | single or multiple expansion |
-| `isCollapsible` | `boolean` | `true` | no | whether all items can be collapsed in single mode |
+| `collapsible` | `boolean` | `true` | no | whether all items can be collapsed in single mode |
 | `ariaLabel` | `string \| null` | `null` | no | accessible label for the root container |
 
 ### AccordionItem Interface
@@ -65,7 +65,7 @@ Updated: 2026-03-15
 | `value` | `string` | yes | unique identifier for this item |
 | `label` | `string` | yes | visible title text |
 | `description` | `string` | no | supporting description text |
-| `isDisabled` | `boolean` | no | suppresses interaction for this item |
+| `disabled` | `boolean` | no | suppresses interaction for this item |
 
 ### Slots
 
@@ -87,7 +87,7 @@ Updated: 2026-03-15
 |-------|---------|-----------------|
 | collapsed | default | panel hidden, indicator points down |
 | expanded | item value in active set | panel visible, indicator rotated 180deg |
-| disabled | `item.isDisabled=true` | trigger non-interactive, cursor not-allowed, reduced opacity |
+| disabled | `item.disabled=true` | trigger non-interactive, cursor not-allowed, reduced opacity |
 | focus | keyboard focus on trigger | focus ring visible |
 
 ### Component States
@@ -267,7 +267,7 @@ Updated: 2026-03-15
 - Data attribute `data-open` on each item section drives indicator rotation
 - Controlled mode: `value !== null`; uncontrolled mode: internal
   `uncontrolledValue` tracks state
-- Single mode with `isCollapsible=false`: toggling an open item keeps it open
+- Single mode with `collapsible=false`: toggling an open item keeps it open
 - The public API is data-driven (items array + slot) rather than compound
   component composition
 
@@ -291,7 +291,7 @@ Updated: 2026-03-15
 - [ ] group role present in multiple mode, absent in single mode
 - [ ] disabled item behavior matches (cursor, opacity, non-interactive)
 - [ ] single vs multiple expansion posture matches
-- [ ] isCollapsible behavior matches in single mode
+- [ ] collapsible behavior matches in single mode
 - [ ] valueChange event payload matches
 - [ ] controlled and uncontrolled modes match
 

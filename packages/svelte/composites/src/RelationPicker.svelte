@@ -371,7 +371,7 @@
           {#if selectionMode === "multiple"}
             <Checkbox
               ariaLabel={`Select ${item.label}`}
-              isChecked={selectedIds.includes(item.id)}
+              checked={selectedIds.includes(item.id)}
               on:checkedChange={() => toggleItem(item.id)}
             />
             <button

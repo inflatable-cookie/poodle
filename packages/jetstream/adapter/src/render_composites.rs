@@ -12,7 +12,7 @@ use poodle_composites::{
     LogListSpec, MarkdownEditorSpec, MediaPickerSpec, MediaPreviewSpec, MediaThumbnailSpec,
     PageHeaderSpec, PageLoadingSpec,
     PaginationSummarySpec, PickerShellSpec, RelationPickerSpec, RemediationBannerSpec,
-    ReorderableListSpec, SelectionSummarySpec, SlugFieldSpec, StateTileSpec, ToastStackSpec,
+    ReorderableListSpec, SelectionSummarySpec, StateTileSpec, ToastStackSpec,
     ValidationSummarySpec, VideoPlayerSpec,
 };
 use poodle_primitives::{
@@ -317,14 +317,6 @@ impl RenderComponent<OrderBySpec> for JetstreamAdapter {
     }
 }
 
-impl RenderComponent<SlugFieldSpec> for JetstreamAdapter {
-    type Target = JetstreamTarget;
-    fn render(&self, _spec: &SlugFieldSpec, style: &StyleDescriptor, _theme: &dyn ThemeProvider) -> JetstreamNodeHandle {
-        let mapped = map_style(style);
-        JetstreamNodeHandle::new("slug-field", "SlugFieldSpec", WidgetKind::TextInput, mapped)
-    }
-}
-
 impl RenderComponent<RelationPickerSpec> for JetstreamAdapter {
     type Target = JetstreamTarget;
     fn render(&self, _spec: &RelationPickerSpec, style: &StyleDescriptor, _theme: &dyn ThemeProvider) -> JetstreamNodeHandle {
@@ -337,6 +329,7 @@ impl RenderComponent<RelationPickerSpec> for JetstreamAdapter {
 mod tests {
     use poodle_adapter::RenderComponent;
     use poodle_composites::*;
+    use poodle_primitives::{BreadcrumbsSpec, ListCardSpec, NavCardGridSpec, NavCardSpec, OrderBySpec};
     use poodle_style::StyleDescriptor;
     use crate::{JetstreamAdapter, WidgetKind, theme::JetstreamThemeProvider};
 
@@ -354,7 +347,7 @@ mod tests {
     // Data composites
     #[test] fn data_table() { assert_eq!(a().render(&DataTableSpec::new(vec![], vec![]), &s(), &t()).widget_kind, WidgetKind::List); }
     #[test] fn detail_shell() { assert_eq!(a().render(&DetailShellSpec::new(), &s(), &t()).spec_type, "DetailShellSpec"); }
-    #[test] fn detail_section() { assert_eq!(a().render(&DetailSectionSpec::new("S"), &s(), &t()).spec_type, "DetailSectionSpec"); }
+    #[test] fn detail_section() { assert_eq!(a().render(&DetailSectionSpec::new(), &s(), &t()).spec_type, "DetailSectionSpec"); }
     #[test] fn filter_toolbar() { assert_eq!(a().render(&FilterToolbarSpec::new(), &s(), &t()).spec_type, "FilterToolbarSpec"); }
     #[test] fn picker_shell() { assert_eq!(a().render(&PickerShellSpec::new("P"), &s(), &t()).spec_type, "PickerShellSpec"); }
     #[test] fn selection_summary() { assert_eq!(a().render(&SelectionSummarySpec::new(vec![]), &s(), &t()).spec_type, "SelectionSummarySpec"); }
@@ -365,9 +358,9 @@ mod tests {
     #[test] fn state_tile() { assert_eq!(a().render(&StateTileSpec::new("L", "V"), &s(), &t()).spec_type, "StateTileSpec"); }
     #[test] fn toast_stack() { assert_eq!(a().render(&ToastStackSpec::new(), &s(), &t()).spec_type, "ToastStackSpec"); }
     #[test] fn log_list() { assert_eq!(a().render(&LogListSpec::new(), &s(), &t()).widget_kind, WidgetKind::List); }
-    #[test] fn nav_card() { assert_eq!(a().render(&NavCardSpec::new("N"), &s(), &t()).widget_kind, WidgetKind::Button); }
-    #[test] fn nav_card_grid() { assert_eq!(a().render(&NavCardGridSpec::new(3), &s(), &t()).spec_type, "NavCardGridSpec"); }
-    #[test] fn list_card() { assert_eq!(a().render(&ListCardSpec::new("C"), &s(), &t()).widget_kind, WidgetKind::Button); }
+    #[test] fn nav_card() { assert_eq!(a().render(&NavCardSpec::new(), &s(), &t()).widget_kind, WidgetKind::Button); }
+    #[test] fn nav_card_grid() { assert_eq!(a().render(&NavCardGridSpec::new(), &s(), &t()).spec_type, "NavCardGridSpec"); }
+    #[test] fn list_card() { assert_eq!(a().render(&ListCardSpec::new(), &s(), &t()).widget_kind, WidgetKind::Button); }
 
     // Editing, media, navigation, and list composites
     #[test] fn audio_player() { assert_eq!(a().render(&AudioPlayerSpec::new("audio.mp3"), &s(), &t()).spec_type, "AudioPlayerSpec"); }
@@ -384,7 +377,6 @@ mod tests {
     #[test] fn breadcrumbs() { assert_eq!(a().render(&BreadcrumbsSpec::new(vec![]), &s(), &t()).spec_type, "BreadcrumbsSpec"); }
     #[test] fn card_radio_group() { assert_eq!(a().render(&CardRadioGroupSpec::new(vec![]), &s(), &t()).spec_type, "CardRadioGroupSpec"); }
     #[test] fn inline_editable_field() { assert_eq!(a().render(&InlineEditableFieldSpec::new("val"), &s(), &t()).spec_type, "InlineEditableFieldSpec"); }
-    #[test] fn order_by() { assert_eq!(a().render(&OrderBySpec::new(vec![]), &s(), &t()).spec_type, "OrderBySpec"); }
-    #[test] fn slug_field() { assert_eq!(a().render(&SlugFieldSpec::new("slug"), &s(), &t()).spec_type, "SlugFieldSpec"); }
+    #[test] fn order_by() { assert_eq!(a().render(&OrderBySpec::new(), &s(), &t()).spec_type, "OrderBySpec"); }
     #[test] fn relation_picker() { assert_eq!(a().render(&RelationPickerSpec::new(vec![]), &s(), &t()).spec_type, "RelationPickerSpec"); }
 }

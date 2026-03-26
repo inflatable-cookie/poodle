@@ -17,7 +17,7 @@
   export let placeholder = "Select date";
   export let weekStartsOn: CalendarWeekStart = "monday";
   export let locale = "en-US";
-  export let isDisabled = false;
+  export let disabled = false;
   export let ariaLabel: string | null = null;
 
   const dispatch = createEventDispatcher<{
@@ -88,7 +88,7 @@
   <button
     type="button"
     class="date-picker__trigger"
-    disabled={isDisabled}
+    disabled={disabled}
     aria-haspopup="dialog"
     aria-expanded={isOpen ? "true" : "false"}
     aria-controls={isOpen ? surfaceId : undefined}
@@ -108,7 +108,7 @@
         visibleMonth={visibleMonth}
         {weekStartsOn}
         {locale}
-        {isDisabled}
+        {disabled}
         ariaLabel={ariaLabel ?? placeholder}
         on:valueChange={(event) => commitValue(event.detail.value)}
         on:monthChange={(event) => (visibleMonth = event.detail.month)}

@@ -2,6 +2,7 @@
   import { createEventDispatcher } from "svelte";
 
   import Icon from "./Icon.svelte";
+  import Spinner from "./Spinner.svelte";
   import type { StatusTone } from "./types";
 
   type CalloutAnnounceMode = "none" | "polite" | "assertive";
@@ -11,7 +12,7 @@
   export let message: string | null = null;
   export let ariaLabel: string | null = null;
   export let announceMode: CalloutAnnounceMode = "none";
-  export let isDismissible = false;
+  export let dismissible = false;
   export let dismissLabel = "Dismiss message";
 
   const dispatch = createEventDispatcher<{
@@ -22,7 +23,6 @@
     success: "check",
     warning: "triangle-alert",
     danger: "circle-x",
-    pending: "loader",
     info: "info",
     neutral: "info",
   };
@@ -52,6 +52,8 @@
     <span class="callout__icon" aria-hidden="true">
       {#if $$slots.icon}
         <slot name="icon" />
+      {:else if tone === "pending"}
+        <Spinner variant="ring" size="sm" tone="accent" />
       {:else}
         <Icon name={toneIcon[tone] ?? "info"} size="sm" />
       {/if}
@@ -74,7 +76,7 @@
     </div>
   {/if}
 
-  {#if isDismissible}
+  {#if dismissible}
     <button
       type="button"
       class="callout__dismiss"

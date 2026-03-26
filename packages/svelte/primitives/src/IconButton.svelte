@@ -3,21 +3,32 @@
 </script>
 
 <script lang="ts">
-  import { createEventDispatcher, onDestroy } from "svelte";
+  import { createEventDispatcher, onDestroy, onMount, tick } from "svelte";
 
   import Icon from "./Icon.svelte";
-  import type { ButtonTone, ButtonVariant, ControlSize, IconProp, OverlayPlacement } from "./types";
+  import { getUiPresentation, resolveSemanticControlSize } from "./presentation";
+  import Spinner from "./Spinner.svelte";
+  import { resolveOverlayPosition } from "./overlay-position";
+  import type {
+    ButtonTone,
+    ButtonVariant,
+    ControlSize,
+    IconProp,
+    OverlayPlacement,
+    SemanticControlSizeRole,
+  } from "./types";
 
   export let variant: ButtonVariant = "ghost";
   export let tone: ButtonTone = "default";
-  export let size: ControlSize = "md";
+  export let size: ControlSize | null = null;
+  export let sizeRole: SemanticControlSizeRole = "control";
   export let icon: IconProp;
   export let ariaLabel: string;
   export let tooltip: string | null = null;
   export let tooltipPlacement: OverlayPlacement = "top";
-  export let isDisabled = false;
-  export let isLoading = false;
-  export let isPressed: boolean | null = null;
+  export let disabled = false;
+  export let loading = false;
+  export let pressed: boolean | null = null;
   export let describedBy: string | null = null;
   export let type: HTMLButtonElement["type"] = "button";
 
@@ -26,13 +37,28 @@
     focus: FocusEvent;
     blur: FocusEvent;
   }>();
+  const uiPresentation = getUiPresentation();
 
   const tooltipId = `poodle-icon-tooltip-${++nextTooltipId}`;
   let tooltipOpen = false;
   let timer: ReturnType<typeof setTimeout> | null = null;
+  let buttonElement: HTMLButtonElement | null = null;
+  let tooltipElement: HTMLSpanElement | null = null;
+  let resolvedTooltipPlacement: OverlayPlacement = tooltipPlacement;
+  let tooltipStyle = "";
 
-  $: isUnavailable = isDisabled || isLoading;
+  $: isUnavailable = disabled || loading;
   $: tooltipText = tooltip ?? ariaLabel;
+  $: resolvedSize = size ?? resolveSemanticControlSize(uiPresentation?.sizeScale ?? "md", sizeRole);
+  $: resolvedIconSize =
+    resolvedSize === "xs" || resolvedSize === "sm"
+      ? "sm"
+      : resolvedSize === "xl"
+        ? "lg"
+        : resolvedSize;
+  $: if (tooltipOpen && tooltipText) {
+    void updateTooltipPosition();
+  }
 
   function scheduleOpen(): void {
     clearTimer();
@@ -51,6 +77,43 @@
     }
   }
 
+  async function updateTooltipPosition(): Promise<void> {
+    if (!tooltipOpen || !buttonElement) {
+      return;
+    }
+
+    await tick();
+
+    if (!tooltipElement) {
+      return;
+    }
+
+    const nextPosition = resolveOverlayPosition(
+      buttonElement.getBoundingClientRect(),
+      tooltipElement.getBoundingClientRect(),
+      tooltipPlacement,
+    );
+
+    resolvedTooltipPlacement = nextPosition.placement;
+    tooltipStyle = `top: ${nextPosition.top}px; left: ${nextPosition.left}px;`;
+  }
+
+  function handleViewportChange(): void {
+    if (tooltipOpen) {
+      void updateTooltipPosition();
+    }
+  }
+
+  onMount(() => {
+    window.addEventListener("resize", handleViewportChange);
+    window.addEventListener("scroll", handleViewportChange, true);
+
+    return () => {
+      window.removeEventListener("resize", handleViewportChange);
+      window.removeEventListener("scroll", handleViewportChange, true);
+    };
+  });
+
   onDestroy(() => clearTimer());
 </script>
 
@@ -62,17 +125,18 @@
 >
   <button
     {type}
+    bind:this={buttonElement}
     class="icon-button"
     data-variant={variant}
     data-tone={tone !== "default" ? tone : undefined}
-    data-size={size}
-    data-loading={isLoading}
-    data-pressed={isPressed === true}
+    data-size={resolvedSize}
+    data-loading={loading}
+    data-pressed={pressed === true}
     disabled={isUnavailable}
     aria-label={ariaLabel}
     aria-describedby={tooltipOpen ? tooltipId : describedBy ?? undefined}
-    aria-busy={isLoading ? "true" : undefined}
-    aria-pressed={isPressed === null ? undefined : isPressed ? "true" : "false"}
+    aria-busy={loading ? "true" : undefined}
+    aria-pressed={pressed === null ? undefined : pressed ? "true" : "false"}
     on:click={(event) => dispatch("click", event)}
     on:focus={scheduleOpen}
     on:blur={dismiss}
@@ -82,17 +146,26 @@
       if (event.key === "Escape") dismiss();
     }}
   >
-    {#if isLoading}
-      <span class="icon-button__spinner" aria-hidden="true"></span>
+    {#if loading}
+      <span class="icon-button__spinner" aria-hidden="true">
+        <Spinner variant="ring" size="sm" tone="current" />
+      </span>
     {:else}
       <span class="icon-button__glyph" aria-hidden="true">
-        <slot><Icon icon={icon} size="md" /></slot>
+        <slot><Icon icon={icon} size={resolvedIconSize} /></slot>
       </span>
     {/if}
   </button>
 
   {#if tooltipOpen && tooltipText}
-    <span id={tooltipId} class="icon-button__tooltip" data-placement={tooltipPlacement} role="tooltip">
+    <span
+      id={tooltipId}
+      bind:this={tooltipElement}
+      class="icon-button__tooltip"
+      data-placement={resolvedTooltipPlacement}
+      style={tooltipStyle}
+      role="tooltip"
+    >
       {tooltipText}
     </span>
   {/if}
@@ -138,6 +211,11 @@
       transform var(--poodle-motion-duration-interaction) var(--poodle-motion-easing-standard);
   }
 
+  .icon-button[data-size="xs"] {
+    width: calc(var(--poodle-size-control-height) - 0.25rem);
+    height: calc(var(--poodle-size-control-height) - 0.25rem);
+  }
+
   .icon-button[data-size="sm"] {
     width: calc(var(--poodle-size-control-height) - 0.375rem);
     height: calc(var(--poodle-size-control-height) - 0.375rem);
@@ -146,6 +224,11 @@
   .icon-button[data-size="lg"] {
     width: calc(var(--poodle-size-control-height) + 0.375rem);
     height: calc(var(--poodle-size-control-height) + 0.375rem);
+  }
+
+  .icon-button[data-size="xl"] {
+    width: calc(var(--poodle-size-control-height) + 0.5rem);
+    height: calc(var(--poodle-size-control-height) + 0.5rem);
   }
 
   .icon-button[data-variant="primary"] {
@@ -251,22 +334,19 @@
   }
 
   .icon-button__spinner {
-    border: 0.125rem solid color-mix(in srgb, currentColor 24%, transparent);
-    border-top-color: currentColor;
-    border-radius: 999px;
-    animation: icon-button-spinner 0.8s linear infinite;
+    width: 45%;
+    height: 45%;
   }
 
-  @keyframes icon-button-spinner {
-    to {
-      transform: rotate(360deg);
-    }
+  .icon-button__spinner :global(.spinner) {
+    width: 100%;
+    height: 100%;
   }
 
   /* ── Tooltip ── */
 
   .icon-button__tooltip {
-    position: absolute;
+    position: fixed;
     z-index: var(--poodle-overlay-z-menu);
     max-width: 16rem;
     padding: 0.375rem 0.5rem;
@@ -279,29 +359,5 @@
     line-height: 1.35;
     white-space: nowrap;
     pointer-events: none;
-  }
-
-  .icon-button__tooltip[data-placement^="top"] {
-    bottom: calc(100% + 0.375rem);
-    left: 50%;
-    transform: translateX(-50%);
-  }
-
-  .icon-button__tooltip[data-placement^="bottom"] {
-    top: calc(100% + 0.375rem);
-    left: 50%;
-    transform: translateX(-50%);
-  }
-
-  .icon-button__tooltip[data-placement^="left"] {
-    top: 50%;
-    right: calc(100% + 0.375rem);
-    transform: translateY(-50%);
-  }
-
-  .icon-button__tooltip[data-placement^="right"] {
-    top: 50%;
-    left: calc(100% + 0.375rem);
-    transform: translateY(-50%);
   }
 </style>

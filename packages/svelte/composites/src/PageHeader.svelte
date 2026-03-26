@@ -1,13 +1,20 @@
 <script lang="ts">
   export let title: string;
+  export let count: number | null = null;
   export let subtitle: string | null = null;
   export let eyebrow: string | null = null;
+  export let backHref: string | null = null;
+  export let backLabel: string | null = null;
   export let align: "start" | "between" = "between";
   export let ariaLabel: string | null = null;
 </script>
 
 <header class="page-header" data-align={align} aria-label={ariaLabel ?? undefined}>
   <div class="page-header__content">
+    {#if backHref}
+      <a class="page-header__back" href={backHref}>{backLabel ?? "Back"}</a>
+    {/if}
+
     {#if $$slots.breadcrumbs}
       <div class="page-header__breadcrumbs">
         <slot name="breadcrumbs" />
@@ -18,7 +25,12 @@
       {#if eyebrow}
         <p class="page-header__eyebrow">{eyebrow}</p>
       {/if}
-      <h2 class="page-header__title">{title}</h2>
+      <h2 class="page-header__title">
+        <span>{title}</span>
+        {#if count !== null}
+          <span class="page-header__count" aria-label={`${count}`}>{count}</span>
+        {/if}
+      </h2>
       {#if subtitle}
         <p class="page-header__subtitle">{subtitle}</p>
       {/if}
@@ -63,6 +75,20 @@
     gap: var(--poodle-space-stack-md);
   }
 
+  .page-header__back {
+    width: fit-content;
+    color: var(--poodle-color-text-secondary);
+    font-size: 0.8125rem;
+    line-height: 1.2;
+    text-decoration: none;
+  }
+
+  .page-header__back:hover {
+    color: var(--poodle-color-text-primary);
+    text-decoration: underline;
+    text-underline-offset: 0.12em;
+  }
+
   .page-header__title-block {
     display: grid;
     gap: var(--poodle-space-inline-sm);
@@ -75,10 +101,28 @@
   }
 
   .page-header__title {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
     font-family: var(--poodle-typography-heading-family);
     font-size: 1.75rem;
     line-height: 1.1;
     font-weight: 700;
+  }
+
+  .page-header__count {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 1.75rem;
+    min-height: 1.75rem;
+    padding: 0 0.5rem;
+    border-radius: 999px;
+    background: color-mix(in srgb, var(--poodle-color-fill-secondary) 72%, transparent);
+    color: var(--poodle-color-text-secondary);
+    font-size: 0.875rem;
+    font-weight: 600;
+    line-height: 1;
   }
 
   .page-header__eyebrow {
