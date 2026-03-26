@@ -41,6 +41,7 @@ Updated: 2026-03-11
 | `maxVisibleItems` | `number \| null` | `null` | no | optional truncation threshold |
 | `size` | `"xs" \| "sm" \| "md" \| "lg" \| "xl"` | `null` | no | explicit control size override; when null, resolves from inherited presentation |
 | `sizeRole` | `"chrome" \| "control" \| "prominent"` | `"chrome"` | no | semantic size offset from inherited presentation |
+| `density` | `ControlDensity \| null` | `null` | no | explicit density override for spacing |
 | `on:navigate` | — | — | no | Svelte event: `dispatch("navigate", { value: item.value })` |
 
 ### Controlled And Uncontrolled
@@ -151,6 +152,7 @@ State table is sufficient.
 ## 9. Svelte Notes
 
 - `data-size` attribute on root reflects the resolved size
+- `data-density` — resolved density value (`compact`, `default`, or `comfortable`)
 - expected substrate: semantic nav/list structure with links or buttons
 - wrapper strategy: truncation mechanics stay internal as long as current-item
   semantics remain intact

@@ -364,6 +364,7 @@ CalendarWeekStart: "sunday" | "monday"
 - `color-mix` formulas are used for intermediate visual states (today border,
   hover tint, selected hover tint)
 - `data-size` data attribute on root reflects the resolved size
+- `data-density` — resolved density value (`compact`, `default`, or `comfortable`)
 
 ## 10. GPUI Notes
 
