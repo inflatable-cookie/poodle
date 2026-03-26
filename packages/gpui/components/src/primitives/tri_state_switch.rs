@@ -78,7 +78,15 @@ impl IntoElement for TriStateSwitch {
         let focus_ring = resolve_color(theme, "semantic.color.accent.focusRing");
         let disabled_opacity = resolve_opacity(theme, "semantic.state.opacity.disabled");
 
-        let control_height = resolve_px(theme, "semantic.size.control.height");
+        let base_control_height = resolve_px(theme, "semantic.size.control.height");
+        let size_offset: f32 = match spec.size {
+            poodle_primitives::ControlSize::Xs => -10.0,
+            poodle_primitives::ControlSize::Sm => -6.0,
+            poodle_primitives::ControlSize::Md => 0.0,
+            poodle_primitives::ControlSize::Lg => 6.0,
+            poodle_primitives::ControlSize::Xl => 10.0,
+        };
+        let control_height = base_control_height + px(size_offset);
         let track_padding = px(2.0);
         let segment_min_w = px(72.0);
         let segment_h = control_height - px(4.0);

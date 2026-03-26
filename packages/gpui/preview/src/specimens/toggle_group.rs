@@ -86,6 +86,39 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                         .child("Selected: design, docs")
                 )
         )
+        // --- Semantic role offsets ---
+        .child(
+            div().flex().flex_col().gap(px(8.0))
+                .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Semantic role offsets"), theme))
+                .child(
+                    div().flex().flex_wrap().gap(px(12.0)).items_center()
+                        .child(
+                            ToggleGroup::new(vec![
+                                ToggleGroupOption::new("grid", "Grid"),
+                                ToggleGroupOption::new("list", "List"),
+                                ToggleGroupOption::new("board", "Board"),
+                            ], theme)
+                                .default_value(vec!["grid".to_string()])
+                        )
+                        .child(
+                            ToggleGroup::new(vec![
+                                ToggleGroupOption::new("grid", "Grid"),
+                                ToggleGroupOption::new("list", "List"),
+                                ToggleGroupOption::new("board", "Board"),
+                            ], theme)
+                                .default_value(vec!["list".to_string()])
+                        )
+                        .child(
+                            ToggleGroup::new(vec![
+                                ToggleGroupOption::new("grid", "Grid"),
+                                ToggleGroupOption::new("list", "List"),
+                                ToggleGroupOption::new("board", "Board"),
+                            ], theme)
+                                .default_value(vec!["board".to_string()])
+                        )
+                )
+        )
+        // --- Disabled ---
         .child(
             div().flex().flex_col().gap(px(8.0))
                 .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Disabled"), theme))

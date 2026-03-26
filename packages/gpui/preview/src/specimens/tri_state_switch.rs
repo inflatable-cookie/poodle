@@ -1,6 +1,6 @@
 use gpui::*;
 use poodle_adapter::ThemeProvider;
-use poodle_primitives::{CheckState, EyebrowSpec, TriStateSwitchSpec};
+use poodle_primitives::{CheckState, ControlSize, EyebrowSpec, TriStateSwitchSpec};
 use poodle_gpui_components::{Eyebrow, TriStateSwitch};
 
 use crate::app_state::AppState;
@@ -71,6 +71,30 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                             .with_included_label("Show"),
                         theme,
                     )
+                )
+        )
+        // --- Semantic sizes ---
+        .child(
+            div().flex().flex_col().gap(px(8.0))
+                .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Semantic sizes"), theme))
+                .child(
+                    div().flex().flex_wrap().gap(px(12.0)).items_center()
+                        .child(TriStateSwitch::from_spec(TriStateSwitchSpec::new().with_state(CheckState::Mixed).with_size(ControlSize::Xs), theme))
+                        .child(TriStateSwitch::from_spec(TriStateSwitchSpec::new().with_state(CheckState::Mixed).with_size(ControlSize::Sm), theme))
+                        .child(TriStateSwitch::from_spec(TriStateSwitchSpec::new().with_state(CheckState::Mixed).with_size(ControlSize::Md), theme))
+                        .child(TriStateSwitch::from_spec(TriStateSwitchSpec::new().with_state(CheckState::Mixed).with_size(ControlSize::Lg), theme))
+                        .child(TriStateSwitch::from_spec(TriStateSwitchSpec::new().with_state(CheckState::Mixed).with_size(ControlSize::Xl), theme))
+                )
+        )
+        // --- Chrome vs prominent role offset ---
+        .child(
+            div().flex().flex_col().gap(px(8.0))
+                .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Chrome vs prominent role offset"), theme))
+                .child(
+                    div().flex().flex_wrap().gap(px(12.0)).items_center()
+                        .child(TriStateSwitch::from_spec(TriStateSwitchSpec::new().with_state(CheckState::Unchecked).with_size(ControlSize::Xs), theme))
+                        .child(TriStateSwitch::from_spec(TriStateSwitchSpec::new().with_state(CheckState::Checked).with_size(ControlSize::Sm), theme))
+                        .child(TriStateSwitch::from_spec(TriStateSwitchSpec::new().with_state(CheckState::Mixed).with_size(ControlSize::Md), theme))
                 )
         )
         // --- Disabled ---

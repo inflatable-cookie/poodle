@@ -1,10 +1,11 @@
 use poodle_tokens::semantic;
 
-use crate::types::CheckState;
+use crate::types::{CheckState, ControlSize};
 
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct TriStateSwitchSpec {
     pub state: CheckState,
+    pub size: ControlSize,
     pub label: Option<String>,
     pub excluded_label: Option<String>,
     pub default_label: Option<String>,
@@ -19,6 +20,7 @@ impl Default for TriStateSwitchSpec {
     fn default() -> Self {
         Self {
             state: CheckState::Unchecked,
+            size: ControlSize::Md,
             label: None,
             excluded_label: None,
             default_label: None,
@@ -38,6 +40,11 @@ impl TriStateSwitchSpec {
 
     pub fn with_state(mut self, state: CheckState) -> Self {
         self.state = state;
+        self
+    }
+
+    pub fn with_size(mut self, size: ControlSize) -> Self {
+        self.size = size;
         self
     }
 
