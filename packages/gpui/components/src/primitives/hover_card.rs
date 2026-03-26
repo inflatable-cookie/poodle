@@ -87,9 +87,16 @@ impl IntoElement for HoverCard {
                 .focusable()
                 .px(inline_padding)
                 .py(px(10.0))
-                .rounded(radius)
-                .bg(fill)
-                .border_1()
+                .rounded(radius);
+
+            // Brand-raised treatment: gradient fill for elevated surface
+            if theme.brand_raised {
+                surface = surface.bg(crate::theme_ext::brand_raised_surface_fill(fill));
+            } else {
+                surface = surface.bg(fill);
+            }
+
+            surface = surface.border_1()
                 .border_color(border)
                 // Contract: elevation-popover shadow
                 .shadow(vec![

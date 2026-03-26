@@ -103,9 +103,16 @@ impl IntoElement for Dialog {
             .focusable()
             .px(panel_x)
             .py(panel_y)
-            .rounded(radius)
-            .bg(bg)
-            .border_1()
+            .rounded(radius);
+
+        // Brand-raised treatment: gradient fill for elevated surface
+        if theme.brand_raised {
+            dialog = dialog.bg(crate::theme_ext::brand_raised_surface_fill(bg));
+        } else {
+            dialog = dialog.bg(bg);
+        }
+
+        dialog = dialog.border_1()
             .border_color(border)
             // Svelte: elevation-dialog shadow
             .shadow(vec![

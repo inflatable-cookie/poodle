@@ -77,12 +77,20 @@ impl IntoElement for Tooltip {
         // Tooltip bubble (shown when open)
         if spec.current_open() && spec.has_content() {
             if let Some(ref content) = spec.content {
-                wrapper = wrapper.child(
-                    div()
+                let mut tooltip_bubble = div()
                         .px(px(6.0))  // Svelte: 0.375rem
                         .py(px(6.0))  // Svelte: 0.5rem (symmetric)
-                        .rounded(tooltip_radius)
-                        .bg(fill)
+                        .rounded(tooltip_radius);
+
+                // Brand-raised treatment: gradient fill for elevated surface
+                if theme.brand_raised {
+                    tooltip_bubble = tooltip_bubble.bg(crate::theme_ext::brand_raised_surface_fill(fill));
+                } else {
+                    tooltip_bubble = tooltip_bubble.bg(fill);
+                }
+
+                wrapper = wrapper.child(
+                    tooltip_bubble
                         .border_1()
                         .border_color(tooltip_border)
                         // Contract: elevation-tooltip shadow

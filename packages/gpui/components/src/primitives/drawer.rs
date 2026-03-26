@@ -100,9 +100,16 @@ impl IntoElement for Drawer {
             .focusable()
             .min_w(px(448.0))
             .h_full()
-            .rounded(px(0.0)) // Contract: drawer radius = 0
-            .bg(surface_bg)
-            .p(panel_padding)
+            .rounded(px(0.0)); // Contract: drawer radius = 0
+
+        // Brand-raised treatment: gradient fill for elevated surface
+        if theme.brand_raised {
+            drawer_panel = drawer_panel.bg(crate::theme_ext::brand_raised_surface_fill(surface_bg));
+        } else {
+            drawer_panel = drawer_panel.bg(surface_bg);
+        }
+
+        drawer_panel = drawer_panel.p(panel_padding)
             .flex()
             .flex_col()
             .gap(stack_gap)

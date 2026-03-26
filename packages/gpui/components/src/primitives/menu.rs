@@ -104,9 +104,16 @@ impl IntoElement for Menu {
         // Contract: min-width 14rem, padding 0.25rem
         let mut menu = div()
             .min_w(px(224.0)) // 14rem
-            .rounded(overlay_radius)
-            .bg(surface_bg)
-            .border_1()
+            .rounded(overlay_radius);
+
+        // Brand-raised treatment: gradient fill for elevated surface
+        if theme.brand_raised {
+            menu = menu.bg(crate::theme_ext::brand_raised_surface_fill(surface_bg));
+        } else {
+            menu = menu.bg(surface_bg);
+        }
+
+        menu = menu.border_1()
             .border_color(border)
             // Contract: elevation-popover shadow
             .shadow(vec![

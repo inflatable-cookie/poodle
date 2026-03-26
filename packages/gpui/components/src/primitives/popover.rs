@@ -97,9 +97,16 @@ impl IntoElement for Popover {
                 let mut surface = div()
                     .id("poodle-popover-surface")
                     .focusable()
-                    .rounded(radius)
-                    .bg(surface_bg)
-                        .border_1()
+                    .rounded(radius);
+
+                // Brand-raised treatment: gradient fill for elevated surface
+                if theme.brand_raised {
+                    surface = surface.bg(crate::theme_ext::brand_raised_surface_fill(surface_bg));
+                } else {
+                    surface = surface.bg(surface_bg);
+                }
+
+                surface = surface.border_1()
                         .border_color(border)
                         // Contract: elevation-popover shadow
                         .shadow(vec![

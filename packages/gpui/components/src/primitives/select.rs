@@ -251,9 +251,16 @@ impl IntoElement for Select {
 
             let mut list = div()
                 .id("poodle-select-list")
-                .rounded(control_radius)
-                .bg(elevated_bg)
-                .border_1()
+                .rounded(control_radius);
+
+            // Brand-raised treatment: gradient fill for elevated surface
+            if theme.brand_raised {
+                list = list.bg(crate::theme_ext::brand_raised_surface_fill(elevated_bg));
+            } else {
+                list = list.bg(elevated_bg);
+            }
+
+            list = list.border_1()
                 .border_color(overlay_border)
                 // Contract: elevation-popover shadow
                 .shadow(vec![

@@ -190,9 +190,22 @@ impl IntoElement for Combobox {
                 .flex()
                 .flex_row()
                 .items_center()
-                .rounded(input_radius)
-                .bg(input_fill)
-                .border_1()
+                .rounded(input_radius);
+
+            // Brand-raised treatment: gradient fill + subtle shadow
+            if theme.brand_raised {
+                input = input.bg(crate::theme_ext::brand_raised_subtle_fill(input_fill))
+                    .shadow(vec![gpui::BoxShadow {
+                        color: hsla(0.0, 0.0, 1.0, 0.08),
+                        offset: point(px(0.0), px(-1.0)),
+                        blur_radius: px(0.0),
+                        spread_radius: px(0.0),
+                    }]);
+            } else {
+                input = input.bg(input_fill);
+            }
+
+            input = input.border_1()
                 .border_color(input_border)
                 .hover(move |s| s.bg(input_hover_fill).border_color(input_hover_border).shadow(vec![gpui::BoxShadow { color: hsla(0.0, 0.0, 1.0, 0.10), offset: point(px(0.0), px(1.0)), blur_radius: px(0.0), spread_radius: px(0.0) }]))
                 .focus(move |s| s
@@ -318,9 +331,16 @@ impl IntoElement for Combobox {
                 .id("poodle-combobox-list")
                 .w_full()
                 .mt(px(6.0)) // Contract: top calc(100% + 0.375rem)
-                .rounded(list_radius)
-                .bg(list_fill)
-                .border_1()
+                .rounded(list_radius);
+
+            // Brand-raised treatment: gradient fill for elevated surface
+            if theme.brand_raised {
+                list = list.bg(crate::theme_ext::brand_raised_surface_fill(list_fill));
+            } else {
+                list = list.bg(list_fill);
+            }
+
+            list = list.border_1()
                 .border_color(list_border)
                 // Contract: elevation-popover shadow
                 .shadow(vec![
