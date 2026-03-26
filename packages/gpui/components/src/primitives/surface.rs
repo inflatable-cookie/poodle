@@ -76,7 +76,13 @@ impl IntoElement for Surface {
             color_mix(panel, elevated_bg, 0.96)
         };
 
-        let mut el = div().rounded(surface_radius).bg(bg);
+        // Brand-raised treatment: gradient fill over the base color
+        let mut el = div().rounded(surface_radius);
+        if theme.brand_raised {
+            el = el.bg(crate::theme_ext::brand_raised_surface_fill(bg));
+        } else {
+            el = el.bg(bg);
+        }
 
         // ── Border ──────────────────────────────────────────────
         // Matches Svelte app.css treatment values:

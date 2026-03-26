@@ -290,9 +290,22 @@ impl IntoElement for TextInput {
             .w_full()
             .h(control_height)
             .px(inline_padding)
-            .rounded(control_radius)
-            .bg(surface_bg)
-            .border_1()
+            .rounded(control_radius);
+
+        // Brand-raised treatment: gradient fill + subtle shadow
+        if theme.brand_raised {
+            el = el.bg(crate::theme_ext::brand_raised_subtle_fill(surface_bg))
+                .shadow(vec![gpui::BoxShadow {
+                    color: hsla(0.0, 0.0, 1.0, 0.08),
+                    offset: point(px(0.0), px(-1.0)),
+                    blur_radius: px(0.0),
+                    spread_radius: px(0.0),
+                }]);
+        } else {
+            el = el.bg(surface_bg);
+        }
+
+        el = el.border_1()
             .border_color(effective_border)
             .text_size(body_size)
             .line_height(body_line_height)

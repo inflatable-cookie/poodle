@@ -123,9 +123,15 @@ impl IntoElement for Select {
             .focusable()
             .h(control_height)
             .px(inline_padding)
-            .rounded(control_radius)
-            .bg(surface_bg)
-            .border_1()
+            .rounded(control_radius);
+
+        if theme.brand_raised {
+            trigger = trigger.bg(crate::theme_ext::brand_raised_subtle_fill(surface_bg));
+        } else {
+            trigger = trigger.bg(surface_bg);
+        }
+
+        trigger = trigger.border_1()
             .border_color(if is_open { accent } else { border })
             .flex()
             .items_center()
