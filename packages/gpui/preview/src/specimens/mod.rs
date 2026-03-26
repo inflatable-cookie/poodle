@@ -94,6 +94,9 @@ mod breadcrumbs_specimen;
 mod duration_input_specimen;
 mod empty_state_specimen;
 mod list_card;
+mod list_container_specimen;
+mod media_browse_panel_specimen;
+mod media_upload_status_panel_specimen;
 mod metric_tile_specimen;
 mod page_header_specimen;
 mod page_loading_specimen;
@@ -349,6 +352,9 @@ pub fn render_single_specimen(
         "media-picker" => specimen_card("MediaPicker", theme, media_picker_specimen::render(theme)),
         "media-preview" => specimen_card("MediaPreview", theme, media_preview_specimen::render(theme)),
         "media-thumbnail" => specimen_card("MediaThumbnail", theme, media_thumbnail_specimen::render(theme)),
+        "media-browse-panel" => specimen_card("MediaBrowsePanel", theme, media_browse_panel_specimen::render(theme)),
+        "media-upload-status-panel" => specimen_card("MediaUploadStatusPanel", theme, media_upload_status_panel_specimen::render(theme)),
+        "list-container" => specimen_card("ListContainer", theme, list_container_specimen::render(state, cx)),
         "markdown-editor" => specimen_card("MarkdownEditor", theme, markdown_editor_specimen::render(state, cx)),
         "block-editor" => specimen_card("BlockEditor", theme, block_editor_specimen::render(theme)),
 
