@@ -20,10 +20,11 @@
   } from "./color-utils";
   import { getUiPresentation, resolveSemanticControlSize } from "./presentation";
 
-  import type { ColorInputMode, ControlSize, SemanticControlSizeRole } from "./types";
+  import type { ColorInputMode, ControlDensity, ControlSize, SemanticControlSizeRole } from "./types";
 
   export let size: ControlSize | null = null;
   export let sizeRole: SemanticControlSizeRole = "control";
+  export let density: ControlDensity | null = null;
 
   export let value = "#6366f1";
   export let swatches: string[] = [];
@@ -68,6 +69,7 @@
   syncFromHex(value);
 
   $: resolvedSize = size ?? resolveSemanticControlSize(uiPresentation?.sizeScale ?? "md", sizeRole);
+  $: resolvedDensity = density ?? uiPresentation?.density ?? "default";
   $: isOpen = open ?? uncontrolledOpen;
 
   // Keep internal state in sync when value prop changes externally
@@ -315,6 +317,7 @@
   aria-label={ariaLabel}
   data-disabled={disabled || undefined}
   data-size={resolvedSize}
+  data-density={resolvedDensity}
   bind:this={rootElement}
 >
   <!-- Trigger row -->
@@ -933,4 +936,8 @@
     height: 2.75rem;
     font-size: 0.9375rem;
   }
+
+  /* Density variants */
+  .color-picker[data-density="compact"] .color-picker__trigger { padding: 0 calc(var(--poodle-space-control-x) - 0.125rem); }
+  .color-picker[data-density="comfortable"] .color-picker__trigger { padding: 0 calc(var(--poodle-space-control-x) + 0.125rem); }
 </style>

@@ -4,10 +4,11 @@
   import Icon from "./Icon.svelte";
   import { getUiPresentation, resolveSemanticControlSize } from "./presentation";
 
-  import type { ControlSize, SemanticControlSizeRole } from "./types";
+  import type { ControlDensity, ControlSize, SemanticControlSizeRole } from "./types";
 
   export let size: ControlSize | null = null;
   export let sizeRole: SemanticControlSizeRole = "control";
+  export let density: ControlDensity | null = null;
   export let value: number | null = null;
   export let defaultValue: number | null = null;
   export let max = 5;
@@ -26,6 +27,7 @@
   let focusIndex = (defaultValue ?? 1) - 1;
 
   $: resolvedSize = size ?? resolveSemanticControlSize(uiPresentation?.sizeScale ?? "md", sizeRole);
+  $: resolvedDensity = density ?? uiPresentation?.density ?? "default";
   $: currentValue = value ?? uncontrolledValue;
   $: itemCount = Math.max(1, Math.floor(max));
   $: if (currentValue !== null) {
@@ -57,7 +59,7 @@
   }
 </script>
 
-<div class="rating" role="radiogroup" aria-label={ariaLabel ?? undefined} data-size={resolvedSize}>
+<div class="rating" role="radiogroup" aria-label={ariaLabel ?? undefined} data-size={resolvedSize} data-density={resolvedDensity}>
   {#each Array.from({ length: itemCount }, (_, index) => index) as index}
     <button
       bind:this={itemElements[index]}
@@ -153,4 +155,8 @@
   .rating[data-size="lg"] .rating__glyph { font-size: 1.125rem; }
   .rating[data-size="xl"] .rating__item { width: calc(var(--poodle-size-icon-default) + 1.25rem); height: calc(var(--poodle-size-icon-default) + 1.25rem); }
   .rating[data-size="xl"] .rating__glyph { font-size: 1.25rem; }
+
+  /* Density variants */
+  .rating[data-density="compact"] { gap: 0.0625rem; }
+  .rating[data-density="comfortable"] { gap: 0.25rem; }
 </style>

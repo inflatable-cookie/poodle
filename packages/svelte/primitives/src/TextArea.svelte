@@ -2,7 +2,7 @@
   import { createEventDispatcher } from "svelte";
 
   import { getUiPresentation, resolveSemanticControlSize } from "./presentation";
-  import type { ControlSize, SemanticControlSizeRole, ValidationState } from "./types";
+  import type { ControlDensity, ControlSize, SemanticControlSizeRole, ValidationState } from "./types";
 
   export let id: string;
   export let value: string | null = null;
@@ -17,6 +17,7 @@
   export let describedBy: string | null = null;
   export let size: ControlSize | null = null;
   export let sizeRole: SemanticControlSizeRole = "control";
+  export let density: ControlDensity | null = null;
 
   const dispatch = createEventDispatcher<{
     valueChange: { value: string };
@@ -30,6 +31,7 @@
   let uncontrolledValue = defaultValue;
 
   $: resolvedSize = size ?? resolveSemanticControlSize(uiPresentation?.sizeScale ?? "md", sizeRole);
+  $: resolvedDensity = density ?? uiPresentation?.density ?? "default";
   $: isControlled = value !== null;
   $: currentValue = isControlled ? value ?? "" : uncontrolledValue;
   $: ariaInvalid = validationState === "invalid" ? true : undefined;
@@ -56,7 +58,7 @@
   }
 </script>
 
-<div class="text-area" data-validation-state={validationState} data-size={resolvedSize}>
+<div class="text-area" data-validation-state={validationState} data-size={resolvedSize} data-density={resolvedDensity}>
   <textarea
     {id}
     {name}
@@ -154,6 +156,15 @@
 
   .text-area__control::placeholder {
     color: var(--poodle-color-text-secondary);
+  }
+
+  /* Density variants */
+  .text-area[data-density="compact"] .text-area__control {
+    padding: calc(var(--poodle-space-control-y, 0.375rem) - 0.125rem) calc(var(--poodle-space-control-x) - 0.125rem);
+  }
+
+  .text-area[data-density="comfortable"] .text-area__control {
+    padding: calc(var(--poodle-space-control-y, 0.375rem) + 0.125rem) calc(var(--poodle-space-control-x) + 0.125rem);
   }
 
   /* Size variants */

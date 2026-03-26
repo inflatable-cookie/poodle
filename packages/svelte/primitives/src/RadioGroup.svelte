@@ -6,7 +6,7 @@
   import { createEventDispatcher } from "svelte";
 
   import { getUiPresentation, resolveSemanticControlSize } from "./presentation";
-  import type { ControlSize, Orientation, RadioGroupOption, SemanticControlSizeRole } from "./types";
+  import type { ControlDensity, ControlSize, Orientation, RadioGroupOption, SemanticControlSizeRole } from "./types";
 
   export let value: string | null = null;
   export let defaultValue: string | null = null;
@@ -19,6 +19,7 @@
   export let selectedColor: string | null = null;
   export let size: ControlSize | null = null;
   export let sizeRole: SemanticControlSizeRole = "control";
+  export let density: ControlDensity | null = null;
 
   const dispatch = createEventDispatcher<{
     valueChange: { value: string };
@@ -31,6 +32,7 @@
   $: isControlled = value !== null;
   $: currentValue = isControlled ? value : uncontrolledValue;
   $: resolvedSize = size ?? resolveSemanticControlSize(uiPresentation?.sizeScale ?? "md", sizeRole);
+  $: resolvedDensity = density ?? uiPresentation?.density ?? "default";
   $: radioGroupStyles = selectedColor ? `--poodle-radio-selected-color: ${selectedColor}` : undefined;
 
   function handleChange(nextValue: string): void {
@@ -47,6 +49,7 @@
   data-orientation={orientation}
   data-disabled={disabled}
   data-size={resolvedSize}
+  data-density={resolvedDensity}
   role="radiogroup"
   aria-label={ariaLabel ?? undefined}
   aria-describedby={describedBy ?? undefined}
@@ -147,6 +150,15 @@
     font-size: var(--poodle-typography-label-size);
     font-weight: var(--poodle-typography-label-weight);
     line-height: var(--poodle-typography-label-lineHeight);
+  }
+
+  /* Density variants */
+  .radio-group[data-density="compact"] {
+    gap: var(--poodle-space-stack-sm);
+  }
+
+  .radio-group[data-density="comfortable"] {
+    gap: var(--poodle-space-stack-lg);
   }
 
   /* Size variants */

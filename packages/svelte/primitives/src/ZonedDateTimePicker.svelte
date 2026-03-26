@@ -16,7 +16,7 @@
   } from "./date";
   import { getUiPresentation, resolveSemanticControlSize } from "./presentation";
 
-  import type { CalendarWeekStart, ControlSize, SemanticControlSizeRole, TimeZoneOption, ZonedDateTimeValue } from "./types";
+  import type { CalendarWeekStart, ControlDensity, ControlSize, SemanticControlSizeRole, TimeZoneOption, ZonedDateTimeValue } from "./types";
 
   export let value: ZonedDateTimeValue | null = null;
   export let defaultValue: ZonedDateTimeValue = { date: null, time: null, timeZone: null };
@@ -30,6 +30,7 @@
   export let ariaLabel: string | null = null;
   export let size: ControlSize | null = null;
   export let sizeRole: SemanticControlSizeRole = "control";
+  export let density: ControlDensity | null = null;
 
   const dispatch = createEventDispatcher<{
     valueChange: { value: ZonedDateTimeValue };
@@ -44,6 +45,7 @@
   let visibleMonth = monthAnchorIso(defaultValue.date ?? todayIsoDate());
 
   $: resolvedSize = size ?? resolveSemanticControlSize(uiPresentation?.sizeScale ?? "md", sizeRole);
+  $: resolvedDensity = density ?? uiPresentation?.density ?? "default";
   $: currentValue = normalizeZonedDateTimeValue(value ?? uncontrolledValue);
   $: isOpen = open ?? uncontrolledOpen;
   $: if (currentValue.date) {
@@ -105,7 +107,7 @@
   });
 </script>
 
-<div bind:this={rootElement} class="zoned-date-time-picker" data-size={resolvedSize} data-open={isOpen}>
+<div bind:this={rootElement} class="zoned-date-time-picker" data-size={resolvedSize} data-density={resolvedDensity} data-open={isOpen}>
   <button
     type="button"
     class="zoned-date-time-picker__trigger"
@@ -296,4 +298,8 @@
     padding: 0 calc(var(--poodle-space-control-x) + 0.1875rem);
     font-size: 1rem;
   }
+
+  /* Density variants */
+  .zoned-date-time-picker[data-density="compact"] .zoned-date-time-picker__trigger { padding: 0 calc(var(--poodle-space-control-x) - 0.125rem); }
+  .zoned-date-time-picker[data-density="comfortable"] .zoned-date-time-picker__trigger { padding: 0 calc(var(--poodle-space-control-x) + 0.125rem); }
 </style>

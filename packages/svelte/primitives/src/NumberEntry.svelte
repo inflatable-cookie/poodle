@@ -5,10 +5,11 @@
   import { clamp, formatNumber, snapToStep } from "./internal";
   import { getUiPresentation, resolveSemanticControlSize } from "./presentation";
 
-  import type { ControlSize, SemanticControlSizeRole, ValidationState } from "./types";
+  import type { ControlDensity, ControlSize, SemanticControlSizeRole, ValidationState } from "./types";
 
   export let size: ControlSize | null = null;
   export let sizeRole: SemanticControlSizeRole = "control";
+  export let density: ControlDensity | null = null;
 
   export let id: string;
   export let value: number | null = null;
@@ -42,6 +43,7 @@
   let isEditing = false;
 
   $: resolvedSize = size ?? resolveSemanticControlSize(uiPresentation?.sizeScale ?? "md", sizeRole);
+  $: resolvedDensity = density ?? uiPresentation?.density ?? "default";
   $: isControlled = value !== null;
   $: currentValue = isControlled ? value : uncontrolledValue;
   $: if (!isEditing) {
@@ -110,7 +112,7 @@
   }
 </script>
 
-<div class="number-entry" data-validation-state={validationState} data-size={resolvedSize}>
+<div class="number-entry" data-validation-state={validationState} data-size={resolvedSize} data-density={resolvedDensity}>
   <input
     {id}
     {name}
@@ -228,6 +230,15 @@
   .number-entry__steppers button:disabled {
     cursor: not-allowed;
     opacity: var(--poodle-state-opacity-disabled);
+  }
+
+  /* Density variants */
+  .number-entry[data-density="compact"] .number-entry__control {
+    padding: 0 calc(var(--poodle-space-control-x) - 0.125rem);
+  }
+
+  .number-entry[data-density="comfortable"] .number-entry__control {
+    padding: 0 calc(var(--poodle-space-control-x) + 0.125rem);
   }
 
   /* Size variants */

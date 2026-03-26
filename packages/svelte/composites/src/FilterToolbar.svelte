@@ -1,6 +1,6 @@
 <script lang="ts">
   import { Icon, CollapseToggle, getUiPresentation, resolveSemanticControlSize } from "@poodle/svelte-primitives";
-  import type { ControlSize, SemanticControlSizeRole } from "@poodle/svelte-primitives";
+  import type { ControlDensity, ControlSize, SemanticControlSizeRole } from "@poodle/svelte-primitives";
 
   export let ariaLabel = "Filters";
   export let summaryText: string | null = null;
@@ -11,10 +11,12 @@
   export let sticky = false;
   export let size: ControlSize | null = null;
   export let sizeRole: SemanticControlSizeRole = "chrome";
+  export let density: ControlDensity | null = null;
 
   const uiPresentation = getUiPresentation();
 
   $: resolvedSize = size ?? resolveSemanticControlSize(uiPresentation?.sizeScale ?? "md", sizeRole);
+  $: resolvedDensity = density ?? uiPresentation?.density ?? "default";
 
   function handleHeaderClick(e: MouseEvent) {
     if (!collapsible || !collapsed) return;
@@ -29,6 +31,7 @@
   data-sticky={sticky}
   data-collapsed={collapsible && collapsed}
   data-size={resolvedSize}
+  data-density={resolvedDensity}
   role="toolbar"
   aria-label={ariaLabel}
 >
@@ -203,4 +206,8 @@
   .filter-toolbar[data-size="xl"] .filter-toolbar__controls {
     gap: 0.75rem;
   }
+
+  /* Density variants */
+  .filter-toolbar[data-density="compact"] { gap: var(--poodle-space-inline-xs); padding: 0.25rem; }
+  .filter-toolbar[data-density="comfortable"] { gap: var(--poodle-space-inline-md); padding: 0.5rem; }
 </style>

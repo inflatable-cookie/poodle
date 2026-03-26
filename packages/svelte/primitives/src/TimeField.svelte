@@ -2,7 +2,7 @@
   import { createEventDispatcher } from "svelte";
   import { getUiPresentation, resolveSemanticControlSize } from "./presentation";
 
-  import type { ControlSize, SemanticControlSizeRole } from "./types";
+  import type { ControlDensity, ControlSize, SemanticControlSizeRole } from "./types";
 
   export let id: string | null = null;
   export let value: string | null = null;
@@ -15,6 +15,7 @@
   export let describedBy: string | null = null;
   export let size: ControlSize | null = null;
   export let sizeRole: SemanticControlSizeRole = "control";
+  export let density: ControlDensity | null = null;
 
   const dispatch = createEventDispatcher<{
     valueChange: { value: string | null };
@@ -24,6 +25,7 @@
   let uncontrolledValue = defaultValue;
 
   $: resolvedSize = size ?? resolveSemanticControlSize(uiPresentation?.sizeScale ?? "md", sizeRole);
+  $: resolvedDensity = density ?? uiPresentation?.density ?? "default";
   $: currentValue = value ?? uncontrolledValue ?? "";
 
   function handleInput(event: Event): void {
@@ -41,6 +43,7 @@
   id={id ?? undefined}
   class="time-field"
   data-size={resolvedSize}
+  data-density={resolvedDensity}
   type="time"
   value={currentValue}
   {min}
@@ -98,4 +101,8 @@
     padding: 0 calc(var(--poodle-space-control-x) + 0.1875rem);
     font-size: 1rem;
   }
+
+  /* Density variants */
+  .time-field[data-density="compact"] { padding: 0 calc(var(--poodle-space-control-x) - 0.125rem); }
+  .time-field[data-density="comfortable"] { padding: 0 calc(var(--poodle-space-control-x) + 0.125rem); }
 </style>

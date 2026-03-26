@@ -4,13 +4,14 @@
   import IconButton from "./IconButton.svelte";
   import { getUiPresentation, resolveSemanticControlSize } from "./presentation";
 
-  import type { BulkAction, ControlSize, SemanticControlSizeRole } from "./types";
+  import type { BulkAction, ControlDensity, ControlSize, SemanticControlSizeRole } from "./types";
 
   export let selectionCount = 0;
   export let totalCount: number | null = null;
   export let actions: BulkAction[] = [];
   export let sizeRole: SemanticControlSizeRole = "control";
   export let size: ControlSize | null = null;
+  export let density: ControlDensity | null = null;
 
   const dispatch = createEventDispatcher<{
     action: { id: string };
@@ -20,9 +21,10 @@
   const uiPresentation = getUiPresentation();
 
   $: resolvedSize = size ?? resolveSemanticControlSize(uiPresentation?.sizeScale ?? "md", sizeRole);
+  $: resolvedDensity = density ?? uiPresentation?.density ?? "default";
 </script>
 
-<div class="bulk-action-bar" role="region" aria-label="Bulk actions" data-size={resolvedSize}>
+<div class="bulk-action-bar" role="region" aria-label="Bulk actions" data-size={resolvedSize} data-density={resolvedDensity}>
   <div class="bulk-action-bar__summary">
     <strong>{selectionCount} selected</strong>
     {#if totalCount !== null}
@@ -139,4 +141,8 @@
     min-height: calc(var(--poodle-size-control-height) + 0.5rem);
     font-size: 1rem;
   }
+
+  /* Density variants */
+  .bulk-action-bar[data-density="compact"] { padding: 0.375rem 0.5rem; gap: var(--poodle-space-inline-sm); }
+  .bulk-action-bar[data-density="comfortable"] { padding: 0.625rem 1rem; gap: var(--poodle-space-inline-lg); }
 </style>

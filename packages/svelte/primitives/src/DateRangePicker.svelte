@@ -9,7 +9,7 @@
   import { formatDateLabel, monthAnchorIso, normalizeDateRange, todayIsoDate } from "./date";
   import { getUiPresentation, resolveSemanticControlSize } from "./presentation";
 
-  import type { CalendarWeekStart, ControlSize, DateRangeValue, SemanticControlSizeRole } from "./types";
+  import type { CalendarWeekStart, ControlDensity, ControlSize, DateRangeValue, SemanticControlSizeRole } from "./types";
 
   export let value: DateRangeValue | null = null;
   export let defaultValue: DateRangeValue = { start: null, end: null };
@@ -22,6 +22,7 @@
   export let ariaLabel: string | null = null;
   export let size: ControlSize | null = null;
   export let sizeRole: SemanticControlSizeRole = "control";
+  export let density: ControlDensity | null = null;
 
   const dispatch = createEventDispatcher<{
     valueChange: { value: DateRangeValue };
@@ -36,6 +37,7 @@
   let visibleMonth = monthAnchorIso(defaultValue.start ?? todayIsoDate());
 
   $: resolvedSize = size ?? resolveSemanticControlSize(uiPresentation?.sizeScale ?? "md", sizeRole);
+  $: resolvedDensity = density ?? uiPresentation?.density ?? "default";
   $: currentValue = normalizeDateRange(value ?? uncontrolledValue);
   $: isOpen = open ?? uncontrolledOpen;
   $: if (currentValue.start) {
@@ -101,7 +103,7 @@
   });
 </script>
 
-<div bind:this={rootElement} class="date-range-picker" data-size={resolvedSize} data-open={isOpen}>
+<div bind:this={rootElement} class="date-range-picker" data-size={resolvedSize} data-density={resolvedDensity} data-open={isOpen}>
   <button
     type="button"
     class="date-range-picker__trigger"
@@ -234,4 +236,8 @@
     padding: 0 calc(var(--poodle-space-control-x) + 0.1875rem);
     font-size: 1rem;
   }
+
+  /* Density variants */
+  .date-range-picker[data-density="compact"] .date-range-picker__trigger { padding: 0 calc(var(--poodle-space-control-x) - 0.125rem); }
+  .date-range-picker[data-density="comfortable"] .date-range-picker__trigger { padding: 0 calc(var(--poodle-space-control-x) + 0.125rem); }
 </style>

@@ -8,7 +8,7 @@
   import { findNextEnabledIndex, firstEnabledIndex } from "./internal";
   import { getUiPresentation, resolveSemanticControlSize } from "./presentation";
 
-  import type { ControlSize, NavigationMenuItem, SemanticControlSizeRole } from "./types";
+  import type { ControlDensity, ControlSize, NavigationMenuItem, SemanticControlSizeRole } from "./types";
 
   export let value: string | null = null;
   export let defaultValue: string | null = null;
@@ -16,6 +16,7 @@
   export let ariaLabel: string | null = null;
   export let sizeRole: SemanticControlSizeRole = "chrome";
   export let size: ControlSize | null = null;
+  export let density: ControlDensity | null = null;
 
   const dispatch = createEventDispatcher<{
     valueChange: { value: string | null };
@@ -30,6 +31,7 @@
   let focusIndex = 0;
 
   $: resolvedSize = size ?? resolveSemanticControlSize(uiPresentation?.sizeScale ?? "md", sizeRole);
+  $: resolvedDensity = density ?? uiPresentation?.density ?? "default";
   $: currentValue = value ?? uncontrolledValue;
   $: currentItem = items.find((item) => item.value === currentValue) ?? null;
   $: selectedIndex = items.findIndex((item) => item.value === currentValue);
@@ -120,7 +122,7 @@
   });
 </script>
 
-<div class="navigation-menu" bind:this={rootElement} data-size={resolvedSize}>
+<div class="navigation-menu" bind:this={rootElement} data-size={resolvedSize} data-density={resolvedDensity}>
   <nav
     class="navigation-menu__list"
     aria-label={ariaLabel ?? undefined}
@@ -234,4 +236,8 @@
     padding: 0 calc(var(--poodle-space-control-x) + 0.1875rem);
     font-size: 0.875rem;
   }
+
+  /* Density variants */
+  .navigation-menu[data-density="compact"] .navigation-menu__trigger { padding: 0.25rem 0.5rem; }
+  .navigation-menu[data-density="comfortable"] .navigation-menu__trigger { padding: 0.375rem 0.75rem; }
 </style>

@@ -8,7 +8,7 @@
   import { findNextEnabledIndex, firstEnabledIndex, menuNavigableItems } from "./internal";
   import { getUiPresentation, resolveSemanticControlSize } from "./presentation";
 
-  import type { ControlSize, MenubarItem, MenuItem, SemanticControlSizeRole } from "./types";
+  import type { ControlDensity, ControlSize, MenubarItem, MenuItem, SemanticControlSizeRole } from "./types";
 
   export let value: string | null = null;
   export let defaultValue: string | null = null;
@@ -16,6 +16,7 @@
   export let ariaLabel: string | null = null;
   export let sizeRole: SemanticControlSizeRole = "chrome";
   export let size: ControlSize | null = null;
+  export let density: ControlDensity | null = null;
 
   const dispatch = createEventDispatcher<{
     valueChange: { value: string | null };
@@ -34,6 +35,7 @@
   let lastOpenValue: string | null = null;
 
   $: resolvedSize = size ?? resolveSemanticControlSize(uiPresentation?.sizeScale ?? "md", sizeRole);
+  $: resolvedDensity = density ?? uiPresentation?.density ?? "default";
   $: currentValue = value ?? uncontrolledValue;
   $: currentMenu = items.find((item) => item.value === currentValue) ?? null;
   $: actionableItems = menuNavigableItems(currentMenu?.items ?? []);
@@ -133,7 +135,7 @@
   });
 </script>
 
-<div bind:this={rootElement} class="menubar" data-size={resolvedSize}>
+<div bind:this={rootElement} class="menubar" data-size={resolvedSize} data-density={resolvedDensity}>
   <div class="menubar__list" role="menubar" aria-label={ariaLabel ?? undefined}>
     {#each items as item, index (item.value)}
       <div class="menubar__group">
@@ -413,4 +415,8 @@
     min-height: calc(var(--poodle-size-control-height) + 0.25rem);
     font-size: 1rem;
   }
+
+  /* Density variants */
+  .menubar[data-density="compact"] .menubar__item { padding: 0.25rem 0.5rem; }
+  .menubar[data-density="comfortable"] .menubar__item { padding: 0.375rem 0.75rem; }
 </style>

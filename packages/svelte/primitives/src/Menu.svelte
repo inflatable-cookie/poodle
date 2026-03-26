@@ -4,7 +4,7 @@
   import { menuNavigableItems } from "./internal";
   import { getUiPresentation, resolveSemanticControlSize } from "./presentation";
 
-  import type { ControlSize, MenuItem, OverlayPlacement, SemanticControlSizeRole } from "./types";
+  import type { ControlDensity, ControlSize, MenuItem, OverlayPlacement, SemanticControlSizeRole } from "./types";
 
   export let items: MenuItem[] = [];
   export let open: boolean | null = null;
@@ -13,6 +13,7 @@
   export let ariaLabel: string | null = null;
   export let sizeRole: SemanticControlSizeRole = "chrome";
   export let size: ControlSize | null = null;
+  export let density: ControlDensity | null = null;
 
   const dispatch = createEventDispatcher<{
     openChange: { open: boolean };
@@ -27,6 +28,7 @@
   let highlightIndex = 0;
 
   $: resolvedSize = size ?? resolveSemanticControlSize(uiPresentation?.sizeScale ?? "md", sizeRole);
+  $: resolvedDensity = density ?? uiPresentation?.density ?? "default";
   $: isControlled = open !== null;
   $: isOpen = isControlled ? open === true : uncontrolledOpen;
   $: actionableItems = menuNavigableItems(items);
@@ -117,7 +119,7 @@
   });
 </script>
 
-<div class="menu" bind:this={rootElement} data-size={resolvedSize}>
+<div class="menu" bind:this={rootElement} data-size={resolvedSize} data-density={resolvedDensity}>
   <div
     class="menu__trigger"
     role="button"
@@ -284,4 +286,8 @@
   .menu[data-size="lg"] .menu__meta { font-size: 0.75rem; }
   .menu[data-size="xl"] .menu__item { min-height: calc(var(--poodle-size-control-height) + 0.375rem); font-size: 1rem; }
   .menu[data-size="xl"] .menu__meta { font-size: 0.8125rem; }
+
+  /* Density variants */
+  .menu[data-density="compact"] .menu__item { padding: 0.25rem 0.375rem; }
+  .menu[data-density="comfortable"] .menu__item { padding: 0.5rem 0.75rem; }
 </style>

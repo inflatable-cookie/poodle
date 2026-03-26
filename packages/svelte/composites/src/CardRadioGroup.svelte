@@ -2,7 +2,7 @@
   import { createEventDispatcher } from "svelte";
 
   import { Card, getUiPresentation, resolveSemanticControlSize } from "@poodle/svelte-primitives";
-  import type { ControlSize, SemanticControlSizeRole } from "@poodle/svelte-primitives";
+  import type { ControlDensity, ControlSize, SemanticControlSizeRole } from "@poodle/svelte-primitives";
 
   import type { CardRadioItem } from "./types";
 
@@ -13,6 +13,7 @@
   export let disabled = false;
   export let size: ControlSize | null = null;
   export let sizeRole: SemanticControlSizeRole = "control";
+  export let density: ControlDensity | null = null;
 
   const dispatch = createEventDispatcher<{
     change: { value: string };
@@ -21,6 +22,7 @@
   const uiPresentation = getUiPresentation();
 
   $: resolvedSize = size ?? resolveSemanticControlSize(uiPresentation?.sizeScale ?? "md", sizeRole);
+  $: resolvedDensity = density ?? uiPresentation?.density ?? "default";
 
   function select(itemValue: string): void {
     if (disabled) return;
@@ -66,6 +68,7 @@
   aria-label={ariaLabel ?? undefined}
   style="--columns: {columns}"
   data-size={resolvedSize}
+  data-density={resolvedDensity}
 >
   {#each items as item, index (item.value)}
     {@const isChecked = value === item.value}
@@ -265,4 +268,8 @@
   .card-radio-group[data-size="xl"] {
     gap: 1rem;
   }
+
+  /* Density variants */
+  .card-radio-group[data-density="compact"] .card-radio-group__option :global(.card) { padding: 0.5rem; }
+  .card-radio-group[data-density="comfortable"] .card-radio-group__option :global(.card) { padding: 1rem; }
 </style>

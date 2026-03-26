@@ -23,7 +23,7 @@
   } from "./date";
   import { getUiPresentation, resolveSemanticControlSize } from "./presentation";
 
-  import type { CalendarWeekStart, ControlSize, DateRangeValue, SemanticControlSizeRole } from "./types";
+  import type { CalendarWeekStart, ControlDensity, ControlSize, DateRangeValue, SemanticControlSizeRole } from "./types";
 
   export let value: DateRangeValue | null = null;
   export let defaultValue: DateRangeValue = { start: null, end: null };
@@ -34,6 +34,7 @@
   export let ariaLabel: string | null = null;
   export let size: ControlSize | null = null;
   export let sizeRole: SemanticControlSizeRole = "control";
+  export let density: ControlDensity | null = null;
 
   const dispatch = createEventDispatcher<{
     valueChange: { value: DateRangeValue };
@@ -48,6 +49,7 @@
   let dayElements: Record<string, HTMLButtonElement | undefined> = {};
 
   $: resolvedSize = size ?? resolveSemanticControlSize(uiPresentation?.sizeScale ?? "md", sizeRole);
+  $: resolvedDensity = density ?? uiPresentation?.density ?? "default";
   $: currentValue = normalizeDateRange(value ?? uncontrolledValue);
   $: currentMonth = monthAnchorIso(visibleMonth ?? uncontrolledMonth);
   $: weeks = buildCalendarWeeks(currentMonth, weekStartsOn);
@@ -153,7 +155,7 @@
   }
 </script>
 
-<div class="range-calendar" data-size={resolvedSize} aria-label={ariaLabel ?? undefined}>
+<div class="range-calendar" data-size={resolvedSize} data-density={resolvedDensity} aria-label={ariaLabel ?? undefined}>
   <div class="range-calendar__header">
     <button
       type="button"
@@ -402,4 +404,10 @@
   .range-calendar[data-size="xl"] .range-calendar__month {
     font-size: 0.9375rem;
   }
+
+  /* Density variants */
+  .range-calendar[data-density="compact"] .range-calendar__grid { gap: 0.0625rem; }
+  .range-calendar[data-density="compact"] .range-calendar__cell { padding: 0.0625rem; }
+  .range-calendar[data-density="comfortable"] .range-calendar__grid { gap: 0.1875rem; }
+  .range-calendar[data-density="comfortable"] .range-calendar__cell { padding: 0.1875rem; }
 </style>

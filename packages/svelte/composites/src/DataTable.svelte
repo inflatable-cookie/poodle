@@ -2,7 +2,7 @@
   import { createEventDispatcher } from "svelte";
 
   import { Checkbox, Icon, Popover, getUiPresentation, resolveSemanticControlSize } from "@poodle/svelte-primitives";
-  import type { ControlSize, SemanticControlSizeRole } from "@poodle/svelte-primitives";
+  import type { ControlDensity, ControlSize, SemanticControlSizeRole } from "@poodle/svelte-primitives";
 
   import type { TableColumn, TableRow, TableSortDirection } from "./types";
 
@@ -21,6 +21,7 @@
   export let exportFilename = "export.csv";
   export let size: ControlSize | null = null;
   export let sizeRole: SemanticControlSizeRole = "control";
+  export let density: ControlDensity | null = null;
 
   const dispatch = createEventDispatcher<{
     sortChange: { columnId: string; direction: TableSortDirection };
@@ -34,6 +35,7 @@
   const uiPresentation = getUiPresentation();
 
   $: resolvedSize = size ?? resolveSemanticControlSize(uiPresentation?.sizeScale ?? "md", sizeRole);
+  $: resolvedDensity = density ?? uiPresentation?.density ?? "default";
 
   $: visibleColumns = columns.filter((c) => !hiddenColumnIds.includes(c.id));
   $: hideableColumns = columns.filter((c) => c.hideable !== false);
@@ -86,7 +88,7 @@
   }
 </script>
 
-<div class="data-table" data-size={resolvedSize}>
+<div class="data-table" data-size={resolvedSize} data-density={resolvedDensity}>
   {#if showColumnVisibility || showExport}
     <div class="data-table__toolbar">
       {#if showExport}
@@ -473,4 +475,8 @@
   .data-table[data-size="xl"] .data-table__selection {
     width: 4rem;
   }
+
+  /* Density variants */
+  .data-table[data-density="compact"] .data-table__cell { padding: 0.25rem 0.375rem; }
+  .data-table[data-density="comfortable"] .data-table__cell { padding: 0.5rem 0.75rem; }
 </style>

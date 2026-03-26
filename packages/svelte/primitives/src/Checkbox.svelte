@@ -3,7 +3,7 @@
 
   import Icon from "./Icon.svelte";
   import { getUiPresentation, resolveSemanticControlSize } from "./presentation";
-  import type { ControlSize, SemanticControlSizeRole } from "./types";
+  import type { ControlDensity, ControlSize, SemanticControlSizeRole } from "./types";
 
   export let id: string | undefined = undefined;
   export let checked = false;
@@ -17,6 +17,7 @@
   export let selectedColor: string | null = null;
   export let size: ControlSize | null = null;
   export let sizeRole: SemanticControlSizeRole = "control";
+  export let density: ControlDensity | null = null;
 
   const dispatch = createEventDispatcher<{
     checkedChange: { checked: boolean };
@@ -28,6 +29,7 @@
 
   $: currentChecked = checked ?? uncontrolledChecked;
   $: resolvedSize = size ?? resolveSemanticControlSize(uiPresentation?.sizeScale ?? "md", sizeRole);
+  $: resolvedDensity = density ?? uiPresentation?.density ?? "default";
   $: checkboxStyles = selectedColor ? `--poodle-checkbox-selected-color: ${selectedColor}` : undefined;
   $: if (input) {
     input.indeterminate = mixed;
@@ -46,7 +48,7 @@
   }
 </script>
 
-<label class="checkbox" data-disabled={disabled} data-size={resolvedSize} style={checkboxStyles}>
+<label class="checkbox" data-disabled={disabled} data-size={resolvedSize} data-density={resolvedDensity} style={checkboxStyles}>
   <input
     bind:this={input}
     {id}
@@ -129,6 +131,15 @@
     font-size: var(--poodle-typography-label-size);
     font-weight: var(--poodle-typography-label-weight);
     line-height: var(--poodle-typography-label-lineHeight);
+  }
+
+  /* Density variants */
+  .checkbox[data-density="compact"] {
+    gap: var(--poodle-space-inline-xs);
+  }
+
+  .checkbox[data-density="comfortable"] {
+    gap: var(--poodle-space-inline-md);
   }
 
   /* Size variants */

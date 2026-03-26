@@ -2,13 +2,14 @@
   import { createEventDispatcher } from "svelte";
   import { getUiPresentation, resolveSemanticControlSize } from "./presentation";
 
-  import type { ControlSize, SemanticControlSizeRole, ToggleVariant } from "./types";
+  import type { ControlDensity, ControlSize, SemanticControlSizeRole, ToggleVariant } from "./types";
 
   export let pressed: boolean | null = null;
   export let defaultPressed = false;
   export let variant: ToggleVariant = "ghost";
   export let size: ControlSize | null = null;
   export let sizeRole: SemanticControlSizeRole = "control";
+  export let density: ControlDensity | null = null;
   export let layout: "inline" | "stack" = "inline";
   export let disabled = false;
   export let ariaLabel: string | null = null;
@@ -24,6 +25,7 @@
   $: controlled = pressed !== null;
   $: currentPressed = controlled ? pressed === true : uncontrolledPressed;
   $: resolvedSize = size ?? resolveSemanticControlSize(uiPresentation?.sizeScale ?? "md", sizeRole);
+  $: resolvedDensity = density ?? uiPresentation?.density ?? "default";
 
   function toggle(): void {
     const nextPressed = !currentPressed;
@@ -41,6 +43,7 @@
   class={`toggle ${className}`.trim()}
   data-variant={variant}
   data-size={resolvedSize}
+  data-density={resolvedDensity}
   data-layout={layout}
   data-pressed={currentPressed}
   disabled={disabled}
@@ -156,4 +159,8 @@
     cursor: not-allowed;
     opacity: var(--poodle-state-opacity-disabled);
   }
+
+  /* Density variants */
+  .toggle[data-density="compact"] { padding: 0 calc(var(--poodle-space-control-x) - 0.125rem); }
+  .toggle[data-density="comfortable"] { padding: 0 calc(var(--poodle-space-control-x) + 0.125rem); }
 </style>

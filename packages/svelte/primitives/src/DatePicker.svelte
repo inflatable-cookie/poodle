@@ -9,7 +9,7 @@
   import { formatDateLabel, monthAnchorIso, todayIsoDate } from "./date";
   import { getUiPresentation, resolveSemanticControlSize } from "./presentation";
 
-  import type { CalendarWeekStart, ControlSize, SemanticControlSizeRole } from "./types";
+  import type { CalendarWeekStart, ControlDensity, ControlSize, SemanticControlSizeRole } from "./types";
 
   export let value: string | null = null;
   export let defaultValue: string | null = null;
@@ -22,6 +22,7 @@
   export let ariaLabel: string | null = null;
   export let size: ControlSize | null = null;
   export let sizeRole: SemanticControlSizeRole = "control";
+  export let density: ControlDensity | null = null;
 
   const dispatch = createEventDispatcher<{
     valueChange: { value: string };
@@ -36,6 +37,7 @@
   let visibleMonth = monthAnchorIso(defaultValue ?? todayIsoDate());
 
   $: resolvedSize = size ?? resolveSemanticControlSize(uiPresentation?.sizeScale ?? "md", sizeRole);
+  $: resolvedDensity = density ?? uiPresentation?.density ?? "default";
   $: currentValue = value ?? uncontrolledValue;
   $: isOpen = open ?? uncontrolledOpen;
   $: if (currentValue) {
@@ -89,7 +91,7 @@
   });
 </script>
 
-<div bind:this={rootElement} class="date-picker" data-size={resolvedSize} data-open={isOpen}>
+<div bind:this={rootElement} class="date-picker" data-size={resolvedSize} data-density={resolvedDensity} data-open={isOpen}>
   <button
     type="button"
     class="date-picker__trigger"
@@ -199,4 +201,8 @@
   .date-picker[data-size="lg"] .date-picker__indicator { font-size: 0.8125rem; }
   .date-picker[data-size="xl"] .date-picker__trigger { min-height: calc(var(--poodle-size-control-height) + 0.5rem); font-size: 1rem; }
   .date-picker[data-size="xl"] .date-picker__indicator { font-size: 0.875rem; }
+
+  /* Density variants */
+  .date-picker[data-density="compact"] .date-picker__trigger { padding: 0 calc(var(--poodle-space-control-x) - 0.125rem); }
+  .date-picker[data-density="comfortable"] .date-picker__trigger { padding: 0 calc(var(--poodle-space-control-x) + 0.125rem); }
 </style>

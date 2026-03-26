@@ -15,7 +15,7 @@
   } from "./date";
   import { getUiPresentation, resolveSemanticControlSize } from "./presentation";
 
-  import type { CalendarWeekStart, ControlSize, DateTimeValue, SemanticControlSizeRole } from "./types";
+  import type { CalendarWeekStart, ControlDensity, ControlSize, DateTimeValue, SemanticControlSizeRole } from "./types";
 
   export let value: DateTimeValue | null = null;
   export let defaultValue: DateTimeValue = { date: null, time: null };
@@ -28,6 +28,7 @@
   export let ariaLabel: string | null = null;
   export let size: ControlSize | null = null;
   export let sizeRole: SemanticControlSizeRole = "control";
+  export let density: ControlDensity | null = null;
 
   const dispatch = createEventDispatcher<{
     valueChange: { value: DateTimeValue };
@@ -42,6 +43,7 @@
   let visibleMonth = monthAnchorIso(defaultValue.date ?? todayIsoDate());
 
   $: resolvedSize = size ?? resolveSemanticControlSize(uiPresentation?.sizeScale ?? "md", sizeRole);
+  $: resolvedDensity = density ?? uiPresentation?.density ?? "default";
   $: currentValue = normalizeDateTimeValue(value ?? uncontrolledValue);
   $: isOpen = open ?? uncontrolledOpen;
   $: if (currentValue.date) {
@@ -101,7 +103,7 @@
   });
 </script>
 
-<div bind:this={rootElement} class="date-time-picker" data-size={resolvedSize} data-open={isOpen}>
+<div bind:this={rootElement} class="date-time-picker" data-size={resolvedSize} data-density={resolvedDensity} data-open={isOpen}>
   <button
     type="button"
     class="date-time-picker__trigger"
@@ -271,4 +273,8 @@
     padding: 0 calc(var(--poodle-space-control-x) + 0.1875rem);
     font-size: 1rem;
   }
+
+  /* Density variants */
+  .date-time-picker[data-density="compact"] .date-time-picker__trigger { padding: 0 calc(var(--poodle-space-control-x) - 0.125rem); }
+  .date-time-picker[data-density="comfortable"] .date-time-picker__trigger { padding: 0 calc(var(--poodle-space-control-x) + 0.125rem); }
 </style>

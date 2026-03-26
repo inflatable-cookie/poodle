@@ -6,6 +6,7 @@
   import Spinner from "./Spinner.svelte";
   import { getUiPresentation, resolveSemanticControlSize } from "./presentation";
   import type {
+    ControlDensity,
     ControlSize,
     InputValidationStatus,
     InputValidator,
@@ -61,6 +62,7 @@
   export let showCharCount = false;
   export let size: ControlSize | null = null;
   export let sizeRole: SemanticControlSizeRole = "control";
+  export let density: ControlDensity | null = null;
 
   const dispatch = createEventDispatcher<{
     valueChange: { value: string };
@@ -111,6 +113,7 @@
   $: charCountText = maxLength ? `${charCount}/${maxLength}` : `${charCount}`;
   $: isOverLimit = maxLength !== null && charCount > maxLength;
   $: resolvedSize = size ?? resolveSemanticControlSize(uiPresentation?.sizeScale ?? "md", sizeRole);
+  $: resolvedDensity = density ?? uiPresentation?.density ?? "default";
   $: showValidationIndicator = showValidationStatus && effectiveValidationState !== "none";
   $: validationIcon =
     effectiveValidationState === "valid"
@@ -262,7 +265,7 @@
   }
 </script>
 
-<div class="text-input" data-validation-state={effectiveValidationState} data-size={resolvedSize}>
+<div class="text-input" data-validation-state={effectiveValidationState} data-size={resolvedSize} data-density={resolvedDensity}>
   {#if prefix}
     <span class="text-input__affix text-input__affix--prefix">{prefix}</span>
   {/if}
@@ -486,6 +489,15 @@
 
   .text-input__char-count--over {
     color: var(--poodle-color-status-danger);
+  }
+
+  /* Density variants */
+  .text-input[data-density="compact"] {
+    padding: 0 calc(var(--poodle-space-control-x) - 0.125rem);
+  }
+
+  .text-input[data-density="comfortable"] {
+    padding: 0 calc(var(--poodle-space-control-x) + 0.125rem);
   }
 
   /* Size variants */

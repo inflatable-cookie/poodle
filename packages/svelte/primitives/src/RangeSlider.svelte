@@ -4,10 +4,11 @@
   import { clamp, joinStyles, snapToStep } from "./internal";
   import { getUiPresentation, resolveSemanticControlSize } from "./presentation";
 
-  import type { ControlSize, Orientation, SemanticControlSizeRole } from "./types";
+  import type { ControlDensity, ControlSize, Orientation, SemanticControlSizeRole } from "./types";
 
   export let size: ControlSize | null = null;
   export let sizeRole: SemanticControlSizeRole = "control";
+  export let density: ControlDensity | null = null;
 
   export let value: [number, number] = [0, 100];
   export let min = 0;
@@ -27,6 +28,7 @@
   }>();
 
   $: resolvedSize = size ?? resolveSemanticControlSize(uiPresentation?.sizeScale ?? "md", sizeRole);
+  $: resolvedDensity = density ?? uiPresentation?.density ?? "default";
   $: safeMax = max <= min ? min + 1 : max;
   $: lowerValue = clamp(Math.min(value[0], value[1]), min, safeMax);
   $: upperValue = clamp(Math.max(value[0], value[1]), min, safeMax);
@@ -48,7 +50,7 @@
   }
 </script>
 
-<div class="range-slider" data-orientation={orientation} data-disabled={disabled} style={rangeStyle} data-size={resolvedSize}>
+<div class="range-slider" data-orientation={orientation} data-disabled={disabled} style={rangeStyle} data-size={resolvedSize} data-density={resolvedDensity}>
   <span class="range-slider__track" aria-hidden="true">
     <span class="range-slider__fill"></span>
   </span>
@@ -226,4 +228,8 @@
   .range-slider[data-size="lg"] .range-slider__control::-moz-range-thumb { width: 1.125rem; height: 1.125rem; }
   .range-slider[data-size="xl"] .range-slider__control::-webkit-slider-thumb { width: 1.25rem; height: 1.25rem; margin-top: -0.4375rem; }
   .range-slider[data-size="xl"] .range-slider__control::-moz-range-thumb { width: 1.25rem; height: 1.25rem; }
+
+  /* Density variants */
+  .range-slider[data-density="compact"] { padding: 0.25rem 0; }
+  .range-slider[data-density="comfortable"] { padding: 0.75rem 0; }
 </style>

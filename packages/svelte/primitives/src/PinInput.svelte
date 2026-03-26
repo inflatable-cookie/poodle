@@ -3,10 +3,11 @@
 
   import { getUiPresentation, resolveSemanticControlSize } from "./presentation";
 
-  import type { ControlSize, SemanticControlSizeRole } from "./types";
+  import type { ControlDensity, ControlSize, SemanticControlSizeRole } from "./types";
 
   export let size: ControlSize | null = null;
   export let sizeRole: SemanticControlSizeRole = "control";
+  export let density: ControlDensity | null = null;
   export let value: string | null = null;
   export let defaultValue = "";
   export let length = 6;
@@ -25,6 +26,7 @@
   let inputs: Array<HTMLInputElement | null> = [];
 
   $: resolvedSize = size ?? resolveSemanticControlSize(uiPresentation?.sizeScale ?? "md", sizeRole);
+  $: resolvedDensity = density ?? uiPresentation?.density ?? "default";
   $: controlled = value !== null;
   $: currentValue = controlled ? value ?? "" : uncontrolledValue;
   $: digits = Array.from({ length }, (_, index) => currentValue[index] ?? "");
@@ -50,7 +52,7 @@
   }
 </script>
 
-<div class="pin-input" role="group" aria-label={ariaLabel ?? undefined} data-size={resolvedSize}>
+<div class="pin-input" role="group" aria-label={ariaLabel ?? undefined} data-size={resolvedSize} data-density={resolvedDensity}>
   {#each digits as digit, index}
     <input
       bind:this={inputs[index]}
@@ -116,4 +118,8 @@
   .pin-input[data-size="sm"] .pin-input__cell { width: calc(var(--poodle-size-control-height) - 0.25rem); height: var(--poodle-size-control-height); font-size: 0.875rem; }
   .pin-input[data-size="lg"] .pin-input__cell { width: calc(var(--poodle-size-control-height) + 0.25rem); height: calc(var(--poodle-size-control-height) + 0.5rem); font-size: 1.125rem; }
   .pin-input[data-size="xl"] .pin-input__cell { width: calc(var(--poodle-size-control-height) + 0.5rem); height: calc(var(--poodle-size-control-height) + 0.75rem); font-size: 1.25rem; }
+
+  /* Density variants */
+  .pin-input[data-density="compact"] { gap: var(--poodle-space-inline-xs); }
+  .pin-input[data-density="comfortable"] { gap: var(--poodle-space-inline-md); }
 </style>

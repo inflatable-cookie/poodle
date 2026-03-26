@@ -4,7 +4,7 @@
   import { menuNavigableItems } from "./internal";
   import { getUiPresentation, resolveSemanticControlSize } from "./presentation";
 
-  import type { ControlSize, MenuItem, SemanticControlSizeRole } from "./types";
+  import type { ControlDensity, ControlSize, MenuItem, SemanticControlSizeRole } from "./types";
 
   export let items: MenuItem[] = [];
   export let open: boolean | null = null;
@@ -13,6 +13,7 @@
   export let ariaLabel: string | null = null;
   export let sizeRole: SemanticControlSizeRole = "chrome";
   export let size: ControlSize | null = null;
+  export let density: ControlDensity | null = null;
 
   const dispatch = createEventDispatcher<{
     openChange: { open: boolean };
@@ -31,6 +32,7 @@
   let adjustedPosition: { left: string; top: string } | null = null;
 
   $: resolvedSize = size ?? resolveSemanticControlSize(uiPresentation?.sizeScale ?? "md", sizeRole);
+  $: resolvedDensity = density ?? uiPresentation?.density ?? "default";
   $: isControlled = open !== null;
   $: isOpen = isControlled ? open === true : uncontrolledOpen;
   $: currentAnchorPoint = anchorPoint ?? uncontrolledAnchorPoint;
@@ -134,6 +136,7 @@
   class="context-menu"
   bind:this={rootElement}
   data-size={resolvedSize}
+  data-density={resolvedDensity}
   role="button"
   tabindex="0"
   aria-haspopup="menu"
@@ -303,4 +306,8 @@
     min-height: calc(var(--poodle-size-control-height) + 0.25rem);
     font-size: 1rem;
   }
+
+  /* Density variants */
+  .context-menu[data-density="compact"] .context-menu__item { padding: 0.25rem 0.375rem; }
+  .context-menu[data-density="comfortable"] .context-menu__item { padding: 0.5rem 0.75rem; }
 </style>

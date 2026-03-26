@@ -11,6 +11,7 @@
   import type {
     ButtonTone,
     ButtonVariant,
+    ControlDensity,
     ControlSize,
     IconProp,
     SemanticControlSizeRole,
@@ -20,6 +21,7 @@
   export let tone: ButtonTone = "default";
   export let size: ControlSize | null = null;
   export let sizeRole: SemanticControlSizeRole = "control";
+  export let density: ControlDensity | null = null;
   export let type: HTMLButtonElement["type"] = "button";
   export let form: string | null = null;
   export let formaction: string | null = null;
@@ -55,6 +57,7 @@
   $: hasLeading = $$slots.leading || leadingIcon || loading;
   $: hasTrailing = $$slots.trailing || trailingIcon || chevron;
   $: resolvedSize = size ?? resolveSemanticControlSize(uiPresentation?.sizeScale ?? "md", sizeRole);
+  $: resolvedDensity = density ?? uiPresentation?.density ?? "default";
   $: resolvedIconSize = resolveSupportingVisualSize(resolvedSize);
 </script>
 
@@ -72,6 +75,7 @@
   data-variant={variant}
   data-tone={tone !== "default" ? tone : undefined}
   data-size={resolvedSize}
+  data-density={resolvedDensity}
   data-icon-only={iconOnly || undefined}
   data-has-leading={hasLeading || undefined}
   data-has-trailing={hasTrailing || undefined}
@@ -374,5 +378,16 @@
   .button__spinner :global(.spinner) {
     width: 0.75rem;
     height: 0.75rem;
+  }
+
+  /* Density variants */
+  .button[data-density="compact"] {
+    padding: 0 calc(var(--poodle-space-control-x) - 0.125rem);
+    gap: var(--poodle-space-inline-xs);
+  }
+
+  .button[data-density="comfortable"] {
+    padding: 0 calc(var(--poodle-space-control-x) + 0.125rem);
+    gap: var(--poodle-space-inline-md);
   }
 </style>

@@ -3,7 +3,8 @@
 
   import Icon from "./Icon.svelte";
   import TextInput from "./TextInput.svelte";
-  import type { ControlSize, SemanticControlSizeRole, ValidationState } from "./types";
+  import { getUiPresentation } from "./presentation";
+  import type { ControlDensity, ControlSize, SemanticControlSizeRole, ValidationState } from "./types";
 
   export let id: string;
   export let value: string | null = null;
@@ -18,6 +19,9 @@
   export let validationState: ValidationState = "none";
   export let size: ControlSize | null = null;
   export let sizeRole: SemanticControlSizeRole = "control";
+  export let density: ControlDensity | null = null;
+
+  const uiPresentation = getUiPresentation();
 
   const dispatch = createEventDispatcher<{
     valueChange: { value: string };
@@ -31,6 +35,7 @@
 
   $: isControlled = value !== null;
   $: currentValue = isControlled ? value ?? "" : uncontrolledValue;
+  $: resolvedDensity = density ?? uiPresentation?.density ?? "default";
   $: canClear = showClearButton && !disabled && !readOnly && currentValue.length > 0;
 
   function handleValueChange(event: CustomEvent<{ value: string }>): void {

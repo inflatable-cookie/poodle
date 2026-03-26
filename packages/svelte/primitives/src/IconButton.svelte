@@ -16,6 +16,7 @@
   import type {
     ButtonTone,
     ButtonVariant,
+    ControlDensity,
     ControlSize,
     IconProp,
     OverlayPlacement,
@@ -26,6 +27,7 @@
   export let tone: ButtonTone = "default";
   export let size: ControlSize | null = null;
   export let sizeRole: SemanticControlSizeRole = "control";
+  export let density: ControlDensity | null = null;
   export let icon: IconProp;
   export let ariaLabel: string;
   export let tooltip: string | null = null;
@@ -54,6 +56,7 @@
   $: isUnavailable = disabled || loading;
   $: tooltipText = tooltip ?? ariaLabel;
   $: resolvedSize = size ?? resolveSemanticControlSize(uiPresentation?.sizeScale ?? "md", sizeRole);
+  $: resolvedDensity = density ?? uiPresentation?.density ?? "default";
   $: resolvedIconSize = resolveSupportingVisualSize(resolvedSize);
   $: if (tooltipOpen && tooltipText) {
     void updateTooltipPosition();
@@ -129,6 +132,7 @@
     data-variant={variant}
     data-tone={tone !== "default" ? tone : undefined}
     data-size={resolvedSize}
+    data-density={resolvedDensity}
     data-loading={loading}
     data-pressed={pressed === true}
     disabled={isUnavailable}
@@ -343,6 +347,15 @@
   }
 
   /* ── Tooltip ── */
+
+  /* Density variants */
+  .icon-button[data-density="compact"] {
+    padding: 0.125rem;
+  }
+
+  .icon-button[data-density="comfortable"] {
+    padding: 0.375rem;
+  }
 
   .icon-button__tooltip {
     position: fixed;

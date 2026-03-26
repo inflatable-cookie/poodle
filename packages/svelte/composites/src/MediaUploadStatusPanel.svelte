@@ -2,7 +2,7 @@
   import { createEventDispatcher } from "svelte";
 
   import { Button, Spinner, getUiPresentation, resolveSemanticControlSize } from "@poodle/svelte-primitives";
-  import type { ControlSize, SemanticControlSizeRole } from "@poodle/svelte-primitives";
+  import type { ControlDensity, ControlSize, SemanticControlSizeRole } from "@poodle/svelte-primitives";
 
   import type { MediaUploadWorkflowStep } from "./types";
 
@@ -12,6 +12,7 @@
   export let uploadError: string | null = null;
   export let size: ControlSize | null = null;
   export let sizeRole: SemanticControlSizeRole = "control";
+  export let density: ControlDensity | null = null;
 
   const dispatch = createEventDispatcher<{
     uploadAnyway: void;
@@ -23,15 +24,16 @@
   const uiPresentation = getUiPresentation();
 
   $: resolvedSize = size ?? resolveSemanticControlSize(uiPresentation?.sizeScale ?? "md", sizeRole);
+  $: resolvedDensity = density ?? uiPresentation?.density ?? "default";
 </script>
 
 {#if uploadStep === "checking"}
-  <div class="media-upload-status-panel" data-size={resolvedSize}>
+  <div class="media-upload-status-panel" data-size={resolvedSize} data-density={resolvedDensity}>
     <Spinner variant="grid" tone="accent" />
     <p>Checking for duplicates...</p>
   </div>
 {:else if uploadStep === "duplicate"}
-  <div class="media-upload-status-panel media-upload-status-panel--warning" data-size={resolvedSize}>
+  <div class="media-upload-status-panel media-upload-status-panel--warning" data-size={resolvedSize} data-density={resolvedDensity}>
     <p>This file already exists.</p>
     {#if duplicateLabel}
       <strong>{duplicateLabel}</strong>
@@ -42,19 +44,19 @@
     </div>
   </div>
 {:else if uploadStep === "uploading"}
-  <div class="media-upload-status-panel" data-size={resolvedSize}>
+  <div class="media-upload-status-panel" data-size={resolvedSize} data-density={resolvedDensity}>
     <div class="media-upload-status-panel__progress">
       <div class="media-upload-status-panel__progress-fill" style="width: {uploadProgress}%"></div>
     </div>
     <p>Uploading... {uploadProgress.toFixed(0)}%</p>
   </div>
 {:else if uploadStep === "finalising"}
-  <div class="media-upload-status-panel" data-size={resolvedSize}>
+  <div class="media-upload-status-panel" data-size={resolvedSize} data-density={resolvedDensity}>
     <Spinner variant="grid" tone="accent" />
     <p>Finalising...</p>
   </div>
 {:else if uploadStep === "complete"}
-  <div class="media-upload-status-panel media-upload-status-panel--success" data-size={resolvedSize}>
+  <div class="media-upload-status-panel media-upload-status-panel--success" data-size={resolvedSize} data-density={resolvedDensity}>
     <p>Upload complete.</p>
     <div class="media-upload-status-panel__actions">
       <Button variant="secondary" on:click={() => dispatch("clearUpload")}>Upload another</Button>
@@ -62,7 +64,7 @@
     </div>
   </div>
 {:else if uploadStep === "error"}
-  <div class="media-upload-status-panel media-upload-status-panel--danger" data-size={resolvedSize}>
+  <div class="media-upload-status-panel media-upload-status-panel--danger" data-size={resolvedSize} data-density={resolvedDensity}>
     <p>{uploadError || "Upload failed"}</p>
     <Button variant="secondary" on:click={() => dispatch("clearUpload")}>Try again</Button>
   </div>
@@ -156,4 +158,8 @@
     height: 0.5rem;
     width: min(17rem, 100%);
   }
+
+  /* Density variants */
+  .media-upload-status-panel[data-density="compact"] { padding: 0.5rem; }
+  .media-upload-status-panel[data-density="comfortable"] { padding: 1rem; }
 </style>

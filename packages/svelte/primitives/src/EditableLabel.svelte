@@ -3,10 +3,11 @@
 
   import { getUiPresentation, resolveSemanticControlSize } from "./presentation";
 
-  import type { ControlSize, EditableLabelActivationMode, SemanticControlSizeRole } from "./types";
+  import type { ControlDensity, ControlSize, EditableLabelActivationMode, SemanticControlSizeRole } from "./types";
 
   export let size: ControlSize | null = null;
   export let sizeRole: SemanticControlSizeRole = "control";
+  export let density: ControlDensity | null = null;
 
   export let value: string;
   export let ariaLabel = "Edit label";
@@ -32,6 +33,7 @@
   let inputElement: HTMLInputElement | null = null;
 
   $: resolvedSize = size ?? resolveSemanticControlSize(uiPresentation?.sizeScale ?? "md", sizeRole);
+  $: resolvedDensity = density ?? uiPresentation?.density ?? "default";
   $: if (!isEditing) {
     draftValue = value;
   }
@@ -73,6 +75,7 @@
   data-disabled={disabled}
   data-variant={variant}
   data-size={resolvedSize}
+  data-density={resolvedDensity}
 >
   {#if isEditing}
     <input
@@ -231,4 +234,8 @@
     padding: calc(var(--poodle-space-control-y) + 0.125rem) calc(var(--poodle-space-control-x) + 0.1875rem);
     font-size: 1rem;
   }
+
+  /* Density variants */
+  .editable-label[data-density="compact"] .editable-label__input { padding: 0 calc(var(--poodle-space-control-x) - 0.125rem); }
+  .editable-label[data-density="comfortable"] .editable-label__input { padding: 0 calc(var(--poodle-space-control-x) + 0.125rem); }
 </style>

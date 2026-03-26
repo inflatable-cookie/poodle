@@ -4,10 +4,11 @@
   import { clamp, joinStyles, snapToStep } from "./internal";
   import { getUiPresentation, resolveSemanticControlSize } from "./presentation";
 
-  import type { ControlSize, Orientation, SemanticControlSizeRole } from "./types";
+  import type { ControlDensity, ControlSize, Orientation, SemanticControlSizeRole } from "./types";
 
   export let size: ControlSize | null = null;
   export let sizeRole: SemanticControlSizeRole = "control";
+  export let density: ControlDensity | null = null;
 
   export let value = 0;
   export let min = 0;
@@ -26,6 +27,7 @@
   }>();
 
   $: resolvedSize = size ?? resolveSemanticControlSize(uiPresentation?.sizeScale ?? "md", sizeRole);
+  $: resolvedDensity = density ?? uiPresentation?.density ?? "default";
   $: safeMax = max <= min ? min + 1 : max;
   $: safeValue = clamp(snapToStep(value, min, step), min, safeMax);
   $: percentage = ((safeValue - min) / (safeMax - min)) * 100;
@@ -36,7 +38,7 @@
   }
 </script>
 
-<div class="slider" data-orientation={orientation} data-disabled={disabled} style={sliderStyle} data-size={resolvedSize}>
+<div class="slider" data-orientation={orientation} data-disabled={disabled} style={sliderStyle} data-size={resolvedSize} data-density={resolvedDensity}>
   <span class="slider__track" aria-hidden="true">
     <span class="slider__fill"></span>
   </span>
@@ -180,4 +182,8 @@
   .slider[data-size="lg"] .slider__control::-moz-range-thumb { width: 1.125rem; height: 1.125rem; }
   .slider[data-size="xl"] .slider__control::-webkit-slider-thumb { width: 1.25rem; height: 1.25rem; margin-top: -0.4375rem; }
   .slider[data-size="xl"] .slider__control::-moz-range-thumb { width: 1.25rem; height: 1.25rem; }
+
+  /* Density variants */
+  .slider[data-density="compact"] { padding: 0.25rem 0; }
+  .slider[data-density="comfortable"] { padding: 0.75rem 0; }
 </style>

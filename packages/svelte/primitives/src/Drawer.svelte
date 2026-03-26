@@ -4,7 +4,7 @@
   import { getFocusableElements } from "./internal";
   import { getUiPresentation, resolveSemanticControlSize } from "./presentation";
 
-  import type { ControlSize, DrawerEdge, SemanticControlSizeRole } from "./types";
+  import type { ControlDensity, ControlSize, DrawerEdge, SemanticControlSizeRole } from "./types";
 
   export let open: boolean | null = null;
   export let defaultOpen = false;
@@ -17,6 +17,7 @@
   export let ariaLabel: string | null = null;
   export let size: ControlSize | null = null;
   export let sizeRole: SemanticControlSizeRole = "control";
+  export let density: ControlDensity | null = null;
 
   const dispatch = createEventDispatcher<{
     openChange: { open: boolean };
@@ -32,6 +33,7 @@
   let previousOpen = false;
 
   $: resolvedSize = size ?? resolveSemanticControlSize(uiPresentation?.sizeScale ?? "md", sizeRole);
+  $: resolvedDensity = density ?? uiPresentation?.density ?? "default";
   $: isControlled = open !== null;
   $: isOpen = isControlled ? open === true : uncontrolledOpen;
   $: if (isOpen && !previousOpen) {
@@ -116,7 +118,7 @@
 </script>
 
 {#if isOpen}
-  <div class="drawer" data-edge={edge} data-modal={modal} data-size={resolvedSize}>
+  <div class="drawer" data-edge={edge} data-modal={modal} data-size={resolvedSize} data-density={resolvedDensity}>
     {#if modal}
       <button
         type="button"
@@ -274,4 +276,8 @@
   .drawer[data-size="xl"] .drawer__header strong {
     font-size: 1.125rem;
   }
+
+  /* Density variants */
+  .drawer[data-density="compact"] .drawer__body { padding: 0.75rem; }
+  .drawer[data-density="comfortable"] .drawer__body { padding: 1.5rem; }
 </style>

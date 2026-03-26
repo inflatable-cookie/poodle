@@ -4,7 +4,7 @@
   import Icon from "./Icon.svelte";
   import { getUiPresentation, resolveSemanticControlSize } from "./presentation";
   import Spinner from "./Spinner.svelte";
-  import type { ControlSize, SemanticControlSizeRole, StatusTone } from "./types";
+  import type { ControlDensity, ControlSize, SemanticControlSizeRole, StatusTone } from "./types";
 
   type CalloutAnnounceMode = "none" | "polite" | "assertive";
 
@@ -17,6 +17,7 @@
   export let dismissLabel = "Dismiss message";
   export let size: ControlSize | null = null;
   export let sizeRole: SemanticControlSizeRole = "control";
+  export let density: ControlDensity | null = null;
 
   const dispatch = createEventDispatcher<{
     dismiss: void;
@@ -33,6 +34,7 @@
   };
 
   $: resolvedSize = size ?? resolveSemanticControlSize(uiPresentation?.sizeScale ?? "md", sizeRole);
+  $: resolvedDensity = density ?? uiPresentation?.density ?? "default";
   $: role =
     announceMode === "assertive"
       ? "alert"
@@ -51,6 +53,7 @@
   class="callout"
   data-tone={tone}
   data-size={resolvedSize}
+  data-density={resolvedDensity}
   aria-label={ariaLabel ?? undefined}
   role={role}
   aria-live={ariaLive}
@@ -271,4 +274,8 @@
     width: 2rem;
     height: 2rem;
   }
+
+  /* Density variants */
+  .callout[data-density="compact"] { padding: 0.5rem 0.625rem; gap: var(--poodle-space-inline-sm); }
+  .callout[data-density="comfortable"] { padding: 0.875rem 1rem; gap: var(--poodle-space-inline-lg); }
 </style>

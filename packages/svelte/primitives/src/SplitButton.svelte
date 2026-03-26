@@ -12,6 +12,7 @@
   import type {
     ButtonTone,
     ButtonVariant,
+    ControlDensity,
     ControlSize,
     MenuItem,
     SemanticControlSizeRole,
@@ -21,6 +22,7 @@
   export let tone: ButtonTone = "default";
   export let size: ControlSize | null = null;
   export let sizeRole: SemanticControlSizeRole = "control";
+  export let density: ControlDensity | null = null;
   export let type: HTMLButtonElement["type"] = "button";
   export let items: MenuItem[] = [];
   export let disabled = false;
@@ -45,6 +47,7 @@
 
   $: isUnavailable = disabled || loading;
   $: resolvedSize = size ?? resolveSemanticControlSize(uiPresentation?.sizeScale ?? "md", sizeRole);
+  $: resolvedDensity = density ?? uiPresentation?.density ?? "default";
   $: resolvedVisualSize = resolveSupportingVisualSize(resolvedSize);
   $: actionableItems = menuNavigableItems(items);
   $: if (menuOpen) {
@@ -162,7 +165,7 @@
   });
 </script>
 
-<div class="split-button" data-variant={variant} data-tone={tone !== "default" ? tone : undefined} data-size={resolvedSize} bind:this={rootElement}>
+<div class="split-button" data-variant={variant} data-tone={tone !== "default" ? tone : undefined} data-size={resolvedSize} data-density={resolvedDensity} bind:this={rootElement}>
   <button
     {type}
     class="split-button__primary"
@@ -506,4 +509,8 @@
     margin: 0.25rem 0;
     background: color-mix(in srgb, var(--poodle-color-border-subtle) 72%, transparent);
   }
+
+  /* Density variants */
+  .split-button[data-density="compact"] { gap: 0; }
+  .split-button[data-density="comfortable"] { gap: 0.125rem; }
 </style>

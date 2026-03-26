@@ -5,7 +5,7 @@
   import Dialog from "./Dialog.svelte";
   import { getUiPresentation, resolveSemanticControlSize } from "./presentation";
 
-  import type { AlertDialogTone, ControlSize, SemanticControlSizeRole } from "./types";
+  import type { AlertDialogTone, ControlDensity, ControlSize, SemanticControlSizeRole } from "./types";
 
   export let open: boolean | null = null;
   export let title: string;
@@ -19,6 +19,7 @@
   export let onCancel: (() => void) | null = null;
   export let size: ControlSize | null = null;
   export let sizeRole: SemanticControlSizeRole = "control";
+  export let density: ControlDensity | null = null;
 
   const dispatch = createEventDispatcher<{
     confirm: void;
@@ -77,10 +78,11 @@
   }
 
   $: resolvedSize = size ?? resolveSemanticControlSize(uiPresentation?.sizeScale ?? "md", sizeRole);
+  $: resolvedDensity = density ?? uiPresentation?.density ?? "default";
   $: confirmTone = tone === "danger" ? "danger" as const : "default" as const;
 </script>
 
-<div data-size={resolvedSize}>
+<div data-size={resolvedSize} data-density={resolvedDensity}>
 <Dialog
   {open}
   {title}

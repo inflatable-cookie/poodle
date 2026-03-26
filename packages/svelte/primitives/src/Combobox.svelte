@@ -8,7 +8,7 @@
   import { firstEnabledIndex } from "./internal";
   import { getUiPresentation, resolveSemanticControlSize } from "./presentation";
 
-  import type { ComboboxOption, ControlSize, SemanticControlSizeRole } from "./types";
+  import type { ComboboxOption, ControlDensity, ControlSize, SemanticControlSizeRole } from "./types";
 
   export let value: string | null = null;
   export let defaultValue: string | null = null;
@@ -18,6 +18,7 @@
   export let ariaLabel: string | null = null;
   export let size: ControlSize | null = null;
   export let sizeRole: SemanticControlSizeRole = "control";
+  export let density: ControlDensity | null = null;
 
   const dispatch = createEventDispatcher<{
     valueChange: { value: string };
@@ -36,6 +37,7 @@
   $: controlled = value !== null;
   $: currentValue = controlled ? value : uncontrolledValue;
   $: resolvedSize = size ?? resolveSemanticControlSize(uiPresentation?.sizeScale ?? "md", sizeRole);
+  $: resolvedDensity = density ?? uiPresentation?.density ?? "default";
   $: selectedOption = options.find((option) => option.value === currentValue) ?? null;
   $: filteredOptions = options.filter((option) =>
     option.label.toLowerCase().includes(query.toLowerCase())
@@ -90,6 +92,7 @@
   class="combobox"
   data-open={open}
   data-size={resolvedSize}
+  data-density={resolvedDensity}
   role="combobox"
   aria-label={ariaLabel ?? undefined}
   aria-expanded={open ? "true" : "false"}
@@ -256,6 +259,15 @@
 
   .combobox__empty {
     padding: 0.5rem;
+  }
+
+  /* Density variants */
+  .combobox[data-density="compact"] .combobox__input {
+    padding: 0 calc(var(--poodle-space-control-x) - 0.125rem);
+  }
+
+  .combobox[data-density="comfortable"] .combobox__input {
+    padding: 0 calc(var(--poodle-space-control-x) + 0.125rem);
   }
 
   /* Size variants */

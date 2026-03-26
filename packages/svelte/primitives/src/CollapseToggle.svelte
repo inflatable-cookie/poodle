@@ -4,7 +4,7 @@
   import Icon from "./Icon.svelte";
   import { getUiPresentation, resolveSemanticControlSize } from "./presentation";
 
-  import type { CollapseDirection, ControlSize, SemanticControlSizeRole } from "./types";
+  import type { CollapseDirection, ControlDensity, ControlSize, SemanticControlSizeRole } from "./types";
 
   export let collapsed = false;
   export let direction: CollapseDirection = "left";
@@ -12,6 +12,7 @@
   export let ariaLabel: string | null = null;
   export let size: ControlSize | null = null;
   export let sizeRole: SemanticControlSizeRole = "chrome";
+  export let density: ControlDensity | null = null;
 
   const dispatch = createEventDispatcher<{
     toggle: { isCollapsed: boolean };
@@ -20,6 +21,7 @@
   const uiPresentation = getUiPresentation();
 
   $: resolvedSize = size ?? resolveSemanticControlSize(uiPresentation?.sizeScale ?? "md", sizeRole);
+  $: resolvedDensity = density ?? uiPresentation?.density ?? "default";
   $: expandDirection = (
     { left: "right", right: "left", up: "down", down: "up" } as const
   )[direction];
@@ -43,6 +45,7 @@
   data-collapsed={collapsed || undefined}
   data-direction={direction}
   data-size={resolvedSize}
+  data-density={resolvedDensity}
   disabled={disabled}
   aria-expanded={!collapsed}
   aria-label={label}
@@ -92,4 +95,8 @@
   .collapse-toggle[data-size="xl"] {
     padding: 0.25rem;
   }
+
+  /* Density variants */
+  .collapse-toggle[data-density="compact"] { padding: 0.125rem; }
+  .collapse-toggle[data-density="comfortable"] { padding: 0.375rem; }
 </style>

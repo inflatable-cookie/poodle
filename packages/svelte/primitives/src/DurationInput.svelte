@@ -3,10 +3,11 @@
 
   import { getUiPresentation, resolveSemanticControlSize } from "./presentation";
 
-  import type { ControlSize, SemanticControlSizeRole } from "./types";
+  import type { ControlDensity, ControlSize, SemanticControlSizeRole } from "./types";
 
   export let size: ControlSize | null = null;
   export let sizeRole: SemanticControlSizeRole = "control";
+  export let density: ControlDensity | null = null;
   export let hours = 0;
   export let minutes = 0;
   export let seconds = 0;
@@ -24,6 +25,7 @@
   }>();
 
   $: resolvedSize = size ?? resolveSemanticControlSize(uiPresentation?.sizeScale ?? "md", sizeRole);
+  $: resolvedDensity = density ?? uiPresentation?.density ?? "default";
   $: totalSeconds = hours * 3600 + minutes * 60 + seconds;
   $: isUnderMin = totalSeconds < minTotalSeconds;
   $: isOverMax = maxTotalSeconds !== null && totalSeconds > maxTotalSeconds;
@@ -117,6 +119,7 @@
   data-disabled={disabled}
   data-invalid={isUnderMin || isOverMax}
   data-size={resolvedSize}
+  data-density={resolvedDensity}
 >
   <div class="duration-input__segment">
     <label class="duration-input__label" for="dur-hours">h</label>
@@ -282,4 +285,8 @@
     width: 2.25rem;
     font-size: 1rem;
   }
+
+  /* Density variants */
+  .duration-input[data-density="compact"] { padding: 0 calc(var(--poodle-space-control-x) - 0.125rem); gap: 0.125rem; }
+  .duration-input[data-density="comfortable"] { padding: 0 calc(var(--poodle-space-control-x) + 0.125rem); gap: 0.375rem; }
 </style>

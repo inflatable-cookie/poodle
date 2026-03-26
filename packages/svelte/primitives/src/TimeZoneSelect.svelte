@@ -4,7 +4,7 @@
   import { defaultTimeZoneOptions } from "./date";
   import { getUiPresentation, resolveSemanticControlSize } from "./presentation";
 
-  import type { ControlSize, SemanticControlSizeRole, TimeZoneOption } from "./types";
+  import type { ControlDensity, ControlSize, SemanticControlSizeRole, TimeZoneOption } from "./types";
 
   export let id: string | undefined = undefined;
   export let value: string | null = null;
@@ -17,6 +17,7 @@
   export let name: string | undefined = undefined;
   export let size: ControlSize | null = null;
   export let sizeRole: SemanticControlSizeRole = "control";
+  export let density: ControlDensity | null = null;
 
   const dispatch = createEventDispatcher<{
     valueChange: { value: string };
@@ -26,6 +27,7 @@
   let uncontrolledValue = defaultValue;
 
   $: resolvedSize = size ?? resolveSemanticControlSize(uiPresentation?.sizeScale ?? "md", sizeRole);
+  $: resolvedDensity = density ?? uiPresentation?.density ?? "default";
   $: availableOptions = options.length > 0 ? options : defaultTimeZoneOptions();
   $: isControlled = value !== null;
   $: currentValue = (isControlled ? value : uncontrolledValue) ?? "";
@@ -42,7 +44,7 @@
   }
 </script>
 
-<div class="time-zone-select" data-size={resolvedSize} data-placeholder={!hasSelection}>
+<div class="time-zone-select" data-size={resolvedSize} data-density={resolvedDensity} data-placeholder={!hasSelection}>
   <select
     {id}
     {name}
@@ -161,4 +163,8 @@
     height: calc(var(--poodle-size-control-height) + 0.5rem - (var(--poodle-border-width-default) * 2));
     font-size: 1rem;
   }
+
+  /* Density variants */
+  .time-zone-select[data-density="compact"] { gap: var(--poodle-space-inline-xs); }
+  .time-zone-select[data-density="comfortable"] { gap: var(--poodle-space-inline-md); }
 </style>

@@ -3,7 +3,7 @@
 
   import { getUiPresentation, resolveSemanticControlSize } from "./presentation";
 
-  import type { ActiveSort, ControlSize, SemanticControlSizeRole, SortField } from "./types";
+  import type { ActiveSort, ControlDensity, ControlSize, SemanticControlSizeRole, SortField } from "./types";
 
   export let fields: SortField[] = [];
   export let activeSort: ActiveSort | null = null;
@@ -11,6 +11,7 @@
   export let disabled = false;
   export let sizeRole: SemanticControlSizeRole = "control";
   export let size: ControlSize | null = null;
+  export let density: ControlDensity | null = null;
 
   const dispatch = createEventDispatcher<{
     change: { sort: ActiveSort | null };
@@ -19,6 +20,7 @@
   const uiPresentation = getUiPresentation();
 
   $: resolvedSize = size ?? resolveSemanticControlSize(uiPresentation?.sizeScale ?? "md", sizeRole);
+  $: resolvedDensity = density ?? uiPresentation?.density ?? "default";
 
   function toggleSort(field: SortField): void {
     if (disabled || field.disabled) return;
@@ -42,7 +44,7 @@
   }
 </script>
 
-<div class="order-by" role="toolbar" aria-label={ariaLabel} data-disabled={disabled} data-size={resolvedSize}>
+<div class="order-by" role="toolbar" aria-label={ariaLabel} data-disabled={disabled} data-size={resolvedSize} data-density={resolvedDensity}>
   <span class="order-by__label">Sort by</span>
   <div class="order-by__fields">
     {#each fields as field (field.value)}
@@ -210,4 +212,10 @@
     padding: 0 0.75rem;
     font-size: 0.875rem;
   }
+
+  /* Density variants */
+  .order-by[data-density="compact"] { gap: var(--poodle-space-inline-xs); }
+  .order-by[data-density="compact"] .order-by__fields { gap: 0.125rem; }
+  .order-by[data-density="comfortable"] { gap: var(--poodle-space-inline-md); }
+  .order-by[data-density="comfortable"] .order-by__fields { gap: 0.375rem; }
 </style>

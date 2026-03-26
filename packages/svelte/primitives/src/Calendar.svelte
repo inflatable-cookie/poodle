@@ -20,7 +20,7 @@
   } from "./date";
   import { getUiPresentation, resolveSemanticControlSize } from "./presentation";
 
-  import type { CalendarWeekStart, ControlSize, SemanticControlSizeRole } from "./types";
+  import type { CalendarWeekStart, ControlDensity, ControlSize, SemanticControlSizeRole } from "./types";
 
   export let value: string | null = null;
   export let defaultValue: string | null = null;
@@ -31,6 +31,7 @@
   export let ariaLabel: string | null = null;
   export let size: ControlSize | null = null;
   export let sizeRole: SemanticControlSizeRole = "control";
+  export let density: ControlDensity | null = null;
 
   const dispatch = createEventDispatcher<{
     valueChange: { value: string };
@@ -45,6 +46,7 @@
   let dayElements: Record<string, HTMLButtonElement | undefined> = {};
 
   $: resolvedSize = size ?? resolveSemanticControlSize(uiPresentation?.sizeScale ?? "md", sizeRole);
+  $: resolvedDensity = density ?? uiPresentation?.density ?? "default";
   $: currentValue = value ?? uncontrolledValue;
   $: currentMonth = monthAnchorIso(visibleMonth ?? uncontrolledMonth);
   $: weeks = buildCalendarWeeks(currentMonth, weekStartsOn);
@@ -132,7 +134,7 @@
   }
 </script>
 
-<div class="calendar" data-size={resolvedSize} aria-label={ariaLabel ?? undefined}>
+<div class="calendar" data-size={resolvedSize} data-density={resolvedDensity} aria-label={ariaLabel ?? undefined}>
   <div class="calendar__header">
     <button
       type="button"
@@ -374,4 +376,10 @@
   .calendar[data-size="xl"] .calendar__month {
     font-size: 0.9375rem;
   }
+
+  /* Density variants */
+  .calendar[data-density="compact"] .calendar__grid { gap: 0.0625rem; }
+  .calendar[data-density="compact"] .calendar__cell { padding: 0.0625rem; }
+  .calendar[data-density="comfortable"] .calendar__grid { gap: 0.1875rem; }
+  .calendar[data-density="comfortable"] .calendar__cell { padding: 0.1875rem; }
 </style>

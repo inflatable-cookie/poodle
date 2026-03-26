@@ -9,7 +9,7 @@
   import Icon from "./Icon.svelte";
   import { getUiPresentation, resolveSemanticControlSize } from "./presentation";
 
-  import type { ControlSize, SemanticControlSizeRole } from "./types";
+  import type { ControlDensity, ControlSize, SemanticControlSizeRole } from "./types";
 
   export let open: boolean | null = null;
   export let defaultOpen = false;
@@ -19,6 +19,7 @@
   export let ariaLabel: string | null = null;
   export let size: ControlSize | null = null;
   export let sizeRole: SemanticControlSizeRole = "control";
+  export let density: ControlDensity | null = null;
 
   const dispatch = createEventDispatcher<{
     openChange: { open: boolean };
@@ -29,6 +30,7 @@
   let uncontrolledOpen = defaultOpen;
 
   $: resolvedSize = size ?? resolveSemanticControlSize(uiPresentation?.sizeScale ?? "md", sizeRole);
+  $: resolvedDensity = density ?? uiPresentation?.density ?? "default";
   $: isControlled = open !== null;
   $: isOpen = isControlled ? open === true : uncontrolledOpen;
 
@@ -41,7 +43,7 @@
   }
 </script>
 
-<section class="collapsible" data-open={isOpen} data-disabled={disabled} data-size={resolvedSize}>
+<section class="collapsible" data-open={isOpen} data-disabled={disabled} data-size={resolvedSize} data-density={resolvedDensity}>
   <button
     type="button"
     class="collapsible__trigger"
@@ -194,4 +196,8 @@
   .collapsible[data-size="xl"] .collapsible__description {
     font-size: 0.9375rem;
   }
+
+  /* Density variants */
+  .collapsible[data-density="compact"] { padding: 0.375rem 0.5rem; }
+  .collapsible[data-density="comfortable"] { padding: 0.75rem 1rem; }
 </style>

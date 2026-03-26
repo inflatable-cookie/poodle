@@ -3,7 +3,7 @@
 
   import Icon from "./Icon.svelte";
   import { getUiPresentation, resolveSemanticControlSize } from "./presentation";
-  import type { ControlSize, SemanticControlSizeRole, SelectOption, SelectOptionGroup, SelectItems } from "./types";
+  import type { ControlDensity, ControlSize, SemanticControlSizeRole, SelectOption, SelectOptionGroup, SelectItems } from "./types";
 
   export let id: string | undefined = undefined;
   export let value: string | null = null;
@@ -16,6 +16,7 @@
   export let name: string | undefined = undefined;
   export let size: ControlSize | null = null;
   export let sizeRole: SemanticControlSizeRole = "control";
+  export let density: ControlDensity | null = null;
 
   const dispatch = createEventDispatcher<{
     valueChange: { value: string };
@@ -25,6 +26,7 @@
   let uncontrolledValue = defaultValue;
 
   $: resolvedSize = size ?? resolveSemanticControlSize(uiPresentation?.sizeScale ?? "md", sizeRole);
+  $: resolvedDensity = density ?? uiPresentation?.density ?? "default";
   $: isControlled = value !== null;
   $: currentValue = (isControlled ? value : uncontrolledValue) ?? "";
   $: hasSelection = currentValue !== "";
@@ -41,7 +43,7 @@
   }
 </script>
 
-<div class="select" data-placeholder={!hasSelection} data-size={resolvedSize}>
+<div class="select" data-placeholder={!hasSelection} data-size={resolvedSize} data-density={resolvedDensity}>
   <select
     {id}
     {name}
@@ -151,6 +153,15 @@
   .select__control option {
     font-weight: normal;
     color: var(--poodle-color-text-primary);
+  }
+
+  /* Density variants */
+  .select[data-density="compact"] {
+    padding: 0 calc(var(--poodle-space-control-x) - 0.125rem);
+  }
+
+  .select[data-density="comfortable"] {
+    padding: 0 calc(var(--poodle-space-control-x) + 0.125rem);
   }
 
   /* Size variants */

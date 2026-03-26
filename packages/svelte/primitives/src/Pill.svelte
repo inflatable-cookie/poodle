@@ -1,12 +1,13 @@
 <script lang="ts">
   import { getUiPresentation, resolveSemanticControlSize } from "./presentation";
-  import type { SemanticControlSizeRole } from "./types";
+  import type { ControlDensity, SemanticControlSizeRole } from "./types";
   import type { PillAppearance, PillFont, PillSize, PillTone } from "./types";
 
   export let tone: PillTone = "neutral";
   export let appearance: PillAppearance = "solid";
   export let size: PillSize | null = null;
   export let sizeRole: SemanticControlSizeRole = "chrome";
+  export let density: ControlDensity | null = null;
   export let font: PillFont = "normal";
   export let muted = false;
   export let ariaLabel: string | null = null;
@@ -14,6 +15,7 @@
   const uiPresentation = getUiPresentation();
 
   $: resolvedSize = (size ?? resolveSemanticControlSize(uiPresentation?.sizeScale ?? "md", sizeRole)) as PillSize;
+  $: resolvedDensity = density ?? uiPresentation?.density ?? "default";
 </script>
 
 <span
@@ -21,6 +23,7 @@
   data-tone={tone}
   data-appearance={appearance}
   data-size={resolvedSize}
+  data-density={resolvedDensity}
   data-font={font}
   data-muted={muted}
   aria-label={ariaLabel ?? undefined}
@@ -111,4 +114,8 @@
   .pill[data-muted="true"] {
     opacity: 0.72;
   }
+
+  /* Density variants */
+  .pill[data-density="compact"] { padding: 0 0.375rem; gap: 0.125rem; }
+  .pill[data-density="comfortable"] { padding: 0 0.625rem; gap: 0.25rem; }
 </style>

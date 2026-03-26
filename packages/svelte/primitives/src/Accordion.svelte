@@ -8,7 +8,7 @@
 
   import Icon from "./Icon.svelte";
   import { getUiPresentation, resolveSemanticControlSize } from "./presentation";
-  import type { AccordionItem, ControlSize, SemanticControlSizeRole } from "./types";
+  import type { AccordionItem, ControlDensity, ControlSize, SemanticControlSizeRole } from "./types";
 
   export let items: AccordionItem[] = [];
   export let value: string | string[] | null = null;
@@ -18,6 +18,7 @@
   export let ariaLabel: string | null = null;
   export let size: ControlSize | null = null;
   export let sizeRole: SemanticControlSizeRole = "control";
+  export let density: ControlDensity | null = null;
 
   const dispatch = createEventDispatcher<{
     valueChange: { value: string | string[] | null };
@@ -28,6 +29,7 @@
   let uncontrolledValue = defaultValue ?? (selectionMode === "multiple" ? [] : null);
 
   $: resolvedSize = size ?? resolveSemanticControlSize(uiPresentation?.sizeScale ?? "md", sizeRole);
+  $: resolvedDensity = density ?? uiPresentation?.density ?? "default";
   $: isControlled = value !== null;
   $: currentValue = isControlled ? value : uncontrolledValue;
   $: openValues = Array.isArray(currentValue)
@@ -63,6 +65,7 @@
   role={selectionMode === "multiple" ? "group" : undefined}
   aria-label={ariaLabel ?? undefined}
   data-size={resolvedSize}
+  data-density={resolvedDensity}
 >
   {#each items as item (item.value)}
     <section class="accordion__item" data-open={openValues.includes(item.value)}>
@@ -216,4 +219,8 @@
   .accordion[data-size="xl"] .accordion__description {
     font-size: 0.9375rem;
   }
+
+  /* Density variants */
+  .accordion[data-density="compact"] .accordion__item { padding: 0.375rem 0.5rem; }
+  .accordion[data-density="comfortable"] .accordion__item { padding: 0.75rem 1rem; }
 </style>

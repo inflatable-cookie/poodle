@@ -1,7 +1,7 @@
 <script lang="ts">
   import { getUiPresentation, resolveSemanticControlSize } from "./presentation";
 
-  import type { ControlSize, SemanticControlSizeRole } from "./types";
+  import type { ControlDensity, ControlSize, SemanticControlSizeRole } from "./types";
 
   export let source = "";
   export let language: string | null = null;
@@ -13,12 +13,14 @@
   export let ariaLabel: string | null = null;
   export let sizeRole: SemanticControlSizeRole = "chrome";
   export let size: ControlSize | null = null;
+  export let density: ControlDensity | null = null;
 
   const uiPresentation = getUiPresentation();
 
   let copied = false;
 
   $: resolvedSize = size ?? resolveSemanticControlSize(uiPresentation?.sizeScale ?? "md", sizeRole);
+  $: resolvedDensity = density ?? uiPresentation?.density ?? "default";
   $: lines = source.split("\n");
   $: highlightSet = new Set(highlightLines);
 
@@ -34,7 +36,7 @@
 </script>
 
 {#if inline}
-  <code class="code code--inline" aria-label={ariaLabel ?? undefined} data-language={language} data-size={resolvedSize}>
+  <code class="code code--inline" aria-label={ariaLabel ?? undefined} data-language={language} data-size={resolvedSize} data-density={resolvedDensity}>
     {source}
   </code>
 {:else}
@@ -43,6 +45,7 @@
     aria-label={ariaLabel ?? `Code block${language ? ` (${language})` : ""}`}
     data-language={language}
     data-size={resolvedSize}
+    data-density={resolvedDensity}
     style={maxHeight ? `max-height: ${maxHeight}` : undefined}
   >
     {#if language || showCopyButton}
@@ -225,4 +228,8 @@
   .code--inline[data-size="xl"] {
     font-size: 0.9375em;
   }
+
+  /* Density variants */
+  .code[data-density="compact"] .code__pre { padding: 0.5rem 0.75rem; }
+  .code[data-density="comfortable"] .code__pre { padding: 1rem 1.25rem; }
 </style>

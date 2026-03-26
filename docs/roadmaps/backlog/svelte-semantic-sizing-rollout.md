@@ -246,8 +246,10 @@ What remains:
 
 1. ~~**Contract updates**~~ — ✅ Done. 53 contracts now document `size`/`sizeRole`.
 2. ~~**Specimen updates**~~ — ✅ Done. 49 specimens updated with Sizes sections.
-3. **Component-docs entries** — Each component-docs entry should list the new
-   props.
-4. **Density pass** — The `density: ControlDensity | null = null` prop is not
-   yet wired on most components (only a handful support it today). This is a
-   follow-up pass once the sizing foundation is stable.
+3. ~~**Component-docs entries**~~ — ✅ Done. All 35 remaining entries now list
+   `size`/`sizeRole` props (52 total entries have them, including 17 previously done).
+4. ~~**Density pass**~~ — ✅ Done. All 75 interactive components now export
+   `density: ControlDensity | null = null`, resolve via presentation context,
+   emit `data-density`, and have CSS `[data-density]` variant rules for
+   compact/comfortable spacing adjustments. Remaining: contract and specimen
+   updates to document density (similar to the sizing documentation pass).

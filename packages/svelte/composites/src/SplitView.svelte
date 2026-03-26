@@ -2,7 +2,7 @@
   import { createEventDispatcher, onDestroy } from "svelte";
 
   import { CollapseToggle, getUiPresentation, resolveSemanticControlSize } from "@poodle/svelte-primitives";
-  import type { CollapseDirection, ControlSize, SemanticControlSizeRole } from "@poodle/svelte-primitives";
+  import type { CollapseDirection, ControlDensity, ControlSize, SemanticControlSizeRole } from "@poodle/svelte-primitives";
   import { ResizeHandle } from "@poodle/svelte-primitives";
   import type { SplitOrientation } from "@poodle/svelte-primitives";
 
@@ -21,6 +21,7 @@
   export let disabled = false;
   export let size: ControlSize | null = null;
   export let sizeRole: SemanticControlSizeRole = "chrome";
+  export let density: ControlDensity | null = null;
 
   const dispatch = createEventDispatcher<{
     ratioChange: { ratio: number };
@@ -37,6 +38,7 @@
   // ── Derived ──────────────────────────────────────────────────────
 
   $: resolvedSize = size ?? resolveSemanticControlSize(uiPresentation?.sizeScale ?? "md", sizeRole);
+  $: resolvedDensity = density ?? uiPresentation?.density ?? "default";
 
   $: currentRatio = Math.min(0.95, Math.max(0.05, ratio ?? uncontrolledRatio));
 
@@ -163,6 +165,7 @@
   data-primary-collapsed={primaryCollapsed || undefined}
   data-secondary-collapsed={secondaryCollapsed || undefined}
   data-size={resolvedSize}
+  data-density={resolvedDensity}
   aria-label={ariaLabel ?? "Split view"}
   bind:this={container}
 >

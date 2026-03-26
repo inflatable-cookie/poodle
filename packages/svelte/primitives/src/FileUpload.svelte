@@ -3,10 +3,11 @@
 
   import { getUiPresentation, resolveSemanticControlSize } from "./presentation";
 
-  import type { ControlSize, FileUploadItem, SemanticControlSizeRole } from "./types";
+  import type { ControlDensity, ControlSize, FileUploadItem, SemanticControlSizeRole } from "./types";
 
   export let size: ControlSize | null = null;
   export let sizeRole: SemanticControlSizeRole = "control";
+  export let density: ControlDensity | null = null;
   import {
     DEFAULT_COMPRESSION,
     compressImage,
@@ -44,6 +45,7 @@
   }>();
 
   $: resolvedSize = size ?? resolveSemanticControlSize(uiPresentation?.sizeScale ?? "md", sizeRole);
+  $: resolvedDensity = density ?? uiPresentation?.density ?? "default";
 
   let inputElement: HTMLInputElement | null = null;
   let dragActive = false;
@@ -224,7 +226,7 @@
   });
 </script>
 
-<div class="file-upload" class:file-upload--disabled={disabled} data-size={resolvedSize}>
+<div class="file-upload" class:file-upload--disabled={disabled} data-size={resolvedSize} data-density={resolvedDensity}>
   <div
     class="file-upload__dropzone"
     class:file-upload__dropzone--active={dragActive}
@@ -547,4 +549,8 @@
   .file-upload[data-size="xl"] .file-upload__label {
     font-size: 1rem;
   }
+
+  /* Density variants */
+  .file-upload[data-density="compact"] { padding: 0.75rem; }
+  .file-upload[data-density="comfortable"] { padding: 1.25rem; }
 </style>

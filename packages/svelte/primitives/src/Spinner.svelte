@@ -1,11 +1,12 @@
 <script lang="ts">
   import { getUiPresentation, resolveSemanticControlSize } from "./presentation";
-  import type { SemanticControlSizeRole } from "./types";
+  import type { ControlDensity, SemanticControlSizeRole } from "./types";
   import type { SpinnerSize, SpinnerTone, SpinnerVariant } from "./types";
 
   export let variant: SpinnerVariant = "ring";
   export let size: SpinnerSize | null = null;
   export let sizeRole: SemanticControlSizeRole = "control";
+  export let density: ControlDensity | null = null;
   export let tone: SpinnerTone = "current";
   export let ariaLabel: string | null = null;
   export let className = "";
@@ -13,6 +14,7 @@
   const uiPresentation = getUiPresentation();
   $: resolvedSize =
     (size ?? resolveSemanticControlSize(uiPresentation?.sizeScale ?? "md", sizeRole)) as SpinnerSize;
+  $: resolvedDensity = density ?? uiPresentation?.density ?? "default";
 
   const gridCells = [
     { id: 0, phase: "tl" },
@@ -29,6 +31,7 @@
   class={`spinner ${className}`.trim()}
   data-variant={variant}
   data-size={resolvedSize}
+  data-density={resolvedDensity}
   data-tone={tone}
   style={style ?? undefined}
   role={ariaLabel ? "status" : undefined}

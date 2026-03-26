@@ -2,13 +2,14 @@
   import { createEventDispatcher } from "svelte";
 
   import { Icon, getUiPresentation, resolveSemanticControlSize } from "@poodle/svelte-primitives";
-  import type { ControlSize, SemanticControlSizeRole } from "@poodle/svelte-primitives";
+  import type { ControlDensity, ControlSize, SemanticControlSizeRole } from "@poodle/svelte-primitives";
 
   export let items: Array<{ id: string; label: string }> = [];
   export let selectionMode: "single" | "multiple" = "multiple";
   export let maxVisibleItems = 4;
   export let size: ControlSize | null = null;
   export let sizeRole: SemanticControlSizeRole = "control";
+  export let density: ControlDensity | null = null;
 
   const dispatch = createEventDispatcher<{
     remove: { id: string };
@@ -18,11 +19,12 @@
   const uiPresentation = getUiPresentation();
 
   $: resolvedSize = size ?? resolveSemanticControlSize(uiPresentation?.sizeScale ?? "md", sizeRole);
+  $: resolvedDensity = density ?? uiPresentation?.density ?? "default";
   $: visibleItems = items.slice(0, maxVisibleItems);
   $: overflowCount = Math.max(0, items.length - visibleItems.length);
 </script>
 
-<section class="selection-summary" aria-label="Current selection" data-size={resolvedSize}>
+<section class="selection-summary" aria-label="Current selection" data-size={resolvedSize} data-density={resolvedDensity}>
   <div class="selection-summary__header">
     <strong>
       {#if selectionMode === "single"}
@@ -201,4 +203,8 @@
     line-height: 2.5rem;
     padding: 0 0.875rem;
   }
+
+  /* Density variants */
+  .selection-summary[data-density="compact"] { padding: 0.25rem 0.375rem; gap: var(--poodle-space-inline-xs); }
+  .selection-summary[data-density="comfortable"] { padding: 0.5rem 0.75rem; gap: var(--poodle-space-inline-md); }
 </style>

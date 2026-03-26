@@ -2,7 +2,7 @@
   import { onMount, onDestroy } from "svelte";
 
   import { getUiPresentation, resolveSemanticControlSize } from "@poodle/svelte-primitives";
-  import type { ControlSize, SemanticControlSizeRole } from "@poodle/svelte-primitives";
+  import type { ControlDensity, ControlSize, SemanticControlSizeRole } from "@poodle/svelte-primitives";
 
   export let src: string;
   export let poster: string | null = null;
@@ -12,6 +12,7 @@
   export let captionsSrc: string | null = null;
   export let size: ControlSize | null = null;
   export let sizeRole: SemanticControlSizeRole = "control";
+  export let density: ControlDensity | null = null;
 
   let videoEl: HTMLVideoElement | null = null;
   let wrapperEl: HTMLDivElement | null = null;
@@ -28,6 +29,7 @@
   const uiPresentation = getUiPresentation();
 
   $: resolvedSize = size ?? resolveSemanticControlSize(uiPresentation?.sizeScale ?? "md", sizeRole);
+  $: resolvedDensity = density ?? uiPresentation?.density ?? "default";
   $: formattedCurrent = formatTime(currentTime);
   $: formattedDuration = formatTime(duration);
   $: progress = duration > 0 ? (currentTime / duration) * 100 : 0;
@@ -149,6 +151,7 @@
   aria-label={ariaLabel}
   aria-pressed={isPlaying}
   data-size={resolvedSize}
+  data-density={resolvedDensity}
 >
   <!-- svelte-ignore a11y-media-has-caption -->
   <video
@@ -501,4 +504,8 @@
     width: 5rem;
     height: 5rem;
   }
+
+  /* Density variants */
+  .video-player[data-density="compact"] .video-player__controls { padding: 0.25rem 0.375rem; gap: 0.25rem; }
+  .video-player[data-density="comfortable"] .video-player__controls { padding: 0.5rem 0.75rem; gap: 0.5rem; }
 </style>

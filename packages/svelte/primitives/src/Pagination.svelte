@@ -3,7 +3,7 @@
 
   import { getUiPresentation, resolveSemanticControlSize } from "./presentation";
 
-  import type { ControlSize, SemanticControlSizeRole } from "./types";
+  import type { ControlDensity, ControlSize, SemanticControlSizeRole } from "./types";
 
   export let currentPage = 1;
   export let totalPages = 1;
@@ -11,6 +11,7 @@
   export let ariaLabel: string | null = null;
   export let sizeRole: SemanticControlSizeRole = "control";
   export let size: ControlSize | null = null;
+  export let density: ControlDensity | null = null;
 
   const dispatch = createEventDispatcher<{
     pageChange: { page: number };
@@ -19,6 +20,7 @@
   const uiPresentation = getUiPresentation();
 
   $: resolvedSize = size ?? resolveSemanticControlSize(uiPresentation?.sizeScale ?? "md", sizeRole);
+  $: resolvedDensity = density ?? uiPresentation?.density ?? "default";
   $: safeTotalPages = Math.max(1, totalPages);
   $: safeCurrentPage = Math.min(Math.max(1, currentPage), safeTotalPages);
   $: visiblePages = buildVisiblePages(safeCurrentPage, safeTotalPages, siblingCount);
@@ -62,7 +64,7 @@
   }
 </script>
 
-<nav class="pagination" aria-label={ariaLabel ?? "Pagination"} data-size={resolvedSize}>
+<nav class="pagination" aria-label={ariaLabel ?? "Pagination"} data-size={resolvedSize} data-density={resolvedDensity}>
   <button
     type="button"
     class="pagination__button"
@@ -167,4 +169,10 @@
   .pagination[data-size="sm"] .pagination__button { min-width: calc(var(--poodle-size-control-height) - 0.375rem); height: calc(var(--poodle-size-control-height) - 0.375rem); }
   .pagination[data-size="lg"] .pagination__button { min-width: calc(var(--poodle-size-control-height) + 0.125rem); height: calc(var(--poodle-size-control-height) + 0.125rem); font-size: 0.875rem; }
   .pagination[data-size="xl"] .pagination__button { min-width: calc(var(--poodle-size-control-height) + 0.375rem); height: calc(var(--poodle-size-control-height) + 0.375rem); font-size: 0.9375rem; }
+
+  /* Density variants */
+  .pagination[data-density="compact"] { gap: 0.0625rem; }
+  .pagination[data-density="compact"] .pagination__pages { gap: 0.0625rem; }
+  .pagination[data-density="comfortable"] { gap: 0.25rem; }
+  .pagination[data-density="comfortable"] .pagination__pages { gap: 0.25rem; }
 </style>

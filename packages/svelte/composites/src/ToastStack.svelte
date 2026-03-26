@@ -2,7 +2,7 @@
   import { createEventDispatcher } from "svelte";
 
   import { Button, Icon, getUiPresentation, resolveSemanticControlSize } from "@poodle/svelte-primitives";
-  import type { ControlSize, SemanticControlSizeRole } from "@poodle/svelte-primitives";
+  import type { ControlDensity, ControlSize, SemanticControlSizeRole } from "@poodle/svelte-primitives";
 
   import type { ToastItem } from "./types";
 
@@ -10,6 +10,7 @@
   export let ariaLabel = "Notifications";
   export let size: ControlSize | null = null;
   export let sizeRole: SemanticControlSizeRole = "chrome";
+  export let density: ControlDensity | null = null;
 
   const dispatch = createEventDispatcher<{
     dismiss: { id: string };
@@ -19,9 +20,10 @@
   const uiPresentation = getUiPresentation();
 
   $: resolvedSize = size ?? resolveSemanticControlSize(uiPresentation?.sizeScale ?? "md", sizeRole);
+  $: resolvedDensity = density ?? uiPresentation?.density ?? "default";
 </script>
 
-<section class="toast-stack" aria-label={ariaLabel} aria-live="polite" aria-atomic="false" role="list" data-size={resolvedSize}>
+<section class="toast-stack" aria-label={ariaLabel} aria-live="polite" aria-atomic="false" role="list" data-size={resolvedSize} data-density={resolvedDensity}>
   {#each items as item (item.id)}
     <article
       class="toast"
@@ -220,4 +222,8 @@
   .toast-stack[data-size="xl"] .toast__copy strong {
     font-size: 1rem;
   }
+
+  /* Density variants */
+  .toast-stack[data-density="compact"] { gap: var(--poodle-space-stack-sm); }
+  .toast-stack[data-density="comfortable"] { gap: var(--poodle-space-stack-lg); }
 </style>

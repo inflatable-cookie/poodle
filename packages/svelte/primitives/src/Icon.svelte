@@ -1,6 +1,6 @@
 <script lang="ts">
   import { getUiPresentation, resolveSemanticControlSize } from "./presentation";
-  import type { SemanticControlSizeRole } from "./types";
+  import type { ControlDensity, SemanticControlSizeRole } from "./types";
   import type { ControlSize } from "./types";
   import type { IconNodes } from "./icon-registry";
 
@@ -17,6 +17,7 @@
   export let name: string | null = null;
   export let size: ControlSize | null = null;
   export let sizeRole: SemanticControlSizeRole = "chrome";
+  export let density: ControlDensity | null = null;
   export let ariaLabel: string | null = null;
 
   const iconSet = getIconSet();
@@ -25,12 +26,14 @@
 
   $: resolvedIcon = icon ?? name;
   $: resolvedSize = size ?? resolveSemanticControlSize(uiPresentation?.sizeScale ?? "md", sizeRole);
+  $: resolvedDensity = density ?? uiPresentation?.density ?? "default";
   $: nodes = resolveIconNodes(resolvedIcon, iconSet);
 </script>
 
 <svg
   class="poodle-icon"
   data-size={resolvedSize}
+  data-density={resolvedDensity}
   xmlns="http://www.w3.org/2000/svg"
   width="24"
   height="24"

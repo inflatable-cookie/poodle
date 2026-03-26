@@ -3,7 +3,7 @@
 
   import { AlertDialog, Button, getUiPresentation, resolveSemanticControlSize } from "@poodle/svelte-primitives";
 
-  import type { AlertDialogTone, ControlSize, SemanticControlSizeRole } from "@poodle/svelte-primitives";
+  import type { AlertDialogTone, ControlDensity, ControlSize, SemanticControlSizeRole } from "@poodle/svelte-primitives";
 
   export let title: string;
   export let description: string | null = null;
@@ -13,6 +13,7 @@
   export let cancelLabel = "Cancel";
   export let size: ControlSize | null = null;
   export let sizeRole: SemanticControlSizeRole = "control";
+  export let density: ControlDensity | null = null;
 
   const dispatch = createEventDispatcher<{
     confirm: void;
@@ -24,6 +25,7 @@
   let open: boolean = false;
 
   $: resolvedSize = size ?? resolveSemanticControlSize(uiPresentation?.sizeScale ?? "md", sizeRole);
+  $: resolvedDensity = density ?? uiPresentation?.density ?? "default";
   $: triggerTone = tone === "danger" ? "danger" as const : "default" as const;
 
   function handleTrigger(): void {
@@ -49,6 +51,7 @@
   <span
     class="confirm-action__trigger"
     data-size={resolvedSize}
+    data-density={resolvedDensity}
     role="presentation"
     on:click={handleTrigger}
     on:keydown={(e) => {
