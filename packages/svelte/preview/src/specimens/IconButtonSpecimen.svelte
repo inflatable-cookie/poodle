@@ -1,6 +1,8 @@
 <script lang="ts">
   import { IconButton, Eyebrow } from "@poodle/svelte-primitives";
   import { plus, settings, x, trash2, star, mapPin, ban, refreshCw } from "@poodle/icons-lucide";
+
+  const controlSizes = ["xs", "sm", "md", "lg", "xl"] as const;
 </script>
 
 <div class="specimen">
@@ -25,9 +27,9 @@
   <div class="specimen__group">
     <Eyebrow>Sizes</Eyebrow>
     <div class="button-row">
-      <IconButton icon={star} ariaLabel="Favorite (small)" size="sm" variant="secondary" />
-      <IconButton icon={star} ariaLabel="Favorite (medium)" size="md" variant="secondary" />
-      <IconButton icon={star} ariaLabel="Favorite (large)" size="lg" variant="secondary" />
+      {#each controlSizes as size}
+        <IconButton icon={star} ariaLabel={`Favorite (${size})`} {size} variant="secondary" />
+      {/each}
     </div>
   </div>
 

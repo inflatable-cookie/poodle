@@ -6,7 +6,11 @@
   import { createEventDispatcher, onDestroy, onMount, tick } from "svelte";
 
   import Icon from "./Icon.svelte";
-  import { getUiPresentation, resolveSemanticControlSize } from "./presentation";
+  import {
+    getUiPresentation,
+    resolveSemanticControlSize,
+    resolveSupportingVisualSize,
+  } from "./presentation";
   import Spinner from "./Spinner.svelte";
   import { resolveOverlayPosition } from "./overlay-position";
   import type {
@@ -50,12 +54,7 @@
   $: isUnavailable = disabled || loading;
   $: tooltipText = tooltip ?? ariaLabel;
   $: resolvedSize = size ?? resolveSemanticControlSize(uiPresentation?.sizeScale ?? "md", sizeRole);
-  $: resolvedIconSize =
-    resolvedSize === "xs" || resolvedSize === "sm"
-      ? "sm"
-      : resolvedSize === "xl"
-        ? "lg"
-        : resolvedSize;
+  $: resolvedIconSize = resolveSupportingVisualSize(resolvedSize);
   $: if (tooltipOpen && tooltipText) {
     void updateTooltipPosition();
   }
@@ -148,7 +147,7 @@
   >
     {#if loading}
       <span class="icon-button__spinner" aria-hidden="true">
-        <Spinner variant="ring" size="sm" tone="current" />
+        <Spinner variant="ring" size={resolvedIconSize} tone="current" />
       </span>
     {:else}
       <span class="icon-button__glyph" aria-hidden="true">

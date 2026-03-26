@@ -195,13 +195,13 @@ Updated: 2026-03-15
 
 | Item | Type | Props / Config | Expected Visual |
 |------|------|---------------|-----------------|
-| Bold | Button | `variant="ghost"`, `size="sm"`, `leadingIcon="bold"`, `ariaLabel="Bold"` | Small ghost icon button |
-| Italic | Button | `variant="ghost"`, `size="sm"`, `leadingIcon="italic"`, `ariaLabel="Italic"` | Small ghost icon button |
-| Underline | Button | `variant="ghost"`, `size="sm"`, `leadingIcon="underline"`, `ariaLabel="Underline"` | Small ghost icon button |
+| Bold | Button | `variant="ghost"`, `sizeRole="chrome"`, `leadingIcon="bold"`, `ariaLabel="Bold"` | Toolbar chrome action |
+| Italic | Button | `variant="ghost"`, `sizeRole="chrome"`, `leadingIcon="italic"`, `ariaLabel="Italic"` | Toolbar chrome action |
+| Underline | Button | `variant="ghost"`, `sizeRole="chrome"`, `leadingIcon="underline"`, `ariaLabel="Underline"` | Toolbar chrome action |
 | (separator) | Separator | `orientation="vertical"` | Vertical divider line |
-| Align left | Button | `variant="ghost"`, `size="sm"`, `leadingIcon="text-align-start"`, `ariaLabel="Align left"` | Small ghost icon button |
-| Align center | Button | `variant="ghost"`, `size="sm"`, `leadingIcon="text-align-center"`, `ariaLabel="Align center"` | Small ghost icon button |
-| Align right | Button | `variant="ghost"`, `size="sm"`, `leadingIcon="text-align-end"`, `ariaLabel="Align right"` | Small ghost icon button |
+| Align left | Button | `variant="ghost"`, `sizeRole="chrome"`, `leadingIcon="text-align-start"`, `ariaLabel="Align left"` | Toolbar chrome action |
+| Align center | Button | `variant="ghost"`, `sizeRole="chrome"`, `leadingIcon="text-align-center"`, `ariaLabel="Align center"` | Toolbar chrome action |
+| Align right | Button | `variant="ghost"`, `sizeRole="chrome"`, `leadingIcon="text-align-end"`, `ariaLabel="Align right"` | Toolbar chrome action |
 
 ### With Primary Action
 
@@ -213,10 +213,10 @@ Updated: 2026-03-15
 
 | Item | Type | Props / Config | Expected Visual |
 |------|------|---------------|-----------------|
-| Discard | Button | `variant="secondary"`, `size="sm"` | Small secondary button with text |
-| Save draft | Button | `variant="secondary"`, `size="sm"` | Small secondary button with text |
+| Discard | Button | `variant="secondary"`, `sizeRole="chrome"` | Secondary action offset below the local baseline |
+| Save draft | Button | `variant="secondary"`, `sizeRole="chrome"` | Secondary action offset below the local baseline |
 | (separator) | Separator | `orientation="vertical"` | Vertical divider line |
-| Publish | Button | `size="sm"` (primary default) | Small primary button with text |
+| Publish | Button | `sizeRole="prominent"` (primary default) | Primary action offset above the local baseline |
 
 ## 14. Approval And Adoption Notes
 

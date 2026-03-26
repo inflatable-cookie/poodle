@@ -26,7 +26,7 @@
       <div class="icon-row">
         {#each sampleNames as name}
           <div class="labeled-icon">
-            <Icon icon={name} size="md" />
+            <Icon icon={name} />
             <span class="label">{name}</span>
           </div>
         {/each}
@@ -44,7 +44,7 @@
       <div class="icon-row">
         {#each Object.keys(customIcons) as name}
           <div class="labeled-icon">
-            <Icon icon={name} size="md" />
+            <Icon icon={name} />
             <span class="label">{name}</span>
           </div>
         {/each}
@@ -60,23 +60,23 @@
     </p>
     <div class="icon-row">
       <div class="labeled-icon">
-        <Icon icon="check" size="md" />
+        <Icon icon="check" />
         <span class="label">check</span>
       </div>
       <div class="labeled-icon">
-        <Icon icon="chevron-down" size="md" />
+        <Icon icon="chevron-down" />
         <span class="label">chevron-down</span>
       </div>
       <div class="labeled-icon">
-        <Icon icon="x" size="md" />
+        <Icon icon="x" />
         <span class="label">x</span>
       </div>
       <div class="labeled-icon">
-        <Icon icon="search" size="md" />
+        <Icon icon="search" />
         <span class="label">search</span>
       </div>
       <div class="labeled-icon">
-        <Icon icon="plus" size="md" />
+        <Icon icon="plus" />
         <span class="label">plus</span>
       </div>
     </div>

@@ -36,7 +36,8 @@ Updated: 2026-03-25
 | Prop | Type | Default | Required | Notes |
 |------|------|---------|----------|-------|
 | `variant` | `"ring" \| "grid"` | `"ring"` | no | selects loader visual |
-| `size` | `"sm" \| "md" \| "lg"` | `"md"` | no | scales the indicator |
+| `size` | `"xs" \| "sm" \| "md" \| "lg" \| "xl"` | `null` | no | explicit size override |
+| `sizeRole` | `"chrome" \| "control" \| "prominent"` | `"control"` | no | semantic size offset from inherited presentation |
 | `tone` | `"current" \| "accent" \| "muted"` | `"current"` | no | color source for the indicator |
 | `ariaLabel` | `string \| null` | `null` | no | optional announced loading label; decorative when omitted |
 
@@ -53,9 +54,11 @@ Updated: 2026-03-25
 |-------|---------|-----------------|
 | ring | `variant="ring"` | circular spinner rotates continuously |
 | grid | `variant="grid"` | six squares fade in a repeating snake loop: top-left, top-right, mid-right, mid-left, bottom-left, bottom-right, then mid-right and mid-left before reset |
+| extra-small | `size="xs"` | compact chrome-sized indicator |
 | small | `size="sm"` | compact inline indicator suitable for buttons |
-| medium | `size="md"` | default inline indicator |
-| large | `size="lg"` | emphasized indicator for overlays or larger loading surfaces |
+| medium | inherited default or `size="md"` | default inline indicator |
+| large | `size="lg"` | emphasized inline indicator |
+| extra-large | `size="xl"` | overlay-scale or prominent indicator |
 | current tone | `tone="current"` | indicator inherits surrounding currentColor |
 | accent tone | `tone="accent"` | indicator uses accent base color |
 | muted tone | `tone="muted"` | indicator uses text-secondary color |

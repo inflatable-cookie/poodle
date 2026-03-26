@@ -1,5 +1,6 @@
 <script lang="ts">
   import { Icon, Spinner } from "@poodle/svelte-primitives";
+  import { getUiPresentation, resolveSemanticControlSize, resolveSupportingVisualSize } from "@poodle/svelte-primitives";
 
   import type { AspectRatio, MediaKind, MediaState } from "./types";
 
@@ -14,6 +15,8 @@
   export let stateMessage: string | null = null;
   export let presentation: "default" | "compact" = "default";
 
+  const uiPresentation = getUiPresentation();
+
   $: resolvedStateTitle =
     stateTitle ??
     (state === "loading"
@@ -23,6 +26,10 @@
         : "No preview");
   $: fallbackIcon =
     kind === "audio" ? "music" : kind === "video" ? "play" : kind === "document" ? "file-text" : kind === "embed" ? "external-link" : "image";
+  $: resolvedVisualSize = resolveSemanticControlSize(uiPresentation?.sizeScale ?? "md", "control");
+  $: resolvedSupportingSize = resolveSupportingVisualSize(resolvedVisualSize);
+  $: resolvedSpinnerSize =
+    presentation === "compact" ? resolveSupportingVisualSize(resolvedSupportingSize) : resolvedSupportingSize;
 </script>
 
 <figure
@@ -40,20 +47,20 @@
         <slot />
       {:else}
         <div class="media-thumbnail__placeholder" aria-hidden="true">
-          <Icon name={fallbackIcon} size="lg" />
+          <Icon name={fallbackIcon} size={resolvedVisualSize} />
         </div>
       {/if}
 
       {#if kind === "audio" || kind === "video"}
         <span class="media-thumbnail__play" aria-hidden="true">
-          <Icon name={kind === "audio" ? "music" : "play"} size="sm" />
+          <Icon name={kind === "audio" ? "music" : "play"} size={resolvedSupportingSize} />
         </span>
       {/if}
     {:else}
       <div class="media-thumbnail__state">
         {#if state === "loading"}
           <span class="media-thumbnail__spinner" aria-hidden="true">
-            <Spinner variant="grid" size={presentation === "compact" ? "sm" : "md"} tone="accent" />
+            <Spinner variant="grid" size={resolvedSpinnerSize} tone="accent" />
           </span>
         {/if}
         <strong>{resolvedStateTitle}</strong>

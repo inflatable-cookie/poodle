@@ -1,5 +1,7 @@
 <script lang="ts">
   import { Pill, Eyebrow } from "@poodle/svelte-primitives";
+
+  const pillSizes = ["xs", "sm", "md", "lg", "xl"] as const;
 </script>
 
 <div class="specimen">
@@ -17,9 +19,9 @@
   <div class="specimen__group">
     <Eyebrow>Sizes</Eyebrow>
     <div class="specimen__row">
-      <Pill size="sm">Small</Pill>
-      <Pill size="md">Medium</Pill>
-      <Pill size="lg">Large</Pill>
+      {#each pillSizes as size}
+        <Pill {size}>{size.toUpperCase()}</Pill>
+      {/each}
     </div>
   </div>
 

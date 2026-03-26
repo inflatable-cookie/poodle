@@ -11,7 +11,7 @@ Updated: 2026-03-25
   label prop rather than visible text content, with variant, size, pressed,
   loading, and disabled states
 - In scope: icon-only command triggers, ghost/primary/secondary/danger
-  variants, sm/md/lg sizes, pressed/selected state when explicitly configured,
+  variants, semantic size roles, xs/sm/md/lg/xl sizes, pressed/selected state when explicitly configured,
   disabled/loading behavior with shared spinner usage, CSS custom property theming
 - Out of scope: toolbar roving-focus behavior, menu-button or toggle-button
   composite semantics beyond explicit opt-in, text-bearing buttons (see Button)
@@ -42,7 +42,8 @@ Updated: 2026-03-25
 |------|------|---------|----------|-------|
 | `variant` | `ButtonVariant` | `"ghost"` | no | semantic appearance |
 | `tone` | `ButtonTone` | `"default"` | no | intent modifier; composes with variant for danger×primary, danger×secondary, danger×ghost |
-| `size` | `ControlSize` | `"md"` | no | shared control size |
+| `size` | `ControlSize` | `null` | no | explicit control size override |
+| `sizeRole` | `"chrome" \| "control" \| "prominent"` | `"control"` | no | semantic size offset from inherited presentation |
 | `icon` | `string` | — | yes | icon glyph character or registry identifier |
 | `ariaLabel` | `string` | — | yes | required accessible name |
 | `disabled` | `boolean` | `false` | no | suppresses activation |
@@ -67,9 +68,7 @@ type ButtonTone = "default" | "danger"
 
 ### ControlSize
 
-```
-type ControlSize = "sm" | "md" | "lg"
-```
+`ControlSize = "xs" | "sm" | "md" | "lg" | "xl"`
 
 ### OverlayPlacement
 

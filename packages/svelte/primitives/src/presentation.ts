@@ -55,6 +55,13 @@ export function controlHeightRem(size: ControlSize): number {
   return 2.25;
 }
 
+export function resolveSupportingVisualSize(size: ControlSize): ControlSize {
+  if (size === "xl") return "lg";
+  if (size === "lg") return "md";
+  if (size === "md") return "sm";
+  return size;
+}
+
 export function controlSpaceXRem(density: ControlDensity): number {
   if (density === "compact") return 0.5;
   if (density === "comfortable") return 1;

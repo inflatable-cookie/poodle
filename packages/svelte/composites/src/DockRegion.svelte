@@ -3,7 +3,11 @@
 
   import { CollapseToggle, Tabs } from "@poodle/svelte-primitives";
   import type { TabItem } from "@poodle/svelte-primitives";
-  import type { ControlDensity, ControlSize } from "@poodle/svelte-primitives";
+  import type {
+    ControlDensity,
+    ControlSize,
+    SemanticControlSizeRole,
+  } from "@poodle/svelte-primitives";
 
   import type {
     DockEdge,
@@ -19,8 +23,9 @@
   export let collapsed = false;
   export let collapsedPosture: DockCollapsedPosture = "icon-strip";
   export let emphasis: DockEmphasis = "standard";
-  export let size: ControlSize = "md";
-  export let density: ControlDensity = "default";
+  export let size: ControlSize | null = null;
+  export let sizeRole: SemanticControlSizeRole = "chrome";
+  export let density: ControlDensity | null = null;
   export let items: PanelTabItem[] = [];
   export let value: string | null = null;
   export let ariaLabel: string | null = null;
@@ -319,12 +324,13 @@
         ariaLabel={`Expand ${edge} dock`}
         on:toggle={handleCollapseToggle}
       />
-      <Tabs
-        variant="strip"
-        orientation="vertical"
-        size={size}
-        density={density}
-        items={tabItems}
+        <Tabs
+          variant="strip"
+          orientation="vertical"
+          size={size}
+          {sizeRole}
+          density={density}
+          items={tabItems}
         value={activeItem?.value ?? ""}
         reorderable={true}
         ariaLabel={ariaLabel ?? `${edge} dock panels`}
@@ -348,6 +354,7 @@
           variant="strip"
           orientation="horizontal"
           size={size}
+          {sizeRole}
           density={density}
           showTooltips={isCompact}
           items={tabItems}
@@ -381,6 +388,7 @@
           variant="strip"
           orientation="horizontal"
           size={size}
+          {sizeRole}
           density={density}
           showTooltips={isCompact}
           items={tabItems}

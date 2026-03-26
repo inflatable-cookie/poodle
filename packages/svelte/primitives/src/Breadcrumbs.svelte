@@ -41,7 +41,7 @@
           <button type="button" on:click={() => handleNavigate(item)}>{item.label}</button>
         {/if}
         {#if index < visibleItems.length - 1}
-          <span class="breadcrumbs__separator" aria-hidden="true"><Icon name="chevron-right" size="sm" /></span>
+          <span class="breadcrumbs__separator" aria-hidden="true"><Icon name="chevron-right" /></span>
         {/if}
       </li>
     {/each}

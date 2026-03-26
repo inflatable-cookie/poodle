@@ -54,14 +54,18 @@ export const tokens = {
     },
     "size": {
       "control": {
+        "xs": "1.5rem",
         "sm": "1.75rem",
         "md": "2.25rem",
-        "lg": "2.75rem"
+        "lg": "2.75rem",
+        "xl": "3.25rem"
       },
       "icon": {
+        "xs": "0.625rem",
         "sm": "0.75rem",
         "md": "1rem",
-        "lg": "1.25rem"
+        "lg": "1.25rem",
+        "xl": "1.5rem"
       },
       "panel": {
         "header": "2.5rem"
@@ -80,9 +84,11 @@ export const tokens = {
     },
     "icon": {
       "size": {
+        "xs": "0.625rem",
         "sm": "0.75rem",
         "md": "1rem",
-        "lg": "1.25rem"
+        "lg": "1.25rem",
+        "xl": "1.5rem"
       },
       "stroke": {
         "default": "0.0938rem"
@@ -231,9 +237,11 @@ export const tokens = {
         "minWidth": "6rem"
       },
       "icon": {
+        "xs": "0.625rem",
         "sm": "0.75rem",
         "md": "1rem",
-        "lg": "1.25rem"
+        "lg": "1.25rem",
+        "xl": "1.5rem"
       },
       "panel": {
         "header": "2.5rem"
@@ -325,21 +333,27 @@ export const tokenPaths = [
   "primitives.space.8",
   "primitives.space.10",
   "primitives.space.12",
+  "primitives.size.control.xs",
   "primitives.size.control.sm",
   "primitives.size.control.md",
   "primitives.size.control.lg",
+  "primitives.size.control.xl",
+  "primitives.size.icon.xs",
   "primitives.size.icon.sm",
   "primitives.size.icon.md",
   "primitives.size.icon.lg",
+  "primitives.size.icon.xl",
   "primitives.size.panel.header",
   "primitives.stroke.hairline",
   "primitives.stroke.focus",
   "primitives.elevation.shadow.sm",
   "primitives.elevation.shadow.md",
   "primitives.elevation.shadow.lg",
+  "primitives.icon.size.xs",
   "primitives.icon.size.sm",
   "primitives.icon.size.md",
   "primitives.icon.size.lg",
+  "primitives.icon.size.xl",
   "primitives.icon.stroke.default",
   "primitives.motion.duration.fast",
   "primitives.motion.duration.standard",
@@ -410,9 +424,11 @@ export const tokenPaths = [
   "semantic.radius.pill",
   "semantic.size.control.height",
   "semantic.size.control.minWidth",
+  "semantic.size.icon.xs",
   "semantic.size.icon.sm",
   "semantic.size.icon.md",
   "semantic.size.icon.lg",
+  "semantic.size.icon.xl",
   "semantic.size.panel.header",
   "semantic.space.stack.sm",
   "semantic.space.stack.md",
@@ -484,9 +500,11 @@ export const cssVars = {
   "semantic.radius.pill": "--poodle-radius-pill",
   "semantic.size.control.height": "--poodle-size-control-height",
   "semantic.size.control.minWidth": "--poodle-size-control-minWidth",
+  "semantic.size.icon.xs": "--poodle-size-icon-xs",
   "semantic.size.icon.sm": "--poodle-size-icon-sm",
   "semantic.size.icon.md": "--poodle-size-icon-md",
   "semantic.size.icon.lg": "--poodle-size-icon-lg",
+  "semantic.size.icon.xl": "--poodle-size-icon-xl",
   "semantic.size.panel.header": "--poodle-size-panel-header",
   "semantic.space.stack.sm": "--poodle-space-stack-sm",
   "semantic.space.stack.md": "--poodle-space-stack-md",

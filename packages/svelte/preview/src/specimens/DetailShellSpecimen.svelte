@@ -26,7 +26,7 @@
           <PageHeader title="Poodle Design System" eyebrow="Project" subtitle="A comprehensive component library.">
             <svelte:fragment slot="actions">
               <Pill appearance="badge" tone="success">Active</Pill>
-              <Button variant="secondary" size="sm">Edit</Button>
+              <Button variant="secondary">Edit</Button>
             </svelte:fragment>
           </PageHeader>
         </svelte:fragment>
@@ -38,7 +38,7 @@
         <Separator />
         <DetailSection title="Configuration">
           <svelte:fragment slot="actions">
-            <Button variant="ghost" size="sm">Reset</Button>
+            <Button variant="ghost">Reset</Button>
           </svelte:fragment>
           <DetailRow label="Theme" value="Dark" />
           <DetailRow label="Density" value="Compact" />

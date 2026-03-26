@@ -44,6 +44,21 @@ pub const COMPACT: DensityDefinition = DensityDefinition {
     ],
 };
 
+pub const DEFAULT: DensityDefinition = DensityDefinition {
+    name: "default",
+    selector: "[data-density=\"default\"]",
+    overrides: &[
+    ("semantic.space.panel.x", "1rem"),
+    ("semantic.space.panel.y", "0.75rem"),
+    ("semantic.space.control.x", "0.75rem"),
+    ("semantic.space.control.y", "0.5rem"),
+    ("semantic.space.stack.md", "0.75rem"),
+    ("semantic.space.stack.lg", "1.25rem"),
+    ("semantic.size.control.height", "2.25rem"),
+    ("semantic.size.panel.header", "2.5rem"),
+    ],
+};
+
 pub const CONTROL_SIZE_LG: ControlSizeDefinition = ControlSizeDefinition {
     name: "lg",
     selector: "[data-control-size=\"lg\"]",
@@ -71,5 +86,25 @@ pub const CONTROL_SIZE_SM: ControlSizeDefinition = ControlSizeDefinition {
     ("semantic.size.control.height", "1.75rem"),
     ("semantic.size.control.minWidth", "5.25rem"),
     ("semantic.size.icon.default", "0.75rem"),
+    ],
+};
+
+pub const CONTROL_SIZE_XL: ControlSizeDefinition = ControlSizeDefinition {
+    name: "xl",
+    selector: "[data-control-size=\"xl\"]",
+    overrides: &[
+    ("semantic.size.control.height", "3.25rem"),
+    ("semantic.size.control.minWidth", "8rem"),
+    ("semantic.size.icon.default", "1.5rem"),
+    ],
+};
+
+pub const CONTROL_SIZE_XS: ControlSizeDefinition = ControlSizeDefinition {
+    name: "xs",
+    selector: "[data-control-size=\"xs\"]",
+    overrides: &[
+    ("semantic.size.control.height", "1.5rem"),
+    ("semantic.size.control.minWidth", "4.5rem"),
+    ("semantic.size.icon.default", "0.625rem"),
     ],
 };

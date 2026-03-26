@@ -40,7 +40,7 @@
           aria-label={`Remove ${item.label}`}
         >
           {item.label}
-          <span aria-hidden="true"><Icon name="x" size="sm" /></span>
+          <span aria-hidden="true"><Icon name="x" /></span>
         </button>
       {/each}
       {#if overflowCount > 0}

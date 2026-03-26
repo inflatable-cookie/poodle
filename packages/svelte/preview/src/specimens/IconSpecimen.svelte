@@ -5,6 +5,7 @@
   import { heart, settings, zap, circleCheck, info, triangleAlert, star, search, pencil } from "@poodle/icons-lucide";
 
   const allIconNames = Object.keys(iconNodes as IconSet).sort();
+  const iconSizes = ["xs", "sm", "md", "lg", "xl"] as const;
 
   let copiedName = "";
 
@@ -36,29 +37,19 @@
       Only the icons you use are included in the bundle.
     </p>
     <div class="size-row">
-      <div class="size-demo">
-        <span class="size-label">sm</span>
-        <Icon icon={star} size="sm" />
-        <Icon icon={heart} size="sm" />
-        <Icon icon={settings} size="sm" />
-      </div>
-      <div class="size-demo">
-        <span class="size-label">md</span>
-        <Icon icon={star} size="md" />
-        <Icon icon={heart} size="md" />
-        <Icon icon={settings} size="md" />
-      </div>
-      <div class="size-demo">
-        <span class="size-label">lg</span>
-        <Icon icon={star} size="lg" />
-        <Icon icon={heart} size="lg" />
-        <Icon icon={settings} size="lg" />
-      </div>
+      {#each iconSizes as size}
+        <div class="size-demo">
+          <span class="size-label">{size}</span>
+          <Icon icon={star} {size} />
+          <Icon icon={heart} {size} />
+          <Icon icon={settings} {size} />
+        </div>
+      {/each}
     </div>
     <div class="code-hint">
       <code>import {"{"} star, heart, settings {"}"} from "@poodle/icons-lucide";</code>
       <br />
-      <code>&lt;Icon icon={"{star}"} size="md" /&gt;</code>
+      <code>&lt;Icon icon={"{star}"} size="lg" /&gt;</code>
     </div>
   </div>
 
@@ -114,13 +105,13 @@
           on:click={() => copyName(name)}
           title={name}
         >
-          <Icon icon={name} size="md" />
+          <Icon icon={name} />
           <span class="icon-name">{name}</span>
         </button>
       {/each}
     </div>
     <div class="code-hint">
-      <code>&lt;Icon icon="chevron-down" size="sm" /&gt;</code>
+      <code>&lt;Icon icon="chevron-down" sizeRole="chrome" /&gt;</code>
     </div>
   </div>
 
@@ -145,7 +136,7 @@
             on:click={() => copyName(name)}
             title={name}
           >
-            <Icon icon={name} size="md" />
+            <Icon icon={name} />
             <span class="icon-name">{name}</span>
           </button>
         {/each}

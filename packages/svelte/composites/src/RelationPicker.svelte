@@ -259,7 +259,7 @@
             on:click={drillBack}
             aria-label="Go back"
           >
-            <Icon name="chevron-left" size="sm" />
+            <Icon name="chevron-left" />
           </button>
           {#each drillBreadcrumbs as crumb, i}
             {#if i > 0}
@@ -294,7 +294,7 @@
             on:click={drillBack}
             aria-label="Go back"
           >
-            <Icon name="chevron-left" size="sm" />
+            <Icon name="chevron-left" />
           </button>
           {#each drillBreadcrumbs as crumb, i}
             {#if i > 0}
@@ -352,7 +352,7 @@
               {#if item.count !== undefined}
                 <span class="drill-list__count">{item.count}</span>
               {/if}
-              <Icon name="chevron-right" size="sm" />
+              <Icon name="chevron-right" />
             </span>
           </button>
         </li>
@@ -431,10 +431,10 @@
         {selectionMode === "single" ? "Single-choice selection keeps the picker confirmable without inline radio-group chrome." : "Multi-selection stays explicit through selection summary and confirm/cancel actions."}
       </p>
       <div class="relation-picker__footer-actions">
-        <Button variant="ghost" size="sm" on:click={() => dispatch("cancel")}>
+        <Button variant="ghost" on:click={() => dispatch("cancel")}>
           {cancelLabel}
         </Button>
-        <Button variant="primary" size="sm" on:click={() => dispatch("confirm", { selectedIds })}>
+        <Button variant="primary" on:click={() => dispatch("confirm", { selectedIds })}>
           {confirmLabel}
         </Button>
       </div>

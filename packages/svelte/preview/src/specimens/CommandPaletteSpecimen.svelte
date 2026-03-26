@@ -10,7 +10,7 @@
     <Eyebrow>Command Palette</Eyebrow>
     <p class="specimen__hint">Click below to open the palette. Close with Escape, click outside, or the X button.</p>
     <div>
-      <Button size="sm" on:click={() => (open = true)}>Open Command Palette</Button>
+      <Button on:click={() => (open = true)}>Open Command Palette</Button>
     </div>
     <CommandPalette
       bind:open

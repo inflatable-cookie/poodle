@@ -33,7 +33,7 @@
       {:else}
         {#if state === "loading"}
           <span class="detail-shell__spinner" aria-hidden="true">
-            <Spinner variant="grid" size="md" tone="accent" />
+            <Spinner variant="grid" tone="accent" />
           </span>
         {/if}
         <strong>{stateTitle ?? "Detail state"}</strong>

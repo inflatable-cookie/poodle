@@ -70,7 +70,7 @@
     {/if}
   </select>
 
-  <span class="select__indicator" aria-hidden="true"><Icon name="chevron-down" size="sm" /></span>
+  <span class="select__indicator" aria-hidden="true"><Icon name="chevron-down" /></span>
 </div>
 
 <style>

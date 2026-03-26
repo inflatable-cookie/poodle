@@ -56,7 +56,7 @@
     {#if error}
       <span class="embed-input__error">{error}</span>
     {:else if parsed}
-      <Pill tone="success" size="md">{parsed.provider}</Pill>
+      <Pill tone="success" sizeRole="chrome">{parsed.provider}</Pill>
       <span class="embed-input__success">Embed detected</span>
     {/if}
   </div>

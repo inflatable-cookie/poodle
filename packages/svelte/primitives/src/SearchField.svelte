@@ -68,7 +68,7 @@
   on:cancel={() => dispatch("cancel")}
   on:keydown={(event) => dispatch("keydown", event.detail)}
 >
-  <span slot="leading" aria-hidden="true"><Icon name="search" size="sm" /></span>
+  <span slot="leading" aria-hidden="true"><Icon name="search" /></span>
   <svelte:fragment slot="trailing">
     {#if canClear}
       <button
@@ -77,7 +77,7 @@
         aria-label="Clear search query"
         on:click={handleClear}
       >
-        <Icon name="x" size="sm" />
+        <Icon name="x" />
       </button>
     {/if}
   </svelte:fragment>

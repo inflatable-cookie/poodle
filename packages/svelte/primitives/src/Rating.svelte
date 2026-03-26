@@ -90,7 +90,7 @@
         }
       }}
     >
-      <span class="rating__glyph" aria-hidden="true"><Icon name="star" size="sm" /></span>
+      <span class="rating__glyph" aria-hidden="true"><Icon name="star" /></span>
     </button>
   {/each}
 </div>
@@ -106,8 +106,8 @@
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    width: 2rem;
-    height: 2rem;
+    width: calc(var(--poodle-size-icon-default) + 0.75rem);
+    height: calc(var(--poodle-size-icon-default) + 0.75rem);
     border: 0;
     border-radius: var(--poodle-radius-control);
     background: transparent;

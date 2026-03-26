@@ -125,7 +125,7 @@
       on:click={scrollToBottom}
       aria-label="Scroll to latest"
     >
-      <Icon name="arrow-down" size="sm" /> New entries
+      <Icon name="arrow-down" /> New entries
     </button>
   {/if}
 </div>

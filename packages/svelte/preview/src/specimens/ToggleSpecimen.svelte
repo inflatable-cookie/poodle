@@ -14,24 +14,24 @@
         pressed={bold}
         ariaLabel="Bold"
         on:pressedChange={(e) => (bold = e.detail.pressed)}
-      ><Icon icon={boldIcon} size="sm" /></Toggle>
+      ><Icon icon={boldIcon} /></Toggle>
       <Toggle
         pressed={italic}
         ariaLabel="Italic"
         on:pressedChange={(e) => (italic = e.detail.pressed)}
-      ><Icon icon={italicIcon} size="sm" /></Toggle>
+      ><Icon icon={italicIcon} /></Toggle>
     </div>
     <p>Bold: {bold}, Italic: {italic}</p>
   </div>
 
   <div class="specimen__group">
     <Eyebrow>Primary variant</Eyebrow>
-    <Toggle variant="primary" defaultPressed ariaLabel="Pinned"><Icon icon={pin} size="sm" /> Pinned</Toggle>
+    <Toggle variant="primary" defaultPressed ariaLabel="Pinned"><Icon icon={pin} /> Pinned</Toggle>
   </div>
 
   <div class="specimen__group">
     <Eyebrow>Secondary variant</Eyebrow>
-    <Toggle variant="secondary" ariaLabel="Favorite"><Icon icon={star} size="sm" /> Favorite</Toggle>
+    <Toggle variant="secondary" ariaLabel="Favorite"><Icon icon={star} /> Favorite</Toggle>
   </div>
 
   <div class="specimen__group">

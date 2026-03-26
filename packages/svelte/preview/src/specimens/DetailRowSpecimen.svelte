@@ -19,7 +19,7 @@
     <Eyebrow>With action slot</Eyebrow>
     <DetailRow label="Email" value="clay@example.com">
       <svelte:fragment slot="action">
-        <Button variant="secondary" size="sm">Change</Button>
+        <Button variant="secondary">Change</Button>
       </svelte:fragment>
     </DetailRow>
   </div>

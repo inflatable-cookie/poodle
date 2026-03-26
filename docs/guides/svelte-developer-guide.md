@@ -56,13 +56,13 @@ Poodle themes are activated via `data-*` attributes on a parent element. Use the
   onMount(() => {
     applyThemeAttributes(shell, {
       theme: "dark",          // "light" | "dark" | "loophole-studio"
-      density: "compact",     // "comfortable" | "compact"
-      controlSize: "md",      // "sm" | "md" | "lg"
+      density: "default",     // "compact" | "default" | "comfortable"
+      controlSize: "sm",      // "xs" | "sm" | "md" | "lg" | "xl"
     });
   });
 </script>
 
-<div bind:this={shell} data-theme="dark" data-density="compact" data-control-size="md">
+<div bind:this={shell} data-theme="dark" data-density="default" data-control-size="sm">
   <!-- your app -->
 </div>
 ```
@@ -199,9 +199,11 @@ Treatment tokens (interactive-state styling)
 **Sizing:**
 ```css
 --poodle-size-control-height: 2.25rem /* default control height */
+--poodle-size-icon-xs: 0.625rem
 --poodle-size-icon-sm: 0.75rem
 --poodle-size-icon-md: 1rem
 --poodle-size-icon-lg: 1.25rem
+--poodle-size-icon-xl: 1.5rem
 ```
 
 **Typography:**
@@ -233,20 +235,46 @@ Three built-in themes, activated via `data-theme` attribute:
 | `dark` | Dark neutral theme |
 | `loophole-studio` | Custom branded dark theme |
 
-Two density modes via `data-density`:
+Three density modes via `data-density`:
 
 | Density | Description |
 |---------|-------------|
-| `comfortable` | Relaxed spacing (default) |
 | `compact` | Tighter spacing for dense UIs |
+| `default` | Balanced spacing (default) |
+| `comfortable` | Relaxed spacing for roomier UIs |
 
-Three control sizes via `data-control-size`:
+Five control sizes via `data-control-size`:
 
 | Size | Control height |
 |------|---------------|
+| `xs` | 1.5rem |
 | `sm` | 1.75rem |
-| `md` | 2.25rem (default) |
+| `md` | 2.25rem |
 | `lg` | 2.75rem |
+| `xl` | 3.25rem |
+
+### Semantic presentation layer
+
+Use `UiPresentationProvider` when a subtree needs a local density or size-scale
+baseline without hard-coding every child:
+
+```svelte
+<script>
+  import { UiPresentationProvider, Toolbar, Button } from "@poodle/svelte-primitives";
+</script>
+
+<UiPresentationProvider density="compact" sizeScale="sm">
+  <Toolbar ariaLabel="Editor toolbar">
+    <Button variant="ghost" sizeRole="chrome" leadingIcon="bold" ariaLabel="Bold" />
+    <Button sizeRole="prominent">Publish</Button>
+  </Toolbar>
+</UiPresentationProvider>
+```
+
+- `sizeScale` sets the local control-size baseline.
+- `sizeRole="chrome" | "control" | "prominent"` offsets child sizing from that
+  baseline.
+- Components can still opt into an absolute `size` when a contract needs it.
 
 ---
 
@@ -282,7 +310,8 @@ The pattern works identically across all value-bearing components:
 ```svelte
 <Button variant="primary" />     <!-- "primary" | "secondary" | "ghost" -->
 <Button tone="danger" />         <!-- "default" | "danger" -->
-<Button size="sm" />             <!-- "sm" | "md" | "lg" -->
+<Button size="sm" />             <!-- "xs" | "sm" | "md" | "lg" | "xl" -->
+<Button sizeRole="prominent" />  <!-- semantic size offset -->
 <Stack direction="horizontal" /> <!-- layout orientation -->
 ```
 
@@ -386,9 +415,9 @@ Import individual icons from `@poodle/icons-lucide`. Only icons you use end up i
   import { search, heart, settings, trash2 } from "@poodle/icons-lucide";
 </script>
 
-<Icon icon={search} size="md" />
+<Icon icon={search} size="lg" />
 <Icon icon={heart} size="sm" />
-<Icon icon={settings} size="lg" ariaLabel="Settings" />
+<Icon icon={settings} size="xl" ariaLabel="Settings" />
 ```
 
 This is the **recommended approach** for application code. Each icon is a standalone `IconNodes` array — an `[tagName, attributes][]` tuple describing SVG children.
@@ -404,7 +433,7 @@ Icon names use camelCase identifiers converted from Lucide's kebab-case names:
 35 icons are embedded directly in the framework for component chrome. These work with string names and require no imports or setup:
 
 ```svelte
-<Icon icon="chevron-down" size="sm" />
+<Icon icon="chevron-down" sizeRole="chrome" />
 <Icon icon="check" />
 <Icon icon="x" />
 ```
@@ -455,13 +484,16 @@ Components that accept icons use the `IconProp` type (`IconNodes | string`):
 
 ### Icon sizing
 
-Icons support three sizes via the `size` prop:
+Icons support five explicit sizes via the `size` prop, and semantic sizing via
+`sizeRole`:
 
 | Size | Dimension |
 |------|-----------|
+| `xs` | 0.625rem (10px) |
 | `sm` | 0.75rem (12px) |
 | `md` | 1rem (16px) — default |
 | `lg` | 1.25rem (20px) |
+| `xl` | 1.5rem (24px) |
 
 Icons inherit `currentColor` from their parent, so they automatically match text color.
 

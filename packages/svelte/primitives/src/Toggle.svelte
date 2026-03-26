@@ -1,12 +1,14 @@
 <script lang="ts">
   import { createEventDispatcher } from "svelte";
+  import { getUiPresentation, resolveSemanticControlSize } from "./presentation";
 
-  import type { ControlSize, ToggleVariant } from "./types";
+  import type { ControlSize, SemanticControlSizeRole, ToggleVariant } from "./types";
 
   export let pressed: boolean | null = null;
   export let defaultPressed = false;
   export let variant: ToggleVariant = "ghost";
-  export let size: ControlSize = "md";
+  export let size: ControlSize | null = null;
+  export let sizeRole: SemanticControlSizeRole = "control";
   export let layout: "inline" | "stack" = "inline";
   export let disabled = false;
   export let ariaLabel: string | null = null;
@@ -17,9 +19,11 @@
   }>();
 
   let uncontrolledPressed = defaultPressed;
+  const uiPresentation = getUiPresentation();
 
   $: controlled = pressed !== null;
   $: currentPressed = controlled ? pressed === true : uncontrolledPressed;
+  $: resolvedSize = size ?? resolveSemanticControlSize(uiPresentation?.sizeScale ?? "md", sizeRole);
 
   function toggle(): void {
     const nextPressed = !currentPressed;
@@ -36,7 +40,7 @@
   type="button"
   class={`toggle ${className}`.trim()}
   data-variant={variant}
-  data-size={size}
+  data-size={resolvedSize}
   data-layout={layout}
   data-pressed={currentPressed}
   disabled={disabled}
@@ -82,14 +86,28 @@
     padding: 0 calc(var(--poodle-space-control-x) - 0.125rem);
   }
 
+  .toggle[data-size="xs"] {
+    height: calc(var(--poodle-size-control-height) - 0.5rem);
+    padding: 0 calc(var(--poodle-space-control-x) - 0.1875rem);
+    font-size: 0.6875rem;
+  }
+
   .toggle[data-size="lg"] {
     height: calc(var(--poodle-size-control-height) + 0.375rem);
     padding: 0 calc(var(--poodle-space-control-x) + 0.125rem);
   }
 
+  .toggle[data-size="xl"] {
+    height: calc(var(--poodle-size-control-height) + 0.5rem);
+    padding: 0 calc(var(--poodle-space-control-x) + 0.1875rem);
+    font-size: 0.8125rem;
+  }
+
   .toggle[data-layout="stack"],
+  .toggle[data-layout="stack"][data-size="xs"],
   .toggle[data-layout="stack"][data-size="sm"],
-  .toggle[data-layout="stack"][data-size="lg"] {
+  .toggle[data-layout="stack"][data-size="lg"],
+  .toggle[data-layout="stack"][data-size="xl"] {
     display: grid;
     width: 100%;
     min-width: 0;

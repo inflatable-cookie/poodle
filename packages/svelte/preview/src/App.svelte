@@ -42,7 +42,7 @@
   let appShell: HTMLElement | null = null;
   let theme: ThemeName = "dark";
   let density: DensityName = "compact";
-  let controlSize: ControlSizeName = "md";
+  let controlSize: ControlSizeName = "sm";
   let appearanceTreatment: AppearanceTreatmentName = "system";
   let disabled = false;
   let invalid = true;

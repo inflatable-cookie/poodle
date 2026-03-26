@@ -23,8 +23,8 @@
     <Eyebrow>With eyebrow and actions</Eyebrow>
     <PageHeader title="Button" eyebrow="Primitive" subtitle="Primary interactive control for triggering actions.">
       <svelte:fragment slot="actions">
-        <Button variant="secondary" size="sm">View source</Button>
-        <Button size="sm">Edit</Button>
+        <Button variant="secondary">View source</Button>
+        <Button>Edit</Button>
       </svelte:fragment>
     </PageHeader>
   </div>

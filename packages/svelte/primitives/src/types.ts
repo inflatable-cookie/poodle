@@ -41,7 +41,7 @@ export type StatusTone =
 export type ToggleVariant = "primary" | "secondary" | "ghost";
 export type PillTone = "neutral" | "success" | "danger";
 export type PillAppearance = "solid" | "subtle" | "badge";
-export type PillSize = "sm" | "md" | "lg";
+export type PillSize = "xs" | "sm" | "md" | "lg" | "xl";
 export type PillFont = "normal" | "mono";
 export type Orientation = "vertical" | "horizontal";
 export type TabActivationMode = "automatic" | "manual";
@@ -78,7 +78,7 @@ export type SkeletonPreset =
   | "detail-section"
   | "avatar-line";
 export type SpinnerVariant = "ring" | "grid";
-export type SpinnerSize = "sm" | "md" | "lg";
+export type SpinnerSize = "xs" | "sm" | "md" | "lg" | "xl";
 export type SpinnerTone = "current" | "accent" | "muted";
 
 export interface AccordionItem {

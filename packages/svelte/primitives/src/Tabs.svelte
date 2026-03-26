@@ -8,11 +8,17 @@
   import Icon from "./Icon.svelte";
   import Pill from "./Pill.svelte";
   import { findNextEnabledIndex, firstEnabledIndex } from "./internal";
+  import {
+    getUiPresentation,
+    resolveSemanticControlSize,
+    resolveSupportingVisualSize,
+  } from "./presentation";
 
   import type {
     ControlDensity,
     ControlSize,
     Orientation,
+    SemanticControlSizeRole,
     TabActivationMode,
     TabItem,
     TabVariant,
@@ -24,8 +30,9 @@
   export let variant: TabVariant = "underline";
   export let orientation: Orientation = "horizontal";
   export let activationMode: TabActivationMode = "automatic";
-  export let size: ControlSize = "md";
-  export let density: ControlDensity = "default";
+  export let size: ControlSize | null = null;
+  export let sizeRole: SemanticControlSizeRole = "chrome";
+  export let density: ControlDensity | null = null;
   export let reorderable = false;
   export let ariaLabel: string | null = null;
   export let showTooltips = false;
@@ -45,6 +52,7 @@
   let prevItems = items;
   let lastSyncedValue: string | null = null;
   const isBrowser = typeof window !== "undefined";
+  const uiPresentation = getUiPresentation();
 
   $: if (items !== prevItems) {
     prevItems = items;
@@ -62,6 +70,9 @@
   $: hasPanel = $$slots.default;
   $: isVertical = orientation === "vertical";
   $: hasTooltips = isVertical || showTooltips;
+  $: resolvedSize = size ?? resolveSemanticControlSize(uiPresentation?.sizeScale ?? "md", sizeRole);
+  $: resolvedDensity = density ?? uiPresentation?.density ?? "default";
+  $: resolvedIconSize = resolveSupportingVisualSize(resolvedSize);
 
   // ── Tooltip (vertical icon-only mode) ──
 
@@ -279,8 +290,8 @@
   class="poodle-tabs"
   data-variant={variant}
   data-orientation={orientation}
-  data-size={size}
-  data-density={density}
+  data-size={resolvedSize}
+  data-density={resolvedDensity}
 >
   <div
     class="poodle-tabs__list"
@@ -326,11 +337,11 @@
           }}
         >
           {#if item.icon}
-            <Icon icon={item.icon} size="sm" />
+            <Icon icon={item.icon} size={resolvedIconSize} />
           {/if}
           <span class="poodle-tabs__label">{item.label}</span>
           {#if item.count !== undefined}
-            <Pill tone="neutral" appearance="badge" size="sm" muted ariaLabel={`${item.count}`}>
+            <Pill tone="neutral" appearance="badge" size={resolvedIconSize} muted ariaLabel={`${item.count}`}>
               {item.count}
             </Pill>
           {/if}
@@ -343,7 +354,7 @@
             aria-label={`Close ${item.label}`}
             on:click|stopPropagation={() => dispatch("close", { value: item.value })}
           >
-            <Icon name="x" size="sm" />
+            <Icon name="x" size={resolvedIconSize} />
           </button>
         {/if}
 
@@ -396,6 +407,14 @@
 
   .poodle-tabs[data-size="lg"] {
     --poodle-tabs-control-height: 2.75rem;
+  }
+
+  .poodle-tabs[data-size="xs"] {
+    --poodle-tabs-control-height: 1.5rem;
+  }
+
+  .poodle-tabs[data-size="xl"] {
+    --poodle-tabs-control-height: 3.25rem;
   }
 
   .poodle-tabs[data-density="compact"] {

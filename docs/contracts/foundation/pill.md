@@ -8,7 +8,7 @@ Updated: 2026-03-24
 - Component name: `Pill`
 - Layer: `foundation`
 - Summary: a rounded inline label for compact categorization or metadata
-- In scope: tone, appearance, compact sizing, optional monospace styling
+- In scope: tone, appearance, semantic sizing, optional monospace styling
 - Out of scope: removable chips, multi-select tag inputs
 
 ## 2. Anatomy
@@ -31,7 +31,8 @@ Updated: 2026-03-24
 |------|------|---------|----------|-------|
 | `tone` | `"neutral" \| "success" \| "danger"` | `"neutral"` | no | semantic tone controlling fill/border/text color |
 | `appearance` | `"solid" \| "subtle" \| "badge"` | `"solid"` | no | fill opacity variant |
-| `size` | `"sm" \| "md" \| "lg"` | `"md"` | no | compact scale from smallest to largest |
+| `size` | `"xs" \| "sm" \| "md" \| "lg" \| "xl"` | `null` | no | explicit pill size override |
+| `sizeRole` | `"chrome" \| "control" \| "prominent"` | `"chrome"` | no | semantic size offset from inherited presentation |
 | `font` | `"normal" \| "mono"` | `"normal"` | no | content font variant |
 | `muted` | `boolean` | `false` | no | visual de-emphasis via reduced opacity |
 | `ariaLabel` | `string \| null` | `null` | no | optional explicit accessible name |

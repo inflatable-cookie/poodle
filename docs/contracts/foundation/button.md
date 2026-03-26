@@ -10,7 +10,8 @@ Updated: 2026-03-25
 - Summary: a general action trigger for commands, confirmations, and view-level
   affordances
 - In scope: text buttons, icon-leading buttons, icon-only buttons, loading and
-  disabled states, three visual variants, three sizes
+  disabled states, three visual variants, semantic size roles, and five explicit
+  control sizes
 - Out of scope: transport controls, DAW-specific command widgets, toggle buttons
   (see Toggle)
 
@@ -28,7 +29,7 @@ Updated: 2026-03-25
 | Part | Required | Description | Token Targets |
 |------|----------|-------------|---------------|
 | Root | yes | clickable command surface | background, border, radius, shadow, focus ring |
-| Spinner | no | shared `Spinner` primitive in `ring` + `sm` + `current` configuration | spinner tokens via primitive contract |
+| Spinner | no | shared `Spinner` primitive in `ring` with supporting visual sizing derived from the resolved control size | spinner tokens via primitive contract |
 | Leading Icon | no | icon before label | icon size, icon color |
 | Label | no | text content | typography, text color |
 | Trailing Icon | no | icon after label | icon size, icon color |
@@ -42,7 +43,8 @@ Updated: 2026-03-25
 |------|------|---------|----------|-------|
 | `variant` | `"primary" \| "secondary" \| "ghost"` | `"secondary"` | no | visual treatment |
 | `tone` | `"default" \| "danger"` | `"default"` | no | intent modifier; composes with variant for danger×primary, danger×secondary, danger×ghost |
-| `size` | `"sm" \| "md" \| "lg"` | `"md"` | no | control size |
+| `size` | `"xs" \| "sm" \| "md" \| "lg" \| "xl"` | `null` | no | explicit control size override |
+| `sizeRole` | `"chrome" \| "control" \| "prominent"` | `"control"` | no | semantic size offset from inherited presentation |
 | `type` | `"button" \| "submit" \| "reset"` | `"button"` | no | HTML button type |
 | `form` | `string \| null` | `null` | no | external form id to associate with |
 | `formaction` | `string \| null` | `null` | no | per-button form submission URL override |

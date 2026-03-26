@@ -94,6 +94,20 @@ export const densityModes = {
       "semantic.size.control.height": "1.75rem",
       "semantic.size.panel.header": "2.25rem"
     }
+  },
+  "default": {
+    "selector": "[data-density=\"default\"]",
+    "description": "Balanced spacing for the standard product presentation.",
+    "overrides": {
+      "semantic.space.panel.x": "1rem",
+      "semantic.space.panel.y": "0.75rem",
+      "semantic.space.control.x": "0.75rem",
+      "semantic.space.control.y": "0.5rem",
+      "semantic.space.stack.md": "0.75rem",
+      "semantic.space.stack.lg": "1.25rem",
+      "semantic.size.control.height": "2.25rem",
+      "semantic.size.panel.header": "2.5rem"
+    }
   }
 } as const;
 
@@ -123,6 +137,24 @@ export const controlSizes = {
       "semantic.size.control.height": "1.75rem",
       "semantic.size.control.minWidth": "5.25rem",
       "semantic.size.icon.default": "0.75rem"
+    }
+  },
+  "xl": {
+    "selector": "[data-control-size=\"xl\"]",
+    "description": "Extra-large control size overlay.",
+    "overrides": {
+      "semantic.size.control.height": "3.25rem",
+      "semantic.size.control.minWidth": "8rem",
+      "semantic.size.icon.default": "1.5rem"
+    }
+  },
+  "xs": {
+    "selector": "[data-control-size=\"xs\"]",
+    "description": "Extra-small control size overlay.",
+    "overrides": {
+      "semantic.size.control.height": "1.5rem",
+      "semantic.size.control.minWidth": "4.5rem",
+      "semantic.size.icon.default": "0.625rem"
     }
   }
 } as const;

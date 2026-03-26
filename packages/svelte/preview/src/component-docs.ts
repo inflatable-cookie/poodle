@@ -201,7 +201,8 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
     props: [
       { name: "variant", type: "ButtonVariant", default: '"secondary"', description: "Visual variant of the button." },
       { name: "tone", type: "ButtonTone", default: '"default"', description: "Color tone of the button." },
-      { name: "size", type: "ControlSize", default: '"md"', description: "Size of the button." },
+      { name: "size", type: "ControlSize | null", default: "null", description: "Explicit size override. Supports xs, sm, md, lg, and xl." },
+      { name: "sizeRole", type: '"chrome" | "control" | "prominent"', default: '"control"', description: "Semantic size offset relative to the inherited presentation scale." },
       { name: "type", type: 'HTMLButtonElement["type"]', default: '"button"', description: "HTML button type attribute." },
       { name: "form", type: "string | null", default: "null", description: "External form id to associate with." },
       { name: "formaction", type: "string | null", default: "null", description: "Per-button form action override." },
@@ -1363,7 +1364,8 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
     props: [
       { name: "icon", type: "IconNodes | string | null", required: true, description: "The icon to display. Pass an IconNodes array (from @poodle/icons-lucide or lucide-static) for tree-shaking, or a string name to resolve from an IconProvider set or the built-in internals." },
       { name: "name", type: "string | null", default: "null", description: "Deprecated. Use icon instead. Alias kept for internal convenience." },
-      { name: "size", type: "ControlSize", default: '"md"', description: "Size of the icon." },
+      { name: "size", type: "ControlSize | null", default: "null", description: "Explicit size override. Supports xs, sm, md, lg, and xl." },
+      { name: "sizeRole", type: '"chrome" | "control" | "prominent"', default: '"chrome"', description: "Semantic size offset relative to the inherited presentation scale." },
       { name: "ariaLabel", type: "string | null", default: "null", description: "Accessible label for the icon. When set, the SVG receives role=\"img\"; otherwise it is role=\"presentation\"." },
     ],
     slots: [],
@@ -1374,12 +1376,12 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
   import { search, heart, star } from "@poodle/icons-lucide";
 </script>
 
-<Icon icon={search} size="md" ariaLabel="Search" />
+<Icon icon={search} size="lg" ariaLabel="Search" />
 <Icon icon={heart} size="sm" />
-<Icon icon={star} size="lg" />
+<Icon icon={star} size="xl" />
 
 <!-- String name: resolves from IconProvider or built-in internals -->
-<Icon icon="chevron-down" size="sm" />
+<Icon icon="chevron-down" sizeRole="chrome" />
 
 <!-- Bulk icon set via provider -->
 <script lang="ts">
@@ -1418,7 +1420,8 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
     props: [
       { name: "variant", type: "ButtonVariant", default: '"ghost"', description: "Visual variant of the button." },
       { name: "tone", type: "ButtonTone", default: '"default"', description: "Color tone of the button." },
-      { name: "size", type: "ControlSize", default: '"md"', description: "Size of the button." },
+      { name: "size", type: "ControlSize | null", default: "null", description: "Explicit size override. Supports xs, sm, md, lg, and xl." },
+      { name: "sizeRole", type: '"chrome" | "control" | "prominent"', default: '"control"', description: "Semantic size offset relative to the inherited presentation scale." },
       { name: "icon", type: "IconProp", required: true, description: "The icon to display. Accepts an IconNodes array or a string name." },
       { name: "ariaLabel", type: "string", required: true, description: "Accessible label for the button (required since there is no text)." },
       { name: "tooltip", type: "string | null", default: "null", description: "Tooltip text shown on hover." },
@@ -2555,7 +2558,8 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
   spinner: {
     props: [
       { name: "variant", type: "SpinnerVariant", default: '"ring"', description: "Visual style of the spinner." },
-      { name: "size", type: "SpinnerSize", default: '"md"', description: "Size scale for the spinner." },
+      { name: "size", type: "SpinnerSize | null", default: "null", description: "Explicit size override. Supports xs, sm, md, lg, and xl." },
+      { name: "sizeRole", type: '"chrome" | "control" | "prominent"', default: '"control"', description: "Semantic size offset relative to the inherited presentation scale." },
       { name: "tone", type: "SpinnerTone", default: '"current"', description: "Color source for the spinner." },
       { name: "ariaLabel", type: "string | null", default: "null", description: "Optional announced loading label." },
     ],
@@ -2565,8 +2569,8 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
   import { Spinner } from "@poodle/svelte-primitives";
 </script>
 
-<Spinner variant="ring" size="sm" tone="current" />
-<Spinner variant="grid" size="md" tone="accent" ariaLabel="Loading logs" />`,
+<Spinner variant="ring" sizeRole="chrome" tone="current" />
+<Spinner variant="grid" size="lg" tone="accent" ariaLabel="Loading logs" />`,
   },
 
   slider: {

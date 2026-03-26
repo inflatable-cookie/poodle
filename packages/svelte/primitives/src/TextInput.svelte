@@ -318,9 +318,9 @@
       aria-hidden="true"
     >
       {#if effectiveValidationState === "pending"}
-        <Spinner variant="ring" size="sm" tone="current" />
+        <Spinner variant="ring" sizeRole="chrome" tone="current" />
       {:else if validationIcon}
-        <Icon icon={validationIcon} size="sm" />
+        <Icon icon={validationIcon} />
       {/if}
     </span>
   {/if}

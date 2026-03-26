@@ -20,7 +20,7 @@
 
 {#if uploadStep === "checking"}
   <div class="media-upload-status-panel">
-    <Spinner variant="grid" size="md" tone="accent" />
+    <Spinner variant="grid" tone="accent" />
     <p>Checking for duplicates...</p>
   </div>
 {:else if uploadStep === "duplicate"}
@@ -43,7 +43,7 @@
   </div>
 {:else if uploadStep === "finalising"}
   <div class="media-upload-status-panel">
-    <Spinner variant="grid" size="md" tone="accent" />
+    <Spinner variant="grid" tone="accent" />
     <p>Finalising...</p>
   </div>
 {:else if uploadStep === "complete"}

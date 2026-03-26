@@ -2,13 +2,25 @@
   import { createEventDispatcher, onMount, tick } from "svelte";
 
   import { menuNavigableItems } from "./internal";
+  import {
+    getUiPresentation,
+    resolveSemanticControlSize,
+    resolveSupportingVisualSize,
+  } from "./presentation";
   import Spinner from "./Spinner.svelte";
 
-  import type { ButtonTone, ButtonVariant, ControlSize, MenuItem } from "./types";
+  import type {
+    ButtonTone,
+    ButtonVariant,
+    ControlSize,
+    MenuItem,
+    SemanticControlSizeRole,
+  } from "./types";
 
   export let variant: ButtonVariant = "secondary";
   export let tone: ButtonTone = "default";
-  export let size: ControlSize = "md";
+  export let size: ControlSize | null = null;
+  export let sizeRole: SemanticControlSizeRole = "control";
   export let type: HTMLButtonElement["type"] = "button";
   export let items: MenuItem[] = [];
   export let disabled = false;
@@ -29,8 +41,11 @@
   let highlightIndex = 0;
   let menuPlacement: "bottom-start" | "top-start" = "bottom-start";
   let menuMaxHeight: string | null = null;
+  const uiPresentation = getUiPresentation();
 
   $: isUnavailable = disabled || loading;
+  $: resolvedSize = size ?? resolveSemanticControlSize(uiPresentation?.sizeScale ?? "md", sizeRole);
+  $: resolvedVisualSize = resolveSupportingVisualSize(resolvedSize);
   $: actionableItems = menuNavigableItems(items);
   $: if (menuOpen) {
     tick().then(async () => {
@@ -147,7 +162,7 @@
   });
 </script>
 
-<div class="split-button" data-variant={variant} data-tone={tone !== "default" ? tone : undefined} data-size={size} bind:this={rootElement}>
+<div class="split-button" data-variant={variant} data-tone={tone !== "default" ? tone : undefined} data-size={resolvedSize} bind:this={rootElement}>
   <button
     {type}
     class="split-button__primary"
@@ -158,7 +173,7 @@
   >
     {#if loading}
       <span class="split-button__spinner" aria-hidden="true">
-        <Spinner variant="ring" size="sm" tone="current" />
+        <Spinner variant="ring" size={resolvedVisualSize} tone="current" />
       </span>
     {/if}
     <span class="split-button__label">
@@ -347,10 +362,22 @@
     font-size: 0.75rem;
   }
 
+  .split-button[data-size="xs"] .split-button__primary,
+  .split-button[data-size="xs"] .split-button__toggle {
+    height: calc(var(--poodle-size-control-height) - 0.5rem);
+    font-size: 0.6875rem;
+  }
+
   .split-button[data-size="lg"] .split-button__primary,
   .split-button[data-size="lg"] .split-button__toggle {
     height: calc(var(--poodle-size-control-height) + 0.375rem);
     font-size: 0.875rem;
+  }
+
+  .split-button[data-size="xl"] .split-button__primary,
+  .split-button[data-size="xl"] .split-button__toggle {
+    height: calc(var(--poodle-size-control-height) + 0.5rem);
+    font-size: 0.9375rem;
   }
 
   .split-button__primary {

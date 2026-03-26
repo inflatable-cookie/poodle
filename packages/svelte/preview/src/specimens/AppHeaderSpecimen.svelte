@@ -59,9 +59,9 @@
           </div>
         </svelte:fragment>
         <svelte:fragment slot="utility">
-          <IconButton icon="search" size="sm" variant="ghost" ariaLabel="Search" />
-          <IconButton icon="bell" size="sm" variant="ghost" ariaLabel="Notifications" />
-          <IconButton icon="settings" size="sm" variant="ghost" ariaLabel="Settings" />
+          <IconButton icon="search" sizeRole="chrome" variant="ghost" ariaLabel="Search" />
+          <IconButton icon="bell" sizeRole="chrome" variant="ghost" ariaLabel="Notifications" />
+          <IconButton icon="settings" sizeRole="chrome" variant="ghost" ariaLabel="Settings" />
         </svelte:fragment>
       </AppHeader>
       <div class="specimen__app-body">
@@ -75,11 +75,11 @@
     <div class="specimen__frame">
       <AppHeader title="My Application">
         <svelte:fragment slot="actions">
-          <Button size="sm" variant="ghost">New</Button>
-          <Button size="sm" variant="ghost">Open</Button>
+          <Button sizeRole="chrome" variant="ghost">New</Button>
+          <Button sizeRole="chrome" variant="ghost">Open</Button>
         </svelte:fragment>
         <svelte:fragment slot="utility">
-          <IconButton icon="settings" size="sm" variant="ghost" ariaLabel="Settings" />
+          <IconButton icon="settings" sizeRole="chrome" variant="ghost" ariaLabel="Settings" />
         </svelte:fragment>
       </AppHeader>
     </div>
@@ -101,8 +101,8 @@
           <strong>Poodle Studio</strong>
         </svelte:fragment>
         <svelte:fragment slot="utility">
-          <IconButton icon="bell" size="sm" variant="ghost" ariaLabel="Notifications" />
-          <IconButton icon="user" size="sm" variant="ghost" ariaLabel="Account" />
+          <IconButton icon="bell" sizeRole="chrome" variant="ghost" ariaLabel="Notifications" />
+          <IconButton icon="user" sizeRole="chrome" variant="ghost" ariaLabel="Account" />
         </svelte:fragment>
       </AppHeader>
     </div>

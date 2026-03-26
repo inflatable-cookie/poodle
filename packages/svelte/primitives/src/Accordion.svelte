@@ -76,7 +76,7 @@
               <span class="accordion__description">{item.description}</span>
             {/if}
           </span>
-          <span class="accordion__indicator" aria-hidden="true"><Icon name="chevron-down" size="sm" /></span>
+          <span class="accordion__indicator" aria-hidden="true"><Icon name="chevron-down" /></span>
         </button>
       </h3>
 

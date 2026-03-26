@@ -153,7 +153,7 @@
             on:dragend={handleDragEnd}
             title="Drag to reorder"
             aria-hidden="true"
-          ><Icon name="grip-vertical" size="sm" /></span>
+          ><Icon name="grip-vertical" /></span>
 
           <select
             class="block-editor__type-select"
@@ -175,14 +175,14 @@
             disabled={disabled || index === 0}
             on:click|stopPropagation={() => moveBlock(index, -1)}
             aria-label="Move up"
-          ><Icon name="arrow-up" size="sm" /></button>
+          ><Icon name="arrow-up" /></button>
           <button
             type="button"
             class="block-editor__tool-btn"
             disabled={disabled || index === blocks.length - 1}
             on:click|stopPropagation={() => moveBlock(index, 1)}
             aria-label="Move down"
-          ><Icon name="arrow-down" size="sm" /></button>
+          ><Icon name="arrow-down" /></button>
           <button
             type="button"
             class="block-editor__tool-btn block-editor__add-btn"
@@ -190,7 +190,7 @@
             aria-label="Add block after this one"
             disabled={disabled}
             on:click|stopPropagation={(e) => openAddMenu(e, index)}
-          ><Icon name="plus" size="sm" /></button>
+          ><Icon name="plus" /></button>
           {#if blocks.length > 1}
             <button
               type="button"
@@ -198,7 +198,7 @@
               disabled={disabled}
               on:click|stopPropagation={() => removeBlock(index)}
               aria-label="Remove block"
-            ><Icon name="x" size="sm" /></button>
+            ><Icon name="x" /></button>
           {/if}
         </div>
       </div>
@@ -292,7 +292,7 @@
             class="block-editor__add-menu-item"
             on:click={() => addBlock(bt.type, addMenuIndex)}
           >
-            <span class="block-editor__add-menu-icon"><Icon icon={bt.icon} size="sm" /></span>
+            <span class="block-editor__add-menu-icon"><Icon icon={bt.icon} /></span>
             <span>{bt.label}</span>
           </button>
         {/each}

@@ -89,7 +89,17 @@ export { default as Toolbar } from "./Toolbar.svelte";
 export { default as Tooltip } from "./Tooltip.svelte";
 export { default as TriStateSwitch } from "./TriStateSwitch.svelte";
 export { default as Menubar } from "./Menubar.svelte";
+export { default as UiPresentationProvider } from "./UiPresentationProvider.svelte";
 export { default as ZonedDateTimePicker } from "./ZonedDateTimePicker.svelte";
+export {
+  controlHeightRem,
+  controlSpaceXRem,
+  getUiPresentation,
+  panelSpaceXRem,
+  panelSpaceYRem,
+  resolveSemanticControlSize,
+  resolveSupportingVisualSize,
+} from "./presentation";
 export type {
   IconProp,
   AccordionItem,
@@ -103,6 +113,7 @@ export type {
   ComboboxOption,
   ControlDensity,
   ControlSize,
+  SemanticControlSizeRole,
   DateTimeValue,
   DateTimeRangeValue,
   DateRangeValue,

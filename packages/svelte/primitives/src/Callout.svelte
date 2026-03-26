@@ -53,9 +53,9 @@
       {#if $$slots.icon}
         <slot name="icon" />
       {:else if tone === "pending"}
-        <Spinner variant="ring" size="sm" tone="accent" />
+        <Spinner variant="ring" sizeRole="chrome" tone="accent" />
       {:else}
-        <Icon name={toneIcon[tone] ?? "info"} size="sm" />
+        <Icon name={toneIcon[tone] ?? "info"} />
       {/if}
     </span>
 
@@ -83,7 +83,7 @@
       aria-label={dismissLabel}
       on:click={() => dispatch("dismiss")}
     >
-      <Icon name="x" size="sm" />
+      <Icon name="x" />
     </button>
   {/if}
 </section>

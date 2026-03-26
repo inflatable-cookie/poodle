@@ -1,12 +1,18 @@
 <script lang="ts">
+  import { getUiPresentation, resolveSemanticControlSize } from "./presentation";
+  import type { SemanticControlSizeRole } from "./types";
   import type { SpinnerSize, SpinnerTone, SpinnerVariant } from "./types";
 
   export let variant: SpinnerVariant = "ring";
-  export let size: SpinnerSize = "md";
+  export let size: SpinnerSize | null = null;
+  export let sizeRole: SemanticControlSizeRole = "control";
   export let tone: SpinnerTone = "current";
   export let ariaLabel: string | null = null;
   export let className = "";
   export let style: string | null = null;
+  const uiPresentation = getUiPresentation();
+  $: resolvedSize =
+    (size ?? resolveSemanticControlSize(uiPresentation?.sizeScale ?? "md", sizeRole)) as SpinnerSize;
 
   const gridCells = [
     { id: 0, phase: "tl" },
@@ -22,7 +28,7 @@
   {...$$restProps}
   class={`spinner ${className}`.trim()}
   data-variant={variant}
-  data-size={size}
+  data-size={resolvedSize}
   data-tone={tone}
   style={style ?? undefined}
   role={ariaLabel ? "status" : undefined}
@@ -68,6 +74,13 @@
     --poodle-spinner-grid-gap: 0.078125rem;
   }
 
+  .spinner[data-size="xs"] {
+    --poodle-spinner-ring-size: 0.625rem;
+    --poodle-spinner-grid-width: 0.375rem;
+    --poodle-spinner-grid-height: 0.5625rem;
+    --poodle-spinner-grid-gap: 0.0625rem;
+  }
+
   .spinner[data-size="md"] {
     --poodle-spinner-ring-size: 1rem;
     --poodle-spinner-grid-width: 0.5625rem;
@@ -80,6 +93,13 @@
     --poodle-spinner-grid-width: 0.75rem;
     --poodle-spinner-grid-height: 1.25rem;
     --poodle-spinner-grid-gap: 0.125rem;
+  }
+
+  .spinner[data-size="xl"] {
+    --poodle-spinner-ring-size: 1.875rem;
+    --poodle-spinner-grid-width: 0.9375rem;
+    --poodle-spinner-grid-height: 1.5625rem;
+    --poodle-spinner-grid-gap: 0.15625rem;
   }
 
   .spinner__ring {

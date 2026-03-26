@@ -1,32 +1,34 @@
 <script lang="ts">
   import { Eyebrow, Spinner } from "@poodle/svelte-primitives";
+
+  const spinnerSizes = ["xs", "sm", "md", "lg", "xl"] as const;
 </script>
 
 <div class="specimen">
   <div class="specimen__group">
     <Eyebrow>Ring</Eyebrow>
     <div class="specimen__row">
-      <Spinner variant="ring" size="sm" />
-      <Spinner variant="ring" size="md" />
-      <Spinner variant="ring" size="lg" />
+      {#each spinnerSizes as size}
+        <Spinner variant="ring" {size} />
+      {/each}
     </div>
   </div>
 
   <div class="specimen__group">
     <Eyebrow>CLI grid</Eyebrow>
     <div class="specimen__row">
-      <Spinner variant="grid" size="sm" tone="muted" />
-      <Spinner variant="grid" size="md" tone="accent" />
-      <Spinner variant="grid" size="lg" />
+      {#each spinnerSizes as size, index}
+        <Spinner variant="grid" {size} tone={index === 0 ? "muted" : index === 2 ? "accent" : "current"} />
+      {/each}
     </div>
   </div>
 
   <div class="specimen__group">
     <Eyebrow>Context tones</Eyebrow>
     <div class="specimen__row specimen__row--tones">
-      <span class="specimen__chip specimen__chip--inverse"><Spinner variant="ring" size="md" tone="current" /></span>
-      <span class="specimen__chip"><Spinner variant="ring" size="md" tone="accent" /></span>
-      <span class="specimen__chip"><Spinner variant="grid" size="md" tone="muted" /></span>
+      <span class="specimen__chip specimen__chip--inverse"><Spinner variant="ring" tone="current" /></span>
+      <span class="specimen__chip"><Spinner variant="ring" tone="accent" /></span>
+      <span class="specimen__chip"><Spinner variant="grid" tone="muted" /></span>
     </div>
   </div>
 </div>

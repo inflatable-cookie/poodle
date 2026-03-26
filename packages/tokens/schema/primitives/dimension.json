@@ -43,6 +43,10 @@
   },
   "size": {
     "control": {
+      "xs": {
+        "$type": "dimension",
+        "$value": "1.5rem"
+      },
       "sm": {
         "$type": "dimension",
         "$value": "1.75rem"
@@ -54,9 +58,17 @@
       "lg": {
         "$type": "dimension",
         "$value": "2.75rem"
+      },
+      "xl": {
+        "$type": "dimension",
+        "$value": "3.25rem"
       }
     },
     "icon": {
+      "xs": {
+        "$type": "dimension",
+        "$value": "0.625rem"
+      },
       "sm": {
         "$type": "dimension",
         "$value": "0.75rem"
@@ -68,6 +80,10 @@
       "lg": {
         "$type": "dimension",
         "$value": "1.25rem"
+      },
+      "xl": {
+        "$type": "dimension",
+        "$value": "1.5rem"
       }
     },
     "panel": {

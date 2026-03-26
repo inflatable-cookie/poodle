@@ -55,9 +55,9 @@
   />
   <span class="checkbox__indicator" aria-hidden="true">
     {#if mixed}
-      <span class="checkbox__mark"><Icon name="minus" size="sm" /></span>
+      <span class="checkbox__mark"><Icon name="minus" /></span>
     {:else if currentChecked}
-      <span class="checkbox__mark"><Icon name="check" size="sm" /></span>
+      <span class="checkbox__mark"><Icon name="check" /></span>
     {/if}
   </span>
   {#if label}

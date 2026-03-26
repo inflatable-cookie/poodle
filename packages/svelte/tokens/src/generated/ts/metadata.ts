@@ -27,12 +27,15 @@ export const manifest = {
   ],
   "requiredDensityModes": [
     "compact",
+    "default",
     "comfortable"
   ],
   "requiredControlSizes": [
+    "xs",
     "sm",
     "md",
-    "lg"
+    "lg",
+    "xl"
   ],
   "artifactTargets": {
     "css": [
@@ -41,6 +44,7 @@ export const manifest = {
       "packages/tokens/artifacts/css/poodle-theme-dark.css",
       "packages/tokens/artifacts/css/poodle-theme-loophole-studio.css",
       "packages/tokens/artifacts/css/poodle-density-compact.css",
+      "packages/tokens/artifacts/css/poodle-density-default.css",
       "packages/tokens/artifacts/css/poodle-density-comfortable.css"
     ],
     "ts": [

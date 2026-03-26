@@ -50,7 +50,8 @@ Updated: 2026-03-25
 |------|------|---------|----------|-------|
 | `variant` | `"primary" \| "secondary" \| "ghost"` | `"secondary"` | no | appearance family |
 | `tone` | `"default" \| "danger"` | `"default"` | no | intent modifier; composes with variant for danger×primary, danger×secondary, danger×ghost |
-| `size` | `"sm" \| "md" \| "lg"` | `"md"` | no | control size |
+| `size` | `"xs" \| "sm" \| "md" \| "lg" \| "xl"` | `null` | no | explicit control size override |
+| `sizeRole` | `"chrome" \| "control" \| "prominent"` | `"control"` | no | semantic size offset from inherited presentation |
 | `type` | `"button" \| "submit" \| "reset"` | `"button"` | no | native button type for the primary action half |
 | `items` | `MenuItem[]` | — | yes | dropdown menu entries |
 | `disabled` | `boolean` | `false` | no | disables entire control |

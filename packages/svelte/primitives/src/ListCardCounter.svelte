@@ -17,24 +17,24 @@
   <Tooltip content={tooltip}>
     {#if href}
       <a class="list-card-counter" {href} on:click={handleClick}>
-        <Icon icon={icon} size="sm" />
+        <Icon icon={icon} />
         <span>{count}</span>
       </a>
     {:else}
       <span class="list-card-counter">
-        <Icon icon={icon} size="sm" />
+        <Icon icon={icon} />
         <span>{count}</span>
       </span>
     {/if}
   </Tooltip>
 {:else if href}
   <a class="list-card-counter" {href} on:click={handleClick}>
-    <Icon icon={icon} size="sm" />
+    <Icon icon={icon} />
     <span>{count}</span>
   </a>
 {:else}
   <span class="list-card-counter">
-    <Icon icon={icon} size="sm" />
+    <Icon icon={icon} />
     <span>{count}</span>
   </span>
 {/if}

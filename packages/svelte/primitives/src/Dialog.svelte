@@ -141,7 +141,7 @@
             icon="x"
             ariaLabel={closeLabel}
             variant="ghost"
-            size="sm"
+            sizeRole="chrome"
             on:click={requestClose}
           />
         </div>

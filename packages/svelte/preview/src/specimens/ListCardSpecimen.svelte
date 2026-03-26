@@ -76,7 +76,7 @@
       >
         <svelte:fragment slot="leading"><Icon name="file-text" /></svelte:fragment>
         <svelte:fragment slot="badges">
-          <Pill tone="accent" size="md">New</Pill>
+          <Pill tone="accent">New</Pill>
         </svelte:fragment>
       </ListCard>
       <ListCard
@@ -88,7 +88,7 @@
         <svelte:fragment slot="leading"><Icon icon={layers} /></svelte:fragment>
         <svelte:fragment slot="badges">
           <Pill appearance="badge" tone="neutral">3</Pill>
-          <Pill tone="caution" size="md">Review</Pill>
+          <Pill tone="caution">Review</Pill>
         </svelte:fragment>
       </ListCard>
     </div>
@@ -106,7 +106,7 @@
       >
         <svelte:fragment slot="leading"><Icon icon={folder} /></svelte:fragment>
         <svelte:fragment slot="badges">
-          <Pill tone="positive" size="md">Active</Pill>
+          <Pill tone="positive">Active</Pill>
         </svelte:fragment>
         <svelte:fragment slot="footer">
           <ListCardCounter icon="file-text" count={24} tooltip="24 documents" />

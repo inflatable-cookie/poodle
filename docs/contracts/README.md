@@ -105,6 +105,7 @@ above it in downstream repos such as Loophole.
 - `foundation/stack.md`
 - `foundation/status-bar.md`
 - `foundation/status-indicator.md`
+- `foundation/spinner.md`
 - `foundation/surface-elevation.md`
 - `foundation/surface.md`
 - `foundation/switch.md`
@@ -120,6 +121,7 @@ above it in downstream repos such as Loophole.
 - `foundation/toolbar.md`
 - `foundation/tooltip.md`
 - `foundation/tri-state-switch.md`
+- `foundation/ui-presentation-provider.md`
 - `foundation/zoned-date-time-picker.md`
 - `composites/README.md`
 - `composites/action-discovery-panel.md`
@@ -144,8 +146,10 @@ above it in downstream repos such as Loophole.
 - `composites/log-list.md`
 - `composites/markdown-editor.md`
 - `composites/media-picker.md`
+- `composites/media-browse-panel.md`
 - `composites/media-preview.md`
 - `composites/media-thumbnail.md`
+- `composites/media-upload-status-panel.md`
 - `composites/metric-tile.md`
 - `composites/page-header.md`
 - `composites/page-loading.md`

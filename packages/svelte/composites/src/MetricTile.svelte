@@ -52,7 +52,7 @@
   {#if trend}
     <span class="state-tile__trend" data-trend={trend}>
       <span class="state-tile__trend-arrow" aria-hidden="true">
-        {#if trend === "up"}<Icon name="trending-up" size="sm" />{:else if trend === "down"}<Icon name="trending-down" size="sm" />{:else}<Icon name="arrow-right" size="sm" />{/if}
+        {#if trend === "up"}<Icon name="trending-up" />{:else if trend === "down"}<Icon name="trending-down" />{:else}<Icon name="arrow-right" />{/if}
       </span>
       {#if trendLabel}
         <span>{trendLabel}</span>

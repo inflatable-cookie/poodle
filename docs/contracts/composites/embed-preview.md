@@ -199,7 +199,7 @@ None. EmbedPreview is a pure display component.
   embedding a live web view
 - Raw embed and fallback states still follow the same priority order as Svelte
 
-## 11. Parity Checklist
+## 10. Parity Checklist
 
 ### Tier 1: Strict Parity
 
@@ -219,13 +219,13 @@ None. EmbedPreview is a pure display component.
 - [ ] iframe rendering may differ per platform
 - [ ] rendering internals stay internal
 
-## 12. Known Deltas
+## 11. Known Deltas
 
 | Delta | Why Allowed | Approval Status | Follow-Up |
 |-------|-------------|-----------------|-----------|
 | GPUI live iframe/web view support | GPUI uses a placeholder panel for `embedUrl` states because it does not yet host a live embedded web surface | accepted for now | investigate WebView integration or an equivalent native embed surface without changing the public contract |
 
-## 13. Specimen Definitions
+## 12. Specimen Definitions
 
 ### YouTube Embed
 
@@ -263,7 +263,7 @@ None. EmbedPreview is a pure display component.
 |-------|---------------|-----------------|
 | Raw embed | `parsed.originalEmbed` set, no provider-specific embed URL | raw embed container in Svelte, raw-embed placeholder/content block in GPUI |
 
-## 14. Approval And Adoption Notes
+## 13. Approval And Adoption Notes
 
 - Contract status: `seed contract`
 - Approvers: pending

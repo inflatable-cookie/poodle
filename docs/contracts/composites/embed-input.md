@@ -186,7 +186,7 @@ None.
   `parsed` and provider-restriction `error` from `value` and `providers`
   when hosts want contract-backed detection without re-implementing the rules
 
-## 11. Parity Checklist
+## 10. Parity Checklist
 
 ### Tier 1: Strict Parity
 
@@ -207,13 +207,13 @@ None.
 - [ ] debounce mechanism may differ
 - [ ] rendering internals stay internal
 
-## 12. Known Deltas
+## 11. Known Deltas
 
 | Delta | Why Allowed | Approval Status | Follow-Up |
 |-------|-------------|-----------------|-----------|
 | Svelte still owns its debounce/event loop while GPUI is render-only and may pre-resolve parse state before rendering | event ownership differs by runtime, but the visible `parsed` / `error` contract and supported detection rules are aligned | accepted for now | extract a shared TS utility or generator path if runtime-level parser implementation drift becomes costly |
 
-## 13. Specimen Definitions
+## 12. Specimen Definitions
 
 ### URL Or Embed Code Input
 
@@ -239,7 +239,7 @@ None.
 |-------|---------------|-----------------|
 | Detection matrix | helper-driven examples covering YouTube short link, Vimeo link, iframe embed, and restricted generic URL | specimen shows the resolved `parsed` payload or provider restriction error for each canonical supported pattern |
 
-## 14. Approval And Adoption Notes
+## 13. Approval And Adoption Notes
 
 - Contract status: `seed contract`
 - Approvers: pending

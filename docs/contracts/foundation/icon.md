@@ -9,7 +9,7 @@ Updated: 2026-03-15
 - Layer: `foundation`
 - Summary: a sized, accessible inline SVG icon element that resolves names from
   an icon registry
-- In scope: three sizes (sm, md, lg), accessible and decorative modes, registry
+- In scope: five explicit sizes (xs, sm, md, lg, xl), semantic size roles, accessible and decorative modes, registry
   resolution, currentColor inheritance
 - Out of scope: animated icons, multi-color icons, icon buttons (see IconButton),
   icon registration (see IconProvider)
@@ -32,7 +32,8 @@ Updated: 2026-03-15
 | Prop | Type | Default | Required | Notes |
 |------|------|---------|----------|-------|
 | `name` | `string` | — | yes | icon registry identifier |
-| `size` | `"sm" \| "md" \| "lg"` | `"md"` | no | icon dimensions |
+| `size` | `"xs" \| "sm" \| "md" \| "lg" \| "xl"` | `null` | no | explicit icon dimensions |
+| `sizeRole` | `"chrome" \| "control" \| "prominent"` | `"chrome"` | no | semantic size offset from inherited presentation |
 | `ariaLabel` | `string \| null` | `null` | no | accessible name; absence triggers decorative mode |
 
 ### Controlled And Uncontrolled
@@ -47,9 +48,11 @@ Updated: 2026-03-15
 |-------|---------|-----------------|
 | decorative | no ariaLabel | `role="presentation"`, `aria-hidden="true"` |
 | accessible | ariaLabel provided | `role="img"`, `aria-label` set |
+| xs | `size="xs"` | extra-small dimensions |
 | sm | `size="sm"` | small dimensions |
-| md | `size="md"` (default) | medium dimensions |
+| md | inherited default or `size="md"` | medium dimensions |
 | lg | `size="lg"` | large dimensions |
+| xl | `size="xl"` | extra-large dimensions |
 
 ## 5. Events
 

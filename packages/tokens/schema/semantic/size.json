@@ -11,6 +11,10 @@
       }
     },
     "icon": {
+      "xs": {
+        "$type": "dimension",
+        "$value": "{primitives.size.icon.xs}"
+      },
       "sm": {
         "$type": "dimension",
         "$value": "{primitives.size.icon.sm}"
@@ -22,6 +26,10 @@
       "lg": {
         "$type": "dimension",
         "$value": "{primitives.size.icon.lg}"
+      },
+      "xl": {
+        "$type": "dimension",
+        "$value": "{primitives.size.icon.xl}"
       }
     },
     "panel": {

@@ -2,7 +2,11 @@
   import { createEventDispatcher } from "svelte";
 
   import Icon from "./Icon.svelte";
-  import { getUiPresentation, resolveSemanticControlSize } from "./presentation";
+  import {
+    getUiPresentation,
+    resolveSemanticControlSize,
+    resolveSupportingVisualSize,
+  } from "./presentation";
   import Spinner from "./Spinner.svelte";
   import type {
     ButtonTone,
@@ -51,12 +55,7 @@
   $: hasLeading = $$slots.leading || leadingIcon || loading;
   $: hasTrailing = $$slots.trailing || trailingIcon || chevron;
   $: resolvedSize = size ?? resolveSemanticControlSize(uiPresentation?.sizeScale ?? "md", sizeRole);
-  $: resolvedIconSize =
-    resolvedSize === "xs" || resolvedSize === "sm"
-      ? "sm"
-      : resolvedSize === "xl"
-        ? "lg"
-        : resolvedSize;
+  $: resolvedIconSize = resolveSupportingVisualSize(resolvedSize);
 </script>
 
 <button
@@ -88,7 +87,7 @@
 >
   {#if loading}
     <span class="button__spinner" aria-hidden="true">
-      <Spinner variant="ring" size="sm" tone="current" />
+      <Spinner variant="ring" size={resolvedIconSize} tone="current" />
     </span>
   {/if}
 

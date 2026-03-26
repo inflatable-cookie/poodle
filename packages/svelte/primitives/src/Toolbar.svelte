@@ -1,12 +1,26 @@
 <script lang="ts">
   import { getFocusableElements } from "./internal";
+  import { controlHeightRem, getUiPresentation, resolveSemanticControlSize } from "./presentation";
 
-  import type { Orientation } from "./types";
+  import type {
+    ControlDensity,
+    ControlSize,
+    Orientation,
+    SemanticControlSizeRole,
+  } from "./types";
 
   export let orientation: Orientation = "horizontal";
+  export let size: ControlSize | null = null;
+  export let sizeRole: SemanticControlSizeRole = "chrome";
+  export let density: ControlDensity | null = null;
   export let ariaLabel: string | null = null;
 
   let rootElement: HTMLDivElement | null = null;
+  const uiPresentation = getUiPresentation();
+
+  $: resolvedSize = size ?? resolveSemanticControlSize(uiPresentation?.sizeScale ?? "md", sizeRole);
+  $: resolvedDensity = density ?? uiPresentation?.density ?? "default";
+  $: toolbarStyle = `--poodle-toolbar-control-height: ${controlHeightRem(resolvedSize)}rem;`;
 
   function focusSibling(direction: 1 | -1): void {
     const focusable = getFocusableElements(rootElement);
@@ -25,6 +39,9 @@
   bind:this={rootElement}
   class="toolbar"
   data-orientation={orientation}
+  data-size={resolvedSize}
+  data-density={resolvedDensity}
+  style={toolbarStyle}
   role="toolbar"
   tabindex="0"
   aria-label={ariaLabel ?? undefined}
@@ -53,11 +70,22 @@
   .toolbar {
     display: inline-flex;
     align-items: center;
-    gap: var(--poodle-space-inline-sm);
-    padding: var(--poodle-space-inline-sm);
+    gap: calc(var(--poodle-space-control-x) * 0.75);
+    min-height: var(--poodle-toolbar-control-height, var(--poodle-size-control-height));
+    padding: calc(var(--poodle-space-control-x) * 0.375) calc(var(--poodle-space-control-x) * 0.5);
     border: 0.0625rem solid color-mix(in srgb, var(--poodle-color-border-subtle) 78%, transparent);
     border-radius: var(--poodle-radius-surface);
     background: color-mix(in srgb, var(--poodle-color-background-panel) 94%, transparent);
+  }
+
+  .toolbar[data-density="compact"] {
+    gap: calc(var(--poodle-space-control-x) * 0.625);
+    padding: calc(var(--poodle-space-control-x) * 0.25) calc(var(--poodle-space-control-x) * 0.375);
+  }
+
+  .toolbar[data-density="comfortable"] {
+    gap: var(--poodle-space-control-x);
+    padding: calc(var(--poodle-space-control-x) * 0.5) calc(var(--poodle-space-control-x) * 0.625);
   }
 
   .toolbar[data-orientation="vertical"] {

@@ -10,7 +10,7 @@ Updated: 2026-03-15
 - Summary: a pressable action control that exposes a persistent pressed or
   selected state, with variant and size options
 - In scope: pressed state, disabled state, icon-only or text usage, ghost,
-  primary, and secondary variants, three sizes, inline and stack layouts
+  primary, and secondary variants, semantic size roles, five explicit sizes, inline and stack layouts
 - Out of scope: mutually exclusive grouped selection (see ToggleGroup), toolbar
   roving-focus, binary on/off switch semantics (see Switch)
 
@@ -35,7 +35,8 @@ Updated: 2026-03-15
 | `pressed` | `boolean \| null` | `null` | no | controlled pressed state; `null` = uncontrolled |
 | `defaultPressed` | `boolean` | `false` | no | uncontrolled initial pressed state |
 | `variant` | `"ghost" \| "primary" \| "secondary"` | `"ghost"` | no | appearance family |
-| `size` | `"sm" \| "md" \| "lg"` | `"md"` | no | control size |
+| `size` | `"xs" \| "sm" \| "md" \| "lg" \| "xl"` | `null` | no | explicit control size override |
+| `sizeRole` | `"chrome" \| "control" \| "prominent"` | `"control"` | no | semantic size offset from inherited presentation |
 | `layout` | `"inline" \| "stack"` | `"inline"` | no | inline button vs full-width stacked layout |
 | `disabled` | `boolean` | `false` | no | suppresses interaction |
 | `ariaLabel` | `string \| null` | `null` | no | required when content is icon-only |

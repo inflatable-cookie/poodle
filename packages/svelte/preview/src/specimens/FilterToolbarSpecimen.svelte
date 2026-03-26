@@ -46,7 +46,7 @@
       ariaLabel="Collapsible filters"
     >
       <svelte:fragment slot="actions">
-        <IconButton icon="refresh-cw" size="sm" ariaLabel="Refresh" />
+        <IconButton icon="refresh-cw" sizeRole="chrome" ariaLabel="Refresh" />
       </svelte:fragment>
       <SearchField id="col-search" placeholder="Search…" ariaLabel="Search" />
       <Select id="col-status" options={statusOptions} defaultValue="all" ariaLabel="Status" />
@@ -63,7 +63,7 @@
       ariaLabel="Collapsed filters"
     >
       <svelte:fragment slot="actions">
-        <IconButton icon="refresh-cw" size="sm" ariaLabel="Refresh" />
+        <IconButton icon="refresh-cw" sizeRole="chrome" ariaLabel="Refresh" />
       </svelte:fragment>
       <SearchField id="col2-search" placeholder="Search…" ariaLabel="Search" />
       <Select id="col2-status" options={statusOptions} defaultValue="active" ariaLabel="Status" />
@@ -77,7 +77,7 @@
       <Select id="proj-status" options={statusOptions} defaultValue="all" ariaLabel="Status" />
       <Select id="proj-type" options={typeOptions} defaultValue="all" ariaLabel="Type" />
       <svelte:fragment slot="secondary">
-        <Button variant="secondary" size="sm">Reset all</Button>
+        <Button variant="secondary" sizeRole="chrome">Reset all</Button>
       </svelte:fragment>
     </FilterToolbar>
   </div>

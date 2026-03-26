@@ -58,7 +58,7 @@
         {/if}
       {/if}
     </span>
-    <span class="collapsible__indicator" aria-hidden="true"><Icon name="chevron-down" size="sm" /></span>
+    <span class="collapsible__indicator" aria-hidden="true"><Icon name="chevron-down" /></span>
   </button>
 
   {#if isOpen}

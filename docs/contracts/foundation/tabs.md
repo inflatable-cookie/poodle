@@ -22,7 +22,7 @@ Updated: 2026-03-15
   ├── [List .poodle-tabs__list]  role="tablist"
   │     ├── [Item .poodle-tabs__item]...
   │     │     ├── [Tab .poodle-tabs__tab]  role="tab"  <button>
-  │     │     │     ├── [Icon] (optional, Icon component size="sm")
+  │     │     │     ├── [Icon] (optional, Icon component using supporting semantic sizing)
   │     │     │     └── [Label .poodle-tabs__label]  <span>
   │     │     └── [Close .poodle-tabs__close] (optional, when closable)
   │     └── [Actions .poodle-tabs__actions] (optional slot)
@@ -63,7 +63,7 @@ Updated: 2026-03-15
 |-------|------|---------|----------|-------|
 | `value` | `string` | — | yes | unique identifier |
 | `label` | `string` | — | yes | visible text |
-| `icon` | `string \| null` | `null` | no | icon registry identifier, renders Icon size="sm" |
+| `icon` | `string \| null` | `null` | no | icon registry identifier, renders Icon with supporting semantic sizing |
 | `disabled` | `boolean` | `false` | no | prevents activation |
 | `closable` | `boolean` | `false` | no | shows close button |
 | `count` | `number` | - | no | optional count badge rendered after the label |

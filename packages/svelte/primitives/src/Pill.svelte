@@ -1,19 +1,26 @@
 <script lang="ts">
+  import { getUiPresentation, resolveSemanticControlSize } from "./presentation";
+  import type { SemanticControlSizeRole } from "./types";
   import type { PillAppearance, PillFont, PillSize, PillTone } from "./types";
 
   export let tone: PillTone = "neutral";
   export let appearance: PillAppearance = "solid";
-  export let size: PillSize = "md";
+  export let size: PillSize | null = null;
+  export let sizeRole: SemanticControlSizeRole = "chrome";
   export let font: PillFont = "normal";
   export let muted = false;
   export let ariaLabel: string | null = null;
+
+  const uiPresentation = getUiPresentation();
+
+  $: resolvedSize = (size ?? resolveSemanticControlSize(uiPresentation?.sizeScale ?? "md", sizeRole)) as PillSize;
 </script>
 
 <span
   class="pill"
   data-tone={tone}
   data-appearance={appearance}
-  data-size={size}
+  data-size={resolvedSize}
   data-font={font}
   data-muted={muted}
   aria-label={ariaLabel ?? undefined}
@@ -64,10 +71,22 @@
     font-size: 0.625rem;
   }
 
+  .pill[data-size="xs"] {
+    min-height: 0.875rem;
+    padding: 0.0625rem 0.3125rem;
+    font-size: 0.5625rem;
+  }
+
   .pill[data-size="lg"] {
     min-height: 1.375rem;
     padding: 0.25rem 0.625rem;
     font-size: 0.75rem;
+  }
+
+  .pill[data-size="xl"] {
+    min-height: 1.5rem;
+    padding: 0.3125rem 0.75rem;
+    font-size: 0.8125rem;
   }
 
   .pill[data-font="mono"] {

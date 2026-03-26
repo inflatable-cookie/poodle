@@ -144,10 +144,10 @@
   {#if showSteppers}
     <div class="number-entry__steppers">
       <button type="button" disabled={disabled || readOnly} on:click={() => adjust(step, "increment")}>
-        <Icon name="plus" size="sm" />
+        <Icon name="plus" />
       </button>
       <button type="button" disabled={disabled || readOnly} on:click={() => adjust(-step, "decrement")}>
-        <Icon name="minus" size="sm" />
+        <Icon name="minus" />
       </button>
     </div>
   {/if}
@@ -206,7 +206,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 1.25rem;
+    width: calc(var(--poodle-size-icon-default) + 0.5rem);
     min-height: 0;
     border: 0;
     border-radius: calc(var(--poodle-radius-control) - 0.125rem);
@@ -216,10 +216,6 @@
     font-size: 0;
     padding: 0;
     overflow: hidden;
-  }
-
-  .number-entry__steppers button :global(.poodle-icon) {
-    transform: scale(0.625);
   }
 
   .number-entry__steppers button:disabled {

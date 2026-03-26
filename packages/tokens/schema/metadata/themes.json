@@ -18,12 +18,20 @@
       "selector": "[data-density=\"compact\"]",
       "description": "Tighter spacing for dense workstation layouts."
     },
+    "default": {
+      "selector": "[data-density=\"default\"]",
+      "description": "Balanced spacing for the standard product presentation."
+    },
     "comfortable": {
       "selector": "[data-density=\"comfortable\"]",
       "description": "Relaxed spacing for content-heavy product layouts."
     }
   },
   "controlSize": {
+    "xs": {
+      "selector": "[data-control-size=\"xs\"]",
+      "description": "Extra-small control size overlay."
+    },
     "sm": {
       "selector": "[data-control-size=\"sm\"]",
       "description": "Small control size overlay."
@@ -35,6 +43,10 @@
     "lg": {
       "selector": "[data-control-size=\"lg\"]",
       "description": "Large control size overlay."
+    },
+    "xl": {
+      "selector": "[data-control-size=\"xl\"]",
+      "description": "Extra-large control size overlay."
     }
   }
 }

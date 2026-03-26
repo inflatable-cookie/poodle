@@ -30,13 +30,20 @@
   type DensityName = keyof typeof densityModes;
   type ControlSizeName = keyof typeof controlSizes;
 
+  const densityOrder: DensityName[] = ["compact", "default", "comfortable"];
+  const controlSizeOrder: ControlSizeName[] = ["xs", "sm", "md", "lg", "xl"];
+
   const themeEntries = Object.entries(themes) as [ThemeName, (typeof themes)[ThemeName]][];
   const densityEntries = Object.entries(densityModes) as [DensityName, (typeof densityModes)[DensityName]][];
   const controlSizeEntries = Object.entries(controlSizes) as [ControlSizeName, (typeof controlSizes)[ControlSizeName]][];
 
   const themeOptions: ToggleGroupOption[] = themeEntries.map(([name]) => ({ value: name, label: name }));
-  const densityOptions: ToggleGroupOption[] = densityEntries.map(([name]) => ({ value: name, label: name }));
-  const controlSizeOptions: ToggleGroupOption[] = controlSizeEntries.map(([name]) => ({ value: name, label: name }));
+  const densityOptions: ToggleGroupOption[] = densityOrder
+    .filter((name) => densityEntries.some(([entryName]) => entryName === name))
+    .map((name) => ({ value: name, label: name }));
+  const controlSizeOptions: ToggleGroupOption[] = controlSizeOrder
+    .filter((name) => controlSizeEntries.some(([entryName]) => entryName === name))
+    .map((name) => ({ value: name, label: name }));
   const appearanceTreatmentOptions: ToggleGroupOption[] = [
     { value: "system", label: "system" },
     { value: "brand-raised", label: "brand-raised" },

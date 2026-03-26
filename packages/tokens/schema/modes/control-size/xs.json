@@ -1,0 +1,20 @@
+{
+  "size": {
+    "control": {
+      "height": {
+        "$type": "dimension",
+        "$value": "{primitives.size.control.xs}"
+      },
+      "minWidth": {
+        "$type": "dimension",
+        "$value": "4.5rem"
+      }
+    },
+    "icon": {
+      "default": {
+        "$type": "dimension",
+        "$value": "{primitives.size.icon.xs}"
+      }
+    }
+  }
+}

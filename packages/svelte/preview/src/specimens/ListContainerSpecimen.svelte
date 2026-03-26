@@ -61,7 +61,7 @@
         on:pageChange={(event) => (page = event.detail.page)}
       >
         <svelte:fragment slot="actions">
-          <IconButton icon="plus" variant="primary" size="sm" ariaLabel="Create incident" tooltip="Create incident" />
+          <IconButton icon="plus" variant="primary" sizeRole="chrome" ariaLabel="Create incident" tooltip="Create incident" />
         </svelte:fragment>
 
         <svelte:fragment slot="filters">
@@ -76,7 +76,7 @@
               <IconButton
                 icon="refresh-cw"
                 variant="ghost"
-                size="sm"
+                sizeRole="chrome"
                 ariaLabel="Refresh queues"
                 tooltip="Refresh queues"
               />
@@ -99,8 +99,8 @@
         <svelte:fragment slot="batch">
           <div class="specimen__batch">
             <Pill tone="neutral" appearance="badge">3 selected</Pill>
-            <Button variant="ghost" size="sm">Archive</Button>
-            <Button variant="ghost" size="sm">Mute alerts</Button>
+            <Button variant="ghost" sizeRole="chrome">Archive</Button>
+            <Button variant="ghost" sizeRole="chrome">Mute alerts</Button>
           </div>
         </svelte:fragment>
 
@@ -123,10 +123,10 @@
     <Eyebrow>State handling</Eyebrow>
     <Surface padding="lg" border="subtle">
       <div class="specimen__state-buttons">
-        <Button variant={state === "ready" ? "primary" : "ghost"} size="sm" on:click={() => (state = "ready")}>Ready</Button>
-        <Button variant={state === "loading" ? "primary" : "ghost"} size="sm" on:click={() => (state = "loading")}>Loading</Button>
-        <Button variant={state === "empty" ? "primary" : "ghost"} size="sm" on:click={() => (state = "empty")}>Empty</Button>
-        <Button variant={state === "error" ? "primary" : "ghost"} size="sm" on:click={() => (state = "error")}>Error</Button>
+        <Button variant={state === "ready" ? "primary" : "ghost"} sizeRole="chrome" on:click={() => (state = "ready")}>Ready</Button>
+        <Button variant={state === "loading" ? "primary" : "ghost"} sizeRole="chrome" on:click={() => (state = "loading")}>Loading</Button>
+        <Button variant={state === "empty" ? "primary" : "ghost"} sizeRole="chrome" on:click={() => (state = "empty")}>Empty</Button>
+        <Button variant={state === "error" ? "primary" : "ghost"} sizeRole="chrome" on:click={() => (state = "error")}>Error</Button>
       </div>
 
       <ListContainer

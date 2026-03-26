@@ -24,7 +24,7 @@
       aria-atomic="true"
     >
       <button type="button" class="toast__dismiss" aria-label={`Dismiss ${item.title}`} on:click={() => dispatch("dismiss", { id: item.id })}>
-        <Icon name="x" size="sm" />
+        <Icon name="x" />
       </button>
 
       <div class="toast__copy">
@@ -36,7 +36,7 @@
 
       {#if item.actionLabel}
         <div class="toast__actions">
-          <Button variant="secondary" size="sm" on:click={() => dispatch("action", { id: item.id })}>
+          <Button variant="secondary" on:click={() => dispatch("action", { id: item.id })}>
             {item.actionLabel}
           </Button>
         </div>

@@ -22,7 +22,7 @@
 <div class="specimen">
   <div class="specimen__group">
     <Eyebrow>Interactive stack</Eyebrow>
-    <Button variant="secondary" size="sm" on:click={addToast}>Add toast</Button>
+    <Button variant="secondary" on:click={addToast}>Add toast</Button>
     <div class="toast-container">
       <ToastStack
         {items}

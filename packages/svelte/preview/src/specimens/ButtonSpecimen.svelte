@@ -3,6 +3,7 @@
 
   let clickLog = "No button clicked yet.";
   let intent = "save";
+  const controlSizes = ["xs", "sm", "md", "lg", "xl"] as const;
 
   function log(label: string): void {
     clickLog = `Clicked: ${label}`;
@@ -49,9 +50,9 @@
   <div class="specimen__group">
     <Eyebrow>Sizes</Eyebrow>
     <div class="specimen__row">
-      <Button variant="primary" size="sm" on:click={() => log("Small")}>Small</Button>
-      <Button variant="primary" size="md" on:click={() => log("Medium")}>Medium</Button>
-      <Button variant="primary" size="lg" on:click={() => log("Large")}>Large</Button>
+      {#each controlSizes as size}
+        <Button variant="primary" {size} on:click={() => log(`Size ${size}`)}>{size.toUpperCase()}</Button>
+      {/each}
     </div>
   </div>
 

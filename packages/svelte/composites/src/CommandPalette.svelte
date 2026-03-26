@@ -174,7 +174,7 @@
           <span class="command-palette__hint">{invocationHint}</span>
         {/if}
         <button type="button" class="command-palette__close" aria-label="Close command palette" on:click={close}>
-          <Icon name="x" size="sm" />
+          <Icon name="x" />
         </button>
       </div>
     </div>

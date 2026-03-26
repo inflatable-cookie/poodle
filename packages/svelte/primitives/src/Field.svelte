@@ -74,7 +74,7 @@
             on:blur={hideHint}
             on:keydown={(e) => { if (e.key === "Escape") hideHint(); }}
           >
-            <Icon name="info" size="sm" />
+            <Icon name="info" />
           </button>
           {#if hintOpen}
             <span id={hintId} class="field__hint-tooltip" role="tooltip">

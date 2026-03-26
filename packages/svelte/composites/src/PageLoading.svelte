@@ -23,7 +23,7 @@
   >
     <div class="page-loading__backdrop" aria-hidden="true"></div>
     <div class="page-loading__card">
-      <Spinner className="page-loading__spinner" variant="ring" size="lg" tone="accent" />
+      <Spinner className="page-loading__spinner" variant="ring" sizeRole="prominent" tone="accent" />
 
       {#if !isIndeterminate}
         <div class="page-loading__progress">

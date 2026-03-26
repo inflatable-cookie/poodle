@@ -90,7 +90,7 @@
           on:click={handleExport}
           aria-label="Export as CSV"
         >
-          <Icon name="download" size="sm" />
+          <Icon name="download" />
           Export
         </button>
       {/if}
@@ -98,7 +98,7 @@
       {#if showColumnVisibility && hideableColumns.length > 0}
         <Popover placement="bottom-end" ariaLabel="Column visibility">
           <span slot="trigger" class="data-table__toolbar-btn">
-            <Icon name="columns-3" size="sm" />
+            <Icon name="columns-3" />
             Columns
           </span>
           <div class="data-table__col-menu" role="menu">
@@ -147,7 +147,7 @@
               >
                 <span>{column.label}</span>
                 {#if sortColumnId === column.id}
-                  <span aria-hidden="true"><Icon name={sortDirection === "asc" ? "arrow-up" : "arrow-down"} size="sm" /></span>
+                  <span aria-hidden="true"><Icon name={sortDirection === "asc" ? "arrow-up" : "arrow-down"} /></span>
                 {/if}
               </button>
             {:else}

@@ -31,9 +31,11 @@ and data components.
 - `ListContainer`
 - `LogList`
 - `MarkdownEditor`
+- `MediaBrowsePanel`
 - `MediaPicker`
 - `MediaPreview`
 - `MediaThumbnail`
+- `MediaUploadStatusPanel`
 - `MetricTile`
 - `NavCard`
 - `NavCardGrid`
@@ -51,6 +53,8 @@ and data components.
 - `ToastStack`
 - `VideoPlayer`
 - `parseWorkspaceLayoutSnapshot`
+- `detectParsedEmbed`
+- `resolveEmbedParseState`
 - `serializeWorkspaceLayoutSnapshot`
 - root import: `@poodle/svelte-composites`
 - type-only import: `@poodle/svelte-composites/types`

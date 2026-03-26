@@ -88,7 +88,20 @@ Contract-backed Svelte primitive surface for the first generalized Poodle baseli
 - `Toolbar`
 - `Tooltip`
 - `TriStateSwitch`
+- `UiPresentationProvider`
 - `ZonedDateTimePicker`
+- `DEFAULT_COMPRESSION`
+- `compressImage`
+- `controlHeightRem`
+- `controlSpaceXRem`
+- `formatFileSize`
+- `getUiPresentation`
+- `panelSpaceXRem`
+- `panelSpaceYRem`
+- `resolveSemanticControlSize`
+- `resolveSupportingVisualSize`
+- `type FileUploadValidationError`
+- `type ImageCompressionOptions`
 - root import: `@poodle/svelte-primitives`
 - type-only import: `@poodle/svelte-primitives/types`
 
