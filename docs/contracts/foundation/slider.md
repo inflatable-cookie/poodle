@@ -47,6 +47,7 @@ Updated: 2026-03-15
 | `valueText` | `string \| null` | `null` | no | human-readable value text for assistive technology (aria-valuetext) |
 | `size` | `"xs" \| "sm" \| "md" \| "lg" \| "xl"` | `null` | no | explicit control size override; when null, resolves from inherited presentation |
 | `sizeRole` | `"chrome" \| "control" \| "prominent"` | `"control"` | no | semantic size offset from inherited presentation |
+| `density` | `ControlDensity \| null` | `null` | no | explicit density override for spacing |
 
 ### Controlled And Uncontrolled
 
@@ -307,8 +308,9 @@ Updated: 2026-03-15
 - Vertical orientation uses `transform: rotate(-90deg)` on the native input
 - `valueChange` fires on the `input` event (live during drag); `valueCommit`
   fires on the `change` event (on release)
-- `data-orientation`, `data-disabled`, and `data-size` attributes on root drive
+- `data-orientation`, `data-disabled`, `data-size`, and `data-density` attributes on root drive
   layout and state styling
+- `data-density` — resolved density value (`compact`, `default`, or `comfortable`)
 
 ## 10. GPUI Notes
 

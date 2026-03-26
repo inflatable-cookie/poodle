@@ -77,6 +77,7 @@ Updated: 2026-03-25
 | `showCharCount` | `boolean` | `false` | no | display live character counter |
 | `size` | `"xs" \| "sm" \| "md" \| "lg" \| "xl"` | `null` | no | explicit control size override; when null, resolves from inherited presentation |
 | `sizeRole` | `"chrome" \| "control" \| "prominent"` | `"control"` | no | semantic size offset from inherited presentation |
+| `density` | `ControlDensity \| null` | `null` | no | explicit density override for spacing |
 
 ### Controlled And Uncontrolled
 
@@ -369,6 +370,7 @@ indicator slot.
   `showCharCount` and `maxLength` are set, or `{currentLength}` when only
   `showCharCount` is set
 - Emits `data-size` on root element reflecting the resolved size
+- `data-density` — resolved density value (`compact`, `default`, or `comfortable`)
 
 ## 10. GPUI Notes
 

@@ -51,6 +51,7 @@ Updated: 2026-03-24
 | `selectedColor` | `string \| null` | `null` | no | optional selected-state color override used for the checked and mixed indicator fill/border |
 | `size` | `"xs" \| "sm" \| "md" \| "lg" \| "xl"` | `null` | no | explicit control size override; when null, resolves from inherited presentation |
 | `sizeRole` | `"chrome" \| "control" \| "prominent"` | `"control"` | no | semantic size offset from inherited presentation |
+| `density` | `ControlDensity \| null` | `null` | no | explicit density override for spacing |
 
 ### Controlled And Uncontrolled
 
@@ -245,6 +246,7 @@ Updated: 2026-03-24
   `:focus-visible +`) connect the hidden input state to the visible indicator
 - `data-disabled` attribute on root drives disabled styling
 - Emits `data-size` on root element reflecting the resolved size
+- `data-density` — resolved density value (`compact`, `default`, or `comfortable`)
 
 ## 10. GPUI Notes
 

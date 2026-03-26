@@ -76,6 +76,7 @@ Updated: 2026-03-16
 | `defaultMode` | `ColorInputMode` | `"hex"` | no | initial input mode (hex/rgb/hsl) |
 | `size` | `"xs" \| "sm" \| "md" \| "lg" \| "xl"` | `null` | no | explicit control size override; when null, resolves from inherited presentation |
 | `sizeRole` | `"chrome" \| "control" \| "prominent"` | `"control"` | no | semantic size offset from inherited presentation |
+| `density` | `ControlDensity \| null` | `null` | no | explicit density override for spacing |
 
 ### Controlled And Uncontrolled
 
@@ -352,6 +353,7 @@ Updated: 2026-03-16
 - `min-height: 0` is applied to gradient thumb, slider wrappers, trigger,
   text inputs, and swatches to override the global button/input min-height reset
 - `data-size` attribute on root reflects the resolved size for CSS variant styling
+- `data-density` — resolved density value (`compact`, `default`, or `comfortable`)
 
 ## 10. GPUI Notes
 

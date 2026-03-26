@@ -46,6 +46,7 @@ Updated: 2026-03-15
 | `describedBy` | `string \| null` | `null` | no | aria-describedby target |
 | `size` | `"xs" \| "sm" \| "md" \| "lg" \| "xl"` | `null` | no | explicit control size override; when null, resolves from inherited presentation |
 | `sizeRole` | `"chrome" \| "control" \| "prominent"` | `"control"` | no | semantic size offset from inherited presentation |
+| `density` | `ControlDensity \| null` | `null` | no | explicit density override for spacing |
 
 ### Controlled And Uncontrolled
 
@@ -232,6 +233,7 @@ Height is not adjusted (determined by `rows`). Only padding and font-size scale.
 - Root uses `display: grid` instead of flex (unlike TextInput) because the
   textarea is the sole child and grid enables clean sizing
 - Emits `data-size` on root element reflecting the resolved size
+- `data-density` — resolved density value (`compact`, `default`, or `comfortable`)
 
 ## 10. GPUI Notes
 

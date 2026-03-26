@@ -52,6 +52,7 @@ Updated: 2026-03-24
 | `onColor` | `string \| null` | `null` | no | optional on-state accent override used for the thumb and active track tint |
 | `size` | `"xs" \| "sm" \| "md" \| "lg" \| "xl"` | `null` | no | explicit control size override; when null, resolves from inherited presentation |
 | `sizeRole` | `"chrome" \| "control" \| "prominent"` | `"control"` | no | semantic size offset from inherited presentation |
+| `density` | `ControlDensity \| null` | `null` | no | explicit density override for spacing |
 
 ### Controlled And Uncontrolled
 
@@ -257,6 +258,7 @@ Updated: 2026-03-24
   tints for the checked state
 - Thumb `translateX(0.875rem)` slides the thumb from the off to on position
 - Emits `data-size` on root element reflecting the resolved size
+- `data-density` — resolved density value (`compact`, `default`, or `comfortable`)
 
 ## 10. GPUI Notes
 

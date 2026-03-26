@@ -44,6 +44,7 @@ Updated: 2026-03-26
 | `tone` | `ButtonTone` | `"default"` | no | intent modifier; composes with variant for danger×primary, danger×secondary, danger×ghost |
 | `size` | `ControlSize` | `null` | no | explicit control size override |
 | `sizeRole` | `"chrome" \| "control" \| "prominent"` | `"control"` | no | semantic size offset from inherited presentation |
+| `density` | `ControlDensity \| null` | `null` | no | explicit density override for spacing |
 | `icon` | `string` | — | yes | icon glyph character or registry identifier |
 | `ariaLabel` | `string` | — | yes | required accessible name |
 | `disabled` | `boolean` | `false` | no | suppresses activation |
@@ -331,7 +332,8 @@ button-owned wrapper.
   loading
 - Custom properties on root element enable variant overrides without
   duplicating transition declarations
-- `data-variant`, `data-tone`, and `data-size` attributes on root for CSS targeting
+- `data-variant`, `data-tone`, `data-size`, and `data-density` attributes on root for CSS targeting
+- `data-density` — resolved density value (`compact`, `default`, or `comfortable`)
 - Icon glyph is `aria-hidden` as the accessible name comes from `ariaLabel`
 - border-radius uses `--poodle-treatment-interactive-radius` with
   fallback to `--poodle-radius-control`

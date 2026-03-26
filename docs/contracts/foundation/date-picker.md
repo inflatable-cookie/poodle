@@ -51,6 +51,7 @@ Updated: 2026-03-15
 | `locale` | `string` | `"en-US"` | no | passed through to composed Calendar |
 | `size` | `"xs" \| "sm" \| "md" \| "lg" \| "xl"` | `null` | no | explicit control size override; when null, resolves from inherited presentation |
 | `sizeRole` | `"chrome" \| "control" \| "prominent"` | `"control"` | no | semantic size offset from inherited presentation |
+| `density` | `ControlDensity \| null` | `null` | no | explicit density override for spacing |
 | `disabled` | `boolean` | `false` | no | disables the trigger and prevents opening |
 | `ariaLabel` | `string \| null` | `null` | no | accessible name for the trigger |
 
@@ -264,6 +265,7 @@ CalendarWeekStart: "sunday" | "monday"
 - Surface uses `color-mix` for border and background blending
 - Trigger displays the formatted selected date or the placeholder text
 - `data-size` data attribute on root reflects the resolved size
+- `data-density` — resolved density value (`compact`, `default`, or `comfortable`)
 
 ## 10. GPUI Notes
 

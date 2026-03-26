@@ -37,6 +37,7 @@ Updated: 2026-03-26
 | `variant` | `"ghost" \| "primary" \| "secondary"` | `"ghost"` | no | appearance family |
 | `size` | `"xs" \| "sm" \| "md" \| "lg" \| "xl"` | `null` | no | explicit control size override |
 | `sizeRole` | `"chrome" \| "control" \| "prominent"` | `"control"` | no | semantic size offset from inherited presentation |
+| `density` | `ControlDensity \| null` | `null` | no | explicit density override for spacing |
 | `layout` | `"inline" \| "stack"` | `"inline"` | no | inline button vs full-width stacked layout |
 | `disabled` | `boolean` | `false` | no | suppresses interaction |
 | `ariaLabel` | `string \| null` | `null` | no | required when content is icon-only |

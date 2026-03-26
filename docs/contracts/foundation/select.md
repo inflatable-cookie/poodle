@@ -51,6 +51,7 @@ Updated: 2026-03-15
 | `name` | `string \| undefined` | `undefined` | no | form field name |
 | `size` | `"xs" \| "sm" \| "md" \| "lg" \| "xl"` | `null` | no | explicit control size override; when null, resolves from inherited presentation |
 | `sizeRole` | `"chrome" \| "control" \| "prominent"` | `"control"` | no | semantic size offset from inherited presentation |
+| `density` | `ControlDensity \| null` | `null` | no | explicit density override for spacing |
 
 ### Type Definitions
 
@@ -225,6 +226,7 @@ SelectItems: SelectOption[] | SelectOptionGroup[]
 - Placeholder rendered as a disabled `<option>` with `selected` when no value is set
 - Option groups rendered as native `<optgroup>` elements
 - Emits `data-size` on root element reflecting the resolved size
+- `data-density` — resolved density value (`compact`, `default`, or `comfortable`)
 
 ## 10. GPUI Notes
 

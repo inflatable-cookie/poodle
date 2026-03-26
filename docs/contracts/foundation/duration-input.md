@@ -56,6 +56,7 @@ Updated: 2026-03-15
 | `ariaLabel` | `string` | `"Duration"` | no | accessible name for the group |
 | `size` | `"xs" \| "sm" \| "md" \| "lg" \| "xl"` | `null` | no | explicit control size override; when null, resolves from inherited presentation |
 | `sizeRole` | `"chrome" \| "control" \| "prominent"` | `"control"` | no | semantic size offset from inherited presentation |
+| `density` | `ControlDensity \| null` | `null` | no | explicit density override for spacing |
 
 ### Controlled And Uncontrolled
 
@@ -229,6 +230,7 @@ Updated: 2026-03-15
 - Total seconds validated against `minTotalSeconds` and `maxTotalSeconds`
 - `data-invalid` attribute set when out of bounds
 - `data-size` attribute on root reflects the resolved size for CSS variant styling
+- `data-density` — resolved density value (`compact`, `default`, or `comfortable`)
 
 ## 10. GPUI Notes
 
