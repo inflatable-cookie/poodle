@@ -29,7 +29,7 @@
   <div class="specimen__group">
     <Eyebrow>Space between</Eyebrow>
     <FormActions align="between">
-      <Button variant="primary" tone="danger">Delete</Button>
+      <Button variant="secondary" tone="danger">Delete</Button>
       <Button variant="primary">Save</Button>
     </FormActions>
   </div>
