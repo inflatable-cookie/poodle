@@ -1,40 +1,50 @@
 # FormLayout
 
-Status: seed contract
-Updated: 2026-03-21
+Status: detailed contract
+Updated: 2026-03-30
 
 ## 1. Purpose
 
 - Component name: `FormLayout`
 - Layer: `composites`
 - Summary: a responsive form grid with multi-column support, error/success
-  messaging, field error summary, and action button area
-- In scope: field grid layout with mixed column widths, form-level messaging,
-  field error summary, action button placement, responsive collapsing
+  messaging via Callout, field error summary with accessible alert, and
+  action button area via FormActions — provides consistent form structure
+  across dialogs, pages, and card content
+- In scope: field grid layout with mixed column widths, form-level
+  error/success messaging via Callout, field error summary list, action
+  button placement via FormActions, responsive collapsing via container
+  queries, description text
 - Out of scope: form submission logic, validation orchestration, individual
   field state management
 
 ## 2. Anatomy
 
 ```text
-[Root]
-  ├── [Description] (optional)
-  ├── [Error Callout] (optional)
-  ├── [Success Callout] (optional)
-  ├── [Field Error Summary] (optional)
-  ├── [Fields Grid]
-  └── [Actions] (optional)
+[Root .form-layout]  <div>
+  ├── [Description .form-layout__description]  <p> (optional)
+  ├── [ErrorCallout]  Callout (tone="danger") (optional)
+  ├── [SuccessCallout]  Callout (tone="success") (optional)
+  ├── [FieldErrors .form-layout__field-errors]  <div> (optional)
+  │     ├── [ErrorHeading]  <p> "Please fix the following errors:"
+  │     └── [ErrorList]  <ul>
+  │           └── [ErrorItem]  <li> per field error
+  ├── [Grid .form-layout__grid]  <div>
+  │     └── (slot: default — form fields)
+  └── [Actions .form-layout__actions]  <div> (optional)
+        └── [FormActions]  FormActions primitive
+              └── (slot: actions)
 ```
 
 | Part | Required | Description | Token Targets |
 |------|----------|-------------|---------------|
-| Root | yes | vertical flex container with container queries | gap |
-| Description | no | introductory help text | typography, text-secondary |
-| Error Callout | no | form-level error message | via Callout danger tone |
-| Success Callout | no | form-level success message | via Callout success tone |
-| Field Error Summary | no | accessible list of per-field errors | background, border, typography |
-| Fields Grid | yes | responsive CSS grid for form fields | grid columns, gap |
-| Actions | no | action buttons via FormActions | via FormActions primitive |
+| Root | yes | flex column container with container-type inline-size | gap (stack-lg) |
+| Description | no | introductory help text | text-secondary, body typography |
+| ErrorCallout | no | form-level error message via Callout | delegates to Callout contract (tone="danger") |
+| SuccessCallout | no | form-level success message via Callout | delegates to Callout contract (tone="success") |
+| FieldErrors | no | accessible error summary list | status-danger background/border, label typography |
+| Grid | yes | responsive CSS grid for form fields | grid columns, gap (stack-lg vertical, inline-md horizontal) |
+| Actions | no | action buttons via FormActions | delegates to FormActions contract |
 
 ## 3. Props And Inputs
 
@@ -42,40 +52,38 @@ Updated: 2026-03-21
 
 | Prop | Type | Default | Required | Notes |
 |------|------|---------|----------|-------|
-| `columns` | `number` | `6` | no | base grid columns — 6 enables mixed 2-col and 3-col layouts |
-| `error` | `string \| null` | `null` | no | form-level error message |
-| `success` | `string \| null` | `null` | no | form-level success message |
-| `fieldErrors` | `Record<string, string> \| null` | `null` | no | per-field error map |
-| `description` | `string \| null` | `null` | no | introductory text |
+| `columns` | `number` | `6` | no | base grid columns; 6 enables mixed 2-col and 3-col layouts |
+| `error` | `string \| null` | `null` | no | form-level error message (displayed via Callout tone="danger") |
+| `success` | `string \| null` | `null` | no | form-level success message (displayed via Callout tone="success") |
+| `fieldErrors` | `Record<string, string> \| null` | `null` | no | per-field error map; keys are field names, values are error messages |
+| `description` | `string \| null` | `null` | no | introductory text above the form |
 
 ### Slots
 
 | Slot | Purpose |
 |------|---------|
-| default | form fields (Field components placed in the grid) |
-| `actions` | action buttons (rendered inside FormActions) |
+| default | form fields (placed in the grid; Field `span` prop controls `grid-column: span N`) |
+| `actions` | action buttons (rendered inside FormActions primitive) |
 
 ### Grid Column System
 
 The default 6-column grid enables flexible multi-column layouts using Field's
 `span` prop:
 
-| Span | Width | Use case |
+| Span | Width | Use Case |
 |------|-------|----------|
 | `span={2}` | 1/3 width | three fields per row |
 | `span={3}` | 1/2 width | two fields per row |
 | `span={6}` | full width | full-width fields (textarea, notes) |
 
-Rows can freely mix 2-col and 3-col divisions. For example, a row of three
-name fields (`span={2}` each) followed by a row of two contact fields
-(`span={3}` each) works naturally.
-
-For simple single-column forms (e.g. inside a dialog), use `columns={1}`.
+Rows can freely mix 2-col and 3-col divisions. For simple single-column
+forms (e.g. inside a dialog), use `columns={1}`.
 
 ### Controlled And Uncontrolled
 
-- all messaging state is host-owned
-- form submission logic is external
+- All messaging state is host-owned
+- Form submission logic is external
+- No internal state
 
 ## 4. States
 
@@ -87,24 +95,27 @@ For simple single-column forms (e.g. inside a dialog), use `columns={1}`.
 | with-description | `description` set | help text above fields |
 | error | `error` set | danger Callout above fields |
 | success | `success` set | success Callout above fields |
-| field-errors | `fieldErrors` populated | accessible error list above fields |
-| with-actions | actions slot populated | FormActions below fields |
+| field-errors | `fieldErrors` populated with entries | accessible error list above fields |
+| with-actions | actions slot populated | FormActions rendered below fields |
 
 ### Component States
 
-State table is sufficient.
+No internal state. All visual variation is driven by props and slots.
 
 ## 5. Events
 
-No component-owned events.
+None. FormLayout is a structural composite with no component-owned events.
 
 ## 6. Accessibility
 
 ### Semantics
 
-- Field Error Summary uses `role="alert"` with `aria-live="polite"`
-- Individual field errors are managed by Field primitive's own accessibility
-- Callout components provide their own ARIA semantics
+- Field Error Summary: `role="alert"` with `aria-live="polite"` for automatic
+  announcement when errors appear
+- Error list heading: `<p>` with text "Please fix the following errors:"
+- Error list: `<ul>` with `<li>` items showing `<strong>{field}</strong>: {message}`
+- Individual field errors: managed by Field primitive's own accessibility
+- Callout components: provide their own ARIA semantics
 
 ### Keyboard
 
@@ -121,198 +132,188 @@ No component-owned events.
 
 ### Sizing
 
-- Fields grid: `repeat(columns, 1fr)` at full container width
+- Root: flex column with `gap: var(--poodle-space-stack-lg)`
+- Fields grid: `repeat(columns, 1fr)` with `gap: stack-lg inline-md`
+- Grid columns driven by CSS custom property `--fl-columns` (set inline from
+  `columns` prop)
 - Uses container queries (not viewport media queries) for responsive behavior
-- Responsive breakpoints based on container width:
-  - **>600px**: full grid (default 6 columns)
-  - **480–600px**: 2-column grid — 3-col rows collapse to 2+1 across two rows,
-    full-width fields span both columns, all other spans reset to 1
-  - **<480px**: single column, all spans reset to 1
-- Gap: `stack-lg` vertically, `inline-md` horizontally
-- Field `span` prop controls `grid-column: span N`
+
+### Responsive Breakpoints (Container-Based)
+
+- **>600px**: full grid (default 6 columns)
+- **480--600px**: 2-column grid; `span 6` and `span -1` fields use
+  `grid-column: 1 / -1` to stay full width; all other spans reset to
+  `span 1`
+- **<480px**: single column; all spans reset
 
 ### Composition
 
-- parent expectations: page sections, Dialog body, card content
-- child expectations: Field-wrapped form controls, standalone controls
-- Used by FormDialog to provide consistent field layout inside dialogs
+- Composes: `Callout` and `FormActions` from `@poodle/svelte-primitives`
+- Parent expectations: page sections, Dialog body, card content
+- Child expectations: Field-wrapped form controls, standalone controls
+- Used by: FormDialog to provide consistent field layout inside dialogs
 
-## 8. Token Usage
+## 8. Token Usage — Exact Values
 
-| Part | Token | Purpose |
-|------|-------|---------|
-| Root | `space-stack-lg` | vertical gap between sections |
-| Description | `text-secondary`, `body-size` | help text styling |
-| Field Error Summary | `status-danger` | error background/border tint |
-| Fields Grid | `space-stack-lg`, `space-inline-md` | grid gap |
-| Actions | via FormActions primitive | button layout |
-
-### Token Usage — Exact CSS Values
-
-#### `.form-layout` (Root)
+### Root `.form-layout`
 
 | Property | Value |
 |----------|-------|
-| `display` | `flex` |
-| `flex-direction` | `column` |
-| `gap` | `var(--poodle-space-stack-lg)` |
-| `container-type` | `inline-size` |
+| display | `flex` |
+| flex-direction | `column` |
+| gap | `var(--poodle-space-stack-lg)` |
+| container-type | `inline-size` |
 
-#### `.form-layout__description`
-
-| Property | Value |
-|----------|-------|
-| `margin` | `0` |
-| `color` | `var(--poodle-color-text-secondary)` |
-| `font-size` | `var(--poodle-typography-body-size, 0.875rem)` |
-| `line-height` | `var(--poodle-typography-body-lineHeight, 1.5)` |
-
-#### `.form-layout__field-errors`
+### Description `.form-layout__description`
 
 | Property | Value |
 |----------|-------|
-| `padding` | `var(--poodle-space-panel-y, 0.75rem) var(--poodle-space-panel-x, 1rem)` |
-| `border-radius` | `var(--poodle-radius-surface, 0.5rem)` |
-| `background` | `color-mix(in srgb, var(--poodle-color-status-danger) 8%, transparent)` |
-| `border` | `0.0625rem solid color-mix(in srgb, var(--poodle-color-status-danger) 40%, transparent)` |
-| `font-size` | `var(--poodle-typography-label-size, 0.75rem)` |
+| margin | `0` |
+| color | `var(--poodle-color-text-secondary)` |
+| font-size | `var(--poodle-typography-body-size, 0.875rem)` |
+| line-height | `var(--poodle-typography-body-lineHeight, 1.5)` |
 
-#### `.form-layout__field-errors p`
-
-| Property | Value |
-|----------|-------|
-| `margin` | `0 0 0.25rem` |
-| `font-weight` | `600` |
-
-#### `.form-layout__field-errors ul`
+### Field Errors `.form-layout__field-errors`
 
 | Property | Value |
 |----------|-------|
-| `margin` | `0` |
-| `padding-left` | `1.25rem` |
+| padding | `var(--poodle-space-panel-y, 0.75rem) var(--poodle-space-panel-x, 1rem)` |
+| border-radius | `var(--poodle-radius-surface, 0.5rem)` |
+| background | `color-mix(in srgb, var(--poodle-color-status-danger) 8%, transparent)` |
+| border | `0.0625rem solid color-mix(in srgb, var(--poodle-color-status-danger) 40%, transparent)` |
+| font-size | `var(--poodle-typography-label-size, 0.75rem)` |
 
-#### `.form-layout__field-errors li`
-
-| Property | Value |
-|----------|-------|
-| `margin-bottom` | `0.125rem` |
-
-#### `.form-layout__grid`
+### Field Errors Heading `.form-layout__field-errors p`
 
 | Property | Value |
 |----------|-------|
-| `display` | `grid` |
-| `grid-template-columns` | `repeat(var(--fl-columns, 6), 1fr)` |
-| `gap` | `var(--poodle-space-stack-lg) var(--poodle-space-inline-md)` |
+| margin | `0 0 0.25rem` |
+| font-weight | `600` |
+
+### Field Errors List `.form-layout__field-errors ul`
+
+| Property | Value |
+|----------|-------|
+| margin | `0` |
+| padding-left | `1.25rem` |
+
+### Field Errors Item `.form-layout__field-errors li`
+
+| Property | Value |
+|----------|-------|
+| margin-bottom | `0.125rem` |
+
+### Grid `.form-layout__grid`
+
+| Property | Value |
+|----------|-------|
+| display | `grid` |
+| grid-template-columns | `repeat(var(--fl-columns, 6), 1fr)` |
+| gap | `var(--poodle-space-stack-lg) var(--poodle-space-inline-md)` |
 
 The `--fl-columns` CSS variable is set inline from the `columns` prop.
 
 ### Container Query Breakpoints
 
-Uses `container-type: inline-size` on the root element (not viewport media queries).
+Uses `container-type: inline-size` on the root element.
 
 #### `@container (max-width: 600px)`
 
 | Selector | Property | Value |
 |----------|----------|-------|
-| `.form-layout__grid` | `grid-template-columns` | `repeat(2, 1fr)` |
-| `.form-layout__grid :global([style*="grid-column"])` | `grid-column` | `span 1 !important` |
-| `.form-layout__grid :global([style*="span 6"])`, `:global([style*="span -1"])` | `grid-column` | `1 / -1 !important` |
+| `.form-layout__grid` | grid-template-columns | `repeat(2, 1fr)` |
+| `.form-layout__grid :global([style*="grid-column"])` | grid-column | `span 1 !important` |
+| `.form-layout__grid :global([style*="span 6"])` | grid-column | `1 / -1 !important` |
+| `.form-layout__grid :global([style*="span -1"])` | grid-column | `1 / -1 !important` |
 
 #### `@container (max-width: 480px)`
 
 | Selector | Property | Value |
 |----------|----------|-------|
-| `.form-layout__grid` | `grid-template-columns` | `1fr` |
+| `.form-layout__grid` | grid-template-columns | `1fr` |
+
+### Composed Primitives
+
+| Part | Delegates To |
+|------|-------------|
+| ErrorCallout | Callout contract (foundation), `tone="danger"` |
+| SuccessCallout | Callout contract (foundation), `tone="success"` |
+| FormActions | FormActions contract (foundation) |
+
+### Light Theme Overrides
+
+None.
 
 ## 9. Svelte Notes
 
-- reuses Callout primitive for error/success banners
-- reuses FormActions primitive for action button layout
-- root element uses `container-type: inline-size` for container queries
-- grid columns driven by CSS custom property `--fl-columns`
+- Reuses `Callout` primitive for error/success banners via `message` prop
+- Reuses `FormActions` primitive for action button layout
+- Root element uses `container-type: inline-size` for container queries
+- Grid columns driven by CSS custom property `--fl-columns` set via
+  `style:--fl-columns={columns}`
 - Field `span` prop maps to `grid-column: span N` naturally
-- at 2-col breakpoint, `span 6` fields use `grid-column: 1 / -1` to stay
+- At 2-col breakpoint, `span 6` fields use `grid-column: 1 / -1` to stay
   full width; all other spans reset to `span 1`
+- `$$slots.actions` used to detect whether the actions slot is populated
+- Callout receives `message` prop (not children/slot)
 
 ## 10. GPUI Notes
 
-- expected crate/module surface: `poodle_gpui::composites::form_layout`
-- grid layout maps to flex with wrap in GPUI
-- responsive collapsing may use different thresholds per platform
+- Expected crate/module surface: `poodle_gpui::composites::form_layout`
+- Grid layout maps to flex with wrap in GPUI
+- Responsive collapsing may use different thresholds per platform
+- Field error summary must maintain `role="alert"` semantics
 
 ## 11. Parity Checklist
 
 ### Tier 1: Strict Parity
 
+- [ ] all props have the same meaning and defaults
 - [ ] error/success messaging semantics match
-- [ ] field error summary accessibility matches
-- [ ] action button placement matches
+- [ ] field error summary uses `role="alert"` with `aria-live="polite"`
+- [ ] action button placement matches (below fields, inside FormActions)
+- [ ] grid column system supports same span values
 
 ### Tier 2: Visual Parity
 
 - [ ] grid layout and responsive breakpoints comparable
 - [ ] spacing and typography use equivalent token roles
 - [ ] multi-column mixing (2-col + 3-col rows) supported
+- [ ] field error summary background/border treatment matches
 
 ### Tier 3: Implementation Freedom
 
 - [ ] grid vs flex realization stays internal
 - [ ] container query vs media query approach stays internal
 
-## 12. Known Deltas
+## 12. Specimen Definitions
 
-| Delta | Why Allowed | Approval Status | Follow-Up |
-|-------|-------------|-----------------|-----------|
-| grid vs flex layout | GPUI lacks CSS grid | allowed | maintain equivalent visual result |
-| responsive thresholds | container size detection differs per platform | allowed | ensure equivalent column reduction |
+### Two-Column Layout (span 3 = half)
 
-## 13. Specimen Definitions
-
-All preview apps must render the following specimens identically.
-
-### Two-column layout (span 3 = half)
-
-A form using span 3 for half-width fields:
-
-| Label | Props/Config | Expected Visual |
-|-------|-------------|-----------------|
+| Label | Props / Config | Expected Visual |
+|-------|---------------|-----------------|
 | Two-column layout | `description="Fill in the details..."`, default 6-col grid, fields: first/last name (span 3 each), email (span 6), role/region selects (span 3 each), notes textarea (span 6), actions: Cancel + Create user | two fields per row with full-width spanning fields |
 
-### Mixed 2-col and 3-col rows
+### Mixed 2-Col And 3-Col Rows
 
-A form mixing half-width and third-width fields:
-
-| Label | Props/Config | Expected Visual |
-|-------|-------------|-----------------|
+| Label | Props / Config | Expected Visual |
+|-------|---------------|-----------------|
 | Mixed 2-col and 3-col rows | `description="Mixing..."`, fields: first/middle/last name (span 2 each = 3-col row), email/phone (span 3 each = 2-col row), role/region/country (span 2 each = 3-col row), bio (span 6 = full), actions: Cancel + Save | mixed column widths with 3-col and 2-col rows in same form |
 
-### Single column (columns=1)
+### Single Column (columns=1)
 
-A single-column form:
-
-| Label | Props/Config | Expected Visual |
-|-------|-------------|-----------------|
+| Label | Props / Config | Expected Visual |
+|-------|---------------|-----------------|
 | Single column | `columns={1}`, fields: display name, bio textarea, checkbox, actions: Save profile | single-column stacked form |
 
-### With error and field errors
+### With Error And Field Errors
 
-A form showing error state:
+| Label | Props / Config | Expected Visual |
+|-------|---------------|-----------------|
+| With error and field errors | `error="Unable to save..."`, `fieldErrors={Email: "...", Role: "..."}`, fields with invalid validation state (span 3 each) | danger callout, field error list with role="alert", and invalid fields |
 
-| Label | Props/Config | Expected Visual |
-|-------|-------------|-----------------|
-| With error and field errors | `error="Unable to save..."`, `fieldErrors={Email: "...", Role: "..."}`, fields with invalid validation state (span 3 each) | danger callout, field error list, and invalid fields |
+### With Success Message
 
-### With success message
-
-A form showing success state:
-
-| Label | Props/Config | Expected Visual |
-|-------|-------------|-----------------|
+| Label | Props / Config | Expected Visual |
+|-------|---------------|-----------------|
 | With success message | `success="Settings saved successfully."`, `columns={1}`, field: site name, actions: Save | success callout above form |
-
-## 14. Approval And Adoption Notes
-
-- contract status: `seed contract`
-- approvers: pending
-- downstream adopters: FormDialog, page-level settings forms, onboarding flows

@@ -1,7 +1,7 @@
 # PickerShell
 
-Status: seed contract
-Updated: 2026-03-25
+Status: detailed contract
+Updated: 2026-03-30
 
 ## 1. Purpose
 
@@ -9,267 +9,257 @@ Updated: 2026-03-25
 - Layer: `composites`
 - Summary: a reusable workflow shell for selecting one or more items from a
   searchable candidate set; provides layout framing, not item semantics
-- In scope: title/description header, search toolbar slot, selected-summary
-  region, result list body, state messaging, status announcements,
-  confirm/cancel footer, inline/popover/modal posture
+- In scope: title/description header, meta area with result and selection counts,
+  search toolbar slot, selected-summary slot, result list body, state messaging
+  with loading spinner, status live-region announcements, confirm/cancel footer
+  slot, inline/popover/modal posture
 - Out of scope: domain-specific relation logic, fetch policy, item renderer
   semantics, destructive confirmation policy
 
-## 2. Core Rule
+PickerShell owns workflow framing, not item semantics. Hosts still own which
+candidates exist, query execution, selection state, and confirm/cancel
+consequences.
 
-`PickerShell` owns workflow framing, not item semantics.
-
-Hosts still own:
-
-- which candidates exist
-- query execution
-- selection state
-- confirm/cancel consequences
-
-## 3. Anatomy
+## 2. Anatomy
 
 ```text
-[Root]
+[Root <section>]
   ├── [Header]
-  │     ├── [Title]
-  │     ├── [Description]  (optional)
+  │     ├── [TitleBlock]
+  │     │     ├── [Title <h3>]
+  │     │     └── [Description <p>]  (optional)
   │     └── [Meta]
   │           ├── [ResultCount]    (optional)
   │           └── [SelectionCount]
-  ├── [Status]             (optional, live region)
-  ├── [Toolbar]            (slot, optional)
-  ├── [Selection]          (slot, optional)
-  ├── [Body]               (default slot, shown when state="ready")
-  ├── [State]              (slot or fallback, shown when state!="ready")
-  │     ├── [StateTitle]
-  │     └── [StateMessage]  (optional)
-  └── [Footer]             (slot, optional)
+  ├── [Status <p>]             (optional, live region)
+  ├── [Toolbar]                (slot, optional)
+  ├── [Selection]              (slot, optional)
+  ├── [Body]                   (default slot, shown when state="ready")
+  ├── [State]                  (shown when state!="ready")
+  │     ├── [Spinner]          (when state="loading", fallback only)
+  │     ├── [StateTitle <strong>]
+  │     └── [StateMessage <p>] (optional)
+  └── [Footer]                 (slot, optional)
 ```
 
-| Part | Required | Description | Token Targets |
-|------|----------|-------------|---------------|
-| Root | yes | picker container `<section>` | border-subtle, radius-surface, background-panel |
-| Header | yes | title/description and meta row | layout only |
-| Title | yes | `<h3>` heading | font-size 1.25rem |
-| Description | no | `<p>` subheading | text-secondary, font-size 0.8125rem |
-| Meta | yes | result count and selection count display | text-secondary, font-size 0.8125rem |
-| Status | no | `role="status"` live region for screen readers | text-secondary |
-| Toolbar | no | slot for search field and filters | layout only |
-| Selection | no | slot for selection summary | layout only |
-| Body | yes | default slot for candidate list (visible when state="ready") | layout only |
-| State | yes | fallback state display (visible when state!="ready") | surface background, border-subtle |
-| Footer | no | slot for confirm/cancel actions | layout only |
+### Parts
 
-## 4. Props And Inputs
+| Part | Element | Notes |
+|------|---------|-------|
+| Root | `<section>` | Class `picker-shell`, `data-variant` and `data-state` attributes |
+| Header | `<div>` | Flex row wrapping title block and meta |
+| TitleBlock | `<div>` | Contains title and optional description |
+| Title | `<h3>` | Picker heading text |
+| Description | `<p>` | Optional subheading below title |
+| Meta | `<div>` | Result count and selection count display |
+| Status | `<p>` | `role="status"`, `aria-live="polite"`, `aria-atomic="true"` |
+| Toolbar | `<div>` | Slot wrapper for search field and filters |
+| Selection | `<div>` | Slot wrapper for selection summary |
+| Body | `<div>` | Default slot, visible only when `state="ready"` |
+| State | `<div>` | Fallback state display, visible when `state!="ready"` |
+| Spinner | `<span>` | Wraps `Spinner` primitive (`variant="grid"`, `tone="accent"`), shown in loading state fallback |
+| Footer | `<div>` | Slot wrapper for confirm/cancel actions |
+
+## 3. Props And Inputs
 
 ### Public Props
 
 | Prop | Type | Default | Required | Notes |
 |------|------|---------|----------|-------|
-| `title` | `string` | -- | yes | picker heading text |
-| `description` | `string \| null` | `null` | no | subheading below title |
-| `variant` | `"inline" \| "popover" \| "modal"` | `"inline"` | no | workflow posture |
-| `state` | `"ready" \| "empty" \| "loading" \| "error" \| "no-results"` | `"ready"` | no | candidate-set posture; controls body vs state display |
-| `ariaLabel` | `string \| null` | `null` | no | accessible name for the `<section>` |
-| `resultCount` | `number \| null` | `null` | no | displayed in meta area as "{n} results" |
-| `selectionCount` | `number` | `0` | no | displayed in meta area as "{n} selected" |
-| `stateTitle` | `string \| null` | `null` | no | heading shown in state area when state!="ready" |
-| `stateMessage` | `string \| null` | `null` | no | description shown in state area |
-| `statusText` | `string \| null` | `null` | no | live-region status text for screen readers |
-| `statusId` | `string \| null` | `null` | no | DOM id for the status element (for aria-describedby) |
+| `title` | `string` | -- | yes | Picker heading text |
+| `description` | `string \| null` | `null` | no | Subheading below title |
+| `variant` | `"inline" \| "popover" \| "modal"` | `"inline"` | no | Workflow posture |
+| `state` | `"ready" \| "empty" \| "loading" \| "error" \| "no-results"` | `"ready"` | no | Candidate-set posture; controls body vs state display |
+| `ariaLabel` | `string \| null` | `null` | no | Accessible name for the `<section>` |
+| `resultCount` | `number \| null` | `null` | no | Displayed in meta area as "{n} results" |
+| `selectionCount` | `number` | `0` | no | Displayed in meta area as "{n} selected" |
+| `stateTitle` | `string \| null` | `null` | no | Heading shown in state area when `state!="ready"`; defaults to "Picker state" when not provided |
+| `stateMessage` | `string \| null` | `null` | no | Description shown in state area |
+| `statusText` | `string \| null` | `null` | no | Live-region status text for screen readers |
+| `statusId` | `string \| null` | `null` | no | DOM id for the status element (for `aria-describedby`) |
 
 ### Slots
 
 | Slot | Purpose | When Rendered |
 |------|---------|---------------|
-| `toolbar` | search field, filters, breadcrumbs | always (if provided) |
-| `selection` | selection summary chips | always (if provided) |
-| `state` | custom state content override | when `state!="ready"` and slot provided |
-| `footer` | confirm/cancel actions | always (if provided) |
-| default | candidate list / result content | when `state="ready"` |
+| `toolbar` | Search field, filters, breadcrumbs | Always (if provided) |
+| `selection` | Selection summary chips | Always (if provided) |
+| `state` | Custom state content override | When `state!="ready"` and slot provided |
+| `footer` | Confirm/cancel actions | Always (if provided) |
+| default | Candidate list / result content | When `state="ready"` |
 
 ### Controlled And Uncontrolled
 
-- display/layout composite; all data is externally driven
-- state prop controls which region is visible (body vs state area)
+Display/layout composite. All data is externally driven. The `state` prop
+controls which region is visible (body vs state area).
 
-## 5. Variants
-
-| Variant | Visual Behavior |
-|---------|-----------------|
-| `inline` | picker stays embedded in surrounding content |
-| `popover` | compact transient chooser, `max-width: 30rem`, overlay elevation shadow |
-| `modal` | focused selection task, dialog elevation shadow, elevated background |
-
-Variant changes posture and layout emphasis. It does not change selection meaning.
-
-## 6. States
-
-### Visual States
+## 4. States
 
 | State | Trigger | Expected Result |
 |-------|---------|-----------------|
-| ready | `state="ready"` | body slot visible with candidate content |
-| empty | `state="empty"` | state area shown with empty message |
-| loading | `state="loading"` | state area shown with shared grid spinner and loading message |
-| error | `state="error"` | state area shown with error message |
-| no-results | `state="no-results"` | state area shown with no-results message |
+| ready | `state="ready"` | Body slot visible with candidate content |
+| empty | `state="empty"` | State area shown with fallback title/message |
+| loading | `state="loading"` | State area shown with Spinner (`variant="grid"`, `tone="accent"`) and loading message |
+| error | `state="error"` | State area shown with error message |
+| no-results | `state="no-results"` | State area shown with no-results message |
 
-### Component States
+No internal component state. PickerShell is a layout container.
 
-No internal state. PickerShell is a layout container.
-
-## 7. Events
+## 5. Events
 
 | Event | When It Fires | Payload | Notes |
 |-------|---------------|---------|-------|
-| none | n/a | n/a | PickerShell is a layout shell; events come from slotted children |
+| none | -- | -- | PickerShell is a layout shell; events come from slotted children |
 
-## 8. Accessibility
+## 6. Accessibility
 
-### Semantics
-
-- Role: `<section>` landmark
-- Optional attributes: `aria-label` for composite accessible name
+- Root is a `<section>` landmark with optional `aria-label`
 - Status element uses `role="status"`, `aria-live="polite"`, `aria-atomic="true"`
-- Status element has configurable `id` for `aria-describedby` references
+- Status element has configurable `id` via `statusId` prop for `aria-describedby` references
+- Keyboard interaction is delegated entirely to slotted children
+- Focus entry goes to slotted toolbar/content, not the shell itself
+- Spinner in loading state is `aria-hidden="true"`
 
-### Keyboard
-
-| Key | Behavior |
-|-----|----------|
-| none | PickerShell itself is non-interactive; keyboard handled by slotted children |
-
-### Focus And Announcement
-
-- focus entry: not directly focusable; focus goes to slotted toolbar/content
-- live-region behavior: `statusText` announced via polite live region
-- GPUI-native accessibility mapping notes: GPUI must preserve picker title,
-  search grouping, candidate list semantics, selection summary, and
-  confirm/cancel actions without relying on HTML dialog/popover defaults
-
-## 9. Layout
+## 7. Layout
 
 ### Sizing
 
-- gap between sections: `--poodle-space-stack-md`
-- padding: `--poodle-space-panel-y` / `--poodle-space-panel-x`
-- header uses flex wrap with `justify-content: space-between`
-- state area has additional padding (1.5x panel-y) and inner border
+- Root uses `display: grid` with `gap: var(--poodle-space-stack-md)`
+- Padding: `var(--poodle-space-panel-y) var(--poodle-space-panel-x)`
+- Header uses `flex-wrap` with `justify-content: space-between`
+- State area has 1.5x panel-y padding and inner border
 
 ### Composition
 
-- parent expectations: inline containers, popovers, modal dialogs
-- child expectations: search fields, selection summaries, candidate lists,
-  form action bars
-- resizing rules: shell stretches to fill container; popover variant caps width
+- Parent expectations: inline containers, popovers, modal dialogs
+- Child expectations: search fields, selection summaries, candidate lists, form action bars
+- Resizing rules: shell stretches to fill container; popover variant caps width at `30rem`
 
-## 10. Token Usage And Precise CSS
+## 8. Token Usage
 
 ### Data Attributes
 
 | Attribute | Element | Values |
 |-----------|---------|--------|
-| `data-variant` | root `<section>` | `"inline"`, `"popover"`, `"modal"` |
-| `data-state` | root `<section>` | `"ready"`, `"empty"`, `"loading"`, `"error"`, `"no-results"` |
+| `data-variant` | Root `<section>` | `"inline"`, `"popover"`, `"modal"` |
+| `data-state` | Root `<section>` | `"ready"`, `"empty"`, `"loading"`, `"error"`, `"no-results"` |
 
-### Root
-
-| Property | Value |
-|----------|-------|
-| display | `grid` |
-| gap | `var(--poodle-space-stack-md)` |
-| padding | `var(--poodle-space-panel-y) var(--poodle-space-panel-x)` |
-| border | `0.0625rem solid var(--poodle-color-border-subtle)` |
-| border-radius | `var(--poodle-radius-surface)` |
-| background | `color-mix(in srgb, var(--poodle-color-background-panel) 94%, transparent)` |
-
-#### Variant: Popover (`[data-variant="popover"]`)
+### `.picker-shell` (Root)
 
 | Property | Value |
 |----------|-------|
-| max-width | `30rem` |
-| box-shadow | `var(--poodle-elevation-overlay)` |
+| `display` | `grid` |
+| `gap` | `var(--poodle-space-stack-md)` |
+| `padding` | `var(--poodle-space-panel-y) var(--poodle-space-panel-x)` |
+| `border` | `0.0625rem solid var(--poodle-color-border-subtle)` |
+| `border-radius` | `var(--poodle-radius-surface)` |
+| `background` | `color-mix(in srgb, var(--poodle-color-background-panel) 94%, transparent)` |
 
-#### Variant: Modal (`[data-variant="modal"]`)
-
-| Property | Value |
-|----------|-------|
-| box-shadow | `var(--poodle-elevation-dialog)` |
-| background | `color-mix(in srgb, var(--poodle-color-background-elevated) 96%, transparent)` |
-
-### Header
+### Variant: Popover (`[data-variant="popover"]`)
 
 | Property | Value |
 |----------|-------|
-| display | `flex` |
-| flex-wrap | `wrap` |
-| justify-content | `space-between` |
-| gap | `var(--poodle-space-inline-md)` |
+| `max-width` | `30rem` |
+| `box-shadow` | `var(--poodle-elevation-overlay)` |
 
-### Title (h3)
+### Variant: Modal (`[data-variant="modal"]`)
 
 | Property | Value |
 |----------|-------|
-| margin | `0` |
-| font-size | `1.25rem` |
-| line-height | `1.2` |
+| `box-shadow` | `var(--poodle-elevation-dialog)` |
+| `background` | `color-mix(in srgb, var(--poodle-color-background-elevated) 96%, transparent)` |
 
-### Description, Meta, State Text, Status
-
-| Property | Value |
-|----------|-------|
-| color | `var(--poodle-color-text-secondary)` |
-| font-size | `0.8125rem` |
-| line-height | `1.5` |
-
-### Status
+### `.picker-shell__header`
 
 | Property | Value |
 |----------|-------|
-| margin | `0` |
+| `display` | `flex` |
+| `flex-wrap` | `wrap` |
+| `justify-content` | `space-between` |
+| `gap` | `var(--poodle-space-inline-md)` |
 
-### Meta
-
-| Property | Value |
-|----------|-------|
-| display | `flex` |
-| flex-wrap | `wrap` |
-| gap | `var(--poodle-space-inline-sm)` |
-| align-items | `baseline` |
-
-### State Area
+### `.picker-shell__title`
 
 | Property | Value |
 |----------|-------|
-| display | `grid` |
-| gap | `var(--poodle-space-stack-sm)` |
+| `margin` | `0` |
+| `font-size` | `1.25rem` |
+| `line-height` | `1.2` |
+
+### `.picker-shell__description`
+
+| Property | Value |
+|----------|-------|
+| `margin` | `0` |
+
+### Description, Meta, State text, Status (shared)
+
+| Property | Value |
+|----------|-------|
+| `color` | `var(--poodle-color-text-secondary)` |
+| `font-size` | `0.8125rem` |
+| `line-height` | `1.5` |
+
+### `.picker-shell__status`
+
+| Property | Value |
+|----------|-------|
+| `margin` | `0` |
+
+### `.picker-shell__meta`
+
+| Property | Value |
+|----------|-------|
+| `display` | `flex` |
+| `flex-wrap` | `wrap` |
+| `gap` | `var(--poodle-space-inline-sm)` |
+| `align-items` | `baseline` |
+
+### `.picker-shell__state` (State Area)
+
+| Property | Value |
+|----------|-------|
+| `display` | `grid` |
+| `gap` | `var(--poodle-space-stack-sm)` |
 | `justify-items` | `start` |
-| padding | `calc(var(--poodle-space-panel-y) * 1.5) var(--poodle-space-panel-x)` |
-| border | `0.0625rem solid var(--poodle-color-border-subtle)` |
-| border-radius | `var(--poodle-radius-surface)` |
-| background | `color-mix(in srgb, var(--poodle-color-background-surface) 86%, transparent)` |
+| `padding` | `calc(var(--poodle-space-panel-y) * 1.5) var(--poodle-space-panel-x)` |
+| `border` | `0.0625rem solid var(--poodle-color-border-subtle)` |
+| `border-radius` | `var(--poodle-radius-surface)` |
+| `background` | `color-mix(in srgb, var(--poodle-color-background-surface) 86%, transparent)` |
 
-When `state="loading"` and no custom `state` slot is provided, the fallback
-state area prepends the shared [`Spinner`](../foundation/spinner.md) primitive
-with `variant="grid"`, `size="md"`, and `tone="accent"`.
+### `.picker-shell__spinner`
+
+| Property | Value |
+|----------|-------|
+| `display` | `inline-flex` |
+| `align-items` | `center` |
+| `justify-content` | `center` |
+
+### State area title and message
+
+| Property | Value |
+|----------|-------|
+| `margin` | `0` |
 
 ### Light Theme Overrides
 
 None.
 
-## 11. Svelte Notes
+## 9. Svelte Notes
 
-- root is `<section class="picker-shell">` with `data-variant` and `data-state` attributes
-- uses Svelte `$$slots` checks for conditional slot rendering
-- state fallback shows `stateTitle` and optional `stateMessage` when no `state` slot provided
+- Root is `<section class="picker-shell">` with `data-variant` and `data-state` attributes
+- Uses Svelte `$$slots` checks for conditional slot rendering (toolbar, selection, state, footer)
+- State fallback shows `stateTitle` (or "Picker state") and optional `stateMessage` when no `state` slot provided
+- Loading state prepends shared `Spinner` primitive (`variant="grid"`, `tone="accent"`) before state title
+- Imports `Spinner` from `@poodle/svelte-primitives`
 
-## 12. GPUI Notes
+## 10. GPUI Notes
 
-- expected crate/module surface: `poodle_gpui::composites::picker_shell`
-- implementation should preserve slot-equivalent regions as child containers
+- Expected crate/module surface: `poodle_gpui::composites::picker_shell`
+- Implementation should preserve slot-equivalent regions as child containers
+- Status live region needs platform-appropriate accessibility announcement
 
-## 13. Parity Checklist
+## 11. Parity Checklist
 
 ### Tier 1: Strict Parity
 
@@ -277,24 +267,20 @@ None.
 - [ ] variant visual differences match (inline, popover, modal)
 - [ ] state prop controls body vs state area visibility
 - [ ] status live region semantics match
+- [ ] loading state shows spinner before state title
 
 ### Tier 2: Visual Parity
 
 - [ ] surface treatment matches across variants
 - [ ] typography hierarchy matches
 - [ ] spacing and padding match token usage
+- [ ] state area inner border and padding match
 
 ### Tier 3: Implementation Freedom
 
 - [ ] rendering internals and slot mechanism stay internal
 
-## 14. Known Deltas
-
-| Delta | Why Allowed | Approval Status | Follow-Up |
-|-------|-------------|-----------------|-----------|
-| none yet | n/a | pending | review during first implementation |
-
-## 15. Specimen Definitions
+## 12. Specimen Definitions
 
 ### Inline Variant (Ready)
 
@@ -306,12 +292,4 @@ None.
 
 | Label | Props / Config | Expected Visual |
 |-------|---------------|-----------------|
-| No results | `title="Select an item"`, `state="no-results"`, `stateTitle="No matches"`, `stateMessage="Try a different search term."`, `variant="inline"` | Picker shell showing empty state with "No matches" title and guidance message |
-
-## 16. Approval And Adoption Notes
-
-- contract status: `seed contract`
-- approvers: pending
-- downstream adopters: RelationPicker, media pickers, entity selectors
-- future follow-up: build concrete workflows such as `RelationPicker` on top of
-  `PickerShell` instead of redefining picker framing per feature
+| No results | `title="Select an item"`, `state="no-results"`, `stateTitle="No matches"`, `stateMessage="Try a different search term."`, `variant="inline"` | Picker shell showing state area with "No matches" title and guidance message |

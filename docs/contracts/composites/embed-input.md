@@ -1,7 +1,7 @@
 # EmbedInput
 
-Status: seed contract
-Updated: 2026-03-25
+Status: detailed contract
+Updated: 2026-03-30
 
 ## 1. Purpose
 
@@ -9,11 +9,12 @@ Updated: 2026-03-25
 - Layer: `composites`
 - Summary: a text area input that accepts URLs or embed codes, automatically
   detects the embed provider (YouTube, Vimeo, generic URL, iframe), and
-  surfaces the parsed result with a status indicator
+  surfaces the parsed result with a status indicator showing provider name
+  and success/error feedback
 - In scope: URL and embed code input via TextArea, debounced parsing,
   provider detection (YouTube, Vimeo, generic URL, iframe embed code),
   provider restriction, error and success status display, parsed result
-  output
+  output via two-way binding
 - Out of scope: embed preview/rendering (see EmbedPreview), file upload,
   custom provider plugins, oEmbed API calls
 
@@ -25,18 +26,18 @@ Updated: 2026-03-25
   └── [Status .embed-input__status]  <div>
         ├── [Error .embed-input__error]  <span> (when error)
         └── [Success]  (when parsed)
-              ├── [ProviderPill]  Pill (tone="success", size="xs")
+              ├── [ProviderPill]  Pill (tone="success", sizeRole="chrome")
               └── [SuccessText .embed-input__success]  <span>
 ```
 
 | Part | Required | Description | Token Targets |
 |------|----------|-------------|---------------|
 | Root | yes | flex column container | gap |
-| TextArea | yes | TextArea primitive for input | delegates to TextArea contract |
+| TextArea | yes | TextArea primitive for URL/embed code input | delegates to TextArea contract |
 | Status | yes | flex row showing parse result or error | min-height, font-size, gap |
-| Error | conditional | error message text | text-danger color |
-| ProviderPill | conditional | Pill showing detected provider name | delegates to Pill contract |
-| SuccessText | conditional | "Embed detected" confirmation text | text-success color |
+| Error | conditional | error message text (when `error` is set) | text-danger color |
+| ProviderPill | conditional | Pill showing detected provider name (when `parsed` is set) | delegates to Pill contract (tone="success", sizeRole="chrome") |
+| SuccessText | conditional | "Embed detected" confirmation text (when `parsed` is set) | text-success color |
 
 ## 3. Props And Inputs
 
@@ -44,13 +45,14 @@ Updated: 2026-03-25
 
 | Prop | Type | Default | Required | Notes |
 |------|------|---------|----------|-------|
-| `value` | `string` | `""` | no | current input text; bind for two-way |
-| `parsed` | `ParsedEmbed \| null` | `null` | no | parsed embed result; bind for two-way output |
+| `id` | `string` | `"embed-input"` | no | id attribute for the TextArea |
+| `value` | `string` | `""` | no | current input text; supports two-way binding |
+| `parsed` | `ParsedEmbed \| null` | `null` | no | parsed embed result; supports two-way binding — updated after parsing |
 | `placeholder` | `string` | `"Paste a URL or embed code..."` | no | placeholder text for the TextArea |
 | `parseDebounce` | `number` | `300` | no | debounce delay in milliseconds before parsing |
 | `providers` | `string[]` | `[]` | no | allowed provider names; empty array means all providers allowed |
 | `disabled` | `boolean` | `false` | no | disables the TextArea input |
-| `error` | `string \| null` | `null` | no | external error message; bind for two-way |
+| `error` | `string \| null` | `null` | no | external error message; supports two-way binding |
 
 ### Types
 
@@ -75,8 +77,10 @@ Both runtimes are expected to resolve `parsed` using the same pattern set:
 | `https://youtube.com/watch?v={id}` | `provider="youtube"`, `id={id}`, `originalUrl=input` |
 | `https://youtube.com/embed/{id}` | `provider="youtube"`, `id={id}`, `originalUrl=input` |
 | `https://vimeo.com/{digits}` | `provider="vimeo"`, `id={digits}`, `originalUrl=input` |
-| valid `http://` or `https://` URL | `provider="generic"`, `id=input`, `originalUrl=input` |
-| `<iframe ... src="...">` embed code | `provider="generic"`, `id=src or raw input`, `originalUrl=src when present`, `originalEmbed=input`, `width` / `height` parsed when numeric |
+| valid `http://` or `https://` URL (no whitespace) | `provider="generic"`, `id=input`, `originalUrl=input` |
+| `<iframe ... src="...">` embed code | `provider="generic"`, `id=src or raw input`, `originalUrl=src when present`, `originalEmbed=input`, `width`/`height` parsed when numeric |
+| empty or whitespace only | `parsed=null` |
+| non-matching text | `parsed=null` |
 
 Provider restriction runs after detection. If `providers` is non-empty and the
 detected provider is not listed, `parsed` resolves to `null` and `error`
@@ -99,18 +103,17 @@ None.
 
 | State | Trigger | Expected Result |
 |-------|---------|-----------------|
-| empty | value is empty or whitespace | status area is empty |
-| parsing | value changed, debounce timer running | no dedicated loading surface or spinner; parsing remains silent until a parse result is available |
+| empty | value is empty or whitespace | status area is empty (no error or success shown) |
+| parsing | value changed, debounce timer running | no dedicated loading surface; parsing remains silent until a result is available |
 | success | valid embed detected | Pill showing provider name + "Embed detected" text |
-| error | provider not allowed or external error | red error message text |
+| error | provider not allowed or external error set | red error message text in status area |
+| disabled | `disabled=true` | TextArea is disabled; parsing still operates on current value |
 
 ### Component States
 
 - `parseTimer` (internal): setTimeout handle for debounced parsing
 - `parsed` (bindable): result of last successful parse
 - `error` (bindable): current error message
-- GPUI may derive `parsed` / `error` from the current `value` via the shared
-  contract helper instead of relying on renderer-local parsing logic
 
 ## 5. Events
 
@@ -124,16 +127,16 @@ None.
 ### Semantics
 
 - TextArea: delegates to TextArea primitive accessibility
-- Status messages: visible text only (no live region); error is visually
-  distinguished by color
-- ProviderPill: decorative indicator
+- Status messages: visible text only (no `aria-live` region); error is
+  visually distinguished by color
+- ProviderPill: decorative indicator; delegates to Pill contract
 
 ### Keyboard
 
 | Key | Behavior |
 |-----|----------|
 | `Tab` | focuses the TextArea (standard form navigation) |
-| (typing) | triggers debounced parsing |
+| (typing) | triggers debounced parsing after `parseDebounce` ms |
 
 ### Focus And Announcement
 
@@ -151,42 +154,77 @@ None.
 
 ### Composition
 
+- Composes: `TextArea` and `Pill` from `@poodle/svelte-primitives`
 - Parent expectations: form fields (often wrapped in Field), embed editing UIs
-- Child expectations: TextArea primitive, Pill primitive
+- Child expectations: none (self-contained inputs)
 - Resizing rules: fills parent width; TextArea height determined by rows prop
-- Loading guidance: `EmbedInput` does not use `Spinner`; provider parsing and
-  validation feedback stay in the compact status row rather than switching to a
-  loading-state shell
 
-## 8. Token Usage
+## 8. Token Usage — Exact Values
 
-| Part | Token | Purpose |
-|------|-------|---------|
-| TextArea | (delegates to TextArea) | all TextArea tokens |
-| ProviderPill | (delegates to Pill) | Pill tone="success", size="xs" tokens |
-| Error | `--poodle-color-text-danger` | error text color (fallback #ef4444) |
-| SuccessText | `--poodle-color-text-success` | success text color (fallback #22c55e) |
+### Root `.embed-input`
 
-## 9. Runtime Notes
+| Property | Value |
+|----------|-------|
+| display | `flex` |
+| flex-direction | `column` |
+| gap | `0.25rem` |
 
-### Svelte
+### Status `.embed-input__status`
+
+| Property | Value |
+|----------|-------|
+| display | `flex` |
+| align-items | `center` |
+| gap | `0.375rem` |
+| min-height | `1.25rem` |
+| font-size | `0.75rem` |
+
+### Error `.embed-input__error`
+
+| Property | Value |
+|----------|-------|
+| color | `var(--poodle-color-text-danger, #ef4444)` |
+
+### SuccessText `.embed-input__success`
+
+| Property | Value |
+|----------|-------|
+| color | `var(--poodle-color-text-success, #22c55e)` |
+
+### Composed Primitives
+
+| Part | Delegates To |
+|------|-------------|
+| TextArea | TextArea contract (foundation), `rows=3` |
+| ProviderPill | Pill contract (foundation), `tone="success"`, `sizeRole="chrome"` |
+
+### Light Theme Overrides
+
+None.
+
+## 9. Svelte Notes
 
 - Uses `createEventDispatcher` for `parse` and `change` events
 - Composes `TextArea` and `Pill` from `@poodle/svelte-primitives`
 - Debounce uses `setTimeout`/`clearTimeout` with configurable delay
-- Parsing is routed through the exported `resolveEmbedParseState` helper rather
-  than being embedded inline inside the component
+- Parsing is routed through the exported `resolveEmbedParseState` helper in
+  `embed-input.ts` rather than being inline; the helper calls
+  `detectParsedEmbed` for pattern matching, then applies provider restriction
+- TextArea receives the `id` prop directly
+- TextArea `on:valueChange` event drives input handling — value is extracted
+  from `event.detail.value`
+- Pill uses `sizeRole="chrome"` (not `size="xs"`)
 
-### GPUI
+## 10. GPUI Notes
 
 - Expected crate/module surface: `poodle_gpui::composites::embed_input`
 - TextArea and Pill are composed from GPUI primitives
 - GPUI consumes the same public `parsed` / `error` contract as Svelte
-- The Rust composites contract also exposes a parser helper for deriving
+- The Rust composites contract should expose a parser helper for deriving
   `parsed` and provider-restriction `error` from `value` and `providers`
-  when hosts want contract-backed detection without re-implementing the rules
+  without re-implementing the detection rules
 
-## 10. Parity Checklist
+## 11. Parity Checklist
 
 ### Tier 1: Strict Parity
 
@@ -200,18 +238,12 @@ None.
 
 - [ ] status area layout matches (gap, min-height, font-size)
 - [ ] error and success colors match
-- [ ] Pill appearance matches
+- [ ] Pill appearance matches (tone="success", sizeRole="chrome")
 
 ### Tier 3: Implementation Freedom
 
 - [ ] debounce mechanism may differ
 - [ ] rendering internals stay internal
-
-## 11. Known Deltas
-
-| Delta | Why Allowed | Approval Status | Follow-Up |
-|-------|-------------|-----------------|-----------|
-| Svelte still owns its debounce/event loop while GPUI is render-only and may pre-resolve parse state before rendering | event ownership differs by runtime, but the visible `parsed` / `error` contract and supported detection rules are aligned | accepted for now | extract a shared TS utility or generator path if runtime-level parser implementation drift becomes costly |
 
 ## 12. Specimen Definitions
 
@@ -238,12 +270,3 @@ None.
 | Label | Props / Config | Expected Visual |
 |-------|---------------|-----------------|
 | Detection matrix | helper-driven examples covering YouTube short link, Vimeo link, iframe embed, and restricted generic URL | specimen shows the resolved `parsed` payload or provider restriction error for each canonical supported pattern |
-
-## 13. Approval And Adoption Notes
-
-- Contract status: `seed contract`
-- Approvers: pending
-- Downstream adopters: content editors, media embed forms, CMS embed fields
-- Future follow-up: consider oEmbed API integration for richer metadata;
-  consider adding a `validate` callback prop for custom validation;
-  consider extracting provider detection into a shared utility

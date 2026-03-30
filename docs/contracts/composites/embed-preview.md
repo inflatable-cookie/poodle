@@ -1,7 +1,7 @@
 # EmbedPreview
 
-Status: seed contract
-Updated: 2026-03-25
+Status: detailed contract
+Updated: 2026-03-30
 
 ## 1. Purpose
 
@@ -10,11 +10,11 @@ Updated: 2026-03-25
 - Summary: renders a preview of a parsed embed — displays an iframe for
   known providers (YouTube, Vimeo), renders raw embed code for iframe embeds,
   shows a fallback link for generic URLs, and handles loading, error, and
-  empty states
+  empty states with appropriate visual treatments
 - In scope: iframe rendering with configurable aspect ratio, provider-specific
   embed URLs (YouTube privacy-enhanced, Vimeo player), loading skeleton,
-  error display, empty state placeholder, raw embed code rendering, fallback
-  link display, sandbox security attributes
+  error display with icon, empty state placeholder with icon, raw embed code
+  rendering, fallback link display, sandbox security attributes
 - Out of scope: embed parsing (see EmbedInput), player controls, playback
   state management, embed editing
 
@@ -33,22 +33,28 @@ Updated: 2026-03-25
   │     └── [EmptyText]  <span>
   ├── [Container .embed-preview__container]  (when parsed && embedUrl)
   │     └── [Iframe .embed-preview__iframe]  <iframe>
-  ├── [Container .embed-preview__container]  (when parsed && originalEmbed)
+  ├── [Container .embed-preview__container]  (when parsed && originalEmbed, no embedUrl)
   │     └── [RawEmbed]  {@html parsed.originalEmbed}
   └── [Fallback .embed-preview__fallback]  (when parsed && no embedUrl && no originalEmbed)
-        └── [FallbackLink]  <a> to originalUrl
+        └── [FallbackLink]  <a>
 ```
 
 | Part | Required | Description | Token Targets |
 |------|----------|-------------|---------------|
 | Root | yes | container with border-radius and overflow hidden | radius-surface |
-| Loading | conditional | centered column with skeleton and loading text | background-panel, radius-surface, min-height, padding |
+| Loading | conditional | centered column with skeleton and loading text | background-panel, radius-surface |
 | Skeleton | conditional | Skeleton primitive (block shape) | delegates to Skeleton contract |
-| Error | conditional | centered column with error icon and message | background-panel, text-danger (icon), text-secondary (message) |
-| Empty | conditional | centered column with play icon and empty message | background-panel, text-tertiary (icon), text-secondary (message) |
-| Container | conditional | aspect-ratio wrapper for iframe or raw embed | background-panel, aspect-ratio |
+| LoadingText | conditional | "Loading preview..." text | text-secondary color |
+| Error | conditional | centered column with alert icon and error message | background-panel, radius-surface |
+| ErrorIcon | conditional | alert circle SVG (decorative) | text-danger color |
+| ErrorText | conditional | error message text | text-secondary color |
+| Empty | conditional | centered column with play icon and empty message | background-panel, radius-surface |
+| EmptyIcon | conditional | play rectangle SVG (decorative) | text-tertiary color |
+| EmptyText | conditional | empty message text | text-secondary color |
+| Container | conditional | aspect-ratio wrapper for iframe or raw embed | background-panel |
 | Iframe | conditional | sandboxed iframe loading the embed URL | full-size absolute positioning |
-| Fallback | conditional | link to the original URL | background-panel, accent color for link |
+| RawEmbed | conditional | raw HTML from `parsed.originalEmbed` | contained within Container |
+| Fallback | conditional | link to the original URL | background-panel, radius-surface, accent color |
 
 ## 3. Props And Inputs
 
@@ -81,7 +87,7 @@ None.
 
 ### Controlled And Uncontrolled
 
-- Fully controlled display component; all state is driven by props.
+Fully controlled display component; all state is driven by props.
 
 ## 4. States
 
@@ -90,23 +96,23 @@ None.
 | State | Trigger | Expected Result |
 |-------|---------|-----------------|
 | loading | `loading` is true | centered skeleton with "Loading preview..." text |
-| error | `error` is set (takes priority over parsed) | alert icon with error message |
-| empty | `parsed` is null, not loading, no error | play icon with empty message text |
-| iframe preview | `parsed` is set and embedUrl is derived | iframe in aspect-ratio container |
-| raw embed | `parsed` is set with `originalEmbed` but no embedUrl | raw HTML rendered in container |
-| fallback | `parsed` is set but no embedUrl and no originalEmbed | link to original URL |
-
-### Component States
-
-- `embedUrl` (derived): provider-specific embed URL computed from `parsed`
-- `isAudio` (derived): true when `parsed.provider === "audioboom"`
-- `effectiveAspectRatio` (derived): `"auto"` for audio, otherwise the
-  `aspectRatio` prop
+| error | `error` is set (takes priority over parsed) | alert circle icon with error message |
+| empty | `parsed` is null, not loading, no error | play rectangle icon with empty message text |
+| iframe preview | `parsed` is set and `embedUrl` is derived | iframe in aspect-ratio container |
+| raw embed | `parsed` is set with `originalEmbed` but no `embedUrl` | raw HTML rendered in aspect-ratio container |
+| fallback | `parsed` is set but no `embedUrl` and no `originalEmbed` | link to original URL |
 
 ### Render Priority
 
 States are evaluated in this order: loading > error > empty > iframe >
 raw embed > fallback.
+
+### Component States (Derived)
+
+- `embedUrl` (derived): provider-specific embed URL computed from `parsed`
+- `isAudio` (derived): true when `parsed.provider === "audioboom"`
+- `effectiveAspectRatio` (derived): `"auto"` for audio providers, otherwise
+  the `aspectRatio` prop
 
 ## 5. Events
 
@@ -119,6 +125,8 @@ None. EmbedPreview is a pure display component.
 - Iframe: `title="{provider} embed"` for screen reader identification
 - Iframe: `loading="lazy"` for performance
 - Iframe: `sandbox="allow-scripts allow-same-origin allow-popups"` for security
+- Iframe: `allowfullscreen` attribute
+- Iframe: `frameborder="0"` attribute
 - Error and empty icons: decorative SVGs (no aria attributes needed as
   accompanying text provides meaning)
 - Fallback link: `target="_blank"` with `rel="noopener noreferrer"`
@@ -139,67 +147,166 @@ None. EmbedPreview is a pure display component.
 ### Sizing
 
 - Root: `border-radius` from token, `overflow: hidden`
-- Container: `position: relative`, full width, aspect-ratio set via inline style
+- Container: `position: relative`, full width, aspect-ratio set via inline
+  style
 - Iframe: absolute positioned, 100% width and height, no border
-- When aspect-ratio is `"auto"`: iframe is static with `height: 10rem`
-- Loading/Error/Empty: centered flex column, min-height `8rem`, padding `1.5rem`,
-  gap `0.5rem`
+- When aspect-ratio is `"auto"` (no inline style applied): iframe is static
+  with `height: 10rem`
+- Loading/Error/Empty: centered flex column, min-height `8rem`, padding
+  `1.5rem`, gap `0.5rem`
 - Error/Empty icons: `2rem` square
 - Text: `0.8125rem` font-size
 - Fallback: padding `0.75rem 1rem`
 
 ### Composition
 
-- Parent expectations: media embed forms, content editors, paired with EmbedInput
-- Child expectations: Skeleton primitive (loading state)
-- Resizing rules: fills parent width; height determined by aspect ratio or content
+- Composes: `Skeleton` from `@poodle/svelte-primitives`
+- Parent expectations: media embed forms, content editors, paired with
+  EmbedInput
+- Child expectations: none (self-contained display)
+- Resizing rules: fills parent width; height determined by aspect ratio or
+  content
 
-## 8. Token Usage
+## 8. Token Usage — Exact Values
 
-| Part | Token | Purpose |
-|------|-------|---------|
-| Root | `--poodle-radius-surface` | container border-radius (fallback 0.5rem) |
-| Container | `--poodle-color-background-panel` | container background (fallback #1a1a1a) |
-| Loading/Error/Empty | `--poodle-color-background-panel` | state container background |
-| Loading/Error/Empty | `--poodle-radius-surface` | state container border-radius |
-| LoadingText | `--poodle-color-text-secondary` | loading text color (fallback #999) |
-| ErrorIcon | `--poodle-color-text-danger` | error icon color (fallback #ef4444) |
-| ErrorText | `--poodle-color-text-secondary` | error message color (fallback #999) |
-| EmptyIcon | `--poodle-color-text-tertiary` | empty icon color (fallback #666) |
-| EmptyText | `--poodle-color-text-secondary` | empty message color (fallback #999) |
-| Fallback | `--poodle-color-background-panel` | fallback container background |
-| FallbackLink | `--poodle-color-accent-default` | link color (fallback #6366f1) |
+### Root `.embed-preview`
 
-## 9. Runtime Notes
+| Property | Value |
+|----------|-------|
+| border-radius | `var(--poodle-radius-surface, 0.5rem)` |
+| overflow | `hidden` |
 
-### Shared Rules
+### Container `.embed-preview__container`
 
-- `embedUrl` is derived from `parsed` using these rules:
-  - YouTube: `https://www.youtube-nocookie.com/embed/{id}`
-  - Vimeo: `https://player.vimeo.com/video/{id}`
-  - default/generic: `parsed.originalUrl`
-- `effectiveAspectRatio` becomes `"auto"` only for provider-specific cases that
-  need intrinsic-height rendering; otherwise it uses the explicit `aspectRatio`
-  prop
+| Property | Value |
+|----------|-------|
+| position | `relative` |
+| width | `100%` |
+| background | `var(--poodle-color-background-panel, #1a1a1a)` |
 
-### Svelte
+Aspect ratio is applied via inline `style` attribute when
+`effectiveAspectRatio !== "auto"`.
+
+### Iframe `.embed-preview__iframe`
+
+| Property | Value |
+|----------|-------|
+| position | `absolute` |
+| top | `0` |
+| left | `0` |
+| width | `100%` |
+| height | `100%` |
+| border | `0` |
+
+### Iframe Without Aspect Ratio (`.embed-preview__container:not([style*="aspect-ratio"]) .embed-preview__iframe`)
+
+| Property | Value |
+|----------|-------|
+| position | `static` |
+| height | `10rem` |
+
+### Loading/Error/Empty `.embed-preview__loading`, `.embed-preview__error`, `.embed-preview__empty`
+
+| Property | Value |
+|----------|-------|
+| display | `flex` |
+| flex-direction | `column` |
+| align-items | `center` |
+| justify-content | `center` |
+| gap | `0.5rem` |
+| min-height | `8rem` |
+| padding | `1.5rem` |
+| background | `var(--poodle-color-background-panel, #1a1a1a)` |
+| border-radius | `var(--poodle-radius-surface, 0.5rem)` |
+
+### Error/Empty Icons `.embed-preview__error svg`, `.embed-preview__empty svg`
+
+| Property | Value |
+|----------|-------|
+| width | `2rem` |
+| height | `2rem` |
+| color | `var(--poodle-color-text-tertiary, #666)` |
+
+### Error Icon Override `.embed-preview__error svg`
+
+| Property | Value |
+|----------|-------|
+| color | `var(--poodle-color-text-danger, #ef4444)` |
+
+### Loading Text `.embed-preview__loading-text`
+
+| Property | Value |
+|----------|-------|
+| font-size | `0.8125rem` |
+| color | `var(--poodle-color-text-secondary, #999)` |
+
+### Error/Empty Text `.embed-preview__error span`, `.embed-preview__empty span`
+
+| Property | Value |
+|----------|-------|
+| font-size | `0.8125rem` |
+| color | `var(--poodle-color-text-secondary, #999)` |
+
+### Fallback `.embed-preview__fallback`
+
+| Property | Value |
+|----------|-------|
+| padding | `0.75rem 1rem` |
+| background | `var(--poodle-color-background-panel, #1a1a1a)` |
+| border-radius | `var(--poodle-radius-surface, 0.5rem)` |
+
+### Fallback Link `.embed-preview__fallback a`
+
+| Property | Value |
+|----------|-------|
+| color | `var(--poodle-color-accent-default, #6366f1)` |
+| font-size | `0.8125rem` |
+| word-break | `break-all` |
+
+### Composed Primitives
+
+| Part | Delegates To |
+|------|-------------|
+| Skeleton | Skeleton contract (foundation), `shape="block"` |
+
+### Embed URL Derivation
+
+| Provider | Generated URL |
+|----------|--------------|
+| `youtube` | `https://www.youtube-nocookie.com/embed/{id}` |
+| `vimeo` | `https://player.vimeo.com/video/{id}` |
+| default/generic | `parsed.originalUrl` (may be null) |
+
+### Light Theme Overrides
+
+None.
+
+## 9. Svelte Notes
 
 - Uses `Skeleton` from `@poodle/svelte-primitives` for the loading state
 - Raw embed code rendered via `{@html parsed.originalEmbed}` — consumers must
   ensure embed code is trusted
-- Aspect ratio applied via inline `style` attribute
+- Aspect ratio applied via inline `style` attribute on the container
+- `embedUrl` is a reactive derived value from `parsed` via `getEmbedUrl()`
+- `isAudio` is derived from `parsed?.provider === "audioboom"`
+- `effectiveAspectRatio` is derived: `"auto"` for audio, otherwise
+  `aspectRatio` prop
+- When `effectiveAspectRatio` is `"auto"`, no inline style is set on
+  container, and the CSS selector `.embed-preview__container:not([style*="aspect-ratio"])`
+  makes the iframe static with `height: 10rem`
+- SVG icons are inline (alert circle for error, play rectangle for empty)
 
-### GPUI
+## 10. GPUI Notes
 
 - Expected crate/module surface: `poodle_gpui::composites::embed_preview`
 - Consumes the same `parsed` / `aspectRatio` / `loading` / `error` /
   `emptyMessage` contract as Svelte
 - Iframe rendering remains platform-specific; GPUI currently renders a
-  contract-aligned placeholder panel for derived `embedUrl` states rather than
-  embedding a live web view
+  contract-aligned placeholder panel for derived `embedUrl` states rather
+  than embedding a live web view
 - Raw embed and fallback states still follow the same priority order as Svelte
 
-## 10. Parity Checklist
+## 11. Parity Checklist
 
 ### Tier 1: Strict Parity
 
@@ -213,17 +320,12 @@ None. EmbedPreview is a pure display component.
 - [ ] aspect-ratio behavior matches
 - [ ] loading, error, and empty state layouts match
 - [ ] icon and text styling matches
+- [ ] fallback link styling matches
 
 ### Tier 3: Implementation Freedom
 
 - [ ] iframe rendering may differ per platform
 - [ ] rendering internals stay internal
-
-## 11. Known Deltas
-
-| Delta | Why Allowed | Approval Status | Follow-Up |
-|-------|-------------|-----------------|-----------|
-| GPUI live iframe/web view support | GPUI uses a placeholder panel for `embedUrl` states because it does not yet host a live embedded web surface | accepted for now | investigate WebView integration or an equivalent native embed surface without changing the public contract |
 
 ## 12. Specimen Definitions
 
@@ -249,25 +351,16 @@ None. EmbedPreview is a pure display component.
 
 | Label | Props / Config | Expected Visual |
 |-------|---------------|-----------------|
-| Error state | `error="Failed to load embed. The URL may be invalid or the provider is unavailable."` | alert icon with error message |
+| Error state | `error="Failed to load embed. The URL may be invalid or the provider is unavailable."` | alert circle icon with error message |
 
 ### Empty State
 
 | Label | Props / Config | Expected Visual |
 |-------|---------------|-----------------|
-| Empty state | `emptyMessage="Paste a URL above to see a preview"` | play icon with custom empty message |
+| Empty state | `emptyMessage="Paste a URL above to see a preview"` | play rectangle icon with custom empty message |
 
 ### Raw Embed
 
 | Label | Props / Config | Expected Visual |
 |-------|---------------|-----------------|
-| Raw embed | `parsed.originalEmbed` set, no provider-specific embed URL | raw embed container in Svelte, raw-embed placeholder/content block in GPUI |
-
-## 13. Approval And Adoption Notes
-
-- Contract status: `seed contract`
-- Approvers: pending
-- Downstream adopters: content editors, media management UIs, paired with EmbedInput
-- Future follow-up: consider adding `onLoad` and `onError` events for iframe
-  loading feedback; consider thumbnail preview mode before activating iframe;
-  consider explicit allow-list for iframe sandbox attributes
+| Raw embed | `parsed.originalEmbed` set, no provider-specific embed URL | raw embed container with aspect-ratio wrapper |

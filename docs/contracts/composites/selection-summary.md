@@ -1,7 +1,7 @@
 # SelectionSummary
 
-Status: seed contract
-Updated: 2026-03-22
+Status: detailed contract
+Updated: 2026-03-30
 
 ## 1. Purpose
 
@@ -9,34 +9,38 @@ Updated: 2026-03-22
 - Layer: `composites`
 - Summary: a compact summary of the current selection with removable chips,
   overflow count, and clear-all affordance
-- In scope: selected item count/label, removable chips, clear action,
-  overflow truncation, single vs multiple display modes
+- In scope: selected item count/label, removable chip buttons, clear action,
+  overflow truncation, single vs multiple display modes, size and density
+  scaling, light theme surface treatment
 - Out of scope: candidate browsing, confirm/cancel workflow,
   pagination-aware selection semantics
 
 ## 2. Anatomy
 
 ```text
-[Root]
+[Root <section>]  aria-label="Current selection"
   ├── [Header]
-  │     ├── [CountLabel]
-  │     └── [ClearButton]  (when items.length > 0)
-  └── [Chips]              (when items.length > 0)
-        ├── [Chip...]
+  │     ├── [CountLabel <strong>]
+  │     └── [ClearButton <button>]  (when items.length > 0)
+  └── [Chips]                       (when items.length > 0)
+        ├── [Chip <button>...]
         │     ├── [ChipLabel]
-        │     └── [RemoveIcon]
-        └── [Overflow]     (when items.length > maxVisibleItems)
+        │     └── [RemoveIcon]  Icon "x", aria-hidden
+        └── [Overflow <span>]       (when items.length > maxVisibleItems)
 ```
 
-| Part | Required | Description | Token Targets |
-|------|----------|-------------|---------------|
-| Root | yes | `<section>` with `aria-label="Current selection"` | background-panel, radius-surface, border, label-size |
-| Header | yes | flex row with count label and clear button | layout only |
-| CountLabel | yes | "N selected" (multiple) or "Selected item" / "No selection" (single) | text-primary (inherited bold) |
-| ClearButton | no | "Clear" button, visible when items exist | surface background, control radius/height |
-| Chips | no | flex-wrap container for removable chip buttons | layout only |
-| Chip | no | button showing item label with remove (x) icon | surface background, control radius |
-| Overflow | no | "+N more" text for truncated items | text-secondary, surface background |
+### Parts
+
+| Part | Element | Notes |
+|------|---------|-------|
+| Root | `<section>` | Class `selection-summary`, `aria-label="Current selection"`, `data-size`, `data-density` |
+| Header | `<div>` | Flex row with count label and clear button |
+| CountLabel | `<strong>` | "N selected" (multiple) or "Selected item" / "No selection" (single) |
+| ClearButton | `<button>` | "Clear" text button, visible only when items exist |
+| Chips | `<div>` | Flex-wrap container for removable chip buttons |
+| Chip | `<button>` | Shows item label with remove (x) icon; `aria-label="Remove {item.label}"` |
+| RemoveIcon | `<span>` | Wraps `Icon` with `name="x"`, `aria-hidden="true"` |
+| Overflow | `<span>` | "+N more" text for truncated items |
 
 ## 3. Props And Inputs
 
@@ -44,102 +48,77 @@ Updated: 2026-03-22
 
 | Prop | Type | Default | Required | Notes |
 |------|------|---------|----------|-------|
-| `items` | `Array<{ id: string; label: string }>` | `[]` | no | selected items to display |
-| `selectionMode` | `"single" \| "multiple"` | `"multiple"` | no | controls header label text |
-| `maxVisibleItems` | `number` | `4` | no | max chips shown before overflow |
-| `density` | `ControlDensity \| null` | `null` | no | explicit density override for spacing |
+| `items` | `Array<{ id: string; label: string }>` | `[]` | no | Selected items to display |
+| `selectionMode` | `"single" \| "multiple"` | `"multiple"` | no | Controls header label text |
+| `maxVisibleItems` | `number` | `4` | no | Max chips shown before overflow |
+| `size` | `ControlSize \| null` | `null` | no | Explicit absolute size override |
+| `sizeRole` | `SemanticControlSizeRole` | `"control"` | no | Semantic size intent for presentation context resolution |
+| `density` | `ControlDensity \| null` | `null` | no | Explicit density override |
+
+### Slots
+
+None.
 
 ### Controlled And Uncontrolled
 
-- display composite; items list is externally driven
-- no internal state
+Display composite. Items list is externally driven. No internal state.
+`visibleItems` and `overflowCount` are derived reactively from `items` and
+`maxVisibleItems`.
 
 ## 4. States
 
-### Visual States
-
 | State | Trigger | Expected Result |
 |-------|---------|-----------------|
-| empty | `items` is empty | header shows "No selection" (single) or "0 selected" (multiple); no chips, no clear button |
-| populated | `items` has entries | header shows count, clear button visible, chips rendered |
-| truncated | `items.length > maxVisibleItems` | only first `maxVisibleItems` chips shown, overflow badge shows "+N more" |
+| empty | `items` is empty | Header shows "No selection" (single) or "0 selected" (multiple); no chips, no clear button |
+| populated | `items` has entries | Header shows count, clear button visible, chips rendered |
+| truncated | `items.length > maxVisibleItems` | Only first `maxVisibleItems` chips shown, overflow badge shows "+N more" |
 
-### Component States
-
-No internal state. Visible items and overflow count are derived from props.
+No internal component state.
 
 ## 5. Events
 
 | Event | When It Fires | Payload | Notes |
 |-------|---------------|---------|-------|
-| `remove` | chip remove button clicked | `{ id: string }` | host removes the item from selection |
-| `clear` | clear button clicked | `void` | host clears all selections |
+| `remove` | Chip remove button clicked | `{ id: string }` | Host removes the item from selection |
+| `clear` | Clear button clicked | `void` | Host clears all selections |
 
 ## 6. Accessibility
 
-### Semantics
-
-- Role: `<section>` with `aria-label="Current selection"`
-- Chip buttons have `aria-label="Remove {item.label}"`
+- Root is `<section>` with `aria-label="Current selection"`
+- Each chip button has `aria-label="Remove {item.label}"`
 - Remove icon (x) is `aria-hidden="true"`
-
-### Keyboard
-
-| Key | Behavior |
-|-----|----------|
-| `Tab` | navigates between clear button and chip buttons |
-| `Enter` / `Space` | activates focused button (clear or remove) |
-
-### Focus And Announcement
-
-- focus entry: clear button or first chip
-- live-region behavior: none
-- GPUI-native accessibility mapping notes: GPUI must preserve selection summary
-  and per-item removal meaning rather than rendering them as decorative tags
+- `Tab` navigates between clear button and chip buttons
+- `Enter` / `Space` activates focused button (clear or remove)
+- Focus entry: clear button or first chip
 
 ## 7. Layout
 
 ### Sizing
 
-- fills available width
-- gap between header and chips: `--poodle-space-stack-sm`
-- chips container uses flex-wrap with gap `--poodle-space-inline-sm`
-- chip min-height: 2rem
-- chip inline padding: 0.75rem
-- chip internal gap: 0.5rem
-- overflow badge line-height: 2rem, padding 0 0.625rem
+- Root fills available width
+- Gap between header and chips: `var(--poodle-space-stack-sm)`
+- Chips container uses `flex-wrap` with `gap: var(--poodle-space-inline-sm)`
+- Chip internal gap: `var(--poodle-space-inline-md)`
+- Chip min-height: `calc(var(--poodle-size-control-height) - 0.25rem)`
+- Chip inline padding: `0 0.75rem`
+- Overflow badge line-height: `2rem`, padding `0 0.625rem`
 
 ### Composition
 
-- parent expectations: PickerShell selection slot, standalone selection displays
-- child expectations: none (self-contained)
-- resizing rules: chips wrap to multiple rows
+- Parent expectations: PickerShell selection slot, standalone selection displays
+- Child expectations: none (self-contained)
+- Resizing rules: chips wrap to multiple rows
 
 ## 8. Token Usage
 
-| Part | Token | Purpose |
-|------|-------|---------|
-| Root | `--poodle-color-background-panel` | container background (94% alpha mix) |
-| Root | `--poodle-radius-surface` | corner radius |
-| Root | `--poodle-typography-label-size` | base font size (fallback 0.75rem) |
-| Root | `--poodle-space-panel-y` / `--poodle-space-panel-x` | container padding |
-| Header | `--poodle-space-inline-md` | gap between label and clear button |
-| ClearButton | `--poodle-color-background-surface` | button background (76% alpha mix) |
-| ClearButton | `--poodle-radius-control` | button radius |
-| ClearButton | `--poodle-size-control-height` | button min-height |
-| ClearButton | `--poodle-space-control-x` | button horizontal padding |
-| Chip | `--poodle-color-background-surface` | chip background (76% alpha mix) |
-| Chip | `--poodle-radius-control` | chip radius |
-| Chip | `--poodle-color-text-primary` | chip text color |
-| Overflow | `--poodle-color-text-secondary` | overflow text color |
-| Overflow | `--poodle-color-background-surface` | overflow background (58% alpha mix) |
-| Overflow | `--poodle-radius-control` | overflow radius |
-| Root (light) | `--poodle-color-border-default` | light theme outer border (14% alpha mix) |
-| Root (light) | `--poodle-color-border-subtle` | light theme inset shadow border |
+### Data Attributes
 
-### Token Usage — Exact CSS Values
+| Attribute | Element | Values |
+|-----------|---------|--------|
+| `data-size` | Root | `"xs"`, `"sm"`, `"md"`, `"lg"`, `"xl"` |
+| `data-density` | Root | `"compact"`, `"default"`, `"comfortable"` |
 
-#### `.selection-summary` (Root)
+### `.selection-summary` (Root)
 
 | Property | Value |
 |----------|-------|
@@ -151,7 +130,7 @@ No internal state. Visible items and overflow count are derived from props.
 | `background` | `color-mix(in srgb, var(--poodle-color-background-panel) 94%, transparent)` |
 | `font-size` | `var(--poodle-typography-label-size, 0.75rem)` |
 
-#### `.selection-summary__header`
+### `.selection-summary__header`
 
 | Property | Value |
 |----------|-------|
@@ -160,7 +139,7 @@ No internal state. Visible items and overflow count are derived from props.
 | `gap` | `var(--poodle-space-inline-md)` |
 | `align-items` | `center` |
 
-#### `.selection-summary__header button`, `.selection-summary__chip` (Shared)
+### `.selection-summary__header button` and `.selection-summary__chip` (shared)
 
 | Property | Value |
 |----------|-------|
@@ -171,14 +150,14 @@ No internal state. Visible items and overflow count are derived from props.
 | `cursor` | `pointer` |
 | `font` | `inherit` |
 
-#### `.selection-summary__header button` (Clear Button)
+### `.selection-summary__header button` (ClearButton)
 
 | Property | Value |
 |----------|-------|
 | `min-height` | `var(--poodle-size-control-height)` |
 | `padding` | `0 var(--poodle-space-control-x)` |
 
-#### `.selection-summary__chips`
+### `.selection-summary__chips`
 
 | Property | Value |
 |----------|-------|
@@ -186,17 +165,17 @@ No internal state. Visible items and overflow count are derived from props.
 | `flex-wrap` | `wrap` |
 | `gap` | `var(--poodle-space-inline-sm)` |
 
-#### `.selection-summary__chip`
+### `.selection-summary__chip`
 
 | Property | Value |
 |----------|-------|
 | `display` | `inline-flex` |
-| `gap` | `0.5rem` |
+| `gap` | `var(--poodle-space-inline-md)` |
 | `align-items` | `center` |
-| `min-height` | `2rem` |
+| `min-height` | `calc(var(--poodle-size-control-height) - 0.25rem)` |
 | `padding` | `0 0.75rem` |
 
-#### `.selection-summary__overflow`
+### `.selection-summary__overflow`
 
 | Property | Value |
 |----------|-------|
@@ -207,31 +186,91 @@ No internal state. Visible items and overflow count are derived from props.
 | `border-radius` | `var(--poodle-radius-control)` |
 | `background` | `color-mix(in srgb, var(--poodle-color-background-surface) 58%, transparent)` |
 
-### Light Theme Override: `:global([data-theme="light"]) .selection-summary`
+### Size Variants
+
+#### `[data-size="xs"]`
+
+| Part | Property | Value |
+|------|----------|-------|
+| Root | `font-size` | `0.6875rem` |
+| ClearButton | `min-height` | `1.25rem` |
+| ClearButton | `padding` | `0 0.375rem` |
+| Chip | `min-height` | `1rem` |
+| Chip | `padding` | `0 0.5rem` |
+| Chip | `font-size` | `0.6875rem` |
+| Overflow | `font-size` | `0.6875rem` |
+| Overflow | `line-height` | `1.5rem` |
+| Overflow | `padding` | `0 0.375rem` |
+
+#### `[data-size="sm"]`
+
+| Part | Property | Value |
+|------|----------|-------|
+| Root | `font-size` | `0.71875rem` |
+| ClearButton | `min-height` | `1.375rem` |
+| Chip | `min-height` | `1.125rem` |
+| Chip | `font-size` | `0.71875rem` |
+| Overflow | `font-size` | `0.71875rem` |
+| Overflow | `line-height` | `1.625rem` |
+
+#### `[data-size="lg"]`
+
+| Part | Property | Value |
+|------|----------|-------|
+| Root | `font-size` | `0.8125rem` |
+| ClearButton | `min-height` | `2.125rem` |
+| ClearButton | `padding` | `0 0.875rem` |
+| Chip | `min-height` | `1.75rem` |
+| Chip | `padding` | `0 0.875rem` |
+| Chip | `font-size` | `0.8125rem` |
+| Overflow | `font-size` | `0.875rem` |
+| Overflow | `line-height` | `2.25rem` |
+| Overflow | `padding` | `0 0.75rem` |
+
+#### `[data-size="xl"]`
+
+| Part | Property | Value |
+|------|----------|-------|
+| Root | `font-size` | `0.875rem` |
+| ClearButton | `min-height` | `2.25rem` |
+| ClearButton | `padding` | `0 1rem` |
+| Chip | `min-height` | `2rem` |
+| Chip | `padding` | `0 1rem` |
+| Chip | `font-size` | `0.875rem` |
+| Overflow | `font-size` | `0.9375rem` |
+| Overflow | `line-height` | `2.5rem` |
+| Overflow | `padding` | `0 0.875rem` |
+
+### Density Variants
+
+| Density | Root `padding` | Root `gap` |
+|---------|---------------|------------|
+| compact | `0.25rem 0.375rem` | `var(--poodle-space-inline-xs)` |
+| comfortable | `0.5rem 0.75rem` | `var(--poodle-space-inline-md)` |
+
+### Light Theme Override
+
+`:global([data-theme="light"]) .selection-summary`
 
 | Property | Value |
 |----------|-------|
 | `border-color` | `color-mix(in srgb, var(--poodle-color-border-default) 14%, transparent)` |
 | `box-shadow` | `inset 0 0 0 0.0625rem color-mix(in srgb, var(--poodle-color-border-subtle) 32%, transparent), 0 0.375rem 1rem rgba(49, 66, 85, 0.03)` |
 
-### Data Attributes Used for CSS Selectors
-
-| Attribute | Element | Purpose |
-|-----------|---------|---------|
-| `data-theme` | global (`:global([data-theme="light"])`) | light theme override selector |
-
 ## 9. Svelte Notes
 
-- `data-density` — resolved density value (`compact`, `default`, or `comfortable`)
-- uses `createEventDispatcher` for `remove` and `clear` events
+- `data-size` resolves via `resolveSemanticControlSize` from presentation context
+- `data-density` resolves via presentation context with explicit override
+- Uses `createEventDispatcher` for `remove` and `clear` events
 - `visibleItems` and `overflowCount` derived reactively from `items` and `maxVisibleItems`
-- uses `Icon` primitive for the remove (x) icon with `size="sm"`
-- light theme has additional border and inset box-shadow treatment
+- Uses `Icon` primitive with `name="x"` for the remove icon
+- Imports `getUiPresentation` and `resolveSemanticControlSize` from `@poodle/svelte-primitives`
 
 ## 10. GPUI Notes
 
-- expected crate/module surface: `poodle_gpui::composites::selection_summary`
-- render as section with header row and chip container
+- Expected crate/module surface: `poodle_gpui::composites::selection_summary`
+- Render as section with header row and chip container
+- Size/density scaling must match CSS variant tables
 
 ## 11. Parity Checklist
 
@@ -240,25 +279,21 @@ No internal state. Visible items and overflow count are derived from props.
 - [ ] all props have the same meaning and defaults
 - [ ] event names and payloads match
 - [ ] maxVisibleItems truncation behavior matches
-- [ ] selectionMode header text matches
+- [ ] selectionMode header text matches ("No selection" / "Selected item" vs "N selected")
 
 ### Tier 2: Visual Parity
 
 - [ ] chip styling matches
 - [ ] overflow badge styling matches
-- [ ] light theme treatment matches
+- [ ] light theme border and box-shadow treatment matches
+- [ ] size variant scaling matches all 5 sizes
+- [ ] density variant padding and gap match
 
 ### Tier 3: Implementation Freedom
 
 - [ ] rendering internals stay internal
 
-## 12. Known Deltas
-
-| Delta | Why Allowed | Approval Status | Follow-Up |
-|-------|-------------|-----------------|-----------|
-| none yet | n/a | pending | review during first implementation |
-
-## 13. Specimen Definitions
+## 12. Specimen Definitions
 
 ### Multiple Items Selected
 
@@ -270,19 +305,10 @@ No internal state. Visible items and overflow count are derived from props.
 
 | Label | Props / Config | Expected Visual |
 |-------|---------------|-----------------|
-| Single item | `selectionMode="single"`, one item (`"Primary button"`) | Compact summary showing a single selected item chip |
+| Single item | `selectionMode="single"`, one item (`"Primary button"`) | Compact summary showing "Selected item" header with a single chip |
 
 ### Truncated (Max 3 Visible)
 
 | Label | Props / Config | Expected Visual |
 |-------|---------------|-----------------|
-| Truncated (max 3 visible) | six items (Alpha through Zeta), `maxVisibleItems={3}` | Three visible chips with an overflow count indicating the remaining three |
-
-## 14. Approval And Adoption Notes
-
-- contract status: `seed contract`
-- approvers: pending
-- downstream adopters: RelationPicker, picker shells, selection-heavy workflows
-- future follow-up: use `SelectionSummary` inside `RelationPicker`, picker
-  shells, and future selection-heavy workflows instead of rebuilding
-  selected-chip summaries ad hoc
+| Truncated (max 3 visible) | Six items (Alpha through Zeta), `maxVisibleItems={3}` | Three visible chips with "+3 more" overflow badge |

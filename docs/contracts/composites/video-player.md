@@ -1,109 +1,123 @@
 # VideoPlayer
 
-Status: seed contract
-Updated: 2026-03-22
+Status: detailed contract
+Updated: 2026-03-30
 
 ## 1. Purpose
 
 - Component name: `VideoPlayer`
 - Layer: `composites`
-- Summary: a video playback component with custom overlay controls, seek bar, volume, fullscreen, and optional captions
-- In scope: play/pause, seek slider, time display, volume slider, mute toggle, fullscreen toggle, poster image, captions track, auto-hiding controls, big play button overlay
-- Out of scope: playlist management, picture-in-picture, playback speed, quality selector, streaming protocol (HLS/DASH), download actions, theatre mode
+- Summary: a video playback component with custom overlay controls, seek bar,
+  volume, fullscreen, and optional captions
+- In scope: play/pause, seek slider, time display, volume slider, mute toggle,
+  fullscreen toggle, poster image, captions track, auto-hiding controls, big
+  play button overlay, size and density scaling, keyboard space/enter on wrapper
+- Out of scope: playlist management, picture-in-picture, playback speed, quality
+  selector, streaming protocol (HLS/DASH), download actions, theatre mode
 
 ## 2. Anatomy
 
 ```text
-[Root]  <div> with aspect-ratio
-  ├── [Video]  <video> element
-  │     └── [Captions Track]  (optional, when showCaptions && captionsSrc)
-  ├── [Big Play Button]  (only when paused at start)
-  └── [Controls]  auto-hiding overlay at bottom
-        ├── [Progress Bar]
-        │     ├── [Progress Fill]  visual fill
-        │     └── [Seek Slider]  <input type="range">, transparent overlay
-        └── [Bar]
-              ├── [Bar Left]
-              │     ├── [Play/Pause Button]
-              │     ├── [Mute Button]
-              │     ├── [Volume Slider]
-              │     └── [Time Display]  current / duration
-              └── [Bar Right]
-                    └── [Fullscreen Button]
+[Root <div>]  role="button", tabindex=0, aspect-ratio from prop
+  ├── [Video <video>]
+  │     └── [CaptionsTrack <track>]  (optional, when showCaptions && captionsSrc)
+  ├── [BigPlay <button>]  (only when paused at currentTime=0)
+  │     └── [BigPlaySVG]  48x48 circle with play triangle
+  └── [Controls <div>]  auto-hiding overlay at bottom
+        ├── [ProgressBar <div>]
+        │     ├── [ProgressFill <div>]  visual fill
+        │     └── [SeekSlider <input type="range">]  transparent overlay
+        └── [Bar <div>]
+              ├── [BarLeft <div>]
+              │     ├── [PlayButton <button>]
+              │     ├── [MuteButton <button>]
+              │     ├── [VolumeSlider <input type="range">]
+              │     └── [TimeDisplay <span>]
+              └── [BarRight <div>]
+                    └── [FullscreenButton <button>]
 ```
 
 ### Parts
 
 | Part | Element | Notes |
 |------|---------|-------|
-| root | `<div>` | Positioned relative, overflow hidden, `radius-surface`, black background, cursor pointer |
-| video | `<video>` | Full-size, `object-fit: contain`, `preload="metadata"`, `playsinline` |
-| captions-track | `<track>` | `kind="captions"`, optional |
-| big-play | `<button>` | Centered overlay play icon, only visible when paused at `currentTime=0` |
-| controls | `<div>` | Gradient overlay at bottom, auto-hides after 3s during playback |
-| progress-bar | `<div>` | `0.25rem` tall track with fill and transparent range input overlay |
-| progress-fill | `<div>` | Fills proportionally to playback progress, accent color |
-| seek-slider | `<input type="range">` | Transparent overlay on progress bar, `aria-label="Seek"` |
-| bar | `<div>` | Flex row, space-between, holding control buttons |
-| play-button | `<button>` | Toggles play/pause, icon swaps |
-| mute-button | `<button>` | Toggles mute, icon reflects muted state |
-| volume-slider | `<input type="range">` | `0` to `1`, step `0.01` |
-| time-display | `<span>` | `m:ss / m:ss` format, monospace |
-| fullscreen-button | `<button>` | Toggles fullscreen, icon swaps |
+| Root | `<div>` | Class `video-player`, `role="button"`, `tabindex="0"`, `aria-label` from prop, `aria-pressed` from play state, `data-size`, `data-density` |
+| Video | `<video>` | Full-size, `object-fit: contain`, `preload="metadata"`, `playsinline` |
+| CaptionsTrack | `<track>` | `kind="captions"`, `default`, rendered when `showCaptions && captionsSrc` |
+| BigPlay | `<button>` | Centered overlay, `aria-label="Play video"`, uses `stopPropagation` |
+| Controls | `<div>` | Gradient overlay, toggles `.visible` class, uses `stopPropagation` on click |
+| ProgressBar | `<div>` | `0.25rem` tall track |
+| ProgressFill | `<div>` | Width set via inline style from progress percentage |
+| SeekSlider | `<input type="range">` | Transparent overlay, `aria-label="Seek"`, `step="0.1"` |
+| Bar | `<div>` | Flex row, space-between |
+| PlayButton | `<button>` | `aria-label` toggles "Pause" / "Play", SVG icon swaps |
+| MuteButton | `<button>` | `aria-label` toggles "Unmute" / "Mute", SVG icon swaps |
+| VolumeSlider | `<input type="range">` | `0` to `1`, `step="0.01"`, `aria-label="Volume"` |
+| TimeDisplay | `<span>` | `m:ss / m:ss` format, monospace font |
+| FullscreenButton | `<button>` | `aria-label` toggles "Exit fullscreen" / "Fullscreen", SVG icon swaps |
 
 ## 3. Props And Inputs
+
+### Public Props
 
 | Prop | Type | Default | Required | Notes |
 |------|------|---------|----------|-------|
 | `src` | `string` | -- | yes | Video source URL |
 | `poster` | `string \| null` | `null` | no | Poster image URL shown before playback |
-| `aspectRatio` | `number` | `16 / 9` | no | CSS aspect-ratio for the container |
+| `aspectRatio` | `number` | `16 / 9` | no | CSS aspect-ratio for the container, set via inline style |
 | `ariaLabel` | `string` | `"Video player"` | no | Accessible label for the root container |
 | `showCaptions` | `boolean` | `false` | no | Enable captions track |
 | `captionsSrc` | `string \| null` | `null` | no | URL to captions/subtitles file |
-| `density` | `ControlDensity \| null` | `null` | no | explicit density override for spacing |
+| `size` | `ControlSize \| null` | `null` | no | Explicit size override for controls |
+| `sizeRole` | `SemanticControlSizeRole` | `"control"` | no | Semantic size intent for presentation context resolution |
+| `density` | `ControlDensity \| null` | `null` | no | Explicit density override for spacing |
 
 ### Slots
 
 None.
 
-### Controlled / Uncontrolled
+### Controlled And Uncontrolled
 
-All playback state (isPlaying, currentTime, volume, isMuted, isFullscreen) is managed internally. Props control initial configuration only.
+All playback state (`isPlaying`, `currentTime`, `volume`, `isMuted`,
+`isFullscreen`, `showControls`) is managed internally. Props control initial
+configuration only.
 
 ## 4. States
 
 ### Visual States
 
-| State | Trigger | Visual Effect |
-|-------|---------|---------------|
+| State | Trigger | Expected Result |
+|-------|---------|-----------------|
 | initial | Video loaded, not yet played | Big play button centered, controls visible |
 | playing | Video playing | Controls auto-hide after 3s; mouse movement re-shows them |
-| paused | Video paused | Controls remain visible |
+| paused | Video paused mid-playback | Controls remain visible |
 | ended | Video ended | Controls visible, play button shows play icon |
-| controls-visible | Mouse movement or paused | Controls overlay opacity 1 |
+| controls-visible | Mouse movement or paused/initial state | Controls overlay opacity 1 |
 | controls-hidden | 3s after last mouse move during playback | Controls overlay opacity 0 |
 | fullscreen | Fullscreen active | Fullscreen button icon changes to exit-fullscreen |
 | muted | Muted or volume=0 | Mute button icon shows muted variant |
 
-### Component States
+### Internal State
 
-| State | Description |
-|-------|-------------|
-| idle | Initial state, video loaded but not started |
-| playing | Video is actively playing |
-| paused | Video paused mid-playback |
-| ended | Playback completed |
+| State | Type | Description |
+|-------|------|-------------|
+| `isPlaying` | `boolean` | Whether video is actively playing |
+| `currentTime` | `number` | Current playback position in seconds |
+| `duration` | `number` | Total video duration in seconds |
+| `volume` | `number` | Volume level 0-1 |
+| `isMuted` | `boolean` | Whether audio is muted |
+| `isFullscreen` | `boolean` | Whether fullscreen is active |
+| `showControls` | `boolean` | Whether controls overlay is visible |
 
 ## 5. Events
 
-No custom events dispatched. All interaction is internal (play/pause/seek/volume/fullscreen).
+No custom events dispatched. All interaction is internal (play/pause/seek/
+volume/fullscreen).
 
 ## 6. Accessibility
 
-### Semantics
-
-- Root carries `aria-label` from prop
+- Root carries `role="button"`, `tabindex="0"`, `aria-label` from prop, `aria-pressed` reflecting play state
+- Wrapper keydown handles Space and Enter to toggle play/pause (only when wrapper itself is focused)
 - Play/pause button: `aria-label` toggles between `"Pause"` and `"Play"`
 - Big play button: `aria-label="Play video"`
 - Mute button: `aria-label` toggles between `"Unmute"` and `"Mute"`
@@ -111,27 +125,16 @@ No custom events dispatched. All interaction is internal (play/pause/seek/volume
 - Volume slider: `aria-label="Volume"`
 - Fullscreen button: `aria-label` toggles between `"Exit fullscreen"` and `"Fullscreen"`
 - All SVG icons are `aria-hidden="true"`
-
-### Keyboard
-
-- Clicking root toggles play/pause
-- Control buttons are standard button keyboard interaction
-- Range inputs accept arrow key adjustments
-- Controls bar click events use `stopPropagation` to avoid triggering play/pause
-
-### Focus
-
-- Control buttons show hover state (white background at 15% opacity)
-- Focus styling inherits from button defaults
+- Control bar click events use `stopPropagation` to avoid triggering play/pause on root
 
 ## 7. Layout
 
 ### Sizing
 
-- Root: full width, `aspect-ratio` from prop, `radius-surface`, overflow hidden, black background
+- Root: full width, `aspect-ratio` from prop (inline style), `border-radius: var(--poodle-radius-surface)`, overflow hidden, black background
 - Video: `width: 100%`, `height: 100%`, `object-fit: contain`
 - Big play button: `4rem x 4rem`, centered absolutely, scale 1.1 on hover
-- Controls: absolute bottom, gradient from transparent to `rgba(0,0,0,0.7)`, padding `1.5rem 0.5rem 0.375rem`
+- Controls: absolute bottom, gradient overlay, padding `1.5rem 0.5rem 0.375rem`
 - Progress bar: `0.25rem` tall, `0.375rem` margin-bottom
 - Control buttons: `1.75rem x 1.75rem`, icon `0.875rem x 0.875rem`
 - Volume slider: `3.5rem` width
@@ -139,148 +142,232 @@ No custom events dispatched. All interaction is internal (play/pause/seek/volume
 
 ### Composition
 
-Standalone component. Does not compose other Poodle primitives.
+Standalone component. Does not compose other Poodle primitives. Uses
+`getUiPresentation` and `resolveSemanticControlSize` for size/density resolution.
 
-## 8. Token Usage And Precise CSS
+## 8. Token Usage
 
 Note: The video player renders against a black background regardless of theme.
 Most colors use hardcoded `rgba(255,255,255,...)` values intentionally.
 
-### Root
+### Data Attributes
+
+| Attribute | Element | Values |
+|-----------|---------|--------|
+| `data-size` | Root | `"xs"`, `"sm"`, `"md"`, `"lg"`, `"xl"` |
+| `data-density` | Root | `"compact"`, `"default"`, `"comfortable"` |
+
+### `.video-player` (Root)
 
 | Property | Value |
 |----------|-------|
-| position | `relative` |
-| overflow | `hidden` |
-| border-radius | `var(--poodle-radius-surface)` |
-| background | `#000` |
-| cursor | `pointer` |
-| aspect-ratio | set via inline style from `aspectRatio` prop |
+| `position` | `relative` |
+| `overflow` | `hidden` |
+| `border-radius` | `var(--poodle-radius-surface)` |
+| `background` | `#000` |
+| `cursor` | `pointer` |
+| `aspect-ratio` | set via inline style from `aspectRatio` prop |
 
-### Video Element
-
-| Property | Value |
-|----------|-------|
-| display | `block` |
-| width | `100%` |
-| height | `100%` |
-| object-fit | `contain` |
-
-### Big Play Button
+### `.video-player video`
 
 | Property | Value |
 |----------|-------|
-| position | `absolute` |
-| top | `50%` |
-| left | `50%` |
-| transform | `translate(-50%, -50%)` |
-| width | `4rem` |
-| height | `4rem` |
-| padding | `0` |
-| border | `0` |
-| background | `transparent` |
-| color | `rgba(255, 255, 255, 0.9)` |
-| transition | `transform 0.2s ease` |
-| `:hover` transform | `translate(-50%, -50%) scale(1.1)` |
-| SVG circle | cx=24, cy=24, r=22, stroke-width=2, opacity=0.6 |
-| SVG play path | `M18 14l16 10-16 10V14z` |
+| `display` | `block` |
+| `width` | `100%` |
+| `height` | `100%` |
+| `object-fit` | `contain` |
 
-### Controls Overlay
+### `.video-player__big-play`
 
 | Property | Value |
 |----------|-------|
-| position | `absolute` |
-| bottom | `0` |
-| left | `0` |
-| right | `0` |
-| background | `linear-gradient(transparent, rgba(0, 0, 0, 0.7))` |
-| padding | `1.5rem 0.5rem 0.375rem` |
-| opacity | `0` (default), `1` (`.visible`) |
-| transition | `opacity 0.3s ease` |
-| cursor | `default` |
+| `position` | `absolute` |
+| `top` | `50%` |
+| `left` | `50%` |
+| `transform` | `translate(-50%, -50%)` |
+| `width` | `4rem` |
+| `height` | `4rem` |
+| `padding` | `0` |
+| `border` | `0` |
+| `background` | `transparent` |
+| `color` | `rgba(255, 255, 255, 0.9)` |
+| `cursor` | `pointer` |
+| `transition` | `transform 0.2s ease` |
 
-### Progress Bar
-
-| Property | Value |
-|----------|-------|
-| position | `relative` |
-| height | `0.25rem` |
-| margin-bottom | `0.375rem` |
-| background | `rgba(255, 255, 255, 0.2)` |
-| border-radius | `999rem` |
-| overflow | `hidden` |
-
-### Progress Fill
+### `.video-player__big-play:hover`
 
 | Property | Value |
 |----------|-------|
-| height | `100%` |
-| background | `var(--poodle-color-accent-base, #6366f1)` |
-| border-radius | `999rem` |
-| transition | `width 0.1s linear` |
+| `transform` | `translate(-50%, -50%) scale(1.1)` |
 
-### Seek Slider (transparent overlay)
+### `.video-player__controls`
 
 | Property | Value |
 |----------|-------|
-| position | `absolute` |
-| top | `-0.375rem` |
-| left | `0` |
-| width | `100%` |
-| height | `1rem` |
-| opacity | `0` |
-| margin | `0` |
+| `position` | `absolute` |
+| `bottom` | `0` |
+| `left` | `0` |
+| `right` | `0` |
+| `background` | `linear-gradient(transparent, rgba(0, 0, 0, 0.7))` |
+| `padding` | `1.5rem 0.5rem 0.375rem` |
+| `opacity` | `0` (default), `1` (`.visible`) |
+| `transition` | `opacity 0.3s ease` |
+| `cursor` | `default` |
 
-### Control Bar
-
-| Property | Value |
-|----------|-------|
-| display | `flex` |
-| align-items | `center` |
-| justify-content | `space-between` |
-
-### Bar Left / Bar Right
+### `.video-player__progress-bar`
 
 | Property | Value |
 |----------|-------|
-| display | `flex` |
-| align-items | `center` |
-| gap | `0.375rem` |
+| `position` | `relative` |
+| `height` | `0.25rem` |
+| `margin-bottom` | `0.375rem` |
+| `background` | `rgba(255, 255, 255, 0.2)` |
+| `border-radius` | `999rem` |
+| `overflow` | `hidden` |
 
-### Control Button
-
-| Property | Value |
-|----------|-------|
-| display | `inline-flex` |
-| align-items | `center` |
-| justify-content | `center` |
-| width | `1.75rem` |
-| height | `1.75rem` |
-| padding | `0` |
-| border | `0` |
-| border-radius | `var(--poodle-radius-control)` |
-| background | `transparent` |
-| color | `rgba(255, 255, 255, 0.9)` |
-| transition | `background 0.15s ease` |
-| `:hover` background | `rgba(255, 255, 255, 0.15)` |
-| SVG icon size | `0.875rem x 0.875rem` |
-
-### Volume Slider
+### `.video-player__progress-fill`
 
 | Property | Value |
 |----------|-------|
-| width | `3.5rem` |
-| height | `0.25rem` |
-| accent-color | `white` |
+| `height` | `100%` |
+| `background` | `var(--poodle-color-accent-base, #6366f1)` |
+| `border-radius` | `999rem` |
+| `transition` | `width 0.1s linear` |
 
-### Time Display
+### `.video-player__seek`
 
 | Property | Value |
 |----------|-------|
-| font-family | `var(--poodle-typography-code-family)` |
-| font-size | `0.6875rem` |
-| color | `rgba(255, 255, 255, 0.8)` |
-| white-space | `nowrap` |
+| `position` | `absolute` |
+| `top` | `-0.375rem` |
+| `left` | `0` |
+| `width` | `100%` |
+| `height` | `1rem` |
+| `opacity` | `0` |
+| `cursor` | `pointer` |
+| `margin` | `0` |
+
+### `.video-player__bar`
+
+| Property | Value |
+|----------|-------|
+| `display` | `flex` |
+| `align-items` | `center` |
+| `justify-content` | `space-between` |
+
+### `.video-player__bar-left`, `.video-player__bar-right`
+
+| Property | Value |
+|----------|-------|
+| `display` | `flex` |
+| `align-items` | `center` |
+| `gap` | `0.375rem` |
+
+### `.video-player__btn`
+
+| Property | Value |
+|----------|-------|
+| `display` | `inline-flex` |
+| `align-items` | `center` |
+| `justify-content` | `center` |
+| `width` | `1.75rem` |
+| `height` | `1.75rem` |
+| `padding` | `0` |
+| `border` | `0` |
+| `border-radius` | `var(--poodle-radius-control)` |
+| `background` | `transparent` |
+| `color` | `rgba(255, 255, 255, 0.9)` |
+| `cursor` | `pointer` |
+| `transition` | `background 0.15s ease` |
+
+### `.video-player__btn:hover`
+
+| Property | Value |
+|----------|-------|
+| `background` | `rgba(255, 255, 255, 0.15)` |
+
+### `.video-player__btn svg`
+
+| Property | Value |
+|----------|-------|
+| `width` | `0.875rem` |
+| `height` | `0.875rem` |
+
+### `.video-player__volume`
+
+| Property | Value |
+|----------|-------|
+| `width` | `3.5rem` |
+| `height` | `0.25rem` |
+| `accent-color` | `white` |
+
+### `.video-player__time`
+
+| Property | Value |
+|----------|-------|
+| `font-family` | `var(--poodle-typography-code-family)` |
+| `font-size` | `0.6875rem` |
+| `color` | `rgba(255, 255, 255, 0.8)` |
+| `white-space` | `nowrap` |
+
+### Size Variants
+
+#### `[data-size="xs"]`
+
+| Part | Property | Value |
+|------|----------|-------|
+| Button | `width` / `height` | `1.25rem` |
+| Button SVG | `width` / `height` | `0.75rem` |
+| Volume | `width` | `2.5rem` |
+| Time | `font-size` | `0.5625rem` |
+| BigPlay | `width` / `height` | `3rem` |
+
+#### `[data-size="sm"]`
+
+| Part | Property | Value |
+|------|----------|-------|
+| Button | `width` / `height` | `1.5rem` |
+| Volume | `width` | `3rem` |
+| Time | `font-size` | `0.625rem` |
+| BigPlay | `width` / `height` | `3.5rem` |
+
+#### `[data-size="lg"]`
+
+| Part | Property | Value |
+|------|----------|-------|
+| Button | `width` / `height` | `2.125rem` |
+| Button SVG | `width` / `height` | `1rem` |
+| Volume | `width` | `4rem` |
+| Time | `font-size` | `0.75rem` |
+| BigPlay | `width` / `height` | `4.5rem` |
+
+#### `[data-size="xl"]`
+
+| Part | Property | Value |
+|------|----------|-------|
+| Button | `width` / `height` | `2.25rem` |
+| Button SVG | `width` / `height` | `1.125rem` |
+| Volume | `width` | `4.5rem` |
+| Time | `font-size` | `0.8125rem` |
+| BigPlay | `width` / `height` | `5rem` |
+
+### Density Variants
+
+#### `[data-density="compact"]`
+
+| Part | Property | Value |
+|------|----------|-------|
+| Controls | `padding` | `0.25rem 0.375rem` |
+| Controls | `gap` | `0.25rem` |
+| Bar Left/Right | `gap` | `0.25rem` |
+
+#### `[data-density="comfortable"]`
+
+| Part | Property | Value |
+|------|----------|-------|
+| Controls | `padding` | `0.5rem 0.75rem` |
+| Controls | `gap` | `0.5rem` |
+| Bar Left/Right | `gap` | `0.5rem` |
 
 ### Light Theme Overrides
 
@@ -288,38 +375,56 @@ None (video player uses hardcoded dark-on-black colors).
 
 ## 9. Svelte Notes
 
-- `data-density` — resolved density value (`compact`, `default`, or `comfortable`)
+- `data-size` resolves via `resolveSemanticControlSize` from presentation context
+- `data-density` resolves via presentation context with explicit override
 - Uses `onMount` for video event listeners (`play`, `pause`, `ended`, `loadedmetadata`)
 - `requestAnimationFrame` loop updates `currentTime` during playback for smooth seek bar
 - Controls auto-hide via `setTimeout` (3s) reset on `mousemove`
 - Fullscreen uses native `requestFullscreen` / `exitFullscreen` API
 - `onDestroy` cleans up animation frame and timeout
 - Click on root toggles play; control bar uses `stopPropagation` to prevent double-toggle
+- Big play button uses `on:click|stopPropagation` to prevent root click handler
+- Wrapper keydown handler only activates on Space/Enter when `event.target === wrapperEl`
+- `document.fullscreenchange` listener updates `isFullscreen` state
+- SVG icons are inline (not Icon primitive) -- play, pause, mute, unmute, fullscreen, exit-fullscreen
 
 ## 10. GPUI Notes
 
-Not yet implemented.
+- Not yet implemented
+- Video playback requires platform-specific media integration
+- Fullscreen API differs per platform
+- Controls overlay with auto-hide may need platform animation system
 
 ## 11. Parity Checklist
 
-| Feature | Svelte | GPUI | Jetstream |
-|---------|--------|------|-----------|
-| Play/pause toggle | Yes | -- | -- |
-| Seek slider | Yes | -- | -- |
-| Time display | Yes | -- | -- |
-| Volume slider | Yes | -- | -- |
-| Mute toggle | Yes | -- | -- |
-| Fullscreen toggle | Yes | -- | -- |
-| Big play button | Yes | -- | -- |
-| Auto-hiding controls | Yes | -- | -- |
-| Poster image | Yes | -- | -- |
-| Captions track | Yes | -- | -- |
+### Tier 1: Strict Parity
 
-## 12. Known Deltas
+- [ ] all props have the same meaning and defaults
+- [ ] play/pause toggle behavior matches
+- [ ] big play button visibility logic matches (paused at currentTime=0)
+- [ ] auto-hide controls after 3s during playback matches
+- [ ] mute/unmute toggle behavior matches
+- [ ] seek and volume slider behavior matches
+- [ ] fullscreen toggle behavior matches
+- [ ] keyboard Space/Enter toggle matches
 
-None yet (single implementation).
+### Tier 2: Visual Parity
 
-## 13. Specimen Definitions
+- [ ] big play button size and hover scale matches
+- [ ] controls gradient overlay matches
+- [ ] progress bar and fill styling matches
+- [ ] control button size and hover background matches
+- [ ] time display monospace formatting matches
+- [ ] size variant scaling matches all sizes
+- [ ] density variant padding and gap matches
+
+### Tier 3: Implementation Freedom
+
+- [ ] animation frame vs polling approach is platform-owned
+- [ ] fullscreen API is platform-owned
+- [ ] SVG icon rendering internals stay internal
+
+## 12. Specimen Definitions
 
 ### Video Player
 
@@ -332,7 +437,3 @@ None yet (single implementation).
 | Label | Props / Config | Expected Visual |
 |-------|---------------|-----------------|
 | Custom aspect ratio | `src` set to sample video, `aspectRatio={4/3}`, `ariaLabel="4:3 aspect video"` | Player with 4:3 aspect ratio container |
-
-## 14. Approval And Adoption Notes
-
-Use `VideoPlayer` for single-video playback embedded in content pages or media detail views. The component uses native HTML5 `<video>` with custom overlay controls. For streaming video with adaptive bitrate, the consuming application should handle protocol selection and provide a compatible `src`. The hardcoded white-on-black control colors are intentional for video player UI contrast and do not follow the theme token system.

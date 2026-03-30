@@ -1,37 +1,45 @@
 # DetailSection
 
-Status: seed contract
-Updated: 2026-03-11
+Status: detailed contract
+Updated: 2026-03-30
 
 ## 1. Purpose
 
 - Component name: `DetailSection`
 - Layer: `composites`
-- Summary: a titled grouping of related detail rows, supporting copy, and
-  optional section-level actions
-- In scope: section heading, supportive description, grouped body content,
-  optional actions, divider posture
+- Summary: a titled grouping of related detail rows, supporting a description,
+  optional section-level actions, multi-column body layout, and a divider
+  posture for visual separation between stacked sections
+- In scope: section heading with optional description, actions slot for
+  section-level controls, multi-column body grid (1/2/3 columns), responsive
+  collapse to single column on narrow viewports, separated/unseparated visual
+  posture, accessible region labeling
 - Out of scope: page-level header identity, domain-specific row contents,
   editable form submission logic
 
 ## 2. Anatomy
 
 ```text
-[Root Section]
-  ├── [Section Header]
-  │     ├── [Title Block]
-  │     └── [Actions] (optional)
-  └── [Section Body]
-        └── [Detail Rows or Custom Content]
+[Root Section]  <section>
+  ├── [Header .detail-section__header]  (when title, description, or actions)
+  │     ├── [TitleBlock .detail-section__title-block]
+  │     │     ├── [Title .detail-section__title]  <h3> (optional)
+  │     │     └── [Description .detail-section__description]  <p> (optional)
+  │     └── [Actions .detail-section__actions]  <div> (optional)
+  │           └── (slot: actions)
+  └── [Body .detail-section__body]  <div>
+        └── (slot: default)
 ```
 
 | Part | Required | Description | Token Targets |
 |------|----------|-------------|---------------|
-| Root Section | yes | grouped detail region | spacing, separator |
-| Section Header | no | heading and optional actions | typography, gap |
-| Title Block | no | title and support text | typography, text color |
-| Section Body | yes | grouped rows/content | spacing, surface |
-| Actions | no | section-scoped actions | action spacing |
+| Root Section | yes | `<section>` element with grid layout and optional separation | spacing, separator |
+| Header | conditional | flex row with title block and actions; rendered when title, description, or actions slot is present | gap |
+| TitleBlock | conditional | grid column with title and description | typography, gap |
+| Title | no | `<h3>` section heading | heading-family, font-size, line-height |
+| Description | no | `<p>` supporting text | text-secondary, body typography |
+| Actions | no | slot container for section-level action buttons | — |
+| Body | yes | grid container for child content | gap, optional multi-column grid |
 
 ## 3. Props And Inputs
 
@@ -39,15 +47,23 @@ Updated: 2026-03-11
 
 | Prop | Type | Default | Required | Notes |
 |------|------|---------|----------|-------|
-| `title` | `string \| null` | `null` | no | section heading |
-| `description` | `string \| null` | `null` | no | support text |
-| `separated` | `boolean` | `true` | no | visual separation from surrounding sections |
-| `ariaLabel` | `string \| null` | `null` | no | optional label when no visible title exists |
+| `title` | `string \| null` | `null` | no | section heading text |
+| `description` | `string \| null` | `null` | no | supporting description text below the title |
+| `separated` | `boolean` | `true` | no | controls `data-separated` attribute for visual separation styling |
+| `ariaLabel` | `string \| null` | `null` | no | accessible label for the root `<section>` when no visible title exists |
+| `columns` | `1 \| 2 \| 3` | `1` | no | number of columns for the body grid |
+
+### Slots
+
+| Slot | Purpose |
+|------|---------|
+| default | detail rows or custom body content |
+| `actions` | section-level action buttons rendered in the header |
 
 ### Controlled And Uncontrolled
 
-- declarative grouping composite
-- child content remains host-owned
+- Declarative grouping composite; all content is host-owned.
+- No internal state.
 
 ## 4. States
 
@@ -55,207 +71,209 @@ Updated: 2026-03-11
 
 | State | Trigger | Expected Result |
 |-------|---------|-----------------|
-| simple | body only | compact grouped body |
-| titled | title present | heading-led section |
-| actionable | actions present | header split layout |
-| separated | `separated=true` | divider or spacing separation |
+| simple | no title, description, or actions | body grid only, no header |
+| titled | `title` present | header rendered with heading-led section |
+| described | `description` present | description text below title in title block |
+| actionable | actions slot populated | header shows split layout with title block on start and actions on end |
+| separated | `separated=true` | `data-separated="true"` on root; border-top set to `0` |
+| multi-column | `columns=2` or `columns=3` | body grid uses multi-column layout |
 
 ### Component States
 
-State table is sufficient.
+No internal state. All visual variation is driven by props and slots.
 
 ## 5. Events
 
-No component-owned events beyond child action behavior.
+None. DetailSection is a grouping composite with no component-owned events.
 
 ## 6. Accessibility
 
 ### Semantics
 
-- Role: region, group, or neutral section container depending on heading and
-  context
-- Required attributes: heading association when the section is addressable
-- Optional attributes: region label override
-- Labeling rules: if the section is meant to be navigable, it needs a stable
-  accessible name
+- Root: `<section>` element
+- `aria-label`: set from `ariaLabel` prop when provided; enables the section
+  to be treated as a named region
+- Title: `<h3>` heading element when `title` is present
+- Actions slot: contains focusable action buttons in logical order
 
 ### Keyboard
 
 | Key | Behavior |
 |-----|----------|
-| `Tab` | moves through section actions and body content in logical order |
+| `Tab` | moves through section actions and body content in DOM order |
 
 ### Focus And Announcement
 
-- focus entry: the section container is not focusable by default
-- focus exit: section-level actions should not interrupt child row order
-- live-region behavior: none
-- GPUI-native accessibility mapping notes: GPUI must preserve heading-to-group
-  relationships when the section acts as a named region or addressable group
+- The section container is not focusable by default
+- Section-level actions do not interrupt child row tab order
+- No live-region behavior
 
 ## 7. Layout
 
 ### Sizing
 
-- sections fill available parent width
-- body spacing stays consistent across simple and descriptive headers
+- Root fills available parent width
+- Body spacing is consistent across simple and descriptive headers
+- Multi-column body uses `minmax(0, 1fr)` grid columns
+- At viewport widths `<= 60rem`, multi-column layouts collapse to single
+  column
 
 ### Composition
 
-- parent expectations: detail shells, settings pages, inspector sections
-- child expectations: `DetailRow`, `Card`, or light custom body content
-- resizing rules: actions may wrap below the title block on narrow widths
-- composition rule: sections may mix summary cards and detail rows, but should
-  still preserve a clear section heading and subordinate hierarchy
+- Parent expectations: detail shells, settings pages, inspector sections
+- Child expectations: `DetailRow`, `Card`, or custom body content
+- Resizing rules: actions may wrap below the title block on narrow widths
+  (via `flex-wrap: wrap` on header)
 
-## 8. Token Usage
+## 8. Token Usage — Exact Values
 
-| Part | Token | Purpose |
-|------|-------|---------|
-| Root Section | spacing and separator roles | grouping |
-| Title Block | heading/subdued text roles | hierarchy |
-| Section Body | spacing and surface roles | content container |
-| Actions | action spacing roles | control cluster |
+### Data Attributes
 
-### Token Usage — Exact CSS Values
+| Attribute | Element | Values |
+|-----------|---------|--------|
+| `data-separated` | root `<section>` | `"true"`, `"false"` |
+| `data-columns` | root `<section>` | `"1"`, `"2"`, `"3"` |
 
-#### `.detail-section` (Root)
+### Root `.detail-section`
 
 | Property | Value |
 |----------|-------|
-| `display` | `grid` |
-| `gap` | `calc(var(--poodle-space-stack-md) + 0.125rem)` |
-| `padding-top` | `calc(var(--poodle-space-stack-md) + 0.125rem)` |
+| display | `grid` |
+| gap | `calc(var(--poodle-space-stack-md) + 0.125rem)` |
+| padding-top | `calc(var(--poodle-space-stack-md) + 0.125rem)` |
 
-#### `.detail-section[data-separated="true"]`
-
-| Property | Value |
-|----------|-------|
-| `border-top` | `0` |
-
-#### `.detail-section__header`
+### `.detail-section[data-separated="true"]`
 
 | Property | Value |
 |----------|-------|
-| `display` | `flex` |
-| `flex-wrap` | `wrap` |
-| `justify-content` | `space-between` |
-| `gap` | `var(--poodle-space-inline-md)` |
-| `align-items` | `start` |
+| border-top | `0` |
 
-#### `.detail-section__title-block`
+### Header `.detail-section__header`
 
 | Property | Value |
 |----------|-------|
-| `display` | `grid` |
-| `gap` | `0.375rem` |
+| display | `flex` |
+| flex-wrap | `wrap` |
+| justify-content | `space-between` |
+| gap | `var(--poodle-space-inline-md)` |
+| align-items | `start` |
 
-#### `.detail-section__title`, `.detail-section__description`
-
-| Property | Value |
-|----------|-------|
-| `margin` | `0` |
-
-#### `.detail-section__title`
+### TitleBlock `.detail-section__title-block`
 
 | Property | Value |
 |----------|-------|
-| `font-family` | `var(--poodle-typography-heading-family)` |
-| `font-size` | `1.125rem` |
-| `line-height` | `1.2` |
+| display | `grid` |
+| gap | `0.375rem` |
 
-#### `.detail-section__description`
-
-| Property | Value |
-|----------|-------|
-| `color` | `var(--poodle-color-text-secondary)` |
-| `font-size` | `var(--poodle-typography-body-size)` |
-| `line-height` | `var(--poodle-typography-body-lineHeight)` |
-
-#### `.detail-section__body`
+### Title `.detail-section__title` and Description `.detail-section__description`
 
 | Property | Value |
 |----------|-------|
-| `display` | `grid` |
-| `gap` | `var(--poodle-space-stack-sm)` |
+| margin | `0` |
 
-### Data Attributes Used for CSS Selectors
+### Title `.detail-section__title`
 
-| Attribute | Element | Purpose |
-|-----------|---------|---------|
-| `data-separated` | `.detail-section` root `<section>` | controls border-top separation styling |
+| Property | Value |
+|----------|-------|
+| font-family | `var(--poodle-typography-heading-family)` |
+| font-size | `1.125rem` |
+| line-height | `1.2` |
+
+### Description `.detail-section__description`
+
+| Property | Value |
+|----------|-------|
+| color | `var(--poodle-color-text-secondary)` |
+| font-size | `var(--poodle-typography-body-size)` |
+| line-height | `var(--poodle-typography-body-lineHeight)` |
+
+### Body `.detail-section__body`
+
+| Property | Value |
+|----------|-------|
+| display | `grid` |
+| gap | `var(--poodle-space-stack-sm)` |
+
+### Multi-Column Body
+
+| Selector | Property | Value |
+|----------|----------|-------|
+| `[data-columns="2"] .detail-section__body` | grid-template-columns | `repeat(2, minmax(0, 1fr))` |
+| `[data-columns="3"] .detail-section__body` | grid-template-columns | `repeat(3, minmax(0, 1fr))` |
+
+### Responsive Breakpoint
+
+| Selector | Breakpoint | Property | Value |
+|----------|-----------|----------|-------|
+| `[data-columns="2"] .detail-section__body` | `max-width: 60rem` | grid-template-columns | `1fr` |
+| `[data-columns="3"] .detail-section__body` | `max-width: 60rem` | grid-template-columns | `1fr` |
+
+### Light Theme Overrides
+
+None.
 
 ## 9. Svelte Notes
 
-- expected substrate: `Stack`, `Inline`, `Separator`, and heading semantics
-- wrapper strategy: section slots stay Poodle-owned; action and body children are
-  composed rather than hard-coded
+- Root element is a `<section>` with scoped CSS class `detail-section`
+- Header is conditionally rendered when `title`, `description`, or `$$slots.actions`
+  is truthy
+- Title is an `<h3>` element; description is a `<p>` element
+- Multi-column layout driven by `data-columns` attribute on root
+- Responsive collapse uses a viewport media query (`max-width: 60rem`), not a
+  container query
+- `$$slots.actions` used to detect whether the actions slot is populated
 
 ## 10. GPUI Notes
 
-- expected crate/module surface: `poodle_gpui::composites::detail_section`
-- implementation-only details: GPUI may use grouped layout views and named
-  subtrees instead of HTML sections, but addressable-section semantics remain
-  required
+- Expected crate/module surface: `poodle_gpui::composites::detail_section`
+- GPUI may use grouped layout views and named subtrees instead of HTML
+  sections, but addressable-section semantics remain required
+- Multi-column body can be realized as a flex-wrap container with fixed-fraction
+  child widths
 
 ## 11. Parity Checklist
 
 ### Tier 1: Strict Parity
 
-- [ ] heading/group semantics match
-- [ ] section action ordering matches
-- [ ] body composition remains semantically neutral and consistent
+- [ ] all props have the same meaning and defaults
+- [ ] heading/group semantics match (`<section>` with `<h3>`)
+- [ ] header renders only when title, description, or actions are present
+- [ ] body grid supports 1/2/3 column modes
+- [ ] multi-column layouts collapse on narrow viewports
 
 ### Tier 2: Visual Parity
 
 - [ ] section spacing, dividers, and title hierarchy use comparable token roles
+- [ ] title-block gap matches (0.375rem)
+- [ ] header flex-wrap behavior matches
 
 ### Tier 3: Implementation Freedom
 
 - [ ] body slot mounting and wrapping behavior stay internal
+- [ ] responsive breakpoint mechanism may differ (media query vs container query)
 
-## 12. Known Deltas
+## 12. Specimen Definitions
 
-| Delta | Why Allowed | Approval Status | Follow-Up |
-|-------|-------------|-----------------|-----------|
-| divider rendering may differ | runtime drawing techniques differ | allowed | keep grouping semantics strict |
+### With Title And Rows
 
-## 13. Specimen Definitions
-
-All preview apps must render the following specimens identically.
-
-### With title and rows
-
-A titled section with description and detail rows:
-
-| Label | Props/Config | Expected Visual |
-|-------|-------------|-----------------|
+| Label | Props / Config | Expected Visual |
+|-------|---------------|-----------------|
 | With title and rows | `title="Project details"`, `description="Core metadata for this project."`, four DetailRows (Name, Owner, Created, Status) | heading-led section with description text and vertically stacked detail rows |
 
-### With actions
+### With Actions
 
-A titled section with a header action button:
-
-| Label | Props/Config | Expected Visual |
-|-------|-------------|-----------------|
+| Label | Props / Config | Expected Visual |
+|-------|---------------|-----------------|
 | With actions | `title="Billing"`, actions slot with secondary sm Edit button, three DetailRows (Plan, Billing cycle, Next invoice) | header split layout with title on start and Edit button on end, detail rows below |
 
-### DetailRow with description
+### Multi-Column Layout
 
-A section demonstrating detail rows that include description text:
+| Label | Props / Config | Expected Visual |
+|-------|---------------|-----------------|
+| Multi-column layout | `title="Server metrics"`, `columns={3}`, six DetailRows arranged in a 3-column grid | three-column body grid with rows distributed across columns |
 
-| Label | Props/Config | Expected Visual |
-|-------|-------------|-----------------|
+### DetailRow With Description
+
+| Label | Props / Config | Expected Visual |
+|-------|---------------|-----------------|
 | DetailRow with description | `title="Configuration"`, two DetailRows with `description` prop; first row has `truncateValue` | detail rows with label, value, and supporting description; first value truncates with ellipsis |
-
-## 14. Approval And Adoption Notes
-
-- contract status: `seed contract`
-- approvers: pending
-- downstream adopters: settings scopes, inspector sections, metadata groupings
-- future follow-up: align with deeper form sections and validation groups later
-
-## Next Task
-
-Use `DetailSection` to group related readonly information under a local heading,
-and keep page-level identity in `PageHeader` or `DetailShell`.
