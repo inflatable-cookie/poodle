@@ -44,6 +44,11 @@ impl IntoElement for Separator {
             RuleTone::Default => raw_color,
         };
 
+        // Accessibility semantics (contract section 6):
+        // When decorative=true: aria-hidden="true" (hidden from assistive technology)
+        // When decorative=false: role="separator", aria-orientation="{orientation}"
+        // GPUI: separator is never focusable in either mode
+
         match self.spec.orientation {
             SeparatorOrientation::Horizontal => {
                 div().w_full().h(px(1.0)).bg(color).into_any_element()

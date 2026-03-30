@@ -81,4 +81,9 @@ impl MeterSpec {
     pub fn track_fill_token(&self) -> &'static str {
         semantic::COLOR_BACKGROUND_SURFACE
     }
+
+    /// Contract: track min-height 0.5rem (8px).
+    pub fn track_height_rem(&self) -> f32 {
+        0.5
+    }
 }

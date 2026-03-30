@@ -74,4 +74,29 @@ impl TooltipSpec {
     pub fn fill_token(&self) -> &'static str {
         semantic::COLOR_BACKGROUND_ELEVATED
     }
+
+    /// Contract: bubble font-size 0.6875rem (11px).
+    pub fn font_size_rem(&self) -> f32 {
+        0.6875
+    }
+
+    /// Contract: bubble padding 0.375rem 0.5rem — horizontal.
+    pub fn padding_x_rem(&self) -> f32 {
+        0.5
+    }
+
+    /// Contract: bubble padding 0.375rem 0.5rem — vertical.
+    pub fn padding_y_rem(&self) -> f32 {
+        0.375
+    }
+
+    /// Contract: bubble max-width 16rem (256px).
+    pub fn max_width_rem(&self) -> f32 {
+        16.0
+    }
+
+    /// Contract: border-radius = calc(control-radius - 0.125rem).
+    pub fn radius_inset_rem(&self) -> f32 {
+        0.125
+    }
 }

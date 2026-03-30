@@ -220,6 +220,12 @@ impl IntoElement for ListCard {
         let has_sash = sash_el.is_some();
 
         // ── Root container ──────────────────────────────────────────
+        // Accessibility semantics (contract section 6):
+        // When interactive/selectable: role="button", tabindex="0", aria-label from spec or title
+        // When selectable: aria-pressed={selected}
+        // When disabled: aria-disabled="true"
+        // When href present: rendered as anchor (link semantics)
+        // Non-interactive: no role (generic container)
         let mut root = div()
             .id(SharedString::from(format!("poodle-list-card-{}", spec.title)))
             .w_full()

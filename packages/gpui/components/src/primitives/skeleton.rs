@@ -6,7 +6,7 @@ use gpui::*;
 use poodle_gpui::GpuiThemeProvider;
 use poodle_primitives::SkeletonSpec;
 
-use crate::theme_ext::{resolve_color, resolve_radius};
+use crate::theme_ext::{resolve_color, resolve_px, resolve_radius};
 
 /// A real GPUI skeleton placeholder component backed by `SkeletonSpec`.
 pub struct Skeleton {
@@ -64,15 +64,16 @@ impl IntoElement for Skeleton {
             el = el.w_full();
         }
 
-        // Contract: default line height is 14px (0.875rem), not 16px
+        // Contract: default height 0.875rem — resolved from body typography size token
+        let default_height = resolve_px(theme, spec.default_height_token());
         if let Some(ref h) = spec.height {
             if let Ok(val) = h.parse::<f32>() {
                 el = el.h(px(val));
             } else {
-                el = el.h(px(14.0));
+                el = el.h(default_height);
             }
         } else {
-            el = el.h(px(14.0));
+            el = el.h(default_height);
         }
 
         // Shimmer animation or static opacity

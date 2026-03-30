@@ -4,6 +4,7 @@ use gpui::*;
 use poodle_gpui::GpuiThemeProvider;
 use poodle_primitives::EyebrowSpec;
 
+use crate::presentation::rem_to_px;
 use crate::theme_ext::resolve_color;
 
 /// A real GPUI eyebrow label component backed by `EyebrowSpec`.
@@ -45,10 +46,12 @@ impl IntoElement for Eyebrow {
         // Contract: uppercase the content
         let label = spec.content.clone().unwrap_or_default().to_uppercase();
 
-        // Contract: 0.6875rem (11px), weight 600, line-height 1.5
+        // Contract: 0.6875rem, weight 600, line-height 1.5
         // letter-spacing 0.12em not available in GPUI (known delta)
+        let font_size = px(rem_to_px(spec.font_size_rem()));
+
         div()
-            .text_size(px(11.0))
+            .text_size(font_size)
             .text_color(text_color)
             .font_weight(FontWeight::SEMIBOLD)
             .line_height(relative(1.5))

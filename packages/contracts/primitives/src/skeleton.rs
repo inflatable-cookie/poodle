@@ -55,4 +55,10 @@ impl SkeletonSpec {
             _ => semantic::RADIUS_SURFACE,
         }
     }
+
+    /// Contract: default line height 0.875rem (14px).
+    /// Uses body typography size token for consistency.
+    pub fn default_height_token(&self) -> &'static str {
+        semantic::TYPOGRAPHY_BODY_SIZE
+    }
 }

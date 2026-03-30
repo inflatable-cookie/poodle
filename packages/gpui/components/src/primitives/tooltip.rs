@@ -4,6 +4,7 @@ use gpui::*;
 use poodle_gpui::GpuiThemeProvider;
 use poodle_primitives::{OverlayPlacement, TooltipSpec};
 
+use crate::presentation::rem_to_px;
 use crate::theme_ext::{resolve_color, resolve_px, resolve_radius};
 
 /// A real GPUI tooltip component backed by `TooltipSpec`.
@@ -61,7 +62,8 @@ impl IntoElement for Tooltip {
         let border_default = resolve_color(theme, "semantic.color.border.default");
         let text_primary = resolve_color(theme, "semantic.color.text.primary");
         let stack_gap = resolve_px(theme, "semantic.space.stack.sm");
-        let tooltip_radius = resolve_radius(theme, "semantic.radius.control") - px(2.0);
+        // Contract: border-radius = calc(control-radius - 0.125rem)
+        let tooltip_radius = resolve_radius(theme, "semantic.radius.control") - px(rem_to_px(spec.radius_inset_rem()));
 
         // Matches Svelte treatment-surface-elevated values
         let fill = Hsla { a: elevated_bg.a * 0.94, ..elevated_bg };
@@ -77,9 +79,15 @@ impl IntoElement for Tooltip {
         // Tooltip bubble (shown when open)
         if spec.current_open() && spec.has_content() {
             if let Some(ref content) = spec.content {
+                // Contract: padding 0.375rem 0.5rem — resolved from spec
+                let tooltip_px = px(rem_to_px(spec.padding_x_rem()));
+                let tooltip_py = px(rem_to_px(spec.padding_y_rem()));
+                let tooltip_font_size = px(rem_to_px(spec.font_size_rem()));
+                let tooltip_max_w = px(rem_to_px(spec.max_width_rem()));
+
                 let mut tooltip_bubble = div()
-                        .px(px(6.0))  // Svelte: 0.375rem
-                        .py(px(6.0))  // Svelte: 0.5rem (symmetric)
+                        .px(tooltip_px)
+                        .py(tooltip_py)
                         .rounded(tooltip_radius);
 
                 // Brand-raised treatment: gradient fill for elevated surface
@@ -102,10 +110,10 @@ impl IntoElement for Tooltip {
                                 spread_radius: px(0.0),
                             },
                         ])
-                        // Svelte: font 0.6875rem (11px), max-width 16rem (256px)
-                        .text_size(px(11.0))
+                        // Contract: font 0.6875rem, max-width 16rem
+                        .text_size(tooltip_font_size)
                         .text_color(text_primary)
-                        .max_w(px(256.0))
+                        .max_w(tooltip_max_w)
                         .child(content.clone()),
                 );
             }

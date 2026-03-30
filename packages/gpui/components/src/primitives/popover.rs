@@ -4,6 +4,7 @@ use gpui::*;
 use poodle_gpui::GpuiThemeProvider;
 use poodle_primitives::{OverlayPlacement, PopoverInitialFocus, PopoverSpec};
 
+use crate::presentation::rem_to_px;
 use crate::theme_ext::{resolve_color, resolve_px, resolve_radius};
 
 /// A real GPUI popover component backed by `PopoverSpec`.
@@ -92,6 +93,10 @@ impl IntoElement for Popover {
         }
 
         // Floating content (shown when open)
+        // Accessibility semantics (contract section 6):
+        // Trigger: role="button", tabindex="0", aria-expanded={open}, aria-controls={surface id}
+        // Surface: role="dialog", tabindex per initialFocus strategy
+        // aria-label on surface from spec.aria_label when provided
         if spec.current_open() {
             if let Some(content) = self.content {
                 let mut surface = div()
@@ -125,9 +130,9 @@ impl IntoElement for Popover {
                         ])
                     .px(panel_x)
                     .py(panel_y)
-                    // Svelte: min-width 14rem (224px), max-width min(24rem, 90vw)
-                    .min_w(px(224.0))
-                    .max_w(px(384.0))
+                    // Contract: min-width 14rem, max-width min(24rem, 90vw)
+                    .min_w(px(rem_to_px(14.0)))
+                    .max_w(px(rem_to_px(24.0)))
                     .child(content);
 
                 // Escape key to close

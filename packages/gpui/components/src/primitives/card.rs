@@ -129,6 +129,11 @@ impl IntoElement for Card {
         let is_horizontal = matches!(spec.layout, CardLayout::Horizontal);
         let card_id = SharedString::from(self.id_prefix.clone());
 
+        // Accessibility semantics (contract section 6):
+        // Root element is <article> in Svelte — GPUI uses div with article-like semantics
+        // aria-label applied when provided via spec.aria_label
+        // Interactive cards: known delta — role="button", tabindex="0", and keyboard
+        // activation are documented but NOT yet implemented (matches Svelte parity)
         let mut el = div()
             .id(card_id)
             .bg(fill)

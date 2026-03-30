@@ -52,6 +52,11 @@ impl IntoElement for FormActions {
         let gap = theme.resolve_space(self.spec.action_gap_token());
         let separation = theme.resolve_space(self.spec.stack_separation_token());
 
+        // Accessibility semantics (contract section 6):
+        // Neutral structural container — no implicit ARIA role.
+        // Action order must remain logical for keyboard and screen reader users.
+        // Collapsed danger trigger must expose an aria-label.
+
         // Contract says no border, only padding-top for separation
         let mut row = div()
             .flex()

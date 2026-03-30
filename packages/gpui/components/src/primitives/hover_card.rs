@@ -4,6 +4,7 @@ use gpui::*;
 use poodle_gpui::GpuiThemeProvider;
 use poodle_primitives::{HoverCardSpec, OverlayPlacement};
 
+use crate::presentation::rem_to_px;
 use crate::theme_ext::{resolve_color, resolve_px, resolve_radius};
 
 /// A real GPUI hover card component backed by `HoverCardSpec`.
@@ -64,7 +65,8 @@ impl IntoElement for HoverCard {
         let theme = &self.theme;
         let spec = &self.spec;
 
-        let inline_padding = resolve_px(theme, "semantic.space.inline.md");
+        // Contract: padding var(--poodle-space-panel-y) var(--poodle-space-panel-x)
+        let panel_x = resolve_px(theme, "semantic.space.panel.x");
         let elevated_bg = resolve_color(theme, "semantic.color.background.elevated");
         let border_default = resolve_color(theme, "semantic.color.border.default");
         let radius = resolve_radius(theme, "semantic.radius.surface");
@@ -73,7 +75,9 @@ impl IntoElement for HoverCard {
         let fill = Hsla { a: elevated_bg.a * 0.94, ..elevated_bg };
         let border = Hsla { a: border_default.a * 0.22, ..border_default };
 
-        let mut wrapper = div().flex().flex_col().gap(px(4.0));
+        // Contract: 0.5rem (8px) gap between trigger and surface
+        let trigger_gap = px(rem_to_px(0.5));
+        let mut wrapper = div().flex().flex_col().gap(trigger_gap);
 
         // Trigger (always rendered)
         if let Some(trigger) = self.trigger {
@@ -81,12 +85,17 @@ impl IntoElement for HoverCard {
         }
 
         // Surface content (shown when open)
+        // Accessibility semantics (contract section 6):
+        // Trigger: role="button", tabindex="0", aria-expanded={open}, aria-controls={surface id}
+        // Surface: role="dialog", tabindex="-1", aria-label from spec
+        // Escape key clears timers and closes the surface
         if spec.is_open {
+            let panel_y = resolve_px(theme, "semantic.space.panel.y");
             let mut surface = div()
                 .id("poodle-hover-card-surface")
                 .focusable()
-                .px(inline_padding)
-                .py(px(10.0))
+                .px(panel_x)
+                .py(panel_y)
                 .rounded(radius);
 
             // Brand-raised treatment: gradient fill for elevated surface
@@ -113,8 +122,9 @@ impl IntoElement for HoverCard {
                         spread_radius: px(0.0),
                     },
                 ])
-                .min_w(px(192.0))  // 12rem
-                .max_w(px(320.0)); // 20rem
+                // Contract: min-width 14rem, max-width min(22rem, 90vw)
+                .min_w(px(rem_to_px(14.0)))
+                .max_w(px(rem_to_px(22.0)));
 
             if let Some(content) = self.content {
                 surface = surface.child(content);

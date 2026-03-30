@@ -4,6 +4,7 @@ use gpui::*;
 use poodle_gpui::GpuiThemeProvider;
 use poodle_primitives::MeterSpec;
 
+use crate::presentation::rem_to_px;
 use crate::theme_ext::{color_mix, resolve_color, resolve_radius};
 
 /// A real GPUI meter component backed by `MeterSpec`.
@@ -61,10 +62,16 @@ impl IntoElement for Meter {
 
         let fill_width_pct = (progress * 100.0) as f32;
 
-        // Contract: track height 0.5rem (8px)
+        // Contract: track min-height 0.5rem — resolved from spec
+        let track_height = px(rem_to_px(spec.track_height_rem()));
+
+        // Accessibility: meter semantics — bounded-value measurement display
+        // GPUI equivalent of role="meter", aria-valuenow, aria-valuemin, aria-valuemax
+        // Native accessibility should expose: value={spec.value}, min={spec.min},
+        // max={spec.max}, low/high/optimum when set, aria-label from spec.aria_label
         div()
             .w_full()
-            .h(px(8.0))
+            .h(track_height)
             .rounded(radius)
             .bg(track_fill)
             .overflow_hidden()
