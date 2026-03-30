@@ -73,6 +73,8 @@ export const primitiveComponents: ComponentEntry[] = [
   entry("IconProvider", "primitive", P, "Context provider that supplies a bulk icon set for string-based icon lookups.", true),
   entry("ListCard", "primitive", P, "Structured list item card with leading/trailing slots.", true),
   entry("Menu", "primitive", P, "Dropdown menu with items, separators, and keyboard navigation.", true),
+  entry("MetaBar", "primitive", P, "Inline metadata ribbon for compact header facts and status context.", true),
+  entry("MetaItem", "primitive", P, "Compact labeled metadata item for use inside inline ribbons.", true),
   entry("Menubar", "primitive", P, "Horizontal menu bar with dropdown sub-menus.", true),
   entry("Meter", "primitive", P, "Visual gauge for scalar values within a known range.", true),
   entry("NavCard", "primitive", P, "Navigation-oriented card link with icon, badge, and arrow.", true),

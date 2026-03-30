@@ -55,6 +55,7 @@ import NavCardSpecimen from "./NavCardSpecimen.svelte";
 import MarkdownEditorSpecimen from "./MarkdownEditorSpecimen.svelte";
 import MediaBrowsePanelSpecimen from "./MediaBrowsePanelSpecimen.svelte";
 import MediaPickerSpecimen from "./MediaPickerSpecimen.svelte";
+import MetaBarSpecimen from "./MetaBarSpecimen.svelte";
 import OrderBySpecimen from "./OrderBySpecimen.svelte";
 import MediaPreviewSpecimen from "./MediaPreviewSpecimen.svelte";
 import MediaThumbnailSpecimen from "./MediaThumbnailSpecimen.svelte";
@@ -189,6 +190,8 @@ export const specimenMap: Record<string, typeof SvelteComponent<any>> = {
   "media-thumbnail": MediaThumbnailSpecimen,
   "media-upload-status-panel": MediaUploadStatusPanelSpecimen,
   menu: MenuSpecimen,
+  "meta-bar": MetaBarSpecimen,
+  "meta-item": MetaBarSpecimen,
   menubar: MenubarSpecimen,
   meter: MeterSpecimen,
   "nav-card": NavCardSpecimen,

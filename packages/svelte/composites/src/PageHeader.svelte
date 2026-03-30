@@ -74,6 +74,11 @@
       {#if subtitle}
         <p class="page-header__subtitle">{subtitle}</p>
       {/if}
+      {#if $$slots.meta}
+        <div class="page-header__meta">
+          <slot name="meta" />
+        </div>
+      {/if}
       {#if $$slots.default}
         <div class="page-header__body">
           <slot />
@@ -222,6 +227,10 @@
     color: var(--poodle-color-text-secondary);
     font-size: var(--poodle-typography-body-size);
     line-height: var(--poodle-typography-body-lineHeight);
+  }
+
+  .page-header__meta {
+    margin-top: 0.125rem;
   }
 
   .page-header__body {

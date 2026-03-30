@@ -44,6 +44,8 @@ export { default as Meter } from "./Meter.svelte";
 export { default as ListCard } from "./ListCard.svelte";
 export { default as ListCardCounter } from "./ListCardCounter.svelte";
 export { default as Menu } from "./Menu.svelte";
+export { default as MetaBar } from "./MetaBar.svelte";
+export { default as MetaItem } from "./MetaItem.svelte";
 export { default as NumberEntry } from "./NumberEntry.svelte";
 export { default as OrderBy } from "./OrderBy.svelte";
 export { default as NavCard } from "./NavCard.svelte";
