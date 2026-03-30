@@ -8,6 +8,9 @@
     { key: "title", direction: "asc" },
   ];
 
+  let sizeValue: OrderByValue = [{ key: "title", direction: "asc" }];
+  let densityValue: OrderByValue = [{ key: "title", direction: "asc" }];
+
   const fields: SortField[] = [
     { key: "title", label: "Title" },
     { key: "kind", label: "Kind" },
@@ -28,7 +31,7 @@
     <Eyebrow>Sizes</Eyebrow>
     <div class="specimen__stack">
       {#each controlSizes as size}
-        <OrderBy fields={fields} value={[{ key: "title", direction: "asc" }]} {size} />
+        <OrderBy {fields} bind:value={sizeValue} {size} />
       {/each}
     </div>
   </div>
@@ -39,7 +42,7 @@
       {#each ["compact", "default", "comfortable"] as density}
         <div class="specimen__row">
           <span class="specimen__label">{density}</span>
-          <OrderBy fields={fields} value={[{ key: "title", direction: "asc" }]} {density} />
+          <OrderBy {fields} bind:value={densityValue} {density} />
         </div>
       {/each}
     </div>
@@ -47,7 +50,7 @@
 
   <div class="specimen__group">
     <Eyebrow>Disabled</Eyebrow>
-    <OrderBy fields={fields} value={[{ key: "title", direction: "asc" }]} disabled />
+    <OrderBy {fields} value={[{ key: "title", direction: "asc" }]} disabled />
   </div>
 </div>
 
