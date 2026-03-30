@@ -1,3 +1,7 @@
+<script context="module" lang="ts">
+  export const noSurface = true;
+</script>
+
 <script lang="ts">
   import { FieldSet, Field, TextInput, Select, Surface } from "@poodle/svelte-primitives";
 </script>

@@ -25,7 +25,13 @@
   {#if specimenComponent}
     <section class="component-page__section">
       <h2 class="component-page__section-title">Live demo</h2>
-      <svelte:component this={specimenComponent} />
+      {#if specimenComponent.noSurface}
+        <svelte:component this={specimenComponent} />
+      {:else}
+        <Surface tone="panel" border="subtle" padding="md">
+          <svelte:component this={specimenComponent} />
+        </Surface>
+      {/if}
     </section>
     <Separator />
   {:else}
