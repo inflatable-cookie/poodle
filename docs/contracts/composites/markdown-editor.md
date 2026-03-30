@@ -1,7 +1,7 @@
 # MarkdownEditor
 
-Status: seed contract
-Updated: 2026-03-26
+Status: detailed contract
+Updated: 2026-03-30
 
 ## 1. Purpose
 
@@ -17,13 +17,13 @@ Updated: 2026-03-26
 [Root]
   ├── [Toolbar]
   │     ├── [Tools]
-  │     │     ├── [Tool Button: Bold]
-  │     │     ├── [Tool Button: Italic]
-  │     │     ├── [Tool Button: Heading]
-  │     │     ├── [Tool Button: Link]
-  │     │     ├── [Tool Button: Code]
-  │     │     ├── [Tool Button: Quote]
-  │     │     └── [Tool Button: List]
+  │     │     ├── [Tool Button: Bold]       Icon: bold
+  │     │     ├── [Tool Button: Italic]     Icon: italic
+  │     │     ├── [Tool Button: Heading]    Icon: heading
+  │     │     ├── [Tool Button: Link]       Icon: link
+  │     │     ├── [Tool Button: Code]       Icon: code
+  │     │     ├── [Tool Button: Quote]      Icon: quote
+  │     │     └── [Tool Button: List]       Icon: list
   │     └── [Mode Switcher]
   │           ├── [Mode Button: Edit]
   │           ├── [Mode Button: Split]
@@ -31,21 +31,24 @@ Updated: 2026-03-26
   └── [Body]
         ├── [Textarea]     (hidden in preview mode)
         └── [Preview Pane]  (hidden in edit mode)
+              ├── [Rendered HTML]  (when value has content)
+              └── [Empty Preview]  (when value is empty)
 ```
 
 ### Parts
 
 | Part | Element | Notes |
 |------|---------|-------|
-| root | `<div>` | Container with border, radius, surface background |
+| root | `<div>` | Container with border, radius, surface background, class `md-editor` |
 | toolbar | `<div>` | Flex row, space-between, toolbar buttons and mode switcher |
 | tools | `<div>` | Flex row of formatting tool buttons |
 | tool-button | `<button>` | Icon button for each formatting action; disabled when `disabled` or in preview mode |
-| mode-switcher | `<div>` | Segmented group of mode toggle buttons |
+| mode-switcher | `<div>` | Segmented group of mode toggle buttons, bordered container |
 | mode-button | `<button>` | Switches between edit, split, preview modes; active state highlighted |
 | body | `<div>` | Flex container holding textarea and/or preview pane |
 | textarea | `<textarea>` | Markdown input area; monospace font; resizable vertically |
-| preview | `<div>` | Rendered HTML preview of markdown content |
+| preview | `<div>` | Rendered HTML preview of markdown content, `aria-label="Preview"` |
+| preview-empty | `<p>` | "Nothing to preview" italic placeholder |
 
 ## 3. Props And Inputs
 
@@ -55,7 +58,7 @@ Updated: 2026-03-26
 | `placeholder` | `string` | `"Write markdown..."` | no | Placeholder text for the textarea |
 | `disabled` | `boolean` | `false` | no | Disables editing and toolbar actions |
 | `ariaLabel` | `string` | `"Markdown editor"` | no | Accessible label for the textarea |
-| `minHeight` | `string` | `"12rem"` | no | CSS min-height for the textarea |
+| `minHeight` | `string` | `"12rem"` | no | CSS min-height for the textarea (applied via inline style) |
 | `mode` | `"edit" \| "preview" \| "split"` | `"edit"` | no | Active view mode |
 | `size` | `ControlSize \| null` | `null` | no | Explicit semantic size override for toolbar and mode controls |
 | `sizeRole` | `SemanticControlSizeRole` | `"control"` | no | Semantic role used to resolve inherited size scale |
@@ -77,17 +80,17 @@ None.
 |-------|---------|---------------|
 | default | -- | Normal appearance |
 | disabled | `disabled=true` | `disabled_opacity` on root, `pointer-events: none` |
-| tool-hover | Mouse over tool button | Accent background at 12% opacity, text-primary color |
-| tool-focus | Focus-visible on tool button | Focus ring |
-| tool-disabled | `disabled` or `mode="preview"` | 40% opacity on tool button |
+| tool-hover | Mouse over tool button (not disabled) | Accent background at 12% opacity, text-primary color |
+| tool-focus | Focus-visible on tool button | Focus ring: `border-width-focus` solid `accent-focusRing`, offset `0.0625rem` |
+| tool-disabled | `disabled` or `mode="preview"` | 40% opacity on tool button, default cursor |
 | mode-active | Mode matches current mode | Accent background at 16% opacity, text-primary color |
-| mode-hover | Mouse over mode button | Elevated background |
+| mode-hover | Mouse over mode button | Elevated background at 72% blend |
 
 ### Component States
 
 | State | Description |
 |-------|-------------|
-| edit | Only textarea visible |
+| edit | Only textarea visible; all tools enabled (unless disabled) |
 | preview | Only preview pane visible; toolbar tools disabled |
 | split | Both textarea and preview visible side by side |
 
@@ -102,37 +105,40 @@ None.
 ### Semantics
 
 - Textarea carries `aria-label` from the `ariaLabel` prop
-- Tool buttons each have `aria-label` matching their action label (Bold, Italic, etc.)
+- Tool buttons each have `aria-label` matching their action label ("Bold", "Italic", "Heading", "Link", "Code", "Quote", "List")
+- Tool buttons also have `title` matching their action label
 - Preview pane has `aria-label="Preview"`
+- Disabled tool buttons use native `disabled` attribute
 
 ### Keyboard
 
 - Standard textarea keyboard behavior for editing
 - Tab navigation through toolbar buttons
-- Tool buttons disabled in preview mode are skipped by tab order (native `disabled`)
+- Tool buttons disabled in preview mode are excluded from tab order (native `disabled`)
+- Mode buttons are always keyboard-accessible
 
 ### Focus
 
-- Tool buttons show focus ring via `focus-visible`: `border-width-focus` solid `accent-focusRing`, offset `0.0625rem`
+- Tool buttons show focus ring via `:focus-visible`: `border-width-focus` solid `accent-focusRing`, offset `0.0625rem`
 - Textarea has outline suppressed (border on parent container serves as visual boundary)
 
 ## 7. Layout
 
 ### Sizing
 
-- Root: full width of container, border `0.0625rem solid border-default`, `radius-surface`
-- Toolbar: flex row, space-between, wraps on narrow widths, and tightens/opens with semantic density
-- Tool button: semantic control box tied to `xs | sm | md | lg | xl` rather than a fixed `1.75rem`
-- Mode button: uses semantic label sizing and density-aware horizontal padding
+- Root: full width of container, border `0.0625rem solid border-default`, `radius-surface`, `overflow: hidden`
+- Toolbar: flex row, space-between, wraps on narrow widths, density-aware padding
+- Tool button: semantic control box tied to size scale
+- Mode button: semantic label sizing and density-aware horizontal padding
 - Body: flex row; in split mode, textarea and preview each `flex: 1`
 - Textarea: density-aware pane padding, min-height from prop, resize vertical
 - Preview: density-aware pane padding, overflow-y auto
 
 ### Composition
 
-In split mode the textarea gets a right border (`border-subtle`) to visually separate from the preview pane.
+In split mode the textarea gets a right border (`border-subtle`) to visually separate from the preview pane. Wraps children in `UiPresentationProvider`.
 
-## 8. Token Usage And Precise CSS
+## 8. Token Usage — Exact Values
 
 ### Data Attributes
 
@@ -142,7 +148,7 @@ In split mode the textarea gets a right border (`border-subtle`) to visually sep
 | `data-size` | root `<div>` | `"xs"`, `"sm"`, `"md"`, `"lg"`, `"xl"` |
 | `data-density` | root `<div>` | `"compact"`, `"default"`, `"comfortable"` |
 
-### Root
+### Root `.md-editor`
 
 | Property | Value |
 |----------|-------|
@@ -151,14 +157,14 @@ In split mode the textarea gets a right border (`border-subtle`) to visually sep
 | background | `var(--poodle-color-background-surface)` |
 | overflow | `hidden` |
 
-### Root (Disabled)
+### Root Disabled `.md-editor--disabled`
 
 | Property | Value |
 |----------|-------|
 | opacity | `var(--poodle-state-opacity-disabled)` |
 | pointer-events | `none` |
 
-### Toolbar
+### Toolbar `.md-editor__toolbar`
 
 | Property | Value |
 |----------|-------|
@@ -166,32 +172,33 @@ In split mode the textarea gets a right border (`border-subtle`) to visually sep
 | align-items | `center` |
 | justify-content | `space-between` |
 | gap | `0.5rem` |
-| padding | `0.375rem 0.5rem` |
+| padding | `0.375rem 0.5rem` (default) |
 | border-bottom | `0.0625rem solid var(--poodle-color-border-subtle)` |
 | background | `color-mix(in srgb, var(--poodle-color-background-elevated) 72%, transparent)` |
 | flex-wrap | `wrap` |
 
-### Tools Container
+### Tools Container `.md-editor__tools`
 
 | Property | Value |
 |----------|-------|
 | display | `flex` |
-| gap | `0.125rem` |
+| gap | `0.125rem` (default) |
 
-### Tool Button
+### Tool Button `.md-editor__tool-btn`
 
 | Property | Value |
 |----------|-------|
 | display | `inline-flex` |
 | align-items | `center` |
 | justify-content | `center` |
-| width | `1.75rem` |
-| height | `1.75rem` |
+| width | `1.75rem` (default, varies by size) |
+| height | `1.75rem` (default, varies by size) |
 | padding | `0` |
 | border | `0` |
 | border-radius | `var(--poodle-radius-control)` |
 | background | `transparent` |
 | color | `var(--poodle-color-text-secondary)` |
+| cursor | `pointer` |
 | font-family | `var(--poodle-typography-code-family)` |
 | font-size | `0.75rem` |
 | font-weight | `600` |
@@ -209,25 +216,28 @@ In split mode the textarea gets a right border (`border-subtle`) to visually sep
 | `:disabled` | opacity | `0.4` |
 | `:disabled` | cursor | `default` |
 
-### Mode Switcher
+### Mode Switcher `.md-editor__modes`
 
 | Property | Value |
 |----------|-------|
 | display | `flex` |
-| gap | `0.125rem` |
+| gap | `0.125rem` (default, same as tool gap) |
 | border | `0.0625rem solid var(--poodle-color-border-default)` |
 | border-radius | `var(--poodle-radius-control)` |
 | overflow | `hidden` |
 
-### Mode Button
+### Mode Button `.md-editor__mode-btn`
 
 | Property | Value |
 |----------|-------|
-| padding | `0.1875rem 0.5rem` |
+| min-height | `calc(tool-size - (toolbar-y * 0.5))` |
+| padding | `0.1875rem 0.5rem` (default) |
 | border | `0` |
 | background | `transparent` |
 | color | `var(--poodle-color-text-secondary)` |
-| font-size | `0.6875rem` |
+| cursor | `pointer` |
+| font | `inherit` |
+| font-size | `var(--poodle-typography-label-size)` |
 | line-height | `1` |
 | transition | `background var(--poodle-motion-duration-interaction) var(--poodle-motion-easing-standard)` |
 
@@ -239,27 +249,27 @@ In split mode the textarea gets a right border (`border-subtle`) to visually sep
 | `.active` | background | `color-mix(in srgb, var(--poodle-color-accent-base) 16%, transparent)` |
 | `.active` | color | `var(--poodle-color-text-primary)` |
 
-### Body
+### Body `.md-editor__body`
 
 | Property | Value |
 |----------|-------|
 | display | `flex` |
 
-#### Body Split Mode (`[data-mode="split"]`)
+#### Body Split Mode `[data-mode="split"]`
 
 | Property | Value |
 |----------|-------|
 | gap | `0` |
-| textarea flex | `1`, right border `0.0625rem solid var(--poodle-color-border-subtle)` |
-| preview flex | `1` |
+| textarea | `flex: 1`, `border-right: 0.0625rem solid var(--poodle-color-border-subtle)` |
+| preview | `flex: 1` |
 
-### Textarea
+### Textarea `.md-editor__textarea`
 
 | Property | Value |
 |----------|-------|
 | flex | `1` |
 | width | `100%` |
-| padding | `0.75rem` |
+| padding | `0.75rem` (default) |
 | border | `0` |
 | background | `transparent` |
 | color | `var(--poodle-color-text-primary)` |
@@ -270,12 +280,12 @@ In split mode the textarea gets a right border (`border-subtle`) to visually sep
 | outline | `none` |
 | `::placeholder` color | `var(--poodle-color-text-tertiary)` |
 
-### Preview Pane
+### Preview Pane `.md-editor__preview`
 
 | Property | Value |
 |----------|-------|
 | flex | `1` |
-| padding | `0.75rem` |
+| padding | `0.75rem` (default) |
 | font-family | `var(--poodle-typography-body-family)` |
 | font-size | `0.875rem` |
 | line-height | `1.6` |
@@ -315,7 +325,7 @@ In split mode the textarea gets a right border (`border-subtle`) to visually sep
 | `a` | color | `var(--poodle-color-accent-default, #6366f1)` |
 | `a` | text-decoration | `underline` |
 
-### Preview Empty
+### Preview Empty `.md-editor__preview-empty`
 
 | Property | Value |
 |----------|-------|
@@ -323,18 +333,35 @@ In split mode the textarea gets a right border (`border-subtle`) to visually sep
 | font-style | `italic` |
 | margin | `0` |
 
-### Light Theme Overrides
+### Size Adjustments
 
-None.
+| Size | Tool button size | Mode horizontal padding |
+|------|-----------------|------------------------|
+| `xs` | `1.5rem` | `0.375rem` |
+| `sm` | `1.75rem` | `0.5rem` (default) |
+| `md` | `2rem` | `0.5rem` |
+| `lg` | `2.25rem` | `0.625rem` |
+| `xl` | `2.5rem` | `0.75rem` |
+
+### Density Adjustments
+
+| Density | Toolbar Y | Toolbar X | Tool gap | Mode Y | Pane X | Pane Y |
+|---------|----------|----------|----------|--------|--------|--------|
+| `compact` | `0.25rem` | `0.375rem` | `0.0625rem` | `0.125rem` | `0.625rem` | `0.625rem` |
+| `default` | `0.375rem` | `0.5rem` | `0.125rem` | `0.1875rem` | `0.75rem` | `0.75rem` |
+| `comfortable` | `0.5rem` | `0.625rem` | `0.1875rem` | `0.25rem` | `0.875rem` | `0.875rem` |
 
 ## 9. Svelte Notes
 
 - Uses `Icon` primitive for toolbar button icons (bold, italic, heading, link, code, quote, list)
-- `insertMarkdown()` manipulates textarea selection to wrap or prepend markdown syntax
-- `insertLine()` prefixes the current line with markdown syntax (heading, quote, list)
-- `renderMarkdown()` is a safe subset HTML renderer (escapes HTML, no raw passthrough)
+- `insertMarkdown(before, after)` manipulates textarea selection to wrap or prepend markdown syntax
+- `insertLine(prefix)` prefixes the current line with markdown syntax (heading, quote, list)
+- `renderMarkdown()` is a safe subset HTML renderer (escapes HTML, no raw passthrough): headings, bold, italic, inline code, links, images, blockquotes, lists, horizontal rules, line breaks
 - `tick()` used after insertion to restore cursor selection
 - `mode` is reactive; changing it shows/hides textarea and preview
+- `handleInput()` dispatches `change` event on every textarea input
+- `textareaEl` bound for programmatic selection manipulation
+- Wraps content in `UiPresentationProvider` with resolved size and density
 
 ## 10. GPUI Notes
 
@@ -342,26 +369,34 @@ Not yet implemented.
 
 ## 11. Parity Checklist
 
-| Feature | Svelte | GPUI | Jetstream |
-|---------|--------|------|-----------|
-| Toolbar formatting buttons | Yes | -- | -- |
-| Edit/Preview/Split modes | Yes | -- | -- |
-| Live markdown preview | Yes | -- | -- |
-| Disabled state | Yes | -- | -- |
-| Keyboard toolbar navigation | Yes | -- | -- |
-| Focus ring on tool buttons | Yes | -- | -- |
+### Tier 1: Strict Parity
 
-## 12. Known Deltas
+- [ ] All props have the same meaning and defaults
+- [ ] `change` event payload matches
+- [ ] Toolbar actions produce correct markdown syntax
+- [ ] Edit/Preview/Split mode switching behavior matches
+- [ ] Disabled state disables all tools and editing
 
-None yet (single implementation).
+### Tier 2: Visual Parity
 
-## 13. Specimen Definitions
+- [ ] Toolbar layout and spacing matches
+- [ ] Tool button and mode button styling matches
+- [ ] Preview rendered HTML styling matches
+- [ ] Size and density adjustments match
+
+### Tier 3: Implementation Freedom
+
+- [ ] Markdown rendering engine may differ
+- [ ] Text insertion mechanics may differ
+- [ ] Cursor restoration approach may differ
+
+## 12. Specimen Definitions
 
 ### Split View
 
 | Label | Props / Config | Expected Visual |
 |-------|---------------|-----------------|
-| Split view | `mode="split"`, pre-filled markdown content | Side-by-side textarea and rendered preview |
+| Split view | `mode="split"`, pre-filled markdown with headings, bold, code, links | Side-by-side textarea and rendered preview |
 
 ### Edit Mode
 
@@ -369,12 +404,14 @@ None yet (single implementation).
 |-------|---------------|-----------------|
 | Edit mode | `mode="edit"`, empty content, `placeholder="Start writing..."` | Textarea only with placeholder text |
 
+### Preview Mode
+
+| Label | Props / Config | Expected Visual |
+|-------|---------------|-----------------|
+| Preview mode | `mode="preview"`, pre-filled markdown content | Rendered HTML only; toolbar tools disabled |
+
 ### Disabled
 
 | Label | Props / Config | Expected Visual |
 |-------|---------------|-----------------|
-| Disabled | `value="Read-only content"`, `disabled=true` | Reduced opacity, no interaction |
-
-## 14. Approval And Adoption Notes
-
-Use `MarkdownEditor` for content authoring fields where markdown formatting is needed. For block-based rich content editing with multiple block types, use `BlockEditor` instead. The built-in markdown renderer is intentionally a safe subset; applications needing full CommonMark or GFM support should provide a custom renderer.
+| Disabled | `value="Read-only content"`, `disabled=true` | Reduced opacity, no interaction possible |

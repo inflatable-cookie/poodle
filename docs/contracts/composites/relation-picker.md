@@ -1,76 +1,103 @@
 # RelationPicker
 
-Status: seed contract
-Updated: 2026-03-26
+Status: detailed contract
+Updated: 2026-03-30
 
 ## 1. Purpose
 
 - Component name: `RelationPicker`
 - Layer: `composites`
-- Summary: a selection workflow for attaching or choosing related entities,
-  assets, presets, or references, with optional multi-level drill-down navigation
-- In scope: candidate browse, search, single or multiple selection, selected
-  summary, confirm/cancel flow, inline/popover/modal posture, hierarchical
-  drill-down with breadcrumbs
-- Out of scope: graph semantics, persistence, authorization, domain-specific
-  validation rules
+- Summary: a selection workflow for attaching or choosing related entities, assets, presets, or references, with optional multi-level drill-down navigation
+- In scope: candidate browse, search, single or multiple selection, selected summary, confirm/cancel flow, inline/popover/modal posture, hierarchical drill-down with breadcrumbs
+- Out of scope: graph semantics, persistence, authorization, domain-specific validation rules
 
 ## 2. Anatomy
 
 ```text
-[PickerShell]
-  ├── [Toolbar]  (slot)
-  │     ├── [DrillBreadcrumbs]  (when drilling or post-drill)
-  │     │     ├── [BackButton]
-  │     │     └── [BreadcrumbItem...]
-  │     ├── [DrillLevelLabel]   (when drilling)
-  │     └── [SearchField]
-  ├── [SelectionSummary]  (slot: selection, hidden while drilling)
-  ├── [DrillList]         (when drilling, replaces candidate list)
-  │     └── [DrillListItem...]
-  │           ├── [Label]
-  │           ├── [Description]  (optional)
-  │           ├── [Count]        (optional)
-  │           └── [ChevronIcon]
-  ├── [CandidateList]     (when not drilling)
-  │     └── [CandidateRow...]
-  │           ├── [Checkbox]     (multiple mode)
-  │           ├── [Label]
-  │           ├── [Description]  (optional)
-  │           └── [Meta]         (optional)
-  ├── [State]             (slot, for custom state content)
-  └── [Footer]            (slot)
-        ├── [FooterNote]
-        └── [FormActions]
-              ├── [CancelButton]
-              └── [ConfirmButton]
+[Root]
+  └── [PickerShell]
+        ├── [Toolbar]  (slot)
+        │     ├── [DrillBreadcrumbs]  (when drilling or post-drill with breadcrumbs)
+        │     │     ├── [BackButton]  Icon: chevron-left
+        │     │     ├── [Separator]   "/"
+        │     │     └── [BreadcrumbItem...]
+        │     ├── [DrillLevelLabel]   (when drilling)
+        │     ├── [SearchField]       (drill search or main search)
+        ├── [SelectionSummary]  (slot: selection, hidden while drilling)
+        ├── [DrillList]         (when drilling, replaces candidate list)
+        │     └── [DrillListItem...]
+        │           └── [DrillButton]
+        │                 ├── [Copy]
+        │                 │     ├── [Label]       <strong>
+        │                 │     └── [Description]  <small> (optional)
+        │                 └── [Meta]
+        │                       ├── [Count]        (optional)
+        │                       └── [ChevronIcon]  Icon: chevron-right
+        ├── [DrillEmpty]        (when drilling, no items, not loading)
+        ├── [CandidateList]     (when not drilling)
+        │     └── [CandidateRow...]
+        │           ├── [Checkbox]     (multiple mode only)
+        │           ├── [CandidateButton]
+        │           │     └── [CandidateCopy]
+        │           │           ├── [Label]       <strong>
+        │           │           └── [Detail]      <small> (description + meta, optional)
+        ├── [State]             (slot, for custom state content via PickerShell)
+        └── [Footer]            (slot)
+              └── [FormActions]
+                    ├── [FooterNote]
+                    └── [FooterActions]
+                          ├── [CancelButton]  ghost variant
+                          └── [ConfirmButton]  primary variant
 ```
+
+### Parts
+
+| Part | Element | Notes |
+|------|---------|-------|
+| root | `<div>` | Wrapper with class `relation-picker`, data attributes |
+| picker-shell | `PickerShell` | Structural shell with title, description, variant, state, status |
+| drill-breadcrumbs | `<div>` | Flex row of breadcrumb items with back button |
+| drill-back | `<button>` | Back navigation icon button, `aria-label="Go back"` |
+| drill-separator | `<span>` | "/" separator between breadcrumb items |
+| drill-breadcrumb-item | `<button>` | Clickable breadcrumb, navigates to that level |
+| drill-level-label | `<div>` | Uppercase label for current drill level |
+| search-field | `SearchField` | Main or drill search, with clear and keydown handling |
+| selection-summary | `SelectionSummary` | Removable selection pills, hidden during drilling |
+| drill-list | `<ul>` | Grid list of drill-down items |
+| drill-button | `<button>` | Full-width button for each drill item |
+| drill-copy | `<span>` | Grid of label and description |
+| drill-meta | `<span>` | Flex row of count and chevron icon |
+| drill-empty | `<li>` | "No items found" centered message |
+| candidate-list | `<ul>` | Grid list of candidate items, `aria-label="Available candidates"` |
+| candidate-item | `<li>` | Grid row with checkbox, button, data-selected attribute |
+| candidate-button | `<button>` | Selection button with `aria-pressed`, `aria-describedby` |
+| candidate-copy | `<span>` | Grid of label and detail text |
+| footer-note | `<p>` | Descriptive text about selection mode |
+| footer-actions | `<div>` | Flex row of cancel and confirm buttons |
 
 ## 3. Props And Inputs
 
-### Public Props
-
 | Prop | Type | Default | Required | Notes |
 |------|------|---------|----------|-------|
-| `title` | `string` | `"Select items"` | no | picker heading text |
-| `description` | `string \| null` | `null` | no | subheading below title |
-| `items` | `PickerItem[]` | `[]` | no | flat candidate list |
-| `selectedIds` | `string[]` | `[]` | no | controlled selection state |
-| `query` | `string` | `""` | no | controlled search query |
-| `selectionMode` | `"single" \| "multiple"` | `"multiple"` | no | selection semantics |
-| `variant` | `"inline" \| "popover" \| "modal"` | `"inline"` | no | workflow posture |
-| `state` | `"ready" \| "empty" \| "loading" \| "error" \| "no-results"` | `"ready"` | no | candidate-set posture |
-| `ariaLabel` | `string \| null` | `null` | no | accessible name override |
-| `confirmLabel` | `string` | `"Confirm selection"` | no | text for confirm button |
-| `cancelLabel` | `string` | `"Cancel"` | no | text for cancel button |
-| `drillDown` | `DrillDownConfig \| null` | `null` | no | drill-down navigation config |
-| `size` | `ControlSize \| null` | `null` | no | explicit semantic size override for picker actions and drill-down controls |
-| `sizeRole` | `SemanticControlSizeRole` | `"control"` | no | semantic role used to resolve inherited size scale |
-| `density` | `ControlDensity \| null` | `null` | no | explicit density override for breadcrumbs and drill-list spacing |
+| `title` | `string` | `"Select items"` | no | Picker heading text |
+| `description` | `string \| null` | `null` | no | Subheading below title |
+| `items` | `PickerItem[]` | `[]` | no | Flat candidate list |
+| `selectedIds` | `string[]` | `[]` | no | Controlled selection state |
+| `query` | `string` | `""` | no | Controlled search query |
+| `selectionMode` | `"single" \| "multiple"` | `"multiple"` | no | Selection semantics |
+| `variant` | `"inline" \| "popover" \| "modal"` | `"inline"` | no | Workflow posture |
+| `state` | `"ready" \| "empty" \| "loading" \| "error" \| "no-results"` | `"ready"` | no | Candidate-set posture |
+| `ariaLabel` | `string \| null` | `null` | no | Accessible name override |
+| `confirmLabel` | `string` | `"Confirm selection"` | no | Text for confirm button |
+| `cancelLabel` | `string` | `"Cancel"` | no | Text for cancel button |
+| `drillDown` | `DrillDownConfig \| null` | `null` | no | Drill-down navigation config |
+| `size` | `ControlSize \| null` | `null` | no | Explicit semantic size override for picker actions and drill-down controls |
+| `sizeRole` | `SemanticControlSizeRole` | `"control"` | no | Semantic role used to resolve inherited size scale |
+| `density` | `ControlDensity \| null` | `null` | no | Explicit density override for breadcrumbs and drill-list spacing |
 
 ### Types
 
-```typescript
+```ts
 type PickerItem = {
   id: string;
   label: string;
@@ -106,13 +133,23 @@ type DrillDownConfig = {
   levels: DrillDownLevel[];
   finalItems?: DrillDownItemsFn;
 };
+
+type BrowseState = "ready" | "empty" | "loading" | "error" | "no-results";
+type PickerVariant = "inline" | "popover" | "modal";
+type SelectionMode = "single" | "multiple";
 ```
 
-### Controlled And Uncontrolled
+### Slots
+
+| Slot | Scope | Notes |
+|------|-------|-------|
+| `state` | none | Custom state content, passed through to PickerShell's `state` slot |
+
+### Controlled / Uncontrolled
 
 - `selectedIds` and `query` are controlled props; host owns final state
-- drill-down state (depth, selections) is managed internally
-- collapse states are externally owned when used
+- Drill-down state (depth, selections, drill search query) is managed internally
+- `query` is also mutated internally on search and passed back via `queryChange`
 
 ## 4. States
 
@@ -120,122 +157,89 @@ type DrillDownConfig = {
 
 | State | Trigger | Expected Result |
 |-------|---------|-----------------|
-| ready | `state="ready"`, no drill-down | candidate list visible with search |
-| drilling | `drillDown` configured, depth < levels.length | drill list shown with level items, breadcrumbs, back button |
-| drill-complete | all drill levels selected | final items loaded (via `finalItems` fn or flat `items`), candidate list shown with breadcrumbs |
-| empty | `state="empty"` | state area with empty message |
-| loading | `state="loading"` | state area with compact `Spinner` (`grid`, accent) plus loading message |
-| error | `state="error"` | state area with error message |
-| no-results | `state="no-results"` | state area with no-results message |
+| ready | `state="ready"`, no drill-down | Candidate list visible with search |
+| drilling | `drillDown` configured, depth < levels.length | Drill list shown with level items, breadcrumbs, back button, drill search |
+| drill-complete | All drill levels selected | Final items loaded (via `finalItems` fn or flat `items`), candidate list shown with breadcrumbs |
+| drill-loading | Level items is async function, awaiting | PickerShell in loading state |
+| empty | `state="empty"` | State area with empty message |
+| loading | `state="loading"` | State area with spinner and loading message |
+| error | `state="error"` | State area with error message |
+| no-results | `state="no-results"` | State area with no-results message |
+| final-items-loading | Drill complete, `finalItems` async resolving | Loading state during final items fetch |
 
 ### Component States
 
-Internal drill-down state includes: `drillDepth`, `drillSelections` (map of
-level key to selected item), `drillSearchQuery`, `drillItems`, `drillLoading`,
-`finalItemsLoaded`, `finalItemsLoading`.
+Internal drill-down state includes: `drillDepth`, `drillSelections` (map of level key to selected item), `drillSearchQuery`, `drillItems`, `drillLoading`, `finalItemsLoaded`, `finalItemsLoading`.
 
 ## 5. Events
 
-| Event | When It Fires | Payload | Notes |
-|-------|---------------|---------|-------|
-| `queryChange` | search query changes | `{ value: string }` | host owns filtering or remote search |
-| `selectionChange` | selection toggled | `{ selectedIds: string[] }` | host owns final state |
-| `confirm` | confirm button clicked | `{ selectedIds: string[] }` | host commits relation change |
-| `cancel` | cancel button clicked | `void` | host decides whether selection resets |
-| `drillContext` | drill-down level selected | `{ context: DrillDownContext }` | fires after each drill selection with accumulated context |
+| Event | When It Fires | Payload |
+|-------|---------------|---------|
+| `queryChange` | Search query changes (typing or clear) | `{ value: string }` |
+| `selectionChange` | Selection toggled (single or multiple) | `{ selectedIds: string[] }` |
+| `confirm` | Confirm button clicked | `{ selectedIds: string[] }` |
+| `cancel` | Cancel button clicked | `void` |
+| `drillContext` | Drill-down level selected | `{ context: DrillDownContext }` |
 
-## 6. Drill-Down Navigation
-
-When `drillDown` is provided, the picker enters a hierarchical navigation mode:
-
-1. **Level navigation**: each level in `drillDown.levels` presents a searchable
-   list of items; selecting an item advances to the next level
-2. **Breadcrumbs**: completed levels appear as clickable breadcrumb links above
-   the search field, with a back button (chevron-left icon)
-3. **Back navigation**: clicking the back button or pressing Escape/Backspace
-   (when search is empty) returns to the previous level
-4. **Breadcrumb jump**: clicking a breadcrumb navigates directly to that level,
-   clearing all subsequent selections
-5. **Final items**: when all levels are completed, if `drillDown.finalItems` is
-   provided, it is called with the accumulated context and search query to load
-   the final candidate list; otherwise, the flat `items` prop is used
-6. **Level loading**: if a level's `items` is a function, it is called with the
-   current search query and accumulated drill context; the picker shows a
-   loading state while the function resolves
-7. **Search isolation**: each drill level has its own search query, independent
-   of the main picker search query
-
-## 7. Accessibility
+## 6. Accessibility
 
 ### Semantics
 
-- candidate list uses `<ul>` with `aria-label`
-- candidate buttons use `aria-pressed` for selection state
-- candidate descriptions use `aria-describedby` linking
-- multiple mode shows `Checkbox` primitive alongside each candidate
-- single mode uses button-press pattern (no radio group)
-- status live region (via PickerShell) announces result/selection counts
+- Candidate list uses `<ul>` with `aria-label="Available candidates"`
+- Candidate buttons use `aria-pressed` for selection state
+- Candidate descriptions use `aria-describedby` linking (id: `relation-picker-item-{id}`)
+- Multiple mode shows `Checkbox` primitive alongside each candidate
+- Single mode uses button-press pattern (no radio group)
+- Status live region (via PickerShell) announces result/selection counts
+- Search field has `aria-describedby` linking to status element
+- Drill list uses `<ul>` with `aria-label` from current level label
+- Back button has `aria-label="Go back"`
 
 ### Keyboard
 
 | Key | Behavior |
 |-----|----------|
-| `ArrowDown` / `ArrowRight` | focus next candidate |
-| `ArrowUp` / `ArrowLeft` | focus previous candidate |
-| `Home` | focus first candidate |
-| `End` | focus last candidate |
-| `Escape` | during drill-down: go back one level (if depth > 0) |
-| `Backspace` | during drill-down with empty search: go back one level |
-| `Enter` / `Space` | on candidate: toggle selection; on drill item: select and advance |
+| `ArrowDown` / `ArrowRight` | Focus next candidate |
+| `ArrowUp` / `ArrowLeft` | Focus previous candidate |
+| `Home` | Focus first candidate |
+| `End` | Focus last candidate |
+| `Escape` | During drill-down with depth > 0: go back one level |
+| `Backspace` | During drill-down with empty search: go back one level |
+| `Enter` / `Space` | On candidate: toggle selection; on drill item: select and advance |
 
-### Focus And Announcement
+### Focus
 
-- focus entry: search field receives initial focus
-- candidate focus wraps (last -> first, first -> last)
-- live-region behavior: status text updated on filter/selection changes
-- GPUI-native accessibility mapping notes: GPUI must expose candidate list,
-  selection state, selected-summary items, and confirm/cancel actions as a
-  coherent workflow rather than unrelated controls
+- Focus entry: search field receives initial focus
+- Candidate focus wraps (last to first, first to last)
+- Live-region behavior: status text updated on filter/selection changes
+- `candidateButtons` array provides programmatic focus management
 
-## 8. Composition Guidance
-
-- use `single` when choosing one relation target
-- use `multiple` when attaching several related entities or assets
-- use `inline` when the picker is part of a larger form or detail flow
-- use `popover` for compact transient selection
-- use `modal` when the selection task needs focused workspace and explicit
-  commit/cancel rhythm
-- use `drillDown` for hierarchical data (e.g. category > subcategory > items)
-
-## 9. Layout
+## 7. Layout
 
 ### Sizing
 
-- inherits layout from PickerShell
-- candidate items use grid layout with checkbox + content + meta columns
-- drill items use flex layout with content + meta/chevron
-- breadcrumb and drill-list controls respond to semantic `size` / `sizeRole`
-- drill-list row padding tightens or opens with `compact | default | comfortable` density
-- breadcrumb items have max-width 8rem with text ellipsis
+- Inherits layout from PickerShell
+- Candidate items use grid layout: `auto minmax(0, 1fr) auto` columns
+- Drill items use flex layout with content and meta/chevron
+- Breadcrumb items have `max-width: 8rem` with text ellipsis
 
 ### Composition
 
-- composes: `PickerShell`, `SelectionSummary`, `SearchField`, `Checkbox`,
-  `Button`, `FormActions`, `Icon`
-- parent expectations: inline containers, popovers, modal dialogs
-- child expectations: candidate items are internally rendered from `items` prop
+- Composes: `PickerShell`, `SelectionSummary`, `SearchField`, `Checkbox`, `Button`, `FormActions`, `Icon`
+- Parent expectations: inline containers, popovers, modal dialogs
+- Wraps children in `UiPresentationProvider` with resolved size and density
 
-## 10. Token Usage And Precise CSS
+## 8. Token Usage — Exact Values
 
 ### Data Attributes
 
 | Attribute | Element | Values |
 |-----------|---------|--------|
 | `data-selected` | candidate item `<li>` | `"true"`, `"false"` |
-| `data-size` | wrapper `<div>` | `"xs"`, `"sm"`, `"md"`, `"lg"`, `"xl"` |
-| `data-density` | wrapper `<div>` | `"compact"`, `"default"`, `"comfortable"` |
+| `data-size` | root `<div>` | `"xs"`, `"sm"`, `"md"`, `"lg"`, `"xl"` |
+| `data-density` | root `<div>` | `"compact"`, `"default"`, `"comfortable"` |
 
-### Drill Breadcrumbs
+### Drill Breadcrumbs `.drill-breadcrumbs`
 
 | Property | Value |
 |----------|-------|
@@ -244,24 +248,25 @@ When `drillDown` is provided, the picker enters a hierarchical navigation mode:
 | gap | `0.25rem` |
 | padding-bottom | `var(--poodle-space-stack-sm)` |
 
-### Drill Breadcrumbs Back Button
+### Drill Breadcrumbs Back Button `.drill-breadcrumbs__back`
 
 | Property | Value |
 |----------|-------|
 | display | `flex` |
 | align-items | `center` |
 | justify-content | `center` |
-| width | `1.5rem` |
-| height | `1.5rem` |
+| width | `1.5rem` (default, varies by size) |
+| height | `1.5rem` (default, varies by size) |
 | padding | `0` |
 | border | `none` |
 | border-radius | `var(--poodle-radius-sm, 0.25rem)` |
 | background | `transparent` |
 | color | `var(--poodle-color-text-secondary)` |
+| cursor | `pointer` |
 | `:hover` background | `var(--poodle-color-surface-hover, rgba(148, 163, 184, 0.12))` |
 | `:hover` color | `var(--poodle-color-text-primary)` |
 
-### Drill Breadcrumbs Separator
+### Drill Breadcrumbs Separator `.drill-breadcrumbs__sep`
 
 | Property | Value |
 |----------|-------|
@@ -269,45 +274,47 @@ When `drillDown` is provided, the picker enters a hierarchical navigation mode:
 | font-size | `0.6875rem` |
 | opacity | `0.6` |
 
-### Drill Breadcrumbs Item
+### Drill Breadcrumbs Item `.drill-breadcrumbs__item`
 
 | Property | Value |
 |----------|-------|
-| padding | `0.125rem 0.375rem` |
+| min-height | `calc(breadcrumb-control - 0.25rem)` |
+| padding | `0.125rem` vertical, horizontal varies by size |
 | border | `none` |
 | border-radius | `var(--poodle-radius-sm, 0.25rem)` |
 | background | `transparent` |
 | color | `var(--poodle-color-accent-base)` |
-| font-size | `0.75rem` |
+| font-size | `var(--poodle-typography-label-size)` |
 | font-weight | `500` |
+| cursor | `pointer` |
 | white-space | `nowrap` |
 | overflow | `hidden` |
 | text-overflow | `ellipsis` |
 | max-width | `8rem` |
 | `:hover` background | `var(--poodle-color-surface-hover, rgba(148, 163, 184, 0.12))` |
 
-### Drill Level Label
+### Drill Level Label `.drill-level-label`
 
 | Property | Value |
 |----------|-------|
-| font-size | `0.6875rem` |
+| font-size | `var(--poodle-typography-label-size)` |
 | font-weight | `600` |
 | text-transform | `uppercase` |
 | letter-spacing | `0.08em` |
 | color | `var(--poodle-color-text-secondary)` |
 | padding-bottom | `0.25rem` |
 
-### Drill List
+### Drill List `.drill-list`
 
 | Property | Value |
 |----------|-------|
 | display | `grid` |
-| gap | `0.125rem` |
+| gap | `0.125rem` (default, varies by density) |
 | margin | `0` |
 | padding | `0` |
 | list-style | `none` |
 
-### Drill List Button
+### Drill List Button `.drill-list__button`
 
 | Property | Value |
 |----------|-------|
@@ -316,29 +323,33 @@ When `drillDown` is provided, the picker enters a hierarchical navigation mode:
 | justify-content | `space-between` |
 | gap | `var(--poodle-space-inline-md)` |
 | width | `100%` |
-| padding | `0.5rem 0.625rem` |
+| padding | `0.5rem 0.625rem` (default, varies by size/density) |
 | border | `none` |
 | border-radius | `var(--poodle-radius-control)` |
 | background | `transparent` |
 | color | `var(--poodle-color-text-primary)` |
+| cursor | `pointer` |
 | text-align | `left` |
-| font-size | `0.875rem` |
+| font | `inherit` |
+| font-size | `var(--poodle-typography-body-size)` |
 | `:hover` background | `color-mix(in srgb, var(--poodle-color-background-surface) 60%, transparent)` |
 | `:focus-visible` outline | `var(--poodle-border-width-focus) solid var(--poodle-color-accent-focusRing)` |
 | `:focus-visible` outline-offset | `-0.0625rem` |
 
-### Drill List Copy
+### Drill List Copy `.drill-list__copy`
 
 | Property | Value |
 |----------|-------|
 | display | `grid` |
 | gap | `0.125rem` |
-| strong font-weight | `500` |
-| strong overflow/text-overflow | `hidden` / `ellipsis` |
-| small color | `var(--poodle-color-text-secondary)` |
-| small font-size | `0.75rem` |
+| min-width | `0` |
+| `strong` font-weight | `500` |
+| `strong` overflow | `hidden`, text-overflow `ellipsis`, white-space `nowrap` |
+| `small` color | `var(--poodle-color-text-secondary)` |
+| `small` font-size | `var(--poodle-typography-label-size)` |
+| `small` overflow | `hidden`, text-overflow `ellipsis`, white-space `nowrap` |
 
-### Drill List Meta
+### Drill List Meta `.drill-list__meta`
 
 | Property | Value |
 |----------|-------|
@@ -347,19 +358,24 @@ When `drillDown` is provided, the picker enters a hierarchical navigation mode:
 | gap | `0.25rem` |
 | flex-shrink | `0` |
 | color | `var(--poodle-color-text-secondary)` |
-| count font-size | `0.6875rem` |
-| count opacity | `0.7` |
 
-### Drill List Empty
+### Drill List Count `.drill-list__count`
 
 | Property | Value |
 |----------|-------|
-| padding | `1.25rem` |
+| font-size | `var(--poodle-typography-label-size)` |
+| opacity | `0.7` |
+
+### Drill List Empty `.drill-list__empty`
+
+| Property | Value |
+|----------|-------|
+| padding | `calc(list-y * 2.5)` |
 | text-align | `center` |
 | color | `var(--poodle-color-text-secondary)` |
 | font-size | `0.8125rem` |
 
-### Candidate List
+### Candidate List `.relation-picker__list`
 
 | Property | Value |
 |----------|-------|
@@ -369,7 +385,7 @@ When `drillDown` is provided, the picker enters a hierarchical navigation mode:
 | padding | `0` |
 | list-style | `none` |
 
-### Candidate Item
+### Candidate Item `.relation-picker__item`
 
 | Property | Value |
 |----------|-------|
@@ -384,38 +400,44 @@ When `drillDown` is provided, the picker enters a hierarchical navigation mode:
 | color | `var(--poodle-color-text-primary)` |
 | font-size | `var(--poodle-typography-label-size, 0.75rem)` |
 
-#### Candidate Item Selected (`[data-selected="true"]`)
+#### Candidate Item Selected `[data-selected="true"]`
 
 | Property | Value |
 |----------|-------|
 | border-color | `color-mix(in srgb, var(--poodle-color-accent-base) 60%, transparent)` |
 | background | `color-mix(in srgb, var(--poodle-color-accent-base) 10%, transparent)` |
 
-### Candidate Item Button
+### Candidate Item Button `.relation-picker__item-button`
 
 | Property | Value |
 |----------|-------|
 | display | `grid` |
 | grid-template-columns | `minmax(0, 1fr)` |
 | gap | `0.25rem` |
+| min-width | `0` |
 | padding | `0` |
 | border | `0` |
 | background | `transparent` |
+| color | `inherit` |
+| cursor | `pointer` |
+| text-align | `left` |
+| font | `inherit` |
 | `:focus-visible` outline | `var(--poodle-border-width-focus) solid var(--poodle-color-accent-focusRing)` |
 | `:focus-visible` outline-offset | `0.125rem` |
 | `:focus-visible` border-radius | `var(--poodle-radius-control)` |
 
-### Candidate Copy
+### Candidate Copy `.relation-picker__item-copy`
 
 | Property | Value |
 |----------|-------|
 | display | `grid` |
 | gap | `0.25rem` |
-| small color | `var(--poodle-color-text-secondary)` |
-| small font-size | `0.8125rem` |
-| small line-height | `1.5` |
+| `strong`, `small`, footer-note margin | `0` |
+| `small` color | `var(--poodle-color-text-secondary)` |
+| `small` font-size | `0.8125rem` |
+| `small` line-height | `1.5` |
 
-### Footer Note
+### Footer Note `.relation-picker__footer-note`
 
 | Property | Value |
 |----------|-------|
@@ -424,7 +446,7 @@ When `drillDown` is provided, the picker enters a hierarchical navigation mode:
 | font-size | `0.8125rem` |
 | line-height | `1.5` |
 
-### Footer Actions
+### Footer Actions `.relation-picker__footer-actions`
 
 | Property | Value |
 |----------|-------|
@@ -433,51 +455,72 @@ When `drillDown` is provided, the picker enters a hierarchical navigation mode:
 | gap | `var(--poodle-space-inline-sm)` |
 | justify-content | `flex-end` |
 
-### Light Theme Overrides
+### Size Adjustments
 
-None.
+| Size | Breadcrumb control | Breadcrumb X padding | List X padding |
+|------|--------------------|---------------------|----------------|
+| `xs` | `1.25rem` | `0.25rem` | `0.5rem` |
+| `sm` | `1.5rem` | `0.375rem` | `0.625rem` |
+| `md` | `1.75rem` | `0.375rem` | `0.625rem` |
+| `lg` | `2rem` | `0.5rem` | `0.75rem` |
+| `xl` | `2.25rem` | `0.625rem` | `0.875rem` |
 
-## 11. Svelte Notes
+### Density Adjustments
 
-- uses `createEventDispatcher` for all events
-- internal `statusId` used for `aria-describedby` on search field
+| Density | List Y padding | List gap |
+|---------|---------------|----------|
+| `compact` | `0.375rem` | `0.0625rem` |
+| `default` | `0.5rem` | `0.125rem` |
+| `comfortable` | `0.625rem` | `0.1875rem` |
+
+## 9. Svelte Notes
+
+- Uses `createEventDispatcher` for all events
+- Internal `statusId` used for `aria-describedby` on search field
 - `candidateButtons` array for programmatic focus management
-- drill-down state is reactive via Svelte `$:` declarations
-- drill search query is separate from main `query` prop
+- Drill-down state is reactive via Svelte `$:` declarations
+- Drill search query (`drillSearchQuery`) is separate from main `query` prop
+- `loadDrillItems()` handles both sync (array) and async (function) level items, with client-side filtering for sync items
+- `loadFinalItems()` calls `drillDown.finalItems` with accumulated context and query
+- `drillSelect()` advances drill depth, records selection, dispatches `drillContext`
+- `drillBack()` decrements depth, removes level selection, clears final items
+- `drillNavigateTo()` jumps to any breadcrumb depth, clearing subsequent selections
+- `handleDrillSearchKeydown()` intercepts Escape and Backspace (when search empty) to navigate back
+- `filteredItems` performs client-side filtering on label, description, and meta fields
+- `activeItems` resolves to `finalItemsLoaded` when drill-down provides items, otherwise falls back to `items` prop
+- `pickerStatusText` provides contextual status announcements
+- Footer note text changes based on `selectionMode`
+- Wraps content in `UiPresentationProvider` with resolved size and density
 
-## 12. GPUI Notes
+## 10. GPUI Notes
 
-- expected crate/module surface: `poodle_gpui::composites::relation_picker`
-- drill-down navigation must preserve breadcrumb and back semantics
+- Expected crate/module surface: `poodle_gpui::composites::relation_picker`
+- Drill-down navigation must preserve breadcrumb and back semantics
 
-## 13. Parity Checklist
+## 11. Parity Checklist
 
 ### Tier 1: Strict Parity
 
-- [ ] all props have the same meaning and defaults
-- [ ] event names and payloads match
-- [ ] selection mode behavior matches (single vs multiple)
-- [ ] drill-down navigation semantics match
-- [ ] keyboard navigation matches
+- [ ] All props have the same meaning and defaults
+- [ ] Event names and payloads match
+- [ ] Selection mode behavior matches (single vs multiple)
+- [ ] Drill-down navigation semantics match (advance, back, breadcrumb jump)
+- [ ] Keyboard navigation matches (Arrow, Home, End, Escape, Backspace)
 
 ### Tier 2: Visual Parity
 
-- [ ] candidate item styling matches
-- [ ] drill breadcrumb styling matches
-- [ ] selected state visual treatment matches
+- [ ] Candidate item styling matches (grid layout, selected state)
+- [ ] Drill breadcrumb styling matches
+- [ ] Drill list button styling matches
+- [ ] Size and density adjustments match
 
 ### Tier 3: Implementation Freedom
 
-- [ ] internal state management approach may differ
-- [ ] async loading patterns may differ
+- [ ] Internal state management approach may differ
+- [ ] Async loading patterns may differ
+- [ ] PickerShell implementation may differ
 
-## 14. Known Deltas
-
-| Delta | Why Allowed | Approval Status | Follow-Up |
-|-------|-------------|-----------------|-----------|
-| none yet | n/a | pending | review during first implementation |
-
-## 15. Specimen Definitions
+## 12. Specimen Definitions
 
 ### Multiple Selection
 
@@ -489,13 +532,10 @@ None.
 
 | Label | Props / Config | Expected Visual |
 |-------|---------------|-----------------|
-| Single selection | `title="Choose a parent"`, same six candidate items, `selectionMode="single"` | Picker with search and candidate list using radio-style single selection, no items pre-selected |
+| Single selection | `title="Choose a parent"`, same six candidate items, `selectionMode="single"` | Picker with search and candidate list using button-press single selection, no items pre-selected |
 
-## 16. Approval And Adoption Notes
+### Drill-Down Navigation
 
-- contract status: `seed contract`
-- approvers: pending
-- downstream adopters: attach-or-choose workflows, entity relation editors,
-  hierarchical category pickers
-- future follow-up: use `RelationPicker` for attach-or-choose workflows and
-  keep domain-specific relation validation above the composite layer
+| Label | Props / Config | Expected Visual |
+|-------|---------------|-----------------|
+| Drill-down | `drillDown` with two levels (e.g. Category > Subcategory), `finalItems` returning filtered items | Drill list with items, breadcrumbs appearing as levels are selected, final candidate list after all levels complete |

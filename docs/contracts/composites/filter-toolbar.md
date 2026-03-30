@@ -1,40 +1,42 @@
 # FilterToolbar
 
-Status: seed contract
-Updated: 2026-03-21
+Status: detailed contract
+Updated: 2026-03-30
 
 ## 1. Purpose
 
 - Component name: `FilterToolbar`
 - Layer: `composites`
-- Summary: a compact, optionally collapsible control strip for search, filtering,
-  sorting, and result summary affordances above lists or grids
-- In scope: search and filter control grouping, responsive grid layout, collapsible
-  state, result summary, action buttons, secondary actions
-- Out of scope: result data ownership, domain-specific filter logic, active filter
-  pill management, command palette behavior
+- Summary: a compact, optionally collapsible control strip for search, filtering, sorting, and result summary affordances above lists or grids
+- In scope: search and filter control grouping, responsive grid layout, collapsible state, result summary, action buttons, secondary actions, size and density variants
+- Out of scope: result data ownership, domain-specific filter logic, active filter pill management, command palette behavior
 
 ## 2. Anatomy
 
 ```text
-[Root Toolbar]
-  ├── [Header]
-  │     ├── [CollapseToggle] (optional)
-  │     ├── [Summary] (optional)
-  │     └── [Actions] (optional)
-  ├── [Controls Grid] (hidden when collapsed)
-  └── [Secondary Actions] (optional)
+[Root .filter-toolbar]  <div role="toolbar"> aria-label
+  ├── [Header .filter-toolbar__header]  (when collapsed: <button>, otherwise: <div>)
+  │     ├── [CollapseToggle]  (optional, when collapsible)
+  │     ├── [Summary .filter-toolbar__summary]  <p>/<span> (optional, when summaryText)
+  │     └── [Actions .filter-toolbar__actions]  <div>/<span> (optional, when actions slot)
+  │           └── [ActionsSlot]  named "actions" slot
+  ├── [ControlsGrid .filter-toolbar__controls]  <div> (hidden when collapsed)
+  │     └── [DefaultSlot]  filter controls (SearchField, Select, etc.)
+  └── [Secondary .filter-toolbar__secondary]  <div> (optional, when secondary slot)
+        └── [SecondarySlot]  named "secondary" slot
 ```
 
-| Part | Required | Description | Token Targets |
-|------|----------|-------------|---------------|
-| Root Toolbar | yes | control grouping container | surface, spacing, border, radius |
-| Header | yes | row containing toggle, summary, and actions | gap, alignment |
-| CollapseToggle | no | chevron toggle to show/hide controls | via CollapseToggle primitive |
-| Summary | no | result count or active-filter summary text | typography, text-secondary |
-| Actions | no | icon buttons (refresh, etc.) aligned right | gap |
-| Controls Grid | yes | responsive grid of filter controls | grid columns, gap |
-| Secondary Actions | no | clear, create, export, or related actions | gap |
+### Parts
+
+| Part | Element | Required | Notes |
+|------|---------|----------|-------|
+| Root | `<div>` | yes | Grid container with `role="toolbar"` and `aria-label` |
+| Header | `<div>` or `<button>` | yes | Flex row; renders as `<button>` when collapsed (for clickable expand) |
+| CollapseToggle | `CollapseToggle` primitive | no | Present when `collapsible` is true |
+| Summary | `<p>` / `<span>` | no | Result count or active-filter summary text |
+| Actions | `<div>` / `<span>` | no | Icon buttons (refresh, etc.) aligned right via `margin-left: auto` |
+| ControlsGrid | `<div>` | yes | Responsive CSS grid of filter controls; hidden when collapsed |
+| Secondary | `<div>` | no | Trailing actions below the grid (reset, export, etc.) |
 
 ## 3. Props And Inputs
 
@@ -42,27 +44,29 @@ Updated: 2026-03-21
 
 | Prop | Type | Default | Required | Notes |
 |------|------|---------|----------|-------|
-| `ariaLabel` | `string` | `"Filters"` | no | toolbar/group label |
-| `summaryText` | `string \| null` | `null` | no | visible summary copy in header |
-| `collapsible` | `boolean` | `false` | no | whether controls can be collapsed |
-| `collapsed` | `boolean` | `false` | no | current collapsed state (bindable) |
-| `columns` | `number` | `4` | no | number of grid columns at full width |
-| `minItemWidth` | `string` | `"10rem"` | no | minimum width per grid item |
-| `sticky` | `boolean` | `false` | no | sticky positioning when host supports it |
-| `density` | `ControlDensity \| null` | `null` | no | explicit density override for spacing |
+| `ariaLabel` | `string` | `"Filters"` | no | Toolbar/group label |
+| `summaryText` | `string \| null` | `null` | no | Visible summary copy in header |
+| `collapsible` | `boolean` | `false` | no | Whether controls can be collapsed |
+| `collapsed` | `boolean` | `false` | no | Current collapsed state (bindable) |
+| `columns` | `number` | `4` | no | Number of grid columns at full width |
+| `minItemWidth` | `string` | `"10rem"` | no | Minimum width per grid item |
+| `sticky` | `boolean` | `false` | no | Sticky positioning when host supports it |
+| `size` | `ControlSize \| null` | `null` | no | Explicit semantic size override |
+| `sizeRole` | `SemanticControlSizeRole` | `"chrome"` | no | Semantic role used to resolve inherited size scale |
+| `density` | `ControlDensity \| null` | `null` | no | Explicit density override for spacing |
 
 ### Slots
 
 | Slot | Purpose |
 |------|---------|
-| default | filter controls (SearchField, Select, etc.) placed in the grid |
-| `actions` | icon buttons in the header row (refresh, settings, etc.) |
-| `secondary` | trailing actions below the grid (reset, export, etc.) |
+| default | Filter controls (SearchField, Select, etc.) placed in the grid |
+| `actions` | Icon buttons in the header row (refresh, settings, etc.) |
+| `secondary` | Trailing actions below the grid (reset, export, etc.) |
 
 ### Controlled And Uncontrolled
 
-- `collapsed` is bindable for two-way control
-- filter state is fully host-owned
+- `collapsed` is bindable for two-way control (`bind:collapsed`)
+- Filter state is fully host-owned
 
 ## 4. States
 
@@ -70,11 +74,11 @@ Updated: 2026-03-21
 
 | State | Trigger | Expected Result |
 |-------|---------|-----------------|
-| expanded | default or `collapsed=false` | header + controls grid visible |
-| collapsed | `collapsible=true`, `collapsed=true` | header only, controls hidden |
-| summarized | `summaryText` present | summary text in header row |
-| with-actions | actions slot populated | icon buttons right-aligned in header |
-| sticky | `sticky=true` | sticky positioning with elevation |
+| expanded | default or `collapsed=false` | Header + controls grid visible |
+| collapsed | `collapsible=true`, `collapsed=true` | Header only (as `<button>`), controls hidden; header clickable to expand |
+| summarized | `summaryText` present | Summary text in header row |
+| with-actions | actions slot populated | Icon buttons right-aligned in header |
+| sticky | `sticky=true` | Sticky positioning with elevation shadow |
 
 ### Component States
 
@@ -82,65 +86,49 @@ State table is sufficient.
 
 ## 5. Events
 
-No component-owned events beyond child control behavior and collapse toggle.
+No component-owned events beyond child control behavior and collapse toggle. The `CollapseToggle` primitive fires `toggle` events internally to update `collapsed`.
 
 ## 6. Accessibility
 
 ### Semantics
 
-- Role: `toolbar` with accessible label
-- Required attributes: `aria-label` for the control group
-- Optional attributes: summary description relationship when helpful
-- Labeling rules: the summary supplements the toolbar; it does not replace the
-  accessible label
+- Root: `role="toolbar"` with `aria-label` (default `"Filters"`)
+- Collapsed header: renders as `<button>` with `aria-expanded="false"` and descriptive `aria-label` including summary text
+- Expanded header: renders as `<div>` (non-interactive)
+- CollapseToggle: managed by CollapseToggle primitive accessibility
 
 ### Keyboard
 
 | Key | Behavior |
 |-----|----------|
-| `Tab` | moves through contained controls in DOM order |
-| `Enter`/`Space` | toggles collapse when CollapseToggle is focused |
-| toolbar-internal arrows | only where child controls define them |
+| `Tab` | Moves through contained controls in DOM order |
+| `Enter` / `Space` | Toggles collapse when CollapseToggle or collapsed header button is focused |
 
 ### Focus And Announcement
 
-- focus entry: the toolbar container is not focusable by default
-- focus exit: sticky positioning must not create duplicate focus order
-- live-region behavior: summary changes may be announced only when the host
-  decides the result update is material
-- collapse toggle: managed by CollapseToggle primitive accessibility
+- Collapsed header button: `border-width-focus` solid `accent-focusRing`, offset `0.125rem`
+- The toolbar container is not focusable by default
+- Sticky positioning must not create duplicate focus order
 
 ## 7. Layout
 
 ### Sizing
 
-- controls grid uses CSS grid with responsive breakpoints:
-  - full width: `columns` columns (default 4)
-  - ≤960px: 2 columns
-  - ≤640px: 1 column
-- each grid item has a minimum width of `minItemWidth` (default `10rem`)
-- summary and actions remain in the header row at all widths
+- Controls grid uses CSS grid with responsive breakpoints:
+  - Full width: `columns` columns (default 4)
+  - <=960px: 2 columns
+  - <=640px: 1 column
+- Each grid item has minimum width of `minItemWidth` (default `10rem`)
+- Summary and actions remain in the header row at all widths
 
 ### Composition
 
-- parent expectations: browser-style pages, settings views with search/filter
-  affordances
-- child expectations: search fields, selects, segmented controls, buttons,
-  icon buttons
-- resizing rules: primary controls remain first in reading and focus order
+- Composes: `CollapseToggle` primitive, `Icon` primitive
+- Parent expectations: browser-style pages, settings views with search/filter affordances
+- Child expectations: SearchField, Select, SegmentedControl, Button, IconButton
+- Resizing rules: primary controls remain first in reading and focus order
 
-## 8. Token Usage
-
-| Part | Token | Purpose |
-|------|-------|---------|
-| Root Toolbar | `border-subtle`, `radius-surface`, `background-elevated` | grouping shell |
-| Header | `space-inline-sm` | header row gap |
-| Summary | `text-secondary`, `label-size` | result metadata |
-| Controls Grid | `space-inline-sm` | grid gap |
-| Secondary Actions | `space-inline-sm` | trailing controls gap |
-| Sticky posture | `elevation-surface` | persistent browse chrome |
-
-### Token Usage — Exact CSS Values
+## 8. Token Usage -- Exact Values
 
 #### `.filter-toolbar` (Root)
 
@@ -167,11 +155,24 @@ No component-owned events beyond child control behavior and collapse toggle.
 | `align-items` | `center` |
 | `gap` | `var(--poodle-space-inline-sm)` |
 
-#### `.filter-toolbar[data-collapsed="true"] .filter-toolbar__header`
+#### `.filter-toolbar__header--button` (collapsed header)
 
 | Property | Value |
 |----------|-------|
+| `width` | `100%` |
+| `padding` | `0` |
+| `border` | `0` |
+| `background` | `transparent` |
+| `color` | `inherit` |
+| `text-align` | `left` |
 | `cursor` | `pointer` |
+
+#### `.filter-toolbar__header--button:focus-visible`
+
+| Property | Value |
+|----------|-------|
+| `outline` | `var(--poodle-border-width-focus) solid var(--poodle-color-accent-focusRing)` |
+| `outline-offset` | `0.125rem` |
 
 #### `.filter-toolbar__summary`
 
@@ -212,42 +213,60 @@ The `--ft-columns` and `--ft-min-width` CSS variables are set inline from the `c
 | `gap` | `var(--poodle-space-inline-sm)` |
 | `align-items` | `center` |
 
-### Responsive Breakpoint: `max-width: 960px`
+### Responsive Breakpoints
 
-#### `.filter-toolbar__controls`
+#### `@media (max-width: 960px)` -- `.filter-toolbar__controls`
 
 | Property | Value |
 |----------|-------|
 | `grid-template-columns` | `repeat(2, minmax(var(--ft-min-width, 10rem), 1fr))` |
 
-### Responsive Breakpoint: `max-width: 640px`
-
-#### `.filter-toolbar__controls`
+#### `@media (max-width: 640px)` -- `.filter-toolbar__controls`
 
 | Property | Value |
 |----------|-------|
 | `grid-template-columns` | `1fr` |
 
+### Size Adjustments (Summary font-size)
+
+| Size | Summary font-size |
+|------|------------------|
+| `xs` | `0.6875rem` |
+| `sm` | `0.71875rem` |
+| `md` | (default from `--poodle-typography-label-size`) |
+| `lg` | `0.8125rem` |
+| `xl` | `0.875rem` |
+
+### Density Adjustments
+
+| Density | Root gap | Root padding | Controls gap |
+|---------|----------|-------------|-------------|
+| `compact` | `var(--poodle-space-inline-xs)` | `0.25rem` | `var(--poodle-space-inline-xs)` |
+| `default` | `var(--poodle-space-stack-sm)` | `var(--poodle-space-panel-y) var(--poodle-space-panel-x)` | `var(--poodle-space-inline-sm)` |
+| `comfortable` | `var(--poodle-space-inline-md)` | `0.5rem` | `var(--poodle-space-inline-md)` |
+
 ### Data Attributes Used for CSS Selectors
 
 | Attribute | Element | Purpose |
 |-----------|---------|---------|
-| `data-sticky` | `.filter-toolbar` root | enables elevation shadow for sticky positioning |
-| `data-collapsed` | `.filter-toolbar` root | controls collapsed state styling (header cursor) |
+| `data-sticky` | `.filter-toolbar` root | Enables elevation shadow for sticky positioning |
+| `data-collapsed` | `.filter-toolbar` root | Controls collapsed state styling |
+| `data-size` | `.filter-toolbar` root | Drives size variant CSS |
+| `data-density` | `.filter-toolbar` root | Drives density variant CSS |
 
 ## 9. Svelte Notes
 
-- `data-density` — resolved density value (`compact`, `default`, or `comfortable`)
-- uses CollapseToggle primitive for collapse affordance
-- controls grid uses CSS custom properties (`--ft-columns`, `--ft-min-width`)
-  driven by props
+- Uses `CollapseToggle` primitive for collapse affordance
+- Controls grid uses CSS custom properties (`--ft-columns`, `--ft-min-width`) driven by props
 - `collapsed` prop supports `bind:collapsed` for two-way binding
+- Resolves size via `resolveSemanticControlSize` with `sizeRole="chrome"` (not `"control"`)
+- When collapsed, header renders as `<button>` for accessibility; clicking expands (unless clicking on actions or collapse toggle)
+- `handleHeaderClick` filters clicks on `.filter-toolbar__actions` and `.collapse-toggle` children
 
 ## 10. GPUI Notes
 
-- expected crate/module surface: `poodle_gpui::composites::filter_toolbar`
-- implementation-only details: GPUI may realize sticky behavior with native
-  layout containers, but must preserve labeled-group semantics and control order
+- Expected crate/module surface: `poodle_gpui::composites::filter_toolbar`
+- GPUI may realize sticky behavior with native layout containers, but must preserve labeled-group semantics and control order
 
 ## 11. Parity Checklist
 
@@ -256,64 +275,40 @@ The `--ft-columns` and `--ft-min-width` CSS variables are set inline from the `c
 - [ ] labeled-group semantics and control order match
 - [ ] summary meaning and placement in the accessibility tree match
 - [ ] collapse behavior hides/shows controls consistently
+- [ ] collapsed header is keyboard-accessible
 
 ### Tier 2: Visual Parity
 
 - [ ] control grouping, spacing, and grid layout use comparable token roles
 - [ ] responsive breakpoints produce equivalent column reduction
+- [ ] size and density variants match
 
 ### Tier 3: Implementation Freedom
 
 - [ ] wrap, sticky, and grid mechanics stay internal
 
-## 12. Known Deltas
+## 12. Specimen Definitions
 
-| Delta | Why Allowed | Approval Status | Follow-Up |
-|-------|-------------|-----------------|-----------|
-| sticky realization may differ | runtime layout systems differ | allowed | keep order and label semantics strict |
-| grid breakpoints may vary | viewport detection differs per platform | allowed | ensure column reduction at equivalent widths |
+### Responsive Grid Layout
 
-## 13. Specimen Definitions
+| Label | Props / Config | Expected Visual |
+|-------|---------------|-----------------|
+| Responsive grid layout | `summaryText="Showing 24 of 156 items"`, children: SearchField + 3 Selects (status, type, owner) | Toolbar with summary text and 4 controls in responsive grid |
 
-All preview apps must render the following specimens identically.
+### Collapsible With Actions
 
-### Responsive grid layout
+| Label | Props / Config | Expected Visual |
+|-------|---------------|-----------------|
+| Collapsible with actions | `collapsible`, `summaryText="Showing 24 of 156 items"`, actions slot: refresh IconButton, children: SearchField + 2 Selects | Toolbar with collapse toggle, summary, refresh button, and filter controls |
 
-A toolbar with four filter controls in a responsive grid:
+### Collapsed By Default
 
-| Label | Props/Config | Expected Visual |
-|-------|-------------|-----------------|
-| Responsive grid layout | `summaryText="Showing 24 of 156 items"`, children: SearchField + 3 Selects (status, type, owner) | toolbar with summary text and 4 controls in responsive grid |
+| Label | Props / Config | Expected Visual |
+|-------|---------------|-----------------|
+| Collapsed by default | `collapsible`, `collapsed`, `summaryText="3 filters active"`, actions slot: refresh IconButton, children: SearchField + Select | Compact header row with expand toggle, summary text, and refresh button |
 
-### Collapsible with actions
+### With Secondary Slot
 
-A collapsible toolbar with action buttons, expanded by default:
-
-| Label | Props/Config | Expected Visual |
-|-------|-------------|-----------------|
-| Collapsible with actions | `collapsible`, `summaryText="Showing 24 of 156 items"`, actions slot: refresh IconButton, children: SearchField + 2 Selects | toolbar with collapse toggle, summary, refresh button, and filter controls |
-
-### Collapsed by default
-
-A collapsible toolbar starting in collapsed state:
-
-| Label | Props/Config | Expected Visual |
-|-------|-------------|-----------------|
-| Collapsed by default | `collapsible`, `collapsed`, `summaryText="3 filters active"`, actions slot: refresh IconButton, children: SearchField + Select | compact header row with expand toggle, summary text, and refresh button |
-
-### With secondary slot
-
-A toolbar with secondary actions below the grid:
-
-| Label | Props/Config | Expected Visual |
-|-------|-------------|-----------------|
-| With secondary slot | `columns={3}`, children: SearchField + 2 Selects; secondary slot: Reset all button | toolbar with 3-column grid and trailing Reset all button |
-
-## 14. Approval And Adoption Notes
-
-- contract status: `seed contract`
-- approvers: pending
-- downstream adopters: settings search/filter bars, collection browsers,
-  inspector filter strips
-- future follow-up: consumers may compose active filter pills in the secondary
-  slot or header for richer filter feedback
+| Label | Props / Config | Expected Visual |
+|-------|---------------|-----------------|
+| With secondary slot | `columns={3}`, children: SearchField + 2 Selects; secondary slot: Reset all button | Toolbar with 3-column grid and trailing Reset all button |

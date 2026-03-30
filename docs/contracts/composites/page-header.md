@@ -1,43 +1,58 @@
 # PageHeader
 
-Status: seed contract
-Updated: 2026-03-11
+Status: detailed contract
+Updated: 2026-03-30
 
 ## 1. Purpose
 
 - Component name: `PageHeader`
 - Layer: `composites`
-- Summary: a standardized title and action region for product pages, panels, or
-  detail surfaces
-- In scope: optional back link, title, subtitle/supporting text, optional
-  breadcrumbs region, section/title hierarchy, optional banner region,
-  primary/secondary actions
-- Out of scope: app shell toolbars, global navigation, domain-specific command
-  wiring
+- Summary: a standardized title and action region for product pages, panels, or detail surfaces
+- In scope: optional back link with contextual indicator, optional breadcrumbs region, title with optional count badge, section/title hierarchy, eyebrow label, subtitle, body slot, primary/secondary actions, optional banner region via slot or shortcut prop, configurable heading level
+- Out of scope: app shell toolbars, global navigation, domain-specific command wiring
 
 ## 2. Anatomy
 
 ```text
-[Root Header]
-  ├── [Back Link] (optional)
-  ├── [Breadcrumbs Region] (optional)
-  ├── [Title Block]
-  │     ├── [Eyebrow] (optional)
-  │     ├── [Section] (optional)
-  │     ├── [Title]
-  │     ├── [Section Title] (optional)
-  │     └── [Subtitle] (optional)
-  └── [Actions] (optional)
-  └── [Banner Region] (optional)
+[Root .page-header]  <header> data-align, aria-label
+  ├── [Content .page-header__content]  <div>
+  │     ├── [BackLink .page-header__back]  <a> (optional, when backHref)
+  │     │     ├── [BackLabel]  <span> back link text
+  │     │     └── [ContextDot .page-header__context-dot]  <span> (optional, when backIsContextual)
+  │     ├── [Breadcrumbs .page-header__breadcrumbs]  <div> (optional, breadcrumbs slot)
+  │     └── [TitleBlock .page-header__title-block]  <div>
+  │           ├── [Eyebrow .page-header__eyebrow]  <p> (optional)
+  │           ├── [Section .page-header__section]  <p> (optional, when section + title)
+  │           ├── [Title .page-header__title]  <h2..h6> (configurable level)
+  │           │     ├── [TitleText]  <span>
+  │           │     └── [Count .page-header__count]  <span> (optional, when count !== null)
+  │           ├── [SectionTitle .page-header__section-title]  <p> (optional, when section + title)
+  │           ├── [Subtitle .page-header__subtitle]  <p> (optional)
+  │           └── [Body .page-header__body]  <div> (optional, default slot)
+  ├── [Actions .page-header__actions]  <div> (optional, actions slot)
+  └── [Banner .page-header__banner]  <div> (optional, banner slot or bannerMessage prop)
+        └── [Callout]  Callout primitive (when bannerMessage shortcut used)
 ```
 
-| Part | Required | Description | Token Targets |
-|------|----------|-------------|---------------|
-| Root Header | yes | header container | spacing, separator |
-| Back Link | no | lightweight return link above the title block | typography, text color, hover treatment |
-| Breadcrumbs Region | no | pre-title navigation trail | typography, text color |
-| Title Block | yes | primary identity region | typography, spacing |
-| Actions | no | page-level action group | gap, alignment |
+### Parts
+
+| Part | Element | Required | Notes |
+|------|---------|----------|-------|
+| Root | `<header>` | yes | Grid layout, `data-align` attribute |
+| Content | `<div>` | yes | Grid container for back link, breadcrumbs, and title block |
+| BackLink | `<a>` | no | Shown when `backHref` is set |
+| ContextDot | `<span>` | no | Shown when `backIsContextual` is true; `aria-hidden="true"` |
+| Breadcrumbs | `<div>` | no | Named slot for breadcrumb navigation |
+| TitleBlock | `<div>` | yes | Contains eyebrow, section, title, subtitle, body |
+| Eyebrow | `<p>` | no | Small meta label above title |
+| Section | `<p>` | no | Section label when two-level header (section + title both set) |
+| Title | `<h2..h6>` | yes | Primary heading, level set via `level` prop |
+| Count | `<span>` | no | Badge inline with title, shown when `count !== null` |
+| SectionTitle | `<p>` | no | Secondary title below main heading in two-level header |
+| Subtitle | `<p>` | no | Supporting copy below title |
+| Body | `<div>` | no | Default slot content below subtitle |
+| Actions | `<div>` | no | Page-level action group via named slot |
+| Banner | `<div>` | no | Full-width banner spanning all grid columns |
 
 ## 3. Props And Inputs
 
@@ -45,24 +60,33 @@ Updated: 2026-03-11
 
 | Prop | Type | Default | Required | Notes |
 |------|------|---------|----------|-------|
-| `title` | `string` | none | yes | primary heading text |
-| `section` | `string \| null` | `null` | no | optional section label rendered above the main title when a two-level header is needed |
-| `count` | `number \| null` | `null` | no | optional count badge rendered inline with the title |
-| `subtitle` | `string \| null` | `null` | no | supporting copy |
-| `eyebrow` | `string \| null` | `null` | no | small meta label |
-| `backHref` | `string \| null` | `null` | no | optional back-link target rendered above breadcrumbs and title |
-| `backLabel` | `string \| null` | `null` | no | optional back-link text, defaults to `Back` when `backHref` is set |
-| `backIsContextual` | `boolean` | `false` | no | adds the contextual indicator dot on the back-link |
-| `bannerMessage` | `string \| null` | `null` | no | shortcut banner message rendered below the header |
-| `bannerTone` | `"neutral" \| "info" \| "success" \| "warning" \| "danger"` | `"warning"` | no | tone for the shortcut banner |
-| `align` | `"start" \| "between"` | `"between"` | no | action alignment posture |
-| `ariaLabel` | `string \| null` | `null` | no | optional region label when header is independently addressable |
+| `title` | `string \| null` | `null` | no | Primary heading text |
+| `section` | `string \| null` | `null` | no | Optional section label; when both `section` and `title` are set, creates a two-level header |
+| `count` | `number \| null` | `null` | no | Optional count badge rendered inline with the title |
+| `subtitle` | `string \| null` | `null` | no | Supporting copy |
+| `eyebrow` | `string \| null` | `null` | no | Small meta label |
+| `backHref` | `string \| null` | `null` | no | Optional back-link target |
+| `backLabel` | `string \| null` | `null` | no | Back-link text; defaults to `"Back"` when `backHref` is set |
+| `backIsContextual` | `boolean` | `false` | no | Adds the contextual indicator dot on the back link |
+| `bannerMessage` | `string \| null` | `null` | no | Shortcut banner message rendered via Callout below the header |
+| `bannerTone` | `"neutral" \| "info" \| "success" \| "warning" \| "danger"` | `"warning"` | no | Tone for the shortcut banner |
+| `align` | `"start" \| "between"` | `"between"` | no | Action alignment posture |
+| `ariaLabel` | `string \| null` | `null` | no | Optional region label |
+| `level` | `1 \| 2 \| 3 \| 4 \| 5 \| 6` | `2` | no | Heading level for the title element |
+
+### Slots
+
+| Slot | Purpose |
+|------|---------|
+| default | Body content rendered below subtitle in the title block |
+| `breadcrumbs` | Pre-title navigation trail |
+| `actions` | Page-level action buttons |
+| `banner` | Custom banner content (overrides `bannerMessage` shortcut) |
 
 ### Controlled And Uncontrolled
 
-- declarative composite
-- actions, breadcrumbs, and banner content remain host-owned children when the
-  slots are used
+- Declarative composite
+- Actions, breadcrumbs, and banner content remain host-owned children
 
 ## 4. States
 
@@ -70,14 +94,21 @@ Updated: 2026-03-11
 
 | State | Trigger | Expected Result |
 |-------|---------|-----------------|
-| simple | title only | compact title row |
-| sectional | `section` and `title` | two-level header hierarchy |
-| descriptive | subtitle or eyebrow present | expanded title block |
-| actionable | actions present | title and actions share row/stack |
+| simple | title only | Compact title row |
+| sectional | `section` and `title` both set | Two-level header hierarchy: section label, primary title, section title |
+| descriptive | subtitle or eyebrow present | Expanded title block |
+| with-count | `count` is not null | Count badge pill inline with title |
+| actionable | actions slot present | Title and actions share row (between alignment) or stack |
+| with-back | `backHref` set | Back link above breadcrumbs and title |
+| with-banner | `bannerMessage` or banner slot | Full-width banner below header body |
 
 ### Component States
 
-State table is sufficient.
+| State | Description |
+|-------|-------------|
+| `primaryTitle` (derived) | `title ?? section ?? ""` |
+| `hasSectionTitleSplit` (derived) | `Boolean(section && title)` |
+| `headingTag` (derived) | `h${level}` |
 
 ## 5. Events
 
@@ -87,54 +118,44 @@ No component-owned events beyond child action behavior.
 
 ### Semantics
 
-- Role: header region or neutral section heading container depending on parent
-  context
-- Required attributes: heading semantics for the visible title
-- Optional attributes: region label when the header is independently navigable
-- Labeling rules: visible title should remain the primary accessible heading,
-  and back-link wording should stay short and destination-oriented
+- Root: `<header>` element with optional `aria-label`
+- Title: rendered as `<h2>` by default (configurable via `level` prop)
+- Count badge: `aria-label` with the count value
+- Back link: standard `<a>` element
+- Context dot: `aria-hidden="true"`
+- Banner via shortcut: Callout with `announceMode="polite"`
 
 ### Keyboard
 
 | Key | Behavior |
 |-----|----------|
-| `Tab` | reaches back link, breadcrumb links, banner actions, and header actions in logical order |
+| `Tab` | Reaches back link, breadcrumb links, banner actions, and header actions in logical order |
 
 ### Focus And Announcement
 
-- focus entry: the header itself is not focusable by default
-- focus exit: back link, breadcrumb links, and actions should not break heading
-  readability or invert expected reading order
-- live-region behavior: none
-- GPUI-native accessibility mapping notes: GPUI must preserve heading
-  hierarchy and action grouping without flattening the title block into plain
-  text with unlabeled buttons nearby
+- The header itself is not focusable by default
+- Back link, breadcrumb links, and actions should not break heading readability
+- Banner via Callout uses `aria-live="polite"`
 
 ## 7. Layout
 
 ### Sizing
 
-- header should support narrow stacked layouts and wider split layouts
-- actions may wrap below the title block when width is constrained
+- Root: CSS grid with `gap: var(--poodle-space-stack-md)`
+- `align="between"`: `grid-template-columns: minmax(0, 1fr) auto`
+- `align="start"`: single-column grid
+- Responsive: at `max-width: 45rem`, between alignment collapses to single column
+- Title block: internal grid with `gap: var(--poodle-space-inline-sm)`
+- Banner: `grid-column: 1 / -1` (spans full width)
 
 ### Composition
 
-- parent expectations: detail shells, settings pages, list/grid surfaces,
-  product panels
-- child expectations: breadcrumbs and action primitives are optional children
-- banner composition rule: banner content belongs below the header body and
-  should not be used as a replacement for shell-specific detail metadata
-- resizing rules: the title remains visually dominant over actions
-- composition rule: back link and breadcrumbs, when present, remain above the
-  title block and do not collapse into the same semantic role as the page title
+- Composes: `Callout` primitive (for banner shortcut)
+- Parent expectations: detail shells, settings pages, list/grid surfaces, product panels
+- Child expectations: breadcrumb navigation, action buttons via slots
+- Resizing rules: title remains visually dominant over actions
 
-## 8. Token Usage And Precise CSS
-
-### Data Attributes
-
-| Attribute | Element | Values |
-|-----------|---------|--------|
-| `data-align` | root `<header>` | `"start"`, `"between"` |
+## 8. Token Usage -- Exact Values
 
 ### Recipe Custom Properties
 
@@ -148,101 +169,196 @@ No component-owned events beyond child action behavior.
 | `--poodle-recipe-page-header-shadow` | `none` |
 | `--poodle-recipe-page-header-radius` | `var(--poodle-radius-surface)` |
 
-### Root
+#### `.page-header` (Root)
 
 | Property | Value |
 |----------|-------|
-| display | `grid` |
-| gap | `var(--poodle-space-stack-md)` |
-| align-items | `end` |
-| padding | `var(--poodle-recipe-page-header-padding-block-start) var(--poodle-recipe-page-header-padding-inline) var(--poodle-recipe-page-header-padding-block-end)` |
-| border | `0.0625rem solid var(--poodle-recipe-page-header-border)` |
-| border-radius | `var(--poodle-recipe-page-header-radius)` |
-| background | `var(--poodle-recipe-page-header-fill)` |
-| box-shadow | `var(--poodle-recipe-page-header-shadow)` |
+| `display` | `grid` |
+| `gap` | `var(--poodle-space-stack-md)` |
+| `align-items` | `end` |
+| `padding` | `var(--poodle-recipe-page-header-padding-block-start) var(--poodle-recipe-page-header-padding-inline) var(--poodle-recipe-page-header-padding-block-end)` |
+| `border` | `0.0625rem solid var(--poodle-recipe-page-header-border)` |
+| `border-radius` | `var(--poodle-recipe-page-header-radius)` |
+| `background` | `var(--poodle-recipe-page-header-fill)` |
+| `box-shadow` | `var(--poodle-recipe-page-header-shadow)` |
 
-#### Root Alignment Variant (`[data-align="between"]`)
-
-| Property | Value |
-|----------|-------|
-| grid-template-columns | `minmax(0, 1fr) auto` |
-
-### Content
+#### `.page-header[data-align="between"]`
 
 | Property | Value |
 |----------|-------|
-| display | `grid` |
-| gap | `var(--poodle-space-stack-md)` |
+| `grid-template-columns` | `minmax(0, 1fr) auto` |
 
-### Title Block
-
-| Property | Value |
-|----------|-------|
-| display | `grid` |
-| gap | `0.375rem` |
-
-### Title (h2)
+#### `.page-header__content`
 
 | Property | Value |
 |----------|-------|
-| margin | `0` |
-| font-family | `var(--poodle-typography-heading-family)` |
-| font-size | `1.75rem` |
-| line-height | `1.1` |
-| font-weight | `700` |
+| `display` | `grid` |
+| `gap` | `var(--poodle-space-stack-md)` |
 
-### Eyebrow
+#### `.page-header__back`
 
 | Property | Value |
 |----------|-------|
-| margin | `0` |
-| color | `var(--poodle-color-text-secondary)` |
-| font-size | `0.6875rem` |
-| font-weight | `600` |
-| letter-spacing | `0.12em` |
-| text-transform | `uppercase` |
+| `width` | `fit-content` |
+| `display` | `inline-flex` |
+| `align-items` | `center` |
+| `gap` | `0.35rem` |
+| `color` | `var(--poodle-color-text-secondary)` |
+| `font-size` | `0.8125rem` |
+| `line-height` | `1.2` |
+| `text-decoration` | `none` |
 
-### Subtitle
-
-| Property | Value |
-|----------|-------|
-| margin | `0` |
-| color | `var(--poodle-color-text-secondary)` |
-| font-size | `var(--poodle-typography-body-size)` |
-| line-height | `var(--poodle-typography-body-lineHeight)` |
-
-### Actions
+#### `.page-header__back:hover`
 
 | Property | Value |
 |----------|-------|
-| display | `flex` |
-| flex-wrap | `wrap` |
-| gap | `var(--poodle-space-inline-md)` |
-| justify-content | `flex-end` |
-| align-items | `start` |
+| `color` | `var(--poodle-color-text-primary)` |
+| `text-decoration` | `underline` |
+| `text-underline-offset` | `0.12em` |
+
+#### `.page-header__context-dot`
+
+| Property | Value |
+|----------|-------|
+| `width` | `0.375rem` |
+| `height` | `0.375rem` |
+| `border-radius` | `999px` |
+| `background` | `var(--poodle-color-fill-info-strong, var(--poodle-color-border-info))` |
+| `flex` | `none` |
+
+#### `.page-header__title-block`
+
+| Property | Value |
+|----------|-------|
+| `display` | `grid` |
+| `gap` | `var(--poodle-space-inline-sm)` |
+
+#### `.page-header__title`
+
+| Property | Value |
+|----------|-------|
+| `margin` | `0` |
+| `display` | `inline-flex` |
+| `align-items` | `center` |
+| `gap` | `0.5rem` |
+| `font-family` | `var(--poodle-typography-heading-family)` |
+| `font-size` | `1.75rem` |
+| `line-height` | `1.1` |
+| `font-weight` | `700` |
+
+#### `.page-header__section`
+
+| Property | Value |
+|----------|-------|
+| `margin` | `0` |
+| `color` | `var(--poodle-color-text-secondary)` |
+| `font-size` | `0.75rem` |
+| `font-weight` | `700` |
+| `letter-spacing` | `0.08em` |
+| `text-transform` | `uppercase` |
+
+#### `.page-header__section-title`
+
+| Property | Value |
+|----------|-------|
+| `margin` | `0` |
+| `color` | `var(--poodle-color-text-secondary)` |
+| `font-family` | `var(--poodle-typography-heading-family)` |
+| `font-size` | `1rem` |
+| `line-height` | `1.25` |
+| `font-weight` | `600` |
+
+#### `.page-header__count`
+
+| Property | Value |
+|----------|-------|
+| `display` | `inline-flex` |
+| `align-items` | `center` |
+| `justify-content` | `center` |
+| `min-width` | `1.75rem` |
+| `min-height` | `1.75rem` |
+| `padding` | `0 0.5rem` |
+| `border-radius` | `999px` |
+| `background` | `color-mix(in srgb, var(--poodle-color-fill-secondary) 72%, transparent)` |
+| `color` | `var(--poodle-color-text-secondary)` |
+| `font-size` | `0.875rem` |
+| `font-weight` | `600` |
+| `line-height` | `1` |
+
+#### `.page-header__eyebrow`
+
+| Property | Value |
+|----------|-------|
+| `margin` | `0` |
+| `color` | `var(--poodle-color-text-secondary)` |
+| `font-size` | `0.6875rem` |
+| `font-weight` | `600` |
+| `letter-spacing` | `0.12em` |
+| `text-transform` | `uppercase` |
+
+#### `.page-header__subtitle`
+
+| Property | Value |
+|----------|-------|
+| `margin` | `0` |
+| `color` | `var(--poodle-color-text-secondary)` |
+| `font-size` | `var(--poodle-typography-body-size)` |
+| `line-height` | `var(--poodle-typography-body-lineHeight)` |
+
+#### `.page-header__body`
+
+| Property | Value |
+|----------|-------|
+| `margin` | `0` |
+| `color` | `var(--poodle-color-text-secondary)` |
+| `font-size` | `var(--poodle-typography-body-size)` |
+| `line-height` | `var(--poodle-typography-body-lineHeight)` |
+
+#### `.page-header__actions`
+
+| Property | Value |
+|----------|-------|
+| `display` | `flex` |
+| `flex-wrap` | `wrap` |
+| `gap` | `var(--poodle-space-inline-md)` |
+| `justify-content` | `flex-end` |
+| `align-items` | `start` |
+
+#### `.page-header__banner`
+
+| Property | Value |
+|----------|-------|
+| `grid-column` | `1 / -1` |
 
 ### Responsive Breakpoints
 
-| Breakpoint | Selector | Property | Value |
-|------------|----------|----------|-------|
-| `max-width: 45rem` | `[data-align="between"]` | grid-template-columns | `1fr` |
+#### `@media (max-width: 45rem)` -- `.page-header[data-align="between"]`
 
-### Light Theme Overrides
+| Property | Value |
+|----------|-------|
+| `grid-template-columns` | `1fr` |
 
-None.
+### Data Attributes Used for CSS Selectors
+
+| Attribute | Element | Purpose |
+|-----------|---------|---------|
+| `data-align` | root `<header>` | Controls grid column layout (`"start"` or `"between"`) |
 
 ## 9. Svelte Notes
 
-- expected substrate: `Stack`/`Inline` composition with semantic heading
-- wrapper strategy: slots for breadcrumbs and actions stay Poodle-owned surface
-  conventions
+- Uses Svelte 5 `$props()` syntax with `Props` interface
+- Composes `Callout` primitive from `@poodle/svelte-primitives` for banner shortcut
+- `primaryTitle` derived as `title ?? section ?? ""`
+- `hasSectionTitleSplit` derived as `Boolean(section && title)`
+- Heading tag is dynamic via `<svelte:element this={headingTag}>`
+- Banner slot takes priority over `bannerMessage` prop (if both provided, slot wins)
+- Uses `$$slots.breadcrumbs`, `$$slots.actions`, `$$slots.banner`, `$$slots.default` for conditional rendering
 
 ## 10. GPUI Notes
 
-- expected crate/module surface: `poodle_gpui::composites::page_header`
-- implementation-only details: GPUI heading semantics may use named region and
-  text hierarchy APIs rather than HTML headings, but the accessible structure
-  still needs to be explicit
+- Expected crate/module surface: `poodle_gpui::composites::page_header`
+- GPUI heading semantics may use named region and text hierarchy APIs rather than HTML headings
+- Accessible structure must be explicit even without native heading elements
 
 ## 11. Parity Checklist
 
@@ -250,24 +366,23 @@ None.
 
 - [ ] title hierarchy and heading semantics match
 - [ ] breadcrumbs and actions remain logically grouped and ordered
-- [ ] section/title split remains readable without collapsing into shell-owned
-      metadata
+- [ ] section/title split produces correct two-level hierarchy
+- [ ] count badge renders inline with title
+- [ ] back link with contextual dot works correctly
+- [ ] banner renders via slot or prop shortcut
 
 ### Tier 2: Visual Parity
 
 - [ ] spacing, heading weight, and action alignment use comparable token roles
+- [ ] count badge pill styling matches
+- [ ] section and section-title typography matches
+- [ ] responsive breakpoint behavior matches
 
 ### Tier 3: Implementation Freedom
 
 - [ ] wrap strategy and layout breakpoints stay internal
 
-## 12. Known Deltas
-
-| Delta | Why Allowed | Approval Status | Follow-Up |
-|-------|-------------|-----------------|-----------|
-| line wrapping may differ slightly | text metrics differ by runtime | allowed | keep hierarchy and order strict |
-
-## 13. Specimen Definitions
+## 12. Specimen Definitions
 
 ### Basic
 
@@ -286,15 +401,3 @@ None.
 | Label | Props / Config | Expected Visual |
 |-------|---------------|-----------------|
 | Title only | `title="Settings"` | Compact title row with no subtitle, no eyebrow, no actions |
-
-## 14. Approval And Adoption Notes
-
-- contract status: `seed contract`
-- approvers: pending
-- downstream adopters: settings headers, detail views, catalog pages
-- future follow-up: pair with shell toolbars separately in workstation work
-
-## Next Task
-
-Use `PageHeader` for local page identity inside `DetailShell` and product pages,
-and reserve app-wide toolbars for workstation or shell composites.
