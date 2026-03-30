@@ -30,53 +30,56 @@
   let uncontrolledOpen = defaultOpen;
   let lastFocusedElement: HTMLElement | null = null;
   let bodyOverflow: string | null = null;
-  let previousOpen = false;
 
-  // Animation state: "closed" | "entering" | "open" | "exiting"
-  let animState: "closed" | "entering" | "open" | "exiting" = defaultOpen ? "open" : "closed";
+  // DOM-visible state: controls whether the drawer is in the DOM
+  let mounted = defaultOpen;
+  // CSS animation class
+  let animOpen = defaultOpen;
 
   $: resolvedSize = size ?? resolveSemanticControlSize($uiPresentation.sizeScale, sizeRole);
   $: resolvedDensity = density ?? $uiPresentation.density;
   $: isControlled = open !== null;
   $: isOpen = isControlled ? open === true : uncontrolledOpen;
 
-  $: if (isOpen && !previousOpen) {
-    // Opening
-    animState = "entering";
-    requestAnimationFrame(() => {
-      animState = "open";
-    });
+  // React to open state changes
+  $: handleOpenChange(isOpen);
 
-    lastFocusedElement = document.activeElement as HTMLElement | null;
-    tick().then(() => {
-      const focusable = getFocusableElements(surfaceElement);
-      focusable[0]?.focus() ?? surfaceElement?.focus();
-    });
+  function handleOpenChange(nowOpen: boolean): void {
+    if (nowOpen && !mounted) {
+      // Mount the DOM, then animate in on the next frame
+      mounted = true;
+      lastFocusedElement = document.activeElement as HTMLElement | null;
 
-    if (typeof document !== "undefined" && modal) {
-      bodyOverflow = document.body.style.overflow;
-      document.body.style.overflow = "hidden";
+      if (typeof document !== "undefined" && modal) {
+        bodyOverflow = document.body.style.overflow;
+        document.body.style.overflow = "hidden";
+      }
+
+      // Wait for mount, then trigger CSS transition
+      tick().then(() => {
+        requestAnimationFrame(() => {
+          animOpen = true;
+          const focusable = getFocusableElements(surfaceElement);
+          focusable[0]?.focus() ?? surfaceElement?.focus();
+        });
+      });
+    } else if (!nowOpen && mounted) {
+      // Animate out — DOM removal happens on transitionend
+      animOpen = false;
+
+      if (typeof document !== "undefined" && bodyOverflow !== null) {
+        document.body.style.overflow = bodyOverflow;
+        bodyOverflow = null;
+      }
+
+      lastFocusedElement?.focus();
     }
   }
 
-  $: if (!isOpen && previousOpen) {
-    // Closing
-    animState = "exiting";
-
-    if (typeof document !== "undefined" && bodyOverflow !== null) {
-      document.body.style.overflow = bodyOverflow;
-    }
-
-    lastFocusedElement?.focus();
-  }
-
-  $: previousOpen = isOpen;
-
-  $: visible = animState !== "closed";
-
-  function onTransitionEnd(): void {
-    if (animState === "exiting") {
-      animState = "closed";
+  function onSurfaceTransitionEnd(event: TransitionEvent): void {
+    // Only react to the surface's own transform transition ending
+    if (event.target === event.currentTarget && !animOpen) {
+      mounted = false;
     }
   }
 
@@ -140,15 +143,14 @@
   });
 </script>
 
-{#if visible}
+{#if mounted}
   <div
     class="drawer"
+    class:drawer--open={animOpen}
     data-edge={edge}
     data-modal={modal}
     data-size={resolvedSize}
     data-density={resolvedDensity}
-    data-anim={animState}
-    on:transitionend={onTransitionEnd}
   >
     {#if modal}
       <button
@@ -171,6 +173,7 @@
       aria-modal={modal ? "true" : undefined}
       aria-label={title ? undefined : ariaLabel ?? undefined}
       on:keydown={trapFocus}
+      on:transitionend={onSurfaceTransitionEnd}
     >
       {#if title || description}
         <div class="drawer__header">
@@ -221,15 +224,11 @@
     pointer-events: auto;
     cursor: default;
     opacity: 0;
-    transition: opacity var(--poodle-motion-duration-overlay, 200ms) var(--poodle-motion-easing-standard, ease);
+    transition: opacity 200ms ease;
   }
 
-  .drawer[data-anim="open"] .drawer__backdrop {
+  .drawer--open .drawer__backdrop {
     opacity: 1;
-  }
-
-  .drawer[data-anim="exiting"] .drawer__backdrop {
-    opacity: 0;
   }
 
   /* Surface */
@@ -255,25 +254,19 @@
       color-mix(in srgb, var(--poodle-color-background-elevated) 98%, var(--poodle-color-background-panel))
     );
     box-shadow: var(--poodle-treatment-surface-elevated-shadow, var(--poodle-elevation-dialog));
-    transition: transform var(--poodle-motion-duration-overlay, 200ms) var(--poodle-motion-easing-standard, ease);
+    transition: transform 200ms ease;
   }
 
-  /* Slide transforms per edge — entering state (off-screen) */
+  /* Off-screen positions (default = entering/exiting) */
   .drawer[data-edge="right"] .drawer__surface { transform: translateX(100%); }
   .drawer[data-edge="left"] .drawer__surface { transform: translateX(-100%); }
   .drawer[data-edge="top"] .drawer__surface { transform: translateY(-100%); }
   .drawer[data-edge="bottom"] .drawer__surface { transform: translateY(100%); }
 
-  /* Open state — on-screen */
-  .drawer[data-anim="open"] .drawer__surface {
+  /* On-screen position */
+  .drawer--open .drawer__surface {
     transform: translate(0, 0);
   }
-
-  /* Exiting — slide back out */
-  .drawer[data-anim="exiting"][data-edge="right"] .drawer__surface { transform: translateX(100%); }
-  .drawer[data-anim="exiting"][data-edge="left"] .drawer__surface { transform: translateX(-100%); }
-  .drawer[data-anim="exiting"][data-edge="top"] .drawer__surface { transform: translateY(-100%); }
-  .drawer[data-anim="exiting"][data-edge="bottom"] .drawer__surface { transform: translateY(100%); }
 
   /* Top/bottom drawers: full width, limited height */
   .drawer[data-edge="top"] .drawer__surface,
