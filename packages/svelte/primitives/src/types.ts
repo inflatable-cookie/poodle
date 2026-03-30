@@ -101,6 +101,7 @@ export interface SegmentedControlOption {
   value: string;
   label: string;
   ariaLabel?: string;
+  title?: string;
   disabled?: boolean;
 }
 

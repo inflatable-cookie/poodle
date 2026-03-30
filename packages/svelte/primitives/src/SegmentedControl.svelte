@@ -22,6 +22,7 @@
   export let disabled = false;
   export let ariaLabel: string | null = null;
   export let name: string | undefined = undefined;
+  export let equalWidth = true;
 
   const dispatch = createEventDispatcher<{
     valueChange: { value: string };
@@ -49,11 +50,12 @@
   class="segmented-control"
   data-size={resolvedSize}
   data-density={resolvedDensity}
+  data-equal-width={equalWidth}
   role="radiogroup"
   aria-label={ariaLabel ?? undefined}
 >
   {#each options as option (option.value)}
-    <label class="segmented-control__segment" data-selected={currentValue === option.value}>
+    <label class="segmented-control__segment" data-selected={currentValue === option.value} title={option.title ?? undefined}>
       <input
         class="segmented-control__control"
         type="radio"
@@ -88,6 +90,11 @@
       color-mix(in srgb, var(--poodle-surface) 93%, var(--poodle-color-text-primary))
     );
     box-shadow: var(--poodle-treatment-interactive-shadow, none);
+  }
+
+  .segmented-control[data-equal-width="false"] {
+    grid-auto-columns: max-content;
+    justify-content: start;
   }
 
   .segmented-control[data-size="xs"] {

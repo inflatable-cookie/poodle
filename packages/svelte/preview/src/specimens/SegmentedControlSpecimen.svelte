@@ -35,6 +35,21 @@
   </div>
 
   <div class="specimen__group">
+    <Eyebrow>Content Fit</Eyebrow>
+    <SegmentedControl
+      options={[
+        { value: "1h", label: "1h", title: "Last 1 hour" },
+        { value: "6h", label: "6h", title: "Last 6 hours" },
+        { value: "24h", label: "24h", title: "Last 24 hours" }
+      ]}
+      defaultValue="24h"
+      ariaLabel="Timeline window"
+      size="xs"
+      equalWidth={false}
+    />
+  </div>
+
+  <div class="specimen__group">
     <Eyebrow>Densities</Eyebrow>
     <div class="specimen__stack">
       {#each ["compact", "default", "comfortable"] as density}

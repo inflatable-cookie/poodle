@@ -3,7 +3,7 @@
 > **Surface elevation**: SegmentedControl is a surface consumer (72% moderate contrast) — see [surface-elevation.md](./surface-elevation.md).
 
 Status: detailed contract
-Updated: 2026-03-15
+Updated: 2026-03-30
 
 ## 1. Purpose
 
@@ -45,6 +45,7 @@ Updated: 2026-03-15
 | `ariaLabel` | `string \| null` | `null` | no | required when no visible label exists |
 | `name` | `string \| undefined` | auto-generated | no | radio group name attribute |
 | `density` | `ControlDensity \| null` | `null` | no | explicit density override for spacing |
+| `equalWidth` | `boolean` | `true` | no | when `false`, segments size to content instead of sharing equal width |
 
 ### SegmentedControlOption
 
@@ -54,6 +55,7 @@ Updated: 2026-03-15
 | `label` | `string` | yes | visible label text |
 | `disabled` | `boolean` | no | disables individual segment |
 | `ariaLabel` | `string` | no | accessible name override for abbreviated labels |
+| `title` | `string` | no | tooltip/title attribute for the segment wrapper |
 
 ### Controlled And Uncontrolled
 
@@ -120,7 +122,8 @@ are required.
 
 ### Sizing
 
-- Root uses CSS grid with equal-width columns for all segments
+- Root uses CSS grid with equal-width columns for all segments by default
+- When `equalWidth=false`, segments size to content and the group left-aligns
 - Segment labels truncate with ellipsis when content overflows
 - Control height derived from shared control-height token minus internal padding
 
@@ -129,7 +132,7 @@ are required.
 - parent expectations: shell tool groups, view mode toggles, compact filters
 - child expectations: option list only in this baseline contract
 - resizing rules: the control remains visually unified regardless of segment
-  count; all segments share equal width via `grid-auto-columns: minmax(0, 1fr)`
+  count; segments either share equal width via `grid-auto-columns: minmax(0, 1fr)` or size to content when `equalWidth=false`
 
 ## 8. Token Usage — Exact Values
 
