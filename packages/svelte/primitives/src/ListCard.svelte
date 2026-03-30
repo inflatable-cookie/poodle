@@ -1,6 +1,12 @@
 <script lang="ts">
   import { createEventDispatcher } from "svelte";
 
+  import { getUiPresentation, resolveSemanticControlSize } from "./presentation";
+  import type { ControlDensity, ControlSize, SemanticControlSizeRole } from "./types";
+
+  export let size: ControlSize | null = null;
+  export let sizeRole: SemanticControlSizeRole = "control";
+  export let density: ControlDensity | null = null;
   export let title: string;
   export let subtitle: string | null = null;
   export let meta: string | null = null;
@@ -24,6 +30,10 @@
     selectedChange: { selected: boolean };
   }>();
 
+  const uiPresentation = getUiPresentation();
+
+  $: resolvedSize = size ?? resolveSemanticControlSize($uiPresentation.sizeScale, sizeRole);
+  $: resolvedDensity = density ?? $uiPresentation.density;
   $: isCompact = layout === "compact";
   $: isInteractive = Boolean(href) || interactive || selectable;
 
@@ -60,6 +70,8 @@
     class="list-card"
     class:list-card--interactive={isInteractive}
     href={href}
+    data-size={resolvedSize}
+    data-density={resolvedDensity}
     data-disabled={disabled}
     data-not-live={notLive}
     data-leading-shape={leadingShape}
@@ -139,6 +151,8 @@
   <div
     class="list-card"
     class:list-card--interactive={isInteractive}
+    data-size={resolvedSize}
+    data-density={resolvedDensity}
     data-disabled={disabled}
     data-not-live={notLive}
     data-leading-shape={leadingShape}
@@ -426,6 +440,35 @@
     align-items: center;
     flex-shrink: 0;
   }
+
+  /* Size variants */
+  .list-card[data-size="xs"] { padding: 0.375rem 0.5rem; gap: 0.375rem; }
+  .list-card[data-size="xs"] .list-card__title { font-size: 0.75rem; }
+  .list-card[data-size="xs"] .list-card__subtitle { font-size: 0.625rem; }
+  .list-card[data-size="xs"] .list-card__meta { font-size: 0.625rem; }
+  .list-card[data-size="xs"] .list-card__leading { width: 1.5rem; height: 1.5rem; font-size: 0.6875rem; }
+
+  .list-card[data-size="sm"] { padding: 0.5rem 0.625rem; gap: 0.5rem; }
+  .list-card[data-size="sm"] .list-card__title { font-size: 0.8125rem; }
+  .list-card[data-size="sm"] .list-card__subtitle { font-size: 0.6875rem; }
+  .list-card[data-size="sm"] .list-card__meta { font-size: 0.6875rem; }
+  .list-card[data-size="sm"] .list-card__leading { width: 1.75rem; height: 1.75rem; font-size: 0.75rem; }
+
+  .list-card[data-size="lg"] { padding: 0.75rem 1rem; gap: 0.875rem; }
+  .list-card[data-size="lg"] .list-card__title { font-size: 1rem; }
+  .list-card[data-size="lg"] .list-card__subtitle { font-size: 0.8125rem; }
+  .list-card[data-size="lg"] .list-card__meta { font-size: 0.8125rem; }
+  .list-card[data-size="lg"] .list-card__leading { width: 2.5rem; height: 2.5rem; font-size: 1rem; }
+
+  .list-card[data-size="xl"] { padding: 0.875rem 1.125rem; gap: 1rem; }
+  .list-card[data-size="xl"] .list-card__title { font-size: 1.0625rem; }
+  .list-card[data-size="xl"] .list-card__subtitle { font-size: 0.875rem; }
+  .list-card[data-size="xl"] .list-card__meta { font-size: 0.875rem; }
+  .list-card[data-size="xl"] .list-card__leading { width: 2.75rem; height: 2.75rem; font-size: 1.125rem; }
+
+  /* Density variants */
+  .list-card[data-density="compact"] { padding: 0.375rem 0.5rem; }
+  .list-card[data-density="comfortable"] { padding: 0.875rem 1.125rem; }
 
   .list-card__sash {
     position: absolute;
