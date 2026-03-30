@@ -5,24 +5,48 @@
   import IconButton from "./IconButton.svelte";
   import { getUiPresentation, resolveSemanticControlSize } from "./presentation";
 
-  import type { ControlDensity, ControlSize, DialogKind, SemanticControlSizeRole } from "./types";
+  import type { ControlDensity, ControlSize, SemanticControlSizeRole } from "./types";
 
+  /** Controlled open state. Pass `null` for uncontrolled mode. */
   export let open: boolean | null = null;
+  /** Initial open state for uncontrolled mode. */
   export let defaultOpen = false;
+  /** Optional title rendered in the built-in header. Ignored when `header` slot is used. */
   export let title: string | null = null;
+  /** Optional description below the title. Ignored when `header` slot is used. */
   export let description: string | null = null;
-  export let kind: DialogKind = "dialog";
+  /** ARIA role. Defaults to "dialog". AlertDialog sets "alertdialog". */
+  export let role: "dialog" | "alertdialog" = "dialog";
+  /** Whether Escape key closes the dialog. */
   export let dismissOnEscape = true;
+  /** Whether clicking the backdrop closes the dialog. */
   export let dismissOnBackdrop = true;
+  /** Accessible label when no visible title is provided. */
   export let ariaLabel: string | null = null;
+  /** Custom CSS class applied to the surface element. */
   export let contentClassName = "";
+  /** Custom inline style applied to the surface element. */
   export let contentStyle = "";
+  /** Custom CSS class applied to the backdrop element. */
   export let overlayClassName = "";
+  /** Show a close button in the top-right corner. */
   export let showCloseButton = false;
+  /** Accessible label for the close button. */
   export let closeLabel = "Close dialog";
+  /** Surface width preset. Defaults to "md". */
+  export let width: "sm" | "md" | "lg" | "xl" | "full" = "md";
+  /** When true, the surface has no internal padding or structure — consumers control all layout. */
+  export let bare = false;
+  /** Explicit size override. */
   export let size: ControlSize | null = null;
+  /** Semantic size role. */
   export let sizeRole: SemanticControlSizeRole = "control";
+  /** Explicit density override. */
   export let density: ControlDensity | null = null;
+
+  // Legacy compat: accept `kind` as alias for `role`
+  /** @deprecated Use `role` instead. */
+  export let kind: "dialog" | "alertdialog" | undefined = undefined;
 
   const dispatch = createEventDispatcher<{
     openChange: { open: boolean };
@@ -37,6 +61,7 @@
   let bodyOverflow: string | null = null;
   let previousOpen = false;
 
+  $: effectiveRole = kind ?? role;
   $: resolvedSize = size ?? resolveSemanticControlSize($uiPresentation.sizeScale, sizeRole);
   $: resolvedDensity = density ?? $uiPresentation.density;
   $: isControlled = open !== null;
@@ -123,7 +148,7 @@
 </script>
 
 {#if isOpen}
-  <div class="dialog" data-size={resolvedSize} data-density={resolvedDensity}>
+  <div class="dialog" data-size={resolvedSize} data-density={resolvedDensity} data-width={width}>
     <button
       type="button"
       class={`dialog__backdrop ${overlayClassName}`}
@@ -137,8 +162,9 @@
     <div
       bind:this={surfaceElement}
       class={`dialog__surface ${contentClassName}`}
+      class:dialog__surface--bare={bare}
       style={contentStyle}
-      role={kind}
+      role={effectiveRole}
       tabindex="-1"
       aria-label={title ? undefined : ariaLabel ?? undefined}
       aria-modal="true"
@@ -152,31 +178,44 @@
             ariaLabel={closeLabel}
             variant="ghost"
             sizeRole="chrome"
+            size={resolvedSize}
             on:click={requestClose}
           />
         </div>
       {/if}
 
-      {#if title || description}
-        <div class="dialog__header">
-          {#if title}
-            <strong>{title}</strong>
-          {/if}
-
-          {#if description}
-            <p>{description}</p>
-          {/if}
-        </div>
-      {/if}
-
-      <div class="dialog__body">
+      {#if bare}
         <slot />
-      </div>
+      {:else}
+        {#if $$slots.header}
+          <div class="dialog__header">
+            <slot name="header" />
+          </div>
+        {:else if title || description}
+          <div class="dialog__header">
+            {#if title}
+              <strong>{title}</strong>
+            {/if}
 
-      {#if $$slots.actions}
-        <div class="dialog__actions">
-          <slot name="actions" />
+            {#if description}
+              <p>{description}</p>
+            {/if}
+          </div>
+        {/if}
+
+        <div class="dialog__body">
+          <slot />
         </div>
+
+        {#if $$slots.footer}
+          <div class="dialog__footer">
+            <slot name="footer" />
+          </div>
+        {:else if $$slots.actions}
+          <div class="dialog__actions">
+            <slot name="actions" />
+          </div>
+        {/if}
       {/if}
     </div>
   </div>
@@ -224,6 +263,16 @@
     box-shadow: var(--poodle-treatment-surface-elevated-shadow, var(--poodle-elevation-dialog));
   }
 
+  .dialog__surface--bare {
+    padding: 0;
+  }
+
+  /* Width presets */
+  .dialog[data-width="sm"] .dialog__surface { width: min(24rem, 100%); }
+  .dialog[data-width="lg"] .dialog__surface { width: min(48rem, 100%); }
+  .dialog[data-width="xl"] .dialog__surface { width: min(64rem, 100%); }
+  .dialog[data-width="full"] .dialog__surface { width: 100%; }
+
   .dialog__close {
     position: absolute;
     top: var(--poodle-space-inline-sm);
@@ -260,6 +309,10 @@
     margin-top: var(--poodle-space-stack-lg);
   }
 
+  .dialog__footer {
+    margin-top: var(--poodle-space-stack-lg);
+  }
+
   /* Size variants */
   .dialog[data-size="xs"] .dialog__header strong {
     font-size: 0.8125rem;
@@ -282,6 +335,8 @@
   }
 
   /* Density variants */
-  .dialog[data-density="compact"] .dialog__body { padding: 0.75rem; }
-  .dialog[data-density="comfortable"] .dialog__body { padding: 1.5rem; }
+  .dialog[data-density="compact"] .dialog__surface { padding: 0.5rem 0.75rem; }
+  .dialog[data-density="compact"] .dialog__surface--bare { padding: 0; }
+  .dialog[data-density="comfortable"] .dialog__surface { padding: 1rem 1.25rem; }
+  .dialog[data-density="comfortable"] .dialog__surface--bare { padding: 0; }
 </style>

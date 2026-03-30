@@ -89,7 +89,8 @@
   {open}
   {title}
   {description}
-  kind="alertdialog"
+  role="alertdialog"
+  width="sm"
   {ariaLabel}
   dismissOnEscape={!working}
   dismissOnBackdrop={!working}
