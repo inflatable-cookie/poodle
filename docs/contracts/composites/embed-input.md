@@ -15,8 +15,7 @@ Updated: 2026-03-30
   provider detection (YouTube, Vimeo, generic URL, iframe embed code),
   provider restriction, error and success status display, parsed result
   output via two-way binding
-- Out of scope: embed preview/rendering (see EmbedPreview), file upload,
-  custom provider plugins, oEmbed API calls
+- Out of scope: file upload, custom provider plugins
 
 ## 2. Anatomy
 
@@ -54,6 +53,18 @@ Updated: 2026-03-30
 | `disabled` | `boolean` | `false` | no | disables the TextArea input |
 | `error` | `string \| null` | `null` | no | external error message; supports two-way binding |
 | `resolveParseState` | `((value: string, providers: string[]) => EmbedParseState) \| undefined` | `undefined` | no | optional custom parse resolver; defaults to the built-in `resolveEmbedParseState` helper |
+
+### Exported Helper Surface
+
+Poodle also exports generic embed helpers from the same composite package:
+
+- `parseEmbed(input, options)`
+- `detectParsedEmbed(input)`
+- `resolveEmbedParseState(input, providers)`
+- `renderEmbed(parsed)`
+- `lookupMeta(parsed)`
+- `getThumbnailUrl(parsed, quality?)`
+- `getProviderAccent(provider)`
 
 ### Types
 
