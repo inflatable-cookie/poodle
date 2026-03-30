@@ -1,22 +1,27 @@
 <script lang="ts">
   import { Icon } from "@poodle/svelte-primitives";
 
-  import type { EmptyStateVariant } from "./types";
+  import type { EmptyStateSize, EmptyStateVariant } from "./types";
 
   export let title: string;
   export let message: string | null = null;
   export let variant: EmptyStateVariant = "neutral";
+  export let size: EmptyStateSize = "default";
   export let ariaLabel: string | null = null;
 </script>
 
-<section class="empty-state" data-variant={variant} aria-label={ariaLabel ?? title}>
+<section class="empty-state" data-variant={variant} data-size={size} aria-label={ariaLabel ?? title}>
   <div class="empty-state__visual" aria-hidden="true">
-    {#if variant === "search"}
-      <Icon name="search" />
-    {:else if variant === "firstRun"}
-      <Icon name="plus" />
+    {#if $$slots.visual}
+      <slot name="visual" />
     {:else}
-      <Icon name="inbox" />
+      {#if variant === "search"}
+        <Icon name="search" />
+      {:else if variant === "firstRun"}
+        <Icon name="plus" />
+      {:else}
+        <Icon name="inbox" />
+      {/if}
     {/if}
   </div>
 
@@ -67,6 +72,17 @@
     font-weight: 600;
   }
 
+  .empty-state[data-size="compact"] {
+    gap: var(--poodle-space-stack-sm);
+    padding: var(--poodle-space-stack-lg) var(--poodle-space-panel-x);
+  }
+
+  .empty-state[data-size="compact"] .empty-state__visual {
+    width: 1.75rem;
+    height: 1.75rem;
+    font-size: 0.9375rem;
+  }
+
   .empty-state__copy {
     display: grid;
     gap: var(--poodle-space-inline-sm);
@@ -83,10 +99,18 @@
     line-height: 1.2;
   }
 
+  .empty-state[data-size="compact"] .empty-state__copy h3 {
+    font-size: 0.9375rem;
+  }
+
   .empty-state__copy p {
     color: var(--poodle-color-text-secondary);
     font-size: 0.8125rem;
     line-height: 1.5;
+  }
+
+  .empty-state[data-size="compact"] .empty-state__copy p {
+    font-size: 0.75rem;
   }
 
   .empty-state__actions {

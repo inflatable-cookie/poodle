@@ -1,29 +1,36 @@
 # Pagination
 
 Status: detailed contract
-Updated: 2026-03-15
+Updated: 2026-03-27
 
 ## 1. Purpose
 
 - Component name: `Pagination`
 - Layer: `foundation`
-- Summary: a low-level page navigation control for moving between discrete
-  result pages, with previous/next buttons, numbered page buttons, and ellipsis
-  truncation
+- Summary: a pagination control that supports both low-level numbered page
+  navigation and higher-level controller-driven list pagination with range
+  summaries, page-size controls, and simple/full variants
 - In scope: previous/next controls, page buttons, current-page state,
-  truncated page window with ellipsis, disabled boundary controls
-- Out of scope: range summaries, page-size controls, server fetch policy,
-  progressive loading, total count display
+  truncated page window with ellipsis, disabled boundary controls, simple and
+  full variants, optional range summary, optional page-size selector,
+  controller-driven pagination integration, scroll targeting after page changes
+- Out of scope: server fetch policy, query serialization, pagination controller
+  creation, data fetching
 
 ## 2. Anatomy
 
 ```text
 [Root .pagination]  <nav>
-  ├── [Previous Button .pagination__button]  <button>
-  ├── [Pages .pagination__pages]  <span>
-  │     ├── [Page Button .pagination__button]...  <button>
-  │     └── [Ellipsis .pagination__ellipsis]...  <span> (conditional)
-  └── [Next Button .pagination__button]  <button>
+  ├── [Info .pagination__info]  <div> (optional)
+  └── [Controls Wrapper .pagination__controls-wrapper]  <div>
+        ├── [Limit Selector .pagination__limit]  <div> (optional)
+        └── [Controls .pagination__controls]  <div>
+              ├── [Previous Button .pagination__button]  <button>
+              ├── [Pages .pagination__pages]  <span> (numbered only)
+              │     ├── [Page Button .pagination__button]...  <button>
+              │     └── [Ellipsis .pagination__ellipsis]...  <span> (conditional)
+              ├── [Summary .pagination__summary]  <span> (simple/full)
+              └── [Next Button .pagination__button]  <button>
 ```
 
 | Part | Required | Description | Token Targets |

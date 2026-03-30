@@ -85,6 +85,7 @@ import SearchFieldSpecimen from "./SearchFieldSpecimen.svelte";
 import SegmentedControlSpecimen from "./SegmentedControlSpecimen.svelte";
 import SelectSpecimen from "./SelectSpecimen.svelte";
 import SelectionSummarySpecimen from "./SelectionSummarySpecimen.svelte";
+import SidebarNavSpecimen from "./SidebarNavSpecimen.svelte";
 import SeparatorSpecimen from "./SeparatorSpecimen.svelte";
 import SkeletonSpecimen from "./SkeletonSpecimen.svelte";
 import SliderSpecimen from "./SliderSpecimen.svelte";
@@ -101,8 +102,10 @@ import TableSpecimen from "./TableSpecimen.svelte";
 import TextAreaSpecimen from "./TextAreaSpecimen.svelte";
 import TimeAgoSpecimen from "./TimeAgoSpecimen.svelte";
 import TextInputSpecimen from "./TextInputSpecimen.svelte";
+import TotpInputSpecimen from "./TotpInputSpecimen.svelte";
 import TimeFieldSpecimen from "./TimeFieldSpecimen.svelte";
 import TimeZoneSelectSpecimen from "./TimeZoneSelectSpecimen.svelte";
+import ToastHostSpecimen from "./ToastHostSpecimen.svelte";
 import ToastStackSpecimen from "./ToastStackSpecimen.svelte";
 import ToggleGroupSpecimen from "./ToggleGroupSpecimen.svelte";
 import ToggleSpecimen from "./ToggleSpecimen.svelte";
@@ -214,6 +217,7 @@ export const specimenMap: Record<string, typeof SvelteComponent<any>> = {
   "segmented-control": SegmentedControlSpecimen,
   select: SelectSpecimen,
   "selection-summary": SelectionSummarySpecimen,
+  "sidebar-nav": SidebarNavSpecimen,
   separator: SeparatorSpecimen,
   skeleton: SkeletonSpecimen,
   slider: SliderSpecimen,
@@ -230,9 +234,11 @@ export const specimenMap: Record<string, typeof SvelteComponent<any>> = {
   "text-area": TextAreaSpecimen,
   "time-ago": TimeAgoSpecimen,
   "text-input": TextInputSpecimen,
+  "totp-input": TotpInputSpecimen,
   "time-field": TimeFieldSpecimen,
   "time-zone-select": TimeZoneSelectSpecimen,
   "toast-stack": ToastStackSpecimen,
+  "toast-host": ToastHostSpecimen,
   toggle: ToggleSpecimen,
   "toggle-group": ToggleGroupSpecimen,
   toolbar: ToolbarSpecimen,

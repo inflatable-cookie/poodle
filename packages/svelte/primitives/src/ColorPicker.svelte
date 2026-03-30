@@ -68,8 +68,8 @@
   // Initialise from prop
   syncFromHex(value);
 
-  $: resolvedSize = size ?? resolveSemanticControlSize(uiPresentation?.sizeScale ?? "md", sizeRole);
-  $: resolvedDensity = density ?? uiPresentation?.density ?? "default";
+  $: resolvedSize = size ?? resolveSemanticControlSize($uiPresentation.sizeScale, sizeRole);
+  $: resolvedDensity = density ?? $uiPresentation.density;
   $: isOpen = open ?? uncontrolledOpen;
 
   // Keep internal state in sync when value prop changes externally

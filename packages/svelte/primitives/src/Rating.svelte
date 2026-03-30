@@ -26,8 +26,8 @@
   let uncontrolledValue = defaultValue;
   let focusIndex = (defaultValue ?? 1) - 1;
 
-  $: resolvedSize = size ?? resolveSemanticControlSize(uiPresentation?.sizeScale ?? "md", sizeRole);
-  $: resolvedDensity = density ?? uiPresentation?.density ?? "default";
+  $: resolvedSize = size ?? resolveSemanticControlSize($uiPresentation.sizeScale, sizeRole);
+  $: resolvedDensity = density ?? $uiPresentation.density;
   $: currentValue = value ?? uncontrolledValue;
   $: itemCount = Math.max(1, Math.floor(max));
   $: if (currentValue !== null) {

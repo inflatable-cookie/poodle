@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-03-26T15:04:57.786Z",
+  "generatedAt": "2026-03-26T20:05:52.268Z",
   "artifact": "packages/svelte/preview/artifacts/parity-report.json",
   "previewBasePath": "/",
   "automatedBoundary": [
@@ -187,18 +187,18 @@
       },
       {
         "packageName": "@poodle/svelte-composites",
-        "exportCount": 51,
-        "componentCount": 36,
+        "exportCount": 52,
+        "componentCount": 37,
         "helperCount": 15,
-        "previewedCount": 51,
+        "previewedCount": 52,
         "contractOnlyCount": 0
       },
       {
         "packageName": "@poodle/svelte-composites",
-        "exportCount": 51,
-        "componentCount": 36,
+        "exportCount": 52,
+        "componentCount": 37,
         "helperCount": 15,
-        "previewedCount": 51,
+        "previewedCount": 52,
         "contractOnlyCount": 0
       }
     ],
@@ -818,6 +818,19 @@
         ],
         "sectionTitles": [
           "Headers, dock orchestration, and workspace shell posture"
+        ]
+      },
+      {
+        "packageName": "@poodle/svelte-composites",
+        "exportName": "SidebarNav",
+        "kind": "component",
+        "status": "previewed",
+        "note": "The catalogue covers the remaining composite exports outside the main suite-specific groupings.",
+        "sectionIds": [
+          "catalog-hub"
+        ],
+        "sectionTitles": [
+          "Catalog hub"
         ]
       },
       {

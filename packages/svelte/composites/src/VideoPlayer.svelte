@@ -28,8 +28,8 @@
 
   const uiPresentation = getUiPresentation();
 
-  $: resolvedSize = size ?? resolveSemanticControlSize(uiPresentation?.sizeScale ?? "md", sizeRole);
-  $: resolvedDensity = density ?? uiPresentation?.density ?? "default";
+  $: resolvedSize = size ?? resolveSemanticControlSize($uiPresentation.sizeScale, sizeRole);
+  $: resolvedDensity = density ?? $uiPresentation.density;
   $: formattedCurrent = formatTime(currentTime);
   $: formattedDuration = formatTime(duration);
   $: progress = duration > 0 ? (currentTime / duration) * 100 : 0;

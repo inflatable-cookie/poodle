@@ -39,6 +39,28 @@
 
   let selectedFruit: string | null = null;
   let selectedGrouped: string | null = null;
+  let selectedClearable: string | null = "all";
+  let selectedLazy: string | null = "module-1";
+
+  async function loadModuleGroups() {
+    return [
+      {
+        label: "",
+        items: [{ value: "all", label: "All modules" }],
+      },
+      {
+        label: "Pathway A",
+        items: [
+          { value: "module-1", label: "FA1 Financial Reporting" },
+          { value: "module-2", label: "TX1 Taxation" },
+        ],
+      },
+      {
+        label: "Pathway B",
+        items: [{ value: "module-3", label: "AA1 Audit" }],
+      },
+    ];
+  }
 </script>
 
 <div class="specimen">
@@ -115,6 +137,35 @@
       value="banana"
       disabled
       ariaLabel="Disabled fruit selection"
+    />
+  </div>
+
+  <div class="specimen__group">
+    <Eyebrow>Clearable</Eyebrow>
+    <Select
+      id="select-clearable"
+      items={fruitOptions}
+      clearable
+      defaultValue="all"
+      placeholder="All fruits"
+      value={selectedClearable}
+      ariaLabel="Clearable fruit selection"
+      on:valueChange={(event) => (selectedClearable = event.detail.value)}
+    />
+  </div>
+
+  <div class="specimen__group">
+    <Eyebrow>Lazy grouped options</Eyebrow>
+    <Select
+      id="select-lazy"
+      value={selectedLazy}
+      valueLabel="FA1 Financial Reporting"
+      placeholder="All modules"
+      clearable
+      defaultValue="all"
+      loadGroups={loadModuleGroups}
+      ariaLabel="Lazy module selection"
+      on:valueChange={(event) => (selectedLazy = event.detail.value)}
     />
   </div>
 </div>

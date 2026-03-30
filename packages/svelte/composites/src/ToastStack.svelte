@@ -19,8 +19,8 @@
 
   const uiPresentation = getUiPresentation();
 
-  $: resolvedSize = size ?? resolveSemanticControlSize(uiPresentation?.sizeScale ?? "md", sizeRole);
-  $: resolvedDensity = density ?? uiPresentation?.density ?? "default";
+  $: resolvedSize = size ?? resolveSemanticControlSize($uiPresentation.sizeScale, sizeRole);
+  $: resolvedDensity = density ?? $uiPresentation.density;
 </script>
 
 <section class="toast-stack" aria-label={ariaLabel} aria-live="polite" aria-atomic="false" role="list" data-size={resolvedSize} data-density={resolvedDensity}>

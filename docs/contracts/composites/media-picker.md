@@ -192,7 +192,17 @@ None yet (single implementation).
 
 Use `MediaPicker` for selecting from an existing media library or uploading new files. The component assumes media items are provided as a flat array; server-side search and pagination should be handled by the consuming application, updating the `items` prop reactively.
 
-This is intentionally the lightweight local-selector posture. It is not the
-same contract as Underlay's retained callback-driven media-library workflow
-shell, which still owns paginated browse loading, duplicate checks, and upload
-handshake orchestration.
+This is intentionally the lightweight local-selector posture.
+
+For callback-driven media-library flows, keep using the presentational Poodle
+media surfaces and pair them with the shared workflow helpers exported from
+`@poodle/svelte-composites`:
+
+- `loadMediaBrowsePage`
+- `mergeMediaBrowseItems`
+- `createResetMediaBrowseState`
+- `runMediaUploadWorkflow`
+- `uploadMediaWithKnownHash`
+
+Those helpers now own the reusable paginated browse, duplicate-detection, and
+upload orchestration layer that previously lived in Underlay `MediaPicker`.

@@ -26,8 +26,8 @@
 
   let uncontrolledValue = defaultValue;
 
-  $: resolvedSize = size ?? resolveSemanticControlSize(uiPresentation?.sizeScale ?? "md", sizeRole);
-  $: resolvedDensity = density ?? uiPresentation?.density ?? "default";
+  $: resolvedSize = size ?? resolveSemanticControlSize($uiPresentation.sizeScale, sizeRole);
+  $: resolvedDensity = density ?? $uiPresentation.density;
   $: availableOptions = options.length > 0 ? options : defaultTimeZoneOptions();
   $: isControlled = value !== null;
   $: currentValue = (isControlled ? value : uncontrolledValue) ?? "";

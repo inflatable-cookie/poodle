@@ -1,6 +1,6 @@
 <script lang="ts">
   import { EmptyState } from "@poodle/svelte-composites";
-  import { Button, Eyebrow } from "@poodle/svelte-primitives";
+  import { Button, Eyebrow, Icon } from "@poodle/svelte-primitives";
 </script>
 
 <div class="specimen">
@@ -33,6 +33,19 @@
       title="Welcome to your workspace"
       message="This is where your team's components will appear once you start building."
     />
+  </div>
+
+  <div class="specimen__group">
+    <Eyebrow>Compact custom visual</Eyebrow>
+    <EmptyState
+      size="compact"
+      title="No captured emails found"
+      message="Emails will appear here when sent in development mode."
+    >
+      <svelte:fragment slot="visual">
+        <Icon name="mail" />
+      </svelte:fragment>
+    </EmptyState>
   </div>
 </div>
 

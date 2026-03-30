@@ -81,6 +81,7 @@ export { default as Table } from "./Table.svelte";
 export { default as TextArea } from "./TextArea.svelte";
 export { default as TimeAgo } from "./TimeAgo.svelte";
 export { default as TextInput } from "./TextInput.svelte";
+export { default as TotpInput } from "./TotpInput.svelte";
 export { default as TimeField } from "./TimeField.svelte";
 export { default as TimeZoneSelect } from "./TimeZoneSelect.svelte";
 export { default as Toggle } from "./Toggle.svelte";
@@ -128,6 +129,7 @@ export type {
   NavigationMenuItem,
   TimeZoneOption,
   FormActionAlign,
+  FormActionDangerItem,
   Orientation,
   OverlayPlacement,
   OverflowMode,
@@ -170,7 +172,11 @@ export type {
   BreadcrumbItem,
   BulkAction,
   CardVariant,
+  OrderByField,
+  OrderByFieldDefinition,
+  OrderByValue,
   SortField,
+  SortDirection,
   SplitOrientation,
   ZonedDateTimeValue,
 } from "./types";

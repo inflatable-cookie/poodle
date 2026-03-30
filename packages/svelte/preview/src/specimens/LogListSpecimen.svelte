@@ -1,6 +1,6 @@
 <script lang="ts">
   import { LogList } from "@poodle/svelte-composites";
-  import type { LogEntry } from "@poodle/svelte-composites";
+  import type { LogEntry, LogFilter } from "@poodle/svelte-composites";
   import { Eyebrow, Button, UiPresentationProvider } from "@poodle/svelte-primitives";
 
   const now = Date.now();
@@ -19,6 +19,57 @@
   ];
 
   let counter = 10;
+  const auditFilters: LogFilter[] = [
+    {
+      field: "action",
+      label: "Action",
+      type: "select",
+      options: [
+        { value: "create", label: "Create" },
+        { value: "update", label: "Update" },
+        { value: "delete", label: "Delete" },
+      ],
+    },
+    {
+      field: "resource_type",
+      label: "Resource",
+      type: "select",
+      options: [
+        { value: "user", label: "User" },
+        { value: "media", label: "Media" },
+        { value: "session", label: "Session" },
+      ],
+    },
+  ];
+  const auditEntries: LogEntry[] = [
+    {
+      id: "audit-1",
+      occurredAt: new Date(now - 3600000).toISOString(),
+      actor: { id: "u-1", name: "Alice Johnson", email: "alice@example.com" },
+      action: "create",
+      resourceType: "project",
+      resourceId: "project-1",
+      resourceLabel: "Spring Launch",
+    },
+    {
+      id: "audit-2",
+      occurredAt: new Date(now - 1800000).toISOString(),
+      actor: { id: "u-2", name: "Marcus Lee", email: "marcus@example.com" },
+      action: "update",
+      resourceType: "media",
+      resourceId: "media-42",
+      resourceLabel: "Campaign Header",
+    },
+    {
+      id: "audit-3",
+      occurredAt: new Date(now - 300000).toISOString(),
+      action: "delete",
+      resourceType: "user",
+      resourceId: "user-77",
+      resourceLabel: "Legacy operator",
+    },
+  ];
+  let auditFilterValues: Record<string, string> = {};
 
   function addEntry() {
     counter += 1;
@@ -31,6 +82,17 @@
     };
     const message = msgs[level][Math.floor(Math.random() * msgs[level].length)];
     entries = [...entries, { id: String(counter), timestamp: new Date(), level, message }];
+  }
+
+  function handleAuditFilterChange(field: string, value: string) {
+    auditFilterValues = {
+      ...auditFilterValues,
+      [field]: value,
+    };
+  }
+
+  function clearAuditFilters() {
+    auditFilterValues = {};
   }
 </script>
 
@@ -51,6 +113,22 @@
         <LogList {entries} ariaLabel="Prominent application logs" sizeRole="prominent" />
       </div>
     </UiPresentationProvider>
+  </div>
+
+  <div class="specimen__group">
+    <Eyebrow>Audit activity list</Eyebrow>
+    <LogList
+      entries={auditEntries}
+      ariaLabel="Audit activity"
+      filters={auditFilters}
+      filterValues={auditFilterValues}
+      onFilterChange={handleAuditFilterChange}
+      onClearFilters={clearAuditFilters}
+      getActorHref={(actor) => `/users/${actor.id}`}
+      getResourceHref={(resourceType, resourceId, action) =>
+        action === "delete" ? null : `/${resourceType}/${resourceId}`
+      }
+    />
   </div>
 </div>
 

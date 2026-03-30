@@ -56,8 +56,8 @@
   let candidateButtons: Array<HTMLButtonElement | null> = [];
   const uiPresentation = getUiPresentation();
 
-  $: resolvedSize = size ?? resolveSemanticControlSize(uiPresentation?.sizeScale ?? "md", sizeRole);
-  $: resolvedDensity = density ?? uiPresentation?.density ?? "default";
+  $: resolvedSize = size ?? resolveSemanticControlSize($uiPresentation.sizeScale, sizeRole);
+  $: resolvedDensity = density ?? $uiPresentation.density;
 
   // Drill-down state
   let drillDepth = 0;

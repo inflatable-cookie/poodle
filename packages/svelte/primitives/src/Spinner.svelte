@@ -13,8 +13,8 @@
   export let style: string | null = null;
   const uiPresentation = getUiPresentation();
   $: resolvedSize =
-    (size ?? resolveSemanticControlSize(uiPresentation?.sizeScale ?? "md", sizeRole)) as SpinnerSize;
-  $: resolvedDensity = density ?? uiPresentation?.density ?? "default";
+    (size ?? resolveSemanticControlSize($uiPresentation.sizeScale, sizeRole)) as SpinnerSize;
+  $: resolvedDensity = density ?? $uiPresentation.density;
 
   const gridCells = [
     { id: 0, phase: "tl" },

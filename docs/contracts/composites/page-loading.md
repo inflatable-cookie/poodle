@@ -7,15 +7,15 @@ Updated: 2026-03-25
 
 - Component name: `PageLoading`
 - Layer: `composites`
-- Summary: a full-page modal loading overlay with shared spinner, optional progress bar, status message, and cancel button
-- In scope: indeterminate spinner, determinate progress bar, status message, cancel action, backdrop with blur, modal-level z-index
-- Out of scope: inline loading indicators, skeleton screens, progress toast notifications, retry logic
+- Summary: a loading surface with shared spinner, optional progress bar, status message, and cancel button that can render either as a full-page modal overlay or an inline centered state
+- In scope: indeterminate spinner, determinate progress bar, status message, cancel action, backdrop with blur, modal-level z-index, inline centered loading state
+- Out of scope: skeleton screens, progress toast notifications, retry logic
 
 ## 2. Anatomy
 
 ```text
-[Root]  role="status", position: fixed, inset: 0
-  ├── [Backdrop]  aria-hidden, semi-transparent blur overlay
+[Root]  role="status"
+  ├── [Backdrop]  (overlay only) aria-hidden, semi-transparent blur overlay
   └── [Card]
         ├── [Spinner]  aria-hidden, shared `Spinner` primitive
         ├── [Progress]  (optional, when value is not null)
@@ -28,9 +28,9 @@ Updated: 2026-03-25
 
 | Part | Element | Notes |
 |------|---------|-------|
-| root | `<div>` | Fixed overlay, `role="status"`, `aria-live="polite"`, centered flex |
-| backdrop | `<div>` | Semi-transparent background with `backdrop-filter: blur(2px)` |
-| card | `<div>` | Elevated card centered in viewport |
+| root | `<div>` | `role="status"`, `aria-live="polite"`, centered flex |
+| backdrop | `<div>` | Overlay-only semi-transparent background with `backdrop-filter: blur(2px)` |
+| card | `<div>` | Elevated card in overlay mode, simplified inline container in inline mode |
 | spinner | `Spinner` | Shared spinner primitive in large accent ring mode |
 | progress | `Progress` | Determinate progress bar (only shown when `value` is not null) |
 | message | `<p>` | Status text, centered |
@@ -41,6 +41,7 @@ Updated: 2026-03-25
 | Prop | Type | Default | Required | Notes |
 |------|------|---------|----------|-------|
 | `visible` | `boolean` | `true` | no | Controls whether the overlay is rendered |
+| `presentation` | `"overlay" \| "inline"` | `"overlay"` | no | Whether the component renders as a modal overlay or an inline centered loading state |
 | `value` | `number \| null` | `null` | no | Progress value; `null` = indeterminate (spinner only) |
 | `max` | `number` | `100` | no | Maximum value for the progress bar |
 | `message` | `string \| null` | `null` | no | Status message text |
@@ -62,6 +63,8 @@ None.
 | State | Trigger | Visual Effect |
 |-------|---------|---------------|
 | hidden | `visible=false` | Component not rendered |
+| inline | `presentation="inline"` | Inline centered loading shell, no backdrop |
+| overlay | `presentation="overlay"` | Full-screen modal treatment with backdrop |
 | indeterminate | `value=null` | Spinning arc animation, no progress bar |
 | determinate | `value` is a number | Spinner shown plus progress bar |
 | with-message | `message` provided | Status text below spinner |
@@ -88,14 +91,14 @@ None.
 
 - Root has `role="status"` and `aria-live="polite"` for screen reader announcements
 - Root carries `aria-label` (defaults to `"Loading"`)
-- Backdrop is `aria-hidden="true"`
+- Backdrop is `aria-hidden="true"` in overlay mode
 - Spinner is `aria-hidden="true"`
 - Progress bar (when present) uses the `Progress` primitive with its own `ariaLabel`
 
 ### Keyboard
 
 - Cancel button is keyboard-focusable when visible
-- Focus is trapped within the overlay when visible (modal behavior via fixed positioning and z-index)
+- Overlay mode uses the modal visual treatment; inline mode participates in normal page flow
 
 ### Focus
 
@@ -105,9 +108,9 @@ None.
 
 ### Sizing
 
-- Root: `position: fixed`, `inset: 0`, `z-index: overlay-z-modal`, flex centered
-- Backdrop: absolute inset 0, `background-base` at 62% opacity, `backdrop-filter: blur(2px)`
-- Card: flex column centered, gap `1rem`, min-width `14rem`, max-width `20rem`, padding `2rem 2.5rem`
+- Root: flex centered in both modes; overlay adds `position: fixed`, `inset: 0`, and modal z-index
+- Backdrop: overlay-only, absolute inset 0, `background-base` at 62% opacity, `backdrop-filter: blur(2px)`
+- Card: flex column centered, gap `1rem`; overlay uses elevated card chrome, inline uses simplified transparent container
 - Card border: `1px solid border-default` at 42% opacity, `radius-surface`
 - Card background: `background-elevated`, shadow: `elevation-overlay`
 - Spinner: `2.5rem x 2.5rem`
@@ -124,12 +127,25 @@ Uses the `Progress` primitive for determinate progress display.
 
 | Property | Value |
 |----------|-------|
-| position | `fixed` |
-| inset | `0` |
-| z-index | `var(--poodle-overlay-z-modal, 1000)` |
 | display | `flex` |
 | align-items | `center` |
 | justify-content | `center` |
+
+#### Root Overlay (`[data-presentation="overlay"]`)
+
+| Property | Value |
+|----------|-------|
+| position | `fixed` |
+| inset | `0` |
+| z-index | `var(--poodle-overlay-z-modal, 1000)` |
+
+#### Root Inline (`[data-presentation="inline"]`)
+
+| Property | Value |
+|----------|-------|
+| position | `relative` |
+| min-height | `12rem` |
+| padding | `3rem 1rem` |
 
 ### Backdrop
 
@@ -156,6 +172,17 @@ Uses the `Progress` primitive for determinate progress display.
 | border-radius | `var(--poodle-radius-surface)` |
 | background | `var(--poodle-color-background-elevated)` |
 | box-shadow | `var(--poodle-elevation-overlay)` |
+
+#### Card Inline (`[data-presentation="inline"] .page-loading__card`)
+
+| Property | Value |
+|----------|-------|
+| min-width | `auto` |
+| max-width | `24rem` |
+| padding | `0` |
+| border | `none` |
+| background | `transparent` |
+| box-shadow | `none` |
 
 ### Spinner
 
@@ -208,6 +235,7 @@ None.
 - Spinner composes the shared primitive rather than owning its own animation
 - Composes the `Progress` primitive for determinate mode
 - `isIndeterminate` reactive: `value === null`
+- `presentation` toggles between overlay/backdrop treatment and inline flow layout
 
 ## 10. GPUI Notes
 
@@ -222,6 +250,7 @@ composition.
 | Determinate progress | Yes | Yes | -- |
 | Status message | Yes | Yes | -- |
 | Cancel button | Yes | Yes | -- |
+| Inline presentation | Yes | -- | -- |
 | Backdrop blur | Yes | Partial | -- |
 | Focus ring on cancel | Yes | Partial | -- |
 

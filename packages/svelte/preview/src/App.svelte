@@ -10,6 +10,7 @@
     Pill,
     Tabs,
     IconProvider,
+    UiPresentationProvider,
     type TabItem,
   } from "@poodle/svelte-primitives";
   import iconNodes from "lucide-static/icon-nodes.json";
@@ -133,56 +134,60 @@
   on:popstate={syncCurrentLocation}
 />
 
-<div class="app-shell" data-appearance-treatment={appearanceTreatment} bind:this={appShell}>
-  <header class="app-top-bar">
-    <div class="app-top-bar__title">
-      <strong>Poodle</strong>
-    </div>
-    <Tabs
-      value={activeSection}
-      items={topTabs}
-      variant="pill"
-      ariaLabel="Main navigation"
-      on:valueChange={(event) => navigateToSection(event.detail.value as SectionId)}
+<UiPresentationProvider density={density} sizeScale={controlSize}>
+  <div class="app-shell" data-appearance-treatment={appearanceTreatment} bind:this={appShell}>
+    <header class="app-top-bar">
+      <div class="app-top-bar__title">
+        <strong>Poodle</strong>
+      </div>
+      <Tabs
+        value={activeSection}
+        items={topTabs}
+        variant="pill"
+        ariaLabel="Main navigation"
+        on:valueChange={(event) => navigateToSection(event.detail.value as SectionId)}
+      />
+      <div class="app-top-bar__pills">
+        <Pill>{theme}</Pill>
+        <Pill>{density}</Pill>
+        <Pill>{controlSize}</Pill>
+      </div>
+    </header>
+
+    <DisplayControls
+      {theme}
+      {density}
+      {controlSize}
+      {appearanceTreatment}
+      {disabled}
+      {invalid}
+      {busy}
+      onThemeChange={(value) => (theme = value as ThemeName)}
+      onDensityChange={(value) => (density = value as DensityName)}
+      onControlSizeChange={(value) => (controlSize = value as ControlSizeName)}
+      onAppearanceTreatmentChange={(value) => (appearanceTreatment = value as AppearanceTreatmentName)}
+      onDisabledChange={(checked) => (disabled = checked)}
+      onInvalidChange={(checked) => (invalid = checked)}
+      onBusyChange={(checked) => (busy = checked)}
     />
-    <div class="app-top-bar__pills">
-      <Pill>{theme}</Pill>
-      <Pill>{density}</Pill>
-      <Pill>{controlSize}</Pill>
-    </div>
-  </header>
 
-  <DisplayControls
-    {theme}
-    {density}
-    {controlSize}
-    {appearanceTreatment}
-    {disabled}
-    {invalid}
-    {busy}
-    onThemeChange={(value) => (theme = value as ThemeName)}
-    onDensityChange={(value) => (density = value as DensityName)}
-    onControlSizeChange={(value) => (controlSize = value as ControlSizeName)}
-    onAppearanceTreatmentChange={(value) => (appearanceTreatment = value as AppearanceTreatmentName)}
-    onDisabledChange={(checked) => (disabled = checked)}
-    onInvalidChange={(checked) => (invalid = checked)}
-    onBusyChange={(checked) => (busy = checked)}
-  />
-
-  <main class="app-main">
-    <IconProvider icons={iconNodes}>
-      {#if activeSection === "primitives"}
-        <PrimitivesSection activeComponent={route.component} />
-      {:else if activeSection === "composites"}
-        <CompositesSection activeComponent={route.component} />
-      {:else if activeSection === "tokens"}
-        <TokensSection {liveTokenValues} />
-      {:else if activeSection === "treatments"}
-        <TreatmentsSection />
-      {/if}
-    </IconProvider>
-  </main>
-</div>
+    <main class="app-main">
+      {#key `${previewModeKey}:${activeSection}:${route.component ?? ""}`}
+        <IconProvider icons={iconNodes}>
+          {#if activeSection === "primitives"}
+            <PrimitivesSection activeComponent={route.component} />
+          {:else if activeSection === "composites"}
+            <CompositesSection activeComponent={route.component} />
+          {:else if activeSection === "tokens"}
+            <TokensSection {liveTokenValues} />
+          {:else if activeSection === "treatments"}
+            <TreatmentsSection />
+          {/if}
+        </IconProvider>
+      {/key}
+    </main>
+  </div>
+</UiPresentationProvider>
 
 <style>
   :global(.app-shell) {

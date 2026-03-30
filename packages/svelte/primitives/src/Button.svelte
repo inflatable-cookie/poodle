@@ -56,8 +56,8 @@
   $: iconOnly = !$$slots.default;
   $: hasLeading = $$slots.leading || leadingIcon || loading;
   $: hasTrailing = $$slots.trailing || trailingIcon || chevron;
-  $: resolvedSize = size ?? resolveSemanticControlSize(uiPresentation?.sizeScale ?? "md", sizeRole);
-  $: resolvedDensity = density ?? uiPresentation?.density ?? "default";
+  $: resolvedSize = size ?? resolveSemanticControlSize($uiPresentation.sizeScale, sizeRole);
+  $: resolvedDensity = density ?? $uiPresentation.density;
   $: resolvedIconSize = resolveSupportingVisualSize(resolvedSize);
 </script>
 

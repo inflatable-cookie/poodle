@@ -44,8 +44,8 @@
   let dragOverIndex: number | null = null;
   const uiPresentation = getUiPresentation();
 
-  $: resolvedSize = size ?? resolveSemanticControlSize(uiPresentation?.sizeScale ?? "md", sizeRole);
-  $: resolvedDensity = density ?? uiPresentation?.density ?? "default";
+  $: resolvedSize = size ?? resolveSemanticControlSize($uiPresentation.sizeScale, sizeRole);
+  $: resolvedDensity = density ?? $uiPresentation.density;
 
   function emitChange(): void {
     dispatch("change", { blocks: [...blocks] });

@@ -47,8 +47,8 @@
   const queryInputId = "command-palette-query";
   const statusId = "command-palette-status";
 
-  $: resolvedSize = size ?? resolveSemanticControlSize(uiPresentation?.sizeScale ?? "md", sizeRole);
-  $: resolvedDensity = density ?? uiPresentation?.density ?? "default";
+  $: resolvedSize = size ?? resolveSemanticControlSize($uiPresentation.sizeScale, sizeRole);
+  $: resolvedDensity = density ?? $uiPresentation.density;
 
   $: enabledItems = items.filter((item) => !item.disabled);
   $: if (open && !wasOpen) {

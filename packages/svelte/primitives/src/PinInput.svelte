@@ -25,8 +25,8 @@
   let uncontrolledValue = defaultValue;
   let inputs: Array<HTMLInputElement | null> = [];
 
-  $: resolvedSize = size ?? resolveSemanticControlSize(uiPresentation?.sizeScale ?? "md", sizeRole);
-  $: resolvedDensity = density ?? uiPresentation?.density ?? "default";
+  $: resolvedSize = size ?? resolveSemanticControlSize($uiPresentation.sizeScale, sizeRole);
+  $: resolvedDensity = density ?? $uiPresentation.density;
   $: controlled = value !== null;
   $: currentValue = controlled ? value ?? "" : uncontrolledValue;
   $: digits = Array.from({ length }, (_, index) => currentValue[index] ?? "");
@@ -120,6 +120,6 @@
   .pin-input[data-size="xl"] .pin-input__cell { width: calc(var(--poodle-size-control-height) + 0.5rem); height: calc(var(--poodle-size-control-height) + 0.75rem); font-size: 1.25rem; }
 
   /* Density variants */
-  .pin-input[data-density="compact"] { gap: var(--poodle-space-inline-xs); }
+  .pin-input[data-density="compact"] { gap: 0.25rem; }
   .pin-input[data-density="comfortable"] { gap: var(--poodle-space-inline-md); }
 </style>

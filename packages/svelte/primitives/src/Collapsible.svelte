@@ -29,8 +29,8 @@
   const collapsibleId = ++nextCollapsibleId;
   let uncontrolledOpen = defaultOpen;
 
-  $: resolvedSize = size ?? resolveSemanticControlSize(uiPresentation?.sizeScale ?? "md", sizeRole);
-  $: resolvedDensity = density ?? uiPresentation?.density ?? "default";
+  $: resolvedSize = size ?? resolveSemanticControlSize($uiPresentation.sizeScale, sizeRole);
+  $: resolvedDensity = density ?? $uiPresentation.density;
   $: isControlled = open !== null;
   $: isOpen = isControlled ? open === true : uncontrolledOpen;
 

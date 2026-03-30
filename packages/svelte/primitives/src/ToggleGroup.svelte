@@ -28,8 +28,8 @@
 
   $: controlled = value !== null;
   $: currentValue = controlled ? value : uncontrolledValue;
-  $: resolvedSize = size ?? resolveSemanticControlSize(uiPresentation?.sizeScale ?? "md", sizeRole);
-  $: resolvedDensity = density ?? uiPresentation?.density ?? "default";
+  $: resolvedSize = size ?? resolveSemanticControlSize($uiPresentation.sizeScale, sizeRole);
+  $: resolvedDensity = density ?? $uiPresentation.density;
 
   function isSelected(optionValue: string): boolean {
     if (selectionMode === "multiple") {

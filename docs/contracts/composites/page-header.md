@@ -10,7 +10,8 @@ Updated: 2026-03-11
 - Summary: a standardized title and action region for product pages, panels, or
   detail surfaces
 - In scope: optional back link, title, subtitle/supporting text, optional
-  breadcrumbs region, primary/secondary actions, status metadata
+  breadcrumbs region, section/title hierarchy, optional banner region,
+  primary/secondary actions
 - Out of scope: app shell toolbars, global navigation, domain-specific command
   wiring
 
@@ -21,10 +22,13 @@ Updated: 2026-03-11
   ├── [Back Link] (optional)
   ├── [Breadcrumbs Region] (optional)
   ├── [Title Block]
-  │     ├── [Eyebrow or Meta] (optional)
+  │     ├── [Eyebrow] (optional)
+  │     ├── [Section] (optional)
   │     ├── [Title]
+  │     ├── [Section Title] (optional)
   │     └── [Subtitle] (optional)
   └── [Actions] (optional)
+  └── [Banner Region] (optional)
 ```
 
 | Part | Required | Description | Token Targets |
@@ -42,18 +46,23 @@ Updated: 2026-03-11
 | Prop | Type | Default | Required | Notes |
 |------|------|---------|----------|-------|
 | `title` | `string` | none | yes | primary heading text |
+| `section` | `string \| null` | `null` | no | optional section label rendered above the main title when a two-level header is needed |
 | `count` | `number \| null` | `null` | no | optional count badge rendered inline with the title |
 | `subtitle` | `string \| null` | `null` | no | supporting copy |
 | `eyebrow` | `string \| null` | `null` | no | small meta label |
 | `backHref` | `string \| null` | `null` | no | optional back-link target rendered above breadcrumbs and title |
 | `backLabel` | `string \| null` | `null` | no | optional back-link text, defaults to `Back` when `backHref` is set |
+| `backIsContextual` | `boolean` | `false` | no | adds the contextual indicator dot on the back-link |
+| `bannerMessage` | `string \| null` | `null` | no | shortcut banner message rendered below the header |
+| `bannerTone` | `"neutral" \| "info" \| "success" \| "warning" \| "danger"` | `"warning"` | no | tone for the shortcut banner |
 | `align` | `"start" \| "between"` | `"between"` | no | action alignment posture |
 | `ariaLabel` | `string \| null` | `null` | no | optional region label when header is independently addressable |
 
 ### Controlled And Uncontrolled
 
 - declarative composite
-- actions and breadcrumbs content remain host-owned children
+- actions, breadcrumbs, and banner content remain host-owned children when the
+  slots are used
 
 ## 4. States
 
@@ -62,6 +71,7 @@ Updated: 2026-03-11
 | State | Trigger | Expected Result |
 |-------|---------|-----------------|
 | simple | title only | compact title row |
+| sectional | `section` and `title` | two-level header hierarchy |
 | descriptive | subtitle or eyebrow present | expanded title block |
 | actionable | actions present | title and actions share row/stack |
 
@@ -88,7 +98,7 @@ No component-owned events beyond child action behavior.
 
 | Key | Behavior |
 |-----|----------|
-| `Tab` | reaches back link, breadcrumb links, and header actions in logical order |
+| `Tab` | reaches back link, breadcrumb links, banner actions, and header actions in logical order |
 
 ### Focus And Announcement
 
@@ -112,6 +122,8 @@ No component-owned events beyond child action behavior.
 - parent expectations: detail shells, settings pages, list/grid surfaces,
   product panels
 - child expectations: breadcrumbs and action primitives are optional children
+- banner composition rule: banner content belongs below the header body and
+  should not be used as a replacement for shell-specific detail metadata
 - resizing rules: the title remains visually dominant over actions
 - composition rule: back link and breadcrumbs, when present, remain above the
   title block and do not collapse into the same semantic role as the page title
@@ -238,6 +250,8 @@ None.
 
 - [ ] title hierarchy and heading semantics match
 - [ ] breadcrumbs and actions remain logically grouped and ordered
+- [ ] section/title split remains readable without collapsing into shell-owned
+      metadata
 
 ### Tier 2: Visual Parity
 

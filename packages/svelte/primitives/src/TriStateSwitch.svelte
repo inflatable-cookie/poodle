@@ -38,8 +38,8 @@
   const uiPresentation = getUiPresentation();
 
   $: selectedIndex = Math.max(0, orderedValues.indexOf(value));
-  $: resolvedSize = size ?? resolveSemanticControlSize(uiPresentation?.sizeScale ?? "md", sizeRole);
-  $: resolvedDensity = density ?? uiPresentation?.density ?? "default";
+  $: resolvedSize = size ?? resolveSemanticControlSize($uiPresentation.sizeScale, sizeRole);
+  $: resolvedDensity = density ?? $uiPresentation.density;
   $: triStateStyles = [
     excludedColor ? `--poodle-tri-state-excluded-color: ${excludedColor}` : "",
     defaultColor ? `--poodle-tri-state-default-color: ${defaultColor}` : "",

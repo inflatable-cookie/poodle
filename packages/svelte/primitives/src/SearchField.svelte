@@ -35,7 +35,7 @@
 
   $: isControlled = value !== null;
   $: currentValue = isControlled ? value ?? "" : uncontrolledValue;
-  $: resolvedDensity = density ?? uiPresentation?.density ?? "default";
+  $: resolvedDensity = density ?? $uiPresentation.density;
   $: canClear = showClearButton && !disabled && !readOnly && currentValue.length > 0;
 
   function handleValueChange(event: CustomEvent<{ value: string }>): void {

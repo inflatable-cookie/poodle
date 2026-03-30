@@ -48,8 +48,8 @@
   let focusIso = defaultValue.start ?? todayIsoDate();
   let dayElements: Record<string, HTMLButtonElement | undefined> = {};
 
-  $: resolvedSize = size ?? resolveSemanticControlSize(uiPresentation?.sizeScale ?? "md", sizeRole);
-  $: resolvedDensity = density ?? uiPresentation?.density ?? "default";
+  $: resolvedSize = size ?? resolveSemanticControlSize($uiPresentation.sizeScale, sizeRole);
+  $: resolvedDensity = density ?? $uiPresentation.density;
   $: currentValue = normalizeDateRange(value ?? uncontrolledValue);
   $: currentMonth = monthAnchorIso(visibleMonth ?? uncontrolledMonth);
   $: weeks = buildCalendarWeeks(currentMonth, weekStartsOn);

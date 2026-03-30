@@ -34,6 +34,18 @@
   </div>
 
   <div class="specimen__group">
+    <Eyebrow>Long format</Eyebrow>
+    <div class="specimen__row">
+      <span class="specimen__label">2 minutes ago:</span>
+      <TimeAgo datetime={twoMinutesAgo} short={false} />
+    </div>
+    <div class="specimen__row">
+      <span class="specimen__label">2 days ago:</span>
+      <TimeAgo datetime={twoDaysAgo} short={false} />
+    </div>
+  </div>
+
+  <div class="specimen__group">
     <Eyebrow>Static (live updates off)</Eyebrow>
     <TimeAgo datetime={twoMinutesAgo} live={false} />
   </div>

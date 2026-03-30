@@ -3,34 +3,38 @@
 > **Surface elevation**: ListCard is a surface consumer (50% strong contrast) — see [surface-elevation.md](./surface-elevation.md).
 
 Status: detailed contract
-Updated: 2026-03-16
+Updated: 2026-03-27
 
 ## 1. Purpose
 
 - Component name: `ListCard`
 - Layer: `foundation`
 - Summary: a compact horizontal card for displaying items in list views with
-  leading icon/thumbnail, title, badges, subtitle, footer counters, meta, and trailing action
+  leading icon/thumbnail, title, badges, subtitle, footer counters, meta,
+  explicit actions, selectable state, and optional link-root navigation
 - In scope: interactive and disabled states, leading shape variants, leading fill
   variants (tint/solid), custom accent color theming, badges slot, footer slot
-  with counter helper, context menu composition, title truncation, meta display
-  with tabular-nums
-- Out of scope: multi-select list items, drag-and-drop reordering, expandable
-  list cards
+  with counter helper, explicit actions slot, title truncation, meta display
+  with tabular-nums, compact layout, selected state, and reorder-affordance
+  presentation
+- Out of scope: drag-and-drop workflow ownership, batch-submit reorder flows,
+  expandable list cards
 
 ## 2. Anatomy
 
 ```text
-[Root .list-card]  <div>
+[Root .list-card]  <div> | <a>
   ├── [Sash .list-card__sash]  <span> (optional, diagonal corner ribbon)
+  ├── [Handle .list-card__handle]  <span> (optional, reorder affordance only)
   ├── [Leading .list-card__leading]  (optional, via leading slot)
   ├── [Body .list-card__body]  <div>
   │   ├── [Header .list-card__header]  <div>
-  │   │   ├── [Title .list-card__title]  <span>
+  │   │   ├── [Title .list-card__title]  <span> (text prop or title slot)
   │   │   └── [Badges .list-card__badges]  (optional, via badges slot)
   │   ├── [Subtitle .list-card__subtitle]  <span> (optional)
   │   └── [Footer .list-card__footer]  (optional, via footer slot)
   ├── [Meta .list-card__meta]  <span> (optional)
+  ├── [Actions .list-card__actions]  (optional, via actions slot)
   └── [Trailing .list-card__trailing]  (optional, via trailing slot)
 ```
 
@@ -38,6 +42,7 @@ Updated: 2026-03-16
 |------|----------|-------------|---------------|
 | Root | yes | flex row container; `position: relative; overflow: hidden` when sash present | padding, border, radius, background, gap |
 | Sash | no | diagonal ribbon in top-left corner | position, background, color, font, transform |
+| Handle | no | compact reorder affordance; visual only | size, color, spacing |
 | Leading | no | avatar, icon, or thumbnail slot | width, height, border-radius, background, color |
 | Body | yes | title/subtitle/footer column | flex, gap |
 | Header | yes | title + badges row | flex, gap, alignment |
@@ -46,6 +51,7 @@ Updated: 2026-03-16
 | Subtitle | no | secondary text, truncated | font-size, color, overflow |
 | Footer | no | counter icons or links row | flex, gap |
 | Meta | no | right-aligned metadata | font-size, color, font-variant-numeric |
+| Actions | no | explicit action trigger area | flex alignment |
 | Trailing | no | action button or indicator slot | flex alignment |
 
 ## 3. Props And Inputs
@@ -57,11 +63,16 @@ Updated: 2026-03-16
 | `title` | `string` | — | yes | primary display text |
 | `subtitle` | `string \| null` | `null` | no | secondary display text |
 | `meta` | `string \| null` | `null` | no | right-aligned metadata text |
+| `href` | `string \| null` | `null` | no | when present and not disabled/selectable, renders a real link root |
 | `leadingShape` | `"circle" \| "rounded-square"` | `"circle"` | no | shape of the leading slot container |
 | `leadingFill` | `"tint" \| "solid"` | `"tint"` | no | fill style — tint uses translucent accent, solid uses opaque accent with white icon |
 | `accentColor` | `string \| null` | `null` | no | custom CSS color for leading background and icon; overrides theme accent |
+| `layout` | `"default" \| "compact"` | `"default"` | no | compact mode is for dense list and reorder contexts |
 | `interactive` | `boolean` | `false` | no | enables hover/focus/click behavior |
 | `disabled` | `boolean` | `false` | no | disables interaction |
+| `selectable` | `boolean` | `false` | no | toggles selected state through the root interaction contract |
+| `selected` | `boolean` | `false` | no | selected visual state |
+| `showReorderHandle` | `boolean` | `false` | no | visual reorder affordance; does not implement drag/drop behavior |
 | `notLive` | `boolean` | `false` | no | dashed border, reduced opacity; still interactive unlike disabled |
 | `sash` | `string \| null` | `null` | no | short label for a diagonal corner ribbon (top-left); keep to ~4 chars |
 | `sashColor` | `string \| null` | `null` | no | custom CSS color for the sash ribbon background; defaults to positive/green |
@@ -71,14 +82,18 @@ Updated: 2026-03-16
 
 | Slot | Purpose |
 |------|---------|
+| title | custom rich title content when plain string title is not enough |
 | leading | avatar, icon, or media thumbnail |
 | badges | pills or badges displayed inline with the title |
 | footer | counter icons, links, or supplementary info below subtitle |
+| actions | explicit action trigger composition |
 | trailing | action button or status indicator |
 
 ### Controlled And Uncontrolled
 
-- Display component; interaction state externally controlled via `interactive`.
+- Display component; interaction state is externally controlled. Selection is
+  host-owned through `selected`, with toggles requested through
+  `selectedChange`.
 
 ## 4. States
 
@@ -90,6 +105,8 @@ Updated: 2026-03-16
 | hover | pointer enters (when interactive) | elevated background, stronger border |
 | focus | keyboard focus (when interactive) | accent focus ring |
 | disabled | `disabled=true` | reduced opacity, not-allowed cursor |
+| selected | `selected=true` | accent border and focus-style outline |
+| compact | `layout="compact"` | denser spacing, smaller leading area, single-line emphasis |
 | not-live | `notLive=true` | dashed border (2px), transparent background, greyscale filter, reduced opacity (0.72); still interactive, greyscale and opacity restore on hover |
 
 ## 5. Events
@@ -97,19 +114,23 @@ Updated: 2026-03-16
 | Event | When It Fires | Payload | Notes |
 |-------|---------------|---------|-------|
 | `click` | card activated (when interactive) | `MouseEvent` | suppressed while disabled |
+| `selectedChange` | selectable card toggled | `{ selected: boolean }` | suppressed while disabled |
 
 ## 6. Accessibility
 
 ### Semantics
 
-- When interactive: `role="button"`, `tabindex="0"`, `aria-label` from prop or title
+- When `href` is present: renders an anchor root
+- When interactive/selectable without `href`: `role="button"`, `tabindex="0"`, `aria-label` from prop or title
 - When not interactive: no role (generic container)
 - When disabled: `aria-disabled="true"`
+- When selectable: `aria-pressed` reflects `selected`
 
 ### Keyboard
 
 | Key | Behavior |
 |-----|----------|
+| `Enter` | activates link roots |
 | `Enter` | activates card (when interactive) |
 | `Space` | activates card (when interactive) |
 | `Tab` | moves focus to/from card |
@@ -133,9 +154,14 @@ Updated: 2026-03-16
 ### Composition
 
 - parent expectations: list views, sidebar navigation, search results
-- child expectations: leading icon/avatar/thumbnail, badges (Pill, Badge), footer counters (ListCardCounter), trailing action via slots
+- child expectations: leading icon/avatar/thumbnail, badges (Pill, Badge),
+  footer counters (ListCardCounter), explicit actions or trailing status via
+  slots, and optional rich title composition via the `title` slot when the
+  title needs inline formatting rather than plain text
 - resizing: fills parent width, height auto-fits content
 - context menu: wrap ListCard in ContextMenu for right-click actions
+- explicit menu/action composition should use the `actions` slot rather than
+  coupling menu trigger ownership to the leading media area
 
 ## 8. Token Usage — Exact Values
 

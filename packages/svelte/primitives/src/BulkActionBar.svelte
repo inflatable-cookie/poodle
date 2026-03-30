@@ -1,14 +1,22 @@
 <script lang="ts">
   import { createEventDispatcher } from "svelte";
+  import type { Component } from "svelte";
 
+  import Icon from "./Icon.svelte";
   import IconButton from "./IconButton.svelte";
   import { getUiPresentation, resolveSemanticControlSize } from "./presentation";
 
-  import type { BulkAction, ControlDensity, ControlSize, SemanticControlSizeRole } from "./types";
+  import type { BulkAction, ControlDensity, ControlSize, IconProp, SemanticControlSizeRole } from "./types";
 
   export let selectionCount = 0;
   export let totalCount: number | null = null;
   export let actions: BulkAction[] = [];
+  export let loading = false;
+  export let disabled = false;
+  export let showSelectAll = false;
+  export let allSelected = false;
+  export let selectAllLabel = "Select all";
+  export let deselectAllLabel = "Deselect all";
   export let sizeRole: SemanticControlSizeRole = "control";
   export let size: ControlSize | null = null;
   export let density: ControlDensity | null = null;
@@ -16,12 +24,22 @@
   const dispatch = createEventDispatcher<{
     action: { id: string };
     clear: void;
+    selectAll: void;
   }>();
 
   const uiPresentation = getUiPresentation();
 
-  $: resolvedSize = size ?? resolveSemanticControlSize(uiPresentation?.sizeScale ?? "md", sizeRole);
-  $: resolvedDensity = density ?? uiPresentation?.density ?? "default";
+  $: resolvedSize = size ?? resolveSemanticControlSize($uiPresentation.sizeScale, sizeRole);
+  $: resolvedDensity = density ?? $uiPresentation.density;
+  $: isUnavailable = disabled || loading;
+
+  function isComponentIcon(icon: BulkAction["icon"]): icon is Component<any> {
+    return typeof icon === "function";
+  }
+
+  function isNamedIcon(icon: BulkAction["icon"]): icon is IconProp {
+    return icon !== undefined && icon !== null && !isComponentIcon(icon);
+  }
 </script>
 
 <div class="bulk-action-bar" role="region" aria-label="Bulk actions" data-size={resolvedSize} data-density={resolvedDensity}>
@@ -33,30 +51,49 @@
   </div>
 
   <div class="bulk-action-bar__actions">
+    {#if showSelectAll}
+      <button
+        type="button"
+        class="bulk-action-bar__button"
+        disabled={isUnavailable}
+        on:click={() => dispatch("selectAll")}
+      >
+        {#if allSelected}
+          {deselectAllLabel}
+        {:else if totalCount !== null}
+          {selectAllLabel} ({totalCount})
+        {:else}
+          {selectAllLabel}
+        {/if}
+      </button>
+    {/if}
+
     {#each actions as action}
-      {#if action.icon}
-        <IconButton
-          icon={action.icon}
-          ariaLabel={action.label}
-          variant="secondary"
-          tone={action.tone ?? "default"}
-          on:click={() => dispatch("action", { id: action.id })}
-        />
-      {:else}
-        <button
-          type="button"
-          class="bulk-action-bar__button"
-          data-tone={action.tone ?? "default"}
-          on:click={() => dispatch("action", { id: action.id })}
-        >
-          {action.label}
-        </button>
-      {/if}
+      {@const actionTone = action.tone ?? "default"}
+      <button
+        type="button"
+        class="bulk-action-bar__button"
+        data-tone={actionTone !== "default" ? actionTone : undefined}
+        disabled={isUnavailable || action.disabled}
+        on:click={() => dispatch("action", { id: action.id })}
+      >
+        {#if action.icon}
+          <span class="bulk-action-bar__icon" aria-hidden="true">
+            {#if isComponentIcon(action.icon)}
+              <svelte:component this={action.icon} size={16} />
+            {:else if isNamedIcon(action.icon)}
+              <Icon icon={action.icon} size={resolvedSize} />
+            {/if}
+          </span>
+        {/if}
+        <span>{action.label}</span>
+      </button>
     {/each}
     <IconButton
       icon="x"
       ariaLabel="Clear selection"
       variant="ghost"
+      disabled={isUnavailable}
       on:click={() => dispatch("clear")}
     />
   </div>
@@ -99,6 +136,9 @@
   }
 
   .bulk-action-bar__button {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.375rem;
     min-height: var(--poodle-size-control-height);
     padding: 0 var(--poodle-space-control-x);
     border: 0.0625rem solid var(--poodle-color-border-default);
@@ -111,6 +151,25 @@
   .bulk-action-bar__button[data-tone="danger"] {
     border-color: color-mix(in srgb, var(--poodle-color-status-danger) 65%, transparent);
     color: var(--poodle-color-status-danger);
+  }
+
+  .bulk-action-bar__button[data-tone="warning"] {
+    border-color: color-mix(in srgb, var(--poodle-color-status-warning) 65%, transparent);
+    color: var(--poodle-color-status-warning);
+  }
+
+  .bulk-action-bar__button:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+
+  .bulk-action-bar__icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 1rem;
+    height: 1rem;
+    flex-shrink: 0;
   }
 
   .bulk-action-bar__button:focus-visible {

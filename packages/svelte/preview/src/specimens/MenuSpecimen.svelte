@@ -17,6 +17,13 @@
     { value: "settings", label: "Settings…" },
   ];
 
+  const destructiveItems: MenuItem[] = [
+    { value: "rename", label: "Rename" },
+    { value: "archive", label: "Archive" },
+    { value: "sep1", label: "", kind: "separator" },
+    { value: "delete", label: "Delete", tone: "danger" },
+  ];
+
   const controlSizes = ["xs", "sm", "md", "lg", "xl"] as const;
 
   let lastAction = "";
@@ -62,6 +69,13 @@
     <Eyebrow>With checkboxes</Eyebrow>
     <Menu items={settingsItems} ariaLabel="Settings menu">
       <Button variant="secondary" slot="trigger">Settings</Button>
+    </Menu>
+  </div>
+
+  <div class="specimen__group">
+    <Eyebrow>Destructive Action</Eyebrow>
+    <Menu items={destructiveItems} ariaLabel="Item actions" triggerAriaLabel="Item actions">
+      <Button variant="secondary" slot="trigger">Actions</Button>
     </Menu>
   </div>
 </div>

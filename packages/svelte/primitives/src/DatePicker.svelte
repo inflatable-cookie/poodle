@@ -36,8 +36,8 @@
   let uncontrolledOpen = defaultOpen;
   let visibleMonth = monthAnchorIso(defaultValue ?? todayIsoDate());
 
-  $: resolvedSize = size ?? resolveSemanticControlSize(uiPresentation?.sizeScale ?? "md", sizeRole);
-  $: resolvedDensity = density ?? uiPresentation?.density ?? "default";
+  $: resolvedSize = size ?? resolveSemanticControlSize($uiPresentation.sizeScale, sizeRole);
+  $: resolvedDensity = density ?? $uiPresentation.density;
   $: currentValue = value ?? uncontrolledValue;
   $: isOpen = open ?? uncontrolledOpen;
   $: if (currentValue) {

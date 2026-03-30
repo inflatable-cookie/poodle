@@ -41,6 +41,7 @@ built from foundation primitives without embedding app-specific workflow logic.
 - `relation-picker.md`
 - `reorderable-list.md`
 - `selection-summary.md`
+- `sidebar-nav.md`
 - `split-view.md`
 - `toast-stack.md`
 - `video-player.md`

@@ -1,18 +1,52 @@
 <script lang="ts">
-  export let title: string;
-  export let count: number | null = null;
-  export let subtitle: string | null = null;
-  export let eyebrow: string | null = null;
-  export let backHref: string | null = null;
-  export let backLabel: string | null = null;
-  export let align: "start" | "between" = "between";
-  export let ariaLabel: string | null = null;
+  import { Callout } from "@poodle/svelte-primitives";
+
+  interface Props {
+    title?: string | null;
+    section?: string | null;
+    count?: number | null;
+    subtitle?: string | null;
+    eyebrow?: string | null;
+    backHref?: string | null;
+    backLabel?: string | null;
+    backIsContextual?: boolean;
+    bannerMessage?: string | null;
+    bannerTone?: "neutral" | "info" | "success" | "warning" | "danger";
+    align?: "start" | "between";
+    ariaLabel?: string | null;
+    level?: 1 | 2 | 3 | 4 | 5 | 6;
+  }
+
+  let {
+    title = null,
+    section = null,
+    count = null,
+    subtitle = null,
+    eyebrow = null,
+    backHref = null,
+    backLabel = null,
+    backIsContextual = false,
+    bannerMessage = null,
+    bannerTone = "warning",
+    align = "between",
+    ariaLabel = null,
+    level = 2,
+  }: Props = $props();
+
+  const primaryTitle = $derived(title ?? section ?? "");
+  const hasSectionTitleSplit = $derived(Boolean(section && title));
+  const headingTag = $derived(`h${level}` as `h${1 | 2 | 3 | 4 | 5 | 6}`);
 </script>
 
 <header class="page-header" data-align={align} aria-label={ariaLabel ?? undefined}>
   <div class="page-header__content">
     {#if backHref}
-      <a class="page-header__back" href={backHref}>{backLabel ?? "Back"}</a>
+      <a class="page-header__back" href={backHref}>
+        <span>{backLabel ?? "Back"}</span>
+        {#if backIsContextual}
+          <span class="page-header__context-dot" aria-hidden="true"></span>
+        {/if}
+      </a>
     {/if}
 
     {#if $$slots.breadcrumbs}
@@ -25,14 +59,25 @@
       {#if eyebrow}
         <p class="page-header__eyebrow">{eyebrow}</p>
       {/if}
-      <h2 class="page-header__title">
-        <span>{title}</span>
+      {#if hasSectionTitleSplit}
+        <p class="page-header__section">{section}</p>
+      {/if}
+      <svelte:element this={headingTag} class="page-header__title">
+        <span>{primaryTitle}</span>
         {#if count !== null}
           <span class="page-header__count" aria-label={`${count}`}>{count}</span>
         {/if}
-      </h2>
+      </svelte:element>
+      {#if hasSectionTitleSplit}
+        <p class="page-header__section-title">{title}</p>
+      {/if}
       {#if subtitle}
         <p class="page-header__subtitle">{subtitle}</p>
+      {/if}
+      {#if $$slots.default}
+        <div class="page-header__body">
+          <slot />
+        </div>
       {/if}
     </div>
   </div>
@@ -40,6 +85,16 @@
   {#if $$slots.actions}
     <div class="page-header__actions">
       <slot name="actions" />
+    </div>
+  {/if}
+
+  {#if $$slots.banner}
+    <div class="page-header__banner">
+      <slot name="banner" />
+    </div>
+  {:else if bannerMessage}
+    <div class="page-header__banner">
+      <Callout tone={bannerTone} message={bannerMessage} announceMode="polite" />
     </div>
   {/if}
 </header>
@@ -77,10 +132,21 @@
 
   .page-header__back {
     width: fit-content;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
     color: var(--poodle-color-text-secondary);
     font-size: 0.8125rem;
     line-height: 1.2;
     text-decoration: none;
+  }
+
+  .page-header__context-dot {
+    width: 0.375rem;
+    height: 0.375rem;
+    border-radius: 999px;
+    background: var(--poodle-color-fill-info-strong, var(--poodle-color-border-info));
+    flex: none;
   }
 
   .page-header__back:hover {
@@ -96,7 +162,10 @@
 
   .page-header__title,
   .page-header__subtitle,
-  .page-header__eyebrow {
+  .page-header__body,
+  .page-header__eyebrow,
+  .page-header__section,
+  .page-header__section-title {
     margin: 0;
   }
 
@@ -108,6 +177,22 @@
     font-size: 1.75rem;
     line-height: 1.1;
     font-weight: 700;
+  }
+
+  .page-header__section {
+    color: var(--poodle-color-text-secondary);
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  .page-header__section-title {
+    color: var(--poodle-color-text-secondary);
+    font-family: var(--poodle-typography-heading-family);
+    font-size: 1rem;
+    line-height: 1.25;
+    font-weight: 600;
   }
 
   .page-header__count {
@@ -139,12 +224,22 @@
     line-height: var(--poodle-typography-body-lineHeight);
   }
 
+  .page-header__body {
+    color: var(--poodle-color-text-secondary);
+    font-size: var(--poodle-typography-body-size);
+    line-height: var(--poodle-typography-body-lineHeight);
+  }
+
   .page-header__actions {
     display: flex;
     flex-wrap: wrap;
     gap: var(--poodle-space-inline-md);
     justify-content: flex-end;
     align-items: start;
+  }
+
+  .page-header__banner {
+    grid-column: 1 / -1;
   }
 
   @media (max-width: 45rem) {

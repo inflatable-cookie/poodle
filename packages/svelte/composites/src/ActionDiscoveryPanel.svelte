@@ -34,8 +34,8 @@
   let itemElements: Array<HTMLElement | null> = [];
   const uiPresentation = getUiPresentation();
 
-  $: resolvedSize = size ?? resolveSemanticControlSize(uiPresentation?.sizeScale ?? "md", sizeRole);
-  $: resolvedDensity = density ?? uiPresentation?.density ?? "default";
+  $: resolvedSize = size ?? resolveSemanticControlSize($uiPresentation.sizeScale, sizeRole);
+  $: resolvedDensity = density ?? $uiPresentation.density;
 
   $: enabledItems = items.filter((item) => !item.disabled);
   $: groupedItems = items.reduce<Record<string, CommandActionItem[]>>((acc, item) => {

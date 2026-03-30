@@ -2,7 +2,12 @@
   import { createEventDispatcher } from "svelte";
 
   import { getUiPresentation, resolveSemanticControlSize } from "./presentation";
-  import type { ControlDensity, ControlSize, SemanticControlSizeRole } from "./types";
+  import type {
+    ControlDensity,
+    ControlSize,
+    SemanticControlSizeRole,
+    SwitchTone,
+  } from "./types";
 
   export let id: string | undefined = undefined;
   export let checked: boolean | null = null;
@@ -10,17 +15,22 @@
   export let disabled = false;
   export let readOnly = false;
   export let label: string | null = null;
+  export let leftLabel: string | null = null;
+  export let rightLabel: string | null = null;
   export let ariaLabel: string | null = null;
   export let describedBy: string | null = null;
   export let name: string | undefined = undefined;
   export let offColor: string | null = null;
   export let onColor: string | null = null;
+  export let leftTone: SwitchTone = "default";
+  export let rightTone: SwitchTone = "primary";
   export let size: ControlSize | null = null;
   export let sizeRole: SemanticControlSizeRole = "control";
   export let density: ControlDensity | null = null;
 
   const dispatch = createEventDispatcher<{
     checkedChange: { checked: boolean };
+    checked: boolean;
   }>();
 
   const uiPresentation = getUiPresentation();
@@ -28,12 +38,36 @@
 
   $: isControlled = checked !== null;
   $: currentChecked = isControlled ? checked === true : uncontrolledChecked;
-  $: resolvedSize = size ?? resolveSemanticControlSize(uiPresentation?.sizeScale ?? "md", sizeRole);
-  $: resolvedDensity = density ?? uiPresentation?.density ?? "default";
+  $: resolvedSize = size ?? resolveSemanticControlSize($uiPresentation.sizeScale, sizeRole);
+  $: resolvedDensity = density ?? $uiPresentation.density;
+  $: resolvedOffColor = offColor ?? toneToColor(leftTone);
+  $: resolvedOnColor = onColor ?? toneToColor(rightTone);
+  $: fallbackAriaLabel = [leftLabel, rightLabel]
+    .filter((value): value is string => Boolean(value && value.trim()))
+    .join(" / ");
+  $: computedAriaLabel =
+    label ??
+    ariaLabel ??
+    (fallbackAriaLabel || null);
   $: switchStyles = [
-    offColor ? `--poodle-switch-off-color: ${offColor}` : "",
-    onColor ? `--poodle-switch-on-color: ${onColor}` : "",
+    resolvedOffColor ? `--poodle-switch-off-color: ${resolvedOffColor}` : "",
+    resolvedOnColor ? `--poodle-switch-on-color: ${resolvedOnColor}` : "",
   ].filter(Boolean).join("; ") || undefined;
+
+  function toneToColor(tone: SwitchTone): string | null {
+    switch (tone) {
+      case "primary":
+        return "var(--poodle-color-accent-base)";
+      case "success":
+        return "var(--poodle-color-status-success)";
+      case "warning":
+        return "var(--poodle-color-status-warning)";
+      case "danger":
+        return "var(--poodle-color-status-danger)";
+      default:
+        return null;
+    }
+  }
 
   function handleChange(event: Event): void {
     const nextChecked = (event.currentTarget as HTMLInputElement).checked;
@@ -48,10 +82,19 @@
     }
 
     dispatch("checkedChange", { checked: nextChecked });
+    dispatch("checked", nextChecked);
   }
 </script>
 
-<label class="switch" data-disabled={disabled} data-read-only={readOnly} data-size={resolvedSize} data-density={resolvedDensity} style={switchStyles}>
+<label
+  class="switch"
+  data-disabled={disabled}
+  data-read-only={readOnly}
+  data-size={resolvedSize}
+  data-density={resolvedDensity}
+  data-dual-label={leftLabel || rightLabel ? "true" : undefined}
+  style={switchStyles}
+>
   <input
     {id}
     {name}
@@ -60,15 +103,20 @@
     role="switch"
     checked={currentChecked}
     disabled={disabled}
-    aria-label={label ? undefined : ariaLabel ?? undefined}
+    aria-label={computedAriaLabel ?? undefined}
     aria-describedby={describedBy ?? undefined}
     aria-readonly={readOnly ? "true" : undefined}
     on:change={handleChange}
   />
+  {#if leftLabel}
+    <span class="switch__label switch__label--left">{leftLabel}</span>
+  {/if}
   <span class="switch__track" aria-hidden="true">
     <span class="switch__thumb"></span>
   </span>
-  {#if label}
+  {#if rightLabel}
+    <span class="switch__label switch__label--right">{rightLabel}</span>
+  {:else if label}
     <span class="switch__label">{label}</span>
   {/if}
 </label>
@@ -153,6 +201,24 @@
     font-size: var(--poodle-typography-label-size);
     font-weight: var(--poodle-typography-label-weight);
     line-height: var(--poodle-typography-label-lineHeight);
+  }
+
+  .switch__label--left,
+  .switch__label--right {
+    color: var(--poodle-color-text-muted);
+    transition: color var(--poodle-motion-duration-interaction) var(--poodle-motion-easing-standard);
+  }
+
+  .switch:not([data-dual-label]) .switch__label {
+    color: var(--poodle-color-text-primary);
+  }
+
+  .switch__control:not(:checked) ~ .switch__label--left {
+    color: var(--poodle-switch-off-color);
+  }
+
+  .switch__control:checked ~ .switch__label--right {
+    color: var(--poodle-switch-on-color);
   }
 
   /* Density variants */

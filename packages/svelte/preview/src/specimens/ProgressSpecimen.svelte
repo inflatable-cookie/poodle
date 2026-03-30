@@ -20,6 +20,13 @@
     <Eyebrow>Custom max</Eyebrow>
     <Progress value={3} max={5} ariaLabel="3 of 5 steps complete" valueText="3 of 5 steps" />
   </div>
+
+  <div class="specimen__group">
+    <Eyebrow>Sizes</Eyebrow>
+    <Progress value={60} size="sm" ariaLabel="Small progress" />
+    <Progress value={60} size="md" ariaLabel="Medium progress" />
+    <Progress value={60} size="lg" ariaLabel="Large progress" />
+  </div>
 </div>
 
 <style>

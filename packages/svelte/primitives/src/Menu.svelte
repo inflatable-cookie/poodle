@@ -11,6 +11,7 @@
   export let defaultOpen = false;
   export let placement: OverlayPlacement = "bottom-start";
   export let ariaLabel: string | null = null;
+  export let triggerAriaLabel: string | null = null;
   export let sizeRole: SemanticControlSizeRole = "chrome";
   export let size: ControlSize | null = null;
   export let density: ControlDensity | null = null;
@@ -27,8 +28,8 @@
   let uncontrolledOpen = defaultOpen;
   let highlightIndex = 0;
 
-  $: resolvedSize = size ?? resolveSemanticControlSize(uiPresentation?.sizeScale ?? "md", sizeRole);
-  $: resolvedDensity = density ?? uiPresentation?.density ?? "default";
+  $: resolvedSize = size ?? resolveSemanticControlSize($uiPresentation.sizeScale, sizeRole);
+  $: resolvedDensity = density ?? $uiPresentation.density;
   $: isControlled = open !== null;
   $: isOpen = isControlled ? open === true : uncontrolledOpen;
   $: actionableItems = menuNavigableItems(items);
@@ -125,6 +126,7 @@
     role="button"
     tabindex="0"
     aria-expanded={isOpen ? "true" : "false"}
+    aria-label={triggerAriaLabel ?? undefined}
     on:click={handleTriggerClick}
     on:keydown={handleTriggerKeydown}
   >
@@ -143,6 +145,7 @@
             class="menu__item"
             disabled={item.disabled === true}
             data-kind={item.kind ?? "action"}
+            data-tone={item.tone ?? "default"}
             role={item.kind === "checkbox" || item.kind === "radio" ? `menuitem${item.kind}` : "menuitem"}
             aria-checked={item.kind === "checkbox" || item.kind === "radio" ? (item.checked ? "true" : "false") : undefined}
             on:click={() => activateItem(item)}
@@ -257,6 +260,15 @@
   .menu__item:focus-visible {
     background: color-mix(in srgb, var(--poodle-color-accent-base) 16%, transparent);
     outline: none;
+  }
+
+  .menu__item[data-tone="danger"] {
+    color: var(--poodle-color-danger-base);
+  }
+
+  .menu__item[data-tone="danger"]:hover:not(:disabled),
+  .menu__item[data-tone="danger"]:focus-visible {
+    background: color-mix(in srgb, var(--poodle-color-danger-base) 14%, transparent);
   }
 
   .menu__item:disabled {

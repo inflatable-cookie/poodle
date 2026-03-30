@@ -1,16 +1,18 @@
 # Select
 
 Status: detailed contract
-Updated: 2026-03-15
+Updated: 2026-03-26
 
 ## 1. Purpose
 
 - Component name: `Select`
 - Layer: `foundation`
 - Summary: a single-select control using a native `<select>` element with
-  custom styling, supporting flat options and option groups
+  custom styling, supporting flat options, option groups, lazy option loading,
+  and filter-friendly clear/reset behavior
 - In scope: single value selection, placeholder, flat options, grouped options
-  (optgroup), disabled options, native select accessibility
+  (optgroup), disabled options, lazy option/group loading, clearable reset
+  state, native select accessibility
 - Out of scope: custom dropdown overlays, multi-select, searchable/filterable
   lists (see Combobox), arbitrary menu content
 
@@ -45,10 +47,19 @@ Updated: 2026-03-15
 | `defaultValue` | `string \| null` | `null` | no | uncontrolled initial value |
 | `placeholder` | `string \| null` | `null` | no | shown when no value selected |
 | `options` | `SelectItems` | — | yes | array of `SelectOption` or `SelectOptionGroup` |
+| `items` | `LegacySelectItem[] \| null` | `null` | no | compatibility alias for flat option arrays using `disabled` instead of `isDisabled` |
+| `groups` | `LegacySelectGroup[] \| null` | `null` | no | compatibility alias for grouped option data using `items` / nested `groups` |
 | `disabled` | `boolean` | `false` | no | disables the select |
+| `required` | `boolean` | `false` | no | forwards native required semantics |
 | `ariaLabel` | `string \| null` | `null` | no | required when no visible label exists |
 | `describedBy` | `string \| null` | `null` | no | aria-describedby target |
 | `name` | `string \| undefined` | `undefined` | no | form field name |
+| `clearable` | `boolean` | `false` | no | keeps the placeholder option selectable so callers can reset to `defaultValue` |
+| `valueLabel` | `string \| null` | `null` | no | temporary label for the current selection before lazy options load |
+| `loadItems` | `(() => Promise<LegacySelectItem[]>) \| null` | `null` | no | lazy flat option loader |
+| `loadGroups` | `(() => Promise<LegacySelectGroup[]>) \| null` | `null` | no | lazy grouped option loader |
+| `loadKey` | `string \| null` | `null` | no | invalidates cached lazy options when it changes |
+| `onchange` | `((value: string) => void) \| null` | `null` | no | callback prop for existing caller styles; `valueChange` remains the canonical event |
 | `size` | `"xs" \| "sm" \| "md" \| "lg" \| "xl"` | `null` | no | explicit control size override; when null, resolves from inherited presentation |
 | `sizeRole` | `"chrome" \| "control" \| "prominent"` | `"control"` | no | semantic size offset from inherited presentation |
 | `density` | `ControlDensity \| null` | `null` | no | explicit density override for spacing |
@@ -59,12 +70,15 @@ Updated: 2026-03-15
 SelectOption: { value: string; label: string; isDisabled?: boolean; group?: string }
 SelectOptionGroup: { label: string; options: SelectOption[] }
 SelectItems: SelectOption[] | SelectOptionGroup[]
+LegacySelectItem: { value: string; label: string; disabled?: boolean; isDisabled?: boolean }
+LegacySelectGroup: { label: string; items?: LegacySelectItem[]; groups?: LegacySelectGroup[] }
 ```
 
 ### Controlled And Uncontrolled
 
 - controlled: `value` plus `valueChange` event
 - uncontrolled: `defaultValue`
+- lazy: `loadItems` / `loadGroups` populate internal options once per `loadKey`
 
 ## 4. States
 
@@ -73,9 +87,12 @@ SelectItems: SelectOption[] | SelectOptionGroup[]
 | State | Trigger | Expected Result |
 |-------|---------|-----------------|
 | placeholder | no value selected, placeholder prop set | placeholder text in secondary color, `data-placeholder="true"` |
+| clearable reset | `clearable=true` | placeholder option remains selectable and maps to `defaultValue` |
 | selected | value matches an option | option label displayed in primary color |
 | focus | select receives focus | focus ring via border-color change, background shift, box-shadow |
 | disabled | `disabled=true` | reduced opacity on root, non-interactive |
+| loading | lazy loader pending | native fallback option shows `Loading…` |
+| load error | lazy loader fails | native fallback option shows the error message |
 
 ### Component States
 
@@ -89,6 +106,7 @@ SelectItems: SelectOption[] | SelectOptionGroup[]
 | Event | When It Fires | Payload | Notes |
 |-------|---------------|---------|-------|
 | `valueChange` | user selects a different option | `{ value: string }` | fires on native change event |
+| `change` | user selects a different option | `{ value: string }` | alias event for existing caller styles |
 
 ## 6. Accessibility
 

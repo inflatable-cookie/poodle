@@ -641,6 +641,7 @@ const packageSurfaceCoverageGroups: PackageSurfaceCoverageGroup[] = [
       "MediaUploadStatusPanel",
       "PageLoading",
       "ReorderableList",
+      "SidebarNav",
       "VideoPlayer",
     ],
   },

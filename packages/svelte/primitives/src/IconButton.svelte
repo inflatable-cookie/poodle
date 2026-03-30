@@ -55,8 +55,8 @@
 
   $: isUnavailable = disabled || loading;
   $: tooltipText = tooltip ?? ariaLabel;
-  $: resolvedSize = size ?? resolveSemanticControlSize(uiPresentation?.sizeScale ?? "md", sizeRole);
-  $: resolvedDensity = density ?? uiPresentation?.density ?? "default";
+  $: resolvedSize = size ?? resolveSemanticControlSize($uiPresentation.sizeScale, sizeRole);
+  $: resolvedDensity = density ?? $uiPresentation.density;
   $: resolvedIconSize = resolveSupportingVisualSize(resolvedSize);
   $: if (tooltipOpen && tooltipText) {
     void updateTooltipPosition();

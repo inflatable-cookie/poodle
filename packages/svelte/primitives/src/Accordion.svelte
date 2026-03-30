@@ -28,8 +28,8 @@
   const accordionId = ++nextAccordionId;
   let uncontrolledValue = defaultValue ?? (selectionMode === "multiple" ? [] : null);
 
-  $: resolvedSize = size ?? resolveSemanticControlSize(uiPresentation?.sizeScale ?? "md", sizeRole);
-  $: resolvedDensity = density ?? uiPresentation?.density ?? "default";
+  $: resolvedSize = size ?? resolveSemanticControlSize($uiPresentation.sizeScale, sizeRole);
+  $: resolvedDensity = density ?? $uiPresentation.density;
   $: isControlled = value !== null;
   $: currentValue = isControlled ? value : uncontrolledValue;
   $: openValues = Array.isArray(currentValue)

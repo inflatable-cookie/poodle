@@ -25,8 +25,8 @@
   const uiPresentation = getUiPresentation();
 
   $: resolvedIcon = icon ?? name;
-  $: resolvedSize = size ?? resolveSemanticControlSize(uiPresentation?.sizeScale ?? "md", sizeRole);
-  $: resolvedDensity = density ?? uiPresentation?.density ?? "default";
+  $: resolvedSize = size ?? resolveSemanticControlSize($uiPresentation.sizeScale, sizeRole);
+  $: resolvedDensity = density ?? $uiPresentation.density;
   $: nodes = resolveIconNodes(resolvedIcon, iconSet);
 </script>
 

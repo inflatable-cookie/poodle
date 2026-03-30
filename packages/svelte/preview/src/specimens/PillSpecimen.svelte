@@ -65,6 +65,16 @@
       <Pill appearance="badge" tone="neutral">Draft</Pill>
     </div>
   </div>
+
+  <div class="specimen__group">
+    <Eyebrow>Custom accent</Eyebrow>
+    <div class="specimen__row">
+      <Pill accent="#3b82f6">Info-ish</Pill>
+      <Pill accent="#22c55e">Positive-ish</Pill>
+      <Pill accent="#f59e0b">Caution-ish</Pill>
+      <Pill accent="#ef4444">Danger-ish</Pill>
+    </div>
+  </div>
 </div>
 
 <style>

@@ -24,8 +24,8 @@
 
   let uncontrolledValue = defaultValue;
 
-  $: resolvedSize = size ?? resolveSemanticControlSize(uiPresentation?.sizeScale ?? "md", sizeRole);
-  $: resolvedDensity = density ?? uiPresentation?.density ?? "default";
+  $: resolvedSize = size ?? resolveSemanticControlSize($uiPresentation.sizeScale, sizeRole);
+  $: resolvedDensity = density ?? $uiPresentation.density;
   $: currentValue = value ?? uncontrolledValue ?? "";
 
   function handleInput(event: Event): void {

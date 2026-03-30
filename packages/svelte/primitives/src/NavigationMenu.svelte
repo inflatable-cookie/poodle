@@ -30,8 +30,8 @@
   let uncontrolledValue = defaultValue;
   let focusIndex = 0;
 
-  $: resolvedSize = size ?? resolveSemanticControlSize(uiPresentation?.sizeScale ?? "md", sizeRole);
-  $: resolvedDensity = density ?? uiPresentation?.density ?? "default";
+  $: resolvedSize = size ?? resolveSemanticControlSize($uiPresentation.sizeScale, sizeRole);
+  $: resolvedDensity = density ?? $uiPresentation.density;
   $: currentValue = value ?? uncontrolledValue;
   $: currentItem = items.find((item) => item.value === currentValue) ?? null;
   $: selectedIndex = items.findIndex((item) => item.value === currentValue);

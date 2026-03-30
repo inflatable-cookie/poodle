@@ -1,8 +1,9 @@
 <script lang="ts">
-  import { ContextMenu, Eyebrow, Icon, ListCard, ListCardCounter, Pill } from "@poodle/svelte-primitives";
+  import { ContextMenu, Eyebrow, Icon, IconButton, ListCard, ListCardCounter, Pill } from "@poodle/svelte-primitives";
   import { folder, layers, grid2x2 } from "@poodle/icons-lucide";
 
   let lastClick = "";
+  let selectedCard = false;
 </script>
 
 <div class="specimen">
@@ -34,6 +35,75 @@
         disabled
       >
         <svelte:fragment slot="leading"><Icon icon={layers} /></svelte:fragment>
+      </ListCard>
+    </div>
+  </div>
+
+  <div class="specimen__group">
+    <Eyebrow>Link roots and explicit actions</Eyebrow>
+    <div class="specimen__stack">
+      <ListCard
+        title="Billing settings"
+        subtitle="Manage invoices and payment methods"
+        href="#billing"
+      >
+        <svelte:fragment slot="leading"><Icon name="credit-card" /></svelte:fragment>
+        <svelte:fragment slot="badges">
+          <Pill appearance="badge" tone="neutral">2</Pill>
+        </svelte:fragment>
+      </ListCard>
+      <ListCard
+        title="Project Alpha"
+        subtitle="Replaces the old media-trigger pattern with explicit actions"
+        interactive
+        on:click={() => (lastClick = "Project Alpha")}
+      >
+        <svelte:fragment slot="leading"><Icon icon={folder} /></svelte:fragment>
+        <svelte:fragment slot="actions">
+          <IconButton icon="ellipsis" ariaLabel="Project actions" variant="ghost" />
+        </svelte:fragment>
+      </ListCard>
+    </div>
+  </div>
+
+  <div class="specimen__group">
+    <Eyebrow>Selectable cards</Eyebrow>
+    <div class="specimen__stack">
+      <ListCard
+        title="Selected row"
+        subtitle="Batch-selection ready"
+        selectable
+        selected={selectedCard}
+        on:selectedChange={(event) => (selectedCard = event.detail.selected)}
+      >
+        <svelte:fragment slot="leading"><Icon name="check-square" /></svelte:fragment>
+        <svelte:fragment slot="badges">
+          <Pill tone="positive">Chosen</Pill>
+        </svelte:fragment>
+      </ListCard>
+      <ListCard
+        title="Compact reorder item"
+        layout="compact"
+        showReorderHandle
+      >
+        <svelte:fragment slot="leading"><Icon name="grip" /></svelte:fragment>
+        <svelte:fragment slot="badges">
+          <Pill appearance="badge" tone="neutral">Draft</Pill>
+        </svelte:fragment>
+      </ListCard>
+      <ListCard
+        title="Reordered item"
+        subtitle="Move within section"
+        layout="compact"
+        showReorderHandle
+      >
+        <svelte:fragment slot="title">
+          <span>Week 2</span>
+          <span style="color: var(--poodle-color-text-secondary);"> → Week 1: Cash Flow</span>
+        </svelte:fragment>
+        <svelte:fragment slot="badges">
+          <Pill tone="accent">Move</Pill>
+        </svelte:fragment>
       </ListCard>
     </div>
   </div>

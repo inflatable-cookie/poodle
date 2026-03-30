@@ -1,31 +1,34 @@
 # OrderBy
 
 Status: detailed contract
-Updated: 2026-03-15
+Updated: 2026-03-27
 
 ## 1. Purpose
 
 - Component name: `OrderBy`
 - Layer: `foundation`
-- Summary: a toolbar of sort-field toggle buttons for controlling list or table
-  sort order with ascending, descending, and clear cycling
-- In scope: sort field buttons, asc/desc/clear toggle cycle, directional arrow
-  indicator, reset button, disabled state
-- Out of scope: column header sort controls (see Table), multi-field sort,
-  drag-and-drop field reordering
+- Summary: a popover-backed ordered sort builder for lists and tables with
+  multi-field sorting, direction toggles, ordered summaries, and clear/reset
+  behavior
+- In scope: ordered sort arrays, add/remove fields, per-field direction,
+  compact trigger summary, clear/reset, disabled state
+- Out of scope: column header sort controls (see Table), drag-and-drop field
+  reordering
 
 ## 2. Anatomy
 
 ```text
-[Root .order-by]  <div role="toolbar">
-  ├── [Label .order-by__label]  <span>
-  ├── [Fields .order-by__fields]  <div>
-  │   ├── [Field .order-by__field]  <button> (repeated)
-  │   │   ├── [Field label text]
-  │   │   └── [Arrow .order-by__arrow]  <svg> (conditional, when active)
-  │   └── ...
-  └── [Reset .order-by__reset]  <button> (conditional, when activeSort)
-      └── [Reset icon]  <svg>
+[Root .order-by] <div>
+  ├── [Trigger .order-by__trigger] <button>
+  │   ├── [Label .order-by__label]
+  │   ├── [Summary .order-by__summary]
+  │   └── [Chevron .order-by__chevron]
+  ├── [Reset .order-by__reset] <button> (conditional)
+  └── [Panel .order-by__panel] <div> (inside popover)
+      ├── [List .order-by__list]
+      │   └── [Item .order-by__item] <div> (repeated)
+      ├── [Add .order-by__add]
+      └── [Footer .order-by__footer] (conditional)
 ```
 
 | Part | Required | Description | Token Targets |
@@ -44,7 +47,10 @@ Updated: 2026-03-15
 | Prop | Type | Default | Required | Notes |
 |------|------|---------|----------|-------|
 | `fields` | `SortField[]` | — | yes | available sort fields |
-| `activeSort` | `ActiveSort \| null` | `null` | no | current sort state |
+| `value` | `OrderByValue` | `[]` | no | ordered multi-field sort state |
+| `activeSort` | `ActiveSort \| null` | `null` | no | legacy first-sort compatibility signal |
+| `maxFields` | `number \| null` | `null` | no | optional cap on active sort fields |
+| `compact` | `boolean` | `false` | no | shortens long trigger summaries |
 | `ariaLabel` | `string` | `"Sort by"` | no | accessible name for toolbar |
 | `size` | `"xs" \| "sm" \| "md" \| "lg" \| "xl"` | `null` | no | explicit control size override; when null, resolves from inherited presentation |
 | `sizeRole` | `"chrome" \| "control" \| "prominent"` | `"control"` | no | semantic size offset from inherited presentation |
@@ -55,10 +61,21 @@ Updated: 2026-03-15
 
 ```typescript
 type SortField = {
-  value: string;
+  key?: string;
+  value?: string;
   label: string;
   disabled?: boolean;
+  defaultDirection?: "asc" | "desc";
 };
+```
+
+### OrderByValue Type
+
+```typescript
+type OrderByValue = Array<{
+  key: string;
+  direction: "asc" | "desc";
+}>;
 ```
 
 ### ActiveSort Type
@@ -72,8 +89,9 @@ type ActiveSort = {
 
 ### Controlled And Uncontrolled
 
-- Sort state is controlled via `activeSort` prop
-- Changes dispatched via `change` event; parent updates prop
+- Multi-field sort state is controlled via `value`
+- `activeSort` remains available as a compatibility signal for single-sort flows
+- Changes dispatched via `change` event; parent updates `value`
 
 ## 4. States
 
@@ -81,19 +99,17 @@ type ActiveSort = {
 
 | State | Trigger | Expected Result |
 |-------|---------|-----------------|
-| default | no active sort | all field buttons in default appearance |
-| field active (asc) | field matches activeSort with direction="asc" | accent border and fill, arrow pointing up |
-| field active (desc) | field matches activeSort with direction="desc" | accent border and fill, arrow rotated 180deg |
-| field hover | pointer enters field button | elevated background |
-| field disabled | field `disabled=true` | reduced opacity, not-allowed cursor |
-| all disabled | `disabled=true` | all buttons disabled, reduced opacity |
-| reset visible | activeSort is non-null | reset button appears |
+| default | no active sort | trigger shows placeholder summary |
+| populated | one or more sort fields active | trigger shows ordered summary |
+| compact populated | `compact=true` and more than 2 fields | summary truncates to first two plus count |
+| disabled | `disabled=true` | trigger and controls unavailable |
+| reset visible | one or more fields active | reset button appears |
 
 ## 5. Events
 
 | Event | When It Fires | Payload | Notes |
 |-------|---------------|---------|-------|
-| `change` | field toggled or reset clicked | `{sort: ActiveSort \| null}` | null when sort cleared |
+| `change` | any sort mutation | `{value: OrderByValue, sort: ActiveSort \| null}` | `sort` mirrors the first item for compatibility |
 
 ## 6. Accessibility
 

@@ -35,6 +35,24 @@
   </div>
 
   <div class="specimen__group">
+    <Eyebrow>Section and banner</Eyebrow>
+    <PageHeader
+      section="Scheduled Task"
+      title="Nightly Sync"
+      backHref="/system/tasks"
+      backLabel="Back to tasks"
+      backIsContextual={true}
+      bannerMessage="This task is currently paused."
+      bannerTone="warning"
+    >
+      <svelte:fragment slot="actions">
+        <Button variant="secondary">Run now</Button>
+        <Button>Edit</Button>
+      </svelte:fragment>
+    </PageHeader>
+  </div>
+
+  <div class="specimen__group">
     <Eyebrow>Title only</Eyebrow>
     <PageHeader title="Settings" />
   </div>

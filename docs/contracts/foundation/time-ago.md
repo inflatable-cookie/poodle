@@ -1,14 +1,14 @@
 # TimeAgo
 
 Status: detailed contract
-Updated: 2026-03-15
+Updated: 2026-03-26
 
 ## 1. Purpose
 
 - Component name: `TimeAgo`
 - Layer: `foundation`
 - Summary: a non-interactive time display primitive that renders a human-readable
-  relative timestamp (e.g., "5m ago") with optional live updating
+  relative timestamp in short or long form with optional live updating
 - In scope: relative time formatting, live interval updates, absolute time in
   title/tooltip, past and future time support
 - Out of scope: date pickers, countdown timers, duration formatting, interactive
@@ -36,6 +36,9 @@ Updated: 2026-03-15
 | `live` | `boolean` | `true` | no | enable periodic re-computation of relative text |
 | `interval` | `number` | `30000` | no | live update interval in milliseconds |
 | `ariaLabel` | `string \| null` | `null` | no | override accessible label |
+| `short` | `boolean` | `true` | no | use compact output like `"5m ago"` instead of long phrases |
+| `tooltipFormat` | `"full" \| "date" \| "datetime"` | `"datetime"` | no | absolute-time format used for the native title tooltip |
+| `timezone` | `string \| null` | `null` | no | optional IANA timezone for tooltip formatting |
 
 ### Controlled And Uncontrolled
 
@@ -50,6 +53,8 @@ Updated: 2026-03-15
 |-------|---------|-----------------|
 | live | `live=true` (default) | relative text updates every `interval` ms |
 | static | `live=false` | relative text computed once and not updated |
+| short | `short=true` | compact relative labels like `"5m ago"` |
+| long | `short=false` | long-form labels like `"5 minutes ago"` and `"yesterday"` |
 | past | datetime is before now | shows "{value} ago" format |
 | future | datetime is after now | shows "in {value}" format |
 | just-now | difference less than 5 seconds | shows "just now" |
@@ -70,8 +75,7 @@ Updated: 2026-03-15
 ### Semantics
 
 - Element: `<time>` with `datetime` attribute set to ISO 8601 string
-- `title` attribute: absolute formatted date via `toLocaleString` with
-  `{ year: "numeric", month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" }`
+- `title` attribute: absolute formatted date via `tooltipFormat` and optional `timezone`
 - `aria-label`: `ariaLabel` prop if provided, otherwise
   `"{relativeText} ({absoluteText})"`
 
@@ -127,13 +131,13 @@ Updated: 2026-03-15
 
 | Condition | Past format | Future format |
 |-----------|-------------|---------------|
-| diff < 5s | `"just now"` | `"just now"` |
-| diff < 60s | `"{seconds}s ago"` | `"in {seconds}s"` |
-| diff < 1h | `"{minutes}m ago"` | `"in {minutes}m"` |
-| diff < 24h | `"{hours}h ago"` | `"in {hours}h"` |
-| diff < 30d | `"{days}d ago"` | `"in {days}d"` |
-| diff < 365d | `"{months}mo ago"` | `"in {months}mo"` |
-| diff >= 365d | `"{years}y ago"` | `"in {years}y"` |
+| diff < 5s | `"now"` or `"just now"` | `"now"` or `"just now"` |
+| diff < 60s | `"{seconds}s ago"` / `"{seconds} seconds ago"` | `"in {seconds}s"` / `"in {seconds} seconds"` |
+| diff < 1h | `"{minutes}m ago"` / `"{minutes} minutes ago"` | `"in {minutes}m"` / `"in {minutes} minutes"` |
+| diff < 24h | `"{hours}h ago"` / `"{hours} hours ago"` | `"in {hours}h"` / `"in {hours} hours"` |
+| diff < 30d | `"{days}d ago"` / `"{days} days ago"` | `"in {days}d"` / `"in {days} days"` |
+| diff < 365d | `"{months}mo ago"` / `"{months} months ago"` | `"in {months}mo"` / `"in {months} months"` |
+| diff >= 365d | `"{years}y ago"` / `"{years} years ago"` | `"in {years}y"` / `"in {years} years"` |
 
 Values are computed using integer division (floor). Thresholds use seconds:
 60s, 3600s, 86400s, 2592000s (30d), 31536000s (365d).

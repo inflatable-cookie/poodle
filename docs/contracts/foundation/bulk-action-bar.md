@@ -1,7 +1,7 @@
 # BulkActionBar
 
 Status: detailed contract
-Updated: 2026-03-15
+Updated: 2026-03-28
 
 ## 1. Purpose
 
@@ -10,7 +10,8 @@ Updated: 2026-03-15
 - Summary: a contextual action bar that appears when items are selected in a
   list or table, showing selection count and available bulk actions
 - In scope: selection summary with count and optional total, action buttons
-  with default and danger tones, clear selection
+  with default, warning, and danger tones, select-all / deselect-all, clear selection,
+  disabled/loading gating
 - Out of scope: selection management (parent-owned), inline editing, batch
   progress indicators
 
@@ -46,6 +47,12 @@ Updated: 2026-03-15
 | `sizeRole` | `"chrome" \| "control" \| "prominent"` | `"control"` | no | semantic size offset from inherited presentation |
 | `density` | `ControlDensity \| null` | `null` | no | explicit density override for spacing |
 | `actions` | `BulkAction[]` | — | yes | available bulk action definitions |
+| `loading` | `boolean` | `false` | no | disables all actions while a batch workflow is running |
+| `disabled` | `boolean` | `false` | no | disables all interactions without changing the displayed selection |
+| `showSelectAll` | `boolean` | `false` | no | shows a select-all / deselect-all action ahead of bulk actions |
+| `allSelected` | `boolean` | `false` | no | controls whether the select-all action presents as deselect-all |
+| `selectAllLabel` | `string` | `"Select all"` | no | label used when `allSelected` is false |
+| `deselectAllLabel` | `string` | `"Deselect all"` | no | label used when `allSelected` is true |
 
 ### BulkAction Type
 
@@ -53,8 +60,9 @@ Updated: 2026-03-15
 type BulkAction = {
   id: string;
   label: string;
-  icon?: string;
-  tone?: "default" | "danger";
+  icon?: IconProp | ComponentType;
+  tone?: "default" | "warning" | "danger";
+  disabled?: boolean;
 };
 ```
 
@@ -71,7 +79,10 @@ type BulkAction = {
 |-------|---------|-----------------|
 | default | items selected | accent-tinted bar with count and action buttons |
 | danger action | action has `tone="danger"` | button with danger border and text color |
+| warning action | action has `tone="warning"` | button with warning border and text color |
 | with total | `totalCount` provided | summary shows "N selected of M" |
+| select all | `showSelectAll=true` | action row shows select-all or deselect-all trigger |
+| loading | `loading=true` | all action controls disabled |
 
 ## 5. Events
 
@@ -79,6 +90,7 @@ type BulkAction = {
 |-------|---------------|---------|-------|
 | `action` | action button clicked | `{id: string}` | identifies which action was triggered |
 | `clear` | clear/deselect triggered | `void` | parent should clear selection |
+| `selectAll` | select-all / deselect-all clicked | `void` | parent decides whether to select all or clear all |
 
 ## 6. Accessibility
 
@@ -202,8 +214,9 @@ type BulkAction = {
 - `data-tone` attribute on danger action buttons
 - Summary text uses template: `"{selectionCount} selected"` with optional
   `"of {totalCount}"` span
-- Action buttons rendered from `actions` array prop; actions with `icon` render as IconButton
+- Action buttons rendered from `actions` array prop; actions with `icon` render a leading icon and label button
 - Clear button is an IconButton with `icon="x"`
+- Select-all control is a text button rendered before registered bulk actions when enabled
 - Summary count is wrapped in a `<strong>` tag
 
 ## 10. GPUI Notes

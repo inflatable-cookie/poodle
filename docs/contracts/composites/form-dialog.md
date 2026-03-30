@@ -1,19 +1,19 @@
 # FormDialog
 
 Status: seed contract
-Updated: 2026-03-22
+Updated: 2026-03-28
 
 ## 1. Purpose
 
 - Component name: `FormDialog`
 - Layer: `composites`
-- Summary: a dialog pre-configured for form submission workflows — wraps a
-  Dialog with a FormLayout body, cancel and submit action buttons, submitting
-  state management, and error display
-- In scope: controlled open state, title and description, form content via
-  default slot, submit and cancel buttons with configurable labels,
-  submitting state (disables dismiss and buttons), error message display
-  via FormLayout, dismiss prevention during submission
+- Summary: a dialog shell for form workflows — wraps a Dialog with a
+  FormLayout body, submitting-state dismiss control, status callouts, optional
+  default submit/cancel actions, and caller-owned custom actions when needed
+- In scope: controlled open state, title and subtitle/description, form
+  content via default slot, optional default submit and cancel buttons, custom
+  actions slot, status callouts, dismiss prevention during submission, custom
+  dialog width
 - Out of scope: form validation logic, field-level errors (handled by
   individual Field components), multi-step forms, file upload handling
 
@@ -21,12 +21,14 @@ Updated: 2026-03-22
 
 ```text
 [Dialog]  Dialog primitive (kind="dialog")
+  ├── [Subtitle slot]  optional rich subtitle content
   ├── [FormLayout]  FormLayout composite
   │     ├── [ErrorDisplay]  (when error is set, handled by FormLayout)
+  │     ├── [SuccessDisplay]  (when success is set, handled by FormLayout)
   │     └── [FormContent]  (via default slot)
   └── [Actions slot]
-        ├── [CancelButton]  Button (variant="ghost")
-        └── [SubmitButton]  Button (variant="primary")
+        ├── [Default actions]  optional cancel + submit buttons
+        └── [Custom actions]  caller-owned slot content when shell mode is used
 ```
 
 | Part | Required | Description | Token Targets |
@@ -45,18 +47,24 @@ Updated: 2026-03-22
 |------|------|---------|----------|-------|
 | `open` | `boolean \| null` | `null` | no | controlled open state; `null` means uncontrolled |
 | `title` | `string` | — | yes | dialog title |
-| `description` | `string \| null` | `null` | no | dialog description text |
+| `subtitle` | `string \| null` | `null` | no | primary description text used by shell-style callers |
+| `description` | `string \| null` | `null` | no | alias/fallback description text |
 | `submitLabel` | `string` | `"Submit"` | no | label for the submit button (shown when not submitting) |
 | `cancelLabel` | `string` | `"Cancel"` | no | label for the cancel button |
 | `submitting` | `boolean` | `false` | no | when true, disables dismiss and shows submitting state |
 | `error` | `string \| null` | `null` | no | form-level error message passed to FormLayout |
+| `success` | `string \| null` | `null` | no | form-level success message passed to FormLayout |
 | `ariaLabel` | `string \| null` | `null` | no | accessible label for the dialog |
+| `width` | `string \| null` | `null` | no | custom dialog width CSS value |
+| `showDefaultActions` | `boolean` | `true` | no | when false, suppresses built-in cancel/submit buttons and expects an `actions` slot |
 
 ### Slots
 
 | Slot | Provided Context | Description |
 |------|-----------------|-------------|
 | default | `{ submitting: boolean }` | form content (fields, inputs); receives submitting state for conditional rendering |
+| `subtitle` | `{ submitting: boolean }` | optional rich subtitle content rendered below the title |
+| `actions` | `{ submitting: boolean }` | optional custom footer actions; replaces default submit/cancel buttons |
 
 ### Controlled And Uncontrolled
 
@@ -74,6 +82,8 @@ Updated: 2026-03-22
 | open | `open` is true | dialog visible with form content and action buttons |
 | submitting | `submitting` is true | submit button shows "Submitting..." text, both buttons disabled, dismiss on Escape and backdrop disabled |
 | error | `error` is set | FormLayout displays error message above form content |
+| success | `success` is set | FormLayout displays success message above form content |
+| shell mode | `showDefaultActions` is false | caller supplies the full footer via the `actions` slot |
 
 ### Component States
 
@@ -83,8 +93,8 @@ No additional internal state. All state is externally controlled via props.
 
 | Event | When It Fires | Payload | Notes |
 |-------|---------------|---------|-------|
-| `submit` | user clicks the submit button | `void` | host is responsible for async logic and setting `submitting`/`error` |
-| `cancel` | user clicks cancel button | `void` | dialog is closed via `setOpen(false)` |
+| `submit` | user clicks the built-in submit button | `void` | host is responsible for async logic and setting `submitting`/`error` |
+| `cancel` | dialog requests cancellation | `void` | fired for built-in cancel button and close/dismiss requests |
 | `openChange` | dialog open state changes (cancel, Escape, backdrop) | `{ open: boolean }` | host must update `open` prop; prevented during submitting |
 
 ## 6. Accessibility
@@ -116,7 +126,7 @@ No additional internal state. All state is externally controlled via props.
 
 ### Sizing
 
-- Dialog: default Dialog sizing (delegated to Dialog contract)
+- Dialog: default Dialog sizing unless `width` is supplied
 - FormLayout: `columns={1}` — single-column form layout
 - Actions: standard Dialog actions slot layout (flex row, right-aligned)
 
@@ -142,11 +152,12 @@ No component-specific tokens; FormDialog is purely compositional.
 - Uses `createEventDispatcher` for `submit`, `cancel`, and `openChange` events
 - Composes `Dialog`, `Button` from `@poodle/svelte-primitives` and `FormLayout`
   from `@poodle/svelte-composites`
-- Submit button text switches between `submitLabel` and `"Submitting..."` (with
-  Unicode ellipsis character U+2026)
+- Submit button text switches between `submitLabel` and `"Submitting..."`
 - Cancel handler calls internal `setOpen(false)` which emits `openChange`
   when `open !== null`
 - `handleOpenChange` prevents close during submitting state
+- `subtitle` takes precedence over `description`
+- custom width is applied through the Dialog content style hook
 
 ## 10. GPUI Notes
 
@@ -158,7 +169,7 @@ No component-specific tokens; FormDialog is purely compositional.
 
 ### Tier 1: Strict Parity
 
-- [ ] all props have the same meaning and defaults
+- [ ] all shell props have the same meaning and defaults
 - [ ] event names and payloads match
 - [ ] submitting state disables dismiss and buttons
 - [ ] submit button text changes during submitting
@@ -177,7 +188,7 @@ No component-specific tokens; FormDialog is purely compositional.
 
 | Delta | Why Allowed | Approval Status | Follow-Up |
 |-------|-------------|-----------------|-----------|
-| none yet | n/a | pending | review during first implementation |
+| `subtitle` aliases `description` | supports shell-style callers without introducing a second dialog component | approved | remove ambiguity later if callers converge |
 
 ## 13. Specimen Definitions
 
@@ -192,6 +203,12 @@ No component-specific tokens; FormDialog is purely compositional.
 | Label | Props / Config | Expected Visual |
 |-------|---------------|-----------------|
 | With error state | `title="Create account"`, `submitLabel="Create"`, form contains Field(email), error set after 0.8s submit | dialog shows inline error message "A user with this email already exists." via FormLayout |
+
+### Shell Mode With Custom Actions
+
+| Label | Props / Config | Expected Visual |
+|-------|---------------|-----------------|
+| Shell mode with custom actions | `title="Edit workspace settings"`, `subtitle="Update shared defaults for this workspace."`, `showDefaultActions=false`, `width="40rem"`, success set after save, actions slot contains caller-owned FormActions | dialog renders custom footer actions, shows success callout, and uses wider shell sizing |
 
 ## 14. Approval And Adoption Notes
 

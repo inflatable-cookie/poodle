@@ -2,26 +2,33 @@
   import { createEventDispatcher } from "svelte";
   import { Progress, Spinner } from "@poodle/svelte-primitives";
 
+  type PageLoadingPresentation = "overlay" | "inline";
+
   export let visible = true;
   export let value: number | null = null;
   export let max: number = 100;
   export let message: string | null = null;
   export let canCancel = false;
   export let ariaLabel: string | null = null;
+  export let presentation: PageLoadingPresentation = "overlay";
 
   const dispatch = createEventDispatcher<{ cancel: void }>();
 
   $: isIndeterminate = value === null;
+  $: isOverlay = presentation === "overlay";
 </script>
 
 {#if visible}
   <div
     class="page-loading"
+    data-presentation={presentation}
     role="status"
     aria-label={ariaLabel ?? "Loading"}
     aria-live="polite"
   >
-    <div class="page-loading__backdrop" aria-hidden="true"></div>
+    {#if isOverlay}
+      <div class="page-loading__backdrop" aria-hidden="true"></div>
+    {/if}
     <div class="page-loading__card">
       <Spinner className="page-loading__spinner" variant="ring" sizeRole="prominent" tone="accent" />
 
@@ -50,12 +57,21 @@
 
 <style>
   .page-loading {
-    position: fixed;
-    inset: 0;
-    z-index: var(--poodle-overlay-z-modal, 1000);
     display: flex;
     align-items: center;
     justify-content: center;
+  }
+
+  .page-loading[data-presentation="overlay"] {
+    position: fixed;
+    inset: 0;
+    z-index: var(--poodle-overlay-z-modal, 1000);
+  }
+
+  .page-loading[data-presentation="inline"] {
+    position: relative;
+    min-height: 12rem;
+    padding: 3rem 1rem;
   }
 
   .page-loading__backdrop {
@@ -78,6 +94,15 @@
     border-radius: var(--poodle-radius-surface);
     background: var(--poodle-color-background-elevated);
     box-shadow: var(--poodle-elevation-overlay);
+  }
+
+  .page-loading[data-presentation="inline"] .page-loading__card {
+    min-width: auto;
+    max-width: 24rem;
+    padding: 0;
+    border: none;
+    background: transparent;
+    box-shadow: none;
   }
 
   .page-loading__progress {

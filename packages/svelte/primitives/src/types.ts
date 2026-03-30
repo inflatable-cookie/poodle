@@ -1,3 +1,5 @@
+import type { Component } from "svelte";
+
 import type { IconNodes } from "./icon-registry";
 
 export type IconProp = IconNodes | string;
@@ -39,7 +41,7 @@ export type StatusTone =
   | "danger"
   | "pending";
 export type ToggleVariant = "primary" | "secondary" | "ghost";
-export type PillTone = "neutral" | "success" | "danger";
+export type PillTone = "neutral" | "info" | "success" | "warning" | "danger";
 export type PillAppearance = "solid" | "subtle" | "badge";
 export type PillSize = "xs" | "sm" | "md" | "lg" | "xl";
 export type PillFont = "normal" | "mono";
@@ -68,6 +70,12 @@ export type EditableLabelActivationMode =
   | "enterOrSpace"
   | "programmatic";
 export type FormActionAlign = "start" | "end" | "between";
+export type FormActionDangerItem = {
+  label: string;
+  onSelect: () => void;
+  value?: string;
+  disabled?: boolean;
+};
 export type CalloutAnnounceMode = "none" | "polite" | "assertive";
 export type ColorInputMode = "hex" | "rgb" | "hsl";
 export type SkeletonShape = "line" | "block" | "circle";
@@ -80,6 +88,7 @@ export type SkeletonPreset =
 export type SpinnerVariant = "ring" | "grid";
 export type SpinnerSize = "xs" | "sm" | "md" | "lg" | "xl";
 export type SpinnerTone = "current" | "accent" | "muted";
+export type SwitchTone = "default" | "primary" | "success" | "warning" | "danger";
 
 export interface AccordionItem {
   value: string;
@@ -112,7 +121,7 @@ export interface TabItem {
   separator?: boolean;
 }
 
-export type TabVariant = "underline" | "card" | "pill" | "strip";
+export type TabVariant = "underline" | "card" | "pill" | "strip" | "block";
 
 /** @deprecated Use TabItem instead */
 export type TabDefinition = TabItem;
@@ -145,6 +154,7 @@ export interface MenuItem {
   disabled?: boolean;
   checked?: boolean;
   shortcutLabel?: string;
+  tone?: "default" | "danger";
   kind?: "action" | "checkbox" | "radio" | "separator";
 }
 
@@ -224,19 +234,38 @@ export type CardVariant = "default" | "outlined" | "elevated";
 export type BulkAction = {
   id: string;
   label: string;
-  icon?: IconProp;
-  tone?: "default" | "danger";
-};
-
-export type SortField = {
-  value: string;
-  label: string;
+  icon?: IconProp | Component<any>;
+  tone?: "default" | "danger" | "warning";
   disabled?: boolean;
 };
 
+export type SortDirection = "asc" | "desc";
+
+export type SortField = {
+  label: string;
+  value?: string;
+  key?: string;
+  disabled?: boolean;
+  defaultDirection?: SortDirection;
+};
+
+export type OrderByFieldDefinition = {
+  key: string;
+  label: string;
+  disabled?: boolean;
+  defaultDirection?: SortDirection;
+};
+
+export type OrderByField = {
+  key: string;
+  direction: SortDirection;
+};
+
+export type OrderByValue = OrderByField[];
+
 export type ActiveSort = {
   field: string;
-  direction: "asc" | "desc";
+  direction: SortDirection;
 };
 
 export type SplitOrientation = "horizontal" | "vertical";

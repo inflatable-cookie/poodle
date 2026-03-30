@@ -26,7 +26,7 @@
         : "No preview");
   $: fallbackIcon =
     kind === "audio" ? "music" : kind === "video" ? "play" : kind === "document" ? "file-text" : kind === "embed" ? "external-link" : "image";
-  $: resolvedVisualSize = resolveSemanticControlSize(uiPresentation?.sizeScale ?? "md", "control");
+  $: resolvedVisualSize = resolveSemanticControlSize($uiPresentation.sizeScale, "control");
   $: resolvedSupportingSize = resolveSupportingVisualSize(resolvedVisualSize);
   $: resolvedSpinnerSize =
     presentation === "compact" ? resolveSupportingVisualSize(resolvedSupportingSize) : resolvedSupportingSize;

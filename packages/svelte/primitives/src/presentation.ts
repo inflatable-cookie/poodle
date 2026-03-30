@@ -1,4 +1,5 @@
 import { getContext, setContext } from "svelte";
+import { readable, writable, type Readable, type Writable } from "svelte/store";
 
 import type { ControlDensity, ControlSize, SemanticControlSizeRole } from "./types";
 
@@ -7,14 +8,31 @@ export interface UiPresentationContextValue {
   sizeScale: ControlSize;
 }
 
-const POODLE_UI_PRESENTATION = Symbol("poodle-ui-presentation");
+type UiPresentationStore = Readable<UiPresentationContextValue> & UiPresentationContextValue;
 
-export function setUiPresentation(value: UiPresentationContextValue): void {
-  setContext(POODLE_UI_PRESENTATION, value);
+const POODLE_UI_PRESENTATION = Symbol("poodle-ui-presentation");
+const DEFAULT_UI_PRESENTATION: UiPresentationContextValue = {
+  density: "default",
+  sizeScale: "md",
+};
+const DEFAULT_UI_PRESENTATION_STORE = readable(DEFAULT_UI_PRESENTATION) as UiPresentationStore;
+
+export function setUiPresentation(value: UiPresentationContextValue): Writable<UiPresentationContextValue> {
+  const existingStore = getContext<Writable<UiPresentationContextValue> | undefined>(POODLE_UI_PRESENTATION);
+  if (existingStore) {
+    existingStore.set(value);
+    return existingStore;
+  }
+
+  const store = writable(value);
+  setContext(POODLE_UI_PRESENTATION, store);
+  return store;
 }
 
-export function getUiPresentation(): UiPresentationContextValue | null {
-  return getContext<UiPresentationContextValue>(POODLE_UI_PRESENTATION) ?? null;
+export function getUiPresentation(): UiPresentationStore {
+  return (
+    getContext<Readable<UiPresentationContextValue>>(POODLE_UI_PRESENTATION) ?? DEFAULT_UI_PRESENTATION_STORE
+  ) as UiPresentationStore;
 }
 
 export function resolveSemanticControlSize(

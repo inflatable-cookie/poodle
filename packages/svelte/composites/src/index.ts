@@ -28,6 +28,14 @@ export { OrderBy } from "@poodle/svelte-primitives";
 export { default as PageLoading } from "./PageLoading.svelte";
 export { default as MediaPicker } from "./MediaPicker.svelte";
 export { default as MediaBrowsePanel } from "./MediaBrowsePanel.svelte";
+export {
+  computeFileHash,
+  createResetMediaBrowseState,
+  loadMediaBrowsePage,
+  mergeMediaBrowseItems,
+  runMediaUploadWorkflow,
+  uploadMediaWithKnownHash,
+} from "./media-workflow";
 export { NavCard, NavCardGrid } from "@poodle/svelte-primitives";
 export { default as MediaPreview } from "./MediaPreview.svelte";
 export { default as MediaThumbnail } from "./MediaThumbnail.svelte";
@@ -40,10 +48,12 @@ export { default as RelationPicker } from "./RelationPicker.svelte";
 export { ResizeHandle } from "@poodle/svelte-primitives";
 export { default as ReorderableList } from "./ReorderableList.svelte";
 export { default as SelectionSummary } from "./SelectionSummary.svelte";
+export { default as SidebarNav } from "./SidebarNav.svelte";
 export { default as SplitView } from "./SplitView.svelte";
 export { StatusBar } from "@poodle/svelte-primitives";
 export { default as MetricTile } from "./MetricTile.svelte";
 export { default as ToastStack } from "./ToastStack.svelte";
+export { default as ToastHost } from "./ToastHost.svelte";
 export { default as VideoPlayer } from "./VideoPlayer.svelte";
 export {
   parseWorkspaceLayoutSnapshot,
@@ -74,12 +84,30 @@ export type {
   DrillDownSearchFn,
   EditorBlock,
   EmptyStateVariant,
+  AuditLogEntry,
+  LogActionType,
+  LogActor,
   LogEntry,
+  LogFilter,
   LogLevel,
   MediaKind,
   MediaPickerItem,
+  MediaBrowseState,
+  MediaDuplicateCheckResult,
+  MediaUploadCompleteResult,
+  MediaUploadDisplayStep,
+  MediaUploadDuplicateResult,
+  MediaWorkflowPageResponse,
+  MediaWorkflowPaginationParams,
+  MediaUploadInitResult,
+  MediaUploadPlan,
+  MediaUploadProgress,
+  MediaUploadWorkflowResult,
   MediaUploadWorkflowStep,
   MediaState,
+  OrderByField,
+  OrderByFieldDefinition,
+  OrderByValue,
   PanelDragData,
   PanelTabItem,
   PanelVariant,
@@ -88,12 +116,23 @@ export type {
   PickerVariant,
   ReorderableItem,
   SelectionMode,
+  SidebarNavGroup,
+  SidebarNavItem,
+  SortDirection,
   SortField,
   StripRegionSnapshot,
   TableColumn,
+  TableCellValue,
   TableRow,
+  TableRowAction,
+  TableFilters,
+  TableFilterType,
+  TablePagination,
   TableSortDirection,
   ToastItem,
+  ToastHostPlacement,
+  ToastHostStore,
+  ToastHostStoreItem,
   ToastTone,
   WorkspaceLayoutSnapshot,
 } from "./types";

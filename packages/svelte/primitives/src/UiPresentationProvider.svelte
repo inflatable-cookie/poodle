@@ -11,7 +11,12 @@
   export let density: ControlDensity = "default";
   export let sizeScale: ControlSize = "md";
 
-  setUiPresentation({
+  const presentation = setUiPresentation({
+    density,
+    sizeScale,
+  });
+
+  $: presentation.set({
     density,
     sizeScale,
   });

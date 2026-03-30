@@ -34,8 +34,8 @@
   let newItemText = "";
   const uiPresentation = getUiPresentation();
 
-  $: resolvedSize = size ?? resolveSemanticControlSize(uiPresentation?.sizeScale ?? "md", sizeRole);
-  $: resolvedDensity = density ?? uiPresentation?.density ?? "default";
+  $: resolvedSize = size ?? resolveSemanticControlSize($uiPresentation.sizeScale, sizeRole);
+  $: resolvedDensity = density ?? $uiPresentation.density;
 
   $: canAdd = !disabled && (maxItems === null || items.length < maxItems);
 
@@ -89,7 +89,7 @@
           density={resolvedDensity}
           on:reorder={handleReorder}
         >
-          <svelte:fragment slot="item" let:item let:index>
+          {#snippet item(item)}
             <span class="autonomous-list__item-row">
               <span class="autonomous-list__item-text">{item.label}</span>
               <button
@@ -104,7 +104,7 @@
                 </svg>
               </button>
             </span>
-          </svelte:fragment>
+          {/snippet}
         </ReorderableList>
       {:else}
         <ul class="autonomous-list__static" role="list" aria-label={ariaLabel}>

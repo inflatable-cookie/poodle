@@ -1,8 +1,6 @@
 <script lang="ts">
   import { Accordion, Eyebrow, type AccordionItem } from "@poodle/svelte-primitives";
 
-  const controlSizes = ["xs", "sm", "md", "lg", "xl"] as const;
-
   const singleItems: AccordionItem[] = [
     { value: "getting-started", label: "Getting started" },
     { value: "api-reference", label: "API reference" },
@@ -49,40 +47,6 @@
   </div>
 
   <div class="specimen__group">
-    <Eyebrow>Sizes</Eyebrow>
-    <div class="specimen__stack">
-      {#each controlSizes as size}
-        <Accordion
-          items={singleItems}
-          selectionMode="single"
-          {size}
-          ariaLabel="Accordion at {size}"
-          let:item
-        >
-          <p>{singleContent[item.value]}</p>
-        </Accordion>
-      {/each}
-    </div>
-  </div>
-
-  <div class="specimen__group">
-    <Eyebrow>Densities</Eyebrow>
-    <div class="specimen__stack">
-      {#each ["compact", "default", "comfortable"] as density}
-        <Accordion
-          items={singleItems}
-          selectionMode="single"
-          {density}
-          ariaLabel="Accordion at {density} density"
-          let:item
-        >
-          <p>{singleContent[item.value]}</p>
-        </Accordion>
-      {/each}
-    </div>
-  </div>
-
-  <div class="specimen__group">
     <Eyebrow>Multiple selection</Eyebrow>
     <Accordion
       items={multiItems}
@@ -114,11 +78,4 @@
     font-size: 0.875rem;
     color: var(--poodle-color-text-secondary);
     line-height: 1.5;
-  }
-
-  .specimen__stack {
-    display: flex;
-    flex-direction: column;
-    gap: 1rem;
-  }
-</style>
+  }</style>

@@ -19,8 +19,8 @@
 
   const uiPresentation = getUiPresentation();
 
-  $: resolvedSize = size ?? resolveSemanticControlSize(uiPresentation?.sizeScale ?? "md", sizeRole);
-  $: resolvedDensity = density ?? uiPresentation?.density ?? "default";
+  $: resolvedSize = size ?? resolveSemanticControlSize($uiPresentation.sizeScale, sizeRole);
+  $: resolvedDensity = density ?? $uiPresentation.density;
   $: visibleItems =
     maxVisibleItems !== null && items.length > maxVisibleItems
       ? [items[0], { value: "__ellipsis__", label: "…", current: false }, ...items.slice(items.length - (maxVisibleItems - 1))]
@@ -97,24 +97,32 @@
 
   /* Size variants */
   .breadcrumbs[data-size="xs"] .breadcrumbs__list {
-    font-size: 0.75rem;
+    gap: 0.25rem;
+    font-size: 0.6875rem;
   }
+  .breadcrumbs[data-size="xs"] .breadcrumbs__item { gap: 0.25rem; }
 
   .breadcrumbs[data-size="sm"] .breadcrumbs__list {
-    font-size: 0.8125rem;
+    gap: 0.375rem;
+    font-size: 0.78125rem;
   }
+  .breadcrumbs[data-size="sm"] .breadcrumbs__item { gap: 0.375rem; }
 
   .breadcrumbs[data-size="lg"] .breadcrumbs__list {
-    font-size: 0.9375rem;
-  }
-
-  .breadcrumbs[data-size="xl"] .breadcrumbs__list {
+    gap: 0.625rem;
     font-size: 1rem;
   }
+  .breadcrumbs[data-size="lg"] .breadcrumbs__item { gap: 0.625rem; }
+
+  .breadcrumbs[data-size="xl"] .breadcrumbs__list {
+    gap: 0.75rem;
+    font-size: 1.125rem;
+  }
+  .breadcrumbs[data-size="xl"] .breadcrumbs__item { gap: 0.75rem; }
 
   /* Density variants */
-  .breadcrumbs[data-density="compact"] .breadcrumbs__list { gap: var(--poodle-space-inline-xs); }
-  .breadcrumbs[data-density="compact"] .breadcrumbs__item { gap: var(--poodle-space-inline-xs); }
-  .breadcrumbs[data-density="comfortable"] .breadcrumbs__list { gap: var(--poodle-space-inline-md); }
-  .breadcrumbs[data-density="comfortable"] .breadcrumbs__item { gap: var(--poodle-space-inline-md); }
+  .breadcrumbs[data-density="compact"] .breadcrumbs__list { gap: 0.3125rem; }
+  .breadcrumbs[data-density="compact"] .breadcrumbs__item { gap: 0.3125rem; }
+  .breadcrumbs[data-density="comfortable"] .breadcrumbs__list { gap: 0.875rem; }
+  .breadcrumbs[data-density="comfortable"] .breadcrumbs__item { gap: 0.875rem; }
 </style>

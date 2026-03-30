@@ -34,8 +34,8 @@
   let highlightIndex = 0;
   let lastOpenValue: string | null = null;
 
-  $: resolvedSize = size ?? resolveSemanticControlSize(uiPresentation?.sizeScale ?? "md", sizeRole);
-  $: resolvedDensity = density ?? uiPresentation?.density ?? "default";
+  $: resolvedSize = size ?? resolveSemanticControlSize($uiPresentation.sizeScale, sizeRole);
+  $: resolvedDensity = density ?? $uiPresentation.density;
   $: currentValue = value ?? uncontrolledValue;
   $: currentMenu = items.find((item) => item.value === currentValue) ?? null;
   $: actionableItems = menuNavigableItems(currentMenu?.items ?? []);

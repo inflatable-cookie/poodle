@@ -71,6 +71,26 @@
       offColor="#94a3b8"
     />
   </div>
+
+  <div class="specimen__group">
+    <Eyebrow>Dual labels and tones</Eyebrow>
+    <Switch
+      checked={true}
+      leftLabel="Draft"
+      rightLabel="Live"
+      leftTone="danger"
+      rightTone="success"
+      ariaLabel="Publication status"
+    />
+    <Switch
+      checked={false}
+      leftLabel="Restricted"
+      rightLabel="Free"
+      leftTone="warning"
+      rightTone="success"
+      ariaLabel="Access status"
+    />
+  </div>
 </div>
 
 <style>

@@ -190,12 +190,17 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
       { name: "selectionCount", type: "number", default: "0", description: "Number of currently selected items." },
       { name: "totalCount", type: "number | null", default: "null", description: "Total number of selectable items." },
       { name: "actions", type: "BulkAction[]", default: "[]", description: "Array of bulk action definitions." },
+      { name: "loading", type: "boolean", default: "false", description: "Disables interactions and shows busy state for bulk workflows." },
+      { name: "disabled", type: "boolean", default: "false", description: "Disables the whole bar without changing selection state." },
+      { name: "showSelectAll", type: "boolean", default: "false", description: "Shows a select-all or deselect-all action before the bulk actions." },
+      { name: "allSelected", type: "boolean", default: "false", description: "Controls whether the select-all action presents as deselect-all." },
       { name: "density", type: "ControlDensity | null", default: "null", description: "Explicit density override. Supports compact, default, and comfortable." },
     ],
     slots: [],
     events: [
       { name: "action", payload: "{ id: string }", description: "Fires when a bulk action is triggered." },
       { name: "clear", payload: "void", description: "Fires when the selection is cleared." },
+      { name: "selectAll", payload: "void", description: "Fires when the select-all or deselect-all control is triggered." },
     ],
     usage: `<script lang="ts">
   import { BulkActionBar } from "@poodle/svelte-primitives";
@@ -206,7 +211,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
   ];
 </script>
 
-<BulkActionBar selectionCount={3} totalCount={50} {actions} />`,
+<BulkActionBar selectionCount={3} totalCount={50} {actions} showSelectAll />`,
   },
 
   button: {
@@ -631,25 +636,46 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
       { name: "ariaLabel", type: "string", default: '"Data table"', description: "Accessible label for the table." },
       { name: "columns", type: "TableColumn[]", default: "[]", description: "Column definitions for the table." },
       { name: "rows", type: "TableRow[]", default: "[]", description: "Row data to display." },
+      { name: "selectable", type: "boolean", default: "false", description: "Whether the selection column is shown." },
       { name: "selectedRowIds", type: "string[]", default: "[]", description: "Array of selected row IDs." },
       { name: "sortColumnId", type: "string | null", default: "null", description: "Currently sorted column ID." },
       { name: "sortDirection", type: "TableSortDirection", default: '"asc"', description: "Current sort direction." },
       { name: "rowActionLabel", type: "string", default: '"Open"', description: "Label for the row action button." },
       { name: "showRowActions", type: "boolean", default: "true", description: "Whether to show row action buttons." },
+      { name: "rowActions", type: "TableRowAction[] | ((row: TableRow) => TableRowAction[])", default: "[]", description: "Richer per-row action model for single actions or action menus." },
+      { name: "expandedRowWhen", type: "(row: TableRow) => boolean", default: "() => false", description: "Controls when the expanded row slot renders." },
+      { name: "filters", type: "TableFilters", default: "{}", description: "Controlled filter values keyed by column ID." },
+      { name: "pagination", type: "TablePagination | null", default: "null", description: "Controlled pagination state for the footer." },
+      { name: "loading", type: "boolean", default: "false", description: "Shows loading rows when true and no rows are currently available." },
+      { name: "loadingRows", type: "number", default: "5", description: "Number of skeleton rows to show in the loading posture." },
       { name: "emptyMessage", type: "string", default: '"No rows match the current view."', description: "Message shown when no rows are present." },
       { name: "hiddenColumnIds", type: "string[]", default: "[]", description: "Array of column IDs to hide." },
       { name: "showColumnVisibility", type: "boolean", default: "false", description: "Whether to show the column visibility toggle." },
       { name: "showExport", type: "boolean", default: "false", description: "Whether to show the CSV export button." },
       { name: "exportFilename", type: "string", default: '"export.csv"', description: "Default filename for CSV export." },
+      { name: "limitOptions", type: "number[]", default: "[10, 20, 50, 100]", description: "Available page-size options when the limit selector is visible." },
+      { name: "showLimitSelector", type: "boolean", default: "true", description: "Whether to show the per-page selector in the footer." },
+      { name: "compact", type: "boolean", default: "false", description: "Tightens table spacing for denser operational tables." },
+      { name: "striped", type: "boolean", default: "false", description: "Alternates row backgrounds for easier scanning." },
+      { name: "stickyHeader", type: "boolean", default: "false", description: "Pins table headers while the table scrolls." },
     ],
-    slots: [],
+    slots: [
+      { name: "cell", description: "Custom cell rendering with `let:column`, `let:row`, and `let:value`." },
+      { name: "expandedRow", description: "Expanded detail row content with `let:row`." },
+      { name: "empty", description: "Custom empty-state content." },
+    ],
     events: [
       { name: "sortChange", payload: "{ columnId: string; direction: TableSortDirection }", description: "Fires when the sort column or direction changes." },
       { name: "rowToggle", payload: "{ rowId: string; selected: boolean }", description: "Fires when a row selection is toggled." },
       { name: "toggleAll", payload: "{ selected: boolean }", description: "Fires when the select-all checkbox is toggled." },
       { name: "rowAction", payload: "{ rowId: string }", description: "Fires when a row action button is clicked." },
+      { name: "rowActionSelect", payload: "{ rowId: string; row: TableRow; action: TableRowAction }", description: "Fires when a rich row action is selected." },
       { name: "columnVisibilityChange", payload: "{ columnId: string; visible: boolean }", description: "Fires when column visibility changes." },
       { name: "exportCsv", payload: "{ filename: string }", description: "Fires when CSV export is triggered." },
+      { name: "rowClick", payload: "{ rowId: string; row: TableRow }", description: "Fires when a non-interactive row surface is clicked." },
+      { name: "filterChange", payload: "{ filters: TableFilters }", description: "Fires when a column filter value changes." },
+      { name: "pageChange", payload: "{ page: number }", description: "Fires when the requested page changes." },
+      { name: "limitChange", payload: "{ limit: number }", description: "Fires when the requested page size changes." },
     ],
     usage: `<script lang="ts">
   import { DataTable } from "@poodle/svelte-composites";
@@ -666,7 +692,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
   ];
 </script>
 
-<DataTable {columns} {rows} showColumnVisibility showExport />`,
+<DataTable {columns} {rows} selectable showColumnVisibility showExport />`,
   },
 
   "date-picker": {
@@ -1131,9 +1157,11 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
       { name: "title", type: "string", required: true, description: "Title text for the empty state." },
       { name: "message", type: "string | null", default: "null", description: "Descriptive message below the title." },
       { name: "variant", type: "EmptyStateVariant", default: '"neutral"', description: "Visual variant of the empty state." },
+      { name: "size", type: '"default" | "compact"', default: '"default"', description: "Layout density for page-level or inline empty states." },
       { name: "ariaLabel", type: "string | null", default: "null", description: "Accessible label for the empty state region." },
     ],
     slots: [
+      { name: "visual", description: "Optional custom visual shown instead of the built-in variant icon." },
       { name: "actions", description: "Action buttons displayed below the message." },
     ],
     events: [],
@@ -1142,7 +1170,10 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
   import { Button } from "@poodle/svelte-primitives";
 </script>
 
-<EmptyState title="No results found" message="Try adjusting your search or filters.">
+<EmptyState title="No results found" message="Try adjusting your search or filters." size="compact">
+  <svelte:fragment slot="visual">
+    <Search size={16} />
+  </svelte:fragment>
   <svelte:fragment slot="actions">
     <Button variant="secondary">Clear filters</Button>
   </svelte:fragment>
@@ -1296,19 +1327,31 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
   "form-actions": {
     props: [
       { name: "align", type: "FormActionAlign", default: '"end"', description: "Horizontal alignment of the action buttons." },
+      { name: "dangerItems", type: "FormActionDangerItem[]", default: "[]", description: "Optional overflow actions used when danger content collapses on narrow containers." },
     ],
     slots: [
       { name: "default", description: "Action buttons (e.g. Submit, Cancel)." },
+      { name: "danger", description: "Optional destructive or cancel action content shown inline on wider containers." },
     ],
     events: [],
     usage: `<script lang="ts">
   import { FormActions } from "@poodle/svelte-primitives";
   import { Button } from "@poodle/svelte-primitives";
+
+  const dangerItems = [
+    {
+      label: "Discard draft",
+      onSelect: () => console.log("discard"),
+    },
+  ];
 </script>
 
-<FormActions align="end">
-  <Button variant="secondary">Cancel</Button>
+<FormActions align="end" {dangerItems}>
+  <Button variant="secondary">Back</Button>
   <Button variant="primary">Save</Button>
+  <svelte:fragment slot="danger">
+    <Button variant="ghost" tone="danger">Discard draft</Button>
+  </svelte:fragment>
 </FormActions>`,
   },
 
@@ -1316,19 +1359,25 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
     props: [
       { name: "open", type: "boolean | null", default: "null", description: "Controlled open state." },
       { name: "title", type: "string", required: true, description: "Title of the form dialog." },
-      { name: "description", type: "string | null", default: "null", description: "Description text below the title." },
+      { name: "subtitle", type: "string | null", default: "null", description: "Primary subtitle text below the title." },
+      { name: "description", type: "string | null", default: "null", description: "Fallback description text when subtitle is not supplied." },
       { name: "submitLabel", type: "string", default: '"Submit"', description: "Label for the submit button." },
       { name: "cancelLabel", type: "string", default: '"Cancel"', description: "Label for the cancel button." },
       { name: "submitting", type: "boolean", default: "false", description: "Whether the form is currently submitting." },
       { name: "error", type: "string | null", default: "null", description: "Error message shown in the dialog." },
+      { name: "success", type: "string | null", default: "null", description: "Success message shown in the dialog." },
+      { name: "width", type: "string | null", default: "null", description: "Optional custom dialog width CSS value." },
+      { name: "showDefaultActions", type: "boolean", default: "true", description: "When false, hides the built-in submit/cancel buttons and expects an actions slot." },
       { name: "ariaLabel", type: "string | null", default: "null", description: "Accessible label for the dialog." },
     ],
     slots: [
       { name: "default", description: "Form content. Receives: { submitting }." },
+      { name: "subtitle", description: "Optional rich subtitle content. Receives: { submitting }." },
+      { name: "actions", description: "Optional custom footer actions. Receives: { submitting }." },
     ],
     events: [
-      { name: "submit", payload: "void", description: "Fires when the form is submitted." },
-      { name: "cancel", payload: "void", description: "Fires when the dialog is cancelled." },
+      { name: "submit", payload: "void", description: "Fires when the built-in submit button is used." },
+      { name: "cancel", payload: "void", description: "Fires when the dialog is cancelled or closed." },
       { name: "openChange", payload: "{ open: boolean }", description: "Fires when the open state changes." },
     ],
     usage: `<script lang="ts">
@@ -1338,7 +1387,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
   let submitting = false;
 </script>
 
-<FormDialog bind:open title="Create User" {submitting} on:submit={() => { submitting = true; }}>
+<FormDialog bind:open title="Create User" subtitle="Invite a new teammate." {submitting} on:submit={() => { submitting = true; }}>
   <input type="text" placeholder="Name" />
   <input type="email" placeholder="Email" />
 </FormDialog>`,
@@ -1530,11 +1579,16 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
       { name: "title", type: "string", required: true, description: "Primary title of the card." },
       { name: "subtitle", type: "string | null", default: "null", description: "Subtitle text below the title." },
       { name: "meta", type: "string | null", default: "null", description: "Meta text shown alongside the title." },
+      { name: "href", type: "string | null", default: "null", description: "Optional link destination. Renders a real anchor root when provided." },
       { name: "leadingShape", type: '"circle" | "rounded-square"', default: '"circle"', description: "Shape of the leading visual element." },
       { name: "leadingFill", type: '"tint" | "solid"', default: '"tint"', description: "Fill style of the leading visual." },
       { name: "accentColor", type: "string | null", default: "null", description: "Accent color for the card." },
+      { name: "layout", type: '"default" | "compact"', default: '"default"', description: "Layout density. Compact is intended for dense list and reorder contexts." },
       { name: "interactive", type: "boolean", default: "false", description: "Whether the card is clickable." },
       { name: "disabled", type: "boolean", default: "false", description: "Whether the card is disabled." },
+      { name: "selectable", type: "boolean", default: "false", description: "Whether the card toggles selected state when activated." },
+      { name: "selected", type: "boolean", default: "false", description: "Selected visual state for selectable cards." },
+      { name: "showReorderHandle", type: "boolean", default: "false", description: "Whether to show the visual reorder affordance." },
       { name: "notLive", type: "boolean", default: "false", description: "Whether to show the card in a non-live state." },
       { name: "sash", type: "string | null", default: "null", description: "Sash label text." },
       { name: "sashColor", type: "string | null", default: "null", description: "Color of the sash." },
@@ -1544,16 +1598,18 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
       { name: "leading", description: "Leading visual content (icon, avatar, etc.)." },
       { name: "badges", description: "Badge elements displayed on the card." },
       { name: "footer", description: "Footer content below the main body." },
+      { name: "actions", description: "Explicit action trigger composition near the trailing edge." },
       { name: "trailing", description: "Trailing content on the right side." },
     ],
     events: [
       { name: "click", payload: "MouseEvent", description: "Fires when the card is clicked." },
+      { name: "selectedChange", payload: "{ selected: boolean }", description: "Fires when a selectable card toggles state." },
     ],
     usage: `<script lang="ts">
-  import { ListCard } from "@poodle/svelte-composites";
+  import { ListCard } from "@poodle/svelte-primitives";
 </script>
 
-<ListCard title="Alice Johnson" subtitle="Software Engineer" meta="Active" interactive>
+<ListCard title="Alice Johnson" subtitle="Software Engineer" meta="Active" href="/team/alice">
   <svelte:fragment slot="leading">
     <img src="/avatars/alice.jpg" alt="Alice" />
   </svelte:fragment>
@@ -1563,10 +1619,26 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
   "log-list": {
     props: [
       { name: "entries", type: "LogEntry[]", default: "[]", description: "Array of log entries to display." },
+      { name: "variant", type: '"auto" | "stream" | "audit"', default: '"auto"', description: "Selects the stream-viewer or audit-list presentation. Auto mode detects the entry shape." },
       { name: "maxEntries", type: "number", default: "500", description: "Maximum number of entries to retain." },
       { name: "autoScroll", type: "boolean", default: "true", description: "Whether to auto-scroll to the latest entry." },
       { name: "filterLevel", type: "LogLevel | null", default: "null", description: "Filter entries by log level." },
       { name: "filterText", type: "string", default: '""', description: "Text filter applied to log entries." },
+      { name: "loading", type: "boolean", default: "false", description: "Whether the audit list is loading." },
+      { name: "error", type: "string | null", default: "null", description: "Error message shown in audit mode." },
+      { name: "emptyMessage", type: "string", default: '"No log entries found"', description: "Empty-state copy for audit mode." },
+      { name: "filters", type: "LogFilter[]", default: "[]", description: "Callback-driven audit filter definitions." },
+      { name: "filterValues", type: "Record<string, string>", default: "{}", description: "Current audit filter values keyed by filter field." },
+      { name: "page", type: "number", default: "1", description: "Current audit-list page (1-indexed)." },
+      { name: "pageSize", type: "number", default: "50", description: "Audit-list page size used for pagination summary and controls." },
+      { name: "total", type: "number | undefined", default: "undefined", description: "Total audit-list row count. When provided beyond pageSize, pagination controls appear." },
+      { name: "onFilterChange", type: "((field: string, value: string) => void) | undefined", default: "undefined", description: "Callback fired when an audit filter changes." },
+      { name: "onClearFilters", type: "(() => void) | undefined", default: "undefined", description: "Callback used to reset active audit filters." },
+      { name: "onPageChange", type: "((page: number) => void) | undefined", default: "undefined", description: "Callback fired when the audit pagination controls request a new page." },
+      { name: "onRefresh", type: "(() => void) | undefined", default: "undefined", description: "Optional audit toolbar refresh action." },
+      { name: "onExport", type: "(() => void) | undefined", default: "undefined", description: "Optional audit toolbar export action." },
+      { name: "getActorHref", type: "((actor: LogActor) => string) | undefined", default: "undefined", description: "Builds actor links for audit entries." },
+      { name: "getResourceHref", type: "((resourceType: string, resourceId: string, action: string) => string | null) | undefined", default: "undefined", description: "Builds resource links for audit entries." },
       { name: "ariaLabel", type: "string", default: '"Log output"', description: "Accessible label for the log list." },
       { name: "size", type: 'ControlSize | null', default: "null", description: "Explicit semantic control size override for toolbar controls." },
       { name: "sizeRole", type: 'SemanticControlSizeRole', default: '"control"', description: "Semantic size role used when inheriting from presentation context." },
@@ -1575,16 +1647,46 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
     slots: [],
     events: [],
     usage: `<script lang="ts">
-  import { LogList } from "@poodle/svelte-composites";
+  import { LogList, type LogEntry, type LogFilter } from "@poodle/svelte-composites";
 
-  const entries = [
-    { id: "1", level: "info", message: "Server started on port 3000", timestamp: Date.now() },
-    { id: "2", level: "warn", message: "Deprecated API call detected", timestamp: Date.now() },
-    { id: "3", level: "error", message: "Failed to connect to database", timestamp: Date.now() },
+  const filters: LogFilter[] = [
+    {
+      field: "action",
+      label: "Action",
+      type: "select",
+      options: [
+        { value: "create", label: "Create" },
+        { value: "update", label: "Update" },
+        { value: "delete", label: "Delete" },
+      ],
+    },
   ];
+
+  const entries: LogEntry[] = [
+    {
+      id: "1",
+      occurredAt: new Date().toISOString(),
+      actor: { id: "u-1", name: "Alice Johnson" },
+      action: "create",
+      resourceType: "project",
+      resourceId: "project-1",
+      resourceLabel: "Launch Plan",
+    },
+  ];
+
+  let filterValues = {};
 </script>
 
-<LogList {entries} autoScroll />`,
+<LogList
+  {entries}
+  {filters}
+  {filterValues}
+  onFilterChange={(field, value) => {
+    filterValues = { ...filterValues, [field]: value };
+  }}
+  getActorHref={(actor) => \`/users/\${actor.id}\`}
+  getResourceHref={(resourceType, resourceId) => \`/\${resourceType}/\${resourceId}\`}
+/>`,
   },
 
   "markdown-editor": {
@@ -1779,6 +1881,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
       { name: "defaultOpen", type: "boolean", default: "false", description: "Initial open state for uncontrolled mode." },
       { name: "placement", type: "OverlayPlacement", default: '"bottom-start"', description: "Preferred placement of the menu." },
       { name: "ariaLabel", type: "string | null", default: "null", description: "Accessible label for the menu." },
+      { name: "triggerAriaLabel", type: "string | null", default: "null", description: "Accessible label for the trigger wrapper, useful for icon-only triggers." },
     ],
     slots: [
       { name: "trigger", description: "Element that opens the menu." },
@@ -1971,42 +2074,52 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
       { name: "size", type: "ControlSize | null", default: "null", description: "Explicit size override. Supports xs, sm, md, lg, and xl." },
       { name: "sizeRole", type: '"chrome" | "control" | "prominent"', default: '"control"', description: "Semantic size offset relative to the inherited presentation scale." },
       { name: "density", type: "ControlDensity | null", default: "null", description: "Explicit density override. Supports compact, default, and comfortable." },
-      { name: "fields", type: "SortField[]", default: "[]", description: "Array of sortable field definitions." },
-      { name: "activeSort", type: "ActiveSort | null", default: "null", description: "Currently active sort configuration." },
+      { name: "fields", type: "SortField[]", default: "[]", description: "Array of sortable field definitions. Multi-field callers should use key plus optional defaultDirection." },
+      { name: "value", type: "OrderByValue", default: "[]", description: "Ordered multi-field sort state." },
+      { name: "activeSort", type: "ActiveSort | null", default: "null", description: "Legacy single-sort compatibility signal derived from the first sort item." },
+      { name: "maxFields", type: "number | null", default: "null", description: "Optional cap on number of active sort fields." },
+      { name: "compact", type: "boolean", default: "false", description: "Collapses long trigger summaries after the first two items." },
       { name: "ariaLabel", type: "string", default: '"Sort by"', description: "Accessible label for the sort control." },
       { name: "disabled", type: "boolean", default: "false", description: "Whether the sort control is disabled." },
     ],
     slots: [],
     events: [
-      { name: "change", payload: "{ sort: ActiveSort | null }", description: "Fires when the sort configuration changes." },
+      { name: "change", payload: "{ value: OrderByValue; sort: ActiveSort | null }", description: "Fires when the sort configuration changes." },
     ],
     usage: `<script lang="ts">
-  import { OrderBy } from "@poodle/svelte-primitives";
+  import { OrderBy, type OrderByValue } from "@poodle/svelte-primitives";
 
   const fields = [
-    { value: "name", label: "Name" },
-    { value: "date", label: "Date" },
-    { value: "priority", label: "Priority" },
+    { key: "name", label: "Name" },
+    { key: "date", label: "Date", defaultDirection: "desc" },
+    { key: "priority", label: "Priority" },
   ];
+
+  let value: OrderByValue = [];
 </script>
 
-<OrderBy {fields} on:change={(e) => console.log(e.detail.sort)} />`,
+<OrderBy {fields} bind:value on:change={(e) => console.log(e.detail.value)} />`,
   },
 
   "page-header": {
     props: [
-      { name: "title", type: "string", required: true, description: "Primary page title." },
+      { name: "title", type: "string | null", default: "null", description: "Primary page title." },
+      { name: "section", type: "string | null", default: "null", description: "Optional section label rendered above the title." },
       { name: "count", type: "number | null", default: "null", description: "Optional count badge rendered inline with the title." },
       { name: "subtitle", type: "string | null", default: "null", description: "Subtitle text below the title." },
       { name: "eyebrow", type: "string | null", default: "null", description: "Eyebrow label above the title." },
       { name: "backHref", type: "string | null", default: "null", description: "Optional back-link URL rendered above the title block." },
       { name: "backLabel", type: "string | null", default: "null", description: "Optional text for the back link; defaults to Back." },
+      { name: "backIsContextual", type: "boolean", default: "false", description: "Whether the back link should show the contextual indicator dot." },
+      { name: "bannerMessage", type: "string | null", default: "null", description: "Optional shortcut banner rendered below the header." },
+      { name: "bannerTone", type: '"neutral" | "info" | "success" | "warning" | "danger"', default: '"warning"', description: "Tone for the shortcut banner." },
       { name: "align", type: '"start" | "between"', default: '"between"', description: "Alignment of the header content and actions." },
       { name: "ariaLabel", type: "string | null", default: "null", description: "Accessible label for the header region." },
     ],
     slots: [
       { name: "breadcrumbs", description: "Breadcrumb navigation rendered above the title." },
       { name: "actions", description: "Action buttons rendered on the right side of the header." },
+      { name: "banner", description: "Optional custom banner content rendered below the header body." },
     ],
     events: [],
     usage: `<script lang="ts">
@@ -2015,12 +2128,14 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
 </script>
 
 <PageHeader
+  section="Catalog"
   title="All Products"
   count={42}
-  eyebrow="Catalog"
   subtitle="Manage your product listings"
   backHref="/dashboard"
   backLabel="Back to dashboard"
+  bannerMessage="Some products are currently hidden."
+  bannerTone="info"
 >
   <svelte:fragment slot="actions">
     <Button variant="primary" leadingIcon="plus">Add Product</Button>
@@ -2031,6 +2146,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
   "page-loading": {
     props: [
       { name: "visible", type: "boolean", default: "true", description: "Whether the loading overlay is visible." },
+      { name: "presentation", type: '"overlay" | "inline"', default: '"overlay"', description: "Whether the component renders as a full-screen overlay or an inline centered loading state." },
       { name: "value", type: "number | null", default: "null", description: "Determinate progress value." },
       { name: "max", type: "number", default: "100", description: "Maximum progress value." },
       { name: "message", type: "string | null", default: "null", description: "Loading message displayed below the spinner." },
@@ -2044,6 +2160,8 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
     usage: `<script lang="ts">
   import { PageLoading } from "@poodle/svelte-composites";
 </script>
+
+<PageLoading visible presentation="inline" message="Loading your data..." />
 
 <PageLoading visible message="Loading your data..." canCancel on:cancel={() => abortRequest()} />`,
   },
@@ -2233,6 +2351,45 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
 <PinInput length={6} mask on:complete={(e) => verify(e.detail.value)} />`,
   },
 
+  "totp-input": {
+    props: [
+      { name: "id", type: "string | null", default: "null", description: "Optional control id. Falls back to a derived id from the name when omitted." },
+      { name: "value", type: "string | null", default: "null", description: "Controlled code value." },
+      { name: "defaultValue", type: "string", default: '""', description: "Initial value for uncontrolled mode." },
+      { name: "name", type: "string", default: '"code"', description: "Hidden input name for form submission." },
+      { name: "label", type: "string", default: '"Authenticator code"', description: "Field label rendered by the built-in Field wrapper." },
+      { name: "hint", type: "string | null", default: "null", description: "Optional help text below the label." },
+      { name: "error", type: "string | null", default: "null", description: "Optional error message; also drives invalid validation state." },
+      { name: "disabled", type: "boolean", default: "false", description: "Disables the hidden real input and visual slot interaction." },
+      { name: "length", type: "number", default: "6", description: "Number of visible digit slots and max code length." },
+      { name: "ariaLabel", type: "string | null", default: "null", description: "Optional accessible label override for the grouped control." },
+      { name: "autocomplete", type: "string", default: '"one-time-code"', description: "Autocomplete hint for verification-code autofill." },
+      { name: "size", type: "ControlSize | null", default: "null", description: "Explicit size override. Supports xs, sm, md, lg, and xl." },
+      { name: "sizeRole", type: '"chrome" | "control" | "prominent"', default: '"control"', description: "Semantic size offset relative to the inherited presentation scale." },
+      { name: "density", type: "ControlDensity | null", default: "null", description: "Explicit density override. Supports compact, default, and comfortable." },
+      { name: "validationState", type: 'ValidationState', default: '"none"', description: "Field-level validation state. Invalid is also inferred automatically when error is present." },
+    ],
+    slots: [],
+    events: [
+      { name: "valueChange", payload: "{ value: string }", description: "Fires whenever the sanitized one-time-code value changes." },
+      { name: "complete", payload: "{ value: string }", description: "Fires when the value reaches the configured length." },
+    ],
+    usage: `<script lang="ts">
+  import { TotpInput } from "@poodle/svelte-primitives";
+
+  let code = "";
+</script>
+
+<TotpInput
+  id="verify-code"
+  value={code}
+  label="Verification code"
+  hint="Enter the 6-digit code from your authenticator app."
+  on:valueChange={(e) => (code = e.detail.value)}
+  on:complete={(e) => verify(e.detail.value)}
+/>`,
+  },
+
   popover: {
     props: [
       { name: "open", type: "boolean | null", default: "null", description: "Controlled open state." },
@@ -2268,6 +2425,8 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
       { name: "max", type: "number", default: "100", description: "Maximum progress value." },
       { name: "isIndeterminate", type: "boolean", default: "false", description: "Whether the progress is indeterminate." },
       { name: "ariaLabel", type: "string | null", default: "null", description: "Accessible label for the progress bar." },
+      { name: "size", type: 'ControlSize | null', default: "null", description: "Explicit height override for the progress bar." },
+      { name: "sizeRole", type: 'SemanticControlSizeRole', default: '"control"', description: "Semantic size role used when inheriting from presentation context." },
       { name: "valueText", type: "string | null", default: "null", description: "Human-readable text for the current value." },
     ],
     slots: [],
@@ -2276,7 +2435,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
   import { Progress } from "@poodle/svelte-primitives";
 </script>
 
-<Progress value={65} max={100} ariaLabel="Upload progress" />
+<Progress value={65} max={100} size="sm" ariaLabel="Upload progress" />
 <Progress isIndeterminate ariaLabel="Loading..." />`,
   },
 
@@ -2458,6 +2617,17 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
       { name: "items", type: "ReorderableItem[]", default: "[]", description: "Array of reorderable items." },
       { name: "ariaLabel", type: "string", default: '"Reorderable list"', description: "Accessible label for the list." },
       { name: "disabled", type: "boolean", default: "false", description: "Whether reordering is disabled." },
+      { name: "dirty", type: "boolean", default: "false", description: "Whether the current order differs from the committed baseline." },
+      { name: "submitting", type: "boolean", default: "false", description: "Whether submit is in progress; disables interaction and shows saving state." },
+      { name: "errorMessage", type: "string | null", default: "null", description: "Optional submit error surfaced above the list." },
+      { name: "infoMessage", type: "string | null", default: "null", description: "Optional workflow guidance surfaced above the list." },
+      { name: "longListThreshold", type: "number | null", default: "50", description: "Shows the built-in large-list guidance when item count exceeds the threshold. Pass null or 0 to disable." },
+      { name: "longListWarningText", type: "string | null", default: "null", description: "Optional custom copy for the large-list guidance panel." },
+      { name: "windowSize", type: "number | null", default: "null", description: "Optional page window size for very large reorder sessions." },
+      { name: "submitLabel", type: "string", default: '"Save Order"', description: "Submit button label when workflow chrome is shown." },
+      { name: "cancelLabel", type: "string", default: '"Cancel"', description: "Cancel button label when workflow chrome is shown." },
+      { name: "onsubmit", type: "() => void | Promise<void>", default: "null", description: "Optional submit callback; enables workflow chrome." },
+      { name: "oncancel", type: "() => void", default: "null", description: "Optional cancel callback; enables workflow chrome." },
       { name: "size", type: 'ControlSize | null', default: "null", description: "Explicit semantic control size override for row and handle geometry." },
       { name: "sizeRole", type: 'SemanticControlSizeRole', default: '"control"', description: "Semantic size role used when inheriting from presentation context." },
       { name: "density", type: 'ControlDensity | null', default: "null", description: "Explicit density override for row padding and list spacing." },
@@ -2467,6 +2637,8 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
     ],
     events: [
       { name: "reorder", payload: "{ items: ReorderableItem[] }", description: "Fires when items are reordered." },
+      { name: "submit", payload: "void", description: "Fires when the submit action is triggered." },
+      { name: "cancel", payload: "void", description: "Fires when the cancel action is triggered." },
     ],
     usage: `<script lang="ts">
   import { ReorderableList } from "@poodle/svelte-composites";
@@ -2476,9 +2648,21 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
     { id: "2", label: "Second" },
     { id: "3", label: "Third" },
   ];
+  let baseline = items.map((item) => item.id);
+  $: dirty = items.some((item, index) => item.id !== baseline[index]);
+
+  async function saveOrder() {
+    baseline = items.map((item) => item.id);
+  }
 </script>
 
-<ReorderableList bind:items on:reorder={(e) => (items = e.detail.items)} />`,
+<ReorderableList
+  bind:items
+  {dirty}
+  onsubmit={saveOrder}
+  oncancel={() => (items = baseline.map((id) => items.find((item) => item.id === id)!))}
+  on:reorder={(e) => (items = e.detail.items)}
+/>`,
   },
 
   "resize-handle": {
@@ -3203,6 +3387,43 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
 </script>
 
 <ToastStack items={toasts} on:dismiss={(e) => { toasts = toasts.filter(t => t.id !== e.detail.id); }} />`,
+  },
+
+  "toast-host": {
+    props: [
+      { name: "store", type: "ToastHostStore", description: "Store with readable toast items and dismiss(id) wiring." },
+      { name: "autoDismissMs", type: "number", default: "6000", description: "Auto-dismiss delay for non-sticky toasts. Set to 0 or less to disable timers." },
+      { name: "stickyTones", type: "ToastTone[]", default: '["danger"]', description: "Toast tones that should stay visible until explicitly dismissed." },
+      { name: "placement", type: '"bottom-end" | "bottom-start" | "top-end" | "top-start"', default: '"bottom-end"', description: "Viewport placement for the toast host." },
+      { name: "ariaLabel", type: "string", default: '"Notifications"', description: "Accessible label forwarded to the internal toast stack." },
+      { name: "size", type: "ControlSize | null", default: "null", description: "Explicit size override forwarded to the internal toast stack." },
+      { name: "sizeRole", type: '"chrome" | "control" | "prominent"', default: '"chrome"', description: "Semantic size offset forwarded to the internal toast stack." },
+      { name: "density", type: "ControlDensity | null", default: "null", description: "Explicit density override forwarded to the internal toast stack." },
+      { name: "onAction", type: "((id: string) => void) | null", default: "null", description: "Optional callback when a toast action button is activated." },
+    ],
+    slots: [],
+    events: [
+      { name: "dismiss", payload: "{ id: string }", description: "Fires after the host dismisses a toast from the backing store." },
+      { name: "action", payload: "{ id: string }", description: "Fires when a toast action button is clicked." },
+    ],
+    usage: `<script lang="ts">
+  import { writable } from "svelte/store";
+  import { ToastHost, type ToastHostStoreItem } from "@poodle/svelte-composites";
+
+  const toasts = writable<ToastHostStoreItem[]>([
+    { id: "1", variant: "success", title: "Saved", message: "Your settings were updated." },
+    { id: "2", variant: "error", message: "Publishing failed." },
+  ]);
+
+  const store = {
+    toasts,
+    dismiss(id: string) {
+      toasts.update((items) => items.filter((item) => item.id !== id));
+    }
+  };
+</script>
+
+<ToastHost {store} />`,
   },
 
   toggle: {

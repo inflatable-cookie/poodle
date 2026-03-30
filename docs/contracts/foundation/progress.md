@@ -40,6 +40,8 @@ The root element doubles as the track. There is no separate track element.
 | `indeterminate` | `boolean` | `false` | no | active progress with no fixed value |
 | `ariaLabel` | `string \| null` | `null` | no | optional accessible name when context needs it |
 | `valueText` | `string \| null` | `null` | no | human-readable progress text (e.g. "3 of 10") |
+| `size` | `"xs" \| "sm" \| "md" \| "lg" \| "xl" \| null` | `null` | no | explicit height override; when null, resolves from inherited presentation |
+| `sizeRole` | `"chrome" \| "control" \| "prominent"` | `"control"` | no | semantic size offset from inherited presentation |
 
 ### Controlled And Uncontrolled
 
@@ -105,7 +107,7 @@ internal state.
 ### Sizing
 
 - Width is parent-owned (`width: 100%`)
-- Minimum height is `0.5rem`
+- Minimum height is size-driven
 - No maximum height constraint (height can be overridden by parent)
 
 ### Composition
@@ -123,7 +125,7 @@ internal state.
 | `position` | `relative` |
 | `overflow` | `hidden` |
 | `width` | `100%` |
-| `min-height` | `0.5rem` |
+| `min-height` | `0.5rem` for `md`; `0.375rem` for `xs` / `sm`; `0.75rem` for `lg` / `xl` |
 | `border-radius` | `999px` |
 | `background` | `color-mix(in srgb, var(--poodle-surface) 96%, var(--poodle-color-text-primary))` |
 
@@ -159,6 +161,16 @@ internal state.
   to { transform: translateX(250%) }
 }
 ```
+
+### Size Variants
+
+| Size | `min-height` |
+|------|--------------|
+| `xs` | `0.375rem` |
+| `sm` | `0.375rem` |
+| `md` | `0.5rem` |
+| `lg` | `0.75rem` |
+| `xl` | `0.75rem` |
 
 ### Token Reference
 

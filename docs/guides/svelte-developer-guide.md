@@ -1104,10 +1104,11 @@ Searchable select with type-ahead:
 ```svelte
 <EmptyState
   variant="firstRun"
+  size="compact"
   title="No projects yet"
-  description="Create your first project to get started."
+  message="Create your first project to get started."
 >
-  <Button variant="primary" slot="action">Create Project</Button>
+  <Button variant="primary" slot="actions">Create Project</Button>
 </EmptyState>
 ```
 

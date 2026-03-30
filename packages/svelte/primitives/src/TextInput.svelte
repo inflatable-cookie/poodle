@@ -112,8 +112,8 @@
   $: charCount = currentValue.length;
   $: charCountText = maxLength ? `${charCount}/${maxLength}` : `${charCount}`;
   $: isOverLimit = maxLength !== null && charCount > maxLength;
-  $: resolvedSize = size ?? resolveSemanticControlSize(uiPresentation?.sizeScale ?? "md", sizeRole);
-  $: resolvedDensity = density ?? uiPresentation?.density ?? "default";
+  $: resolvedSize = size ?? resolveSemanticControlSize($uiPresentation.sizeScale, sizeRole);
+  $: resolvedDensity = density ?? $uiPresentation.density;
   $: showValidationIndicator = showValidationStatus && effectiveValidationState !== "none";
   $: validationIcon =
     effectiveValidationState === "valid"

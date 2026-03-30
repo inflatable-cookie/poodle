@@ -27,8 +27,8 @@
     valueCommit: { value: [number, number] };
   }>();
 
-  $: resolvedSize = size ?? resolveSemanticControlSize(uiPresentation?.sizeScale ?? "md", sizeRole);
-  $: resolvedDensity = density ?? uiPresentation?.density ?? "default";
+  $: resolvedSize = size ?? resolveSemanticControlSize($uiPresentation.sizeScale, sizeRole);
+  $: resolvedDensity = density ?? $uiPresentation.density;
   $: safeMax = max <= min ? min + 1 : max;
   $: lowerValue = clamp(Math.min(value[0], value[1]), min, safeMax);
   $: upperValue = clamp(Math.max(value[0], value[1]), min, safeMax);

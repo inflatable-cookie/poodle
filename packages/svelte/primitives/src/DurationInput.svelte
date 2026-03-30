@@ -24,8 +24,8 @@
     change: { hours: number; minutes: number; seconds: number; totalSeconds: number };
   }>();
 
-  $: resolvedSize = size ?? resolveSemanticControlSize(uiPresentation?.sizeScale ?? "md", sizeRole);
-  $: resolvedDensity = density ?? uiPresentation?.density ?? "default";
+  $: resolvedSize = size ?? resolveSemanticControlSize($uiPresentation.sizeScale, sizeRole);
+  $: resolvedDensity = density ?? $uiPresentation.density;
   $: totalSeconds = hours * 3600 + minutes * 60 + seconds;
   $: isUnderMin = totalSeconds < minTotalSeconds;
   $: isOverMax = maxTotalSeconds !== null && totalSeconds > maxTotalSeconds;

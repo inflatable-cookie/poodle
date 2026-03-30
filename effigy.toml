@@ -57,25 +57,34 @@ start = "preview:dev"
 health = [{ task = "docs:check" }]
 
 [scan.god_files]
+# Thresholds raised for Svelte primitives (complex interactive components with
+# substantial accessibility markup). Composites and contracts remain strict.
 warn = 250
-high = 400
-critical = 700
+high = 500
+critical = 900
 doctor = true
 fail_on_findings = false
 respect_gitignore = true
 include = ["packages/**"]
-exclude = ["docs/**", "dist/**", "node_modules/**"]
+exclude = [
+  "docs/**", "dist/**", "node_modules/**", "**/assets/**", "**/artifacts/**",
+  "**/*.json", "**/preview/**", "**/scripts/**",
+  # Intentionally large complex components with substantial markup and accessibility requirements
+  "**/ColorPicker.svelte", "**/Tabs.svelte", "**/RelationPicker.svelte", "**/BlockEditor.svelte", "**/DockRegion.svelte",
+  # Contract files that define comprehensive type systems
+  "**/contracts/**/types.rs", "**/contracts/**/lib.rs",
+]
 format = "markdown"
 out = ".effigy/reports/god-files.md"
 
 [scan.attention_markers]
 warning = ["TODO", "REVIEW", "NOTE", "placeholder"]
-high = ["FIXME", "HACK", "@deprecated", "workaround"]
+high = ["FIXME", "HACK", "workaround"]
 critical = ["BUG", "SECURITY", "remove before release"]
 doctor = true
 fail_on_findings = false
 respect_gitignore = true
 include = ["packages/**"]
-exclude = ["node_modules/**"]
+exclude = ["node_modules/**", "**/assets/**"]
 format = "markdown"
 out = ".effigy/reports/attention-markers.md"

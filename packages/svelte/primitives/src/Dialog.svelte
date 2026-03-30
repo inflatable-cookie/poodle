@@ -16,6 +16,7 @@
   export let dismissOnBackdrop = true;
   export let ariaLabel: string | null = null;
   export let contentClassName = "";
+  export let contentStyle = "";
   export let overlayClassName = "";
   export let showCloseButton = false;
   export let closeLabel = "Close dialog";
@@ -36,8 +37,8 @@
   let bodyOverflow: string | null = null;
   let previousOpen = false;
 
-  $: resolvedSize = size ?? resolveSemanticControlSize(uiPresentation?.sizeScale ?? "md", sizeRole);
-  $: resolvedDensity = density ?? uiPresentation?.density ?? "default";
+  $: resolvedSize = size ?? resolveSemanticControlSize($uiPresentation.sizeScale, sizeRole);
+  $: resolvedDensity = density ?? $uiPresentation.density;
   $: isControlled = open !== null;
   $: isOpen = isControlled ? open === true : uncontrolledOpen;
   $: if (isOpen && !previousOpen) {
@@ -136,6 +137,7 @@
     <div
       bind:this={surfaceElement}
       class={`dialog__surface ${contentClassName}`}
+      style={contentStyle}
       role={kind}
       tabindex="-1"
       aria-label={title ? undefined : ariaLabel ?? undefined}

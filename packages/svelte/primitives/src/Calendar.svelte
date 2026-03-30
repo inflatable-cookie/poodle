@@ -45,8 +45,8 @@
   let focusIso = defaultValue ?? todayIsoDate();
   let dayElements: Record<string, HTMLButtonElement | undefined> = {};
 
-  $: resolvedSize = size ?? resolveSemanticControlSize(uiPresentation?.sizeScale ?? "md", sizeRole);
-  $: resolvedDensity = density ?? uiPresentation?.density ?? "default";
+  $: resolvedSize = size ?? resolveSemanticControlSize($uiPresentation.sizeScale, sizeRole);
+  $: resolvedDensity = density ?? $uiPresentation.density;
   $: currentValue = value ?? uncontrolledValue;
   $: currentMonth = monthAnchorIso(visibleMonth ?? uncontrolledMonth);
   $: weeks = buildCalendarWeeks(currentMonth, weekStartsOn);

@@ -79,6 +79,22 @@
   </div>
 
   <div class="specimen__group">
+    <Eyebrow>Block variant (full-width shell tabs with separators)</Eyebrow>
+    <div class="specimen__frame">
+      <Tabs
+        items={stripTabs}
+        variant="block"
+        defaultValue="editor"
+        reorderable
+        ariaLabel="Workspace surfaces"
+      />
+      <div class="specimen__surface-body">
+        <p>Surface content area</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="specimen__group">
     <Eyebrow>Pill variant (with icons)</Eyebrow>
     <Tabs
       items={iconTabs}

@@ -3,34 +3,155 @@
 
   import Icon from "./Icon.svelte";
   import { getUiPresentation, resolveSemanticControlSize } from "./presentation";
-  import type { ControlDensity, ControlSize, SemanticControlSizeRole, SelectOption, SelectOptionGroup, SelectItems } from "./types";
+  import type {
+    ControlDensity,
+    ControlSize,
+    SemanticControlSizeRole,
+    SelectItems,
+    SelectOption,
+    SelectOptionGroup,
+  } from "./types";
+
+  type LegacySelectItem = {
+    value: string;
+    label: string;
+    disabled?: boolean;
+    isDisabled?: boolean;
+  };
+
+  type LegacySelectGroup = {
+    label: string;
+    items?: LegacySelectItem[];
+    groups?: LegacySelectGroup[];
+  };
 
   export let id: string | undefined = undefined;
   export let value: string | null = null;
   export let defaultValue: string | null = null;
   export let placeholder: string | null = null;
   export let options: SelectItems = [];
+  export let items: LegacySelectItem[] | null = null;
+  export let groups: LegacySelectGroup[] | null = null;
   export let disabled = false;
+  export let required = false;
   export let ariaLabel: string | null = null;
   export let describedBy: string | null = null;
   export let name: string | undefined = undefined;
+  export let clearable = false;
+  export let valueLabel: string | null = null;
+  export let loadItems: (() => Promise<LegacySelectItem[]>) | null = null;
+  export let loadGroups: (() => Promise<LegacySelectGroup[]>) | null = null;
+  export let loadKey: string | null = null;
+  export let onchange: ((value: string) => void) | null = null;
   export let size: ControlSize | null = null;
   export let sizeRole: SemanticControlSizeRole = "control";
   export let density: ControlDensity | null = null;
 
   const dispatch = createEventDispatcher<{
     valueChange: { value: string };
+    change: { value: string };
   }>();
 
   const uiPresentation = getUiPresentation();
   let uncontrolledValue = defaultValue;
+  let loadedItems: LegacySelectItem[] | null = null;
+  let loadedGroups: LegacySelectGroup[] | null = null;
+  let loadState: "idle" | "loading" | "loaded" | "error" = "idle";
+  let loadError: string | null = null;
+  let lastLoadKey: string | null = null;
 
-  $: resolvedSize = size ?? resolveSemanticControlSize(uiPresentation?.sizeScale ?? "md", sizeRole);
-  $: resolvedDensity = density ?? uiPresentation?.density ?? "default";
+  function normalizeItems(source: LegacySelectItem[] | SelectItems | null): SelectItems {
+    if (!source || source.length === 0) return [];
+    if ("options" in source[0]) {
+      return source as SelectItems;
+    }
+    return (source as LegacySelectItem[]).map((option) => ({
+      value: option.value,
+      label: option.label,
+      isDisabled: option.isDisabled ?? option.disabled ?? false,
+    }));
+  }
+
+  function normalizeGroups(source: LegacySelectGroup[]): SelectOptionGroup[] {
+    return source.flatMap((group) => {
+      const ownOptions = (group.items ?? []).map((option) => ({
+        value: option.value,
+        label: option.label,
+        isDisabled: option.isDisabled ?? option.disabled ?? false,
+      }));
+      const nestedOptions = group.groups?.length ? normalizeGroups(group.groups) : [];
+
+      if (group.label.trim().length === 0) {
+        return [
+          ...(ownOptions.length ? [{ label: "", options: ownOptions }] : []),
+          ...nestedOptions,
+        ];
+      }
+
+      return [
+        ...(ownOptions.length ? [{ label: group.label, options: ownOptions }] : []),
+        ...nestedOptions,
+      ];
+    });
+  }
+
+  function flattenOptions(source: SelectItems): SelectOption[] {
+    if (source.length === 0) return [];
+    if ("options" in source[0]) {
+      return (source as SelectOptionGroup[]).flatMap((group) => group.options);
+    }
+    return source as SelectOption[];
+  }
+
+  async function startLoad(): Promise<void> {
+    if (loadState === "loading" || (!loadItems && !loadGroups)) return;
+    loadState = "loading";
+    loadError = null;
+
+    try {
+      if (loadGroups) {
+        loadedGroups = await loadGroups();
+      } else if (loadItems) {
+        loadedItems = await loadItems();
+      }
+      loadState = "loaded";
+    } catch (error) {
+      loadState = "error";
+      loadError = error instanceof Error ? error.message : "Failed to load options";
+    }
+  }
+
+  $: resolvedSize = size ?? resolveSemanticControlSize($uiPresentation.sizeScale, sizeRole);
+  $: resolvedDensity = density ?? $uiPresentation.density;
   $: isControlled = value !== null;
   $: currentValue = (isControlled ? value : uncontrolledValue) ?? "";
-  $: hasSelection = currentValue !== "";
-  $: isGrouped = options.length > 0 && "options" in options[0];
+  $: isLazy = Boolean(loadItems || loadGroups);
+  $: clearValue = defaultValue ?? "";
+  $: placeholderValue = clearable ? clearValue : "";
+  $: placeholderLabel = placeholder ?? (clearable ? valueLabel ?? "All" : null);
+  $: normalizedOptions = loadedGroups
+    ? normalizeGroups(loadedGroups)
+    : loadedItems
+      ? normalizeItems(loadedItems)
+      : groups
+        ? normalizeGroups(groups)
+        : normalizeItems(items ?? options);
+  $: flatOptions = flattenOptions(normalizedOptions);
+  $: hasCurrentOption = flatOptions.some((option) => option.value === currentValue);
+  $: hasSelection = currentValue !== "" && currentValue !== clearValue;
+  $: isGrouped = normalizedOptions.length > 0 && "options" in normalizedOptions[0];
+
+  $: if (loadKey !== lastLoadKey) {
+    lastLoadKey = loadKey;
+    loadedItems = null;
+    loadedGroups = null;
+    loadState = "idle";
+    loadError = null;
+  }
+
+  $: if (isLazy && loadState === "idle") {
+    void startLoad();
+  }
 
   function handleChange(event: Event): void {
     const nextValue = (event.currentTarget as HTMLSelectElement).value;
@@ -40,6 +161,8 @@
     }
 
     dispatch("valueChange", { value: nextValue });
+    dispatch("change", { value: nextValue });
+    onchange?.(nextValue);
   }
 </script>
 
@@ -50,30 +173,49 @@
     class="select__control"
     value={currentValue}
     disabled={disabled}
+    {required}
     aria-label={ariaLabel ?? undefined}
     aria-describedby={describedBy ?? undefined}
     on:change={handleChange}
   >
-    {#if placeholder}
-      <option value="" disabled>{placeholder}</option>
+    {#if placeholderLabel}
+      <option value={placeholderValue} disabled={!clearable && required}>{placeholderLabel}</option>
     {/if}
 
     {#if isGrouped}
-      {#each options as group}
-        <optgroup label={(group as SelectOptionGroup).label}>
+      {#each normalizedOptions as group}
+        {#if (group as SelectOptionGroup).label.trim().length === 0}
           {#each (group as SelectOptionGroup).options as option (option.value)}
             <option value={option.value} disabled={option.isDisabled === true}>
               {option.label}
             </option>
           {/each}
-        </optgroup>
+        {:else}
+          <optgroup label={(group as SelectOptionGroup).label}>
+            {#each (group as SelectOptionGroup).options as option (option.value)}
+              <option value={option.value} disabled={option.isDisabled === true}>
+                {option.label}
+              </option>
+            {/each}
+          </optgroup>
+        {/if}
       {/each}
-    {:else}
-      {#each options as option}
-        <option value={(option as SelectOption).value} disabled={(option as SelectOption).isDisabled === true}>
-          {(option as SelectOption).label}
+    {:else if flatOptions.length > 0}
+      {#each flatOptions as option}
+        <option value={option.value} disabled={option.isDisabled === true}>
+          {option.label}
         </option>
       {/each}
+    {:else if isLazy && currentValue && valueLabel}
+      <option value={currentValue}>{valueLabel}</option>
+    {:else if isLazy && loadState === "loading"}
+      <option value={placeholderValue} disabled>Loading…</option>
+    {:else if isLazy && loadState === "error"}
+      <option value={placeholderValue} disabled>{loadError ?? "Failed to load options"}</option>
+    {:else if currentValue && !hasCurrentOption && valueLabel}
+      <option value={currentValue}>{valueLabel}</option>
+    {:else if currentValue && !hasCurrentOption}
+      <option value={currentValue}>{currentValue}</option>
     {/if}
   </select>
 

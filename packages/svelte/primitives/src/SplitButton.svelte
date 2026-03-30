@@ -46,8 +46,8 @@
   const uiPresentation = getUiPresentation();
 
   $: isUnavailable = disabled || loading;
-  $: resolvedSize = size ?? resolveSemanticControlSize(uiPresentation?.sizeScale ?? "md", sizeRole);
-  $: resolvedDensity = density ?? uiPresentation?.density ?? "default";
+  $: resolvedSize = size ?? resolveSemanticControlSize($uiPresentation.sizeScale, sizeRole);
+  $: resolvedDensity = density ?? $uiPresentation.density;
   $: resolvedVisualSize = resolveSupportingVisualSize(resolvedSize);
   $: actionableItems = menuNavigableItems(items);
   $: if (menuOpen) {

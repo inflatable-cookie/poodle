@@ -1,7 +1,7 @@
 <script lang="ts">
   import { DataTable } from "@poodle/svelte-composites";
-  import type { TableColumn, TableRow } from "@poodle/svelte-composites";
-  import { Eyebrow } from "@poodle/svelte-primitives";
+  import type { TableColumn, TableFilters, TablePagination, TableRow } from "@poodle/svelte-composites";
+  import { Eyebrow, Pill } from "@poodle/svelte-primitives";
 
   const controlSizes = ["xs", "sm", "md", "lg", "xl"] as const;
 
@@ -25,6 +25,43 @@
   let sortDirection: "asc" | "desc" = "asc";
   let hiddenColumnIds: string[] = [];
   let lastAction = "";
+  let expandedIncidentId: string | null = null;
+  let filters: TableFilters = {
+    name: "",
+    role: "",
+  };
+  let pagination: TablePagination = {
+    page: 1,
+    limit: 10,
+    total: 42,
+  };
+
+  type Incident = {
+    status: "open" | "resolved";
+    endpoint: string;
+    owner: string;
+    updatedAt: string;
+  };
+
+  const incidentColumns: TableColumn[] = [
+    { id: "expand", label: "", width: "3rem", align: "center", hideable: false, isRowHeader: false },
+    { id: "status", label: "Status", width: "7rem" },
+    { id: "endpoint", label: "Endpoint", width: "minmax(14rem, 1fr)" },
+    { id: "owner", label: "Owner", width: "10rem" },
+  ];
+
+  const incidentRows: TableRow<Incident>[] = [
+    {
+      id: "incident-1",
+      cells: { expand: "", status: "Open", endpoint: "POST /api/orders", owner: "Alice" },
+      data: { status: "open", endpoint: "POST /api/orders", owner: "Alice", updatedAt: "2026-03-27T11:18:00Z" },
+    },
+    {
+      id: "incident-2",
+      cells: { expand: "", status: "Resolved", endpoint: "GET /api/catalog", owner: "Bob" },
+      data: { status: "resolved", endpoint: "GET /api/catalog", owner: "Bob", updatedAt: "2026-03-27T09:42:00Z" },
+    },
+  ];
 
   function handleSortChange(event: CustomEvent<{ columnId: string; direction: "asc" | "desc" }>): void {
     sortColumnId = event.detail.columnId;
@@ -66,6 +103,7 @@
     <DataTable
       {columns}
       {rows}
+      selectable
       {selectedRowIds}
       {sortColumnId}
       {sortDirection}
@@ -86,6 +124,23 @@
   </div>
 
   <div class="specimen__group">
+    <Eyebrow>With filters and pagination</Eyebrow>
+    <DataTable
+      {columns}
+      {rows}
+      {filters}
+      {pagination}
+      compact
+      striped
+      stickyHeader
+      ariaLabel="Directory table"
+      on:filterChange={(event) => (filters = event.detail.filters)}
+      on:pageChange={(event) => (pagination = { ...pagination, page: event.detail.page })}
+      on:limitChange={(event) => (pagination = { ...pagination, page: 1, limit: event.detail.limit })}
+    />
+  </div>
+
+  <div class="specimen__group">
     <Eyebrow>Sizes</Eyebrow>
     <div class="specimen__stack">
       {#each controlSizes as size}
@@ -97,6 +152,42 @@
         />
       {/each}
     </div>
+  </div>
+
+  <div class="specimen__group">
+    <Eyebrow>With custom cells and expanded rows</Eyebrow>
+    <DataTable
+      columns={incidentColumns}
+      rows={incidentRows}
+      showRowActions={false}
+      expandedRowWhen={(row) => expandedIncidentId === row.id}
+      ariaLabel="Active incidents"
+    >
+      <svelte:fragment slot="cell" let:column let:row>
+        {@const incident = row.data as Incident | undefined}
+        {#if column.id === "expand"}
+          <button type="button" class="expand-button" on:click={() => (expandedIncidentId = expandedIncidentId === row.id ? null : row.id)}>
+            {expandedIncidentId === row.id ? "Hide" : "Show"}
+          </button>
+        {:else if column.id === "status"}
+          <Pill appearance="badge" tone={incident?.status === "open" ? "danger" : "success"}>
+            {row.cells.status}
+          </Pill>
+        {:else}
+          {row.cells[column.id]}
+        {/if}
+      </svelte:fragment>
+      <svelte:fragment slot="expandedRow" let:row>
+        {@const incident = row.data as Incident | undefined}
+        {#if incident}
+          <div class="incident-detail">
+            <strong>{incident.endpoint}</strong>
+            <span>Owned by {incident.owner}</span>
+            <span>Updated {new Date(incident.updatedAt).toLocaleString()}</span>
+          </div>
+        {/if}
+      </svelte:fragment>
+    </DataTable>
   </div>
 
   <div class="specimen__group">
@@ -132,6 +223,21 @@
   .last-action,
   .selection-count {
     margin: 0;
+    font-size: 0.8125rem;
+    color: var(--poodle-color-text-secondary);
+  }
+
+  .expand-button {
+    border: 0;
+    background: transparent;
+    color: var(--poodle-color-text-secondary);
+    font: inherit;
+    cursor: pointer;
+  }
+
+  .incident-detail {
+    display: grid;
+    gap: 0.25rem;
     font-size: 0.8125rem;
     color: var(--poodle-color-text-secondary);
   }

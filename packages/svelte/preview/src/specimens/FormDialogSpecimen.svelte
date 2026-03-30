@@ -1,11 +1,13 @@
 <script lang="ts">
   import { FormDialog } from "@poodle/svelte-composites";
-  import { Button, Eyebrow, TextInput, Field, Select } from "@poodle/svelte-primitives";
+  import { Button, Eyebrow, TextInput, Field, Select, FormActions } from "@poodle/svelte-primitives";
 
   let basicOpen: boolean | null = null;
   let errorOpen: boolean | null = null;
+  let shellOpen: boolean | null = null;
   let submitting = false;
   let error: string | null = null;
+  let success: string | null = null;
   let name = "";
   let role = "";
   let lastAction = "";
@@ -32,6 +34,15 @@
     setTimeout(() => {
       submitting = false;
       error = "A user with this email already exists.";
+    }, 800);
+  }
+
+  function handleShellSubmit(): void {
+    submitting = true;
+    success = null;
+    setTimeout(() => {
+      submitting = false;
+      success = "Settings saved successfully.";
     }, 800);
   }
 </script>
@@ -75,6 +86,37 @@
       <Field label="Email">
         <TextInput value="existing@example.com" placeholder="Enter email" />
       </Field>
+    </FormDialog>
+  </div>
+
+  <div class="specimen__group">
+    <Eyebrow>Shell mode with custom actions</Eyebrow>
+    <Button variant="ghost" on:click={() => { shellOpen = true; success = null; }}>Open settings shell</Button>
+    <FormDialog
+      open={shellOpen}
+      title="Edit workspace settings"
+      subtitle="Update shared defaults for this workspace."
+      width="40rem"
+      {submitting}
+      success={success}
+      showDefaultActions={false}
+      on:cancel={() => { shellOpen = false; success = null; }}
+      on:openChange={(e) => { shellOpen = e.detail.open ? true : null; }}
+    >
+      <Field label="Workspace name">
+        <TextInput value="Northstar" disabled={submitting} />
+      </Field>
+      <Field label="Default role">
+        <Select options={roleOptions} value="editor" disabled={submitting} />
+      </Field>
+      <svelte:fragment slot="actions">
+        <FormActions align="end">
+          <Button variant="ghost" on:click={() => { shellOpen = false; success = null; }} disabled={submitting}>Cancel</Button>
+          <Button variant="primary" on:click={handleShellSubmit} disabled={submitting}>
+            {submitting ? "Saving..." : "Save changes"}
+          </Button>
+        </FormActions>
+      </svelte:fragment>
     </FormDialog>
   </div>
 

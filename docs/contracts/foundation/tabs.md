@@ -10,8 +10,8 @@ Updated: 2026-03-15
 - Summary: a tabbed navigation control that coordinates a tablist and one
   active content panel
 - In scope: tablist semantics, tab activation, tab-panel relationship,
-  orientation, automatic vs manual activation, three visual variants
-  (underline/card/pill/strip), reorderable tabs, closable tabs, tab counts,
+  orientation, automatic vs manual activation, visual variants
+  (underline/card/pill/strip/block), reorderable tabs, closable tabs, tab counts,
   optional visual separators, actions slot, lightweight URL query sync
 - Out of scope: docking, overflow menus
 
@@ -49,7 +49,7 @@ Updated: 2026-03-15
 | `value` | `string \| null` | `null` | no | controlled active tab |
 | `defaultValue` | `string \| null` | `null` | no | uncontrolled initial active tab |
 | `items` | `TabItem[]` | `[]` | yes | tab definitions |
-| `variant` | `"underline" \| "card" \| "pill" \| "strip"` | `"underline"` | no | visual variant |
+| `variant` | `"underline" \| "card" \| "pill" \| "strip" \| "block"` | `"underline"` | no | visual variant |
 | `orientation` | `"horizontal" \| "vertical"` | `"horizontal"` | no | navigation axis |
 | `activationMode` | `"automatic" \| "manual"` | `"automatic"` | no | whether focus changes selection |
 | `reorderable` | `boolean` | `false` | no | enables drag-and-drop and keyboard reorder |
@@ -193,7 +193,7 @@ Updated: 2026-03-15
 | `border-bottom` | `0` |
 | `border-right` | `0.0625rem solid color-mix(in srgb, var(--poodle-color-border-subtle) 82%, transparent)` |
 
-### List — Card + Pill + Strip
+### List — Card + Pill + Strip + Block
 
 | Property | Value |
 |----------|-------|
@@ -201,7 +201,7 @@ Updated: 2026-03-15
 | `overflow-x` | `auto` |
 | `overflow-y` | `hidden` |
 
-### List — Card + Pill + Strip vertical
+### List — Card + Pill + Strip + Block vertical
 
 | Property | Value |
 |----------|-------|
@@ -297,12 +297,33 @@ Updated: 2026-03-15
 | `border-bottom` | `0.0625rem solid var(--poodle-color-border-subtle)` |
 | `background` | `color-mix(in srgb, var(--poodle-color-background-panel) 92%, transparent)` |
 
+### List — Block variant
+
+| Property | Value |
+|----------|-------|
+| `display` | `flex` |
+| `width` | `fit-content` |
+| `max-width` | `100%` |
+| `gap` | `0` |
+| `padding` | `0` |
+| `border-bottom` | `0.0625rem solid var(--poodle-color-border-subtle)` |
+| `background` | `color-mix(in srgb, var(--poodle-color-background-panel) 90%, transparent)` |
+
 ### Item — Strip variant
 
 | Property | Value |
 |----------|-------|
 | `border-bottom` | `0.125rem solid transparent` |
 | `margin-bottom` | `-0.0625rem` |
+
+### Item — Block variant
+
+| Property | Value |
+|----------|-------|
+| `display` | `flex` |
+| `flex` | `0 0 auto` |
+| `min-width` | `0` |
+| `separator` | `0.0625rem solid color-mix(in srgb, var(--poodle-color-border-subtle) 72%, transparent)` between sibling items |
 
 ### Item — Strip variant (selected)
 
@@ -323,6 +344,29 @@ Updated: 2026-03-15
 | `min-height` | `2.25rem` |
 | `padding` | `0 0.625rem` |
 | `border-radius` | `0` |
+
+### Tab — Block variant
+
+| Property | Value |
+|----------|-------|
+| `justify-content` | `center` |
+| `width` | `auto` |
+| `min-height` | `var(--poodle-size-control-height)` |
+| `padding` | `0 var(--poodle-space-control-x)` |
+| `border-radius` | `0` |
+
+### Tab — Block variant (selected)
+
+| Property | Value |
+|----------|-------|
+| `background` | `color-mix(in srgb, var(--poodle-color-accent-base) 14%, var(--poodle-color-background-surface))` |
+| `color` | `var(--poodle-color-text-primary)` |
+
+### Tab — Block variant (hover)
+
+| Property | Value |
+|----------|-------|
+| `background` | `color-mix(in srgb, var(--poodle-color-surface-hover) 40%, transparent)` |
 
 ### Tab — Strip variant (selected)
 
@@ -374,6 +418,12 @@ Updated: 2026-03-15
 | `min-height` | `0` |
 | `min-width` | `2.25rem` |
 | `padding` | `0.5rem` |
+
+### Tab — Block vertical (selected)
+
+| Property | Value |
+|----------|-------|
+| `background` | same selected fill treatment without an accent edge |
 
 ### Vertical orientation — label + close
 
@@ -500,7 +550,7 @@ Updated: 2026-03-15
 
 ### Tier 2: Visual Parity
 
-- [ ] all three variants render with exact token/dimension match
+- [ ] all five variants render with exact token/dimension match
 - [ ] color-mix percentages match (82%, 68%, 18%, 14%, 32%, 74%, 92%, 96%)
 - [ ] font-size 0.75rem, font-weight 600, line-height 1 match
 - [ ] min-height calc expressions match per variant

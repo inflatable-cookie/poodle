@@ -5,11 +5,13 @@
     { id: "export", label: "Export", icon: "download" },
     { id: "archive", label: "Archive", icon: "inbox" },
     { id: "delete", label: "Delete", icon: "trash-2", tone: "danger" },
+    { id: "review", label: "Review", icon: "triangle-alert", tone: "warning" },
   ];
 
   const controlSizes = ["xs", "sm", "md", "lg", "xl"] as const;
 
   let lastAction = "";
+  let allSelected = false;
 </script>
 
 <div class="specimen">
@@ -19,7 +21,10 @@
       selectionCount={5}
       totalCount={42}
       {actions}
+      showSelectAll
+      {allSelected}
       on:action={(e) => (lastAction = e.detail.id)}
+      on:selectAll={() => (allSelected = !allSelected)}
     />
     {#if lastAction}
       <p>Last action: <strong>{lastAction}</strong></p>
@@ -50,6 +55,21 @@
   <div class="specimen__group">
     <Eyebrow>Single item selected</Eyebrow>
     <BulkActionBar selectionCount={1} actions={actions.slice(0, 2)} />
+  </div>
+
+  <div class="specimen__group">
+    <Eyebrow>Loading and disabled actions</Eyebrow>
+    <BulkActionBar
+      selectionCount={12}
+      totalCount={12}
+      actions={[
+        { id: "publish", label: "Publish", icon: "rocket" },
+        { id: "delete", label: "Delete", icon: "trash-2", tone: "danger", disabled: true },
+      ]}
+      showSelectAll
+      allSelected
+      loading
+    />
   </div>
 </div>
 

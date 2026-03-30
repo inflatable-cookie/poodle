@@ -9,13 +9,14 @@
   export let sizeRole: SemanticControlSizeRole = "chrome";
   export let density: ControlDensity | null = null;
   export let font: PillFont = "normal";
+  export let accent: string | null = null;
   export let muted = false;
   export let ariaLabel: string | null = null;
 
   const uiPresentation = getUiPresentation();
 
-  $: resolvedSize = (size ?? resolveSemanticControlSize(uiPresentation?.sizeScale ?? "md", sizeRole)) as PillSize;
-  $: resolvedDensity = density ?? uiPresentation?.density ?? "default";
+  $: resolvedSize = (size ?? resolveSemanticControlSize($uiPresentation.sizeScale, sizeRole)) as PillSize;
+  $: resolvedDensity = density ?? $uiPresentation.density;
 </script>
 
 <span
@@ -26,7 +27,9 @@
   data-density={resolvedDensity}
   data-font={font}
   data-muted={muted}
+  data-accent={accent ? "custom" : undefined}
   aria-label={ariaLabel ?? undefined}
+  style:--poodle-pill-accent={accent ?? undefined}
 >
   <slot />
 </span>
@@ -58,10 +61,28 @@
     --poodle-pill-text: var(--poodle-color-text-primary);
   }
 
+  .pill[data-tone="info"] {
+    --poodle-pill-fill: color-mix(in srgb, var(--poodle-color-status-info) 14%, var(--poodle-color-background-surface));
+    --poodle-pill-border: color-mix(in srgb, var(--poodle-color-status-info) 38%, var(--poodle-color-border-subtle));
+    --poodle-pill-text: var(--poodle-color-text-primary);
+  }
+
+  .pill[data-tone="warning"] {
+    --poodle-pill-fill: color-mix(in srgb, var(--poodle-color-status-warning) 14%, var(--poodle-color-background-surface));
+    --poodle-pill-border: color-mix(in srgb, var(--poodle-color-status-warning) 38%, var(--poodle-color-border-subtle));
+    --poodle-pill-text: var(--poodle-color-text-primary);
+  }
+
   .pill[data-tone="danger"] {
     --poodle-pill-fill: color-mix(in srgb, var(--poodle-color-status-danger) 14%, var(--poodle-color-background-surface));
     --poodle-pill-border: color-mix(in srgb, var(--poodle-color-status-danger) 38%, var(--poodle-color-border-subtle));
     --poodle-pill-text: var(--poodle-color-text-primary);
+  }
+
+  .pill[data-accent="custom"] {
+    --poodle-pill-fill: color-mix(in srgb, var(--poodle-pill-accent) 18%, rgba(148, 163, 184, 0.08));
+    --poodle-pill-border: color-mix(in srgb, var(--poodle-pill-accent) 30%, rgba(148, 163, 184, 0.12));
+    --poodle-pill-text: color-mix(in srgb, var(--poodle-pill-accent) 88%, white);
   }
 
   .pill[data-appearance="subtle"] {

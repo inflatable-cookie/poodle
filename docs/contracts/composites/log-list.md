@@ -1,378 +1,217 @@
 # LogList
 
-Status: seed contract
-Updated: 2026-03-26
+Status: active contract
+Updated: 2026-03-28
 
 ## 1. Purpose
 
 - Component name: `LogList`
 - Layer: `composites`
-- Summary: a scrollable log output viewer with level-based filtering, text search, auto-scroll, and color-coded entries
-- In scope: log entry display (timestamp, level, message), level filter buttons with counts, text search, auto-scroll to latest, scroll-to-bottom button, level-based color coding, max entry cap
-- Out of scope: log ingestion/streaming, log persistence, log export, regex search, column sorting, log grouping/folding, virtualization
+- Summary: a shared operational log surface that supports both streaming runtime logs and audit/activity lists
+- In scope:
+  - stream-viewer mode with level chips, text search, capped entry retention, and auto-scroll
+  - audit-list mode with callback-driven filters, loading/error/empty states, refresh/export controls, pagination, actor/resource linking, and custom entry detail rendering
+- Out of scope:
+  - log ingestion or persistence
+  - server-side query orchestration
+  - CSV generation
+  - bulk actions or table-style column controls
 
-## 2. Anatomy
+## 2. Variants
 
-```text
-[Root]  role="log"
-  ├── [Toolbar]
-  │     ├── [Filters]
-  │     │     ├── [Filter Button: All]
-  │     │     ├── [Filter Button: Info]
-  │     │     ├── [Filter Button: Warn]
-  │     │     └── [Filter Button: Error]
-  │     └── [Search Input]
-  ├── [Scroll Container]
-  │     ├── [Empty Message]  (when no entries match)
-  │     └── [Entry...]
-  │           ├── [Timestamp]
-  │           ├── [Level Badge]
-  │           └── [Message]
-  └── [Scroll-to-Bottom Button]  (floating, when user has scrolled up)
-```
+### Stream mode
 
-### Parts
+Use for runtime or console-like logs:
 
-| Part | Element | Notes |
-|------|---------|-------|
-| root | `<div>` | `role="log"`, `aria-label`, flex column with border |
-| toolbar | `<div>` | Flex row with filter buttons and search input |
-| filter-button | `<button>` | Toggles level filter; shows level name and count |
-| search-input | `<input>` | Text filter for log messages, `aria-label="Filter log messages"` |
-| scroll-container | `<div>` | Scrollable area, max-height `20rem`, monospace font |
-| entry | `<div>` | Flex row with timestamp, level, message; `data-level` attribute for styling |
-| timestamp | `<time>` | Formatted as `HH:MM:SS.mmm` (24-hour with milliseconds) |
-| level-badge | `<span>` | Uppercase level text, fixed width, color-coded by level |
-| message | `<span>` | Log message text, word-break for long content |
-| empty-message | `<div>` | Centered message when no entries match filters |
-| scroll-button | `<button>` | Floating pill button to scroll to latest entries |
+- entries shaped as `{ timestamp, level, message }`
+- level chip filtering
+- text filtering
+- scroll-to-latest behavior
 
-## 3. Props And Inputs
+### Audit mode
 
-| Prop | Type | Default | Required | Notes |
-|------|------|---------|----------|-------|
-| `entries` | `LogEntry[]` | `[]` | no | Array of log entries to display |
-| `maxEntries` | `number` | `500` | no | Maximum number of entries to render (shows last N) |
-| `autoScroll` | `boolean` | `true` | no | Auto-scroll to bottom on new entries |
-| `filterLevel` | `LogLevel \| null` | `null` | no | Active level filter; `null` shows all |
-| `filterText` | `string` | `""` | no | Text search filter for messages |
-| `ariaLabel` | `string` | `"Log output"` | no | Accessible label for the log region |
-| `size` | `ControlSize \| null` | `null` | no | Explicit semantic size override for toolbar controls |
-| `sizeRole` | `SemanticControlSizeRole` | `"control"` | no | Semantic role used to resolve inherited size scale |
-| `density` | `ControlDensity \| null` | `null` | no | Explicit density override for toolbar, entry, and floating action spacing |
+Use for admin/activity histories:
 
-### Types
+- entries shaped as `{ occurredAt, actor, action, resourceType, resourceId }`
+- callback-driven filter toolbar
+- loading, error, and empty states
+- optional refresh and export controls
+- optional pagination controls
+- actor and resource link builders
+- optional custom entry details snippet
+
+`variant="auto"` detects the mode from the supplied entry shape.
+
+## 3. Props
+
+### Shared
+
+| Prop | Type | Default | Notes |
+|------|------|---------|-------|
+| `entries` | `LogEntry[]` | `[]` | Stream or audit entries. |
+| `variant` | `"auto" \| "stream" \| "audit"` | `"auto"` | Auto detects from the entry shape when not specified. |
+| `ariaLabel` | `string` | `"Log output"` | Accessible label for the root region. |
+| `size` | `ControlSize \| null` | `null` | Explicit semantic size override. |
+| `sizeRole` | `SemanticControlSizeRole` | `"control"` | Semantic size role used when inheriting presentation scale. |
+| `density` | `ControlDensity \| null` | `null` | Explicit density override. |
+
+### Stream mode
+
+| Prop | Type | Default | Notes |
+|------|------|---------|-------|
+| `maxEntries` | `number` | `500` | Maximum number of stream entries rendered. |
+| `autoScroll` | `boolean` | `true` | Auto-scrolls to the latest entry unless the user has scrolled up. |
+| `filterLevel` | `LogLevel \| null` | `null` | Active level filter. |
+| `filterText` | `string` | `""` | Client-side text filter for stream entries. |
+
+### Audit mode
+
+| Prop | Type | Default | Notes |
+|------|------|---------|-------|
+| `loading` | `boolean` | `false` | Shows loading state when there are no current entries. |
+| `error` | `string \| null` | `null` | Error message displayed in audit mode. |
+| `emptyMessage` | `string` | `"No log entries found"` | Empty-state text for audit mode. |
+| `filters` | `LogFilter[]` | `[]` | Filter definitions for select/date controls. |
+| `filterValues` | `Record<string, string>` | `{}` | Current filter values keyed by field. |
+| `page` | `number` | `1` | Current page for audit pagination. |
+| `pageSize` | `number` | `50` | Page size used for pagination copy. |
+| `total` | `number \| undefined` | `undefined` | Total row count; enables pagination when greater than `pageSize`. |
+| `onFilterChange` | `(field: string, value: string) => void` | `undefined` | Called when a filter value changes. |
+| `onClearFilters` | `() => void` | `undefined` | Clears active filters. |
+| `onPageChange` | `(page: number) => void` | `undefined` | Pagination callback. |
+| `onRefresh` | `() => void` | `undefined` | Optional refresh action. |
+| `onExport` | `() => void` | `undefined` | Optional export action. |
+| `actionIcon` | `Snippet<[LogActionType]> \| undefined` | `undefined` | Custom action icon content per audit entry. |
+| `entryDetails` | `Snippet<[AuditLogEntry]> \| undefined` | `undefined` | Custom detail rendering below the main audit row. |
+| `getActionType` | `(action: string) => LogActionType` | `undefined` | Overrides default action classification. |
+| `formatAction` | `(action: string) => string` | `undefined` | Overrides default action label formatting. |
+| `formatResourceType` | `(resourceType: string) => string` | `undefined` | Overrides default resource label formatting. |
+| `getActorHref` | `(actor: LogActor) => string` | `undefined` | Builds actor links. |
+| `getResourceHref` | `(resourceType: string, resourceId: string, action: string) => string \| null` | `undefined` | Builds resource links. |
+
+## 4. Types
 
 ```ts
 type LogLevel = "info" | "warn" | "error";
 
-type LogEntry = {
+type StreamLogEntry = {
   id?: string;
   timestamp: Date | string | number;
   level: LogLevel;
   message: string;
 };
+
+type LogActor = {
+  id: string;
+  email?: string;
+  name?: string;
+};
+
+type AuditLogEntry = {
+  id: string;
+  occurredAt: string;
+  actor?: LogActor | null;
+  action: string;
+  resourceType: string;
+  resourceId: string;
+  resourceLabel?: string;
+  details?: Record<string, unknown>;
+};
+
+type LogFilter = {
+  field: string;
+  label: string;
+  type: "select" | "date";
+  options?: { value: string; label: string }[];
+  placeholder?: string;
+};
+
+type LogActionType =
+  | "create"
+  | "update"
+  | "delete"
+  | "restore"
+  | "upload"
+  | "login"
+  | "logout"
+  | "security"
+  | "other";
+
+type LogEntry = StreamLogEntry | AuditLogEntry;
 ```
 
-### Slots
+## 5. Slots
 
-None.
-
-### Controlled / Uncontrolled
-
-`entries` is controlled externally (append new entries to the array). `filterLevel` and `filterText` are managed internally but can be set from outside.
-
-## 4. States
-
-### Visual States
-
-| State | Trigger | Visual Effect |
-|-------|---------|---------------|
-| empty | No entries or no matches | Centered empty message |
-| filter-active | A level filter button is active | Button shows accent/warning/danger tinted background |
-| entry-info | `level="info"` | Level badge in accent color |
-| entry-warn | `level="warn"` | Level badge in warning color, row has warning-tinted background |
-| entry-error | `level="error"` | Level badge in danger color, row has danger-tinted background |
-| entry-hover | Mouse over entry row | Slightly elevated background |
-| user-scrolled | User scrolls up from bottom | Floating scroll-to-bottom button appears |
-| search-focus | Search input focused | Border changes to `accent-focusRing` |
-
-### Component States
-
-| State | Description |
-|-------|-------------|
-| auto-scrolling | New entries automatically scroll into view |
-| user-scrolled | User has scrolled away from bottom; auto-scroll paused; scroll button shown |
-| filtering | Level or text filter active, reducing visible entries |
-
-## 5. Events
-
-None. The component is display-only; entries are provided externally.
+| Slot | Notes |
+|------|-------|
+| `actionIcon` | Audit mode only. Receives `(actionType)` and replaces the default action marker. |
+| `entryDetails` | Audit mode only. Receives `(entry)` and renders below the main row content. |
 
 ## 6. Accessibility
 
-### Semantics
+- Stream mode uses `role="log"` and supports live-updating output semantics.
+- Audit mode uses a labelled region with native form controls and buttons.
+- Pagination, refresh, and export actions must remain keyboard accessible.
+- Actor and resource links are optional; when absent, plain text is rendered instead.
 
-- Root has `role="log"` and `aria-label` -- the `log` role indicates a live region where new content is appended
-- Search input has `aria-label="Filter log messages"`
-- Scroll-to-bottom button has `aria-label="Scroll to latest"`
+## 7. Usage
 
-### Keyboard
+### Audit list
 
-- Tab navigates between filter buttons, search input, and scroll-to-bottom button
-- Filter buttons toggle on click/Enter/Space
-- Search input accepts standard text input
+```svelte
+<script lang="ts">
+  import { LogList, type LogEntry, type LogFilter } from "@poodle/svelte-composites";
 
-### Focus
+  const filters: LogFilter[] = [
+    {
+      field: "action",
+      label: "Action",
+      type: "select",
+      options: [
+        { value: "create", label: "Create" },
+        { value: "update", label: "Update" },
+        { value: "delete", label: "Delete" },
+      ],
+    },
+  ];
 
-- Search input: border changes to `accent-focusRing` on focus
-- Filter buttons inherit standard button focus behavior
+  let filterValues = {};
+  const entries: LogEntry[] = [
+    {
+      id: "1",
+      occurredAt: new Date().toISOString(),
+      actor: { id: "u-1", name: "Alice" },
+      action: "create",
+      resourceType: "project",
+      resourceId: "p-1",
+      resourceLabel: "Launch Plan",
+    },
+  ];
+</script>
 
-## 7. Layout
+<LogList
+  {entries}
+  {filters}
+  {filterValues}
+  onFilterChange={(field, value) => {
+    filterValues = { ...filterValues, [field]: value };
+  }}
+  getActorHref={(actor) => `/users/${actor.id}`}
+  getResourceHref={(resourceType, resourceId) => `/${resourceType}/${resourceId}`}
+/>
+```
 
-### Sizing
+### Stream viewer
 
-- Root: flex column, border `0.0625rem solid border-subtle`, `radius-surface`, overflow hidden, position relative
-- Toolbar: flex row, wrapping, with density-aware padding and gap
-- Filter button: semantic control height, semantic label sizing, monospace, `radius-control`
-- Search input: flex 1, min-width `8rem`, semantic control height, semantic label sizing, monospace
-- Scroll container: max-height `20rem`, overflow-y auto, font-size `0.75rem`, line-height `1.6`
-- Entry: flex row with density-aware padding and gap, border-bottom subtle
-- Timestamp: flex-shrink 0, nowrap
-- Level badge: flex-shrink 0, width `3rem`, right-aligned, font-weight 600
-- Message: flex 1, min-width 0, word-break
-- Scroll button: absolute positioned, bottom `0.5rem`, centered, pill shape, shadow, and semantic label sizing
+```svelte
+<script lang="ts">
+  import { LogList } from "@poodle/svelte-composites";
 
-### Composition
+  const entries = [
+    { id: "1", level: "info", message: "Server started", timestamp: Date.now() },
+    { id: "2", level: "warn", message: "Slow query detected", timestamp: Date.now() },
+  ];
+</script>
 
-Uses `Icon` primitive for the scroll-to-bottom button arrow icon.
-
-## 8. Token Usage And Precise CSS
-
-### Data Attributes
-
-| Attribute | Element | Values |
-|-----------|---------|--------|
-| `data-level` | entry `<div>` | `"info"`, `"warn"`, `"error"` |
-
-### Root
-
-| Property | Value |
-|----------|-------|
-| display | `flex` |
-| flex-direction | `column` |
-| border | `0.0625rem solid var(--poodle-color-border-subtle)` |
-| border-radius | `var(--poodle-radius-surface)` |
-| background | `var(--poodle-color-background-panel)` |
-| overflow | `hidden` |
-| position | `relative` |
-
-### Toolbar
-
-| Property | Value |
-|----------|-------|
-| display | `flex` |
-| align-items | `center` |
-| gap | `0.5rem` |
-| padding | `0.375rem 0.5rem` |
-| border-bottom | `0.0625rem solid var(--poodle-color-border-subtle)` |
-| background | `color-mix(in srgb, var(--poodle-color-background-elevated) 92%, transparent)` |
-| flex-wrap | `wrap` |
-
-### Filters Container
-
-| Property | Value |
-|----------|-------|
-| display | `flex` |
-| gap | `0.25rem` |
-
-### Filter Button
-
-| Property | Value |
-|----------|-------|
-| display | `inline-flex` |
-| align-items | `center` |
-| gap | `0.25rem` |
-| padding | `0.1875rem 0.5rem` |
-| border | `0.0625rem solid var(--poodle-color-border-default)` |
-| border-radius | `var(--poodle-radius-control)` |
-| background | `transparent` |
-| color | `var(--poodle-color-text-secondary)` |
-| font-size | `0.6875rem` |
-| font-family | `var(--poodle-typography-code-family)` |
-| line-height | `1` |
-| transition | `background var(--poodle-motion-duration-interaction) var(--poodle-motion-easing-standard)` |
-
-#### Filter Button States
-
-| State | Property | Value |
-|-------|----------|-------|
-| `:hover` | background | `color-mix(in srgb, var(--poodle-color-background-elevated) 72%, transparent)` |
-| `.active` (all/info) | background | `color-mix(in srgb, var(--poodle-color-accent-base) 16%, transparent)` |
-| `.active` (all/info) | border-color | `color-mix(in srgb, var(--poodle-color-accent-base) 42%, transparent)` |
-| `.active` (all/info) | color | `var(--poodle-color-text-primary)` |
-| `.active` (warn) | background | `color-mix(in srgb, var(--poodle-color-status-warning, #eab308) 16%, transparent)` |
-| `.active` (warn) | border-color | `color-mix(in srgb, var(--poodle-color-status-warning, #eab308) 42%, transparent)` |
-| `.active` (error) | background | `color-mix(in srgb, var(--poodle-color-status-danger, #ef4444) 16%, transparent)` |
-| `.active` (error) | border-color | `color-mix(in srgb, var(--poodle-color-status-danger, #ef4444) 42%, transparent)` |
-
-### Count Badge
-
-| Property | Value |
-|----------|-------|
-| opacity | `0.7` |
-| font-size | `0.625rem` |
-
-### Search Input
-
-| Property | Value |
-|----------|-------|
-| flex | `1` |
-| min-width | `8rem` |
-| padding | `0.1875rem 0.5rem` |
-| border | `0.0625rem solid var(--poodle-color-border-default)` |
-| border-radius | `var(--poodle-radius-control)` |
-| background | `var(--poodle-color-background-surface)` |
-| color | `var(--poodle-color-text-primary)` |
-| font-size | `0.6875rem` |
-| font-family | `var(--poodle-typography-code-family)` |
-| outline | `none` |
-| `:focus` border-color | `var(--poodle-color-accent-focusRing)` |
-
-### Scroll Container
-
-| Property | Value |
-|----------|-------|
-| max-height | `20rem` |
-| overflow-y | `auto` |
-| font-family | `var(--poodle-typography-code-family)` |
-| font-size | `0.75rem` |
-| line-height | `1.6` |
-
-### Entry
-
-| Property | Value |
-|----------|-------|
-| display | `flex` |
-| gap | `0.625rem` |
-| padding | `0.125rem 0.5rem` |
-| border-bottom | `0.0625rem solid color-mix(in srgb, var(--poodle-color-border-subtle) 42%, transparent)` |
-
-#### Entry States
-
-| State | Property | Value |
-|-------|----------|-------|
-| `:hover` | background | `color-mix(in srgb, var(--poodle-color-background-elevated) 42%, transparent)` |
-| `[data-level="warn"]` | background | `color-mix(in srgb, var(--poodle-color-status-warning, #eab308) 6%, transparent)` |
-| `[data-level="error"]` | background | `color-mix(in srgb, var(--poodle-color-status-danger, #ef4444) 8%, transparent)` |
-
-### Timestamp
-
-| Property | Value |
-|----------|-------|
-| color | `var(--poodle-color-text-tertiary)` |
-| flex-shrink | `0` |
-| white-space | `nowrap` |
-
-### Level Badge
-
-| Property | Value |
-|----------|-------|
-| flex-shrink | `0` |
-| width | `3rem` |
-| text-align | `right` |
-| font-weight | `600` |
-
-#### Level Badge Colors By Data-Level
-
-| data-level | color |
-|------------|-------|
-| `info` | `var(--poodle-color-accent-base, #6366f1)` |
-| `warn` | `var(--poodle-color-status-warning, #eab308)` |
-| `error` | `var(--poodle-color-status-danger, #ef4444)` |
-
-### Message
-
-| Property | Value |
-|----------|-------|
-| flex | `1` |
-| min-width | `0` |
-| word-break | `break-word` |
-| color | `var(--poodle-color-text-primary)` |
-
-### Empty Message
-
-| Property | Value |
-|----------|-------|
-| display | `flex` |
-| align-items | `center` |
-| justify-content | `center` |
-| min-height | `4rem` |
-| color | `var(--poodle-color-text-tertiary)` |
-| font-size | `0.8125rem` |
-
-### Scroll-To-Bottom Button
-
-| Property | Value |
-|----------|-------|
-| position | `absolute` |
-| bottom | `0.5rem` |
-| left | `50%` |
-| transform | `translateX(-50%)` |
-| padding | `0.25rem 0.75rem` |
-| border | `0.0625rem solid var(--poodle-color-border-default)` |
-| border-radius | `999rem` |
-| background | `var(--poodle-color-background-elevated)` |
-| color | `var(--poodle-color-accent-base)` |
-| font-size | `0.6875rem` |
-| box-shadow | `var(--poodle-elevation-overlay)` |
-| transition | `background var(--poodle-motion-duration-interaction) var(--poodle-motion-easing-standard)` |
-| `:hover` background | `color-mix(in srgb, var(--poodle-color-accent-base) 12%, transparent)` |
-
-### Light Theme Overrides
-
-None.
-
-## 9. Svelte Notes
-
-- `displayEntries` reactive: filters by level and text, then slices to `maxEntries` from the end
-- `levelCounts` reactive: counts entries per level for filter button badges
-- `afterUpdate` auto-scrolls when `autoScroll` is true and user has not scrolled away
-- `handleScroll` detects user scroll: sets `isUserScrolled` when more than 32px from bottom
-- `scrollToBottom()` resets `isUserScrolled` and uses `tick()` to scroll after DOM update
-- `formatTimestamp` converts to `HH:MM:SS.mmm` using `toLocaleTimeString` with `fractionalSecondDigits: 3`
-- Entry key uses `entry.id` or falls back to `${entry.timestamp}-${entry.message}`
-
-## 10. GPUI Notes
-
-Not yet implemented.
-
-## 11. Parity Checklist
-
-| Feature | Svelte | GPUI | Jetstream |
-|---------|--------|------|-----------|
-| Level filter buttons with counts | Yes | -- | -- |
-| Text search filter | Yes | -- | -- |
-| Auto-scroll to bottom | Yes | -- | -- |
-| Scroll-to-bottom button | Yes | -- | -- |
-| Level-coded entry colors | Yes | -- | -- |
-| Max entries cap | Yes | -- | -- |
-| Timestamp formatting | Yes | -- | -- |
-| Empty state | Yes | -- | -- |
-| Entry hover highlight | Yes | -- | -- |
-
-## 12. Known Deltas
-
-None yet (single implementation).
-
-## 13. Specimen Definitions
-
-### Log Output With Filtering
-
-| Label | Props / Config | Expected Visual |
-|-------|---------------|-----------------|
-| Log output with filtering | 10 pre-populated entries (mixed info/warn/error), `ariaLabel="Application logs"`, button to add random entries | Toolbar with level filters and search; scrollable log entries color-coded by level; new entries auto-scroll |
-
-## 14. Approval And Adoption Notes
-
-Use `LogList` for displaying application logs, build output, or event streams in developer tools and admin panels. The component caps visible entries at `maxEntries` (default 500) for performance; for larger log volumes, the consuming application should handle windowing or pagination before passing entries. The `role="log"` semantics indicate to assistive technology that this is a live region where content is appended.
+<LogList {entries} variant="stream" autoScroll />
+```

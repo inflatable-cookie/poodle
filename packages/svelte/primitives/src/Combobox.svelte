@@ -36,8 +36,8 @@
 
   $: controlled = value !== null;
   $: currentValue = controlled ? value : uncontrolledValue;
-  $: resolvedSize = size ?? resolveSemanticControlSize(uiPresentation?.sizeScale ?? "md", sizeRole);
-  $: resolvedDensity = density ?? uiPresentation?.density ?? "default";
+  $: resolvedSize = size ?? resolveSemanticControlSize($uiPresentation.sizeScale, sizeRole);
+  $: resolvedDensity = density ?? $uiPresentation.density;
   $: selectedOption = options.find((option) => option.value === currentValue) ?? null;
   $: filteredOptions = options.filter((option) =>
     option.label.toLowerCase().includes(query.toLowerCase())

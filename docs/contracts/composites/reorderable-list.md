@@ -1,20 +1,27 @@
 # ReorderableList
 
 Status: seed contract
-Updated: 2026-03-26
+Updated: 2026-03-27
 
 ## 1. Purpose
 
 - Component name: `ReorderableList`
 - Layer: `composites`
-- Summary: a vertical list of items that can be reordered via drag-and-drop or keyboard shortcuts
-- In scope: drag-and-drop reordering, keyboard reordering (Alt+Arrow), drag handle, item slot, disabled state
-- Out of scope: multi-list transfer, nested lists, horizontal orientation, sortable grids, virtualization
+- Summary: a vertical reorder surface with optional submit/cancel workflow chrome
+  for controlled reorder sessions, including large-list guidance and optional
+  page-window mode
+- In scope: drag-and-drop reordering, keyboard reordering, drag handle, item
+  slot, disabled state, submit/cancel workflow, dirty gating, async error
+  surface, live announcements, long-list guidance, page-window mode
+- Out of scope: multi-list transfer, nested lists, horizontal orientation,
+  sortable grids, virtualization
 
 ## 2. Anatomy
 
 ```text
 [Root]  <ul> role="listbox"
+  ├── [Header] optional action row
+  ├── [Error] optional error surface
   └── [Item...]  <li> role="option"
         ├── [Handle]  drag grip icon, aria-hidden
         └── [Content]  slot or default label text
@@ -36,6 +43,17 @@ Updated: 2026-03-26
 | `items` | `ReorderableItem[]` | `[]` | no | List items (two-way bindable) |
 | `ariaLabel` | `string` | `"Reorderable list"` | no | Accessible label for the list |
 | `disabled` | `boolean` | `false` | no | Disables drag, keyboard reorder, and interaction |
+| `dirty` | `boolean` | `false` | no | Enables submit button when true |
+| `submitting` | `boolean` | `false` | no | Disables interaction and shows saving state |
+| `errorMessage` | `string \| null` | `null` | no | Optional workflow error |
+| `infoMessage` | `string \| null` | `null` | no | Optional workflow guidance |
+| `longListThreshold` | `number \| null` | `50` | no | Show large-list guidance when item count exceeds the threshold |
+| `longListWarningText` | `string \| null` | `null` | no | Optional custom large-list guidance copy |
+| `windowSize` | `number \| null` | `null` | no | Reorder large lists in page windows of this size |
+| `submitLabel` | `string` | `"Save Order"` | no | Submit button label |
+| `cancelLabel` | `string` | `"Cancel"` | no | Cancel button label |
+| `onsubmit` | `() => void \| Promise<void>` | `null` | no | Optional submit callback; enables workflow chrome |
+| `oncancel` | `() => void` | `null` | no | Optional cancel callback; enables workflow chrome |
 | `size` | `ControlSize \| null` | `null` | no | explicit semantic size override for row and handle geometry |
 | `sizeRole` | `SemanticControlSizeRole` | `"control"` | no | semantic role used to resolve inherited size scale |
 | `density` | `ControlDensity \| null` | `null` | no | explicit density override for row padding and list spacing |
@@ -84,6 +102,8 @@ type ReorderableItem = {
 | Event | When It Fires | Payload |
 |-------|---------------|---------|
 | `reorder` | Items reordered via drag-and-drop or keyboard | `{ items: ReorderableItem[] }` |
+| `submit` | Submit action triggered | `void` |
+| `cancel` | Cancel action triggered | `void` |
 
 ## 6. Accessibility
 
@@ -98,11 +118,17 @@ type ReorderableItem = {
 
 | Key | Action |
 |-----|--------|
-| `Alt+ArrowUp` | Move focused item up one position |
-| `Alt+ArrowDown` | Move focused item down one position |
+| `Space` / `Enter` | Grab or drop the focused item |
+| `ArrowUp` | Move the grabbed item or the focused item up one position |
+| `ArrowDown` | Move the grabbed item or the focused item down one position |
+| `Escape` | Cancel keyboard grab mode |
 | `Tab` | Navigate between items |
 
-After keyboard reorder, focus follows the moved item to its new position.
+After keyboard reorder, focus follows the moved item to its new position and a
+live region announces the move.
+
+When `windowSize` is enabled, focus follows the moved item across page-window
+transitions so keyboard reordering can continue without reopening the list.
 
 ### Focus
 
@@ -114,6 +140,8 @@ After keyboard reorder, focus follows the moved item to its new position.
 ### Sizing
 
 - Root: flex column with semantic density-driven gap, no list styling, no margin/padding
+- Optional info panels for workflow and large-list guidance sit above the list
+- Optional window navigation sits above the list when `windowSize` is enabled
 - Item: flex row, centered, semantic density-driven gap and padding, border `0.0625rem solid transparent`, `radius-control`
 - Handle: semantic size-driven square grip, flex-shrink 0
 - Content: flex 1, min-width 0
@@ -208,6 +236,7 @@ None.
 - `event.dataTransfer.effectAllowed = "move"` for correct drag cursor
 - `moveItem()` splices and re-inserts; dispatches `reorder` after mutation
 - Keyboard reordering uses `requestAnimationFrame` to focus the moved item after DOM update
+- Windowed mode reorders within the visible page while preserving the bound full `items` array
 - Items keyed by `item.id` for stable Svelte `{#each}` rendering
 
 ## 10. GPUI Notes

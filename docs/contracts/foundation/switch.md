@@ -44,12 +44,16 @@ Updated: 2026-03-24
 | `defaultChecked` | `boolean` | `false` | no | uncontrolled initial state |
 | `disabled` | `boolean` | `false` | no | disables interaction, applies disabled opacity |
 | `readOnly` | `boolean` | `false` | no | allows focus and reading but reverts any change attempt |
-| `label` | `string \| null` | `null` | no | visible label text |
+| `label` | `string \| null` | `null` | no | visible single trailing label text |
+| `leftLabel` | `string \| null` | `null` | no | optional off-state label shown to the left of the track |
+| `rightLabel` | `string \| null` | `null` | no | optional on-state label shown to the right of the track |
 | `ariaLabel` | `string \| null` | `null` | no | accessible name; required when no visible label exists |
 | `describedBy` | `string \| null` | `null` | no | aria-describedby target id |
 | `name` | `string \| undefined` | `undefined` | no | form submission name |
 | `offColor` | `string \| null` | `null` | no | optional off-state accent override used for the thumb and muted track tint |
 | `onColor` | `string \| null` | `null` | no | optional on-state accent override used for the thumb and active track tint |
+| `leftTone` | `"default" \| "primary" \| "success" \| "warning" \| "danger"` | `"default"` | no | semantic off-state tone used when `offColor` is not set |
+| `rightTone` | `"default" \| "primary" \| "success" \| "warning" \| "danger"` | `"primary"` | no | semantic on-state tone used when `onColor` is not set |
 | `size` | `"xs" \| "sm" \| "md" \| "lg" \| "xl"` | `null` | no | explicit control size override; when null, resolves from inherited presentation |
 | `sizeRole` | `"chrome" \| "control" \| "prominent"` | `"control"` | no | semantic size offset from inherited presentation |
 | `density` | `ControlDensity \| null` | `null` | no | explicit density override for spacing |
@@ -59,8 +63,10 @@ Updated: 2026-03-24
 - controlled: `checked` (non-null) plus `checkedChange` event handler
 - uncontrolled: `defaultChecked` sets the initial state; component owns its own
   state thereafter
-- visual overrides: `offColor` and `onColor` map to CSS custom properties on
-  the root label and affect only the local switch instance
+- visual overrides: `offColor` and `onColor` take precedence over `leftTone`
+  and `rightTone` and map to CSS custom properties on the root label
+- dual labels: `leftLabel` and `rightLabel` provide the common settings-toggle
+  layout without requiring extra caller markup
 
 ## 4. States
 
@@ -70,7 +76,8 @@ Updated: 2026-03-24
 |-------|---------|-----------------|
 | off | default | thumb at left position, track has default border and muted background |
 | on | `checked=true` or user toggle | thumb slides right with accent color, track border and background shift to accent tints |
-| custom colors | `offColor` or `onColor` set | off/on track and thumb derive from the provided local override colors instead of theme defaults |
+| semantic tones | `leftTone` or `rightTone` set | off/on track and active side label use status/accent theme colors |
+| custom colors | `offColor` or `onColor` set | off/on track, thumb, and active side label derive from the provided local override colors instead of theme defaults |
 | focus | native input receives focus-visible | focus ring outline on track |
 | disabled | `disabled=true` | reduced opacity, cursor not-allowed |
 | readOnly | `readOnly=true` | default cursor, change reverted on toggle attempt |
@@ -91,7 +98,7 @@ Updated: 2026-03-24
 
 - Role: `role="switch"` on the hidden checkbox input
 - `id`: from prop, used for external `<label for>` association
-- `aria-label`: from ariaLabel prop; required when no visible label exists
+- `aria-label`: from `label`, `ariaLabel`, or a fallback composed from `leftLabel`/`rightLabel`
 - `aria-describedby`: from describedBy prop
 - `aria-checked`: reflects current on/off state
 - `aria-readonly`: set when isReadOnly

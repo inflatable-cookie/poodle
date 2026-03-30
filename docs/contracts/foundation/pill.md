@@ -29,12 +29,13 @@ Updated: 2026-03-26
 
 | Prop | Type | Default | Required | Notes |
 |------|------|---------|----------|-------|
-| `tone` | `"neutral" \| "success" \| "danger"` | `"neutral"` | no | semantic tone controlling fill/border/text color |
+| `tone` | `"neutral" \| "info" \| "success" \| "warning" \| "danger"` | `"neutral"` | no | semantic tone controlling fill/border/text color |
 | `appearance` | `"solid" \| "subtle" \| "badge"` | `"solid"` | no | fill opacity variant |
 | `size` | `"xs" \| "sm" \| "md" \| "lg" \| "xl"` | `null` | no | explicit pill size override |
 | `sizeRole` | `"chrome" \| "control" \| "prominent"` | `"chrome"` | no | semantic size offset from inherited presentation |
 | `density` | `ControlDensity \| null` | `null` | no | explicit density override for spacing |
 | `font` | `"normal" \| "mono"` | `"normal"` | no | content font variant |
+| `accent` | `string \| null` | `null` | no | optional custom accent color overriding the semantic tone colors |
 | `muted` | `boolean` | `false` | no | visual de-emphasis via reduced opacity |
 | `ariaLabel` | `string \| null` | `null` | no | optional explicit accessible name |
 
@@ -49,8 +50,11 @@ Updated: 2026-03-26
 | State | Trigger | Expected Result |
 |-------|---------|-----------------|
 | neutral | default | neutral fill, subtle border, secondary text |
+| info | `tone="info"` | blue-tinted fill and border, primary text |
 | success | `tone="success"` | green-tinted fill and border, primary text |
+| warning | `tone="warning"` | amber-tinted fill and border, primary text |
 | danger | `tone="danger"` | red-tinted fill and border, primary text |
+| custom accent | `accent` provided | accent-tinted fill, border, and text using the provided color |
 | subtle | `appearance="subtle"` | 50% transparent fill overlay |
 | muted | `muted=true` | reduced opacity (0.72) |
 | xs | `size="xs"` | smallest metadata chip sizing |
@@ -134,6 +138,14 @@ No internal state.
 | `--poodle-pill-border` | `color-mix(in srgb, var(--poodle-color-border-subtle) 82%, transparent)` |
 | `--poodle-pill-text` | `var(--poodle-color-text-secondary)` |
 
+### Tone: info `.pill[data-tone="info"]`
+
+| Custom Property | Value |
+|-----------------|-------|
+| `--poodle-pill-fill` | `color-mix(in srgb, var(--poodle-color-status-info) 14%, var(--poodle-color-background-surface))` |
+| `--poodle-pill-border` | `color-mix(in srgb, var(--poodle-color-status-info) 38%, var(--poodle-color-border-subtle))` |
+| `--poodle-pill-text` | `var(--poodle-color-text-primary)` |
+
 ### Tone: success `.pill[data-tone="success"]`
 
 | Custom Property | Value |
@@ -149,6 +161,14 @@ No internal state.
 | `--poodle-pill-fill` | `color-mix(in srgb, var(--poodle-color-status-danger) 14%, var(--poodle-color-background-surface))` |
 | `--poodle-pill-border` | `color-mix(in srgb, var(--poodle-color-status-danger) 38%, var(--poodle-color-border-subtle))` |
 | `--poodle-pill-text` | `var(--poodle-color-text-primary)` |
+
+### Custom accent `.pill[data-accent="custom"]`
+
+| Custom Property | Value |
+|-----------------|-------|
+| `--poodle-pill-fill` | `color-mix(in srgb, var(--poodle-pill-accent) 18%, rgba(148, 163, 184, 0.08))` |
+| `--poodle-pill-border` | `color-mix(in srgb, var(--poodle-pill-accent) 30%, rgba(148, 163, 184, 0.12))` |
+| `--poodle-pill-text` | `color-mix(in srgb, var(--poodle-pill-accent) 88%, white)` |
 
 ### Appearance: subtle `.pill[data-appearance="subtle"]`
 
@@ -305,3 +325,10 @@ Three muted pills in a horizontal row:
 - approvers: pending
 - downstream adopters: metadata displays, labels, status tags, card headers
 - future follow-up: add dismissible-chip semantics separately if needed
+### Tone: warning `.pill[data-tone="warning"]`
+
+| Custom Property | Value |
+|-----------------|-------|
+| `--poodle-pill-fill` | `color-mix(in srgb, var(--poodle-color-status-warning) 14%, var(--poodle-color-background-surface))` |
+| `--poodle-pill-border` | `color-mix(in srgb, var(--poodle-color-status-warning) 38%, var(--poodle-color-border-subtle))` |
+| `--poodle-pill-text` | `var(--poodle-color-text-primary)` |

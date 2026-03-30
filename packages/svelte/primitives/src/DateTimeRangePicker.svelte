@@ -46,8 +46,8 @@
   let uncontrolledOpen = defaultOpen;
   let visibleMonth = monthAnchorIso(defaultValue.start.date ?? todayIsoDate());
 
-  $: resolvedSize = size ?? resolveSemanticControlSize(uiPresentation?.sizeScale ?? "md", sizeRole);
-  $: resolvedDensity = density ?? uiPresentation?.density ?? "default";
+  $: resolvedSize = size ?? resolveSemanticControlSize($uiPresentation.sizeScale, sizeRole);
+  $: resolvedDensity = density ?? $uiPresentation.density;
   $: currentValue = normalizeDateTimeRangeValue(value ?? uncontrolledValue);
   $: currentRange = normalizeDateRange({
     start: currentValue.start.date,

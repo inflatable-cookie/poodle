@@ -1,38 +1,34 @@
 <script lang="ts">
-  import { Eyebrow, OrderBy, type ActiveSort, type SortField } from "@poodle/svelte-primitives";
+  import { Eyebrow, OrderBy, type OrderByValue, type SortField } from "@poodle/svelte-primitives";
 
   const controlSizes = ["xs", "sm", "md", "lg", "xl"] as const;
 
-  let activeSort: ActiveSort | null = null;
+  let value: OrderByValue = [
+    { key: "updatedAt", direction: "desc" },
+    { key: "title", direction: "asc" },
+  ];
 
   const fields: SortField[] = [
-    { value: "name", label: "Name" },
-    { value: "date", label: "Date" },
-    { value: "size", label: "Size" },
-    { value: "type", label: "Type", disabled: true },
+    { key: "title", label: "Title" },
+    { key: "kind", label: "Kind" },
+    { key: "updatedAt", label: "Updated", defaultDirection: "desc" },
+    { key: "createdAt", label: "Created", defaultDirection: "desc" },
+    { key: "visibility", label: "Visibility", disabled: true },
   ];
 </script>
 
 <div class="specimen">
   <div class="specimen__group">
-    <Eyebrow>Sort controls</Eyebrow>
-    <OrderBy
-      {fields}
-      bind:activeSort
-      on:change={(e) => {}}
-    />
-    {#if activeSort}
-      <p>Sorted by: <strong>{activeSort.field}</strong> ({activeSort.direction})</p>
-    {:else}
-      <p>No active sort</p>
-    {/if}
+    <Eyebrow>Multi-field sort builder</Eyebrow>
+    <OrderBy {fields} bind:value compact />
+    <pre>{JSON.stringify(value, null, 2)}</pre>
   </div>
 
   <div class="specimen__group">
     <Eyebrow>Sizes</Eyebrow>
     <div class="specimen__stack">
       {#each controlSizes as size}
-        <OrderBy fields={fields} {size} />
+        <OrderBy fields={fields} value={[{ key: "title", direction: "asc" }]} {size} />
       {/each}
     </div>
   </div>
@@ -43,7 +39,7 @@
       {#each ["compact", "default", "comfortable"] as density}
         <div class="specimen__row">
           <span class="specimen__label">{density}</span>
-          <OrderBy fields={fields} {density} />
+          <OrderBy fields={fields} value={[{ key: "title", direction: "asc" }]} {density} />
         </div>
       {/each}
     </div>
@@ -51,10 +47,7 @@
 
   <div class="specimen__group">
     <Eyebrow>Disabled</Eyebrow>
-    <OrderBy
-      fields={[{ value: "name", label: "Name" }, { value: "date", label: "Date" }]}
-      disabled
-    />
+    <OrderBy fields={fields} value={[{ key: "title", direction: "asc" }]} disabled />
   </div>
 </div>
 
@@ -64,5 +57,5 @@
   .specimen__stack { display: flex; flex-direction: column; gap: 0.5rem; }
   .specimen__row { display: flex; align-items: center; gap: 0.5rem; }
   .specimen__label { font-size: 0.75rem; font-family: var(--poodle-typography-code-family); color: var(--poodle-color-text-muted); min-width: 6rem; }
-  p { margin: 0; }
+  pre { margin: 0; font-size: 0.75rem; }
 </style>

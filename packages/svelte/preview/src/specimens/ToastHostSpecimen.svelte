@@ -1,0 +1,83 @@
+<script lang="ts">
+  import { writable } from "svelte/store";
+
+  import { ToastHost, type ToastHostStoreItem } from "@poodle/svelte-composites";
+  import { Button, Eyebrow } from "@poodle/svelte-primitives";
+
+  type ToneSeed = "info" | "success" | "warning" | "error";
+
+  let nextId = 4;
+  const seedTones: ToneSeed[] = ["info", "success", "warning", "error"];
+
+  const toasts = writable<ToastHostStoreItem[]>([
+    { id: "1", variant: "success", title: "Saved", message: "Your changes have been stored." },
+    { id: "2", variant: "warning", title: "Retry later", message: "Background sync is delayed." },
+    { id: "3", variant: "error", message: "Publishing failed. Check your connection." },
+  ]);
+
+  const store = {
+    toasts,
+    dismiss(id: string) {
+      toasts.update((items) => items.filter((item) => item.id !== id));
+    }
+  };
+
+  function pushToast() {
+    const variant = seedTones[nextId % seedTones.length];
+    const id = String(nextId++);
+    toasts.update((items) => [
+      ...items,
+      {
+        id,
+        variant,
+        title: variant === "error" ? undefined : `Toast #${id}`,
+        message: variant === "error" ? "This one stays until you dismiss it." : "A new runtime-host toast was added."
+      }
+    ]);
+  }
+</script>
+
+<div class="specimen">
+  <div class="specimen__group">
+    <Eyebrow>Runtime host</Eyebrow>
+    <p class="specimen__copy">
+      The host owns timer policy and fixed positioning while `ToastStack` stays presentational.
+    </p>
+    <Button variant="secondary" on:click={pushToast}>Add toast</Button>
+  </div>
+
+  <div class="specimen__surface">
+    <ToastHost {store} />
+  </div>
+</div>
+
+<style>
+  .specimen {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .specimen__group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .specimen__copy {
+    margin: 0;
+    color: var(--poodle-color-text-secondary);
+  }
+
+  .specimen__surface {
+    position: relative;
+    min-height: 16rem;
+    border: 1px dashed color-mix(in srgb, var(--poodle-color-border-default) 82%, transparent);
+    border-radius: var(--poodle-radius-surface);
+    background: color-mix(in srgb, var(--poodle-color-background-panel) 96%, transparent);
+  }
+
+  .specimen__surface :global(.toast-host) {
+    position: absolute;
+  }
+</style>

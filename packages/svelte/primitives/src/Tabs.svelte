@@ -9,6 +9,12 @@
   import Pill from "./Pill.svelte";
   import { findNextEnabledIndex, firstEnabledIndex } from "./internal";
   import {
+    applyReorder as applyReorderItems,
+    handleDragStart as startDrag,
+    handleDragOver as overDrag,
+    handleDrop as dropDrag,
+  } from "./tabs-reorder";
+  import {
     getUiPresentation,
     resolveSemanticControlSize,
     resolveSupportingVisualSize,
@@ -70,8 +76,8 @@
   $: hasPanel = $$slots.default;
   $: isVertical = orientation === "vertical";
   $: hasTooltips = isVertical || showTooltips;
-  $: resolvedSize = size ?? resolveSemanticControlSize(uiPresentation?.sizeScale ?? "md", sizeRole);
-  $: resolvedDensity = density ?? uiPresentation?.density ?? "default";
+  $: resolvedSize = size ?? resolveSemanticControlSize($uiPresentation.sizeScale, sizeRole);
+  $: resolvedDensity = density ?? $uiPresentation.density;
   $: resolvedIconSize = resolveSupportingVisualSize(resolvedSize);
 
   // ── Tooltip (vertical icon-only mode) ──
@@ -161,46 +167,32 @@
   let dropTargetIndex: number | null = null;
 
   function applyReorder(fromIndex: number, toIndex: number): void {
-    if (fromIndex === toIndex) return;
-
-    const nextItems = [...renderedItems];
-    const [moved] = nextItems.splice(fromIndex, 1);
-    nextItems.splice(toIndex, 0, moved);
-    renderedItems = nextItems;
-    focusIndex = toIndex;
-
-    tick().then(() => tabElements[toIndex]?.focus());
-    dispatch("reorder", { items: nextItems.map((item) => item.value) });
+    const result = applyReorderItems(renderedItems, fromIndex, toIndex);
+    renderedItems = result.items;
+    focusIndex = result.focusIndex;
+    tick().then(() => tabElements[result.focusIndex]?.focus());
+    dispatch("reorder", { items: result.items.map((item) => item.value) });
   }
 
   function requestReorder(index: number, direction: -1 | 1): void {
     if (!reorderable) return;
-
     const nextIndex = index + direction;
-
     if (nextIndex < 0 || nextIndex >= renderedItems.length) return;
-
     applyReorder(index, nextIndex);
   }
 
   function handleDragStart(event: DragEvent, index: number): void {
-    if (!reorderable) return;
-
-    dragSourceIndex = index;
-    if (event.dataTransfer) {
-      event.dataTransfer.effectAllowed = "move";
-      event.dataTransfer.setData("text/plain", String(index));
+    const result = startDrag(event, index, reorderable);
+    if (result.dragSourceIndex !== null) {
+      dragSourceIndex = result.dragSourceIndex;
     }
   }
 
   function handleDragOver(event: DragEvent, index: number): void {
-    if (dragSourceIndex === null) return;
-
-    event.preventDefault();
-    if (event.dataTransfer) {
-      event.dataTransfer.dropEffect = "move";
+    const result = overDrag(event, index, dragSourceIndex);
+    if (result.dropTargetIndex !== null) {
+      dropTargetIndex = result.dropTargetIndex;
     }
-    dropTargetIndex = index;
   }
 
   function handleDragLeave(): void {
@@ -208,12 +200,10 @@
   }
 
   function handleDrop(event: DragEvent, index: number): void {
-    event.preventDefault();
-
-    if (dragSourceIndex !== null) {
-      applyReorder(dragSourceIndex, index);
+    const result = dropDrag(event, index, dragSourceIndex);
+    if (result.fromIndex !== null && result.toIndex !== null) {
+      applyReorder(result.fromIndex, result.toIndex);
     }
-
     dragSourceIndex = null;
     dropTargetIndex = null;
   }
@@ -467,10 +457,11 @@
     border-right: 0.0625rem solid color-mix(in srgb, var(--poodle-color-border-subtle) 82%, transparent);
   }
 
-  /* Card + Pill + Strip: no wrapping, allow scroll on main axis only */
+  /* Card + Pill + Strip + Block: no wrapping, allow scroll on main axis only */
   .poodle-tabs[data-variant="card"] .poodle-tabs__list,
   .poodle-tabs[data-variant="pill"] .poodle-tabs__list,
-  .poodle-tabs[data-variant="strip"] .poodle-tabs__list {
+  .poodle-tabs[data-variant="strip"] .poodle-tabs__list,
+  .poodle-tabs[data-variant="block"] .poodle-tabs__list {
     flex-wrap: nowrap;
     overflow-x: auto;
     overflow-y: hidden;
@@ -478,7 +469,8 @@
 
   .poodle-tabs[data-variant="card"][data-orientation="vertical"] .poodle-tabs__list,
   .poodle-tabs[data-variant="pill"][data-orientation="vertical"] .poodle-tabs__list,
-  .poodle-tabs[data-variant="strip"][data-orientation="vertical"] .poodle-tabs__list {
+  .poodle-tabs[data-variant="strip"][data-orientation="vertical"] .poodle-tabs__list,
+  .poodle-tabs[data-variant="block"][data-orientation="vertical"] .poodle-tabs__list {
     flex-direction: column;
     overflow-x: hidden;
     overflow-y: auto;
@@ -491,6 +483,17 @@
     padding: 0 var(--poodle-space-panel-x, 0.75rem);
     border-bottom: 0.0625rem solid var(--poodle-color-border-subtle);
     background: color-mix(in srgb, var(--poodle-color-background-panel) 92%, transparent);
+  }
+
+  /* Block: full-width tabs with separators, no radius, no outer border chrome */
+  .poodle-tabs[data-variant="block"] .poodle-tabs__list {
+    display: flex;
+    width: fit-content;
+    max-width: 100%;
+    gap: 0;
+    padding: 0;
+    border-bottom: 0.0625rem solid var(--poodle-color-border-subtle);
+    background: color-mix(in srgb, var(--poodle-color-background-panel) 90%, transparent);
   }
 
   /* ── Item wrapper (for tab + close) ── */
@@ -527,6 +530,21 @@
   .poodle-tabs[data-variant="card"] .poodle-tabs__item[data-selected="true"] {
     border-color: color-mix(in srgb, var(--poodle-color-accent-base) 32%, var(--poodle-color-border-subtle));
     background: color-mix(in srgb, var(--poodle-color-accent-base) 14%, var(--poodle-color-background-surface));
+  }
+
+  .poodle-tabs[data-variant="block"] .poodle-tabs__item {
+    display: flex;
+    flex: 0 0 auto;
+    min-width: 0;
+  }
+
+  .poodle-tabs[data-variant="block"] .poodle-tabs__item + .poodle-tabs__item {
+    border-left: 0.0625rem solid color-mix(in srgb, var(--poodle-color-border-subtle) 72%, transparent);
+  }
+
+  .poodle-tabs[data-variant="block"][data-orientation="vertical"] .poodle-tabs__item + .poodle-tabs__item {
+    border-left: 0;
+    border-top: 0.0625rem solid color-mix(in srgb, var(--poodle-color-border-subtle) 72%, transparent);
   }
 
   /* Drag-and-drop states */
@@ -576,6 +594,23 @@
   .poodle-tabs[data-variant="card"] .poodle-tabs__tab {
     padding: 0 var(--poodle-tabs-control-x);
     color: var(--poodle-color-text-primary);
+  }
+
+  .poodle-tabs[data-variant="block"] .poodle-tabs__tab {
+    justify-content: center;
+    width: auto;
+    min-height: var(--poodle-tabs-control-height);
+    padding: 0 var(--poodle-tabs-control-x);
+    border-radius: 0;
+  }
+
+  .poodle-tabs[data-variant="block"] .poodle-tabs__item[data-selected="true"] .poodle-tabs__tab {
+    background: color-mix(in srgb, var(--poodle-color-accent-base) 14%, var(--poodle-color-background-surface));
+    color: var(--poodle-color-text-primary);
+  }
+
+  .poodle-tabs[data-variant="block"] .poodle-tabs__item:hover .poodle-tabs__tab {
+    background: color-mix(in srgb, var(--poodle-color-surface-hover) 40%, transparent);
   }
 
   /* Strip variant: compact tabs in a bar */

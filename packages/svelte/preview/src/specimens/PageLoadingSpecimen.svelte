@@ -5,6 +5,7 @@
   let showIndeterminate = false;
   let showDeterminate = false;
   let showWithCancel = false;
+  let showInline = true;
   let demoProgress = 0;
   let progressTimer: ReturnType<typeof setInterval> | null = null;
 
@@ -34,6 +35,22 @@
 </script>
 
 <div class="specimen">
+  <div class="specimen__group">
+    <Eyebrow>Inline</Eyebrow>
+    <Button variant="secondary" on:click={() => (showInline = !showInline)}>
+      Toggle inline loading
+    </Button>
+    {#if showInline}
+      <div class="specimen__inline-shell">
+        <PageLoading
+          visible
+          presentation="inline"
+          message="Loading section content..."
+        />
+      </div>
+    {/if}
+  </div>
+
   <div class="specimen__group">
     <Eyebrow>Indeterminate (spinner only)</Eyebrow>
     <Button variant="secondary" on:click={() => (showIndeterminate = true)}>
@@ -88,6 +105,13 @@
     display: flex;
     flex-direction: column;
     gap: 0.5rem;
+  }
+
+  .specimen__inline-shell {
+    min-height: 18rem;
+    border: 1px dashed var(--poodle-color-border-default);
+    border-radius: var(--poodle-radius-surface);
+    background: color-mix(in srgb, var(--poodle-color-background-surface) 94%, transparent);
   }
 
   .specimen__dismiss {

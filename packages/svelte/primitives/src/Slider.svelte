@@ -26,8 +26,8 @@
     valueCommit: { value: number };
   }>();
 
-  $: resolvedSize = size ?? resolveSemanticControlSize(uiPresentation?.sizeScale ?? "md", sizeRole);
-  $: resolvedDensity = density ?? uiPresentation?.density ?? "default";
+  $: resolvedSize = size ?? resolveSemanticControlSize($uiPresentation.sizeScale, sizeRole);
+  $: resolvedDensity = density ?? $uiPresentation.density;
   $: safeMax = max <= min ? min + 1 : max;
   $: safeValue = clamp(snapToStep(value, min, step), min, safeMax);
   $: percentage = ((safeValue - min) / (safeMax - min)) * 100;

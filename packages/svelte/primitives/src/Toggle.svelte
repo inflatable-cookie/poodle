@@ -24,8 +24,8 @@
 
   $: controlled = pressed !== null;
   $: currentPressed = controlled ? pressed === true : uncontrolledPressed;
-  $: resolvedSize = size ?? resolveSemanticControlSize(uiPresentation?.sizeScale ?? "md", sizeRole);
-  $: resolvedDensity = density ?? uiPresentation?.density ?? "default";
+  $: resolvedSize = size ?? resolveSemanticControlSize($uiPresentation.sizeScale, sizeRole);
+  $: resolvedDensity = density ?? $uiPresentation.density;
 
   function toggle(): void {
     const nextPressed = !currentPressed;

@@ -28,8 +28,8 @@
 
   $: formattedCurrent = formatTime(currentTime);
   $: formattedDuration = formatTime(duration);
-  $: resolvedSize = size ?? resolveSemanticControlSize(uiPresentation?.sizeScale ?? "md", sizeRole);
-  $: resolvedDensity = density ?? uiPresentation?.density ?? "default";
+  $: resolvedSize = size ?? resolveSemanticControlSize($uiPresentation.sizeScale, sizeRole);
+  $: resolvedDensity = density ?? $uiPresentation.density;
 
   function formatTime(sec: number): string {
     const m = Math.floor(sec / 60);

@@ -48,6 +48,7 @@ and data components.
 - `ResizeHandle`
 - `ReorderableList`
 - `SelectionSummary`
+- `SidebarNav`
 - `SplitView`
 - `StatusBar`
 - `ToastStack`

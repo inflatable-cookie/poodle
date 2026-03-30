@@ -18,8 +18,8 @@
   let rootElement: HTMLDivElement | null = null;
   const uiPresentation = getUiPresentation();
 
-  $: resolvedSize = size ?? resolveSemanticControlSize(uiPresentation?.sizeScale ?? "md", sizeRole);
-  $: resolvedDensity = density ?? uiPresentation?.density ?? "default";
+  $: resolvedSize = size ?? resolveSemanticControlSize($uiPresentation.sizeScale, sizeRole);
+  $: resolvedDensity = density ?? $uiPresentation.density;
   $: toolbarStyle = `--poodle-toolbar-control-height: ${controlHeightRem(resolvedSize)}rem;`;
 
   function focusSibling(direction: 1 | -1): void {

@@ -28,7 +28,7 @@ Updated: 2026-03-15
 | Part | Required | Description | Token Targets |
 |------|----------|-------------|---------------|
 | Root | yes | menu host, position context | relative positioning |
-| Trigger | yes | opens the menu | button tokens, focus ring |
+| Trigger | yes | opens the menu | button tokens, focus ring, optional aria label |
 | Overlay | conditional | floating command list | surface, elevation, border, radius |
 | Item | yes | actionable or selectable row | text, hover, focus, disabled state |
 | Meta | no | shortcut label column | secondary text, code font |
@@ -53,6 +53,7 @@ Updated: 2026-03-15
 | `size` | `"xs" \| "sm" \| "md" \| "lg" \| "xl"` | `null` | no | explicit control size override; when null, resolves from inherited presentation |
 | `sizeRole` | `"chrome" \| "control" \| "prominent"` | `"control"` | no | semantic size offset from inherited presentation |
 | `ariaLabel` | `string \| null` | `null` | no | menu label when item set needs one |
+| `triggerAriaLabel` | `string \| null` | `null` | no | accessible label for the trigger wrapper, useful for icon-only triggers |
 
 ### Type Definitions
 
@@ -64,6 +65,7 @@ MenuItem: {
   disabled?: boolean;
   checked?: boolean;
   shortcutLabel?: string;
+  tone?: "default" | "danger";
 }
 
 OverlayPlacement: "bottom-start" | "bottom-end" | "top-start" | "top-end"
@@ -239,6 +241,13 @@ Open/closed state and current highlighted item index are required.
 |----------|-------|
 | `background` | `color-mix(in srgb, var(--poodle-color-accent-base) 16%, transparent)` |
 | `outline` | `none` |
+
+### Item — destructive tone
+
+| Property | Value |
+|----------|-------|
+| `color` | `var(--poodle-color-danger-base)` |
+| `background` | `color-mix(in srgb, var(--poodle-color-danger-base) 14%, transparent)` on hover/focus |
 
 ### Item — disabled
 
