@@ -1,4 +1,5 @@
 use poodle_tokens::semantic;
+use poodle_primitives::{ControlDensity, ControlSize, SemanticControlSizeRole};
 
 #[derive(Clone, Debug, PartialEq)]
 pub struct AudioPlayerSpec {
@@ -9,6 +10,9 @@ pub struct AudioPlayerSpec {
     pub volume: f64,
     pub is_muted: bool,
     pub show_speed_control: bool,
+    pub size: ControlSize,
+    pub size_role: SemanticControlSizeRole,
+    pub density: ControlDensity,
 }
 
 impl AudioPlayerSpec {
@@ -21,6 +25,9 @@ impl AudioPlayerSpec {
             volume: 1.0,
             is_muted: false,
             show_speed_control: false,
+            size: ControlSize::Md,
+            size_role: SemanticControlSizeRole::Control,
+            density: ControlDensity::Default,
         }
     }
 
@@ -68,5 +75,20 @@ impl AudioPlayerSpec {
 
     pub fn control_color_token(&self) -> &'static str {
         semantic::COLOR_TEXT_PRIMARY
+    }
+
+    pub fn with_size(mut self, size: ControlSize) -> Self {
+        self.size = size;
+        self
+    }
+
+    pub fn with_size_role(mut self, size_role: SemanticControlSizeRole) -> Self {
+        self.size_role = size_role;
+        self
+    }
+
+    pub fn with_density(mut self, density: ControlDensity) -> Self {
+        self.density = density;
+        self
     }
 }

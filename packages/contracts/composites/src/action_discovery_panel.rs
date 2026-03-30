@@ -1,4 +1,4 @@
-use poodle_primitives::StatusTone;
+use poodle_primitives::{ControlDensity, ControlSize, SemanticControlSizeRole, StatusTone};
 use poodle_tokens::semantic;
 
 use crate::types::{ActionDiscoverySection, DiscoveryState};
@@ -8,6 +8,9 @@ pub struct ActionDiscoveryPanelSpec {
     pub sections: Vec<ActionDiscoverySection>,
     pub state: DiscoveryState,
     pub empty_message: Option<String>,
+    pub size: ControlSize,
+    pub size_role: SemanticControlSizeRole,
+    pub density: ControlDensity,
 }
 
 impl Default for ActionDiscoveryPanelSpec {
@@ -16,6 +19,9 @@ impl Default for ActionDiscoveryPanelSpec {
             sections: Vec::new(),
             state: DiscoveryState::Ready,
             empty_message: None,
+            size: ControlSize::Md,
+            size_role: SemanticControlSizeRole::Control,
+            density: ControlDensity::Default,
         }
     }
 }
@@ -60,5 +66,20 @@ impl ActionDiscoveryPanelSpec {
 
     pub fn gap_token(&self) -> &'static str {
         semantic::SPACE_STACK_MD
+    }
+
+    pub fn with_size(mut self, size: ControlSize) -> Self {
+        self.size = size;
+        self
+    }
+
+    pub fn with_size_role(mut self, size_role: SemanticControlSizeRole) -> Self {
+        self.size_role = size_role;
+        self
+    }
+
+    pub fn with_density(mut self, density: ControlDensity) -> Self {
+        self.density = density;
+        self
     }
 }

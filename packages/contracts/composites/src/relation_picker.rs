@@ -1,5 +1,6 @@
 use crate::picker_shell::PickerShellSpec;
 use crate::types::{BrowseState, PickerItemSpec, PickerVariant, SelectionMode};
+use poodle_primitives::{ControlDensity, ControlSize, SemanticControlSizeRole};
 
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct RelationPickerSpec {
@@ -9,6 +10,9 @@ pub struct RelationPickerSpec {
     pub selection_mode: SelectionMode,
     pub variant: PickerVariant,
     pub state: BrowseState,
+    pub size: ControlSize,
+    pub size_role: SemanticControlSizeRole,
+    pub density: ControlDensity,
 }
 
 impl RelationPickerSpec {
@@ -20,6 +24,9 @@ impl RelationPickerSpec {
             selection_mode: SelectionMode::Multiple,
             variant: PickerVariant::Inline,
             state: BrowseState::Ready,
+            size: ControlSize::Md,
+            size_role: SemanticControlSizeRole::Control,
+            density: ControlDensity::Default,
         }
     }
 
@@ -71,5 +78,20 @@ impl RelationPickerSpec {
             .with_query(self.query.clone())
             .with_result_count(self.items.len())
             .with_selected_count(self.selected_item_count())
+    }
+
+    pub fn with_size(mut self, size: ControlSize) -> Self {
+        self.size = size;
+        self
+    }
+
+    pub fn with_size_role(mut self, size_role: SemanticControlSizeRole) -> Self {
+        self.size_role = size_role;
+        self
+    }
+
+    pub fn with_density(mut self, density: ControlDensity) -> Self {
+        self.density = density;
+        self
     }
 }

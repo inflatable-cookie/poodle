@@ -1,4 +1,5 @@
 use poodle_tokens::semantic;
+use poodle_primitives::{ControlDensity, ControlSize, SemanticControlSizeRole};
 
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct MediaPickerSpec {
@@ -7,6 +8,9 @@ pub struct MediaPickerSpec {
     pub is_multiple: bool,
     pub accepted_types: Option<String>,
     pub selected_count: usize,
+    pub size: ControlSize,
+    pub size_role: SemanticControlSizeRole,
+    pub density: ControlDensity,
 }
 
 impl MediaPickerSpec {
@@ -17,6 +21,9 @@ impl MediaPickerSpec {
             is_multiple: false,
             accepted_types: None,
             selected_count: 0,
+            size: ControlSize::Md,
+            size_role: SemanticControlSizeRole::Control,
+            density: ControlDensity::Default,
         }
     }
 
@@ -46,5 +53,20 @@ impl MediaPickerSpec {
 
     pub fn shadow_token(&self) -> &'static str {
         semantic::ELEVATION_DIALOG
+    }
+
+    pub fn with_size(mut self, size: ControlSize) -> Self {
+        self.size = size;
+        self
+    }
+
+    pub fn with_size_role(mut self, size_role: SemanticControlSizeRole) -> Self {
+        self.size_role = size_role;
+        self
+    }
+
+    pub fn with_density(mut self, density: ControlDensity) -> Self {
+        self.density = density;
+        self
     }
 }

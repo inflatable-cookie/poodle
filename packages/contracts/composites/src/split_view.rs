@@ -1,4 +1,5 @@
 use crate::types::SplitOrientation;
+use poodle_primitives::{ControlDensity, ControlSize, SemanticControlSizeRole};
 
 #[derive(Clone, Debug, PartialEq)]
 pub struct SplitViewSpec {
@@ -9,6 +10,9 @@ pub struct SplitViewSpec {
     pub min_secondary_size: Option<f32>,
     pub is_primary_collapsed: bool,
     pub is_secondary_collapsed: bool,
+    pub size: ControlSize,
+    pub size_role: SemanticControlSizeRole,
+    pub density: ControlDensity,
 }
 
 impl SplitViewSpec {
@@ -21,6 +25,9 @@ impl SplitViewSpec {
             min_secondary_size: None,
             is_primary_collapsed: false,
             is_secondary_collapsed: false,
+            size: ControlSize::Md,
+            size_role: SemanticControlSizeRole::Control,
+            density: ControlDensity::Default,
         }
     }
 
@@ -60,5 +67,20 @@ impl SplitViewSpec {
 
     pub fn keyboard_resize_supported(&self) -> bool {
         !self.is_primary_collapsed && !self.is_secondary_collapsed
+    }
+
+    pub fn with_size(mut self, size: ControlSize) -> Self {
+        self.size = size;
+        self
+    }
+
+    pub fn with_size_role(mut self, size_role: SemanticControlSizeRole) -> Self {
+        self.size_role = size_role;
+        self
+    }
+
+    pub fn with_density(mut self, density: ControlDensity) -> Self {
+        self.density = density;
+        self
     }
 }

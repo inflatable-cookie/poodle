@@ -1,6 +1,7 @@
 use poodle_tokens::semantic;
 
 use crate::types::{DockEdge, PanelTabItem};
+use poodle_primitives::{ControlDensity, ControlSize, SemanticControlSizeRole};
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub enum DockTabsPlacement {
@@ -16,6 +17,9 @@ pub struct DockRegionSpec {
     pub items: Vec<PanelTabItem>,
     pub value: Option<String>,
     pub aria_label: Option<String>,
+    pub size: ControlSize,
+    pub size_role: SemanticControlSizeRole,
+    pub density: ControlDensity,
 }
 
 impl DockRegionSpec {
@@ -27,6 +31,9 @@ impl DockRegionSpec {
             items,
             value: None,
             aria_label: None,
+            size: ControlSize::Md,
+            size_role: SemanticControlSizeRole::Control,
+            density: ControlDensity::Default,
         }
     }
 
@@ -62,5 +69,20 @@ impl DockRegionSpec {
 
     pub fn strip_fill_token(&self) -> &'static str {
         semantic::COLOR_BACKGROUND_SURFACE
+    }
+
+    pub fn with_size(mut self, size: ControlSize) -> Self {
+        self.size = size;
+        self
+    }
+
+    pub fn with_size_role(mut self, size_role: SemanticControlSizeRole) -> Self {
+        self.size_role = size_role;
+        self
+    }
+
+    pub fn with_density(mut self, density: ControlDensity) -> Self {
+        self.density = density;
+        self
     }
 }

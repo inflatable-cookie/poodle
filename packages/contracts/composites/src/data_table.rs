@@ -1,4 +1,4 @@
-use poodle_primitives::CheckState;
+use poodle_primitives::{CheckState, ControlDensity, ControlSize, SemanticControlSizeRole};
 use poodle_tokens::semantic;
 
 use crate::types::{TableColumnSpec, TableRowSpec, TableSortDirection};
@@ -14,6 +14,9 @@ pub struct DataTableSpec {
     pub show_row_actions: bool,
     pub empty_message: Option<String>,
     pub aria_label: String,
+    pub size: ControlSize,
+    pub size_role: SemanticControlSizeRole,
+    pub density: ControlDensity,
 }
 
 impl DataTableSpec {
@@ -28,6 +31,9 @@ impl DataTableSpec {
             show_row_actions: true,
             empty_message: None,
             aria_label: String::from("Data table"),
+            size: ControlSize::Md,
+            size_role: SemanticControlSizeRole::Control,
+            density: ControlDensity::Default,
         }
     }
 
@@ -101,5 +107,20 @@ impl DataTableSpec {
 
     pub fn header_fill_token(&self) -> &'static str {
         semantic::COLOR_BACKGROUND_SURFACE
+    }
+
+    pub fn with_size(mut self, size: ControlSize) -> Self {
+        self.size = size;
+        self
+    }
+
+    pub fn with_size_role(mut self, size_role: SemanticControlSizeRole) -> Self {
+        self.size_role = size_role;
+        self
+    }
+
+    pub fn with_density(mut self, density: ControlDensity) -> Self {
+        self.density = density;
+        self
     }
 }

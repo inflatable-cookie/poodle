@@ -1,3 +1,5 @@
+use poodle_primitives::{ControlDensity, ControlSize, SemanticControlSizeRole};
+
 /// MediaBrowsePanel — grid of selectable media items with loading/error/empty states.
 
 #[derive(Clone, Debug, PartialEq, Eq)]
@@ -22,6 +24,9 @@ pub struct MediaBrowsePanelSpec {
     pub loading: bool,
     pub error: Option<String>,
     pub has_more: bool,
+    pub size: ControlSize,
+    pub size_role: SemanticControlSizeRole,
+    pub density: ControlDensity,
 }
 
 impl MediaBrowsePanelSpec {
@@ -31,4 +36,19 @@ impl MediaBrowsePanelSpec {
     pub fn with_loading(mut self, v: bool) -> Self { self.loading = v; self }
     pub fn with_error(mut self, v: impl Into<String>) -> Self { self.error = Some(v.into()); self }
     pub fn with_has_more(mut self, v: bool) -> Self { self.has_more = v; self }
+
+    pub fn with_size(mut self, size: ControlSize) -> Self {
+        self.size = size;
+        self
+    }
+
+    pub fn with_size_role(mut self, size_role: SemanticControlSizeRole) -> Self {
+        self.size_role = size_role;
+        self
+    }
+
+    pub fn with_density(mut self, density: ControlDensity) -> Self {
+        self.density = density;
+        self
+    }
 }

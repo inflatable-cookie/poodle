@@ -1,10 +1,14 @@
 use poodle_tokens::semantic;
+use poodle_primitives::{ControlDensity, ControlSize, SemanticControlSizeRole};
 
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct ReorderableListSpec {
     pub item_count: usize,
     pub is_disabled: bool,
     pub active_drag_index: Option<usize>,
+    pub size: ControlSize,
+    pub size_role: SemanticControlSizeRole,
+    pub density: ControlDensity,
 }
 
 impl ReorderableListSpec {
@@ -13,6 +17,9 @@ impl ReorderableListSpec {
             item_count: 0,
             is_disabled: false,
             active_drag_index: None,
+            size: ControlSize::Md,
+            size_role: SemanticControlSizeRole::Control,
+            density: ControlDensity::Default,
         }
     }
 
@@ -45,5 +52,20 @@ impl ReorderableListSpec {
         } else {
             semantic::COLOR_ICON_PRIMARY
         }
+    }
+
+    pub fn with_size(mut self, size: ControlSize) -> Self {
+        self.size = size;
+        self
+    }
+
+    pub fn with_size_role(mut self, size_role: SemanticControlSizeRole) -> Self {
+        self.size_role = size_role;
+        self
+    }
+
+    pub fn with_density(mut self, density: ControlDensity) -> Self {
+        self.density = density;
+        self
     }
 }

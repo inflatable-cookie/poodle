@@ -1,6 +1,7 @@
 use poodle_tokens::semantic;
 
 use crate::types::AspectRatio;
+use poodle_primitives::{ControlDensity, ControlSize, SemanticControlSizeRole};
 
 #[derive(Clone, Debug, PartialEq)]
 pub struct VideoPlayerSpec {
@@ -12,6 +13,9 @@ pub struct VideoPlayerSpec {
     pub duration: f64,
     pub volume: f64,
     pub is_fullscreen: bool,
+    pub size: ControlSize,
+    pub size_role: SemanticControlSizeRole,
+    pub density: ControlDensity,
 }
 
 impl VideoPlayerSpec {
@@ -25,6 +29,9 @@ impl VideoPlayerSpec {
             duration: 0.0,
             volume: 1.0,
             is_fullscreen: false,
+            size: ControlSize::Md,
+            size_role: SemanticControlSizeRole::Control,
+            density: ControlDensity::Default,
         }
     }
 
@@ -77,5 +84,20 @@ impl VideoPlayerSpec {
 
     pub fn overlay_fill_token(&self) -> &'static str {
         semantic::COLOR_BACKGROUND_OVERLAY
+    }
+
+    pub fn with_size(mut self, size: ControlSize) -> Self {
+        self.size = size;
+        self
+    }
+
+    pub fn with_size_role(mut self, size_role: SemanticControlSizeRole) -> Self {
+        self.size_role = size_role;
+        self
+    }
+
+    pub fn with_density(mut self, density: ControlDensity) -> Self {
+        self.density = density;
+        self
     }
 }

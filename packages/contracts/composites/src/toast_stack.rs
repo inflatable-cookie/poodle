@@ -1,4 +1,5 @@
 use poodle_tokens::semantic;
+use poodle_primitives::{ControlDensity, ControlSize, SemanticControlSizeRole};
 
 /// Tone for a toast notification.
 #[derive(Clone, Copy, Debug, Default, Eq, PartialEq)]
@@ -62,6 +63,9 @@ impl Toast {
 pub struct ToastStackSpec {
     pub toasts: Vec<Toast>,
     pub position: ToastPosition,
+    pub size: ControlSize,
+    pub size_role: SemanticControlSizeRole,
+    pub density: ControlDensity,
 }
 
 impl ToastStackSpec {
@@ -69,6 +73,9 @@ impl ToastStackSpec {
         Self {
             toasts: Vec::new(),
             position: ToastPosition::default(),
+            size: ControlSize::Md,
+            size_role: SemanticControlSizeRole::Control,
+            density: ControlDensity::Default,
         }
     }
 
@@ -130,5 +137,20 @@ impl ToastStackSpec {
             ToastTone::Warning => semantic::COLOR_STATUS_WARNING,
             ToastTone::Danger => semantic::COLOR_STATUS_DANGER,
         }
+    }
+
+    pub fn with_size(mut self, size: ControlSize) -> Self {
+        self.size = size;
+        self
+    }
+
+    pub fn with_size_role(mut self, size_role: SemanticControlSizeRole) -> Self {
+        self.size_role = size_role;
+        self
+    }
+
+    pub fn with_density(mut self, density: ControlDensity) -> Self {
+        self.density = density;
+        self
     }
 }

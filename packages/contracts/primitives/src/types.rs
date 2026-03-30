@@ -122,6 +122,12 @@ pub enum ControlSize {
     Xl,
 }
 
+impl Default for ControlSize {
+    fn default() -> Self {
+        Self::Md
+    }
+}
+
 impl ControlSize {
     pub fn control_height_token(self) -> &'static str {
         semantic::SIZE_CONTROL_HEIGHT

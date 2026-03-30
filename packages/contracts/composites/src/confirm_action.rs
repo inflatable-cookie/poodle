@@ -1,4 +1,4 @@
-use poodle_primitives::StatusTone;
+use poodle_primitives::{ControlDensity, ControlSize, SemanticControlSizeRole, StatusTone};
 use poodle_tokens::semantic;
 
 #[derive(Clone, Debug, Eq, PartialEq)]
@@ -9,6 +9,9 @@ pub struct ConfirmActionSpec {
     pub cancel_label: String,
     pub tone: StatusTone,
     pub is_open: bool,
+    pub size: ControlSize,
+    pub size_role: SemanticControlSizeRole,
+    pub density: ControlDensity,
 }
 
 impl ConfirmActionSpec {
@@ -25,6 +28,9 @@ impl ConfirmActionSpec {
             cancel_label: cancel_label.into(),
             tone: StatusTone::Neutral,
             is_open: false,
+            size: ControlSize::Md,
+            size_role: SemanticControlSizeRole::Control,
+            density: ControlDensity::Default,
         }
     }
 
@@ -52,5 +58,20 @@ impl ConfirmActionSpec {
             StatusTone::Warning => semantic::COLOR_STATUS_WARNING,
             _ => semantic::COLOR_ACCENT_BASE,
         }
+    }
+
+    pub fn with_size(mut self, size: ControlSize) -> Self {
+        self.size = size;
+        self
+    }
+
+    pub fn with_size_role(mut self, size_role: SemanticControlSizeRole) -> Self {
+        self.size_role = size_role;
+        self
+    }
+
+    pub fn with_density(mut self, density: ControlDensity) -> Self {
+        self.density = density;
+        self
     }
 }

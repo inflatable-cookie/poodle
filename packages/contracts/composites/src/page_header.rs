@@ -1,4 +1,5 @@
 use poodle_tokens::semantic;
+use poodle_primitives::{ControlDensity, ControlSize, SemanticControlSizeRole};
 
 #[derive(Clone, Copy, Debug, Default, Eq, PartialEq)]
 pub enum PageHeaderAlign {
@@ -14,6 +15,9 @@ pub struct PageHeaderSpec {
     pub eyebrow: Option<String>,
     pub align: PageHeaderAlign,
     pub aria_label: Option<String>,
+    pub size: ControlSize,
+    pub size_role: SemanticControlSizeRole,
+    pub density: ControlDensity,
 }
 
 impl PageHeaderSpec {
@@ -24,6 +28,9 @@ impl PageHeaderSpec {
             eyebrow: None,
             align: PageHeaderAlign::default(),
             aria_label: None,
+            size: ControlSize::Md,
+            size_role: SemanticControlSizeRole::Control,
+            density: ControlDensity::Default,
         }
     }
 
@@ -73,5 +80,20 @@ impl PageHeaderSpec {
 
     pub fn padding_y_token(&self) -> &'static str {
         semantic::SPACE_PANEL_Y
+    }
+
+    pub fn with_size(mut self, size: ControlSize) -> Self {
+        self.size = size;
+        self
+    }
+
+    pub fn with_size_role(mut self, size_role: SemanticControlSizeRole) -> Self {
+        self.size_role = size_role;
+        self
+    }
+
+    pub fn with_density(mut self, density: ControlDensity) -> Self {
+        self.density = density;
+        self
     }
 }

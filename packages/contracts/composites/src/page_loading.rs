@@ -1,4 +1,5 @@
 use poodle_tokens::semantic;
+use poodle_primitives::{ControlDensity, ControlSize, SemanticControlSizeRole};
 
 #[derive(Clone, Debug, PartialEq)]
 pub struct PageLoadingSpec {
@@ -7,6 +8,9 @@ pub struct PageLoadingSpec {
     pub max: f64,
     pub message: Option<String>,
     pub can_cancel: bool,
+    pub size: ControlSize,
+    pub size_role: SemanticControlSizeRole,
+    pub density: ControlDensity,
 }
 
 impl PageLoadingSpec {
@@ -17,6 +21,9 @@ impl PageLoadingSpec {
             max: 100.0,
             message: None,
             can_cancel: false,
+            size: ControlSize::Md,
+            size_role: SemanticControlSizeRole::Control,
+            density: ControlDensity::Default,
         }
     }
 
@@ -51,5 +58,20 @@ impl PageLoadingSpec {
 
     pub fn progress_fill_token(&self) -> &'static str {
         semantic::COLOR_ACCENT_BASE
+    }
+
+    pub fn with_size(mut self, size: ControlSize) -> Self {
+        self.size = size;
+        self
+    }
+
+    pub fn with_size_role(mut self, size_role: SemanticControlSizeRole) -> Self {
+        self.size_role = size_role;
+        self
+    }
+
+    pub fn with_density(mut self, density: ControlDensity) -> Self {
+        self.density = density;
+        self
     }
 }
