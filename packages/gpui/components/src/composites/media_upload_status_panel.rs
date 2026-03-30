@@ -3,7 +3,9 @@
 use gpui::*;
 use poodle_gpui::GpuiThemeProvider;
 use poodle_composites::{MediaUploadStatusPanelSpec, MediaUploadStep};
+use poodle_primitives::{ControlDensity, ControlSize, SemanticControlSizeRole};
 
+use crate::presentation::{resolve_semantic_size, size_font_rem, panel_space_x_rem, panel_space_y_rem, control_space_x_rem, rem_to_px};
 use crate::theme_ext::{resolve_color, resolve_px, resolve_radius};
 
 pub struct MediaUploadStatusPanel {
@@ -15,6 +17,9 @@ impl MediaUploadStatusPanel {
     pub fn from_spec(spec: MediaUploadStatusPanelSpec, theme: &GpuiThemeProvider) -> Self {
         Self { spec, theme: theme.clone() }
     }
+    pub fn with_size(mut self, v: ControlSize) -> Self { self.spec.size = v; self }
+    pub fn with_size_role(mut self, v: SemanticControlSizeRole) -> Self { self.spec.size_role = v; self }
+    pub fn with_density(mut self, v: ControlDensity) -> Self { self.spec.density = v; self }
 }
 
 impl IntoElement for MediaUploadStatusPanel {
@@ -23,8 +28,13 @@ impl IntoElement for MediaUploadStatusPanel {
     fn into_element(self) -> Self::Element {
         let theme = &self.theme;
         let spec = &self.spec;
-        let body_size = resolve_px(theme, "semantic.typography.body.size");
-        let label_size = resolve_px(theme, "semantic.typography.label.size");
+        let effective_size = resolve_semantic_size(spec.size, spec.size_role);
+        let font_size = rem_to_px(size_font_rem(effective_size));
+        let pad = rem_to_px(panel_space_x_rem(spec.density));
+        let item_gap = rem_to_px(control_space_x_rem(spec.density));
+
+        let body_size = px(font_size);
+        let label_size = px(font_size * 0.85);
         let text_primary = resolve_color(theme, "semantic.color.text.primary");
         let text_secondary = resolve_color(theme, "semantic.color.text.secondary");
         let accent = resolve_color(theme, "semantic.color.accent.base");
@@ -47,8 +57,8 @@ impl IntoElement for MediaUploadStatusPanel {
             .rounded(radius)
             .bg(Hsla { a: surface_bg.a * 0.82, ..surface_bg })
             .border_1().border_color(Hsla { a: text_secondary.a * 0.2, ..text_secondary })
-            .p(px(16.0))
-            .flex().flex_col().gap(px(8.0));
+            .p(px(pad))
+            .flex().flex_col().gap(px(item_gap));
 
         panel = panel.child(
             div().text_size(body_size).font_weight(FontWeight::SEMIBOLD)

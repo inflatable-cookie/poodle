@@ -3,7 +3,9 @@
 use gpui::*;
 use poodle_gpui::GpuiThemeProvider;
 use poodle_composites::{DockEdge, DockRegionSpec, DockTabsPlacement, PanelTabItem};
+use poodle_primitives::{ControlDensity, ControlSize, SemanticControlSizeRole};
 
+use crate::presentation::{resolve_semantic_size, size_font_rem, control_space_x_rem, rem_to_px};
 use crate::theme_ext::resolve_color;
 
 /// A real GPUI dock region backed by `DockRegionSpec`.
@@ -48,6 +50,9 @@ impl DockRegion {
     pub fn items(mut self, v: Vec<PanelTabItem>) -> Self { self.spec.items = v; self }
     pub fn value(mut self, v: impl Into<String>) -> Self { self.spec.value = Some(v.into()); self }
     pub fn aria_label(mut self, v: impl Into<String>) -> Self { self.spec.aria_label = Some(v.into()); self }
+    pub fn with_size(mut self, v: ControlSize) -> Self { self.spec.size = v; self }
+    pub fn with_size_role(mut self, v: SemanticControlSizeRole) -> Self { self.spec.size_role = v; self }
+    pub fn with_density(mut self, v: ControlDensity) -> Self { self.spec.density = v; self }
 
 
     pub fn with_id(mut self, prefix: impl Into<String>) -> Self {
@@ -83,6 +88,9 @@ impl IntoElement for DockRegion {
     fn into_element(self) -> Self::Element {
         let theme = &self.theme;
         let spec = &self.spec;
+        let effective_size = resolve_semantic_size(spec.size, spec.size_role);
+        let font_size = rem_to_px(size_font_rem(effective_size));
+        let tab_gap = rem_to_px(control_space_x_rem(spec.density));
 
         let strip_fill = resolve_color(theme, spec.strip_fill_token());
         let border = resolve_color(theme, "semantic.color.border.default");
@@ -122,14 +130,14 @@ impl IntoElement for DockRegion {
 
         if is_tabs_on_edge {
             // Vertical tab strip along the edge
-            tabs_strip = tabs_strip.flex().flex_col().gap(px(2.0)).py(px(4.0)).w(px(36.0));
+            tabs_strip = tabs_strip.flex().flex_col().gap(px(tab_gap * 0.25)).py(px(tab_gap * 0.5)).w(px(36.0));
         } else {
             // Horizontal tab strip on top
             tabs_strip = tabs_strip
                 .flex()
                 .items_center()
-                .gap(px(2.0))
-                .px(px(4.0))
+                .gap(px(tab_gap * 0.25))
+                .px(px(tab_gap * 0.5))
                 .h(px(32.0))
                 .border_b_1()
                 .border_color(border);
@@ -148,9 +156,9 @@ impl IntoElement for DockRegion {
                 .rounded(px(3.0));
 
             if is_tabs_on_edge {
-                tab = tab.w_full().py(px(6.0)).text_size(px(12.0));
+                tab = tab.w_full().py(px(tab_gap * 0.75)).text_size(px(font_size * 0.85));
             } else {
-                tab = tab.px(px(8.0)).py(px(4.0)).text_size(px(12.0));
+                tab = tab.px(px(tab_gap)).py(px(tab_gap * 0.5)).text_size(px(font_size * 0.85));
             }
 
             if is_active {

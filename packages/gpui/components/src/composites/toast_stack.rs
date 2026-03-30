@@ -5,7 +5,9 @@ use std::rc::Rc;
 use gpui::*;
 use poodle_gpui::GpuiThemeProvider;
 use poodle_composites::{Toast, ToastPosition, ToastStackSpec};
+use poodle_primitives::{ControlDensity, ControlSize, SemanticControlSizeRole};
 
+use crate::presentation::{resolve_semantic_size, size_font_rem, rem_to_px};
 use crate::theme_ext::{resolve_color, resolve_px, resolve_radius};
 
 /// A real GPUI toast stack component backed by `ToastStackSpec`.
@@ -40,6 +42,9 @@ impl ToastStack {
     // ── Forwarded spec builders ───────────────────────────────
     pub fn toasts(mut self, v: Vec<Toast>) -> Self { self.spec.toasts = v; self }
     pub fn position(mut self, v: ToastPosition) -> Self { self.spec.position = v; self }
+    pub fn with_size(mut self, v: ControlSize) -> Self { self.spec.size = v; self }
+    pub fn with_size_role(mut self, v: SemanticControlSizeRole) -> Self { self.spec.size_role = v; self }
+    pub fn with_density(mut self, v: ControlDensity) -> Self { self.spec.density = v; self }
 
 
     pub fn on_dismiss(
@@ -65,9 +70,11 @@ impl IntoElement for ToastStack {
     fn into_element(self) -> Self::Element {
         let theme = &self.theme;
         let spec = &self.spec;
+        let effective_size = resolve_semantic_size(spec.size, spec.size_role);
+        let font_size = rem_to_px(size_font_rem(effective_size));
 
         let gap = resolve_px(theme, spec.gap_token());
-        let body_size = resolve_px(theme, "semantic.typography.body.size");
+        let body_size = px(font_size);
         let padding = resolve_px(theme, spec.padding_token());
         let fill = resolve_color(theme, spec.fill_token());
         let border_color = resolve_color(theme, spec.border_token());

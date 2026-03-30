@@ -3,7 +3,9 @@
 use gpui::*;
 use poodle_gpui::GpuiThemeProvider;
 use poodle_composites::FilterToolbarSpec;
+use poodle_primitives::{ControlDensity, ControlSize, SemanticControlSizeRole};
 
+use crate::presentation::{resolve_semantic_size, size_font_rem, panel_space_x_rem, panel_space_y_rem, control_space_x_rem, rem_to_px};
 use crate::theme_ext::{resolve_color, resolve_px};
 
 /// A real GPUI filter toolbar component backed by `FilterToolbarSpec`.
@@ -43,6 +45,9 @@ impl FilterToolbar {
     pub fn active_filter_count(mut self, v: usize) -> Self { self.spec.active_filter_count = v; self }
     pub fn result_count(mut self, v: usize) -> Self { self.spec.result_count = Some(v); self }
     pub fn show_clear_action(mut self, v: bool) -> Self { self.spec.show_clear_action = v; self }
+    pub fn with_size(mut self, v: ControlSize) -> Self { self.spec.size = v; self }
+    pub fn with_size_role(mut self, v: SemanticControlSizeRole) -> Self { self.spec.size_role = v; self }
+    pub fn with_density(mut self, v: ControlDensity) -> Self { self.spec.density = v; self }
 
 
     pub fn with_search(mut self, search: impl IntoElement) -> Self {
@@ -70,16 +75,21 @@ impl IntoElement for FilterToolbar {
     fn into_element(self) -> Self::Element {
         let theme = &self.theme;
         let spec = &self.spec;
+        let effective_size = resolve_semantic_size(spec.size, spec.size_role);
+        let font_size = rem_to_px(size_font_rem(effective_size));
+        let panel_px = rem_to_px(panel_space_x_rem(spec.density));
+        let panel_py = rem_to_px(panel_space_y_rem(spec.density));
+        let item_gap = rem_to_px(control_space_x_rem(spec.density));
 
-        let inline_padding = resolve_px(theme, "semantic.space.inline.md");
-        let body_size = resolve_px(theme, "semantic.typography.body.size");
+        let inline_padding = px(panel_px);
+        let body_size = px(font_size);
         let gap = resolve_px(theme, spec.gap_token());
         let text_primary = resolve_color(theme, "semantic.color.text.primary");
         let text_secondary = resolve_color(theme, "semantic.color.text.secondary");
         let accent = resolve_color(theme, "semantic.color.accent.base");
         let border = resolve_color(theme, "semantic.color.border.subtle");
 
-        let block_padding = resolve_px(theme, "semantic.space.inline.sm");
+        let block_padding = px(panel_py);
 
         let mut toolbar = div()
             .w_full()

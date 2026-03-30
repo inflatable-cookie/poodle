@@ -3,8 +3,9 @@
 
 use gpui::*;
 use poodle_gpui::GpuiThemeProvider;
-use poodle_primitives::{IconSize, IconSpec};
+use poodle_primitives::{ControlDensity, ControlSize, IconSize, IconSpec, SemanticControlSizeRole};
 use poodle_composites::VideoPlayerSpec;
+use crate::presentation::{resolve_semantic_size, panel_space_x_rem, panel_space_y_rem, control_space_x_rem, rem_to_px};
 use crate::primitives::Icon;
 use crate::theme_ext::{resolve_color, resolve_radius};
 
@@ -30,11 +31,19 @@ impl VideoPlayer {
         self.has_captions = has_captions;
         self
     }
+    pub fn with_size(mut self, v: ControlSize) -> Self { self.spec.size = v; self }
+    pub fn with_size_role(mut self, v: SemanticControlSizeRole) -> Self { self.spec.size_role = v; self }
+    pub fn with_density(mut self, v: ControlDensity) -> Self { self.spec.density = v; self }
 }
 
 impl IntoElement for VideoPlayer {
     type Element = AnyElement;
     fn into_element(self) -> Self::Element {
+        let _effective_size = resolve_semantic_size(self.spec.size, self.spec.size_role);
+        let pad_x = rem_to_px(panel_space_x_rem(self.spec.density));
+        let pad_y = rem_to_px(panel_space_y_rem(self.spec.density));
+        let item_gap = rem_to_px(control_space_x_rem(self.spec.density));
+
         let fill = resolve_color(&self.theme, self.spec.fill_token());
         let overlay = resolve_color(&self.theme, self.spec.overlay_fill_token());
         let radius = resolve_radius(&self.theme, "semantic.radius.surface");
@@ -155,12 +164,12 @@ impl IntoElement for VideoPlayer {
 
         let control_bar = div()
             .bg(overlay)
-            .px(px(12.0))
-            .py(px(8.0))
+            .px(px(pad_x))
+            .py(px(pad_y))
             .flex()
             .flex_row()
             .items_center()
-            .gap(px(8.0))
+            .gap(px(item_gap))
             .child(left_group)
             .child(right_group);
 

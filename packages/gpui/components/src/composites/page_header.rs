@@ -3,7 +3,9 @@
 use gpui::*;
 use poodle_gpui::GpuiThemeProvider;
 use poodle_composites::{PageHeaderAlign, PageHeaderSpec};
+use poodle_primitives::{ControlDensity, ControlSize, SemanticControlSizeRole};
 
+use crate::presentation::{resolve_semantic_size, size_font_rem, panel_space_x_rem, panel_space_y_rem, rem_to_px};
 use crate::theme_ext::{resolve_color, resolve_px};
 
 /// A real GPUI page header component backed by `PageHeaderSpec`.
@@ -42,6 +44,9 @@ impl PageHeader {
     pub fn eyebrow(mut self, v: impl Into<String>) -> Self { self.spec.eyebrow = Some(v.into()); self }
     pub fn align(mut self, v: PageHeaderAlign) -> Self { self.spec.align = v; self }
     pub fn aria_label(mut self, v: impl Into<String>) -> Self { self.spec.aria_label = Some(v.into()); self }
+    pub fn with_size(mut self, v: ControlSize) -> Self { self.spec.size = v; self }
+    pub fn with_size_role(mut self, v: SemanticControlSizeRole) -> Self { self.spec.size_role = v; self }
+    pub fn with_density(mut self, v: ControlDensity) -> Self { self.spec.density = v; self }
 
 
     pub fn with_breadcrumbs(mut self, breadcrumbs: impl IntoElement) -> Self {
@@ -61,9 +66,13 @@ impl IntoElement for PageHeader {
     fn into_element(self) -> Self::Element {
         let theme = &self.theme;
         let spec = &self.spec;
+        let effective_size = resolve_semantic_size(spec.size, spec.size_role);
+        let font_size = rem_to_px(size_font_rem(effective_size));
+        let _panel_px = rem_to_px(panel_space_x_rem(spec.density));
+        let _panel_py = rem_to_px(panel_space_y_rem(spec.density));
 
         let gap = resolve_px(theme, spec.gap_token());
-        let body_size = resolve_px(theme, "semantic.typography.body.size");
+        let body_size = px(font_size);
         let heading_size = resolve_px(theme, "semantic.typography.heading.size");
         let header_gap = resolve_px(theme, spec.header_gap_token());
         let padding_y = resolve_px(theme, spec.padding_y_token());

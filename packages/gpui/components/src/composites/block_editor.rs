@@ -3,7 +3,8 @@
 use gpui::*;
 use poodle_gpui::GpuiThemeProvider;
 use poodle_composites::BlockEditorSpec;
-use poodle_primitives::{IconSize, IconSpec};
+use poodle_primitives::{ControlDensity, ControlSize, IconSize, IconSpec, SemanticControlSizeRole};
+use crate::presentation::{resolve_semantic_size, panel_space_x_rem, panel_space_y_rem, control_space_x_rem, rem_to_px};
 use crate::primitives::Icon;
 use crate::theme_ext::{resolve_color, resolve_opacity, resolve_px, resolve_radius};
 
@@ -28,7 +29,9 @@ impl BlockEditor {
     pub fn with_child(mut self, child: impl IntoElement) -> Self {
         self.children.push(child.into_any_element()); self
     }
-
+    pub fn with_size(mut self, v: ControlSize) -> Self { self.spec.size = v; self }
+    pub fn with_size_role(mut self, v: SemanticControlSizeRole) -> Self { self.spec.size_role = v; self }
+    pub fn with_density(mut self, v: ControlDensity) -> Self { self.spec.density = v; self }
 }
 
 /// Build a small toolbar icon button (20x20, rounded, hover-bg).
@@ -50,6 +53,11 @@ impl IntoElement for BlockEditor {
     type Element = AnyElement;
     fn into_element(self) -> Self::Element {
         let theme = &self.theme;
+        let _effective_size = resolve_semantic_size(self.spec.size, self.spec.size_role);
+        let pad_x = rem_to_px(panel_space_x_rem(self.spec.density));
+        let pad_y = rem_to_px(panel_space_y_rem(self.spec.density));
+        let item_gap = rem_to_px(control_space_x_rem(self.spec.density));
+
         let fill = resolve_color(theme, self.spec.fill_token());
         let border = resolve_color(theme, self.spec.border_token());
         let gap = resolve_px(theme, self.spec.block_gap_token());
@@ -61,7 +69,7 @@ impl IntoElement for BlockEditor {
         let mut el = div()
             .bg(fill).border_1().border_color(border).rounded(radius)
             .flex().flex_col().gap(gap)
-            .px(px(12.0)).py(px(8.0))
+            .px(px(pad_x)).py(px(pad_y))
             .min_h(px(120.0));
 
         let block_count = self.children.len();

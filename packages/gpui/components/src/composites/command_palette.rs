@@ -4,9 +4,10 @@ use gpui::prelude::FluentBuilder;
 use gpui::*;
 use poodle_gpui::GpuiThemeProvider;
 use poodle_composites::{CommandActionItem, CommandPaletteSpec, DiscoveryState};
+use poodle_primitives::{ControlDensity, ControlSize, OverlayPlacement, SemanticControlSizeRole};
 
+use crate::presentation::{resolve_semantic_size, size_font_rem, panel_space_x_rem, panel_space_y_rem, control_space_x_rem, rem_to_px};
 use crate::theme_ext::{resolve_color, resolve_opacity, resolve_px};
-use poodle_primitives::{OverlayPlacement};
 
 /// A real GPUI command palette backed by `CommandPaletteSpec`.
 ///
@@ -46,6 +47,9 @@ impl CommandPalette {
     pub fn state(mut self, v: DiscoveryState) -> Self { self.spec.state = v; self }
     pub fn active_action_id(mut self, v: impl Into<String>) -> Self { self.spec.active_action_id = Some(v.into()); self }
     pub fn placement(mut self, v: OverlayPlacement) -> Self { self.spec.placement = v; self }
+    pub fn with_size(mut self, v: ControlSize) -> Self { self.spec.size = v; self }
+    pub fn with_size_role(mut self, v: SemanticControlSizeRole) -> Self { self.spec.size_role = v; self }
+    pub fn with_density(mut self, v: ControlDensity) -> Self { self.spec.density = v; self }
 
 
     pub fn with_id(mut self, prefix: impl Into<String>) -> Self {
@@ -76,9 +80,14 @@ impl IntoElement for CommandPalette {
     fn into_element(self) -> Self::Element {
         let theme = &self.theme;
         let spec = &self.spec;
+        let effective_size = resolve_semantic_size(spec.size, spec.size_role);
+        let font_size = rem_to_px(size_font_rem(effective_size));
+        let panel_px = rem_to_px(panel_space_x_rem(spec.density));
+        let panel_py = rem_to_px(panel_space_y_rem(spec.density));
+        let item_gap = rem_to_px(control_space_x_rem(spec.density));
 
-        let inline_padding = resolve_px(theme, "semantic.space.inline.md");
-        let body_size = resolve_px(theme, "semantic.typography.body.size");
+        let inline_padding = px(panel_px);
+        let body_size = px(font_size);
 
         let results_bg = resolve_color(theme, spec.results_fill_token());
         let border = resolve_color(theme, "semantic.color.border.default");

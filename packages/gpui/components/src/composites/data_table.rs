@@ -4,8 +4,9 @@ use gpui::prelude::FluentBuilder;
 use gpui::*;
 use poodle_gpui::GpuiThemeProvider;
 use poodle_composites::{DataTableSpec, TableColumnSpec, TableRowSpec, TableSortDirection};
-use poodle_primitives::{IconSize, IconSpec};
+use poodle_primitives::{ControlDensity, ControlSize, IconSize, IconSpec, SemanticControlSizeRole};
 
+use crate::presentation::{resolve_semantic_size, size_font_rem, panel_space_x_rem, panel_space_y_rem, control_space_x_rem, rem_to_px};
 use crate::primitives::Icon;
 use crate::theme_ext::{resolve_color, resolve_px};
 
@@ -49,6 +50,9 @@ impl DataTable {
     pub fn show_row_actions(mut self, v: bool) -> Self { self.spec.show_row_actions = v; self }
     pub fn empty_message(mut self, v: impl Into<String>) -> Self { self.spec.empty_message = Some(v.into()); self }
     pub fn aria_label(mut self, v: impl Into<String>) -> Self { self.spec.aria_label = v.into(); self }
+    pub fn with_size(mut self, v: ControlSize) -> Self { self.spec.size = v; self }
+    pub fn with_size_role(mut self, v: SemanticControlSizeRole) -> Self { self.spec.size_role = v; self }
+    pub fn with_density(mut self, v: ControlDensity) -> Self { self.spec.density = v; self }
 
 
     pub fn on_row_click(
@@ -74,9 +78,14 @@ impl IntoElement for DataTable {
     fn into_element(self) -> Self::Element {
         let theme = &self.theme;
         let spec = &self.spec;
+        let effective_size = resolve_semantic_size(spec.size, spec.size_role);
+        let font_size = rem_to_px(size_font_rem(effective_size));
+        let panel_px = rem_to_px(panel_space_x_rem(spec.density));
+        let panel_py = rem_to_px(panel_space_y_rem(spec.density));
+        let _item_gap = rem_to_px(control_space_x_rem(spec.density));
 
-        let inline_padding = resolve_px(theme, "semantic.space.inline.md");
-        let body_size = resolve_px(theme, "semantic.typography.body.size");
+        let inline_padding = px(panel_px);
+        let body_size = px(font_size);
 
         let header_bg = resolve_color(theme, spec.header_fill_token());
         let border_color = resolve_color(theme, "semantic.color.border.subtle");
@@ -117,8 +126,8 @@ impl IntoElement for DataTable {
             let mut header_cell = div()
                 .flex_1()
                 .px(inline_padding)
-                .py(px(12.0))
-                .text_size(px(12.0))
+                .py(px(panel_py))
+                .text_size(px(font_size * 0.85))
                 .font_weight(FontWeight::SEMIBOLD)
                 .text_color(text_secondary)
                 .when(col.align_end, |el| el.text_right());

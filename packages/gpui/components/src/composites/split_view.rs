@@ -3,8 +3,9 @@
 use gpui::*;
 use poodle_gpui::GpuiThemeProvider;
 use poodle_composites::{SplitOrientation, SplitViewSpec};
-use poodle_primitives::{IconSize, IconSpec};
+use poodle_primitives::{ControlDensity, ControlSize, IconSize, IconSpec, SemanticControlSizeRole};
 
+use crate::presentation::resolve_semantic_size;
 use crate::primitives::Icon;
 use crate::theme_ext::resolve_color;
 
@@ -51,6 +52,9 @@ impl SplitView {
     pub fn min_secondary_size(mut self, v: f32) -> Self { self.spec.min_secondary_size = Some(v); self }
     pub fn primary_collapsed(mut self, v: bool) -> Self { self.spec.is_primary_collapsed = v; self }
     pub fn secondary_collapsed(mut self, v: bool) -> Self { self.spec.is_secondary_collapsed = v; self }
+    pub fn with_size(mut self, v: ControlSize) -> Self { self.spec.size = v; self }
+    pub fn with_size_role(mut self, v: SemanticControlSizeRole) -> Self { self.spec.size_role = v; self }
+    pub fn with_density(mut self, v: ControlDensity) -> Self { self.spec.density = v; self }
 
 
     pub fn with_primary(mut self, content: impl IntoElement) -> Self {
@@ -78,6 +82,7 @@ impl IntoElement for SplitView {
     fn into_element(self) -> Self::Element {
         let theme = &self.theme;
         let spec = &self.spec;
+        let _effective_size = resolve_semantic_size(spec.size, spec.size_role);
 
         let border = resolve_color(theme, "semantic.color.border.default");
         let ratio = spec.current_ratio();

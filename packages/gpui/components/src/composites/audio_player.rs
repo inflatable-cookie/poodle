@@ -3,8 +3,9 @@
 
 use gpui::*;
 use poodle_gpui::GpuiThemeProvider;
-use poodle_primitives::{IconSize, IconSpec};
+use poodle_primitives::{ControlDensity, ControlSize, IconSize, IconSpec, SemanticControlSizeRole};
 use poodle_composites::AudioPlayerSpec;
+use crate::presentation::{resolve_semantic_size, size_font_rem, panel_space_x_rem, panel_space_y_rem, control_space_x_rem, rem_to_px};
 use crate::primitives::Icon;
 use crate::theme_ext::{color_mix, resolve_color, resolve_radius};
 
@@ -25,11 +26,20 @@ impl AudioPlayer {
     pub fn from_spec(spec: AudioPlayerSpec, theme: &GpuiThemeProvider) -> Self {
         Self { spec, theme: theme.clone() }
     }
+    pub fn with_size(mut self, v: ControlSize) -> Self { self.spec.size = v; self }
+    pub fn with_size_role(mut self, v: SemanticControlSizeRole) -> Self { self.spec.size_role = v; self }
+    pub fn with_density(mut self, v: ControlDensity) -> Self { self.spec.density = v; self }
 }
 
 impl IntoElement for AudioPlayer {
     type Element = AnyElement;
     fn into_element(self) -> Self::Element {
+        let effective_size = resolve_semantic_size(self.spec.size, self.spec.size_role);
+        let font_size = rem_to_px(size_font_rem(effective_size));
+        let pad_x = rem_to_px(panel_space_x_rem(self.spec.density));
+        let pad_y = rem_to_px(panel_space_y_rem(self.spec.density));
+        let gap = rem_to_px(control_space_x_rem(self.spec.density));
+
         let fill = resolve_color(&self.theme, self.spec.fill_token());
         let control_color = resolve_color(&self.theme, self.spec.control_color_token());
         let radius = resolve_radius(&self.theme, "semantic.radius.surface");
@@ -72,8 +82,8 @@ impl IntoElement for AudioPlayer {
 
         div()
             .bg(fill).rounded(radius)
-            .px(px(12.0)).py(px(8.0))
-            .flex().flex_row().items_center().gap(px(8.0))
+            .px(px(pad_x)).py(px(pad_y))
+            .flex().flex_row().items_center().gap(px(gap))
             .child(
                 div()
                     .id(SharedString::from("poodle-audio-play"))
@@ -86,7 +96,7 @@ impl IntoElement for AudioPlayer {
                     .focus(move |s| s.border_color(focus_ring))
                     .child(play_icon)
             )
-            .child(div().text_size(px(12.0)).text_color(muted_color).child(time))
+            .child(div().text_size(px(font_size * 0.85)).text_color(muted_color).child(time))
             .child(track_bar)
             .child(
                 div()

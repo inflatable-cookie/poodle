@@ -6,6 +6,8 @@
 use gpui::*;
 use poodle_gpui::GpuiThemeProvider;
 use poodle_composites::ConfirmActionSpec;
+use poodle_primitives::{ControlDensity, ControlSize, SemanticControlSizeRole};
+use crate::presentation::{resolve_semantic_size, size_font_rem, panel_space_x_rem, panel_space_y_rem, control_space_x_rem, rem_to_px};
 use crate::theme_ext::{resolve_color, resolve_px, resolve_radius};
 
 pub struct ConfirmAction {
@@ -51,6 +53,9 @@ impl ConfirmAction {
         self.on_cancel = Some(Box::new(handler));
         self
     }
+    pub fn with_size(mut self, v: ControlSize) -> Self { self.spec.size = v; self }
+    pub fn with_size_role(mut self, v: SemanticControlSizeRole) -> Self { self.spec.size_role = v; self }
+    pub fn with_density(mut self, v: ControlDensity) -> Self { self.spec.density = v; self }
 }
 
 impl IntoElement for ConfirmAction {
@@ -58,18 +63,24 @@ impl IntoElement for ConfirmAction {
     fn into_element(self) -> Self::Element {
         let theme = &self.theme;
         let spec = &self.spec;
+        let effective_size = resolve_semantic_size(spec.size, spec.size_role);
+        let font_size = rem_to_px(size_font_rem(effective_size));
+        let pad_x = rem_to_px(panel_space_x_rem(spec.density));
+        let pad_y = rem_to_px(panel_space_y_rem(spec.density));
+        let gap = rem_to_px(control_space_x_rem(spec.density));
+
         let fill = resolve_color(theme, "semantic.color.background.elevated");
         let border = resolve_color(theme, "semantic.color.border.default");
         let radius = resolve_radius(theme, "semantic.radius.surface");
         let title_color = resolve_color(theme, "semantic.color.text.primary");
         let msg_color = resolve_color(theme, "semantic.color.text.secondary");
         let confirm_fill = resolve_color(theme, spec.confirm_fill_token());
-        let body_size = resolve_px(theme, "semantic.typography.body.size");
+        let body_size = px(font_size);
 
         let mut dialog = div()
             .bg(fill).border_1().border_color(border).rounded(radius)
-            .px(px(24.0)).py(px(20.0))
-            .flex().flex_col().gap(px(16.0))
+            .px(px(pad_x)).py(px(pad_y))
+            .flex().flex_col().gap(px(gap * 2.0))
             .min_w(px(360.0))
             .shadow(vec![
                 gpui::BoxShadow {
@@ -125,7 +136,7 @@ impl IntoElement for ConfirmAction {
             });
         }
 
-        let actions = div().flex().flex_row().flex_wrap().gap(px(8.0)).justify_end()
+        let actions = div().flex().flex_row().flex_wrap().gap(px(gap)).justify_end()
             .child(cancel_btn)
             .child(confirm_btn);
         dialog = dialog.child(actions);

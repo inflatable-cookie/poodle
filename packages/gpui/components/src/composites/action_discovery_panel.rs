@@ -4,8 +4,9 @@ use gpui::*;
 use poodle_adapter::ThemeProvider;
 use poodle_gpui::GpuiThemeProvider;
 use poodle_composites::{ActionDiscoveryPanelSpec, ActionDiscoverySection, DiscoveryState};
-use poodle_primitives::SkeletonSpec;
+use poodle_primitives::{ControlDensity, ControlSize, SemanticControlSizeRole, SkeletonSpec};
 
+use crate::presentation::{resolve_semantic_size, size_font_rem, panel_space_x_rem, panel_space_y_rem, control_space_x_rem, rem_to_px};
 use crate::primitives::Skeleton;
 use crate::theme_ext::{resolve_color, resolve_opacity, resolve_px};
 
@@ -43,6 +44,9 @@ impl ActionDiscoveryPanel {
     pub fn sections(mut self, v: Vec<ActionDiscoverySection>) -> Self { self.spec.sections = v; self }
     pub fn state(mut self, v: DiscoveryState) -> Self { self.spec.state = v; self }
     pub fn empty_message(mut self, v: impl Into<String>) -> Self { self.spec.empty_message = Some(v.into()); self }
+    pub fn with_size(mut self, v: ControlSize) -> Self { self.spec.size = v; self }
+    pub fn with_size_role(mut self, v: SemanticControlSizeRole) -> Self { self.spec.size_role = v; self }
+    pub fn with_density(mut self, v: ControlDensity) -> Self { self.spec.density = v; self }
 
 
     pub fn with_id(mut self, prefix: impl Into<String>) -> Self {
@@ -66,6 +70,12 @@ impl IntoElement for ActionDiscoveryPanel {
         let theme = &self.theme;
         let spec = &self.spec;
 
+        let effective_size = resolve_semantic_size(spec.size, spec.size_role);
+        let font_size = rem_to_px(size_font_rem(effective_size));
+        let panel_px = rem_to_px(panel_space_x_rem(spec.density));
+        let panel_py = rem_to_px(panel_space_y_rem(spec.density));
+        let item_gap = rem_to_px(control_space_x_rem(spec.density));
+
         let text_primary = resolve_color(theme, "semantic.color.text.primary");
         let text_secondary = resolve_color(theme, "semantic.color.text.secondary");
         let text_muted = resolve_color(theme, "semantic.color.text.muted");
@@ -73,7 +83,7 @@ impl IntoElement for ActionDiscoveryPanel {
         let disabled_opacity = resolve_opacity(theme, "semantic.state.opacity.disabled");
         let hover_bg = resolve_color(theme, "semantic.color.background.elevated");
         let focus_ring = resolve_color(theme, "semantic.color.accent.focusRing");
-        let body_size = resolve_px(theme, "semantic.typography.body.size");
+        let body_size = px(font_size);
         let gap = theme.resolve_space(spec.gap_token());
 
         let mut panel = div()
@@ -129,7 +139,7 @@ impl IntoElement for ActionDiscoveryPanel {
             DiscoveryState::Error => {
                 panel = panel.child(
                     div()
-                        .p(px(16.0))
+                        .px(px(panel_px)).py(px(panel_py))
                         .text_size(body_size)
                         .text_color(resolve_color(theme, "semantic.color.status.danger"))
                         .child("Failed to load actions"),
@@ -143,7 +153,7 @@ impl IntoElement for ActionDiscoveryPanel {
                     .unwrap_or("No actions found");
                 panel = panel.child(
                     div()
-                        .p(px(16.0))
+                        .px(px(panel_px)).py(px(panel_py))
                         .text_size(body_size)
                         .text_color(text_secondary)
                         .child(msg.to_string()),
@@ -155,14 +165,14 @@ impl IntoElement for ActionDiscoveryPanel {
 
         // Render each section
         for section in &spec.sections {
-            let mut section_el = div().flex().flex_col().gap(px(4.0));
+            let mut section_el = div().flex().flex_col().gap(px(item_gap));
 
             // Section heading
             section_el = section_el.child(
                 div()
-                    .px(px(8.0))
-                    .py(px(4.0))
-                    .text_size(px(12.0))
+                    .px(px(panel_px * 0.5))
+                    .py(px(panel_py * 0.5))
+                    .text_size(px(font_size * 0.85))
                     .font_weight(FontWeight::SEMIBOLD)
                     .text_color(text_muted)
                     .child(section.title.clone()),
@@ -172,8 +182,8 @@ impl IntoElement for ActionDiscoveryPanel {
             if let Some(ref desc) = section.description {
                 section_el = section_el.child(
                     div()
-                        .px(px(8.0))
-                        .text_size(px(12.0))
+                        .px(px(panel_px * 0.5))
+                        .text_size(px(font_size * 0.85))
                         .text_color(text_secondary)
                         .child(desc.clone()),
                 );
@@ -189,8 +199,8 @@ impl IntoElement for ActionDiscoveryPanel {
                     .flex()
                     .items_center()
                     .justify_between()
-                    .px(px(8.0))
-                    .py(px(6.0))
+                    .px(px(panel_px * 0.5))
+                    .py(px(panel_py * 0.5))
                     .rounded(px(4.0))
                     .text_size(body_size)
                     .text_color(text_primary);

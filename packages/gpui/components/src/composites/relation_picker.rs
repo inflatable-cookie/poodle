@@ -5,8 +5,9 @@ use gpui::prelude::FluentBuilder;
 use gpui::*;
 use poodle_gpui::GpuiThemeProvider;
 use poodle_composites::{BrowseState, PickerItemSpec, PickerVariant, RelationPickerSpec, SelectionMode};
-use poodle_primitives::{IconSize, IconSpec, SpinnerSize, SpinnerSpec, SpinnerTone, SpinnerVariant};
+use poodle_primitives::{ControlDensity, ControlSize, IconSize, IconSpec, SemanticControlSizeRole, SpinnerSize, SpinnerSpec, SpinnerTone, SpinnerVariant};
 
+use crate::presentation::{resolve_semantic_size, size_font_rem, panel_space_x_rem, panel_space_y_rem, control_space_x_rem, rem_to_px};
 use crate::primitives::{Icon, Spinner};
 use crate::theme_ext::{resolve_color, resolve_px, resolve_radius};
 
@@ -51,6 +52,9 @@ impl RelationPicker {
     pub fn variant(mut self, v: PickerVariant) -> Self { self.spec.variant = v; self }
     pub fn state(mut self, v: BrowseState) -> Self { self.spec.state = v; self }
     pub fn with_drill_path(mut self, path: Vec<String>) -> Self { self.drill_path = path; self }
+    pub fn with_size(mut self, v: ControlSize) -> Self { self.spec.size = v; self }
+    pub fn with_size_role(mut self, v: SemanticControlSizeRole) -> Self { self.spec.size_role = v; self }
+    pub fn with_density(mut self, v: ControlDensity) -> Self { self.spec.density = v; self }
 
 
     pub fn on_select(
@@ -76,10 +80,15 @@ impl IntoElement for RelationPicker {
     fn into_element(self) -> Self::Element {
         let theme = &self.theme;
         let spec = &self.spec;
+        let effective_size = resolve_semantic_size(spec.size, spec.size_role);
+        let font_size = rem_to_px(size_font_rem(effective_size));
+        let panel_px = rem_to_px(panel_space_x_rem(spec.density));
+        let panel_py = rem_to_px(panel_space_y_rem(spec.density));
+        let item_gap = rem_to_px(control_space_x_rem(spec.density));
 
-        let inline_padding = resolve_px(theme, "semantic.space.inline.md");
-        let inline_gap = resolve_px(theme, "semantic.space.inline.sm");
-        let body_size = resolve_px(theme, "semantic.typography.body.size");
+        let inline_padding = px(panel_px);
+        let inline_gap = px(item_gap);
+        let body_size = px(font_size);
         let control_radius = resolve_radius(theme, "semantic.radius.control");
 
         let text_primary = resolve_color(theme, "semantic.color.text.primary");

@@ -3,7 +3,9 @@
 use gpui::*;
 use poodle_gpui::GpuiThemeProvider;
 use poodle_composites::MediaBrowsePanelSpec;
+use poodle_primitives::{ControlDensity, ControlSize, SemanticControlSizeRole};
 
+use crate::presentation::{resolve_semantic_size, size_font_rem, panel_space_x_rem, panel_space_y_rem, control_space_x_rem, rem_to_px};
 use crate::theme_ext::{resolve_color, resolve_px};
 
 pub struct MediaBrowsePanel {
@@ -15,6 +17,9 @@ impl MediaBrowsePanel {
     pub fn from_spec(spec: MediaBrowsePanelSpec, theme: &GpuiThemeProvider) -> Self {
         Self { spec, theme: theme.clone() }
     }
+    pub fn with_size(mut self, v: ControlSize) -> Self { self.spec.size = v; self }
+    pub fn with_size_role(mut self, v: SemanticControlSizeRole) -> Self { self.spec.size_role = v; self }
+    pub fn with_density(mut self, v: ControlDensity) -> Self { self.spec.density = v; self }
 }
 
 impl IntoElement for MediaBrowsePanel {
@@ -23,14 +28,18 @@ impl IntoElement for MediaBrowsePanel {
     fn into_element(self) -> Self::Element {
         let theme = &self.theme;
         let spec = &self.spec;
-        let body_size = resolve_px(theme, "semantic.typography.body.size");
-        let label_size = resolve_px(theme, "semantic.typography.label.size");
+        let effective_size = resolve_semantic_size(spec.size, spec.size_role);
+        let font_size = rem_to_px(size_font_rem(effective_size));
+        let item_gap = rem_to_px(control_space_x_rem(spec.density));
+
+        let body_size = px(font_size);
+        let label_size = px(font_size);
         let text_primary = resolve_color(theme, "semantic.color.text.primary");
         let text_secondary = resolve_color(theme, "semantic.color.text.secondary");
         let surface_bg = resolve_color(theme, "semantic.color.background.surface");
         let border_subtle = resolve_color(theme, "semantic.color.border.subtle");
 
-        let mut panel = div().flex().flex_col().gap(px(8.0)).w_full();
+        let mut panel = div().flex().flex_col().gap(px(item_gap)).w_full();
 
         if spec.loading {
             panel = panel.child(
@@ -48,7 +57,7 @@ impl IntoElement for MediaBrowsePanel {
                     .child("No media items")
             );
         } else {
-            let mut grid = div().flex().flex_wrap().gap(px(8.0));
+            let mut grid = div().flex().flex_wrap().gap(px(item_gap));
             for item in &spec.items {
                 grid = grid.child(
                     div()

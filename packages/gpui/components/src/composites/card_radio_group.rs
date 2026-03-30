@@ -3,6 +3,8 @@
 use gpui::*;
 use poodle_gpui::GpuiThemeProvider;
 use poodle_composites::CardRadioGroupSpec;
+use poodle_primitives::{ControlDensity, ControlSize, SemanticControlSizeRole};
+use crate::presentation::{resolve_semantic_size, size_font_rem, panel_space_x_rem, panel_space_y_rem, control_space_x_rem, rem_to_px};
 use crate::theme_ext::{color_mix, resolve_color, resolve_px, resolve_radius, resolve_opacity};
 
 pub struct CardRadioGroup {
@@ -28,6 +30,9 @@ impl CardRadioGroup {
         self.on_change = Some(std::rc::Rc::new(handler));
         self
     }
+    pub fn with_size(mut self, v: ControlSize) -> Self { self.spec.size = v; self }
+    pub fn with_size_role(mut self, v: SemanticControlSizeRole) -> Self { self.spec.size_role = v; self }
+    pub fn with_density(mut self, v: ControlDensity) -> Self { self.spec.density = v; self }
 }
 
 impl IntoElement for CardRadioGroup {
@@ -35,6 +40,12 @@ impl IntoElement for CardRadioGroup {
     fn into_element(self) -> Self::Element {
         let theme = &self.theme;
         let spec = &self.spec;
+        let effective_size = resolve_semantic_size(spec.size, spec.size_role);
+        let font_size = rem_to_px(size_font_rem(effective_size));
+        let pad_x = rem_to_px(panel_space_x_rem(spec.density));
+        let pad_y = rem_to_px(panel_space_y_rem(spec.density));
+        let gap = rem_to_px(control_space_x_rem(spec.density));
+
         let unselected_fill = resolve_color(theme, spec.unselected_fill_token());
         let border = resolve_color(theme, spec.border_token());
         let radius = resolve_radius(theme, "semantic.radius.surface");
@@ -42,7 +53,7 @@ impl IntoElement for CardRadioGroup {
         let text_secondary = resolve_color(theme, "semantic.color.text.secondary");
         let accent = resolve_color(theme, "semantic.color.accent.base");
         let focus_ring = resolve_color(theme, "semantic.color.accent.focusRing");
-        let body_size = resolve_px(theme, "semantic.typography.body.size");
+        let body_size = px(font_size);
         let selected = spec.value.as_deref().or(spec.default_value.as_deref());
 
         // Selected card: accent-tinted background (color-mix accent 12%)
@@ -53,7 +64,7 @@ impl IntoElement for CardRadioGroup {
             .flex()
             .flex_row()
             .flex_wrap()
-            .gap(px(8.0))
+            .gap(px(gap))
 ;
 
         for (idx, option) in spec.options.iter().enumerate() {
@@ -116,11 +127,11 @@ impl IntoElement for CardRadioGroup {
                 .rounded(radius)
                 .border(px(bw))
                 .border_color(border_c)
-                .px(px(16.0))
-                .py(px(12.0))
+                .px(px(pad_x))
+                .py(px(pad_y))
                 .flex()
                 .items_center()
-                .gap(px(10.0))
+                .gap(px(gap))
                 // Focus ring
                 .focus(move |s| s.border_color(focus_ring))
                 .child(indicator)

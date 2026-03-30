@@ -3,7 +3,8 @@
 use gpui::*;
 use poodle_gpui::GpuiThemeProvider;
 use poodle_composites::PageLoadingSpec;
-use poodle_primitives::{SpinnerSize, SpinnerSpec, SpinnerTone, SpinnerVariant};
+use poodle_primitives::{ControlDensity, ControlSize, SemanticControlSizeRole, SpinnerSize, SpinnerSpec, SpinnerTone, SpinnerVariant};
+use crate::presentation::{resolve_semantic_size, size_font_rem, panel_space_x_rem, panel_space_y_rem, control_space_x_rem, rem_to_px};
 use crate::primitives::Spinner;
 use crate::theme_ext::{resolve_color, resolve_px, resolve_radius};
 
@@ -29,6 +30,9 @@ impl PageLoading {
         self.on_cancel = Some(Box::new(handler));
         self
     }
+    pub fn with_size(mut self, v: ControlSize) -> Self { self.spec.size = v; self }
+    pub fn with_size_role(mut self, v: SemanticControlSizeRole) -> Self { self.spec.size_role = v; self }
+    pub fn with_density(mut self, v: ControlDensity) -> Self { self.spec.density = v; self }
 }
 
 impl IntoElement for PageLoading {
@@ -36,11 +40,17 @@ impl IntoElement for PageLoading {
     fn into_element(self) -> Self::Element {
         if !self.spec.is_visible { return div().into_any_element(); }
         let theme = &self.theme;
+        let effective_size = resolve_semantic_size(self.spec.size, self.spec.size_role);
+        let font_size = rem_to_px(size_font_rem(effective_size));
+        let pad_x = rem_to_px(panel_space_x_rem(self.spec.density));
+        let pad_y = rem_to_px(panel_space_y_rem(self.spec.density));
+        let item_gap = rem_to_px(control_space_x_rem(self.spec.density));
+
         let backdrop = resolve_color(theme, self.spec.backdrop_fill_token());
         let accent = resolve_color(theme, self.spec.progress_fill_token());
         let text_color = resolve_color(theme, "semantic.color.text.primary");
-        let body_size = resolve_px(theme, "semantic.typography.body.size");
-        let label_size = resolve_px(theme, "semantic.typography.label.size");
+        let body_size = px(font_size);
+        let label_size = px(font_size * 0.85);
         let surface_bg = resolve_color(theme, "semantic.color.background.surface");
         let border = resolve_color(theme, "semantic.color.border.default");
         let radius = resolve_radius(theme, "semantic.radius.surface");
@@ -65,8 +75,8 @@ impl IntoElement for PageLoading {
                     spread_radius: px(0.0),
                 },
             ])
-            .px(px(24.0)).py(px(20.0))
-            .flex().flex_col().items_center().gap(px(16.0));
+            .px(px(pad_x)).py(px(pad_y))
+            .flex().flex_col().items_center().gap(px(item_gap * 2.0));
 
         // Spinner
         card = card.child(

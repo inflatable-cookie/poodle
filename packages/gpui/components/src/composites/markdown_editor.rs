@@ -3,7 +3,8 @@
 use gpui::*;
 use poodle_gpui::GpuiThemeProvider;
 use poodle_composites::MarkdownEditorSpec;
-use poodle_primitives::{IconSize, IconSpec};
+use poodle_primitives::{ControlDensity, ControlSize, IconSize, IconSpec, SemanticControlSizeRole};
+use crate::presentation::{resolve_semantic_size, size_font_rem, panel_space_x_rem, panel_space_y_rem, control_space_x_rem, rem_to_px};
 use crate::primitives::Icon;
 use crate::theme_ext::{resolve_color, resolve_opacity, resolve_px, resolve_radius};
 
@@ -36,11 +37,20 @@ impl MarkdownEditor {
     pub fn on_mode_change(mut self, handler: impl Fn(&str, &mut Window, &mut App) + 'static) -> Self {
         self.on_mode_change = Some(Box::new(handler)); self
     }
+    pub fn with_size(mut self, v: ControlSize) -> Self { self.spec.size = v; self }
+    pub fn with_size_role(mut self, v: SemanticControlSizeRole) -> Self { self.spec.size_role = v; self }
+    pub fn with_density(mut self, v: ControlDensity) -> Self { self.spec.density = v; self }
 }
 
 impl IntoElement for MarkdownEditor {
     type Element = AnyElement;
     fn into_element(self) -> Self::Element {
+        let effective_size = resolve_semantic_size(self.spec.size, self.spec.size_role);
+        let font_size = rem_to_px(size_font_rem(effective_size));
+        let pad_x = rem_to_px(panel_space_x_rem(self.spec.density));
+        let pad_y = rem_to_px(panel_space_y_rem(self.spec.density));
+        let _item_gap = rem_to_px(control_space_x_rem(self.spec.density));
+
         let fill = resolve_color(&self.theme, self.spec.fill_token());
         let border = resolve_color(&self.theme, self.spec.border_token());
         let toolbar_fill = resolve_color(&self.theme, self.spec.toolbar_fill_token());
@@ -49,7 +59,7 @@ impl IntoElement for MarkdownEditor {
         let muted = resolve_color(&self.theme, "semantic.color.text.secondary");
         let hover_bg = resolve_color(&self.theme, "semantic.color.bg.hover");
         let active_bg = resolve_color(&self.theme, "semantic.color.bg.active");
-        let body_size = resolve_px(&self.theme, "semantic.typography.body.size");
+        let body_size = px(font_size);
 
         let display = if self.spec.value.is_empty() { self.spec.placeholder.as_deref().unwrap_or("Type here...") } else { &self.spec.value };
         let color = if self.spec.value.is_empty() { muted } else { text_color };
@@ -155,7 +165,7 @@ impl IntoElement for MarkdownEditor {
             let mut editor_pane = div()
                 .id("poodle-md-editor-pane")
                 .focusable()
-                .px(px(12.0)).py(px(8.0)).flex_grow().flex_basis(px(0.0))
+                .px(px(pad_x)).py(px(pad_y)).flex_grow().flex_basis(px(0.0))
                 .text_size(body_size).text_color(color)
                 .overflow_y_scroll()
                 .child(display.to_string());
@@ -211,7 +221,7 @@ impl IntoElement for MarkdownEditor {
             let preview_text_color = if self.spec.value.is_empty() { muted } else { text_color };
             let preview_pane = div()
                 .id("poodle-md-preview-pane")
-                .px(px(12.0)).py(px(8.0)).flex_grow().flex_basis(px(0.0))
+                .px(px(pad_x)).py(px(pad_y)).flex_grow().flex_basis(px(0.0))
                 .text_size(body_size).text_color(preview_text_color)
                 .overflow_y_scroll()
                 .child(preview_content);

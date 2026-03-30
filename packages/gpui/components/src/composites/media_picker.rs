@@ -4,8 +4,9 @@ use std::rc::Rc;
 use gpui::prelude::FluentBuilder;
 use gpui::*;
 use poodle_gpui::GpuiThemeProvider;
-use poodle_primitives::{IconSize, IconSpec};
+use poodle_primitives::{ControlDensity, ControlSize, IconSize, IconSpec, SemanticControlSizeRole};
 use poodle_composites::MediaPickerSpec;
+use crate::presentation::{resolve_semantic_size, size_font_rem, panel_space_x_rem, panel_space_y_rem, control_space_x_rem, rem_to_px};
 use crate::primitives::Icon;
 use crate::theme_ext::{resolve_color, resolve_px, resolve_radius};
 
@@ -99,19 +100,28 @@ impl MediaPicker {
         self.on_tab_change = Some(Rc::new(handler));
         self
     }
+    pub fn with_size(mut self, v: ControlSize) -> Self { self.spec.size = v; self }
+    pub fn with_size_role(mut self, v: SemanticControlSizeRole) -> Self { self.spec.size_role = v; self }
+    pub fn with_density(mut self, v: ControlDensity) -> Self { self.spec.density = v; self }
 }
 
 impl IntoElement for MediaPicker {
     type Element = AnyElement;
     fn into_element(self) -> Self::Element {
         let theme = &self.theme;
+        let effective_size = resolve_semantic_size(self.spec.size, self.spec.size_role);
+        let font_size = rem_to_px(size_font_rem(effective_size));
+        let pad_x = rem_to_px(panel_space_x_rem(self.spec.density));
+        let pad_y = rem_to_px(panel_space_y_rem(self.spec.density));
+        let item_gap = rem_to_px(control_space_x_rem(self.spec.density));
+
         let fill = resolve_color(theme, self.spec.fill_token());
         let radius = resolve_radius(theme, "semantic.radius.surface");
         let border_color = resolve_color(theme, "semantic.color.border.subtle");
         let text_primary = resolve_color(theme, "semantic.color.text.primary");
         let text_secondary = resolve_color(theme, "semantic.color.text.secondary");
         let accent = resolve_color(theme, "semantic.color.accent.base");
-        let label_size = resolve_px(theme, "semantic.typography.label.size");
+        let label_size = px(font_size);
 
         // ── Dialog wrapper ───────────────────────────────────────
         let mut dialog = div()
@@ -144,8 +154,8 @@ impl IntoElement for MediaPicker {
             .flex()
             .items_center()
             .justify_between()
-            .px(px(20.0))
-            .py(px(12.0))
+            .px(px(pad_x))
+            .py(px(pad_y))
             .border_b_1()
             .border_color(border_color)
             .child(
@@ -281,9 +291,9 @@ impl IntoElement for MediaPicker {
         let mut grid = div()
             .flex()
             .flex_wrap()
-            .gap(px(8.0))
-            .px(px(16.0))
-            .py(px(12.0))
+            .gap(px(item_gap))
+            .px(px(pad_x))
+            .py(px(pad_y))
             .overflow_hidden()
             .flex_grow();
 
@@ -358,8 +368,8 @@ impl IntoElement for MediaPicker {
             .flex()
             .items_center()
             .justify_between()
-            .px(px(16.0))
-            .py(px(10.0))
+            .px(px(pad_x))
+            .py(px(pad_y))
             .border_t_1()
             .border_color(border_color)
             .child(

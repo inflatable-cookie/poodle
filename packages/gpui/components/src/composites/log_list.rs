@@ -2,8 +2,9 @@
 
 use gpui::*;
 use poodle_gpui::GpuiThemeProvider;
-use poodle_primitives::{IconSize, IconSpec};
+use poodle_primitives::{ControlDensity, ControlSize, IconSize, IconSpec, SemanticControlSizeRole};
 use poodle_composites::LogListSpec;
+use crate::presentation::{resolve_semantic_size, size_font_rem, panel_space_x_rem, panel_space_y_rem, control_space_x_rem, rem_to_px};
 use crate::primitives::Icon;
 use crate::theme_ext::{resolve_color, resolve_px};
 
@@ -80,14 +81,23 @@ impl LogList {
     pub fn on_search(mut self, handler: impl Fn(&str, &mut Window, &mut App) + 'static) -> Self {
         self.on_search = Some(Box::new(handler)); self
     }
+    pub fn with_size(mut self, v: ControlSize) -> Self { self.spec.size = v; self }
+    pub fn with_size_role(mut self, v: SemanticControlSizeRole) -> Self { self.spec.size_role = v; self }
+    pub fn with_density(mut self, v: ControlDensity) -> Self { self.spec.density = v; self }
 }
 
 impl IntoElement for LogList {
     type Element = AnyElement;
     fn into_element(self) -> Self::Element {
         let theme = &self.theme;
+        let effective_size = resolve_semantic_size(self.spec.size, self.spec.size_role);
+        let font_size = rem_to_px(size_font_rem(effective_size));
+        let pad_x = rem_to_px(panel_space_x_rem(self.spec.density));
+        let pad_y = rem_to_px(panel_space_y_rem(self.spec.density));
+        let item_gap = rem_to_px(control_space_x_rem(self.spec.density));
+
         let fill = resolve_color(theme, self.spec.fill_token());
-        let label_size = resolve_px(theme, "semantic.typography.label.size");
+        let label_size = px(font_size);
         let gap = resolve_px(theme, self.spec.entry_gap_token());
         let border_color = resolve_color(theme, "semantic.color.border.subtle");
         let text_primary = resolve_color(theme, "semantic.color.text.primary");
@@ -107,9 +117,9 @@ impl IntoElement for LogList {
         let mut toolbar = div()
             .flex()
             .items_center()
-            .gap(px(8.0))
-            .px(px(12.0))
-            .py(px(6.0))
+            .gap(px(item_gap))
+            .px(px(pad_x))
+            .py(px(pad_y * 0.5))
             .border_b_1()
             .border_color(border_color);
 
@@ -180,8 +190,8 @@ impl IntoElement for LogList {
             .gap(gap)
             .overflow_y_scroll()
             .flex_grow()
-            .px(px(12.0))
-            .py(px(6.0));
+            .px(px(pad_x))
+            .py(px(pad_y * 0.5));
 
         if self.entries.is_empty() && self.children.is_empty() {
             rows = rows.child(
@@ -222,7 +232,7 @@ impl IntoElement for LogList {
             let row = div()
                 .flex()
                 .items_center()
-                .gap(px(8.0))
+                .gap(px(item_gap))
                 .py(px(2.0))
                 .child(timestamp)
                 .child(badge)

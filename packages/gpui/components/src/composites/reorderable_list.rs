@@ -2,8 +2,9 @@
 
 use gpui::*;
 use poodle_gpui::GpuiThemeProvider;
-use poodle_primitives::{IconSize, IconSpec};
+use poodle_primitives::{ControlDensity, ControlSize, IconSize, IconSpec, SemanticControlSizeRole};
 use poodle_composites::ReorderableListSpec;
+use crate::presentation::{resolve_semantic_size, control_space_x_rem, rem_to_px};
 use crate::primitives::Icon;
 use crate::theme_ext::{resolve_color, resolve_opacity, resolve_px};
 
@@ -28,6 +29,9 @@ impl ReorderableList {
     pub fn with_child(mut self, child: impl IntoElement) -> Self {
         self.children.push(child.into_any_element()); self
     }
+    pub fn with_size(mut self, v: ControlSize) -> Self { self.spec.size = v; self }
+    pub fn with_size_role(mut self, v: SemanticControlSizeRole) -> Self { self.spec.size_role = v; self }
+    pub fn with_density(mut self, v: ControlDensity) -> Self { self.spec.density = v; self }
 }
 
 impl IntoElement for ReorderableList {
@@ -35,6 +39,9 @@ impl IntoElement for ReorderableList {
     fn into_element(self) -> Self::Element {
         let theme = &self.theme;
         let spec = &self.spec;
+        let _effective_size = resolve_semantic_size(spec.size, spec.size_role);
+        let item_gap = rem_to_px(control_space_x_rem(spec.density));
+
         let _fill = resolve_color(theme, spec.fill_token());
         let gap = resolve_px(theme, spec.item_gap_token());
         let handle_color = resolve_color(theme, spec.handle_color_token());
@@ -63,7 +70,7 @@ impl IntoElement for ReorderableList {
                 .flex()
                 .flex_row()
                 .items_center()
-                .gap(px(8.0))
+                .gap(px(item_gap))
                 .px(px(4.0))
                 .py(px(2.0))
                 .rounded(px(4.0))

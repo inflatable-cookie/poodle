@@ -3,7 +3,9 @@
 use gpui::*;
 use poodle_gpui::GpuiThemeProvider;
 use poodle_composites::{RemediationAction, SelectionSummaryItem, SelectionSummarySpec};
+use poodle_primitives::{ControlDensity, ControlSize, SemanticControlSizeRole};
 
+use crate::presentation::{resolve_semantic_size, size_font_rem, control_space_x_rem, rem_to_px};
 use crate::theme_ext::{resolve_color, resolve_px};
 
 /// A real GPUI selection summary component backed by `SelectionSummarySpec`.
@@ -39,6 +41,9 @@ impl SelectionSummary {
     // ── Forwarded spec builders ───────────────────────────────
     pub fn items(mut self, v: Vec<SelectionSummaryItem>) -> Self { self.spec.items = v; self }
     pub fn clear_action(mut self, v: RemediationAction) -> Self { self.spec.clear_action = Some(v); self }
+    pub fn with_size(mut self, v: ControlSize) -> Self { self.spec.size = v; self }
+    pub fn with_size_role(mut self, v: SemanticControlSizeRole) -> Self { self.spec.size_role = v; self }
+    pub fn with_density(mut self, v: ControlDensity) -> Self { self.spec.density = v; self }
 
 
     pub fn on_remove(
@@ -64,6 +69,9 @@ impl IntoElement for SelectionSummary {
     fn into_element(self) -> Self::Element {
         let theme = &self.theme;
         let spec = &self.spec;
+        let effective_size = resolve_semantic_size(spec.size, spec.size_role);
+        let _font_size = rem_to_px(size_font_rem(effective_size));
+        let _item_gap = rem_to_px(control_space_x_rem(spec.density));
 
         let gap = resolve_px(theme, spec.gap_token());
         let text_primary = resolve_color(theme, "semantic.color.text.primary");
