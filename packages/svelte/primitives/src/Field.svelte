@@ -1,5 +1,6 @@
 <script lang="ts">
   import Icon from "./Icon.svelte";
+  import Popover from "./Popover.svelte";
   import type { ValidationState } from "./types";
 
   export let id: string;
@@ -16,29 +17,8 @@
   export let span: number | "full" | null = null;
   export let gridArea: string | null = null;
 
-  const popoverId = `${id}-info`;
-  let infoOpen = false;
-  let infoTimer: ReturnType<typeof setTimeout> | null = null;
-
   // Merge hint and description — both render in the same popover
   $: infoText = description ?? hint;
-
-  function showInfo(): void {
-    clearInfoTimer();
-    infoTimer = setTimeout(() => (infoOpen = true), 200);
-  }
-
-  function hideInfo(): void {
-    clearInfoTimer();
-    infoOpen = false;
-  }
-
-  function clearInfoTimer(): void {
-    if (infoTimer) {
-      clearTimeout(infoTimer);
-      infoTimer = null;
-    }
-  }
 
   $: errorId = error ? `${id}-error` : null;
   $: pendingId = pendingMessage ? `${id}-pending` : null;
@@ -60,35 +40,24 @@
   ].filter(Boolean).join("; ") || undefined}
 >
   <div class="field__header">
-    <label class="field__label" for={id}>
-      {label}
-      {#if required}
-        <span class="field__required" aria-hidden="true">*</span>
-      {/if}
+    <div class="field__label-row">
+      <label class="field__label" for={id}>
+        {label}
+        {#if required}
+          <span class="field__required" aria-hidden="true">*</span>
+        {/if}
+      </label>
       {#if infoText}
-        <span class="field__info-wrap" role="presentation">
-          <button
-            class="field__info-trigger"
-            type="button"
-            aria-label="More information"
-            aria-describedby={infoOpen ? popoverId : undefined}
-            on:mouseenter={showInfo}
-            on:mouseleave={hideInfo}
-            on:focus={showInfo}
-            on:blur={hideInfo}
-            on:click={() => (infoOpen = !infoOpen)}
-            on:keydown={(e) => { if (e.key === "Escape") hideInfo(); }}
-          >
-            <Icon name="info" />
-          </button>
-          {#if infoOpen}
-            <span id={popoverId} class="field__info-popover" role="tooltip">
-              {infoText}
+        <Popover placement="top" offset={6} ariaLabel="Field description">
+          <span slot="trigger" class="field__info-trigger-wrap">
+            <span class="field__info-icon" aria-label="More information">
+              <Icon name="info" />
             </span>
-          {/if}
-        </span>
+          </span>
+          <p class="field__info-content">{infoText}</p>
+        </Popover>
       {/if}
-    </label>
+    </div>
     {#if !required && optionalLabel}
       <span class="field__optional">{optionalLabel}</span>
     {/if}
@@ -128,6 +97,12 @@
     gap: var(--poodle-space-inline-md);
   }
 
+  .field__label-row {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+  }
+
   .field__label,
   .field__optional,
   .field__message {
@@ -135,9 +110,6 @@
   }
 
   .field__label {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.125rem;
     color: var(--poodle-color-text-primary);
     font-family: var(--poodle-typography-label-family);
     font-size: var(--poodle-typography-label-size);
@@ -170,63 +142,59 @@
     color: var(--poodle-color-status-danger);
   }
 
-  /* ── Info popover ── */
+  /* ── Info icon ── */
 
-  .field__info-wrap {
-    position: relative;
+  .field__info-trigger-wrap {
     display: inline-flex;
     align-items: center;
-    margin-left: 0.1875rem;
   }
 
-  .field__info-trigger {
+  .field__info-icon {
     display: inline-flex;
     align-items: center;
     justify-content: center;
     width: 0.8125rem;
     height: 0.8125rem;
-    padding: 0;
-    border: none;
     border-radius: var(--poodle-radius-pill);
     background: color-mix(in srgb, var(--poodle-color-text-secondary) 14%, transparent);
     color: var(--poodle-color-text-secondary);
-    cursor: pointer;
     transition: background var(--poodle-motion-duration-interaction) var(--poodle-motion-easing-standard);
   }
 
-  .field__info-trigger :global(svg) {
+  .field__info-icon :global(svg) {
     width: 0.5625rem;
     height: 0.5625rem;
   }
 
-  .field__info-trigger:hover {
+  .field__info-trigger-wrap:hover .field__info-icon {
     background: color-mix(in srgb, var(--poodle-color-text-secondary) 26%, transparent);
     color: var(--poodle-color-text-primary);
   }
 
-  .field__info-trigger:focus-visible {
-    outline: var(--poodle-border-width-focus) solid var(--poodle-color-accent-focusRing);
-    outline-offset: 0.0625rem;
-  }
+  /* ── Info popover content ── */
 
-  .field__info-popover {
-    position: absolute;
-    z-index: var(--poodle-overlay-z-menu);
-    bottom: calc(100% + 0.375rem);
-    left: 50%;
-    transform: translateX(-50%);
-    max-width: 18rem;
-    padding: 0.375rem 0.5rem;
-    border: 0.0625rem solid color-mix(in srgb, var(--poodle-color-border-default) 72%, transparent);
-    border-radius: calc(var(--poodle-radius-control) - 0.125rem);
-    background: color-mix(in srgb, var(--poodle-color-background-elevated) 98%, var(--poodle-color-background-panel));
-    box-shadow: var(--poodle-elevation-overlay);
+  .field__info-content {
+    margin: 0;
     color: var(--poodle-color-text-primary);
     font-family: var(--poodle-typography-body-family);
-    font-size: 0.6875rem;
-    font-weight: var(--poodle-typography-body-weight);
-    line-height: 1.4;
-    white-space: normal;
-    pointer-events: none;
+    font-size: 0.75rem;
+    line-height: 1.5;
+  }
+
+  /* Override Popover's min-width for this compact use case */
+  .field__label-row :global(.popover__surface) {
+    min-width: 10rem;
+    max-width: 22rem;
+    padding: 0.5rem 0.625rem;
+  }
+
+  /* Remove Popover trigger's default focus ring — the icon handles it */
+  .field__label-row :global(.popover__trigger:focus-visible) {
+    outline: none;
+  }
+
+  .field__info-trigger-wrap:focus-visible .field__info-icon {
+    outline: var(--poodle-border-width-focus) solid var(--poodle-color-accent-focusRing);
+    outline-offset: 0.0625rem;
   }
 </style>
