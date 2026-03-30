@@ -5,15 +5,18 @@
 
 use poodle_adapter::{RenderComponent, ThemeProvider};
 use poodle_composites::{
-    AudioPlayerSpec, BlockEditorSpec, CardRadioGroupSpec,
-    ConfirmActionSpec, DataTableSpec, DetailSectionSpec, DetailShellSpec, EmbedInputSpec,
-    EmbedPreviewSpec, EmptyStateSpec, FilterToolbarSpec, FormShellSpec,
-    InlineRemediationSpec,
-    LogListSpec, MarkdownEditorSpec, MediaPickerSpec, MediaPreviewSpec, MediaThumbnailSpec,
-    PageHeaderSpec, PageLoadingSpec,
-    PaginationSummarySpec, PickerShellSpec, RelationPickerSpec, RemediationBannerSpec,
-    ReorderableListSpec, SelectionSummarySpec, StateTileSpec, ToastStackSpec,
-    ValidationSummarySpec, VideoPlayerSpec,
+    ActionDiscoveryPanelSpec, AppHeaderSpec, AudioPlayerSpec, BlockEditorSpec,
+    CardRadioGroupSpec, CommandPaletteSpec, ConfirmActionSpec, DataTableSpec,
+    DetailSectionSpec, DetailShellSpec, DockRegionSpec, EditableListSpec,
+    EmbedInputSpec, EmbedPreviewSpec, EmptyStateSpec, FilterToolbarSpec,
+    FormShellSpec, InlineRemediationSpec, ListContainerSpec, LogListSpec,
+    MarkdownEditorSpec, MediaBrowsePanelSpec, MediaPickerSpec, MediaPreviewSpec,
+    MediaThumbnailSpec, MediaUploadStatusPanelSpec, MetricTileSpec,
+    PageHeaderSpec, PageLoadingSpec, PaginationSummarySpec, PickerShellSpec,
+    RelationPickerSpec, RemediationBannerSpec, ReorderableListSpec,
+    SelectionSummarySpec, ShellStatusBarSpec, SidebarNavSpec, SplitViewSpec,
+    StateTileSpec, ToastHostSpec, ToastStackSpec, ValidationSummarySpec,
+    VideoPlayerSpec,
 };
 use poodle_primitives::{
     BreadcrumbsSpec, ListCardSpec, NavCardGridSpec, NavCardSpec, OrderBySpec,
@@ -309,6 +312,112 @@ impl RenderComponent<RelationPickerSpec> for JetstreamAdapter {
     }
 }
 
+// New composites — full contract coverage
+
+impl RenderComponent<ActionDiscoveryPanelSpec> for JetstreamAdapter {
+    type Target = JetstreamTarget;
+    fn render(&self, _spec: &ActionDiscoveryPanelSpec, style: &StyleDescriptor, _theme: &dyn ThemeProvider) -> JetstreamNodeHandle {
+        let mapped = map_style(style);
+        JetstreamNodeHandle::new("action-discovery-panel", "ActionDiscoveryPanelSpec", WidgetKind::Panel, mapped)
+    }
+}
+
+impl RenderComponent<AppHeaderSpec> for JetstreamAdapter {
+    type Target = JetstreamTarget;
+    fn render(&self, _spec: &AppHeaderSpec, style: &StyleDescriptor, _theme: &dyn ThemeProvider) -> JetstreamNodeHandle {
+        let mapped = map_style(style);
+        JetstreamNodeHandle::new("app-header", "AppHeaderSpec", WidgetKind::Panel, mapped)
+    }
+}
+
+impl RenderComponent<CommandPaletteSpec> for JetstreamAdapter {
+    type Target = JetstreamTarget;
+    fn render(&self, _spec: &CommandPaletteSpec, style: &StyleDescriptor, _theme: &dyn ThemeProvider) -> JetstreamNodeHandle {
+        let mapped = map_style(style);
+        JetstreamNodeHandle::new("command-palette", "CommandPaletteSpec", WidgetKind::Panel, mapped)
+    }
+}
+
+impl RenderComponent<DockRegionSpec> for JetstreamAdapter {
+    type Target = JetstreamTarget;
+    fn render(&self, _spec: &DockRegionSpec, style: &StyleDescriptor, _theme: &dyn ThemeProvider) -> JetstreamNodeHandle {
+        let mapped = map_style(style);
+        JetstreamNodeHandle::new("dock-region", "DockRegionSpec", WidgetKind::Panel, mapped)
+    }
+}
+
+impl RenderComponent<EditableListSpec> for JetstreamAdapter {
+    type Target = JetstreamTarget;
+    fn render(&self, _spec: &EditableListSpec, style: &StyleDescriptor, _theme: &dyn ThemeProvider) -> JetstreamNodeHandle {
+        let mapped = map_style(style);
+        JetstreamNodeHandle::new("editable-list", "EditableListSpec", WidgetKind::List, mapped)
+    }
+}
+
+impl RenderComponent<ListContainerSpec> for JetstreamAdapter {
+    type Target = JetstreamTarget;
+    fn render(&self, _spec: &ListContainerSpec, style: &StyleDescriptor, _theme: &dyn ThemeProvider) -> JetstreamNodeHandle {
+        let mapped = map_style(style);
+        JetstreamNodeHandle::new("list-container", "ListContainerSpec", WidgetKind::Panel, mapped)
+    }
+}
+
+impl RenderComponent<MediaBrowsePanelSpec> for JetstreamAdapter {
+    type Target = JetstreamTarget;
+    fn render(&self, _spec: &MediaBrowsePanelSpec, style: &StyleDescriptor, _theme: &dyn ThemeProvider) -> JetstreamNodeHandle {
+        let mapped = map_style(style);
+        JetstreamNodeHandle::new("media-browse-panel", "MediaBrowsePanelSpec", WidgetKind::Panel, mapped)
+    }
+}
+
+impl RenderComponent<MediaUploadStatusPanelSpec> for JetstreamAdapter {
+    type Target = JetstreamTarget;
+    fn render(&self, _spec: &MediaUploadStatusPanelSpec, style: &StyleDescriptor, _theme: &dyn ThemeProvider) -> JetstreamNodeHandle {
+        let mapped = map_style(style);
+        JetstreamNodeHandle::new("media-upload-status-panel", "MediaUploadStatusPanelSpec", WidgetKind::Panel, mapped)
+    }
+}
+
+impl RenderComponent<MetricTileSpec> for JetstreamAdapter {
+    type Target = JetstreamTarget;
+    fn render(&self, _spec: &MetricTileSpec, style: &StyleDescriptor, _theme: &dyn ThemeProvider) -> JetstreamNodeHandle {
+        let mapped = map_style(style);
+        JetstreamNodeHandle::new("metric-tile", "MetricTileSpec", WidgetKind::Panel, mapped)
+    }
+}
+
+impl RenderComponent<ShellStatusBarSpec> for JetstreamAdapter {
+    type Target = JetstreamTarget;
+    fn render(&self, _spec: &ShellStatusBarSpec, style: &StyleDescriptor, _theme: &dyn ThemeProvider) -> JetstreamNodeHandle {
+        let mapped = map_style(style);
+        JetstreamNodeHandle::new("shell-status-bar", "ShellStatusBarSpec", WidgetKind::Panel, mapped)
+    }
+}
+
+impl RenderComponent<SplitViewSpec> for JetstreamAdapter {
+    type Target = JetstreamTarget;
+    fn render(&self, _spec: &SplitViewSpec, style: &StyleDescriptor, _theme: &dyn ThemeProvider) -> JetstreamNodeHandle {
+        let mapped = map_style(style);
+        JetstreamNodeHandle::new("split-view", "SplitViewSpec", WidgetKind::Panel, mapped)
+    }
+}
+
+impl RenderComponent<ToastHostSpec> for JetstreamAdapter {
+    type Target = JetstreamTarget;
+    fn render(&self, _spec: &ToastHostSpec, style: &StyleDescriptor, _theme: &dyn ThemeProvider) -> JetstreamNodeHandle {
+        let mapped = map_style(style);
+        JetstreamNodeHandle::new("toast-host", "ToastHostSpec", WidgetKind::Panel, mapped)
+    }
+}
+
+impl RenderComponent<SidebarNavSpec> for JetstreamAdapter {
+    type Target = JetstreamTarget;
+    fn render(&self, _spec: &SidebarNavSpec, style: &StyleDescriptor, _theme: &dyn ThemeProvider) -> JetstreamNodeHandle {
+        let mapped = map_style(style);
+        JetstreamNodeHandle::new("sidebar-nav", "SidebarNavSpec", WidgetKind::List, mapped)
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use poodle_adapter::RenderComponent;
@@ -361,4 +470,18 @@ mod tests {
     #[test] fn card_radio_group() { assert_eq!(a().render(&CardRadioGroupSpec::new(vec![]), &s(), &t()).spec_type, "CardRadioGroupSpec"); }
     #[test] fn order_by() { assert_eq!(a().render(&OrderBySpec::new(), &s(), &t()).spec_type, "OrderBySpec"); }
     #[test] fn relation_picker() { assert_eq!(a().render(&RelationPickerSpec::new(vec![]), &s(), &t()).spec_type, "RelationPickerSpec"); }
+
+    // New composites
+    #[test] fn action_discovery_panel() { assert_eq!(a().render(&ActionDiscoveryPanelSpec::default(), &s(), &t()).spec_type, "ActionDiscoveryPanelSpec"); }
+    #[test] fn app_header() { assert_eq!(a().render(&AppHeaderSpec::default(), &s(), &t()).spec_type, "AppHeaderSpec"); }
+    #[test] fn command_palette() { assert_eq!(a().render(&CommandPaletteSpec::default(), &s(), &t()).spec_type, "CommandPaletteSpec"); }
+    #[test] fn dock_region() { assert_eq!(a().render(&DockRegionSpec::new(poodle_composites::DockEdge::Left, vec![]), &s(), &t()).spec_type, "DockRegionSpec"); }
+    #[test] fn editable_list() { assert_eq!(a().render(&EditableListSpec::new(), &s(), &t()).spec_type, "EditableListSpec"); }
+    #[test] fn list_container() { assert_eq!(a().render(&ListContainerSpec::default(), &s(), &t()).spec_type, "ListContainerSpec"); }
+    #[test] fn media_browse_panel() { assert_eq!(a().render(&MediaBrowsePanelSpec::new(), &s(), &t()).spec_type, "MediaBrowsePanelSpec"); }
+    #[test] fn media_upload_status_panel() { assert_eq!(a().render(&MediaUploadStatusPanelSpec::new(), &s(), &t()).spec_type, "MediaUploadStatusPanelSpec"); }
+    #[test] fn metric_tile() { assert_eq!(a().render(&MetricTileSpec::new("L", "V"), &s(), &t()).spec_type, "MetricTileSpec"); }
+    #[test] fn shell_status_bar() { assert_eq!(a().render(&ShellStatusBarSpec::default(), &s(), &t()).spec_type, "ShellStatusBarSpec"); }
+    #[test] fn split_view() { assert_eq!(a().render(&SplitViewSpec::new(poodle_composites::SplitOrientation::Horizontal), &s(), &t()).spec_type, "SplitViewSpec"); }
+    #[test] fn toast_host() { assert_eq!(a().render(&ToastHostSpec::new(), &s(), &t()).spec_type, "ToastHostSpec"); }
 }

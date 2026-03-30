@@ -151,7 +151,7 @@ const SUPPORTED_PRIMITIVES: &[&str] = &[
     "DateRangePickerSpec", "DateTimePickerSpec", "DateTimeRangePickerSpec",
 ];
 
-/// Composite spec type names supported by the Jetstream adapter (41 — full parity).
+/// Composite spec type names supported by the Jetstream adapter (48 — full parity).
 #[allow(dead_code)]
 const SUPPORTED_COMPOSITES: &[&str] = &[
     // Form and validation
@@ -162,14 +162,20 @@ const SUPPORTED_COMPOSITES: &[&str] = &[
     "DetailSectionSpec", "FilterToolbarSpec", "PickerShellSpec",
     "RelationPickerSpec", "SelectionSummarySpec", "PaginationSummarySpec",
     "MediaThumbnailSpec", "MediaPreviewSpec", "EmptyStateSpec",
+    "ListContainerSpec", "MetricTileSpec",
     // Editing, media, navigation, list, operational
     "AudioPlayerSpec", "VideoPlayerSpec", "MediaPickerSpec",
+    "MediaBrowsePanelSpec", "MediaUploadStatusPanelSpec",
     "MarkdownEditorSpec", "BlockEditorSpec", "EmbedInputSpec",
-    "EmbedPreviewSpec",
+    "EmbedPreviewSpec", "EditableListSpec",
     "ReorderableListSpec", "BreadcrumbsSpec", "CardRadioGroupSpec",
     "ListCardSpec", "NavCardSpec",
     "NavCardGridSpec", "OrderBySpec", "PageHeaderSpec", "PageLoadingSpec",
-    "LogListSpec", "StateTileSpec", "ToastStackSpec",
+    "LogListSpec", "StateTileSpec", "ToastStackSpec", "ToastHostSpec",
+    "SidebarNavSpec", "SplitViewSpec", "ShellStatusBarSpec",
+    // Workstation composites registered here (moved from separate list)
+    "ActionDiscoveryPanelSpec", "AppHeaderSpec", "CommandPaletteSpec",
+    "DockRegionSpec",
 ];
 
 /// Workstation spec type names supported by the Jetstream adapter (13 — full parity).
@@ -226,7 +232,7 @@ mod tests {
     #[test]
     fn full_parity_component_counts() {
         assert_eq!(SUPPORTED_PRIMITIVES.len(), 64);
-        assert_eq!(SUPPORTED_COMPOSITES.len(), 35);
+        assert_eq!(SUPPORTED_COMPOSITES.len(), 48);
         assert_eq!(SUPPORTED_WORKSTATION.len(), 13);
     }
 }
