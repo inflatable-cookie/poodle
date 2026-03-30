@@ -1,5 +1,6 @@
 <script lang="ts">
-  import { Icon } from "@poodle/svelte-primitives";
+  import { Icon, getUiPresentation } from "@poodle/svelte-primitives";
+  import type { ControlDensity } from "@poodle/svelte-primitives";
 
   import type { EmptyStateSize, EmptyStateVariant } from "./types";
 
@@ -7,10 +8,15 @@
   export let message: string | null = null;
   export let variant: EmptyStateVariant = "neutral";
   export let size: EmptyStateSize = "default";
+  export let density: ControlDensity | null = null;
   export let ariaLabel: string | null = null;
+
+  const uiPresentation = getUiPresentation();
+
+  $: resolvedDensity = density ?? $uiPresentation.density;
 </script>
 
-<section class="empty-state" data-variant={variant} data-size={size} aria-label={ariaLabel ?? title}>
+<section class="empty-state" data-variant={variant} data-size={size} data-density={resolvedDensity} aria-label={ariaLabel ?? title}>
   <div class="empty-state__visual" aria-hidden="true">
     {#if $$slots.visual}
       <slot name="visual" />
@@ -72,11 +78,6 @@
     font-weight: 600;
   }
 
-  .empty-state[data-size="compact"] {
-    gap: var(--poodle-space-stack-sm);
-    padding: var(--poodle-space-stack-lg) var(--poodle-space-panel-x);
-  }
-
   .empty-state[data-size="compact"] .empty-state__visual {
     width: 1.75rem;
     height: 1.75rem;
@@ -117,5 +118,17 @@
     display: flex;
     flex-wrap: wrap;
     gap: var(--poodle-space-inline-sm);
+  }
+
+  /* ── Density variants ─────────────────────────────────────── */
+
+  .empty-state[data-density="compact"] {
+    gap: var(--poodle-space-stack-sm);
+    padding: var(--poodle-space-stack-lg) var(--poodle-space-panel-x);
+  }
+
+  .empty-state[data-density="comfortable"] {
+    gap: var(--poodle-space-stack-lg);
+    padding: calc(var(--poodle-space-panel-y) * 2) var(--poodle-space-panel-x);
   }
 </style>

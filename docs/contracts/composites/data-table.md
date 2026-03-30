@@ -238,7 +238,7 @@ the table:
 - Slot ownership: custom cells, expanded rows, and empty-state language stay
   host-owned
 
-## 10. Token Usage
+## 11. Token Usage
 
 | Part | Token | Purpose |
 |------|-------|---------|
@@ -464,7 +464,7 @@ the table:
 | `.selected` | `tbody tr` | selected row highlight |
 | `.end-align` | `th`, `td` | right-aligned columns |
 
-## 11. Specimen Definitions
+## 12. Specimen Definitions
 
 ### With Sorting, Column Visibility, And Export
 

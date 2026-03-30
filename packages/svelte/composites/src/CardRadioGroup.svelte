@@ -190,10 +190,6 @@
 
   /* ── Size variants ──────────────────────────────────────────── */
 
-  .card-radio-group[data-size="xs"] {
-    gap: 0.5rem;
-  }
-
   .card-radio-group[data-size="xs"] .card-radio-group__indicator {
     width: 0.875rem;
     height: 0.875rem;
@@ -243,10 +239,6 @@
     font-size: 0.875rem;
   }
 
-  .card-radio-group[data-size="lg"] {
-    gap: 0.875rem;
-  }
-
   .card-radio-group[data-size="xl"] .card-radio-group__indicator {
     width: 1.375rem;
     height: 1.375rem;
@@ -265,11 +257,14 @@
     font-size: 0.9375rem;
   }
 
-  .card-radio-group[data-size="xl"] {
+  /* Density variants */
+  .card-radio-group[data-density="compact"] {
+    gap: 0.5rem;
+  }
+  .card-radio-group[data-density="compact"] .card-radio-group__option :global(.card) { padding: 0.5rem; }
+
+  .card-radio-group[data-density="comfortable"] {
     gap: 1rem;
   }
-
-  /* Density variants */
-  .card-radio-group[data-density="compact"] .card-radio-group__option :global(.card) { padding: 0.5rem; }
   .card-radio-group[data-density="comfortable"] .card-radio-group__option :global(.card) { padding: 1rem; }
 </style>

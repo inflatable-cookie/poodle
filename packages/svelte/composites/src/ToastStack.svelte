@@ -149,11 +149,6 @@
 
   /* ── Size variants ──────────────────────────────────────────── */
 
-  .toast-stack[data-size="xs"] .toast {
-    padding: 0.375rem 0.5rem;
-    padding-right: calc(0.5rem + 1.25rem);
-  }
-
   .toast-stack[data-size="xs"] .toast__dismiss {
     width: 1rem;
     height: 1rem;
@@ -169,11 +164,6 @@
     font-size: 0.71875rem;
   }
 
-  .toast-stack[data-size="sm"] .toast {
-    padding: 0.5rem 0.625rem;
-    padding-right: calc(0.625rem + 1.375rem);
-  }
-
   .toast-stack[data-size="sm"] .toast__dismiss {
     width: 1.125rem;
     height: 1.125rem;
@@ -181,11 +171,6 @@
 
   .toast-stack[data-size="sm"] .toast__copy p {
     font-size: 0.75rem;
-  }
-
-  .toast-stack[data-size="lg"] .toast {
-    padding: 0.75rem 0.875rem;
-    padding-right: calc(0.875rem + 1.75rem);
   }
 
   .toast-stack[data-size="lg"] .toast__dismiss {
@@ -201,11 +186,6 @@
 
   .toast-stack[data-size="lg"] .toast__copy strong {
     font-size: 0.9375rem;
-  }
-
-  .toast-stack[data-size="xl"] .toast {
-    padding: 0.875rem 1rem;
-    padding-right: calc(1rem + 2rem);
   }
 
   .toast-stack[data-size="xl"] .toast__dismiss {
@@ -226,4 +206,14 @@
   /* Density variants */
   .toast-stack[data-density="compact"] { gap: var(--poodle-space-stack-sm); }
   .toast-stack[data-density="comfortable"] { gap: var(--poodle-space-stack-lg); }
+
+  .toast-stack[data-density="compact"] .toast {
+    padding: calc(var(--poodle-space-panel-x) * 0.75);
+    padding-right: calc(var(--poodle-space-panel-x) * 0.75 + 1.25rem);
+  }
+
+  .toast-stack[data-density="comfortable"] .toast {
+    padding: calc(var(--poodle-space-panel-x) * 1.25);
+    padding-right: calc(var(--poodle-space-panel-x) * 1.25 + 1.75rem);
+  }
 </style>

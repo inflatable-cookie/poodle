@@ -508,7 +508,6 @@
   /* Size variants */
   .file-upload[data-size="xs"] .file-upload__dropzone {
     min-height: 5rem;
-    padding: 0.75rem;
   }
 
   .file-upload[data-size="xs"] .file-upload__icon {
@@ -526,7 +525,6 @@
 
   .file-upload[data-size="sm"] .file-upload__dropzone {
     min-height: 6rem;
-    padding: 1rem;
   }
 
   .file-upload[data-size="lg"] .file-upload__dropzone {

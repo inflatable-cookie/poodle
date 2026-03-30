@@ -43,6 +43,7 @@ built from foundation primitives without embedding app-specific workflow logic.
 - `selection-summary.md`
 - `sidebar-nav.md`
 - `split-view.md`
+- `toast-host.md`
 - `toast-stack.md`
 - `video-player.md`
 

@@ -121,6 +121,7 @@ above it in downstream repos such as Loophole.
 - `foundation/toggle.md`
 - `foundation/toolbar.md`
 - `foundation/tooltip.md`
+- `foundation/totp-input.md`
 - `foundation/tri-state-switch.md`
 - `foundation/ui-presentation-provider.md`
 - `foundation/zoned-date-time-picker.md`
@@ -160,6 +161,7 @@ above it in downstream repos such as Loophole.
 - `composites/selection-summary.md`
 - `composites/sidebar-nav.md`
 - `composites/split-view.md`
+- `composites/toast-host.md`
 - `composites/toast-stack.md`
 - `composites/video-player.md`
 

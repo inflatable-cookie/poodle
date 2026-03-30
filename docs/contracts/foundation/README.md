@@ -69,6 +69,7 @@ Foundation contracts define the lowest reusable surface in Poodle.
 - `segmented-control.md`
 - `select.md`
 - `separator.md`
+- `size-and-density.md`
 - `skeleton.md`
 - `slider.md`
 - `spinner.md`
@@ -91,6 +92,7 @@ Foundation contracts define the lowest reusable surface in Poodle.
 - `toggle.md`
 - `toolbar.md`
 - `tooltip.md`
+- `totp-input.md`
 - `tri-state-switch.md`
 - `ui-presentation-provider.md`
 - `zoned-date-time-picker.md`

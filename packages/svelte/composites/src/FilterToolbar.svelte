@@ -183,10 +183,6 @@
     font-size: 0.6875rem;
   }
 
-  .filter-toolbar[data-size="xs"] .filter-toolbar__controls {
-    gap: 0.375rem;
-  }
-
   .filter-toolbar[data-size="sm"] .filter-toolbar__summary {
     font-size: 0.71875rem;
   }
@@ -195,19 +191,13 @@
     font-size: 0.8125rem;
   }
 
-  .filter-toolbar[data-size="lg"] .filter-toolbar__controls {
-    gap: 0.625rem;
-  }
-
   .filter-toolbar[data-size="xl"] .filter-toolbar__summary {
     font-size: 0.875rem;
   }
 
-  .filter-toolbar[data-size="xl"] .filter-toolbar__controls {
-    gap: 0.75rem;
-  }
-
   /* Density variants */
   .filter-toolbar[data-density="compact"] { gap: var(--poodle-space-inline-xs); padding: 0.25rem; }
+  .filter-toolbar[data-density="compact"] .filter-toolbar__controls { gap: var(--poodle-space-inline-xs); }
   .filter-toolbar[data-density="comfortable"] { gap: var(--poodle-space-inline-md); padding: 0.5rem; }
+  .filter-toolbar[data-density="comfortable"] .filter-toolbar__controls { gap: var(--poodle-space-inline-md); }
 </style>

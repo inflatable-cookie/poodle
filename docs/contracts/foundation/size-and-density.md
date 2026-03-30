@@ -5,6 +5,11 @@ Updated: 2026-03-30
 
 ## 1. Purpose
 
+- Component name: `SizeAndDensity`
+- Layer: `foundation`
+- Summary: global contract defining how size and density responsibilities
+  are partitioned across all Poodle components — not a rendered component
+
 This contract defines the **global rules** for how `size` and `density`
 properties partition visual responsibility across all Poodle components.
 Every component that accepts `size`, `sizeRole`, or `density` props must
@@ -197,7 +202,22 @@ Not every component uses both axes the same way.
 - **Size**: intrinsic dimensions
 - **Density**: not applicable
 
-## 8. Compliance Checklist
+## 8. Accessibility
+
+Size and density changes must never break accessibility:
+
+- Minimum touch target of 44×44 CSS pixels must be maintained at all sizes
+  including `xs`. If the visible control is smaller, hit-area padding must
+  compensate.
+- Density changes must not push interactive elements so close together that
+  they fail the 24 CSS pixel minimum spacing guideline (WCAG 2.5.8 Target
+  Size minimum).
+- Font sizes must remain above 12px (0.75rem) at the smallest size stop to
+  maintain legibility.
+- `data-size` and `data-density` attributes carry no ARIA semantics and must
+  not be relied upon for assistive technology.
+
+## 9. Compliance Checklist (Parity)
 
 Every component that accepts `size` or `density` must satisfy:
 
@@ -210,7 +230,7 @@ Every component that accepts `size` or `density` must satisfy:
 - [ ] `data-size` and `data-density` attributes are emitted on the root
 - [ ] Both axes can be combined independently without visual breakage
 
-## 9. Tokens and Helper Functions
+## 10. Tokens and Helper Functions
 
 ### CSS custom properties (set by density mode overlays)
 
@@ -235,7 +255,7 @@ Density overlays adjust spacing tokens only.
 | `panelSpaceYRem(density)` | rem value | density → panel vertical inset |
 | `resolveSemanticControlSize(scale, role)` | ControlSize | sizeScale + role → absolute size |
 
-## 10. Anti-Patterns
+## 11. Anti-Patterns
 
 ### Wrong: size controlling container padding
 

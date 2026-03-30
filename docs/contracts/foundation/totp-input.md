@@ -66,7 +66,16 @@ Updated: 2026-03-28
 - The component composes its own `Field` wrapper so callers can use `label`,
   `hint`, and `error` directly
 
-## 6. Relationship To `PinInput`
+## 6. Accessibility
+
+- Hidden input carries `autocomplete="one-time-code"`, `inputmode="numeric"`,
+  and `aria-label` from the `ariaLabel` prop
+- Visual slots are `aria-hidden="true"` — only the real input is in the
+  accessibility tree
+- Focus ring appears on the active slot to indicate which digit is next
+- Disabled state applies `aria-disabled` and prevents keyboard entry
+
+## 7. Relationship To `PinInput`
 
 - `PinInput` uses multiple real cell inputs
 - `TotpInput` intentionally uses one hidden real input plus visual slots

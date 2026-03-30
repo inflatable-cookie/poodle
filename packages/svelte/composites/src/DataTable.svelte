@@ -891,15 +891,14 @@
   .data-table[data-size="xs"] td,
   .data-table[data-size="xs"] .data-table__filters-row td,
   .data-table[data-size="xs"] .data-table__footer {
-    padding-left: 0.5rem;
-    padding-right: 0.5rem;
     font-size: 0.6875rem;
   }
 
   .data-table[data-size="xs"] th,
-  .data-table[data-size="xs"] td {
-    padding-top: 0.25rem;
-    padding-bottom: 0.25rem;
+  .data-table[data-size="xs"] td,
+  .data-table[data-size="xs"] .data-table__filters-row td {
+    padding-left: 0.5rem;
+    padding-right: 0.5rem;
   }
 
   .data-table[data-size="xs"] .data-table__sort,
@@ -922,15 +921,14 @@
   .data-table[data-size="sm"] td,
   .data-table[data-size="sm"] .data-table__filters-row td,
   .data-table[data-size="sm"] .data-table__footer {
-    padding-left: 0.625rem;
-    padding-right: 0.625rem;
     font-size: 0.71875rem;
   }
 
   .data-table[data-size="sm"] th,
-  .data-table[data-size="sm"] td {
-    padding-top: 0.3125rem;
-    padding-bottom: 0.3125rem;
+  .data-table[data-size="sm"] td,
+  .data-table[data-size="sm"] .data-table__filters-row td {
+    padding-left: 0.625rem;
+    padding-right: 0.625rem;
   }
 
   .data-table[data-size="sm"] .data-table__sort,
@@ -958,15 +956,14 @@
   .data-table[data-size="lg"] td,
   .data-table[data-size="lg"] .data-table__filters-row td,
   .data-table[data-size="lg"] .data-table__footer {
-    padding-left: 0.875rem;
-    padding-right: 0.875rem;
     font-size: 0.8125rem;
   }
 
   .data-table[data-size="lg"] th,
-  .data-table[data-size="lg"] td {
-    padding-top: 0.5rem;
-    padding-bottom: 0.5rem;
+  .data-table[data-size="lg"] td,
+  .data-table[data-size="lg"] .data-table__filters-row td {
+    padding-left: 0.875rem;
+    padding-right: 0.875rem;
   }
 
   .data-table[data-size="lg"] .data-table__sort,
@@ -994,15 +991,14 @@
   .data-table[data-size="xl"] td,
   .data-table[data-size="xl"] .data-table__filters-row td,
   .data-table[data-size="xl"] .data-table__footer {
-    padding-left: 1rem;
-    padding-right: 1rem;
     font-size: 0.875rem;
   }
 
   .data-table[data-size="xl"] th,
-  .data-table[data-size="xl"] td {
-    padding-top: 0.625rem;
-    padding-bottom: 0.625rem;
+  .data-table[data-size="xl"] td,
+  .data-table[data-size="xl"] .data-table__filters-row td {
+    padding-left: 1rem;
+    padding-right: 1rem;
   }
 
   .data-table[data-size="xl"] .data-table__sort,
@@ -1014,6 +1010,30 @@
 
   .data-table[data-size="xl"] .data-table__selection {
     width: 4rem;
+  }
+
+  /* ── Density variants ─────────────────────────────────────── */
+
+  .data-table[data-density="compact"] th,
+  .data-table[data-density="compact"] td {
+    padding-top: var(--poodle-space-control-y-tight);
+    padding-bottom: var(--poodle-space-control-y-tight);
+  }
+
+  .data-table[data-density="compact"] .data-table__footer {
+    padding-left: var(--poodle-space-control-x);
+    padding-right: var(--poodle-space-control-x);
+  }
+
+  .data-table[data-density="comfortable"] th,
+  .data-table[data-density="comfortable"] td {
+    padding-top: calc(var(--poodle-space-panel-y) * 1.25);
+    padding-bottom: calc(var(--poodle-space-panel-y) * 1.25);
+  }
+
+  .data-table[data-density="comfortable"] .data-table__footer {
+    padding-left: calc(var(--poodle-space-panel-x) * 1.25);
+    padding-right: calc(var(--poodle-space-panel-x) * 1.25);
   }
 
   @media (max-width: 48rem) {
