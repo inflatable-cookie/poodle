@@ -153,8 +153,9 @@
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    width: 0.8125rem;
-    height: 0.8125rem;
+    width: var(--poodle-typography-label-size, 0.8125rem);
+    height: var(--poodle-typography-label-size, 0.8125rem);
+    flex-shrink: 0;
     border-radius: var(--poodle-radius-pill);
     background: color-mix(in srgb, var(--poodle-color-text-secondary) 14%, transparent);
     color: var(--poodle-color-text-secondary);
@@ -162,8 +163,8 @@
   }
 
   .field__info-icon :global(svg) {
-    width: 0.5625rem;
-    height: 0.5625rem;
+    width: 0.5625rem !important;
+    height: 0.5625rem !important;
   }
 
   .field__info-trigger-wrap:hover .field__info-icon {
