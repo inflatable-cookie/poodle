@@ -44,6 +44,7 @@ pub mod button;
 pub mod checkbox;
 pub mod progress;
 pub mod separator;
+pub mod spinner;
 pub mod status_indicator;
 pub mod switch;
 
@@ -84,29 +85,46 @@ pub mod tabs;
 pub mod text_area;
 pub mod text_input;
 pub mod time_ago;
+pub mod toggle;
+pub mod toggle_group;
+pub mod tri_state_switch;
 
 // Complex primitives (g10.005)
 pub mod alert_dialog;
 pub mod breadcrumbs_comp;
 pub mod bulk_action_bar;
 pub mod calendar;
+pub mod color_picker;
 pub mod combobox;
 pub mod context_menu;
 pub mod date_picker;
+pub mod date_range_picker;
+pub mod date_time_picker;
+pub mod date_time_range_picker;
 pub mod dialog;
 pub mod drawer;
+pub mod duration_input;
 pub mod editable_label;
+pub mod field_set;
+pub mod file_upload;
 pub mod hover_card;
 pub mod menu;
 pub mod menubar;
 pub mod navigation_menu;
 pub mod pagination_comp;
+pub mod password_requirements;
 pub mod pin_input;
 pub mod popover;
+pub mod range_calendar;
 pub mod resize_handle;
 pub mod scroll_shell;
 pub mod select;
+pub mod table;
+pub mod time_field;
+pub mod time_zone_select;
 pub mod tooltip;
+pub mod totp_input;
+pub mod zoned_date_time_picker;
 
 // Composites (g10.006)
 pub mod action_discovery_panel;
