@@ -3,6 +3,7 @@
 //! Each component wraps a spec from `poodle_primitives`, resolves tokens through
 //! `GpuiThemeProvider`, and implements `IntoElement` to produce interactive gpui elements.
 
+pub mod presentation;
 pub mod theme_ext;
 pub mod primitives;
 pub mod composites;
@@ -15,5 +16,6 @@ pub use composites::*;
 
 // Re-export common types from poodle_primitives for ergonomic imports
 pub use poodle_primitives::{
-    ButtonTone, ButtonVariant, ControlSize, IconSize, IconSpec, StatusTone, ValidationState,
+    ButtonTone, ButtonVariant, ControlDensity, ControlSize, IconSize, IconSpec,
+    SemanticControlSizeRole, StatusTone, ValidationState,
 };

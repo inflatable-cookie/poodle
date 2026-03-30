@@ -10,6 +10,7 @@ use poodle_primitives::{ButtonSpec, ButtonTone, ButtonVariant, ControlSize, Icon
 
 use super::icon::Icon;
 use super::spinner::Spinner;
+use crate::presentation::{rem_to_px, resolve_semantic_size, size_font_rem, size_height_offset_rem, size_min_width_rem, size_padding_x_offset_rem};
 use crate::theme_ext::{color_mix, color_mix_black, resolve_color, resolve_opacity, resolve_px, resolve_radius};
 
 /// A real GPUI button component backed by `ButtonSpec`.
@@ -53,6 +54,8 @@ impl Button {
     pub fn loading(mut self, v: bool) -> Self { self.spec.is_loading = v; self }
     pub fn leading_icon(mut self, v: impl Into<String>) -> Self { self.spec.leading_icon = Some(v.into()); self }
     pub fn trailing_icon(mut self, v: impl Into<String>) -> Self { self.spec.trailing_icon = Some(v.into()); self }
+    pub fn size_role(mut self, v: poodle_primitives::SemanticControlSizeRole) -> Self { self.spec.size_role = v; self }
+    pub fn density(mut self, v: poodle_primitives::ControlDensity) -> Self { self.spec.density = v; self }
     pub fn chevron(mut self, v: bool) -> Self { self.spec.chevron = v; self }
     pub fn aria_label(mut self, v: impl Into<String>) -> Self { self.spec.aria_label = Some(v.into()); self }
     pub fn described_by(mut self, v: impl Into<String>) -> Self { self.spec.described_by = Some(v.into()); self }
@@ -87,41 +90,16 @@ impl IntoElement for Button {
         let text_primary = resolve_color(theme, "semantic.color.text.primary");
         let radius = resolve_radius(theme, spec.radius_token());
 
+        // ── Resolve effective size from size + size_role ────────
+        let effective_size = resolve_semantic_size(spec.size, spec.size_role);
+
         // ── Size-aware layout values (contract §7, §8) ──────────
         let base_height = resolve_px(theme, spec.control_height_token());
-        let height_offset: f32 = match spec.size {
-            ControlSize::Xs => -10.0,
-            ControlSize::Sm => -6.0,
-            ControlSize::Md => 0.0,
-            ControlSize::Lg => 6.0,
-            ControlSize::Xl => 10.0,
-        };
-        let height = base_height + px(height_offset);
-        let min_width: f32 = match spec.size {
-            ControlSize::Xs => 56.0,
-            ControlSize::Sm => 68.0,
-            ControlSize::Md => 80.0,
-            ControlSize::Lg => 92.0,
-            ControlSize::Xl => 104.0,
-        };
-        let min_width = px(min_width);
+        let height = base_height + px(rem_to_px(size_height_offset_rem(effective_size)));
+        let min_width = px(rem_to_px(size_min_width_rem(effective_size)));
         let base_pad_x = resolve_px(theme, spec.horizontal_padding_token());
-        let pad_x_offset: f32 = match spec.size {
-            ControlSize::Xs => -4.0,
-            ControlSize::Sm => -2.0,
-            ControlSize::Md => 0.0,
-            ControlSize::Lg => 2.0,
-            ControlSize::Xl => 4.0,
-        };
-        let pad_x = base_pad_x + px(pad_x_offset);
-        let font_size: f32 = match spec.size {
-            ControlSize::Xs => 11.0,
-            ControlSize::Sm => 12.0,
-            ControlSize::Md => 13.0,
-            ControlSize::Lg => 14.0,
-            ControlSize::Xl => 15.0,
-        };
-        let font_size = px(font_size);
+        let pad_x = base_pad_x + px(rem_to_px(size_padding_x_offset_rem(effective_size)));
+        let font_size = px(rem_to_px(size_font_rem(effective_size)));
         let gap = px(6.0); // contract: 0.375rem = 6px
 
         // Icon padding adjustment (contract §8): reduce padding on icon side by 2px
