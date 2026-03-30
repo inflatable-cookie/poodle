@@ -319,13 +319,15 @@ impl PreviewRoot {
                     }
                     "density" => {
                         this.state.density = Density::ALL[i];
+                        this.state.rebuild_theme();
                     }
                     "size" => {
                         this.state.control_size = ControlSize::ALL[i];
+                        this.state.rebuild_theme();
                     }
                     "treatment" => {
                         this.state.appearance_treatment = AppearanceTreatment::ALL[i];
-                        this.state.theme.brand_raised = this.state.appearance_treatment == AppearanceTreatment::BrandRaised;
+                        this.state.rebuild_theme();
                     }
                     _ => {}
                 }
@@ -848,8 +850,10 @@ fn main() {
                     let mut root = PreviewRoot::new();
 
                     // Apply CLI overrides — display controls
+                    // Set all values first, then rebuild once so density +
+                    // control-size + treatment are all layered correctly.
                     if let Some(preset) = cli.theme {
-                        root.state.set_theme(preset);
+                        root.state.theme_preset = preset;
                     }
                     if let Some(d) = cli.density {
                         root.state.density = d;
@@ -859,8 +863,9 @@ fn main() {
                     }
                     if let Some(t) = cli.treatment {
                         root.state.appearance_treatment = t;
-                        root.state.theme.brand_raised = t == AppearanceTreatment::BrandRaised;
                     }
+                    // Rebuild theme with all overrides applied together
+                    root.state.rebuild_theme();
 
                     // Apply CLI overrides — navigation
                     if let Some(section) = cli.section {

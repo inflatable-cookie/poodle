@@ -94,6 +94,14 @@ impl Density {
             Density::Compact => "compact",
         }
     }
+
+    /// Return the token density definition for this variant.
+    pub fn token_definition(self) -> &'static poodle_tokens::density::DensityDefinition {
+        match self {
+            Density::Comfortable => &poodle_tokens::density::COMFORTABLE,
+            Density::Compact => &poodle_tokens::density::COMPACT,
+        }
+    }
 }
 
 /// Control size.
@@ -117,6 +125,17 @@ impl ControlSize {
             ControlSize::Md => "md",
             ControlSize::Lg => "lg",
             ControlSize::Xl => "xl",
+        }
+    }
+
+    /// Return the token control-size definition for this variant.
+    pub fn token_definition(self) -> &'static poodle_tokens::density::ControlSizeDefinition {
+        match self {
+            ControlSize::Xs => &poodle_tokens::density::CONTROL_SIZE_XS,
+            ControlSize::Sm => &poodle_tokens::density::CONTROL_SIZE_SM,
+            ControlSize::Md => &poodle_tokens::density::CONTROL_SIZE_MD,
+            ControlSize::Lg => &poodle_tokens::density::CONTROL_SIZE_LG,
+            ControlSize::Xl => &poodle_tokens::density::CONTROL_SIZE_XL,
         }
     }
 }
@@ -259,13 +278,22 @@ pub struct AppState {
 impl AppState {
     pub fn new() -> Self {
         let preset = ThemePreset::Dark;
+        let density = Density::Compact;
+        let control_size = ControlSize::Md;
+        let appearance_treatment = AppearanceTreatment::System;
+
+        // Build theme with density + control-size layered on top
+        let theme = preset.build_theme()
+            .with_density(density.token_definition())
+            .with_control_size(control_size.token_definition());
+
         Self {
             section: Section::Primitives,
-            theme: preset.build_theme(),
+            theme,
             theme_preset: preset,
-            density: Density::Compact,
-            control_size: ControlSize::Md,
-            appearance_treatment: AppearanceTreatment::System,
+            density,
+            control_size,
+            appearance_treatment,
             disabled: false,
             invalid: true,
             busy: false,
@@ -280,6 +308,18 @@ impl AppState {
 
     pub fn set_theme(&mut self, preset: ThemePreset) {
         self.theme_preset = preset;
-        self.theme = preset.build_theme();
+        self.rebuild_theme();
+    }
+
+    /// Rebuild the theme provider from the current preset, density, and control size.
+    ///
+    /// Layering order: base theme first, then density overrides, then control-size
+    /// overrides. Later overrides win for conflicting tokens (e.g. control height).
+    pub fn rebuild_theme(&mut self) {
+        let mut theme = self.theme_preset.build_theme();
+        theme = theme.with_density(self.density.token_definition());
+        theme = theme.with_control_size(self.control_size.token_definition());
+        theme.brand_raised = self.appearance_treatment == AppearanceTreatment::BrandRaised;
+        self.theme = theme;
     }
 }
