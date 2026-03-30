@@ -4,7 +4,9 @@
 
   export let id: string;
   export let label: string;
+  /** Description shown in an info popover next to the label. */
   export let description: string | null = null;
+  /** @deprecated Use `description` instead. Alias kept for backward compatibility. */
   export let hint: string | null = null;
   export let error: string | null = null;
   export let pendingMessage: string | null = null;
@@ -14,28 +16,30 @@
   export let span: number | "full" | null = null;
   export let gridArea: string | null = null;
 
-  const hintId = `${id}-hint`;
-  let hintOpen = false;
-  let hintTimer: ReturnType<typeof setTimeout> | null = null;
+  const popoverId = `${id}-info`;
+  let infoOpen = false;
+  let infoTimer: ReturnType<typeof setTimeout> | null = null;
 
-  function showHint(): void {
-    clearHintTimer();
-    hintTimer = setTimeout(() => (hintOpen = true), 200);
+  // Merge hint and description — both render in the same popover
+  $: infoText = description ?? hint;
+
+  function showInfo(): void {
+    clearInfoTimer();
+    infoTimer = setTimeout(() => (infoOpen = true), 200);
   }
 
-  function hideHint(): void {
-    clearHintTimer();
-    hintOpen = false;
+  function hideInfo(): void {
+    clearInfoTimer();
+    infoOpen = false;
   }
 
-  function clearHintTimer(): void {
-    if (hintTimer) {
-      clearTimeout(hintTimer);
-      hintTimer = null;
+  function clearInfoTimer(): void {
+    if (infoTimer) {
+      clearTimeout(infoTimer);
+      infoTimer = null;
     }
   }
 
-  $: descriptionId = description ? `${id}-description` : null;
   $: errorId = error ? `${id}-error` : null;
   $: pendingId = pendingMessage ? `${id}-pending` : null;
   $: messageId =
@@ -44,7 +48,7 @@
       : validationState === "pending" && pendingId
         ? pendingId
         : null;
-  $: describedBy = [descriptionId, messageId].filter(Boolean).join(" ") || null;
+  $: describedBy = messageId ?? null;
 </script>
 
 <div
@@ -61,24 +65,25 @@
       {#if required}
         <span class="field__required" aria-hidden="true">*</span>
       {/if}
-      {#if hint}
-        <span class="field__hint-wrap" role="presentation">
+      {#if infoText}
+        <span class="field__info-wrap" role="presentation">
           <button
-            class="field__hint-trigger"
+            class="field__info-trigger"
             type="button"
             aria-label="More information"
-            aria-describedby={hintOpen ? hintId : undefined}
-            on:mouseenter={showHint}
-            on:mouseleave={hideHint}
-            on:focus={showHint}
-            on:blur={hideHint}
-            on:keydown={(e) => { if (e.key === "Escape") hideHint(); }}
+            aria-describedby={infoOpen ? popoverId : undefined}
+            on:mouseenter={showInfo}
+            on:mouseleave={hideInfo}
+            on:focus={showInfo}
+            on:blur={hideInfo}
+            on:click={() => (infoOpen = !infoOpen)}
+            on:keydown={(e) => { if (e.key === "Escape") hideInfo(); }}
           >
             <Icon name="info" />
           </button>
-          {#if hintOpen}
-            <span id={hintId} class="field__hint-tooltip" role="tooltip">
-              {hint}
+          {#if infoOpen}
+            <span id={popoverId} class="field__info-popover" role="tooltip">
+              {infoText}
             </span>
           {/if}
         </span>
@@ -89,14 +94,10 @@
     {/if}
   </div>
 
-  {#if description}
-    <p class="field__description" id={descriptionId}>{description}</p>
-  {/if}
-
   <div class="field__control">
     <slot
       {describedBy}
-      {descriptionId}
+      descriptionId={null}
       {errorId}
       {messageId}
       {validationState}
@@ -129,12 +130,14 @@
 
   .field__label,
   .field__optional,
-  .field__description,
   .field__message {
     margin: 0;
   }
 
   .field__label {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.125rem;
     color: var(--poodle-color-text-primary);
     font-family: var(--poodle-typography-label-family);
     font-size: var(--poodle-typography-label-size);
@@ -153,14 +156,12 @@
     line-height: var(--poodle-typography-body-lineHeight);
   }
 
-  .field__description,
   .field__message {
     font-family: var(--poodle-typography-body-family);
     font-size: 0.75rem;
     line-height: var(--poodle-typography-body-lineHeight);
   }
 
-  .field__description,
   .field__message--pending {
     color: var(--poodle-color-text-secondary);
   }
@@ -169,42 +170,46 @@
     color: var(--poodle-color-status-danger);
   }
 
-  /* ── Hint ── */
+  /* ── Info popover ── */
 
-  .field__hint-wrap {
+  .field__info-wrap {
     position: relative;
     display: inline-flex;
     align-items: center;
-    margin-left: 0.25rem;
-    vertical-align: middle;
+    margin-left: 0.1875rem;
   }
 
-  .field__hint-trigger {
+  .field__info-trigger {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    width: 1rem;
-    height: 1rem;
+    width: 0.8125rem;
+    height: 0.8125rem;
     padding: 0;
     border: none;
     border-radius: var(--poodle-radius-pill);
-    background: color-mix(in srgb, var(--poodle-color-text-secondary) 16%, transparent);
+    background: color-mix(in srgb, var(--poodle-color-text-secondary) 14%, transparent);
     color: var(--poodle-color-text-secondary);
     cursor: pointer;
     transition: background var(--poodle-motion-duration-interaction) var(--poodle-motion-easing-standard);
   }
 
-  .field__hint-trigger:hover {
-    background: color-mix(in srgb, var(--poodle-color-text-secondary) 28%, transparent);
+  .field__info-trigger :global(svg) {
+    width: 0.5625rem;
+    height: 0.5625rem;
+  }
+
+  .field__info-trigger:hover {
+    background: color-mix(in srgb, var(--poodle-color-text-secondary) 26%, transparent);
     color: var(--poodle-color-text-primary);
   }
 
-  .field__hint-trigger:focus-visible {
+  .field__info-trigger:focus-visible {
     outline: var(--poodle-border-width-focus) solid var(--poodle-color-accent-focusRing);
     outline-offset: 0.0625rem;
   }
 
-  .field__hint-tooltip {
+  .field__info-popover {
     position: absolute;
     z-index: var(--poodle-overlay-z-menu);
     bottom: calc(100% + 0.375rem);
