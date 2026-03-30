@@ -1,7 +1,8 @@
 <script lang="ts">
   import Icon from "./Icon.svelte";
   import Popover from "./Popover.svelte";
-  import type { ValidationState } from "./types";
+  import { getUiPresentation, resolveSemanticControlSize } from "./presentation";
+  import type { ControlDensity, ControlSize, SemanticControlSizeRole, ValidationState } from "./types";
 
   export let id: string;
   export let label: string;
@@ -16,6 +17,14 @@
   export let optionalLabel: string | null = null;
   export let span: number | "full" | null = null;
   export let gridArea: string | null = null;
+  export let size: ControlSize | null = null;
+  export let sizeRole: SemanticControlSizeRole = "control";
+  export let density: ControlDensity | null = null;
+
+  const uiPresentation = getUiPresentation();
+
+  $: resolvedSize = size ?? resolveSemanticControlSize($uiPresentation.sizeScale, sizeRole);
+  $: resolvedDensity = density ?? $uiPresentation.density;
 
   // Merge hint and description — both render in the same popover
   $: infoText = description ?? hint;
@@ -33,6 +42,8 @@
 
 <div
   class="field"
+  data-size={resolvedSize}
+  data-density={resolvedDensity}
   data-validation-state={validationState}
   style={[
     span ? (span === "full" ? "grid-column: 1 / -1" : `grid-column: span ${span}`) : "",
@@ -141,6 +152,23 @@
   .field__message--error {
     color: var(--poodle-color-status-danger);
   }
+
+  /* Size variants */
+  .field[data-size="xs"] .field__label { font-size: 0.6875rem; }
+  .field[data-size="xs"] .field__message,
+  .field[data-size="xs"] .field__optional { font-size: 0.625rem; }
+
+  .field[data-size="sm"] .field__label { font-size: 0.75rem; }
+  .field[data-size="sm"] .field__message,
+  .field[data-size="sm"] .field__optional { font-size: 0.6875rem; }
+
+  .field[data-size="lg"] .field__label { font-size: 0.875rem; }
+  .field[data-size="lg"] .field__message,
+  .field[data-size="lg"] .field__optional { font-size: 0.8125rem; }
+
+  .field[data-size="xl"] .field__label { font-size: 0.9375rem; }
+  .field[data-size="xl"] .field__message,
+  .field[data-size="xl"] .field__optional { font-size: 0.875rem; }
 
   /* ── Info icon ── */
 
