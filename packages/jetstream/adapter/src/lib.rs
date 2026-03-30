@@ -165,9 +165,9 @@ const SUPPORTED_COMPOSITES: &[&str] = &[
     // Editing, media, navigation, list, operational
     "AudioPlayerSpec", "VideoPlayerSpec", "MediaPickerSpec",
     "MarkdownEditorSpec", "BlockEditorSpec", "EmbedInputSpec",
-    "EmbedPreviewSpec", "AutonomousListSpec",
+    "EmbedPreviewSpec",
     "ReorderableListSpec", "BreadcrumbsSpec", "CardRadioGroupSpec",
-    "InlineEditableFieldSpec", "ListCardSpec", "NavCardSpec",
+    "ListCardSpec", "NavCardSpec",
     "NavCardGridSpec", "OrderBySpec", "PageHeaderSpec", "PageLoadingSpec",
     "LogListSpec", "StateTileSpec", "ToastStackSpec",
 ];
@@ -225,8 +225,8 @@ mod tests {
 
     #[test]
     fn full_parity_component_counts() {
-        assert_eq!(SUPPORTED_PRIMITIVES.len(), 63);
-        assert_eq!(SUPPORTED_COMPOSITES.len(), 37);
+        assert_eq!(SUPPORTED_PRIMITIVES.len(), 64);
+        assert_eq!(SUPPORTED_COMPOSITES.len(), 35);
         assert_eq!(SUPPORTED_WORKSTATION.len(), 13);
     }
 }

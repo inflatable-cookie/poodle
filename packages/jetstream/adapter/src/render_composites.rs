@@ -5,10 +5,10 @@
 
 use poodle_adapter::{RenderComponent, ThemeProvider};
 use poodle_composites::{
-    AudioPlayerSpec, AutonomousListSpec, BlockEditorSpec, CardRadioGroupSpec,
+    AudioPlayerSpec, BlockEditorSpec, CardRadioGroupSpec,
     ConfirmActionSpec, DataTableSpec, DetailSectionSpec, DetailShellSpec, EmbedInputSpec,
     EmbedPreviewSpec, EmptyStateSpec, FilterToolbarSpec, FormShellSpec,
-    InlineEditableFieldSpec, InlineRemediationSpec,
+    InlineRemediationSpec,
     LogListSpec, MarkdownEditorSpec, MediaPickerSpec, MediaPreviewSpec, MediaThumbnailSpec,
     PageHeaderSpec, PageLoadingSpec,
     PaginationSummarySpec, PickerShellSpec, RelationPickerSpec, RemediationBannerSpec,
@@ -269,14 +269,6 @@ impl RenderComponent<EmbedPreviewSpec> for JetstreamAdapter {
     }
 }
 
-impl RenderComponent<AutonomousListSpec> for JetstreamAdapter {
-    type Target = JetstreamTarget;
-    fn render(&self, _spec: &AutonomousListSpec, style: &StyleDescriptor, _theme: &dyn ThemeProvider) -> JetstreamNodeHandle {
-        let mapped = map_style(style);
-        JetstreamNodeHandle::new("autonomous-list", "AutonomousListSpec", WidgetKind::List, mapped)
-    }
-}
-
 impl RenderComponent<ReorderableListSpec> for JetstreamAdapter {
     type Target = JetstreamTarget;
     fn render(&self, _spec: &ReorderableListSpec, style: &StyleDescriptor, _theme: &dyn ThemeProvider) -> JetstreamNodeHandle {
@@ -298,14 +290,6 @@ impl RenderComponent<CardRadioGroupSpec> for JetstreamAdapter {
     fn render(&self, _spec: &CardRadioGroupSpec, style: &StyleDescriptor, _theme: &dyn ThemeProvider) -> JetstreamNodeHandle {
         let mapped = map_style(style);
         JetstreamNodeHandle::new("card-radio-group", "CardRadioGroupSpec", WidgetKind::Panel, mapped)
-    }
-}
-
-impl RenderComponent<InlineEditableFieldSpec> for JetstreamAdapter {
-    type Target = JetstreamTarget;
-    fn render(&self, _spec: &InlineEditableFieldSpec, style: &StyleDescriptor, _theme: &dyn ThemeProvider) -> JetstreamNodeHandle {
-        let mapped = map_style(style);
-        JetstreamNodeHandle::new("inline-editable-field", "InlineEditableFieldSpec", WidgetKind::TextInput, mapped)
     }
 }
 
@@ -372,11 +356,9 @@ mod tests {
     #[test] fn block_editor() { assert_eq!(a().render(&BlockEditorSpec::new(), &s(), &t()).spec_type, "BlockEditorSpec"); }
     #[test] fn embed_input() { assert_eq!(a().render(&EmbedInputSpec::new(), &s(), &t()).spec_type, "EmbedInputSpec"); }
     #[test] fn embed_preview() { assert_eq!(a().render(&EmbedPreviewSpec::new(), &s(), &t()).spec_type, "EmbedPreviewSpec"); }
-    #[test] fn autonomous_list() { assert_eq!(a().render(&AutonomousListSpec::new(), &s(), &t()).widget_kind, WidgetKind::List); }
     #[test] fn reorderable_list() { assert_eq!(a().render(&ReorderableListSpec::new(), &s(), &t()).widget_kind, WidgetKind::List); }
     #[test] fn breadcrumbs() { assert_eq!(a().render(&BreadcrumbsSpec::new(vec![]), &s(), &t()).spec_type, "BreadcrumbsSpec"); }
     #[test] fn card_radio_group() { assert_eq!(a().render(&CardRadioGroupSpec::new(vec![]), &s(), &t()).spec_type, "CardRadioGroupSpec"); }
-    #[test] fn inline_editable_field() { assert_eq!(a().render(&InlineEditableFieldSpec::new("val"), &s(), &t()).spec_type, "InlineEditableFieldSpec"); }
     #[test] fn order_by() { assert_eq!(a().render(&OrderBySpec::new(), &s(), &t()).spec_type, "OrderBySpec"); }
     #[test] fn relation_picker() { assert_eq!(a().render(&RelationPickerSpec::new(vec![]), &s(), &t()).spec_type, "RelationPickerSpec"); }
 }

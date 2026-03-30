@@ -57,6 +57,25 @@ impl GpuiThemeProvider {
         self
     }
 
+    /// Apply density overrides on top of the current theme.
+    ///
+    /// Density overrides adjust spacing tokens (panel padding, control
+    /// spacing, stack gaps) and control height. They layer on top of
+    /// theme overrides — later overrides win when tokens conflict.
+    pub fn with_density(mut self, density: &poodle_tokens::density::DensityDefinition) -> Self {
+        self.overrides.extend_from_slice(density.overrides);
+        self
+    }
+
+    /// Apply control-size overrides on top of the current theme.
+    ///
+    /// Control-size overrides adjust control height, min-width, and
+    /// default icon size for the given size stop.
+    pub fn with_control_size(mut self, size: &poodle_tokens::density::ControlSizeDefinition) -> Self {
+        self.overrides.extend_from_slice(size.overrides);
+        self
+    }
+
     /// Parse a CSS hex color string into a `ColorValue`.
     ///
     /// Handles `#RRGGBB` and `#RRGGBBAA` formats.

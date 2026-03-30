@@ -14,7 +14,9 @@ use poodle_tokens::themes::ThemeDefinition;
 /// Theme provider for the Jetstream rendering adapter.
 ///
 /// Resolves Poodle semantic token strings to typed values. Supports runtime
-/// theme switching by applying color overrides from a `ThemeDefinition`.
+/// theme switching by applying color overrides from a `ThemeDefinition`,
+/// and density/control-size overrides from `DensityDefinition` /
+/// `ControlSizeDefinition`.
 #[derive(Debug, Clone)]
 pub struct JetstreamThemeProvider {
     scale_factor: f32,
@@ -22,6 +24,10 @@ pub struct JetstreamThemeProvider {
     /// token paths (e.g. "semantic.color.background.canvas"), values are
     /// pre-parsed RGBA colors.
     color_overrides: HashMap<String, ColorValue>,
+    /// Space/size overrides from density and control-size definitions.
+    /// Keys are semantic token paths (e.g. "semantic.space.panel.x"),
+    /// values are raw CSS strings (e.g. "0.75rem") parsed at resolve time.
+    space_overrides: HashMap<String, String>,
 }
 
 impl Default for JetstreamThemeProvider {
@@ -48,11 +54,35 @@ impl JetstreamThemeProvider {
         Self {
             scale_factor: 1.0,
             color_overrides,
+            space_overrides: HashMap::new(),
         }
     }
 
     pub fn with_scale_factor(mut self, factor: f32) -> Self {
         self.scale_factor = factor;
+        self
+    }
+
+    /// Apply density overrides on top of the current theme.
+    ///
+    /// Density overrides adjust spacing tokens (panel padding, control
+    /// spacing, stack gaps) and control height. They layer on top of
+    /// theme overrides — later calls win when tokens conflict.
+    pub fn with_density(mut self, density: &poodle_tokens::density::DensityDefinition) -> Self {
+        for &(key, value) in density.overrides {
+            self.space_overrides.insert(key.to_string(), value.to_string());
+        }
+        self
+    }
+
+    /// Apply control-size overrides on top of the current theme.
+    ///
+    /// Control-size overrides adjust control height, min-width, and
+    /// default icon size for the given size stop.
+    pub fn with_control_size(mut self, size: &poodle_tokens::density::ControlSizeDefinition) -> Self {
+        for &(key, value) in size.overrides {
+            self.space_overrides.insert(key.to_string(), value.to_string());
+        }
         self
     }
 
@@ -106,6 +136,23 @@ impl ThemeProvider for JetstreamThemeProvider {
     }
 
     fn resolve_space(&self, token: &str) -> f32 {
+        // Strategy 0: Check density/control-size overrides first (highest priority)
+        if let Some(value) = self.space_overrides.get(token) {
+            if let Some(rem_str) = value.strip_suffix("rem") {
+                if let Ok(rem) = rem_str.parse::<f32>() {
+                    return rem * 16.0 * self.scale_factor;
+                }
+            }
+            if let Some(px_str) = value.strip_suffix("px") {
+                if let Ok(px) = px_str.parse::<f32>() {
+                    return px * self.scale_factor;
+                }
+            }
+            if let Ok(val) = value.parse::<f32>() {
+                return val * self.scale_factor;
+            }
+        }
+
         // Strategy 1: Look up semantic space/size/radius tokens
         if let Some(val) = match_semantic_space(token) {
             return val;
