@@ -171,7 +171,7 @@ CalendarWeekStart: "sunday" | "monday"
 |----------|-------|
 | `display` | `grid` |
 | `gap` | `0.75rem` |
-| `min-width` | `16rem` |
+| `width` | `18rem` (scales per size: xs=14.5rem, sm=16rem, lg=20.5rem, xl=23rem) |
 
 ### Header `.calendar__header`
 
@@ -395,7 +395,7 @@ CalendarWeekStart: "sunday" | "monday"
 
 ### Tier 2: Visual Parity
 
-- [ ] root gap (0.75rem) and min-width (16rem) match
+- [ ] root gap (0.75rem) and fixed width (18rem at md) match
 - [ ] header grid layout (auto 1fr auto, 0.5rem gap) matches
 - [ ] month label typography (label-family, 0.8125rem, 600, 0.02em) matches
 - [ ] nav button sizing (2rem x 2rem) and chrome match

@@ -203,7 +203,7 @@
   .calendar {
     display: grid;
     gap: 0.75rem;
-    min-width: 16rem;
+    width: 18rem;
   }
 
   .calendar__header,
@@ -326,6 +326,11 @@
   }
 
   /* Size variants */
+  .calendar[data-size="xs"] { width: 14.5rem; }
+  .calendar[data-size="sm"] { width: 16rem; }
+  .calendar[data-size="lg"] { width: 20.5rem; }
+  .calendar[data-size="xl"] { width: 23rem; }
+
   .calendar[data-size="xs"] .calendar__nav {
     width: 1.5rem;
     height: 1.5rem;
