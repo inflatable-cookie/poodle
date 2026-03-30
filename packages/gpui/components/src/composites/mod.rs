@@ -31,7 +31,9 @@ mod picker_shell;
 mod relation_picker;
 mod reorderable_list;
 mod selection_summary;
+mod sidebar_nav;
 mod split_view;
+mod toast_host;
 mod toast_stack;
 mod video_player;
 
@@ -68,6 +70,8 @@ pub use picker_shell::PickerShell;
 pub use relation_picker::RelationPicker;
 pub use reorderable_list::ReorderableList;
 pub use selection_summary::SelectionSummary;
+pub use sidebar_nav::SidebarNav;
 pub use split_view::SplitView;
+pub use toast_host::ToastHost;
 pub use toast_stack::ToastStack;
 pub use video_player::VideoPlayer;

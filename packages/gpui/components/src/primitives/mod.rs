@@ -81,7 +81,9 @@ pub mod toggle;
 mod toggle_group;
 mod toolbar;
 mod tooltip;
+mod totp_input;
 mod tri_state_switch;
+mod password_requirements;
 mod zoned_date_time_picker;
 
 pub use accordion::Accordion;
@@ -166,5 +168,7 @@ pub use toggle::Toggle;
 pub use toggle_group::ToggleGroup;
 pub use toolbar::Toolbar;
 pub use tooltip::Tooltip;
+pub use totp_input::TotpInput;
 pub use tri_state_switch::TriStateSwitch;
+pub use password_requirements::PasswordRequirements;
 pub use zoned_date_time_picker::ZonedDateTimePicker;
