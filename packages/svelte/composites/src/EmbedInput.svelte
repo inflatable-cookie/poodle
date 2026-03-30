@@ -4,6 +4,7 @@
   import { TextArea, Pill } from "@poodle/svelte-primitives";
 
   import { resolveEmbedParseState } from "./embed-input";
+  import type { EmbedParseState } from "./embed-input";
   import type { ParsedEmbed } from "./types";
 
   export let id = "embed-input";
@@ -14,6 +15,9 @@
   export let providers: string[] = [];
   export let disabled = false;
   export let error: string | null = null;
+  export let resolveParseState:
+    | ((value: string, providers: string[]) => EmbedParseState)
+    | undefined = undefined;
 
   const dispatch = createEventDispatcher<{
     parse: { parsed: ParsedEmbed | null; error: string | null };
@@ -23,7 +27,7 @@
   let parseTimer: ReturnType<typeof setTimeout> | null = null;
 
   function doParse(): void {
-    const nextState = resolveEmbedParseState(value, providers);
+    const nextState = (resolveParseState ?? resolveEmbedParseState)(value, providers);
     parsed = nextState.parsed;
     error = nextState.error;
 

@@ -1,7 +1,7 @@
 # FileUpload
 
 Status: detailed contract
-Updated: 2026-03-15
+Updated: 2026-03-30
 
 ## 1. Purpose
 
@@ -176,7 +176,7 @@ interface ImageCompressionOptions {
 - Root fills parent width
 - Dropzone min-height: `8rem`
 - File item preview/icon: `2rem` square
-- Remove button: `1.5rem` square
+- Remove button: `1.75rem` square
 
 ### Composition
 
@@ -278,8 +278,8 @@ interface ImageCompressionOptions {
 | Property | Value |
 |----------|-------|
 | `margin` | `0` |
-| `font-size` | `0.75rem` |
-| `color` | `var(--poodle-color-text-tertiary, #666)` |
+| `font-size` | `0.8125rem` |
+| `color` | `var(--poodle-color-text-tertiary, #777)` |
 
 ### File List `.file-upload__list`
 
@@ -287,7 +287,7 @@ interface ImageCompressionOptions {
 |----------|-------|
 | `display` | `flex` |
 | `flex-direction` | `column` |
-| `gap` | `0.25rem` |
+| `gap` | `0.5rem` |
 | `margin` | `0` |
 | `padding` | `0` |
 | `list-style` | `none` |
@@ -296,19 +296,19 @@ interface ImageCompressionOptions {
 
 | Property | Value |
 |----------|-------|
-| `position` | `relative` |
-| `display` | `flex` |
+| `display` | `grid` |
+| `grid-template-columns` | `auto 1fr auto` |
 | `align-items` | `center` |
-| `gap` | `0.5rem` |
-| `padding` | `0.375rem 0.5rem` |
-| `border-radius` | `var(--poodle-radius-control, 0.375rem)` |
+| `gap` | `0.75rem` |
+| `padding` | `0.75rem` |
+| `border-radius` | `var(--poodle-radius-surface, 0.5rem)` |
 | `background` | `var(--poodle-color-background-panel, #1a1a1a)` |
 
 ### File Item Error `.file-upload__item--error`
 
 | Property | Value |
 |----------|-------|
-| `background` | `color-mix(in srgb, var(--poodle-color-text-danger, #ef4444) 10%, var(--poodle-color-background-panel, #1a1a1a))` |
+| `background` | `color-mix(in srgb, var(--poodle-color-danger-base, #ef4444) 10%, var(--poodle-color-background-panel, #1a1a1a))` |
 
 ### Preview `.file-upload__preview`
 
@@ -316,7 +316,7 @@ interface ImageCompressionOptions {
 |----------|-------|
 | `width` | `2rem` |
 | `height` | `2rem` |
-| `border-radius` | `0.25rem` |
+| `border-radius` | `0.375rem` |
 | `object-fit` | `cover` |
 
 ### File Icon `.file-upload__file-icon`
@@ -328,7 +328,9 @@ interface ImageCompressionOptions {
 | `justify-content` | `center` |
 | `width` | `2rem` |
 | `height` | `2rem` |
-| `flex-shrink` | `0` |
+| `border-radius` | `0.375rem` |
+| `background` | `color-mix(in srgb, var(--poodle-color-background-surface, #111) 82%, transparent)` |
+| `color` | `var(--poodle-color-text-secondary, #999)` |
 
 ### File Icon SVG `.file-upload__file-icon svg`
 
@@ -336,7 +338,6 @@ interface ImageCompressionOptions {
 |----------|-------|
 | `width` | `1.25rem` |
 | `height` | `1.25rem` |
-| `color` | `var(--poodle-color-text-tertiary, #666)` |
 
 ### Meta `.file-upload__meta`
 
@@ -344,15 +345,15 @@ interface ImageCompressionOptions {
 |----------|-------|
 | `display` | `flex` |
 | `flex-direction` | `column` |
-| `gap` | `0.0625rem` |
-| `flex` | `1` |
+| `gap` | `0.125rem` |
 | `min-width` | `0` |
 
 ### Name `.file-upload__name`
 
 | Property | Value |
 |----------|-------|
-| `font-size` | `0.8125rem` |
+| `font-size` | `0.875rem` |
+| `color` | `var(--poodle-color-text-primary, #f5f5f5)` |
 | `white-space` | `nowrap` |
 | `overflow` | `hidden` |
 | `text-overflow` | `ellipsis` |
@@ -361,26 +362,23 @@ interface ImageCompressionOptions {
 
 | Property | Value |
 |----------|-------|
-| `font-size` | `0.75rem` |
-| `color` | `var(--poodle-color-text-secondary, #999)` |
+| `font-size` | `0.8125rem` |
+| `color` | `var(--poodle-color-text-tertiary, #777)` |
 
 ### Error Text `.file-upload__error-text`
 
 | Property | Value |
 |----------|-------|
-| `color` | `var(--poodle-color-text-danger, #ef4444)` |
+| `color` | `var(--poodle-color-danger-base, #ef4444)` |
 
 ### Progress `.file-upload__progress`
 
 | Property | Value |
 |----------|-------|
-| `position` | `absolute` |
-| `bottom` | `0` |
-| `left` | `0` |
-| `right` | `0` |
-| `height` | `0.125rem` |
-| `border-radius` | `0 0 var(--poodle-radius-control, 0.375rem) var(--poodle-radius-control, 0.375rem)` |
-| `background` | `var(--poodle-color-border-default, #444)` |
+| `grid-column` | `2` |
+| `height` | `0.25rem` |
+| `border-radius` | `999px` |
+| `background` | `color-mix(in srgb, var(--poodle-color-background-surface, #111) 82%, transparent)` |
 | `overflow` | `hidden` |
 
 ### Progress Bar `.file-upload__progress-bar`
@@ -389,31 +387,31 @@ interface ImageCompressionOptions {
 |----------|-------|
 | `height` | `100%` |
 | `background` | `var(--poodle-color-accent-default, #6366f1)` |
-| `transition` | `width 0.2s` |
+| `transition` | `width 0.15s ease` |
 
 ### Remove Button `.file-upload__remove` (default)
 
 | Property | Value |
 |----------|-------|
-| `display` | `flex` |
+| `display` | `inline-flex` |
 | `align-items` | `center` |
 | `justify-content` | `center` |
-| `flex-shrink` | `0` |
-| `width` | `1.5rem` |
-| `height` | `1.5rem` |
+| `width` | `1.75rem` |
+| `height` | `1.75rem` |
 | `padding` | `0` |
-| `border` | `0` |
-| `border-radius` | `0.25rem` |
+| `border` | `none` |
+| `border-radius` | `999px` |
 | `background` | `transparent` |
 | `color` | `var(--poodle-color-text-secondary, #999)` |
 | `cursor` | `pointer` |
 
-### Remove Button Hover `.file-upload__remove:hover`
+### Remove Button Hover `.file-upload__remove:hover`, `.file-upload__remove:focus-visible`
 
 | Property | Value |
 |----------|-------|
-| `background` | `var(--poodle-color-background-elevated, #2a2a2a)` |
-| `color` | `var(--poodle-color-text-default, #eee)` |
+| `background` | `color-mix(in srgb, var(--poodle-color-background-surface, #111) 82%, transparent)` |
+| `color` | `var(--poodle-color-text-primary, #f5f5f5)` |
+| `outline` | `none` |
 
 ### Remove Button SVG `.file-upload__remove svg`
 
@@ -424,13 +422,13 @@ interface ImageCompressionOptions {
 
 ### Size adjustments
 
-| Size | dropzone min-height | dropzone padding | icon size | label font-size | hint font-size |
-|------|---------------------|------------------|-----------|-----------------|----------------|
-| `xs` | `5rem` | `0.75rem` | `1.5rem` | `0.75rem` | `0.6875rem` |
-| `sm` | `6rem` | `1rem` | _(base)_ | _(base)_ | _(base)_ |
-| `md` | `8rem` | `1.5rem` | `2rem` | `0.875rem` | `0.75rem` |
-| `lg` | `10rem` | _(base)_ | _(base)_ | `0.9375rem` | _(base)_ |
-| `xl` | `12rem` | _(base)_ | `2.5rem` | `1rem` | _(base)_ |
+| Size | dropzone min-height | icon size | label font-size | hint font-size |
+|------|---------------------|-----------|-----------------|----------------|
+| `xs` | `5rem` | `1.5rem` | `0.75rem` | `0.6875rem` |
+| `sm` | `6rem` | _(base)_ | _(base)_ | _(base)_ |
+| `md` | `8rem` | `2rem` | `0.875rem` | `0.8125rem` |
+| `lg` | `10rem` | _(base)_ | `0.9375rem` | _(base)_ |
+| `xl` | `12rem` | `2.5rem` | `1rem` | _(base)_ |
 
 ## 9. Svelte Notes
 
@@ -485,17 +483,21 @@ interface ImageCompressionOptions {
 - [ ] dropzone dashed border 0.125rem matches
 - [ ] dropzone active accent border and 8% tint matches
 - [ ] dropzone hover border-focus and 50% panel background matches
-- [ ] file item padding 0.375rem 0.5rem matches
-- [ ] file item error background color-mix 10% danger matches
-- [ ] preview thumbnail 2rem square with 0.25rem radius matches
-- [ ] progress bar height 0.125rem matches
+- [ ] file item grid layout (auto 1fr auto) with 0.75rem gap and 0.75rem padding matches
+- [ ] file item border-radius (radius-surface) matches
+- [ ] file item error background color-mix 10% danger-base matches
+- [ ] preview thumbnail 2rem square with 0.375rem radius matches
+- [ ] progress bar height 0.25rem with 999px radius matches
 - [ ] progress bar accent background matches
-- [ ] remove button 1.5rem square matches
-- [ ] remove hover elevated background matches
+- [ ] remove button 1.75rem square with 999px pill radius matches
+- [ ] remove hover surface color-mix background matches
 - [ ] disabled opacity 0.5 matches
 - [ ] icon 2rem square, file icon SVG 1.25rem matches
-- [ ] name font-size 0.8125rem with ellipsis truncation matches
-- [ ] size/hint font-size 0.75rem matches
+- [ ] name font-size 0.875rem with ellipsis truncation matches
+- [ ] size font-size 0.8125rem matches
+- [ ] hint font-size 0.8125rem matches
+- [ ] meta gap 0.125rem matches
+- [ ] file list gap 0.5rem matches
 - [ ] browse text accent color with underline matches
 
 ### Tier 3: Implementation Freedom

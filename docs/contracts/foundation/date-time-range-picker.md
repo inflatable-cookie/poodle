@@ -1,7 +1,7 @@
 # Date Time Range Picker
 
 Status: detailed contract
-Updated: 2026-03-15
+Updated: 2026-03-30
 
 ## 1. Purpose
 
@@ -274,16 +274,15 @@ DateTimeRangeValue: {
 |------|----------|-------|
 | `xs` (`[data-size="xs"]`) | `min-height` | `calc(var(--poodle-size-control-height) - 0.5rem)` |
 | `xs` | `padding` | `0 calc(var(--poodle-space-control-x) - 0.125rem)` |
-| `xs` | `font-size` | `0.6875rem` |
+| `xs` | `font-size` | `0.75rem` |
 | `sm` (`[data-size="sm"]`) | `min-height` | `calc(var(--poodle-size-control-height) - 0.375rem)` |
-| `sm` | `padding` | `0 calc(var(--poodle-space-control-x) - 0.125rem)` |
-| `sm` | `font-size` | `0.75rem` |
+| `sm` | `padding` | `0 calc(var(--poodle-space-control-x) - 0.0625rem)` |
 | `lg` (`[data-size="lg"]`) | `min-height` | `calc(var(--poodle-size-control-height) + 0.375rem)` |
 | `lg` | `padding` | `0 calc(var(--poodle-space-control-x) + 0.125rem)` |
-| `lg` | `font-size` | `0.875rem` |
+| `lg` | `font-size` | `0.9375rem` |
 | `xl` (`[data-size="xl"]`) | `min-height` | `calc(var(--poodle-size-control-height) + 0.5rem)` |
 | `xl` | `padding` | `0 calc(var(--poodle-space-control-x) + 0.1875rem)` |
-| `xl` | `font-size` | `0.9375rem` |
+| `xl` | `font-size` | `1rem` |
 
 ## 9. Svelte Notes
 

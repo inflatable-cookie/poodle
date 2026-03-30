@@ -1,7 +1,7 @@
 # DataTable
 
 Status: contract
-Updated: 2026-03-27
+Updated: 2026-03-30
 
 ## 1. Purpose
 
@@ -149,6 +149,8 @@ type TablePagination = {
 | `compact` | `boolean` | `false` | no | tighter table spacing |
 | `striped` | `boolean` | `false` | no | alternating row backgrounds |
 | `stickyHeader` | `boolean` | `false` | no | sticky header treatment while scrolling |
+| `size` | `"xs" \| "sm" \| "md" \| "lg" \| "xl"` | `null` | no | explicit control size override; when null, resolves from inherited presentation |
+| `sizeRole` | `"chrome" \| "control" \| "prominent"` | `"control"` | no | semantic size offset from inherited presentation |
 | `density` | `ControlDensity \| null` | `null` | no | explicit density override for spacing |
 
 ## 5. Events

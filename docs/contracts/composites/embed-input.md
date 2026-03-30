@@ -53,6 +53,7 @@ Updated: 2026-03-30
 | `providers` | `string[]` | `[]` | no | allowed provider names; empty array means all providers allowed |
 | `disabled` | `boolean` | `false` | no | disables the TextArea input |
 | `error` | `string \| null` | `null` | no | external error message; supports two-way binding |
+| `resolveParseState` | `((value: string, providers: string[]) => EmbedParseState) \| undefined` | `undefined` | no | optional custom parse resolver; defaults to the built-in `resolveEmbedParseState` helper |
 
 ### Types
 
@@ -64,6 +65,11 @@ type ParsedEmbed = {
   originalEmbed?: string; // the original iframe embed code if applicable
   width?: number;        // extracted width (if present in embed code)
   height?: number;       // extracted height (if present in embed code)
+};
+
+type EmbedParseState = {
+  parsed: ParsedEmbed | null;
+  error: string | null;
 };
 ```
 
@@ -210,6 +216,8 @@ None.
 - Parsing is routed through the exported `resolveEmbedParseState` helper in
   `embed-input.ts` rather than being inline; the helper calls
   `detectParsedEmbed` for pattern matching, then applies provider restriction
+- callers can override parsing with `resolveParseState` when they need a richer
+  provider/parser contract while keeping the same Poodle UI shell
 - TextArea receives the `id` prop directly
 - TextArea `on:valueChange` event drives input handling — value is extracted
   from `event.detail.value`

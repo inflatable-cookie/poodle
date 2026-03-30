@@ -1,7 +1,7 @@
 # Icon
 
 Status: detailed contract
-Updated: 2026-03-26
+Updated: 2026-03-30
 
 ## 1. Purpose
 
@@ -31,7 +31,8 @@ Updated: 2026-03-26
 
 | Prop | Type | Default | Required | Notes |
 |------|------|---------|----------|-------|
-| `name` | `string` | — | yes | icon registry identifier |
+| `icon` | `IconNodes \| string \| null` | `null` | no | icon to display; accepts an IconNodes array, a string name resolved from the icon set, or null |
+| `name` | `string \| null` | `null` | no | **deprecated** — alias for `icon`; use `icon` instead |
 | `size` | `"xs" \| "sm" \| "md" \| "lg" \| "xl"` | `null` | no | explicit icon dimensions |
 | `sizeRole` | `"chrome" \| "control" \| "prominent"` | `"chrome"` | no | semantic size offset from inherited presentation |
 | `density` | `ControlDensity \| null` | `null` | no | explicit density override for spacing |

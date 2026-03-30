@@ -1,7 +1,7 @@
 # Tabs
 
 Status: detailed contract
-Updated: 2026-03-15
+Updated: 2026-03-30
 
 ## 1. Purpose
 
@@ -52,6 +52,8 @@ Updated: 2026-03-15
 | `variant` | `"underline" \| "card" \| "pill" \| "strip" \| "block"` | `"underline"` | no | visual variant |
 | `orientation` | `"horizontal" \| "vertical"` | `"horizontal"` | no | navigation axis |
 | `activationMode` | `"automatic" \| "manual"` | `"automatic"` | no | whether focus changes selection |
+| `size` | `"xs" \| "sm" \| "md" \| "lg" \| "xl"` | `null` | no | explicit control size override; when null, resolves from inherited presentation |
+| `sizeRole` | `"chrome" \| "control" \| "prominent"` | `"chrome"` | no | semantic size offset from inherited presentation |
 | `reorderable` | `boolean` | `false` | no | enables drag-and-drop and keyboard reorder |
 | `ariaLabel` | `string \| null` | `null` | no | accessible name for the tablist |
 | `showTooltips` | `boolean` | `false` | no | shows tooltips on tab hover |

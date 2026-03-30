@@ -1,7 +1,7 @@
 # Drawer
 
 Status: detailed contract
-Updated: 2026-03-15
+Updated: 2026-03-30
 
 ## 1. Purpose
 
@@ -244,8 +244,8 @@ modal vs non-modal posture.
 | `xs` | `0.8125rem` |
 | `sm` | `0.875rem` |
 | `md` | `1rem` |
-| `lg` | `1.125rem` |
-| `xl` | `1.25rem` |
+| `lg` | `1.0625rem` |
+| `xl` | `1.125rem` |
 
 ### Data Attributes
 

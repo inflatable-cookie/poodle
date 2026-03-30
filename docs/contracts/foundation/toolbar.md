@@ -1,7 +1,7 @@
 # Toolbar
 
 Status: detailed contract
-Updated: 2026-03-15
+Updated: 2026-03-30
 
 ## 1. Purpose
 
@@ -32,6 +32,8 @@ Updated: 2026-03-15
 | Prop | Type | Default | Required | Notes |
 |------|------|---------|----------|-------|
 | `orientation` | `"horizontal" \| "vertical"` | `"horizontal"` | no | layout direction and keyboard axis |
+| `size` | `"xs" \| "sm" \| "md" \| "lg" \| "xl"` | `null` | no | explicit control size override; when null, resolves from inherited presentation |
+| `sizeRole` | `"chrome" \| "control" \| "prominent"` | `"chrome"` | no | semantic size offset from inherited presentation |
 | `ariaLabel` | `string \| null` | `null` | no | accessible name when no visible title exists |
 | `density` | `ControlDensity \| null` | `null` | no | explicit density override for spacing |
 

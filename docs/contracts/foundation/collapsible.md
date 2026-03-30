@@ -3,7 +3,7 @@
 > **Surface elevation**: Collapsible is a surface consumer (50% strong contrast) — see [surface-elevation.md](./surface-elevation.md).
 
 Status: detailed contract
-Updated: 2026-03-15
+Updated: 2026-03-30
 
 ## 1. Purpose
 
@@ -247,8 +247,8 @@ Updated: 2026-03-15
 | `xs` | `0.8125rem` | `0.6875rem` |
 | `sm` | `0.875rem` | `0.75rem` |
 | `md` | `1rem` | `0.8125rem` |
-| `lg` | `1.125rem` | `0.875rem` |
-| `xl` | `1.25rem` | `0.9375rem` |
+| `lg` | `1.0625rem` | `0.875rem` |
+| `xl` | `1.125rem` | `0.9375rem` |
 
 ## 9. Svelte Notes
 

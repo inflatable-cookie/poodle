@@ -41,6 +41,8 @@ Updated: 2026-03-30
 | `value` | `string \| null` | `null` | no | controlled selected value |
 | `defaultValue` | `string \| null` | `null` | no | uncontrolled initial value |
 | `options` | `SegmentedControlOption[]` | none | yes | segment list |
+| `size` | `"xs" \| "sm" \| "md" \| "lg" \| "xl"` | `null` | no | explicit control size override; when null, resolves from inherited presentation |
+| `sizeRole` | `"chrome" \| "control" \| "prominent"` | `"control"` | no | semantic size offset from inherited presentation |
 | `disabled` | `boolean` | `false` | no | disables whole control |
 | `ariaLabel` | `string \| null` | `null` | no | required when no visible label exists |
 | `name` | `string \| undefined` | auto-generated | no | radio group name attribute |

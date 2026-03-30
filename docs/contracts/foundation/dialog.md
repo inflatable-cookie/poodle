@@ -1,7 +1,7 @@
 # Dialog
 
 Status: detailed contract
-Updated: 2026-03-26
+Updated: 2026-03-30
 
 ## 1. Purpose
 
@@ -245,8 +245,8 @@ Updated: 2026-03-26
 | `xs` | `0.8125rem` |
 | `sm` | `0.875rem` |
 | `md` | `1rem` |
-| `lg` | `1.125rem` |
-| `xl` | `1.25rem` |
+| `lg` | `1.0625rem` |
+| `xl` | `1.125rem` |
 
 ## 9. Svelte Notes
 
