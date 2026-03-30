@@ -1,7 +1,7 @@
 # ConfirmAction
 
-Status: seed contract
-Updated: 2026-03-22
+Status: detailed contract
+Updated: 2026-03-30
 
 ## 1. Purpose
 
@@ -9,21 +9,21 @@ Updated: 2026-03-22
 - Layer: `composites`
 - Summary: a convenience composite that pairs a trigger button with an
   AlertDialog for confirming destructive or significant actions — handles
-  open/close state internally
+  open/close state internally, supports custom trigger slot and body content
 - In scope: default trigger button, custom trigger slot, configurable tone
   (danger/warning), confirm/cancel labels, AlertDialog composition, body
-  content slot, internal open state management
+  content slot, internal open state management, size and density support
 - Out of scope: multi-step confirmation, undo workflows, inline confirmation
-  patterns (non-dialog), form submission within the dialog
+  patterns (non-dialog), form submission within the dialog, async loading
+  state during confirmation
 
 ## 2. Anatomy
 
 ```text
 [TriggerZone]
-  ├── [TriggerSlot]  (when "trigger" slot is provided)
-  │     └── <span role="presentation"> wrapper with click/keydown handlers
-  └── [DefaultTrigger]  (when no "trigger" slot)
-        └── Button (variant="secondary", tone derived from prop)
+  ├── [TriggerSlot .confirm-action__trigger]  <span role="presentation"> (when trigger slot provided)
+  │     └── (slot: trigger)
+  └── [DefaultTrigger]  Button (variant="secondary", tone derived) (when no trigger slot)
 
 [AlertDialog]  AlertDialog primitive
   └── [BodySlot]  (optional, via default slot)
@@ -31,8 +31,9 @@ Updated: 2026-03-22
 
 | Part | Required | Description | Token Targets |
 |------|----------|-------------|---------------|
-| TriggerZone | yes | either a custom trigger slot or default Button | delegates to Button or custom element |
-| DefaultTrigger | conditional | Button with `variant="secondary"` and tone matching the ConfirmAction tone | delegates to Button contract |
+| TriggerZone | yes | either a custom trigger slot wrapper or default Button | delegates to Button or custom element |
+| DefaultTrigger | conditional | Button with `variant="secondary"` and tone derived from the `tone` prop | delegates to Button contract |
+| TriggerSlot | conditional | `<span role="presentation">` wrapper with click/keydown handlers | layout only |
 | AlertDialog | yes | AlertDialog primitive managing the confirmation dialog | delegates to AlertDialog contract |
 | BodySlot | no | additional content rendered inside the AlertDialog body | layout delegated to consumer |
 
@@ -44,10 +45,12 @@ Updated: 2026-03-22
 |------|------|---------|----------|-------|
 | `title` | `string` | — | yes | AlertDialog title text |
 | `description` | `string \| null` | `null` | no | AlertDialog description text |
-| `tone` | `AlertDialogTone` | `"danger"` | no | visual tone; maps to AlertDialog tone and default trigger Button tone |
+| `tone` | `"danger" \| "warning"` | `"danger"` | no | visual tone; maps to AlertDialog tone and default trigger Button tone |
 | `triggerLabel` | `string` | `"Delete"` | no | label for the default trigger Button (ignored when trigger slot is used) |
 | `confirmLabel` | `string` | `"Confirm"` | no | label for the AlertDialog confirm button |
 | `cancelLabel` | `string` | `"Cancel"` | no | label for the AlertDialog cancel button |
+| `size` | `"xs" \| "sm" \| "md" \| "lg" \| "xl" \| null` | `null` | no | explicit control size override |
+| `sizeRole` | `"chrome" \| "control" \| "prominent"` | `"control"` | no | semantic size offset from inherited presentation |
 | `density` | `ControlDensity \| null` | `null` | no | explicit density override for spacing |
 
 ### Types
@@ -66,8 +69,8 @@ type AlertDialogTone = "danger" | "warning";
 ### Controlled And Uncontrolled
 
 - `open` state is managed internally; no external control prop
-- The dialog opens when the trigger is activated and closes on confirm, cancel,
-  or backdrop/escape dismiss
+- the dialog opens when the trigger is activated and closes on confirm,
+  cancel, or backdrop/escape dismiss
 
 ## 4. States
 
@@ -80,8 +83,9 @@ type AlertDialogTone = "danger" | "warning";
 
 ### Component States
 
-- `open` (internal boolean): controls AlertDialog visibility
-- Derived: `triggerTone` — maps `"danger"` tone to `"danger"` Button tone,
+- `open` (internal boolean): controls AlertDialog visibility; passed as
+  `open || null` to AlertDialog (falsy maps to null for uncontrolled initial state)
+- Derived: `triggerTone` — maps `tone === "danger"` to `"danger"` Button tone,
   all others to `"default"`
 
 ## 5. Events
@@ -95,9 +99,10 @@ type AlertDialogTone = "danger" | "warning";
 
 ### Semantics
 
-- Default trigger: standard Button semantics
-- Custom trigger wrapper: `<span role="presentation">` — the slotted element
-  is expected to be an interactive element (Button, IconButton, etc.)
+- Default trigger: standard Button semantics (variant="secondary", derived tone)
+- Custom trigger wrapper: `<span role="presentation">` with click and keydown
+  handlers — the slotted element is expected to be an interactive element
+  (Button, IconButton, etc.)
 - AlertDialog: delegates all dialog accessibility to the AlertDialog primitive
   (role="alertdialog", aria-labelledby, aria-describedby, focus trap)
 
@@ -105,53 +110,95 @@ type AlertDialogTone = "danger" | "warning";
 
 | Key | Behavior |
 |-----|----------|
-| `Enter` / `Space` | activates the trigger (default button or custom trigger wrapper) |
+| `Enter` / `Space` | activates the trigger (default button or custom trigger wrapper keydown handler) |
 | `Escape` | closes the AlertDialog (delegated to AlertDialog) |
 | `Tab` | cycles focus within the open AlertDialog (delegated to AlertDialog) |
 
 ### Focus And Announcement
 
-- When opened: focus moves to the AlertDialog (delegated to AlertDialog primitive)
-- When closed: focus returns to the trigger element
-- Custom trigger wrapper handles `keydown` for Enter and Space
+- when opened: focus moves to the AlertDialog (delegated to AlertDialog primitive)
+- when closed: focus returns to the trigger element
+- custom trigger wrapper handles `keydown` for Enter and Space with
+  `e.preventDefault()` to avoid double-activation
 
 ## 7. Layout
 
 ### Sizing
 
-- Trigger: inline; sized by the Button or custom content
+- trigger: inline; sized by the Button or custom content
+- custom trigger wrapper: `<span>` wrapper does not add layout
 - AlertDialog: centered modal (delegated to AlertDialog contract)
 
 ### Composition
 
-- Parent expectations: toolbars, list item actions, settings forms
-- Child expectations: AlertDialog primitive (foundation), Button primitive (foundation)
-- Resizing rules: trigger is inline, dialog is modal overlay
+- composes: `AlertDialog` and `Button` from `@poodle/svelte-primitives`
+- parent expectations: toolbars, list item actions, settings forms
+- child expectations: AlertDialog primitive, Button primitive, optional body
+  content via default slot
+- resizing rules: trigger is inline, dialog is modal overlay
 
-## 8. Token Usage
+## 8. Token Usage — Exact Values
 
-| Part | Token | Purpose |
-|------|-------|---------|
-| DefaultTrigger | (delegates to Button) | Button variant="secondary" with tone |
-| AlertDialog | (delegates to AlertDialog) | all AlertDialog tokens |
+### Data Attributes
 
-No component-specific tokens; ConfirmAction is purely compositional.
+| Attribute | Element | Values |
+|-----------|---------|--------|
+| `data-size` | trigger `<span>` (custom trigger) | `"xs"`, `"sm"`, `"md"`, `"lg"`, `"xl"` |
+| `data-density` | trigger `<span>` (custom trigger) | `"compact"`, `"default"`, `"comfortable"` |
+
+### Trigger Tone Derivation
+
+| `tone` prop | Default trigger Button `tone` |
+|-------------|------------------------------|
+| `"danger"` | `"danger"` |
+| `"warning"` | `"default"` |
+
+### AlertDialog Props Mapping
+
+| ConfirmAction Prop | AlertDialog Prop |
+|-------------------|-----------------|
+| `open \|\| null` | `open` |
+| `title` | `title` |
+| `description` | `description` |
+| `tone` | `tone` |
+| `confirmLabel` | `confirmLabel` |
+| `cancelLabel` | `cancelLabel` |
+
+### Composed Primitives
+
+All token usage delegates to the respective primitive contracts:
+
+| Part | Delegates To |
+|------|-------------|
+| DefaultTrigger | Button contract (foundation), variant="secondary", tone derived |
+| AlertDialog | AlertDialog contract (foundation) |
+
+### Light Theme Overrides
+
+None.
 
 ## 9. Svelte Notes
 
-- `data-density` — resolved density value (`compact`, `default`, or `comfortable`)
-- Uses `createEventDispatcher` for `confirm` and `cancel` events
-- Composes `AlertDialog` and `Button` from `@poodle/svelte-primitives`
-- `open` is passed to AlertDialog as `open || null` (falsy → null for
+- uses `createEventDispatcher` for `confirm` and `cancel` events
+- composes `AlertDialog` and `Button` from `@poodle/svelte-primitives`
+- `open` is passed to AlertDialog as `open || null` (falsy to null for
   uncontrolled initial state)
-- Handles `openChange` from AlertDialog to sync internal open state
-- Trigger tone derivation: `tone === "danger" ? "danger" : "default"`
+- handles `openChange` from AlertDialog to sync internal open state
+- trigger tone derivation: `tone === "danger" ? "danger" : "default"`
+- custom trigger wrapper `<span>` receives `data-size` and `data-density`
+  resolved from `resolveSemanticControlSize` and `getUiPresentation`
+- `$$slots.trigger` check determines custom vs default trigger rendering
+- `AlertDialogTone`, `ControlSize`, `SemanticControlSizeRole`, `ControlDensity`
+  types imported from `@poodle/svelte-primitives`
+- size resolves via `resolveSemanticControlSize` with `sizeRole="control"`
 
 ## 10. GPUI Notes
 
-- Expected crate/module surface: `poodle_gpui::composites::confirm_action`
-- Compose AlertDialog and Button primitives
-- Internal open state managed by the composite
+- expected crate/module surface: `poodle_gpui::composites::confirm_action`
+- spec struct: `ConfirmActionSpec` with title, description, tone, labels,
+  size, density
+- compose AlertDialog and Button primitives
+- internal open state managed by the composite
 
 ## 11. Parity Checklist
 
@@ -159,25 +206,23 @@ No component-specific tokens; ConfirmAction is purely compositional.
 
 - [ ] all props have the same meaning and defaults
 - [ ] event names and payloads match
-- [ ] trigger tone derivation logic matches
+- [ ] trigger tone derivation logic matches (danger->danger, warning->default)
 - [ ] custom trigger slot behavior matches (click and keyboard activation)
+- [ ] open state passed as `open || null` to AlertDialog
+- [ ] dialog closes after confirm and cancel events
 
 ### Tier 2: Visual Parity
 
 - [ ] default trigger renders as secondary Button with correct tone
 - [ ] AlertDialog appearance delegates correctly
+- [ ] size and density propagation matches
 
 ### Tier 3: Implementation Freedom
 
 - [ ] rendering internals stay internal
+- [ ] custom trigger wrapper element may differ
 
-## 12. Known Deltas
-
-| Delta | Why Allowed | Approval Status | Follow-Up |
-|-------|-------------|-----------------|-----------|
-| none yet | n/a | pending | review during first implementation |
-
-## 13. Specimen Definitions
+## 12. Specimen Definitions
 
 ### Default Trigger (Danger)
 
@@ -202,12 +247,3 @@ No component-specific tokens; ConfirmAction is purely compositional.
 | Label | Props / Config | Expected Visual |
 |-------|---------------|-----------------|
 | With body content | `title="Revoke API key?"`, `description="This key will immediately stop working."`, `confirmLabel="Revoke"`, default slot shows code block with API key preview | danger trigger button; AlertDialog includes custom body content between description and actions |
-
-## 14. Approval And Adoption Notes
-
-- Contract status: `seed contract`
-- Approvers: pending
-- Downstream adopters: list item delete actions, settings destructive actions,
-  admin panels
-- Future follow-up: consider adding `isLoading` prop for async confirm actions;
-  consider controlled `open` prop for external state management

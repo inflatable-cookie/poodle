@@ -1,30 +1,36 @@
 # ToastStack
 
-Status: seed contract
-Updated: 2026-03-22
+Status: detailed contract
+Updated: 2026-03-30
 
 ## 1. Purpose
 
 - Component name: `ToastStack`
 - Layer: `composites`
 - Summary: a transient notification stack for low-interruption confirmations,
-  warnings, and recoverable failures
+  warnings, and recoverable failures — renders a list of tone-styled toast
+  articles with dismiss buttons, optional action affordances, and polite
+  live-region posture
 - In scope: toast ordering, title/message copy, optional action affordance,
-  dismissal, tone-based styling, left accent bar, polite live-region posture
+  dismissal, tone-based styling (info/success/warning/danger), left accent
+  bar, polite live-region posture, size-aware typography, density-aware
+  spacing
 - Out of scope: long-lived inline status, blocking errors, background queue
   persistence, system notification integration, auto-dismiss timers
 
 ## 2. Anatomy
 
 ```text
-[Stack]
-  └── [Toast...]
-        ├── [DismissButton]
-        ├── [Copy]
-        │     ├── [Title]
-        │     └── [Message]   (optional)
-        └── [Actions]         (optional)
-              └── [ActionButton]
+[Stack .toast-stack]  <section role="list">
+  └── [Toast .toast]  <article role="listitem"> (repeated)
+        ├── [AccentBar .toast::before]  pseudo-element
+        ├── [DismissButton .toast__dismiss]  <button>
+        │     └── [Icon]  Icon primitive (name="x")
+        ├── [Copy .toast__copy]  <div>
+        │     ├── [Title]  <strong>
+        │     └── [Message]  <p> (optional)
+        └── [Actions .toast__actions]  <div> (optional)
+              └── [ActionButton]  Button primitive (variant="secondary")
 ```
 
 | Part | Required | Description | Token Targets |
@@ -37,7 +43,7 @@ Updated: 2026-03-22
 | Title | yes | `<strong>` toast heading | text-primary (inherited) |
 | Message | no | `<p>` toast detail text | text-secondary, font-size 0.8125rem |
 | Actions | no | container for action button(s) | layout only |
-| ActionButton | no | `Button` primitive (variant="secondary", size="sm") | (uses Button primitive tokens) |
+| ActionButton | no | `Button` primitive (variant="secondary") | (uses Button primitive tokens) |
 
 ## 3. Props And Inputs
 
@@ -46,7 +52,7 @@ Updated: 2026-03-22
 | Prop | Type | Default | Required | Notes |
 |------|------|---------|----------|-------|
 | `items` | `ToastItem[]` | `[]` | no | toast items to display |
-| `size` | `"xs" \| "sm" \| "md" \| "lg" \| "xl"` | `null` | no | explicit control size override; when null, resolves from inherited presentation |
+| `size` | `"xs" \| "sm" \| "md" \| "lg" \| "xl" \| null` | `null` | no | explicit control size override; when null, resolves from inherited presentation |
 | `sizeRole` | `"chrome" \| "control" \| "prominent"` | `"chrome"` | no | semantic size offset from inherited presentation |
 | `density` | `ControlDensity \| null` | `null` | no | explicit density override for spacing |
 | `ariaLabel` | `string` | `"Notifications"` | no | accessible name for the stack section |
@@ -76,7 +82,7 @@ type ToastItem = {
 
 | State | Trigger | Expected Result |
 |-------|---------|-----------------|
-| empty | `items` is empty | nothing rendered |
+| empty | `items` is empty | nothing rendered (empty section) |
 | populated | `items` has entries | stack of toast articles |
 | info | `tone="info"` (or undefined) | blue accent bar and border tint (fallback `#3b82f6`) |
 | success | `tone="success"` | success-colored accent bar and border tint |
@@ -94,32 +100,7 @@ No internal state. Toast list is externally managed.
 | `dismiss` | dismiss button clicked | `{ id: string }` | host removes toast from items |
 | `action` | action button clicked | `{ id: string }` | host handles the action (e.g. navigate, retry) |
 
-## 6. Visual Rules
-
-### Tone Colors
-
-Each toast uses a CSS custom property `--poodle-toast-tone` set per tone:
-
-| Tone | Token | Fallback |
-|------|-------|----------|
-| `info` | `--poodle-color-status-info` | `#3b82f6` (blue) |
-| `success` | `--poodle-color-status-success` | -- |
-| `warning` | `--poodle-color-status-warning` | -- |
-| `danger` | `--poodle-color-status-danger` | -- |
-
-The tone color is used for:
-- **Left accent bar**: 3px wide, `::before` pseudo-element, `inset: 0 auto 0 0`,
-  color at 82% mix with 6% white
-- **Border**: 1px solid, tone at 34% mixed with `--poodle-color-border-default`
-- **Background gradient**: left edge has 12% tone blended into elevated background,
-  fading to 98% elevated background at 18% gradient stop
-
-### Elevation
-
-- toasts use `--poodle-elevation-overlay` box shadow
-- background uses `--poodle-color-background-elevated` at 96% alpha mix
-
-## 7. Accessibility
+## 6. Accessibility
 
 ### Semantics
 
@@ -146,14 +127,14 @@ The tone color is used for:
   notification meaning and dismiss/action reachability even where there is
   no web-style live region
 
-## 8. Layout
+## 7. Layout
 
 ### Sizing
 
-- stack gap: `--poodle-space-stack-sm`
-- toast padding: `--poodle-space-panel-x` (with extra 1.5rem on right for dismiss button)
-- toast internal gap: `--poodle-space-stack-sm`
-- toast border-radius: `calc(--poodle-radius-surface - 0.125rem)`
+- stack gap: `var(--poodle-space-stack-sm)`
+- toast padding: `var(--poodle-space-panel-x)` (with extra 1.5rem on right for dismiss button)
+- toast internal gap: `var(--poodle-space-stack-sm)`
+- toast border-radius: `calc(var(--poodle-radius-surface) - 0.125rem)`
 - dismiss button: 1.25rem x 1.25rem, positioned top-right (0.375rem inset)
 - accent bar width: 0.1875rem (3px)
 
@@ -164,26 +145,28 @@ The tone color is used for:
 - child expectations: none (self-contained)
 - resizing rules: toasts fill container width
 
-## 9. Token Usage And Precise CSS
+## 8. Token Usage — Exact Values
 
 ### Data Attributes
 
 | Attribute | Element | Values |
 |-----------|---------|--------|
 | `data-tone` | toast `<article>` | `"info"`, `"success"`, `"warning"`, `"danger"` |
+| `data-size` | stack `<section>` | `"xs"`, `"sm"`, `"md"`, `"lg"`, `"xl"` |
+| `data-density` | stack `<section>` | `"compact"`, `"default"`, `"comfortable"` |
 
-### Stack
+### Stack (`.toast-stack`)
 
 | Property | Value |
 |----------|-------|
 | display | `grid` |
 | gap | `var(--poodle-space-stack-sm)` |
 
-### Toast
+### Toast (`.toast`)
 
 | Property | Value |
 |----------|-------|
-| `--poodle-toast-tone` | (set per tone, see below) |
+| `--poodle-toast-tone` | `var(--poodle-color-status-info, #3b82f6)` (default) |
 | display | `grid` |
 | gap | `var(--poodle-space-stack-sm)` |
 | padding | `var(--poodle-space-panel-x)` |
@@ -195,7 +178,7 @@ The tone color is used for:
 | position | `relative` |
 | overflow | `hidden` |
 
-### Toast Accent Bar (`::before`)
+### Toast Accent Bar (`.toast::before`)
 
 | Property | Value |
 |----------|-------|
@@ -214,7 +197,7 @@ The tone color is used for:
 | `warning` | `var(--poodle-color-status-warning)` |
 | `danger` | `var(--poodle-color-status-danger)` |
 
-### Dismiss Button
+### Dismiss Button (`.toast__dismiss`)
 
 | Property | Value |
 |----------|-------|
@@ -231,6 +214,7 @@ The tone color is used for:
 | border-radius | `var(--poodle-radius-sm, 0.25rem)` |
 | background | `transparent` |
 | color | `var(--poodle-color-text-secondary)` |
+| cursor | `pointer` |
 
 #### Dismiss Button Hover
 
@@ -239,7 +223,7 @@ The tone color is used for:
 | color | `var(--poodle-color-text-primary)` |
 | background | `color-mix(in srgb, var(--poodle-color-background-surface) 60%, transparent)` |
 
-### Copy Container
+### Copy Container (`.toast__copy`)
 
 | Property | Value |
 |----------|-------|
@@ -247,7 +231,7 @@ The tone color is used for:
 | gap | `0.25rem` |
 | `strong`, `p` margin | `0` |
 
-### Message Text (`p`)
+### Message Text (`.toast__copy p`)
 
 | Property | Value |
 |----------|-------|
@@ -255,39 +239,96 @@ The tone color is used for:
 | font-size | `0.8125rem` |
 | line-height | `1.5` |
 
-### Actions Container
+### Actions Container (`.toast__actions`)
 
 | Property | Value |
 |----------|-------|
 | display | `flex` |
 | justify-content | `flex-start` |
 
+### Size Adjustments
+
+#### `data-size="xs"`
+
+| Part | Property | Value |
+|------|----------|-------|
+| `.toast__dismiss` | width, height | `1rem` |
+| `.toast__dismiss` | top, right | `0.25rem` |
+| `.toast__copy strong` | font-size | `0.71875rem` |
+| `.toast__copy p` | font-size | `0.6875rem` |
+
+#### `data-size="sm"`
+
+| Part | Property | Value |
+|------|----------|-------|
+| `.toast__dismiss` | width, height | `1.125rem` |
+| `.toast__copy p` | font-size | `0.75rem` |
+
+#### `data-size="md"` (default)
+
+No overrides — uses base values.
+
+#### `data-size="lg"`
+
+| Part | Property | Value |
+|------|----------|-------|
+| `.toast__dismiss` | width, height | `1.5rem` |
+| `.toast__dismiss` | top, right | `0.5rem` |
+| `.toast__copy strong` | font-size | `0.9375rem` |
+| `.toast__copy p` | font-size | `0.875rem` |
+
+#### `data-size="xl"`
+
+| Part | Property | Value |
+|------|----------|-------|
+| `.toast__dismiss` | width, height | `1.75rem` |
+| `.toast__dismiss` | top, right | `0.5rem` |
+| `.toast__copy strong` | font-size | `1rem` |
+| `.toast__copy p` | font-size | `0.9375rem` |
+
+### Density Adjustments
+
+#### `data-density="compact"`
+
+| Part | Property | Value |
+|------|----------|-------|
+| `.toast-stack` | gap | `var(--poodle-space-stack-sm)` |
+| `.toast` | padding | `calc(var(--poodle-space-panel-x) * 0.75)` |
+| `.toast` | padding-right | `calc(var(--poodle-space-panel-x) * 0.75 + 1.25rem)` |
+
+#### `data-density="comfortable"`
+
+| Part | Property | Value |
+|------|----------|-------|
+| `.toast-stack` | gap | `var(--poodle-space-stack-lg)` |
+| `.toast` | padding | `calc(var(--poodle-space-panel-x) * 1.25)` |
+| `.toast` | padding-right | `calc(var(--poodle-space-panel-x) * 1.25 + 1.75rem)` |
+
 ### Light Theme Overrides
 
 None.
 
-### Size adjustments
-
-Size is propagated to child Button primitives and affects toast typography. Specific size tables are deferred to implementation.
-
-## 10. Svelte Notes
+## 9. Svelte Notes
 
 - `data-size` attribute on stack reflects the resolved size
-- `data-density` — resolved density value (`compact`, `default`, or `comfortable`)
+- `data-density` attribute on stack reflects resolved density (`compact`, `default`, `comfortable`)
 - uses `createEventDispatcher` for `dismiss` and `action` events
-- uses `Button` primitive (variant="secondary", size="sm") for action buttons
-- uses `Icon` primitive (name="x", size="sm") for dismiss button
-- toast tone set via `data-tone` attribute and CSS custom property
+- uses `Button` primitive (variant="secondary") for action buttons
+- uses `Icon` primitive (name="x") for dismiss button icon
+- toast tone set via `data-tone` attribute and `--poodle-toast-tone` CSS custom property
 - items keyed by `item.id` in `{#each}` block
-- `ToastItem` type imported from shared `types.ts`
+- `ToastItem` and `ToastTone` types imported from shared `types.ts`
+- resolves size via `resolveSemanticControlSize` from inherited `getUiPresentation`
+- resolves density via `getUiPresentation` store
 
-## 11. GPUI Notes
+## 10. GPUI Notes
 
 - expected crate/module surface: `poodle_gpui::composites::toast_stack`
+- spec struct: `ToastStackSpec` with items, size, density
 - tone-based accent bar may use platform-specific drawing
 - assertive announcement for danger tone must be preserved
 
-## 12. Parity Checklist
+## 11. Parity Checklist
 
 ### Tier 1: Strict Parity
 
@@ -296,6 +337,7 @@ Size is propagated to child Button primitives and affects toast typography. Spec
 - [ ] ToastItem type matches
 - [ ] tone mapping matches (info/success/warning/danger)
 - [ ] aria-live escalation for danger tone matches
+- [ ] dismiss button aria-label includes toast title
 
 ### Tier 2: Visual Parity
 
@@ -304,19 +346,14 @@ Size is propagated to child Button primitives and affects toast typography. Spec
 - [ ] tone color treatment matches (border, gradient, accent)
 - [ ] elevation and background treatment match
 - [ ] dismiss button placement matches
+- [ ] density spacing matches
 
 ### Tier 3: Implementation Freedom
 
 - [ ] rendering internals stay internal
 - [ ] animation/transition approach may differ
 
-## 13. Known Deltas
-
-| Delta | Why Allowed | Approval Status | Follow-Up |
-|-------|-------------|-----------------|-----------|
-| none yet | n/a | pending | review during first implementation |
-
-## 14. Specimen Definitions
+## 12. Specimen Definitions
 
 ### Interactive Stack
 
@@ -330,13 +367,3 @@ The specimen includes an "Add toast" button that appends new toasts cycling
 through info, success, warning, and danger tones. Dismiss and action handlers
 remove toasts from the stack. Toasts are rendered in a stacked layout within
 a positioned container.
-
-## 15. Approval And Adoption Notes
-
-- contract status: `seed contract`
-- approvers: pending
-- downstream adopters: application-level notification systems, workspace
-  feedback, recoverable error display
-- future follow-up: use `ToastStack` for transient confirmations and
-  recoverable warnings while keeping long-lived or blocking conditions on
-  persistent inline surfaces; consider auto-dismiss timer support

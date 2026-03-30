@@ -1,34 +1,41 @@
 # Breadcrumbs
 
-Status: seed contract
-Updated: 2026-03-11
+Status: detailed contract
+Updated: 2026-03-30
 
 ## 1. Purpose
 
 - Component name: `Breadcrumbs`
 - Layer: `foundation`
 - Summary: a compact hierarchical path navigation trail for product pages or
-  detail surfaces
-- In scope: path items, current-page indication, truncation/overflow posture,
-  separators
-- Out of scope: global navigation bars, history stacks, tab navigation
+  detail surfaces, showing the user's location within a navigational hierarchy
+- In scope: path items with link or callback navigation, current-page indication,
+  truncation/overflow via ellipsis when items exceed a threshold, separator icons
+  between items, size and density scaling
+- Out of scope: global navigation bars, history stacks, tab navigation, dropdown
+  menus for collapsed items, breadcrumb editing
 
 ## 2. Anatomy
 
 ```text
-[Root Nav]
-  └── [Path List]
-        └── [Path Item...]
-              ├── [Link or Label]
-              └── [Separator] (except last)
+[Root .breadcrumbs]  <nav aria-label="...">
+  └── [List .breadcrumbs__list]  <ol>
+        └── [Item .breadcrumbs__item]  <li> (repeated)
+              ├── [Link]  <a href="..."> | <button> | <span aria-current="page"> | <span aria-hidden="true">
+              └── [Separator .breadcrumbs__separator]  <span aria-hidden="true"> (except last)
+                    └── [Icon]  chevron-right
 ```
 
 | Part | Required | Description | Token Targets |
 |------|----------|-------------|---------------|
-| Root Nav | yes | breadcrumb navigation region | spacing |
-| Path List | yes | ordered path container | gap, alignment |
-| Path Item | yes | one hierarchy step | typography, text color |
-| Separator | no | visual delimiter | icon, text-muted |
+| Root | yes | `<nav>` landmark wrapping the breadcrumb trail | `data-size`, `data-density` |
+| List | yes | `<ol>` ordered list of path items | flex layout, gap, color, font-size, line-height |
+| Item | yes | `<li>` one hierarchy step | inline-flex, gap |
+| Link (anchor) | no | `<a>` when `href` is provided on the item | color inherited from list |
+| Link (button) | no | `<button>` for callback-driven navigation | color inherited, transparent background |
+| Current label | no | `<span aria-current="page">` for the current/last item | color: text-primary |
+| Ellipsis label | no | `<span aria-hidden="true">` for truncation indicator | color inherited |
+| Separator | no | chevron-right icon between items (not on last) | opacity: 0.4 |
 
 ## 3. Props And Inputs
 
@@ -36,18 +43,36 @@ Updated: 2026-03-11
 
 | Prop | Type | Default | Required | Notes |
 |------|------|---------|----------|-------|
-| `items` | `Array<{ value: string; label: string; href?: string; current?: boolean }>` | none | yes | hierarchy items |
-| `ariaLabel` | `string` | `"Breadcrumb"` | no | navigation label |
-| `maxVisibleItems` | `number \| null` | `null` | no | optional truncation threshold |
-| `size` | `"xs" \| "sm" \| "md" \| "lg" \| "xl"` | `null` | no | explicit control size override; when null, resolves from inherited presentation |
-| `sizeRole` | `"chrome" \| "control" \| "prominent"` | `"chrome"` | no | semantic size offset from inherited presentation |
-| `density` | `ControlDensity \| null` | `null` | no | explicit density override for spacing |
-| `on:navigate` | — | — | no | Svelte event: `dispatch("navigate", { value: item.value })` |
+| `items` | `BreadcrumbItem[]` | `[]` | no | hierarchy items to display |
+| `ariaLabel` | `string` | `"Breadcrumb"` | no | accessible label for the `<nav>` element |
+| `maxVisibleItems` | `number \| null` | `null` | no | when set and items exceed threshold, collapses middle items to ellipsis |
+| `size` | `ControlSize \| null` | `null` | no | explicit control size override; when null, resolves from inherited presentation |
+| `sizeRole` | `SemanticControlSizeRole` | `"chrome"` | no | semantic size offset from inherited presentation |
+| `density` | `ControlDensity \| null` | `null` | no | explicit density override for gap spacing |
+
+### BreadcrumbItem Type
+
+```typescript
+type BreadcrumbItem = {
+  value: string;
+  label: string;
+  href?: string;
+  current?: boolean;
+};
+```
 
 ### Controlled And Uncontrolled
 
-- declarative path model
-- navigation may be link-driven or callback-driven
+- Declarative path model; parent provides the complete `items` array
+- Navigation may be link-driven (`href`) or callback-driven (via `navigate` event)
+
+### Truncation Behavior
+
+When `maxVisibleItems` is set and `items.length > maxVisibleItems`:
+- First item is always shown
+- Middle items collapse to a single ellipsis entry (`"..."`)
+- Last `maxVisibleItems - 1` items are shown
+- The ellipsis entry has `value="__ellipsis__"` and is non-interactive
 
 ## 4. States
 
@@ -55,174 +80,215 @@ Updated: 2026-03-11
 
 | State | Trigger | Expected Result |
 |-------|---------|-----------------|
-| default | intermediate item | link-style item |
-| current | `current=true` or last item | non-link current page indicator |
-| truncated | path exceeds threshold | overflow treatment visible |
-
-### Component States
-
-State table is sufficient.
+| default | intermediate item without `current` | link-style item in secondary text color, clickable |
+| current | `current=true` or last item in the list | non-link `<span>` with `aria-current="page"`, primary text color |
+| truncated | `items.length > maxVisibleItems` | first item, ellipsis, then last N-1 items shown |
+| hover (link/button) | pointer over interactive item | browser default link/button hover |
 
 ## 5. Events
 
 | Event | When It Fires | Payload | Notes |
 |-------|---------------|---------|-------|
-| `navigate` | non-current item activates | `{ value: string }` | dispatched via Svelte `dispatch("navigate", { value: item.value })` |
+| `navigate` | non-current, non-ellipsis item is clicked (button path only) | `{ value: string }` | dispatched via `dispatch("navigate", { value: item.value })`; items with `href` navigate via native anchor behavior instead |
 
 ## 6. Accessibility
 
 ### Semantics
 
-- Role: navigation landmark with breadcrumb list semantics
-- Required attributes: navigation label and current-page indication
-- Optional attributes: overflow disclosure labeling when truncation exists
-- Labeling rules: only one item may represent the current location
+- Root: `<nav>` element with `aria-label` (defaults to `"Breadcrumb"`)
+- List: `<ol>` providing ordered list semantics
+- Current item: `aria-current="page"` on the `<span>` for the current/last item
+- Ellipsis: `aria-hidden="true"` so screen readers skip the truncation indicator
+- Separator: `aria-hidden="true"` on all separator icons
+- Interactive items: rendered as `<a>` (when `href` provided) or `<button>` (callback-driven)
 
 ### Keyboard
 
 | Key | Behavior |
 |-----|----------|
-| `Tab` | moves through interactive path items in order |
-| `Enter` or `Space` | activates focused path item when callback-driven |
+| `Tab` | moves focus through interactive path items (links and buttons) in document order |
+| `Enter` | activates focused link or button |
+| `Space` | activates focused button |
 
 ### Focus And Announcement
 
-- focus entry: only interactive path items participate in tab order
-- focus exit: current location remains perceivable after link focus leaves
+- focus entry: only interactive path items (links, buttons) participate in tab order
+- focus exit: current-page item is not focusable (it is a `<span>`)
 - live-region behavior: none
-- GPUI-native accessibility mapping notes: GPUI must expose breadcrumb
-  navigation as hierarchical path navigation with a current-location marker, not
-  as decorative inline text
 
 ## 7. Layout
 
 ### Sizing
 
-- path may wrap or truncate according to parent policy
-- separators should remain compact and secondary
+- List uses flex-wrap so items can wrap to multiple lines in narrow containers
+- Separators are inline-flex and secondary to path items
+- No explicit width constraints; fills available space
 
 ### Composition
 
 - parent expectations: page headers, detail shells, nested settings views
-- child expectations: path items only
-- resizing rules: current page remains visible when truncation occurs
+- child expectations: only `BreadcrumbItem` data; no slot content
+- resizing: wraps naturally; current page remains visible when truncation occurs
 - composition rule: breadcrumbs provide hierarchy context before local page
-  identity; they do not replace the page heading itself
+  identity; they do not replace the page heading
 
-## 8. Token Usage — Exact Values
+## 8. Token Usage -- Exact Values
 
-### Root Nav `.breadcrumbs`
+### Root `.breadcrumbs`
+
+The `<nav>` root carries `data-size` and `data-density` attributes but has no
+visual styles of its own.
+
+### List `.breadcrumbs__list`
 
 | Property | Value |
 |----------|-------|
 | `display` | `flex` |
 | `flex-wrap` | `wrap` |
-| `align-items` | `center` |
 | `gap` | `var(--poodle-space-inline-sm)` |
+| `margin` | `0` |
+| `padding` | `0` |
+| `list-style` | `none` |
+| `color` | `var(--poodle-color-text-secondary)` |
 | `font-size` | `var(--poodle-typography-body-size)` |
+| `line-height` | `var(--poodle-typography-body-lineHeight)` |
 
-### Path Item (link)
+### Item `.breadcrumbs__item`
 
 | Property | Value |
 |----------|-------|
-| `color` | `var(--poodle-color-text-secondary)` |
+| `display` | `inline-flex` |
+| `align-items` | `center` |
+| `gap` | `var(--poodle-space-inline-sm)` |
 
-### Current Item
+### Link (anchor and button)
+
+| Property | Value |
+|----------|-------|
+| `border` | `0` |
+| `padding` | `0` |
+| `background` | `transparent` |
+| `color` | `inherit` |
+| `cursor` | `pointer` |
+| `font` | `inherit` |
+| `text-decoration` | `none` |
+
+### Current item `[aria-current="page"]`
 
 | Property | Value |
 |----------|-------|
 | `color` | `var(--poodle-color-text-primary)` |
 
-### Separator
+### Separator `.breadcrumbs__separator`
 
 | Property | Value |
 |----------|-------|
+| `display` | `inline-flex` |
 | `opacity` | `0.4` |
 
 ### Size adjustments
 
-| Size | font-size |
-|------|-----------|
-| `xs` | `0.75rem` |
-| `sm` | `0.8125rem` |
-| `md` | `var(--poodle-typography-body-size)` |
-| `lg` | `0.9375rem` |
-| `xl` | `1rem` |
+Size affects list and item gap, and list font-size.
+
+| Size | list/item gap | font-size |
+|------|---------------|-----------|
+| `xs` | `0.25rem` | `0.6875rem` |
+| `sm` | `0.375rem` | `0.78125rem` |
+| `md` | `var(--poodle-space-inline-sm)` | `var(--poodle-typography-body-size)` |
+| `lg` | `0.625rem` | `1rem` |
+| `xl` | `0.75rem` | `1.125rem` |
+
+### Density adjustments
+
+Density controls list and item gap only. It does NOT affect font-size.
+
+| Density | list/item gap |
+|---------|---------------|
+| `compact` | `0.25rem` |
+| `default` | `var(--poodle-space-inline-sm)` (base) |
+| `comfortable` | `0.75rem` |
 
 ## 9. Svelte Notes
 
-- `data-size` attribute on root reflects the resolved size
-- `data-density` — resolved density value (`compact`, `default`, or `comfortable`)
-- expected substrate: semantic nav/list structure with links or buttons
-- wrapper strategy: truncation mechanics stay internal as long as current-item
-  semantics remain intact
+- `data-size` attribute on root `<nav>` reflects the resolved size
+- `data-density` attribute on root `<nav>` reflects the resolved density (`compact`, `default`, or `comfortable`)
+- Root is a `<nav>` element; list is an `<ol>` with `list-style: none`
+- Items with `href` render as `<a>` elements for native link behavior
+- Items without `href` and not current render as `<button type="button">` for callback navigation
+- Current or last item renders as `<span aria-current="page">`
+- Ellipsis item renders as `<span aria-hidden="true">` and is not interactive
+- Separator uses the `Icon` component with `name="chevron-right"`
+- Size and density resolve from `UiPresentationProvider` context when not explicitly set
 
 ## 10. GPUI Notes
 
-- expected crate/module surface: `poodle_gpui::composites::breadcrumbs`
-- implementation-only details: GPUI may render separators and overflow using
-  native layout and menu surfaces, but path semantics and current location still
-  need explicit mapping
+- expected crate/module surface: `poodle_gpui::components::breadcrumbs`
+- Spec struct: `BreadcrumbsSpec` in primitives crate
+- GPUI may render separators and overflow using native layout, but path semantics
+  and current location must be explicitly mapped
+- Truncation behavior must match: first item + ellipsis + last N-1 items
 
 ## 11. Parity Checklist
 
 ### Tier 1: Strict Parity
 
-- [ ] navigation role and current-location semantics match
-- [ ] item activation order and meaning match
-- [ ] truncation preserves current-item accessibility in both runtimes
+- [ ] `<nav>` landmark with `aria-label` matches
+- [ ] `aria-current="page"` on current/last item
+- [ ] `aria-hidden="true"` on separators and ellipsis
+- [ ] `navigate` event fires with correct `value`
+- [ ] truncation shows first item + ellipsis + last N-1 items
+- [ ] items with `href` use anchor navigation; items without use callback
 
 ### Tier 2: Visual Parity
 
-- [ ] all five sizes visually match per size table
-- [ ] hierarchy emphasis and separator treatment use comparable token roles
+- [ ] all five sizes visually match per size table (gap and font-size)
+- [ ] all three densities match per density table (gap)
+- [ ] secondary text color for intermediate items
+- [ ] primary text color for current item
+- [ ] separator opacity 0.4 with chevron-right icon
+- [ ] links and buttons have no visible border, padding, or background
+- [ ] list has no margin, padding, or list-style markers
 
 ### Tier 3: Implementation Freedom
 
-- [ ] overflow presentation stays internal
+- [ ] overflow presentation and wrap behavior stay internal
+- [ ] link vs button decision is renderer-specific
 
-## 12. Known Deltas
+## 12. Specimen Definitions
 
-| Delta | Why Allowed | Approval Status | Follow-Up |
-|-------|-------------|-----------------|-----------|
-| overflow interaction may differ | runtime layout constraints differ | allowed | keep navigation meaning and current-item exposure strict |
+### Group: Basic
 
-## 13. Specimen Definitions
+| Label | Props / Config | Expected Visual |
+|-------|---------------|-----------------|
+| Basic | `items=[Home, Projects, Poodle (current)]` | Three-item trail with link-style intermediate items and non-link current item; clicking an intermediate item shows its value |
 
-All preview apps must render the following specimens identically.
+### Group: Sizes
 
-### Basic
+| Label | Props / Config | Expected Visual |
+|-------|---------------|-----------------|
+| Size variants | `items=[Home, Projects, Poodle (current)]`, one row per size (xs, sm, md, lg, xl) | Five breadcrumb trails at increasing font-size and gap |
 
-A three-item breadcrumb trail with navigation callback:
+### Group: Densities
 
-| Label | Props/Config | Expected Visual |
-|-------|-------------|-----------------|
-| Basic | items: Home > Projects > Poodle (current) | trail with link-style intermediate items and non-link current item; navigation callback reports clicked value |
+| Label | Props / Config | Expected Visual |
+|-------|---------------|-----------------|
+| Density variants | `items=[Home, Projects, Poodle (current)]`, one row per density (compact, default, comfortable) | Three breadcrumb trails with increasing gap between items |
 
-### Deep path
+### Group: Deep path
 
-A six-item breadcrumb trail with no truncation:
+| Label | Props / Config | Expected Visual |
+|-------|---------------|-----------------|
+| Deep path | `items=[Home, Workspace, Projects, Poodle Design System, Primitives, Button (current)]` | Full six-item trail with all intermediate links and current-page terminus |
 
-| Label | Props/Config | Expected Visual |
-|-------|-------------|-----------------|
-| Deep path | items: Home > Workspace > Projects > Poodle Design System > Primitives > Button (current) | full trail visible with all intermediate links and current-page terminus |
+### Group: Collapsed (max 3 visible)
 
-### Collapsed (max 3 visible)
+| Label | Props / Config | Expected Visual |
+|-------|---------------|-----------------|
+| Collapsed | same deep items, `maxVisibleItems=3` | Home > ... > Primitives > Button with ellipsis replacing middle items |
 
-A six-item breadcrumb trail with truncation enabled:
+## 13. Approval And Adoption Notes
 
-| Label | Props/Config | Expected Visual |
-|-------|-------------|-----------------|
-| Collapsed (max 3 visible) | same deep items, `maxVisibleItems=3` | overflow treatment visible; only three items shown with truncation indicator |
-
-## 14. Approval And Adoption Notes
-
-- contract status: `seed contract`
+- contract status: `detailed contract`
 - approvers: pending
 - downstream adopters: nested settings, detail pages, catalog hierarchies
 - future follow-up: add richer overflow breadcrumb menu if real adopters need it
-
-## Next Task
-
-Use `Breadcrumbs` above `PageHeader` title identity for hierarchical location
-context, not as a replacement for tabs or shell navigation.

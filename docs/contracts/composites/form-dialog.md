@@ -1,7 +1,7 @@
 # FormDialog
 
-Status: seed contract
-Updated: 2026-03-28
+Status: detailed contract
+Updated: 2026-03-30
 
 ## 1. Purpose
 
@@ -12,8 +12,8 @@ Updated: 2026-03-28
   default submit/cancel actions, and caller-owned custom actions when needed
 - In scope: controlled open state, title and subtitle/description, form
   content via default slot, optional default submit and cancel buttons, custom
-  actions slot, status callouts, dismiss prevention during submission, custom
-  dialog width
+  actions slot, status callouts via FormLayout, dismiss prevention during
+  submission, custom dialog width via CSS custom property
 - Out of scope: form validation logic, field-level errors (handled by
   individual Field components), multi-step forms, file upload handling
 
@@ -21,23 +21,29 @@ Updated: 2026-03-28
 
 ```text
 [Dialog]  Dialog primitive (kind="dialog")
-  ├── [Subtitle slot]  optional rich subtitle content
-  ├── [FormLayout]  FormLayout composite
+  ├── [Header .form-dialog__header]  (optional, when subtitle slot provided)
+  │     └── [Subtitle .form-dialog__subtitle]  <div>
+  │           └── (slot: subtitle)
+  ├── [FormLayout]  FormLayout composite (columns=1)
   │     ├── [ErrorDisplay]  (when error is set, handled by FormLayout)
   │     ├── [SuccessDisplay]  (when success is set, handled by FormLayout)
   │     └── [FormContent]  (via default slot)
   └── [Actions slot]
-        ├── [Default actions]  optional cancel + submit buttons
-        └── [Custom actions]  caller-owned slot content when shell mode is used
+        ├── [Custom actions]  (slot: actions) — when provided
+        └── [Default actions]  when showDefaultActions=true and no actions slot
+              ├── [CancelButton]  Button (variant="ghost")
+              └── [SubmitButton]  Button (variant="primary")
 ```
 
 | Part | Required | Description | Token Targets |
 |------|----------|-------------|---------------|
 | Dialog | yes | Dialog primitive with controlled open state | delegates to Dialog contract |
-| FormLayout | yes | FormLayout composite for form structure and error display | delegates to FormLayout contract |
+| Header | no | subtitle container rendered when subtitle slot is provided | margin-bottom spacing |
+| Subtitle | no | rich subtitle content area | text-secondary, body typography |
+| FormLayout | yes | FormLayout composite for form structure and error/success display | delegates to FormLayout contract |
 | FormContent | yes (via slot) | form fields and content provided by consumer | layout delegated to FormLayout |
-| CancelButton | yes | ghost Button for canceling; disabled during submission | delegates to Button contract |
-| SubmitButton | yes | primary Button for submission; shows "Submitting..." text and is disabled during submission | delegates to Button contract |
+| CancelButton | conditional | ghost Button for canceling; disabled during submission | delegates to Button contract |
+| SubmitButton | conditional | primary Button for submission; shows "Submitting..." text when submitting | delegates to Button contract |
 
 ## 3. Props And Inputs
 
@@ -45,25 +51,25 @@ Updated: 2026-03-28
 
 | Prop | Type | Default | Required | Notes |
 |------|------|---------|----------|-------|
-| `open` | `boolean \| null` | `null` | no | controlled open state; `null` means uncontrolled |
+| `open` | `boolean \| null` | `null` | no | controlled open state; `null` means uncontrolled (Dialog manages visibility) |
 | `title` | `string` | — | yes | dialog title |
-| `subtitle` | `string \| null` | `null` | no | primary description text used by shell-style callers |
-| `description` | `string \| null` | `null` | no | alias/fallback description text |
+| `subtitle` | `string \| null` | `null` | no | primary description text; takes precedence over `description` |
+| `description` | `string \| null` | `null` | no | alias/fallback description text; used when `subtitle` is null |
 | `submitLabel` | `string` | `"Submit"` | no | label for the submit button (shown when not submitting) |
 | `cancelLabel` | `string` | `"Cancel"` | no | label for the cancel button |
 | `submitting` | `boolean` | `false` | no | when true, disables dismiss and shows submitting state |
 | `error` | `string \| null` | `null` | no | form-level error message passed to FormLayout |
 | `success` | `string \| null` | `null` | no | form-level success message passed to FormLayout |
 | `ariaLabel` | `string \| null` | `null` | no | accessible label for the dialog |
-| `width` | `string \| null` | `null` | no | custom dialog width CSS value |
-| `showDefaultActions` | `boolean` | `true` | no | when false, suppresses built-in cancel/submit buttons and expects an `actions` slot |
+| `width` | `string \| null` | `null` | no | custom dialog width CSS value (applied via `--poodle-form-dialog-width`) |
+| `showDefaultActions` | `boolean` | `true` | no | when false, suppresses built-in cancel/submit buttons; expects an `actions` slot |
 
 ### Slots
 
 | Slot | Provided Context | Description |
 |------|-----------------|-------------|
 | default | `{ submitting: boolean }` | form content (fields, inputs); receives submitting state for conditional rendering |
-| `subtitle` | `{ submitting: boolean }` | optional rich subtitle content rendered below the title |
+| `subtitle` | `{ submitting: boolean }` | optional rich subtitle content rendered below the title; when provided, the `description` prop is not passed to Dialog |
 | `actions` | `{ submitting: boolean }` | optional custom footer actions; replaces default submit/cancel buttons |
 
 ### Controlled And Uncontrolled
@@ -84,6 +90,7 @@ Updated: 2026-03-28
 | error | `error` is set | FormLayout displays error message above form content |
 | success | `success` is set | FormLayout displays success message above form content |
 | shell mode | `showDefaultActions` is false | caller supplies the full footer via the `actions` slot |
+| custom width | `width` is set | dialog surface uses the specified width (capped at 100%) |
 
 ### Component States
 
@@ -94,19 +101,22 @@ No additional internal state. All state is externally controlled via props.
 | Event | When It Fires | Payload | Notes |
 |-------|---------------|---------|-------|
 | `submit` | user clicks the built-in submit button | `void` | host is responsible for async logic and setting `submitting`/`error` |
-| `cancel` | dialog requests cancellation | `void` | fired for built-in cancel button and close/dismiss requests |
-| `openChange` | dialog open state changes (cancel, Escape, backdrop) | `{ open: boolean }` | host must update `open` prop; prevented during submitting |
+| `cancel` | dialog requests cancellation (cancel button, Escape, backdrop, close button) | `void` | fired before `openChange` when applicable |
+| `openChange` | dialog open state changes | `{ open: boolean }` | host must update `open` prop; cancel event also fires when closing while not submitting |
 
 ## 6. Accessibility
 
 ### Semantics
 
 - Dialog: `kind="dialog"` — standard dialog semantics (not alertdialog)
+- Dialog: `showCloseButton={true}` — always shows the Dialog close button
 - Dialog: optional `ariaLabel` for custom accessible name
 - CancelButton and SubmitButton: standard button semantics
 - Both buttons: `disabled` attribute set during submitting state
-- Dismiss: Escape and backdrop dismiss are disabled during submitting
+- Dismiss: Escape and backdrop dismiss disabled during submitting
   (`dismissOnEscape={!submitting}`, `dismissOnBackdrop={!submitting}`)
+- Description: when subtitle slot is provided, `description` is not passed to
+  Dialog to avoid duplicate description announcement
 
 ### Keyboard
 
@@ -127,43 +137,84 @@ No additional internal state. All state is externally controlled via props.
 ### Sizing
 
 - Dialog: default Dialog sizing unless `width` is supplied
+- Custom width: applied via `--poodle-form-dialog-width` CSS custom property,
+  capped with `min(var(--poodle-form-dialog-width, 34rem), 100%)`
 - FormLayout: `columns={1}` — single-column form layout
 - Actions: standard Dialog actions slot layout (flex row, right-aligned)
 
 ### Composition
 
-- Parent expectations: any view needing a modal form (user creation, settings edit, etc.)
-- Child expectations: Dialog primitive, FormLayout composite, Button primitive
-- Resizing rules: delegated to Dialog; form content scrolls if it exceeds dialog height
+- composes: `Dialog` and `Button` from `@poodle/svelte-primitives`,
+  `FormLayout` from composites
+- parent expectations: any view needing a modal form (user creation, settings
+  edit, etc.)
+- child expectations: form fields and action primitives via slots
+- resizing rules: delegated to Dialog; form content scrolls if it exceeds
+  dialog height
 
-## 8. Token Usage
+## 8. Token Usage — Exact Values
 
-| Part | Token | Purpose |
-|------|-------|---------|
-| Dialog | (delegates to Dialog) | all Dialog tokens |
-| FormLayout | (delegates to FormLayout) | error display, form spacing tokens |
-| CancelButton | (delegates to Button) | ghost variant tokens |
-| SubmitButton | (delegates to Button) | primary variant tokens |
+### Dialog Surface Width (`:global(.form-dialog__surface)`)
 
-No component-specific tokens; FormDialog is purely compositional.
+| Property | Value |
+|----------|-------|
+| width | `min(var(--poodle-form-dialog-width, 34rem), 100%)` |
+
+### Header (`.form-dialog__header`)
+
+| Property | Value |
+|----------|-------|
+| margin-bottom | `var(--poodle-space-stack-md)` |
+
+### Subtitle (`.form-dialog__subtitle`)
+
+| Property | Value |
+|----------|-------|
+| color | `var(--poodle-color-text-secondary)` |
+| font-size | `var(--poodle-typography-body-size, 0.875rem)` |
+| line-height | `var(--poodle-typography-body-lineHeight, 1.5)` |
+
+### Composed Primitives
+
+All other token usage delegates to the respective primitive/composite
+contracts:
+
+| Part | Delegates To |
+|------|-------------|
+| Dialog | Dialog contract (foundation) |
+| FormLayout | FormLayout contract (composites) |
+| CancelButton | Button contract (foundation), variant="ghost" |
+| SubmitButton | Button contract (foundation), variant="primary" |
+
+### Light Theme Overrides
+
+None.
 
 ## 9. Svelte Notes
 
-- Uses `createEventDispatcher` for `submit`, `cancel`, and `openChange` events
-- Composes `Dialog`, `Button` from `@poodle/svelte-primitives` and `FormLayout`
+- uses `createEventDispatcher` for `submit`, `cancel`, and `openChange` events
+- composes `Dialog`, `Button` from `@poodle/svelte-primitives` and `FormLayout`
   from `@poodle/svelte-composites`
-- Submit button text switches between `submitLabel` and `"Submitting..."`
-- Cancel handler calls internal `setOpen(false)` which emits `openChange`
+- submit button text switches between `submitLabel` and `"Submitting..."`
+- cancel handler calls internal `setOpen(false)` which emits `openChange`
   when `open !== null`
-- `handleOpenChange` prevents close during submitting state
-- `subtitle` takes precedence over `description`
-- custom width is applied through the Dialog content style hook
+- `handleOpenChange` prevents cancel event during submitting state but
+  always forwards `openChange`
+- `subtitle` takes precedence over `description` via `resolvedDescription`
+  reactive binding
+- when subtitle slot is provided, `description` is set to null on the Dialog
+  to avoid duplication
+- custom width is applied through `contentStyle` and `contentClassName`
+  props on Dialog; the global `.form-dialog__surface` class sets the width
+- Dialog receives `showCloseButton={true}` always
 
 ## 10. GPUI Notes
 
-- Expected crate/module surface: `poodle_gpui::composites::form_dialog`
-- Compose Dialog, FormLayout, and Button from their respective crates
-- Submitting state must prevent dismiss and disable buttons
+- expected crate/module surface: `poodle_gpui::composites::form_dialog`
+- spec struct: `FormDialogSpec` with open, title, description, submit/cancel
+  labels, submitting, error, success, width
+- compose Dialog, FormLayout, and Button from their respective crates
+- submitting state must prevent dismiss and disable buttons
 
 ## 11. Parity Checklist
 
@@ -172,25 +223,23 @@ No component-specific tokens; FormDialog is purely compositional.
 - [ ] all shell props have the same meaning and defaults
 - [ ] event names and payloads match
 - [ ] submitting state disables dismiss and buttons
-- [ ] submit button text changes during submitting
+- [ ] submit button text changes to "Submitting..." during submitting
 - [ ] slot context provides submitting boolean
+- [ ] subtitle takes precedence over description
+- [ ] cancel event fires on Escape/backdrop/cancel button (not during submitting)
 
 ### Tier 2: Visual Parity
 
 - [ ] action button layout matches (ghost cancel left, primary submit right)
-- [ ] error display via FormLayout matches
+- [ ] error/success display via FormLayout matches
+- [ ] custom width CSS treatment matches
+- [ ] subtitle typography matches
 
 ### Tier 3: Implementation Freedom
 
 - [ ] rendering internals stay internal
 
-## 12. Known Deltas
-
-| Delta | Why Allowed | Approval Status | Follow-Up |
-|-------|-------------|-----------------|-----------|
-| `subtitle` aliases `description` | supports shell-style callers without introducing a second dialog component | approved | remove ambiguity later if callers converge |
-
-## 13. Specimen Definitions
+## 12. Specimen Definitions
 
 ### Basic Form Dialog
 
@@ -209,13 +258,3 @@ No component-specific tokens; FormDialog is purely compositional.
 | Label | Props / Config | Expected Visual |
 |-------|---------------|-----------------|
 | Shell mode with custom actions | `title="Edit workspace settings"`, `subtitle="Update shared defaults for this workspace."`, `showDefaultActions=false`, `width="40rem"`, success set after save, actions slot contains caller-owned FormActions | dialog renders custom footer actions, shows success callout, and uses wider shell sizing |
-
-## 14. Approval And Adoption Notes
-
-- Contract status: `seed contract`
-- Approvers: pending
-- Downstream adopters: CRUD forms, settings dialogs, user management,
-  any modal form workflow
-- Future follow-up: consider adding `onSubmit` return value for promise-based
-  auto-submitting management; consider form-level validation callback;
-  consider `size` prop pass-through to Dialog
