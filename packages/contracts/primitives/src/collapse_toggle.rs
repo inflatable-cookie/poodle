@@ -1,4 +1,5 @@
 use poodle_tokens::semantic;
+use crate::types::{ControlDensity, ControlSize, SemanticControlSizeRole};
 
 /// Direction the collapse toggle points when in the "collapsed" position.
 ///
@@ -51,6 +52,9 @@ pub struct CollapseToggleSpec {
     pub is_disabled: bool,
     /// Custom accessible label. Defaults to "Collapse"/"Expand".
     pub aria_label: Option<String>,
+    pub size: ControlSize,
+    pub size_role: SemanticControlSizeRole,
+    pub density: ControlDensity,
 }
 
 impl Default for CollapseToggleSpec {
@@ -60,6 +64,9 @@ impl Default for CollapseToggleSpec {
             direction: CollapseDirection::Left,
             is_disabled: false,
             aria_label: None,
+            size: ControlSize::Md,
+            size_role: SemanticControlSizeRole::Chrome,
+            density: ControlDensity::Default,
         }
     }
 }
@@ -157,5 +164,20 @@ impl CollapseToggleSpec {
     /// Focus ring width.
     pub fn focus_ring_width_token(&self) -> &'static str {
         semantic::BORDER_WIDTH_FOCUS
+    }
+
+    pub fn with_size(mut self, size: ControlSize) -> Self {
+        self.size = size;
+        self
+    }
+
+    pub fn with_size_role(mut self, size_role: SemanticControlSizeRole) -> Self {
+        self.size_role = size_role;
+        self
+    }
+
+    pub fn with_density(mut self, density: ControlDensity) -> Self {
+        self.density = density;
+        self
     }
 }

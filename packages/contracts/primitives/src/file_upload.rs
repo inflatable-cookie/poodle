@@ -1,4 +1,5 @@
 use poodle_tokens::semantic;
+use crate::types::{ControlDensity, ControlSize, SemanticControlSizeRole};
 
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct FileUploadSpec {
@@ -7,6 +8,9 @@ pub struct FileUploadSpec {
     pub is_multiple: bool,
     pub is_disabled: bool,
     pub is_dragging: bool,
+    pub size: ControlSize,
+    pub size_role: SemanticControlSizeRole,
+    pub density: ControlDensity,
 }
 
 impl Default for FileUploadSpec {
@@ -17,6 +21,9 @@ impl Default for FileUploadSpec {
             is_multiple: false,
             is_disabled: false,
             is_dragging: false,
+            size: ControlSize::Md,
+            size_role: SemanticControlSizeRole::Control,
+            density: ControlDensity::Default,
         }
     }
 }
@@ -81,5 +88,20 @@ impl FileUploadSpec {
 
     pub fn focus_border_token(&self) -> &'static str {
         semantic::COLOR_ACCENT_FOCUS_RING
+    }
+
+    pub fn with_size(mut self, size: ControlSize) -> Self {
+        self.size = size;
+        self
+    }
+
+    pub fn with_size_role(mut self, size_role: SemanticControlSizeRole) -> Self {
+        self.size_role = size_role;
+        self
+    }
+
+    pub fn with_density(mut self, density: ControlDensity) -> Self {
+        self.density = density;
+        self
     }
 }

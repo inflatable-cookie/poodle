@@ -1,4 +1,4 @@
-use crate::types::CalendarWeekStart;
+use crate::types::{CalendarWeekStart, ControlDensity, ControlSize, SemanticControlSizeRole};
 
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct CalendarSpec {
@@ -9,6 +9,9 @@ pub struct CalendarSpec {
     pub locale: String,
     pub is_disabled: bool,
     pub aria_label: Option<String>,
+    pub size: ControlSize,
+    pub size_role: SemanticControlSizeRole,
+    pub density: ControlDensity,
 }
 
 impl Default for CalendarSpec {
@@ -21,6 +24,9 @@ impl Default for CalendarSpec {
             locale: String::from("en-GB"),
             is_disabled: false,
             aria_label: None,
+            size: ControlSize::Md,
+            size_role: SemanticControlSizeRole::Control,
+            density: ControlDensity::Default,
         }
     }
 }
@@ -51,5 +57,20 @@ impl CalendarSpec {
 
     pub fn effective_visible_month(&self) -> Option<&str> {
         self.visible_month.as_deref().or(self.current_value())
+    }
+
+    pub fn with_size(mut self, size: ControlSize) -> Self {
+        self.size = size;
+        self
+    }
+
+    pub fn with_size_role(mut self, size_role: SemanticControlSizeRole) -> Self {
+        self.size_role = size_role;
+        self
+    }
+
+    pub fn with_density(mut self, density: ControlDensity) -> Self {
+        self.density = density;
+        self
     }
 }

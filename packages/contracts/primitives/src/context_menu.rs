@@ -1,10 +1,13 @@
 use crate::menu::MenuSpec;
-use crate::types::MenuEntry;
+use crate::types::{ControlDensity, ControlSize, MenuEntry, SemanticControlSizeRole};
 
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct ContextMenuSpec {
     pub menu: MenuSpec,
     pub anchor_point: Option<(i32, i32)>,
+    pub size: ControlSize,
+    pub size_role: SemanticControlSizeRole,
+    pub density: ControlDensity,
 }
 
 impl Default for ContextMenuSpec {
@@ -12,6 +15,9 @@ impl Default for ContextMenuSpec {
         Self {
             menu: MenuSpec::default(),
             anchor_point: None,
+            size: ControlSize::Md,
+            size_role: SemanticControlSizeRole::Chrome,
+            density: ControlDensity::Default,
         }
     }
 }
@@ -50,5 +56,20 @@ impl ContextMenuSpec {
 
     pub fn actionable_item_count(&self) -> usize {
         self.menu.actionable_item_count()
+    }
+
+    pub fn with_size(mut self, size: ControlSize) -> Self {
+        self.size = size;
+        self
+    }
+
+    pub fn with_size_role(mut self, size_role: SemanticControlSizeRole) -> Self {
+        self.size_role = size_role;
+        self
+    }
+
+    pub fn with_density(mut self, density: ControlDensity) -> Self {
+        self.density = density;
+        self
     }
 }

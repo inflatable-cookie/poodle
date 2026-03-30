@@ -1,4 +1,5 @@
 use poodle_tokens::semantic;
+use crate::types::{ControlDensity, ControlSize, SemanticControlSizeRole};
 
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub enum BulkActionTone {
@@ -39,6 +40,9 @@ pub struct BulkActionBarSpec {
     pub selection_count: usize,
     pub total_count: Option<usize>,
     pub actions: Vec<BulkAction>,
+    pub size: ControlSize,
+    pub size_role: SemanticControlSizeRole,
+    pub density: ControlDensity,
 }
 
 impl Default for BulkActionBarSpec {
@@ -47,6 +51,9 @@ impl Default for BulkActionBarSpec {
             selection_count: 0,
             total_count: None,
             actions: Vec::new(),
+            size: ControlSize::Md,
+            size_role: SemanticControlSizeRole::Control,
+            density: ControlDensity::Default,
         }
     }
 }
@@ -139,5 +146,20 @@ impl BulkActionBarSpec {
 
     pub fn focus_ring_color_token(&self) -> &'static str {
         semantic::COLOR_ACCENT_FOCUS_RING
+    }
+
+    pub fn with_size(mut self, size: ControlSize) -> Self {
+        self.size = size;
+        self
+    }
+
+    pub fn with_size_role(mut self, size_role: SemanticControlSizeRole) -> Self {
+        self.size_role = size_role;
+        self
+    }
+
+    pub fn with_density(mut self, density: ControlDensity) -> Self {
+        self.density = density;
+        self
     }
 }

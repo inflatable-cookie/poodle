@@ -1,4 +1,5 @@
 use poodle_tokens::semantic;
+use crate::types::{ControlDensity, ControlSize, SemanticControlSizeRole};
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
 pub enum AlertDialogTone {
@@ -16,6 +17,9 @@ pub struct AlertDialogSpec {
     pub confirm_label: String,
     pub cancel_label: String,
     pub aria_label: Option<String>,
+    pub size: ControlSize,
+    pub size_role: SemanticControlSizeRole,
+    pub density: ControlDensity,
 }
 
 impl Default for AlertDialogSpec {
@@ -28,6 +32,9 @@ impl Default for AlertDialogSpec {
             confirm_label: "Confirm".to_string(),
             cancel_label: "Cancel".to_string(),
             aria_label: None,
+            size: ControlSize::Md,
+            size_role: SemanticControlSizeRole::Control,
+            density: ControlDensity::Default,
         }
     }
 }
@@ -137,5 +144,20 @@ impl AlertDialogSpec {
 
     pub fn focus_ring_color_token(&self) -> &'static str {
         semantic::COLOR_ACCENT_FOCUS_RING
+    }
+
+    pub fn with_size(mut self, size: ControlSize) -> Self {
+        self.size = size;
+        self
+    }
+
+    pub fn with_size_role(mut self, size_role: SemanticControlSizeRole) -> Self {
+        self.size_role = size_role;
+        self
+    }
+
+    pub fn with_density(mut self, density: ControlDensity) -> Self {
+        self.density = density;
+        self
     }
 }

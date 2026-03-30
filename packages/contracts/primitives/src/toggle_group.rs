@@ -1,4 +1,5 @@
 use poodle_tokens::semantic;
+use crate::types::{ControlDensity, ControlSize, SemanticControlSizeRole};
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub enum ToggleGroupSelectionMode {
@@ -38,6 +39,9 @@ pub struct ToggleGroupSpec {
     pub selection_mode: ToggleGroupSelectionMode,
     pub is_disabled: bool,
     pub aria_label: Option<String>,
+    pub size: ControlSize,
+    pub size_role: SemanticControlSizeRole,
+    pub density: ControlDensity,
 }
 
 impl Default for ToggleGroupSpec {
@@ -49,6 +53,9 @@ impl Default for ToggleGroupSpec {
             selection_mode: ToggleGroupSelectionMode::Single,
             is_disabled: false,
             aria_label: None,
+            size: ControlSize::Md,
+            size_role: SemanticControlSizeRole::Control,
+            density: ControlDensity::Default,
         }
     }
 }
@@ -84,5 +91,20 @@ impl ToggleGroupSpec {
 
     pub fn focus_ring_color_token(&self) -> &'static str {
         semantic::COLOR_ACCENT_FOCUS_RING
+    }
+
+    pub fn with_size(mut self, size: ControlSize) -> Self {
+        self.size = size;
+        self
+    }
+
+    pub fn with_size_role(mut self, size_role: SemanticControlSizeRole) -> Self {
+        self.size_role = size_role;
+        self
+    }
+
+    pub fn with_density(mut self, density: ControlDensity) -> Self {
+        self.density = density;
+        self
     }
 }

@@ -1,4 +1,5 @@
 use poodle_tokens::semantic;
+use crate::types::{ControlDensity, ControlSize, SemanticControlSizeRole};
 
 #[derive(Clone, Debug, PartialEq)]
 pub enum SortDirection {
@@ -55,6 +56,9 @@ pub struct OrderBySpec {
     pub active_sort: Option<ActiveSort>,
     pub aria_label: String,
     pub is_disabled: bool,
+    pub size: ControlSize,
+    pub size_role: SemanticControlSizeRole,
+    pub density: ControlDensity,
 }
 
 impl OrderBySpec {
@@ -64,6 +68,9 @@ impl OrderBySpec {
             active_sort: None,
             aria_label: "Sort by".to_string(),
             is_disabled: false,
+            size: ControlSize::Md,
+            size_role: SemanticControlSizeRole::Control,
+            density: ControlDensity::Default,
         }
     }
 
@@ -154,5 +161,20 @@ impl OrderBySpec {
 
     pub fn reset_color_token(&self) -> &'static str {
         semantic::COLOR_TEXT_SECONDARY
+    }
+
+    pub fn with_size(mut self, size: ControlSize) -> Self {
+        self.size = size;
+        self
+    }
+
+    pub fn with_size_role(mut self, size_role: SemanticControlSizeRole) -> Self {
+        self.size_role = size_role;
+        self
+    }
+
+    pub fn with_density(mut self, density: ControlDensity) -> Self {
+        self.density = density;
+        self
     }
 }

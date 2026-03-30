@@ -1,4 +1,4 @@
-use crate::types::{ButtonVariant, ControlSize};
+use crate::types::{ButtonVariant, ControlDensity, ControlSize, SemanticControlSizeRole};
 
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct IconButtonSpec {
@@ -9,6 +9,8 @@ pub struct IconButtonSpec {
     pub is_disabled: bool,
     pub is_loading: bool,
     pub is_pressed: Option<bool>,
+    pub size_role: SemanticControlSizeRole,
+    pub density: ControlDensity,
 }
 
 impl Default for IconButtonSpec {
@@ -21,6 +23,8 @@ impl Default for IconButtonSpec {
             is_disabled: false,
             is_loading: false,
             is_pressed: None,
+            size_role: SemanticControlSizeRole::Control,
+            density: ControlDensity::Default,
         }
     }
 }
@@ -93,5 +97,15 @@ impl IconButtonSpec {
 
     pub fn control_height_token(&self) -> &'static str {
         self.size.control_height_token()
+    }
+
+    pub fn with_size_role(mut self, size_role: SemanticControlSizeRole) -> Self {
+        self.size_role = size_role;
+        self
+    }
+
+    pub fn with_density(mut self, density: ControlDensity) -> Self {
+        self.density = density;
+        self
     }
 }

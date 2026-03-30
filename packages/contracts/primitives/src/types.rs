@@ -142,6 +142,37 @@ impl ControlSize {
     }
 }
 
+/// Semantic size role relative to the inherited presentation scale.
+/// `Chrome` resolves one stop smaller, `Prominent` one stop larger,
+/// `Control` maps directly to the inherited size scale.
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub enum SemanticControlSizeRole {
+    Chrome,
+    Control,
+    Prominent,
+}
+
+impl Default for SemanticControlSizeRole {
+    fn default() -> Self {
+        Self::Control
+    }
+}
+
+/// Density mode controlling container padding and sibling gaps.
+/// See docs/contracts/foundation/size-and-density.md for the global rules.
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub enum ControlDensity {
+    Compact,
+    Default,
+    Comfortable,
+}
+
+impl Default for ControlDensity {
+    fn default() -> Self {
+        Self::Default
+    }
+}
+
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub enum Orientation {
     Horizontal,

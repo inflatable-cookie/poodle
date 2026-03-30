@@ -1,6 +1,6 @@
 use poodle_tokens::semantic;
 
-use crate::types::ValidationState;
+use crate::types::{ControlDensity, ControlSize, SemanticControlSizeRole, ValidationState};
 
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct TextAreaSpec {
@@ -16,6 +16,9 @@ pub struct TextAreaSpec {
     pub error_message_id: Option<String>,
     pub submit_enabled: bool,
     pub cancel_enabled: bool,
+    pub size: ControlSize,
+    pub size_role: SemanticControlSizeRole,
+    pub density: ControlDensity,
 }
 
 impl Default for TextAreaSpec {
@@ -33,6 +36,9 @@ impl Default for TextAreaSpec {
             error_message_id: None,
             submit_enabled: false,
             cancel_enabled: false,
+            size: ControlSize::Md,
+            size_role: SemanticControlSizeRole::Control,
+            density: ControlDensity::Default,
         }
     }
 }
@@ -179,5 +185,20 @@ impl TextAreaSpec {
 
     pub fn body_line_height_token(&self) -> &'static str {
         semantic::TYPOGRAPHY_BODY_LINE_HEIGHT
+    }
+
+    pub fn with_size(mut self, size: ControlSize) -> Self {
+        self.size = size;
+        self
+    }
+
+    pub fn with_size_role(mut self, size_role: SemanticControlSizeRole) -> Self {
+        self.size_role = size_role;
+        self
+    }
+
+    pub fn with_density(mut self, density: ControlDensity) -> Self {
+        self.density = density;
+        self
     }
 }

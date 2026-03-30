@@ -1,4 +1,5 @@
 use poodle_tokens::semantic;
+use crate::types::{ControlDensity, ControlSize, SemanticControlSizeRole};
 
 #[derive(Clone)]
 pub struct BreadcrumbItem {
@@ -34,6 +35,9 @@ pub struct BreadcrumbsSpec {
     pub items: Vec<BreadcrumbItem>,
     pub aria_label: String,
     pub max_visible_items: Option<usize>,
+    pub size: ControlSize,
+    pub size_role: SemanticControlSizeRole,
+    pub density: ControlDensity,
 }
 
 impl BreadcrumbsSpec {
@@ -42,6 +46,9 @@ impl BreadcrumbsSpec {
             items,
             aria_label: "Breadcrumb".to_string(),
             max_visible_items: None,
+            size: ControlSize::Md,
+            size_role: SemanticControlSizeRole::Chrome,
+            density: ControlDensity::Default,
         }
     }
 
@@ -73,5 +80,20 @@ impl BreadcrumbsSpec {
 
     pub fn gap_token(&self) -> &'static str {
         semantic::SPACE_INLINE_SM
+    }
+
+    pub fn with_size(mut self, size: ControlSize) -> Self {
+        self.size = size;
+        self
+    }
+
+    pub fn with_size_role(mut self, size_role: SemanticControlSizeRole) -> Self {
+        self.size_role = size_role;
+        self
+    }
+
+    pub fn with_density(mut self, density: ControlDensity) -> Self {
+        self.density = density;
+        self
     }
 }

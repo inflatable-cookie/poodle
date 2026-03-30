@@ -1,6 +1,6 @@
 use poodle_tokens::semantic;
 
-use crate::types::{ChoiceOption, Orientation};
+use crate::types::{ChoiceOption, ControlDensity, ControlSize, Orientation, SemanticControlSizeRole};
 
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct RadioGroupSpec {
@@ -13,6 +13,9 @@ pub struct RadioGroupSpec {
     pub description_id: Option<String>,
     /// Custom color override for the selected radio indicator (CSS hex string).
     pub selected_color: Option<String>,
+    pub size: ControlSize,
+    pub size_role: SemanticControlSizeRole,
+    pub density: ControlDensity,
 }
 
 impl Default for RadioGroupSpec {
@@ -26,6 +29,9 @@ impl Default for RadioGroupSpec {
             aria_label: None,
             description_id: None,
             selected_color: None,
+            size: ControlSize::Md,
+            size_role: SemanticControlSizeRole::Control,
+            density: ControlDensity::Default,
         }
     }
 }
@@ -72,5 +78,20 @@ impl RadioGroupSpec {
             Orientation::Horizontal => semantic::SPACE_INLINE_MD,
             Orientation::Vertical => semantic::SPACE_STACK_SM,
         }
+    }
+
+    pub fn with_size(mut self, size: ControlSize) -> Self {
+        self.size = size;
+        self
+    }
+
+    pub fn with_size_role(mut self, size_role: SemanticControlSizeRole) -> Self {
+        self.size_role = size_role;
+        self
+    }
+
+    pub fn with_density(mut self, density: ControlDensity) -> Self {
+        self.density = density;
+        self
     }
 }

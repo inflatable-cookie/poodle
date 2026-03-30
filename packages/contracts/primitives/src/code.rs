@@ -1,4 +1,5 @@
 use poodle_tokens::semantic;
+use crate::types::{ControlDensity, ControlSize, SemanticControlSizeRole};
 
 #[derive(Clone, Debug, PartialEq)]
 pub struct CodeSpec {
@@ -9,6 +10,9 @@ pub struct CodeSpec {
     pub highlight_lines: Vec<usize>,
     pub max_height: Option<f64>,
     pub is_inline: bool,
+    pub size: ControlSize,
+    pub size_role: SemanticControlSizeRole,
+    pub density: ControlDensity,
 }
 
 impl Default for CodeSpec {
@@ -21,6 +25,9 @@ impl Default for CodeSpec {
             highlight_lines: Vec::new(),
             max_height: None,
             is_inline: false,
+            size: ControlSize::Md,
+            size_role: SemanticControlSizeRole::Chrome,
+            density: ControlDensity::Default,
         }
     }
 }
@@ -83,5 +90,20 @@ impl CodeSpec {
 
     pub fn border_token(&self) -> &'static str {
         semantic::COLOR_BORDER_SUBTLE
+    }
+
+    pub fn with_size(mut self, size: ControlSize) -> Self {
+        self.size = size;
+        self
+    }
+
+    pub fn with_size_role(mut self, size_role: SemanticControlSizeRole) -> Self {
+        self.size_role = size_role;
+        self
+    }
+
+    pub fn with_density(mut self, density: ControlDensity) -> Self {
+        self.density = density;
+        self
     }
 }

@@ -1,4 +1,5 @@
 use poodle_tokens::semantic;
+use crate::types::{ControlDensity, ControlSize, SemanticControlSizeRole};
 
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct ComboboxOption {
@@ -39,6 +40,9 @@ pub struct ComboboxSpec {
     pub is_open: bool,
     pub query: String,
     pub aria_label: Option<String>,
+    pub size: ControlSize,
+    pub size_role: SemanticControlSizeRole,
+    pub density: ControlDensity,
 }
 
 impl Default for ComboboxSpec {
@@ -52,6 +56,9 @@ impl Default for ComboboxSpec {
             is_open: false,
             query: String::new(),
             aria_label: None,
+            size: ControlSize::Md,
+            size_role: SemanticControlSizeRole::Control,
+            density: ControlDensity::Default,
         }
     }
 }
@@ -205,5 +212,20 @@ impl ComboboxSpec {
 
     pub fn body_line_height_token(&self) -> &'static str {
         semantic::TYPOGRAPHY_BODY_LINE_HEIGHT
+    }
+
+    pub fn with_size(mut self, size: ControlSize) -> Self {
+        self.size = size;
+        self
+    }
+
+    pub fn with_size_role(mut self, size_role: SemanticControlSizeRole) -> Self {
+        self.size_role = size_role;
+        self
+    }
+
+    pub fn with_density(mut self, density: ControlDensity) -> Self {
+        self.density = density;
+        self
     }
 }

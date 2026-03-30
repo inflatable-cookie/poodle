@@ -1,6 +1,6 @@
 use poodle_tokens::semantic;
 
-use crate::types::DrawerEdge;
+use crate::types::{ControlDensity, ControlSize, DrawerEdge, SemanticControlSizeRole};
 
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct DrawerSpec {
@@ -13,6 +13,9 @@ pub struct DrawerSpec {
     pub dismiss_on_escape: bool,
     pub dismiss_on_backdrop: bool,
     pub aria_label: Option<String>,
+    pub size: ControlSize,
+    pub size_role: SemanticControlSizeRole,
+    pub density: ControlDensity,
 }
 
 impl Default for DrawerSpec {
@@ -27,6 +30,9 @@ impl Default for DrawerSpec {
             dismiss_on_escape: true,
             dismiss_on_backdrop: true,
             aria_label: None,
+            size: ControlSize::Md,
+            size_role: SemanticControlSizeRole::Control,
+            density: ControlDensity::Default,
         }
     }
 }
@@ -99,5 +105,20 @@ impl DrawerSpec {
 
     pub fn shadow_token(&self) -> &'static str {
         semantic::ELEVATION_DIALOG
+    }
+
+    pub fn with_size(mut self, size: ControlSize) -> Self {
+        self.size = size;
+        self
+    }
+
+    pub fn with_size_role(mut self, size_role: SemanticControlSizeRole) -> Self {
+        self.size_role = size_role;
+        self
+    }
+
+    pub fn with_density(mut self, density: ControlDensity) -> Self {
+        self.density = density;
+        self
     }
 }

@@ -1,6 +1,6 @@
 use poodle_tokens::semantic;
 
-use crate::types::ValidationState;
+use crate::types::{ControlDensity, ControlSize, SemanticControlSizeRole, ValidationState};
 
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct TimeFieldSpec {
@@ -13,6 +13,9 @@ pub struct TimeFieldSpec {
     pub aria_label: Option<String>,
     pub described_by: Option<String>,
     pub validation_state: ValidationState,
+    pub size: ControlSize,
+    pub size_role: SemanticControlSizeRole,
+    pub density: ControlDensity,
 }
 
 impl Default for TimeFieldSpec {
@@ -27,6 +30,9 @@ impl Default for TimeFieldSpec {
             aria_label: None,
             described_by: None,
             validation_state: ValidationState::None,
+            size: ControlSize::Md,
+            size_role: SemanticControlSizeRole::Control,
+            density: ControlDensity::Default,
         }
     }
 }
@@ -89,5 +95,20 @@ impl TimeFieldSpec {
 
     pub fn body_line_height_token(&self) -> &'static str {
         semantic::TYPOGRAPHY_BODY_LINE_HEIGHT
+    }
+
+    pub fn with_size(mut self, size: ControlSize) -> Self {
+        self.size = size;
+        self
+    }
+
+    pub fn with_size_role(mut self, size_role: SemanticControlSizeRole) -> Self {
+        self.size_role = size_role;
+        self
+    }
+
+    pub fn with_density(mut self, density: ControlDensity) -> Self {
+        self.density = density;
+        self
     }
 }

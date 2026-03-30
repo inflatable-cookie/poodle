@@ -1,4 +1,5 @@
 use poodle_tokens::semantic;
+use crate::types::{ControlDensity, ControlSize, SemanticControlSizeRole};
 
 /// Color input mode for the picker.
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
@@ -24,6 +25,9 @@ pub struct ColorPickerSpec {
     pub show_alpha: bool,
     pub show_input: bool,
     pub default_mode: ColorInputMode,
+    pub size: ControlSize,
+    pub size_role: SemanticControlSizeRole,
+    pub density: ControlDensity,
 }
 
 impl Default for ColorPickerSpec {
@@ -37,6 +41,9 @@ impl Default for ColorPickerSpec {
             show_alpha: false,
             show_input: true,
             default_mode: ColorInputMode::Hex,
+            size: ControlSize::Md,
+            size_role: SemanticControlSizeRole::Control,
+            density: ControlDensity::Default,
         }
     }
 }
@@ -116,5 +123,20 @@ impl ColorPickerSpec {
 
     pub fn surface_radius_token(&self) -> &'static str {
         semantic::RADIUS_SURFACE
+    }
+
+    pub fn with_size(mut self, size: ControlSize) -> Self {
+        self.size = size;
+        self
+    }
+
+    pub fn with_size_role(mut self, size_role: SemanticControlSizeRole) -> Self {
+        self.size_role = size_role;
+        self
+    }
+
+    pub fn with_density(mut self, density: ControlDensity) -> Self {
+        self.density = density;
+        self
     }
 }

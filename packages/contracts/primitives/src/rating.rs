@@ -1,4 +1,5 @@
 use poodle_tokens::semantic;
+use crate::types::{ControlDensity, ControlSize, SemanticControlSizeRole};
 
 #[derive(Clone, Debug, PartialEq)]
 pub struct RatingSpec {
@@ -7,6 +8,9 @@ pub struct RatingSpec {
     pub is_readonly: bool,
     pub is_disabled: bool,
     pub precision: f64,
+    pub size: ControlSize,
+    pub size_role: SemanticControlSizeRole,
+    pub density: ControlDensity,
 }
 
 impl Default for RatingSpec {
@@ -17,6 +21,9 @@ impl Default for RatingSpec {
             is_readonly: false,
             is_disabled: false,
             precision: 1.0,
+            size: ControlSize::Md,
+            size_role: SemanticControlSizeRole::Control,
+            density: ControlDensity::Default,
         }
     }
 }
@@ -67,5 +74,20 @@ impl RatingSpec {
 
     pub fn inactive_color_token(&self) -> &'static str {
         semantic::COLOR_BORDER_SUBTLE
+    }
+
+    pub fn with_size(mut self, size: ControlSize) -> Self {
+        self.size = size;
+        self
+    }
+
+    pub fn with_size_role(mut self, size_role: SemanticControlSizeRole) -> Self {
+        self.size_role = size_role;
+        self
+    }
+
+    pub fn with_density(mut self, density: ControlDensity) -> Self {
+        self.density = density;
+        self
     }
 }

@@ -1,6 +1,6 @@
 use poodle_tokens::semantic;
 
-use crate::types::{ButtonVariant, ControlSize};
+use crate::types::{ButtonVariant, ControlDensity, ControlSize, SemanticControlSizeRole};
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub enum ToggleLayout {
@@ -20,6 +20,8 @@ pub struct ToggleSpec {
     pub label: Option<String>,
     /// Icon name (e.g. "bold", "italic", "pin") rendered before label.
     pub icon: Option<String>,
+    pub size_role: SemanticControlSizeRole,
+    pub density: ControlDensity,
 }
 
 impl Default for ToggleSpec {
@@ -34,6 +36,8 @@ impl Default for ToggleSpec {
             aria_label: None,
             label: None,
             icon: None,
+            size_role: SemanticControlSizeRole::Control,
+            density: ControlDensity::Default,
         }
     }
 }
@@ -71,5 +75,15 @@ impl ToggleSpec {
 
     pub fn focus_ring_color_token(&self) -> &'static str {
         semantic::COLOR_ACCENT_FOCUS_RING
+    }
+
+    pub fn with_size_role(mut self, size_role: SemanticControlSizeRole) -> Self {
+        self.size_role = size_role;
+        self
+    }
+
+    pub fn with_density(mut self, density: ControlDensity) -> Self {
+        self.density = density;
+        self
     }
 }

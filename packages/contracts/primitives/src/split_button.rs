@@ -1,6 +1,6 @@
 use poodle_tokens::semantic;
 
-use crate::types::{ButtonTone, ButtonVariant, ControlSize};
+use crate::types::{ButtonTone, ButtonVariant, ControlDensity, ControlSize, SemanticControlSizeRole};
 
 /// A menu item for the split button dropdown.
 #[derive(Clone, Debug, Eq, PartialEq)]
@@ -46,6 +46,8 @@ pub struct SplitButtonSpec {
     pub is_open: bool,
     pub aria_label: Option<String>,
     pub menu_aria_label: String,
+    pub size_role: SemanticControlSizeRole,
+    pub density: ControlDensity,
 }
 
 impl Default for SplitButtonSpec {
@@ -61,6 +63,8 @@ impl Default for SplitButtonSpec {
             is_open: false,
             aria_label: None,
             menu_aria_label: "More actions".to_string(),
+            size_role: SemanticControlSizeRole::Control,
+            density: ControlDensity::Default,
         }
     }
 }
@@ -158,5 +162,15 @@ impl SplitButtonSpec {
 
     pub fn disabled_opacity_token(&self) -> &'static str {
         semantic::STATE_OPACITY_DISABLED
+    }
+
+    pub fn with_size_role(mut self, size_role: SemanticControlSizeRole) -> Self {
+        self.size_role = size_role;
+        self
+    }
+
+    pub fn with_density(mut self, density: ControlDensity) -> Self {
+        self.density = density;
+        self
     }
 }

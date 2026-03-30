@@ -1,6 +1,6 @@
 use poodle_tokens::semantic;
 
-use crate::types::{MenuEntry, MenuItemKind, OverlayPlacement};
+use crate::types::{ControlDensity, ControlSize, MenuEntry, MenuItemKind, OverlayPlacement, SemanticControlSizeRole};
 
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct MenuSpec {
@@ -9,6 +9,9 @@ pub struct MenuSpec {
     pub default_open: bool,
     pub placement: OverlayPlacement,
     pub aria_label: Option<String>,
+    pub size: ControlSize,
+    pub size_role: SemanticControlSizeRole,
+    pub density: ControlDensity,
 }
 
 impl Default for MenuSpec {
@@ -19,6 +22,9 @@ impl Default for MenuSpec {
             default_open: false,
             placement: OverlayPlacement::BottomStart,
             aria_label: None,
+            size: ControlSize::Md,
+            size_role: SemanticControlSizeRole::Chrome,
+            density: ControlDensity::Default,
         }
     }
 }
@@ -96,5 +102,20 @@ impl MenuSpec {
 
     pub fn disabled_opacity_token(&self) -> &'static str {
         semantic::STATE_OPACITY_DISABLED
+    }
+
+    pub fn with_size(mut self, size: ControlSize) -> Self {
+        self.size = size;
+        self
+    }
+
+    pub fn with_size_role(mut self, size_role: SemanticControlSizeRole) -> Self {
+        self.size_role = size_role;
+        self
+    }
+
+    pub fn with_density(mut self, density: ControlDensity) -> Self {
+        self.density = density;
+        self
     }
 }

@@ -1,6 +1,6 @@
 use poodle_tokens::semantic;
 
-use crate::types::ValidationState;
+use crate::types::{ControlDensity, ControlSize, SemanticControlSizeRole, ValidationState};
 
 #[derive(Clone, Debug, PartialEq)]
 pub struct DurationInputSpec {
@@ -8,6 +8,9 @@ pub struct DurationInputSpec {
     pub is_disabled: bool,
     pub validation_state: ValidationState,
     pub show_seconds: bool,
+    pub size: ControlSize,
+    pub size_role: SemanticControlSizeRole,
+    pub density: ControlDensity,
 }
 
 impl Default for DurationInputSpec {
@@ -17,6 +20,9 @@ impl Default for DurationInputSpec {
             is_disabled: false,
             validation_state: ValidationState::None,
             show_seconds: false,
+            size: ControlSize::Md,
+            size_role: SemanticControlSizeRole::Control,
+            density: ControlDensity::Default,
         }
     }
 }
@@ -80,5 +86,20 @@ impl DurationInputSpec {
 
     pub fn body_line_height_token(&self) -> &'static str {
         semantic::TYPOGRAPHY_BODY_LINE_HEIGHT
+    }
+
+    pub fn with_size(mut self, size: ControlSize) -> Self {
+        self.size = size;
+        self
+    }
+
+    pub fn with_size_role(mut self, size_role: SemanticControlSizeRole) -> Self {
+        self.size_role = size_role;
+        self
+    }
+
+    pub fn with_density(mut self, density: ControlDensity) -> Self {
+        self.density = density;
+        self
     }
 }

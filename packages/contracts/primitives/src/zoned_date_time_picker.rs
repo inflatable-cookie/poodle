@@ -1,4 +1,5 @@
 use poodle_tokens::semantic;
+use crate::types::{ControlDensity, ControlSize, SemanticControlSizeRole};
 
 #[derive(Clone, Debug, PartialEq)]
 pub struct ZonedDateTimePickerSpec {
@@ -6,6 +7,9 @@ pub struct ZonedDateTimePickerSpec {
     pub time_zone: Option<String>,
     pub is_open: bool,
     pub is_disabled: bool,
+    pub size: ControlSize,
+    pub size_role: SemanticControlSizeRole,
+    pub density: ControlDensity,
 }
 
 impl Default for ZonedDateTimePickerSpec {
@@ -15,6 +19,9 @@ impl Default for ZonedDateTimePickerSpec {
             time_zone: None,
             is_open: false,
             is_disabled: false,
+            size: ControlSize::Md,
+            size_role: SemanticControlSizeRole::Control,
+            density: ControlDensity::Default,
         }
     }
 }
@@ -54,5 +61,20 @@ impl ZonedDateTimePickerSpec {
 
     pub fn shadow_token(&self) -> &'static str {
         semantic::ELEVATION_OVERLAY
+    }
+
+    pub fn with_size(mut self, size: ControlSize) -> Self {
+        self.size = size;
+        self
+    }
+
+    pub fn with_size_role(mut self, size_role: SemanticControlSizeRole) -> Self {
+        self.size_role = size_role;
+        self
+    }
+
+    pub fn with_density(mut self, density: ControlDensity) -> Self {
+        self.density = density;
+        self
     }
 }

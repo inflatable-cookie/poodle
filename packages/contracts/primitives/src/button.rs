@@ -1,6 +1,6 @@
 use poodle_tokens::semantic;
 
-use crate::types::{ButtonTone, ButtonVariant, ControlSize};
+use crate::types::{ButtonTone, ButtonVariant, ControlDensity, ControlSize, SemanticControlSizeRole};
 
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct ButtonSpec {
@@ -15,6 +15,8 @@ pub struct ButtonSpec {
     pub aria_label: Option<String>,
     pub described_by: Option<String>,
     pub label: Option<String>,
+    pub size_role: SemanticControlSizeRole,
+    pub density: ControlDensity,
 }
 
 impl Default for ButtonSpec {
@@ -31,6 +33,8 @@ impl Default for ButtonSpec {
             aria_label: None,
             described_by: None,
             label: None,
+            size_role: SemanticControlSizeRole::Control,
+            density: ControlDensity::Default,
         }
     }
 }
@@ -167,5 +171,15 @@ impl ButtonSpec {
 
     pub fn radius_token(&self) -> &'static str {
         semantic::RADIUS_CONTROL
+    }
+
+    pub fn with_size_role(mut self, size_role: SemanticControlSizeRole) -> Self {
+        self.size_role = size_role;
+        self
+    }
+
+    pub fn with_density(mut self, density: ControlDensity) -> Self {
+        self.density = density;
+        self
     }
 }

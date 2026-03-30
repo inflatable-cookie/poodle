@@ -1,6 +1,6 @@
 use poodle_tokens::semantic;
 
-use crate::types::ChoiceOption;
+use crate::types::{ChoiceOption, ControlDensity, ControlSize, SemanticControlSizeRole};
 
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct SelectSpec {
@@ -13,6 +13,9 @@ pub struct SelectSpec {
     pub description_id: Option<String>,
     pub open: Option<bool>,
     pub default_open: bool,
+    pub size: ControlSize,
+    pub size_role: SemanticControlSizeRole,
+    pub density: ControlDensity,
 }
 
 impl Default for SelectSpec {
@@ -27,6 +30,9 @@ impl Default for SelectSpec {
             description_id: None,
             open: None,
             default_open: false,
+            size: ControlSize::Md,
+            size_role: SemanticControlSizeRole::Control,
+            density: ControlDensity::Default,
         }
     }
 }
@@ -85,5 +91,20 @@ impl SelectSpec {
 
     pub fn overlay_fill_token(&self) -> &'static str {
         semantic::COLOR_BACKGROUND_ELEVATED
+    }
+
+    pub fn with_size(mut self, size: ControlSize) -> Self {
+        self.size = size;
+        self
+    }
+
+    pub fn with_size_role(mut self, size_role: SemanticControlSizeRole) -> Self {
+        self.size_role = size_role;
+        self
+    }
+
+    pub fn with_density(mut self, density: ControlDensity) -> Self {
+        self.density = density;
+        self
     }
 }

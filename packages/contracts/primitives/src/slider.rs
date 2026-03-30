@@ -1,6 +1,6 @@
 use poodle_tokens::semantic;
 
-use crate::types::Orientation;
+use crate::types::{ControlDensity, ControlSize, Orientation, SemanticControlSizeRole};
 
 #[derive(Clone, Debug, PartialEq)]
 pub struct SliderSpec {
@@ -12,6 +12,9 @@ pub struct SliderSpec {
     pub is_disabled: bool,
     pub aria_label: Option<String>,
     pub value_text: Option<String>,
+    pub size: ControlSize,
+    pub size_role: SemanticControlSizeRole,
+    pub density: ControlDensity,
 }
 
 impl Default for SliderSpec {
@@ -25,6 +28,9 @@ impl Default for SliderSpec {
             is_disabled: false,
             aria_label: None,
             value_text: None,
+            size: ControlSize::Md,
+            size_role: SemanticControlSizeRole::Control,
+            density: ControlDensity::Default,
         }
     }
 }
@@ -70,5 +76,20 @@ impl SliderSpec {
 
     pub fn disabled_opacity_token(&self) -> &'static str {
         semantic::STATE_OPACITY_DISABLED
+    }
+
+    pub fn with_size(mut self, size: ControlSize) -> Self {
+        self.size = size;
+        self
+    }
+
+    pub fn with_size_role(mut self, size_role: SemanticControlSizeRole) -> Self {
+        self.size_role = size_role;
+        self
+    }
+
+    pub fn with_density(mut self, density: ControlDensity) -> Self {
+        self.density = density;
+        self
     }
 }

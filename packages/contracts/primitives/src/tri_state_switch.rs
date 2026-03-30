@@ -1,6 +1,6 @@
 use poodle_tokens::semantic;
 
-use crate::types::{CheckState, ControlSize};
+use crate::types::{CheckState, ControlDensity, ControlSize, SemanticControlSizeRole};
 
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct TriStateSwitchSpec {
@@ -14,6 +14,8 @@ pub struct TriStateSwitchSpec {
     pub default_color: Option<String>,
     pub included_color: Option<String>,
     pub is_disabled: bool,
+    pub size_role: SemanticControlSizeRole,
+    pub density: ControlDensity,
 }
 
 impl Default for TriStateSwitchSpec {
@@ -29,6 +31,8 @@ impl Default for TriStateSwitchSpec {
             default_color: None,
             included_color: None,
             is_disabled: false,
+            size_role: SemanticControlSizeRole::Control,
+            density: ControlDensity::Default,
         }
     }
 }
@@ -110,5 +114,15 @@ impl TriStateSwitchSpec {
             CheckState::Mixed => semantic::COLOR_ACCENT_HOVER,
             CheckState::Unchecked => semantic::COLOR_BACKGROUND_SURFACE,
         }
+    }
+
+    pub fn with_size_role(mut self, size_role: SemanticControlSizeRole) -> Self {
+        self.size_role = size_role;
+        self
+    }
+
+    pub fn with_density(mut self, density: ControlDensity) -> Self {
+        self.density = density;
+        self
     }
 }
