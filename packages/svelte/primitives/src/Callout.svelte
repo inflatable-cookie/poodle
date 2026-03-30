@@ -63,9 +63,9 @@
       {#if $$slots.icon}
         <slot name="icon" />
       {:else if tone === "pending"}
-        <Spinner variant="ring" sizeRole="chrome" tone="accent" />
+        <Spinner variant="ring" size={resolvedSize} sizeRole="chrome" tone="accent" />
       {:else}
-        <Icon name={toneIcon[tone] ?? "info"} />
+        <Icon name={toneIcon[tone] ?? "info"} size={resolvedSize} />
       {/if}
     </span>
 
@@ -165,6 +165,13 @@
     display: grid;
     gap: var(--poodle-space-inline-sm);
     min-width: 0;
+    color: var(--poodle-color-text-secondary);
+    font-size: 0.8125rem;
+    line-height: 1.5;
+  }
+
+  .callout__content strong {
+    color: var(--poodle-color-text-primary);
   }
 
   .callout__content :global(p) {
@@ -219,63 +226,46 @@
 
   /* Size variants */
   .callout[data-size="xs"] .callout__icon {
-    width: 1.125rem;
-    height: 1.125rem;
-    font-size: 0.625rem;
+    width: 0.875rem;
+    height: 0.875rem;
+    font-size: 0.5rem;
   }
-
-  .callout[data-size="xs"] .callout__content strong {
-    font-size: 0.75rem;
-  }
-
-  .callout[data-size="xs"] .callout__content :global(p) {
-    font-size: 0.6875rem;
-  }
-
-  .callout[data-size="xs"] .callout__dismiss {
-    width: 1.375rem;
-    height: 1.375rem;
-  }
+  .callout[data-size="xs"] .callout__content { font-size: 0.625rem; }
+  .callout[data-size="xs"] .callout__content strong { font-size: 0.6875rem; }
+  .callout[data-size="xs"] .callout__dismiss { width: 1.25rem; height: 1.25rem; }
+  .callout[data-size="xs"] { gap: 0.375rem; }
 
   .callout[data-size="sm"] .callout__icon {
-    width: 1.25rem;
-    height: 1.25rem;
+    width: 1.125rem;
+    height: 1.125rem;
+    font-size: 0.5625rem;
   }
-
-  .callout[data-size="sm"] .callout__content :global(p) {
-    font-size: 0.75rem;
-  }
+  .callout[data-size="sm"] .callout__content { font-size: 0.6875rem; }
+  .callout[data-size="sm"] .callout__content strong { font-size: 0.75rem; }
+  .callout[data-size="sm"] .callout__dismiss { width: 1.5rem; height: 1.5rem; }
+  .callout[data-size="sm"] { gap: 0.5rem; }
 
   .callout[data-size="lg"] .callout__icon {
-    width: 1.5rem;
-    height: 1.5rem;
-    font-size: 0.8125rem;
+    width: 1.75rem;
+    height: 1.75rem;
+    font-size: 0.9375rem;
   }
-
-  .callout[data-size="lg"] .callout__content :global(p) {
-    font-size: 0.875rem;
-  }
+  .callout[data-size="lg"] .callout__content { font-size: 0.9375rem; }
+  .callout[data-size="lg"] .callout__content strong { font-size: 1rem; }
+  .callout[data-size="lg"] .callout__dismiss { width: 2rem; height: 2rem; }
+  .callout[data-size="lg"] { gap: 0.875rem; }
 
   .callout[data-size="xl"] .callout__icon {
-    width: 1.625rem;
-    height: 1.625rem;
-    font-size: 0.875rem;
-  }
-
-  .callout[data-size="xl"] .callout__content strong {
-    font-size: 0.9375rem;
-  }
-
-  .callout[data-size="xl"] .callout__content :global(p) {
-    font-size: 0.9375rem;
-  }
-
-  .callout[data-size="xl"] .callout__dismiss {
     width: 2rem;
     height: 2rem;
+    font-size: 1.0625rem;
   }
+  .callout[data-size="xl"] .callout__content { font-size: 1.0625rem; }
+  .callout[data-size="xl"] .callout__content strong { font-size: 1.125rem; }
+  .callout[data-size="xl"] .callout__dismiss { width: 2.25rem; height: 2.25rem; }
+  .callout[data-size="xl"] { gap: 1rem; }
 
   /* Density variants */
-  .callout[data-density="compact"] { padding: 0.5rem 0.625rem; gap: var(--poodle-space-inline-sm); }
-  .callout[data-density="comfortable"] { padding: 0.875rem 1rem; gap: var(--poodle-space-inline-lg); }
+  .callout[data-density="compact"] { padding: 0.375rem 0.5rem; }
+  .callout[data-density="comfortable"] { padding: 1rem 1.25rem; }
 </style>

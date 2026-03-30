@@ -91,8 +91,7 @@
     padding: var(--poodle-space-panel-y) var(--poodle-space-panel-x);
     border: 0.0625rem solid color-mix(in srgb, var(--poodle-color-border-subtle) 42%, transparent);
     border-radius: var(--poodle-radius-surface);
-    background: color-mix(in srgb, var(--poodle-surface) 88%, var(--poodle-color-text-primary));
-    box-shadow: inset 0 0.0625rem 0 color-mix(in srgb, var(--poodle-color-text-inverse) 8%, transparent);
+    background: color-mix(in srgb, var(--poodle-surface, var(--poodle-color-background-panel)) 82%, var(--poodle-color-background-elevated));
   }
 
   .collapsible[data-open="false"] {

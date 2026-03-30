@@ -51,7 +51,7 @@
   aria-label={label}
   on:click={handleClick}
 >
-  <Icon name={iconName} />
+  <Icon name={iconName} size={resolvedSize} />
 </button>
 
 <style>

@@ -49,6 +49,7 @@
   let rootElement: HTMLDivElement | null = null;
   let gradientElement: HTMLDivElement | null = null;
   let uncontrolledOpen = defaultOpen;
+  let placement: "below" | "above" = "below";
   let inputMode: ColorInputMode = defaultMode;
 
   // Internal HSV state
@@ -124,6 +125,12 @@
   }
 
   function setOpen(next: boolean): void {
+    if (next && rootElement) {
+      const rect = rootElement.getBoundingClientRect();
+      const spaceBelow = window.innerHeight - rect.bottom;
+      // Surface is roughly 22rem tall (~352px); flip if not enough room below
+      placement = spaceBelow < 360 ? "above" : "below";
+    }
     if (open === null) {
       uncontrolledOpen = next;
     }
@@ -358,6 +365,7 @@
     <div
       id={surfaceId}
       class="color-picker__surface"
+      class:color-picker__surface--above={placement === "above"}
       role="dialog"
       aria-label="Color picker"
     >
@@ -675,6 +683,13 @@
     border-radius: var(--poodle-radius-surface);
     background: var(--poodle-color-background-elevated);
     box-shadow: var(--poodle-shadow-lg);
+  }
+
+  .color-picker__surface--above {
+    top: auto;
+    bottom: 100%;
+    margin-top: 0;
+    margin-bottom: 0.25rem;
   }
 
   /* ── Picker area (gradient + controls side by side) ────── */
