@@ -54,7 +54,7 @@
   .specimen__group {
     display: flex;
     flex-direction: column;
-    gap: 0;
+    gap: 0.375rem;
   }
 
   .status-badge {
