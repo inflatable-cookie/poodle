@@ -1,5 +1,6 @@
 <script lang="ts">
   import { createEventDispatcher, onMount, tick } from "svelte";
+  import { fade } from "svelte/transition";
 
   import { getFocusableElements } from "./internal";
   import { getUiPresentation, resolveSemanticControlSize } from "./presentation";
@@ -25,62 +26,51 @@
   }>();
 
   const uiPresentation = getUiPresentation();
+  const duration = 200;
 
   let surfaceElement: HTMLDivElement | null = null;
   let uncontrolledOpen = defaultOpen;
   let lastFocusedElement: HTMLElement | null = null;
   let bodyOverflow: string | null = null;
-
-  // DOM-visible state: controls whether the drawer is in the DOM
-  let mounted = defaultOpen;
-  // CSS animation class
-  let animOpen = defaultOpen;
+  let previousOpen = false;
 
   $: resolvedSize = size ?? resolveSemanticControlSize($uiPresentation.sizeScale, sizeRole);
   $: resolvedDensity = density ?? $uiPresentation.density;
   $: isControlled = open !== null;
   $: isOpen = isControlled ? open === true : uncontrolledOpen;
 
-  // React to open state changes
-  $: handleOpenChange(isOpen);
+  $: if (isOpen && !previousOpen) {
+    lastFocusedElement = document.activeElement as HTMLElement | null;
+    tick().then(() => {
+      const focusable = getFocusableElements(surfaceElement);
+      focusable[0]?.focus() ?? surfaceElement?.focus();
+    });
 
-  function handleOpenChange(nowOpen: boolean): void {
-    if (nowOpen && !mounted) {
-      // Mount the DOM, then animate in on the next frame
-      mounted = true;
-      lastFocusedElement = document.activeElement as HTMLElement | null;
-
-      if (typeof document !== "undefined" && modal) {
-        bodyOverflow = document.body.style.overflow;
-        document.body.style.overflow = "hidden";
-      }
-
-      // Wait for mount, then trigger CSS transition
-      tick().then(() => {
-        requestAnimationFrame(() => {
-          animOpen = true;
-          const focusable = getFocusableElements(surfaceElement);
-          focusable[0]?.focus() ?? surfaceElement?.focus();
-        });
-      });
-    } else if (!nowOpen && mounted) {
-      // Animate out — DOM removal happens on transitionend
-      animOpen = false;
-
-      if (typeof document !== "undefined" && bodyOverflow !== null) {
-        document.body.style.overflow = bodyOverflow;
-        bodyOverflow = null;
-      }
-
-      lastFocusedElement?.focus();
+    if (typeof document !== "undefined" && modal) {
+      bodyOverflow = document.body.style.overflow;
+      document.body.style.overflow = "hidden";
     }
   }
-
-  function onSurfaceTransitionEnd(event: TransitionEvent): void {
-    // Only react to the surface's own transform transition ending
-    if (event.target === event.currentTarget && !animOpen) {
-      mounted = false;
+  $: if (!isOpen && previousOpen) {
+    if (typeof document !== "undefined" && bodyOverflow !== null) {
+      document.body.style.overflow = bodyOverflow;
+      bodyOverflow = null;
     }
+
+    lastFocusedElement?.focus();
+  }
+  $: previousOpen = isOpen;
+
+  /** Custom Svelte transition: slides from the configured edge. */
+  function slideEdge(node: HTMLElement) {
+    const axis = edge === "left" || edge === "right" ? "X" : "Y";
+    const sign = edge === "right" || edge === "bottom" ? 1 : -1;
+
+    return {
+      duration,
+      css: (t: number, u: number) =>
+        `transform: translate${axis}(${u * sign * 100}%)`,
+    };
   }
 
   function setOpen(nextOpen: boolean): void {
@@ -143,20 +133,14 @@
   });
 </script>
 
-{#if mounted}
-  <div
-    class="drawer"
-    class:drawer--open={animOpen}
-    data-edge={edge}
-    data-modal={modal}
-    data-size={resolvedSize}
-    data-density={resolvedDensity}
-  >
+{#if isOpen}
+  <div class="drawer" data-edge={edge} data-modal={modal} data-size={resolvedSize} data-density={resolvedDensity}>
     {#if modal}
       <button
         type="button"
         class="drawer__backdrop"
         aria-label="Dismiss drawer backdrop"
+        transition:fade={{ duration }}
         on:click={() => {
           if (dismissOnBackdrop) {
             requestClose();
@@ -172,8 +156,8 @@
       tabindex="-1"
       aria-modal={modal ? "true" : undefined}
       aria-label={title ? undefined : ariaLabel ?? undefined}
+      transition:slideEdge
       on:keydown={trapFocus}
-      on:transitionend={onSurfaceTransitionEnd}
     >
       {#if title || description}
         <div class="drawer__header">
@@ -214,7 +198,6 @@
   .drawer[data-edge="top"] { align-items: flex-start; }
   .drawer[data-edge="bottom"] { align-items: flex-end; }
 
-  /* Backdrop */
   .drawer__backdrop {
     position: absolute;
     inset: 0;
@@ -223,15 +206,8 @@
     background: var(--poodle-color-background-overlay);
     pointer-events: auto;
     cursor: default;
-    opacity: 0;
-    transition: opacity 200ms ease;
   }
 
-  .drawer--open .drawer__backdrop {
-    opacity: 1;
-  }
-
-  /* Surface */
   .drawer__surface {
     position: relative;
     z-index: 1;
@@ -254,21 +230,8 @@
       color-mix(in srgb, var(--poodle-color-background-elevated) 98%, var(--poodle-color-background-panel))
     );
     box-shadow: var(--poodle-treatment-surface-elevated-shadow, var(--poodle-elevation-dialog));
-    transition: transform 200ms ease;
   }
 
-  /* Off-screen positions (default = entering/exiting) */
-  .drawer[data-edge="right"] .drawer__surface { transform: translateX(100%); }
-  .drawer[data-edge="left"] .drawer__surface { transform: translateX(-100%); }
-  .drawer[data-edge="top"] .drawer__surface { transform: translateY(-100%); }
-  .drawer[data-edge="bottom"] .drawer__surface { transform: translateY(100%); }
-
-  /* On-screen position */
-  .drawer--open .drawer__surface {
-    transform: translate(0, 0);
-  }
-
-  /* Top/bottom drawers: full width, limited height */
   .drawer[data-edge="top"] .drawer__surface,
   .drawer[data-edge="bottom"] .drawer__surface {
     width: 100vw;
@@ -310,12 +273,4 @@
   /* Density variants */
   .drawer[data-density="compact"] .drawer__surface { padding: 0.5rem 0.75rem; }
   .drawer[data-density="comfortable"] .drawer__surface { padding: 1rem 1.25rem; }
-
-  /* Reduced motion */
-  @media (prefers-reduced-motion: reduce) {
-    .drawer__backdrop,
-    .drawer__surface {
-      transition-duration: 0ms;
-    }
-  }
 </style>
