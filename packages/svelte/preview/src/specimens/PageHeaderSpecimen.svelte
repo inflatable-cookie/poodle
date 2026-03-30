@@ -1,6 +1,6 @@
 <script lang="ts">
   import { PageHeader } from "@poodle/svelte-composites";
-  import { Button, Eyebrow } from "@poodle/svelte-primitives";
+  import { Button, Eyebrow, MetaBar, Pill, TimeAgo } from "@poodle/svelte-primitives";
 </script>
 
 <div class="specimen">
@@ -53,6 +53,23 @@
   </div>
 
   <div class="specimen__group">
+    <Eyebrow>With MetaBar</Eyebrow>
+    <PageHeader title="Nightly Sync" section="Scheduled Task" backHref="/system/tasks" backLabel="Tasks">
+      <svelte:fragment slot="meta">
+        <MetaBar>
+          <Pill tone="success" appearance="badge">Active</Pill>
+          <span class="meta-text">Every 6 hours</span>
+          <span class="meta-text">Last run <TimeAgo datetime="2026-03-30T08:15:00Z" /></span>
+        </MetaBar>
+      </svelte:fragment>
+      <svelte:fragment slot="actions">
+        <Button variant="secondary">Run now</Button>
+        <Button>Edit schedule</Button>
+      </svelte:fragment>
+    </PageHeader>
+  </div>
+
+  <div class="specimen__group">
     <Eyebrow>Title only</Eyebrow>
     <PageHeader title="Settings" />
   </div>
@@ -69,5 +86,10 @@
     display: flex;
     flex-direction: column;
     gap: 0.5rem;
+  }
+
+  .meta-text {
+    color: var(--poodle-color-text-secondary);
+    font-size: 0.8125rem;
   }
 </style>
