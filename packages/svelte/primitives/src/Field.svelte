@@ -112,6 +112,7 @@
     display: inline-flex;
     align-items: center;
     gap: 0.375rem;
+    font-size: var(--poodle-typography-label-size);
   }
 
   .field__label,
@@ -154,19 +155,19 @@
   }
 
   /* Size variants */
-  .field[data-size="xs"] .field__label { font-size: 0.6875rem; }
+  .field[data-size="xs"] .field__label-row { font-size: 0.6875rem; }
   .field[data-size="xs"] .field__message,
   .field[data-size="xs"] .field__optional { font-size: 0.625rem; }
 
-  .field[data-size="sm"] .field__label { font-size: 0.75rem; }
+  .field[data-size="sm"] .field__label-row { font-size: 0.75rem; }
   .field[data-size="sm"] .field__message,
   .field[data-size="sm"] .field__optional { font-size: 0.6875rem; }
 
-  .field[data-size="lg"] .field__label { font-size: 0.875rem; }
+  .field[data-size="lg"] .field__label-row { font-size: 0.875rem; }
   .field[data-size="lg"] .field__message,
   .field[data-size="lg"] .field__optional { font-size: 0.8125rem; }
 
-  .field[data-size="xl"] .field__label { font-size: 0.9375rem; }
+  .field[data-size="xl"] .field__label-row { font-size: 0.9375rem; }
   .field[data-size="xl"] .field__message,
   .field[data-size="xl"] .field__optional { font-size: 0.875rem; }
 
