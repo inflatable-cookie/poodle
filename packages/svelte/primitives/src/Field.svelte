@@ -181,8 +181,8 @@
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    width: var(--poodle-typography-label-size, 0.8125rem);
-    height: var(--poodle-typography-label-size, 0.8125rem);
+    width: 1em;
+    height: 1em;
     flex-shrink: 0;
     border-radius: var(--poodle-radius-pill);
     background: color-mix(in srgb, var(--poodle-color-text-secondary) 14%, transparent);
@@ -191,8 +191,8 @@
   }
 
   .field__info-icon :global(svg) {
-    width: 0.5625rem !important;
-    height: 0.5625rem !important;
+    width: 0.625em !important;
+    height: 0.625em !important;
   }
 
   .field__info-trigger-wrap:hover .field__info-icon {
