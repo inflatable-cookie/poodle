@@ -7,8 +7,10 @@ pub mod accordion;
 pub mod action_discovery_panel;
 pub mod alert_dialog;
 pub mod app_header;
+pub mod audio_player;
 pub mod badge;
 pub mod banner;
+pub mod block_editor;
 pub mod breadcrumbs;
 pub mod bulk_action_bar;
 pub mod button;
@@ -16,34 +18,54 @@ pub mod bx;
 pub mod calendar;
 pub mod callout;
 pub mod card;
+pub mod card_radio_group;
 pub mod checkbox;
 pub mod code;
 pub mod collapse_toggle;
 pub mod collapsible;
+pub mod color_picker;
 pub mod combobox;
 pub mod command_palette;
+pub mod confirm_action;
 pub mod context_menu;
 pub mod data_table;
 pub mod date_picker;
+pub mod date_range_picker;
+pub mod date_time_picker;
+pub mod date_time_range_picker;
 pub mod detail_row;
 pub mod detail_section;
 pub mod detail_shell;
 pub mod dialog;
 pub mod dock_region;
 pub mod drawer;
+pub mod duration_input;
 pub mod editable_label;
+pub mod editable_list;
+pub mod embed_input;
+pub mod embed_preview;
 pub mod empty_state;
 pub mod eyebrow;
 pub mod field;
+pub mod field_set;
+pub mod file_upload;
 pub mod filter_toolbar;
 pub mod form_actions;
+pub mod form_shell;
 pub mod grid;
 pub mod hover_card;
 pub mod icon;
 pub mod icon_button;
+pub mod inline_remediation;
 pub mod list_card;
+pub mod list_container;
+pub mod log_list;
+pub mod markdown_editor;
+pub mod media_browse_panel;
+pub mod media_picker;
 pub mod media_preview;
 pub mod media_thumbnail;
+pub mod media_upload_status_panel;
 pub mod menu;
 pub mod menubar;
 pub mod meter;
@@ -54,18 +76,23 @@ pub mod navigation_menu;
 pub mod number_entry;
 pub mod order_by;
 pub mod page_header;
+pub mod page_loading;
 pub mod pagination;
 pub mod pagination_summary;
+pub mod password_requirements;
 pub mod picker_shell;
 pub mod pill;
 pub mod pin_input;
 pub mod popover;
 pub mod progress;
 pub mod radio_group;
+pub mod range_calendar;
 pub mod range_slider;
 pub mod rating;
 pub mod region;
 pub mod relation_picker;
+pub mod remediation_banner;
+pub mod reorderable_list;
 pub mod resize_handle;
 pub mod scroll_shell;
 pub mod search_field;
@@ -73,22 +100,37 @@ pub mod segmented_control;
 pub mod select;
 pub mod selection_summary;
 pub mod separator;
+pub mod shell_status_bar;
+pub mod sidebar_nav;
 pub mod skeleton;
 pub mod slider;
+pub mod spinner;
 pub mod split_button;
 pub mod split_view;
 pub mod stack;
+pub mod state_tile;
 pub mod status_indicator;
 pub mod surface;
 pub mod switch;
 pub mod tab_strip;
+pub mod table;
 pub mod tabs;
 pub mod text_area;
 pub mod text_input;
 pub mod time_ago;
+pub mod time_field;
+pub mod time_zone_select;
+pub mod toast_host;
 pub mod toast_stack;
+pub mod toggle;
+pub mod toggle_group;
 pub mod toolbar;
 pub mod tooltip;
+pub mod totp_input;
+pub mod tri_state_switch;
+pub mod validation_summary;
+pub mod video_player;
+pub mod zoned_date_time_picker;
 
 use jetstream_runtime::ui_element::*;
 use poodle_jetstream::JetstreamThemeProvider;
@@ -194,8 +236,10 @@ fn render_specimen(slug: &str, theme: &JetstreamThemeProvider) -> Option<JsEl> {
         "action-discovery-panel" => Some(action_discovery_panel::render(theme)),
         "alert-dialog" => Some(alert_dialog::render(theme)),
         "app-header" => Some(app_header::render(theme)),
+        "audio-player" => Some(audio_player::render(theme)),
         "badge" => Some(badge::render(theme)),
         "banner" => Some(banner::render(theme)),
+        "block-editor" => Some(block_editor::render(theme)),
         "box" => Some(bx::render(theme)),
         "breadcrumbs" => Some(breadcrumbs::render(theme)),
         "bulk-action-bar" => Some(bulk_action_bar::render(theme)),
@@ -203,34 +247,54 @@ fn render_specimen(slug: &str, theme: &JetstreamThemeProvider) -> Option<JsEl> {
         "calendar" => Some(calendar::render(theme)),
         "callout" => Some(callout::render(theme)),
         "card" => Some(card::render(theme)),
+        "card-radio-group" => Some(card_radio_group::render(theme)),
         "checkbox" => Some(checkbox::render(theme)),
         "code" => Some(code::render(theme)),
         "collapse-toggle" => Some(collapse_toggle::render(theme)),
         "collapsible" => Some(collapsible::render(theme)),
+        "color-picker" => Some(color_picker::render(theme)),
         "combobox" => Some(combobox::render(theme)),
         "command-palette" => Some(command_palette::render(theme)),
+        "confirm-action" => Some(confirm_action::render(theme)),
         "context-menu" => Some(context_menu::render(theme)),
         "data-table" => Some(data_table::render(theme)),
         "date-picker" => Some(date_picker::render(theme)),
+        "date-range-picker" => Some(date_range_picker::render(theme)),
+        "date-time-picker" => Some(date_time_picker::render(theme)),
+        "date-time-range-picker" => Some(date_time_range_picker::render(theme)),
         "detail-row" => Some(detail_row::render(theme)),
         "detail-section" => Some(detail_section::render(theme)),
         "detail-shell" => Some(detail_shell::render(theme)),
         "dialog" => Some(dialog::render(theme)),
         "dock-region" => Some(dock_region::render(theme)),
         "drawer" => Some(drawer::render(theme)),
+        "duration-input" => Some(duration_input::render(theme)),
         "editable-label" => Some(editable_label::render(theme)),
+        "editable-list" => Some(editable_list::render(theme)),
+        "embed-input" => Some(embed_input::render(theme)),
+        "embed-preview" => Some(embed_preview::render(theme)),
         "empty-state" => Some(empty_state::render(theme)),
         "eyebrow" => Some(eyebrow::render(theme)),
         "field" => Some(field::render(theme)),
+        "field-set" => Some(field_set::render(theme)),
+        "file-upload" => Some(file_upload::render(theme)),
         "filter-toolbar" => Some(filter_toolbar::render(theme)),
         "form-actions" => Some(form_actions::render(theme)),
+        "form-shell" => Some(form_shell::render(theme)),
         "grid" => Some(grid::render(theme)),
         "hover-card" => Some(hover_card::render(theme)),
         "icon" => Some(icon::render(theme)),
         "icon-button" => Some(icon_button::render(theme)),
+        "inline-remediation" => Some(inline_remediation::render(theme)),
         "list-card" => Some(list_card::render(theme)),
+        "list-container" => Some(list_container::render(theme)),
+        "log-list" => Some(log_list::render(theme)),
+        "markdown-editor" => Some(markdown_editor::render(theme)),
+        "media-browse-panel" => Some(media_browse_panel::render(theme)),
+        "media-picker" => Some(media_picker::render(theme)),
         "media-preview" => Some(media_preview::render(theme)),
         "media-thumbnail" => Some(media_thumbnail::render(theme)),
+        "media-upload-status-panel" => Some(media_upload_status_panel::render(theme)),
         "menu" => Some(menu::render(theme)),
         "menubar" => Some(menubar::render(theme)),
         "meter" => Some(meter::render(theme)),
@@ -241,18 +305,23 @@ fn render_specimen(slug: &str, theme: &JetstreamThemeProvider) -> Option<JsEl> {
         "number-entry" => Some(number_entry::render(theme)),
         "order-by" => Some(order_by::render(theme)),
         "page-header" => Some(page_header::render(theme)),
+        "page-loading" => Some(page_loading::render(theme)),
         "pagination" => Some(pagination::render(theme)),
         "pagination-summary" => Some(pagination_summary::render(theme)),
+        "password-requirements" => Some(password_requirements::render(theme)),
         "picker-shell" => Some(picker_shell::render(theme)),
         "pill" => Some(pill::render(theme)),
         "pin-input" => Some(pin_input::render(theme)),
         "popover" => Some(popover::render(theme)),
         "progress" => Some(progress::render(theme)),
         "radio-group" => Some(radio_group::render(theme)),
+        "range-calendar" => Some(range_calendar::render(theme)),
         "range-slider" => Some(range_slider::render(theme)),
         "rating" => Some(rating::render(theme)),
         "region" => Some(region::render(theme)),
         "relation-picker" => Some(relation_picker::render(theme)),
+        "remediation-banner" => Some(remediation_banner::render(theme)),
+        "reorderable-list" => Some(reorderable_list::render(theme)),
         "resize-handle" => Some(resize_handle::render(theme)),
         "scroll-shell" => Some(scroll_shell::render(theme)),
         "search-field" => Some(search_field::render(theme)),
@@ -260,22 +329,37 @@ fn render_specimen(slug: &str, theme: &JetstreamThemeProvider) -> Option<JsEl> {
         "select" => Some(select::render(theme)),
         "selection-summary" => Some(selection_summary::render(theme)),
         "separator" => Some(separator::render(theme)),
+        "shell-status-bar" => Some(shell_status_bar::render(theme)),
+        "sidebar-nav" => Some(sidebar_nav::render(theme)),
         "skeleton" => Some(skeleton::render(theme)),
         "slider" => Some(slider::render(theme)),
+        "spinner" => Some(spinner::render(theme)),
         "split-button" => Some(split_button::render(theme)),
         "split-view" => Some(split_view::render(theme)),
         "stack" => Some(stack::render(theme)),
+        "state-tile" => Some(state_tile::render(theme)),
         "status-indicator" => Some(status_indicator::render(theme)),
         "surface" => Some(surface::render(theme)),
         "switch" => Some(switch::render(theme)),
         "tab-strip" => Some(tab_strip::render(theme)),
+        "table" => Some(table::render(theme)),
         "tabs" => Some(tabs::render(theme)),
         "text-area" => Some(text_area::render(theme)),
         "text-input" => Some(text_input::render(theme)),
         "time-ago" => Some(time_ago::render(theme)),
+        "time-field" => Some(time_field::render(theme)),
+        "time-zone-select" => Some(time_zone_select::render(theme)),
+        "toast-host" => Some(toast_host::render(theme)),
         "toast-stack" => Some(toast_stack::render(theme)),
+        "toggle" => Some(toggle::render(theme)),
+        "toggle-group" => Some(toggle_group::render(theme)),
         "toolbar" => Some(toolbar::render(theme)),
         "tooltip" => Some(tooltip::render(theme)),
+        "totp-input" => Some(totp_input::render(theme)),
+        "tri-state-switch" => Some(tri_state_switch::render(theme)),
+        "validation-summary" => Some(validation_summary::render(theme)),
+        "video-player" => Some(video_player::render(theme)),
+        "zoned-date-time-picker" => Some(zoned_date_time_picker::render(theme)),
         _ => None,
     }
 }
