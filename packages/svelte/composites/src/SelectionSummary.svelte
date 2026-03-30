@@ -205,6 +205,6 @@
   }
 
   /* Density variants */
-  .selection-summary[data-density="compact"] { padding: 0.25rem 0.375rem; gap: var(--poodle-space-inline-xs); }
+  .selection-summary[data-density="compact"] { padding: 0.25rem 0.375rem; gap: 0.25rem; }
   .selection-summary[data-density="comfortable"] { padding: 0.5rem 0.75rem; gap: var(--poodle-space-inline-md); }
 </style>

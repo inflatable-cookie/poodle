@@ -383,7 +383,7 @@
   /* Density variants */
   .button[data-density="compact"] {
     padding: 0 calc(var(--poodle-space-control-x) - 0.125rem);
-    gap: var(--poodle-space-inline-xs);
+    gap: 0.25rem;
   }
 
   .button[data-density="comfortable"] {

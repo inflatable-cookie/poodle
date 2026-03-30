@@ -135,7 +135,7 @@
 
   /* Density variants */
   .checkbox[data-density="compact"] {
-    gap: var(--poodle-space-inline-xs);
+    gap: 0.25rem;
   }
 
   .checkbox[data-density="comfortable"] {

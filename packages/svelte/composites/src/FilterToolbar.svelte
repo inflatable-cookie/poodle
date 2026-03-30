@@ -144,7 +144,7 @@
   .filter-toolbar__actions {
     display: flex;
     align-items: center;
-    gap: var(--poodle-space-inline-xs, 0.25rem);
+    gap: 0.25rem;
     margin-left: auto;
   }
 
@@ -196,8 +196,8 @@
   }
 
   /* Density variants */
-  .filter-toolbar[data-density="compact"] { gap: var(--poodle-space-inline-xs); padding: 0.25rem; }
-  .filter-toolbar[data-density="compact"] .filter-toolbar__controls { gap: var(--poodle-space-inline-xs); }
+  .filter-toolbar[data-density="compact"] { gap: 0.25rem; padding: 0.25rem; }
+  .filter-toolbar[data-density="compact"] .filter-toolbar__controls { gap: 0.25rem; }
   .filter-toolbar[data-density="comfortable"] { gap: var(--poodle-space-inline-md); padding: 0.5rem; }
   .filter-toolbar[data-density="comfortable"] .filter-toolbar__controls { gap: var(--poodle-space-inline-md); }
 </style>

@@ -223,7 +223,7 @@
 
   /* Density variants */
   .switch[data-density="compact"] {
-    gap: var(--poodle-space-inline-xs);
+    gap: 0.25rem;
   }
 
   .switch[data-density="comfortable"] {

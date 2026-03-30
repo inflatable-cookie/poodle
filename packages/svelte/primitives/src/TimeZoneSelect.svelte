@@ -165,6 +165,6 @@
   }
 
   /* Density variants */
-  .time-zone-select[data-density="compact"] { gap: var(--poodle-space-inline-xs); }
+  .time-zone-select[data-density="compact"] { gap: 0.25rem; }
   .time-zone-select[data-density="comfortable"] { gap: var(--poodle-space-inline-md); }
 </style>
