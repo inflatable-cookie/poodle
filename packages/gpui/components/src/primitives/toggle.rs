@@ -6,6 +6,7 @@ use gpui::*;
 use poodle_gpui::GpuiThemeProvider;
 use poodle_primitives::{ButtonVariant, ControlSize, ToggleLayout, ToggleSpec};
 
+use crate::presentation::{rem_to_px, resolve_semantic_size, size_font_rem, size_height_offset_rem};
 use crate::theme_ext::{color_mix, color_mix_black, resolve_color, resolve_opacity, resolve_px, resolve_radius};
 
 pub struct Toggle {
@@ -38,6 +39,8 @@ impl Toggle {
     pub fn aria_label(mut self, v: impl Into<String>) -> Self { self.spec.aria_label = Some(v.into()); self }
     pub fn label(mut self, v: impl Into<String>) -> Self { self.spec.label = Some(v.into()); self }
     pub fn icon(mut self, v: impl Into<String>) -> Self { self.spec.icon = Some(v.into()); self }
+    pub fn size_role(mut self, v: poodle_primitives::SemanticControlSizeRole) -> Self { self.spec.size_role = v; self }
+    pub fn density(mut self, v: poodle_primitives::ControlDensity) -> Self { self.spec.density = v; self }
 
     // ── GPUI-specific ─────────────────────────────────────────
     pub fn on_click(mut self, handler: impl Fn(&ClickEvent, &mut Window, &mut App) + 'static) -> Self {
@@ -54,18 +57,14 @@ impl IntoElement for Toggle {
         let spec = &self.spec;
         let is_pressed = spec.current_pressed();
 
+        // ── Resolve effective size from size + size_role ────────
+        let effective_size = resolve_semantic_size(spec.size, spec.size_role);
+
         // ── Size ──────────────────────────────────────────────────
         let base_height = resolve_px(theme, spec.control_height_token());
-        let size_offset: f32 = match spec.size {
-            ControlSize::Xs => -10.0, ControlSize::Sm => -6.0, ControlSize::Md => 0.0, ControlSize::Lg => 6.0, ControlSize::Xl => 10.0,
-        };
-        let height = base_height + px(size_offset);
+        let height = base_height + px(rem_to_px(size_height_offset_rem(effective_size)));
         let pad_x = resolve_px(theme, "semantic.space.control.x");
-        let label_size = resolve_px(theme, "semantic.typography.label.size");
-        let body_size = resolve_px(theme, "semantic.typography.body.size");
-        let font_size = match spec.size {
-            ControlSize::Xs => label_size - px(2.0), ControlSize::Sm => label_size - px(1.0), ControlSize::Md => label_size, ControlSize::Lg => body_size, ControlSize::Xl => body_size + px(1.0),
-        };
+        let font_size = px(rem_to_px(size_font_rem(effective_size)));
         let radius = resolve_radius(theme, spec.radius_token());
         let focus_ring = resolve_color(theme, spec.focus_ring_color_token());
 
@@ -161,7 +160,7 @@ impl IntoElement for Toggle {
         if let Some(ref icon_name) = spec.icon {
             use super::icon::Icon;
             use poodle_primitives::{IconSize, IconSpec};
-            let icon_size = match spec.size {
+            let icon_size = match effective_size {
                 ControlSize::Xs | ControlSize::Sm => IconSize::Sm,
                 _ => IconSize::Sm,
             };

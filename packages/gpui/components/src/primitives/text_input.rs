@@ -6,10 +6,11 @@
 
 use gpui::*;
 use poodle_gpui::GpuiThemeProvider;
-use poodle_primitives::{IconSize, IconSpec, SpinnerSize, SpinnerSpec, SpinnerTone, SpinnerVariant, TextInputSpec, ValidationState};
+use poodle_primitives::{ControlSize, IconSize, IconSpec, SpinnerSize, SpinnerSpec, SpinnerTone, SpinnerVariant, TextInputSpec, ValidationState};
 
 use super::icon::Icon;
 use super::spinner::Spinner;
+use crate::presentation::{rem_to_px, resolve_semantic_size, size_font_rem, size_height_offset_rem, size_padding_x_offset_rem};
 use crate::theme_ext::{color_mix, resolve_color, resolve_opacity, resolve_px, resolve_radius};
 
 /// A real GPUI text input component backed by `TextInputSpec`.
@@ -67,7 +68,9 @@ impl TextInput {
     pub fn show_char_count(mut self, v: bool) -> Self { self.spec.show_char_count = v; self }
     pub fn submit_enabled(mut self, v: bool) -> Self { self.spec.submit_enabled = v; self }
     pub fn cancel_enabled(mut self, v: bool) -> Self { self.spec.cancel_enabled = v; self }
-
+    pub fn size(mut self, v: ControlSize) -> Self { self.spec.size = v; self }
+    pub fn size_role(mut self, v: poodle_primitives::SemanticControlSizeRole) -> Self { self.spec.size_role = v; self }
+    pub fn density(mut self, v: poodle_primitives::ControlDensity) -> Self { self.spec.density = v; self }
 
     pub fn with_id(mut self, suffix: impl Into<String>) -> Self {
         self.id_suffix = Some(suffix.into());
@@ -117,12 +120,17 @@ impl IntoElement for TextInput {
         let theme = &self.theme;
         let spec = &self.spec;
 
+        // ── Resolve effective size from size + size_role ────────
+        let effective_size = resolve_semantic_size(spec.size, spec.size_role);
+
         // ── Token resolution ──────────────────────────────────
-        let control_height = resolve_px(theme, spec.control_height_token());
-        let inline_padding = resolve_px(theme, spec.horizontal_padding_token());
+        let base_height = resolve_px(theme, spec.control_height_token());
+        let control_height = base_height + px(rem_to_px(size_height_offset_rem(effective_size)));
+        let base_padding = resolve_px(theme, spec.horizontal_padding_token());
+        let inline_padding = base_padding + px(rem_to_px(size_padding_x_offset_rem(effective_size)));
         let inline_gap = resolve_px(theme, spec.inline_gap_token());
         let control_radius = resolve_radius(theme, spec.radius_token());
-        let body_size = resolve_px(theme, spec.body_size_token());
+        let body_size = px(rem_to_px(size_font_rem(effective_size)));
         let body_line_height = resolve_px(theme, spec.body_line_height_token());
 
         let disabled_opacity = resolve_opacity(theme, spec.disabled_opacity_token());

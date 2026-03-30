@@ -8,8 +8,9 @@
 use gpui::prelude::FluentBuilder;
 use gpui::*;
 use poodle_gpui::GpuiThemeProvider;
-use poodle_primitives::{ComboboxOption, ComboboxSpec};
+use poodle_primitives::{ComboboxOption, ComboboxSpec, ControlSize};
 
+use crate::presentation::{rem_to_px, resolve_semantic_size, size_font_rem, size_height_offset_rem, size_padding_x_offset_rem};
 use crate::theme_ext::{color_mix, resolve_color, resolve_opacity, resolve_px, resolve_radius};
 
 /// A real GPUI combobox component backed by `ComboboxSpec`.
@@ -52,6 +53,9 @@ impl Combobox {
     pub fn open(mut self, v: bool) -> Self { self.spec.is_open = v; self }
     pub fn query(mut self, v: impl Into<String>) -> Self { self.spec.query = v.into(); self }
     pub fn aria_label(mut self, v: impl Into<String>) -> Self { self.spec.aria_label = Some(v.into()); self }
+    pub fn size(mut self, v: ControlSize) -> Self { self.spec.size = v; self }
+    pub fn size_role(mut self, v: poodle_primitives::SemanticControlSizeRole) -> Self { self.spec.size_role = v; self }
+    pub fn density(mut self, v: poodle_primitives::ControlDensity) -> Self { self.spec.density = v; self }
 
     pub fn with_id(mut self, suffix: impl Into<String>) -> Self {
         self.id_suffix = Some(suffix.into());
@@ -90,6 +94,9 @@ impl IntoElement for Combobox {
         let theme = &self.theme;
         let spec = &self.spec;
 
+        // ── Resolve effective size from size + size_role ────────
+        let effective_size = resolve_semantic_size(spec.size, spec.size_role);
+
         // ── Resolve input tokens ────────────────────────────────────
         let input_fill_raw = resolve_color(theme, spec.input_fill_token());
         let input_border_raw = resolve_color(theme, spec.input_border_token());
@@ -101,9 +108,11 @@ impl IntoElement for Combobox {
         let input_text = resolve_color(theme, spec.input_text_token());
         let input_placeholder = resolve_color(theme, spec.input_placeholder_token());
         let input_radius = resolve_radius(theme, spec.input_radius_token());
-        let input_height = resolve_px(theme, spec.input_height_token());
-        let input_padding_x = resolve_px(theme, "semantic.space.control.x");
-        let body_size = resolve_px(theme, spec.body_size_token());
+        let base_input_height = resolve_px(theme, spec.input_height_token());
+        let input_height = base_input_height + px(rem_to_px(size_height_offset_rem(effective_size)));
+        let base_padding_x = resolve_px(theme, "semantic.space.control.x");
+        let input_padding_x = base_padding_x + px(rem_to_px(size_padding_x_offset_rem(effective_size)));
+        let body_size = px(rem_to_px(size_font_rem(effective_size)));
         let focus_ring = resolve_color(theme, spec.focus_ring_color_token());
         let disabled_opacity = resolve_opacity(theme, spec.disabled_opacity_token());
 

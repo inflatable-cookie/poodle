@@ -9,6 +9,7 @@ use poodle_primitives::{
 };
 
 use super::icon::Icon;
+use crate::presentation::{rem_to_px, resolve_semantic_size, size_font_rem, size_height_offset_rem, size_min_width_rem, size_padding_x_offset_rem};
 use crate::theme_ext::{color_mix, color_mix_black, resolve_color, resolve_opacity, resolve_px, resolve_radius};
 
 pub struct SplitButton {
@@ -48,6 +49,8 @@ impl SplitButton {
     pub fn open(mut self, v: bool) -> Self { self.spec.is_open = v; self }
     pub fn aria_label(mut self, v: impl Into<String>) -> Self { self.spec.aria_label = Some(v.into()); self }
     pub fn menu_aria_label(mut self, v: impl Into<String>) -> Self { self.spec.menu_aria_label = v.into(); self }
+    pub fn size_role(mut self, v: poodle_primitives::SemanticControlSizeRole) -> Self { self.spec.size_role = v; self }
+    pub fn density(mut self, v: poodle_primitives::ControlDensity) -> Self { self.spec.density = v; self }
 
     // ── GPUI-specific builders ────────────────────────────────
     pub fn on_click(mut self, handler: impl Fn(&ClickEvent, &mut Window, &mut App) + 'static) -> Self {
@@ -79,16 +82,15 @@ impl IntoElement for SplitButton {
         let focus_ring = resolve_color(theme, "semantic.color.accent.focusRing");
         let body_size = resolve_px(theme, "semantic.typography.body.size");
 
-        // Size
+        // ── Resolve effective size from size + size_role ────────
+        let effective_size = resolve_semantic_size(spec.size, spec.size_role);
+
+        // Size-aware layout values via presentation helpers
         let base_height = resolve_px(theme, spec.control_height_token());
-        let size_offset: f32 = match spec.size {
-            ControlSize::Xs => -10.0, ControlSize::Sm => -6.0, ControlSize::Md => 0.0, ControlSize::Lg => 6.0, ControlSize::Xl => 10.0,
-        };
-        let height = base_height + px(size_offset);
-        let pad_x = resolve_px(theme, "semantic.space.control.x");
-        let font_size: f32 = match spec.size {
-            ControlSize::Xs => 11.0, ControlSize::Sm => 12.0, ControlSize::Md => 13.0, ControlSize::Lg => 14.0, ControlSize::Xl => 15.0,
-        };
+        let height = base_height + px(rem_to_px(size_height_offset_rem(effective_size)));
+        let base_pad_x = resolve_px(theme, "semantic.space.control.x");
+        let pad_x = base_pad_x + px(rem_to_px(size_padding_x_offset_rem(effective_size)));
+        let font_size = rem_to_px(size_font_rem(effective_size));
 
         // Variant fills
         let (fill, border_color) = match spec.variant {
@@ -121,7 +123,7 @@ impl IntoElement for SplitButton {
             .id("poodle-split-primary")
             .focusable()
             .h(height)
-            .min_w(px(64.0))
+            .min_w(px(rem_to_px(size_min_width_rem(effective_size)) * 0.75))
             .px(pad_x);
 
         // Brand-raised treatment for primary half

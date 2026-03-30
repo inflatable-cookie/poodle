@@ -2,8 +2,9 @@
 
 use gpui::*;
 use poodle_gpui::GpuiThemeProvider;
-use poodle_primitives::SwitchSpec;
+use poodle_primitives::{ControlSize, SwitchSpec};
 
+use crate::presentation::{control_height_rem, resolve_semantic_size};
 use crate::theme_ext::{color_mix, resolve_color, resolve_opacity, resolve_px};
 
 /// A real GPUI switch/toggle component backed by `SwitchSpec`.
@@ -40,7 +41,9 @@ impl Switch {
     pub fn read_only(mut self, v: bool) -> Self { self.spec.is_read_only = v; self }
     pub fn label(mut self, v: impl Into<String>) -> Self { self.spec.label = Some(v.into()); self }
     pub fn aria_label(mut self, v: impl Into<String>) -> Self { self.spec.aria_label = Some(v.into()); self }
-
+    pub fn size(mut self, v: ControlSize) -> Self { self.spec.size = v; self }
+    pub fn size_role(mut self, v: poodle_primitives::SemanticControlSizeRole) -> Self { self.spec.size_role = v; self }
+    pub fn density(mut self, v: poodle_primitives::ControlDensity) -> Self { self.spec.density = v; self }
 
     pub fn with_id(mut self, suffix: impl Into<String>) -> Self {
         self.id_suffix = Some(suffix.into());
@@ -62,6 +65,10 @@ impl IntoElement for Switch {
     fn into_element(self) -> Self::Element {
         let theme = &self.theme;
         let spec = &self.spec;
+
+        // ── Resolve effective size from size + size_role ────────
+        let effective_size = resolve_semantic_size(spec.size, spec.size_role);
+        let scale = control_height_rem(effective_size) / control_height_rem(ControlSize::Md);
 
         // Contract: gap = space-inline-sm
         let inline_gap = resolve_px(theme, "semantic.space.inline.sm");
@@ -86,16 +93,15 @@ impl IntoElement for Switch {
         };
 
         // Svelte: track = calc(icon-default * 2 + 0.125rem) wide × calc(icon-default + 0.25rem) tall
-        // With icon-default = 16px: track = 34px × 20px (matches). But Svelte actually
-        // uses icon-default which is 1rem (16px) → 34px × 20px
-        // Thumb = calc(icon-default - 0.125rem) = 14px
+        // Base values at Md (icon-default = 16px): track = 34px × 20px, thumb = 14px
+        // Scale proportionally with effective_size
         let icon_default = resolve_px(theme, "semantic.size.icon.md");
-        let track_w = icon_default * 2.0 + px(2.0); // 34px
-        let track_h = icon_default + px(4.0);        // 20px
+        let track_w = (icon_default * 2.0 + px(2.0)) * scale;
+        let track_h = (icon_default + px(4.0)) * scale;
         let track_radius = track_h / 2.0;            // pill
-        let track_padding = px(2.0);                  // 0.125rem
+        let track_padding = px(2.0 * scale);
 
-        let thumb_size = icon_default - px(2.0);     // 14px
+        let thumb_size = (icon_default - px(2.0)) * scale;
         let thumb_radius = thumb_size / 2.0;          // circle
 
         // Thumb travel = thumb_size distance

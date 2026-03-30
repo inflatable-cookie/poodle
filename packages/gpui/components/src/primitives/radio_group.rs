@@ -2,8 +2,9 @@
 
 use gpui::*;
 use poodle_gpui::GpuiThemeProvider;
-use poodle_primitives::{ChoiceOption, Orientation, RadioGroupSpec};
+use poodle_primitives::{ChoiceOption, ControlSize, Orientation, RadioGroupSpec};
 
+use crate::presentation::{control_height_rem, resolve_semantic_size};
 use crate::theme_ext::{resolve_color, resolve_opacity, resolve_px};
 
 /// A real GPUI radio group component backed by `RadioGroupSpec`.
@@ -41,7 +42,9 @@ impl RadioGroup {
     pub fn disabled(mut self, v: bool) -> Self { self.spec.is_disabled = v; self }
     pub fn aria_label(mut self, v: impl Into<String>) -> Self { self.spec.aria_label = Some(v.into()); self }
     pub fn description_id(mut self, v: impl Into<String>) -> Self { self.spec.description_id = Some(v.into()); self }
-
+    pub fn size(mut self, v: ControlSize) -> Self { self.spec.size = v; self }
+    pub fn size_role(mut self, v: poodle_primitives::SemanticControlSizeRole) -> Self { self.spec.size_role = v; self }
+    pub fn density(mut self, v: poodle_primitives::ControlDensity) -> Self { self.spec.density = v; self }
 
     pub fn with_id(mut self, prefix: impl Into<String>) -> Self {
         self.id_prefix = prefix.into();
@@ -64,10 +67,15 @@ impl IntoElement for RadioGroup {
         let theme = &self.theme;
         let spec = &self.spec;
 
+        // ── Resolve effective size from size + size_role ────────
+        let effective_size = resolve_semantic_size(spec.size, spec.size_role);
+        let scale = control_height_rem(effective_size) / control_height_rem(ControlSize::Md);
+
         // Svelte: indicator = calc(icon-default + 0.125rem) ≈ 18px, dot = calc(icon-default * 0.5) = 8px
+        // Scale proportionally with effective_size
         let icon_default = resolve_px(theme, "semantic.size.icon.md");
-        let indicator_size = icon_default + px(2.0);
-        let dot_size = icon_default * 0.5;
+        let indicator_size = (icon_default + px(2.0)) * scale;
+        let dot_size = icon_default * 0.5 * scale;
 
         // Contract: gap per orientation
         let group_gap = resolve_px(theme, spec.option_gap_token());

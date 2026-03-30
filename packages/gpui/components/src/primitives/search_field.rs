@@ -4,7 +4,7 @@
 
 use gpui::*;
 use poodle_gpui::GpuiThemeProvider;
-use poodle_primitives::{SearchFieldSpec, ValidationState};
+use poodle_primitives::{ControlSize, SearchFieldSpec, ValidationState};
 
 use super::text_input::TextInput;
 
@@ -54,6 +54,9 @@ impl SearchField {
     pub fn submit_enabled(mut self, v: bool) -> Self { self.spec.submit_enabled = v; self }
     pub fn validation_state(mut self, v: ValidationState) -> Self { self.spec.validation_state = v; self }
     pub fn described_by(mut self, v: impl Into<String>) -> Self { self.spec.described_by = Some(v.into()); self }
+    pub fn size(mut self, v: ControlSize) -> Self { self.spec.size = v; self }
+    pub fn size_role(mut self, v: poodle_primitives::SemanticControlSizeRole) -> Self { self.spec.size_role = v; self }
+    pub fn density(mut self, v: poodle_primitives::ControlDensity) -> Self { self.spec.density = v; self }
 
 
     pub fn with_id(mut self, suffix: impl Into<String>) -> Self {
@@ -91,6 +94,11 @@ impl IntoElement for SearchField {
 
     fn into_element(self) -> Self::Element {
         let mut input_spec = self.spec.as_text_input_spec();
+
+        // Forward size/size_role/density so TextInput can resolve via presentation helpers
+        input_spec.size = self.spec.size;
+        input_spec.size_role = self.spec.size_role;
+        input_spec.density = self.spec.density;
 
         // Contract fix: the spec emits trailing_icon("clear") but the actual
         // icon asset is "x". Remap so the Icon component resolves correctly.

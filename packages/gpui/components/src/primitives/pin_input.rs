@@ -5,9 +5,10 @@
 
 use gpui::*;
 use poodle_gpui::GpuiThemeProvider;
-use poodle_primitives::PinInputSpec;
+use poodle_primitives::{ControlSize, PinInputSpec};
 
-use crate::theme_ext::{resolve_color, resolve_opacity, resolve_px, resolve_radius};
+use crate::presentation::{rem_to_px, resolve_semantic_size, control_height_rem, size_font_rem};
+use crate::theme_ext::{resolve_color, resolve_opacity, resolve_radius};
 
 /// A real GPUI pin/OTP input component with fixed-length digit cells backed by `PinInputSpec`.
 pub struct PinInput {
@@ -44,6 +45,9 @@ impl PinInput {
     pub fn masked(mut self, v: bool) -> Self { self.spec.is_masked = v; self }
     pub fn disabled(mut self, v: bool) -> Self { self.spec.is_disabled = v; self }
     pub fn aria_label(mut self, v: impl Into<String>) -> Self { self.spec.aria_label = Some(v.into()); self }
+    pub fn size(mut self, v: ControlSize) -> Self { self.spec.size = v; self }
+    pub fn size_role(mut self, v: poodle_primitives::SemanticControlSizeRole) -> Self { self.spec.size_role = v; self }
+    pub fn density(mut self, v: poodle_primitives::ControlDensity) -> Self { self.spec.density = v; self }
 
     pub fn with_id(mut self, suffix: impl Into<String>) -> Self {
         self.id_suffix = Some(suffix.into());
@@ -70,9 +74,13 @@ impl IntoElement for PinInput {
         let theme = &self.theme;
         let spec = &self.spec;
 
-        // Contract: cell 2.25rem × 2.5rem, gap 0.375rem
-        let cell_width = px(36.0);  // 2.25rem
-        let cell_height = px(40.0); // 2.5rem
+        // ── Resolve effective size from size + size_role ────────
+        let effective_size = resolve_semantic_size(spec.size, spec.size_role);
+
+        // Contract: cell dimensions scale with effective size
+        let base_cell_height = rem_to_px(control_height_rem(effective_size));
+        let cell_width = px(base_cell_height * 0.9);   // slightly narrower than tall
+        let cell_height = px(base_cell_height);
         let cell_gap = px(6.0);     // 0.375rem
         let control_radius = resolve_radius(theme, spec.radius_token());
 
@@ -81,7 +89,7 @@ impl IntoElement for PinInput {
         let text_primary = resolve_color(theme, spec.text_color_token());
         let focus_ring = resolve_color(theme, spec.focus_ring_color_token());
         let disabled_opacity = resolve_opacity(theme, spec.disabled_opacity_token());
-        let heading_size = resolve_px(theme, "semantic.typography.heading.size");
+        let cell_font_size = px(rem_to_px(size_font_rem(effective_size)) * 1.25);
 
         let chars: Vec<char> = spec.value.chars().collect();
 
@@ -118,8 +126,8 @@ impl IntoElement for PinInput {
                 .flex()
                 .items_center()
                 .justify_center()
-                // Contract: code font family, 1rem size
-                .text_size(heading_size)
+                // Contract: code font family, size scales with effective size
+                .text_size(cell_font_size)
                 .text_color(text_primary)
                 .child(display);
 

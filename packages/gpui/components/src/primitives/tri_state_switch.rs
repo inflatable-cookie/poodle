@@ -4,8 +4,9 @@
 
 use gpui::*;
 use poodle_gpui::GpuiThemeProvider;
-use poodle_primitives::{CheckState, TriStateSwitchSpec};
+use poodle_primitives::{CheckState, ControlSize, TriStateSwitchSpec};
 
+use crate::presentation::{rem_to_px, resolve_semantic_size, control_height_rem, size_font_rem};
 use crate::theme_ext::{color_mix, parse_hex_color, resolve_color, resolve_opacity, resolve_px};
 
 /// A real GPUI tri-state switch component backed by `TriStateSwitchSpec`.
@@ -42,6 +43,9 @@ impl TriStateSwitch {
     pub fn state(mut self, v: CheckState) -> Self { self.spec.state = v; self }
     pub fn label(mut self, v: impl Into<String>) -> Self { self.spec.label = Some(v.into()); self }
     pub fn disabled(mut self, v: bool) -> Self { self.spec.is_disabled = v; self }
+    pub fn size(mut self, v: ControlSize) -> Self { self.spec.size = v; self }
+    pub fn size_role(mut self, v: poodle_primitives::SemanticControlSizeRole) -> Self { self.spec.size_role = v; self }
+    pub fn density(mut self, v: poodle_primitives::ControlDensity) -> Self { self.spec.density = v; self }
 
     pub fn on_change(
         mut self,
@@ -78,20 +82,22 @@ impl IntoElement for TriStateSwitch {
         let focus_ring = resolve_color(theme, "semantic.color.accent.focusRing");
         let disabled_opacity = resolve_opacity(theme, "semantic.state.opacity.disabled");
 
-        let base_control_height = resolve_px(theme, "semantic.size.control.height");
-        let size_offset: f32 = match spec.size {
-            poodle_primitives::ControlSize::Xs => -10.0,
-            poodle_primitives::ControlSize::Sm => -6.0,
-            poodle_primitives::ControlSize::Md => 0.0,
-            poodle_primitives::ControlSize::Lg => 6.0,
-            poodle_primitives::ControlSize::Xl => 10.0,
-        };
-        let control_height = base_control_height + px(size_offset);
+        // ── Resolve effective size from size + size_role ────────
+        let effective_size = resolve_semantic_size(spec.size, spec.size_role);
+
+        let control_height = px(rem_to_px(control_height_rem(effective_size)));
         let track_padding = px(2.0);
-        let segment_min_w = px(72.0);
+        // Segment width scales with effective size
+        let segment_min_w: Pixels = match effective_size {
+            ControlSize::Xs => px(56.0),
+            ControlSize::Sm => px(64.0),
+            ControlSize::Md => px(72.0),
+            ControlSize::Lg => px(80.0),
+            ControlSize::Xl => px(88.0),
+        };
         let segment_h = control_height - px(4.0);
         let segment_radius = segment_h / 2.0;
-        let label_size = resolve_px(theme, "semantic.typography.body.size");
+        let label_size = px(rem_to_px(size_font_rem(effective_size)));
         let track_w = segment_min_w * 3.0 + track_padding * 2.0;
         let track_radius = control_height / 2.0;
 

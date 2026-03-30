@@ -2,8 +2,9 @@
 
 use gpui::*;
 use poodle_gpui::GpuiThemeProvider;
-use poodle_primitives::{CheckState, CheckboxSpec};
+use poodle_primitives::{CheckState, CheckboxSpec, ControlSize};
 
+use crate::presentation::{rem_to_px, resolve_semantic_size, control_height_rem};
 use crate::theme_ext::{resolve_color, resolve_opacity, resolve_px};
 
 /// A real GPUI checkbox component backed by `CheckboxSpec`.
@@ -37,6 +38,9 @@ impl Checkbox {
     pub fn label(mut self, v: impl Into<String>) -> Self { self.spec.label = Some(v.into()); self }
     pub fn aria_label(mut self, v: impl Into<String>) -> Self { self.spec.aria_label = Some(v.into()); self }
     pub fn description_id(mut self, v: impl Into<String>) -> Self { self.spec.description_id = Some(v.into()); self }
+    pub fn size(mut self, v: ControlSize) -> Self { self.spec.size = v; self }
+    pub fn size_role(mut self, v: poodle_primitives::SemanticControlSizeRole) -> Self { self.spec.size_role = v; self }
+    pub fn density(mut self, v: poodle_primitives::ControlDensity) -> Self { self.spec.density = v; self }
 
     // ── GPUI-specific builders ────────────────────────────────
     pub fn with_id(mut self, suffix: impl Into<String>) -> Self {
@@ -60,12 +64,18 @@ impl IntoElement for Checkbox {
         let theme = &self.theme;
         let spec = &self.spec;
 
+        // ── Resolve effective size from size + size_role ────────
+        let effective_size = resolve_semantic_size(spec.size, spec.size_role);
+
         // Contract: gap = space-inline-sm
         let inline_gap = resolve_px(theme, "semantic.space.inline.sm");
         let body_size = resolve_px(theme, "semantic.typography.body.size");
-        // Contract: indicator = 1.125rem (18px), radius = 0.3125rem (5px)
-        let indicator_size = px(18.0); // contract: 1.125rem fixed
-        let indicator_radius = px(5.0); // contract: 0.3125rem fixed
+        // Contract: indicator scales with effective size — base 1.125rem at Md,
+        // proportional to control height ratio
+        let indicator_base = 18.0_f32; // 1.125rem at Md
+        let scale = control_height_rem(effective_size) / control_height_rem(ControlSize::Md);
+        let indicator_size = px(indicator_base * scale);
+        let indicator_radius = px(5.0 * scale); // 0.3125rem scaled
         let focus_ring_color = resolve_color(theme, "semantic.color.accent.focusRing");
 
         let disabled_opacity = resolve_opacity(theme, "semantic.state.opacity.disabled");
@@ -105,8 +115,8 @@ impl IntoElement for Checkbox {
                 .justify_center()
                 .flex_shrink_0();
 
-            // Contract: check mark inside indicator = 0.875rem = 14px
-            let mark_size = px(14.0);
+            // Contract: check mark inside indicator = 0.875rem at Md, scaled
+            let mark_size = px(14.0 * scale);
 
             if is_checked {
                 ind = ind.bg(accent).border_1().border_color(accent);

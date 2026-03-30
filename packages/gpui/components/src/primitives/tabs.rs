@@ -7,8 +7,9 @@
 
 use gpui::*;
 use poodle_gpui::GpuiThemeProvider;
-use poodle_primitives::{Orientation, TabActivationMode, TabDefinition, TabVariant, TabsSpec};
+use poodle_primitives::{ControlSize, Orientation, TabActivationMode, TabDefinition, TabVariant, TabsSpec};
 
+use crate::presentation::{rem_to_px, resolve_semantic_size, control_height_rem, size_font_rem, size_padding_x_offset_rem, control_space_x_rem};
 use crate::theme_ext::{resolve_color, resolve_opacity, resolve_px, resolve_radius};
 
 /// A real GPUI tabs component backed by `TabsSpec`.
@@ -49,6 +50,9 @@ impl Tabs {
     pub fn orientation(mut self, v: Orientation) -> Self { self.spec.orientation = v; self }
     pub fn activation_mode(mut self, v: TabActivationMode) -> Self { self.spec.activation_mode = v; self }
     pub fn aria_label(mut self, v: impl Into<String>) -> Self { self.spec.aria_label = Some(v.into()); self }
+    pub fn size(mut self, v: ControlSize) -> Self { self.spec.size = v; self }
+    pub fn size_role(mut self, v: poodle_primitives::SemanticControlSizeRole) -> Self { self.spec.size_role = v; self }
+    pub fn density(mut self, v: poodle_primitives::ControlDensity) -> Self { self.spec.density = v; self }
 
 
     pub fn with_id(mut self, prefix: impl Into<String>) -> Self {
@@ -73,7 +77,11 @@ impl Tabs {
 
     fn render_underline(&self) -> Div {
         let theme = &self.theme;
-        let inline_padding = resolve_px(theme, "semantic.space.inline.md");
+
+        // ── Resolve effective size from size + size_role ────────
+        let effective_size = resolve_semantic_size(self.spec.size, self.spec.size_role);
+
+        let inline_padding = px(rem_to_px(0.75 + size_padding_x_offset_rem(effective_size)));
         let control_y = resolve_px(theme, "semantic.space.control.y");
         let disabled_opacity = resolve_opacity(theme, self.spec.disabled_opacity_token());
         let accent = resolve_color(theme, self.spec.indicator_token());
@@ -85,7 +93,7 @@ impl Tabs {
         let focus_ring = resolve_color(theme, self.spec.focus_ring_color_token());
 
         let hover_bg = elevated;
-        let label_size = resolve_px(theme, "semantic.typography.label.size");
+        let label_size = px(rem_to_px(size_font_rem(effective_size)));
 
         let current_value = self.spec.current_value().map(|s| s.to_string());
 
@@ -179,7 +187,11 @@ impl Tabs {
 
     fn render_card(&self) -> Div {
         let theme = &self.theme;
-        let inline_padding = resolve_px(theme, "semantic.space.inline.md");
+
+        // ── Resolve effective size from size + size_role ────────
+        let effective_size = resolve_semantic_size(self.spec.size, self.spec.size_role);
+
+        let inline_padding = px(rem_to_px(0.75 + size_padding_x_offset_rem(effective_size)));
         let control_y = resolve_px(theme, "semantic.space.control.y");
         let disabled_opacity = resolve_opacity(theme, self.spec.disabled_opacity_token());
         let accent = resolve_color(theme, self.spec.indicator_token());
@@ -190,7 +202,7 @@ impl Tabs {
         let elevated = resolve_color(theme, "semantic.color.background.elevated");
         let radius = resolve_radius(theme, "semantic.radius.control");
         let focus_ring = resolve_color(theme, self.spec.focus_ring_color_token());
-        let label_size = resolve_px(theme, "semantic.typography.label.size");
+        let label_size = px(rem_to_px(size_font_rem(effective_size)));
 
         let current_value = self.spec.current_value().map(|s| s.to_string());
 
@@ -309,8 +321,12 @@ impl Tabs {
 
     fn render_pill(&self) -> Div {
         let theme = &self.theme;
-        let control_x = resolve_px(theme, "semantic.space.control.x");
-        let control_height = resolve_px(theme, "semantic.size.control.height");
+
+        // ── Resolve effective size from size + size_role ────────
+        let effective_size = resolve_semantic_size(self.spec.size, self.spec.size_role);
+
+        let control_x = px(rem_to_px(control_space_x_rem(self.spec.density) + size_padding_x_offset_rem(effective_size)));
+        let control_height = px(rem_to_px(control_height_rem(effective_size)));
         let disabled_opacity = resolve_opacity(theme, self.spec.disabled_opacity_token());
         let accent = resolve_color(theme, self.spec.indicator_token());
         let border_subtle = resolve_color(theme, self.spec.list_border_token());
@@ -318,7 +334,7 @@ impl Tabs {
         let text_secondary = resolve_color(theme, "semantic.color.text.secondary");
         let pill_radius = resolve_radius(theme, "semantic.radius.pill");
         let focus_ring = resolve_color(theme, self.spec.focus_ring_color_token());
-        let label_size = resolve_px(theme, "semantic.typography.label.size");
+        let label_size = px(rem_to_px(size_font_rem(effective_size)));
 
         let current_value = self.spec.current_value().map(|s| s.to_string());
 

@@ -4,8 +4,9 @@
 
 use gpui::*;
 use poodle_gpui::GpuiThemeProvider;
-use poodle_primitives::{ToggleGroupOption, ToggleGroupSelectionMode, ToggleGroupSpec};
+use poodle_primitives::{ControlSize, ToggleGroupOption, ToggleGroupSelectionMode, ToggleGroupSpec};
 
+use crate::presentation::{rem_to_px, resolve_semantic_size, size_font_rem, size_height_offset_rem, size_padding_x_offset_rem};
 use crate::theme_ext::{color_mix, resolve_color, resolve_opacity, resolve_px, resolve_radius};
 
 pub struct ToggleGroup {
@@ -34,6 +35,9 @@ impl ToggleGroup {
     pub fn selection_mode(mut self, v: ToggleGroupSelectionMode) -> Self { self.spec.selection_mode = v; self }
     pub fn disabled(mut self, v: bool) -> Self { self.spec.is_disabled = v; self }
     pub fn aria_label(mut self, v: impl Into<String>) -> Self { self.spec.aria_label = Some(v.into()); self }
+    pub fn size(mut self, v: ControlSize) -> Self { self.spec.size = v; self }
+    pub fn size_role(mut self, v: poodle_primitives::SemanticControlSizeRole) -> Self { self.spec.size_role = v; self }
+    pub fn density(mut self, v: poodle_primitives::ControlDensity) -> Self { self.spec.density = v; self }
 
     // ── GPUI-specific ─────────────────────────────────────────
     pub fn on_change(mut self, handler: impl Fn(&str, &mut Window, &mut App) + 'static) -> Self {
@@ -49,6 +53,9 @@ impl IntoElement for ToggleGroup {
         let theme = &self.theme;
         let spec = &self.spec;
 
+        // ── Resolve effective size from size + size_role ────────
+        let effective_size = resolve_semantic_size(spec.size, spec.size_role);
+
         let gap = resolve_px(theme, spec.item_gap_token());
         let radius = resolve_radius(theme, "semantic.radius.control");
         let accent = resolve_color(theme, "semantic.color.accent.base");
@@ -57,7 +64,13 @@ impl IntoElement for ToggleGroup {
         let border_default = resolve_color(theme, "semantic.color.border.default");
         let text_primary = resolve_color(theme, "semantic.color.text.primary");
         let focus_ring = resolve_color(theme, spec.focus_ring_color_token());
-        let label_size = resolve_px(theme, "semantic.typography.label.size");
+        let label_size = px(rem_to_px(size_font_rem(effective_size)));
+
+        // Size-aware item height and padding
+        let base_height = resolve_px(theme, "semantic.size.control.height");
+        let item_height = base_height + px(rem_to_px(size_height_offset_rem(effective_size)));
+        let base_pad_x = resolve_px(theme, "semantic.space.control.x");
+        let item_pad_x = base_pad_x + px(rem_to_px(size_padding_x_offset_rem(effective_size)));
 
         // Contract: selected = accent 22% tinted bg, accent 42% border
         let selected_fill = color_mix(accent, surface, 0.22);
@@ -86,8 +99,8 @@ impl IntoElement for ToggleGroup {
             let mut item = div()
                 .id(SharedString::from(format!("tg-{}", option.value)))
                 .focusable()
-                .px(px(12.0))
-                .py(px(4.0))
+                .h(item_height)
+                .px(item_pad_x)
                 .rounded(radius);
 
             // Brand-raised treatment: gradient fills for selected items

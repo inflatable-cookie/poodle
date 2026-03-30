@@ -3,8 +3,9 @@
 use gpui::*;
 use poodle_adapter::ThemeProvider;
 use poodle_gpui::GpuiThemeProvider;
-use poodle_primitives::{Orientation, SliderSpec};
+use poodle_primitives::{ControlSize, Orientation, SliderSpec};
 
+use crate::presentation::{rem_to_px, resolve_semantic_size, size_font_rem};
 use crate::theme_ext::{resolve_color, resolve_opacity, resolve_px};
 
 static SLIDER_ID_COUNTER: std::sync::atomic::AtomicU32 = std::sync::atomic::AtomicU32::new(0);
@@ -55,6 +56,9 @@ impl Slider {
     pub fn disabled(mut self, v: bool) -> Self { self.spec.is_disabled = v; self }
     pub fn aria_label(mut self, v: impl Into<String>) -> Self { self.spec.aria_label = Some(v.into()); self }
     pub fn value_text(mut self, v: impl Into<String>) -> Self { self.spec.value_text = Some(v.into()); self }
+    pub fn size(mut self, v: ControlSize) -> Self { self.spec.size = v; self }
+    pub fn size_role(mut self, v: poodle_primitives::SemanticControlSizeRole) -> Self { self.spec.size_role = v; self }
+    pub fn density(mut self, v: poodle_primitives::ControlDensity) -> Self { self.spec.density = v; self }
 
 }
 
@@ -72,14 +76,24 @@ impl IntoElement for Slider {
         let text_secondary = resolve_color(theme, "semantic.color.text.secondary");
         let stack_gap = resolve_px(theme, "semantic.space.stack.sm");
 
+        // ── Resolve effective size from size + size_role ────────
+        let effective_size = resolve_semantic_size(spec.size, spec.size_role);
+
         let elevated_bg = resolve_color(theme, "semantic.color.background.elevated");
-        // Svelte: track height = 0.375rem (6px), thumb = 1rem (16px)
-        let track_height = px(6.0);
-        let track_f: f32 = 6.0;
+        // Track/thumb scale with effective size
+        let track_f: f32 = match effective_size {
+            ControlSize::Xs => 4.0,
+            ControlSize::Sm => 5.0,
+            ControlSize::Md => 6.0,
+            ControlSize::Lg => 7.0,
+            ControlSize::Xl => 8.0,
+        };
+        let track_height = px(track_f);
         let track_radius = px(track_f / 2.0);
         let thumb_f = theme.resolve_space("semantic.size.icon.md");
         let thumb_size = px(thumb_f);
         let thumb_radius = px(thumb_f / 2.0);
+        let label_font_size = px(rem_to_px(size_font_rem(effective_size)));
 
         let progress = spec.normalized_progress().clamp(0.0, 1.0) as f32;
 
@@ -129,7 +143,7 @@ impl IntoElement for Slider {
             .flex()
             .items_center()
             .justify_between()
-            .text_size(px(12.0))
+            .text_size(label_font_size)
             .text_color(text_secondary)
             .child(format!("{:.0}", spec.min))
             .child(format!("{:.0}", spec.clamped_value()))

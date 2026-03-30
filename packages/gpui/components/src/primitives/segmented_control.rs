@@ -2,8 +2,9 @@
 
 use gpui::*;
 use poodle_gpui::GpuiThemeProvider;
-use poodle_primitives::{ChoiceOption, SegmentedControlSpec};
+use poodle_primitives::{ChoiceOption, ControlSize, SegmentedControlSpec};
 
+use crate::presentation::{rem_to_px, resolve_semantic_size, control_height_rem, size_font_rem, size_padding_x_offset_rem};
 use crate::theme_ext::{color_mix, resolve_color, resolve_opacity, resolve_px, resolve_radius};
 
 /// A real GPUI segmented control component backed by `SegmentedControlSpec`.
@@ -39,6 +40,9 @@ impl SegmentedControl {
     pub fn options(mut self, v: Vec<ChoiceOption>) -> Self { self.spec.options = v; self }
     pub fn disabled(mut self, v: bool) -> Self { self.spec.is_disabled = v; self }
     pub fn aria_label(mut self, v: impl Into<String>) -> Self { self.spec.aria_label = Some(v.into()); self }
+    pub fn size(mut self, v: ControlSize) -> Self { self.spec.size = v; self }
+    pub fn size_role(mut self, v: poodle_primitives::SemanticControlSizeRole) -> Self { self.spec.size_role = v; self }
+    pub fn density(mut self, v: poodle_primitives::ControlDensity) -> Self { self.spec.density = v; self }
 
 
     pub fn with_id(mut self, prefix: impl Into<String>) -> Self {
@@ -87,9 +91,14 @@ impl IntoElement for SegmentedControl {
         let current_value = self.spec.current_value().map(|s| s.to_string());
         let is_disabled = self.spec.is_disabled;
 
-        let control_height = resolve_px(theme, "semantic.size.control.height");
+        // ── Resolve effective size from size + size_role ────────
+        let effective_size = resolve_semantic_size(self.spec.size, self.spec.size_role);
+
+        let control_height = px(rem_to_px(control_height_rem(effective_size)));
         // Contract: segment min-height = calc(control-height - 0.25rem)
         let segment_height = control_height - px(4.0);
+        let segment_font_size = px(rem_to_px(size_font_rem(effective_size)));
+        let segment_pad_x = px(rem_to_px(0.75 + size_padding_x_offset_rem(effective_size)));
 
         let mut row = div()
             .flex()
@@ -110,15 +119,15 @@ impl IntoElement for SegmentedControl {
             let is_opt_disabled = option.is_disabled;
             let seg_id = SharedString::from(format!("{}-{}", self.id_prefix, option.value));
 
-            // Contract: font 0.75rem (12px), weight 600, padding 0 0.75rem (12px)
+            // Contract: font + padding resolved from effective size
             let mut seg = div()
                 .id(seg_id)
                 .focusable()
                 .border_1()
                 .border_color(gpui::transparent_black())
-                .px(px(12.0))
+                .px(segment_pad_x)
                 .h(segment_height)
-                .text_size(px(12.0))
+                .text_size(segment_font_size)
                 .font_weight(FontWeight::SEMIBOLD)
                 .flex().items_center().justify_center()
                 .whitespace_nowrap()

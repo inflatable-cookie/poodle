@@ -8,6 +8,7 @@ use poodle_primitives::{ButtonTone, ButtonVariant, ControlSize, IconButtonSpec, 
 
 use super::icon::Icon;
 use super::spinner::Spinner;
+use crate::presentation::{rem_to_px, resolve_semantic_size, size_height_offset_rem};
 use crate::theme_ext::{color_mix, color_mix_black, resolve_color, resolve_opacity, resolve_px, resolve_radius};
 
 /// A real GPUI icon button component backed by `IconButtonSpec`.
@@ -41,6 +42,8 @@ impl IconButton {
     pub fn disabled(mut self, v: bool) -> Self { self.spec.is_disabled = v; self }
     pub fn loading(mut self, v: bool) -> Self { self.spec.is_loading = v; self }
     pub fn pressed(mut self, v: bool) -> Self { self.spec.is_pressed = Some(v); self }
+    pub fn size_role(mut self, v: poodle_primitives::SemanticControlSizeRole) -> Self { self.spec.size_role = v; self }
+    pub fn density(mut self, v: poodle_primitives::ControlDensity) -> Self { self.spec.density = v; self }
 
     pub fn with_id(mut self, suffix: impl Into<String>) -> Self {
         self.id_suffix = Some(suffix.into());
@@ -79,16 +82,12 @@ impl IntoElement for IconButton {
         let radius = resolve_radius(theme, "semantic.radius.control");
         let focus_ring_color = resolve_color(theme, "semantic.color.accent.focusRing");
 
+        // ── Resolve effective size from size + size_role ────────
+        let effective_size = resolve_semantic_size(spec.size, spec.size_role);
+
         // ── Size adjustments (contract: sm -0.375rem, lg +0.375rem) ──
         let base_height = resolve_px(theme, spec.control_height_token());
-        let size_offset: f32 = match spec.size {
-            ControlSize::Xs => -10.0,
-            ControlSize::Sm => -6.0,
-            ControlSize::Md => 0.0,
-            ControlSize::Lg => 6.0,
-            ControlSize::Xl => 10.0,
-        };
-        let control_size = base_height + px(size_offset);
+        let control_size = base_height + px(rem_to_px(size_height_offset_rem(effective_size)));
 
         // ── Variant-specific colors ───────────────────────────────
         let (fill, border_color) = match spec.variant {

@@ -3,8 +3,9 @@
 use gpui::*;
 use poodle_adapter::ThemeProvider;
 use poodle_gpui::GpuiThemeProvider;
-use poodle_primitives::{Orientation, RangeSliderSpec};
+use poodle_primitives::{ControlSize, Orientation, RangeSliderSpec};
 
+use crate::presentation::{rem_to_px, resolve_semantic_size, size_font_rem};
 use crate::theme_ext::{resolve_color, resolve_opacity, resolve_px};
 
 static RANGE_SLIDER_ID_COUNTER: std::sync::atomic::AtomicU32 = std::sync::atomic::AtomicU32::new(0);
@@ -41,6 +42,9 @@ impl RangeSlider {
     pub fn orientation(mut self, v: Orientation) -> Self { self.spec.orientation = v; self }
     pub fn disabled(mut self, v: bool) -> Self { self.spec.is_disabled = v; self }
     pub fn aria_label(mut self, v: impl Into<String>) -> Self { self.spec.aria_label = Some(v.into()); self }
+    pub fn size(mut self, v: ControlSize) -> Self { self.spec.size = v; self }
+    pub fn size_role(mut self, v: poodle_primitives::SemanticControlSizeRole) -> Self { self.spec.size_role = v; self }
+    pub fn density(mut self, v: poodle_primitives::ControlDensity) -> Self { self.spec.density = v; self }
 
 }
 
@@ -58,8 +62,17 @@ impl IntoElement for RangeSlider {
         let disabled_opacity = resolve_opacity(theme, spec.disabled_opacity_token());
         let stack_gap = resolve_px(theme, "semantic.space.stack.sm");
 
-        // Track dimensions
-        let track_height_f = theme.resolve_space("semantic.space.stack.sm");
+        // ── Resolve effective size from size + size_role ────────
+        let effective_size = resolve_semantic_size(spec.size, spec.size_role);
+
+        // Track dimensions scale with effective size
+        let track_height_f: f32 = match effective_size {
+            ControlSize::Xs => 4.0,
+            ControlSize::Sm => 5.0,
+            ControlSize::Md => 6.0,
+            ControlSize::Lg => 7.0,
+            ControlSize::Xl => 8.0,
+        };
         let track_height = px(track_height_f);
         let track_radius = px(track_height_f / 2.0);
 
@@ -67,6 +80,7 @@ impl IntoElement for RangeSlider {
         let thumb_f = theme.resolve_space("semantic.size.icon.md");
         let thumb_size = px(thumb_f);
         let thumb_radius = px(thumb_f / 2.0);
+        let label_font_size = px(rem_to_px(size_font_rem(effective_size)));
 
         let norm_low = spec.normalized_low().clamp(0.0, 1.0) as f32;
         let norm_high = spec.normalized_high().clamp(0.0, 1.0) as f32;
@@ -137,7 +151,7 @@ impl IntoElement for RangeSlider {
             .flex()
             .items_center()
             .justify_between()
-            .text_size(px(12.0))
+            .text_size(label_font_size)
             .text_color(text_secondary)
             .child(format!("{:.0}", spec.clamped_low()))
             .child(format!("{:.0}", spec.clamped_high()));

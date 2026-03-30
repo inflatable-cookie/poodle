@@ -5,9 +5,10 @@
 
 use gpui::*;
 use poodle_gpui::GpuiThemeProvider;
-use poodle_primitives::{IconSize, IconSpec, NumberEntrySpec, ValidationState};
+use poodle_primitives::{ControlSize, IconSize, IconSpec, NumberEntrySpec, ValidationState};
 
 use super::icon::Icon;
+use crate::presentation::{rem_to_px, resolve_semantic_size, control_height_rem, size_font_rem, size_padding_x_offset_rem};
 use crate::theme_ext::{color_mix, resolve_color, resolve_opacity, resolve_px, resolve_radius};
 
 /// A real GPUI numeric input component with +/- stepper buttons backed by `NumberEntrySpec`.
@@ -49,6 +50,9 @@ impl NumberEntry {
     pub fn disabled(mut self, v: bool) -> Self { self.spec.is_disabled = v; self }
     pub fn validation_state(mut self, v: ValidationState) -> Self { self.spec.validation_state = v; self }
     pub fn aria_label(mut self, v: impl Into<String>) -> Self { self.spec.aria_label = Some(v.into()); self }
+    pub fn size(mut self, v: ControlSize) -> Self { self.spec.size = v; self }
+    pub fn size_role(mut self, v: poodle_primitives::SemanticControlSizeRole) -> Self { self.spec.size_role = v; self }
+    pub fn density(mut self, v: poodle_primitives::ControlDensity) -> Self { self.spec.density = v; self }
 
     pub fn with_id(mut self, suffix: impl Into<String>) -> Self {
         self.id_suffix = Some(suffix.into());
@@ -88,11 +92,16 @@ impl IntoElement for NumberEntry {
         let theme = &self.theme;
         let spec = &self.spec;
 
-        let control_height = resolve_px(theme, spec.control_height_token());
-        let control_padding_x = resolve_px(theme, spec.horizontal_padding_token());
+        // ── Resolve effective size from size + size_role ────────
+        let effective_size = resolve_semantic_size(spec.size, spec.size_role);
+
+        let control_height = px(rem_to_px(control_height_rem(effective_size)));
+        let base_padding_x = resolve_px(theme, spec.horizontal_padding_token());
+        let control_padding_x = base_padding_x + px(rem_to_px(size_padding_x_offset_rem(effective_size)));
         let control_radius = resolve_radius(theme, spec.radius_token());
-        let body_size = resolve_px(theme, spec.body_size_token());
-        let body_line_height = resolve_px(theme, spec.body_line_height_token());
+        let body_size_f = rem_to_px(size_font_rem(effective_size));
+        let body_size = px(body_size_f);
+        let body_line_height = px(body_size_f * 1.4);
 
         let border = resolve_color(theme, spec.border_token());
         let surface_bg = resolve_color(theme, spec.fill_token());

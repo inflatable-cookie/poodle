@@ -7,8 +7,9 @@
 use gpui::prelude::FluentBuilder;
 use gpui::*;
 use poodle_gpui::GpuiThemeProvider;
-use poodle_primitives::EditableLabelSpec;
+use poodle_primitives::{ControlSize, EditableLabelSpec};
 
+use crate::presentation::{rem_to_px, resolve_semantic_size, control_height_rem, size_font_rem, size_padding_x_offset_rem};
 use crate::theme_ext::{color_mix, resolve_color, resolve_opacity, resolve_px, resolve_radius};
 
 /// A real GPUI editable label component backed by `EditableLabelSpec`.
@@ -47,6 +48,9 @@ impl EditableLabel {
     pub fn placeholder(mut self, v: impl Into<String>) -> Self { self.spec.placeholder = Some(v.into()); self }
     pub fn editing(mut self, v: bool) -> Self { self.spec.is_editing = v; self }
     pub fn disabled(mut self, v: bool) -> Self { self.spec.is_disabled = v; self }
+    pub fn size(mut self, v: ControlSize) -> Self { self.spec.size = v; self }
+    pub fn size_role(mut self, v: poodle_primitives::SemanticControlSizeRole) -> Self { self.spec.size_role = v; self }
+    pub fn density(mut self, v: poodle_primitives::ControlDensity) -> Self { self.spec.density = v; self }
 
     pub fn with_id(mut self, suffix: impl Into<String>) -> Self {
         self.id_suffix = Some(suffix.into());
@@ -76,13 +80,18 @@ impl IntoElement for EditableLabel {
         let theme = &self.theme;
         let spec = &self.spec;
 
+        // ── Resolve effective size from size + size_role ────────
+        let effective_size = resolve_semantic_size(spec.size, spec.size_role);
+
         let text_color = resolve_color(theme, spec.text_color_token());
         let placeholder_color = resolve_color(theme, spec.placeholder_color_token());
         let border_color = resolve_color(theme, spec.edit_border_token());
         let focus_ring = resolve_color(theme, spec.focus_ring_color_token());
         let control_radius = resolve_radius(theme, spec.radius_token());
-        let body_size = resolve_px(theme, spec.body_size_token());
+        let body_size = px(rem_to_px(size_font_rem(effective_size)));
         let disabled_opacity = resolve_opacity(theme, spec.disabled_opacity_token());
+        let pad_x = px(rem_to_px(0.5 + size_padding_x_offset_rem(effective_size)));
+        let pad_y = px(rem_to_px(0.375));
 
         // Contract: hover hint border in display mode
         let surface_bg = resolve_color(theme, "semantic.color.background.surface");
@@ -105,13 +114,13 @@ impl IntoElement for EditableLabel {
             "poodle-editable-label".to_string()
         };
 
-        // Contract: padding 0.375rem 0.5rem
+        // Contract: padding scales with effective size
         let mut el = div()
             .id(SharedString::from(id_str))
             .focusable()
             .w_full()
-            .px(px(8.0))  // 0.5rem
-            .py(px(6.0))  // 0.375rem
+            .px(pad_x)
+            .py(pad_y)
             .rounded(control_radius)
             .text_size(body_size)
             .text_color(text_col)
