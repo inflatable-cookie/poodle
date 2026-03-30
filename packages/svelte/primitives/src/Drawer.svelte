@@ -32,11 +32,21 @@
   let bodyOverflow: string | null = null;
   let previousOpen = false;
 
+  // Animation state: "closed" | "entering" | "open" | "exiting"
+  let animState: "closed" | "entering" | "open" | "exiting" = defaultOpen ? "open" : "closed";
+
   $: resolvedSize = size ?? resolveSemanticControlSize($uiPresentation.sizeScale, sizeRole);
   $: resolvedDensity = density ?? $uiPresentation.density;
   $: isControlled = open !== null;
   $: isOpen = isControlled ? open === true : uncontrolledOpen;
+
   $: if (isOpen && !previousOpen) {
+    // Opening
+    animState = "entering";
+    requestAnimationFrame(() => {
+      animState = "open";
+    });
+
     lastFocusedElement = document.activeElement as HTMLElement | null;
     tick().then(() => {
       const focusable = getFocusableElements(surfaceElement);
@@ -48,14 +58,27 @@
       document.body.style.overflow = "hidden";
     }
   }
+
   $: if (!isOpen && previousOpen) {
+    // Closing
+    animState = "exiting";
+
     if (typeof document !== "undefined" && bodyOverflow !== null) {
       document.body.style.overflow = bodyOverflow;
     }
 
     lastFocusedElement?.focus();
   }
+
   $: previousOpen = isOpen;
+
+  $: visible = animState !== "closed";
+
+  function onTransitionEnd(): void {
+    if (animState === "exiting") {
+      animState = "closed";
+    }
+  }
 
   function setOpen(nextOpen: boolean): void {
     if (!isControlled) {
@@ -117,8 +140,16 @@
   });
 </script>
 
-{#if isOpen}
-  <div class="drawer" data-edge={edge} data-modal={modal} data-size={resolvedSize} data-density={resolvedDensity}>
+{#if visible}
+  <div
+    class="drawer"
+    data-edge={edge}
+    data-modal={modal}
+    data-size={resolvedSize}
+    data-density={resolvedDensity}
+    data-anim={animState}
+    on:transitionend={onTransitionEnd}
+  >
     {#if modal}
       <button
         type="button"
@@ -175,22 +206,12 @@
     pointer-events: none;
   }
 
-  .drawer[data-edge="left"] {
-    justify-content: flex-start;
-  }
+  .drawer[data-edge="left"] { justify-content: flex-start; }
+  .drawer[data-edge="right"] { justify-content: flex-end; }
+  .drawer[data-edge="top"] { align-items: flex-start; }
+  .drawer[data-edge="bottom"] { align-items: flex-end; }
 
-  .drawer[data-edge="right"] {
-    justify-content: flex-end;
-  }
-
-  .drawer[data-edge="top"] {
-    align-items: flex-start;
-  }
-
-  .drawer[data-edge="bottom"] {
-    align-items: flex-end;
-  }
-
+  /* Backdrop */
   .drawer__backdrop {
     position: absolute;
     inset: 0;
@@ -199,8 +220,19 @@
     background: var(--poodle-color-background-overlay);
     pointer-events: auto;
     cursor: default;
+    opacity: 0;
+    transition: opacity var(--poodle-motion-duration-overlay, 200ms) var(--poodle-motion-easing-standard, ease);
   }
 
+  .drawer[data-anim="open"] .drawer__backdrop {
+    opacity: 1;
+  }
+
+  .drawer[data-anim="exiting"] .drawer__backdrop {
+    opacity: 0;
+  }
+
+  /* Surface */
   .drawer__surface {
     position: relative;
     z-index: 1;
@@ -223,8 +255,27 @@
       color-mix(in srgb, var(--poodle-color-background-elevated) 98%, var(--poodle-color-background-panel))
     );
     box-shadow: var(--poodle-treatment-surface-elevated-shadow, var(--poodle-elevation-dialog));
+    transition: transform var(--poodle-motion-duration-overlay, 200ms) var(--poodle-motion-easing-standard, ease);
   }
 
+  /* Slide transforms per edge — entering state (off-screen) */
+  .drawer[data-edge="right"] .drawer__surface { transform: translateX(100%); }
+  .drawer[data-edge="left"] .drawer__surface { transform: translateX(-100%); }
+  .drawer[data-edge="top"] .drawer__surface { transform: translateY(-100%); }
+  .drawer[data-edge="bottom"] .drawer__surface { transform: translateY(100%); }
+
+  /* Open state — on-screen */
+  .drawer[data-anim="open"] .drawer__surface {
+    transform: translate(0, 0);
+  }
+
+  /* Exiting — slide back out */
+  .drawer[data-anim="exiting"][data-edge="right"] .drawer__surface { transform: translateX(100%); }
+  .drawer[data-anim="exiting"][data-edge="left"] .drawer__surface { transform: translateX(-100%); }
+  .drawer[data-anim="exiting"][data-edge="top"] .drawer__surface { transform: translateY(-100%); }
+  .drawer[data-anim="exiting"][data-edge="bottom"] .drawer__surface { transform: translateY(100%); }
+
+  /* Top/bottom drawers: full width, limited height */
   .drawer[data-edge="top"] .drawer__surface,
   .drawer[data-edge="bottom"] .drawer__surface {
     width: 100vw;
@@ -257,27 +308,21 @@
   }
 
   /* Size variants */
-  .drawer[data-size="xs"] .drawer__header strong {
-    font-size: 0.8125rem;
-  }
-
-  .drawer[data-size="xs"] .drawer__header p {
-    font-size: 0.75rem;
-  }
-
-  .drawer[data-size="sm"] .drawer__header strong {
-    font-size: 0.875rem;
-  }
-
-  .drawer[data-size="lg"] .drawer__header strong {
-    font-size: 1.0625rem;
-  }
-
-  .drawer[data-size="xl"] .drawer__header strong {
-    font-size: 1.125rem;
-  }
+  .drawer[data-size="xs"] .drawer__header strong { font-size: 0.8125rem; }
+  .drawer[data-size="xs"] .drawer__header p { font-size: 0.75rem; }
+  .drawer[data-size="sm"] .drawer__header strong { font-size: 0.875rem; }
+  .drawer[data-size="lg"] .drawer__header strong { font-size: 1.0625rem; }
+  .drawer[data-size="xl"] .drawer__header strong { font-size: 1.125rem; }
 
   /* Density variants */
-  .drawer[data-density="compact"] .drawer__body { padding: 0.75rem; }
-  .drawer[data-density="comfortable"] .drawer__body { padding: 1.5rem; }
+  .drawer[data-density="compact"] .drawer__surface { padding: 0.5rem 0.75rem; }
+  .drawer[data-density="comfortable"] .drawer__surface { padding: 1rem 1.25rem; }
+
+  /* Reduced motion */
+  @media (prefers-reduced-motion: reduce) {
+    .drawer__backdrop,
+    .drawer__surface {
+      transition-duration: 0ms;
+    }
+  }
 </style>
