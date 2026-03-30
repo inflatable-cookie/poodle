@@ -1,17 +1,19 @@
 # Field
 
 Status: detailed contract
-Updated: 2026-03-24
+Updated: 2026-03-30
 
 ## 1. Purpose
 
 - Component name: `Field`
 - Layer: `foundation`
-- Summary: a labeled field wrapper that owns label, description, validation
-  message, and error-message relationships around a single form control; it
-  provides accessibility wiring to slotted controls via slot props
-- In scope: label, required/optional marker, help text, error text, pending
-  text, control/message relationship wiring via slot props, grid-column span
+- Summary: a labeled field wrapper that owns label, info popover,
+  validation message, and error-message relationships around a single
+  form control; it provides accessibility wiring to slotted controls
+  via slot props
+- In scope: label, required/optional marker, description/hint popover
+  via info icon, error text, pending text, size/density scaling,
+  control/message relationship wiring via slot props, grid-column span
   and grid-area for form layout integration
 - Out of scope: input editing semantics (owned by child controls), submit
   buttons, multi-column form layout systems (owned by parent form/grid),
@@ -20,26 +22,31 @@ Updated: 2026-03-24
 ## 2. Anatomy
 
 ```text
-[Root .field]  <div>
+[Root .field]  <div data-size data-density data-validation-state>
   ├── [Header .field__header]  <div>
-  │     ├── [Label .field__label]  <label>
-  │     └── [Optional Marker .field__optional] (conditional, when not required)
-  │         OR [Required Marker .field__required] (conditional, when required)
-  ├── [Description .field__description] (conditional, when description prop set)
+  │     ├── [Label Row .field__label-row]  <div>
+  │     │     ├── [Label .field__label]  <label for={id}>
+  │     │     │     └── [Required Marker .field__required] (conditional)
+  │     │     └── [Info Popover]  <Popover placement="top"> (conditional)
+  │     │           ├── trigger: [Info Icon .field__info-icon]
+  │     │           └── surface: [Info Content .field__info-content] <p>
+  │     └── [Optional Marker .field__optional] (conditional)
   ├── [Control Slot] (default slot, receives describedBy and validation props)
   └── [Validation Message .field__message] (conditional)
-        ├── [Error .field__message--error] (when validationState="invalid" and error set)
-        └── [Pending .field__message--pending] (when validationState="pending" and pendingMessage set)
+        ├── [Error .field__message--error]
+        └── [Pending .field__message--pending]
 ```
 
 | Part | Required | Description | Token Targets |
 |------|----------|-------------|---------------|
-| Root | yes | field wrapper with vertical stack spacing | stack spacing, grid-column, grid-area |
-| Header | yes | label + optionality marker alignment row | inline spacing, baseline alignment |
+| Root | yes | field wrapper with vertical stack spacing | stack spacing, grid-column, grid-area, data-size, data-density |
+| Header | yes | label row + optionality marker alignment | inline spacing, baseline alignment |
+| Label Row | yes | label + info icon container | font-size scales with size, inline-flex with gap |
 | Label | yes | accessible naming anchor for the slotted control | label typography, text color |
+| Info Popover | no | Popover triggered by info icon; shows description or hint text | Popover elevated surface |
+| Info Icon | no | small icon button inside label row; scales with label font-size via em units | pill radius, secondary background |
 | Optional Marker | no | text marker when field is not required | body typography, secondary text color |
 | Required Marker | no | visual required indicator | status-danger color |
-| Description | no | pre-validation help text | body typography, secondary text color |
 | Control Slot | yes | injected input/select/textarea control | inherited from child control |
 | Validation Message | no | error or pending copy below the control | body typography, status color |
 
@@ -49,35 +56,49 @@ Updated: 2026-03-24
 
 | Prop | Type | Default | Required | Notes |
 |------|------|---------|----------|-------|
-| `id` | `string` | none | yes | base control id; used to derive description, error, and message element ids |
+| `id` | `string` | none | yes | base control id; used to derive error and message element ids |
 | `label` | `string` | none | yes | visible field label text |
-| `description` | `string \| null` | `null` | no | helper or scope text below label |
+| `description` | `string \| null` | `null` | no | text shown in info popover next to the label |
+| `hint` | `string \| null` | `null` | no | **deprecated** — alias for `description`; kept for backward compatibility |
 | `error` | `string \| null` | `null` | no | invalid-state error message |
 | `pendingMessage` | `string \| null` | `null` | no | pending-validation message |
 | `validationState` | `"none" \| "invalid" \| "valid" \| "pending"` | `"none"` | no | field-level validation posture |
 | `required` | `boolean` | `false` | no | shows required marker and sets semantics |
-| `optionalLabel` | `string \| null` | `null` | no | explicit optional marker text; opt-in only, null hides the marker |
+| `optionalLabel` | `string \| null` | `null` | no | explicit optional marker text; opt-in only |
 | `span` | `number \| "full" \| null` | `null` | no | grid-column span for form layout |
 | `gridArea` | `string \| null` | `null` | no | grid-area for named grid placement |
+| `size` | `ControlSize \| null` | `null` | no | explicit size override |
+| `sizeRole` | `"chrome" \| "control" \| "prominent"` | `"control"` | no | semantic size offset |
+| `density` | `ControlDensity \| null` | `null` | no | explicit density override |
+
+### Description/Hint Merging
+
+Both `description` and `hint` feed the same info popover. `description`
+takes precedence if both are provided. The `hint` prop is a deprecated
+alias — use `description` for new code.
+
+The description text is **never rendered as an inline paragraph**. It always
+renders inside a Popover triggered by an info icon next to the label. This
+ensures forms align consistently without varying-height help text between
+label and control.
 
 ### Slot Contract
 
 | Slot | Purpose | Props Passed |
 |------|---------|-------------|
-| default | exactly one form control | `describedBy`, `descriptionId`, `errorId`, `messageId`, `validationState` |
+| default | exactly one form control | `describedBy`, `descriptionId` (always null), `errorId`, `messageId`, `validationState` |
 
 - `describedBy`: computed string for the child control's `aria-describedby`,
-  combining description, error, and pending message ids as appropriate
-- `descriptionId`: id of the description element (derived from `id` prop)
-- `errorId`: id of the error message element (derived from `id` prop)
-- `messageId`: id of the pending message element (derived from `id` prop)
+  containing the error or pending message id as appropriate
+- `descriptionId`: always `null` (description is in a popover, not inline)
+- `errorId`: id of the error message element
+- `messageId`: id of the active validation message element
 - `validationState`: passed through so the child control can render its own
   validation border
 
 ### Controlled And Uncontrolled
 
 - Field has no value model; it is a pure layout and relationship wrapper
-- Value semantics are entirely owned by the slotted control
 
 ## 4. States
 
@@ -85,76 +106,64 @@ Updated: 2026-03-24
 
 | State | Trigger | Expected Result |
 |-------|---------|-----------------|
-| default | no validation posture | label and description visible; no optional marker unless `optionalLabel` is provided |
-| required | `required=true` | required marker visible instead of optional marker |
-| invalid | `validationState="invalid"` and `error` set | error message visible below control; `describedBy` includes error id |
-| valid | `validationState="valid"` | no required success copy; child control may show success border |
-| pending | `validationState="pending"` and `pendingMessage` set | pending message visible below control; `describedBy` includes message id |
-
-### Message Precedence
-
-- When both `error` and `pendingMessage` are present, the `validationState`
-  determines which is shown: `"invalid"` shows the error, `"pending"` shows the
-  pending message
-- Only one validation message is visible at a time
+| default | no validation posture | label visible; no optional marker unless `optionalLabel` is provided |
+| with description | `description` set | info icon visible next to label; click/hover opens popover |
+| required | `required=true` | required marker visible |
+| invalid | `validationState="invalid"` and `error` set | error message visible below control |
+| valid | `validationState="valid"` | no message; child control may show success border |
+| pending | `validationState="pending"` and `pendingMessage` set | pending message visible below control |
 
 ## 5. Events
 
-Field fires no events. It is a pure wrapper component. All interaction events
-are owned by the slotted control.
+Field fires no events. All interaction events are owned by the slotted
+control. The info popover's open/close is handled internally by the
+embedded Popover component.
 
 ## 6. Accessibility
 
 ### Semantics
 
-- Role: wrapper is structurally neutral (`<div>`), not a fieldset or group
-- Label: visible `<label>` element with `for` attribute pointing to the child
-  control's `id`
-- Required: when `required` is true, the required marker is decorative; the
-  child control should set `aria-required` or the native `required` attribute
-- Description relationship: `aria-describedby` on the child control includes
-  the description id when description is present
-- Error relationship: `aria-describedby` on the child control includes the
-  error id when error is present and validationState is invalid
-- Pending relationship: `aria-describedby` on the child control includes the
-  message id when pendingMessage is present and validationState is pending
-- The `describedBy` slot prop computes the full space-separated id list so
-  child controls can use it directly
+- Root: structurally neutral (`<div>`), not a fieldset or group
+- Label: visible `<label>` element with `for` attribute pointing to `id`
+- Info icon: `aria-label="More information"` on the Popover trigger
+- Info popover: `role="dialog"` with `aria-label="Field description"`
+- Required marker: decorative (`aria-hidden`); child should set `aria-required`
+- Error/pending: `aria-live="polite"` for dynamic announcements
+- `describedBy` includes error or pending message id (not description,
+  since description is in a popover)
 
 ### Keyboard
 
 - Field itself is not focusable
-- Clicking the label focuses the slotted control (native `<label for>` behavior)
-- All keyboard semantics belong to the slotted control
-
-### Focus And Announcement
-
-- Focus stays on the child control
-- Validation and pending copy are attachable to assistive technology
-  announcements via `aria-describedby` relationship
-- When validation state changes from none to invalid, screen readers announce
-  the error message on the next focus event of the child control
-- GPUI-native accessibility mapping notes: GPUI must expose the same name,
-  description, and error/pending relationships in native accessibility node
-  structure even though there is no HTML label element fallback
+- Clicking the label focuses the slotted control (native `<label for>`)
+- Info icon is focusable and toggles the popover on click
+- Escape closes the info popover
 
 ## 7. Layout
 
 ### Sizing
 
-- Root uses vertical grid with stack spacing between children
-- Width determined by parent (form grid or flex container)
-- `span` prop sets `grid-column: span {n}` for form grid integration
-- `span="full"` sets `grid-column: 1 / -1` (full width)
-- `gridArea` prop sets `grid-area` for named grid placement
+- Root uses vertical grid with stack spacing
+- Label row uses inline-flex with gap; font-size set per size variant
+- Info icon uses `em` units (`1.25em` wrapper, `0.75em` SVG) so it
+  scales proportionally with the label font-size at every size stop
+
+### Size Adjustments
+
+| Size | Label Row font-size | Message/Optional font-size |
+|------|--------------------|-----------------------------|
+| `xs` | `0.6875rem` | `0.625rem` |
+| `sm` | `0.75rem` | `0.6875rem` |
+| `md` | `label-size` (0.8125rem) | `0.75rem` |
+| `lg` | `0.875rem` | `0.8125rem` |
+| `xl` | `0.9375rem` | `0.875rem` |
 
 ### Composition
 
 - parent expectations: forms, filter bars, dialogs, drawers, settings panes
-- child expectations: exactly one addressable form control (TextInput, TextArea,
-  Select, etc.)
-- layout rule: Field owns vertical stacking and messaging; the child control
-  owns its own chrome (border, background, focus ring)
+- child expectations: exactly one addressable form control
+- layout rule: Field owns vertical stacking and messaging; child control
+  owns its own chrome
 
 ## 8. Token Usage — Exact Values
 
@@ -165,14 +174,6 @@ are owned by the slotted control.
 | `display` | `grid` |
 | `gap` | `var(--poodle-space-stack-sm)` |
 
-### Root inline styles (conditional)
-
-| Condition | Property | Value |
-|-----------|----------|-------|
-| `span` is a number | `grid-column` | `span {n}` |
-| `span` is `"full"` | `grid-column` | `1 / -1` |
-| `gridArea` is set | `grid-area` | `{gridArea}` |
-
 ### Header `.field__header`
 
 | Property | Value |
@@ -182,124 +183,113 @@ are owned by the slotted control.
 | `justify-content` | `space-between` |
 | `gap` | `var(--poodle-space-inline-md)` |
 
+### Label Row `.field__label-row`
+
+| Property | Value |
+|----------|-------|
+| `display` | `inline-flex` |
+| `align-items` | `center` |
+| `gap` | `0.375rem` |
+| `font-size` | `var(--poodle-typography-label-size)` (scales per size variant) |
+
 ### Label `.field__label`
 
 | Property | Value |
 |----------|-------|
 | `color` | `var(--poodle-color-text-primary)` |
 | `font-family` | `var(--poodle-typography-label-family)` |
-| `font-size` | `var(--poodle-typography-label-size)` |
 | `font-weight` | `var(--poodle-typography-label-weight)` |
 | `line-height` | `var(--poodle-typography-label-lineHeight)` |
-| `margin` | `0` |
 
-### Required Marker `.field__required`
-
-| Property | Value |
-|----------|-------|
-| `color` | `var(--poodle-color-status-danger)` |
-
-### Optional Marker `.field__optional`
+### Info Icon `.field__info-icon`
 
 | Property | Value |
 |----------|-------|
+| `width` | `1.25em` |
+| `height` | `1.25em` |
+| `border-radius` | `var(--poodle-radius-pill)` |
+| `background` | `color-mix(in srgb, var(--poodle-color-text-secondary) 14%, transparent)` |
 | `color` | `var(--poodle-color-text-secondary)` |
-| `font-family` | `var(--poodle-typography-body-family)` |
-| `font-size` | `0.75rem` |
-| `line-height` | `var(--poodle-typography-body-lineHeight)` |
-| `margin` | `0` |
+| `cursor` | `pointer` |
 
-### Description `.field__description`
+### Info Icon SVG
 
 | Property | Value |
 |----------|-------|
-| `color` | `var(--poodle-color-text-secondary)` |
-| `font-family` | `var(--poodle-typography-body-family)` |
-| `font-size` | `0.75rem` |
-| `line-height` | `var(--poodle-typography-body-lineHeight)` |
-| `margin` | `0` |
+| `width` | `0.75em` |
+| `height` | `0.75em` |
 
-### Error Message `.field__message--error`
+### Info Popover Surface (via Popover component)
 
 | Property | Value |
 |----------|-------|
-| `color` | `var(--poodle-color-status-danger)` |
-| `font-family` | `var(--poodle-typography-body-family)` |
+| `min-width` | `10rem` |
+| `max-width` | `22rem` |
+| `padding` | `0.5rem 0.625rem` |
 | `font-size` | `0.75rem` |
-| `line-height` | `var(--poodle-typography-body-lineHeight)` |
-| `margin` | `0` |
-
-### Pending Message `.field__message--pending`
-
-| Property | Value |
-|----------|-------|
-| `color` | `var(--poodle-color-text-secondary)` |
-| `font-family` | `var(--poodle-typography-body-family)` |
-| `font-size` | `0.75rem` |
-| `line-height` | `var(--poodle-typography-body-lineHeight)` |
-| `margin` | `0` |
+| `line-height` | `1.5` |
+| `placement` | `top` |
+| `offset` | `6px` |
 
 ## 9. Svelte Notes
 
 - Label uses `<label for="{id}">` for native label-to-control association
-- Required marker renders an asterisk or similar indicator; optional marker
-  renders the `optionalLabel` text only when explicitly provided
-- Slot passes `describedBy`, `descriptionId`, `errorId`, `messageId`, and
-  `validationState` as slot props so child controls can wire up accessibility
-  relationships without knowing the Field's internal id scheme
-- `span` and `gridArea` are applied as inline styles on the root element for
-  form grid integration
-- The wrapper does not swallow child focus or edit events
-- Description and message elements use derived ids: `{id}-description`,
-  `{id}-error`, `{id}-message` (or similar scheme)
+- Description and hint are merged: `infoText = description ?? hint`
+- Info icon uses the Popover primitive with `placement="top"` and
+  `offset={6}`; Popover surface min/max-width overridden via
+  `:global(.popover__surface)` scoped selector
+- Info icon uses `em` units so it scales with the label row font-size
+- `data-size` and `data-density` attributes emitted on root
+- `descriptionId` slot prop is always `null` (description is in popover)
+- `hint` prop kept as deprecated alias for `description`
+- Size variants set font-size on `.field__label-row` (not `.field__label`)
+  so both label text and em-based icon scale together
 
 ## 10. GPUI Notes
 
 - expected crate/module surface: `poodle_gpui::primitives::field`
-- GPUI implementation must explicitly model label-to-control and
-  description/error relationships in the accessible tree
-- Since GPUI has no HTML `<label for>` equivalent, the accessible name
-  relationship must be established through native accessibility APIs
-- Grid-column span and grid-area for form layout: GPUI must support equivalent
-  layout properties in its form/grid system
-- Message precedence (error over pending based on validationState) must be
-  enforced in the same way
+- GPUI must expose label-to-control and error/pending relationships
+  in native accessible tree
+- Description renders as a tooltip/popover triggered by an info icon,
+  not as inline text
+- Info icon size should match label font size proportionally
+- Grid-column span and grid-area: GPUI must support equivalent layout
 
 ## 11. Parity Checklist
 
 ### Tier 1: Strict Parity
 
 - [ ] label-to-control accessible name relationship matches
-- [ ] description and error/pending `aria-describedby` relationships match
+- [ ] error/pending `aria-describedby` relationships match
 - [ ] invalid and pending message precedence matches
 - [ ] required/optional marker visibility rules match
-- [ ] field wrapper remains non-focusable in both runtimes
-- [ ] slot props (describedBy, validationState) are passed to child controls
+- [ ] description renders in info popover, not inline
+- [ ] info icon scales with label font-size across all size stops
 
 ### Tier 2: Visual Parity
 
-- [ ] label typography matches (label family, size, weight, line-height)
-- [ ] optional/description/message typography matches (body family, size, line-height)
+- [ ] label typography matches per size variant table
+- [ ] info icon size matches (1.25em wrapper, 0.75em SVG)
+- [ ] optional/message typography matches per size variant table
 - [ ] required marker color matches (status-danger)
 - [ ] error message color matches (status-danger)
-- [ ] pending message and description color matches (text-secondary)
 - [ ] stack spacing matches (space-stack-sm)
 - [ ] header inline spacing matches (space-inline-md)
-- [ ] header baseline alignment matches
+- [ ] info icon background and hover state match
 
 ### Tier 3: Implementation Freedom
 
-- [ ] label-to-control wiring mechanism (HTML `<label for>` vs native accessibility API)
+- [ ] label-to-control wiring mechanism
 - [ ] grid-column/grid-area integration is platform-owned
-- [ ] id derivation scheme for description/error/message elements
+- [ ] info popover implementation details (Popover primitive vs custom)
 
 ## 12. Known Deltas
 
 | Delta | Why Allowed | Approval Status | Follow-Up |
 |-------|-------------|-----------------|-----------|
-| label-to-control wiring mechanism | HTML `<label for>` vs GPUI native accessibility node | allowed | same accessible name result required |
-| grid layout integration | CSS grid-column/grid-area vs GPUI layout system | allowed | same visual positioning result required |
-| id derivation scheme | internal implementation detail | allowed | child controls must receive correct describedBy string |
+| label-to-control wiring | HTML `<label for>` vs GPUI native | allowed | same accessible name result |
+| grid layout integration | CSS grid vs GPUI layout system | allowed | same positioning result |
+| info popover implementation | Svelte uses Popover primitive; GPUI may use tooltip | allowed | same content and trigger behavior |
 
 ## 13. Specimen Definitions
 
@@ -307,31 +297,25 @@ are owned by the slotted control.
 
 | Label | Props / Config | Expected Visual |
 |-------|---------------|-----------------|
-| Default with description | `label="Display name"`, `description="This is how your name appears to other users."`, child TextInput with placeholder | Field with label, description text below label, and text input control |
+| Default with description | `label="Display name"`, `description="This is how your name appears to other users."`, child TextInput | Field with label, info icon, and text input; clicking icon shows description in popover |
 
 ### Required
 
 | Label | Props / Config | Expected Visual |
 |-------|---------------|-----------------|
-| Required | `label="Email address"`, `required`, child TextInput with placeholder | Field with label and required marker visible, no optional marker |
+| Required | `label="Email address"`, `required`, child TextInput | Field with label and required marker |
 
 ### With Error
 
 | Label | Props / Config | Expected Visual |
 |-------|---------------|-----------------|
-| With error | `label="Username"`, `error="This username is already taken."`, `validationState="invalid"`, child TextInput with value | Field with label, error message in danger color below the control |
+| With error | `label="Username"`, `error="This username is already taken."`, `validationState="invalid"`, child TextInput | Field with label, error message below control |
 
-### Valid
-
-| Label | Props / Config | Expected Visual |
-|-------|---------------|-----------------|
-| Valid | `label="Password"`, `validationState="valid"`, `description="Must be at least 8 characters."`, child TextInput with value | Field with label, description text, valid state (no error message) |
-
-### Optional
+### Optional With Description
 
 | Label | Props / Config | Expected Visual |
 |-------|---------------|-----------------|
-| Optional | `label="Phone number"`, `optionalLabel="Optional"`, child TextInput with placeholder | Field with label and explicit optional marker text in secondary color |
+| Optional with description | `label="Phone number"`, `optionalLabel="Optional"`, `description="Include country code."`, child TextInput | Field with label, info icon, optional marker, and text input |
 
 ## 14. Approval And Adoption Notes
 
@@ -340,4 +324,3 @@ are owned by the slotted control.
 - downstream adopters: all form-based UIs wrapping TextInput, TextArea,
   SearchField, Select, and future selection controls
 - future follow-up: fieldset/field-group semantics for grouped controls
-  (e.g. radio groups within a form) may need a separate FieldGroup contract
