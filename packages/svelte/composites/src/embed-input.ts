@@ -1,4 +1,4 @@
-import type { ParsedEmbed } from "./types";
+import type { EmbedMeta, EmbedParseResult, ParsedEmbed } from "./types";
 
 export type EmbedParseState = {
   parsed: ParsedEmbed | null;
@@ -45,6 +45,17 @@ export function detectParsedEmbed(input: string): ParsedEmbed | null {
       provider: "vimeo",
       id: vimeoId,
       originalUrl: trimmed,
+      embedType: "video",
+    };
+  }
+
+  const audioboomId = extractDigitsAfter(trimmed, "audioboom.com/posts/");
+  if (audioboomId) {
+    return {
+      provider: "audioboom",
+      id: audioboomId,
+      originalUrl: trimmed,
+      embedType: "audio",
     };
   }
 
@@ -52,14 +63,16 @@ export function detectParsedEmbed(input: string): ParsedEmbed | null {
     const src = extractAttribute(trimmed, "src");
     const width = parseOptionalDimension(extractAttribute(trimmed, "width"));
     const height = parseOptionalDimension(extractAttribute(trimmed, "height"));
+    const embedded = src ? detectParsedEmbed(src) : null;
 
     return {
-      provider: "generic",
-      id: src ?? trimmed,
+      provider: embedded?.provider ?? "generic",
+      id: embedded?.id ?? src ?? trimmed,
       originalUrl: src ?? undefined,
       originalEmbed: trimmed,
       width,
       height,
+      embedType: embedded?.embedType ?? "generic",
     };
   }
 
@@ -68,6 +81,7 @@ export function detectParsedEmbed(input: string): ParsedEmbed | null {
       provider: "generic",
       id: trimmed,
       originalUrl: trimmed,
+      embedType: "generic",
     };
   }
 
@@ -78,19 +92,177 @@ export function resolveEmbedParseState(
   value: string,
   providers: string[],
 ): EmbedParseState {
-  const parsed = detectParsedEmbed(value);
+  const result = parseEmbed(value, {
+    allowedProviders: providers,
+    allowGeneric: true,
+  });
+  return {
+    parsed: result.parsed,
+    error: result.success ? null : result.error ?? null,
+  };
+}
 
-  if (parsed && providers.length > 0 && !providers.includes(parsed.provider)) {
+export function parseEmbed(
+  input: string,
+  options: {
+    allowedProviders?: string[];
+    allowGeneric?: boolean;
+  } = {},
+): EmbedParseResult {
+  const trimmed = input.trim();
+  if (!trimmed) {
     return {
+      success: true,
+      parsed: null,
+    };
+  }
+
+  const parsed = detectParsedEmbed(trimmed);
+  if (!parsed) {
+    return {
+      success: false,
+      parsed: null,
+      error: "Could not parse embed source",
+    };
+  }
+
+  if (parsed.provider === "generic" && options.allowGeneric === false) {
+    return {
+      success: false,
+      parsed: null,
+      error: "Generic embeds are not allowed",
+    };
+  }
+
+  if (
+    options.allowedProviders &&
+    options.allowedProviders.length > 0 &&
+    !options.allowedProviders.includes(parsed.provider)
+  ) {
+    return {
+      success: false,
       parsed: null,
       error: `Provider "${parsed.provider}" is not allowed`,
     };
   }
 
   return {
+    success: true,
     parsed,
-    error: null,
   };
+}
+
+export function renderEmbed(embed: Pick<ParsedEmbed, "provider" | "id" | "originalEmbed">): string | null {
+  if (embed.originalEmbed) {
+    return embed.originalEmbed;
+  }
+
+  switch (embed.provider) {
+    case "youtube":
+      return `<iframe src="https://www.youtube.com/embed/${embed.id}" loading="lazy" allowfullscreen></iframe>`;
+    case "vimeo":
+      return `<iframe src="https://player.vimeo.com/video/${embed.id}" loading="lazy" allowfullscreen></iframe>`;
+    case "audioboom":
+      return `<iframe src="https://embeds.audioboom.com/posts/${embed.id}/embed/v5" loading="lazy"></iframe>`;
+    default:
+      return null;
+  }
+}
+
+export function getThumbnailUrl(
+  embed: Pick<ParsedEmbed, "provider" | "id">,
+  quality: "default" | "medium" | "high" | "max" = "high",
+): string | null {
+  if (embed.provider !== "youtube") {
+    return null;
+  }
+
+  const file =
+    quality === "max"
+      ? "maxresdefault.jpg"
+      : quality === "medium"
+        ? "mqdefault.jpg"
+        : quality === "default"
+          ? "default.jpg"
+          : "hqdefault.jpg";
+
+  return `https://img.youtube.com/vi/${embed.id}/${file}`;
+}
+
+export function getProviderAccent(provider: string): string {
+  switch (provider) {
+    case "youtube":
+      return "#ff0033";
+    case "vimeo":
+      return "#1ab7ea";
+    case "audioboom":
+      return "#f97316";
+    default:
+      return "#64748b";
+  }
+}
+
+export async function lookupMeta(embed: Pick<ParsedEmbed, "provider" | "id" | "originalUrl">): Promise<EmbedMeta | null> {
+  const url = getOEmbedUrl(embed);
+  if (!url) {
+    return null;
+  }
+
+  try {
+    const response = await fetch(url);
+    if (!response.ok) {
+      return null;
+    }
+
+    const data = await response.json() as {
+      title?: string;
+      description?: string;
+      duration?: number;
+      thumbnail_url?: string;
+      author_name?: string;
+    };
+
+    return {
+      title: data.title,
+      description: data.description,
+      duration: data.duration,
+      thumbnailUrl: data.thumbnail_url,
+      authorName: data.author_name,
+    };
+  } catch {
+    return null;
+  }
+}
+
+function getOEmbedUrl(embed: Pick<ParsedEmbed, "provider" | "id" | "originalUrl">): string | null {
+  const originalUrl = embed.originalUrl ?? renderOriginalUrl(embed);
+  if (!originalUrl) {
+    return null;
+  }
+
+  switch (embed.provider) {
+    case "youtube":
+      return `https://www.youtube.com/oembed?url=${encodeURIComponent(originalUrl)}&format=json`;
+    case "vimeo":
+      return `https://vimeo.com/api/oembed.json?url=${encodeURIComponent(originalUrl)}`;
+    case "audioboom":
+      return `https://api.audioboom.com/oembed?url=${encodeURIComponent(originalUrl)}&format=json`;
+    default:
+      return null;
+  }
+}
+
+function renderOriginalUrl(embed: Pick<ParsedEmbed, "provider" | "id">): string | null {
+  switch (embed.provider) {
+    case "youtube":
+      return `https://www.youtube.com/watch?v=${embed.id}`;
+    case "vimeo":
+      return `https://vimeo.com/${embed.id}`;
+    case "audioboom":
+      return `https://audioboom.com/posts/${embed.id}`;
+    default:
+      return null;
+  }
 }
 
 function extractAfter(input: string, needle: string): string | null {

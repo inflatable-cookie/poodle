@@ -57,9 +57,14 @@ and data components.
 - `computeFileHash`
 - `createResetMediaBrowseState`
 - `detectParsedEmbed`
+- `getProviderAccent`
+- `getThumbnailUrl`
 - `loadMediaBrowsePage`
+- `lookupMeta`
 - `mergeMediaBrowseItems`
+- `parseEmbed`
 - `parseWorkspaceLayoutSnapshot`
+- `renderEmbed`
 - `resolveEmbedParseState`
 - `runMediaUploadWorkflow`
 - `serializeWorkspaceLayoutSnapshot`

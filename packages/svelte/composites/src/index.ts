@@ -15,7 +15,15 @@ export { default as DockRegion } from "./DockRegion.svelte";
 export { default as DetailShell } from "./DetailShell.svelte";
 export { default as EmbedInput } from "./EmbedInput.svelte";
 export { default as EmbedPreview } from "./EmbedPreview.svelte";
-export { detectParsedEmbed, resolveEmbedParseState } from "./embed-input";
+export {
+  detectParsedEmbed,
+  getProviderAccent,
+  getThumbnailUrl,
+  lookupMeta,
+  parseEmbed,
+  renderEmbed,
+  resolveEmbedParseState,
+} from "./embed-input";
 export { default as EmptyState } from "./EmptyState.svelte";
 export { default as FilterToolbar } from "./FilterToolbar.svelte";
 export { default as FormDialog } from "./FormDialog.svelte";
@@ -76,6 +84,8 @@ export type {
   DockEmphasis,
   DockRegionSnapshot,
   DockSizing,
+  EmbedMeta,
+  EmbedParseResult,
   DrillDownConfig,
   DrillDownContext,
   DrillDownItem,

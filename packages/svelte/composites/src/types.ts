@@ -247,6 +247,21 @@ export type ParsedEmbed = {
   originalEmbed?: string;
   width?: number;
   height?: number;
+  embedType?: "video" | "audio" | "playlist" | "generic";
+};
+
+export type EmbedParseResult = {
+  success: boolean;
+  parsed: ParsedEmbed | null;
+  error?: string;
+};
+
+export type EmbedMeta = {
+  title?: string;
+  description?: string;
+  duration?: number;
+  thumbnailUrl?: string;
+  authorName?: string;
 };
 
 export type CardRadioItem = {

@@ -40,7 +40,7 @@
       {#each ["compact", "default", "comfortable"] as density}
         <div class="toggle-row">
           <span class="specimen__label">{density}</span>
-          <Toggle {density} ariaLabel={"Toggle at " + density}>Option</Toggle>
+          <Toggle {density} ariaLabel={"Toggle at " + density}><Icon icon={star} /> Option</Toggle>
         </div>
       {/each}
     </div>

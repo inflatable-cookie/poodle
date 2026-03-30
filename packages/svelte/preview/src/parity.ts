@@ -682,7 +682,7 @@ const packageSurfaceCoverageGroups: PackageSurfaceCoverageGroup[] = [
     status: "previewed",
     sectionIds: ["catalog-hub"],
     note: "Embed helper exports remain reviewable through the catalogue specimen matrix and media suite surfaces.",
-    exportNames: ["detectParsedEmbed", "resolveEmbedParseState"],
+    exportNames: ["detectParsedEmbed", "getProviderAccent", "getThumbnailUrl", "lookupMeta", "parseEmbed", "renderEmbed", "resolveEmbedParseState"],
   },
   {
     packageName: "@poodle/svelte-composites",

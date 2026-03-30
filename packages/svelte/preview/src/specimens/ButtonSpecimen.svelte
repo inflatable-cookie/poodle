@@ -51,7 +51,7 @@
     <Eyebrow>Sizes</Eyebrow>
     <div class="specimen__row">
       {#each controlSizes as size}
-        <Button variant="primary" {size} on:click={() => log(`Size ${size}`)}>{size.toUpperCase()}</Button>
+        <Button variant="primary" leadingIcon="plus" {size} on:click={() => log(`Size ${size}`)}>{size.toUpperCase()}</Button>
       {/each}
     </div>
   </div>
@@ -62,7 +62,7 @@
       {#each ["compact", "default", "comfortable"] as density}
         <div class="specimen__row">
           <span class="specimen__label">{density}</span>
-          <Button variant="secondary" {density} on:click={() => log(`Density ${density}`)}>Action</Button>
+          <Button variant="secondary" leadingIcon="download" {density} on:click={() => log(`Density ${density}`)}>Action</Button>
         </div>
       {/each}
     </div>

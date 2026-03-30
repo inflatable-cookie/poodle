@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-03-30T13:16:19.278Z",
+  "generatedAt": "2026-03-30T16:03:25.620Z",
   "artifact": "packages/svelte/preview/artifacts/parity-report.json",
   "previewBasePath": "/",
   "automatedBoundary": [
@@ -187,18 +187,18 @@
       },
       {
         "packageName": "@poodle/svelte-composites",
-        "exportCount": 59,
+        "exportCount": 64,
         "componentCount": 38,
-        "helperCount": 21,
-        "previewedCount": 59,
+        "helperCount": 26,
+        "previewedCount": 64,
         "contractOnlyCount": 0
       },
       {
         "packageName": "@poodle/svelte-composites",
-        "exportCount": 59,
+        "exportCount": 64,
         "componentCount": 38,
-        "helperCount": 21,
-        "previewedCount": 59,
+        "helperCount": 26,
+        "previewedCount": 64,
         "contractOnlyCount": 0
       }
     ],
@@ -530,6 +530,32 @@
       },
       {
         "packageName": "@poodle/svelte-composites",
+        "exportName": "getProviderAccent",
+        "kind": "helper",
+        "status": "previewed",
+        "note": "Embed helper exports remain reviewable through the catalogue specimen matrix and media suite surfaces.",
+        "sectionIds": [
+          "catalog-hub"
+        ],
+        "sectionTitles": [
+          "Catalog hub"
+        ]
+      },
+      {
+        "packageName": "@poodle/svelte-composites",
+        "exportName": "getThumbnailUrl",
+        "kind": "helper",
+        "status": "previewed",
+        "note": "Embed helper exports remain reviewable through the catalogue specimen matrix and media suite surfaces.",
+        "sectionIds": [
+          "catalog-hub"
+        ],
+        "sectionTitles": [
+          "Catalog hub"
+        ]
+      },
+      {
+        "packageName": "@poodle/svelte-composites",
         "exportName": "ListCard",
         "kind": "helper",
         "status": "previewed",
@@ -573,6 +599,19 @@
         "kind": "component",
         "status": "previewed",
         "note": "The catalogue covers the remaining composite exports outside the main suite-specific groupings.",
+        "sectionIds": [
+          "catalog-hub"
+        ],
+        "sectionTitles": [
+          "Catalog hub"
+        ]
+      },
+      {
+        "packageName": "@poodle/svelte-composites",
+        "exportName": "lookupMeta",
+        "kind": "helper",
+        "status": "previewed",
+        "note": "Embed helper exports remain reviewable through the catalogue specimen matrix and media suite surfaces.",
         "sectionIds": [
           "catalog-hub"
         ],
@@ -764,6 +803,19 @@
       },
       {
         "packageName": "@poodle/svelte-composites",
+        "exportName": "parseEmbed",
+        "kind": "helper",
+        "status": "previewed",
+        "note": "Embed helper exports remain reviewable through the catalogue specimen matrix and media suite surfaces.",
+        "sectionIds": [
+          "catalog-hub"
+        ],
+        "sectionTitles": [
+          "Catalog hub"
+        ]
+      },
+      {
+        "packageName": "@poodle/svelte-composites",
         "exportName": "parseWorkspaceLayoutSnapshot",
         "kind": "helper",
         "status": "previewed",
@@ -803,6 +855,19 @@
         "sectionTitles": [
           "Picker, relation, and selection workflows",
           "Detail display, cards, headers, and navigation"
+        ]
+      },
+      {
+        "packageName": "@poodle/svelte-composites",
+        "exportName": "renderEmbed",
+        "kind": "helper",
+        "status": "previewed",
+        "note": "Embed helper exports remain reviewable through the catalogue specimen matrix and media suite surfaces.",
+        "sectionIds": [
+          "catalog-hub"
+        ],
+        "sectionTitles": [
+          "Catalog hub"
         ]
       },
       {
