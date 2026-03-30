@@ -25,13 +25,7 @@
   {#if specimenComponent}
     <section class="component-page__section">
       <h2 class="component-page__section-title">Live demo</h2>
-      {#if entry.tier === "primitive"}
-        <Surface tone="panel" border="subtle" padding="md">
-          <svelte:component this={specimenComponent} />
-        </Surface>
-      {:else}
-        <svelte:component this={specimenComponent} />
-      {/if}
+      <svelte:component this={specimenComponent} />
     </section>
     <Separator />
   {:else}

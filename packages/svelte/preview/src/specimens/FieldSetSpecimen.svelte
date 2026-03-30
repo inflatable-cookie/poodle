@@ -1,9 +1,9 @@
 <script lang="ts">
-  import { FieldSet, Field, TextInput, Select } from "@poodle/svelte-primitives";
+  import { FieldSet, Field, TextInput, Select, Surface } from "@poodle/svelte-primitives";
 </script>
 
 <div class="specimen">
-  <div class="specimen__card">
+  <Surface tone="panel" border="subtle" padding="md">
     <FieldSet legend="Contact Information">
       <Field id="fs-name" label="Full Name" required>
         <TextInput id="fs-name" placeholder="Jane Smith" ariaLabel="Full Name" />
@@ -15,9 +15,9 @@
         <TextInput id="fs-phone" placeholder="+1 (555) 000-0000" ariaLabel="Phone" />
       </Field>
     </FieldSet>
-  </div>
+  </Surface>
 
-  <div class="specimen__card">
+  <Surface tone="panel" border="subtle" padding="md">
     <FieldSet legend="Address" columns={2}>
       <Field id="fs-street" label="Street" span="full">
         <TextInput id="fs-street" placeholder="123 Main St" ariaLabel="Street" />
@@ -51,9 +51,9 @@
         />
       </Field>
     </FieldSet>
-  </div>
+  </Surface>
 
-  <div class="specimen__card">
+  <Surface tone="panel" border="subtle" padding="md">
     <FieldSet columns={2} gap="sm">
       <Field id="fs-first" label="First Name">
         <TextInput id="fs-first" placeholder="Jane" ariaLabel="First Name" />
@@ -62,9 +62,9 @@
         <TextInput id="fs-last" placeholder="Smith" ariaLabel="Last Name" />
       </Field>
     </FieldSet>
-  </div>
+  </Surface>
 
-  <div class="specimen__card">
+  <Surface tone="panel" border="subtle" padding="md">
     <div class="form-sections">
       <FieldSet legend="Personal" columns={2}>
         <Field id="fs2-first" label="First Name" required>
@@ -99,7 +99,7 @@
         </Field>
       </FieldSet>
     </div>
-  </div>
+  </Surface>
 </div>
 
 <style>
@@ -108,16 +108,6 @@
     flex-direction: column;
     gap: 1.5rem;
     max-width: 36rem;
-    /* Break out of the parent Surface padding */
-    margin: calc(-1 * var(--poodle-space-panel-y, 0.75rem)) calc(-1 * var(--poodle-space-panel-x, 1rem));
-    padding: var(--poodle-space-panel-y, 0.75rem) var(--poodle-space-panel-x, 1rem);
-  }
-
-  .specimen__card {
-    padding: var(--poodle-space-panel-y) var(--poodle-space-panel-x);
-    border: 0.0625rem solid var(--poodle-color-border-subtle);
-    border-radius: var(--poodle-radius-surface);
-    background: color-mix(in srgb, var(--poodle-color-background-panel) 93%, var(--poodle-color-background-elevated));
   }
 
   .form-sections {
