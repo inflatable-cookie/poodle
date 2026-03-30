@@ -49,7 +49,6 @@ export { default as MetaItem } from "./MetaItem.svelte";
 export { default as NumberEntry } from "./NumberEntry.svelte";
 export { default as OrderBy } from "./OrderBy.svelte";
 export { default as NavCard } from "./NavCard.svelte";
-export { default as NavCardGrid } from "./NavCardGrid.svelte";
 export { default as NavigationMenu } from "./NavigationMenu.svelte";
 export { default as Pill } from "./Pill.svelte";
 export { default as PinInput } from "./PinInput.svelte";

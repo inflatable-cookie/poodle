@@ -160,10 +160,10 @@ owns the field and text-input capabilities needed to express that workflow.
 
 ## Related Contracts
 
-- [Field](/Users/betterthanclay/Dev/projects/poodle/docs/contracts/foundation/field.md)
-- [TextInput](/Users/betterthanclay/Dev/projects/poodle/docs/contracts/foundation/text-input.md)
-- [FieldSet](/Users/betterthanclay/Dev/projects/poodle/docs/contracts/foundation/field-set.md)
-- [FormLayout](/Users/betterthanclay/Dev/projects/poodle/docs/contracts/composites/form-layout.md)
+- [Field](../contracts/foundation/field.md)
+- [TextInput](../contracts/foundation/text-input.md)
+- [FieldSet](../contracts/foundation/field-set.md)
+- [FormLayout](../contracts/composites/form-layout.md)
 
 ## Next Task
 

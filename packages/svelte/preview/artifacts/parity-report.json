@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-03-30T16:03:25.620Z",
+  "generatedAt": "2026-03-30T20:59:52.165Z",
   "artifact": "packages/svelte/preview/artifacts/parity-report.json",
   "previewBasePath": "/",
   "automatedBoundary": [
@@ -179,18 +179,10 @@
     "summary": [
       {
         "packageName": "@poodle/svelte-primitives",
-        "exportCount": 100,
-        "componentCount": 88,
+        "exportCount": 102,
+        "componentCount": 90,
         "helperCount": 12,
-        "previewedCount": 100,
-        "contractOnlyCount": 0
-      },
-      {
-        "packageName": "@poodle/svelte-composites",
-        "exportCount": 64,
-        "componentCount": 38,
-        "helperCount": 26,
-        "previewedCount": 64,
+        "previewedCount": 102,
         "contractOnlyCount": 0
       },
       {
@@ -726,19 +718,6 @@
       {
         "packageName": "@poodle/svelte-composites",
         "exportName": "NavCard",
-        "kind": "helper",
-        "status": "previewed",
-        "note": "Composite package helper re-exports remain reviewable through the catalogue and suite surfaces.",
-        "sectionIds": [
-          "catalog-hub"
-        ],
-        "sectionTitles": [
-          "Catalog hub"
-        ]
-      },
-      {
-        "packageName": "@poodle/svelte-composites",
-        "exportName": "NavCardGrid",
         "kind": "helper",
         "status": "previewed",
         "note": "Composite package helper re-exports remain reviewable through the catalogue and suite surfaces.",
@@ -1628,6 +1607,32 @@
       },
       {
         "packageName": "@poodle/svelte-primitives",
+        "exportName": "MetaBar",
+        "kind": "component",
+        "status": "previewed",
+        "note": "Foundational disclosure, control, and chip primitives exercised directly in catalogue specimens.",
+        "sectionIds": [
+          "catalog-hub"
+        ],
+        "sectionTitles": [
+          "Catalog hub"
+        ]
+      },
+      {
+        "packageName": "@poodle/svelte-primitives",
+        "exportName": "MetaItem",
+        "kind": "component",
+        "status": "previewed",
+        "note": "Foundational disclosure, control, and chip primitives exercised directly in catalogue specimens.",
+        "sectionIds": [
+          "catalog-hub"
+        ],
+        "sectionTitles": [
+          "Catalog hub"
+        ]
+      },
+      {
+        "packageName": "@poodle/svelte-primitives",
         "exportName": "Meter",
         "kind": "component",
         "status": "previewed",
@@ -1642,19 +1647,6 @@
       {
         "packageName": "@poodle/svelte-primitives",
         "exportName": "NavCard",
-        "kind": "component",
-        "status": "previewed",
-        "note": "Every public primitive export is directly reviewable from the catalogue.",
-        "sectionIds": [
-          "catalog-hub"
-        ],
-        "sectionTitles": [
-          "Catalog hub"
-        ]
-      },
-      {
-        "packageName": "@poodle/svelte-primitives",
-        "exportName": "NavCardGrid",
         "kind": "component",
         "status": "previewed",
         "note": "Every public primitive export is directly reviewable from the catalogue.",

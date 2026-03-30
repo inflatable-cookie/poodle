@@ -58,7 +58,6 @@ That runs docs lint, parity and accessibility artifact generation, and the Svelt
 
 ## Naming
 
-The repository root is `/Users/betterthanclay/Dev/projects/poodle`.
 Current package and crate namespaces use `poodle` and `@poodle/*`.
 Historical `pug` and `flint` references should be treated as migration leftovers unless they appear in explicit rename handoff docs.
 

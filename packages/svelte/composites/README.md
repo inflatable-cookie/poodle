@@ -38,7 +38,6 @@ and data components.
 - `MediaUploadStatusPanel`
 - `MetricTile`
 - `NavCard`
-- `NavCardGrid`
 - `OrderBy`
 - `PageHeader`
 - `PageLoading`

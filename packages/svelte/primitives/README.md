@@ -51,8 +51,9 @@ Contract-backed Svelte primitive surface for the first generalized Poodle baseli
 - `Menubar`
 - `Menu`
 - `NavCard`
-- `NavCardGrid`
 - `NavigationMenu`
+- `MetaBar`
+- `MetaItem`
 - `NumberEntry`
 - `OrderBy`
 - `Pagination`

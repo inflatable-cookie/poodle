@@ -48,24 +48,24 @@
 <section class="list-container" aria-label={ariaLabel ?? title} data-state={state}>
   {#if $$slots.breadcrumbs && $$slots.actions}
     <PageHeader {title} {subtitle} {eyebrow}>
-      <svelte:fragment slot="breadcrumbs">
+      {#snippet breadcrumbs()}
         <slot name="breadcrumbs" />
-      </svelte:fragment>
-      <svelte:fragment slot="actions">
+      {/snippet}
+      {#snippet actions()}
         <slot name="actions" />
-      </svelte:fragment>
+      {/snippet}
     </PageHeader>
   {:else if $$slots.breadcrumbs}
     <PageHeader {title} {subtitle} {eyebrow}>
-      <svelte:fragment slot="breadcrumbs">
+      {#snippet breadcrumbs()}
         <slot name="breadcrumbs" />
-      </svelte:fragment>
+      {/snippet}
     </PageHeader>
   {:else if $$slots.actions}
     <PageHeader {title} {subtitle} {eyebrow}>
-      <svelte:fragment slot="actions">
+      {#snippet actions()}
         <slot name="actions" />
-      </svelte:fragment>
+      {/snippet}
     </PageHeader>
   {:else}
     <PageHeader {title} {subtitle} {eyebrow} />

@@ -156,10 +156,10 @@ Those remain host-owned unless Poodle later promotes a narrower generic surface.
 
 ## Related Contracts
 
-- [FormDialog](/Users/betterthanclay/Dev/projects/poodle/docs/contracts/composites/form-dialog.md)
-- [DetailShell](/Users/betterthanclay/Dev/projects/poodle/docs/contracts/composites/detail-shell.md)
-- [DetailSection](/Users/betterthanclay/Dev/projects/poodle/docs/contracts/composites/detail-section.md)
-- [DetailRow](/Users/betterthanclay/Dev/projects/poodle/docs/contracts/foundation/detail-row.md)
+- [FormDialog](../contracts/composites/form-dialog.md)
+- [DetailShell](../contracts/composites/detail-shell.md)
+- [DetailSection](../contracts/composites/detail-section.md)
+- [DetailRow](../contracts/foundation/detail-row.md)
 
 ## Next Task
 

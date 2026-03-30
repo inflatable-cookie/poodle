@@ -44,7 +44,7 @@ export {
   runMediaUploadWorkflow,
   uploadMediaWithKnownHash,
 } from "./media-workflow";
-export { NavCard, NavCardGrid } from "@poodle/svelte-primitives";
+export { NavCard } from "@poodle/svelte-primitives";
 export { default as MediaPreview } from "./MediaPreview.svelte";
 export { default as MediaThumbnail } from "./MediaThumbnail.svelte";
 export { default as MediaUploadStatusPanel } from "./MediaUploadStatusPanel.svelte";

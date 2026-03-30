@@ -1,4 +1,6 @@
 <script lang="ts">
+  import type { Snippet } from "svelte";
+
   import { Callout } from "@poodle/svelte-primitives";
 
   interface Props {
@@ -15,6 +17,11 @@
     align?: "start" | "between";
     ariaLabel?: string | null;
     level?: 1 | 2 | 3 | 4 | 5 | 6;
+    children?: Snippet;
+    breadcrumbs?: Snippet;
+    meta?: Snippet;
+    actions?: Snippet;
+    banner?: Snippet;
   }
 
   let {
@@ -31,6 +38,11 @@
     align = "between",
     ariaLabel = null,
     level = 2,
+    children,
+    breadcrumbs,
+    meta,
+    actions,
+    banner,
   }: Props = $props();
 
   const primaryTitle = $derived(title ?? section ?? "");
@@ -49,9 +61,9 @@
       </a>
     {/if}
 
-    {#if $$slots.breadcrumbs}
+    {#if breadcrumbs}
       <div class="page-header__breadcrumbs">
-        <slot name="breadcrumbs" />
+        {@render breadcrumbs()}
       </div>
     {/if}
 
@@ -74,28 +86,28 @@
       {#if subtitle}
         <p class="page-header__subtitle">{subtitle}</p>
       {/if}
-      {#if $$slots.meta}
+      {#if meta}
         <div class="page-header__meta">
-          <slot name="meta" />
+          {@render meta()}
         </div>
       {/if}
-      {#if $$slots.default}
+      {#if children}
         <div class="page-header__body">
-          <slot />
+          {@render children()}
         </div>
       {/if}
     </div>
   </div>
 
-  {#if $$slots.actions}
+  {#if actions}
     <div class="page-header__actions">
-      <slot name="actions" />
+      {@render actions()}
     </div>
   {/if}
 
-  {#if $$slots.banner}
+  {#if banner}
     <div class="page-header__banner">
-      <slot name="banner" />
+      {@render banner()}
     </div>
   {:else if bannerMessage}
     <div class="page-header__banner">

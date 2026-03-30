@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { Eyebrow, Icon, NavCard, NavCardGrid } from "@poodle/svelte-primitives";
+  import { Eyebrow, Grid, Icon, NavCard } from "@poodle/svelte-primitives";
   import { house, layers, slidersHorizontal, fileText } from "@poodle/icons-lucide";
 
   let lastClick = "";
@@ -7,8 +7,8 @@
 
 <div class="specimen">
   <div class="specimen__group">
-    <Eyebrow>Navigation card grid (2 columns)</Eyebrow>
-    <NavCardGrid columns={2}>
+    <Eyebrow>Navigation cards in a grid (2 columns)</Eyebrow>
+    <Grid columns="1fr 1fr" gap="md" asRole="navigation" ariaLabel="Navigation cards">
       <NavCard
         title="Getting Started"
         description="Learn the basics of the component library."
@@ -38,7 +38,7 @@
       >
         <svelte:fragment slot="icon"><Icon icon={fileText} /></svelte:fragment>
       </NavCard>
-    </NavCardGrid>
+    </Grid>
   </div>
 
   <div class="specimen__group">

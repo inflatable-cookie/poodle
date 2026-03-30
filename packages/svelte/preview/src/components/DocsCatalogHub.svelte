@@ -186,10 +186,12 @@
           eyebrow="Website-style wrapper"
           subtitle="This proof uses app-owned composition plus scoped appearance recipes so cards, header framing, and CTA chrome can shift together."
         >
-          <Stack slot="actions" direction="row" justify="end" wrap gap="md">
+          {#snippet actions()}
+<Stack direction="row" justify="end" wrap gap="md">
             <Button variant="secondary">Read pattern notes</Button>
             <Button variant="primary">Launch branded preview</Button>
           </Stack>
+{/snippet}
         </PageHeader>
 
         <div class="brand-proof-grid">

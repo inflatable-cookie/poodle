@@ -22,10 +22,10 @@
   <div class="specimen__group">
     <Eyebrow>With eyebrow and actions</Eyebrow>
     <PageHeader title="Button" eyebrow="Primitive" subtitle="Primary interactive control for triggering actions.">
-      <svelte:fragment slot="actions">
+      {#snippet actions()}
         <Button variant="secondary">View source</Button>
         <Button>Edit</Button>
-      </svelte:fragment>
+      {/snippet}
     </PageHeader>
   </div>
 
@@ -45,27 +45,27 @@
       bannerMessage="This task is currently paused."
       bannerTone="warning"
     >
-      <svelte:fragment slot="actions">
+      {#snippet actions()}
         <Button variant="secondary">Run now</Button>
         <Button>Edit</Button>
-      </svelte:fragment>
+      {/snippet}
     </PageHeader>
   </div>
 
   <div class="specimen__group">
     <Eyebrow>With MetaBar</Eyebrow>
     <PageHeader title="Nightly Sync" section="Scheduled Task" backHref="/system/tasks" backLabel="Tasks">
-      <svelte:fragment slot="meta">
+      {#snippet meta()}
         <MetaBar>
           <Pill tone="success" appearance="badge">Active</Pill>
           <span class="meta-text">Every 6 hours</span>
           <span class="meta-text">Last run <TimeAgo datetime="2026-03-30T08:15:00Z" /></span>
         </MetaBar>
-      </svelte:fragment>
-      <svelte:fragment slot="actions">
+      {/snippet}
+      {#snippet actions()}
         <Button variant="secondary">Run now</Button>
         <Button>Edit schedule</Button>
-      </svelte:fragment>
+      {/snippet}
     </PageHeader>
   </div>
 

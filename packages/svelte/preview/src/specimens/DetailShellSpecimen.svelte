@@ -24,10 +24,10 @@
       <DetailShell ariaLabel="Project detail view">
         <svelte:fragment slot="header">
           <PageHeader title="Poodle Design System" eyebrow="Project" subtitle="A comprehensive component library.">
-            <svelte:fragment slot="actions">
+            {#snippet actions()}
               <Pill appearance="badge" tone="success">Active</Pill>
               <Button variant="secondary">Edit</Button>
-            </svelte:fragment>
+            {/snippet}
           </PageHeader>
         </svelte:fragment>
         <DetailSection title="General">

@@ -120,10 +120,10 @@ For grouped page-level actions:
 
 ## Related Contracts
 
-- [Button](/Users/betterthanclay/Dev/projects/poodle/docs/contracts/foundation/button.md)
-- [IconButton](/Users/betterthanclay/Dev/projects/poodle/docs/contracts/foundation/icon-button.md)
-- [SplitButton](/Users/betterthanclay/Dev/projects/poodle/docs/contracts/foundation/split-button.md)
-- [Menu](/Users/betterthanclay/Dev/projects/poodle/docs/contracts/foundation/menu.md)
+- [Button](../contracts/foundation/button.md)
+- [IconButton](../contracts/foundation/icon-button.md)
+- [SplitButton](../contracts/foundation/split-button.md)
+- [Menu](../contracts/foundation/menu.md)
 
 ## Next Task
 

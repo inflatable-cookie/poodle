@@ -75,8 +75,9 @@ above it in downstream repos such as Loophole.
 - `foundation/list-card.md`
 - `foundation/menu.md`
 - `foundation/menubar.md`
+- `foundation/meta-bar.md`
+- `foundation/meta-item.md`
 - `foundation/meter.md`
-- `foundation/nav-card-grid.md`
 - `foundation/nav-card.md`
 - `foundation/navigation-menu.md`
 - `foundation/number-entry.md`

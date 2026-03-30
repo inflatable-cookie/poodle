@@ -195,7 +195,6 @@ export const specimenMap: Record<string, typeof SvelteComponent<any>> = {
   menubar: MenubarSpecimen,
   meter: MeterSpecimen,
   "nav-card": NavCardSpecimen,
-  "nav-card-grid": NavCardSpecimen,
   "navigation-menu": NavigationMenuSpecimen,
   "order-by": OrderBySpecimen,
   "number-entry": NumberEntrySpecimen,

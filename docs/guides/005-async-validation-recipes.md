@@ -88,8 +88,8 @@ Do not extend Poodle with app-specific validation rules or endpoint knowledge.
 
 ## Related Contracts
 
-- [TextInput](/Users/betterthanclay/Dev/projects/poodle/docs/contracts/foundation/text-input.md)
-- [Field](/Users/betterthanclay/Dev/projects/poodle/docs/contracts/foundation/field.md)
+- [TextInput](../contracts/foundation/text-input.md)
+- [Field](../contracts/foundation/field.md)
 
 ## Next Task
 

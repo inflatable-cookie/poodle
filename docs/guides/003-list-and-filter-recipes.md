@@ -148,9 +148,9 @@ root.
 
 ## Related Contracts
 
-- [ListContainer](/Users/betterthanclay/Dev/projects/poodle/docs/contracts/composites/list-container.md)
-- [FilterToolbar](/Users/betterthanclay/Dev/projects/poodle/docs/contracts/composites/filter-toolbar.md)
-- [PageHeader](/Users/betterthanclay/Dev/projects/poodle/docs/contracts/composites/page-header.md)
+- [ListContainer](../contracts/composites/list-container.md)
+- [FilterToolbar](../contracts/composites/filter-toolbar.md)
+- [PageHeader](../contracts/composites/page-header.md)
 
 ## Next Task
 

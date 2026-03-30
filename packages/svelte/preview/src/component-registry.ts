@@ -78,7 +78,6 @@ export const primitiveComponents: ComponentEntry[] = [
   entry("Menubar", "primitive", P, "Horizontal menu bar with dropdown sub-menus.", true),
   entry("Meter", "primitive", P, "Visual gauge for scalar values within a known range.", true),
   entry("NavCard", "primitive", P, "Navigation-oriented card link with icon, badge, and arrow.", true),
-  entry("NavCardGrid", "primitive", P, "Responsive grid layout for NavCard navigation panels.", true),
   entry("NavigationMenu", "primitive", P, "Horizontal navigation with dropdown sub-menus.", true),
   entry("NumberEntry", "primitive", P, "Numeric input with increment/decrement controls.", true),
   entry("OrderBy", "primitive", P, "Sort-control toolbar for data views with direction toggle.", true),

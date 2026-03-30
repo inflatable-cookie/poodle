@@ -33,6 +33,20 @@ or product-specific abstractions into the design system.
 10. [Media Picker Workflow Recipes](./009-media-picker-workflow-recipes.md)
    Lightweight selector posture for Poodle `MediaPicker` and the boundary for
    heavier media-library workflow shells.
+11. [Auth UI And Workflow Recipes](./010-auth-ui-and-workflow-recipes.md)
+   Poodle-first auth page framing, one-time-code entry, and password-policy
+   checklist composition.
+12. [Page Shell And Admin Recipes](./011-page-shell-and-admin-recipes.md)
+   Poodle-first detail/list/header/tab composition for admin and back-office
+   apps.
+13. [Media Library And Upload Recipes](./012-media-library-and-upload-recipes.md)
+   Poodle-first media browse, upload, thumbnail, and picker-shell composition.
+14. [Admin Feature Delivery Recipes](./013-admin-feature-delivery-recipes.md)
+   Implementation-order guidance for real admin list/detail/edit flows using
+   Poodle-first UI composition.
+15. [Admin App Shell Recipes](./014-admin-app-shell-recipes.md)
+   Poodle-first sidebar, mobile header, toast host, and context-panel shell
+   composition.
 
 ## Rules
 

@@ -27,15 +27,15 @@
     "packages": [
       {
         "packageName": "@poodle/svelte-primitives",
-        "exportCount": 100,
-        "previewedCount": 100,
+        "exportCount": 102,
+        "previewedCount": 102,
         "contractOnlyCount": 0,
         "priorityMissingExports": []
       },
       {
         "packageName": "@poodle/svelte-composites",
-        "exportCount": 59,
-        "previewedCount": 59,
+        "exportCount": 64,
+        "previewedCount": 64,
         "contractOnlyCount": 0,
         "priorityMissingExports": []
       }

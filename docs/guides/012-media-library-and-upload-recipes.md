@@ -1,0 +1,132 @@
+# Media Library And Upload Recipes
+
+Reusable media-library UI composition rules for Poodle-based admin apps.
+
+## Purpose
+
+Use this guide when you need to build media browse, preview, picker, and upload
+surfaces without recreating a second media workflow kit above Poodle.
+
+## Default Posture
+
+- use Poodle `MediaPicker` for lightweight local selection
+- use Poodle `MediaBrowsePanel` and `MediaUploadStatusPanel` for heavier
+  callback-driven media-library shells
+- use Poodle `MediaThumbnail` and `MediaPreview` for display posture
+- keep upload orchestration, duplicate detection, and media-record policy in
+  host code or retained runtime helpers
+
+## Lightweight Selector
+
+Use `MediaPicker` when the host already owns the local items and upload queue.
+
+```svelte
+<script lang="ts">
+  import { MediaPicker, type MediaPickerItem } from "@poodle/svelte-composites";
+
+  let open = false;
+  let items: MediaPickerItem[] = [];
+</script>
+
+<MediaPicker
+  bind:open
+  {items}
+  on:select={(event) => {
+    const item = event.detail.item;
+    // host-owned selection handling
+  }}
+  on:upload={(event) => {
+    const files = event.detail.files;
+    // host-owned queue handling
+  }}
+/>
+```
+
+## Browse And Upload Shell
+
+When the flow needs paginated browse and upload status together, compose
+directly over Poodle media composites instead of inventing a new generic media
+wrapper.
+
+```svelte
+<script lang="ts">
+  import {
+    MediaBrowsePanel,
+    MediaUploadStatusPanel,
+    type MediaBrowseItem
+  } from "@poodle/svelte-composites";
+
+  let items: MediaBrowseItem[] = [];
+  let uploads = [];
+</script>
+
+<div class="media-library-shell">
+  <MediaBrowsePanel
+    title="Media"
+    items={items}
+    state="ready"
+    on:search={(event) => {
+      const query = event.detail.query;
+      // host-owned search/pagination
+    }}
+    on:select={(event) => {
+      const item = event.detail.item;
+      // host-owned selection
+    }}
+  />
+
+  <MediaUploadStatusPanel
+    title="Uploads"
+    uploads={uploads}
+    on:retry={(event) => {
+      const upload = event.detail.upload;
+      // host-owned retry
+    }}
+  />
+</div>
+```
+
+## Display Posture
+
+Use `MediaThumbnail` and `MediaPreview` directly for read-only media framing.
+
+```svelte
+<script lang="ts">
+  import { MediaPreview, MediaThumbnail } from "@poodle/svelte-composites";
+</script>
+
+<MediaThumbnail src={media.thumbnailUrl} alt={media.title} aspectRatio="landscape" />
+<MediaPreview kind={media.kind} src={media.url} title={media.title} />
+```
+
+## What Stays Out
+
+- duplicate-detection APIs
+- create/initiate/finalize upload commands
+- media-record creation and versioning policy
+- media-usage tracking
+- app-specific destructive wording and permission checks
+
+Those remain host-owned unless a genuinely generic workflow seam emerges across
+multiple apps.
+
+## Decision
+
+- keep media UI composition Poodle-first
+- keep media orchestration host-owned
+- only add Poodle capability when multiple apps need the same generic media
+  interaction, not when one app wants a convenience wrapper
+
+## Related Contracts
+
+- [MediaPicker](../contracts/composites/media-picker.md)
+- [MediaBrowsePanel](../contracts/composites/media-browse-panel.md)
+- [MediaUploadStatusPanel](../contracts/composites/media-upload-status-panel.md)
+- [MediaPreview](../contracts/composites/media-preview.md)
+- [MediaThumbnail](../contracts/composites/media-thumbnail.md)
+
+## Next Task
+
+Add the next media recipe only when a genuinely generic media workflow seam is
+proven across multiple apps, instead of recreating app-specific library logic
+inside Poodle.
