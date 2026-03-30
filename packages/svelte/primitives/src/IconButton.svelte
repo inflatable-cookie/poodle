@@ -215,13 +215,13 @@
   }
 
   .icon-button[data-size="xs"] {
-    width: calc(var(--poodle-size-control-height) - 0.25rem);
-    height: calc(var(--poodle-size-control-height) - 0.25rem);
+    width: calc(var(--poodle-size-control-height) - 0.5rem);
+    height: calc(var(--poodle-size-control-height) - 0.5rem);
   }
 
   .icon-button[data-size="sm"] {
-    width: calc(var(--poodle-size-control-height) - 0.375rem);
-    height: calc(var(--poodle-size-control-height) - 0.375rem);
+    width: calc(var(--poodle-size-control-height) - 0.25rem);
+    height: calc(var(--poodle-size-control-height) - 0.25rem);
   }
 
   .icon-button[data-size="lg"] {

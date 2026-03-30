@@ -98,6 +98,7 @@ above it in downstream repos such as Loophole.
 - `foundation/segmented-control.md`
 - `foundation/select.md`
 - `foundation/separator.md`
+- `foundation/size-and-density.md`
 - `foundation/skeleton.md`
 - `foundation/slider.md`
 - `foundation/spacer.md`

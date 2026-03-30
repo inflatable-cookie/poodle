@@ -121,8 +121,8 @@
   .breadcrumbs[data-size="xl"] .breadcrumbs__item { gap: 0.75rem; }
 
   /* Density variants */
-  .breadcrumbs[data-density="compact"] .breadcrumbs__list { gap: 0.3125rem; }
-  .breadcrumbs[data-density="compact"] .breadcrumbs__item { gap: 0.3125rem; }
-  .breadcrumbs[data-density="comfortable"] .breadcrumbs__list { gap: 0.875rem; }
-  .breadcrumbs[data-density="comfortable"] .breadcrumbs__item { gap: 0.875rem; }
+  .breadcrumbs[data-density="compact"] .breadcrumbs__list { gap: 0.25rem; }
+  .breadcrumbs[data-density="compact"] .breadcrumbs__item { gap: 0.25rem; }
+  .breadcrumbs[data-density="comfortable"] .breadcrumbs__list { gap: 0.75rem; }
+  .breadcrumbs[data-density="comfortable"] .breadcrumbs__item { gap: 0.75rem; }
 </style>

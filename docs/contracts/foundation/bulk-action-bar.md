@@ -1,17 +1,17 @@
 # BulkActionBar
 
 Status: detailed contract
-Updated: 2026-03-28
+Updated: 2026-03-30
 
 ## 1. Purpose
 
 - Component name: `BulkActionBar`
 - Layer: `foundation`
 - Summary: a contextual action bar that appears when items are selected in a
-  list or table, showing selection count and available bulk actions
-- In scope: selection summary with count and optional total, action buttons
-  with default, warning, and danger tones, select-all / deselect-all, clear selection,
-  disabled/loading gating
+  list or table, showing selection count and available bulk actions as icon buttons
+- In scope: selection summary with count and optional total, action IconButtons
+  with default, warning, and danger tones, select-all / deselect-all text button,
+  clear selection IconButton, disabled/loading gating
 - Out of scope: selection management (parent-owned), inline editing, batch
   progress indicators
 
@@ -20,20 +20,23 @@ Updated: 2026-03-28
 ```text
 [Root .bulk-action-bar]  <div role="region" aria-label="Bulk actions">
   ├── [Summary .bulk-action-bar__summary]  <div>
-  │   ├── [Count text]  "{selectionCount} selected"
-  │   └── [Total text]  <span> "of {totalCount}" (optional)
+  │   ├── [Count text]  <strong> "{selectionCount} selected"
+  │   └── [Total text]  <span> "of {totalCount} visible rows" (optional)
   ├── [Actions .bulk-action-bar__actions]  <div>
-  │   ├── [Button .bulk-action-bar__button]  <button> (repeated)
-  │   └── ...
-  └── [Clear button]  (via clear event)
+  │   ├── [Select-all button .bulk-action-bar__button]  <button> (optional)
+  │   ├── [Action icon-action .bulk-action-bar__icon-action]  <span> (repeated)
+  │   │   └── [IconButton]  ghost variant, tone from action
+  │   └── [Clear IconButton]  ghost variant, icon="x"
 ```
 
 | Part | Required | Description | Token Targets |
 |------|----------|-------------|---------------|
 | Root | yes | region container with accent-tinted background | flex layout, padding, border, radius, background |
 | Summary | yes | selection count and optional total display | flex, gap, color, typography |
-| Actions | yes | action button row | flex, gap |
-| Button | yes | action trigger with optional danger tone | height, padding, border, radius, background, color |
+| Actions | yes | icon button row | flex, gap |
+| Icon action wrapper | yes | tone wrapper for warning IconButtons | color override via `:global()` |
+| Select-all button | no | text button for select-all / deselect-all | height, padding, border, radius, background, color |
+| Clear IconButton | yes | dismisses the selection | ghost variant, inherits resolved size |
 
 ## 3. Props And Inputs
 
@@ -42,11 +45,11 @@ Updated: 2026-03-28
 | Prop | Type | Default | Required | Notes |
 |------|------|---------|----------|-------|
 | `selectionCount` | `number` | `0` | no | number of selected items |
-| `totalCount` | `number \| null` | `null` | no | total item count for "of N" display |
-| `size` | `"xs" \| "sm" \| "md" \| "lg" \| "xl"` | `null` | no | explicit control size override; when null, resolves from inherited presentation |
+| `totalCount` | `number \| null` | `null` | no | total item count for "of N visible rows" display |
+| `size` | `ControlSize \| null` | `null` | no | explicit control size override; when null, resolves from inherited presentation |
 | `sizeRole` | `"chrome" \| "control" \| "prominent"` | `"control"` | no | semantic size offset from inherited presentation |
-| `density` | `ControlDensity \| null` | `null` | no | explicit density override for spacing |
-| `actions` | `BulkAction[]` | — | yes | available bulk action definitions |
+| `density` | `ControlDensity \| null` | `null` | no | explicit density override for container padding |
+| `actions` | `BulkAction[]` | `[]` | no | available bulk action definitions |
 | `loading` | `boolean` | `false` | no | disables all actions while a batch workflow is running |
 | `disabled` | `boolean` | `false` | no | disables all interactions without changing the displayed selection |
 | `showSelectAll` | `boolean` | `false` | no | shows a select-all / deselect-all action ahead of bulk actions |
@@ -77,19 +80,20 @@ type BulkAction = {
 
 | State | Trigger | Expected Result |
 |-------|---------|-----------------|
-| default | items selected | accent-tinted bar with count and action buttons |
-| danger action | action has `tone="danger"` | button with danger border and text color |
-| warning action | action has `tone="warning"` | button with warning border and text color |
-| with total | `totalCount` provided | summary shows "N selected of M" |
-| select all | `showSelectAll=true` | action row shows select-all or deselect-all trigger |
+| default | items selected | accent-tinted bar with count and ghost IconButton actions |
+| danger action | action has `tone="danger"` | IconButton renders with danger tone |
+| warning action | action has `tone="warning"` | wrapper overrides IconButton color to status-warning |
+| with total | `totalCount` provided | summary shows "N selected of M visible rows" |
+| select all | `showSelectAll=true` | action row shows select-all or deselect-all text button |
 | loading | `loading=true` | all action controls disabled |
+| disabled | `disabled=true` | all action controls disabled |
 
 ## 5. Events
 
 | Event | When It Fires | Payload | Notes |
 |-------|---------------|---------|-------|
-| `action` | action button clicked | `{id: string}` | identifies which action was triggered |
-| `clear` | clear/deselect triggered | `void` | parent should clear selection |
+| `action` | action IconButton clicked | `{id: string}` | identifies which action was triggered |
+| `clear` | clear IconButton clicked | `void` | parent should clear selection |
 | `selectAll` | select-all / deselect-all clicked | `void` | parent decides whether to select all or clear all |
 
 ## 6. Accessibility
@@ -97,20 +101,22 @@ type BulkAction = {
 ### Semantics
 
 - Root: `role="region"`, `aria-label="Bulk actions"`
-- Action buttons: native `<button>` elements with action labels
+- Action IconButtons: `ariaLabel` set to action's `label`, tooltip shows label on hover
+- Select-all button: native `<button>` with text label
+- Clear IconButton: `ariaLabel="Clear selection"`
 - Selection count: live region or announced on change
-- Danger actions: visually distinct but no special ARIA role
+- Danger/warning tones: visually distinct but no special ARIA role
 
 ### Keyboard
 
 | Key | Behavior |
 |-----|----------|
-| `Enter` / `Space` | activates focused action button |
-| `Tab` | moves focus between action buttons |
+| `Enter` / `Space` | activates focused action |
+| `Tab` | moves focus between actions |
 
 ### Focus And Announcement
 
-- focus entry: first action button receives focus
+- focus entry: first action receives focus
 - selection change: count update announced via live region
 
 ## 7. Layout
@@ -120,6 +126,14 @@ type BulkAction = {
 - Root: flex row, wraps, space-between alignment
 - Summary: flex row, wraps
 - Actions: flex row, wraps
+
+### Size vs Density Separation
+
+- **Size** controls: icon button dimensions (via `size` prop passthrough),
+  summary font-size, select-all button min-height and font-size.
+  Size does NOT affect container padding or gap.
+- **Density** controls: container padding only. Compact tightens padding,
+  comfortable loosens it. Default inherits from panel tokens.
 
 ### Composition
 
@@ -170,7 +184,18 @@ type BulkAction = {
 | `flex-wrap` | `wrap` |
 | `gap` | `var(--poodle-space-inline-sm)` |
 
-### Button (default tone)
+### Action rendering
+
+Each action in the `actions` array renders as a ghost `IconButton` with:
+- `icon` from the action's `icon` prop (falls back to `"circle"`)
+- `ariaLabel` and `tooltip` set to the action's `label`
+- `tone` mapped from action tone (`"danger"` passes through; `"warning"` uses a wrapper override)
+- `size` set to the bar's resolved size
+
+Warning tone is handled by a `.bulk-action-bar__icon-action[data-tone="warning"]` wrapper
+that overrides the IconButton's color to `var(--poodle-color-status-warning)` via `:global()`.
+
+### Select-all button (shown when `showSelectAll` is true)
 
 | Property | Value |
 |----------|-------|
@@ -180,43 +205,42 @@ type BulkAction = {
 | `border-radius` | `var(--poodle-radius-control)` |
 | `background` | `var(--poodle-color-background-surface)` |
 | `color` | `var(--poodle-color-text-primary)` |
-| `cursor` | `pointer` |
-
-### Button (danger tone)
-
-| Property | Value |
-|----------|-------|
-| `border-color` | `color-mix(in srgb, var(--poodle-color-status-danger) 65%, transparent)` |
-| `color` | `var(--poodle-color-status-danger)` |
-
-### Button focus
-
-| Property | Value |
-|----------|-------|
-| `outline` | `var(--poodle-border-width-focus) solid var(--poodle-color-accent-focusRing)` |
-| `outline-offset` | `0.125rem` |
+| `font-size` | `var(--poodle-typography-body-size)` |
 
 ### Size adjustments
 
-| Size | button min-height | button font-size |
-|------|------------------|-----------------|
-| `xs` | `calc(control-height - 0.5rem)` | `0.6875rem` |
-| `sm` | `calc(control-height - 0.375rem)` | `0.75rem` |
-| `md` | `control-height` | `typography-label-size` |
-| `lg` | `calc(control-height + 0.375rem)` | `0.875rem` |
-| `xl` | `calc(control-height + 0.5rem)` | `0.9375rem` |
+Size affects summary font-size and select-all button dimensions.
+Action IconButtons and clear IconButton inherit size via their `size` prop.
+
+| Size | summary font-size | select-all button min-height | select-all button font-size |
+|------|-------------------|-----------------------------|-----------------------------|
+| `xs` | `0.75rem` | `calc(control-height - 0.5rem)` | `0.75rem` |
+| `sm` | `0.8125rem` | `calc(control-height - 0.375rem)` | `0.8125rem` |
+| `md` | `typography-body-size` | `control-height` | `typography-body-size` |
+| `lg` | `0.9375rem` | `calc(control-height + 0.375rem)` | `0.9375rem` |
+| `xl` | `1rem` | `calc(control-height + 0.5rem)` | `1rem` |
+
+### Density adjustments
+
+Density controls container padding only. It does NOT affect icon button sizes,
+summary font-size, or action gap.
+
+| Density | padding |
+|---------|---------|
+| `compact` | `0.25rem 0.5rem` |
+| `default` | `var(--poodle-space-panel-y) var(--poodle-space-panel-x)` |
+| `comfortable` | `0.625rem 1rem` |
 
 ## 9. Svelte Notes
 
 - `data-size` attribute on root reflects the resolved size
-- `data-density` — resolved density value (`compact`, `default`, or `comfortable`)
+- `data-density` attribute on root reflects the resolved density (`compact`, `default`, or `comfortable`)
 - Bar typically conditionally rendered when `selectionCount > 0`
-- `data-tone` attribute on danger action buttons
-- Summary text uses template: `"{selectionCount} selected"` with optional
-  `"of {totalCount}"` span
-- Action buttons rendered from `actions` array prop; actions with `icon` render a leading icon and label button
-- Clear button is an IconButton with `icon="x"`
-- Select-all control is a text button rendered before registered bulk actions when enabled
+- Action buttons are ghost `IconButton` components, not custom `<button>` elements
+- Warning tone uses a wrapper span (`.bulk-action-bar__icon-action[data-tone]`)
+  with `:global()` color override since IconButton only supports `"default"` and `"danger"` tones natively
+- Clear button is a ghost `IconButton` with `icon="x"` and `size={resolvedSize}`
+- Select-all control is a text button (`.bulk-action-bar__button`) rendered before action IconButtons when enabled
 - Summary count is wrapped in a `<strong>` tag
 
 ## 10. GPUI Notes
@@ -227,6 +251,7 @@ type BulkAction = {
 - Action callbacks identified by `id` string
 - Accent-tinted background uses color-mix equivalent in Rust
 - Danger tone maps to status-danger color tokens
+- Actions rendered as icon buttons, not labeled text buttons
 
 ## 11. Parity Checklist
 
@@ -235,18 +260,21 @@ type BulkAction = {
 - [ ] selectionCount and totalCount display correctly
 - [ ] action event fires with correct id
 - [ ] clear event fires correctly
-- [ ] danger tone produces distinct button styling
+- [ ] danger tone produces distinct IconButton styling
+- [ ] warning tone overrides IconButton color to status-warning
 
 ### Tier 2: Visual Parity
 
 - [ ] all five sizes visually match per size table
-- [ ] accent-tinted background matches (10% accent-base)
-- [ ] padding and gap match
+- [ ] density variants affect only container padding
+- [ ] accent-tinted background matches (93% panel, 7% text-primary)
+- [ ] gap between summary and actions matches (space-inline-md)
+- [ ] gap between action IconButtons matches (space-inline-sm)
 - [ ] border and border-radius match
-- [ ] summary typography matches
-- [ ] button dimensions and styling match
-- [ ] danger button border and text color match
-- [ ] focus ring matches
+- [ ] summary typography matches per size
+- [ ] select-all button dimensions and styling match
+- [ ] IconButton actions are ghost variant with tooltip
+- [ ] focus ring matches on select-all button
 
 ### Tier 3: Implementation Freedom
 
@@ -258,6 +286,7 @@ type BulkAction = {
 | Delta | Why Allowed | Approval Status | Follow-Up |
 |-------|-------------|-----------------|-----------|
 | Live region announcement | GPUI may use different accessibility announcement method | allowed | same functional result |
+| Warning tone wrapper | Svelte uses `:global()` override; GPUI can apply color directly | allowed | same visual result |
 
 ## 13. Specimen Definitions
 
@@ -265,13 +294,19 @@ type BulkAction = {
 
 | Label | Props / Config | Expected Visual |
 |-------|---------------|-----------------|
-| With selection count | `selectionCount=5`, `totalCount=42`, `actions=[Export (icon: download), Archive (icon: inbox), Delete (icon: trash-2, tone: danger)]` | Bar showing "5 selected of 42" with three action buttons; Delete button has danger styling; clicking any action displays the action id below |
+| With selection count | `selectionCount=5`, `totalCount=42`, `showSelectAll`, `actions=[Export (icon: download), Archive (icon: inbox), Delete (icon: trash-2, tone: danger), Review (icon: triangle-alert, tone: warning)]` | Bar showing "5 selected of 42 visible rows" with four ghost IconButton actions and a clear X; Delete has danger styling, Review has warning color; clicking any action displays the action id below |
 
 ### Group: Single item selected
 
 | Label | Props / Config | Expected Visual |
 |-------|---------------|-----------------|
-| Single item selected | `selectionCount=1`, `actions=[Export (icon: download), Archive (icon: inbox)]` (subset, no danger) | Bar showing "1 selected" (no total); only two action buttons, no danger-toned button |
+| Single item selected | `selectionCount=1`, `actions=[Export (icon: download), Archive (icon: inbox)]` (subset, no danger) | Bar showing "1 selected" (no total); only two IconButton actions, no danger-toned button |
+
+### Group: Loading and disabled actions
+
+| Label | Props / Config | Expected Visual |
+|-------|---------------|-----------------|
+| Loading and disabled | `selectionCount=12`, `totalCount=12`, `loading`, `showSelectAll`, `allSelected`, `actions=[Publish (icon: rocket), Delete (icon: trash-2, tone: danger, disabled)]` | All actions disabled; delete additionally per-action disabled |
 
 ## 14. Approval And Adoption Notes
 

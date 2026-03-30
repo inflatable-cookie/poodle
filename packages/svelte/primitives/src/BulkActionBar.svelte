@@ -1,12 +1,17 @@
 <script lang="ts">
-  import { createEventDispatcher } from "svelte";
   import type { Component } from "svelte";
-
+  import { createEventDispatcher } from "svelte";
   import Icon from "./Icon.svelte";
   import IconButton from "./IconButton.svelte";
   import { getUiPresentation, resolveSemanticControlSize } from "./presentation";
 
-  import type { BulkAction, ControlDensity, ControlSize, IconProp, SemanticControlSizeRole } from "./types";
+  import type {
+    BulkAction,
+    ControlDensity,
+    ControlSize,
+    IconProp,
+    SemanticControlSizeRole
+  } from "./types";
 
   export let selectionCount = 0;
   export let totalCount: number | null = null;
@@ -33,13 +38,14 @@
   $: resolvedDensity = density ?? $uiPresentation.density;
   $: isUnavailable = disabled || loading;
 
-  function isComponentIcon(icon: BulkAction["icon"]): icon is Component<any> {
-    return typeof icon === "function";
+  function isIconComponent(icon: BulkAction["icon"]): icon is Component<any> {
+    return icon != null && typeof icon !== "string" && !Array.isArray(icon);
   }
 
   function isNamedIcon(icon: BulkAction["icon"]): icon is IconProp {
-    return icon !== undefined && icon !== null && !isComponentIcon(icon);
+    return icon !== undefined && icon !== null && !isIconComponent(icon);
   }
+
 </script>
 
 <div class="bulk-action-bar" role="region" aria-label="Bulk actions" data-size={resolvedSize} data-density={resolvedDensity}>
@@ -70,29 +76,42 @@
 
     {#each actions as action}
       {@const actionTone = action.tone ?? "default"}
-      <button
-        type="button"
-        class="bulk-action-bar__button"
+      <span
+        class="bulk-action-bar__icon-action"
         data-tone={actionTone !== "default" ? actionTone : undefined}
-        disabled={isUnavailable || action.disabled}
-        on:click={() => dispatch("action", { id: action.id })}
       >
-        {#if action.icon}
-          <span class="bulk-action-bar__icon" aria-hidden="true">
-            {#if isComponentIcon(action.icon)}
-              <svelte:component this={action.icon} size={16} />
-            {:else if isNamedIcon(action.icon)}
-              <Icon icon={action.icon} size={resolvedSize} />
-            {/if}
-          </span>
+        {#if action.icon && isIconComponent(action.icon)}
+          <IconButton
+            icon="circle"
+            ariaLabel={action.label}
+            tooltip={action.label}
+            variant="ghost"
+            tone={actionTone === "danger" ? "danger" : "default"}
+            size={resolvedSize}
+            disabled={isUnavailable || action.disabled}
+            on:click={() => dispatch("action", { id: action.id })}
+          >
+            <svelte:component this={action.icon} size={16} />
+          </IconButton>
+        {:else}
+          <IconButton
+            icon={isNamedIcon(action.icon) ? action.icon : "circle"}
+            ariaLabel={action.label}
+            tooltip={action.label}
+            variant="ghost"
+            tone={actionTone === "danger" ? "danger" : "default"}
+            size={resolvedSize}
+            disabled={isUnavailable || action.disabled}
+            on:click={() => dispatch("action", { id: action.id })}
+          />
         {/if}
-        <span>{action.label}</span>
-      </button>
+      </span>
     {/each}
     <IconButton
       icon="x"
       ariaLabel="Clear selection"
       variant="ghost"
+      size={resolvedSize}
       disabled={isUnavailable}
       on:click={() => dispatch("clear")}
     />
@@ -145,31 +164,27 @@
     border-radius: var(--poodle-radius-control);
     background: var(--poodle-color-background-surface);
     color: var(--poodle-color-text-primary);
+    font: inherit;
+    font-size: var(--poodle-typography-body-size);
     cursor: pointer;
   }
 
-  .bulk-action-bar__button[data-tone="danger"] {
-    border-color: color-mix(in srgb, var(--poodle-color-status-danger) 65%, transparent);
-    color: var(--poodle-color-status-danger);
-  }
-
-  .bulk-action-bar__button[data-tone="warning"] {
-    border-color: color-mix(in srgb, var(--poodle-color-status-warning) 65%, transparent);
-    color: var(--poodle-color-status-warning);
-  }
-
   .bulk-action-bar__button:disabled {
-    opacity: 0.6;
+    opacity: var(--poodle-state-opacity-disabled);
     cursor: not-allowed;
   }
 
-  .bulk-action-bar__icon {
+  .bulk-action-bar__icon-action {
     display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: 1rem;
-    height: 1rem;
-    flex-shrink: 0;
+  }
+
+  .bulk-action-bar__icon-action[data-tone="warning"] :global(.icon-button) {
+    color: var(--poodle-color-status-warning);
+  }
+
+  .bulk-action-bar__icon-action[data-tone="warning"] :global(.icon-button:hover),
+  .bulk-action-bar__icon-action[data-tone="warning"] :global(.icon-button:focus-visible) {
+    color: color-mix(in srgb, var(--poodle-color-status-warning) 82%, var(--poodle-color-text-primary));
   }
 
   .bulk-action-bar__button:focus-visible {
@@ -177,31 +192,20 @@
     outline-offset: 0.125rem;
   }
 
-  /* Size variants */
-  .bulk-action-bar[data-size="xs"] .bulk-action-bar__button {
-    min-height: calc(var(--poodle-size-control-height) - 0.5rem);
-    font-size: 0.75rem;
-  }
+  /* Size variants — controls and text only, not container padding */
+  .bulk-action-bar[data-size="xs"] .bulk-action-bar__summary { font-size: 0.75rem; }
+  .bulk-action-bar[data-size="xs"] .bulk-action-bar__button { min-height: calc(var(--poodle-size-control-height) - 0.5rem); font-size: 0.75rem; }
 
-  .bulk-action-bar[data-size="xs"] .bulk-action-bar__summary {
-    font-size: 0.75rem;
-  }
+  .bulk-action-bar[data-size="sm"] .bulk-action-bar__summary { font-size: 0.8125rem; }
+  .bulk-action-bar[data-size="sm"] .bulk-action-bar__button { min-height: calc(var(--poodle-size-control-height) - 0.375rem); font-size: 0.8125rem; }
 
-  .bulk-action-bar[data-size="sm"] .bulk-action-bar__button {
-    min-height: calc(var(--poodle-size-control-height) - 0.375rem);
-  }
+  .bulk-action-bar[data-size="lg"] .bulk-action-bar__summary { font-size: 0.9375rem; }
+  .bulk-action-bar[data-size="lg"] .bulk-action-bar__button { min-height: calc(var(--poodle-size-control-height) + 0.375rem); font-size: 0.9375rem; }
 
-  .bulk-action-bar[data-size="lg"] .bulk-action-bar__button {
-    min-height: calc(var(--poodle-size-control-height) + 0.375rem);
-    font-size: 0.9375rem;
-  }
+  .bulk-action-bar[data-size="xl"] .bulk-action-bar__summary { font-size: 1rem; }
+  .bulk-action-bar[data-size="xl"] .bulk-action-bar__button { min-height: calc(var(--poodle-size-control-height) + 0.5rem); font-size: 1rem; }
 
-  .bulk-action-bar[data-size="xl"] .bulk-action-bar__button {
-    min-height: calc(var(--poodle-size-control-height) + 0.5rem);
-    font-size: 1rem;
-  }
-
-  /* Density variants */
-  .bulk-action-bar[data-density="compact"] { padding: 0.375rem 0.5rem; gap: var(--poodle-space-inline-sm); }
-  .bulk-action-bar[data-density="comfortable"] { padding: 0.625rem 1rem; gap: var(--poodle-space-inline-lg); }
+  /* Density variants — container padding and spacing */
+  .bulk-action-bar[data-density="compact"] { padding: 0.25rem 0.5rem; }
+  .bulk-action-bar[data-density="comfortable"] { padding: 0.625rem 1rem; }
 </style>
