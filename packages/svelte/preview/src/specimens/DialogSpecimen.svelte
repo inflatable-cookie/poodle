@@ -1,55 +1,184 @@
 <script lang="ts">
-  import { Dialog, Button, Eyebrow, TextInput, Select, Field } from "@poodle/svelte-primitives";
+  import { Dialog, Button, Eyebrow, TextInput, TextArea, Select, Field, Checkbox, Pill } from "@poodle/svelte-primitives";
 
   let basicOpen = false;
+  let formOpen = false;
+  let contentOnlyOpen = false;
   let customHeaderOpen = false;
-  let wideOpen = false;
+  let customFooterOpen = false;
   let bareOpen = false;
-  let noBackdropOpen = false;
-  let closeButtonOpen = false;
+  let wideOpen = false;
+  let scrollableOpen = false;
   let widthOpenMap: Record<string, boolean> = {};
 </script>
 
 <div class="specimen">
   <div class="specimen__group">
-    <Eyebrow>Basic dialog with title and actions</Eyebrow>
-    <Button variant="secondary" on:click={() => (basicOpen = true)}>Open dialog</Button>
+    <Eyebrow>Simple informational</Eyebrow>
+    <Button variant="secondary" on:click={() => (basicOpen = true)}>View details</Button>
     <Dialog
       open={basicOpen}
-      title="Confirm action"
-      description="Are you sure you want to proceed? This action cannot be undone."
+      title="Keyboard shortcuts"
       showCloseButton
       on:openChange={(e) => (basicOpen = e.detail.open)}
     >
-      <p>This is the dialog body content. You can place any content here.</p>
+      <div class="shortcuts-list">
+        <div class="shortcut"><kbd>⌘ K</kbd> <span>Command palette</span></div>
+        <div class="shortcut"><kbd>⌘ S</kbd> <span>Save</span></div>
+        <div class="shortcut"><kbd>⌘ /</kbd> <span>Toggle comment</span></div>
+        <div class="shortcut"><kbd>⌘ ⇧ P</kbd> <span>Quick actions</span></div>
+        <div class="shortcut"><kbd>Esc</kbd> <span>Close dialog</span></div>
+      </div>
+    </Dialog>
+  </div>
+
+  <div class="specimen__group">
+    <Eyebrow>Form dialog</Eyebrow>
+    <Button variant="secondary" on:click={() => (formOpen = true)}>Create project</Button>
+    <Dialog
+      open={formOpen}
+      title="New project"
+      description="Set up a new project workspace."
+      width="lg"
+      showCloseButton
+      on:openChange={(e) => (formOpen = e.detail.open)}
+    >
+      <div class="form-grid">
+        <Field label="Project name">
+          <TextInput id="dialog-proj-name" placeholder="My project" />
+        </Field>
+        <Field label="Template">
+          <Select id="dialog-template" placeholder="Choose a template" options={[
+            { value: "blank", label: "Blank" },
+            { value: "starter", label: "Starter kit" },
+            { value: "advanced", label: "Advanced" },
+          ]} />
+        </Field>
+        <div class="form-full-width">
+          <Field label="Description">
+            <TextArea id="dialog-desc" placeholder="What is this project for?" />
+          </Field>
+        </div>
+        <div class="form-full-width">
+          <Checkbox id="dialog-private" label="Make this project private" />
+        </div>
+      </div>
       <svelte:fragment slot="actions">
-        <Button variant="ghost" on:click={() => (basicOpen = false)}>Cancel</Button>
-        <Button on:click={() => (basicOpen = false)}>Confirm</Button>
+        <Button variant="ghost" on:click={() => (formOpen = false)}>Cancel</Button>
+        <Button on:click={() => (formOpen = false)}>Create project</Button>
       </svelte:fragment>
     </Dialog>
   </div>
 
   <div class="specimen__group">
-    <Eyebrow>Custom header slot</Eyebrow>
-    <Button variant="secondary" on:click={() => (customHeaderOpen = true)}>Open with custom header</Button>
+    <Eyebrow>Content-only (no actions)</Eyebrow>
+    <Button variant="secondary" on:click={() => (contentOnlyOpen = true)}>View changelog</Button>
     <Dialog
-      open={customHeaderOpen}
+      open={contentOnlyOpen}
       showCloseButton
-      on:openChange={(e) => (customHeaderOpen = e.detail.open)}
+      on:openChange={(e) => (contentOnlyOpen = e.detail.open)}
     >
       <svelte:fragment slot="header">
-        <div class="custom-header">
-          <div class="custom-header__badge">NEW</div>
-          <h2 class="custom-header__title">Custom Header Layout</h2>
-          <p class="custom-header__subtitle">The header slot gives you full control over the dialog header structure.</p>
+        <div class="changelog-header">
+          <h2 class="changelog-header__title">What's new</h2>
+          <Pill tone="info" appearance="badge">v2.4.0</Pill>
         </div>
       </svelte:fragment>
 
-      <p>When using the <code>header</code> slot, the built-in title/description are replaced entirely. This lets you add badges, icons, tabs, or any custom layout in the header area.</p>
+      <div class="changelog">
+        <div class="changelog__entry">
+          <strong>Dialog flexibility improvements</strong>
+          <p>Dialogs now support custom headers, footers, width presets, and bare mode for fully custom content.</p>
+        </div>
+        <div class="changelog__entry">
+          <strong>Size propagation fixes</strong>
+          <p>All parent components now correctly forward size and density to embedded children.</p>
+        </div>
+        <div class="changelog__entry">
+          <strong>Calendar fixed width</strong>
+          <p>Calendar components no longer stretch to fill their parent container.</p>
+        </div>
+      </div>
+    </Dialog>
+  </div>
 
+  <div class="specimen__group">
+    <Eyebrow>Custom footer</Eyebrow>
+    <Button variant="secondary" on:click={() => (customFooterOpen = true)}>Terms &amp; conditions</Button>
+    <Dialog
+      open={customFooterOpen}
+      title="Terms of service"
+      showCloseButton
+      on:openChange={(e) => (customFooterOpen = e.detail.open)}
+    >
+      <div class="terms-body">
+        <p>By using this service, you agree to our terms and conditions. Please review the full document before accepting.</p>
+        <p>These terms govern your use of the platform, including data handling, privacy, and acceptable use policies.</p>
+      </div>
+
+      <svelte:fragment slot="footer">
+        <div class="split-footer">
+          <a href="#terms" class="split-footer__link">Read full terms</a>
+          <div class="split-footer__actions">
+            <Button variant="ghost" on:click={() => (customFooterOpen = false)}>Decline</Button>
+            <Button on:click={() => (customFooterOpen = false)}>Accept</Button>
+          </div>
+        </div>
+      </svelte:fragment>
+    </Dialog>
+  </div>
+
+  <div class="specimen__group">
+    <Eyebrow>Bare mode (image preview)</Eyebrow>
+    <Button variant="secondary" on:click={() => (bareOpen = true)}>Preview image</Button>
+    <Dialog
+      open={bareOpen}
+      bare
+      width="lg"
+      ariaLabel="Image preview"
+      on:openChange={(e) => (bareOpen = e.detail.open)}
+    >
+      <div class="image-preview">
+        <div class="image-preview__canvas">
+          <span class="image-preview__placeholder">2400 × 1600</span>
+        </div>
+        <div class="image-preview__bar">
+          <div class="image-preview__meta">
+            <strong>landscape-hero.png</strong>
+            <span>2.4 MB · Uploaded today</span>
+          </div>
+          <div class="image-preview__actions">
+            <Button variant="ghost" on:click={() => (bareOpen = false)}>Close</Button>
+            <Button leadingIcon="download" on:click={() => (bareOpen = false)}>Download</Button>
+          </div>
+        </div>
+      </div>
+    </Dialog>
+  </div>
+
+  <div class="specimen__group">
+    <Eyebrow>Scrollable content</Eyebrow>
+    <Button variant="secondary" on:click={() => (scrollableOpen = true)}>View log</Button>
+    <Dialog
+      open={scrollableOpen}
+      title="Activity log"
+      description="Recent activity across all projects."
+      showCloseButton
+      on:openChange={(e) => (scrollableOpen = e.detail.open)}
+    >
+      <div class="log-list">
+        {#each Array(20) as _, i}
+          <div class="log-entry">
+            <span class="log-entry__time">{String(9 + Math.floor(i / 3)).padStart(2, "0")}:{String((i * 17) % 60).padStart(2, "0")}</span>
+            <span class="log-entry__message">
+              {["User signed in", "Project created", "File uploaded", "Settings updated", "Comment added", "Build completed", "Deploy started", "Review requested"][i % 8]}
+            </span>
+          </div>
+        {/each}
+      </div>
       <svelte:fragment slot="actions">
-        <Button variant="ghost" on:click={() => (customHeaderOpen = false)}>Close</Button>
-        <Button on:click={() => (customHeaderOpen = false)}>Continue</Button>
+        <Button variant="ghost" on:click={() => (scrollableOpen = false)}>Close</Button>
+        <Button on:click={() => (scrollableOpen = false)}>Export log</Button>
       </svelte:fragment>
     </Dialog>
   </div>
@@ -66,7 +195,7 @@
           showCloseButton
           on:openChange={(e) => (widthOpenMap[w] = e.detail.open)}
         >
-          <p>This dialog uses <code>width="{w}"</code>. The surface scales from 24rem (sm) through 64rem (xl).</p>
+          <p>This dialog uses <code>width="{w}"</code>.</p>
           <svelte:fragment slot="actions">
             <Button on:click={() => (widthOpenMap[w] = false)}>Close</Button>
           </svelte:fragment>
@@ -76,93 +205,18 @@
   </div>
 
   <div class="specimen__group">
-    <Eyebrow>Wide dialog with form content</Eyebrow>
-    <Button variant="secondary" on:click={() => (wideOpen = true)}>Open wide dialog</Button>
+    <Eyebrow>Non-dismissible</Eyebrow>
+    <Button variant="secondary" on:click={() => (wideOpen = true)}>Open persistent</Button>
     <Dialog
       open={wideOpen}
-      width="lg"
-      title="Edit profile"
-      description="Update your account information below."
-      showCloseButton
+      title="Processing"
+      dismissOnBackdrop={false}
+      dismissOnEscape={false}
       on:openChange={(e) => (wideOpen = e.detail.open)}
     >
-      <div class="form-grid">
-        <Field label="Display name">
-          <TextInput id="dialog-name" placeholder="Enter your name" />
-        </Field>
-        <Field label="Role">
-          <Select id="dialog-role" options={[
-            { value: "admin", label: "Admin" },
-            { value: "editor", label: "Editor" },
-            { value: "viewer", label: "Viewer" },
-          ]} />
-        </Field>
-      </div>
+      <p>This dialog cannot be dismissed by clicking the backdrop or pressing Escape. Only the button below will close it.</p>
       <svelte:fragment slot="actions">
-        <Button variant="ghost" on:click={() => (wideOpen = false)}>Cancel</Button>
-        <Button on:click={() => (wideOpen = false)}>Save changes</Button>
-      </svelte:fragment>
-    </Dialog>
-  </div>
-
-  <div class="specimen__group">
-    <Eyebrow>Bare mode (no internal padding)</Eyebrow>
-    <Button variant="secondary" on:click={() => (bareOpen = true)}>Open bare dialog</Button>
-    <Dialog
-      open={bareOpen}
-      bare
-      showCloseButton
-      ariaLabel="Image preview"
-      on:openChange={(e) => (bareOpen = e.detail.open)}
-    >
-      <div class="bare-content">
-        <div class="bare-content__image">
-          <span class="bare-content__placeholder">Image preview area</span>
-        </div>
-        <div class="bare-content__footer">
-          <Button variant="ghost" on:click={() => (bareOpen = false)}>Close</Button>
-          <Button on:click={() => (bareOpen = false)}>Download</Button>
-        </div>
-      </div>
-    </Dialog>
-  </div>
-
-  <div class="specimen__group">
-    <Eyebrow>Custom footer slot</Eyebrow>
-    <Button variant="secondary" on:click={() => (closeButtonOpen = true)}>Open with footer</Button>
-    <Dialog
-      open={closeButtonOpen}
-      title="Terms and conditions"
-      showCloseButton
-      on:openChange={(e) => (closeButtonOpen = e.detail.open)}
-    >
-      <p>The <code>footer</code> slot replaces the standard right-aligned actions row, giving you full control over the footer layout — left-aligned links, split buttons, progress indicators, etc.</p>
-
-      <svelte:fragment slot="footer">
-        <div class="custom-footer">
-          <a href="#learn-more" class="custom-footer__link">Learn more</a>
-          <div class="custom-footer__actions">
-            <Button variant="ghost" on:click={() => (closeButtonOpen = false)}>Decline</Button>
-            <Button on:click={() => (closeButtonOpen = false)}>Accept</Button>
-          </div>
-        </div>
-      </svelte:fragment>
-    </Dialog>
-  </div>
-
-  <div class="specimen__group">
-    <Eyebrow>Non-dismissible (no backdrop close)</Eyebrow>
-    <Button variant="secondary" on:click={() => (noBackdropOpen = true)}>Open persistent dialog</Button>
-    <Dialog
-      open={noBackdropOpen}
-      title="Persistent dialog"
-      description="This dialog cannot be dismissed by clicking the backdrop."
-      dismissOnBackdrop={false}
-      on:openChange={(e) => (noBackdropOpen = e.detail.open)}
-    >
-      <p>Click the backdrop — nothing happens. Use the button or Escape key to close.</p>
-      <svelte:fragment slot="actions">
-        <Button on:click={() => (noBackdropOpen = false)}>Got it</Button>
+        <Button on:click={() => (wideOpen = false)}>Done</Button>
       </svelte:fragment>
     </Dialog>
   </div>
@@ -186,6 +240,7 @@
     margin: 0;
     font-size: 0.875rem;
     color: var(--poodle-color-text-secondary);
+    line-height: 1.5;
   }
 
   .specimen__group code {
@@ -203,88 +258,192 @@
     align-items: center;
   }
 
-  .custom-header {
+  /* Shortcuts dialog */
+  .shortcuts-list {
     display: flex;
     flex-direction: column;
-    gap: 0.375rem;
+    gap: 0.5rem;
   }
 
-  .custom-header__badge {
+  .shortcut {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+  }
+
+  .shortcut kbd {
     display: inline-flex;
-    align-self: flex-start;
-    padding: 0.125rem 0.5rem;
-    border-radius: 999px;
-    background: var(--poodle-color-accent-base);
-    color: var(--poodle-color-text-inverse);
-    font-size: 0.625rem;
-    font-weight: 700;
-    letter-spacing: 0.05em;
-    text-transform: uppercase;
+    align-items: center;
+    justify-content: center;
+    min-width: 4.5rem;
+    padding: 0.25rem 0.5rem;
+    border: 0.0625rem solid var(--poodle-color-border-default);
+    border-radius: 0.25rem;
+    background: color-mix(in srgb, var(--poodle-color-background-panel) 80%, var(--poodle-color-background-elevated));
+    font-family: var(--poodle-typography-code-family);
+    font-size: 0.75rem;
+    font-weight: 500;
   }
 
-  .custom-header__title {
-    margin: 0;
-    font-family: var(--poodle-typography-heading-family);
-    font-size: 1.125rem;
-    font-weight: 600;
-    line-height: 1.2;
-  }
-
-  .custom-header__subtitle {
-    margin: 0;
+  .shortcut span {
     color: var(--poodle-color-text-secondary);
     font-size: 0.8125rem;
   }
 
+  /* Form grid */
   .form-grid {
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: 1rem;
   }
 
-  .bare-content {
+  .form-full-width {
+    grid-column: 1 / -1;
+  }
+
+  /* Changelog */
+  .changelog-header {
+    display: flex;
+    align-items: center;
+    gap: 0.625rem;
+  }
+
+  .changelog-header__title {
+    margin: 0;
+    font-family: var(--poodle-typography-heading-family);
+    font-size: 1rem;
+    font-weight: 600;
+    line-height: 1.2;
+  }
+
+  .changelog {
     display: flex;
     flex-direction: column;
+    gap: 0.875rem;
   }
 
-  .bare-content__image {
-    display: grid;
-    place-items: center;
-    min-height: 16rem;
-    background: color-mix(in srgb, var(--poodle-color-background-canvas) 90%, black);
+  .changelog__entry {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
   }
 
-  .bare-content__placeholder {
-    color: var(--poodle-color-text-secondary);
+  .changelog__entry strong {
     font-size: 0.875rem;
   }
 
-  .bare-content__footer {
-    display: flex;
-    justify-content: flex-end;
-    gap: 0.5rem;
-    padding: 0.75rem 1rem;
-    border-top: 0.0625rem solid var(--poodle-color-border-subtle);
+  .changelog__entry p {
+    margin: 0;
+    color: var(--poodle-color-text-secondary);
+    font-size: 0.8125rem;
+    line-height: 1.5;
   }
 
-  .custom-footer {
+  /* Terms footer */
+  .terms-body p {
+    margin: 0 0 0.5rem;
+    color: var(--poodle-color-text-secondary);
+    font-size: 0.8125rem;
+    line-height: 1.6;
+  }
+
+  .split-footer {
     display: flex;
     align-items: center;
     justify-content: space-between;
   }
 
-  .custom-footer__link {
+  .split-footer__link {
     color: var(--poodle-color-accent-base);
     font-size: 0.8125rem;
     text-decoration: none;
   }
 
-  .custom-footer__link:hover {
+  .split-footer__link:hover {
     text-decoration: underline;
   }
 
-  .custom-footer__actions {
+  .split-footer__actions {
     display: flex;
     gap: 0.5rem;
+  }
+
+  /* Image preview (bare) */
+  .image-preview {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .image-preview__canvas {
+    display: grid;
+    place-items: center;
+    min-height: 20rem;
+    background: color-mix(in srgb, var(--poodle-color-background-canvas) 90%, black);
+    border-radius: var(--poodle-radius-surface) var(--poodle-radius-surface) 0 0;
+  }
+
+  .image-preview__placeholder {
+    color: var(--poodle-color-text-secondary);
+    font-family: var(--poodle-typography-code-family);
+    font-size: 0.875rem;
+    opacity: 0.5;
+  }
+
+  .image-preview__bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 0.75rem 1rem;
+    border-top: 0.0625rem solid var(--poodle-color-border-subtle);
+  }
+
+  .image-preview__meta {
+    display: flex;
+    flex-direction: column;
+    gap: 0.125rem;
+  }
+
+  .image-preview__meta strong {
+    font-size: 0.8125rem;
+  }
+
+  .image-preview__meta span {
+    color: var(--poodle-color-text-secondary);
+    font-size: 0.75rem;
+  }
+
+  .image-preview__actions {
+    display: flex;
+    gap: 0.5rem;
+  }
+
+  /* Log list */
+  .log-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    max-height: 18rem;
+    overflow-y: auto;
+    margin: 0 -0.25rem;
+    padding: 0 0.25rem;
+  }
+
+  .log-entry {
+    display: flex;
+    gap: 0.75rem;
+    padding: 0.375rem 0;
+    border-bottom: 0.0625rem solid color-mix(in srgb, var(--poodle-color-border-subtle) 50%, transparent);
+  }
+
+  .log-entry__time {
+    color: var(--poodle-color-text-secondary);
+    font-family: var(--poodle-typography-code-family);
+    font-size: 0.75rem;
+    min-width: 3rem;
+  }
+
+  .log-entry__message {
+    font-size: 0.8125rem;
   }
 </style>
