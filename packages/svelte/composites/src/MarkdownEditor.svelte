@@ -14,8 +14,10 @@
   } from "@poodle/svelte-primitives";
 
   export let value = "";
+  export let name: string | null = null;
   export let placeholder = "Write markdown...";
   export let disabled = false;
+  export let required = false;
   export let ariaLabel = "Markdown editor";
   export let minHeight = "12rem";
   export let mode: "edit" | "preview" | "split" = "edit";
@@ -166,8 +168,10 @@
         <textarea
           bind:this={textareaEl}
           class="md-editor__textarea"
+          name={name ?? undefined}
           {placeholder}
           disabled={disabled}
+          {required}
           aria-label={ariaLabel}
           style="min-height: {minHeight}"
           on:input={handleInput}

@@ -55,8 +55,10 @@ Updated: 2026-03-30
 | Prop | Type | Default | Required | Notes |
 |------|------|---------|----------|-------|
 | `value` | `string` | `""` | no | Markdown content (two-way bindable) |
+| `name` | `string \| null` | `null` | no | Optional textarea `name` for native form submission |
 | `placeholder` | `string` | `"Write markdown..."` | no | Placeholder text for the textarea |
 | `disabled` | `boolean` | `false` | no | Disables editing and toolbar actions |
+| `required` | `boolean` | `false` | no | Forwards `required` to the backing textarea for native form validation |
 | `ariaLabel` | `string` | `"Markdown editor"` | no | Accessible label for the textarea |
 | `minHeight` | `string` | `"12rem"` | no | CSS min-height for the textarea (applied via inline style) |
 | `mode` | `"edit" \| "preview" \| "split"` | `"edit"` | no | Active view mode |

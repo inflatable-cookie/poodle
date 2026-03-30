@@ -11,6 +11,8 @@
   export let triggerLabel = "Delete";
   export let confirmLabel = "Confirm";
   export let cancelLabel = "Cancel";
+  export let onConfirm: (() => void | Promise<void>) | null = null;
+  export let onCancel: (() => void) | null = null;
   export let size: ControlSize | null = null;
   export let sizeRole: SemanticControlSizeRole = "control";
   export let density: ControlDensity | null = null;
@@ -32,13 +34,21 @@
     open = true;
   }
 
-  function handleConfirm(): void {
-    dispatch("confirm");
+  async function handleConfirm(): Promise<void> {
+    if (onConfirm) {
+      await onConfirm();
+    } else {
+      dispatch("confirm");
+    }
     open = false;
   }
 
   function handleCancel(): void {
-    dispatch("cancel");
+    if (onCancel) {
+      onCancel();
+    } else {
+      dispatch("cancel");
+    }
     open = false;
   }
 

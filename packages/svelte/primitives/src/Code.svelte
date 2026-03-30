@@ -36,9 +36,30 @@
 </script>
 
 {#if inline}
-  <code class="code code--inline" aria-label={ariaLabel ?? undefined} data-language={language} data-size={resolvedSize} data-density={resolvedDensity}>
-    {source}
-  </code>
+  <span class="code code--inline-wrap" data-size={resolvedSize} data-density={resolvedDensity}>
+    <code class="code code--inline" aria-label={ariaLabel ?? undefined} data-language={language} data-size={resolvedSize} data-density={resolvedDensity}>
+      {source}
+    </code>
+    {#if showCopyButton}
+      <button
+        type="button"
+        class="code__copy code__copy--inline"
+        aria-label={copied ? "Copied" : "Copy to clipboard"}
+        on:click={copyToClipboard}
+      >
+        {#if copied}
+          <svg viewBox="0 0 16 16" fill="none" aria-hidden="true">
+            <path d="M3 8.5l3 3 7-7" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+          </svg>
+        {:else}
+          <svg viewBox="0 0 16 16" fill="none" aria-hidden="true">
+            <rect x="5" y="5" width="8" height="8" rx="1" stroke="currentColor" stroke-width="1.25" />
+            <path d="M3 11V3a1 1 0 011-1h8" stroke="currentColor" stroke-width="1.25" stroke-linecap="round" />
+          </svg>
+        {/if}
+      </button>
+    {/if}
+  </span>
 {:else}
   <div
     class="code code--block"
@@ -87,6 +108,12 @@
 {/if}
 
 <style>
+  .code--inline-wrap {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+  }
+
   .code--inline {
     display: inline;
     padding: 0.125rem 0.375rem;
@@ -155,6 +182,16 @@
   .code__copy svg {
     width: 0.875rem;
     height: 0.875rem;
+  }
+
+  .code__copy--inline {
+    width: 1.25rem;
+    height: 1.25rem;
+  }
+
+  .code__copy--inline svg {
+    width: 0.75rem;
+    height: 0.75rem;
   }
 
   .code__scroll {

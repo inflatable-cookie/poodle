@@ -19,15 +19,15 @@ Updated: 2026-03-27
 
 ```text
 [Root .form-actions]
-  ├── [Default Slot]
-  ├── [Danger Slot] (optional)
+  ├── [Children Snippet]
+  ├── [Danger Snippet] (optional)
   └── [Danger Menu Trigger] (optional; narrow containers only)
 ```
 
 | Part | Required | Description |
 |------|----------|-------------|
 | Root | yes | action-row layout wrapper |
-| Danger slot | no | inline cancel/delete content for wider containers |
+| Danger snippet | no | inline cancel/delete content for wider containers |
 | Danger menu | no | overflow treatment for danger actions on narrow containers |
 
 ## 3. Props And Inputs
@@ -39,12 +39,12 @@ Updated: 2026-03-27
 | `align` | `"start" \| "end" \| "between"` | `"end"` | no | alignment rule for the action row |
 | `dangerItems` | `FormActionDangerItem[]` | `[]` | no | menu items used when danger content collapses |
 
-### Slots
+### Snippets
 
-| Slot | Purpose |
-|------|---------|
-| default | buttons, links, or other action elements |
-| danger | optional destructive or cancel action content |
+| Snippet | Purpose |
+|---------|---------|
+| `children` | buttons, links, or other action elements |
+| `danger` | optional destructive or cancel action content |
 
 ### Controlled And Uncontrolled
 
@@ -59,8 +59,8 @@ Updated: 2026-03-27
 |-------|---------|-----------------|
 | default | resting | actions aligned per `align` prop |
 | wrapped | narrow container | actions wrap to multiple lines maintaining gap |
-| danger-inline | `danger` slot present | danger content is rendered inline |
-| danger-collapsed | `danger` slot and `dangerItems` present in a narrow container | danger slot is hidden and overflow trigger is shown |
+| danger-inline | `danger` snippet present | danger content is rendered inline |
+| danger-collapsed | `danger` snippet and `dangerItems` present in a narrow container | danger content is hidden and overflow trigger is shown |
 
 ## 5. Events
 
@@ -125,8 +125,8 @@ Updated: 2026-03-27
 
 ## 9. Svelte Notes
 
-- default slot is the main action row
-- `danger` is a named slot for cancel/delete actions that should remain visually
+- `children` is the main action row snippet
+- `danger` is a named snippet for cancel/delete actions that should remain visually
   separated from primary actions
 - if `dangerItems` is absent, inline danger content remains visible at all sizes
 - if both `danger` and `dangerItems` are provided, `dangerItems` become the
@@ -137,8 +137,8 @@ Updated: 2026-03-27
 - [ ] align prop values mean the same thing
 - [ ] action order remains logical for keyboard and screen readers
 - [ ] wrapped layouts preserve logical action ordering
-- [ ] danger slot remains inline when `dangerItems` is absent
-- [ ] danger slot collapses into overflow only when both `danger` and
+- [ ] danger snippet remains inline when `dangerItems` is absent
+- [ ] danger snippet collapses into overflow only when both `danger` and
   `dangerItems` are present
 
 ## 11. Specimen Definitions
@@ -148,7 +148,7 @@ Updated: 2026-03-27
 | End-aligned (default) | default `align`, children: secondary "Cancel" + primary "Save changes" | Buttons right-aligned |
 | Start-aligned | `align="start"`, children: secondary "Back" + primary "Continue" | Buttons left-aligned |
 | Space between | `align="between"`, children: danger "Delete" + primary "Save" | Buttons spread to opposite ends |
-| Responsive danger actions | `align="end"`, `danger` slot contains a destructive/cancel action, `dangerItems` contains matching overflow action | Danger action stays inline on wide containers and collapses to overflow on narrow containers |
+| Responsive danger actions | `align="end"`, `danger` snippet contains a destructive/cancel action, `dangerItems` contains matching overflow action | Danger action stays inline on wide containers and collapses to overflow on narrow containers |
 
 ## 12. Approval And Adoption Notes
 

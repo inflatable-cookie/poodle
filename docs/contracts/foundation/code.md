@@ -65,7 +65,7 @@ Updated: 2026-03-15
 | `language` | `string \| null` | `null` | no | language label shown in toolbar |
 | `showLineNumbers` | `boolean` | `false` | no | display line numbers in gutter |
 | `highlightLines` | `number[]` | `[]` | no | 1-based line indices to highlight |
-| `showCopyButton` | `boolean` | `true` | no | show copy-to-clipboard button |
+| `showCopyButton` | `boolean` | `true` | no | show copy-to-clipboard button; when `inline`, renders a compact adjacent copy button |
 | `maxHeight` | `string \| null` | `null` | no | max-height for block container (inline style) |
 | `inline` | `boolean` | `false` | no | render as inline `<code>` element |
 | `size` | `"xs" \| "sm" \| "md" \| "lg" \| "xl"` | `null` | no | explicit control size override; when null, resolves from inherited presentation |

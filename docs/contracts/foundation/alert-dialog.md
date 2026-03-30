@@ -41,6 +41,8 @@ Updated: 2026-03-26
 | `open` | `boolean \| null` | `null` | no | controlled open state; `null` = uncontrolled |
 | `title` | `string` | — | yes | visible title text passed to Dialog |
 | `description` | `string \| null` | `null` | no | description text passed to Dialog |
+| `itemLabel` | `string \| null` | `null` | no | optional highlighted detail-row label rendered ahead of the body slot |
+| `itemValue` | `string \| null` | `null` | no | optional highlighted detail-row value rendered ahead of the body slot |
 | `tone` | `"danger" \| "warning"` | `"danger"` | no | controls confirm button tone (variant is always `"primary"`) |
 | `confirmLabel` | `string` | `"Confirm"` | no | label for confirm button |
 | `cancelLabel` | `string` | `"Cancel"` | no | label for cancel button |

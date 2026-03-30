@@ -10,6 +10,8 @@
   export let open: boolean | null = null;
   export let title: string;
   export let description: string | null = null;
+  export let itemLabel: string | null = null;
+  export let itemValue: string | null = null;
   export let tone: AlertDialogTone = "danger";
   export let confirmLabel = "Confirm";
   export let cancelLabel = "Cancel";
@@ -94,6 +96,12 @@
   showCloseButton={!working}
   on:openChange={handleOpenChange}
 >
+  {#if itemLabel && itemValue}
+    <p class="alert-dialog__item-detail">
+      <strong>{itemLabel}:</strong> {itemValue}
+    </p>
+  {/if}
+
   <slot />
 
   <svelte:fragment slot="actions">
@@ -115,3 +123,15 @@
   </svelte:fragment>
 </Dialog>
 </div>
+
+<style>
+  .alert-dialog__item-detail {
+    margin: 0 0 0.75rem;
+    color: var(--poodle-color-text-secondary);
+    line-height: 1.5;
+  }
+
+  .alert-dialog__item-detail strong {
+    color: var(--poodle-color-text-primary);
+  }
+</style>

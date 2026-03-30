@@ -49,6 +49,8 @@ Updated: 2026-03-30
 | `triggerLabel` | `string` | `"Delete"` | no | label for the default trigger Button (ignored when trigger slot is used) |
 | `confirmLabel` | `string` | `"Confirm"` | no | label for the AlertDialog confirm button |
 | `cancelLabel` | `string` | `"Cancel"` | no | label for the AlertDialog cancel button |
+| `onConfirm` | `(() => void \| Promise<void>) \| null` | `null` | no | callback invoked when the confirm action is accepted; falls back to the `confirm` event when absent |
+| `onCancel` | `(() => void) \| null` | `null` | no | callback invoked when the dialog is canceled or dismissed; falls back to the `cancel` event when absent |
 | `size` | `"xs" \| "sm" \| "md" \| "lg" \| "xl" \| null` | `null` | no | explicit control size override |
 | `sizeRole` | `"chrome" \| "control" \| "prominent"` | `"control"` | no | semantic size offset from inherited presentation |
 | `density` | `ControlDensity \| null` | `null` | no | explicit density override for spacing |

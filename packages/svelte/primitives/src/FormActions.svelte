@@ -1,4 +1,6 @@
 <script lang="ts">
+  import type { Snippet } from "svelte";
+
   import IconButton from "./IconButton.svelte";
   import Menu from "./Menu.svelte";
 
@@ -6,8 +8,10 @@
 
   export let align: FormActionAlign = "end";
   export let dangerItems: FormActionDangerItem[] = [];
+  export let children: Snippet | undefined = undefined;
+  export let danger: Snippet | undefined = undefined;
 
-  $: hasDangerSlot = Boolean($$slots.danger);
+  $: hasDangerSlot = Boolean(danger);
   $: hasDangerMenu = dangerItems.length > 0;
   $: showResponsiveDangerSwap = hasDangerSlot && hasDangerMenu;
   $: collapsedDangerItems = dangerItems.map<MenuItem>((item, index) => ({
@@ -23,11 +27,13 @@
 </script>
 
 <div class="form-actions" data-align={align}>
-  <slot />
+  {#if children}
+    {@render children()}
+  {/if}
 
   {#if hasDangerSlot}
     <div class="form-actions__danger" data-mode={showResponsiveDangerSwap ? "responsive" : "inline"}>
-      <slot name="danger" />
+      {@render danger?.()}
     </div>
   {/if}
 
