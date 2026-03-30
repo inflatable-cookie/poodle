@@ -57,6 +57,7 @@ Contract-backed Svelte primitive surface for the first generalized Poodle baseli
 - `OrderBy`
 - `Pagination`
 - `PaginationSummary`
+- `PasswordRequirements`
 - `Pill`
 - `PinInput`
 - `Popover`
@@ -87,6 +88,7 @@ Contract-backed Svelte primitive surface for the first generalized Poodle baseli
 - `ToggleGroup`
 - `Toolbar`
 - `Tooltip`
+- `TotpInput`
 - `TriStateSwitch`
 - `UiPresentationProvider`
 - `ZonedDateTimePicker`

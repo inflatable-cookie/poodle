@@ -2390,6 +2390,38 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
 />`,
   },
 
+  "password-requirements": {
+    props: [
+      { name: "password", type: "string", default: '""', description: "Current password value to evaluate against the supplied rules." },
+      { name: "requirements", type: "PasswordRequirementsPolicy | null", default: "null", description: "Caller-supplied password policy rules. When omitted, the component renders loading or error state instead of the checklist." },
+      { name: "loading", type: "boolean", default: "false", description: "Shows the loading label instead of the checklist." },
+      { name: "error", type: "string | null", default: "null", description: "Optional inline error message shown when requirements are unavailable." },
+      { name: "title", type: "string", default: '"Password requirements"', description: "Heading shown above the checklist." },
+      { name: "hint", type: "string | null", default: '"Avoid common words, patterns, and personal information."', description: "Optional supporting text shown below the checklist." },
+      { name: "loadingLabel", type: "string", default: '"Loading requirements..."', description: "Text shown while requirements are loading." },
+    ],
+    slots: [],
+    events: [],
+    usage: `<script lang="ts">
+  import { PasswordRequirements } from "@poodle/svelte-primitives";
+
+  let password = "";
+
+  const requirements = {
+    minLength: 12,
+    requireMixedCase: true,
+    requireDigit: true,
+    requireSpecial: true,
+    description: "Use a long password with varied character types."
+  };
+</script>
+
+<PasswordRequirements
+  {password}
+  {requirements}
+/>`,
+  },
+
   popover: {
     props: [
       { name: "open", type: "boolean | null", default: "null", description: "Controlled open state." },

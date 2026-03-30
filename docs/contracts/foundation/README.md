@@ -54,6 +54,7 @@ Foundation contracts define the lowest reusable surface in Poodle.
 - `order-by.md`
 - `pagination-summary.md`
 - `pagination.md`
+- `password-requirements.md`
 - `pill.md`
 - `pin-input.md`
 - `popover.md`

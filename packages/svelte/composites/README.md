@@ -51,12 +51,19 @@ and data components.
 - `SidebarNav`
 - `SplitView`
 - `StatusBar`
+- `ToastHost`
 - `ToastStack`
 - `VideoPlayer`
-- `parseWorkspaceLayoutSnapshot`
+- `computeFileHash`
+- `createResetMediaBrowseState`
 - `detectParsedEmbed`
+- `loadMediaBrowsePage`
+- `mergeMediaBrowseItems`
+- `parseWorkspaceLayoutSnapshot`
 - `resolveEmbedParseState`
+- `runMediaUploadWorkflow`
 - `serializeWorkspaceLayoutSnapshot`
+- `uploadMediaWithKnownHash`
 - root import: `@poodle/svelte-composites`
 - type-only import: `@poodle/svelte-composites/types`
 

@@ -198,6 +198,15 @@ export interface ComboboxOption {
   disabled?: boolean;
 }
 
+export interface PasswordRequirementsPolicy {
+  minLength: number;
+  requireMixedCase: boolean;
+  requireDigit: boolean;
+  requireSpecial: boolean;
+  minStrengthScore?: number;
+  description?: string | null;
+}
+
 export interface DateRangeValue {
   start: string | null;
   end: string | null;

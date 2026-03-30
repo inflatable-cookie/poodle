@@ -83,6 +83,7 @@ above it in downstream repos such as Loophole.
 - `foundation/order-by.md`
 - `foundation/pagination-summary.md`
 - `foundation/pagination.md`
+- `foundation/password-requirements.md`
 - `foundation/pill.md`
 - `foundation/pin-input.md`
 - `foundation/popover.md`

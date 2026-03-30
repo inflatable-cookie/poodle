@@ -82,6 +82,7 @@ export const primitiveComponents: ComponentEntry[] = [
   entry("OrderBy", "primitive", P, "Sort-control toolbar for data views with direction toggle.", true),
   entry("Pagination", "primitive", P, "Page navigation controls for paged data sets.", true),
   entry("PaginationSummary", "primitive", P, "Textual summary of pagination state.", true),
+  entry("PasswordRequirements", "primitive", P, "UI-only password-policy checklist driven by caller-supplied requirements.", true),
   entry("Pill", "primitive", P, "Small inline label chip with tone and size variants.", true),
   entry("PinInput", "primitive", P, "Multi-digit code entry with separate character fields.", true),
   entry("Popover", "primitive", P, "Anchored overlay for contextual content.", true),

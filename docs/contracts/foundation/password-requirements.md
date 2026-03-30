@@ -52,3 +52,38 @@ type PasswordRequirementsPolicy = {
 - callers own policy fetch and retry behavior
 - callers own fallback defaults when policy fetch fails
 - callers may wrap this primitive in auth-specific adapters or workflow shells
+
+## 6. Accessibility
+
+### Semantics
+
+- Root element uses a descriptive heading or region so assistive technology
+  identifies the checklist as a distinct landmark when appropriate
+- Requirements list uses semantic `<ul>` with `<li>` items so screen readers
+  announce list length and position
+- Each requirement item conveys its pass/fail state via `aria-label` text (e.g.
+  "Minimum 8 characters — met" / "Minimum 8 characters — not met") so status
+  is available without vision
+- Color alone must not convey pass/fail status — a checkmark or cross icon (or
+  equivalent text indicator) must supplement the color change
+- The component should be associated with its password input via
+  `aria-describedby` on the input, so that screen readers announce the
+  requirements when the password field receives focus
+- Loading state uses `aria-live="polite"` or equivalent so the transition from
+  loading to loaded is announced
+- Error message, when present, uses `role="alert"` or `aria-live="assertive"`
+  so it is announced immediately
+
+### Keyboard
+
+| Key | Behavior |
+|-----|----------|
+| none | not interactive — display-only checklist |
+
+### Focus And Announcement
+
+- Focus entry: not focusable by default (informational display)
+- Live-region behavior: parent-owned; callers are responsible for associating
+  this component with the password field via `aria-describedby`
+- GPUI-native accessibility mapping notes: GPUI must expose list semantics and
+  per-item pass/fail status through native accessibility APIs

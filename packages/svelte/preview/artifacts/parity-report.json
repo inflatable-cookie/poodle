@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-03-26T20:05:52.268Z",
+  "generatedAt": "2026-03-30T10:42:09.446Z",
   "artifact": "packages/svelte/preview/artifacts/parity-report.json",
   "previewBasePath": "/",
   "automatedBoundary": [
@@ -179,26 +179,26 @@
     "summary": [
       {
         "packageName": "@poodle/svelte-primitives",
-        "exportCount": 98,
-        "componentCount": 86,
+        "exportCount": 100,
+        "componentCount": 88,
         "helperCount": 12,
-        "previewedCount": 98,
+        "previewedCount": 100,
         "contractOnlyCount": 0
       },
       {
         "packageName": "@poodle/svelte-composites",
-        "exportCount": 52,
-        "componentCount": 37,
-        "helperCount": 15,
-        "previewedCount": 52,
+        "exportCount": 59,
+        "componentCount": 38,
+        "helperCount": 21,
+        "previewedCount": 59,
         "contractOnlyCount": 0
       },
       {
         "packageName": "@poodle/svelte-composites",
-        "exportCount": 52,
-        "componentCount": 37,
-        "helperCount": 15,
-        "previewedCount": 52,
+        "exportCount": 59,
+        "componentCount": 38,
+        "helperCount": 21,
+        "previewedCount": 59,
         "contractOnlyCount": 0
       }
     ],
@@ -322,6 +322,19 @@
       },
       {
         "packageName": "@poodle/svelte-composites",
+        "exportName": "computeFileHash",
+        "kind": "helper",
+        "status": "previewed",
+        "note": "Media workflow helper exports support browse-panel pagination, upload orchestration, and hash-based deduplication.",
+        "sectionIds": [
+          "media-suite"
+        ],
+        "sectionTitles": [
+          "Preview framing, embeds, and fallback posture"
+        ]
+      },
+      {
+        "packageName": "@poodle/svelte-composites",
         "exportName": "ConfirmAction",
         "kind": "component",
         "status": "previewed",
@@ -331,6 +344,19 @@
         ],
         "sectionTitles": [
           "Catalog hub"
+        ]
+      },
+      {
+        "packageName": "@poodle/svelte-composites",
+        "exportName": "createResetMediaBrowseState",
+        "kind": "helper",
+        "status": "previewed",
+        "note": "Media workflow helper exports support browse-panel pagination, upload orchestration, and hash-based deduplication.",
+        "sectionIds": [
+          "media-suite"
+        ],
+        "sectionTitles": [
+          "Preview framing, embeds, and fallback posture"
         ]
       },
       {
@@ -530,6 +556,19 @@
       },
       {
         "packageName": "@poodle/svelte-composites",
+        "exportName": "loadMediaBrowsePage",
+        "kind": "helper",
+        "status": "previewed",
+        "note": "Media workflow helper exports support browse-panel pagination, upload orchestration, and hash-based deduplication.",
+        "sectionIds": [
+          "media-suite"
+        ],
+        "sectionTitles": [
+          "Preview framing, embeds, and fallback posture"
+        ]
+      },
+      {
+        "packageName": "@poodle/svelte-composites",
         "exportName": "LogList",
         "kind": "component",
         "status": "previewed",
@@ -617,6 +656,19 @@
         ],
         "sectionTitles": [
           "Catalog hub"
+        ]
+      },
+      {
+        "packageName": "@poodle/svelte-composites",
+        "exportName": "mergeMediaBrowseItems",
+        "kind": "helper",
+        "status": "previewed",
+        "note": "Media workflow helper exports support browse-panel pagination, upload orchestration, and hash-based deduplication.",
+        "sectionIds": [
+          "media-suite"
+        ],
+        "sectionTitles": [
+          "Preview framing, embeds, and fallback posture"
         ]
       },
       {
@@ -794,6 +846,19 @@
       },
       {
         "packageName": "@poodle/svelte-composites",
+        "exportName": "runMediaUploadWorkflow",
+        "kind": "helper",
+        "status": "previewed",
+        "note": "Media workflow helper exports support browse-panel pagination, upload orchestration, and hash-based deduplication.",
+        "sectionIds": [
+          "media-suite"
+        ],
+        "sectionTitles": [
+          "Preview framing, embeds, and fallback posture"
+        ]
+      },
+      {
+        "packageName": "@poodle/svelte-composites",
         "exportName": "SelectionSummary",
         "kind": "component",
         "status": "previewed",
@@ -861,6 +926,19 @@
       },
       {
         "packageName": "@poodle/svelte-composites",
+        "exportName": "ToastHost",
+        "kind": "component",
+        "status": "previewed",
+        "note": "The catalogue covers the remaining composite exports outside the main suite-specific groupings.",
+        "sectionIds": [
+          "catalog-hub"
+        ],
+        "sectionTitles": [
+          "Catalog hub"
+        ]
+      },
+      {
+        "packageName": "@poodle/svelte-composites",
         "exportName": "ToastStack",
         "kind": "component",
         "status": "previewed",
@@ -870,6 +948,19 @@
         ],
         "sectionTitles": [
           "Banners, toasts, skeletons, and remediation"
+        ]
+      },
+      {
+        "packageName": "@poodle/svelte-composites",
+        "exportName": "uploadMediaWithKnownHash",
+        "kind": "helper",
+        "status": "previewed",
+        "note": "Media workflow helper exports support browse-panel pagination, upload orchestration, and hash-based deduplication.",
+        "sectionIds": [
+          "media-suite"
+        ],
+        "sectionTitles": [
+          "Preview framing, embeds, and fallback posture"
         ]
       },
       {
@@ -1602,6 +1693,19 @@
       },
       {
         "packageName": "@poodle/svelte-primitives",
+        "exportName": "PasswordRequirements",
+        "kind": "component",
+        "status": "previewed",
+        "note": "Every public primitive export is directly reviewable from the catalogue.",
+        "sectionIds": [
+          "catalog-hub"
+        ],
+        "sectionTitles": [
+          "Catalog hub"
+        ]
+      },
+      {
+        "packageName": "@poodle/svelte-primitives",
         "exportName": "Pill",
         "kind": "component",
         "status": "previewed",
@@ -2084,6 +2188,19 @@
       {
         "packageName": "@poodle/svelte-primitives",
         "exportName": "Tooltip",
+        "kind": "component",
+        "status": "previewed",
+        "note": "Every public primitive export is directly reviewable from the catalogue.",
+        "sectionIds": [
+          "catalog-hub"
+        ],
+        "sectionTitles": [
+          "Catalog hub"
+        ]
+      },
+      {
+        "packageName": "@poodle/svelte-primitives",
+        "exportName": "TotpInput",
         "kind": "component",
         "status": "previewed",
         "note": "Every public primitive export is directly reviewable from the catalogue.",
