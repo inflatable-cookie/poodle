@@ -6,9 +6,10 @@
 
 use gpui::*;
 use poodle_gpui::GpuiThemeProvider;
-use poodle_primitives::{FileUploadSpec, IconSize, IconSpec};
+use poodle_primitives::{ControlDensity, ControlSize, FileUploadSpec, IconSize, IconSpec, SemanticControlSizeRole};
 
 use super::icon::Icon;
+use crate::presentation::{rem_to_px, resolve_semantic_size, size_font_rem, panel_space_x_rem, panel_space_y_rem};
 use crate::theme_ext::{resolve_color, resolve_opacity, resolve_px, resolve_radius};
 
 /// A real GPUI file upload drop zone component backed by `FileUploadSpec`.
@@ -43,6 +44,10 @@ impl FileUpload {
     pub fn disabled(mut self, v: bool) -> Self { self.spec.is_disabled = v; self }
     pub fn dragging(mut self, v: bool) -> Self { self.spec.is_dragging = v; self }
 
+    pub fn size(mut self, v: ControlSize) -> Self { self.spec.size = v; self }
+    pub fn with_size_role(mut self, v: SemanticControlSizeRole) -> Self { self.spec.size_role = v; self }
+    pub fn with_density(mut self, v: ControlDensity) -> Self { self.spec.density = v; self }
+
     pub fn with_id(mut self, suffix: impl Into<String>) -> Self {
         self.id_suffix = Some(suffix.into());
         self
@@ -56,9 +61,11 @@ impl IntoElement for FileUpload {
         let theme = &self.theme;
         let spec = &self.spec;
 
-        // Contract: panel padding
-        let panel_padding_x = resolve_px(theme, "semantic.space.panel.x");
-        let panel_padding_y = resolve_px(theme, "semantic.space.panel.y");
+        let effective_size = resolve_semantic_size(spec.size, spec.size_role);
+        let body_font = px(rem_to_px(size_font_rem(effective_size)));
+        // Contract: panel padding from density
+        let panel_padding_x = px(rem_to_px(panel_space_x_rem(spec.density)));
+        let panel_padding_y = px(rem_to_px(panel_space_y_rem(spec.density)));
         let stack_gap = resolve_px(theme, "semantic.space.stack.sm");
         let dropzone_radius = resolve_radius(theme, spec.radius_token());
         let control_radius = resolve_radius(theme, "semantic.radius.control");
@@ -70,7 +77,7 @@ impl IntoElement for FileUpload {
         let accent = resolve_color(theme, "semantic.color.accent.base");
         let focus_border = resolve_color(theme, spec.focus_border_token());
         let disabled_opacity = resolve_opacity(theme, spec.disabled_opacity_token());
-        let body_size = resolve_px(theme, "semantic.typography.body.size");
+        let body_size = body_font;
 
         let label = if spec.is_dragging {
             "Drop files here"

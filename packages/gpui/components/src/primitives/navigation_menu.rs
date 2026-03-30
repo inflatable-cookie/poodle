@@ -7,8 +7,9 @@
 use gpui::*;
 use poodle_adapter::ThemeProvider;
 use poodle_gpui::GpuiThemeProvider;
-use poodle_primitives::{NavigationMenuEntry, NavigationMenuSpec};
+use poodle_primitives::{ControlDensity, ControlSize, NavigationMenuEntry, NavigationMenuSpec, SemanticControlSizeRole};
 
+use crate::presentation::{rem_to_px, resolve_semantic_size, size_font_rem, size_height_offset_rem, control_space_x_rem, panel_space_x_rem, panel_space_y_rem};
 use crate::theme_ext::{color_mix, resolve_color, resolve_opacity, resolve_px, resolve_radius};
 
 /// A real GPUI navigation menu component backed by `NavigationMenuSpec`.
@@ -43,6 +44,9 @@ impl NavigationMenu {
     pub fn value(mut self, v: impl Into<String>) -> Self { self.spec.value = Some(v.into()); self }
     pub fn default_value(mut self, v: impl Into<String>) -> Self { self.spec.default_value = Some(v.into()); self }
     pub fn aria_label(mut self, v: impl Into<String>) -> Self { self.spec.aria_label = Some(v.into()); self }
+    pub fn size(mut self, v: ControlSize) -> Self { self.spec.size = v; self }
+    pub fn with_size_role(mut self, v: SemanticControlSizeRole) -> Self { self.spec.size_role = v; self }
+    pub fn with_density(mut self, v: ControlDensity) -> Self { self.spec.density = v; self }
 
     pub fn with_id(mut self, prefix: impl Into<String>) -> Self {
         self.id_prefix = prefix.into();
@@ -63,14 +67,18 @@ impl IntoElement for NavigationMenu {
 
     fn into_element(self) -> Self::Element {
         let theme = &self.theme;
+        let effective_size = resolve_semantic_size(self.spec.size, self.spec.size_role);
+        let trigger_font = px(rem_to_px(size_font_rem(effective_size)));
+        let base_height = resolve_px(theme, "semantic.size.control.height");
+        let trigger_height_offset = px(rem_to_px(size_height_offset_rem(effective_size)));
+        let trigger_pad_x = px(rem_to_px(control_space_x_rem(self.spec.density)));
+        let density_panel_x = px(rem_to_px(panel_space_x_rem(self.spec.density)));
+        let density_panel_y = px(rem_to_px(panel_space_y_rem(self.spec.density)));
 
         let control_height = resolve_px(theme, "semantic.size.control.height");
         let trigger_radius = resolve_radius(theme, self.spec.trigger_radius_token());
         let viewport_radius = resolve_radius(theme, self.spec.viewport_radius_token());
         let viewport_gap = theme.resolve_space(self.spec.viewport_gap_token());
-        let panel_x = resolve_px(theme, "semantic.space.panel.x");
-        let panel_y = resolve_px(theme, "semantic.space.panel.y");
-
         let accent = resolve_color(theme, "semantic.color.accent.base");
         let text_primary = resolve_color(theme, "semantic.color.text.primary");
         let text_secondary = resolve_color(theme, "semantic.color.text.secondary");
@@ -94,8 +102,8 @@ impl IntoElement for NavigationMenu {
         let viewport_border = color_mix(border_subtle, panel, 0.74);
         let viewport_bg = color_mix(panel, gpui::transparent_black(), 0.96);
 
-        // Contract: trigger min-height = control-height - 0.125rem
-        let trigger_height = control_height - px(2.0);
+        // Contract: trigger min-height = control-height + offset - 0.125rem
+        let trigger_height = control_height + trigger_height_offset - px(2.0);
 
         let current_value = self.spec.current_value().map(|s| s.to_string());
 
@@ -115,18 +123,18 @@ impl IntoElement for NavigationMenu {
             let is_disabled = item.is_disabled;
             let item_id = SharedString::from(format!("{}-{}", self.id_prefix, item.value));
 
-            // Contract: pill-style trigger with border, padding 0 0.875rem
+            // Contract: pill-style trigger with border, padding per density
             let mut trigger = div()
                 .id(item_id)
                 .focusable()
                 .flex()
                 .items_center()
                 .min_h(trigger_height)
-                .px(px(14.0)) // 0.875rem
+                .px(trigger_pad_x)
                 .border_1()
                 .rounded(trigger_radius)
-                // Contract: font 0.75rem / 600
-                .text_size(px(12.0))
+                // Contract: font per effective size
+                .text_size(trigger_font)
                 .font_weight(FontWeight::SEMIBOLD);
 
             if is_active {
@@ -178,8 +186,8 @@ impl IntoElement for NavigationMenu {
                 if let Some(ref desc) = item.description {
                     wrapper = wrapper.child(
                         div()
-                            .px(panel_x)
-                            .py(panel_y)
+                            .px(density_panel_x)
+                            .py(density_panel_y)
                             .border_1()
                             .border_color(viewport_border)
                             .rounded(viewport_radius)

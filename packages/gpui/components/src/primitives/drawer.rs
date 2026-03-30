@@ -2,8 +2,9 @@
 
 use gpui::*;
 use poodle_gpui::GpuiThemeProvider;
-use poodle_primitives::{DrawerEdge, DrawerSpec};
+use poodle_primitives::{ControlDensity, ControlSize, DrawerEdge, DrawerSpec, SemanticControlSizeRole};
 
+use crate::presentation::{rem_to_px, resolve_semantic_size, size_font_rem, panel_space_x_rem, panel_space_y_rem};
 use crate::theme_ext::{resolve_color, resolve_px};
 
 /// A real GPUI drawer component backed by `DrawerSpec`.
@@ -50,7 +51,9 @@ impl Drawer {
     pub fn dismiss_on_escape(mut self, v: bool) -> Self { self.spec.dismiss_on_escape = v; self }
     pub fn dismiss_on_backdrop(mut self, v: bool) -> Self { self.spec.dismiss_on_backdrop = v; self }
     pub fn aria_label(mut self, v: impl Into<String>) -> Self { self.spec.aria_label = Some(v.into()); self }
-
+    pub fn size(mut self, v: ControlSize) -> Self { self.spec.size = v; self }
+    pub fn with_size_role(mut self, v: SemanticControlSizeRole) -> Self { self.spec.size_role = v; self }
+    pub fn with_density(mut self, v: ControlDensity) -> Self { self.spec.density = v; self }
 
     pub fn with_content(mut self, content: impl IntoElement) -> Self {
         self.content = Some(content.into_any_element());
@@ -75,9 +78,12 @@ impl IntoElement for Drawer {
     fn into_element(self) -> Self::Element {
         let theme = &self.theme;
         let spec = &self.spec;
+        let effective_size = resolve_semantic_size(spec.size, spec.size_role);
+        let density_pad = px(rem_to_px(panel_space_x_rem(spec.density)));
+        let body_font = px(rem_to_px(size_font_rem(effective_size)));
 
         let stack_gap = resolve_px(theme, "semantic.space.stack.sm");
-        let panel_padding = resolve_px(theme, "semantic.space.panel.x");
+        let panel_padding = density_pad;
 
         let elevated_bg = resolve_color(theme, "semantic.color.background.elevated");
         let border_default = resolve_color(theme, "semantic.color.border.default");

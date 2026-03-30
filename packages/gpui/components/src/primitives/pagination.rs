@@ -7,9 +7,10 @@
 use gpui::prelude::FluentBuilder;
 use gpui::*;
 use poodle_gpui::GpuiThemeProvider;
-use poodle_primitives::{IconSize, IconSpec, PageItem, PaginationSpec};
+use poodle_primitives::{ControlDensity, ControlSize, IconSize, IconSpec, PageItem, PaginationSpec, SemanticControlSizeRole};
 
 use super::icon::Icon;
+use crate::presentation::{rem_to_px, resolve_semantic_size, size_font_rem, size_height_offset_rem, size_padding_x_offset_rem};
 use crate::theme_ext::{color_mix, resolve_color, resolve_opacity, resolve_px, resolve_radius};
 
 pub struct Pagination {
@@ -27,6 +28,8 @@ pub struct Pagination {
     disabled_opacity: f32,
     radius: Pixels,
     button_height: Pixels,
+    font_size: Pixels,
+    button_padding: Pixels,
     // Callback
     on_page_change: Option<std::rc::Rc<dyn Fn(usize, &mut Window, &mut App) + 'static>>,
 }
@@ -55,9 +58,14 @@ impl Pagination {
         // Contract: 12% accent mix for hover
         let hover_fill = color_mix(accent_base, surface_fill, 0.88);
 
-        // Contract: height = control-height - 0.125rem
-        let control_height = resolve_px(theme, "semantic.size.control.height");
-        let button_height = control_height - px(2.0);
+        // ── Resolve effective size from size + size_role ────────
+        let effective_size = resolve_semantic_size(spec.size, spec.size_role);
+        let base_height = resolve_px(theme, "semantic.size.control.height");
+        // Contract: height = control-height + size offset - 0.125rem
+        let button_height = base_height + px(rem_to_px(size_height_offset_rem(effective_size))) - px(2.0);
+        let font_size = px(rem_to_px(size_font_rem(effective_size)));
+        let base_pad = resolve_px(theme, "semantic.space.control.x");
+        let button_padding = base_pad + px(rem_to_px(size_padding_x_offset_rem(effective_size)));
 
         Self {
             theme: theme.clone(),
@@ -72,6 +80,8 @@ impl Pagination {
             disabled_opacity: resolve_opacity(theme, spec.disabled_opacity_token()),
             radius: resolve_radius(theme, spec.radius_token()),
             button_height,
+            font_size,
+            button_padding,
             spec,
             on_page_change: None,
         }
@@ -82,6 +92,9 @@ impl Pagination {
     pub fn total_pages(mut self, v: usize) -> Self { self.spec.total_pages = v; self }
     pub fn sibling_count(mut self, v: usize) -> Self { self.spec.sibling_count = v; self }
     pub fn aria_label(mut self, v: impl Into<String>) -> Self { self.spec.aria_label = Some(v.into()); self }
+    pub fn size(mut self, v: ControlSize) -> Self { self.spec.size = v; self }
+    pub fn with_size_role(mut self, v: SemanticControlSizeRole) -> Self { self.spec.size_role = v; self }
+    pub fn with_density(mut self, v: ControlDensity) -> Self { self.spec.density = v; self }
 
     pub fn on_page_change(
         mut self,
@@ -117,7 +130,7 @@ impl Pagination {
             // Contract: min-width 2.25rem
             .min_w(px(36.0))
             .h(button_height)
-            .px(px(8.0)) // 0.5rem
+            .px(self.button_padding)
             .bg(fill)
             .border_1()
             .border_color(border)
@@ -180,14 +193,14 @@ impl Pagination {
             .justify_center()
             .min_w(px(36.0)) // 2.25rem
             .h(button_height)
-            .px(px(12.0)) // 0.75rem
+            .px(self.button_padding)
             .bg(fill)
             .border_1()
             .border_color(border)
             .rounded(radius)
             .text_color(text_color)
-            // Contract: label font 0.75rem / 600
-            .text_size(px(12.0))
+            // Contract: label font per effective size
+            .text_size(self.font_size)
             .font_weight(FontWeight::SEMIBOLD)
             // Focus ring
             .focus(move |s| s.border_color(focus_ring))
@@ -223,7 +236,7 @@ impl Pagination {
             .h(self.button_height)
             .text_color(self.ellipsis_color)
             // Contract: same font as buttons
-            .text_size(px(12.0))
+            .text_size(self.font_size)
             .font_weight(FontWeight::SEMIBOLD)
             .child("...")
             .into_any_element()

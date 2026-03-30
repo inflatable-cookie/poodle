@@ -4,9 +4,10 @@ use std::rc::Rc;
 
 use gpui::*;
 use poodle_gpui::GpuiThemeProvider;
-use poodle_primitives::{IconSize, IconSpec, RatingSpec};
+use poodle_primitives::{ControlDensity, ControlSize, IconSize, IconSpec, RatingSpec, SemanticControlSizeRole};
 
 use super::icon::Icon;
+use crate::presentation::{rem_to_px, resolve_semantic_size, control_height_rem};
 use crate::theme_ext::{resolve_color, resolve_opacity};
 
 /// A real GPUI rating component backed by `RatingSpec`.
@@ -39,6 +40,9 @@ impl Rating {
     pub fn readonly(mut self, v: bool) -> Self { self.spec.is_readonly = v; self }
     pub fn disabled(mut self, v: bool) -> Self { self.spec.is_disabled = v; self }
     pub fn precision(mut self, v: f64) -> Self { self.spec.precision = v; self }
+    pub fn size(mut self, v: ControlSize) -> Self { self.spec.size = v; self }
+    pub fn with_size_role(mut self, v: SemanticControlSizeRole) -> Self { self.spec.size_role = v; self }
+    pub fn with_density(mut self, v: ControlDensity) -> Self { self.spec.density = v; self }
 
     pub fn on_change(
         mut self,
@@ -55,6 +59,8 @@ impl IntoElement for Rating {
     fn into_element(self) -> Self::Element {
         let theme = &self.theme;
         let spec = &self.spec;
+        let effective_size = resolve_semantic_size(spec.size, spec.size_role);
+        let star_touch_size = px(rem_to_px(control_height_rem(effective_size)));
 
         let active_color = resolve_color(theme, spec.active_color_token());
         let inactive_color = resolve_color(theme, spec.inactive_color_token());
@@ -84,13 +90,13 @@ impl IntoElement for Rating {
                 let star_id = SharedString::from(format!("poodle-rating-star-{}", i));
                 let hover_color = active_color;
 
-                // Contract: touch target 2rem (32px) per star
+                // Contract: touch target per effective size
                 let mut star_wrapper = div()
                     .id(star_id)
                     .focusable()
                     .cursor_pointer()
-                    .min_w(px(32.0))
-                    .min_h(px(32.0))
+                    .min_w(star_touch_size)
+                    .min_h(star_touch_size)
                     .flex()
                     .items_center()
                     .justify_center()

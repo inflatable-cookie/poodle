@@ -2,9 +2,10 @@
 
 use gpui::*;
 use poodle_gpui::GpuiThemeProvider;
-use poodle_primitives::{CalendarSpec, CalendarWeekStart, IconSize, IconSpec};
+use poodle_primitives::{CalendarSpec, CalendarWeekStart, ControlDensity, ControlSize, IconSize, IconSpec, SemanticControlSizeRole};
 
 use super::icon::Icon;
+use crate::presentation::{rem_to_px, resolve_semantic_size, size_font_rem, control_height_rem};
 use crate::theme_ext::{color_mix, resolve_color, resolve_opacity, resolve_px, resolve_radius};
 
 /// Weekday header labels (Sunday-first; rotated at render time based on spec).
@@ -51,7 +52,9 @@ impl Calendar {
     pub fn locale(mut self, v: impl Into<String>) -> Self { self.spec.locale = v.into(); self }
     pub fn disabled(mut self, v: bool) -> Self { self.spec.is_disabled = v; self }
     pub fn aria_label(mut self, v: impl Into<String>) -> Self { self.spec.aria_label = Some(v.into()); self }
-
+    pub fn size(mut self, v: ControlSize) -> Self { self.spec.size = v; self }
+    pub fn with_size_role(mut self, v: SemanticControlSizeRole) -> Self { self.spec.size_role = v; self }
+    pub fn with_density(mut self, v: ControlDensity) -> Self { self.spec.density = v; self }
 
     pub fn with_id(mut self, suffix: impl Into<String>) -> Self {
         self.id_suffix = Some(suffix.into());
@@ -145,6 +148,9 @@ impl IntoElement for Calendar {
     fn into_element(self) -> Self::Element {
         let theme = &self.theme;
         let spec = &self.spec;
+        let effective_size = resolve_semantic_size(spec.size, spec.size_role);
+        let cell_size = px(rem_to_px(control_height_rem(effective_size)));
+        let cal_font = px(rem_to_px(size_font_rem(effective_size)));
 
         let control_radius = resolve_radius(theme, "semantic.radius.control");
 
@@ -157,7 +163,7 @@ impl IntoElement for Calendar {
         let border = resolve_color(theme, "semantic.color.border.default");
         let icon_muted = resolve_color(theme, "semantic.color.icon.muted");
         let disabled_opacity = resolve_opacity(theme, "semantic.state.opacity.disabled");
-        let body_size = resolve_px(theme, "semantic.typography.body.size");
+        let body_size = cal_font;
 
         // Contract: hover = color-mix(accent 8%, surface)
         let hover_bg = color_mix(accent, surface_bg, 0.08);

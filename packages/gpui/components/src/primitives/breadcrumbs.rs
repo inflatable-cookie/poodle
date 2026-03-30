@@ -5,9 +5,10 @@
 
 use gpui::*;
 use poodle_gpui::GpuiThemeProvider;
-use poodle_primitives::{BreadcrumbItem, BreadcrumbsSpec};
+use poodle_primitives::{BreadcrumbItem, BreadcrumbsSpec, ControlDensity, ControlSize, SemanticControlSizeRole};
 
-use crate::theme_ext::{resolve_color, resolve_px};
+use crate::presentation::{rem_to_px, resolve_semantic_size, size_font_rem, control_space_x_rem};
+use crate::theme_ext::resolve_color;
 
 pub struct Breadcrumbs {
     spec: BreadcrumbsSpec,
@@ -31,12 +32,14 @@ impl Breadcrumbs {
     }
 
     pub fn from_spec(spec: BreadcrumbsSpec, theme: &GpuiThemeProvider) -> Self {
+        let effective_size = resolve_semantic_size(spec.size, spec.size_role);
+
         let text_color = resolve_color(theme, spec.text_color_token());
         let current_text_color = resolve_color(theme, spec.current_text_color_token());
         let separator_color = resolve_color(theme, spec.separator_color_token());
         let hover_color = resolve_color(theme, spec.hover_color_token());
-        let gap = resolve_px(theme, spec.gap_token());
-        let body_size = resolve_px(theme, "semantic.typography.body.size");
+        let gap = px(rem_to_px(control_space_x_rem(spec.density)));
+        let body_size = px(rem_to_px(size_font_rem(effective_size)));
 
         Self {
             spec,
@@ -52,6 +55,9 @@ impl Breadcrumbs {
 
     // ── Forwarded spec builders ───────────────────────────────
     pub fn items(mut self, v: Vec<BreadcrumbItem>) -> Self { self.spec.items = v; self }
+    pub fn size(mut self, v: ControlSize) -> Self { self.spec.size = v; self }
+    pub fn with_size_role(mut self, v: SemanticControlSizeRole) -> Self { self.spec.size_role = v; self }
+    pub fn with_density(mut self, v: ControlDensity) -> Self { self.spec.density = v; self }
 
     pub fn on_navigate(
         mut self,

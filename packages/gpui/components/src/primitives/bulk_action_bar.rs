@@ -3,8 +3,9 @@
 use std::rc::Rc;
 use gpui::*;
 use poodle_gpui::GpuiThemeProvider;
-use poodle_primitives::{BulkAction, BulkActionBarSpec, BulkActionTone};
+use poodle_primitives::{BulkAction, BulkActionBarSpec, BulkActionTone, ControlDensity, ControlSize, SemanticControlSizeRole};
 
+use crate::presentation::{rem_to_px, resolve_semantic_size, size_font_rem, size_height_offset_rem, size_padding_x_offset_rem, panel_space_x_rem, panel_space_y_rem, control_space_x_rem};
 use crate::theme_ext::{color_mix, resolve_color, resolve_px, resolve_radius};
 
 /// A real GPUI bulk-action bar component backed by `BulkActionBarSpec`.
@@ -36,6 +37,9 @@ impl BulkActionBar {
     pub fn selection_count(mut self, v: usize) -> Self { self.spec.selection_count = v; self }
     pub fn total_count(mut self, v: usize) -> Self { self.spec.total_count = Some(v); self }
     pub fn actions(mut self, v: Vec<BulkAction>) -> Self { self.spec.actions = v; self }
+    pub fn size(mut self, v: ControlSize) -> Self { self.spec.size = v; self }
+    pub fn with_size_role(mut self, v: SemanticControlSizeRole) -> Self { self.spec.size_role = v; self }
+    pub fn with_density(mut self, v: ControlDensity) -> Self { self.spec.density = v; self }
 
     pub fn on_action(
         mut self,
@@ -53,6 +57,17 @@ impl IntoElement for BulkActionBar {
         let theme = &self.theme;
         let spec = &self.spec;
 
+        // ── Resolve effective size / density ──────────────────────
+        let effective_size = resolve_semantic_size(spec.size, spec.size_role);
+        let body_font = px(rem_to_px(size_font_rem(effective_size)));
+        let density_pad_x = px(rem_to_px(panel_space_x_rem(spec.density)));
+        let density_pad_y = px(rem_to_px(panel_space_y_rem(spec.density)));
+        let density_gap = px(rem_to_px(control_space_x_rem(spec.density)));
+        let base_height = resolve_px(theme, "semantic.size.control.height");
+        let btn_height = base_height + px(rem_to_px(size_height_offset_rem(effective_size)));
+        let base_pad = resolve_px(theme, "semantic.space.control.x");
+        let btn_pad_x = base_pad + px(rem_to_px(size_padding_x_offset_rem(effective_size)));
+
         // ── Resolve tokens ──────────────────────────────────────────
         let accent = resolve_color(theme, spec.fill_token());
         let panel_bg = resolve_color(theme, "semantic.color.background.panel");
@@ -66,14 +81,14 @@ impl IntoElement for BulkActionBar {
         let button_radius = resolve_radius(theme, spec.button_radius_token());
         let danger_border_raw = resolve_color(theme, spec.danger_border_token());
         let danger_text = resolve_color(theme, spec.danger_text_token());
-        let gap = resolve_px(theme, spec.gap_token());
-        let pad_x = resolve_px(theme, spec.padding_x_token());
-        let pad_y = resolve_px(theme, spec.padding_y_token());
-        let control_height = resolve_px(theme, "semantic.size.control.height");
-        let control_pad_x = resolve_px(theme, "semantic.space.control.x");
+        let gap = density_gap;
+        let pad_x = density_pad_x;
+        let pad_y = density_pad_y;
+        let control_height = btn_height;
+        let control_pad_x = btn_pad_x;
         let elevated = resolve_color(theme, "semantic.color.background.elevated");
-        let body_size = resolve_px(theme, "semantic.typography.body.size");
-        let label_size = resolve_px(theme, "semantic.typography.label.size");
+        let body_size = body_font;
+        let label_size = body_font;
 
         // Danger button border: 65% danger mixed with default border
         let danger_border = color_mix(danger_border_raw, button_border, 0.65);

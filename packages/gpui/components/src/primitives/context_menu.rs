@@ -2,7 +2,7 @@
 
 use gpui::*;
 use poodle_gpui::GpuiThemeProvider;
-use poodle_primitives::{ContextMenuSpec, MenuSpec};
+use poodle_primitives::{ContextMenuSpec, ControlDensity, ControlSize, MenuSpec, SemanticControlSizeRole};
 
 use super::menu::Menu;
 
@@ -47,6 +47,9 @@ impl ContextMenu {
     // ── Forwarded spec builders ───────────────────────────────
     pub fn menu(mut self, v: MenuSpec) -> Self { self.spec.menu = v; self }
     pub fn anchor_point(mut self, v: (i32, i32)) -> Self { self.spec.anchor_point = Some(v); self }
+    pub fn size(mut self, v: ControlSize) -> Self { self.spec.size = v; self }
+    pub fn with_size_role(mut self, v: SemanticControlSizeRole) -> Self { self.spec.size_role = v; self }
+    pub fn with_density(mut self, v: ControlDensity) -> Self { self.spec.density = v; self }
 
     /// Set the trigger element (the right-click target that opens the menu).
     pub fn with_trigger(mut self, trigger: impl IntoElement) -> Self {
@@ -79,8 +82,12 @@ impl IntoElement for ContextMenu {
     type Element = AnyElement;
 
     fn into_element(self) -> Self::Element {
-        // Delegate to Menu with the inner menu spec
-        let mut menu = Menu::from_spec(self.spec.menu.clone(), &self.theme)
+        // Delegate to Menu with the inner menu spec, forwarding size/density
+        let mut inner_menu_spec = self.spec.menu.clone();
+        inner_menu_spec.size = self.spec.size;
+        inner_menu_spec.size_role = self.spec.size_role;
+        inner_menu_spec.density = self.spec.density;
+        let mut menu = Menu::from_spec(inner_menu_spec, &self.theme)
             .with_id(self.id_prefix);
 
         if let Some(selected) = self.selected_value {

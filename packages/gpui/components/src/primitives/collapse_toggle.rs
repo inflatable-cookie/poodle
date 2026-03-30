@@ -6,9 +6,10 @@
 
 use gpui::*;
 use poodle_gpui::GpuiThemeProvider;
-use poodle_primitives::{CollapseDirection, CollapseToggleSpec, IconSize, IconSpec};
+use poodle_primitives::{CollapseDirection, CollapseToggleSpec, ControlDensity, ControlSize, IconSize, IconSpec, SemanticControlSizeRole};
 
 use super::icon::Icon;
+use crate::presentation::resolve_semantic_size;
 use crate::theme_ext::{resolve_color, resolve_opacity, resolve_px, resolve_radius};
 
 /// A real GPUI collapse toggle component backed by `CollapseToggleSpec`.
@@ -43,7 +44,9 @@ impl CollapseToggle {
     pub fn direction(mut self, v: CollapseDirection) -> Self { self.spec.direction = v; self }
     pub fn disabled(mut self, v: bool) -> Self { self.spec.is_disabled = v; self }
     pub fn aria_label(mut self, v: impl Into<String>) -> Self { self.spec.aria_label = Some(v.into()); self }
-
+    pub fn size(mut self, v: ControlSize) -> Self { self.spec.size = v; self }
+    pub fn with_size_role(mut self, v: SemanticControlSizeRole) -> Self { self.spec.size_role = v; self }
+    pub fn with_density(mut self, v: ControlDensity) -> Self { self.spec.density = v; self }
 
     pub fn with_id(mut self, suffix: impl Into<String>) -> Self {
         self.id_suffix = Some(suffix.into());
@@ -65,6 +68,9 @@ impl IntoElement for CollapseToggle {
     fn into_element(self) -> Self::Element {
         let theme = &self.theme;
         let spec = &self.spec;
+
+        // ── Resolve effective size ───────────────────────────────
+        let _effective_size = resolve_semantic_size(spec.size, spec.size_role);
 
         // ── Resolve tokens ───────────────────────────────────────
         let text_color = resolve_color(theme, spec.text_color_token());

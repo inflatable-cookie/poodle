@@ -6,10 +6,11 @@
 
 use gpui::*;
 use poodle_gpui::GpuiThemeProvider;
-use poodle_primitives::{IconSize, IconSpec, MenuEntry, MenuItemKind, MenuSpec, OverlayPlacement};
+use poodle_primitives::{ControlDensity, ControlSize, IconSize, IconSpec, MenuEntry, MenuItemKind, MenuSpec, OverlayPlacement, SemanticControlSizeRole};
 
 use super::icon::Icon;
 
+use crate::presentation::{rem_to_px, resolve_semantic_size, size_font_rem, size_height_offset_rem, control_space_x_rem, panel_space_y_rem};
 use crate::theme_ext::{color_mix, resolve_color, resolve_opacity, resolve_px, resolve_radius};
 
 /// A real GPUI menu component backed by `MenuSpec`.
@@ -59,6 +60,9 @@ impl Menu {
     pub fn default_open(mut self, v: bool) -> Self { self.spec.default_open = v; self }
     pub fn placement(mut self, v: OverlayPlacement) -> Self { self.spec.placement = v; self }
     pub fn aria_label(mut self, v: impl Into<String>) -> Self { self.spec.aria_label = Some(v.into()); self }
+    pub fn size(mut self, v: ControlSize) -> Self { self.spec.size = v; self }
+    pub fn with_size_role(mut self, v: SemanticControlSizeRole) -> Self { self.spec.size_role = v; self }
+    pub fn with_density(mut self, v: ControlDensity) -> Self { self.spec.density = v; self }
 
     pub fn with_id(mut self, prefix: impl Into<String>) -> Self {
         self.id_prefix = prefix.into();
@@ -77,6 +81,12 @@ impl IntoElement for Menu {
 
     fn into_element(self) -> Self::Element {
         let theme = &self.theme;
+        let effective_size = resolve_semantic_size(self.spec.size, self.spec.size_role);
+        let item_font_size = px(rem_to_px(size_font_rem(effective_size)));
+        let base_height = resolve_px(theme, "semantic.size.control.height");
+        let item_min_height = base_height + px(rem_to_px(size_height_offset_rem(effective_size))) - px(4.0);
+        let item_pad_x = px(rem_to_px(control_space_x_rem(self.spec.density)));
+        let menu_pad = px(rem_to_px(panel_space_y_rem(self.spec.density) * 0.5));
 
         let overlay_radius = resolve_radius(theme, self.spec.overlay_radius_token());
         let control_radius = resolve_radius(theme, "semantic.radius.control");
@@ -99,7 +109,6 @@ impl IntoElement for Menu {
         let separator_color = Hsla { a: border_subtle.a * 0.48, ..border_subtle };
         let disabled_opacity = resolve_opacity(theme, self.spec.disabled_opacity_token());
         let focus_ring = resolve_color(theme, "semantic.color.accent.focusRing");
-        let body_size = resolve_px(theme, "semantic.typography.body.size");
 
         // Contract: min-width 14rem, padding 0.25rem
         let mut menu = div()
@@ -130,7 +139,7 @@ impl IntoElement for Menu {
                     spread_radius: px(0.0),
                 },
             ])
-            .p(px(4.0)); // 0.25rem
+            .p(menu_pad);
 
         // Collect focusable (non-separator, non-disabled) item values for arrow key navigation
         let focusable_values: Vec<String> = self.spec.items.iter()
@@ -161,17 +170,17 @@ impl IntoElement for Menu {
             let is_checked = item.is_checked;
             let item_id = SharedString::from(format!("{}-{}", self.id_prefix, item.value));
 
-            // Contract: item min-height 2rem, padding 0.375rem 0.5rem
+            // Contract: item min-height, padding per size/density
             let mut row = div()
                 .id(item_id)
                 .focusable()
                 .w_full()
-                .min_h(px(32.0)) // 2rem
-                .px(px(8.0))  // 0.5rem
-                .py(px(6.0)) // 0.375rem
+                .min_h(item_min_height)
+                .px(item_pad_x)
+                .py(menu_pad)
                 .rounded(item_radius)
-                // Contract: font 0.875rem
-                .text_size(body_size)
+                // Contract: font per effective size
+                .text_size(item_font_size)
                 .flex()
                 .items_center()
                 .justify_between();

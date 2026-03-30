@@ -2,9 +2,10 @@
 
 use gpui::*;
 use poodle_gpui::GpuiThemeProvider;
-use poodle_primitives::{CallOutSpec, IconSize, IconSpec, StatusTone};
+use poodle_primitives::{CallOutSpec, ControlDensity, ControlSize, IconSize, IconSpec, SemanticControlSizeRole, StatusTone};
 
 use super::icon::Icon;
+use crate::presentation::{rem_to_px, resolve_semantic_size, size_font_rem, panel_space_x_rem, panel_space_y_rem};
 use crate::theme_ext::{color_mix, resolve_color, resolve_px, resolve_radius};
 
 /// A real GPUI call-out component backed by `CallOutSpec`.
@@ -48,6 +49,9 @@ impl Callout {
     pub fn message(mut self, v: impl Into<String>) -> Self { self.spec.content = Some(v.into()); self }
 
     pub fn dismissible(mut self, v: bool) -> Self { self.is_dismissible = v; self }
+    pub fn size(mut self, v: ControlSize) -> Self { self.spec.size = v; self }
+    pub fn with_size_role(mut self, v: SemanticControlSizeRole) -> Self { self.spec.size_role = v; self }
+    pub fn with_density(mut self, v: ControlDensity) -> Self { self.spec.density = v; self }
 
     pub fn on_dismiss(
         mut self,
@@ -64,9 +68,13 @@ impl IntoElement for Callout {
     fn into_element(self) -> Self::Element {
         let theme = &self.theme;
         let spec = &self.spec;
+        let effective_size = resolve_semantic_size(spec.size, spec.size_role);
+        let body_font = px(rem_to_px(size_font_rem(effective_size)));
+        let density_pad_x = px(rem_to_px(panel_space_x_rem(spec.density)));
+        let density_pad_y = px(rem_to_px(panel_space_y_rem(spec.density)));
 
-        let panel_x = resolve_px(theme, "semantic.space.panel.x");
-        let panel_y = resolve_px(theme, "semantic.space.panel.y");
+        let panel_x = density_pad_x;
+        let panel_y = density_pad_y;
 
         let tone_color = resolve_color(theme, spec.fill_token());
         let surface_bg = resolve_color(theme, "semantic.color.background.surface");
@@ -75,7 +83,7 @@ impl IntoElement for Callout {
         let radius = resolve_radius(theme, "semantic.radius.surface");
         let control_radius = resolve_radius(theme, "semantic.radius.control");
         let inline_md = resolve_px(theme, "semantic.space.inline.md");
-        let body_size = resolve_px(theme, "semantic.typography.body.size");
+        let body_size = body_font;
         let label_size = resolve_px(theme, "semantic.typography.label.size");
 
         // Tone icon name

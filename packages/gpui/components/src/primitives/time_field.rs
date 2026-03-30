@@ -5,8 +5,9 @@
 
 use gpui::*;
 use poodle_gpui::GpuiThemeProvider;
-use poodle_primitives::{TimeFieldSpec, ValidationState};
+use poodle_primitives::{ControlDensity, ControlSize, SemanticControlSizeRole, TimeFieldSpec, ValidationState};
 
+use crate::presentation::{rem_to_px, resolve_semantic_size, size_font_rem, size_height_offset_rem, size_padding_x_offset_rem};
 use crate::theme_ext::{resolve_color, resolve_opacity, resolve_px, resolve_radius};
 
 /// A real GPUI time field component backed by `TimeFieldSpec`.
@@ -46,6 +47,9 @@ impl TimeField {
     pub fn aria_label(mut self, v: impl Into<String>) -> Self { self.spec.aria_label = Some(v.into()); self }
     pub fn described_by(mut self, v: impl Into<String>) -> Self { self.spec.described_by = Some(v.into()); self }
     pub fn validation_state(mut self, v: ValidationState) -> Self { self.spec.validation_state = v; self }
+    pub fn size(mut self, v: ControlSize) -> Self { self.spec.size = v; self }
+    pub fn with_size_role(mut self, v: SemanticControlSizeRole) -> Self { self.spec.size_role = v; self }
+    pub fn with_density(mut self, v: ControlDensity) -> Self { self.spec.density = v; self }
 
     pub fn with_id(mut self, suffix: impl Into<String>) -> Self {
         self.id_suffix = Some(suffix.into());
@@ -65,9 +69,12 @@ impl IntoElement for TimeField {
     fn into_element(self) -> Self::Element {
         let theme = &self.theme;
         let spec = &self.spec;
+        let effective_size = resolve_semantic_size(spec.size, spec.size_role);
 
-        let control_height = resolve_px(theme, "semantic.size.control.height");
-        let control_padding_x = resolve_px(theme, "semantic.space.control.x");
+        let base_height = resolve_px(theme, "semantic.size.control.height");
+        let control_height = base_height + px(rem_to_px(size_height_offset_rem(effective_size)));
+        let base_pad = resolve_px(theme, "semantic.space.control.x");
+        let control_padding_x = base_pad + px(rem_to_px(size_padding_x_offset_rem(effective_size)));
         let control_radius = resolve_radius(theme, spec.radius_token());
         let body_size = resolve_px(theme, spec.body_size_token());
 

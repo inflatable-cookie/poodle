@@ -4,9 +4,10 @@
 
 use gpui::*;
 use poodle_gpui::GpuiThemeProvider;
-use poodle_primitives::{CollapsibleSpec, IconSize, IconSpec};
+use poodle_primitives::{CollapsibleSpec, ControlDensity, ControlSize, IconSize, IconSpec, SemanticControlSizeRole};
 
 use super::icon::Icon;
+use crate::presentation::{rem_to_px, resolve_semantic_size, size_font_rem, panel_space_x_rem, panel_space_y_rem};
 use crate::theme_ext::{color_mix, resolve_color, resolve_opacity, resolve_px, resolve_radius};
 
 pub struct Collapsible {
@@ -38,6 +39,9 @@ impl Collapsible {
     pub fn description(mut self, v: impl Into<String>) -> Self { self.spec.description = Some(v.into()); self }
     pub fn disabled(mut self, v: bool) -> Self { self.spec.is_disabled = v; self }
     pub fn aria_label(mut self, v: impl Into<String>) -> Self { self.spec.aria_label = Some(v.into()); self }
+    pub fn size(mut self, v: ControlSize) -> Self { self.spec.size = v; self }
+    pub fn with_size_role(mut self, v: SemanticControlSizeRole) -> Self { self.spec.size_role = v; self }
+    pub fn with_density(mut self, v: ControlDensity) -> Self { self.spec.density = v; self }
 
     pub fn with_id(mut self, suffix: impl Into<String>) -> Self {
         self.id_suffix = Some(suffix.into());
@@ -62,8 +66,12 @@ impl IntoElement for Collapsible {
         let theme = &self.theme;
         let spec = &self.spec;
         let is_open = spec.current_open();
+        let effective_size = resolve_semantic_size(spec.size, spec.size_role);
+        let density_pad_x = px(rem_to_px(panel_space_x_rem(spec.density)));
+        let density_pad_y = px(rem_to_px(panel_space_y_rem(spec.density)));
+        let title_font = px(rem_to_px(size_font_rem(effective_size)));
 
-        let heading_size = resolve_px(theme, "semantic.typography.heading.size");
+        let heading_size = title_font;
         let label_size = resolve_px(theme, "semantic.typography.label.size");
         let text_primary = resolve_color(theme, "semantic.color.text.primary");
         let text_secondary = resolve_color(theme, "semantic.color.text.secondary");
@@ -71,7 +79,7 @@ impl IntoElement for Collapsible {
         let _panel_bg = resolve_color(theme, "semantic.color.background.panel");
         let radius = resolve_radius(theme, "semantic.radius.surface");
         let focus_ring = resolve_color(theme, "semantic.color.accent.focusRing");
-        let panel_pad = resolve_px(theme, "semantic.space.panel.x");
+        let panel_pad = density_pad_x;
 
         // Svelte: border = color-mix(border-subtle 42%, transparent)
         let root_border = Hsla { a: border_color.a * 0.42, ..border_color };

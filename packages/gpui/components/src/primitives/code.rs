@@ -2,9 +2,10 @@
 
 use gpui::*;
 use poodle_gpui::GpuiThemeProvider;
-use poodle_primitives::{CodeSpec, IconSize, IconSpec};
+use poodle_primitives::{CodeSpec, ControlDensity, ControlSize, IconSize, IconSpec, SemanticControlSizeRole};
 use crate::primitives::Icon;
 
+use crate::presentation::{rem_to_px, resolve_semantic_size, size_font_rem, panel_space_x_rem, panel_space_y_rem};
 use crate::theme_ext::{resolve_color, resolve_px, resolve_radius};
 
 /// A real GPUI code display component backed by `CodeSpec`.
@@ -38,6 +39,9 @@ impl Code {
     pub fn highlight_lines(mut self, v: Vec<usize>) -> Self { self.spec.highlight_lines = v; self }
     pub fn max_height(mut self, v: f64) -> Self { self.spec.max_height = Some(v); self }
     pub fn inline(mut self, v: bool) -> Self { self.spec.is_inline = v; self }
+    pub fn size(mut self, v: ControlSize) -> Self { self.spec.size = v; self }
+    pub fn with_size_role(mut self, v: SemanticControlSizeRole) -> Self { self.spec.size_role = v; self }
+    pub fn with_density(mut self, v: ControlDensity) -> Self { self.spec.density = v; self }
 }
 
 impl IntoElement for Code {
@@ -46,8 +50,12 @@ impl IntoElement for Code {
     fn into_element(self) -> Self::Element {
         let theme = &self.theme;
         let spec = &self.spec;
+        let effective_size = resolve_semantic_size(spec.size, spec.size_role);
+        let code_font = px(rem_to_px(size_font_rem(effective_size)));
+        let density_pad_x = px(rem_to_px(panel_space_x_rem(spec.density)));
+        let density_pad_y = px(rem_to_px(panel_space_y_rem(spec.density)));
 
-        let label_size = resolve_px(theme, "semantic.typography.label.size");
+        let label_size = code_font;
         let fill = resolve_color(theme, spec.fill_token());
         let text_color = resolve_color(theme, spec.text_color_token());
 
@@ -65,8 +73,8 @@ impl IntoElement for Code {
         }
 
         // ── Block mode ────────────────────────────────────────
-        let panel_x = resolve_px(theme, "semantic.space.panel.x");
-        let panel_y = resolve_px(theme, "semantic.space.panel.y");
+        let panel_x = density_pad_x;
+        let panel_y = density_pad_y;
         let inline_gap = resolve_px(theme, "semantic.space.inline.sm");
 
         let border = resolve_color(theme, spec.border_token());

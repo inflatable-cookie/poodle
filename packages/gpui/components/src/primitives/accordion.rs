@@ -9,9 +9,10 @@
 use std::rc::Rc;
 use gpui::*;
 use poodle_gpui::GpuiThemeProvider;
-use poodle_primitives::{AccordionItemSpec, AccordionSelectionValue, AccordionSpec, IconSize, IconSpec};
+use poodle_primitives::{AccordionItemSpec, AccordionSelectionValue, AccordionSpec, ControlDensity, ControlSize, IconSize, IconSpec, SemanticControlSizeRole};
 
 use super::icon::Icon;
+use crate::presentation::{rem_to_px, resolve_semantic_size, size_font_rem, panel_space_x_rem, panel_space_y_rem, control_space_x_rem};
 use crate::theme_ext::{color_mix, resolve_color, resolve_opacity, resolve_px, resolve_radius};
 
 /// A real GPUI accordion component backed by `AccordionSpec`.
@@ -50,6 +51,9 @@ impl Accordion {
     pub fn allow_multiple(mut self, v: bool) -> Self { self.spec.allow_multiple = v; self }
     pub fn collapsible(mut self, v: bool) -> Self { self.spec.is_collapsible = v; self }
     pub fn aria_label(mut self, v: impl Into<String>) -> Self { self.spec.aria_label = Some(v.into()); self }
+    pub fn size(mut self, v: ControlSize) -> Self { self.spec.size = v; self }
+    pub fn with_size_role(mut self, v: SemanticControlSizeRole) -> Self { self.spec.size_role = v; self }
+    pub fn with_density(mut self, v: ControlDensity) -> Self { self.spec.density = v; self }
 
     /// Add content for a specific item value, shown when that item is expanded.
     pub fn with_content(mut self, value: impl Into<String>, content: impl IntoElement) -> Self {
@@ -76,6 +80,11 @@ impl IntoElement for Accordion {
 
     fn into_element(self) -> Self::Element {
         let theme = &self.theme;
+        let effective_size = resolve_semantic_size(self.spec.size, self.spec.size_role);
+        let title_font = px(rem_to_px(size_font_rem(effective_size)));
+        let density_pad_x = px(rem_to_px(panel_space_x_rem(self.spec.density)));
+        let density_pad_y = px(rem_to_px(panel_space_y_rem(self.spec.density)));
+        let density_gap = px(rem_to_px(control_space_x_rem(self.spec.density)));
 
         let disabled_opacity = resolve_opacity(theme, self.spec.disabled_opacity_token());
         let border_subtle = resolve_color(theme, "semantic.color.border.subtle");
@@ -85,10 +94,10 @@ impl IntoElement for Accordion {
         let surface_bg = resolve_color(theme, "semantic.color.background.surface");
         let focus_ring = resolve_color(theme, self.spec.focus_ring_color_token());
         let surface_radius = resolve_radius(theme, "semantic.radius.surface");
-        let panel_pad_x = resolve_px(theme, "semantic.space.panel.x");
-        let panel_pad_y = resolve_px(theme, "semantic.space.panel.y");
-        let stack_md = resolve_px(theme, "semantic.space.stack.md");
-        let heading_size = resolve_px(theme, "semantic.typography.heading.size");
+        let panel_pad_x = density_pad_x;
+        let panel_pad_y = density_pad_y;
+        let stack_md = density_gap;
+        let heading_size = title_font;
         let label_size = resolve_px(theme, "semantic.typography.label.size");
 
         // Item background: color-mix(surface 93%, text-primary)

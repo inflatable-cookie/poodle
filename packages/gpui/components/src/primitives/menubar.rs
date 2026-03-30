@@ -6,10 +6,11 @@
 use gpui::*;
 use poodle_adapter::ThemeProvider;
 use poodle_gpui::GpuiThemeProvider;
-use poodle_primitives::{MenuSpec, MenubarEntry, MenubarSpec};
+use poodle_primitives::{ControlDensity, ControlSize, MenuSpec, MenubarEntry, MenubarSpec, SemanticControlSizeRole};
 
 use super::menu::Menu;
-use crate::theme_ext::{color_mix, resolve_color, resolve_opacity, resolve_radius};
+use crate::presentation::{rem_to_px, resolve_semantic_size, size_font_rem, size_height_offset_rem, control_space_x_rem};
+use crate::theme_ext::{color_mix, resolve_color, resolve_opacity, resolve_px, resolve_radius};
 
 /// A real GPUI menubar component backed by `MenubarSpec`.
 pub struct Menubar {
@@ -45,6 +46,9 @@ impl Menubar {
     pub fn value(mut self, v: impl Into<String>) -> Self { self.spec.value = Some(v.into()); self }
     pub fn default_value(mut self, v: impl Into<String>) -> Self { self.spec.default_value = Some(v.into()); self }
     pub fn aria_label(mut self, v: impl Into<String>) -> Self { self.spec.aria_label = Some(v.into()); self }
+    pub fn size(mut self, v: ControlSize) -> Self { self.spec.size = v; self }
+    pub fn with_size_role(mut self, v: SemanticControlSizeRole) -> Self { self.spec.size_role = v; self }
+    pub fn with_density(mut self, v: ControlDensity) -> Self { self.spec.density = v; self }
 
     pub fn with_id(mut self, prefix: impl Into<String>) -> Self {
         self.id_prefix = prefix.into();
@@ -74,6 +78,11 @@ impl IntoElement for Menubar {
 
     fn into_element(self) -> Self::Element {
         let theme = &self.theme;
+        let effective_size = resolve_semantic_size(self.spec.size, self.spec.size_role);
+        let trigger_font = px(rem_to_px(size_font_rem(effective_size)));
+        let base_height = resolve_px(theme, "semantic.size.control.height");
+        let trigger_min_height = base_height + px(rem_to_px(size_height_offset_rem(effective_size)));
+        let trigger_pad_x = px(rem_to_px(control_space_x_rem(self.spec.density)));
 
         let accent = resolve_color(theme, "semantic.color.accent.base");
         let panel = resolve_color(theme, "semantic.color.background.panel");
@@ -115,16 +124,16 @@ impl IntoElement for Menubar {
             let is_disabled = entry.is_disabled;
             let item_id = SharedString::from(format!("{}-{}", self.id_prefix, entry.value));
 
-            // Contract: trigger min-height 2rem, padding 0 0.75rem, font 0.75rem/600
+            // Contract: trigger min-height, padding, font per size/density
             let mut trigger = div()
                 .id(item_id)
                 .focusable()
                 .flex()
                 .items_center()
-                .min_h(px(32.0)) // 2rem
-                .px(px(12.0)) // 0.75rem
+                .min_h(trigger_min_height)
+                .px(trigger_pad_x)
                 .rounded(control_radius)
-                .text_size(px(12.0)) // 0.75rem
+                .text_size(trigger_font)
                 .font_weight(FontWeight::SEMIBOLD)
                 .text_color(text_primary);
 

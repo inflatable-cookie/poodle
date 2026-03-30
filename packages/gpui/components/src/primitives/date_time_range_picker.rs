@@ -2,9 +2,10 @@
 
 use gpui::*;
 use poodle_gpui::GpuiThemeProvider;
-use poodle_primitives::{CalendarWeekStart, DateTimeRangePickerSpec, DateTimeRangeValue, IconSize, IconSpec};
+use poodle_primitives::{CalendarWeekStart, ControlDensity, ControlSize, DateTimeRangePickerSpec, DateTimeRangeValue, IconSize, IconSpec, SemanticControlSizeRole};
 
 use super::icon::Icon;
+use crate::presentation::{rem_to_px, resolve_semantic_size, size_font_rem, size_height_offset_rem, size_padding_x_offset_rem};
 use crate::theme_ext::{color_mix, resolve_color, resolve_opacity, resolve_px, resolve_radius};
 
 /// A real GPUI date-time range picker backed by `DateTimeRangePickerSpec`.
@@ -46,7 +47,9 @@ impl DateTimeRangePicker {
     pub fn locale(mut self, v: impl Into<String>) -> Self { self.spec.locale = v.into(); self }
     pub fn disabled(mut self, v: bool) -> Self { self.spec.is_disabled = v; self }
     pub fn aria_label(mut self, v: impl Into<String>) -> Self { self.spec.aria_label = Some(v.into()); self }
-
+    pub fn size(mut self, v: ControlSize) -> Self { self.spec.size = v; self }
+    pub fn with_size_role(mut self, v: SemanticControlSizeRole) -> Self { self.spec.size_role = v; self }
+    pub fn with_density(mut self, v: ControlDensity) -> Self { self.spec.density = v; self }
 
     pub fn with_id(mut self, suffix: impl Into<String>) -> Self {
         self.id_suffix = Some(suffix.into());
@@ -81,9 +84,12 @@ impl IntoElement for DateTimeRangePicker {
     fn into_element(self) -> Self::Element {
         let theme = &self.theme;
         let spec = &self.spec;
+        let effective_size = resolve_semantic_size(spec.size, spec.size_role);
 
-        let control_height = resolve_px(theme, "semantic.size.control.height");
-        let inline_padding = resolve_px(theme, "semantic.space.inline.md");
+        let base_height = resolve_px(theme, "semantic.size.control.height");
+        let control_height = base_height + px(rem_to_px(size_height_offset_rem(effective_size)));
+        let base_pad = resolve_px(theme, "semantic.space.inline.md");
+        let inline_padding = base_pad + px(rem_to_px(size_padding_x_offset_rem(effective_size)));
         let inline_gap = resolve_px(theme, "semantic.space.inline.sm");
         let control_radius = resolve_radius(theme, "semantic.radius.control");
 
@@ -95,7 +101,7 @@ impl IntoElement for DateTimeRangePicker {
         let icon_muted = resolve_color(theme, "semantic.color.icon.muted");
         let accent = resolve_color(theme, "semantic.color.accent.base");
         let disabled_opacity = resolve_opacity(theme, "semantic.state.opacity.disabled");
-        let body_size = resolve_px(theme, "semantic.typography.body.size");
+        let body_size = px(rem_to_px(size_font_rem(effective_size)));
         let label_size = resolve_px(theme, "semantic.typography.label.size");
         let hover_bg = color_mix(surface_bg, elevated_bg, 0.84);
 

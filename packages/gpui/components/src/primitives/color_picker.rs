@@ -6,8 +6,9 @@
 
 use gpui::*;
 use poodle_gpui::GpuiThemeProvider;
-use poodle_primitives::ColorPickerSpec;
+use poodle_primitives::{ColorPickerSpec, ControlDensity, ControlSize, SemanticControlSizeRole};
 
+use crate::presentation::{rem_to_px, resolve_semantic_size, control_height_rem, panel_space_x_rem, panel_space_y_rem};
 use crate::theme_ext::{resolve_color, resolve_opacity, resolve_px, resolve_radius};
 
 /// Parse a hex color string (e.g. "#ff0000") into an Hsla color.
@@ -56,6 +57,9 @@ impl ColorPicker {
     pub fn disabled(mut self, v: bool) -> Self { self.spec.is_disabled = v; self }
     pub fn show_alpha(mut self, v: bool) -> Self { self.spec.show_alpha = v; self }
     pub fn swatches(mut self, v: Vec<String>) -> Self { self.spec.swatches = v; self }
+    pub fn size(mut self, v: ControlSize) -> Self { self.spec.size = v; self }
+    pub fn with_size_role(mut self, v: SemanticControlSizeRole) -> Self { self.spec.size_role = v; self }
+    pub fn with_density(mut self, v: ControlDensity) -> Self { self.spec.density = v; self }
 
     pub fn with_id(mut self, suffix: impl Into<String>) -> Self {
         self.id_suffix = Some(suffix.into());
@@ -103,8 +107,9 @@ impl IntoElement for ColorPicker {
             .to_string();
         let current_color = parse_hex_color(&current);
 
-        // Contract: trigger 2.25rem × 2.25rem square
-        let trigger_size = px(36.0); // 2.25rem
+        let effective_size = resolve_semantic_size(spec.size, spec.size_role);
+        // Contract: trigger square sized to control height
+        let trigger_size = px(rem_to_px(control_height_rem(effective_size)));
 
         let id_str = if let Some(ref suffix) = self.id_suffix {
             format!("poodle-color-picker-{}", suffix)

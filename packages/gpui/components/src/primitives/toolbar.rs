@@ -2,9 +2,10 @@
 
 use gpui::*;
 use poodle_gpui::GpuiThemeProvider;
-use poodle_primitives::{Alignment, ToolbarSpec};
+use poodle_primitives::{Alignment, ControlDensity, ControlSize, SemanticControlSizeRole, ToolbarSpec};
 
-use crate::theme_ext::{color_mix, resolve_color, resolve_px};
+use crate::presentation::{rem_to_px, control_space_x_rem, panel_space_y_rem};
+use crate::theme_ext::{color_mix, resolve_color};
 
 /// A real GPUI horizontal toolbar component backed by `ToolbarSpec`.
 pub struct Toolbar {
@@ -35,7 +36,9 @@ impl Toolbar {
     pub fn alignment(mut self, v: Alignment) -> Self { self.spec.alignment = v; self }
     pub fn has_separator(mut self, v: bool) -> Self { self.spec.has_separator = v; self }
     pub fn aria_label(mut self, v: impl Into<String>) -> Self { self.spec.aria_label = Some(v.into()); self }
-
+    pub fn size(mut self, v: ControlSize) -> Self { self.spec.size = v; self }
+    pub fn with_size_role(mut self, v: SemanticControlSizeRole) -> Self { self.spec.size_role = v; self }
+    pub fn with_density(mut self, v: ControlDensity) -> Self { self.spec.density = v; self }
 
     pub fn child(mut self, child: impl IntoElement) -> Self {
         self.children.push(child.into_any_element());
@@ -53,8 +56,8 @@ impl IntoElement for Toolbar {
         let bg = resolve_color(theme, "semantic.color.background.surface");
         let border_raw = resolve_color(theme, "semantic.color.border.default");
         let panel = resolve_color(theme, "semantic.color.background.panel");
-        let gap = resolve_px(theme, spec.gap_token());
-        let padding = px(4.0);
+        let gap = px(rem_to_px(control_space_x_rem(spec.density)));
+        let padding = px(rem_to_px(panel_space_y_rem(spec.density) * 0.5));
 
         // Contract: border color-mix 78% border-default over panel
         let border = color_mix(border_raw, panel, 0.78);

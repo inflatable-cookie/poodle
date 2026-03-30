@@ -6,8 +6,9 @@ use std::time::Duration;
 
 use gpui::*;
 use poodle_gpui::GpuiThemeProvider;
-use poodle_primitives::ProgressSpec;
+use poodle_primitives::{ControlDensity, ControlSize, ProgressSpec, SemanticControlSizeRole};
 
+use crate::presentation::{rem_to_px, resolve_semantic_size, size_height_offset_rem};
 use crate::theme_ext::{color_mix, resolve_color};
 
 /// A real GPUI progress bar component backed by `ProgressSpec`.
@@ -39,7 +40,9 @@ impl Progress {
     pub fn indeterminate(mut self, v: bool) -> Self { self.spec.is_indeterminate = v; self }
     pub fn aria_label(mut self, v: impl Into<String>) -> Self { self.spec.aria_label = Some(v.into()); self }
     pub fn value_text(mut self, v: impl Into<String>) -> Self { self.spec.value_text = Some(v.into()); self }
-
+    pub fn size(mut self, v: ControlSize) -> Self { self.spec.size = v; self }
+    pub fn with_size_role(mut self, v: SemanticControlSizeRole) -> Self { self.spec.size_role = v; self }
+    pub fn with_density(mut self, v: ControlDensity) -> Self { self.spec.density = v; self }
 }
 
 impl IntoElement for Progress {
@@ -48,6 +51,9 @@ impl IntoElement for Progress {
     fn into_element(self) -> Self::Element {
         let theme = &self.theme;
         let spec = &self.spec;
+        let effective_size = resolve_semantic_size(spec.size, spec.size_role);
+        // Bar height scales with size: base 0.5rem (8px) + height offset
+        let bar_height = px(8.0 + rem_to_px(size_height_offset_rem(effective_size)) * 0.5);
 
         let accent = resolve_color(theme, spec.indicator_fill_token());
         let surface = resolve_color(theme, "semantic.color.background.surface");
@@ -57,10 +63,10 @@ impl IntoElement for Progress {
 
         let progress = spec.normalized_progress();
 
-        // Contract: track height 0.5rem (8px), radius 999px
+        // Contract: track height per effective size, radius 999px
         let mut track = div()
             .w_full()
-            .h(px(8.0))
+            .h(bar_height)
             .rounded(px(999.0))
             .bg(track_bg)
             .overflow_hidden();
