@@ -134,6 +134,7 @@
         class="navigation-menu__trigger"
         data-open={currentValue === item.value}
         disabled={item.disabled === true}
+        tabindex={index === focusIndex ? 0 : -1}
         id={`poodle-navigation-menu-trigger-${menuId}-${item.value}`}
         aria-expanded={currentValue === item.value ? "true" : "false"}
         aria-controls={currentValue === item.value ? `poodle-navigation-menu-panel-${menuId}-${item.value}` : undefined}

@@ -151,6 +151,11 @@
           aria-controls={currentValue === item.value ? `poodle-menubar-menu-${menubarId}-${item.value}` : undefined}
           on:focus={() => (focusIndex = index)}
           on:click={() => setValue(currentValue === item.value ? null : item.value)}
+          on:mouseenter={() => {
+            if (currentValue !== null && currentValue !== item.value && !item.disabled) {
+              openMenuAtIndex(index);
+            }
+          }}
           on:keydown={(event) => {
             if (event.key === "ArrowRight") {
               event.preventDefault();

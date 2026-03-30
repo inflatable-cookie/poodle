@@ -1,7 +1,7 @@
 # Menubar
 
 Status: detailed contract
-Updated: 2026-03-15
+Updated: 2026-03-30
 
 ## 1. Purpose
 
@@ -326,8 +326,9 @@ MenuItem: {
 - Document-level keydown listener closes menu on Escape from any focus context
 - Items use `role` based on `kind` field: menuitem, menuitemcheckbox, menuitemradio
 - `aria-checked` set on checkbox and radio items
-- Trigger hover while a menu is already open should immediately switch to the
-  hovered trigger's menu (roving open state)
+- Trigger hover while a menu is already open immediately switches to the
+  hovered trigger's menu via `on:mouseenter` on each trigger button (roving
+  open state); the handler checks `currentValue !== null` before switching
 - Arrow Left/Right within a submenu should close the current menu and open the
   adjacent one, maintaining the roving open behavior
 - Submenu items use identical CSS to `Menu` items (same grid, padding, height,

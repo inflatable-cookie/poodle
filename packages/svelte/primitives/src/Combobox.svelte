@@ -48,6 +48,10 @@
   $: if (filteredOptions.length > 0 && highlightIndex >= filteredOptions.length) {
     highlightIndex = firstEnabledIndex(filteredOptions);
   }
+  $: highlightedOptionId =
+    open && filteredOptions.length > 0 && highlightIndex >= 0
+      ? `${listboxId}-option-${highlightIndex}`
+      : undefined;
 
   function setOpen(nextOpen: boolean): void {
     open = nextOpen;
@@ -105,6 +109,7 @@
     value={query}
     disabled={disabled}
     aria-autocomplete="list"
+    aria-activedescendant={highlightedOptionId}
     {placeholder}
     on:focus={() => setOpen(true)}
     on:input={(event) => {
@@ -146,6 +151,7 @@
           <button
             type="button"
             class="combobox__option"
+            id={`${listboxId}-option-${index}`}
             data-highlighted={highlightIndex === index}
             disabled={option.disabled === true}
             role="option"

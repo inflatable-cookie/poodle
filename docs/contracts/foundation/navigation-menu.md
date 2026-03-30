@@ -1,7 +1,7 @@
 # NavigationMenu
 
 Status: detailed contract
-Updated: 2026-03-15
+Updated: 2026-03-30
 
 ## 1. Purpose
 
@@ -246,6 +246,10 @@ Updated: 2026-03-15
 - Default slot receives `activeValue` and `activeItem` as slot props
 - Viewport conditionally rendered when value is non-null
 - Triggers use `data-open` attribute for open-state styling
+- Roving tabindex is implemented: the trigger at `focusIndex` gets
+  `tabindex="0"`, all others get `tabindex="-1"`; ArrowLeft/ArrowRight
+  move focus between triggers with wrapping, and `focusIndex` updates
+  when a trigger receives focus
 - `aria-controls` on triggers references viewport panel id
 - The list element is a `<nav>` for landmark semantics
 - Triggers have a visible border in their default state (unlike Menubar triggers

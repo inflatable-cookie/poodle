@@ -1,7 +1,7 @@
 # Combobox
 
 Status: detailed contract
-Updated: 2026-03-15
+Updated: 2026-03-30
 
 ## 1. Purpose
 
@@ -257,6 +257,9 @@ ComboboxOption: {
 - Options are rendered as `<button>` elements with `role="option"` for click handling
 - Emits `data-size` on root element reflecting the resolved size
 - `data-density` — resolved density value (`compact`, `default`, or `comfortable`)
+- `aria-activedescendant` on the input tracks the currently highlighted option
+  by referencing its stable id (`{listboxId}-option-{index}`); when no option
+  is highlighted or the list is closed, the attribute is undefined
 
 ## 10. GPUI Notes
 
