@@ -7,6 +7,7 @@ use jetstream_runtime::ui_element::{self, JsEl};
 use poodle_jetstream::JetstreamThemeProvider;
 use poodle_primitives::{BannerSpec, StatusTone};
 
+use crate::presentation::rem_to_px;
 use crate::theme_ext::resolve_color;
 
 /// Map a status tone to its icon name.
@@ -29,21 +30,29 @@ pub fn js_banner(spec: &BannerSpec, theme: &JetstreamThemeProvider) -> JsEl {
 
     let fill = tone_color.mix(panel, 0.12);
 
+    // Contract: padding 0.75rem 0.5rem, gap 0.5rem, font-size 0.8125rem (13px),
+    // icon-size 1rem (16px)
+    let pad_x = rem_to_px(0.75);
+    let pad_y = rem_to_px(0.5);
+    let gap = rem_to_px(0.5);
+    let font_size = rem_to_px(0.8125);
+    let icon_size = rem_to_px(1.0);
+
     let mut el = ui_element::div()
         .bg(fill)
         .border(1.0)
         .border_color(border_color)
-        .pl(12.0).pr(12.0)
-        .pt(8.0).pb(8.0)
+        .pl(pad_x).pr(pad_x)
+        .pt(pad_y).pb(pad_y)
         .flex_row()
         .items_center()
-        .gap(8.0);
+        .gap(gap);
 
     // Icon (from tone)
     if spec.has_icon {
         el = el.child(
             ui_element::icon(tone_icon(spec.tone))
-                .w(16.0).h(16.0)
+                .w(icon_size).h(icon_size)
                 .text_color(icon_color)
         );
     }
@@ -52,7 +61,7 @@ pub fn js_banner(spec: &BannerSpec, theme: &JetstreamThemeProvider) -> JsEl {
         el = el.child(
             ui_element::label(title)
                 .text_color(text_primary)
-                .text_size(13.0)
+                .text_size(font_size)
                 .text_weight(600)
         );
     }
@@ -61,7 +70,7 @@ pub fn js_banner(spec: &BannerSpec, theme: &JetstreamThemeProvider) -> JsEl {
         el = el.child(
             ui_element::label(message)
                 .text_color(text_primary)
-                .text_size(13.0)
+                .text_size(font_size)
                 .grow()
         );
     }
@@ -70,7 +79,7 @@ pub fn js_banner(spec: &BannerSpec, theme: &JetstreamThemeProvider) -> JsEl {
     if spec.is_dismissible {
         el = el.child(
             ui_element::icon("x")
-                .w(16.0).h(16.0)
+                .w(icon_size).h(icon_size)
                 .text_color(text_primary)
                 .cursor_pointer()
         );

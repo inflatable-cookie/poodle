@@ -4,6 +4,7 @@ use jetstream_runtime::ui_element::{self, JsEl};
 use poodle_jetstream::JetstreamThemeProvider;
 use poodle_primitives::DetailRowSpec;
 
+use crate::presentation::rem_to_px;
 use crate::theme_ext::{resolve_color, resolve_px, resolve_radius};
 
 pub fn js_detail_row(spec: &DetailRowSpec, theme: &JetstreamThemeProvider) -> JsEl {
@@ -14,6 +15,10 @@ pub fn js_detail_row(spec: &DetailRowSpec, theme: &JetstreamThemeProvider) -> Js
     let pad_x = resolve_px(theme, spec.padding_x_token());
     let pad_y = resolve_px(theme, spec.padding_y_token());
     let gap = resolve_px(theme, spec.gap_token());
+
+    // Contract: body font-size 0.8125rem (13px), description 0.75rem (12px)
+    let body_font = rem_to_px(0.8125);
+    let desc_font = rem_to_px(0.75);
 
     let mut el = ui_element::div()
         .bg(bg)
@@ -28,7 +33,7 @@ pub fn js_detail_row(spec: &DetailRowSpec, theme: &JetstreamThemeProvider) -> Js
     el = el.child(
         ui_element::label(&spec.label)
             .text_color(label_color)
-            .text_size(13.0)
+            .text_size(body_font)
     );
 
     // Value
@@ -36,7 +41,7 @@ pub fn js_detail_row(spec: &DetailRowSpec, theme: &JetstreamThemeProvider) -> Js
         el = el.child(
             ui_element::label(value)
                 .text_color(value_color)
-                .text_size(13.0)
+                .text_size(body_font)
                 .grow()
         );
     }
@@ -47,7 +52,7 @@ pub fn js_detail_row(spec: &DetailRowSpec, theme: &JetstreamThemeProvider) -> Js
         el = el.child(
             ui_element::label(desc)
                 .text_color(desc_color)
-                .text_size(12.0)
+                .text_size(desc_font)
         );
     }
 

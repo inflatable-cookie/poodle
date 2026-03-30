@@ -2,9 +2,12 @@
 use jetstream_runtime::ui_element::{self, JsEl};
 use poodle_jetstream::JetstreamThemeProvider;
 use poodle_composites::FilterToolbarSpec;
+
+use crate::presentation::resolve_semantic_size;
 use crate::theme_ext::resolve_px;
 
 pub fn js_filter_toolbar(spec: &FilterToolbarSpec, theme: &JetstreamThemeProvider, search: Option<JsEl>, filters: Option<JsEl>) -> JsEl {
+    let _effective_size = resolve_semantic_size(spec.size, spec.size_role);
     let gap = resolve_px(theme, spec.gap_token());
 
     let mut el = ui_element::div().flex_row().items_center().gap(gap);

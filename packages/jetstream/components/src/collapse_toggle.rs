@@ -4,18 +4,24 @@ use jetstream_runtime::ui_element::{self, JsEl};
 use poodle_jetstream::JetstreamThemeProvider;
 use poodle_primitives::CollapseToggleSpec;
 
+use crate::presentation::{control_height_rem, rem_to_px, resolve_semantic_size};
 use crate::theme_ext::{resolve_color, resolve_opacity, resolve_px, resolve_radius};
 
 pub fn js_collapse_toggle(spec: &CollapseToggleSpec, theme: &JetstreamThemeProvider) -> JsEl {
+    let effective_size = resolve_semantic_size(spec.size, spec.size_role);
     let icon_size = resolve_px(theme, spec.icon_size_token());
     let radius = resolve_radius(theme, spec.radius_token());
     let text_color = resolve_color(theme, spec.text_color_token());
 
-    let chevron_icon = if spec.is_collapsed { "chevron-right" } else { "chevron-down" };
+    // Contract: toggle button is a square sized to the effective control height
+    // CollapseToggle defaults to Chrome role, so Md resolves to Sm (28px → 1.5rem)
+    let toggle_size = rem_to_px(control_height_rem(effective_size));
+
+    let chevron_icon = spec.effective_icon_name();
 
     let mut el = ui_element::button("")
         .rounded(radius)
-        .w(24.0).h(24.0)
+        .w(toggle_size).h(toggle_size)
         .flex_row().items_center().justify_center()
         .focusable()
         .cursor_pointer()

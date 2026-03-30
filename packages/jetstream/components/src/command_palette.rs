@@ -2,9 +2,21 @@
 use jetstream_runtime::ui_element::{self, JsEl};
 use poodle_jetstream::JetstreamThemeProvider;
 use poodle_composites::CommandPaletteSpec;
+
+use crate::presentation::{
+    control_space_x_rem, panel_space_y_rem, rem_to_px, resolve_semantic_size, size_font_rem,
+};
 use crate::theme_ext::{resolve_color, resolve_radius};
 
 pub fn js_command_palette(spec: &CommandPaletteSpec, theme: &JetstreamThemeProvider) -> JsEl {
+    let effective_size = resolve_semantic_size(spec.size, spec.size_role);
+    let font_size = rem_to_px(size_font_rem(effective_size));
+    let icon_size = rem_to_px(size_font_rem(effective_size));
+    let pad_x = rem_to_px(control_space_x_rem(spec.density));
+    let pad_y = rem_to_px(panel_space_y_rem(spec.density) - 0.25);
+    let item_py = rem_to_px(panel_space_y_rem(spec.density) - 0.375);
+    let gap = rem_to_px(0.5);
+
     let fill = resolve_color(theme, "semantic.color.background.elevated");
     let border = resolve_color(theme, "semantic.color.border.default");
     let radius = resolve_radius(theme, "semantic.radius.surface");
@@ -16,27 +28,27 @@ pub fn js_command_palette(spec: &CommandPaletteSpec, theme: &JetstreamThemeProvi
         .border(1.0).border_color(border)
         .rounded(radius)
         .flex_col()
-        .min_w(400.0).min_h(200.0)
+        .min_w(rem_to_px(25.0)).min_h(rem_to_px(12.5))
         .shadow_lg()
         .overlay();
 
     // Search input area with icon
     el = el.child(
         ui_element::div()
-            .flex_row().items_center().gap(8.0)
-            .pl(12.0).pr(12.0).pt(8.0).pb(8.0)
+            .flex_row().items_center().gap(gap)
+            .pl(pad_x).pr(pad_x).pt(pad_y).pb(pad_y)
             .border_b_1().border_color(border)
-            .child(ui_element::icon("search").w(16.0).h(16.0).text_color(text_muted))
-            .child(ui_element::label("Type a command...").text_color(text_muted).text_size(14.0).grow())
+            .child(ui_element::icon("search").w(icon_size).h(icon_size).text_color(text_muted))
+            .child(ui_element::label("Type a command...").text_color(text_muted).text_size(font_size).grow())
     );
 
     // Action list
     for action in &spec.actions {
         el = el.child(
             ui_element::div()
-                .flex_row().items_center().gap(8.0)
-                .pl(12.0).pr(12.0).pt(6.0).pb(6.0)
-                .child(ui_element::label(&action.title).text_color(text_color).text_size(13.0).grow())
+                .flex_row().items_center().gap(gap)
+                .pl(pad_x).pr(pad_x).pt(item_py).pb(item_py)
+                .child(ui_element::label(&action.title).text_color(text_color).text_size(font_size).grow())
         );
     }
 

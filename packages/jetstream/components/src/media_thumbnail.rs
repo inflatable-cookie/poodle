@@ -2,6 +2,8 @@
 use jetstream_runtime::ui_element::{self, JsEl};
 use poodle_jetstream::JetstreamThemeProvider;
 use poodle_composites::MediaThumbnailSpec;
+
+use crate::presentation::rem_to_px;
 use crate::theme_ext::{resolve_color, resolve_radius};
 
 pub fn js_media_thumbnail(spec: &MediaThumbnailSpec, theme: &JetstreamThemeProvider) -> JsEl {
@@ -14,11 +16,11 @@ pub fn js_media_thumbnail(spec: &MediaThumbnailSpec, theme: &JetstreamThemeProvi
         .bg(fill)
         .border(1.0).border_color(border)
         .rounded(radius)
-        .w(120.0).h(80.0)
+        .w(rem_to_px(7.5)).h(rem_to_px(5.0))
         .flex_col().items_center().justify_center();
 
     if let Some(ref title) = spec.title {
-        el = el.child(ui_element::label(title).text_color(text_color).text_size(11.0));
+        el = el.child(ui_element::label(title).text_color(text_color).text_size(rem_to_px(0.6875)));
     }
 
     el

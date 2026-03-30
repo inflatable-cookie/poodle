@@ -2,7 +2,7 @@
 use jetstream_runtime::ui_element::{self, JsEl};
 use poodle_jetstream::JetstreamThemeProvider;
 use poodle_composites::DetailShellSpec;
-use crate::theme_ext::{resolve_color, resolve_px};
+use crate::theme_ext::resolve_color;
 
 pub fn js_detail_shell(spec: &DetailShellSpec, theme: &JetstreamThemeProvider, header: Option<JsEl>, content: Option<JsEl>) -> JsEl {
     let bg = resolve_color(theme, spec.body_fill_token());

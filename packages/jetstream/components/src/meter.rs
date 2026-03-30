@@ -4,21 +4,22 @@ use jetstream_runtime::ui_element::{self, JsEl};
 use poodle_jetstream::JetstreamThemeProvider;
 use poodle_primitives::MeterSpec;
 
+use crate::presentation::rem_to_px;
 use crate::theme_ext::resolve_color;
 
 pub fn js_meter(spec: &MeterSpec, theme: &JetstreamThemeProvider) -> JsEl {
     let fill = resolve_color(theme, spec.fill_token());
     let track = resolve_color(theme, spec.track_fill_token());
 
-    let range = (spec.max - spec.min).max(0.001);
-    let fraction = ((spec.value - spec.min) / range).clamp(0.0, 1.0) as f32;
+    // Contract: track height 0.5rem (8px), border-radius 999px (pill)
+    let track_height = rem_to_px(spec.track_height_rem());
 
     let track_el = ui_element::div()
-        .h(8.0).grow().rounded(4.0).bg(track)
+        .h(track_height).grow().rounded(999.0).bg(track)
         .flex_row();
 
     let fill_el = ui_element::div()
-        .h(8.0).bg(fill).rounded(4.0);
+        .h(track_height).bg(fill).rounded(999.0);
 
     ui_element::div()
         .grow().flex_row().items_center()

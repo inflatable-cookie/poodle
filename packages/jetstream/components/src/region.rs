@@ -4,6 +4,7 @@ use jetstream_runtime::ui_element::{self, JsEl};
 use poodle_jetstream::JetstreamThemeProvider;
 use poodle_primitives::RegionSpec;
 
+use crate::presentation::rem_to_px;
 use crate::theme_ext::{resolve_color, resolve_px, resolve_radius};
 
 pub fn js_region(spec: &RegionSpec, theme: &JetstreamThemeProvider, children: Vec<JsEl>) -> JsEl {
@@ -20,11 +21,12 @@ pub fn js_region(spec: &RegionSpec, theme: &JetstreamThemeProvider, children: Ve
         .pl(padding).pr(padding)
         .pt(padding).pb(padding);
 
+    // Contract: label font-size 0.75rem (12px)
     if !spec.label.is_empty() {
         el = el.child(
             ui_element::label(&spec.label)
                 .text_color(label_color)
-                .text_size(12.0)
+                .text_size(rem_to_px(0.75))
         );
     }
 
