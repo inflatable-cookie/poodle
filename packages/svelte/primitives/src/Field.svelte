@@ -100,7 +100,7 @@
   .field__label-row {
     display: inline-flex;
     align-items: center;
-    gap: 0.25rem;
+    gap: 0.375rem;
   }
 
   .field__label,
