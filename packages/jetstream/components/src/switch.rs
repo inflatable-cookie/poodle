@@ -10,7 +10,10 @@ use jetstream_runtime::ui_element::{self, JsEl};
 use poodle_jetstream::JetstreamThemeProvider;
 use poodle_primitives::SwitchSpec;
 
-use crate::theme_ext::{resolve_color, resolve_opacity, resolve_px};
+use crate::presentation::{
+    control_space_x_rem, rem_to_px, resolve_semantic_size, size_font_rem,
+};
+use crate::theme_ext::{resolve_color, resolve_opacity};
 
 /// Build a switch element from a SwitchSpec.
 ///
@@ -31,6 +34,7 @@ use crate::theme_ext::{resolve_color, resolve_opacity, resolve_px};
 /// - Thumb travel: 0.875rem (14px) translateX
 /// - Gap: var(--poodle-space-inline-sm) = 8px
 pub fn js_switch(spec: &SwitchSpec, theme: &JetstreamThemeProvider) -> JsEl {
+    let effective_size = resolve_semantic_size(spec.size, spec.size_role);
     let is_checked = spec.current_checked();
 
     // ── Token resolution ──
@@ -38,15 +42,15 @@ pub fn js_switch(spec: &SwitchSpec, theme: &JetstreamThemeProvider) -> JsEl {
     let border_default = resolve_color(theme, "semantic.color.border.default");
     let accent = resolve_color(theme, "semantic.color.accent.base");
     let text_primary = resolve_color(theme, "semantic.color.text.primary");
-    let gap = resolve_px(theme, "semantic.space.inline.sm");
-    let label_size = resolve_px(theme, "semantic.typography.label.size");
+    let gap = rem_to_px(control_space_x_rem(spec.density));
+    let label_size = rem_to_px(size_font_rem(effective_size));
 
     // Contract dimensions (rem → px at 16px base)
-    let track_width: f32 = 34.0;  // 2.125rem
-    let track_height: f32 = 20.0; // 1.25rem
-    let track_padding: f32 = 2.0; // 0.125rem
-    let thumb_size: f32 = 14.0;   // 0.875rem
-    let thumb_travel: f32 = 14.0; // 0.875rem
+    let track_width: f32 = rem_to_px(2.125);  // 2.125rem
+    let track_height: f32 = rem_to_px(1.25);  // 1.25rem
+    let track_padding: f32 = rem_to_px(0.125); // 0.125rem
+    let thumb_size: f32 = rem_to_px(0.875);   // 0.875rem
+    let thumb_travel: f32 = rem_to_px(0.875); // 0.875rem
 
     // Contract: thumb color = text-primary when off, accent-base when on
     let thumb_color = if is_checked { accent } else { text_primary };

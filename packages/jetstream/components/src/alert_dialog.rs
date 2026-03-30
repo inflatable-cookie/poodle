@@ -8,9 +8,18 @@ use jetstream_runtime::ui_element::{self, JsEl};
 use poodle_jetstream::JetstreamThemeProvider;
 use poodle_primitives::AlertDialogSpec;
 
+use crate::presentation::{
+    panel_space_x_rem, panel_space_y_rem, rem_to_px, resolve_semantic_size, size_font_rem,
+};
 use crate::theme_ext::{resolve_color, resolve_radius};
 
 pub fn js_alert_dialog(spec: &AlertDialogSpec, theme: &JetstreamThemeProvider) -> JsEl {
+    let effective_size = resolve_semantic_size(spec.size, spec.size_role);
+    let title_font = rem_to_px(size_font_rem(effective_size) + 0.1875);
+    let body_font = rem_to_px(size_font_rem(effective_size));
+    let space_x = rem_to_px(panel_space_x_rem(spec.density) + 0.5);
+    let space_y = rem_to_px(panel_space_y_rem(spec.density) + 0.5);
+
     let fill = resolve_color(theme, "semantic.color.background.elevated");
     let backdrop: Color = resolve_color(theme, spec.backdrop_fill_token()).into();
     let border = resolve_color(theme, "semantic.color.border.default");
@@ -22,20 +31,20 @@ pub fn js_alert_dialog(spec: &AlertDialogSpec, theme: &JetstreamThemeProvider) -
         .bg(fill)
         .border(1.0).border_color(border)
         .rounded(radius)
-        .pl(24.0).pr(24.0).pt(20.0).pb(20.0)
-        .flex_col().gap(12.0)
-        .min_w(320.0)
+        .pl(space_x).pr(space_x).pt(space_y).pb(space_y)
+        .flex_col().gap(rem_to_px(0.75))
+        .min_w(rem_to_px(20.0))
         .shadow_lg();
 
     if !spec.title.is_empty() {
         panel = panel.child(
-            ui_element::label(&spec.title).text_color(title_color).text_size(16.0).text_weight(600)
+            ui_element::label(&spec.title).text_color(title_color).text_size(title_font).text_weight(600)
         );
     }
 
     if let Some(ref desc) = spec.description {
         panel = panel.child(
-            ui_element::label(desc).text_color(desc_color).text_size(13.0)
+            ui_element::label(desc).text_color(desc_color).text_size(body_font)
         );
     }
 

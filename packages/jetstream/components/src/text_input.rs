@@ -10,17 +10,22 @@ use jetstream_runtime::ui_element::{self, JsEl};
 use poodle_jetstream::JetstreamThemeProvider;
 use poodle_primitives::TextInputSpec;
 
-use crate::theme_ext::{resolve_color, resolve_opacity, resolve_px, resolve_radius};
+use crate::presentation::{
+    control_height_rem, control_space_x_rem, rem_to_px, resolve_semantic_size, size_font_rem,
+};
+use crate::theme_ext::{resolve_color, resolve_opacity, resolve_radius};
 
 pub fn js_text_input(spec: &TextInputSpec, theme: &JetstreamThemeProvider) -> JsEl {
-    let height = resolve_px(theme, spec.control_height_token());
+    let effective_size = resolve_semantic_size(spec.size, spec.size_role);
+    let height = rem_to_px(control_height_rem(effective_size));
+    let font_size = rem_to_px(size_font_rem(effective_size));
+    let pad_x = rem_to_px(control_space_x_rem(spec.density));
+
     let fill = resolve_color(theme, spec.fill_token());
     let border_color = resolve_color(theme, spec.border_token());
     let radius = resolve_radius(theme, spec.radius_token());
-    let pad_x = resolve_px(theme, spec.horizontal_padding_token());
     let text_color = resolve_color(theme, spec.text_color_token());
     let placeholder_color = resolve_color(theme, "semantic.color.text.secondary");
-    let label_size = resolve_px(theme, "semantic.typography.body.size");
 
     // Hover border: contract color-mix(border 78%, text-primary)
     let border_c: Color = border_color.into();
@@ -46,13 +51,13 @@ pub fn js_text_input(spec: &TextInputSpec, theme: &JetstreamThemeProvider) -> Js
         .pl(pad_x).pr(pad_x)
         .flex_row()
         .items_center()
-        .gap(8.0)
+        .gap(rem_to_px(0.5))
         .focusable()
         .hover(|s| s.border_color(hover_border))
         .child(
             ui_element::label(show_text)
                 .text_color(show_color)
-                .text_size(label_size)
+                .text_size(font_size)
                 .grow()
         );
 

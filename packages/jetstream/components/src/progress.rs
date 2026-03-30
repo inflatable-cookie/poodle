@@ -9,6 +9,7 @@ use jetstream_runtime::ui_element::{self, JsEl};
 use poodle_jetstream::JetstreamThemeProvider;
 use poodle_primitives::ProgressSpec;
 
+use crate::presentation::{rem_to_px, resolve_semantic_size};
 use crate::theme_ext::{resolve_color, tint};
 
 /// Build a progress bar element from a ProgressSpec.
@@ -27,15 +28,21 @@ use crate::theme_ext::{resolve_color, tint};
 /// - Determinate: scaleX(percentage)
 /// - Indeterminate: width 40%, animation translateX(-100% to 250%)
 pub fn js_progress(spec: &ProgressSpec, theme: &JetstreamThemeProvider) -> JsEl {
+    // Resolve effective size for presentation consistency (size_role wiring).
+    // Track height is currently fixed per contract but the plumbing is ready.
+    let _effective_size = resolve_semantic_size(spec.size, spec.size_role);
     let accent = resolve_color(theme, spec.indicator_fill_token());
     let surface = resolve_color(theme, "semantic.color.background.surface");
 
     // Contract: track bg = color-mix(surface 80%, elevated)
     let track_bg = tint(surface, 0.80);
 
+    // Contract: track min-height 0.5rem = 8px
+    let track_height = rem_to_px(0.5);
+
     // Contract: min-height 0.5rem = 8px, border-radius 999px
     let mut track = ui_element::div()
-        .min_h(8.0)  // 0.5rem
+        .min_h(track_height)
         .self_stretch()
         .rounded(999.0) // pill
         .bg(track_bg);
@@ -50,7 +57,7 @@ pub fn js_progress(spec: &ProgressSpec, theme: &JetstreamThemeProvider) -> JsEl 
         // Proper percentage-based width requires Widget::ProgressBar support.
         track = track.child(
             ui_element::div()
-                .min_h(8.0)  // match track height
+                .min_h(track_height)  // match track height
                 .rounded(999.0)
                 .bg(accent)
                 .self_stretch()
@@ -60,7 +67,7 @@ pub fn js_progress(spec: &ProgressSpec, theme: &JetstreamThemeProvider) -> JsEl 
         // Animation is a runtime capability not yet in JsEl.
         track = track.child(
             ui_element::div()
-                .min_h(8.0)
+                .min_h(track_height)
                 .rounded(999.0)
                 .bg(accent)
         );

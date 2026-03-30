@@ -10,18 +10,25 @@ use jetstream_runtime::ui_element::{self, JsEl};
 use poodle_jetstream::JetstreamThemeProvider;
 use poodle_primitives::SelectSpec;
 
-use crate::theme_ext::{resolve_color, resolve_opacity, resolve_px, resolve_radius};
+use crate::presentation::{
+    control_height_rem, control_space_x_rem, rem_to_px, resolve_semantic_size,
+    resolve_supporting_visual_size, size_font_rem,
+};
+use crate::theme_ext::{resolve_color, resolve_opacity, resolve_radius};
 
 pub fn js_select(spec: &SelectSpec, theme: &JetstreamThemeProvider) -> JsEl {
+    let effective_size = resolve_semantic_size(spec.size, spec.size_role);
+    let height = rem_to_px(control_height_rem(effective_size));
+    let font_size = rem_to_px(size_font_rem(effective_size));
+    let pad_x = rem_to_px(control_space_x_rem(spec.density));
+    let icon_size = rem_to_px(size_font_rem(resolve_supporting_visual_size(effective_size)));
+
     let fill = resolve_color(theme, "semantic.color.background.surface");
     let border_color = resolve_color(theme, "semantic.color.border.default");
     let radius = resolve_radius(theme, "semantic.radius.control");
     let text_color = resolve_color(theme, "semantic.color.text.primary");
     let muted = resolve_color(theme, "semantic.color.text.secondary");
     let icon_muted = resolve_color(theme, "semantic.color.icon.muted");
-    let height = resolve_px(theme, "semantic.size.control.height");
-    let pad_x = resolve_px(theme, "semantic.space.control.x");
-    let label_size = resolve_px(theme, "semantic.typography.body.size");
 
     // Hover state
     let border_c: Color = border_color.into();
@@ -41,9 +48,9 @@ pub fn js_select(spec: &SelectSpec, theme: &JetstreamThemeProvider) -> JsEl {
         .border(1.0).border_color(border_color)
         .rounded(radius)
         .h(height)
-        .pl(pad_x).pr(pad_x - 4.0)
+        .pl(pad_x).pr(pad_x - rem_to_px(0.25))
         .flex_row().items_center()
-        .gap(4.0)
+        .gap(rem_to_px(0.25))
         .focusable()
         .cursor_pointer()
         .hover(|s| s.border_color(hover_border));
@@ -51,14 +58,14 @@ pub fn js_select(spec: &SelectSpec, theme: &JetstreamThemeProvider) -> JsEl {
     el = el.child(
         ui_element::label(display)
             .text_color(display_color)
-            .text_size(label_size)
+            .text_size(font_size)
             .grow()
     );
 
     // SVG chevron indicator
     el = el.child(
         ui_element::icon("chevron-down")
-            .w(16.0).h(16.0)
+            .w(icon_size).h(icon_size)
             .text_color(icon_muted)
     );
 

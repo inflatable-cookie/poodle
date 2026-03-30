@@ -9,6 +9,7 @@ use jetstream_runtime::ui_element::{self, JsEl};
 use poodle_jetstream::JetstreamThemeProvider;
 use poodle_primitives::StatusIndicatorSpec;
 
+use crate::presentation::rem_to_px;
 use crate::theme_ext::resolve_color;
 
 /// Build a status indicator element from a StatusIndicatorSpec.
@@ -29,10 +30,10 @@ pub fn js_status_indicator(spec: &StatusIndicatorSpec, theme: &JetstreamThemePro
     let status_color = resolve_color(theme, spec.status_color_token());
     let text_primary = resolve_color(theme, "semantic.color.text.primary");
 
-    // Contract: dot dimensions
-    let dot_size: f32 = 9.0;   // 0.5625rem
-    let gap: f32 = 7.0;        // 0.4375rem
-    let label_size: f32 = 12.0; // 0.75rem
+    // Contract: dot dimensions (via spec helper rem values → px)
+    let dot_size = rem_to_px(spec.dot_size_rem());
+    let gap = rem_to_px(spec.gap_rem());
+    let label_size = rem_to_px(spec.label_font_size_rem());
 
     // Contract: dot with box-shadow glow (18% of status color)
     let dot = ui_element::div()

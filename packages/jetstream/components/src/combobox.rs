@@ -8,9 +8,19 @@ use jetstream_runtime::ui_element::{self, JsEl};
 use poodle_jetstream::JetstreamThemeProvider;
 use poodle_primitives::ComboboxSpec;
 
+use crate::presentation::{
+    control_height_rem, control_space_x_rem, rem_to_px, resolve_semantic_size,
+    resolve_supporting_visual_size, size_font_rem,
+};
 use crate::theme_ext::{resolve_color, resolve_radius};
 
 pub fn js_combobox(spec: &ComboboxSpec, theme: &JetstreamThemeProvider) -> JsEl {
+    let effective_size = resolve_semantic_size(spec.size, spec.size_role);
+    let height = rem_to_px(control_height_rem(effective_size));
+    let font_size = rem_to_px(size_font_rem(effective_size));
+    let pad_x = rem_to_px(control_space_x_rem(spec.density));
+    let icon_size = rem_to_px(size_font_rem(resolve_supporting_visual_size(effective_size)));
+
     let fill = resolve_color(theme, "semantic.color.background.surface");
     let border_color = resolve_color(theme, "semantic.color.border.default");
     let radius = resolve_radius(theme, "semantic.radius.control");
@@ -30,19 +40,19 @@ pub fn js_combobox(spec: &ComboboxSpec, theme: &JetstreamThemeProvider) -> JsEl 
         .bg(fill)
         .border(1.0).border_color(border_color)
         .rounded(radius)
-        .h(36.0).pl(12.0).pr(8.0)
-        .flex_row().items_center().gap(4.0)
+        .h(height).pl(pad_x).pr(pad_x - rem_to_px(0.25))
+        .flex_row().items_center().gap(rem_to_px(0.25))
         .focusable()
         .cursor_pointer()
         .hover(|s| s.border_color(hover_border))
         .child(
             ui_element::label(display)
                 .text_color(if spec.value.is_some() { text_color } else { muted })
-                .text_size(13.0).grow()
+                .text_size(font_size).grow()
         )
         .child(
             ui_element::icon("chevron-down")
-                .w(16.0).h(16.0)
+                .w(icon_size).h(icon_size)
                 .text_color(muted)
         )
 }

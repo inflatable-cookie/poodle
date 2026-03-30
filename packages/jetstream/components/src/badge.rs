@@ -10,6 +10,7 @@ use jetstream_runtime::ui_element::{self, JsEl};
 use poodle_jetstream::JetstreamThemeProvider;
 use poodle_primitives::{BadgeSpec, BadgeVariant};
 
+use crate::presentation::rem_to_px;
 use crate::theme_ext::resolve_color;
 
 /// Build a badge element from a BadgeSpec.
@@ -50,19 +51,17 @@ pub fn js_badge(spec: &BadgeSpec, theme: &JetstreamThemeProvider) -> JsEl {
         }
     };
 
-    // Contract dimensions (rem → px at 16px base):
-    // min-height: 1.25rem = 20px
-    // padding: 0.125rem 0.4375rem = 2px 7px
-    // font-size: 0.6875rem = 11px
-    // border-radius: 999px (pill)
+    // Contract dimensions (rem → px via presentation helpers):
+    // min-height: 1.25rem, padding: 0.125rem 0.4375rem
+    // font-size: 0.6875rem, border-radius: 999px (pill)
     ui_element::label(&content)
-        .min_h(20.0)   // 1.25rem
-        .px(7.0)       // 0.4375rem
-        .py(2.0)       // 0.125rem
+        .min_h(rem_to_px(1.25))
+        .px(rem_to_px(0.4375))
+        .py(rem_to_px(0.125))
         .rounded(999.0) // pill
         .bg(bg)
         .text_color(text_color)
-        .text_size(11.0) // 0.6875rem
+        .text_size(rem_to_px(0.6875))
         .items_center()
         .justify_center()
     // Note: text-transform: uppercase and letter-spacing: 0.04em are CSS-only

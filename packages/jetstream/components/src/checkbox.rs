@@ -9,7 +9,10 @@ use jetstream_runtime::ui_element::{self, JsEl};
 use poodle_jetstream::JetstreamThemeProvider;
 use poodle_primitives::{CheckState, CheckboxSpec};
 
-use crate::theme_ext::{resolve_color, resolve_opacity, resolve_px};
+use crate::presentation::{
+    control_space_x_rem, rem_to_px, resolve_semantic_size, size_font_rem,
+};
+use crate::theme_ext::{resolve_color, resolve_opacity};
 
 /// Build a checkbox element from a CheckboxSpec.
 ///
@@ -30,13 +33,15 @@ use crate::theme_ext::{resolve_color, resolve_opacity, resolve_px};
 /// - Gap (root): var(--poodle-space-inline-sm) = 8px
 /// - Label typography: label-family, label-size (13px), label-weight (500), label-lineHeight (16px)
 pub fn js_checkbox(spec: &CheckboxSpec, theme: &JetstreamThemeProvider) -> JsEl {
+    let effective_size = resolve_semantic_size(spec.size, spec.size_role);
+
     // ── Token resolution ──
     let indicator_fill = resolve_color(theme, spec.indicator_fill_token());
     let border_default = resolve_color(theme, "semantic.color.border.default");
     let text_primary = resolve_color(theme, "semantic.color.text.primary");
     let text_inverse = resolve_color(theme, "semantic.color.text.inverse");
-    let gap = resolve_px(theme, "semantic.space.inline.sm");
-    let label_size = resolve_px(theme, "semantic.typography.label.size");
+    let gap = rem_to_px(control_space_x_rem(spec.density));
+    let label_size = rem_to_px(size_font_rem(effective_size));
 
     let state = spec.current_state();
     let is_checked = matches!(state, CheckState::Checked | CheckState::Mixed);
@@ -51,10 +56,13 @@ pub fn js_checkbox(spec: &CheckboxSpec, theme: &JetstreamThemeProvider) -> JsEl 
     let indicator_bg = if is_checked { indicator_fill } else { surface };
 
     // ── Indicator (contract: 1.125rem = 18px, border-radius 0.3125rem = 5px) ──
+    let indicator_size = rem_to_px(1.125);
+    let indicator_radius = rem_to_px(0.3125);
+    let mark_size = rem_to_px(0.875);
     let mut indicator = ui_element::div()
-        .w(18.0)  // 1.125rem
-        .h(18.0)  // 1.125rem
-        .rounded(5.0) // 0.3125rem
+        .w(indicator_size)
+        .h(indicator_size)
+        .rounded(indicator_radius)
         .bg(indicator_bg)
         .border_1().border_color(indicator_border)
         .items_center().justify_center();
@@ -64,14 +72,14 @@ pub fn js_checkbox(spec: &CheckboxSpec, theme: &JetstreamThemeProvider) -> JsEl 
         CheckState::Checked => {
             indicator = indicator.child(
                 ui_element::icon("check")
-                    .w(14.0).h(14.0) // 0.875rem mark size
+                    .w(mark_size).h(mark_size)
                     .text_color(mark_color)
             );
         }
         CheckState::Mixed => {
             indicator = indicator.child(
                 ui_element::icon("minus")
-                    .w(14.0).h(14.0)
+                    .w(mark_size).h(mark_size)
                     .text_color(mark_color)
             );
         }

@@ -10,9 +10,17 @@ use jetstream_runtime::ui_element::{self, JsEl};
 use poodle_jetstream::JetstreamThemeProvider;
 use poodle_primitives::SliderSpec;
 
+use crate::presentation::{
+    control_height_rem, rem_to_px, resolve_semantic_size,
+};
 use crate::theme_ext::{resolve_color, resolve_opacity};
 
 pub fn js_slider(spec: &SliderSpec, theme: &JetstreamThemeProvider) -> JsEl {
+    let effective_size = resolve_semantic_size(spec.size, spec.size_role);
+    let thumb_size = rem_to_px(control_height_rem(effective_size) * 0.44);
+    let track_h = rem_to_px(0.25);
+    let container_h = rem_to_px(control_height_rem(effective_size) * 0.56);
+
     let accent: Color = resolve_color(theme, spec.range_fill_token()).into();
     let surface: Color = resolve_color(theme, "semantic.color.background.surface").into();
     let border_default: Color = resolve_color(theme, "semantic.color.border.default").into();
@@ -24,28 +32,28 @@ pub fn js_slider(spec: &SliderSpec, theme: &JetstreamThemeProvider) -> JsEl {
     let range = (spec.max - spec.min).max(0.001);
     let fraction = ((spec.value - spec.min) / range).clamp(0.0, 1.0) as f32;
 
-    // Track: 4px tall, full width
+    // Track
     let track = ui_element::div()
-        .h(4.0).grow().rounded(2.0).bg(track_bg)
+        .h(track_h).grow().rounded(track_h * 0.5).bg(track_bg)
         .relative()
         .flex_row();
 
     // Fill: accent-colored portion from left
     let fill = ui_element::div()
-        .h(4.0)
+        .h(track_h)
         .bg(accent)
-        .rounded(2.0);
+        .rounded(track_h * 0.5);
 
-    // Thumb: 16px circle, positioned at fill percentage
+    // Thumb
     let thumb = ui_element::div()
-        .w(16.0).h(16.0)
-        .rounded(8.0)
+        .w(thumb_size).h(thumb_size)
+        .rounded(thumb_size * 0.5)
         .bg(elevated)
         .border(1.0).border_color(border_default)
         .cursor_pointer();
 
     let mut el = ui_element::div()
-        .h(20.0).grow()
+        .h(container_h).grow()
         .flex_row().items_center()
         .relative()
         .child(

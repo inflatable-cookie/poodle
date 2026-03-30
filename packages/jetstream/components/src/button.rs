@@ -13,7 +13,11 @@ use poodle_primitives::ButtonTone;
 use poodle_primitives::ButtonVariant;
 use poodle_primitives::ControlSize;
 
-use crate::theme_ext::{resolve_color, resolve_opacity, resolve_px, resolve_radius};
+use crate::presentation::{
+    control_height_rem, control_space_x_rem, rem_to_px, resolve_semantic_size,
+    size_font_rem, size_min_width_rem, size_padding_x_offset_rem,
+};
+use crate::theme_ext::{resolve_color, resolve_opacity, resolve_radius};
 
 /// Build a Jetstream button element from a ButtonSpec.
 ///
@@ -26,7 +30,7 @@ use crate::theme_ext::{resolve_color, resolve_opacity, resolve_px, resolve_radiu
 ///   └── [Trailing Icon] — optional
 /// ```
 pub fn js_button(spec: &ButtonSpec, theme: &JetstreamThemeProvider) -> JsEl {
-    let is_ghost = spec.variant == ButtonVariant::Ghost;
+    let effective_size = resolve_semantic_size(spec.size, spec.size_role);
     let tone = spec.effective_tone();
     let is_danger_tone = tone == ButtonTone::Danger;
 
@@ -62,51 +66,23 @@ pub fn js_button(spec: &ButtonSpec, theme: &JetstreamThemeProvider) -> JsEl {
     let text_primary: Color = resolve_color(theme, "semantic.color.text.primary").into();
     let hover_border = border_color.mix(text_primary, 0.78);
 
-    // ── Sizing per ControlSize (contract: sm = height-6, md = height, lg = height+6) ──
-    let base_height = resolve_px(theme, spec.control_height_token());
-    let height = match spec.size {
-        ControlSize::Xs => base_height - 10.0,
-        ControlSize::Sm => base_height - 6.0,
-        ControlSize::Md => base_height,
-        ControlSize::Lg => base_height + 6.0,
-        ControlSize::Xl => base_height + 10.0,
-    };
-
-    let base_min_width = resolve_px(theme, spec.control_min_width_token());
-    let min_width = match spec.size {
-        ControlSize::Xs => (base_min_width - 24.0).max(0.0), // 56px
-        ControlSize::Sm => (base_min_width - 12.0).max(0.0), // 68px vs 80px
-        ControlSize::Md => base_min_width,                     // 80px
-        ControlSize::Lg => base_min_width + 12.0,              // 92px
-        ControlSize::Xl => base_min_width + 24.0,              // 104px
-    };
-
-    let base_pad_x = resolve_px(theme, spec.horizontal_padding_token());
-    let pad_x = match spec.size {
-        ControlSize::Xs => base_pad_x - 4.0,
-        ControlSize::Sm => base_pad_x - 2.0,
-        ControlSize::Md => base_pad_x,
-        ControlSize::Lg => base_pad_x + 2.0,
-        ControlSize::Xl => base_pad_x + 4.0,
-    };
+    // ── Sizing via presentation helpers (size_role resolves effective size) ──
+    let height = rem_to_px(control_height_rem(effective_size));
+    let min_width = rem_to_px(size_min_width_rem(effective_size));
+    let base_pad_x = rem_to_px(control_space_x_rem(spec.density));
+    let pad_x = base_pad_x + rem_to_px(size_padding_x_offset_rem(effective_size));
 
     // Padding adjustments when icons present (contract: reduce by 2px on icon side)
     let pad_left = if spec.leading_icon.is_some() { pad_x - 2.0 } else { pad_x };
     let pad_right = if spec.trailing_icon.is_some() { pad_x - 2.0 } else { pad_x };
 
     let radius = resolve_radius(theme, spec.radius_token());
-    let gap = 6.0; // contract: 0.375rem = 6px
+    let gap = rem_to_px(control_space_x_rem(spec.density)) * 0.5; // inner gap is half of control space
 
-    // Font size per size (contract: sm=12px, md=label-size, lg=14px)
-    let label_size = match spec.size {
-        ControlSize::Xs => 11.0,
-        ControlSize::Sm => 12.0,
-        ControlSize::Md => resolve_px(theme, "semantic.typography.label.size"),
-        ControlSize::Lg => 14.0,
-        ControlSize::Xl => 15.0,
-    };
+    // Font size from presentation helper, driven by effective size
+    let label_size = rem_to_px(size_font_rem(effective_size));
 
-    let icon_size = resolve_px(theme, spec.icon_size_token());
+    let icon_size = rem_to_px(size_font_rem(effective_size)); // icon tracks font size
     let is_disabled = spec.is_disabled || spec.is_loading;
 
     let has_icons = spec.leading_icon.is_some() || spec.trailing_icon.is_some() || spec.is_loading;
@@ -244,7 +220,7 @@ mod tests {
         let theme = test_theme();
         let sm = js_button(&ButtonSpec::new().with_size(ControlSize::Sm).with_label("S"), &theme);
         let md = js_button(&ButtonSpec::new().with_size(ControlSize::Md).with_label("M"), &theme);
-        // sm should be 30px (36-6), md should be 36px
+        // sm should be 28px (1.75rem), md should be 36px (2.25rem)
         assert_ne!(sm.layout.size.height, md.layout.size.height,
             "sm and md should have different heights");
     }

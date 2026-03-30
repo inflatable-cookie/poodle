@@ -9,6 +9,7 @@ use jetstream_runtime::ui_element::{self, JsEl};
 use poodle_jetstream::JetstreamThemeProvider;
 use poodle_primitives::{SeparatorOrientation, SeparatorSpec};
 
+use crate::presentation::rem_to_px;
 use crate::theme_ext::{resolve_color, tint};
 
 /// Build a separator element from a SeparatorSpec.
@@ -39,17 +40,18 @@ pub fn js_separator(spec: &SeparatorSpec, theme: &JetstreamThemeProvider) -> JsE
     };
 
     // Contract: flex 0 0 auto — separator doesn't grow or shrink
+    let stroke = rem_to_px(0.0625); // 0.0625rem = 1px at 16px base
     match spec.orientation {
         SeparatorOrientation::Horizontal => {
             ui_element::div()
-                .min_h(1.0) // 0.0625rem
+                .min_h(stroke)
                 .self_stretch() // width 100%
                 .bg(color)
                 .flex_none() // flex: 0 0 auto
         }
         SeparatorOrientation::Vertical => {
             ui_element::div()
-                .w(1.0)     // 0.0625rem
+                .w(stroke)
                 .h_full()   // min-height 100%
                 .bg(color)
                 .flex_none() // flex: 0 0 auto

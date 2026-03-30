@@ -10,11 +10,16 @@ use jetstream_runtime::ui_element::{self, JsEl};
 use poodle_jetstream::JetstreamThemeProvider;
 use poodle_primitives::IconButtonSpec;
 
-use crate::theme_ext::{resolve_color, resolve_opacity, resolve_px, resolve_radius};
+use crate::presentation::{
+    control_height_rem, rem_to_px, resolve_semantic_size, resolve_supporting_visual_size,
+    size_font_rem,
+};
+use crate::theme_ext::{resolve_color, resolve_opacity, resolve_radius};
 
 pub fn js_icon_button(spec: &IconButtonSpec, theme: &JetstreamThemeProvider) -> JsEl {
-    let height = resolve_px(theme, spec.control_height_token());
-    let icon_size = resolve_px(theme, spec.icon_size_token());
+    let effective_size = resolve_semantic_size(spec.size, spec.size_role);
+    let height = rem_to_px(control_height_rem(effective_size));
+    let icon_size = rem_to_px(size_font_rem(resolve_supporting_visual_size(effective_size)));
     let radius = resolve_radius(theme, "semantic.radius.control");
     let text_color = resolve_color(theme, "semantic.color.text.primary");
 

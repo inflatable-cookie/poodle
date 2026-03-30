@@ -6,9 +6,14 @@
 //! ALL dimensions from contract. ZERO hardcoded values.
 
 use jetstream_runtime::ui_element::{self, JsEl};
+use poodle_primitives::ControlSize;
 use poodle_jetstream::JetstreamThemeProvider;
-use poodle_primitives::{AccordionItemSpec, AccordionSpec};
+use poodle_primitives::{AccordionItemSpec, AccordionSpec, ControlDensity};
 
+use crate::presentation::{
+    panel_space_x_rem, panel_space_y_rem, rem_to_px, resolve_semantic_size,
+    size_font_rem,
+};
 use crate::theme_ext::{resolve_color, resolve_opacity, resolve_px, resolve_radius, tint};
 
 /// Build an accordion element from an AccordionSpec.
@@ -33,6 +38,7 @@ use crate::theme_ext::{resolve_color, resolve_opacity, resolve_px, resolve_radiu
 /// - background: color-mix(surface 50%, elevated)
 /// - box-shadow: inset 0 0.0625rem 0 color-mix(text-inverse 8%, transparent)
 pub fn js_accordion(spec: &AccordionSpec, theme: &JetstreamThemeProvider) -> JsEl {
+    let effective_size = resolve_semantic_size(spec.size, spec.size_role);
     let item_gap = resolve_px(theme, spec.item_gap_token());
     let expanded = spec.expanded_values();
 
@@ -44,7 +50,7 @@ pub fn js_accordion(spec: &AccordionSpec, theme: &JetstreamThemeProvider) -> JsE
 
     for item in &spec.items {
         let is_expanded = expanded.iter().any(|v| *v == item.value);
-        root = root.child(render_item(item, is_expanded, theme));
+        root = root.child(render_item(item, is_expanded, effective_size, spec.density, theme));
     }
 
     root
@@ -53,6 +59,8 @@ pub fn js_accordion(spec: &AccordionSpec, theme: &JetstreamThemeProvider) -> JsE
 fn render_item(
     item: &AccordionItemSpec,
     is_expanded: bool,
+    effective_size: ControlSize,
+    density: ControlDensity,
     theme: &JetstreamThemeProvider,
 ) -> JsEl {
     // ── Token resolution ──
@@ -77,26 +85,30 @@ fn render_item(
     // Contract: chevron indicator, rotates 180deg when open
     let chevron = if is_expanded { "▾" } else { "▸" };
 
+    // Density-driven padding for trigger and panel
+    let pad_x = rem_to_px(panel_space_x_rem(density));
+    let pad_y = rem_to_px(panel_space_y_rem(density));
+    let title_font_size = rem_to_px(size_font_rem(effective_size));
+    let chevron_font_size = title_font_size * 0.85; // slightly smaller than title
+
     // Contract: trigger is full-width button with grid layout 1fr auto
-    // Title: heading-family, 1rem (16px), weight 700
-    // We use 14px as compromise since heading tokens may differ
     let trigger = ui_element::div()
         .flex_row()
         .self_stretch()
-        .px(16.0)  // 1rem
-        .py(14.0)  // 0.875rem
+        .px(pad_x)
+        .py(pad_y)
         .items_center()
         .justify_between()
         .focusable()
         .child(
             ui_element::label(&item.label)
                 .text_color(text_primary)
-                .text_size(14.0) // contract: heading, approximately 1rem
+                .text_size(title_font_size)
         )
         .child(
             ui_element::label(chevron)
                 .text_color(text_secondary)
-                .text_size(12.0)
+                .text_size(chevron_font_size)
         );
 
     // Contract: item is a section with border, radius, background
@@ -111,13 +123,14 @@ fn render_item(
     // Contract: panel is role="region" with aria-labelledby, conditional render
     if is_expanded {
         if let Some(ref desc) = item.description {
+            let content_font_size = rem_to_px(size_font_rem(effective_size));
             let panel = ui_element::div()
-                .px(16.0)  // 1rem — matches trigger padding
-                .py(12.0)  // slightly less than trigger
+                .px(pad_x)   // matches trigger padding
+                .py(pad_y * 0.85) // slightly less than trigger
                 .child(
                     ui_element::label(desc)
                         .text_color(text_secondary)
-                        .text_size(13.0) // 0.8125rem
+                        .text_size(content_font_size)
                 );
             el = el.child(panel);
         }

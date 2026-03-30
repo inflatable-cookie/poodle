@@ -8,6 +8,10 @@ use jetstream_runtime::ui_element::{self, JsEl};
 use poodle_jetstream::JetstreamThemeProvider;
 use poodle_primitives::{CallOutSpec, StatusTone};
 
+use crate::presentation::{
+    control_space_x_rem, panel_space_y_rem, rem_to_px, resolve_semantic_size,
+    resolve_supporting_visual_size, size_font_rem,
+};
 use crate::theme_ext::{resolve_color, resolve_radius};
 
 /// Map a status tone to its icon name (contract icon mapping).
@@ -22,6 +26,14 @@ fn tone_icon(tone: StatusTone) -> &'static str {
 }
 
 pub fn js_callout(spec: &CallOutSpec, theme: &JetstreamThemeProvider) -> JsEl {
+    let effective_size = resolve_semantic_size(spec.size, spec.size_role);
+    let font_size = rem_to_px(size_font_rem(effective_size));
+    let icon_size = rem_to_px(size_font_rem(resolve_supporting_visual_size(effective_size)));
+    let pad_x = rem_to_px(control_space_x_rem(spec.density));
+    let pad_y = rem_to_px(panel_space_y_rem(spec.density));
+    let gap = rem_to_px(0.5);
+    let content_gap = rem_to_px(0.25);
+
     let tone_color: Color = resolve_color(theme, spec.fill_token()).into();
     let border_color = resolve_color(theme, spec.border_token());
     let radius = resolve_radius(theme, "semantic.radius.surface");
@@ -36,26 +48,26 @@ pub fn js_callout(spec: &CallOutSpec, theme: &JetstreamThemeProvider) -> JsEl {
         .border(1.0)
         .border_color(border_color)
         .rounded(radius)
-        .pl(12.0).pr(12.0)
-        .pt(12.0).pb(12.0)
+        .pl(pad_x).pr(pad_x)
+        .pt(pad_y).pb(pad_y)
         .flex_row()
-        .gap(8.0);
+        .gap(gap);
 
     // Icon per tone
     el = el.child(
         ui_element::icon(tone_icon(spec.tone))
-            .w(16.0).h(16.0)
+            .w(icon_size).h(icon_size)
             .text_color(tone_color)
     );
 
     // Content column
-    let mut content = ui_element::div().flex_col().gap(4.0).grow();
+    let mut content = ui_element::div().flex_col().gap(content_gap).grow();
 
     if let Some(ref title) = spec.title {
         content = content.child(
             ui_element::label(title)
                 .text_color(text_primary)
-                .text_size(13.0)
+                .text_size(font_size)
                 .text_weight(600)
         );
     }
@@ -64,7 +76,7 @@ pub fn js_callout(spec: &CallOutSpec, theme: &JetstreamThemeProvider) -> JsEl {
         content = content.child(
             ui_element::label(body)
                 .text_color(text_primary)
-                .text_size(13.0)
+                .text_size(font_size)
         );
     }
 

@@ -9,15 +9,22 @@ use jetstream_runtime::ui_element::{self, JsEl};
 use poodle_jetstream::JetstreamThemeProvider;
 use poodle_primitives::TabsSpec;
 
-use crate::theme_ext::{resolve_color, resolve_px};
+use crate::presentation::{
+    control_space_x_rem, panel_space_y_rem, rem_to_px, resolve_semantic_size, size_font_rem,
+};
+use crate::theme_ext::resolve_color;
 
 pub fn js_tabs(spec: &TabsSpec, theme: &JetstreamThemeProvider) -> JsEl {
-    let gap = resolve_px(theme, spec.list_gap_token());
+    let effective_size = resolve_semantic_size(spec.size, spec.size_role);
+    let font_size = rem_to_px(size_font_rem(effective_size));
+    let tab_px = rem_to_px(control_space_x_rem(spec.density));
+    let tab_py = rem_to_px(panel_space_y_rem(spec.density));
+    let gap = rem_to_px(0.25);
+
     let indicator = resolve_color(theme, spec.indicator_token());
     let border = resolve_color(theme, spec.list_border_token());
     let text_color = resolve_color(theme, "semantic.color.text.primary");
     let text_muted = resolve_color(theme, "semantic.color.text.secondary");
-    let label_size = resolve_px(theme, "semantic.typography.label.size");
 
     let selected = spec.value.as_deref().or(spec.default_value.as_deref());
 
@@ -31,10 +38,10 @@ pub fn js_tabs(spec: &TabsSpec, theme: &JetstreamThemeProvider) -> JsEl {
     for tab in &spec.tabs {
         let is_active = selected == Some(tab.value.as_str());
         let mut tab_el = ui_element::button(&tab.label)
-            .text_size(label_size)
+            .text_size(font_size)
             .text_weight(if is_active { 600 } else { 400 })
             .text_color(if is_active { text_color } else { text_muted })
-            .pt(8.0).pb(8.0).pl(12.0).pr(12.0)
+            .pt(tab_py).pb(tab_py).pl(tab_px).pr(tab_px)
             .focusable()
             .cursor_pointer();
 
