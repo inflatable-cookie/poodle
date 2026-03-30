@@ -141,6 +141,8 @@
           {weekStartsOn}
           {locale}
           {disabled}
+          size={resolvedSize}
+          density={resolvedDensity}
           ariaLabel={ariaLabel ?? "Date"}
           on:valueChange={(event) => commitValue({ ...currentValue, date: event.detail.value })}
           on:monthChange={(event) => (visibleMonth = event.detail.month)}
@@ -155,6 +157,8 @@
               id={`${surfaceId}-time`}
               value={currentValue.time}
               disabled={disabled}
+              size={resolvedSize}
+              density={resolvedDensity}
               ariaLabel={ariaLabel ? `${ariaLabel} time` : "Time"}
               on:valueChange={(event) => commitValue({ ...currentValue, time: event.detail.value })}
             />
@@ -169,6 +173,8 @@
               value={currentValue.timeZone}
               options={timeZoneOptions}
               disabled={disabled}
+              size={resolvedSize}
+              density={resolvedDensity}
               ariaLabel={ariaLabel ? `${ariaLabel} time zone` : "Time zone"}
               on:valueChange={(event) => commitValue({ ...currentValue, timeZone: event.detail.value })}
             />

@@ -143,6 +143,8 @@
           {weekStartsOn}
           {locale}
           {disabled}
+          size={resolvedSize}
+          density={resolvedDensity}
           ariaLabel={ariaLabel ?? placeholder}
           on:valueChange={(event) =>
             commitValue({
@@ -161,6 +163,8 @@
               id={`${surfaceId}-start-time`}
               value={currentValue.start.time}
               disabled={disabled}
+              size={resolvedSize}
+              density={resolvedDensity}
               ariaLabel={ariaLabel ? `${ariaLabel} start time` : "Start time"}
               on:valueChange={(event) =>
                 commitValue({
@@ -178,6 +182,8 @@
               id={`${surfaceId}-end-time`}
               value={currentValue.end.time}
               disabled={disabled}
+              size={resolvedSize}
+              density={resolvedDensity}
               ariaLabel={ariaLabel ? `${ariaLabel} end time` : "End time"}
               on:valueChange={(event) =>
                 commitValue({

@@ -116,6 +116,8 @@
         {weekStartsOn}
         {locale}
         {disabled}
+        size={resolvedSize}
+        density={resolvedDensity}
         ariaLabel={ariaLabel ?? placeholder}
         on:valueChange={(event) => commitValue(event.detail.value)}
         on:monthChange={(event) => (visibleMonth = event.detail.month)}
