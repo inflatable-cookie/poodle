@@ -30,6 +30,7 @@
   const uiPresentation = getUiPresentation();
   let rootElement: HTMLDivElement | null = null;
   let uncontrolledValue = defaultValue;
+  let placement: "below" | "above" = "below";
   let query = "";
   let open = false;
   let highlightIndex = 0;
@@ -54,6 +55,11 @@
       : undefined;
 
   function setOpen(nextOpen: boolean): void {
+    if (nextOpen && rootElement) {
+      const rect = rootElement.getBoundingClientRect();
+      const spaceBelow = window.innerHeight - rect.bottom;
+      placement = spaceBelow < 280 ? "above" : "below";
+    }
     open = nextOpen;
     dispatch("openChange", { open: nextOpen });
   }
@@ -143,7 +149,7 @@
   />
 
   {#if open}
-    <div id={listboxId} class="combobox__list" role="listbox">
+    <div id={listboxId} class="combobox__list" class:combobox__list--above={placement === "above"} role="listbox">
       {#if filteredOptions.length === 0}
         <div class="combobox__empty">No matches</div>
       {:else}
@@ -230,6 +236,11 @@
       color-mix(in srgb, var(--poodle-color-background-elevated) 98%, var(--poodle-color-background-panel))
     );
     box-shadow: var(--poodle-treatment-surface-elevated-shadow, var(--poodle-elevation-overlay));
+  }
+
+  .combobox__list--above {
+    top: auto;
+    bottom: calc(100% + 0.375rem);
   }
 
   .combobox__option {
