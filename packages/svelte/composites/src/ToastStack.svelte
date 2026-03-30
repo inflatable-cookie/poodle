@@ -45,7 +45,7 @@
 
       {#if item.actionLabel}
         <div class="toast__actions">
-          <Button variant="secondary" on:click={() => dispatch("action", { id: item.id })}>
+          <Button variant="secondary" size={resolvedSize} density={resolvedDensity} on:click={() => dispatch("action", { id: item.id })}>
             {item.actionLabel}
           </Button>
         </div>

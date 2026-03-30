@@ -74,7 +74,7 @@
     <slot name="trigger" />
   </span>
 {:else}
-  <Button variant="secondary" tone={triggerTone} on:click={handleTrigger}>
+  <Button variant="secondary" tone={triggerTone} size={resolvedSize} density={resolvedDensity} on:click={handleTrigger}>
     {triggerLabel}
   </Button>
 {/if}
@@ -86,6 +86,8 @@
   {tone}
   {confirmLabel}
   {cancelLabel}
+  size={resolvedSize}
+  density={resolvedDensity}
   on:confirm={handleConfirm}
   on:cancel={handleCancel}
   on:openChange={handleOpenChange}

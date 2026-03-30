@@ -92,6 +92,8 @@
   role="alertdialog"
   width="sm"
   {ariaLabel}
+  size={resolvedSize}
+  density={resolvedDensity}
   dismissOnEscape={!working}
   dismissOnBackdrop={!working}
   showCloseButton={!working}
@@ -108,6 +110,7 @@
   <svelte:fragment slot="actions">
     <Button
       variant="ghost"
+      size={resolvedSize}
       on:click={handleCancel}
       disabled={working}
     >
@@ -116,6 +119,7 @@
     <Button
       variant="primary"
       tone={confirmTone}
+      size={resolvedSize}
       on:click={handleConfirm}
       disabled={working}
     >

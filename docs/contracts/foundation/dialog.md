@@ -11,35 +11,45 @@ Updated: 2026-03-30
   flows
 - In scope: modal semantics, backdrop, title/description, focus trap,
   dismissal on escape and backdrop, focus restoration, body scroll lock,
-  dialog and alertdialog roles
+  dialog and alertdialog roles, width presets, bare mode, custom header/footer
+  slots
 - Out of scope: anchored contextual overlays, full-screen multi-step workflows,
   toast notifications, edge-anchored drawers
 
 ## 2. Anatomy
 
 ```text
-[Wrapper .dialog]  <div> (fixed overlay, conditional render)
+[Wrapper .dialog]  <div data-size data-density data-width> (fixed overlay, conditional render)
   ├── [Backdrop .dialog__backdrop]  <button aria-label="Dismiss dialog backdrop">
-  └── [Surface .dialog__surface]  <div role={kind} aria-modal tabindex="-1">
-      ├── [Close Button .dialog__close]  <IconButton> (optional)
-      ├── [Header .dialog__header]  <div> (optional, when title or description)
-      │   ├── [Title]  <strong>
-      │   └── [Description]  <p>
+  └── [Surface .dialog__surface]  <div role={role} aria-modal tabindex="-1">
+      ├── [Close Button .dialog__close]  <IconButton> (optional, receives resolvedSize)
+      │
+      │   ── when bare=true ──
+      ├── [Slot: default]  (no structural wrappers)
+      │
+      │   ── when bare=false ──
+      ├── [Header .dialog__header]  <div> (optional: when `header` slot used, OR title/description provided)
+      │   ├── [Slot: header]  (custom header content, replaces built-in title/description)
+      │   ├── [Title]  <strong>  (built-in, when no header slot)
+      │   └── [Description]  <p>  (built-in, when no header slot)
       ├── [Body .dialog__body]  <div>
       │   └── [Slot: default]
-      └── [Actions .dialog__actions]  <div> (optional, when actions slot used)
+      ├── [Footer .dialog__footer]  <div> (optional, when footer slot used — replaces actions)
+      │   └── [Slot: footer]
+      └── [Actions .dialog__actions]  <div> (optional, when actions slot used and no footer slot)
           └── [Slot: actions]
 ```
 
 | Part | Required | Description | Token Targets |
 |------|----------|-------------|---------------|
-| Wrapper | yes | fixed full-viewport overlay container | z-index, padding |
+| Wrapper | yes | fixed full-viewport overlay container | z-index, padding, data-size, data-density, data-width |
 | Backdrop | yes | background scrim and interaction block | overlay background, cursor |
-| Surface | yes | modal content container | border, radius, background, elevation, padding, max sizing |
-| Close Button | no | dismiss affordance in the top-right corner | position, z-index |
-| Header | no | title and description region | gap, margin, typography |
+| Surface | yes | modal content container | border, radius, background, elevation, padding, max sizing, width presets |
+| Close Button | no | dismiss affordance in the top-right corner; receives `resolvedSize` and uses `sizeRole="chrome"` | position, z-index |
+| Header | no | title and description region, or custom header slot content | gap, margin, typography |
 | Body | yes | primary content area | min-width |
-| Actions | no | action button row | flex layout, gap, margin |
+| Footer | no | custom footer region (replaces actions when present) | margin |
+| Actions | no | action button row (only when footer slot is not used) | flex layout, gap, margin |
 
 ## 3. Props And Inputs
 
@@ -49,26 +59,42 @@ Updated: 2026-03-30
 |------|------|---------|----------|-------|
 | `open` | `boolean \| null` | `null` | no | controlled open state; `null` = uncontrolled |
 | `defaultOpen` | `boolean` | `false` | no | uncontrolled initial open state |
-| `title` | `string \| null` | `null` | no | visible title text |
-| `description` | `string \| null` | `null` | no | visible supporting description |
-| `kind` | `"dialog" \| "alertdialog"` | `"dialog"` | no | semantic role for the surface |
+| `title` | `string \| null` | `null` | no | visible title text; ignored when `header` slot is used |
+| `description` | `string \| null` | `null` | no | visible supporting description; ignored when `header` slot is used |
+| `role` | `"dialog" \| "alertdialog"` | `"dialog"` | no | semantic ARIA role for the surface |
+| `kind` | `"dialog" \| "alertdialog" \| undefined` | `undefined` | no | **deprecated** — legacy alias for `role`; when provided, overrides `role` |
+| `width` | `"sm" \| "md" \| "lg" \| "xl" \| "full"` | `"md"` | no | surface width preset |
+| `bare` | `boolean` | `false` | no | when true, surface has no padding or internal structure; consumers control all layout |
 | `dismissOnEscape` | `boolean` | `true` | no | whether Escape key dismisses the dialog |
 | `dismissOnBackdrop` | `boolean` | `true` | no | whether backdrop click dismisses the dialog |
 | `ariaLabel` | `string \| null` | `null` | no | required when no visible title exists |
 | `contentClassName` | `string` | `""` | no | additional class name added to the dialog surface |
+| `contentStyle` | `string` | `""` | no | additional inline style applied to the dialog surface |
 | `overlayClassName` | `string` | `""` | no | additional class name added to the backdrop button |
 | `showCloseButton` | `boolean` | `false` | no | whether to render the built-in close button |
+| `closeLabel` | `string` | `"Close dialog"` | no | accessible label for the close button |
 | `size` | `"xs" \| "sm" \| "md" \| "lg" \| "xl"` | `null` | no | explicit control size override; when null, resolves from inherited presentation |
 | `sizeRole` | `"chrome" \| "control" \| "prominent"` | `"control"` | no | semantic size offset from inherited presentation |
 | `density` | `ControlDensity \| null` | `null` | no | explicit density override for spacing |
-| `closeLabel` | `string` | `"Close dialog"` | no | accessible label for the close button |
+
+### Width Presets
+
+| Width | CSS Value |
+|-------|-----------|
+| `"sm"` | `min(24rem, 100%)` (384px) |
+| `"md"` | `min(34rem, 100%)` (544px) — default |
+| `"lg"` | `min(48rem, 100%)` (768px) |
+| `"xl"` | `min(64rem, 100%)` (1024px) |
+| `"full"` | `100%` |
 
 ### Slots
 
 | Slot | Purpose |
 |------|---------|
-| default | body content |
-| actions (named) | action button row (renders `.dialog__actions` wrapper when present) |
+| default | body content (or full content when `bare=true`) |
+| header (named) | custom header content; replaces built-in title/description when present |
+| footer (named) | custom footer content; replaces the actions row when present |
+| actions (named) | action button row (renders `.dialog__actions` wrapper when present and no footer slot) |
 
 ### Controlled And Uncontrolled
 
@@ -102,12 +128,12 @@ Updated: 2026-03-30
 
 ### Semantics
 
-- Surface: `role` set to `kind` prop value (`"dialog"` or `"alertdialog"`)
+- Surface: `role` set to `role` prop value (`"dialog"` or `"alertdialog"`); legacy `kind` prop overrides when provided
 - Surface: `aria-modal="true"`
 - Surface: `aria-label` from prop when no `title` is present
 - Surface: `tabindex="-1"` for programmatic focus
 - Backdrop: `<button>` with `aria-label="Dismiss dialog backdrop"`
-- Close button: `IconButton` with `ariaLabel` from `closeLabel`
+- Close button: `IconButton` with `ariaLabel` from `closeLabel`, `sizeRole="chrome"`, `size={resolvedSize}`
 
 ### Keyboard
 
@@ -139,14 +165,17 @@ Updated: 2026-03-30
 ### Sizing
 
 - Wrapper: fixed full-viewport overlay with 2rem padding for safe area
-- Surface: width constrained to `min(34rem, 100%)`, height constrained to
-  `min(80vh, 42rem)` with overflow auto
-- Content flows vertically: header, body, actions
+- Surface: width controlled by `width` prop preset (default `min(34rem, 100%)`),
+  height constrained to `min(80vh, 42rem)` with overflow auto
+- Content flows vertically: header, body, actions/footer
+- When `bare=true`, surface has no padding and no internal structure — default
+  slot renders directly inside the surface
 
 ### Composition
 
 - parent expectations: confirmation flows, settings sheets, focused tasks
-- child expectations: structured header/body/footer content via props and slots
+- child expectations: structured header/body/footer content via props and slots;
+  or fully custom layout via `bare` mode
 - resizing: surface respects viewport constraints; overflow scrolls within
   surface
 
@@ -180,15 +209,31 @@ Updated: 2026-03-30
 |----------|-------|
 | `position` | `relative` |
 | `z-index` | `1` |
-| `width` | `min(34rem, 100%)` |
+| `width` | `min(34rem, 100%)` (default, overridden by width preset) |
 | `max-height` | `min(80vh, 42rem)` |
 | `overflow` | `auto` |
 | `padding` | `var(--poodle-space-panel-y) var(--poodle-space-panel-x)` |
-| `border` | `0.0625rem solid color-mix(in srgb, var(--poodle-color-border-default) 78%, transparent)` |
-| `border-radius` | `var(--poodle-radius-surface)` |
-| `background` | `color-mix(in srgb, var(--poodle-color-background-elevated) 98%, var(--poodle-color-background-panel))` |
-| `--poodle-surface` | `color-mix(in srgb, var(--poodle-color-background-elevated) 98%, var(--poodle-color-background-panel))` |
-| `box-shadow` | `var(--poodle-elevation-dialog)` |
+| `border` | `0.0625rem solid var(--poodle-treatment-surface-elevated-border, color-mix(in srgb, var(--poodle-color-border-default) 78%, transparent))` |
+| `border-radius` | `var(--poodle-treatment-surface-elevated-radius, var(--poodle-radius-surface))` |
+| `background` | `var(--poodle-treatment-surface-elevated-fill, color-mix(in srgb, var(--poodle-color-background-elevated) 98%, var(--poodle-color-background-panel)))` |
+| `--poodle-surface` | `var(--poodle-treatment-surface-elevated-fill, color-mix(in srgb, var(--poodle-color-background-elevated) 98%, var(--poodle-color-background-panel)))` |
+| `box-shadow` | `var(--poodle-treatment-surface-elevated-shadow, var(--poodle-elevation-dialog))` |
+
+### Surface bare modifier `.dialog__surface--bare`
+
+| Property | Value |
+|----------|-------|
+| `padding` | `0` |
+
+### Width presets (on `.dialog[data-width]`)
+
+| Width | CSS Rule |
+|-------|----------|
+| `sm` | `.dialog__surface { width: min(24rem, 100%); }` |
+| `md` | (default — `min(34rem, 100%)` from base rule) |
+| `lg` | `.dialog__surface { width: min(48rem, 100%); }` |
+| `xl` | `.dialog__surface { width: min(64rem, 100%); }` |
+| `full` | `.dialog__surface { width: 100%; }` |
 
 ### Close Button `.dialog__close`
 
@@ -198,6 +243,8 @@ Updated: 2026-03-30
 | `top` | `var(--poodle-space-inline-sm)` |
 | `right` | `var(--poodle-space-inline-sm)` |
 | `z-index` | `1` |
+
+The close button renders an `IconButton` with `icon="x"`, `variant="ghost"`, `sizeRole="chrome"`, and `size={resolvedSize}`.
 
 ### Header `.dialog__header`
 
@@ -238,20 +285,37 @@ Updated: 2026-03-30
 | `justify-content` | `flex-end` |
 | `margin-top` | `var(--poodle-space-stack-lg)` |
 
+### Footer `.dialog__footer`
+
+| Property | Value |
+|----------|-------|
+| `margin-top` | `var(--poodle-space-stack-lg)` |
+
 ### Size adjustments
 
-| Size | header title font-size |
-|------|----------------------|
-| `xs` | `0.8125rem` |
-| `sm` | `0.875rem` |
-| `md` | `1rem` |
-| `lg` | `1.0625rem` |
-| `xl` | `1.125rem` |
+| Size | header title font-size | header description font-size |
+|------|----------------------|---------------------------|
+| `xs` | `0.8125rem` | `0.75rem` |
+| `sm` | `0.875rem` | (default) |
+| `md` | `1rem` | (default) |
+| `lg` | `1.0625rem` | (default) |
+| `xl` | `1.125rem` | (default) |
+
+### Density adjustments (applied to surface padding, not body)
+
+| Density | Surface padding | Bare surface |
+|---------|----------------|-------------|
+| `compact` | `0.5rem 0.75rem` | `0` (override preserved) |
+| `default` | `var(--poodle-space-panel-y) var(--poodle-space-panel-x)` | `0` |
+| `comfortable` | `1rem 1.25rem` | `0` (override preserved) |
 
 ## 9. Svelte Notes
 
-- `data-size` attribute on surface reflects the resolved size
-- `data-density` — resolved density value (`compact`, `default`, or `comfortable`)
+- `data-size` attribute on wrapper reflects the resolved size
+- `data-density` attribute on wrapper reflects the resolved density (`compact`, `default`, or `comfortable`)
+- `data-width` attribute on wrapper reflects the width preset (`sm`, `md`, `lg`, `xl`, `full`)
+- `role` prop replaces the deprecated `kind` prop; `kind` is still accepted as a
+  legacy alias and overrides `role` when provided (`effectiveRole = kind ?? role`)
 - No `<dialog>` element used; modal behavior implemented with fixed overlay,
   manual focus trap, and body scroll lock
 - Backdrop is a `<button>` element (not a div) for click handling
@@ -264,10 +328,16 @@ Updated: 2026-03-30
   edges
 - Surface uses `bind:this` for DOM reference needed by focus trap
 - Entire dialog tree conditionally rendered with `{#if isOpen}` (mount/unmount)
-- Close button rendered only when `showCloseButton=true`
-- Header rendered only when `title` or `description` is provided
+- Close button rendered only when `showCloseButton=true`; receives `size={resolvedSize}` and `sizeRole="chrome"`
+- Header rendered when `header` slot is used OR when `title`/`description` is provided
+  - When `header` slot is present, it replaces the built-in title/description
+  - Built-in title/description render only when no `header` slot is used
+- Footer slot renders `.dialog__footer` wrapper; when present, suppresses the
+  actions slot entirely
 - Actions wrapper rendered only when named `actions` slot is used
-  (`$$slots.actions`)
+  (`$$slots.actions`) and no `footer` slot is present
+- When `bare=true`, the default slot renders directly inside the surface with
+  no header, body, actions, or footer wrappers
 
 ## 10. GPUI Notes
 
@@ -278,6 +348,7 @@ Updated: 2026-03-30
 - Background inertness must be enforced (not just visual overlay)
 - Focus trap must handle edge cases: empty surface, single focusable element
 - Body scroll lock equivalent required in GPUI context
+- Width presets must be mapped to equivalent pixel constraints
 
 ## 11. Parity Checklist
 
@@ -292,25 +363,29 @@ Updated: 2026-03-30
 - [ ] body scroll lock while open matches
 - [ ] openChange and requestClose event payloads match
 - [ ] controlled and uncontrolled modes match
+- [ ] bare mode disables padding and internal structure
 
 ### Tier 2: Visual Parity
 
 - [ ] all five sizes visually match per size table
+- [ ] all five width presets match (sm/md/lg/xl/full)
 - [ ] backdrop overlay color matches (background-overlay)
-- [ ] surface border color-mix (78% border-default) matches
-- [ ] surface background color-mix (98% elevated, panel) matches
-- [ ] surface elevation shadow matches (elevation-dialog)
-- [ ] surface border-radius uses radius-surface
+- [ ] surface border uses treatment-surface-elevated-border fallback matches
+- [ ] surface background uses treatment-surface-elevated-fill fallback matches
+- [ ] surface elevation shadow uses treatment-surface-elevated-shadow fallback matches
+- [ ] surface border-radius uses treatment-surface-elevated-radius fallback matches
 - [ ] surface padding uses space-panel-y and space-panel-x
-- [ ] surface width constraint (min(34rem, 100%)) matches
 - [ ] surface max-height constraint (min(80vh, 42rem)) matches
 - [ ] header gap (0.375rem) and margin-bottom (space-stack-md) match
 - [ ] title typography (heading-family, 1rem, 1.2) matches
 - [ ] description color (text-secondary) and margin reset match
 - [ ] actions flex layout (wrap, flex-end, space-inline-sm gap) matches
 - [ ] actions margin-top (space-stack-lg) matches
+- [ ] footer margin-top (space-stack-lg) matches
 - [ ] wrapper z-index uses overlay-z-dialog
 - [ ] wrapper padding (2rem) matches
+- [ ] density variants adjust surface padding correctly
+- [ ] density variants preserve bare mode (padding: 0)
 
 ### Tier 3: Implementation Freedom
 
@@ -327,6 +402,7 @@ Updated: 2026-03-30
 | CSS color-mix vs GPUI color blending | different color systems per platform | allowed | same visual result required |
 | backdrop as button vs div with click handler | semantic choice for click handling | allowed | backdrop dismissal behavior must match |
 | getFocusableElements utility internals | focus detection mechanism varies | allowed | Tab cycling behavior must match |
+| treatment-surface-elevated tokens with fallbacks | GPUI may resolve tokens differently | allowed | visual result must match reference |
 
 ## 13. Specimen Definitions
 
@@ -362,6 +438,29 @@ Triggered by "Open persistent" button:
 | Description | This dialog can only be closed via the buttons or Escape key. |
 | Actions | Got it (primary) |
 | `dismissOnBackdrop` | `false` |
+
+### Width presets
+
+A row of trigger buttons ("SM", "MD", "LG", "XL", "Full") each opening the
+same dialog content at the corresponding `width` preset.
+
+### Bare dialog
+
+Triggered by "Open bare" button:
+
+| Property | Value |
+|----------|-------|
+| `bare` | `true` |
+| Content | Custom layout with no structural padding or wrappers |
+
+### Custom header and footer
+
+Triggered by "Open custom" button:
+
+| Property | Value |
+|----------|-------|
+| `header` slot | Custom header with icon and styled title |
+| `footer` slot | Custom footer with status text and action buttons |
 
 ## 14. Approval And Adoption Notes
 

@@ -72,6 +72,7 @@
   {validationState}
   {size}
   {sizeRole}
+  density={resolvedDensity}
   on:valueChange={handleValueChange}
   on:submit={(event) => dispatch("submit", event.detail)}
   on:cancel={() => dispatch("cancel")}

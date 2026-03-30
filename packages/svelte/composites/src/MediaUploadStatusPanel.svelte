@@ -39,8 +39,8 @@
       <strong>{duplicateLabel}</strong>
     {/if}
     <div class="media-upload-status-panel__actions">
-      <Button variant="secondary" on:click={() => dispatch("uploadAnyway")}>Upload as new</Button>
-      <Button variant="primary" on:click={() => dispatch("selectDuplicate")}>Use existing</Button>
+      <Button variant="secondary" size={resolvedSize} density={resolvedDensity} on:click={() => dispatch("uploadAnyway")}>Upload as new</Button>
+      <Button variant="primary" size={resolvedSize} density={resolvedDensity} on:click={() => dispatch("selectDuplicate")}>Use existing</Button>
     </div>
   </div>
 {:else if uploadStep === "uploading"}
@@ -59,14 +59,14 @@
   <div class="media-upload-status-panel media-upload-status-panel--success" data-size={resolvedSize} data-density={resolvedDensity}>
     <p>Upload complete.</p>
     <div class="media-upload-status-panel__actions">
-      <Button variant="secondary" on:click={() => dispatch("clearUpload")}>Upload another</Button>
-      <Button variant="primary" on:click={() => dispatch("selectUploaded")}>Use this media</Button>
+      <Button variant="secondary" size={resolvedSize} density={resolvedDensity} on:click={() => dispatch("clearUpload")}>Upload another</Button>
+      <Button variant="primary" size={resolvedSize} density={resolvedDensity} on:click={() => dispatch("selectUploaded")}>Use this media</Button>
     </div>
   </div>
 {:else if uploadStep === "error"}
   <div class="media-upload-status-panel media-upload-status-panel--danger" data-size={resolvedSize} data-density={resolvedDensity}>
     <p>{uploadError || "Upload failed"}</p>
-    <Button variant="secondary" on:click={() => dispatch("clearUpload")}>Try again</Button>
+    <Button variant="secondary" size={resolvedSize} density={resolvedDensity} on:click={() => dispatch("clearUpload")}>Try again</Button>
   </div>
 {/if}
 

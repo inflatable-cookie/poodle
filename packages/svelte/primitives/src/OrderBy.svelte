@@ -273,6 +273,8 @@
           bind:value={addFieldValue}
           placeholder="+ Add field"
           ariaLabel="Add sort field"
+          size={resolvedSize}
+          density={resolvedDensity}
           onchange={addField}
           disabled={disabled}
         />

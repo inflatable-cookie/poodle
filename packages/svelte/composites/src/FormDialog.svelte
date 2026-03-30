@@ -1,7 +1,8 @@
 <script lang="ts">
   import { createEventDispatcher } from "svelte";
 
-  import { Button, Dialog } from "@poodle/svelte-primitives";
+  import { Button, Dialog, getUiPresentation, resolveSemanticControlSize } from "@poodle/svelte-primitives";
+  import type { ControlDensity, ControlSize, SemanticControlSizeRole } from "@poodle/svelte-primitives";
 
   import FormLayout from "./FormLayout.svelte";
 
@@ -17,6 +18,11 @@
   export let ariaLabel: string | null = null;
   export let width: string | null = null;
   export let showDefaultActions = true;
+  export let size: ControlSize | null = null;
+  export let sizeRole: SemanticControlSizeRole = "control";
+  export let density: ControlDensity | null = null;
+
+  const uiPresentation = getUiPresentation();
 
   const dispatch = createEventDispatcher<{
     submit: void;
@@ -24,6 +30,8 @@
     openChange: { open: boolean };
   }>();
 
+  $: resolvedSize = size ?? resolveSemanticControlSize($uiPresentation.sizeScale, sizeRole);
+  $: resolvedDensity = density ?? $uiPresentation.density;
   $: resolvedDescription = subtitle ?? description;
   $: contentStyle = width ? `--poodle-form-dialog-width: ${width};` : "";
   $: contentClassName = width ? "form-dialog__surface" : "";
@@ -62,6 +70,8 @@
   description={$$slots.subtitle ? null : resolvedDescription}
   kind="dialog"
   {ariaLabel}
+  size={resolvedSize}
+  density={resolvedDensity}
   dismissOnEscape={!submitting}
   dismissOnBackdrop={!submitting}
   showCloseButton={true}
@@ -87,6 +97,8 @@
     {:else if showDefaultActions}
       <Button
         variant="ghost"
+        size={resolvedSize}
+        density={resolvedDensity}
         on:click={handleCancel}
         disabled={submitting}
       >
@@ -94,6 +106,8 @@
       </Button>
       <Button
         variant="primary"
+        size={resolvedSize}
+        density={resolvedDensity}
         on:click={handleSubmit}
         disabled={submitting}
       >

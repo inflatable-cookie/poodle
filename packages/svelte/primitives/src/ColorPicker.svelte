@@ -404,6 +404,8 @@
               max={360}
               step={1}
               ariaLabel="Hue"
+              size={resolvedSize}
+              density={resolvedDensity}
               on:valueChange={onHueChange}
             />
           </div>
@@ -420,6 +422,8 @@
                 max={100}
                 step={1}
                 ariaLabel="Opacity"
+                size={resolvedSize}
+                density={resolvedDensity}
                 on:valueChange={onAlphaChange}
               />
             </div>
@@ -432,6 +436,8 @@
             value={inputMode}
             options={modeOptions}
             ariaLabel="Color input mode"
+            size={resolvedSize}
+            density={resolvedDensity}
             on:valueChange={onModeChange}
           />
         </div>
@@ -459,6 +465,8 @@
                   max={100}
                   step={1}
                   ariaLabel="Alpha"
+                  size={resolvedSize}
+                  density={resolvedDensity}
                   on:valueChange={onAlphaInputChange}
                 />
                 <span class="color-picker__input-label" aria-hidden="true">A</span>
@@ -473,6 +481,8 @@
                 max={255}
                 step={1}
                 ariaLabel="Red"
+                size={resolvedSize}
+                density={resolvedDensity}
                 on:valueChange={(e) => onRgbChange("r", e)}
               />
               <span class="color-picker__input-label" aria-hidden="true">R</span>
@@ -485,6 +495,8 @@
                 max={255}
                 step={1}
                 ariaLabel="Green"
+                size={resolvedSize}
+                density={resolvedDensity}
                 on:valueChange={(e) => onRgbChange("g", e)}
               />
               <span class="color-picker__input-label" aria-hidden="true">G</span>
@@ -497,6 +509,8 @@
                 max={255}
                 step={1}
                 ariaLabel="Blue"
+                size={resolvedSize}
+                density={resolvedDensity}
                 on:valueChange={(e) => onRgbChange("b", e)}
               />
               <span class="color-picker__input-label" aria-hidden="true">B</span>
@@ -510,6 +524,8 @@
                   max={100}
                   step={1}
                   ariaLabel="Alpha"
+                  size={resolvedSize}
+                  density={resolvedDensity}
                   on:valueChange={onAlphaInputChange}
                 />
                 <span class="color-picker__input-label" aria-hidden="true">A</span>
@@ -524,6 +540,8 @@
                 max={360}
                 step={1}
                 ariaLabel="Hue"
+                size={resolvedSize}
+                density={resolvedDensity}
                 on:valueChange={(e) => onHslChange("h", e)}
               />
               <span class="color-picker__input-label" aria-hidden="true">H</span>
@@ -536,6 +554,8 @@
                 max={100}
                 step={1}
                 ariaLabel="Saturation"
+                size={resolvedSize}
+                density={resolvedDensity}
                 on:valueChange={(e) => onHslChange("s", e)}
               />
               <span class="color-picker__input-label" aria-hidden="true">S</span>
@@ -548,6 +568,8 @@
                 max={100}
                 step={1}
                 ariaLabel="Lightness"
+                size={resolvedSize}
+                density={resolvedDensity}
                 on:valueChange={(e) => onHslChange("l", e)}
               />
               <span class="color-picker__input-label" aria-hidden="true">L</span>
@@ -561,6 +583,8 @@
                   max={100}
                   step={1}
                   ariaLabel="Alpha"
+                  size={resolvedSize}
+                  density={resolvedDensity}
                   on:valueChange={onAlphaInputChange}
                 />
                 <span class="color-picker__input-label" aria-hidden="true">A</span>
