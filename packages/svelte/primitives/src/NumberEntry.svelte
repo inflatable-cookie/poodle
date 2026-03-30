@@ -112,7 +112,7 @@
   }
 </script>
 
-<div class="number-entry" data-validation-state={validationState} data-size={resolvedSize} data-density={resolvedDensity}>
+<div class="number-entry" data-validation-state={validationState} data-size={resolvedSize} data-density={resolvedDensity} data-disabled={disabled}>
   <input
     {id}
     {name}
@@ -227,9 +227,17 @@
     overflow: hidden;
   }
 
+  .number-entry[data-disabled="true"] {
+    opacity: var(--poodle-state-opacity-disabled);
+    cursor: not-allowed;
+  }
+
+  .number-entry[data-disabled="true"] .number-entry__control {
+    cursor: not-allowed;
+  }
+
   .number-entry__steppers button:disabled {
     cursor: not-allowed;
-    opacity: var(--poodle-state-opacity-disabled);
   }
 
   /* Density variants */
