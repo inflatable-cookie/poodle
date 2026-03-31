@@ -37,6 +37,8 @@
   export let scrollOffset = 16;
   export let className = "";
   export let loading = false;
+  /** When true, renders without container padding, border, and background. */
+  export let standalone = false;
   export let ariaLabel: string | null = null;
   export let sizeRole: SemanticControlSizeRole = "control";
   export let size: ControlSize | null = null;
@@ -200,6 +202,7 @@
     class="pagination {className}"
     class:pagination--compact={compact}
     class:pagination--loading={isLoading}
+    class:pagination--standalone={standalone}
     aria-label={ariaLabel ?? "Pagination"}
     data-size={resolvedSize}
     data-density={resolvedDensity}
@@ -324,6 +327,13 @@
     padding: var(--poodle-space-control-y) var(--poodle-space-panel-x);
     border-top: 0.0625rem solid var(--poodle-color-border-subtle);
     background: color-mix(in srgb, var(--poodle-color-background-elevated) 92%, transparent);
+  }
+
+  .pagination--standalone {
+    margin-top: 0;
+    padding: 0;
+    border-top: none;
+    background: transparent;
   }
 
   .pagination--compact {
