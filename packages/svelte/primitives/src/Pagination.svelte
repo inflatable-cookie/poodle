@@ -281,7 +281,7 @@
             </span>
           {:else}
             <span class="pagination__summary">
-              {startItem}–{endItem}{#if effectiveTotal !== null} of {effectiveTotal.toLocaleString()}{/if}
+              {startItem}–{endItem}{#if effectiveTotal !== null}&nbsp;of {effectiveTotal.toLocaleString()}{/if}
             </span>
           {/if}
 
