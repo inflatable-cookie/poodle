@@ -350,7 +350,10 @@
   .order-by__panel {
     display: flex;
     flex-direction: column;
-    gap: 0.5rem;
+    gap: 0.375rem;
+    /* Tighten popover surface padding */
+    margin: calc(-0.5 * var(--poodle-space-panel-y)) calc(-0.5 * var(--poodle-space-panel-x));
+    padding: 0.375rem;
   }
 
   .order-by__list {
@@ -363,12 +366,14 @@
     display: flex;
     align-items: center;
     gap: 0.375rem;
-    padding: 0.25rem 0.375rem;
+    padding: 0.3125rem 0.5rem;
+    border: 0.0625rem solid var(--poodle-color-border-subtle);
     border-radius: calc(var(--poodle-radius-control) - 0.0625rem);
+    background: color-mix(in srgb, var(--poodle-color-background-surface) 90%, var(--poodle-color-background-elevated));
   }
 
   .order-by__item:hover {
-    background: color-mix(in srgb, var(--poodle-color-background-elevated) 50%, transparent);
+    border-color: color-mix(in srgb, var(--poodle-color-border-default) 60%, transparent);
   }
 
   .order-by__item:focus-visible {
