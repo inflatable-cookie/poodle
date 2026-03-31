@@ -159,7 +159,10 @@
       --poodle-treatment-surface-elevated-fill,
       color-mix(in srgb, var(--poodle-color-background-elevated) 96%, var(--poodle-color-background-panel))
     );
-    box-shadow: var(--poodle-treatment-surface-elevated-shadow, var(--poodle-elevation-surface));
+    box-shadow:
+      inset 0 0.0625rem 0 rgba(255, 255, 255, 0.08),
+      0 0.625rem 1.5rem rgba(9, 13, 18, 0.22),
+      0 0.125rem 0.375rem rgba(0, 0, 0, 0.15);
   }
 
   .popover__surface[data-placement^="bottom"] {
