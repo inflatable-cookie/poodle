@@ -23,7 +23,7 @@ use poodle_composites::{
 };
 use poodle_primitives::{
     AccordionSpec, BadgeSpec, BannerSpec, BoxSpec, BreadcrumbsSpec, ButtonSpec, CheckboxSpec,
-    FieldSpec, GridSpec, MenuSpec, NavCardGridSpec, NavCardSpec, ProgressSpec, SearchFieldSpec,
+    FieldSpec, GridSpec, MenuSpec, NavCardSpec, ProgressSpec, SearchFieldSpec,
     SelectSpec, SeparatorSpec, SkeletonSpec, StackSpec, StatusIndicatorSpec, SurfaceSpec,
     SwitchSpec, TabsSpec, TextAreaSpec, TextInputSpec, ToolbarSpec,
 };
@@ -96,7 +96,6 @@ fn render_overview_shell(a: &GpuiAdapter, t: &dyn ThemeProvider) -> DemoScreen {
     screen.push(a.render(&BadgeSpec::new(), &s, t));
     screen.push(a.render(&ProgressSpec::new(), &s, t));
     screen.push(a.render(&ToastStackSpec::new(), &s, t));
-    screen.push(a.render(&NavCardGridSpec::new().with_columns(4), &s, t));
     screen.push(a.render(&NavCardSpec::new().with_title("Recent project"), &s, t));
     screen.push(a.render(&LogListSpec::new(), &s, t));
 
@@ -226,7 +225,6 @@ mod tests {
         assert!(types.contains(&"StateTileSpec"));
         assert!(types.contains(&"BannerSpec"));
         assert!(types.contains(&"ProgressSpec"));
-        assert!(types.contains(&"NavCardGridSpec"));
         assert!(screen.component_count() >= 10);
     }
 

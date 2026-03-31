@@ -24,7 +24,7 @@
     { value: "team", label: "My team" },
   ];
 
-  let collapsed1 = false;
+  let collapsed1 = true;
   let collapsed2 = true;
 </script>
 
@@ -69,7 +69,7 @@
   </div>
 
   <div class="specimen__group">
-    <Eyebrow>Collapsed by default</Eyebrow>
+    <Eyebrow>Explicit collapsed state</Eyebrow>
     <FilterToolbar
       collapsible
       bind:collapsed={collapsed2}

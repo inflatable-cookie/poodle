@@ -46,7 +46,6 @@ pub static PRIMITIVES: &[ComponentEntry] = &[
     ComponentEntry { slug: "menubar", display_name: "Menubar", description: "Horizontal menu bar." },
     ComponentEntry { slug: "meter", display_name: "Meter", description: "Visual gauge for values." },
     ComponentEntry { slug: "nav-card", display_name: "NavCard", description: "Navigation-oriented card." },
-    ComponentEntry { slug: "nav-card-grid", display_name: "NavCardGrid", description: "Responsive NavCard grid." },
     ComponentEntry { slug: "navigation-menu", display_name: "NavigationMenu", description: "Navigation with dropdowns." },
     ComponentEntry { slug: "number-entry", display_name: "NumberEntry", description: "Numeric input with controls." },
     ComponentEntry { slug: "order-by", display_name: "OrderBy", description: "Sort-control toolbar." },

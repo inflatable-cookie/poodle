@@ -51,7 +51,7 @@ export { default as OrderBy } from "./OrderBy.svelte";
 export { default as NavCard } from "./NavCard.svelte";
 export { default as NavigationMenu } from "./NavigationMenu.svelte";
 export { default as Pill } from "./Pill.svelte";
-export { default as PinInput } from "./PinInput.svelte";
+export { default as CodeInput } from "./CodeInput.svelte";
 export { default as Popover } from "./Popover.svelte";
 export { default as Pagination } from "./Pagination.svelte";
 export { default as PaginationSummary } from "./PaginationSummary.svelte";
@@ -83,7 +83,8 @@ export { default as Table } from "./Table.svelte";
 export { default as TextArea } from "./TextArea.svelte";
 export { default as TimeAgo } from "./TimeAgo.svelte";
 export { default as TextInput } from "./TextInput.svelte";
-export { default as TotpInput } from "./TotpInput.svelte";
+/** @deprecated Use CodeInput instead */
+export { default as TotpInput } from "./CodeInput.svelte";
 export { default as TimeField } from "./TimeField.svelte";
 export { default as TimeZoneSelect } from "./TimeZoneSelect.svelte";
 export { default as Toggle } from "./Toggle.svelte";

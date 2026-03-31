@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { PinInput, Eyebrow } from "@poodle/svelte-primitives";
+  import { Eyebrow, CodeInput } from "@poodle/svelte-primitives";
 
   const controlSizes = ["xs", "sm", "md", "lg", "xl"] as const;
 
@@ -9,23 +9,35 @@
 
 <div class="specimen">
   <div class="specimen__group">
-    <Eyebrow>6-digit code</Eyebrow>
-    <PinInput
-      length={6}
-      ariaLabel="Verification code"
-      on:valueChange={(e) => { code = e.detail.value; completed = false; }}
-      on:complete={() => (completed = true)}
+    <Eyebrow>Default</Eyebrow>
+    <CodeInput
+      id="code-default"
+      value={code}
+      label="Verification code"
+      hint="Enter the 6-digit code from your authenticator app."
+      on:valueChange={(event) => { code = event.detail.value; completed = false; }}
+      on:complete={() => { completed = true; }}
     />
     {#if completed}
-      <p>Code entered: <strong>{code}</strong></p>
+      <p>Completed value: <strong>{code}</strong></p>
     {/if}
+  </div>
+
+  <div class="specimen__group">
+    <Eyebrow>Masked</Eyebrow>
+    <CodeInput
+      id="code-masked"
+      label="PIN code"
+      hint="Digits are hidden for security."
+      mask
+    />
   </div>
 
   <div class="specimen__group">
     <Eyebrow>Sizes</Eyebrow>
     <div class="specimen__stack">
       {#each controlSizes as size}
-        <PinInput length={4} ariaLabel={"PIN at " + size} {size} />
+        <CodeInput id={"size-" + size} label={"Code at " + size} ariaLabel={"Code at " + size} {size} />
       {/each}
     </div>
   </div>
@@ -36,20 +48,31 @@
       {#each ["compact", "default", "comfortable"] as density}
         <div class="specimen__row">
           <span class="specimen__label">{density}</span>
-          <PinInput id={"density-" + density} length={4} ariaLabel={"PIN at " + density + " density"} {density} />
+          <CodeInput id={"density-" + density} label={"Code at " + density} ariaLabel={"Code at " + density} {density} />
         </div>
       {/each}
     </div>
   </div>
 
   <div class="specimen__group">
-    <Eyebrow>4-digit masked</Eyebrow>
-    <PinInput length={4} mask ariaLabel="PIN" />
+    <Eyebrow>With error</Eyebrow>
+    <CodeInput
+      id="code-error"
+      value="12"
+      label="Email code"
+      error="That verification code is invalid."
+    />
   </div>
 
   <div class="specimen__group">
     <Eyebrow>Disabled</Eyebrow>
-    <PinInput length={6} defaultValue="123" disabled ariaLabel="Disabled code" />
+    <CodeInput
+      id="code-disabled"
+      defaultValue="1234"
+      length={4}
+      label="Disabled code"
+      disabled
+    />
   </div>
 </div>
 
@@ -58,6 +81,7 @@
     display: flex;
     flex-direction: column;
     gap: 1.5rem;
+    max-width: 24rem;
   }
 
   .specimen__group {

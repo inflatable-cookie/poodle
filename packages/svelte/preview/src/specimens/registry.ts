@@ -72,7 +72,7 @@ import PaginationSummarySpecimen from "./PaginationSummarySpecimen.svelte";
 import PasswordRequirementsSpecimen from "./PasswordRequirementsSpecimen.svelte";
 import PickerShellSpecimen from "./PickerShellSpecimen.svelte";
 import PillSpecimen from "./PillSpecimen.svelte";
-import PinInputSpecimen from "./PinInputSpecimen.svelte";
+import CodeInputSpecimen from "./CodeInputSpecimen.svelte";
 import PopoverSpecimen from "./PopoverSpecimen.svelte";
 import ProgressSpecimen from "./ProgressSpecimen.svelte";
 import RadioGroupSpecimen from "./RadioGroupSpecimen.svelte";
@@ -104,7 +104,6 @@ import TableSpecimen from "./TableSpecimen.svelte";
 import TextAreaSpecimen from "./TextAreaSpecimen.svelte";
 import TimeAgoSpecimen from "./TimeAgoSpecimen.svelte";
 import TextInputSpecimen from "./TextInputSpecimen.svelte";
-import TotpInputSpecimen from "./TotpInputSpecimen.svelte";
 import TimeFieldSpecimen from "./TimeFieldSpecimen.svelte";
 import TimeZoneSelectSpecimen from "./TimeZoneSelectSpecimen.svelte";
 import ToastHostSpecimen from "./ToastHostSpecimen.svelte";
@@ -205,7 +204,7 @@ export const specimenMap: Record<string, typeof SvelteComponent<any>> = {
   "password-requirements": PasswordRequirementsSpecimen,
   "picker-shell": PickerShellSpecimen,
   pill: PillSpecimen,
-  "pin-input": PinInputSpecimen,
+  "code-input": CodeInputSpecimen,
   popover: PopoverSpecimen,
   progress: ProgressSpecimen,
   "radio-group": RadioGroupSpecimen,
@@ -238,7 +237,6 @@ export const specimenMap: Record<string, typeof SvelteComponent<any>> = {
   "text-area": TextAreaSpecimen,
   "time-ago": TimeAgoSpecimen,
   "text-input": TextInputSpecimen,
-  "totp-input": TotpInputSpecimen,
   "time-field": TimeFieldSpecimen,
   "time-zone-select": TimeZoneSelectSpecimen,
   "toast-stack": ToastStackSpecimen,

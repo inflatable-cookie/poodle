@@ -205,7 +205,6 @@ const SUPPORTED_COMPOSITES: &[&str] = &[
     "CardRadioGroupSpec",
     "ListCardSpec",
     "NavCardSpec",
-    "NavCardGridSpec",
     "OrderBySpec",
     "PageHeaderSpec",
     "PageLoadingSpec",

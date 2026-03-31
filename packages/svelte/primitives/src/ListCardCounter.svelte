@@ -7,16 +7,18 @@
   export let count: number;
   export let tooltip: string | null = null;
   export let href: string | null = null;
+  export let onClick: ((event: MouseEvent) => void) | null = null;
 
   function handleClick(e: MouseEvent): void {
     if (href) e.stopPropagation();
+    onClick?.(e);
   }
 </script>
 
 {#if tooltip}
   <Tooltip content={tooltip}>
     {#if href}
-      <a class="list-card-counter" {href} on:click={handleClick}>
+      <a class="list-card-counter" {href} onclick={handleClick}>
         <Icon icon={icon} />
         <span>{count}</span>
       </a>
@@ -28,7 +30,7 @@
     {/if}
   </Tooltip>
 {:else if href}
-  <a class="list-card-counter" {href} on:click={handleClick}>
+  <a class="list-card-counter" {href} onclick={handleClick}>
     <Icon icon={icon} />
     <span>{count}</span>
   </a>

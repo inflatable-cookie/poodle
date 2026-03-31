@@ -156,7 +156,6 @@ pub mod media_thumbnail;
 pub mod media_upload_status_panel;
 pub mod metric_tile;
 pub mod nav_card;
-pub mod nav_card_grid;
 pub mod order_by;
 pub mod page_header;
 pub mod page_loading;

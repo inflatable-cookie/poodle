@@ -19,7 +19,7 @@ use poodle_composites::{
     VideoPlayerSpec,
 };
 use poodle_primitives::{
-    BreadcrumbsSpec, ListCardSpec, NavCardGridSpec, NavCardSpec, OrderBySpec,
+    BreadcrumbsSpec, ListCardSpec, NavCardSpec, OrderBySpec,
 };
 use poodle_style::StyleDescriptor;
 
@@ -179,14 +179,6 @@ impl RenderComponent<NavCardSpec> for JetstreamAdapter {
     fn render(&self, _spec: &NavCardSpec, style: &StyleDescriptor, _theme: &dyn ThemeProvider) -> JetstreamNodeHandle {
         let mapped = map_style(style);
         JetstreamNodeHandle::new("nav-card", "NavCardSpec", WidgetKind::Button, mapped)
-    }
-}
-
-impl RenderComponent<NavCardGridSpec> for JetstreamAdapter {
-    type Target = JetstreamTarget;
-    fn render(&self, _spec: &NavCardGridSpec, style: &StyleDescriptor, _theme: &dyn ThemeProvider) -> JetstreamNodeHandle {
-        let mapped = map_style(style);
-        JetstreamNodeHandle::new("nav-card-grid", "NavCardGridSpec", WidgetKind::Panel, mapped)
     }
 }
 
@@ -422,7 +414,7 @@ impl RenderComponent<SidebarNavSpec> for JetstreamAdapter {
 mod tests {
     use poodle_adapter::RenderComponent;
     use poodle_composites::*;
-    use poodle_primitives::{BreadcrumbsSpec, ListCardSpec, NavCardGridSpec, NavCardSpec, OrderBySpec};
+    use poodle_primitives::{BreadcrumbsSpec, ListCardSpec, NavCardSpec, OrderBySpec};
     use poodle_style::StyleDescriptor;
     use crate::{JetstreamAdapter, WidgetKind, theme::JetstreamThemeProvider};
 
@@ -452,7 +444,6 @@ mod tests {
     #[test] fn toast_stack() { assert_eq!(a().render(&ToastStackSpec::new(), &s(), &t()).spec_type, "ToastStackSpec"); }
     #[test] fn log_list() { assert_eq!(a().render(&LogListSpec::new(), &s(), &t()).widget_kind, WidgetKind::List); }
     #[test] fn nav_card() { assert_eq!(a().render(&NavCardSpec::new(), &s(), &t()).widget_kind, WidgetKind::Button); }
-    #[test] fn nav_card_grid() { assert_eq!(a().render(&NavCardGridSpec::new(), &s(), &t()).spec_type, "NavCardGridSpec"); }
     #[test] fn list_card() { assert_eq!(a().render(&ListCardSpec::new(), &s(), &t()).widget_kind, WidgetKind::Button); }
 
     // Editing, media, navigation, and list composites

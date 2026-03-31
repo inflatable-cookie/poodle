@@ -1327,7 +1327,7 @@ interface MenuItem {
 ### Primitives (83 components)
 
 **Action:** Button, IconButton, SplitButton
-**Input:** TextInput, TextArea, NumberEntry, SearchField, PinInput, DurationInput, ColorPicker
+**Input:** TextInput, TextArea, NumberEntry, SearchField, CodeInput, DurationInput, ColorPicker
 **Selection:** Checkbox, Switch, RadioGroup, Select, Combobox, SegmentedControl, Toggle, ToggleGroup, TriStateSwitch, Slider, RangeSlider, Rating
 **Date/Time:** Calendar, RangeCalendar, DatePicker, DateRangePicker, DateTimePicker, DateTimeRangePicker, ZonedDateTimePicker, TimeField, TimeZoneSelect
 **Layout:** Box, Grid, Stack, Spacer, Separator, Surface, Region, ScrollShell

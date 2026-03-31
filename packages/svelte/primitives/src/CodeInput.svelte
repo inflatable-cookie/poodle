@@ -15,6 +15,7 @@
   export let error: string | null = null;
   export let disabled = false;
   export let length = 6;
+  export let mask = false;
   export let ariaLabel: string | null = null;
   export let size: ControlSize | null = null;
   export let sizeRole: SemanticControlSizeRole = "control";
@@ -36,7 +37,7 @@
 
   $: resolvedSize = size ?? resolveSemanticControlSize($uiPresentation.sizeScale, sizeRole);
   $: resolvedDensity = density ?? $uiPresentation.density;
-  $: effectiveId = id ?? `totp-${name}`;
+  $: effectiveId = id ?? `code-${name}`;
   $: isControlled = value !== null;
   $: currentValue = sanitizeValue(isControlled ? value ?? "" : uncontrolledValue);
   $: digits = Array.from({ length }, (_, index) => currentValue[index] ?? "");
@@ -107,6 +108,11 @@
     inputRef.setSelectionRange(nextPosition, nextPosition);
     caretIndex = Math.min(nextPosition, Math.max(length - 1, 0));
   }
+
+  function displayDigit(digit: string): string {
+    if (!digit) return "";
+    return mask ? "\u2022" : digit;
+  }
 </script>
 
 <Field
@@ -120,19 +126,19 @@
     <input type="hidden" {name} value={currentValue} />
 
     <div
-      class="totp-input"
-      class:totp-input--disabled={disabled}
-      class:totp-input--focused={hasFocus}
+      class="code-input"
+      class:code-input--disabled={disabled}
+      class:code-input--focused={hasFocus}
       data-size={resolvedSize}
       data-density={resolvedDensity}
-      style={`--totp-slot-border:${slotBorderColor}; --totp-slot-focus:${slotFocusColor}; --totp-slot-focus-ring:${slotFocusRing};`}
+      style={`--code-slot-border:${slotBorderColor}; --code-slot-focus:${slotFocusColor}; --code-slot-focus-ring:${slotFocusRing};`}
       role="group"
       aria-label={ariaLabel ?? label}
     >
       <input
         bind:this={inputRef}
         id={effectiveId}
-        class="totp-input__control"
+        class="code-input__control"
         type="text"
         inputmode="numeric"
         pattern="[0-9]*"
@@ -153,15 +159,15 @@
       {#each digits as digit, index}
         <button
           type="button"
-          class="totp-input__slot"
-          class:totp-input__slot--active={hasFocus && index === activeCaretIndex}
-          class:totp-input__slot--filled={digit.length > 0}
-          class:totp-input__slot--split-after={length === 6 && index === 2}
+          class="code-input__slot"
+          class:code-input__slot--active={hasFocus && index === activeCaretIndex}
+          class:code-input__slot--filled={digit.length > 0}
+          class:code-input__slot--split-after={length === 6 && index === 2}
           tabindex={-1}
           onclick={() => handleSlotClick(index)}
           aria-hidden="true"
         >
-          {digit}
+          {displayDigit(digit)}
         </button>
       {/each}
     </div>
@@ -169,14 +175,14 @@
 </Field>
 
 <style>
-  .totp-input {
+  .code-input {
     position: relative;
     display: inline-flex;
     gap: var(--poodle-space-inline-sm);
     width: max-content;
   }
 
-  .totp-input__control {
+  .code-input__control {
     position: absolute;
     inset: 0;
     width: 100%;
@@ -186,14 +192,14 @@
     z-index: 1;
   }
 
-  .totp-input__slot {
+  .code-input__slot {
     display: flex;
     align-items: center;
     justify-content: center;
     width: calc(var(--poodle-size-control-height) + 0.25rem);
     height: calc(var(--poodle-size-control-height) + 0.5rem);
     padding: 0;
-    border: 0.0625rem solid var(--totp-slot-border, var(--poodle-color-border-default));
+    border: 0.0625rem solid var(--code-slot-border, var(--poodle-color-border-default));
     border-radius: var(--poodle-radius-control);
     background: var(--poodle-color-background-surface);
     color: var(--poodle-color-text-primary);
@@ -207,60 +213,60 @@
     z-index: 0;
   }
 
-  .totp-input__slot--active {
-    border-color: var(--totp-slot-focus, var(--poodle-color-accent-border));
-    box-shadow: 0 0 0 var(--poodle-border-width-focus) var(--totp-slot-focus-ring, color-mix(in srgb, var(--poodle-color-accent-focusRing) 28%, transparent));
+  .code-input__slot--active {
+    border-color: var(--code-slot-focus, var(--poodle-color-accent-border));
+    box-shadow: 0 0 0 var(--poodle-border-width-focus) var(--code-slot-focus-ring, color-mix(in srgb, var(--poodle-color-accent-focusRing) 28%, transparent));
   }
 
-  .totp-input__slot--split-after {
+  .code-input__slot--split-after {
     margin-right: var(--poodle-space-inline-md);
   }
 
-  .totp-input--disabled .totp-input__slot {
+  .code-input--disabled .code-input__slot {
     opacity: var(--poodle-state-opacity-disabled);
     cursor: not-allowed;
   }
 
-  .totp-input[data-size="xs"] .totp-input__slot {
+  .code-input[data-size="xs"] .code-input__slot {
     width: calc(var(--poodle-size-control-height) - 0.5rem);
     height: calc(var(--poodle-size-control-height) - 0.125rem);
     font-size: 0.8125rem;
   }
 
-  .totp-input[data-size="sm"] .totp-input__slot {
+  .code-input[data-size="sm"] .code-input__slot {
     width: calc(var(--poodle-size-control-height) - 0.125rem);
     height: calc(var(--poodle-size-control-height) + 0.125rem);
     font-size: 0.875rem;
   }
 
-  .totp-input[data-size="lg"] .totp-input__slot {
+  .code-input[data-size="lg"] .code-input__slot {
     width: calc(var(--poodle-size-control-height) + 0.5rem);
     height: calc(var(--poodle-size-control-height) + 0.75rem);
     font-size: 1.125rem;
   }
 
-  .totp-input[data-size="xl"] .totp-input__slot {
+  .code-input[data-size="xl"] .code-input__slot {
     width: calc(var(--poodle-size-control-height) + 0.75rem);
     height: calc(var(--poodle-size-control-height) + 1rem);
     font-size: 1.25rem;
   }
 
-  .totp-input[data-density="compact"] {
+  .code-input[data-density="compact"] {
     gap: 0.25rem;
   }
 
-  .totp-input[data-density="comfortable"] {
+  .code-input[data-density="comfortable"] {
     gap: var(--poodle-space-inline-md);
   }
 
   @media (max-width: 30rem) {
-    .totp-input__slot {
+    .code-input__slot {
       width: var(--poodle-size-control-height);
       height: calc(var(--poodle-size-control-height) + 0.25rem);
       font-size: 0.9375rem;
     }
 
-    .totp-input__slot--split-after {
+    .code-input__slot--split-after {
       margin-right: var(--poodle-space-inline-sm);
     }
   }

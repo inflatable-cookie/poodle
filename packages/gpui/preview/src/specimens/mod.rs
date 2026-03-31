@@ -132,7 +132,6 @@ mod reorderable_list;
 mod collapse_toggle;
 mod region;
 mod resize_handle;
-mod nav_card_grid;
 
 // ── App Shell ─────────────────────────────────────────────
 mod app_header;
@@ -325,7 +324,6 @@ pub fn render_single_specimen(
         "detail-section" => specimen_card("DetailSection", theme, detail_section_specimen::render(theme)),
         "card" => specimen_card("Card", theme, card_specimen::render(theme)),
         "card-radio-group" => specimen_card("CardRadioGroup", theme, card_radio_group_specimen::render(state, cx)),
-        "nav-card" => specimen_card("NavCard", theme, nav_card_grid::render(theme)),
         "picker-shell" => specimen_card("PickerShell", theme, picker_shell_specimen::render(theme)),
         "relation-picker" => specimen_card("RelationPicker", theme, relation_picker_specimen::render(theme)),
         "selection-summary" => specimen_card("SelectionSummary", theme, selection_summary_specimen::render(theme)),
@@ -362,7 +360,6 @@ pub fn render_single_specimen(
         "collapse-toggle" => specimen_card("CollapseToggle", theme, collapse_toggle::render(state, cx)),
         "region" => specimen_card("Region", theme, region::render(theme)),
         "resize-handle" => specimen_card("ResizeHandle", theme, resize_handle::render(theme)),
-        "nav-card-grid" => specimen_card("NavCardGrid", theme, nav_card_grid::render(theme)),
 
         // ── App Shell ───────────────────────────────────────────
         "app-header" => specimen_card("AppHeader", theme, app_header::render(theme)),

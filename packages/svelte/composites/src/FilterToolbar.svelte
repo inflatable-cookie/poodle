@@ -4,8 +4,8 @@
 
   export let ariaLabel = "Filters";
   export let summaryText: string | null = null;
-  export let collapsible = false;
-  export let collapsed = false;
+  export let collapsible = true;
+  export let collapsed = true;
   export let columns = 4;
   export let minItemWidth = "10rem";
   export let sticky = false;
@@ -102,6 +102,7 @@
   .filter-toolbar {
     display: grid;
     gap: var(--poodle-space-stack-sm);
+    margin-block-end: var(--poodle-space-stack-md);
     padding: var(--poodle-space-panel-y) var(--poodle-space-panel-x);
     border: 0.0625rem solid var(--poodle-color-border-subtle);
     border-radius: var(--poodle-radius-surface);

@@ -2465,31 +2465,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
 <Pill tone="warning" appearance="solid" muted>Pending</Pill>`,
   },
 
-  "pin-input": {
-    props: [
-      { name: "size", type: "ControlSize | null", default: "null", description: "Explicit size override. Supports xs, sm, md, lg, and xl." },
-      { name: "sizeRole", type: '"chrome" | "control" | "prominent"', default: '"control"', description: "Semantic size offset relative to the inherited presentation scale." },
-      { name: "density", type: "ControlDensity | null", default: "null", description: "Explicit density override. Supports compact, default, and comfortable." },
-      { name: "value", type: "string | null", default: "null", description: "Controlled value of the pin input." },
-      { name: "defaultValue", type: "string", default: '""', description: "Initial value for uncontrolled mode." },
-      { name: "length", type: "number", default: "6", description: "Number of character fields." },
-      { name: "disabled", type: "boolean", default: "false", description: "Whether the input is disabled." },
-      { name: "ariaLabel", type: "string | null", default: "null", description: "Accessible label for the pin input." },
-      { name: "mask", type: "boolean", default: "false", description: "Whether to mask input characters." },
-    ],
-    slots: [],
-    events: [
-      { name: "valueChange", payload: "{ value: string }", description: "Fires when the pin value changes." },
-      { name: "complete", payload: "{ value: string }", description: "Fires when all character fields are filled." },
-    ],
-    usage: `<script lang="ts">
-  import { PinInput } from "@poodle/svelte-primitives";
-</script>
-
-<PinInput length={6} mask on:complete={(e) => verify(e.detail.value)} />`,
-  },
-
-  "totp-input": {
+  "code-input": {
     props: [
       { name: "id", type: "string | null", default: "null", description: "Optional control id. Falls back to a derived id from the name when omitted." },
       { name: "value", type: "string | null", default: "null", description: "Controlled code value." },
@@ -2500,6 +2476,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
       { name: "error", type: "string | null", default: "null", description: "Optional error message; also drives invalid validation state." },
       { name: "disabled", type: "boolean", default: "false", description: "Disables the hidden real input and visual slot interaction." },
       { name: "length", type: "number", default: "6", description: "Number of visible digit slots and max code length." },
+      { name: "mask", type: "boolean", default: "false", description: "When true, display dots instead of digits in the visual slots." },
       { name: "ariaLabel", type: "string | null", default: "null", description: "Optional accessible label override for the grouped control." },
       { name: "autocomplete", type: "string", default: '"one-time-code"', description: "Autocomplete hint for verification-code autofill." },
       { name: "size", type: "ControlSize | null", default: "null", description: "Explicit size override. Supports xs, sm, md, lg, and xl." },
@@ -2509,16 +2486,16 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
     ],
     slots: [],
     events: [
-      { name: "valueChange", payload: "{ value: string }", description: "Fires whenever the sanitized one-time-code value changes." },
+      { name: "valueChange", payload: "{ value: string }", description: "Fires whenever the sanitized code value changes." },
       { name: "complete", payload: "{ value: string }", description: "Fires when the value reaches the configured length." },
     ],
     usage: `<script lang="ts">
-  import { TotpInput } from "@poodle/svelte-primitives";
+  import { CodeInput } from "@poodle/svelte-primitives";
 
   let code = "";
 </script>
 
-<TotpInput
+<CodeInput
   id="verify-code"
   value={code}
   label="Verification code"

@@ -48,6 +48,7 @@ const aliases: Record<string, string> = {
   "filter": "list-filter",
   "more-horizontal": "ellipsis",
   "more-vertical": "ellipsis-vertical",
+  "package": "package-icon",
   "unlock": "lock-open",
 };
 

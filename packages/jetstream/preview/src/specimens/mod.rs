@@ -71,7 +71,6 @@ pub mod menubar;
 pub mod meter;
 pub mod metric_tile;
 pub mod nav_card;
-pub mod nav_card_grid;
 pub mod navigation_menu;
 pub mod number_entry;
 pub mod order_by;
@@ -300,7 +299,6 @@ fn render_specimen(slug: &str, theme: &JetstreamThemeProvider) -> Option<JsEl> {
         "meter" => Some(meter::render(theme)),
         "metric-tile" => Some(metric_tile::render(theme)),
         "nav-card" => Some(nav_card::render(theme)),
-        "nav-card-grid" => Some(nav_card_grid::render(theme)),
         "navigation-menu" => Some(navigation_menu::render(theme)),
         "number-entry" => Some(number_entry::render(theme)),
         "order-by" => Some(order_by::render(theme)),

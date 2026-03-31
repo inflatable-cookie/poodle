@@ -4,7 +4,7 @@
 //! g07.009: AudioPlayer, VideoPlayer, MediaPicker, MarkdownEditor, BlockEditor,
 //! EmbedInput, EmbedPreview, ReorderableList,
 //! Breadcrumbs, CardRadioGroup, ListCard, NavCard,
-//! NavCardGrid, OrderBy, PageHeader, LogList, PageLoading,
+//! OrderBy, PageHeader, LogList, PageLoading,
 //! StateTile, ToastStack, EmptyState
 
 use poodle_adapter::{RenderComponent, ThemeProvider};
@@ -16,7 +16,7 @@ use poodle_composites::{
     StateTileSpec, ToastStackSpec, VideoPlayerSpec,
 };
 use poodle_primitives::{
-    BreadcrumbsSpec, ListCardSpec, NavCardGridSpec, NavCardSpec, OrderBySpec,
+    BreadcrumbsSpec, ListCardSpec, NavCardSpec, OrderBySpec,
 };
 use poodle_style::StyleDescriptor;
 
@@ -119,14 +119,6 @@ impl RenderComponent<NavCardSpec> for GpuiAdapter {
     }
 }
 
-impl RenderComponent<NavCardGridSpec> for GpuiAdapter {
-    type Target = GpuiTarget;
-    fn render(&self, _spec: &NavCardGridSpec, style: &StyleDescriptor, _theme: &dyn ThemeProvider) -> GpuiElementHandle {
-        let _s = map_style(style);
-        GpuiElementHandle::new("nav-card-grid", "NavCardGridSpec")
-    }
-}
-
 impl RenderComponent<OrderBySpec> for GpuiAdapter {
     type Target = GpuiTarget;
     fn render(&self, _spec: &OrderBySpec, style: &StyleDescriptor, _theme: &dyn ThemeProvider) -> GpuiElementHandle {
@@ -187,7 +179,7 @@ impl RenderComponent<EmptyStateSpec> for GpuiAdapter {
 mod tests {
     use poodle_adapter::RenderComponent;
     use poodle_composites::*;
-    use poodle_primitives::{BreadcrumbsSpec, ChoiceOption, ListCardSpec, NavCardGridSpec, NavCardSpec, OrderBySpec};
+    use poodle_primitives::{BreadcrumbsSpec, ChoiceOption, ListCardSpec, NavCardSpec, OrderBySpec};
     use poodle_style::StyleDescriptor;
     use crate::{GpuiAdapter, theme::GpuiThemeProvider};
 
@@ -207,7 +199,6 @@ mod tests {
     #[test] fn card_radio_group() { assert_eq!(a().render(&CardRadioGroupSpec::new(vec![ChoiceOption::new("a", "A")]), &s(), &t()).spec_type, "CardRadioGroupSpec"); }
     #[test] fn list_card() { assert_eq!(a().render(&ListCardSpec::new(), &s(), &t()).spec_type, "ListCardSpec"); }
     #[test] fn nav_card() { assert_eq!(a().render(&NavCardSpec::new(), &s(), &t()).spec_type, "NavCardSpec"); }
-    #[test] fn nav_card_grid() { assert_eq!(a().render(&NavCardGridSpec::new(), &s(), &t()).spec_type, "NavCardGridSpec"); }
     #[test] fn order_by() { assert_eq!(a().render(&OrderBySpec::new(), &s(), &t()).spec_type, "OrderBySpec"); }
     #[test] fn page_header() { assert_eq!(a().render(&PageHeaderSpec::new("Title"), &s(), &t()).spec_type, "PageHeaderSpec"); }
     #[test] fn page_loading() { assert_eq!(a().render(&PageLoadingSpec::new(), &s(), &t()).spec_type, "PageLoadingSpec"); }
