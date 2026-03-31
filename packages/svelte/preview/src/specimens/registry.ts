@@ -64,7 +64,7 @@ import MenuSpecimen from "./MenuSpecimen.svelte";
 import MenubarSpecimen from "./MenubarSpecimen.svelte";
 import MeterSpecimen from "./MeterSpecimen.svelte";
 import NavigationMenuSpecimen from "./NavigationMenuSpecimen.svelte";
-import NumberEntrySpecimen from "./NumberEntrySpecimen.svelte";
+import NumberInputSpecimen from "./NumberInputSpecimen.svelte";
 import PageHeaderSpecimen from "./PageHeaderSpecimen.svelte";
 import PageLoadingSpecimen from "./PageLoadingSpecimen.svelte";
 import PaginationSpecimen from "./PaginationSpecimen.svelte";
@@ -76,7 +76,6 @@ import CodeInputSpecimen from "./CodeInputSpecimen.svelte";
 import PopoverSpecimen from "./PopoverSpecimen.svelte";
 import ProgressSpecimen from "./ProgressSpecimen.svelte";
 import RadioGroupSpecimen from "./RadioGroupSpecimen.svelte";
-import RangeCalendarSpecimen from "./RangeCalendarSpecimen.svelte";
 import RangeSliderSpecimen from "./RangeSliderSpecimen.svelte";
 import RatingSpecimen from "./RatingSpecimen.svelte";
 import RegionSpecimen from "./RegionSpecimen.svelte";
@@ -196,7 +195,7 @@ export const specimenMap: Record<string, typeof SvelteComponent<any>> = {
   "nav-card": NavCardSpecimen,
   "navigation-menu": NavigationMenuSpecimen,
   "order-by": OrderBySpecimen,
-  "number-entry": NumberEntrySpecimen,
+  "number-input": NumberInputSpecimen,
   "page-header": PageHeaderSpecimen,
   "page-loading": PageLoadingSpecimen,
   pagination: PaginationSpecimen,
@@ -208,7 +207,6 @@ export const specimenMap: Record<string, typeof SvelteComponent<any>> = {
   popover: PopoverSpecimen,
   progress: ProgressSpecimen,
   "radio-group": RadioGroupSpecimen,
-  "range-calendar": RangeCalendarSpecimen,
   "range-slider": RangeSliderSpecimen,
   rating: RatingSpecimen,
   region: RegionSpecimen,

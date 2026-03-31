@@ -2,13 +2,13 @@
 //!
 //! g07.006: Code, ColorPicker, FileUpload, Eyebrow, Pill, TimeAgo, DurationInput,
 //! TimeZoneSelect, ZonedDateTimePicker, SplitButton, DatePicker, Calendar,
-//! RangeCalendar, DateRangePicker, DateTimePicker, DateTimeRangePicker
+//! DateRangePicker, DateTimePicker, DateTimeRangePicker
 
 use poodle_adapter::{RenderComponent, ThemeProvider};
 use poodle_primitives::{
     CalendarSpec, CodeSpec, ColorPickerSpec, DatePickerSpec, DateRangePickerSpec,
     DateTimePickerSpec, DateTimeRangePickerSpec, DurationInputSpec, EyebrowSpec, FileUploadSpec,
-    PillSpec, RangeCalendarSpec, SplitButtonSpec, TimeAgoSpec, TimeZoneSelectSpec,
+    PillSpec, SplitButtonSpec, TimeAgoSpec, TimeZoneSelectSpec,
     ZonedDateTimePickerSpec,
 };
 use poodle_style::StyleDescriptor;
@@ -225,14 +225,6 @@ impl RenderComponent<CalendarSpec> for GpuiAdapter {
     }
 }
 
-impl RenderComponent<RangeCalendarSpec> for GpuiAdapter {
-    type Target = GpuiTarget;
-    fn render(&self, _spec: &RangeCalendarSpec, style: &StyleDescriptor, _theme: &dyn ThemeProvider) -> GpuiElementHandle {
-        let _s = map_style(style);
-        GpuiElementHandle::new("range-calendar", "RangeCalendarSpec")
-    }
-}
-
 impl RenderComponent<DatePickerSpec> for GpuiAdapter {
     type Target = GpuiTarget;
     fn render(&self, _spec: &DatePickerSpec, style: &StyleDescriptor, _theme: &dyn ThemeProvider) -> GpuiElementHandle {
@@ -287,7 +279,6 @@ mod tests {
     #[test] fn zoned_date_time_picker() { assert_eq!(a().render(&ZonedDateTimePickerSpec::new(), &s(), &t()).spec_type, "ZonedDateTimePickerSpec"); }
     #[test] fn split_button() { assert_eq!(a().render(&SplitButtonSpec::new(), &s(), &t()).spec_type, "SplitButtonSpec"); }
     #[test] fn calendar() { assert_eq!(a().render(&CalendarSpec::new(), &s(), &t()).spec_type, "CalendarSpec"); }
-    #[test] fn range_calendar() { assert_eq!(a().render(&RangeCalendarSpec::new(), &s(), &t()).spec_type, "RangeCalendarSpec"); }
     #[test] fn date_picker() { assert_eq!(a().render(&DatePickerSpec::new(), &s(), &t()).spec_type, "DatePickerSpec"); }
     #[test] fn date_range_picker() { assert_eq!(a().render(&DateRangePickerSpec::new(), &s(), &t()).spec_type, "DateRangePickerSpec"); }
     #[test] fn date_time_picker() { assert_eq!(a().render(&DateTimePickerSpec::new(), &s(), &t()).spec_type, "DateTimePickerSpec"); }

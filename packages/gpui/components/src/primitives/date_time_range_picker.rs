@@ -248,7 +248,7 @@ impl IntoElement for DateTimeRangePicker {
                 grid = grid.child(row);
             }
 
-            // RangeCalendar section
+            // Calendar (range mode) section
             let calendar_section = div()
                 .p(section_padding)
                 .flex()

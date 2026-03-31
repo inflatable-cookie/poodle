@@ -22,6 +22,7 @@
   export let name: string | undefined = undefined;
   export let disabled = false;
   export let readOnly = false;
+  export let required = false;
   export let validationState: ValidationState = "none";
   export let showSteppers = false;
   export let ariaLabel: string | null = null;
@@ -123,6 +124,7 @@
     {placeholder}
     disabled={disabled}
     readonly={readOnly}
+    required={required}
     aria-label={ariaLabel ?? undefined}
     aria-describedby={describedBy ?? undefined}
     aria-invalid={ariaInvalid}

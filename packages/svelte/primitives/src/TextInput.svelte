@@ -15,7 +15,7 @@
     ValidationState,
   } from "./types";
 
-  export let id: string;
+  export let id = "";
   export let value: string | null = null;
   export let defaultValue = "";
   export let placeholder: string | null = null;
@@ -45,6 +45,7 @@
   export let validationState: ValidationState = "none";
   export let ariaLabel: string | null = null;
   export let describedBy: string | null = null;
+  export let list: string | null = null;
   export let inputMode:
     | "none"
     | "search"
@@ -277,8 +278,9 @@
   {/if}
 
   <input
-    {id}
+    id={id || undefined}
     {name}
+    list={list ?? undefined}
     {type}
     inputmode={inputMode ?? undefined}
     class="text-input__control"
@@ -540,3 +542,4 @@
     font-size: 1rem;
   }
 </style>
+  const fallbackId = getNextTextInputId();

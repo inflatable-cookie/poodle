@@ -119,7 +119,7 @@
         size={resolvedSize}
         density={resolvedDensity}
         ariaLabel={ariaLabel ?? placeholder}
-        on:valueChange={(event) => commitValue(event.detail.value)}
+        on:valueChange={(event) => commitValue(event.detail.value as string)}
         on:monthChange={(event) => (visibleMonth = event.detail.month)}
       />
     </div>

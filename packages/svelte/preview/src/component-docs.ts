@@ -270,11 +270,12 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
 
   calendar: {
     props: [
+      { name: "mode", type: '"single" | "range"', default: '"single"', description: "Selection mode. 'single' selects one date, 'range' selects a start/end pair." },
       { name: "size", type: "ControlSize | null", default: "null", description: "Explicit size override. Supports xs, sm, md, lg, and xl." },
       { name: "sizeRole", type: '"chrome" | "control" | "prominent"', default: '"control"', description: "Semantic size offset relative to the inherited presentation scale." },
       { name: "density", type: "ControlDensity | null", default: "null", description: "Explicit density override. Supports compact, default, and comfortable." },
-      { name: "value", type: "string | null", default: "null", description: "Controlled selected date in ISO format." },
-      { name: "defaultValue", type: "string | null", default: "null", description: "Initial selected date for uncontrolled mode." },
+      { name: "value", type: "string | DateRangeValue | null", default: "null", description: "Controlled selected value. String in single mode, DateRangeValue in range mode." },
+      { name: "defaultValue", type: "string | DateRangeValue | null", default: "null", description: "Initial value for uncontrolled mode." },
       { name: "visibleMonth", type: "string | null", default: "null", description: "Controlled visible month in YYYY-MM format." },
       { name: "weekStartsOn", type: "CalendarWeekStart", default: '"monday"', description: "Which day of the week the calendar starts on." },
       { name: "locale", type: "string", default: '"en-US"', description: "Locale for date formatting." },
@@ -283,7 +284,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
     ],
     slots: [],
     events: [
-      { name: "valueChange", payload: "{ value: string }", description: "Fires when the selected date changes." },
+      { name: "valueChange", payload: "{ value: string } | { value: DateRangeValue }", description: "Fires when the selected date or range changes." },
       { name: "monthChange", payload: "{ month: string }", description: "Fires when the visible month changes." },
     ],
     usage: `<script lang="ts">
@@ -292,7 +293,10 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
   let selectedDate: string | null = null;
 </script>
 
-<Calendar bind:value={selectedDate} weekStartsOn="monday" locale="en-US" />`,
+<Calendar bind:value={selectedDate} weekStartsOn="monday" locale="en-US" />
+
+<!-- Range mode -->
+<Calendar mode="range" ariaLabel="Select a date range" />`,
   },
 
   callout: {
@@ -2134,43 +2138,48 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
 <NavigationMenu {items} ariaLabel="Main navigation" />`,
   },
 
-  "number-entry": {
+  "number-input": {
     props: [
       { name: "size", type: "ControlSize | null", default: "null", description: "Explicit size override. Supports xs, sm, md, lg, and xl." },
       { name: "sizeRole", type: '"chrome" | "control" | "prominent"', default: '"control"', description: "Semantic size offset relative to the inherited presentation scale." },
       { name: "density", type: "ControlDensity | null", default: "null", description: "Explicit density override. Supports compact, default, and comfortable." },
-      { name: "id", type: "string", required: true, description: "HTML id attribute for the input." },
-      { name: "value", type: "number | null", default: "null", description: "Controlled numeric value." },
-      { name: "defaultValue", type: "number | null", default: "null", description: "Initial value for uncontrolled mode." },
+      { name: "id", type: "string", default: "\"\"", description: "HTML id attribute for the input." },
+      { name: "value", type: "number | string | null", default: "null", description: "Controlled value. Numeric bindings stay numeric; string-form bindings round-trip as strings." },
+      { name: "defaultValue", type: "number | string | null", default: "null", description: "Initial value for uncontrolled mode." },
       { name: "placeholder", type: "string | null", default: "null", description: "Placeholder text when empty." },
-      { name: "min", type: "number | null", default: "null", description: "Minimum allowed value." },
-      { name: "max", type: "number | null", default: "null", description: "Maximum allowed value." },
-      { name: "step", type: "number", default: "1", description: "Step increment for value changes." },
-      { name: "precision", type: "number | null", default: "null", description: "Number of decimal places to display." },
       { name: "name", type: "string | undefined", default: "undefined", description: "Form field name." },
       { name: "disabled", type: "boolean", default: "false", description: "Whether the input is disabled." },
       { name: "readOnly", type: "boolean", default: "false", description: "Whether the input is read-only." },
+      { name: "required", type: "boolean", default: "false", description: "Whether the input is required for form submission." },
+      { name: "min", type: "number | null", default: "null", description: "Minimum allowed value." },
+      { name: "max", type: "number | null", default: "null", description: "Maximum allowed value." },
+      { name: "step", type: "number | string | null", default: "null", description: "Step increment for value changes." },
+      { name: "precision", type: "number | null", default: "null", description: "Number of decimal places to display." },
+      { name: "prefix", type: "string | null", default: "null", description: "Optional prefix chip rendered before the control." },
       { name: "validationState", type: "ValidationState", default: '"none"', description: "Validation state of the input." },
+      { name: "validate", type: "InputValidator | undefined", default: "undefined", description: "Optional async/sync validator for string-form workflows." },
+      { name: "validationContext", type: "unknown", default: "undefined", description: "Optional validation context passed to the validator." },
       { name: "showSteppers", type: "boolean", default: "false", description: "Whether to show increment/decrement stepper buttons." },
       { name: "ariaLabel", type: "string | null", default: "null", description: "Accessible label for the input." },
       { name: "describedBy", type: "string | null", default: "null", description: "ID of the element describing this input." },
     ],
     slots: [],
     events: [
-      { name: "valueChange", payload: "{ value: number | null }", description: "Fires when the numeric value changes." },
-      { name: "submit", payload: "{ value: number | null }", description: "Fires when the value is submitted (e.g. Enter key)." },
-      { name: "increment", payload: "{ value: number | null }", description: "Fires when the value is incremented." },
-      { name: "decrement", payload: "{ value: number | null }", description: "Fires when the value is decremented." },
+      { name: "valueChange", payload: "{ value: number | string | null }", description: "Fires when the value changes." },
+      { name: "validationChange", payload: "{ status: InputValidationStatus; valid: boolean; message: string }", description: "Fires when validation status changes." },
+      { name: "submit", payload: "{ value: number | string | null }", description: "Fires when the value is submitted (e.g. Enter key)." },
+      { name: "increment", payload: "{ value: number | string | null }", description: "Fires when the value is incremented." },
+      { name: "decrement", payload: "{ value: number | string | null }", description: "Fires when the value is decremented." },
       { name: "focus", payload: "FocusEvent", description: "Fires when the input receives focus." },
       { name: "blur", payload: "FocusEvent", description: "Fires when the input loses focus." },
     ],
     usage: `<script lang="ts">
-  import { NumberEntry } from "@poodle/svelte-primitives";
+  import { NumberInput } from "@poodle/svelte-primitives";
 
   let quantity: number | null = 1;
 </script>
 
-<NumberEntry id="quantity" bind:value={quantity} min={0} max={100} step={1} showSteppers />`,
+<NumberInput id="quantity" bind:value={quantity} min={0} max={100} step={1} showSteppers />`,
   },
 
   "order-by": {
@@ -2618,33 +2627,6 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
 </script>
 
 <RadioGroup {options} bind:value={size} orientation="vertical" selectedColor="#22c55e" />`,
-  },
-
-  "range-calendar": {
-    props: [
-      { name: "size", type: "ControlSize | null", default: "null", description: "Explicit size override. Supports xs, sm, md, lg, and xl." },
-      { name: "sizeRole", type: '"chrome" | "control" | "prominent"', default: '"control"', description: "Semantic size offset relative to the inherited presentation scale." },
-      { name: "density", type: "ControlDensity | null", default: "null", description: "Explicit density override. Supports compact, default, and comfortable." },
-      { name: "value", type: "DateRangeValue | null", default: "null", description: "Controlled date range value." },
-      { name: "defaultValue", type: "DateRangeValue", default: "{ start: null, end: null }", description: "Initial date range for uncontrolled mode." },
-      { name: "visibleMonth", type: "string | null", default: "null", description: "Controlled visible month in YYYY-MM format." },
-      { name: "weekStartsOn", type: "CalendarWeekStart", default: '"monday"', description: "Which day the calendar week starts on." },
-      { name: "locale", type: "string", default: '"en-US"', description: "Locale for date formatting." },
-      { name: "disabled", type: "boolean", default: "false", description: "Whether the calendar is disabled." },
-      { name: "ariaLabel", type: "string | null", default: "null", description: "Accessible label for the range calendar." },
-    ],
-    slots: [],
-    events: [
-      { name: "valueChange", payload: "{ value: DateRangeValue }", description: "Fires when the selected date range changes." },
-      { name: "monthChange", payload: "{ month: string }", description: "Fires when the visible month changes." },
-    ],
-    usage: `<script lang="ts">
-  import { RangeCalendar } from "@poodle/svelte-primitives";
-
-  let range = { start: null, end: null };
-</script>
-
-<RangeCalendar bind:value={range} locale="en-US" />`,
   },
 
   "range-slider": {

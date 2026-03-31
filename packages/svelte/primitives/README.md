@@ -54,7 +54,7 @@ Contract-backed Svelte primitive surface for the first generalized Poodle baseli
 - `NavigationMenu`
 - `MetaBar`
 - `MetaItem`
-- `NumberEntry`
+- `NumberInput`
 - `OrderBy`
 - `Pagination`
 - `PaginationSummary`
@@ -65,7 +65,6 @@ Contract-backed Svelte primitive surface for the first generalized Poodle baseli
 - `Progress`
 - `RadioGroup`
 - `Rating`
-- `RangeCalendar`
 - `RangeSlider`
 - `Region`
 - `ResizeHandle`

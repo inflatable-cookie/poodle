@@ -9,21 +9,25 @@
     addDays,
     addMonths,
     buildCalendarWeeks,
+    compareIsoDate,
     dayDeltaForWeekBoundary,
     formatDateLabel,
     formatIsoDate,
     formatMonthLabel,
     getWeekdayLabels,
+    isIsoDateWithinRange,
     monthAnchorIso,
+    normalizeDateRange,
     parseIsoDate,
     todayIsoDate,
   } from "./date";
   import { getUiPresentation, resolveSemanticControlSize } from "./presentation";
 
-  import type { CalendarWeekStart, ControlDensity, ControlSize, SemanticControlSizeRole } from "./types";
+  import type { CalendarWeekStart, ControlDensity, ControlSize, DateRangeValue, SemanticControlSizeRole } from "./types";
 
-  export let value: string | null = null;
-  export let defaultValue: string | null = null;
+  export let mode: "single" | "range" = "single";
+  export let value: string | DateRangeValue | null = null;
+  export let defaultValue: string | DateRangeValue | null = null;
   export let visibleMonth: string | null = null;
   export let weekStartsOn: CalendarWeekStart = "monday";
   export let locale = "en-US";
@@ -34,26 +38,81 @@
   export let density: ControlDensity | null = null;
 
   const dispatch = createEventDispatcher<{
-    valueChange: { value: string };
+    valueChange: { value: string } | { value: DateRangeValue };
     monthChange: { month: string };
   }>();
 
   const gridId = `poodle-calendar-grid-${++nextCalendarId}`;
   const uiPresentation = getUiPresentation();
-  let uncontrolledValue = defaultValue;
-  let uncontrolledMonth = monthAnchorIso(visibleMonth ?? defaultValue ?? todayIsoDate());
-  let focusIso = defaultValue ?? todayIsoDate();
+
+  // Single mode state
+  let uncontrolledSingleValue: string | null =
+    mode === "single" && typeof defaultValue === "string" ? defaultValue : null;
+
+  // Range mode state
+  let uncontrolledRangeValue: DateRangeValue =
+    mode === "range" && defaultValue !== null && typeof defaultValue === "object"
+      ? normalizeDateRange(defaultValue as DateRangeValue)
+      : { start: null, end: null };
+
+  let uncontrolledMonth = monthAnchorIso(
+    visibleMonth ??
+    (mode === "range"
+      ? (typeof defaultValue === "object" && defaultValue !== null ? (defaultValue as DateRangeValue).start : null) ?? todayIsoDate()
+      : (typeof defaultValue === "string" ? defaultValue : null) ?? todayIsoDate())
+  );
+
+  let focusIso = mode === "range"
+    ? (typeof defaultValue === "object" && defaultValue !== null ? (defaultValue as DateRangeValue).start : null) ?? todayIsoDate()
+    : (typeof defaultValue === "string" ? defaultValue : null) ?? todayIsoDate();
+
   let dayElements: Record<string, HTMLButtonElement | undefined> = {};
 
   $: resolvedSize = size ?? resolveSemanticControlSize($uiPresentation.sizeScale, sizeRole);
   $: resolvedDensity = density ?? $uiPresentation.density;
-  $: currentValue = value ?? uncontrolledValue;
+
+  // Resolved current values based on mode
+  $: currentSingleValue = mode === "single"
+    ? (typeof value === "string" ? value : null) ?? uncontrolledSingleValue
+    : null;
+  $: currentRangeValue = mode === "range"
+    ? normalizeDateRange(
+        (value !== null && typeof value === "object" ? value as DateRangeValue : null) ?? uncontrolledRangeValue
+      )
+    : { start: null, end: null };
+
   $: currentMonth = monthAnchorIso(visibleMonth ?? uncontrolledMonth);
   $: weeks = buildCalendarWeeks(currentMonth, weekStartsOn);
   $: weekdayLabels = getWeekdayLabels(weekStartsOn, locale);
   $: monthLabel = formatMonthLabel(currentMonth, locale);
-  $: if (currentValue) {
-    focusIso = currentValue;
+
+  // Update focusIso when values change
+  $: if (mode === "single" && currentSingleValue) {
+    focusIso = currentSingleValue;
+  }
+  $: if (mode === "range") {
+    if (currentRangeValue.end) {
+      focusIso = currentRangeValue.end;
+    } else if (currentRangeValue.start) {
+      focusIso = currentRangeValue.start;
+    }
+  }
+
+  // Day state helpers for range mode
+  function isRangeStart(iso: string): boolean {
+    return mode === "range" && currentRangeValue.start === iso;
+  }
+  function isRangeEnd(iso: string): boolean {
+    return mode === "range" && currentRangeValue.end === iso;
+  }
+  function isInRange(iso: string): boolean {
+    return mode === "range" && isIsoDateWithinRange(iso, currentRangeValue);
+  }
+  function isSelected(iso: string): boolean {
+    if (mode === "single") {
+      return currentSingleValue === iso;
+    }
+    return isRangeStart(iso) || isRangeEnd(iso);
   }
 
   function setMonth(nextMonth: string): void {
@@ -69,12 +128,38 @@
       return;
     }
 
+    if (mode === "single") {
+      if (value === null) {
+        uncontrolledSingleValue = iso;
+      }
+
+      focusIso = iso;
+      dispatch("valueChange", { value: iso });
+    } else {
+      // Range mode: two-click selection
+      if (!currentRangeValue.start || currentRangeValue.end) {
+        commitRange({ start: iso, end: null });
+        return;
+      }
+
+      if (compareIsoDate(iso, currentRangeValue.start) < 0) {
+        commitRange({ start: iso, end: currentRangeValue.start });
+        return;
+      }
+
+      commitRange({ start: currentRangeValue.start, end: iso });
+    }
+  }
+
+  function commitRange(nextValue: DateRangeValue): void {
+    const normalized = normalizeDateRange(nextValue);
+
     if (value === null) {
-      uncontrolledValue = iso;
+      uncontrolledRangeValue = normalized;
     }
 
-    focusIso = iso;
-    dispatch("valueChange", { value: iso });
+    focusIso = normalized.end ?? normalized.start ?? focusIso;
+    dispatch("valueChange", { value: normalized });
   }
 
   async function focusDate(iso: string): Promise<void> {
@@ -134,7 +219,7 @@
   }
 </script>
 
-<div class="calendar" data-size={resolvedSize} data-density={resolvedDensity} aria-label={ariaLabel ?? undefined}>
+<div class="calendar" data-size={resolvedSize} data-density={resolvedDensity} data-mode={mode} aria-label={ariaLabel ?? undefined}>
   <div class="calendar__header">
     <button
       type="button"
@@ -143,7 +228,7 @@
       aria-label="Previous month"
       on:click={() => setMonth(monthAnchorIso(formatIsoDate(addMonths(parseIsoDate(currentMonth)!, -1))))}
     >
-      <span aria-hidden="true">‹</span>
+      <span aria-hidden="true">&#x2039;</span>
     </button>
 
     <div class="calendar__month" aria-live="polite">
@@ -157,7 +242,7 @@
       aria-label="Next month"
       on:click={() => setMonth(monthAnchorIso(formatIsoDate(addMonths(parseIsoDate(currentMonth)!, 1))))}
     >
-      <span aria-hidden="true">›</span>
+      <span aria-hidden="true">&#x203A;</span>
     </button>
   </div>
 
@@ -174,15 +259,18 @@
           <div
             class="calendar__cell"
             role="gridcell"
-            aria-selected={currentValue === day.iso ? "true" : "false"}
+            aria-selected={isSelected(day.iso) ? "true" : "false"}
           >
             <button
               bind:this={dayElements[day.iso]}
               type="button"
               class="calendar__day"
               data-current-month={day.inMonth}
-              data-selected={currentValue === day.iso}
+              data-selected={mode === "single" && currentSingleValue === day.iso}
               data-today={day.isToday}
+              data-range-start={isRangeStart(day.iso)}
+              data-range-end={isRangeEnd(day.iso)}
+              data-in-range={isInRange(day.iso)}
               disabled={disabled}
               aria-label={formatDateLabel(day.iso, locale)}
               tabindex={focusIso === day.iso ? 0 : -1}
@@ -297,7 +385,20 @@
     border-color: color-mix(in srgb, var(--poodle-color-accent-base) 44%, var(--poodle-color-border-default));
   }
 
+  /* Single mode: selected day */
   .calendar__day[data-selected="true"] {
+    background: var(--poodle-color-accent-base);
+    color: var(--poodle-color-text-inverse);
+  }
+
+  /* Range mode: in-range days */
+  .calendar__day[data-in-range="true"] {
+    background: color-mix(in srgb, var(--poodle-color-accent-base) 16%, transparent);
+  }
+
+  /* Range mode: range endpoints */
+  .calendar__day[data-range-start="true"],
+  .calendar__day[data-range-end="true"] {
     background: var(--poodle-color-accent-base);
     color: var(--poodle-color-text-inverse);
   }
@@ -311,6 +412,13 @@
 
   .calendar__day[data-selected="true"]:hover:not(:disabled),
   .calendar__day[data-selected="true"]:focus-visible {
+    background: color-mix(in srgb, var(--poodle-color-accent-base) 88%, white 8%);
+  }
+
+  .calendar__day[data-range-start="true"]:hover:not(:disabled),
+  .calendar__day[data-range-start="true"]:focus-visible,
+  .calendar__day[data-range-end="true"]:hover:not(:disabled),
+  .calendar__day[data-range-end="true"]:focus-visible {
     background: color-mix(in srgb, var(--poodle-color-accent-base) 88%, white 8%);
   }
 

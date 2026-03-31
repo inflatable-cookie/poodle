@@ -49,7 +49,6 @@ mod code_input;
 mod popover;
 mod progress;
 mod radio_group;
-mod range_calendar;
 mod range_slider;
 mod rating;
 mod region;
@@ -90,7 +89,7 @@ pub use banner::BannerSpec;
 pub use breadcrumbs::{BreadcrumbItem, BreadcrumbsSpec};
 pub use bulk_action_bar::{BulkAction, BulkActionBarSpec, BulkActionTone};
 pub use button::ButtonSpec;
-pub use calendar::CalendarSpec;
+pub use calendar::{CalendarMode, CalendarSpec};
 pub use call_out::CallOutSpec;
 pub use card::{CardLayout, CardSpec, CardVariant};
 pub use checkbox::CheckboxSpec;
@@ -134,7 +133,8 @@ pub use popover::PopoverSpec;
 pub use progress::ProgressSpec;
 pub use r#box::BoxSpec;
 pub use radio_group::RadioGroupSpec;
-pub use range_calendar::RangeCalendarSpec;
+/// Deprecated: use `CalendarSpec` with `CalendarMode::Range` instead.
+pub type RangeCalendarSpec = CalendarSpec;
 pub use range_slider::RangeSliderSpec;
 pub use rating::RatingSpec;
 pub use region::RegionSpec;
@@ -208,7 +208,6 @@ pub const SELECTION_FEEDBACK_DATE_EXPORTS: &[&str] = &[
     "BadgeSpec",
     "StatusIndicatorSpec",
     "CalendarSpec",
-    "RangeCalendarSpec",
     "DatePickerSpec",
     "DateRangePickerSpec",
     "TimeFieldSpec",
@@ -236,14 +235,14 @@ mod tests {
 
     use super::{
         AccordionItemSpec, AccordionSelectionValue, AccordionSpec, BadgeSpec, BadgeVariant,
-        BoxSpec, ButtonSpec, ButtonVariant, CalendarSpec, CalendarWeekStart, CheckState,
-        CheckboxSpec, ChoiceOption, CollapsibleSpec, ContextMenuSpec, ControlSize, DatePickerSpec,
-        DateRangePickerSpec, DateRangeValue, DateTimePickerSpec, DateTimeRangePickerSpec,
-        DateTimeRangeValue, DateTimeValue, DialogKind, DialogSpec, Direction, DrawerEdge,
-        DrawerSpec, FieldSpec, FormActionAlign, FormActionsSpec, GridSpec, IconButtonSpec,
-        MenuEntry, MenuItemKind, MenuSpec, MenubarEntry, MenubarSpec, NavigationMenuEntry,
-        NavigationMenuSpec, Orientation, OverlayPlacement, PaddingScale, PopoverInitialFocus,
-        PopoverSpec, ProgressSpec, RadioGroupSpec, RangeCalendarSpec, ScrollShellSpec,
+        BoxSpec, ButtonSpec, ButtonVariant, CalendarMode, CalendarSpec, CalendarWeekStart,
+        CheckState, CheckboxSpec, ChoiceOption, CollapsibleSpec, ContextMenuSpec, ControlSize,
+        DatePickerSpec, DateRangePickerSpec, DateRangeValue, DateTimePickerSpec,
+        DateTimeRangePickerSpec, DateTimeRangeValue, DateTimeValue, DialogKind, DialogSpec,
+        Direction, DrawerEdge, DrawerSpec, FieldSpec, FormActionAlign, FormActionsSpec, GridSpec,
+        IconButtonSpec, MenuEntry, MenuItemKind, MenuSpec, MenubarEntry, MenubarSpec,
+        NavigationMenuEntry, NavigationMenuSpec, Orientation, OverlayPlacement, PaddingScale,
+        PopoverInitialFocus, PopoverSpec, ProgressSpec, RadioGroupSpec, ScrollShellSpec,
         SearchFieldSpec, SegmentedControlSpec, SelectSpec, SeparatorSpec, SliderSpec, StackSpec,
         StatusIndicatorSpec, StatusTone, SurfaceSpec, SurfaceTone, SwitchSpec, TabActivationMode,
         TabDefinition, TabStripItem, TabStripSpec, TabsSpec, TextAreaSpec, TextInputSpec,
@@ -531,12 +530,14 @@ mod tests {
             Some(String::from("2026-03-12")),
             Some(String::from("2026-03-18")),
         );
-        let calendar = RangeCalendarSpec::new().with_default_value(range.clone());
+        let calendar = CalendarSpec::new()
+            .with_mode(CalendarMode::Range)
+            .with_default_range_value(range.clone());
         let picker = DateRangePickerSpec::new()
             .with_default_value(range.clone())
             .with_open(true);
 
-        assert_eq!(calendar.current_value(), &range);
+        assert_eq!(calendar.current_range_value(), &range);
         assert_eq!(picker.current_value(), &range);
         assert!(picker.current_open());
     }

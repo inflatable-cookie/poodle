@@ -5,7 +5,7 @@
 <script lang="ts">
   import { createEventDispatcher, onMount } from "svelte";
 
-  import RangeCalendar from "./RangeCalendar.svelte";
+  import Calendar from "./Calendar.svelte";
   import { formatDateLabel, monthAnchorIso, normalizeDateRange, todayIsoDate } from "./date";
   import { getUiPresentation, resolveSemanticControlSize } from "./presentation";
 
@@ -127,7 +127,8 @@
       role="dialog"
       aria-label={ariaLabel ?? placeholder}
     >
-      <RangeCalendar
+      <Calendar
+        mode="range"
         value={currentValue}
         visibleMonth={visibleMonth}
         {weekStartsOn}
@@ -136,7 +137,7 @@
         size={resolvedSize}
         density={resolvedDensity}
         ariaLabel={ariaLabel ?? placeholder}
-        on:valueChange={(event) => commitValue(event.detail.value)}
+        on:valueChange={(event) => commitValue(event.detail.value as DateRangeValue)}
         on:monthChange={(event) => (visibleMonth = event.detail.month)}
       />
     </div>

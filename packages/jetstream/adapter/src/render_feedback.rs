@@ -3,14 +3,14 @@
 //! g08.007: ProgressSpec, BadgeSpec, SpinnerSpec, StatusIndicatorSpec, SkeletonSpec,
 //! MeterSpec, RatingSpec, CodeSpec, EyebrowSpec, PillSpec, TimeAgoSpec,
 //! SplitButtonSpec, ColorPickerSpec, FileUploadSpec, DurationInputSpec,
-//! TimeZoneSelectSpec, ZonedDateTimePickerSpec, CalendarSpec, RangeCalendarSpec,
+//! TimeZoneSelectSpec, ZonedDateTimePickerSpec, CalendarSpec,
 //! DatePickerSpec, DateRangePickerSpec, DateTimePickerSpec, DateTimeRangePickerSpec
 
 use poodle_adapter::{RenderComponent, ThemeProvider};
 use poodle_primitives::{
     BadgeSpec, CalendarSpec, CodeSpec, ColorPickerSpec, DatePickerSpec, DateRangePickerSpec,
     DateTimePickerSpec, DateTimeRangePickerSpec, DurationInputSpec, EyebrowSpec, FileUploadSpec,
-    MeterSpec, PillSpec, ProgressSpec, RangeCalendarSpec, RatingSpec, SkeletonSpec,
+    MeterSpec, PillSpec, ProgressSpec, RatingSpec, SkeletonSpec,
     SpinnerSpec, SplitButtonSpec, StatusIndicatorSpec, TimeAgoSpec, TimeZoneSelectSpec,
     ZonedDateTimePickerSpec,
 };
@@ -370,14 +370,6 @@ impl RenderComponent<CalendarSpec> for JetstreamAdapter {
     }
 }
 
-impl RenderComponent<RangeCalendarSpec> for JetstreamAdapter {
-    type Target = JetstreamTarget;
-    fn render(&self, _spec: &RangeCalendarSpec, style: &StyleDescriptor, _theme: &dyn ThemeProvider) -> JetstreamNodeHandle {
-        let mapped = map_style(style);
-        JetstreamNodeHandle::new("range-calendar", "RangeCalendarSpec", WidgetKind::Panel, mapped)
-    }
-}
-
 impl RenderComponent<DatePickerSpec> for JetstreamAdapter {
     type Target = JetstreamTarget;
     fn render(&self, _spec: &DatePickerSpec, style: &StyleDescriptor, _theme: &dyn ThemeProvider) -> JetstreamNodeHandle {
@@ -439,7 +431,6 @@ mod tests {
     #[test] fn time_zone_select() { assert_eq!(a().render(&TimeZoneSelectSpec::new(), &s(), &t()).spec_type, "TimeZoneSelectSpec"); }
     #[test] fn zoned_date_time_picker() { assert_eq!(a().render(&ZonedDateTimePickerSpec::new(), &s(), &t()).spec_type, "ZonedDateTimePickerSpec"); }
     #[test] fn calendar() { assert_eq!(a().render(&CalendarSpec::new(), &s(), &t()).spec_type, "CalendarSpec"); }
-    #[test] fn range_calendar() { assert_eq!(a().render(&RangeCalendarSpec::new(), &s(), &t()).spec_type, "RangeCalendarSpec"); }
     #[test] fn date_picker() { assert_eq!(a().render(&DatePickerSpec::new(), &s(), &t()).spec_type, "DatePickerSpec"); }
     #[test] fn date_range_picker() { assert_eq!(a().render(&DateRangePickerSpec::new(), &s(), &t()).spec_type, "DateRangePickerSpec"); }
     #[test] fn date_time_picker() { assert_eq!(a().render(&DateTimePickerSpec::new(), &s(), &t()).spec_type, "DateTimePickerSpec"); }

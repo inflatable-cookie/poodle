@@ -81,7 +81,7 @@ above it in downstream repos such as Loophole.
 - `foundation/meter.md`
 - `foundation/nav-card.md`
 - `foundation/navigation-menu.md`
-- `foundation/number-entry.md`
+- `foundation/number-input.md`
 - `foundation/order-by.md`
 - `foundation/pagination-summary.md`
 - `foundation/pagination.md`
@@ -90,7 +90,6 @@ above it in downstream repos such as Loophole.
 - `foundation/popover.md`
 - `foundation/progress.md`
 - `foundation/radio-group.md`
-- `foundation/range-calendar.md`
 - `foundation/range-slider.md`
 - `foundation/rating.md`
 - `foundation/region.md`

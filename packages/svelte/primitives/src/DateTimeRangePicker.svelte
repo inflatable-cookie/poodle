@@ -5,7 +5,7 @@
 <script lang="ts">
   import { createEventDispatcher, onMount } from "svelte";
 
-  import RangeCalendar from "./RangeCalendar.svelte";
+  import Calendar from "./Calendar.svelte";
   import TimeField from "./TimeField.svelte";
   import {
     formatDateTimeRangeLabel,
@@ -16,7 +16,7 @@
   } from "./date";
   import { getUiPresentation, resolveSemanticControlSize } from "./presentation";
 
-  import type { CalendarWeekStart, ControlDensity, ControlSize, DateTimeRangeValue, SemanticControlSizeRole } from "./types";
+  import type { CalendarWeekStart, ControlDensity, ControlSize, DateRangeValue, DateTimeRangeValue, SemanticControlSizeRole } from "./types";
 
   export let value: DateTimeRangeValue | null = null;
   export let defaultValue: DateTimeRangeValue = {
@@ -137,7 +137,8 @@
       aria-label={ariaLabel ?? placeholder}
     >
       <div class="date-time-range-picker__body">
-        <RangeCalendar
+        <Calendar
+          mode="range"
           value={currentRange}
           visibleMonth={visibleMonth}
           {weekStartsOn}
@@ -148,8 +149,8 @@
           ariaLabel={ariaLabel ?? placeholder}
           on:valueChange={(event) =>
             commitValue({
-              start: { ...currentValue.start, date: event.detail.value.start },
-              end: { ...currentValue.end, date: event.detail.value.end },
+              start: { ...currentValue.start, date: (event.detail.value as DateRangeValue).start },
+              end: { ...currentValue.end, date: (event.detail.value as DateRangeValue).end },
             })}
           on:monthChange={(event) => (visibleMonth = event.detail.month)}
         />

@@ -15,7 +15,7 @@ Updated: 2026-03-25
   value models
 - Out of scope: multiline editing (see TextArea), search-specific clear behavior
   (see SearchField), inline edit mode switching (see EditableLabel), number
-  formatting (see NumberEntry)
+  formatting (see NumberInput)
 
 ## 2. Anatomy
 
@@ -464,7 +464,7 @@ One disabled text input:
 
 - contract status: `detailed contract`
 - approvers: pending
-- downstream adopters: SearchField (composition), EditableLabel, NumberEntry,
+- downstream adopters: SearchField (composition), EditableLabel, NumberInput,
   Field-wrapped form inputs, Aura search/edit controls, Spark search/edit controls
 - future follow-up: attach richer validation timing rules once Field wrappers
   are fully adopted

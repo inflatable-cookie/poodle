@@ -56,7 +56,6 @@ pub static PRIMITIVES: &[ComponentEntry] = &[
     ComponentEntry { slug: "popover", display_name: "Popover", description: "Anchored overlay." },
     ComponentEntry { slug: "progress", display_name: "Progress", description: "Progress indicator." },
     ComponentEntry { slug: "radio-group", display_name: "RadioGroup", description: "Single-selection group." },
-    ComponentEntry { slug: "range-calendar", display_name: "RangeCalendar", description: "Calendar for date ranges." },
     ComponentEntry { slug: "range-slider", display_name: "RangeSlider", description: "Dual-thumb slider." },
     ComponentEntry { slug: "rating", display_name: "Rating", description: "Star-based rating." },
     ComponentEntry { slug: "scroll-shell", display_name: "ScrollShell", description: "Scrollable container." },

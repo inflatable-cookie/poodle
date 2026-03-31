@@ -33,9 +33,9 @@ Updated: 2026-03-16
         │           └── [Mode Section .color-picker__mode-section]
         │                 ├── [Mode Toggle .color-picker__mode-toggle]  → SegmentedControl (Hex/RGB/HSL)
         │                 └── [Inputs .color-picker__inputs]
-        │                       ├── hex mode: text input + optional alpha NumberEntry
-        │                       ├── rgb mode: 3x NumberEntry (R/G/B) + optional alpha NumberEntry
-        │                       └── hsl mode: 3x NumberEntry (H/S/L) + optional alpha NumberEntry
+        │                       ├── hex mode: text input + optional alpha NumberInput
+        │                       ├── rgb mode: 3x NumberInput (R/G/B) + optional alpha NumberInput
+        │                       └── hsl mode: 3x NumberInput (H/S/L) + optional alpha NumberInput
         └── [Swatches .color-picker__swatches]  <div role="listbox"> (conditional: swatches.length > 0)
               └── [Swatch .color-picker__swatch]  <button role="option"> (repeated)
 ```
@@ -165,7 +165,7 @@ Updated: 2026-03-16
 
 - parent expectations: form fields, settings panels, toolbar popovers
 - child expectations: no child slots; uses Slider, SegmentedControl,
-  NumberEntry internally
+  NumberInput internally via the shared numeric-entry implementation
 
 ## 8. Token Usage — Exact Values
 
@@ -347,7 +347,7 @@ Updated: 2026-03-16
   transparent-to-black overlays; pointer tracking via `setPointerCapture`
 - Hue and alpha sliders reuse the Slider component with `:global()` CSS
   overrides for custom track backgrounds and hidden fill
-- Mode toggle uses SegmentedControl; channel inputs use NumberEntry
+- Mode toggle uses SegmentedControl; channel inputs use NumberInput
 - Color conversion utilities are in `color-utils.ts`: hexToRgb, rgbToHex,
   rgbToHsl, hslToRgb, rgbToHsv, hsvToRgb, hexToHsv, hsvToHex, etc.
 - `min-height: 0` is applied to gradient thumb, slider wrappers, trigger,
@@ -363,7 +363,7 @@ Updated: 2026-03-16
 - Hue strip: render a horizontal gradient through all hue stops
 - Alpha strip: render checkerboard pattern with color-to-transparent overlay
 - Surface popover: use GPUI's overlay/popover primitives for positioning
-- Slider, SegmentedControl, NumberEntry: use GPUI equivalents
+- Slider, SegmentedControl, NumberInput: use GPUI equivalents
 - `color-mix` values: GPUI computes equivalent alpha blending
 - Swatch scale transform: GPUI applies 1.15x scale on hover
 

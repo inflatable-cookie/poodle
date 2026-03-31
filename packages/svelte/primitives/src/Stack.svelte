@@ -16,6 +16,8 @@
   export let padding: SpaceScale = "none";
   export let asRole: string | null = null;
   export let ariaLabel: string | null = null;
+  export let className = "";
+  export { className as class };
 
   $: style = joinStyles([
     `flex-direction: ${direction}`,
@@ -27,7 +29,7 @@
   ]);
 </script>
 
-<div class="stack" role={asRole ?? undefined} aria-label={ariaLabel ?? undefined} style={style}>
+<div class={`stack ${className}`.trim()} role={asRole ?? undefined} aria-label={ariaLabel ?? undefined} style={style}>
   <slot />
 </div>
 

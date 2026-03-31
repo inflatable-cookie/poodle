@@ -45,7 +45,6 @@ mod range_slider;
 
 // ── Date/Time ────────────────────────────────────────────
 mod calendar;
-mod range_calendar;
 mod date_picker;
 mod date_range_picker;
 mod time_field;
@@ -274,7 +273,6 @@ pub fn render_single_specimen(
 
         // ── Date/Time ───────────────────────────────────────────
         "calendar" => specimen_card("Calendar", theme, calendar::render(state, cx)),
-        "range-calendar" => specimen_card("RangeCalendar", theme, range_calendar::render(theme)),
         "date-picker" => specimen_card("DatePicker", theme, date_picker::render(state, cx)),
         "date-range-picker" => specimen_card("DateRangePicker", theme, date_range_picker::render(state, cx)),
         "date-time-picker" => specimen_card("DateTimePicker", theme, date_time_picker::render(state, cx)),

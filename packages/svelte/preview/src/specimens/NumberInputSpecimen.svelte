@@ -1,31 +1,31 @@
 <script lang="ts">
-  import { NumberEntry, Eyebrow } from "@poodle/svelte-primitives";
+  import { NumberInput, Eyebrow } from "@poodle/svelte-primitives";
 
   const controlSizes = ["xs", "sm", "md", "lg", "xl"] as const;
 
-  let quantity = 1;
-  let price = 29.99;
+  let quantity: number | null = 1;
+  let price: number | null = 29.99;
+  let ticketCode = "12";
 </script>
 
 <div class="specimen">
   <div class="specimen__group">
-    <Eyebrow>Default</Eyebrow>
-    <NumberEntry
+    <Eyebrow>Numeric Value</Eyebrow>
+    <NumberInput
       id="qty"
-      value={quantity}
+      bind:value={quantity}
       min={0}
       max={100}
       ariaLabel="Quantity"
-      on:valueChange={(e) => { if (e.detail.value != null) quantity = e.detail.value; }}
     />
-    <p>Quantity: <strong>{quantity}</strong></p>
+    <p>Quantity: <strong>{quantity ?? "none"}</strong></p>
   </div>
 
   <div class="specimen__group">
     <Eyebrow>Sizes</Eyebrow>
     <div class="specimen__stack">
       {#each controlSizes as size}
-        <NumberEntry id={"size-" + size} value={1} ariaLabel={"Number at " + size} {size} />
+        <NumberInput id={"size-" + size} value={1} ariaLabel={"Number at " + size} {size} />
       {/each}
     </div>
   </div>
@@ -36,35 +36,47 @@
       {#each ["compact", "default", "comfortable"] as density}
         <div class="specimen__row">
           <span class="specimen__label">{density}</span>
-          <NumberEntry id={"density-" + density} value={1} ariaLabel={"Number at " + density + " density"} {density} />
+          <NumberInput id={"density-" + density} value={1} ariaLabel={"Number at " + density + " density"} {density} />
         </div>
       {/each}
     </div>
   </div>
 
   <div class="specimen__group">
-    <Eyebrow>With steppers</Eyebrow>
-    <NumberEntry
+    <Eyebrow>With Steppers</Eyebrow>
+    <NumberInput
       id="price"
-      value={price}
+      bind:value={price}
       min={0}
       step={0.01}
       precision={2}
       showSteppers
       ariaLabel="Price"
-      on:valueChange={(e) => { if (e.detail.value != null) price = e.detail.value; }}
     />
-    <p>Price: <strong>${price.toFixed(2)}</strong></p>
+    <p>Price: <strong>{price == null ? "none" : `$${price.toFixed(2)}`}</strong></p>
+  </div>
+
+  <div class="specimen__group">
+    <Eyebrow>String Form Binding</Eyebrow>
+    <NumberInput
+      id="ticket-code"
+      bind:value={ticketCode}
+      prefix="A"
+      min={1}
+      max={999}
+      ariaLabel="Ticket code"
+    />
+    <p>Ticket code: <strong>{ticketCode}</strong></p>
   </div>
 
   <div class="specimen__group">
     <Eyebrow>Disabled</Eyebrow>
-    <NumberEntry id="disabled-num" value={42} ariaLabel="Disabled" disabled />
+    <NumberInput id="disabled-num" value={42} ariaLabel="Disabled" disabled />
   </div>
 
   <div class="specimen__group">
     <Eyebrow>Invalid</Eyebrow>
-    <NumberEntry id="invalid-num" value={-5} min={0} ariaLabel="Invalid number" validationState="invalid" />
+    <NumberInput id="invalid-num" value={-5} min={0} ariaLabel="Invalid number" validationState="invalid" />
   </div>
 </div>
 
@@ -73,7 +85,7 @@
     display: flex;
     flex-direction: column;
     gap: 1.5rem;
-    max-width: 14rem;
+    max-width: 16rem;
   }
 
   .specimen__group {

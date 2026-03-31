@@ -1,9 +1,20 @@
-use crate::types::{CalendarWeekStart, ControlDensity, ControlSize, SemanticControlSizeRole};
+use crate::types::{CalendarWeekStart, ControlDensity, ControlSize, DateRangeValue, SemanticControlSizeRole};
+
+/// Selection mode for Calendar.
+#[derive(Clone, Copy, Debug, Default, Eq, PartialEq)]
+pub enum CalendarMode {
+    #[default]
+    Single,
+    Range,
+}
 
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct CalendarSpec {
+    pub mode: CalendarMode,
     pub value: Option<String>,
     pub default_value: Option<String>,
+    pub range_value: Option<DateRangeValue>,
+    pub default_range_value: DateRangeValue,
     pub visible_month: Option<String>,
     pub week_starts_on: CalendarWeekStart,
     pub locale: String,
@@ -17,8 +28,11 @@ pub struct CalendarSpec {
 impl Default for CalendarSpec {
     fn default() -> Self {
         Self {
+            mode: CalendarMode::Single,
             value: None,
             default_value: None,
+            range_value: None,
+            default_range_value: DateRangeValue::new(None, None),
             visible_month: None,
             week_starts_on: CalendarWeekStart::Sunday,
             locale: String::from("en-GB"),
@@ -36,6 +50,11 @@ impl CalendarSpec {
         Self::default()
     }
 
+    pub fn with_mode(mut self, mode: CalendarMode) -> Self {
+        self.mode = mode;
+        self
+    }
+
     pub fn with_value(mut self, value: impl Into<String>) -> Self {
         self.value = Some(value.into());
         self
@@ -51,8 +70,17 @@ impl CalendarSpec {
         self
     }
 
+    pub fn with_default_range_value(mut self, default_value: DateRangeValue) -> Self {
+        self.default_range_value = default_value;
+        self
+    }
+
     pub fn current_value(&self) -> Option<&str> {
         self.value.as_deref().or(self.default_value.as_deref())
+    }
+
+    pub fn current_range_value(&self) -> &DateRangeValue {
+        self.range_value.as_ref().unwrap_or(&self.default_range_value)
     }
 
     pub fn effective_visible_month(&self) -> Option<&str> {

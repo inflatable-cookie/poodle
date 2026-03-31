@@ -163,7 +163,6 @@ const SUPPORTED_PRIMITIVES: &[&str] = &[
     "ZonedDateTimePickerSpec",
     "SplitButtonSpec",
     "CalendarSpec",
-    "RangeCalendarSpec",
     "DatePickerSpec",
     "DateRangePickerSpec",
     "DateTimePickerSpec",

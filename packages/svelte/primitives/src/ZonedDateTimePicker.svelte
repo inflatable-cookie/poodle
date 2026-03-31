@@ -144,7 +144,7 @@
           size={resolvedSize}
           density={resolvedDensity}
           ariaLabel={ariaLabel ?? "Date"}
-          on:valueChange={(event) => commitValue({ ...currentValue, date: event.detail.value })}
+          on:valueChange={(event) => commitValue({ ...currentValue, date: event.detail.value as string | null })}
           on:monthChange={(event) => (visibleMonth = event.detail.month)}
         />
 

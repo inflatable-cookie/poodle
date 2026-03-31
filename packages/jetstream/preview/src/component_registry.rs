@@ -80,7 +80,6 @@ pub static PRIMITIVES: &[ComponentEntry] = &[
     ComponentEntry { slug: "popover", display_name: "Popover", description: "Anchored overlay.", tier: Tier::Primitive, has_specimen: true },
     ComponentEntry { slug: "progress", display_name: "Progress", description: "Progress indicator.", tier: Tier::Primitive, has_specimen: true },
     ComponentEntry { slug: "radio-group", display_name: "RadioGroup", description: "Single-selection group.", tier: Tier::Primitive, has_specimen: true },
-    ComponentEntry { slug: "range-calendar", display_name: "RangeCalendar", description: "Calendar for date ranges.", tier: Tier::Primitive, has_specimen: true },
     ComponentEntry { slug: "range-slider", display_name: "RangeSlider", description: "Dual-thumb slider.", tier: Tier::Primitive, has_specimen: true },
     ComponentEntry { slug: "rating", display_name: "Rating", description: "Star-based rating.", tier: Tier::Primitive, has_specimen: true },
     ComponentEntry { slug: "scroll-shell", display_name: "ScrollShell", description: "Scrollable container.", tier: Tier::Primitive, has_specimen: true },

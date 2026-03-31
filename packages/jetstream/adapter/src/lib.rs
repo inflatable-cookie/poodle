@@ -147,7 +147,7 @@ const SUPPORTED_PRIMITIVES: &[&str] = &[
     // Informational and temporal
     "CodeSpec", "EyebrowSpec", "PillSpec", "TimeAgoSpec", "SplitButtonSpec",
     "ColorPickerSpec", "FileUploadSpec", "DurationInputSpec", "TimeZoneSelectSpec",
-    "ZonedDateTimePickerSpec", "CalendarSpec", "RangeCalendarSpec", "DatePickerSpec",
+    "ZonedDateTimePickerSpec", "CalendarSpec", "DatePickerSpec",
     "DateRangePickerSpec", "DateTimePickerSpec", "DateTimeRangePickerSpec",
 ];
 
@@ -231,7 +231,7 @@ mod tests {
 
     #[test]
     fn full_parity_component_counts() {
-        assert_eq!(SUPPORTED_PRIMITIVES.len(), 64);
+        assert_eq!(SUPPORTED_PRIMITIVES.len(), 63);
         assert_eq!(SUPPORTED_COMPOSITES.len(), 47);
         assert_eq!(SUPPORTED_WORKSTATION.len(), 13);
     }

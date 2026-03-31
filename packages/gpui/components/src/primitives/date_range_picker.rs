@@ -5,14 +5,14 @@ use poodle_gpui::GpuiThemeProvider;
 use poodle_primitives::{CalendarWeekStart, ControlDensity, ControlSize, DateRangePickerSpec, DateRangeValue, IconSize, IconSpec, SemanticControlSizeRole};
 
 use super::icon::Icon;
-use super::range_calendar::RangeCalendar;
+use super::calendar::Calendar;
 use crate::presentation::{rem_to_px, resolve_semantic_size, size_font_rem, size_height_offset_rem, size_padding_x_offset_rem};
 use crate::theme_ext::{color_mix, resolve_color, resolve_opacity, resolve_px, resolve_radius};
 
 /// A real GPUI date range picker backed by `DateRangePickerSpec`.
 ///
-/// Shows a trigger button with start–end date text. When open, displays
-/// a `RangeCalendar` below.
+/// Shows a trigger button with start-end date text. When open, displays
+/// a `Calendar` in range mode below.
 pub struct DateRangePicker {
     spec: DateRangePickerSpec,
     theme: GpuiThemeProvider,
@@ -180,15 +180,16 @@ impl IntoElement for DateRangePicker {
 
         // Range calendar dropdown when open
         if is_open {
-            let mut cal_spec = poodle_primitives::RangeCalendarSpec::new();
+            let mut cal_spec = poodle_primitives::CalendarSpec::new()
+                .with_mode(poodle_primitives::CalendarMode::Range);
             cal_spec.week_starts_on = spec.week_starts_on.clone();
-            cal_spec.value = Some(range.clone());
+            cal_spec.range_value = Some(range.clone());
 
             if let Some(ref start) = range.start {
                 cal_spec.visible_month = Some(start.clone());
             }
 
-            let calendar = RangeCalendar::from_spec(cal_spec, theme);
+            let calendar = Calendar::from_spec(cal_spec, theme);
             let overlay = div()
                 .rounded(control_radius)
                 .bg(elevated_bg)

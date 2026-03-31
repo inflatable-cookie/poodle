@@ -7,13 +7,14 @@ Updated: 2026-03-15
 
 - Component name: `Calendar`
 - Layer: `foundation`
-- Summary: a visible month grid for selecting one date value, with month
-  navigation, roving tabindex keyboard control, and week start policy
-- In scope: month navigation, day-grid semantics, single-date selection, week
-  start policy, controlled and uncontrolled value and visible month, roving
-  tabindex focus management
+- Summary: a visible month grid for selecting one date value or a bounded
+  date range, with month navigation, roving tabindex keyboard control, and
+  week start policy
+- In scope: month navigation, day-grid semantics, single-date selection,
+  date-range selection (two-click start/end), week start policy, controlled
+  and uncontrolled value and visible month, roving tabindex focus management
 - Out of scope: time selection, recurrence, timezone handling, scheduling
-  workflows, date range selection (see RangeCalendar)
+  workflows
 
 ## 2. Anatomy
 
@@ -51,8 +52,9 @@ Updated: 2026-03-15
 
 | Prop | Type | Default | Required | Notes |
 |------|------|---------|----------|-------|
-| `value` | `string \| null` | `null` | no | controlled selected date (ISO `YYYY-MM-DD`) |
-| `defaultValue` | `string \| null` | `null` | no | uncontrolled initial selected date |
+| `mode` | `"single" \| "range"` | `"single"` | no | selection mode — single date or date range |
+| `value` | `string \| DateRangeValue \| null` | `null` | no | controlled selected value; string in single mode, DateRangeValue in range mode |
+| `defaultValue` | `string \| DateRangeValue \| null` | `null` | no | uncontrolled initial value |
 | `visibleMonth` | `string \| null` | `null` | no | controlled visible month (ISO `YYYY-MM`) |
 | `weekStartsOn` | `CalendarWeekStart` | `"monday"` | no | first day of the week |
 | `locale` | `string` | `"en-US"` | no | locale for month and weekday formatting |
@@ -66,6 +68,7 @@ Updated: 2026-03-15
 
 ```
 CalendarWeekStart: "sunday" | "monday"
+DateRangeValue: { start: string | null; end: string | null }
 ```
 
 ### Controlled And Uncontrolled
@@ -86,8 +89,11 @@ CalendarWeekStart: "sunday" | "monday"
 | hover | pointer enters day button | tinted background and border via color-mix |
 | focus | day button receives focus | tinted background and border, outline removed |
 | today | date matches current date | border color via color-mix of accent and border-default |
-| selected | date matches selected value | accent background, inverse text |
+| selected | date matches selected value (single mode) | accent background, inverse text |
 | selected hover | pointer enters selected day | slightly lightened accent background |
+| range-start | date matches range start (range mode) | accent background, inverse text |
+| range-end | date matches range end (range mode) | accent background, inverse text |
+| in-range | date falls between start and end (range mode) | tinted accent background |
 | outside month | date belongs to adjacent month | secondary text color, reduced opacity |
 | disabled | `disabled=true` | cursor not-allowed, reduced opacity on root |
 
@@ -96,7 +102,9 @@ CalendarWeekStart: "sunday" | "monday"
 | State | Trigger | Expected Result |
 |-------|---------|-----------------|
 | idle | initial render | grid shows current or visible month |
-| value selected | user clicks/presses day | `valueChange` fires, day receives selected treatment |
+| value selected | user clicks/presses day (single mode) | `valueChange` fires, day receives selected treatment |
+| start selected | first click on a day (range mode) | start is set, end is cleared; waiting for second click |
+| complete range | second click on a day (range mode) | end is set (swapped with start if before start); `valueChange` fires |
 | month navigated | user clicks prev/next or PageUp/PageDown | `monthChange` fires, grid rebuilds |
 | focus roving | arrow key navigation | focus moves between days via roving tabindex |
 
@@ -104,7 +112,7 @@ CalendarWeekStart: "sunday" | "monday"
 
 | Event | When It Fires | Payload | Notes |
 |-------|---------------|---------|-------|
-| `valueChange` | user selects a day | `{ value: string }` | ISO date string of selected day |
+| `valueChange` | user selects a day | `{ value: string }` (single) or `{ value: DateRangeValue }` (range) | ISO date string in single mode; `{ start, end }` in range mode |
 | `monthChange` | visible month changes via nav or keyboard | `{ month: string }` | ISO month string `YYYY-MM` |
 
 ## 6. Accessibility
@@ -315,6 +323,25 @@ CalendarWeekStart: "sunday" | "monday"
 |----------|-------|
 | `background` | `color-mix(in srgb, var(--poodle-color-accent-base) 88%, white 8%)` |
 
+### Day Button — in-range `[data-in-range="true"]` (range mode)
+
+| Property | Value |
+|----------|-------|
+| `background` | `color-mix(in srgb, var(--poodle-color-accent-base) 16%, transparent)` |
+
+### Day Button — range-start / range-end (range mode)
+
+| Property | Value |
+|----------|-------|
+| `background` | `var(--poodle-color-accent-base)` |
+| `color` | `var(--poodle-color-text-inverse)` |
+
+### Day Button — range endpoint hover (range mode)
+
+| Property | Value |
+|----------|-------|
+| `background` | `color-mix(in srgb, var(--poodle-color-accent-base) 88%, white 8%)` |
+
 ### Nav Button — disabled (`.calendar__nav:disabled`)
 
 | Property | Value |
@@ -354,6 +381,12 @@ CalendarWeekStart: "sunday" | "monday"
 
 - Public value uses ISO `YYYY-MM-DD` strings rather than browser `Date`
   instances
+- `mode` prop controls whether the calendar selects a single date or a range;
+  when `mode="range"`, value is a `DateRangeValue` object with `start` and
+  `end` fields, and selection uses two-click start/end logic with automatic
+  swap normalization
+- Range state is communicated via data attributes: `data-in-range="true"`,
+  `data-range-start`, `data-range-end`
 - Month-grid generation is implementation-owned; keyboard and selected-date
   semantics remain stable
 - Module-level `nextCalendarId` counter generates unique IDs for each instance
@@ -365,6 +398,7 @@ CalendarWeekStart: "sunday" | "monday"
   hover tint, selected hover tint)
 - `data-size` data attribute on root reflects the resolved size
 - `data-density` — resolved density value (`compact`, `default`, or `comfortable`)
+- `data-mode` — current selection mode (`single` or `range`)
 
 ## 10. GPUI Notes
 
@@ -452,7 +486,8 @@ All preview apps must render the following specimens identically.
 
 - contract status: `detailed contract`
 - approvers: pending
-- downstream adopters: DatePicker (composition), inline schedulers, filter
-  calendars, settings forms
-- future follow-up: consider min/max date constraints if needed; align with
-  RangeCalendar for shared grid styling
+- downstream adopters: DatePicker (composition), DateRangePicker (composition
+  via mode="range"), inline schedulers, filter calendars, settings forms,
+  report filters, booking windows
+- future follow-up: consider min/max date constraints if needed; consider
+  hover-preview of prospective range end in range mode

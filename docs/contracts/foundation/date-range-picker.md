@@ -10,7 +10,7 @@ Updated: 2026-03-30
 - Summary: a range value control that combines a picker trigger with a
   calendar-based bounded range selection overlay
 - In scope: range display, open state, selected start and end dates,
-  range-calendar overlay, placeholder behavior, outside-click and Escape
+  calendar (range mode) overlay, placeholder behavior, outside-click and Escape
   dismissal, controlled and uncontrolled value and open state
 - Out of scope: recurring windows, time ranges, report presets, availability
   logic, preset range shortcuts
@@ -23,7 +23,7 @@ Updated: 2026-03-30
   │     ├── [Value .date-range-picker__value]  <span>
   │     └── [Indicator .date-range-picker__indicator]  <span>
   └── [Surface .date-range-picker__surface]  <div role="dialog"> (conditional, when open)
-        └── [RangeCalendar] (composed)
+        └── [Calendar mode="range"] (composed)
 ```
 
 | Part | Required | Description | Token Targets |
@@ -32,8 +32,8 @@ Updated: 2026-03-30
 | Trigger | yes | button that toggles the overlay | border, radius, background, typography, focus ring, padding |
 | Value | yes | displays selected range or placeholder text | color, text-align, truncation |
 | Indicator | yes | decorative disclosure chevron | color, font-size |
-| Surface | yes | overlay containing the range calendar | position, border, radius, background, shadow, padding |
-| RangeCalendar | yes | composed range-calendar primitive | delegated to RangeCalendar contract |
+| Surface | yes | overlay containing the calendar | position, border, radius, background, shadow, padding |
+| Calendar (range) | yes | composed Calendar with mode="range" | delegated to Calendar contract (range mode) |
 
 ## 3. Props And Inputs
 
@@ -110,14 +110,14 @@ DateRangeValue: { start: string | null; end: string | null }
 |-----|----------|
 | `Enter` / `Space` | toggles overlay open/closed |
 | `Escape` | closes overlay without changing value |
-| `Tab` | when open, moves focus into range-calendar; when closed, exits control |
+| `Tab` | when open, moves focus into calendar; when closed, exits control |
 
 ### Focus And Announcement
 
 - focus entry: trigger receives focus ring via outline
-- focus transition: opening the overlay moves focus into the range-calendar
+- focus transition: opening the overlay moves focus into the calendar
 - focus restoration: closing the overlay returns focus to the trigger
-- live-region behavior: none; range-calendar handles date announcement
+- live-region behavior: none; calendar handles date announcement
 - GPUI-native accessibility mapping notes: GPUI must expose button with haspopup, expanded state, and dialog relationship through native accessibility APIs
 
 ## 7. Layout
@@ -131,7 +131,7 @@ DateRangeValue: { start: string | null; end: string | null }
 ### Composition
 
 - parent expectations: forms, filter bars, reporting controls, inspector panels
-- child expectations: composes RangeCalendar internally; no child slots
+- child expectations: composes Calendar (mode="range") internally; no child slots
 - resizing rules: trigger stretches to parent width; value text truncates with ellipsis
 
 ## 8. Token Usage — Exact Values
@@ -236,7 +236,7 @@ DateRangeValue: { start: string | null; end: string | null }
   operates in controlled mode; otherwise `defaultValue` seeds internal state
 - Same pattern for `open`/`defaultOpen`
 - Outside click handler closes the overlay; Escape key closes the overlay
-- Composes `RangeCalendar` internally; auto-closes overlay when both start and
+- Composes `Calendar` with `mode="range"` internally; auto-closes overlay when both start and
   end dates are committed
 - Value display formats the range using `locale` prop for localized date strings
 - Placeholder option rendered as `<span>` with secondary text color
@@ -252,7 +252,7 @@ DateRangeValue: { start: string | null; end: string | null }
 - `color-mix` formulas for surface border (72%), background (98%), and trigger
   hover (86%) must be replicated or approximated
 - Auto-close on range completion must match Svelte behavior
-- RangeCalendar composition: GPUI delegates to its own range-calendar primitive
+- Calendar composition: GPUI delegates to its own calendar primitive in range mode
 
 ## 11. Parity Checklist
 
@@ -302,7 +302,7 @@ All preview apps must render the following specimens identically.
 
 | Label | Props/Config | Expected Visual |
 |-------|-------------|-----------------|
-| Default | `ariaLabel="Select date range"` | Trigger button showing placeholder text "Select date range" with disclosure indicator; interactive, opens range calendar on click |
+| Default | `ariaLabel="Select date range"` | Trigger button showing placeholder text "Select date range" with disclosure indicator; interactive, opens calendar on click |
 
 ### With default range
 

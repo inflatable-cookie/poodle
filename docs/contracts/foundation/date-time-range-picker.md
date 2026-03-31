@@ -8,10 +8,10 @@ Updated: 2026-03-30
 - Component name: `DateTimeRangePicker`
 - Layer: `foundation`
 - Summary: a bounded range value control that combines a picker trigger with a
-  range-calendar and paired start/end time-field composition in a single overlay
+  calendar (range mode) and paired start/end time-field composition in a single overlay
   surface
 - In scope: selected start and end date values, selected start and end local
-  time values, open state, range-calendar plus paired time-field composition,
+  time values, open state, calendar (range mode) plus paired time-field composition,
   placeholder behavior, outside-click and Escape dismissal, controlled and
   uncontrolled value and open state
 - Out of scope: timezone selection, recurrence, booking availability, transport
@@ -26,7 +26,7 @@ Updated: 2026-03-30
   │     └── [Indicator .date-time-range-picker__indicator]  <span>
   └── [Surface .date-time-range-picker__surface]  <div role="dialog"> (conditional, when open)
         └── [Body .date-time-range-picker__body]
-              ├── [RangeCalendar] (composed)
+              ├── [Calendar mode="range"] (composed)
               └── [Times Row .date-time-range-picker__times]
                     ├── [Time Section .date-time-range-picker__time-section]
                     │     ├── [Time Label .date-time-range-picker__time-label]  <span> ("Start time")
@@ -42,9 +42,9 @@ Updated: 2026-03-30
 | Trigger | yes | button that toggles the overlay | border, radius, background, typography, focus ring, padding |
 | Value | yes | displays selected range or placeholder text | color, text-align, truncation |
 | Indicator | yes | decorative disclosure chevron | color, font-size |
-| Surface | yes | overlay containing range calendar and time fields | position, border, radius, background, shadow, padding |
-| Body | yes | vertical stack for range calendar and times row | display, gap |
-| RangeCalendar | yes | composed range-calendar primitive | delegated to RangeCalendar contract |
+| Surface | yes | overlay containing calendar and time fields | position, border, radius, background, shadow, padding |
+| Body | yes | vertical stack for calendar and times row | display, gap |
+| Calendar (range) | yes | composed Calendar with mode="range" | delegated to Calendar contract (range mode) |
 | Times Row | yes | horizontal grid for start and end time sections | display, grid-template-columns, gap |
 | Time Section | yes | container for time label and time field | display, gap |
 | Time Label | yes | "Start time" / "End time" heading above time field | color, font-family, font-size, font-weight, letter-spacing, text-transform |
@@ -128,14 +128,14 @@ DateTimeRangeValue: {
 |-----|----------|
 | `Enter` / `Space` | toggles overlay open/closed |
 | `Escape` | closes overlay without changing value |
-| `Tab` | when open, moves focus between range-calendar, start time field, and end time field; when closed, exits control |
+| `Tab` | when open, moves focus between calendar, start time field, and end time field; when closed, exits control |
 
 ### Focus And Announcement
 
 - focus entry: trigger receives focus ring via outline
-- focus transition: opening the overlay moves focus into the range-calendar
+- focus transition: opening the overlay moves focus into the calendar
 - focus restoration: closing the overlay returns focus to the trigger
-- live-region behavior: none; range-calendar and time fields handle their own announcements
+- live-region behavior: none; calendar and time fields handle their own announcements
 - GPUI-native accessibility mapping notes: GPUI must expose button with haspopup, expanded state, and dialog relationship through native accessibility APIs
 
 ## 7. Layout
@@ -145,14 +145,14 @@ DateTimeRangeValue: {
 - Root min-width: `18rem`
 - Trigger height follows `size-control-height` token
 - Surface is absolutely positioned below trigger with a gap
-- Body uses vertical grid layout with gap between range calendar and times row
+- Body uses vertical grid layout with gap between calendar and times row
 - Times row uses two equal columns for start and end time sections
 
 ### Composition
 
 - parent expectations: report filters, booking windows, publishing ranges,
   scheduled review windows
-- child expectations: composes RangeCalendar and two TimeField instances
+- child expectations: composes Calendar (mode="range") and two TimeField instances
   internally; no child slots
 - resizing rules: trigger stretches to parent width; value text truncates with
   ellipsis
@@ -292,7 +292,7 @@ DateTimeRangeValue: {
   operates in controlled mode; otherwise `defaultValue` seeds internal state
 - Same pattern for `open`/`defaultOpen`
 - Outside click handler closes the overlay; Escape key closes the overlay
-- Composes `RangeCalendar` and two `TimeField` instances internally
+- Composes `Calendar` with `mode="range"` and two `TimeField` instances internally
 - Public value uses nested local-value objects rather than `Date` instances
 - Partial values are allowed during editing without forcing timezone or
   timestamp normalization into the public contract
@@ -308,8 +308,8 @@ DateTimeRangeValue: {
   accessibility APIs
 - `color-mix` formulas for surface border (72%), background (98%), and trigger
   hover (86%) must be replicated or approximated
-- RangeCalendar and TimeField composition: GPUI delegates to its own
-  range-calendar and time-field primitives
+- Calendar and TimeField composition: GPUI delegates to its own
+  calendar (range mode) and time-field primitives
 - Two-column time layout: GPUI must replicate the equal-width column grid for
   start and end time sections
 - Time label typography must match: label-family, 0.6875rem, weight 600,
@@ -370,7 +370,7 @@ All preview apps must render the following specimens identically.
 
 | Label | Props/Config | Expected Visual |
 |-------|-------------|-----------------|
-| Default | `ariaLabel="Select date and time range"` | Trigger button showing placeholder text "Select date and time range" with disclosure indicator; interactive, opens range calendar and paired time fields overlay on click |
+| Default | `ariaLabel="Select date and time range"` | Trigger button showing placeholder text "Select date and time range" with disclosure indicator; interactive, opens calendar and paired time fields overlay on click |
 
 ### With default range
 

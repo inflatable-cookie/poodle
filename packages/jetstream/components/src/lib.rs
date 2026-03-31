@@ -115,7 +115,6 @@ pub mod pagination_comp;
 pub mod password_requirements;
 pub mod code_input;
 pub mod popover;
-pub mod range_calendar;
 pub mod resize_handle;
 pub mod scroll_shell;
 pub mod select;

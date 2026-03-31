@@ -85,7 +85,6 @@ pub mod code_input;
 pub mod popover;
 pub mod progress;
 pub mod radio_group;
-pub mod range_calendar;
 pub mod range_slider;
 pub mod rating;
 pub mod region;
@@ -312,7 +311,6 @@ fn render_specimen(slug: &str, theme: &JetstreamThemeProvider) -> Option<JsEl> {
         "popover" => Some(popover::render(theme)),
         "progress" => Some(progress::render(theme)),
         "radio-group" => Some(radio_group::render(theme)),
-        "range-calendar" => Some(range_calendar::render(theme)),
         "range-slider" => Some(range_slider::render(theme)),
         "rating" => Some(rating::render(theme)),
         "region" => Some(region::render(theme)),

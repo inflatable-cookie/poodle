@@ -1641,7 +1641,6 @@ function validateGpuiSelectionFeedbackDateBaseline(errors: string[]): { selectio
     "DateTimeRangePickerSpec",
     "ProgressSpec",
     "RadioGroupSpec",
-    "RangeCalendarSpec",
     "SegmentedControlSpec",
     "SelectSpec",
     "SliderSpec",

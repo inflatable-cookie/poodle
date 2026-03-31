@@ -4,6 +4,7 @@
   const controlSizes = ["xs", "sm", "md", "lg", "xl"] as const;
 
   let selected = "";
+  let range = { start: "", end: "" };
 </script>
 
 <div class="specimen">
@@ -44,6 +45,32 @@
   <div class="specimen__group">
     <Eyebrow>Disabled</Eyebrow>
     <Calendar defaultValue="2026-03-01" disabled ariaLabel="Disabled calendar" />
+  </div>
+
+  <div class="specimen__group">
+    <Eyebrow>Range selection</Eyebrow>
+    <Calendar
+      mode="range"
+      ariaLabel="Select a date range"
+      on:valueChange={(e) => (range = e.detail.value)}
+    />
+    {#if range.start}
+      <p>{range.start} &rarr; {range.end || "..."}</p>
+    {/if}
+  </div>
+
+  <div class="specimen__group">
+    <Eyebrow>Range with pre-selected range</Eyebrow>
+    <Calendar
+      mode="range"
+      defaultValue={{ start: "2026-03-05", end: "2026-03-12" }}
+      ariaLabel="Pre-selected range"
+    />
+  </div>
+
+  <div class="specimen__group">
+    <Eyebrow>Range disabled</Eyebrow>
+    <Calendar mode="range" disabled ariaLabel="Disabled range calendar" />
   </div>
 </div>
 
