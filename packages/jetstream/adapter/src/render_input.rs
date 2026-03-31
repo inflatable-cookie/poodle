@@ -1,11 +1,11 @@
 //! RenderComponent implementations for input primitives.
 //!
 //! g08.005: TextInputSpec, TextAreaSpec, SearchFieldSpec, FieldSpec,
-//! NumberEntrySpec, CodeInputSpec, EditableLabelSpec, TimeFieldSpec
+//! NumberInputSpec, CodeInputSpec, EditableLabelSpec, TimeFieldSpec
 
 use poodle_adapter::{RenderComponent, ThemeProvider};
 use poodle_primitives::{
-    CodeInputSpec, EditableLabelSpec, FieldSpec, NumberEntrySpec, SearchFieldSpec, TextAreaSpec,
+    CodeInputSpec, EditableLabelSpec, FieldSpec, NumberInputSpec, SearchFieldSpec, TextAreaSpec,
     TextInputSpec, TimeFieldSpec,
 };
 use poodle_style::StyleDescriptor;
@@ -122,9 +122,9 @@ impl RenderComponent<FieldSpec> for JetstreamAdapter {
     }
 }
 
-impl RenderComponent<NumberEntrySpec> for JetstreamAdapter {
+impl RenderComponent<NumberInputSpec> for JetstreamAdapter {
     type Target = JetstreamTarget;
-    fn render(&self, spec: &NumberEntrySpec, style: &StyleDescriptor, theme: &dyn ThemeProvider) -> JetstreamNodeHandle {
+    fn render(&self, spec: &NumberInputSpec, style: &StyleDescriptor, theme: &dyn ThemeProvider) -> JetstreamNodeHandle {
         let mut mapped = map_style(style);
 
         // Resolve border color (varies by validation state)
@@ -136,7 +136,7 @@ impl RenderComponent<NumberEntrySpec> for JetstreamAdapter {
             mapped.visuals.opacity = theme.resolve_opacity(spec.disabled_opacity_token());
         }
 
-        JetstreamNodeHandle::new("number-entry", "NumberEntrySpec", WidgetKind::TextInput, mapped)
+        JetstreamNodeHandle::new("number-input", "NumberInputSpec", WidgetKind::TextInput, mapped)
     }
 }
 
@@ -257,18 +257,18 @@ mod tests {
     }
 
     #[test]
-    fn number_entry_renders() {
-        let h = a().render(&NumberEntrySpec::new(0.0), &s(), &t());
-        assert_eq!(h.node_id, "number-entry");
-        assert_eq!(h.spec_type, "NumberEntrySpec");
+    fn number_input_renders() {
+        let h = a().render(&NumberInputSpec::new(0.0), &s(), &t());
+        assert_eq!(h.node_id, "number-input");
+        assert_eq!(h.spec_type, "NumberInputSpec");
         assert_eq!(h.widget_kind, WidgetKind::TextInput);
     }
 
     #[test]
-    fn number_entry_disabled_renders() {
-        let spec = NumberEntrySpec::new(5.0).with_disabled(true);
+    fn number_input_disabled_renders() {
+        let spec = NumberInputSpec::new(5.0).with_disabled(true);
         let h = a().render(&spec, &s(), &t());
-        assert_eq!(h.node_id, "number-entry");
+        assert_eq!(h.node_id, "number-input");
         assert_eq!(h.widget_kind, WidgetKind::TextInput);
     }
 

@@ -2,7 +2,7 @@ use poodle_tokens::semantic;
 
 /// Layout direction for the label-value pair.
 #[derive(Clone, Debug, Default, Eq, PartialEq)]
-pub enum DetailRowLayout {
+pub enum DetailItemLayout {
     /// Label and value side by side (default).
     #[default]
     Inline,
@@ -11,16 +11,16 @@ pub enum DetailRowLayout {
 }
 
 #[derive(Clone)]
-pub struct DetailRowSpec {
+pub struct DetailItemSpec {
     pub label: String,
     pub description: Option<String>,
     pub value: Option<String>,
     pub truncate_value: bool,
     pub aria_label: Option<String>,
-    pub layout: DetailRowLayout,
+    pub layout: DetailItemLayout,
 }
 
-impl DetailRowSpec {
+impl DetailItemSpec {
     pub fn new(label: impl Into<String>) -> Self {
         Self {
             label: label.into(),
@@ -28,7 +28,7 @@ impl DetailRowSpec {
             value: None,
             truncate_value: false,
             aria_label: None,
-            layout: DetailRowLayout::default(),
+            layout: DetailItemLayout::default(),
         }
     }
 
@@ -57,7 +57,7 @@ impl DetailRowSpec {
         self
     }
 
-    pub fn with_layout(mut self, layout: DetailRowLayout) -> Self {
+    pub fn with_layout(mut self, layout: DetailItemLayout) -> Self {
         self.layout = layout;
         self
     }

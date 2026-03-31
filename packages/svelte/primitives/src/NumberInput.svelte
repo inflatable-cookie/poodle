@@ -1,7 +1,9 @@
 <script lang="ts">
   import { createEventDispatcher } from "svelte";
 
-  import NumberEntry from "./NumberEntry.svelte";
+  import Icon from "./Icon.svelte";
+  import { clamp, formatNumber, snapToStep } from "./internal";
+  import { getUiPresentation, resolveSemanticControlSize } from "./presentation";
 
   import type {
     ControlDensity,
@@ -45,9 +47,14 @@
     blur: FocusEvent;
   }>();
 
+  const uiPresentation = getUiPresentation();
+
   let internalValidationStatus: InputValidationStatus = "idle";
   let validationMessage = "";
   let activeValidationKey = 0;
+  let uncontrolledValue: number | null = null;
+  let draftValue = "";
+  let isEditing = false;
 
   $: valueMode = inferValueMode(value, defaultValue);
   $: parsedValue = parseNumberish(value);
@@ -55,6 +62,13 @@
   $: parsedMin = parseNumberish(min);
   $: parsedMax = parseNumberish(max);
   $: resolvedStep = parseStep(step);
+  $: resolvedSize = size ?? resolveSemanticControlSize($uiPresentation.sizeScale, sizeRole);
+  $: resolvedDensity = density ?? $uiPresentation.density;
+  $: isControlled = value !== null;
+  $: currentValue = isControlled ? parsedValue : uncontrolledValue;
+  $: if (!isControlled && uncontrolledValue === null && parsedDefaultValue !== null) {
+    uncontrolledValue = parsedDefaultValue;
+  }
   $: effectiveValidationState = validate
     ? internalValidationStatus === "validating"
       ? "pending"
@@ -64,6 +78,11 @@
           ? "invalid"
           : validationState
     : validationState;
+  $: ariaInvalid = effectiveValidationState === "invalid" ? true : undefined;
+  $: ariaBusy = effectiveValidationState === "pending" ? true : undefined;
+  $: if (!isEditing) {
+    draftValue = formatNumber(currentValue, precision);
+  }
 
   function inferValueMode(
     currentValue: number | string | null,
@@ -83,6 +102,10 @@
     if (input === null || input === "") return 1;
     const nextValue = Number(input);
     return Number.isFinite(nextValue) && nextValue > 0 ? nextValue : 1;
+  }
+
+  function clampIfNeeded(nextValue: number): number {
+    return clamp(nextValue, parsedMin, parsedMax);
   }
 
   function emitValidationChange(): void {
@@ -131,10 +154,50 @@
     return nextValue;
   }
 
-  function handleValueChange(nextValue: number | null): void {
+  function commitValue(nextValue: number | null): void {
+    if (!isControlled) {
+      uncontrolledValue = nextValue;
+    }
+
     value = coerceOutgoingValue(nextValue);
     dispatch("valueChange", { value });
     void runValidation(value);
+  }
+
+  function handleInput(event: Event): void {
+    draftValue = (event.currentTarget as HTMLInputElement).value;
+
+    if (draftValue.trim() === "") {
+      commitValue(null);
+      return;
+    }
+
+    const parsedNextValue = Number(draftValue);
+
+    if (!Number.isNaN(parsedNextValue)) {
+      commitValue(parsedNextValue);
+    }
+  }
+
+  function handleBlur(event: FocusEvent): void {
+    isEditing = false;
+
+    if (draftValue.trim() !== "") {
+      const parsedNextValue = Number(draftValue);
+
+      if (!Number.isNaN(parsedNextValue)) {
+        commitValue(clampIfNeeded(snapToStep(parsedNextValue, parsedMin ?? 0, resolvedStep)));
+      }
+    }
+
+    dispatch("blur", event);
+  }
+
+  function adjust(delta: number, eventName: "increment" | "decrement"): void {
+    const baseline = currentValue ?? parsedMin ?? 0;
+    const nextValue = clampIfNeeded(snapToStep(baseline + delta, parsedMin ?? 0, resolvedStep));
+    commitValue(nextValue);
+    dispatch(eventName, { value: coerceOutgoingValue(nextValue) });
   }
 </script>
 
@@ -143,33 +206,62 @@
     <span class="number-input__prefix">{prefix}</span>
   {/if}
 
-  <NumberEntry
-    {id}
-    value={parsedValue}
-    defaultValue={parsedDefaultValue}
-    {placeholder}
-    {name}
-    {disabled}
-    {readOnly}
-    {required}
-    min={parsedMin}
-    max={parsedMax}
-    step={resolvedStep}
-    {precision}
-    {showSteppers}
-    {size}
-    {sizeRole}
-    {density}
-    validationState={effectiveValidationState}
-    {ariaLabel}
-    {describedBy}
-    on:valueChange={(event) => handleValueChange(event.detail.value)}
-    on:submit={(event) => dispatch("submit", { value: coerceOutgoingValue(event.detail.value) })}
-    on:increment={(event) => dispatch("increment", { value: coerceOutgoingValue(event.detail.value) })}
-    on:decrement={(event) => dispatch("decrement", { value: coerceOutgoingValue(event.detail.value) })}
-    on:focus={(event) => dispatch("focus", event.detail)}
-    on:blur={(event) => dispatch("blur", event.detail)}
-  />
+  <div
+    class="number-input__field"
+    data-validation-state={effectiveValidationState}
+    data-size={resolvedSize}
+    data-density={resolvedDensity}
+    data-disabled={disabled}
+  >
+    <input
+      {id}
+      {name}
+      class="number-input__control"
+      type="text"
+      inputmode="decimal"
+      value={draftValue}
+      {placeholder}
+      disabled={disabled}
+      readonly={readOnly}
+      required={required}
+      aria-label={ariaLabel ?? undefined}
+      aria-describedby={describedBy ?? undefined}
+      aria-invalid={ariaInvalid}
+      aria-busy={ariaBusy}
+      on:input={handleInput}
+      on:focus={(event) => {
+        isEditing = true;
+        dispatch("focus", event);
+      }}
+      on:blur={handleBlur}
+      on:keydown={(event) => {
+        if (event.key === "Enter") {
+          dispatch("submit", { value: coerceOutgoingValue(currentValue) });
+        }
+
+        if (event.key === "ArrowUp" && !readOnly) {
+          event.preventDefault();
+          adjust(resolvedStep, "increment");
+        }
+
+        if (event.key === "ArrowDown" && !readOnly) {
+          event.preventDefault();
+          adjust(-resolvedStep, "decrement");
+        }
+      }}
+    />
+
+    {#if showSteppers}
+      <div class="number-input__steppers">
+        <button type="button" disabled={disabled || readOnly} on:click={() => adjust(resolvedStep, "increment")}>
+          <Icon name="plus" />
+        </button>
+        <button type="button" disabled={disabled || readOnly} on:click={() => adjust(-resolvedStep, "decrement")}>
+          <Icon name="minus" />
+        </button>
+      </div>
+    {/if}
+  </div>
 </div>
 
 <style>
@@ -190,7 +282,117 @@
     white-space: nowrap;
   }
 
-  .number-input :global(.number-entry) {
+  .number-input__field {
     flex: 1 1 auto;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: stretch;
+    height: var(--poodle-size-control-height);
+    border: 0.0625rem solid var(--poodle-color-border-default);
+    border-radius: var(--poodle-radius-control);
+    background: var(--poodle-color-background-surface);
+    overflow: hidden;
+  }
+
+  .number-input__field[data-validation-state="invalid"] {
+    border-color: var(--poodle-color-status-danger);
+  }
+
+  .number-input__field[data-validation-state="valid"] {
+    border-color: var(--poodle-color-status-success);
+  }
+
+  .number-input__field[data-validation-state="pending"] {
+    border-color: var(--poodle-color-accent-base);
+  }
+
+  .number-input__field:focus-within {
+    box-shadow:
+      0 0 0 var(--poodle-border-width-focus)
+      color-mix(in srgb, var(--poodle-color-accent-focusRing) 28%, transparent);
+  }
+
+  .number-input__control {
+    min-width: 0;
+    padding: 0 var(--poodle-space-control-x);
+    border: 0;
+    background: transparent;
+    color: var(--poodle-color-text-primary);
+    font-family: var(--poodle-typography-body-family);
+    font-size: var(--poodle-typography-body-size);
+    line-height: var(--poodle-typography-body-lineHeight);
+    outline: 0;
+  }
+
+  .number-input__steppers {
+    display: grid;
+    grid-template-rows: 1fr 1fr;
+    gap: 0;
+    padding: 0.0625rem;
+  }
+
+  .number-input__steppers button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: calc(var(--poodle-size-icon-default) + 0.5rem);
+    min-height: 0;
+    border: 0;
+    border-radius: calc(var(--poodle-radius-control) - 0.125rem);
+    background: color-mix(in srgb, var(--poodle-color-background-elevated) 88%, transparent);
+    color: var(--poodle-color-text-primary);
+    cursor: pointer;
+    font-size: 0;
+    padding: 0;
+    overflow: hidden;
+  }
+
+  .number-input__field[data-disabled="true"] {
+    opacity: var(--poodle-state-opacity-disabled);
+    cursor: not-allowed;
+  }
+
+  .number-input__field[data-disabled="true"] .number-input__control {
+    cursor: not-allowed;
+  }
+
+  .number-input__steppers button:disabled {
+    cursor: not-allowed;
+  }
+
+  .number-input__field[data-density="compact"] .number-input__control {
+    padding: 0 calc(var(--poodle-space-control-x) - 0.125rem);
+  }
+
+  .number-input__field[data-density="comfortable"] .number-input__control {
+    padding: 0 calc(var(--poodle-space-control-x) + 0.125rem);
+  }
+
+  .number-input__field[data-size="xs"] {
+    height: calc(var(--poodle-size-control-height) - 0.5rem);
+  }
+
+  .number-input__field[data-size="xs"] .number-input__control {
+    font-size: 0.75rem;
+  }
+
+  .number-input__field[data-size="sm"] {
+    height: calc(var(--poodle-size-control-height) - 0.375rem);
+  }
+
+  .number-input__field[data-size="lg"] {
+    height: calc(var(--poodle-size-control-height) + 0.375rem);
+  }
+
+  .number-input__field[data-size="lg"] .number-input__control {
+    font-size: 0.9375rem;
+  }
+
+  .number-input__field[data-size="xl"] {
+    height: calc(var(--poodle-size-control-height) + 0.5rem);
+  }
+
+  .number-input__field[data-size="xl"] .number-input__control {
+    font-size: 1rem;
   }
 </style>

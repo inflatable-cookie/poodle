@@ -58,7 +58,7 @@ Use detail rows when:
 
 `DetailShell` owns page- or scope-level framing.
 `DetailSection` owns related subgrouping within the body.
-`DetailRow` owns individual readonly label/value relationships.
+`DetailItem` owns individual readonly label/value relationships.
 
 Hosts should not flatten all three levels into one unstructured card wall.
 
@@ -98,13 +98,13 @@ tree.
 - `docs/contracts/composites/breadcrumbs.md`
 - `docs/contracts/composites/detail-shell.md`
 - `docs/contracts/composites/detail-section.md`
-- `docs/contracts/composites/detail-row.md`
+- `docs/contracts/composites/detail-item.md`
 - `packages/svelte/composites/src/Card.svelte`
 - `packages/svelte/composites/src/PageHeader.svelte`
 - `packages/svelte/composites/src/Breadcrumbs.svelte`
 - `packages/svelte/composites/src/DetailShell.svelte`
 - `packages/svelte/composites/src/DetailSection.svelte`
-- `packages/svelte/composites/src/DetailRow.svelte`
+- `packages/svelte/composites/src/DetailItem.svelte`
 - `packages/svelte/preview/src/App.svelte`
 
 ## Next Task

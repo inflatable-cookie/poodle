@@ -24,7 +24,7 @@ Contract-backed Svelte primitive surface for the first generalized Poodle baseli
 - `DateRangePicker`
 - `DateTimePicker`
 - `DateTimeRangePicker`
-- `DetailRow`
+- `DetailItem`
 - `Dialog`
 - `Drawer`
 - `DurationInput`

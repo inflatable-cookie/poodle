@@ -1,19 +1,19 @@
-//! NumberEntry — real GPUI component backed by NumberEntrySpec.
+//! NumberInput — real GPUI component backed by NumberInputSpec.
 //!
 //! Contract: grid layout with input field + vertical steppers.
 //! Focus ring via border-color on focus. No hover on root.
 
 use gpui::*;
 use poodle_gpui::GpuiThemeProvider;
-use poodle_primitives::{ControlSize, IconSize, IconSpec, NumberEntrySpec, ValidationState};
+use poodle_primitives::{ControlSize, IconSize, IconSpec, NumberInputSpec, ValidationState};
 
 use super::icon::Icon;
 use crate::presentation::{rem_to_px, resolve_semantic_size, control_height_rem, size_font_rem, size_padding_x_offset_rem};
 use crate::theme_ext::{color_mix, resolve_color, resolve_opacity, resolve_px, resolve_radius};
 
-/// A real GPUI numeric input component with +/- stepper buttons backed by `NumberEntrySpec`.
-pub struct NumberEntry {
-    spec: NumberEntrySpec,
+/// A real GPUI numeric input component with +/- stepper buttons backed by `NumberInputSpec`.
+pub struct NumberInput {
+    spec: NumberInputSpec,
     theme: GpuiThemeProvider,
     id_suffix: Option<String>,
     on_increment: Option<Box<dyn Fn(&ClickEvent, &mut Window, &mut App) + 'static>>,
@@ -21,17 +21,17 @@ pub struct NumberEntry {
     on_change: Option<Box<dyn Fn(&f64, &mut Window, &mut App) + 'static>>,
 }
 
-impl std::ops::Deref for NumberEntry {
-    type Target = NumberEntrySpec;
-    fn deref(&self) -> &NumberEntrySpec { &self.spec }
+impl std::ops::Deref for NumberInput {
+    type Target = NumberInputSpec;
+    fn deref(&self) -> &NumberInputSpec { &self.spec }
 }
 
-impl NumberEntry {
+impl NumberInput {
     pub fn new(theme: &GpuiThemeProvider) -> Self {
-        Self { spec: NumberEntrySpec::default(), theme: theme.clone(), id_suffix: None, on_increment: None, on_decrement: None, on_change: None }
+        Self { spec: NumberInputSpec::default(), theme: theme.clone(), id_suffix: None, on_increment: None, on_decrement: None, on_change: None }
     }
 
-    pub fn from_spec(spec: NumberEntrySpec, theme: &GpuiThemeProvider) -> Self {
+    pub fn from_spec(spec: NumberInputSpec, theme: &GpuiThemeProvider) -> Self {
         Self {
             spec,
             theme: theme.clone(),
@@ -85,7 +85,7 @@ impl NumberEntry {
     }
 }
 
-impl IntoElement for NumberEntry {
+impl IntoElement for NumberInput {
     type Element = AnyElement;
 
     fn into_element(self) -> Self::Element {
@@ -118,9 +118,9 @@ impl IntoElement for NumberEntry {
         let stepper_inner_radius = control_radius - px(2.0);
 
         let id_str = if let Some(ref suffix) = self.id_suffix {
-            format!("poodle-number-entry-{}", suffix)
+            format!("poodle-number-input-{}", suffix)
         } else {
-            "poodle-number-entry".to_string()
+            "poodle-number-input".to_string()
         };
 
         // Wrap callbacks in Rc for sharing across stepper clicks + keyboard handler
@@ -131,7 +131,7 @@ impl IntoElement for NumberEntry {
 
         // Increment button (top) — Svelte uses Icon component
         let mut inc_btn = div()
-            .id("poodle-number-entry-inc")
+            .id("poodle-number-input-inc")
             .w(stepper_width)
             .flex_1()
             .flex()
@@ -160,7 +160,7 @@ impl IntoElement for NumberEntry {
 
         // Decrement button (bottom) — Svelte uses Icon component
         let mut dec_btn = div()
-            .id("poodle-number-entry-dec")
+            .id("poodle-number-input-dec")
             .w(stepper_width)
             .flex_1()
             .flex()

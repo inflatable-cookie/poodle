@@ -14,7 +14,7 @@ export { default as Combobox } from "./Combobox.svelte";
 export { default as ContextMenu } from "./ContextMenu.svelte";
 export { default as CollapseToggle } from "./CollapseToggle.svelte";
 export { default as Collapsible } from "./Collapsible.svelte";
-export { default as DetailRow } from "./DetailRow.svelte";
+export { default as DetailItem } from "./DetailItem.svelte";
 export { default as DatePicker } from "./DatePicker.svelte";
 export { default as DateRangePicker } from "./DateRangePicker.svelte";
 export { default as DateTimePicker } from "./DateTimePicker.svelte";

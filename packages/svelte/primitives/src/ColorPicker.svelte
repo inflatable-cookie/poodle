@@ -7,7 +7,7 @@
 
   import Slider from "./Slider.svelte";
   import SegmentedControl from "./SegmentedControl.svelte";
-  import NumberEntry from "./NumberEntry.svelte";
+  import NumberInput from "./NumberInput.svelte";
   import {
     hexToHsv,
     hsvToHex,
@@ -458,7 +458,7 @@
             </div>
             {#if showAlpha}
               <div class="color-picker__channel-field">
-                <NumberEntry
+                <NumberInput
                   id="cp-{pickerId}-a-hex"
                   value={Math.round(alpha * 100)}
                   min={0}
@@ -474,7 +474,7 @@
             {/if}
           {:else if inputMode === "rgb"}
             <div class="color-picker__channel-field">
-              <NumberEntry
+              <NumberInput
                 id="cp-{pickerId}-r"
                 value={currentRgb.r}
                 min={0}
@@ -488,7 +488,7 @@
               <span class="color-picker__input-label" aria-hidden="true">R</span>
             </div>
             <div class="color-picker__channel-field">
-              <NumberEntry
+              <NumberInput
                 id="cp-{pickerId}-g"
                 value={currentRgb.g}
                 min={0}
@@ -502,7 +502,7 @@
               <span class="color-picker__input-label" aria-hidden="true">G</span>
             </div>
             <div class="color-picker__channel-field">
-              <NumberEntry
+              <NumberInput
                 id="cp-{pickerId}-b"
                 value={currentRgb.b}
                 min={0}
@@ -517,7 +517,7 @@
             </div>
             {#if showAlpha}
               <div class="color-picker__channel-field">
-                <NumberEntry
+                <NumberInput
                   id="cp-{pickerId}-a-rgb"
                   value={Math.round(alpha * 100)}
                   min={0}
@@ -533,7 +533,7 @@
             {/if}
           {:else}
             <div class="color-picker__channel-field">
-              <NumberEntry
+              <NumberInput
                 id="cp-{pickerId}-hsl-h"
                 value={currentHsl.h}
                 min={0}
@@ -547,7 +547,7 @@
               <span class="color-picker__input-label" aria-hidden="true">H</span>
             </div>
             <div class="color-picker__channel-field">
-              <NumberEntry
+              <NumberInput
                 id="cp-{pickerId}-hsl-s"
                 value={currentHsl.s}
                 min={0}
@@ -561,7 +561,7 @@
               <span class="color-picker__input-label" aria-hidden="true">S</span>
             </div>
             <div class="color-picker__channel-field">
-              <NumberEntry
+              <NumberInput
                 id="cp-{pickerId}-hsl-l"
                 value={currentHsl.l}
                 min={0}
@@ -576,7 +576,7 @@
             </div>
             {#if showAlpha}
               <div class="color-picker__channel-field">
-                <NumberEntry
+                <NumberInput
                   id="cp-{pickerId}-a-hsl"
                   value={Math.round(alpha * 100)}
                   min={0}

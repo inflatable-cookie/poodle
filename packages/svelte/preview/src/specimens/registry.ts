@@ -25,7 +25,7 @@ import DatePickerSpecimen from "./DatePickerSpecimen.svelte";
 import DateRangePickerSpecimen from "./DateRangePickerSpecimen.svelte";
 import DateTimePickerSpecimen from "./DateTimePickerSpecimen.svelte";
 import DateTimeRangePickerSpecimen from "./DateTimeRangePickerSpecimen.svelte";
-import DetailRowSpecimen from "./DetailRowSpecimen.svelte";
+import DetailItemSpecimen from "./DetailItemSpecimen.svelte";
 import DetailSectionSpecimen from "./DetailSectionSpecimen.svelte";
 import DetailShellSpecimen from "./DetailShellSpecimen.svelte";
 import DialogSpecimen from "./DialogSpecimen.svelte";
@@ -155,7 +155,7 @@ export const specimenMap: Record<string, typeof SvelteComponent<any>> = {
   "date-range-picker": DateRangePickerSpecimen,
   "date-time-picker": DateTimePickerSpecimen,
   "date-time-range-picker": DateTimeRangePickerSpecimen,
-  "detail-row": DetailRowSpecimen,
+  "detail-item": DetailItemSpecimen,
   "detail-section": DetailSectionSpecimen,
   "detail-shell": DetailShellSpecimen,
   dialog: DialogSpecimen,

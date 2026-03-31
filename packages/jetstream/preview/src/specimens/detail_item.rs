@@ -1,10 +1,10 @@
-//! DetailRow specimen — key-value pair rows.
+//! DetailItem specimen — key-value pair rows.
 
 use jetstream_runtime::ui_element::*;
 use poodle_jetstream::JetstreamThemeProvider;
-use poodle_jetstream_components::detail_row::js_detail_row;
+use poodle_jetstream_components::detail_item::js_detail_item;
 use poodle_jetstream_components::theme_ext::*;
-use poodle_primitives::DetailRowSpec;
+use poodle_primitives::DetailItemSpec;
 
 pub fn render(theme: &JetstreamThemeProvider) -> JsEl {
     let secondary = resolve_color(theme, "semantic.color.text.secondary");
@@ -12,16 +12,16 @@ pub fn render(theme: &JetstreamThemeProvider) -> JsEl {
     div().flex_col().gap(24.0)
         .child(group("Key-value rows", secondary,
             div().flex_col().gap(4.0)
-                .child(js_detail_row(
-                    &DetailRowSpec::new("Name").with_value("Jetstream Preview"),
+                .child(js_detail_item(
+                    &DetailItemSpec::new("Name").with_value("Jetstream Preview"),
                     theme,
                 ))
-                .child(js_detail_row(
-                    &DetailRowSpec::new("Version").with_value("0.1.0"),
+                .child(js_detail_item(
+                    &DetailItemSpec::new("Version").with_value("0.1.0"),
                     theme,
                 ))
-                .child(js_detail_row(
-                    &DetailRowSpec::new("Status")
+                .child(js_detail_item(
+                    &DetailItemSpec::new("Status")
                         .with_value("Active")
                         .with_description("Running in development mode"),
                     theme,

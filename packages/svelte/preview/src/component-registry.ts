@@ -53,7 +53,7 @@ export const primitiveComponents: ComponentEntry[] = [
   entry("Combobox", "primitive", P, "Text input with filtered dropdown suggestions.", true),
   entry("ContextMenu", "primitive", P, "Right-click triggered menu overlay.", true),
   entry("DatePicker", "primitive", P, "Date selection with calendar popup.", true),
-  entry("DetailRow", "primitive", P, "Label-value pair for metadata display.", true),
+  entry("DetailItem", "primitive", P, "Label-value pair for metadata display.", true),
   entry("DateRangePicker", "primitive", P, "Start and end date selection with dual calendar.", true),
   entry("DateTimePicker", "primitive", P, "Combined date and time selection.", true),
   entry("DateTimeRangePicker", "primitive", P, "Start/end date-time range selection.", true),

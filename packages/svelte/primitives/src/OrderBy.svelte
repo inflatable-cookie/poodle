@@ -184,7 +184,13 @@
     </button>
 
     {#if effectiveValue.length > 0}
-      <span class="order-by__reset" on:click|stopPropagation|preventDefault={clearAll}>
+      <button
+        type="button"
+        class="order-by__reset"
+        on:click|stopPropagation|preventDefault={clearAll}
+        disabled={disabled}
+        aria-label="Clear sort"
+      >
         <IconButton
           icon="x"
           ariaLabel="Clear sort"
@@ -192,7 +198,7 @@
           size={resolvedSize}
           disabled={disabled}
         />
-      </span>
+      </button>
     {/if}
   </div>
 
@@ -206,19 +212,25 @@
             class:order-by__item--dragging={dragIndex === index}
             class:order-by__item--drop-target={dragOverIndex === index && dragIndex !== index}
             role="listitem"
-            draggable={!disabled}
-            tabindex="0"
-            on:dragstart={() => handleDragStart(index)}
-            on:dragenter={() => handleDragEnter(index)}
-            on:dragover|preventDefault
-            on:drop|preventDefault={() => handleDrop(index)}
-            on:dragend={clearDragState}
-            on:keydown={(e) => {
-              if (e.altKey && e.key === "ArrowUp" && index > 0) { e.preventDefault(); moveField(index, -1); }
-              if (e.altKey && e.key === "ArrowDown" && index < effectiveValue.length - 1) { e.preventDefault(); moveField(index, 1); }
-            }}
           >
-            <span class="order-by__drag-handle" aria-hidden="true">⠿</span>
+            <button
+              type="button"
+              class="order-by__drag-handle"
+              draggable={!disabled}
+              disabled={disabled}
+              aria-label={`Reorder ${field?.label ?? item.key}. Drag or use Alt plus arrow keys.`}
+              on:dragstart={() => handleDragStart(index)}
+              on:dragenter={() => handleDragEnter(index)}
+              on:dragover|preventDefault
+              on:drop|preventDefault={() => handleDrop(index)}
+              on:dragend={clearDragState}
+              on:keydown={(e) => {
+                if (e.altKey && e.key === "ArrowUp" && index > 0) { e.preventDefault(); moveField(index, -1); }
+                if (e.altKey && e.key === "ArrowDown" && index < effectiveValue.length - 1) { e.preventDefault(); moveField(index, 1); }
+              }}
+            >
+              ⠿
+            </button>
             <span class="order-by__item-label">{field?.label ?? item.key}</span>
             <IconButton
               icon={item.direction === "asc" ? "arrow-up" : "arrow-down"}
@@ -331,6 +343,10 @@
 
   .order-by__reset {
     display: inline-flex;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    cursor: pointer;
   }
 
   .order-by__panel {
@@ -387,11 +403,23 @@
   }
 
   .order-by__drag-handle {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 1.5rem;
+    min-height: 1.5rem;
+    padding: 0;
+    border: 0;
+    background: transparent;
     color: var(--poodle-color-text-muted);
     cursor: grab;
     user-select: none;
     font-size: 0.75rem;
     flex-shrink: 0;
+  }
+
+  .order-by__drag-handle:disabled {
+    cursor: not-allowed;
   }
 
   .order-by__empty {

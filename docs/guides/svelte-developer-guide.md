@@ -1082,7 +1082,7 @@ Searchable select with type-ahead:
 
 ```svelte
 <script>
-  import { PageHeader, DetailShell, DetailSection, DetailRow } from "@poodle/svelte-composites";
+  import { PageHeader, DetailShell, DetailSection, DetailItem } from "@poodle/svelte-composites";
   import { Breadcrumbs } from "@poodle/svelte-primitives";
 </script>
 
@@ -1092,9 +1092,9 @@ Searchable select with type-ahead:
 
 <DetailShell>
   <DetailSection title="Personal Information">
-    <DetailRow label="Name">{user.name}</DetailRow>
-    <DetailRow label="Email">{user.email}</DetailRow>
-    <DetailRow label="Role">{user.role}</DetailRow>
+    <DetailItem label="Name">{user.name}</DetailItem>
+    <DetailItem label="Email">{user.email}</DetailItem>
+    <DetailItem label="Role">{user.role}</DetailItem>
   </DetailSection>
 </DetailShell>
 ```
@@ -1339,7 +1339,7 @@ interface MenuItem {
 ### Composites (34 components)
 
 **Data:** DataTable, FilterToolbar, SelectionSummary, PaginationSummary
-**Detail:** DetailShell, DetailSection, DetailRow
+**Detail:** DetailShell, DetailSection, DetailItem
 **Forms:** FormLayout, FormDialog, ConfirmAction, EmbedInput
 **Browse:** PageHeader, EmptyState, PageLoading
 **Media:** MediaThumbnail, MediaPreview, MediaPicker, AudioPlayer, VideoPlayer, EmbedPreview

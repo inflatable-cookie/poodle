@@ -10,7 +10,7 @@
   - `Card`
   - `PageHeader`
   - `Breadcrumbs`
-  - `DetailRow`
+  - `DetailItem`
   - `DetailSection`
   - `DetailShell`
   - `EmptyState`
@@ -27,7 +27,7 @@
 ## Downstream Alignment
 
 - Aura's settings sections and generated settings surfaces reinforced the need
-  for generic `DetailRow`, `DetailSection`, `DetailShell`, and `PageHeader`
+  for generic `DetailItem`, `DetailSection`, `DetailShell`, and `PageHeader`
   contracts rather than app-specific settings widgets in Poodle core
 - Aura's command and browse surfaces reinforced the need for a reusable
   `FilterToolbar` plus `ListShell` and `GridShell` framing that keeps result

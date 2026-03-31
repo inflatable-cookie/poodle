@@ -57,7 +57,7 @@ above it in downstream repos such as Loophole.
 - `foundation/date-range-picker.md`
 - `foundation/date-time-picker.md`
 - `foundation/date-time-range-picker.md`
-- `foundation/detail-row.md`
+- `foundation/detail-item.md`
 - `foundation/dialog.md`
 - `foundation/drawer.md`
 - `foundation/duration-input.md`

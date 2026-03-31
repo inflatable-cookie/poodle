@@ -1,12 +1,12 @@
 use gpui::prelude::FluentBuilder;
 use gpui::*;
 use poodle_gpui::GpuiThemeProvider;
-use poodle_primitives::{DetailRowLayout, DetailRowSpec};
+use poodle_primitives::{DetailItemLayout, DetailItemSpec};
 
 use crate::theme_ext::{resolve_color, resolve_px, resolve_radius};
 
-pub struct DetailRow {
-    spec: DetailRowSpec,
+pub struct DetailItem {
+    spec: DetailItemSpec,
     label_color: Hsla,
     value_color: Hsla,
     description_color: Hsla,
@@ -19,17 +19,17 @@ pub struct DetailRow {
     value_content: Option<AnyElement>,
 }
 
-impl std::ops::Deref for DetailRow {
-    type Target = DetailRowSpec;
-    fn deref(&self) -> &DetailRowSpec { &self.spec }
+impl std::ops::Deref for DetailItem {
+    type Target = DetailItemSpec;
+    fn deref(&self) -> &DetailItemSpec { &self.spec }
 }
 
-impl DetailRow {
+impl DetailItem {
     pub fn new(label: impl Into<String>, theme: &GpuiThemeProvider) -> Self {
-        Self::from_spec(DetailRowSpec::new(label), theme)
+        Self::from_spec(DetailItemSpec::new(label), theme)
     }
 
-    pub fn from_spec(spec: DetailRowSpec, theme: &GpuiThemeProvider) -> Self {
+    pub fn from_spec(spec: DetailItemSpec, theme: &GpuiThemeProvider) -> Self {
         let label_color = resolve_color(theme, spec.label_color_token());
         let value_color = resolve_color(theme, spec.value_color_token());
         let description_color = resolve_color(theme, spec.description_color_token());
@@ -73,11 +73,11 @@ impl DetailRow {
     }
 }
 
-impl IntoElement for DetailRow {
+impl IntoElement for DetailItem {
     type Element = AnyElement;
 
     fn into_element(self) -> Self::Element {
-        let is_stacked = self.spec.layout == DetailRowLayout::Stacked;
+        let is_stacked = self.spec.layout == DetailItemLayout::Stacked;
 
         let mut label_el = div()
             .flex()

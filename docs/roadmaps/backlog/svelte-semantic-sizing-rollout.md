@@ -193,7 +193,7 @@ control chrome. They do not need `sizeRole` props.
 
 Box, Spacer, Stack, Grid, Region, Surface, Card, ListCard, ListCardCounter,
 NavCard, NavCardGrid, Eyebrow, Separator, ScrollShell, Skeleton,
-StatusIndicator, StatusBar, Progress, Meter, TimeAgo, DetailRow, FormActions,
+StatusIndicator, StatusBar, Progress, Meter, TimeAgo, DetailItem, FormActions,
 Field, FieldSet, Tooltip, Popover, HoverCard, Table, PaginationSummary,
 UiPresentationProvider, IconProvider
 

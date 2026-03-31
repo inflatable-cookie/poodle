@@ -14,8 +14,16 @@
   export let stateTitle: string | null = null;
   export let stateMessage: string | null = null;
   export let presentation: "default" | "compact" = "default";
+  export let frameWidth: "fill" | "xl" | number | string | null = "fill";
 
   const uiPresentation = getUiPresentation();
+  $: resolvedKind = kind === "pdf" || kind === "other" ? "document" : kind;
+  $: rootStyle =
+    frameWidth === null || frameWidth === undefined || frameWidth === "fill"
+      ? "inline-size: 100%;"
+      : frameWidth === "xl"
+        ? "inline-size: min(100%, 24rem);"
+        : `inline-size: ${typeof frameWidth === "number" ? `${frameWidth}px` : frameWidth};`;
 
   $: resolvedStateTitle =
     stateTitle ??
@@ -25,7 +33,7 @@
         ? "Preview unavailable"
         : "No preview");
   $: fallbackIcon =
-    kind === "audio" ? "music" : kind === "video" ? "play" : kind === "document" ? "file-text" : kind === "embed" ? "external-link" : "image";
+    resolvedKind === "audio" ? "music" : resolvedKind === "video" ? "play" : resolvedKind === "document" ? "file-text" : resolvedKind === "embed" ? "external-link" : "image";
   $: resolvedVisualSize = resolveSemanticControlSize($uiPresentation.sizeScale, "control");
   $: resolvedSupportingSize = resolveSupportingVisualSize(resolvedVisualSize);
   $: resolvedSpinnerSize =
@@ -34,12 +42,13 @@
 
 <figure
   class="media-thumbnail"
-  data-kind={kind}
+  data-kind={resolvedKind}
   data-state={state}
   data-aspect-ratio={aspectRatio}
   data-presentation={presentation}
   aria-label={ariaLabel ?? title ?? undefined}
   aria-busy={state === "loading"}
+  style={rootStyle}
 >
   <div class="media-thumbnail__frame">
     {#if state === "ready"}
@@ -51,9 +60,9 @@
         </div>
       {/if}
 
-      {#if kind === "audio" || kind === "video"}
+      {#if resolvedKind === "audio" || resolvedKind === "video"}
         <span class="media-thumbnail__play" aria-hidden="true">
-          <Icon name={kind === "audio" ? "music" : "play"} size={resolvedSupportingSize} />
+          <Icon name={resolvedKind === "audio" ? "music" : "play"} size={resolvedSupportingSize} />
         </span>
       {/if}
     {:else}

@@ -1,8 +1,8 @@
-//! NumberEntry — Jetstream number input backed by NumberEntrySpec.
+//! NumberInput — Jetstream number input backed by NumberInputSpec.
 
 use jetstream_runtime::ui_element::{self, JsEl};
 use poodle_jetstream::JetstreamThemeProvider;
-use poodle_primitives::NumberEntrySpec;
+use poodle_primitives::NumberInputSpec;
 
 use crate::presentation::{
     control_height_rem, control_space_x_rem, rem_to_px, resolve_semantic_size,
@@ -10,7 +10,7 @@ use crate::presentation::{
 };
 use crate::theme_ext::{resolve_color, resolve_opacity, resolve_radius};
 
-pub fn js_number_entry(spec: &NumberEntrySpec, theme: &JetstreamThemeProvider) -> JsEl {
+pub fn js_number_input(spec: &NumberInputSpec, theme: &JetstreamThemeProvider) -> JsEl {
     let effective_size = resolve_semantic_size(spec.size, spec.size_role);
     let height = rem_to_px(control_height_rem(effective_size));
     let font_size = rem_to_px(size_font_rem(effective_size));

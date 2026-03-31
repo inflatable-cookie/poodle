@@ -12,7 +12,7 @@ export type { CardVariant } from "@poodle/svelte-primitives";
 export type PickerVariant = "inline" | "popover" | "modal";
 export type SelectionMode = "single" | "multiple";
 export type MediaState = "ready" | "loading" | "error" | "empty";
-export type MediaKind = "image" | "audio" | "video" | "document" | "embed";
+export type MediaKind = "image" | "audio" | "video" | "document" | "embed" | "pdf" | "other";
 export type AspectRatio = "square" | "landscape" | "portrait" | "video";
 export type EmptyStateVariant = "neutral" | "search" | "firstRun";
 export type EmptyStateSize = "default" | "compact";

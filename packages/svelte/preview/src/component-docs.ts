@@ -845,7 +845,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
 <DateTimeRangePicker bind:value={range} placeholder="Select date and time range" />`,
   },
 
-  "detail-row": {
+  "detail-item": {
     props: [
       { name: "label", type: "string", required: true, description: "Label text for the detail row." },
       { name: "value", type: "string | null", default: "null", description: "Value text displayed next to the label." },
@@ -860,12 +860,12 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
     ],
     events: [],
     usage: `<script lang="ts">
-  import { DetailRow } from "@poodle/svelte-primitives";
+  import { DetailItem } from "@poodle/svelte-primitives";
 </script>
 
-<DetailRow label="Email" value="alice@example.com" />
-<DetailRow label="Role" value="Administrator" />
-<DetailRow label="Notes" emptyText="No notes provided" />`,
+<DetailItem label="Email" value="alice@example.com" />
+<DetailItem label="Role" value="Administrator" />
+<DetailItem label="Notes" emptyText="No notes provided" />`,
   },
 
   "detail-section": {
@@ -882,12 +882,12 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
     ],
     events: [],
     usage: `<script lang="ts">
-  import { DetailSection, DetailRow } from "@poodle/svelte-composites";
+  import { DetailSection, DetailItem } from "@poodle/svelte-composites";
 </script>
 
 <DetailSection title="Account Information" description="Basic account details">
-  <DetailRow label="Name" value="Alice Johnson" />
-  <DetailRow label="Email" value="alice@example.com" />
+  <DetailItem label="Name" value="Alice Johnson" />
+  <DetailItem label="Email" value="alice@example.com" />
 </DetailSection>`,
   },
 

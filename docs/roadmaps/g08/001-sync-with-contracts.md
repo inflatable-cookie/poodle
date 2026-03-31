@@ -76,7 +76,7 @@ callout, pill, progress, separator, dialog, tooltip, surface
 ## 20 Contracts Needing New GPUI Components
 
 Foundation (16): `alert-dialog`, `breadcrumbs`, `bulk-action-bar`, `card`,
-`collapse-toggle`, `combobox`, `detail-row`, `list-card`, `nav-card`,
+`collapse-toggle`, `combobox`, `detail-item`, `list-card`, `nav-card`,
 `nav-card-grid`, `order-by`, `pagination`, `region`, `resize-handle`,
 `status-bar`, `table`
 

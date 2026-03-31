@@ -62,10 +62,10 @@ resolution, focus rings, and ARIA from the start.
 - [ ] Create spec struct, implement component, write specimen
 - [ ] Pass 10-point quality checklist
 
-### detail-row
+### detail-item
 
-- [ ] Read contract: `docs/contracts/foundation/detail-row.md`
-- [ ] Read Svelte: `packages/svelte/primitives/src/DetailRow.svelte`
+- [ ] Read contract: `docs/contracts/foundation/detail-item.md`
+- [ ] Read Svelte: `packages/svelte/primitives/src/DetailItem.svelte`
 - [ ] Create spec struct, implement component, write specimen
 - [ ] Pass 10-point quality checklist
 

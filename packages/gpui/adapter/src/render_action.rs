@@ -4,12 +4,12 @@
 //! - ButtonSpec, IconButtonSpec
 //! - FieldSpec, TextInputSpec, TextAreaSpec, SearchFieldSpec
 //! - FormActionsSpec, TimeFieldSpec
-//! - EditableLabelSpec, NumberEntrySpec, CodeInputSpec, ToolbarSpec
+//! - EditableLabelSpec, NumberInputSpec, CodeInputSpec, ToolbarSpec
 
 use poodle_adapter::{RenderComponent, ThemeProvider};
 use poodle_primitives::{
     ButtonSpec, CodeInputSpec, EditableLabelSpec, FieldSpec, FormActionsSpec, IconButtonSpec,
-    NumberEntrySpec, SearchFieldSpec, TextAreaSpec, TextInputSpec, TimeFieldSpec, ToolbarSpec,
+    NumberInputSpec, SearchFieldSpec, TextAreaSpec, TextInputSpec, TimeFieldSpec, ToolbarSpec,
 };
 use poodle_style::StyleDescriptor;
 
@@ -275,12 +275,12 @@ impl RenderComponent<EditableLabelSpec> for GpuiAdapter {
     }
 }
 
-impl RenderComponent<NumberEntrySpec> for GpuiAdapter {
+impl RenderComponent<NumberInputSpec> for GpuiAdapter {
     type Target = GpuiTarget;
 
     fn render(
         &self,
-        spec: &NumberEntrySpec,
+        spec: &NumberInputSpec,
         style: &StyleDescriptor,
         theme: &dyn ThemeProvider,
     ) -> GpuiElementHandle {
@@ -293,7 +293,7 @@ impl RenderComponent<NumberEntrySpec> for GpuiAdapter {
             gpui_style.opacity = theme.resolve_opacity(spec.disabled_opacity_token());
         }
 
-        GpuiElementHandle::new("number-entry", "NumberEntrySpec")
+        GpuiElementHandle::new("number-input", "NumberInputSpec")
     }
 }
 
@@ -353,7 +353,7 @@ mod tests {
     use poodle_adapter::RenderComponent;
     use poodle_primitives::{
         ButtonSpec, CodeInputSpec, EditableLabelSpec, FieldSpec, FormActionsSpec, IconButtonSpec,
-        NumberEntrySpec, SearchFieldSpec, TextAreaSpec, TextInputSpec,
+        NumberInputSpec, SearchFieldSpec, TextAreaSpec, TextInputSpec,
         TimeFieldSpec, ToolbarSpec,
     };
     use poodle_style::StyleDescriptor;
@@ -465,10 +465,10 @@ mod tests {
     }
 
     #[test]
-    fn render_number_entry_produces_handle() {
+    fn render_number_input_produces_handle() {
         let a = adapter();
-        let handle = a.render(&NumberEntrySpec::new(42.0), &style(), &theme());
-        assert_eq!(handle.spec_type, "NumberEntrySpec");
+        let handle = a.render(&NumberInputSpec::new(42.0), &style(), &theme());
+        assert_eq!(handle.spec_type, "NumberInputSpec");
     }
 
     #[test]

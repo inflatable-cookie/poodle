@@ -35,7 +35,7 @@ Updated: 2026-03-30
 ## 5. Boundary
 
 - use `MetaItem` inside `MetaBar` or another compact inline metadata context
-- use `DetailRow` when the value needs a dedicated row, description, or action
+- use `DetailItem` when the value needs a dedicated row, description, or action
   slot
 - caller owns any domain-specific semantics or display logic for the value
 

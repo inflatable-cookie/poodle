@@ -13,14 +13,14 @@ Owner: Poodle Core
   `packages/svelte/composites/src/Breadcrumbs.svelte`,
   `packages/svelte/composites/src/DetailShell.svelte`,
   `packages/svelte/composites/src/DetailSection.svelte`, and
-  `packages/svelte/composites/src/DetailRow.svelte`
+  `packages/svelte/composites/src/DetailItem.svelte`
 - extended the preview with a real detail surface that composes breadcrumbs,
   local page identity, summary cards, readonly detail rows, and section
   hierarchy together
 - added the normative detail-display baseline at
   `docs/specs/012-detail-display-card-header-and-navigation-rules.md`
 - deepened the existing card, header, breadcrumb, detail-shell, detail-section,
-  and detail-row contracts so summary/detail composition is explicit rather than
+  and detail-item contracts so summary/detail composition is explicit rather than
   implied
 
 ## Validation

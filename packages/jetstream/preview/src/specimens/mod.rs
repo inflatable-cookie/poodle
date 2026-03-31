@@ -33,7 +33,7 @@ pub mod date_picker;
 pub mod date_range_picker;
 pub mod date_time_picker;
 pub mod date_time_range_picker;
-pub mod detail_row;
+pub mod detail_item;
 pub mod detail_section;
 pub mod detail_shell;
 pub mod dialog;
@@ -72,7 +72,7 @@ pub mod meter;
 pub mod metric_tile;
 pub mod nav_card;
 pub mod navigation_menu;
-pub mod number_entry;
+pub mod number_input;
 pub mod order_by;
 pub mod page_header;
 pub mod page_loading;
@@ -259,7 +259,7 @@ fn render_specimen(slug: &str, theme: &JetstreamThemeProvider) -> Option<JsEl> {
         "date-range-picker" => Some(date_range_picker::render(theme)),
         "date-time-picker" => Some(date_time_picker::render(theme)),
         "date-time-range-picker" => Some(date_time_range_picker::render(theme)),
-        "detail-row" => Some(detail_row::render(theme)),
+        "detail-item" => Some(detail_item::render(theme)),
         "detail-section" => Some(detail_section::render(theme)),
         "detail-shell" => Some(detail_shell::render(theme)),
         "dialog" => Some(dialog::render(theme)),
@@ -298,7 +298,7 @@ fn render_specimen(slug: &str, theme: &JetstreamThemeProvider) -> Option<JsEl> {
         "metric-tile" => Some(metric_tile::render(theme)),
         "nav-card" => Some(nav_card::render(theme)),
         "navigation-menu" => Some(navigation_menu::render(theme)),
-        "number-entry" => Some(number_entry::render(theme)),
+        "number-input" => Some(number_input::render(theme)),
         "order-by" => Some(order_by::render(theme)),
         "page-header" => Some(page_header::render(theme)),
         "page-loading" => Some(page_loading::render(theme)),

@@ -72,7 +72,7 @@ detail pages and modal forms without recreating old app-shell helpers.
 - use `DetailShell` for page-level readonly identity and state handling
 - use `DetailSection` to group related readonly information under a local
   heading
-- use `DetailRow` for label/value presentation
+- use `DetailItem` for label/value presentation
 - keep routing, fetch state, actions, and domain data shaping in host code
 
 ### Standard detail page
@@ -80,7 +80,7 @@ detail pages and modal forms without recreating old app-shell helpers.
 ```svelte
 <script lang="ts">
   import { DetailShell, DetailSection } from "@poodle/svelte-composites";
-  import { DetailRow, Button } from "@poodle/svelte-primitives";
+  import { DetailItem, Button } from "@poodle/svelte-primitives";
 </script>
 
 <DetailShell
@@ -94,14 +94,14 @@ detail pages and modal forms without recreating old app-shell helpers.
   </svelte:fragment>
 
   <DetailSection title="Overview">
-    <DetailRow label="Name" value="Marketing site rebuild" />
-    <DetailRow label="Owner" value="Alice Johnson" />
-    <DetailRow label="Status" value="Active" />
+    <DetailItem label="Name" value="Marketing site rebuild" />
+    <DetailItem label="Owner" value="Alice Johnson" />
+    <DetailItem label="Status" value="Active" />
   </DetailSection>
 
   <DetailSection title="Publishing">
-    <DetailRow label="Published at" value="2026-03-25" />
-    <DetailRow label="Expires at" emptyText="No expiry set" />
+    <DetailItem label="Published at" value="2026-03-25" />
+    <DetailItem label="Expires at" emptyText="No expiry set" />
   </DetailSection>
 </DetailShell>
 ```
@@ -118,7 +118,7 @@ new Poodle wrapper.
     <Button variant="secondary">Edit billing</Button>
   </svelte:fragment>
 
-  <DetailRow label="Plan" value="Pro" />
+  <DetailItem label="Plan" value="Pro" />
 </DetailSection>
 ```
 
@@ -151,7 +151,7 @@ Those remain host-owned unless Poodle later promotes a narrower generic surface.
 
 - `FormDialog` is the default modal form shell
 - `DetailShell` is the default readonly page shell
-- `DetailSection` and `DetailRow` are the default building blocks for grouped
+- `DetailSection` and `DetailItem` are the default building blocks for grouped
   detail content
 
 ## Related Contracts
@@ -159,7 +159,7 @@ Those remain host-owned unless Poodle later promotes a narrower generic surface.
 - [FormDialog](../contracts/composites/form-dialog.md)
 - [DetailShell](../contracts/composites/detail-shell.md)
 - [DetailSection](../contracts/composites/detail-section.md)
-- [DetailRow](../contracts/foundation/detail-row.md)
+- [DetailItem](../contracts/foundation/detail-item.md)
 
 ## Next Task
 

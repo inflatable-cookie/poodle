@@ -210,7 +210,7 @@ The first primitive contracts that explicitly exercise this baseline are:
 - `docs/contracts/foundation/drawer.md`
 - `docs/contracts/composites/page-header.md`
 - `docs/contracts/composites/breadcrumbs.md`
-- `docs/contracts/composites/detail-row.md`
+- `docs/contracts/composites/detail-item.md`
 - `docs/contracts/composites/detail-shell.md`
 - `docs/contracts/composites/filter-toolbar.md`
 - `docs/contracts/composites/empty-state.md`

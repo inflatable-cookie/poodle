@@ -178,7 +178,7 @@
         "Breadcrumbs",
         "DetailShell",
         "DetailSection",
-        "DetailRow",
+        "DetailItem",
         "Card",
         "SelectionSummary",
         "Tabs"

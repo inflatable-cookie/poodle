@@ -63,7 +63,7 @@ status_bar, tab_strip, toggle_group, surface
 These contracts have Svelte component + specimen but no GPUI component:
 
 **Foundation (16):** alert-dialog, breadcrumbs, bulk-action-bar, card,
-collapse-toggle, combobox, detail-row, list-card, nav-card, nav-card-grid,
+collapse-toggle, combobox, detail-item, list-card, nav-card, nav-card-grid,
 order-by, pagination, region, resize-handle, status-bar, table
 
 **Composites (4):** detail-section, metric-tile, page-header, toast-stack

@@ -121,7 +121,7 @@ None. DetailSection is a grouping composite with no component-owned events.
 ### Composition
 
 - Parent expectations: detail shells, settings pages, inspector sections
-- Child expectations: `DetailRow`, `Card`, or custom body content
+- Child expectations: `DetailItem`, `Card`, or custom body content
 - Resizing rules: actions may wrap below the title block on narrow widths
   (via `flex-wrap: wrap` on header)
 
@@ -258,22 +258,22 @@ None.
 
 | Label | Props / Config | Expected Visual |
 |-------|---------------|-----------------|
-| With title and rows | `title="Project details"`, `description="Core metadata for this project."`, four DetailRows (Name, Owner, Created, Status) | heading-led section with description text and vertically stacked detail rows |
+| With title and rows | `title="Project details"`, `description="Core metadata for this project."`, four DetailItems (Name, Owner, Created, Status) | heading-led section with description text and vertically stacked detail rows |
 
 ### With Actions
 
 | Label | Props / Config | Expected Visual |
 |-------|---------------|-----------------|
-| With actions | `title="Billing"`, actions slot with secondary sm Edit button, three DetailRows (Plan, Billing cycle, Next invoice) | header split layout with title on start and Edit button on end, detail rows below |
+| With actions | `title="Billing"`, actions slot with secondary sm Edit button, three DetailItems (Plan, Billing cycle, Next invoice) | header split layout with title on start and Edit button on end, detail rows below |
 
 ### Multi-Column Layout
 
 | Label | Props / Config | Expected Visual |
 |-------|---------------|-----------------|
-| Multi-column layout | `title="Server metrics"`, `columns={3}`, six DetailRows arranged in a 3-column grid | three-column body grid with rows distributed across columns |
+| Multi-column layout | `title="Server metrics"`, `columns={3}`, six DetailItems arranged in a 3-column grid | three-column body grid with rows distributed across columns |
 
-### DetailRow With Description
+### DetailItem With Description
 
 | Label | Props / Config | Expected Visual |
 |-------|---------------|-----------------|
-| DetailRow with description | `title="Configuration"`, two DetailRows with `description` prop; first row has `truncateValue` | detail rows with label, value, and supporting description; first value truncates with ellipsis |
+| DetailItem with description | `title="Configuration"`, two DetailItems with `description` prop; first row has `truncateValue` | detail rows with label, value, and supporting description; first value truncates with ellipsis |

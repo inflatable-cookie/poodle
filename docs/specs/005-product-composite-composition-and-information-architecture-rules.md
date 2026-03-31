@@ -30,7 +30,7 @@ is probably not a generic product composite.
 
 The first composite tranche is grouped into:
 
-- information display: `Card`, `PageHeader`, `Breadcrumbs`, `DetailRow`,
+- information display: `Card`, `PageHeader`, `Breadcrumbs`, `DetailItem`,
   `DetailSection`, `DetailShell`, `EmptyState`
 - browse shells: `FilterToolbar`
 
@@ -184,7 +184,7 @@ The first contracts that explicitly exercise this baseline are:
 - `docs/contracts/composites/card.md`
 - `docs/contracts/composites/page-header.md`
 - `docs/contracts/composites/breadcrumbs.md`
-- `docs/contracts/composites/detail-row.md`
+- `docs/contracts/composites/detail-item.md`
 - `docs/contracts/composites/detail-section.md`
 - `docs/contracts/composites/detail-shell.md`
 - `docs/contracts/composites/filter-toolbar.md`

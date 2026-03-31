@@ -1,16 +1,16 @@
 <script lang="ts">
   import { DetailSection } from "@poodle/svelte-composites";
-  import { Button, DetailRow, Eyebrow } from "@poodle/svelte-primitives";
+  import { Button, DetailItem, Eyebrow } from "@poodle/svelte-primitives";
 </script>
 
 <div class="specimen">
   <div class="specimen__group">
     <Eyebrow>With title and rows</Eyebrow>
     <DetailSection title="Project details" description="Core metadata for this project.">
-      <DetailRow label="Name" value="Poodle Design System" />
-      <DetailRow label="Owner" value="Clay + Aura" />
-      <DetailRow label="Created" value="March 2025" />
-      <DetailRow label="Status" value="Active" />
+      <DetailItem label="Name" value="Poodle Design System" />
+      <DetailItem label="Owner" value="Clay + Aura" />
+      <DetailItem label="Created" value="March 2025" />
+      <DetailItem label="Status" value="Active" />
     </DetailSection>
   </div>
 
@@ -20,17 +20,17 @@
       <svelte:fragment slot="actions">
         <Button variant="secondary" size="sm">Edit</Button>
       </svelte:fragment>
-      <DetailRow label="Plan" value="Pro" />
-      <DetailRow label="Billing cycle" value="Monthly" />
-      <DetailRow label="Next invoice" value="April 1, 2026" />
+      <DetailItem label="Plan" value="Pro" />
+      <DetailItem label="Billing cycle" value="Monthly" />
+      <DetailItem label="Next invoice" value="April 1, 2026" />
     </DetailSection>
   </div>
 
   <div class="specimen__group">
-    <Eyebrow>DetailRow with description</Eyebrow>
+    <Eyebrow>DetailItem with description</Eyebrow>
     <DetailSection title="Configuration">
-      <DetailRow label="API endpoint" value="https://api.example.com/v2" description="The base URL for all API requests." truncateValue />
-      <DetailRow label="Rate limit" value="1,000 req/min" description="Maximum requests per minute." />
+      <DetailItem label="API endpoint" value="https://api.example.com/v2" description="The base URL for all API requests." truncateValue />
+      <DetailItem label="Rate limit" value="1,000 req/min" description="Maximum requests per minute." />
     </DetailSection>
   </div>
 
@@ -41,10 +41,10 @@
       description="Compact layout for denser metadata surfaces."
       columns={2}
     >
-      <DetailRow label="Route" value="local-brokered" layout="stacked" />
-      <DetailRow label="Posture" value="aura-local-brokered" layout="stacked" />
-      <DetailRow label="Authority" value="local" layout="stacked" />
-      <DetailRow label="Displays" value="2" layout="stacked" />
+      <DetailItem label="Route" value="local-brokered" layout="stacked" />
+      <DetailItem label="Posture" value="aura-local-brokered" layout="stacked" />
+      <DetailItem label="Authority" value="local" layout="stacked" />
+      <DetailItem label="Displays" value="2" layout="stacked" />
     </DetailSection>
   </div>
 </div>

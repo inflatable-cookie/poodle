@@ -1,6 +1,6 @@
 <script lang="ts">
   import { DetailShell, DetailSection, PageHeader } from "@poodle/svelte-composites";
-  import { Button, Pill, DetailRow, Eyebrow, Region, Separator, Surface } from "@poodle/svelte-primitives";
+  import { Button, Pill, DetailItem, Eyebrow, Region, Separator, Surface } from "@poodle/svelte-primitives";
 </script>
 
 <div class="specimen">
@@ -31,23 +31,23 @@
           </PageHeader>
         </svelte:fragment>
         <DetailSection title="General">
-          <DetailRow label="Owner" value="Clay" />
-          <DetailRow label="Created" value="March 2025" />
-          <DetailRow label="Repository" value="github.com/poodle-ui/poodle" />
+          <DetailItem label="Owner" value="Clay" />
+          <DetailItem label="Created" value="March 2025" />
+          <DetailItem label="Repository" value="github.com/poodle-ui/poodle" />
         </DetailSection>
         <Separator />
         <DetailSection title="Configuration">
           <svelte:fragment slot="actions">
             <Button variant="ghost">Reset</Button>
           </svelte:fragment>
-          <DetailRow label="Theme" value="Dark" />
-          <DetailRow label="Density" value="Compact" />
-          <DetailRow label="Default size" value="Medium" />
+          <DetailItem label="Theme" value="Dark" />
+          <DetailItem label="Density" value="Compact" />
+          <DetailItem label="Default size" value="Medium" />
         </DetailSection>
         <Separator />
         <DetailSection title="Integrations">
-          <DetailRow label="Figma" value="Connected" />
-          <DetailRow label="Storybook" value="Not configured" />
+          <DetailItem label="Figma" value="Connected" />
+          <DetailItem label="Storybook" value="Not configured" />
         </DetailSection>
       </DetailShell>
     </div>

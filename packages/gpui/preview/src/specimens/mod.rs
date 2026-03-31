@@ -25,7 +25,7 @@ mod text_area;
 mod search_field;
 mod field;
 mod form_actions;
-mod number_entry;
+mod number_input;
 mod code_input;
 mod toolbar;
 mod editable_label;
@@ -86,7 +86,7 @@ mod data_table;
 mod table;
 mod card_radio_group_specimen;
 mod card_specimen;
-mod detail_row_specimen;
+mod detail_item_specimen;
 mod detail_section_specimen;
 mod detail_shell;
 mod breadcrumbs_specimen;
@@ -252,7 +252,7 @@ pub fn render_single_specimen(
         "field" => specimen_card("Field", theme, field::render(state, cx)),
         "field-set" => specimen_card("FieldSet", theme, field_set_specimen::render(theme)),
         "form-actions" => specimen_card("FormActions", theme, form_actions::render(state, cx)),
-        "number-entry" => specimen_card("NumberEntry", theme, number_entry::render(state, cx)),
+        "number-input" => specimen_card("NumberInput", theme, number_input::render(state, cx)),
         "code-input" => specimen_card("CodeInput", theme, code_input::render(state, cx)),
         "toolbar" => specimen_card("Toolbar", theme, toolbar::render(state, cx)),
         "time-field" => specimen_card("TimeField", theme, time_field::render(state, cx)),
@@ -318,7 +318,7 @@ pub fn render_single_specimen(
         "form-layout" => specimen_card("FormLayout", theme, form_layout::render(state, cx)),
         "reorderable-list" => specimen_card("ReorderableList", theme, reorderable_list::render(theme)),
         "detail-shell" => specimen_card("DetailShell", theme, detail_shell::render(theme)),
-        "detail-row" => specimen_card("DetailRow", theme, detail_row_specimen::render(theme)),
+        "detail-item" => specimen_card("DetailItem", theme, detail_item_specimen::render(theme)),
         "detail-section" => specimen_card("DetailSection", theme, detail_section_specimen::render(theme)),
         "card" => specimen_card("Card", theme, card_specimen::render(theme)),
         "card-radio-group" => specimen_card("CardRadioGroup", theme, card_radio_group_specimen::render(state, cx)),

@@ -10,7 +10,7 @@ Updated: 2026-03-30
 - Summary: an inline wrapping metadata ribbon for page headers and compact
   contextual facts
 - In scope: horizontal metadata layout, wrapping, optional visual separators
-- Out of scope: value semantics, status treatment, copy affordances, detail-row
+- Out of scope: value semantics, status treatment, copy affordances, detail-item
   block layout
 
 ## 2. Public Props
@@ -37,7 +37,7 @@ Updated: 2026-03-30
 ## 5. Boundary
 
 - use `MetaBar` for compact header or summary metadata
-- use `DetailRow` for block-level label/value presentation in detail sections
+- use `DetailItem` for block-level label/value presentation in detail sections
 - callers own item semantics such as copyable IDs, status pills, timestamps,
   and links
 

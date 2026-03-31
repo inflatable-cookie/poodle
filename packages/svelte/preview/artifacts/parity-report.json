@@ -366,7 +366,7 @@
       },
       {
         "packageName": "@poodle/svelte-composites",
-        "exportName": "DetailRow",
+        "exportName": "DetailItem",
         "kind": "helper",
         "status": "previewed",
         "note": "Composite package helper re-exports remain reviewable through the catalogue and suite surfaces.",
@@ -1347,7 +1347,7 @@
       },
       {
         "packageName": "@poodle/svelte-primitives",
-        "exportName": "DetailRow",
+        "exportName": "DetailItem",
         "kind": "component",
         "status": "previewed",
         "note": "Every public primitive export is directly reviewable from the catalogue.",

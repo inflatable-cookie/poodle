@@ -28,7 +28,7 @@ Foundation contracts define the lowest reusable surface in Poodle.
 - `date-range-picker.md`
 - `date-time-picker.md`
 - `date-time-range-picker.md`
-- `detail-row.md`
+- `detail-item.md`
 - `dialog.md`
 - `drawer.md`
 - `duration-input.md`

@@ -1,7 +1,7 @@
 use gpui::*;
 use poodle_composites::DetailSectionSpec;
-use poodle_primitives::{DetailRowLayout, DetailRowSpec, ButtonSpec, ButtonVariant, ControlSize, EyebrowSpec};
-use poodle_gpui_components::{DetailRow, DetailSection, Button, Eyebrow};
+use poodle_primitives::{DetailItemLayout, DetailItemSpec, ButtonSpec, ButtonVariant, ControlSize, EyebrowSpec};
+use poodle_gpui_components::{DetailItem, DetailSection, Button, Eyebrow};
 use poodle_gpui::GpuiThemeProvider;
 
 pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
@@ -19,10 +19,10 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
                     )
                     .with_body(
                         div().flex().flex_col()
-                            .child(DetailRow::from_spec(DetailRowSpec::new("Name").with_value("Poodle Design System"), theme))
-                            .child(DetailRow::from_spec(DetailRowSpec::new("Owner").with_value("Clay + Aura"), theme))
-                            .child(DetailRow::from_spec(DetailRowSpec::new("Created").with_value("March 2025"), theme))
-                            .child(DetailRow::from_spec(DetailRowSpec::new("Status").with_value("Active"), theme))
+                            .child(DetailItem::from_spec(DetailItemSpec::new("Name").with_value("Poodle Design System"), theme))
+                            .child(DetailItem::from_spec(DetailItemSpec::new("Owner").with_value("Clay + Aura"), theme))
+                            .child(DetailItem::from_spec(DetailItemSpec::new("Created").with_value("March 2025"), theme))
+                            .child(DetailItem::from_spec(DetailItemSpec::new("Status").with_value("Active"), theme))
                     )
                 )
         )
@@ -47,16 +47,16 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
                     )
                     .with_body(
                         div().flex().flex_col()
-                            .child(DetailRow::from_spec(DetailRowSpec::new("Plan").with_value("Pro"), theme))
-                            .child(DetailRow::from_spec(DetailRowSpec::new("Billing cycle").with_value("Monthly"), theme))
-                            .child(DetailRow::from_spec(DetailRowSpec::new("Next invoice").with_value("April 1, 2026"), theme))
+                            .child(DetailItem::from_spec(DetailItemSpec::new("Plan").with_value("Pro"), theme))
+                            .child(DetailItem::from_spec(DetailItemSpec::new("Billing cycle").with_value("Monthly"), theme))
+                            .child(DetailItem::from_spec(DetailItemSpec::new("Next invoice").with_value("April 1, 2026"), theme))
                     )
                 )
         )
-        // --- DetailRow with description ---
+        // --- DetailItem with description ---
         .child(
             div().flex().flex_col().gap(px(8.0))
-                .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("DetailRow with description"), theme))
+                .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("DetailItem with description"), theme))
                 .child(
                     DetailSection::from_spec(
                         DetailSectionSpec::new()
@@ -65,15 +65,15 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
                     )
                     .with_body(
                         div().flex().flex_col()
-                            .child(DetailRow::from_spec(
-                                DetailRowSpec::new("API endpoint")
+                            .child(DetailItem::from_spec(
+                                DetailItemSpec::new("API endpoint")
                                     .with_value("https://api.example.com/v2")
                                     .with_description("The base URL for all API requests.")
                                     .with_truncate_value(true),
                                 theme,
                             ))
-                            .child(DetailRow::from_spec(
-                                DetailRowSpec::new("Rate limit")
+                            .child(DetailItem::from_spec(
+                                DetailItemSpec::new("Rate limit")
                                     .with_value("1,000 req/min")
                                     .with_description("Maximum requests per minute."),
                                 theme,
@@ -96,16 +96,16 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
                     .with_body(
                         div().flex().flex_wrap().gap(px(4.0))
                             .child(div().w(px(192.0)).child(
-                                DetailRow::from_spec(DetailRowSpec::new("Route").with_value("local-brokered").with_layout(DetailRowLayout::Stacked), theme)
+                                DetailItem::from_spec(DetailItemSpec::new("Route").with_value("local-brokered").with_layout(DetailItemLayout::Stacked), theme)
                             ))
                             .child(div().w(px(192.0)).child(
-                                DetailRow::from_spec(DetailRowSpec::new("Posture").with_value("aura-local-brokered").with_layout(DetailRowLayout::Stacked), theme)
+                                DetailItem::from_spec(DetailItemSpec::new("Posture").with_value("aura-local-brokered").with_layout(DetailItemLayout::Stacked), theme)
                             ))
                             .child(div().w(px(192.0)).child(
-                                DetailRow::from_spec(DetailRowSpec::new("Authority").with_value("local").with_layout(DetailRowLayout::Stacked), theme)
+                                DetailItem::from_spec(DetailItemSpec::new("Authority").with_value("local").with_layout(DetailItemLayout::Stacked), theme)
                             ))
                             .child(div().w(px(192.0)).child(
-                                DetailRow::from_spec(DetailRowSpec::new("Displays").with_value("2").with_layout(DetailRowLayout::Stacked), theme)
+                                DetailItem::from_spec(DetailItemSpec::new("Displays").with_value("2").with_layout(DetailItemLayout::Stacked), theme)
                             ))
                     )
                 )

@@ -287,7 +287,7 @@ i=3 `20%`.
 | `height` | `1rem` |
 | `margin-bottom` | `0.25rem` |
 
-#### Detail row `.skeleton-preset__detail-row`
+#### Detail row `.skeleton-preset__detail-item`
 
 | Property | Value |
 |----------|-------|

@@ -1,13 +1,13 @@
-//! DetailRow — Jetstream label/value row backed by DetailRowSpec.
+//! DetailItem — Jetstream label/value row backed by DetailItemSpec.
 
 use jetstream_runtime::ui_element::{self, JsEl};
 use poodle_jetstream::JetstreamThemeProvider;
-use poodle_primitives::DetailRowSpec;
+use poodle_primitives::DetailItemSpec;
 
 use crate::presentation::rem_to_px;
 use crate::theme_ext::{resolve_color, resolve_px, resolve_radius};
 
-pub fn js_detail_row(spec: &DetailRowSpec, theme: &JetstreamThemeProvider) -> JsEl {
+pub fn js_detail_item(spec: &DetailItemSpec, theme: &JetstreamThemeProvider) -> JsEl {
     let label_color = resolve_color(theme, spec.label_color_token());
     let value_color = resolve_color(theme, spec.value_color_token());
     let bg = resolve_color(theme, spec.background_token());

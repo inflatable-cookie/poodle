@@ -3,7 +3,7 @@ use poodle_tokens::semantic;
 use crate::types::{ControlDensity, ControlSize, SemanticControlSizeRole, ValidationState};
 
 #[derive(Clone, Debug, PartialEq)]
-pub struct NumberEntrySpec {
+pub struct NumberInputSpec {
     pub value: f64,
     pub min: f64,
     pub max: f64,
@@ -16,7 +16,7 @@ pub struct NumberEntrySpec {
     pub density: ControlDensity,
 }
 
-impl Default for NumberEntrySpec {
+impl Default for NumberInputSpec {
     fn default() -> Self {
         Self {
             value: 0.0,
@@ -33,7 +33,7 @@ impl Default for NumberEntrySpec {
     }
 }
 
-impl NumberEntrySpec {
+impl NumberInputSpec {
     pub fn new(value: f64) -> Self {
         Self {
             value,

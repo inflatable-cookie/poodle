@@ -16,7 +16,7 @@ and data components.
 - `CommandPalette`
 - `ConfirmAction`
 - `DataTable`
-- `DetailRow`
+- `DetailItem`
 - `DetailSection`
 - `DetailShell`
 - `DockRegion`

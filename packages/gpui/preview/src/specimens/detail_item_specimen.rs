@@ -1,7 +1,7 @@
 use gpui::*;
 use poodle_adapter::ThemeProvider;
-use poodle_primitives::{DetailRowLayout, DetailRowSpec, ButtonSpec, ButtonVariant, ControlSize, EyebrowSpec};
-use poodle_gpui_components::{DetailRow, Button, Eyebrow};
+use poodle_primitives::{DetailItemLayout, DetailItemSpec, ButtonSpec, ButtonVariant, ControlSize, EyebrowSpec};
+use poodle_gpui_components::{DetailItem, Button, Eyebrow};
 use poodle_gpui::GpuiThemeProvider;
 use crate::style_bridge::color_to_hsla;
 
@@ -15,9 +15,9 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
                 .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Basic label-value pairs"), theme))
                 .child(
                     div().flex().flex_col()
-                        .child(DetailRow::from_spec(DetailRowSpec::new("Name").with_value("Poodle Design System"), theme))
-                        .child(DetailRow::from_spec(DetailRowSpec::new("Version").with_value("2.1.0"), theme))
-                        .child(DetailRow::from_spec(DetailRowSpec::new("License").with_value("MIT"), theme))
+                        .child(DetailItem::from_spec(DetailItemSpec::new("Name").with_value("Poodle Design System"), theme))
+                        .child(DetailItem::from_spec(DetailItemSpec::new("Version").with_value("2.1.0"), theme))
+                        .child(DetailItem::from_spec(DetailItemSpec::new("License").with_value("MIT"), theme))
                 )
         )
         // --- With description ---
@@ -25,8 +25,8 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
             div().flex().flex_col().gap(px(8.0))
                 .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("With description"), theme))
                 .child(
-                    DetailRow::from_spec(
-                        DetailRowSpec::new("API endpoint")
+                    DetailItem::from_spec(
+                        DetailItemSpec::new("API endpoint")
                             .with_value("https://api.example.com/v2")
                             .with_description("Base URL for all API requests.")
                             .with_truncate_value(true),
@@ -39,8 +39,8 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
             div().flex().flex_col().gap(px(8.0))
                 .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("With action slot"), theme))
                 .child(
-                    DetailRow::from_spec(
-                        DetailRowSpec::new("Email").with_value("clay@example.com"),
+                    DetailItem::from_spec(
+                        DetailItemSpec::new("Email").with_value("clay@example.com"),
                         theme,
                     )
                     .with_action(
@@ -59,8 +59,8 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
             div().flex().flex_col().gap(px(8.0))
                 .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("With value slot"), theme))
                 .child(
-                    DetailRow::from_spec(
-                        DetailRowSpec::new("Status"),
+                    DetailItem::from_spec(
+                        DetailItemSpec::new("Status"),
                         theme,
                     )
                     .with_value_content(
@@ -82,11 +82,11 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
             div().flex().flex_col().gap(px(8.0))
                 .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Stacked layout"), theme))
                 .child(
-                    DetailRow::from_spec(
-                        DetailRowSpec::new("Arrangement")
+                    DetailItem::from_spec(
+                        DetailItemSpec::new("Arrangement")
                             .with_value("2CF8B3D0-F592-4D87-8F9F-74D6B42E0E7D:main:external:0:0:3440:1440:1000|37D8832A...")
                             .with_truncate_value(true)
-                            .with_layout(DetailRowLayout::Stacked),
+                            .with_layout(DetailItemLayout::Stacked),
                         theme,
                     )
                 )

@@ -46,7 +46,7 @@
   <div class="skeleton-preset skeleton-preset--detail" data-animated={animated} aria-hidden="true">
     <span class="skeleton skeleton--heading"></span>
     {#each { length: lines } as _}
-      <div class="skeleton-preset__detail-row">
+      <div class="skeleton-preset__detail-item">
         <span class="skeleton skeleton--label"></span>
         <span class="skeleton skeleton--value"></span>
       </div>
@@ -203,7 +203,7 @@
     margin-bottom: 0.25rem;
   }
 
-  .skeleton-preset__detail-row {
+  .skeleton-preset__detail-item {
     display: flex;
     gap: 1rem;
     align-items: center;
