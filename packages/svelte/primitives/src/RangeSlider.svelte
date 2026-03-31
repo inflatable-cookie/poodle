@@ -35,8 +35,8 @@
   $: lowerPercent = ((lowerValue - min) / (safeMax - min)) * 100;
   $: upperPercent = ((upperValue - min) / (safeMax - min)) * 100;
   $: rangeStyle = joinStyles([
-    `--poodle-range-start: ${lowerPercent}`,
-    `--poodle-range-end: ${upperPercent}`,
+    `--poodle-range-start: ${lowerPercent}%`,
+    `--poodle-range-end: ${upperPercent}%`,
   ]);
 
   function normalizeLower(nextValue: number): [number, number] {
@@ -134,12 +134,9 @@
   }
 
   .range-slider__fill {
-    --_thumb: 1rem;
-    --_half: calc(var(--_thumb) / 2);
-    --_track: calc(100% - var(--_thumb));
     position: absolute;
-    left: calc(var(--_half) + var(--_track) * var(--poodle-range-start) / 100);
-    width: calc(var(--_track) * (var(--poodle-range-end) - var(--poodle-range-start)) / 100);
+    left: var(--poodle-range-start);
+    width: calc(var(--poodle-range-end) - var(--poodle-range-start));
     height: 100%;
     border-radius: inherit;
     background: var(--poodle-color-accent-base);
@@ -147,9 +144,9 @@
 
   .range-slider[data-orientation="vertical"] .range-slider__fill {
     left: 0;
-    bottom: calc(var(--_half) + var(--_track) * var(--poodle-range-start) / 100);
+    bottom: var(--poodle-range-start);
     width: 100%;
-    height: calc(var(--_track) * (var(--poodle-range-end) - var(--poodle-range-start)) / 100);
+    height: calc(var(--poodle-range-end) - var(--poodle-range-start));
   }
 
   .range-slider__control {

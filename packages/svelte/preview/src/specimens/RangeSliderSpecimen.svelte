@@ -4,7 +4,7 @@
   const controlSizes = ["xs", "sm", "md", "lg", "xl"] as const;
 
   let priceRange: [number, number] = [20, 80];
-  let ageRange: [number, number] = [25, 45];
+  let ageRange: [number, number] = [23, 43];
 </script>
 
 <div class="specimen">
