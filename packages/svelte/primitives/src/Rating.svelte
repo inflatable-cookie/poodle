@@ -137,8 +137,20 @@
   }
 
   .rating__glyph {
-    font-size: 1rem;
-    line-height: 1;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .rating__glyph :global(svg) {
+    width: 1em;
+    height: 1em;
+    stroke-width: 2;
+  }
+
+  .rating__item[data-filled="true"] .rating__glyph :global(svg) {
+    fill: currentColor;
+    stroke-width: 1.5;
   }
 
   .rating__item:disabled {
