@@ -8,11 +8,11 @@
   <div class="specimen__group">
     <Eyebrow>Tones</Eyebrow>
     <div class="specimen__row">
-      <Pill tone="neutral">Neutral</Pill>
-      <Pill tone="info">Info</Pill>
-      <Pill tone="success">Success</Pill>
-      <Pill tone="warning">Warning</Pill>
-      <Pill tone="danger">Danger</Pill>
+      <Pill tone="neutral" sizeRole="control">Neutral</Pill>
+      <Pill tone="info" sizeRole="control">Info</Pill>
+      <Pill tone="success" sizeRole="control">Success</Pill>
+      <Pill tone="warning" sizeRole="control">Warning</Pill>
+      <Pill tone="danger" sizeRole="control">Danger</Pill>
     </div>
   </div>
 
@@ -40,39 +40,39 @@
   <div class="specimen__group">
     <Eyebrow>Code font</Eyebrow>
     <div class="specimen__row">
-      <Pill font="code">v2.4.1</Pill>
-      <Pill font="code" tone="success">stable</Pill>
-      <Pill font="code" tone="warning">beta</Pill>
+      <Pill font="code" sizeRole="control">v2.4.1</Pill>
+      <Pill font="code" tone="success" sizeRole="control">stable</Pill>
+      <Pill font="code" tone="warning" sizeRole="control">beta</Pill>
     </div>
   </div>
 
   <div class="specimen__group">
     <Eyebrow>Muted</Eyebrow>
     <div class="specimen__row">
-      <Pill muted>Muted neutral</Pill>
-      <Pill muted tone="success">Muted success</Pill>
-      <Pill muted tone="danger">Muted danger</Pill>
+      <Pill muted sizeRole="control">Muted neutral</Pill>
+      <Pill muted tone="success" sizeRole="control">Muted success</Pill>
+      <Pill muted tone="danger" sizeRole="control">Muted danger</Pill>
     </div>
   </div>
 
   <div class="specimen__group">
     <Eyebrow>Badge</Eyebrow>
     <div class="specimen__row">
-      <Pill appearance="badge">3</Pill>
-      <Pill appearance="badge">12</Pill>
-      <Pill appearance="badge">99+</Pill>
-      <Pill appearance="badge">New</Pill>
-      <Pill appearance="badge" tone="neutral">Draft</Pill>
+      <Pill appearance="badge" sizeRole="control">3</Pill>
+      <Pill appearance="badge" sizeRole="control">12</Pill>
+      <Pill appearance="badge" sizeRole="control">99+</Pill>
+      <Pill appearance="badge" sizeRole="control">New</Pill>
+      <Pill appearance="badge" tone="neutral" sizeRole="control">Draft</Pill>
     </div>
   </div>
 
   <div class="specimen__group">
     <Eyebrow>Custom accent</Eyebrow>
     <div class="specimen__row">
-      <Pill accent="#3b82f6">Info-ish</Pill>
-      <Pill accent="#22c55e">Positive-ish</Pill>
-      <Pill accent="#f59e0b">Caution-ish</Pill>
-      <Pill accent="#ef4444">Danger-ish</Pill>
+      <Pill accent="#3b82f6" sizeRole="control">Info-ish</Pill>
+      <Pill accent="#22c55e" sizeRole="control">Positive-ish</Pill>
+      <Pill accent="#f59e0b" sizeRole="control">Caution-ish</Pill>
+      <Pill accent="#ef4444" sizeRole="control">Danger-ish</Pill>
     </div>
   </div>
 </div>
