@@ -93,6 +93,7 @@
   }
 
   .segmented-control[data-equal-width="false"] {
+    width: fit-content;
     grid-auto-columns: max-content;
     justify-content: start;
   }
