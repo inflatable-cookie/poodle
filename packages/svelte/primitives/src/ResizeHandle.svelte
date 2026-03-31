@@ -147,7 +147,7 @@
     height: 0.125rem;
   }
 
-  .resize-handle:hover .resize-handle__line,
+  .resize-handle:not([data-disabled]):hover .resize-handle__line,
   .resize-handle[data-dragging] .resize-handle__line {
     background: var(--poodle-color-accent-base);
   }
