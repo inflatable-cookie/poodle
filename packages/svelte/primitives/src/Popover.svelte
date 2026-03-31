@@ -49,7 +49,9 @@
   $: previousOpen = isOpen;
 
   function setOpen(nextOpen: boolean): void {
-    if (!isControlled) {
+    if (isControlled) {
+      open = nextOpen;
+    } else {
       uncontrolledOpen = nextOpen;
     }
 
