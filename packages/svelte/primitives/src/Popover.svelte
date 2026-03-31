@@ -153,7 +153,7 @@
     border-radius: var(--poodle-treatment-surface-elevated-radius, var(--poodle-radius-surface));
     background: var(--poodle-color-background-elevated);
     --poodle-surface: var(--poodle-color-background-elevated);
-    box-shadow: var(--poodle-treatment-surface-elevated-shadow);
+    box-shadow: var(--poodle-treatment-surface-shadow, var(--poodle-elevation-overlay));
   }
 
   .popover__surface[data-placement^="bottom"] {
