@@ -151,14 +151,8 @@
       var(--poodle-color-border-default)
     );
     border-radius: var(--poodle-treatment-surface-elevated-radius, var(--poodle-radius-surface));
-    background: var(
-      --poodle-treatment-surface-elevated-fill,
-      var(--poodle-color-background-elevated)
-    );
-    --poodle-surface: var(
-      --poodle-treatment-surface-elevated-fill,
-      var(--poodle-color-background-elevated)
-    );
+    background: var(--poodle-color-background-elevated);
+    --poodle-surface: var(--poodle-color-background-elevated);
     box-shadow: var(
       --poodle-treatment-surface-elevated-shadow,
       0 0.25rem 1.5rem rgba(0, 0, 0, 0.35),
