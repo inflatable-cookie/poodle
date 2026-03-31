@@ -184,15 +184,15 @@
     </button>
 
     {#if effectiveValue.length > 0}
-      <button
-        type="button"
-        class="order-by__reset"
-        on:click|stopPropagation|preventDefault={clearAll}
-        disabled={disabled}
-        aria-label="Clear sort"
-      >
-        ×
-      </button>
+      <span class="order-by__reset" on:click|stopPropagation|preventDefault={clearAll}>
+        <IconButton
+          icon="x"
+          ariaLabel="Clear sort"
+          variant="ghost"
+          size={resolvedSize}
+          disabled={disabled}
+        />
+      </span>
     {/if}
   </div>
 
@@ -331,20 +331,6 @@
 
   .order-by__reset {
     display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: 1.75rem;
-    height: 1.75rem;
-    border: 0;
-    border-radius: var(--poodle-radius-control);
-    background: transparent;
-    color: var(--poodle-color-text-secondary);
-    cursor: pointer;
-  }
-
-  .order-by__reset:hover:not(:disabled) {
-    color: var(--poodle-color-text-primary);
-    background: color-mix(in srgb, var(--poodle-color-background-surface) 68%, var(--poodle-color-background-elevated));
   }
 
   .order-by__panel {
@@ -420,26 +406,21 @@
     align-items: center;
   }
 
-  .order-by[data-size="xs"] .order-by__trigger {
-    min-height: 1.625rem;
-    padding: 0 0.5rem;
-  }
+  .order-by[data-size="xs"] .order-by__trigger { min-height: 1.625rem; padding: 0 0.5rem; }
+  .order-by[data-size="xs"] .order-by__label { font-size: 0.5625rem; }
+  .order-by[data-size="xs"] .order-by__summary { font-size: 0.6875rem; }
 
-  .order-by[data-size="xs"] .order-by__label {
-    font-size: 0.625rem;
-  }
+  .order-by[data-size="sm"] .order-by__trigger { min-height: 1.75rem; }
+  .order-by[data-size="sm"] .order-by__label { font-size: 0.625rem; }
+  .order-by[data-size="sm"] .order-by__summary { font-size: 0.75rem; }
 
-  .order-by[data-size="sm"] .order-by__trigger {
-    min-height: 1.75rem;
-  }
+  .order-by[data-size="lg"] .order-by__trigger { min-height: 2.25rem; }
+  .order-by[data-size="lg"] .order-by__label { font-size: 0.8125rem; }
+  .order-by[data-size="lg"] .order-by__summary { font-size: 0.9375rem; }
 
-  .order-by[data-size="lg"] .order-by__trigger {
-    min-height: 2.25rem;
-  }
-
-  .order-by[data-size="xl"] .order-by__trigger {
-    min-height: 2.5rem;
-  }
+  .order-by[data-size="xl"] .order-by__trigger { min-height: 2.5rem; }
+  .order-by[data-size="xl"] .order-by__label { font-size: 0.875rem; }
+  .order-by[data-size="xl"] .order-by__summary { font-size: 1rem; }
 
   .order-by[data-density="compact"] .order-by__trigger {
     gap: 0.375rem;
