@@ -27,6 +27,8 @@ export type ComponentDocs = {
 export const componentDocsMap: Record<string, ComponentDocs> = {
   accordion: {
     props: [
+      { name: "size", type: "ControlSize | null", default: "null", description: "Explicit size override. Supports xs, sm, md, lg, and xl." },
+      { name: "sizeRole", type: '"chrome" | "control" | "prominent"', default: '"control"', description: "Semantic size offset relative to the inherited presentation scale." },
       { name: "items", type: "AccordionItem[]", default: "[]", description: "Array of accordion panel items to render." },
       { name: "value", type: "string | string[] | null", default: "null", description: "Controlled open panel value(s)." },
       { name: "defaultValue", type: "string | string[] | null", default: "null", description: "Initial open panel value(s) for uncontrolled mode." },
@@ -61,6 +63,8 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
       { name: "open", type: "boolean | null", default: "null", description: "Controlled open state of the dialog." },
       { name: "title", type: "string", required: true, description: "Title displayed at the top of the alert dialog." },
       { name: "description", type: "string | null", default: "null", description: "Descriptive text shown below the title." },
+      { name: "itemLabel", type: "string | null", default: "null", description: "Label for an optional detail line showing the affected item." },
+      { name: "itemValue", type: "string | null", default: "null", description: "Value for the optional detail line (shown when itemLabel is also set)." },
       { name: "tone", type: "AlertDialogTone", default: '"danger"', description: "Visual tone of the dialog (e.g. danger, warning)." },
       { name: "confirmLabel", type: "string", default: '"Confirm"', description: "Label for the confirm action button." },
       { name: "cancelLabel", type: "string", default: '"Cancel"', description: "Label for the cancel action button." },
@@ -163,6 +167,8 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
 
   breadcrumbs: {
     props: [
+      { name: "size", type: "ControlSize | null", default: "null", description: "Explicit size override. Supports xs, sm, md, lg, and xl." },
+      { name: "sizeRole", type: '"chrome" | "control" | "prominent"', default: '"chrome"', description: "Semantic size offset relative to the inherited presentation scale." },
       { name: "density", type: "ControlDensity | null", default: "null", description: "Explicit density override. Supports compact, default, and comfortable." },
       { name: "items", type: "BreadcrumbItem[]", default: "[]", description: "Array of breadcrumb navigation items." },
       { name: "ariaLabel", type: "string", default: '"Breadcrumb"', description: "Accessible label for the breadcrumb nav." },
@@ -187,6 +193,9 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
 
   "bulk-action-bar": {
     props: [
+      { name: "size", type: "ControlSize | null", default: "null", description: "Explicit size override. Supports xs, sm, md, lg, and xl." },
+      { name: "sizeRole", type: '"chrome" | "control" | "prominent"', default: '"control"', description: "Semantic size offset relative to the inherited presentation scale." },
+      { name: "density", type: "ControlDensity | null", default: "null", description: "Explicit density override. Supports compact, default, and comfortable." },
       { name: "selectionCount", type: "number", default: "0", description: "Number of currently selected items." },
       { name: "totalCount", type: "number | null", default: "null", description: "Total number of selectable items." },
       { name: "actions", type: "BulkAction[]", default: "[]", description: "Array of bulk action definitions." },
@@ -194,7 +203,8 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
       { name: "disabled", type: "boolean", default: "false", description: "Disables the whole bar without changing selection state." },
       { name: "showSelectAll", type: "boolean", default: "false", description: "Shows a select-all or deselect-all action before the bulk actions." },
       { name: "allSelected", type: "boolean", default: "false", description: "Controls whether the select-all action presents as deselect-all." },
-      { name: "density", type: "ControlDensity | null", default: "null", description: "Explicit density override. Supports compact, default, and comfortable." },
+      { name: "selectAllLabel", type: "string", default: '"Select all"', description: "Label for the select-all button." },
+      { name: "deselectAllLabel", type: "string", default: '"Deselect all"', description: "Label for the deselect-all button." },
     ],
     slots: [],
     events: [
@@ -260,6 +270,8 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
 
   calendar: {
     props: [
+      { name: "size", type: "ControlSize | null", default: "null", description: "Explicit size override. Supports xs, sm, md, lg, and xl." },
+      { name: "sizeRole", type: '"chrome" | "control" | "prominent"', default: '"control"', description: "Semantic size offset relative to the inherited presentation scale." },
       { name: "density", type: "ControlDensity | null", default: "null", description: "Explicit density override. Supports compact, default, and comfortable." },
       { name: "value", type: "string | null", default: "null", description: "Controlled selected date in ISO format." },
       { name: "defaultValue", type: "string | null", default: "null", description: "Initial selected date for uncontrolled mode." },
@@ -285,6 +297,8 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
 
   callout: {
     props: [
+      { name: "size", type: "ControlSize | null", default: "null", description: "Explicit size override. Supports xs, sm, md, lg, and xl." },
+      { name: "sizeRole", type: '"chrome" | "control" | "prominent"', default: '"control"', description: "Semantic size offset relative to the inherited presentation scale." },
       { name: "density", type: "ControlDensity | null", default: "null", description: "Explicit density override. Supports compact, default, and comfortable." },
       { name: "tone", type: 'StatusTone | "neutral"', default: '"neutral"', description: "Visual tone indicating the callout severity." },
       { name: "title", type: "string | null", default: "null", description: "Title text for the callout." },
@@ -369,6 +383,8 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
 
   checkbox: {
     props: [
+      { name: "size", type: "ControlSize | null", default: "null", description: "Explicit size override. Supports xs, sm, md, lg, and xl." },
+      { name: "sizeRole", type: '"chrome" | "control" | "prominent"', default: '"control"', description: "Semantic size offset relative to the inherited presentation scale." },
       { name: "density", type: "ControlDensity | null", default: "null", description: "Explicit density override. Supports compact, default, and comfortable." },
       { name: "id", type: "string | undefined", default: "undefined", description: "HTML id attribute for the checkbox input." },
       { name: "checked", type: "boolean", default: "false", description: "Controlled checked state." },
@@ -404,6 +420,8 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
       { name: "maxHeight", type: "string | null", default: "null", description: "Maximum height before scrolling." },
       { name: "inline", type: "boolean", default: "false", description: "Whether to render as an inline code element." },
       { name: "ariaLabel", type: "string | null", default: "null", description: "Accessible label for the code block." },
+      { name: "size", type: "ControlSize | null", default: "null", description: "Explicit size override. Supports xs, sm, md, lg, and xl." },
+      { name: "sizeRole", type: '"chrome" | "control" | "prominent"', default: '"chrome"', description: "Semantic size offset relative to the inherited presentation scale." },
       { name: "density", type: "ControlDensity | null", default: "null", description: "Explicit density override. Supports compact, default, and comfortable." },
     ],
     slots: [],
@@ -450,6 +468,8 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
       { name: "description", type: "string | null", default: "null", description: "Description shown below the title." },
       { name: "disabled", type: "boolean", default: "false", description: "Whether the collapsible is disabled." },
       { name: "ariaLabel", type: "string | null", default: "null", description: "Accessible label for the collapsible region." },
+      { name: "size", type: "ControlSize | null", default: "null", description: "Explicit size override. Supports xs, sm, md, lg, and xl." },
+      { name: "sizeRole", type: '"chrome" | "control" | "prominent"', default: '"control"', description: "Semantic size offset relative to the inherited presentation scale." },
       { name: "density", type: "ControlDensity | null", default: "null", description: "Explicit density override. Supports compact, default, and comfortable." },
     ],
     slots: [
@@ -500,6 +520,8 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
 
   combobox: {
     props: [
+      { name: "size", type: "ControlSize | null", default: "null", description: "Explicit size override. Supports xs, sm, md, lg, and xl." },
+      { name: "sizeRole", type: '"chrome" | "control" | "prominent"', default: '"control"', description: "Semantic size offset relative to the inherited presentation scale." },
       { name: "density", type: "ControlDensity | null", default: "null", description: "Explicit density override. Supports compact, default, and comfortable." },
       { name: "value", type: "string | null", default: "null", description: "Controlled selected value." },
       { name: "defaultValue", type: "string | null", default: "null", description: "Initial value for uncontrolled mode." },
@@ -823,11 +845,14 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
     props: [
       { name: "label", type: "string", required: true, description: "Label text for the detail row." },
       { name: "value", type: "string | null", default: "null", description: "Value text displayed next to the label." },
-      { name: "emptyText", type: "string", default: '"\u2014"', description: "Text shown when value is null or empty." },
+      { name: "description", type: "string | null", default: "null", description: "Description text shown below the label." },
+      { name: "truncateValue", type: "boolean", default: "false", description: "Whether to truncate long values with an ellipsis." },
+      { name: "ariaLabel", type: "string | null", default: "null", description: "Accessible label for the detail row." },
+      { name: "layout", type: '"inline" | "stacked"', default: '"inline"', description: "Layout mode for label/value arrangement." },
     ],
     slots: [
-      { name: "default", description: "Custom value content replacing the value prop." },
-      { name: "actions", description: "Action buttons rendered at the end of the row." },
+      { name: "value", description: "Custom value content replacing the value prop." },
+      { name: "action", description: "Action button rendered at the end of the row." },
     ],
     events: [],
     usage: `<script lang="ts">
@@ -844,6 +869,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
       { name: "title", type: "string | null", default: "null", description: "Section title." },
       { name: "description", type: "string | null", default: "null", description: "Description shown below the title." },
       { name: "separated", type: "boolean", default: "true", description: "Whether a separator is shown above the section." },
+      { name: "columns", type: "1 | 2 | 3", default: "1", description: "Number of columns for the section body grid layout." },
       { name: "ariaLabel", type: "string | null", default: "null", description: "Accessible label for the section region." },
     ],
     slots: [
@@ -891,20 +917,29 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
     props: [
       { name: "open", type: "boolean | null", default: "null", description: "Controlled open state." },
       { name: "defaultOpen", type: "boolean", default: "false", description: "Initial open state for uncontrolled mode." },
-      { name: "title", type: "string | null", default: "null", description: "Dialog title." },
-      { name: "description", type: "string | null", default: "null", description: "Dialog description text." },
-      { name: "kind", type: "DialogKind", default: '"dialog"', description: "Kind of dialog (dialog, alert, drawer)." },
+      { name: "title", type: "string | null", default: "null", description: "Dialog title rendered in the built-in header." },
+      { name: "description", type: "string | null", default: "null", description: "Dialog description text shown below the title." },
+      { name: "role", type: '"dialog" | "alertdialog"', default: '"dialog"', description: "ARIA role for the dialog surface." },
+      { name: "width", type: '"sm" | "md" | "lg" | "xl" | "full"', default: '"md"', description: "Surface width preset controlling the max inline size." },
+      { name: "bare", type: "boolean", default: "false", description: "When true, the surface has no internal padding or structure; consumers control all layout." },
+      { name: "size", type: "ControlSize | null", default: "null", description: "Explicit size override. Supports xs, sm, md, lg, and xl." },
+      { name: "sizeRole", type: '"chrome" | "control" | "prominent"', default: '"control"', description: "Semantic size offset relative to the inherited presentation scale." },
+      { name: "density", type: "ControlDensity | null", default: "null", description: "Explicit density override. Supports compact, default, and comfortable." },
       { name: "dismissOnEscape", type: "boolean", default: "true", description: "Whether pressing Escape dismisses the dialog." },
       { name: "dismissOnBackdrop", type: "boolean", default: "true", description: "Whether clicking the backdrop dismisses the dialog." },
       { name: "ariaLabel", type: "string | null", default: "null", description: "Accessible label for the dialog." },
       { name: "contentClassName", type: "string", default: '""', description: "Additional class name applied to the dialog surface." },
+      { name: "contentStyle", type: "string", default: '""', description: "Custom inline style applied to the dialog surface element." },
       { name: "overlayClassName", type: "string", default: '""', description: "Additional class name applied to the backdrop button." },
       { name: "showCloseButton", type: "boolean", default: "false", description: "Whether to render the built-in close button." },
       { name: "closeLabel", type: "string", default: '"Close dialog"', description: "Accessible label for the built-in close button." },
+      { name: "kind", type: '"dialog" | "alertdialog"', default: "undefined", description: "Deprecated. Use role instead." },
     ],
     slots: [
       { name: "default", description: "Dialog body content." },
+      { name: "header", description: "Custom header content replacing the built-in title/description." },
       { name: "actions", description: "Footer actions (buttons) for the dialog." },
+      { name: "footer", description: "Custom footer replacing the default actions slot." },
     ],
     events: [
       { name: "openChange", payload: "{ open: boolean }", description: "Fires when the open state changes." },
@@ -923,13 +958,18 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
   title="Edit Settings"
   description="Update your preferences below."
   showCloseButton
-  contentClassName="settings-dialog"
+  width="lg"
 >
   <p>Dialog content here.</p>
   <svelte:fragment slot="actions">
     <Button variant="secondary" on:click={() => (open = false)}>Cancel</Button>
     <Button variant="primary">Save</Button>
   </svelte:fragment>
+</Dialog>
+
+<!-- Bare mode: no padding, consumer controls all layout -->
+<Dialog bind:open bare width="sm">
+  <div style="padding: 2rem;">Custom bare content</div>
 </Dialog>`,
   },
 
@@ -980,6 +1020,9 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
 
   drawer: {
     props: [
+      { name: "size", type: "ControlSize | null", default: "null", description: "Explicit size override. Supports xs, sm, md, lg, and xl." },
+      { name: "sizeRole", type: '"chrome" | "control" | "prominent"', default: '"control"', description: "Semantic size offset relative to the inherited presentation scale." },
+      { name: "density", type: "ControlDensity | null", default: "null", description: "Explicit density override. Supports compact, default, and comfortable." },
       { name: "open", type: "boolean | null", default: "null", description: "Controlled open state." },
       { name: "defaultOpen", type: "boolean", default: "false", description: "Initial open state for uncontrolled mode." },
       { name: "edge", type: "DrawerEdge", default: '"right"', description: "Which edge the drawer slides from." },
@@ -1110,6 +1153,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
 
   "embed-input": {
     props: [
+      { name: "id", type: "string", default: '"embed-input"', description: "HTML id attribute for the textarea." },
       { name: "value", type: "string", default: '""', description: "Current input value." },
       { name: "parsed", type: "ParsedEmbed | null", default: "null", description: "Parsed embed result from the input value." },
       { name: "placeholder", type: "string", default: '"Paste a URL or embed code..."', description: "Placeholder text for the input." },
@@ -1117,6 +1161,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
       { name: "providers", type: "string[]", default: "[]", description: "Allowed embed provider names." },
       { name: "disabled", type: "boolean", default: "false", description: "Whether the input is disabled." },
       { name: "error", type: "string | null", default: "null", description: "Error message to display." },
+      { name: "resolveParseState", type: "((value: string, providers: string[]) => EmbedParseState) | undefined", default: "undefined", description: "Custom parse function override. When provided, replaces the built-in URL/embed parser." },
     ],
     slots: [],
     events: [
@@ -1158,6 +1203,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
       { name: "message", type: "string | null", default: "null", description: "Descriptive message below the title." },
       { name: "variant", type: "EmptyStateVariant", default: '"neutral"', description: "Visual variant of the empty state." },
       { name: "size", type: '"default" | "compact"', default: '"default"', description: "Layout density for page-level or inline empty states." },
+      { name: "density", type: "ControlDensity | null", default: "null", description: "Explicit density override. Supports compact, default, and comfortable." },
       { name: "ariaLabel", type: "string | null", default: "null", description: "Accessible label for the empty state region." },
     ],
     slots: [
@@ -1357,6 +1403,8 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
 
   "form-dialog": {
     props: [
+      { name: "size", type: "ControlSize | null", default: "null", description: "Explicit size override. Supports xs, sm, md, lg, and xl." },
+      { name: "sizeRole", type: '"chrome" | "control" | "prominent"', default: '"control"', description: "Semantic size offset relative to the inherited presentation scale." },
       { name: "open", type: "boolean | null", default: "null", description: "Controlled open state." },
       { name: "title", type: "string", required: true, description: "Title of the form dialog." },
       { name: "subtitle", type: "string | null", default: "null", description: "Primary subtitle text below the title." },
@@ -1614,6 +1662,24 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
     <img src="/avatars/alice.jpg" alt="Alice" />
   </svelte:fragment>
 </ListCard>`,
+  },
+
+  "list-card-counter": {
+    props: [
+      { name: "icon", type: "IconProp", required: true, description: "Icon displayed before the count." },
+      { name: "count", type: "number", required: true, description: "Numeric count to display." },
+      { name: "tooltip", type: "string | null", default: "null", description: "Tooltip text shown on hover." },
+      { name: "href", type: "string | null", default: "null", description: "Optional link destination. Renders an anchor when provided." },
+      { name: "onClick", type: "((event: MouseEvent) => void) | null", default: "null", description: "Click handler callback." },
+    ],
+    slots: [],
+    events: [],
+    usage: `<script lang="ts">
+  import { ListCardCounter } from "@poodle/svelte-primitives";
+  import { messageSquare } from "lucide-svelte";
+</script>
+
+<ListCardCounter icon={messageSquare} count={12} tooltip="12 comments" href="/comments" />`,
   },
 
   "log-list": {
@@ -1911,6 +1977,8 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
 
   menubar: {
     props: [
+      { name: "size", type: "ControlSize | null", default: "null", description: "Explicit size override. Supports xs, sm, md, lg, and xl." },
+      { name: "sizeRole", type: '"chrome" | "control" | "prominent"', default: '"chrome"', description: "Semantic size offset relative to the inherited presentation scale." },
       { name: "density", type: "ControlDensity | null", default: "null", description: "Explicit density override. Supports compact, default, and comfortable." },
       { name: "value", type: "string | null", default: "null", description: "Controlled active menu value." },
       { name: "defaultValue", type: "string | null", default: "null", description: "Initial active menu for uncontrolled mode." },
@@ -1938,6 +2006,42 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
 </script>
 
 <Menubar {items} on:action={(e) => console.log(e.detail.value)} />`,
+  },
+
+  "meta-bar": {
+    props: [
+      { name: "ariaLabel", type: "string | null", default: "null", description: "Accessible label for the meta bar region." },
+      { name: "showSeparators", type: "boolean", default: "true", description: "Whether to show dot separators between items." },
+    ],
+    slots: [
+      { name: "default", description: "MetaItem children rendered as separated inline items." },
+    ],
+    events: [],
+    usage: `<script lang="ts">
+  import { MetaBar, MetaItem } from "@poodle/svelte-primitives";
+</script>
+
+<MetaBar ariaLabel="Document metadata">
+  <MetaItem label="Status">Published</MetaItem>
+  <MetaItem label="Author">Alice</MetaItem>
+  <MetaItem>3 min read</MetaItem>
+</MetaBar>`,
+  },
+
+  "meta-item": {
+    props: [
+      { name: "label", type: "string | null", default: "null", description: "Uppercase label text displayed before the value." },
+      { name: "ariaLabel", type: "string | null", default: "null", description: "Accessible label for the meta item." },
+    ],
+    slots: [
+      { name: "default", description: "Value content rendered after the optional label." },
+    ],
+    events: [],
+    usage: `<script lang="ts">
+  import { MetaItem } from "@poodle/svelte-primitives";
+</script>
+
+<MetaItem label="Updated">March 30, 2026</MetaItem>`,
   },
 
   meter: {
@@ -2489,7 +2593,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
     props: [
       { name: "value", type: "number | null", default: "null", description: "Current progress value." },
       { name: "max", type: "number", default: "100", description: "Maximum progress value." },
-      { name: "isIndeterminate", type: "boolean", default: "false", description: "Whether the progress is indeterminate." },
+      { name: "indeterminate", type: "boolean", default: "false", description: "Whether the progress is indeterminate (no specific value, shows animated bar)." },
       { name: "ariaLabel", type: "string | null", default: "null", description: "Accessible label for the progress bar." },
       { name: "size", type: 'ControlSize | null', default: "null", description: "Explicit height override for the progress bar." },
       { name: "sizeRole", type: 'SemanticControlSizeRole', default: '"control"', description: "Semantic size role used when inheriting from presentation context." },
@@ -2502,7 +2606,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
 </script>
 
 <Progress value={65} max={100} size="sm" ariaLabel="Upload progress" />
-<Progress isIndeterminate ariaLabel="Loading..." />`,
+<Progress indeterminate ariaLabel="Loading..." />`,
   },
 
   "radio-group": {
@@ -2597,6 +2701,8 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
 
   rating: {
     props: [
+      { name: "size", type: "ControlSize | null", default: "null", description: "Explicit size override. Supports xs, sm, md, lg, and xl." },
+      { name: "sizeRole", type: '"chrome" | "control" | "prominent"', default: '"control"', description: "Semantic size offset relative to the inherited presentation scale." },
       { name: "density", type: "ControlDensity | null", default: "null", description: "Explicit density override. Supports compact, default, and comfortable." },
       { name: "value", type: "number | null", default: "null", description: "Controlled rating value." },
       { name: "defaultValue", type: "number | null", default: "null", description: "Initial value for uncontrolled mode." },
@@ -2821,6 +2927,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
       { name: "disabled", type: "boolean", default: "false", description: "Whether the control is disabled." },
       { name: "ariaLabel", type: "string | null", default: "null", description: "Accessible label for the segmented control." },
       { name: "name", type: "string | undefined", default: "undefined", description: "Form field name." },
+      { name: "equalWidth", type: "boolean", default: "true", description: "Whether all segments are rendered with equal width." },
     ],
     slots: [],
     events: [
@@ -2843,36 +2950,71 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
 
   select: {
     props: [
+      { name: "size", type: "ControlSize | null", default: "null", description: "Explicit size override. Supports xs, sm, md, lg, and xl." },
+      { name: "sizeRole", type: '"chrome" | "control" | "prominent"', default: '"control"', description: "Semantic size offset relative to the inherited presentation scale." },
       { name: "density", type: "ControlDensity | null", default: "null", description: "Explicit density override. Supports compact, default, and comfortable." },
       { name: "id", type: "string | undefined", default: "undefined", description: "HTML id attribute for the select." },
       { name: "value", type: "string | null", default: "null", description: "Controlled selected value." },
       { name: "defaultValue", type: "string | null", default: "null", description: "Initial value for uncontrolled mode." },
       { name: "placeholder", type: "string | null", default: "null", description: "Placeholder text when no option is selected." },
-      { name: "options", type: "SelectItems", default: "[]", description: "Array of select options or option groups." },
+      { name: "options", type: "SelectItems", default: "[]", description: "Array of select options or grouped option objects." },
+      { name: "items", type: "SelectItem[] | null", default: "null", description: "Legacy flat list of selectable items. Normalized into options internally." },
+      { name: "groups", type: "SelectGroup[] | null", default: "null", description: "Legacy grouped items. Normalized into option groups internally." },
+      { name: "loadItems", type: "(() => Promise<SelectItem[]>) | null", default: "null", description: "Async loader for flat options. Fetched automatically on mount." },
+      { name: "loadGroups", type: "(() => Promise<SelectGroup[]>) | null", default: "null", description: "Async loader for grouped options. Fetched automatically on mount." },
+      { name: "loadKey", type: "string | null", default: "null", description: "Cache-busting key for async loaders. Changing this value resets and re-fetches." },
+      { name: "clearable", type: "boolean", default: "false", description: "Whether a clear option is shown to reset the value." },
+      { name: "required", type: "boolean", default: "false", description: "Whether the native select has the required attribute." },
       { name: "disabled", type: "boolean", default: "false", description: "Whether the select is disabled." },
+      { name: "valueLabel", type: "string | null", default: "null", description: "Display label for the current value when options have not loaded yet." },
       { name: "ariaLabel", type: "string | null", default: "null", description: "Accessible label for the select." },
       { name: "describedBy", type: "string | null", default: "null", description: "ID of the element describing this select." },
       { name: "name", type: "string | undefined", default: "undefined", description: "Form field name." },
+      { name: "onchange", type: "((value: string) => void) | null", default: "null", description: "Direct callback fired on value change, in addition to the valueChange event." },
     ],
     slots: [],
     events: [
       { name: "valueChange", payload: "{ value: string }", description: "Fires when the selected value changes." },
+      { name: "change", payload: "{ value: string }", description: "Alias for valueChange for convenience." },
     ],
     usage: `<script lang="ts">
   import { Select } from "@poodle/svelte-primitives";
 
-  const options = [
+  // Simple flat options
+  const statuses = [
     { value: "draft", label: "Draft" },
     { value: "published", label: "Published" },
     { value: "archived", label: "Archived" },
   ];
+
+  // Grouped options
+  const grouped = [
+    { label: "Fruits", options: [
+      { value: "apple", label: "Apple" },
+      { value: "banana", label: "Banana" },
+    ]},
+    { label: "Vegetables", options: [
+      { value: "carrot", label: "Carrot" },
+      { value: "broccoli", label: "Broccoli" },
+    ]},
+  ];
+
+  // Async loading
+  async function loadCountries() {
+    const res = await fetch("/api/countries");
+    return res.json();
+  }
 </script>
 
-<Select {options} placeholder="Select status..." />`,
+<Select options={statuses} placeholder="Select status..." clearable />
+<Select options={grouped} placeholder="Pick a food..." />
+<Select loadItems={loadCountries} loadKey="countries" placeholder="Select country..." valueLabel="Loading..." />`,
   },
 
   "selection-summary": {
     props: [
+      { name: "size", type: "ControlSize | null", default: "null", description: "Explicit size override. Supports xs, sm, md, lg, and xl." },
+      { name: "sizeRole", type: '"chrome" | "control" | "prominent"', default: '"control"', description: "Semantic size offset relative to the inherited presentation scale." },
       { name: "density", type: "ControlDensity | null", default: "null", description: "Explicit density override. Supports compact, default, and comfortable." },
       { name: "items", type: "Array<{ id: string; label: string }>", default: "[]", description: "Array of selected items to display." },
       { name: "selectionMode", type: '"single" | "multiple"', default: '"multiple"', description: "Selection mode." },
@@ -2913,6 +3055,40 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
 <p>Section two content</p>`,
   },
 
+  "sidebar-nav": {
+    props: [
+      { name: "groups", type: "SidebarNavGroup[]", default: "[]", description: "Array of navigation groups, each containing a list of nav items." },
+      { name: "value", type: "string | null", default: "null", description: "Currently active navigation item value." },
+      { name: "ariaLabel", type: "string | null", default: "null", description: "Accessible label for the nav landmark." },
+      { name: "size", type: "ControlSize | null", default: "null", description: "Explicit size override. Supports xs, sm, md, lg, and xl." },
+      { name: "sizeRole", type: '"chrome" | "control" | "prominent"', default: '"chrome"', description: "Semantic size offset relative to the inherited presentation scale." },
+      { name: "density", type: "ControlDensity | null", default: "null", description: "Explicit density override. Supports compact, default, and comfortable." },
+    ],
+    slots: [],
+    events: [
+      { name: "valueChange", payload: "{ value: string }", description: "Fires when a navigation item is activated." },
+    ],
+    usage: `<script lang="ts">
+  import { SidebarNav } from "@poodle/svelte-composites";
+
+  const groups = [
+    {
+      id: "main",
+      label: "Navigation",
+      items: [
+        { value: "dashboard", label: "Dashboard" },
+        { value: "projects", label: "Projects", href: "/projects" },
+        { value: "settings", label: "Settings" },
+      ],
+    },
+  ];
+
+  let active = "dashboard";
+</script>
+
+<SidebarNav {groups} value={active} ariaLabel="Main navigation" on:valueChange={(e) => (active = e.detail.value)} />`,
+  },
+
   skeleton: {
     props: [
       { name: "shape", type: "SkeletonShape", default: '"line"', description: "Shape of the skeleton placeholder." },
@@ -2940,6 +3116,8 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
       { name: "density", type: "ControlDensity | null", default: "null", description: "Explicit density override. Supports compact, default, and comfortable." },
       { name: "tone", type: "SpinnerTone", default: '"current"', description: "Color source for the spinner." },
       { name: "ariaLabel", type: "string | null", default: "null", description: "Optional announced loading label." },
+      { name: "className", type: "string", default: '""', description: "Additional CSS class name applied to the spinner element." },
+      { name: "style", type: "string | null", default: "null", description: "Custom inline style applied to the spinner element." },
     ],
     slots: [],
     events: [],
@@ -2953,6 +3131,8 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
 
   slider: {
     props: [
+      { name: "size", type: "ControlSize | null", default: "null", description: "Explicit size override. Supports xs, sm, md, lg, and xl." },
+      { name: "sizeRole", type: '"chrome" | "control" | "prominent"', default: '"control"', description: "Semantic size offset relative to the inherited presentation scale." },
       { name: "density", type: "ControlDensity | null", default: "null", description: "Explicit density override. Supports compact, default, and comfortable." },
       { name: "value", type: "number", default: "0", description: "Current slider value." },
       { name: "min", type: "number", default: "0", description: "Minimum allowed value." },
@@ -3040,6 +3220,8 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
       { name: "defaultRatio", type: "number", default: "0.5", description: "Initial split ratio for uncontrolled mode." },
       { name: "minPrimarySize", type: "number | null", default: "null", description: "Minimum pixel size of the primary pane." },
       { name: "minSecondarySize", type: "number | null", default: "null", description: "Minimum pixel size of the secondary pane." },
+      { name: "primarySize", type: "number | null", default: "null", description: "Fixed pixel size for the primary pane. When set, the primary pane uses this size and the secondary fills the remaining space." },
+      { name: "secondarySize", type: "number | null", default: "null", description: "Fixed pixel size for the secondary pane. When set, the secondary pane uses this size and the primary fills the remaining space." },
       { name: "primaryCollapsed", type: "boolean", default: "false", description: "Whether the primary pane is collapsed." },
       { name: "secondaryCollapsed", type: "boolean", default: "false", description: "Whether the secondary pane is collapsed." },
       { name: "showCollapsePrimary", type: "boolean", default: "false", description: "Whether to show the primary collapse toggle." },
@@ -3158,6 +3340,8 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
 
   switch: {
     props: [
+      { name: "size", type: "ControlSize | null", default: "null", description: "Explicit size override. Supports xs, sm, md, lg, and xl." },
+      { name: "sizeRole", type: '"chrome" | "control" | "prominent"', default: '"control"', description: "Semantic size offset relative to the inherited presentation scale." },
       { name: "density", type: "ControlDensity | null", default: "null", description: "Explicit density override. Supports compact, default, and comfortable." },
       { name: "id", type: "string | undefined", default: "undefined", description: "HTML id attribute for the switch." },
       { name: "checked", type: "boolean | null", default: "null", description: "Controlled checked state." },
@@ -3165,11 +3349,15 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
       { name: "disabled", type: "boolean", default: "false", description: "Whether the switch is disabled." },
       { name: "readOnly", type: "boolean", default: "false", description: "Whether the switch is read-only." },
       { name: "label", type: "string | null", default: "null", description: "Label text displayed next to the switch." },
+      { name: "leftLabel", type: "string | null", default: "null", description: "Label displayed to the left of the track for dual-label mode." },
+      { name: "rightLabel", type: "string | null", default: "null", description: "Label displayed to the right of the track for dual-label mode." },
       { name: "ariaLabel", type: "string | null", default: "null", description: "Accessible label when no visible label is used." },
       { name: "describedBy", type: "string | null", default: "null", description: "ID of the element describing this switch." },
       { name: "name", type: "string | undefined", default: "undefined", description: "Form field name." },
       { name: "offColor", type: "string | null", default: "null", description: "Optional off-state accent override used for the thumb and muted track tint." },
       { name: "onColor", type: "string | null", default: "null", description: "Optional on-state accent override used for the thumb and active track tint." },
+      { name: "leftTone", type: "SwitchTone", default: '"default"', description: "Color tone for the left (off) state. Supports default, primary, success, warning, and danger." },
+      { name: "rightTone", type: "SwitchTone", default: '"primary"', description: "Color tone for the right (on) state. Supports default, primary, success, warning, and danger." },
     ],
     slots: [],
     events: [
@@ -3217,6 +3405,8 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
 
   tabs: {
     props: [
+      { name: "size", type: "ControlSize | null", default: "null", description: "Explicit size override. Supports xs, sm, md, lg, and xl." },
+      { name: "sizeRole", type: '"chrome" | "control" | "prominent"', default: '"chrome"', description: "Semantic size offset relative to the inherited presentation scale." },
       { name: "density", type: "ControlDensity | null", default: "null", description: "Explicit density override. Supports compact, default, and comfortable." },
       { name: "value", type: "string | null", default: "null", description: "Controlled active tab value." },
       { name: "defaultValue", type: "string | null", default: "null", description: "Initial active tab for uncontrolled mode." },
@@ -3364,6 +3554,9 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
       { name: "datetime", type: "Date | string | number", required: true, description: "The date/time to display relative to now." },
       { name: "live", type: "boolean", default: "true", description: "Whether the display updates automatically." },
       { name: "interval", type: "number", default: "30000", description: "Update interval in milliseconds when live." },
+      { name: "short", type: "boolean", default: "true", description: "Use short format (e.g. 5m ago) instead of long format (e.g. 5 minutes ago)." },
+      { name: "tooltipFormat", type: '"full" | "date" | "datetime"', default: '"datetime"', description: "Format for the native title tooltip showing the absolute date." },
+      { name: "timezone", type: "string | null", default: "null", description: "IANA timezone override for the absolute date tooltip (e.g. America/New_York)." },
       { name: "ariaLabel", type: "string | null", default: "null", description: "Accessible label override." },
     ],
     slots: [],
@@ -3498,6 +3691,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
       { name: "defaultPressed", type: "boolean", default: "false", description: "Initial pressed state for uncontrolled mode." },
       { name: "variant", type: "ToggleVariant", default: '"ghost"', description: "Visual style variant." },
       { name: "size", type: "ControlSize", default: '"md"', description: "Size of the toggle button." },
+      { name: "sizeRole", type: '"chrome" | "control" | "prominent"', default: '"control"', description: "Semantic size offset relative to the inherited presentation scale." },
       { name: "density", type: "ControlDensity | null", default: "null", description: "Explicit density override. Supports compact, default, and comfortable." },
       { name: "layout", type: '"inline" | "stack"', default: '"inline"', description: "Layout direction of icon and label." },
       { name: "disabled", type: "boolean", default: "false", description: "Whether the toggle is disabled." },
@@ -3552,6 +3746,8 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
 
   toolbar: {
     props: [
+      { name: "size", type: "ControlSize | null", default: "null", description: "Explicit size override. Supports xs, sm, md, lg, and xl." },
+      { name: "sizeRole", type: '"chrome" | "control" | "prominent"', default: '"chrome"', description: "Semantic size offset relative to the inherited presentation scale." },
       { name: "density", type: "ControlDensity | null", default: "null", description: "Explicit density override. Supports compact, default, and comfortable." },
       { name: "orientation", type: "Orientation", default: '"horizontal"', description: "Layout orientation of the toolbar." },
       { name: "ariaLabel", type: "string | null", default: "null", description: "Accessible label for the toolbar." },
@@ -3619,6 +3815,25 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
 </script>
 
 <TriStateSwitch bind:value={filter} ariaLabel="Include archived items" excludedColor="#ef4444" includedColor="#22c55e" />`,
+  },
+
+  "ui-presentation-provider": {
+    props: [
+      { name: "density", type: "ControlDensity", default: '"default"', description: "Density applied to all descendant components. Supports compact, default, and comfortable." },
+      { name: "sizeScale", type: "ControlSize", default: '"md"', description: "Base size scale applied to all descendant components. Supports xs, sm, md, lg, and xl." },
+    ],
+    slots: [
+      { name: "default", description: "Child content that inherits the presentation settings." },
+    ],
+    events: [],
+    usage: `<script lang="ts">
+  import { UiPresentationProvider, Button, Select } from "@poodle/svelte-primitives";
+</script>
+
+<UiPresentationProvider density="compact" sizeScale="sm">
+  <Button>Compact small button</Button>
+  <Select id="demo" options={[{ value: "a", label: "Alpha" }]} />
+</UiPresentationProvider>`,
   },
 
   "video-player": {
