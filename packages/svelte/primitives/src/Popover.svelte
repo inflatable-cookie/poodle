@@ -148,18 +148,22 @@
     padding: var(--poodle-space-panel-y) var(--poodle-space-panel-x);
     border: 0.0625rem solid var(
       --poodle-treatment-surface-elevated-border,
-      color-mix(in srgb, var(--poodle-color-border-default) 72%, transparent)
+      var(--poodle-color-border-default)
     );
     border-radius: var(--poodle-treatment-surface-elevated-radius, var(--poodle-radius-surface));
     background: var(
       --poodle-treatment-surface-elevated-fill,
-      color-mix(in srgb, var(--poodle-color-background-elevated) 98%, var(--poodle-color-background-panel))
+      var(--poodle-color-background-elevated)
     );
     --poodle-surface: var(
       --poodle-treatment-surface-elevated-fill,
-      color-mix(in srgb, var(--poodle-color-background-elevated) 98%, var(--poodle-color-background-panel))
+      var(--poodle-color-background-elevated)
     );
-    box-shadow: var(--poodle-treatment-surface-elevated-shadow, var(--poodle-elevation-overlay));
+    box-shadow: var(
+      --poodle-treatment-surface-elevated-shadow,
+      0 0.25rem 1.5rem rgba(0, 0, 0, 0.35),
+      0 0.0625rem 0.25rem rgba(0, 0, 0, 0.2)
+    );
   }
 
   .popover__surface[data-placement^="bottom"] {
