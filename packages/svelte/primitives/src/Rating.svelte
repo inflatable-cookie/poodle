@@ -113,7 +113,7 @@
         }
       }}
     >
-      <span class="rating__glyph" aria-hidden="true"><Icon name="star" /></span>
+      <span class="rating__glyph" aria-hidden="true"><Icon name="star" size={resolvedSize} /></span>
     </button>
   {/each}
 </div>
