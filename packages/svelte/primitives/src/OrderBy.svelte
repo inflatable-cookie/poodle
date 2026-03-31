@@ -207,63 +207,42 @@
             class:order-by__item--drop-target={dragOverIndex === index && dragIndex !== index}
             role="listitem"
             draggable={!disabled}
+            tabindex="0"
             on:dragstart={() => handleDragStart(index)}
             on:dragenter={() => handleDragEnter(index)}
             on:dragover|preventDefault
             on:drop|preventDefault={() => handleDrop(index)}
             on:dragend={clearDragState}
+            on:keydown={(e) => {
+              if (e.altKey && e.key === "ArrowUp" && index > 0) { e.preventDefault(); moveField(index, -1); }
+              if (e.altKey && e.key === "ArrowDown" && index < effectiveValue.length - 1) { e.preventDefault(); moveField(index, 1); }
+            }}
           >
-            <div class="order-by__item-main">
-              <span class="order-by__item-label">
-                <span class="order-by__drag-handle" aria-hidden="true">⠿</span>
-                {field?.label ?? item.key}
-              </span>
-              <span class="order-by__item-direction">{item.direction === "asc" ? "Ascending" : "Descending"}</span>
-            </div>
-            <div class="order-by__item-actions">
-              <IconButton
-                icon={item.direction === "asc" ? "arrow-up" : "arrow-down"}
-                ariaLabel={`Toggle ${field?.label ?? item.key} direction`}
-                tooltip={item.direction === "asc" ? "Ascending" : "Descending"}
-                size="sm"
-                variant="ghost"
-                disabled={disabled}
-                on:click={() => toggleDirection(index)}
-              />
-              <IconButton
-                icon="chevron-up"
-                ariaLabel={`Move ${field?.label ?? item.key} earlier`}
-                tooltip="Move up"
-                size="sm"
-                variant="ghost"
-                disabled={disabled || index === 0}
-                on:click={() => moveField(index, -1)}
-              />
-              <IconButton
-                icon="chevron-down"
-                ariaLabel={`Move ${field?.label ?? item.key} later`}
-                tooltip="Move down"
-                size="sm"
-                variant="ghost"
-                disabled={disabled || index === effectiveValue.length - 1}
-                on:click={() => moveField(index, 1)}
-              />
-              <IconButton
-                icon="x"
-                ariaLabel={`Remove ${field?.label ?? item.key} from sort`}
-                tooltip="Remove"
-                size="sm"
-                variant="ghost"
-                tone="danger"
-                disabled={disabled}
-                on:click={() => removeField(index)}
-              />
-            </div>
+            <span class="order-by__drag-handle" aria-hidden="true">⠿</span>
+            <span class="order-by__item-label">{field?.label ?? item.key}</span>
+            <IconButton
+              icon={item.direction === "asc" ? "arrow-up" : "arrow-down"}
+              ariaLabel={`${field?.label ?? item.key}: ${item.direction === "asc" ? "ascending" : "descending"}. Click to toggle.`}
+              tooltip={item.direction === "asc" ? "Asc" : "Desc"}
+              size="xs"
+              variant="ghost"
+              disabled={disabled}
+              on:click={() => toggleDirection(index)}
+            />
+            <IconButton
+              icon="x"
+              ariaLabel={`Remove ${field?.label ?? item.key}`}
+              tooltip="Remove"
+              size="xs"
+              variant="ghost"
+              disabled={disabled}
+              on:click={() => removeField(index)}
+            />
           </div>
         {/each}
       </div>
     {:else}
-      <p class="order-by__empty">No sort fields selected</p>
+      <p class="order-by__empty">No sort fields</p>
     {/if}
 
     {#if canAddMore && availableFields.length > 0}
@@ -278,14 +257,6 @@
           onchange={addField}
           disabled={disabled}
         />
-      </div>
-    {/if}
-
-    {#if effectiveValue.length > 1}
-      <div class="order-by__footer">
-        <Button variant="ghost" tone="default" size="sm" on:click={clearAll} disabled={disabled}>
-          Clear all
-        </Button>
       </div>
     {/if}
   </div>
@@ -379,24 +350,30 @@
   .order-by__panel {
     display: flex;
     flex-direction: column;
-    gap: 0.75rem;
+    gap: 0.5rem;
   }
 
   .order-by__list {
     display: flex;
     flex-direction: column;
-    gap: 0.5rem;
+    gap: 0.25rem;
   }
 
   .order-by__item {
     display: flex;
     align-items: center;
-    justify-content: space-between;
-    gap: 0.75rem;
-    padding: 0.625rem 0.75rem;
-    border: 0.0625rem solid var(--poodle-color-border-default);
-    border-radius: var(--poodle-radius-surface);
-    background: color-mix(in srgb, var(--poodle-color-background-surface) 88%, var(--poodle-color-background-elevated));
+    gap: 0.375rem;
+    padding: 0.25rem 0.375rem;
+    border-radius: calc(var(--poodle-radius-control) - 0.0625rem);
+  }
+
+  .order-by__item:hover {
+    background: color-mix(in srgb, var(--poodle-color-background-elevated) 50%, transparent);
+  }
+
+  .order-by__item:focus-visible {
+    outline: var(--poodle-border-width-focus) solid var(--poodle-color-accent-focusRing);
+    outline-offset: -0.0625rem;
   }
 
   .order-by__item--dragging {
@@ -404,49 +381,38 @@
   }
 
   .order-by__item--drop-target {
-    border-color: var(--poodle-color-accent-base);
-    box-shadow: 0 0 0 var(--poodle-border-width-focus)
-      color-mix(in srgb, var(--poodle-color-accent-base) 22%, transparent);
-  }
-
-  .order-by__item-main {
-    display: flex;
-    flex-direction: column;
-    gap: 0.125rem;
-    min-width: 0;
+    background: color-mix(in srgb, var(--poodle-color-accent-base) 8%, transparent);
+    box-shadow: inset 0.125rem 0 0 var(--poodle-color-accent-base);
   }
 
   .order-by__item-label {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.375rem;
-    font-weight: var(--poodle-typography-body-strong-weight, 600);
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-size: 0.8125rem;
+    color: var(--poodle-color-text-primary);
   }
 
   .order-by__drag-handle {
     color: var(--poodle-color-text-muted);
     cursor: grab;
     user-select: none;
-  }
-
-  .order-by__item-direction,
-  .order-by__empty {
-    color: var(--poodle-color-text-secondary);
-    font-size: 0.875rem;
-  }
-
-  .order-by__item-actions {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.25rem;
+    font-size: 0.75rem;
     flex-shrink: 0;
   }
 
-  .order-by__add,
-  .order-by__footer {
+  .order-by__empty {
+    color: var(--poodle-color-text-secondary);
+    font-size: 0.75rem;
+    margin: 0;
+    padding: 0.25rem 0;
+  }
+
+  .order-by__add {
     display: flex;
     align-items: center;
-    justify-content: flex-start;
   }
 
   .order-by[data-size="xs"] .order-by__trigger {
