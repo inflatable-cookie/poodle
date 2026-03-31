@@ -26,7 +26,7 @@ mod search_field;
 mod field;
 mod form_actions;
 mod number_entry;
-mod pin_input;
+mod code_input;
 mod toolbar;
 mod editable_label;
 mod toggle;
@@ -254,7 +254,7 @@ pub fn render_single_specimen(
         "field-set" => specimen_card("FieldSet", theme, field_set_specimen::render(theme)),
         "form-actions" => specimen_card("FormActions", theme, form_actions::render(state, cx)),
         "number-entry" => specimen_card("NumberEntry", theme, number_entry::render(state, cx)),
-        "pin-input" => specimen_card("PinInput", theme, pin_input::render(state, cx)),
+        "code-input" => specimen_card("CodeInput", theme, code_input::render(state, cx)),
         "toolbar" => specimen_card("Toolbar", theme, toolbar::render(state, cx)),
         "time-field" => specimen_card("TimeField", theme, time_field::render(state, cx)),
         "editable-label" => specimen_card("EditableLabel", theme, editable_label::render(state, cx)),

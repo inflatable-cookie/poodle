@@ -81,7 +81,7 @@ pub mod pagination_summary;
 pub mod password_requirements;
 pub mod picker_shell;
 pub mod pill;
-pub mod pin_input;
+pub mod code_input;
 pub mod popover;
 pub mod progress;
 pub mod radio_group;
@@ -125,7 +125,6 @@ pub mod toggle;
 pub mod toggle_group;
 pub mod toolbar;
 pub mod tooltip;
-pub mod totp_input;
 pub mod tri_state_switch;
 pub mod validation_summary;
 pub mod video_player;
@@ -309,7 +308,7 @@ fn render_specimen(slug: &str, theme: &JetstreamThemeProvider) -> Option<JsEl> {
         "password-requirements" => Some(password_requirements::render(theme)),
         "picker-shell" => Some(picker_shell::render(theme)),
         "pill" => Some(pill::render(theme)),
-        "pin-input" => Some(pin_input::render(theme)),
+        "code-input" => Some(code_input::render(theme)),
         "popover" => Some(popover::render(theme)),
         "progress" => Some(progress::render(theme)),
         "radio-group" => Some(radio_group::render(theme)),
@@ -353,7 +352,6 @@ fn render_specimen(slug: &str, theme: &JetstreamThemeProvider) -> Option<JsEl> {
         "toggle-group" => Some(toggle_group::render(theme)),
         "toolbar" => Some(toolbar::render(theme)),
         "tooltip" => Some(tooltip::render(theme)),
-        "totp-input" => Some(totp_input::render(theme)),
         "tri-state-switch" => Some(tri_state_switch::render(theme)),
         "validation-summary" => Some(validation_summary::render(theme)),
         "video-player" => Some(video_player::render(theme)),

@@ -4,12 +4,12 @@
 //! - ButtonSpec, IconButtonSpec
 //! - FieldSpec, TextInputSpec, TextAreaSpec, SearchFieldSpec
 //! - FormActionsSpec, TimeFieldSpec
-//! - EditableLabelSpec, NumberEntrySpec, PinInputSpec, ToolbarSpec
+//! - EditableLabelSpec, NumberEntrySpec, CodeInputSpec, ToolbarSpec
 
 use poodle_adapter::{RenderComponent, ThemeProvider};
 use poodle_primitives::{
-    ButtonSpec, EditableLabelSpec, FieldSpec, FormActionsSpec, IconButtonSpec, NumberEntrySpec,
-    PinInputSpec, SearchFieldSpec, TextAreaSpec, TextInputSpec, TimeFieldSpec, ToolbarSpec,
+    ButtonSpec, CodeInputSpec, EditableLabelSpec, FieldSpec, FormActionsSpec, IconButtonSpec,
+    NumberEntrySpec, SearchFieldSpec, TextAreaSpec, TextInputSpec, TimeFieldSpec, ToolbarSpec,
 };
 use poodle_style::StyleDescriptor;
 
@@ -297,12 +297,12 @@ impl RenderComponent<NumberEntrySpec> for GpuiAdapter {
     }
 }
 
-impl RenderComponent<PinInputSpec> for GpuiAdapter {
+impl RenderComponent<CodeInputSpec> for GpuiAdapter {
     type Target = GpuiTarget;
 
     fn render(
         &self,
-        spec: &PinInputSpec,
+        spec: &CodeInputSpec,
         style: &StyleDescriptor,
         theme: &dyn ThemeProvider,
     ) -> GpuiElementHandle {
@@ -314,8 +314,8 @@ impl RenderComponent<PinInputSpec> for GpuiAdapter {
         gpui_style.focus_ring_color = Some(focus_ring.into());
 
         GpuiElementHandle::new(
-            format!("pin-input-{}", spec.length),
-            "PinInputSpec",
+            format!("code-input-{}", spec.length),
+            "CodeInputSpec",
         )
     }
 }
@@ -352,8 +352,8 @@ impl RenderComponent<ToolbarSpec> for GpuiAdapter {
 mod tests {
     use poodle_adapter::RenderComponent;
     use poodle_primitives::{
-        ButtonSpec, EditableLabelSpec, FieldSpec, FormActionsSpec, IconButtonSpec,
-        NumberEntrySpec, PinInputSpec, SearchFieldSpec, TextAreaSpec, TextInputSpec,
+        ButtonSpec, CodeInputSpec, EditableLabelSpec, FieldSpec, FormActionsSpec, IconButtonSpec,
+        NumberEntrySpec, SearchFieldSpec, TextAreaSpec, TextInputSpec,
         TimeFieldSpec, ToolbarSpec,
     };
     use poodle_style::StyleDescriptor;
@@ -472,11 +472,11 @@ mod tests {
     }
 
     #[test]
-    fn render_pin_input_produces_handle() {
+    fn render_code_input_produces_handle() {
         let a = adapter();
-        let spec = PinInputSpec::new(6);
+        let spec = CodeInputSpec::new().with_length(6);
         let handle = a.render(&spec, &style(), &theme());
-        assert_eq!(handle.element_id, "pin-input-6");
+        assert_eq!(handle.element_id, "code-input-6");
     }
 
     #[test]

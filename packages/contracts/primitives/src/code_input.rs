@@ -1,8 +1,13 @@
+use poodle_tokens::semantic;
 use crate::types::{ControlDensity, ControlSize, SemanticControlSizeRole, ValidationState};
 
-/// TotpInput -- a segmented one-time-password code entry field.
+/// CodeInput -- a segmented code entry field with visual digit slots.
+///
+/// Consolidates the former PinInput and TotpInput into a single component.
+/// Use `mask: true` for PIN-style masked entry, `mask: false` (default) for
+/// visible code entry (OTP, verification codes, etc.).
 #[derive(Clone, Debug, Eq, PartialEq)]
-pub struct TotpInputSpec {
+pub struct CodeInputSpec {
     pub length: usize,
     pub value: Option<String>,
     pub default_value: String,
@@ -10,6 +15,7 @@ pub struct TotpInputSpec {
     pub label: String,
     pub hint: Option<String>,
     pub error: Option<String>,
+    pub mask: bool,
     pub is_disabled: bool,
     pub aria_label: Option<String>,
     pub autocomplete: String,
@@ -19,16 +25,17 @@ pub struct TotpInputSpec {
     pub density: ControlDensity,
 }
 
-impl Default for TotpInputSpec {
+impl Default for CodeInputSpec {
     fn default() -> Self {
         Self {
             length: 6,
             value: None,
             default_value: String::new(),
             name: String::from("code"),
-            label: String::from("Authenticator code"),
+            label: String::from("Verification code"),
             hint: None,
             error: None,
+            mask: false,
             is_disabled: false,
             aria_label: None,
             autocomplete: String::from("one-time-code"),
@@ -40,7 +47,7 @@ impl Default for TotpInputSpec {
     }
 }
 
-impl TotpInputSpec {
+impl CodeInputSpec {
     pub fn new() -> Self {
         Self::default()
     }
@@ -77,6 +84,11 @@ impl TotpInputSpec {
 
     pub fn with_error(mut self, error: impl Into<String>) -> Self {
         self.error = Some(error.into());
+        self
+    }
+
+    pub fn with_mask(mut self, mask: bool) -> Self {
+        self.mask = mask;
         self
     }
 
@@ -131,6 +143,41 @@ impl TotpInputSpec {
     /// The effective accessible label for the input group.
     pub fn effective_aria_label(&self) -> &str {
         self.aria_label.as_deref().unwrap_or(self.label.as_str())
+    }
+
+    /// Count of filled digit positions.
+    pub fn filled_count(&self) -> usize {
+        self.current_value().chars().filter(|c| c.is_ascii_digit()).count().min(self.length)
+    }
+
+    // ── Token methods ────────────────────────────────────────
+
+    pub fn border_token(&self) -> &'static str {
+        semantic::COLOR_BORDER_DEFAULT
+    }
+
+    pub fn focus_ring_color_token(&self) -> &'static str {
+        semantic::COLOR_ACCENT_FOCUS_RING
+    }
+
+    pub fn fill_token(&self) -> &'static str {
+        semantic::COLOR_BACKGROUND_SURFACE
+    }
+
+    pub fn text_color_token(&self) -> &'static str {
+        semantic::COLOR_TEXT_PRIMARY
+    }
+
+    pub fn radius_token(&self) -> &'static str {
+        semantic::RADIUS_CONTROL
+    }
+
+    pub fn disabled_opacity_token(&self) -> &'static str {
+        semantic::STATE_OPACITY_DISABLED
+    }
+
+    pub fn code_font_size_token(&self) -> &'static str {
+        semantic::TYPOGRAPHY_BODY_SIZE
     }
 
     pub fn with_size(mut self, size: ControlSize) -> Self {

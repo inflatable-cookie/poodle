@@ -11,7 +11,7 @@ account-password screens without recreating wrapper churn.
 ## Default Posture
 
 - use Poodle for auth page framing, fields, actions, tabs, and feedback
-- use Poodle `TotpInput` directly for one-time-code entry
+- use Poodle `CodeInput` directly for one-time-code entry
 - use Poodle `PasswordRequirements` directly when password-policy loading is
   already caller-owned
 - keep auth transport, token refresh, and policy loading in host code or in a
@@ -67,18 +67,18 @@ Compose the visible screen in Poodle even when the flow logic lives elsewhere.
 
 ## One-Time Code Entry
 
-Use `TotpInput` directly. Do not add a second app-level or system-level OTP
+Use `CodeInput` directly. Do not add a second app-level or system-level OTP
 wrapper unless the flow owns non-generic orchestration around it.
 
 ```svelte
 <script lang="ts">
-  import { Field, TotpInput } from "@poodle/svelte-primitives";
+  import { Field, CodeInput } from "@poodle/svelte-primitives";
 
   let code = "";
 </script>
 
 <Field id="login-totp" label="Verification code" hint="Enter the 6-digit code from your authenticator app." required>
-  <TotpInput id="login-totp" bind:value={code} />
+  <CodeInput id="login-totp" bind:value={code} />
 </Field>
 ```
 
@@ -126,7 +126,7 @@ place outside Poodle.
 - [Card](../contracts/foundation/card.md)
 - [Field](../contracts/foundation/field.md)
 - [TextInput](../contracts/foundation/text-input.md)
-- [TotpInput](../contracts/foundation/totp-input.md)
+- [CodeInput](../contracts/foundation/code-input.md)
 - [PasswordRequirements](../contracts/foundation/password-requirements.md)
 
 ## Next Task

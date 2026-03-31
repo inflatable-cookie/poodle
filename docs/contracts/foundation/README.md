@@ -17,6 +17,7 @@ Foundation contracts define the lowest reusable surface in Poodle.
 - `callout.md`
 - `card.md`
 - `checkbox.md`
+- `code-input.md`
 - `code.md`
 - `collapse-toggle.md`
 - `collapsible.md`
@@ -57,7 +58,6 @@ Foundation contracts define the lowest reusable surface in Poodle.
 - `pagination.md`
 - `password-requirements.md`
 - `pill.md`
-- `pin-input.md`
 - `popover.md`
 - `progress.md`
 - `radio-group.md`
@@ -94,7 +94,6 @@ Foundation contracts define the lowest reusable surface in Poodle.
 - `toggle.md`
 - `toolbar.md`
 - `tooltip.md`
-- `totp-input.md`
 - `treatment-tokens.md`
 - `tri-state-switch.md`
 - `ui-presentation-provider.md`

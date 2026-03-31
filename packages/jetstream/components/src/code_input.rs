@@ -1,15 +1,15 @@
-//! JsTotpInput — one-time-password code entry with visual digit slots,
-//! backed by TotpInputSpec.
+//! JsCodeInput — segmented code entry with visual digit slots,
+//! backed by CodeInputSpec.
 //!
-//! Contract: `docs/contracts/foundation/totp-input.md`
-//! Reference: `packages/svelte/primitives/src/TotpInput.svelte`
+//! Contract: `docs/contracts/foundation/code-input.md`
+//! Reference: `packages/svelte/primitives/src/CodeInput.svelte`
 //!
 //! ALL dimensions resolve from tokens. ZERO hardcoded pixel values.
 
 use jetstream_runtime::game_ui::Color;
 use jetstream_runtime::ui_element::{self, JsEl};
 use poodle_jetstream::JetstreamThemeProvider;
-use poodle_primitives::{ControlSize, TotpInputSpec, ValidationState};
+use poodle_primitives::{ControlSize, CodeInputSpec, ValidationState};
 
 use crate::presentation::{
     control_height_rem, control_space_x_rem, rem_to_px, resolve_semantic_size,
@@ -28,20 +28,20 @@ fn slot_width_rem(size: ControlSize) -> f32 {
     }
 }
 
-/// Build a Jetstream TOTP input element from a TotpInputSpec.
+/// Build a Jetstream code input element from a CodeInputSpec.
 ///
 /// Anatomy (from contract):
 /// ```text
 /// [Field]
-///   └── [Root .totp-input] <div role="group">
+///   └── [Root .code-input] <div role="group">
 ///         ├── [Hidden submission input] <input type="hidden">
-///         ├── [Real input .totp-input__control] <input type="text">
-///         └── [Visual slot .totp-input__slot]... (repeated `length`)
+///         ├── [Real input .code-input__control] <input type="text">
+///         └── [Visual slot .code-input__slot]... (repeated `length`)
 /// ```
 ///
 /// In Jetstream the real input and hidden input are runtime-level concerns.
 /// This builder produces the visual slot grid with the current digit values.
-pub fn js_totp_input(spec: &TotpInputSpec, theme: &JetstreamThemeProvider) -> JsEl {
+pub fn js_code_input(spec: &CodeInputSpec, theme: &JetstreamThemeProvider) -> JsEl {
     let effective_size = resolve_semantic_size(spec.size, spec.size_role);
     let validation = spec.effective_validation_state();
 
@@ -86,6 +86,7 @@ pub fn js_totp_input(spec: &TotpInputSpec, theme: &JetstreamThemeProvider) -> Js
         let digit_char = digits.get(i).copied();
         let is_active = i == digits.len(); // Next slot to fill
         let display_text = match digit_char {
+            Some(_) if spec.mask => "\u{2022}".to_string(),
             Some(c) => c.to_string(),
             None => String::new(),
         };
@@ -164,38 +165,45 @@ mod tests {
 
     #[test]
     fn default_has_six_slots() {
-        let spec = TotpInputSpec::new();
-        let el = js_totp_input(&spec, &theme());
+        let spec = CodeInputSpec::new();
+        let el = js_code_input(&spec, &theme());
         assert_eq!(el.children.len(), 6);
     }
 
     #[test]
     fn custom_length_changes_slot_count() {
-        let spec = TotpInputSpec::new().with_length(4);
-        let el = js_totp_input(&spec, &theme());
+        let spec = CodeInputSpec::new().with_length(4);
+        let el = js_code_input(&spec, &theme());
         assert_eq!(el.children.len(), 4);
     }
 
     #[test]
     fn disabled_has_reduced_opacity() {
-        let spec = TotpInputSpec::new().with_disabled(true);
-        let el = js_totp_input(&spec, &theme());
+        let spec = CodeInputSpec::new().with_disabled(true);
+        let el = js_code_input(&spec, &theme());
         assert!(el.style.opacity < 1.0);
     }
 
     #[test]
     fn with_value_fills_slots() {
-        let spec = TotpInputSpec::new().with_value("123");
-        let el = js_totp_input(&spec, &theme());
+        let spec = CodeInputSpec::new().with_value("123");
+        let el = js_code_input(&spec, &theme());
         // First 3 slots should have digit children with text
         assert_eq!(el.children.len(), 6);
     }
 
     #[test]
     fn error_wraps_in_column() {
-        let spec = TotpInputSpec::new().with_error("Invalid code");
-        let el = js_totp_input(&spec, &theme());
+        let spec = CodeInputSpec::new().with_error("Invalid code");
+        let el = js_code_input(&spec, &theme());
         // With error: outer wrapper is a column with slots + error label
         assert_eq!(el.children.len(), 2, "Should have slot row + error label");
+    }
+
+    #[test]
+    fn masked_hides_digits() {
+        let spec = CodeInputSpec::new().with_value("123").with_mask(true);
+        let el = js_code_input(&spec, &theme());
+        assert_eq!(el.children.len(), 6);
     }
 }

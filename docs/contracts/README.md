@@ -46,6 +46,7 @@ above it in downstream repos such as Loophole.
 - `foundation/callout.md`
 - `foundation/card.md`
 - `foundation/checkbox.md`
+- `foundation/code-input.md`
 - `foundation/code.md`
 - `foundation/collapse-toggle.md`
 - `foundation/collapsible.md`
@@ -86,7 +87,6 @@ above it in downstream repos such as Loophole.
 - `foundation/pagination.md`
 - `foundation/password-requirements.md`
 - `foundation/pill.md`
-- `foundation/pin-input.md`
 - `foundation/popover.md`
 - `foundation/progress.md`
 - `foundation/radio-group.md`
@@ -123,7 +123,6 @@ above it in downstream repos such as Loophole.
 - `foundation/toggle.md`
 - `foundation/toolbar.md`
 - `foundation/tooltip.md`
-- `foundation/totp-input.md`
 - `foundation/treatment-tokens.md`
 - `foundation/tri-state-switch.md`
 - `foundation/ui-presentation-provider.md`

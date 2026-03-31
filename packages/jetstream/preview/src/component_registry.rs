@@ -76,7 +76,7 @@ pub static PRIMITIVES: &[ComponentEntry] = &[
     ComponentEntry { slug: "pagination-summary", display_name: "PaginationSummary", description: "Pagination state summary.", tier: Tier::Primitive, has_specimen: true },
     ComponentEntry { slug: "password-requirements", display_name: "PasswordRequirements", description: "Live password policy checklist.", tier: Tier::Primitive, has_specimen: true },
     ComponentEntry { slug: "pill", display_name: "Pill", description: "Small inline label chip.", tier: Tier::Primitive, has_specimen: true },
-    ComponentEntry { slug: "pin-input", display_name: "PinInput", description: "Multi-digit code entry.", tier: Tier::Primitive, has_specimen: true },
+    ComponentEntry { slug: "code-input", display_name: "CodeInput", description: "Segmented code entry with optional masking.", tier: Tier::Primitive, has_specimen: true },
     ComponentEntry { slug: "popover", display_name: "Popover", description: "Anchored overlay.", tier: Tier::Primitive, has_specimen: true },
     ComponentEntry { slug: "progress", display_name: "Progress", description: "Progress indicator.", tier: Tier::Primitive, has_specimen: true },
     ComponentEntry { slug: "radio-group", display_name: "RadioGroup", description: "Single-selection group.", tier: Tier::Primitive, has_specimen: true },
@@ -108,7 +108,6 @@ pub static PRIMITIVES: &[ComponentEntry] = &[
     ComponentEntry { slug: "toggle-group", display_name: "ToggleGroup", description: "Mutually exclusive toggles.", tier: Tier::Primitive, has_specimen: true },
     ComponentEntry { slug: "toolbar", display_name: "Toolbar", description: "Horizontal action bar.", tier: Tier::Primitive, has_specimen: true },
     ComponentEntry { slug: "tooltip", display_name: "Tooltip", description: "Informational overlay.", tier: Tier::Primitive, has_specimen: true },
-    ComponentEntry { slug: "totp-input", display_name: "TotpInput", description: "Segmented one-time-password code entry.", tier: Tier::Primitive, has_specimen: true },
     ComponentEntry { slug: "tri-state-switch", display_name: "TriStateSwitch", description: "Three-position switch.", tier: Tier::Primitive, has_specimen: true },
     ComponentEntry { slug: "zoned-date-time-picker", display_name: "ZonedDateTimePicker", description: "Date-time with timezone.", tier: Tier::Primitive, has_specimen: true },
 ];

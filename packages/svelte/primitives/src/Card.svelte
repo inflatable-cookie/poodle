@@ -1,6 +1,8 @@
 <script lang="ts">
   import type { CardVariant } from "./types";
 
+  export let className = "";
+  export { className as class };
   export let variant: CardVariant = "default";
   export let layout: "vertical" | "horizontal" | "compact" = "vertical";
   export let interactive = false;
@@ -10,7 +12,7 @@
 </script>
 
 <article
-  class="card"
+  class={`card ${className}`.trim()}
   data-variant={variant}
   data-layout={layout}
   data-interactive={interactive}

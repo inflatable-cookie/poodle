@@ -113,7 +113,7 @@ pub mod menubar;
 pub mod navigation_menu;
 pub mod pagination_comp;
 pub mod password_requirements;
-pub mod pin_input;
+pub mod code_input;
 pub mod popover;
 pub mod range_calendar;
 pub mod resize_handle;
@@ -123,7 +123,6 @@ pub mod table;
 pub mod time_field;
 pub mod time_zone_select;
 pub mod tooltip;
-pub mod totp_input;
 pub mod zoned_date_time_picker;
 
 // Composites (g10.006)

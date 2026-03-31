@@ -120,7 +120,7 @@ const SUPPORTED_PRIMITIVES: &[&str] = &[
     "TimeFieldSpec",
     "EditableLabelSpec",
     "NumberEntrySpec",
-    "PinInputSpec",
+    "CodeInputSpec",
     "ToolbarSpec",
     // g07.004 — selection, value, feedback, temporal
     "CheckboxSpec",

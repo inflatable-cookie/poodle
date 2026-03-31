@@ -1,11 +1,11 @@
 //! RenderComponent implementations for input primitives.
 //!
 //! g08.005: TextInputSpec, TextAreaSpec, SearchFieldSpec, FieldSpec,
-//! NumberEntrySpec, PinInputSpec, EditableLabelSpec, TimeFieldSpec
+//! NumberEntrySpec, CodeInputSpec, EditableLabelSpec, TimeFieldSpec
 
 use poodle_adapter::{RenderComponent, ThemeProvider};
 use poodle_primitives::{
-    EditableLabelSpec, FieldSpec, NumberEntrySpec, PinInputSpec, SearchFieldSpec, TextAreaSpec,
+    CodeInputSpec, EditableLabelSpec, FieldSpec, NumberEntrySpec, SearchFieldSpec, TextAreaSpec,
     TextInputSpec, TimeFieldSpec,
 };
 use poodle_style::StyleDescriptor;
@@ -140,9 +140,9 @@ impl RenderComponent<NumberEntrySpec> for JetstreamAdapter {
     }
 }
 
-impl RenderComponent<PinInputSpec> for JetstreamAdapter {
+impl RenderComponent<CodeInputSpec> for JetstreamAdapter {
     type Target = JetstreamTarget;
-    fn render(&self, spec: &PinInputSpec, style: &StyleDescriptor, theme: &dyn ThemeProvider) -> JetstreamNodeHandle {
+    fn render(&self, spec: &CodeInputSpec, style: &StyleDescriptor, theme: &dyn ThemeProvider) -> JetstreamNodeHandle {
         let mut mapped = map_style(style);
 
         // Resolve border color
@@ -153,8 +153,8 @@ impl RenderComponent<PinInputSpec> for JetstreamAdapter {
         let ring_color = theme.resolve_color(spec.focus_ring_color_token());
         mapped.visuals.focus_ring_color = Some(JetstreamColor::from(ring_color));
 
-        let node_id = format!("pin-input-{}", spec.length);
-        JetstreamNodeHandle::new(node_id, "PinInputSpec", WidgetKind::TextInput, mapped)
+        let node_id = format!("code-input-{}", spec.length);
+        JetstreamNodeHandle::new(node_id, "CodeInputSpec", WidgetKind::TextInput, mapped)
     }
 }
 
@@ -273,19 +273,19 @@ mod tests {
     }
 
     #[test]
-    fn pin_input_uses_length_in_id() {
-        let spec = PinInputSpec::new(6);
+    fn code_input_uses_length_in_id() {
+        let spec = CodeInputSpec::new().with_length(6);
         let h = a().render(&spec, &s(), &t());
-        assert_eq!(h.node_id, "pin-input-6");
-        assert_eq!(h.spec_type, "PinInputSpec");
+        assert_eq!(h.node_id, "code-input-6");
+        assert_eq!(h.spec_type, "CodeInputSpec");
         assert_eq!(h.widget_kind, WidgetKind::TextInput);
     }
 
     #[test]
-    fn pin_input_default_length() {
-        let spec = PinInputSpec::new(4);
+    fn code_input_custom_length() {
+        let spec = CodeInputSpec::new().with_length(4);
         let h = a().render(&spec, &s(), &t());
-        assert_eq!(h.node_id, "pin-input-4");
+        assert_eq!(h.node_id, "code-input-4");
     }
 
     #[test]

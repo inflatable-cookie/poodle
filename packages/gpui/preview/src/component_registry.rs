@@ -52,7 +52,7 @@ pub static PRIMITIVES: &[ComponentEntry] = &[
     ComponentEntry { slug: "pagination", display_name: "Pagination", description: "Page navigation controls." },
     ComponentEntry { slug: "pagination-summary", display_name: "PaginationSummary", description: "Pagination state summary." },
     ComponentEntry { slug: "pill", display_name: "Pill", description: "Small inline label chip." },
-    ComponentEntry { slug: "pin-input", display_name: "PinInput", description: "Multi-digit code entry." },
+    ComponentEntry { slug: "code-input", display_name: "CodeInput", description: "Segmented code entry with optional masking." },
     ComponentEntry { slug: "popover", display_name: "Popover", description: "Anchored overlay." },
     ComponentEntry { slug: "progress", display_name: "Progress", description: "Progress indicator." },
     ComponentEntry { slug: "radio-group", display_name: "RadioGroup", description: "Single-selection group." },

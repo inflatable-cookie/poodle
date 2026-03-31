@@ -83,8 +83,6 @@ export { default as Table } from "./Table.svelte";
 export { default as TextArea } from "./TextArea.svelte";
 export { default as TimeAgo } from "./TimeAgo.svelte";
 export { default as TextInput } from "./TextInput.svelte";
-/** @deprecated Use CodeInput instead */
-export { default as TotpInput } from "./CodeInput.svelte";
 export { default as TimeField } from "./TimeField.svelte";
 export { default as TimeZoneSelect } from "./TimeZoneSelect.svelte";
 export { default as Toggle } from "./Toggle.svelte";

@@ -133,7 +133,7 @@ const SUPPORTED_PRIMITIVES: &[&str] = &[
     "ButtonSpec", "IconButtonSpec", "FormActionsSpec", "ToolbarSpec",
     // Input
     "TextInputSpec", "TextAreaSpec", "SearchFieldSpec", "FieldSpec", "NumberEntrySpec",
-    "PinInputSpec", "EditableLabelSpec", "TimeFieldSpec",
+    "CodeInputSpec", "EditableLabelSpec", "TimeFieldSpec",
     // Selection
     "CheckboxSpec", "RadioGroupSpec", "SwitchSpec", "SelectSpec", "SliderSpec",
     "RangeSliderSpec", "SegmentedControlSpec", "TriStateSwitchSpec",

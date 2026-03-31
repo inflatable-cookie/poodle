@@ -1,18 +1,19 @@
-//! TotpInput — real GPUI component backed by TotpInputSpec.
+//! CodeInput — real GPUI component backed by CodeInputSpec.
 //!
-//! Renders a segmented one-time-password entry field with per-slot focus
+//! Renders a segmented code entry field with per-slot focus
 //! rings, a hidden real input, and split-after-3 gap for 6-digit codes.
+//! Supports optional masking for PIN-style entry.
 
 use gpui::*;
 use poodle_gpui::GpuiThemeProvider;
-use poodle_primitives::{ControlDensity, ControlSize, SemanticControlSizeRole, TotpInputSpec, ValidationState};
+use poodle_primitives::{ControlDensity, ControlSize, SemanticControlSizeRole, CodeInputSpec, ValidationState};
 
 use crate::presentation::{rem_to_px, resolve_semantic_size, control_height_rem, size_font_rem};
 use crate::theme_ext::{resolve_color, resolve_opacity, resolve_radius, focus_ring_shadow};
 
-/// A real GPUI TOTP input component backed by `TotpInputSpec`.
-pub struct TotpInput {
-    spec: TotpInputSpec,
+/// A real GPUI code input component backed by `CodeInputSpec`.
+pub struct CodeInput {
+    spec: CodeInputSpec,
     theme: GpuiThemeProvider,
     id_suffix: Option<String>,
     /// Index of the slot that appears "active" (focused).
@@ -21,15 +22,15 @@ pub struct TotpInput {
     on_complete: Option<Box<dyn Fn(&str, &mut Window, &mut App) + 'static>>,
 }
 
-impl std::ops::Deref for TotpInput {
-    type Target = TotpInputSpec;
-    fn deref(&self) -> &TotpInputSpec { &self.spec }
+impl std::ops::Deref for CodeInput {
+    type Target = CodeInputSpec;
+    fn deref(&self) -> &CodeInputSpec { &self.spec }
 }
 
-impl TotpInput {
+impl CodeInput {
     pub fn new(theme: &GpuiThemeProvider) -> Self {
         Self {
-            spec: TotpInputSpec::new(),
+            spec: CodeInputSpec::new(),
             theme: theme.clone(),
             id_suffix: None,
             active_index: None,
@@ -38,7 +39,7 @@ impl TotpInput {
         }
     }
 
-    pub fn from_spec(spec: TotpInputSpec, theme: &GpuiThemeProvider) -> Self {
+    pub fn from_spec(spec: CodeInputSpec, theme: &GpuiThemeProvider) -> Self {
         Self {
             spec,
             theme: theme.clone(),
@@ -57,6 +58,7 @@ impl TotpInput {
     pub fn label(mut self, v: impl Into<String>) -> Self { self.spec.label = v.into(); self }
     pub fn hint(mut self, v: impl Into<String>) -> Self { self.spec.hint = Some(v.into()); self }
     pub fn error(mut self, v: impl Into<String>) -> Self { self.spec.error = Some(v.into()); self }
+    pub fn mask(mut self, v: bool) -> Self { self.spec.mask = v; self }
     pub fn disabled(mut self, v: bool) -> Self { self.spec.is_disabled = v; self }
     pub fn aria_label(mut self, v: impl Into<String>) -> Self { self.spec.aria_label = Some(v.into()); self }
     pub fn validation_state(mut self, v: ValidationState) -> Self { self.spec.validation_state = v; self }
@@ -87,7 +89,7 @@ impl TotpInput {
     }
 }
 
-impl IntoElement for TotpInput {
+impl IntoElement for CodeInput {
     type Element = AnyElement;
 
     fn into_element(self) -> Self::Element {
@@ -148,9 +150,9 @@ impl IntoElement for TotpInput {
         let active_idx = self.active_index.unwrap_or(digits.len().min(spec.length.saturating_sub(1)));
 
         let id_str = if let Some(ref suffix) = self.id_suffix {
-            format!("poodle-totp-{}", suffix)
+            format!("poodle-code-input-{}", suffix)
         } else {
-            format!("poodle-totp-{}", spec.name)
+            format!("poodle-code-input-{}", spec.name)
         };
 
         // ── Build outer wrapper (label + slots + hint/error) ──────
@@ -180,7 +182,9 @@ impl IntoElement for TotpInput {
         row = row.focus(move |s| s.shadow(focus_ring_shadow(focus_color)));
 
         for i in 0..spec.length {
-            let digit = digits.get(i).map(|c| c.to_string()).unwrap_or_default();
+            let digit = digits.get(i).map(|c| {
+                if spec.mask { "\u{2022}".to_string() } else { c.to_string() }
+            }).unwrap_or_default();
             let is_active = i == active_idx;
 
             let mut slot = div()

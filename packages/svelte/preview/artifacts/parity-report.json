@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-03-30T20:59:52.165Z",
+  "generatedAt": "2026-03-31T16:10:17.742Z",
   "artifact": "packages/svelte/preview/artifacts/parity-report.json",
   "previewBasePath": "/",
   "automatedBoundary": [
@@ -179,18 +179,18 @@
     "summary": [
       {
         "packageName": "@poodle/svelte-primitives",
-        "exportCount": 102,
-        "componentCount": 90,
+        "exportCount": 100,
+        "componentCount": 88,
         "helperCount": 12,
-        "previewedCount": 102,
+        "previewedCount": 100,
         "contractOnlyCount": 0
       },
       {
         "packageName": "@poodle/svelte-composites",
-        "exportCount": 64,
+        "exportCount": 63,
         "componentCount": 38,
-        "helperCount": 26,
-        "previewedCount": 64,
+        "helperCount": 25,
+        "previewedCount": 63,
         "contractOnlyCount": 0
       }
     ],
@@ -1165,6 +1165,19 @@
       },
       {
         "packageName": "@poodle/svelte-primitives",
+        "exportName": "CodeInput",
+        "kind": "component",
+        "status": "previewed",
+        "note": "Every public primitive export is directly reviewable from the catalogue.",
+        "sectionIds": [
+          "catalog-hub"
+        ],
+        "sectionTitles": [
+          "Catalog hub"
+        ]
+      },
+      {
+        "packageName": "@poodle/svelte-primitives",
         "exportName": "CollapseToggle",
         "kind": "component",
         "status": "previewed",
@@ -1776,19 +1789,6 @@
       },
       {
         "packageName": "@poodle/svelte-primitives",
-        "exportName": "PinInput",
-        "kind": "component",
-        "status": "previewed",
-        "note": "Every public primitive export is directly reviewable from the catalogue.",
-        "sectionIds": [
-          "catalog-hub"
-        ],
-        "sectionTitles": [
-          "Catalog hub"
-        ]
-      },
-      {
-        "packageName": "@poodle/svelte-primitives",
         "exportName": "Popover",
         "kind": "component",
         "status": "previewed",
@@ -2245,19 +2245,6 @@
       {
         "packageName": "@poodle/svelte-primitives",
         "exportName": "Tooltip",
-        "kind": "component",
-        "status": "previewed",
-        "note": "Every public primitive export is directly reviewable from the catalogue.",
-        "sectionIds": [
-          "catalog-hub"
-        ],
-        "sectionTitles": [
-          "Catalog hub"
-        ]
-      },
-      {
-        "packageName": "@poodle/svelte-primitives",
-        "exportName": "TotpInput",
         "kind": "component",
         "status": "previewed",
         "note": "Every public primitive export is directly reviewable from the catalogue.",
