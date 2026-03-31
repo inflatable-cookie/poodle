@@ -59,7 +59,6 @@
 <style>
   .component-page {
     padding: 1.5rem 2rem;
-    max-width: 52rem;
   }
 
   .component-page__hero {

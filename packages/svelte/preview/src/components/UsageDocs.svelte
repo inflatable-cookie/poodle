@@ -163,6 +163,27 @@
     vertical-align: top;
   }
 
+  .usage-docs__table td.usage-docs__prop-name {
+    white-space: nowrap;
+    font-weight: 500;
+  }
+
+  .usage-docs__table td.usage-docs__type {
+    white-space: nowrap;
+    max-width: 14rem;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .usage-docs__table td.usage-docs__default {
+    white-space: nowrap;
+  }
+
+  .usage-docs__table td.usage-docs__description {
+    min-width: 12rem;
+    word-break: break-word;
+  }
+
   .usage-docs__table tbody tr:last-child td {
     border-bottom: none;
   }
