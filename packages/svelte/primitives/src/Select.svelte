@@ -224,10 +224,10 @@
 
 <style>
   .select {
+    position: relative;
     display: grid;
-    grid-template-columns: minmax(0, 1fr) auto;
+    grid-template-columns: minmax(0, 1fr);
     align-items: center;
-    gap: var(--poodle-space-inline-sm);
     min-height: var(--poodle-size-control-height);
     padding: 0 var(--poodle-space-control-x);
     border: 0.0625rem solid var(
@@ -265,6 +265,7 @@
     width: 100%;
     height: calc(var(--poodle-size-control-height) - (var(--poodle-border-width-default) * 2));
     padding: 0;
+    padding-right: 1.5rem;
     border: 0;
     background: transparent;
     color: var(--poodle-color-text-primary);
@@ -280,8 +281,11 @@
   }
 
   .select__indicator {
+    position: absolute;
+    right: var(--poodle-space-control-x);
+    top: 50%;
+    transform: translateY(-50%);
     color: var(--poodle-color-icon-muted);
-    font-family: var(--poodle-typography-code-family);
     font-size: 0.75rem;
     line-height: 1;
     pointer-events: none;
