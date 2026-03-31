@@ -31,7 +31,7 @@
   $: safeMax = max <= min ? min + 1 : max;
   $: safeValue = clamp(snapToStep(value, min, step), min, safeMax);
   $: percentage = ((safeValue - min) / (safeMax - min)) * 100;
-  $: sliderStyle = joinStyles([`--poodle-slider-percent: ${percentage}%`]);
+  $: sliderStyle = joinStyles([`--poodle-slider-percent: ${percentage}`]);
 
   function parseValue(nextRawValue: string): number {
     return clamp(snapToStep(Number(nextRawValue), min, step), min, safeMax);
@@ -99,9 +99,9 @@
   .slider__fill {
     --_thumb: 1rem;
     --_half: calc(var(--_thumb) / 2);
-    --_usable: calc(100% - var(--_thumb));
+    --_track: calc(100% - var(--_thumb));
     display: block;
-    width: calc(var(--_half) + var(--_usable) * var(--poodle-slider-percent) / 100);
+    width: calc(var(--_half) + var(--_track) * var(--poodle-slider-percent) / 100);
     height: 100%;
     border-radius: inherit;
     background: var(--poodle-color-accent-base);
@@ -111,7 +111,7 @@
     position: absolute;
     bottom: 0;
     width: 100%;
-    height: calc(var(--_half) + var(--_usable) * var(--poodle-slider-percent) / 100);
+    height: calc(var(--_half) + var(--_track) * var(--poodle-slider-percent) / 100);
   }
 
   .slider__control {
