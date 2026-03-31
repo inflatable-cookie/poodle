@@ -274,6 +274,7 @@
     line-height: var(--poodle-typography-body-lineHeight);
     outline: 0;
     appearance: none;
+    cursor: pointer;
   }
 
   .select[data-placeholder="true"] .select__control {
