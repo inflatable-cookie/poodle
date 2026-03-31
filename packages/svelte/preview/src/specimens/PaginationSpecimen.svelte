@@ -94,6 +94,16 @@
     />
     <p>Page <strong>{page4}</strong> of 7</p>
   </div>
+
+  <div class="specimen__group">
+    <Eyebrow>Standalone (no container chrome)</Eyebrow>
+    <Pagination
+      currentPage={1}
+      totalPages={10}
+      standalone
+      ariaLabel="Standalone pagination"
+    />
+  </div>
 </div>
 
 <style>

@@ -110,6 +110,7 @@ jumps it calls `goToPage()` if available, otherwise falls back to the
 | `scrollOffset` | `number` | `16` | no | pixel offset from the scroll container top when scrolling to target |
 | `className` | `string` | `""` | no | additional CSS class on root element |
 | `loading` | `boolean` | `false` | no | loading state; overridden by controller.loading |
+| `standalone` | `boolean` | `false` | no | when true, renders without container padding, border-top, and background |
 | `ariaLabel` | `string \| null` | `null` | no | accessible label for the nav element; defaults to "Pagination" |
 | `size` | `"xs" \| "sm" \| "md" \| "lg" \| "xl" \| null` | `null` | no | explicit control size override; when null, resolves from inherited presentation |
 | `sizeRole` | `"chrome" \| "control" \| "prominent"` | `"control"` | no | semantic size offset from inherited presentation |
@@ -283,6 +284,15 @@ component scrolls the target into view after any page or limit change:
 |----------|-------|
 | `padding` | `0.5rem 0.75rem` |
 | `gap` | `0.75rem` |
+
+### Root standalone `.pagination--standalone`
+
+| Property | Value |
+|----------|-------|
+| `margin-top` | `0` |
+| `padding` | `0` |
+| `border-top` | `none` |
+| `background` | `transparent` |
 
 ### Root loading `.pagination--loading`
 
