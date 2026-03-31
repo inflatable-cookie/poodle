@@ -2234,23 +2234,57 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
 
   pagination: {
     props: [
+      { name: "controller", type: "PaginationControllerLike | null", default: "null", description: "Optional controller object with currentPage, total, pageSize, prevPage(), nextPage(), goToPage(), setPageSize(). When provided, overrides individual props." },
+      { name: "currentPage", type: "number | null", default: "null", description: "Active page number (1-indexed). Overridden by controller." },
+      { name: "totalPages", type: "number | null", default: "null", description: "Total number of pages. Overridden by controller." },
+      { name: "page", type: "number | null", default: "null", description: "Alias for currentPage — used with item-based pagination (page + limit + total)." },
+      { name: "limit", type: "number | null", default: "null", description: "Page size. Used with page + total to compute totalPages." },
+      { name: "total", type: "number | null", default: "null", description: "Total item count. Used with page + limit to compute totalPages and info row." },
+      { name: "variant", type: '"numbered" | "full" | "simple"', default: '"numbered"', description: "Navigation layout. numbered: page buttons with ellipsis. full: first/last + \"Page X of Y\" summary. simple: \"X-Y of Z\" range with Prev/Next." },
+      { name: "siblingCount", type: "number", default: "1", description: "Number of sibling page buttons shown around the current page (numbered variant)." },
+      { name: "showInfo", type: "boolean", default: "true", description: "Show \"Showing X to Y of Z\" info row above the controls." },
+      { name: "showLimitSelector", type: "boolean", default: "false", description: "Show a page size dropdown (\"Show N per page\")." },
+      { name: "limitOptions", type: "number[]", default: "[30, 50, 100]", description: "Options for the page size dropdown." },
+      { name: "compact", type: "boolean", default: "false", description: "Tighter padding and gap. Hides the info row." },
+      { name: "standalone", type: "boolean", default: "false", description: "Removes container padding, border-top, and background for embedding in custom layouts." },
+      { name: "loading", type: "boolean", default: "false", description: "Shows loading state (reduced opacity, pointer-events disabled). Overridden by controller.loading." },
+      { name: "scrollTarget", type: "HTMLElement | string | false", default: "false", description: "Element or CSS selector to scroll into view after page change. false disables." },
+      { name: "scrollOffset", type: "number", default: "16", description: "Pixel offset from scroll container top when scrolling to target." },
+      { name: "size", type: "ControlSize | null", default: "null", description: "Explicit size override. Supports xs, sm, md, lg, and xl." },
+      { name: "sizeRole", type: '"chrome" | "control" | "prominent"', default: '"control"', description: "Semantic size offset relative to the inherited presentation scale." },
       { name: "density", type: "ControlDensity | null", default: "null", description: "Explicit density override. Supports compact, default, and comfortable." },
-      { name: "currentPage", type: "number", default: "1", description: "Currently active page number." },
-      { name: "totalPages", type: "number", default: "1", description: "Total number of pages." },
-      { name: "siblingCount", type: "number", default: "1", description: "Number of sibling pages shown around the current page." },
-      { name: "ariaLabel", type: "string | null", default: "null", description: "Accessible label for the pagination nav." },
+      { name: "ariaLabel", type: "string | null", default: "null", description: "Accessible label for the pagination nav element." },
+      { name: "className", type: "string", default: '""', description: "Additional CSS class on the root element." },
     ],
     slots: [],
     events: [
-      { name: "pageChange", payload: "{ page: number }", description: "Fires when the current page changes." },
+      { name: "pageChange", payload: "{ page: number }", description: "Fires when the current page changes. When a controller is provided, the controller method is called instead." },
+      { name: "limitChange", payload: "{ limit: number }", description: "Fires when the page size changes via the limit selector." },
     ],
     usage: `<script lang="ts">
   import { Pagination } from "@poodle/svelte-primitives";
 
   let page = 1;
+  let limit = 25;
 </script>
 
-<Pagination currentPage={page} totalPages={10} on:pageChange={(e) => (page = e.detail.page)} />`,
+<!-- Basic numbered pagination -->
+<Pagination currentPage={page} totalPages={10} on:pageChange={(e) => (page = e.detail.page)} />
+
+<!-- Simple variant with page size selector -->
+<Pagination
+  {page}
+  {limit}
+  total={248}
+  variant="simple"
+  showLimitSelector
+  limitOptions={[10, 25, 50, 100]}
+  on:pageChange={(e) => (page = e.detail.page)}
+  on:limitChange={(e) => { limit = e.detail.limit; page = 1; }}
+/>
+
+<!-- Standalone (no container chrome) -->
+<Pagination currentPage={1} totalPages={10} standalone />`,
   },
 
   "pagination-summary": {
