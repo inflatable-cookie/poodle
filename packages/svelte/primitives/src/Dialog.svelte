@@ -171,35 +171,52 @@
       aria-modal="true"
       on:keydown={trapFocus}
     >
-      {#if showCloseButton}
-        <div class="dialog__close">
-          <IconButton
-            type="button"
-            icon="x"
-            ariaLabel={closeLabel}
-            variant="ghost"
-            sizeRole="chrome"
-            size={resolvedSize}
-            on:click={requestClose}
-          />
-        </div>
-      {/if}
-
       {#if bare}
+        {#if showCloseButton}
+          <div class="dialog__close dialog__close--overlay">
+            <IconButton
+              type="button"
+              icon="x"
+              ariaLabel={closeLabel}
+              variant="ghost"
+              sizeRole="chrome"
+              size={resolvedSize}
+              on:click={requestClose}
+            />
+          </div>
+        {/if}
         <slot />
       {:else}
-        {#if $$slots.header}
-          <div class="dialog__header">
-            <slot name="header" />
-          </div>
-        {:else if title || description}
-          <div class="dialog__header">
-            {#if title}
-              <strong>{title}</strong>
+        {#if $$slots.header || title || description || showCloseButton}
+          <div class="dialog__header-row">
+            {#if $$slots.header}
+              <div class="dialog__header">
+                <slot name="header" />
+              </div>
+            {:else if title || description}
+              <div class="dialog__header">
+                {#if title}
+                  <strong>{title}</strong>
+                {/if}
+
+                {#if description}
+                  <p>{description}</p>
+                {/if}
+              </div>
             {/if}
 
-            {#if description}
-              <p>{description}</p>
+            {#if showCloseButton}
+              <div class="dialog__close">
+                <IconButton
+                  type="button"
+                  icon="x"
+                  ariaLabel={closeLabel}
+                  variant="ghost"
+                  sizeRole="chrome"
+                  size={resolvedSize}
+                  on:click={requestClose}
+                />
+              </div>
             {/if}
           </div>
         {/if}
@@ -274,7 +291,20 @@
   .dialog[data-width="xl"] .dialog__surface { width: min(64rem, 100%); }
   .dialog[data-width="full"] .dialog__surface { width: 100%; }
 
+  .dialog__header-row {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: var(--poodle-space-inline-md);
+    margin-bottom: var(--poodle-space-stack-md);
+  }
+
   .dialog__close {
+    position: static;
+    flex-shrink: 0;
+  }
+
+  .dialog__close--overlay {
     position: absolute;
     top: var(--poodle-space-panel-y);
     right: var(--poodle-space-panel-x);
@@ -284,9 +314,8 @@
   .dialog__header {
     display: grid;
     gap: 0.375rem;
-    margin-bottom: var(--poodle-space-stack-md);
-    padding-right: calc(var(--poodle-size-control-height) + var(--poodle-space-inline-sm));
-    min-height: var(--poodle-size-control-height);
+    flex: 1 1 auto;
+    min-width: 0;
   }
 
   .dialog__header strong {
@@ -340,13 +369,13 @@
   /* Density variants */
   .dialog[data-density="compact"] .dialog__surface { padding: 0.5rem 0.75rem; }
   .dialog[data-density="compact"] .dialog__surface--bare { padding: 0; }
-  .dialog[data-density="compact"] .dialog__close {
+  .dialog[data-density="compact"] .dialog__close--overlay {
     top: 0.5rem;
     right: 0.75rem;
   }
   .dialog[data-density="comfortable"] .dialog__surface { padding: 1rem 1.25rem; }
   .dialog[data-density="comfortable"] .dialog__surface--bare { padding: 0; }
-  .dialog[data-density="comfortable"] .dialog__close {
+  .dialog[data-density="comfortable"] .dialog__close--overlay {
     top: 1rem;
     right: 1.25rem;
   }
