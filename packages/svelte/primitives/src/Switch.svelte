@@ -131,6 +131,7 @@
     --poodle-switch-on-thumb: var(--poodle-switch-on-color);
     --poodle-switch-off-border: var(--poodle-color-border-default);
     --poodle-switch-on-border: color-mix(in srgb, var(--poodle-switch-on-thumb) 58%, var(--poodle-color-border-default));
+    position: relative;
     display: inline-flex;
     align-items: center;
     gap: var(--poodle-space-inline-sm);
@@ -149,8 +150,14 @@
 
   .switch__control {
     position: absolute;
-    opacity: 0;
-    pointer-events: none;
+    width: 1px;
+    height: 1px;
+    margin: -1px;
+    padding: 0;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
   }
 
   .switch__track {
