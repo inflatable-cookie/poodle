@@ -151,14 +151,8 @@
       color-mix(in srgb, var(--poodle-color-border-subtle) 74%, transparent)
     );
     border-radius: var(--poodle-treatment-surface-elevated-radius, var(--poodle-radius-surface));
-    background: var(
-      --poodle-treatment-surface-elevated-fill,
-      color-mix(in srgb, var(--poodle-color-background-elevated) 96%, var(--poodle-color-background-panel))
-    );
-    --poodle-surface: var(
-      --poodle-treatment-surface-elevated-fill,
-      color-mix(in srgb, var(--poodle-color-background-elevated) 96%, var(--poodle-color-background-panel))
-    );
+    background: var(--poodle-color-background-elevated);
+    --poodle-surface: var(--poodle-color-background-elevated);
     box-shadow:
       inset 0 0.0625rem 0 rgba(255, 255, 255, 0.08),
       0 0.625rem 1.5rem rgba(9, 13, 18, 0.22),
