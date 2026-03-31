@@ -97,8 +97,11 @@
   }
 
   .slider__fill {
+    --_thumb: 1rem;
+    --_half: calc(var(--_thumb) / 2);
+    --_usable: calc(100% - var(--_thumb));
     display: block;
-    width: var(--poodle-slider-percent);
+    width: calc(var(--_half) + var(--_usable) * var(--poodle-slider-percent) / 100);
     height: 100%;
     border-radius: inherit;
     background: var(--poodle-color-accent-base);
@@ -108,7 +111,7 @@
     position: absolute;
     bottom: 0;
     width: 100%;
-    height: var(--poodle-slider-percent);
+    height: calc(var(--_half) + var(--_usable) * var(--poodle-slider-percent) / 100);
   }
 
   .slider__control {

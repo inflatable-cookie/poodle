@@ -134,9 +134,12 @@
   }
 
   .range-slider__fill {
+    --_thumb: 1rem;
+    --_half: calc(var(--_thumb) / 2);
+    --_usable: calc(100% - var(--_thumb));
     position: absolute;
-    left: var(--poodle-range-start);
-    width: calc(var(--poodle-range-end) - var(--poodle-range-start));
+    left: calc(var(--_half) + var(--_usable) * var(--poodle-range-start) / 100);
+    width: calc(var(--_usable) * (var(--poodle-range-end) - var(--poodle-range-start)) / 100);
     height: 100%;
     border-radius: inherit;
     background: var(--poodle-color-accent-base);
@@ -144,9 +147,9 @@
 
   .range-slider[data-orientation="vertical"] .range-slider__fill {
     left: 0;
-    bottom: var(--poodle-range-start);
+    bottom: calc(var(--_half) + var(--_usable) * var(--poodle-range-start) / 100);
     width: 100%;
-    height: calc(var(--poodle-range-end) - var(--poodle-range-start));
+    height: calc(var(--_usable) * (var(--poodle-range-end) - var(--poodle-range-start)) / 100);
   }
 
   .range-slider__control {
