@@ -1932,7 +1932,7 @@
       },
       {
         "packageName": "@poodle/svelte-primitives",
-        "exportName": "SearchField",
+        "exportName": "SearchInput",
         "kind": "component",
         "status": "previewed",
         "note": "Form and validation screen now exercises the broader field, text-entry, selection, and remediation primitive set directly.",

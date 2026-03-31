@@ -82,7 +82,7 @@
   <svelte:fragment slot="trailing">
     {#if canClear}
       <button
-        class="search-field__clear"
+        class="search-input__clear"
         type="button"
         aria-label="Clear search query"
         on:click={handleClear}
@@ -94,7 +94,7 @@
 </TextInput>
 
 <style>
-  .search-field__clear {
+  .search-input__clear {
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -110,7 +110,7 @@
     );
   }
 
-  .search-field__clear:hover {
+  .search-input__clear:hover {
     background: var(
       --poodle-treatment-interactive-subtle-fill-hover,
       color-mix(in srgb, var(--poodle-color-background-surface) 84%, transparent)
@@ -118,7 +118,7 @@
     color: var(--poodle-color-text-primary);
   }
 
-  .search-field__clear:focus-visible {
+  .search-input__clear:focus-visible {
     outline: var(--poodle-border-width-focus) solid var(--poodle-color-accent-focusRing);
     outline-offset: 0.125rem;
   }

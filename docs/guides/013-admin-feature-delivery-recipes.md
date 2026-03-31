@@ -37,7 +37,7 @@ list/detail/edit/tasks routes plus the user and media detail flows.
 ```svelte
 <script lang="ts">
   import { FilterToolbar, ListContainer, PageHeader } from "@poodle/svelte-composites";
-  import { Button, Code, Field, MetaBar, MetaItem, Pill, SearchField, Tabs } from "@poodle/svelte-primitives";
+  import { Button, Code, Field, MetaBar, MetaItem, Pill, SearchInput, Tabs } from "@poodle/svelte-primitives";
 </script>
 
 <ListContainer title="Projects" state="ready" currentPage={page} totalPages={totalPages} totalItems={totalItems}>
@@ -48,7 +48,7 @@ list/detail/edit/tasks routes plus the user and media detail flows.
   {#snippet filters()}
     <FilterToolbar summaryText={summaryText}>
       <Field id="projects-search" label="Search">
-        <SearchField id="projects-search" bind:value={query} />
+        <SearchInput id="projects-search" bind:value={query} />
       </Field>
     </FilterToolbar>
   {/snippet}

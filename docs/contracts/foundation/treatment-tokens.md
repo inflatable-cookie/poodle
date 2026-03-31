@@ -215,7 +215,7 @@ No tokens are currently defined for this role.
 |-----------|----------------|
 | TextInput | radius, fill, fill-focus, border, border-focus, shadow, shadow-focus |
 | TextArea | radius, fill, fill-focus, border, border-focus, shadow, shadow-focus |
-| SearchField | radius (via calc), fill-hover |
+| SearchInput | radius (via calc), fill-hover |
 | Select | radius, fill, fill-focus, border, shadow, shadow-focus |
 | Combobox (input part) | radius, fill, fill-focus, border, shadow, shadow-focus |
 

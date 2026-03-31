@@ -1,11 +1,11 @@
-# Search Field
+# Search Input
 
 Status: detailed contract
 Updated: 2026-03-15
 
 ## 1. Purpose
 
-- Component name: `SearchField`
+- Component name: `SearchInput`
 - Layer: `foundation`
 - Summary: a search-oriented text entry control that composes TextInput with a
   persistent search icon, optional clear button, and explicit query semantics
@@ -20,12 +20,12 @@ Updated: 2026-03-15
 [Root]  (delegates to TextInput)
   ├── [Search Icon] (leading affordance, via TextInput slot)
   ├── [Input Control] (from TextInput, type="search")
-  └── [Clear Button .search-field__clear] (conditional, when value non-empty and showClearButton)
+  └── [Clear Button .search-input__clear] (conditional, when value non-empty and showClearButton)
 ```
 
 | Part | Required | Description | Token Targets |
 |------|----------|-------------|---------------|
-| Root | yes | search field chrome (from TextInput) | background, border, radius, focus ring |
+| Root | yes | search input chrome (from TextInput) | background, border, radius, focus ring |
 | Search Icon | yes | persistent search affordance in leading position | icon color, icon size |
 | Input Control | yes | query entry control (TextInput with type="search") | typography, text color |
 | Clear Button | no | clears non-empty query; visible only when value is non-empty | icon color, hover background, border-radius |
@@ -101,7 +101,7 @@ Updated: 2026-03-15
 | character input | updates query |
 | `Enter` | fires `submit` event |
 | `Escape` | fires `cancel` event (inherited from TextInput) |
-| `Tab` | moves focus out of the search field |
+| `Tab` | moves focus out of the search input |
 
 ### Focus And Announcement
 
@@ -130,19 +130,19 @@ Updated: 2026-03-15
 - child expectations: search icon (leading) and optional clear button (trailing)
 - resizing rules: input grows to consume remaining width after icon and clear
   button allocation
-- composition model: SearchField composes TextInput rather than duplicating
+- composition model: SearchInput composes TextInput rather than duplicating
   its internals
 
 ## 8. Token Usage — Exact Values
 
 ### Inherited from TextInput
 
-SearchField inherits all root, input control, and affordance styling from
+SearchInput inherits all root, input control, and affordance styling from
 TextInput. The treatment CSS custom properties use the `--poodle-text-input-*`
 namespace since the root element is a TextInput. See the TextInput contract
 Section 8 for the full root, focus, validation, and disabled token tables.
 
-### Clear Button `.search-field__clear`
+### Clear Button `.search-input__clear`
 
 | Property | Value |
 |----------|-------|
@@ -174,8 +174,8 @@ Section 8 for the full root, focus, validation, and disabled token tables.
 
 ### Size adjustments
 
-SearchField delegates `size` and `sizeRole` to the wrapped TextInput. No
-additional size-specific CSS rules exist on SearchField itself; all min-height,
+SearchInput delegates `size` and `sizeRole` to the wrapped TextInput. No
+additional size-specific CSS rules exist on SearchInput itself; all min-height,
 padding, and font-size scaling is inherited from the TextInput size adjustments.
 
 ## 9. Svelte Notes
@@ -195,7 +195,7 @@ padding, and font-size scaling is inherited from the TextInput size adjustments.
 
 ## 10. GPUI Notes
 
-- expected crate/module surface: `poodle_gpui::primitives::search_field`
+- expected crate/module surface: `poodle_gpui::primitives::search_input`
 - GPUI implementation should compose or extend the TextInput primitive rather
   than duplicating text-editing internals
 - clear button must have its own accessible name ("Clear search" or equivalent)
@@ -246,19 +246,19 @@ padding, and font-size scaling is inherited from the TextInput size adjustments.
 
 | Label | Props / Config | Expected Visual |
 |-------|---------------|-----------------|
-| Default | `placeholder="Search components..."`, `ariaLabel="Search components"` | Search field with leading search icon and placeholder text; typing shows clear button and displays current query and submitted value below |
+| Default | `placeholder="Search components..."`, `ariaLabel="Search components"` | Search input with leading search icon and placeholder text; typing shows clear button and displays current query and submitted value below |
 
 ### Disabled
 
 | Label | Props / Config | Expected Visual |
 |-------|---------------|-----------------|
-| Disabled | `value="locked query"`, `disabled` | Search field with pre-filled value, reduced opacity, non-interactive |
+| Disabled | `value="locked query"`, `disabled` | Search input with pre-filled value, reduced opacity, non-interactive |
 
 ### Read-only
 
 | Label | Props / Config | Expected Visual |
 |-------|---------------|-----------------|
-| Read-only | `value="active filter"`, `readOnly` | Search field with pre-filled value, selectable but not editable |
+| Read-only | `value="active filter"`, `readOnly` | Search input with pre-filled value, selectable but not editable |
 
 ## 14. Approval And Adoption Notes
 
@@ -267,4 +267,4 @@ padding, and font-size scaling is inherited from the TextInput size adjustments.
 - downstream adopters: Aura browser/search fields, Spark browser/plugin search,
   filter toolbars, browse-search-shell
 - future follow-up: command-palette-specific ranking and discovery heuristics
-  belong in workstation-layer milestones, not in the foundation search field
+  belong in workstation-layer milestones, not in the foundation search input

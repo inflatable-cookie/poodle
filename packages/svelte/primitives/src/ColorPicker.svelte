@@ -257,8 +257,26 @@
   }
 
   // ── RGB inputs ───────────────────────────────────────────────
-  function onRgbChange(channel: "r" | "g" | "b", event: CustomEvent<{ value: number | null }>): void {
-    const val = event.detail.value ?? 0;
+  function toNumericInputValue(event: CustomEvent<{ value: string | number | null }>): number | null {
+    const nextValue = event.detail.value;
+
+    if (nextValue === null || nextValue === "") {
+      return null;
+    }
+
+    if (typeof nextValue === "number") {
+      return Number.isFinite(nextValue) ? nextValue : null;
+    }
+
+    const parsedValue = Number(nextValue);
+    return Number.isFinite(parsedValue) ? parsedValue : null;
+  }
+
+  function onRgbChange(
+    channel: "r" | "g" | "b",
+    event: CustomEvent<{ value: string | number | null }>
+  ): void {
+    const val = toNumericInputValue(event) ?? 0;
     const rgb = { ...currentRgb };
     rgb[channel] = val;
     const hsv = rgbToHsv(rgb.r, rgb.g, rgb.b);
@@ -269,8 +287,11 @@
   }
 
   // ── HSL inputs ───────────────────────────────────────────────
-  function onHslChange(channel: "h" | "s" | "l", event: CustomEvent<{ value: number | null }>): void {
-    const val = event.detail.value ?? 0;
+  function onHslChange(
+    channel: "h" | "s" | "l",
+    event: CustomEvent<{ value: string | number | null }>
+  ): void {
+    const val = toNumericInputValue(event) ?? 0;
     const hsl = { ...currentHsl };
     hsl[channel] = val;
     const hsv = hslToHsv(hsl.h, hsl.s, hsl.l);
@@ -281,8 +302,8 @@
   }
 
   // ── Alpha input (shared across modes) ────────────────────────
-  function onAlphaInputChange(event: CustomEvent<{ value: number | null }>): void {
-    alpha = (event.detail.value ?? 100) / 100;
+  function onAlphaInputChange(event: CustomEvent<{ value: string | number | null }>): void {
+    alpha = (toNumericInputValue(event) ?? 100) / 100;
     commitColor();
   }
 

@@ -28,7 +28,7 @@ pagination placement. Render the actual list or grid in the default slot.
     Button,
     Field,
     IconButton,
-    SearchField,
+    SearchInput,
     Select
   } from "@poodle/svelte-primitives";
 
@@ -63,7 +63,7 @@ pagination placement. Render the actual list or grid in the default slot.
       </svelte:fragment>
 
       <Field id="project-search" label="Search">
-        <SearchField id="project-search" placeholder="Search projects" />
+        <SearchInput id="project-search" placeholder="Search projects" />
       </Field>
 
       <Field id="project-status" label="Status">

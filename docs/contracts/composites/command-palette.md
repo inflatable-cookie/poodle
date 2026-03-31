@@ -8,7 +8,7 @@ Updated: 2026-03-26
 - Component name: `CommandPalette`
 - Layer: `composites`
 - Summary: a modal command-discovery surface for searching and invoking actions;
-  composes `ActionDiscoveryPanel` with `SearchField` in a dialog overlay
+  composes `ActionDiscoveryPanel` with `SearchInput` in a dialog overlay
 - In scope: modal overlay, query input, grouped action results, active-result
   movement, command commit, loading/error/empty/no-results posture, focus
   trapping, body scroll lock, invocation hint display
@@ -32,7 +32,7 @@ Uses `CommandActionItem` and `DiscoveryState` from `ActionDiscoveryPanel`.
   │           ├── [Invocation Hint]  (optional, kbd-styled)
   │           └── [Close Button]  aria-label="Close command palette"
   ├── [Query]
-  │     └── SearchField
+  │     └── SearchInput
   ├── [Status]  role="status" aria-live="polite"
   └── [ActionDiscoveryPanel]  results list
 ```
@@ -43,7 +43,7 @@ Uses `CommandActionItem` and `DiscoveryState` from `ActionDiscoveryPanel`.
 | Dialog | yes | centered modal container |
 | Header | yes | title, optional description, close button |
 | Invocation Hint | no | keyboard shortcut reminder (e.g. "Cmd+K") |
-| Query | yes | SearchField for filtering commands |
+| Query | yes | SearchInput for filtering commands |
 | Status | yes | live status region announcing result count and active item |
 | ActionDiscoveryPanel | yes | grouped command results list |
 
@@ -287,8 +287,8 @@ Uses `CommandActionItem` and `DiscoveryState` from `ActionDiscoveryPanel`.
 
 ## 10. Composition
 
-- Composes: `SearchField`, `Icon`, `ActionDiscoveryPanel`
-- The SearchField dispatches `valueChange`, `clear`, `cancel`, and `submit`
+- Composes: `SearchInput`, `Icon`, `ActionDiscoveryPanel`
+- The SearchInput dispatches `valueChange`, `clear`, `cancel`, and `submit`
   events which are mapped to palette events
 - ActionDiscoveryPanel is bound with `activeId` for two-way active tracking
 - Loading treatment is delegated to `ActionDiscoveryPanel`, which remains

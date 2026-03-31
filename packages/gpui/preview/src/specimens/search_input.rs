@@ -1,8 +1,8 @@
 use gpui::*;
 use gpui::prelude::FluentBuilder;
 use poodle_adapter::ThemeProvider;
-use poodle_primitives::{SearchFieldSpec, EyebrowSpec};
-use poodle_gpui_components::{SearchField, Eyebrow};
+use poodle_primitives::{SearchInputSpec, EyebrowSpec};
+use poodle_gpui_components::{SearchInput, Eyebrow};
 use crate::app_state::AppState;
 use crate::style_bridge::color_to_hsla;
 use crate::PreviewRoot;
@@ -24,8 +24,8 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                 .child(
                     div().flex().flex_col().gap(px(4.0))
                         .child(
-                            SearchField::from_spec(
-                                SearchFieldSpec::new()
+                            SearchInput::from_spec(
+                                SearchInputSpec::new()
                                     .with_placeholder("Search components...")
                                     .with_value(&query)
                                     .with_aria_label("Search components"),
@@ -62,8 +62,8 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
             div().flex().flex_col().gap(px(8.0))
                 .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Disabled"), theme))
                 .child(
-                    SearchField::from_spec(
-                        SearchFieldSpec::new()
+                    SearchInput::from_spec(
+                        SearchInputSpec::new()
                             .with_value("locked query")
                             .with_disabled(true)
                             .with_aria_label("Disabled search"),
@@ -77,8 +77,8 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
             div().flex().flex_col().gap(px(8.0))
                 .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Read-only"), theme))
                 .child(
-                    SearchField::from_spec(
-                        SearchFieldSpec::new()
+                    SearchInput::from_spec(
+                        SearchInputSpec::new()
                             .with_value("active filter")
                             .with_read_only(true)
                             .with_aria_label("Read-only search"),

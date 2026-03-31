@@ -54,7 +54,7 @@ mod rating;
 mod region;
 mod resize_handle;
 mod scroll_shell;
-mod search_field;
+mod search_input;
 mod segmented_control;
 mod select;
 mod separator;
@@ -140,7 +140,9 @@ pub use rating::RatingSpec;
 pub use region::RegionSpec;
 pub use resize_handle::ResizeHandleSpec;
 pub use scroll_shell::ScrollShellSpec;
-pub use search_field::SearchFieldSpec;
+pub use search_input::SearchInputSpec;
+/// Deprecated: use `SearchInputSpec` instead.
+pub type SearchFieldSpec = SearchInputSpec;
 pub use segmented_control::SegmentedControlSpec;
 pub use select::SelectSpec;
 pub use separator::SeparatorSpec;
@@ -193,7 +195,7 @@ pub const ACTION_FIELD_EXPORTS: &[&str] = &[
     "FieldRelationships",
     "TextInputSpec",
     "TextAreaSpec",
-    "SearchFieldSpec",
+    "SearchInputSpec",
     "FormActionsSpec",
 ];
 pub const SELECTION_FEEDBACK_DATE_EXPORTS: &[&str] = &[
@@ -243,7 +245,7 @@ mod tests {
         IconButtonSpec, MenuEntry, MenuItemKind, MenuSpec, MenubarEntry, MenubarSpec,
         NavigationMenuEntry, NavigationMenuSpec, Orientation, OverlayPlacement, PaddingScale,
         PopoverInitialFocus, PopoverSpec, ProgressSpec, RadioGroupSpec, ScrollShellSpec,
-        SearchFieldSpec, SegmentedControlSpec, SelectSpec, SeparatorSpec, SliderSpec, StackSpec,
+        SearchInputSpec, SegmentedControlSpec, SelectSpec, SeparatorSpec, SliderSpec, StackSpec,
         StatusIndicatorSpec, StatusTone, SurfaceSpec, SurfaceTone, SwitchSpec, TabActivationMode,
         TabDefinition, TabStripItem, TabStripSpec, TabsSpec, TextAreaSpec, TextInputSpec,
         TimeFieldSpec, TooltipSpec, ValidationState,
@@ -394,8 +396,8 @@ mod tests {
     }
 
     #[test]
-    fn search_field_exposes_clear_action_only_when_query_exists() {
-        let spec = SearchFieldSpec::new().with_default_value("track lane");
+    fn search_input_exposes_clear_action_only_when_query_exists() {
+        let spec = SearchInputSpec::new().with_default_value("track lane");
         let input = spec.as_text_input_spec();
 
         assert!(spec.shows_clear_action());

@@ -23,7 +23,7 @@ use poodle_composites::{
 };
 use poodle_primitives::{
     AccordionSpec, BadgeSpec, BannerSpec, BoxSpec, BreadcrumbsSpec, ButtonSpec, CheckboxSpec,
-    FieldSpec, GridSpec, MenuSpec, NavCardSpec, ProgressSpec, SearchFieldSpec,
+    FieldSpec, GridSpec, MenuSpec, NavCardSpec, ProgressSpec, SearchInputSpec,
     SelectSpec, SeparatorSpec, SkeletonSpec, StackSpec, StatusIndicatorSpec, SurfaceSpec,
     SwitchSpec, TabsSpec, TextAreaSpec, TextInputSpec, ToolbarSpec,
 };
@@ -133,7 +133,7 @@ fn render_browse_and_filter(a: &GpuiAdapter, t: &dyn ThemeProvider) -> DemoScree
     screen.push(a.render(&SurfaceSpec::new(), &s, t));
     screen.push(a.render(&PageHeaderSpec::new("Asset Library"), &s, t));
     screen.push(a.render(&FilterToolbarSpec::new(), &s, t));
-    screen.push(a.render(&SearchFieldSpec::new(), &s, t));
+    screen.push(a.render(&SearchInputSpec::new(), &s, t));
     screen.push(a.render(&DataTableSpec::new(vec![], vec![]), &s, t));
     screen.push(a.render(&PaginationSummarySpec::new(1, 25, 142), &s, t));
     screen.push(a.render(&EmptyStateSpec::new("No results found"), &s, t));
@@ -173,7 +173,7 @@ fn render_picker_and_selection(a: &GpuiAdapter, t: &dyn ThemeProvider) -> DemoSc
     screen.push(a.render(&PickerShellSpec::new("Select assets"), &s, t));
     screen.push(a.render(&RelationPickerSpec::new(vec![]), &s, t));
     screen.push(a.render(&SelectionSummarySpec::new(vec![]), &s, t));
-    screen.push(a.render(&SearchFieldSpec::new(), &s, t));
+    screen.push(a.render(&SearchInputSpec::new(), &s, t));
     screen.push(a.render(&CheckboxSpec::new(), &s, t));
     screen.push(a.render(&ButtonSpec::new(), &s, t));
 

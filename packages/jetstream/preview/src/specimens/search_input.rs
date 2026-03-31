@@ -1,10 +1,10 @@
-//! SearchField specimen — search fields with default and value states.
+//! SearchInput specimen — search inputs with default and value states.
 
 use jetstream_runtime::ui_element::*;
 use poodle_jetstream::JetstreamThemeProvider;
-use poodle_jetstream_components::search_field::js_search_field;
+use poodle_jetstream_components::search_input::js_search_input;
 use poodle_jetstream_components::theme_ext::*;
-use poodle_primitives::SearchFieldSpec;
+use poodle_primitives::SearchInputSpec;
 
 pub fn render(theme: &JetstreamThemeProvider) -> JsEl {
     let secondary = resolve_color(theme, "semantic.color.text.secondary");
@@ -13,17 +13,17 @@ pub fn render(theme: &JetstreamThemeProvider) -> JsEl {
         // Default
         .child(group("Default", secondary,
             div().w(300.0)
-                .child(js_search_field(&SearchFieldSpec::new(), theme))
+                .child(js_search_input(&SearchInputSpec::new(), theme))
         ))
         // With value
         .child(group("With value", secondary,
             div().w(300.0)
-                .child(js_search_field(&SearchFieldSpec::new().with_value("search query"), theme))
+                .child(js_search_input(&SearchInputSpec::new().with_value("search query"), theme))
         ))
         // Disabled
         .child(group("Disabled", secondary,
             div().w(300.0)
-                .child(js_search_field(&SearchFieldSpec::new().with_value("locked search").with_disabled(true), theme))
+                .child(js_search_input(&SearchInputSpec::new().with_value("locked search").with_disabled(true), theme))
         ))
 }
 

@@ -1,16 +1,16 @@
-//! SearchField — real GPUI component backed by SearchFieldSpec.
+//! SearchInput — real GPUI component backed by SearchInputSpec.
 //!
 //! Delegates rendering to TextInput via `as_text_input_spec()`.
 
 use gpui::*;
 use poodle_gpui::GpuiThemeProvider;
-use poodle_primitives::{ControlSize, SearchFieldSpec, ValidationState};
+use poodle_primitives::{ControlSize, SearchInputSpec, ValidationState};
 
 use super::text_input::TextInput;
 
-/// A real GPUI search field component backed by `SearchFieldSpec`.
-pub struct SearchField {
-    spec: SearchFieldSpec,
+/// A real GPUI search field component backed by `SearchInputSpec`.
+pub struct SearchInput {
+    spec: SearchInputSpec,
     theme: GpuiThemeProvider,
     id_suffix: Option<String>,
     on_focus: Option<Box<dyn Fn(&mut Window, &mut App) + 'static>>,
@@ -20,17 +20,17 @@ pub struct SearchField {
     on_clear: Option<Box<dyn Fn(&mut Window, &mut App) + 'static>>,
 }
 
-impl std::ops::Deref for SearchField {
-    type Target = SearchFieldSpec;
-    fn deref(&self) -> &SearchFieldSpec { &self.spec }
+impl std::ops::Deref for SearchInput {
+    type Target = SearchInputSpec;
+    fn deref(&self) -> &SearchInputSpec { &self.spec }
 }
 
-impl SearchField {
+impl SearchInput {
     pub fn new(theme: &GpuiThemeProvider) -> Self {
-        Self { spec: SearchFieldSpec::new(), theme: theme.clone(), id_suffix: None, on_focus: None, on_change: None, on_submit: None, on_cancel: None, on_clear: None }
+        Self { spec: SearchInputSpec::new(), theme: theme.clone(), id_suffix: None, on_focus: None, on_change: None, on_submit: None, on_cancel: None, on_clear: None }
     }
 
-    pub fn from_spec(spec: SearchFieldSpec, theme: &GpuiThemeProvider) -> Self {
+    pub fn from_spec(spec: SearchInputSpec, theme: &GpuiThemeProvider) -> Self {
         Self {
             spec,
             theme: theme.clone(),
@@ -89,7 +89,7 @@ impl SearchField {
     }
 }
 
-impl IntoElement for SearchField {
+impl IntoElement for SearchInput {
     type Element = AnyElement;
 
     fn into_element(self) -> Self::Element {

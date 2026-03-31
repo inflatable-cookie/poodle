@@ -4,7 +4,7 @@ use crate::text_input::TextInputSpec;
 use crate::types::{ControlDensity, ControlSize, SemanticControlSizeRole, ValidationState};
 
 #[derive(Clone, Debug, Eq, PartialEq)]
-pub struct SearchFieldSpec {
+pub struct SearchInputSpec {
     pub value: Option<String>,
     pub default_value: String,
     pub placeholder: String,
@@ -20,7 +20,7 @@ pub struct SearchFieldSpec {
     pub density: ControlDensity,
 }
 
-impl Default for SearchFieldSpec {
+impl Default for SearchInputSpec {
     fn default() -> Self {
         Self {
             value: None,
@@ -40,7 +40,7 @@ impl Default for SearchFieldSpec {
     }
 }
 
-impl SearchFieldSpec {
+impl SearchInputSpec {
     pub fn new() -> Self {
         Self::default()
     }

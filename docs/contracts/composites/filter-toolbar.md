@@ -21,7 +21,7 @@ Updated: 2026-03-30
   │     └── [Actions .filter-toolbar__actions]  <div>/<span> (optional, when actions slot)
   │           └── [ActionsSlot]  named "actions" slot
   ├── [ControlsGrid .filter-toolbar__controls]  <div> (hidden when collapsed)
-  │     └── [DefaultSlot]  filter controls (SearchField, Select, etc.)
+  │     └── [DefaultSlot]  filter controls (SearchInput, Select, etc.)
   └── [Secondary .filter-toolbar__secondary]  <div> (optional, when secondary slot)
         └── [SecondarySlot]  named "secondary" slot
 ```
@@ -59,7 +59,7 @@ Updated: 2026-03-30
 
 | Slot | Purpose |
 |------|---------|
-| default | Filter controls (SearchField, Select, etc.) placed in the grid |
+| default | Filter controls (SearchInput, Select, etc.) placed in the grid |
 | `actions` | Icon buttons in the header row (refresh, settings, etc.) |
 | `secondary` | Trailing actions below the grid (reset, export, etc.) |
 
@@ -125,7 +125,7 @@ No component-owned events beyond child control behavior and collapse toggle. The
 
 - Composes: `CollapseToggle` primitive, `Icon` primitive
 - Parent expectations: browser-style pages, settings views with search/filter affordances
-- Child expectations: SearchField, Select, SegmentedControl, Button, IconButton
+- Child expectations: SearchInput, Select, SegmentedControl, Button, IconButton
 - Resizing rules: primary controls remain first in reading and focus order
 
 ## 8. Token Usage -- Exact Values
@@ -293,22 +293,22 @@ The `--ft-columns` and `--ft-min-width` CSS variables are set inline from the `c
 
 | Label | Props / Config | Expected Visual |
 |-------|---------------|-----------------|
-| Responsive grid layout | `summaryText="Showing 24 of 156 items"`, children: SearchField + 3 Selects (status, type, owner) | Toolbar with summary text and 4 controls in responsive grid |
+| Responsive grid layout | `summaryText="Showing 24 of 156 items"`, children: SearchInput + 3 Selects (status, type, owner) | Toolbar with summary text and 4 controls in responsive grid |
 
 ### Collapsible With Actions
 
 | Label | Props / Config | Expected Visual |
 |-------|---------------|-----------------|
-| Collapsible with actions | `collapsible`, `summaryText="Showing 24 of 156 items"`, actions slot: refresh IconButton, children: SearchField + 2 Selects | Toolbar with collapse toggle, summary, refresh button, and filter controls |
+| Collapsible with actions | `collapsible`, `summaryText="Showing 24 of 156 items"`, actions slot: refresh IconButton, children: SearchInput + 2 Selects | Toolbar with collapse toggle, summary, refresh button, and filter controls |
 
 ### Collapsed By Default
 
 | Label | Props / Config | Expected Visual |
 |-------|---------------|-----------------|
-| Collapsed by default | `collapsible`, `collapsed`, `summaryText="3 filters active"`, actions slot: refresh IconButton, children: SearchField + Select | Compact header row with expand toggle, summary text, and refresh button |
+| Collapsed by default | `collapsible`, `collapsed`, `summaryText="3 filters active"`, actions slot: refresh IconButton, children: SearchInput + Select | Compact header row with expand toggle, summary text, and refresh button |
 
 ### With Secondary Slot
 
 | Label | Props / Config | Expected Visual |
 |-------|---------------|-----------------|
-| With secondary slot | `columns={3}`, children: SearchField + 2 Selects; secondary slot: Reset all button | Toolbar with 3-column grid and trailing Reset all button |
+| With secondary slot | `columns={3}`, children: SearchInput + 2 Selects; secondary slot: Reset all button | Toolbar with 3-column grid and trailing Reset all button |

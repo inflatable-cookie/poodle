@@ -3,7 +3,7 @@
 
   import {
     Icon,
-    SearchField,
+    SearchInput,
     UiPresentationProvider,
     getUiPresentation,
     resolveSemanticControlSize,
@@ -201,7 +201,7 @@
       </div>
 
       <div class="command-palette__query">
-        <SearchField
+        <SearchInput
           id={queryInputId}
           value={query}
           ariaLabel="Search commands"

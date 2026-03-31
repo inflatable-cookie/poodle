@@ -8,7 +8,7 @@
     "field",
     "form-actions",
     "icon-button",
-    "search-field",
+    "search-input",
     "text-area",
     "text-input"
   ],
@@ -18,7 +18,7 @@
     "FieldSpec",
     "FormActionsSpec",
     "IconButtonSpec",
-    "SearchFieldSpec",
+    "SearchInputSpec",
     "TextAreaSpec",
     "TextInputSpec"
   ],

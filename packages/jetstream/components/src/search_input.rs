@@ -1,8 +1,8 @@
-//! SearchField — Jetstream search input backed by SearchFieldSpec.
+//! SearchInput — Jetstream search input backed by SearchInputSpec.
 
 use jetstream_runtime::ui_element::{self, JsEl};
 use poodle_jetstream::JetstreamThemeProvider;
-use poodle_primitives::SearchFieldSpec;
+use poodle_primitives::SearchInputSpec;
 
 use crate::presentation::{
     control_height_rem, control_space_x_rem, rem_to_px, resolve_semantic_size,
@@ -10,7 +10,7 @@ use crate::presentation::{
 };
 use crate::theme_ext::resolve_color;
 
-pub fn js_search_field(spec: &SearchFieldSpec, theme: &JetstreamThemeProvider) -> JsEl {
+pub fn js_search_input(spec: &SearchInputSpec, theme: &JetstreamThemeProvider) -> JsEl {
     let effective_size = resolve_semantic_size(spec.size, spec.size_role);
     let height = rem_to_px(control_height_rem(effective_size));
     let font_size = rem_to_px(size_font_rem(effective_size));

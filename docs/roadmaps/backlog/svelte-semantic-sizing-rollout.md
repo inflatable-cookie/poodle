@@ -46,7 +46,7 @@ Button, IconButton, Icon, Spinner, Pill, Toggle, SplitButton, Tabs,
 ToggleGroup, TriStateSwitch, SegmentedControl, Toolbar, Checkbox,
 RadioGroup, Switch, TextInput, Select, Combobox, NumberEntry, Slider,
 RangeSlider, Rating, PinInput, Pagination, Menu, DatePicker, TextArea,
-SearchField, EditableLabel, FileUpload, DurationInput, ColorPicker,
+SearchInput, EditableLabel, FileUpload, DurationInput, ColorPicker,
 DateRangePicker, DateTimePicker, DateTimeRangePicker, TimeField,
 TimeZoneSelect, ZonedDateTimePicker, Calendar, RangeCalendar, Menubar,
 ContextMenu, NavigationMenu, Breadcrumbs, OrderBy, BulkActionBar, Code,
@@ -61,7 +61,7 @@ VideoPlayer, SelectionSummary, ToastStack, MediaUploadStatusPanel
 
 ### Delegates to children — no unique chrome (3)
 
-SearchField (delegates to TextInput), ConfirmAction (composes
+SearchInput (delegates to TextInput), ConfirmAction (composes
 AlertDialog + Button), SplitView (structural layout, delegates
 CollapseToggle and resize handles)
 
@@ -82,7 +82,7 @@ experience responds coherently to workspace presentation.
 | TextArea | no | `control` | needs full implementation |
 | Select | yes (CSS only) | `control` | has control-height token but no sizeRole prop |
 | Combobox | yes (CSS only) | `control` | has control-height token but no sizeRole prop |
-| SearchField | no | `control` | needs full implementation |
+| SearchInput | no | `control` | needs full implementation |
 
 Status: ✅ complete — props + CSS variants landed
 

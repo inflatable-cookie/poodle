@@ -7,7 +7,7 @@
     Icon,
     Menu,
     Popover,
-    SearchField,
+    SearchInput,
     Select,
     TextInput,
     getUiPresentation,
@@ -372,7 +372,7 @@
                     on:valueChange={(event) => requestFilterChange(column.id, event.detail.value)}
                   />
                 {:else}
-                  <SearchField
+                  <SearchInput
                     id={getFilterInputId(column)}
                     value={filters[column.id] ?? ""}
                     placeholder={`Filter ${column.label.toLowerCase()}...`}

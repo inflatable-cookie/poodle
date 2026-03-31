@@ -24,7 +24,7 @@ export const underlayWrapperPolicies: UnderlayWrapperPolicy[] = [
       "Underlay may wrap Poodle's button family internally, but apps should keep importing Underlay Button.",
   },
   {
-    underlayExport: "SearchField",
+    underlayExport: "SearchInput",
     publicOwner: "underlay",
     mayUsePoodleInternals: true,
     appImportsPoodleDirectly: false,
@@ -34,7 +34,7 @@ export const underlayWrapperPolicies: UnderlayWrapperPolicy[] = [
       "result-shell composition remains Underlay-owned",
     ],
     notes:
-      "Underlay may reuse Poodle SearchField internals while preserving Underlay search APIs and surrounding browse workflows.",
+      "Underlay may reuse Poodle SearchInput internals while preserving Underlay search APIs and surrounding browse workflows.",
   },
   {
     underlayExport: "Panel",

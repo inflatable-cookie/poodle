@@ -93,7 +93,7 @@ pub mod remediation_banner;
 pub mod reorderable_list;
 pub mod resize_handle;
 pub mod scroll_shell;
-pub mod search_field;
+pub mod search_input;
 pub mod segmented_control;
 pub mod select;
 pub mod selection_summary;
@@ -319,7 +319,7 @@ fn render_specimen(slug: &str, theme: &JetstreamThemeProvider) -> Option<JsEl> {
         "reorderable-list" => Some(reorderable_list::render(theme)),
         "resize-handle" => Some(resize_handle::render(theme)),
         "scroll-shell" => Some(scroll_shell::render(theme)),
-        "search-field" => Some(search_field::render(theme)),
+        "search-input" => Some(search_input::render(theme)),
         "segmented-control" => Some(segmented_control::render(theme)),
         "select" => Some(select::render(theme)),
         "selection-summary" => Some(selection_summary::render(theme)),

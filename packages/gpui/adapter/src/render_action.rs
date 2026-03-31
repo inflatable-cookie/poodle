@@ -2,14 +2,14 @@
 //!
 //! Implements the adapter trait for:
 //! - ButtonSpec, IconButtonSpec
-//! - FieldSpec, TextInputSpec, TextAreaSpec, SearchFieldSpec
+//! - FieldSpec, TextInputSpec, TextAreaSpec, SearchInputSpec
 //! - FormActionsSpec, TimeFieldSpec
 //! - EditableLabelSpec, NumberInputSpec, CodeInputSpec, ToolbarSpec
 
 use poodle_adapter::{RenderComponent, ThemeProvider};
 use poodle_primitives::{
     ButtonSpec, CodeInputSpec, EditableLabelSpec, FieldSpec, FormActionsSpec, IconButtonSpec,
-    NumberInputSpec, SearchFieldSpec, TextAreaSpec, TextInputSpec, TimeFieldSpec, ToolbarSpec,
+    NumberInputSpec, SearchInputSpec, TextAreaSpec, TextInputSpec, TimeFieldSpec, ToolbarSpec,
 };
 use poodle_style::StyleDescriptor;
 
@@ -187,12 +187,12 @@ impl RenderComponent<TextAreaSpec> for GpuiAdapter {
     }
 }
 
-impl RenderComponent<SearchFieldSpec> for GpuiAdapter {
+impl RenderComponent<SearchInputSpec> for GpuiAdapter {
     type Target = GpuiTarget;
 
     fn render(
         &self,
-        spec: &SearchFieldSpec,
+        spec: &SearchInputSpec,
         style: &StyleDescriptor,
         theme: &dyn ThemeProvider,
     ) -> GpuiElementHandle {
@@ -206,8 +206,8 @@ impl RenderComponent<SearchFieldSpec> for GpuiAdapter {
         let _clear_icon_color = theme.resolve_color(spec.clear_action_icon_color_token());
 
         GpuiElementHandle::new(
-            format!("search-field-{}", if spec.shows_clear_action() { "active" } else { "idle" }),
-            "SearchFieldSpec",
+            format!("search-input-{}", if spec.shows_clear_action() { "active" } else { "idle" }),
+            "SearchInputSpec",
         )
     }
 }
@@ -353,7 +353,7 @@ mod tests {
     use poodle_adapter::RenderComponent;
     use poodle_primitives::{
         ButtonSpec, CodeInputSpec, EditableLabelSpec, FieldSpec, FormActionsSpec, IconButtonSpec,
-        NumberInputSpec, SearchFieldSpec, TextAreaSpec, TextInputSpec,
+        NumberInputSpec, SearchInputSpec, TextAreaSpec, TextInputSpec,
         TimeFieldSpec, ToolbarSpec,
     };
     use poodle_style::StyleDescriptor;
@@ -425,12 +425,12 @@ mod tests {
     }
 
     #[test]
-    fn render_search_field_resolves_tokens() {
+    fn render_search_input_resolves_tokens() {
         let a = adapter();
-        let spec = SearchFieldSpec::new().with_default_value("query");
+        let spec = SearchInputSpec::new().with_default_value("query");
         let handle = a.render(&spec, &style(), &theme());
-        assert_eq!(handle.element_id, "search-field-active");
-        assert_eq!(handle.spec_type, "SearchFieldSpec");
+        assert_eq!(handle.element_id, "search-input-active");
+        assert_eq!(handle.spec_type, "SearchInputSpec");
     }
 
     #[test]

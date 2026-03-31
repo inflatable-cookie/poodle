@@ -115,7 +115,7 @@ const SUPPORTED_PRIMITIVES: &[&str] = &[
     "FieldSpec",
     "TextInputSpec",
     "TextAreaSpec",
-    "SearchFieldSpec",
+    "SearchInputSpec",
     "FormActionsSpec",
     "TimeFieldSpec",
     "EditableLabelSpec",

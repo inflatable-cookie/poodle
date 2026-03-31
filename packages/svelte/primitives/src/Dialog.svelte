@@ -2,6 +2,7 @@
   import { createEventDispatcher, onMount, tick } from "svelte";
 
   import { getFocusableElements } from "./internal";
+  import { portal } from "./portal";
   import IconButton from "./IconButton.svelte";
   import { getUiPresentation, resolveSemanticControlSize } from "./presentation";
 
@@ -148,7 +149,7 @@
 </script>
 
 {#if isOpen}
-  <div class="dialog" data-size={resolvedSize} data-density={resolvedDensity} data-width={width}>
+  <div use:portal class="dialog" data-size={resolvedSize} data-density={resolvedDensity} data-width={width}>
     <button
       type="button"
       class={`dialog__backdrop ${overlayClassName}`}
@@ -275,8 +276,8 @@
 
   .dialog__close {
     position: absolute;
-    top: var(--poodle-space-inline-sm);
-    right: var(--poodle-space-inline-sm);
+    top: var(--poodle-space-panel-y);
+    right: var(--poodle-space-panel-x);
     z-index: 1;
   }
 
@@ -284,6 +285,8 @@
     display: grid;
     gap: 0.375rem;
     margin-bottom: var(--poodle-space-stack-md);
+    padding-right: calc(var(--poodle-size-control-height) + var(--poodle-space-inline-sm));
+    min-height: var(--poodle-size-control-height);
   }
 
   .dialog__header strong {
@@ -337,6 +340,14 @@
   /* Density variants */
   .dialog[data-density="compact"] .dialog__surface { padding: 0.5rem 0.75rem; }
   .dialog[data-density="compact"] .dialog__surface--bare { padding: 0; }
+  .dialog[data-density="compact"] .dialog__close {
+    top: 0.5rem;
+    right: 0.75rem;
+  }
   .dialog[data-density="comfortable"] .dialog__surface { padding: 1rem 1.25rem; }
   .dialog[data-density="comfortable"] .dialog__surface--bare { padding: 0; }
+  .dialog[data-density="comfortable"] .dialog__close {
+    top: 1rem;
+    right: 1.25rem;
+  }
 </style>

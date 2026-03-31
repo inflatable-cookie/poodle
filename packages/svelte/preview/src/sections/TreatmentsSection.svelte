@@ -44,7 +44,7 @@
         { name: "--poodle-treatment-interactive-subtle-shadow-hover", purpose: "Hover shadow" },
         { name: "--poodle-treatment-interactive-subtle-shadow-focus", purpose: "Focus shadow" },
       ],
-      components: ["TextInput", "TextArea", "SearchField", "Select", "Combobox (input)"],
+      components: ["TextInput", "TextArea", "SearchInput", "Select", "Combobox (input)"],
     },
     {
       name: "surface",

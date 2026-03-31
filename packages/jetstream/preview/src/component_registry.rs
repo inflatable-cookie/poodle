@@ -83,7 +83,7 @@ pub static PRIMITIVES: &[ComponentEntry] = &[
     ComponentEntry { slug: "range-slider", display_name: "RangeSlider", description: "Dual-thumb slider.", tier: Tier::Primitive, has_specimen: true },
     ComponentEntry { slug: "rating", display_name: "Rating", description: "Star-based rating.", tier: Tier::Primitive, has_specimen: true },
     ComponentEntry { slug: "scroll-shell", display_name: "ScrollShell", description: "Scrollable container.", tier: Tier::Primitive, has_specimen: true },
-    ComponentEntry { slug: "search-field", display_name: "SearchField", description: "Search text input.", tier: Tier::Primitive, has_specimen: true },
+    ComponentEntry { slug: "search-input", display_name: "SearchInput", description: "Search text input.", tier: Tier::Primitive, has_specimen: true },
     ComponentEntry { slug: "segmented-control", display_name: "SegmentedControl", description: "Inline toggle options.", tier: Tier::Primitive, has_specimen: true },
     ComponentEntry { slug: "select", display_name: "Select", description: "Dropdown selection.", tier: Tier::Primitive, has_specimen: true },
     ComponentEntry { slug: "separator", display_name: "Separator", description: "Visual divider.", tier: Tier::Primitive, has_specimen: true },

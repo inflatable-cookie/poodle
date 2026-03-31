@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { Eyebrow, Grid, Stack, SearchField, Surface, Table, Tabs, type TabItem, type TableColumn, type TableRow } from "@poodle/svelte-primitives";
+  import { Eyebrow, Grid, Stack, SearchInput, Surface, Table, Tabs, type TabItem, type TableColumn, type TableRow } from "@poodle/svelte-primitives";
 
   export let activePanelId: "token-summary-section" | "token-inspector" = "token-summary-section";
   export let keySemanticTokens: Array<{ path: string; value: string }> = [];
@@ -68,8 +68,8 @@
       </Grid>
     {:else}
       <Stack gap="md">
-        <div class="search-field">
-          <SearchField
+        <div class="search-input">
+          <SearchInput
             id="token-inspector-query"
             value={inspectorQuery}
             placeholder="Filter tokens by path"
@@ -135,7 +135,7 @@
     font-size: 0.8125rem;
   }
 
-  .search-field {
+  .search-input {
     min-width: min(17.5rem, 100%);
     max-width: 26rem;
   }

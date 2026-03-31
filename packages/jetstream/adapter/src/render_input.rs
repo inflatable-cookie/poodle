@@ -1,11 +1,11 @@
 //! RenderComponent implementations for input primitives.
 //!
-//! g08.005: TextInputSpec, TextAreaSpec, SearchFieldSpec, FieldSpec,
+//! g08.005: TextInputSpec, TextAreaSpec, SearchInputSpec, FieldSpec,
 //! NumberInputSpec, CodeInputSpec, EditableLabelSpec, TimeFieldSpec
 
 use poodle_adapter::{RenderComponent, ThemeProvider};
 use poodle_primitives::{
-    CodeInputSpec, EditableLabelSpec, FieldSpec, NumberInputSpec, SearchFieldSpec, TextAreaSpec,
+    CodeInputSpec, EditableLabelSpec, FieldSpec, NumberInputSpec, SearchInputSpec, TextAreaSpec,
     TextInputSpec, TimeFieldSpec,
 };
 use poodle_style::StyleDescriptor;
@@ -76,9 +76,9 @@ impl RenderComponent<TextAreaSpec> for JetstreamAdapter {
     }
 }
 
-impl RenderComponent<SearchFieldSpec> for JetstreamAdapter {
+impl RenderComponent<SearchInputSpec> for JetstreamAdapter {
     type Target = JetstreamTarget;
-    fn render(&self, spec: &SearchFieldSpec, style: &StyleDescriptor, theme: &dyn ThemeProvider) -> JetstreamNodeHandle {
+    fn render(&self, spec: &SearchInputSpec, style: &StyleDescriptor, theme: &dyn ThemeProvider) -> JetstreamNodeHandle {
         let mut mapped = map_style(style);
 
         // Resolve search icon color
@@ -88,7 +88,7 @@ impl RenderComponent<SearchFieldSpec> for JetstreamAdapter {
         // Resolve clear action icon color (for proof)
         let _clear_icon_color = theme.resolve_color(spec.clear_action_icon_color_token());
 
-        JetstreamNodeHandle::new("search-field", "SearchFieldSpec", WidgetKind::TextInput, mapped)
+        JetstreamNodeHandle::new("search-input", "SearchInputSpec", WidgetKind::TextInput, mapped)
     }
 }
 
@@ -233,10 +233,10 @@ mod tests {
     }
 
     #[test]
-    fn search_field_renders() {
-        let h = a().render(&SearchFieldSpec::new(), &s(), &t());
-        assert_eq!(h.node_id, "search-field");
-        assert_eq!(h.spec_type, "SearchFieldSpec");
+    fn search_input_renders() {
+        let h = a().render(&SearchInputSpec::new(), &s(), &t());
+        assert_eq!(h.node_id, "search-input");
+        assert_eq!(h.spec_type, "SearchInputSpec");
         assert_eq!(h.widget_kind, WidgetKind::TextInput);
     }
 

@@ -1529,7 +1529,7 @@ function validateGpuiActionFieldBaseline(errors: string[]): { actionFieldExportC
     "field",
     "form-actions",
     "icon-button",
-    "search-field",
+    "search-input",
     "text-area",
     "text-input",
   ];
@@ -1539,7 +1539,7 @@ function validateGpuiActionFieldBaseline(errors: string[]): { actionFieldExportC
     "FieldSpec",
     "FormActionsSpec",
     "IconButtonSpec",
-    "SearchFieldSpec",
+    "SearchInputSpec",
     "TextAreaSpec",
     "TextInputSpec",
   ];

@@ -95,7 +95,7 @@ export const primitiveComponents: ComponentEntry[] = [
   entry("StatusBar", "primitive", P, "Bottom status bar with leading and trailing slots.", true),
   entry("Region", "primitive", P, "Dashed placeholder block for designating layout areas.", true),
   entry("ScrollShell", "primitive", P, "Scrollable container with overflow management.", true),
-  entry("SearchField", "primitive", P, "Text input optimized for search with clear action.", true),
+  entry("SearchInput", "primitive", P, "Text input optimized for search with clear action.", true),
   entry("SegmentedControl", "primitive", P, "Inline toggle between mutually exclusive options.", true),
   entry("Select", "primitive", P, "Dropdown selection from a list of options.", true),
   entry("Separator", "primitive", P, "Visual divider between content sections.", true),

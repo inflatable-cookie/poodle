@@ -2317,7 +2317,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
     ],
     usage: `<script lang="ts">
   import { ListContainer } from "@poodle/svelte-composites";
-  import { Button, Field, SearchField, Select } from "@poodle/svelte-primitives";
+  import { Button, Field, SearchInput, Select } from "@poodle/svelte-primitives";
 
   let page = 1;
 </script>
@@ -2337,7 +2337,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
 
   <svelte:fragment slot="filters">
     <Field label="Search">
-      <SearchField placeholder="Search incidents" />
+      <SearchInput placeholder="Search incidents" />
     </Field>
   </svelte:fragment>
 
@@ -2842,7 +2842,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
 </ScrollShell>`,
   },
 
-  "search-field": {
+  "search-input": {
     props: [
       { name: "size", type: "ControlSize | null", default: "null", description: "Explicit size override. Supports xs, sm, md, lg, and xl." },
       { name: "sizeRole", type: '"chrome" | "control" | "prominent"', default: '"control"', description: "Semantic size offset relative to the inherited presentation scale." },
@@ -2867,12 +2867,12 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
       { name: "cancel", payload: "void", description: "Fires when the search is cancelled." },
     ],
     usage: `<script lang="ts">
-  import { SearchField } from "@poodle/svelte-primitives";
+  import { SearchInput } from "@poodle/svelte-primitives";
 
   let query = "";
 </script>
 
-<SearchField id="search" bind:value={query} placeholder="Search products..." on:submit={(e) => search(e.detail.value)} />`,
+<SearchInput id="search" bind:value={query} placeholder="Search products..." on:submit={(e) => search(e.detail.value)} />`,
   },
 
   "segmented-control": {

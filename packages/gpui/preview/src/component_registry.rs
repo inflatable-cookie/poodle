@@ -59,7 +59,7 @@ pub static PRIMITIVES: &[ComponentEntry] = &[
     ComponentEntry { slug: "range-slider", display_name: "RangeSlider", description: "Dual-thumb slider." },
     ComponentEntry { slug: "rating", display_name: "Rating", description: "Star-based rating." },
     ComponentEntry { slug: "scroll-shell", display_name: "ScrollShell", description: "Scrollable container." },
-    ComponentEntry { slug: "search-field", display_name: "SearchField", description: "Search text input." },
+    ComponentEntry { slug: "search-input", display_name: "SearchInput", description: "Search text input." },
     ComponentEntry { slug: "segmented-control", display_name: "SegmentedControl", description: "Inline toggle options." },
     ComponentEntry { slug: "select", display_name: "Select", description: "Dropdown selection." },
     ComponentEntry { slug: "separator", display_name: "Separator", description: "Visual divider." },

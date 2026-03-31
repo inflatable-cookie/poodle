@@ -2,7 +2,7 @@
   import { createEventDispatcher } from "svelte";
 
   import Icon from "./Icon.svelte";
-  import { clamp, formatNumber, snapToStep } from "./internal";
+  import { formatNumber, snapToStep } from "./internal";
   import { getUiPresentation, resolveSemanticControlSize } from "./presentation";
 
   import type {
@@ -105,7 +105,17 @@
   }
 
   function clampIfNeeded(nextValue: number): number {
-    return clamp(nextValue, parsedMin, parsedMax);
+    let clampedValue = nextValue;
+
+    if (parsedMin !== null) {
+      clampedValue = Math.max(clampedValue, parsedMin);
+    }
+
+    if (parsedMax !== null) {
+      clampedValue = Math.min(clampedValue, parsedMax);
+    }
+
+    return clampedValue;
   }
 
   function emitValidationChange(): void {

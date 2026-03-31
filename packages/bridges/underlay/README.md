@@ -81,7 +81,7 @@ It makes the bridge posture concrete by recording:
 The current proof surfaces are:
 
 - `@underlay/ui/Button`
-- `@underlay/ui/SearchField`
+- `@underlay/ui/SearchInput`
 - `@underlay/ui/Panel`
 
 Each of these surfaces assumes:

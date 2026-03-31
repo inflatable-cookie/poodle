@@ -65,7 +65,9 @@ export { default as ResizeHandle } from "./ResizeHandle.svelte";
 /** @deprecated Use `Calendar` with `mode="range"` instead. */
 export { default as RangeCalendar } from "./Calendar.svelte";
 export { default as RangeSlider } from "./RangeSlider.svelte";
-export { default as SearchField } from "./SearchField.svelte";
+export { default as SearchInput } from "./SearchInput.svelte";
+/** @deprecated Use `SearchInput` instead. */
+export { default as SearchField } from "./SearchInput.svelte";
 export { default as SegmentedControl } from "./SegmentedControl.svelte";
 export { default as Select } from "./Select.svelte";
 export { default as ScrollShell } from "./ScrollShell.svelte";

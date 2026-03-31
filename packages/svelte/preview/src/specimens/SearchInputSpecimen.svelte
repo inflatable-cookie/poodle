@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { SearchField, Eyebrow } from "@poodle/svelte-primitives";
+  import { SearchInput, Eyebrow } from "@poodle/svelte-primitives";
 
   const controlSizes = ["xs", "sm", "md", "lg", "xl"] as const;
 
@@ -10,7 +10,7 @@
 <div class="specimen">
   <div class="specimen__group">
     <Eyebrow>Default</Eyebrow>
-    <SearchField
+    <SearchInput
       id="search-default"
       value={query}
       placeholder="Search components..."
@@ -31,7 +31,7 @@
     <Eyebrow>Sizes</Eyebrow>
     <div class="specimen__stack">
       {#each controlSizes as size}
-        <SearchField id={"size-" + size} placeholder={size.toUpperCase()} ariaLabel={"Search at " + size} {size} />
+        <SearchInput id={"size-" + size} placeholder={size.toUpperCase()} ariaLabel={"Search at " + size} {size} />
       {/each}
     </div>
   </div>
@@ -42,7 +42,7 @@
       {#each ["compact", "default", "comfortable"] as density}
         <div class="specimen__row">
           <span class="specimen__label">{density}</span>
-          <SearchField id={"density-" + density} placeholder="Search" {density} />
+          <SearchInput id={"density-" + density} placeholder="Search" {density} />
         </div>
       {/each}
     </div>
@@ -50,7 +50,7 @@
 
   <div class="specimen__group">
     <Eyebrow>Disabled</Eyebrow>
-    <SearchField
+    <SearchInput
       id="search-disabled"
       value="locked query"
       ariaLabel="Disabled search"
@@ -60,7 +60,7 @@
 
   <div class="specimen__group">
     <Eyebrow>Read-only</Eyebrow>
-    <SearchField
+    <SearchInput
       id="search-readonly"
       value="active filter"
       ariaLabel="Read-only search"
