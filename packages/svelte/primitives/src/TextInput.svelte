@@ -542,4 +542,3 @@
     font-size: 1rem;
   }
 </style>
-  const fallbackId = getNextTextInputId();
