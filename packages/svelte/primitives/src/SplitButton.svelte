@@ -510,7 +510,7 @@
     background: color-mix(in srgb, var(--poodle-color-border-subtle) 72%, transparent);
   }
 
-  /* Density variants */
+  /* Density variants — gap only, no height changes */
   .split-button[data-density="compact"] { gap: 0; }
-  .split-button[data-density="comfortable"] { gap: 0.125rem; }
+  .split-button[data-density="comfortable"] { gap: 0; }
 </style>
