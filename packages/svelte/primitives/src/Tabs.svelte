@@ -537,6 +537,11 @@
     min-width: 0;
   }
 
+  .poodle-tabs[data-variant="block"] .poodle-tabs__close {
+    margin-left: -0.375rem;
+    margin-right: 0.375rem;
+  }
+
   .poodle-tabs[data-variant="block"] .poodle-tabs__item + .poodle-tabs__item {
     border-left: 0.0625rem solid color-mix(in srgb, var(--poodle-color-border-subtle) 72%, transparent);
   }
