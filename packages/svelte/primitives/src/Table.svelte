@@ -78,9 +78,12 @@
   }
 
   .table__caption {
-    padding: var(--poodle-space-panel-y) var(--poodle-space-panel-x) 0;
+    caption-side: top;
+    padding: var(--poodle-space-panel-y) var(--poodle-space-panel-x);
     color: var(--poodle-color-text-secondary);
-    font-size: 0.75rem;
+    font-family: var(--poodle-typography-label-family);
+    font-size: 0.8125rem;
+    font-weight: 500;
     text-align: left;
   }
 
