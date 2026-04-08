@@ -373,13 +373,14 @@
     opacity: var(--poodle-state-opacity-disabled);
   }
 
-  /* Pressed/toggle state — override the button custom properties */
-  .button[data-pressed="true"] {
+  /* Pressed/toggle state — high specificity to override all variants */
+  .button.button[data-pressed="true"] {
     --poodle-button-fill: var(--poodle-color-accent-base);
     --poodle-button-fill-hover: var(--poodle-color-accent-hover, color-mix(in srgb, var(--poodle-color-accent-base) 88%, black));
     --poodle-button-fill-active: color-mix(in srgb, var(--poodle-color-accent-base) 82%, black);
     --poodle-button-border: color-mix(in srgb, var(--poodle-color-accent-base) 85%, black);
     --poodle-button-text: var(--poodle-color-text-inverse);
+    --poodle-button-shadow: none;
   }
 
   .button__label {
