@@ -1,5 +1,7 @@
 <script lang="ts">
   import { StatusIndicator, Eyebrow } from "@poodle/svelte-primitives";
+
+  const controlSizes = ["xs", "sm", "md", "lg", "xl"] as const;
 </script>
 
 <div class="specimen">
@@ -16,9 +18,19 @@
   </div>
 
   <div class="specimen__group">
+    <Eyebrow>Sizes</Eyebrow>
+    <div class="status-list">
+      {#each controlSizes as size}
+        <StatusIndicator status="success" label={size.toUpperCase()} {size} />
+      {/each}
+    </div>
+  </div>
+
+  <div class="specimen__group">
     <Eyebrow>Without labels (dot only)</Eyebrow>
     <div class="status-row">
       <StatusIndicator status="success" ariaLabel="Online" />
+      <StatusIndicator status="info" ariaLabel="Active" />
       <StatusIndicator status="warning" ariaLabel="Away" />
       <StatusIndicator status="danger" ariaLabel="Offline" />
       <StatusIndicator status="neutral" ariaLabel="Unknown" />
