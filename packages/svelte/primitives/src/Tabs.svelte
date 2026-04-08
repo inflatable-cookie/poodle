@@ -488,8 +488,7 @@
   /* Block: full-width tabs with separators, no radius, no outer border chrome */
   .poodle-tabs[data-variant="block"] .poodle-tabs__list {
     display: flex;
-    width: fit-content;
-    max-width: 100%;
+    width: 100%;
     gap: 0;
     padding: 0;
     border-bottom: 0.0625rem solid var(--poodle-color-border-subtle);
@@ -609,8 +608,12 @@
     color: var(--poodle-color-text-primary);
   }
 
-  .poodle-tabs[data-variant="block"] .poodle-tabs__item:hover .poodle-tabs__tab {
-    background: color-mix(in srgb, var(--poodle-color-surface-hover) 40%, transparent);
+  .poodle-tabs[data-variant="block"] .poodle-tabs__item:not([data-selected="true"]):hover .poodle-tabs__tab {
+    background: color-mix(in srgb, var(--poodle-color-background-elevated) 50%, transparent);
+  }
+
+  .poodle-tabs[data-variant="block"] .poodle-tabs__item[data-selected="true"]:hover .poodle-tabs__tab {
+    background: color-mix(in srgb, var(--poodle-color-accent-base) 18%, var(--poodle-color-background-surface));
   }
 
   /* Strip variant: compact tabs in a bar */
