@@ -1,5 +1,8 @@
 //! Combobox — real GPUI component backed by ComboboxSpec.
 //!
+//! **Deprecated**: use `Select` with `searchable(true)` instead. This component
+//! is retained for backward compatibility.
+//!
 //! Contract: grid root min-width 14rem, input with focus ring,
 //! absolutely positioned list with overlay shadow.
 //! Option padding uses semantic.space.control.{x,y}, radius control-0.125rem.

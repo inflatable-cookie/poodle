@@ -1,5 +1,8 @@
 //! Combobox — Jetstream combobox backed by ComboboxSpec.
 //!
+//! **Deprecated**: use `js_select()` with `SelectSpec::with_searchable(true)` instead.
+//! This module is retained for backward compatibility.
+//!
 //! Contract: `docs/contracts/foundation/combobox.md`
 //! Uses SVG chevron icon and overlay() for dropdown.
 

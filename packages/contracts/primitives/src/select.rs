@@ -2,6 +2,23 @@ use poodle_tokens::semantic;
 
 use crate::types::{ChoiceOption, ControlDensity, ControlSize, SemanticControlSizeRole};
 
+/// Controls how the Select renders its dropdown.
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub enum SelectMode {
+    /// Auto: native unless searchable or custom rendering needed.
+    Auto,
+    /// Always native `<select>`.
+    Native,
+    /// Always custom dropdown.
+    Custom,
+}
+
+impl Default for SelectMode {
+    fn default() -> Self {
+        Self::Auto
+    }
+}
+
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct SelectSpec {
     pub value: Option<String>,
@@ -16,6 +33,14 @@ pub struct SelectSpec {
     pub size: ControlSize,
     pub size_role: SemanticControlSizeRole,
     pub density: ControlDensity,
+    /// Rendering mode: Auto, Native, or Custom.
+    pub mode: SelectMode,
+    /// When true, shows a filter/search input inside the dropdown.
+    pub searchable: bool,
+    /// When true, allows typing arbitrary values not in the options list.
+    pub freeform: bool,
+    /// Message shown when filtering produces no matches.
+    pub empty_message: String,
 }
 
 impl Default for SelectSpec {
@@ -33,6 +58,10 @@ impl Default for SelectSpec {
             size: ControlSize::Md,
             size_role: SemanticControlSizeRole::Control,
             density: ControlDensity::Default,
+            mode: SelectMode::default(),
+            searchable: false,
+            freeform: false,
+            empty_message: String::from("No matches"),
         }
     }
 }
@@ -106,5 +135,41 @@ impl SelectSpec {
     pub fn with_density(mut self, density: ControlDensity) -> Self {
         self.density = density;
         self
+    }
+
+    pub fn with_mode(mut self, mode: SelectMode) -> Self {
+        self.mode = mode;
+        self
+    }
+
+    pub fn with_searchable(mut self, searchable: bool) -> Self {
+        self.searchable = searchable;
+        self
+    }
+
+    pub fn with_freeform(mut self, freeform: bool) -> Self {
+        self.freeform = freeform;
+        self
+    }
+
+    pub fn with_empty_message(mut self, msg: impl Into<String>) -> Self {
+        self.empty_message = msg.into();
+        self
+    }
+
+    /// Returns true when the dropdown should render a search/filter input.
+    /// This is the case when `searchable` is true or `freeform` is true.
+    pub fn shows_search_input(&self) -> bool {
+        self.searchable || self.freeform
+    }
+
+    /// Returns true when the select must use a custom dropdown
+    /// (either explicitly requested or required by searchable/freeform).
+    pub fn requires_custom_dropdown(&self) -> bool {
+        match self.mode {
+            SelectMode::Custom => true,
+            SelectMode::Native => false,
+            SelectMode::Auto => self.shows_search_input(),
+        }
     }
 }

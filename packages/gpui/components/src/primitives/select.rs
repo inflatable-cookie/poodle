@@ -2,7 +2,7 @@
 
 use gpui::*;
 use poodle_gpui::GpuiThemeProvider;
-use poodle_primitives::{ChoiceOption, ControlSize, IconSize, IconSpec, SelectSpec};
+use poodle_primitives::{ChoiceOption, ControlSize, IconSize, IconSpec, SelectMode, SelectSpec};
 
 use super::icon::Icon;
 use crate::presentation::{rem_to_px, resolve_semantic_size, size_font_rem, size_height_offset_rem, size_padding_x_offset_rem};
@@ -50,6 +50,10 @@ impl Select {
     pub fn size(mut self, v: ControlSize) -> Self { self.spec.size = v; self }
     pub fn size_role(mut self, v: poodle_primitives::SemanticControlSizeRole) -> Self { self.spec.size_role = v; self }
     pub fn density(mut self, v: poodle_primitives::ControlDensity) -> Self { self.spec.density = v; self }
+    pub fn mode(mut self, v: SelectMode) -> Self { self.spec.mode = v; self }
+    pub fn searchable(mut self, v: bool) -> Self { self.spec.searchable = v; self }
+    pub fn freeform(mut self, v: bool) -> Self { self.spec.freeform = v; self }
+    pub fn empty_message(mut self, v: impl Into<String>) -> Self { self.spec.empty_message = v.into(); self }
 
     pub fn with_id(mut self, suffix: impl Into<String>) -> Self {
         self.id_suffix = Some(suffix.into());
@@ -253,9 +257,11 @@ impl IntoElement for Select {
         let mut wrapper = div().flex().flex_col().gap(stack_gap).min_w(px(128.0)).child(trigger);
 
         // Dropdown list (when open)
+        // Note: GPUI always renders a custom dropdown (no native mode).
         if is_open {
             let option_hover = color_mix(accent, elevated_bg, 0.08);
             let option_selected = color_mix(accent, elevated_bg, 0.10);
+            let empty_message = spec.empty_message.clone();
 
             let mut list = div()
                 .id("poodle-select-list")
@@ -289,7 +295,30 @@ impl IntoElement for Select {
                 .max_h(px(240.0))
                 .overflow_y_scroll();
 
+            // Searchable: show a filter input placeholder at the top of the dropdown
+            if spec.shows_search_input() {
+                let search_placeholder = div()
+                    .id("poodle-select-search")
+                    .focusable()
+                    .mx(inline_padding)
+                    .mb(stack_gap)
+                    .px(inline_padding)
+                    .h(control_height)
+                    .flex()
+                    .items_center()
+                    .rounded(control_radius)
+                    .bg(surface_bg)
+                    .border_1()
+                    .border_color(border)
+                    .text_size(body_size)
+                    .text_color(text_secondary)
+                    .child("Search...");
+                list = list.child(search_placeholder);
+            }
+
+            let mut has_visible_options = false;
             for option in spec.options.iter() {
+                has_visible_options = true;
                 let is_selected =
                     spec.current_value() == Some(option.value.as_str());
                 let is_opt_disabled = option.is_disabled;
@@ -337,6 +366,18 @@ impl IntoElement for Select {
 
                 item = item.child(option.label.clone());
                 list = list.child(item);
+            }
+
+            // Empty state message (shown when searchable and no options match)
+            if !has_visible_options && spec.shows_search_input() {
+                list = list.child(
+                    div()
+                        .px(inline_padding)
+                        .py(stack_gap)
+                        .text_size(body_size)
+                        .text_color(text_secondary)
+                        .child(empty_message),
+                );
             }
 
             wrapper = wrapper.child(list);

@@ -97,6 +97,7 @@ pub use code::Code;
 pub use collapse_toggle::CollapseToggle;
 pub use collapsible::Collapsible;
 pub use color_picker::ColorPicker;
+/// Deprecated: use `Select` with `searchable(true)` instead.
 pub use combobox::Combobox;
 pub use context_menu::ContextMenu;
 pub use date_picker::DatePicker;

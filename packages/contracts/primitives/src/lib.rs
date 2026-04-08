@@ -97,6 +97,7 @@ pub use code::CodeSpec;
 pub use collapse_toggle::{CollapseDirection, CollapseToggleSpec};
 pub use collapsible::CollapsibleSpec;
 pub use color_picker::{ColorPickerSpec, ColorInputMode};
+/// Deprecated: use `SelectSpec` with `searchable = true` instead.
 pub use combobox::{ComboboxOption, ComboboxSpec};
 pub use context_menu::ContextMenuSpec;
 pub use date_picker::DatePickerSpec;
@@ -144,7 +145,7 @@ pub use search_input::SearchInputSpec;
 /// Deprecated: use `SearchInputSpec` instead.
 pub type SearchFieldSpec = SearchInputSpec;
 pub use segmented_control::SegmentedControlSpec;
-pub use select::SelectSpec;
+pub use select::{SelectMode, SelectSpec};
 pub use separator::SeparatorSpec;
 pub use skeleton::SkeletonSpec;
 pub use slider::SliderSpec;

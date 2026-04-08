@@ -1,3 +1,9 @@
+//! Deprecated: use `SelectSpec` with `searchable = true` instead.
+//!
+//! This module is retained for backward compatibility. New code should use
+//! `SelectSpec::new(options).with_searchable(true)` which provides the same
+//! searchable dropdown behavior through the unified Select component.
+
 use poodle_tokens::semantic;
 use crate::types::{ControlDensity, ControlSize, SemanticControlSizeRole};
 

@@ -4,6 +4,9 @@
 //! Reference: `packages/svelte/primitives/src/Select.svelte`
 //!
 //! Uses SVG chevron icon and overlay() for the dropdown panel.
+//! Jetstream always renders a custom dropdown (no native `<select>` support).
+//! When `spec.searchable` is true, a search input placeholder is shown at the
+//! top of the dropdown panel.
 
 use jetstream_runtime::game_ui::Color;
 use jetstream_runtime::ui_element::{self, JsEl};
@@ -43,6 +46,13 @@ pub fn js_select(spec: &SelectSpec, theme: &JetstreamThemeProvider) -> JsEl {
 
     let display_color = if selected.is_some() { text_color } else { muted };
 
+    // Searchable: show search icon instead of just label for the trigger
+    let trigger_icon = if spec.shows_search_input() {
+        "search"
+    } else {
+        "chevron-down"
+    };
+
     let mut el = ui_element::div()
         .bg(fill)
         .border(1.0).border_color(border_color)
@@ -62,9 +72,9 @@ pub fn js_select(spec: &SelectSpec, theme: &JetstreamThemeProvider) -> JsEl {
             .grow()
     );
 
-    // SVG chevron indicator
+    // SVG indicator icon (chevron-down for standard, search for searchable)
     el = el.child(
-        ui_element::icon("chevron-down")
+        ui_element::icon(trigger_icon)
             .w(icon_size).h(icon_size)
             .text_color(icon_muted)
     );
