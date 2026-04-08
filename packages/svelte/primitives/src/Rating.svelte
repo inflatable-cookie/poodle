@@ -66,6 +66,7 @@
 <div
   class="rating"
   role="radiogroup"
+  tabindex="-1"
   aria-label={ariaLabel ?? undefined}
   data-size={resolvedSize}
   data-density={resolvedDensity}

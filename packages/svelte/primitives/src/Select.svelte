@@ -425,26 +425,28 @@
       </div>
     {:else}
       <!-- Non-searchable: button trigger -->
-      <button
-        type="button"
-        class="select__trigger"
-        id={selectId}
-        {disabled}
-        aria-expanded={open ? "true" : "false"}
-        aria-haspopup="listbox"
-        aria-controls={open ? listboxId : undefined}
-        aria-label={ariaLabel ?? undefined}
-        aria-describedby={describedBy ?? undefined}
-        on:click={handleTriggerClick}
-        on:keydown={handleKeydown}
-      >
-        {#if $$slots.trigger}
-          <slot name="trigger" selectedOption={selectedOption} {open} {placeholder} />
-        {:else}
-          <span class="select__value" data-placeholder={!hasSelection}>
-            {selectedOption?.label ?? placeholder ?? ""}
-          </span>
-        {/if}
+      <div class="select__trigger-area">
+        <button
+          type="button"
+          class="select__trigger"
+          id={selectId}
+          {disabled}
+          aria-expanded={open ? "true" : "false"}
+          aria-haspopup="listbox"
+          aria-controls={open ? listboxId : undefined}
+          aria-label={ariaLabel ?? undefined}
+          aria-describedby={describedBy ?? undefined}
+          on:click={handleTriggerClick}
+          on:keydown={handleKeydown}
+        >
+          {#if $$slots.trigger}
+            <slot name="trigger" selectedOption={selectedOption} {open} {placeholder} />
+          {:else}
+            <span class="select__value" data-placeholder={!hasSelection}>
+              {selectedOption?.label ?? placeholder ?? ""}
+            </span>
+          {/if}
+        </button>
         {#if clearable && hasSelection && !disabled}
           <button
             type="button"
@@ -458,7 +460,7 @@
         <span class="select__indicator" aria-hidden="true">
           <Icon name="chevron-down" />
         </span>
-      </button>
+      </div>
     {/if}
 
     <!-- Hidden input for form submission -->
@@ -763,9 +765,10 @@
     display: flex;
     align-items: center;
     gap: 0.25rem;
-    width: 100%;
-    min-height: var(--poodle-size-control-height);
-    padding: 0 var(--poodle-space-control-x);
+    flex: 1;
+    min-width: 0;
+    min-height: calc(var(--poodle-size-control-height) - 0.125rem);
+    padding: 0;
     border: 0;
     background: transparent;
     color: var(--poodle-color-text-primary);
@@ -909,9 +912,11 @@
   .select--custom[data-density="compact"] { padding: 0; }
   .select--custom[data-density="compact"] .select__trigger-area,
   .select--custom[data-density="compact"] .select__trigger { padding: 0 calc(var(--poodle-space-control-x) - 0.125rem); }
+  .select--custom[data-density="compact"] .select__trigger { padding: 0; }
   .select--custom[data-density="comfortable"] { padding: 0; }
   .select--custom[data-density="comfortable"] .select__trigger-area,
   .select--custom[data-density="comfortable"] .select__trigger { padding: 0 calc(var(--poodle-space-control-x) + 0.125rem); }
+  .select--custom[data-density="comfortable"] .select__trigger { padding: 0; }
 
   /* ═══ SIZE VARIANTS ═══ */
   .select[data-size="xs"] { min-height: calc(var(--poodle-size-control-height) - 0.5rem); padding: 0 calc(var(--poodle-space-control-x) - 0.125rem); }
