@@ -75,7 +75,7 @@
   <div class="specimen__group">
     <Eyebrow>Dual labels and tones</Eyebrow>
     <Switch
-      checked={true}
+      defaultChecked={true}
       leftLabel="Draft"
       rightLabel="Live"
       leftTone="danger"
@@ -83,7 +83,7 @@
       ariaLabel="Publication status"
     />
     <Switch
-      checked={false}
+      defaultChecked={false}
       leftLabel="Restricted"
       rightLabel="Free"
       leftTone="warning"
