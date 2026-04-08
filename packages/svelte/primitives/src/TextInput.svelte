@@ -118,9 +118,9 @@
   $: showValidationIndicator = showValidationStatus && effectiveValidationState !== "none";
   $: validationIcon =
     effectiveValidationState === "valid"
-      ? "circle-check"
+      ? "check"
       : effectiveValidationState === "invalid"
-        ? "circle-x"
+        ? "x"
         : null;
   $: contextKey = serializeValidationContext(validationContext);
 
