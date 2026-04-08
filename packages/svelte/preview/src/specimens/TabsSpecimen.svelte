@@ -48,7 +48,7 @@
 
 <div class="specimen">
   <div class="specimen__group">
-    <Eyebrow>Underline variant (default, with panel)</Eyebrow>
+    <Eyebrow>Text variant (default, with indicator line)</Eyebrow>
     <Tabs
       items={basicTabs}
       defaultValue="overview"
@@ -57,6 +57,16 @@
     >
       <p>Active tab: <strong>{activeValue}</strong></p>
     </Tabs>
+  </div>
+
+  <div class="specimen__group">
+    <Eyebrow>Text variant (no indicator line)</Eyebrow>
+    <Tabs
+      items={basicTabs}
+      defaultValue="overview"
+      showIndicator={false}
+      ariaLabel="Section tabs without indicator"
+    />
   </div>
 
   <div class="specimen__group">

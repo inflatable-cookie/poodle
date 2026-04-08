@@ -33,9 +33,11 @@
   export let value: string | null = null;
   export let defaultValue: string | null = null;
   export let items: TabItem[] = [];
-  export let variant: TabVariant = "underline";
+  export let variant: TabVariant = "text";
   export let orientation: Orientation = "horizontal";
   export let activationMode: TabActivationMode = "automatic";
+  /** When false, hides the bottom border indicator line on the text variant. */
+  export let showIndicator = true;
   export let size: ControlSize | null = null;
   export let sizeRole: SemanticControlSizeRole = "chrome";
   export let density: ControlDensity | null = null;
@@ -76,6 +78,7 @@
   $: hasPanel = $$slots.default;
   $: isVertical = orientation === "vertical";
   $: hasTooltips = isVertical || showTooltips;
+  $: resolvedVariant = variant === "underline" ? "text" : variant;
   $: resolvedSize = size ?? resolveSemanticControlSize($uiPresentation.sizeScale, sizeRole);
   $: resolvedDensity = density ?? $uiPresentation.density;
   $: resolvedIconSize = resolveSupportingVisualSize(resolvedSize);
@@ -278,7 +281,8 @@
 
 <div
   class="poodle-tabs"
-  data-variant={variant}
+  data-variant={resolvedVariant}
+  data-show-indicator={showIndicator}
   data-orientation={orientation}
   data-size={resolvedSize}
   data-density={resolvedDensity}
@@ -444,12 +448,15 @@
   }
 
   /* Underline: bottom border on list */
-  .poodle-tabs[data-variant="underline"] .poodle-tabs__list {
+  .poodle-tabs[data-variant="text"] .poodle-tabs__list {
     padding-bottom: var(--poodle-space-inline-sm);
+  }
+
+  .poodle-tabs[data-variant="text"][data-show-indicator="true"] .poodle-tabs__list {
     border-bottom: 0.0625rem solid color-mix(in srgb, var(--poodle-color-border-subtle) 82%, transparent);
   }
 
-  .poodle-tabs[data-variant="underline"][data-orientation="vertical"] .poodle-tabs__list {
+  .poodle-tabs[data-variant="text"][data-orientation="vertical"] .poodle-tabs__list {
     flex-direction: column;
     padding-bottom: 0;
     padding-right: 0.5rem;
@@ -585,11 +592,11 @@
   }
 
   /* Underline variant: pill-shaped highlight on selected */
-  .poodle-tabs[data-variant="underline"] .poodle-tabs__tab {
+  .poodle-tabs[data-variant="text"] .poodle-tabs__tab {
     border-radius: var(--poodle-radius-control);
   }
 
-  .poodle-tabs[data-variant="underline"] .poodle-tabs__item[data-selected="true"] .poodle-tabs__tab {
+  .poodle-tabs[data-variant="text"] .poodle-tabs__item[data-selected="true"] .poodle-tabs__tab {
     background: color-mix(in srgb, var(--poodle-color-accent-base) 18%, transparent);
     color: var(--poodle-color-text-primary);
   }

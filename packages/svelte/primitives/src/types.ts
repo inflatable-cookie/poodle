@@ -122,7 +122,7 @@ export interface TabItem {
   separator?: boolean;
 }
 
-export type TabVariant = "underline" | "card" | "pill" | "strip" | "block";
+export type TabVariant = "text" | "card" | "pill" | "strip" | "block" | "underline";
 
 /** @deprecated Use TabItem instead */
 export type TabDefinition = TabItem;
