@@ -297,4 +297,10 @@
   .switch[data-size="xl"] .switch__control:checked ~ .switch__track .switch__thumb {
     transform: translateX(calc(var(--poodle-size-icon-default) + 0.125rem));
   }
+
+  /* Label size variants */
+  .switch[data-size="xs"] .switch__label { font-size: 0.6875rem; }
+  .switch[data-size="sm"] .switch__label { font-size: 0.75rem; }
+  .switch[data-size="lg"] .switch__label { font-size: 0.875rem; }
+  .switch[data-size="xl"] .switch__label { font-size: 0.9375rem; }
 </style>
