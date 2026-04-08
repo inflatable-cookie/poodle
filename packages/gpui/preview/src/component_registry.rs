@@ -21,7 +21,6 @@ pub static PRIMITIVES: &[ComponentEntry] = &[
     ComponentEntry { slug: "code", display_name: "Code", description: "Syntax-highlighted code display." },
     ComponentEntry { slug: "collapsible", display_name: "Collapsible", description: "Show/hide content toggle." },
     ComponentEntry { slug: "color-picker", display_name: "ColorPicker", description: "Color selection with swatches." },
-    ComponentEntry { slug: "combobox", display_name: "Combobox", description: "Text input with dropdown." },
     ComponentEntry { slug: "context-menu", display_name: "ContextMenu", description: "Right-click triggered menu." },
     ComponentEntry { slug: "date-picker", display_name: "DatePicker", description: "Date selection with calendar." },
     ComponentEntry { slug: "date-range-picker", display_name: "DateRangePicker", description: "Dual calendar date range." },

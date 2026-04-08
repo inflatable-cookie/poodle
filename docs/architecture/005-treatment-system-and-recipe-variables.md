@@ -135,9 +135,9 @@ This pattern ensures:
 |---|---|
 | `interactive` | Button (secondary/ghost), IconButton (secondary), SplitButton, Toggle, ToggleGroup, SegmentedControl (track), Tabs (card variant items) |
 | `interactive-primary` | Button (primary), SplitButton (primary), IconButton (primary) |
-| `interactive-subtle` | TextInput, TextArea, SearchField, Select, Combobox (input) |
+| `interactive-subtle` | TextInput, TextArea, SearchField, Select |
 | `surface` | Surface, Card (default/outlined), MetricTile |
-| `surface-elevated` | Surface (elevated), Card (elevated), Dialog, Drawer, Popover, Menu (overlay), HoverCard, Tooltip, Combobox (list), SplitButton (menu) |
+| `surface-elevated` | Surface (elevated), Card (elevated), Dialog, Drawer, Popover, Menu (overlay), HoverCard, Tooltip, SplitButton (menu) |
 | `focus-ring` | (reserved — currently uses accent token directly) |
 
 ## How to Apply Treatments
@@ -280,7 +280,6 @@ redefine canonical token meaning.
 - `packages/svelte/primitives/src/TextInput.svelte` — interactive-subtle (reference pattern)
 - `packages/svelte/primitives/src/TextArea.svelte` — interactive-subtle
 - `packages/svelte/primitives/src/Select.svelte` — interactive-subtle
-- `packages/svelte/primitives/src/Combobox.svelte` — interactive-subtle (input), surface-elevated (list)
 - `packages/svelte/primitives/src/Card.svelte` — surface and surface-elevated
 - `packages/svelte/primitives/src/Surface.svelte` — surface and surface-elevated
 - `packages/svelte/primitives/src/Dialog.svelte` — surface-elevated

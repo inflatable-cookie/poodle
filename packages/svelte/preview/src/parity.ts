@@ -490,7 +490,6 @@ const packageSurfaceCoverageGroups: PackageSurfaceCoverageGroup[] = [
       "Card",
       "ColorPicker",
       "Code",
-      "Combobox",
       "CollapseToggle",
       "ContextMenu",
       "DateRangePicker",

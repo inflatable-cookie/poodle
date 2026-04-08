@@ -12,7 +12,6 @@ mod code;
 mod collapse_toggle;
 mod collapsible;
 mod color_picker;
-mod combobox;
 mod context_menu;
 mod date_picker;
 mod date_range_picker;
@@ -97,8 +96,6 @@ pub use code::Code;
 pub use collapse_toggle::CollapseToggle;
 pub use collapsible::Collapsible;
 pub use color_picker::ColorPicker;
-/// Deprecated: use `Select` with `searchable(true)` instead.
-pub use combobox::Combobox;
 pub use context_menu::ContextMenu;
 pub use date_picker::DatePicker;
 pub use date_range_picker::DateRangePicker;

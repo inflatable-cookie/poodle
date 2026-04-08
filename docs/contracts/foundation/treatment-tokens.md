@@ -217,7 +217,6 @@ No tokens are currently defined for this role.
 | TextArea | radius, fill, fill-focus, border, border-focus, shadow, shadow-focus |
 | SearchInput | radius (via calc), fill-hover |
 | Select | radius, fill, fill-focus, border, shadow, shadow-focus |
-| Combobox (input part) | radius, fill, fill-focus, border, shadow, shadow-focus |
 
 ### surface role
 
@@ -241,7 +240,6 @@ No tokens are currently defined for this role.
 | ContextMenu | radius, fill, border, shadow |
 | HoverCard | radius, fill, border, shadow |
 | Tooltip | radius, fill, border, shadow |
-| Combobox (list part) | radius, fill, border, shadow |
 | SplitButton (menu part) | radius, fill, border, shadow |
 
 ## 5. Theme Integration

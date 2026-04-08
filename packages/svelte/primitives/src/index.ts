@@ -10,8 +10,6 @@ export { default as Code } from "./Code.svelte";
 export { default as ColorPicker } from "./ColorPicker.svelte";
 export { default as Checkbox } from "./Checkbox.svelte";
 export { default as Calendar } from "./Calendar.svelte";
-/** @deprecated Use `Select` with `searchable` prop instead. Migrate to `<Select searchable options={...} />`. */
-export { default as Combobox } from "./Combobox.svelte";
 export { default as ContextMenu } from "./ContextMenu.svelte";
 export { default as CollapseToggle } from "./CollapseToggle.svelte";
 export { default as Collapsible } from "./Collapsible.svelte";
@@ -117,7 +115,6 @@ export type {
   ButtonVariant,
   CalendarWeekStart,
   CollapseDirection,
-  ComboboxOption,
   ControlDensity,
   ControlSize,
   SemanticControlSizeRole,

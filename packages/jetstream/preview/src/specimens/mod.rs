@@ -24,7 +24,6 @@ pub mod code;
 pub mod collapse_toggle;
 pub mod collapsible;
 pub mod color_picker;
-pub mod combobox;
 pub mod command_palette;
 pub mod confirm_action;
 pub mod context_menu;
@@ -250,7 +249,6 @@ fn render_specimen(slug: &str, theme: &JetstreamThemeProvider) -> Option<JsEl> {
         "collapse-toggle" => Some(collapse_toggle::render(theme)),
         "collapsible" => Some(collapsible::render(theme)),
         "color-picker" => Some(color_picker::render(theme)),
-        "combobox" => Some(combobox::render(theme)),
         "command-palette" => Some(command_palette::render(theme)),
         "confirm-action" => Some(confirm_action::render(theme)),
         "context-menu" => Some(context_menu::render(theme)),

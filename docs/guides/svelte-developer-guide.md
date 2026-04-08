@@ -1060,20 +1060,6 @@ Grouped options:
 />
 ```
 
-### Combobox
-
-Searchable select with type-ahead:
-
-```svelte
-<Combobox
-  id="assignee"
-  options={users}
-  value={assignee}
-  placeholder="Search users..."
-  on:valueChange={(e) => assignee = e.detail.value}
-/>
-```
-
 ---
 
 ## Composite Patterns
@@ -1328,7 +1314,7 @@ interface MenuItem {
 
 **Action:** Button, IconButton, SplitButton
 **Input:** TextInput, TextArea, NumberInput, SearchInput, CodeInput, DurationInput, ColorPicker
-**Selection:** Checkbox, Switch, RadioGroup, Select, Combobox, SegmentedControl, Toggle, ToggleGroup, TriStateSwitch, Slider, RangeSlider, Rating
+**Selection:** Checkbox, Switch, RadioGroup, Select, SegmentedControl, Toggle, ToggleGroup, TriStateSwitch, Slider, RangeSlider, Rating
 **Date/Time:** Calendar, RangeCalendar, DatePicker, DateRangePicker, DateTimePicker, DateTimeRangePicker, ZonedDateTimePicker, TimeField, TimeZoneSelect
 **Layout:** Box, Grid, Stack, Spacer, Separator, Surface, Region, ScrollShell
 **Navigation:** Breadcrumbs, Pagination, PaginationSummary, Tabs, Menu, Menubar, NavigationMenu

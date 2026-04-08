@@ -37,7 +37,6 @@ mod radio_group;
 mod switch;
 mod tri_state_switch;
 mod select;
-mod combobox;
 mod segmented_control;
 mod toggle_group;
 mod slider;
@@ -266,7 +265,6 @@ pub fn render_single_specimen(
         "switch" => specimen_card("Switch", theme, switch::render(state, cx)),
         "tri-state-switch" => specimen_card("TriStateSwitch", theme, tri_state_switch::render(state, cx)),
         "select" => specimen_card("Select", theme, select::render(state, cx)),
-        "combobox" => specimen_card("Combobox", theme, combobox::render(state, cx)),
         "segmented-control" => specimen_card("SegmentedControl", theme, segmented_control::render(state, cx)),
         "slider" => specimen_card("Slider", theme, slider::render(state, cx)),
         "range-slider" => specimen_card("RangeSlider", theme, range_slider::render(theme)),

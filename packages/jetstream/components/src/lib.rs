@@ -95,7 +95,6 @@ pub mod breadcrumbs_comp;
 pub mod bulk_action_bar;
 pub mod calendar;
 pub mod color_picker;
-pub mod combobox;
 pub mod context_menu;
 pub mod date_picker;
 pub mod date_range_picker;

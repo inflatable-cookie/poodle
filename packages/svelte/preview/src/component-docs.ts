@@ -522,38 +522,6 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
 <ColorPicker bind:value={color} {swatches} showAlpha />`,
   },
 
-  combobox: {
-    props: [
-      { name: "size", type: "ControlSize | null", default: "null", description: "Explicit size override. Supports xs, sm, md, lg, and xl." },
-      { name: "sizeRole", type: '"chrome" | "control" | "prominent"', default: '"control"', description: "Semantic size offset relative to the inherited presentation scale." },
-      { name: "density", type: "ControlDensity | null", default: "null", description: "Explicit density override. Supports compact, default, and comfortable." },
-      { name: "value", type: "string | null", default: "null", description: "Controlled selected value." },
-      { name: "defaultValue", type: "string | null", default: "null", description: "Initial value for uncontrolled mode." },
-      { name: "options", type: "ComboboxOption[]", default: "[]", description: "Array of selectable options." },
-      { name: "placeholder", type: "string | null", default: "null", description: "Placeholder text when no value is selected." },
-      { name: "disabled", type: "boolean", default: "false", description: "Whether the combobox is disabled." },
-      { name: "ariaLabel", type: "string | null", default: "null", description: "Accessible label for the combobox." },
-    ],
-    slots: [],
-    events: [
-      { name: "valueChange", payload: "{ value: string }", description: "Fires when the selected value changes." },
-      { name: "queryChange", payload: "{ query: string }", description: "Fires when the search query text changes." },
-      { name: "openChange", payload: "{ open: boolean }", description: "Fires when the dropdown open state changes." },
-    ],
-    usage: `<!-- DEPRECATED: Use <Select searchable> instead -->
-<script lang="ts">
-  import { Select } from "@poodle/svelte-primitives";
-
-  const options = [
-    { value: "us", label: "United States" },
-    { value: "ca", label: "Canada" },
-    { value: "mx", label: "Mexico" },
-  ];
-</script>
-
-<!-- Before (deprecated): <Combobox {options} placeholder="Search countries..." /> -->
-<Select {options} searchable placeholder="Search countries..." />`,
-  },
 
   "command-palette": {
     props: [
@@ -2965,7 +2933,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
 <!-- Custom dropdown with rich options -->
 <Select options={fruits} native={false} placeholder="Choose..." />
 
-<!-- Searchable (replaces Combobox) -->
+<!-- Searchable -->
 <Select options={fruits} searchable placeholder="Search fruits..." />
 
 <!-- Freeform autocomplete -->

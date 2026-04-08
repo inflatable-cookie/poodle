@@ -15,7 +15,6 @@ Contract-backed Svelte primitive surface for the first generalized Poodle baseli
 - `Card`
 - `Checkbox`
 - `Code`
-- `Combobox`
 - `CollapseToggle`
 - `Collapsible`
 - `ColorPicker`

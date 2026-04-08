@@ -1217,19 +1217,6 @@
       },
       {
         "packageName": "@poodle/svelte-primitives",
-        "exportName": "Combobox",
-        "kind": "component",
-        "status": "previewed",
-        "note": "Every public primitive export is directly reviewable from the catalogue.",
-        "sectionIds": [
-          "catalog-hub"
-        ],
-        "sectionTitles": [
-          "Catalog hub"
-        ]
-      },
-      {
-        "packageName": "@poodle/svelte-primitives",
         "exportName": "compressImage",
         "kind": "helper",
         "status": "previewed",

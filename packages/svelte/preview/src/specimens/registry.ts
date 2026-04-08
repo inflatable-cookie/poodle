@@ -18,7 +18,6 @@ import CardRadioGroupSpecimen from "./CardRadioGroupSpecimen.svelte";
 import CheckboxSpecimen from "./CheckboxSpecimen.svelte";
 import ConfirmActionSpecimen from "./ConfirmActionSpecimen.svelte";
 import CollapsibleSpecimen from "./CollapsibleSpecimen.svelte";
-import ComboboxSpecimen from "./ComboboxSpecimen.svelte";
 import ContextMenuSpecimen from "./ContextMenuSpecimen.svelte";
 import DataTableSpecimen from "./DataTableSpecimen.svelte";
 import DatePickerSpecimen from "./DatePickerSpecimen.svelte";
@@ -147,7 +146,6 @@ export const specimenMap: Record<string, typeof SvelteComponent<any>> = {
   "card-radio-group": CardRadioGroupSpecimen,
   checkbox: CheckboxSpecimen,
   collapsible: CollapsibleSpecimen,
-  combobox: ComboboxSpecimen,
   "confirm-action": ConfirmActionSpecimen,
   "context-menu": ContextMenuSpecimen,
   "data-table": DataTableSpecimen,

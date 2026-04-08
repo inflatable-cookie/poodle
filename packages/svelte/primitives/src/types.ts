@@ -199,13 +199,6 @@ export interface TableRow {
   summary?: string | null;
 }
 
-export interface ComboboxOption {
-  value: string;
-  label: string;
-  description?: string;
-  disabled?: boolean;
-}
-
 export interface PasswordRequirementsPolicy {
   minLength: number;
   requireMixedCase: boolean;

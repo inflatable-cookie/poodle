@@ -44,7 +44,7 @@
         { name: "--poodle-treatment-interactive-subtle-shadow-hover", purpose: "Hover shadow" },
         { name: "--poodle-treatment-interactive-subtle-shadow-focus", purpose: "Focus shadow" },
       ],
-      components: ["TextInput", "TextArea", "SearchInput", "Select", "Combobox (input)"],
+      components: ["TextInput", "TextArea", "SearchInput", "Select"],
     },
     {
       name: "surface",
@@ -71,7 +71,7 @@
         { name: "--poodle-treatment-surface-elevated-border", purpose: "Border color" },
         { name: "--poodle-treatment-surface-elevated-shadow", purpose: "Shadow" },
       ],
-      components: ["Surface (elevated)", "Card (elevated)", "Dialog", "Drawer", "Popover", "Menu (overlay)", "HoverCard", "Tooltip", "Combobox (list)", "SplitButton (menu)"],
+      components: ["Surface (elevated)", "Card (elevated)", "Dialog", "Drawer", "Popover", "Menu (overlay)", "HoverCard", "Tooltip", "SplitButton (menu)"],
     },
     {
       name: "focus-ring",

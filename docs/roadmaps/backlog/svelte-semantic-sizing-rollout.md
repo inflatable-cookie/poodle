@@ -44,7 +44,7 @@ rules that visually respond to all five size stops (xs, sm, md, lg, xl).
 
 Button, IconButton, Icon, Spinner, Pill, Toggle, SplitButton, Tabs,
 ToggleGroup, TriStateSwitch, SegmentedControl, Toolbar, Checkbox,
-RadioGroup, Switch, TextInput, Select, Combobox, NumberEntry, Slider,
+RadioGroup, Switch, TextInput, Select, NumberEntry, Slider,
 RangeSlider, Rating, PinInput, Pagination, Menu, DatePicker, TextArea,
 SearchInput, EditableLabel, FileUpload, DurationInput, ColorPicker,
 DateRangePicker, DateTimePicker, DateTimeRangePicker, TimeField,
@@ -81,7 +81,6 @@ experience responds coherently to workspace presentation.
 | TextInput | yes (CSS only) | `control` | has control-height token but no sizeRole prop |
 | TextArea | no | `control` | needs full implementation |
 | Select | yes (CSS only) | `control` | has control-height token but no sizeRole prop |
-| Combobox | yes (CSS only) | `control` | has control-height token but no sizeRole prop |
 | SearchInput | no | `control` | needs full implementation |
 
 Status: ✅ complete — props + CSS variants landed

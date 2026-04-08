@@ -43,7 +43,6 @@ pub static PRIMITIVES: &[ComponentEntry] = &[
     ComponentEntry { slug: "code", display_name: "Code", description: "Syntax-highlighted code display.", tier: Tier::Primitive, has_specimen: true },
     ComponentEntry { slug: "collapsible", display_name: "Collapsible", description: "Show/hide content toggle.", tier: Tier::Primitive, has_specimen: true },
     ComponentEntry { slug: "color-picker", display_name: "ColorPicker", description: "Color selection with swatches.", tier: Tier::Primitive, has_specimen: true },
-    ComponentEntry { slug: "combobox", display_name: "Combobox", description: "Text input with dropdown.", tier: Tier::Primitive, has_specimen: true },
     ComponentEntry { slug: "context-menu", display_name: "ContextMenu", description: "Right-click triggered menu.", tier: Tier::Primitive, has_specimen: true },
     ComponentEntry { slug: "date-picker", display_name: "DatePicker", description: "Date selection with calendar.", tier: Tier::Primitive, has_specimen: true },
     ComponentEntry { slug: "date-range-picker", display_name: "DateRangePicker", description: "Dual calendar date range.", tier: Tier::Primitive, has_specimen: true },

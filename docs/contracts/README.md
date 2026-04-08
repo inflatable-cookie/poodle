@@ -51,7 +51,6 @@ above it in downstream repos such as Loophole.
 - `foundation/collapse-toggle.md`
 - `foundation/collapsible.md`
 - `foundation/color-picker.md`
-- `foundation/combobox.md`
 - `foundation/context-menu.md`
 - `foundation/date-picker.md`
 - `foundation/date-range-picker.md`

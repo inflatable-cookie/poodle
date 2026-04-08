@@ -50,7 +50,6 @@ export const primitiveComponents: ComponentEntry[] = [
   entry("ColorPicker", "primitive", P, "Color selection with native picker, hex input, and swatches.", true),
   entry("CollapseToggle", "primitive", P, "Directional chevron toggle for collapsing/expanding regions.", true),
   entry("Collapsible", "primitive", P, "Show/hide content toggle without accordion grouping.", true),
-  entry("Combobox", "primitive", P, "Text input with filtered dropdown suggestions.", true),
   entry("ContextMenu", "primitive", P, "Right-click triggered menu overlay.", true),
   entry("DatePicker", "primitive", P, "Date selection with calendar popup.", true),
   entry("DetailItem", "primitive", P, "Label-value pair for metadata display.", true),
