@@ -30,19 +30,5 @@
         "$value": "{primitives.space.6}"
       }
     }
-  },
-  "size": {
-    "control": {
-      "height": {
-        "$type": "dimension",
-        "$value": "{primitives.size.control.lg}"
-      }
-    },
-    "panel": {
-      "header": {
-        "$type": "dimension",
-        "$value": "2.75rem"
-      }
-    }
   }
 }

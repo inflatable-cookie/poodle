@@ -24,8 +24,6 @@ pub const COMFORTABLE: DensityDefinition = DensityDefinition {
     ("semantic.space.control.y", "0.75rem"),
     ("semantic.space.stack.md", "1rem"),
     ("semantic.space.stack.lg", "1.5rem"),
-    ("semantic.size.control.height", "2.75rem"),
-    ("semantic.size.panel.header", "2.75rem"),
     ],
 };
 
@@ -39,8 +37,6 @@ pub const COMPACT: DensityDefinition = DensityDefinition {
     ("semantic.space.control.y", "0.25rem"),
     ("semantic.space.stack.md", "0.5rem"),
     ("semantic.space.stack.lg", "1rem"),
-    ("semantic.size.control.height", "1.75rem"),
-    ("semantic.size.panel.header", "2.25rem"),
     ],
 };
 
@@ -54,8 +50,6 @@ pub const DEFAULT: DensityDefinition = DensityDefinition {
     ("semantic.space.control.y", "0.5rem"),
     ("semantic.space.stack.md", "0.75rem"),
     ("semantic.space.stack.lg", "1.25rem"),
-    ("semantic.size.control.height", "2.25rem"),
-    ("semantic.size.panel.header", "2.5rem"),
     ],
 };
 
