@@ -379,7 +379,7 @@
     --poodle-button-fill-hover: var(--poodle-color-accent-hover, color-mix(in srgb, var(--poodle-color-accent-base) 88%, black));
     --poodle-button-fill-active: color-mix(in srgb, var(--poodle-color-accent-base) 82%, black);
     --poodle-button-border: color-mix(in srgb, var(--poodle-color-accent-base) 85%, black);
-    --poodle-button-text: var(--poodle-color-text-inverse);
+    --poodle-button-text: var(--poodle-color-accent-contrast, #fff);
     --poodle-button-shadow: none;
   }
 
