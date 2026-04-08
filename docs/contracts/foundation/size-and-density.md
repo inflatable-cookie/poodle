@@ -1,7 +1,7 @@
 # Size and Density
 
 Status: stable contract
-Updated: 2026-03-30
+Updated: 2026-04-01
 
 ## 1. Purpose
 
@@ -244,6 +244,11 @@ Every component that accepts `size` or `density` must satisfy:
 
 Note: `--poodle-size-control-height` is set by size-scale mode, not density.
 Density overlays adjust spacing tokens only.
+
+**Important:** Density overlays no longer set `--poodle-size-control-height` or
+`--poodle-size-panel-header`. These are size-only tokens set exclusively by the
+control-size overlays. Earlier implementations that included these tokens in
+density overlays should be updated to remove them.
 
 ### TypeScript helpers (presentation.ts)
 

@@ -3,7 +3,7 @@
 > **Surface elevation**: Table header is a surface consumer (60% medium-strong contrast) — see [surface-elevation.md](./surface-elevation.md).
 
 Status: detailed contract
-Updated: 2026-03-15
+Updated: 2026-04-01
 
 ## 1. Purpose
 
@@ -151,9 +151,11 @@ TableRow: { id: string; cells: Record<string, string> }
 
 | Property | Value |
 |----------|-------|
-| `padding` | `var(--poodle-space-panel-y) var(--poodle-space-panel-x) 0` |
+| `padding` | `var(--poodle-space-panel-y)` |
 | `color` | `var(--poodle-color-text-secondary)` |
-| `font-size` | `0.75rem` |
+| `font-family` | `var(--poodle-typography-label-family)` |
+| `font-size` | `0.8125rem` |
+| `font-weight` | `500` |
 | `text-align` | `left` |
 
 ### Column Header `.table__header`

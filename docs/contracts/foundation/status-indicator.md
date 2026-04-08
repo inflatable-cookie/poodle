@@ -1,7 +1,7 @@
 # Status Indicator
 
 Status: detailed contract
-Updated: 2026-03-15
+Updated: 2026-04-01
 
 ## 1. Purpose
 
@@ -35,6 +35,9 @@ Updated: 2026-03-15
 | `status` | `"neutral" \| "info" \| "success" \| "warning" \| "danger" \| "pending"` | `"neutral"` | no | semantic status tone |
 | `label` | `string \| null` | `null` | no | optional short visible label text |
 | `ariaLabel` | `string \| null` | `null` | no | explicit accessible label when visible label is absent or abbreviated |
+| `size` | `"xs" \| "sm" \| "md" \| "lg" \| "xl"` | `null` | no | explicit size override; when null, resolves from inherited presentation |
+| `sizeRole` | `"chrome" \| "control" \| "prominent"` | `"control"` | no | semantic size offset from inherited presentation |
+| `density` | `ControlDensity \| null` | `null` | no | explicit density override for spacing |
 
 ### Controlled And Uncontrolled
 
@@ -52,7 +55,7 @@ Updated: 2026-03-15
 | State | Trigger | Expected Result |
 |-------|---------|-----------------|
 | neutral | `status="neutral"` (default) | dot uses `--poodle-color-text-secondary` |
-| info | `status="info"` | dot uses `--poodle-color-accent-base` |
+| info | `status="info"` | dot uses `--poodle-color-status-info` (fallback `#3b82f6`) |
 | success | `status="success"` | dot uses `--poodle-color-status-success` |
 | warning | `status="warning"` | dot uses `--poodle-color-status-warning` |
 | danger | `status="danger"` | dot uses `--poodle-color-status-danger` |
@@ -123,7 +126,7 @@ No internal state. Status is fully parent-controlled.
 
 | Selector | `--poodle-status-color` Value |
 |----------|---------------------------|
-| `[data-status="info"]` | `var(--poodle-color-accent-base)` |
+| `[data-status="info"]` | `var(--poodle-color-status-info, #3b82f6)` |
 | `[data-status="success"]` | `var(--poodle-color-status-success)` |
 | `[data-status="warning"]` | `var(--poodle-color-status-warning)` |
 | `[data-status="danger"]` | `var(--poodle-color-status-danger)` |
@@ -170,13 +173,24 @@ When `status="pending"`, the dot receives:
 | `font-weight` | `600` |
 | `line-height` | `1.3` |
 
+### Size adjustments
+
+| Size | Dot size | Label font-size |
+|------|----------|----------------|
+| `xs` | `0.375rem` | `0.625rem` |
+| `sm` | `0.4375rem` | `0.6875rem` |
+| `md` | `0.5625rem` | `0.75rem` |
+| `lg` | `0.6875rem` | `0.8125rem` |
+| `xl` | `0.8125rem` | `0.875rem` |
+
 ### Token Reference
 
 | Token | Role |
 |-------|------|
 | `--poodle-color-text-secondary` | neutral dot color (default) |
 | `--poodle-color-text-primary` | label text color |
-| `--poodle-color-accent-base` | info and pending dot color |
+| `--poodle-color-status-info` | info dot color (fallback `#3b82f6`) |
+| `--poodle-color-accent-base` | pending dot color |
 | `--poodle-color-status-success` | success dot color |
 | `--poodle-color-status-warning` | warning dot color |
 | `--poodle-color-status-danger` | danger dot color |
@@ -188,6 +202,8 @@ When `status="pending"`, the dot receives:
   the root, then consumed by the dot's `background` and `box-shadow`
 - Data attribute `data-status` on root controls the color override via CSS
   selectors
+- `data-size` on root reflects the resolved size
+- `data-density` on root reflects the resolved density value (`compact`, `default`, or `comfortable`)
 - Label content can come from prop or default slot
 
 ## 10. GPUI Notes

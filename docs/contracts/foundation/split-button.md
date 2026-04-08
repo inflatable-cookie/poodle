@@ -1,7 +1,7 @@
 # SplitButton
 
 Status: detailed contract
-Updated: 2026-03-25
+Updated: 2026-04-01
 
 ## 1. Purpose
 
@@ -207,6 +207,15 @@ type MenuItem = {
 | `sm` | `calc(var(--poodle-size-control-height) - 0.375rem)` | `0.75rem` |
 | `md` | `var(--poodle-size-control-height)` | `var(--poodle-typography-label-size)` |
 | `lg` | `calc(var(--poodle-size-control-height) + 0.375rem)` | `0.875rem` |
+
+### Density variants
+
+| Density | `gap` |
+|---------|-------|
+| `compact` | `0` |
+| `comfortable` | `0` |
+
+Note: Both density variants set `gap: 0` on the root, removing the default spacing between the primary and toggle halves. The `default` density uses the standard root layout without an explicit gap override.
 
 ### Primary half
 

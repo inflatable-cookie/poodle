@@ -1,7 +1,7 @@
 # Tabs
 
 Status: detailed contract
-Updated: 2026-03-30
+Updated: 2026-04-01
 
 ## 1. Purpose
 
@@ -11,7 +11,7 @@ Updated: 2026-03-30
   active content panel
 - In scope: tablist semantics, tab activation, tab-panel relationship,
   orientation, automatic vs manual activation, visual variants
-  (underline/card/pill/strip/block), reorderable tabs, closable tabs, tab counts,
+  (text/card/pill/strip/block), reorderable tabs, closable tabs, tab counts,
   optional visual separators, actions slot, lightweight URL query sync
 - Out of scope: docking, overflow menus
 
@@ -49,7 +49,8 @@ Updated: 2026-03-30
 | `value` | `string \| null` | `null` | no | controlled active tab |
 | `defaultValue` | `string \| null` | `null` | no | uncontrolled initial active tab |
 | `items` | `TabItem[]` | `[]` | yes | tab definitions |
-| `variant` | `"underline" \| "card" \| "pill" \| "strip" \| "block"` | `"underline"` | no | visual variant |
+| `variant` | `"text" \| "card" \| "pill" \| "strip" \| "block"` | `"text"` | no | visual variant (`"underline"` is a deprecated alias for `"text"`) |
+| `bordered` | `boolean` | `true` | no | when false, hides the bottom border line on the text variant |
 | `orientation` | `"horizontal" \| "vertical"` | `"horizontal"` | no | navigation axis |
 | `activationMode` | `"automatic" \| "manual"` | `"automatic"` | no | whether focus changes selection |
 | `size` | `"xs" \| "sm" \| "md" \| "lg" \| "xl"` | `null` | no | explicit control size override; when null, resolves from inherited presentation |
@@ -142,7 +143,7 @@ Updated: 2026-03-30
 
 - Root: `display: grid`, `gap: space-stack-md`, `min-width: 0`
 - Vertical: `grid-template-columns: auto minmax(0, 1fr)`, `align-items: start`
-- List: `display: inline-flex`, `flex-wrap: wrap` (underline), `flex-wrap: nowrap` (card/pill)
+- List: `display: inline-flex`, `flex-wrap: wrap` (text), `flex-wrap: nowrap` (card/pill)
 - Card/Pill/Strip overflow: `overflow-x: auto; overflow-y: hidden`
 - Item: `display: inline-flex`, `align-items: center`, `min-width: 0`, `position: relative`
 
@@ -178,14 +179,16 @@ Updated: 2026-03-30
 | `align-items` | `stretch` |
 | `gap` | `0.25rem` |
 
-### List — Underline variant
+### List — Text variant
 
 | Property | Value |
 |----------|-------|
 | `padding-bottom` | `0.25rem` |
 | `border-bottom` | `0.0625rem solid color-mix(in srgb, var(--poodle-color-border-subtle) 82%, transparent)` |
 
-### List — Underline vertical
+When `bordered` is `false`, the `border-bottom` is removed (set to `0`).
+
+### List — Text vertical
 
 | Property | Value |
 |----------|-------|
@@ -254,13 +257,13 @@ Updated: 2026-03-30
 | `line-height` | `1` |
 | `white-space` | `nowrap` |
 
-### Tab — Underline variant
+### Tab — Text variant
 
 | Property | Value |
 |----------|-------|
 | `border-radius` | `var(--poodle-radius-control)` |
 
-### Tab — Underline variant (selected)
+### Tab — Text variant (selected)
 
 | Property | Value |
 |----------|-------|
@@ -357,14 +360,18 @@ Updated: 2026-03-30
 | `padding` | `0 var(--poodle-space-control-x)` |
 | `border-radius` | `0` |
 
-### Tab — Block variant (selected)
+### Item — Block variant (selected)
+
+Note: In the block variant, the selected background is applied on the **item wrapper**, not the tab button itself.
 
 | Property | Value |
 |----------|-------|
 | `background` | `color-mix(in srgb, var(--poodle-color-accent-base) 14%, var(--poodle-color-background-surface))` |
 | `color` | `var(--poodle-color-text-primary)` |
 
-### Tab — Block variant (hover)
+### Item — Block variant (hover)
+
+Note: In the block variant, the hover background is applied on the **item wrapper**, not the tab button itself.
 
 | Property | Value |
 |----------|-------|
@@ -531,8 +538,9 @@ Updated: 2026-03-30
 - Spec struct: `TabsSpec` in primitives crate holds tab definitions + variant
 - Component struct: `PoodleTabs` in components crate renders via `IntoElement`
 - Opacity multipliers centralized in spec: `pill_border_opacity() -> 0.68`, `pill_active_bg_opacity() -> 0.18`
+- Note: `"underline"` is accepted as a deprecated alias for `"text"` in the variant prop
 - GPUI must model `color-mix` as `token.opacity(token.a * multiplier)` since GPUI has no CSS color-mix
-- Underline border opacity: 82% → `0.82` multiplier on border-subtle
+- Text variant border opacity: 82% → `0.82` multiplier on border-subtle
 - Card item border opacity: 68% → `0.68` multiplier on border-subtle
 - Card item bg opacity: 92% → `0.92` on background-surface
 - Card selected: accent 32% mix + border-subtle (not simple opacity), accent 14% mix + background-surface
@@ -578,9 +586,9 @@ Updated: 2026-03-30
 
 All preview apps must render the following specimens identically.
 
-### Underline variant (default, with panel)
+### Text variant (default, with panel)
 
-Underline tabs with associated panel content:
+Text tabs with associated panel content:
 
 | Tab label | Panel content | State |
 |-----------|--------------|-------|
@@ -610,9 +618,9 @@ Pill tabs with leading icons:
 | Settings | settings | inactive |
 | Users | users | inactive |
 
-### Underline (with icons, no panel)
+### Text (with icons, no panel)
 
-Underline tabs with icons and no panel below:
+Text tabs with icons and no panel below:
 
 | Tab label | Icon | State |
 |-----------|------|-------|

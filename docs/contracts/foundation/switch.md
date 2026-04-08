@@ -1,7 +1,7 @@
 # Switch
 
 Status: detailed contract
-Updated: 2026-03-24
+Updated: 2026-04-01
 
 ## 1. Purpose
 
@@ -239,6 +239,16 @@ Updated: 2026-03-24
 | `font-weight` | `var(--poodle-typography-label-weight)` |
 | `line-height` | `var(--poodle-typography-label-lineHeight)` |
 
+### Label size variants
+
+| Size | Label font-size |
+|------|----------------|
+| `xs` | `0.6875rem` |
+| `sm` | `0.75rem` |
+| `md` | `var(--poodle-typography-label-size)` |
+| `lg` | `0.875rem` |
+| `xl` | `0.9375rem` |
+
 ### Size adjustments
 
 | Size | track width | track height | track padding | thumb size | thumb travel |
@@ -260,6 +270,9 @@ Updated: 2026-03-24
   the toggle from taking effect
 - Adjacent sibling CSS selectors (`:checked +`, `:focus-visible +`) connect the
   hidden input state to the visible track and thumb
+- The `~` general sibling combinator is used for checked-state styling of labels
+  (e.g., `:checked ~ .switch__label`) since the label is not an immediate sibling
+  of the hidden input
 - `data-disabled` and `data-read-only` attributes on root drive state styling
 - `color-mix` formulas create the semi-transparent track background and accent
   tints for the checked state
