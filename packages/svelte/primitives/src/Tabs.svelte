@@ -37,7 +37,7 @@
   export let orientation: Orientation = "horizontal";
   export let activationMode: TabActivationMode = "automatic";
   /** When false, hides the bottom border indicator line on the text variant. */
-  export let showIndicator = true;
+  export let bordered = true;
   export let size: ControlSize | null = null;
   export let sizeRole: SemanticControlSizeRole = "chrome";
   export let density: ControlDensity | null = null;
@@ -282,7 +282,7 @@
 <div
   class="poodle-tabs"
   data-variant={resolvedVariant}
-  data-show-indicator={showIndicator}
+  data-bordered={bordered}
   data-orientation={orientation}
   data-size={resolvedSize}
   data-density={resolvedDensity}
@@ -452,7 +452,7 @@
     padding-bottom: var(--poodle-space-inline-sm);
   }
 
-  .poodle-tabs[data-variant="text"][data-show-indicator="true"] .poodle-tabs__list {
+  .poodle-tabs[data-variant="text"][data-bordered="true"] .poodle-tabs__list {
     border-bottom: 0.0625rem solid color-mix(in srgb, var(--poodle-color-border-subtle) 82%, transparent);
   }
 

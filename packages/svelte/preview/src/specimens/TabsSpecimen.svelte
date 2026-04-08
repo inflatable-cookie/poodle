@@ -60,12 +60,12 @@
   </div>
 
   <div class="specimen__group">
-    <Eyebrow>Text variant (no indicator line)</Eyebrow>
+    <Eyebrow>Text variant (no border)</Eyebrow>
     <Tabs
       items={basicTabs}
       defaultValue="overview"
-      showIndicator={false}
-      ariaLabel="Section tabs without indicator"
+      bordered={false}
+      ariaLabel="Section tabs without border"
     />
   </div>
 
