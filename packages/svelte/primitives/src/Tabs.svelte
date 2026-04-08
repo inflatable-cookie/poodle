@@ -538,8 +538,8 @@
   }
 
   .poodle-tabs[data-variant="block"] .poodle-tabs__close {
-    margin-left: -0.375rem;
-    margin-right: 0.375rem;
+    margin-left: -0.25rem;
+    margin-right: 0.25rem;
   }
 
   .poodle-tabs[data-variant="block"] .poodle-tabs__item + .poodle-tabs__item {
@@ -608,16 +608,19 @@
     border-radius: 0;
   }
 
-  .poodle-tabs[data-variant="block"] .poodle-tabs__item[data-selected="true"] .poodle-tabs__tab {
+  .poodle-tabs[data-variant="block"] .poodle-tabs__item[data-selected="true"] {
     background: color-mix(in srgb, var(--poodle-color-accent-base) 14%, var(--poodle-color-background-surface));
+  }
+
+  .poodle-tabs[data-variant="block"] .poodle-tabs__item[data-selected="true"] .poodle-tabs__tab {
     color: var(--poodle-color-text-primary);
   }
 
-  .poodle-tabs[data-variant="block"] .poodle-tabs__item:not([data-selected="true"]):hover .poodle-tabs__tab {
+  .poodle-tabs[data-variant="block"] .poodle-tabs__item:not([data-selected="true"]):hover {
     background: color-mix(in srgb, var(--poodle-color-background-elevated) 50%, transparent);
   }
 
-  .poodle-tabs[data-variant="block"] .poodle-tabs__item[data-selected="true"]:hover .poodle-tabs__tab {
+  .poodle-tabs[data-variant="block"] .poodle-tabs__item[data-selected="true"]:hover {
     background: color-mix(in srgb, var(--poodle-color-accent-base) 18%, var(--poodle-color-background-surface));
   }
 
