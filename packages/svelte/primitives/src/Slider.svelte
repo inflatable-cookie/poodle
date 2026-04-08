@@ -26,15 +26,26 @@
     valueCommit: { value: number };
   }>();
 
+  let displayValue = value;
+
   $: resolvedSize = size ?? resolveSemanticControlSize($uiPresentation.sizeScale, sizeRole);
   $: resolvedDensity = density ?? $uiPresentation.density;
   $: safeMax = max <= min ? min + 1 : max;
-  $: safeValue = clamp(snapToStep(value, min, step), min, safeMax);
-  $: percentage = ((safeValue - min) / (safeMax - min)) * 100;
+  // Sync displayValue when the prop changes from outside
+  $: displayValue = clamp(snapToStep(value, min, step), min, safeMax);
+  $: percentage = ((displayValue - min) / (safeMax - min)) * 100;
   $: sliderStyle = joinStyles([`--poodle-slider-percent: ${percentage}%`]);
 
-  function parseValue(nextRawValue: string): number {
-    return clamp(snapToStep(Number(nextRawValue), min, step), min, safeMax);
+  function handleInput(event: Event): void {
+    const next = clamp(snapToStep(Number((event.currentTarget as HTMLInputElement).value), min, step), min, safeMax);
+    displayValue = next;
+    dispatch("valueChange", { value: next });
+  }
+
+  function handleChange(event: Event): void {
+    const next = clamp(snapToStep(Number((event.currentTarget as HTMLInputElement).value), min, step), min, safeMax);
+    displayValue = next;
+    dispatch("valueCommit", { value: next });
   }
 </script>
 
@@ -48,14 +59,12 @@
     min={min}
     max={safeMax}
     {step}
-    value={safeValue}
+    value={displayValue}
     disabled={disabled}
     aria-label={ariaLabel ?? undefined}
     aria-valuetext={valueText ?? undefined}
-    on:input={(event) =>
-      dispatch("valueChange", { value: parseValue((event.currentTarget as HTMLInputElement).value) })}
-    on:change={(event) =>
-      dispatch("valueCommit", { value: parseValue((event.currentTarget as HTMLInputElement).value) })}
+    on:input={handleInput}
+    on:change={handleChange}
   />
 </div>
 

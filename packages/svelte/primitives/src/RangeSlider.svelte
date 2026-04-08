@@ -27,26 +27,48 @@
     valueCommit: { value: [number, number] };
   }>();
 
+  let displayLower = Math.min(value[0], value[1]);
+  let displayUpper = Math.max(value[0], value[1]);
+
   $: resolvedSize = size ?? resolveSemanticControlSize($uiPresentation.sizeScale, sizeRole);
   $: resolvedDensity = density ?? $uiPresentation.density;
   $: safeMax = max <= min ? min + 1 : max;
-  $: lowerValue = clamp(Math.min(value[0], value[1]), min, safeMax);
-  $: upperValue = clamp(Math.max(value[0], value[1]), min, safeMax);
-  $: lowerPercent = ((lowerValue - min) / (safeMax - min)) * 100;
-  $: upperPercent = ((upperValue - min) / (safeMax - min)) * 100;
+  // Sync from prop
+  $: displayLower = clamp(Math.min(value[0], value[1]), min, safeMax);
+  $: displayUpper = clamp(Math.max(value[0], value[1]), min, safeMax);
+  $: lowerPercent = ((displayLower - min) / (safeMax - min)) * 100;
+  $: upperPercent = ((displayUpper - min) / (safeMax - min)) * 100;
   $: rangeStyle = joinStyles([
     `--poodle-range-start: ${lowerPercent}%`,
     `--poodle-range-end: ${upperPercent}%`,
   ]);
 
-  function normalizeLower(nextValue: number): [number, number] {
-    const snapped = clamp(snapToStep(nextValue, min, step), min, upperValue);
-    return [snapped, upperValue];
+  function handleLowerInput(event: Event): void {
+    const raw = Number((event.currentTarget as HTMLInputElement).value);
+    const snapped = clamp(snapToStep(raw, min, step), min, displayUpper);
+    displayLower = snapped;
+    dispatch("valueChange", { value: [snapped, displayUpper] });
   }
 
-  function normalizeUpper(nextValue: number): [number, number] {
-    const snapped = clamp(snapToStep(nextValue, min, step), lowerValue, safeMax);
-    return [lowerValue, snapped];
+  function handleLowerChange(event: Event): void {
+    const raw = Number((event.currentTarget as HTMLInputElement).value);
+    const snapped = clamp(snapToStep(raw, min, step), min, displayUpper);
+    displayLower = snapped;
+    dispatch("valueCommit", { value: [snapped, displayUpper] });
+  }
+
+  function handleUpperInput(event: Event): void {
+    const raw = Number((event.currentTarget as HTMLInputElement).value);
+    const snapped = clamp(snapToStep(raw, min, step), displayLower, safeMax);
+    displayUpper = snapped;
+    dispatch("valueChange", { value: [displayLower, snapped] });
+  }
+
+  function handleUpperChange(event: Event): void {
+    const raw = Number((event.currentTarget as HTMLInputElement).value);
+    const snapped = clamp(snapToStep(raw, min, step), displayLower, safeMax);
+    displayUpper = snapped;
+    dispatch("valueCommit", { value: [displayLower, snapped] });
   }
 </script>
 
@@ -61,18 +83,12 @@
     min={min}
     max={safeMax}
     {step}
-    value={lowerValue}
+    value={displayLower}
     disabled={disabled}
     aria-label={ariaLabel ? `${ariaLabel} minimum` : "Minimum value"}
     aria-valuetext={lowerValueText ?? undefined}
-    on:input={(event) =>
-      dispatch("valueChange", {
-        value: normalizeLower(Number((event.currentTarget as HTMLInputElement).value)),
-      })}
-    on:change={(event) =>
-      dispatch("valueCommit", {
-        value: normalizeLower(Number((event.currentTarget as HTMLInputElement).value)),
-      })}
+    on:input={handleLowerInput}
+    on:change={handleLowerChange}
   />
 
   <input
@@ -81,18 +97,12 @@
     min={min}
     max={safeMax}
     {step}
-    value={upperValue}
+    value={displayUpper}
     disabled={disabled}
     aria-label={ariaLabel ? `${ariaLabel} maximum` : "Maximum value"}
     aria-valuetext={upperValueText ?? undefined}
-    on:input={(event) =>
-      dispatch("valueChange", {
-        value: normalizeUpper(Number((event.currentTarget as HTMLInputElement).value)),
-      })}
-    on:change={(event) =>
-      dispatch("valueCommit", {
-        value: normalizeUpper(Number((event.currentTarget as HTMLInputElement).value)),
-      })}
+    on:input={handleUpperInput}
+    on:change={handleUpperChange}
   />
 </div>
 
