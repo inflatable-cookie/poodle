@@ -114,7 +114,6 @@ export const primitiveComponents: ComponentEntry[] = [
   entry("TimeAgo", "primitive", P, "Live-updating relative timestamp display.", true),
   entry("TimeField", "primitive", P, "Time-of-day input with hour/minute selection.", true),
   entry("TimeZoneSelect", "primitive", P, "Timezone selection dropdown.", true),
-  entry("Toggle", "primitive", P, "Pressable toggle button with active/inactive states.", true),
   entry("ToggleGroup", "primitive", P, "Group of mutually exclusive toggle buttons.", true),
   entry("Toolbar", "primitive", P, "Horizontal action bar with grouped controls.", true),
   entry("Tooltip", "primitive", P, "Hover/focus-triggered informational overlay.", true),

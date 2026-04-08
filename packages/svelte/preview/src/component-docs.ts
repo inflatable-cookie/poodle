@@ -238,6 +238,8 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
       { name: "formmethod", type: '"get" | "post" | "dialog" | null', default: "null", description: "Per-button form method override." },
       { name: "formnovalidate", type: "boolean", default: "false", description: "Skips validation for this submit action." },
       { name: "formtarget", type: '"_self" | "_blank" | "_parent" | "_top" | string | null', default: "null", description: "Per-button form target override." },
+      { name: "pressed", type: "boolean | null", default: "null", description: "Pressed state for toggle buttons. When non-null, button renders aria-pressed and fires pressedChange." },
+      { name: "defaultPressed", type: "boolean", default: "false", description: "Initial pressed state for uncontrolled toggle mode." },
       { name: "disabled", type: "boolean", default: "false", description: "Whether the button is disabled." },
       { name: "loading", type: "boolean", default: "false", description: "Whether the button shows a loading spinner." },
       { name: "leadingIcon", type: "string | null", default: "null", description: "Icon name displayed before the label." },
@@ -3620,36 +3622,6 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
 </script>
 
 <ToastHost {store} />`,
-  },
-
-  toggle: {
-    props: [
-      { name: "pressed", type: "boolean | null", default: "null", description: "Controlled pressed state." },
-      { name: "defaultPressed", type: "boolean", default: "false", description: "Initial pressed state for uncontrolled mode." },
-      { name: "variant", type: "ToggleVariant", default: '"ghost"', description: "Visual style variant." },
-      { name: "size", type: "ControlSize", default: '"md"', description: "Size of the toggle button." },
-      { name: "sizeRole", type: '"chrome" | "control" | "prominent"', default: '"control"', description: "Semantic size offset relative to the inherited presentation scale." },
-      { name: "density", type: "ControlDensity | null", default: "null", description: "Explicit density override. Supports compact, default, and comfortable." },
-      { name: "layout", type: '"inline" | "stack"', default: '"inline"', description: "Layout direction of icon and label." },
-      { name: "disabled", type: "boolean", default: "false", description: "Whether the toggle is disabled." },
-      { name: "ariaLabel", type: "string | null", default: "null", description: "Accessible label for the toggle." },
-      { name: "className", type: "string", default: '""', description: "Additional CSS class name." },
-    ],
-    slots: [
-      { name: "default", description: "Content rendered inside the toggle button." },
-    ],
-    events: [
-      { name: "pressedChange", payload: "{ pressed: boolean }", description: "Fires when the pressed state changes." },
-    ],
-    usage: `<script lang="ts">
-  import { Toggle } from "@poodle/svelte-primitives";
-
-  let bold = false;
-</script>
-
-<Toggle bind:pressed={bold} ariaLabel="Bold">
-  <strong>B</strong>
-</Toggle>`,
   },
 
   "toggle-group": {

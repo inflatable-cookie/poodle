@@ -40,7 +40,6 @@ export type StatusTone =
   | "warning"
   | "danger"
   | "pending";
-export type ToggleVariant = "primary" | "secondary" | "ghost";
 export type PillTone = "neutral" | "info" | "success" | "warning" | "danger";
 export type PillAppearance = "solid" | "subtle" | "badge";
 export type PillSize = "xs" | "sm" | "md" | "lg" | "xl";

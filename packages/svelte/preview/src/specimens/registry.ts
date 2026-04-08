@@ -107,7 +107,6 @@ import TimeZoneSelectSpecimen from "./TimeZoneSelectSpecimen.svelte";
 import ToastHostSpecimen from "./ToastHostSpecimen.svelte";
 import ToastStackSpecimen from "./ToastStackSpecimen.svelte";
 import ToggleGroupSpecimen from "./ToggleGroupSpecimen.svelte";
-import ToggleSpecimen from "./ToggleSpecimen.svelte";
 import ToolbarSpecimen from "./ToolbarSpecimen.svelte";
 import TooltipSpecimen from "./TooltipSpecimen.svelte";
 import TriStateSwitchSpecimen from "./TriStateSwitchSpecimen.svelte";
@@ -237,7 +236,6 @@ export const specimenMap: Record<string, typeof SvelteComponent<any>> = {
   "time-zone-select": TimeZoneSelectSpecimen,
   "toast-stack": ToastStackSpecimen,
   "toast-host": ToastHostSpecimen,
-  toggle: ToggleSpecimen,
   "toggle-group": ToggleGroupSpecimen,
   toolbar: ToolbarSpecimen,
   tooltip: TooltipSpecimen,

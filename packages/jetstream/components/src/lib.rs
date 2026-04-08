@@ -85,7 +85,6 @@ pub mod tabs;
 pub mod text_area;
 pub mod text_input;
 pub mod time_ago;
-pub mod toggle;
 pub mod toggle_group;
 pub mod tri_state_switch;
 

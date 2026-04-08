@@ -196,7 +196,7 @@ No tokens are currently defined for this role.
 | Button (secondary/ghost variants) | radius, fill, fill-active, border, border-active, shadow, shadow-active |
 | IconButton (secondary/ghost variants) | radius, fill, border, shadow, shadow-active |
 | SplitButton (secondary action + trigger) | radius, fill, border, shadow |
-| Toggle | radius, fill, fill (pressed), border, border-active, shadow |
+| Button (pressed mode) | radius, fill, fill (pressed), border, border-active, shadow |
 | ToggleGroup (track) | radius, fill, fill (active item), border, border-active, shadow |
 | SegmentedControl (track) | radius, fill, border, shadow |
 | Tabs (card variant items) | radius, fill, border, shadow |

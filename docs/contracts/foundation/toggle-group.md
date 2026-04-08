@@ -15,7 +15,7 @@ Updated: 2026-03-15
   items, disabled group, accent-tinted selected state, semantic size roles,
   density-aware spacing, and explicit `xs | sm | md | lg | xl` size overrides
 - Out of scope: tab-panel navigation (see Tabs), segmented shell chrome (see
-  SegmentedControl), standalone pressed-state buttons (see Toggle)
+  SegmentedControl), standalone pressed-state buttons (use Button with pressed prop)
 
 ## 2. Anatomy
 

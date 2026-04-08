@@ -14,7 +14,7 @@
         { name: "--poodle-treatment-interactive-shadow", purpose: "Resting shadow" },
         { name: "--poodle-treatment-interactive-shadow-active", purpose: "Hover/active shadow" },
       ],
-      components: ["Button (secondary)", "IconButton (secondary)", "SplitButton", "Toggle", "ToggleGroup", "SegmentedControl (track)", "Tabs (card items)"],
+      components: ["Button (secondary)", "IconButton (secondary)", "SplitButton", "Button (pressed)", "ToggleGroup", "SegmentedControl (track)", "Tabs (card items)"],
     },
     {
       name: "interactive-primary",

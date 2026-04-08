@@ -2192,19 +2192,6 @@
       },
       {
         "packageName": "@poodle/svelte-primitives",
-        "exportName": "Toggle",
-        "kind": "component",
-        "status": "previewed",
-        "note": "Foundational disclosure, control, and chip primitives exercised directly in catalogue specimens.",
-        "sectionIds": [
-          "catalog-hub"
-        ],
-        "sectionTitles": [
-          "Catalog hub"
-        ]
-      },
-      {
-        "packageName": "@poodle/svelte-primitives",
         "exportName": "ToggleGroup",
         "kind": "component",
         "status": "previewed",

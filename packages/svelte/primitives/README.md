@@ -83,7 +83,6 @@ Contract-backed Svelte primitive surface for the first generalized Poodle baseli
 - `Switch`
 - `Table`
 - `Tabs`
-- `Toggle`
 - `ToggleGroup`
 - `Toolbar`
 - `Tooltip`

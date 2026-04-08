@@ -12,8 +12,8 @@ Updated: 2026-03-26
 - In scope: text buttons, icon-leading buttons, icon-only buttons, loading and
   disabled states, three visual variants, semantic size roles, and five explicit
   control sizes
-- Out of scope: transport controls, DAW-specific command widgets, toggle buttons
-  (see Toggle)
+- Out of scope: transport controls, DAW-specific command widgets
+- Toggle behavior: Button supports `pressed`/`defaultPressed` props and `pressedChange` event for toggle-button use cases
 
 ## 2. Anatomy
 

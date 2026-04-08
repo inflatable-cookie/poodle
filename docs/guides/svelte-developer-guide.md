@@ -360,7 +360,7 @@ Components dispatch typed events via Svelte's `createEventDispatcher`:
 **Naming conventions:**
 - `valueChange` — value-bearing controls (TextInput, Select, RadioGroup)
 - `checkedChange` — boolean toggles (Checkbox, Switch)
-- `pressedChange` — toggle buttons (Toggle)
+- `pressedChange` — toggle buttons (Button with pressed prop)
 - `openChange` — overlays (Dialog, Drawer, Popover)
 - `requestClose` — modal dismiss requests
 - `submit` — TextInput on Enter
@@ -1314,7 +1314,7 @@ interface MenuItem {
 
 **Action:** Button, IconButton, SplitButton
 **Input:** TextInput, TextArea, NumberInput, SearchInput, CodeInput, DurationInput, ColorPicker
-**Selection:** Checkbox, Switch, RadioGroup, Select, SegmentedControl, Toggle, ToggleGroup, TriStateSwitch, Slider, RangeSlider, Rating
+**Selection:** Checkbox, Switch, RadioGroup, Select, SegmentedControl, ToggleGroup, TriStateSwitch, Slider, RangeSlider, Rating
 **Date/Time:** Calendar, RangeCalendar, DatePicker, DateRangePicker, DateTimePicker, DateTimeRangePicker, ZonedDateTimePicker, TimeField, TimeZoneSelect
 **Layout:** Box, Grid, Stack, Spacer, Separator, Surface, Region, ScrollShell
 **Navigation:** Breadcrumbs, Pagination, PaginationSummary, Tabs, Menu, Menubar, NavigationMenu

@@ -133,7 +133,7 @@ This pattern ensures:
 
 | Treatment Role | Components |
 |---|---|
-| `interactive` | Button (secondary/ghost), IconButton (secondary), SplitButton, Toggle, ToggleGroup, SegmentedControl (track), Tabs (card variant items) |
+| `interactive` | Button (secondary/ghost), IconButton (secondary), SplitButton, Button (pressed), ToggleGroup, SegmentedControl (track), Tabs (card variant items) |
 | `interactive-primary` | Button (primary), SplitButton (primary), IconButton (primary) |
 | `interactive-subtle` | TextInput, TextArea, SearchField, Select |
 | `surface` | Surface, Card (default/outlined), MetricTile |
@@ -273,7 +273,6 @@ redefine canonical token meaning.
 - `packages/svelte/primitives/src/Button.svelte` — interactive and interactive-primary
 - `packages/svelte/primitives/src/IconButton.svelte` — interactive (secondary) and interactive-primary
 - `packages/svelte/primitives/src/SplitButton.svelte` — interactive, interactive-primary, surface-elevated (menu)
-- `packages/svelte/primitives/src/Toggle.svelte` — interactive
 - `packages/svelte/primitives/src/ToggleGroup.svelte` — interactive
 - `packages/svelte/primitives/src/SegmentedControl.svelte` — interactive (track)
 - `packages/svelte/primitives/src/Tabs.svelte` — interactive (card variant items)

@@ -1,6 +1,6 @@
 <script lang="ts">
   import { PageHeader } from "@poodle/svelte-composites";
-  import { Accordion, Button, Card, Collapsible, Eyebrow, Stack, Pill, Toggle } from "@poodle/svelte-primitives";
+  import { Accordion, Button, Card, Collapsible, Eyebrow, Stack, Pill } from "@poodle/svelte-primitives";
 
   import type { DocsFamilyEntry, DocsSectionEntry } from "../catalog";
 
@@ -145,13 +145,11 @@
       </div>
       <div class="docs-section-list">
         {#each catalogEntries as entry}
-          <Toggle
+          <Button
             className="docs-section-card"
-            pressed={false}
-            layout="stack"
             variant="ghost"
             ariaLabel={`Open ${entry.title}`}
-            on:pressedChange={() => onSelectSection(entry.id)}
+            on:click={() => onSelectSection(entry.id)}
           >
             <div>
               <Eyebrow>{entry.eyebrow}</Eyebrow>
@@ -167,7 +165,7 @@
                 <Pill appearance="subtle">{exampleType}</Pill>
               {/each}
             </div>
-          </Toggle>
+          </Button>
         {/each}
       </div>
     </article>

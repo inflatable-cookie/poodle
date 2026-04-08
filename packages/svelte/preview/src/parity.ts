@@ -463,7 +463,6 @@ const packageSurfaceCoverageGroups: PackageSurfaceCoverageGroup[] = [
       "MetaItem",
       "Pill",
       "Select",
-      "Toggle",
       "ToggleGroup",
     ],
   },

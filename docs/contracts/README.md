@@ -120,7 +120,6 @@ above it in downstream repos such as Loophole.
 - `foundation/time-field.md`
 - `foundation/time-zone-select.md`
 - `foundation/toggle-group.md`
-- `foundation/toggle.md`
 - `foundation/toolbar.md`
 - `foundation/tooltip.md`
 - `foundation/treatment-tokens.md`

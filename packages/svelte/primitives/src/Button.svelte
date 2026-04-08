@@ -38,6 +38,10 @@
   export let leadingIcon: IconProp | null = null;
   export let trailingIcon: IconProp | null = null;
   export let chevron = false;
+  /** Toggle pressed state. When provided (non-null), button acts as a toggle with aria-pressed. */
+  export let pressed: boolean | null = null;
+  /** Initial pressed state for uncontrolled toggle mode. */
+  export let defaultPressed = false;
   export let ariaLabel: string | null = null;
   export let ariaExpanded: boolean | null = null;
   export let describedBy: string | null = null;
@@ -48,7 +52,24 @@
     click: MouseEvent;
     focus: FocusEvent;
     blur: FocusEvent;
+    pressedChange: { pressed: boolean };
   }>();
+
+  let uncontrolledPressed = defaultPressed;
+  $: isToggle = pressed !== null || defaultPressed;
+  $: pressedControlled = pressed !== null;
+  $: currentPressed = pressedControlled ? pressed === true : uncontrolledPressed;
+
+  function handleClick(event: MouseEvent): void {
+    if (isToggle) {
+      const next = !currentPressed;
+      if (!pressedControlled) {
+        uncontrolledPressed = next;
+      }
+      dispatch("pressedChange", { pressed: next });
+    }
+    dispatch("click", event);
+  }
 
   const uiPresentation = getUiPresentation();
 
@@ -80,12 +101,14 @@
   data-has-leading={hasLeading || undefined}
   data-has-trailing={hasTrailing || undefined}
   data-loading={loading}
+  data-pressed={isToggle ? currentPressed : undefined}
   disabled={isUnavailable}
   aria-label={ariaLabel ?? undefined}
+  aria-pressed={isToggle ? (currentPressed ? "true" : "false") : undefined}
   aria-expanded={ariaExpanded === null ? undefined : ariaExpanded ? "true" : "false"}
   aria-describedby={describedBy ?? undefined}
   aria-busy={loading ? "true" : undefined}
-  on:click={(event) => dispatch("click", event)}
+  on:click={handleClick}
   on:focus={(event) => dispatch("focus", event)}
   on:blur={(event) => dispatch("blur", event)}
 >
@@ -348,6 +371,17 @@
   .button:disabled {
     cursor: not-allowed;
     opacity: var(--poodle-state-opacity-disabled);
+  }
+
+  /* Pressed/toggle state */
+  .button[data-pressed="true"] {
+    background: color-mix(in srgb, var(--poodle-color-accent-base) 82%, var(--poodle-color-background-surface));
+    border-color: color-mix(in srgb, var(--poodle-color-accent-base) 78%, black);
+    color: var(--poodle-color-text-inverse);
+  }
+
+  .button[data-pressed="true"]:hover:not(:disabled) {
+    background: color-mix(in srgb, var(--poodle-color-accent-base) 72%, var(--poodle-color-background-surface));
   }
 
   .button__label {

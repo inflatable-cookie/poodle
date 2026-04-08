@@ -74,7 +74,6 @@ mod time_ago;
 mod time_field;
 mod time_zone_select;
 mod toolbar;
-mod toggle;
 mod toggle_group;
 mod tooltip;
 mod tri_state_switch;
@@ -161,7 +160,8 @@ pub use time_ago::TimeAgoSpec;
 pub use time_field::TimeFieldSpec;
 pub use time_zone_select::TimeZoneSelectSpec;
 pub use toolbar::ToolbarSpec;
-pub use toggle::{ToggleLayout, ToggleSpec};
+/// Deprecated: Toggle has been superseded by Button with `pressed` prop.
+pub type ToggleSpec = ButtonSpec;
 pub use toggle_group::{ToggleGroupOption, ToggleGroupSelectionMode, ToggleGroupSpec};
 pub use tooltip::TooltipSpec;
 pub use tri_state_switch::TriStateSwitchSpec;

@@ -119,7 +119,6 @@ pub mod time_field;
 pub mod time_zone_select;
 pub mod toast_host;
 pub mod toast_stack;
-pub mod toggle;
 pub mod toggle_group;
 pub mod toolbar;
 pub mod tooltip;
@@ -344,7 +343,6 @@ fn render_specimen(slug: &str, theme: &JetstreamThemeProvider) -> Option<JsEl> {
         "time-zone-select" => Some(time_zone_select::render(theme)),
         "toast-host" => Some(toast_host::render(theme)),
         "toast-stack" => Some(toast_stack::render(theme)),
-        "toggle" => Some(toggle::render(theme)),
         "toggle-group" => Some(toggle_group::render(theme)),
         "toolbar" => Some(toolbar::render(theme)),
         "tooltip" => Some(tooltip::render(theme)),

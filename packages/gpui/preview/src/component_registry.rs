@@ -78,7 +78,6 @@ pub static PRIMITIVES: &[ComponentEntry] = &[
     ComponentEntry { slug: "time-ago", display_name: "TimeAgo", description: "Relative timestamp." },
     ComponentEntry { slug: "time-field", display_name: "TimeField", description: "Time-of-day input." },
     ComponentEntry { slug: "time-zone-select", display_name: "TimeZoneSelect", description: "Timezone selection." },
-    ComponentEntry { slug: "toggle", display_name: "Toggle", description: "Pressable toggle button." },
     ComponentEntry { slug: "toggle-group", display_name: "ToggleGroup", description: "Mutually exclusive toggles." },
     ComponentEntry { slug: "toolbar", display_name: "Toolbar", description: "Horizontal action bar." },
     ComponentEntry { slug: "tooltip", display_name: "Tooltip", description: "Informational overlay." },

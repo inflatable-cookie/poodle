@@ -42,7 +42,7 @@ rules that visually respond to all five size stops (xs, sm, md, lg, xl).
 
 ### Primitives (53)
 
-Button, IconButton, Icon, Spinner, Pill, Toggle, SplitButton, Tabs,
+Button, IconButton, Icon, Spinner, Pill, SplitButton, Tabs,
 ToggleGroup, TriStateSwitch, SegmentedControl, Toolbar, Checkbox,
 RadioGroup, Switch, TextInput, Select, NumberEntry, Slider,
 RangeSlider, Rating, PinInput, Pagination, Menu, DatePicker, TextArea,
