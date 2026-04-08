@@ -65,6 +65,8 @@ above it in downstream repos such as Loophole.
 - `foundation/field.md`
 - `foundation/field-set.md`
 - `foundation/file-upload.md`
+- `foundation/format-display-date.md`
+- `foundation/format-file-size.md`
 - `foundation/form-actions.md`
 - `foundation/grid.md`
 - `foundation/hover-card.md`

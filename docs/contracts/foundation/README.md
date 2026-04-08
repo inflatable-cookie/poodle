@@ -36,6 +36,8 @@ Foundation contracts define the lowest reusable surface in Poodle.
 - `field.md`
 - `field-set.md`
 - `file-upload.md`
+- `format-display-date.md`
+- `format-file-size.md`
 - `form-actions.md`
 - `grid.md`
 - `hover-card.md`

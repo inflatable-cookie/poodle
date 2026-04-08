@@ -97,6 +97,10 @@ export { default as Menubar } from "./Menubar.svelte";
 export { default as UiPresentationProvider } from "./UiPresentationProvider.svelte";
 export { default as ZonedDateTimePicker } from "./ZonedDateTimePicker.svelte";
 export {
+  formatDisplayDate,
+  formatDisplayDateTime,
+} from "./date";
+export {
   controlHeightRem,
   controlSpaceXRem,
   getUiPresentation,

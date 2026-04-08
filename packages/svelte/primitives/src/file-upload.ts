@@ -20,7 +20,8 @@ export function generateFileUploadId(): string {
   return `file-${Date.now()}-${Math.random().toString(36).slice(2, 11)}`;
 }
 
-export function formatFileSize(bytes: number): string {
+export function formatFileSize(bytes: number | null | undefined): string {
+  if (bytes == null || Number.isNaN(bytes)) return "";
   if (bytes === 0) return "0 B";
   const k = 1024;
   const sizes = ["B", "KB", "MB", "GB"];

@@ -136,6 +136,46 @@ export function formatDateLabel(value: string | null, locale = "en-US"): string 
   }).format(date);
 }
 
+function parseDisplayDateValue(value: Date | string | number | null | undefined): Date | null {
+  if (value == null) {
+    return null;
+  }
+
+  const date = value instanceof Date ? value : new Date(value);
+
+  if (Number.isNaN(date.getTime())) {
+    return null;
+  }
+
+  return date;
+}
+
+export function formatDisplayDate(
+  value: Date | string | number | null | undefined,
+  locale = "en-US",
+): string {
+  const date = parseDisplayDateValue(value);
+
+  if (!date) {
+    return "";
+  }
+
+  return date.toLocaleDateString(locale);
+}
+
+export function formatDisplayDateTime(
+  value: Date | string | number | null | undefined,
+  locale = "en-US",
+): string {
+  const date = parseDisplayDateValue(value);
+
+  if (!date) {
+    return "";
+  }
+
+  return date.toLocaleString(locale);
+}
+
 export function isTimeValue(value: string | null | undefined): boolean {
   if (!value) {
     return false;
