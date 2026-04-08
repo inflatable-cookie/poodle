@@ -375,13 +375,13 @@
 
   /* Pressed/toggle state */
   .button[data-pressed="true"] {
-    background: color-mix(in srgb, var(--poodle-color-accent-base) 82%, var(--poodle-color-background-surface));
-    border-color: color-mix(in srgb, var(--poodle-color-accent-base) 78%, black);
+    background: var(--poodle-color-accent-base);
+    border-color: color-mix(in srgb, var(--poodle-color-accent-base) 85%, black);
     color: var(--poodle-color-text-inverse);
   }
 
   .button[data-pressed="true"]:hover:not(:disabled) {
-    background: color-mix(in srgb, var(--poodle-color-accent-base) 72%, var(--poodle-color-background-surface));
+    background: var(--poodle-color-accent-hover, color-mix(in srgb, var(--poodle-color-accent-base) 88%, black));
   }
 
   .button__label {

@@ -5,6 +5,11 @@
   let intent = "save";
   const controlSizes = ["xs", "sm", "md", "lg", "xl"] as const;
 
+  let boldPressed = false;
+  let italicPressed = false;
+  let underlinePressed = true;
+  let bookmarked = false;
+
   function log(label: string): void {
     clickLog = `Clicked: ${label}`;
   }
@@ -74,6 +79,47 @@
       <Button variant="primary" disabled>Disabled</Button>
       <Button variant="primary" loading>Loading</Button>
       <Button variant="secondary" disabled>Disabled secondary</Button>
+    </div>
+  </div>
+
+  <div class="specimen__group">
+    <Eyebrow>Toggle (pressed state)</Eyebrow>
+    <div class="specimen__row">
+      <Button
+        variant="ghost"
+        leadingIcon="bold"
+        pressed={boldPressed}
+        ariaLabel="Bold"
+        on:pressedChange={(e) => (boldPressed = e.detail.pressed)}
+      >B</Button>
+      <Button
+        variant="ghost"
+        leadingIcon="italic"
+        pressed={italicPressed}
+        ariaLabel="Italic"
+        on:pressedChange={(e) => (italicPressed = e.detail.pressed)}
+      >I</Button>
+      <Button
+        variant="ghost"
+        leadingIcon="underline"
+        pressed={underlinePressed}
+        ariaLabel="Underline"
+        on:pressedChange={(e) => (underlinePressed = e.detail.pressed)}
+      >U</Button>
+    </div>
+  </div>
+
+  <div class="specimen__group">
+    <Eyebrow>Toggle with icon (uncontrolled)</Eyebrow>
+    <div class="specimen__row">
+      <Button
+        variant="secondary"
+        leadingIcon="star"
+        defaultPressed={false}
+        on:pressedChange={(e) => (bookmarked = e.detail.pressed)}
+      >{bookmarked ? "Bookmarked" : "Bookmark"}</Button>
+      <Button variant="ghost" leadingIcon="heart" defaultPressed={false}>Like</Button>
+      <Button variant="ghost" leadingIcon="lock-open" defaultPressed>Lock</Button>
     </div>
   </div>
 
