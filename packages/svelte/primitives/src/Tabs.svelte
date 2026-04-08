@@ -296,7 +296,6 @@
     {#each renderedItems as item, index (item.value)}
       <div
         class="poodle-tabs__item"
-        class:poodle-tabs__item--separated={item.separator}
         role="presentation"
         data-selected={currentValue === item.value}
         data-drag-source={dragSourceIndex === index || undefined}
@@ -366,10 +365,10 @@
           </span>
         {/if}
 
-        {#if item.separator}
-          <span class="poodle-tabs__separator" aria-hidden="true"></span>
-        {/if}
       </div>
+      {#if item.separator}
+        <span class="poodle-tabs__separator" aria-hidden="true"></span>
+      {/if}
     {/each}
 
     {#if $$slots.actions}
@@ -517,12 +516,8 @@
     width: 0.0625rem;
     align-self: stretch;
     flex-shrink: 0;
-    margin-left: var(--poodle-space-inline-sm);
+    margin: 0 var(--poodle-space-inline-sm);
     background: var(--poodle-color-border-default);
-  }
-
-  .poodle-tabs__item--separated + .poodle-tabs__item {
-    margin-left: var(--poodle-space-inline-sm);
   }
 
   /* Card variant: bordered card items */
