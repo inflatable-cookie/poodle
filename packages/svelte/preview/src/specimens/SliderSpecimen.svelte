@@ -5,6 +5,8 @@
 
   let volume = 65;
   let opacity = 100;
+  let sizeValues = Object.fromEntries(controlSizes.map((s) => [s, 50]));
+  let densityValues: Record<string, number> = { compact: 50, default: 50, comfortable: 50 };
 </script>
 
 <div class="specimen">
@@ -37,7 +39,7 @@
     <Eyebrow>Sizes</Eyebrow>
     <div class="specimen__stack">
       {#each controlSizes as size}
-        <Slider value={50} min={0} max={100} ariaLabel={"Slider at " + size} {size} />
+        <Slider bind:value={sizeValues[size]} min={0} max={100} ariaLabel={"Slider at " + size} {size} />
       {/each}
     </div>
   </div>
@@ -48,7 +50,7 @@
       {#each ["compact", "default", "comfortable"] as density}
         <div class="specimen__row">
           <span class="specimen__label">{density}</span>
-          <Slider id={"density-" + density} value={50} min={0} max={100} ariaLabel={"Slider at " + density + " density"} {density} />
+          <Slider id={"density-" + density} bind:value={densityValues[density]} min={0} max={100} ariaLabel={"Slider at " + density + " density"} {density} />
         </div>
       {/each}
     </div>
