@@ -540,8 +540,9 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
       { name: "queryChange", payload: "{ query: string }", description: "Fires when the search query text changes." },
       { name: "openChange", payload: "{ open: boolean }", description: "Fires when the dropdown open state changes." },
     ],
-    usage: `<script lang="ts">
-  import { Combobox } from "@poodle/svelte-primitives";
+    usage: `<!-- DEPRECATED: Use <Select searchable> instead -->
+<script lang="ts">
+  import { Select } from "@poodle/svelte-primitives";
 
   const options = [
     { value: "us", label: "United States" },
@@ -550,7 +551,8 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
   ];
 </script>
 
-<Combobox {options} placeholder="Search countries..." />`,
+<!-- Before (deprecated): <Combobox {options} placeholder="Search countries..." /> -->
+<Select {options} searchable placeholder="Search countries..." />`,
   },
 
   "command-palette": {

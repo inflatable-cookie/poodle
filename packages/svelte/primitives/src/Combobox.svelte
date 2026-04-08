@@ -1,3 +1,11 @@
+<!--
+  @deprecated Use <Select searchable> instead.
+  This component is maintained for backward compatibility but will be
+  removed in a future major release. Migrate to:
+    <Select options={...} searchable placeholder="..." />
+  For freeform text entry, use:
+    <Select options={...} searchable freeform placeholder="..." />
+-->
 <script context="module" lang="ts">
   let nextComboboxId = 0;
 </script>

@@ -23,6 +23,13 @@
 </script>
 
 <div class="specimen">
+  <div class="specimen__deprecation">
+    <strong>Deprecated:</strong> Combobox is deprecated in favor of
+    <code>&lt;Select searchable&gt;</code>. Use
+    <code>&lt;Select options=&#123;...&#125; searchable placeholder="..." /&gt;</code>
+    instead. For freeform text entry, add the <code>freeform</code> prop.
+  </div>
+
   <div class="specimen__group">
     <Eyebrow>Default</Eyebrow>
     <Combobox
@@ -74,6 +81,25 @@
     flex-direction: column;
     gap: 1.5rem;
     max-width: 20rem;
+  }
+
+  .specimen__deprecation {
+    padding: 0.75rem 1rem;
+    border: 0.0625rem solid var(--poodle-color-border-default);
+    border-left: 0.1875rem solid var(--poodle-color-status-warning, #e6a700);
+    border-radius: var(--poodle-radius-control, 0.375rem);
+    background: color-mix(in srgb, var(--poodle-color-status-warning, #e6a700) 8%, transparent);
+    color: var(--poodle-color-text-primary);
+    font-size: 0.8125rem;
+    line-height: 1.5;
+  }
+
+  .specimen__deprecation code {
+    font-family: var(--poodle-typography-code-family);
+    font-size: 0.75rem;
+    background: color-mix(in srgb, var(--poodle-color-text-primary) 8%, transparent);
+    padding: 0.0625rem 0.25rem;
+    border-radius: 0.1875rem;
   }
 
   .specimen__group {

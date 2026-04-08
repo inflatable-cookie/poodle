@@ -1,22 +1,28 @@
 # Select
 
 Status: detailed contract
-Updated: 2026-03-26
+Updated: 2026-04-01
 
 ## 1. Purpose
 
 - Component name: `Select`
 - Layer: `foundation`
-- Summary: a single-select control using a native `<select>` element with
-  custom styling, supporting flat options, option groups, lazy option loading,
-  and filter-friendly clear/reset behavior
+- Summary: a unified single-select control that operates in native mode
+  (platform `<select>` element) or custom mode (styled dropdown overlay with
+  optional search input), supporting flat options, option groups, lazy option
+  loading, searchable filtering, freeform text entry, custom option rendering
+  via slots, and filter-friendly clear/reset behavior
 - In scope: single value selection, placeholder, flat options, grouped options
   (optgroup), disabled options, lazy option/group loading, clearable reset
-  state, native select accessibility
-- Out of scope: custom dropdown overlays, multi-select, searchable/filterable
-  lists (see Combobox), arbitrary menu content
+  state, native select accessibility, custom dropdown with keyboard navigation,
+  searchable/filterable lists, freeform text-as-value, custom option/trigger/empty
+  slot rendering
+- Out of scope: multi-select, command-palette ranking, arbitrary menu content
+- Supersedes: `Combobox` (deprecated; use `Select` with `searchable` prop instead)
 
 ## 2. Anatomy
+
+### Native Mode
 
 ```text
 [Root .select]  <div>
@@ -28,13 +34,58 @@ Updated: 2026-03-26
   └── [Indicator .select__indicator]  <span> (decorative chevron)
 ```
 
+### Custom Mode
+
+```text
+[Root .select.select--custom]  <div>
+  ├── [Trigger Area .select__trigger-area]  <div role="combobox"> (searchable)
+  │     ├── [Input .select__input]  <input type="text"> (searchable)
+  │     ├── [Clear Button .select__clear]  <button> (clearable + has selection)
+  │     └── [Indicator .select__indicator]  <span> (decorative chevron)
+  ├── [Trigger Button .select__trigger]  <button> (non-searchable)
+  │     ├── [Value/Slot .select__value | slot:trigger]
+  │     ├── [Clear Button .select__clear]  <button> (clearable + has selection)
+  │     └── [Indicator .select__indicator]  <span> (decorative chevron)
+  ├── [Hidden Input]  <input type="hidden"> (when name prop set, for form submission)
+  └── [Listbox .select__listbox]  <div role="listbox"> (conditional, when open)
+        ├── [Group .select__group]  <div role="group"> (grouped options)
+        │     ├── [Group Label .select__group-label]
+        │     └── [Option Button .select__option]  <button role="option">
+        │           ├── [slot:option] (custom rendering) OR
+        │           ├── [Option Icon .select__option-icon] (optional)
+        │           ├── [Option Label .select__option-label]
+        │           └── [Option Description .select__option-description] (optional)
+        ├── [Option Button .select__option]  <button role="option"> (flat options)
+        └── [Empty .select__empty | slot:empty]  (when no filtered matches)
+```
+
 | Part | Required | Description | Token Targets |
 |------|----------|-------------|---------------|
 | Root | yes | styled wrapper providing field chrome | background, border, radius, shadow, focus ring |
-| Control | yes | native `<select>` element | typography, text color, appearance reset |
+| Control | native mode | native `<select>` element | typography, text color, appearance reset |
 | Indicator | yes | decorative disclosure chevron (Icon component) | icon color |
-| Option | yes | selectable value | text color, font-weight |
-| Option Group | no | labeled group of options | font-weight, text color |
+| Trigger Area | custom + searchable | combobox container with ARIA role | position |
+| Trigger Button | custom + non-searchable | button that opens the dropdown | typography, text color |
+| Input | custom + searchable | text query input for filtering | border, background, typography |
+| Hidden Input | custom + name prop | hidden input for form submission | none |
+| Listbox | custom mode | dropdown overlay containing options | position, border, radius, background, shadow |
+| Option Button | custom mode | selectable option in dropdown | padding, radius, background, color, cursor |
+| Option Icon | no | icon before option label | icon size |
+| Option Description | no | secondary text under option label | color, font-size |
+| Group | no | labeled group of options in dropdown | none (container) |
+| Group Label | no | group header text | font-weight, color, font-size |
+| Empty | custom mode | "no results" message or slot | color, font-size, padding |
+| Clear Button | no | clears selection back to default | icon color |
+| Option | native mode | selectable value in native select | text color, font-weight |
+| Option Group | native mode | labeled group of options in native select | font-weight, text color |
+
+### Slots (Svelte / Custom Mode)
+
+| Slot | Props | Description |
+|------|-------|-------------|
+| `option` | `{ option, highlighted, selected, index }` | Custom rendering for each option in the dropdown |
+| `trigger` | `{ selectedOption, open, placeholder }` | Custom rendering for the trigger button content (non-searchable only) |
+| `empty` | `{ query }` | Custom rendering for the empty state when no options match the search query |
 
 ## 3. Props And Inputs
 
@@ -47,17 +98,22 @@ Updated: 2026-03-26
 | `defaultValue` | `string \| null` | `null` | no | uncontrolled initial value |
 | `placeholder` | `string \| null` | `null` | no | shown when no value selected |
 | `options` | `SelectItems` | — | yes | array of `SelectOption` or `SelectOptionGroup` |
-| `items` | `LegacySelectItem[] \| null` | `null` | no | compatibility alias for flat option arrays using `disabled` instead of `isDisabled` |
-| `groups` | `LegacySelectGroup[] \| null` | `null` | no | compatibility alias for grouped option data using `items` / nested `groups` |
+| `items` | `LegacySelectItem[] \| null` | `null` | no | deprecated compatibility alias for flat option arrays using `disabled` instead of `isDisabled` |
+| `groups` | `LegacySelectGroup[] \| null` | `null` | no | deprecated compatibility alias for grouped option data using `items` / nested `groups` |
 | `disabled` | `boolean` | `false` | no | disables the select |
 | `required` | `boolean` | `false` | no | forwards native required semantics |
 | `ariaLabel` | `string \| null` | `null` | no | required when no visible label exists |
 | `describedBy` | `string \| null` | `null` | no | aria-describedby target |
-| `name` | `string \| undefined` | `undefined` | no | form field name |
+| `name` | `string \| undefined` | `undefined` | no | form field name; in custom mode a hidden input is rendered for form submission |
 | `clearable` | `boolean` | `false` | no | keeps the placeholder option selectable so callers can reset to `defaultValue` |
 | `valueLabel` | `string \| null` | `null` | no | temporary label for the current selection before lazy options load |
-| `loadItems` | `(() => Promise<LegacySelectItem[]>) \| null` | `null` | no | lazy flat option loader |
-| `loadGroups` | `(() => Promise<LegacySelectGroup[]>) \| null` | `null` | no | lazy grouped option loader |
+| `searchable` | `boolean` | `false` | no | renders custom dropdown with search/filter text input instead of native select |
+| `freeform` | `boolean` | `false` | no | with `searchable`, query text becomes the value if no option is selected |
+| `native` | `boolean \| undefined` | `undefined` | no | explicit mode override: `true` forces native select, `false` forces custom dropdown, `undefined` uses auto-detection |
+| `emptyMessage` | `string` | `"No matches"` | no | text shown in custom dropdown when no options match the search query |
+| `loadOptions` | `SelectLoadOptions \| null` | `null` | no | unified async option loader; returns flat or grouped options |
+| `loadItems` | `(() => Promise<LegacySelectItem[]>) \| null` | `null` | no | deprecated lazy flat option loader; use `loadOptions` |
+| `loadGroups` | `(() => Promise<LegacySelectGroup[]>) \| null` | `null` | no | deprecated lazy grouped option loader; use `loadOptions` |
 | `loadKey` | `string \| null` | `null` | no | invalidates cached lazy options when it changes |
 | `onchange` | `((value: string) => void) \| null` | `null` | no | callback prop for existing caller styles; `valueChange` remains the canonical event |
 | `size` | `"xs" \| "sm" \| "md" \| "lg" \| "xl"` | `null` | no | explicit control size override; when null, resolves from inherited presentation |
@@ -67,9 +123,10 @@ Updated: 2026-03-26
 ### Type Definitions
 
 ```
-SelectOption: { value: string; label: string; isDisabled?: boolean; group?: string }
+SelectOption: { value: string; label: string; isDisabled?: boolean; disabled?: boolean; icon?: IconProp; description?: string; group?: string }
 SelectOptionGroup: { label: string; options: SelectOption[] }
 SelectItems: SelectOption[] | SelectOptionGroup[]
+SelectLoadOptions: () => Promise<SelectItems>
 LegacySelectItem: { value: string; label: string; disabled?: boolean; isDisabled?: boolean }
 LegacySelectGroup: { label: string; items?: LegacySelectItem[]; groups?: LegacySelectGroup[] }
 ```
@@ -78,7 +135,18 @@ LegacySelectGroup: { label: string; items?: LegacySelectItem[]; groups?: LegacyS
 
 - controlled: `value` plus `valueChange` event
 - uncontrolled: `defaultValue`
-- lazy: `loadItems` / `loadGroups` populate internal options once per `loadKey`
+- lazy: `loadOptions` (preferred) or `loadItems` / `loadGroups` (deprecated) populate internal options once per `loadKey`
+
+### Mode Resolution
+
+The component automatically determines whether to render a native `<select>` or a custom dropdown overlay. The resolution cascade is:
+
+1. `native=true` -- always native `<select>` (searchable/slots ignored)
+2. `native=false` -- always custom dropdown
+3. `searchable=true` -- custom dropdown (search input as trigger)
+4. `option` slot present -- custom dropdown (custom option rendering requires overlay)
+5. `trigger` slot present -- custom dropdown
+6. Otherwise -- native `<select>`
 
 ## 4. States
 
@@ -91,8 +159,11 @@ LegacySelectGroup: { label: string; items?: LegacySelectItem[]; groups?: LegacyS
 | selected | value matches an option | option label displayed in primary color |
 | focus | select receives focus | focus ring via border-color change, background shift, box-shadow |
 | disabled | `disabled=true` | reduced opacity on root, non-interactive |
-| loading | lazy loader pending | native fallback option shows `Loading…` |
+| loading | lazy loader pending | native fallback option shows `Loading...` |
 | load error | lazy loader fails | native fallback option shows the error message |
+| open (custom) | dropdown is visible | `data-open="true"` on root, listbox rendered |
+| highlighted (custom) | keyboard nav or hover over option | `data-highlighted="true"` on option, accent background mix |
+| empty results (custom) | searchable query matches no options | empty message or empty slot rendered in listbox |
 
 ### Component States
 
@@ -100,17 +171,24 @@ LegacySelectGroup: { label: string; items?: LegacySelectItem[]; groups?: LegacyS
 |-------|---------|-----------------|
 | value selected | user picks an option | `valueChange` fires with selected option value |
 | placeholder shown | no value and placeholder set | placeholder option displayed, disabled in dropdown |
+| query active (custom) | user types in searchable input | options filtered by query, `queryChange` fires |
+| highlight tracked (custom) | ArrowDown/ArrowUp or hover | one option visually highlighted via `data-highlighted` |
+| value committed (custom) | Enter on highlighted option or click | `valueChange` fires, dropdown closes |
+| dismissed (custom) | Escape or click outside | dropdown closes without changing value |
+| freeform commit (custom) | blur or Enter with no highlight, `freeform=true` | query text becomes the value |
 
 ## 5. Events
 
 | Event | When It Fires | Payload | Notes |
 |-------|---------------|---------|-------|
-| `valueChange` | user selects a different option | `{ value: string }` | fires on native change event |
+| `valueChange` | user selects a different option | `{ value: string }` | fires on native change event or custom option commit |
 | `change` | user selects a different option | `{ value: string }` | alias event for existing caller styles |
+| `queryChange` | user types in searchable input | `{ query: string }` | custom mode with `searchable` only; fires on every input change |
+| `openChange` | dropdown opens or closes | `{ open: boolean }` | custom mode only; fires on open and close transitions |
 
 ## 6. Accessibility
 
-### Semantics
+### Semantics (Native Mode)
 
 - Role: native `<select>` element provides built-in accessibility
 - Required attributes: accessible name from external label or `ariaLabel`
@@ -119,7 +197,19 @@ LegacySelectGroup: { label: string; items?: LegacySelectItem[]; groups?: LegacyS
 - Disabled individual options use native `disabled` attribute on `<option>`
 - Labeling rules: placeholder text is not the accessible name
 
-### Keyboard
+### Semantics (Custom Mode)
+
+- Searchable: trigger area has `role="combobox"`, `aria-expanded`, `aria-haspopup="listbox"`, `aria-controls` pointing to listbox id
+- Searchable input: `aria-autocomplete="list"`, `aria-activedescendant` pointing to highlighted option id
+- Non-searchable: trigger button has `aria-expanded`, `aria-haspopup="listbox"`, `aria-controls`
+- Listbox: `role="listbox"`, unique id referenced by `aria-controls`
+- Option: `role="option"`, `aria-selected` on the currently selected option
+- Group: `role="group"` with `aria-label` from group label
+- Disabled options: native `disabled` attribute on button
+- Clear button: `aria-label="Clear selection"`
+- Module-level `nextSelectId` counter generates unique ids for ARIA relationships
+
+### Keyboard (Native Mode)
 
 | Key | Behavior |
 |-----|----------|
@@ -128,11 +218,25 @@ LegacySelectGroup: { label: string; items?: LegacySelectItem[]; groups?: LegacyS
 | `Escape` | closes native dropdown |
 | `Tab` | exits the control |
 
+### Keyboard (Custom Mode)
+
+| Key | Behavior |
+|-----|----------|
+| `Arrow Down` | highlights next option; opens dropdown if closed |
+| `Arrow Up` | highlights previous option |
+| `Enter` | selects the highlighted option, closes dropdown |
+| `Escape` | closes dropdown without selecting |
+| `Home` | highlights first option |
+| `End` | highlights last option |
+| `Tab` | closes dropdown if open, exits control |
+| typing (searchable) | filters options, opens dropdown if closed |
+
 ### Focus And Announcement
 
 - focus entry: root receives visible focus treatment (border-color, background, box-shadow changes)
 - focus exit: focus treatment clears
-- live-region behavior: none; native select handles value announcement
+- custom mode: highlight moves via `aria-activedescendant` (no DOM focus change); closing the dropdown keeps focus on the input/trigger
+- live-region behavior: none; native select handles value announcement; custom mode uses `aria-activedescendant`
 - GPUI-native accessibility mapping notes: GPUI must expose select/combobox semantics with option list, selected value, and expanded state through the native accessibility tree
 
 ## 7. Layout
@@ -237,6 +341,8 @@ LegacySelectGroup: { label: string; items?: LegacySelectItem[]; groups?: LegacyS
 
 ## 9. Svelte Notes
 
+### Native Mode
+
 - Uses a native `<select>` element for full platform accessibility without a custom overlay
 - `appearance: none` on the select removes native browser chrome; the custom indicator provides the disclosure chevron
 - `data-placeholder="true"` attribute on root signals placeholder state for CSS targeting
@@ -244,7 +350,26 @@ LegacySelectGroup: { label: string; items?: LegacySelectItem[]; groups?: LegacyS
 - Placeholder rendered as a disabled `<option>` with `selected` when no value is set
 - Option groups rendered as native `<optgroup>` elements
 - Emits `data-size` on root element reflecting the resolved size
-- `data-density` — resolved density value (`compact`, `default`, or `comfortable`)
+- `data-density` -- resolved density value (`compact`, `default`, or `comfortable`)
+
+### Custom Mode
+
+- Root has `select--custom` class and `data-open` attribute tracking dropdown visibility
+- Dropdown placement: calculated from viewport space -- positions above (`select__listbox--above`) when less than 280px below the trigger, otherwise below
+- Hidden `<input type="hidden">` rendered when `name` prop is set, for form submission in custom mode
+- Keyboard navigation: `ArrowDown`/`ArrowUp` move highlight, `Enter` commits, `Escape` closes, `Home`/`End` jump to first/last option
+- Click-outside detection via document `mousedown` listener closes the dropdown
+- Module-level `nextSelectId` counter generates unique ids for ARIA relationships (`aria-controls`, `aria-activedescendant`)
+- `aria-activedescendant` on the input/trigger tracks the currently highlighted option by referencing its stable id (`{listboxId}-option-{index}`)
+- Searchable mode: client-side filtering matches query against option labels (case-insensitive substring)
+- Freeform mode: when `freeform=true` and `searchable=true`, the query text becomes the selected value on commit if no option is highlighted
+- Three named slots available in custom mode:
+  - `option` -- slot props: `{ option, highlighted, selected, index }` -- custom rendering for each option row
+  - `trigger` -- slot props: `{ selectedOption, open, placeholder }` -- custom trigger button content (non-searchable only)
+  - `empty` -- slot props: `{ query }` -- custom empty state when no options match
+- Options support optional `icon` (rendered via Icon component) and `description` (secondary text) fields
+- Clearable mode renders a clear button (X icon) inside the trigger when a value is selected
+- When the dropdown is closed, the searchable input text resets to the selected option's label (or empty if no selection, unless freeform)
 
 ## 10. GPUI Notes
 

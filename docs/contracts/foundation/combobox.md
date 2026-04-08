@@ -1,7 +1,15 @@
 # Combobox
 
-Status: detailed contract
-Updated: 2026-03-30
+> **Deprecated:** This component is superseded by `Select` with the `searchable`
+> prop. Use `<Select options={...} searchable />` instead of `<Combobox>`.
+> For freeform text entry (where typed text becomes the value), use
+> `<Select options={...} searchable freeform />`.
+>
+> See the [Select contract](./select.md) for the unified component specification.
+> This contract is retained for reference during migration only.
+
+Status: deprecated (see Select)
+Updated: 2026-04-01
 
 ## 1. Purpose
 
