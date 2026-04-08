@@ -155,7 +155,7 @@
   }
 
   .text-area__control::placeholder {
-    color: var(--poodle-color-text-secondary);
+    color: var(--poodle-color-text-muted, color-mix(in srgb, var(--poodle-color-text-secondary) 60%, transparent));
   }
 
   /* Density variants */
