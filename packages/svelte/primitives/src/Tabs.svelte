@@ -296,6 +296,7 @@
     {#each renderedItems as item, index (item.value)}
       <div
         class="poodle-tabs__item"
+        class:poodle-tabs__item--separated={item.separator}
         role="presentation"
         data-selected={currentValue === item.value}
         data-drag-source={dragSourceIndex === index || undefined}
@@ -511,11 +512,15 @@
     min-width: 0;
   }
 
+  .poodle-tabs__item--separated {
+    margin-left: var(--poodle-space-inline-md);
+  }
+
   .poodle-tabs__separator {
     width: 0.0625rem;
     align-self: stretch;
-    margin-right: var(--poodle-space-inline-sm);
-    background: color-mix(in srgb, var(--poodle-color-border-subtle) 72%, transparent);
+    flex-shrink: 0;
+    background: var(--poodle-color-border-default);
   }
 
   /* Card variant: bordered card items */
