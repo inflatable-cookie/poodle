@@ -310,9 +310,6 @@
         on:mouseenter={() => hasTooltips && scheduleTooltip(index)}
         on:mouseleave={() => hasTooltips && dismissTooltip()}
       >
-        {#if item.separator}
-          <span class="poodle-tabs__separator" aria-hidden="true"></span>
-        {/if}
         <button
           bind:this={tabElements[index]}
           type="button"
@@ -367,6 +364,10 @@
           <span class="poodle-tabs__tooltip" data-placement={isVertical ? "right" : "bottom"} role="tooltip">
             {item.label}
           </span>
+        {/if}
+
+        {#if item.separator}
+          <span class="poodle-tabs__separator" aria-hidden="true"></span>
         {/if}
       </div>
     {/each}
@@ -512,15 +513,16 @@
     min-width: 0;
   }
 
-  .poodle-tabs__item--separated {
-    margin-left: var(--poodle-space-inline-md);
-  }
-
   .poodle-tabs__separator {
     width: 0.0625rem;
     align-self: stretch;
     flex-shrink: 0;
+    margin-left: var(--poodle-space-inline-sm);
     background: var(--poodle-color-border-default);
+  }
+
+  .poodle-tabs__item--separated + .poodle-tabs__item {
+    margin-left: var(--poodle-space-inline-sm);
   }
 
   /* Card variant: bordered card items */
