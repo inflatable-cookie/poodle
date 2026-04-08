@@ -188,12 +188,12 @@
       background var(--poodle-motion-duration-interaction) var(--poodle-motion-easing-standard);
   }
 
-  .switch__control:checked + .switch__track {
+  .switch__control:checked ~ .switch__track {
     border-color: var(--poodle-switch-on-border);
     background: var(--poodle-switch-on-track);
   }
 
-  .switch__control:checked + .switch__track .switch__thumb {
+  .switch__control:checked ~ .switch__track .switch__thumb {
     background: var(--poodle-switch-on-thumb);
     transform: translateX(calc(var(--poodle-size-icon-default) - 0.125rem));
   }
@@ -249,7 +249,7 @@
     height: calc(var(--poodle-size-icon-default) * 0.75 - 0.125rem);
   }
 
-  .switch[data-size="xs"] .switch__control:checked + .switch__track .switch__thumb {
+  .switch[data-size="xs"] .switch__control:checked ~ .switch__track .switch__thumb {
     transform: translateX(calc(var(--poodle-size-icon-default) * 0.875));
   }
 
@@ -264,7 +264,7 @@
     height: calc(var(--poodle-size-icon-default) - 0.1875rem);
   }
 
-  .switch[data-size="sm"] .switch__control:checked + .switch__track .switch__thumb {
+  .switch[data-size="sm"] .switch__control:checked ~ .switch__track .switch__thumb {
     transform: translateX(calc(var(--poodle-size-icon-default) - 0.0625rem));
   }
 
@@ -279,7 +279,7 @@
     height: var(--poodle-size-icon-default);
   }
 
-  .switch[data-size="lg"] .switch__control:checked + .switch__track .switch__thumb {
+  .switch[data-size="lg"] .switch__control:checked ~ .switch__track .switch__thumb {
     transform: translateX(calc(var(--poodle-size-icon-default) + 0.0625rem));
   }
 
@@ -294,7 +294,7 @@
     height: calc(var(--poodle-size-icon-default) + 0.125rem);
   }
 
-  .switch[data-size="xl"] .switch__control:checked + .switch__track .switch__thumb {
+  .switch[data-size="xl"] .switch__control:checked ~ .switch__track .switch__thumb {
     transform: translateX(calc(var(--poodle-size-icon-default) + 0.125rem));
   }
 </style>
