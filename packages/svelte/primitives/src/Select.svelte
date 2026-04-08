@@ -847,6 +847,10 @@
     text-transform: uppercase;
   }
 
+  .select__group .select__option {
+    padding-left: 1rem;
+  }
+
   /* Option */
   .select__option {
     display: flex;
