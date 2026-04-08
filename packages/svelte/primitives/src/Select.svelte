@@ -1,17 +1,25 @@
+<script context="module" lang="ts">
+  let nextSelectId = 0;
+</script>
+
 <script lang="ts">
-  import { createEventDispatcher } from "svelte";
+  import { createEventDispatcher, onMount, tick } from "svelte";
 
   import Icon from "./Icon.svelte";
+  import { firstEnabledIndex } from "./internal";
   import { getUiPresentation, resolveSemanticControlSize } from "./presentation";
   import type {
     ControlDensity,
     ControlSize,
+    IconProp,
     SemanticControlSizeRole,
     SelectItems,
+    SelectLoadOptions,
     SelectOption,
     SelectOptionGroup,
   } from "./types";
 
+  // ── Legacy compat types ──────────────────────────────────────
   type LegacySelectItem = {
     value: string;
     label: string;
@@ -25,91 +33,214 @@
     groups?: LegacySelectGroup[];
   };
 
+  // ── Props ────────────────────────────────────────────────────
+
+  // Identity & form
   export let id: string | undefined = undefined;
+  export let name: string | undefined = undefined;
+
+  // Value
   export let value: string | null = null;
   export let defaultValue: string | null = null;
-  export let placeholder: string | null = null;
+
+  // Options
   export let options: SelectItems = [];
+  /** @deprecated Use `options` with flat or grouped array */
   export let items: LegacySelectItem[] | null = null;
+  /** @deprecated Use `options` with SelectOptionGroup[] */
   export let groups: LegacySelectGroup[] | null = null;
-  export let disabled = false;
-  export let required = false;
-  export let ariaLabel: string | null = null;
-  export let describedBy: string | null = null;
-  export let name: string | undefined = undefined;
-  export let clearable = false;
-  export let valueLabel: string | null = null;
+  export let loadOptions: SelectLoadOptions | null = null;
+  /** @deprecated Use `loadOptions` */
   export let loadItems: (() => Promise<LegacySelectItem[]>) | null = null;
+  /** @deprecated Use `loadOptions` */
   export let loadGroups: (() => Promise<LegacySelectGroup[]>) | null = null;
   export let loadKey: string | null = null;
-  export let onchange: ((value: string) => void) | null = null;
+  export let valueLabel: string | null = null;
+
+  // Presentation
+  export let placeholder: string | null = null;
   export let size: ControlSize | null = null;
   export let sizeRole: SemanticControlSizeRole = "control";
   export let density: ControlDensity | null = null;
 
+  // Behavior
+  export let disabled = false;
+  export let required = false;
+  export let clearable = false;
+  /** When true, renders a custom dropdown with search/filter input. */
+  export let searchable = false;
+  /** When true with searchable, query text becomes the value if no option selected. */
+  export let freeform = false;
+  /**
+   * Explicit native/custom mode override.
+   * - `true`: always native `<select>` (searchable/slots ignored)
+   * - `false`: always custom dropdown
+   * - `undefined`: auto (native unless searchable or option slot provided)
+   */
+  export let native: boolean | undefined = undefined;
+  export let emptyMessage = "No matches";
+
+  // Accessibility
+  export let ariaLabel: string | null = null;
+  export let describedBy: string | null = null;
+
+  // Callbacks
+  export let onchange: ((value: string) => void) | null = null;
+
+  // ── Internal state ───────────────────────────────────────────
+
+  const selectId = id ?? `poodle-select-${++nextSelectId}`;
+  const listboxId = `${selectId}-listbox`;
   const dispatch = createEventDispatcher<{
     valueChange: { value: string };
     change: { value: string };
+    queryChange: { query: string };
+    openChange: { open: boolean };
   }>();
 
   const uiPresentation = getUiPresentation();
+  let rootElement: HTMLDivElement | null = null;
   let uncontrolledValue = defaultValue;
-  let loadedItems: LegacySelectItem[] | null = null;
-  let loadedGroups: LegacySelectGroup[] | null = null;
+  let open = false;
+  let query = "";
+  let highlightIndex = 0;
+  let placement: "below" | "above" = "below";
+
+  // Async loading state
+  let loadedOptions: SelectItems | null = null;
   let loadState: "idle" | "loading" | "loaded" | "error" = "idle";
   let loadError: string | null = null;
   let lastLoadKey: string | null = null;
 
+  // Legacy compat loading
+  let loadedItems: LegacySelectItem[] | null = null;
+  let loadedGroups: LegacySelectGroup[] | null = null;
+
+  // ── Derived state ────────────────────────────────────────────
+
+  $: resolvedSize = size ?? resolveSemanticControlSize($uiPresentation.sizeScale, sizeRole);
+  $: resolvedDensity = density ?? $uiPresentation.density;
+  $: isControlled = value !== null;
+  $: currentValue = (isControlled ? value : uncontrolledValue) ?? "";
+  $: useCustom = native === true ? false : native === false ? true : searchable || $$slots.option;
+  $: isLazy = Boolean(loadOptions || loadItems || loadGroups);
+  $: clearValue = defaultValue ?? "";
+  $: placeholderValue = clearable ? clearValue : "";
+  $: placeholderLabel = placeholder ?? (clearable ? valueLabel ?? "All" : null);
+
+  // Normalize options from all sources
+  $: normalizedOptions = (() => {
+    if (loadedOptions) return loadedOptions;
+    if (loadedGroups) return normalizeGroups(loadedGroups);
+    if (loadedItems) return normalizeItems(loadedItems);
+    if (groups) return normalizeGroups(groups);
+    return normalizeItems(items ?? options);
+  })();
+
+  $: flatOptions = flattenOptions(normalizedOptions);
+  $: hasCurrentOption = flatOptions.some((o) => o.value === currentValue);
+  $: hasSelection = currentValue !== "" && currentValue !== clearValue;
+  $: isGrouped = normalizedOptions.length > 0 && "options" in normalizedOptions[0];
+  $: selectedOption = flatOptions.find((o) => o.value === currentValue) ?? null;
+
+  // Custom mode: filtering
+  $: filteredOptions = searchable && query.length > 0
+    ? flatOptions.filter((o) => !(o.disabled || o.isDisabled) && o.label.toLowerCase().includes(query.toLowerCase()))
+    : flatOptions.filter((o) => !(o.disabled || o.isDisabled));
+
+  $: filteredGroups = searchable && query.length > 0
+    ? filterGroups(normalizedOptions, query)
+    : normalizedOptions;
+
+  // Keep query in sync with selected option when closed
+  $: if (!open && selectedOption && !freeform) {
+    query = selectedOption.label;
+  } else if (!open && !selectedOption && !freeform) {
+    query = "";
+  }
+
+  // Clamp highlight
+  $: if (filteredOptions.length > 0 && highlightIndex >= filteredOptions.length) {
+    highlightIndex = 0;
+  }
+
+  $: highlightedOptionId =
+    open && filteredOptions.length > 0 && highlightIndex >= 0
+      ? `${listboxId}-option-${highlightIndex}`
+      : undefined;
+
+  // Async loading
+  $: if (loadKey !== lastLoadKey) {
+    lastLoadKey = loadKey;
+    loadedOptions = null;
+    loadedItems = null;
+    loadedGroups = null;
+    loadState = "idle";
+    loadError = null;
+  }
+
+  $: if (isLazy && loadState === "idle") {
+    void startLoad();
+  }
+
+  // ── Helpers ──────────────────────────────────────────────────
+
   function normalizeItems(source: LegacySelectItem[] | SelectItems | null): SelectItems {
     if (!source || source.length === 0) return [];
-    if ("options" in source[0]) {
-      return source as SelectItems;
-    }
-    return (source as LegacySelectItem[]).map((option) => ({
-      value: option.value,
-      label: option.label,
-      isDisabled: option.isDisabled ?? option.disabled ?? false,
+    if ("options" in source[0]) return source as SelectItems;
+    return (source as LegacySelectItem[]).map((o) => ({
+      value: o.value,
+      label: o.label,
+      disabled: o.isDisabled ?? o.disabled ?? false,
     }));
   }
 
   function normalizeGroups(source: LegacySelectGroup[]): SelectOptionGroup[] {
     return source.flatMap((group) => {
-      const ownOptions = (group.items ?? []).map((option) => ({
-        value: option.value,
-        label: option.label,
-        isDisabled: option.isDisabled ?? option.disabled ?? false,
+      const ownOptions = (group.items ?? []).map((o) => ({
+        value: o.value,
+        label: o.label,
+        disabled: o.isDisabled ?? o.disabled ?? false,
       }));
-      const nestedOptions = group.groups?.length ? normalizeGroups(group.groups) : [];
-
+      const nested = group.groups?.length ? normalizeGroups(group.groups) : [];
       if (group.label.trim().length === 0) {
-        return [
-          ...(ownOptions.length ? [{ label: "", options: ownOptions }] : []),
-          ...nestedOptions,
-        ];
+        return [...(ownOptions.length ? [{ label: "", options: ownOptions }] : []), ...nested];
       }
-
-      return [
-        ...(ownOptions.length ? [{ label: group.label, options: ownOptions }] : []),
-        ...nestedOptions,
-      ];
+      return [...(ownOptions.length ? [{ label: group.label, options: ownOptions }] : []), ...nested];
     });
   }
 
   function flattenOptions(source: SelectItems): SelectOption[] {
     if (source.length === 0) return [];
     if ("options" in source[0]) {
-      return (source as SelectOptionGroup[]).flatMap((group) => group.options);
+      return (source as SelectOptionGroup[]).flatMap((g) => g.options);
     }
     return source as SelectOption[];
   }
 
+  function filterGroups(source: SelectItems, q: string): SelectItems {
+    if (!isGrouped) return source;
+    const lq = q.toLowerCase();
+    return (source as SelectOptionGroup[])
+      .map((g) => ({
+        ...g,
+        options: g.options.filter((o) => o.label.toLowerCase().includes(lq)),
+      }))
+      .filter((g) => g.options.length > 0);
+  }
+
+  function isOptionDisabled(o: SelectOption): boolean {
+    return o.disabled === true || o.isDisabled === true;
+  }
+
   async function startLoad(): Promise<void> {
-    if (loadState === "loading" || (!loadItems && !loadGroups)) return;
+    if (loadState === "loading") return;
     loadState = "loading";
     loadError = null;
-
     try {
-      if (loadGroups) {
+      if (loadOptions) {
+        loadedOptions = await loadOptions();
+      } else if (loadGroups) {
         loadedGroups = await loadGroups();
       } else if (loadItems) {
         loadedItems = await loadItems();
@@ -121,108 +252,401 @@
     }
   }
 
-  $: resolvedSize = size ?? resolveSemanticControlSize($uiPresentation.sizeScale, sizeRole);
-  $: resolvedDensity = density ?? $uiPresentation.density;
-  $: isControlled = value !== null;
-  $: currentValue = (isControlled ? value : uncontrolledValue) ?? "";
-  $: isLazy = Boolean(loadItems || loadGroups);
-  $: clearValue = defaultValue ?? "";
-  $: placeholderValue = clearable ? clearValue : "";
-  $: placeholderLabel = placeholder ?? (clearable ? valueLabel ?? "All" : null);
-  $: normalizedOptions = loadedGroups
-    ? normalizeGroups(loadedGroups)
-    : loadedItems
-      ? normalizeItems(loadedItems)
-      : groups
-        ? normalizeGroups(groups)
-        : normalizeItems(items ?? options);
-  $: flatOptions = flattenOptions(normalizedOptions);
-  $: hasCurrentOption = flatOptions.some((option) => option.value === currentValue);
-  $: hasSelection = currentValue !== "" && currentValue !== clearValue;
-  $: isGrouped = normalizedOptions.length > 0 && "options" in normalizedOptions[0];
+  // ── Native mode handlers ─────────────────────────────────────
 
-  $: if (loadKey !== lastLoadKey) {
-    lastLoadKey = loadKey;
-    loadedItems = null;
-    loadedGroups = null;
-    loadState = "idle";
-    loadError = null;
-  }
-
-  $: if (isLazy && loadState === "idle") {
-    void startLoad();
-  }
-
-  function handleChange(event: Event): void {
+  function handleNativeChange(event: Event): void {
     const nextValue = (event.currentTarget as HTMLSelectElement).value;
+    commitValue(nextValue);
+  }
 
+  // ── Custom mode handlers ─────────────────────────────────────
+
+  function commitValue(nextValue: string): void {
     if (!isControlled) {
       uncontrolledValue = nextValue;
     }
-
     dispatch("valueChange", { value: nextValue });
     dispatch("change", { value: nextValue });
     onchange?.(nextValue);
   }
+
+  function setOpen(nextOpen: boolean): void {
+    if (nextOpen && rootElement) {
+      const rect = rootElement.getBoundingClientRect();
+      const spaceBelow = window.innerHeight - rect.bottom;
+      placement = spaceBelow < 280 ? "above" : "below";
+    }
+    open = nextOpen;
+    dispatch("openChange", { open: nextOpen });
+
+    if (nextOpen) {
+      highlightIndex = selectedOption
+        ? filteredOptions.findIndex((o) => o.value === selectedOption!.value)
+        : 0;
+      if (highlightIndex < 0) highlightIndex = 0;
+    }
+  }
+
+  function selectOption(option: SelectOption): void {
+    if (isOptionDisabled(option)) return;
+    query = option.label;
+    commitValue(option.value);
+    setOpen(false);
+  }
+
+  function handleTriggerClick(): void {
+    if (disabled) return;
+    setOpen(!open);
+  }
+
+  function handleInputInput(event: Event): void {
+    query = (event.currentTarget as HTMLInputElement).value;
+    highlightIndex = 0;
+    if (!open) setOpen(true);
+    dispatch("queryChange", { query });
+
+    if (freeform) {
+      commitValue(query);
+    }
+  }
+
+  function handleKeydown(event: KeyboardEvent): void {
+    if (event.key === "ArrowDown") {
+      event.preventDefault();
+      if (!open) { setOpen(true); return; }
+      highlightIndex = Math.min(highlightIndex + 1, filteredOptions.length - 1);
+    }
+
+    if (event.key === "ArrowUp") {
+      event.preventDefault();
+      if (!open) { setOpen(true); return; }
+      highlightIndex = Math.max(highlightIndex - 1, 0);
+    }
+
+    if (event.key === "Enter" && open && filteredOptions[highlightIndex]) {
+      event.preventDefault();
+      selectOption(filteredOptions[highlightIndex]);
+    }
+
+    if (event.key === "Escape" && open) {
+      event.preventDefault();
+      setOpen(false);
+    }
+
+    if (event.key === "Home" && open) {
+      event.preventDefault();
+      highlightIndex = 0;
+    }
+
+    if (event.key === "End" && open) {
+      event.preventDefault();
+      highlightIndex = Math.max(filteredOptions.length - 1, 0);
+    }
+  }
+
+  function handleClear(event: MouseEvent): void {
+    event.stopPropagation();
+    query = "";
+    commitValue(clearValue);
+  }
+
+  onMount(() => {
+    function handlePointerDown(event: MouseEvent): void {
+      if (!open || !rootElement) return;
+      if (!rootElement.contains(event.target as Node)) {
+        setOpen(false);
+      }
+    }
+
+    function handleDocKeydown(event: KeyboardEvent): void {
+      if (event.key === "Escape" && open) {
+        event.preventDefault();
+        setOpen(false);
+      }
+    }
+
+    document.addEventListener("mousedown", handlePointerDown);
+    document.addEventListener("keydown", handleDocKeydown);
+
+    return () => {
+      document.removeEventListener("mousedown", handlePointerDown);
+      document.removeEventListener("keydown", handleDocKeydown);
+    };
+  });
 </script>
 
-<div class="select" data-placeholder={!hasSelection} data-size={resolvedSize} data-density={resolvedDensity}>
-  <select
-    {id}
-    {name}
-    class="select__control"
-    value={currentValue}
-    disabled={disabled}
-    {required}
-    aria-label={ariaLabel ?? undefined}
-    aria-describedby={describedBy ?? undefined}
-    on:change={handleChange}
+{#if useCustom}
+  <!-- ═══ CUSTOM MODE ═══ -->
+  <div
+    bind:this={rootElement}
+    class="select select--custom"
+    data-open={open}
+    data-placeholder={!hasSelection}
+    data-size={resolvedSize}
+    data-density={resolvedDensity}
   >
-    {#if placeholderLabel}
-      <option value={placeholderValue} disabled={!clearable && required}>{placeholderLabel}</option>
+    {#if searchable}
+      <!-- Searchable: text input trigger -->
+      <div
+        class="select__trigger-area"
+        role="combobox"
+        aria-expanded={open ? "true" : "false"}
+        aria-haspopup="listbox"
+        aria-controls={open ? listboxId : undefined}
+        aria-label={ariaLabel ?? undefined}
+      >
+        <input
+          id={selectId}
+          class="select__input"
+          type="text"
+          value={query}
+          {disabled}
+          placeholder={placeholder ?? undefined}
+          aria-autocomplete="list"
+          aria-activedescendant={highlightedOptionId}
+          aria-describedby={describedBy ?? undefined}
+          on:focus={() => { if (!open) setOpen(true); }}
+          on:input={handleInputInput}
+          on:keydown={handleKeydown}
+        />
+        {#if clearable && hasSelection && !disabled}
+          <button
+            type="button"
+            class="select__clear"
+            aria-label="Clear selection"
+            on:click={handleClear}
+          >
+            <Icon name="x" size="xs" />
+          </button>
+        {/if}
+        <span class="select__indicator" aria-hidden="true">
+          <Icon name="chevron-down" />
+        </span>
+      </div>
+    {:else}
+      <!-- Non-searchable: button trigger -->
+      <button
+        type="button"
+        class="select__trigger"
+        id={selectId}
+        {disabled}
+        aria-expanded={open ? "true" : "false"}
+        aria-haspopup="listbox"
+        aria-controls={open ? listboxId : undefined}
+        aria-label={ariaLabel ?? undefined}
+        aria-describedby={describedBy ?? undefined}
+        on:click={handleTriggerClick}
+        on:keydown={handleKeydown}
+      >
+        {#if $$slots.trigger}
+          <slot name="trigger" selectedOption={selectedOption} {open} {placeholder} />
+        {:else}
+          <span class="select__value" data-placeholder={!hasSelection}>
+            {selectedOption?.label ?? placeholder ?? ""}
+          </span>
+        {/if}
+        {#if clearable && hasSelection && !disabled}
+          <button
+            type="button"
+            class="select__clear"
+            aria-label="Clear selection"
+            on:click={handleClear}
+          >
+            <Icon name="x" size="xs" />
+          </button>
+        {/if}
+        <span class="select__indicator" aria-hidden="true">
+          <Icon name="chevron-down" />
+        </span>
+      </button>
     {/if}
 
-    {#if isGrouped}
-      {#each normalizedOptions as group}
-        {#if (group as SelectOptionGroup).label.trim().length === 0}
-          {#each (group as SelectOptionGroup).options as option (option.value)}
-            <option value={option.value} disabled={option.isDisabled === true}>
-              {option.label}
-            </option>
+    <!-- Hidden input for form submission -->
+    {#if name}
+      <input type="hidden" {name} value={currentValue} />
+    {/if}
+
+    <!-- Dropdown listbox -->
+    {#if open}
+      <div
+        id={listboxId}
+        class="select__listbox"
+        class:select__listbox--above={placement === "above"}
+        role="listbox"
+        aria-label={ariaLabel ?? undefined}
+      >
+        {#if isGrouped && !searchable}
+          {#each normalizedOptions as group}
+            {@const g = group as SelectOptionGroup}
+            {#if g.options.length > 0}
+              <div class="select__group" role="group" aria-label={g.label || undefined}>
+                {#if g.label}
+                  <div class="select__group-label">{g.label}</div>
+                {/if}
+                {#each g.options as option, idx}
+                  {@const flatIdx = flatOptions.indexOf(option)}
+                  <button
+                    type="button"
+                    class="select__option"
+                    id={`${listboxId}-option-${flatIdx}`}
+                    role="option"
+                    aria-selected={currentValue === option.value ? "true" : "false"}
+                    data-highlighted={highlightIndex === flatIdx}
+                    disabled={isOptionDisabled(option)}
+                    on:mouseenter={() => (highlightIndex = flatIdx)}
+                    on:click={() => selectOption(option)}
+                  >
+                    {#if $$slots.option}
+                      <slot name="option" {option} highlighted={highlightIndex === flatIdx} selected={currentValue === option.value} index={flatIdx} />
+                    {:else}
+                      {#if option.icon}
+                        <span class="select__option-icon"><Icon icon={option.icon} size="sm" /></span>
+                      {/if}
+                      <span class="select__option-label">{option.label}</span>
+                      {#if option.description}
+                        <span class="select__option-description">{option.description}</span>
+                      {/if}
+                    {/if}
+                  </button>
+                {/each}
+              </div>
+            {/if}
+          {/each}
+        {:else if isGrouped && searchable}
+          {#each filteredGroups as group}
+            {@const g = group as SelectOptionGroup}
+            {#if g.options.length > 0}
+              <div class="select__group" role="group" aria-label={g.label || undefined}>
+                {#if g.label}
+                  <div class="select__group-label">{g.label}</div>
+                {/if}
+                {#each g.options as option}
+                  {@const flatIdx = filteredOptions.indexOf(option)}
+                  <button
+                    type="button"
+                    class="select__option"
+                    id={`${listboxId}-option-${flatIdx}`}
+                    role="option"
+                    aria-selected={currentValue === option.value ? "true" : "false"}
+                    data-highlighted={highlightIndex === flatIdx}
+                    disabled={isOptionDisabled(option)}
+                    on:mouseenter={() => (highlightIndex = flatIdx)}
+                    on:click={() => selectOption(option)}
+                  >
+                    {#if $$slots.option}
+                      <slot name="option" {option} highlighted={highlightIndex === flatIdx} selected={currentValue === option.value} index={flatIdx} />
+                    {:else}
+                      <span class="select__option-label">{option.label}</span>
+                      {#if option.description}
+                        <span class="select__option-description">{option.description}</span>
+                      {/if}
+                    {/if}
+                  </button>
+                {/each}
+              </div>
+            {/if}
           {/each}
         {:else}
-          <optgroup label={(group as SelectOptionGroup).label}>
+          {#each filteredOptions as option, index (option.value)}
+            <button
+              type="button"
+              class="select__option"
+              id={`${listboxId}-option-${index}`}
+              role="option"
+              aria-selected={currentValue === option.value ? "true" : "false"}
+              data-highlighted={highlightIndex === index}
+              disabled={isOptionDisabled(option)}
+              on:mouseenter={() => (highlightIndex = index)}
+              on:click={() => selectOption(option)}
+            >
+              {#if $$slots.option}
+                <slot name="option" {option} highlighted={highlightIndex === index} selected={currentValue === option.value} {index} />
+              {:else}
+                {#if option.icon}
+                  <span class="select__option-icon"><Icon icon={option.icon} size="sm" /></span>
+                {/if}
+                <span class="select__option-label">{option.label}</span>
+                {#if option.description}
+                  <span class="select__option-description">{option.description}</span>
+                {/if}
+              {/if}
+            </button>
+          {/each}
+        {/if}
+
+        {#if filteredOptions.length === 0}
+          {#if $$slots.empty}
+            <slot name="empty" {query} />
+          {:else}
+            <div class="select__empty">{emptyMessage}</div>
+          {/if}
+        {/if}
+      </div>
+    {/if}
+  </div>
+
+{:else}
+  <!-- ═══ NATIVE MODE ═══ -->
+  <div class="select" data-placeholder={!hasSelection} data-size={resolvedSize} data-density={resolvedDensity}>
+    <select
+      id={selectId}
+      {name}
+      class="select__control"
+      value={currentValue}
+      {disabled}
+      {required}
+      aria-label={ariaLabel ?? undefined}
+      aria-describedby={describedBy ?? undefined}
+      on:change={handleNativeChange}
+    >
+      {#if placeholderLabel}
+        <option value={placeholderValue} disabled={!clearable && required}>{placeholderLabel}</option>
+      {/if}
+
+      {#if isGrouped}
+        {#each normalizedOptions as group}
+          {#if (group as SelectOptionGroup).label.trim().length === 0}
             {#each (group as SelectOptionGroup).options as option (option.value)}
-              <option value={option.value} disabled={option.isDisabled === true}>
+              <option value={option.value} disabled={isOptionDisabled(option)}>
                 {option.label}
               </option>
             {/each}
-          </optgroup>
-        {/if}
-      {/each}
-    {:else if flatOptions.length > 0}
-      {#each flatOptions as option}
-        <option value={option.value} disabled={option.isDisabled === true}>
-          {option.label}
-        </option>
-      {/each}
-    {:else if isLazy && currentValue && valueLabel}
-      <option value={currentValue}>{valueLabel}</option>
-    {:else if isLazy && loadState === "loading"}
-      <option value={placeholderValue} disabled>Loading…</option>
-    {:else if isLazy && loadState === "error"}
-      <option value={placeholderValue} disabled>{loadError ?? "Failed to load options"}</option>
-    {:else if currentValue && !hasCurrentOption && valueLabel}
-      <option value={currentValue}>{valueLabel}</option>
-    {:else if currentValue && !hasCurrentOption}
-      <option value={currentValue}>{currentValue}</option>
-    {/if}
-  </select>
+          {:else}
+            <optgroup label={(group as SelectOptionGroup).label}>
+              {#each (group as SelectOptionGroup).options as option (option.value)}
+                <option value={option.value} disabled={isOptionDisabled(option)}>
+                  {option.label}
+                </option>
+              {/each}
+            </optgroup>
+          {/if}
+        {/each}
+      {:else if flatOptions.length > 0}
+        {#each flatOptions as option}
+          <option value={option.value} disabled={isOptionDisabled(option)}>
+            {option.label}
+          </option>
+        {/each}
+      {:else if isLazy && currentValue && valueLabel}
+        <option value={currentValue}>{valueLabel}</option>
+      {:else if isLazy && loadState === "loading"}
+        <option value={placeholderValue} disabled>Loading…</option>
+      {:else if isLazy && loadState === "error"}
+        <option value={placeholderValue} disabled>{loadError ?? "Failed to load options"}</option>
+      {:else if currentValue && !hasCurrentOption && valueLabel}
+        <option value={currentValue}>{valueLabel}</option>
+      {:else if currentValue && !hasCurrentOption}
+        <option value={currentValue}>{currentValue}</option>
+      {/if}
+    </select>
 
-  <span class="select__indicator" aria-hidden="true"><Icon name="chevron-down" /></span>
-</div>
+    <span class="select__indicator" aria-hidden="true"><Icon name="chevron-down" /></span>
+  </div>
+{/if}
 
 <style>
+  /* ═══ SHARED STYLES ═══ */
+
   .select {
     position: relative;
     display: grid;
@@ -256,6 +680,19 @@
     );
   }
 
+  .select__indicator {
+    position: absolute;
+    right: var(--poodle-space-control-x);
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--poodle-color-icon-muted);
+    font-size: 0.75rem;
+    line-height: 1;
+    pointer-events: none;
+  }
+
+  /* ═══ NATIVE MODE ═══ */
+
   .select:has(.select__control:disabled) {
     opacity: var(--poodle-state-opacity-disabled);
   }
@@ -281,73 +718,219 @@
     color: var(--poodle-color-text-secondary);
   }
 
-  .select__indicator {
-    position: absolute;
-    right: var(--poodle-space-control-x);
-    top: 50%;
-    transform: translateY(-50%);
-    color: var(--poodle-color-icon-muted);
-    font-size: 0.75rem;
-    line-height: 1;
-    pointer-events: none;
+  .select__control optgroup { font-weight: 600; color: var(--poodle-color-text-secondary); }
+  .select__control option { font-weight: normal; color: var(--poodle-color-text-primary); }
+
+  /* ═══ CUSTOM MODE ═══ */
+
+  .select--custom {
+    padding: 0;
   }
 
-  .select__control optgroup {
-    font-weight: 600;
+  .select--custom:has(:disabled) {
+    opacity: var(--poodle-state-opacity-disabled);
+  }
+
+  /* Trigger area (searchable) */
+  .select__trigger-area {
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+    padding: 0 var(--poodle-space-control-x);
+    min-height: var(--poodle-size-control-height);
+  }
+
+  .select__input {
+    flex: 1;
+    min-width: 0;
+    height: calc(var(--poodle-size-control-height) - 0.125rem);
+    padding: 0;
+    border: 0;
+    background: transparent;
+    color: var(--poodle-color-text-primary);
+    font-family: var(--poodle-typography-body-family);
+    font-size: var(--poodle-typography-body-size);
+    line-height: var(--poodle-typography-body-lineHeight);
+    outline: 0;
+  }
+
+  .select__input::placeholder {
     color: var(--poodle-color-text-secondary);
   }
 
-  .select__control option {
-    font-weight: normal;
+  /* Trigger button (non-searchable custom) */
+  .select__trigger {
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+    width: 100%;
+    min-height: var(--poodle-size-control-height);
+    padding: 0 var(--poodle-space-control-x);
+    border: 0;
+    background: transparent;
+    color: var(--poodle-color-text-primary);
+    font-family: var(--poodle-typography-body-family);
+    font-size: var(--poodle-typography-body-size);
+    line-height: var(--poodle-typography-body-lineHeight);
+    text-align: left;
+    cursor: pointer;
+  }
+
+  .select__trigger:disabled {
+    cursor: not-allowed;
+  }
+
+  .select__value {
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .select__value[data-placeholder="true"] {
+    color: var(--poodle-color-text-secondary);
+  }
+
+  /* Clear button */
+  .select__clear {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    width: 1.125rem;
+    height: 1.125rem;
+    padding: 0;
+    border: 0;
+    border-radius: var(--poodle-radius-pill);
+    background: color-mix(in srgb, var(--poodle-color-text-secondary) 18%, transparent);
+    color: var(--poodle-color-text-secondary);
+    cursor: pointer;
+  }
+
+  .select__clear:hover {
+    background: color-mix(in srgb, var(--poodle-color-text-secondary) 28%, transparent);
     color: var(--poodle-color-text-primary);
   }
 
-  /* Density variants */
-  .select[data-density="compact"] {
-    padding: 0 calc(var(--poodle-space-control-x) - 0.125rem);
+  /* Listbox dropdown */
+  .select__listbox {
+    position: absolute;
+    top: calc(100% + 0.25rem);
+    left: -0.0625rem;
+    right: -0.0625rem;
+    z-index: var(--poodle-overlay-z-menu);
+    display: grid;
+    gap: 0.0625rem;
+    max-height: 16rem;
+    overflow-y: auto;
+    padding: 0.25rem;
+    border: 0.0625rem solid var(--poodle-color-border-default);
+    border-radius: var(--poodle-radius-surface);
+    background: var(--poodle-color-background-elevated);
+    box-shadow: var(--poodle-treatment-surface-elevated-shadow, var(--poodle-elevation-overlay));
   }
 
-  .select[data-density="comfortable"] {
-    padding: 0 calc(var(--poodle-space-control-x) + 0.125rem);
+  .select__listbox--above {
+    top: auto;
+    bottom: calc(100% + 0.25rem);
   }
 
-  /* Size variants */
-  .select[data-size="xs"] {
-    min-height: calc(var(--poodle-size-control-height) - 0.5rem);
-    padding: 0 calc(var(--poodle-space-control-x) - 0.125rem);
+  /* Group */
+  .select__group-label {
+    padding: 0.375rem 0.5rem 0.1875rem;
+    color: var(--poodle-color-text-secondary);
+    font-family: var(--poodle-typography-label-family);
+    font-size: 0.6875rem;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
   }
 
-  .select[data-size="xs"] .select__control {
-    height: calc(var(--poodle-size-control-height) - 0.5rem - (var(--poodle-border-width-default) * 2));
-    font-size: 0.75rem;
+  /* Option */
+  .select__option {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    width: 100%;
+    padding: 0.375rem 0.5rem;
+    border: 0;
+    border-radius: calc(var(--poodle-radius-control) - 0.125rem);
+    background: transparent;
+    color: var(--poodle-color-text-primary);
+    cursor: pointer;
+    font: inherit;
+    font-size: var(--poodle-typography-body-size);
+    text-align: left;
   }
 
-  .select[data-size="sm"] {
-    min-height: calc(var(--poodle-size-control-height) - 0.375rem);
-    padding: 0 calc(var(--poodle-space-control-x) - 0.0625rem);
+  .select__option[data-highlighted="true"],
+  .select__option:hover:not(:disabled) {
+    background: color-mix(in srgb, var(--poodle-color-accent-base) 14%, transparent);
   }
 
-  .select[data-size="sm"] .select__control {
-    height: calc(var(--poodle-size-control-height) - 0.375rem - (var(--poodle-border-width-default) * 2));
+  .select__option[aria-selected="true"] {
+    font-weight: 500;
   }
 
-  .select[data-size="lg"] {
-    min-height: calc(var(--poodle-size-control-height) + 0.375rem);
-    padding: 0 calc(var(--poodle-space-control-x) + 0.125rem);
+  .select__option:disabled {
+    cursor: not-allowed;
+    opacity: var(--poodle-state-opacity-disabled);
   }
 
-  .select[data-size="lg"] .select__control {
-    height: calc(var(--poodle-size-control-height) + 0.375rem - (var(--poodle-border-width-default) * 2));
-    font-size: 0.9375rem;
+  .select__option-icon {
+    display: inline-flex;
+    flex-shrink: 0;
   }
 
-  .select[data-size="xl"] {
-    min-height: calc(var(--poodle-size-control-height) + 0.5rem);
-    padding: 0 calc(var(--poodle-space-control-x) + 0.1875rem);
+  .select__option-label {
+    flex: 1;
+    min-width: 0;
   }
 
-  .select[data-size="xl"] .select__control {
-    height: calc(var(--poodle-size-control-height) + 0.5rem - (var(--poodle-border-width-default) * 2));
-    font-size: 1rem;
+  .select__option-description {
+    color: var(--poodle-color-text-secondary);
+    font-size: 0.6875rem;
   }
+
+  .select__empty {
+    padding: 0.5rem;
+    color: var(--poodle-color-text-secondary);
+    font-size: 0.8125rem;
+  }
+
+  /* ═══ DENSITY VARIANTS ═══ */
+  .select[data-density="compact"] { padding: 0 calc(var(--poodle-space-control-x) - 0.125rem); }
+  .select[data-density="comfortable"] { padding: 0 calc(var(--poodle-space-control-x) + 0.125rem); }
+  .select--custom[data-density="compact"] { padding: 0; }
+  .select--custom[data-density="compact"] .select__trigger-area,
+  .select--custom[data-density="compact"] .select__trigger { padding: 0 calc(var(--poodle-space-control-x) - 0.125rem); }
+  .select--custom[data-density="comfortable"] { padding: 0; }
+  .select--custom[data-density="comfortable"] .select__trigger-area,
+  .select--custom[data-density="comfortable"] .select__trigger { padding: 0 calc(var(--poodle-space-control-x) + 0.125rem); }
+
+  /* ═══ SIZE VARIANTS ═══ */
+  .select[data-size="xs"] { min-height: calc(var(--poodle-size-control-height) - 0.5rem); padding: 0 calc(var(--poodle-space-control-x) - 0.125rem); }
+  .select[data-size="xs"] .select__control { height: calc(var(--poodle-size-control-height) - 0.5rem - (var(--poodle-border-width-default) * 2)); font-size: 0.75rem; }
+  .select[data-size="xs"] .select__input,
+  .select[data-size="xs"] .select__trigger { font-size: 0.75rem; min-height: calc(var(--poodle-size-control-height) - 0.5rem); }
+  .select--custom[data-size="xs"] { padding: 0; }
+
+  .select[data-size="sm"] { min-height: calc(var(--poodle-size-control-height) - 0.375rem); padding: 0 calc(var(--poodle-space-control-x) - 0.0625rem); }
+  .select[data-size="sm"] .select__control { height: calc(var(--poodle-size-control-height) - 0.375rem - (var(--poodle-border-width-default) * 2)); }
+  .select[data-size="sm"] .select__input,
+  .select[data-size="sm"] .select__trigger { min-height: calc(var(--poodle-size-control-height) - 0.375rem); }
+  .select--custom[data-size="sm"] { padding: 0; }
+
+  .select[data-size="lg"] { min-height: calc(var(--poodle-size-control-height) + 0.375rem); padding: 0 calc(var(--poodle-space-control-x) + 0.125rem); }
+  .select[data-size="lg"] .select__control { height: calc(var(--poodle-size-control-height) + 0.375rem - (var(--poodle-border-width-default) * 2)); font-size: 0.9375rem; }
+  .select[data-size="lg"] .select__input,
+  .select[data-size="lg"] .select__trigger { font-size: 0.9375rem; min-height: calc(var(--poodle-size-control-height) + 0.375rem); }
+  .select--custom[data-size="lg"] { padding: 0; }
+
+  .select[data-size="xl"] { min-height: calc(var(--poodle-size-control-height) + 0.5rem); padding: 0 calc(var(--poodle-space-control-x) + 0.1875rem); }
+  .select[data-size="xl"] .select__control { height: calc(var(--poodle-size-control-height) + 0.5rem - (var(--poodle-border-width-default) * 2)); font-size: 1rem; }
+  .select[data-size="xl"] .select__input,
+  .select[data-size="xl"] .select__trigger { font-size: 1rem; min-height: calc(var(--poodle-size-control-height) + 0.5rem); }
+  .select--custom[data-size="xl"] { padding: 0; }
 </style>

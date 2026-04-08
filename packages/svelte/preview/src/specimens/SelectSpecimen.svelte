@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { Select, Eyebrow, type SelectOption, type SelectOptionGroup } from "@poodle/svelte-primitives";
+  import { Select, Eyebrow, Pill, type SelectOption, type SelectOptionGroup } from "@poodle/svelte-primitives";
 
   const fruitOptions: SelectOption[] = [
     { value: "apple", label: "Apple" },
@@ -7,6 +7,14 @@
     { value: "cherry", label: "Cherry" },
     { value: "dragonfruit", label: "Dragonfruit" },
     { value: "elderberry", label: "Elderberry" },
+  ];
+
+  const richOptions: SelectOption[] = [
+    { value: "us", label: "United States", description: "North America", icon: "globe" },
+    { value: "uk", label: "United Kingdom", description: "Europe", icon: "globe" },
+    { value: "jp", label: "Japan", description: "Asia", icon: "globe" },
+    { value: "au", label: "Australia", description: "Oceania", icon: "globe" },
+    { value: "br", label: "Brazil", description: "South America", icon: "globe" },
   ];
 
   const groupedOptions: SelectOptionGroup[] = [
@@ -23,56 +31,37 @@
       options: [
         { value: "carrot", label: "Carrot" },
         { value: "broccoli", label: "Broccoli" },
-        { value: "spinach", label: "Spinach", isDisabled: true },
-      ],
-    },
-    {
-      label: "Grains",
-      options: [
-        { value: "rice", label: "Rice" },
-        { value: "wheat", label: "Wheat" },
+        { value: "spinach", label: "Spinach", disabled: true },
       ],
     },
   ];
 
-  const controlSizes = ["xs", "sm", "md", "lg", "xl"] as const;
+  const frameworkOptions: SelectOption[] = [
+    { value: "svelte", label: "Svelte" },
+    { value: "react", label: "React" },
+    { value: "vue", label: "Vue" },
+    { value: "angular", label: "Angular" },
+    { value: "solid", label: "SolidJS" },
+    { value: "astro", label: "Astro" },
+  ];
 
   let selectedFruit: string | null = null;
+  let selectedCountry: string | null = null;
+  let selectedFramework: string | null = null;
   let selectedGrouped: string | null = null;
-  let selectedClearable: string | null = "all";
-  let selectedLazy: string | null = "module-1";
-
-  async function loadModuleGroups() {
-    return [
-      {
-        label: "",
-        items: [{ value: "all", label: "All modules" }],
-      },
-      {
-        label: "Pathway A",
-        items: [
-          { value: "module-1", label: "FA1 Financial Reporting" },
-          { value: "module-2", label: "TX1 Taxation" },
-        ],
-      },
-      {
-        label: "Pathway B",
-        items: [{ value: "module-3", label: "AA1 Audit" }],
-      },
-    ];
-  }
+  let freeformValue: string | null = null;
 </script>
 
 <div class="specimen">
   <div class="specimen__group">
-    <Eyebrow>Default (flat options)</Eyebrow>
+    <Eyebrow>Native (default)</Eyebrow>
     <div class="specimen__field">
       <Select
-        id="select-default"
+        id="select-native"
         options={fruitOptions}
         placeholder="Choose a fruit"
         ariaLabel="Fruit selection"
-        on:valueChange={(event) => (selectedFruit = event.detail.value)}
+        on:valueChange={(e) => (selectedFruit = e.detail.value)}
       />
       {#if selectedFruit}
         <p class="specimen__value">Selected: {selectedFruit}</p>
@@ -81,14 +70,49 @@
   </div>
 
   <div class="specimen__group">
-    <Eyebrow>Grouped options</Eyebrow>
+    <Eyebrow>Custom dropdown (non-searchable)</Eyebrow>
     <div class="specimen__field">
       <Select
-        id="select-grouped"
+        id="select-custom"
+        options={richOptions}
+        placeholder="Choose a country"
+        native={false}
+        ariaLabel="Country selection"
+        on:valueChange={(e) => (selectedCountry = e.detail.value)}
+      />
+      {#if selectedCountry}
+        <p class="specimen__value">Selected: {selectedCountry}</p>
+      {/if}
+    </div>
+  </div>
+
+  <div class="specimen__group">
+    <Eyebrow>Searchable</Eyebrow>
+    <div class="specimen__field">
+      <Select
+        id="select-searchable"
+        options={frameworkOptions}
+        placeholder="Search frameworks..."
+        searchable
+        ariaLabel="Framework search"
+        on:valueChange={(e) => (selectedFramework = e.detail.value)}
+      />
+      {#if selectedFramework}
+        <p class="specimen__value">Selected: {selectedFramework}</p>
+      {/if}
+    </div>
+  </div>
+
+  <div class="specimen__group">
+    <Eyebrow>Searchable with groups</Eyebrow>
+    <div class="specimen__field">
+      <Select
+        id="select-searchable-grouped"
         options={groupedOptions}
-        placeholder="Choose a food"
-        ariaLabel="Food selection with groups"
-        on:valueChange={(event) => (selectedGrouped = event.detail.value)}
+        placeholder="Search food..."
+        searchable
+        ariaLabel="Food search"
+        on:valueChange={(e) => (selectedGrouped = e.detail.value)}
       />
       {#if selectedGrouped}
         <p class="specimen__value">Selected: {selectedGrouped}</p>
@@ -97,36 +121,66 @@
   </div>
 
   <div class="specimen__group">
-    <Eyebrow>Sizes</Eyebrow>
-    <div class="specimen__stack">
-      {#each controlSizes as size}
-        <Select
-          id={"select-size-" + size}
-          options={fruitOptions}
-          placeholder={size.toUpperCase()}
-          ariaLabel={"Fruit at " + size}
-          {size}
-        />
-      {/each}
+    <Eyebrow>Freeform (autocomplete)</Eyebrow>
+    <div class="specimen__field">
+      <Select
+        id="select-freeform"
+        options={frameworkOptions}
+        placeholder="Type or select..."
+        searchable
+        freeform
+        ariaLabel="Framework freeform"
+        on:valueChange={(e) => (freeformValue = e.detail.value)}
+      />
+      {#if freeformValue}
+        <p class="specimen__value">Value: {freeformValue}</p>
+      {/if}
     </div>
   </div>
 
   <div class="specimen__group">
-    <Eyebrow>Densities</Eyebrow>
-    <div class="specimen__stack">
-      {#each ["compact", "default", "comfortable"] as density}
-        <div class="specimen__row">
-          <span class="specimen__label">{density}</span>
-          <Select
-            id={"select-density-" + density}
-            options={fruitOptions}
-            placeholder="Choose a fruit"
-            ariaLabel={"Fruit at " + density + " density"}
-            {density}
-          />
-        </div>
-      {/each}
-    </div>
+    <Eyebrow>Rich option rendering (custom slot)</Eyebrow>
+    <Select
+      id="select-rich"
+      options={richOptions}
+      placeholder="Choose a country"
+      ariaLabel="Country with rich options"
+    >
+      <div slot="option" let:option let:selected class="rich-option">
+        <span class="rich-option__flag">{option.icon ? "🌍" : ""}</span>
+        <span class="rich-option__content">
+          <span class="rich-option__label">{option.label}</span>
+          {#if option.description}
+            <span class="rich-option__desc">{option.description}</span>
+          {/if}
+        </span>
+        {#if selected}
+          <Pill tone="info" appearance="badge" sizeRole="chrome">✓</Pill>
+        {/if}
+      </div>
+    </Select>
+  </div>
+
+  <div class="specimen__group">
+    <Eyebrow>Clearable (custom)</Eyebrow>
+    <Select
+      id="select-clearable"
+      options={fruitOptions}
+      placeholder="All fruits"
+      native={false}
+      clearable
+      ariaLabel="Clearable fruit selection"
+    />
+  </div>
+
+  <div class="specimen__group">
+    <Eyebrow>Native grouped</Eyebrow>
+    <Select
+      id="select-native-grouped"
+      options={groupedOptions}
+      placeholder="Choose a food"
+      ariaLabel="Grouped food selection"
+    />
   </div>
 
   <div class="specimen__group">
@@ -136,36 +190,7 @@
       options={fruitOptions}
       value="banana"
       disabled
-      ariaLabel="Disabled fruit selection"
-    />
-  </div>
-
-  <div class="specimen__group">
-    <Eyebrow>Clearable</Eyebrow>
-    <Select
-      id="select-clearable"
-      items={fruitOptions}
-      clearable
-      defaultValue="all"
-      placeholder="All fruits"
-      value={selectedClearable}
-      ariaLabel="Clearable fruit selection"
-      on:valueChange={(event) => (selectedClearable = event.detail.value)}
-    />
-  </div>
-
-  <div class="specimen__group">
-    <Eyebrow>Lazy grouped options</Eyebrow>
-    <Select
-      id="select-lazy"
-      value={selectedLazy}
-      valueLabel="FA1 Financial Reporting"
-      placeholder="All modules"
-      clearable
-      defaultValue="all"
-      loadGroups={loadModuleGroups}
-      ariaLabel="Lazy module selection"
-      on:valueChange={(event) => (selectedLazy = event.detail.value)}
+      ariaLabel="Disabled"
     />
   </div>
 </div>
@@ -181,7 +206,7 @@
     display: flex;
     flex-direction: column;
     gap: 0.5rem;
-    max-width: 20rem;
+    max-width: 22rem;
   }
 
   .specimen__field {
@@ -196,23 +221,32 @@
     margin: 0;
   }
 
-  .specimen__stack {
+  .rich-option {
     display: flex;
-    flex-direction: column;
-    gap: 0.75rem;
-  }
-
-  .specimen__row {
-    display: flex;
-    flex-wrap: wrap;
     align-items: center;
     gap: 0.5rem;
+    width: 100%;
   }
 
-  .specimen__label {
-    font-size: 0.75rem;
-    font-family: var(--poodle-typography-code-family);
-    color: var(--poodle-color-text-muted);
-    min-width: 6rem;
+  .rich-option__flag {
+    font-size: 1rem;
+    flex-shrink: 0;
+  }
+
+  .rich-option__content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 0.0625rem;
+    min-width: 0;
+  }
+
+  .rich-option__label {
+    font-size: 0.8125rem;
+  }
+
+  .rich-option__desc {
+    font-size: 0.6875rem;
+    color: var(--poodle-color-text-secondary);
   }
 </style>

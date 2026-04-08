@@ -138,6 +138,10 @@ export interface RadioGroupOption {
 export interface SelectOption {
   value: string;
   label: string;
+  description?: string;
+  icon?: IconProp;
+  disabled?: boolean;
+  /** @deprecated Use `disabled` instead */
   isDisabled?: boolean;
   group?: string;
 }
@@ -148,6 +152,9 @@ export interface SelectOptionGroup {
 }
 
 export type SelectItems = SelectOption[] | SelectOptionGroup[];
+
+/** Async option loader for Select. Returns flat or grouped options. */
+export type SelectLoadOptions = () => Promise<SelectItems>;
 
 export interface MenuItem {
   value: string;

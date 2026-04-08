@@ -2929,45 +2929,53 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
       { name: "ariaLabel", type: "string | null", default: "null", description: "Accessible label for the select." },
       { name: "describedBy", type: "string | null", default: "null", description: "ID of the element describing this select." },
       { name: "name", type: "string | undefined", default: "undefined", description: "Form field name." },
-      { name: "onchange", type: "((value: string) => void) | null", default: "null", description: "Direct callback fired on value change, in addition to the valueChange event." },
+      { name: "onchange", type: "((value: string) => void) | null", default: "null", description: "Direct callback fired on value change." },
+      { name: "searchable", type: "boolean", default: "false", description: "Renders a custom dropdown with search/filter input instead of native <select>." },
+      { name: "freeform", type: "boolean", default: "false", description: "With searchable, query text becomes the value if no option selected. Options act as suggestions." },
+      { name: "native", type: "boolean | undefined", default: "undefined", description: "Explicit mode override. true = always native, false = always custom, undefined = auto." },
+      { name: "emptyMessage", type: "string", default: '"No matches"', description: "Text shown when filter yields zero results (custom mode only)." },
+      { name: "loadOptions", type: "SelectLoadOptions | null", default: "null", description: "Unified async loader returning flat or grouped options." },
     ],
-    slots: [],
+    slots: [
+      { name: "option", description: "Custom rendering for each option row. Receives: option, highlighted, selected, index. Presence forces custom mode." },
+      { name: "trigger", description: "Custom trigger rendering. Receives: selectedOption, open, placeholder. Presence forces custom mode." },
+      { name: "empty", description: "Custom empty-state for no matching options. Receives: query." },
+    ],
     events: [
       { name: "valueChange", payload: "{ value: string }", description: "Fires when the selected value changes." },
-      { name: "change", payload: "{ value: string }", description: "Alias for valueChange for convenience." },
+      { name: "change", payload: "{ value: string }", description: "Alias for valueChange." },
+      { name: "queryChange", payload: "{ query: string }", description: "Fires when the search query changes (searchable mode only)." },
+      { name: "openChange", payload: "{ open: boolean }", description: "Fires when the dropdown opens/closes (custom mode only)." },
     ],
     usage: `<script lang="ts">
   import { Select } from "@poodle/svelte-primitives";
 
-  // Simple flat options
-  const statuses = [
-    { value: "draft", label: "Draft" },
-    { value: "published", label: "Published" },
-    { value: "archived", label: "Archived" },
+  const fruits = [
+    { value: "apple", label: "Apple" },
+    { value: "banana", label: "Banana" },
+    { value: "cherry", label: "Cherry" },
   ];
-
-  // Grouped options
-  const grouped = [
-    { label: "Fruits", options: [
-      { value: "apple", label: "Apple" },
-      { value: "banana", label: "Banana" },
-    ]},
-    { label: "Vegetables", options: [
-      { value: "carrot", label: "Carrot" },
-      { value: "broccoli", label: "Broccoli" },
-    ]},
-  ];
-
-  // Async loading
-  async function loadCountries() {
-    const res = await fetch("/api/countries");
-    return res.json();
-  }
 </script>
 
-<Select options={statuses} placeholder="Select status..." clearable />
-<Select options={grouped} placeholder="Pick a food..." />
-<Select loadItems={loadCountries} loadKey="countries" placeholder="Select country..." valueLabel="Loading..." />`,
+<!-- Native (default) -->
+<Select options={fruits} placeholder="Choose a fruit" />
+
+<!-- Custom dropdown with rich options -->
+<Select options={fruits} native={false} placeholder="Choose..." />
+
+<!-- Searchable (replaces Combobox) -->
+<Select options={fruits} searchable placeholder="Search fruits..." />
+
+<!-- Freeform autocomplete -->
+<Select options={fruits} searchable freeform placeholder="Type or pick..." />
+
+<!-- Custom option rendering -->
+<Select options={countries} placeholder="Choose a country">
+  <div slot="option" let:option let:selected>
+    <span>{option.icon} {option.label}</span>
+    {#if selected}<strong>✓</strong>{/if}
+  </div>
+</Select>`,
   },
 
   "selection-summary": {
