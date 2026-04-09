@@ -110,7 +110,7 @@
     padding: var(--poodle-tri-state-track-inset);
     border: 0.0625rem solid var(--poodle-color-border-default);
     border-radius: 999px;
-    background: color-mix(in srgb, var(--poodle-color-text-primary) 18%, var(--poodle-color-background-surface));
+    background: color-mix(in srgb, var(--poodle-color-background-canvas) 75%, black);
     color: var(--poodle-color-text-primary);
     isolation: isolate;
   }
