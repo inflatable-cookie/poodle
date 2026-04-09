@@ -143,6 +143,26 @@ Rules for this pattern:
 - switch to `SpaFormShell` only when the child route needs save-vs-save-close,
   delete intent, or navigation-context return orchestration
 
+## Child Collection Pattern
+
+Use this when a parent detail route needs to surface child entities like tasks,
+aliases, notices, variants, or similar scoped records.
+
+Rules for this pattern:
+
+- keep compact related child collections inside the parent detail route as one
+  local carded section with a title, count badge, add action, empty copy, and
+  row-level actions
+- keep richer child collections on their own tab or section body when they need
+  filters, reorder, selection mode, or batch actions
+- use `InlineListSection` only for very small read-mostly related collections
+  like versions or usages, not as the default for editable child browse
+  surfaces
+- avoid introducing a second inner page header for the child collection; the
+  parent `PageHeader` and `MetaBar` still own the route shell
+- keep tab labels and child counts host-owned rather than pushing those into a
+  generic child-collection wrapper
+
 ## Diagnostics Browse Pattern
 
 Use this when the page is primarily about operational inspection and safe
