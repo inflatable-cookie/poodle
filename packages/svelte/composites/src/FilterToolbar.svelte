@@ -19,10 +19,10 @@
   $: resolvedDensity = density ?? $uiPresentation.density;
 
   function handleHeaderClick(e: MouseEvent) {
-    if (!collapsible || !collapsed) return;
+    if (!collapsible) return;
     const target = e.target as HTMLElement;
     if (target.closest('.filter-toolbar__actions') || target.closest('.collapse-toggle')) return;
-    collapsed = false;
+    collapsed = !collapsed;
   }
 </script>
 
@@ -60,7 +60,12 @@
       {/if}
     </button>
   {:else}
-    <div class="filter-toolbar__header">
+    <!-- svelte-ignore a11y-click-events-have-key-events a11y-no-static-element-interactions -->
+    <div
+      class="filter-toolbar__header"
+      class:filter-toolbar__header--clickable={collapsible}
+      on:click={handleHeaderClick}
+    >
       {#if collapsible}
         <CollapseToggle
           collapsed={collapsed}
@@ -117,6 +122,10 @@
     display: flex;
     align-items: center;
     gap: var(--poodle-space-inline-sm);
+  }
+
+  .filter-toolbar__header--clickable {
+    cursor: pointer;
   }
 
   .filter-toolbar__header--button {
