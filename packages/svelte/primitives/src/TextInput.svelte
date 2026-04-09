@@ -733,6 +733,7 @@
 
   .text-input__affix--suffix {
     padding-inline-start: var(--poodle-text-input-padding-inline);
+    padding-inline-end: var(--poodle-text-input-padding-inline);
     border-left: 0.0625rem solid color-mix(in srgb, var(--poodle-color-border-subtle) 52%, transparent);
     margin-inline-start: var(--poodle-text-input-adornment-gap);
   }
