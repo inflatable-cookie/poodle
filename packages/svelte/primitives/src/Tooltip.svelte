@@ -166,7 +166,11 @@
       --poodle-treatment-surface-elevated-fill,
       color-mix(in srgb, var(--poodle-color-background-elevated) 98%, var(--poodle-color-background-panel))
     );
-    box-shadow: var(--poodle-treatment-surface-elevated-shadow, var(--poodle-elevation-overlay));
+    box-shadow: var(
+      --poodle-treatment-surface-shadow,
+      0 0.5rem 1.25rem rgba(0, 0, 0, 0.25),
+      0 0.125rem 0.375rem rgba(0, 0, 0, 0.15)
+    );
     color: var(--poodle-color-text-primary);
     font-size: 0.6875rem;
     line-height: 1.35;
