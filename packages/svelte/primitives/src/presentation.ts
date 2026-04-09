@@ -18,12 +18,6 @@ const DEFAULT_UI_PRESENTATION: UiPresentationContextValue = {
 const DEFAULT_UI_PRESENTATION_STORE = readable(DEFAULT_UI_PRESENTATION) as UiPresentationStore;
 
 export function setUiPresentation(value: UiPresentationContextValue): Writable<UiPresentationContextValue> {
-  const existingStore = getContext<Writable<UiPresentationContextValue> | undefined>(POODLE_UI_PRESENTATION);
-  if (existingStore) {
-    existingStore.set(value);
-    return existingStore;
-  }
-
   const store = writable(value);
   setContext(POODLE_UI_PRESENTATION, store);
   return store;

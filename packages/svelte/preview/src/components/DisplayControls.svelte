@@ -56,6 +56,8 @@
     <ToggleGroup
       value={theme}
       options={themeOptions}
+      size="sm"
+      density="compact"
       ariaLabel="Theme"
       on:valueChange={(event) => onThemeChange(event.detail.value as string)}
     />
@@ -66,6 +68,8 @@
     <ToggleGroup
       value={density}
       options={densityOptions}
+      size="sm"
+      density="compact"
       ariaLabel="Density"
       on:valueChange={(event) => onDensityChange(event.detail.value as string)}
     />
@@ -76,6 +80,8 @@
     <ToggleGroup
       value={controlSize}
       options={controlSizeOptions}
+      size="sm"
+      density="compact"
       ariaLabel="Control size"
       on:valueChange={(event) => onControlSizeChange(event.detail.value as string)}
     />
@@ -86,6 +92,8 @@
     <ToggleGroup
       value={appearanceTreatment}
       options={appearanceTreatmentOptions}
+      size="sm"
+      density="compact"
       ariaLabel="Appearance treatment"
       on:valueChange={(event) => onAppearanceTreatmentChange(event.detail.value as string)}
     />
@@ -96,16 +104,22 @@
     <Checkbox
       checked={disabled}
       label="Disabled"
+      size="sm"
+      density="compact"
       on:checkedChange={(event) => onDisabledChange(event.detail.checked)}
     />
     <Checkbox
       checked={invalid}
       label="Invalid"
+      size="sm"
+      density="compact"
       on:checkedChange={(event) => onInvalidChange(event.detail.checked)}
     />
     <Checkbox
       checked={busy}
       label="Busy"
+      size="sm"
+      density="compact"
       on:checkedChange={(event) => onBusyChange(event.detail.checked)}
     />
   </div>

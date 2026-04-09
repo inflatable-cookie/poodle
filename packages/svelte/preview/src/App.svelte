@@ -154,7 +154,6 @@
       </div>
     </header>
 
-    <UiPresentationProvider density="compact" sizeScale="sm">
     <DisplayControls
       {theme}
       {density}
@@ -171,7 +170,6 @@
       onInvalidChange={(checked) => (invalid = checked)}
       onBusyChange={(checked) => (busy = checked)}
     />
-    </UiPresentationProvider>
 
     <main class="app-main">
       {#key `${previewModeKey}:${activeSection}`}
