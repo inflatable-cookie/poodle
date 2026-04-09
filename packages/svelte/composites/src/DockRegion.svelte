@@ -20,6 +20,7 @@
 
   export let edge: DockEdge = "left";
   export let sizing: DockSizing = "flexible";
+  export let collapsible = false;
   export let collapsed = false;
   export let collapsedPosture: DockCollapsedPosture = "icon-strip";
   export let emphasis: DockEmphasis = "standard";
@@ -306,24 +307,28 @@
 
   {:else if showHidden}
     <!-- Flexible collapsed (hidden): just the collapse toggle -->
-    <div class="dock-region__edge-toggle">
-      <CollapseToggle
-        collapsed={collapsed}
-        direction={collapseDirection}
-        ariaLabel={`Expand ${edge} dock`}
-        on:toggle={handleCollapseToggle}
-      />
-    </div>
+    {#if collapsible}
+      <div class="dock-region__edge-toggle">
+        <CollapseToggle
+          collapsed={collapsed}
+          direction={collapseDirection}
+          ariaLabel={`Expand ${edge} dock`}
+          on:toggle={handleCollapseToggle}
+        />
+      </div>
+    {/if}
 
   {:else if showIconStrip && isVerticalEdge}
     <!-- Flexible collapsed (icon-strip) for left/right: collapse toggle + vertical tabs -->
     <div class="dock-region__strip" data-orientation="vertical">
-      <CollapseToggle
-        collapsed={collapsed}
-        direction={collapseDirection}
-        ariaLabel={`Expand ${edge} dock`}
-        on:toggle={handleCollapseToggle}
-      />
+      {#if collapsible}
+        <CollapseToggle
+          collapsed={collapsed}
+          direction={collapseDirection}
+          ariaLabel={`Expand ${edge} dock`}
+          on:toggle={handleCollapseToggle}
+        />
+      {/if}
         <Tabs
           variant="strip"
           orientation="vertical"
@@ -366,12 +371,14 @@
           on:close={handleClose}
         />
       </div>
-      <CollapseToggle
-        collapsed={collapsed}
-        direction={collapseDirection}
-        ariaLabel={`Expand ${edge} dock`}
-        on:toggle={handleCollapseToggle}
-      />
+      {#if collapsible}
+        <CollapseToggle
+          collapsed={collapsed}
+          direction={collapseDirection}
+          ariaLabel={`Expand ${edge} dock`}
+          on:toggle={handleCollapseToggle}
+        />
+      {/if}
     </div>
 
   {:else}
@@ -400,12 +407,14 @@
           on:close={handleClose}
         />
       </div>
-      <CollapseToggle
-        collapsed={collapsed}
-        direction={collapseDirection}
-        ariaLabel={`Collapse ${edge} dock`}
-        on:toggle={handleCollapseToggle}
-      />
+      {#if collapsible}
+        <CollapseToggle
+          collapsed={collapsed}
+          direction={collapseDirection}
+          ariaLabel={`Collapse ${edge} dock`}
+          on:toggle={handleCollapseToggle}
+        />
+      {/if}
     </div>
 
     <div class="dock-region__body">

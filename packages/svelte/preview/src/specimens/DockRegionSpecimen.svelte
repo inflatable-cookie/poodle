@@ -199,6 +199,7 @@
         <DockRegion
           edge="left"
           sizing="flexible"
+          collapsible
           items={interactiveItems}
           value={interactiveActive}
           collapsed={interactiveCollapsed}
@@ -229,6 +230,7 @@
         <DockRegion
           edge="bottom"
           sizing="flexible"
+          collapsible
           items={bottomItems}
           value={bottomActive}
           collapsed={bottomCollapsed}
