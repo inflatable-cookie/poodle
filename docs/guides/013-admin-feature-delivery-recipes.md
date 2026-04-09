@@ -205,6 +205,25 @@ Rules for this pattern:
 - keep retry/cancel/refresh behavior in host code; only the visible layout is
   shared
 
+## Review Queue Pattern
+
+Use this when the browse surface is a work queue for review, marking, triage,
+or claim/release flows rather than a passive diagnostics table.
+
+Rules for this pattern:
+
+- keep the same `PageHeader` shell as other queue pages, but use a task-oriented
+  subtitle that tells operators what work they are continuing
+- use a small action-oriented stats band above the table when the queue has
+  meaningful staged states like queued, in-progress, or completed
+- let those stats act as fast queue filters when that improves triage speed
+- keep the filter rail simple: one `FilterToolbar` with local filters and a
+  small ghost refresh action
+- keep row-level next actions host-owned, such as claim, release, retry, or
+  open detail
+- use a `DataTable` browse surface for the queue body; only introduce a
+  dedicated detail route when the review workflow truly needs drill-in context
+
 ## Ops Detail Pattern
 
 Use this when a system page drills into one job, scheduled task, or operational
