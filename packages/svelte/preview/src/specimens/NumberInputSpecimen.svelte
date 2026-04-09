@@ -1,5 +1,8 @@
 <script lang="ts">
   import { NumberInput, Eyebrow } from "@poodle/svelte-primitives";
+  import type { ControlDensity } from "@poodle/svelte-primitives";
+
+  const densities: ControlDensity[] = ["compact", "default", "comfortable"];
 
   const controlSizes = ["xs", "sm", "md", "lg", "xl"] as const;
 
@@ -33,7 +36,7 @@
   <div class="specimen__group">
     <Eyebrow>Densities</Eyebrow>
     <div class="specimen__stack">
-      {#each ["compact", "default", "comfortable"] as density}
+      {#each densities as density}
         <div class="specimen__row">
           <span class="specimen__label">{density}</span>
           <NumberInput id={"density-" + density} value={1} ariaLabel={"Number at " + density + " density"} {density} />

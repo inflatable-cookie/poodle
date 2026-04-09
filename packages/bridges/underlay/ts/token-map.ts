@@ -1,4 +1,4 @@
-import { aliases, tokens } from "../../../tokens/artifacts/ts/index";
+import { tokens } from "../../../tokens/artifacts/ts/index";
 
 export type UnderlayBridgeToken = {
   underlayVar: string;
@@ -68,5 +68,4 @@ export const underlayTokenMap: UnderlayBridgeToken[] = [
   },
 ];
 
-export const underlayBridgeAliasNotes = aliases;
 export const canonicalTokenFamilies = Object.keys(tokens.semantic);

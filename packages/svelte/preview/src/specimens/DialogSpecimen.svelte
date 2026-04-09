@@ -44,10 +44,10 @@
       on:openChange={(e) => (formOpen = e.detail.open)}
     >
       <div class="form-grid">
-        <Field label="Project name">
+        <Field label="Project name" id="dialog-project-name">
           <TextInput id="dialog-proj-name" placeholder="My project" />
         </Field>
-        <Field label="Template">
+        <Field label="Template" id="dialog-template">
           <Select id="dialog-template" placeholder="Choose a template" options={[
             { value: "blank", label: "Blank" },
             { value: "starter", label: "Starter kit" },
@@ -55,7 +55,7 @@
           ]} />
         </Field>
         <div class="form-full-width">
-          <Field label="Description">
+          <Field label="Description" id="dialog-description">
             <TextInput id="dialog-desc" placeholder="What is this project for?" rows={3} />
           </Field>
         </div>
@@ -190,7 +190,7 @@
         <Button variant="secondary" on:click={() => (widthOpenMap[w] = true)}>{w}</Button>
         <Dialog
           open={widthOpenMap[w] ?? false}
-          width={w}
+          width={w as "sm" | "md" | "lg" | "xl"}
           title="Width: {w}"
           showCloseButton
           on:openChange={(e) => (widthOpenMap[w] = e.detail.open)}

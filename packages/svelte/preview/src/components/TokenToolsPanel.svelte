@@ -53,7 +53,7 @@
     {#if activeValue === "token-summary-section"}
       <Grid columns="repeat(auto-fit, minmax(14rem, 1fr))" gap="md">
         {#each keySemanticTokens as token}
-          <Surface tone="default" border="subtle" padding="md">
+          <Surface tone="panel" border="subtle" padding="md">
             <Stack gap="md">
               <span class="path">{token.path}</span>
               <span class="value-row">

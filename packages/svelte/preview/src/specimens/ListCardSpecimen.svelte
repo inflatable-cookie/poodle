@@ -78,7 +78,7 @@
       >
         <svelte:fragment slot="leading"><Icon name="check-square" /></svelte:fragment>
         <svelte:fragment slot="badges">
-          <Pill tone="positive">Chosen</Pill>
+          <Pill tone="success">Chosen</Pill>
         </svelte:fragment>
       </ListCard>
       <ListCard
@@ -102,7 +102,7 @@
           <span style="color: var(--poodle-color-text-secondary);"> → Week 1: Cash Flow</span>
         </svelte:fragment>
         <svelte:fragment slot="badges">
-          <Pill tone="accent">Move</Pill>
+          <Pill tone="info">Move</Pill>
         </svelte:fragment>
       </ListCard>
     </div>
@@ -146,7 +146,7 @@
       >
         <svelte:fragment slot="leading"><Icon name="file-text" /></svelte:fragment>
         <svelte:fragment slot="badges">
-          <Pill tone="accent">New</Pill>
+          <Pill tone="info">New</Pill>
         </svelte:fragment>
       </ListCard>
       <ListCard
@@ -158,7 +158,7 @@
         <svelte:fragment slot="leading"><Icon icon={layers} /></svelte:fragment>
         <svelte:fragment slot="badges">
           <Pill appearance="badge" tone="neutral">3</Pill>
-          <Pill tone="caution">Review</Pill>
+          <Pill tone="warning">Review</Pill>
         </svelte:fragment>
       </ListCard>
     </div>
@@ -176,7 +176,7 @@
       >
         <svelte:fragment slot="leading"><Icon icon={folder} /></svelte:fragment>
         <svelte:fragment slot="badges">
-          <Pill tone="positive">Active</Pill>
+          <Pill tone="success">Active</Pill>
         </svelte:fragment>
         <svelte:fragment slot="footer">
           <ListCardCounter icon="file-text" count={24} tooltip="24 documents" />
@@ -297,7 +297,7 @@
       >
         <svelte:fragment slot="leading"><Icon icon={layers} /></svelte:fragment>
         <svelte:fragment slot="badges">
-          <Pill tone="caution" size="md">Pending</Pill>
+          <Pill tone="warning" size="md">Pending</Pill>
         </svelte:fragment>
       </ListCard>
     </div>

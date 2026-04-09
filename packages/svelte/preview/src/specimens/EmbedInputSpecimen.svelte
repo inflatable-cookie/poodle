@@ -87,7 +87,7 @@
 
   <div class="specimen__group">
     <Eyebrow>With Field wrapper</Eyebrow>
-    <Field label="Video embed">
+    <Field label="Video embed" id="embed-input-video">
       <EmbedInput
         placeholder="https://youtube.com/watch?v=..."
       />

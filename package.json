@@ -10,5 +10,8 @@
         "packages/bridges/underlay",
         "packages/svelte/icons-lucide",
         "packages/svelte/preview"
-    ]
+    ],
+    "devDependencies": {
+        "@types/node": "^25.5.2"
+    }
 }

@@ -37,7 +37,7 @@
       options={viewOptions}
       value={view}
       ariaLabel="View mode"
-      on:valueChange={(e) => (view = e.detail.value)}
+      on:valueChange={(e) => (view = e.detail.value as string)}
     />
     <p>View: <strong>{view}</strong></p>
   </div>
@@ -48,7 +48,7 @@
       options={alignOptions}
       value={align}
       ariaLabel="Text alignment"
-      on:valueChange={(e) => (align = e.detail.value)}
+      on:valueChange={(e) => (align = e.detail.value as string)}
     />
   </div>
 
@@ -59,7 +59,7 @@
       value={tags}
       selectionMode="multiple"
       ariaLabel="Filter tags"
-      on:valueChange={(e) => (tags = e.detail.value)}
+      on:valueChange={(e) => (tags = e.detail.value as string[])}
     />
     <p>Selected: <strong>{tags.join(", ") || "none"}</strong></p>
   </div>

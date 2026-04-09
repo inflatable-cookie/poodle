@@ -1,5 +1,8 @@
 <script lang="ts">
   import { Pill, Eyebrow } from "@poodle/svelte-primitives";
+  import type { ControlDensity } from "@poodle/svelte-primitives";
+
+  const densities: ControlDensity[] = ["compact", "default", "comfortable"];
 
   const pillSizes = ["xs", "sm", "md", "lg", "xl"] as const;
 </script>
@@ -28,7 +31,7 @@
   <div class="specimen__group">
     <Eyebrow>Densities</Eyebrow>
     <div class="specimen__stack">
-      {#each ["compact", "default", "comfortable"] as density}
+      {#each densities as density}
         <div class="specimen__row">
           <span class="specimen__label">{density}</span>
           <Pill {density}>Label</Pill>
@@ -40,9 +43,9 @@
   <div class="specimen__group">
     <Eyebrow>Code font</Eyebrow>
     <div class="specimen__row">
-      <Pill font="code" sizeRole="control">v2.4.1</Pill>
-      <Pill font="code" tone="success" sizeRole="control">stable</Pill>
-      <Pill font="code" tone="warning" sizeRole="control">beta</Pill>
+      <Pill font="mono" sizeRole="control">v2.4.1</Pill>
+      <Pill font="mono" tone="success" sizeRole="control">stable</Pill>
+      <Pill font="mono" tone="warning" sizeRole="control">beta</Pill>
     </div>
   </div>
 

@@ -22,7 +22,7 @@
       make all {Object.keys(iconNodes).length} Lucide icons available by name.
       Icons resolve from this set first, then fall back to the 35 built-in internals.
     </p>
-    <IconProvider icons={iconNodes}>
+    <IconProvider icons={iconNodes as unknown as IconSet}>
       <div class="icon-row">
         {#each sampleNames as name}
           <div class="labeled-icon">

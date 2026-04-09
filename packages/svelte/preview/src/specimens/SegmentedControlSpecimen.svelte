@@ -1,5 +1,7 @@
 <script lang="ts">
-  import { SegmentedControl, Eyebrow, type SegmentedControlOption } from "@poodle/svelte-primitives";
+  import { SegmentedControl, Eyebrow, type SegmentedControlOption, type ControlDensity } from "@poodle/svelte-primitives";
+
+  const densities: ControlDensity[] = ["compact", "default", "comfortable"];
 
   const viewOptions: SegmentedControlOption[] = [
     { value: "grid", label: "Grid" },
@@ -52,7 +54,7 @@
   <div class="specimen__group">
     <Eyebrow>Densities</Eyebrow>
     <div class="specimen__stack">
-      {#each ["compact", "default", "comfortable"] as density}
+      {#each densities as density}
         <div class="specimen__row">
           <span class="specimen__label">{density}</span>
           <SegmentedControl options={viewOptions} defaultValue="grid" ariaLabel="{density} view mode" {density} />

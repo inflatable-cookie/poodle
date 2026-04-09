@@ -763,10 +763,10 @@ export function parsePreviewLocation(
   hash: string,
 ): PreviewHarnessState {
   return normalizePreviewState({
-    sectionId: hash.replace(/^#/, ""),
-    theme: searchParams.get("theme"),
-    density: searchParams.get("density"),
-    controlSize: searchParams.get("controlSize"),
+    sectionId: hash.replace(/^#/, "") as DocsSectionId,
+    theme: searchParams.get("theme") as ThemeName,
+    density: searchParams.get("density") as DensityName,
+    controlSize: searchParams.get("controlSize") as ControlSizeName,
   });
 }
 

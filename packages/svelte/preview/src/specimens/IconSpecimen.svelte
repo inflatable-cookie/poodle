@@ -1,10 +1,12 @@
 <script lang="ts">
   import { Icon, IconProvider, Eyebrow } from "@poodle/svelte-primitives";
-  import type { IconSet } from "@poodle/svelte-primitives";
+  import type { ControlDensity, IconSet } from "@poodle/svelte-primitives";
   import iconNodes from "lucide-static/icon-nodes.json";
   import { heart, settings, zap, circleCheck, info, triangleAlert, star, search, pencil } from "@poodle/icons-lucide";
 
-  const allIconNames = Object.keys(iconNodes as IconSet).sort();
+  const densities: ControlDensity[] = ["compact", "default", "comfortable"];
+
+  const allIconNames = Object.keys(iconNodes as unknown as IconSet).sort();
   const iconSizes = ["xs", "sm", "md", "lg", "xl"] as const;
 
   let copiedName = "";
@@ -56,7 +58,7 @@
   <div class="specimen__group">
     <Eyebrow>Densities</Eyebrow>
     <div class="density-stack">
-      {#each ["compact", "default", "comfortable"] as density}
+      {#each densities as density}
         <div class="density-row">
           <span class="density-label">{density}</span>
           <Icon icon={star} {density} />
@@ -141,7 +143,7 @@
       <br />
       <code>&lt;IconProvider icons={"{iconNodes}"}&gt; ... &lt;/IconProvider&gt;</code>
     </div>
-    <IconProvider icons={iconNodes}>
+    <IconProvider icons={iconNodes as unknown as IconSet}>
       <div class="icon-grid">
         {#each allIconNames as name}
           <button

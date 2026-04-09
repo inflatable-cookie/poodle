@@ -61,10 +61,10 @@
       on:cancel={() => (basicOpen = false)}
       on:openChange={(e) => (basicOpen = e.detail.open ? true : null)}
     >
-      <Field label="Full name">
+      <Field label="Full name" id="form-dialog-full-name">
         <TextInput bind:value={name} placeholder="Enter name" />
       </Field>
-      <Field label="Role">
+      <Field label="Role" id="form-dialog-role">
         <Select options={roleOptions} bind:value={role} placeholder="Select role" />
       </Field>
     </FormDialog>
@@ -83,7 +83,7 @@
       on:cancel={() => { errorOpen = false; error = null; }}
       on:openChange={(e) => { if (!e.detail.open) { errorOpen = null; error = null; } }}
     >
-      <Field label="Email">
+      <Field label="Email" id="form-dialog-email">
         <TextInput value="existing@example.com" placeholder="Enter email" />
       </Field>
     </FormDialog>
@@ -103,10 +103,10 @@
       on:cancel={() => { shellOpen = false; success = null; }}
       on:openChange={(e) => { shellOpen = e.detail.open ? true : null; }}
     >
-      <Field label="Workspace name">
+      <Field label="Workspace name" id="form-dialog-workspace-name">
         <TextInput value="Northstar" disabled={submitting} />
       </Field>
-      <Field label="Default role">
+      <Field label="Default role" id="form-dialog-default-role">
         <Select options={roleOptions} value="editor" disabled={submitting} />
       </Field>
       <svelte:fragment slot="actions">

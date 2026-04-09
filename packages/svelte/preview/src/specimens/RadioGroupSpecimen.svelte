@@ -1,5 +1,7 @@
 <script lang="ts">
-  import { RadioGroup, Eyebrow, type RadioGroupOption } from "@poodle/svelte-primitives";
+  import { RadioGroup, Eyebrow, type RadioGroupOption, type ControlDensity } from "@poodle/svelte-primitives";
+
+  const densities: ControlDensity[] = ["compact", "default", "comfortable"];
 
   const planOptions: RadioGroupOption[] = [
     { value: "free", label: "Free" },
@@ -61,7 +63,7 @@
   <div class="specimen__group">
     <Eyebrow>Densities</Eyebrow>
     <div class="specimen__stack">
-      {#each ["compact", "default", "comfortable"] as density}
+      {#each densities as density}
         <div class="specimen__stack">
           <span class="specimen__label">{density}</span>
           <RadioGroup

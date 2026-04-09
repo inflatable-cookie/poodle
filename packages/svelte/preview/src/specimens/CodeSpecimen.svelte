@@ -1,5 +1,8 @@
 <script lang="ts">
   import { Code, Eyebrow } from "@poodle/svelte-primitives";
+  import type { ControlDensity } from "@poodle/svelte-primitives";
+
+  const densities: ControlDensity[] = ["compact", "default", "comfortable"];
 
   const controlSizes = ["xs", "sm", "md", "lg", "xl"] as const;
 
@@ -35,7 +38,7 @@ function handleClick(event: MouseEvent): void {
   <div class="specimen__group">
     <Eyebrow>Densities</Eyebrow>
     <div class="specimen__stack">
-      {#each ["compact", "default", "comfortable"] as density}
+      {#each densities as density}
         <div class="specimen__row">
           <span class="specimen__label">{density}</span>
           <Code source="const x = 1;" {density} />

@@ -1,6 +1,9 @@
 <script lang="ts">
   import { IconButton, Eyebrow } from "@poodle/svelte-primitives";
+  import type { ControlDensity } from "@poodle/svelte-primitives";
   import { plus, settings, x, trash2, star, mapPin, ban, refreshCw } from "@poodle/icons-lucide";
+
+  const densities: ControlDensity[] = ["compact", "default", "comfortable"];
 
   const controlSizes = ["xs", "sm", "md", "lg", "xl"] as const;
 </script>
@@ -36,7 +39,7 @@
   <div class="specimen__group">
     <Eyebrow>Densities</Eyebrow>
     <div class="specimen__stack">
-      {#each ["compact", "default", "comfortable"] as density}
+      {#each densities as density}
         <div class="button-row">
           <span class="specimen__label">{density}</span>
           <IconButton icon={settings} ariaLabel="Settings" {density} variant="secondary" />

@@ -1,6 +1,5 @@
 export {
   canonicalTokenFamilies,
-  underlayBridgeAliasNotes,
   underlayTokenMap,
   type UnderlayBridgeToken,
 } from "./token-map";

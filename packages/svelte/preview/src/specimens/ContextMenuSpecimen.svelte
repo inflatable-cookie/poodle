@@ -1,5 +1,7 @@
 <script lang="ts">
-  import { ContextMenu, Eyebrow, type MenuItem } from "@poodle/svelte-primitives";
+  import { ContextMenu, Eyebrow, type MenuItem, type ControlDensity } from "@poodle/svelte-primitives";
+
+  const densities: ControlDensity[] = ["compact", "default", "comfortable"];
 
   const items: MenuItem[] = [
     { value: "cut", label: "Cut", shortcutLabel: "⌘X" },
@@ -44,7 +46,7 @@
   <div class="specimen__group">
     <Eyebrow>Densities</Eyebrow>
     <div class="specimen__row">
-      {#each ["compact", "default", "comfortable"] as density}
+      {#each densities as density}
         <ContextMenu {items} {density}>
           <div class="target-area target-area--small">
             <p>{density}</p>

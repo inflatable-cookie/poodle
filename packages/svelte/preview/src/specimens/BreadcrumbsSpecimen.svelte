@@ -1,6 +1,8 @@
 <script lang="ts">
-  import { Breadcrumbs, type BreadcrumbItem } from "@poodle/svelte-primitives";
+  import { Breadcrumbs, type BreadcrumbItem, type ControlDensity } from "@poodle/svelte-primitives";
   import { Eyebrow } from "@poodle/svelte-primitives";
+
+  const densities: ControlDensity[] = ["compact", "default", "comfortable"];
 
   const basicItems: BreadcrumbItem[] = [
     { value: "home", label: "Home" },
@@ -46,7 +48,7 @@
   <div class="specimen__group">
     <Eyebrow>Densities</Eyebrow>
     <div class="specimen__stack">
-      {#each ["compact", "default", "comfortable"] as density}
+      {#each densities as density}
         <div class="specimen__row">
           <span class="specimen__label">{density}</span>
           <Breadcrumbs items={basicItems} {density} />

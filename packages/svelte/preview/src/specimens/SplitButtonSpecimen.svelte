@@ -1,6 +1,8 @@
 <script lang="ts">
   import { SplitButton, Eyebrow } from "@poodle/svelte-primitives";
-  import type { MenuItem } from "@poodle/svelte-primitives";
+  import type { ControlDensity, MenuItem } from "@poodle/svelte-primitives";
+
+  const densities: ControlDensity[] = ["compact", "default", "comfortable"];
 
   let lastAction = "";
   let submitIntent = "save-close";
@@ -79,7 +81,7 @@
   <div class="specimen__group">
     <Eyebrow>Densities</Eyebrow>
     <div class="specimen__stack">
-      {#each ["compact", "default", "comfortable"] as density}
+      {#each densities as density}
         <div class="specimen__row">
           <span class="specimen__label">{density}</span>
           <SplitButton variant="primary" items={saveItems} {density}>Save</SplitButton>

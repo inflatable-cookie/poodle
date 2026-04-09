@@ -1,16 +1,19 @@
 <script lang="ts">
   import { Calendar, Eyebrow } from "@poodle/svelte-primitives";
+  import type { ControlDensity, DateRangeValue } from "@poodle/svelte-primitives";
+
+  const densities: ControlDensity[] = ["compact", "default", "comfortable"];
 
   const controlSizes = ["xs", "sm", "md", "lg", "xl"] as const;
 
   let selected = "";
-  let range = { start: "", end: "" };
+  let range: DateRangeValue = { start: "", end: "" };
 </script>
 
 <div class="specimen">
   <div class="specimen__group">
     <Eyebrow>Default</Eyebrow>
-    <Calendar ariaLabel="Select a date" on:valueChange={(e) => (selected = e.detail.value)} />
+    <Calendar ariaLabel="Select a date" on:valueChange={(e) => (selected = e.detail.value as string)} />
     {#if selected}
       <p>Selected: <strong>{selected}</strong></p>
     {/if}
@@ -28,7 +31,7 @@
   <div class="specimen__group">
     <Eyebrow>Densities</Eyebrow>
     <div class="specimen__stack">
-      {#each ["compact", "default", "comfortable"] as density}
+      {#each densities as density}
         <div class="specimen__row">
           <span class="specimen__label">{density}</span>
           <Calendar {density} />
@@ -52,7 +55,7 @@
     <Calendar
       mode="range"
       ariaLabel="Select a date range"
-      on:valueChange={(e) => (range = e.detail.value)}
+      on:valueChange={(e) => (range = e.detail.value as DateRangeValue)}
     />
     {#if range.start}
       <p>{range.start} &rarr; {range.end || "..."}</p>

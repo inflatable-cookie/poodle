@@ -12,6 +12,7 @@
     IconProvider,
     UiPresentationProvider,
     type TabItem,
+    type IconSet,
   } from "@poodle/svelte-primitives";
   import iconNodes from "lucide-static/icon-nodes.json";
   import { onMount } from "svelte";
@@ -173,7 +174,7 @@
 
     <main class="app-main">
       {#key `${previewModeKey}:${activeSection}`}
-        <IconProvider icons={iconNodes}>
+        <IconProvider icons={iconNodes as unknown as IconSet}>
           {#if activeSection === "primitives"}
             <PrimitivesSection activeComponent={route.component} />
           {:else if activeSection === "composites"}

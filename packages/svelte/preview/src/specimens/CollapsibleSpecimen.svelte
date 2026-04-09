@@ -1,5 +1,8 @@
 <script lang="ts">
   import { Collapsible, Eyebrow } from "@poodle/svelte-primitives";
+  import type { ControlDensity } from "@poodle/svelte-primitives";
+
+  const densities: ControlDensity[] = ["compact", "default", "comfortable"];
 
   const controlSizes = ["xs", "sm", "md", "lg", "xl"] as const;
 </script>
@@ -37,7 +40,7 @@
   <div class="specimen__group">
     <Eyebrow>Densities</Eyebrow>
     <div class="specimen__stack">
-      {#each ["compact", "default", "comfortable"] as density}
+      {#each densities as density}
         <Collapsible title="Collapsible at {density} density" {density}>
           <p>Content at <strong>{density}</strong> density.</p>
         </Collapsible>

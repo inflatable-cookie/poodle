@@ -1,5 +1,7 @@
 <script lang="ts">
-  import { BulkActionBar, Eyebrow, type BulkAction } from "@poodle/svelte-primitives";
+  import { BulkActionBar, Eyebrow, type BulkAction, type ControlDensity } from "@poodle/svelte-primitives";
+
+  const densities: ControlDensity[] = ["compact", "default", "comfortable"];
 
   const actions: BulkAction[] = [
     { id: "export", label: "Export", icon: "download" },
@@ -43,7 +45,7 @@
   <div class="specimen__group">
     <Eyebrow>Densities</Eyebrow>
     <div class="specimen__stack">
-      {#each ["compact", "default", "comfortable"] as density}
+      {#each densities as density}
         <div class="specimen__row">
           <span class="specimen__label">{density}</span>
           <BulkActionBar selectionCount={5} {actions} {density} />

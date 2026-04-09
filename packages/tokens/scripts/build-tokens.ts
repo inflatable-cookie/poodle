@@ -62,7 +62,7 @@ function isJsonObject(value: JsonValue | undefined): value is JsonObject {
   return Boolean(value) && typeof value === "object" && !Array.isArray(value);
 }
 
-function isTokenLeaf(value: JsonValue | undefined): value is TokenLeaf {
+function isTokenLeaf(value: JsonValue | undefined): value is TokenLeaf & JsonObject {
   return isJsonObject(value) && "$value" in value;
 }
 
@@ -258,11 +258,11 @@ function formatHeader(commentPrefix: string): string {
 }
 
 const metadata = loadDirectoryObject("metadata");
-const themesMetadata = metadata.themes as Record<string, ThemeMetadata>;
-const densityMetadata = metadata.density as Record<string, ThemeMetadata>;
-const controlSizeMetadata = metadata.controlSize as Record<string, ThemeMetadata>;
-const aliasesMetadata = metadata.aliases as AliasMetadata[];
-const deprecationsMetadata = metadata.deprecations as DeprecationMetadata[];
+const themesMetadata = metadata.themes as unknown as Record<string, ThemeMetadata>;
+const densityMetadata = metadata.density as unknown as Record<string, ThemeMetadata>;
+const controlSizeMetadata = metadata.controlSize as unknown as Record<string, ThemeMetadata>;
+const aliasesMetadata = metadata.aliases as unknown as AliasMetadata[];
+const deprecationsMetadata = metadata.deprecations as unknown as DeprecationMetadata[];
 
 const schema = {
   primitives: loadDirectoryObject("primitives"),
