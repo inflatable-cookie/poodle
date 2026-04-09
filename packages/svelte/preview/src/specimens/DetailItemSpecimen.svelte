@@ -1,25 +1,28 @@
 <script lang="ts">
-  import { DetailItem, Eyebrow, Button } from "@poodle/svelte-primitives";
+  import { DetailItem, Eyebrow, Button, Pill } from "@poodle/svelte-primitives";
+  import { DetailSection } from "@poodle/svelte-composites";
 </script>
 
 <div class="specimen">
   <div class="specimen__group">
-    <Eyebrow>Basic label-value pairs</Eyebrow>
-    <DetailItem label="Name" value="Poodle Design System" />
-    <DetailItem label="Version" value="2.1.0" />
-    <DetailItem label="License" value="MIT" />
+    <Eyebrow>Inline layout (default)</Eyebrow>
+    <DetailSection title="Package info">
+      <DetailItem label="Name" value="Poodle Design System" />
+      <DetailItem label="Version" value="2.1.0" />
+      <DetailItem label="License" value="MIT" />
+    </DetailSection>
   </div>
 
   <div class="specimen__group">
     <Eyebrow>With description</Eyebrow>
-    <DetailItem label="API endpoint" value="https://api.example.com/v2" description="Base URL for all API requests." truncateValue />
+    <DetailItem label="API endpoint" value="https://api.example.com/v2" description="Base URL for all API requests." />
   </div>
 
   <div class="specimen__group">
     <Eyebrow>With action slot</Eyebrow>
     <DetailItem label="Email" value="clay@example.com">
       <svelte:fragment slot="action">
-        <Button variant="secondary">Change</Button>
+        <Button variant="secondary" size="sm">Change</Button>
       </svelte:fragment>
     </DetailItem>
   </div>
@@ -28,7 +31,7 @@
     <Eyebrow>With value slot</Eyebrow>
     <DetailItem label="Status">
       <svelte:fragment slot="value">
-        <span class="status-badge">Active</span>
+        <Pill tone="success" appearance="badge">Active</Pill>
       </svelte:fragment>
     </DetailItem>
   </div>
@@ -41,6 +44,19 @@
       truncateValue
       layout="stacked"
     />
+  </div>
+
+  <div class="specimen__group">
+    <Eyebrow>Surface presentation</Eyebrow>
+    <DetailSection title="Account">
+      <DetailItem label="Name" value="Alice Chen" presentation="surface" />
+      <DetailItem label="Role" value="Engineer" presentation="surface" />
+      <DetailItem label="Email" value="alice@example.com" presentation="surface">
+        <svelte:fragment slot="action">
+          <Button variant="secondary" size="sm">Edit</Button>
+        </svelte:fragment>
+      </DetailItem>
+    </DetailSection>
   </div>
 </div>
 
@@ -55,15 +71,5 @@
     display: flex;
     flex-direction: column;
     gap: 0.375rem;
-  }
-
-  .status-badge {
-    display: inline-block;
-    padding: 0.125rem 0.5rem;
-    border-radius: 999px;
-    background: var(--poodle-color-bg-success-subtle, #2d4a2d);
-    color: var(--poodle-color-text-success, #8fbc8f);
-    font-size: 0.75rem;
-    font-weight: 500;
   }
 </style>
