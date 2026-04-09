@@ -35,6 +35,7 @@
 
   $: resolvedSize = size ?? resolveSemanticControlSize($uiPresentation.sizeScale, sizeRole);
   $: resolvedDensity = density ?? $uiPresentation.density;
+  $: resolvedShowActions = bare ? false : showDefaultActions;
   $: resolvedDescription = subtitle ?? description;
   $: contentStyle = width ? `--poodle-form-dialog-width: ${width};` : "";
   $: contentClassName = width ? "form-dialog__surface" : "";
@@ -101,7 +102,7 @@
   <svelte:fragment slot="actions">
     {#if $$slots.actions}
       <slot name="actions" {submitting} />
-    {:else if showDefaultActions}
+    {:else if resolvedShowActions}
       <Button
         variant="ghost"
         size={resolvedSize}
