@@ -28,10 +28,12 @@ Updated: 2026-04-09
 ```text
 [Root .text-input]  <div>
   ├── [Prefix .text-input__affix--prefix] (optional, when prefix prop set)
-  ├── [Leading Affordance .text-input__affordance] (optional, via slot)
-  ├── [Input Control .text-input__control]  <input>
-  ├── [Trailing Affordance .text-input__affordance] (optional, via slot)
-  ├── [Validation Indicator .text-input__validation-indicator] (optional, when validationState != "none")
+  ├── [Field .text-input__field]
+  │   ├── [Leading Affordance .text-input__affordance] (optional, overlaid inside field)
+  │   ├── [Input Control .text-input__control]  <input|textarea>
+  │   ├── [Trailing Affordance .text-input__affordance] (optional, overlaid inside field)
+  │   ├── [Clear Button .text-input__clear] (optional, search mode only)
+  │   └── [Validation Indicator .text-input__validation-indicator] (optional, overlaid inside field)
   ├── [Suffix .text-input__affix--suffix] (optional, when suffix prop set)
   └── [Character Count .text-input__char-count] (optional, when showCharCount)
 ```
@@ -40,10 +42,12 @@ Updated: 2026-04-09
 |------|----------|-------------|---------------|
 | Root | yes | field chrome container with flex layout | background, border, radius, shadow, focus ring |
 | Prefix | no | non-editable text prefix with separator | text color, border, spacing |
-| Leading Affordance | no | icon or adornment before text | icon color, icon size |
-| Input Control | yes | native single-line text input element | typography, text color, caret |
-| Trailing Affordance | no | icon or action after text | icon color, icon size |
-| Validation Indicator | no | pending shared spinner or valid/invalid status icon | status colors, icon size, motion |
+| Field | yes | relative positioning layer for editable surface and overlaid chrome | internal spacing, overlay offsets |
+| Leading Affordance | no | icon or adornment inside editable field leading edge | icon color, icon size |
+| Input Control | yes | native single-line or multiline input element that owns its own padding | typography, text color, caret |
+| Trailing Affordance | no | icon or action inside editable field trailing edge | icon color, icon size |
+| Clear Button | no | search clear action inside editable field trailing edge | icon color, hover state, focus ring |
+| Validation Indicator | no | pending shared spinner or valid/invalid status icon overlaid inside field | status colors, icon size, motion |
 | Suffix | no | non-editable text suffix with separator | text color, border, spacing |
 | Character Count | no | live char count, optionally with max | code typography, status color |
 
@@ -119,6 +123,11 @@ Updated: 2026-04-09
   - `autocapitalize="off"`
   - `spellcheck={false}`
   - `inputmode="text"`
+- slug mode uses `var(--poodle-typography-code-family)` for both the editable
+  value and any prefix affix so the full slug reads as one code-like unit
+- slug mode sizes editable and affix text through
+  `var(--poodle-typography-code-adjustmentRatio)` so monospace treatment can be
+  globally tuned without per-component overrides
 - input normalisation rules:
   - accents are removed
   - lowercase is enforced
@@ -282,11 +291,9 @@ Updated: 2026-04-09
 
 | Property | Value |
 |----------|-------|
-| `flex` | `1` |
-| `min-width` | `0` |
+| `display` | `block` |
 | `width` | `100%` |
 | `height` | `calc(var(--poodle-size-control-height) - (var(--poodle-border-width-default) * 2))` |
-| `padding` | `0` |
 | `border` | `0` |
 | `background` | `transparent` |
 | `color` | `inherit` |
@@ -294,6 +301,16 @@ Updated: 2026-04-09
 | `font-size` | `var(--poodle-typography-body-size)` |
 | `line-height` | `var(--poodle-typography-body-lineHeight)` |
 | `outline` | `0` |
+
+### Field `.text-input__field`
+
+| Property | Value |
+|----------|-------|
+| `position` | `relative` |
+| `display` | `flex` |
+| `flex` | `1` |
+| `min-width` | `0` |
+| `align-items` | `stretch` |
 
 ### Input Control `::placeholder`
 
@@ -305,21 +322,29 @@ Updated: 2026-04-09
 
 | Property | Value |
 |----------|-------|
+| `position` | `absolute` |
+| `top` | `50%` |
+| `transform` | `translateY(-50%)` |
 | `display` | `inline-flex` |
 | `align-items` | `center` |
 | `justify-content` | `center` |
 | `color` | `var(--poodle-color-icon-muted)` |
 | `font-family` | `var(--poodle-typography-code-family)` |
 | `font-size` | `var(--poodle-icon-size-default)` |
+| `pointer-events` | `none` |
 
 ### Validation Indicator `.text-input__validation-indicator`
 
 | Property | Value |
 |----------|-------|
+| `position` | `absolute` |
+| `top` | `50%` |
+| `transform` | `translateY(-50%)` |
 | `display` | `inline-flex` |
 | `align-items` | `center` |
 | `justify-content` | `center` |
 | `color` | `var(--poodle-color-icon-muted)` |
+| `pointer-events` | `none` |
 
 ### Validation Indicator state colors
 

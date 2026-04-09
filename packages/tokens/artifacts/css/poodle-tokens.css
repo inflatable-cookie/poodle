@@ -152,6 +152,7 @@
   --poodle-typography-heading-lineHeight: 1.5rem;
   --poodle-typography-heading-weight: 600;
   --poodle-typography-code-family: "IBM Plex Mono", "SFMono-Regular", monospace;
+  --poodle-typography-code-adjustmentRatio: 0.8125;
   --poodle-typography-code-size: 0.8125rem;
   --poodle-typography-code-lineHeight: 1rem;
   --poodle-typography-code-weight: 400;

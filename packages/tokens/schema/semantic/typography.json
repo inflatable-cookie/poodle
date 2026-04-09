@@ -59,6 +59,10 @@
         "$type": "fontFamily",
         "$value": "{primitives.typography.font.family.mono}"
       },
+      "adjustmentRatio": {
+        "$type": "number",
+        "$value": 0.8125
+      },
       "size": {
         "$type": "dimension",
         "$value": "{primitives.typography.font.size.sm}"

@@ -70,6 +70,7 @@ pub const TYPOGRAPHY_HEADING_SIZE: &str = "semantic.typography.heading.size";
 pub const TYPOGRAPHY_HEADING_LINE_HEIGHT: &str = "semantic.typography.heading.lineHeight";
 pub const TYPOGRAPHY_HEADING_WEIGHT: &str = "semantic.typography.heading.weight";
 pub const TYPOGRAPHY_CODE_FAMILY: &str = "semantic.typography.code.family";
+pub const TYPOGRAPHY_CODE_ADJUSTMENT_RATIO: &str = "semantic.typography.code.adjustmentRatio";
 pub const TYPOGRAPHY_CODE_SIZE: &str = "semantic.typography.code.size";
 pub const TYPOGRAPHY_CODE_LINE_HEIGHT: &str = "semantic.typography.code.lineHeight";
 pub const TYPOGRAPHY_CODE_WEIGHT: &str = "semantic.typography.code.weight";

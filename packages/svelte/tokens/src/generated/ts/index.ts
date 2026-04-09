@@ -294,6 +294,7 @@ export const tokens = {
       },
       "code": {
         "family": "\"IBM Plex Mono\", \"SFMono-Regular\", monospace",
+        "adjustmentRatio": 0.8125,
         "size": "0.8125rem",
         "lineHeight": "1rem",
         "weight": "400"
@@ -455,6 +456,7 @@ export const tokenPaths = [
   "semantic.typography.heading.lineHeight",
   "semantic.typography.heading.weight",
   "semantic.typography.code.family",
+  "semantic.typography.code.adjustmentRatio",
   "semantic.typography.code.size",
   "semantic.typography.code.lineHeight",
   "semantic.typography.code.weight"
@@ -531,6 +533,7 @@ export const cssVars = {
   "semantic.typography.heading.lineHeight": "--poodle-typography-heading-lineHeight",
   "semantic.typography.heading.weight": "--poodle-typography-heading-weight",
   "semantic.typography.code.family": "--poodle-typography-code-family",
+  "semantic.typography.code.adjustmentRatio": "--poodle-typography-code-adjustmentRatio",
   "semantic.typography.code.size": "--poodle-typography-code-size",
   "semantic.typography.code.lineHeight": "--poodle-typography-code-lineHeight",
   "semantic.typography.code.weight": "--poodle-typography-code-weight"

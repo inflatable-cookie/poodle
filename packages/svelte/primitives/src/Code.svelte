@@ -121,7 +121,7 @@
     background: color-mix(in srgb, var(--poodle-color-background-panel) 72%, var(--poodle-color-background-elevated));
     color: var(--poodle-color-text-primary);
     font-family: var(--poodle-typography-code-family);
-    font-size: 0.8125em;
+    font-size: calc(0.8125em * var(--poodle-typography-code-adjustmentRatio));
     line-height: 1.5;
   }
 
@@ -240,7 +240,7 @@
   }
 
   .code--inline[data-size="xs"] {
-    font-size: 0.6875em;
+    font-size: calc(0.6875em * var(--poodle-typography-code-adjustmentRatio));
   }
 
   .code[data-size="sm"] .code__source {
@@ -248,7 +248,7 @@
   }
 
   .code--inline[data-size="sm"] {
-    font-size: 0.75em;
+    font-size: calc(0.75em * var(--poodle-typography-code-adjustmentRatio));
   }
 
   .code[data-size="lg"] .code__source {
@@ -256,7 +256,7 @@
   }
 
   .code--inline[data-size="lg"] {
-    font-size: 0.875em;
+    font-size: calc(0.875em * var(--poodle-typography-code-adjustmentRatio));
   }
 
   .code[data-size="xl"] .code__source {
@@ -264,7 +264,7 @@
   }
 
   .code--inline[data-size="xl"] {
-    font-size: 0.9375em;
+    font-size: calc(0.9375em * var(--poodle-typography-code-adjustmentRatio));
   }
 
   /* Density variants */

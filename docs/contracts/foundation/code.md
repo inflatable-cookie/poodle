@@ -282,13 +282,17 @@ Displays check icon when `copied` is true, copy icon otherwise.
 
 ### Size adjustments
 
+Inline code font sizing uses `var(--poodle-typography-code-adjustmentRatio)` so
+body-context monospace scale can be tuned in one place when the configured code
+face reads larger or smaller than the default sans family.
+
 | Size | source font-size | inline font-size |
 |------|-----------------|-----------------|
-| `xs` | `0.6875rem` | `0.6875em` |
-| `sm` | `0.75rem` | `0.75em` |
-| `md` | `0.8125rem` | `0.8125em` |
-| `lg` | `0.875rem` | `0.875em` |
-| `xl` | `0.9375rem` | `0.9375em` |
+| `xs` | `0.6875rem` | `0.6875em × var(--poodle-typography-code-adjustmentRatio)` |
+| `sm` | `0.75rem` | `0.75em × var(--poodle-typography-code-adjustmentRatio)` |
+| `md` | `0.8125rem` | `0.8125em × var(--poodle-typography-code-adjustmentRatio)` |
+| `lg` | `0.875rem` | `0.875em × var(--poodle-typography-code-adjustmentRatio)` |
+| `xl` | `0.9375rem` | `0.9375em × var(--poodle-typography-code-adjustmentRatio)` |
 
 ## 9. Svelte Notes
 

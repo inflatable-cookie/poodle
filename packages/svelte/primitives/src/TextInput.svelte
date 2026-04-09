@@ -122,6 +122,8 @@
   $: isSearch = type === "search";
   $: isSlug = type === "slug";
   $: canClear = isSearch && showClearButton && !disabled && !readOnly && currentValue.length > 0;
+  $: hasLeadingAffordance = Boolean($$slots.leading) || isSearch;
+  $: hasTrailingAffordance = Boolean($$slots.trailing);
   $: isControlled = value !== null;
   $: if (isControlled) {
     if (value !== previousControlledValue) {
@@ -162,6 +164,17 @@
   $: effectiveValidationContext = mergeValidationContext(validationContext, validationKey);
   $: contextKey = serializeValidationContext(effectiveValidationContext);
   $: generatedSlug = isSlug ? slugify(source ?? "") : "";
+  $: fieldEndAdornmentCount =
+    Number(hasTrailingAffordance) + Number(canClear) + Number(showValidationIndicator);
+  $: controlPaddingStart = hasLeadingAffordance
+    ? "calc(var(--poodle-text-input-padding-inline) + var(--poodle-icon-size-default) + var(--poodle-text-input-adornment-gap))"
+    : "var(--poodle-text-input-padding-inline)";
+  $: controlPaddingEnd = fieldEndAdornmentCount > 0
+    ? `calc(var(--poodle-text-input-padding-inline) + (${fieldEndAdornmentCount} * var(--poodle-icon-size-default)) + (${fieldEndAdornmentCount} * var(--poodle-text-input-adornment-gap)))`
+    : "var(--poodle-text-input-padding-inline)";
+  $: multilineBottomPadding = showCharCount
+    ? "calc(var(--poodle-text-input-padding-block) + 1.5rem)"
+    : "var(--poodle-text-input-padding-block)";
 
   $: if (isSlug && source !== null) {
     if (!userEditedSlug || liveValue === previousGeneratedSlug || liveValue === "") {
@@ -398,135 +411,145 @@
   }
 </script>
 
-<div class="text-input" class:text-input--multiline={isMultiline} data-validation-state={effectiveValidationState} data-size={resolvedSize} data-density={resolvedDensity}>
+<div
+  class="text-input"
+  class:text-input--multiline={isMultiline}
+  data-validation-state={effectiveValidationState}
+  data-size={resolvedSize}
+  data-density={resolvedDensity}
+  data-type={type}
+  style={`--poodle-text-input-control-padding-start: ${controlPaddingStart}; --poodle-text-input-control-padding-end: ${controlPaddingEnd}; --poodle-text-input-multiline-padding-end: ${multilineBottomPadding};`}
+>
   {#if prefix}
     <span class="text-input__affix text-input__affix--prefix">{prefix}</span>
   {/if}
 
-  {#if $$slots.leading}
-    <span class="text-input__affordance text-input__affordance--leading">
-      <slot name="leading" />
-    </span>
-  {:else if isSearch}
-    <span class="text-input__affordance text-input__affordance--leading" aria-hidden="true">
-      <Icon icon="search" />
-    </span>
-  {/if}
+  <div class="text-input__field">
+    {#if $$slots.leading}
+      <span class="text-input__affordance text-input__affordance--leading">
+        <slot name="leading" />
+      </span>
+    {:else if isSearch}
+      <span class="text-input__affordance text-input__affordance--leading" aria-hidden="true">
+        <Icon icon="search" />
+      </span>
+    {/if}
 
-  {#if isMultiline}
-    <textarea
-      id={id || undefined}
-      {name}
-      class="text-input__control text-input__control--multiline"
-      value={currentValue}
-      {placeholder}
-      {autocomplete}
-      {spellcheck}
-      autocapitalize={autocapitalize ?? undefined}
-      rows={rows ?? 4}
-      style={resize !== "vertical" ? `resize: ${resize}` : undefined}
-      maxlength={maxLength ?? undefined}
-      disabled={disabled}
-      readonly={readOnly}
-      aria-label={ariaLabel ?? undefined}
-      aria-describedby={describedBy ?? undefined}
-      aria-invalid={ariaInvalid}
-      aria-busy={ariaBusy}
-      on:input={handleInput}
-      on:keydown={(event) => {
-        if ((event.metaKey || event.ctrlKey) && event.key === "Enter") {
-          dispatch("submit", { value: currentValue });
-        }
-        if (event.key === "Escape") {
-          dispatch("cancel");
-        }
-        dispatch("keydown", event);
-      }}
-      on:focus={(event) => dispatch("focus", event)}
-      on:blur={(event) => {
-        if (debounceTimer) {
-          clearTimeout(debounceTimer);
-          debounceTimer = null;
-          dispatch("valueChange", { value: liveValue });
-        }
-        if (validate && validateOnBlur) {
-          triggerValidation(liveValue, true);
-        }
-        dispatch("blur", event);
-      }}
-    ></textarea>
-  {:else}
-    <input
-      id={id || undefined}
-      {name}
-      list={list ?? undefined}
-      type={nativeInputType}
-      inputmode={(isSlug ? "text" : inputMode) ?? undefined}
-      class="text-input__control"
-      value={currentValue}
-      {placeholder}
-      {autocomplete}
-      {required}
-      {pattern}
-      spellcheck={isSlug ? false : spellcheck}
-      autocapitalize={isSlug ? "off" : autocapitalize ?? undefined}
-      enterkeyhint={enterKeyHint ?? undefined}
-      maxlength={maxLength ?? undefined}
-      disabled={disabled}
-      readonly={readOnly}
-      aria-label={ariaLabel ?? undefined}
-      aria-describedby={describedBy ?? undefined}
-      aria-invalid={ariaInvalid}
-      aria-busy={ariaBusy}
-      on:input={handleInput}
-      on:keydown={handleKeydown}
-      on:focus={(event) => dispatch("focus", event)}
-      on:blur={(event) => {
-        if (debounceTimer) {
-          clearTimeout(debounceTimer);
-          debounceTimer = null;
-          dispatch("valueChange", { value: liveValue });
-        }
-        if (validate && validateOnBlur) {
-          triggerValidation(liveValue, true);
-        }
-        dispatch("blur", event);
-      }}
-    />
-  {/if}
+    {#if isMultiline}
+      <textarea
+        id={id || undefined}
+        {name}
+        class="text-input__control text-input__control--multiline"
+        value={currentValue}
+        {placeholder}
+        {autocomplete}
+        {spellcheck}
+        autocapitalize={autocapitalize ?? undefined}
+        rows={rows ?? 4}
+        style={resize !== "vertical" ? `resize: ${resize};` : undefined}
+        maxlength={maxLength ?? undefined}
+        disabled={disabled}
+        readonly={readOnly}
+        aria-label={ariaLabel ?? undefined}
+        aria-describedby={describedBy ?? undefined}
+        aria-invalid={ariaInvalid}
+        aria-busy={ariaBusy}
+        on:input={handleInput}
+        on:keydown={(event) => {
+          if ((event.metaKey || event.ctrlKey) && event.key === "Enter") {
+            dispatch("submit", { value: currentValue });
+          }
+          if (event.key === "Escape") {
+            dispatch("cancel");
+          }
+          dispatch("keydown", event);
+        }}
+        on:focus={(event) => dispatch("focus", event)}
+        on:blur={(event) => {
+          if (debounceTimer) {
+            clearTimeout(debounceTimer);
+            debounceTimer = null;
+            dispatch("valueChange", { value: liveValue });
+          }
+          if (validate && validateOnBlur) {
+            triggerValidation(liveValue, true);
+          }
+          dispatch("blur", event);
+        }}
+      ></textarea>
+    {:else}
+      <input
+        id={id || undefined}
+        {name}
+        list={list ?? undefined}
+        type={nativeInputType}
+        inputmode={(isSlug ? "text" : inputMode) ?? undefined}
+        class="text-input__control"
+        value={currentValue}
+        {placeholder}
+        {autocomplete}
+        {required}
+        {pattern}
+        spellcheck={isSlug ? false : spellcheck}
+        autocapitalize={isSlug ? "off" : autocapitalize ?? undefined}
+        enterkeyhint={enterKeyHint ?? undefined}
+        maxlength={maxLength ?? undefined}
+        disabled={disabled}
+        readonly={readOnly}
+        aria-label={ariaLabel ?? undefined}
+        aria-describedby={describedBy ?? undefined}
+        aria-invalid={ariaInvalid}
+        aria-busy={ariaBusy}
+        on:input={handleInput}
+        on:keydown={handleKeydown}
+        on:focus={(event) => dispatch("focus", event)}
+        on:blur={(event) => {
+          if (debounceTimer) {
+            clearTimeout(debounceTimer);
+            debounceTimer = null;
+            dispatch("valueChange", { value: liveValue });
+          }
+          if (validate && validateOnBlur) {
+            triggerValidation(liveValue, true);
+          }
+          dispatch("blur", event);
+        }}
+      />
+    {/if}
 
-  {#if $$slots.trailing}
-    <span class="text-input__affordance text-input__affordance--trailing">
-      <slot name="trailing" />
-    </span>
-  {/if}
+    {#if $$slots.trailing}
+      <span class="text-input__affordance text-input__affordance--trailing">
+        <slot name="trailing" />
+      </span>
+    {/if}
 
-  {#if canClear}
-    <button
-      class="text-input__clear"
-      type="button"
-      aria-label="Clear search query"
-      on:click={handleClear}
-    >
-      <Icon icon="x" />
-    </button>
-  {/if}
+    {#if canClear}
+      <button
+        class="text-input__clear"
+        type="button"
+        aria-label="Clear search query"
+        on:click={handleClear}
+      >
+        <Icon icon="x" />
+      </button>
+    {/if}
 
-  {#if showValidationIndicator}
-    <span
-      class="text-input__validation-indicator"
-      class:text-input__validation-indicator--pending={effectiveValidationState === "pending"}
-      class:text-input__validation-indicator--valid={effectiveValidationState === "valid"}
-      class:text-input__validation-indicator--invalid={effectiveValidationState === "invalid"}
-      aria-hidden="true"
-    >
-      {#if effectiveValidationState === "pending"}
-        <Spinner variant="ring" sizeRole="chrome" tone="current" />
-      {:else if validationIcon}
-        <Icon icon={validationIcon} />
-      {/if}
-    </span>
-  {/if}
+    {#if showValidationIndicator}
+      <span
+        class="text-input__validation-indicator"
+        class:text-input__validation-indicator--pending={effectiveValidationState === "pending"}
+        class:text-input__validation-indicator--valid={effectiveValidationState === "valid"}
+        class:text-input__validation-indicator--invalid={effectiveValidationState === "invalid"}
+        aria-hidden="true"
+      >
+        {#if effectiveValidationState === "pending"}
+          <Spinner variant="ring" sizeRole="chrome" tone="current" />
+        {:else if validationIcon}
+          <Icon icon={validationIcon} />
+        {/if}
+      </span>
+    {/if}
+  </div>
 
   {#if suffix}
     <span class="text-input__affix text-input__affix--suffix">{suffix}</span>
@@ -564,11 +587,16 @@
       0 0 0 var(--poodle-border-width-focus)
         color-mix(in srgb, var(--poodle-color-accent-focusRing) 28%, transparent)
     );
+    --poodle-text-input-padding-inline: var(--poodle-space-control-x);
+    --poodle-text-input-padding-block: var(--poodle-space-control-y);
+    --poodle-text-input-adornment-gap: var(--poodle-space-inline-sm);
+    --poodle-text-input-height-adjust: 0rem;
+    --poodle-text-input-inline-adjust: 0rem;
+    --poodle-text-input-block-adjust: 0rem;
     display: flex;
     align-items: center;
-    gap: var(--poodle-space-inline-sm);
-    min-height: var(--poodle-size-control-height);
-    padding: 0 var(--poodle-space-control-x);
+    gap: var(--poodle-text-input-adornment-gap);
+    min-height: calc(var(--poodle-size-control-height) + var(--poodle-text-input-height-adjust));
     border: 0.0625rem solid var(--poodle-text-input-border);
     border-radius: var(--poodle-text-input-radius);
     background: var(--poodle-text-input-fill);
@@ -603,11 +631,12 @@
   }
 
   .text-input__control {
-    flex: 1;
-    min-width: 0;
+    display: block;
     width: 100%;
-    height: calc(var(--poodle-size-control-height) - (var(--poodle-border-width-default) * 2));
-    padding: 0;
+    height: calc(
+      var(--poodle-size-control-height) + var(--poodle-text-input-height-adjust) - (var(--poodle-border-width-default) * 2)
+    );
+    box-sizing: border-box;
     border: 0;
     background: transparent;
     color: inherit;
@@ -615,6 +644,25 @@
     font-size: var(--poodle-typography-body-size);
     line-height: var(--poodle-typography-body-lineHeight);
     outline: 0;
+    padding-left: var(--poodle-text-input-control-padding-start, var(--poodle-text-input-padding-inline));
+    padding-right: var(--poodle-text-input-control-padding-end, var(--poodle-text-input-padding-inline));
+  }
+
+  .text-input__field {
+    display: flex;
+    flex: 1;
+    min-width: 0;
+    align-items: center;
+  }
+
+  .text-input[data-type="slug"] .text-input__control {
+    font-family: var(--poodle-typography-code-family);
+    font-size: calc(var(--poodle-typography-body-size) * var(--poodle-typography-code-adjustmentRatio));
+  }
+
+  .text-input[data-type="slug"] .text-input__affix {
+    font-family: var(--poodle-typography-code-family);
+    font-size: calc(var(--poodle-typography-body-size) * var(--poodle-typography-code-adjustmentRatio));
   }
 
   .text-input__control::placeholder {
@@ -628,6 +676,12 @@
     color: var(--poodle-color-icon-muted);
     font-family: var(--poodle-typography-code-family);
     font-size: var(--poodle-icon-size-default);
+    pointer-events: none;
+    flex: 0 0 auto;
+  }
+
+  .text-input__affordance--leading {
+    margin-inline-start: var(--poodle-text-input-padding-inline);
   }
 
   .text-input__validation-indicator {
@@ -635,6 +689,9 @@
     align-items: center;
     justify-content: center;
     color: var(--poodle-color-icon-muted);
+    pointer-events: none;
+    flex: 0 0 auto;
+    margin-inline-end: var(--poodle-text-input-padding-inline);
   }
 
   .text-input__validation-indicator--pending {
@@ -660,15 +717,14 @@
   }
 
   .text-input__affix--prefix {
-    padding-right: var(--poodle-space-inline-sm);
+    padding-inline-start: var(--poodle-text-input-padding-inline);
     border-right: 0.0625rem solid color-mix(in srgb, var(--poodle-color-border-subtle) 52%, transparent);
-    margin-right: var(--poodle-space-inline-sm);
   }
 
   .text-input__affix--suffix {
-    padding-left: var(--poodle-space-inline-sm);
+    padding-inline-start: var(--poodle-text-input-padding-inline);
     border-left: 0.0625rem solid color-mix(in srgb, var(--poodle-color-border-subtle) 52%, transparent);
-    margin-left: var(--poodle-space-inline-sm);
+    margin-inline-start: var(--poodle-text-input-adornment-gap);
   }
 
   .text-input__char-count {
@@ -696,9 +752,15 @@
     background: transparent;
     color: var(--poodle-color-icon-muted);
     cursor: pointer;
+    flex: 0 0 auto;
     border-radius: calc(
       var(--poodle-treatment-interactive-subtle-radius, var(--poodle-radius-control)) - 0.0625rem
     );
+  }
+
+  .text-input__field > .text-input__clear:last-child,
+  .text-input__field > .text-input__affordance--trailing:last-child {
+    margin-inline-end: var(--poodle-text-input-padding-inline);
   }
 
   .text-input__clear:hover {
@@ -716,17 +778,20 @@
 
   /* Density variants */
   .text-input[data-density="compact"] {
-    padding: 0 calc(var(--poodle-space-control-x) - 0.125rem);
+    --poodle-text-input-adornment-gap: calc(var(--poodle-space-inline-sm) - 0.125rem);
+    --poodle-text-input-inline-adjust: -0.125rem;
+    --poodle-text-input-block-adjust: -0.125rem;
   }
 
   .text-input[data-density="comfortable"] {
-    padding: 0 calc(var(--poodle-space-control-x) + 0.125rem);
+    --poodle-text-input-adornment-gap: calc(var(--poodle-space-inline-sm) + 0.125rem);
+    --poodle-text-input-inline-adjust: 0.125rem;
+    --poodle-text-input-block-adjust: 0.125rem;
   }
 
   /* Multiline (textarea) mode */
   .text-input--multiline {
     min-height: auto;
-    padding: 0;
     position: relative;
   }
 
@@ -738,15 +803,12 @@
     opacity: 0.7;
   }
 
-  .text-input--multiline .text-input__control--multiline {
-    padding-bottom: 1.5rem;
-  }
-
   .text-input__control--multiline {
     min-height: calc(1lh * 4);
-    padding: var(--poodle-space-control-y) var(--poodle-space-control-x);
     resize: vertical;
     line-height: var(--poodle-typography-body-lineHeight);
+    padding-top: var(--poodle-text-input-padding-block);
+    padding-bottom: var(--poodle-text-input-multiline-padding-end, var(--poodle-text-input-padding-block));
   }
 
   .text-input--multiline[data-density="compact"] .text-input__control--multiline {
@@ -759,41 +821,39 @@
 
   /* Size variants */
   .text-input[data-size="xs"] {
-    min-height: calc(var(--poodle-size-control-height) - 0.5rem);
-    padding: 0 calc(var(--poodle-space-control-x) - 0.125rem);
+    --poodle-text-input-height-adjust: -0.5rem;
+    --poodle-text-input-inline-adjust: calc(var(--poodle-text-input-inline-adjust) - 0.125rem);
   }
 
   .text-input[data-size="xs"] .text-input__control {
-    height: calc(var(--poodle-size-control-height) - 0.5rem - (var(--poodle-border-width-default) * 2));
     font-size: 0.75rem;
   }
 
   .text-input[data-size="sm"] {
-    min-height: calc(var(--poodle-size-control-height) - 0.375rem);
-    padding: 0 calc(var(--poodle-space-control-x) - 0.0625rem);
-  }
-
-  .text-input[data-size="sm"] .text-input__control {
-    height: calc(var(--poodle-size-control-height) - 0.375rem - (var(--poodle-border-width-default) * 2));
+    --poodle-text-input-height-adjust: -0.375rem;
+    --poodle-text-input-inline-adjust: calc(var(--poodle-text-input-inline-adjust) - 0.0625rem);
   }
 
   .text-input[data-size="lg"] {
-    min-height: calc(var(--poodle-size-control-height) + 0.375rem);
-    padding: 0 calc(var(--poodle-space-control-x) + 0.125rem);
+    --poodle-text-input-height-adjust: 0.375rem;
+    --poodle-text-input-inline-adjust: calc(var(--poodle-text-input-inline-adjust) + 0.125rem);
   }
 
   .text-input[data-size="lg"] .text-input__control {
-    height: calc(var(--poodle-size-control-height) + 0.375rem - (var(--poodle-border-width-default) * 2));
     font-size: 0.9375rem;
   }
 
   .text-input[data-size="xl"] {
-    min-height: calc(var(--poodle-size-control-height) + 0.5rem);
-    padding: 0 calc(var(--poodle-space-control-x) + 0.1875rem);
+    --poodle-text-input-height-adjust: 0.5rem;
+    --poodle-text-input-inline-adjust: calc(var(--poodle-text-input-inline-adjust) + 0.1875rem);
   }
 
   .text-input[data-size="xl"] .text-input__control {
-    height: calc(var(--poodle-size-control-height) + 0.5rem - (var(--poodle-border-width-default) * 2));
     font-size: 1rem;
+  }
+
+  .text-input {
+    --poodle-text-input-padding-inline: calc(var(--poodle-space-control-x) + var(--poodle-text-input-inline-adjust));
+    --poodle-text-input-padding-block: calc(var(--poodle-space-control-y) + var(--poodle-text-input-block-adjust));
   }
 </style>

@@ -72,6 +72,7 @@ pub const TYPOGRAPHY_HEADING_SIZE: SpaceValue = SpaceValue(16.0);
 pub const TYPOGRAPHY_HEADING_LINE_HEIGHT: SpaceValue = SpaceValue(24.0);
 pub const TYPOGRAPHY_HEADING_WEIGHT: f32 = 600.0;
 pub const TYPOGRAPHY_CODE_FAMILY: &str = "\"IBM Plex Mono\", \"SFMono-Regular\", monospace";
+pub const TYPOGRAPHY_CODE_ADJUSTMENT_RATIO: f32 = 0.8125;
 pub const TYPOGRAPHY_CODE_SIZE: SpaceValue = SpaceValue(13.0);
 pub const TYPOGRAPHY_CODE_LINE_HEIGHT: SpaceValue = SpaceValue(16.0);
 pub const TYPOGRAPHY_CODE_WEIGHT: f32 = 400.0;
